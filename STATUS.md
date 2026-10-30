@@ -8,9 +8,9 @@
 | Layer | Source | Cadence | Plan | Measured |
 |---|---|---|---|---|
 | Earthquakes | USGS 2.5_day | 5 min | Free | <1 ms CPU |
-| Kp | NOAA SWPC | 5 min | Free | <1 ms; feed is now an array of objects (fixed 0.1.1) |
+| Kp | NOAA SWPC | 5 min (→ hourly queued: NWS asks for cadence matched to the 3-hourly refresh) | Free | <1 ms; feed is now an array of objects (fixed 0.1.1) |
 | Fires | NASA FIRMS VIIRS NOAA-20, world, 24 h | 15 min | Free | 15 ms CPU at 1.3 MB / 16k rows (soft 10 ms limit); file grew to ~31k rows by afternoon — decision on Workers Paid ($5/mo) vs regional vs external parse after a week of `raw_bytes` logs |
-| CO₂ (carbon) | NOAA GML Mauna Loa daily + weekly CSV | hourly (:07) | Free | collector 0.1.2 deployed 16:16; index tile on page with NOAA's own 1 y / 10 y comparison (the only comparison shown; it is theirs, not ours); `co2_daily` table in D1 |
+| CO₂ (carbon) | NOAA GML Mauna Loa daily + weekly CSV | hourly (:07) | Free | collector 0.1.3 deployed 16:33 (0.1.2 parsed the whole 433 KB daily file: 113 ms CPU P99 measured; 0.1.3 parses the tail only, CPU to be read at the next :07); index tile on page with NOAA's own 1 y / 10 y comparison (the only comparison shown; it is theirs, not ours); `co2_daily` table in D1 |
 | Hourly aggregation → D1 | — | :07 | Free | first batch ran 12:07; runs after CO₂ in the same job |
 | Page | GitHub Pages | reads `latest` only | Free | imagery 2048×1024 ≈ 2.4 s |
 
@@ -22,7 +22,7 @@ D1 one Worker · D2 hourly aggregation · D3 row records · D4 aircraft quantity
 
 ## Next
 1. `/ingest/<layer>` endpoint + Mac collector script — test first with a mock feed (auth, idempotent snapshot id, three timestamps, validate before publishing `latest`). Ships need a runtime that can hold a WebSocket; whether it must be residential is aisstream's policy, to be measured.
-2. Register: Terms + Coverage checks for USGS, SWPC, GIBS, FIRMS (Chad reads and dates the licence pages).
+2. Register (`REGISTER.md`): USGS ✅ SWPC ✅ NOAA GML ✅ (30 Oct) · FIRMS, GIBS pending (Chad reads and dates the licence pages).
 3. ~~carbon~~ done (index only; CAMS/GEOS CO₂ maps are model tier, not for phase 1). Next layer requested: **polar caps** (NSIDC Sea Ice Index + GIBS sea-ice imagery).
 4. ADS-B receiver decision (unlocks aircraft; optional; price a real basket first).
 5. Week-one review: FIRMS CPU/raw_bytes logs → Paid vs regional; D1 daily writes vs 100k.
