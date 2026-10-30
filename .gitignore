@@ -1,0 +1,8 @@
+# keys and secrets never enter this repo (Cloudflare holds them as secrets; KEYS.md lives in the project folder only)
+KEYS.md
+*.env
+.env*
+.dev.vars
+.wrangler/
+node_modules/
+.DS_Store

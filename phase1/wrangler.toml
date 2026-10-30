@@ -1,0 +1,23 @@
+# Reference only — the dashboard guide (GUIDE-step1.md) does all of this by clicking.
+# Kept so the configuration is documented in one place and usable with the CLI later.
+name = "mother-earth"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "mother-earth"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mother-earth"
+database_id = "<from the D1 dashboard>"
+
+[triggers]
+crons = ["*/5 * * * *", "* * * * *", "*/15 * * * *", "7 * * * *"]
+
+[vars]
+OPENSKY_BBOX = "-35.5,15,-21,34"
+# FIRMS_REGION = "-20,-35,55,38"
+
+# Secrets (never here): OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, FIRMS_MAP_KEY, ADMIN_KEY
