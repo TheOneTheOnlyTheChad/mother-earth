@@ -96,7 +96,7 @@ details.choices .fixed{color:var(--dim);font-style:italic}
   <div class="layers" id="layers">
     <div class="layer" data-layer="usgs" style="--c:var(--quake)"><span class="pip"></span><span><span class="name">Earthquakes</span><span class="src">USGS · M2.5+ · 24 h window</span></span><span><span class="count" id="c-usgs">–</span><span class="state" id="s-usgs">loading</span></span></div>
     <div class="layer" data-layer="firms" style="--c:var(--fire)"><span class="pip"></span><span><span class="name">Fires</span><span class="src">NASA FIRMS · VIIRS NOAA-20 · 24 h</span></span><span><span class="count" id="c-firms">–</span><span class="state" id="s-firms">loading</span></span></div>
-    <div class="layer locked" style="--c:var(--plane)"><span class="pip"></span><span><span class="name">Aircraft</span><span class="src">OpenSky · written agreement pending</span></span><span><span class="state">not shown</span></span></div>
+    <div class="layer locked" style="--c:var(--plane)"><span class="pip"></span><span><span class="name">Aircraft</span><span class="src">OpenSky · public sites must feed the network · receiver planned</span></span><span><span class="state">not shown</span></span></div>
   </div>
 
   <div class="kp" id="kp"><span class="v" id="kp-v">–</span><span class="bar"><i id="kp-bar" style="width:0"></i></span><span class="l">Kp index · planetary, not a map layer<br>NOAA SWPC · <span id="kp-t">–</span></span></div>
@@ -233,7 +233,7 @@ function sentence() {
   parts.push(u && fu.grade !== 'unknown' ? `${(u.records_count ?? points.usgs.length).toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS feed ${Math.round(u.source_age_s || 0)} s old at retrieval, retrieved ${ago(u.retrieved_at)})` : `earthquakes: unknown — ${fu.why}`);
   parts.push(f && ff.grade !== 'unknown' ? `${(f.records_count ?? points.firms.length).toLocaleString()} fire detections in the last 24 h (NASA FIRMS, ${f.scope || 'world'}, retrieved ${ago(f.retrieved_at)}; cloud may hide detections)` : `fires: unknown — ${ff.why}`);
   parts.push(k && fk.grade !== 'unknown' && k.index ? `Kp ${k.index.value} at ${hhmm(k.index.time_tag)} (NOAA SWPC)` : `Kp: unknown — ${fk.why}`);
-  parts.push('aircraft: not shown, written agreement with OpenSky pending');
+  parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; one is planned');
   $('sentence').textContent = `As of ${new Date().toISOString().slice(11, 16)} UTC: ` + parts.join('; ') + '.';
 }
 
@@ -252,7 +252,7 @@ function choices() {
     if (s.coverage_default) add(label + ' · coverage rule', `${s.coverage_default.grade}: ${s.coverage_default.evidence} (not adjustable)`, true);
     add(label + ' · collector', `v${s.collector_version}, schema ${s.schema_version}, scheduled ${s.scheduled_for ? s.scheduled_for.slice(11, 16) + ' UTC' : ''}`);
   }
-  add('Aircraft', 'OpenSky · tier observation · not shown: terms §3(vi) require a written agreement for automated use; requested 30 Oct 2026', true);
+  add('Aircraft', 'OpenSky · tier observation · not shown: OpenSky permits public sites only if they feed the network (reply 30 Oct 2026); an ADS-B receiver in Cape Town is planned. Cloud collectors are not whitelisted.', true);
   add('Comparisons', 'none in phase 1; descriptive comparisons from phase 3, highlights only after a held-out validation (§6)', true);
   add('Sentence template', 'cannot emit a cause', true);
   add('Imagery', `NASA GIBS VIIRS NOAA-20 true colour, ${imgDay}, direct from NASA (the only direct source call)`);
