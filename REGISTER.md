@@ -47,6 +47,14 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Coverage statement:** daily composite; the page labels it "previous day, not live" with the date. Not an observation layer; never graded.
 - **Status:** ✅ cleared.
 
+## NSIDC — Sea Ice Index v4 (G02135), daily extent + 1981–2010 climatology, NOAA mirror
+- **Read:** 30 Oct 2026 by Claude — directory listing and file headers at https://noaadata.apps.nsidc.org/NOAA/G02135/ (open; no Earthdata login). **Chad to read and paste NSIDC's data-use/citation page:** https://nsidc.org/data/g02135 (look for "Citing These Data" and any use terms).
+- **Terms:** NOAA-hosted NSIDC product; header points to source products nsidc-0081 / nsidc-0051. Citation form carried in the snapshot: Fetterer, F., K. Knowles, W. N. Meier, M. Savoie, and A. K. Windnagel. Sea Ice Index, Version 4. NSIDC. https://nsidc.org/data/g02135 — **verbatim terms pending Chad's paste.**
+- **Cadence (measured):** file updated once a day (~14:20 UTC on 29–30 Oct); we fetch at 03/09/15/21 UTC. Daily files ≈1.9 MB each (tail-parsed), climatology 34 KB.
+- **Coverage statement:** passive microwave; extent = ocean with ≥15 % concentration; one number per hemisphere; ~1 day latency. Not a map layer.
+- **Map layer (measured 30 Oct 2026, GIBS WMS, 2048×1024, day 29 Oct):** VIIRS_NOAA20_Sea_Ice (observation) painted 0.76 % of the globe — polar night + cloud; AMSRU2_Sea_Ice_Concentration_12km ended 2025-09-01; GHRSST_L4_MUR_Sea_Ice_Concentration (L4 analysis, model tier) painted 12.2 %, 133 KB, 2.2 s. **Decision pending:** show MUR labelled "analysis, not observation", or no cap imagery.
+- **Status:** ✅ data in use (attributed); terms paste outstanding.
+
 ## OpenSky Network — states API
 - **Read:** 30 Oct 2026 (Terms §3(iii)/(vi) + reply Ticket#837506 by Chad).
 - **Terms:** automated/public use needs written licence; hobbyist use OK within credits; public site requires being a feeder; no cloud whitelisting.
