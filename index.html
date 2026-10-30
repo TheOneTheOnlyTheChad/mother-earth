@@ -231,8 +231,9 @@ function sentence() {
   const parts = [];
   const u = state.usgs, f = state.firms, k = state.swpc;
   const fu = layerFreshness(u), ff = layerFreshness(f), fk = layerFreshness(k);
-  parts.push(u && fu.grade !== 'unknown' ? `${(u.records_count ?? points.usgs.length).toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS feed ${Math.round(u.source_age_s || 0)} s old at retrieval, retrieved ${ago(u.retrieved_at)})` : `earthquakes: unknown — ${fu.why}`);
-  parts.push(f && ff.grade !== 'unknown' ? `${(f.records_count ?? points.firms.length).toLocaleString()} fire detections in the last 24 h (NASA FIRMS, ${f.scope || 'world'}, retrieved ${ago(f.retrieved_at)}; cloud may hide detections)` : `fires: unknown — ${ff.why}`);
+  const total = snap => Object.values((snap && snap.cells) || {}).reduce((n, c) => n + (c.count || 0), 0);
+  parts.push(u && fu.grade !== 'unknown' ? `${total(u).toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS feed ${Math.round(u.source_age_s || 0)} s old at retrieval, retrieved ${ago(u.retrieved_at)})` : `earthquakes: unknown — ${fu.why}`);
+  parts.push(f && ff.grade !== 'unknown' ? `${total(f).toLocaleString()} fire detections in the last 24 h (NASA FIRMS, ${f.scope || 'world'}, retrieved ${ago(f.retrieved_at)}; cloud may hide detections)` : `fires: unknown — ${ff.why}`);
   parts.push(k && fk.grade !== 'unknown' && k.index ? `Kp ${k.index.value} at ${hhmm(k.index.time_tag)} (NOAA SWPC)` : `Kp: unknown — ${fk.why}`);
   parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; one is planned');
   $('sentence').textContent = `As of ${new Date().toISOString().slice(11, 16)} UTC: ` + parts.join('; ') + '.';
