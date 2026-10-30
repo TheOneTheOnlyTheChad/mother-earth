@@ -41,19 +41,21 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.1';
+const COLLECTOR_VERSION = '0.1.2';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 900, opensky: 600, firms: 2400 }; // §3.3 collector freshness
-const FIRMS_MAX_PARSE_BYTES = 25 * 1024 * 1024; // guard: beyond this, keep raw only (CPU limit)
+const STALE_AFTER_S = { usgs: 900, swpc: 900, opensky: 600, firms: 2400, co2: 2 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
 const URLS = {
   usgs: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson',
   swpc: 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json',
   opensky: 'https://opensky-network.org/api/states/all',
   openskyToken: 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token',
+  co2Daily: 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_daily_mlo.csv',
+  co2Weekly: 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_weekly_mlo.csv',
   firms: (key, region) => `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${key}/VIIRS_NOAA20_NRT/${region || 'world'}/1`,  // region = "west,south,east,north"
 };
 
@@ -415,7 +417,7 @@ async function collectFirms(env, scheduledMs) {
   const stamp = isoMinute(scheduledMs);
   await env.R2.put(`raw/firms/${stamp}.csv`, res.text, { httpMetadata: { contentType: 'text/csv' } });  // raw is the asset (§4.2)
   if (res.text.length > FIRMS_MAX_PARSE_BYTES) {
-    return writeDown(env, layer, scheduledMs, `raw stored, parse skipped: ${res.text.length} bytes > guard (CPU limit)`, res.status);
+    return writeDown(env, layer, scheduledMs, `raw archived; processing skipped: resource guard (${res.text.length} bytes > ${FIRMS_MAX_PARSE_BYTES})`, res.status);  // D14: not 'source down' — the source answered
   }
   let parsed;
   try { parsed = firmsParse(res.text); } catch (e) { return writeDown(env, layer, scheduledMs, String(e), res.status); }
@@ -428,6 +430,40 @@ async function collectFirms(env, scheduledMs) {
       quantity: 'VIIRS NOAA-20 NRT thermal detections in the last 24 h, per cell (detections per pass, not a fire census)' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
   await logRun(env, layer, scheduledMs, 'ok', res.status, parsed.rows.length, bytes, 'raw_bytes=' + res.text.length);
+}
+
+
+// ---------------------------------------------------------------- NOAA GML CO2 (Mauna Loa) — index, not a map layer
+
+/** Daily Mauna Loa CO2 (ppm) plus NOAA's own weekly comparison columns (1 yr ago, 10 yr ago, since 1800).
+ *  Terms live in the file header ("made freely available… please include relevant citation"); recent months are
+ *  preliminary, and the header says so — both are carried into the envelope. Collected hourly on the :07 job. */
+async function collectCo2(env, scheduledMs) {
+  const layer = 'co2';
+  let d, w;
+  try { d = await fetchText(URLS.co2Daily); w = await fetchText(URLS.co2Weekly); } catch (e) { return writeDown(env, layer, scheduledMs, 'fetch failed: ' + e, 0); }
+  if (!d.ok || !w.ok) return writeDown(env, layer, scheduledMs, `http daily=${d.status} weekly=${w.status}`, d.ok ? w.status : d.status);
+  const notes = w.text.split('\n').filter(l => l.startsWith('#')).map(l => l.replace(/^#\s?/, '')).filter(Boolean);
+  const dRows = d.text.split('\n').filter(l => l && !l.startsWith('#')).map(l => l.split(',').map(x => x.trim()))
+    .filter(c => c.length >= 5 && Number.isFinite(+c[4]) && +c[4] > 0)
+    .map(c => [`${c[0]}-${c[1].padStart(2, '0')}-${c[2].padStart(2, '0')}`, +c[4]]);
+  const wRows = w.text.split('\n').filter(l => l && !l.startsWith('#') && !/^year/i.test(l)).map(l => l.split(',').map(x => x.trim()))
+    .filter(c => c.length >= 9 && Number.isFinite(+c[4]) && +c[4] > 0);
+  if (!dRows.length || !wRows.length) return writeDown(env, layer, scheduledMs, 'unexpected CO2 file shape', 200);
+  const last = dRows[dRows.length - 1], lw = wRows[wRows.length - 1];
+  const ageS = (Date.now() - Date.parse(last[0] + 'T00:00:00Z')) / 1000;
+  const status = ageS < 7 * 86400 ? 'ok' : 'degraded';                      // daily product; > 7 days behind is late
+  const weekStart = `${lw[0]}-${lw[1].padStart(2, '0')}-${lw[2].padStart(2, '0')}`;
+  const num = x => (Number.isFinite(+x) && +x > 0 ? +x : null);
+  const e = envelope(layer, scheduledMs, dRows[Math.max(0, dRows.length - 366)][0], last[0], status, {}, ['date', 'ppm'], dRows.slice(-366),
+    { index: { name: 'CO2, Mauna Loa Observatory', value: last[1], unit: 'ppm', date: last[0], source_age_s: ageS, preliminary: true },
+      comparison: { basis: 'source-provided: NOAA GML weekly file, same week 1 year ago (365 days) and 10 years ago (3,653 days), week starting ' + weekStart,
+        week_average: num(lw[4]), days_in_week: +lw[5], one_year_ago: num(lw[6]), ten_years_ago: num(lw[7]), increase_since_1800: num(lw[8]) },
+      map_layer: false, source_notes: notes, citation: 'Lan, X., Tans, P. and Thoning, K.W.: Trends in globally-averaged CO2 determined from NOAA Global Monitoring Laboratory measurements. NOAA GML, gml.noaa.gov/ccgg/trends/',
+      quantity: 'daily mean CO2 mole fraction (ppm) at Mauna Loa, Hawaii — one station, not a map layer; recent months preliminary' });
+  const bytes = await writeSnapshot(env, layer, scheduledMs, e);
+  try { await env.DB.prepare('INSERT OR IGNORE INTO co2_daily (date, ppm, retrieved_at) VALUES (?,?,?)').bind(last[0], last[1], nowIso()).run(); } catch (err) { console.log('co2 insert', String(err)); }
+  await logRun(env, layer, scheduledMs, status, 200, dRows.length, bytes, `ppm=${last[1]} date=${last[0]} 1y=${lw[6]} 10y=${lw[7]}`);
 }
 
 // ---------------------------------------------------------------- hourly aggregation → D1 (D2, D6)
@@ -569,7 +605,7 @@ const JOBS = {
   ])).join('; '),
   minute: async (env, ms) => guarded(env, 'opensky-bbox', ms, collectOpenskyBbox),
   firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
-  hourly: async (env, ms) => hourlyBatch(env, ms),
+  hourly: async (env, ms) => { const c = await guarded(env, 'co2', ms, collectCo2); const b = await hourlyBatch(env, ms); return { co2: c, batch: b }; },
 };
 
 function jobForCron(cron) {
@@ -582,7 +618,7 @@ function jobForCron(cron) {
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms'];
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2'];
 
 function json(obj, status = 200, extra = {}) {
   return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...CORS, ...extra } });

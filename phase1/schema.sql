@@ -84,3 +84,10 @@ CREATE TABLE IF NOT EXISTS batch_runs (
   finished_at TEXT NOT NULL,
   result TEXT
 );
+
+-- Added 30 Oct 2026 (collector 0.1.2): daily Mauna Loa CO2, one row per day (written by the hourly job when a new date appears).
+CREATE TABLE IF NOT EXISTS co2_daily (
+  date TEXT PRIMARY KEY,
+  ppm REAL NOT NULL,
+  retrieved_at TEXT NOT NULL
+);
