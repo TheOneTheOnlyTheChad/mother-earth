@@ -21,9 +21,14 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Status:** ✅ cleared; Chad to confirm by reading the header himself (open the weekly CSV, first 40 lines) — optional.
 
 ## NOAA SWPC — planetary K-index JSON
-- **Read:** — (pending)
-- **Terms:** —
-- **Coverage statement:** —
+- **Read:** 30 Oct 2026 by Chad, https://www.weather.gov/disclaimer (SWPC is an NWS centre; the NWS disclaimer governs)
+- **Terms (verbatim):** "The information on National Weather Service (NWS) Web pages are in the public domain, unless specifically noted otherwise, and may be used without charge for any lawful purpose so long as you do not: 1) claim it is your own …, 2) use it in a manner that implies an endorsement or affiliation with NOAA/NWS, or 3) modify its content and then present it as official government material."
+- **Name/logo:** "Use of the NWS name … and/or visual identifier to identify unaltered NWS content or links to NWS web sites are allowable uses." → the credit "NOAA SWPC" + link is allowed; **no logo**, no implied endorsement.
+- **Freshness (verbatim):** "special attention should be given to the date and time of the data and products being displayed." → the tile shows the Kp `time_tag` and retrieval age; already in force.
+- **Appropriate use (verbatim, abuse policy):** "Know your data refresh frequency … Example: If the forecast data is updated every 6 hours you should only make requests during those cycle output windows." "If a Web Service isn't available users should limit the number of retries to 1 minute intervals." Blocked users email sdm@noaa.gov.
+- **Action:** Kp is a 3-hourly product; we currently poll it every 5 min (288/day) — lawful but against the spirit of "know your refresh frequency". **Change to hourly** when the collector is next touched (the `kp_index` D1 write already dedups by time_tag).
+- **Coverage statement:** planetary index derived from a fixed set of ground magnetometers (`station_count` is in the feed). Not a map layer; never graded per cell.
+- **Status:** ✅ cleared for public, automated, attributed use; cadence change queued.
 
 ## NASA FIRMS — VIIRS NOAA-20 NRT area CSV
 - **Read:** — (pending)
