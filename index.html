@@ -126,7 +126,7 @@ details.choices .fixed{color:var(--dim);font-style:italic}
 <div class="imgdate" id="imgdate">Imagery: loading…</div>
 
 <div class="status"><span class="tag">STATUS</span><span id="sentence">Loading the latest published snapshots…</span>
-  <div class="img"><span id="imgdate2"></span>Comparison period: none of ours yet — baselines accumulating since 30 Oct 2026 (the CO₂ comparison is NOAA's). Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a> · <a href="https://github.com/TheOneTheOnlyTheChad/mother-earth" target="_blank" rel="noopener">source</a></div>
+  <div class="img"><span id="imgdate2"></span>Comparison period: none of ours yet — baselines accumulating since 30 Oct 2026 (the CO₂ comparison is NOAA's). Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a> · <a href="https://github.com/TheOneTheOnlyTheChad/mother-earth" target="_blank" rel="noopener">source</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). NASA advises against using these data for tactical decisions or local-scale conditions.</div>
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
@@ -228,6 +228,7 @@ function inspectCell(p) {
     ['Retrieved', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : '–'],
     ['Comparison', 'insufficient history — baselines accumulate from 30 Oct 2026'],
   ];
+  if (p.layer === 'firms') rows.push(['Caveat', 'NASA: not for tactical decisions or local-scale conditions; detections per pass, cloud may hide']);
   for (const r of recs) rows.push([p.layer === 'usgs' ? `M${Number(r.mag).toFixed(1)} (${r.mag_type || '?'})` : `${Number(r.frp_mw || 0).toFixed(0)} MW`, (p.layer === 'usgs' ? `${r.title || ''} · ` : `${r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : 'nominal'} confidence · ${r.daynight === 'D' ? 'day' : 'night'} · `) + r.observed_at.replace('T', ' ').slice(0, 16) + ' UTC' + (r.src ? ` · <a href="${r.src}" target="_blank" rel="noopener">USGS</a>` : '')]);
   if (p.cell.count > recs.length) rows.push(['…', `${p.cell.count - recs.length} more in this cell`]);
   $('insp-dl').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
@@ -265,6 +266,7 @@ function choices() {
     add(label + ' · tier', isIndex ? 'observation (index, not a map layer)' : 'observation');
     add(label + ' · quantity', s.quantity || '');
     add(label + ' · window', layer === 'swpc' ? '3-hourly index' : layer === 'co2' ? 'daily mean; collected hourly; recent months preliminary until NOAA finalises them' : `${LAYER_WINDOW_H[layer]} h, event layer: events keep their age, do not expire inside the window`);
+    if (layer === 'firms') add(label + ' · source caveat', 'NASA LANCE: near-real-time product (latency is the point here); "their use for tactical decision-making or informing about conditions at a local scale are not advised" (read 30 Oct 2026)', true);
     if (layer === 'co2' && s.comparison) add(label + ' · comparison', `${s.comparison.basis} — the only comparison on this page; it is NOAA's, not ours`, true);
     if (layer === 'co2' && s.citation) add(label + ' · citation', s.citation, true);
     add(label + ' · stale_after', `${s.stale_after_s} s — layer becomes Unknown past this (not adjustable)`, true);

@@ -31,19 +31,21 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Status:** ✅ cleared for public, automated, attributed use; cadence change queued.
 
 ## NASA FIRMS — VIIRS NOAA-20 NRT area CSV
-- **Read:** 30 Oct 2026 — FIRMS front page by Chad; LANCE project page (https://www.earthdata.nasa.gov/data/projects/lance) by Claude via fetch (summarised, not verbatim — **Chad to paste the Disclaimer and Acknowledgment paragraphs verbatim**, links below).
-- **Terms (as summarised):** "NASA supports full and open sharing of data." LANCE/FIRMS data are provided "as is"; "users bear all responsibility and liability for their use of data." NRT users "are willing to trade science product quality for timely access" — standard science products are recommended where latency is not the point.
-- **Attribution (opening sentence, verbatim):** "We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (LANCE)…" — full form pending paste. → footer credit "NASA FIRMS" must become the LANCE acknowledgment form (queued, page change).
+- **Read:** 30 Oct 2026 by Chad: https://www.earthdata.nasa.gov/data/projects/lance (Acknowledgments, Disclaimer) and https://www.earthdata.nasa.gov/data/projects/lance/disclaimer (full text). FIRMS front page also read.
+- **Terms (verbatim):** "NASA supports full and open sharing of data. We ask that if you provide Land, Atmosphere Near real-time Capability for Earth observation (LANCE) data to a third party, you follow the guidelines below."
+- **Attribution (verbatim, required form):** "We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (LANCE) (https://earthdata.nasa.gov/lance), part of NASA's Earth Science Data and Information System (ESDIS)." → on the page footer (done 30 Oct 2026).
+- **Disclaimer (verbatim):** "The information presented through LANCE, GIBS, Worldview, and FIRMS are provided 'as is' and users bear all responsibility and liability for their use of data…" and — **the operative line for us** — "Due to the spatial resolution and other characteristics of these data, their use for tactical decision-making or informing about conditions at a local scale are not advised." Also: "If latency is not a primary concern, users are encouraged to use standard science products." And: "The designations employed in the data do not imply the expression of any opinion whatsoever on the part of ESDIS concerning the legal or development status of any country, territory…"
+- **Consequences on the page:** (1) the "not for local-scale or tactical decisions" line sits in the fire layer's Choices rows and in the cell inspector; (2) we use NRT because latency is the point, and say so; (3) we draw no borders, so the designations clause is moot — recorded anyway.
 - **Rate limit (from MAP_KEY issue email, 30 Oct 2026):** 5,000 transactions / 10 minutes per key. We make 96/day.
-- **Operational notice (front page, 30 Oct 2026):** Suomi NPP data delivery ceases 2 Nov 2026; users told to move to NOAA-20/NOAA-21. **We already use NOAA-20 — no action.** NOAA-21 is a possible second source later.
+- **Operational notice (FIRMS front page, 30 Oct 2026):** Suomi NPP data delivery ceases 2 Nov 2026; users told to move to NOAA-20/NOAA-21. **We already use NOAA-20 — no action.** NOAA-21 is a possible second source later.
 - **Coverage statement:** global detections "within 3 hours of satellite observation" (US/Canada real-time). Per-cell adequacy needs the pass schedule (not wired); cloud hides detections (on the page already).
-- **Status:** ✅ cleared for public, automated use, subject to the acknowledgment wording; two verbatim pastes outstanding:
-  - Disclaimer: https://www.earthdata.nasa.gov/data/projects/lance/disclaimer
-  - Acknowledgment: https://www.earthdata.nasa.gov/data/projects/lance#ed-firms-citation
+- **Status:** ✅ cleared for public, automated use with the LANCE acknowledgment and the local-scale caveat shown.
 
-## NASA GIBS — WMS imagery
-- **Read:** — (pending)
-- **Terms:** —
+## NASA GIBS — WMS imagery (VIIRS NOAA-20 true colour)
+- **Read:** 30 Oct 2026 by Chad — same LANCE pages as FIRMS; the disclaimer names GIBS explicitly ("The information presented through LANCE, GIBS, Worldview, and FIRMS are provided 'as is'…").
+- **Terms / attribution:** as FIRMS — the single LANCE acknowledgment sentence covers "data and/or imagery", so one footer sentence credits both.
+- **Coverage statement:** daily composite; the page labels it "previous day, not live" with the date. Not an observation layer; never graded.
+- **Status:** ✅ cleared.
 
 ## OpenSky Network — states API
 - **Read:** 30 Oct 2026 (Terms §3(iii)/(vi) + reply Ticket#837506 by Chad).
