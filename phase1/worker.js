@@ -41,7 +41,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.2';
+const COLLECTOR_VERSION = '0.1.3';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -444,10 +444,12 @@ async function collectCo2(env, scheduledMs) {
   try { d = await fetchText(URLS.co2Daily); w = await fetchText(URLS.co2Weekly); } catch (e) { return writeDown(env, layer, scheduledMs, 'fetch failed: ' + e, 0); }
   if (!d.ok || !w.ok) return writeDown(env, layer, scheduledMs, `http daily=${d.status} weekly=${w.status}`, d.ok ? w.status : d.status);
   const notes = w.text.split('\n').filter(l => l.startsWith('#')).map(l => l.replace(/^#\s?/, '')).filter(Boolean);
-  const dRows = d.text.split('\n').filter(l => l && !l.startsWith('#')).map(l => l.split(',').map(x => x.trim()))
+  // Parse only the tail: the daily file holds every day since 1974 (433 KB); parsing it all measured 113 ms CPU (P99, 30 Oct 2026). The page needs one year.
+  const tail = (t, n) => t.slice(Math.max(0, t.lastIndexOf('\n', t.length - n * 40) + 1));   // lines are ~27 bytes; 40 over-fetches, never under
+  const dRows = tail(d.text, 420).split('\n').filter(l => l && !l.startsWith('#')).map(l => l.split(',').map(x => x.trim()))
     .filter(c => c.length >= 5 && Number.isFinite(+c[4]) && +c[4] > 0)
     .map(c => [`${c[0]}-${c[1].padStart(2, '0')}-${c[2].padStart(2, '0')}`, +c[4]]);
-  const wRows = w.text.split('\n').filter(l => l && !l.startsWith('#') && !/^year/i.test(l)).map(l => l.split(',').map(x => x.trim()))
+  const wRows = tail(w.text, 60).split('\n').filter(l => l && !l.startsWith('#') && !/^year/i.test(l)).map(l => l.split(',').map(x => x.trim()))
     .filter(c => c.length >= 9 && Number.isFinite(+c[4]) && +c[4] > 0);
   if (!dRows.length || !wRows.length) return writeDown(env, layer, scheduledMs, 'unexpected CO2 file shape', 200);
   const last = dRows[dRows.length - 1], lw = wRows[wRows.length - 1];
