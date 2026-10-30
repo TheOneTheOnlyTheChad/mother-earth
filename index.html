@@ -168,7 +168,8 @@ globe.controls().addEventListener('start', () => globe.controls().autoRotate = f
 function cellGeom(id) {
   const [r, c] = id.split('_').map(Number);
   const lat0 = r * CELL_DEG - 90, lng0 = c * CELL_DEG - 180;
-  return { type: 'Polygon', coordinates: [[[lng0, lat0], [lng0 + CELL_DEG, lat0], [lng0 + CELL_DEG, lat0 + CELL_DEG], [lng0, lat0 + CELL_DEG], [lng0, lat0]]] };
+  // ring order matters to the polygon renderer: the wrong winding paints everything *except* the cell (measured 30 Oct 2026)
+  return { type: 'Polygon', coordinates: [[[lng0, lat0], [lng0, lat0 + CELL_DEG], [lng0 + CELL_DEG, lat0 + CELL_DEG], [lng0 + CELL_DEG, lat0], [lng0, lat0]]] };
 }
 const STROKE = { adequate: 'rgba(214,221,232,1)', partial: 'rgba(214,221,232,.8)', unknown: 'rgba(255,90,60,.95)' };
 const FILL = { adequate: 'rgba(214,221,232,.10)', partial: 'rgba(214,221,232,.05)', unknown: 'rgba(255,90,60,.12)' };
