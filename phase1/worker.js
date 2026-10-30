@@ -41,12 +41,12 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.3';
+const COLLECTOR_VERSION = '0.1.4';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 900, opensky: 600, firms: 2400, co2: 2 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const STALE_AFTER_S = { usgs: 900, swpc: 900, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
 const URLS = {
@@ -56,6 +56,8 @@ const URLS = {
   openskyToken: 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token',
   co2Daily: 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_daily_mlo.csv',
   co2Weekly: 'https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_weekly_mlo.csv',
+  seaice: (h) => `https://noaadata.apps.nsidc.org/NOAA/G02135/${h}/daily/data/${h === 'north' ? 'N' : 'S'}_seaice_extent_daily_v4.0.csv`,
+  seaiceClim: (h) => `https://noaadata.apps.nsidc.org/NOAA/G02135/${h}/daily/data/${h === 'north' ? 'N' : 'S'}_seaice_extent_climatology_1981-2010_v4.0.csv`,
   firms: (key, region) => `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${key}/VIIRS_NOAA20_NRT/${region || 'world'}/1`,  // region = "west,south,east,north"
 };
 
@@ -433,6 +435,9 @@ async function collectFirms(env, scheduledMs) {
 }
 
 
+/* Last ~n lines of a big text file without splitting the whole thing (bytesPerLine is an over-estimate; never under). */
+function tail(t, n, bytesPerLine = 40) { return t.slice(Math.max(0, t.lastIndexOf('\n', t.length - n * bytesPerLine) + 1)); }
+
 // ---------------------------------------------------------------- NOAA GML CO2 (Mauna Loa) — index, not a map layer
 
 /** Daily Mauna Loa CO2 (ppm) plus NOAA's own weekly comparison columns (1 yr ago, 10 yr ago, since 1800).
@@ -445,7 +450,6 @@ async function collectCo2(env, scheduledMs) {
   if (!d.ok || !w.ok) return writeDown(env, layer, scheduledMs, `http daily=${d.status} weekly=${w.status}`, d.ok ? w.status : d.status);
   const notes = w.text.slice(0, 8192).split('\n').filter(l => l.startsWith('#')).map(l => l.replace(/^#\s?/, '')).filter(Boolean);
   // Parse only the tail: the daily file holds every day since 1974 (433 KB); parsing it all measured 113 ms CPU (P99, 30 Oct 2026). The page needs one year.
-  const tail = (t, n) => t.slice(Math.max(0, t.lastIndexOf('\n', t.length - n * 40) + 1));   // lines are ~27 bytes; 40 over-fetches, never under
   const dRows = tail(d.text, 420).split('\n').filter(l => l && !l.startsWith('#')).map(l => l.split(',').map(x => x.trim()))
     .filter(c => c.length >= 5 && Number.isFinite(+c[4]) && +c[4] > 0)
     .map(c => [`${c[0]}-${c[1].padStart(2, '0')}-${c[2].padStart(2, '0')}`, +c[4]]);
@@ -466,6 +470,51 @@ async function collectCo2(env, scheduledMs) {
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
   try { await env.DB.prepare('INSERT OR IGNORE INTO co2_daily (date, ppm, retrieved_at) VALUES (?,?,?)').bind(last[0], last[1], nowIso()).run(); } catch (err) { console.log('co2 insert', String(err)); }
   await logRun(env, layer, scheduledMs, status, 200, dRows.length, bytes, `ppm=${last[1]} date=${last[0]} 1y=${lw[6]} 10y=${lw[7]}`);
+}
+
+// ---------------------------------------------------------------- NSIDC Sea Ice Index (G02135 v4) — index per hemisphere, not a map layer
+
+/* Daily sea-ice extent (10^6 km²) for each hemisphere from NSIDC's NOAA mirror (open; no login), with NSIDC's own
+*  1981–2010 climatology for the same day of year. Updated once a day (~14:20 UTC, measured 30 Oct 2026); collected at
+*  03/09/15/21 UTC on the hourly job. Daily files are ~1.9 MB with 48 years of rows → tail-parsed. */
+function doyOf(dateStr) { const d = Date.parse(dateStr + 'T00:00:00Z'); return Math.floor((d - Date.UTC(new Date(d).getUTCFullYear(), 0, 1)) / 86400e3) + 1; }
+
+async function collectSeaIce(env, scheduledMs) {
+  const layer = 'seaice';
+  const out = {}; const notes = [];
+  for (const h of ['north', 'south']) {
+    let d, c;
+    try { d = await fetchText(URLS.seaice(h)); c = await fetchText(URLS.seaiceClim(h)); } catch (e) { return writeDown(env, layer, scheduledMs, h + ' fetch failed: ' + e, 0); }
+    if (!d.ok || !c.ok) return writeDown(env, layer, scheduledMs, `${h} http daily=${d.status} clim=${c.status}`, d.ok ? c.status : d.status);
+    // daily: "Year, Month, Day, Extent, Missing, Source Data" — the last column is a quoted list that contains commas; take the first five fields only
+    const rows = tail(d.text, 400, 260).split('\n').map(l => l.split(',').slice(0, 5).map(x => x.trim()))
+      .filter(f => f.length === 5 && /^\d{4}$/.test(f[0]) && Number.isFinite(+f[3]) && +f[3] > 0)
+      .map(f => [`${f[0]}-${f[1].padStart(2, '0')}-${f[2].padStart(2, '0')}`, +f[3], +f[4]]);
+    if (!rows.length) return writeDown(env, layer, scheduledMs, h + ': unexpected daily file shape', 200);
+    const last = rows[rows.length - 1];
+    // climatology: "DOY, Average Extent, Std Deviation, 10th, 25th, 50th, 75th, 90th" (34 KB; parsed whole)
+    const doy = doyOf(last[0]);
+    const clim = c.text.split('\n').map(l => l.split(',').map(x => x.trim())).find(f => f.length >= 8 && +f[0] === doy);
+    const header = d.text.slice(0, 400).split('\n').slice(0, 2).join(' ');
+    notes.push(h + ': ' + header.slice(0, 200));
+    out[h] = { value: last[1], unit: '10^6 km^2', date: last[0], missing_area: last[2], day_of_year: doy,
+      climatology_1981_2010: clim ? { average: +clim[1], std: +clim[2], p10: +clim[3], p25: +clim[4], p50: +clim[5], p75: +clim[6], p90: +clim[7] } : null,
+      difference_from_average: clim ? Math.round((last[1] - +clim[1]) * 1000) / 1000 : null,
+      last_366: rows.slice(-366) };
+  }
+  const n = out.north, s = out.south;
+  const ageS = (Date.now() - Date.parse(n.date + 'T00:00:00Z')) / 1000;
+  const status = ageS < 5 * 86400 ? 'ok' : 'degraded';                     // daily product with ~1 day latency; > 5 days behind is late
+  const recs = n.last_366.map((r, i) => [r[0], r[1], (s.last_366[i] || [])[1] ?? null]);
+  delete n.last_366; delete s.last_366;
+  const e = envelope(layer, scheduledMs, recs[0][0], n.date, status, {}, ['date', 'north_extent', 'south_extent'], recs,
+    { index: { name: 'sea-ice extent, NSIDC Sea Ice Index v4', north: n, south: s, source_age_s: ageS },
+      comparison: { basis: 'source-provided baseline: NSIDC 1981–2010 daily climatology for the same day of year (average and percentiles). The subtraction (today minus average) is computed by this collector; the baseline is NSIDC\'s.' },
+      map_layer: false, source_notes: notes,
+      citation: 'Fetterer, F., K. Knowles, W. N. Meier, M. Savoie, and A. K. Windnagel. Sea Ice Index, Version 4. Boulder, Colorado USA. NSIDC: National Snow and Ice Data Center. https://nsidc.org/data/g02135',
+      quantity: 'daily sea-ice extent per hemisphere, million km² (area of ocean with ≥15% ice concentration, passive microwave) — one number per hemisphere, not a map layer' });
+  const bytes = await writeSnapshot(env, layer, scheduledMs, e);
+  await logRun(env, layer, scheduledMs, status, 200, recs.length, bytes, `N=${n.value} S=${s.value} date=${n.date} dN=${n.difference_from_average} dS=${s.difference_from_average}`);
 }
 
 // ---------------------------------------------------------------- hourly aggregation → D1 (D2, D6)
@@ -607,7 +656,13 @@ const JOBS = {
   ])).join('; '),
   minute: async (env, ms) => guarded(env, 'opensky-bbox', ms, collectOpenskyBbox),
   firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
-  hourly: async (env, ms) => { const c = await guarded(env, 'co2', ms, collectCo2); const b = await hourlyBatch(env, ms); return { co2: c, batch: b }; },
+  hourly: async (env, ms, manual) => {
+    const c = await guarded(env, 'co2', ms, collectCo2);
+    const hr = new Date(ms).getUTCHours();
+    const i = (manual || hr % 6 === 3) ? await guarded(env, 'seaice', ms, collectSeaIce) : 'seaice:skipped (runs 03/09/15/21 UTC)';   // NSIDC updates once a day
+    const b = await hourlyBatch(env, ms);
+    return { co2: c, seaice: i, batch: b };
+  },
 };
 
 function jobForCron(cron) {
@@ -620,7 +675,7 @@ function jobForCron(cron) {
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2'];
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice'];
 
 function json(obj, status = 200, extra = {}) {
   return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...CORS, ...extra } });
@@ -662,7 +717,7 @@ export default {
       const job = p[2];
       if (!JOBS[job]) return json({ error: 'unknown job', jobs: Object.keys(JOBS) }, 404);
       const t0 = Date.now();
-      try { const r = await JOBS[job](env, Date.now()); return json({ job, result: r, wall_ms: Date.now() - t0 }, 200, { 'Cache-Control': 'no-store' }); }
+      try { const r = await JOBS[job](env, Date.now(), true); return json({ job, result: r, wall_ms: Date.now() - t0 }, 200, { 'Cache-Control': 'no-store' }); }
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
