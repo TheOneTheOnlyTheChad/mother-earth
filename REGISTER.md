@@ -31,9 +31,15 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Status:** ✅ cleared for public, automated, attributed use; cadence change queued.
 
 ## NASA FIRMS — VIIRS NOAA-20 NRT area CSV
-- **Read:** — (pending)
-- **Terms:** —
-- **Coverage statement:** — (pass schedule; cloud invisibility is already on the page)
+- **Read:** 30 Oct 2026 — FIRMS front page by Chad; LANCE project page (https://www.earthdata.nasa.gov/data/projects/lance) by Claude via fetch (summarised, not verbatim — **Chad to paste the Disclaimer and Acknowledgment paragraphs verbatim**, links below).
+- **Terms (as summarised):** "NASA supports full and open sharing of data." LANCE/FIRMS data are provided "as is"; "users bear all responsibility and liability for their use of data." NRT users "are willing to trade science product quality for timely access" — standard science products are recommended where latency is not the point.
+- **Attribution (opening sentence, verbatim):** "We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (LANCE)…" — full form pending paste. → footer credit "NASA FIRMS" must become the LANCE acknowledgment form (queued, page change).
+- **Rate limit (from MAP_KEY issue email, 30 Oct 2026):** 5,000 transactions / 10 minutes per key. We make 96/day.
+- **Operational notice (front page, 30 Oct 2026):** Suomi NPP data delivery ceases 2 Nov 2026; users told to move to NOAA-20/NOAA-21. **We already use NOAA-20 — no action.** NOAA-21 is a possible second source later.
+- **Coverage statement:** global detections "within 3 hours of satellite observation" (US/Canada real-time). Per-cell adequacy needs the pass schedule (not wired); cloud hides detections (on the page already).
+- **Status:** ✅ cleared for public, automated use, subject to the acknowledgment wording; two verbatim pastes outstanding:
+  - Disclaimer: https://www.earthdata.nasa.gov/data/projects/lance/disclaimer
+  - Acknowledgment: https://www.earthdata.nasa.gov/data/projects/lance#ed-firms-citation
 
 ## NASA GIBS — WMS imagery
 - **Read:** — (pending)
