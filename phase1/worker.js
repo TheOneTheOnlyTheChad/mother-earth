@@ -41,7 +41,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.0';
+const COLLECTOR_VERSION = '0.1.1';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -177,14 +177,24 @@ async function collectSwpc(env, scheduledMs) {
   if (!res.ok) return writeDown(env, layer, scheduledMs, 'http ' + res.status, res.status);
   let j;
   try { j = JSON.parse(res.text); } catch (e) { return writeDown(env, layer, scheduledMs, 'bad json', res.status); }
-  const body = Array.isArray(j) && j.length > 1 ? j.slice(1) : [];   // first row is a header
-  const last = body[body.length - 1] || [];
-  const timeTag = last[0] ? last[0].replace(' ', 'T') + 'Z' : null;  // §3.4 health: last row time_tag
-  const kp = last[1] !== undefined ? Number(last[1]) : null;
+  // Sample check (30 Oct 2026): the feed is an array of objects {time_tag, Kp, a_running, station_count}.
+  // Older documentation described an array of arrays with a header row; both shapes are accepted.
+  const norm = (t) => (typeof t === 'string' ? t.replace(' ', 'T').replace(/Z?$/, 'Z') : null);
+  let rows = [];
+  if (Array.isArray(j)) {
+    if (j.length && Array.isArray(j[0])) {
+      rows = j.slice(1).filter(r => Array.isArray(r) && typeof r[0] === 'string').map(r => [norm(r[0]), Number(r[1]), r[2] !== undefined ? Number(r[2]) : null, r[3] !== undefined ? Number(r[3]) : null]);
+    } else {
+      rows = j.filter(r => r && typeof r === 'object' && r.time_tag).map(r => [norm(r.time_tag), Number(r.Kp ?? r.kp), r.a_running !== undefined ? Number(r.a_running) : null, r.station_count !== undefined ? Number(r.station_count) : null]);
+    }
+  }
+  if (!rows.length) return writeDown(env, layer, scheduledMs, 'unexpected SWPC shape: ' + res.text.slice(0, 80), res.status);
+  const last = rows[rows.length - 1];
+  const timeTag = last[0];                                               // §3.4 health: last row time_tag
+  const kp = Number.isFinite(last[1]) ? last[1] : null;
   const ageS = timeTag ? (Date.now() - Date.parse(timeTag)) / 1000 : null;
   const status = ageS !== null && ageS < 4 * 3600 ? 'ok' : 'degraded';   // Kp is 3-hourly; > 4 h is late
-  const fields = ['time_tag', 'kp', 'estimated_kp', 'kp_label'];
-  const rows = body.map(r => [r[0].replace(' ', 'T') + 'Z', Number(r[1]), r[2] !== undefined ? Number(r[2]) : null, r[3] || null]);
+  const fields = ['time_tag', 'kp', 'a_running', 'station_count'];
   const e = envelope(layer, scheduledMs, rows[0] ? rows[0][0] : null, timeTag, status, {}, fields, rows,
     { index: { name: 'planetary K-index', value: kp, time_tag: timeTag, source_age_s: ageS }, map_layer: false,
       quantity: 'NOAA planetary Kp, 3-hourly index (not a map layer)' });
@@ -547,10 +557,18 @@ async function hourlyBatch(env, scheduledMs) {
 
 // ---------------------------------------------------------------- dispatch
 
+/** Run a collector so that an unexpected throw is recorded as a 'down' run and never takes the others with it. */
+async function guarded(env, layer, ms, fn) {
+  try { await fn(env, ms); return layer + ':ran'; }
+  catch (e) { try { await writeDown(env, layer, ms, 'uncaught: ' + String(e).slice(0, 200), 0); } catch (_) {} return layer + ':threw ' + String(e).slice(0, 80); }
+}
+
 const JOBS = {
-  five: async (env, ms) => { await Promise.all([collectUsgs(env, ms), collectSwpc(env, ms), collectOpenskyWorld(env, ms)]); return 'five-minute collectors ran'; },
-  minute: async (env, ms) => { await collectOpenskyBbox(env, ms); return 'bbox tick ran'; },
-  firms: async (env, ms) => { await collectFirms(env, ms); return 'firms ran'; },
+  five: async (env, ms) => (await Promise.all([
+    guarded(env, 'usgs', ms, collectUsgs), guarded(env, 'swpc', ms, collectSwpc), guarded(env, 'opensky', ms, collectOpenskyWorld),
+  ])).join('; '),
+  minute: async (env, ms) => guarded(env, 'opensky-bbox', ms, collectOpenskyBbox),
+  firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
   hourly: async (env, ms) => hourlyBatch(env, ms),
 };
 
