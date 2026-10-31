@@ -8,7 +8,7 @@ One browser globe showing the latest observations of the planet from open live f
 - Page: https://theonetheonlythechad.github.io/mother-earth/ (GitHub Pages, repo root `index.html`)
 - Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `/admin/run/<job>?key=ADMIN_KEY`
 - Repo: https://github.com/TheOneTheOnlyTheChad/mother-earth — push straight to `main` (no branches unless there is a reason; say the reason and let Chad decide)
-- Layers running: usgs (quakes), swpc (Kp, hourly), firms (fires), co2 (NOAA GML), seaice (NSIDC); `mock` = hidden test layer fed from the Mac via `POST /ingest/mock` (D11, proven 31 Oct). Parked: opensky (aircraft) — see STATUS.
+- Layers running: usgs (quakes), swpc (Kp, hourly), firms (fires), co2 (NOAA GML), seaice (NSIDC), **ships** (aisstream via the Mac, `phase1/run.sh ships`, manual cadence); `mock` = hidden test layer. Parked: opensky — gated off by `OPENSKY_ENABLED` (unset), minute trigger deleted. R2 lifecycle rules delete `raw/ snapshots/ cells/` after 2 days.
 
 ## 2. How Chad works (observe these; they are standing)
 - **Baby steps, click-by-click.** One key, one dialog, one action at a time. He reads code; he does not write it.
@@ -48,6 +48,9 @@ D1 console: dashboard → D1 → mother-earth → Console; Chad or Claude runs `
 Metrics: `…/workers/services/view/mother-earth/production/metrics` — read with `get_page_text`. Free plan: 10 ms CPU soft limit per invocation; measured medians ~1 ms; worst offenders were whole-file parses (fixed by `tail()`).
 
 ## 5. Browser pane facts
+- **If the Claude desktop window is covered (Chad in another app), the pane stops drawing: screenshots repeat the same frame and nothing looks typed — but keystrokes still land.** Ask Chad to bring Claude to the front, then screenshot again before deciding anything. Never retype on the strength of a frozen screenshot; probe with one character first and delete it after.
+- The R2 lifecycle "Add rule" form opens with "Delete uploaded objects after" already ticked — fill name, prefix, days; do not click the checkbox.
+- Cron triggers: Worker → Settings → Trigger events → trash icon → Save. Only three remain (hourly :07, */5, */15).
 - Tab names change; call `tabs_context` first. Keep the globe in its own tab for Chad; do dashboard work in a second tab.
 - `browser_batch` has ignored `tabId` once and acted on the wrong tab — use single `computer` calls with explicit `tabId` for anything that clicks.
 - New sites need `request_access` (scope "site"). Granted so far: dash.cloudflare.com, github.io, noaadata.apps.nsidc.org, gibs.earthdata.nasa.gov (via page fetches), firms.
