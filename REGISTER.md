@@ -59,3 +59,13 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Read:** 30 Oct 2026 (Terms §3(iii)/(vi) + reply Ticket#837506 by Chad).
 - **Terms:** automated/public use needs written licence; hobbyist use OK within credits; public site requires being a feeder; no cloud whitelisting.
 - **Status:** ⛔ parked until a receiver feeds the network. Page says "not shown" with reason.
+
+## aisstream.io — AIS WebSocket stream (ships)
+- **Read:** 31 Oct 2026 by Claude (browser pane), https://aisstream.io/ and https://aisstream.io/documentation. **No terms-of-use or licence page exists on the site** (the only policy link is /privacypolicy); the sentences below are the operative ones on the site. Chad to eyeball and confirm.
+- **Terms (verbatim, homepage):** "Track ship movements, monitor maritime accidents and discover ship's cargo from aisstream.io's websocket api in real-time and for free."
+- **Automated / public use (verbatim, documentation §02):** "Direct browser connections are not permitted; proxy only the information your clients need from your own server." → exactly our design: Mac collector holds the socket, the hub publishes snapshots, viewers never connect.
+- **Limits (verbatim, documentation §05):** "Connections per account — 3 subscribed connections"; "Initial subscription — Within 3 seconds"; "Connection speed — Read continuously… the service drops messages"; "Beginning in September 2026, uncompressed connections will be subject to per-user bandwidth limits". We use 1 connection, compression negotiated (measured `CompressionEnabled: true`, 31 Oct).
+- **Attribution:** none required by the site; we credit "AIS via aisstream.io" in the footer and carry a citation string in the envelope.
+- **Coverage statement:** the site says its stations are "Our global network of Automatic Identification System (AIS) stations" — terrestrial receivers; no coverage map published. → cells stay `partial` with evidence `terrestrial_ais_only`; a silent cell is never read as an empty sea.
+- **Measured (31 Oct 2026, 60 s window, world bbox):** 3,943 messages → 3,838 unique vessels (3,058 Class A, 780 Class B), 175 cells, 424 KB envelope; near-zero repeat rate per vessel within 60 s — reason not known (server-side thinning suspected, not confirmed).
+- **Status:** ✅ in use, public, attributed; durability risk: a free service with no published terms can change or close without notice.
