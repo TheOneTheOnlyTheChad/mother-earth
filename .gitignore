@@ -6,3 +6,4 @@ KEYS.md
 .wrangler/
 node_modules/
 .DS_Store
+phase1/logs/
