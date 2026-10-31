@@ -41,12 +41,12 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.5';
+const COLLECTOR_VERSION = '0.1.6';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
 const URLS = {
@@ -676,7 +676,7 @@ function jobForCron(cron) {
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock'];
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning'];   // GET-readable; ships/lightning arrive via /ingest (D11)
 const INGEST_LAYERS = ['mock', 'opensky', 'ships', 'lightning'];   // D11: external collectors (Mac/Pi) publish these through /ingest
 const INGEST_MAX_BYTES = 5 * 1024 * 1024;
 
