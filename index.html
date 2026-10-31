@@ -103,7 +103,7 @@ details.choices .fixed{color:var(--dim);font-style:italic}
   <div class="layers" id="layers">
     <div class="layer" data-layer="usgs" style="--c:var(--quake)"><span class="pip"></span><span><span class="name">Earthquakes</span><span class="src">USGS · M2.5+ · 24 h window</span></span><span><span class="count" id="c-usgs">–</span><span class="state" id="s-usgs">loading</span></span></div>
     <div class="layer" data-layer="firms" style="--c:var(--fire)"><span class="pip"></span><span><span class="name">Fires</span><span class="src">NASA FIRMS · VIIRS NOAA-20 · 24 h</span></span><span><span class="count" id="c-firms">–</span><span class="state" id="s-firms">loading</span></span></div>
-    <div class="layer" data-layer="ships" style="--c:var(--ship)"><span class="pip"></span><span><span class="name">Ships</span><span class="src">aisstream.io · AIS Class A+B · <span id="w-ships">60 s</span> window · terrestrial only</span></span><span><span class="count" id="c-ships">–</span><span class="state" id="s-ships">loading</span></span></div>
+    <div class="layer" data-layer="ships" style="--c:var(--ship)"><span class="pip"></span><span><span class="name">Ships</span><span class="src">aisstream.io · AIS Class A+B · <span id="w-ships">60 s</span> sample ~every 30 min · terrestrial only</span></span><span><span class="count" id="c-ships">–</span><span class="state" id="s-ships">loading</span></span></div>
     <div class="layer locked" style="--c:var(--plane)"><span class="pip"></span><span><span class="name">Aircraft</span><span class="src">OpenSky · public sites must feed the network · receiver planned</span></span><span><span class="state">not shown</span></span></div>
   </div>
 
@@ -115,8 +115,8 @@ details.choices .fixed{color:var(--dim);font-style:italic}
 
   <div class="legend">
     <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (one per satellite pass, not one fire) · <span class="dot" style="--c:var(--ship)"></span>vessel (last AIS position in the window; open ocean has no terrestrial receivers)</div>
-    <div><span class="sw"></span><b>observed throughout the window</b> (cell outline, solid)</div>
-    <div><span class="sw partial"></span>partly observed — count is a floor, not a total</div>
+    <div><span class="sw"></span><b>collector observed throughout the window</b> (cell outline, solid) — source coverage can still be incomplete</div>
+    <div><span class="sw partial"></span>partly observed — records observed; coverage incomplete (not a total, and not guaranteed a minimum)</div>
     <div><span class="sw unknown"></span>unknown — nothing can be said about this cell</div>
     <div>No outline = no detections in that cell; <b>not</b> evidence of absence unless the cell was observed throughout.</div>
   </div>
@@ -145,13 +145,14 @@ const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const CELL_DEG = 4;
 const LAYER_WINDOW_H = { usgs: 24, firms: 24 };               // event layers: window-based (§3.3); ships carries its own window_s in the snapshot
 const LABEL = { usgs: 'Earthquakes', firms: 'Fire detections', ships: 'Vessels' };
-const windowText = (layer, snap) => layer === 'ships' ? `in a ${(snap && snap.window_s) || 60} s window` : `in the last ${LAYER_WINDOW_H[layer]} h`;
+const windowText = (layer, snap) => layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : `in the last ${LAYER_WINDOW_H[layer]} h`;
 const REFRESH_MS = 5 * 60e3;
 
 const st = (k, txt, cls) => { const e = $('s-' + k); if (!e) return; e.textContent = txt; e.className = 'state' + (cls ? ' ' + cls : ''); };
 const cnt = (k, n) => { const e = $('c-' + k); if (e) e.textContent = n === null ? '–' : n.toLocaleString(); };
 const ago = iso => { if (!iso) return 'unknown'; const s = (Date.now() - Date.parse(iso)) / 1000; return s < 90 ? Math.round(s) + ' s ago' : s < 5400 ? Math.round(s / 60) + ' min ago' : (s / 3600).toFixed(1) + ' h ago'; };
 const hhmm = iso => iso ? iso.slice(11, 16) + ' UTC' : '–';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));   // every source-supplied string goes through this before innerHTML
 const rowsToObjects = snap => { const f = snap.record_fields || []; return (snap.records || []).map(r => Object.fromEntries(f.map((k, i) => [k, r[i]]))); };
 
 setInterval(() => { $('clock').firstChild.textContent = new Date().toISOString().slice(11, 19); }, 1000);
@@ -166,7 +167,9 @@ const state = { usgs: null, firms: null, ships: null, swpc: null, co2: null, sea
 const points = { usgs: [], firms: [], ships: [] };
 const on = { usgs: true, firms: true, ships: true };
 
-const globe = Globe()($('globe'))
+let globe;
+try {
+  globe = Globe()($('globe'))
   .globeImageUrl(gibs).backgroundColor('#070a0f')
   .showAtmosphere(true).atmosphereColor('#4a6a9a').atmosphereAltitude(.18)
   .pointsData([]).pointLat('lat').pointLng('lng').pointColor('col').pointAltitude('alt').pointRadius('r').pointsMerge(true)
@@ -174,9 +177,15 @@ const globe = Globe()($('globe'))
   .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonSideColor(() => 'rgba(0,0,0,0)').polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
   .polygonLabel(p => p.label)
   .onPolygonClick(p => inspectCell(p));
-globe.pointOfView({ lat: -10, lng: 25, altitude: 2.2 });
-globe.controls().autoRotate = true; globe.controls().autoRotateSpeed = .25;
-globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
+  globe.pointOfView({ lat: -10, lng: 25, altitude: 2.2 });
+  globe.controls().autoRotate = true; globe.controls().autoRotateSpeed = .25;
+  globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
+} catch (e) {
+  // No WebGL (or the library threw): keep the numbers, the sentence and the inspector; say plainly that the globe is unavailable.
+  const noop = new Proxy(function () {}, { get: (_, k) => k === 'autoRotate' ? false : noop, apply: () => noop, set: () => true });
+  globe = noop;
+  $('globe').innerHTML = '<div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:#7f8da3;font:14px/1.6 IBM Plex Mono,monospace"><div><b style="color:#ffb347">Globe unavailable in this browser</b> (' + esc(String(e && e.message || e).slice(0, 120)) + ').<br>The counts, indices and status sentence below are still live.</div></div>';
+}
 // Point clicks: globe.gl merged points don't support per-point click; use nearest search on polygon/cell click instead (inspector shows the cell).
 
 function cellGeom(id) {
@@ -207,7 +216,7 @@ function render() {
       let grade = (cell.coverage && cell.coverage.grade) || 'unknown';
       if (fresh.grade === 'unknown') grade = 'unknown';                                  // stale snapshot → nothing is current
       polys.push({ geom: cellGeom(id), layer, id, cell, grade, stroke: STROKE[grade], fill: FILL[grade],
-        label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL[layer]}</b> · cell ${id}<br>${cell.count} ${windowText(layer, snap)} · coverage: ${grade}<br><span style="color:#7f8da3">${cell.coverage ? cell.coverage.evidence : ''}</span></div>` });
+        label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL[layer]}</b> · cell ${id}<br>${cell.count} ${windowText(layer, snap)} · coverage: ${grade}<br><span style="color:#7f8da3">${esc(cell.coverage ? cell.coverage.evidence : '')}</span></div>` });
     }
   }
   globe.polygonsData(polys);
@@ -216,7 +225,7 @@ function render() {
   if (on.firms && layerFreshness(state.firms).grade !== 'unknown') pts.push(...points.firms);
   if (on.ships && layerFreshness(state.ships).grade !== 'unknown') pts.push(...points.ships);
   globe.pointsData(pts);
-  globe.ringsData(on.usgs ? points.usgs.filter(q => q.mag >= 5) : []);
+  globe.ringsData(on.usgs && layerFreshness(state.usgs).grade !== 'unknown' ? points.usgs.filter(q => q.mag >= 5) : []);   // rings obey freshness like points
   sentence();
 }
 
@@ -225,20 +234,21 @@ document.querySelectorAll('.layer[data-layer]').forEach(el => el.addEventListene
 // ---------- inspector (§10.3): observation, observed_at, retrieved_at, coverage with evidence, source, comparison basis
 function inspectCell(p) {
   const snap = state[p.layer]; const fresh = layerFreshness(snap);
-  const recs = points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => Date.parse(b.observed_at) - Date.parse(a.observed_at)).slice(0, 8);
+  const recs = points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, 8);
+  const when = iso => iso ? iso.replace('T', ' ').slice(0, 16) + ' UTC' : 'source time not supplied';
   $('insp-h').textContent = LABEL[p.layer] + ' · cell ' + p.id;
   const rows = [
     ['Count', `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
-    ['Quantity', snap.quantity || ''],
-    ['Coverage', `${p.grade} — ${p.cell.coverage ? p.cell.coverage.evidence : 'n/a'}`],
-    ['Collector', `${fresh.grade} — ${fresh.why}`],
+    ['Quantity', esc(snap.quantity || '')],
+    ['Coverage', `${p.grade} — ${esc(p.cell.coverage ? p.cell.coverage.evidence : 'n/a')}`],
+    ['Collector', `${fresh.grade} — ${esc(fresh.why)}`],
     ['Retrieved', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : '–'],
     ['Comparison', 'insufficient history — baselines accumulate from 30 Oct 2026'],
   ];
   if (p.layer === 'firms') rows.push(['Caveat', 'NASA: not for tactical decisions or local-scale conditions; detections per pass, cloud may hide']);
-  if (p.layer === 'ships') rows.push(['Caveat', `terrestrial AIS only: a cell with no vessels is not an empty sea. Socket up ${Number(snap.socket_up_s || 0).toFixed(0)} of ${snap.window_s} s; ${snap.class_a} Class A + ${snap.class_b} Class B worldwide in this window`]);
-  if (p.layer === 'ships') for (const r of recs) rows.push([r.name || r.mmsi, `MMSI ${r.mmsi} · class ${r.cls} · ${r.sog_kn === null ? '?' : Number(r.sog_kn).toFixed(1)} kn · ${r.observed_at.replace('T', ' ').slice(0, 19)} UTC`]);
-  else for (const r of recs) rows.push([p.layer === 'usgs' ? `M${Number(r.mag).toFixed(1)} (${r.mag_type || '?'})` : `${Number(r.frp_mw || 0).toFixed(0)} MW`, (p.layer === 'usgs' ? `${r.title || ''} · ` : `${r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : 'nominal'} confidence · ${r.daynight === 'D' ? 'day' : 'night'} · `) + r.observed_at.replace('T', ' ').slice(0, 16) + ' UTC' + (r.src ? ` · <a href="${r.src}" target="_blank" rel="noopener">USGS</a>` : '')]);
+  if (p.layer === 'ships') rows.push(['Caveat', `latest received position per MMSI in this sample; positions between samples unknown. Terrestrial AIS only: a cell with no vessels is not an empty sea. Socket up ${Number(snap.socket_up_s || 0).toFixed(0)} of ${snap.window_s} s; ${esc(snap.class_a)} Class A + ${esc(snap.class_b)} Class B worldwide in this sample`]);
+  if (p.layer === 'ships') for (const r of recs) rows.push([esc(r.name || r.mmsi), `MMSI ${esc(r.mmsi)} · class ${esc(r.cls)} · ${r.sog_kn === null || r.sog_kn === undefined ? '?' : Number(r.sog_kn).toFixed(1)} kn · ${when(r.observed_at)}${r.received_at ? ' · received ' + r.received_at.slice(11, 19) + ' UTC' : ''}`]);
+  else for (const r of recs) rows.push([p.layer === 'usgs' ? `M${Number(r.mag).toFixed(1)} (${esc(r.mag_type || '?')})` : `${Number(r.frp_mw || 0).toFixed(0)} MW`, (p.layer === 'usgs' ? `${esc(r.title || '')} · ` : `${r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : 'nominal'} confidence · ${r.daynight === 'D' ? 'day' : 'night'} · `) + when(r.observed_at) + (r.src && /^https:\/\/earthquake\.usgs\.gov\//.test(r.src) ? ` · <a href="${esc(r.src)}" target="_blank" rel="noopener">USGS</a>` : '')]);
   if (p.cell.count > recs.length) rows.push(['…', `${p.cell.count - recs.length} more in this cell`]);
   $('insp-dl').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   $('insp').classList.add('show'); globe.controls().autoRotate = false;
@@ -257,7 +267,8 @@ function sentence() {
   if (c && fc.grade !== 'unknown' && c.index) {
     const cm = c.comparison || {};
     const d1 = cm.week_average && cm.one_year_ago ? (cm.week_average - cm.one_year_ago).toFixed(2) : null;
-    parts.push(`CO₂ ${Number(c.index.value).toFixed(2)} ppm at Mauna Loa on ${c.index.date} (NOAA GML, preliminary${d1 !== null ? `; week average ${Number(cm.week_average).toFixed(2)} is ${d1 > 0 ? '+' : ''}${d1} ppm against the same week one year ago, NOAA's own comparison` : ''})`);
+    const wk = (cm.basis || '').match(/week starting (\d{4}-\d\d-\d\d)/);
+    parts.push(`CO₂ ${Number(c.index.value).toFixed(2)} ppm at Mauna Loa on ${c.index.date} (NOAA GML, preliminary${d1 !== null ? `; week average ${Number(cm.week_average).toFixed(2)}${wk ? ' for the week starting ' + wk[1] : ''} is ${d1 > 0 ? '+' : ''}${d1} ppm against the same week one year ago, NOAA's own comparison` : ''})`);
   } else parts.push(`CO₂: unknown — ${fc.why}`);
   const ice = state.seaice, fi = layerFreshness(ice);
   if (ice && fi.grade !== 'unknown' && ice.index && ice.index.north) {
@@ -266,7 +277,7 @@ function sentence() {
     parts.push(`sea ice on ${n.date}: Arctic ${Number(n.value).toFixed(2)} M km²${d(n)}, Antarctic ${Number(s.value).toFixed(2)} M km²${d(s)} (NSIDC Sea Ice Index)`);
   } else parts.push(`sea ice: unknown — ${fi.why}`);
   const sh = state.ships, fs = layerFreshness(sh);
-  parts.push(sh && fs.grade !== 'unknown' ? `${total(sh).toLocaleString()} vessels with an AIS position in a ${sh.window_s} s window (aisstream.io, ${sh.class_a} Class A + ${sh.class_b} Class B, collected ${ago(sh.retrieved_at)} from a home collector; terrestrial receivers only, so open ocean is not covered)` : `ships: unknown — ${fs.why}`);
+  parts.push(sh && fs.grade !== 'unknown' ? `${total(sh).toLocaleString()} vessel identities received during a ${sh.window_s} s AIS sample ending ${hhmm(sh.window_end)} (aisstream.io, ${sh.class_a} Class A + ${sh.class_b} Class B; sampled roughly every 30 min while the home collector is available; receiver coverage incomplete; positions between samples unknown)` : `ships: unknown — ${fs.why}`);
   parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; one is planned');
   $('sentence').textContent = `As of ${new Date().toISOString().slice(11, 16)} UTC: ` + parts.join('; ') + '.';
 }
@@ -281,17 +292,17 @@ function choices() {
     const s = state[layer]; if (!s) { add(label, 'no snapshot yet'); continue; }
     const isIndex = layer === 'swpc' || layer === 'co2' || layer === 'seaice';
     add(label + ' · tier', isIndex ? 'observation (index, not a map layer)' : 'observation');
-    add(label + ' · quantity', s.quantity || '');
-    add(label + ' · window', layer === 'ships' ? `${s.window_s} s listening window per snapshot; latest position per vessel (MMSI); collected on demand from a home machine (D11), not continuously` : layer === 'swpc' ? '3-hourly index' : layer === 'co2' ? 'daily mean; collected hourly; recent months preliminary until NOAA finalises them' : layer === 'seaice' ? 'daily extent (~1 day latency); collected at 03/09/15/21 UTC, matching NSIDC\'s once-a-day update' : `${LAYER_WINDOW_H[layer]} h, event layer: events keep their age, do not expire inside the window`);
+    add(label + ' · quantity', esc(s.quantity || ''));
+    add(label + ' · window', layer === 'ships' ? `${s.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (s.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence); latest received position per vessel (MMSI) within the sample; collected from a home machine (D11) while it is available, not continuously` : layer === 'swpc' ? '3-hourly index' : layer === 'co2' ? 'daily mean; collected hourly; recent months preliminary until NOAA finalises them' : layer === 'seaice' ? 'daily extent (~1 day latency); collected at 03/09/15/21 UTC, matching NSIDC\'s once-a-day update' : `${LAYER_WINDOW_H[layer]} h, event layer: events keep their age, do not expire inside the window`);
     if (layer === 'ships') add(label + ' · source caveat', 'aisstream.io (read 31 Oct 2026): free; "Direct browser connections are not permitted. Connect from your own server"; 3 subscribed connections per account; read continuously or messages are dropped. No terms-of-use page exists on the site — only a privacy policy. Terrestrial AIS: coverage is coastal.', true);
     if (layer === 'firms') add(label + ' · source caveat', 'NASA LANCE: near-real-time product (latency is the point here); "their use for tactical decision-making or informing about conditions at a local scale are not advised" (read 30 Oct 2026)', true);
-    if (layer === 'co2' && s.comparison) add(label + ' · comparison', `${s.comparison.basis} — NOAA\'s comparison, not ours`, true);
-    if (layer === 'seaice' && s.comparison) add(label + ' · comparison', s.comparison.basis, true);
+    if (layer === 'co2' && s.comparison) add(label + ' · comparison', `${esc(s.comparison.basis)} — NOAA\'s comparison, not ours`, true);
+    if (layer === 'seaice' && s.comparison) add(label + ' · comparison', esc(s.comparison.basis), true);
     if (layer === 'seaice') add(label + ' · map layer', 'not shown. Measured 30 Oct 2026: GIBS VIIRS NOAA-20 sea ice (observation) paints 0.76% of the globe for 29 Oct — polar night and cloud blind it; AMSR2 concentration ended 1 Sep 2025; GHRSST MUR concentration (12% painted) is an L4 analysis, model tier. Decision pending.', true);
-    if ((layer === 'co2' || layer === 'seaice' || layer === 'ships') && s.citation) add(label + ' · citation', s.citation, true);
+    if ((layer === 'co2' || layer === 'seaice' || layer === 'ships') && s.citation) add(label + ' · citation', esc(s.citation), true);
     add(label + ' · stale_after', `${s.stale_after_s} s — layer becomes Unknown past this (not adjustable)`, true);
-    if (s.coverage_default) add(label + ' · coverage rule', `${s.coverage_default.grade}: ${s.coverage_default.evidence} (not adjustable)`, true);
-    add(label + ' · collector', `v${s.collector_version}, schema ${s.schema_version}, scheduled ${s.scheduled_for ? s.scheduled_for.slice(11, 16) + ' UTC' : ''}`);
+    if (s.coverage_default) add(label + ' · coverage rule', `${esc(s.coverage_default.grade)}: ${esc(s.coverage_default.evidence)} (not adjustable)`, true);
+    add(label + ' · collector', `v${esc(s.collector_version)}, schema ${esc(s.schema_version)}, scheduled ${s.scheduled_for ? s.scheduled_for.slice(11, 16) + ' UTC' : ''}`);
   }
   add('Aircraft', 'OpenSky · tier observation · not shown: OpenSky permits public sites only if they feed the network (reply 30 Oct 2026); an ADS-B receiver in Cape Town is planned. Cloud collectors are not whitelisted.', true);
   add('Comparisons', 'none in phase 1; descriptive comparisons from phase 3, highlights only after a held-out validation (§6)', true);
@@ -326,7 +337,8 @@ async function loadCells() {
     const cm = c.comparison || {};
     const delta = (a, b) => (a && b) ? `${a - b > 0 ? '+' : ''}${(a - b).toFixed(2)}` : null;
     const d1 = delta(cm.week_average, cm.one_year_ago), d10 = delta(cm.week_average, cm.ten_years_ago);
-    $('co2-cmp').innerHTML = d1 ? `NOAA's own comparison, week average <b>${Number(cm.week_average).toFixed(2)}</b>: <b>${d1}</b> vs same week 1 yr ago (${Number(cm.one_year_ago).toFixed(2)}) · <b>${d10}</b> vs 10 yr ago (${Number(cm.ten_years_ago).toFixed(2)})${cm.increase_since_1800 ? ` · +${Number(cm.increase_since_1800).toFixed(2)} since 1800` : ''}` : 'comparison: not provided by source this week';
+    const wk = (cm.basis || '').match(/week starting (\d{4}-\d\d-\d\d)/);
+    $('co2-cmp').innerHTML = d1 ? `NOAA's own comparison, week average <b>${Number(cm.week_average).toFixed(2)}</b>${wk ? ' (week of ' + wk[1] + ')' : ''}: <b>${d1}</b> vs same week 1 yr ago (${Number(cm.one_year_ago).toFixed(2)}) · <b>${d10}</b> vs 10 yr ago (${Number(cm.ten_years_ago).toFixed(2)})${cm.increase_since_1800 ? ` · +${Number(cm.increase_since_1800).toFixed(2)} since 1800` : ''}` : 'comparison: not provided by source this week';
   } else { $('co2-v').textContent = '–'; $('co2-t').textContent = 'unknown' + (c ? ' — ' + layerFreshness(c).why : ''); $('co2-cmp').textContent = 'comparison: unknown'; }
   const ice = state.seaice;
   if (ice && ice.index && ice.index.north && layerFreshness(ice).grade !== 'unknown') {
@@ -356,7 +368,7 @@ async function loadRecords() {
   render();
   try {
     const s = await getJson('/snapshot/ships');
-    points.ships = rowsToObjects(s).map(v => ({ lat: v.lat, lng: v.lng, mmsi: v.mmsi, name: v.name, sog_kn: v.sog_kn, cls: v.class, observed_at: v.observed_at,
+    points.ships = rowsToObjects(s).map(v => ({ lat: v.lat, lng: v.lng, mmsi: v.mmsi, name: v.name, sog_kn: v.sog_kn, cls: v.class, observed_at: v.observed_at, received_at: v.received_at,
       cellId: cellId(v.lat, v.lng), col: '#5fe3c8', alt: .003, r: .05 }));
     if (state.ships) state.ships.records_count = points.ships.length;
   } catch (e) { }

@@ -22,3 +22,9 @@ Phase 1, step 1 (collectors) — code complete, not yet deployed. See the guide.
 ## Licence
 
 MIT. Data sources carry their own terms; see the source register in the spec.
+
+## Documents
+- `docs/SPEC-v0.3.md` — the build spec (deviations D1–D14 logged in `STATUS.md`)
+- `docs/PROJECT-BRIEF.md` — the brief
+- `REGISTER.md` — every source's terms, verbatim and dated
+- `reviews/` — every external review round and our questions

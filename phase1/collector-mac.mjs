@@ -15,7 +15,7 @@
  * not covered, so a silent cell is not an empty cell (coverage stays 'partial' until receipt history exists — same rule as OpenSky, D9).
  */
 
-const COLLECTOR_VERSION = 'mac-0.2.0';
+const COLLECTOR_VERSION = 'mac-0.2.1';
 const SCHEMA_VERSION = 1;
 const CELL_DEG = 4;
 const HUB = process.env.HUB || 'https://mother-earth.chadoberholzer.workers.dev';
@@ -53,7 +53,7 @@ const FEEDS = {
     const bbox = flag('bbox', '-90,-180,90,180').split(',').map(Number);          // lat1,lng1,lat2,lng2 (default: world)
     const CLASS = { PositionReport: 'A', StandardClassBPositionReport: 'B', ExtendedClassBPositionReport: 'B' };
     const vessels = new Map();                                                     // mmsi -> row
-    let messages = 0, parseErrors = 0, confirmed = false, compression = null, closeInfo = null, connectedAt = null, lastMsgAt = null;
+    let messages = 0, parseErrors = 0, confirmed = false, compression = null, closeInfo = null, connectedAt = null, lastMsgAt = null, closedAt = null, noSourceTime = 0, olderIgnored = 0;
     const t0 = Date.now();
     await new Promise((resolve, reject) => {
       const ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
@@ -64,7 +64,7 @@ const FEEDS = {
         ws.send(JSON.stringify({ APIKey: key, BoundingBoxes: [[[bbox[0], bbox[1]], [bbox[2], bbox[3]]]], FilterMessageTypes: Object.keys(CLASS) }));
       };
       ws.onerror = (ev) => { clearTimeout(timer); const er = ev && ev.error; reject(new Error('websocket error: ' + [ev && ev.message, er && er.message, er && er.cause && er.cause.message, er && er.cause && er.cause.code].filter(Boolean).join(' | ') || 'unknown (no detail from the socket)')); };
-      ws.onclose = (ev) => { closeInfo = { code: ev.code, reason: ev.reason }; clearTimeout(timer); resolve(); };
+      ws.onclose = (ev) => { closeInfo = { code: ev.code, reason: ev.reason }; closedAt = Date.now(); clearTimeout(timer); resolve(); };
       ws.onmessage = (ev) => {
         let m;
         try { m = JSON.parse(typeof ev.data === 'string' ? ev.data : Buffer.from(ev.data).toString('utf8')); } catch (_) { parseErrors++; return; }
@@ -76,23 +76,30 @@ const FEEDS = {
         if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
         const mmsi = String(md.MMSI ?? pr.UserID ?? '');
         if (!mmsi) return;
+        // observed_at = the source's own time, or null when the source gives none (never "now" — that would claim more than the source supplied). received_at is ours.
         const tUtc = md.time_utc ? new Date(String(md.time_utc).replace(' +0000 UTC', 'Z').replace(' ', 'T')) : null;
-        const observedAt = tUtc && !isNaN(tUtc) ? tUtc.toISOString() : nowIso();
-        vessels.set(mmsi, [mmsi, lat, lng, observedAt, pr.Sog ?? null, pr.Cog ?? null, pr.TrueHeading ?? null, pr.NavigationalStatus ?? null, cls, (md.ShipName || '').trim()]);
+        const observedAt = tUtc && !isNaN(tUtc) ? tUtc.toISOString() : null;
+        if (!observedAt) noSourceTime++;
+        // "latest" = the newest source time when both carry one; otherwise the last one received.
+        const prev = vessels.get(mmsi);
+        if (prev && prev[3] && observedAt && Date.parse(observedAt) < Date.parse(prev[3])) { olderIgnored++; return; }
+        vessels.set(mmsi, [mmsi, lat, lng, observedAt, nowIso(), pr.Sog ?? null, pr.Cog ?? null, pr.TrueHeading ?? null, pr.NavigationalStatus ?? null, cls, String(md.ShipName || '').trim().slice(0, 40)]);
       };
     });
     const wallS = (Date.now() - t0) / 1000;
-    const upS = connectedAt ? ((lastMsgAt || connectedAt) - connectedAt) / 1000 : 0;
+    const upS = connectedAt ? ((closedAt || Date.now()) - connectedAt) / 1000 : 0;                 // connection duration, not message activity
+    const quietS = connectedAt && lastMsgAt ? ((closedAt || Date.now()) - lastMsgAt) / 1000 : null;  // seconds between the last message and close
     const upFrac = Math.max(0, Math.min(1, upS / windowS));
     if (!confirmed) throw new Error('no SubscriptionConfirmation within the window' + (closeInfo ? ' (close ' + closeInfo.code + ' ' + closeInfo.reason + ')' : ''));
     const rows = [...vessels.values()];
-    const rowsA = rows.filter(r => r[8] === 'A').length;
+    const rowsA = rows.filter(r => r[9] === 'A').length;
     const status = upFrac >= 0.9 ? 'ok' : 'degraded';
-    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s up=${upS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
-    return { fields: ['mmsi', 'lat', 'lng', 'observed_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'], rows,
-      quantity: `unique vessels (by MMSI) with a Class A or B position report during a ${windowS} s window, per cell — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell`,
-      coverageDefault: { grade: 'partial', evidence: 'socket_up;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },
-      extra: { scope: bbox.join(',') === '-90,-180,90,180' ? 'world' : 'bbox ' + bbox.join(','), window_s: windowS, socket_up_s: upS, messages, class_a: rowsA, class_b: rows.length - rowsA,
+    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s up=${upS.toFixed(1)}s quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
+    return { fields: ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'], rows,
+      quantity: `vessel identities (MMSI) with a Class A or B position report received during a ${windowS} s AIS sample, per cell; latest received position per vessel — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell; positions between samples unknown`,
+      coverageDefault: { grade: 'partial', evidence: 'socket_up;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },   // observed_fraction = fraction of the sample the socket was connected (§3.1), not geographic coverage
+      extra: { scope: bbox.join(',') === '-90,-180,90,180' ? 'world' : 'bbox ' + bbox.join(','), window_s: windowS, socket_up_s: upS, quiet_at_end_s: quietS, connection_fraction_of_sample: upFrac, messages, class_a: rowsA, class_b: rows.length - rowsA,
+        records_without_source_time: noSourceTime, older_reports_ignored: olderIgnored, sampling: 'one sample per run; runs are scheduled roughly every 30 min while the collector is available; no observation between samples',
         compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,
         citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' } };
   },
