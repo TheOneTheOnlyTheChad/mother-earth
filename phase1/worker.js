@@ -17,7 +17,8 @@
  * Bindings (set in dashboard → Worker → Settings → Bindings):
  *   R2  = R2 bucket binding        DB = D1 database binding
  * Secrets: OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, FIRMS_MAP_KEY, ADMIN_KEY, INGEST_KEY (external collectors; ingest is disabled until set)
- * Plain vars (optional): OPENSKY_BBOX = "lamin,lomin,lamax,lomax"  (default southern Africa)
+ * Plain vars (optional): OPENSKY_ENABLED = "1" to run the OpenSky pulls (parked 31 Oct 2026: Cloudflare egress 522 + public site must feed; unset = skip silently)
+*                        OPENSKY_BBOX = "lamin,lomin,lamax,lomax"  (default southern Africa)
  *                        FIRMS_REGION = "west,south,east,north"   (default: world; set only if the Free plan's CPU limit forces it)
  *
  * Deviations from v0.3 to be recorded as a v0.4 diff (reasons in GUIDE-step1.md §6):
@@ -41,7 +42,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.6';
+const COLLECTOR_VERSION = '0.1.7';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -630,11 +631,33 @@ async function aggregateFirms(env, hourMs) {
   return { ok: true, runs_ok: okRuns, rows_seen: rowsSeen, changed };
 }
 
+/* Ships hour H (ingested samples, irregular cadence): list the hour's cells files (1 R2 list), mean/max unique vessels per cell over ok samples.
+ * Keeps the sampling metadata a later comparison needs: which samples, window length, connection fraction — not just counts (review round 4). */
+async function aggregateShips(env, hourMs) {
+  const layer = 'ships';
+  const hour = hourKey(hourMs);
+  const listed = await env.R2.list({ prefix: `cells/${layer}/${hour}` });
+  const files = [];
+  for (const o of listed.objects || []) { const f = await getJson(env, o.key); if (f) files.push({ key: o.key, f }); }
+  const ok = files.filter(x => x.f.source_status === 'ok');
+  const sums = {}, maxes = {};
+  for (const { f } of ok) for (const id in f.cells) { sums[id] = (sums[id] || 0) + f.cells[id].count; maxes[id] = Math.max(maxes[id] || 0, f.cells[id].count); }
+  const expected = 2;                                                   // 30-min cadence while the home collector is available
+  const frac = Math.min(1, ok.length / expected);
+  const incoming = {};
+  for (const id in sums) incoming[id] = { count: Math.round(sums[id] / ok.length * 100) / 100, count_max: maxes[id], coverage: 'partial', observed_fraction: frac, extra: null };   // partial: terrestrial AIS, receipt history pending
+  const meta = { window_s: ok.map(x => x.f.window_s), samples: ok.map(x => x.key.slice(-22, -5)), connection_fraction: ok.map(x => x.f.connection_fraction_of_sample ?? (x.f.coverage_default && x.f.coverage_default.observed_fraction)), class_a: ok.map(x => x.f.class_a), class_b: ok.map(x => x.f.class_b), collector: ok.map(x => x.f.collector_version) };
+  await layerHourly(env, layer, hour, expected, ok.length, ok.length >= expected ? 'ok' : (ok.length ? 'degraded' : 'down'), 'none', JSON.stringify({ rule: 'mean of per-sample unique vessels; sampled, not continuous', ...meta }).slice(0, 1500));
+  const changed = ok.length ? await upsertChanged(env, layer, { [hour]: incoming }) : 0;
+  return { files: files.length, ok: ok.length, cells: Object.keys(incoming).length, changed };
+}
+
 async function hourlyBatch(env, scheduledMs) {
   const started = Date.now();
   const hourMs = Math.floor((scheduledMs - 3600e3) / 3600e3) * 3600e3;    // previous full hour
   const out = {};
-  try { out.opensky = await aggregateOpensky(env, hourMs); } catch (e) { out.opensky = 'error ' + e; }
+  if (env.OPENSKY_ENABLED === '1') { try { out.opensky = await aggregateOpensky(env, hourMs); } catch (e) { out.opensky = 'error ' + e; } } else out.opensky = 'parked';
+  try { out.ships = await aggregateShips(env, hourMs); } catch (e) { out.ships = 'error ' + e; }
   try { out.usgs = await aggregateUsgs(env, hourMs); } catch (e) { out.usgs = 'error ' + e; }
   try { out.firms = await aggregateFirms(env, hourMs); } catch (e) { out.firms = 'error ' + e; }
   await env.DB.prepare('INSERT INTO batch_runs (hour_utc, started_at, finished_at, result) VALUES (?,?,?,?)')
@@ -652,9 +675,10 @@ async function guarded(env, layer, ms, fn) {
 
 const JOBS = {
   five: async (env, ms) => (await Promise.all([
-    guarded(env, 'usgs', ms, collectUsgs), guarded(env, 'opensky', ms, collectOpenskyWorld),
+    guarded(env, 'usgs', ms, collectUsgs),
+    env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky', ms, collectOpenskyWorld) : 'opensky:parked',
   ])).join('; '),
-  minute: async (env, ms) => guarded(env, 'opensky-bbox', ms, collectOpenskyBbox),
+  minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
   firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
   hourly: async (env, ms, manual) => {
     const k = await guarded(env, 'swpc', ms, collectSwpc);          // Kp is a 3-hourly product; hourly matches NWS's "know your refresh frequency" (REGISTER.md)
@@ -725,6 +749,15 @@ async function ingest(req, env, layer) {
   if (e.source_status === 'down') {
     await writeDown(env, layer, scheduledMs, 'ingested down: ' + (e.note || ''), 0);
     return json({ ok: true, layer, published: 'cells only (down)', snapshot: isoMinute(scheduledMs) }, 200, { 'Cache-Control': 'no-store' });
+  }
+  // Ordering guard (review round 4): an upload older than what latest/ already holds is archived but must not become "latest".
+  const cur = await getJson(env, `latest-cells/${layer}.json`);
+  if (cur && cur.retrieved_at && Date.parse(cur.retrieved_at) > Date.parse(e.retrieved_at)) {
+    const stamp = isoMinute(scheduledMs);
+    const bytes = await putJson(env, `snapshots/${layer}/${stamp}.json`, e);
+    await putJson(env, `cells/${layer}/${stamp}.json`, { ...e, records: undefined, record_fields: undefined, record_format: undefined });
+    await logRun(env, layer, scheduledMs, e.source_status, 200, e.records.length, bytes, 'ingested (archive only: older than latest ' + cur.retrieved_at + ') from ' + e.ingested_from);
+    return json({ ok: true, layer, snapshot: stamp, published: 'archive only (older than latest)', latest_retrieved_at: cur.retrieved_at }, 200, { 'Cache-Control': 'no-store' });
   }
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);    // same path as internal collectors: snapshot, cells, latest, latest-cells
   await logRun(env, layer, scheduledMs, e.source_status, 200, e.records.length, bytes, 'ingested from ' + e.ingested_from + ' v' + e.collector_version);
