@@ -1,4 +1,6 @@
-# Mother Earth — status (30 Oct 2026, end of day one, 17:40 UTC)
+# Mother Earth — status (31 Oct 2026 — end of thread 1)
+
+**Deployed on Cloudflare: collector 0.1.4. Repo `main` has 0.1.5 (NOT yet deployed).** Read `START-HERE.md` first.
 
 **Public URL:** https://theonetheonlythechad.github.io/mother-earth/
 **Hub:** https://mother-earth.chadoberholzer.workers.dev (`/status`, `/cells/<layer>`, `/snapshot/<layer>`)
@@ -8,7 +10,7 @@
 | Layer | Source | Cadence | Plan | Measured |
 |---|---|---|---|---|
 | Earthquakes | USGS 2.5_day | 5 min | Free | <1 ms CPU |
-| Kp | NOAA SWPC | 5 min (→ hourly queued: NWS asks for cadence matched to the 3-hourly refresh) | Free | <1 ms; feed is now an array of objects (fixed 0.1.1) |
+| Kp | NOAA SWPC | 5 min on 0.1.4; hourly from 0.1.5 (NWS: match cadence to the 3-hourly refresh) | Free | <1 ms; feed is now an array of objects (fixed 0.1.1) |
 | Fires | NASA FIRMS VIIRS NOAA-20, world, 24 h | 15 min | Free | 15 ms CPU at 1.3 MB / 16k rows (soft 10 ms limit); file grew to ~31k rows by afternoon — decision on Workers Paid ($5/mo) vs regional vs external parse after a week of `raw_bytes` logs |
 | CO₂ (carbon) | NOAA GML Mauna Loa daily + weekly CSV | hourly (:07) | Free | collector 0.1.3 deployed 16:33 (0.1.2 parsed the whole 433 KB daily file: 113 ms CPU P99 measured; 0.1.3 parses the tail only, CPU to be read at the next :07); index tile on page with NOAA's own 1 y / 10 y comparison (the only comparison shown; it is theirs, not ours); `co2_daily` table in D1 |
 | Sea ice (polar caps) | NSIDC Sea Ice Index v4, N+S daily extent + 1981–2010 climatology (NOAA mirror, no login) | 03/09/15/21 UTC on the hourly job | Free | collector 0.1.4 deployed 17:30; tile on page with NSIDC baseline + percentile position (subtraction is ours, labelled); **no cap imagery** — VIIRS sea-ice paints 0.76 % (polar night), AMSR2 ended Sep 2025, GHRSST MUR is an analysis (decision pending) |
@@ -21,12 +23,14 @@
 ## Decisions (v0.4 diff, to be written)
 D1 one Worker · D2 hourly aggregation · D3 row records · D4 aircraft quantity = mean/max unique per snapshot · D5 USGS M4.5+ as comparison-eligible · D6 zeros are not rows · D7 CPU is the binding Free-tier constraint · D8 D1 writes ≈40–70k/day · D9 receipt history = evidence of prior successful sampling only (NOT receiver coverage; never licenses reading an empty cell as absence) — aircraft cells stay `partial` in phase 1; code change pending when aircraft is enabled · D10 USGS/FIRMS partial in phase 1 · **D11** hub + external collectors via authenticated `/ingest` (approved by GPT & Gemini; collector sends parsed envelope) · **D12** raw R2 retention 48 h (not 90 days); D1 hourly aggregates kept as a deliberate phase-3 investment (~1,500 rows/hour, cost kept visible) · **D13** page promise shows comparison as "not yet" until phase 3 · **D14** FIRMS guard labelled "raw archived; processing skipped: resource guard", not "down"
 
-## Next
-1. `/ingest/<layer>` endpoint + Mac collector script — test first with a mock feed (auth, idempotent snapshot id, three timestamps, validate before publishing `latest`). Ships need a runtime that can hold a WebSocket; whether it must be residential is aisstream's policy, to be measured.
-2. Register (`REGISTER.md`): USGS ✅ SWPC ✅ NOAA GML ✅ FIRMS ✅ GIBS ✅ (30 Oct); NSIDC data-use page paste outstanding. Page carries the LANCE acknowledgment and NASA's local-scale caveat.
-3. ~~carbon~~ ~~polar caps~~ done as indices (30 Oct). Open decision: GHRSST MUR sea-ice concentration as a *labelled analysis* overlay, or none. Kp cadence → hourly (queued, collector change).
-4. ADS-B receiver decision (unlocks aircraft; optional; price a real basket first).
-5. Week-one review: FIRMS CPU/raw_bytes logs → Paid vs regional; D1 daily writes vs 100k.
+## Next (in order)
+1. **Deploy 0.1.5** (`phase1/worker.js`, committed c279777) via the editor flow in START-HERE §4; verify `/` → 0.1.5. It adds `POST /ingest/<layer>` (D11) and moves Kp to the hourly job. Then: Chad generates an `INGEST_KEY` (any long random string) → KEYS.md first → Cloudflare Settings → Variables and Secrets → Add (Key `INGEST_KEY`, Secret ticked). Until the secret exists, `/ingest` answers 503 by design.
+2. **Prove the ingest path** with the mock feed from his Mac: `cd ~/Documents/Mother\ Earth/phase1 && INGEST_KEY=… node collector-mac.mjs mock` → expect `200 {"ok":true,"layer":"mock",…}` → `GET /cells/mock` shows it. (`--dry` prints the envelope without sending.) Then delete nothing — mock stays as the test layer; the page does not show it.
+3. Ships/lightning/aircraft collectors then plug into the same script (FEEDS map). Ships need a runtime that can hold a WebSocket; whether it must be residential is aisstream's policy, to be measured.
+4. Register (`REGISTER.md`): USGS ✅ SWPC ✅ NOAA GML ✅ FIRMS ✅ GIBS ✅ (30 Oct); NSIDC: paste the **Citation** tab text from https://nsidc.org/data/g02135 (Overview already read; NSIDC moved G02135 to "Basic" level of service for funding reasons — durability risk noted). Page carries the LANCE acknowledgment and NASA's local-scale caveat.
+5. ~~carbon~~ ~~polar caps~~ done as indices (30 Oct). Open decision (Chad's): polar-cap imagery — (a) none, numbers only [Claude's lean]; (b) GHRSST MUR concentration as a toggle labelled "analysis, not observation"; (c) phase 2: NSIDC's own daily extent GeoTIFF (EPSG:3411/3412) reprojected by the Mac collector — the honest observation-tier option. Kp → hourly is in 0.1.5.
+6. ADS-B receiver decision (unlocks aircraft; optional; price a real basket first).
+7. Week-one review: FIRMS CPU/raw_bytes logs → Paid vs regional; D1 daily writes vs 100k.
 
 ## Keys
 `~/Documents/Mother Earth/KEYS.md` (gitignored). Secrets are write-only in Cloudflare; the file is the record.
