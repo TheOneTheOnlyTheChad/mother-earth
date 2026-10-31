@@ -11,7 +11,7 @@
    (the imagery tiles are the one exception, dated on the globe). Spec v0.3 §7. */
 :root{
   --bg:#070a0f; --panel:rgba(12,17,26,.84); --line:rgba(140,170,200,.16); --fg:#d6dde8; --dim:#7f8da3;
-  --accent:#ffb347; --quake:#ff5a3c; --fire:#ff9b2e; --plane:#7fd3ff; --space:#c58bff; --carbon:#9ad0a4; --ice:#bfe6ff; --ok:#b9ff6b; --warn:#ffd166; --bad:#ff5a3c;
+  --accent:#ffb347; --quake:#ff5a3c; --fire:#ff9b2e; --plane:#7fd3ff; --ship:#5fe3c8; --space:#c58bff; --carbon:#9ad0a4; --ice:#bfe6ff; --ok:#b9ff6b; --warn:#ffd166; --bad:#ff5a3c;
   --display:"Barlow Condensed",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -103,6 +103,7 @@ details.choices .fixed{color:var(--dim);font-style:italic}
   <div class="layers" id="layers">
     <div class="layer" data-layer="usgs" style="--c:var(--quake)"><span class="pip"></span><span><span class="name">Earthquakes</span><span class="src">USGS · M2.5+ · 24 h window</span></span><span><span class="count" id="c-usgs">–</span><span class="state" id="s-usgs">loading</span></span></div>
     <div class="layer" data-layer="firms" style="--c:var(--fire)"><span class="pip"></span><span><span class="name">Fires</span><span class="src">NASA FIRMS · VIIRS NOAA-20 · 24 h</span></span><span><span class="count" id="c-firms">–</span><span class="state" id="s-firms">loading</span></span></div>
+    <div class="layer" data-layer="ships" style="--c:var(--ship)"><span class="pip"></span><span><span class="name">Ships</span><span class="src">aisstream.io · AIS Class A+B · <span id="w-ships">60 s</span> window · terrestrial only</span></span><span><span class="count" id="c-ships">–</span><span class="state" id="s-ships">loading</span></span></div>
     <div class="layer locked" style="--c:var(--plane)"><span class="pip"></span><span><span class="name">Aircraft</span><span class="src">OpenSky · public sites must feed the network · receiver planned</span></span><span><span class="state">not shown</span></span></div>
   </div>
 
@@ -113,7 +114,7 @@ details.choices .fixed{color:var(--dim);font-style:italic}
   <div class="co2 ice" id="ice"><span class="v"><span id="ice-n">–</span><small>M km² Arctic</small> · <span id="ice-s">–</span><small>M km² Antarctic</small></span><span class="l">Sea-ice extent · two numbers, not a map layer <br>NSIDC Sea Ice Index · <span id="ice-t">–</span></span><span class="cmp" id="ice-cmp">comparison: loading…</span></div>
 
   <div class="legend">
-    <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (one per satellite pass, not one fire)</div>
+    <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (one per satellite pass, not one fire) · <span class="dot" style="--c:var(--ship)"></span>vessel (last AIS position in the window; open ocean has no terrestrial receivers)</div>
     <div><span class="sw"></span><b>observed throughout the window</b> (cell outline, solid)</div>
     <div><span class="sw partial"></span>partly observed — count is a floor, not a total</div>
     <div><span class="sw unknown"></span>unknown — nothing can be said about this cell</div>
@@ -129,7 +130,7 @@ details.choices .fixed{color:var(--dim);font-style:italic}
 <div class="imgdate" id="imgdate">Imagery: loading…</div>
 
 <div class="status"><span class="tag">STATUS</span><span id="sentence">Loading the latest published snapshots…</span>
-  <div class="img"><span id="imgdate2"></span>Comparison period: none of ours yet — baselines accumulating since 30 Oct 2026 (the CO₂ comparison is NOAA's). Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a> · <a href="https://github.com/TheOneTheOnlyTheChad/mother-earth" target="_blank" rel="noopener">source</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). NASA advises against using these data for tactical decisions or local-scale conditions.</div>
+  <div class="img"><span id="imgdate2"></span>Comparison period: none of ours yet — baselines accumulating since 30 Oct 2026 (the CO₂ comparison is NOAA's). Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · AIS via <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a> · <a href="https://github.com/TheOneTheOnlyTheChad/mother-earth" target="_blank" rel="noopener">source</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). NASA advises against using these data for tactical decisions or local-scale conditions.</div>
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
@@ -142,7 +143,9 @@ if (typeof Globe === 'undefined') {
 }
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const CELL_DEG = 4;
-const LAYER_WINDOW_H = { usgs: 24, firms: 24 };               // event layers: window-based (§3.3)
+const LAYER_WINDOW_H = { usgs: 24, firms: 24 };               // event layers: window-based (§3.3); ships carries its own window_s in the snapshot
+const LABEL = { usgs: 'Earthquakes', firms: 'Fire detections', ships: 'Vessels' };
+const windowText = (layer, snap) => layer === 'ships' ? `in a ${(snap && snap.window_s) || 60} s window` : `in the last ${LAYER_WINDOW_H[layer]} h`;
 const REFRESH_MS = 5 * 60e3;
 
 const st = (k, txt, cls) => { const e = $('s-' + k); if (!e) return; e.textContent = txt; e.className = 'state' + (cls ? ' ' + cls : ''); };
@@ -159,9 +162,9 @@ const gibs = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=
 $('imgdate').textContent = 'Imagery: ' + new Date(imgDay).toUTCString().slice(5, 16) + ' (NASA GIBS, VIIRS NOAA-20) — not live';
 $('imgdate2').textContent = 'Imagery ' + new Date(imgDay).toUTCString().slice(5, 16) + ', not live · ';
 
-const state = { usgs: null, firms: null, swpc: null, co2: null, seaice: null };     // cells files (small)
-const points = { usgs: [], firms: [] };
-const on = { usgs: true, firms: true };
+const state = { usgs: null, firms: null, ships: null, swpc: null, co2: null, seaice: null };     // cells files (small)
+const points = { usgs: [], firms: [], ships: [] };
+const on = { usgs: true, firms: true, ships: true };
 
 const globe = Globe()($('globe'))
   .globeImageUrl(gibs).backgroundColor('#070a0f')
@@ -197,20 +200,21 @@ function layerFreshness(snap) {
 
 function render() {
   const polys = [];
-  for (const layer of ['usgs', 'firms']) {
+  for (const layer of ['usgs', 'firms', 'ships']) {
     const snap = state[layer]; if (!snap || !on[layer]) continue;
     const fresh = layerFreshness(snap);
     for (const [id, cell] of Object.entries(snap.cells || {})) {
       let grade = (cell.coverage && cell.coverage.grade) || 'unknown';
       if (fresh.grade === 'unknown') grade = 'unknown';                                  // stale snapshot → nothing is current
       polys.push({ geom: cellGeom(id), layer, id, cell, grade, stroke: STROKE[grade], fill: FILL[grade],
-        label: `<div style="font:12px IBM Plex Mono,monospace"><b>${layer === 'usgs' ? 'Earthquakes' : 'Fire detections'}</b> · cell ${id}<br>${cell.count} in the last ${LAYER_WINDOW_H[layer]} h · coverage: ${grade}<br><span style="color:#7f8da3">${cell.coverage ? cell.coverage.evidence : ''}</span></div>` });
+        label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL[layer]}</b> · cell ${id}<br>${cell.count} ${windowText(layer, snap)} · coverage: ${grade}<br><span style="color:#7f8da3">${cell.coverage ? cell.coverage.evidence : ''}</span></div>` });
     }
   }
   globe.polygonsData(polys);
   const pts = [];
   if (on.usgs && layerFreshness(state.usgs).grade !== 'unknown') pts.push(...points.usgs);
   if (on.firms && layerFreshness(state.firms).grade !== 'unknown') pts.push(...points.firms);
+  if (on.ships && layerFreshness(state.ships).grade !== 'unknown') pts.push(...points.ships);
   globe.pointsData(pts);
   globe.ringsData(on.usgs ? points.usgs.filter(q => q.mag >= 5) : []);
   sentence();
@@ -221,10 +225,10 @@ document.querySelectorAll('.layer[data-layer]').forEach(el => el.addEventListene
 // ---------- inspector (§10.3): observation, observed_at, retrieved_at, coverage with evidence, source, comparison basis
 function inspectCell(p) {
   const snap = state[p.layer]; const fresh = layerFreshness(snap);
-  const recs = (p.layer === 'usgs' ? points.usgs : points.firms).filter(x => x.cellId === p.id).sort((a, b) => Date.parse(b.observed_at) - Date.parse(a.observed_at)).slice(0, 8);
-  $('insp-h').textContent = (p.layer === 'usgs' ? 'Earthquakes' : 'Fire detections') + ' · cell ' + p.id;
+  const recs = points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => Date.parse(b.observed_at) - Date.parse(a.observed_at)).slice(0, 8);
+  $('insp-h').textContent = LABEL[p.layer] + ' · cell ' + p.id;
   const rows = [
-    ['Count', `${p.cell.count} in the last ${LAYER_WINDOW_H[p.layer]} h` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
+    ['Count', `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
     ['Quantity', snap.quantity || ''],
     ['Coverage', `${p.grade} — ${p.cell.coverage ? p.cell.coverage.evidence : 'n/a'}`],
     ['Collector', `${fresh.grade} — ${fresh.why}`],
@@ -232,7 +236,9 @@ function inspectCell(p) {
     ['Comparison', 'insufficient history — baselines accumulate from 30 Oct 2026'],
   ];
   if (p.layer === 'firms') rows.push(['Caveat', 'NASA: not for tactical decisions or local-scale conditions; detections per pass, cloud may hide']);
-  for (const r of recs) rows.push([p.layer === 'usgs' ? `M${Number(r.mag).toFixed(1)} (${r.mag_type || '?'})` : `${Number(r.frp_mw || 0).toFixed(0)} MW`, (p.layer === 'usgs' ? `${r.title || ''} · ` : `${r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : 'nominal'} confidence · ${r.daynight === 'D' ? 'day' : 'night'} · `) + r.observed_at.replace('T', ' ').slice(0, 16) + ' UTC' + (r.src ? ` · <a href="${r.src}" target="_blank" rel="noopener">USGS</a>` : '')]);
+  if (p.layer === 'ships') rows.push(['Caveat', `terrestrial AIS only: a cell with no vessels is not an empty sea. Socket up ${Number(snap.socket_up_s || 0).toFixed(0)} of ${snap.window_s} s; ${snap.class_a} Class A + ${snap.class_b} Class B worldwide in this window`]);
+  if (p.layer === 'ships') for (const r of recs) rows.push([r.name || r.mmsi, `MMSI ${r.mmsi} · class ${r.cls} · ${r.sog_kn === null ? '?' : Number(r.sog_kn).toFixed(1)} kn · ${r.observed_at.replace('T', ' ').slice(0, 19)} UTC`]);
+  else for (const r of recs) rows.push([p.layer === 'usgs' ? `M${Number(r.mag).toFixed(1)} (${r.mag_type || '?'})` : `${Number(r.frp_mw || 0).toFixed(0)} MW`, (p.layer === 'usgs' ? `${r.title || ''} · ` : `${r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : 'nominal'} confidence · ${r.daynight === 'D' ? 'day' : 'night'} · `) + r.observed_at.replace('T', ' ').slice(0, 16) + ' UTC' + (r.src ? ` · <a href="${r.src}" target="_blank" rel="noopener">USGS</a>` : '')]);
   if (p.cell.count > recs.length) rows.push(['…', `${p.cell.count - recs.length} more in this cell`]);
   $('insp-dl').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   $('insp').classList.add('show'); globe.controls().autoRotate = false;
@@ -259,6 +265,8 @@ function sentence() {
     const d = (h) => h.difference_from_average === null ? '' : ` (${h.difference_from_average > 0 ? '+' : ''}${Number(h.difference_from_average).toFixed(2)} vs NSIDC's 1981–2010 average for this day)`;
     parts.push(`sea ice on ${n.date}: Arctic ${Number(n.value).toFixed(2)} M km²${d(n)}, Antarctic ${Number(s.value).toFixed(2)} M km²${d(s)} (NSIDC Sea Ice Index)`);
   } else parts.push(`sea ice: unknown — ${fi.why}`);
+  const sh = state.ships, fs = layerFreshness(sh);
+  parts.push(sh && fs.grade !== 'unknown' ? `${total(sh).toLocaleString()} vessels with an AIS position in a ${sh.window_s} s window (aisstream.io, ${sh.class_a} Class A + ${sh.class_b} Class B, collected ${ago(sh.retrieved_at)} from a home collector; terrestrial receivers only, so open ocean is not covered)` : `ships: unknown — ${fs.why}`);
   parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; one is planned');
   $('sentence').textContent = `As of ${new Date().toISOString().slice(11, 16)} UTC: ` + parts.join('; ') + '.';
 }
@@ -269,17 +277,18 @@ function choices() {
   const add = (k, v, fixed) => rows.push(`<tr><td>${k}</td><td class="${fixed ? 'fixed' : ''}">${v}</td></tr>`);
   add('Promise', 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.');
   add('Cell size', `${CELL_DEG}° × ${CELL_DEG}° (fixed set; adjustable from phase 3)`);
-  for (const [layer, label] of [['usgs', 'Earthquakes'], ['firms', 'Fires'], ['swpc', 'Kp'], ['co2', 'CO₂'], ['seaice', 'Sea ice']]) {
+  for (const [layer, label] of [['usgs', 'Earthquakes'], ['firms', 'Fires'], ['ships', 'Ships'], ['swpc', 'Kp'], ['co2', 'CO₂'], ['seaice', 'Sea ice']]) {
     const s = state[layer]; if (!s) { add(label, 'no snapshot yet'); continue; }
     const isIndex = layer === 'swpc' || layer === 'co2' || layer === 'seaice';
     add(label + ' · tier', isIndex ? 'observation (index, not a map layer)' : 'observation');
     add(label + ' · quantity', s.quantity || '');
-    add(label + ' · window', layer === 'swpc' ? '3-hourly index' : layer === 'co2' ? 'daily mean; collected hourly; recent months preliminary until NOAA finalises them' : layer === 'seaice' ? 'daily extent (~1 day latency); collected at 03/09/15/21 UTC, matching NSIDC\'s once-a-day update' : `${LAYER_WINDOW_H[layer]} h, event layer: events keep their age, do not expire inside the window`);
+    add(label + ' · window', layer === 'ships' ? `${s.window_s} s listening window per snapshot; latest position per vessel (MMSI); collected on demand from a home machine (D11), not continuously` : layer === 'swpc' ? '3-hourly index' : layer === 'co2' ? 'daily mean; collected hourly; recent months preliminary until NOAA finalises them' : layer === 'seaice' ? 'daily extent (~1 day latency); collected at 03/09/15/21 UTC, matching NSIDC\'s once-a-day update' : `${LAYER_WINDOW_H[layer]} h, event layer: events keep their age, do not expire inside the window`);
+    if (layer === 'ships') add(label + ' · source caveat', 'aisstream.io (read 31 Oct 2026): free; "Direct browser connections are not permitted. Connect from your own server"; 3 subscribed connections per account; read continuously or messages are dropped. No terms-of-use page exists on the site — only a privacy policy. Terrestrial AIS: coverage is coastal.', true);
     if (layer === 'firms') add(label + ' · source caveat', 'NASA LANCE: near-real-time product (latency is the point here); "their use for tactical decision-making or informing about conditions at a local scale are not advised" (read 30 Oct 2026)', true);
     if (layer === 'co2' && s.comparison) add(label + ' · comparison', `${s.comparison.basis} — NOAA\'s comparison, not ours`, true);
     if (layer === 'seaice' && s.comparison) add(label + ' · comparison', s.comparison.basis, true);
     if (layer === 'seaice') add(label + ' · map layer', 'not shown. Measured 30 Oct 2026: GIBS VIIRS NOAA-20 sea ice (observation) paints 0.76% of the globe for 29 Oct — polar night and cloud blind it; AMSR2 concentration ended 1 Sep 2025; GHRSST MUR concentration (12% painted) is an L4 analysis, model tier. Decision pending.', true);
-    if ((layer === 'co2' || layer === 'seaice') && s.citation) add(label + ' · citation', s.citation, true);
+    if ((layer === 'co2' || layer === 'seaice' || layer === 'ships') && s.citation) add(label + ' · citation', s.citation, true);
     add(label + ' · stale_after', `${s.stale_after_s} s — layer becomes Unknown past this (not adjustable)`, true);
     if (s.coverage_default) add(label + ' · coverage rule', `${s.coverage_default.grade}: ${s.coverage_default.evidence} (not adjustable)`, true);
     add(label + ' · collector', `v${s.collector_version}, schema ${s.schema_version}, scheduled ${s.scheduled_for ? s.scheduled_for.slice(11, 16) + ' UTC' : ''}`);
@@ -296,11 +305,12 @@ function choices() {
 async function getJson(path) { const r = await fetch(HUB + path, { cache: 'no-store' }); if (!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }
 
 async function loadCells() {
-  for (const layer of ['usgs', 'firms', 'swpc', 'co2', 'seaice']) {
+  for (const layer of ['usgs', 'firms', 'ships', 'swpc', 'co2', 'seaice']) {
     try { state[layer] = await getJson('/cells/' + layer); }
     catch (e) { state[layer] = null; st(layer, 'no snapshot', 'bad'); }
   }
-  for (const layer of ['usgs', 'firms']) {
+  if (state.ships && state.ships.window_s) $('w-ships').textContent = state.ships.window_s + ' s';
+  for (const layer of ['usgs', 'firms', 'ships']) {
     const s = state[layer]; if (!s) continue;
     const f = layerFreshness(s);
     st(layer, f.grade === 'adequate' ? 'retrieved ' + ago(s.retrieved_at) : f.grade === 'partial' ? 'degraded' : 'unknown', f.grade === 'adequate' ? 'ok' : f.grade === 'partial' ? 'warn' : 'bad');
@@ -342,6 +352,13 @@ async function loadRecords() {
     points.firms = rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, frp_mw: d.frp_mw, confidence: d.confidence, daynight: d.daynight, observed_at: d.observed_at,
       cellId: cellId(d.lat, d.lng), col: d.frp_mw > 50 ? '#ff6a1a' : '#ff9b2e', alt: .004, r: .04 + Math.min(d.frp_mw || 0, 300) / 3000 }));
     if (state.firms) state.firms.records_count = points.firms.length;
+  } catch (e) { }
+  render();
+  try {
+    const s = await getJson('/snapshot/ships');
+    points.ships = rowsToObjects(s).map(v => ({ lat: v.lat, lng: v.lng, mmsi: v.mmsi, name: v.name, sog_kn: v.sog_kn, cls: v.class, observed_at: v.observed_at,
+      cellId: cellId(v.lat, v.lng), col: '#5fe3c8', alt: .003, r: .05 }));
+    if (state.ships) state.ships.records_count = points.ships.length;
   } catch (e) { }
   render();
 }
