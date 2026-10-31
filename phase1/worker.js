@@ -3,7 +3,7 @@
  * Spec: SPEC-v0.3.md (§3 activity/coverage/freshness, §4 architecture, §5 data model, §10 acceptance)
  *
  * One Worker, three jobs, dispatched by cron string:
- *   "* /5 * * * *"  (every 5 min)  → USGS, SWPC, OpenSky world pull
+ *   "* /5 * * * *"  (every 5 min)  → USGS, OpenSky world pull
  *   "* * * * *"     (every 1 min)  → OpenSky bbox pull, budget-gated (auto-degrades; §4.3)
  *   "* /15 * * * *" (every 15 min) → FIRMS world/1
  *   "7 * * * *"     (hourly, :07)  → aggregate previous hour from R2 cell files into D1
@@ -16,7 +16,7 @@
  *
  * Bindings (set in dashboard → Worker → Settings → Bindings):
  *   R2  = R2 bucket binding        DB = D1 database binding
- * Secrets: OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, FIRMS_MAP_KEY, ADMIN_KEY
+ * Secrets: OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, FIRMS_MAP_KEY, ADMIN_KEY, INGEST_KEY (external collectors; ingest is disabled until set)
  * Plain vars (optional): OPENSKY_BBOX = "lamin,lomin,lamax,lomax"  (default southern Africa)
  *                        FIRMS_REGION = "west,south,east,north"   (default: world; set only if the Free plan's CPU limit forces it)
  *
@@ -41,12 +41,12 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.4';
+const COLLECTOR_VERSION = '0.1.5';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 900, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
 const URLS = {
@@ -652,16 +652,17 @@ async function guarded(env, layer, ms, fn) {
 
 const JOBS = {
   five: async (env, ms) => (await Promise.all([
-    guarded(env, 'usgs', ms, collectUsgs), guarded(env, 'swpc', ms, collectSwpc), guarded(env, 'opensky', ms, collectOpenskyWorld),
+    guarded(env, 'usgs', ms, collectUsgs), guarded(env, 'opensky', ms, collectOpenskyWorld),
   ])).join('; '),
   minute: async (env, ms) => guarded(env, 'opensky-bbox', ms, collectOpenskyBbox),
   firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
   hourly: async (env, ms, manual) => {
+    const k = await guarded(env, 'swpc', ms, collectSwpc);          // Kp is a 3-hourly product; hourly matches NWS's "know your refresh frequency" (REGISTER.md)
     const c = await guarded(env, 'co2', ms, collectCo2);
     const hr = new Date(ms).getUTCHours();
     const i = (manual || hr % 6 === 3) ? await guarded(env, 'seaice', ms, collectSeaIce) : 'seaice:skipped (runs 03/09/15/21 UTC)';   // NSIDC updates once a day
     const b = await hourlyBatch(env, ms);
-    return { co2: c, seaice: i, batch: b };
+    return { swpc: k, co2: c, seaice: i, batch: b };
   },
 };
 
@@ -674,8 +675,61 @@ function jobForCron(cron) {
   return null;
 }
 
-const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice'];
+const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock'];
+const INGEST_LAYERS = ['mock', 'opensky', 'ships', 'lightning'];   // D11: external collectors (Mac/Pi) publish these through /ingest
+const INGEST_MAX_BYTES = 5 * 1024 * 1024;
+
+// ---------------------------------------------------------------- /ingest (D11): validate, then publish like any collector
+
+/* Returns null if the body is a publishable §5 envelope for `layer`, else a reason string. The hub never repairs a bad envelope. */
+function validateEnvelope(e, layer) {
+  if (!e || typeof e !== 'object') return 'body is not an object';
+  if (e.schema_version !== SCHEMA_VERSION) return 'schema_version must be ' + SCHEMA_VERSION;
+  if (e.layer !== layer) return 'layer in body (' + e.layer + ') does not match path (' + layer + ')';
+  for (const k of ['retrieved_at', 'scheduled_for']) if (!e[k] || !Number.isFinite(Date.parse(e[k]))) return k + ' missing or not ISO-8601';
+  if (Math.abs(Date.now() - Date.parse(e.retrieved_at)) > 6 * 3600e3) return 'retrieved_at is more than 6 h from now';
+  if (!['ok', 'degraded', 'down'].includes(e.source_status)) return 'source_status must be ok|degraded|down';
+  if (typeof e.collector_version !== 'string') return 'collector_version missing';
+  if (!e.cells || typeof e.cells !== 'object' || Array.isArray(e.cells)) return 'cells must be an object';
+  for (const id in e.cells) {
+    const m = /^(\d{1,2})_(\d{1,2})$/.exec(id);
+    if (!m || +m[1] >= 180 / CELL_DEG || +m[2] >= 360 / CELL_DEG) return 'bad cell id ' + id + ' (rows 0-' + (180 / CELL_DEG - 1) + ', cols 0-' + (360 / CELL_DEG - 1) + ')';
+    const c = e.cells[id];
+    if (!c || !Number.isFinite(c.count)) return 'cell ' + id + ' has no numeric count';
+    if (!c.coverage || !['adequate', 'partial', 'unknown'].includes(c.coverage.grade) || typeof c.coverage.evidence !== 'string') return 'cell ' + id + ' coverage must be {grade: adequate|partial|unknown, evidence: string}';
+  }
+  if (e.source_status !== 'down') {
+    if (e.record_format !== 'rows' || !Array.isArray(e.record_fields) || !Array.isArray(e.records)) return "record_format must be 'rows' with record_fields[] and records[]";
+    for (const r of e.records) if (!Array.isArray(r) || r.length !== e.record_fields.length) return 'every record must have exactly ' + e.record_fields.length + ' fields';
+    if (typeof e.quantity !== 'string') return 'quantity (what one count means) is required';
+  }
+  return null;
+}
+
+async function ingest(req, env, layer) {
+  if (!env.INGEST_KEY) return json({ error: 'ingest not enabled (INGEST_KEY unset)' }, 503, { 'Cache-Control': 'no-store' });
+  const auth = req.headers.get('Authorization') || '';
+  if (auth !== 'Bearer ' + env.INGEST_KEY) return json({ error: 'forbidden' }, 403, { 'Cache-Control': 'no-store' });
+  if (!INGEST_LAYERS.includes(layer)) return json({ error: 'layer not ingestable', layers: INGEST_LAYERS }, 404);
+  const len = Number(req.headers.get('Content-Length') || 0);
+  if (len > INGEST_MAX_BYTES) return json({ error: 'body too large', max_bytes: INGEST_MAX_BYTES }, 413);
+  let e;
+  try { e = await req.json(); } catch (_) { return json({ error: 'body is not JSON' }, 400); }
+  const why = validateEnvelope(e, layer);
+  if (why) return json({ error: 'invalid envelope', why }, 422, { 'Cache-Control': 'no-store' });
+  const scheduledMs = Date.parse(e.scheduled_for);
+  e.received_at = nowIso();                                          // third timestamp: observed (window_end) / retrieved_at / received_at
+  e.ingested_from = (req.headers.get('User-Agent') || '').slice(0, 120);
+  e.stale_after_s = e.stale_after_s || STALE_AFTER_S[layer] || 900;
+  if (e.source_status === 'down') {
+    await writeDown(env, layer, scheduledMs, 'ingested down: ' + (e.note || ''), 0);
+    return json({ ok: true, layer, published: 'cells only (down)', snapshot: isoMinute(scheduledMs) }, 200, { 'Cache-Control': 'no-store' });
+  }
+  const bytes = await writeSnapshot(env, layer, scheduledMs, e);    // same path as internal collectors: snapshot, cells, latest, latest-cells
+  await logRun(env, layer, scheduledMs, e.source_status, 200, e.records.length, bytes, 'ingested from ' + e.ingested_from + ' v' + e.collector_version);
+  return json({ ok: true, layer, snapshot: isoMinute(scheduledMs), records: e.records.length, cells: Object.keys(e.cells).length, bytes }, 200, { 'Cache-Control': 'no-store' });
+}
 
 function json(obj, status = 200, extra = {}) {
   return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...CORS, ...extra } });
@@ -693,8 +747,12 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
-    if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
     const p = url.pathname.split('/').filter(Boolean);
+    if (p[0] === 'ingest') {
+      if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
+      return ingest(req, env, p[1] || '');
+    }
+    if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
     if (p[0] === 'snapshot' || p[0] === 'cells') {
       const layer = p[1];
