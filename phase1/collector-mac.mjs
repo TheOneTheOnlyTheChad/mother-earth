@@ -88,7 +88,7 @@ const FEEDS = {
     const rows = [...vessels.values()];
     const rowsA = rows.filter(r => r[8] === 'A').length;
     const status = upFrac >= 0.9 ? 'ok' : 'degraded';
-    if (!quiet) console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s up=${upS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
+    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s up=${upS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
     return { fields: ['mmsi', 'lat', 'lng', 'observed_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'], rows,
       quantity: `unique vessels (by MMSI) with a Class A or B position report during a ${windowS} s window, per cell — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell`,
       coverageDefault: { grade: 'partial', evidence: 'socket_up;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },
