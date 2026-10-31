@@ -63,7 +63,7 @@ const FEEDS = {
         connectedAt = Date.now();
         ws.send(JSON.stringify({ APIKey: key, BoundingBoxes: [[[bbox[0], bbox[1]], [bbox[2], bbox[3]]]], FilterMessageTypes: Object.keys(CLASS) }));
       };
-      ws.onerror = (ev) => { clearTimeout(timer); reject(new Error('websocket error: ' + (ev && ev.message || 'unknown'))); };
+      ws.onerror = (ev) => { clearTimeout(timer); const er = ev && ev.error; reject(new Error('websocket error: ' + [ev && ev.message, er && er.message, er && er.cause && er.cause.message, er && er.cause && er.cause.code].filter(Boolean).join(' | ') || 'unknown (no detail from the socket)')); };
       ws.onclose = (ev) => { closeInfo = { code: ev.code, reason: ev.reason }; clearTimeout(timer); resolve(); };
       ws.onmessage = (ev) => {
         let m;
