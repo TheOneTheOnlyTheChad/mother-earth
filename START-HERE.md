@@ -1,6 +1,6 @@
 # Mother Earth — START HERE (read this before anything else in a new thread)
 
-Written 31 Oct 2026 at the end of build day one. Purpose: a cold-start brief so a new thread can continue without re-learning. Read this, then `claude/STATUS.md` (current state), then only the docs a task needs (`claude/SPEC-v0.3.md`, `claude/PROJECT-BRIEF.md`, `phase1/GUIDE-step1.md`).
+Written 31 Oct 2026 at the end of build day one; §3–§5 revised in thread 2 (31 Oct). Purpose: a cold-start brief so a new thread can continue without re-learning. Read this, then `claude/STATUS.md` (current state), then only the docs a task needs (`claude/SPEC-v0.3.md`, `claude/PROJECT-BRIEF.md`, `phase1/GUIDE-step1.md`).
 
 ## 1. What this is
 One browser globe showing the latest observations of the planet from open live feeds. The promise, verbatim and on the page: **"See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage."** Build spec is SPEC-v0.3 with deviations D1–D14 logged in STATUS.md. Phase 1 is live.
@@ -8,7 +8,7 @@ One browser globe showing the latest observations of the planet from open live f
 - Page: https://theonetheonlythechad.github.io/mother-earth/ (GitHub Pages, repo root `index.html`)
 - Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `/admin/run/<job>?key=ADMIN_KEY`
 - Repo: https://github.com/TheOneTheOnlyTheChad/mother-earth — push straight to `main` (no branches unless there is a reason; say the reason and let Chad decide)
-- Layers running: usgs (quakes), swpc (Kp), firms (fires), co2 (NOAA GML), seaice (NSIDC). Parked: opensky (aircraft) — see STATUS.
+- Layers running: usgs (quakes), swpc (Kp, hourly), firms (fires), co2 (NOAA GML), seaice (NSIDC); `mock` = hidden test layer fed from the Mac via `POST /ingest/mock` (D11, proven 31 Oct). Parked: opensky (aircraft) — see STATUS.
 
 ## 2. How Chad works (observe these; they are standing)
 - **Baby steps, click-by-click.** One key, one dialog, one action at a time. He reads code; he does not write it.
@@ -20,24 +20,29 @@ One browser globe showing the latest observations of the planet from open live f
 - He says "lol/bro", is warm and direct; match it, keep replies short, bottom line first, no restating his request.
 
 ## 3. Where the files live (three copies, keep them in sync)
-| What | Working copy (container) | Repo path | Mac path |
-|---|---|---|---|
-| Collector | `/mnt/user-data/outputs/phase1/worker.js` | `phase1/worker.js` | `~/Documents/Mother Earth/phase1/worker.js` |
-| Page | `/mnt/user-data/outputs/site/index.html` | `index.html` | `~/Documents/Mother Earth/index.html` |
-| Status | `/home/claude/me/STATUS.md` → copy to `/mnt/user-data/outputs/STATUS.md` | `STATUS.md` | `~/Documents/Mother Earth/STATUS.md` + project doc `claude/STATUS.md` |
-| Register | `/mnt/user-data/outputs/REGISTER.md` | `REGISTER.md` | `~/Documents/Mother Earth/REGISTER.md` |
-| Schema | `/mnt/user-data/outputs/phase1/schema.sql` | `phase1/schema.sql` | same |
-| Keys | — (never in container/repo) | gitignored | `~/Documents/Mother Earth/KEYS.md` |
+| What | Repo path (clone at `/home/claude/mother-earth`) | Mac path |
+|---|---|---|
+| Collector | `phase1/worker.js` | `~/Documents/Mother Earth/phase1/worker.js` |
+| Mac/Pi collector | `phase1/collector-mac.mjs` | same |
+| Page | `index.html` | `~/Documents/Mother Earth/index.html` |
+| Status | `STATUS.md` | `~/Documents/Mother Earth/STATUS.md` + project doc `claude/STATUS.md` |
+| Start here | `START-HERE.md` | `~/Documents/Mother Earth/START-HERE.md` + project doc `claude/START-HERE.md` |
+| Register | `REGISTER.md` | `~/Documents/Mother Earth/REGISTER.md` |
+| Schema | `phase1/schema.sql` | same |
+| Keys | never in repo (gitignored) | `~/Documents/Mother Earth/KEYS.md` |
 
-Sync procedure after any change: edit the working copy → `cp` into the clone at `/home/claude/mother-earth` → commit with the attribution trailer → `git push origin main` → `device_commit_files` with `stagedPath` under `/mnt/user-data/outputs/` and `devicePath` `~/Documents/Mother Earth/...` (force:true) → for STATUS also `Projects.project_write` to `claude/STATUS.md`.
-In a new container the clone may not exist: clone it first (`gh`/git via the proxy works; Pages API does not).
+The clone is the working copy (thread 2 onward; the old `/mnt/user-data/outputs/` paths are gone with thread 1's container). In a new container: `add_repo` (push access) → `git clone --depth 1` to `/home/claude/mother-earth`.
+
+Sync procedure after any change: edit in the clone → commit with the attribution trailer → `git push origin main` → copy to the Mac → for STATUS/START-HERE also `Projects.project_write` to `claude/<name>.md`.
+Copy to the Mac: the folder `~/Documents/Mother Earth` must be granted each thread (`device_request_folder_access`; Chad approves one prompt). Then either `device_bash` (the folder is mounted at `$HOME/mnt/Mother Earth`; edit in place with sed/python; `rm` is blocked) or `device_commit_files` with `stagedPath` under `/mnt/user-data/outputs/` and `devicePath` `~/Documents/Mother Earth/...` (force:true). Neither shell (container or device) can reach the hub or data hosts — use the browser pane's `javascript_tool` on a hub tab for every HTTP check. The Mac **Terminal** is the only place that reaches the hub from the Mac: Chad runs `node collector-mac.mjs …` there and pastes the output.
 
 ## 4. Deploying the collector (Cloudflare has no connector; use the built-in browser pane)
 1. Open `https://dash.cloudflare.com/0538d0fe34d9fd261a2eac11583f8972/workers/services/edit/mother-earth/production` in a browser-pane tab. Wait ~15 s for the VS Code editor.
 2. Click inside the code (left pane) so it has focus, then **right-click → Command Palette…** (bottom item, ~(213,1111) in an 800-px-wide pane) → type `Select All` → Return. Zoom to confirm the whole file is highlighted. (cmd+A / paste do **not** reach the editor — it is a cross-origin iframe.)
-3. **`type`** the whole file over the selection, from a copy with leading whitespace stripped and `/**` changed to `/*` (`sed -E 's/^[[:space:]]+//' worker.js | sed 's#^/\*\*#/*#'`). ~45–50 KB types in ~3 min.
+3. **`type`** the whole file over the selection, from a copy with leading whitespace stripped and `/**` changed to `/*` (`sed -E 's/^[[:space:]]+//' worker.js | sed 's#^/\*\*#/*#'`; `node --check` the stripped copy first). ~54 KB types in ~2 min. **The `type` call returns a 30 s timeout error — ignore it; the keystrokes keep arriving.** Do NOT retype. Wait ~2 min, screenshot, confirm the last line number equals the stripped file's line count and the status bar shows 0 errors.
 4. Right-click → **Format Document**; click **Deploy** (~(705,107)); wait ~10 s.
-5. Verify: `fetch(hub+'/').then(r=>r.json()).then(j=>j.version)` from a page's JS, then `/admin/run/<job>?key=…` and read `/cells/<layer>`.
+5. Verify: `fetch(hub+'/').then(r=>r.json()).then(j=>j.version)` from a hub tab's `javascript_tool`, then `/admin/run/<job>?key=…` and read `/status`. `javascript_tool` has a 45 s cap: the `hourly` job can exceed it — fire it in one call, read `/status` in the next.
+6. Secrets: Claude generates the value, writes it to KEYS.md, opens Settings → Variables and Secrets → Add in the browser pane, fills the Key name and ticks Secret, then **Chad pastes the value** and clicks "Add 1 variable and deploy" (Claude does not type secrets into Cloudflare). Settings URL: `…/workers/services/view/mother-earth/production/settings`.
 Bump `COLLECTOR_VERSION` on every deploy. Jobs: five, minute, firms, hourly (hourly = co2 + seaice-gated + D1 aggregation; admin runs pass `manual=true`).
 D1 console: dashboard → D1 → mother-earth → Console; Chad or Claude runs `CREATE TABLE` statements there (schema.sql holds them).
 Metrics: `…/workers/services/view/mother-earth/production/metrics` — read with `get_page_text`. Free plan: 10 ms CPU soft limit per invocation; measured medians ~1 ms; worst offenders were whole-file parses (fixed by `tail()`).
@@ -59,10 +64,8 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 ## 7. Register discipline
 `REGISTER.md`: Chad opens the licence page and pastes the operative sentence; Claude files it verbatim with the date. Attribution forms required by sources are on the page footer (USGS credit, NOAA SWPC, NOAA GML citation, LANCE acknowledgment sentence, NSIDC). NASA's "not for tactical/local-scale decisions" line is on the page.
 
-## 8. Open items (also in STATUS → Next)
-- NSIDC citation text paste (Citation tab at https://nsidc.org/data/g02135). Note: NSIDC moved G02135 to "Basic" level of service (funding) — durability risk recorded.
-- Decision: polar-cap imagery (GHRSST MUR = analysis tier; or NSIDC's own GeoTIFF reprojected by the Mac collector in phase 2; or none).
-- Kp cadence → hourly (NWS courtesy). `/ingest/<layer>` + Mac collector (mock feed first). R2 48 h retention job. ADS-B receiver basket. Week-one FIRMS CPU review (Paid $5 vs regional vs external parse).
+## 8. Open items (the ordered list is STATUS → Next)
+- Ships via the Mac collector (aisstream WebSocket → `/ingest/ships`), then show on the page. R2 48 h retention job (D12). NSIDC citation paste. Polar-cap imagery decision. ADS-B receiver basket. Week-one FIRMS CPU review.
 
 ## 9. Handover rule for every thread
 Before a thread ends: update STATUS.md (all three copies + project doc), update this file if an operating fact changed, and leave the next concrete action as item 1 of STATUS → Next. The new thread's first act is to read START-HERE then STATUS — Chad has put that instruction in the Project's custom instructions so it happens without being asked.
