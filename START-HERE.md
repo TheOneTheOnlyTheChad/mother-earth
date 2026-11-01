@@ -1,6 +1,6 @@
 # Mother Earth — START HERE (read this before anything else in a new thread)
 
-Written 31 Oct 2026 at the end of build day one; §3–§5 revised in thread 2 (31 Oct). Purpose: a cold-start brief so a new thread can continue without re-learning. Read this, then `claude/STATUS.md` (current state), then only the docs a task needs (`claude/SPEC-v0.3.md`, `claude/PROJECT-BRIEF.md`, `phase1/GUIDE-step1.md`).
+Written 31 Oct 2026 at the end of build day one; §3–§5 revised in thread 2 (31 Oct); §5a added in thread 4 (1 Nov). Purpose: a cold-start brief so a new thread can continue without re-learning. Read this, then `claude/STATUS.md` (current state), then only the docs a task needs (`claude/SPEC-v0.3.md`, `claude/PROJECT-BRIEF.md`, `phase1/GUIDE-step1.md`).
 
 ## 1. What this is
 One browser globe showing the latest observations of the planet from open live feeds. The promise, verbatim and on the page: **"See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage."** Build spec is SPEC-v0.3 with deviations D1–D14 logged in STATUS.md. Phase 1 is live.
@@ -69,6 +69,15 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - New sites need `request_access` (scope "site"). Granted so far: dash.cloudflare.com, github.io, noaadata.apps.nsidc.org, gibs.earthdata.nasa.gov (via page fetches), firms.
 - The container shell cannot reach most data hosts (egress allowlist); fetch test data through the browser pane's `javascript_tool` on a same-origin or CORS-open page instead.
 - Computer use is granted narrowly (TextEdit + clipboard write). Not needed for the editor flow above.
+
+## 5a. Testing the page before and after a push (added thread 4, 1 Nov 2026)
+The Pages deploy lock makes a bad push expensive (~30 min before the next one lands), so test before pushing, and again after.
+
+- **Offline, in the container (no hub, no unpkg):** `python3 -m http.server 8899 --bind 127.0.0.1` in the clone, then drive it with the pre-installed Playwright — `require('playwright')` from a **`.cjs`** file (an `.mjs` import of it fails to resolve from the scratchpad). `context.addInitScript()` runs before the page scripts, which is how the no-WebGL path is tested: patch `HTMLCanvasElement.prototype.getContext` to return null for `webgl`. The hub, unpkg and Google Fonts are all blocked here, so expect `ERR_TUNNEL_CONNECTION_FAILED` noise and no data — this tests **failure paths and markup**, not readings.
+- **Logic against real data, before pushing:** paste the new pure helpers into the live page with the pane's `javascript_tool` and run them over real `/snapshot/*` records. This caught the tie case (two M6.0 quakes) and the genuine FRP zeros.
+- **Failure paths on the live page, after pushing:** `ME.getJson` is reachable on `window.ME`, and the inline script calls it by property lookup, so it can be patched at runtime to inject faults — return a doctored `retrieved_at` for a mismatch, throw for a failed read. The next polling tick (`ME.REFRESH_MS`, 5 min) picks it up; `javascript_tool` caps at ~45 s, so patch in one call and poll in later ones. Reload to clear.
+- **What none of that catches:** anything depending on the *shape* of a live envelope. `hasField()` reading `record_fields` off the cells envelope passed syntax checks, headless tests and code review, and only showed up as missing rows on the deployed page. After any inspector/record change, open a record on the live site and read the rows.
+- Toggling the other layers off is the cheap way to prove one layer's points actually render.
 
 ## 6. Collector conventions (worker.js)
 - Envelope per §5: `record_format:'rows'` + `record_fields`; cells `{count, coverage:{grade, evidence, observed_fraction}}` on a 4° grid; `latest/<layer>.json` only overwritten on success; `latest-cells/` small files; `stale_after_s` per layer; `writeDown()` on failure.
