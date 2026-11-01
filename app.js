@@ -121,7 +121,7 @@ ME.readings = function () {
   const s = state.ships, fs = ME.freshness('ships');
   const lastCount = s ? ME.total(s) : null;
   R.ships = { label: LABEL.ships, source: SOURCE.ships, fresh: fs, value: fs.grade !== 'unknown' ? lastCount : null, lastSample: lastCount, unit: `vessel identities in a ${s ? s.window_s : 60} s AIS sample`,
-    sampleEnd: s && s.window_end, observed: s ? `sample ended ${hhmm(s.window_end)}; ${s.class_a} Class A + ${s.class_b} Class B; socket up ${num(s.socket_up_s, 0)} of ${s.window_s} s` : '', retrieved: s && s.retrieved_at,
+    sampleEnd: s && s.window_end, observed: s ? `sample ended ${hhmm(s.window_end)}; ${s.class_a} Class A + ${s.class_b} Class B; socket connected ${num(s.socket_connected_s ?? s.socket_up_s, 0)} s of ${s.window_s} s` : '', retrieved: s && s.retrieved_at,
     mode: SHIPS_MODE.text, coverage: 'terrestrial AIS only — a cell with no vessels is not an empty sea; positions between samples unknown', quantity: s && s.quantity,
     window: s ? `${s.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (s.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours yet — baseline accumulates from first sample (31 Oct 2026)` };
   const fo = state.forest, ffo = ME.freshness('forest');

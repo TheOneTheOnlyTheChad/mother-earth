@@ -765,9 +765,21 @@ async function aggregateShips(env, hourMs) {
    *   some usable, fewer than expected -> degraded
    *   usable >= expected               -> ok                                                                              */
   const received = files.length, usable = ok.length;
-  const status = usable >= expected ? 'ok' : (received ? 'degraded' : 'absent');
-  const rejected = files.filter(x => x.f.source_status !== 'ok').map(x => ({ sample: x.key.slice(-22, -5), status: x.f.source_status, receiving_s: x.f.receiving_s ?? null, wall_s: x.f.wall_s ?? null }));
-  await layerHourly(env, layer, hour, expected, usable, status, 'none', JSON.stringify({ rule: 'mean of per-sample unique vessels; sampled, not continuous', received, usable, rejected, ...meta }).slice(0, 1500));
+  const downs = files.filter(x => x.f.source_status === 'down').length;
+  /* FOUR outcomes, kept apart on purpose — collapsing any pair of them loses something a later comparison needs:
+   *   absent    nothing was received for the hour; nobody asked the source. The ONLY value that licenses
+   *             reading the hour as never-asked, so nothing else may be written as 'absent'.
+   *   down      every attempt that reached us reported the source itself as failed (writeDown also stores a
+   *             cells file, so these DO appear in `files` — they must not be re-labelled 'degraded').
+   *   degraded  attempts arrived but none were usable, or fewer were usable than expected.
+   *   ok        at least `expected` usable samples.                                                            */
+  const status = usable >= expected ? 'ok'
+    : usable > 0 ? 'degraded'
+    : received === 0 ? 'absent'
+    : downs === received ? 'down'
+    : 'degraded';
+  const rejected = files.filter(x => x.f.source_status !== 'ok').map(x => ({ sample: x.key.slice(-22, -5), status: x.f.source_status, socket_connected_s: x.f.socket_connected_s ?? null, messages_flowing_s_inferred: x.f.messages_flowing_s ?? x.f.receiving_s ?? null, elapsed_wall_s: x.f.wall_s ?? null, overlong: x.f.overlong_sample ?? null }));
+  await layerHourly(env, layer, hour, expected, usable, status, 'none', JSON.stringify({ rule: 'mean of per-sample unique vessels; sampled, not continuous', received, usable, down: downs, rejected, ...meta }).slice(0, 1500));
   const changed = ok.length ? await upsertChanged(env, layer, { [hour]: incoming }) : 0;
   return { files: received, ok: usable, status, rejected: rejected.length, cells: Object.keys(incoming).length, changed };
 }
@@ -886,6 +898,56 @@ async function ingest(req, env, layer) {
   return json({ ok: true, layer, snapshot: isoMinute(scheduledMs), records: e.records.length, cells: Object.keys(e.cells).length, bytes }, 200, { 'Cache-Control': 'no-store' });
 }
 
+/* Repair ONE hour of ships aggregation from the objects still in R2 (added 1 Nov 2026 after hours 12/13 UTC were
+ * written 'absent' although samples had been received and stored).
+ *   - POST only, admin key required. Default is a read-only PREVIEW; nothing is written without ?apply=1.
+ *   - Touches one layer and one hour. Never calls hourlyBatch, so no other layer and no other hour is recomputed.
+ *   - Idempotent: layerHourly upserts on (layer, hour_utc) and upsertChanged upserts on (layer, cell_id, hour_utc),
+ *     so running it twice converges and the second run reports 0 cell rows changed.
+ *   - EVIDENCE RULE. An empty or short R2 listing cannot tell expiry from "nobody ever collected", so the listing is
+ *     cross-checked against collector_runs — an independent record, written at ingest, of every attempt the hub
+ *     received in that hour. We refuse unless the retained objects account for every logged attempt. History is never
+ *     overwritten from a set that might be partial. */
+async function reaggregate(req, env, url, layer) {
+  if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403, { 'Cache-Control': 'no-store' });
+  if (layer !== 'ships') return json({ error: 'only ships re-aggregation is implemented', layer }, 400);
+  const hour = url.searchParams.get('hour') || '';
+  if (!/^\d{4}-\d\d-\d\dT\d\d$/.test(hour)) return json({ error: 'hour must look like 2026-11-01T12 (UTC)' }, 400);
+  const hourMs = Date.parse(hour + ':00:00Z');
+  if (!Number.isFinite(hourMs)) return json({ error: 'hour is not a valid UTC hour', hour }, 400);
+  const apply = url.searchParams.get('apply') === '1';
+
+  const listed = await env.R2.list({ prefix: `cells/${layer}/${hour}` });
+  const objects = (listed.objects || []).map(o => ({ key: o.key, uploaded: o.uploaded && new Date(o.uploaded).toISOString(), size: o.size }));
+  const from = new Date(hourMs).toISOString(), to = new Date(hourMs + 3600e3).toISOString();
+  const logged = await env.DB.prepare('SELECT started_at, status, records, note FROM collector_runs WHERE layer = ? AND started_at >= ? AND started_at < ? ORDER BY started_at')
+    .bind(layer, from, to).all();
+  const attempts = (logged.results || []);
+  const before = await env.DB.prepare('SELECT snapshots_expected, snapshots_ok, source_status, note, updated_at FROM layer_hourly WHERE layer = ? AND hour_utc = ?').bind(layer, hour).first();
+  const cellRowsBefore = await env.DB.prepare('SELECT COUNT(*) AS n FROM cell_hourly WHERE layer = ? AND hour_utc = ?').bind(layer, hour).first();
+  const evidence = { objects_retained: objects.length, attempts_logged: attempts.length, attempts, objects,
+    oldest_object_uploaded: objects.length ? objects.map(o => o.uploaded).sort()[0] : null };
+
+  if (!objects.length && !attempts.length) return json({ refused: 'no evidence of any attempt in this hour — nothing was received and nothing was retained, so the existing record stands', hour, evidence, before }, 409, { 'Cache-Control': 'no-store' });
+  if (!objects.length) return json({ refused: 'objects for this hour are gone but attempts were logged — the retained set cannot reconstruct the hour', hour, evidence, before }, 409, { 'Cache-Control': 'no-store' });
+  if (objects.length < attempts.length) return json({ refused: 'retained objects do not account for every logged attempt — repairing from a partial set would overwrite history with less than it already holds', hour, evidence, before }, 409, { 'Cache-Control': 'no-store' });
+
+  if (!apply) {
+    // Preview: read exactly what the aggregation would read, report the verdict, write nothing.
+    const files = [];
+    for (const o of objects) { const f = await getJson(env, o.key); if (f) files.push({ key: o.key, source_status: f.source_status, cells: Object.keys(f.cells || {}).length, overlong: f.overlong_sample ?? null, socket_connected_s: f.socket_connected_s ?? null, elapsed_wall_s: f.wall_s ?? null }); }
+    const usable = files.filter(f => f.source_status === 'ok').length, downs = files.filter(f => f.source_status === 'down').length;
+    const would = usable >= 2 ? 'ok' : usable > 0 ? 'degraded' : files.length === 0 ? 'absent' : downs === files.length ? 'down' : 'degraded';
+    return json({ preview: true, hour, layer, evidence, files, before, cell_rows_before: cellRowsBefore && cellRowsBefore.n,
+      would_write: { snapshots_ok: usable, source_status: would }, apply_with: 'POST the same URL with &apply=1' }, 200, { 'Cache-Control': 'no-store' });
+  }
+
+  const result = await aggregateShips(env, hourMs);
+  const after = await env.DB.prepare('SELECT snapshots_expected, snapshots_ok, source_status, note, updated_at FROM layer_hourly WHERE layer = ? AND hour_utc = ?').bind(layer, hour).first();
+  const cellRowsAfter = await env.DB.prepare('SELECT COUNT(*) AS n FROM cell_hourly WHERE layer = ? AND hour_utc = ?').bind(layer, hour).first();
+  return json({ applied: true, hour, layer, evidence, before, after, cell_rows_before: cellRowsBefore && cellRowsBefore.n, cell_rows_after: cellRowsAfter && cellRowsAfter.n, result }, 200, { 'Cache-Control': 'no-store' });
+}
+
 function json(obj, status = 200, extra = {}) {
   return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...CORS, ...extra } });
 }
@@ -907,6 +969,10 @@ export default {
       if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
       return ingest(req, env, p[1] || '');
     }
+    if (p[0] === 'admin' && p[1] === 'reaggregate') {
+      if (req.method !== 'POST') return json({ error: 'POST only (this can write history)' }, 405);
+      return reaggregate(req, env, url, p[2] || '');
+    }
     if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
     if (p[0] === 'snapshot' || p[0] === 'cells') {
@@ -923,26 +989,6 @@ export default {
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
       return json({ now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch }, 200, { 'Cache-Control': 'no-store' });
-    }
-
-    /* Repair one hour's aggregation from the objects still in R2 (added 1 Nov 2026 for the hours 12/13 defect).
-     * Refuses when the hour's evidence has expired: cells/ is deleted after 2 days (D12), and an hour that can no longer
-     * be rebuilt from what was retained stays exactly as it was recorded. We do not reconstruct history we cannot read. */
-    if (p[0] === 'admin' && p[1] === 'reaggregate') {
-      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
-      const layer = p[2] || '';
-      if (layer !== 'ships') return json({ error: 'only ships re-aggregation is implemented', layer }, 400);
-      const hour = url.searchParams.get('hour') || '';
-      if (!/^\d{4}-\d\d-\d\dT\d\d$/.test(hour)) return json({ error: "hour must look like 2026-11-01T12 (UTC)" }, 400);
-      const hourMs = Date.parse(hour + ':00:00Z');
-      if (!Number.isFinite(hourMs)) return json({ error: 'hour is not a valid UTC hour', hour }, 400);
-      const listed = await env.R2.list({ prefix: `cells/${layer}/${hour}` });
-      const found = (listed.objects || []).map(o => o.key);
-      if (!found.length) return json({ error: 'no retained objects for that hour — history is not repaired without evidence', hour, note: 'cells/ objects are deleted 2 days after they are written (D12 lifecycle)' }, 409, { 'Cache-Control': 'no-store' });
-      const before = await env.DB.prepare('SELECT snapshots_expected, snapshots_ok, source_status, note FROM layer_hourly WHERE layer = ? AND hour_utc = ?').bind(layer, hour).first();
-      const result = await aggregateShips(env, hourMs);
-      const after = await env.DB.prepare('SELECT snapshots_expected, snapshots_ok, source_status, note FROM layer_hourly WHERE layer = ? AND hour_utc = ?').bind(layer, hour).first();
-      return json({ reaggregated: hour, layer, objects: found, before, after, result }, 200, { 'Cache-Control': 'no-store' });
     }
 
     if (p[0] === 'admin' && p[1] === 'run') {

@@ -78,9 +78,10 @@ const FEEDS = {
       const ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
       ws.binaryType = 'arraybuffer';
       const timer = setTimeout(() => { try { ws.close(1000, 'window done'); } catch (_) {} resolve(); }, windowS * 1000);
-      // Duration contract (1 Nov 2026): a nominal windowS sample must not run on indefinitely. Timers do not fire while the
-      // host is suspended, so this cannot PREVENT an overlong sample — it bounds it once the host is running again and
-      // guarantees the run ends and is reported, instead of holding a dead socket open for a quarter of an hour.
+      // Duration contract (1 Nov 2026). This timer bounds the sample ONLY while the process is actually running: a
+      // suspended host runs no timers, so nothing here prevents a suspension overrun and no such claim is made. It
+      // ends the run once the host is scheduling again, instead of holding a dead socket open. The real guard against
+      // folding post-resumption data into an expired window is the elapsed check in onmessage below.
       hardStop = setTimeout(() => { try { ws.close(4000, 'overlong'); } catch (_) {} resolve(); }, MAX_WALL_MULTIPLE * windowS * 1000);
       const connectTimer = setTimeout(() => { if (!connectedAt) { try { ws.close(); } catch (_) {} reject(new Error('connect timeout (15 s)')); } }, 15e3);
       ws.onopen = () => {
@@ -90,6 +91,10 @@ const FEEDS = {
       ws.onerror = (ev) => { clearTimeout(timer); clearTimeout(hardStop); const er = ev && ev.error; reject(new Error('websocket error: ' + [ev && ev.message, er && er.message, er && er.cause && er.cause.message, er && er.cause && er.cause.code].filter(Boolean).join(' | ') || 'unknown (no detail from the socket)')); };
       ws.onclose = (ev) => { closeInfo = { code: ev.code, reason: ev.reason }; closedAt = Date.now(); clearTimeout(timer); clearTimeout(hardStop); resolve(); };
       ws.onmessage = (ev) => {
+        // On resumption the timers above may not have fired while the host was away. Check elapsed time BEFORE accepting
+        // anything: a message arriving past the hard bound belongs to a window that expired, so the sample is closed and
+        // left unusable rather than topped up with data from long after the period it claims to describe.
+        if (Date.now() - t0 > MAX_WALL_MULTIPLE * windowS * 1000) { try { ws.close(4000, 'overlong on resumption'); } catch (_) {} resolve(); return; }
         let m;
         try { m = JSON.parse(typeof ev.data === 'string' ? ev.data : Buffer.from(ev.data).toString('utf8')); } catch (_) { parseErrors++; return; }
         if (m.MessageType === 'SubscriptionConfirmation') { confirmed = true; compression = m.Message && m.Message.CompressionEnabled; return; }
@@ -119,10 +124,17 @@ const FEEDS = {
     const quietS = connectedAt && lastMsgAt ? (end - lastMsgAt) / 1000 : null;                      // seconds between the last message and close
     if (lastMsgAt && quietS > GAP_S) interruptions.push({ from: new Date(lastMsgAt).toISOString(), to: new Date(end).toISOString(), seconds: Math.round(quietS) });
     const lostS = interruptions.reduce((n, i) => n + i.seconds, 0);
-    const socketS = connectedAt ? (end - connectedAt) / 1000 : 0;                                   // socket connected (what the transport reports)
-    const receivingS = Math.max(0, socketS - lostS);                                                // connected AND messages flowing — the observation time
-    const upS = receivingS;
-    const upFrac = Math.max(0, Math.min(1, receivingS / windowS));
+    /* Three DIFFERENT durations, never to be merged or swapped for one another:
+     *   elapsedWallS  — measured: start of the attempt to its end. Includes any time the host was away.
+     *   socketS       — measured: how long the transport reported the socket connected.
+     *   gapS          — measured: the sum of silences > GAP_S between message arrivals.
+     *   flowingS      — INFERRED: socketS − gapS. It is arithmetic on arrival times, not an observation of reception,
+     *                   and it is never geographic coverage: it says nothing about which seas a receiver could hear. */
+    const elapsedWallS = wallS;
+    const socketS = connectedAt ? (end - connectedAt) / 1000 : 0;
+    const gapS = lostS;
+    const flowingS = Math.max(0, socketS - gapS);
+    const upFrac = Math.max(0, Math.min(1, flowingS / windowS));
     if (!confirmed) throw new Error('no SubscriptionConfirmation within the window' + (closeInfo ? ' (close ' + closeInfo.code + ' ' + closeInfo.reason + ')' : ''));
     const rows = [...vessels.values()];
     const rowsA = rows.filter(r => r[9] === 'A').length;
@@ -133,14 +145,20 @@ const FEEDS = {
      * exists to settle. Until it is run, treat a long gap as "a gap in locally processed messages" of unestablished origin. */
     const overlong = wallS > OVERLONG_MULTIPLE * windowS;
     const status = upFrac >= 0.9 && !slept && !overlong ? 'ok' : 'degraded';
-    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s slept=${slept} overlong=${overlong} status=${status} socket=${socketS.toFixed(1)}s receiving=${receivingS.toFixed(1)}s interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
+    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s slept=${slept} overlong=${overlong} status=${status} socket=${socketS.toFixed(1)}s flowing=${flowingS.toFixed(1)}s(inferred) interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
     return { fields: ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'], rows,
       quantity: `vessel identities (MMSI) with a Class A or B position report received during a ${windowS} s AIS sample, per cell; latest received position per vessel — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell; positions between samples unknown`,
-      coverageDefault: { grade: 'partial', evidence: 'socket_up;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },   // observed_fraction = fraction of the sample the socket was connected (§3.1), not geographic coverage
-      extra: { scope: bbox.join(',') === '-90,-180,90,180' ? 'world' : 'bbox ' + bbox.join(','), window_s: windowS, socket_connected_s: Math.round(socketS * 10) / 10, receiving_s: Math.round(receivingS * 10) / 10, socket_up_s: Math.round(receivingS * 10) / 10 /* kept for the page; = receiving_s */, quiet_at_end_s: quietS, connection_fraction_of_sample: upFrac, messages, class_a: rowsA, class_b: rows.length - rowsA,
+      coverageDefault: { grade: 'partial', evidence: 'messages_flowing_inferred_from_arrival_gaps;not_a_measure_of_reception;not_geographic_coverage;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },
+      extra: { scope: bbox.join(',') === '-90,-180,90,180' ? 'world' : 'bbox ' + bbox.join(','), window_s: windowS,
+        socket_connected_s: Math.round(socketS * 10) / 10,                                  // measured
+        message_gap_s: Math.round(gapS * 10) / 10,                                          // measured
+        elapsed_wall_s: Math.round(elapsedWallS * 10) / 10,                                 // measured
+        messages_flowing_s: Math.round(flowingS * 10) / 10,                                 // INFERRED: socket_connected_s − message_gap_s
+        durations_note: 'socket_connected_s, message_gap_s and elapsed_wall_s are measured; messages_flowing_s is inferred by subtracting the gaps and is not a measurement of reception, nor any statement about geographic coverage',
+        quiet_at_end_s: quietS, connection_fraction_of_sample: upFrac, messages, class_a: rowsA, class_b: rows.length - rowsA,
         interruptions_override: interruptions, wall_s: Math.round(wallS * 10) / 10, mono_s: Math.round(monoS * 10) / 10, slept_during_sample: slept,
-        overlong_sample: overlong, elapsed_not_counted_s: overlong ? Math.round((wallS - receivingS) * 10) / 10 : 0,
-        duration_rule: `observation time is receiving_s (${Math.round(receivingS)} s), never elapsed time (${Math.round(wallS)} s); a sample over ${OVERLONG_MULTIPLE}× its ${windowS} s window is degraded whatever the cause, and is force-closed at ${MAX_WALL_MULTIPLE}×`,
+        overlong_sample: overlong, elapsed_not_counted_s: overlong ? Math.round((elapsedWallS - flowingS) * 10) / 10 : 0,
+        duration_rule: `elapsed time (${Math.round(elapsedWallS)} s) is never counted as listening; a sample over ${OVERLONG_MULTIPLE}× its ${windowS} s window is degraded whatever the cause, is closed at ${MAX_WALL_MULTIPLE}× once the process runs again, and rejects messages arriving past that bound`,
         sleep_detector_caveat: 'slept = (wall - monotonic > 5 s); on macOS both clocks may include host suspend, so slept=false does not establish the host stayed awake',
         records_without_source_time: noSourceTime, older_reports_ignored: olderIgnored, sampling: 'one sample per run; runs are scheduled roughly every 30 min while the collector is available; no observation between samples',
         compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,

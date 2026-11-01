@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611011600">
+<link rel="stylesheet" href="style.css?v=202611011700">
 </head>
 <body class="world">
 <header class="top">
@@ -122,7 +122,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611011600"></script>
+<script src="app.js?v=202611011700"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -317,7 +317,13 @@ function inspectCell(p) {
       ['Queried', `${when(p.cell.queried_at)} · alerts dated from ${esc(p.cell.since || MISSING)} · dataset ${esc(p.cell.version || 'latest')}`]);
     rows.push(['Caveat', 'Global Nature Watch: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment; 10 m pixels, not hectares; detection date ≠ clearing date; counts can fall when low-confidence alerts are retracted'], ['Citation', esc(snap.citation || '')], ['Records', 'this layer publishes counts per cell only — there are no individual records to open']);
   }
-  if (p.layer === 'ships') rows.push(['Caveat', `latest received position per MMSI in this sample; positions between samples unknown; terrestrial AIS only. Socket up ${fmt(snap.socket_up_s, { dp: 0, unit: 's', zeroNote: null })} of ${fmt(snap.window_s, { dp: 0, unit: 's', zeroNote: null })}`]);
+  if (p.layer === 'ships') rows.push(
+    // three different durations, kept apart: two measured, one inferred — and none of them is geographic coverage
+    ['Sample window', fmt(snap.window_s, { dp: 0, unit: 's', zeroNote: null })],
+    ['Socket connected', `${fmt(snap.socket_connected_s ?? snap.socket_up_s, { dp: 0, unit: 's', zeroNote: null })} <span class="q">(measured)</span>`],
+    ['Messages flowing', `${fmt(snap.messages_flowing_s ?? snap.socket_up_s, { dp: 0, unit: 's', zeroNote: null })} <span class="q">(inferred: socket time minus gaps between arrivals — not a measurement of reception, and not geographic coverage)</span>`],
+    ['Elapsed', `${fmt(snap.elapsed_wall_s, { dp: 0, unit: 's', zeroNote: null })} <span class="q">(measured; never counted as listening)</span>`],
+    ['Caveat', 'latest received position per MMSI in this sample; positions between samples unknown; terrestrial AIS only — a cell with no vessels is not an empty sea']);
   if (p.layer !== 'forest' && !paired) rows.push(['Records', `withheld — ${esc(unusableWhy(p.layer) || 'records and counts are not from the same collector run')}`]);
   if (recs.length) {
     rows.push(['Records', `${recs.length} of ${p.cell.count} in this cell — select one for its own detail`]);
