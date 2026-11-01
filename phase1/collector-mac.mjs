@@ -5,9 +5,17 @@
  *
  * Usage:   INGEST_KEY=… node collector-mac.mjs mock          # synthetic feed, proves the path end to end
  *          INGEST_KEY=… node collector-mac.mjs mock --dry    # print the envelope, send nothing
- *          INGEST_KEY=… AISSTREAM_KEY=… node collector-mac.mjs ships [--window=60] [--dry] [--quiet]
+ *          INGEST_KEY=… AISSTREAM_KEY=… node collector-mac.mjs ships [--window=60] [--dry] [--quiet] [--state=DIR]
+ *          node collector-mac.mjs retry --state=DIR          # upload the one pending envelope, if any (expired/oversize ones are dropped)
  * Hub:     HUB=https://mother-earth.chadoberholzer.workers.dev (default)
  * Needs Node 22+ (global fetch + global WebSocket). No dependencies.
+ *
+ * Exit codes (the runner relies on them):  0 collected and uploaded · 3 source-down report uploaded (collection failed, hub told)
+ *   · 1 upload failed (envelope kept as the single pending file, 2 h expiry, 5 MB cap) · 2 usage/config error · 4 nothing pending (retry mode)
+ * Bounded storage: nothing is archived locally — messages are processed in memory and only the finished envelope leaves the machine.
+ *   The only files: <state>/pending.json (≤ 1 envelope) and whatever the runner logs. No credentials or vessel payloads are ever logged.
+ * Sleep/interruption: message gaps > 10 s inside a sample are recorded as interruptions and subtracted from connected time; a sample whose
+ *   wall-clock ran long (laptop slept) is marked degraded, never counted as observed.
  *
  * ships (aisstream.io, measured 31 Oct 2026 from aisstream.io/documentation): wss://stream.aisstream.io/v0/stream; one JSON
  * subscription within 3 s of connecting; 3 subscribed connections per account; read continuously or the service drops messages;
@@ -15,7 +23,7 @@
  * not covered, so a silent cell is not an empty cell (coverage stays 'partial' until receipt history exists — same rule as OpenSky, D9).
  */
 
-const COLLECTOR_VERSION = 'mac-0.2.1';
+const COLLECTOR_VERSION = 'mac-0.3.0';
 const SCHEMA_VERSION = 1;
 const CELL_DEG = 4;
 const HUB = process.env.HUB || 'https://mother-earth.chadoberholzer.workers.dev';
@@ -24,6 +32,13 @@ const [, , layer = 'mock', ...flags] = process.argv;
 const dry = flags.includes('--dry');
 const quiet = flags.includes('--quiet');
 const flag = (name, dflt) => { const f = flags.find(x => x.startsWith('--' + name + '=')); return f ? f.slice(name.length + 3) : dflt; };
+import fs from 'node:fs';
+import path from 'node:path';
+const STATE_DIR = flag('state', path.join(path.dirname(new URL(import.meta.url).pathname), 'state'));
+const PENDING = path.join(STATE_DIR, 'pending.json');
+const PENDING_MAX_BYTES = 5 * 1024 * 1024, PENDING_MAX_AGE_MS = 2 * 3600e3;
+const UPLOAD_TIMEOUT_MS = 20e3, UPLOAD_BACKOFF_MS = [5e3, 20e3, 60e3];   // 3 tries inside one run; after that the envelope waits as pending
+const GAP_S = 10;                                                         // a silence longer than this inside a sample is an interruption
 
 function cellId(lat, lng) {
   const r = Math.max(0, Math.min(Math.floor(180 / CELL_DEG) - 1, Math.floor((lat + 90) / CELL_DEG)));
@@ -54,13 +69,15 @@ const FEEDS = {
     const CLASS = { PositionReport: 'A', StandardClassBPositionReport: 'B', ExtendedClassBPositionReport: 'B' };
     const vessels = new Map();                                                     // mmsi -> row
     let messages = 0, parseErrors = 0, confirmed = false, compression = null, closeInfo = null, connectedAt = null, lastMsgAt = null, closedAt = null, noSourceTime = 0, olderIgnored = 0;
-    const t0 = Date.now();
+    const interruptions = [];                                                      // [{from, to, seconds}] gaps > GAP_S between messages (sleep, Wi-Fi loss, upstream silence)
+    const t0 = Date.now(); const h0 = process.hrtime.bigint();
     await new Promise((resolve, reject) => {
       const ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
       ws.binaryType = 'arraybuffer';
       const timer = setTimeout(() => { try { ws.close(1000, 'window done'); } catch (_) {} resolve(); }, windowS * 1000);
+      const connectTimer = setTimeout(() => { if (!connectedAt) { try { ws.close(); } catch (_) {} reject(new Error('connect timeout (15 s)')); } }, 15e3);
       ws.onopen = () => {
-        connectedAt = Date.now();
+        connectedAt = Date.now(); clearTimeout(connectTimer);
         ws.send(JSON.stringify({ APIKey: key, BoundingBoxes: [[[bbox[0], bbox[1]], [bbox[2], bbox[3]]]], FilterMessageTypes: Object.keys(CLASS) }));
       };
       ws.onerror = (ev) => { clearTimeout(timer); const er = ev && ev.error; reject(new Error('websocket error: ' + [ev && ev.message, er && er.message, er && er.cause && er.cause.message, er && er.cause && er.cause.code].filter(Boolean).join(' | ') || 'unknown (no detail from the socket)')); };
@@ -70,7 +87,9 @@ const FEEDS = {
         try { m = JSON.parse(typeof ev.data === 'string' ? ev.data : Buffer.from(ev.data).toString('utf8')); } catch (_) { parseErrors++; return; }
         if (m.MessageType === 'SubscriptionConfirmation') { confirmed = true; compression = m.Message && m.Message.CompressionEnabled; return; }
         const cls = CLASS[m.MessageType]; if (!cls) return;
-        messages++; lastMsgAt = Date.now();
+        const now = Date.now();
+        if (lastMsgAt && now - lastMsgAt > GAP_S * 1000) interruptions.push({ from: new Date(lastMsgAt).toISOString(), to: new Date(now).toISOString(), seconds: Math.round((now - lastMsgAt) / 1000) });
+        messages++; lastMsgAt = now;
         const md = m.MetaData || {}; const pr = (m.Message || {})[m.MessageType] || {};
         const lat = Number(pr.Latitude ?? md.Latitude ?? md.latitude), lng = Number(pr.Longitude ?? md.Longitude ?? md.longitude);
         if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
@@ -87,18 +106,24 @@ const FEEDS = {
       };
     });
     const wallS = (Date.now() - t0) / 1000;
-    const upS = connectedAt ? ((closedAt || Date.now()) - connectedAt) / 1000 : 0;                 // connection duration, not message activity
-    const quietS = connectedAt && lastMsgAt ? ((closedAt || Date.now()) - lastMsgAt) / 1000 : null;  // seconds between the last message and close
+    const monoS = Number(process.hrtime.bigint() - h0) / 1e9;                                       // monotonic; a laptop sleep shows as wall ≫ mono
+    const slept = wallS - monoS > 5;
+    const end = closedAt || Date.now();
+    const quietS = connectedAt && lastMsgAt ? (end - lastMsgAt) / 1000 : null;                      // seconds between the last message and close
+    if (lastMsgAt && quietS > GAP_S) interruptions.push({ from: new Date(lastMsgAt).toISOString(), to: new Date(end).toISOString(), seconds: Math.round(quietS) });
+    const lostS = interruptions.reduce((n, i) => n + i.seconds, 0);
+    const upS = connectedAt ? Math.max(0, (end - connectedAt) / 1000 - lostS) : 0;                   // connected AND receiving; gaps are not observation time
     const upFrac = Math.max(0, Math.min(1, upS / windowS));
     if (!confirmed) throw new Error('no SubscriptionConfirmation within the window' + (closeInfo ? ' (close ' + closeInfo.code + ' ' + closeInfo.reason + ')' : ''));
     const rows = [...vessels.values()];
     const rowsA = rows.filter(r => r[9] === 'A').length;
-    const status = upFrac >= 0.9 ? 'ok' : 'degraded';
-    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s up=${upS.toFixed(1)}s quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
+    const status = upFrac >= 0.9 && !slept ? 'ok' : 'degraded';
+    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s slept=${slept} up=${upS.toFixed(1)}s interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
     return { fields: ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'], rows,
       quantity: `vessel identities (MMSI) with a Class A or B position report received during a ${windowS} s AIS sample, per cell; latest received position per vessel — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell; positions between samples unknown`,
       coverageDefault: { grade: 'partial', evidence: 'socket_up;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },   // observed_fraction = fraction of the sample the socket was connected (§3.1), not geographic coverage
       extra: { scope: bbox.join(',') === '-90,-180,90,180' ? 'world' : 'bbox ' + bbox.join(','), window_s: windowS, socket_up_s: upS, quiet_at_end_s: quietS, connection_fraction_of_sample: upFrac, messages, class_a: rowsA, class_b: rows.length - rowsA,
+        interruptions_override: interruptions, wall_s: Math.round(wallS * 10) / 10, slept_during_sample: slept,
         records_without_source_time: noSourceTime, older_reports_ignored: olderIgnored, sampling: 'one sample per run; runs are scheduled roughly every 30 min while the collector is available; no observation between samples',
         compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,
         citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' } };
@@ -106,7 +131,7 @@ const FEEDS = {
 };
 
 async function main() {
-  if (!FEEDS[layer]) { console.error('unknown layer', layer, '— known:', Object.keys(FEEDS).join(', ')); process.exit(2); }
+  if (!FEEDS[layer]) { console.error('unknown layer', layer, '— known:', Object.keys(FEEDS).join(', ') + ', retry'); process.exit(2); }
   const scheduledMs = Date.now();
   let e;
   try {
@@ -116,9 +141,10 @@ async function main() {
     for (const r of f.rows) { const id = cellId(r[iLat], r[iLng]); (cells[id] || (cells[id] = { count: 0 })).count++; }
     for (const id in cells) cells[id].coverage = { ...f.coverageDefault };
     const extra = { ...(f.extra || {}) }; const status = extra.source_status_override || 'ok'; delete extra.source_status_override;
+    const interruptions = extra.interruptions_override || []; delete extra.interruptions_override;
     e = { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer,
       window_start: new Date(scheduledMs).toISOString(), window_end: nowIso(), retrieved_at: nowIso(),
-      scheduled_for: new Date(scheduledMs).toISOString(), source_status: status, interruptions: [],
+      scheduled_for: new Date(scheduledMs).toISOString(), source_status: status, interruptions,
       cells, record_format: 'rows', record_fields: f.fields, records: f.rows,
       coverage_default: f.coverageDefault, quantity: f.quantity, ...extra };
   } catch (err) {
@@ -131,9 +157,41 @@ async function main() {
     console.log(quiet ? body.slice(0, 2000) + (body.length > 2000 ? '…' : '') : JSON.stringify(e, null, 1)); return;
   }
   if (!KEY) { console.error('INGEST_KEY not set'); process.exit(2); }
-  const r = await fetch(`${HUB}/ingest/${layer}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + KEY, 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION }, body: JSON.stringify(e) });
-  const t = await r.text();
-  console.log(r.status, t);
-  process.exit(r.ok ? 0 : 1);
+  const code = await upload(e);
+  process.exit(code === 0 && e.source_status === 'down' ? 3 : code);
 }
-main();
+
+/* Upload with bounded timeouts and backoff. On final failure keep the envelope as the single pending file (identity and timestamps intact). */
+async function upload(e) {
+  const body = JSON.stringify(e);
+  for (let i = 0; i <= UPLOAD_BACKOFF_MS.length; i++) {
+    const ac = new AbortController(); const to = setTimeout(() => ac.abort(), UPLOAD_TIMEOUT_MS);
+    try {
+      const r = await fetch(`${HUB}/ingest/${e.layer}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + KEY, 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION }, body, signal: ac.signal });
+      const t = await r.text();
+      console.log(r.status, t.slice(0, 300));
+      if (r.ok) { dropPending(); return 0; }
+      if (r.status >= 400 && r.status < 500) { console.error('rejected by hub; not retrying'); dropPending(); return 1; }   // 4xx: our envelope is wrong — retrying will not help
+    } catch (err) { console.error(`upload attempt ${i + 1} failed: ${String(err && err.name === 'AbortError' ? 'timeout' : err).slice(0, 120)}`); }
+    finally { clearTimeout(to); }
+    if (i < UPLOAD_BACKOFF_MS.length) await new Promise(r => setTimeout(r, UPLOAD_BACKOFF_MS[i]));
+  }
+  savePending(e, body); return 1;
+}
+function savePending(e, body) {
+  try {
+    if (body.length > PENDING_MAX_BYTES) { console.error(`pending envelope ${body.length} bytes exceeds the ${PENDING_MAX_BYTES} byte cap; dropped`); return; }
+    fs.mkdirSync(STATE_DIR, { recursive: true }); fs.writeFileSync(PENDING, body);
+    console.error(`kept as pending: ${PENDING} (${body.length} bytes, retrieved_at ${e.retrieved_at}; expires 2 h after that)`);
+  } catch (err) { console.error('could not write pending file: ' + String(err).slice(0, 120)); }
+}
+function dropPending() { try { fs.unlinkSync(PENDING); } catch (_) {} }
+async function retryPending() {
+  if (!fs.existsSync(PENDING)) { console.error('nothing pending'); process.exit(4); }
+  let e; try { e = JSON.parse(fs.readFileSync(PENDING, 'utf8')); } catch (_) { console.error('pending file unreadable; dropped'); dropPending(); process.exit(4); }
+  if (Date.now() - Date.parse(e.retrieved_at) > PENDING_MAX_AGE_MS) { console.error(`pending envelope from ${e.retrieved_at} expired (> 2 h); dropped — the hub would refuse it anyway`); dropPending(); process.exit(4); }
+  if (!KEY) { console.error('INGEST_KEY not set'); process.exit(2); }
+  console.error(`retrying pending envelope: layer=${e.layer} retrieved_at=${e.retrieved_at} records=${(e.records || []).length}`);
+  process.exit(await upload(e));
+}
+if (layer === 'retry') retryPending(); else main();

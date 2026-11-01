@@ -7,3 +7,4 @@ KEYS.md
 node_modules/
 .DS_Store
 phase1/logs/
+phase1/state/
