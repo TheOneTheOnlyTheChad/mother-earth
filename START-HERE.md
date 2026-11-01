@@ -19,6 +19,16 @@ One browser globe showing the latest observations of the planet from open live f
 - **Honesty over polish.** If a layer can't be shown honestly (e.g. sea-ice imagery blind in polar night), say "not shown" with the measured reason rather than paint something.
 - He says "lol/bro", is warm and direct; match it, keep replies short, bottom line first, no restating his request.
 
+**Constitution (agreed 1 Nov 2026 — these outlast any one layer; Mother Earth is the first page of something broader, and every later page is built the same way):**
+- **Live data, real things.** Only observations with provenance, time, place and an honest coverage grade. Nothing is shown that was not observed, and what is modelled or computed says so.
+- **We force no view.** The site shows; it does not tell. No politics, no drama, no editorial. People take the real things and bridge, work and play with them themselves.
+- **Bias is chucked.** Any source or dataset found to carry bias, an agenda, or an inability to be checked is removed outright — not re-labelled, not balanced, removed. Record the reason and date in REGISTER.md.
+- **A bridge carries its evidence grade.** When cross-field links arrive, every link states what supports it and how sure, exactly as a cell states its coverage. Nothing implies a cause without saying so.
+- **Shared keys for things.** From here on, records that name a thing (place, organisation, species, person, work) carry a stable public identifier where one exists (Wikidata ID preferred), so later pages can link across fields.
+- **The hub is the product; the page is a client.** All future surfaces read the hub API; history stays private and accumulates from day one; paid features (later) are hub endpoints, never page code.
+- **Code is AGPL-3.0** (switched 1 Nov 2026 from MIT; earlier commits remain MIT). Forks run as a service must publish their changes.
+- **Every source's commercial standing is in the register** before it goes live (column: commercial use yes / with attribution / needs agreement).
+
 ## 3. Where the files live (three copies, keep them in sync)
 | What | Repo path (clone at `/home/claude/mother-earth`) | Mac path |
 |---|---|---|

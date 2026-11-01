@@ -1,6 +1,6 @@
 # Mother Earth — source register (Terms and Coverage)
 
-Rule: Chad reads the licence page and pastes the operative sentence; Claude files it with the date read. One row per source. "Coverage" is what the source documents about its own completeness — the thing the page's coverage grades lean on.
+Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with attribution / needs agreement — from the pasted terms, before the layer goes live. Chad reads the licence page and pastes the operative sentence; Claude files it with the date read. One row per source. "Coverage" is what the source documents about its own completeness — the thing the page's coverage grades lean on.
 
 ## USGS — Earthquake Hazards Program, GeoJSON feed `2.5_day`
 - **Read:** 30 Oct 2026 by Chad, https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
@@ -11,6 +11,7 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Coverage statement:** USGS documents the catalog as complete worldwide at M4.5+; M2.5 completeness is regional (ANSS network density). → D5: `count_m45` is the comparison-eligible quantity; `count` stays `partial`.
 - **In force on the page:** footer credit "USGS" links to earthquake.usgs.gov; cell evidence string `m2.5_completeness_map_pending;m4.5_global_complete`.
 - **Status:** ✅ cleared for public, automated, attributed use.
+- **Commercial use:** yes — U.S. public domain; credit requested.
 
 ## NOAA GML — Mauna Loa CO₂ daily/weekly CSV
 - **Read:** 30 Oct 2026 by Claude, from the file header of `co2_weekly_mlo.csv` and `co2_daily_mlo.csv` (carried into the snapshot as `source_notes`).
@@ -19,6 +20,7 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Coverage statement:** one station. Not a map layer; never graded per cell.
 - **In force on the page:** tile labelled "one station, not a map layer", value marked preliminary, comparison labelled as NOAA's; citation in Choices.
 - **Status:** ✅ cleared; Chad to confirm by reading the header himself (open the weekly CSV, first 40 lines) — optional.
+- **Commercial use:** yes — freely available to the public; citation requested.
 
 ## NOAA SWPC — planetary K-index JSON
 - **Read:** 30 Oct 2026 by Chad, https://www.weather.gov/disclaimer (SWPC is an NWS centre; the NWS disclaimer governs)
@@ -29,6 +31,7 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Action:** Kp is a 3-hourly product; we currently poll it every 5 min (288/day) — lawful but against the spirit of "know your refresh frequency". **Change to hourly** when the collector is next touched (the `kp_index` D1 write already dedups by time_tag).
 - **Coverage statement:** planetary index derived from a fixed set of ground magnetometers (`station_count` is in the feed). Not a map layer; never graded per cell.
 - **Status:** ✅ cleared for public, automated, attributed use; cadence change queued.
+- **Commercial use:** yes — public domain, "for any lawful purpose"; no implied endorsement, no logo.
 
 ## NASA FIRMS — VIIRS NOAA-20 NRT area CSV
 - **Read:** 30 Oct 2026 by Chad: https://www.earthdata.nasa.gov/data/projects/lance (Acknowledgments, Disclaimer) and https://www.earthdata.nasa.gov/data/projects/lance/disclaimer (full text). FIRMS front page also read.
@@ -41,12 +44,14 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Coverage statement:** global detections "within 3 hours of satellite observation" (US/Canada real-time). Per-cell adequacy needs the pass schedule (not wired); cloud hides detections (on the page already).
 - **Window semantics (measured 1 Nov 2026, confirmed against the area-API docs by Gemini):** `day_range=1` returns the **current UTC date only**, not the last 24 h. The file was header-only (122 bytes) from 02:15 to 03:45 UTC and held 507 rows at 04:00. Decision: keep `day_range=1` (no extra CPU, no doubled file) and label the reading "detections so far today (UTC)". Hub 0.1.9: an empty file before 04:00 UTC is recorded as "no detections processed yet for today", later in the day as "not a validated zero"; both show as unknown, never zero. `day_range=2` would give a true 24 h but doubles the parse (~15 ms CPU at 1.3 MB already exceeds the Free plan's 10 ms soft limit) — not taken.
 - **Status:** ✅ cleared for public, automated use with the LANCE acknowledgment and the local-scale caveat shown.
+- **Commercial use:** yes — NASA full and open data; LANCE acknowledgment required; local-scale caveat shown.
 
 ## NASA GIBS — WMS imagery (VIIRS NOAA-20 true colour)
 - **Read:** 30 Oct 2026 by Chad — same LANCE pages as FIRMS; the disclaimer names GIBS explicitly ("The information presented through LANCE, GIBS, Worldview, and FIRMS are provided 'as is'…").
 - **Terms / attribution:** as FIRMS — the single LANCE acknowledgment sentence covers "data and/or imagery", so one footer sentence credits both.
 - **Coverage statement:** daily composite; the page labels it "previous day, not live" with the date. Not an observation layer; never graded.
 - **Status:** ✅ cleared.
+- **Commercial use:** yes — as FIRMS (same LANCE terms).
 
 ## NSIDC — Sea Ice Index v4 (G02135), daily extent + 1981–2010 climatology, NOAA mirror
 - **Read:** 30 Oct 2026 by Claude — directory listing and file headers at https://noaadata.apps.nsidc.org/NOAA/G02135/ (open; no Earthdata login). **Chad to read and paste NSIDC's data-use/citation page:** https://nsidc.org/data/g02135 (look for "Citing These Data" and any use terms).
@@ -55,11 +60,13 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Coverage statement:** passive microwave; extent = ocean with ≥15 % concentration; one number per hemisphere; ~1 day latency. Not a map layer.
 - **Map layer (measured 30 Oct 2026, GIBS WMS, 2048×1024, day 29 Oct):** VIIRS_NOAA20_Sea_Ice (observation) painted 0.76 % of the globe — polar night + cloud; AMSRU2_Sea_Ice_Concentration_12km ended 2025-09-01; GHRSST_L4_MUR_Sea_Ice_Concentration (L4 analysis, model tier) painted 12.2 %, 133 KB, 2.2 s. **Decision pending:** show MUR labelled "analysis, not observation", or no cap imagery.
 - **Status:** ✅ data in use (attributed); terms paste outstanding.
+- **Commercial use:** yes (NOAA-hosted, open) — citation required; NSIDC terms page still to be pasted.
 
 ## OpenSky Network — states API
 - **Read:** 30 Oct 2026 (Terms §3(iii)/(vi) + reply Ticket#837506 by Chad).
 - **Terms:** automated/public use needs written licence; hobbyist use OK within credits; public site requires being a feeder; no cloud whitelisting.
 - **Status:** ⛔ parked until a receiver feeds the network. Page says "not shown" with reason.
+- **Commercial use:** needs agreement — Terms §3 non-commercial by default; written licence required for commercial/operational use.
 
 ## aisstream.io — AIS WebSocket stream (ships)
 - **Read:** 31 Oct 2026 by Claude (browser pane), https://aisstream.io/ and https://aisstream.io/documentation. **No terms-of-use or licence page exists on the site** (the only policy link is /privacypolicy); the sentences below are the operative ones on the site. Chad to eyeball and confirm.
@@ -70,6 +77,7 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Coverage statement:** the site says its stations are "Our global network of Automatic Identification System (AIS) stations" — terrestrial receivers; no coverage map published. → cells stay `partial` with evidence `terrestrial_ais_only`; a silent cell is never read as an empty sea.
 - **Measured (31 Oct 2026, 60 s window, world bbox):** 3,943 messages → 3,838 unique vessels (3,058 Class A, 780 Class B), 175 cells, 424 KB envelope; near-zero repeat rate per vessel within 60 s — reason not known (server-side thinning suspected, not confirmed).
 - **Status:** ⚠️ in use, public, attributed — **scope not established**: the site's proxy guidance supports serving our own viewers, but "free" plus the absence of any licence page does not establish archival or redistribution rights. Evidence recorded above; the unresolved scope is recorded here. Durability risk: a free service with no published terms can change or close without notice. (Reviewer GPT, round 4, 31 Oct 2026.)
+- **Commercial use:** needs agreement — no published terms; "server-side use only"; a paid product built on it requires their written OK or another AIS source.
 
 ## Global Forest Watch — Integrated Deforestation Alerts (`gfw_integrated_alerts`, GLAD-L + GLAD-S2 + RADD)
 - **Read:** 1 Nov 2026 by Chad — https://www.globalforestwatch.org/terms/ (full text pasted) and the dataset metadata https://data-api.globalforestwatch.org/dataset/gfw_integrated_alerts (full JSON pasted); by Claude — the Data API how-tos (integrated alerts; getting started).
@@ -82,3 +90,4 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Consequences for the page:** label "vegetation disturbance alerts · satellite-derived · published in the last 7 days"; counts are 10 m pixels, never hectares or trends; detection date ≠ clearing date; confidence split shown; counts may fall as low-confidence alerts are retracted (say so); coverage grade `partial` in phase 1 (no per-cell observation-opportunity record; cloud and system coverage vary); cells outside 30°N–30°S `unknown` by definition; the "not for trend or area" line in Choices and the inspector.
 - **Coverage statement (verbatim, metadata):** "30°N to 30°S", "Daily"; GLAD-L "Operating in the entire tropics (30°N to 30°S)" within tree cover ≥10% as of 2000; GLAD-S2 "primary humid tropical forest areas of South America"; RADD "primary humid tropical forest areas of South America, sub-Saharan Africa and Southeast Asia".
 - **Status:** ✅ terms + licence + access + endpoint + sample dated. Open: cadence to be agreed and recorded before the collector runs.
+- **Commercial use:** with attribution — CC BY 4.0 permits commercial use; WRI API attribution requirement applies; "do not overburden".

@@ -21,7 +21,7 @@ Phase 1, step 1 (collectors) — code complete, not yet deployed. See the guide.
 
 ## Licence
 
-MIT. Data sources carry their own terms; see the source register in the spec.
+AGPL-3.0 (from 1 Nov 2026; commits before that date were published under MIT). Data sources carry their own terms and commercial standing; see REGISTER.md.
 
 ## Documents
 - `docs/SPEC-v0.3.md` — the build spec (deviations D1–D14 logged in `STATUS.md`)
