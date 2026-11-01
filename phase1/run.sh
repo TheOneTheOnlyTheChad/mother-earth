@@ -64,6 +64,7 @@ record() { printf '{"last_run":"%s","mode":"%s","result":%s,"last_sample":"%s","
 
 case "$MODE" in
   tick)
+    touch state/last_tick            # heartbeat: mtime only, nothing grows
     now=$(date +%s)
     last=$(grep -o '"last_sample_epoch":[0-9]*' state/scheduler.json 2>/dev/null | grep -o '[0-9]*$'); last=${last:-0}
     if [ -f state/pending.json ]; then log "pending upload found; retrying"; run_collector retry; rc=$?; log "retry exit=$rc"; fi
