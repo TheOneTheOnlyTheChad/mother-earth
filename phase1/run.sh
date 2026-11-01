@@ -50,12 +50,22 @@ INGEST_KEY="$(keyval INGEST_KEY)"; AISSTREAM_KEY="$(keyval AISSTREAM_KEY)"
 if [ -z "$INGEST_KEY" ] || [ -z "$AISSTREAM_KEY" ]; then log "keys unreadable from $KEYS_FILE (background access to ~/Documents denied? ingest=${#INGEST_KEY} ais=${#AISSTREAM_KEY} chars)"; echo "keys unreadable" >&2; exit 6; fi
 export INGEST_KEY AISSTREAM_KEY
 
-# ---- one shared lock (mkdir is atomic); a lock older than 10 min is from a crashed run
+# ---- one shared lock (mkdir is atomic). Age alone does NOT make a lock stale (1 Nov 2026): a sample that was running
+# when the host suspended is older than the timeout but still alive, and reclaiming it would start a second sample
+# alongside it on wake. A lock is stale only when it is old AND its owning process is gone.
 if ! mkdir state/lock 2>/dev/null; then
-  if [ -n "$(find state/lock -maxdepth 0 -mmin +10 2>/dev/null)" ]; then log "stale lock removed"; rmdir state/lock 2>/dev/null; mkdir state/lock 2>/dev/null || exit 5
-  else [ "$MODE" = "tick" ] || echo "another run is in progress (state/lock); try again in a minute" >&2; exit 5; fi
+  lockpid=$(cat state/lock/pid 2>/dev/null)
+  if [ -n "$lockpid" ] && kill -0 "$lockpid" 2>/dev/null; then
+    [ "$MODE" = "tick" ] || echo "another run is in progress (pid $lockpid); try again in a minute" >&2
+    log "lock held by live pid $lockpid; not reclaimed"; exit 5
+  elif [ -n "$(find state/lock -maxdepth 0 -mmin +10 2>/dev/null)" ]; then
+    log "stale lock removed (owner ${lockpid:-unknown} is gone)"; rm -f state/lock/pid 2>/dev/null; rmdir state/lock 2>/dev/null; mkdir state/lock 2>/dev/null || exit 5
+  else
+    [ "$MODE" = "tick" ] || echo "another run is in progress (state/lock); try again in a minute" >&2; exit 5
+  fi
 fi
-trap 'rmdir state/lock 2>/dev/null' EXIT
+echo $$ > state/lock/pid 2>/dev/null
+trap 'rm -f state/lock/pid 2>/dev/null; rmdir state/lock 2>/dev/null' EXIT
 
 run_collector() {   # $1 = layer/mode, rest = flags
   "$NODE" collector-mac.mjs "$@" --quiet --state=state >> logs/collector.log 2>&1; return $?
