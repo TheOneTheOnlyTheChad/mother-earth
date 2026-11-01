@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611010545">
+<link rel="stylesheet" href="style.css?v=202611011030">
 </head>
 <body class="doc">
 <header class="top">
@@ -68,7 +68,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611010545"></script>
+<script src="app.js?v=202611011030"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -95,6 +95,7 @@ function renderAll() {
   $('limits-body').innerHTML = [
     `<p><b>Aircraft — not shown.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,
     `<p><b>Fires.</b> ${esc((rules.find(x => x.section === 'firms' && x.k === 'Source caveat') || {}).v || '')} One detection per satellite pass, not one fire; cloud may hide detections. The count is <b>today (UTC) so far</b>: the FIRMS area API with day_range=1 returns the current UTC date only, so it resets at 00:00 UTC and refills as near-real-time processing lands, about 2–3 h after each pass (confirmed 1 Nov 2026 after a run of empty files between 02:15 and 03:45 UTC). An empty response is shown as unknown, never as zero.</p>`,
+    `<p><b>Forest disturbance.</b> ${esc((rules.find(x => x.section === 'forest' && x.k === 'Source caveat') || {}).v || '')} Counts are 10 m alert pixels published in the 7 days before each cell's query — never hectares, never a trend. Only cells between 30°N and 30°S with land are queried (559 at 4°, six every 30 minutes, so a full sweep takes about two days and each cell shows its own query time); the rest of the globe is outside the alert systems and is shown as nothing, not as zero. Coverage inside the tropics is graded partial: the three systems (GLAD-L Landsat, GLAD-S2 and RADD Sentinel) have different forest masks and coverage periods, cloud varies, and GLAD-L 30 m pixels are resampled to 10 m so integrated counts exceed native GLAD-L counts. ${esc((rules.find(x => x.section === 'forest' && x.k === 'Attribution') || {}).v || '')}</p>`,
     `<p><b>Ships.</b> ${esc((rules.find(x => x.section === 'ships' && x.k === 'Source terms') || {}).v || '')} Terrestrial receivers only: a cell with no vessels is not an empty sea. Samples, not a continuous feed; current positions are unknown between samples; mode: ${esc(ME.SHIPS_MODE.text)}.</p>`,
     `<p><b>Sea ice.</b> ${esc((rules.find(x => x.section === 'seaice' && x.k === 'Map layer') || {}).v || '')}</p>`,
     `<p><b>Kp, CO₂, sea ice</b> are indices, not map layers: one planetary number, one station, two hemispheres. A degraded source state means the latest observation is older than its product's refresh and is shown with its observation time.</p>`,

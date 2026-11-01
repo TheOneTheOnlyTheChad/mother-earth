@@ -2,7 +2,7 @@
 :root{
   --bg:#070a0f; --panel:rgba(12,17,26,.92); --card:rgba(7,10,15,.62); --line:rgba(140,170,200,.16); --line-strong:rgba(140,170,200,.4);
   --fg:#d6dde8; --dim:#7f8da3; --accent:#ffb347;
-  --quake:#ff5a3c; --fire:#ff9b2e; --plane:#7fd3ff; --ship:#5fe3c8; --space:#c58bff; --carbon:#9ad0a4; --ice:#bfe6ff;
+  --quake:#ff5a3c; --fire:#ff9b2e; --plane:#7fd3ff; --ship:#5fe3c8; --space:#c58bff; --carbon:#9ad0a4; --ice:#bfe6ff; --forest:#6fd37a;
   --ok:#b9ff6b; --warn:#ffd166; --bad:#ff5a3c;
   --display:"Barlow Condensed",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --col:300px; --header:56px; --gap:12px;
@@ -48,6 +48,7 @@ body.world{height:100vh;height:100dvh;overflow:hidden;display:grid;grid-template
 .sw{display:inline-block;width:18px;height:10px;vertical-align:-1px;margin-right:6px;border:1px solid #9fb3c8}
 .sw.partial{border-style:dashed;border-color:#7f8da3}
 .sw.unknown{border-style:dotted;border-color:#ff5a3c}
+.sw.forest{background:rgba(111,211,122,.35);border-color:rgba(111,211,122,.7)}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:0;margin-right:6px;background:var(--c)}
 .credits{position:absolute;left:12px;right:12px;top:12px;font-size:10.5px;color:#aab6c6;line-height:1.4;background:rgba(7,10,15,.55);padding:4px 8px;border:1px solid var(--line);pointer-events:auto}
 .credits a{color:#c9d3e0}

@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611010545">
+<link rel="stylesheet" href="style.css?v=202611011030">
 </head>
 <body class="world">
 <header class="top">
@@ -25,10 +25,10 @@
 <div class="stage">
   <div class="centre">
     <div id="globe"></div>
-    <div class="credits" id="credits">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></div>
+    <div class="credits" id="credits">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></div>
     <div class="imgdate" id="imgdate">Imagery: loading…</div>
     <div class="legend" id="legend">
-      <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample)</div>
+      <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample) · <span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</div>
       <div class="cov"><span class="sw"></span><b>collector observed throughout the window</b> — source coverage can still be incomplete</div>
       <div class="cov"><span class="sw partial"></span>partly observed — records observed; coverage incomplete</div>
       <div class="cov"><span class="sw unknown"></span>unknown — nothing can be said about this cell</div>
@@ -59,6 +59,12 @@
           <div class="value"><span class="lbl" id="l-ships"></span><span id="v-ships">–</span><small id="u-ships">vessel identities · 60 s sample</small></div>
           <div class="meta" id="m-ships">aisstream.io · loading…</div>
           <div class="meta" id="mode-ships">Mode: manual samples — no schedule installed. Terrestrial AIS only: a cell with no vessels is not an empty sea. <a class="more" href="sources.html#ships">details</a></div>
+        </div>
+        <div class="card toggle" id="card-forest" style="--c:var(--forest)">
+          <button class="tgl" type="button" data-layer="forest" aria-pressed="true"><span class="pip"></span><span class="name">Forest disturbance</span><span class="state" id="s-forest">loading</span></button>
+          <div class="value"><span id="v-forest">–</span><small>alert pixels (10 m) · published in the last 7 days</small></div>
+          <div class="meta" id="m-forest">Global Nature Watch · integrated alerts (GLAD-L, GLAD-S2, RADD) · loading…</div>
+          <div class="meta">Counts of 10 m pixels, not hectares; detection date ≠ clearing date; tropics only (30°N–30°S); not for area or trend. <a class="more" href="sources.html#forest">details</a></div>
         </div>
         <div class="card locked" style="--c:var(--plane)">
           <div class="head"><span class="pip"></span><span class="name">Aircraft</span><span class="state">not shown</span></div>
@@ -97,7 +103,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611010545"></script>
+<script src="app.js?v=202611011030"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, MAP_LAYERS, IMG_DAY, IMG_LABEL } = ME;
@@ -109,8 +115,8 @@ const gibs = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=
 $('imgdate').textContent = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS NOAA-20) — not live · Arctic dark = polar night';
 
 // ---------- globe (survives WebGL failure: readings and report still load)
-const points = { usgs: [], firms: [], ships: [] };
-const on = { usgs: true, firms: true, ships: true };
+const points = { usgs: [], firms: [], ships: [], forest: [] };
+const on = { usgs: true, firms: true, ships: true, forest: true };
 const el = $('globe');
 let globe;
 try {
@@ -143,7 +149,8 @@ function cellGeom(id) {
 }
 const STROKE = { adequate: 'rgba(214,221,232,1)', partial: 'rgba(214,221,232,.8)', unknown: 'rgba(255,90,60,.95)' };
 const FILL = { adequate: 'rgba(214,221,232,.10)', partial: 'rgba(214,221,232,.05)', unknown: 'rgba(255,90,60,.12)' };
-const windowText = (layer, snap) => layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : 'in the last 24 h';
+const forestFill = n => { const t = n <= 0 ? 0 : Math.min(1, Math.log10(n + 1) / 5); return `rgba(111,211,122,${(0.06 + 0.5 * t).toFixed(2)})`; };   // 0 → faint, 10^5 pixels → 0.56; log scale so the Amazon doesn't drown the rest
+const windowText = (layer, snap) => layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : layer === 'forest' ? 'alert pixels published in the 7 days before this cell\'s query' : 'in the last 24 h';
 
 function render() {
   const polys = [];
@@ -153,7 +160,8 @@ function render() {
     for (const [id, cell] of Object.entries(snap.cells || {})) {
       let grade = (cell.coverage && cell.coverage.grade) || 'unknown';
       if (fresh.grade === 'unknown') grade = 'unknown';
-      polys.push({ geom: cellGeom(id), layer, id, cell, grade, stroke: STROKE[grade], fill: FILL[grade],
+      const fill = layer === 'forest' && grade !== 'unknown' ? forestFill(cell.count) : FILL[grade];
+      polys.push({ geom: cellGeom(id), layer, id, cell, grade, stroke: layer === 'forest' && grade !== 'unknown' ? 'rgba(111,211,122,.55)' : STROKE[grade], fill,
         label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL[layer]}</b> · cell ${id}<br>${cell.count} ${windowText(layer, snap)} · coverage: ${grade}<br><span style="color:#7f8da3">${esc(cell.coverage ? cell.coverage.evidence : '')}</span></div>` });
     }
   }
@@ -183,6 +191,7 @@ function inspectCell(p) {
     ['Comparison', `insufficient history — Mother Earth\'s baselines accumulate from 30 Oct 2026`],
   ];
   if (p.layer === 'firms') rows.push(['Caveat', 'NASA: not for tactical decisions or local-scale conditions; detections per pass, cloud may hide']);
+  if (p.layer === 'forest') { const c = p.cell.confidence || {}; rows.splice(1, 0, ['By confidence', `nominal ${Number(c.nominal || 0).toLocaleString()} · high ${Number(c.high || 0).toLocaleString()} · highest ${Number(c.highest || 0).toLocaleString()} (highest = detected by more than one alert system)`], ['Queried', `${when(p.cell.queried_at)} · alerts dated from ${esc(p.cell.since || '?')} · dataset ${esc(p.cell.version || 'latest')}`]); rows.push(['Caveat', 'Global Nature Watch: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment; 10 m pixels, not hectares; detection date ≠ clearing date; counts can fall when low-confidence alerts are retracted'], ['Citation', esc(snap.citation || '')]); }
   if (p.layer === 'ships') rows.push(['Caveat', `latest received position per MMSI in this sample; positions between samples unknown; terrestrial AIS only. Socket up ${Number(snap.socket_up_s || 0).toFixed(0)} of ${snap.window_s} s`]);
   if (p.layer === 'ships') for (const r of recs) rows.push([esc(r.name || r.mmsi), `MMSI ${esc(r.mmsi)} · class ${esc(r.cls)} · ${r.sog_kn === null || r.sog_kn === undefined ? '?' : Number(r.sog_kn).toFixed(1)} kn · ${when(r.observed_at)}${r.received_at ? ' · received ' + r.received_at.slice(11, 19) + ' UTC' : ''}`]);
   else for (const r of recs) rows.push([p.layer === 'usgs' ? `M${Number(r.mag).toFixed(1)} (${esc(r.mag_type || '?')})` : `${Number(r.frp_mw || 0).toFixed(0)} MW`, (p.layer === 'usgs' ? `${esc(r.title || '')} · ` : `${r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : 'nominal'} confidence · ${r.daynight === 'D' ? 'day' : 'night'} · `) + when(r.observed_at) + (r.src && /^https:\/\/earthquake\.usgs\.gov\//.test(r.src) ? ` · <a href="${esc(r.src)}" target="_blank" rel="noopener">USGS</a>` : '')]);
@@ -207,6 +216,8 @@ function cards() {
   $('u-ships').textContent = R.ships.unit;
   $('m-ships').innerHTML = `aisstream.io · ${esc(R.ships.observed || 'no sample yet')}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.fresh.why)}</b>` : ''}`;
   $('mode-ships').innerHTML = `Mode: ${esc(R.ships.mode)}. Terrestrial AIS only: a cell with no vessels is not an empty sea; positions between samples unknown. <a class="more" href="sources.html#ships">details</a>`;
+  setState('forest', R.forest.fresh); $('v-forest').textContent = R.forest.value === null ? '–' : R.forest.value.toLocaleString();
+  $('m-forest').innerHTML = `Global Nature Watch · integrated alerts (GLAD-L, GLAD-S2, RADD) · ${esc(R.forest.observed || 'no sweep yet')} · across ${R.forest.cells} cells, ${R.forest.highest.toLocaleString()} highest-confidence · last run ${ago(R.forest.retrieved)}${R.forest.fresh.grade === 'unknown' ? ` · <b>${esc(R.forest.fresh.why)}</b>` : ''}`;
   setState('swpc', R.swpc.fresh); $('v-swpc').textContent = R.swpc.value === null ? '–' : Number(R.swpc.value).toFixed(2);
   $('kp-bar').style.width = R.swpc.value === null ? '0' : (R.swpc.value / 9 * 100) + '%';
   $('m-swpc').innerHTML = `NOAA SWPC · ${esc(R.swpc.observed || '')} · retrieved ${ago(R.swpc.retrieved)}${R.swpc.fresh.grade !== 'adequate' ? ` · <b>${esc(R.swpc.fresh.why)}</b>` : ''}`;

@@ -23,22 +23,23 @@ const rowsToObjects = ME.rowsToObjects = snap => { const f = snap.record_fields 
 ME.cellId = (lat, lng) => { const r = Math.max(0, Math.min(44, Math.floor((lat + 90) / CELL_DEG))), c = Math.max(0, Math.min(89, Math.floor((lng + 180) / CELL_DEG))); return r + '_' + c; };
 ME.total = snap => Object.values((snap && snap.cells) || {}).reduce((n, c) => n + (c.count || 0), 0);
 
-const LAYERS = ME.LAYERS = ['usgs', 'firms', 'ships', 'swpc', 'co2', 'seaice'];
-const MAP_LAYERS = ME.MAP_LAYERS = ['usgs', 'firms', 'ships'];
-const LABEL = ME.LABEL = { usgs: 'Earthquakes', firms: 'Fire detections', ships: 'Ships', swpc: 'Kp index', co2: 'CO₂', seaice: 'Sea ice' };
+const LAYERS = ME.LAYERS = ['usgs', 'firms', 'ships', 'forest', 'swpc', 'co2', 'seaice'];
+const MAP_LAYERS = ME.MAP_LAYERS = ['usgs', 'firms', 'ships', 'forest'];   // forest is cells-only: counts per cell, no points
+const LABEL = ME.LABEL = { usgs: 'Earthquakes', firms: 'Fire detections', ships: 'Ships', forest: 'Forest disturbance', swpc: 'Kp index', co2: 'CO₂', seaice: 'Sea ice' };
 const SOURCE = ME.SOURCE = {
   usgs: { name: 'USGS', url: 'https://earthquake.usgs.gov/', credit: 'Credit: U.S. Geological Survey', terms: 'U.S. public domain' },
   firms: { name: 'NASA FIRMS', url: 'https://firms.modaps.eosdis.nasa.gov/', credit: 'We acknowledge the use of data and/or imagery from NASA\'s Land, Atmosphere Near real-time Capability for Earth observations (LANCE), part of NASA\'s Earth Science Data and Information System (ESDIS).', terms: 'NASA data policy; LANCE acknowledgment requested' },
   ships: { name: 'aisstream.io', url: 'https://aisstream.io/', credit: 'AIS via aisstream.io', terms: 'free API, server-side use only; no licence page published — redistribution scope not established' },
+  forest: { name: 'Global Nature Watch', url: 'https://www.globalforestwatch.org/', credit: 'Source: "Integrated Deforestation Alerts". UMD/GLAD and WUR, accessed through Global Nature Watch. Powered by Resource Watch / Global Nature Watch (WRI).', terms: 'CC BY 4.0 (dataset metadata); WRI terms: attribute the API; comply with the dataset licence' },
   swpc: { name: 'NOAA SWPC', url: 'https://www.swpc.noaa.gov/', credit: 'NOAA Space Weather Prediction Center', terms: 'U.S. public domain' },
   co2: { name: 'NOAA GML', url: 'https://gml.noaa.gov/ccgg/trends/', credit: 'Lan, X., Tans, P. and Thoning, K.W.: Trends in globally-averaged CO2 determined from NOAA Global Monitoring Laboratory measurements. NOAA GML.', terms: 'freely available; citation requested; recent months preliminary' },
   seaice: { name: 'NSIDC', url: 'https://nsidc.org/data/g02135', credit: 'Fetterer, F., K. Knowles, W. N. Meier, M. Savoie, and A. K. Windnagel. Sea Ice Index, Version 4. NSIDC.', terms: 'open (NOAA mirror); citation requested' },
   gibs: { name: 'NASA GIBS', url: 'https://earthdata.nasa.gov/gibs', credit: 'Imagery: NASA GIBS, VIIRS NOAA-20 true colour', terms: 'open; dated; not live' },
 };
-const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated, previous day)' };
+const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', forest: 'observation (satellite-derived alert pixels, published; three alert systems with their own confidence rules)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated, previous day)' };
 
 // ---------- state
-const state = ME.state = { usgs: null, firms: null, ships: null, swpc: null, co2: null, seaice: null };
+const state = ME.state = { usgs: null, firms: null, ships: null, forest: null, swpc: null, co2: null, seaice: null };
 ME.loadedAt = null;
 
 async function getJson(path) { const r = await fetch(HUB + path, { cache: 'no-store' }); if (!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }
@@ -58,6 +59,8 @@ ME.freshness = function (layer) {
   if (ageS > (snap.stale_after_s || 900)) return { grade: 'unknown', why: layer === 'ships' ? `last sample is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)}); current positions unknown` : `last snapshot is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)})` };
   // FIRMS (brief §5): an empty response is not a validated zero. day_range=1 = today (UTC): the file empties at 00:00 UTC and refills ~2–3 h behind.
   if (layer === 'firms' && ME.total(snap) === 0 && (snap.raw_bytes || 0) < 1000) return { grade: 'unknown', why: new Date().getUTCHours() < 4 ? `no detections processed yet for today (UTC) — FIRMS resets at 00:00 UTC, NRT runs ~2–3 h behind` : `source returned an empty file (${snap.raw_bytes || 0} bytes) — not a validated zero` };
+  if (layer === 'forest' && !(snap.sweep && snap.sweep.answered)) return { grade: 'unknown', why: 'no cell has answered yet — the sweep has not started' };
+  if (layer === 'forest') return { grade: 'partial', why: `sweep ${snap.sweep.answered} of ${snap.sweep.cells_total} cells answered; oldest query ${ago(snap.sweep.oldest_queried_at)}; last run ${ago(snap.retrieved_at)}` };   // partial by design in phase 1 (REGISTER: no per-cell observation-opportunity record)
   if (snap.source_status === 'degraded') return { grade: 'partial', why: layer === 'swpc' && snap.index ? `source degraded — observation ${ago(snap.index.time_tag)}, retrieved ${ago(snap.retrieved_at)}` : 'source degraded' };
   return { grade: 'adequate', why: 'retrieved ' + ago(snap.retrieved_at) };
 };
@@ -81,6 +84,13 @@ ME.readings = function () {
     sampleEnd: s && s.window_end, observed: s ? `sample ended ${hhmm(s.window_end)}; ${s.class_a} Class A + ${s.class_b} Class B; socket up ${num(s.socket_up_s, 0)} of ${s.window_s} s` : '', retrieved: s && s.retrieved_at,
     mode: SHIPS_MODE.text, coverage: 'terrestrial AIS only — a cell with no vessels is not an empty sea; positions between samples unknown', quantity: s && s.quantity,
     window: s ? `${s.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (s.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours yet — baseline accumulates from first sample (31 Oct 2026)` };
+  const fo = state.forest, ffo = ME.freshness('forest');
+  const fsum = fo ? Object.values(fo.cells || {}).reduce((a, c) => { a.n += c.count || 0; a.hi += (c.confidence && c.confidence.highest) || 0; a.cells++; return a; }, { n: 0, hi: 0, cells: 0 }) : { n: 0, hi: 0, cells: 0 };
+  R.forest = { label: LABEL.forest, source: SOURCE.forest, fresh: ffo, value: ffo.grade !== 'unknown' ? fsum.n : null, highest: fsum.hi, cells: fsum.cells, sweep: fo && fo.sweep, unit: 'alert pixels (10 m) · published in the last 7 days',
+    observed: fo && fo.sweep ? `${fo.sweep.answered} of ${fo.sweep.cells_total} tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset ${fo.source_version || 'latest'}` : '', retrieved: fo && fo.retrieved_at,
+    coverage: 'alert systems operate between 30°N and 30°S only — cells outside are unknown by definition, not zero; inside, cloud and alert-system coverage vary (partial); counts can fall when low-confidence alerts are retracted', quantity: fo && fo.quantity,
+    window: 'alerts whose detection date falls in the 7 days before each cell\'s query; detection date ≠ clearing date', cadence: '6 cells every 30 min (one GFW query each, sequential); full sweep ≈ 2 days', comparison: `none of ours yet — baseline accumulates from 1 Nov 2026 (forest_daily)`,
+    caveat: 'GFW: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment' };
   const k = state.swpc, fk = ME.freshness('swpc');
   R.swpc = { label: LABEL.swpc, source: SOURCE.swpc, fresh: fk, value: k && k.index && fk.grade !== 'unknown' ? k.index.value : null, unit: 'planetary Kp (0–9)',
     observedAt: k && k.index && k.index.time_tag, observed: k && k.index ? `observation ${hhmm(k.index.time_tag)} (${ago(k.index.time_tag)}); 3-hourly product` : '', retrieved: k && k.retrieved_at,
@@ -110,6 +120,7 @@ ME.report = function (R) {
   parts.push(R.usgs.value !== null ? `${R.usgs.value.toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS; ${R.usgs.observed}; retrieved ${ago(R.usgs.retrieved)})` : `earthquakes: unknown — ${R.usgs.fresh.why}`);
   parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections so far today, UTC (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'source degraded; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
   parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
+  parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels published in the last 7 days across ${R.forest.cells} queried cells (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; sweep ${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells; 10 m pixels, not hectares; detection date ≠ clearing date; not for area or trend)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
   parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value} observed ${hhmm(R.swpc.observedAt)} (${ago(R.swpc.observedAt)}; NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; source degraded — ' + R.swpc.fresh.why : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa on ${R.co2.date} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
   parts.push(R.seaice.north !== null ? `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km² (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
@@ -138,6 +149,7 @@ ME.rules = function (R) {
     if (s) add(layer, 'Collector', `v${s.collector_version}, schema ${s.schema_version}, scheduled ${s.scheduled_for ? s.scheduled_for.slice(11, 16) + ' UTC' : ''}${s.ingested_from ? '; ingested from ' + s.ingested_from : ''}`);
     if (s && s.citation) add(layer, 'Citation', s.citation, true);
     if (layer === 'firms') add(layer, 'Source caveat', 'NASA LANCE: near-real-time product; "their use for tactical decision-making or informing about conditions at a local scale are not advised" (read 30 Oct 2026)', true);
+    if (layer === 'forest') { add(layer, 'Source caveat', 'Global Nature Watch (read 1 Nov 2026): "these alerts detect forest or tree cover disturbances. This product does not distinguish between human-caused and other disturbance types"; "We do not recommend using deforestation alerts for global or regional trend assessment, nor for area estimates." Recent alerts include false positives that may later be removed; GLAD low-confidence alerts are removed after 180 days, RADD after 90.', true); add(layer, 'Attribution', 'WRI terms require crediting the API: "powered by Resource Watch" text-and-link form (no logos on this site); dataset CC BY 4.0 with the citation above.', true); add(layer, 'Coverage note', 'Only cells between 30°N and 30°S with land are ever queried (559 at 4°); the rest of the globe is outside the alert systems and is shown as nothing, not as zero.', true); }
     if (layer === 'ships') add(layer, 'Source terms', 'aisstream.io (read 31 Oct 2026): free; "Direct browser connections are not permitted. Connect from your own server"; 3 subscribed connections per account. No terms-of-use page exists on the site — redistribution/archival scope not established.', true);
     if (layer === 'seaice') add(layer, 'Map layer', 'not shown. Measured 30 Oct 2026: GIBS VIIRS sea ice paints 0.76% of the globe (polar night, cloud); AMSR2 concentration ended 1 Sep 2025; GHRSST MUR is an L4 analysis (model tier). Decision pending.', true);
   }
