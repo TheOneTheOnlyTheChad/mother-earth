@@ -10,7 +10,7 @@ const BASELINE_SINCE = '30 Oct 2026';
 const IMG_DAY = ME.IMG_DAY = new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10);
 const IMG_LABEL = ME.IMG_LABEL = new Date(IMG_DAY).toUTCString().slice(5, 16);
 // Operating mode of the home collector. Change only when a schedule has been installed AND verified from logs (brief §5).
-const SHIPS_MODE = ME.SHIPS_MODE = { text: 'manual samples — no schedule installed', verified_schedule: false };
+const SHIPS_MODE = ME.SHIPS_MODE = { text: 'about every 30 min while the home Mac is awake and online (launchd; verified by two unattended samples, 1 Nov 2026) — gaps when it sleeps', verified_schedule: true };   // flip back to false if the schedule is removed
 
 const $ = ME.$ = id => document.getElementById(id);
 const esc = ME.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
