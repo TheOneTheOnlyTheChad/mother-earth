@@ -54,7 +54,7 @@ EOF
 OUT="$HOME/mother-earth/state/gfw-sample.json"
 mkdir -p "$(dirname "$OUT")"
 START=$(date +%s)
-HTTP=$(curl -sS -m 170 -o "$OUT" -w '%{http_code}' -X POST "$API/dataset/gfw_integrated_alerts/latest/query/json" \
+HTTP=$(curl -sS -L -m 170 -o "$OUT" -w '%{http_code}' -X POST "$API/dataset/gfw_integrated_alerts/latest/query/json" \
   -H "x-api-key: $KEY" -H "Origin: $ORIGIN" -H "Content-Type: application/json" -d "$BODY")
 END=$(date +%s)
 echo "http=$HTTP seconds=$((END-START)) bytes=$(wc -c < "$OUT" | tr -d ' ')"
