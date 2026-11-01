@@ -19,6 +19,42 @@ const dur = ME.dur = s => s < 3600 ? Math.round(s / 60) + ' min' : (s % 3600 ===
 const hhmm = ME.hhmm = iso => iso ? iso.slice(11, 16) + ' UTC' : '–';
 const when = ME.when = iso => iso ? iso.replace('T', ' ').slice(0, 16) + ' UTC' : 'source time not supplied';
 const num = (x, d = 2) => Number.isFinite(+x) ? (+x).toFixed(d) : '–';
+
+// ---------- missing vs genuine zero (review round 5): a value the source did not supply is NEVER formatted as 0.
+// A zero the source did report is shown as 0 and said to be the source's, so the two can never be read as the same thing.
+const MISSING = ME.MISSING = 'not provided';
+const has = ME.has = x => !(x === null || x === undefined || x === '' || !Number.isFinite(+x));
+const fmt = ME.fmt = (x, { dp = 0, unit = '', zeroNote = 'source-reported zero' } = {}) => {
+  if (!has(x)) return MISSING;
+  const n = +x;
+  const s = n.toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp }) + (unit ? ' ' + unit : '');
+  return n === 0 && zeroNote ? `${s} (${zeroNote})` : s;
+};
+
+// ---------- snapshot identity (review round 5): cells and records are only ever combined when they come from the SAME run.
+// retrieved_at is written once per collector run and copied into both latest/<layer>.json and latest-cells/<layer>.json.
+const snapId = ME.snapId = snap => (snap && snap.retrieved_at) || null;
+ME.samePair = (cellsSnap, recordsSnap) => !!snapId(cellsSnap) && snapId(cellsSnap) === snapId(recordsSnap);
+
+// ---------- extreme within a loaded snapshot (navigation only; not a ranking of the world).
+// Records with no value are excluded, never treated as zero. Ties are all returned.
+ME.extremeOf = (recs, key) => {
+  const usable = (recs || []).filter(r => has(r[key]));
+  if (!usable.length) return null;
+  const max = Math.max(...usable.map(r => +r[key]));
+  return { max, tied: usable.filter(r => +r[key] === max), excluded: (recs || []).length - usable.length, considered: usable.length };
+};
+
+// ---------- WebGL availability, in plain language (item 1). The minified library error goes to diagnostics, not to the reader.
+ME.webglMissing = function () {
+  try {
+    const c = document.createElement('canvas');
+    if (c.getContext('webgl2') || c.getContext('webgl')) return null;
+    return 'This browser or device has 3-D graphics (WebGL) turned off or unavailable.';
+  } catch (e) {
+    return 'This browser blocked 3-D graphics (WebGL) when the page asked for it.';
+  }
+};
 const rowsToObjects = ME.rowsToObjects = snap => { const f = snap.record_fields || []; return (snap.records || []).map(r => Object.fromEntries(f.map((k, i) => [k, r[i]]))); };
 ME.cellId = (lat, lng) => { const r = Math.max(0, Math.min(44, Math.floor((lat + 90) / CELL_DEG))), c = Math.max(0, Math.min(89, Math.floor((lng + 180) / CELL_DEG))); return r + '_' + c; };
 ME.total = snap => Object.values((snap && snap.cells) || {}).reduce((n, c) => n + (c.count || 0), 0);
@@ -61,7 +97,8 @@ ME.freshness = function (layer) {
   if (layer === 'firms' && ME.total(snap) === 0 && (snap.raw_bytes || 0) < 1000) return { grade: 'unknown', why: new Date().getUTCHours() < 4 ? `no detections processed yet for today (UTC) — FIRMS resets at 00:00 UTC, NRT runs ~2–3 h behind` : `source returned an empty file (${snap.raw_bytes || 0} bytes) — not a validated zero` };
   if (layer === 'forest' && !(snap.sweep && snap.sweep.answered)) return { grade: 'unknown', why: 'no cell has answered yet — the sweep has not started' };
   if (layer === 'forest') return { grade: 'partial', sweeping: snap.sweep.answered < snap.sweep.cells_total, why: `${snap.sweep.answered < snap.sweep.cells_total ? 'first sweep in progress: ' : 'coverage partial by design: '}${snap.sweep.answered} of ${snap.sweep.cells_total} cells answered; oldest query ${ago(snap.sweep.oldest_queried_at)}; last run ${ago(snap.retrieved_at)}` };   // partial by design in phase 1 (REGISTER: no per-cell observation-opportunity record)
-  if (snap.source_status === 'degraded') return { grade: 'partial', why: layer === 'swpc' && snap.index ? `source degraded — observation ${ago(snap.index.time_tag)}, retrieved ${ago(snap.retrieved_at)}` : 'source degraded' };
+  // the card and the report already print the observation and retrieval times; this reason must not repeat them (review round 5)
+  if (snap.source_status === 'degraded') return { grade: 'partial', why: 'the source flagged this observation as degraded' };
   return { grade: 'adequate', why: 'retrieved ' + ago(snap.retrieved_at) };
 };
 ME.stateWord = (f, layer) => f.grade === 'adequate' ? ['current', 'ok'] : f.grade === 'partial' ? (layer === 'forest' ? [f.sweeping ? 'sweeping' : 'partial', 'warn'] : ['degraded', 'warn']) : ['unknown', 'bad'];   // forest is partial by design (REGISTER): say what it is, not 'degraded'
@@ -121,7 +158,7 @@ ME.report = function (R) {
   parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections so far today, UTC (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'source degraded; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
   parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
   parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels published in the last 7 days across ${R.forest.cells} queried cells (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; sweep ${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells; 10 m pixels, not hectares; detection date ≠ clearing date; not for area or trend)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
-  parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value} observed ${hhmm(R.swpc.observedAt)} (${ago(R.swpc.observedAt)}; NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; source degraded — ' + R.swpc.fresh.why : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
+  parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value} observed ${hhmm(R.swpc.observedAt)} (${ago(R.swpc.observedAt)}; NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; source degraded' : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa on ${R.co2.date} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
   parts.push(R.seaice.north !== null ? `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km² (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
   parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; none installed');
@@ -136,6 +173,9 @@ ME.rules = function (R) {
   add('general', 'Cell size', `${CELL_DEG}° × ${CELL_DEG}° (fixed set; adjustable from phase 3)`);
   add('general', 'Viewers', 'never collect: this page reads published snapshots only', true);
   add('general', 'Sentence template', 'cannot emit a cause', true);
+  add('general', 'Missing is not zero', 'A value the source did not supply is shown as "not provided". A zero the source did report is shown as 0 and marked as the source\'s zero. The two are never displayed the same way.', true);
+  add('general', 'Records and cells must match', 'Per-cell counts and individual records are only ever shown together when both files carry the same collector run (retrieved_at). If a run lands between the two reads the page re-reads the counts once; if they still differ, the counts are shown alone and the records are withheld with the reason. A failed record read clears the previous records instead of leaving them beside newer counts.', true);
+  add('general', 'Navigation', 'The "find in this snapshot" buttons move the view to the largest value inside the records already loaded — the loaded snapshot, not the world, and not a danger ranking. They make no further requests, run only when clicked, and never move the camera on their own.', true);
   add('general', 'Comparisons', `none of Mother Earth\'s own in phase 1; its baselines accumulate from ${BASELINE_SINCE}; descriptive comparisons from phase 3, highlights only after a held-out validation. Source-provided comparisons (NOAA CO₂, NSIDC climatology) are shown and labelled as the source\'s.`, true);
   for (const layer of LAYERS) {
     const s = state[layer]; const r = R[layer];

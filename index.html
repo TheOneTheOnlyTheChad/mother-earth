@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611011045">
+<link rel="stylesheet" href="style.css?v=202611011500">
 </head>
 <body class="world">
 <header class="top">
@@ -41,34 +41,50 @@
   <div class="sheet" id="sheet">
     <button type="button" id="sheet-btn" aria-expanded="true" aria-controls="sheet-scroll">Readings <span id="sheet-arrow">▾</span></button>
     <div class="scroll" id="sheet-scroll">
-      <section class="col left" aria-label="Map layers">
+      <section class="col left" aria-label="Map layers and navigation">
         <div class="card toggle" id="card-usgs" style="--c:var(--quake)">
           <button class="tgl" type="button" data-layer="usgs" aria-pressed="true"><span class="pip"></span><span class="name">Earthquakes</span><span class="state" id="s-usgs">loading</span></button>
           <div class="value"><span id="v-usgs">–</span><small>M2.5+ · last 24 h</small></div>
-          <div class="meta" id="m-usgs">USGS · loading…</div>
-          <div class="meta">Coverage: M2.5 completeness is regional (global at M4.5+). <a class="more" href="sources.html#usgs">details</a></div>
+          <div class="obs" id="o-usgs">loading…</div>
+          <div class="src" id="m-usgs">USGS</div>
+          <div class="pair" id="p-usgs" hidden></div>
+          <div class="cav">M2.5 completeness is regional; USGS documents global completeness at M4.5+. <a class="more" href="sources.html#usgs">details</a></div>
         </div>
         <div class="card toggle" id="card-firms" style="--c:var(--fire)">
           <button class="tgl" type="button" data-layer="firms" aria-pressed="true"><span class="pip"></span><span class="name">Fire detections</span><span class="state" id="s-firms">loading</span></button>
           <div class="value"><span id="v-firms">–</span><small>detections · today so far (UTC)</small></div>
-          <div class="meta" id="m-firms">NASA FIRMS · VIIRS NOAA-20 · loading…</div>
-          <div class="meta">One detection per pass, not one fire; cloud may hide detections. NASA: not for tactical or local-scale decisions. <a class="more" href="sources.html#firms">details</a></div>
+          <div class="obs" id="o-firms">loading…</div>
+          <div class="src" id="m-firms">NASA FIRMS · VIIRS NOAA-20</div>
+          <div class="pair" id="p-firms" hidden></div>
+          <div class="cav">One detection per pass, not one fire; cloud may hide detections. NASA: not for tactical or local-scale decisions. <a class="more" href="sources.html#firms">details</a></div>
         </div>
         <div class="card toggle" id="card-ships" style="--c:var(--ship)">
           <button class="tgl" type="button" data-layer="ships" aria-pressed="true"><span class="pip"></span><span class="name">Ships</span><span class="state" id="s-ships">loading</span></button>
           <div class="value"><span class="lbl" id="l-ships"></span><span id="v-ships">–</span><small id="u-ships">vessel identities · 60 s sample</small></div>
-          <div class="meta" id="m-ships">aisstream.io · loading…</div>
-          <div class="meta" id="mode-ships">Mode: manual samples — no schedule installed. Terrestrial AIS only: a cell with no vessels is not an empty sea. <a class="more" href="sources.html#ships">details</a></div>
+          <div class="obs" id="o-ships">loading…</div>
+          <div class="src" id="m-ships">aisstream.io</div>
+          <div class="pair" id="p-ships" hidden></div>
+          <div class="cav" id="mode-ships">Terrestrial AIS only: a cell with no vessels is not an empty sea. <a class="more" href="sources.html#ships">details</a></div>
         </div>
         <div class="card toggle" id="card-forest" style="--c:var(--forest)">
           <button class="tgl" type="button" data-layer="forest" aria-pressed="true"><span class="pip"></span><span class="name">Forest disturbance</span><span class="state" id="s-forest">loading</span></button>
           <div class="value"><span id="v-forest">–</span><small>alert pixels (10 m) · published in the last 7 days</small></div>
-          <div class="meta" id="m-forest">Global Nature Watch · integrated alerts (GLAD-L, GLAD-S2, RADD) · loading…</div>
-          <div class="meta">Counts of 10 m pixels, not hectares; detection date ≠ clearing date; tropics only (30°N–30°S); not for area or trend. <a class="more" href="sources.html#forest">details</a></div>
+          <div class="obs" id="o-forest">loading…</div>
+          <div class="src" id="m-forest">Global Nature Watch · integrated alerts (GLAD-L, GLAD-S2, RADD)</div>
+          <div class="cav">Counts of 10 m pixels, not hectares; detection date ≠ clearing date; tropics only (30°N–30°S); not for area or trend. <a class="more" href="sources.html#forest">details</a></div>
         </div>
         <div class="card locked" style="--c:var(--plane)">
           <div class="head"><span class="pip"></span><span class="name">Aircraft</span><span class="state">not shown</span></div>
-          <div class="meta">OpenSky permits public sites only if they feed the network; no receiver installed yet. <a class="more" href="sources.html#aircraft">details</a></div>
+          <div class="cav">OpenSky permits public sites only if they feed the network; no receiver installed yet. <a class="more" href="sources.html#aircraft">details</a></div>
+        </div>
+
+        <div class="card find" id="card-find">
+          <div class="head"><span class="name">Find in this snapshot</span></div>
+          <div class="findrow">
+            <button class="findbtn" type="button" id="find-usgs">Highest magnitude in this feed</button>
+            <button class="findbtn" type="button" id="find-firms">Highest FRP in this snapshot</button>
+          </div>
+          <div class="cav" id="find-note">Moves the view to the largest value among the records already loaded. This snapshot only — not a ranking of the world, and not a measure of danger. Nothing moves unless you click.</div>
         </div>
       </section>
 
@@ -77,25 +93,28 @@
           <div class="head"><span class="pip"></span><span class="name">Kp index</span><span class="state" id="s-swpc">loading</span></div>
           <div class="value"><span id="v-swpc">–</span><small>planetary Kp · 0–9</small></div>
           <div class="bar"><i id="kp-bar" style="width:0"></i></div>
-          <div class="meta" id="m-swpc">NOAA SWPC · loading…</div>
-          <div class="meta">3-hourly index; planetary, not a map layer. <a class="more" href="sources.html#swpc">details</a></div>
+          <div class="obs" id="o-swpc">loading…</div>
+          <div class="src" id="m-swpc">NOAA SWPC</div>
+          <div class="cav">3-hourly index; planetary, not a map layer. <a class="more" href="sources.html#swpc">details</a></div>
         </div>
         <div class="card" id="card-co2" style="--c:var(--carbon)">
           <div class="head"><span class="pip"></span><span class="name">CO₂</span><span class="state" id="s-co2">loading</span></div>
           <div class="value"><span id="v-co2">–</span><small>ppm · daily mean</small></div>
-          <div class="meta" id="m-co2">NOAA GML · Mauna Loa, Hawaii · loading…</div>
+          <div class="obs" id="o-co2">loading…</div>
+          <div class="src" id="m-co2">NOAA GML · Mauna Loa, Hawaii</div>
           <div class="cmp" id="c-co2">comparison: loading…</div>
-          <div class="meta">One station; not a map layer; recent months preliminary. <a class="more" href="sources.html#co2">details</a></div>
+          <div class="cav">One station; not a map layer; recent months preliminary. <a class="more" href="sources.html#co2">details</a></div>
         </div>
         <div class="card" id="card-seaice" style="--c:var(--ice)">
           <div class="head"><span class="pip"></span><span class="name">Sea ice</span><span class="state" id="s-seaice">loading</span></div>
           <div class="twin">
-            <div><div class="value"><span id="v-ice-n">–</span><small>M km²</small></div><div class="meta"><b>Arctic</b> extent</div></div>
-            <div><div class="value"><span id="v-ice-s">–</span><small>M km²</small></div><div class="meta"><b>Antarctic</b> extent</div></div>
+            <div><div class="value"><span id="v-ice-n">–</span><small>M km²</small></div><div class="src"><b>Arctic</b> extent</div></div>
+            <div><div class="value"><span id="v-ice-s">–</span><small>M km²</small></div><div class="src"><b>Antarctic</b> extent</div></div>
           </div>
-          <div class="meta" id="m-seaice">NSIDC Sea Ice Index · loading…</div>
+          <div class="obs" id="o-seaice">loading…</div>
+          <div class="src" id="m-seaice">NSIDC Sea Ice Index</div>
           <div class="cmp" id="c-seaice">comparison: loading…</div>
-          <div class="meta">Area with ≥15% ice concentration; two numbers, not a map layer; polar-cap imagery not shown. <a class="more" href="sources.html#seaice">details</a></div>
+          <div class="cav">Area with ≥15% ice concentration; two numbers, not a map layer; polar-cap imagery not shown. <a class="more" href="sources.html#seaice">details</a></div>
         </div>
       </section>
     </div>
@@ -103,10 +122,10 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611011045"></script>
+<script src="app.js?v=202611011500"></script>
 <script>
 (() => {
-const { $, esc, ago, hhmm, when, state, LABEL, MAP_LAYERS, IMG_DAY, IMG_LABEL } = ME;
+const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
 ME.menu(); ME.clock();
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -116,27 +135,45 @@ $('imgdate').textContent = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS NOAA-20
 
 // ---------- globe (survives WebGL failure: readings and report still load)
 const points = { usgs: [], firms: [], ships: [], forest: [] };
+// which collector run the loaded records came from, and whether the last read succeeded (review round 5)
+const pmeta = { usgs: { id: null, ok: false, why: 'not read yet' }, firms: { id: null, ok: false, why: 'not read yet' }, ships: { id: null, ok: false, why: 'not read yet' } };
 const on = { usgs: true, firms: true, ships: true, forest: true };
 const el = $('globe');
-let globe;
-try {
-  if (typeof Globe === 'undefined') throw new Error('globe library did not load');
-  globe = Globe()(el)
-    .width(el.clientWidth).height(el.clientHeight)
-    .globeImageUrl(gibs).backgroundColor('#070a0f')
-    .showAtmosphere(true).atmosphereColor('#4a6a9a').atmosphereAltitude(.18)
-    .pointsData([]).pointLat('lat').pointLng('lng').pointColor('col').pointAltitude('alt').pointRadius('r').pointsMerge(true)
-    .ringsData([]).ringLat('lat').ringLng('lng').ringColor(() => t => `rgba(255,90,60,${1 - t})`).ringMaxRadius('rr').ringPropagationSpeed(2).ringRepeatPeriod(900)
-    .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonSideColor(() => 'rgba(0,0,0,0)').polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
-    .polygonLabel(p => p.label)
-    .onPolygonClick(p => inspectCell(p));
-  globe.pointOfView({ lat: -10, lng: 25, altitude: innerWidth <= 720 ? 2.8 : 2.2 });   // phones: the whole sphere fits above the readings sheet
-  globe.controls().autoRotate = !reduced; globe.controls().autoRotateSpeed = .25;
-  globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
-} catch (e) {
-  const noop = new Proxy(function () {}, { get: (_, k) => k === 'autoRotate' ? false : noop, apply: () => noop, set: () => true });
-  globe = noop;
-  el.innerHTML = '<div class="globe-fail"><div><b style="color:#ffb347">Globe unavailable in this browser</b> (' + esc(String(e && e.message || e).slice(0, 120)) + ').<br>The readings and the status report are still live. <a href="sources.html">Sources &amp; Details</a></div></div>';
+let globe, globeOk = false;
+
+// The reader gets plain language; the library's own (minified) error goes to the console and a collapsed Diagnostics block.
+function globeUnavailable(plain, technical) {
+  const noop = new Proxy(function () { }, { get: (_, k) => k === 'autoRotate' ? false : noop, apply: () => noop, set: () => true });
+  globe = noop; globeOk = false;
+  if (technical) console.error('[Mother Earth] globe initialisation failed:', technical);
+  el.innerHTML = '<div class="globe-fail"><div><b>The globe needs 3-D graphics</b><br>' + esc(plain) +
+    ' Every reading beside it is live, and the full status report is on <a href="sources.html">Sources &amp; Details</a>.' +
+    (technical ? '<details><summary>Diagnostics</summary><code>' + esc(String(technical).slice(0, 300)) + '</code></details>' : '') +
+    '</div></div>';
+}
+
+const noWebGL = ME.webglMissing();
+if (noWebGL) {
+  globeUnavailable(noWebGL, null);   // checked before loading the library, so no minified error is produced at all
+} else {
+  try {
+    if (typeof Globe === 'undefined') throw new Error('globe.gl did not load (script blocked, or no network when the page opened)');
+    globe = Globe()(el)
+      .width(el.clientWidth).height(el.clientHeight)
+      .globeImageUrl(gibs).backgroundColor('#070a0f')
+      .showAtmosphere(true).atmosphereColor('#4a6a9a').atmosphereAltitude(.18)
+      .pointsData([]).pointLat('lat').pointLng('lng').pointColor('col').pointAltitude('alt').pointRadius('r').pointsMerge(true)
+      .ringsData([]).ringLat('lat').ringLng('lng').ringColor(() => t => `rgba(255,90,60,${1 - t})`).ringMaxRadius('rr').ringPropagationSpeed(2).ringRepeatPeriod(900)
+      .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonSideColor(() => 'rgba(0,0,0,0)').polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
+      .polygonLabel(p => p.label)
+      .onPolygonClick(p => inspectCell(p));
+    globe.pointOfView({ lat: -10, lng: 25, altitude: innerWidth <= 720 ? 2.8 : 2.2 });   // phones: the whole sphere fits above the readings sheet
+    globe.controls().autoRotate = !reduced; globe.controls().autoRotateSpeed = .25;
+    globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
+    globeOk = true;
+  } catch (e) {
+    globeUnavailable('The 3-D globe could not start in this browser.', (e && e.message) || e);
+  }
 }
 const sizeGlobe = () => { if (el.clientWidth && el.clientHeight) globe.width(el.clientWidth).height(el.clientHeight); };
 window.addEventListener('resize', sizeGlobe);
@@ -151,6 +188,7 @@ const STROKE = { adequate: 'rgba(214,221,232,1)', partial: 'rgba(214,221,232,.8)
 const FILL = { adequate: 'rgba(214,221,232,.10)', partial: 'rgba(214,221,232,.05)', unknown: 'rgba(255,90,60,.12)' };
 const forestFill = n => { const t = n <= 0 ? 0 : Math.min(1, Math.log10(n + 1) / 5); return `rgba(111,211,122,${(0.06 + 0.5 * t).toFixed(2)})`; };   // 0 → faint, 10^5 pixels → 0.56; log scale so the Amazon doesn't drown the rest
 const windowText = (layer, snap) => layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : layer === 'forest' ? 'alert pixels published in the 7 days before this cell\'s query' : 'in the last 24 h';
+const hasField = (snap, name) => !!(snap && snap.record_fields && snap.record_fields.includes(name));   // show only fields the envelope actually publishes
 
 function render() {
   const polys = [];
@@ -177,66 +215,190 @@ document.querySelectorAll('button.tgl').forEach(b => b.addEventListener('click',
   b.setAttribute('aria-pressed', String(on[k])); b.closest('.card').classList.toggle('off', !on[k]); render();
 }));
 
-// ---------- inspector (§10.3)
+// ---------- inspector (§10.3): coverage cells AND individual records, through one open/close path
+let lastFocus = null;          // restored when the inspector closes
+let inspCtx = null;            // { layer, recs } so a listed record can be opened on its own
+function openInspector(title, rows) {
+  lastFocus = document.activeElement;
+  $('insp-h').textContent = title;
+  $('insp-dl').innerHTML = rows.filter(Boolean).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('');
+  $('insp').classList.add('show');
+  if (globeOk) globe.controls().autoRotate = false;
+  $('insp-x').focus();
+}
+function closeInspector() {
+  if (!$('insp').classList.contains('show')) return;
+  $('insp').classList.remove('show');
+  if (lastFocus && document.contains(lastFocus) && typeof lastFocus.focus === 'function') lastFocus.focus();
+  lastFocus = null; inspCtx = null;
+}
+$('insp-x').onclick = closeInspector;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInspector(); });
+$('insp-dl').addEventListener('click', e => {
+  const b = e.target.closest('button.reclink'); if (!b || !inspCtx) return;
+  const r = inspCtx.recs[Number(b.dataset.i)]; if (r) inspectRecord(inspCtx.layer, r);
+});
+
+function recordTitle(layer, r) {
+  if (layer === 'usgs') return has(r.mag) ? `M${Number(r.mag).toFixed(1)}` : 'magnitude ' + MISSING;
+  if (layer === 'firms') return fmt(r.frp_mw, { dp: 0, unit: 'MW' });
+  return esc(r.name || ('MMSI ' + (r.mmsi || MISSING)));
+}
+
+// one record on its own — never a cell total (review round 5)
+function inspectRecord(layer, r) {
+  const snap = state[layer];
+  const rows = [['Selected', 'one record from the loaded snapshot — not a cell total']];
+  if (layer === 'usgs') {
+    rows.push(['Magnitude', has(r.mag) ? `M${Number(r.mag).toFixed(1)} <span class="q">(${esc(r.mag_type || MISSING)})</span>` : MISSING]);
+    if (hasField(snap, 'title')) rows.push(['Place', esc(r.title || MISSING)]);
+    if (hasField(snap, 'depth_km')) rows.push(['Depth', fmt(r.depth_km, { dp: 1, unit: 'km', zeroNote: null })]);
+  }
+  if (layer === 'firms') {
+    rows.push(['Fire radiative power', fmt(r.frp_mw, { dp: 0, unit: 'MW' })]);
+    if (hasField(snap, 'confidence')) rows.push(['Confidence', r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : r.confidence === 'n' ? 'nominal' : MISSING]);
+    if (hasField(snap, 'daynight')) rows.push(['Day or night', r.daynight === 'D' ? 'day' : r.daynight === 'N' ? 'night' : MISSING]);
+    if (hasField(snap, 'satellite')) rows.push(['Satellite', esc(r.satellite || MISSING)]);
+  }
+  if (layer === 'ships') {
+    rows.push(['Vessel', esc(r.name || MISSING)], ['MMSI', esc(r.mmsi || MISSING)], ['AIS class', esc(r.cls || MISSING)]);
+    if (hasField(snap, 'sog_kn')) rows.push(['Speed over ground', fmt(r.sog_kn, { dp: 1, unit: 'kn', zeroNote: null })]);
+  }
+  rows.push(
+    ['Observed', when(r.observed_at)],
+    r.received_at !== undefined ? ['Received by us', r.received_at ? r.received_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING] : null,
+    ['Position', `${Number(r.lat).toFixed(3)}, ${Number(r.lng).toFixed(3)} · cell ${r.cellId} (${ME.CELL_DEG}° × ${ME.CELL_DEG}°)`],
+    ['Source', `${esc(SOURCE[layer].name)} — ${esc(snap.quantity || '')}`],
+    ['Window', windowText(layer, snap)],
+    ['This run', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING]);
+  if (layer === 'firms') rows.push(['What FRP is', 'Fire radiative power is the radiant energy measured during this one satellite pass — not the size, spread or severity of a fire, and not a comparison between fires. Cloud decides what could be detected at all. NASA: not for tactical decisions or local-scale conditions.']);
+  if (layer === 'usgs') rows.push(['Comparison', 'none of ours yet — Mother Earth\'s baselines accumulate from 30 Oct 2026']);
+  if (layer === 'ships') rows.push(['Caveat', 'latest position received for this MMSI during the sample; where it was between samples is unknown; terrestrial AIS only']);
+  if (layer === 'usgs' && r.src && /^https:\/\/earthquake\.usgs\.gov\//.test(r.src)) rows.push(['At the source', `<a href="${esc(r.src)}" target="_blank" rel="noopener">USGS event page</a>`]);
+  openInspector(`${LABEL[layer]} · one record`, rows);
+}
+
 function inspectCell(p) {
-  const snap = state[p.layer]; const fresh = ME.freshness(p.layer);
-  const recs = points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, 8);
-  $('insp-h').textContent = LABEL[p.layer] + ' · cell ' + p.id;
+  const snap = state[p.layer]; const fresh = ME.freshness(p.layer); const pm = pmeta[p.layer];
+  const paired = p.layer === 'forest' ? false : pm && pm.ok;
+  const recs = paired ? points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, 8) : [];
+  inspCtx = { layer: p.layer, recs };
   const rows = [
-    ['Count', `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
+    ['Selected', `one ${ME.CELL_DEG}° × ${ME.CELL_DEG}° coverage cell — totals for the cell, not a single record`],
+    ['Cell total', `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
     ['Quantity', esc(snap.quantity || '')],
-    ['Coverage', `${p.grade} — ${esc(p.cell.coverage ? p.cell.coverage.evidence : 'n/a')}`],
+    ['Coverage', `${p.grade} — ${esc(p.cell.coverage ? p.cell.coverage.evidence : MISSING)}`],
     ['Collector', `${fresh.grade} — ${esc(fresh.why)}`],
     ['Retrieved', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : '–'],
-    ['Comparison', `insufficient history — Mother Earth\'s baselines accumulate from 30 Oct 2026`],
+    ['Comparison', 'insufficient history — Mother Earth\'s baselines accumulate from 30 Oct 2026'],
   ];
   if (p.layer === 'firms') rows.push(['Caveat', 'NASA: not for tactical decisions or local-scale conditions; detections per pass, cloud may hide']);
-  if (p.layer === 'forest') { const c = p.cell.confidence || {}; rows.splice(1, 0, ['By confidence', `nominal ${Number(c.nominal || 0).toLocaleString()} · high ${Number(c.high || 0).toLocaleString()} · highest ${Number(c.highest || 0).toLocaleString()} (highest = detected by more than one alert system)`], ['Queried', `${when(p.cell.queried_at)} · alerts dated from ${esc(p.cell.since || '?')} · dataset ${esc(p.cell.version || 'latest')}`]); rows.push(['Caveat', 'Global Nature Watch: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment; 10 m pixels, not hectares; detection date ≠ clearing date; counts can fall when low-confidence alerts are retracted'], ['Citation', esc(snap.citation || '')]); }
-  if (p.layer === 'ships') rows.push(['Caveat', `latest received position per MMSI in this sample; positions between samples unknown; terrestrial AIS only. Socket up ${Number(snap.socket_up_s || 0).toFixed(0)} of ${snap.window_s} s`]);
-  if (p.layer === 'ships') for (const r of recs) rows.push([esc(r.name || r.mmsi), `MMSI ${esc(r.mmsi)} · class ${esc(r.cls)} · ${r.sog_kn === null || r.sog_kn === undefined ? '?' : Number(r.sog_kn).toFixed(1)} kn · ${when(r.observed_at)}${r.received_at ? ' · received ' + r.received_at.slice(11, 19) + ' UTC' : ''}`]);
-  else for (const r of recs) rows.push([p.layer === 'usgs' ? `M${Number(r.mag).toFixed(1)} (${esc(r.mag_type || '?')})` : `${Number(r.frp_mw || 0).toFixed(0)} MW`, (p.layer === 'usgs' ? `${esc(r.title || '')} · ` : `${r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : 'nominal'} confidence · ${r.daynight === 'D' ? 'day' : 'night'} · `) + when(r.observed_at) + (r.src && /^https:\/\/earthquake\.usgs\.gov\//.test(r.src) ? ` · <a href="${esc(r.src)}" target="_blank" rel="noopener">USGS</a>` : '')]);
-  if (p.cell.count > recs.length) rows.push(['…', `${p.cell.count - recs.length} more in this cell`]);
-  $('insp-dl').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
-  $('insp').classList.add('show'); globe.controls().autoRotate = false; $('insp-x').focus();
+  if (p.layer === 'forest') {
+    const c = p.cell.confidence || {};
+    rows.splice(2, 0,
+      ['By confidence', `nominal ${fmt(c.nominal, { zeroNote: null })} · high ${fmt(c.high, { zeroNote: null })} · highest ${fmt(c.highest, { zeroNote: null })} (highest = detected by more than one alert system)`],
+      ['Queried', `${when(p.cell.queried_at)} · alerts dated from ${esc(p.cell.since || MISSING)} · dataset ${esc(p.cell.version || 'latest')}`]);
+    rows.push(['Caveat', 'Global Nature Watch: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment; 10 m pixels, not hectares; detection date ≠ clearing date; counts can fall when low-confidence alerts are retracted'], ['Citation', esc(snap.citation || '')], ['Records', 'this layer publishes counts per cell only — there are no individual records to open']);
+  }
+  if (p.layer === 'ships') rows.push(['Caveat', `latest received position per MMSI in this sample; positions between samples unknown; terrestrial AIS only. Socket up ${fmt(snap.socket_up_s, { dp: 0, unit: 's', zeroNote: null })} of ${fmt(snap.window_s, { dp: 0, unit: 's', zeroNote: null })}`]);
+  if (p.layer !== 'forest' && !paired) rows.push(['Records', `withheld — ${esc((pm && pm.why) || 'records and counts are not from the same collector run')}`]);
+  if (recs.length) {
+    rows.push(['Records', `${recs.length} of ${p.cell.count} in this cell — select one for its own detail`]);
+    recs.forEach((r, i) => rows.push([recordTitle(p.layer, r), `<button type="button" class="reclink" data-i="${i}">${esc(p.layer === 'ships' ? `MMSI ${r.mmsi} · ${when(r.observed_at)}` : `${when(r.observed_at)}${p.layer === 'usgs' ? ' · ' + (r.title || '') : ''}`)}</button>`]));
+    if (p.cell.count > recs.length) rows.push(['…', `${p.cell.count - recs.length} more in this cell, not listed`]);
+  }
+  openInspector(`${LABEL[p.layer]} · cell ${p.id}`, rows);
 }
-$('insp-x').onclick = () => $('insp').classList.remove('show');
-document.addEventListener('keydown', e => { if (e.key === 'Escape') $('insp').classList.remove('show'); });
+
+// ---------- find in this snapshot (navigation only; user-triggered, no ranking, no automatic camera movement)
+const findTie = { usgs: 0, firms: 0 };
+function findExtreme(layer, key, label) {
+  const note = $('find-note'), snap = state[layer], fresh = ME.freshness(layer);
+  const say = html => { note.innerHTML = html; };
+  if (!snap) return say(`No ${LABEL[layer].toLowerCase()} snapshot has been read yet.`);
+  if (fresh.grade === 'unknown') return say(`${LABEL[layer]} is unknown right now — ${esc(fresh.why)}. Nothing to move to.`);
+  if (!pmeta[layer].ok) return say(`Records for ${LABEL[layer].toLowerCase()} are not usable — ${esc(pmeta[layer].why)}.`);
+  const ex = ME.extremeOf(points[layer], key);
+  if (!ex) return say(`No ${LABEL[layer].toLowerCase()} record in this snapshot carries a ${esc(label.toLowerCase())} value. Records without one are excluded, not counted as zero.`);
+  const i = findTie[layer] % ex.tied.length; findTie[layer] = i + 1;
+  const r = ex.tied[i];
+  say(`<b>${esc(label)} in the loaded snapshot:</b> ${recordTitle(layer, r)}, observed ${when(r.observed_at)} · ${esc(SOURCE[layer].name)} · ${windowText(layer, snap)}.`
+    + (ex.tied.length > 1 ? ` ${ex.tied.length} records tie at this value — showing ${i + 1} of ${ex.tied.length}; click again for the next.` : '')
+    + (ex.excluded ? ` ${ex.excluded} record${ex.excluded === 1 ? '' : 's'} excluded for carrying no value (not counted as zero).` : '')
+    + (layer === 'firms' ? ' FRP is the radiant energy of this one pass, not the size or severity of a fire; cloud decides what could be detected at all.' : '')
+    + ' This is the largest value among the records loaded here, not a ranking of the world.');
+  if (globeOk) globe.pointOfView({ lat: r.lat, lng: r.lng, altitude: 1.1 }, reduced ? 0 : 1200);
+  inspectRecord(layer, r);
+}
+$('find-usgs').addEventListener('click', () => findExtreme('usgs', 'mag', 'Highest magnitude'));
+$('find-firms').addEventListener('click', () => findExtreme('firms', 'frp_mw', 'Highest FRP'));
 
 // ---------- cards
 const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = f.why; };
+const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
+function pairNote(layer) {
+  const e = $('p-' + layer); if (!e) return;
+  const pm = pmeta[layer], show = !pm.ok && pm.why !== 'not read yet';
+  e.hidden = !show; if (show) e.innerHTML = `<b>Records withheld:</b> ${esc(pm.why)}`;
+}
 function cards() {
   const R = ME.readings();
   setState('usgs', R.usgs.fresh); $('v-usgs').textContent = R.usgs.value === null ? '–' : R.usgs.value.toLocaleString();
-  $('m-usgs').innerHTML = `USGS · ${esc(R.usgs.observed || '')} · retrieved ${ago(R.usgs.retrieved)}${R.usgs.fresh.grade !== 'adequate' ? ` · <b>${esc(R.usgs.fresh.why)}</b>` : ''}`;
+  $('o-usgs').textContent = R.usgs.observed || 'no snapshot yet';
+  $('m-usgs').innerHTML = `USGS · retrieved ${ago(R.usgs.retrieved)}${warn(R.usgs.fresh)}`;
   setState('firms', R.firms.fresh); $('v-firms').textContent = R.firms.value === null ? '–' : R.firms.value.toLocaleString();
-  $('m-firms').innerHTML = `NASA FIRMS · VIIRS NOAA-20 · ${esc(state.firms ? state.firms.scope || 'world' : '')} · retrieved ${ago(R.firms.retrieved)}${R.firms.fresh.grade !== 'adequate' ? ` · <b>${esc(R.firms.fresh.why)}</b>` : ''}`;
+  $('o-firms').textContent = R.firms.observed || 'no snapshot yet';
+  $('m-firms').innerHTML = `NASA FIRMS · VIIRS NOAA-20 · ${esc(state.firms ? state.firms.scope || 'world' : '')} · retrieved ${ago(R.firms.retrieved)}${warn(R.firms.fresh)}`;
   setState('ships', R.ships.fresh);
   if (R.ships.value !== null) { $('l-ships').textContent = ''; $('v-ships').textContent = R.ships.value.toLocaleString(); }
   else { $('l-ships').textContent = R.ships.lastSample !== null ? 'Last sample:' : ''; $('v-ships').textContent = R.ships.lastSample === null ? '–' : R.ships.lastSample.toLocaleString(); }
   $('u-ships').textContent = R.ships.unit;
-  $('m-ships').innerHTML = `aisstream.io · ${esc(R.ships.observed || 'no sample yet')}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.fresh.why)}</b>` : ''}`;
-  $('mode-ships').innerHTML = `Mode: ${esc(R.ships.mode)}. Terrestrial AIS only: a cell with no vessels is not an empty sea; positions between samples unknown. <a class="more" href="sources.html#ships">details</a>`;
+  $('o-ships').textContent = R.ships.observed || 'no sample yet';
+  $('m-ships').innerHTML = `aisstream.io · ${esc(R.ships.mode)}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.fresh.why)}</b>` : ''}`;
   setState('forest', R.forest.fresh); $('v-forest').textContent = R.forest.value === null ? '–' : R.forest.value.toLocaleString();
-  $('m-forest').innerHTML = `Global Nature Watch · integrated alerts (GLAD-L, GLAD-S2, RADD) · ${esc(R.forest.observed || 'no sweep yet')} · across ${R.forest.cells} cells, ${R.forest.highest.toLocaleString()} highest-confidence · last run ${ago(R.forest.retrieved)}${R.forest.fresh.grade === 'unknown' ? ` · <b>${esc(R.forest.fresh.why)}</b>` : ''}`;
+  $('o-forest').textContent = R.forest.observed || 'no sweep yet';
+  $('m-forest').innerHTML = `Global Nature Watch · integrated alerts · across ${R.forest.cells} cells, ${R.forest.highest.toLocaleString()} highest-confidence · last run ${ago(R.forest.retrieved)}${R.forest.fresh.grade === 'unknown' ? ` · <b>${esc(R.forest.fresh.why)}</b>` : ''}`;
   setState('swpc', R.swpc.fresh); $('v-swpc').textContent = R.swpc.value === null ? '–' : Number(R.swpc.value).toFixed(2);
   $('kp-bar').style.width = R.swpc.value === null ? '0' : (R.swpc.value / 9 * 100) + '%';
-  $('m-swpc').innerHTML = `NOAA SWPC · ${esc(R.swpc.observed || '')} · retrieved ${ago(R.swpc.retrieved)}${R.swpc.fresh.grade !== 'adequate' ? ` · <b>${esc(R.swpc.fresh.why)}</b>` : ''}`;
+  $('o-swpc').textContent = R.swpc.observed || 'no snapshot yet';
+  $('m-swpc').innerHTML = `NOAA SWPC · retrieved ${ago(R.swpc.retrieved)}${warn(R.swpc.fresh)}`;
   setState('co2', R.co2.fresh); $('v-co2').textContent = R.co2.value === null ? '–' : Number(R.co2.value).toFixed(2);
-  $('m-co2').innerHTML = `NOAA GML · ${esc(R.co2.observed || '')} · retrieved ${ago(R.co2.retrieved)}${R.co2.fresh.grade !== 'adequate' ? ` · <b>${esc(R.co2.fresh.why)}</b>` : ''}`;
-  $('c-co2').innerHTML = R.co2.value === null ? 'comparison: unknown' : (R.co2.d1 !== null ? `NOAA's comparison, week of <b>${esc(R.co2.cmpWeek || '?')}</b>: week average <b>${Number(R.co2.cm.week_average).toFixed(2)}</b> is <b>${R.co2.d1 > 0 ? '+' : ''}${R.co2.d1.toFixed(2)}</b> vs 1 yr ago · <b>${R.co2.d10 > 0 ? '+' : ''}${R.co2.d10.toFixed(2)}</b> vs 10 yr ago${R.co2.cm.increase_since_1800 ? ` · +${Number(R.co2.cm.increase_since_1800).toFixed(2)} since 1800` : ''} — the source's comparison, not ours` : 'comparison: not provided by the source this week');
+  $('o-co2').textContent = R.co2.observed || 'no snapshot yet';
+  $('m-co2').innerHTML = `NOAA GML · Mauna Loa, Hawaii · retrieved ${ago(R.co2.retrieved)}${warn(R.co2.fresh)}`;
+  $('c-co2').innerHTML = R.co2.value === null ? 'comparison: unknown' : (R.co2.d1 !== null ? `NOAA's comparison, week of <b>${esc(R.co2.cmpWeek || MISSING)}</b>: week average <b>${Number(R.co2.cm.week_average).toFixed(2)}</b> is <b>${R.co2.d1 > 0 ? '+' : ''}${R.co2.d1.toFixed(2)}</b> vs 1 yr ago · <b>${R.co2.d10 > 0 ? '+' : ''}${R.co2.d10.toFixed(2)}</b> vs 10 yr ago${R.co2.cm.increase_since_1800 ? ` · +${Number(R.co2.cm.increase_since_1800).toFixed(2)} since 1800` : ''} — the source's comparison, not ours` : 'comparison: not provided by the source this week');
   setState('seaice', R.seaice.fresh); $('v-ice-n').textContent = R.seaice.north === null ? '–' : Number(R.seaice.north).toFixed(2); $('v-ice-s').textContent = R.seaice.south === null ? '–' : Number(R.seaice.south).toFixed(2);
-  $('m-seaice').innerHTML = `NSIDC Sea Ice Index · ${esc(R.seaice.observed || '')} · retrieved ${ago(R.seaice.retrieved)}${R.seaice.fresh.grade !== 'adequate' ? ` · <b>${esc(R.seaice.fresh.why)}</b>` : ''}`;
+  $('o-seaice').textContent = R.seaice.observed || 'no snapshot yet';
+  $('m-seaice').innerHTML = `NSIDC Sea Ice Index · retrieved ${ago(R.seaice.retrieved)}${warn(R.seaice.fresh)}`;
   $('c-seaice').innerHTML = R.seaice.north === null ? 'comparison: unknown' : `Arctic <b>${esc(R.seaice.pctN)}</b> · Antarctic <b>${esc(R.seaice.pctS)}</b> — baseline NSIDC's 1981–2010 climatology; the subtraction is ours`;
+  ['usgs', 'firms', 'ships'].forEach(pairNote);
 }
 
-// ---------- records (progressive): map points
+// ---------- records (progressive): map points, paired with the counts they are shown beside
+const toPoints = {
+  usgs: s => ME.rowsToObjects(s).map(q => ({ lat: q.lat, lng: q.lng, mag: q.mag, mag_type: q.mag_type, depth_km: q.depth_km, title: q.title, src: q.src, observed_at: q.observed_at, cellId: ME.cellId(q.lat, q.lng), col: '#ff5a3c', alt: .002 + q.mag * .004, r: .12 + q.mag * .1, rr: q.mag * 1.2 })),
+  firms: s => ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, frp_mw: d.frp_mw, confidence: d.confidence, daynight: d.daynight, satellite: d.satellite, observed_at: d.observed_at, cellId: ME.cellId(d.lat, d.lng), col: d.frp_mw > 50 ? '#ff6a1a' : '#ff9b2e', alt: .004, r: .04 + Math.min(d.frp_mw || 0, 300) / 3000 })),
+  ships: s => ME.rowsToObjects(s).map(v => ({ lat: v.lat, lng: v.lng, mmsi: v.mmsi, name: v.name, sog_kn: v.sog_kn, cls: v.class, observed_at: v.observed_at, received_at: v.received_at, cellId: ME.cellId(v.lat, v.lng), col: '#5fe3c8', alt: .003, r: .05 })),
+};
+
 async function loadRecords() {
-  try { const s = await ME.getJson('/snapshot/usgs'); points.usgs = ME.rowsToObjects(s).map(q => ({ lat: q.lat, lng: q.lng, mag: q.mag, mag_type: q.mag_type, title: q.title, src: q.src, observed_at: q.observed_at, cellId: ME.cellId(q.lat, q.lng), col: '#ff5a3c', alt: .002 + q.mag * .004, r: .12 + q.mag * .1, rr: q.mag * 1.2 })); } catch (e) { }
-  render();
-  try { const s = await ME.getJson('/snapshot/firms'); points.firms = ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, frp_mw: d.frp_mw, confidence: d.confidence, daynight: d.daynight, observed_at: d.observed_at, cellId: ME.cellId(d.lat, d.lng), col: d.frp_mw > 50 ? '#ff6a1a' : '#ff9b2e', alt: .004, r: .04 + Math.min(d.frp_mw || 0, 300) / 3000 })); } catch (e) { }
-  render();
-  try { const s = await ME.getJson('/snapshot/ships'); points.ships = ME.rowsToObjects(s).map(v => ({ lat: v.lat, lng: v.lng, mmsi: v.mmsi, name: v.name, sog_kn: v.sog_kn, cls: v.class, observed_at: v.observed_at, received_at: v.received_at, cellId: ME.cellId(v.lat, v.lng), col: '#5fe3c8', alt: .003, r: .05 })); } catch (e) { }
-  render();
+  for (const layer of ['usgs', 'firms', 'ships']) {
+    try {
+      const s = await ME.getJson('/snapshot/' + layer);
+      // a collector run can land between the two reads: re-read the counts ONCE to re-pair them, then give up honestly
+      if (!samePair(state[layer], s)) {
+        try { const c = await ME.getJson('/cells/' + layer); if (snapId(c)) state[layer] = c; } catch (e) { /* keep the counts already held */ }
+      }
+      if (samePair(state[layer], s)) { points[layer] = toPoints[layer](s); pmeta[layer] = { id: snapId(s), ok: true, why: '' }; }
+      else {
+        points[layer] = [];
+        pmeta[layer] = { id: snapId(s), ok: false, why: `records are from a different collector run (records ${hhmm(snapId(s))}, counts ${hhmm(snapId(state[layer]))}) — counts shown alone` };
+      }
+    } catch (e) {
+      points[layer] = [];   // a failed read must never leave older records beside newer counts
+      pmeta[layer] = { id: null, ok: false, why: `the record file could not be read (${String((e && e.message) || e).slice(0, 80)}) — counts shown alone` };
+    }
+    render(); cards();
+  }
 }
 
 // ---------- mobile sheet

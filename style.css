@@ -67,6 +67,22 @@ body.world{height:100vh;height:100dvh;overflow:hidden;display:grid;grid-template
 .card .value .lbl{font:500 12px var(--mono);color:var(--dim)}
 .card .meta{font-size:11px;color:var(--dim);line-height:1.45}
 .card .meta b{color:var(--fg);font-weight:500}
+/* ---------- card hierarchy (review round 5): value → observation time → source/retrieval → caveat, each a step quieter */
+.card .obs{font-size:11.5px;color:var(--fg);line-height:1.45;font-variant-numeric:tabular-nums}
+.card .src{font-size:11px;color:var(--dim);line-height:1.45}
+.card .src b{color:var(--fg);font-weight:500}
+.card .cav{font-size:10.5px;color:rgba(127,141,163,.78);line-height:1.4}
+.card .cav a.more{color:rgba(255,179,71,.85)}
+.card .pair{font-size:11px;color:var(--warn);line-height:1.4;border-left:2px solid var(--warn);padding-left:7px}
+.card .pair b{font-weight:600}
+/* ---------- find in this snapshot: navigation, user-triggered only */
+.card.find{border-color:var(--line-strong)}
+.card.find .name{color:var(--fg)}
+.findrow{display:flex;flex-wrap:wrap;gap:6px}
+.findbtn{flex:1 1 140px;min-height:44px;padding:8px 10px;border:1px solid var(--line-strong);background:var(--card);cursor:pointer;font:600 13px/1.2 var(--display);letter-spacing:.04em;text-transform:uppercase;text-align:left}
+.findbtn:hover{border-color:var(--accent)}
+#find-note{font-variant-numeric:tabular-nums}
+#find-note b{color:var(--fg);font-weight:600}
 .card .cmp{font-size:11px;color:var(--dim);line-height:1.45;border-top:1px dashed var(--line);padding-top:5px;font-variant-numeric:tabular-nums}
 .card .cmp b{color:var(--c);font-weight:600}
 .card .more{font-size:11px}
@@ -86,8 +102,16 @@ body.world{height:100vh;height:100dvh;overflow:hidden;display:grid;grid-template
 .inspector h2{font:700 20px/1.1 var(--display);margin:0 0 6px;text-transform:uppercase;letter-spacing:.03em;padding-right:36px}
 .inspector dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:8px 0 0;font-size:12px}
 .inspector dt{color:var(--dim)} .inspector dd{margin:0;font-variant-numeric:tabular-nums;word-break:break-word}
+.inspector dd .q{color:var(--dim)}
+.inspector button.reclink{all:unset;display:block;width:100%;min-height:32px;padding:3px 0;cursor:pointer;color:var(--accent);text-align:left;word-break:break-word}
+.inspector button.reclink:hover{text-decoration:underline}
+@media (max-width:720px){.inspector button.reclink{min-height:44px;padding:8px 0}}
 .inspector .x{position:absolute;top:4px;right:4px;background:none;border:0;color:var(--dim);font:18px var(--mono);cursor:pointer;min-width:44px;min-height:44px}
 .globe-fail{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:#7f8da3;font:14px/1.6 var(--mono)}
+.globe-fail b{color:var(--accent)}
+.globe-fail details{margin-top:14px;text-align:left;font-size:11px}
+.globe-fail summary{cursor:pointer;color:var(--dim);min-height:28px}
+.globe-fail code{display:block;margin-top:6px;padding:8px;border:1px solid var(--line);color:var(--dim);word-break:break-word}
 
 /* ---------- sources & details page */
 body.doc{overflow:auto}
