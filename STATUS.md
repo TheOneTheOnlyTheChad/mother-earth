@@ -26,6 +26,23 @@
 ## Decisions (v0.4 diff, to be written)
 D1 one Worker · D2 hourly aggregation · D3 row records · D4 aircraft quantity = mean/max unique per snapshot · D5 USGS M4.5+ as comparison-eligible · D6 zeros are not rows · D7 CPU is the binding Free-tier constraint · D8 D1 writes ≈40–70k/day · D9 receipt history = evidence of prior successful sampling only (NOT receiver coverage; never licenses reading an empty cell as absence) — aircraft cells stay `partial` in phase 1; code change pending when aircraft is enabled · D10 USGS/FIRMS partial in phase 1 · **D11** hub + external collectors via authenticated `/ingest` (approved by GPT & Gemini; collector sends parsed envelope) · **D12** raw R2 retention 48 h (not 90 days); D1 hourly aggregates kept as a deliberate phase-3 investment (~1,500 rows/hour, cost kept visible) · **D13** page promise shows comparison as "not yet" until phase 3 · **D14** FIRMS guard labelled "raw archived; processing skipped: resource guard", not "down"
 
+## Done 1 Nov (thread 4, 19:05 SAST) — **collector 0.2.1 deployed; hours 12 and 13 repaired**
+Deployed via the editor flow (two `type` calls, 36.4 k + 40.6 k chars, 1,000 lines, 0 errors); `/` reports `0.2.1`.
+
+**Repair, before → after** (`POST /admin/reaggregate/ships?hour=…&key=…`, preview first, then `&apply=1`):
+
+| hour UTC | before | after | cell rows before → after |
+|---|---|---|---|
+| 2026-11-01T12 | `absent`, ok 0/2, written 13:08:03 | **`degraded`**, ok 0/2, written 17:04:43 | 0 → 0 |
+| 2026-11-01T13 | `absent`, ok 0/2, written 14:08:05 | **`degraded`**, ok 0/2, written 17:04:45 | 0 → 0 |
+
+- **Evidence was sufficient and was checked, not assumed.** Hour 12: 2 objects retained vs 2 attempts logged in `collector_runs`. Hour 13: 1 vs 1. The endpoint refuses (409) when objects are missing, when nothing was received at all, or when objects are fewer than logged attempts.
+- **The repaired hours remain excluded from comparisons.** `snapshots_ok` is still 0 — these samples were never usable and the repair does not make them so. It corrects only the claim about whether anyone asked. `upsertChanged` is skipped when no sample is usable, so **cell rows were 0 before and are 0 after**: no count from these hours can enter a comparison. What changed is that the record no longer says the source was never asked.
+- **The note now carries the evidence**, per sample: `received: 2, usable: 0, down: 0` and a `rejected[]` list giving `socket_connected_s` 972.3 / 973.3, `messages_flowing_s_inferred` 41.3 / 43.3 and `elapsed_wall_s` 974.5 / 974.6. (`overlong` is null on these: the field post-dates them.)
+- **Idempotent, verified:** hour 12 re-applied a second time → same `degraded` 0/2, 0 cell rows changed.
+- **Scope verified in D1, not asserted:** every `layer_hourly` row from 09:00 on — firms ×7, usgs ×7, the other ships hours — still carries its original hourly-batch `updated_at`. Only ships 12 and 13 show 17:04.
+- **Retention deadline, read from the configuration and the objects** (the earlier "03:00 UTC on 3 Nov" was unfounded and is withdrawn): bucket rule `cells-48h`, prefix `cells/`, "Delete objects after 2 day(s)", enabled. Objects uploaded 12:44:07, 13:16:15 and 13:47:23 UTC on 1 Nov → expiry from **3 Nov 12:44 UTC** at the earliest, and Cloudflare deletes within ~24 h *after* expiry, so the true window ran to somewhere between 3 Nov 12:44 and 4 Nov 12:44. Moot now that the repair is done, but the method is the point: read it from object timestamps plus the rule, never from memory.
+
 ## Done 1 Nov (thread 4, 18:15 SAST) — **FIRMS CPU measured (Next 6, the headroom question)**
 Read from the Worker's Metrics and Observability tabs, last 24 h, deployment `ba17936d`.
 
