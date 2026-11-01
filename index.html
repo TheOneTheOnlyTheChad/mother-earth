@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611011530">
+<link rel="stylesheet" href="style.css?v=202611011600">
 </head>
 <body class="world">
 <header class="top">
@@ -122,7 +122,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611011530"></script>
+<script src="app.js?v=202611011600"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -134,6 +134,8 @@ const gibs = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=
 $('imgdate').textContent = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS NOAA-20) — not live · Arctic dark = polar night';
 
 // ---------- globe (survives WebGL failure: readings and report still load)
+const RECORD_LAYERS = ['usgs', 'firms', 'ships'];            // publish individual records alongside their cell counts
+const CELL_ONLY_LAYERS = ['forest', 'swpc', 'co2', 'seaice']; // counts or indices only
 const points = { usgs: [], firms: [], ships: [], forest: [] };
 // which collector run the loaded records came from, and whether the last read succeeded (review round 5)
 const pmeta = { usgs: { id: null, ok: false, fields: [], why: 'not read yet' }, firms: { id: null, ok: false, fields: [], why: 'not read yet' }, ships: { id: null, ok: false, fields: [], why: 'not read yet' } };
@@ -147,7 +149,7 @@ function globeUnavailable(plain, technical) {
   globe = noop; globeOk = false;
   if (technical) console.error('[Mother Earth] globe initialisation failed:', technical);
   el.innerHTML = '<div class="globe-fail"><div><b>The globe needs 3-D graphics</b><br>' + esc(plain) +
-    ' Every reading beside it is live, and the full status report is on <a href="sources.html">Sources &amp; Details</a>.' +
+    ' The latest published readings remain available, with their observation times and freshness labels, and the full status report is on <a href="sources.html">Sources &amp; Details</a>.' +
     (technical ? '<details><summary>Diagnostics</summary><code>' + esc(String(technical).slice(0, 300)) + '</code></details>' : '') +
     '</div></div>';
 }
@@ -191,6 +193,19 @@ const windowText = (layer, snap) => layer === 'ships' ? `received during a ${(sn
 // show only fields the RECORD envelope publishes — record_fields lives on /snapshot/<layer>, never on /cells/<layer> (measured 1 Nov 2026)
 const hasField = (layer, name) => !!(pmeta[layer] && pmeta[layer].fields && pmeta[layer].fields.includes(name));
 
+// THE invariant (review round 5, correction 1): records may be rendered, listed, inspected or selected only while the
+// run they came from is still the run the displayed counts came from. Checked here at every read, not once at load,
+// so a refresh in progress can never put old records beside new totals or stamp an old record with a newer run.
+const usable = layer => !!(pmeta[layer] && pmeta[layer].ok && pmeta[layer].id && pmeta[layer].id === snapId(state[layer]));
+const unusableWhy = layer => {
+  const pm = pmeta[layer]; if (!pm || usable(layer)) return '';
+  if (pm.ok) return `records are from the ${hhmm(pm.id)} run and the counts are from ${hhmm(snapId(state[layer]))} — not combined`;
+  return pm.why;
+};
+// read-only diagnostic for verifying the invariant from the console or a test harness (START-HERE §5a)
+ME.pairState = layer => Object.fromEntries((layer ? [layer] : RECORD_LAYERS).map(k =>
+  [k, { cells: snapId(state[k]), records: pmeta[k].id, ok: pmeta[k].ok, usable: usable(k), points: points[k].length }]));
+
 function render() {
   const polys = [];
   for (const layer of MAP_LAYERS) {
@@ -206,9 +221,10 @@ function render() {
   }
   globe.polygonsData(polys);
   const pts = [];
-  for (const layer of MAP_LAYERS) if (on[layer] && ME.freshness(layer).grade !== 'unknown') pts.push(...points[layer]);
+  for (const layer of RECORD_LAYERS) if (on[layer] && usable(layer) && ME.freshness(layer).grade !== 'unknown') pts.push(...points[layer]);
   globe.pointsData(pts);
-  globe.ringsData(on.usgs && ME.freshness('usgs').grade !== 'unknown' ? points.usgs.filter(q => q.mag >= 5) : []);
+  // rings are drawn from records too, so they obey the same identity check
+  globe.ringsData(on.usgs && usable('usgs') && ME.freshness('usgs').grade !== 'unknown' ? points.usgs.filter(q => q.mag >= 5) : []);
 }
 
 document.querySelectorAll('button.tgl').forEach(b => b.addEventListener('click', () => {
@@ -272,7 +288,7 @@ function inspectRecord(layer, r) {
     ['Source', `${esc(SOURCE[layer].name)} — ${esc(snap.quantity || '')}`],
     ['Window', windowText(layer, snap)],
     ['This run', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING]);
-  if (layer === 'firms') rows.push(['What FRP is', 'Fire radiative power is the radiant energy measured during this one satellite pass — not the size, spread or severity of a fire, and not a comparison between fires. Cloud decides what could be detected at all. NASA: not for tactical decisions or local-scale conditions.']);
+  if (layer === 'firms') rows.push(['What FRP is', 'Pixel-integrated fire radiative power estimated at the satellite observation time; not fire size, spread or severity. It is a power (MW), not an amount of energy, and it is not a comparison between fires. Cloud decides what could be detected at all. NASA: not for tactical decisions or local-scale conditions.']);
   if (layer === 'usgs') rows.push(['Comparison', 'none of ours yet — Mother Earth\'s baselines accumulate from 30 Oct 2026']);
   if (layer === 'ships') rows.push(['Caveat', 'latest position received for this MMSI during the sample; where it was between samples is unknown; terrestrial AIS only']);
   if (layer === 'usgs' && r.src && /^https:\/\/earthquake\.usgs\.gov\//.test(r.src)) rows.push(['At the source', `<a href="${esc(r.src)}" target="_blank" rel="noopener">USGS event page</a>`]);
@@ -280,8 +296,8 @@ function inspectRecord(layer, r) {
 }
 
 function inspectCell(p) {
-  const snap = state[p.layer]; const fresh = ME.freshness(p.layer); const pm = pmeta[p.layer];
-  const paired = p.layer === 'forest' ? false : pm && pm.ok;
+  const snap = state[p.layer]; const fresh = ME.freshness(p.layer);
+  const paired = p.layer !== 'forest' && usable(p.layer);
   const recs = paired ? points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, 8) : [];
   inspCtx = { layer: p.layer, recs };
   const rows = [
@@ -302,7 +318,7 @@ function inspectCell(p) {
     rows.push(['Caveat', 'Global Nature Watch: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment; 10 m pixels, not hectares; detection date ≠ clearing date; counts can fall when low-confidence alerts are retracted'], ['Citation', esc(snap.citation || '')], ['Records', 'this layer publishes counts per cell only — there are no individual records to open']);
   }
   if (p.layer === 'ships') rows.push(['Caveat', `latest received position per MMSI in this sample; positions between samples unknown; terrestrial AIS only. Socket up ${fmt(snap.socket_up_s, { dp: 0, unit: 's', zeroNote: null })} of ${fmt(snap.window_s, { dp: 0, unit: 's', zeroNote: null })}`]);
-  if (p.layer !== 'forest' && !paired) rows.push(['Records', `withheld — ${esc((pm && pm.why) || 'records and counts are not from the same collector run')}`]);
+  if (p.layer !== 'forest' && !paired) rows.push(['Records', `withheld — ${esc(unusableWhy(p.layer) || 'records and counts are not from the same collector run')}`]);
   if (recs.length) {
     rows.push(['Records', `${recs.length} of ${p.cell.count} in this cell — select one for its own detail`]);
     recs.forEach((r, i) => rows.push([recordTitle(p.layer, r), `<button type="button" class="reclink" data-i="${i}">${esc(p.layer === 'ships' ? `MMSI ${r.mmsi} · ${when(r.observed_at)}` : `${when(r.observed_at)}${p.layer === 'usgs' ? ' · ' + (r.title || '') : ''}`)}</button>`]));
@@ -318,7 +334,7 @@ function findExtreme(layer, key, label) {
   const say = html => { note.innerHTML = html; };
   if (!snap) return say(`No ${LABEL[layer].toLowerCase()} snapshot has been read yet.`);
   if (fresh.grade === 'unknown') return say(`${LABEL[layer]} is unknown right now — ${esc(fresh.why)}. Nothing to move to.`);
-  if (!pmeta[layer].ok) return say(`Records for ${LABEL[layer].toLowerCase()} are not usable — ${esc(pmeta[layer].why)}.`);
+  if (!usable(layer)) return say(`Records for ${LABEL[layer].toLowerCase()} are not usable — ${esc(unusableWhy(layer))}.`);
   const ex = ME.extremeOf(points[layer], key);
   if (!ex) return say(`No ${LABEL[layer].toLowerCase()} record in this snapshot carries a ${esc(label.toLowerCase())} value. Records without one are excluded, not counted as zero.`);
   const i = findTie[layer] % ex.tied.length; findTie[layer] = i + 1;
@@ -326,7 +342,7 @@ function findExtreme(layer, key, label) {
   say(`<b>${esc(label)} in the loaded snapshot:</b> ${recordTitle(layer, r)}, observed ${when(r.observed_at)} · ${esc(SOURCE[layer].name)} · ${windowText(layer, snap)}.`
     + (ex.tied.length > 1 ? ` ${ex.tied.length} records tie at this value — showing ${i + 1} of ${ex.tied.length}; click again for the next.` : '')
     + (ex.excluded ? ` ${ex.excluded} record${ex.excluded === 1 ? '' : 's'} excluded for carrying no value (not counted as zero).` : '')
-    + (layer === 'firms' ? ' FRP is the radiant energy of this one pass, not the size or severity of a fire; cloud decides what could be detected at all.' : '')
+    + (layer === 'firms' ? ' FRP is pixel-integrated fire radiative power estimated at the satellite observation time — a power (MW), not fire size, spread or severity; cloud decides what could be detected at all.' : '')
     + ' This is the largest value among the records loaded here, not a ranking of the world.');
   if (globeOk) globe.pointOfView({ lat: r.lat, lng: r.lng, altitude: 1.1 }, reduced ? 0 : 1200);
   inspectRecord(layer, r);
@@ -339,8 +355,8 @@ const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $
 const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
 function pairNote(layer) {
   const e = $('p-' + layer); if (!e) return;
-  const pm = pmeta[layer], show = !pm.ok && pm.why !== 'not read yet';
-  e.hidden = !show; if (show) e.innerHTML = `<b>Records withheld:</b> ${esc(pm.why)}`;
+  const why = unusableWhy(layer), show = !!why && why !== 'not read yet';
+  e.hidden = !show; if (show) e.innerHTML = `<b>Records withheld:</b> ${esc(why)}`;
 }
 function cards() {
   const R = ME.readings();
@@ -371,7 +387,7 @@ function cards() {
   $('o-seaice').textContent = R.seaice.observed || 'no snapshot yet';
   $('m-seaice').innerHTML = `NSIDC Sea Ice Index · retrieved ${ago(R.seaice.retrieved)}${warn(R.seaice.fresh)}`;
   $('c-seaice').innerHTML = R.seaice.north === null ? 'comparison: unknown' : `Arctic <b>${esc(R.seaice.pctN)}</b> · Antarctic <b>${esc(R.seaice.pctS)}</b> — baseline NSIDC's 1981–2010 climatology; the subtraction is ours`;
-  ['usgs', 'firms', 'ships'].forEach(pairNote);
+  RECORD_LAYERS.forEach(pairNote);
 }
 
 // ---------- records (progressive): map points, paired with the counts they are shown beside
@@ -381,24 +397,29 @@ const toPoints = {
   ships: s => ME.rowsToObjects(s).map(v => ({ lat: v.lat, lng: v.lng, mmsi: v.mmsi, name: v.name, sog_kn: v.sog_kn, cls: v.class, observed_at: v.observed_at, received_at: v.received_at, cellId: ME.cellId(v.lat, v.lng), col: '#5fe3c8', alt: .003, r: .05 })),
 };
 
-async function loadRecords() {
-  for (const layer of ['usgs', 'firms', 'ships']) {
-    try {
-      const s = await ME.getJson('/snapshot/' + layer);
-      // a collector run can land between the two reads: re-read the counts ONCE to re-pair them, then give up honestly
-      if (!samePair(state[layer], s)) {
-        try { const c = await ME.getJson('/cells/' + layer); if (snapId(c)) state[layer] = c; } catch (e) { /* keep the counts already held */ }
-      }
-      if (samePair(state[layer], s)) { points[layer] = toPoints[layer](s); pmeta[layer] = { id: snapId(s), ok: true, why: '', fields: s.record_fields || [] }; }
-      else {
-        points[layer] = [];
-        pmeta[layer] = { id: snapId(s), ok: false, fields: [], why: `records are from a different collector run (records ${hhmm(snapId(s))}, counts ${hhmm(snapId(state[layer]))}) — counts shown alone` };
-      }
-    } catch (e) {
-      points[layer] = [];   // a failed read must never leave older records beside newer counts
-      pmeta[layer] = { id: null, ok: false, fields: [], why: `the record file could not be read (${String((e && e.message) || e).slice(0, 80)}) — counts shown alone` };
-    }
-    render(); cards();
+// A record layer is refreshed as a PAIR and committed in one step (review round 5, correction 1): the counts in `state`
+// are not replaced until the records that belong with them are in hand and validated. Until then the previous validated
+// pair stays on screen — consistent, and labelled with its own run — instead of new totals beside old records.
+async function refreshPair(layer) {
+  let cells = null, snap = null, snapErr = null;
+  try { cells = await ME.getJson('/cells/' + layer); } catch (e) { cells = null; }
+  try { snap = await ME.getJson('/snapshot/' + layer); } catch (e) { snapErr = e; }
+  if (!cells) {   // no counts: the layer is unknown, and records cannot stand on their own
+    state[layer] = null; points[layer] = [];
+    pmeta[layer] = { id: null, ok: false, fields: [], why: 'the counts file could not be read — records withheld' };
+    return;
+  }
+  if (snapErr) {  // counts advance; the records that went with the old counts are dropped, never carried forward
+    state[layer] = cells; points[layer] = [];
+    pmeta[layer] = { id: null, ok: false, fields: [], why: `the record file could not be read (${String((snapErr && snapErr.message) || snapErr).slice(0, 80)}) — counts shown alone` };
+    return;
+  }
+  // a collector run can land between the two reads: re-read the counts ONCE to re-pair them, then give up honestly
+  if (!samePair(cells, snap)) { try { const again = await ME.getJson('/cells/' + layer); if (snapId(again)) cells = again; } catch (e) { /* keep what we fetched */ } }
+  if (samePair(cells, snap)) { state[layer] = cells; points[layer] = toPoints[layer](snap); pmeta[layer] = { id: snapId(snap), ok: true, fields: snap.record_fields || [], why: '' }; }
+  else {
+    state[layer] = cells; points[layer] = [];
+    pmeta[layer] = { id: snapId(snap), ok: false, fields: [], why: `records are from a different collector run (records ${hhmm(snapId(snap))}, counts ${hhmm(snapId(cells))}) — counts shown alone` };
   }
 }
 
@@ -408,7 +429,12 @@ sheetBtn.addEventListener('click', () => { const c = sheet.classList.toggle('col
 ['pointerdown', 'pointermove', 'wheel', 'touchstart', 'touchmove'].forEach(t => sheet.addEventListener(t, e => e.stopPropagation(), { passive: true }));
 
 // ---------- one polling loop per page load (navigation is a full page load, so no duplicates)
-async function tick() { await ME.loadCells(); cards(); render(); await loadRecords(); }
+// Request count per cycle is unchanged: 4 cell-only layers + 3 record layers × (cells + records) = 10, as before.
+async function tick() {
+  await ME.loadCells(CELL_ONLY_LAYERS);   // layers that publish no records of their own
+  cards(); render();
+  for (const layer of RECORD_LAYERS) { await refreshPair(layer); cards(); render(); }   // each commits its own validated pair
+}
 tick(); setInterval(tick, ME.REFRESH_MS);
 setInterval(cards, 30e3);        // ages keep moving between refreshes
 sizeGlobe();

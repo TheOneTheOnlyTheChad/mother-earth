@@ -80,8 +80,11 @@ ME.loadedAt = null;
 
 async function getJson(path) { const r = await fetch(HUB + path, { cache: 'no-store' }); if (!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }
 ME.getJson = getJson;
-ME.loadCells = async function () {
-  for (const layer of LAYERS) { try { state[layer] = await getJson('/cells/' + layer); } catch (e) { state[layer] = null; } }
+// `layers` lets World View refresh only the layers that have no records of their own; the record layers are fetched
+// and committed as validated cells+records pairs by the page (review round 5). Sources & Details calls it with no
+// argument and gets all seven, because it renders counts and wording only.
+ME.loadCells = async function (layers) {
+  for (const layer of (layers || LAYERS)) { try { state[layer] = await getJson('/cells/' + layer); } catch (e) { state[layer] = null; } }
   ME.loadedAt = new Date().toISOString();
 };
 
