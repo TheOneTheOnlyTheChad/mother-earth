@@ -91,3 +91,16 @@ CREATE TABLE IF NOT EXISTS co2_daily (
   ppm REAL NOT NULL,
   retrieved_at TEXT NOT NULL
 );
+
+-- 0.2.0 (1 Nov 2026): GFW integrated alerts, one row per cell per completed query (the phase-3 baseline for forest)
+CREATE TABLE IF NOT EXISTS forest_daily (
+  cell_id TEXT NOT NULL,
+  date TEXT NOT NULL,          -- UTC day the query ran
+  since TEXT NOT NULL,         -- window start used in the query (date >= since)
+  nominal INTEGER NOT NULL,
+  high INTEGER NOT NULL,
+  highest INTEGER NOT NULL,
+  version TEXT,                -- GFW dataset version answered (vYYYYMMDD)
+  retrieved_at TEXT NOT NULL,
+  PRIMARY KEY (cell_id, date)
+);

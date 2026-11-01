@@ -13,7 +13,7 @@
  *   GET /snapshot/<layer>   latest full snapshot (records + cells)
  *   GET /cells/<layer>      latest cells-only file (small)
  *   GET /status             last runs per layer + OpenSky spend today
- *   GET /admin/run/<job>?key=ADMIN_KEY   run a job now (jobs: five, minute, firms, hourly)
+ *   GET /admin/run/<job>?key=ADMIN_KEY   run a job now (jobs: five, minute, firms, forest, hourly)
  *
  * Bindings (set in dashboard → Worker → Settings → Bindings):
  *   R2  = R2 bucket binding        DB = D1 database binding
@@ -43,12 +43,12 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.9';
+const COLLECTOR_VERSION = '0.2.0';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_DAY_BOUNDARY_H = 4;             // before 04:00 UTC an empty FIRMS file is the day boundary, not an outage (measured 1 Nov 2026: first rows at 04:00)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
@@ -62,6 +62,7 @@ const URLS = {
   seaice: (h) => `https://noaadata.apps.nsidc.org/NOAA/G02135/${h}/daily/data/${h === 'north' ? 'N' : 'S'}_seaice_extent_daily_v4.0.csv`,
   seaiceClim: (h) => `https://noaadata.apps.nsidc.org/NOAA/G02135/${h}/daily/data/${h === 'north' ? 'N' : 'S'}_seaice_extent_climatology_1981-2010_v4.0.csv`,
   firms: (key, region) => `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${key}/VIIRS_NOAA20_NRT/${region || 'world'}/1`,  // region = "west,south,east,north"
+  forest: 'https://data-api.globalforestwatch.org/dataset/gfw_integrated_alerts/latest/query/json',   // 307 → dated version (daily); fetch follows it
 };
 
 const UA = 'mother-earth-collector/' + COLLECTOR_VERSION + ' (open project; github.com/TheOneTheOnlyTheChad)';
@@ -529,6 +530,104 @@ async function collectSeaIce(env, scheduledMs) {
   await logRun(env, layer, scheduledMs, status, 200, recs.length, bytes, `N=${n.value} S=${s.value} date=${n.date} dN=${n.difference_from_average} dS=${s.difference_from_average}`);
 }
 
+// ---------------------------------------------------------------- Global Forest Watch integrated deforestation alerts (GLAD-L + GLAD-S2 + RADD)
+
+/* Counts of 10 m alert pixels published in the last FOREST_WINDOW_DAYS, per 4° cell, grouped by GFW's confidence
+ * (nominal | high | highest — as delivered 1 Nov 2026; the how-to says low/nominal/high). We never pull the pixels.
+ * Measured 1 Nov 2026 (Mac, gfw-timing.sh): one 4° cell is 2–25 s cold and hits a 30 s gateway cap (HTTP 504) on
+ * roughly half of cold queries; GFW caches the finished result, so the same query answers in 2–11 s on the next ask.
+ * Hence the sweep: every 30 min take FOREST_PER_RUN cells (retries first), 30 s limit each, sequentially (kind to GFW);
+ * a timeout marks the cell pending and it is re-asked next run. 559 tropical land cells (land mask, 1 Nov 2026) → a full
+ * sweep ≈ 2 days, inside the 7-day window. Coverage is 'partial' for every cell in phase 1 (no per-cell observation-
+ * opportunity record; cloud and alert-system coverage vary) and 'unknown' outside 30°N–30°S (outside the systems).
+ * REGISTER.md: CC BY 4.0; cite "Integrated Deforestation Alerts", UMD/GLAD and WUR, via Global Nature Watch; not for area
+ * or trend; detection date ≠ clearing date. State lives in R2 state/forest.json (cursor + latest per cell); each completed
+ * cell query is also a row in D1 forest_daily (the phase-3 baseline). */
+const FOREST_WINDOW_DAYS = 7;
+const FOREST_PER_RUN = 6;
+const FOREST_TIMEOUT_MS = 30000;
+const FOREST_ORIGIN = 'https://theonetheonlythechad.github.io';
+const FOREST_CITATION = 'Source: "Integrated Deforestation Alerts". UMD/GLAD and WUR, accessed through Global Nature Watch on [date]';
+// 4° cells between 30°N and 30°S with any land (global-land-mask, 16×16 samples per cell, 1 Nov 2026): 559 of 1,350
+const FOREST_CELLS = '15_8 15_17 15_27 15_28 15_29 15_30 15_31 15_32 15_48 15_49 15_50 15_51 15_52 15_53 15_73 15_74 15_75 15_76 15_77 15_78 15_79 15_80 15_81 15_82 15_83 16_6 16_27 16_28 16_29 16_30 16_31 16_32 16_33 16_34 16_48 16_49 16_50 16_51 16_52 16_53 16_55 16_56 16_73 16_74 16_75 16_76 16_77 16_78 16_79 16_80 16_81 16_82 16_83 16_86 17_2 17_27 17_28 17_29 17_30 17_31 17_32 17_33 17_34 17_35 17_47 17_48 17_49 17_50 17_51 17_52 17_53 17_54 17_55 17_56 17_57 17_58 17_59 17_73 17_74 17_75 17_76 17_77 17_78 17_79 17_80 17_81 17_82 17_86 17_87 17_89 18_0 18_1 18_7 18_25 18_26 18_27 18_28 18_29 18_30 18_31 18_32 18_33 18_34 18_35 18_47 18_48 18_49 18_50 18_51 18_52 18_53 18_54 18_55 18_56 18_57 18_75 18_76 18_77 18_78 18_79 18_80 18_81 18_86 18_87 18_89 19_1 19_2 19_25 19_26 19_27 19_28 19_29 19_30 19_31 19_32 19_33 19_34 19_35 19_48 19_49 19_50 19_51 19_52 19_53 19_54 19_55 19_56 19_57 19_75 19_76 19_77 19_78 19_79 19_80 19_82 19_83 19_85 19_86 20_9 20_24 20_25 20_26 20_27 20_28 20_29 20_30 20_31 20_32 20_33 20_34 20_35 20_36 20_48 20_49 20_50 20_51 20_52 20_53 20_54 20_71 20_72 20_73 20_74 20_75 20_76 20_77 20_78 20_79 20_80 20_81 20_82 20_83 20_84 20_85 20_86 21_6 21_24 21_25 21_26 21_27 21_28 21_29 21_30 21_31 21_32 21_33 21_34 21_35 21_36 21_47 21_48 21_49 21_50 21_51 21_52 21_53 21_54 21_55 21_58 21_69 21_70 21_71 21_72 21_73 21_74 21_75 21_76 21_77 21_78 21_79 21_80 21_81 21_82 21_83 22_22 22_24 22_25 22_26 22_27 22_28 22_29 22_30 22_31 22_32 22_33 22_46 22_47 22_48 22_49 22_50 22_51 22_52 22_53 22_54 22_55 22_56 22_69 22_70 22_71 22_72 22_73 22_74 22_75 22_76 22_77 22_78 22_79 22_82 23_25 23_26 23_27 23_28 23_29 23_30 23_31 23_32 23_42 23_43 23_44 23_45 23_46 23_47 23_48 23_49 23_50 23_51 23_52 23_53 23_54 23_55 23_56 23_57 23_68 23_69 23_70 23_72 23_73 23_74 23_76 23_77 23_87 24_23 24_24 24_25 24_26 24_27 24_28 24_29 24_30 24_41 24_42 24_43 24_44 24_45 24_46 24_47 24_48 24_49 24_50 24_51 24_52 24_53 24_54 24_55 24_56 24_57 24_64 24_65 24_68 24_69 24_70 24_71 24_74 24_75 24_76 24_78 24_82 25_22 25_23 25_24 25_26 25_27 25_28 25_29 25_30 25_40 25_41 25_42 25_43 25_44 25_45 25_46 25_47 25_48 25_49 25_50 25_51 25_52 25_53 25_54 25_55 25_56 25_57 25_58 25_63 25_64 25_65 25_68 25_69 25_70 25_71 25_72 25_74 25_75 25_76 25_81 26_19 26_20 26_21 26_22 26_23 26_24 26_25 26_27 26_29 26_38 26_39 26_40 26_41 26_42 26_43 26_44 26_45 26_46 26_47 26_48 26_49 26_50 26_51 26_52 26_53 26_54 26_55 26_56 26_57 26_58 26_63 26_64 26_65 26_68 26_69 26_70 26_71 26_72 26_74 26_75 26_81 27_4 27_5 27_6 27_18 27_19 27_20 27_21 27_22 27_23 27_24 27_25 27_26 27_27 27_28 27_40 27_41 27_42 27_43 27_44 27_45 27_46 27_47 27_48 27_49 27_50 27_51 27_52 27_53 27_54 27_55 27_56 27_57 27_58 27_59 27_62 27_63 27_64 27_65 27_66 27_67 27_68 27_69 27_70 27_71 27_72 27_73 27_75 28_5 28_16 28_17 28_18 28_19 28_20 28_23 28_24 28_25 28_26 28_40 28_41 28_42 28_43 28_44 28_45 28_46 28_47 28_48 28_49 28_50 28_51 28_52 28_53 28_54 28_55 28_56 28_57 28_58 28_59 28_60 28_61 28_62 28_63 28_64 28_65 28_66 28_67 28_68 28_69 28_70 28_71 28_72 28_73 28_74 28_75 28_76 29_16 29_17 29_18 29_19 29_20 29_21 29_22 29_23 29_24 29_25 29_40 29_41 29_42 29_43 29_44 29_45 29_46 29_47 29_48 29_49 29_50 29_51 29_52 29_53 29_54 29_55 29_56 29_57 29_58 29_59 29_60 29_61 29_62 29_63 29_64 29_65 29_66 29_67 29_68 29_69 29_70 29_71 29_72 29_73 29_74 29_75 29_76 29_77'.split(' ');
+
+function cellBounds(id) { const [r, c] = id.split('_').map(Number); const s = -90 + r * CELL_DEG, w = -180 + c * CELL_DEG; return { w, s, e: w + CELL_DEG, n: s + CELL_DEG }; }
+
+async function forestQuery(env, id, since) {
+  const b = cellBounds(id);
+  const body = JSON.stringify({
+    sql: `SELECT gfw_integrated_alerts__confidence, COUNT(*) AS n FROM results WHERE gfw_integrated_alerts__date >= '${since}' GROUP BY gfw_integrated_alerts__confidence`,
+    geometry: { type: 'Polygon', coordinates: [[[b.w, b.s], [b.e, b.s], [b.e, b.n], [b.w, b.n], [b.w, b.s]]] },
+  });
+  const t0 = Date.now();
+  try {
+    const r = await fetch(URLS.forest, { method: 'POST', body, redirect: 'follow', signal: AbortSignal.timeout(FOREST_TIMEOUT_MS),
+      headers: { 'User-Agent': UA, 'x-api-key': env.GFW_API_KEY, 'Origin': FOREST_ORIGIN, 'Content-Type': 'application/json' } });
+    const text = await r.text();
+    const ms = Date.now() - t0;
+    if (r.status === 504) return { pending: true, http: 504, ms };                   // GFW gateway cap; result is being cached server-side
+    if (!r.ok) return { error: `http ${r.status} ${text.slice(0, 120)}`, http: r.status, ms };
+    const j = JSON.parse(text);
+    const counts = { nominal: 0, high: 0, highest: 0 };
+    for (const row of j.data || []) counts[row.gfw_integrated_alerts__confidence] = +row.n || +row.count || 0;   // keys as delivered; unknown labels are kept and surface in the snapshot
+    return { ok: true, counts, http: r.status, ms, version: (r.url.match(/\/(v\d{8})\//) || [])[1] || 'latest' };
+  } catch (e) {
+    const ms = Date.now() - t0;
+    if (String(e).includes('Timeout') || String(e).includes('abort')) return { pending: true, http: 0, ms };
+    return { error: String(e).slice(0, 160), http: 0, ms };
+  }
+}
+
+async function collectForest(env, scheduledMs) {
+  const layer = 'forest';
+  if (!env.GFW_API_KEY) return writeDown(env, layer, scheduledMs, 'no GFW_API_KEY set', 0);
+  const st = (await getJson(env, 'state/forest.json')) || { cursor: 0, cells: {}, pending: [] };
+  const since = dayKey(scheduledMs - FOREST_WINDOW_DAYS * 86400e3);
+  const today = dayKey(scheduledMs);
+  // this run's cells: pending retries first, then the next FOREST_PER_RUN from the cursor
+  const todo = [];
+  for (const id of st.pending || []) if (todo.length < FOREST_PER_RUN) todo.push(id);
+  while (todo.length < FOREST_PER_RUN) { todo.push(FOREST_CELLS[st.cursor % FOREST_CELLS.length]); st.cursor = (st.cursor + 1) % FOREST_CELLS.length; }
+  const stillPending = []; const notes = []; let okN = 0, errN = 0, version = null; const d1 = [];
+  for (const id of todo) {                                                              // sequential on purpose: one query at a time against GFW
+    const r = await forestQuery(env, id, st.cells[id] && st.cells[id].pending_since ? st.cells[id].pending_since : since);
+    if (r.pending) { stillPending.push(id); st.cells[id] = { ...(st.cells[id] || {}), pending_since: (st.cells[id] && st.cells[id].pending_since) || since, pending_at: nowIso() }; notes.push(`${id}:pending ${r.ms}ms`); continue; }
+    if (r.error) { errN++; st.cells[id] = { ...(st.cells[id] || {}), last_error: r.error, error_at: nowIso() }; notes.push(`${id}:error ${r.error.slice(0, 60)}`); continue; }
+    okN++; version = r.version;
+    const total = r.counts.nominal + r.counts.high + r.counts.highest;
+    const usedSince = (st.cells[id] && st.cells[id].pending_since) || since;
+    st.cells[id] = { count: total, confidence: r.counts, since: usedSince, queried_at: nowIso(), ms: r.ms, version: r.version };
+    d1.push([id, today, usedSince, r.counts.nominal, r.counts.high, r.counts.highest, r.version]);
+    notes.push(`${id}:${total} ${r.ms}ms`);
+  }
+  st.pending = stillPending;
+  st.last_run = nowIso(); st.ok_runs = (st.ok_runs || 0) + (okN ? 1 : 0); st.version = version || st.version;
+  await putJson(env, 'state/forest.json', st);
+  if (d1.length) { try { await env.DB.batch(d1.map(r => env.DB.prepare('INSERT OR REPLACE INTO forest_daily (cell_id, date, since, nominal, high, highest, version, retrieved_at) VALUES (?,?,?,?,?,?,?,?)').bind(...r, nowIso()))); } catch (e) { console.log('forest_daily insert', String(e)); } }
+  // envelope: every cell that has ever answered, with its own since/queried_at; coverage partial everywhere (phase 1)
+  const cells = {}; const rows = []; let queriedToday = 0, oldest = null;
+  for (const id in st.cells) {
+    const c = st.cells[id]; if (c.count === undefined) continue;
+    cells[id] = { count: c.count, confidence: c.confidence, since: c.since, queried_at: c.queried_at, version: c.version,
+      coverage: { grade: 'partial', evidence: 'no_per_cell_observation_opportunity;cloud_and_system_coverage_vary;sweep_' + c.queried_at.slice(0, 10), observed_fraction: null } };
+    const b = cellBounds(id);
+    rows.push([id, b.w, b.s, b.e, b.n, c.confidence.nominal, c.confidence.high, c.confidence.highest, c.since, c.queried_at, c.version]);
+    if (c.queried_at.slice(0, 10) === today) queriedToday++;
+    if (!oldest || c.queried_at < oldest) oldest = c.queried_at;
+  }
+  const answered = Object.keys(cells).length;
+  const status = okN ? 'ok' : (stillPending.length === todo.length ? 'degraded' : 'down');
+  const e = envelope(layer, scheduledMs, since, today, status, cells, ['cell_id', 'west', 'south', 'east', 'north', 'nominal', 'high', 'highest', 'since', 'queried_at', 'version'], rows,
+    { quantity: `10 m alert pixels published in the last ${FOREST_WINDOW_DAYS} days per 4° cell, by GFW confidence (nominal | high | highest) — counts of pixels, never hectares or trends; detection date ≠ clearing date`,
+      window_days: FOREST_WINDOW_DAYS, cell_window_note: 'each cell carries its own since/queried_at; the sweep takes ~2 days',
+      sweep: { cells_total: FOREST_CELLS.length, answered, queried_today: queriedToday, oldest_queried_at: oldest, pending: stillPending.length, per_run: FOREST_PER_RUN, cursor: st.cursor, this_run: notes },
+      coverage_note: 'alert systems operate between 30°N and 30°S only; cells outside are unknown by definition, not zero. Within: partial — cloud and system coverage vary; counts can fall when low-confidence alerts are retracted (GLAD after 180 days, RADD after 90).',
+      source_version: st.version, citation: FOREST_CITATION.replace('[date]', today),
+      attribution: 'powered by Resource Watch / Global Nature Watch (WRI) — CC BY 4.0', map_layer: true });
+  const bytes = await writeSnapshot(env, layer, scheduledMs, e);
+  await logRun(env, layer, scheduledMs, status, okN ? 200 : (stillPending.length ? 504 : 0), okN, bytes, `ok=${okN} pending=${stillPending.length} err=${errN} answered=${answered}/${FOREST_CELLS.length} cursor=${st.cursor} ${notes.join(' ')}`.slice(0, 500));
+}
+
 // ---------------------------------------------------------------- hourly aggregation → D1 (D2, D6)
 
 const BATCH_SIZE = 300;   // statements per D1 batch (one subrequest each; D1's limit is 100 bound params *per statement*)
@@ -692,6 +791,7 @@ const JOBS = {
   ])).join('; '),
   minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
   firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
+  forest: async (env, ms) => guarded(env, 'forest', ms, collectForest),
   hourly: async (env, ms, manual) => {
     const k = await guarded(env, 'swpc', ms, collectSwpc);          // Kp is a 3-hourly product; hourly matches NWS's "know your refresh frequency" (REGISTER.md)
     const c = await guarded(env, 'co2', ms, collectCo2);
@@ -707,12 +807,13 @@ function jobForCron(cron) {
   if (c === '*/5 * * * *') return 'five';
   if (c === '* * * * *') return 'minute';
   if (c === '*/15 * * * *') return 'firms';
+  if (c === '11,41 * * * *') return 'forest';
   if (/^\d+ \* \* \* \*$/.test(c)) return 'hourly';
   return null;
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning'];   // GET-readable; ships/lightning arrive via /ingest (D11)
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest'];   // GET-readable; ships/lightning arrive via /ingest (D11)
 const INGEST_LAYERS = ['mock', 'opensky', 'ships', 'lightning'];   // D11: external collectors (Mac/Pi) publish these through /ingest
 const INGEST_MAX_BYTES = 5 * 1024 * 1024;
 
