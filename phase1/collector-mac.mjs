@@ -23,7 +23,7 @@
  * not covered, so a silent cell is not an empty cell (coverage stays 'partial' until receipt history exists — same rule as OpenSky, D9).
  */
 
-const COLLECTOR_VERSION = 'mac-0.3.0';
+const COLLECTOR_VERSION = 'mac-0.3.1';
 const SCHEMA_VERSION = 1;
 const CELL_DEG = 4;
 const HUB = process.env.HUB || 'https://mother-earth.chadoberholzer.workers.dev';
@@ -112,17 +112,19 @@ const FEEDS = {
     const quietS = connectedAt && lastMsgAt ? (end - lastMsgAt) / 1000 : null;                      // seconds between the last message and close
     if (lastMsgAt && quietS > GAP_S) interruptions.push({ from: new Date(lastMsgAt).toISOString(), to: new Date(end).toISOString(), seconds: Math.round(quietS) });
     const lostS = interruptions.reduce((n, i) => n + i.seconds, 0);
-    const upS = connectedAt ? Math.max(0, (end - connectedAt) / 1000 - lostS) : 0;                   // connected AND receiving; gaps are not observation time
-    const upFrac = Math.max(0, Math.min(1, upS / windowS));
+    const socketS = connectedAt ? (end - connectedAt) / 1000 : 0;                                   // socket connected (what the transport reports)
+    const receivingS = Math.max(0, socketS - lostS);                                                // connected AND messages flowing — the observation time
+    const upS = receivingS;
+    const upFrac = Math.max(0, Math.min(1, receivingS / windowS));
     if (!confirmed) throw new Error('no SubscriptionConfirmation within the window' + (closeInfo ? ' (close ' + closeInfo.code + ' ' + closeInfo.reason + ')' : ''));
     const rows = [...vessels.values()];
     const rowsA = rows.filter(r => r[9] === 'A').length;
     const status = upFrac >= 0.9 && !slept ? 'ok' : 'degraded';
-    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s slept=${slept} up=${upS.toFixed(1)}s interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
+    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s slept=${slept} socket=${socketS.toFixed(1)}s receiving=${receivingS.toFixed(1)}s interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
     return { fields: ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'], rows,
       quantity: `vessel identities (MMSI) with a Class A or B position report received during a ${windowS} s AIS sample, per cell; latest received position per vessel — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell; positions between samples unknown`,
       coverageDefault: { grade: 'partial', evidence: 'socket_up;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },   // observed_fraction = fraction of the sample the socket was connected (§3.1), not geographic coverage
-      extra: { scope: bbox.join(',') === '-90,-180,90,180' ? 'world' : 'bbox ' + bbox.join(','), window_s: windowS, socket_up_s: upS, quiet_at_end_s: quietS, connection_fraction_of_sample: upFrac, messages, class_a: rowsA, class_b: rows.length - rowsA,
+      extra: { scope: bbox.join(',') === '-90,-180,90,180' ? 'world' : 'bbox ' + bbox.join(','), window_s: windowS, socket_connected_s: Math.round(socketS * 10) / 10, receiving_s: Math.round(receivingS * 10) / 10, socket_up_s: Math.round(receivingS * 10) / 10 /* kept for the page; = receiving_s */, quiet_at_end_s: quietS, connection_fraction_of_sample: upFrac, messages, class_a: rowsA, class_b: rows.length - rowsA,
         interruptions_override: interruptions, wall_s: Math.round(wallS * 10) / 10, slept_during_sample: slept,
         records_without_source_time: noSourceTime, older_reports_ignored: olderIgnored, sampling: 'one sample per run; runs are scheduled roughly every 30 min while the collector is available; no observation between samples',
         compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,

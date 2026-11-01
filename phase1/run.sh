@@ -13,9 +13,9 @@
 #   state/scheduler.json   one small JSON: last sample time and result            (< 1 KB)
 #   state/pending.json     at most ONE envelope awaiting upload, 2 h expiry        (≤ 5 MB, usually absent)
 #   state/lock/            lock directory while a run is in progress               (0 bytes)
-#   logs/collector.log     rotated: 1 MB × 4 files max                             (≤ 4 MB)
-#   logs/launchd.log       scheduler stdout/stderr, rotated at 512 KB × 2           (≤ 1 MB)
-# Maximum retained footprint: ~10 MB. Runtime (Node) is separate.
+#   logs/collector.log     rotated at 1 MB, 3 archived copies: live + 3 ≈ 4 MB worst case (rotation runs before each write, so the live file can overshoot by one run's output, ~1 KB)
+#   logs/launchd.log       scheduler stdout/stderr, rotated at 512 KB, 1 archived copy ≈ 1 MB
+# Maximum retained footprint: logs ≈ 5 MB + one pending envelope ≤ 5 MB + state < 1 KB ≈ 10 MB. Runtime (Node) is separate.
 # Exit codes pass straight through from collector-mac.mjs: 0 uploaded · 3 source-down report uploaded · 1 upload failed (pending kept) · 2 config · 4 nothing pending · 5 lock held · 6 keys unreadable
 
 set -u
@@ -27,8 +27,8 @@ mkdir -p state logs
 # ---- bounded logging
 rotate() { local f="$1" max="$2" keep="$3"; [ -f "$f" ] && [ "$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f")" -gt "$max" ] || return 0
   local i=$keep; while [ $i -gt 1 ]; do [ -f "$f.$((i-1))" ] && mv -f "$f.$((i-1))" "$f.$i"; i=$((i-1)); done; mv -f "$f" "$f.1"; }
-rotate logs/collector.log 1048576 4
-rotate logs/launchd.log 524288 2
+rotate logs/collector.log 1048576 3
+rotate logs/launchd.log 524288 1
 log() { echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) [$MODE] $*" >> logs/collector.log; }
 
 # ---- node: launchd has a minimal PATH, so resolve the absolute binary once and record it
