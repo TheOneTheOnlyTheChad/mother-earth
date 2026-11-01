@@ -8,7 +8,7 @@ One browser globe showing the latest observations of the planet from open live f
 - Page: https://theonetheonlythechad.github.io/mother-earth/ (GitHub Pages, repo root `index.html`)
 - Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `/admin/run/<job>?key=ADMIN_KEY`
 - Repo: https://github.com/TheOneTheOnlyTheChad/mother-earth — push straight to `main` (no branches unless there is a reason; say the reason and let Chad decide)
-- Layers running: usgs (quakes), swpc (Kp, hourly), firms (fires), co2 (NOAA GML), seaice (NSIDC), **ships** (aisstream via the Mac, `phase1/run.sh ships`, manual cadence); `mock` = hidden test layer. Parked: opensky — gated off by `OPENSKY_ENABLED` (unset), minute trigger deleted. R2 lifecycle rules delete `raw/ snapshots/ cells/` after 2 days.
+- Layers running: usgs (quakes), swpc (Kp, hourly), firms (fires), co2 (NOAA GML), seaice (NSIDC), **ships** (aisstream via the Mac: launchd job `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples ~every 30 min while awake); `mock` = hidden test layer. Parked: opensky — gated off by `OPENSKY_ENABLED` (unset), minute trigger deleted. R2 lifecycle rules delete `raw/ snapshots/ cells/` after 2 days.
 
 ## 2. How Chad works (observe these; they are standing)
 - **Baby steps, click-by-click.** One key, one dialog, one action at a time. He reads code; he does not write it.
@@ -23,7 +23,7 @@ One browser globe showing the latest observations of the planet from open live f
 | What | Repo path (clone at `/home/claude/mother-earth`) | Mac path |
 |---|---|---|
 | Collector | `phase1/worker.js` | `~/Documents/Mother Earth/phase1/worker.js` |
-| Mac/Pi collector | `phase1/collector-mac.mjs` | same |
+| Mac/Pi collector | `phase1/collector-mac.mjs`, `phase1/run.sh`, `phase1/earth.mother.ships.plist` | same in the project folder **plus the RUNTIME copy in `~/mother-earth/`** (run.sh, collector-mac.mjs, KEYS.md, state/, logs/). macOS denies launchd access to `~/Documents`, so the scheduler runs from `~/mother-earth` — copy any collector/run.sh change there too (device_bash: mounted at `$HOME/mnt/mother-earth`). Installed agent: `~/Library/LaunchAgents/earth.mother.ships.plist` (reinstall with `launchctl bootout gui/$(id -u)/earth.mother.ships` then `bootstrap` if the plist changes). Check: `~/mother-earth/run.sh status`. |
 | Pages | `index.html` (World View), `sources.html` (Sources & Details), `app.js` (shared logic: freshness, readings, report, rules), `style.css` — bump the `?v=` on the css/js links in both html files on every change | same names in `~/Documents/Mother Earth/` |
 | Status | `STATUS.md` | `~/Documents/Mother Earth/STATUS.md` + project doc `claude/STATUS.md` |
 | Start here | `START-HERE.md` | `~/Documents/Mother Earth/START-HERE.md` + project doc `claude/START-HERE.md` |
@@ -34,7 +34,7 @@ One browser globe showing the latest observations of the planet from open live f
 The clone is the working copy (thread 2 onward; the old `/mnt/user-data/outputs/` paths are gone with thread 1's container). In a new container: `add_repo` (push access) → `git clone --depth 1` to `/home/claude/mother-earth`.
 
 Sync procedure after any change: edit in the clone → commit with the attribution trailer → `git push origin main` → copy to the Mac → for STATUS/START-HERE also `Projects.project_write` to `claude/<name>.md`.
-Copy to the Mac: the folder `~/Documents/Mother Earth` must be granted each thread (`device_request_folder_access`; Chad approves one prompt). Then either `device_bash` (the folder is mounted at `$HOME/mnt/Mother Earth`; edit in place with sed/python; `rm` is blocked) or `device_commit_files` with `stagedPath` under `/mnt/user-data/outputs/` and `devicePath` `~/Documents/Mother Earth/...` (force:true). Neither shell (container or device) can reach the hub or data hosts — use the browser pane's `javascript_tool` on a hub tab for every HTTP check. The Mac **Terminal** is the only place that reaches the hub from the Mac: Chad runs `node collector-mac.mjs …` there and pastes the output.
+Copy to the Mac: the folder `~/Documents/Mother Earth` must be granted each thread (`device_request_folder_access`; Chad approves one prompt). Then either `device_bash` (the folder is mounted at `$HOME/mnt/Mother Earth`; edit in place with sed/python; `rm` is blocked) or `device_commit_files` with `stagedPath` under `/mnt/user-data/outputs/` and `devicePath` `~/Documents/Mother Earth/...` (force:true). Neither shell (container or device) can reach the hub or data hosts — use the browser pane's `javascript_tool` on a hub tab for every HTTP check. The Mac **Terminal** is the only interactive place that reaches the hub from the Mac (computer-use typing into Terminal is blocked; clicks only). For the collector, read `~/mother-earth/logs/collector.log` and `state/scheduler.json` via device_bash instead of asking Chad to paste.
 
 ## 4. Deploying the collector (Cloudflare has no connector; use the built-in browser pane)
 1. Open `https://dash.cloudflare.com/0538d0fe34d9fd261a2eac11583f8972/workers/services/edit/mother-earth/production` in a browser-pane tab. Wait ~15 s for the VS Code editor.
