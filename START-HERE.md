@@ -43,7 +43,7 @@ Copy to the Mac: the folder `~/Documents/Mother Earth` must be granted each thre
 4. Right-click → **Format Document**; click **Deploy** (~(705,107)); wait ~10 s.
 5. Verify: `fetch(hub+'/').then(r=>r.json()).then(j=>j.version)` from a hub tab's `javascript_tool`, then `/admin/run/<job>?key=…` and read `/status`. `javascript_tool` has a 45 s cap: the `hourly` job can exceed it — fire it in one call, read `/status` in the next.
 6. Secrets: Claude generates the value, writes it to KEYS.md, opens Settings → Variables and Secrets → Add in the browser pane, fills the Key name and ticks Secret, then **Chad pastes the value** and clicks "Add 1 variable and deploy" (Claude does not type secrets into Cloudflare). Settings URL: `…/workers/services/view/mother-earth/production/settings`.
-Bump `COLLECTOR_VERSION` on every deploy. Jobs: five, minute, firms, hourly (hourly = co2 + seaice-gated + D1 aggregation; admin runs pass `manual=true`).
+Bump `COLLECTOR_VERSION` on every deploy. Jobs: five, minute, firms, forest, hourly (hourly = co2 + seaice-gated + D1 aggregation; admin runs pass `manual=true`). A file over ~50 KB is typed in TWO `type` calls (split at a line boundary; the second call continues at the cursor) — 0.2.0 (71 KB) went in as 45.6 k + 25.0 k chars with no timeout error.
 D1 console: dashboard → D1 → mother-earth → Console; Chad or Claude runs `CREATE TABLE` statements there (schema.sql holds them).
 Metrics: `…/workers/services/view/mother-earth/production/metrics` — read with `get_page_text`. Free plan: 10 ms CPU soft limit per invocation; measured medians ~1 ms; worst offenders were whole-file parses (fixed by `tail()`).
 
@@ -51,8 +51,9 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **The browser pane renders only while it is visible in the Claude app.** Hidden (side panel showing something else, or Chad in another app) = keystrokes still land but screenshots freeze or time out; `tabs_context` says "hidden". Ask Chad to show it (Cmd+Shift+B) before any deploy verification.
 - **If the Claude desktop window is covered (Chad in another app), the pane stops drawing: screenshots repeat the same frame and nothing looks typed — but keystrokes still land.** Ask Chad to bring Claude to the front, then screenshot again before deciding anything. Never retype on the strength of a frozen screenshot; probe with one character first and delete it after.
 - The R2 lifecycle "Add rule" form opens with "Delete uploaded objects after" already ticked — fill name, prefix, days; do not click the checkbox.
-- Cron triggers: Worker → Settings → Trigger events → trash icon → Save. Only three remain (hourly :07, */5, */15).
+- Cron triggers: Worker → Settings → Trigger events → Add → "Cron expression" tab → the box is PREFILLED with `*/30 * * * *` (cmd+a then type replaces it; type a space + Backspace to re-run the validator) → Add → the **Save button is in a floating toast at the bottom** (ref clicks miss it; click by coordinate ~(612,1045) in an 800-px pane). Four now: hourly :07, */5, */15, 11,41 (forest).
 - Tab names change; call `tabs_context` first. Keep the globe in its own tab for Chad; do dashboard work in a second tab.
+- D1 console: click the textbox by `ref` (coordinate clicks missed it once), type, click Execute (~(720,856)); Return does not submit.
 - `browser_batch` has ignored `tabId` once and acted on the wrong tab — use single `computer` calls with explicit `tabId` for anything that clicks.
 - New sites need `request_access` (scope "site"). Granted so far: dash.cloudflare.com, github.io, noaadata.apps.nsidc.org, gibs.earthdata.nasa.gov (via page fetches), firms.
 - The container shell cannot reach most data hosts (egress allowlist); fetch test data through the browser pane's `javascript_tool` on a same-origin or CORS-open page instead.
