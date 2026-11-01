@@ -16,6 +16,7 @@ One browser globe showing the latest observations of the planet from open live f
 - **$0/month target.** Name every non-zero line item explicitly before it is incurred.
 - **MVP lives in the now.** Page reads `latest/*` only; history accumulates cheaply for phase-3 baselines.
 - **Keys are shared and recorded.** He is fine with Claude knowing them. Record: `~/Documents/Mother Earth/KEYS.md` (gitignored). Secrets can't be read back from Cloudflare, so the value goes into KEYS.md *first*, then into Cloudflare.
+- **Reviews (updated 1 Nov 2026):** GPT and Gemini are watching the site grow and want to assist, but they do not weigh in on every decision — Chad pulls them in when he sees something worth a three-way chat; otherwise Claude judges and builds. Claude stays sole code writer/deployer.
 - **Honesty over polish.** If a layer can't be shown honestly (e.g. sea-ice imagery blind in polar night), say "not shown" with the measured reason rather than paint something.
 - He says "lol/bro", is warm and direct; match it, keep replies short, bottom line first, no restating his request.
 
