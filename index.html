@@ -105,7 +105,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- imagery skin: NASA GIBS true colour, previous day, dated on the globe (§7.1)
 const gibs = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&FORMAT=image/jpeg&WIDTH=2048&HEIGHT=1024&CRS=EPSG:4326&BBOX=-90,-180,90,180&TIME=' + IMG_DAY + '&LAYERS=VIIRS_NOAA20_CorrectedReflectance_TrueColor';
-$('imgdate').textContent = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS NOAA-20) — not live · Arctic dark = polar night, not missing data';
+$('imgdate').textContent = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS NOAA-20) — not live · Arctic dark = polar night';
 
 // ---------- globe (survives WebGL failure: readings and report still load)
 const points = { usgs: [], firms: [], ships: [] };
