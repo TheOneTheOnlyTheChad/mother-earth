@@ -43,7 +43,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.2.0';
+const COLLECTOR_VERSION = '0.2.1';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -757,10 +757,19 @@ async function aggregateShips(env, hourMs) {
   const incoming = {};
   for (const id in sums) incoming[id] = { count: Math.round(sums[id] / ok.length * 100) / 100, count_max: maxes[id], coverage: 'partial', observed_fraction: frac, extra: null };   // partial: terrestrial AIS, receipt history pending
   const meta = { window_s: ok.map(x => x.f.window_s), samples: ok.map(x => x.key.slice(-22, -5)), connection_fraction: ok.map(x => x.f.connection_fraction_of_sample ?? (x.f.coverage_default && x.f.coverage_default.observed_fraction)), class_a: ok.map(x => x.f.class_a), class_b: ok.map(x => x.f.class_b), collector: ok.map(x => x.f.collector_version) };
-  // zero samples in the hour means nobody sampled (collector asleep/absent), not that the source failed: 'absent', never 'down'
-  await layerHourly(env, layer, hour, expected, ok.length, ok.length >= expected ? 'ok' : (ok.length ? 'degraded' : 'absent'), 'none', JSON.stringify({ rule: 'mean of per-sample unique vessels; sampled, not continuous', ...meta }).slice(0, 1500));
+  /* D9, tightened 1 Nov 2026 after hours 12 and 13 UTC were recorded 'absent' although two and one sample had been received
+   * and stored: a sample that ARRIVED but did not meet the quality bar is not "nobody sampled". The two must stay
+   * distinguishable, because 'absent' is the only value that licenses reading the hour as never-asked.
+   *   no file for the hour at all      -> absent
+   *   files received, none usable      -> degraded (received > 0, usable = 0)
+   *   some usable, fewer than expected -> degraded
+   *   usable >= expected               -> ok                                                                              */
+  const received = files.length, usable = ok.length;
+  const status = usable >= expected ? 'ok' : (received ? 'degraded' : 'absent');
+  const rejected = files.filter(x => x.f.source_status !== 'ok').map(x => ({ sample: x.key.slice(-22, -5), status: x.f.source_status, receiving_s: x.f.receiving_s ?? null, wall_s: x.f.wall_s ?? null }));
+  await layerHourly(env, layer, hour, expected, usable, status, 'none', JSON.stringify({ rule: 'mean of per-sample unique vessels; sampled, not continuous', received, usable, rejected, ...meta }).slice(0, 1500));
   const changed = ok.length ? await upsertChanged(env, layer, { [hour]: incoming }) : 0;
-  return { files: files.length, ok: ok.length, cells: Object.keys(incoming).length, changed };
+  return { files: received, ok: usable, status, rejected: rejected.length, cells: Object.keys(incoming).length, changed };
 }
 
 async function hourlyBatch(env, scheduledMs) {
@@ -914,6 +923,26 @@ export default {
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
       return json({ now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch }, 200, { 'Cache-Control': 'no-store' });
+    }
+
+    /* Repair one hour's aggregation from the objects still in R2 (added 1 Nov 2026 for the hours 12/13 defect).
+     * Refuses when the hour's evidence has expired: cells/ is deleted after 2 days (D12), and an hour that can no longer
+     * be rebuilt from what was retained stays exactly as it was recorded. We do not reconstruct history we cannot read. */
+    if (p[0] === 'admin' && p[1] === 'reaggregate') {
+      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+      const layer = p[2] || '';
+      if (layer !== 'ships') return json({ error: 'only ships re-aggregation is implemented', layer }, 400);
+      const hour = url.searchParams.get('hour') || '';
+      if (!/^\d{4}-\d\d-\d\dT\d\d$/.test(hour)) return json({ error: "hour must look like 2026-11-01T12 (UTC)" }, 400);
+      const hourMs = Date.parse(hour + ':00:00Z');
+      if (!Number.isFinite(hourMs)) return json({ error: 'hour is not a valid UTC hour', hour }, 400);
+      const listed = await env.R2.list({ prefix: `cells/${layer}/${hour}` });
+      const found = (listed.objects || []).map(o => o.key);
+      if (!found.length) return json({ error: 'no retained objects for that hour — history is not repaired without evidence', hour, note: 'cells/ objects are deleted 2 days after they are written (D12 lifecycle)' }, 409, { 'Cache-Control': 'no-store' });
+      const before = await env.DB.prepare('SELECT snapshots_expected, snapshots_ok, source_status, note FROM layer_hourly WHERE layer = ? AND hour_utc = ?').bind(layer, hour).first();
+      const result = await aggregateShips(env, hourMs);
+      const after = await env.DB.prepare('SELECT snapshots_expected, snapshots_ok, source_status, note FROM layer_hourly WHERE layer = ? AND hour_utc = ?').bind(layer, hour).first();
+      return json({ reaggregated: hour, layer, objects: found, before, after, result }, 200, { 'Cache-Control': 'no-store' });
     }
 
     if (p[0] === 'admin' && p[1] === 'run') {

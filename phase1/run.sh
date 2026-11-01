@@ -71,7 +71,9 @@ case "$MODE" in
     if [ $((now - last)) -ge $INTERVAL_S ]; then
       stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ); log "sample due (last $((now - last)) s ago)"
       run_collector ships; rc=$?; log "ships exit=$rc"
-      record tick "$rc" "$stamp" "$now"   # the attempt counts as the sample time either way: no catch-up burst after failures or sleep
+      # The interval runs from COMPLETION, not from the start of the attempt (1 Nov 2026). Measuring from the start meant an
+      # overlong sample shortened the next gap — a quiet catch-up. The attempt counts either way: no burst after a failure.
+      record tick "$rc" "$stamp" "$(date +%s)"
       exit $rc
     fi
     exit 0 ;;
