@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611010237">
+<link rel="stylesheet" href="style.css?v=202611010245">
 </head>
 <body class="world">
 <header class="top">
@@ -29,10 +29,11 @@
     <div class="imgdate" id="imgdate">Imagery: loading…</div>
     <div class="legend" id="legend">
       <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample)</div>
-      <div><span class="sw"></span><b>collector observed throughout the window</b> — source coverage can still be incomplete</div>
-      <div><span class="sw partial"></span>partly observed — records observed; coverage incomplete</div>
-      <div><span class="sw unknown"></span>unknown — nothing can be said about this cell</div>
-      <div>No outline = no records in that cell; not evidence of absence. <a href="sources.html#coverage">How coverage is graded →</a></div>
+      <div class="cov"><span class="sw"></span><b>collector observed throughout the window</b> — source coverage can still be incomplete</div>
+      <div class="cov"><span class="sw partial"></span>partly observed — records observed; coverage incomplete</div>
+      <div class="cov"><span class="sw unknown"></span>unknown — nothing can be said about this cell</div>
+      <div class="cov">No outline = no records in that cell; not evidence of absence.</div>
+      <div><a href="sources.html#coverage">How coverage is graded →</a></div>
     </div>
     <div class="inspector" id="insp" role="dialog" aria-labelledby="insp-h"><button class="x" id="insp-x" type="button" aria-label="Close">×</button><h2 id="insp-h">—</h2><dl id="insp-dl"></dl></div>
   </div>
@@ -96,7 +97,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611010237"></script>
+<script src="app.js?v=202611010245"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, MAP_LAYERS, IMG_DAY, IMG_LABEL } = ME;
@@ -123,7 +124,7 @@ try {
     .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonSideColor(() => 'rgba(0,0,0,0)').polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
     .polygonLabel(p => p.label)
     .onPolygonClick(p => inspectCell(p));
-  globe.pointOfView({ lat: -10, lng: 25, altitude: 2.2 });
+  globe.pointOfView({ lat: -10, lng: 25, altitude: innerWidth <= 720 ? 3.6 : 2.2 });   // phones: the whole sphere fits above the readings sheet
   globe.controls().autoRotate = !reduced; globe.controls().autoRotateSpeed = .25;
   globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
 } catch (e) {
