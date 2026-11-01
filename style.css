@@ -140,9 +140,9 @@ body.doc{overflow:auto}
   .centre{display:block;padding:0}
   #globe{position:absolute;inset:0;bottom:52%;height:auto;min-height:0}
   .stage:has(.sheet.collapsed) #globe{bottom:48px}
-  .legend{position:absolute;bottom:auto;top:12px;right:12px;margin:0;font-size:10.5px;max-width:min(230px,55%);padding:6px 8px}
+  .legend{position:absolute;bottom:auto;top:12px;right:12px;margin:0;font-size:10.5px;max-width:min(230px,52%);padding:6px 8px}
   .legend .cov{display:none}
-  .imgdate{position:absolute;bottom:auto;top:12px;left:12px;margin:0;max-width:42%;font-size:10.5px}
+  .imgdate{position:absolute;bottom:auto;top:12px;left:12px;margin:0;max-width:40%;font-size:10.5px}
   .credits{display:none}
   .inspector{top:60px;left:12px;right:12px;width:auto;max-height:45%}
 }
