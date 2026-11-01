@@ -6,7 +6,9 @@
 #   ./run.sh tick                          scheduler entry point (launchd, every minute): samples when ~30 min are due; retries a pending upload
 #   ./run.sh status                        what the scheduler has been doing
 #
-# Keys come from ../KEYS.md (INGEST_KEY, AISSTREAM_KEY rows); nothing is typed in Terminal and nothing secret is ever logged.
+# Keys come from ./KEYS.md (runtime copy) or ../KEYS.md (project record); nothing is typed in Terminal and nothing secret is ever logged.
+# RUNTIME LOCATION (measured 1 Nov 2026): macOS denies launchd jobs access to ~/Documents ("Operation not permitted"), so the scheduled copy
+# lives in ~/mother-earth/ (run.sh, collector-mac.mjs, KEYS.md, state/, logs/). The project folder keeps the source of truth; sync both.
 # Files it keeps (all under phase1/, nothing else, no archive of samples):
 #   state/scheduler.json   one small JSON: last sample time and result            (< 1 KB)
 #   state/pending.json     at most ONE envelope awaiting upload, 2 h expiry        (≤ 5 MB, usually absent)
@@ -42,9 +44,10 @@ if [ "$MODE" = "status" ]; then
 fi
 
 # ---- keys (never echoed)
-keyval() { grep -m1 "^| $1" ../KEYS.md 2>/dev/null | awk -F'|' '{gsub(/ /,"",$3); print $3}'; }
+KEYS_FILE="${KEYS_FILE:-$([ -f ./KEYS.md ] && echo ./KEYS.md || echo ../KEYS.md)}"   # runtime copy next to the script (~/mother-earth) or the project record (../KEYS.md)
+keyval() { grep -m1 "^| $1" "$KEYS_FILE" 2>/dev/null | awk -F'|' '{gsub(/ /,"",$3); print $3}'; }
 INGEST_KEY="$(keyval INGEST_KEY)"; AISSTREAM_KEY="$(keyval AISSTREAM_KEY)"
-if [ -z "$INGEST_KEY" ] || [ -z "$AISSTREAM_KEY" ]; then log "keys unreadable from ../KEYS.md (background access to ~/Documents denied? ingest=${#INGEST_KEY} ais=${#AISSTREAM_KEY} chars)"; echo "keys unreadable" >&2; exit 6; fi
+if [ -z "$INGEST_KEY" ] || [ -z "$AISSTREAM_KEY" ]; then log "keys unreadable from $KEYS_FILE (background access to ~/Documents denied? ingest=${#INGEST_KEY} ais=${#AISSTREAM_KEY} chars)"; echo "keys unreadable" >&2; exit 6; fi
 export INGEST_KEY AISSTREAM_KEY
 
 # ---- one shared lock (mkdir is atomic); a lock older than 10 min is from a crashed run

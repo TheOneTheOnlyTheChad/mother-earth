@@ -5,25 +5,26 @@
   <!-- Mother Earth — per-user scheduler for the Mac ships collector.
        Every minute launchd runs `run.sh tick`; the runner samples only when ~30 min are due and retries one pending upload.
        Runs at login; after sleep launchd fires the missed minute once (no catch-up burst, no forced waking, no sleep prevention).
+       Runtime copy lives in ~/mother-earth (NOT ~/Documents: macOS denies launchd jobs access there — measured 1 Nov 2026).
        Install (one line in Terminal):
-         cp ~/Documents/Mother\ Earth/phase1/earth.mother.ships.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/earth.mother.ships.plist
+         cp ~/mother-earth/earth.mother.ships.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/earth.mother.ships.plist
        Remove:
          launchctl bootout gui/$(id -u)/earth.mother.ships
        Check:
-         ~/Documents/Mother\ Earth/phase1/run.sh status -->
+         ~/mother-earth/run.sh status -->
   <key>Label</key><string>earth.mother.ships</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>/Users/chadobie/Documents/Mother Earth/phase1/run.sh</string>
+    <string>/Users/chadobie/mother-earth/run.sh</string>
     <string>tick</string>
   </array>
-  <key>WorkingDirectory</key><string>/Users/chadobie/Documents/Mother Earth/phase1</string>
+  <key>WorkingDirectory</key><string>/Users/chadobie/mother-earth</string>
   <key>StartCalendarInterval</key>
   <dict></dict>
   <key>RunAtLoad</key><true/>
-  <key>StandardOutPath</key><string>/Users/chadobie/Documents/Mother Earth/phase1/logs/launchd.log</string>
-  <key>StandardErrorPath</key><string>/Users/chadobie/Documents/Mother Earth/phase1/logs/launchd.log</string>
+  <key>StandardOutPath</key><string>/Users/chadobie/mother-earth/logs/launchd.log</string>
+  <key>StandardErrorPath</key><string>/Users/chadobie/mother-earth/logs/launchd.log</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
