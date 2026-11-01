@@ -60,11 +60,11 @@ ME.freshness = function (layer) {
   // FIRMS (brief §5): an empty response is not a validated zero. day_range=1 = today (UTC): the file empties at 00:00 UTC and refills ~2–3 h behind.
   if (layer === 'firms' && ME.total(snap) === 0 && (snap.raw_bytes || 0) < 1000) return { grade: 'unknown', why: new Date().getUTCHours() < 4 ? `no detections processed yet for today (UTC) — FIRMS resets at 00:00 UTC, NRT runs ~2–3 h behind` : `source returned an empty file (${snap.raw_bytes || 0} bytes) — not a validated zero` };
   if (layer === 'forest' && !(snap.sweep && snap.sweep.answered)) return { grade: 'unknown', why: 'no cell has answered yet — the sweep has not started' };
-  if (layer === 'forest') return { grade: 'partial', why: `sweep ${snap.sweep.answered} of ${snap.sweep.cells_total} cells answered; oldest query ${ago(snap.sweep.oldest_queried_at)}; last run ${ago(snap.retrieved_at)}` };   // partial by design in phase 1 (REGISTER: no per-cell observation-opportunity record)
+  if (layer === 'forest') return { grade: 'partial', sweeping: snap.sweep.answered < snap.sweep.cells_total, why: `${snap.sweep.answered < snap.sweep.cells_total ? 'first sweep in progress: ' : 'coverage partial by design: '}${snap.sweep.answered} of ${snap.sweep.cells_total} cells answered; oldest query ${ago(snap.sweep.oldest_queried_at)}; last run ${ago(snap.retrieved_at)}` };   // partial by design in phase 1 (REGISTER: no per-cell observation-opportunity record)
   if (snap.source_status === 'degraded') return { grade: 'partial', why: layer === 'swpc' && snap.index ? `source degraded — observation ${ago(snap.index.time_tag)}, retrieved ${ago(snap.retrieved_at)}` : 'source degraded' };
   return { grade: 'adequate', why: 'retrieved ' + ago(snap.retrieved_at) };
 };
-ME.stateWord = f => f.grade === 'adequate' ? ['current', 'ok'] : f.grade === 'partial' ? ['degraded', 'warn'] : ['unknown', 'bad'];
+ME.stateWord = (f, layer) => f.grade === 'adequate' ? ['current', 'ok'] : f.grade === 'partial' ? (layer === 'forest' ? [f.sweeping ? 'sweeping' : 'partial', 'warn'] : ['degraded', 'warn']) : ['unknown', 'bad'];   // forest is partial by design (REGISTER): say what it is, not 'degraded'
 
 // ---------- readings: one object per layer that both pages render from (value, unit, observed, source, freshness, coverage, comparison)
 ME.readings = function () {
@@ -116,7 +116,7 @@ ME.readings = function () {
 // ---------- the status report (§7): generated from a template that cannot emit a cause; identical on both pages
 ME.report = function (R) {
   const parts = [];
-  const st = r => `${r.fresh.grade === 'adequate' ? 'current' : r.fresh.grade === 'partial' ? 'degraded' : 'unknown'} — ${r.fresh.why}`;
+  const st = (r, k) => `${ME.stateWord(r.fresh, k)[0]} — ${r.fresh.why}`;
   parts.push(R.usgs.value !== null ? `${R.usgs.value.toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS; ${R.usgs.observed}; retrieved ${ago(R.usgs.retrieved)})` : `earthquakes: unknown — ${R.usgs.fresh.why}`);
   parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections so far today, UTC (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'source degraded; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
   parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
@@ -125,7 +125,7 @@ ME.report = function (R) {
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa on ${R.co2.date} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
   parts.push(R.seaice.north !== null ? `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km² (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
   parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; none installed');
-  return { at: new Date().toISOString(), text: `As of ${new Date().toISOString().slice(11, 16)} UTC: ` + parts.join('; ') + '.', states: Object.fromEntries(Object.entries(R).map(([k, r]) => [k, st(r)])) };
+  return { at: new Date().toISOString(), text: `As of ${new Date().toISOString().slice(11, 16)} UTC: ` + parts.join('; ') + '.', states: Object.fromEntries(Object.entries(R).map(([k, r]) => [k, st(r, k)])) };
 };
 
 // ---------- rules in force (§7.3): one list, rendered in full on Sources & Details and in part on World View
