@@ -15,6 +15,7 @@ const SHIPS_MODE = ME.SHIPS_MODE = { text: 'manual samples — no schedule insta
 const $ = ME.$ = id => document.getElementById(id);
 const esc = ME.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const ago = ME.ago = iso => { if (!iso) return 'unknown'; const s = (Date.now() - Date.parse(iso)) / 1000; return s < 90 ? Math.round(s) + ' s ago' : s < 5400 ? Math.round(s / 60) + ' min ago' : (s / 3600).toFixed(1) + ' h ago'; };
+const dur = ME.dur = s => s < 3600 ? Math.round(s / 60) + ' min' : (s % 3600 === 0 ? (s / 3600) + ' h' : (s / 3600).toFixed(1) + ' h');   // plain-language limits: 10800 → "3 h"
 const hhmm = ME.hhmm = iso => iso ? iso.slice(11, 16) + ' UTC' : '–';
 const when = ME.when = iso => iso ? iso.replace('T', ' ').slice(0, 16) + ' UTC' : 'source time not supplied';
 const num = (x, d = 2) => Number.isFinite(+x) ? (+x).toFixed(d) : '–';
@@ -54,7 +55,7 @@ ME.freshness = function (layer) {
   if (!snap) return { grade: 'unknown', why: 'no snapshot from the hub' };
   const ageS = (Date.now() - Date.parse(snap.retrieved_at)) / 1000;
   if (snap.source_status === 'down') return { grade: 'unknown', why: 'collector reported down: ' + (snap.note || '') };
-  if (ageS > (snap.stale_after_s || 900)) return { grade: 'unknown', why: `snapshot ${ago(snap.retrieved_at)} exceeds stale_after ${snap.stale_after_s} s` };
+  if (ageS > (snap.stale_after_s || 900)) return { grade: 'unknown', why: layer === 'ships' ? `last sample is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)}); current positions unknown` : `last snapshot is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)})` };
   // FIRMS (brief §5): an empty response is not a validated zero. The source's 24 h world file is never legitimately empty.
   if (layer === 'firms' && ME.total(snap) === 0 && (snap.raw_bytes || 0) < 1000) return { grade: 'unknown', why: `source returned an empty file (${snap.raw_bytes || 0} bytes) — not a validated zero` };
   if (snap.source_status === 'degraded') return { grade: 'partial', why: layer === 'swpc' && snap.index ? `source degraded — observation ${ago(snap.index.time_tag)}, retrieved ${ago(snap.retrieved_at)}` : 'source degraded' };
@@ -133,7 +134,7 @@ ME.rules = function (R) {
     add(layer, 'Cadence', r.cadence);
     add(layer, 'Coverage rule', s && s.coverage_default ? `${s.coverage_default.grade}: ${s.coverage_default.evidence} (not adjustable)` : r.coverage, true);
     add(layer, 'Comparison', r.comparison + (r.comparisonWho ? ` — ${r.comparisonWho}` : ''), true);
-    if (s) add(layer, 'stale_after', `${s.stale_after_s} s — layer becomes Unknown past this (not adjustable)`, true);
+    if (s) add(layer, 'Stale limit', `${dur(s.stale_after_s)} (stale_after_s = ${s.stale_after_s}) — the layer becomes Unknown past this (not adjustable)`, true);
     if (s) add(layer, 'Collector', `v${s.collector_version}, schema ${s.schema_version}, scheduled ${s.scheduled_for ? s.scheduled_for.slice(11, 16) + ' UTC' : ''}${s.ingested_from ? '; ingested from ' + s.ingested_from : ''}`);
     if (s && s.citation) add(layer, 'Citation', s.citation, true);
     if (layer === 'firms') add(layer, 'Source caveat', 'NASA LANCE: near-real-time product; "their use for tactical decision-making or informing about conditions at a local scale are not advised" (read 30 Oct 2026)', true);
