@@ -42,7 +42,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.7';
+const COLLECTOR_VERSION = '0.1.8';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -424,6 +424,8 @@ async function collectFirms(env, scheduledMs) {
   }
   let parsed;
   try { parsed = firmsParse(res.text); } catch (e) { return writeDown(env, layer, scheduledMs, String(e), res.status); }
+  // An empty 24 h world file is not a plausible observation (measured 1 Nov 2026 02:15 UTC: HTTP 200, 122 bytes, header only). Failure means unknown, never zero.
+  if (parsed.rows.length === 0) return writeDown(env, layer, scheduledMs, `empty response (header only, ${res.text.length} bytes): not a validated zero`, res.status);
   // Coverage (§3.2 FIRMS): adequacy needs the pass schedule, not wired in step 1 → partial, and cloud is
   // invisible in the CSV (§9.4). The evidence string says both.
   for (const id in parsed.cells) parsed.cells[id].coverage = { grade: 'partial', evidence: 'pass_schedule_pending;cloud_may_hide_detections', observed_fraction: 1 };
