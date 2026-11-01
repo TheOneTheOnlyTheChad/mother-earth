@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611011500">
+<link rel="stylesheet" href="style.css?v=202611011530">
 </head>
 <body class="world">
 <header class="top">
@@ -122,7 +122,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611011500"></script>
+<script src="app.js?v=202611011530"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -136,7 +136,7 @@ $('imgdate').textContent = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS NOAA-20
 // ---------- globe (survives WebGL failure: readings and report still load)
 const points = { usgs: [], firms: [], ships: [], forest: [] };
 // which collector run the loaded records came from, and whether the last read succeeded (review round 5)
-const pmeta = { usgs: { id: null, ok: false, why: 'not read yet' }, firms: { id: null, ok: false, why: 'not read yet' }, ships: { id: null, ok: false, why: 'not read yet' } };
+const pmeta = { usgs: { id: null, ok: false, fields: [], why: 'not read yet' }, firms: { id: null, ok: false, fields: [], why: 'not read yet' }, ships: { id: null, ok: false, fields: [], why: 'not read yet' } };
 const on = { usgs: true, firms: true, ships: true, forest: true };
 const el = $('globe');
 let globe, globeOk = false;
@@ -188,7 +188,8 @@ const STROKE = { adequate: 'rgba(214,221,232,1)', partial: 'rgba(214,221,232,.8)
 const FILL = { adequate: 'rgba(214,221,232,.10)', partial: 'rgba(214,221,232,.05)', unknown: 'rgba(255,90,60,.12)' };
 const forestFill = n => { const t = n <= 0 ? 0 : Math.min(1, Math.log10(n + 1) / 5); return `rgba(111,211,122,${(0.06 + 0.5 * t).toFixed(2)})`; };   // 0 → faint, 10^5 pixels → 0.56; log scale so the Amazon doesn't drown the rest
 const windowText = (layer, snap) => layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : layer === 'forest' ? 'alert pixels published in the 7 days before this cell\'s query' : 'in the last 24 h';
-const hasField = (snap, name) => !!(snap && snap.record_fields && snap.record_fields.includes(name));   // show only fields the envelope actually publishes
+// show only fields the RECORD envelope publishes — record_fields lives on /snapshot/<layer>, never on /cells/<layer> (measured 1 Nov 2026)
+const hasField = (layer, name) => !!(pmeta[layer] && pmeta[layer].fields && pmeta[layer].fields.includes(name));
 
 function render() {
   const polys = [];
@@ -251,18 +252,18 @@ function inspectRecord(layer, r) {
   const rows = [['Selected', 'one record from the loaded snapshot — not a cell total']];
   if (layer === 'usgs') {
     rows.push(['Magnitude', has(r.mag) ? `M${Number(r.mag).toFixed(1)} <span class="q">(${esc(r.mag_type || MISSING)})</span>` : MISSING]);
-    if (hasField(snap, 'title')) rows.push(['Place', esc(r.title || MISSING)]);
-    if (hasField(snap, 'depth_km')) rows.push(['Depth', fmt(r.depth_km, { dp: 1, unit: 'km', zeroNote: null })]);
+    if (hasField(layer, 'title')) rows.push(['Place', esc(r.title || MISSING)]);
+    if (hasField(layer, 'depth_km')) rows.push(['Depth', fmt(r.depth_km, { dp: 1, unit: 'km', zeroNote: null })]);
   }
   if (layer === 'firms') {
     rows.push(['Fire radiative power', fmt(r.frp_mw, { dp: 0, unit: 'MW' })]);
-    if (hasField(snap, 'confidence')) rows.push(['Confidence', r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : r.confidence === 'n' ? 'nominal' : MISSING]);
-    if (hasField(snap, 'daynight')) rows.push(['Day or night', r.daynight === 'D' ? 'day' : r.daynight === 'N' ? 'night' : MISSING]);
-    if (hasField(snap, 'satellite')) rows.push(['Satellite', esc(r.satellite || MISSING)]);
+    if (hasField(layer, 'confidence')) rows.push(['Confidence', r.confidence === 'h' ? 'high' : r.confidence === 'l' ? 'low' : r.confidence === 'n' ? 'nominal' : MISSING]);
+    if (hasField(layer, 'daynight')) rows.push(['Day or night', r.daynight === 'D' ? 'day' : r.daynight === 'N' ? 'night' : MISSING]);
+    if (hasField(layer, 'satellite')) rows.push(['Satellite', esc(r.satellite || MISSING)]);
   }
   if (layer === 'ships') {
     rows.push(['Vessel', esc(r.name || MISSING)], ['MMSI', esc(r.mmsi || MISSING)], ['AIS class', esc(r.cls || MISSING)]);
-    if (hasField(snap, 'sog_kn')) rows.push(['Speed over ground', fmt(r.sog_kn, { dp: 1, unit: 'kn', zeroNote: null })]);
+    if (hasField(layer, 'sog_kn')) rows.push(['Speed over ground', fmt(r.sog_kn, { dp: 1, unit: 'kn', zeroNote: null })]);
   }
   rows.push(
     ['Observed', when(r.observed_at)],
@@ -388,14 +389,14 @@ async function loadRecords() {
       if (!samePair(state[layer], s)) {
         try { const c = await ME.getJson('/cells/' + layer); if (snapId(c)) state[layer] = c; } catch (e) { /* keep the counts already held */ }
       }
-      if (samePair(state[layer], s)) { points[layer] = toPoints[layer](s); pmeta[layer] = { id: snapId(s), ok: true, why: '' }; }
+      if (samePair(state[layer], s)) { points[layer] = toPoints[layer](s); pmeta[layer] = { id: snapId(s), ok: true, why: '', fields: s.record_fields || [] }; }
       else {
         points[layer] = [];
-        pmeta[layer] = { id: snapId(s), ok: false, why: `records are from a different collector run (records ${hhmm(snapId(s))}, counts ${hhmm(snapId(state[layer]))}) — counts shown alone` };
+        pmeta[layer] = { id: snapId(s), ok: false, fields: [], why: `records are from a different collector run (records ${hhmm(snapId(s))}, counts ${hhmm(snapId(state[layer]))}) — counts shown alone` };
       }
     } catch (e) {
       points[layer] = [];   // a failed read must never leave older records beside newer counts
-      pmeta[layer] = { id: null, ok: false, why: `the record file could not be read (${String((e && e.message) || e).slice(0, 80)}) — counts shown alone` };
+      pmeta[layer] = { id: null, ok: false, fields: [], why: `the record file could not be read (${String((e && e.message) || e).slice(0, 80)}) — counts shown alone` };
     }
     render(); cards();
   }

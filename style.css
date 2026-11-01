@@ -170,6 +170,7 @@ body.doc{overflow:auto}
   .imgdate{position:absolute;bottom:auto;top:12px;left:12px;margin:0;max-width:40%;font-size:10.5px}
   .credits{display:none}
   .inspector{top:60px;left:12px;right:12px;width:auto;max-height:45%}
+  .card .cav{font-size:11.5px;color:rgba(127,141,163,.9)}   /* 10.5px measured too small on a 390 px phone (1 Nov 2026) */
 }
 @media (prefers-reduced-motion:reduce){
   .sheet{transition:none}
