@@ -5,7 +5,8 @@
  * One Worker, three jobs, dispatched by cron string:
  *   "* /5 * * * *"  (every 5 min)  → USGS, OpenSky world pull
  *   "* * * * *"     (every 1 min)  → OpenSky bbox pull, budget-gated (auto-degrades; §4.3)
- *   "* /15 * * * *" (every 15 min) → FIRMS world/1
+ *   "* /15 * * * *" (every 15 min) → FIRMS world/1  (day_range=1 = the CURRENT UTC DATE, not "last 24 h": the file
+ *                                      empties at 00:00 UTC and refills as NRT processing lands, ~2–3 h behind; confirmed 1 Nov 2026)
  *   "7 * * * *"     (hourly, :07)  → aggregate previous hour from R2 cell files into D1
  *
  * HTTP (viewers only read; §4.2):
@@ -42,12 +43,13 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.1.8';
+const COLLECTOR_VERSION = '0.1.9';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
 const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const FIRMS_DAY_BOUNDARY_H = 4;             // before 04:00 UTC an empty FIRMS file is the day boundary, not an outage (measured 1 Nov 2026: first rows at 04:00)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
 const URLS = {
@@ -424,15 +426,22 @@ async function collectFirms(env, scheduledMs) {
   }
   let parsed;
   try { parsed = firmsParse(res.text); } catch (e) { return writeDown(env, layer, scheduledMs, String(e), res.status); }
-  // An empty 24 h world file is not a plausible observation (measured 1 Nov 2026 02:15 UTC: HTTP 200, 122 bytes, header only). Failure means unknown, never zero.
-  if (parsed.rows.length === 0) return writeDown(env, layer, scheduledMs, `empty response (header only, ${res.text.length} bytes): not a validated zero`, res.status);
+  // day_range=1 is "today (UTC)": the file is legitimately empty for the first hours after 00:00 UTC while NRT processing
+  // catches up (measured 1 Nov 2026: header-only 02:15–03:45 UTC, 507 rows at 04:00). Either way an empty file is unknown, never zero.
+  if (parsed.rows.length === 0) {
+    const utcHour = new Date().getUTCHours();
+    const why = utcHour < FIRMS_DAY_BOUNDARY_H ? `no detections processed yet for today (UTC): FIRMS day_range=1 resets at 00:00 UTC and NRT runs ~2–3 h behind (header only, ${res.text.length} bytes)` : `empty response (header only, ${res.text.length} bytes) at ${utcHour}:xx UTC: not a validated zero`;
+    return writeDown(env, layer, scheduledMs, why, res.status);
+  }
   // Coverage (§3.2 FIRMS): adequacy needs the pass schedule, not wired in step 1 → partial, and cloud is
   // invisible in the CSV (§9.4). The evidence string says both.
   for (const id in parsed.cells) parsed.cells[id].coverage = { grade: 'partial', evidence: 'pass_schedule_pending;cloud_may_hide_detections', observed_fraction: 1 };
-  const e = envelope(layer, scheduledMs, new Date(scheduledMs - 86400e3).toISOString(), nowIso(), 'ok', parsed.cells, parsed.fields, parsed.rows,
+  const dayStart = new Date(scheduledMs); dayStart.setUTCHours(0, 0, 0, 0);   // window = today (UTC) so far, which is what day_range=1 returns
+  const e = envelope(layer, scheduledMs, dayStart.toISOString(), nowIso(), 'ok', parsed.cells, parsed.fields, parsed.rows,
     { by_hour: parsed.byHour, raw: `raw/firms/${stamp}.csv`, raw_bytes: res.text.length, scope: region ? 'region ' + region : 'world',
       coverage_default: { grade: 'partial', evidence: 'pass_schedule_pending;cloud_may_hide_detections', observed_fraction: 1 },
-      quantity: 'VIIRS NOAA-20 NRT thermal detections in the last 24 h, per cell (detections per pass, not a fire census)' });
+      window_rule: 'today (UTC) so far: FIRMS day_range=1 returns the current UTC date only; resets at 00:00 UTC; NRT processing lands ~2–3 h after the pass',
+      quantity: 'VIIRS NOAA-20 NRT thermal detections so far today (UTC), per cell (detections per pass, not a fire census)' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
   await logRun(env, layer, scheduledMs, 'ok', res.status, parsed.rows.length, bytes, 'raw_bytes=' + res.text.length);
 }
@@ -649,7 +658,8 @@ async function aggregateShips(env, hourMs) {
   const incoming = {};
   for (const id in sums) incoming[id] = { count: Math.round(sums[id] / ok.length * 100) / 100, count_max: maxes[id], coverage: 'partial', observed_fraction: frac, extra: null };   // partial: terrestrial AIS, receipt history pending
   const meta = { window_s: ok.map(x => x.f.window_s), samples: ok.map(x => x.key.slice(-22, -5)), connection_fraction: ok.map(x => x.f.connection_fraction_of_sample ?? (x.f.coverage_default && x.f.coverage_default.observed_fraction)), class_a: ok.map(x => x.f.class_a), class_b: ok.map(x => x.f.class_b), collector: ok.map(x => x.f.collector_version) };
-  await layerHourly(env, layer, hour, expected, ok.length, ok.length >= expected ? 'ok' : (ok.length ? 'degraded' : 'down'), 'none', JSON.stringify({ rule: 'mean of per-sample unique vessels; sampled, not continuous', ...meta }).slice(0, 1500));
+  // zero samples in the hour means nobody sampled (collector asleep/absent), not that the source failed: 'absent', never 'down'
+  await layerHourly(env, layer, hour, expected, ok.length, ok.length >= expected ? 'ok' : (ok.length ? 'degraded' : 'absent'), 'none', JSON.stringify({ rule: 'mean of per-sample unique vessels; sampled, not continuous', ...meta }).slice(0, 1500));
   const changed = ok.length ? await upsertChanged(env, layer, { [hour]: incoming }) : 0;
   return { files: files.length, ok: ok.length, cells: Object.keys(incoming).length, changed };
 }

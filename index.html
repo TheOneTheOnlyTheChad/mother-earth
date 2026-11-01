@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611010320">
+<link rel="stylesheet" href="style.css?v=202611010540">
 </head>
 <body class="world">
 <header class="top">
@@ -50,7 +50,7 @@
         </div>
         <div class="card toggle" id="card-firms" style="--c:var(--fire)">
           <button class="tgl" type="button" data-layer="firms" aria-pressed="true"><span class="pip"></span><span class="name">Fire detections</span><span class="state" id="s-firms">loading</span></button>
-          <div class="value"><span id="v-firms">–</span><small>detections · last 24 h</small></div>
+          <div class="value"><span id="v-firms">–</span><small>detections · today so far (UTC)</small></div>
           <div class="meta" id="m-firms">NASA FIRMS · VIIRS NOAA-20 · loading…</div>
           <div class="meta">One detection per pass, not one fire; cloud may hide detections. NASA: not for tactical or local-scale decisions. <a class="more" href="sources.html#firms">details</a></div>
         </div>
@@ -97,7 +97,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611010320"></script>
+<script src="app.js?v=202611010540"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, MAP_LAYERS, IMG_DAY, IMG_LABEL } = ME;
@@ -143,7 +143,7 @@ function cellGeom(id) {
 }
 const STROKE = { adequate: 'rgba(214,221,232,1)', partial: 'rgba(214,221,232,.8)', unknown: 'rgba(255,90,60,.95)' };
 const FILL = { adequate: 'rgba(214,221,232,.10)', partial: 'rgba(214,221,232,.05)', unknown: 'rgba(255,90,60,.12)' };
-const windowText = (layer, snap) => layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : 'in the last 24 h';
+const windowText = (layer, snap) => layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : 'in the last 24 h';
 
 function render() {
   const polys = [];

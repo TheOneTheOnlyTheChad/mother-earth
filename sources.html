@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611010320">
+<link rel="stylesheet" href="style.css?v=202611010540">
 </head>
 <body class="doc">
 <header class="top">
@@ -68,7 +68,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611010320"></script>
+<script src="app.js?v=202611010540"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -94,7 +94,7 @@ function renderAll() {
   $('p-imagery').textContent = (rules.find(x => x.section === 'imagery') || {}).v || '';
   $('limits-body').innerHTML = [
     `<p><b>Aircraft — not shown.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,
-    `<p><b>Fires.</b> ${esc((rules.find(x => x.section === 'firms' && x.k === 'Source caveat') || {}).v || '')} One detection per satellite pass, not one fire; cloud may hide detections; an empty response from the source is shown as unknown, never as zero.</p>`,
+    `<p><b>Fires.</b> ${esc((rules.find(x => x.section === 'firms' && x.k === 'Source caveat') || {}).v || '')} One detection per satellite pass, not one fire; cloud may hide detections. The count is <b>today (UTC) so far</b>: the FIRMS area API with day_range=1 returns the current UTC date only, so it resets at 00:00 UTC and refills as near-real-time processing lands, about 2–3 h after each pass (confirmed 1 Nov 2026 after a run of empty files between 02:15 and 03:45 UTC). An empty response is shown as unknown, never as zero.</p>`,
     `<p><b>Ships.</b> ${esc((rules.find(x => x.section === 'ships' && x.k === 'Source terms') || {}).v || '')} Terrestrial receivers only: a cell with no vessels is not an empty sea. Samples, not a continuous feed; current positions are unknown between samples; mode: ${esc(ME.SHIPS_MODE.text)}.</p>`,
     `<p><b>Sea ice.</b> ${esc((rules.find(x => x.section === 'seaice' && x.k === 'Map layer') || {}).v || '')}</p>`,
     `<p><b>Kp, CO₂, sea ice</b> are indices, not map layers: one planetary number, one station, two hemispheres. A degraded source state means the latest observation is older than its product's refresh and is shown with its observation time.</p>`,

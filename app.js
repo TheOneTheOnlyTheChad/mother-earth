@@ -56,8 +56,8 @@ ME.freshness = function (layer) {
   const ageS = (Date.now() - Date.parse(snap.retrieved_at)) / 1000;
   if (snap.source_status === 'down') return { grade: 'unknown', why: 'collector reported down: ' + (snap.note || '') };
   if (ageS > (snap.stale_after_s || 900)) return { grade: 'unknown', why: layer === 'ships' ? `last sample is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)}); current positions unknown` : `last snapshot is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)})` };
-  // FIRMS (brief §5): an empty response is not a validated zero. The source's 24 h world file is never legitimately empty.
-  if (layer === 'firms' && ME.total(snap) === 0 && (snap.raw_bytes || 0) < 1000) return { grade: 'unknown', why: `source returned an empty file (${snap.raw_bytes || 0} bytes) — not a validated zero` };
+  // FIRMS (brief §5): an empty response is not a validated zero. day_range=1 = today (UTC): the file empties at 00:00 UTC and refills ~2–3 h behind.
+  if (layer === 'firms' && ME.total(snap) === 0 && (snap.raw_bytes || 0) < 1000) return { grade: 'unknown', why: new Date().getUTCHours() < 4 ? `no detections processed yet for today (UTC) — FIRMS resets at 00:00 UTC, NRT runs ~2–3 h behind` : `source returned an empty file (${snap.raw_bytes || 0} bytes) — not a validated zero` };
   if (snap.source_status === 'degraded') return { grade: 'partial', why: layer === 'swpc' && snap.index ? `source degraded — observation ${ago(snap.index.time_tag)}, retrieved ${ago(snap.retrieved_at)}` : 'source degraded' };
   return { grade: 'adequate', why: 'retrieved ' + ago(snap.retrieved_at) };
 };
@@ -71,9 +71,9 @@ ME.readings = function () {
     observed: u ? `feed generated ${hhmm(u.source_generated_at)}, ${Math.round(u.source_age_s || 0)} s old at retrieval` : '', retrieved: u && u.retrieved_at,
     coverage: 'M2.5 completeness is regional (USGS documents global completeness at M4.5+); cells shown partial', quantity: u && u.quantity, window: '24 h rolling window; events keep their age inside it', cadence: 'collected every 5 min', comparison: `none of ours yet — Mother Earth\'s own baseline accumulates from ${BASELINE_SINCE}` };
   const f = state.firms, ff = ME.freshness('firms');
-  R.firms = { label: LABEL.firms, source: SOURCE.firms, fresh: ff, value: ff.grade !== 'unknown' ? ME.total(f) : null, unit: 'detections in the last 24 h',
-    observed: f ? `VIIRS NOAA-20, ${f.scope || 'world'}; latest pass times inside the window` : '', retrieved: f && f.retrieved_at,
-    coverage: 'pass schedule not yet wired; cloud may hide detections; one detection per pass, not one fire', quantity: f && f.quantity, window: '24 h rolling window', cadence: 'collected every 15 min', comparison: `none of ours yet — baseline accumulates from ${BASELINE_SINCE}`,
+  R.firms = { label: LABEL.firms, source: SOURCE.firms, fresh: ff, value: ff.grade !== 'unknown' ? ME.total(f) : null, unit: 'detections so far today (UTC)',
+    observed: f ? `VIIRS NOAA-20, ${f.scope || 'world'}; passes since 00:00 UTC that NRT has processed (~2–3 h behind)` : '', retrieved: f && f.retrieved_at,
+    coverage: 'pass schedule not yet wired; cloud may hide detections; one detection per pass, not one fire', quantity: f && f.quantity, window: 'today (UTC) so far — FIRMS day_range=1 is the current UTC date, not a rolling 24 h; the count resets at 00:00 UTC and is lowest in the first hours of the day', cadence: 'collected every 15 min', comparison: `none of ours yet — baseline accumulates from ${BASELINE_SINCE}`,
     caveat: 'NASA: not for tactical decisions or local-scale conditions' };
   const s = state.ships, fs = ME.freshness('ships');
   const lastCount = s ? ME.total(s) : null;
@@ -108,7 +108,7 @@ ME.report = function (R) {
   const parts = [];
   const st = r => `${r.fresh.grade === 'adequate' ? 'current' : r.fresh.grade === 'partial' ? 'degraded' : 'unknown'} — ${r.fresh.why}`;
   parts.push(R.usgs.value !== null ? `${R.usgs.value.toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS; ${R.usgs.observed}; retrieved ${ago(R.usgs.retrieved)})` : `earthquakes: unknown — ${R.usgs.fresh.why}`);
-  parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections in the last 24 h (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'source degraded; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
+  parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections so far today, UTC (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'source degraded; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
   parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
   parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value} observed ${hhmm(R.swpc.observedAt)} (${ago(R.swpc.observedAt)}; NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; source degraded — ' + R.swpc.fresh.why : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa on ${R.co2.date} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);

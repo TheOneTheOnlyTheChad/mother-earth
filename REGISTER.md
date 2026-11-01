@@ -39,6 +39,7 @@ Rule: Chad reads the licence page and pastes the operative sentence; Claude file
 - **Rate limit (from MAP_KEY issue email, 30 Oct 2026):** 5,000 transactions / 10 minutes per key. We make 96/day.
 - **Operational notice (FIRMS front page, 30 Oct 2026):** Suomi NPP data delivery ceases 2 Nov 2026; users told to move to NOAA-20/NOAA-21. **We already use NOAA-20 — no action.** NOAA-21 is a possible second source later.
 - **Coverage statement:** global detections "within 3 hours of satellite observation" (US/Canada real-time). Per-cell adequacy needs the pass schedule (not wired); cloud hides detections (on the page already).
+- **Window semantics (measured 1 Nov 2026, confirmed against the area-API docs by Gemini):** `day_range=1` returns the **current UTC date only**, not the last 24 h. The file was header-only (122 bytes) from 02:15 to 03:45 UTC and held 507 rows at 04:00. Decision: keep `day_range=1` (no extra CPU, no doubled file) and label the reading "detections so far today (UTC)". Hub 0.1.9: an empty file before 04:00 UTC is recorded as "no detections processed yet for today", later in the day as "not a validated zero"; both show as unknown, never zero. `day_range=2` would give a true 24 h but doubles the parse (~15 ms CPU at 1.3 MB already exceeds the Free plan's 10 ms soft limit) — not taken.
 - **Status:** ✅ cleared for public, automated use with the LANCE acknowledgment and the local-scale caveat shown.
 
 ## NASA GIBS — WMS imagery (VIIRS NOAA-20 true colour)

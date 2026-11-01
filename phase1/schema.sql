@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS layer_hourly (
   hour_utc TEXT NOT NULL,
   snapshots_expected INTEGER NOT NULL,
   snapshots_ok INTEGER NOT NULL,
-  source_status TEXT NOT NULL,     -- ok | degraded | down
+  source_status TEXT NOT NULL,     -- ok | degraded | down | absent (ships: no collector sample in the hour; the source was not asked)
   adequate_cells TEXT NOT NULL,    -- JSON array of cell_ids, or 'none' / 'all'
   note TEXT,
   updated_at TEXT NOT NULL,
