@@ -24,7 +24,7 @@ One browser globe showing the latest observations of the planet from open live f
 |---|---|---|
 | Collector | `phase1/worker.js` | `~/Documents/Mother Earth/phase1/worker.js` |
 | Mac/Pi collector | `phase1/collector-mac.mjs` | same |
-| Page | `index.html` | `~/Documents/Mother Earth/index.html` |
+| Pages | `index.html` (World View), `sources.html` (Sources & Details), `app.js` (shared logic: freshness, readings, report, rules), `style.css` — bump the `?v=` on the css/js links in both html files on every change | same names in `~/Documents/Mother Earth/` |
 | Status | `STATUS.md` | `~/Documents/Mother Earth/STATUS.md` + project doc `claude/STATUS.md` |
 | Start here | `START-HERE.md` | `~/Documents/Mother Earth/START-HERE.md` + project doc `claude/START-HERE.md` |
 | Register | `REGISTER.md` | `~/Documents/Mother Earth/REGISTER.md` |
@@ -48,6 +48,7 @@ D1 console: dashboard → D1 → mother-earth → Console; Chad or Claude runs `
 Metrics: `…/workers/services/view/mother-earth/production/metrics` — read with `get_page_text`. Free plan: 10 ms CPU soft limit per invocation; measured medians ~1 ms; worst offenders were whole-file parses (fixed by `tail()`).
 
 ## 5. Browser pane facts
+- **The browser pane renders only while it is visible in the Claude app.** Hidden (side panel showing something else, or Chad in another app) = keystrokes still land but screenshots freeze or time out; `tabs_context` says "hidden". Ask Chad to show it (Cmd+Shift+B) before any deploy verification.
 - **If the Claude desktop window is covered (Chad in another app), the pane stops drawing: screenshots repeat the same frame and nothing looks typed — but keystrokes still land.** Ask Chad to bring Claude to the front, then screenshot again before deciding anything. Never retype on the strength of a frozen screenshot; probe with one character first and delete it after.
 - The R2 lifecycle "Add rule" form opens with "Delete uploaded objects after" already ticked — fill name, prefix, days; do not click the checkbox.
 - Cron triggers: Worker → Settings → Trigger events → trash icon → Save. Only three remain (hourly :07, */5, */15).
