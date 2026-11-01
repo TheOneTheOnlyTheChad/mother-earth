@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mother Earth — Sources &amp; Details</title>
+<meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="doc">
+<header class="top">
+  <h1>Mother Earth</h1>
+  <div class="promise">Sources &amp; Details</div>
+  <div class="clock" id="clock">--:--:--<span>UTC</span></div>
+  <nav class="menu" aria-label="Pages">
+    <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
+    <ul id="menu-list" role="menu">
+      <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
+      <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
+    </ul>
+  </nav>
+</header>
+<main>
+  <p class="small"><a href="index.html">← World View</a></p>
+  <nav class="toc" aria-label="Sections">
+    <a href="#report">Status report</a> · <a href="#sources">Sources &amp; attribution</a> · <a href="#measures">What each layer measures</a> · <a href="#windows">Windows &amp; cadence</a> · <a href="#dates">Observation vs retrieval</a> · <a href="#coverage">Coverage</a> · <a href="#comparisons">Comparisons</a> · <a href="#tiers">Classification</a> · <a href="#imagery">Imagery</a> · <a href="#limits">Limitations</a>
+  </nav>
+
+  <h2 id="report">Full status report</h2>
+  <div class="report"><span class="tag">STATUS</span><span id="report-text">Loading the latest published snapshots…</span><div class="small" id="report-at"></div></div>
+  <p class="small">Generated from the same template as the World View sentence; the template cannot emit a cause. States per layer: <span id="report-states"></span></p>
+
+  <h2 id="sources">Sources, links and attribution</h2>
+  <table id="t-sources"><tr><th>Layer</th><th>Source</th><th>Terms (as read, dated in the register)</th><th>Attribution carried</th></tr></table>
+  <p class="small">The full register with verbatim terms and read dates is <a href="https://github.com/TheOneTheOnlyTheChad/mother-earth/blob/main/REGISTER.md" target="_blank" rel="noopener">REGISTER.md</a> in the public repository.</p>
+
+  <h2 id="measures">What each layer measures</h2>
+  <table id="t-measures"><tr><th>Layer</th><th>Quantity (what one count means)</th></tr></table>
+
+  <h2 id="windows">Observation windows and collection cadence</h2>
+  <table id="t-windows"><tr><th>Layer</th><th>Window</th><th>Cadence / mode</th></tr></table>
+
+  <h2 id="dates">Observation dates versus retrieval dates</h2>
+  <p>Three timestamps travel with every snapshot: when the source observed it, when the collector retrieved it, and (for home collectors) when the hub received it. A recent retrieval never makes an old observation current.</p>
+  <table id="t-dates"><tr><th>Layer</th><th>Observed</th><th>Retrieved by collector</th><th>State now</th></tr></table>
+
+  <h2 id="coverage">Coverage grades, evidence and unknown coverage</h2>
+  <p>Every map cell carries an activity count and, separately, a coverage grade with an evidence string. <b>adequate</b>: the collector observed throughout the window and the source documents coverage of that cell (source coverage can still be incomplete). <b>partial</b>: records observed; coverage incomplete — the count is not a total, and not a guaranteed minimum of real-world activity. <b>unknown</b>: nothing can be said about the cell. A cell with no outline has no records; that is not evidence of absence unless it was adequately observed. Comparisons (phase 3) will run only on adequate cells.</p>
+  <table id="t-coverage"><tr><th>Layer</th><th>Rule in force</th></tr></table>
+
+  <h2 id="comparisons">Comparison methods and baseline dates</h2>
+  <p><b>Mother Earth's own baselines</b> accumulate from 30 Oct 2026 (hourly per-cell aggregates kept in the hub's database). No comparison of ours is shown yet; descriptive comparisons come in phase 3 and probabilistic highlights only after a held-out validation with a measured false-highlight rate. <b>Source-provided baselines</b> (NOAA's CO₂ weekly comparison, NSIDC's 1981–2010 sea-ice climatology) are shown now and labelled as the source's; where a subtraction is ours, it says so.</p>
+  <table id="t-cmp"><tr><th>Layer</th><th>Comparison shown</th><th>Whose baseline</th></tr></table>
+
+  <h2 id="tiers">Observation / analysis / model classification</h2>
+  <table id="t-tiers"><tr><th>Layer</th><th>Tier</th></tr></table>
+
+  <h2 id="imagery">Imagery source and date</h2>
+  <p id="p-imagery"></p>
+
+  <h2 id="limits">Limitations, disclaimers and currently unavailable layers</h2>
+  <div id="limits-body"></div>
+
+  <h2 id="rules">Every rule in force</h2>
+  <p class="small">Read-only in phase 1. Items marked <span class="fixed">fixed</span> are never adjustable, because changing them would make the view less honest rather than quieter or louder.</p>
+  <div id="rules-body"></div>
+
+  <p class="back"><a href="index.html">← Back to World View</a></p>
+</main>
+<script src="app.js"></script>
+<script>
+(() => {
+const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
+ME.menu(); ME.clock();
+const anchor = (layer) => `<a id="${layer}"></a>${LABEL[layer]}`;
+const row = cells => '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+function fill(id, rows) { const t = $(id); t.querySelectorAll('tr:not(:first-child)').forEach(r => r.remove()); t.insertAdjacentHTML('beforeend', rows.join('')); }
+
+function renderAll() {
+  const R = ME.readings(), rep = ME.report(R), rules = ME.rules(R);
+  $('report-text').textContent = rep.text;
+  $('report-at').textContent = 'Generated ' + rep.at.replace('T', ' ').slice(0, 19) + ' UTC from snapshots loaded ' + (ME.loadedAt || '').replace('T', ' ').slice(0, 19) + ' UTC';
+  $('report-states').innerHTML = Object.entries(rep.states).map(([k, v]) => `<b>${esc(LABEL[k])}</b>: ${esc(v)}`).join(' · ');
+  fill('t-sources', [...LAYERS.map(l => row([anchor(l), `<a href="${SOURCE[l].url}" target="_blank" rel="noopener">${esc(SOURCE[l].name)}</a>`, esc(SOURCE[l].terms), esc(SOURCE[l].credit)])),
+    row(['<a id="gibs"></a>Imagery', `<a href="${SOURCE.gibs.url}" target="_blank" rel="noopener">${esc(SOURCE.gibs.name)}</a>`, esc(SOURCE.gibs.terms), esc(SOURCE.gibs.credit)]),
+    row(['<a id="aircraft"></a>Aircraft', '<a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a>', 'hobbyist use within credits; a public-facing website must additionally feed the network; cloud servers not whitelisted (reply 30 Oct 2026)', 'not shown'])]);
+  fill('t-measures', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].quantity || 'no snapshot yet')])));
+  fill('t-windows', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].window), esc(R[l].cadence)])));
+  fill('t-dates', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].observed || '–'), R[l].retrieved ? esc(R[l].retrieved.replace('T', ' ').slice(0, 19) + ' UTC (' + ago(R[l].retrieved) + ')') : '–', esc(rep.states[l])])));
+  fill('t-coverage', LAYERS.map(l => row([esc(LABEL[l]), esc((rules.find(x => x.section === l && x.k === 'Coverage rule') || {}).v || R[l].coverage) + ' — ' + esc(R[l].coverage)])));
+  fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || 'none shown; Mother Earth\'s baseline accumulating since 30 Oct 2026')])));
+  fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Aircraft', 'observation — not shown'])]);
+  $('p-imagery').textContent = (rules.find(x => x.section === 'imagery') || {}).v || '';
+  $('limits-body').innerHTML = [
+    `<p><b>Aircraft — not shown.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,
+    `<p><b>Fires.</b> ${esc((rules.find(x => x.section === 'firms' && x.k === 'Source caveat') || {}).v || '')} One detection per satellite pass, not one fire; cloud may hide detections; an empty response from the source is shown as unknown, never as zero.</p>`,
+    `<p><b>Ships.</b> ${esc((rules.find(x => x.section === 'ships' && x.k === 'Source terms') || {}).v || '')} Terrestrial receivers only: a cell with no vessels is not an empty sea. Samples, not a continuous feed; current positions are unknown between samples; mode: ${esc(ME.SHIPS_MODE.text)}.</p>`,
+    `<p><b>Sea ice.</b> ${esc((rules.find(x => x.section === 'seaice' && x.k === 'Map layer') || {}).v || '')}</p>`,
+    `<p><b>Kp, CO₂, sea ice</b> are indices, not map layers: one planetary number, one station, two hemispheres. A degraded source state means the latest observation is older than its product's refresh and is shown with its observation time.</p>`,
+    `<p><b>Comparisons.</b> None of Mother Earth's own yet. Nothing on either page implies a cause.</p>`,
+  ].join('');
+  // every rule, grouped
+  const groups = ['general', ...LAYERS, 'aircraft', 'imagery'];
+  $('rules-body').innerHTML = groups.map(g => { const rs = rules.filter(r => r.section === g); if (!rs.length) return ''; return `<h3>${esc(LABEL[g] || g)}</h3><table>${rs.map(r => `<tr><td>${esc(r.k)}</td><td class="${r.fixed ? 'fixed' : ''}">${esc(r.v)}${r.fixed ? ' <span class="fixed">(fixed)</span>' : ''}</td></tr>`).join('')}</table>`; }).join('');
+  if (location.hash) { const el = document.querySelector(location.hash); if (el) el.scrollIntoView(); }
+}
+async function tick() { await ME.loadCells(); renderAll(); }
+tick(); setInterval(tick, ME.REFRESH_MS);
+})();
+</script>
+</body>
+</html>
