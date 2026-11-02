@@ -14,8 +14,9 @@
  *   · 1 upload failed (envelope kept as the single pending file, 2 h expiry, 5 MB cap) · 2 usage/config error · 4 nothing pending (retry mode)
  * Bounded storage: nothing is archived locally — messages are processed in memory and only the finished envelope leaves the machine.
  *   The only files: <state>/pending.json (≤ 1 envelope) and whatever the runner logs. No credentials or vessel payloads are ever logged.
- * Sleep/interruption: message gaps > 10 s inside a sample are recorded as interruptions and subtracted from connected time; a sample whose
- *   wall-clock ran long (laptop slept) is marked degraded, never counted as observed.
+ * Interruptions: message gaps > 10 s inside a sample are recorded and subtracted from connected time. A sample whose ELAPSED time ran past
+ *   the overlong threshold is marked degraded and never counted as observed — on elapsed time alone, with no cause inferred. The
+ *   wall-minus-monotonic sleep detector was retired 2 Nov 2026 (it cannot see host suspend on this hardware). See the duration contract below.
  *
  * ships (aisstream.io, measured 31 Oct 2026 from aisstream.io/documentation): wss://stream.aisstream.io/v0/stream; one JSON
  * subscription within 3 s of connecting; 3 subscribed connections per account; read continuously or the service drops messages;
@@ -34,13 +35,25 @@ const quiet = flags.includes('--quiet');
 const flag = (name, dflt) => { const f = flags.find(x => x.startsWith('--' + name + '=')); return f ? f.slice(name.length + 3) : dflt; };
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 const STATE_DIR = flag('state', path.join(path.dirname(new URL(import.meta.url).pathname), 'state'));
 const PENDING = path.join(STATE_DIR, 'pending.json');
 const PENDING_MAX_BYTES = 5 * 1024 * 1024, PENDING_MAX_AGE_MS = 2 * 3600e3;
 const UPLOAD_TIMEOUT_MS = 20e3, UPLOAD_BACKOFF_MS = [5e3, 20e3, 60e3];   // 3 tries inside one run; after that the envelope waits as pending
+/* ---- DURATION CONTRACT (authoritative; envelope and docs must match this and nothing else) ----------------------
+ *   intended sample length   windowS  = --window=<s>, default 60, floor 10. This is the LISTENING period we intend.
+ *   overlong threshold       elapsed > OVERLONG_MULTIPLE × windowS   (1.25 × 60 = 75 s at the default)
+ *                            -> source_status 'degraded', overlong_sample true, never counted as a usable sample.
+ *   hard-stop threshold      elapsed ≥ MAX_WALL_MULTIPLE × windowS   (2 × 60 = 120 s at the default)
+ *                            -> socket force-closed, and any message arriving at or past this point is rejected
+ *                               BEFORE it can touch the vessel map.
+ * Both thresholds are multiples of the window, so a non-default --window scales them. The 180 s window used in the
+ * 2 Nov physical test was a one-off override to give a human time to trigger Apple-menu Sleep; it moved the
+ * thresholds to 225 s and 360 s for that run only. Production is and remains 60 s / 75 s / 120 s.
+ * Elapsed time is never counted as listening: the observation figure is messages_flowing_s, and that is inferred.  */
 const GAP_S = 10;                                                         // a silence longer than this inside a sample is an interruption
-const MAX_WALL_MULTIPLE = 2;                                              // a sample whose elapsed time exceeds this × its window is OVERLONG: bounded, never counted as listening
-const OVERLONG_MULTIPLE = 1.25;                                           // elapsed beyond this × window is already not a clean sample, whatever the cause
+const MAX_WALL_MULTIPLE = 2;
+const OVERLONG_MULTIPLE = 1.25;
 
 function cellId(lat, lng) {
   const r = Math.max(0, Math.min(Math.floor(180 / CELL_DEG) - 1, Math.floor((lat + 90) / CELL_DEG)));
@@ -50,7 +63,7 @@ function cellId(lat, lng) {
 const nowIso = () => new Date().toISOString();
 
 /* ---- feeds: each returns { fields, rows, quantity, coverageDefault, extra } or throws ---- */
-const FEEDS = {
+export const FEEDS = {
   // Synthetic: a handful of points around Cape Town. Exists only to prove auth → validate → publish → page.
   mock: async () => {
     const base = [-33.97, 18.60];
@@ -118,8 +131,13 @@ const FEEDS = {
       };
     });
     const wallS = (Date.now() - t0) / 1000;
-    const monoS = Number(process.hrtime.bigint() - h0) / 1e9;                                       // monotonic; a laptop sleep shows as wall ≫ mono
-    const slept = wallS - monoS > 5;
+    const monoS = Number(process.hrtime.bigint() - h0) / 1e9;
+    /* The wall-minus-monotonic sleep detector is RETIRED on this hardware (2 Nov 2026). Measured against pmset -g log,
+     * which macOS writes and this collector has no part in: three overnight samples sat inside Maintenance Sleep of
+     * 946/921/682 s against gaps of 948/923/686 s, and it reported slept=false on every one. process.hrtime advances
+     * across suspend here, so both clocks include the suspended time and the comparison can never fire. Both numbers
+     * are still published as raw measurements; neither is evidence that sleep did or did not happen, and nothing
+     * downstream may read them that way. Status hangs on elapsed time instead — see the duration contract above. */
     const end = closedAt || Date.now();
     const quietS = connectedAt && lastMsgAt ? (end - lastMsgAt) / 1000 : null;                      // seconds between the last message and close
     if (lastMsgAt && quietS > GAP_S) interruptions.push({ from: new Date(lastMsgAt).toISOString(), to: new Date(end).toISOString(), seconds: Math.round(quietS) });
@@ -138,14 +156,11 @@ const FEEDS = {
     if (!confirmed) throw new Error('no SubscriptionConfirmation within the window' + (closeInfo ? ' (close ' + closeInfo.code + ' ' + closeInfo.reason + ')' : ''));
     const rows = [...vessels.values()];
     const rowsA = rows.filter(r => r[9] === 'A').length;
-    /* A nominal windowS sample that took far longer in elapsed time is an interrupted/overlong sample, whatever the cause,
-     * and it is degraded on that fact alone — we do NOT need to know why to know it is not a clean 60 s of listening.
-     * `slept` is only this detector's verdict: on macOS both clocks can include suspend time, so slept=false does not
-     * establish that the host stayed awake. That is what the untested "sleep mid-sample" acceptance test (STATUS Next 0)
-     * exists to settle. Until it is run, treat a long gap as "a gap in locally processed messages" of unestablished origin. */
+    // A sample whose elapsed time ran past the overlong threshold is not a clean window of listening, whatever the
+    // cause, and is degraded on that fact alone. No cause is inferred or needed.
     const overlong = wallS > OVERLONG_MULTIPLE * windowS;
-    const status = upFrac >= 0.9 && !slept && !overlong ? 'ok' : 'degraded';
-    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s slept=${slept} overlong=${overlong} status=${status} socket=${socketS.toFixed(1)}s flowing=${flowingS.toFixed(1)}s(inferred) interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
+    const status = upFrac >= 0.9 && !overlong ? 'ok' : 'degraded';
+    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s overlong=${overlong} status=${status} socket=${socketS.toFixed(1)}s flowing=${flowingS.toFixed(1)}s(inferred) interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
     return { fields: ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'], rows,
       quantity: `vessel identities (MMSI) with a Class A or B position report received during a ${windowS} s AIS sample, per cell; latest received position per vessel — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell; positions between samples unknown`,
       coverageDefault: { grade: 'partial', evidence: 'messages_flowing_inferred_from_arrival_gaps;not_a_measure_of_reception;not_geographic_coverage;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },
@@ -156,10 +171,10 @@ const FEEDS = {
         messages_flowing_s: Math.round(flowingS * 10) / 10,                                 // INFERRED: socket_connected_s − message_gap_s
         durations_note: 'socket_connected_s, message_gap_s and elapsed_wall_s are measured; messages_flowing_s is inferred by subtracting the gaps and is not a measurement of reception, nor any statement about geographic coverage',
         quiet_at_end_s: quietS, connection_fraction_of_sample: upFrac, messages, class_a: rowsA, class_b: rows.length - rowsA,
-        interruptions_override: interruptions, wall_s: Math.round(wallS * 10) / 10, mono_s: Math.round(monoS * 10) / 10, slept_during_sample: slept,
+        interruptions_override: interruptions, wall_s: Math.round(wallS * 10) / 10, mono_s: Math.round(monoS * 10) / 10,
+        sleep_detection: 'retired 2 Nov 2026: wall-minus-monotonic cannot detect host suspend on this hardware (verified against pmset -g log). Neither wall_s nor mono_s is evidence about sleep.',
         overlong_sample: overlong, elapsed_not_counted_s: overlong ? Math.round((elapsedWallS - flowingS) * 10) / 10 : 0,
         duration_rule: `elapsed time (${Math.round(elapsedWallS)} s) is never counted as listening; a sample over ${OVERLONG_MULTIPLE}× its ${windowS} s window is degraded whatever the cause, is closed at ${MAX_WALL_MULTIPLE}× once the process runs again, and rejects messages arriving past that bound`,
-        sleep_detector_caveat: 'slept = (wall - monotonic > 5 s); on macOS both clocks may include host suspend, so slept=false does not establish the host stayed awake',
         records_without_source_time: noSourceTime, older_reports_ignored: olderIgnored, sampling: 'one sample per run; runs are scheduled roughly every 30 min while the collector is available; no observation between samples',
         compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,
         citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' } };
@@ -230,4 +245,7 @@ async function retryPending() {
   console.error(`retrying pending envelope: layer=${e.layer} retrieved_at=${e.retrieved_at} records=${(e.records || []).length}`);
   process.exit(await upload(e));
 }
-if (layer === 'retry') retryPending(); else main();
+// Run only when invoked as a command, so the feeds can be imported and driven by a test harness with a stubbed
+// socket and clock (phase1/duration-contract.test.mjs) without this file uploading anything.
+const invokedDirectly = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (invokedDirectly) { if (layer === 'retry') retryPending(); else main(); }

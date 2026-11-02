@@ -81,6 +81,21 @@ The Pages deploy lock makes a bad push expensive (~30 min before the next one la
 - **Testing a transition, not just an end state (added after review round 5, correction 1):** a bug can live entirely in the window between two fetches, so assert on what the page hands the renderer over time, not on where it settles. Serve the build locally, `page.route()` the hub to fixtures whose payloads carry a run label, delay one response, and swap in a **globe.gl test double** that records every `pointsData` / `ringsData` / `polygonsData` call. Zip the calls by index (a render pass calls them back to back) and assert no pass mixes labels. Run it against the **previous** build first: a test that does not fail on the old code is not evidence. `ME.pairState(layer?)` reports the same invariant live.
 - Page logic rule that came out of it: records and counts are committed together per layer (`refreshPair`), and `usable(layer)` re-checks `pmeta.id === snapId(state[layer])` at every read. Anything new that renders, lists or selects records goes through `usable()`.
 
+## 5b. Ships duration contract and the retired sleep detector (2 Nov 2026)
+One statement of the contract. Code (`collector-mac.mjs`), the envelope's `duration_rule`, and this file must agree; if they ever disagree, the code block marked DURATION CONTRACT is authoritative and the others are the bug.
+
+| | value at the default | rule |
+|---|---|---|
+| intended sample length | **60 s** | `--window=<s>`, floor 10 s. The listening period we intend. |
+| overlong threshold | **> 75 s** elapsed | `1.25 × window`. → `degraded`, `overlong_sample: true`, never a usable sample. |
+| hard stop | **120 s** elapsed | `2 × window`. Socket force-closed; a message arriving at or past this is rejected **before** it can touch the vessel map. |
+
+Both thresholds are multiples of the window, so a non-default `--window` scales them. The **180 s window in the 2 Nov physical test was a one-off override** to give a human time to trigger Apple-menu Sleep; it moved the thresholds to 225 s / 360 s for that run only and appears nowhere in production. Elapsed time is never counted as listening — the observation figure is `messages_flowing_s`, which is inferred.
+
+**The wall-minus-monotonic sleep detector is retired on this Mac.** Measured 2 Nov against `pmset -g log`, which macOS writes and the collector has no part in: three overnight samples sat inside Maintenance Sleep of 946/921/682 s against collector gaps of 948/923/686 s, and it reported `slept=false` on every one. `process.hrtime` advances across suspend here, so both clocks include the suspended time. `wall_s` and `mono_s` are still published as raw measurements; **neither is evidence that sleep did or did not occur**, and nothing may be written that reads them that way. Status hangs on elapsed time instead.
+
+Deterministic test of the hard boundary: `node phase1/duration-contract.test.mjs` (stubbed socket, controllable clock, no network, nothing uploaded). Case A delivers a position past the hard deadline and proves it is rejected before mutation; Case B lets the deadline pass with no further message and proves the run still ends and is still unusable, so cleanup does not depend on `onmessage`. **This proves the guard's logic only — the physical long-sleep/resumption case on real hardware stays open.**
+
 ## 6. Collector conventions (worker.js)
 - Envelope per §5: `record_format:'rows'` + `record_fields`; cells `{count, coverage:{grade, evidence, observed_fraction}}` on a 4° grid; `latest/<layer>.json` only overwritten on success; `latest-cells/` small files; `stale_after_s` per layer; `writeDown()` on failure.
 - Each collector runs inside `guarded()`; one throw never kills the others.
