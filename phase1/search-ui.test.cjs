@@ -293,7 +293,7 @@ async function harness(browser, opts = {}) {
     const povBefore = (await povs()).length;
 
     st.runs.usgs = RUN_B;                                   // ONLY earthquakes move on
-    await page.clock.runFor(ME_REFRESH_MS);
+    await page.clock.fastForward(ME_REFRESH_MS);   // fastForward, not runFor: runFor fires every intermediate animation frame and the software renderer then redraws the globe thousands of times
     await page.waitForFunction(run => window.ME && ME.pairState('usgs').usgs.cells === run, RUN_B, { timeout: 20000 });
     await page.waitForFunction(() => ME.searchState() && ME.searchState().dead.some(Boolean), null, { timeout: 20000 });
 

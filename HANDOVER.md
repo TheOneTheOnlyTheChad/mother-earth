@@ -10,7 +10,7 @@ Read `START-HERE.md` (§2 is the constitution; §5a testing; §5b the ships dura
 |---|---|
 | Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main` at **`9e690be`**. Commit straight to main, no branches. AGPL-3.0. |
 | Hub (Cloudflare Worker) | **collector `0.2.1`** · `https://mother-earth.chadoberholzer.workers.dev` · `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `POST /ingest/<layer>`, `POST /admin/reaggregate/ships`, `GET /admin/run/<job>` |
-| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021200` — **bump on every page change, in `index.html` and `sources.html`** |
+| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021400` — **bump on every page change, in `index.html` and `sources.html`** |
 | Mac collector | **`mac-0.3.2`**, launchd `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples when 30 min are due |
 | Cron triggers | `:07` hourly · `*/5` · `*/15` firms · `11,41` forest |
 | Layers live | quakes, fires, ships, forest, Kp, CO₂, sea ice. Aircraft parked (OpenSky correspondence governs — public site must feed the network). |
@@ -72,14 +72,16 @@ node phase1/search.realdata.test.mjs        # 50 — the same helpers over REAL 
 node phase1/search-ui.test.cjs              # 104 — Playwright; needs: python3 -m http.server 8899 --bind 127.0.0.1 in the clone
 node phase1/solar.test.mjs                  # 26 — subsolar vs astronomy-engine, poles, date line, stated assumptions
 node phase1/terminator-ui.test.cjs          # 19 — day/night ACCEPTANCE gate: one page load, 6-min watchdog
-node phase1/terminator-behaviour.test.cjs   # day/night behaviour: cadence, toggling, rotating globe, no-WebGL,
-                                            #      failed harvest, phone. One page load each, 15-min watchdog.
+node phase1/terminator-behaviour.test.cjs   # 39 — day/night behaviour: cadence, toggling, rotating globe,
+                                            #      no-WebGL, failed harvest, phone. ~22s, 6-min watchdog.
 ~/mother-earth/run.sh status                # scheduler state, pending upload, lock
 ~/mother-earth/sleeptest.sh                 # physical sleep test; captures pmset -g log alongside the sample
 ```
 The browser suites drive the page's own timers with Playwright's clock, so the stale-result and recompute paths
 run through production code and not a test hook. **Both terminator suites carry a hard watchdog that FAILS rather
-than hangs** — an indefinite test is a defect in itself. globe.gl and the test-only `astronomy-engine` and `pngjs`
+than hangs** — an indefinite test is a defect in itself. Use `page.clock.fastForward()`, never `runFor()`:
+`runFor` fires every intermediate animation frame, so with globe.gl's render loop a two-minute jump makes the
+software renderer draw thousands of globes (measured: >900 s versus 22 s for the identical assertions). globe.gl and the test-only `astronomy-engine` and `pngjs`
 are served from `/home/claude/spike/node_modules` because the container cannot reach unpkg; set up with
 `cd /home/claude/spike && npm i globe.gl@2.45.0 astronomy-engine pngjs`. Pixel cases emulate reduced motion so the
 globe does not rotate between the before and after frames; behaviour while it *is* rotating is covered separately

@@ -32,6 +32,10 @@ The **drawn** boundary can sit ~**0.6°** from the instantaneous geometric one �
 
 **Acceptance gate (`node phase1/terminator-ui.test.cjs`, 19/19, one page load, 6-minute budget).** Rendered shading agrees with `ME.sunlit` at **104/104** probes across the visible disc, **90/90** at a pole and **56/56** across the date line; repaint **5–13 ms** at 1024×512 on a software renderer. Reduced motion is emulated for the pixel cases only, so the globe does not rotate between the before and after frames.
 
+**Behaviour suite (`node phase1/terminator-behaviour.test.cjs`, 39/39, 22 s).** Cadence (one-minute timer, no recompute while hidden, immediate recompute on returning to the tab and on `pageshow`), **no network request from a recompute**, 24 toggles leaving exactly one working overlay and exactly one timer, disable releasing the mesh and clearing the legend line and timestamp **together** with no timer still repainting, **behaviour while the globe is rotating** (normal motion, asserted on state not pixels: enables, keeps recomputing, picking still works, disables cleanly), no-WebGL refusal, failed-constructor-harvest refusal with the globe left intact, and phone width.
+
+**A second test defect, which is why that suite took 900 s before.** `page.clock.runFor()` fires every intermediate animation frame, so with a fake clock and globe.gl's render loop a `runFor(125_000)` made the software renderer draw ~7,500 globe frames. Measured page load is **1.3 s** — load was never the cost. Switched to `clock.fastForward()`, which jumps the clock and fires due timers without simulating the frames between: **>900 s → 22 s**, same assertions. The same call in `search-ui.test.cjs` got the same fix.
+
 **A test defect found and fixed, which matters for what earlier numbers meant.** `autoRotate` is on by default, so an earlier run compared screenshots taken while the globe was turning — its apparent failures showed luminance drops of 150 against a base of 119, far larger than 0.40 alpha can produce. **Those exploratory screenshots establish nothing**; the fixed-camera acceptance run above is what the visual checks rest on. An indefinite test is itself a defect, so both suites now carry a hard watchdog that fails rather than hangs.
 
 ## Measured 2 Nov (thread 5, ~09:55 SAST) — **operational items 2, 3 and 4: forest usage, FIRMS CPU, GML integrity**
@@ -68,7 +72,7 @@ Aggregate CPU has risen slightly since 1 Nov: **P50 3.67 (was 2.95) · P90 57.63
 
 **Also observed:** `swpc` is currently `degraded` — `kp=2 age_s=14879` (≈4.1 h on a 3-hourly product). Expected behaviour for a late product, shown with its observation time; noted, not actioned.
 
-## Done 2 Nov (thread 5) — **limited search shipped (Next 10 closed); page assets `?v=202611021200`, repo `310c13d`**
+## Done 2 Nov (thread 5) — **limited search shipped (Next 10 closed); page assets `?v=202611021400`, repo `310c13d`**
 Chad picked limited search, one feature. No collector, worker, source or network change; no REGISTER row; $0. Hub stays `0.2.1`, Mac collector stays `mac-0.3.2`.
 
 **What shipped.** The `Find in this snapshot` card is **replaced** by one collapsible **Explore** panel, closed on load, holding the labelled search input, the latitude-first hint, and the two existing snapshot-jump buttons unchanged. Results appear only after submission. Long scope text sits behind a `Search scope & limitations` disclosure, with the full rules in a new `sources.html#search` section and a generated `general / Search` rule row.

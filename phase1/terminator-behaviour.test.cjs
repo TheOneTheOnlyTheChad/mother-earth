@@ -32,11 +32,14 @@ const PAGE_PIN = (fs.readFileSync(__dirname + '/../index.html', 'utf8').match(/g
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
 const D = JSON.parse(fs.readFileSync(__dirname + '/realdata/live-sample.json', 'utf8'));
 
-const BUDGET_DEFAULT = 15 * 60e3;   // five page loads under a software renderer, each ~60-70s
+const BUDGET_DEFAULT = 6 * 60e3;   // measured: a page load is ~1.3s. The old budget assumed load cost;
+                                   // the real cost was clock.runFor firing every intermediate animation frame.
 const BUDGET_MS = +(process.env.BUDGET_MS || BUDGET_DEFAULT);
 const watchdog = setTimeout(() => { console.log(`\nFAIL  suite exceeded its ${BUDGET_MS / 1000}s budget — treated as a failure, not a hang`); process.exit(1); }, BUDGET_MS);
 watchdog.unref && watchdog.ref();
 
+const T0 = Date.now();
+const mark = t => console.log(`   [timing] ${t}: +${((Date.now() - T0) / 1000).toFixed(1)}s`);
 let pass = 0, fail = 0;
 const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got)}` : ''}`); } };
 const iso = (h, m, s = 0) => new Date(Date.UTC(2026, 10, 2, h, m, s)).toISOString().replace(/\.\d+Z$/, 'Z');
@@ -87,6 +90,7 @@ async function harness(browser, o = {}) {
   await page.waitForFunction(() => window.ME && ME.pairState && ME.pairState('usgs').usgs.usable, null, { timeout: 30000 });
   await page.waitForTimeout(600);
   const shot = async () => read(await page.locator('#globe').screenshot());
+  mark('page loaded');
   return { ctx, page, perr, shot };
 }
 
@@ -118,13 +122,13 @@ function agreement(before, after, probes) {
     // ---- cadence, on the same page load (overlay is currently ON)
     const t0 = await page.evaluate(() => ME.nightState().at);
     let hubCalls = 0; page.on('request', r => { if (r.url().includes('chadoberholzer.workers.dev')) hubCalls++; });
-    await page.clock.runFor(61_000); await page.waitForTimeout(350);
+    await page.clock.fastForward(61_000); await page.waitForTimeout(350);
     const t1 = await page.evaluate(() => ME.nightState().at);
     ok('recomputes on the one-minute timer', Date.parse(t1) - Date.parse(t0) >= 60_000, { t0, t1 });
     ok('a recompute makes no network request', hubCalls === 0, hubCalls);
 
     await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); });
-    await page.clock.runFor(125_000); await page.waitForTimeout(250);
+    await page.clock.fastForward(125_000); await page.waitForTimeout(250);
     const tHidden = await page.evaluate(() => ME.nightState().at);
     ok('does not recompute while the tab is hidden', tHidden === t1, { t1, tHidden });
     await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); });
@@ -132,7 +136,7 @@ function agreement(before, after, probes) {
     const tBack = await page.evaluate(() => ME.nightState().at);
     ok('recomputes immediately on returning to the tab', Date.parse(tBack) > Date.parse(tHidden), { tHidden, tBack });
 
-    await page.clock.runFor(61_000);
+    await page.clock.fastForward(61_000);
     await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
     await page.waitForTimeout(300);
     ok('pageshow recomputes too', Date.parse(await page.evaluate(() => ME.nightState().at)) > Date.parse(tBack));
@@ -143,17 +147,18 @@ function agreement(before, after, probes) {
     ok('still exactly one working overlay after 12 off/on cycles', on.on === true && on.hasMesh === true && on.at !== null, on);
     // a leaked timer from an earlier cycle would repaint more than once per minute
     const b4 = await page.evaluate(() => ME.nightState().at);
-    await page.clock.runFor(61_000); await page.waitForTimeout(300);
+    await page.clock.fastForward(61_000); await page.waitForTimeout(300);
     const af = await page.evaluate(() => ME.nightState().at);
     ok('exactly one timer survives (one minute advances the stamp by one minute)', Math.abs((Date.parse(af) - Date.parse(b4)) - 61_000) < 2000, { b4, af });
     await page.click('#tgl-night'); await page.waitForTimeout(300);
     const off = await page.evaluate(() => ME.nightState());
     ok('disabling releases the mesh', off.on === false && off.hasMesh === false, off);
     ok('disabling removes the legend line and the timestamp together', await page.locator('#night-legend').isHidden() && await page.locator('#night-time').isHidden());
-    await page.clock.runFor(125_000); await page.waitForTimeout(250);
+    await page.clock.fastForward(125_000); await page.waitForTimeout(250);
     ok('no timer keeps repainting after disable', await page.evaluate(() => ME.nightState().at) === null);
     ok('no page errors across 24 toggles', perr.length === 0, perr.slice(0, 3));
     ok('no page errors in the cadence/toggle run', perr.length === 0, perr.slice(0, 3));
+    mark('cadence+toggles done');
     await ctx.close();
   }
 
@@ -164,7 +169,7 @@ function agreement(before, after, probes) {
     await page.click('#exp-btn'); await page.click('#tgl-night'); await page.waitForTimeout(800);
     const s1 = await page.evaluate(() => ME.nightState());
     ok('overlay enables while the globe is rotating', s1.on === true && s1.hasMesh === true, s1);
-    await page.clock.runFor(61_000); await page.waitForTimeout(400);
+    await page.clock.fastForward(61_000); await page.waitForTimeout(400);
     const s2 = await page.evaluate(() => ME.nightState());
     ok('it keeps recomputing while the globe rotates', Date.parse(s2.at) > Date.parse(s1.at), { s1: s1.at, s2: s2.at });
     const cc = await page.evaluate(() => ME.screenAt(-32, 18, 0.006));
@@ -176,6 +181,7 @@ function agreement(before, after, probes) {
     await page.click('#tgl-night'); await page.waitForTimeout(300);
     ok('disabling works while rotating', await page.evaluate(() => ME.nightState().hasMesh) === false);
     ok('no page errors with motion enabled', perr.length === 0, perr.slice(0, 3));
+    mark('rotating-globe done');
     await ctx.close();
   }
 
@@ -190,6 +196,7 @@ function agreement(before, after, probes) {
     await page.fill('#search-q', 'hawaii'); await page.press('#search-q', 'Enter');
     await page.waitForSelector('#search-list button.res');
     ok('search still works without a globe', await page.locator('#search-list button.res').count() >= 1);
+    mark('no-webgl done');
     ok('no page errors', perr.length === 0, perr.slice(0, 3));
     await ctx.close();
   }
@@ -215,6 +222,7 @@ function agreement(before, after, probes) {
     await page.waitForSelector('#search-list button.res');
     ok('the globe is untouched: search still works', await page.locator('#search-list button.res').count() >= 1);
     ok('no page errors when the harvest fails', perr.length === 0, perr.slice(0, 3));
+    mark('failed-harvest done');
     await ctx.close();
   }
 
@@ -228,6 +236,7 @@ function agreement(before, after, probes) {
     ok('no scrollbar nested inside the sheet', await page.evaluate(() => ['.ovl', '#card-explore', '.exp-body'].map(q => document.querySelector(q)).filter(Boolean)
       .filter(e => { const o = getComputedStyle(e).overflowY; return (o === 'auto' || o === 'scroll') && e.scrollHeight > e.clientHeight + 1; }).length) === 0);
     ok('the panel does not overflow horizontally', await page.evaluate(() => { const e = document.getElementById('card-explore'); return e.scrollWidth - e.clientWidth <= 1; }));
+    mark('phone done');
     ok('no page errors', perr.length === 0, perr.slice(0, 3));
     await ctx.close();
   }
