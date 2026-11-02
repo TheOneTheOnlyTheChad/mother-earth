@@ -20,7 +20,7 @@ Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration co
 | **Private bench page** | claude.ai artifact "Satellite Population Bench" (platform-stated: readable by only Chad). Holds the same 10 frozen input files. Results save to its private store, collections `runs/` and `memory/`; read them with ArtifactData. Freezer artifact "Satellite Bench Freezer" exists, asset store empty, unused. |
 | Docs | `STATUS.md`, `START-HERE.md`, `HANDOVER.md`, `REGISTER.md` — repo, Mac, and `Projects.project_write` to `claude/<name>.md` |
 
-**Sync gotcha seen this thread:** `device_commit_files` once reported "written" for an existing path while the Mac kept the old file. Overwrite via a new name + `mv` on the Mac, or verify with `shasum` after every overwrite.
+**Sync gotcha seen this thread (twice):** `device_commit_files` reported "written" while the Mac received an OLD copy. It appears to cache by staged filename: re-using a `stagedPath` that was committed before delivered the earlier content. Always stage under a fresh, unique name (e.g. `STATUS-<commit>.md`), commit to a temporary name, `mv` on the Mac, then compare `shasum` with the repo.
 
 **Reaching things:** the container and the Mac's `device_bash` cannot reach celestrak.org or the hub. The browser pane can (cross-origin reads are allowed by both). Only Chad's Terminal can write a fetched file to disk byte-exact. Claude in Chrome was **not reachable** from this session.
 
