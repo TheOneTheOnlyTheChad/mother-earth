@@ -87,6 +87,7 @@ globe.gl orients or UV-maps its sphere would show up there as disagreement, not 
 | Texture quantisation at 1024 × 512 | ~**0.35°** | one pixel of the equirectangular canvas |
 | Staleness between one-minute repaints | up to **0.25°** | Earth's rotation between recomputes |
 
-The **drawn** boundary can therefore sit ~**0.6°** from the instantaneous geometric one — about fifty times
-the arithmetic's own error. Reference agreement is not a statement about what is on screen, and neither is a
-statement about observed sunrise, which is a further ~0.83° away.
+These are three different kinds of statement and are deliberately **not added together**: a *measured
+agreement*, a *quantisation bound*, and a *drift bound*. Summing them would assert a combined figure nobody
+measured. State them separately. Reference agreement is not a statement about what is on screen; and neither
+is a statement about observed sunrise, which is a further ~0.83° away (refraction plus solar disc).

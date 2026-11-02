@@ -203,11 +203,11 @@ function agreement(before, after, probes) {
   await browser.close();
   clearTimeout(watchdog);
   console.log(`\n${pass} passed, ${fail} failed`);
-  console.log(`\nResolution limits — SEPARATE from the solar-reference agreement in phase1/solar.test.mjs:`);
-  console.log(`  solar position vs astronomy-engine ..... max 0.0124°  (the maths only)`);
-  console.log(`  texture quantisation at 1024x512 ....... ~0.35° per pixel`);
-  console.log(`  staleness between 1-minute repaints .... up to 0.25° of rotation`);
-  console.log(`  The DRAWN boundary can therefore sit ~0.6° from the instantaneous geometric one — far larger`);
-  console.log(`  than the maths agreement — and the geometric boundary is itself ~0.83° from observed sunrise.`);
+  console.log(`\nThree limits — different kinds of statement, reported SEPARATELY and never summed:`);
+  console.log(`  measured agreement : solar position vs astronomy-engine ... within 0.0124°`);
+  console.log(`  quantisation bound : 1024x512 texture ..................... ~0.35° per pixel`);
+  console.log(`  drift bound        : up to one minute between repaints .... up to 0.25° of rotation`);
+  console.log(`  Only the first is a measurement. Summing them would assert a combined bound nobody measured.`);
+  console.log(`  Separately: the geometric boundary is ~0.83° from an observed sunrise (refraction + solar disc).`);
   process.exit(fail ? 1 : 0);
 })();

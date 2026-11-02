@@ -67,7 +67,7 @@ const BREAK_HARVEST = () => {
 };
 
 async function harness(browser, o = {}) {
-  const { viewport = { width: 560, height: 420 }, isMobile = false, noWebGL = false, reduced = true, breakHarvest = false } = o;
+  const { viewport = { width: 560, height: 420 }, isMobile = false, noWebGL = false, reduced = true, breakHarvest = false, realClock = false } = o;
   const ctx = await browser.newContext({ viewport, isMobile, hasTouch: isMobile, ...(reduced ? { reducedMotion: 'reduce' } : {}) });
   await ctx.route('**/unpkg.com/globe.gl**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }));
   await ctx.route('**/fonts.googleapis.com/**', r => r.fulfill({ status: 200, contentType: 'text/css', body: '' }));
@@ -85,7 +85,7 @@ async function harness(browser, o = {}) {
   if (breakHarvest) await ctx.addInitScript(BREAK_HARVEST);
   const page = await ctx.newPage();
   const perr = []; page.on('pageerror', e => perr.push(String(e).slice(0, 200)));
-  await page.clock.install({ time: new Date(Date.UTC(2026, 10, 2, 6, 0, 0)) });
+  if (!realClock) await page.clock.install({ time: new Date(Date.UTC(2026, 10, 2, 6, 0, 0)) });
   await page.goto(BASE + '/index.html', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.ME && ME.pairState && ME.pairState('usgs').usgs.usable, null, { timeout: 30000 });
   await page.waitForTimeout(600);
@@ -134,33 +134,46 @@ function agreement(before, after, probes) {
   {
     const { ctx, page, perr } = await harness(browser);
     await page.click('#exp-btn'); await page.click('#tgl-night'); await page.waitForTimeout(500);
-    // ---- cadence, on the same page load (overlay is currently ON)
+    // ================= timer behaviour under a FAKE clock (clock.fastForward).
+    // Two consecutive jumps each producing a new stamp proves the timer REPEATS rather than being a
+    // one-shot. What a fake clock cannot show is behaviour under ordinary frame-by-frame running — that
+    // is proved separately, with real timers and no clock faking, in the ordinary-cadence case below.
+    // (clock.runFor would advance frame by frame but fires every intermediate animation frame: with
+    //  globe.gl's render loop a single 61 s runFor costs ~180 s on a software renderer.)
     const t0 = await page.evaluate(() => ME.nightState().at);
     let hubCalls = 0; page.on('request', r => { if (r.url().includes('chadoberholzer.workers.dev')) hubCalls++; });
-    await page.clock.fastForward(61_000); await page.waitForTimeout(350);
+    await page.clock.fastForward(61_000); await page.waitForTimeout(300);
     const t1 = await page.evaluate(() => ME.nightState().at);
-    ok('recomputes on the one-minute timer', Date.parse(t1) - Date.parse(t0) >= 60_000, { t0, t1 });
+    ok('a minute tick happens (fastForward)', Date.parse(t1) - Date.parse(t0) >= 60_000, { t0, t1 });
+    await page.clock.fastForward(61_000); await page.waitForTimeout(300);
+    const t1b = await page.evaluate(() => ME.nightState().at);
+    ok('a SECOND consecutive tick happens — the timer REPEATS, it is not a one-shot',
+      Date.parse(t1b) - Date.parse(t1) >= 60_000, { t1, t1b });
     ok('a recompute makes no network request', hubCalls === 0, hubCalls);
 
+    // ================= the remaining timer assertions use clock.fastForward (jump, no intermediate frames):
+    // suspension and recovery, which are about what happens ACROSS a gap rather than during ordinary running.
+
     await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); });
-    await page.clock.fastForward(125_000); await page.waitForTimeout(250);
+    await page.clock.fastForward(125_000); await page.waitForTimeout(250);   // fastForward: a gap, not ordinary running
     const tHidden = await page.evaluate(() => ME.nightState().at);
-    ok('does not recompute while the tab is hidden', tHidden === t1, { t1, tHidden });
+    ok('does not recompute while the tab is hidden (fastForward)', tHidden === t1b, { t1b, tHidden });
     await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); });
     await page.waitForTimeout(300);
     const tBack = await page.evaluate(() => ME.nightState().at);
-    ok('recomputes immediately on returning to the tab', Date.parse(tBack) > Date.parse(tHidden), { tHidden, tBack });
+    ok('recomputes immediately on returning to the tab (fastForward recovery)', Date.parse(tBack) > Date.parse(tHidden), { tHidden, tBack });
 
     await page.clock.fastForward(61_000);
     await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
     await page.waitForTimeout(300);
-    ok('pageshow recomputes too', Date.parse(await page.evaluate(() => ME.nightState().at)) > Date.parse(tBack));
+    ok('pageshow recomputes too (fastForward recovery)', Date.parse(await page.evaluate(() => ME.nightState().at)) > Date.parse(tBack));
     // ---- repeated toggling accumulates nothing, same page load
     for (let i = 0; i < 12; i++) { await page.click('#tgl-night'); await page.waitForTimeout(25); await page.click('#tgl-night'); await page.waitForTimeout(25); }
     await page.waitForTimeout(400);
     const on = await page.evaluate(() => ME.nightState());
     ok('still exactly one working overlay after 12 off/on cycles', on.on === true && on.hasMesh === true && on.at !== null, on);
-    // a leaked timer from an earlier cycle would repaint more than once per minute
+    // a leaked timer from an earlier cycle would repaint more than once per minute (fastForward is enough here:
+    // we are counting how many timers exist, not proving ordinary repetition, which is covered above)
     const b4 = await page.evaluate(() => ME.nightState().at);
     await page.clock.fastForward(61_000); await page.waitForTimeout(300);
     const af = await page.evaluate(() => ME.nightState().at);
@@ -175,6 +188,25 @@ function agreement(before, after, probes) {
     ok('no page errors in the cadence/toggle run', perr.length === 0, perr.slice(0, 3));
     mark('cadence+toggles done');
     await ctx.close();
+  }
+
+
+  // ===================================================== ORDINARY CADENCE — real timers, no clock faking
+  // The one case that proves the overlay actually updates minute after minute while the page simply runs.
+  // It costs a real ~65 s wait, which is the price of not faking the thing under test.
+  {
+    const { ctx, page, perr } = await harness(browser, { realClock: true });
+    await page.click('#exp-btn'); await page.click('#tgl-night'); await page.waitForTimeout(800);
+    const a = await page.evaluate(() => ME.nightState().at);
+    ok('overlay enabled under real timers', a !== null);
+    await page.waitForTimeout(65_000);
+    const b = await page.evaluate(() => ME.nightState().at);
+    ok('ordinary cadence: the stamp advances about a minute with NO clock faking',
+      Date.parse(b) - Date.parse(a) >= 55_000 && Date.parse(b) - Date.parse(a) <= 80_000, { a, b, deltaMs: Date.parse(b) - Date.parse(a) });
+    ok('and it is still the same single overlay', await page.evaluate(() => ME.nightState().hasMesh) === true);
+    ok('no page errors under real timers', perr.length === 0, perr.slice(0, 3));
+    await ctx.close();
+    mark('ordinary-cadence (real timers) done');
   }
 
   // ===================================================== D. NORMAL motion (globe rotating): behaviour, not pixels
@@ -258,11 +290,11 @@ function agreement(before, after, probes) {
   await browser.close();
   clearTimeout(watchdog);
   console.log(`\n${pass} passed, ${fail} failed`);
-  console.log(`\nResolution limits — SEPARATE from the solar-reference agreement in phase1/solar.test.mjs:`);
-  console.log(`  solar position vs astronomy-engine ..... max 0.0124°  (the maths only)`);
-  console.log(`  texture quantisation at 1024x512 ....... ~0.35° per pixel`);
-  console.log(`  staleness between 1-minute repaints .... up to 0.25° of rotation`);
-  console.log(`  The DRAWN boundary can therefore sit ~0.6° from the instantaneous geometric one — far larger`);
-  console.log(`  than the maths agreement — and the geometric boundary is itself ~0.83° from observed sunrise.`);
+  console.log(`\nThree limits — different kinds of statement, reported SEPARATELY and never summed:`);
+  console.log(`  measured agreement : solar position vs astronomy-engine ... within 0.0124°`);
+  console.log(`  quantisation bound : 1024x512 texture ..................... ~0.35° per pixel`);
+  console.log(`  drift bound        : up to one minute between repaints .... up to 0.25° of rotation`);
+  console.log(`  Only the first is a measurement. Summing them would assert a combined bound nobody measured.`);
+  console.log(`  Separately: the geometric boundary is ~0.83° from an observed sunrise (refraction + solar disc).`);
   process.exit(fail ? 1 : 0);
 })();

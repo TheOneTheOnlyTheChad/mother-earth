@@ -4,6 +4,20 @@ Read `START-HERE.md` (§2 is the constitution; §5a testing; §5b the ships dura
 
 ---
 
+## 0. Do this first
+
+**The only outstanding verification from thread 5 — and it has already been done once; redo it only to confirm, do not rebuild anything.**
+
+1. Confirm Pages is serving **`?v=202611021500`**:
+   `fetch('https://theonetheonlythechad.github.io/mother-earth/index.html', {cache:'no-store'})` and read the `style.css?v=` stamp.
+2. At **phone width** (375 px), enable **Day/night now — computed** in Explore, then **collapse Explore**.
+   The legend must still read `Day/night now · computed · HH:MM:SS UTC`.
+3. Switch it off: both the shading and that label must clear together.
+
+**Result when thread 5 checked it (2 Nov, 11:42 UTC, on the deployed build):** served `?v=202611021500`; at 375 px the legend was `display:block`, visible, text `Day/night now · computed · 11:42:27 UTC`, and it **stayed visible with Explore collapsed**; after switching off, `on:false`, `hasMesh:false`, legend and timestamp both hidden. **This passed.** It is listed first only because it is the last thing that was in flight — if it still passes, there is nothing outstanding on the day/night work.
+
+**Pushed and synced is not the same as served.** Repo and Mac copies are at **`a1cd136`** plus the doc commit below; GitHub Pages locks the next deploy for ~30 min after each one, so always read the served asset stamp rather than assuming a push is live.
+
 ## 1. State
 
 | | |
@@ -33,7 +47,7 @@ Procedure: edit in the clone → commit with the attribution trailer → `git pu
 
 - **Page.** World View layout (map layers left, globe centre, indices right), Sources & Details, card hierarchy (value → observation time → source/retrieval → quiet caveat), plain-language WebGL fallback with technical detail in a collapsed Diagnostics block, record inspector for individual records as well as coverage cells with focus restore, and user-triggered snapshot navigation ("highest magnitude in this feed", "highest FRP in this snapshot") with ties, exclusions and the FRP caveat. No ticker, no automatic selection, no automatic camera movement, no danger ranking.
 - **Day/night overlay (2 Nov, thread 5).** The first **computed** (non-observed) thing on the page. Optional switch at the end of Explore, off on load, "Day/night now — computed", with the UTC calculation time in the panel and the legend. Geometric boundary only; twilight deferred. Never touches `state`/`points`/`pmeta`/`usable()` or globe.gl's data channels, and runs on its own one-minute timer rather than the network poll. Subsolar point from the Astronomical Almanac / USNO low-precision coordinates (a US Government work; **no runtime dependency**). **Dependency on globe.gl internals is deliberate and recorded**: no global `THREE`, so constructors are harvested lazily off live objects, the version is **pinned at 2.45.0** and both suites assert the page and the test agree on it; a missing constructor makes the overlay **refuse** (toggle reset, plain explanation, globe untouched). Render channel chosen by spike — see `phase1/SPIKE-terminator.md`, which also records that globe.gl rotates its globe mesh by −π/2 and that omitting it put the shading 90° out.
-  **Three limits kept apart:** solar maths ≤0.0124°, texture quantisation ~0.35°, one-minute staleness up to 0.25° — so the *drawn* boundary can sit ~0.6° from the instantaneous geometric one, and that is itself ~0.83° from observed sunrise. Reference agreement is not a statement about what is drawn.
+  **Three limits, stated separately and never summed** (summing would assert a bound nobody measured): solar position *agrees with the reference* to within **0.0124°**; the texture *quantises* the shading to **~0.35°**; the line *drifts* up to **0.25°** between repaints. Separately, the geometric boundary is ~**0.83°** from observed sunrise. Only the first is a measurement.
 - **Limited search (2 Nov, thread 5).** One collapsible **Explore** panel, closed on load, replacing the Find card and holding the search plus the two unchanged snapshot-jump buttons. Searches only loaded records: USGS descriptions, vessel names and MMSIs, and latitude/longitude typed in that order. Fires and forest publish no text and are never text-searched (fires do join a coordinate search). A coordinate always offers "Go to", then records within 250 km nearest first, 12 max with the true total; the radius is stated as a choice for this box, never as a coverage boundary. Results are revalidated per layer against run identity, visibility, freshness and the pairing rule, and refused with the reason rather than opened. Ships' observation time, receipt time and sample end are kept distinct. Coordinate tokens are validated whole — a number that cannot be read is refused by name, never repaired — and with no WebGL the Go-to row says the globe is unavailable instead of claiming a movement. Full detail in STATUS "Done 2 Nov (thread 5)".
 - **Atomic cells/records pairing.** `refreshPair()` commits counts and records together; `usable(layer)` re-checks `pmeta.id === snapId(state[layer])` at every read — points **and rings**, inspector, navigation, card note. Proven with a harness that reproduced the bug on the previous build (render passes mixing RUN2 cells with RUN1 points/rings) and shows 0 mixed passes now.
 - **Missing is not zero.** `ME.fmt()` renders an absent value "not provided" and a source-reported zero as "0 … (source-reported zero)". Verified against a live FIRMS snapshot containing two genuine FRP zeros.
@@ -72,8 +86,9 @@ node phase1/search.realdata.test.mjs        # 50 — the same helpers over REAL 
 node phase1/search-ui.test.cjs              # 104 — Playwright; needs: python3 -m http.server 8899 --bind 127.0.0.1 in the clone
 node phase1/solar.test.mjs                  # 26 — subsolar vs astronomy-engine, poles, date line, stated assumptions
 node phase1/terminator-ui.test.cjs          # 19 — day/night ACCEPTANCE gate: one page load, 6-min watchdog
-node phase1/terminator-behaviour.test.cjs   # 42 — day/night behaviour: cadence, toggling, rotating globe,
-                                            #      no-WebGL, failed harvest, phone. ~22s, 6-min watchdog.
+node phase1/terminator-behaviour.test.cjs   # 47 — day/night behaviour: cadence, toggling, rotating globe,
+                                            #      no-WebGL, failed harvest, phone, plus ONE real-timer
+                                            #      ordinary-cadence case (~65s wait). ~92s, 6-min watchdog.
 ~/mother-earth/run.sh status                # scheduler state, pending upload, lock
 ~/mother-earth/sleeptest.sh                 # physical sleep test; captures pmset -g log alongside the sample
 ```
