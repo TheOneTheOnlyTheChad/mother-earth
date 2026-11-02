@@ -1,147 +1,70 @@
-# Mother Earth — handover to thread 6 (2 Nov 2026)
+# Mother Earth — handover to thread 7 (2 Nov 2026, end of thread 6)
 
-Read `START-HERE.md` (§2 is the constitution; §5a testing; §5b the ships duration contract), then `STATUS.md`. This file is the index: what is deployed, what is finished, what is genuinely unverified, and what Chad might build next.
+Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration contract), then this file, then `STATUS.md` (newest sections first). Not a fresh sandbox: nothing below needs re-investigating.
 
 ---
 
-## 0. Do this first
+## 0. State in one paragraph
 
-> **CLOSED 2 Nov 2026 (thread 6, 12:08 UTC).** Re-run on the deployed build: served `?v=202611021500` (css and js); at 375 px with Explore collapsed the legend read `Day/night now · computed · 12:08:01 UTC`, `display:block`, visible; switched off → `on:false`, `hasMesh:false`, legend line and `#night-time` stamp both hidden. Chad marked the terminator deployment check complete. Nothing outstanding on the day/night work. The text below is kept as the record of the check.
+**Nothing public changed in thread 6.** Page, hub (collector `0.2.1`) and Mac collector (`mac-0.3.2`) are exactly as at the start of the day; page assets still `?v=202611021500`. Thread 6 closed the terminator deployment check, did two desk checks (FIRMS observability docs, NOAA's raw CO₂ file), and ran the satellite work to an approved direction and a private benchmark. Satellites are **not live**: the gate is the reuse basis.
 
-**The only outstanding verification from thread 5 — and it has already been done once; redo it only to confirm, do not rebuild anything.**
-
-1. Confirm Pages is serving **`?v=202611021500`**:
-   `fetch('https://theonetheonlythechad.github.io/mother-earth/index.html', {cache:'no-store'})` and read the `style.css?v=` stamp.
-2. At **phone width** (375 px), enable **Day/night now — computed** in Explore, then **collapse Explore**.
-   The legend must still read `Day/night now · computed · HH:MM:SS UTC`.
-3. Switch it off: both the shading and that label must clear together.
-
-**Result when thread 5 checked it (2 Nov, 11:42 UTC, on the deployed build):** served `?v=202611021500`; at 375 px the legend was `display:block`, visible, text `Day/night now · computed · 11:42:27 UTC`, and it **stayed visible with Explore collapsed**; after switching off, `on:false`, `hasMesh:false`, legend and timestamp both hidden. **This passed.** It is listed first only because it is the last thing that was in flight — if it still passes, there is nothing outstanding on the day/night work.
-
-**Pushed and synced is not the same as served.** Repo and Mac copies are at **`a1cd136`** plus the doc commit below; GitHub Pages locks the next deploy for ~30 min after each one, so always read the served asset stamp rather than assuming a push is live.
-
-## 1. State
+## 1. Where things are
 
 | | |
 |---|---|
-| Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main` at **`9e690be`**. Commit straight to main, no branches. AGPL-3.0. |
-| Hub (Cloudflare Worker) | **collector `0.2.1`** · `https://mother-earth.chadoberholzer.workers.dev` · `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `POST /ingest/<layer>`, `POST /admin/reaggregate/ships`, `GET /admin/run/<job>` |
-| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021500` — **bump on every page change, in `index.html` and `sources.html`** |
-| Mac collector | **`mac-0.3.2`**, launchd `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples when 30 min are due |
-| Cron triggers | `:07` hourly · `*/5` · `*/15` firms · `11,41` forest |
-| Layers live | quakes, fires, ships, forest, Kp, CO₂, sea ice. Aircraft parked (OpenSky correspondence governs — public site must feed the network). |
+| Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main`. Commit straight to main. `bench-private/` is gitignored. |
+| Hub | `https://mother-earth.chadoberholzer.workers.dev`, collector `0.2.1`, crons `:07` · `*/5` · `*/15` · `11,41` |
+| Page | `https://theonetheonlythechad.github.io/mother-earth/`, assets `?v=202611021500` (bump in both html files on any change) |
+| Mac | `~/Documents/Mother Earth/` (synced copy, not a git repo) + runtime `~/mother-earth/` for the collector |
+| **Satellite working set (private)** | `~/Documents/Mother Earth/bench-private/` — `README.md` indexes it. Frozen inputs + `hub-manifest.json` / `celestrak-manifest.json`, `results/`, `code/` (bench source 1.6, `build.py`, `score.py`, runners, `freeze.mjs` + tests). |
+| **Private bench page** | claude.ai artifact "Satellite Population Bench" (platform-stated: readable by only Chad). Holds the same 10 frozen input files. Results save to its private store, collections `runs/` and `memory/`; read them with ArtifactData. Freezer artifact "Satellite Bench Freezer" exists, asset store empty, unused. |
+| Docs | `STATUS.md`, `START-HERE.md`, `HANDOVER.md`, `REGISTER.md` — repo, Mac, and `Projects.project_write` to `claude/<name>.md` |
 
-**Authoritative paths and sync.** The repo clone is the working copy. Three copies must stay in step:
+**Sync gotcha seen this thread:** `device_commit_files` once reported "written" for an existing path while the Mac kept the old file. Overwrite via a new name + `mv` on the Mac, or verify with `shasum` after every overwrite.
 
-| What | Repo | Mac |
-|---|---|---|
-| Hub | `phase1/worker.js` | `~/Documents/Mother Earth/phase1/worker.js` |
-| Mac collector | `phase1/collector-mac.mjs`, `run.sh`, `sleeptest.sh`, `duration-contract.test.mjs` | same under `~/Documents/Mother Earth/phase1/` **plus the runtime copy in `~/mother-earth/`** — macOS denies launchd access to `~/Documents`, so the scheduler runs from `~/mother-earth` and any change must be copied there too |
-| Page | `index.html`, `sources.html`, `app.js`, `style.css` | same names in `~/Documents/Mother Earth/` |
-| Docs | `STATUS.md`, `START-HERE.md`, `HANDOVER.md`, `REGISTER.md` | same, **and** `Projects.project_write` to `claude/<name>.md` |
-| Keys | never in the repo (gitignored) | `~/Documents/Mother Earth/KEYS.md` and `~/mother-earth/KEYS.md` |
+**Reaching things:** the container and the Mac's `device_bash` cannot reach celestrak.org or the hub. The browser pane can (cross-origin reads are allowed by both). Only Chad's Terminal can write a fetched file to disk byte-exact. Claude in Chrome was **not reachable** from this session.
 
-Procedure: edit in the clone → commit with the attribution trailer → `git push origin main` → `device_commit_files` to both Mac paths → `project_write` for the docs. Hub deploys go through the Cloudflare editor (START-HERE §4; two `type` calls for a file over ~50 KB). GitHub Pages locks the next push for ~30 min after a successful deploy.
+## 2. Satellites — where it stands
 
----
+**Approved direction (Chad + GPT):** the full CelesTrak *active* catalogue as a population/distribution view. Keep all objects; only propagation failures omitted, and counted. One toggle, off on load, no card, no trails. Always visible while on: "Markers enlarged for visibility; not to physical scale." Positions at propagated altitude; height above the surface kept distinct from distance from the centre. The geostationary camera view must never be described as showing every orbit. Not a measure of obscuration, ground coverage or collision risk.
 
-## 2. Completed and verified
+**Frozen inputs (hash-checked by every bench run):**
+- CelesTrak `GROUP=active&FORMAT=csv`, fetched 2026-11-02 14:26:53 UTC by Chad's Terminal, 16,847 rows, sha256 `2c5c78ab…`. Structure ok, 0 value problems, 0 duplicate IDs, **completeness not established**. Includes 4 rocket bodies CelesTrak lists as active (documented in the scope line).
+- Hub snapshots frozen 13:31:09 UTC, each records/cells pair matched on `retrieved_at` first attempt.
 
-- **Page.** World View layout (map layers left, globe centre, indices right), Sources & Details, card hierarchy (value → observation time → source/retrieval → quiet caveat), plain-language WebGL fallback with technical detail in a collapsed Diagnostics block, record inspector for individual records as well as coverage cells with focus restore, and user-triggered snapshot navigation ("highest magnitude in this feed", "highest FRP in this snapshot") with ties, exclusions and the FRP caveat. No ticker, no automatic selection, no automatic camera movement, no danger ranking.
-- **Day/night overlay (2 Nov, thread 5).** The first **computed** (non-observed) thing on the page. Optional switch at the end of Explore, off on load, "Day/night now — computed", with the UTC calculation time in the panel and the legend. Geometric boundary only; twilight deferred. Never touches `state`/`points`/`pmeta`/`usable()` or globe.gl's data channels, and runs on its own one-minute timer rather than the network poll. Subsolar point from the Astronomical Almanac / USNO low-precision coordinates (a US Government work; **no runtime dependency**). **Dependency on globe.gl internals is deliberate and recorded**: no global `THREE`, so constructors are harvested lazily off live objects, the version is **pinned at 2.45.0** and both suites assert the page and the test agree on it; a missing constructor makes the overlay **refuse** (toggle reset, plain explanation, globe untouched). Render channel chosen by spike — see `phase1/SPIKE-terminator.md`, which also records that globe.gl rotates its globe mesh by −π/2 and that omitting it put the shading 90° out.
-  **Three limits, stated separately and never summed** (summing would assert a bound nobody measured): solar position *agrees with the reference* to within **0.0124°**; the texture *quantises* the shading to **~0.35°**; the line *drifts* up to **0.25°** between repaints. Separately, the geometric boundary is ~**0.83°** from observed sunrise. Only the first is a measurement.
-- **Limited search (2 Nov, thread 5).** One collapsible **Explore** panel, closed on load, replacing the Find card and holding the search plus the two unchanged snapshot-jump buttons. Searches only loaded records: USGS descriptions, vessel names and MMSIs, and latitude/longitude typed in that order. Fires and forest publish no text and are never text-searched (fires do join a coordinate search). A coordinate always offers "Go to", then records within 250 km nearest first, 12 max with the true total; the radius is stated as a choice for this box, never as a coverage boundary. Results are revalidated per layer against run identity, visibility, freshness and the pairing rule, and refused with the reason rather than opened. Ships' observation time, receipt time and sample end are kept distinct. Coordinate tokens are validated whole — a number that cannot be read is refused by name, never repaired — and with no WebGL the Go-to row says the globe is unavailable instead of claiming a movement. Full detail in STATUS "Done 2 Nov (thread 5)".
-- **Atomic cells/records pairing.** `refreshPair()` commits counts and records together; `usable(layer)` re-checks `pmeta.id === snapId(state[layer])` at every read — points **and rings**, inspector, navigation, card note. Proven with a harness that reproduced the bug on the previous build (render passes mixing RUN2 cells with RUN1 points/rings) and shows 0 mixed passes now.
-- **Missing is not zero.** `ME.fmt()` renders an absent value "not provided" and a source-reported zero as "0 … (source-reported zero)". Verified against a live FIRMS snapshot containing two genuine FRP zeros.
-- **Ships aggregation.** Four outcomes kept apart — `absent` (nothing received), `down` (every received attempt reported source failure), `degraded` (received, none usable or fewer than expected), `ok`. Verified in production on live degraded data.
-- **Hours 12/13 UTC repaired** (1 Nov): `absent 0/2` → `degraded 0/2`, cell rows 0 → 0, evidence cross-checked against `collector_runs` before writing, idempotent on re-run, scope confirmed in D1. Those hours remain excluded from comparisons.
-- **Mac runner.** Shared `mkdir` lock with pid-liveness (a lock is stale only when old **and** its owner is gone); bounded local storage (one pending envelope, 5 MB cap, 2 h expiry; rotated logs ~5 MB); upload retries with backoff; **completion-based scheduling** — the 30 min interval runs from when the previous attempt finished, so an overrun cannot shorten the next gap.
-- **Duration contract** (START-HERE §5b, authoritative in code): intended sample **60 s**; elapsed **> 75 s** → `degraded`, `overlong_sample`, never usable; **120 s** hard stop → socket closed and later messages rejected before mutation. Thresholds are multiples of the window. The 180 s window in the 2 Nov physical test was a one-off override for that run only.
-- **Sleep detector retired.** Verified against `pmset -g log` (written by macOS, not by us): three overnight samples sat inside Maintenance Sleep of 946/921/682 s against gaps of 948/923/686 s and it reported `slept=false` every time. `wall_s`/`mono_s` stay as raw measurements; **neither is evidence about sleep**.
-- **Deterministic duration tests pass on both the container and the Mac** — see §4.
+**Format:** OMM-keyword CSV/JSON, never TLE (TLE silently drops catalogue numbers > 99999: 949 in the active set).
 
----
+**Results:** see STATUS "Satellite benchmark 2 Nov" and "Satellite work 2 Nov (later)". In short:
+- **Mac pane:** the satellites add ~0 to median frame time. Today's layers already hold the pane at ~30 fps. Satellites alone run at 60 fps.
+- **Memory:** a per-toggle GPU geometry leak was found, and fixed by creating the layer once and toggling visibility (bench 1.6). Retained-heap plateau is not yet proven.
+- **Software rendering:** reported only, never scored.
 
-## 3. Remaining checks — each with its decisive next step
+**Recommended implementation (not built):**
+- **Browser:** worker propagation every 2 s with satellite.js 6.0.2 pinned. One batched particle layer, created once, visibility-toggled, positions written in place. globe.gl pinned 2.45.0, with the same refuse-if-missing pattern as day/night. Teardown disposes after removal.
+- **Hub:** stamp-gated single-attempt fetch, at most every 2 h, file stored unparsed (REGISTER has the bounded failure handling). Viewers never touch CelesTrak.
+- **Scope lines:** counts drawn / not drawn, the stale-element line ("124 objects use element sets older than 3 days; their propagated positions may be unreliable"), and "N objects lie beyond the geostationary view".
 
-| # | Open item | Decisive next check | Blocks feature work? |
+## 3. Open — each with its decisive next step
+
+| # | Item | Next step | Blocks satellites going public? |
 |---|---|---|---|
-| 1 | **Physical long-sleep / resumption — UNVERIFIED on hardware** | A suspend that actually lasts past the hard deadline. The 2 Nov attempt under-ran: macOS recorded `Software Sleep pid=410` then DarkWaked 27 s later on `wifibt`, so the sample was still inside its window. Need a method that keeps the host down (method not yet agreed; **no power-setting changes**). | **No** |
-| 2 | ~~Forest 24 h usage~~ **CLOSED 2 Nov** | Measured: **48 invocations/day** ✓, **575 outbound subrequests** (287 2xx + 288 3xx — every GFW query is a redirect plus a response, so the recorded ~290 expectation was out by 2×), **0 GFW 4xx/5xx**, 0 worker errors. Sweep 293/559, pending 0, err 0. **Initial 24-hour usage check COMPLETE**; window ≈1 Nov 08:00 → 2 Nov 08:00 UTC (first full day), workload 48 invocations / 288 cell queries / 575 subrequests. Not a steady-state figure; first full sweep not yet complete. | — |
-| 3 | **FIRMS CPU profiling and attribution** — *2 Nov: still not attributable. Thread 6 docs check: CPU and wall time are in the **invocation log** (one event per invocation, ~2.4% of the Free budget at 100%); traces are not documented to carry CPU. Next: Chad turns on "Include Invocation logs".* | Aggregate CPU is P50 2.95 / P90 46.09 / P99 81.17 / P999 90.15 ms with 0 CPU-limit errors, rising with file size through the UTC day (~310 ms at 16:00, input 2.4 MB / 28,924 records). **This does not establish that FIRMS routinely consumes 5–8× its allowance** — the Free-plan event log has no per-invocation CPU field. **2 Nov: checked. Observability IS enabled (Free, 200K events/day), but an event's `$workers` block carries no `cpuTimeMs`/`wallTimeMs`, so per-invocation CPU is not exposed to us.** Re-measured aggregate: P50 3.67 / P90 57.63 / P99 93.08 / P999 103 ms, 0 CPU-limit errors; **The earlier "FIRMS is 2%, so it is the P98+ tail" reasoning is withdrawn as wrong**: share of invocations says nothing about position in the duration distribution, and at ~4,710/day the P90 band is the slowest ~471 invocations while FIRMS supplies at most 96 — so **FIRMS alone cannot explain the elevated P90**. No CPU is attributed to any job. **Traces checked 2 Nov: available on Free, simply Disabled ("Enable Traces" button).** Settings → Observability offers **"Include Invocation logs"** and **"Persist traces"**, each with a sampling %; there is no dedicated CPU profiler. Next: enable invocation logs and/or traces and read whether the invocation record carries CPU time — **both are Chad's settings changes** and both draw on the 200K events/day budget. **Disabling the `*/15` FIRMS trigger to compare percentiles is ruled out** (Chad, 2 Nov): a real data gap is too high a price for an inference. Do **not** add `Date.now`/`performance.now` timers — deployed Worker clocks freeze between I/O. | No, but decide before adding another heavy parse |
-| 4 | ~~GML retrieval integrity~~ **CLOSED 2 Nov, one residual risk named** | gml.noaa.gov subrequests failed at 13% over 24 h. Confirm a failed retrieval preserves the previous value with its original observation and retrieval times and an honest failure status. **2 Nov measured: 58/58 CO₂ runs `ok` since 31 Oct; 46 × 2xx and no 4xx/5xx from gml.noaa.gov in 24 h (the 13% has not recurred); `writeDown()` provably leaves `latest/co2.json` untouched so the previous value keeps its original observation and retrieval times and the page shows 'unknown — collector reported down'. For 2026-10-30 there is **no valid value in our parsed source series**, **Resolved 2 Nov (thread 6): omitted at source** — raw file has no 30 Oct row and no −999.99 anywhere; it omits 109 of 366 days, so the earlier "contiguous" note is withdrawn.** Residual risk still open: a **truncated 200** would be parsed to the last complete row and published honestly but with an older date, masking the truncation — verify Workers' behaviour on a cut body, or add a row-count/content-length sanity check. | No |
-| 5 | **Physical mobile testing** | The Galaxy as an always-on collector: Termux + Node, battery optimisation off, 48 h screen-off logging expected vs successful collections, then a Wi-Fi interruption and a reboot recovery test. Second candidate: Xiaomi Mi TV Stick. **No hardware purchase.** | No |
+| 1 | **Satellite reuse basis** | Three questions in REGISTER (CelesTrak row): does Space-Track's blanket approval reach data taken via CelesTrak; what "appropriate citation" wording satisfies it; commercial use. Clean route on the evidence: Chad's own Space-Track account (he creates it — Claude never creates accounts) + citation. Alternative: written confirmation from CelesTrak. TraCSS CC0 endpoint answers 200 "OK" with no records — recheck occasionally. | **Yes** |
+| 2 | **Memory plateau** | Rerun bench 1.6 memory mode in the container with forced GC and the orphan tracker OFF (it keeps a record of every ring geometry and is the likely source of the residual +~1.1 MB / 30 toggles). Plateau = flat retained heap across batches. | Yes, before release |
+| 3 | **Ordinary Mac Chrome run** | Chad opens the private bench in Chrome, labels "Mac Chrome", runs **Run benchmark** then **Memory test**; read `runs/` + `memory/`; score with `score.py`, label separately from the pane run. | Desktop decision |
+| 4 | Existing page at ~30 fps on the Mac pane | Separate investigation of today's layers (polygons, merged points, rings). Not a satellite issue. | No |
+| 5 | FIRMS CPU attribution | Docs say CPU/wall time are in the **invocation log** (one event per invocation, ~2.4 % of the Free 200K/day at 100 %). Chad turns on Worker → Settings → Observability → "Include Invocation logs" (Traces off), then read CPU for the `*/15` runs. | No |
+| 6 | CO₂ truncated-200 guard | Response carries Content-Length; file header carries "File Creation". A guard can check both. Not built. (30 Oct is omitted at source; the source omits 109 of 366 days — earlier "contiguous" note withdrawn.) | No |
+| 7 | Physical long-sleep test (Mac) | Unchanged: a suspend that lasts past the hard deadline; no power-setting changes. Note: Chad ran `caffeinate` during the thread-6 benchmark. | No |
+| 8 | Galaxy / Android | Unchanged: physical test pending; all phone checks emulated. Satellites unverified on mobile. | No (desktop decision) |
+| 9 | Submarine cables | Licence question kept for its turn; the shorthand share-alike explanation is not a settled assessment. | — |
 
-Nothing in this list blocks starting a feature. Items 1 and 5 are about collection reliability; 2–4 are measurement and integrity.
+## 4. Rules that came out of thread 6
 
-**Synthetic ≠ hardware.** The duration-contract tests prove the guard's logic. They do not verify behaviour on a real suspend, and item 1 stays open regardless of them.
+- **CelesTrak:** never fetch the active set from the pane or anywhere else without a reason that justifies it. CelesTrak counted the pane and Chad's Terminal as one requester (403: "GP data has not updated since your last successful download of GROUP=active at …"). The stamp is on `https://celestrak.org/NORAD/elements/` ("Current as of … UTC"). A stamp check is a request strategy, not a guarantee.
+- **Benchmarks:** criteria are written before any real run; a hidden pane throttles rAF to ~1 Hz (bench 1.2+ records visibility and `score.py` refuses hidden runs); software rendering is its own environment, never scored, never a stand-in for phones; consistency between element sets is not accuracy.
+- **Clipboard:** the app flags page-initiated clipboard writes; that route was abandoned rather than worked around.
+- **Report unavailable measurements as unavailable.** Keep cold-start and steady-state costs separate, both reported.
 
----
+## 5. Standing rules (unchanged)
 
-## 4. Test commands and evidence locations
-
-```
-node phase1/duration-contract.test.mjs      # hard-boundary logic; stubbed socket + clock, no network, nothing uploaded
-node phase1/search.test.mjs                 # 111 — search helpers: coordinate parser (incl. leading decimals
-                                            #       and malformed-token refusals), distance, escaping, matcher
-node phase1/search.realdata.test.mjs        # 50 — the same helpers over REAL hub records captured 2 Nov
-node phase1/search-ui.test.cjs              # 104 — Playwright; needs: python3 -m http.server 8899 --bind 127.0.0.1 in the clone
-node phase1/solar.test.mjs                  # 26 — subsolar vs astronomy-engine, poles, date line, stated assumptions
-node phase1/terminator-ui.test.cjs          # 19 — day/night ACCEPTANCE gate: one page load, 6-min watchdog
-node phase1/terminator-behaviour.test.cjs   # 47 — day/night behaviour: cadence, toggling, rotating globe,
-                                            #      no-WebGL, failed harvest, phone, plus ONE real-timer
-                                            #      ordinary-cadence case (~65s wait). ~92s, 6-min watchdog.
-~/mother-earth/run.sh status                # scheduler state, pending upload, lock
-~/mother-earth/sleeptest.sh                 # physical sleep test; captures pmset -g log alongside the sample
-```
-The browser suites drive the page's own timers with Playwright's clock, so the stale-result and recompute paths
-run through production code and not a test hook. **Both terminator suites carry a hard watchdog that FAILS rather
-than hangs** — an indefinite test is a defect in itself. Use `page.clock.fastForward()`, never `runFor()`:
-`runFor` fires every intermediate animation frame, so with globe.gl's render loop a two-minute jump makes the
-software renderer draw thousands of globes (measured: >900 s versus 22 s for the identical assertions). globe.gl and the test-only `astronomy-engine` and `pngjs`
-are served from `/home/claude/spike/node_modules` because the container cannot reach unpkg; set up with
-`cd /home/claude/spike && npm i globe.gl@2.45.0 astronomy-engine pngjs`. Pixel cases emulate reduced motion so the
-globe does not rotate between the before and after frames; behaviour while it *is* rotating is covered separately
-in the behaviour suite, asserting on state rather than pixels. `ME.pairState(layer)` and `ME.searchState()` are the read-only
-diagnostics it hangs on; both are reachable from the console on the live page.
-
-| Evidence | Where |
-|---|---|
-| Sleep test report, hub snapshots at the time | `~/mother-earth/logs/sleeptest-20261102T035620Z.*` |
-| Collector log (rotated, ~5 MB cap) | `~/mother-earth/logs/collector.log` |
-| Hours 12/13 before/after, idempotency, scope | STATUS "Done 1 Nov (thread 4, 19:05 SAST)" |
-| FIRMS CPU figures and their stated limitation | STATUS "Done 1 Nov (thread 4, 18:15 SAST)" |
-| pmset ↔ collector gap correspondence | STATUS "Done 2 Nov" |
-| Real hub records behind the search tests | `phase1/realdata/live-sample.json` (captured 2 Nov via the browser pane) |
-| Reviews | `reviews/` |
-| Source register | `REGISTER.md` |
-
-Re-run of a repair: `POST /admin/reaggregate/ships?hour=YYYY-MM-DDTHH&key=<ADMIN_KEY>` previews; add `&apply=1` to write. Refuses with 409 when retained objects do not account for every logged attempt.
-
----
-
-## 5. Product direction — a queue for Chad to choose from
-
-Chad wants to add features one at a time. ~~Limited search~~ **shipped 2 Nov (thread 5)** — see §2. He has said the **solar terminator can follow**; it is the next pick unless he changes it. Nothing else below is started.
-
-1. **Solar terminator** — computed client-side, labelled computed, not observed. No network cost. *Chad's stated next pick.*
-2. **Satellites from CelesTrak TLEs** — MODEL tier, labelled "propagated from TLEs, not observed positions"; 12–24 h TLE fetch, browser-side SGP4, few hundred objects on phones. Register row first.
-3. **Submarine cables** (TeleGeography) — needs a CC BY-SA share-alike decision before anything is committed.
-4. **Chad's own asks** — plastic in the oceans, mining, solar farms. Each needs the observed-vs-modelled question answered per source before any build.
-
-Deferred *inside* the shipped search, by design: country-boundary and place search (needs a geographic dataset specified first) and any coverage-cell result for a coordinate.
-
-Parked with reasons recorded: aircraft (OpenSky correspondence), GFS wind (a model), GOES GLM lightning (needs a NOAA bucket pipeline), polar-cap imagery (measured blind in polar night).
-
----
-
-## 6. Standing rules that outlast this thread
-
-- **The promise, verbatim on the page:** "See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage."
-- **The constitution** (START-HERE §2): live data and real things only; force no view; no politics, no drama; biased data chucked outright with the reason dated in REGISTER; a bridge carries its evidence grade; stable public IDs for things; the hub is the product and the page is a client; no fear or shock as a means.
-- **Observations, analyses and models stay distinguishable.** Anything computed or propagated says so. Coverage is never inferred from collector uptime — `observed_fraction` is about sampling, not geography, and a silent cell is not an empty one.
-- **No inferred causes, no invented zeros.** A value the source did not supply is "not provided"; a zero it did report says so. An hour nobody sampled is `absent` and nothing else may be written as `absent`.
-- **Every source's commercial standing is in REGISTER before it goes live.** Attribution forms required by sources stay on the page.
-- **$0/month target**, every non-zero line item named before it is incurred. Triggers: D1 at 80k writes/day (80% of the free allowance; measured usage ~10k/day), Workers requests at 70k/day. Bounded Mac storage.
-- **No power-setting changes, no sleep prevention, no hardware purchases assumed.**
-- **Measure, don't assume.** Every limit or cost claim gets measured on the real platform with the number and date written down. Baby steps, one key at a time; Chad pastes secrets himself.
+The promise verbatim; the constitution (START-HERE §2); observations, models and computed context stay distinguishable; no inferred causes, no invented zeros; coverage never inferred from collector uptime; every source's commercial standing in REGISTER before it goes live; $0/month with named triggers; measure, don't assume; bound every test; baby steps; Chad pastes secrets himself.
