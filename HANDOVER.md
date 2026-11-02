@@ -35,7 +35,7 @@ Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration co
 **Format:** OMM-keyword CSV/JSON, never TLE (TLE silently drops catalogue numbers > 99999: 949 in the active set).
 
 **Results:** see STATUS "Satellite benchmark 2 Nov" and "Satellite work 2 Nov (later)". In short:
-- **Mac pane:** the satellites add ~0 to median frame time. Today's layers already hold the pane at ~30 fps. Satellites alone run at 60 fps.
+- **Mac pane and ordinary Mac Chrome agree:** the satellites add ~0 to median frame time. Today's layers already hold the Mac at ~30 fps. Satellites alone run at 60 fps. 0 long tasks in Chrome.
 - **Memory:** a per-toggle GPU geometry leak was found, and fixed by creating the layer once and toggling visibility (bench 1.6). Retained-heap plateau is not yet proven.
 - **Software rendering:** reported only, never scored.
 
@@ -50,7 +50,7 @@ Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration co
 |---|---|---|---|
 | 1 | **Satellite reuse basis** | Three questions in REGISTER (CelesTrak row): does Space-Track's blanket approval reach data taken via CelesTrak; what "appropriate citation" wording satisfies it; commercial use. Clean route on the evidence: Chad's own Space-Track account (he creates it — Claude never creates accounts) + citation. Alternative: written confirmation from CelesTrak. TraCSS CC0 endpoint answers 200 "OK" with no records — recheck occasionally. | **Yes** |
 | 2 | **Memory plateau** | Rerun bench 1.6 memory mode in the container with forced GC and the orphan tracker OFF (it keeps a record of every ring geometry and is the likely source of the residual +~1.1 MB / 30 toggles). Plateau = flat retained heap across batches. | Yes, before release |
-| 3 | **Ordinary Mac Chrome run** | Chad opens the private bench in Chrome, labels "Mac Chrome", runs **Run benchmark** then **Memory test**; read `runs/` + `memory/`; score with `score.py`, label separately from the pane run. | Desktop decision |
+| 3 | ~~Ordinary Mac Chrome run~~ **DONE 2 Nov** | Same result as the pane (STATUS item 2). Bench defect to fix if the bench is used again: re-find the satellite object after the phase-6 re-digest before the toggle phase (phase 7 toggled a stale reference — likely, unproven). `score.py`'s "0 objects left" criterion predates create-once; it should check *visible* objects. | — |
 | 4 | Existing page at ~30 fps on the Mac pane | Separate investigation of today's layers (polygons, merged points, rings). Not a satellite issue. | No |
 | 5 | FIRMS CPU attribution | Docs say CPU/wall time are in the **invocation log** (one event per invocation, ~2.4 % of the Free 200K/day at 100 %). Chad turns on Worker → Settings → Observability → "Include Invocation logs" (Traces off), then read CPU for the `*/15` runs. | No |
 | 6 | CO₂ truncated-200 guard | Response carries Content-Length; file header carries "File Creation". A guard can check both. Not built. (30 Oct is omitted at source; the source omits 109 of 366 days — earlier "contiguous" note withdrawn.) | No |
