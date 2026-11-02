@@ -156,6 +156,22 @@ async function harness(browser, opts = {}) {
       /earthquakes/i.test(row) && /M4\.0/.test(row) && /Volcano/.test(row) && /observed 2026-11-02 05:40 UTC/.test(row) && /current/i.test(row) && /run 05:50 UTC/i.test(row), row);
     ok('the highlight covers the matched substring only',
       (await page.evaluate(() => document.querySelector('#search-list mark').textContent)).toLowerCase() === 'volcano');
+    // live-data finding: a vessel matched on its own name must not print that name twice
+    await search('MAERSK');
+    await page.waitForSelector('#search-list button.res');
+    const shipRow = (await page.locator('#search-list button.res').first().innerText()).replace(/\n+/g, ' | ');
+    ok('a vessel matched on its name shows that name once, with the highlight in the title',
+      (shipRow.match(/MAERSK CHILE/g) || []).length === 1 && /maersk/i.test(await page.evaluate(() => document.querySelector('#search-list mark').textContent)), shipRow);
+    await search('636092111');
+    await page.waitForSelector('#search-list button.res');
+    const mmsiRow = (await page.locator('#search-list button.res').first().innerText()).replace(/\n+/g, ' | ');
+    ok('a named vessel matched on its MMSI still shows both name and MMSI',
+      /NO TIME SHIP/.test(mmsiRow) && /636092111/.test(mmsiRow), mmsiRow);
+    await search('volcano');
+    await page.waitForSelector('#search-list button.res');
+    const qRow = (await page.locator('#search-list button.res').first().innerText()).replace(/\n+/g, ' | ');
+    ok('an earthquake keeps magnitude and description as separate lines',
+      /M4\.0/.test(qRow) && /14 km SSW of Volcano/.test(qRow), qRow);
     const notes = await page.locator('#search-notes').innerText();
     ok('a layer with no searchable text is named with its reason',
       /Fire detections: not searched — publishes no text to search/.test(notes), notes);

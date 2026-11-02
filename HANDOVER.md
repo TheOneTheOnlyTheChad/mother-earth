@@ -10,7 +10,7 @@ Read `START-HERE.md` (§2 is the constitution; §5a testing; §5b the ships dura
 |---|---|
 | Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main` at **`310c13d`**. Commit straight to main, no branches. AGPL-3.0. |
 | Hub (Cloudflare Worker) | **collector `0.2.1`** · `https://mother-earth.chadoberholzer.workers.dev` · `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `POST /ingest/<layer>`, `POST /admin/reaggregate/ships`, `GET /admin/run/<job>` |
-| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021000` — **bump on every page change, in `index.html` and `sources.html`** |
+| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021100` — **bump on every page change, in `index.html` and `sources.html`** |
 | Mac collector | **`mac-0.3.2`**, launchd `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples when 30 min are due |
 | Cron triggers | `:07` hourly · `*/5` · `*/15` firms · `11,41` forest |
 | Layers live | quakes, fires, ships, forest, Kp, CO₂, sea ice. Aircraft parked (OpenSky correspondence governs — public site must feed the network). |

@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611021000">
+<link rel="stylesheet" href="style.css?v=202611021100">
 </head>
 <body class="world">
 <header class="top">
@@ -148,7 +148,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611021000"></script>
+<script src="app.js?v=202611021100"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -417,11 +417,18 @@ function rowTimes(layer, h) {
   if (h.km !== undefined) bits.push(`${Math.round(h.km).toLocaleString()} km away`);
   return bits.join(' · ');
 }
+// When the match IS the record's title — a vessel found by the name it is titled with, or an unnamed vessel
+// found by the MMSI it is titled with — the highlight goes in the title and the matched line is dropped, so the
+// same text is not printed twice (seen on live data: "CAPE CONDOR | CAPE CONDOR").
 function rowHtml(h, i) {
   const f = ME.freshness(h.layer);
-  const matched = h.field ? `<span class="rm">${h.field === 'mmsi' ? 'MMSI ' : ''}${ME.markMatch(h.text, h.at, h.len)}</span>` : '';
+  const titleIsMatch = h.layer === 'ships' && (h.field === 'name' ? !!h.rec.name : h.field === 'mmsi' && !h.rec.name);
+  const title = titleIsMatch
+    ? (h.field === 'mmsi' ? 'MMSI ' : '') + ME.markMatch(h.text, h.at, h.len)
+    : recordTitle(h.layer, h.rec);
+  const matched = h.field && !titleIsMatch ? `<span class="rm">${h.field === 'mmsi' ? 'MMSI ' : ''}${ME.markMatch(h.text, h.at, h.len)}</span>` : '';
   return `<li><button type="button" class="res${h.dead ? ' dead' : ''}" data-i="${i}"${h.dead ? ' aria-disabled="true"' : ''}>`
-    + `<span class="rh"><span class="rl">${esc(LABEL[h.layer])}</span><span class="rt">${recordTitle(h.layer, h.rec)}</span></span>`
+    + `<span class="rh"><span class="rl">${esc(LABEL[h.layer])}</span><span class="rt">${title}</span></span>`
     + matched
     + `<span class="rw">${rowTimes(h.layer, h)}</span>`
     + `<span class="rf">${esc(ME.stateWord(f, h.layer)[0])} · run ${esc(hhmm(h.runId))}</span>`
