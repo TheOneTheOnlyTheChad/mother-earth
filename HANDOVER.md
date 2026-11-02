@@ -8,6 +8,16 @@ Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration co
 
 **Nothing public changed in thread 6.** Page, hub (collector `0.2.1`) and Mac collector (`mac-0.3.2`) are exactly as at the start of the day; page assets still `?v=202611021500`. Thread 6 closed the terminator deployment check, did two desk checks (FIRMS observability docs, NOAA's raw CO₂ file), and ran the satellite work to an approved direction and a private benchmark. Satellites are **not live**: the gate is the reuse basis.
 
+## 0a. Access the next thread has (all verified in thread 6)
+
+- **GitHub:** push straight to `main` of `TheOneTheOnlyTheChad/mother-earth` (attach with `add_repo`, access "push", then shallow-clone to `/home/claude/mother-earth`). `gh` works from the container.
+- **Chad's Mac:** remote-device tools. `~/Documents/Mother Earth/` granted by one folder-access prompt per thread; read/write via `device_bash` (mounted at `$HOME/mnt/Mother Earth`), `device_stage_files` (Mac → container) and `device_commit_files` (container → Mac; see the sync gotcha below). The runtime folder `~/mother-earth/` is reachable the same way. `rm` is blocked unless Chad grants delete permission.
+- **Built-in browser pane (Claude app):** works when the Claude app is open and the pane is displayed (Cmd+Shift+B). Signed in to Cloudflare (dashboard, Worker editor, D1 console, Metrics) and claude.ai. Reaches the hub, the live site, CelesTrak, Space-Track, TraCSS (sites approved this thread: celestrak.org, space-track.org, api.tracss.gov, claude.ai, api.ipify.org, plus earlier ones). Timing measurements are only valid while the pane is displayed.
+- **claude.ai artifacts:** private pages with their own data store (ArtifactData). The private "Satellite Population Bench" lives there.
+- **Project docs:** `Projects.project_write` to `claude/<name>.md` (STATUS, HANDOVER, START-HERE).
+- **Not reachable from these sessions:** Claude in Chrome (extension not connected); the container's and the Mac VM's shells cannot reach celestrak.org or the hub (allowlists). Only Chad's own Terminal writes a fetched file to disk byte-exact.
+- **Chad does himself:** pastes every secret; any account creation (e.g. Space-Track); Worker settings changes (e.g. Observability "Include Invocation logs"); runs in his own Chrome.
+
 ## 1. Where things are
 
 | | |
