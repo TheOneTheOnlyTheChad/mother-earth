@@ -1,3 +1,35 @@
+# Mother Earth — status (2 Nov 2026 — thread 4, 06:45 SAST)
+
+## Done 2 Nov — **sleep-mid-sample test run; the sleep detector is proven unreliable**
+`sleeptest.sh`, collector `mac-0.3.2`, 03:56:20 UTC. Partial result: three criteria pass, two were not exercised, and the independent record settled a bigger question than the test was aimed at.
+
+**1. The overnight gaps were host suspension, and the detector missed every one.** `pmset -g log` is written by macOS and the collector has no part in it. Lining its Sleep events up against the collector's own samples (local +0200 converted to UTC):
+
+| sample started | collector gap | macOS entered Sleep | macOS Sleep duration | detector said |
+|---|---|---|---|---|
+| 01:23:38 | 948 s | 01:24:14 (`Maintenance Sleep`) | 946 s | `slept=false` |
+| 02:16:15 | 923 s | 02:16:59 (`Maintenance Sleep`) | 921 s | `slept=false` |
+| 03:05:08 | 686 s | 03:05:52 (`Maintenance Sleep`) | 682 s | `slept=false` |
+
+Three exact correspondences: the Mac enters maintenance sleep ~40 s into each sample, stays suspended for the gap, wakes, and the sample completes. **`wall − monotonic > 5 s` never fires, so `process.hrtime.bigint()` evidently advances across suspend on this hardware and both clocks include the suspended time.** The detector cannot see macOS sleep here and its output must not be read as evidence either way. This replaces yesterday's "cause unknown" — the cause is established, by a source outside our own code.
+- **The safety net held regardless:** `overlong=true` fired on all of them, status `degraded`, and the aggregation rejected them as received-but-unusable. The design decision to hang status on elapsed time rather than on the detector is what saved this.
+- **Idle is the trigger, not lid state:** the Mac maintenance-sleeps roughly every 15 min when idle. The two samples taken while Chad was using it (03:48, 04:28) are clean — wall 60.1 s, gap 0, `ok`.
+
+**2. What the controlled test did and did not exercise.** macOS recorded `Software Sleep pid=410` at 03:56:36 UTC — the Apple-menu sleep, 15 s into the sample — but it **DarkWaked 27 s later** (`wifibt SMC.OutboxNotEmpty`), so the host never stayed down for the intended 8 min. The sample was still inside its 180 s window on wake and ended at 76 s with `websocket error` → `source_status: down`, uploaded, exit 3.
+- NOT exercised: records rejected past the hard bound; overlong classification in this run.
+- Worth noting for the re-run: in every natural suspend overnight the socket went quiet and **stayed** quiet to close (`quiet_at_end` ≈ the whole gap), so no message ever arrived after resumption to be rejected. The guard may be difficult to exercise naturally because a long suspend kills the socket.
+- Power assertions were read *after* wake with the user active (`PreventUserIdleSystemSleep 1`, `InternalPreventSleep 1`), so they say nothing about what held during the test.
+
+**3. Criteria that did pass, on evidence:**
+- **Lock:** the catch-up tick at 03:57:03 logged `lock held by live pid 3804; not reclaimed` — the pid-liveness path ran and refused. After exit: `lock: free`, no pid file.
+- **Exit and upload:** exit 3, down report accepted (`200 cells only (down)`), `pending: none`.
+- **No catch-up burst:** exactly one attempt at 04:28:02, **1,825 s after the test completed at 03:57:37** — the completion-based interval behaving as intended.
+- **Hub and aggregation preserved it without counting it:** hour 03 aggregated `files 3, ok 1, rejected 2, status degraded`, 177 cells from the one usable sample. The overlong attempt and the down attempt are both in the record; neither counts as usable; the hour is not `absent` and not `ok`.
+
+**4. FIRMS confirmed recovered (the question left open this morning):** valid rows returned at **04:30:40 UTC — 663 records, 54,273 bytes, status ok**. The header-only responses through 03:30 were the UTC rollover with NRT latency, now confirmed by observation rather than assumed.
+
+**Still open:** the sleep/resumption contract is not validated — the test needs a suspend that actually lasts past the hard bound. The wake was caused by network/Bluetooth, so a re-run needs the host to stay down longer; method to be agreed before changing anything.
+
 # Mother Earth — status (1 Nov 2026 — thread 4 close, 18:00 SAST)
 
 **Deployed on Cloudflare: collector 0.2.0 (1 Nov 07:58 UTC; repo `main` matches). Front end per the World View layout brief: `index.html` + `sources.html` + shared `app.js`/`style.css`. Six layers on the page; a SEVENTH — forest disturbance (GFW) — is live on the page (cells-only green layer, filling as the sweep runs). Ships scheduled from the Mac (launchd, ~every 30 min while awake).** Read `START-HERE.md` first.
