@@ -1,4 +1,4 @@
-# Mother Earth — handover to thread 7 (2 Nov 2026, end of thread 6)
+# Mother Earth — handover (2 Nov 2026; §3 updated end of thread 7 — see STATUS "Thread 7" first)
 
 Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration contract), then this file, then `STATUS.md` (newest sections first). Not a fresh sandbox: nothing below needs re-investigating.
 
@@ -58,10 +58,10 @@ Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration co
 
 | # | Item | Next step | Blocks satellites going public? |
 |---|---|---|---|
-| 1 | **Satellite reuse basis** | Three questions in REGISTER (CelesTrak row): does Space-Track's blanket approval reach data taken via CelesTrak; what "appropriate citation" wording satisfies it; commercial use. Clean route on the evidence: Chad's own Space-Track account (he creates it — Claude never creates accounts) + citation. Alternative: written confirmation from CelesTrak. TraCSS CC0 endpoint answers 200 "OK" with no records — recheck occasionally. | **Yes** |
-| 2 | **Memory plateau** | Rerun bench 1.6 memory mode in the container with forced GC and the orphan tracker OFF (it keeps a record of every ring geometry and is the likely source of the residual +~1.1 MB / 30 toggles). Plateau = flat retained heap across batches. | Yes, before release |
-| 3 | ~~Ordinary Mac Chrome run~~ **DONE 2 Nov** | Same result as the pane (STATUS item 2). Bench defect to fix if the bench is used again: re-find the satellite object after the phase-6 re-digest before the toggle phase (phase 7 toggled a stale reference — likely, unproven). `score.py`'s "0 objects left" criterion predates create-once; it should check *visible* objects. | — |
-| 4 | Existing page at ~30 fps on the Mac pane | Separate investigation of today's layers (polygons, merged points, rings). Not a satellite issue. | No |
+| 1 | **Satellite reuse basis — now a decision, not a research gap (thread 7)** | Evidence read and filed (REGISTER CelesTrak row; STATUS thread 7). No published requirement for individual permission found; the constitution requires the commercial standing *recorded*, not a grant. Chad decides the basis. Recommendation: benchmarked CelesTrak active set fetched by the Worker under CelesTrak's rules, credit + origin citation; Space-Track (Chad's account, created 2 Nov) is the documented alternative. An email to CelesTrak is optional, not required. | **Yes — Chad's decision** |
+| 2 | ~~Memory plateau~~ **DONE 2 Nov (thread 7)** | Tracker hypothesis refuted; the same growth appears with satellites never shown (control), so there is no satellite-attributable retained growth. Whole-page growth (about +0.5 MB/min in the software renderer) belongs to the existing layers and is folded into item 4. | No (satellites) |
+| 3 | ~~Phase-7 visible object~~ **DONE 2 Nov (thread 7)** | Stale-reference state observed in kind after the phase-6 re-digest (`?refind` run) and cleared by re-finding; only the re-digest path can cause it. Production path (create once, in-place, visibility) shown clean: 0 visible after every one of 180 toggles. | — |
+| 4 | Existing page at ~30 fps on the Mac pane | Separate investigation of today's layers (polygons, merged points, rings), now including their slow retained-heap growth (thread 7). Not a satellite issue. | No |
 | 5 | FIRMS CPU attribution | Docs say CPU/wall time are in the **invocation log** (one event per invocation, ~2.4 % of the Free 200K/day at 100 %). Chad turns on Worker → Settings → Observability → "Include Invocation logs" (Traces off), then read CPU for the `*/15` runs. | No |
 | 6 | CO₂ truncated-200 guard | Response carries Content-Length; file header carries "File Creation". A guard can check both. Not built. (30 Oct is omitted at source; the source omits 109 of 366 days — earlier "contiguous" note withdrawn.) | No |
 | 7 | Physical long-sleep test (Mac) | Unchanged: a suspend that lasts past the hard deadline; no power-setting changes. Note: Chad ran `caffeinate` during the thread-6 benchmark. | No |
