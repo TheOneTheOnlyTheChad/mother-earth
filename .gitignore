@@ -8,3 +8,6 @@ node_modules/
 .DS_Store
 phase1/logs/
 phase1/state/
+
+# satellite benchmark: frozen third-party data stays private until reuse is established (2 Nov 2026)
+bench-private/
