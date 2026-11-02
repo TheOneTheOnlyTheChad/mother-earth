@@ -75,9 +75,53 @@ body.world{height:100vh;height:100dvh;overflow:hidden;display:grid;grid-template
 .card .cav a.more{color:rgba(255,179,71,.85)}
 .card .pair{font-size:11px;color:var(--warn);line-height:1.4;border-left:2px solid var(--warn);padding-left:7px}
 .card .pair b{font-weight:600}
-/* ---------- find in this snapshot: navigation, user-triggered only */
-.card.find{border-color:var(--line-strong)}
-.card.find .name{color:var(--fg)}
+/* ---------- Explore: one collapsible panel holding the search and the snapshot-jump buttons. Closed on load. */
+.card.explore{border-color:var(--line-strong);padding:0;gap:0}
+.card.explore>button.exp{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;width:100%;min-height:44px;padding:8px 12px}   /* all:unset drops box-sizing, so width:100% + padding would overflow the card */
+.card.explore>button.exp:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.card.explore>button.exp .name{font:600 16px/1 var(--display);letter-spacing:.05em;text-transform:uppercase;color:var(--fg)}
+.card.explore>button.exp[aria-expanded="true"]{border-bottom:1px solid var(--line)}
+.card.explore .chev{color:var(--dim)}
+.exp-body{display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px}
+.exp-body[hidden]{display:none}   /* a class rule with display: beats the UA [hidden] rule, so say it here */
+.exp-body label{font-size:11px;color:var(--dim);letter-spacing:.03em}
+.searchrow{display:flex;gap:6px}
+.searchrow input{flex:1 1 auto;min-width:0;min-height:44px;padding:6px 10px;border:1px solid var(--line-strong);background:rgba(7,10,15,.8);color:var(--fg);font:400 16px/1.3 var(--mono)}
+.searchrow input:focus-visible{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.searchrow input::placeholder{color:rgba(127,141,163,.75)}
+.findbtn.go{flex:0 0 auto}
+.exp-body .hint{font-size:10.5px;color:var(--dim);line-height:1.4}
+.exp-body .hint b{color:var(--fg);font-weight:500}
+.exp-body code{font-size:10.5px;color:var(--fg);background:rgba(140,170,200,.1);padding:0 3px}
+/* results: one scrolling surface only — the list never gets its own scrollbar inside the column or the sheet */
+.results:empty{display:none}
+.rstatus{font-size:11.5px;line-height:1.45;color:var(--fg);font-variant-numeric:tabular-nums}
+.rstatus:empty{display:none}
+.rstatus b{font-weight:600}
+.rstatus .bad{color:var(--warn)}
+.rlist{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:1px}
+.rlist:empty{display:none}
+button.res{all:unset;display:flex;flex-direction:column;gap:2px;width:100%;box-sizing:border-box;cursor:pointer;padding:7px 8px;min-height:44px;border-left:2px solid var(--line-strong);background:rgba(140,170,200,.05)}
+button.res:hover{background:rgba(140,170,200,.12);border-left-color:var(--accent)}
+button.res:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+button.res .rh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+button.res .rl{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+button.res .rt{font:600 14px/1.1 var(--display);letter-spacing:.03em;color:var(--accent)}
+button.res .rm{font-size:11.5px;color:var(--fg);line-height:1.35;word-break:break-word}
+button.res mark{background:rgba(255,179,71,.28);color:#fff;padding:0 1px}
+button.res .rw{font-size:10.5px;color:var(--dim);line-height:1.35;font-variant-numeric:tabular-nums}
+button.res .rw b{color:var(--warn);font-weight:500}
+button.res .rf{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
+button.res .rx{font-size:10.5px;color:var(--warn);line-height:1.35}
+button.res.dead{opacity:.6;border-left-color:var(--warn);background:rgba(255,209,102,.06)}
+button.res.go .rt{color:var(--fg)}
+.rnotes{font-size:10.5px;color:rgba(127,141,163,.85);line-height:1.4;display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.rnotes:empty{display:none}
+.rnotes b{color:var(--fg);font-weight:500}
+.exp-body details.scope summary{font-size:11px;color:rgba(255,179,71,.85);cursor:pointer;min-height:28px;display:flex;align-items:center}
+.exp-body details.scope>div{font-size:10.5px;color:rgba(127,141,163,.9);line-height:1.5;border-left:2px solid var(--line);padding-left:8px;margin-top:4px}
+.exp-body details.scope p{margin:0 0 6px}
+.exp-body details.scope b{color:var(--fg);font-weight:500}
 .findrow{display:flex;flex-wrap:wrap;gap:6px}
 .findbtn{flex:1 1 140px;min-height:44px;padding:8px 10px;border:1px solid var(--line-strong);background:var(--card);cursor:pointer;font:600 13px/1.2 var(--display);letter-spacing:.04em;text-transform:uppercase;text-align:left}
 .findbtn:hover{border-color:var(--accent)}
@@ -171,6 +215,14 @@ body.doc{overflow:auto}
   .credits{display:none}
   .inspector{top:60px;left:12px;right:12px;width:auto;max-height:45%}
   .card .cav{font-size:11.5px;color:rgba(127,141,163,.9)}   /* 10.5px measured too small on a 390 px phone (1 Nov 2026) */
+  /* the sheet is the only scrolling surface: results extend it rather than scrolling inside it */
+  .exp-body .hint,.rnotes,.exp-body details.scope>div,button.res .rw,button.res .rx{font-size:11.5px}
+  .exp-body details.scope summary{font-size:12px;min-height:44px}
+  button.res{padding:9px 10px}
+  button.res .rm{font-size:12.5px}
+  /* input and button stay on one row so the latitude-first hint sits directly under the input,
+     not below the button (measured on a 390 px phone, 2 Nov 2026) */
+  .searchrow input{font-size:16px}
 }
 @media (prefers-reduced-motion:reduce){
   .sheet{transition:none}

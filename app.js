@@ -45,6 +45,118 @@ ME.extremeOf = (recs, key) => {
   return { max, tied: usable.filter(r => +r[key] === max), excluded: (recs || []).length - usable.length, considered: usable.length };
 };
 
+// ---------- search over records ALREADY LOADED in this browser (thread 5). No geocoder, no place dataset,
+// no country boundaries, no new request of any kind. Pure functions so they can be tested offline and run
+// against real snapshots from the console (START-HERE §5a).
+const MIN_QUERY = ME.MIN_QUERY = 2;             // one character matches nearly everything and helps nobody
+const MIN_DIGITS = ME.MIN_DIGITS = 3;           // an MMSI fragment shorter than this is not a search
+const MAX_RESULTS = ME.MAX_RESULTS = 12;        // the true total is always stated alongside
+const SEARCH_RADIUS_KM = ME.SEARCH_RADIUS_KM = 250;   // a radius chosen for this box. NOT a coverage boundary, and not derived from the cell grid.
+// Only fields a layer actually publishes as text. firms and forest publish none — they are never listed as text-searchable.
+const TEXT_FIELDS = ME.TEXT_FIELDS = { usgs: ['title'], firms: [], ships: ['name', 'mmsi'], forest: [] };
+
+const coordLabel = ME.coordLabel = (lat, lng) =>
+  `${Math.abs(lat).toFixed(3)}° ${lat < 0 ? 'S' : 'N'}, ${Math.abs(lng).toFixed(3)}° ${lng < 0 ? 'W' : 'E'}`;
+const trim0 = x => String(x).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+
+// null  → not a coordinate attempt at all; the caller falls through to a text search.
+// {ok:false, why} → it reads as one but cannot be accepted, with the reason in plain language.
+// {ok:true, lat, lng, label}
+ME.parseCoord = function (raw) {
+  const q = String(raw ?? '').trim().replace(/[−–—]/g, '-');
+  if (!q || !/\d/.test(q)) return null;
+  if (/[^0-9NSEWnsew\s,.+\-°'"]/.test(q)) return null;          // any other letter: this is a text search
+  if (/[°'"]/.test(q)) return { ok: false, why: 'Degrees, minutes and seconds are not accepted. Enter decimal degrees, latitude first: <code>-33.92, 18.42</code>.' };
+  const items = q.match(/[+-]?\d+(?:\.\d+)?|[NSEWnsew]/g) || [];
+  const numTok = items.filter(t => /\d/.test(t));
+  // A lone bare number is NOT a coordinate attempt — it is far more likely a fragment of an MMSI or a magnitude,
+  // so it falls through to the text search rather than being refused as half a coordinate.
+  if (numTok.length < 2 && !/[,NSEWnsew]/.test(q)) return null;
+  const twoNumbers = 'Enter two numbers, latitude first and longitude second — <code>-33.92, 18.42</code> or <code>33.92S, 18.42E</code>.';
+  if (numTok.length !== 2) return { ok: false, why: twoNumbers };
+  // A hemisphere letter may be written before its number ("S33.92 E18.42") or after it ("33.92 S, 18.42 E").
+  // A letter sitting between two numbers is ambiguous on its own, so the style is decided ONCE from where the
+  // first letter falls relative to the first number, and then applied to all of them.
+  const firstNum = items.findIndex(t => /\d/.test(t)), firstHemi = items.findIndex(t => !/\d/.test(t));
+  const prefixStyle = firstHemi >= 0 && firstHemi < firstNum;
+  const hemi = [null, null];
+  let seen = -1, bad = false;
+  items.forEach(t => {
+    if (/\d/.test(t)) { seen++; return; }
+    const k = prefixStyle ? seen + 1 : seen;
+    if (k < 0 || k > 1 || hemi[k]) { bad = true; return; }
+    hemi[k] = t.toUpperCase();
+  });
+  if (bad) return { ok: false, why: twoNumbers };
+  if ((hemi[0] === 'E' || hemi[0] === 'W') && (hemi[1] === 'N' || hemi[1] === 'S'))
+    return { ok: false, why: `That reads as longitude first (${esc(numTok[0])}${hemi[0]}, ${esc(numTok[1])}${hemi[1]}). This box takes <b>latitude first</b>, then longitude.` };
+  if (hemi[0] === 'E' || hemi[0] === 'W') return { ok: false, why: `The first value carries ${hemi[0]}, which marks a longitude. Latitude comes first here.` };
+  if (hemi[1] === 'N' || hemi[1] === 'S') return { ok: false, why: `The second value carries ${hemi[1]}, which marks a latitude. Longitude comes second here.` };
+  const val = (tok, h) => {
+    const neg = tok.startsWith('-');
+    if (neg && h) return null;                                   // "-33.92S" says south twice over: refuse rather than guess
+    let v = Math.abs(parseFloat(tok));
+    if (neg || h === 'S' || h === 'W') v = -v;
+    return v;
+  };
+  const lat = val(numTok[0], hemi[0]), lng = val(numTok[1], hemi[1]);
+  if (lat === null || lng === null) return { ok: false, why: 'A minus sign and a hemisphere letter together (<code>-33.92S</code>) is ambiguous, so it is refused rather than guessed. Use one or the other.' };
+  if (!(lat >= -90 && lat <= 90)) return { ok: false, why: `Latitude ${esc(trim0(lat))} is outside −90 to 90. Latitude is the first value.` };
+  if (!(lng >= -180 && lng <= 180)) return { ok: false, why: `Longitude ${esc(trim0(lng))} is outside −180 to 180. Longitude is the second value.` };
+  return { ok: true, lat, lng, label: coordLabel(lat, lng) };
+};
+
+ME.kmBetween = function (aLat, aLng, bLat, bLng) {
+  const R = 6371, rad = Math.PI / 180;
+  const dLat = (bLat - aLat) * rad, dLng = (bLng - aLng) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(aLat * rad) * Math.cos(bLat * rad) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+};
+
+// Escape FIRST, then wrap: the match is located in the raw string and each of the three pieces is escaped on its own,
+// so source text can never reach the page as markup.
+ME.markMatch = (s, at, len) => esc(String(s).slice(0, at)) + '<mark>' + esc(String(s).slice(at, at + len)) + '</mark>' + esc(String(s).slice(at + len));
+
+// pools: [{layer, records, runId, fields}] — the caller has already excluded hidden, unusable and unknown layers,
+// and `fields` is the record envelope's own field list, so a field the source did not publish is never searched.
+ME.searchLoaded = function (raw, pools) {
+  const q = String(raw ?? '').trim();
+  const coord = ME.parseCoord(q);
+  if (coord && coord.ok) {
+    const hits = [];
+    for (const p of pools) for (const r of p.records || []) {
+      if (!Number.isFinite(+r.lat) || !Number.isFinite(+r.lng)) continue;
+      const km = ME.kmBetween(coord.lat, coord.lng, +r.lat, +r.lng);
+      if (km <= SEARCH_RADIUS_KM) hits.push({ layer: p.layer, rec: r, runId: p.runId, km, dead: null });
+    }
+    hits.sort((a, b) => a.km - b.km);
+    return { kind: 'coord', coord, total: hits.length, hits: hits.slice(0, MAX_RESULTS),
+      searched: pools.map(p => p.layer), considered: pools.reduce((n, p) => n + (p.records || []).length, 0) };
+  }
+  if (coord) return { kind: 'badcoord', why: coord.why };
+  if (/^\d+$/.test(q)) { if (q.length < MIN_DIGITS) return { kind: 'short', why: `Enter at least ${MIN_DIGITS} digits of an MMSI.` }; }
+  else if (q.length < MIN_QUERY) return { kind: 'short', why: `Enter at least ${MIN_QUERY} characters, or a latitude and longitude.` };
+  const needle = q.toLowerCase();
+  const hits = [], searched = [];
+  let considered = 0;
+  for (const p of pools) {
+    const fields = (TEXT_FIELDS[p.layer] || []).filter(f => (p.fields || []).includes(f));
+    if (!fields.length) continue;                                 // no text to search: not claimed as searched
+    searched.push(p.layer);
+    considered += (p.records || []).length;
+    for (const r of p.records || []) {
+      for (const f of fields) {
+        const v = r[f] === null || r[f] === undefined ? '' : String(r[f]);
+        const at = v.toLowerCase().indexOf(needle);
+        if (at >= 0) { hits.push({ layer: p.layer, rec: r, runId: p.runId, field: f, text: v, at, len: q.length, dead: null }); break; }
+      }
+    }
+  }
+  // a bare number that found nothing may have been a half-typed position: offer the order, do not assume it
+  const couldBeCoord = !hits.length && /^[+-]?\d+(?:\.\d+)?$/.test(q);
+  return { kind: 'text', q, total: hits.length, hits: hits.slice(0, MAX_RESULTS), searched, considered, couldBeCoord };
+};
+
 // ---------- WebGL availability, in plain language (item 1). The minified library error goes to diagnostics, not to the reader.
 ME.webglMissing = function () {
   try {
@@ -178,6 +290,7 @@ ME.rules = function (R) {
   add('general', 'Sentence template', 'cannot emit a cause', true);
   add('general', 'Missing is not zero', 'A value the source did not supply is shown as "not provided". A zero the source did report is shown as 0 and marked as the source\'s zero. The two are never displayed the same way.', true);
   add('general', 'Records and cells must match', 'Per-cell counts and individual records are only ever shown together when both files carry the same collector run (retrieved_at). If a run lands between the two reads the page re-reads the counts once; if they still differ, the counts are shown alone and the records are withheld with the reason. A failed record read clears the previous records instead of leaving them beside newer counts.', true);
+  add('general', 'Search', `The Explore box searches only the records this browser has already loaded from each layer's latest snapshot. It searches earthquake descriptions as USGS writes them, vessel names and MMSIs, and a latitude and longitude typed in that order. Fire detections and forest disturbance publish no text and are never text-searched; fire detections are included in a coordinate search. A layer that is hidden, unknown, or whose records are withheld by the pairing rule is not searched, and the panel says which and why. There is no geocoder, no place-name dataset and no country boundaries: a place or country word matches the source's own description text and nothing more, so it finds records described that way and misses records in the same country described another way. A coordinate search always offers to move the view to the position, and separately lists loaded records within ${SEARCH_RADIUS_KM} km, nearest first, up to ${MAX_RESULTS} with the true total stated; that radius is a choice made for this box and is not a coverage boundary. "No matching loaded records" describes the loaded snapshot only and does not establish absence. A result stays tied to the collector run, the layer visibility and the freshness it was found under: if any of those changes the result is marked and refused rather than opened, and no camera movement or selection happens without a click.`, true);
   add('general', 'Navigation', 'The "find in this snapshot" buttons move the view to the largest value inside the records already loaded — the loaded snapshot, not the world, and not a danger ranking. They make no further requests, run only when clicked, and never move the camera on their own.', true);
   add('general', 'Comparisons', `none of Mother Earth\'s own in phase 1; its baselines accumulate from ${BASELINE_SINCE}; descriptive comparisons from phase 3, highlights only after a held-out validation. Source-provided comparisons (NOAA CO₂, NSIDC climatology) are shown and labelled as the source\'s.`, true);
   for (const layer of LAYERS) {

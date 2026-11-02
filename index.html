@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611011700">
+<link rel="stylesheet" href="style.css?v=202611021000">
 </head>
 <body class="world">
 <header class="top">
@@ -78,13 +78,39 @@
           <div class="cav">OpenSky permits public sites only if they feed the network; no receiver installed yet. <a class="more" href="sources.html#aircraft">details</a></div>
         </div>
 
-        <div class="card find" id="card-find">
-          <div class="head"><span class="name">Find in this snapshot</span></div>
-          <div class="findrow">
-            <button class="findbtn" type="button" id="find-usgs">Highest magnitude in this feed</button>
-            <button class="findbtn" type="button" id="find-firms">Highest FRP in this snapshot</button>
+        <div class="card explore" id="card-explore">
+          <button class="exp" type="button" id="exp-btn" aria-expanded="false" aria-controls="exp-body"><span class="name">Explore</span><span class="chev" id="exp-chev" aria-hidden="true">▸</span></button>
+          <div class="exp-body" id="exp-body" hidden>
+            <form id="search-form" role="search" novalidate>
+              <label for="search-q">Search loaded records or coordinates</label>
+              <div class="searchrow">
+                <input type="search" id="search-q" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="name, MMSI, place words, or -33.9, 18.4" aria-describedby="search-hint">
+                <button class="findbtn go" type="submit">Search</button>
+              </div>
+              <div class="hint" id="search-hint">Coordinates: <b>latitude first</b>, then longitude — <code>-33.92, 18.42</code></div>
+            </form>
+            <div class="results" id="search-results">
+              <div class="rstatus" id="search-status" role="status" aria-live="polite"></div>
+              <ul class="rlist" id="search-list"></ul>
+              <div class="rnotes" id="search-notes"></div>
+            </div>
+            <details class="scope">
+              <summary>Search scope &amp; limitations</summary>
+              <div>
+                <p>This searches only the records your browser has already loaded from each layer's latest snapshot. It makes no request of any kind. It is not a search of the world, of history, or of everything a source holds.</p>
+                <p>Earthquake descriptions are searched exactly as USGS writes them. Vessel names and MMSIs are searched as received. <b>Fire detections and forest disturbance publish no text</b>, so they are never text-searched; fire detections do take part in a coordinate search.</p>
+                <p>There is no geocoder and no country boundaries. A place or country word matches the source's own description text: it finds records described that way and misses records in the same country described some other way.</p>
+                <p>A coordinate search always offers to move the view to that position, and separately lists loaded records within <span id="scope-km">250</span> km. That radius is a choice made for this box — it is not a coverage boundary.</p>
+                <p>A hidden, unknown, or withheld layer is not searched, and the panel names it. A result is tied to the collector run, layer visibility and freshness it was found under; if any of those change the result is marked and refused rather than opened.</p>
+                <p><a href="sources.html#search">Full rules on Sources &amp; Details →</a></p>
+              </div>
+            </details>
+            <div class="findrow">
+              <button class="findbtn" type="button" id="find-usgs">Highest magnitude in this feed</button>
+              <button class="findbtn" type="button" id="find-firms">Highest FRP in this snapshot</button>
+            </div>
+            <div class="cav" id="find-note">Moves the view to the largest value among the records already loaded. This snapshot only — not a ranking of the world, and not a measure of danger. Nothing moves unless you click.</div>
           </div>
-          <div class="cav" id="find-note">Moves the view to the largest value among the records already loaded. This snapshot only — not a ranking of the world, and not a measure of danger. Nothing moves unless you click.</div>
         </div>
       </section>
 
@@ -122,7 +148,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611011700"></script>
+<script src="app.js?v=202611021000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -230,6 +256,7 @@ function render() {
 document.querySelectorAll('button.tgl').forEach(b => b.addEventListener('click', () => {
   const k = b.dataset.layer; on[k] = !on[k];
   b.setAttribute('aria-pressed', String(on[k])); b.closest('.card').classList.toggle('off', !on[k]); render();
+  reviewResults();   // hiding a layer must invalidate that layer's open results, and only that layer's
 }));
 
 // ---------- inspector (§10.3): coverage cells AND individual records, through one open/close path
@@ -356,6 +383,130 @@ function findExtreme(layer, key, label) {
 $('find-usgs').addEventListener('click', () => findExtreme('usgs', 'mag', 'Highest magnitude'));
 $('find-firms').addEventListener('click', () => findExtreme('firms', 'frp_mw', 'Highest FRP'));
 
+// ---------- Explore panel (collapsible, closed on load) — holds the search and the two snapshot-jump buttons
+const expBody = $('exp-body'), expBtn = $('exp-btn');
+$('scope-km').textContent = ME.SEARCH_RADIUS_KM;
+function expOpen(o) { expBody.hidden = !o; expBtn.setAttribute('aria-expanded', String(o)); $('exp-chev').textContent = o ? '▾' : '▸'; }
+expBtn.addEventListener('click', () => { const o = expBody.hidden; expOpen(o); if (o) { $('search-q').focus({ preventScroll: true }); if (innerWidth <= 720) $('card-explore').scrollIntoView({ block: 'nearest' }); } });
+
+// ---------- search: results appear only after submission; a result is only ever opened while everything it was
+// found under still holds — the same collector run, the layer still visible, the layer still not unknown, and the
+// records still paired with their counts. Each result is judged on its own layer, so one layer refreshing does not
+// disable the others' results.
+let sres = null;         // the submitted result set; each hit carries its own layer, run id and liveness
+let sstatus = '';        // the one-line status, written to an aria-live region only when it changes
+
+function liveness(layer, runId) {
+  if (!on[layer]) return `${LABEL[layer]} are hidden now — turn the layer back on to open this`;
+  const f = ME.freshness(layer);
+  if (f.grade === 'unknown') return `${LABEL[layer]} is unknown now — ${f.why}`;
+  if (!usable(layer)) return `records withheld — ${unusableWhy(layer) || 'records and counts are not from the same collector run'}`;
+  if (pmeta[layer].id !== runId) return `found in the ${hhmm(runId)} run; the page now shows the ${hhmm(pmeta[layer].id)} run — search again to use it`;
+  return null;
+}
+const searchPools = () => RECORD_LAYERS
+  .filter(l => on[l] && usable(l) && ME.freshness(l).grade !== 'unknown')
+  .map(l => ({ layer: l, records: points[l], runId: pmeta[l].id, fields: pmeta[l].fields || [] }));
+
+// observation time, receipt time and the sample window are three different things and are never substituted for
+// one another: a record shows its own observed_at (said plainly when the source did not supply one) and, for ships,
+// the time we received it. The sample end belongs to the snapshot and is stated once, below the list.
+function rowTimes(layer, h) {
+  const bits = [h.rec.observed_at ? `observed ${esc(when(h.rec.observed_at))}` : '<b>source observation time not supplied</b>'];
+  if (layer === 'ships') bits.push(`received ${h.rec.received_at ? esc(h.rec.received_at.replace('T', ' ').slice(0, 19) + ' UTC') : 'not recorded'}`);
+  if (h.km !== undefined) bits.push(`${Math.round(h.km).toLocaleString()} km away`);
+  return bits.join(' · ');
+}
+function rowHtml(h, i) {
+  const f = ME.freshness(h.layer);
+  const matched = h.field ? `<span class="rm">${h.field === 'mmsi' ? 'MMSI ' : ''}${ME.markMatch(h.text, h.at, h.len)}</span>` : '';
+  return `<li><button type="button" class="res${h.dead ? ' dead' : ''}" data-i="${i}"${h.dead ? ' aria-disabled="true"' : ''}>`
+    + `<span class="rh"><span class="rl">${esc(LABEL[h.layer])}</span><span class="rt">${recordTitle(h.layer, h.rec)}</span></span>`
+    + matched
+    + `<span class="rw">${rowTimes(h.layer, h)}</span>`
+    + `<span class="rf">${esc(ME.stateWord(f, h.layer)[0])} · run ${esc(hhmm(h.runId))}</span>`
+    + (h.dead ? `<span class="rx">${esc(h.dead)}</span>` : '')
+    + `</button></li>`;
+}
+function notesHtml() {
+  const notes = [];
+  if (sres && (sres.kind === 'text' || sres.kind === 'coord')) {
+    if (sres.kind === 'coord') notes.push(`${ME.SEARCH_RADIUS_KM} km is a search radius chosen for this box, not a coverage boundary.`);
+    if (!sres.total) notes.push('Loaded snapshots only — this does not establish that nothing happened there.');
+    for (const l of sres.searched) { const f = ME.freshness(l); if (f.grade !== 'adequate') notes.push(`<b>${esc(LABEL[l])}: ${esc(ME.stateWord(f, l)[0])}</b> — ${esc(f.why)}`); }
+    if (sres.searched.includes('ships') && state.ships) notes.push(`Ship records come from the ${esc(String(state.ships.window_s || 60))} s sample ending ${esc(hhmm(state.ships.window_end))}; each record shows its own observation and receipt times.`);
+    for (const l of RECORD_LAYERS.filter(l => !sres.searched.includes(l))) {
+      const why = !on[l] ? 'layer hidden' : ME.freshness(l).grade === 'unknown' ? ME.freshness(l).why : !usable(l) ? (unusableWhy(l) || 'records withheld') : ME.TEXT_FIELDS[l] && !ME.TEXT_FIELDS[l].length ? 'publishes no text to search' : 'not searched';
+      notes.push(`${esc(LABEL[l])}: not searched — ${esc(why)}`);
+    }
+  }
+  return notes.map(n => `<div>${n}</div>`).join('');
+}
+function paintResults() {
+  const list = $('search-list'), act = document.activeElement;
+  const keep = act && act.classList && act.classList.contains('res') ? act.dataset.i : null;
+  list.innerHTML = sres && sres.hits ? (sres.kind === 'coord' ? `<li><button type="button" class="res go" data-go="1"><span class="rh"><span class="rl">Go to</span><span class="rt">${esc(sres.coord.label)}</span></span><span class="rw">moves the view only — no record is opened</span></button></li>` : '') + sres.hits.map(rowHtml).join('') : '';
+  $('search-notes').innerHTML = notesHtml();
+  if (keep != null) { const el = list.querySelector(`button.res[data-i="${keep}"]`); if (el) el.focus({ preventScroll: true }); }
+}
+function setStatus(html) { if (html === sstatus) return; sstatus = html; $('search-status').innerHTML = html; }
+
+function runSearch() {
+  const raw = $('search-q').value;
+  const pools = searchPools();
+  const r = ME.searchLoaded(raw, pools);
+  if (r.kind === 'short' || r.kind === 'badcoord') { sres = null; paintResults(); setStatus(`<span class="bad">${r.why}</span>`); return; }
+  sres = r;
+  const names = r.searched.map(l => LABEL[l].toLowerCase()).join(', ');
+  if (r.kind === 'coord') {
+    setStatus(`<b>${esc(r.coord.label)}</b> · ` + (r.total
+      ? `${r.total.toLocaleString()} loaded record${r.total === 1 ? '' : 's'} within ${ME.SEARCH_RADIUS_KM} km, nearest first${r.total > r.hits.length ? ` — showing the nearest ${r.hits.length}` : ''}${names ? ` · searched: ${esc(names)}` : ''}`
+      : `<b>No matching loaded records within ${ME.SEARCH_RADIUS_KM} km; this does not establish absence.</b>`));
+  } else if (!r.total) {
+    setStatus(`<b>No matching loaded records.</b>${names ? ` Searched ${r.considered.toLocaleString()} loaded records in: ${esc(names)}.` : ' No layer with searchable text is available right now.'}`
+      + (r.couldBeCoord ? ' If you meant a position, enter both values — latitude first: <code>-33.92, 18.42</code>.' : ''));
+  } else {
+    setStatus(`${r.total.toLocaleString()} match${r.total === 1 ? '' : 'es'} in ${r.considered.toLocaleString()} loaded records · searched: ${esc(names)}${r.total > r.hits.length ? ` — showing the first ${r.hits.length}` : ''}`);
+  }
+  paintResults();
+}
+// Re-judge every open result against the live state. Called after each layer commits, every 30 s with the cards,
+// and whenever a layer is toggled — so a result dies the moment its own basis moves, not when it is clicked.
+function reviewResults() {
+  if (!sres || !sres.hits) return;
+  let changed = false;
+  for (const h of sres.hits) { const w = liveness(h.layer, h.runId); if (w !== h.dead) { h.dead = w; changed = true; } }
+  if (changed) paintResults();
+}
+ME.searchState = () => sres && { kind: sres.kind, total: sres.total, shown: sres.hits.length, searched: sres.searched, dead: sres.hits.map(h => h.dead) };
+
+$('search-form').addEventListener('submit', e => { e.preventDefault(); runSearch(); });
+$('search-list').addEventListener('click', e => {
+  const b = e.target.closest('button.res'); if (!b) return;
+  if (b.dataset.go && sres && sres.coord) {
+    if (globeOk) globe.pointOfView({ lat: sres.coord.lat, lng: sres.coord.lng, altitude: 1.1 }, reduced ? 0 : 1200);
+    setStatus(`Moved the view to <b>${esc(sres.coord.label)}</b>. No record was opened.`);
+    return;
+  }
+  if (!sres) return;
+  const h = sres.hits[Number(b.dataset.i)]; if (!h) return;
+  const why = liveness(h.layer, h.runId);
+  if (why) { reviewResults(); setStatus(`<span class="bad">Not opened — ${esc(why)}.</span>`); return; }
+  if (globeOk) globe.pointOfView({ lat: +h.rec.lat, lng: +h.rec.lng, altitude: 1.1 }, reduced ? 0 : 1200);
+  inspectRecord(h.layer, h.rec);
+});
+$('search-list').addEventListener('keydown', e => {
+  const btns = [...$('search-list').querySelectorAll('button.res')], i = btns.indexOf(document.activeElement);
+  if (i < 0) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); btns[Math.min(i + 1, btns.length - 1)].focus(); }
+  if (e.key === 'ArrowUp') { e.preventDefault(); if (i === 0) $('search-q').focus(); else btns[i - 1].focus(); }
+  if (e.key === 'Escape' && !$('insp').classList.contains('show')) { e.stopPropagation(); $('search-q').focus(); }
+});
+$('search-q').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') { const f = $('search-list').querySelector('button.res'); if (f) { e.preventDefault(); f.focus(); } }
+  if (e.key === 'Escape' && !$('insp').classList.contains('show') && $('search-q').value) { e.stopPropagation(); $('search-q').value = ''; sres = null; paintResults(); setStatus(''); }
+});
+
 // ---------- cards
 const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = f.why; };
 const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
@@ -394,6 +545,7 @@ function cards() {
   $('m-seaice').innerHTML = `NSIDC Sea Ice Index · retrieved ${ago(R.seaice.retrieved)}${warn(R.seaice.fresh)}`;
   $('c-seaice').innerHTML = R.seaice.north === null ? 'comparison: unknown' : `Arctic <b>${esc(R.seaice.pctN)}</b> · Antarctic <b>${esc(R.seaice.pctS)}</b> — baseline NSIDC's 1981–2010 climatology; the subtraction is ours`;
   RECORD_LAYERS.forEach(pairNote);
+  reviewResults();   // freshness can lapse purely through time passing, so open results are re-judged here too
 }
 
 // ---------- records (progressive): map points, paired with the counts they are shown beside
