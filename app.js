@@ -166,6 +166,48 @@ ME.searchLoaded = function (raw, pools) {
   return { kind: 'text', q, total: hits.length, hits: hits.slice(0, MAX_RESULTS), searched, considered, couldBeCoord };
 };
 
+// ---------- solar geometry: COMPUTED astronomical context, not an observation (thread 5).
+// Formulation: the Astronomical Almanac / USNO low-precision solar coordinates — mean longitude and anomaly,
+// a two-term equation of centre, obliquity, then right ascension and declination, with GMST for the hour angle.
+// A US Government work, so no licence obligation; nothing is reused at runtime and the page gains no dependency.
+// ASSUMPTIONS, all of which make this differ from an observed sunrise:
+//   · the Sun is a geometric point at its centre — NO atmospheric refraction (~34') and NO solar semi-diameter (~16'),
+//     so true sunrise/sunset is about 50' of arc away from this boundary, and much further where the Sun's path is shallow;
+//   · a spherical Earth: no topography, no observer elevation;
+//   · UTC as supplied by the viewer's clock.
+// No accuracy is claimed here. Agreement against an independent reference is measured in phase1/solar.test.mjs
+// over a stated date range, and that measurement is the only figure quoted anywhere.
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const wrap180 = ME.wrap180 = d => ((d + 180) % 360 + 360) % 360 - 180;
+
+// The point on Earth where the Sun is directly overhead at `date`.
+ME.subsolar = function (date) {
+  const d = date instanceof Date ? date : new Date(date);
+  const n = d.getTime() / 86400000 + 2440587.5 - 2451545.0;        // days from J2000.0
+  const L = 280.460 + 0.9856474 * n;                                // mean longitude
+  const g = (357.528 + 0.9856003 * n) * D2R;                        // mean anomaly
+  const lam = (L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * D2R;   // ecliptic longitude
+  const eps = (23.439 - 0.0000004 * n) * D2R;                       // obliquity
+  const lat = Math.asin(Math.sin(eps) * Math.sin(lam)) * R2D;       // declination
+  const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) * R2D;
+  const gmst = 280.46061837 + 360.98564736629 * n;                  // Greenwich mean sidereal time
+  return { lat, lng: wrap180(ra - gmst), at: d.toISOString() };
+};
+
+// Geometric test: is (lat, lng) on the sunlit side at this subsolar point? Sun centre on the horizon is the boundary.
+ME.sunlit = function (lat, lng, sub) {
+  return Math.sin(lat * D2R) * Math.sin(sub.lat * D2R)
+    + Math.cos(lat * D2R) * Math.cos(sub.lat * D2R) * Math.cos((lng - sub.lng) * D2R) > 0;
+};
+
+// Angular separation between two directions given as lat/lng, in degrees. Used to compare subsolar points
+// against a reference without ever differencing longitudes directly (which breaks at the date line and the poles).
+ME.angularSep = function (aLat, aLng, bLat, bLng) {
+  const p1 = aLat * D2R, p2 = bLat * D2R, dl = (bLng - aLng) * D2R;
+  const x = Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(dl);
+  return Math.acos(Math.max(-1, Math.min(1, x))) * R2D;
+};
+
 // ---------- WebGL availability, in plain language (item 1). The minified library error goes to diagnostics, not to the reader.
 ME.webglMissing = function () {
   try {
@@ -299,6 +341,7 @@ ME.rules = function (R) {
   add('general', 'Sentence template', 'cannot emit a cause', true);
   add('general', 'Missing is not zero', 'A value the source did not supply is shown as "not provided". A zero the source did report is shown as 0 and marked as the source\'s zero. The two are never displayed the same way.', true);
   add('general', 'Records and cells must match', 'Per-cell counts and individual records are only ever shown together when both files carry the same collector run (retrieved_at). If a run lands between the two reads the page re-reads the counts once; if they still differ, the counts are shown alone and the records are withheld with the reason. A failed record read clears the previous records instead of leaving them beside newer counts.', true);
+  add('general', 'Day/night overlay', 'Optional, off unless switched on, and the only thing on this page that is computed rather than observed — tier: computed (astronomical context — calculated from the clock, not observed). It is not a layer: no source, no snapshot, no coverage grade, no freshness, and it never enters the status report. It shows calculated solar illumination for the UTC time it states, and nothing else: not whether anything was observed in daylight (the records were observed at many different times), not satellite coverage, not cloud, not visibility, and not evidence of absence. It does not explain fire-detection counts — VIIRS detects thermal anomalies by day and by night. The boundary is geometric (the Sun\'s centre on the horizon, no refraction and no solar disc), so it is not sunrise, and twilight is not drawn. It makes no request and recomputes locally once a minute while visible.', true);
   add('general', 'Search', `The Explore box searches only the records this browser has already loaded from each layer's latest snapshot. It searches earthquake descriptions as USGS writes them, vessel names and MMSIs, and a latitude and longitude typed in that order. Fire detections and forest disturbance publish no text and are never text-searched; fire detections are included in a coordinate search. A layer that is hidden, unknown, or whose records are withheld by the pairing rule is not searched, and the panel says which and why. There is no geocoder, no place-name dataset and no country boundaries: a place or country word matches the source's own description text and nothing more, so it finds records described that way and misses records in the same country described another way. Coordinates are read whole: leading decimals are kept as written, and a number that cannot be read in full is refused by name rather than repaired, because dropping a character would silently move the position somewhere else. A coordinate search always offers to move the view to the position, and separately lists loaded records within ${SEARCH_RADIUS_KM} km, nearest first, up to ${MAX_RESULTS} with the true total stated; that radius is a choice made for this box and is not a coverage boundary. Where the browser cannot show the globe there is no view to move, and the panel says so rather than reporting a movement that did not happen. "No matching loaded records" describes the loaded snapshot only and does not establish absence. A result stays tied to the collector run, the layer visibility and the freshness it was found under: if any of those changes the result is marked and refused rather than opened, and no camera movement or selection happens without a click.`, true);
   add('general', 'Navigation', 'The "find in this snapshot" buttons move the view to the largest value inside the records already loaded — the loaded snapshot, not the world, and not a danger ranking. They make no further requests, run only when clicked, and never move the camera on their own.', true);
   add('general', 'Comparisons', `none of Mother Earth\'s own in phase 1; its baselines accumulate from ${BASELINE_SINCE}; descriptive comparisons from phase 3, highlights only after a held-out validation. Source-provided comparisons (NOAA CO₂, NSIDC climatology) are shown and labelled as the source\'s.`, true);

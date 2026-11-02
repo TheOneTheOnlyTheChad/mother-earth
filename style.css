@@ -122,6 +122,20 @@ button.res.go .rt{color:var(--fg)}
 .exp-body details.scope>div{font-size:10.5px;color:rgba(127,141,163,.9);line-height:1.5;border-left:2px solid var(--line);padding-left:8px;margin-top:4px}
 .exp-body details.scope p{margin:0 0 6px}
 .exp-body details.scope b{color:var(--fg);font-weight:500}
+/* overlays group: computed context, visually quieter than the observation controls above it */
+.ovl{border-top:1px dashed var(--line);padding-top:8px;margin-top:2px;display:flex;flex-direction:column;gap:6px}
+.ovl-h{font:600 11px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.ovl-tgl{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:9px;cursor:pointer;width:100%;min-height:44px;padding:4px 2px}
+.ovl-tgl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ovl-tgl .box{flex:none;width:15px;height:15px;border:1px solid var(--line-strong);background:rgba(7,10,15,.8);position:relative}
+.ovl-tgl[aria-checked="true"] .box{border-color:var(--accent)}
+.ovl-tgl[aria-checked="true"] .box::after{content:"";position:absolute;inset:3px;background:var(--accent)}
+.ovl-tgl .t{font-size:12.5px;color:var(--fg);line-height:1.3}
+.ovl-tgl:hover .t{color:var(--accent)}
+.ovl .hint{font-variant-numeric:tabular-nums}
+.ovl .hint b{color:var(--warn);font-weight:500}
+.legend .nightleg{color:var(--fg);font-variant-numeric:tabular-nums}
+.legend .nightleg b{color:#cfe0f5;font-weight:600}
 .findrow{display:flex;flex-wrap:wrap;gap:6px}
 .findbtn{flex:1 1 140px;min-height:44px;padding:8px 10px;border:1px solid var(--line-strong);background:var(--card);cursor:pointer;font:600 13px/1.2 var(--display);letter-spacing:.04em;text-transform:uppercase;text-align:left}
 .findbtn:hover{border-color:var(--accent)}

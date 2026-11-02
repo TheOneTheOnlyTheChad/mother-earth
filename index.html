@@ -33,6 +33,7 @@
       <div class="cov"><span class="sw partial"></span>partly observed — records observed; coverage incomplete</div>
       <div class="cov"><span class="sw unknown"></span>unknown — nothing can be said about this cell</div>
       <div class="cov">No outline = no records in that cell; not evidence of absence.</div>
+      <div class="cov nightleg" id="night-legend" hidden></div>
       <div><a href="sources.html#coverage">How coverage is graded →</a></div>
     </div>
     <div class="inspector" id="insp" role="dialog" aria-labelledby="insp-h"><button class="x" id="insp-x" type="button" aria-label="Close">×</button><h2 id="insp-h">—</h2><dl id="insp-dl"></dl></div>
@@ -110,6 +111,24 @@
               <button class="findbtn" type="button" id="find-firms">Highest FRP in this snapshot</button>
             </div>
             <div class="cav" id="find-note">Moves the view to the largest value among the records already loaded. This snapshot only — not a ranking of the world, and not a measure of danger. Nothing moves unless you click.</div>
+            <div class="ovl">
+              <div class="ovl-h">Overlays</div>
+              <button class="ovl-tgl" type="button" id="tgl-night" role="switch" aria-checked="false" aria-describedby="night-note"><span class="box" aria-hidden="true"></span><span class="t">Day/night now — computed</span></button>
+              <div class="cav" id="night-note">Current sunlight geometry—not observation coverage.</div>
+              <div class="hint" id="night-time" hidden></div>
+              <details class="scope">
+                <summary>What this is and is not</summary>
+                <div>
+                  <p>Calculated solar illumination for the time shown, from the clock — <b>computed, not observed</b>.</p>
+                  <p>It is <b>not</b> a record of whether anything was observed in daylight. The records on this globe were observed at many different times, not at the time shown.</p>
+                  <p>It is not satellite coverage, not cloud, not visibility, and <b>not evidence of absence</b>.</p>
+                  <p><b>It does not explain fire-detection counts.</b> VIIRS detects thermal anomalies by day and by night, and each detection carries its own day/night flag.</p>
+                  <p>The imagery beneath this shading is from a previous day and is dated separately; every record carries its own observation time. Three different clocks, kept apart.</p>
+                  <p>Geometric boundary only: the Sun's centre on the horizon, with no refraction and no solar disc, so this is <b>not</b> sunrise or sunset. Twilight is not shown.</p>
+                  <p><a href="sources.html#daynight">Full rules on Sources &amp; Details →</a></p>
+                </div>
+              </details>
+            </div>
           </div>
         </div>
       </section>
@@ -525,6 +544,138 @@ $('search-q').addEventListener('keydown', e => {
   if (e.key === 'ArrowDown') { const f = $('search-list').querySelector('button.res'); if (f) { e.preventDefault(); f.focus(); } }
   if (e.key === 'Escape' && !$('insp').classList.contains('show') && $('search-q').value) { e.stopPropagation(); $('search-q').value = ''; sres = null; paintResults(); setStatus(''); }
 });
+
+// ---------- day/night overlay: COMPUTED astronomical context, deliberately kept out of the observation path.
+// It never touches `state`, `points`, `pmeta`, `usable()`, polygonsData, pointsData or ringsData, and it is
+// driven by its own one-minute timer rather than the network poll — so nothing computed can ever be mistaken
+// for, or entangled with, something observed.
+//
+// Render channel settled by spike (2 Nov, phase1/SPIKE-terminator.md): our own mesh added to the globe mesh's
+// own parent. `customLayerData` threw 22 uncaught TypeErrors across 25 toggles; scene add/remove threw none and
+// returned renderer memory to baseline when disposed explicitly.
+const NIGHT = { W: 1024, H: 512, ALPHA: 0.40, SEG_W: 128, SEG_H: 64, ALT: 0.0005 };
+const night = { on: false, mesh: null, parent: null, cv: null, ctx: null, img: null, tex: null, timer: null, at: null, why: null, lastPaintMs: null };
+
+// The three.js constructors are not exposed as a global by the UMD bundle, and they are NOT present at script
+// time — the globe mesh does not exist yet. Harvest lazily, at the moment the overlay is first enabled, and
+// fail honestly if anything is missing rather than half-rendering.
+function harvestThree() {
+  if (!globeOk || typeof globe.scene !== 'function' || typeof globe.globeMaterial !== 'function') return null;
+  const gm = globe.globeMaterial();
+  let gmesh = null, Mat = null, Tex = null;
+  globe.scene().traverse(o => {
+    if (!o.isMesh) return;
+    const m = Array.isArray(o.material) ? o.material[0] : o.material;
+    if (m === gm) gmesh = o;
+    if (m) { Mat = Mat || m.constructor; if (m.map) Tex = Tex || m.map.constructor; }
+  });
+  if (gm && gm.map) Tex = Tex || gm.map.constructor;
+  if (!gmesh || !gmesh.geometry || !/Sphere/i.test(gmesh.geometry.type || '') || !Mat || !Tex || !gmesh.parent) return null;
+  return { gmesh, Sphere: gmesh.geometry.constructor, Mesh: gmesh.constructor, Mat, Tex };
+}
+
+function buildNight() {
+  const h = harvestThree();
+  if (!h) return false;
+  const cv = document.createElement('canvas'); cv.width = NIGHT.W; cv.height = NIGHT.H;
+  const ctx = cv.getContext('2d');
+  const tex = new h.Tex(cv);
+  if ('colorSpace' in tex) tex.colorSpace = 'srgb';
+  const p = h.gmesh.geometry.parameters || {};
+  // Copy the globe's own sphere parameters AND its rotation. globe.gl orients its globe mesh at
+  // rotation.y = -PI/2; a fresh sphere does not inherit that, and the spike measured the shading landing
+  // 90 degrees out when it was omitted. This is the line that makes the texture line up with longitude.
+  const geo = new h.Sphere(globe.getGlobeRadius() * (1 + NIGHT.ALT), NIGHT.SEG_W, NIGHT.SEG_H,
+    p.phiStart != null ? p.phiStart : 0, p.phiLength != null ? p.phiLength : Math.PI * 2,
+    p.thetaStart != null ? p.thetaStart : 0, p.thetaLength != null ? p.thetaLength : Math.PI);
+  const mesh = new h.Mesh(geo, new h.Mat({ map: tex, transparent: true, depthWrite: false }));
+  mesh.rotation.set(h.gmesh.rotation.x, h.gmesh.rotation.y, h.gmesh.rotation.z);
+  mesh.raycast = () => { };            // never a pick target: coverage cells and records stay clickable through it
+  mesh.renderOrder = -1;
+  Object.assign(night, { mesh, parent: h.gmesh.parent, cv, ctx, tex, img: ctx.createImageData(NIGHT.W, NIGHT.H) });
+  return true;
+}
+
+// Per-pixel geometric test. Chosen over solving for the boundary latitude because it has no special case at an
+// equinox (declination 0), at the poles, or across the date line. cos(lng - subsolar) is hoisted per column and
+// the latitude terms per row, so the inner loop carries no trigonometry.
+function paintNight(when) {
+  if (!night.ctx) return;
+  const t0 = (performance && performance.now) ? performance.now() : 0;
+  const sub = ME.subsolar(when);
+  const { W, H } = NIGHT, d = night.img.data;
+  const a = Math.round(NIGHT.ALPHA * 255);
+  const rad = Math.PI / 180;
+  const sinD = Math.sin(sub.lat * rad), cosD = Math.cos(sub.lat * rad);
+  const cosDl = new Float64Array(W);
+  for (let x = 0; x < W; x++) cosDl[x] = Math.cos(((-180 + (x + 0.5) * 360 / W) - sub.lng) * rad);
+  for (let y = 0; y < H; y++) {
+    const lat = (90 - (y + 0.5) * 180 / H) * rad;
+    const sLat = Math.sin(lat) * sinD, cLat = Math.cos(lat) * cosD;
+    let i = y * W * 4;
+    for (let x = 0; x < W; x++, i += 4) {
+      // alpha only: the RGB stays 0, so the shading darkens and never tints
+      d[i + 3] = (sLat + cLat * cosDl[x]) > 0 ? 0 : a;
+    }
+  }
+  night.ctx.putImageData(night.img, 0, 0);
+  night.tex.needsUpdate = true;
+  night.at = sub.at;
+  night.lastPaintMs = (performance && performance.now) ? +(performance.now() - t0).toFixed(2) : null;
+  paintNightLabels();
+}
+
+function paintNightLabels() {
+  const t = $('night-time'), lg = $('night-legend');
+  const show = night.on && night.at;
+  // the label is written from the SAME timestamp the geometry was computed from, never a fresh clock read
+  t.hidden = !show;
+  if (show) t.textContent = 'Computed for ' + night.at.replace('T', ' ').slice(0, 19) + ' UTC';
+  lg.hidden = !show;
+  if (show) lg.innerHTML = `<b>Day/night now</b> · computed · ${esc(night.at.slice(11, 19))} UTC`;
+  if (!show && night.why) { t.hidden = false; t.innerHTML = `<b>${esc(night.why)}</b>`; }
+}
+
+function destroyNight() {
+  if (night.timer) { clearInterval(night.timer); night.timer = null; }
+  if (night.mesh) {
+    if (night.mesh.parent) night.mesh.parent.remove(night.mesh);
+    // explicit disposal: the spike measured 10 rebuilds leaking 10 geometries without it
+    if (night.mesh.geometry) night.mesh.geometry.dispose();
+    if (night.mesh.material) { if (night.mesh.material.map) night.mesh.material.map.dispose(); night.mesh.material.dispose(); }
+  }
+  Object.assign(night, { mesh: null, parent: null, cv: null, ctx: null, img: null, tex: null, at: null });
+}
+
+function setNight(on) {
+  if (on === night.on) return;
+  if (on) {
+    night.why = null;
+    if (!globeOk) { night.why = 'The globe is unavailable in this browser, so there is no surface to shade.'; paintNightLabels(); return; }
+    if (!buildNight()) { night.why = 'This browser did not expose what the overlay needs to draw; it has not been turned on.'; destroyNight(); paintNightLabels(); return; }
+    night.parent.add(night.mesh);
+    night.on = true;
+    paintNight(new Date());                                   // immediately on enable
+    night.timer = setInterval(() => { if (!document.hidden && night.on) paintNight(new Date()); }, 60e3);
+  } else {
+    night.on = false;
+    destroyNight();
+  }
+  $('tgl-night').setAttribute('aria-checked', String(night.on));
+  paintNightLabels();
+}
+
+$('tgl-night').addEventListener('click', () => setNight(!night.on));
+// one local cadence: every minute while visible, and immediately whenever we come back into view.
+// Background tabs throttle or suspend timers, so returning to a stale overlay is the expected failure.
+document.addEventListener('visibilitychange', () => { if (!document.hidden && night.on) paintNight(new Date()); });
+window.addEventListener('pageshow', () => { if (night.on) paintNight(new Date()); });
+// read-only diagnostics, like ME.pairState — for the console and the test harness (START-HERE §5a).
+// Neither changes anything; ME.screenAt is how the poles and the date line are checked on the real render.
+ME.nightState = () => ({ on: night.on, at: night.at, why: night.why, hasMesh: !!night.mesh, paintMs: night.lastPaintMs,
+  texture: NIGHT.W + 'x' + NIGHT.H, alpha: NIGHT.ALPHA, altitude: NIGHT.ALT, sub: night.at ? ME.subsolar(night.at) : null });
+ME.screenAt = (lat, lng, alt = 0) => globeOk ? globe.getScreenCoords(lat, lng, alt) : null;
+ME.cameraAt = () => globeOk ? globe.pointOfView() : null;   // a point on the far side still returns screen coords, so callers need this to tell which hemisphere faces them
 
 // ---------- cards
 const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = f.why; };
