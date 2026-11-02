@@ -1,4 +1,4 @@
-# Mother Earth — handover to thread 5 (2 Nov 2026)
+# Mother Earth — handover to thread 6 (2 Nov 2026)
 
 Read `START-HERE.md` (§2 is the constitution; §5a testing; §5b the ships duration contract), then `STATUS.md`. This file is the index: what is deployed, what is finished, what is genuinely unverified, and what Chad might build next.
 
@@ -8,9 +8,9 @@ Read `START-HERE.md` (§2 is the constitution; §5a testing; §5b the ships dura
 
 | | |
 |---|---|
-| Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main` at **`44ec1a7`**. Commit straight to main, no branches. AGPL-3.0. |
+| Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main` at **`310c13d`**. Commit straight to main, no branches. AGPL-3.0. |
 | Hub (Cloudflare Worker) | **collector `0.2.1`** · `https://mother-earth.chadoberholzer.workers.dev` · `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `POST /ingest/<layer>`, `POST /admin/reaggregate/ships`, `GET /admin/run/<job>` |
-| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611011700` — **bump on every page change, in `index.html` and `sources.html`** |
+| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021000` — **bump on every page change, in `index.html` and `sources.html`** |
 | Mac collector | **`mac-0.3.2`**, launchd `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples when 30 min are due |
 | Cron triggers | `:07` hourly · `*/5` · `*/15` firms · `11,41` forest |
 | Layers live | quakes, fires, ships, forest, Kp, CO₂, sea ice. Aircraft parked (OpenSky correspondence governs — public site must feed the network). |
@@ -32,6 +32,7 @@ Procedure: edit in the clone → commit with the attribution trailer → `git pu
 ## 2. Completed and verified
 
 - **Page.** World View layout (map layers left, globe centre, indices right), Sources & Details, card hierarchy (value → observation time → source/retrieval → quiet caveat), plain-language WebGL fallback with technical detail in a collapsed Diagnostics block, record inspector for individual records as well as coverage cells with focus restore, and user-triggered snapshot navigation ("highest magnitude in this feed", "highest FRP in this snapshot") with ties, exclusions and the FRP caveat. No ticker, no automatic selection, no automatic camera movement, no danger ranking.
+- **Limited search (2 Nov, thread 5).** One collapsible **Explore** panel, closed on load, replacing the Find card and holding the search plus the two unchanged snapshot-jump buttons. Searches only loaded records: USGS descriptions, vessel names and MMSIs, and latitude/longitude typed in that order. Fires and forest publish no text and are never text-searched (fires do join a coordinate search). A coordinate always offers "Go to", then records within 250 km nearest first, 12 max with the true total; the radius is stated as a choice for this box, never as a coverage boundary. Results are revalidated per layer against run identity, visibility, freshness and the pairing rule, and refused with the reason rather than opened. Ships' observation time, receipt time and sample end are kept distinct. Full detail in STATUS "Done 2 Nov (thread 5)".
 - **Atomic cells/records pairing.** `refreshPair()` commits counts and records together; `usable(layer)` re-checks `pmeta.id === snapId(state[layer])` at every read — points **and rings**, inspector, navigation, card note. Proven with a harness that reproduced the bug on the previous build (render passes mixing RUN2 cells with RUN1 points/rings) and shows 0 mixed passes now.
 - **Missing is not zero.** `ME.fmt()` renders an absent value "not provided" and a source-reported zero as "0 … (source-reported zero)". Verified against a live FIRMS snapshot containing two genuine FRP zeros.
 - **Ships aggregation.** Four outcomes kept apart — `absent` (nothing received), `down` (every received attempt reported source failure), `degraded` (received, none usable or fewer than expected), `ok`. Verified in production on live degraded data.
@@ -63,9 +64,15 @@ Nothing in this list blocks starting a feature. Items 1 and 5 are about collecti
 
 ```
 node phase1/duration-contract.test.mjs      # hard-boundary logic; stubbed socket + clock, no network, nothing uploaded
+node phase1/search.test.mjs                 # 70 — search helpers: coordinate parser, distance, escaping, matcher
+node phase1/search.realdata.test.mjs        # 50 — the same helpers over REAL hub records captured 2 Nov
+node phase1/search-ui.test.cjs              # 85 — Playwright; needs: python3 -m http.server 8899 --bind 127.0.0.1 in the clone
 ~/mother-earth/run.sh status                # scheduler state, pending upload, lock
 ~/mother-earth/sleeptest.sh                 # physical sleep test; captures pmset -g log alongside the sample
 ```
+The browser suite drives the page's own 5-minute refresh with Playwright's clock, so the stale-result path runs
+through production code and not a test hook. `ME.pairState(layer)` and `ME.searchState()` are the read-only
+diagnostics it hangs on; both are reachable from the console on the live page.
 
 | Evidence | Where |
 |---|---|
@@ -74,6 +81,7 @@ node phase1/duration-contract.test.mjs      # hard-boundary logic; stubbed socke
 | Hours 12/13 before/after, idempotency, scope | STATUS "Done 1 Nov (thread 4, 19:05 SAST)" |
 | FIRMS CPU figures and their stated limitation | STATUS "Done 1 Nov (thread 4, 18:15 SAST)" |
 | pmset ↔ collector gap correspondence | STATUS "Done 2 Nov" |
+| Real hub records behind the search tests | `phase1/realdata/live-sample.json` (captured 2 Nov via the browser pane) |
 | Reviews | `reviews/` |
 | Source register | `REGISTER.md` |
 
@@ -83,13 +91,14 @@ Re-run of a repair: `POST /admin/reaggregate/ships?hour=YYYY-MM-DDTHH&key=<ADMIN
 
 ## 5. Product direction — a queue for Chad to choose from
 
-Chad wants to add features one at a time. **Limited search was deferred, not rejected.** Nothing below is started; the next thread should build whichever Chad picks, one at a time.
+Chad wants to add features one at a time. ~~Limited search~~ **shipped 2 Nov (thread 5)** — see §2. He has said the **solar terminator can follow**; it is the next pick unless he changes it. Nothing else below is started.
 
-1. **Limited search** (deferred from review round 5, spec already agreed). Coordinates plus loaded earthquake descriptions and vessel names/MMSIs, scope labelled "Search loaded records or coordinates", "No matching loaded records" rather than "nothing happened here". Country-boundary and place search deferred until a geographic dataset is specified. Builds on the pairing guard already in place. *Smallest, spec settled.*
-2. **Solar terminator** — computed client-side, labelled computed, not observed. No network cost.
-3. **Satellites from CelesTrak TLEs** — MODEL tier, labelled "propagated from TLEs, not observed positions"; 12–24 h TLE fetch, browser-side SGP4, few hundred objects on phones. Register row first.
-4. **Submarine cables** (TeleGeography) — needs a CC BY-SA share-alike decision before anything is committed.
-5. **Chad's own asks** — plastic in the oceans, mining, solar farms. Each needs the observed-vs-modelled question answered per source before any build.
+1. **Solar terminator** — computed client-side, labelled computed, not observed. No network cost. *Chad's stated next pick.*
+2. **Satellites from CelesTrak TLEs** — MODEL tier, labelled "propagated from TLEs, not observed positions"; 12–24 h TLE fetch, browser-side SGP4, few hundred objects on phones. Register row first.
+3. **Submarine cables** (TeleGeography) — needs a CC BY-SA share-alike decision before anything is committed.
+4. **Chad's own asks** — plastic in the oceans, mining, solar farms. Each needs the observed-vs-modelled question answered per source before any build.
+
+Deferred *inside* the shipped search, by design: country-boundary and place search (needs a geographic dataset specified first) and any coverage-cell result for a coordinate.
 
 Parked with reasons recorded: aircraft (OpenSky correspondence), GFS wind (a model), GOES GLM lightning (needs a NOAA bucket pipeline), polar-cap imagery (measured blind in polar night).
 
