@@ -1,4 +1,7 @@
-# Mother Earth — status (2 Nov 2026 — thread 4, 06:45 SAST)
+# Mother Earth — status (2 Nov 2026 — thread 4 close, 07:10 SAST)
+
+**Thread 4 is closed. `HANDOVER.md` is the index for the next thread** — deployed versions, sync procedure, what is verified, what is genuinely unverified (with the decisive next check for each), test commands, evidence locations, and the feature queue for Chad to choose from. Read `START-HERE.md` → `STATUS.md` → `HANDOVER.md`.
+
 
 ## Done 2 Nov — **sleep-mid-sample test run; the sleep detector is proven unreliable**
 `sleeptest.sh`, collector `mac-0.3.2`, 03:56:20 UTC. Partial result: three criteria pass, two were not exercised, and the independent record settled a bigger question than the test was aimed at.
