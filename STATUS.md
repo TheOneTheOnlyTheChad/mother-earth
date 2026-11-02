@@ -2,6 +2,38 @@
 
 **`HANDOVER.md` is the index** — deployed versions, sync procedure, what is verified, what is genuinely unverified (with the decisive next check for each), test commands, evidence locations, and the feature queue for Chad to choose from. Read `START-HERE.md` → `STATUS.md` → `HANDOVER.md`.
 
+## Done 2 Nov (thread 5) — **day/night overlay: the first COMPUTED thing on the page**
+Chad's pick after limited search. No collector, worker, source, request or backend change; no REGISTER source row (there is no source); $0. Hub stays `0.2.1`, Mac collector `mac-0.3.2`.
+
+**A correction that changed the rationale before any code was written.** The feature was first pitched partly as explaining low FIRMS counts. That was wrong, and Chad caught it: **VIIRS active-fire detection is thermal and works day and night** — each detection even carries its own day/night flag — and the low counts early in a UTC day are the FIRMS daily reset plus NRT lag, established 1 Nov. What survives is narrower and true: the GIBS imagery skin is a daylight reflectance product (hence the black Arctic in polar night), the same reason sea-ice imagery is "not shown", plus plain orientation. Because a reader will naturally draw the inference I drew, **the page actively prevents it**: the disclosure states in terms that this does not explain fire-detection counts.
+
+**What shipped.** One switch at the end of Explore under "Overlays", **off on load**, labelled **"Day/night now — computed"**, with the always-visible line *"Current sunlight geometry—not observation coverage."* While on, the panel shows **"Computed for YYYY-MM-DD HH:MM:SS UTC"** and the legend carries **"Day/night now · computed · HH:MM:SS UTC"**, so the state is visible with Explore collapsed. Long explanation behind the disclosure and in a new `sources.html#daynight`. Geometric boundary only; twilight deferred. No new card.
+
+**Kept out of the observation path by construction.** It never touches `state`, `points`, `pmeta`, `usable()`, `polygonsData`, `pointsData` or `ringsData`, and runs on **its own one-minute timer, not the network poll** — immediately on enable, on return to visibility, and on `pageshow`. Not a layer: no source, no snapshot, no coverage grade, no freshness, never in the status report. Tier added as free text under the existing convention, no tier-system rewrite: `computed (astronomical context — calculated from the clock, not observed)`.
+
+**Render channel chosen by spike, not assumption** (`phase1/SPIKE-terminator.md`, run against the real globe.gl):
+- `customLayerData` threw **22 uncaught TypeErrors across 25 toggles**; our own mesh added to the globe mesh's parent threw **none across 30**, and is the simpler code — so the separate channel cost nothing.
+- **globe.gl orients its globe mesh at `rotation.y = −π/2`.** A fresh `SphereGeometry` does not inherit it and the shading landed **90° out**, looking entirely plausible. The code copies the globe mesh's rotation and geometry parameters rather than hard-coding anything. *A texture does not make the poles and date line free — this was the proof.*
+- Records keep their exact colours at minimum and maximum altitude; a coverage cell under the shading stays clickable; **disposal is load-bearing** (10 rebuilds leaked 10 geometries without it).
+
+**Dependency on library internals, recorded deliberately.** There is no global `THREE`, so the three.js constructors are read off objects globe.gl has already built. The version is **pinned at 2.45.0** and both suites assert the pinned copy under test equals the version the page loads. Harvest is lazy, at first enable. **Failure is refusal, not degradation**: if a constructor is missing the overlay does not switch on, the toggle resets, a plain explanation appears, and the globe, records, picking and search are untouched — a material built with `map: null` would otherwise render an opaque white sphere hiding the whole globe.
+
+**Three limits, kept apart** — reference agreement is *not* a statement about what is drawn:
+
+| Limit | Size | What it is |
+|---|---|---|
+| Solar position vs astronomy-engine | ≤ **0.0124°** | the arithmetic only |
+| Texture quantisation at 1024×512 | ~**0.35°** | one pixel of the canvas |
+| Staleness between one-minute repaints | up to **0.25°** | Earth's rotation between recomputes |
+
+The **drawn** boundary can sit ~**0.6°** from the instantaneous geometric one — about fifty times the arithmetic's own error — and the geometric boundary is itself ~**0.83°** from observed sunrise.
+
+**Validation (`node phase1/solar.test.mjs`, 26/26).** Against astronomy-engine (MIT, **test-only, never shipped**) over **2024-01-01 → 2030-01-01**, 7,516 samples at 7 h steps: angular separation of the subsolar directions **mean 0.0040°, P99 0.0103°, max 0.0124°**. Compared like-for-like against the reference's **geometric** solar altitude across 10,080 points spanning both equinoxes and solstices: **0 disagreements**. Stated as agreement with one reference over a stated range, not absolute accuracy. *An earlier run showed 47 disagreements; that was my error — astronomy-engine's `'normal'` option applies refraction, so it was geometric-vs-refracted.*
+
+**Acceptance gate (`node phase1/terminator-ui.test.cjs`, 19/19, one page load, 6-minute budget).** Rendered shading agrees with `ME.sunlit` at **104/104** probes across the visible disc, **90/90** at a pole and **56/56** across the date line; repaint **5–13 ms** at 1024×512 on a software renderer. Reduced motion is emulated for the pixel cases only, so the globe does not rotate between the before and after frames.
+
+**A test defect found and fixed, which matters for what earlier numbers meant.** `autoRotate` is on by default, so an earlier run compared screenshots taken while the globe was turning — its apparent failures showed luminance drops of 150 against a base of 119, far larger than 0.40 alpha can produce. **Those exploratory screenshots establish nothing**; the fixed-camera acceptance run above is what the visual checks rest on. An indefinite test is itself a defect, so both suites now carry a hard watchdog that fails rather than hangs.
+
 ## Measured 2 Nov (thread 5, ~09:55 SAST) — **operational items 2, 3 and 4: forest usage, FIRMS CPU, GML integrity**
 Read from Cloudflare Worker Metrics (last 24 h), Workers Observability, the D1 console and the live hub. Numbers, not estimates. Nothing changed; no code touched.
 

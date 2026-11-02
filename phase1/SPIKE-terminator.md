@@ -51,3 +51,42 @@ Scripts: `/home/claude/spike/spike{1..6}.cjs` (scratch, not committed — the fi
   reports rather than hard-coding the value, so an upstream change is followed rather than broken — but the
   assertion that the rendered shading matches `ME.sunlit` (in `phase1/terminator-ui.test.cjs`) is what would
   actually catch a regression.
+
+---
+
+## Dependency on globe.gl internals (recorded deliberately)
+
+The overlay needs three.js constructors (`SphereGeometry`, `Mesh`, a material, `Texture`) and globe.gl's UMD
+bundle exposes **no global `THREE`**, with class names minified. The only route is to read them off objects
+globe.gl has already built — `mesh.constructor`, `geometry.constructor`, `globeMaterial().map.constructor`.
+
+**This is reliance on another library's internals and is treated as such:**
+
+- **The version is pinned.** The page loads `globe.gl@2.45.0`; both automated suites assert that the pinned
+  copy they serve is the same version the page requests, and fail if they ever diverge.
+- **Orientation is read, not assumed.** The code copies the globe mesh's `rotation` and its geometry's
+  angular parameters instead of hard-coding the `-π/2` the spike measured, so an upstream change is
+  followed rather than silently mis-rendered.
+- **Harvest happens lazily, at first enable** — the globe mesh does not exist at script time.
+- **Failure is refusal, not degradation.** If any constructor is missing the overlay does not switch on: the
+  toggle resets to unchecked, a plain-language explanation appears, no legend line is shown, and the globe,
+  its records, picking and search are untouched. A material built with `map: null` would otherwise render an
+  **opaque white sphere hiding the entire globe**, which is precisely why this path refuses.
+- `phase1/terminator-behaviour.test.cjs` exercises that failure path directly by stripping the globe
+  material's map before the page builds, and asserts the globe survives intact.
+
+**What would catch an upstream regression:** the acceptance suite asserts that the *rendered* shading agrees
+with `ME.sunlit` at probes across the visible disc, at a pole and across the date line. A change in how
+globe.gl orients or UV-maps its sphere would show up there as disagreement, not as a silent 90° error.
+
+## Three different limits, kept apart
+
+| Limit | Size | What it is |
+|---|---|---|
+| Solar position vs astronomy-engine | ≤ **0.0124°** | the arithmetic only (`phase1/solar.test.mjs`) |
+| Texture quantisation at 1024 × 512 | ~**0.35°** | one pixel of the equirectangular canvas |
+| Staleness between one-minute repaints | up to **0.25°** | Earth's rotation between recomputes |
+
+The **drawn** boundary can therefore sit ~**0.6°** from the instantaneous geometric one — about fifty times
+the arithmetic's own error. Reference agreement is not a statement about what is on screen, and neither is a
+statement about observed sunrise, which is a further ~0.83° away.

@@ -32,6 +32,8 @@ Procedure: edit in the clone → commit with the attribution trailer → `git pu
 ## 2. Completed and verified
 
 - **Page.** World View layout (map layers left, globe centre, indices right), Sources & Details, card hierarchy (value → observation time → source/retrieval → quiet caveat), plain-language WebGL fallback with technical detail in a collapsed Diagnostics block, record inspector for individual records as well as coverage cells with focus restore, and user-triggered snapshot navigation ("highest magnitude in this feed", "highest FRP in this snapshot") with ties, exclusions and the FRP caveat. No ticker, no automatic selection, no automatic camera movement, no danger ranking.
+- **Day/night overlay (2 Nov, thread 5).** The first **computed** (non-observed) thing on the page. Optional switch at the end of Explore, off on load, "Day/night now — computed", with the UTC calculation time in the panel and the legend. Geometric boundary only; twilight deferred. Never touches `state`/`points`/`pmeta`/`usable()` or globe.gl's data channels, and runs on its own one-minute timer rather than the network poll. Subsolar point from the Astronomical Almanac / USNO low-precision coordinates (a US Government work; **no runtime dependency**). **Dependency on globe.gl internals is deliberate and recorded**: no global `THREE`, so constructors are harvested lazily off live objects, the version is **pinned at 2.45.0** and both suites assert the page and the test agree on it; a missing constructor makes the overlay **refuse** (toggle reset, plain explanation, globe untouched). Render channel chosen by spike — see `phase1/SPIKE-terminator.md`, which also records that globe.gl rotates its globe mesh by −π/2 and that omitting it put the shading 90° out.
+  **Three limits kept apart:** solar maths ≤0.0124°, texture quantisation ~0.35°, one-minute staleness up to 0.25° — so the *drawn* boundary can sit ~0.6° from the instantaneous geometric one, and that is itself ~0.83° from observed sunrise. Reference agreement is not a statement about what is drawn.
 - **Limited search (2 Nov, thread 5).** One collapsible **Explore** panel, closed on load, replacing the Find card and holding the search plus the two unchanged snapshot-jump buttons. Searches only loaded records: USGS descriptions, vessel names and MMSIs, and latitude/longitude typed in that order. Fires and forest publish no text and are never text-searched (fires do join a coordinate search). A coordinate always offers "Go to", then records within 250 km nearest first, 12 max with the true total; the radius is stated as a choice for this box, never as a coverage boundary. Results are revalidated per layer against run identity, visibility, freshness and the pairing rule, and refused with the reason rather than opened. Ships' observation time, receipt time and sample end are kept distinct. Coordinate tokens are validated whole — a number that cannot be read is refused by name, never repaired — and with no WebGL the Go-to row says the globe is unavailable instead of claiming a movement. Full detail in STATUS "Done 2 Nov (thread 5)".
 - **Atomic cells/records pairing.** `refreshPair()` commits counts and records together; `usable(layer)` re-checks `pmeta.id === snapId(state[layer])` at every read — points **and rings**, inspector, navigation, card note. Proven with a harness that reproduced the bug on the previous build (render passes mixing RUN2 cells with RUN1 points/rings) and shows 0 mixed passes now.
 - **Missing is not zero.** `ME.fmt()` renders an absent value "not provided" and a source-reported zero as "0 … (source-reported zero)". Verified against a live FIRMS snapshot containing two genuine FRP zeros.
@@ -68,11 +70,20 @@ node phase1/search.test.mjs                 # 111 — search helpers: coordinate
                                             #       and malformed-token refusals), distance, escaping, matcher
 node phase1/search.realdata.test.mjs        # 50 — the same helpers over REAL hub records captured 2 Nov
 node phase1/search-ui.test.cjs              # 104 — Playwright; needs: python3 -m http.server 8899 --bind 127.0.0.1 in the clone
+node phase1/solar.test.mjs                  # 26 — subsolar vs astronomy-engine, poles, date line, stated assumptions
+node phase1/terminator-ui.test.cjs          # 19 — day/night ACCEPTANCE gate: one page load, 6-min watchdog
+node phase1/terminator-behaviour.test.cjs   # day/night behaviour: cadence, toggling, rotating globe, no-WebGL,
+                                            #      failed harvest, phone. One page load each, 15-min watchdog.
 ~/mother-earth/run.sh status                # scheduler state, pending upload, lock
 ~/mother-earth/sleeptest.sh                 # physical sleep test; captures pmset -g log alongside the sample
 ```
-The browser suite drives the page's own 5-minute refresh with Playwright's clock, so the stale-result path runs
-through production code and not a test hook. `ME.pairState(layer)` and `ME.searchState()` are the read-only
+The browser suites drive the page's own timers with Playwright's clock, so the stale-result and recompute paths
+run through production code and not a test hook. **Both terminator suites carry a hard watchdog that FAILS rather
+than hangs** — an indefinite test is a defect in itself. globe.gl and the test-only `astronomy-engine` and `pngjs`
+are served from `/home/claude/spike/node_modules` because the container cannot reach unpkg; set up with
+`cd /home/claude/spike && npm i globe.gl@2.45.0 astronomy-engine pngjs`. Pixel cases emulate reduced motion so the
+globe does not rotate between the before and after frames; behaviour while it *is* rotating is covered separately
+in the behaviour suite, asserting on state rather than pixels. `ME.pairState(layer)` and `ME.searchState()` are the read-only
 diagnostics it hangs on; both are reachable from the console on the live page.
 
 | Evidence | Where |
