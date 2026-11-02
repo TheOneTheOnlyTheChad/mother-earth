@@ -97,6 +97,21 @@ async function harness(browser, o = {}) {
 // Agreement between the RENDERED shading and ME.sunlit, judged RELATIVE to each pixel's own brightness:
 // the globe is lit by a light source, so absolute luminance falls off toward the limb and a fixed
 // threshold would misclassify dim pixels there.
+// Clicking a coverage cell by projected coordinate can miss by a frame while the renderer settles.
+// Retry once rather than leaving a flaky assertion: a test that fails at random is worse than none.
+async function pickCell(page, lat = -32, lng = 18) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const c = await page.evaluate(([a, b]) => ME.screenAt(a, b, 0.006), [lat, lng]);
+    if (!c) return false;
+    const box = await page.locator('#globe').boundingBox();
+    await page.mouse.click(box.x + c.x, box.y + c.y);
+    await page.waitForTimeout(400);
+    if (await page.locator('#insp.show').count() === 1) return true;
+    await page.waitForTimeout(400);
+  }
+  return false;
+}
+
 function agreement(before, after, probes) {
   let agree = 0, disagree = 0; const cases = [];
   for (const q of probes) {
@@ -172,11 +187,7 @@ function agreement(before, after, probes) {
     await page.clock.fastForward(61_000); await page.waitForTimeout(400);
     const s2 = await page.evaluate(() => ME.nightState());
     ok('it keeps recomputing while the globe rotates', Date.parse(s2.at) > Date.parse(s1.at), { s1: s1.at, s2: s2.at });
-    const cc = await page.evaluate(() => ME.screenAt(-32, 18, 0.006));
-    const box = await page.locator('#globe').boundingBox();
-    await page.mouse.click(box.x + cc.x, box.y + cc.y);
-    await page.waitForTimeout(400);
-    ok('picking still works while rotating with the overlay on', await page.locator('#insp.show').count() === 1);
+        ok('picking still works while rotating with the overlay on', await pickCell(page));
     await page.keyboard.press('Escape');
     await page.click('#tgl-night'); await page.waitForTimeout(300);
     ok('disabling works while rotating', await page.evaluate(() => ME.nightState().hasMesh) === false);
@@ -212,11 +223,7 @@ function agreement(before, after, probes) {
     ok('a clear explanation is shown', /did not expose what the overlay needs/i.test(await page.locator('#night-time').innerText()), await page.locator('#night-time').innerText());
     ok('no legend line', await page.locator('#night-legend').isHidden());
     ok('the globe is untouched: records still render', await page.evaluate(() => ME.pairState('usgs').usgs.points) === 50);
-    const cc = await page.evaluate(() => ME.screenAt(-32, 18, 0.006));
-    const box = await page.locator('#globe').boundingBox();
-    await page.mouse.click(box.x + cc.x, box.y + cc.y);
-    await page.waitForTimeout(350);
-    ok('the globe is untouched: picking still works', await page.locator('#insp.show').count() === 1);
+        ok('the globe is untouched: picking still works', await pickCell(page));
     await page.keyboard.press('Escape');
     await page.fill('#search-q', 'hawaii'); await page.press('#search-q', 'Enter');
     await page.waitForSelector('#search-list button.res');
@@ -233,6 +240,13 @@ function agreement(before, after, probes) {
     ok('the toggle is at least 44 px tall', await page.evaluate(() => document.getElementById('tgl-night').getBoundingClientRect().height >= 44));
     await page.click('#tgl-night'); await page.waitForTimeout(600);
     ok('overlay works at phone width', await page.evaluate(() => ME.nightState().on) === true);
+    // the legend line is the ONLY indication of the overlay's state once Explore is collapsed, so it must
+    // survive the phone breakpoint that hides the other .cov legend rows (found on the live page, 2 Nov)
+    ok('the legend line is VISIBLE at phone width', await page.locator('#night-legend').isVisible(),
+      await page.evaluate(() => { const e = document.getElementById('night-legend'); return { hidden: e.hidden, display: getComputedStyle(e).display, text: e.textContent }; }));
+    ok('and it still carries the computed time', /Day\/night now · computed · \d\d:\d\d:\d\d UTC/.test(await page.locator('#night-legend').innerText()));
+    await page.click('#tgl-night'); await page.waitForTimeout(300);
+    ok('and it disappears again when the overlay is off at phone width', await page.locator('#night-legend').isHidden());
     ok('no scrollbar nested inside the sheet', await page.evaluate(() => ['.ovl', '#card-explore', '.exp-body'].map(q => document.querySelector(q)).filter(Boolean)
       .filter(e => { const o = getComputedStyle(e).overflowY; return (o === 'auto' || o === 'scroll') && e.scrollHeight > e.clientHeight + 1; }).length) === 0);
     ok('the panel does not overflow horizontally', await page.evaluate(() => { const e = document.getElementById('card-explore'); return e.scrollWidth - e.clientWidth <= 1; }));

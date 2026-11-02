@@ -10,7 +10,7 @@ Read `START-HERE.md` (§2 is the constitution; §5a testing; §5b the ships dura
 |---|---|
 | Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main` at **`9e690be`**. Commit straight to main, no branches. AGPL-3.0. |
 | Hub (Cloudflare Worker) | **collector `0.2.1`** · `https://mother-earth.chadoberholzer.workers.dev` · `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `POST /ingest/<layer>`, `POST /admin/reaggregate/ships`, `GET /admin/run/<job>` |
-| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021400` — **bump on every page change, in `index.html` and `sources.html`** |
+| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021500` — **bump on every page change, in `index.html` and `sources.html`** |
 | Mac collector | **`mac-0.3.2`**, launchd `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples when 30 min are due |
 | Cron triggers | `:07` hourly · `*/5` · `*/15` firms · `11,41` forest |
 | Layers live | quakes, fires, ships, forest, Kp, CO₂, sea ice. Aircraft parked (OpenSky correspondence governs — public site must feed the network). |
@@ -72,7 +72,7 @@ node phase1/search.realdata.test.mjs        # 50 — the same helpers over REAL 
 node phase1/search-ui.test.cjs              # 104 — Playwright; needs: python3 -m http.server 8899 --bind 127.0.0.1 in the clone
 node phase1/solar.test.mjs                  # 26 — subsolar vs astronomy-engine, poles, date line, stated assumptions
 node phase1/terminator-ui.test.cjs          # 19 — day/night ACCEPTANCE gate: one page load, 6-min watchdog
-node phase1/terminator-behaviour.test.cjs   # 39 — day/night behaviour: cadence, toggling, rotating globe,
+node phase1/terminator-behaviour.test.cjs   # 42 — day/night behaviour: cadence, toggling, rotating globe,
                                             #      no-WebGL, failed harvest, phone. ~22s, 6-min watchdog.
 ~/mother-earth/run.sh status                # scheduler state, pending upload, lock
 ~/mother-earth/sleeptest.sh                 # physical sleep test; captures pmset -g log alongside the sample

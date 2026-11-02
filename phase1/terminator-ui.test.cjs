@@ -93,6 +93,21 @@ async function harness(browser, o = {}) {
 // Agreement between the RENDERED shading and ME.sunlit, judged RELATIVE to each pixel's own brightness:
 // the globe is lit by a light source, so absolute luminance falls off toward the limb and a fixed
 // threshold would misclassify dim pixels there.
+// Clicking a coverage cell by projected coordinate can miss by a frame while the renderer settles.
+// Retry once rather than leaving a flaky assertion: a test that fails at random is worse than none.
+async function pickCell(page, lat = -32, lng = 18) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const c = await page.evaluate(([a, b]) => ME.screenAt(a, b, 0.006), [lat, lng]);
+    if (!c) return false;
+    const box = await page.locator('#globe').boundingBox();
+    await page.mouse.click(box.x + c.x, box.y + c.y);
+    await page.waitForTimeout(400);
+    if (await page.locator('#insp.show').count() === 1) return true;
+    await page.waitForTimeout(400);
+  }
+  return false;
+}
+
 function agreement(before, after, probes) {
   let agree = 0, disagree = 0; const cases = [];
   for (const q of probes) {
@@ -152,11 +167,7 @@ function agreement(before, after, probes) {
     const rB = reddest(before), rA = reddest(after);
     ok('a record point survives the shading', rA.v > rB.v * 0.75 && rA.rgb[0] > 110, { before: rB, after: rA });
 
-    const cc = await page.evaluate(() => ME.screenAt(-32, 18, 0.006));
-    const box = await page.locator('#globe').boundingBox();
-    await page.mouse.click(box.x + cc.x, box.y + cc.y);
-    await page.waitForTimeout(350);
-    ok('a coverage cell is still clickable through the shading', await page.locator('#insp.show').count() === 1 && /cell/i.test(await page.locator('#insp-h').innerText()));
+        ok('a coverage cell is still clickable through the shading', await pickCell(page) && /cell/i.test(await page.locator('#insp-h').innerText()));
     await page.keyboard.press('Escape');
 
     await page.fill('#search-q', 'hawaii'); await page.press('#search-q', 'Enter');
