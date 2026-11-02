@@ -243,8 +243,26 @@ async function harness(browser, opts = {}) {
     ok('Go-to opens no inspector', await page.locator('#insp.show').count() === 0);
     ok('Go-to says what it did', /Moved the view/.test(await page.locator('#search-status').innerText()));
 
+    // leading decimals must reach the globe as the place the user typed, not ten times it
+    await search('.5, .5');
+    await page.waitForFunction(() => /0\.500° N, 0\.500° E/.test(document.getElementById('search-status').textContent));
+    ok('".5, .5" is shown as half a degree, not five degrees',
+      /0\.500° N, 0\.500° E/.test(await page.locator('#search-status').innerText())
+      && !/5\.000° N/.test(await page.locator('#search-status').innerText()));
+    const nGo = (await povs()).length;
+    await page.locator('#search-list button.res[data-go]').click();
+    const goPov = (await povs()).slice(-1)[0];
+    ok('and the camera is sent to 0.5, 0.5 — not 5, 5',
+      (await povs()).length === nGo + 1 && goPov.v.lat === 0.5 && goPov.v.lng === 0.5, goPov.v);
+    await search('-.5, 3');
+    await page.waitForFunction(() => /0\.500° S/.test(document.getElementById('search-status').textContent));
+    ok('"-.5, 3" stays in the southern hemisphere',
+      /0\.500° S, 3\.000° E/.test(await page.locator('#search-status').innerText()));
+
     for (const [q, re] of [['95, 0', /outside −90 to 90/], ['0, 181', /outside −180 to 180/],
-                           ['18.42E, 33.92S', /longitude first/i], ['-33.92S, 18.42E', /ambiguous/i]]) {
+                           ['18.42E, 33.92S', /longitude first/i], ['-33.92S, 18.42E', /ambiguous/i],
+                           ['1.2.3, 4', /1\.2\.3 is not a number/], ['--5, 3', /--5 is not a number/],
+                           ['+-5, 3', /\+-5 is not a number/], ['5..5, 3', /5\.\.5 is not a number/]]) {
       await search(q);
       const st2 = await page.locator('#search-status').innerText();
       ok(`"${q}" refused with its reason and no results`,
@@ -377,6 +395,30 @@ async function harness(browser, opts = {}) {
     await page.click('#search-list button.res');
     ok('selecting opens the inspector and does not throw', await page.locator('#insp.show').count() === 1);
     ok('no camera call reaches a real globe when WebGL is missing', (await povs()).length === 0, await povs());
+    ok('selecting without a globe says the view did not move, and the record is open',
+      /globe is unavailable/i.test(await page.locator('#search-status').innerText())
+      && /did not move/i.test(await page.locator('#search-status').innerText()),
+      await page.locator('#search-status').innerText());
+
+    // Go to: must NOT report a movement it cannot perform
+    await search('-33.92, 18.42');
+    await page.waitForSelector('#search-list button.res[data-go]');
+    const go = page.locator('#search-list button.res[data-go]');
+    ok('the Go-to row says up front that the globe is unavailable',
+      /globe is unavailable/i.test(await go.innerText()), (await go.innerText()).replace(/\n+/g, ' | '));
+    ok('the Go-to row is marked unavailable for assistive tech', await go.getAttribute('aria-disabled') === 'true');
+    await go.click({ force: true });
+    const st = await page.locator('#search-status').innerText();
+    ok('clicking Go-to never claims the view moved', !/moved the view/i.test(st), st);
+    ok('clicking Go-to explains that the globe is unavailable', /globe is unavailable/i.test(st), st);
+    ok('and it still points at the records that can be opened', /can still be opened/i.test(st), st);
+    ok('no camera call was made', (await povs()).length === 0);
+    // record search and inspection stay usable
+    const recRows = page.locator('#search-list button.res:not([data-go])');
+    ok('records near the coordinate are still listed without a globe', await recRows.count() >= 2, await recRows.count());
+    const recBtn = recRows.first();
+    await recBtn.click();
+    ok('and a record still opens in the inspector', await page.locator('#insp.show').count() === 1);
     await ctx.close();
   }
 

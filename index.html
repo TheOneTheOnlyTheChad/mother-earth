@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611021100">
+<link rel="stylesheet" href="style.css?v=202611021200">
 </head>
 <body class="world">
 <header class="top">
@@ -148,7 +148,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611021100"></script>
+<script src="app.js?v=202611021200"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -452,7 +452,16 @@ function notesHtml() {
 function paintResults() {
   const list = $('search-list'), act = document.activeElement;
   const keep = act && act.classList && act.classList.contains('res') ? act.dataset.i : null;
-  list.innerHTML = sres && sres.hits ? (sres.kind === 'coord' ? `<li><button type="button" class="res go" data-go="1"><span class="rh"><span class="rl">Go to</span><span class="rt">${esc(sres.coord.label)}</span></span><span class="rw">moves the view only — no record is opened</span></button></li>` : '') + sres.hits.map(rowHtml).join('') : '';
+  // With no globe there is no view to move, so the Go-to row says so up front rather than looking available
+  // and then doing nothing. The records below it stay listed, selectable and inspectable.
+  const goRow = sres && sres.kind === 'coord'
+    ? `<li><button type="button" class="res go${globeOk ? '' : ' dead'}" data-go="1"${globeOk ? '' : ' aria-disabled="true"'}>`
+      + `<span class="rh"><span class="rl">Go to</span><span class="rt">${esc(sres.coord.label)}</span></span>`
+      + `<span class="rw">${globeOk ? 'moves the view only — no record is opened' : 'the globe is unavailable in this browser'}</span>`
+      + (globeOk ? '' : `<span class="rx">there is no view to move — the records below can still be opened</span>`)
+      + `</button></li>`
+    : '';
+  list.innerHTML = sres && sres.hits ? goRow + sres.hits.map(rowHtml).join('') : '';
   $('search-notes').innerHTML = notesHtml();
   if (keep != null) { const el = list.querySelector(`button.res[data-i="${keep}"]`); if (el) el.focus({ preventScroll: true }); }
 }
@@ -491,7 +500,9 @@ $('search-form').addEventListener('submit', e => { e.preventDefault(); runSearch
 $('search-list').addEventListener('click', e => {
   const b = e.target.closest('button.res'); if (!b) return;
   if (b.dataset.go && sres && sres.coord) {
-    if (globeOk) globe.pointOfView({ lat: sres.coord.lat, lng: sres.coord.lng, altitude: 1.1 }, reduced ? 0 : 1200);
+    // never report a movement that did not happen
+    if (!globeOk) return setStatus(`<span class="bad">The globe is unavailable in this browser, so there is no view to move to ${esc(sres.coord.label)}.</span> The loaded records near that position are listed below and can still be opened.`);
+    globe.pointOfView({ lat: sres.coord.lat, lng: sres.coord.lng, altitude: 1.1 }, reduced ? 0 : 1200);
     setStatus(`Moved the view to <b>${esc(sres.coord.label)}</b>. No record was opened.`);
     return;
   }
@@ -500,6 +511,7 @@ $('search-list').addEventListener('click', e => {
   const why = liveness(h.layer, h.runId);
   if (why) { reviewResults(); setStatus(`<span class="bad">Not opened — ${esc(why)}.</span>`); return; }
   if (globeOk) globe.pointOfView({ lat: +h.rec.lat, lng: +h.rec.lng, altitude: 1.1 }, reduced ? 0 : 1200);
+  else setStatus('The globe is unavailable in this browser, so the view did not move. The record is open below.');
   inspectRecord(h.layer, h.rec);
 });
 $('search-list').addEventListener('keydown', e => {

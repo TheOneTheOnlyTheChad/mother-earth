@@ -10,7 +10,7 @@ Read `START-HERE.md` (§2 is the constitution; §5a testing; §5b the ships dura
 |---|---|
 | Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main` at **`310c13d`**. Commit straight to main, no branches. AGPL-3.0. |
 | Hub (Cloudflare Worker) | **collector `0.2.1`** · `https://mother-earth.chadoberholzer.workers.dev` · `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `POST /ingest/<layer>`, `POST /admin/reaggregate/ships`, `GET /admin/run/<job>` |
-| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021100` — **bump on every page change, in `index.html` and `sources.html`** |
+| Page (GitHub Pages) | `https://theonetheonlythechad.github.io/mother-earth/` · assets at `?v=202611021200` — **bump on every page change, in `index.html` and `sources.html`** |
 | Mac collector | **`mac-0.3.2`**, launchd `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples when 30 min are due |
 | Cron triggers | `:07` hourly · `*/5` · `*/15` firms · `11,41` forest |
 | Layers live | quakes, fires, ships, forest, Kp, CO₂, sea ice. Aircraft parked (OpenSky correspondence governs — public site must feed the network). |
@@ -32,7 +32,7 @@ Procedure: edit in the clone → commit with the attribution trailer → `git pu
 ## 2. Completed and verified
 
 - **Page.** World View layout (map layers left, globe centre, indices right), Sources & Details, card hierarchy (value → observation time → source/retrieval → quiet caveat), plain-language WebGL fallback with technical detail in a collapsed Diagnostics block, record inspector for individual records as well as coverage cells with focus restore, and user-triggered snapshot navigation ("highest magnitude in this feed", "highest FRP in this snapshot") with ties, exclusions and the FRP caveat. No ticker, no automatic selection, no automatic camera movement, no danger ranking.
-- **Limited search (2 Nov, thread 5).** One collapsible **Explore** panel, closed on load, replacing the Find card and holding the search plus the two unchanged snapshot-jump buttons. Searches only loaded records: USGS descriptions, vessel names and MMSIs, and latitude/longitude typed in that order. Fires and forest publish no text and are never text-searched (fires do join a coordinate search). A coordinate always offers "Go to", then records within 250 km nearest first, 12 max with the true total; the radius is stated as a choice for this box, never as a coverage boundary. Results are revalidated per layer against run identity, visibility, freshness and the pairing rule, and refused with the reason rather than opened. Ships' observation time, receipt time and sample end are kept distinct. Full detail in STATUS "Done 2 Nov (thread 5)".
+- **Limited search (2 Nov, thread 5).** One collapsible **Explore** panel, closed on load, replacing the Find card and holding the search plus the two unchanged snapshot-jump buttons. Searches only loaded records: USGS descriptions, vessel names and MMSIs, and latitude/longitude typed in that order. Fires and forest publish no text and are never text-searched (fires do join a coordinate search). A coordinate always offers "Go to", then records within 250 km nearest first, 12 max with the true total; the radius is stated as a choice for this box, never as a coverage boundary. Results are revalidated per layer against run identity, visibility, freshness and the pairing rule, and refused with the reason rather than opened. Ships' observation time, receipt time and sample end are kept distinct. Coordinate tokens are validated whole — a number that cannot be read is refused by name, never repaired — and with no WebGL the Go-to row says the globe is unavailable instead of claiming a movement. Full detail in STATUS "Done 2 Nov (thread 5)".
 - **Atomic cells/records pairing.** `refreshPair()` commits counts and records together; `usable(layer)` re-checks `pmeta.id === snapId(state[layer])` at every read — points **and rings**, inspector, navigation, card note. Proven with a harness that reproduced the bug on the previous build (render passes mixing RUN2 cells with RUN1 points/rings) and shows 0 mixed passes now.
 - **Missing is not zero.** `ME.fmt()` renders an absent value "not provided" and a source-reported zero as "0 … (source-reported zero)". Verified against a live FIRMS snapshot containing two genuine FRP zeros.
 - **Ships aggregation.** Four outcomes kept apart — `absent` (nothing received), `down` (every received attempt reported source failure), `degraded` (received, none usable or fewer than expected), `ok`. Verified in production on live degraded data.
@@ -64,9 +64,10 @@ Nothing in this list blocks starting a feature. Items 1 and 5 are about collecti
 
 ```
 node phase1/duration-contract.test.mjs      # hard-boundary logic; stubbed socket + clock, no network, nothing uploaded
-node phase1/search.test.mjs                 # 70 — search helpers: coordinate parser, distance, escaping, matcher
+node phase1/search.test.mjs                 # 111 — search helpers: coordinate parser (incl. leading decimals
+                                            #       and malformed-token refusals), distance, escaping, matcher
 node phase1/search.realdata.test.mjs        # 50 — the same helpers over REAL hub records captured 2 Nov
-node phase1/search-ui.test.cjs              # 85 — Playwright; needs: python3 -m http.server 8899 --bind 127.0.0.1 in the clone
+node phase1/search-ui.test.cjs              # 104 — Playwright; needs: python3 -m http.server 8899 --bind 127.0.0.1 in the clone
 ~/mother-earth/run.sh status                # scheduler state, pending upload, lock
 ~/mother-earth/sleeptest.sh                 # physical sleep test; captures pmset -g log alongside the sample
 ```

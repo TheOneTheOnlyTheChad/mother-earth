@@ -67,22 +67,31 @@ ME.parseCoord = function (raw) {
   if (!q || !/\d/.test(q)) return null;
   if (/[^0-9NSEWnsew\s,.+\-°'"]/.test(q)) return null;          // any other letter: this is a text search
   if (/[°'"]/.test(q)) return { ok: false, why: 'Degrees, minutes and seconds are not accepted. Enter decimal degrees, latitude first: <code>-33.92, 18.42</code>.' };
-  const items = q.match(/[+-]?\d+(?:\.\d+)?|[NSEWnsew]/g) || [];
-  const numTok = items.filter(t => /\d/.test(t));
-  // A lone bare number is NOT a coordinate attempt — it is far more likely a fragment of an MMSI or a magnitude,
-  // so it falls through to the text search rather than being refused as half a coordinate.
-  if (numTok.length < 2 && !/[,NSEWnsew]/.test(q)) return null;
+  // A single run with no comma, hemisphere letter or internal space (".5", "219018123") is not a coordinate
+  // attempt at all — it is far more likely an MMSI or magnitude fragment, so it falls through to a text search.
+  if (!/[,NSEWnsew]/.test(q) && !/\S\s+\S/.test(q)) return null;
+  // STRICT tokenising. Every character must belong to a token or a separator, and every token must match in
+  // full. The earlier version scanned with `match()`, which SKIPS whatever it cannot match — so ".5" lost its
+  // point and became 5, "-.5" lost its sign as well and flipped hemisphere, and "--5" quietly became -5.
+  // Nothing may be discarded: a number we cannot read whole is refused by name, never repaired into another place.
+  const spaced = q.replace(/([0-9.])\s*([NSEWnsew])/g, '$1 $2').replace(/([NSEWnsew])\s*([0-9.+-])/g, '$1 $2');
+  const items = spaced.split(/[\s,]+/).filter(t => t !== '');
+  const NUM = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/;   // 5 · 5. · 5.5 · .5 · -.5 — each complete, none repaired
+  const HEMI = /^[NSEWnsew]$/;
   const twoNumbers = 'Enter two numbers, latitude first and longitude second — <code>-33.92, 18.42</code> or <code>33.92S, 18.42E</code>.';
+  const broken = items.find(t => !NUM.test(t) && !HEMI.test(t));
+  if (broken) return { ok: false, why: `<code>${esc(broken)}</code> is not a number this box can read, so it is refused rather than guessed at. ${twoNumbers}` };
+  const numTok = items.filter(t => NUM.test(t));
   if (numTok.length !== 2) return { ok: false, why: twoNumbers };
   // A hemisphere letter may be written before its number ("S33.92 E18.42") or after it ("33.92 S, 18.42 E").
   // A letter sitting between two numbers is ambiguous on its own, so the style is decided ONCE from where the
   // first letter falls relative to the first number, and then applied to all of them.
-  const firstNum = items.findIndex(t => /\d/.test(t)), firstHemi = items.findIndex(t => !/\d/.test(t));
+  const firstNum = items.findIndex(t => NUM.test(t)), firstHemi = items.findIndex(t => HEMI.test(t));
   const prefixStyle = firstHemi >= 0 && firstHemi < firstNum;
   const hemi = [null, null];
   let seen = -1, bad = false;
   items.forEach(t => {
-    if (/\d/.test(t)) { seen++; return; }
+    if (NUM.test(t)) { seen++; return; }
     const k = prefixStyle ? seen + 1 : seen;
     if (k < 0 || k > 1 || hemi[k]) { bad = true; return; }
     hemi[k] = t.toUpperCase();
@@ -153,7 +162,7 @@ ME.searchLoaded = function (raw, pools) {
     }
   }
   // a bare number that found nothing may have been a half-typed position: offer the order, do not assume it
-  const couldBeCoord = !hits.length && /^[+-]?\d+(?:\.\d+)?$/.test(q);
+  const couldBeCoord = !hits.length && /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(q);
   return { kind: 'text', q, total: hits.length, hits: hits.slice(0, MAX_RESULTS), searched, considered, couldBeCoord };
 };
 
@@ -290,7 +299,7 @@ ME.rules = function (R) {
   add('general', 'Sentence template', 'cannot emit a cause', true);
   add('general', 'Missing is not zero', 'A value the source did not supply is shown as "not provided". A zero the source did report is shown as 0 and marked as the source\'s zero. The two are never displayed the same way.', true);
   add('general', 'Records and cells must match', 'Per-cell counts and individual records are only ever shown together when both files carry the same collector run (retrieved_at). If a run lands between the two reads the page re-reads the counts once; if they still differ, the counts are shown alone and the records are withheld with the reason. A failed record read clears the previous records instead of leaving them beside newer counts.', true);
-  add('general', 'Search', `The Explore box searches only the records this browser has already loaded from each layer's latest snapshot. It searches earthquake descriptions as USGS writes them, vessel names and MMSIs, and a latitude and longitude typed in that order. Fire detections and forest disturbance publish no text and are never text-searched; fire detections are included in a coordinate search. A layer that is hidden, unknown, or whose records are withheld by the pairing rule is not searched, and the panel says which and why. There is no geocoder, no place-name dataset and no country boundaries: a place or country word matches the source's own description text and nothing more, so it finds records described that way and misses records in the same country described another way. A coordinate search always offers to move the view to the position, and separately lists loaded records within ${SEARCH_RADIUS_KM} km, nearest first, up to ${MAX_RESULTS} with the true total stated; that radius is a choice made for this box and is not a coverage boundary. "No matching loaded records" describes the loaded snapshot only and does not establish absence. A result stays tied to the collector run, the layer visibility and the freshness it was found under: if any of those changes the result is marked and refused rather than opened, and no camera movement or selection happens without a click.`, true);
+  add('general', 'Search', `The Explore box searches only the records this browser has already loaded from each layer's latest snapshot. It searches earthquake descriptions as USGS writes them, vessel names and MMSIs, and a latitude and longitude typed in that order. Fire detections and forest disturbance publish no text and are never text-searched; fire detections are included in a coordinate search. A layer that is hidden, unknown, or whose records are withheld by the pairing rule is not searched, and the panel says which and why. There is no geocoder, no place-name dataset and no country boundaries: a place or country word matches the source's own description text and nothing more, so it finds records described that way and misses records in the same country described another way. Coordinates are read whole: leading decimals are kept as written, and a number that cannot be read in full is refused by name rather than repaired, because dropping a character would silently move the position somewhere else. A coordinate search always offers to move the view to the position, and separately lists loaded records within ${SEARCH_RADIUS_KM} km, nearest first, up to ${MAX_RESULTS} with the true total stated; that radius is a choice made for this box and is not a coverage boundary. Where the browser cannot show the globe there is no view to move, and the panel says so rather than reporting a movement that did not happen. "No matching loaded records" describes the loaded snapshot only and does not establish absence. A result stays tied to the collector run, the layer visibility and the freshness it was found under: if any of those changes the result is marked and refused rather than opened, and no camera movement or selection happens without a click.`, true);
   add('general', 'Navigation', 'The "find in this snapshot" buttons move the view to the largest value inside the records already loaded — the loaded snapshot, not the world, and not a danger ranking. They make no further requests, run only when clicked, and never move the camera on their own.', true);
   add('general', 'Comparisons', `none of Mother Earth\'s own in phase 1; its baselines accumulate from ${BASELINE_SINCE}; descriptive comparisons from phase 3, highlights only after a held-out validation. Source-provided comparisons (NOAA CO₂, NSIDC climatology) are shown and labelled as the source\'s.`, true);
   for (const layer of LAYERS) {

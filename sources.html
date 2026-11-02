@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611021100">
+<link rel="stylesheet" href="style.css?v=202611021200">
 </head>
 <body class="doc">
 <header class="top">
@@ -70,10 +70,10 @@
     <tr><td>Kp, CO₂, sea ice</td><td>Nothing. These are indices, not records with places.</td></tr>
   </table>
   <p><b>A place or country word matches text, not territory.</b> Searching "Chile" finds loaded records whose description contains that word and misses records in Chile described some other way. Nothing in this box knows where a border is.</p>
-  <p><b>Coordinates are entered latitude first, then longitude</b> — decimal degrees, with optional hemisphere letters (<code>-33.92, 18.42</code> or <code>33.92S, 18.42E</code>). Latitude is accepted from −90 to 90 and longitude from −180 to 180; a value outside its range is refused with the range named. A minus sign and a hemisphere letter together is ambiguous and is refused rather than guessed. When both values are in range, a latitude and longitude typed the wrong way round cannot be detected, which is why the order is stated at the input.</p>
+  <p><b>Coordinates are entered latitude first, then longitude</b> — decimal degrees, with optional hemisphere letters (<code>-33.92, 18.42</code> or <code>33.92S, 18.42E</code>). Latitude is accepted from −90 to 90 and longitude from −180 to 180; a value outside its range is refused with the range named. Leading decimals are read as written (<code>.5</code> is half a degree, <code>-.5</code> is half a degree south). A minus sign and a hemisphere letter together is ambiguous and is refused rather than guessed. <b>A number that cannot be read whole is refused by name and never repaired</b> — nothing is dropped from what you typed to make it parse, because a discarded character would silently move the position somewhere else. When both values are in range, a latitude and longitude typed the wrong way round cannot be detected, which is why the order is stated at the input.</p>
   <p>A coordinate search always offers to <b>move the view to that position</b>, whether or not any record is near it. It then separately lists loaded records within <b>250 km</b>, nearest first, up to twelve with the true total stated. That radius is a choice made for this box: <b>it is not a coverage boundary</b> and says nothing about what was observed there.</p>
   <p><b>"No matching loaded records" describes the loaded snapshot and nothing else.</b> It does not establish absence. A layer that is hidden, whose state is unknown, or whose records are withheld by the records-and-cells pairing rule is not searched at all, and the panel names each one with the reason.</p>
-  <p><b>A result stays tied to what it was found under.</b> Every result carries its layer and the collector run it came from. If that run is replaced, or the layer is hidden, or the layer's state lapses to unknown, or its records are withheld, the result is marked and refused rather than opened — the page never attaches an old record to a newer run. Each result is judged on its own layer, so one layer refreshing does not invalidate another's results. Nothing moves the view and nothing is selected without a click.</p>
+  <p><b>A result stays tied to what it was found under.</b> Every result carries its layer and the collector run it came from. If that run is replaced, or the layer is hidden, or the layer's state lapses to unknown, or its records are withheld, the result is marked and refused rather than opened — the page never attaches an old record to a newer run. Each result is judged on its own layer, so one layer refreshing does not invalidate another's results. Nothing moves the view and nothing is selected without a click. <b>If this browser cannot show the globe</b> there is no view to move, and the panel says so instead of reporting a movement that did not happen; searching and opening records still work.</p>
 
   <h2 id="limits">Limitations, disclaimers and currently unavailable layers</h2>
   <div id="limits-body"></div>
@@ -84,7 +84,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611021100"></script>
+<script src="app.js?v=202611021200"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;

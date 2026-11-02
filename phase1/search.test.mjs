@@ -50,6 +50,46 @@ for (const [q, re] of Object.entries(refused)) {
   const r = ME.parseCoord(q);
   ok(`parseCoord(${JSON.stringify(q)}) refused with a reason`, r && r.ok === false && re.test(r.why), r);
 }
+// ---- leading-decimal notation, and the rule that a character is NEVER discarded (GPT, 2 Nov 2026).
+// The first tokeniser scanned with match(), which skips what it cannot match: ".5" silently became 5,
+// "-.5" lost its sign as well and flipped hemisphere, and "--5" became -5. A number that cannot be read
+// WHOLE is refused by name; it is never repaired into a different place on Earth.
+ok('".5, .5" is half a degree, not five degrees',
+  (r => r.ok && r.lat === 0.5 && r.lng === 0.5)(ME.parseCoord('.5, .5')), ME.parseCoord('.5, .5'));
+ok('"-.5, 3" keeps its sign (southern hemisphere, not northern)',
+  (r => r.ok && r.lat === -0.5 && r.lng === 3)(ME.parseCoord('-.5, 3')), ME.parseCoord('-.5, 3'));
+ok('"-.5,-.5" stays in the south-west quadrant',
+  (r => r.ok && r.lat === -0.5 && r.lng === -0.5)(ME.parseCoord('-.5,-.5')), ME.parseCoord('-.5,-.5'));
+ok('".5 .5" (space separated) parses the same',
+  (r => r.ok && r.lat === 0.5 && r.lng === 0.5)(ME.parseCoord('.5 .5')));
+ok('".5S, .5E" applies the hemisphere to a leading decimal',
+  (r => r.ok && r.lat === -0.5 && r.lng === 0.5)(ME.parseCoord('.5S, .5E')), ME.parseCoord('.5S, .5E'));
+ok('"5., 3" (trailing point) is read as 5',
+  (r => r.ok && r.lat === 5 && r.lng === 3)(ME.parseCoord('5., 3')));
+ok('a lone ".5" is still a text search, not half a coordinate', ME.parseCoord('.5') === null);
+ok('"-.5" alone is still a text search', ME.parseCoord('-.5') === null);
+
+// malformed punctuation and signs: refused BY NAME, never silently repaired
+for (const q of ['1.2.3, 4', '5..5, 3', '--5, 3', '+-5, 3', '3, 4.5.6', '5-5, 3', '.., 3', '3, .', '1..2, 3']) {
+  const r = ME.parseCoord(q);
+  ok(`${JSON.stringify(q)} is refused, not repaired`, r && r.ok === false, r);
+  if (r && r.ok === false) ok(`...and the offending token is named`, /is not a number this box can read|two numbers/.test(r.why), r.why);
+}
+// the specific silent-corruption regressions, stated as the values they must NEVER produce
+ok('".5, .5" never becomes 5, 5', (r => !(r.ok && r.lat === 5 && r.lng === 5))(ME.parseCoord('.5, .5')));
+ok('"-.5, 3" never becomes 5, 3', (r => !(r.ok && r.lat === 5))(ME.parseCoord('-.5, 3')));
+ok('"--5, 3" never becomes -5, 3', (r => !(r.ok && r.lat === -5))(ME.parseCoord('--5, 3')));
+ok('"+-5, 3" never becomes -5, 3', (r => !(r.ok && r.lat === -5))(ME.parseCoord('+-5, 3')));
+// nothing accepted may be altered: each accepted form states the exact pair it must produce
+for (const [q, lat, lng] of [
+  ['.5, .5', 0.5, 0.5], ['-.5, 3', -0.5, 3], ['-.5,-.5', -0.5, -0.5], ['.5 .5', 0.5, 0.5],
+  ['.5S, .5E', -0.5, 0.5], ['5., 3', 5, 3], ['0.5, 0.5', 0.5, 0.5], ['-33.92, 18.42', -33.92, 18.42],
+  ['33.92S, 18.42E', -33.92, 18.42], ['+12, -7', 12, -7], ['.05, .005', 0.05, 0.005],
+]) {
+  const r = ME.parseCoord(q);
+  ok(`${JSON.stringify(q)} produces exactly ${lat}, ${lng}`, r && r.ok && r.lat === lat && r.lng === lng, r);
+}
+
 // a swapped pair that is in range for both is NOT detectable — it must be accepted as typed, never auto-swapped
 ok('in-range swap accepted as typed (order is stated at the input, not guessed)',
   (r => r.ok && r.lat === 18.42 && r.lng === -33.92)(ME.parseCoord('18.42, -33.92')));
