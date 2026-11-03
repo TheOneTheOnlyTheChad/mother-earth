@@ -2,7 +2,7 @@
 :root{
   --bg:#070a0f; --panel:rgba(12,17,26,.92); --card:rgba(7,10,15,.62); --line:rgba(140,170,200,.16); --line-strong:rgba(140,170,200,.4);
   --fg:#d6dde8; --dim:#7f8da3; --accent:#ffb347;
-  --quake:#ff5a3c; --fire:#ff9b2e; --plane:#7fd3ff; --ship:#5fe3c8; --space:#c58bff; --carbon:#9ad0a4; --ice:#bfe6ff; --forest:#6fd37a;
+  --quake:#ff5a3c; --fire:#ff9b2e; --plane:#7fd3ff; --ship:#5fe3c8; --space:#c58bff; --carbon:#9ad0a4; --ice:#bfe6ff; --forest:#6fd37a; --drift:#ffd86b;
   --ok:#b9ff6b; --warn:#ffd166; --bad:#ff5a3c;
   --display:"Barlow Condensed",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --col:300px; --header:56px; --gap:12px;

@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611040900">
+<link rel="stylesheet" href="style.css?v=202611041800">
 </head>
 <body class="doc">
 <header class="top">
@@ -76,6 +76,12 @@
   <p><b>A dependency on library internals.</b> The overlay draws by adding its own sphere to the scene graph of <a href="https://github.com/vasturiano/globe.gl" target="_blank" rel="noopener">globe.gl</a>, and it obtains the three.js constructors it needs by reading them off objects that library has already created — there is no global <code>THREE</code> to use. That is <b>reliance on another library's internals</b>, so the version is pinned (currently <b>2.45.0</b>) and the automated checks assert that the pinned version under test is the one the page loads. It also copies the globe mesh's own rotation and sphere parameters rather than assuming how the texture lines up with longitude. If a future version stops exposing what is needed, <b>the overlay refuses to switch on</b>, resets its toggle and says so, and the globe, its records, picking and search are left exactly as they were.</p>
   <p><b>Cost.</b> None. It makes no request, has no collector and no backend, and recomputes locally once a minute while the page is visible, and immediately when you enable it, return to the tab, or restore the page.</p>
 
+  <h2 id="drifters">Drifting buoys — latest reported fixes (observation)</h2>
+  <p>Each point is one drifting buoy at its <b>own latest reported fix</b> in the 24 hours before the hub's run. The fixes were taken at different times, so the layer is not a picture of one moment; every buoy's inspector shows its own fix time. Where a buoy is now is unknown.</p>
+  <p><b>Source:</b> NOAA Observing System Monitoring Center (OSMC) ERDDAP, dataset <code>OSMC_flattened</code> — observations relayed over the WMO Global Telecommunication System (GTS); platform types "DRIFTING BUOYS" and "DRIFTING BUOYS (GENERIC)". Licence stated in the dataset: CC0 1.0 (public domain dedication). These are real-time reports, not the Global Drifter Program's quality-controlled data, which are published years later.</p>
+  <p><b>Collection:</b> the hub makes one request each hour (about 100 KB, about 1,300 buoys, measured 3 Nov 2026) and keeps one current snapshot only. Before anything is shown it checks the header and units, each row's time, position and buoy id, and that the count has not collapsed (at least 200 buoys, and at least half the previous count). A report stamped <b>in the future</b> (10 buoys on 3 Nov 2026) is refused and counted, never drawn. If a run fails, the previous snapshot stays with its own times and the layer goes Unknown after 4 hours.</p>
+  <p><b>Sea-surface temperature</b> is shown as the buoy reported it (°C); a missing value is shown as not provided, never as zero, and a value outside −3 to 40 °C is withheld and counted.</p>
+  <p><b>Coverage:</b> buoys are few and far apart. A cell with no buoy says nothing about that water. The layer is off when the page loads and is fetched only while it is switched on.</p>
   <h2 id="orbital">Orbital layers — computed positions (model tier)</h2>
   <p>Optional layers on World View, <b>each off unless you turn it on</b>, each touching only its own markers. Each marker is a position <b>computed</b> with the SGP4 model (satellite.js 6.0.2, pinned) from the latest general-perturbations element set Space-Track.org publishes for that object. Classification: <span class="fixed">model (propagated from published orbital elements — computed, not observed)</span>. They are not observation layers: they never enter the status report, the status sentence or search, and nothing about coverage, absence or change is read from them. (They replace the earlier Satellites overlay, which drew CelesTrak's "active" group.)</p>
   <p><b>What they show.</b> The scale and distribution of the public catalogue: every object Space-Track lists as not decayed whose elements are under 10 days old (Space-Track's recommended query). Older elements are filtered out upstream and are outside these counts. The layers follow Space-Track's <b>object type</b> — <b>Payloads</b>, <b>Rocket bodies</b>, <b>Debris</b>. Objects of unknown type are counted, not drawn. Payload <b>operational status</b> (active or inactive) is <b>not used yet</b>: a payload is shown as a payload, and whether it is working is not established here. When a status source is adopted the layers become Active satellites · Inactive satellites &amp; rocket bodies · Orbital debris, and any payload without a usable status is counted, not drawn — missing status is never counted as inactive.</p>
@@ -109,7 +115,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611040900"></script>
+<script src="app.js?v=202611041800"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
