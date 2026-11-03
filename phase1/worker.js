@@ -16,6 +16,7 @@
  *   GET /admin/run/<job>?key=ADMIN_KEY   run a job now (jobs: five, minute, firms, forest, hourly)
  *   GET /admin/probe/spacetrack?key=ADMIN_KEY   ONE bounded Space-Track check (0.2.3; 0.2.4 also stages the GP body privately at staging/spacetrack-gp.csv; not scheduled)
  *   GET /admin/probe/orbital-build?key=ADMIN_KEY  run the orbital build on the staged copy (0.2.4; no upstream request, writes nothing)
+ *   GET /snapshot/orbital, /elements/orbital   orbital meta + classified element CSV (0.3.0; job gated by ORBITAL_ENABLED=1, odd UTC hours at :41)
  *
  * Bindings (set in dashboard → Worker → Settings → Bindings):
  *   R2  = R2 bucket binding        DB = D1 database binding
@@ -46,12 +47,12 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.2.5';
+const COLLECTOR_VERSION = '0.3.0';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600, orbital: 8 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_DAY_BOUNDARY_H = 4;             // before 04:00 UTC an empty FIRMS file is the day boundary, not an outage (measured 1 Nov 2026: first rows at 04:00)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
@@ -1044,6 +1045,78 @@ function orbBuild(text, statusMap, previousRows) {
 }
 export { orbBuild, orbClassify, ORB_CLASSES };
 
+// ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
+
+/* Two-hourly, on the forest cron's :41 tick in ODD UTC hours (Space-Track: GP ≤ 1/hour at a random minute away from
+*  :00/:30), only when env.ORBITAL_ENABLED === '1'. One attempt per slot: login → ONE trimmed GP request (ST.gpPath,
+*  18 columns) → logout. No retries. Shares the ≥ 60-min guard with the probe (state/spacetrack-probe.json) so the two
+*  can never exceed one GP request an hour between them.
+*  Storage rule (MVP): validate + build → new CSV under its own key → meta pointing at it → only then delete the previous
+*  CSV. Any failure (login, HTTP, empty, validation, publication) is recorded and the previous meta + CSV keep serving
+*  with their original times; an orphan from a failed meta write is deleted. Nothing is written before validation.
+*  Payload operational status (CelesTrak SATCAT) is PENDING: no status map is used, every payload is
+*  'payload_status_unavailable'. Completeness is UNVERIFIED and the meta says so. */
+const ORBF = { metaKey: 'latest/orbital.json', csvPrefix: 'latest/orbital-elements-', stateKey: 'state/orbital.json' };
+async function collectOrbital(env, scheduledMs, manual) {
+  const layer = 'orbital', started = Date.now();
+  const state = (await getJson(env, ORBF.stateKey)) || {};
+  const probe = await getJson(env, ST.stateKey);
+  const record = async (status, http, note, extra = {}) => {
+    await putJson(env, ORBF.stateKey, { ...state, last_attempt: { at: new Date(started).toISOString(), scheduled_for: new Date(scheduledMs).toISOString(), manual: !!manual, status, http, note, ...extra } });
+    await logRun(env, layer, started, status, http, extra.rows || 0, extra.bytes || 0, note);
+    return `${status}: ${note}`;
+  };
+  if (!env.SPACETRACK_USER || !env.SPACETRACK_PASS) return record('down', 0, 'SPACETRACK_USER / SPACETRACK_PASS not set — no request made');
+  if (!stOffPeak(started)) return record('down', 0, `UTC minute ${new Date(started).getUTCMinutes()} outside off-peak windows — no request made`);
+  const lastGp = [state.last_attempt && state.last_attempt.gp_request ? state.last_attempt.at : null, probe && probe.at].filter(Boolean).map(Date.parse);
+  if (lastGp.some(t => started - t < ST.minGapMs)) return record('down', 0, 'a GP request was made < 60 min ago — no request made');
+  // 1. login
+  let cookie = '';
+  try {
+    const r = await fetch(ST.base + '/ajaxauth/login', { method: 'POST', body: new URLSearchParams({ identity: env.SPACETRACK_USER, password: env.SPACETRACK_PASS }), redirect: 'manual', headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const txt = (await r.text()).slice(0, 200); cookie = stCookies(r.headers);
+    if (r.status !== 200 || !cookie || /"Login"\s*:\s*"Failed"/i.test(txt)) return record('down', r.status, 'login failed: HTTP ' + r.status + (/"Login"/.test(txt) ? ' ' + txt : ''));
+  } catch (e) { return record('down', 0, 'login fetch failed: ' + String(e).slice(0, 160)); }
+  // 2. ONE GP request
+  let text = '', http = 0;
+  try {
+    const r = await fetch(ST.base + ST.gpPath, { headers: { 'User-Agent': UA, Cookie: cookie } });
+    http = r.status; text = await r.text();
+  } catch (e) { text = ''; http = 0; state.gp_error = String(e).slice(0, 160); }
+  try { const r = await fetch(ST.base + '/ajaxauth/logout', { headers: { 'User-Agent': UA, Cookie: cookie } }); await r.text(); } catch (_) {}
+  if (http !== 200) return record('down', http, 'GP HTTP ' + http + (state.gp_error ? ' ' + state.gp_error : ''), { gp_request: true });
+  if (!text.length) return record('down', 200, 'GP empty body', { gp_request: true });
+  // 3. validate + build (nothing written before this passes)
+  const prevRows = state.last_success && state.last_success.rows;
+  const b = orbBuild(text, null, prevRows);
+  if (!b.ok) return record('down', 200, 'validation failed: ' + b.problems.join('; ').slice(0, 400), { gp_request: true, rows: b.rows, bytes: text.length });
+  const sha = await sha256Hex(b.csv);
+  const retrievedAt = new Date(started).toISOString();
+  // 4. publish: CSV → meta → delete previous CSV
+  const prevMeta = await getJson(env, ORBF.metaKey);
+  const csvKey = ORBF.csvPrefix + sha.slice(0, 12) + '.csv';
+  try { await env.R2.put(csvKey, b.csv, { httpMetadata: { contentType: 'text/csv; charset=utf-8' }, customMetadata: { sha256: sha, retrieved_at: retrievedAt } }); }
+  catch (e) { return record('down', 200, 'publication failed (csv write): ' + String(e).slice(0, 160), { gp_request: true }); }
+  const meta = {
+    schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer, tier: 'model', retrieved_at: retrievedAt, source_status: 'ok', stale_after_s: STALE_AFTER_S[layer],
+    elements: { path: '/elements/orbital', key: csvKey, rows: b.rows, bytes: b.csv.length, sha256: sha, columns: ORB.out.concat('CLASS'), source_bytes: text.length },
+    counts: b.counts,
+    classification: { by: 'OBJECT_TYPE first (Space-Track GP)', payload_status: 'pending — CelesTrak SATCAT operational status not used yet; every payload is payload_status_unavailable', classes: ORB_CLASSES },
+    validation: { checks: 'every row: 18 quoted fields, OBJECT_TYPE known, EPOCH ISO, NORAD unique; final newline; rows >= ' + ORB.minRows + ' and >= ' + Math.round(ORB.minFractionOfPrevious * 100) + ' % of the previous valid file',
+      completeness: 'unverified — Space-Track returns no row count or Content-Length for CSV; a response cut cleanly between rows above the floors would pass' },
+    source: { name: 'Space-Track.org', query: ST.gpPath, filter: 'not decayed, epoch within 10 days (Space-Track recommended); older elements filtered upstream, outside these counts',
+      origin: 'US Space Force 18th/19th Space Defense Squadrons', citation: 'Space-Track.org (www.space-track.org)' },
+    quantity: 'general-perturbations mean element sets for propagation (SGP4); positions drawn from them are computed, not observed',
+    map_layer: true,
+  };
+  try { await putJson(env, ORBF.metaKey, meta); }
+  catch (e) { try { if (!prevMeta || prevMeta.elements.key !== csvKey) await env.R2.delete(csvKey); } catch (_) {} return record('down', 200, 'publication failed (meta write): ' + String(e).slice(0, 160), { gp_request: true }); }
+  if (prevMeta && prevMeta.elements && prevMeta.elements.key && prevMeta.elements.key !== csvKey) { try { await env.R2.delete(prevMeta.elements.key); } catch (e) { console.log('orbital: previous CSV not deleted', String(e)); } }
+  state.last_success = { at: retrievedAt, rows: b.rows, bytes: b.csv.length, sha256: sha };
+  const c = b.counts;
+  return record('ok', 200, `published ${b.rows} objects (payload ${c.payload_status_unavailable + c.active + c.inactive + c.payload_status_unknown + c.payload_unmatched}, rocket body ${c.rocket_body}, debris ${c.debris}, unknown type ${c.unknown_type}), ${b.csv.length} B from ${text.length} B`, { gp_request: true, rows: b.rows, bytes: b.csv.length });
+}
+
 // ---------------------------------------------------------------- dispatch
 
 /** Run a collector so that an unexpected throw is recorded as a 'down' run and never takes the others with it. */
@@ -1059,7 +1132,13 @@ const JOBS = {
   ])).join('; '),
   minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
   firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
-  forest: async (env, ms) => guarded(env, 'forest', ms, collectForest),
+  forest: async (env, ms) => {
+    const f = await guarded(env, 'forest', ms, collectForest);
+    const d = new Date(ms);   // orbital rides the :41 tick in odd UTC hours (two-hourly, off-peak for Space-Track)
+    const o = env.ORBITAL_ENABLED !== '1' ? 'orbital:not scheduled (ORBITAL_ENABLED unset)' : (d.getUTCHours() % 2 === 1 && d.getUTCMinutes() === 41) ? await guarded(env, 'orbital', ms, collectOrbital) : 'orbital:skipped (odd UTC hours at :41 only)';
+    return f + '; ' + o;
+  },
+  orbital: async (env, ms) => guarded(env, 'orbital', ms, (e, m) => collectOrbital(e, m, true)),   // manual: /admin/run/orbital (same guards)
   satellites: async (env, ms) => guarded(env, 'satellites', ms, collectSatellites),   // manual: /admin/run/satellites (same stamp gate)
   hourly: async (env, ms, manual) => {
     const k = await guarded(env, 'swpc', ms, collectSwpc);          // Kp is a 3-hourly product; hourly matches NWS's "know your refresh frequency" (REGISTER.md)
@@ -1083,7 +1162,7 @@ function jobForCron(cron) {
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest', 'satellites'];   // GET-readable; ships/lightning arrive via /ingest (D11)
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest', 'satellites', 'orbital'];   // GET-readable; ships/lightning arrive via /ingest (D11)
 const INGEST_LAYERS = ['mock', 'opensky', 'ships', 'lightning'];   // D11: external collectors (Mac/Pi) publish these through /ingest
 const INGEST_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -1233,6 +1312,13 @@ export default {
       return new Response(o.body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'ETag': o.httpEtag, ...CORS } });
     }
 
+    if (p[0] === 'elements' && p[1] === 'orbital') {   // the validated, classified orbital element file; served as stored
+      const m = await getJson(env, ORBF.metaKey);
+      const o = m && m.elements && m.elements.key ? await env.R2.get(m.elements.key) : null;
+      if (!o) return json({ error: 'no element file yet', layer: 'orbital' }, 404);
+      return new Response(o.body, { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Cache-Control': 'public, max-age=600', 'ETag': o.httpEtag, 'X-Elements-SHA256': (o.customMetadata && o.customMetadata.sha256) || '', 'Access-Control-Expose-Headers': 'ETag, X-Elements-SHA256', ...CORS } });
+    }
+
     if (p[0] === 'elements' && p[1] === 'satellites') {   // the validated GP CSV the page propagates; served as stored
       const m = await getJson(env, SAT.metaKey);
       const o = m && m.elements && m.elements.key ? await env.R2.get(m.elements.key) : null;
@@ -1273,7 +1359,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/elements/satellites', '/status'], layers: LAYERS,
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/elements/satellites', '/elements/orbital', '/status'], layers: LAYERS,
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };
