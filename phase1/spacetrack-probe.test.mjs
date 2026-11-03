@@ -54,7 +54,7 @@ await t('D. success: login → ONE GP query → logout; measured; no credentials
   NOW = Date.parse('2026-11-03T10:14:00Z'); const { env, store } = makeEnv(); stub();
   const r = await probe(env);
   assert.equal(r.body.status, 'ok');
-  assert.deepEqual(calls.map(c => c.url.replace('https://www.space-track.org', '')), ['/ajaxauth/login', '/basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-10/emptyresult/show/format/csv', '/ajaxauth/logout']);
+  assert.deepEqual(calls.map(c => c.url.replace('https://www.space-track.org', '')), ['/ajaxauth/login', '/basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-10/predicates/OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT,OBJECT_TYPE/emptyresult/show/format/csv', '/ajaxauth/logout']);
   assert.equal(calls[0].method, 'POST'); assert.equal(calls[1].cookie, 'chocolatechip=abc123');
   assert.equal(calls.filter(c => c.url.includes('/class/gp/')).length, 1);
   assert.equal(r.body.steps.gp.bytes, GP.length); assert.equal(r.body.steps.gp.header, '"NORAD_CAT_ID","OBJECT_TYPE"');

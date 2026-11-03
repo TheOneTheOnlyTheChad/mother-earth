@@ -46,7 +46,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.2.4';
+const COLLECTOR_VERSION = '0.2.5';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -916,7 +916,9 @@ async function collectSatellites(env, scheduledMs) {
 *  state/spacetrack-probe.json and returned. */
 const ST = {
   base: 'https://www.space-track.org',
-  gpPath: '/basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-10/emptyresult/show/format/csv',
+  // 0.2.5: /predicates/ (documented REST predicate: comma-separated list of predicates to return) — only the 17 propagation
+  // columns + OBJECT_TYPE that orbBuild needs. Same population filter as Space-Track's recommended query.
+  gpPath: '/basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-10/predicates/OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT,OBJECT_TYPE/emptyresult/show/format/csv',
   stateKey: 'state/spacetrack-probe.json', stagingKey: 'staging/spacetrack-gp.csv', minGapMs: 60 * 60e3, maxBytes: 64 * 1024 * 1024,
 };
 function stOffPeak(ms) { const m = new Date(ms).getUTCMinutes(); return (m >= 10 && m <= 20) || (m >= 40 && m <= 50); }
