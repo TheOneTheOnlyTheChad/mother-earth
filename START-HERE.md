@@ -9,6 +9,7 @@ One browser globe showing the latest observations of the planet from open live f
 - Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `/elements/satellites`, `/elements/orbital`, `/admin/run/<job>?key=ADMIN_KEY` (Workers Paid since 3 Nov 2026)
 - Repo: https://github.com/TheOneTheOnlyTheChad/mother-earth — push straight to `main` (no branches unless there is a reason; say the reason and let Chad decide)
 - Orbital (Space-Track via the hub): Payloads · Rocket bodies · Debris toggles on the page since 3 Nov 14:49 UTC; replaced the Satellites card.
+- **Drifting buoys** (NOAA OSMC, GTS, CC0) since 3 Nov 17:19 UTC: hourly on the :07 job (`DRIFTERS_ENABLED=1`), own toggle card, off on load. **Ships cloud fallback** since 3 Nov ~18:10 (`SHIPS_FALLBACK=1`): the hub samples aisstream itself only when no Mac sample has arrived for 40 min; it hears ~half the vessels (measured twice) and the card says so. CelesTrak satellites job stopped (`SATELLITES_ENABLED=0`).
 - Layers running: usgs (quakes), swpc (Kp, hourly), firms (fires), co2 (NOAA GML), seaice (NSIDC), **ships** (aisstream via the Mac: launchd job `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples ~every 30 min while awake); `mock` = hidden test layer. Parked: opensky — gated off by `OPENSKY_ENABLED` (unset), minute trigger deleted. R2 lifecycle rules delete `raw/ snapshots/ cells/` after 2 days.
 
 ## 2. How Chad works (observe these; they are standing)
@@ -60,6 +61,12 @@ Copy to the Mac: the folder `~/Documents/Mother Earth` must be granted each thre
 Bump `COLLECTOR_VERSION` on every deploy. Jobs: five, minute, firms, forest, hourly (hourly = co2 + seaice-gated + D1 aggregation; admin runs pass `manual=true`). A file over ~50 KB is typed in TWO `type` calls (split at a line boundary; the second call continues at the cursor) — 0.2.0 (71 KB) went in as 45.6 k + 25.0 k chars with no timeout error.
 D1 console: dashboard → D1 → mother-earth → Console; Chad or Claude runs `CREATE TABLE` statements there (schema.sql holds them).
 Metrics: `…/workers/services/view/mother-earth/production/metrics` — read with `get_page_text`. Free plan: 10 ms CPU soft limit per invocation; measured medians ~1 ms; worst offenders were whole-file parses (fixed by `tail()`).
+
+## 4b. Thread 10 operating facts (3 Nov 2026)
+- **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.
+- **Optional layers** on the page go through `OPTIONAL_LAYERS` in index.html (fetched only while on, cleared on off, `refreshPair` + `usable()` as for the always-on record layers). `ME.renderState()` and `ME.openCell(layer, id)` are the read-only test/console aids.
+- **Shallow clone:** a `--depth=1` fetch can cut parent links ("unrelated histories"); `git fetch --deepen=5 origin main <branch>` restores them. Remote refspec is `+refs/heads/*:refs/remotes/origin/*` so branch tracking resolves (the stop hook checks it).
+- Mac folder access in a new thread: `device_request_folder_access ["~/Documents/Mother Earth"]` (one prompt); KEYS.md line 8 admin key, line 16 aisstream (3 connections per account).
 
 ## 4a. Measuring Worker CPU and cleaning R2 (added thread 8, 3 Nov 2026)
 - **Per-invocation CPU is readable** (invocation logs are on): from a `dash.cloudflare.com` tab, `POST /api/v4/accounts/<acct>/workers/observability/telemetry/query` with header `x-atok: window.bootstrap.atok` and body `{queryId:'adhoc', timeframe:{from,to}, view:'events', limit, parameters:{filters:[{key:'$workers.scriptName',operation:'eq',type:'string',value:'mother-earth'}]}}`. Each `cf-worker-event` carries `$workers.cpuTimeMs`, `wallTimeMs`, `outcome`, `eventType`, `event.cron`. Events take ~20 s to appear. A cron invocation runs every job of that tick, so its CPU is shared (forest + orbital on the :41 odd-hour tick).
