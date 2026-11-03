@@ -6,6 +6,8 @@
  * Usage:   INGEST_KEY=… node collector-mac.mjs mock          # synthetic feed, proves the path end to end
  *          INGEST_KEY=… node collector-mac.mjs mock --dry    # print the envelope, send nothing
  *          INGEST_KEY=… AISSTREAM_KEY=… node collector-mac.mjs ships [--window=60] [--dry] [--quiet] [--state=DIR]
+ *          INGEST_KEY=… OPENSKY_CLIENT_ID=… OPENSKY_CLIENT_SECRET=… node collector-mac.mjs opensky [--bbox=lamin,lomin,lamax,lomax] [--dry]
+ *              (aircraft; public display gated on OpenSky's terms — see REGISTER; nothing schedules this mode)
  *          node collector-mac.mjs retry --state=DIR          # upload the one pending envelope, if any (expired/oversize ones are dropped)
  * Hub:     HUB=https://mother-earth.chadoberholzer.workers.dev (default)
  * Needs Node 22+ (global fetch + global WebSocket). No dependencies.
@@ -179,7 +181,47 @@ export const FEEDS = {
         compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,
         citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' } };
   },
+
+  // OpenSky Network states API (aircraft). One request per run: the latest state vector per aircraft that has a position.
+  // OAuth2 client credentials (OpenSky's current scheme). Credits are reported by the source in X-Rate-Limit-Remaining and
+  // carried in the envelope. Terms gate PUBLIC display (REGISTER, OpenSky row); this mode is never scheduled by run.sh.
+  opensky: async () => {
+    const id = process.env.OPENSKY_CLIENT_ID, secret = process.env.OPENSKY_CLIENT_SECRET;
+    if (!id || !secret) throw new Error('OPENSKY_CLIENT_ID / OPENSKY_CLIENT_SECRET not set');
+    const tr = await fetch('https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token', { method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION },
+      body: new URLSearchParams({ grant_type: 'client_credentials', client_id: id, client_secret: secret }) });
+    if (!tr.ok) throw new Error('token http ' + tr.status);
+    const token = (await tr.json()).access_token;
+    const bbox = flag('bbox', null);
+    const q = bbox ? '?' + (([a, b, c, d]) => `lamin=${a}&lomin=${b}&lamax=${c}&lomax=${d}`)(bbox.split(',').map(Number)) : '';
+    const r = await fetch('https://opensky-network.org/api/states/all' + q, { headers: { Authorization: 'Bearer ' + token, 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION } });
+    const remaining = r.headers.get('X-Rate-Limit-Remaining');
+    if (!r.ok) throw new Error('states http ' + r.status + (remaining !== null ? ' (credits remaining ' + remaining + ')' : ''));
+    const j = await r.json();
+    const o = openskyRows(j);
+    return { fields: o.fields, rows: o.rows, quantity: o.quantity, coverageDefault: o.coverageDefault, extra: { without_position: o.noPos, duplicates_dropped: o.dup, scope: bbox ? 'bbox ' + bbox : 'world', source_time: j.time, window_start: j.time ? new Date(j.time * 1000).toISOString() : null,
+      window_end: j.time ? new Date(j.time * 1000).toISOString() : null, credits_remaining: remaining === null ? null : Number(remaining), stale_after_s: 3600,
+      citation: 'The OpenSky Network, https://opensky-network.org', public_display: 'gated — see REGISTER (OpenSky row)' } };
+  },
 };
+
+/* OpenSky state vectors → rows. Pure (tested in phase1/aircraft.test.mjs). Dedup by icao24; drop vectors with no position.
+ * observed_at = time_position (the source's own position time) or null — never "now". */
+export function openskyRows(j) {
+  const fields = ['icao24', 'lat', 'lng', 'observed_at', 'last_contact', 'callsign', 'origin_country', 'baro_alt_m', 'on_ground', 'velocity_ms', 'track_deg', 'position_source', 'category'];
+  const rows = [], seen = new Set();
+  let noPos = 0, dup = 0;
+  for (const s of (j && j.states) || []) {
+    if (s[5] == null || s[6] == null || !Number.isFinite(+s[5]) || !Number.isFinite(+s[6]) || Math.abs(s[6]) > 90 || Math.abs(s[5]) > 180) { noPos++; continue; }
+    if (seen.has(s[0])) { dup++; continue; } seen.add(s[0]);
+    rows.push([s[0], +s[6], +s[5], s[3] ? new Date(s[3] * 1000).toISOString() : null, s[4] ? new Date(s[4] * 1000).toISOString() : null,
+      String(s[1] || '').trim(), s[2] || null, s[7] ?? null, !!s[8], s[9] ?? null, s[10] ?? null, s[16] ?? null, s[17] ?? null]);
+  }
+  return { fields, rows, noPos, dup,
+    quantity: 'aircraft (unique ICAO 24-bit address) with a reported position in one OpenSky state snapshot, per cell — heard only where a volunteer receiver is in range; a cell with no aircraft is not an empty sky',
+    coverageDefault: { grade: 'partial', evidence: 'receiver_network_coverage_not_mapped;snapshot_not_track', observed_fraction: 1 } };
+}
 
 async function main() {
   if (!FEEDS[layer]) { console.error('unknown layer', layer, '— known:', Object.keys(FEEDS).join(', ') + ', retry'); process.exit(2); }

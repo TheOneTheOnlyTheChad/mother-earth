@@ -224,7 +224,7 @@ ME.total = snap => Object.values((snap && snap.cells) || {}).reduce((n, c) => n 
 
 const LAYERS = ME.LAYERS = ['usgs', 'firms', 'ships', 'forest', 'swpc', 'co2', 'seaice'];
 const MAP_LAYERS = ME.MAP_LAYERS = ['usgs', 'firms', 'ships', 'forest'];   // forest is cells-only: counts per cell, no points
-const LABEL = ME.LABEL = { usgs: 'Earthquakes', firms: 'Fire detections', ships: 'Ships', forest: 'Forest disturbance', swpc: 'Kp index', co2: 'CO₂', seaice: 'Sea ice' };
+const LABEL = ME.LABEL = { usgs: 'Earthquakes', firms: 'Fire detections', ships: 'Ships', forest: 'Forest disturbance', swpc: 'Kp index', co2: 'CO₂', seaice: 'Sea ice', opensky: 'Aircraft' };
 const SOURCE = ME.SOURCE = {
   usgs: { name: 'USGS', url: 'https://earthquake.usgs.gov/', credit: 'Credit: U.S. Geological Survey', terms: 'U.S. public domain' },
   firms: { name: 'NASA FIRMS', url: 'https://firms.modaps.eosdis.nasa.gov/', credit: 'We acknowledge the use of data and/or imagery from NASA\'s Land, Atmosphere Near real-time Capability for Earth observations (LANCE), part of NASA\'s Earth Science Data and Information System (ESDIS).', terms: 'NASA data policy; LANCE acknowledgment requested' },
@@ -233,12 +233,13 @@ const SOURCE = ME.SOURCE = {
   swpc: { name: 'NOAA SWPC', url: 'https://www.swpc.noaa.gov/', credit: 'NOAA Space Weather Prediction Center', terms: 'U.S. public domain' },
   co2: { name: 'NOAA GML', url: 'https://gml.noaa.gov/ccgg/trends/', credit: 'Lan, X., Tans, P. and Thoning, K.W.: Trends in globally-averaged CO2 determined from NOAA Global Monitoring Laboratory measurements. NOAA GML.', terms: 'freely available; citation requested; recent months preliminary' },
   seaice: { name: 'NSIDC', url: 'https://nsidc.org/data/g02135', credit: 'Fetterer, F., K. Knowles, W. N. Meier, M. Savoie, and A. K. Windnagel. Sea Ice Index, Version 4. NSIDC.', terms: 'open (NOAA mirror); citation requested' },
+  opensky: { name: 'OpenSky Network', url: 'https://opensky-network.org/', credit: 'The OpenSky Network, https://opensky-network.org', terms: 'see REGISTER (OpenSky row): public display only on the terms recorded there' },
   gibs: { name: 'NASA GIBS', url: 'https://earthdata.nasa.gov/gibs', credit: 'Imagery: NASA GIBS, VIIRS NOAA-20 true colour', terms: 'open; dated; not live' },
 };
-const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', forest: 'observation (satellite-derived alert pixels, published; three alert systems with their own confidence rules)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated, previous day)' };
+const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', forest: 'observation (satellite-derived alert pixels, published; three alert systems with their own confidence rules)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated, previous day)', opensky: 'observation (ADS-B/Mode S positions heard by volunteer receivers; one snapshot)' };
 
 // ---------- state
-const state = ME.state = { usgs: null, firms: null, ships: null, forest: null, swpc: null, co2: null, seaice: null };
+const state = ME.state = { usgs: null, firms: null, ships: null, forest: null, swpc: null, co2: null, seaice: null, opensky: null };
 ME.loadedAt = null;
 
 async function getJson(path) { const r = await fetch(HUB + path, { cache: 'no-store' }); if (!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }
