@@ -14,10 +14,12 @@
  *   GET /cells/<layer>      latest cells-only file (small)
  *   GET /status             last runs per layer + OpenSky spend today
  *   GET /admin/run/<job>?key=ADMIN_KEY   run a job now (jobs: five, minute, firms, forest, hourly)
+ *   GET /admin/probe/spacetrack?key=ADMIN_KEY   ONE bounded Space-Track reachability + auth check (0.2.3; not scheduled, stores nothing but its own result)
  *
  * Bindings (set in dashboard → Worker → Settings → Bindings):
  *   R2  = R2 bucket binding        DB = D1 database binding
  * Secrets: OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, FIRMS_MAP_KEY, ADMIN_KEY, INGEST_KEY (external collectors; ingest is disabled until set)
+ *          SPACETRACK_USER, SPACETRACK_PASS (Chad's Space-Track login; used only by /admin/probe/spacetrack)
  * Plain vars (optional): OPENSKY_ENABLED = "1" to run the OpenSky pulls (parked 31 Oct 2026: Cloudflare egress 522 + public site must feed; unset = skip silently)
 *                        OPENSKY_BBOX = "lamin,lomin,lamax,lomax"  (default southern Africa)
  *                        FIRMS_REGION = "west,south,east,north"   (default: world; set only if the Free plan's CPU limit forces it)
@@ -43,7 +45,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.2.2';
+const COLLECTOR_VERSION = '0.2.3';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -901,6 +903,76 @@ async function collectSatellites(env, scheduledMs) {
   return record('ok', 200, `published ${v.rows} element sets, ${d.text.length} B, stamp ${stamp}`, { data_request: true, rows: v.rows, bytes: d.text.length });
 }
 
+// ---------------------------------------------------------------- Space-Track probe (0.2.3) — one bounded check, by hand only
+
+/* Answers one question: can this Worker reach space-track.org, log in with Chad's account, and receive the GP query?
+*  Not a collector: not in JOBS, no cron, nothing published, no element data stored. Guards, all checked BEFORE any
+*  network call: admin key; both secrets present; UTC minute inside Space-Track's off-peak advice (10–20 min either
+*  side of :00/:30 ⇒ minutes 10–20 or 40–50); no earlier probe attempt in the last 60 min (any outcome — GP ≤ 1/hour).
+*  Requests: login (POST ajaxauth/login) → ONE GP query (Space-Track's documented recommended query, CSV) → logout.
+*  No retries. The body is streamed and only measured (bytes, lines, header, element-age not computed). The result,
+*  never the credentials or cookies, is kept in state/spacetrack-probe.json and returned. */
+const ST = {
+  base: 'https://www.space-track.org',
+  gpPath: '/basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-10/emptyresult/show/format/csv',
+  stateKey: 'state/spacetrack-probe.json', minGapMs: 60 * 60e3, maxBytes: 64 * 1024 * 1024,
+};
+function stOffPeak(ms) { const m = new Date(ms).getUTCMinutes(); return (m >= 10 && m <= 20) || (m >= 40 && m <= 50); }
+function stCookies(headers) {
+  const list = typeof headers.getSetCookie === 'function' ? headers.getSetCookie() : (headers.get('set-cookie') ? [headers.get('set-cookie')] : []);
+  return list.map(c => c.split(';')[0].trim()).filter(Boolean).join('; ');
+}
+async function stMeasure(res) {   // stream: count bytes and newlines, keep the first 400 chars; never hold the whole file
+  let bytes = 0, lines = 0, head = '', truncated = false;
+  if (!res.body) return { bytes, lines, head, truncated };
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  for (;;) {
+    const { done, value } = await reader.read(); if (done) break;
+    bytes += value.length;
+    for (let i = 0; i < value.length; i++) if (value[i] === 10) lines++;
+    if (head.length < 400) head += dec.decode(value.subarray(0, 400), { stream: true });
+    if (bytes > ST.maxBytes) { truncated = true; try { await reader.cancel(); } catch (_) {} break; }
+  }
+  return { bytes, lines, head: head.slice(0, 400), truncated };
+}
+async function probeSpacetrack(env, nowMs) {
+  if (!env.SPACETRACK_USER || !env.SPACETRACK_PASS) return { refused: 'SPACETRACK_USER / SPACETRACK_PASS not set — no request made' };
+  if (!stOffPeak(nowMs)) return { refused: `UTC minute ${new Date(nowMs).getUTCMinutes()} is outside the off-peak windows (minutes 10–20, 40–50) — no request made` };
+  const prev = await getJson(env, ST.stateKey);
+  if (prev && prev.at && nowMs - Date.parse(prev.at) < ST.minGapMs) return { refused: `an earlier probe ran at ${prev.at} (< 60 min ago) — no request made`, previous: prev };
+  const out = { at: new Date(nowMs).toISOString(), collector_version: COLLECTOR_VERSION, query: ST.gpPath, steps: {} };
+  await putJson(env, ST.stateKey, { ...out, status: 'started' });   // claim the hour before the first request, so a crash cannot allow a second one
+  const t0 = Date.now();
+  let cookie = '';
+  try {
+    const body = new URLSearchParams({ identity: env.SPACETRACK_USER, password: env.SPACETRACK_PASS });
+    const r = await fetch(ST.base + '/ajaxauth/login', { method: 'POST', body, redirect: 'manual', headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const txt = (await r.text()).slice(0, 200);
+    cookie = stCookies(r.headers);
+    const failed = /"Login"\s*:\s*"Failed"/i.test(txt);
+    out.steps.login = { http: r.status, ms: Date.now() - t0, session_cookie: cookie ? 'received' : 'none', body: failed ? txt : (txt ? '(non-empty, not shown)' : '(empty)') };
+    out.auth = !failed && r.status === 200 && !!cookie;
+  } catch (e) { out.steps.login = { error: String(e).slice(0, 200), ms: Date.now() - t0 }; out.auth = false; }
+  if (out.auth) {
+    const t1 = Date.now();
+    try {
+      const r = await fetch(ST.base + ST.gpPath, { headers: { 'User-Agent': UA, Cookie: cookie } });
+      const m = await stMeasure(r);
+      const firstLine = m.head.split('\n')[0].replace(/\r$/, '');
+      out.steps.gp = { http: r.status, ms: Date.now() - t1, content_type: r.headers.get('content-type'), content_length: r.headers.get('content-length'),
+        bytes: m.bytes, lines: m.lines, data_rows_if_csv: Math.max(0, m.lines - 1), truncated_at_cap: m.truncated,
+        header: firstLine.slice(0, 300), empty_body: m.bytes === 0, no_results_marker: /NO RESULTS RETURNED/.test(m.head) };
+    } catch (e) { out.steps.gp = { error: String(e).slice(0, 200), ms: Date.now() - t1 }; }
+    try { const r = await fetch(ST.base + '/ajaxauth/logout', { headers: { 'User-Agent': UA, Cookie: cookie } }); await r.text(); out.steps.logout = { http: r.status }; }
+    catch (e) { out.steps.logout = { error: String(e).slice(0, 120) }; }
+  }
+  const gp = out.steps.gp || {};
+  out.status = !out.auth ? 'auth_or_reach_failed' : gp.http === 200 && gp.bytes > 0 && !gp.truncated_at_cap ? 'ok' : 'gp_failed';
+  out.wall_ms = Date.now() - t0;
+  await putJson(env, ST.stateKey, out);
+  return out;
+}
+
 // ---------------------------------------------------------------- dispatch
 
 /** Run a collector so that an unexpected throw is recorded as a 'down' run and never takes the others with it. */
@@ -1102,6 +1174,13 @@ export default {
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
       return json({ now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch }, 200, { 'Cache-Control': 'no-store' });
+    }
+
+    if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'spacetrack') {
+      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+      if (url.searchParams.get('last') === '1') return json({ last: await getJson(env, ST.stateKey) }, 200, { 'Cache-Control': 'no-store' });
+      try { return json(await probeSpacetrack(env, Date.now()), 200, { 'Cache-Control': 'no-store' }); }
+      catch (e) { return json({ error: String(e).slice(0, 200) }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
     if (p[0] === 'admin' && p[1] === 'run') {
