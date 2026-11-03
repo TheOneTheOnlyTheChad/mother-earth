@@ -1,5 +1,10 @@
 # Mother Earth — status (3 Nov 2026 — thread 7, continued)
 
+## 3 Nov 07:47 UTC — satellites refresh check + backlog
+- `/status`: latest satellites run 07:08:01 UTC `down`, stamp page HTTP 522 (2nd of 2 scheduled slots). **Last good snapshot kept serving with its original times:** `retrieved_at` 04:12:23 UTC, `source_stamp` 02:15:09 UTC, `latest/satellites-elements-067d2c65d883.csv`, 16,848 rows, 2,490,850 B, header SHA matches meta. **Next slot 09:07 UTC — thread 8 verifies.**
+- Orbital: quoted-CSV regression test added (`bench-orbital` `594aae2`, `phase1/bench-orbital-unquote.test.mjs`, shown to fail). Saved sample sha256 `fa260337b74dc91e708d58ffbbbf9c1999f51d204c23eb6c24e64fcacb4de1c0` (18,849,484 B, Chad's Downloads). Next orbital step: one bounded Space-Track reachability + authentication check from the hub; no schedule or public change; Chad enters the login as Worker secrets. Today's Satellites toggle stays live until the replacement passes end-to-end checks.
+- **Backlog (outside orbital scope):** ocean plastic — first step one NOAA Marine Microplastics export: check reuse terms, plot dated surface-water samples with units and sampling method. NOAA ocean drifter tracks — separate possible layer (surface water movement).
+
 ## 3 Nov ~07:40 UTC — **Orbital layers: counts and combined benchmark done (VALID, C1–C5 pass). Public view unchanged.**
 Chad's decisions (3 Nov) are in `docs/SPEC-orbital-layers.md` → "Decisions". Measured on one dataset, no second download:
 - **Space-Track GP** (Chad's address-bar request ~07:31 UTC, Space-Track's filter: not decayed + epoch within 10 days): **18,849,484 B, 32,517 objects**, every field quoted, no field contains a comma. By `OBJECT_TYPE`: **PAYLOAD 18,954 · ROCKET BODY 2,205 · DEBRIS 10,124 · UNKNOWN 1,234**. Element ages at download: p50 15.1 h, p90 31.6 h, max 239.6 h. Older elements are filtered upstream by the query, outside these counts.
