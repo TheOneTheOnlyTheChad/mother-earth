@@ -47,12 +47,12 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.3.1';
+const COLLECTOR_VERSION = '0.3.2';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600, orbital: 8 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600, orbital: 8 * 3600, drifters: 4 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_DAY_BOUNDARY_H = 4;             // before 04:00 UTC an empty FIRMS file is the day boundary, not an outage (measured 1 Nov 2026: first rows at 04:00)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
@@ -66,6 +66,7 @@ const URLS = {
   seaice: (h) => `https://noaadata.apps.nsidc.org/NOAA/G02135/${h}/daily/data/${h === 'north' ? 'N' : 'S'}_seaice_extent_daily_v4.0.csv`,
   seaiceClim: (h) => `https://noaadata.apps.nsidc.org/NOAA/G02135/${h}/daily/data/${h === 'north' ? 'N' : 'S'}_seaice_extent_climatology_1981-2010_v4.0.csv`,
   firms: (key, region) => `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${key}/VIIRS_NOAA20_NRT/${region || 'world'}/1`,  // region = "west,south,east,north"
+  drifters: (since) => `https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.csv?platform_code,platform_type,country,time,latitude,longitude,sst&time%3E=${since}&platform_type=~%22DRIFTING%20BUOYS.*%22&orderByMax(%22platform_code,time%22)`,   // latest fix per buoy, last 24 h (CC0)
   forest: 'https://data-api.globalforestwatch.org/dataset/gfw_integrated_alerts/latest/query/json',   // 307 → dated version (daily); fetch follows it
 };
 
@@ -827,6 +828,77 @@ async function hourlyBatch(env, scheduledMs) {
   return out;
 }
 
+// ---------------------------------------------------------------- Drifting buoys — NOAA OSMC (GTS), CC0
+/* Latest reported fix per drifting buoy in the last 24 h, from NOAA's Observing System Monitoring Center ERDDAP
+ * (OSMC_flattened = observations relayed over the WMO GTS; dataset licence CC0 1.0, read 3 Nov 2026).
+ * ONE request (~100 KB, ~1,300 rows measured 3 Nov), server-side orderByMax → one row per buoy.
+ * Validation before anything is published: exact header + units line, 7 fields per row, valid time and position,
+ * unique buoy id, no fix stamped in the future (> 5 min after retrieval — 10 buoys on 3 Nov), at least 200 buoys
+ * and at least 50 % of the previous valid count. A refused row is counted, never drawn. Any failure → writeDown,
+ * and the previous valid snapshot keeps its own times. Storage (Chad, 3 Nov): one current snapshot only —
+ * latest/drifters.json + latest-cells/drifters.json; no snapshots/ or cells/ history for this layer. */
+const DRIFT = { header: 'platform_code,platform_type,country,time,latitude,longitude,sst', units: ',,,UTC,degrees_north,degrees_east,Deg C',
+  minRows: 200, minFrac: 0.5, futureSlackMs: 5 * 60e3, windowMs: 24 * 3600e3, sstMin: -3, sstMax: 40 };
+/** One CSV line → fields, honouring "quoted, fields" (ERDDAP quotes strings that contain commas). Pure. */
+function csvFields(line) {
+  const out = []; let cur = '', q = false;
+  for (let i = 0; i < line.length; i++) { const ch = line[i];
+    if (q) { if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true; else if (ch === ',') { out.push(cur); cur = ''; } else cur += ch; }
+  out.push(cur); return out;
+}
+/** Validate + build the drifters envelope parts from the OSMC CSV. Pure; tested in drifters-hub.test.mjs. */
+function driftBuild(text, retrievedMs, prevCount) {
+  const L = text.replace(/\r/g, '').split('\n'); while (L.length && L[L.length - 1] === '') L.pop();
+  if (L[0] !== DRIFT.header) return { problem: 'unexpected header' };
+  if (L[1] !== DRIFT.units) return { problem: 'unexpected units line' };
+  const refused = { future: 0, bad_time: 0, bad_position: 0, field_count: 0, duplicate: 0, too_old: 0 };
+  const seen = new Set(), rows = [], cells = {}; let sstOut = 0, newest = null;
+  for (let i = 2; i < L.length; i++) {
+    const c = csvFields(L[i]); if (c.length !== 7) { refused.field_count++; continue; }
+    const [id, type, country, time, la, lo, sst] = c; const t = Date.parse(time); const lat = +la, lng = +lo;
+    if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/.test(time) || !Number.isFinite(t)) { refused.bad_time++; continue; }
+    if (t > retrievedMs + DRIFT.futureSlackMs) { refused.future++; continue; }
+    if (t < retrievedMs - DRIFT.windowMs - 3600e3) { refused.too_old++; continue; }
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180 || la === '' || lo === '') { refused.bad_position++; continue; }
+    if (!id || seen.has(id)) { refused.duplicate++; continue; }
+    seen.add(id);
+    let s = sst === '' || sst === 'NaN' ? null : +sst; if (s !== null && (!Number.isFinite(s) || s < DRIFT.sstMin || s > DRIFT.sstMax)) { s = null; sstOut++; }
+    rows.push([id, lat, lng, new Date(t).toISOString(), s, type, country || null]);
+    const cid = cellId(lat, lng); (cells[cid] || (cells[cid] = { count: 0 })).count++;
+    if (!newest || t > newest) newest = t;
+  }
+  if (rows.length < DRIFT.minRows) return { problem: `too few buoys (${rows.length} < ${DRIFT.minRows})`, refused };
+  if (prevCount && rows.length < prevCount * DRIFT.minFrac) return { problem: `buoy count fell to ${rows.length} from ${prevCount} (below ${DRIFT.minFrac * 100} %)`, refused };
+  return { rows, cells, refused, sst_out_of_range: sstOut, newest: newest && new Date(newest).toISOString() };
+}
+async function collectDrifters(env, scheduledMs) {
+  const layer = 'drifters', retrievedMs = Date.now();
+  const since = new Date(retrievedMs - DRIFT.windowMs).toISOString().slice(0, 19) + 'Z';
+  let res;
+  try { res = await fetchText(URLS.drifters(since)); } catch (e) { return writeDown(env, layer, scheduledMs, 'fetch failed: ' + e, 0); }
+  if (!res.ok) return writeDown(env, layer, scheduledMs, 'http ' + res.status, res.status);
+  const prev = await getJson(env, `latest/${layer}.json`);
+  const b = driftBuild(res.text, retrievedMs, prev && prev.records && prev.records.length);
+  if (b.problem) return writeDown(env, layer, scheduledMs, 'refused: ' + b.problem + (b.refused ? ' ' + JSON.stringify(b.refused) : ''), res.status);
+  const grade = 'partial', evidence = 'buoy_positions_only;sparse_platforms;gts_relay';
+  for (const id in b.cells) b.cells[id].coverage = { grade, evidence, observed_fraction: null };
+  const fields = ['id', 'lat', 'lng', 'observed_at', 'sst_c', 'platform_type', 'country'];
+  const e = envelope(layer, scheduledMs, since, b.newest, 'ok', b.cells, fields, b.rows, {
+    coverage_default: { grade, evidence, observed_fraction: null },
+    quantity: 'drifting buoys with a reported fix in the last 24 h (latest fix per buoy)',
+    refused: b.refused, sst_out_of_range: b.sst_out_of_range,
+    source: { name: 'NOAA OSMC ERDDAP — OSMC_flattened (GTS)', url: 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html', licence: 'CC0 1.0' },
+    citation: 'NOAA Observing System Monitoring Center (OSMC), OSMC_flattened observations from the WMO GTS; drifting buoys.',
+    map_layer: true,
+  });
+  const cellsOnly = { ...e, records: undefined, record_fields: undefined, record_format: undefined };
+  const bytes = await putJson(env, `latest/${layer}.json`, e);       // one current snapshot (records)
+  await putJson(env, `latest-cells/${layer}.json`, cellsOnly);        // and its counts — same run, same retrieved_at
+  const r = b.refused; const refusedN = Object.values(r).reduce((a, x) => a + x, 0);
+  await logRun(env, layer, scheduledMs, 'ok', res.status, b.rows.length, bytes, `buoys=${b.rows.length} refused=${refusedN} ${JSON.stringify(r)} newest=${b.newest}`);
+}
+
 // ---------------------------------------------------------------- CelesTrak GP — satellites (MODEL tier: element sets for propagation, not observations)
 
 /* CelesTrak "active" GP element sets (OMM-keyword CSV). The hub stores the file as received and validated; the page
@@ -1069,7 +1141,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H };
+export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1165,15 +1237,17 @@ const JOBS = {
     return f + '; ' + o;
   },
   orbital: async (env, ms) => guarded(env, 'orbital', ms, (e, m) => collectOrbital(e, m, true)),   // manual: /admin/run/orbital (same guards)
-  satellites: async (env, ms) => guarded(env, 'satellites', ms, collectSatellites),   // manual: /admin/run/satellites (same stamp gate)
+  satellites: async (env, ms) => guarded(env, 'satellites', ms, collectSatellites),
+  drifters: async (env, ms) => guarded(env, 'drifters', ms, collectDrifters),   // manual: /admin/run/drifters (no gate: one ~100 KB request)   // manual: /admin/run/satellites (same stamp gate)
   hourly: async (env, ms, manual) => {
     const k = await guarded(env, 'swpc', ms, collectSwpc);          // Kp is a 3-hourly product; hourly matches NWS's "know your refresh frequency" (REGISTER.md)
     const c = await guarded(env, 'co2', ms, collectCo2);
     const hr = new Date(ms).getUTCHours();
     const i = (manual || hr % 6 === 3) ? await guarded(env, 'seaice', ms, collectSeaIce) : 'seaice:skipped (runs 03/09/15/21 UTC)';   // NSIDC updates once a day
     const s = env.SATELLITES_ENABLED !== '1' ? 'satellites:not scheduled (SATELLITES_ENABLED unset)' : (!manual && hr % 2 === 1) ? await guarded(env, 'satellites', ms, collectSatellites) : 'satellites:skipped (odd UTC hours only)';
+    const d = env.DRIFTERS_ENABLED !== '1' ? 'drifters:not scheduled (DRIFTERS_ENABLED unset)' : await guarded(env, 'drifters', ms, collectDrifters);
     const b = await hourlyBatch(env, ms);
-    return { swpc: k, co2: c, seaice: i, satellites: s, batch: b };
+    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, batch: b };
   },
 };
 
@@ -1188,7 +1262,7 @@ function jobForCron(cron) {
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest', 'satellites', 'orbital'];   // GET-readable; ships/lightning arrive via /ingest (D11)
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest', 'satellites', 'orbital', 'drifters'];   // GET-readable; ships/lightning arrive via /ingest (D11)
 const INGEST_LAYERS = ['mock', 'opensky', 'ships', 'lightning'];   // D11: external collectors (Mac/Pi) publish these through /ingest
 const INGEST_MAX_BYTES = 5 * 1024 * 1024;
 
