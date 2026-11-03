@@ -1,5 +1,15 @@
 # Mother Earth — status (3 Nov 2026 — thread 8)
 
+## 3 Nov 13:43 UTC — **first SCHEDULED orbital run: OK end to end** (hub 0.3.0)
+- Invocation: cron `11,41 * * * *`, 13:41 tick (odd hour), event logged 13:42:36 UTC; log line `forest forest:ran; orbital:ran`; outcome ok. **Worker CPU 173 ms for the whole invocation, wall 58,788 ms** — forest (6 GFW cells, ~50 s waiting) and orbital share it, so orbital's share is not separable from this log; consistent with the private build test (170–237 ms). Orbital started 13:42:31 (after forest's sweep), inside the off-peak window.
+- **Served snapshot:** `/snapshot/orbital` retrieved_at **2026-11-03T13:42:31.943Z**; `latest/orbital-elements-5b2aa04c8025.csv`, **32,509 objects**, 6,206,440 B (from 7,010,484 B upstream); **served-body sha256 = `X-Elements-SHA256` = meta sha256** (`5b2aa04c…`); header = 17 propagation columns + CLASS; 32,509 data lines.
+- **Counts:** payload (status unavailable) 18,954 · rocket body 2,205 · debris 10,118 · unknown type 1,232 (counted, not drawn). Completeness recorded **unverified**; payload status recorded **pending**.
+- `/status` orbital row: ok, 200, `published 32509 objects …`. Exactly one current orbital CSV.
+- **Risk noted:** orbital waits for the forest sweep in the same tick; a forest sweep longer than ~9 min would push orbital past minute 50 and the off-peak guard would refuse that slot (recorded as down, last good kept). Measured sweeps ~1 min; watch.
+- **Satellites (CelesTrak) recovered on its own:** the 13:07 slot succeeded — 16,844 element sets, 2,507,227 B, CelesTrak stamp 12:14:33, retrieved 13:08:06, new file `latest/satellites-elements-4dfa12d3161d.csv`. Four scheduled attempts: 522 × 3 (05:08, 07:08, 09:08), ok × 1 (13:08; 11:08 not checked). Cause of the 522s still not established. Satellites toggle unchanged and live.
+- Next: orbital renderer + browser tests on `orbital-rc` (thread 9), then Chad's go to replace Satellites.
+
+
 ## 3 Nov ~12:30 UTC — Workers Paid on; orbital job wired (hub 0.3.0), first scheduled slot 13:41 UTC
 - **Workers Paid enabled by Chad** — confirmed from the account's subscriptions API: "Workers Paid", $5/month, state Paid (also listed: R2 Paid $0, Images Stream Basic $0). Crons unchanged: `11,41 * * * *`, `*/15`, `*/5`, `7 * * * *`.
 - **Hub 0.3.0 deployed** (`1646bbf`, worker.js sha256 `8c4ddf06…` matched, content-only API, HTTP 200, 12:29 UTC). **`ORBITAL_ENABLED=1` added** (plain text, Production) through the Settings form; all bindings intact (12 incl. SATELLITES_ENABLED=1 and the two Space-Track secrets).

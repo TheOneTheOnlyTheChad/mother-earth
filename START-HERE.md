@@ -6,7 +6,7 @@ Written 31 Oct 2026 at the end of build day one; §3–§5 revised in thread 2 (
 One browser globe showing the latest observations of the planet from open live feeds. The promise, verbatim and on the page: **"See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage."** Build spec is SPEC-v0.3 with deviations D1–D14 logged in STATUS.md. Phase 1 is live.
 
 - Page: https://theonetheonlythechad.github.io/mother-earth/ (GitHub Pages, repo root `index.html`). **Pushing `main` publishes it** — unreleased page work lives on a branch (e.g. `aircraft-rc`) until Chad approves.
-- Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `/admin/run/<job>?key=ADMIN_KEY`
+- Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `/elements/satellites`, `/elements/orbital`, `/admin/run/<job>?key=ADMIN_KEY` (Workers Paid since 3 Nov 2026)
 - Repo: https://github.com/TheOneTheOnlyTheChad/mother-earth — push straight to `main` (no branches unless there is a reason; say the reason and let Chad decide)
 - Layers running: usgs (quakes), swpc (Kp, hourly), firms (fires), co2 (NOAA GML), seaice (NSIDC), **ships** (aisstream via the Mac: launchd job `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples ~every 30 min while awake); `mock` = hidden test layer. Parked: opensky — gated off by `OPENSKY_ENABLED` (unset), minute trigger deleted. R2 lifecycle rules delete `raw/ snapshots/ cells/` after 2 days.
 
@@ -59,6 +59,13 @@ Copy to the Mac: the folder `~/Documents/Mother Earth` must be granted each thre
 Bump `COLLECTOR_VERSION` on every deploy. Jobs: five, minute, firms, forest, hourly (hourly = co2 + seaice-gated + D1 aggregation; admin runs pass `manual=true`). A file over ~50 KB is typed in TWO `type` calls (split at a line boundary; the second call continues at the cursor) — 0.2.0 (71 KB) went in as 45.6 k + 25.0 k chars with no timeout error.
 D1 console: dashboard → D1 → mother-earth → Console; Chad or Claude runs `CREATE TABLE` statements there (schema.sql holds them).
 Metrics: `…/workers/services/view/mother-earth/production/metrics` — read with `get_page_text`. Free plan: 10 ms CPU soft limit per invocation; measured medians ~1 ms; worst offenders were whole-file parses (fixed by `tail()`).
+
+## 4a. Measuring Worker CPU and cleaning R2 (added thread 8, 3 Nov 2026)
+- **Per-invocation CPU is readable** (invocation logs are on): from a `dash.cloudflare.com` tab, `POST /api/v4/accounts/<acct>/workers/observability/telemetry/query` with header `x-atok: window.bootstrap.atok` and body `{queryId:'adhoc', timeframe:{from,to}, view:'events', limit, parameters:{filters:[{key:'$workers.scriptName',operation:'eq',type:'string',value:'mother-earth'}]}}`. Each `cf-worker-event` carries `$workers.cpuTimeMs`, `wallTimeMs`, `outcome`, `eventType`, `event.cron`. Events take ~20 s to appear. A cron invocation runs every job of that tick, so its CPU is shared (forest + orbital on the :41 odd-hour tick).
+- **Plan:** Workers Paid ($5/month) since 3 Nov — read from `GET /api/v4/accounts/<acct>/subscriptions`. Paid CPU limits: 30 s per request (default), 15 min for crons at ≥ 1-hour intervals, 30 s below.
+- **R2 objects via the dashboard session:** list `GET …/r2/buckets/mother-earth/objects?prefix=…`, delete `DELETE …/r2/buckets/mother-earth/objects/<url-encoded key>` (only when Chad asked for it, e.g. a private staging file).
+- **Space-Track:** the pane's sign-in does not survive a Mac restart; Chad signs in again. API docs (REST predicates, operators) are only visible signed in.
+- Wait timers: a background `sleep` defaults to a 30-min limit — pass a longer `timeout` for longer waits.
 
 ## 5. Browser pane facts
 - **The browser pane renders only while it is visible in the Claude app.** Hidden (side panel showing something else, or Chad in another app) = keystrokes still land but screenshots freeze or time out; `tabs_context` says "hidden". Ask Chad to show it (Cmd+Shift+B) before any deploy verification.

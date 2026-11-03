@@ -68,8 +68,8 @@ Chad sees it as the first page of something broader — a way for people to see 
 | Ships | aisstream.io via Chad's Mac | live, sampled ~30 min |
 | Forest disturbance | Global Forest Watch integrated alerts (CC BY 4.0) | live |
 | Day/night | computed (no source) | live, optional |
-| Satellites | CelesTrak "active" (16,848) | live toggle, off by default; refresh failing (CelesTrak 522 to Cloudflare), last good file 3 Nov 04:12 UTC served with its time |
-| Orbital (replaces Satellites) | Space-Track GP (Chad's account) | hub job live, page panel on `orbital-rc`, not public |
+| Satellites | CelesTrak "active" (~16,850) | live toggle, off by default; CelesTrak refresh intermittent (522 × 3, then ok at 13:08 UTC 3 Nov); failures keep the last good file with its time |
+| Orbital (replaces Satellites) | Space-Track GP (Chad's account) | hub job live and verified (first scheduled run 3 Nov 13:41 ok); page panel on `orbital-rc`, not public |
 | Aircraft | OpenSky | built on `aircraft-rc`, not public — Chad is checking OpenSky's wording (only record: ticket #837506 — hobbyist use within credits; a public site must also feed; no cloud whitelisting) |
 
 ### 7. Orbital decisions (3 Nov 2026)
@@ -88,12 +88,12 @@ Chad sees it as the first page of something broader — a way for people to see 
 - A test suite must be shown to fail on a deliberate break before its green result counts.
 - Cost: Workers Paid is accepted; avoid material new load without naming the trigger. R2 and D1 are within free allowances (as of 3 Nov). A spending cap is not configured/verified.
 
-### 9. Checkpoint — 3 Nov 2026, ~13:15 UTC (replace from STATUS at each handover)
-- Hub 0.3.0 deployed with `ORBITAL_ENABLED=1`. First scheduled orbital run due 13:41 UTC; result to be added here from STATUS.
+### 9. Checkpoint — 3 Nov 2026, 13:45 UTC (replace from STATUS at each handover)
+- Hub 0.3.0 deployed with `ORBITAL_ENABLED=1`. **First scheduled orbital run (13:41 tick) OK end to end:** served snapshot retrieved 13:42:31 UTC, 32,509 objects (payload 18,954 · rocket body 2,205 · debris 10,118 · unknown 1,232), 6.2 MB, served file checksum = published checksum. Invocation CPU 173 ms, shared with the forest job in the same tick (orbital's share not separable).
 - Private tests (one sample each): untrimmed 18.85 MB → fetch+stage 19 ms CPU, build 170 ms; trimmed 7.01 MB → fetch+stage 17 ms, build 237 ms. Same 32,512 objects (payload 18,954 · rocket body 2,205 · debris 10,121 · unknown 1,232) and same 6.2 MB output. Trimming cut upstream bytes 63 %; no build-CPU improvement established.
 - Tests: orbital collector 13/13 (synthetic + real-shaped), probe 11/11, panel logic on `orbital-rc` 32/32 — each shown to fail on deliberate breaks. Quoted-CSV regression test kept.
-- Satellites toggle still live on the 04:12 UTC file (three scheduled CelesTrak refreshes refused with 522).
-- Next: verify the scheduled run (CPU, counts, served time, checksum) → orbital renderer + browser tests on `orbital-rc` → Chad's go to replace Satellites.
+- Satellites toggle still live; CelesTrak refused three scheduled refreshes with 522 (05:08–09:08 UTC) then succeeded at 13:08 UTC (16,844 objects). Cause of the 522s not established.
+- Next: orbital renderer + browser tests on `orbital-rc` (each toggle alone, combinations, all on, all off, fresh load off) against the real file → Chad's go to replace Satellites.
 
 ### 10. Open items outside orbital
 - **Ships:** hourly rollup recorded "absent 0/2" for hours whose samples were received (found 1 Nov; the two hours were repaired by hand). Reproduce with the affected hours' records before changing comparison logic.
