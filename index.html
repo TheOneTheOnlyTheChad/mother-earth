@@ -759,7 +759,7 @@ const nextFrames = n => new Promise(res => { const step = k => k ? requestAnimat
 // larger files are written in place without rebuilding.
 async function satCreateLayer(rows) {
   const capacity = Math.ceil(rows * (1 + SATC.CAPACITY_HEADROOM));
-  const filler = Array.from({ length: capacity }, () => ({ lat: 0, lng: 0, alt: 0 }));
+  const filler = Array.from({ length: capacity }, () => ({ lat: 0, lng: 0, alt: -0.9 }));   // inside the globe (occluded) until the first real positions land
   globe.particlesList(d => d).particleLat('lat').particleLng('lng').particleAltitude('alt')
     .particlesSize(SATC.MARKER_PX).particlesSizeAttenuation(false).particlesColor(() => SATC.COLOUR)
     .particlesData([filler]);
