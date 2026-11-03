@@ -47,7 +47,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.3.4';
+const COLLECTOR_VERSION = '0.3.5';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -963,6 +963,96 @@ async function probeShips(env, nowMs, windowS) {
   return out;
 }
 
+// ---------------------------------------------------------------- Ships — cloud FALLBACK sample (0.3.5)
+/* Chad, 3 Nov 2026: the home Mac stays the primary ships collector; the hub samples ONLY when no Mac sample has arrived
+ * recently (Mac asleep, off, away). Rides the every-15-min FIRMS tick. Gates, all before connecting: SHIPS_FALLBACK=1 and
+ * AISSTREAM_KEY set; latest ships sample older than SF.macStaleMs; no fallback attempt in the last SF.minGapMs (claimed
+ * first). One 60 s listen, same subscription and envelope shape as collector-mac, so the page and the hourly
+ * aggregation treat it like any other sample — but `collected_by` says it was the cloud hub, and the page says so.
+ * Measured 3 Nov 2026 (one probe, 17:45 UTC): the cloud connection heard 1,873 vessels in 60 s against the Mac's
+ * 3,408 at 17:19 — a difference that is stated on the card, not hidden. A Mac upload landing during the listen wins:
+ * the hub's sample is archived only, never published over a newer one. */
+const SF = { macStaleMs: 40 * 60e3, minGapMs: 25 * 60e3, stateKey: 'state/ships-fallback.json', windowS: 60, url: 'wss://stream.aisstream.io/v0/stream',
+  CLASS: { PositionReport: 'A', StandardClassBPositionReport: 'B', ExtendedClassBPositionReport: 'B' } };
+async function aisListen(env, windowS) {
+  const t0 = Date.now(); const r = await fetch('https://stream.aisstream.io/v0/stream', { headers: { Upgrade: 'websocket', 'User-Agent': UA } });
+  const ws = r.webSocket; if (!ws) throw new Error('no websocket (HTTP ' + r.status + ')');
+  ws.accept();
+  const dec = new TextDecoder(); const vessels = new Map(); const pending = new Set();
+  let messages = 0, parseErrors = 0, handlerErrors = 0, confirmed = false, connectedAt = Date.now(), lastMsg = null, gapS = 0, closeInfo = null, sourceError = null, noSourceTime = 0, olderIgnored = 0;
+  const toText = async d => typeof d === 'string' ? d : d instanceof ArrayBuffer ? dec.decode(new Uint8Array(d)) : ArrayBuffer.isView(d) ? dec.decode(new Uint8Array(d.buffer, d.byteOffset, d.byteLength)) : d && typeof d.arrayBuffer === 'function' ? dec.decode(new Uint8Array(await d.arrayBuffer())) : String(d);
+  const onFrame = async ev => {
+    const txt = await toText(ev.data); let m; try { m = JSON.parse(txt); } catch (_) { parseErrors++; return; }
+    if (m.MessageType === 'SubscriptionConfirmation') { confirmed = true; return; }
+    if (m.error) { sourceError = String(m.error).slice(0, 200); return; }
+    const cls = SF.CLASS[m.MessageType]; if (!cls) return;
+    const now = Date.now(); if (lastMsg && now - lastMsg > 10e3) gapS += (now - lastMsg) / 1000; lastMsg = now; messages++;
+    const md = m.MetaData || {}; const pr = (m.Message || {})[m.MessageType] || {};
+    const lat = Number(pr.Latitude ?? md.Latitude ?? md.latitude), lng = Number(pr.Longitude ?? md.Longitude ?? md.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return;
+    const mmsi = String(md.MMSI ?? pr.UserID ?? ''); if (!mmsi) return;
+    const tUtc = md.time_utc ? new Date(String(md.time_utc).replace(' +0000 UTC', 'Z').replace(' ', 'T')) : null;
+    const observedAt = tUtc && !isNaN(tUtc) ? tUtc.toISOString() : null; if (!observedAt) noSourceTime++;
+    const prev = vessels.get(mmsi); if (prev && prev[3] && observedAt && Date.parse(observedAt) < Date.parse(prev[3])) { olderIgnored++; return; }
+    vessels.set(mmsi, [mmsi, lat, lng, observedAt, nowIso(), pr.Sog ?? null, pr.Cog ?? null, pr.TrueHeading ?? null, pr.NavigationalStatus ?? null, cls, String(md.ShipName || '').trim().slice(0, 40)]);
+  };
+  await new Promise(resolve => {
+    const done = () => { clearTimeout(timer); clearTimeout(hard); resolve(); };
+    const timer = setTimeout(() => { try { ws.close(1000, 'window done'); } catch (_) {} done(); }, windowS * 1000);
+    const hard = setTimeout(() => { try { ws.close(4000, 'hard stop'); } catch (_) {} done(); }, (windowS + 15) * 1000);
+    ws.addEventListener('message', ev => { const p = onFrame(ev).catch(() => { handlerErrors++; }); pending.add(p); p.finally(() => pending.delete(p)); });
+    ws.addEventListener('close', ev => { closeInfo = { code: ev.code, reason: String(ev.reason || '').slice(0, 120) }; done(); });
+    ws.send(JSON.stringify({ APIKey: env.AISSTREAM_KEY, BoundingBoxes: [[[-90, -180], [90, 180]]], FilterMessageTypes: Object.keys(SF.CLASS) }));
+  });
+  await Promise.allSettled([...pending]);
+  const end = Date.now(); if (lastMsg && end - lastMsg > 10e3) gapS += (end - lastMsg) / 1000;
+  const socketS = (end - connectedAt) / 1000;
+  return { rows: [...vessels.values()], messages, parseErrors, handlerErrors, confirmed, socketS, gapS, wallS: (end - t0) / 1000, closeInfo, sourceError, noSourceTime, olderIgnored, upgradeStatus: r.status };
+}
+async function collectShipsFallback(env, scheduledMs) {
+  if (env.SHIPS_FALLBACK !== '1') return 'ships-fallback:off (SHIPS_FALLBACK unset)';
+  if (!env.AISSTREAM_KEY) return 'ships-fallback:off (AISSTREAM_KEY unset)';
+  const now = Date.now(); const latest = await getJson(env, 'latest/ships.json');
+  const ageMs = latest && latest.retrieved_at ? now - Date.parse(latest.retrieved_at) : Infinity;
+  if (ageMs < SF.macStaleMs) return `ships-fallback:not needed (latest sample ${Math.round(ageMs / 60e3)} min old, by ${latest.collected_by || latest.collector_version || 'unknown'})`;
+  const st = await getJson(env, SF.stateKey);
+  if (st && st.started_at && now - Date.parse(st.started_at) < SF.minGapMs) return 'ships-fallback:waiting (last attempt ' + st.started_at + ')';
+  await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'claimed', latest_age_min: Number.isFinite(ageMs) ? Math.round(ageMs / 60e3) : null });
+  const layer = 'ships';
+  let L;
+  try { L = await aisListen(env, SF.windowS); }
+  catch (e) { await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'down', reason: String(e).slice(0, 160) }); await writeDown(env, layer, scheduledMs, 'cloud fallback: ' + String(e).slice(0, 160), 0); return 'ships-fallback:down'; }
+  const flowingS = Math.max(0, L.socketS - L.gapS), upFrac = Math.max(0, Math.min(1, flowingS / SF.windowS));
+  if (!L.confirmed || !L.messages) { await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'down', reason: L.sourceError || 'no messages', close: L.closeInfo }); await writeDown(env, layer, scheduledMs, 'cloud fallback: ' + (L.sourceError || 'no subscription confirmation or no messages'), L.upgradeStatus); return 'ships-fallback:down'; }
+  const overlong = L.wallS > 1.25 * SF.windowS;
+  const status = upFrac >= 0.9 && !overlong ? 'ok' : 'degraded';
+  const fields = ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'];
+  const cov = { grade: 'partial', evidence: 'messages_flowing_inferred_from_arrival_gaps;not_a_measure_of_reception;not_geographic_coverage;receipt_history_pending;terrestrial_ais_only;cloud_fallback_connection', observed_fraction: upFrac };
+  const cells = {}; for (const r of L.rows) { const id = cellId(r[1], r[2]); (cells[id] || (cells[id] = { count: 0, coverage: { ...cov } })).count++; }
+  const rowsA = L.rows.filter(r => r[9] === 'A').length;
+  const e = envelope(layer, scheduledMs, new Date(now).toISOString(), nowIso(), status, cells, fields, L.rows, {
+    coverage_default: cov,
+    quantity: `vessel identities (MMSI) with a Class A or B position report received during a ${SF.windowS} s AIS sample, per cell; latest received position per vessel — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell; positions between samples unknown`,
+    collected_by: 'cloud hub (fallback: no home sample in the last 40 min)',
+    scope: 'world', window_s: SF.windowS, socket_connected_s: Math.round(L.socketS * 10) / 10, message_gap_s: Math.round(L.gapS * 10) / 10,
+    elapsed_wall_s: Math.round(L.wallS * 10) / 10, messages_flowing_s: Math.round(flowingS * 10) / 10, connection_fraction_of_sample: upFrac,
+    messages: L.messages, class_a: rowsA, class_b: L.rows.length - rowsA, records_without_source_time: L.noSourceTime, older_reports_ignored: L.olderIgnored,
+    parse_errors: L.parseErrors, handler_errors: L.handlerErrors, close: L.closeInfo, overlong_sample: overlong,
+    sampling: 'cloud fallback: one 60 s sample when no home sample has arrived for 40 min; at most one attempt per 25 min',
+    stale_after_s: 3 * 3600, citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' });
+  e.received_at = nowIso(); e.ingested_from = 'hub ' + COLLECTOR_VERSION;
+  const cur = await getJson(env, 'latest/ships.json');
+  let bytes, published = true;
+  if (cur && cur.retrieved_at && Date.parse(cur.retrieved_at) > Date.parse(e.retrieved_at)) {   // a Mac sample landed meanwhile: it wins
+    const stamp = isoMinute(scheduledMs); published = false;
+    bytes = await putJson(env, `snapshots/${layer}/${stamp}.json`, e);
+    await putJson(env, `cells/${layer}/${stamp}.json`, { ...e, records: undefined, record_fields: undefined, record_format: undefined });
+  } else bytes = await writeSnapshot(env, layer, scheduledMs, e);
+  await logRun(env, layer, scheduledMs, status, 200, L.rows.length, bytes, `cloud fallback${published ? '' : ' (archive only: newer home sample)'} messages=${L.messages} vessels=${L.rows.length} flowing=${flowingS.toFixed(1)}s`);
+  await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status, published, vessels: L.rows.length, messages: L.messages });
+  return `ships-fallback:${status} (${L.rows.length} vessels${published ? '' : ', archive only'})`;
+}
+
 // ---------------------------------------------------------------- CelesTrak GP — satellites (MODEL tier: element sets for propagation, not observations)
 
 /* CelesTrak "active" GP element sets (OMM-keyword CSV). The hub stores the file as received and validated; the page
@@ -1293,7 +1383,8 @@ const JOBS = {
     env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky', ms, collectOpenskyWorld) : 'opensky:parked',
   ])).join('; '),
   minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
-  firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
+  firms: async (env, ms) => { const f = await guarded(env, 'firms', ms, collectFirms); let s; try { s = await collectShipsFallback(env, ms); } catch (e) { s = 'ships-fallback:threw ' + String(e).slice(0, 80); } return f + '; ' + s; },
+  'ships-fallback': async (env, ms) => collectShipsFallback(env, ms),   // manual: /admin/run/ships-fallback (same gates)
   forest: async (env, ms) => {
     const f = await guarded(env, 'forest', ms, collectForest);
     const d = new Date(ms);   // orbital rides the :41 tick in odd UTC hours (two-hourly, off-peak for Space-Track)

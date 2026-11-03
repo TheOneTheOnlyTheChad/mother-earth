@@ -10,6 +10,9 @@ const BASELINE_SINCE = '30 Oct 2026';
 const IMG_DAY = ME.IMG_DAY = new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10);
 const IMG_LABEL = ME.IMG_LABEL = new Date(IMG_DAY).toUTCString().slice(5, 16);
 // Operating mode of the home collector. Change only when a schedule has been installed AND verified from logs (brief §5).
+/* Cloud fallback (hub 0.3.5, 3 Nov 2026): taken only when no home sample arrived for 40 min. Measured once so far: the cloud
+ * connection heard 1,873 vessels in 60 s vs the home collector's 3,408 — stated, never hidden; update after more samples. */
+ME.SHIPS_CLOUD_TEXT = 'this sample was taken by the cloud hub because no home sample arrived in the last 40 min — in our tests the cloud connection hears fewer vessels than the home collector (1,873 vs 3,408 on 3 Nov), so a lower count here is not fewer ships';
 const SHIPS_MODE = ME.SHIPS_MODE = { text: 'about every 30 min while the home Mac is awake and online (launchd; verified by two unattended samples, 1 Nov 2026) — gaps when it sleeps', verified_schedule: true };   // flip back to false if the schedule is removed
 
 const $ = ME.$ = id => document.getElementById(id);
@@ -286,7 +289,7 @@ ME.readings = function () {
   const lastCount = s ? ME.total(s) : null;
   R.ships = { label: LABEL.ships, source: SOURCE.ships, fresh: fs, value: fs.grade !== 'unknown' ? lastCount : null, lastSample: lastCount, unit: `vessel identities in a ${s ? s.window_s : 60} s AIS sample`,
     sampleEnd: s && s.window_end, observed: s ? `sample ended ${hhmm(s.window_end)}; ${s.class_a} Class A + ${s.class_b} Class B; socket connected ${num(s.socket_connected_s ?? s.socket_up_s, 0)} s of ${s.window_s} s` : '', retrieved: s && s.retrieved_at,
-    mode: SHIPS_MODE.text, coverage: 'terrestrial AIS only — a cell with no vessels is not an empty sea; positions between samples unknown', quantity: s && s.quantity,
+    mode: s && /cloud/.test(s.collected_by || '') ? ME.SHIPS_CLOUD_TEXT : SHIPS_MODE.text, coverage: 'terrestrial AIS only — a cell with no vessels is not an empty sea; positions between samples unknown', quantity: s && s.quantity,
     window: s ? `${s.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (s.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours yet — baseline accumulates from first sample (31 Oct 2026)` };
   const fo = state.forest, ffo = ME.freshness('forest');
   const fsum = fo ? Object.values(fo.cells || {}).reduce((a, c) => { a.n += c.count || 0; a.hi += (c.confidence && c.confidence.highest) || 0; a.cells++; return a; }, { n: 0, hi: 0, cells: 0 }) : { n: 0, hi: 0, cells: 0 };
