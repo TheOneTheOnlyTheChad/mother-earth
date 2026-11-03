@@ -366,6 +366,75 @@ ME.rules = function (R) {
   return rows;
 };
 
+// ---------- orbital layers (Space-Track GP via the hub): MODEL tier — positions computed, never observed.
+// Pure helpers only (thread 8, 3 Nov 2026); drawing reuses the satellites design. Object TYPE (Space-Track) and payload
+// operational STATUS (CelesTrak, pending) are separate facts: a payload is shown as a payload while its status is unknown.
+ME.ORB = {
+  HEADER: 'OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT,CLASS',
+  PAYLOAD_CLASSES: ['active', 'inactive', 'payload_status_unknown', 'payload_unmatched', 'payload_status_unavailable'],
+  // While payload status is pending, toggles follow object type only. When the hub supplies status, the spec's toggles
+  // apply (Active · Inactive & rocket bodies · Debris) and payloads without a usable status are counted, not drawn.
+  GROUPS_BY_TYPE: [
+    { id: 'payload', label: 'Payloads', classes: ['active', 'inactive', 'payload_status_unknown', 'payload_unmatched', 'payload_status_unavailable'] },
+    { id: 'rocket_body', label: 'Rocket bodies', classes: ['rocket_body'] },
+    { id: 'debris', label: 'Debris', classes: ['debris'] },
+  ],
+  GROUPS_WITH_STATUS: [
+    { id: 'active', label: 'Active satellites', classes: ['active'] },
+    { id: 'inactive_rb', label: 'Inactive satellites & rocket bodies', classes: ['inactive', 'rocket_body'] },
+    { id: 'debris', label: 'Orbital debris', classes: ['debris'] },
+  ],
+  NOT_DRAWN_BY_TYPE: ['unknown_type'],
+  NOT_DRAWN_WITH_STATUS: ['unknown_type', 'payload_status_unknown', 'payload_unmatched', 'payload_status_unavailable'],
+};
+ME.orbStatusPending = meta => !meta || !meta.classification || /^pending/.test(meta.classification.payload_status || 'pending');
+ME.orbGroups = meta => ME.orbStatusPending(meta) ? ME.ORB.GROUPS_BY_TYPE : ME.ORB.GROUPS_WITH_STATUS;
+ME.orbNotDrawn = meta => ME.orbStatusPending(meta) ? ME.ORB.NOT_DRAWN_BY_TYPE : ME.ORB.NOT_DRAWN_WITH_STATUS;
+// Which toggle (group id) draws an object of this class, or null if it is counted but never drawn.
+ME.orbGroupOf = (cls, meta) => { for (const g of ME.orbGroups(meta)) if (g.classes.includes(cls)) return g.id; return null; };
+
+ME.orbMetaProblem = meta => {
+  if (!meta || meta.layer !== 'orbital') return 'the hub has no orbital element file yet';
+  if (meta.source_status !== 'ok') return 'the hub reports the orbital file as ' + (meta.source_status || 'unknown');
+  const e = meta.elements || {};
+  if (!(e.rows > 0) || !/^[0-9a-f]{64}$/.test(e.sha256 || '') || !Array.isArray(e.columns) || e.columns.join(',') !== ME.ORB.HEADER) return 'the orbital file description is incomplete or in an unexpected format';
+  if (!meta.retrieved_at || !Date.parse(meta.retrieved_at)) return 'the orbital file has no retrieval time';
+  if (!meta.counts || typeof meta.counts !== 'object') return 'the orbital file has no counts';
+  const sum = Object.values(meta.counts).reduce((a, b) => a + (b || 0), 0);
+  if (sum !== e.rows) return 'the orbital file counts do not add up to its rows';
+  return null;
+};
+
+/* Panel text from what the page knows: meta = last good /snapshot/orbital (or null); lastRun = the hub's latest 'orbital'
+*  row from /status (or null); now = ms. Freshness states: none (no file yet) · ok · refresh failed (previous file kept,
+*  shown with its ORIGINAL time) · stale (older than stale_after_s). Never invents a time. */
+ME.orbPanel = (meta, lastRun, now) => {
+  const n = x => (x || 0).toLocaleString('en-US');
+  const t = iso => iso.replace('T', ' ').slice(0, 16) + ' UTC';
+  const problem = meta ? ME.orbMetaProblem(meta) : 'the hub has no orbital element file yet';
+  const failedRun = lastRun && lastRun.status !== 'ok' && (!meta || Date.parse(lastRun.started_at) > Date.parse(meta.retrieved_at)) ? lastRun : null;
+  if (problem) return { state: 'none', available: false,
+    headline: 'Orbital layers not available: ' + problem + '.',
+    lines: failedRun ? [`Latest hub attempt ${t(failedRun.started_at)}: ${failedRun.status} (${(failedRun.note || '').slice(0, 120)}).`] : [], groups: [] };
+  const ageS = (now - Date.parse(meta.retrieved_at)) / 1000, stale = ageS > (meta.stale_after_s || 8 * 3600);
+  const c = meta.counts, pending = ME.orbStatusPending(meta);
+  const groups = ME.orbGroups(meta).map(g => ({ id: g.id, label: g.label, count: g.classes.reduce((a, k) => a + (c[k] || 0), 0),
+    parts: g.classes.length > 1 && !pending ? g.classes.map(k => ({ cls: k, count: c[k] || 0 })) : null }));
+  const notDrawn = ME.orbNotDrawn(meta).reduce((a, k) => a + (c[k] || 0), 0);
+  const lines = [
+    `Element file retrieved ${t(meta.retrieved_at)} · ${n(meta.elements.rows)} objects · Space-Track.org (not decayed, elements under 10 days old).`,
+    pending ? 'Object type comes from Space-Track. Operational status (active or inactive) is not shown yet: payloads are identified as payloads, and whether each one is working is not established here.'
+            : 'Object type comes from Space-Track; payload operational status from CelesTrak. Missing status is never counted as inactive.',
+    `${n(notDrawn)} object${notDrawn === 1 ? ' is' : 's are'} counted but not drawn (${pending ? 'object type unknown' : 'object type unknown, or payload status unknown or unmatched'}).`,
+    'Completeness unverified: the source gives no row count, so a file cut short between rows could pass our checks.',
+    'Positions computed from published orbital elements — not observed. Markers enlarged for visibility; not to physical scale.',
+  ];
+  let state = 'ok';
+  if (failedRun) { state = 'refresh_failed'; lines.unshift(`Latest refresh ${t(failedRun.started_at)} failed (${failedRun.status}); showing the previous file, retrieved ${t(meta.retrieved_at)}.`); }
+  if (stale) { state = state === 'refresh_failed' ? 'refresh_failed_stale' : 'stale'; lines.unshift(`This element file is ${Math.floor(ageS / 3600)} h old (older than ${Math.round((meta.stale_after_s || 28800) / 3600)} h); positions are computed from it as it stands.`); }
+  return { state, available: true, headline: null, lines, groups };
+};
+
 // ---------- satellites: MODEL tier — positions are COMPUTED by SGP4 from CelesTrak element sets, never observed.
 // Pure helpers live here so they can be tested in Node; the overlay itself is in index.html. Benchmarked design
 // (thread 6/7, bench 1.6.1): propagation in a Web Worker every 2 s, one batched particle layer created once,
