@@ -21,12 +21,13 @@ globalThis.fetch = async (url) => {
     send() { setTimeout(async () => {
       if (mode === 'badkey') { emit('message', { data: new Blob([JSON.stringify({ error: 'Api Key Is Not Valid' })]) }); emit('close', { code: 1008, reason: 'x' }); return; }
       emit('message', { data: new Blob([JSON.stringify({ MessageType: 'SubscriptionConfirmation' })]) });
-      for (let i = 0; i < 40; i++) emit('message', { data: new Blob([JSON.stringify({ MessageType: i % 4 ? 'PositionReport' : 'StandardClassBPositionReport', MetaData: { MMSI: 200000 + (i % 25), latitude: -33 + i * 0.01, longitude: 18, ShipName: 'V' + i, time_utc: '2026-11-03 18:00:0' + (i % 10) + '.0 +0000 UTC' }, Message: { PositionReport: { Sog: 5 } } })]) });
+      for (let i = 0; i < 40; i++) { await new Promise(r => setTimeout(r, 1450)); emit('message', { data: new Blob([JSON.stringify({ MessageType: i % 4 ? 'PositionReport' : 'StandardClassBPositionReport', MetaData: { MMSI: 200000 + (i % 25), latitude: -33 + i * 0.01, longitude: 18, ShipName: 'V' + i, time_utc: '2026-11-03 18:00:0' + (i % 10) + '.0 +0000 UTC' }, Message: { PositionReport: { Sog: 5 } } })]) }); }
       if (onDuring) await onDuring();
     }, 5); } };
   return { status: 101, webSocket: ws };
 };
-let NOW = Date.parse('2026-11-03T22:00:00Z'); const real = Date.now, B = real(); Date.now = () => NOW + (real() - B);
+const RealDate = Date; let NOW = RealDate.parse('2026-11-03T22:00:00Z'); const real = RealDate.now, B = real();
+globalThis.Date = class extends RealDate { constructor(...a) { a.length ? super(...a) : super(NOW + (real() - B)); } static now() { return NOW + (real() - B); } };
 const macSample = (store, isoAt) => store.set('latest/ships.json', JSON.stringify({ layer: 'ships', retrieved_at: isoAt, collector_version: 'mac-0.3.2', source_status: 'ok', records: [] }));
 const run = env => worker.fetch(new Request('https://hub/admin/run/ships-fallback?key=k'), env).then(r => r.json());
 // window is 60 s in production; shorten for the test by patching the clock is not possible for timers, so accept ~60 s per sampling case
