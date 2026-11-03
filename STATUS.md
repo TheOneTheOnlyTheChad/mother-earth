@@ -8,6 +8,7 @@ Verified on the live hub before release (RC files loaded into a github.io page, 
 - `SATELLITES_ENABLED=1` added through the dashboard form (plain text, Production); all 8 previous bindings intact; code still 0.2.2. First scheduled run due 05:07 UTC (odd hours).
 - Not verified: Mac GPU frame time with this exact build (bench measured the same design), phones (Galaxy pending).
 - Satellites and Aircraft are **independent optional layers, both off on a fresh load** (Chad, 3 Nov).
+- **3 Nov ~05:05 UTC: Satellites moved to its own card in the right column** (under Sea ice; was hidden inside the closed Explore panel — Chad couldn't find it). Page `4c974ab`, assets `?v=202611031600`. Public re-check: visible with Explore closed, off on load with 0 requests, on → 16,848 drawn + legend, off → 0 visible, timers stopped, no further propagation. satellites-ui 66/66, terminator-ui 19/19. `aircraft-rc` rebased onto it (`67c98e3`, toggles 25/25).
 
 ## 3 Nov — **Aircraft: release candidate on branch `aircraft-rc` (`80d413f`), NOT public.**
 Chad: aircraft is next, own toggle, off by default, kept off the public site until the exact OpenSky reply is checked against our setup. The **30 Oct ticket #837506 is the only wording on record**: hobbyist use within credits; a public-facing site must additionally feed the network; cloud servers not whitelisted. Public release waits on that check.
