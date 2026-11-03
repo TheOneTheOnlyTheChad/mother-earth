@@ -973,6 +973,78 @@ async function probeSpacetrack(env, nowMs) {
   return out;
 }
 
+// ---------------------------------------------------------------- Orbital (Space-Track GP) — pure parse/validate/classify (offline-tested; NOT wired to any job yet)
+
+/* Input: Space-Track GP CSV (unquoted header, every field quoted, LF line ends, no field contains '","' — measured 3 Nov).
+*  Output: a compact CSV with the 17 CelesTrak GP columns the page already propagates + CLASS, and counts.
+*  Classes (SPEC-orbital-layers): by OBJECT_TYPE first; payloads split by CelesTrak OPS_STATUS_CODE only when a status
+*  map is supplied and fresh, otherwise every payload is 'payload_status_unavailable' (never guessed). Unknown status
+*  never becomes inactive. Truncation that ends on a complete row is NOT detectable from the body (no row count or
+*  Content-Length from Space-Track); the row floors are the only guard against it, and the meta says so. */
+const ORB = {
+  out: ['OBJECT_NAME','OBJECT_ID','EPOCH','MEAN_MOTION','ECCENTRICITY','INCLINATION','RA_OF_ASC_NODE','ARG_OF_PERICENTER','MEAN_ANOMALY','EPHEMERIS_TYPE','CLASSIFICATION_TYPE','NORAD_CAT_ID','ELEMENT_SET_NO','REV_AT_EPOCH','BSTAR','MEAN_MOTION_DOT','MEAN_MOTION_DDOT'],
+  types: { 'PAYLOAD': 1, 'ROCKET BODY': 1, 'DEBRIS': 1, 'UNKNOWN': 1, 'TBA': 1 },
+  active: { '+': 1, 'P': 1, 'B': 1, 'S': 1, 'X': 1 },
+  minRows: 20000, minFractionOfPrevious: 0.9,
+};
+const ORB_CLASSES = ['active', 'inactive', 'rocket_body', 'debris', 'unknown_type', 'payload_status_unknown', 'payload_unmatched', 'payload_status_unavailable'];
+
+function orbClassify(type, status) {   // status: undefined = no map; null = no match in the map; string = code ('' = blank)
+  if (type === 'ROCKET BODY') return 'rocket_body';
+  if (type === 'DEBRIS') return 'debris';
+  if (type !== 'PAYLOAD') return 'unknown_type';
+  if (status === undefined) return 'payload_status_unavailable';
+  if (status === null) return 'payload_unmatched';
+  if (ORB.active[status]) return 'active';
+  if (status === '-') return 'inactive';
+  return 'payload_status_unknown';   // '', '?', 'D' or anything else: counted, never folded into inactive
+}
+
+/** text → { ok, problems, rows, counts, csv }. statusMap: Map<norad string, code> or null. Pure. */
+function orbBuild(text, statusMap, previousRows) {
+  const problems = [];
+  if (typeof text !== 'string' || !text.length) return { ok: false, rows: 0, problems: ['empty body'] };
+  if (!text.endsWith('\n')) problems.push('final line incomplete (no trailing newline)');
+  const nl = text.indexOf('\n');
+  const head = text.slice(0, nl).replace(/\r$/, '').split(',');
+  const col = Object.fromEntries(head.map((h, i) => [h, i]));
+  const need = [...ORB.out, 'OBJECT_TYPE'];
+  const missing = need.filter(h => !(h in col));
+  if (missing.length) return { ok: false, rows: 0, problems: ['header missing ' + missing.join(',')] };
+  const idx = ORB.out.map(h => col[h]), iType = col.OBJECT_TYPE, iNorad = col.NORAD_CAT_ID, iEpoch = col.EPOCH, nf = head.length;
+  const counts = Object.fromEntries(ORB_CLASSES.map(c => [c, 0]));
+  const seen = new Set(); const out = [ORB.out.join(',') + ',CLASS'];
+  let rows = 0, badShape = 0, badEpoch = 0, badType = 0, dup = 0, comma = 0;
+  for (let s = nl + 1; s < text.length; ) {
+    let e = text.indexOf('\n', s); if (e < 0) e = text.length;
+    let line = text.slice(s, e); s = e + 1;
+    if (line.endsWith('\r')) line = line.slice(0, -1);
+    if (!line) continue;
+    rows++;
+    if (line[0] !== '"' || line[line.length - 1] !== '"') { badShape++; continue; }
+    const f = line.slice(1, -1).split('","');
+    if (f.length !== nf) { badShape++; continue; }
+    const type = f[iType], norad = f[iNorad];
+    if (!ORB.types[type]) badType++;
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(f[iEpoch])) badEpoch++;
+    if (seen.has(norad)) dup++; seen.add(norad);
+    const vals = idx.map(i => f[i]);
+    for (const v of vals) if (v.indexOf(',') >= 0) { comma++; break; }
+    const cls = orbClassify(type, statusMap ? (statusMap.has(norad) ? statusMap.get(norad) : null) : undefined);
+    counts[cls]++;
+    out.push(vals.join(',') + ',' + cls);
+  }
+  if (badShape) problems.push(`${badShape} rows not ${nf} quoted fields`);
+  if (badType) problems.push(`${badType} rows with an unexpected OBJECT_TYPE`);
+  if (badEpoch) problems.push(`${badEpoch} rows with a malformed EPOCH`);
+  if (dup) problems.push(`${dup} duplicate NORAD_CAT_ID`);
+  if (comma) problems.push(`${comma} output values contain a comma`);
+  if (rows < ORB.minRows) problems.push(`only ${rows} rows (floor ${ORB.minRows})`);
+  if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
+  return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
+}
+export { orbBuild, orbClassify, ORB_CLASSES };
+
 // ---------------------------------------------------------------- dispatch
 
 /** Run a collector so that an unexpected throw is recorded as a 'down' run and never takes the others with it. */
