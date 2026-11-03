@@ -8,6 +8,7 @@ One browser globe showing the latest observations of the planet from open live f
 - Page: https://theonetheonlythechad.github.io/mother-earth/ (GitHub Pages, repo root `index.html`). **Pushing `main` publishes it** — unreleased page work lives on a branch (e.g. `aircraft-rc`) until Chad approves.
 - Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `/elements/satellites`, `/elements/orbital`, `/admin/run/<job>?key=ADMIN_KEY` (Workers Paid since 3 Nov 2026)
 - Repo: https://github.com/TheOneTheOnlyTheChad/mother-earth — push straight to `main` (no branches unless there is a reason; say the reason and let Chad decide)
+- Orbital (Space-Track via the hub): Payloads · Rocket bodies · Debris toggles on the page since 3 Nov 14:49 UTC; replaced the Satellites card.
 - Layers running: usgs (quakes), swpc (Kp, hourly), firms (fires), co2 (NOAA GML), seaice (NSIDC), **ships** (aisstream via the Mac: launchd job `earth.mother.ships` runs `~/mother-earth/run.sh tick` every minute, samples ~every 30 min while awake); `mock` = hidden test layer. Parked: opensky — gated off by `OPENSKY_ENABLED` (unset), minute trigger deleted. R2 lifecycle rules delete `raw/ snapshots/ cells/` after 2 days.
 
 ## 2. How Chad works (observe these; they are standing)

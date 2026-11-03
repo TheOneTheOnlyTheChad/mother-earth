@@ -2,14 +2,15 @@
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §4a measuring CPU · §5a testing), then this file, then `STATUS.md` (newest first). Not a fresh sandbox: nothing below needs re-investigating.
 
-## 0. State at the end of thread 9 (3 Nov ~14:20 UTC)
-Hub 0.3.0 unchanged; orbital job live (first scheduled run 13:42:31, 32,509 objects, sha `5b2aa04c…`). **Orbital renderer DONE on `orbital-rc` `936528a`** (rebased on main `919c7cb`): Payloads · Rocket bodies · Debris, replaces the Satellites card; browser suite 105/105 and shown to fail on 7 breaks; live check on the real file matched an independent calculation exactly. **Not public. Satellites toggle still live on main.** See STATUS thread 9.
+## 0. State at the end of thread 9 (3 Nov ~14:55 UTC)
+**Orbital layers are PUBLIC** (main `e2d5134`, 14:49 UTC): Payloads · Rocket bodies · Debris, off on load, Satellites card retired, smoke-tested on the live site (STATUS thread 9). Hub 0.3.0 unchanged; orbital job live two-hourly. Payloads mixes working and dead satellites until payload status is decided — Chad accepted that knowingly.
 
 ## 1. Next (Chad's calls first)
-1. Chad looks at the RC (pane tab `seed`, all three on; it only draws while the pane is visible) and decides the **GEO line** (STATUS finding: 968 of 1,310 "above GEO" are within 500 km of GEO height).
-2. On his go: apply the GEO decision on the branch (both orbital and — if he wants — nothing else, since Satellites retires), re-run `orbital-browser.test.cjs`, merge `orbital-rc` → main (publishes; mind the ~30 min Pages lock), retire `satellites-ui.test.cjs`, public smoke test (fresh load 0 requests; each toggle; all off).
-3. After release, later: SATELLITES_ENABLED / the CelesTrak job can stop (his call — schedule change needs his go); payload status source (CelesTrak) still his decision.
-To re-run tests in a new container: `cd /home/claude/spike && npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine`; rebuild the fixture with the builder in STATUS thread 9 (copy committed as `phase1/orbital-fixture.build.mjs`); `python3 -m http.server 8899 --bind 127.0.0.1`.
+1. **GEO line** — 968 of 1,310 objects counted "higher than geostationary orbit, may lie outside the view" are within 500 km of GEO height. Raise the threshold or drop "may lie outside the view". His call.
+2. **CelesTrak satellites job** still runs (`SATELLITES_ENABLED=1`) though nothing reads it — stopping it is a schedule change, his go.
+3. **Payload status** (CelesTrak operational status) — his decision; when adopted, the page switches to Active · Inactive & rocket bodies · Debris on its own (the hub needs the status map).
+4. Then the backlog in STATUS (aircraft check, ships rollup bug, etc.).
+Tests in a new container: `cd /home/claude/spike && npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine`; `node phase1/orbital-fixture.build.mjs` (writes `/home/claude/fixtures/`); `python3 -m http.server 8899 --bind 127.0.0.1` in the clone (check it is still alive before reading a CSS-dependent failure); `node phase1/orbital-browser.test.cjs /home/claude/fixtures`.
 
 ## 2. Measured in thread 8 (keep the distinctions)
 | | bytes | CPU fetch+stage | CPU validate+build |
@@ -35,7 +36,7 @@ To re-run tests in a new container: `cd /home/claude/spike && npm i globe.gl@2.4
 ## 5. Where things are
 | | |
 |---|---|
-| Page | `main` (public). Assets `?v=202611031600`. |
+| Page | `main` `e2d5134` (public, orbital layers). Assets `?v=202611032100`. |
 | Hub | 0.3.0, worker.js sha256 `8c4ddf06…` (`1646bbf`). Bindings: 12 (incl. `ORBITAL_ENABLED=1`, `SATELLITES_ENABLED=1`). Crons unchanged: `11,41`, `*/15`, `*/5`, `7 * * * *`. |
 | Orbital endpoints | `/snapshot/orbital` (meta: counts, classification, validation.completeness, source), `/elements/orbital` (CSV + `X-Elements-SHA256`) |
 | Branches | `orbital-rc` (panel logic, 32/32) · `aircraft-rc` · `bench-orbital` |
