@@ -1,5 +1,14 @@
 # Mother Earth — status (3 Nov 2026 — thread 8)
 
+## 3 Nov 11:40–11:45 UTC — trimmed-column private test (hub 0.2.5, Chad's go)
+- **Field selection verified in Space-Track's signed-in docs** (REST Predicates): `predicates/p1, p2,...` — comma-separated list of predicates to return; their example `…/class/gp/NORAD_CAT_ID/25544,…/predicates/FILE,EPOCH,TLE_LINE1,TLE_LINE2/format/html`. Same page: `metadata/true` (record count) is **ignored for csv**. GP still ≤ 1/hour, random minute off :00/:30. Offline projection of the saved 07:31 file to the 18 columns: 7,012,235 B, identical counts; build ~42 ms warm on the Mac VM.
+- **Deploy:** hub 0.2.5 (`e0ab99f`, sha256 `dd071e21…` matched, content-only, HTTP 200) 10:53 UTC. Query = Space-Track's recommended GP filter + `/predicates/` with the 17 propagation columns + `OBJECT_TYPE`.
+- **Step 1 — fetch into private staging, 11:40:46 UTC:** login 200 (2,187 ms) → one GP request 200 (2,159 ms) → header = **exactly the 18 requested columns, in order** → **7,011,137 B** (vs 18,846,589 B untrimmed, −62.8 %) → staged (R2 put 1,220 ms) → logout 200. **Worker CPU 17 ms**, wall 7,943 ms, ok.
+- **Step 2 — validate + build on the same staged file, 11:41:01 UTC:** valid; **32,512 rows**; payload (status unavailable — no status map) 18,954 · rocket body 2,205 · debris 10,121 · unknown type 1,232 — **identical to the untrimmed 10:40 build**; output **6,206,985 B, byte-for-byte the same size as the untrimmed build's output**. **Worker CPU 237 ms**, wall 1,684 ms, ok, not terminated. One sample each: trimming did **not** reduce build CPU in this sample (170 ms untrimmed vs 237 ms trimmed — same order, run-to-run variance not measured); the build's cost is the per-row work, not the bytes.
+- **Completeness: unverified** (no row count or Content-Length from Space-Track for CSV).
+- **Cleanup:** staging object deleted (1 object, 7,011,137 B before; 0 after); build step 404. Public satellites pointer and all schedules unchanged.
+- **Outcome for Chad's decision:** both steps measured; fetch-and-stage 17–19 ms, validate-and-build 170–237 ms — both above the Free plan's documented 10 ms. Column trimming confirmed usable (all fields present, same counts, same output) and cuts the download 63 %. Chad's stated path if over 10 ms: Workers Paid ($5/month), processing kept in the hub. Awaiting his billing decision; no schedule, no public change.
+
 ## 3 Nov 10:40–10:45 UTC — private Worker test of hub 0.2.4 (Chad's go): fetch+stage and build measured separately
 - **Deploy:** hub 0.2.4 (`3c1a2c4`, sha256 matched, content-only API, HTTP 200) ~10:25 UTC; script version `81bbc660…`. Public pointer and all schedules untouched (satellites still `latest/satellites-elements-067d2c65d883.csv`, retrieved 04:12:23).
 - **Step 1 — Space-Track fetch into private staging, 10:40:36 UTC (off-peak window):** login 200 (1,224 ms) → ONE GP request 200 (3,497 ms, `application/csv`, no Content-Length) → **18,846,589 B** → staged at `staging/spacetrack-gp.csv` (R2 put 2,802 ms) → logout 200. **Worker CPU 19 ms**, wall 9,669 ms, outcome ok. Versus 189 ms CPU for run 2 (which counted lines byte by byte): consistent with the byte loop having been the cost; fetch + store of 18.8 MB ≈ 19 ms.
@@ -7,6 +16,7 @@
 - **Completeness: unverified.** The row checks passed, but Space-Track sends no row count or Content-Length, so a response cut cleanly between rows above the floors would also pass.
 - **Cleanup:** staging object deleted via the R2 API (listed 1 object 18,846,589 B before; 0 after); `/admin/probe/orbital-build` now 404 (nothing staged). `state/spacetrack-probe.json` (the probe's own small result) kept.
 - **For Chad's decision:** fetch+store fits (19 ms); the build as written does not fit 10 ms (170 ms). Levers, unmeasured: request fewer fields from Space-Track (docs need his sign-in to read), build outside the hub's hot path, or Workers Paid. Nothing shipped.
+- **Correction (Chad):** 170 ms every two hours = 2,040 CPU-ms **per day**, ≈ **61,200 CPU-ms per 30-day month** for the build alone (an earlier reply said 2,000 a month — wrong).
 
 ## 3 Nov ~10:40 UTC — orbital build tested offline; hub 0.2.4 ready, NOT deployed
 - GPT's follow-up adopted: 189 ms is the whole probe's CPU; the byte loop is the likely cause, not established — the next Worker run settles it.
