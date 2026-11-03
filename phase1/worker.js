@@ -47,7 +47,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.3.2';
+const COLLECTOR_VERSION = '0.3.3';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -899,6 +899,61 @@ async function collectDrifters(env, scheduledMs) {
   await logRun(env, layer, scheduledMs, 'ok', res.status, b.rows.length, bytes, `buoys=${b.rows.length} refused=${refusedN} ${JSON.stringify(r)} newest=${b.newest}`);
 }
 
+// ---------------------------------------------------------------- Ships from the Worker — PRIVATE probe (0.3.3)
+/* Question (Chad, 3 Nov 2026): on Workers Paid, can the hub take the ships sample itself instead of the Mac?
+ * ONE bounded listen to aisstream.io from the Worker, measured and stored privately: nothing published, no latest/,
+ * no cells/, no page change, not in JOBS, no cron. Same subscription as collector-mac (world box, Class A + B).
+ * Guards before any connection: AISSTREAM_KEY secret set; no earlier probe in the last 10 min (claimed first).
+ * Wall time is bounded by the window + 15 s; CPU is read afterwards from the invocation log. Result (no key) in
+ * state/ships-probe.json, readable with &last=1. The Mac collector keeps running; if both listen at once on one
+ * key, whether aisstream allows that is itself unknown — the result records the overlap risk, it does not assume it. */
+const SP = { stateKey: 'state/ships-probe.json', minGapMs: 10 * 60e3, url: 'https://stream.aisstream.io/v0/stream',
+  CLASS: { PositionReport: 'A', StandardClassBPositionReport: 'B', ExtendedClassBPositionReport: 'B' } };
+async function probeShips(env, nowMs, windowS) {
+  if (!env.AISSTREAM_KEY) return { refused: 'AISSTREAM_KEY secret is not set' };
+  const last = await getJson(env, SP.stateKey);
+  if (last && last.started_at && nowMs - Date.parse(last.started_at) < SP.minGapMs) return { refused: 'a probe ran less than 10 minutes ago', last_started_at: last.started_at };
+  const out = { started_at: new Date(nowMs).toISOString(), window_s: windowS, collector_version: COLLECTOR_VERSION };
+  await putJson(env, SP.stateKey, { ...out, status: 'claimed' });                 // claimed BEFORE connecting
+  const t0 = Date.now(); let ws;
+  try {
+    const r = await fetch(SP.url, { headers: { Upgrade: 'websocket', 'User-Agent': UA } });
+    out.upgrade_status = r.status; out.connect_ms = Date.now() - t0;
+    ws = r.webSocket;
+    if (!ws) { out.status = 'down'; out.reason = 'no websocket (HTTP ' + r.status + ')'; out.body = (await r.text().catch(() => '')).slice(0, 200); await putJson(env, SP.stateKey, out); return out; }
+  } catch (e) { out.status = 'down'; out.reason = 'connect failed: ' + String(e).slice(0, 160); out.connect_ms = Date.now() - t0; await putJson(env, SP.stateKey, out); return out; }
+  ws.accept();
+  const vessels = new Map(); let messages = 0, parseErrors = 0, confirmed = false, firstMsgMs = null, lastMsgMs = null, closeInfo = null, bytes = 0, maxGapS = 0, errorMsg = null;
+  await new Promise(resolve => {
+    const done = () => { clearTimeout(timer); clearTimeout(hard); resolve(); };
+    const timer = setTimeout(() => { try { ws.close(1000, 'window done'); } catch (_) {} done(); }, windowS * 1000);
+    const hard = setTimeout(() => { try { ws.close(4000, 'hard stop'); } catch (_) {} done(); }, (windowS + 15) * 1000);
+    ws.addEventListener('message', ev => {
+      const now = Date.now(); const txt = typeof ev.data === 'string' ? ev.data : new TextDecoder().decode(ev.data); bytes += txt.length;
+      let m; try { m = JSON.parse(txt); } catch (_) { parseErrors++; return; }
+      if (m.MessageType === 'SubscriptionConfirmation') { confirmed = true; return; }
+      if (m.error) { errorMsg = String(m.error).slice(0, 200); return; }
+      const cls = SP.CLASS[m.MessageType]; if (!cls) return;
+      if (firstMsgMs === null) firstMsgMs = now - t0;
+      if (lastMsgMs !== null) maxGapS = Math.max(maxGapS, (now - lastMsgMs) / 1000);
+      lastMsgMs = now; messages++;
+      const md = m.MetaData || {}; const mmsi = String(md.MMSI ?? '');
+      if (mmsi) vessels.set(mmsi, cls);
+    });
+    ws.addEventListener('close', ev => { closeInfo = { code: ev.code, reason: String(ev.reason || '').slice(0, 120) }; done(); });
+    ws.addEventListener('error', ev => { errorMsg = errorMsg || 'socket error: ' + String((ev && ev.message) || 'no detail'); });
+    ws.send(JSON.stringify({ APIKey: env.AISSTREAM_KEY, BoundingBoxes: [[[-90, -180], [90, 180]]], FilterMessageTypes: Object.keys(SP.CLASS) }));
+  });
+  const vals = [...vessels.values()];
+  Object.assign(out, { finished_at: nowIso(), wall_s: (Date.now() - t0) / 1000, confirmed, messages, vessels: vessels.size,
+    class_a: vals.filter(v => v === 'A').length, class_b: vals.filter(v => v === 'B').length, bytes, parse_errors: parseErrors,
+    first_message_s: firstMsgMs === null ? null : firstMsgMs / 1000, max_gap_s: maxGapS, close: closeInfo, source_error: errorMsg,
+    status: messages > 0 && confirmed ? 'ok' : messages > 0 ? 'degraded' : 'down',
+    note: 'private measurement only; nothing published; CPU from the invocation log' });
+  await putJson(env, SP.stateKey, out);
+  return out;
+}
+
 // ---------------------------------------------------------------- CelesTrak GP — satellites (MODEL tier: element sets for propagation, not observations)
 
 /* CelesTrak "active" GP element sets (OMM-keyword CSV). The hub stores the file as received and validated; the page
@@ -1431,6 +1486,14 @@ export default {
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
       return json({ now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch }, 200, { 'Cache-Control': 'no-store' });
+    }
+
+    if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'ships') {   // 0.3.3: private Worker listen to aisstream; publishes nothing
+      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+      if (url.searchParams.get('last') === '1') return json({ last: await getJson(env, SP.stateKey) }, 200, { 'Cache-Control': 'no-store' });
+      const w = Math.min(90, Math.max(10, Number(url.searchParams.get('window') || 60)));
+      try { return json(await probeShips(env, Date.now(), w), 200, { 'Cache-Control': 'no-store' }); }
+      catch (e) { return json({ error: String(e).slice(0, 200) }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
     if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'spacetrack') {
