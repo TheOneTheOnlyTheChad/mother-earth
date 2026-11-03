@@ -47,7 +47,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.3.0';
+const COLLECTOR_VERSION = '0.3.1';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -788,12 +788,38 @@ async function aggregateShips(env, hourMs) {
   return { files: received, ok: usable, status, rejected: rejected.length, cells: Object.keys(incoming).length, changed };
 }
 
+/* Late ships samples (found 3 Nov 2026, hour 2026-11-02T22): ingest files a sample under the hour it was SCHEDULED for, but a
+ * sample suspended by host sleep can arrive after that hour's :07 batch. Nothing re-read the hour, so the sample was counted
+ * nowhere and the hour said 'absent' (never asked) although it had been asked. Each batch therefore looks back over the
+ * previous SHIPS_LOOKBACK_H hours and re-aggregates an hour ONLY when one of its cells files was uploaded after that hour's
+ * layer_hourly row was last written (or the hour has no row). aggregateShips is idempotent, so a re-run writes the same
+ * verdict the first run would have written had the file been there. Bounded: one R2 list + one D1 read per hour looked at.
+ * A sample later than the lookback is repaired with /admin/reaggregate (R2 keeps cells/ for 48 h). */
+const SHIPS_LOOKBACK_H = 6;
+async function reaggregateLateShips(env, hourMs) {
+  const redone = [];
+  for (let k = 1; k <= SHIPS_LOOKBACK_H; k++) {
+    const hMs = hourMs - k * 3600e3, hour = hourKey(hMs);
+    const listed = await env.R2.list({ prefix: `cells/ships/${hour}` });
+    const objs = listed.objects || [];
+    if (!objs.length) continue;                                         // nothing received for that hour: the existing record stands
+    const row = await env.DB.prepare('SELECT updated_at FROM layer_hourly WHERE layer = ? AND hour_utc = ?').bind('ships', hour).first();
+    const written = row && Date.parse(row.updated_at);
+    const late = objs.filter(o => !written || (o.uploaded && new Date(o.uploaded).getTime() > written));
+    if (!late.length) continue;
+    const r = await aggregateShips(env, hMs);
+    redone.push({ hour, late: late.length, status: r.status, ok: r.ok, files: r.files });
+  }
+  return redone;
+}
+
 async function hourlyBatch(env, scheduledMs) {
   const started = Date.now();
   const hourMs = Math.floor((scheduledMs - 3600e3) / 3600e3) * 3600e3;    // previous full hour
   const out = {};
   if (env.OPENSKY_ENABLED === '1') { try { out.opensky = await aggregateOpensky(env, hourMs); } catch (e) { out.opensky = 'error ' + e; } } else out.opensky = 'parked';
   try { out.ships = await aggregateShips(env, hourMs); } catch (e) { out.ships = 'error ' + e; }
+  try { out.ships_late = await reaggregateLateShips(env, hourMs); } catch (e) { out.ships_late = 'error ' + e; }
   try { out.usgs = await aggregateUsgs(env, hourMs); } catch (e) { out.usgs = 'error ' + e; }
   try { out.firms = await aggregateFirms(env, hourMs); } catch (e) { out.firms = 'error ' + e; }
   await env.DB.prepare('INSERT INTO batch_runs (hour_utc, started_at, finished_at, result) VALUES (?,?,?,?)')
@@ -1043,7 +1069,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { orbBuild, orbClassify, ORB_CLASSES };
+export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
