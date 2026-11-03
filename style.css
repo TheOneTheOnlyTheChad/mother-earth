@@ -133,6 +133,10 @@ button.res.go .rt{color:var(--fg)}
 .ovl-tgl .t{font-size:12.5px;color:var(--fg);line-height:1.3}
 .ovl-tgl:hover .t{color:var(--accent)}
 .ovl .hint{font-variant-numeric:tabular-nums}
+.sat-card .ovl{border-top:0;padding-top:0;margin-top:0}
+.sat-card .ovl-tgl .t{font:600 15px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.sat-card .ovl-tgl[aria-checked="true"] .box{border-color:var(--space)}
+.sat-card .ovl-tgl[aria-checked="true"] .box::after{background:var(--space)}
 .sat-lines div{margin-top:3px}
 .sat-lines .sat-mk b{color:#c9b6ff}
 .ovl .hint b{color:var(--warn);font-weight:500}

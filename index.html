@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611031200">
+<link rel="stylesheet" href="style.css?v=202611031600">
 </head>
 <body class="world">
 <header class="top">
@@ -129,20 +129,6 @@
                   <p><a href="sources.html#daynight">Full rules on Sources &amp; Details →</a></p>
                 </div>
               </details>
-              <button class="ovl-tgl" type="button" id="tgl-sat" role="switch" aria-checked="false" aria-describedby="sat-note"><span class="box" aria-hidden="true"></span><span class="t">Satellites — computed positions</span></button>
-              <div class="cav" id="sat-note">Calculated from published orbital elements—not observed positions.</div>
-              <div class="hint sat-lines" id="sat-lines" hidden aria-live="polite"></div>
-              <details class="scope" id="sat-scope">
-                <summary>What this is and is not</summary>
-                <div>
-                  <p>Each marker is a position <b>computed</b> (SGP4) from the latest general-perturbations element set CelesTrak publishes for that object in its "active" group. Nothing here was observed at the time shown.</p>
-                  <p>It shows the <b>scale and distribution</b> of the public satellite catalogue. It is <b>not</b> a measure of how much sky is obscured, of ground coverage, or of collision risk, and it is not every object in orbit: classified objects, debris and inactive objects are not in this group.</p>
-                  <p>Markers are enlarged so they can be seen; they are not to physical scale. Positions are drawn at their propagated height — height above the surface, not distance from the Earth's centre.</p>
-                  <p>Element sets age. Objects whose elements are more than three days old at the time shown are counted on screen, because their computed positions may be unreliable. Three days is a disclosure threshold, not an accuracy limit.</p>
-                  <p>The geostationary view does not frame every orbit; objects higher than geostationary orbit are counted.</p>
-                  <p><a href="sources.html#satellites">Full rules on Sources &amp; Details →</a></p>
-                </div>
-              </details>
             </div>
           </div>
         </div>
@@ -176,13 +162,31 @@
           <div class="cmp" id="c-seaice">comparison: loading…</div>
           <div class="cav">Area with ≥15% ice concentration; two numbers, not a map layer; polar-cap imagery not shown. <a class="more" href="sources.html#seaice">details</a></div>
         </div>
+        <div class="card sat-card" id="card-sat" style="--c:var(--space)">
+          <div class="ovl">
+            <button class="ovl-tgl" type="button" id="tgl-sat" role="switch" aria-checked="false" aria-describedby="sat-note"><span class="box" aria-hidden="true"></span><span class="t">Satellites</span></button>
+            <div class="cav" id="sat-note">Computed positions of the public satellite catalogue, from published orbital elements—not observed. Off until you switch it on.</div>
+            <div class="hint sat-lines" id="sat-lines" hidden aria-live="polite"></div>
+            <details class="scope" id="sat-scope">
+              <summary>What this is and is not</summary>
+              <div>
+                <p>Each marker is a position <b>computed</b> (SGP4) from the latest general-perturbations element set CelesTrak publishes for that object in its "active" group. Nothing here was observed at the time shown.</p>
+                <p>It shows the <b>scale and distribution</b> of the public satellite catalogue. It is <b>not</b> a measure of how much sky is obscured, of ground coverage, or of collision risk, and it is not every object in orbit: classified objects, debris and inactive objects are not in this group.</p>
+                <p>Markers are enlarged so they can be seen; they are not to physical scale. Positions are drawn at their propagated height — height above the surface, not distance from the Earth's centre.</p>
+                <p>Element sets age. Objects whose elements are more than three days old at the time shown are counted on screen, because their computed positions may be unreliable. Three days is a disclosure threshold, not an accuracy limit.</p>
+                <p>The geostationary view does not frame every orbit; objects higher than geostationary orbit are counted.</p>
+                <p><a href="sources.html#satellites">Full rules on Sources &amp; Details →</a></p>
+              </div>
+            </details>
+          </div>
+        </div>
       </section>
     </div>
   </div>
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611031200"></script>
+<script src="app.js?v=202611031600"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
