@@ -1,5 +1,15 @@
 # Mother Earth — status (3 Nov 2026 — thread 7, continued)
 
+## 3 Nov ~07:40 UTC — **Orbital layers: counts and combined benchmark done (VALID, C1–C5 pass). Public view unchanged.**
+Chad's decisions (3 Nov) are in `docs/SPEC-orbital-layers.md` → "Decisions". Measured on one dataset, no second download:
+- **Space-Track GP** (Chad's address-bar request ~07:31 UTC, Space-Track's filter: not decayed + epoch within 10 days): **18,849,484 B, 32,517 objects**, every field quoted, no field contains a comma. By `OBJECT_TYPE`: **PAYLOAD 18,954 · ROCKET BODY 2,205 · DEBRIS 10,124 · UNKNOWN 1,234**. Element ages at download: p50 15.1 h, p90 31.6 h, max 239.6 h. Older elements are filtered upstream by the query, outside these counts.
+- **Join with CelesTrak SATCAT** (1 Nov file, 6,789,639 B) by NORAD ID: **payload status match rate 18,951 / 18,954 = 99.98 %** (3 payloads unmatched). Matched payload codes: `+` 15,762 · `P` 407 · `B` 22 · `S` 4 · `X` 9 · `-` 1,385 · **blank 1,362** · `D` 0.
+- **Classes:** Active satellites (catalogued as active) **16,204** · Inactive satellites **1,385** · Rocket bodies **2,205** (toggle total 3,590) · Debris **10,124** · **counted, not drawn: 2,599** = unknown type 1,234 + payload status blank 1,362 + payload unmatched 3. Missing status never becomes "inactive".
+- **At one propagation pass:** active 16,204 drawn / 0 failed / 48 elements > 3 d / 292 beyond GEO · inactive & rocket bodies 3,590 / 0 / 128 / 788 · debris 10,123 / **1 failed** / 762 / 99. Worker built 29,918 records, 0 init failures, 171 ms.
+- **Benchmark (bench-orbital 1.1, `b7f621a`, results `phase1/bench-orbital-results-2026-11-03.json` on branch `bench-orbital`):** live workload (12,306 points, 558 polygons) + all three layers in the browser pane on the Mac, visible throughout. Frame median / p95: baseline **16.7 / 16.8 ms**; all three on **16.7 / 16.8**; geostationary view **16.7 / 16.8** — pinned at the 60 Hz cap, so the added cost is below what this display can show. Worker pass median **55–57 ms** (max 88). 3 particle objects; 0 visible with all off; geometries 564 → 564 after 10 cycles per class + 10 together; **no propagation in 6 s after the last toggle off**; 0 errors.
+- **First run INVALID (bench defect, not data):** 1.0 skipped quoted rows → 0 classified. Fixed in 1.1 (unquote first), shown to fail when the fix is broken, re-run on the same in-page data.
+- Not measured yet: Worker reachability to space-track.org; 2-hour cadence under the hub; phones.
+
 ## 3 Nov ~04:50 UTC — **SATELLITES RELEASED (public).** Page `bd1ab59`, assets `?v=202611031200`; hub 0.2.2 with `SATELLITES_ENABLED=1`.
 Verified on the live hub before release (RC files loaded into a github.io page, pane visible) and again on the public site after the Pages deploy:
 - **Fresh load:** toggle off (`aria-checked=false`), no layer, no worker, no timers, **zero satellite requests**; legend line hidden.

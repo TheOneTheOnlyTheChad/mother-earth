@@ -47,8 +47,16 @@ Reuses the satellites design unchanged: one batched particle layer per toggle cr
 3. **Benchmark the combined view at the real payload** (bench 1.6.1 design; the 16,848 run cost ~0 frame time on the Mac, 30–40k unmeasured) — before shipping, as a bounded run with criteria written first.
 4. Worker reachability to space-track.org (one request inside the rules).
 
-## Open decisions (Chad)
-- Does the new **Active satellites** toggle replace today's Satellites toggle (CelesTrak active group), or do both coexist for a while?
-- **Unknown** class: own toggle, drawn with debris but counted apart, or counted only?
-- Element-age filter: Space-Track's 10-day epoch filter vs keeping everything with elements and disclosing age (as today).
-- Cadence: hourly allowed; every 2 h proposed.
+## Decisions (Chad, 3 Nov)
+1. **Replace today's Satellites toggle** when the new view is ready — same right-hand pane, three independent toggles, all off by default: Active satellites · Inactive satellites & rocket bodies · Orbital debris. Inactive payloads and rocket bodies keep separate counts.
+2. **Unknowns are counted, not drawn, in v1**, tracked separately: unknown object type · payloads with no catalogue match · payloads with unknown operational status. Missing status never becomes "inactive". Wording: "catalogued as active".
+3. **10-day element filter for v1** (Space-Track's); individual element ages stay visible; report rows returned / drawable / omitted and why; say older elements are filtered upstream outside this query.
+4. **Two-hour source refresh** if the test supports it, separate from the browser position update. The page fetches the shared dataset once when the first toggle turns on, reuses it across all three, and stops propagation when the last turns off.
+
+## Measured (3 Nov, see STATUS)
+32,517 objects, 18.8 MB; payload status match 99.98 %; draw 16,204 / 3,590 / 10,124; counted-not-drawn 2,599. Combined benchmark valid, C1–C5 pass (frames at the 60 Hz cap with and without; worker pass ~56 ms).
+
+## Next (in order)
+1. Worker reachability to space-track.org (one login + one GP request inside the rules, Chad pastes credentials as Worker secrets). If refused (as CelesTrak/OpenSky were), the Mac fetches and posts.
+2. Hub job: classify in the hub; publish one current element file + a class column + counts metadata (storage rule); 2-hour cadence.
+3. Page: three toggles replacing Satellites; disclosures listed above; tests (each alone / combinations / all off / fresh load off) shown to fail on a deliberate break; then Chad's go for release.
