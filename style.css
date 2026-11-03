@@ -250,3 +250,10 @@ body.doc{overflow:auto}
 @media (prefers-reduced-motion:reduce){
   .sheet{transition:none}
 }
+/* orbital layers (thread 9): one switch per object group, each in its own marker colour */
+.orb-tgls{display:flex;flex-direction:column}
+.orb-card .ovl-tgl[aria-checked="true"] .box{border-color:var(--oc,var(--space))}
+.orb-card .ovl-tgl[aria-checked="true"] .box::after{background:var(--oc,var(--space))}
+.orb-card .ovl-tgl[aria-busy="true"]{opacity:.6;cursor:progress}
+.orb-g{border-left:3px solid var(--oc,var(--space));padding-left:6px}
+.orb-sw{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--oc);margin:0 4px 0 2px;vertical-align:middle}

@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611031600">
+<link rel="stylesheet" href="style.css?v=202611032100">
 </head>
 <body class="world">
 <header class="top">
@@ -25,7 +25,7 @@
 <div class="stage">
   <div class="centre">
     <div id="globe"></div>
-    <div class="credits" id="credits">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · satellite element sets <a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a> (originating with the US Space Force 18th/19th Space Defense Squadrons via <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a>) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></div>
+    <div class="credits" id="credits">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · orbital element sets <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> (US Space Force 18th/19th Space Defense Squadrons) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></div>
     <div class="imgdate" id="imgdate">Imagery: loading…</div>
     <div class="legend" id="legend">
       <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample) · <span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</div>
@@ -34,7 +34,7 @@
       <div class="cov"><span class="sw unknown"></span>unknown — nothing can be said about this cell</div>
       <div class="cov">No outline = no records in that cell; not evidence of absence.</div>
       <div class="cov nightleg" id="night-legend" hidden></div>
-      <div class="cov nightleg" id="sat-legend" hidden></div>
+      <div class="cov nightleg" id="orb-legend" hidden></div>
       <div><a href="sources.html#coverage">How coverage is graded →</a></div>
     </div>
     <div class="inspector" id="insp" role="dialog" aria-labelledby="insp-h"><button class="x" id="insp-x" type="button" aria-label="Close">×</button><h2 id="insp-h">—</h2><dl id="insp-dl"></dl></div>
@@ -162,20 +162,25 @@
           <div class="cmp" id="c-seaice">comparison: loading…</div>
           <div class="cav">Area with ≥15% ice concentration; two numbers, not a map layer; polar-cap imagery not shown. <a class="more" href="sources.html#seaice">details</a></div>
         </div>
-        <div class="card sat-card" id="card-sat" style="--c:var(--space)">
+        <div class="card sat-card orb-card" id="card-orb" style="--c:var(--space)">
           <div class="ovl">
-            <button class="ovl-tgl" type="button" id="tgl-sat" role="switch" aria-checked="false" aria-describedby="sat-note"><span class="box" aria-hidden="true"></span><span class="t">Satellites</span></button>
-            <div class="cav" id="sat-note">Computed positions of the public satellite catalogue, from published orbital elements—not observed. Off until you switch it on.</div>
-            <div class="hint sat-lines" id="sat-lines" hidden aria-live="polite"></div>
-            <details class="scope" id="sat-scope">
+            <div class="ovl-h" id="orb-h">Orbital objects</div>
+            <div class="orb-tgls" id="orb-tgls" role="group" aria-labelledby="orb-h">
+              <button class="ovl-tgl" type="button" data-g="payload" role="switch" aria-checked="false" aria-describedby="orb-note" style="--oc:#c9b6ff"><span class="box" aria-hidden="true"></span><span class="t">Payloads</span></button>
+              <button class="ovl-tgl" type="button" data-g="rocket_body" role="switch" aria-checked="false" aria-describedby="orb-note" style="--oc:#ffd27a"><span class="box" aria-hidden="true"></span><span class="t">Rocket bodies</span></button>
+              <button class="ovl-tgl" type="button" data-g="debris" role="switch" aria-checked="false" aria-describedby="orb-note" style="--oc:#9fb4c8"><span class="box" aria-hidden="true"></span><span class="t">Debris</span></button>
+            </div>
+            <div class="cav" id="orb-note">Computed positions of catalogued objects in orbit, from published orbital elements—not observed. Each layer is off until you switch it on.</div>
+            <div class="hint sat-lines" id="orb-lines" hidden aria-live="polite"></div>
+            <details class="scope" id="orb-scope">
               <summary>What this is and is not</summary>
               <div>
-                <p>Each marker is a position <b>computed</b> (SGP4) from the latest general-perturbations element set CelesTrak publishes for that object in its "active" group. Nothing here was observed at the time shown.</p>
-                <p>It shows the <b>scale and distribution</b> of the public satellite catalogue. It is <b>not</b> a measure of how much sky is obscured, of ground coverage, or of collision risk, and it is not every object in orbit: classified objects, debris and inactive objects are not in this group.</p>
-                <p>Markers are enlarged so they can be seen; they are not to physical scale. Positions are drawn at their propagated height — height above the surface, not distance from the Earth's centre.</p>
-                <p>Element sets age. Objects whose elements are more than three days old at the time shown are counted on screen, because their computed positions may be unreliable. Three days is a disclosure threshold, not an accuracy limit.</p>
-                <p>The geostationary view does not frame every orbit; objects higher than geostationary orbit are counted.</p>
-                <p><a href="sources.html#satellites">Full rules on Sources &amp; Details →</a></p>
+                <p>Each marker is a position <b>computed</b> (SGP4) from the latest general-perturbations element set Space-Track.org publishes for that object: every catalogued object not yet decayed whose elements are under 10 days old. Older elements are filtered out upstream and are not in these counts. Nothing here was observed at the time shown.</p>
+                <p>The layers follow Space-Track's <b>object type</b>: payloads, rocket bodies, debris. Objects of unknown type are counted, not drawn. Whether a payload is working is <b>not established here</b>: operational status is not used yet, so no payload is shown as active or inactive.</p>
+                <p>It shows the <b>scale and distribution</b> of the public catalogue. It is <b>not</b> a measure of how much sky is obscured, of ground coverage, or of collision risk, and it is not every object in orbit: classified objects and objects too small to track are not in the catalogue.</p>
+                <p>Markers are enlarged so they can be seen; they are not to physical scale. Positions are drawn at their propagated height above the surface.</p>
+                <p>Element sets age. Objects whose elements are more than three days old at the time shown are counted on screen; three days is a disclosure threshold, not an accuracy limit. Objects higher than geostationary orbit are counted, because the view may not frame them.</p>
+                <p><a href="sources.html#orbital">Full rules on Sources &amp; Details →</a></p>
               </div>
             </details>
           </div>
@@ -186,7 +191,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611031600"></script>
+<script src="app.js?v=202611032100"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -696,197 +701,251 @@ ME.nightState = () => ({ on: night.on, at: night.at, why: night.why, hasMesh: !!
 ME.screenAt = (lat, lng, alt = 0) => globeOk ? globe.getScreenCoords(lat, lng, alt) : null;
 ME.cameraAt = () => globeOk ? globe.pointOfView() : null;   // a point on the far side still returns screen coords, so callers need this to tell which hemisphere faces them
 
-// ---------- satellites overlay: MODEL tier (propagated positions), kept out of the observation path like day/night.
-// It never touches `state`, `points`, `pmeta`, `usable()`, polygonsData, pointsData or ringsData, is never in the
-// status sentence or search, and has its own timers. Viewers read the hub only (/snapshot/satellites meta and
-// /elements/satellites CSV); CelesTrak is never contacted from the page.
-const SATC = ME.SAT;
-const sat = { on: false, busy: false, why: null, meta: null, csvVersion: null, worker: null, ready: null, layer: null, capacity: 0,
-  timer: null, metaTimer: null, inflight: false, seq: 0, last: null, lastApplyMs: null, hiddenSkips: 0 };
+// ---------- orbital layers: MODEL tier (propagated positions), kept out of the observation path like day/night.
+// Replaces the Satellites overlay (Chad, 3 Nov: same pane, independent toggles, all off on a fresh load). It never
+// touches `state`, `points`, `pmeta`, `usable()`, polygonsData, pointsData or ringsData, is never in the status sentence
+// or search, and has its own timers. Viewers read the hub only (/snapshot/orbital, /status, /elements/orbital);
+// Space-Track is never contacted from the page. One particle set per toggle, created once for the whole file.
+const OC = ME.ORB;
+const orb = { on: new Set(), busy: false, why: null, meta: null, lastRun: null, csvVersion: null, worker: null, ready: null,
+  groupIds: [...document.querySelectorAll('#orb-tgls [data-g]')].map(b => b.dataset.g), sets: {}, layers: {}, caps: {},
+  timer: null, metaTimer: null, inflight: false, seq: 0, last: {}, at: null, hiddenSkips: 0, requests: 0 };
+const orbBtns = () => [...document.querySelectorAll('#orb-tgls [data-g]')];
+const orbGroupsNow = () => orb.meta ? ME.orbGroups(orb.meta) : ME.ORB.GROUPS_BY_TYPE;
 
-function satPaint() {
-  const box = $('sat-lines'), lg = $('sat-legend');
-  const p = sat.on && sat.last && sat.meta ? ME.satLines(sat.last, sat.meta) : null;
-  box.hidden = !p && !sat.why;
-  if (p) box.innerHTML = [p.time, p.scope, p.stale, p.beyond].filter(Boolean).map(t => `<div>${esc(t)}</div>`).join('') + `<div class="sat-mk"><b>${esc(p.marker)}</b></div>`;
-  else if (sat.why) box.innerHTML = `<div><b>${esc(sat.why)}</b></div>`;
-  lg.hidden = !p;
-  if (p) lg.innerHTML = p.legend;
-  $('tgl-sat').setAttribute('aria-checked', String(sat.on));
-  $('tgl-sat').setAttribute('aria-busy', String(sat.busy));
+function orbPaint() {
+  for (const b of orbBtns()) { b.setAttribute('aria-checked', String(orb.on.has(b.dataset.g))); b.setAttribute('aria-busy', String(orb.busy)); }
+  const box = $('orb-lines'), lg = $('orb-legend');
+  const groups = orbGroupsNow(), onG = groups.filter(g => orb.on.has(g.id));
+  let html = '';
+  if (orb.why) html = `<div><b>${esc(orb.why)}</b></div>`;
+  else if (onG.length && orb.meta) {
+    const p = ME.orbPanel(orb.meta, orb.lastRun, Date.now());
+    const pc = Object.fromEntries(p.groups.map(g => [g.id, g]));
+    html = (orb.at ? `<div>Positions propagated for ${esc(orb.at.replace('T', ' ').slice(0, 19))} UTC</div>` : '<div>Computing positions…</div>')
+      + onG.map(g => orb.last[g.id] ? `<div class="orb-g" style="--oc:${ME.orbColour(g.id)}">${esc(ME.orbPassLine(pc[g.id] || g, orb.last[g.id]))}</div>` : '').join('')
+      + p.lines.map(t => `<div>${esc(t)}</div>`).join('') + `<div>${esc(OC.SIZE_FLOOR)}</div>`;
+  }
+  box.hidden = !html; box.innerHTML = html;
+  const drawnOn = onG.filter(g => orb.last[g.id]);
+  lg.hidden = !(drawnOn.length && orb.at && !orb.why);
+  if (!lg.hidden) lg.innerHTML = ME.orbLegend(drawnOn, orb.at);
 }
 
-async function satFetchMeta() {
-  const r = await fetch(ME.HUB + '/snapshot/satellites', { cache: 'no-store' });
-  if (r.status === 404) return { problem: 'the hub has no satellite element file yet' };
+async function orbFetchMeta() {
+  orb.requests++;
+  const r = await fetch(ME.HUB + '/snapshot/orbital', { cache: 'no-store' });
+  try { orb.requests++; const s = await fetch(ME.HUB + '/status', { cache: 'no-store' }); if (s.ok) { const j = await s.json(); orb.lastRun = (j.last_runs || []).find(x => x.layer === 'orbital') || null; } } catch (_) { /* freshness line only */ }
+  if (r.status === 404) return { problem: 'the hub has no orbital element file yet' };
   if (!r.ok) return { problem: 'the hub did not answer (HTTP ' + r.status + ')' };
   const meta = await r.json();
-  const problem = ME.satMetaProblem(meta);
+  const problem = ME.orbMetaProblem(meta);
   return problem ? { problem } : { meta };
 }
 
-function satWorkerStart() {
-  if (sat.worker) return sat.worker;
-  const url = URL.createObjectURL(new Blob([ME.satWorkerSource(SATC.SATJS_URL, SATC.R_KM, SATC.STALE_DAYS, SATC.GEO_H_KM)], { type: 'text/javascript' }));
-  sat.worker = new Worker(url);
+function orbWorkerStart() {
+  if (orb.worker) return orb.worker;
+  const url = URL.createObjectURL(new Blob([ME.orbWorkerSource(ME.SAT.SATJS_URL, OC.R_KM, OC.STALE_DAYS, OC.GEO_H_KM)], { type: 'text/javascript' }));
+  orb.worker = new Worker(url);
   URL.revokeObjectURL(url);
-  sat.worker.onerror = ev => { ev.preventDefault && ev.preventDefault(); satFail('the orbit calculation stopped unexpectedly'); };
-  return sat.worker;
+  orb.worker.onerror = ev => { ev.preventDefault && ev.preventDefault(); orbFail('the orbit calculation stopped unexpectedly'); };
+  return orb.worker;
 }
 
-// Load (or reload, when the hub's file changed) the element set into the worker. Resolves {ok} or {problem}.
-async function satLoadElements(meta) {
-  if (sat.csvVersion === meta.elements.sha256) return { ok: true };
-  const r = await fetch(ME.HUB + '/elements/satellites');
+// Load (or reload, when the hub's file changed) the classified element file into the worker. Resolves {ok} or {problem}.
+async function orbLoadElements(meta) {
+  if (orb.csvVersion === meta.elements.sha256) return { ok: true };
+  orb.requests++;
+  const r = await fetch(ME.HUB + '/elements/orbital');
   if (!r.ok) return { problem: 'the element file could not be read from the hub (HTTP ' + r.status + ')' };
+  const hdr = r.headers.get('X-Elements-SHA256');
+  if (hdr && hdr !== meta.elements.sha256) return { problem: 'the element file served is not the one the hub describes (checksum header differs); nothing was drawn from it' };
   const csv = await r.text();
-  const problem = await ME.satCsvProblem(csv, meta);
+  const problem = await ME.orbCsvProblem(csv, meta);
   if (problem) return { problem };
-  const w = satWorkerStart();
+  const w = orbWorkerStart();
   const ready = await new Promise(res => {
-    const to = setTimeout(() => res({ type: 'error', why: 'the orbit library did not load in time' }), 20000);
+    const to = setTimeout(() => res({ type: 'error', why: 'the orbit library did not load in time' }), 30000);
     w.onmessage = e => { if (e.data.type === 'ready' || e.data.type === 'error') { clearTimeout(to); res(e.data); } };
-    w.postMessage({ type: 'init', csv, version: meta.elements.sha256 });
+    w.postMessage({ type: 'init', csv, version: meta.elements.sha256, groupOf: ME.orbGroupMap(meta) });
   });
-  w.onmessage = satOnMessage;
+  w.onmessage = orbOnMessage;
   if (ready.type === 'error') return { problem: ready.why };
-  if (!ready.usable) return { problem: 'no element set in the file could be used' };
-  sat.ready = ready; sat.csvVersion = meta.elements.sha256; sat.meta = meta;
+  if (!Object.values(ready.groups).some(g => g.usable)) return { problem: 'no element set in the file could be used' };
+  orb.ready = ready; orb.csvVersion = meta.elements.sha256; orb.meta = meta;
   return { ok: true };
 }
 
-function satFindLayer() { let f = null; globe.scene().traverse(o => { if (!f && o.type === 'Points' && o.__globeObjType === 'particles') f = o; }); return f; }
-const nextFrames = n => new Promise(res => { const step = k => k ? requestAnimationFrame(() => step(k - 1)) : res(); step(n); });
-
-// Create the batched layer ONCE per capacity. globe.gl builds the object on its next tick, so the reference is
-// taken only after it exists; nothing toggles it before then (busy flag). Capacity carries headroom so later,
-// larger files are written in place without rebuilding.
-async function satCreateLayer(rows) {
-  const capacity = Math.ceil(rows * (1 + SATC.CAPACITY_HEADROOM));
-  const filler = Array.from({ length: capacity }, () => ({ lat: 0, lng: 0, alt: -0.9 }));   // inside the globe (occluded) until the first real positions land
-  globe.particlesList(d => d).particleLat('lat').particleLng('lng').particleAltitude('alt')
-    .particlesSize(SATC.MARKER_PX).particlesSizeAttenuation(false).particlesColor(() => SATC.COLOUR)
-    .particlesData([filler]);
-  let layer = null;
-  for (let i = 0; i < 120 && !(layer = satFindLayer()); i++) await nextFrames(1);
-  if (!layer || !layer.geometry || !layer.geometry.attributes || !layer.geometry.attributes.position || layer.geometry.attributes.position.count < capacity) {
-    globe.particlesData([]); return false;
-  }
-  layer.frustumCulled = false;            // positions are rewritten in place; the original bounding sphere is meaningless
-  layer.raycast = () => { };              // never a pick target: coverage cells and records stay clickable through it
-  layer.geometry.setDrawRange(0, 0);
-  layer.visible = false;
-  sat.layer = layer; sat.capacity = capacity;
+// The toggles on offer follow the hub's classification (by type while payload status is pending). If that changes,
+// the buttons are rebuilt and every layer starts again from off.
+function orbSyncButtons(meta) {
+  const groups = ME.orbGroups(meta), ids = groups.map(g => g.id);
+  if (ids.join() === orb.groupIds.join()) return false;
+  $('orb-tgls').innerHTML = groups.map(g => `<button class="ovl-tgl" type="button" data-g="${esc(g.id)}" role="switch" aria-checked="false" aria-describedby="orb-note" style="--oc:${ME.orbColour(g.id)}"><span class="box" aria-hidden="true"></span><span class="t">${esc(g.label)}</span></button>`).join('');
+  orb.groupIds = ids;
   return true;
 }
 
-function satTeardownLayer() {
-  if (!sat.layer) return;
-  const l = sat.layer; sat.layer = null; sat.capacity = 0;
+const orbNextFrames = n => new Promise(res => { const step = k => k ? requestAnimationFrame(() => step(k - 1)) : res(); step(n); });
+
+// Create one particle set per group, ONCE, sized from the meta counts with headroom. globe.gl builds the objects on
+// its next tick; each is found through its own data set (set.__threeObjParticles), so nothing relies on scene order.
+async function orbCreateLayers(meta) {
+  const p = ME.orbPanel(meta, null, Date.now());
+  const sets = p.groups.map(g => {
+    const cap = Math.max(16, Math.ceil(g.count * (1 + OC.CAPACITY_HEADROOM)));
+    const a = Array.from({ length: cap }, () => ({ lat: 0, lng: 0, alt: -0.9 }));   // inside the globe (occluded) until real positions land
+    a.__gid = g.id; a.__cap = cap; return a;
+  });
+  globe.particlesList(d => d).particleLat('lat').particleLng('lng').particleAltitude('alt')
+    .particlesSize(OC.MARKER_PX).particlesSizeAttenuation(false).particlesColor(d => ME.orbColour(d.__gid))
+    .particlesData(sets);
+  for (let i = 0; i < 120 && !sets.every(s => s.__threeObjParticles); i++) await orbNextFrames(1);
+  const okAll = sets.every(s => { const o = s.__threeObjParticles; return o && o.geometry && o.geometry.attributes && o.geometry.attributes.position && o.geometry.attributes.position.count >= s.__cap; });
+  if (!okAll) { globe.particlesData([]); return false; }
+  orb.sets = {}; orb.layers = {}; orb.caps = {};
+  for (const s of sets) {
+    const o = s.__threeObjParticles;
+    o.frustumCulled = false;            // positions are rewritten in place; the original bounding sphere is meaningless
+    o.raycast = () => { };              // never a pick target: coverage cells and records stay clickable through it
+    o.geometry.setDrawRange(0, 0); o.visible = false;
+    orb.sets[s.__gid] = s; orb.layers[s.__gid] = o; orb.caps[s.__gid] = s.__cap;
+  }
+  return true;
+}
+const orbFits = meta => ME.orbPanel(meta, null, Date.now()).groups.every(g => orb.layers[g.id] && g.count <= orb.caps[g.id]);
+
+function orbTeardownLayers() {
+  const ls = Object.values(orb.layers); if (!ls.length) return;
+  orb.layers = {}; orb.sets = {}; orb.caps = {};
   globe.particlesData([]);
-  nextFrames(2).then(() => { l.geometry.dispose(); l.material.dispose(); });   // dispose only after globe.gl has removed it
+  orbNextFrames(2).then(() => ls.forEach(l => { l.geometry.dispose(); l.material.dispose(); }));   // dispose only after globe.gl has removed them
 }
 
-function satApply(m) {
-  if (!sat.layer || m.version !== sat.csvVersion) return;     // a pass from a previous element file is discarded, never drawn
-  const t0 = performance.now();
-  const attr = sat.layer.geometry.attributes.position, arr = attr.array, n = Math.min(m.drawn, sat.capacity);
-  arr.set(m.xyz.subarray(0, n * 3), 0);
-  sat.layer.geometry.setDrawRange(0, n);
-  attr.needsUpdate = true;
-  sat.last = { rows: m.rows, drawn: n, failed: m.failed, stale: m.stale, beyondGeo: m.beyond, at: m.at };
-  sat.lastApplyMs = +(performance.now() - t0).toFixed(2);
-  satPaint();
+function orbApply(m) {
+  if (m.version !== orb.csvVersion) return;                   // a pass from a previous element file is discarded, never drawn
+  for (const gid in m.groups) {
+    const l = orb.layers[gid], g = m.groups[gid];
+    if (!l || !orb.on.has(gid)) continue;                       // switched off while the pass was running: not drawn
+    const attr = l.geometry.attributes.position, n = Math.min(g.drawn, orb.caps[gid]);
+    attr.array.set(g.xyz.subarray(0, n * 3), 0);
+    l.geometry.setDrawRange(0, n); attr.needsUpdate = true; l.visible = true;
+    orb.last[gid] = { rows: g.rows, drawn: n, failed: g.failed, stale: g.stale, beyond: g.beyond, at: m.at };
+  }
+  orb.at = m.at; orb.passGroups = Object.keys(m.groups);
+  orbPaint();
 }
 
-function satOnMessage(e) {
+function orbOnMessage(e) {
   const m = e.data;
-  if (m.type === 'error') return satFail(m.why);
-  if (m.type !== 'pos' || m.seq !== sat.seq) return;          // only the latest request counts
-  sat.inflight = false;
-  if (sat.on) satApply(m);
+  if (m.type === 'error') return orbFail(m.why);
+  if (m.type !== 'pos' || m.seq !== orb.seq) return;          // only the latest request counts
+  orb.inflight = false;
+  if (orb.on.size) orbApply(m);
 }
 
-function satRequest() {
-  if (!sat.on || !sat.worker || sat.inflight) return;
-  if (document.hidden) { sat.hiddenSkips++; return; }          // no work while the tab is hidden
-  sat.inflight = true;
-  sat.worker.postMessage({ type: 'prop', t: Date.now(), seq: ++sat.seq, version: sat.csvVersion, globeR: globe.getGlobeRadius() });
+function orbRequest(force) {
+  if (!orb.on.size || !orb.worker || (orb.inflight && !force)) return;
+  if (document.hidden) { orb.hiddenSkips++; return; }          // no work while the tab is hidden
+  orb.inflight = true;
+  orb.worker.postMessage({ type: 'prop', t: Date.now(), seq: ++orb.seq, version: orb.csvVersion, globeR: globe.getGlobeRadius(), groups: [...orb.on] });
 }
 
-function satStopTimers() {
-  if (sat.timer) { clearInterval(sat.timer); sat.timer = null; }
-  if (sat.metaTimer) { clearInterval(sat.metaTimer); sat.metaTimer = null; }
-  sat.inflight = false;
+function orbStartTimers() {
+  if (!orb.timer) orb.timer = setInterval(orbRequest, OC.UPDATE_MS);
+  if (!orb.metaTimer) orb.metaTimer = setInterval(orbRecheck, OC.META_RECHECK_MS);
+}
+function orbStopTimers() {
+  if (orb.timer) { clearInterval(orb.timer); orb.timer = null; }
+  if (orb.metaTimer) { clearInterval(orb.metaTimer); orb.metaTimer = null; }
+  orb.inflight = false;
 }
 
-// Refuse cleanly: toggle off, reason shown, nothing else on the page touched.
-function satFail(why) {
-  satStopTimers();
-  if (sat.layer) { sat.layer.visible = false; sat.layer.geometry.setDrawRange(0, 0); }
-  sat.on = false; sat.busy = false; sat.why = 'Satellites not shown: ' + why + '.';
-  satPaint();
+// Refuse cleanly: every orbital toggle off, reason shown, nothing else on the page touched.
+function orbFail(why) {
+  orbStopTimers();
+  for (const l of Object.values(orb.layers)) { l.visible = false; l.geometry.setDrawRange(0, 0); }
+  orb.on.clear(); orb.last = {}; orb.at = null; orb.busy = false; orb.why = 'Orbital layers not shown: ' + why + '.';
+  orbPaint();
 }
 
-// While on: re-read the small meta; fetch the CSV only if its checksum changed. A failed re-check keeps the
-// current file (it carries its own times; stale counts keep rising honestly).
-async function satRecheck() {
-  if (!sat.on || document.hidden) return;
+// While on: re-read the small meta (+ the hub's latest orbital run); fetch the CSV only if its checksum changed. A failed
+// re-check keeps the current file, which carries its own times.
+async function orbRecheck() {
+  if (!orb.on.size || document.hidden || orb.busy) return;
   try {
-    const { meta } = await satFetchMeta();
-    if (!meta || meta.elements.sha256 === sat.csvVersion) { if (meta) sat.meta = meta; return; }
-    const loaded = await satLoadElements(meta);
-    if (loaded.ok && sat.ready.rows > sat.capacity) { satTeardownLayer(); await nextFrames(2); if (!(await satCreateLayer(sat.ready.rows))) return satFail('the satellite layer could not be rebuilt for a larger file'); sat.layer.visible = sat.on; }
-    if (loaded.ok) satRequest();
-  } catch (e) { /* keep the current file */ }
-}
-
-async function setSat(on) {
-  if (sat.busy || on === sat.on) return;
-  if (!on) {
-    satStopTimers();
-    sat.on = false; sat.why = null;
-    if (sat.layer) sat.layer.visible = false;                  // hidden, not destroyed: the measured fix (bench 1.6)
-    satPaint(); return;
-  }
-  sat.why = null;
-  if (!globeOk) { sat.why = 'Satellites not shown: the globe is unavailable in this browser.'; satPaint(); return; }
-  if (typeof Worker === 'undefined' || !(window.crypto && crypto.subtle)) { sat.why = 'Satellites not shown: this browser lacks what the calculation needs (background workers or checksums).'; satPaint(); return; }
-  sat.busy = true; satPaint();
-  $('sat-lines').hidden = false; $('sat-lines').innerHTML = '<div>Loading element sets from the hub…</div>';
-  try {
-    const { meta, problem } = await satFetchMeta();
-    if (problem) return satFail(problem);
-    const loaded = await satLoadElements(meta);
-    if (loaded.problem) return satFail(loaded.problem);
-    sat.meta = meta;
-    if (!sat.layer || sat.ready.rows > sat.capacity) {
-      if (sat.layer) { satTeardownLayer(); await nextFrames(2); }
-      if (!(await satCreateLayer(sat.ready.rows))) return satFail('this browser did not create the satellite layer');
+    const { meta } = await orbFetchMeta();
+    if (!meta) { orbPaint(); return; }
+    if (meta.elements.sha256 === orb.csvVersion) { orb.meta = meta; orbPaint(); return; }
+    if (ME.orbGroups(meta).map(g => g.id).join() !== orb.groupIds.join()) {
+      orbStopTimers(); for (const l of Object.values(orb.layers)) l.visible = false; orb.on.clear(); orb.last = {}; orb.at = null;
+      orbTeardownLayers(); orb.csvVersion = null; orb.meta = meta; orbSyncButtons(meta); orbWire();
+      orb.why = null; $('orb-lines').hidden = false; $('orb-lines').innerHTML = '<div>The hub now classifies these objects differently; the layers on offer changed. Switch on again.</div>';
+      return;
     }
-    sat.on = true; sat.busy = false;
-    sat.layer.visible = true;
-    satRequest();                                               // immediately on enable
-    sat.timer = setInterval(satRequest, SATC.UPDATE_MS);
-    sat.metaTimer = setInterval(satRecheck, SATC.META_RECHECK_MS);
-    satPaint();
+    orb.busy = true;
+    const loaded = await orbLoadElements(meta);
+    if (loaded.ok && !orbFits(meta)) {
+      orbTeardownLayers(); await orbNextFrames(2);
+      if (!(await orbCreateLayers(meta))) return orbFail('the orbital layers could not be rebuilt for a larger file');
+      for (const id of orb.on) orb.layers[id].visible = true;
+    }
+    orb.busy = false;
+    if (loaded.ok) { orb.last = {}; orbRequest(true); }
+    orbPaint();
+  } catch (e) { orb.busy = false; /* keep the current file */ }
+}
+
+async function setOrb(id, want) {
+  if (orb.busy || want === orb.on.has(id)) return;
+  if (!want) {
+    orb.on.delete(id); delete orb.last[id];
+    const l = orb.layers[id]; if (l) { l.visible = false; l.geometry.setDrawRange(0, 0); }   // hidden, not destroyed (bench 1.6)
+    if (!orb.on.size) { orbStopTimers(); orb.at = null; }
+    orbPaint(); return;
+  }
+  orb.why = null;
+  if (!globeOk) { orb.why = 'Orbital layers not shown: the globe is unavailable in this browser.'; orbPaint(); return; }
+  if (typeof Worker === 'undefined' || !(window.crypto && crypto.subtle)) { orb.why = 'Orbital layers not shown: this browser lacks what the calculation needs (background workers or checksums).'; orbPaint(); return; }
+  if (orb.worker && orb.csvVersion && Object.keys(orb.layers).length) {        // file already loaded: just show this group
+    orb.on.add(id); orbStartTimers(); orbRequest(true); orbPaint(); return;
+  }
+  orb.busy = true; orbPaint();
+  $('orb-lines').hidden = false; $('orb-lines').innerHTML = '<div>Loading orbital element sets from the hub…</div>';
+  try {
+    const { meta, problem } = await orbFetchMeta();
+    if (problem) return orbFail(problem);
+    if (orbSyncButtons(meta)) { orbWire(); if (!orb.groupIds.includes(id)) { orb.busy = false; orb.meta = meta; orbPaint(); return; } }
+    const loaded = await orbLoadElements(meta);
+    if (loaded.problem) return orbFail(loaded.problem);
+    orb.meta = meta;
+    if (!orbFits(meta)) {
+      if (Object.keys(orb.layers).length) { orbTeardownLayers(); await orbNextFrames(2); }
+      if (!(await orbCreateLayers(meta))) return orbFail('this browser did not create the orbital layers');
+    }
+    orb.busy = false; orb.on.add(id);
+    orbStartTimers(); orbRequest(true);                         // immediately on enable
+    orbPaint();
   } catch (e) {
-    console.error('[Mother Earth] satellites:', e);
-    satFail('the hub could not be reached');
+    console.error('[Mother Earth] orbital:', e);
+    orbFail('the hub could not be reached');
   }
 }
 
-$('tgl-sat').addEventListener('click', () => setSat(!sat.on));
-document.addEventListener('visibilitychange', () => { if (!document.hidden && sat.on) satRequest(); });
-window.addEventListener('pageshow', () => { if (sat.on) satRequest(); });
+function orbWire() { for (const b of orbBtns()) b.onclick = () => setOrb(b.dataset.g, !orb.on.has(b.dataset.g)); }
+orbWire();
+document.addEventListener('visibilitychange', () => { if (!document.hidden && orb.on.size) orbRequest(true); });
+window.addEventListener('pageshow', () => { if (orb.on.size) orbRequest(true); });
 // read-only diagnostics for the console and the test harness
-ME.satVertex = i => sat.layer ? Array.from(sat.layer.geometry.attributes.position.array.slice(i * 3, i * 3 + 3)) : null;
+ME.orbState = () => {
+  const layers = {}; for (const id in orb.layers) { const l = orb.layers[id]; layers[id] = { visible: l.visible, drawRange: l.geometry.drawRange.count, cap: orb.caps[id], colour: '#' + l.material.color.getHexString() }; }
+  return { on: [...orb.on], busy: orb.busy, why: orb.why, groupIds: orb.groupIds, layers, timer: !!orb.timer, metaTimer: !!orb.metaTimer, worker: !!orb.worker,
+    seq: orb.seq, inflight: orb.inflight, passGroups: orb.passGroups || [], hiddenSkips: orb.hiddenSkips, requests: orb.requests, last: orb.last, at: orb.at, fileSha: orb.csvVersion,
+    ready: orb.ready && { rows: orb.ready.rows, groups: orb.ready.groups, notDrawn: orb.ready.notDrawn }, retrieved: orb.meta && orb.meta.retrieved_at,
+    particleObjects: globeOk ? (() => { let n = 0, v = 0; globe.scene().traverse(o => { if (o.type === 'Points' && o.__globeObjType === 'particles') { n++; if (o.visible) v++; } }); return { n, v }; })() : null };
+};
+ME.orbVertex = (gid, i) => orb.layers[gid] ? Array.from(orb.layers[gid].geometry.attributes.position.array.slice(i * 3, i * 3 + 3)) : null;
 ME.coordsAt = (lat, lng, alt) => globeOk ? globe.getCoords(lat, lng, alt) : null;
-ME.satState = () => ({ on: sat.on, busy: sat.busy, why: sat.why, hasLayer: !!sat.layer, layerVisible: sat.layer ? sat.layer.visible : null,
-  capacity: sat.capacity, drawRange: sat.layer ? sat.layer.geometry.drawRange.count : null, timer: !!sat.timer, metaTimer: !!sat.metaTimer,
-  worker: !!sat.worker, seq: sat.seq, inflight: sat.inflight, hiddenSkips: sat.hiddenSkips, last: sat.last, applyMs: sat.lastApplyMs,
-  fileSha: sat.csvVersion, retrieved: sat.meta && sat.meta.retrieved_at,
-  particleObjects: globeOk ? (() => { let n = 0, v = 0; globe.scene().traverse(o => { if (o.type === 'Points' && o.__globeObjType === 'particles') { n++; if (o.visible) v++; } }); return { n, v }; })() : null });
 
 // ---------- cards
 const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = f.why; };

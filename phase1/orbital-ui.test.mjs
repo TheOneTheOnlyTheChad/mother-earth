@@ -65,5 +65,16 @@ ok('missing CLASS column refused', !!ME.orbMetaProblem(meta({ elements: { rows: 
 ok('counts that do not add up refused', !!ME.orbMetaProblem(meta({ counts: { ...COUNTS, debris: 1 } })));
 ok('non-ok source_status refused', !!ME.orbMetaProblem(meta({ source_status: 'down' })));
 
+// ---- renderer helpers (thread 9)
+const gm = ME.orbGroupMap(meta());
+ok('group map: every published class mapped; unknown type → null; payload statuses → payload while pending', gm.unknown_type === null && gm.payload_status_unavailable === 'payload' && gm.rocket_body === 'rocket_body' && gm.debris === 'debris' && Object.keys(gm).length === 8, gm);
+const gmS = ME.orbGroupMap(withStatus);
+ok('group map with status: unavailable/unknown/unmatched → null, inactive + rocket bodies share a toggle', gmS.payload_status_unavailable === null && gmS.payload_unmatched === null && gmS.inactive === 'inactive_rb' && gmS.rocket_body === 'inactive_rb' && gmS.active === 'active', gmS);
+const pl = ME.orbPassLine({ id: 'debris', label: 'Debris' }, { rows: 10118, drawn: 10107, failed: 11, stale: 300, beyond: 2 });
+ok('pass line: rows, drawn, not drawn, stale, beyond — from one pass', pl === 'Debris: 10,118 in the file · 10,107 drawn · 11 not drawn (unusable elements or propagation failure) · 300 with elements older than 3 days (positions may be unreliable) · 2 higher than geostationary orbit, may lie outside the view.', pl);
+ok('pass line: zeros omitted, never invented', ME.orbPassLine({ label: 'Payloads' }, { rows: 5, drawn: 5, failed: 0, stale: 0, beyond: 0 }) === 'Payloads: 5 in the file · 5 drawn.');
+ok('colours: three distinct per type group', new Set(['payload', 'rocket_body', 'debris'].map(ME.orbColour)).size === 3);
+ok('size-floor line cites ESA report with its data date', /ESA Space Environment Report 2025, data to end of 2024/.test(ME.ORB.SIZE_FLOOR));
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

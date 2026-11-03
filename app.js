@@ -435,6 +435,88 @@ ME.orbPanel = (meta, lastRun, now) => {
   return { state, available: true, headline: null, lines, groups };
 };
 
+// ---------- orbital renderer helpers (thread 9, 3 Nov 2026). Same design as satellites: worker propagation every 2 s only
+// while a toggle is on and the tab is visible; one particle set PER TOGGLE, created once, positions written in place,
+// visibility toggled, never re-digested. The worker carries CLASS so each object goes to its group via ME.orbGroupOf;
+// a class with no group (null) is counted, never drawn.
+Object.assign(ME.ORB, {
+  UPDATE_MS: 2000, META_RECHECK_MS: 30 * 60e3, STALE_DAYS: 3, GEO_H_KM: 35786, R_KM: 6371, MARKER_PX: 2.5, CAPACITY_HEADROOM: 0.25,
+  COLOURS: { payload: '#c9b6ff', active: '#c9b6ff', rocket_body: '#ffd27a', inactive_rb: '#ffd27a', debris: '#9fb4c8' },
+  // ESA, "ESA Space Environment Report 2025" (esa.int, 1 Apr 2025; data to end of 2024). Figures as published there.
+  SIZE_FLOOR: 'Only catalogued objects can be drawn. Space surveillance networks track about 40,000 objects; ESA estimates more than 1.2 million objects larger than 1 cm in orbit (ESA Space Environment Report 2025, data to end of 2024). Objects that are not catalogued are not shown.',
+});
+ME.orbColour = id => ME.ORB.COLOURS[id] || '#c9b6ff';
+// class → group id (or null) for every class the hub can publish, under this meta's classification
+ME.orbGroupMap = meta => Object.fromEntries((meta && meta.classification && meta.classification.classes || Object.keys((meta && meta.counts) || {})).map(k => [k, ME.orbGroupOf(k, meta)]));
+
+// The CSV that arrives must be exactly the file the meta describes (hash), with the expected 18-column header.
+ME.orbCsvProblem = async (csv, meta) => {
+  if (typeof csv !== 'string' || !csv.length) return 'the element file was empty';
+  const head = csv.slice(0, csv.indexOf('\n')).replace(/\r$/, '');
+  if (head !== ME.ORB.HEADER) return 'the element file has an unexpected header';
+  if ((await ME.sha256Hex(csv)) !== meta.elements.sha256) return 'the element file does not match its published checksum (it may have changed mid-read); nothing was drawn from it';
+  return null;
+};
+
+// One line per ON toggle, from that toggle's own pass (never mixed across passes or groups).
+// g = { id, label, count } from orbPanel; p = { rows, drawn, failed, stale, beyond, at } for that group
+ME.orbPassLine = (g, p) => {
+  const n = x => (x || 0).toLocaleString('en-US');
+  const notDrawn = p.rows - p.drawn;
+  return `${g.label}: ${n(p.rows)} in the file · ${n(p.drawn)} drawn` + (notDrawn ? ` · ${n(notDrawn)} not drawn (unusable elements or propagation failure)` : '')
+    + (p.stale ? ` · ${n(p.stale)} with elements older than ${ME.ORB.STALE_DAYS} days (positions may be unreliable)` : '')
+    + (p.beyond ? ` · ${n(p.beyond)} higher than geostationary orbit, may lie outside the view` : '') + '.';
+};
+ME.orbLegend = (groups, at) => `<b>Orbital</b> · ${groups.map(g => `<span class="orb-sw" style="--oc:${ME.orbColour(g.id)}"></span>${g.label}`).join(' · ')} · computed positions · ${at.slice(11, 19)} UTC · markers enlarged, not to scale`;
+
+/* Worker: CSV (17 propagation columns + CLASS) → satrecs per group → positions for the groups asked for.
+*  init {csv, version, groupOf:{class: groupId|null}} → ready {rows, version, groups:{id:{rows, usable, initFail}}, notDrawn, unknownClass}
+*  prop {t, seq, version, globeR, groups:[ids]} → pos {seq, version, at, groups:{id:{xyz, rows, drawn, failed, stale, beyond}}}
+*  Same arithmetic as the satellites worker (placement agreed with globe.gl to 9e-5 units). */
+ME.orbWorkerSource = (satjsUrl, R_KM, staleDays, geoKm) => `
+let loadErr = null;
+try { importScripts(${JSON.stringify(satjsUrl)}); } catch (e) { loadErr = String(e && e.message || e); }
+const NUM = new Set(['MEAN_MOTION','ECCENTRICITY','INCLINATION','RA_OF_ASC_NODE','ARG_OF_PERICENTER','MEAN_ANOMALY','EPHEMERIS_TYPE','NORAD_CAT_ID','ELEMENT_SET_NO','REV_AT_EPOCH','BSTAR','MEAN_MOTION_DOT','MEAN_MOTION_DDOT']);
+const D2R = Math.PI / 180, RKM = ${R_KM}, STALE_MS = ${staleDays} * 86400e3, GEO = ${geoKm};
+let G = {}, rows = 0;
+onmessage = e => { const m = e.data;
+  if (m.type === 'init') {
+    if (loadErr || typeof satellite === 'undefined') { postMessage({ type: 'error', why: 'the orbit library could not be loaded' + (loadErr ? ' (' + loadErr + ')' : '') }); return; }
+    G = {}; let notDrawn = 0, unknownClass = 0;
+    const L = m.csv.trim().split(/\\r?\\n/); const h = L[0].split(','); const iC = h.indexOf('CLASS'); rows = L.length - 1;
+    for (let i = 1; i < L.length; i++) {
+      const c = L[i].split(','); const cls = c[iC];
+      if (!(cls in m.groupOf)) { unknownClass++; notDrawn++; continue; }
+      const gid = m.groupOf[cls]; if (gid === null) { notDrawn++; continue; }
+      const g = G[gid] || (G[gid] = { recs: [], epoch: [], rows: 0, initFail: 0 }); g.rows++;
+      const o = {}; h.forEach((k, j) => { if (k !== 'CLASS') o[k] = NUM.has(k) ? +c[j] : c[j]; });
+      try { const s = satellite.json2satrec(o); if (!s || s.error) { g.initFail++; continue; } g.recs.push(s); g.epoch.push(Date.parse(o.EPOCH + 'Z')); } catch (err) { g.initFail++; }
+    }
+    const groups = {}; for (const k in G) groups[k] = { rows: G[k].rows, usable: G[k].recs.length, initFail: G[k].initFail };
+    postMessage({ type: 'ready', rows, version: m.version, groups, notDrawn, unknownClass });
+  }
+  if (m.type === 'prop') {
+    const t = m.t, d = new Date(t), gm = satellite.gstime(d), GR = m.globeR, out = {}, tr = [];
+    for (const gid of m.groups) { const g = G[gid];
+      if (!g) { const xyz = new Float32Array(0); out[gid] = { xyz, rows: 0, drawn: 0, failed: 0, stale: 0, beyond: 0 }; continue; }
+      const N = g.recs.length, xyz = new Float32Array(N * 3); let k = 0, failed = 0, stale = 0, beyond = 0;
+      for (let i = 0; i < N; i++) {
+        if (t - g.epoch[i] > STALE_MS) stale++;
+        let pv; try { pv = satellite.propagate(g.recs[i], d); } catch (err) { pv = null; }
+        const p = pv && pv.position;
+        if (!p || typeof p !== 'object' || !isFinite(p.x)) { failed++; continue; }
+        const q = satellite.eciToGeodetic(p, gm); const lat = q.latitude / D2R, lng = q.longitude / D2R, hkm = q.height;
+        if (!isFinite(lat) || !isFinite(lng) || !isFinite(hkm)) { failed++; continue; }
+        if (hkm > GEO) beyond++;
+        const r = GR * (1 + hkm / RKM), phi = (90 - lat) * D2R, th = (90 - lng) * D2R;
+        xyz[k++] = r * Math.sin(phi) * Math.cos(th); xyz[k++] = r * Math.cos(phi); xyz[k++] = r * Math.sin(phi) * Math.sin(th);
+      }
+      out[gid] = { xyz, rows: g.rows, drawn: k / 3, failed: failed + g.initFail, stale, beyond }; tr.push(xyz.buffer);
+    }
+    postMessage({ type: 'pos', seq: m.seq, version: m.version, at: d.toISOString(), groups: out }, tr);
+  }
+};`;
+
 // ---------- satellites: MODEL tier — positions are COMPUTED by SGP4 from CelesTrak element sets, never observed.
 // Pure helpers live here so they can be tested in Node; the overlay itself is in index.html. Benchmarked design
 // (thread 6/7, bench 1.6.1): propagation in a Web Worker every 2 s, one batched particle layer created once,
