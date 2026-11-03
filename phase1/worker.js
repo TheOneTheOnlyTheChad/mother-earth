@@ -43,12 +43,12 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.2.1';
+const COLLECTOR_VERSION = '0.2.2';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_DAY_BOUNDARY_H = 4;             // before 04:00 UTC an empty FIRMS file is the day boundary, not an outage (measured 1 Nov 2026: first rows at 04:00)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
@@ -797,6 +797,104 @@ async function hourlyBatch(env, scheduledMs) {
   return out;
 }
 
+// ---------------------------------------------------------------- CelesTrak GP — satellites (MODEL tier: element sets for propagation, not observations)
+
+/* CelesTrak "active" GP element sets (OMM-keyword CSV). The hub stores the file as received and validated; the page
+*  propagates it. Viewers never touch CelesTrak. Request strategy (REGISTER, CelesTrak row): at most one stamp check per
+*  slot, a data request only when CelesTrak's "Current as of" stamp is newer than the stamp of our last successful download,
+*  one attempt, no retries inside a slot; any non-200 or failed validation is recorded and the previous valid file is kept
+*  with its own times. Scheduled only when env.SATELLITES_ENABLED === '1' (odd UTC hours on the :07 job ≈ 43 min after
+*  CelesTrak's even-hour refresh); /admin/run/satellites runs it once by hand under the same rules. */
+const SAT = {
+  stampUrl: 'https://celestrak.org/NORAD/elements/',
+  dataUrl: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=csv',
+  header: 'OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT',
+  minRows: 1000, minFractionOfPrevious: 0.8, maxBytes: 8 * 1024 * 1024, sampleLines: 200,
+  stateKey: 'state/satellites.json', csvKey: 'latest/satellites.csv', metaKey: 'latest/satellites.json',
+};
+const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+
+/** "Current as of 2026 Nov 02 14:24:24 UTC" → ISO, or null. Pure; tested in satellites-hub.test.mjs. */
+function parseCelestrakStamp(html) {
+  const m = /Current as of\s+(\d{4})\s+([A-Z][a-z]{2})\s+(\d{1,2})\s+(\d{2}):(\d{2}):(\d{2})\s+UTC/.exec(html || '');
+  if (!m || !(m[2] in MONTHS)) return null;
+  return new Date(Date.UTC(+m[1], MONTHS[m[2]], +m[3], +m[4], +m[5], +m[6])).toISOString();
+}
+
+/** Structural validation of the GP CSV, cheap enough for a Worker: exact header, complete final line, row count against
+ *  floors, and a field-count check on evenly spaced sample lines (not every line — stated as a sample in the result). */
+function validateGpCsv(text, previousRows) {
+  const problems = [];
+  if (typeof text !== 'string' || !text.length) return { ok: false, rows: 0, problems: ['empty body'] };
+  if (text.length > SAT.maxBytes) problems.push(`body ${text.length} B exceeds ${SAT.maxBytes} B`);
+  const firstNl = text.indexOf('\n');
+  const header = (firstNl < 0 ? text : text.slice(0, firstNl)).replace(/\r$/, '');
+  if (header !== SAT.header) problems.push('unexpected header: ' + header.slice(0, 120));
+  if (!text.endsWith('\n')) problems.push('final line incomplete (no trailing newline)');
+  const starts = [];
+  for (let i = firstNl; i >= 0 && i < text.length - 1; i = text.indexOf('\n', i + 1)) starts.push(i + 1);
+  const rows = starts.length;
+  if (rows < SAT.minRows) problems.push(`only ${rows} rows (floor ${SAT.minRows})`);
+  if (previousRows && rows < previousRows * SAT.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(SAT.minFractionOfPrevious * 100)} %)`);
+  let sampled = 0, badFields = 0;
+  const step = Math.max(1, Math.floor(rows / SAT.sampleLines));
+  for (let k = 0; k < rows; k += step) {
+    const s = starts[k], e = text.indexOf('\n', s), line = text.slice(s, e < 0 ? text.length : e).replace(/\r$/, '');
+    sampled++; if (line.split(',').length !== 17 || !/^\d{4}-\d{2}-\d{2}T/.test(line.split(',')[2] || '')) badFields++;
+  }
+  if (badFields) problems.push(`${badFields} of ${sampled} sampled lines malformed`);
+  return { ok: problems.length === 0, rows, sampled_lines: sampled, problems };
+}
+
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function collectSatellites(env, scheduledMs) {
+  const layer = 'satellites', started = Date.now();
+  const state = (await getJson(env, SAT.stateKey)) || {};
+  const attempt = { at: nowIso(), scheduled_for: new Date(scheduledMs).toISOString() };
+  const record = async (status, http, note, extra = {}) => {
+    const next = { ...state, last_attempt: { ...attempt, status, http, note, ...extra } };
+    await putJson(env, SAT.stateKey, next);
+    await logRun(env, layer, started, status, http, extra.rows || 0, extra.bytes || 0, note);
+    return `${status}: ${note}`;
+  };
+  // 1. stamp check (one request)
+  let st;
+  try { st = await fetchText(SAT.stampUrl); } catch (e) { return record('down', 0, 'stamp fetch failed: ' + String(e).slice(0, 160)); }
+  if (st.status !== 200) return record('down', st.status, 'stamp page HTTP ' + st.status + ': ' + st.text.slice(0, 300));
+  const stamp = parseCelestrakStamp(st.text);
+  if (!stamp) return record('down', 200, 'stamp not found on ' + SAT.stampUrl);
+  attempt.source_stamp = stamp;
+  if (state.last_success && state.last_success.source_stamp && stamp <= state.last_success.source_stamp)
+    return record('ok', 200, `no newer data (stamp ${stamp}; last success stamp ${state.last_success.source_stamp}); no data request made`, { data_request: false });
+  // 2. data request (one attempt)
+  let d;
+  try { d = await fetchText(SAT.dataUrl); } catch (e) { return record('down', 0, 'data fetch failed: ' + String(e).slice(0, 160), { data_request: true }); }
+  if (d.status !== 200) return record('down', d.status, `data HTTP ${d.status}: ${d.text.slice(0, 600)}`, { data_request: true });
+  // 3. validate before publishing anything
+  const v = validateGpCsv(d.text, state.last_success && state.last_success.rows);
+  if (!v.ok) return record('down', 200, 'validation failed: ' + v.problems.join('; ').slice(0, 400), { data_request: true, rows: v.rows, bytes: d.text.length });
+  const sha = await sha256Hex(d.text);
+  const retrievedAt = nowIso();
+  // 4. publish: CSV first, then the meta that points at it (a reader that sees new meta always finds the matching CSV)
+  await env.R2.put(SAT.csvKey, d.text, { httpMetadata: { contentType: 'text/csv; charset=utf-8' }, customMetadata: { sha256: sha, retrieved_at: retrievedAt, source_stamp: stamp } });
+  const meta = {
+    schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer, tier: 'model',
+    retrieved_at: retrievedAt, source_stamp: stamp, source_status: 'ok', stale_after_s: STALE_AFTER_S[layer],
+    elements: { path: '/elements/satellites', format: 'OMM-keyword CSV (CelesTrak GP)', rows: v.rows, bytes: d.text.length, sha256: sha, header: SAT.header },
+    validation: { structural: 'header exact; final line complete; row floors passed', sampled_lines: v.sampled_lines, completeness: 'not established — the response carries no row count or checksum' },
+    source: { name: 'CelesTrak', url: SAT.dataUrl, group: 'active', origin: 'US Space Force 18th/19th Space Defense Squadrons, via Space-Track.org' },
+    quantity: 'general-perturbations mean element sets for propagation (SGP4); positions drawn from them are computed, not observed',
+    map_layer: true,
+  };
+  await putJson(env, SAT.metaKey, meta);
+  state.last_success = { at: retrievedAt, source_stamp: stamp, rows: v.rows, bytes: d.text.length, sha256: sha };
+  return record('ok', 200, `published ${v.rows} element sets, ${d.text.length} B, stamp ${stamp}`, { data_request: true, rows: v.rows, bytes: d.text.length });
+}
+
 // ---------------------------------------------------------------- dispatch
 
 /** Run a collector so that an unexpected throw is recorded as a 'down' run and never takes the others with it. */
@@ -813,13 +911,15 @@ const JOBS = {
   minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
   firms: async (env, ms) => guarded(env, 'firms', ms, collectFirms),
   forest: async (env, ms) => guarded(env, 'forest', ms, collectForest),
+  satellites: async (env, ms) => guarded(env, 'satellites', ms, collectSatellites),   // manual: /admin/run/satellites (same stamp gate)
   hourly: async (env, ms, manual) => {
     const k = await guarded(env, 'swpc', ms, collectSwpc);          // Kp is a 3-hourly product; hourly matches NWS's "know your refresh frequency" (REGISTER.md)
     const c = await guarded(env, 'co2', ms, collectCo2);
     const hr = new Date(ms).getUTCHours();
     const i = (manual || hr % 6 === 3) ? await guarded(env, 'seaice', ms, collectSeaIce) : 'seaice:skipped (runs 03/09/15/21 UTC)';   // NSIDC updates once a day
+    const s = env.SATELLITES_ENABLED !== '1' ? 'satellites:not scheduled (SATELLITES_ENABLED unset)' : (!manual && hr % 2 === 1) ? await guarded(env, 'satellites', ms, collectSatellites) : 'satellites:skipped (odd UTC hours only)';
     const b = await hourlyBatch(env, ms);
-    return { swpc: k, co2: c, seaice: i, batch: b };
+    return { swpc: k, co2: c, seaice: i, satellites: s, batch: b };
   },
 };
 
@@ -834,7 +934,7 @@ function jobForCron(cron) {
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest'];   // GET-readable; ships/lightning arrive via /ingest (D11)
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest', 'satellites'];   // GET-readable; ships/lightning arrive via /ingest (D11)
 const INGEST_LAYERS = ['mock', 'opensky', 'ships', 'lightning'];   // D11: external collectors (Mac/Pi) publish these through /ingest
 const INGEST_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -984,6 +1084,12 @@ export default {
       return new Response(o.body, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'ETag': o.httpEtag, ...CORS } });
     }
 
+    if (p[0] === 'elements' && p[1] === 'satellites') {   // the validated GP CSV the page propagates; served as stored
+      const o = await env.R2.get(SAT.csvKey);
+      if (!o) return json({ error: 'no element file yet', layer: 'satellites' }, 404);
+      return new Response(o.body, { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Cache-Control': 'public, max-age=600', 'ETag': o.httpEtag, 'X-Elements-SHA256': (o.customMetadata && o.customMetadata.sha256) || '', 'Access-Control-Expose-Headers': 'ETag, X-Elements-SHA256', ...CORS } });
+    }
+
     if (p[0] === 'status') {
       const runs = await env.DB.prepare('SELECT layer, started_at, status, http_status, records, bytes, note FROM collector_runs WHERE id IN (SELECT MAX(id) FROM collector_runs GROUP BY layer)').all();
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
@@ -1000,7 +1106,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/status'], layers: LAYERS,
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/elements/satellites', '/status'], layers: LAYERS,
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };
