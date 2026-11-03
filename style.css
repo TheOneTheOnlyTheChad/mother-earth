@@ -133,6 +133,8 @@ button.res.go .rt{color:var(--fg)}
 .ovl-tgl .t{font-size:12.5px;color:var(--fg);line-height:1.3}
 .ovl-tgl:hover .t{color:var(--accent)}
 .ovl .hint{font-variant-numeric:tabular-nums}
+.sat-lines div{margin-top:3px}
+.sat-lines .sat-mk b{color:#c9b6ff}
 .ovl .hint b{color:var(--warn);font-weight:500}
 .legend .nightleg{color:var(--fg);font-variant-numeric:tabular-nums}
 .legend .nightleg b{color:#cfe0f5;font-weight:600}
