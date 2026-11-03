@@ -1,80 +1,50 @@
-# Mother Earth — handover (3 Nov, thread 7: satellites PUBLIC; aircraft RC on branch `aircraft-rc`, not public — read STATUS top sections first)
+# Mother Earth — handover to thread 8 (3 Nov 2026, end of thread 7)
 
-Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration contract), then this file, then `STATUS.md` (newest sections first). Not a fresh sandbox: nothing below needs re-investigating.
+Read `START-HERE.md` (§2 constitution · §4 deploy — API method first · §5a testing), then this file, then `STATUS.md` (newest sections first). Not a fresh sandbox: nothing below needs re-investigating.
 
 ---
 
 ## 0. State in one paragraph
 
-**Nothing public changed in thread 6.** Page, hub (collector `0.2.1`) and Mac collector (`mac-0.3.2`) are exactly as at the start of the day; page assets still `?v=202611021500`. Thread 6 closed the terminator deployment check, did two desk checks (FIRMS observability docs, NOAA's raw CO₂ file), and ran the satellite work to an approved direction and a private benchmark. Satellites are **not live**: the gate is the reuse basis.
+**Satellites are public** (page `4c974ab`+docs, assets `?v=202611031600`): its own card at the bottom of the right column, off on load, CelesTrak "active" set (16,848 objects) propagated in the browser from the hub's validated file. **Hub = collector 0.2.2** with `SATELLITES_ENABLED=1` (satellites job on odd UTC hours at `:07`). **First scheduled run (05:08 UTC) failed: CelesTrak stamp page HTTP 522**; last good file (04:12 UTC) keeps serving — 07:07 slot is the next evidence (a reminder is set in thread 7; re-check it here if it hasn't been recorded). **Aircraft is built but NOT public** on branch `aircraft-rc` (`67c98e3`). Mac collector unchanged (`mac-0.3.2` running; the new `opensky` mode exists only on the branch and is never scheduled). Retention unchanged by decision.
 
-## 0a. Access the next thread has (all verified in thread 6)
+## 0a. Access (all verified thread 7)
 
-- **GitHub:** push straight to `main` of `TheOneTheOnlyTheChad/mother-earth` (attach with `add_repo`, access "push", then shallow-clone to `/home/claude/mother-earth`). `gh` works from the container.
-- **Chad's Mac:** remote-device tools. `~/Documents/Mother Earth/` granted by one folder-access prompt per thread; read/write via `device_bash` (mounted at `$HOME/mnt/Mother Earth`), `device_stage_files` (Mac → container) and `device_commit_files` (container → Mac; see the sync gotcha below). The runtime folder `~/mother-earth/` is reachable the same way. `rm` is blocked unless Chad grants delete permission.
-- **Built-in browser pane (Claude app):** works when the Claude app is open and the pane is displayed (Cmd+Shift+B). Signed in to Cloudflare (dashboard, Worker editor, D1 console, Metrics) and claude.ai. Reaches the hub, the live site, CelesTrak, Space-Track, TraCSS (sites approved this thread: celestrak.org, space-track.org, api.tracss.gov, claude.ai, api.ipify.org, plus earlier ones). Timing measurements are only valid while the pane is displayed.
-- **claude.ai artifacts:** private pages with their own data store (ArtifactData). The private "Satellite Population Bench" lives there.
-- **Project docs:** `Projects.project_write` to `claude/<name>.md` (STATUS, HANDOVER, START-HERE).
-- **Not reachable from these sessions:** Claude in Chrome (extension not connected); the container's and the Mac VM's shells cannot reach celestrak.org or the hub (allowlists). Only Chad's own Terminal writes a fetched file to disk byte-exact.
-- **Chad does himself:** pastes every secret; any account creation (e.g. Space-Track); Worker settings changes (e.g. Observability "Include Invocation logs"); runs in his own Chrome.
+- **GitHub:** `add_repo` (push) → `git clone --depth 1 … /home/claude/mother-earth`. **Pushing `main` publishes the page** — unreleased page work goes on a branch. Shallow clone: fetch a branch as `git fetch origin <b>:refs/remotes/origin/<b>` before `--force-with-lease`.
+- **Chad's Mac:** remote-device tools; `~/Documents/Mother Earth/` needs one folder prompt per thread. `device_bash` there CAN reach `raw.githubusercontent.com` (sync by `curl` from a commit, then `shasum`) but NOT the hub or celestrak. `device_stage_files`/`device_commit_files` were not available in thread 7; private files were moved by base64-in-command (worked, hash-verified).
+- **Browser pane:** signed in to Cloudflare, Space-Track (Chad's account, created 2 Nov), claude.ai. Reaches hub, CelesTrak, Space-Track, raw.githubusercontent.com, github.io. **It only draws (requestAnimationFrame) while displayed** — if a check stalls, `tabs_context` says "hidden"; ask Chad for Cmd+Shift+B. Sending Chad screenshots/files (SendUserFile, display render) takes over the side panel and hides the pane.
+- **Cloudflare deploys:** dashboard API from a `dash.cloudflare.com` tab (START-HERE §4) — code-only `PUT …/content`, file pulled from GitHub by commit + hash check. **Needs Chad's explicit go each time** (the session's safety check blocks it otherwise). Plain-text Worker variables: Settings → Variables and Secrets form, never the bindings API. ADMIN_KEY is in KEYS.md line 8.
+- **Test toolchain (container):** `/home/claude/spike` (npm: globe.gl@2.45.0, satellite.js@6.0.2, pngjs, astronomy-engine); Playwright via `NODE_PATH=/opt/npm-tools/node_modules`; serve the clone with `python3 -m http.server 8899 --bind 127.0.0.1` **in the same command** as the test (backgrounded servers die between turns). The frozen CelesTrak CSV (needed by the satellite suites) is in `~/Documents/Mother Earth/bench-private/celestrak-active-gp.csv` and the private bench artifact — copy it in first.
 
 ## 1. Where things are
 
 | | |
 |---|---|
-| Repo | `github.com/TheOneTheOnlyTheChad/mother-earth`, `main`. Commit straight to main. `bench-private/` is gitignored. |
-| Hub | `https://mother-earth.chadoberholzer.workers.dev`, collector `0.2.1`, crons `:07` · `*/5` · `*/15` · `11,41` |
-| Page | `https://theonetheonlythechad.github.io/mother-earth/`, assets `?v=202611021500` (bump in both html files on any change) |
-| Mac | `~/Documents/Mother Earth/` (synced copy, not a git repo) + runtime `~/mother-earth/` for the collector |
-| **Satellite working set (private)** | `~/Documents/Mother Earth/bench-private/` — `README.md` indexes it. Frozen inputs + `hub-manifest.json` / `celestrak-manifest.json`, `results/`, `code/` (bench source 1.6, `build.py`, `score.py`, runners, `freeze.mjs` + tests). |
-| **Private bench page** | claude.ai artifact "Satellite Population Bench" (platform-stated: readable by only Chad). Holds the same 10 frozen input files. Results save to its private store, collections `runs/` and `memory/`; read them with ArtifactData. Freezer artifact "Satellite Bench Freezer" exists, asset store empty, unused. |
-| Docs | `STATUS.md`, `START-HERE.md`, `HANDOVER.md`, `REGISTER.md` — repo, Mac, and `Projects.project_write` to `claude/<name>.md` |
+| Page | https://theonetheonlythechad.github.io/mother-earth/ · `main` · assets `?v=202611031600` |
+| Hub | https://mother-earth.chadoberholzer.workers.dev · collector **0.2.2** · `SATELLITES_ENABLED=1` · endpoints add `/snapshot/satellites`, `/elements/satellites` |
+| Satellite storage | ONE current file `latest/satellites-elements-<sha12>.csv` + `latest/satellites.json` + `state/satellites.json` (new file → meta → delete previous; failure keeps last good) |
+| Aircraft RC | branch `aircraft-rc` `67c98e3`; Mac copy `~/Documents/Mother Earth/aircraft-rc/` (pre-rebase files — refresh from the branch) |
+| Bench evidence | `~/Documents/Mother Earth/bench-private/thread7/` (hash-verified) |
+| Tests | `phase1/satellites-hub.test.mjs` (12) · `satellites-ui.test.cjs` (66) · on aircraft-rc: `aircraft.test.mjs` (5), `toggles-ui.test.cjs` (25) · plus search/solar/terminator/duration suites, all green 3 Nov |
 
-**Sync gotcha seen this thread (twice):** `device_commit_files` reported "written" while the Mac received an OLD copy. It appears to cache by staged filename: re-using a `stagedPath` that was committed before delivered the earlier content. Always stage under a fresh, unique name (e.g. `STATUS-<commit>.md`), commit to a temporary name, `mv` on the Mac, then compare `shasum` with the repo.
+## 2. Open — next actions in order
 
-**Reaching things:** the container and the Mac's `device_bash` cannot reach celestrak.org or the hub. The browser pane can (cross-origin reads are allowed by both). Only Chad's Terminal can write a fetched file to disk byte-exact. Claude in Chrome was **not reachable** from this session.
+| # | Item | Next step |
+|---|---|---|
+| 1 | **Satellites scheduled refresh: 522 at 05:08** | Read `/status` (satellites) for the 07:07 and 09:07 slots. If they succeed → note recovered. If 522 persists → evidence that Cloudflare egress to celestrak.org is refused; options for Chad: fetch from the Mac (like ships; posts to a new ingest path) or Space-Track via Chad's account (also from the Mac if Cloudflare is refused there too). Never retry inside a slot. |
+| 2 | **Debris / inactive layers (Chad's next ask, with GPT)** | Plan agreed in principle (thread 7 end): positions from Space-Track GP (all on-orbit, Chad's account, ≤ 1/h at an off-peak minute) + SATCAT object type (≤ 1/day after 17:00 UTC) → three independent toggles, all off: Active · Inactive satellites & rocket bodies · Debris. Space-Track's blanket approval covers basic data accessed via the account, with citation. **First step: ONE deliberate Space-Track query from the pane (Chad logged in) to get real counts by OBJECT_TYPE** — nothing built before that. Then: does CelesTrak's OPS_STATUS (working/dead) or an equivalent exist on Space-Track (unverified); one bounded browser re-measure at the real count (16,848 cost ~0 frame time; 30–40k unmeasured); Worker reachability to space-track.org (unmeasured). Below ~10 cm: state ESA's estimate as a number, never draw it. |
+| 3 | **Aircraft to public** | Chad checks the exact OpenSky wording against our setup (only wording on record: ticket #837506, 30 Oct — hobbyist use within credits; public site must also feed the network; no cloud whitelisting). Then: feeder decision if still required; a Mac schedule for `collector-mac.mjs opensky` within credits (posts to `/ingest/opensky`); REGISTER row; merge `aircraft-rc`. |
+| 4 | Retention | Chad handles separately today (incl. provider emails). **Do not change retention without him.** STATUS has the read-from-code audit (page reads only `latest/*`; `cells/` feeds the hourly D1 aggregation; `snapshots/` and `raw/firms/` are read by nothing; D1 aggregates = phase-3 baseline). |
+| 5 | Existing page ~30 fps / slow heap growth | Separate investigation of today's layers. Not a satellite issue. |
+| 6 | Unchanged from thread 6 | FIRMS CPU attribution (invocation logs ARE on — read CPU for `*/15` and the satellites job), CO₂ truncated-200 guard, physical long-sleep test, Galaxy/phones, cables licence. |
 
-## 2. Satellites — where it stands
+## 3. Rules that came out of thread 7
 
-**Approved direction (Chad + GPT):** the full CelesTrak *active* catalogue as a population/distribution view. Keep all objects; only propagation failures omitted, and counted. One toggle, off on load, no card, no trails. Always visible while on: "Markers enlarged for visibility; not to physical scale." Positions at propagated altitude; height above the surface kept distinct from distance from the centre. The geostationary camera view must never be described as showing every orbit. Not a measure of obscuration, ground coverage or collision risk.
+- **Independent optional layers:** satellites and aircraft (and any future debris layers) are separate toggles, **off on a fresh load**, no requests while off, each toggle touches only its own layer. Test both off / each alone / both on / both off.
+- **Storage (MVP, $0):** one current validated snapshot per replaceable feed; publish new with matching metadata before deleting the previous; failures keep the last good snapshot with original times; no temp files. Flag anything the site relies on before changing retention.
+- **Reuse wording:** record published policies + remaining uncertainty + the decision; never describe uncertainty as a licence grant; no commercial-use assumption. Space-Track direct is the documented, cleanest basis.
+- **A test suite must be shown to fail** on a deliberate break before its green result counts.
 
-**Frozen inputs (hash-checked by every bench run):**
-- CelesTrak `GROUP=active&FORMAT=csv`, fetched 2026-11-02 14:26:53 UTC by Chad's Terminal, 16,847 rows, sha256 `2c5c78ab…`. Structure ok, 0 value problems, 0 duplicate IDs, **completeness not established**. Includes 4 rocket bodies CelesTrak lists as active (documented in the scope line).
-- Hub snapshots frozen 13:31:09 UTC, each records/cells pair matched on `retrieved_at` first attempt.
+## 4. Standing rules (unchanged)
 
-**Format:** OMM-keyword CSV/JSON, never TLE (TLE silently drops catalogue numbers > 99999: 949 in the active set).
-
-**Results:** see STATUS "Satellite benchmark 2 Nov" and "Satellite work 2 Nov (later)". In short:
-- **Mac pane and ordinary Mac Chrome agree:** the satellites add ~0 to median frame time. Today's layers already hold the Mac at ~30 fps. Satellites alone run at 60 fps. 0 long tasks in Chrome.
-- **Memory:** a per-toggle GPU geometry leak was found, and fixed by creating the layer once and toggling visibility (bench 1.6). Retained-heap plateau is not yet proven.
-- **Software rendering:** reported only, never scored.
-
-**Recommended implementation (not built):**
-- **Browser:** worker propagation every 2 s with satellite.js 6.0.2 pinned. One batched particle layer, created once, visibility-toggled, positions written in place. globe.gl pinned 2.45.0, with the same refuse-if-missing pattern as day/night. Teardown disposes after removal.
-- **Hub:** stamp-gated single-attempt fetch, at most every 2 h, file stored unparsed (REGISTER has the bounded failure handling). Viewers never touch CelesTrak.
-- **Scope lines:** counts drawn / not drawn, the stale-element line ("124 objects use element sets older than 3 days; their propagated positions may be unreliable"), and "N objects lie beyond the geostationary view".
-
-## 3. Open — each with its decisive next step
-
-| # | Item | Next step | Blocks satellites going public? |
-|---|---|---|---|
-| 1 | **Satellite reuse basis — now a decision, not a research gap (thread 7)** | Evidence read and filed (REGISTER CelesTrak row; STATUS thread 7). No published requirement for individual permission found; the constitution requires the commercial standing *recorded*, not a grant. Chad decides the basis. Recommendation: benchmarked CelesTrak active set fetched by the Worker under CelesTrak's rules, credit + origin citation; Space-Track (Chad's account, created 2 Nov) is the documented alternative. An email to CelesTrak is optional, not required. | **Yes — Chad's decision** |
-| 2 | ~~Memory plateau~~ **DONE 2 Nov (thread 7)** | Tracker hypothesis refuted. No additional growth attributable to satellites was detected against the control (same growth with satellites never shown). Whole-page growth (about +0.5 MB/min in the software renderer) belongs to the existing layers and is folded into item 4. | No (satellites) |
-| 3 | ~~Phase-7 visible object~~ **DONE 2 Nov (thread 7)** | Stale-reference state observed in kind after the phase-6 re-digest (`?refind` run) and cleared by re-finding; only the re-digest path can cause it. Production path (create once, in-place, visibility) shown clean: 0 visible after every one of 180 toggles. | — |
-| 4 | Existing page at ~30 fps on the Mac pane | Separate investigation of today's layers (polygons, merged points, rings), now including their slow retained-heap growth (thread 7). Not a satellite issue. | No |
-| 5 | FIRMS CPU attribution | Docs say CPU/wall time are in the **invocation log** (one event per invocation, ~2.4 % of the Free 200K/day at 100 %). Chad turns on Worker → Settings → Observability → "Include Invocation logs" (Traces off), then read CPU for the `*/15` runs. | No |
-| 6 | CO₂ truncated-200 guard | Response carries Content-Length; file header carries "File Creation". A guard can check both. Not built. (30 Oct is omitted at source; the source omits 109 of 366 days — earlier "contiguous" note withdrawn.) | No |
-| 7 | Physical long-sleep test (Mac) | Unchanged: a suspend that lasts past the hard deadline; no power-setting changes. Note: Chad ran `caffeinate` during the thread-6 benchmark. | No |
-| 8 | Galaxy / Android | Unchanged: physical test pending; all phone checks emulated. Satellites unverified on mobile. | No (desktop decision) |
-| 9 | Submarine cables | Licence question kept for its turn; the shorthand share-alike explanation is not a settled assessment. | — |
-
-## 4. Rules that came out of thread 6
-
-- **CelesTrak:** never fetch the active set from the pane or anywhere else without a reason that justifies it. CelesTrak counted the pane and Chad's Terminal as one requester (403: "GP data has not updated since your last successful download of GROUP=active at …"). The stamp is on `https://celestrak.org/NORAD/elements/` ("Current as of … UTC"). A stamp check is a request strategy, not a guarantee.
-- **Benchmarks:** criteria are written before any real run; a hidden pane throttles rAF to ~1 Hz (bench 1.2+ records visibility and `score.py` refuses hidden runs); software rendering is its own environment, never scored, never a stand-in for phones; consistency between element sets is not accuracy.
-- **Clipboard:** the app flags page-initiated clipboard writes; that route was abandoned rather than worked around.
-- **Report unavailable measurements as unavailable.** Keep cold-start and steady-state costs separate, both reported.
-
-## 5. Standing rules (unchanged)
-
-The promise verbatim; the constitution (START-HERE §2); observations, models and computed context stay distinguishable; no inferred causes, no invented zeros; coverage never inferred from collector uptime; every source's commercial standing in REGISTER before it goes live; $0/month with named triggers; measure, don't assume; bound every test; baby steps; Chad pastes secrets himself.
+The promise verbatim; the constitution (START-HERE §2); observations, models and computed context stay distinguishable; no inferred causes, no invented zeros; every source's commercial standing in REGISTER before it goes live; $0/month with named triggers; measure, don't assume; bound every test; baby steps; Chad pastes secrets himself.
