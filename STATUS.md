@@ -20,6 +20,28 @@ Decision (Chad, 3 Nov): proceed with the benchmarked CelesTrak route on the docu
 - Tests (all 3 Nov, container SwiftShader, real globe.gl 2.45.0 + satellite.js 6.0.2, frozen 16,847-row file): `node phase1/satellites-ui.test.cjs <frozen csv>` **66/66** — counts (drawn, stale > 3 d, beyond GEO) equal an independent Node propagation at the same instant; vertex 0 equals globe.gl's own placement of the reference position (< 1e-3 units); ~2 s cadence with real timers; off stops requests; 20 toggles ⇒ 1 object, 0 visible, no timers, CSV not re-downloaded; hidden tab ⇒ no work; changed hub file picked up in place; six failure paths; phone width. **The suite was shown to fail** when the page was deliberately broken (timers left running on off; stale threshold off by a day). Regression: search 111 · real-data 50 · search-ui 104 · solar 26 · terminator-ui 19 · terminator-behaviour 47 · duration contract — all pass. terminator-ui's selector `.ovl details.scope` became ambiguous (two disclosures) and now targets `#night-scope`; same assertion.
 - **Not verified:** the live hub path (needs 0.2.2 deployed + one run), real Worker CPU for the satellites job, Mac GPU frame time with this exact page build (the bench measured the same rendering design), phones (Galaxy test still pending).
 
+**3 Nov ~04:12 UTC — Chad approved the full release in one go.** Progress:
+1. ✅ **Hub 0.2.2 deployed** (main `1496e2a`, file sha256 `03648f32…`) via the dashboard session's content-only endpoint (code replaced; bindings, secrets, crons untouched; 0.2.1 kept in Cloudflare's version history). `/` and `/status` report 0.2.2; existing layers still served.
+2. ✅ **Reachability test — the single policy-compliant run** (`/admin/run/satellites`, 04:12:13 UTC): stamp check → CelesTrak stamp **2026-11-03 02:15:09 UTC** (newer than nothing) → one data request → validated → published **16,848 element sets, 2,490,850 B**, key `latest/satellites-elements-067d2c65d883.csv`, meta sha256 = served file sha256 (`067d2c65…`, checked in the pane). Wall 12.9 s. CelesTrak reachable from the Worker.
+3. ⏸ RC against the live hub — started on the real origin (RC files loaded from GitHub into a github.io page), meta + CSV + checksum loaded fine; the layer step waits on the pane drawing a frame and **the Claude-app pane is hidden** (no requestAnimationFrame while hidden). Waiting for the pane to be shown. Not a failure.
+   - Found on the way and fixed on the RC (`c9e6122`): the placeholder particles were at 0°,0° on the surface for a frame before the first positions; they now start inside the globe (occluded). satellites-ui still 66/66.
+4. ☐ `SATELLITES_ENABLED=1` · 5. ☐ merge `satellites-rc` → main · 6. ☐ public smoke test.
+
+**Storage rule (Chad, 3 Nov) — MVP, $0/month:** one current validated snapshot per replaceable feed. Satellites implement it exactly: new file validated → stored under its own key → meta published pointing at it → only then the previous file deleted; any failure (fetch, validation, publication) keeps serving the last good snapshot with its original times, and an orphan from a failed publication is deleted. Nothing temporary is written before validation passes.
+
+**Storage audit — what the site and the collectors actually read (worker 0.2.2, read from the code 3 Nov). NO retention changed; flagged for Chad's decision:**
+| Store | Written | Read by | If removed |
+|---|---|---|---|
+| R2 `latest/<layer>.json`, `latest-cells/<layer>.json` | every run (overwritten) | **the page** (`/snapshot`, `/cells`), forest/ships/firms code | site breaks — this IS the latest-good-snapshot store |
+| R2 `latest/satellites.json` + one `latest/satellites-elements-<sha>.csv` | on new data only | **the page** | satellites overlay off |
+| R2 `state/*.json` (forest sweep, satellites, opensky token) | per run | collectors | forest sweep restarts; satellites re-download once |
+| R2 `cells/<layer>/<stamp>.json` | every run; 48 h lifecycle | **hourly aggregation** (previous hour) and `/admin/reaggregate` repair | D1 hourly aggregates stop — **site does not read them** |
+| R2 `snapshots/<layer>/<stamp>.json` | every run; 48 h lifecycle | nothing in code | no visible effect (history only) |
+| R2 `raw/firms/<stamp>.csv` | every 15 min; 48 h lifecycle | nothing in code | no visible effect (history only) |
+| D1 `layer_hourly`, `cell_hourly`, `co2_daily`, `kp_index`, `forest_daily` | hourly / per value | nothing on the page; the phase-3 baseline (D12 deliberate investment) | no visible effect; loses the baseline clock |
+| D1 `collector_runs`, `batch_runs` | per run | `/status` | status report loses "last run" |
+Candidates if Chad wants leaner storage now: `snapshots/` and `raw/firms/` (pure history, nothing reads them); `cells/` could shrink to a few hours (aggregation needs only the previous hour) but not to zero while D1 aggregation runs; the D1 aggregates are the phase-3 baseline — keep or stop is a product decision, not a cleanup. All currently within free allowances (D1 ~10k writes/day measured 1 Nov).
+
 **Release sequence proposed (each step Chad's go):** 1) deploy hub 0.2.2 → 2) one `/admin/run/satellites` = the reachability test (result recorded either way) → 3) open the RC page locally against the live hub and check the lines → 4) set `SATELLITES_ENABLED=1` → 5) merge `satellites-rc` to main (public).
 
 # Mother Earth — status (2 Nov 2026 — thread 7)
