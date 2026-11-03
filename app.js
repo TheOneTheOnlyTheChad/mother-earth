@@ -465,7 +465,7 @@ ME.orbPassLine = (g, p) => {
   const notDrawn = p.rows - p.drawn;
   return `${g.label}: ${n(p.rows)} in the file · ${n(p.drawn)} drawn` + (notDrawn ? ` · ${n(notDrawn)} not drawn (unusable elements or propagation failure)` : '')
     + (p.stale ? ` · ${n(p.stale)} with elements older than ${ME.ORB.STALE_DAYS} days (positions may be unreliable)` : '')
-    + (p.beyond ? ` · ${n(p.beyond)} higher than geostationary orbit, may lie outside the view` : '') + '.';
+    + (p.beyond ? ` · ${n(p.beyond)} above geostationary height (${n(ME.ORB.GEO_H_KM)} km)` : '') + '.';
 };
 ME.orbLegend = (groups, at) => `<b>Orbital</b> · ${groups.map(g => `<span class="orb-sw" style="--oc:${ME.orbColour(g.id)}"></span>${g.label}`).join(' · ')} · computed positions · ${at.slice(11, 19)} UTC · markers enlarged, not to scale`;
 

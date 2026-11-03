@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611032100">
+<link rel="stylesheet" href="style.css?v=202611040900">
 </head>
 <body class="world">
 <header class="top">
@@ -179,7 +179,7 @@
                 <p>The layers follow Space-Track's <b>object type</b>: payloads, rocket bodies, debris. Objects of unknown type are counted, not drawn. Whether a payload is working is <b>not established here</b>: operational status is not used yet, so no payload is shown as active or inactive.</p>
                 <p>It shows the <b>scale and distribution</b> of the public catalogue. It is <b>not</b> a measure of how much sky is obscured, of ground coverage, or of collision risk, and it is not every object in orbit: classified objects and objects too small to track are not in the catalogue.</p>
                 <p>Markers are enlarged so they can be seen; they are not to physical scale. Positions are drawn at their propagated height above the surface.</p>
-                <p>Element sets age. Objects whose elements are more than three days old at the time shown are counted on screen; three days is a disclosure threshold, not an accuracy limit. Objects higher than geostationary orbit are counted, because the view may not frame them.</p>
+                <p>Element sets age. Objects whose elements are more than three days old at the time shown are counted on screen; three days is a disclosure threshold, not an accuracy limit. Objects above geostationary height (35,786 km) are counted too.</p>
                 <p><a href="sources.html#orbital">Full rules on Sources &amp; Details →</a></p>
               </div>
             </details>
@@ -191,7 +191,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611032100"></script>
+<script src="app.js?v=202611040900"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
