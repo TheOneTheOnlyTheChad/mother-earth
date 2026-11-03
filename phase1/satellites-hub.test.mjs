@@ -16,7 +16,8 @@ const ROWS = CSV.split('\n').length - 2;
 function makeEnv(extra = {}) {
   const store = new Map();
   const R2 = {
-    async put(key, body, opts = {}) { store.set(key, { body: String(body), meta: opts.customMetadata || {}, etag: '"' + key.length + ':' + String(body).length + '"' }); },
+    async delete(key) { store.delete(key); },
+    async put(key, body, opts = {}) { if (globalThis.FAIL_PUT && FAIL_PUT(key)) throw new Error('R2 put failed (test)'); store.set(key, { body: String(body), meta: opts.customMetadata || {}, etag: '"' + key.length + ':' + String(body).length + '"' }); },
     async get(key) {
       const o = store.get(key); if (!o) return null;
       return { body: o.body, httpEtag: o.etag, customMetadata: o.meta, async json() { return JSON.parse(o.body); }, async text() { return o.body; } };
@@ -47,6 +48,7 @@ const get = (env, path) => worker.fetch(new Request('https://hub' + path), env);
 let passed = 0; const t = async (name, fn) => { await fn(); passed++; console.log('ok -', name); };
 
 const { env, store, runs } = makeEnv();
+const csvKeys = () => [...store.keys()].filter(k => k.startsWith('latest/satellites-elements-'));
 
 await t('A. first run: stamp check then one data request; CSV + meta published', async () => {
   stubFetch({ stamp: () => stampPage('2026 Nov 02 14:24:24'), data: () => ok(CSV) });
@@ -57,7 +59,7 @@ await t('A. first run: stamp check then one data request; CSV + meta published',
   assert.equal(meta.source_stamp, '2026-11-02T14:24:24.000Z');
   assert.equal(meta.elements.rows, ROWS);
   assert.equal(meta.tier, 'model');
-  assert.equal(store.get('latest/satellites.csv').body, CSV);
+  assert.equal(store.get(meta.elements.key).body, CSV); assert.deepEqual(csvKeys(), [meta.elements.key], 'exactly one element file stored');
   const state = JSON.parse(store.get('state/satellites.json').body);
   assert.equal(state.last_attempt.status, 'ok'); assert.equal(state.last_success.rows, ROWS);
 });
@@ -71,7 +73,7 @@ await t('A2. GET /elements/satellites serves the stored CSV byte-for-byte, CORS 
   const m = await get(env, '/snapshot/satellites'); assert.equal(m.status, 200); assert.equal((await m.json()).layer, 'satellites');
 });
 
-const before = () => ({ csv: store.get('latest/satellites.csv').body, meta: store.get('latest/satellites.json').body });
+const before = () => ({ csv: store.get(JSON.parse(store.get('latest/satellites.json').body).elements.key).body, meta: store.get('latest/satellites.json').body, keys: csvKeys() });
 
 await t('B. same stamp: no data request at all', async () => {
   stubFetch({ stamp: () => stampPage('2026 Nov 02 14:24:24'), data: () => { throw new Error('must not be called'); } });
@@ -126,9 +128,20 @@ await t('H. newer stamp + valid data: replaced, new times, D1 run rows logged', 
   stubFetch({ stamp: () => stampPage('2026 Nov 03 00:24:00'), data: () => ok(csv2) });
   const b = before(); await run(env);
   assert.notDeepEqual(before(), b);
-  assert.equal(store.get('latest/satellites.csv').body, csv2);
+  const m2 = JSON.parse(store.get('latest/satellites.json').body);
+  assert.equal(store.get(m2.elements.key).body, csv2);
+  assert.deepEqual(csvKeys(), [m2.elements.key], 'previous element file deleted after the new meta was published');
   assert.equal(JSON.parse(store.get('latest/satellites.json').body).source_stamp, '2026-11-03T00:24:00.000Z');
   assert.ok(runs.filter(r => r[0] === 'satellites').length >= 8);
+});
+
+await t('H2. meta write fails after the new CSV was stored: previous meta + CSV keep serving; new orphan removed', async () => {
+  const b = before();
+  stubFetch({ stamp: () => stampPage('2026 Nov 03 02:24:00'), data: () => ok(CSV.replace('CALSPHERE 1', 'CALSPHERE 1Y')) });
+  globalThis.FAIL_PUT = k => k === 'latest/satellites.json'; await run(env); globalThis.FAIL_PUT = null;
+  assert.deepEqual(before(), b);
+  assert.match(JSON.parse(store.get('state/satellites.json').body).last_attempt.note, /publication failed/);
+  const r = await get(env, '/elements/satellites'); assert.equal(await r.text(), b.csv);
 });
 
 await t('I. scheduled hourly job: never runs satellites unless SATELLITES_ENABLED=1, and then only on odd UTC hours', async () => {

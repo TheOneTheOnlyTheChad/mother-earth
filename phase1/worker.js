@@ -810,7 +810,7 @@ const SAT = {
   dataUrl: 'https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=csv',
   header: 'OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT',
   minRows: 1000, minFractionOfPrevious: 0.8, maxBytes: 8 * 1024 * 1024, sampleLines: 200,
-  stateKey: 'state/satellites.json', csvKey: 'latest/satellites.csv', metaKey: 'latest/satellites.json',
+  stateKey: 'state/satellites.json', csvPrefix: 'latest/satellites-elements-', metaKey: 'latest/satellites.json',   // ONE current validated file: latest/satellites-elements-<sha12>.csv
 };
 const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
@@ -879,18 +879,24 @@ async function collectSatellites(env, scheduledMs) {
   if (!v.ok) return record('down', 200, 'validation failed: ' + v.problems.join('; ').slice(0, 400), { data_request: true, rows: v.rows, bytes: d.text.length });
   const sha = await sha256Hex(d.text);
   const retrievedAt = nowIso();
-  // 4. publish: CSV first, then the meta that points at it (a reader that sees new meta always finds the matching CSV)
-  await env.R2.put(SAT.csvKey, d.text, { httpMetadata: { contentType: 'text/csv; charset=utf-8' }, customMetadata: { sha256: sha, retrieved_at: retrievedAt, source_stamp: stamp } });
+  // 4. publish (MVP storage: one current validated snapshot). New CSV under its own key → meta pointing at it →
+  //    only then delete the previous CSV. A reader always finds the CSV its meta describes; a failure before the meta
+  //    write leaves the previous meta + CSV serving with their original times (the orphan new key is removed).
+  const prevMeta = await getJson(env, SAT.metaKey);
+  const csvKey = SAT.csvPrefix + sha.slice(0, 12) + '.csv';
+  await env.R2.put(csvKey, d.text, { httpMetadata: { contentType: 'text/csv; charset=utf-8' }, customMetadata: { sha256: sha, retrieved_at: retrievedAt, source_stamp: stamp } });
   const meta = {
     schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer, tier: 'model',
     retrieved_at: retrievedAt, source_stamp: stamp, source_status: 'ok', stale_after_s: STALE_AFTER_S[layer],
-    elements: { path: '/elements/satellites', format: 'OMM-keyword CSV (CelesTrak GP)', rows: v.rows, bytes: d.text.length, sha256: sha, header: SAT.header },
+    elements: { path: '/elements/satellites', key: csvKey, format: 'OMM-keyword CSV (CelesTrak GP)', rows: v.rows, bytes: d.text.length, sha256: sha, header: SAT.header },
     validation: { structural: 'header exact; final line complete; row floors passed', sampled_lines: v.sampled_lines, completeness: 'not established — the response carries no row count or checksum' },
     source: { name: 'CelesTrak', url: SAT.dataUrl, group: 'active', origin: 'US Space Force 18th/19th Space Defense Squadrons, via Space-Track.org' },
     quantity: 'general-perturbations mean element sets for propagation (SGP4); positions drawn from them are computed, not observed',
     map_layer: true,
   };
-  await putJson(env, SAT.metaKey, meta);
+  try { await putJson(env, SAT.metaKey, meta); }
+  catch (e) { try { if (!prevMeta || prevMeta.elements.key !== csvKey) await env.R2.delete(csvKey); } catch (_) {} return record('down', 200, 'publication failed (meta write): ' + String(e).slice(0, 160), { data_request: true }); }
+  if (prevMeta && prevMeta.elements && prevMeta.elements.key && prevMeta.elements.key !== csvKey) { try { await env.R2.delete(prevMeta.elements.key); } catch (e) { console.log('satellites: previous CSV not deleted', String(e)); } }
   state.last_success = { at: retrievedAt, source_stamp: stamp, rows: v.rows, bytes: d.text.length, sha256: sha };
   return record('ok', 200, `published ${v.rows} element sets, ${d.text.length} B, stamp ${stamp}`, { data_request: true, rows: v.rows, bytes: d.text.length });
 }
@@ -1085,7 +1091,8 @@ export default {
     }
 
     if (p[0] === 'elements' && p[1] === 'satellites') {   // the validated GP CSV the page propagates; served as stored
-      const o = await env.R2.get(SAT.csvKey);
+      const m = await getJson(env, SAT.metaKey);
+      const o = m && m.elements && m.elements.key ? await env.R2.get(m.elements.key) : null;
       if (!o) return json({ error: 'no element file yet', layer: 'satellites' }, 404);
       return new Response(o.body, { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Cache-Control': 'public, max-age=600', 'ETag': o.httpEtag, 'X-Elements-SHA256': (o.customMetadata && o.customMetadata.sha256) || '', 'Access-Control-Expose-Headers': 'ETag, X-Elements-SHA256', ...CORS } });
     }
