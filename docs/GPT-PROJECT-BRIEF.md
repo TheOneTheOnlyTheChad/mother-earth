@@ -88,14 +88,12 @@ Chad sees it as the first page of something broader — a way for people to see 
 - A test suite must be shown to fail on a deliberate break before its green result counts.
 - Cost: Workers Paid is accepted; avoid material new load without naming the trigger. R2 and D1 are within free allowances (as of 3 Nov). A spending cap is not configured/verified.
 
-### 9. Checkpoint — 3 Nov 2026, 13:45 UTC (replace from STATUS at each handover)
-- Hub 0.3.0 deployed with `ORBITAL_ENABLED=1`. **First scheduled orbital run (13:41 tick) OK end to end:** served snapshot retrieved 13:42:31 UTC, 32,509 objects (payload 18,954 · rocket body 2,205 · debris 10,118 · unknown 1,232), 6.2 MB, served file checksum = published checksum. Invocation CPU 173 ms, shared with the forest job in the same tick (orbital's share not separable).
-- Private tests (one sample each): untrimmed 18.85 MB → fetch+stage 19 ms CPU, build 170 ms; trimmed 7.01 MB → fetch+stage 17 ms, build 237 ms. Same 32,512 objects (payload 18,954 · rocket body 2,205 · debris 10,121 · unknown 1,232) and same 6.2 MB output. Trimming cut upstream bytes 63 %; no build-CPU improvement established.
-- Tests: orbital collector 13/13 (synthetic + real-shaped), probe 11/11, panel logic on `orbital-rc` 32/32 — each shown to fail on deliberate breaks. Quoted-CSV regression test kept.
-- Satellites toggle still live; CelesTrak refused three scheduled refreshes with 522 (05:08–09:08 UTC) then succeeded at 13:08 UTC (16,844 objects). Cause of the 522s not established.
-- Next: orbital renderer + browser tests on `orbital-rc` (each toggle alone, combinations, all on, all off, fresh load off) against the real file → Chad's go to replace Satellites.
+### 9. Checkpoint — 3 Nov 2026, ~18:30 UTC, end of thread 10 (replace from STATUS at each handover)
+- **Live:** Orbital (Payloads · Rocket bodies · Debris, payload status left mixed by Chad's choice); GEO line now a plain count. **Drifting buoys** public since 17:19 UTC — NOAA OSMC ERDDAP (GTS, CC0), hourly, latest fix per buoy, ~1,300 buoys, future-stamped fixes refused (~10/run), own toggle off on load. Hub 0.3.5.
+- **Ships:** Mac primary; **cloud fallback** on since ~18:10 — the hub samples only when no Mac sample for 40 min. Measured twice: cloud connection hears 43–55 % of the vessels the Mac hears (cause not established; the card says so). Rollup fix: hours whose samples arrive after their batch are re-aggregated (6 h lookback); 2 Nov hour 22 repaired.
+- **Stopped:** CelesTrak satellites job. **Closed:** forest highest-confidence watch (32 cells, 51,497 pixels after the full sweep).
+- **Chad's direction:** history now starts to build deliberately (D1 hourly aggregates kept); Mother Earth is the baseline for his larger purpose. The "Overwatch" comparison is presentation advice only — Chad rejects it as a model (video surveillance).
+- **Next:** Sources & Details storage wording; optional-layers group; compact desktop layout (screenshots first); inspector source links; ocean plastic (dated samples, labelled not live; drifter tracks never imply plastic).
 
-### 10. Open items outside orbital
-- **Ships:** hourly rollup recorded "absent 0/2" for hours whose samples were received (found 1 Nov; the two hours were repaired by hand). Reproduce with the affected hours' records before changing comparison logic.
-- **FIRMS CPU attribution;** CO₂ truncated-200 guard; physical long-sleep test of the Mac collector; Android phone as collector.
-- **Backlog:** ocean plastic (one NOAA Marine Microplastics export first — reuse terms, then dated surface-water samples with units and sampling method; no gap-filling); NOAA drifter tracks as a separate layer; submarine cables (CC BY-SA decision first).
+### 10. Open items outside the next list
+- FIRMS CPU attribution; CO₂ truncated-200 guard; physical long-sleep test of the Mac collector; Android phone as collector; aircraft (Cloudflare 522 + OpenSky feeder requirement; other open ADS-B networks untested); submarine cables (CC BY-SA decision first).
