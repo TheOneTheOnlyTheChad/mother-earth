@@ -1,4 +1,4 @@
-# Mother Earth — handover (2 Nov 2026; §3 updated end of thread 7 — see STATUS "Thread 7" first)
+# Mother Earth — handover (§3 updated 3 Nov, thread 7 — read STATUS "Thread 7, 3 Nov" first: satellites RC on branch `satellites-rc`, hub 0.2.2 committed not deployed)
 
 Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration contract), then this file, then `STATUS.md` (newest sections first). Not a fresh sandbox: nothing below needs re-investigating.
 
@@ -59,7 +59,7 @@ Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration co
 | # | Item | Next step | Blocks satellites going public? |
 |---|---|---|---|
 | 1 | **Satellite reuse basis — now a decision, not a research gap (thread 7)** | Evidence read and filed (REGISTER CelesTrak row; STATUS thread 7). No published requirement for individual permission found; the constitution requires the commercial standing *recorded*, not a grant. Chad decides the basis. Recommendation: benchmarked CelesTrak active set fetched by the Worker under CelesTrak's rules, credit + origin citation; Space-Track (Chad's account, created 2 Nov) is the documented alternative. An email to CelesTrak is optional, not required. | **Yes — Chad's decision** |
-| 2 | ~~Memory plateau~~ **DONE 2 Nov (thread 7)** | Tracker hypothesis refuted; the same growth appears with satellites never shown (control), so there is no satellite-attributable retained growth. Whole-page growth (about +0.5 MB/min in the software renderer) belongs to the existing layers and is folded into item 4. | No (satellites) |
+| 2 | ~~Memory plateau~~ **DONE 2 Nov (thread 7)** | Tracker hypothesis refuted. No additional growth attributable to satellites was detected against the control (same growth with satellites never shown). Whole-page growth (about +0.5 MB/min in the software renderer) belongs to the existing layers and is folded into item 4. | No (satellites) |
 | 3 | ~~Phase-7 visible object~~ **DONE 2 Nov (thread 7)** | Stale-reference state observed in kind after the phase-6 re-digest (`?refind` run) and cleared by re-finding; only the re-digest path can cause it. Production path (create once, in-place, visibility) shown clean: 0 visible after every one of 180 toggles. | — |
 | 4 | Existing page at ~30 fps on the Mac pane | Separate investigation of today's layers (polygons, merged points, rings), now including their slow retained-heap growth (thread 7). Not a satellite issue. | No |
 | 5 | FIRMS CPU attribution | Docs say CPU/wall time are in the **invocation log** (one event per invocation, ~2.4 % of the Free 200K/day at 100 %). Chad turns on Worker → Settings → Observability → "Include Invocation logs" (Traces off), then read CPU for the `*/15` runs. | No |
