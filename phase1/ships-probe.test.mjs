@@ -13,12 +13,12 @@ function makeEnv(extra = {}) {
   return { env: { R2, DB: { prepare: st, async batch() { return []; } }, ADMIN_KEY: 'k', AISSTREAM_KEY: 'AIS-SECRET-123', ...extra }, store };
 }
 // A fake Workers WebSocket: emits a confirmation then `n` position reports, then (optionally) closes early.
-function fakeSocket({ n = 5, closeEarlyMs = null, sendError = null, binary = false } = {}) {
+function fakeSocket({ n = 5, closeEarlyMs = null, sendError = null, binary = false, shape = null } = {}) {
   const L = {}; const sent = [];
   const ws = { accept() {}, send(x) { sent.push(x);
       setTimeout(() => { if (sendError) { emit('message', { data: JSON.stringify({ error: sendError }) }); emit('close', { code: 1008, reason: 'bad key' }); return; }
         emit('message', { data: JSON.stringify({ MessageType: 'SubscriptionConfirmation', Message: {} }) });
-        for (let i = 0; i < n; i++) { const m = JSON.stringify({ MessageType: i % 3 ? 'PositionReport' : 'StandardClassBPositionReport', MetaData: { MMSI: 100 + (i % 4), latitude: 1, longitude: 2 }, Message: {} }); emit('message', { data: binary ? new TextEncoder().encode(m).buffer : m }); }
+        for (let i = 0; i < n; i++) { const m = JSON.stringify({ MessageType: i % 3 ? 'PositionReport' : 'StandardClassBPositionReport', MetaData: { MMSI: 100 + (i % 4), latitude: 1, longitude: 2 }, Message: {} }); emit('message', { data: shape === 'blob' ? new Blob([m]) : shape === 'u8' ? new TextEncoder().encode(m) : binary ? new TextEncoder().encode(m).buffer : m }); }
         emit('message', { data: '{not json' });
         if (closeEarlyMs !== null) setTimeout(() => emit('close', { code: 1006, reason: 'gone' }), closeEarlyMs);
       }, 5); },
@@ -80,5 +80,19 @@ await t('H. binary frames are decoded (aisstream sends bytes)', async () => {
 await t('I. window is clamped to 10–90 s', async () => {
   const { env } = makeEnv(); mode = { kind: 'ok', n: 1, closeEarlyMs: 50 }; NOW += 11 * 60e3;
   const r = await probe(env, 5000); assert.equal(r.window_s, 90); assert.ok(r.wall_s < 5, 'early close ends the run');
+});
+await t('J. every frame shape decodes: Blob, Uint8Array, ArrayBuffer, string — and the shape is recorded', async () => {
+  for (const shape of ['blob', 'u8', null]) {
+    const { env } = makeEnv(); mode = { kind: 'ok', n: 6, shape, binary: shape === null }; NOW += 11 * 60e3;
+    const r = await probe(env, 10);
+    assert.equal(r.messages, 6, shape); assert.equal(r.vessels, 4); assert.equal(r.handler_errors, 0);
+    assert.ok(Object.keys(r.frame_types).length >= 1, JSON.stringify(r.frame_types));
+  }
+});
+await t('K. a frame the handler cannot process is counted as a handler error, never silently dropped', async () => {
+  const { env } = makeEnv(); mode = { kind: 'ok', n: 3, shape: 'blob' }; NOW += 11 * 60e3;
+  const orig = Blob.prototype.arrayBuffer; Blob.prototype.arrayBuffer = async function () { throw new Error('boom'); };
+  try { const r = await probe(env, 10); assert.ok(r.handler_errors >= 3); assert.match(r.first_handler_error, /boom/); assert.equal(r.messages, 0); }
+  finally { Blob.prototype.arrayBuffer = orig; }
 });
 console.log(`\n${passed} passed`);

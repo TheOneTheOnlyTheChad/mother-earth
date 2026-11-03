@@ -47,7 +47,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.3.3';
+const COLLECTOR_VERSION = '0.3.4';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -923,13 +923,20 @@ async function probeShips(env, nowMs, windowS) {
     if (!ws) { out.status = 'down'; out.reason = 'no websocket (HTTP ' + r.status + ')'; out.body = (await r.text().catch(() => '')).slice(0, 200); await putJson(env, SP.stateKey, out); return out; }
   } catch (e) { out.status = 'down'; out.reason = 'connect failed: ' + String(e).slice(0, 160); out.connect_ms = Date.now() - t0; await putJson(env, SP.stateKey, out); return out; }
   ws.accept();
-  const vessels = new Map(); let messages = 0, parseErrors = 0, confirmed = false, firstMsgMs = null, lastMsgMs = null, closeInfo = null, bytes = 0, maxGapS = 0, errorMsg = null;
+  const vessels = new Map(); let messages = 0, parseErrors = 0, confirmed = false, firstMsgMs = null, lastMsgMs = null, closeInfo = null, bytes = 0, maxGapS = 0, errorMsg = null, handlerErrors = 0, firstHandlerError = null;
+  const frameTypes = {}; const pending = new Set(); const dec = new TextDecoder();
+  /* Frame shapes differ between runtimes (3 Nov 2026: the first live probe threw on every frame). Accept every shape the
+   * WebSocket API allows and record which one arrived, so the next test is built from the real one. */
+  const toText = async d => typeof d === 'string' ? d : d instanceof ArrayBuffer ? dec.decode(new Uint8Array(d))
+    : ArrayBuffer.isView(d) ? dec.decode(new Uint8Array(d.buffer, d.byteOffset, d.byteLength))
+    : d && typeof d.arrayBuffer === 'function' ? dec.decode(new Uint8Array(await d.arrayBuffer())) : String(d);
   await new Promise(resolve => {
     const done = () => { clearTimeout(timer); clearTimeout(hard); resolve(); };
     const timer = setTimeout(() => { try { ws.close(1000, 'window done'); } catch (_) {} done(); }, windowS * 1000);
     const hard = setTimeout(() => { try { ws.close(4000, 'hard stop'); } catch (_) {} done(); }, (windowS + 15) * 1000);
-    ws.addEventListener('message', ev => {
-      const now = Date.now(); const txt = typeof ev.data === 'string' ? ev.data : new TextDecoder().decode(ev.data); bytes += txt.length;
+    const onFrame = async ev => {
+      const now = Date.now(); const tag = typeof ev.data === 'string' ? 'string' : Object.prototype.toString.call(ev.data); frameTypes[tag] = (frameTypes[tag] || 0) + 1;
+      const txt = await toText(ev.data); bytes += txt.length;
       let m; try { m = JSON.parse(txt); } catch (_) { parseErrors++; return; }
       if (m.MessageType === 'SubscriptionConfirmation') { confirmed = true; return; }
       if (m.error) { errorMsg = String(m.error).slice(0, 200); return; }
@@ -939,13 +946,15 @@ async function probeShips(env, nowMs, windowS) {
       lastMsgMs = now; messages++;
       const md = m.MetaData || {}; const mmsi = String(md.MMSI ?? '');
       if (mmsi) vessels.set(mmsi, cls);
-    });
+    };
+    ws.addEventListener('message', ev => { const p = onFrame(ev).catch(e => { handlerErrors++; if (!firstHandlerError) firstHandlerError = String(e).slice(0, 160); }); pending.add(p); p.finally(() => pending.delete(p)); });
     ws.addEventListener('close', ev => { closeInfo = { code: ev.code, reason: String(ev.reason || '').slice(0, 120) }; done(); });
     ws.addEventListener('error', ev => { errorMsg = errorMsg || 'socket error: ' + String((ev && ev.message) || 'no detail'); });
     ws.send(JSON.stringify({ APIKey: env.AISSTREAM_KEY, BoundingBoxes: [[[-90, -180], [90, 180]]], FilterMessageTypes: Object.keys(SP.CLASS) }));
   });
+  await Promise.allSettled([...pending]);
   const vals = [...vessels.values()];
-  Object.assign(out, { finished_at: nowIso(), wall_s: (Date.now() - t0) / 1000, confirmed, messages, vessels: vessels.size,
+  Object.assign(out, { frame_types: frameTypes, handler_errors: handlerErrors, first_handler_error: firstHandlerError, finished_at: nowIso(), wall_s: (Date.now() - t0) / 1000, confirmed, messages, vessels: vessels.size,
     class_a: vals.filter(v => v === 'A').length, class_b: vals.filter(v => v === 'B').length, bytes, parse_errors: parseErrors,
     first_message_s: firstMsgMs === null ? null : firstMsgMs / 1000, max_gap_s: maxGapS, close: closeInfo, source_error: errorMsg,
     status: messages > 0 && confirmed ? 'ok' : messages > 0 ? 'degraded' : 'down',
