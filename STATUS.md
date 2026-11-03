@@ -1,3 +1,10 @@
+# Mother Earth — status (3 Nov 2026 — thread 8)
+
+## 3 Nov ~08:10 UTC — thread 8 start
+- **07:54 UTC read:** hub 0.2.2; latest satellites run 07:08:01 `down` (stamp page HTTP 522); `/snapshot/satellites` still the last good file (retrieved 04:12:23, stamp 02:15:09, `latest/satellites-elements-067d2c65d883.csv`, 16,848 rows). **09:07 slot check scheduled for 09:15 UTC.**
+- **Space-Track probe built, NOT deployed** — hub **0.2.3** on main `82fb70d` (worker.js sha256 `5b1a9372…`). `GET /admin/probe/spacetrack?key=ADMIN_KEY`: login → ONE GP query (documented recommended query, CSV) → logout. Guards before any request: `SPACETRACK_USER` + `SPACETRACK_PASS` secrets set; UTC minute 10–20 or 40–50; no earlier attempt in 60 min (claimed before the first request). Body streamed and measured only (bytes, lines, header, empty/no-results flags); nothing published; result (no credentials, no cookie) in `state/spacetrack-probe.json`, readable with `&last=1`. Not in JOBS, no cron. Test `node phase1/spacetrack-probe.test.mjs` **10/10**, shown to fail on four deliberate breaks (off-peak guard, hourly guard, GP after failed login, cookie leak). satellites-hub 12/12 unchanged.
+- **Waiting on Chad:** the two secrets (he enters them), then his go for the code-only deploy of 0.2.3, then one run at an off-peak minute.
+
 # Mother Earth — status (3 Nov 2026 — thread 7, continued)
 
 ## 3 Nov 07:47 UTC — satellites refresh check + backlog
