@@ -9,6 +9,7 @@ const TYPES = ['PAYLOAD', 'PAYLOAD', 'DEBRIS', 'ROCKET BODY', 'UNKNOWN'];
 const synth = (n, off = 0) => COLS + '\n' + Array.from({ length: n }, (_, i) => '"' + [`OBJ ${i}`, '2020-001A', '2026-11-03T01:02:03.000000', '15.5', '0.0001', '53', '10', '20', '30', '0', 'U', String(10000 + i + off), '999', '1', '0.0001', '0.00001', '0', TYPES[i % 5]].join('","') + '"').join('\n') + '\n';
 const GP = process.argv[2] ? fs.readFileSync(process.argv[2], 'utf8') : synth(21000);
 const GP_ROWS = GP.split('\n').filter(Boolean).length - 1;
+const variant = (tag) => { const i = GP.indexOf('\n') + 2; return GP.slice(0, i) + tag + GP.slice(i); };   // edit the first object's name only
 
 function makeEnv(extra = {}) {
   const store = new Map(); const runs = [];
@@ -81,12 +82,12 @@ await failCase('G. truncated mid-row → validation failed, last good kept', '20
 await failCase('H. cut on a complete row at 80 % → refused by the previous-rows floor', '2026-11-04T01:41:00Z', { gp: () => new Response(GP.slice(0, GP.indexOf('\n', Math.floor(GP.length * 0.8)) + 1), { status: 200 }) }, /vs previous valid/);
 await t('I. meta write fails → orphan CSV removed, last good kept', async () => {
   const before = meta(store); globalThis.FAIL_PUT = (k) => k === 'latest/orbital.json';
-  stub({ gp: () => new Response(GP.replace('OBJ 1"', 'OBJ 1b"'), { status: 200 }) }); await cron(env, '2026-11-04T03:41:00Z'); globalThis.FAIL_PUT = null;
+  stub({ gp: () => new Response(variant('b'), { status: 200 }) }); await cron(env, '2026-11-04T03:41:00Z'); globalThis.FAIL_PUT = null;
   assert.deepEqual(meta(store), before); assert.deepEqual(csvKeys(store), [before.elements.key]);
   assert.match(runs.at(-1)[7], /publication failed \(meta write\)/);
 });
 await t('J. a later valid run replaces: new file + meta, previous CSV deleted, exactly one current file', async () => {
-  stub({ gp: () => new Response(GP.replace('OBJ 2"', 'OBJ 2c"'), { status: 200 }) }); await cron(env, '2026-11-04T05:41:00Z');
+  stub({ gp: () => new Response(variant('c'), { status: 200 }) }); await cron(env, '2026-11-04T05:41:00Z');
   const m = meta(store); assert.notEqual(m.elements.key, good.elements.key); assert.equal(m.retrieved_at, '2026-11-04T05:41:00.000Z');
   assert.deepEqual(csvKeys(store), [m.elements.key]);
 });
