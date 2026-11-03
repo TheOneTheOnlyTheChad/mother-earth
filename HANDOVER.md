@@ -1,4 +1,4 @@
-# Mother Earth — handover (§3 updated 3 Nov, thread 7 — read STATUS "Thread 7, 3 Nov" first: satellites RC on branch `satellites-rc`, hub 0.2.2 committed not deployed)
+# Mother Earth — handover (3 Nov, thread 7: satellites PUBLIC; aircraft RC on branch `aircraft-rc`, not public — read STATUS top sections first)
 
 Read `START-HERE.md` (§2 constitution · §5a testing · §5b ships duration contract), then this file, then `STATUS.md` (newest sections first). Not a fresh sandbox: nothing below needs re-investigating.
 

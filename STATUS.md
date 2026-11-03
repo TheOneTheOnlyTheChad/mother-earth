@@ -1,5 +1,25 @@
 # Mother Earth — status (3 Nov 2026 — thread 7, continued)
 
+## 3 Nov ~04:50 UTC — **SATELLITES RELEASED (public).** Page `bd1ab59`, assets `?v=202611031200`; hub 0.2.2 with `SATELLITES_ENABLED=1`.
+Verified on the live hub before release (RC files loaded into a github.io page, pane visible) and again on the public site after the Pages deploy:
+- **Fresh load:** toggle off (`aria-checked=false`), no layer, no worker, no timers, **zero satellite requests**; legend line hidden.
+- **On:** reads `/snapshot/satellites` (277 ms) + `/elements/satellites` (2.49 MB, 1.0 s), checksum matched → **16,848 drawn, 0 failed, 86 with element sets older than 3 days, 316–317 above GEO**; ~2 s updates; main-thread apply 0.1 ms; lines + legend + "Markers enlarged for visibility; not to physical scale." shown; quakes/fires/ships pairs unaffected.
+- **Off:** markers gone (0 visible objects), legend line and lines hidden, both timers stopped, propagation count unchanged over 5–6 s, no further hub requests.
+- `SATELLITES_ENABLED=1` added through the dashboard form (plain text, Production); all 8 previous bindings intact; code still 0.2.2. First scheduled run due 05:07 UTC (odd hours).
+- Not verified: Mac GPU frame time with this exact build (bench measured the same design), phones (Galaxy pending).
+- Satellites and Aircraft are **independent optional layers, both off on a fresh load** (Chad, 3 Nov).
+
+## 3 Nov — **Aircraft: release candidate on branch `aircraft-rc` (`80d413f`), NOT public.**
+Chad: aircraft is next, own toggle, off by default, kept off the public site until the exact OpenSky reply is checked against our setup. The **30 Oct ticket #837506 is the only wording on record**: hobbyist use within credits; a public-facing site must additionally feed the network; cloud servers not whitelisted. Public release waits on that check.
+- Page: the Aircraft card becomes a toggle (off on load, `aria-pressed=false`, card says "off"); fetched **only while on** (`/cells/opensky` + `/snapshot/opensky`, same records/counts pairing rule and `usable()` guard as quakes/fires/ships); off clears its records, cells and legend entry and makes no further requests; never contacts OpenSky from the browser. Legend gets an aircraft entry only while on. Inspector shows callsign, ICAO 24-bit address, registered country, barometric altitude / on ground, ground speed, caveat ("heard only where a receiver is in range; a cell with no aircraft is not an empty sky; not for navigation or safety").
+- Mac collector: new `opensky` feed (OAuth client credentials → one `states/all` request; dedup by icao24; position required; `observed_at` = OpenSky's own position time or null; credits from `X-Rate-Limit-Remaining`; citation "The OpenSky Network, https://opensky-network.org"). **Nothing schedules it**; it would post to the existing `/ingest/opensky`. Cloudflare egress to OpenSky measured blocked (522) on 30 Oct, so collection must run on the Mac (like ships).
+- Tests: `node phase1/aircraft.test.mjs` 5/5 (parser + stubbed OAuth/states, 429 → down, missing credentials); `node phase1/toggles-ui.test.cjs <csv>` **25/25** — both off on fresh load with zero optional requests; aircraft only; satellites only; both on; each toggled while the other is on (satellites keep propagating while aircraft toggles); both off with no further requests; reload → both off; observation points unchanged throughout. Shown to fail when aircraft-off keeps its records. Regression on the branch: search 111 · real-data 50 · search-ui 104 · solar 26 · satellites-ui 66 · duration contract — pass.
+- To go public: the OpenSky wording check (Chad), a feeder decision if still required, a Mac schedule for the `opensky` mode within credits, then merge `aircraft-rc`.
+
+**Deploy method (3 Nov):** the Worker was deployed through the dashboard session's own API (`PUT …/workers/scripts/mother-earth/content`, multipart with `metadata {main_module:'worker.js'}`), loading the exact file from GitHub by commit and refusing on a hash mismatch — code only; bindings, secrets and crons untouched. Replaces the 2-minute typing flow (START-HERE §4 kept as the fallback). Requires Chad's explicit go per deploy.
+
+**Retention: unchanged in this release** (Chad: handled separately today, including provider emails). The storage audit below stands as information only.
+
 ## Thread 7, 3 Nov — **satellites: release candidate built and tested; NOT public. Hub 0.2.2 awaiting Chad's deploy go-ahead.**
 Decision (Chad, 3 Nov): proceed with the benchmarked CelesTrak route on the documented basis; the policy uncertainty stays recorded and is **not** described as an explicit licence grant; **no commercial-use assumption**. Bench evidence copied to the Mac: `~/Documents/Mother Earth/bench-private/thread7/` (7 files + `SHA256SUMS-thread7.txt`, every hash verified on the Mac) — no longer held only in the artifact database.
 
@@ -23,9 +43,9 @@ Decision (Chad, 3 Nov): proceed with the benchmarked CelesTrak route on the docu
 **3 Nov ~04:12 UTC — Chad approved the full release in one go.** Progress:
 1. ✅ **Hub 0.2.2 deployed** (main `1496e2a`, file sha256 `03648f32…`) via the dashboard session's content-only endpoint (code replaced; bindings, secrets, crons untouched; 0.2.1 kept in Cloudflare's version history). `/` and `/status` report 0.2.2; existing layers still served.
 2. ✅ **Reachability test — the single policy-compliant run** (`/admin/run/satellites`, 04:12:13 UTC): stamp check → CelesTrak stamp **2026-11-03 02:15:09 UTC** (newer than nothing) → one data request → validated → published **16,848 element sets, 2,490,850 B**, key `latest/satellites-elements-067d2c65d883.csv`, meta sha256 = served file sha256 (`067d2c65…`, checked in the pane). Wall 12.9 s. CelesTrak reachable from the Worker.
-3. ⏸ RC against the live hub — started on the real origin (RC files loaded from GitHub into a github.io page), meta + CSV + checksum loaded fine; the layer step waits on the pane drawing a frame and **the Claude-app pane is hidden** (no requestAnimationFrame while hidden). Waiting for the pane to be shown. Not a failure.
+3. ✅ (completed once the pane was visible — see top) RC against the live hub — started on the real origin (RC files loaded from GitHub into a github.io page), meta + CSV + checksum loaded fine; the layer step waits on the pane drawing a frame and **the Claude-app pane is hidden** (no requestAnimationFrame while hidden). Waiting for the pane to be shown. Not a failure.
    - Found on the way and fixed on the RC (`c9e6122`): the placeholder particles were at 0°,0° on the surface for a frame before the first positions; they now start inside the globe (occluded). satellites-ui still 66/66.
-4. ☐ `SATELLITES_ENABLED=1` · 5. ☐ merge `satellites-rc` → main · 6. ☐ public smoke test.
+4. ✅ `SATELLITES_ENABLED=1` · 5. ✅ merged (`bd1ab59`) · 6. ✅ public smoke test — see the top section.
 
 **Storage rule (Chad, 3 Nov) — MVP, $0/month:** one current validated snapshot per replaceable feed. Satellites implement it exactly: new file validated → stored under its own key → meta published pointing at it → only then the previous file deleted; any failure (fetch, validation, publication) keeps serving the last good snapshot with its original times, and an orphan from a failed publication is deleted. Nothing temporary is written before validation passes.
 
