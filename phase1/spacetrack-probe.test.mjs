@@ -7,7 +7,7 @@ function makeEnv(extra = {}) {
   const store = new Map();
   const R2 = {
     async delete(k) { store.delete(k); },
-    async put(k, body) { store.set(k, String(body)); },
+    async put(k, body) { store.set(k, body instanceof ArrayBuffer ? new TextDecoder().decode(body) : String(body)); },
     async get(k) { const b = store.get(k); return b == null ? null : { body: b, async json() { return JSON.parse(b); }, async text() { return b; } }; },
   };
   const stmt = () => ({ bind: () => ({ async run() { return {}; }, async first() { return null; }, async all() { return { results: [] }; } }), async run() { return {}; }, async first() { return null; }, async all() { return { results: [] }; } });
@@ -57,10 +57,12 @@ await t('D. success: login → ONE GP query → logout; measured; no credentials
   assert.deepEqual(calls.map(c => c.url.replace('https://www.space-track.org', '')), ['/ajaxauth/login', '/basicspacedata/query/class/gp/decay_date/null-val/epoch/%3Enow-10/emptyresult/show/format/csv', '/ajaxauth/logout']);
   assert.equal(calls[0].method, 'POST'); assert.equal(calls[1].cookie, 'chocolatechip=abc123');
   assert.equal(calls.filter(c => c.url.includes('/class/gp/')).length, 1);
-  assert.equal(r.body.steps.gp.bytes, GP.length); assert.equal(r.body.steps.gp.data_rows_if_csv, 500); assert.equal(r.body.steps.gp.header, '"NORAD_CAT_ID","OBJECT_TYPE"');
+  assert.equal(r.body.steps.gp.bytes, GP.length); assert.equal(r.body.steps.gp.header, '"NORAD_CAT_ID","OBJECT_TYPE"');
+  assert.equal(store.get('staging/spacetrack-gp.csv'), GP);   // staged privately, byte-exact
   const everything = JSON.stringify(r.body) + JSON.stringify([...store.values()]);
   for (const secret of ['S3CRET-pass', 'user@example.org', 'abc123']) assert.ok(!everything.includes(secret), 'leaked ' + secret);
-  assert.deepEqual([...store.keys()], ['state/spacetrack-probe.json']);   // nothing published, no element data stored
+  assert.deepEqual([...store.keys()].sort(), ['staging/spacetrack-gp.csv', 'state/spacetrack-probe.json']);   // nothing published; only the private staging copy
+  const pub = await worker.fetch(new Request('https://hub/snapshot/orbital'), env); assert.equal(pub.status, 404);   // not served
 });
 await t('E. second call 30 min later (still off-peak) → refused by the hourly guard, no request', async () => {
   const { env } = makeEnv(); stub();
@@ -80,7 +82,7 @@ await t('G. login HTTP 522 (unreachable from Cloudflare) → no GP query, record
 });
 await t('H. empty HTTP 200 GP body (what the pane saw) → gp_failed with empty_body true, no retry', async () => {
   NOW = Date.parse('2026-11-03T13:14:00Z'); const { env } = makeEnv(); stub({ gp: () => new Response('', { status: 200 }) });
-  const r = await probe(env); assert.equal(r.body.status, 'gp_failed'); assert.equal(r.body.steps.gp.empty_body, true);
+  const r = await probe(env); assert.equal(r.body.status, 'gp_failed'); assert.equal(r.body.steps.gp.empty_body, true); assert.equal(r.body.steps.staged, undefined);
   assert.equal(calls.filter(c => c.url.includes('/class/gp/')).length, 1);
 });
 await t('I. the probe is not a job and no cron reaches Space-Track', async () => {
@@ -96,4 +98,16 @@ await t('J. ?last=1 reads the stored result without any request', async () => {
   const r = await worker.fetch(new Request('https://hub/admin/probe/spacetrack?key=k&last=1'), env).then(x => x.json());
   assert.equal(r.last.status, 'ok'); assert.equal(calls.length, 0);
 });
-console.log(`\n${passed}/10 passed`);
+await t('K. orbital-build: 403 without key, 404 with nothing staged, runs on the staged copy without any request and writes nothing', async () => {
+  const { env, store } = makeEnv(); stub();
+  assert.equal((await worker.fetch(new Request('https://hub/admin/probe/orbital-build?key=x'), env)).status, 403);
+  assert.equal((await worker.fetch(new Request('https://hub/admin/probe/orbital-build?key=k'), env)).status, 404);
+  const head = 'OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT,OBJECT_TYPE';
+  const row = (i, ty) => '"' + ['X', '2020-001A', '2026-11-03T00:00:00', '15', '0.001', '50', '1', '2', '3', '0', 'U', String(i), '999', '1', '0.0001', '0', '0', ty].join('","') + '"';
+  await env.R2.put('staging/spacetrack-gp.csv', head + '\n' + [row(1, 'PAYLOAD'), row(2, 'DEBRIS'), row(3, 'ROCKET BODY')].join('\n') + '\n');
+  const before = [...store.keys()].sort().join();
+  const r = await worker.fetch(new Request('https://hub/admin/probe/orbital-build?key=k'), env).then(x => x.json());
+  assert.equal(r.rows, 3); assert.equal(r.counts.debris, 1); assert.equal(r.ok, false);   // 3 rows < 20,000 floor
+  assert.equal(calls.length, 0); assert.equal([...store.keys()].sort().join(), before);
+});
+console.log(`\n${passed}/11 passed`);
