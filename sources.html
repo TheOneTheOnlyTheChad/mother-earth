@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611021500">
+<link rel="stylesheet" href="style.css?v=202611031200">
 </head>
 <body class="doc">
 <header class="top">
@@ -76,6 +76,14 @@
   <p><b>A dependency on library internals.</b> The overlay draws by adding its own sphere to the scene graph of <a href="https://github.com/vasturiano/globe.gl" target="_blank" rel="noopener">globe.gl</a>, and it obtains the three.js constructors it needs by reading them off objects that library has already created — there is no global <code>THREE</code> to use. That is <b>reliance on another library's internals</b>, so the version is pinned (currently <b>2.45.0</b>) and the automated checks assert that the pinned version under test is the one the page loads. It also copies the globe mesh's own rotation and sphere parameters rather than assuming how the texture lines up with longitude. If a future version stops exposing what is needed, <b>the overlay refuses to switch on</b>, resets its toggle and says so, and the globe, its records, picking and search are left exactly as they were.</p>
   <p><b>Cost.</b> None. It makes no request, has no collector and no backend, and recomputes locally once a minute while the page is visible, and immediately when you enable it, return to the tab, or restore the page.</p>
 
+  <h2 id="satellites">Satellites overlay — computed positions (model tier)</h2>
+  <p>An optional overlay on World View, <b>off unless you turn it on</b>. Each marker is a position <b>computed</b> with the SGP4 model (satellite.js 6.0.2, pinned) from the latest general-perturbations element set published for that object. Classification: <span class="fixed">model (propagated from published orbital elements — computed, not observed)</span>. It is not an observation layer: it never enters the status report, the status sentence or search, and nothing about coverage, absence or change is read from it.</p>
+  <p><b>What it shows.</b> The scale and distribution of the public satellite catalogue: every element set in CelesTrak's "active" group at the time of the hub's last valid download. All objects are kept; only element sets that cannot be used or fail to propagate are left out, and they are counted on screen ("not drawn"). The group is defined by CelesTrak by operational status; it includes four rocket bodies CelesTrak lists as active, and it excludes debris and inactive objects.</p>
+  <p><b>What it does not show.</b> Not every object in orbit (classified objects are absent from the public catalogue). Not a measure of how much of the sky is obscured, of ground coverage, or of collision risk. Not an observed position: publicly released element sets are not suitable for conjunction assessment (Space-Track's own warning).</p>
+  <p><b>Always visible while it is on:</b> "Markers enlarged for visibility; not to physical scale."; the time the positions were propagated for; when the element file was retrieved and CelesTrak's own data time; the counts in the file, drawn and not drawn; how many objects use element sets older than <b>three days</b> at the time shown ("their propagated positions may be unreliable" — a disclosure threshold, not an accuracy limit); and how many objects are higher than geostationary orbit (35,786 km), which the geostationary view does not frame. Heights are drawn above the surface at the propagated height, not as distance from the Earth's centre.</p>
+  <p><b>Cadence and data path.</b> The hub checks CelesTrak's "Current as of" stamp at most once every two hours and downloads the active set only when that stamp is newer than its last successful download — one attempt, no retries inside a slot. Before publishing, it checks the header, that the file ends on a complete line, the row count against floors, and a sample of lines; on any failure it keeps the previous valid file with its own times. Your browser reads only the hub (a small description and the element file, checked against its published checksum) and never contacts CelesTrak. While the overlay is on, positions are recomputed every 2 seconds in a background worker and only while the tab is visible; turning it off stops the updates.</p>
+  <p><b>Source standing.</b> CelesTrak states its resources are freely available to all users; it publishes no statement on redistribution or attribution. The element sets originate with the US Space Force 18th/19th Space Defense Squadrons; Space-Track.org grants an express blanket approval to redistribute basic data accessed via Space-Track, conditioned on citation. Whether that approval covers data obtained via CelesTrak is not established, and commercial use is not addressed by either source. This is recorded in the project's source register as an open question, not as a licence grant. Credit: CelesTrak; elements originate with the US Space Force 18th/19th Space Defense Squadrons via Space-Track.org.</p>
+
   <h2 id="search">Search — what it covers and what it cannot</h2>
   <p>The Explore panel on World View searches <b>only the records your browser has already loaded</b> from each layer's latest published snapshot. It issues no request of any kind: no geocoder, no place-name dataset, no country boundaries, no history. It is not a search of the world, and not a search of everything a source holds.</p>
   <table>
@@ -101,7 +109,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611021500"></script>
+<script src="app.js?v=202611031200"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;

@@ -134,8 +134,8 @@ function agreement(before, after, probes) {
     ok('legend line hidden while off', await page.locator('#night-legend').isHidden());
     ok('it is a switch, unchecked', await page.locator('#tgl-night').getAttribute('role') === 'switch' && await page.locator('#tgl-night').getAttribute('aria-checked') === 'false');
     ok('the short clarification is always visible', /Current sunlight geometry—not observation coverage\./.test(await page.locator('#night-note').innerText()));
-    ok('the long explanation is behind a closed disclosure', await page.evaluate(() => !document.querySelector('.ovl details.scope').open));
-    ok('the disclosure carries the FIRMS warning', /VIIRS detects thermal anomalies by day and by night/.test(await page.locator('.ovl details.scope').innerText()));
+    ok('the long explanation is behind a closed disclosure', await page.evaluate(() => !document.querySelector('#night-scope').open));
+    ok('the disclosure carries the FIRMS warning', /VIIRS detects thermal anomalies by day and by night/.test(await page.locator('#night-scope').innerText()));
 
     await page.click('#exp-btn');
     const before = await shot();

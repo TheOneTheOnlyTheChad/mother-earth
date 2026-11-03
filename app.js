@@ -366,6 +366,97 @@ ME.rules = function (R) {
   return rows;
 };
 
+// ---------- satellites: MODEL tier — positions are COMPUTED by SGP4 from CelesTrak element sets, never observed.
+// Pure helpers live here so they can be tested in Node; the overlay itself is in index.html. Benchmarked design
+// (thread 6/7, bench 1.6.1): propagation in a Web Worker every 2 s, one batched particle layer created once,
+// positions written in place, visibility toggled — never re-digested (that path is what produced a stale reference).
+ME.SAT = {
+  SATJS_URL: 'https://cdn.jsdelivr.net/npm/satellite.js@6.0.2/dist/satellite.min.js',   // pinned; loaded inside the worker only
+  UPDATE_MS: 2000,                 // propagation cadence while on and visible
+  META_RECHECK_MS: 30 * 60e3,      // while on, re-read the hub's small meta file this often; the element CSV is fetched only when it changed
+  STALE_DAYS: 3,                   // disclosure threshold, not an accuracy claim
+  GEO_H_KM: 35786,                 // geostationary height above the surface
+  R_KM: 6371,                      // globe.gl draws a sphere; one globe radius = mean Earth radius
+  MARKER_PX: 2.5, COLOUR: '#c9b6ff',
+  HEADER: 'OBJECT_NAME,OBJECT_ID,EPOCH,MEAN_MOTION,ECCENTRICITY,INCLINATION,RA_OF_ASC_NODE,ARG_OF_PERICENTER,MEAN_ANOMALY,EPHEMERIS_TYPE,CLASSIFICATION_TYPE,NORAD_CAT_ID,ELEMENT_SET_NO,REV_AT_EPOCH,BSTAR,MEAN_MOTION_DOT,MEAN_MOTION_DDOT',
+  CAPACITY_HEADROOM: 0.25,         // the layer's buffer is sized once with headroom so a later, larger file is still written in place
+};
+
+// The hub's meta file must describe an element file we can trust before we fetch 2.5 MB. Returns a reason or null.
+ME.satMetaProblem = meta => {
+  if (!meta || meta.layer !== 'satellites') return 'the hub has no satellite element file yet';
+  if (meta.source_status !== 'ok') return 'the hub reports the element file as ' + (meta.source_status || 'unknown');
+  const e = meta.elements || {};
+  if (!(e.rows > 0) || !/^[0-9a-f]{64}$/.test(e.sha256 || '') || e.header !== ME.SAT.HEADER) return 'the element file description is incomplete or in an unexpected format';
+  if (!meta.retrieved_at || !Date.parse(meta.retrieved_at)) return 'the element file has no retrieval time';
+  return null;
+};
+
+ME.sha256Hex = async text => {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+// The CSV that arrives must be exactly the file the meta describes (hash), with the expected header.
+ME.satCsvProblem = async (csv, meta) => {
+  if (typeof csv !== 'string' || !csv.length) return 'the element file was empty';
+  const head = csv.slice(0, csv.indexOf('\n')).replace(/\r$/, '');
+  if (head !== ME.SAT.HEADER) return 'the element file has an unexpected header';
+  if ((await ME.sha256Hex(csv)) !== meta.elements.sha256) return 'the element file does not match its published checksum (it may have changed mid-read); nothing was drawn from it';
+  return null;
+};
+
+// Scope and disclosure lines, from ONE propagation pass's own numbers (never mixed across passes).
+// p = { rows, drawn, failed, stale, beyondGeo, at } ; meta = hub meta
+ME.satLines = (p, meta) => {
+  const n = x => (x || 0).toLocaleString('en-US');
+  const notDrawn = p.rows - p.drawn;
+  return {
+    scope: `CelesTrak "active" element sets · ${n(p.rows)} in the file · ${n(p.drawn)} drawn · ${n(notDrawn)} not drawn (unusable elements or propagation failure${p.failed ? `: ${n(p.failed)} failed this pass` : ''}) · public catalogue only, not every object in orbit`,
+    marker: 'Markers enlarged for visibility; not to physical scale.',
+    time: `Positions propagated for ${p.at.replace('T', ' ').slice(0, 19)} UTC · element file retrieved ${meta.retrieved_at.replace('T', ' ').slice(0, 16)} UTC (CelesTrak data as of ${meta.source_stamp.replace('T', ' ').slice(0, 16)} UTC)`,
+    stale: p.stale ? `${n(p.stale)} object${p.stale === 1 ? '' : 's'} use${p.stale === 1 ? 's' : ''} element sets older than ${ME.SAT.STALE_DAYS} days; ${p.stale === 1 ? 'its' : 'their'} propagated position${p.stale === 1 ? '' : 's'} may be unreliable.` : `No object uses element sets older than ${ME.SAT.STALE_DAYS} days.`,
+    beyond: p.beyondGeo ? `${n(p.beyondGeo)} object${p.beyondGeo === 1 ? ' is' : 's are'} higher than geostationary orbit (${n(ME.SAT.GEO_H_KM)} km) and may lie outside the current view.` : '',
+    legend: `<b>Satellites</b> · computed positions · ${p.at.slice(11, 19)} UTC · markers enlarged, not to scale`,
+  };
+};
+
+// Worker source: CSV → satrecs → positions. Same arithmetic as bench 1.6.1 (placement agreed with globe.gl to 9e-5 units).
+// Runs off the main thread; reports per pass: drawn, failed, stale (epoch older than STALE_DAYS at the pass time), beyond GEO.
+ME.satWorkerSource = (satjsUrl, R_KM, staleDays, geoKm) => `
+let loadErr = null;
+try { importScripts(${JSON.stringify(satjsUrl)}); } catch (e) { loadErr = String(e && e.message || e); }
+const NUM = new Set(['MEAN_MOTION','ECCENTRICITY','INCLINATION','RA_OF_ASC_NODE','ARG_OF_PERICENTER','MEAN_ANOMALY','EPHEMERIS_TYPE','NORAD_CAT_ID','ELEMENT_SET_NO','REV_AT_EPOCH','BSTAR','MEAN_MOTION_DOT','MEAN_MOTION_DDOT']);
+const D2R = Math.PI / 180, RKM = ${R_KM}, STALE_MS = ${staleDays} * 86400e3, GEO = ${geoKm};
+let recs = [], epochMs = [], rows = 0;
+onmessage = e => { const m = e.data;
+  if (m.type === 'init') {
+    if (loadErr || typeof satellite === 'undefined') { postMessage({ type: 'error', why: 'the orbit library could not be loaded' + (loadErr ? ' (' + loadErr + ')' : '') }); return; }
+    recs = []; epochMs = []; let quoted = 0, initFail = 0;
+    const L = m.csv.trim().split(/\\r?\\n/); const h = L[0].split(','); rows = L.length - 1;
+    for (let i = 1; i < L.length; i++) { const line = L[i]; if (line.indexOf('"') >= 0) { quoted++; continue; }
+      const c = line.split(','); const o = {}; h.forEach((k, j) => o[k] = NUM.has(k) ? +c[j] : c[j]);
+      try { const s = satellite.json2satrec(o); if (!s || s.error) { initFail++; continue; } recs.push(s); epochMs.push(Date.parse(o.EPOCH + 'Z')); } catch (err) { initFail++; } }
+    postMessage({ type: 'ready', rows, usable: recs.length, quoted, initFail, version: m.version });
+  }
+  if (m.type === 'prop') {
+    const t = m.t, d = new Date(t), gm = satellite.gstime(d), N = recs.length, GR = m.globeR;
+    const xyz = new Float32Array(N * 3); let k = 0, failed = 0, stale = 0, beyond = 0;
+    for (let i = 0; i < N; i++) {
+      if (t - epochMs[i] > STALE_MS) stale++;
+      let pv; try { pv = satellite.propagate(recs[i], d); } catch (err) { pv = null; }
+      const p = pv && pv.position;
+      if (!p || typeof p !== 'object' || !isFinite(p.x)) { failed++; continue; }
+      const g = satellite.eciToGeodetic(p, gm); const lat = g.latitude / D2R, lng = g.longitude / D2R, hkm = g.height;
+      if (!isFinite(lat) || !isFinite(lng) || !isFinite(hkm)) { failed++; continue; }
+      if (hkm > GEO) beyond++;
+      const r = GR * (1 + hkm / RKM), phi = (90 - lat) * D2R, th = (90 - lng) * D2R;
+      xyz[k++] = r * Math.sin(phi) * Math.cos(th); xyz[k++] = r * Math.cos(phi); xyz[k++] = r * Math.sin(phi) * Math.sin(th);
+    }
+    postMessage({ type: 'pos', seq: m.seq, version: m.version, at: d.toISOString(), xyz, drawn: k / 3, failed, stale, beyond, rows }, [xyz.buffer]);
+  }
+};`;
+
 // ---------- menu (both pages)
 ME.menu = function () {
   const btn = $('menu-btn'), list = $('menu-list'); if (!btn || !list) return;

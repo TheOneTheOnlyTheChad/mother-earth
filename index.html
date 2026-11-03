@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611021500">
+<link rel="stylesheet" href="style.css?v=202611031200">
 </head>
 <body class="world">
 <header class="top">
@@ -25,7 +25,7 @@
 <div class="stage">
   <div class="centre">
     <div id="globe"></div>
-    <div class="credits" id="credits">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></div>
+    <div class="credits" id="credits">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · satellite element sets <a href="https://celestrak.org/" target="_blank" rel="noopener">CelesTrak</a> (originating with the US Space Force 18th/19th Space Defense Squadrons via <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a>) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></div>
     <div class="imgdate" id="imgdate">Imagery: loading…</div>
     <div class="legend" id="legend">
       <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample) · <span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</div>
@@ -34,6 +34,7 @@
       <div class="cov"><span class="sw unknown"></span>unknown — nothing can be said about this cell</div>
       <div class="cov">No outline = no records in that cell; not evidence of absence.</div>
       <div class="cov nightleg" id="night-legend" hidden></div>
+      <div class="cov nightleg" id="sat-legend" hidden></div>
       <div><a href="sources.html#coverage">How coverage is graded →</a></div>
     </div>
     <div class="inspector" id="insp" role="dialog" aria-labelledby="insp-h"><button class="x" id="insp-x" type="button" aria-label="Close">×</button><h2 id="insp-h">—</h2><dl id="insp-dl"></dl></div>
@@ -116,7 +117,7 @@
               <button class="ovl-tgl" type="button" id="tgl-night" role="switch" aria-checked="false" aria-describedby="night-note"><span class="box" aria-hidden="true"></span><span class="t">Day/night now — computed</span></button>
               <div class="cav" id="night-note">Current sunlight geometry—not observation coverage.</div>
               <div class="hint" id="night-time" hidden></div>
-              <details class="scope">
+              <details class="scope" id="night-scope">
                 <summary>What this is and is not</summary>
                 <div>
                   <p>Calculated solar illumination for the time shown, from the clock — <b>computed, not observed</b>.</p>
@@ -126,6 +127,20 @@
                   <p>The imagery beneath this shading is from a previous day and is dated separately; every record carries its own observation time. Three different clocks, kept apart.</p>
                   <p>Geometric boundary only: the Sun's centre on the horizon, with no refraction and no solar disc, so this is <b>not</b> sunrise or sunset. Twilight is not shown.</p>
                   <p><a href="sources.html#daynight">Full rules on Sources &amp; Details →</a></p>
+                </div>
+              </details>
+              <button class="ovl-tgl" type="button" id="tgl-sat" role="switch" aria-checked="false" aria-describedby="sat-note"><span class="box" aria-hidden="true"></span><span class="t">Satellites — computed positions</span></button>
+              <div class="cav" id="sat-note">Calculated from published orbital elements—not observed positions.</div>
+              <div class="hint sat-lines" id="sat-lines" hidden aria-live="polite"></div>
+              <details class="scope" id="sat-scope">
+                <summary>What this is and is not</summary>
+                <div>
+                  <p>Each marker is a position <b>computed</b> (SGP4) from the latest general-perturbations element set CelesTrak publishes for that object in its "active" group. Nothing here was observed at the time shown.</p>
+                  <p>It shows the <b>scale and distribution</b> of the public satellite catalogue. It is <b>not</b> a measure of how much sky is obscured, of ground coverage, or of collision risk, and it is not every object in orbit: classified objects, debris and inactive objects are not in this group.</p>
+                  <p>Markers are enlarged so they can be seen; they are not to physical scale. Positions are drawn at their propagated height — height above the surface, not distance from the Earth's centre.</p>
+                  <p>Element sets age. Objects whose elements are more than three days old at the time shown are counted on screen, because their computed positions may be unreliable. Three days is a disclosure threshold, not an accuracy limit.</p>
+                  <p>The geostationary view does not frame every orbit; objects higher than geostationary orbit are counted.</p>
+                  <p><a href="sources.html#satellites">Full rules on Sources &amp; Details →</a></p>
                 </div>
               </details>
             </div>
@@ -167,7 +182,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611021500"></script>
+<script src="app.js?v=202611031200"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -676,6 +691,198 @@ ME.nightState = () => ({ on: night.on, at: night.at, why: night.why, hasMesh: !!
   texture: NIGHT.W + 'x' + NIGHT.H, alpha: NIGHT.ALPHA, altitude: NIGHT.ALT, sub: night.at ? ME.subsolar(night.at) : null });
 ME.screenAt = (lat, lng, alt = 0) => globeOk ? globe.getScreenCoords(lat, lng, alt) : null;
 ME.cameraAt = () => globeOk ? globe.pointOfView() : null;   // a point on the far side still returns screen coords, so callers need this to tell which hemisphere faces them
+
+// ---------- satellites overlay: MODEL tier (propagated positions), kept out of the observation path like day/night.
+// It never touches `state`, `points`, `pmeta`, `usable()`, polygonsData, pointsData or ringsData, is never in the
+// status sentence or search, and has its own timers. Viewers read the hub only (/snapshot/satellites meta and
+// /elements/satellites CSV); CelesTrak is never contacted from the page.
+const SATC = ME.SAT;
+const sat = { on: false, busy: false, why: null, meta: null, csvVersion: null, worker: null, ready: null, layer: null, capacity: 0,
+  timer: null, metaTimer: null, inflight: false, seq: 0, last: null, lastApplyMs: null, hiddenSkips: 0 };
+
+function satPaint() {
+  const box = $('sat-lines'), lg = $('sat-legend');
+  const p = sat.on && sat.last && sat.meta ? ME.satLines(sat.last, sat.meta) : null;
+  box.hidden = !p && !sat.why;
+  if (p) box.innerHTML = [p.time, p.scope, p.stale, p.beyond].filter(Boolean).map(t => `<div>${esc(t)}</div>`).join('') + `<div class="sat-mk"><b>${esc(p.marker)}</b></div>`;
+  else if (sat.why) box.innerHTML = `<div><b>${esc(sat.why)}</b></div>`;
+  lg.hidden = !p;
+  if (p) lg.innerHTML = p.legend;
+  $('tgl-sat').setAttribute('aria-checked', String(sat.on));
+  $('tgl-sat').setAttribute('aria-busy', String(sat.busy));
+}
+
+async function satFetchMeta() {
+  const r = await fetch(ME.HUB + '/snapshot/satellites', { cache: 'no-store' });
+  if (r.status === 404) return { problem: 'the hub has no satellite element file yet' };
+  if (!r.ok) return { problem: 'the hub did not answer (HTTP ' + r.status + ')' };
+  const meta = await r.json();
+  const problem = ME.satMetaProblem(meta);
+  return problem ? { problem } : { meta };
+}
+
+function satWorkerStart() {
+  if (sat.worker) return sat.worker;
+  const url = URL.createObjectURL(new Blob([ME.satWorkerSource(SATC.SATJS_URL, SATC.R_KM, SATC.STALE_DAYS, SATC.GEO_H_KM)], { type: 'text/javascript' }));
+  sat.worker = new Worker(url);
+  URL.revokeObjectURL(url);
+  sat.worker.onerror = ev => { ev.preventDefault && ev.preventDefault(); satFail('the orbit calculation stopped unexpectedly'); };
+  return sat.worker;
+}
+
+// Load (or reload, when the hub's file changed) the element set into the worker. Resolves {ok} or {problem}.
+async function satLoadElements(meta) {
+  if (sat.csvVersion === meta.elements.sha256) return { ok: true };
+  const r = await fetch(ME.HUB + '/elements/satellites');
+  if (!r.ok) return { problem: 'the element file could not be read from the hub (HTTP ' + r.status + ')' };
+  const csv = await r.text();
+  const problem = await ME.satCsvProblem(csv, meta);
+  if (problem) return { problem };
+  const w = satWorkerStart();
+  const ready = await new Promise(res => {
+    const to = setTimeout(() => res({ type: 'error', why: 'the orbit library did not load in time' }), 20000);
+    w.onmessage = e => { if (e.data.type === 'ready' || e.data.type === 'error') { clearTimeout(to); res(e.data); } };
+    w.postMessage({ type: 'init', csv, version: meta.elements.sha256 });
+  });
+  w.onmessage = satOnMessage;
+  if (ready.type === 'error') return { problem: ready.why };
+  if (!ready.usable) return { problem: 'no element set in the file could be used' };
+  sat.ready = ready; sat.csvVersion = meta.elements.sha256; sat.meta = meta;
+  return { ok: true };
+}
+
+function satFindLayer() { let f = null; globe.scene().traverse(o => { if (!f && o.type === 'Points' && o.__globeObjType === 'particles') f = o; }); return f; }
+const nextFrames = n => new Promise(res => { const step = k => k ? requestAnimationFrame(() => step(k - 1)) : res(); step(n); });
+
+// Create the batched layer ONCE per capacity. globe.gl builds the object on its next tick, so the reference is
+// taken only after it exists; nothing toggles it before then (busy flag). Capacity carries headroom so later,
+// larger files are written in place without rebuilding.
+async function satCreateLayer(rows) {
+  const capacity = Math.ceil(rows * (1 + SATC.CAPACITY_HEADROOM));
+  const filler = Array.from({ length: capacity }, () => ({ lat: 0, lng: 0, alt: -0.9 }));   // inside the globe (occluded) until the first real positions land
+  globe.particlesList(d => d).particleLat('lat').particleLng('lng').particleAltitude('alt')
+    .particlesSize(SATC.MARKER_PX).particlesSizeAttenuation(false).particlesColor(() => SATC.COLOUR)
+    .particlesData([filler]);
+  let layer = null;
+  for (let i = 0; i < 120 && !(layer = satFindLayer()); i++) await nextFrames(1);
+  if (!layer || !layer.geometry || !layer.geometry.attributes || !layer.geometry.attributes.position || layer.geometry.attributes.position.count < capacity) {
+    globe.particlesData([]); return false;
+  }
+  layer.frustumCulled = false;            // positions are rewritten in place; the original bounding sphere is meaningless
+  layer.raycast = () => { };              // never a pick target: coverage cells and records stay clickable through it
+  layer.geometry.setDrawRange(0, 0);
+  layer.visible = false;
+  sat.layer = layer; sat.capacity = capacity;
+  return true;
+}
+
+function satTeardownLayer() {
+  if (!sat.layer) return;
+  const l = sat.layer; sat.layer = null; sat.capacity = 0;
+  globe.particlesData([]);
+  nextFrames(2).then(() => { l.geometry.dispose(); l.material.dispose(); });   // dispose only after globe.gl has removed it
+}
+
+function satApply(m) {
+  if (!sat.layer || m.version !== sat.csvVersion) return;     // a pass from a previous element file is discarded, never drawn
+  const t0 = performance.now();
+  const attr = sat.layer.geometry.attributes.position, arr = attr.array, n = Math.min(m.drawn, sat.capacity);
+  arr.set(m.xyz.subarray(0, n * 3), 0);
+  sat.layer.geometry.setDrawRange(0, n);
+  attr.needsUpdate = true;
+  sat.last = { rows: m.rows, drawn: n, failed: m.failed, stale: m.stale, beyondGeo: m.beyond, at: m.at };
+  sat.lastApplyMs = +(performance.now() - t0).toFixed(2);
+  satPaint();
+}
+
+function satOnMessage(e) {
+  const m = e.data;
+  if (m.type === 'error') return satFail(m.why);
+  if (m.type !== 'pos' || m.seq !== sat.seq) return;          // only the latest request counts
+  sat.inflight = false;
+  if (sat.on) satApply(m);
+}
+
+function satRequest() {
+  if (!sat.on || !sat.worker || sat.inflight) return;
+  if (document.hidden) { sat.hiddenSkips++; return; }          // no work while the tab is hidden
+  sat.inflight = true;
+  sat.worker.postMessage({ type: 'prop', t: Date.now(), seq: ++sat.seq, version: sat.csvVersion, globeR: globe.getGlobeRadius() });
+}
+
+function satStopTimers() {
+  if (sat.timer) { clearInterval(sat.timer); sat.timer = null; }
+  if (sat.metaTimer) { clearInterval(sat.metaTimer); sat.metaTimer = null; }
+  sat.inflight = false;
+}
+
+// Refuse cleanly: toggle off, reason shown, nothing else on the page touched.
+function satFail(why) {
+  satStopTimers();
+  if (sat.layer) { sat.layer.visible = false; sat.layer.geometry.setDrawRange(0, 0); }
+  sat.on = false; sat.busy = false; sat.why = 'Satellites not shown: ' + why + '.';
+  satPaint();
+}
+
+// While on: re-read the small meta; fetch the CSV only if its checksum changed. A failed re-check keeps the
+// current file (it carries its own times; stale counts keep rising honestly).
+async function satRecheck() {
+  if (!sat.on || document.hidden) return;
+  try {
+    const { meta } = await satFetchMeta();
+    if (!meta || meta.elements.sha256 === sat.csvVersion) { if (meta) sat.meta = meta; return; }
+    const loaded = await satLoadElements(meta);
+    if (loaded.ok && sat.ready.rows > sat.capacity) { satTeardownLayer(); await nextFrames(2); if (!(await satCreateLayer(sat.ready.rows))) return satFail('the satellite layer could not be rebuilt for a larger file'); sat.layer.visible = sat.on; }
+    if (loaded.ok) satRequest();
+  } catch (e) { /* keep the current file */ }
+}
+
+async function setSat(on) {
+  if (sat.busy || on === sat.on) return;
+  if (!on) {
+    satStopTimers();
+    sat.on = false; sat.why = null;
+    if (sat.layer) sat.layer.visible = false;                  // hidden, not destroyed: the measured fix (bench 1.6)
+    satPaint(); return;
+  }
+  sat.why = null;
+  if (!globeOk) { sat.why = 'Satellites not shown: the globe is unavailable in this browser.'; satPaint(); return; }
+  if (typeof Worker === 'undefined' || !(window.crypto && crypto.subtle)) { sat.why = 'Satellites not shown: this browser lacks what the calculation needs (background workers or checksums).'; satPaint(); return; }
+  sat.busy = true; satPaint();
+  $('sat-lines').hidden = false; $('sat-lines').innerHTML = '<div>Loading element sets from the hub…</div>';
+  try {
+    const { meta, problem } = await satFetchMeta();
+    if (problem) return satFail(problem);
+    const loaded = await satLoadElements(meta);
+    if (loaded.problem) return satFail(loaded.problem);
+    sat.meta = meta;
+    if (!sat.layer || sat.ready.rows > sat.capacity) {
+      if (sat.layer) { satTeardownLayer(); await nextFrames(2); }
+      if (!(await satCreateLayer(sat.ready.rows))) return satFail('this browser did not create the satellite layer');
+    }
+    sat.on = true; sat.busy = false;
+    sat.layer.visible = true;
+    satRequest();                                               // immediately on enable
+    sat.timer = setInterval(satRequest, SATC.UPDATE_MS);
+    sat.metaTimer = setInterval(satRecheck, SATC.META_RECHECK_MS);
+    satPaint();
+  } catch (e) {
+    console.error('[Mother Earth] satellites:', e);
+    satFail('the hub could not be reached');
+  }
+}
+
+$('tgl-sat').addEventListener('click', () => setSat(!sat.on));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && sat.on) satRequest(); });
+window.addEventListener('pageshow', () => { if (sat.on) satRequest(); });
+// read-only diagnostics for the console and the test harness
+ME.satVertex = i => sat.layer ? Array.from(sat.layer.geometry.attributes.position.array.slice(i * 3, i * 3 + 3)) : null;
+ME.coordsAt = (lat, lng, alt) => globeOk ? globe.getCoords(lat, lng, alt) : null;
+ME.satState = () => ({ on: sat.on, busy: sat.busy, why: sat.why, hasLayer: !!sat.layer, layerVisible: sat.layer ? sat.layer.visible : null,
+  capacity: sat.capacity, drawRange: sat.layer ? sat.layer.geometry.drawRange.count : null, timer: !!sat.timer, metaTimer: !!sat.metaTimer,
+  worker: !!sat.worker, seq: sat.seq, inflight: sat.inflight, hiddenSkips: sat.hiddenSkips, last: sat.last, applyMs: sat.lastApplyMs,
+  fileSha: sat.csvVersion, retrieved: sat.meta && sat.meta.retrieved_at,
+  particleObjects: globeOk ? (() => { let n = 0, v = 0; globe.scene().traverse(o => { if (o.type === 'Points' && o.__globeObjType === 'particles') { n++; if (o.visible) v++; } }); return { n, v }; })() : null });
 
 // ---------- cards
 const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = f.why; };
