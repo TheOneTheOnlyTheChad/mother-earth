@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611061000">
+<link rel="stylesheet" href="style.css?v=202611061400">
 </head>
 <body class="world">
 <header class="top">
@@ -227,7 +227,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611061000"></script>
+<script src="app.js?v=202611061400"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -1079,7 +1079,7 @@ ME.cellPolys = layer => globeOk ? globe.polygonsData().filter(p => p.layer === l
 ME.renderState = () => globeOk ? { points: globe.pointsData().length, driftPoints: globe.pointsData().filter(p => p.buoy !== undefined).length, driftCells: globe.polygonsData().filter(p => p.layer === 'drifters').length, plasticPoints: globe.pointsData().filter(p => p.sampled_on !== undefined).length, plasticRings: globe.pathsData().length, plasticCells: globe.polygonsData().filter(p => p.layer === 'plastic').length, polygons: globe.polygonsData().length, on: { ...on } } : null;
 
 // ---------- cards
-const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = f.why; };
+const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = k === 'plastic' ? 'the hub\'s copy is fresh — says nothing about when the samples were taken; ' + f.why : f.why; };
 const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
 function pairNote(layer) {
   const e = $('p-' + layer); if (!e) return;

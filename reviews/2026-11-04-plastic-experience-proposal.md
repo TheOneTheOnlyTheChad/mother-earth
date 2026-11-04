@@ -1,5 +1,7 @@
 # Ocean plastic — dated-samples experience, proposal v2 (4 Nov 2026)
 
+**Superseded figures (4 Nov, after release):** the live hub's totals are 647 reproduced / 11 possible date conflicts / 1 not reproduced / 486 no original (the 645 / 3 earlier came from a sample-ID merge bug in the exploration code — see the research note). Built and public since 4 Nov 12:28 UTC.
+
 v2 = GPT's second review applied (rows B, uniform markers, wording, per-record provenance). Changes from v1 are in the text; evidence in the research note §10.
 
 For Chad and GPT to react to. Nothing built. Evidence: `reviews/2026-11-04-ocean-plastic-export.md` (§8–9 Oceaneye).

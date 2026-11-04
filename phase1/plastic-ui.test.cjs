@@ -65,7 +65,7 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 5 min — failur
       v: document.getElementById('v-plastic').textContent, o: document.getElementById('o-plastic').textContent, note: document.getElementById('n-plastic').textContent, polys };
   });
   const toggle = async page => { await page.click('[data-layer="plastic"]'); await page.waitForTimeout(400); };
-  const on = async page => { await page.click('[data-layer="plastic"]'); await page.waitForFunction(() => !document.getElementById('s-plastic').textContent.match(/off|loading/), null, { timeout: 15000 }); await page.waitForTimeout(400); };
+  const on = async page => { await page.click('[data-layer="plastic"]'); await page.waitForFunction(() => !document.getElementById('s-plastic').textContent.match(/^(off|loading)$/), null, { timeout: 15000 }); await page.waitForTimeout(400); };
   const openRec = async (page, lat, lng, date) => {
     await page.keyboard.press('Escape'); await page.evaluate(k => ME.openCell('plastic', k), cellOf(lat, lng)); await page.waitForTimeout(150);
     const i = await page.evaluate(d => [...document.querySelectorAll('#insp-dl .reclink')].findIndex(b => b.textContent.startsWith(d)), date);
@@ -89,6 +89,7 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 5 min — failur
   const cellFill = await page.evaluate(() => ME.cellPolys ? ME.cellPolys('plastic') : null);
   ok('2 on: cells outlined, never filled', x.r.plasticCells === Object.keys(pCells).length && cellFill && cellFill.every(c => c.fill === 'rgba(0,0,0,0)'), { cells: x.r.plasticCells, cellFill });
   ok('2 on: legend line says dated, tow-start, hollow ring = reported zero', x.leg && await page.evaluate(() => /2011–2024 · tow-start locations · dated observations/.test(document.getElementById('leg-plastic').textContent) && /hollow ring = source reports zero/.test(document.getElementById('leg-plastic').textContent)), x.leg);
+  ok('2 on: state badge says "loaded", never "current" (GPT review 4 Nov)', x.st === 'loaded', x.st);
   ok('2 on: card count + date range + reproduced count', x.v === String(REC.length) && /2011-08-31 to 2023-06-30/.test(x.o) && /2 reproduced/.test(x.o), x);
   ok('2 on: other layers unchanged (earthquake markers still drawn)', x.r.points === basePts + NPTS && x.usgs.usable, x.r);
   ok('2 on: exactly one /cells + one /snapshot plastic request', count(/^\/cells\/plastic$/) === 1 && count(/^\/snapshot\/plastic$/) === 1, hits.filter(h => /plastic/.test(h)));

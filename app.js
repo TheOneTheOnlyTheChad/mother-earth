@@ -274,7 +274,8 @@ ME.freshness = function (layer) {
   if (snap.source_status === 'degraded') return { grade: 'partial', why: 'the source flagged this observation as degraded' };
   return { grade: 'adequate', why: 'retrieved ' + ago(snap.retrieved_at) };
 };
-ME.stateWord = (f, layer) => f.grade === 'adequate' ? ['current', 'ok'] : f.grade === 'partial' ? (layer === 'forest' ? [f.sweeping ? 'sweeping' : 'partial', 'warn'] : ['degraded', 'warn']) : ['unknown', 'bad'];   // forest is partial by design (REGISTER): say what it is, not 'degraded'
+ME.stateWord = (f, layer) => f.grade === 'adequate' ? [layer === 'plastic' ? 'loaded' : 'current', 'ok']   // plastic: the badge is about our retrieval, and beside 2011–2024 samples 'current' would read as current observations (GPT review, 4 Nov)
+   : f.grade === 'partial' ? (layer === 'forest' ? [f.sweeping ? 'sweeping' : 'partial', 'warn'] : ['degraded', 'warn']) : ['unknown', 'bad'];   // forest is partial by design (REGISTER): say what it is, not 'degraded'
 
 // ---------- readings: one object per layer that both pages render from (value, unit, observed, source, freshness, coverage, comparison)
 ME.readings = function () {
