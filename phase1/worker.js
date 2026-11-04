@@ -498,7 +498,8 @@ async function collectCo2(env, scheduledMs) {
 function doyOf(dateStr) { const d = Date.parse(dateStr + 'T00:00:00Z'); return Math.floor((d - Date.UTC(new Date(d).getUTCFullYear(), 0, 1)) / 86400e3) + 1; }
 
 // NSIDC's required citation (2025 form, CITATION tab of nsidc.org/data/g02135/versions/4, read 4 Nov 2026; REGISTER).
-// NSIDC's placeholders filled by us: the subset used, and the access date = this run's date, in NSIDC's own MM-DD-YYYY form.
+// NSIDC's placeholders filled by us: the subset used, and the access date = the UTC date the files were actually fetched
+// (MM-DD-YYYY, NSIDC's form). A failed run never rewrites latest/seaice.json, so a served older snapshot keeps its own date.
 function nsidcCitation(ms) {
   const [y, m, d] = new Date(ms).toISOString().slice(0, 10).split('-');
   return 'Fetterer, F., Knowles, K., Meier, W. N., Savoie, M., Windnagel, A. K. & Stafford, T. (2025). Sea Ice Index. (G02135, Version 4). [Data Set]. Boulder, Colorado USA. National Snow and Ice Data Center. https://doi.org/10.7265/a98x-0f50. Daily sea-ice extent, Northern and Southern Hemispheres, and the 1981–2010 daily climatology. Date Accessed ' + `${m}-${d}-${y}.`;
@@ -527,6 +528,7 @@ async function collectSeaIce(env, scheduledMs) {
       difference_from_average: clim ? Math.round((last[1] - +clim[1]) * 1000) / 1000 : null,
       last_366: rows.slice(-366) };
   }
+  const fetchedMs = Date.now();   // after both hemispheres' fetches = the actual retrieval; same moment as the envelope's retrieved_at
   const n = out.north, s = out.south;
   const ageS = (Date.now() - Date.parse(n.date + 'T00:00:00Z')) / 1000;
   const status = ageS < 5 * 86400 ? 'ok' : 'degraded';                     // daily product with ~1 day latency; > 5 days behind is late
@@ -536,7 +538,7 @@ async function collectSeaIce(env, scheduledMs) {
     { index: { name: 'sea-ice extent, NSIDC Sea Ice Index v4', north: n, south: s, source_age_s: ageS },
       comparison: { basis: 'source-provided baseline: NSIDC 1981–2010 daily climatology for the same day of year (average and percentiles). The subtraction (today minus average) is computed by this collector; the baseline is NSIDC\'s.' },
       map_layer: false, source_notes: notes,
-      citation: nsidcCitation(scheduledMs),
+      citation: nsidcCitation(fetchedMs),
       quantity: 'daily sea-ice extent per hemisphere, million km² (area of ocean with ≥15% ice concentration, passive microwave) — one number per hemisphere, not a map layer' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
   await logRun(env, layer, scheduledMs, status, 200, recs.length, bytes, `N=${n.value} S=${s.value} date=${n.date} dN=${n.difference_from_average} dS=${s.difference_from_average}`);
