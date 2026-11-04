@@ -2,6 +2,9 @@
 
 Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with attribution / needs agreement — from the pasted terms, before the layer goes live. Chad reads the licence page and pastes the operative sentence; Claude files it with the date read. One row per source. "Coverage" is what the source documents about its own completeness — the thing the page's coverage grades lean on.
 
+
+**Open question — attribution placement (recorded 4 Nov 2026, UX round 1).** No source states where on a page its credit must sit. What each requires, from the rows below: LANCE — a fixed acknowledgment sentence (required form); NSIDC — citation required as a condition of use; GFW/WRI — credit under CC BY 4.0 plus "please credit Us"; Space-Track — "appropriate citation"; USGS — "we ask that proper credit be given"; NOAA GML — "please include relevant citation"; aisstream — none required. Interim layout: the full current acknowledgment text stays visible below the globe (and at the end of the phone readings sheet). Whether any of it may move behind a click is undecided; this note is not a decision.
+
 ## USGS — Earthquake Hazards Program, GeoJSON feed `2.5_day`
 - **Read:** 30 Oct 2026 by Chad, https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits
 - **Terms (verbatim):** "USGS-authored or produced data and information are considered to be in the U.S. Public Domain."
@@ -55,13 +58,18 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Commercial use:** yes — as FIRMS (same LANCE terms).
 
 ## NSIDC — Sea Ice Index v4 (G02135), daily extent + 1981–2010 climatology, NOAA mirror
-- **Read:** 30 Oct 2026 by Claude — directory listing and file headers at https://noaadata.apps.nsidc.org/NOAA/G02135/ (open; no Earthdata login). **Chad to read and paste NSIDC's data-use/citation page:** https://nsidc.org/data/g02135 (look for "Citing These Data" and any use terms).
-- **Terms:** NOAA-hosted NSIDC product; header points to source products nsidc-0081 / nsidc-0051. Citation form carried in the snapshot: Fetterer, F., K. Knowles, W. N. Meier, M. Savoie, and A. K. Windnagel. Sea Ice Index, Version 4. NSIDC. https://nsidc.org/data/g02135 — **verbatim terms pending Chad's paste.**
+- **Read:** 30 Oct 2026 by Claude — directory listing and file headers at https://noaadata.apps.nsidc.org/NOAA/G02135/ (open; no Earthdata login).
+- **Read:** 4 Nov 2026 by Claude in the browser pane — https://nsidc.org/data/g02135/versions/4, CITATION tab (Chad's instruction: complete the attribution record).
+- **Use condition (verbatim):** "As a condition of using these data, you must cite the use of this data set."
+- **Required citation (verbatim, NSIDC's form):** "Fetterer, F., Knowles, K., Meier, W. N., Savoie, M., Windnagel, A. K. & Stafford, T. (2025). Sea Ice Index. (G02135, Version 4). [Data Set]. Boulder, Colorado USA. National Snow and Ice Data Center. https://doi.org/10.7265/a98x-0f50. [describe subset used if applicable]. Date Accessed 11-03-2026." (the access date is NSIDC's placeholder; we fill our own.)
+- **Gap found 4 Nov 2026:** the hub's carried citation (worker.js) is the older form — no Stafford, no year, no DOI. Fix = a one-line hub change, deployed only on Chad's go. Placement on the page (where the citation must appear) is not stated by NSIDC; recorded as part of the open attribution-placement question.
+- **Service level (verbatim notice, 4 Nov 2026):** "Due to funding limitations, this data set was recently changed to a “Basic” Level of Service." Recorded as a watch item for continuity, not a reason to change anything now.
+- **Terms:** NOAA-hosted NSIDC product; header points to source products nsidc-0081 / nsidc-0051. Citation form carried in the snapshot (older form, see gap above): Fetterer, F., K. Knowles, W. N. Meier, M. Savoie, and A. K. Windnagel. Sea Ice Index, Version 4. NSIDC. https://nsidc.org/data/g02135.
 - **Cadence (measured):** file updated once a day (~14:20 UTC on 29–30 Oct); we fetch at 03/09/15/21 UTC. Daily files ≈1.9 MB each (tail-parsed), climatology 34 KB.
 - **Coverage statement:** passive microwave; extent = ocean with ≥15 % concentration; one number per hemisphere; ~1 day latency. Not a map layer.
 - **Map layer (measured 30 Oct 2026, GIBS WMS, 2048×1024, day 29 Oct):** VIIRS_NOAA20_Sea_Ice (observation) painted 0.76 % of the globe — polar night + cloud; AMSRU2_Sea_Ice_Concentration_12km ended 2025-09-01; GHRSST_L4_MUR_Sea_Ice_Concentration (L4 analysis, model tier) painted 12.2 %, 133 KB, 2.2 s. **Decision pending:** show MUR labelled "analysis, not observation", or no cap imagery.
-- **Status:** ✅ data in use (attributed); terms paste outstanding.
-- **Commercial use:** yes (NOAA-hosted, open) — citation required; NSIDC terms page still to be pasted.
+- **Status:** ✅ data in use (attributed); citation required as a condition of use — carried form needs updating to NSIDC's 2025 form (hub change pending Chad's go).
+- **Commercial use:** yes (NOAA-hosted, open) — citation required as a condition of use.
 
 ## OpenSky Network — states API
 - **Read:** 30 Oct 2026 (Terms §3(iii)/(vi) + reply Ticket#837506 by Chad).

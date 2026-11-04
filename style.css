@@ -162,7 +162,7 @@ button.res.go .rt{color:var(--fg)}
 .twin>div .value{font-size:22px}
 
 /* ---------- inspector */
-.inspector{position:absolute;top:12px;right:12px;width:340px;max-width:calc(100% - 24px);padding:14px 16px;border:1px solid var(--line-strong);background:var(--panel);display:none;max-height:calc(100% - 24px);overflow:auto;z-index:20}
+.inspector{position:absolute;top:12px;right:12px;width:400px;max-width:calc(100% - 24px);padding:14px 16px;border:1px solid var(--line-strong);background:var(--panel);display:none;max-height:calc(100% - 24px);overflow:auto;z-index:20}
 .inspector.show{display:block}
 .inspector h2{font:700 20px/1.1 var(--display);margin:0 0 6px;text-transform:uppercase;letter-spacing:.03em;padding-right:36px}
 .inspector dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:8px 0 0;font-size:12px}
@@ -287,3 +287,6 @@ details.cd>.cav{margin-top:2px}
 #t-kept td:first-child{white-space:normal;color:#c9d3e0}
 /* found 4 Nov 2026 (UX round 1, 360 px check): title + clock + menu ran 31 px past a 360 px screen on main too */
 @media (max-width:380px){.top{gap:8px;padding:0 10px}.top h1{font-size:17px}.top .clock{font-size:14px}.top .clock span{margin-left:3px}.menu>button{padding:0 10px}}
+.inspector details.imore{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px}
+.inspector details.imore>summary{cursor:pointer;color:rgba(255,179,71,.85);font-size:12px;min-height:28px;display:flex;align-items:center}
+.inspector details.imore>dl{margin-top:4px}

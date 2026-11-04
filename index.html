@@ -42,7 +42,7 @@
       </div>
     </div>
     <footer class="credits" id="credits" aria-label="Data sources and acknowledgments">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · orbital element sets <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> (US Space Force 18th/19th Space Defense Squadrons) · drifting buoys <a href="https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html" target="_blank" rel="noopener">NOAA OSMC</a> (WMO GTS reports; CC0) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></footer>
-    <div class="inspector" id="insp" role="dialog" aria-labelledby="insp-h"><button class="x" id="insp-x" type="button" aria-label="Close">×</button><h2 id="insp-h">—</h2><dl id="insp-dl"></dl></div>
+    <div class="inspector" id="insp" role="dialog" aria-labelledby="insp-h"><button class="x" id="insp-x" type="button" aria-label="Close">×</button><h2 id="insp-h">—</h2><dl id="insp-dl"></dl><div id="insp-more"></div></div>
   </div>
 
   <div class="sheet" id="sheet">
@@ -345,7 +345,11 @@ let inspCtx = null;            // { layer, recs } so a listed record can be open
 function openInspector(title, rows) {
   lastFocus = document.activeElement;
   $('insp-h').textContent = title;
-  $('insp-dl').innerHTML = rows.filter(Boolean).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('');
+  // rows tagged 'more' (long method text) go behind one disclosure so the measurement, time, place and source stay findable
+  const dl = r => r.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('');
+  const main = rows.filter(r => r && r[2] !== 'more'), more = rows.filter(r => r && r[2] === 'more');
+  $('insp-dl').innerHTML = dl(main);
+  $('insp-more').innerHTML = more.length ? `<details class="imore"><summary>Method and full explanation</summary><dl>${dl(more)}</dl></details>` : '';
   $('insp').classList.add('show');
   if (globeOk) globe.controls().autoRotate = false;
   $('insp-x').focus();
@@ -397,10 +401,12 @@ function inspectRecord(layer, r) {
     ['Observed', when(r.observed_at)],
     r.received_at !== undefined ? ['Received by us', r.received_at ? r.received_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING] : null,
     ['Position', `${Number(r.lat).toFixed(3)}, ${Number(r.lng).toFixed(3)} · cell ${r.cellId} (${ME.CELL_DEG}° × ${ME.CELL_DEG}°)`],
-    ['Source', `${esc(SOURCE[layer].name)} — ${esc(snap.quantity || '')}`],
+    ['Source', esc(SOURCE[layer].name)],
+    ['Quantity', esc(snap.quantity || MISSING), 'more'],
     ['Window', windowText(layer, snap)],
     ['This run', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING]);
-  if (layer === 'firms') rows.push(['What FRP is', 'Pixel-integrated fire radiative power estimated at the satellite observation time; not fire size, spread or severity. It is a power (MW), not an amount of energy, and it is not a comparison between fires. Cloud decides what could be detected at all. NASA: not for tactical decisions or local-scale conditions.']);
+  if (layer === 'firms') rows.push(['NASA', 'not for tactical decisions or local-scale conditions']);
+  if (layer === 'firms') rows.push(['What FRP is', 'Pixel-integrated fire radiative power estimated at the satellite observation time; not fire size, spread or severity. It is a power (MW), not an amount of energy, and it is not a comparison between fires. Cloud decides what could be detected at all. NASA: not for tactical decisions or local-scale conditions.', 'more']);
   if (ME.KEPT[layer]) rows.push(['Comparison', 'none of ours shown yet — ' + ME.KEPT[layer]]);
   if (layer === 'drifters') rows.push(['Caveat', 'this buoy\'s latest fix as relayed over the WMO GTS; where it is now is unknown; reports are not quality-controlled (delayed-mode QC data lag by years)']);
   if (layer === 'ships') rows.push(['Caveat', 'latest position received for this MMSI during the sample; where it was between samples is unknown; terrestrial AIS only']);
