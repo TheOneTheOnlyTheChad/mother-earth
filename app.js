@@ -8,7 +8,7 @@ const CELL_DEG = ME.CELL_DEG = 4;
 const REFRESH_MS = ME.REFRESH_MS = 5 * 60e3;
 const BASELINE_SINCE = '30 Oct 2026';
 // What the hub keeps per layer (read from D1 + R2 lifecycle rules, 4 Nov 2026). Shown wherever a comparison is mentioned.
-const KEPT = ME.KEPT = { usgs: 'hourly per-cell counts kept since 30 Oct 2026', firms: 'hourly per-cell counts kept since 30 Oct 2026', ships: 'hourly per-cell counts kept since 1 Nov 2026', forest: 'daily per-cell alert counts kept since 1 Nov 2026', swpc: 'every Kp value kept since 30 Oct 2026', co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026', seaice: 'no history kept — current file only', drifters: 'no history kept — current file only' };
+const KEPT = ME.KEPT = { usgs: 'hourly per-cell counts kept since 30 Oct 2026', firms: 'hourly per-cell counts kept since 30 Oct 2026', ships: 'hourly per-cell counts kept since 1 Nov 2026', forest: 'daily per-cell alert counts kept since 1 Nov 2026', swpc: 'every Kp value kept since 30 Oct 2026', co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026', seaice: 'no history kept — current file only', drifters: 'no history kept — current file only', plastic: 'no history kept — the current NOAA file only, plus Oceaneye\'s original file used for the checks' };
 const IMG_DAY = ME.IMG_DAY = new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10);
 const IMG_LABEL = ME.IMG_LABEL = new Date(IMG_DAY).toUTCString().slice(5, 16);
 // Operating mode of the home collector. Change only when a schedule has been installed AND verified from logs (brief §5).
@@ -229,7 +229,7 @@ ME.total = snap => Object.values((snap && snap.cells) || {}).reduce((n, c) => n 
 
 const LAYERS = ME.LAYERS = ['usgs', 'firms', 'ships', 'forest', 'swpc', 'co2', 'seaice'];
 const MAP_LAYERS = ME.MAP_LAYERS = ['usgs', 'firms', 'ships', 'forest'];   // forest is cells-only: counts per cell, no points
-const LABEL = ME.LABEL = { usgs: 'Earthquakes', firms: 'Fire detections', ships: 'Ships', forest: 'Forest disturbance', swpc: 'Kp index', co2: 'CO₂', seaice: 'Sea ice', drifters: 'Drifting buoys' };
+const LABEL = ME.LABEL = { usgs: 'Earthquakes', firms: 'Fire detections', ships: 'Ships', forest: 'Forest disturbance', swpc: 'Kp index', co2: 'CO₂', seaice: 'Sea ice', drifters: 'Drifting buoys', plastic: 'Microplastic samples' };
 const SOURCE = ME.SOURCE = {
   usgs: { name: 'USGS', url: 'https://earthquake.usgs.gov/', credit: 'Credit: U.S. Geological Survey', terms: 'U.S. public domain' },
   firms: { name: 'NASA FIRMS', url: 'https://firms.modaps.eosdis.nasa.gov/', credit: 'We acknowledge the use of data and/or imagery from NASA\'s Land, Atmosphere Near real-time Capability for Earth observations (LANCE), part of NASA\'s Earth Science Data and Information System (ESDIS).', terms: 'NASA data policy; LANCE acknowledgment requested' },
@@ -238,13 +238,14 @@ const SOURCE = ME.SOURCE = {
   swpc: { name: 'NOAA SWPC', url: 'https://www.swpc.noaa.gov/', credit: 'NOAA Space Weather Prediction Center', terms: 'U.S. public domain' },
   co2: { name: 'NOAA GML', url: 'https://gml.noaa.gov/ccgg/trends/', credit: 'Lan, X., Tans, P. and Thoning, K.W.: Trends in globally-averaged CO2 determined from NOAA Global Monitoring Laboratory measurements. NOAA GML.', terms: 'freely available; citation requested; recent months preliminary' },
   seaice: { name: 'NSIDC', url: 'https://nsidc.org/data/g02135', credit: 'Fetterer, F., Knowles, K., Meier, W. N., Savoie, M., Windnagel, A. K. & Stafford, T. (2025). Sea Ice Index. (G02135, Version 4). [Data Set]. Boulder, Colorado USA. National Snow and Ice Data Center. https://doi.org/10.7265/a98x-0f50. Daily sea-ice extent, Northern and Southern Hemispheres, and the 1981–2010 daily climatology. Date accessed: the retrieval date of the snapshot shown.', terms: 'open (NOAA mirror); citation required as a condition of use' },
+  plastic: { name: 'Oceaneye via NOAA NCEI', url: 'https://www.ncei.noaa.gov/products/microplastics', credit: 'NOAA NCEI Marine Microplastics (Nyadjro et al. 2018; Nyadjro et al. 2023, Scientific Data, doi:10.1038/s41597-023-02632-y); dataset NCEI Accession 0276422 (Faure, Saini, Potter, Galgani, de Alencastro, Hagmann 2023); original counts Hagmann & Potter (2022), SEANOE doi:10.17882/86630', terms: 'NCEI compiled product CC0; Oceaneye original CC BY 4.0; NCEI archive licence unstated' },
   drifters: { name: 'NOAA OSMC', url: 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html', credit: 'NOAA Observing System Monitoring Center (OSMC) — drifting-buoy reports relayed over the WMO GTS', terms: 'CC0 1.0 (public domain dedication)' },
   gibs: { name: 'NASA GIBS', url: 'https://earthdata.nasa.gov/gibs', credit: 'Imagery: NASA GIBS, VIIRS NOAA-20 true colour', terms: 'open; dated; not live' },
 };
-const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', forest: 'observation (satellite-derived alert pixels, published; three alert systems with their own confidence rules)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated, previous day)', drifters: 'observation (each buoy\'s latest reported fix; positions at different times, not one moment)' };
+const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', forest: 'observation (satellite-derived alert pixels, published; three alert systems with their own confidence rules)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated, previous day)', drifters: 'observation (each buoy\'s latest reported fix; positions at different times, not one moment)', plastic: 'observation (dated samples 2011–2024; concentrations as published by NOAA NCEI; not current positions)' };
 
 // ---------- state
-const state = ME.state = { usgs: null, firms: null, ships: null, forest: null, swpc: null, co2: null, seaice: null, drifters: null };
+const state = ME.state = { usgs: null, firms: null, ships: null, forest: null, swpc: null, co2: null, seaice: null, drifters: null, plastic: null };
 ME.loadedAt = null;
 
 async function getJson(path) { const r = await fetch(HUB + path, { cache: 'no-store' }); if (!r.ok) throw new Error(path + ' ' + r.status); return r.json(); }

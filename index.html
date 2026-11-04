@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611051200">
+<link rel="stylesheet" href="style.css?v=202611061000">
 </head>
 <body class="world">
 <header class="top">
@@ -28,7 +28,7 @@
       <div id="globe"></div>
       <div class="imgdate" id="imgdate">Imagery: loading…</div>
       <div class="legend" id="legend">
-      <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample) · <span id="leg-drifters" hidden><span class="dot" style="--c:var(--drift)"></span>drifting buoy (latest fix) · </span><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</div>
+      <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample) · <span id="leg-drifters" hidden><span class="dot" style="--c:var(--drift)"></span>drifting buoy (latest fix) · </span><span id="leg-plastic" hidden><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero) · </span><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</div>
       <div class="cov nightleg" id="night-legend" hidden></div>
       <div class="cov nightleg" id="orb-legend" hidden></div>
       <details class="covkey">
@@ -168,6 +168,16 @@
             <div class="pair" id="p-drifters" hidden></div>
             <details class="cd"><summary>Details</summary><div class="cav">Each dot is one buoy at its own last reported time, not one moment; buoys are few and far apart, so empty ocean is not evidence of anything. <a class="more" href="sources.html#drifters">details</a></div></details>
           </div>
+          <div class="card toggle off" id="card-plastic" style="--c:var(--plastic)">
+            <button class="tgl" type="button" data-layer="plastic" aria-pressed="false"><span class="pip"></span><span class="name">Microplastic samples — dated</span><span class="state" id="s-plastic">off</span></button>
+            <div class="evl"><span class="ev obs">Observed</span> dated samples — not current positions</div>
+            <div class="value"><span id="v-plastic">–</span><small>surface samples · 2011–2024</small></div>
+            <div class="obs" id="o-plastic">off — switch on to load the samples</div>
+            <div class="src" id="m-plastic">Oceaneye · published by NOAA NCEI</div>
+            <div class="cav" id="n-plastic">1,145 Oceaneye surface-water samples published by NOAA NCEI, 2011–2024; newest 23 Oct 2024. Markers show tow-start locations on their sampling dates — not plastic's current position. A missing marker does not establish plastic-free water.</div>
+            <div class="pair" id="p-plastic" hidden></div>
+            <details class="cd"><summary>Details</summary><div class="cav">Each marker is one manta-net tow (0.33 mm mesh, surface), counting pieces smaller than 5 mm, at the place the tow started and on its own date. One programme's routes — mostly Atlantic and Mediterranean — not global coverage. Concentrations are as published by NOAA NCEI; where Oceaneye's original record was found and checked, the inspector shows the check. <a class="more" href="sources.html#plastic">details</a></div></details>
+          </div>
           <div class="ovl opt-night">
             <div class="ovl-h">Day/night <span class="ev comp">Computed</span></div>
             <button class="ovl-tgl" type="button" id="tgl-night" role="switch" aria-checked="false" aria-describedby="night-note"><span class="box" aria-hidden="true"></span><span class="t">Day/night now — computed</span></button>
@@ -217,7 +227,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611051200"></script>
+<script src="app.js?v=202611061000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -232,11 +242,11 @@ $('imgdate').textContent = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS NOAA-20
 // ---------- globe (survives WebGL failure: readings and report still load)
 const RECORD_LAYERS = ['usgs', 'firms', 'ships'];            // publish individual records alongside their cell counts
 const CELL_ONLY_LAYERS = ['forest', 'swpc', 'co2', 'seaice']; // counts or indices only
-const points = { usgs: [], firms: [], ships: [], forest: [], drifters: [] };
+const points = { usgs: [], firms: [], ships: [], forest: [], drifters: [], plastic: [] };
 // which collector run the loaded records came from, and whether the last read succeeded (review round 5)
-const pmeta = { usgs: { id: null, ok: false, fields: [], why: 'not read yet' }, firms: { id: null, ok: false, fields: [], why: 'not read yet' }, ships: { id: null, ok: false, fields: [], why: 'not read yet' }, drifters: { id: null, ok: false, fields: [], why: 'off' } };
-const on = { usgs: true, firms: true, ships: true, forest: true, drifters: false };   // drifters: OPTIONAL layer, off on load, fetched only while on
-const OPTIONAL_LAYERS = ['drifters'];
+const pmeta = { usgs: { id: null, ok: false, fields: [], why: 'not read yet' }, firms: { id: null, ok: false, fields: [], why: 'not read yet' }, ships: { id: null, ok: false, fields: [], why: 'not read yet' }, drifters: { id: null, ok: false, fields: [], why: 'off' }, plastic: { id: null, ok: false, fields: [], why: 'off' } };
+const on = { usgs: true, firms: true, ships: true, forest: true, drifters: false, plastic: false };   // drifters: OPTIONAL layer, off on load, fetched only while on
+const OPTIONAL_LAYERS = ['drifters', 'plastic'];
 const shownRecordLayers = () => RECORD_LAYERS.concat(OPTIONAL_LAYERS.filter(l => on[l]));
 const shownMapLayers = () => MAP_LAYERS.concat(OPTIONAL_LAYERS.filter(l => on[l]));
 const optLoading = {};
@@ -269,6 +279,7 @@ if (noWebGL) {
       .ringsData([]).ringLat('lat').ringLng('lng').ringColor(() => t => `rgba(255,90,60,${1 - t})`).ringMaxRadius('rr').ringPropagationSpeed(2).ringRepeatPeriod(900)
       .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonSideColor(() => 'rgba(0,0,0,0)').polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
       .polygonLabel(p => p.label)
+      .pathsData([]).pathPoints('pts').pathPointLat(q => q[0]).pathPointLng(q => q[1]).pathPointAlt(() => .003).pathColor(() => 'rgba(206,222,236,.95)').pathTransitionDuration(0)
       .onPolygonClick(p => inspectCell(p));
     globe.pointOfView({ lat: -10, lng: 25, altitude: innerWidth <= 720 ? 2.8 : 2.2 });   // phones: the whole sphere fits above the readings sheet
     globe.controls().autoRotate = !reduced; globe.controls().autoRotateSpeed = .25;
@@ -290,7 +301,7 @@ function cellGeom(id) {
 const STROKE = { adequate: 'rgba(214,221,232,1)', partial: 'rgba(214,221,232,.8)', unknown: 'rgba(255,90,60,.95)' };
 const FILL = { adequate: 'rgba(214,221,232,.10)', partial: 'rgba(214,221,232,.05)', unknown: 'rgba(255,90,60,.12)' };
 const forestFill = n => { const t = n <= 0 ? 0 : Math.min(1, Math.log10(n + 1) / 5); return `rgba(111,211,122,${(0.06 + 0.5 * t).toFixed(2)})`; };   // 0 → faint, 10^5 pixels → 0.56; log scale so the Amazon doesn't drown the rest
-const windowText = (layer, snap) => layer === 'drifters' ? 'latest fix per buoy reported in the 24 h before this run' : layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : layer === 'forest' ? 'alert pixels published in the 7 days before this cell\'s query' : 'in the last 24 h';
+const windowText = (layer, snap) => layer === 'plastic' ? `dated samples ${snap && snap.window_start ? snap.window_start.slice(0, 4) : ''}–${snap && snap.window_end ? snap.window_end.slice(0, 4) : ''}, each on its own sampling date` : layer === 'drifters' ? 'latest fix per buoy reported in the 24 h before this run' : layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : layer === 'forest' ? 'alert pixels published in the 7 days before this cell\'s query' : 'in the last 24 h';
 // show only fields the RECORD envelope publishes — record_fields lives on /snapshot/<layer>, never on /cells/<layer> (measured 1 Nov 2026)
 const hasField = (layer, name) => !!(pmeta[layer] && pmeta[layer].fields && pmeta[layer].fields.includes(name));
 
@@ -307,6 +318,7 @@ const unusableWhy = layer => {
 ME.pairState = layer => Object.fromEntries((layer ? [layer] : RECORD_LAYERS.concat(OPTIONAL_LAYERS)).map(k =>
   [k, { cells: snapId(state[k]), records: pmeta[k].id, ok: pmeta[k].ok, usable: usable(k), points: points[k].length }]));
 
+const ringAround = (lat, lng, r = .35, n = 24) => Array.from({ length: n + 1 }, (_, i) => { const a = 2 * Math.PI * i / n; return [lat + r * Math.sin(a), lng + r * Math.cos(a) / Math.max(.2, Math.cos(lat * Math.PI / 180))]; });
 function render() {
   const polys = [];
   for (const layer of shownMapLayers()) {
@@ -315,15 +327,19 @@ function render() {
     for (const [id, cell] of Object.entries(snap.cells || {})) {
       let grade = (cell.coverage && cell.coverage.grade) || 'unknown';
       if (fresh.grade === 'unknown') grade = 'unknown';
-      const fill = layer === 'forest' && grade !== 'unknown' ? forestFill(cell.count) : FILL[grade];
-      polys.push({ geom: cellGeom(id), layer, id, cell, grade, stroke: layer === 'forest' && grade !== 'unknown' ? 'rgba(111,211,122,.55)' : STROKE[grade], fill,
+      // plastic: no shading, no value in the cell — a faint outline only, so the samples inside can be listed and opened
+      const fill = layer === 'plastic' ? 'rgba(0,0,0,0)' : layer === 'forest' && grade !== 'unknown' ? forestFill(cell.count) : FILL[grade];
+      polys.push({ geom: cellGeom(id), layer, id, cell, grade, stroke: layer === 'plastic' ? 'rgba(206,222,236,.14)' : layer === 'forest' && grade !== 'unknown' ? 'rgba(111,211,122,.55)' : STROKE[grade], fill,
         label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL[layer]}</b> · cell ${id}<br>${cell.count} ${windowText(layer, snap)} · coverage: ${grade}<br><span style="color:#7f8da3">${esc(cell.coverage ? cell.coverage.evidence : '')}</span></div>` });
     }
   }
   globe.polygonsData(polys);
   const pts = [];
-  for (const layer of shownRecordLayers()) if (on[layer] && usable(layer) && ME.freshness(layer).grade !== 'unknown') pts.push(...points[layer]);
+  for (const layer of shownRecordLayers()) if (on[layer] && usable(layer) && ME.freshness(layer).grade !== 'unknown') pts.push(...points[layer].filter(q => !q.zero));
   globe.pointsData(pts);
+  // a sample the source reports as zero is a hollow ring — sampled, none counted in this size range — never the same mark as a value
+  const showPlastic = on.plastic && usable('plastic') && ME.freshness('plastic').grade !== 'unknown';
+  globe.pathsData(showPlastic ? points.plastic.filter(q => q.zero).map(q => ({ pts: ringAround(q.lat, q.lng), q })) : []);
   // rings are drawn from records too, so they obey the same identity check
   globe.ringsData(on.usgs && usable('usgs') && ME.freshness('usgs').grade !== 'unknown' ? points.usgs.filter(q => q.mag >= 5) : []);
 }
@@ -371,11 +387,13 @@ function recordTitle(layer, r) {
   if (layer === 'usgs') return has(r.mag) ? `M${Number(r.mag).toFixed(1)}` : 'magnitude ' + MISSING;
   if (layer === 'firms') return fmt(r.frp_mw, { dp: 0, unit: 'MW' });
   if (layer === 'drifters') return esc('Buoy ' + (r.buoy || MISSING));
+  if (layer === 'plastic') return esc(r.sampled_on || MISSING);
   return esc(r.name || ('MMSI ' + (r.mmsi || MISSING)));
 }
 
 // one record on its own — never a cell total (review round 5)
 function inspectRecord(layer, r) {
+  if (layer === 'plastic') return inspectSample(r);
   const snap = state[layer];
   const rows = [['Selected', 'one record from the loaded snapshot — not a cell total']];
   if (layer === 'usgs') {
@@ -416,6 +434,50 @@ function inspectRecord(layer, r) {
   openInspector(`${LABEL[layer]} · one record`, rows);
 }
 
+
+// one plastic sample: NOAA NCEI's published values always; Oceaneye's original record only where it was found and checked
+const PL_STATUS = {
+  reproduced: 'Reproduced from Oceaneye\'s original record — matches the published value within 0.5 % (a check of this calculation only, not a quality grade)',
+  not_reproduced: 'Oceaneye\'s original record found, but the published value could not be reproduced from it',
+  possible_date_conflict: 'Possible corresponding record in Oceaneye\'s original file has a different date',
+  ambiguous: 'More than one original record could correspond — no check claimed',
+  no_original: 'Original count/method detail not available in the inspected source file',
+  original_unavailable: 'Original file not available to the hub on this run — no check made',
+};
+function inspectSample(r) {
+  const snap = state.plastic, o = r.original, num = (x, dp) => Number(x).toLocaleString('en', { maximumFractionDigits: dp });
+  const rows = [['Selected', 'one sample — not a cell total']];
+  rows.push(['Sampled', `${esc(r.sampled_on || MISSING)} <span class="q">(date as published by NOAA NCEI)</span>`]);
+  rows.push(['Where', `${Number(r.lat).toFixed(3)}, ${Number(r.lng).toFixed(3)} — tow start · cell ${r.cellId}`]);
+  rows.push(['Concentration', r.zero
+    ? (r.check === 'reproduced' ? '0 pieces/m³ — published by NOAA NCEI; Oceaneye\'s record counts no pieces < 5 mm in this tow' : 'NOAA NCEI reports zero concentration for this sample')
+    : `${num(r.pieces_m3, 6)} pieces/m³ <span class="q">— published by NOAA NCEI</span>`]);
+  if (r.zero) rows.push(['Zero means', 'none in the sampled size range (< 5 mm, 0.33 mm mesh) with this method on this tow — not that the water held no plastic']);
+  rows.push(['Size range', 'smaller than 5 mm, retained by a 0.33 mm net' + (o && o.size_class ? ` · recorded size class ${esc(o.size_class)}` : '')]);
+  rows.push(['Method', `${esc(r.method || 'manta net')}, mesh ${r.mesh_mm ? r.mesh_mm + ' mm' : MISSING}, surface`]);
+  rows.push(['Original record', esc(PL_STATUS[r.check] || r.check || MISSING)]);
+  if (o) {
+    const ca = o.checked_against || {};
+    if (r.check === 'reproduced' || r.check === 'not_reproduced') {
+      rows.push(['Pieces counted', o.count === null ? MISSING : `${num(o.count, 0)} <span class="q">(size class ${esc(o.size_class || MISSING)}; ${o.count_5_25mm === null ? 'no' : num(o.count_5_25mm, 0)} pieces 5–25 mm not included)</span>`]);
+      rows.push(['Tow', `${o.distance_m === null ? MISSING : num(o.distance_m, 1) + ' m'} · distance by ${esc(o.distance_method || 'method not recorded')} · net mouth ${o.net_width_m} m × ${o.depth_m} m`]);
+      if (r.check === 'reproduced') rows.push(['Calculation', o.count === 0 ? '0 pieces → 0 pieces/m³, as published'
+        : `${num(o.count, 0)} ÷ (${num(o.distance_m, 1)} m × ${o.net_width_m} m × ${o.depth_m} m) = ${num(o.computed, 6)} pieces/m³ — within 0.5 % of the published ${num(ca.value, 6)}`]);
+      else rows.push(['Why not', o.distance_m === 0 ? 'the original record gives a tow distance of 0 m, so no volume can be computed; the cause is not established' : `computed ${o.computed === null ? MISSING : num(o.computed, 6)} vs published ${num(ca.value, 6)}; the cause is not established`]);
+    }
+    if (r.check === 'possible_date_conflict') rows.push(['Dates', `NOAA NCEI dates this sample ${esc(ca.date)}. Oceaneye's original file has a record at the same start position with the same concentration, starting ${esc((o.start || '').slice(0, 10))}` + (o.end ? ` and ending ${esc(o.end.slice(0, 10))}` : '') + (o.end_date_matches_noaa ? ' — its end date equals NOAA\'s date' : '') + '. Which date is correct is not established.']);
+    rows.push(['Original source', `Oceaneye's microlitter data 2011-2020 (SEANOE 10.17882/86630, CC BY 4.0), file ${esc(o.file)}${o.also_in_file ? ' (also in ' + esc(o.also_in_file) + ')' : ''}, sample ${esc(o.sample)}; checked against NOAA's ${esc(ca.date)}, ${ca.lat}, ${ca.lng}, ${ca.value} on this run`, 'more']);
+    if (o.method_note) rows.push(['Note', esc(o.method_note), 'more']);
+  }
+  rows.push(['Source', `Oceaneye Association via NOAA NCEI Marine Microplastics, Accession 0276422 · ${esc(r.id)}`]);
+  rows.push(['This run', snap && snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING]);
+  rows.push(['Not current', 'a sample on its own date at the tow-start location — not where plastic is now', 'more']);
+  rows.push(['Comparability', 'NOAA NCEI: concentrations may not be comparable across studies (methods differ); this layer shows one programme only', 'more']);
+  rows.push(['Quality flags', 'Oceaneye\'s original file encodes SeaDataNet flag 0 (no quality control recorded in that flag) on its values; Oceaneye states its staff analysed all samples', 'more']);
+  rows.push(['At the source', `<a href="https://www.ncei.noaa.gov/products/microplastics" target="_blank" rel="noopener">NOAA NCEI Marine Microplastics</a> · <a href="https://doi.org/10.17882/86630" target="_blank" rel="noopener">Oceaneye original (SEANOE)</a>`]);
+  openInspector(`Microplastic sample · ${r.sampled_on || ''}`, rows);
+}
+
 // Source pages per layer (UX spec §8): an individual record page only where the source publishes one (USGS);
 // otherwise the dataset page, labelled as such. No third-party vessel trackers, no invented per-record URLs.
 const SRC_LINK = {
@@ -424,13 +486,14 @@ const SRC_LINK = {
   ships: ['https://aisstream.io/documentation', 'aisstream.io documentation (no page per vessel)'],
   forest: ['https://data-api.globalforestwatch.org/dataset/gfw_integrated_alerts', 'GFW Data API record for the integrated alerts dataset (JSON: licence, citation, versions; no page per alert)'],
   drifters: ['https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html', 'NOAA OSMC dataset (no page per buoy)'],
+  plastic: ['https://www.ncei.noaa.gov/products/microplastics', 'NOAA NCEI Marine Microplastics (dataset)'],
 };
 const srcLink = layer => `<a href="${SRC_LINK[layer][0]}" target="_blank" rel="noopener">${esc(SRC_LINK[layer][1])}</a>`;
 
 function inspectCell(p) {
   const snap = state[p.layer]; const fresh = ME.freshness(p.layer);
   const paired = p.layer !== 'forest' && usable(p.layer);
-  const recs = paired ? points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, 8) : [];
+  const recs = paired ? points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, p.layer === 'plastic' ? Infinity : 8) : [];   // plastic: every sample reachable, collocated ones included
   inspCtx = { layer: p.layer, recs };
   const rows = [
     ['Selected', `one ${ME.CELL_DEG}° × ${ME.CELL_DEG}° coverage cell — totals for the cell, not a single record`],
@@ -442,6 +505,7 @@ function inspectCell(p) {
     ['Comparison', 'none of ours shown yet — ' + (ME.KEPT[p.layer] || 'no history kept')],
   ];
   if (p.layer === 'drifters') rows.push(['Caveat', 'buoys are sparse: a cell with no buoy is not evidence of anything about that water']);
+  if (p.layer === 'plastic') rows.push(['Caveat', 'dated samples at tow-start locations, not current positions; a missing marker does not establish plastic-free water']);
   if (p.layer === 'firms') rows.push(['Caveat', 'NASA: not for tactical decisions or local-scale conditions; detections per pass, cloud may hide']);
   if (p.layer === 'forest') {
     const c = p.cell.confidence || {};
@@ -460,7 +524,7 @@ function inspectCell(p) {
   if (p.layer !== 'forest' && !paired) rows.push(['Records', `withheld — ${esc(unusableWhy(p.layer) || 'records and counts are not from the same collector run')}`]);
   if (recs.length) {
     rows.push(['Records', `${recs.length} of ${p.cell.count} in this cell — select one for its own detail`]);
-    recs.forEach((r, i) => rows.push([recordTitle(p.layer, r), `<button type="button" class="reclink" data-i="${i}">${esc(p.layer === 'ships' ? `MMSI ${r.mmsi} · ${when(r.observed_at)}` : `${p.layer === 'drifters' ? 'Buoy ' + (r.buoy || '') + ' · ' : ''}${when(r.observed_at)}${p.layer === 'usgs' ? ' · ' + (r.title || '') : ''}`)}</button>`]));
+    recs.forEach((r, i) => rows.push([recordTitle(p.layer, r), `<button type="button" class="reclink" data-i="${i}">${esc(p.layer === 'ships' ? `MMSI ${r.mmsi} · ${when(r.observed_at)}` : p.layer === 'plastic' ? `${r.sampled_on} · ${r.zero ? 'reported zero' : Number(r.pieces_m3).toLocaleString('en', { maximumFractionDigits: 4 }) + ' pieces/m³'}` : `${p.layer === 'drifters' ? 'Buoy ' + (r.buoy || '') + ' · ' : ''}${when(r.observed_at)}${p.layer === 'usgs' ? ' · ' + (r.title || '') : ''}`)}</button>`]));
     if (p.cell.count > recs.length) rows.push(['…', `${p.cell.count - recs.length} more in this cell, not listed`]);
   }
   if (SRC_LINK[p.layer]) rows.push(['At the source', srcLink(p.layer)]);
@@ -1011,7 +1075,8 @@ ME.orbState = () => {
 ME.orbVertex = (gid, i) => orb.layers[gid] ? Array.from(orb.layers[gid].geometry.attributes.position.array.slice(i * 3, i * 3 + 3)) : null;
 ME.coordsAt = (lat, lng, alt) => globeOk ? globe.getCoords(lat, lng, alt) : null;
 ME.openCell = (layer, id) => { if (!globeOk) return false; const p = globe.polygonsData().find(q => q.layer === layer && q.id === id); if (p) inspectCell(p); return !!p; };   // test/console aid: same path as a click
-ME.renderState = () => globeOk ? { points: globe.pointsData().length, driftPoints: globe.pointsData().filter(p => p.buoy !== undefined).length, driftCells: globe.polygonsData().filter(p => p.layer === 'drifters').length, polygons: globe.polygonsData().length, on: { ...on } } : null;
+ME.cellPolys = layer => globeOk ? globe.polygonsData().filter(p => p.layer === layer).map(p => ({ id: p.id, fill: p.fill, stroke: p.stroke })) : null;   // read-only test aid
+ME.renderState = () => globeOk ? { points: globe.pointsData().length, driftPoints: globe.pointsData().filter(p => p.buoy !== undefined).length, driftCells: globe.polygonsData().filter(p => p.layer === 'drifters').length, plasticPoints: globe.pointsData().filter(p => p.sampled_on !== undefined).length, plasticRings: globe.pathsData().length, plasticCells: globe.polygonsData().filter(p => p.layer === 'plastic').length, polygons: globe.polygonsData().length, on: { ...on } } : null;
 
 // ---------- cards
 const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = f.why; };
@@ -1052,6 +1117,7 @@ function cards() {
   $('m-seaice').innerHTML = `NSIDC Sea Ice Index · retrieved ${ago(R.seaice.retrieved)}${warn(R.seaice.fresh)}`;
   $('c-seaice').innerHTML = R.seaice.north === null ? 'comparison: unknown' : `Arctic <b>${esc(R.seaice.pctN)}</b> · Antarctic <b>${esc(R.seaice.pctS)}</b> — baseline NSIDC's 1981–2010 climatology; the subtraction is ours`;
   driftCard();
+  plasticCard();
   RECORD_LAYERS.concat(OPTIONAL_LAYERS).forEach(pairNote);
   reviewResults();   // freshness can lapse purely through time passing, so open results are re-judged here too
 }
@@ -1068,11 +1134,24 @@ function driftCard() {
   $('m-drifters').innerHTML = `NOAA OSMC · GTS · retrieved ${ago(s && s.retrieved_at)}${warn(f)}`;
 }
 
+function plasticCard() {
+  $('leg-plastic').hidden = !on.plastic;
+  const st = $('s-plastic');
+  if (!on.plastic) { st.textContent = 'off'; st.className = 'state'; st.title = ''; $('v-plastic').textContent = '–'; $('o-plastic').textContent = 'off — switch on to load the samples'; $('m-plastic').textContent = 'Oceaneye · published by NOAA NCEI'; return; }
+  if (optLoading.plastic && !state.plastic) { st.textContent = 'loading'; st.className = 'state'; $('o-plastic').textContent = 'loading the samples from the hub…'; return; }
+  const f = ME.freshness('plastic'), s = state.plastic; setState('plastic', f);
+  $('v-plastic').textContent = f.grade !== 'unknown' && s ? ME.total(s).toLocaleString() : '–';
+  const v = s && s.verification;
+  $('o-plastic').textContent = s && s.window_end ? `sampled ${s.window_start} to ${s.window_end}, each on its own date` + (v && v.counts ? ` · ${v.counts.reproduced.toLocaleString()} reproduced from Oceaneye's original record` : v && v.status === 'unavailable' ? ' · original-record checks unavailable this run' : '') : 'no snapshot from the hub';
+  $('m-plastic').innerHTML = `Oceaneye · published by NOAA NCEI · retrieved ${ago(s && s.retrieved_at)}${warn(f)}`;
+}
+
 // ---------- records (progressive): map points, paired with the counts they are shown beside
 const toPoints = {
   usgs: s => ME.rowsToObjects(s).map(q => ({ lat: q.lat, lng: q.lng, mag: q.mag, mag_type: q.mag_type, depth_km: q.depth_km, title: q.title, src: q.src, observed_at: q.observed_at, cellId: ME.cellId(q.lat, q.lng), col: '#ff5a3c', alt: .002 + q.mag * .004, r: .12 + q.mag * .1, rr: q.mag * 1.2 })),
   firms: s => ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, frp_mw: d.frp_mw, confidence: d.confidence, daynight: d.daynight, satellite: d.satellite, observed_at: d.observed_at, cellId: ME.cellId(d.lat, d.lng), col: d.frp_mw > 50 ? '#ff6a1a' : '#ff9b2e', alt: .004, r: .04 + Math.min(d.frp_mw || 0, 300) / 3000 })),
   drifters: s => ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, buoy: d.id, sst_c: d.sst_c, platform_type: d.platform_type, country: d.country, observed_at: d.observed_at, cellId: ME.cellId(d.lat, d.lng), col: '#ffd86b', alt: .003, r: .07 })),
+  plastic: s => ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, id: d.id, sampled_on: d.sampled_on, pieces_m3: d.pieces_m3, zero: d.pieces_m3 === 0, check: d.check, original: d.original, method: d.method, mesh_mm: d.mesh_mm, observed_at: d.sampled_on ? d.sampled_on + 'T12:00:00Z' : null, cellId: ME.cellId(d.lat, d.lng), col: '#cedeec', alt: .003, r: .07 })),
   ships: s => ME.rowsToObjects(s).map(v => ({ lat: v.lat, lng: v.lng, mmsi: v.mmsi, name: v.name, sog_kn: v.sog_kn, cls: v.class, observed_at: v.observed_at, received_at: v.received_at, cellId: ME.cellId(v.lat, v.lng), col: '#5fe3c8', alt: .003, r: .05 })),
 };
 

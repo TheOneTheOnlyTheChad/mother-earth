@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611051200">
+<link rel="stylesheet" href="style.css?v=202611061000">
 </head>
 <body class="doc">
 <header class="top">
@@ -24,7 +24,7 @@
 <main>
   <p class="small"><a href="index.html">← World View</a></p>
   <nav class="toc" aria-label="Sections">
-    <a href="#report">Status report</a> · <a href="#sources">Sources &amp; attribution</a> · <a href="#measures">What each layer measures</a> · <a href="#windows">Windows &amp; cadence</a> · <a href="#dates">Observation vs retrieval</a> · <a href="#coverage">Coverage</a> · <a href="#kept">What is kept</a> · <a href="#comparisons">Comparisons</a> · <a href="#tiers">Classification</a> · <a href="#imagery">Imagery</a> · <a href="#daynight">Day/night overlay</a> · <a href="#search">Search</a> · <a href="#limits">Limitations</a>
+    <a href="#report">Status report</a> · <a href="#sources">Sources &amp; attribution</a> · <a href="#measures">What each layer measures</a> · <a href="#windows">Windows &amp; cadence</a> · <a href="#dates">Observation vs retrieval</a> · <a href="#coverage">Coverage</a> · <a href="#kept">What is kept</a> · <a href="#comparisons">Comparisons</a> · <a href="#tiers">Classification</a> · <a href="#imagery">Imagery</a> · <a href="#daynight">Day/night overlay</a> · <a href="#plastic">Microplastic samples</a> · <a href="#search">Search</a> · <a href="#limits">Limitations</a>
   </nav>
 
   <h2 id="report">Full status report</h2>
@@ -59,6 +59,7 @@
     <tr><td>Every Kp value</td><td>Kp index (since 30 Oct 2026)</td><td>no end date set</td></tr>
     <tr><td>One daily value, as NOAA publishes it (days NOAA omits are absent, not filled)</td><td>CO₂ (since 29 Oct 2026)</td><td>no end date set</td></tr>
     <tr><td>Daily alert counts per cell, by confidence</td><td>Forest disturbance (since 1 Nov 2026)</td><td>no end date set</td></tr>
+    <tr><td>Oceaneye's original microlitter file (96 KB, CC BY 4.0), held so each refresh can re-check NOAA NCEI's published values; the samples themselves are not kept beyond the current file</td><td>Microplastic samples (since the layer's first run)</td><td>replaced only after review if the source file changes</td></tr>
     <tr><td>A log of every collector run and its outcome</td><td>all layers (since 30 Oct 2026)</td><td>no end date set</td></tr>
     <tr><td>Raw source files, full snapshots and per-run cell files</td><td>most layers</td><td>2 days, then deleted by a storage rule (deletion can lag up to a day)</td></tr>
     <tr><td>Current file only — no history</td><td>Drifting buoys, orbital objects, sea ice</td><td>replaced on each successful update</td></tr>
@@ -95,6 +96,14 @@
   <p><b>Collection:</b> the hub makes one request each hour (about 100 KB, about 1,300 buoys, measured 3 Nov 2026) and keeps one current snapshot only. Before anything is shown it checks the header and units, each row's time, position and buoy id, and that the count has not collapsed (at least 200 buoys, and at least half the previous count). A report stamped <b>in the future</b> (10 buoys on 3 Nov 2026) is refused and counted, never drawn. If a run fails, the previous snapshot stays with its own times and the layer goes Unknown after 4 hours.</p>
   <p><b>Sea-surface temperature</b> is shown as the buoy reported it (°C); a missing value is shown as not provided, never as zero, and a value outside −3 to 40 °C is withheld and counted.</p>
   <p><b>Coverage:</b> buoys are few and far apart. A cell with no buoy says nothing about that water. The layer is off when the page loads and is fetched only while it is switched on.</p>
+  <h2 id="plastic">Microplastic samples — dated (observation, optional layer)</h2>
+  <p><b>What it is.</b> 1,145 surface-water samples taken with manta nets (0.33 mm mesh) by Oceaneye volunteers and analysed by Oceaneye staff, <b>2011–2024</b> (newest 23 Oct 2024), as <b>published by NOAA NCEI</b> in its Marine Microplastics collection (Accession 0276422). Each marker is one sample at the place the tow started, on its own sampling date. <b>It is not where plastic is now</b>, and it is one programme's routes — mostly Atlantic and Mediterranean — not global coverage. <b>A missing marker does not establish plastic-free water.</b> The layer is off when the page opens and is fetched only while switched on.</p>
+  <p><b>The number.</b> Concentrations are shown in pieces per cubic metre (pieces smaller than 5 mm), as NOAA NCEI publishes them. NOAA warns that concentrations may not be comparable across studies because methods differ; this layer shows a single programme. NOAA's "Very Low … High" concentration classes are <b>not shown</b>: they are set from NOAA's whole database and shift as records are added, and on a globe they would read as danger levels.</p>
+  <p><b>Zero.</b> A hollow ring marks a sample the source reports as zero: nothing counted in the sampled size range with this method on that tow. It says nothing about larger plastic or about other water.</p>
+  <p><b>Checking against the original.</b> On every refresh the hub re-checks each published value from scratch against Oceaneye's original file (<a href="https://doi.org/10.17882/86630" target="_blank" rel="noopener">SEANOE 10.17882/86630</a>, 2011–2020, CC BY 4.0), held once and pinned to its SHA-256. The calculation checked is: pieces counted in the &lt; 5 mm size class ÷ (tow distance in km × 1,000 m/km × 0.60 m net width × 0.15 m sampled depth). <b>Reproduced</b> means the result is within 0.5 % of the published value — a check of that calculation only, not a quality grade. Nothing from an earlier check is carried forward: if NOAA changes a sample's date, position or value, the check runs again against the new values, and if the original file changes, every check pauses until it is reviewed. Measured on 4 Nov 2026: <b>647 reproduced</b>; <b>11</b> have a possible corresponding original record with a different date (in each, the original record's end date equals NOAA's date; which is correct is not established); <b>1</b> could not be reproduced (the original record gives a tow distance of 0 m); <b>486</b> have no original record in the inspected file (472 dated after the file's last sample on 26 Nov 2020, 14 within its period). Every sample's own status is in its inspector.</p>
+  <p><b>Within the original file.</b> Tow distance was measured by GPS (over ground) for some tows and by flowmeter for others; each checked sample shows which. The &lt; 5 mm size class is recorded as "1 to 5 mm" for some samples and "0.3 to 5 mm" for others under the same 0.33 mm mesh — whether that is a labelling choice or a real lower bound is not established. Its values carry SeaDataNet quality flag 0 (no quality control recorded in that flag); Oceaneye states that its staff analysed all samples. Three samples appear in two regional files with identical values and are counted once.</p>
+  <p><b>Terms and citation.</b> NOAA NCEI applies CC0 to its compiled database; Oceaneye's original file is CC BY 4.0; NCEI's archive record for the accession states no licence, recorded as unstated. Cite: NOAA NCEI Marine Microplastics — Nyadjro, E., et al. (2018), The NOAA NCEI Global Marine Microplastics Data Collection (1972-present), and Nyadjro, E. S., et al. (2023), <i>Scientific Data</i> 10, doi:10.1038/s41597-023-02632-y; dataset: Faure, F., Saini, C., Potter, G., Galgani, F., de Alencastro, L. F., Hagmann, P. (2023), NCEI Accession 0276422; original counts: Hagmann, P., Potter, G. (2022), Oceaneye's microlitter data 2011-2020, SEANOE.</p>
+  <p><b>Collection.</b> Once a day the hub reads NOAA's published layer in pages of 1,000 and publishes only if the rows retrieved equal NOAA's own count, every row passes its checks (identifier, date, position, unit, value), and the total has not collapsed. A failed run keeps the previous file with its own times.</p>
   <h2 id="orbital">Orbital layers — computed positions (model tier)</h2>
   <p>Optional layers on World View, <b>each off unless you turn it on</b>, each touching only its own markers. Each marker is a position <b>computed</b> with the SGP4 model (satellite.js 6.0.2, pinned) from the latest general-perturbations element set Space-Track.org publishes for that object. Classification: <span class="fixed">model (propagated from published orbital elements — computed, not observed)</span>. They are not observation layers: they never enter the status report, the status sentence or search, and nothing about coverage, absence or change is read from them. (They replace the earlier Satellites overlay, which drew CelesTrak's "active" group.)</p>
   <p><b>What they show.</b> The scale and distribution of the public catalogue: every object Space-Track lists as not decayed whose elements are under 10 days old (Space-Track's recommended query). Older elements are filtered out upstream and are outside these counts. The layers follow Space-Track's <b>object type</b> — <b>Payloads</b>, <b>Rocket bodies</b>, <b>Debris</b>. Objects of unknown type are counted, not drawn. Payload <b>operational status</b> (active or inactive) is <b>not used yet</b>: a payload is shown as a payload, and whether it is working is not established here. When a status source is adopted the layers become Active satellites · Inactive satellites &amp; rocket bodies · Orbital debris, and any payload without a usable status is counted, not drawn — missing status is never counted as inactive.</p>
@@ -128,7 +137,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611051200"></script>
+<script src="app.js?v=202611061000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -150,7 +159,7 @@ function renderAll() {
   fill('t-dates', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].observed || '–'), R[l].retrieved ? esc(R[l].retrieved.replace('T', ' ').slice(0, 19) + ' UTC (' + ago(R[l].retrieved) + ')') : '–', esc(rep.states[l])])));
   fill('t-coverage', LAYERS.map(l => row([esc(LABEL[l]), esc((rules.find(x => x.section === l && x.k === 'Coverage rule') || {}).v || R[l].coverage) + ' — ' + esc(R[l].coverage)])));
   fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || ('none shown; ' + (ME.KEPT[l] || 'no history kept')))])));
-  fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Orbital objects', 'computed — positions calculated (SGP4) from published orbital elements; not observed (model-based method)']), row(['Day/night', 'computed — astronomical context, from the clock']), row(['Aircraft', 'observation — not shown'])]);
+  fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Orbital objects', 'computed — positions calculated (SGP4) from published orbital elements; not observed (model-based method)']), row(['Day/night', 'computed — astronomical context, from the clock']), row(['Microplastic samples', esc(TIER.plastic)]), row(['Aircraft', 'observation — not shown'])]);
   $('p-imagery').textContent = (rules.find(x => x.section === 'imagery') || {}).v || '';
   $('limits-body').innerHTML = [
     `<p><b>Aircraft — not shown.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,

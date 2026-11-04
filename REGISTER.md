@@ -71,6 +71,17 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Status:** ✅ data in use (attributed); citation required as a condition of use — carried form needs updating to NSIDC's 2025 form (hub change pending Chad's go).
 - **Commercial use:** yes (NOAA-hosted, open) — citation required as a condition of use.
 
+## NOAA NCEI Marine Microplastics — Oceaneye surface samples (Accession 0276422) + Oceaneye original (SEANOE 10.17882/86630)
+- **Read:** 4 Nov 2026 by Claude — https://ncei.noaa.gov/products/microplastics; data.gov record for the Harmonized Database (NCEI Accession 0306475); Nyadjro et al. 2023 (*Scientific Data*) via nature.com; NCEI accession page + OAS record 0276422; SEANOE 10.17882/86630; ArcGIS item metadata (NOAA GeoPlatform). Research note: `reviews/2026-11-04-ocean-plastic-export.md`.
+- **Use statement (verbatim, NCEI product page):** "All data in the NCEI Marine Microplastics database is free to access and use."
+- **Licences as found:** NCEI compiled database product — CC0 (database paper; data.gov licence field CC0 1.0, with "otherRestrictions" and access level "non-public" listed inconsistently). NCEI archive 0276422 — use/access constraints **blank (unstated)**. SEANOE original (2011–2020) — **CC BY 4.0**; Oceaneye asks to be co-author on *articles* based on unpublished data. ArcGIS items — distribution-liability disclaimer only.
+- **What we publish:** NOAA NCEI's published values (compiled product, CC0) for accession 0276422 from `Ocean_Surface_Microplastics_(PS)`; original counts and tow details from the SEANOE file (CC BY 4.0, attributed) only for samples matched and checked.
+- **Citation (on the page):** Nyadjro et al. (2018) collection + Nyadjro et al. (2023) paper; Faure, Saini, Potter, Galgani, de Alencastro, Hagmann (2023) NCEI Accession 0276422; Hagmann & Potter (2022) SEANOE doi:10.17882/86630.
+- **Caveats carried:** NOAA's comparability warning; dated samples, not current positions; NOAA concentration classes database-relative (not shown); 11 possible date conflicts and 1 non-reproducible value shown per sample; GPT reports NCEI v2.2 (4 Dec 2025) documents general methods — not verified (NCEI 503 on 4 Nov 2026).
+- **Automated use:** ArcGIS REST, page size 1,000; one refresh a day (source updates quarterly). SEANOE file fetched once and pinned by SHA-256.
+- **Status:** ⚠️ release candidate (branch `plastic-rc`), not public.
+- **Commercial use:** yes for the NCEI compiled product (CC0); SEANOE original CC BY 4.0 (attribution); NCEI archive licence unstated — not assumed.
+
 ## OpenSky Network — states API
 - **Read:** 30 Oct 2026 (Terms §3(iii)/(vi) + reply Ticket#837506 by Chad).
 - **Terms:** automated/public use needs written licence; hobbyist use OK within credits; public site requires being a feeder; no cloud whitelisting.
