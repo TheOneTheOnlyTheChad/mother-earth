@@ -952,14 +952,15 @@ function odvSamples(files) {
     const L = f.text.split(/\r?\n/).filter(l => l && !l.startsWith('//')); if (!L.length) continue;
     const H = L[0].split('\t'); const ix = n => H.findIndex(h => h.startsWith(n));
     const I = { id: ix('SampleID'), dist: ix('SamplingEffort'), net: ix('Net_opening'), dmax: ix('MaximumObservationDepth'), sz: ix('Microlitter_Size'), cnt: ix('Microlitter_Count'), t: ix('YYYY-MM-DD'), lon: ix('Longitude'), lat: ix('Latitude'), et: ix('ENDX8601'), elon: ix('ENDXXLON'), elat: ix('ENDXXLAT'), prot: ix('SAMPPROT'), cruise: ix('Cruise'), mesh: ix('Mesh_size') };
-    if (Object.values(I).some(i => i < 0)) throw new Error('unexpected ODV header in ' + f.name);
+    // the end-time column is absent from 4 of the 30 files (measured 4 Nov 2026) — optional; every other column is required
+    if (Object.entries(I).some(([k, i]) => i < 0 && k !== 'et')) throw new Error('unexpected ODV header in ' + f.name);
     let cur = null; const by = {};
     for (const l of L.slice(1)) {
       const c = l.split('\t'); if (c[I.t]) cur = { cruise: c[I.cruise], t: c[I.t], lat: +c[I.lat], lon: +c[I.lon] };
       if (!cur) continue;
       const id = c[I.id]; const num = v => v === '' || v === undefined ? null : +v;
       const s = by[id] || (by[id] = { file: f.name, cruise: cur.cruise, sample: id, start: cur.t.slice(0, 16), start_pos: [cur.lat, cur.lon],
-        end: c[I.et] || null, end_pos: num(c[I.elat]) === null ? null : [+c[I.elat], +c[I.elon]], distance_km: num(c[I.dist]), net_cm: num(c[I.net]),
+        end: I.et >= 0 && c[I.et] ? c[I.et] : null, end_pos: num(c[I.elat]) === null ? null : [+c[I.elat], +c[I.elon]], distance_km: num(c[I.dist]), net_cm: num(c[I.net]),
         depth_max_m: num(c[I.dmax]), mesh_um: num(c[I.mesh]), distance_method: ((c[I.prot] || '').match(/Distance measurement method:\s*([^,]+)/) || [])[1] || null, counts: {} });
       const k = PLASTIC.SIZE[c[I.sz]] || c[I.sz]; s.counts[k] = (s.counts[k] || 0) + (+c[I.cnt]);
     }
