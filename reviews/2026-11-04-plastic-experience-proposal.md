@@ -35,7 +35,7 @@ Already decided (Chad, 3 Nov): plastic may be shown as **dated samples, stated h
 | Reproduced | 645 | pieces counted (e.g. 419); tow distance and how measured (GPS / flowmeter); size class as recorded (1–5 mm or 0.3–5 mm); "419 ÷ (9,223 m × 0.60 m × 0.15 m) = 0.505 pieces/m³ — matches the published value" |
 | Does not reproduce | 3 | the counted pieces and distance as recorded, and "the published value differs (×0.5 / tow distance recorded as 0); cause not established" |
 | Date differs between sources | 11 | "Oceaneye's original file dates this tow 6 Apr 2013; NOAA NCEI 6 Apr 2014. Which is correct is not established." |
-| No original record in the inspected file | 486 (2020-11-27 onward, incl. the 343 later rows) | "Original count/method detail not available in the inspected source file." |
+| No original record in the inspected file | 486 = 472 dated after SEANOE's last sample (2020-11-26), incl. the 343 later rows, + 14 within 2011–2020 that have no SEANOE counterpart | "Original count/method detail not available in the inspected source file." |
 A single formula is never shown for a sample it was not checked against.
 
 **Behind "Method and full explanation":** NOAA's comparability warning; tow-start vs route; why no marker is not plastic-free water; GPS vs flowmeter; the two size-class labels under one mesh; quality flags reported as encoded (SeaDataNet QV 0 on the original values) separately from the documented processing (Oceaneye staff analysed all samples).
