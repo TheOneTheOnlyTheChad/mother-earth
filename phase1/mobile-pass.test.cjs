@@ -144,7 +144,10 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 8 min — failur
       await page.evaluate(k => ME.openCell('plastic', k), cellOf(42.75, 4.13)); await page.waitForTimeout(200);
       const i1 = await page.evaluate(() => { const x = document.getElementById('insp-x').getBoundingClientRect(), kb = document.getElementById('key-btn').getBoundingClientRect();
         return { insp: document.getElementById('insp').classList.contains('show'), key: ME.keyState().open, xHit: document.elementFromPoint(x.x + x.width / 2, x.y + x.height / 2) === document.getElementById('insp-x'),
-          kHit: document.elementFromPoint(kb.x + kb.width / 2, kb.y + kb.height / 2) === document.getElementById('key-btn') || document.getElementById('key-btn').contains(document.elementFromPoint(kb.x + kb.width / 2, kb.y + kb.height / 2)) }; });
+          kHit: document.elementFromPoint(kb.x + kb.width / 2, kb.y + kb.height / 2) === document.getElementById('key-btn') || document.getElementById('key-btn').contains(document.elementFromPoint(kb.x + kb.width / 2, kb.y + kb.height / 2)),
+          sheetHit: (() => { const sb = document.getElementById('sheet-btn').getBoundingClientRect(), h = document.elementFromPoint(sb.x + sb.width / 2, sb.y + sb.height / 2); return document.getElementById('sheet-btn').contains(h); })(),
+          inspBottom: document.getElementById('insp').getBoundingClientRect().bottom, sheetTop: document.getElementById('sheet').getBoundingClientRect().top }; });
+      ok(`${tag}: with a record open, the Readings button stays reachable (inspector ends above the sheet)`, i1.sheetHit && i1.inspBottom <= i1.sheetTop + 1, i1);
       ok(`${tag}: opening a record closes the Key; inspector close and Key button both reachable`, i1.insp && !i1.key && i1.xHit && i1.kHit, i1);
       await shot(page, tag + '-inspector');
       await page.click('#key-btn'); await page.waitForTimeout(150);
@@ -188,6 +191,9 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 8 min — failur
       await page.evaluate(k => ME.openCell('plastic', k), cellOf(42.75, 4.13)); await page.waitForTimeout(200);
       const x = await page.evaluate(() => { const b = document.getElementById('insp-x').getBoundingClientRect(); return document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2) === document.getElementById('insp-x'); });
       ok(`${tag}: inspector close button reachable`, x);
+      const lc = await page.evaluate(() => { const reach = el => { el.scrollIntoView({ block: 'center' }); const b = el.getBoundingClientRect(), h = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2); return el.contains(h); };
+        return { plasticToggle: reach(document.querySelector('[data-layer="plastic"]')), nightToggle: reach(document.getElementById('tgl-night')), orbToggle: reach(document.querySelector('#orb-tgls [data-g="debris"]')), covkey: reach(document.querySelector('.legend details.covkey > summary')) }; });
+      ok(`${tag}: with the inspector open, layer toggles and the legend's coverage key are reachable (scroll the page)`, Object.values(lc).every(Boolean), lc);
       await page.keyboard.press('Escape');
       ok(`${tag}: no page errors`, perr.length === 0, perr);
     }

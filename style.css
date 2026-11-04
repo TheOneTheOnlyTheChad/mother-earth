@@ -319,4 +319,8 @@ details.cd>.cav{margin-top:2px}
   .imgdate{top:12px;bottom:auto;left:12px;max-width:calc(100% - 190px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:3px 7px;min-height:24px;display:flex;align-items:center}
   .img-long{display:none}
   .img-short{display:inline}
+  /* the inspector stops above the Readings sheet so its button stays reachable (found in the live RC check, 4 Nov:
+     max-height 45% ran 37 px over it at 390x844; the rule predates the mobile pass) */
+  .inspector{max-height:calc(48% - 72px)}
+  .stage:has(.sheet.collapsed) .inspector{max-height:calc(100% - 48px - 72px)}
 }
