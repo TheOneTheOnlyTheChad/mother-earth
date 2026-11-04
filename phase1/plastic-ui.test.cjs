@@ -17,7 +17,7 @@ const REC = [
   ['0276422-0000001', 42.753333, 4.13, '2011-08-31', 0.504779, 'reproduced', orig({}), 'Manta net', 0.33, 0],
   ['0276422-0000002', 40.1, 5.2, '2012-05-01', 0, 'reproduced', orig({ sample: 'OE_2', count: 0, computed: 0, checked_against: { date: '2012-05-01', lat: 40.1, lng: 5.2, value: 0 } }), 'Manta net', 0.33, 0],
   ['0276422-0000099', 43.078167, 5.1725, '2014-04-06', 0.368834, 'possible_date_conflict', orig({ sample: 'OE_108', start: '2013-04-06T11:54', end: '2014-04-06T12:40', end_date_matches_noaa: true, checked_against: { date: '2014-04-06', lat: 43.078167, lng: 5.1725, value: 0.368834 } }), 'Manta net', 0.33, 0],
-  ['0276422-0000560', 67.456083, 13.457433, '2019-08-01', 0.022234, 'not_reproduced', orig({ sample: 'TMF_2019_11', file: 'Swiss<b>Sailing</b>.txt', distance_m: 0, count: 4, computed: null, end: null, checked_against: { date: '2019-08-01', lat: 67.456083, lng: 13.457433, value: 0.022234 } }), 'Manta net', 0.33, 0],
+  ['0276422-0000560', 67.456083, 13.457433, '2019-08-01', 0.022234, 'not_reproduced', orig({ sample: 'TMF_2019_11', file: 'Swiss<b>Sailing</b>.txt', distance_m: 0, count: 4, count_5_25mm: 1, computed: null, end: null, checked_against: { date: '2019-08-01', lat: 67.456083, lng: 13.457433, value: 0.022234 } }), 'Manta net', 0.33, 0],
   ['0276422-0001000', -20.5, 57.5, '2023-06-30', 0, 'no_original', null, 'Manta net', 0.33, 0],
 ];
 for (let i = 0; i < 12; i++) REC.push(['0276422-000' + (2000 + i), 36.5, -5.5, '2022-0' + (1 + i % 9) + '-1' + (i % 9), 0.1 + i / 100, 'no_original', null, 'Manta net', 0.33, 0]);   // 12 collocated samples
@@ -113,7 +113,7 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 5 min — failur
   ok('6 date conflict: "possible corresponding record … different date"; NOAA\'s date attributed; correctness not established', /Possible corresponding record in Oceaneye's original file has a different date/.test(rec.text) && /NOAA NCEI dates this sample 2014-04-06/.test(rec.text) && /starting 2013-04-06 and ending 2014-04-06 — its end date equals NOAA's date/.test(rec.text) && /Which date is correct is not established/.test(rec.text), rec.text.slice(0, 900));
   ok('6 date conflict: no calculation claimed', !/Calculation/.test(rec.text), rec.text.slice(0, 600));
   rec = await openRec(page, 67.456083, 13.457433, '2019-08-01');
-  ok('7 not reproduced: kept visible with its reason (tow distance 0 m), cause not established', /could not be reproduced/.test(rec.text) && /tow distance of 0 m/.test(rec.text) && /not established/.test(rec.text), rec.text.slice(0, 700));
+  ok('7 not reproduced: kept visible with its reason (tow distance 0 m), cause not established; "1 piece" singular', /could not be reproduced/.test(rec.text) && /1 piece 5–25 mm/.test(rec.text) && /tow distance of 0 m/.test(rec.text) && /not established/.test(rec.text), rec.text.slice(0, 700));
   ok('7 source text escaped (file name with markup)', !/<b>Sailing<\/b>/.test(rec.html) && /Swiss&lt;b&gt;Sailing/.test(rec.html), rec.html.slice(0, 200));
   await page.keyboard.press('Escape');
 

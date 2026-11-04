@@ -459,7 +459,7 @@ function inspectSample(r) {
   if (o) {
     const ca = o.checked_against || {};
     if (r.check === 'reproduced' || r.check === 'not_reproduced') {
-      rows.push(['Pieces counted', o.count === null ? MISSING : `${num(o.count, 0)} <span class="q">(size class ${esc(o.size_class || MISSING)}; ${o.count_5_25mm === null ? 'no' : num(o.count_5_25mm, 0)} pieces 5–25 mm not included)</span>`]);
+      rows.push(['Pieces counted', o.count === null ? MISSING : `${num(o.count, 0)} <span class="q">(size class ${esc(o.size_class || MISSING)}; ${o.count_5_25mm === null ? 'no pieces' : o.count_5_25mm === 1 ? '1 piece' : num(o.count_5_25mm, 0) + ' pieces'} 5–25 mm not included)</span>`]);
       rows.push(['Tow', `${o.distance_m === null ? MISSING : num(o.distance_m, 1) + ' m'} · distance by ${esc(o.distance_method || 'method not recorded')} · net mouth ${o.net_width_m} m × ${o.depth_m} m`]);
       if (r.check === 'reproduced') rows.push(['Calculation', o.count === 0 ? '0 pieces → 0 pieces/m³, as published'
         : `${num(o.count, 0)} ÷ (${num(o.distance_m, 1)} m × ${o.net_width_m} m × ${o.depth_m} m) = ${num(o.computed, 6)} pieces/m³ — within 0.5 % of the published ${num(ca.value, 6)}`]);
