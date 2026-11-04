@@ -95,3 +95,25 @@ Sources: ncei.noaa.gov/products/microplastics · catalog.data.gov (Harmonized Da
 - 75 zeros, 0 nulls; median 0.116, P90 0.91, max 51.8 pieces/m³.
 - References: "Unpublished" 1,107, Faure et al. 2015 38.
 - Next: inspect its archive (original units, size classes, licence, the 802 vs 1,145 versions) — needs ncei.noaa.gov approval in the pane.
+
+## 8. Oceaneye archive inspection (4 Nov, ~11:00 UTC)
+Read: NCEI accession page 0276422 and its OAS details record (via fetch; the archive page itself timed out in the pane during NCEI's cloud migration), SEANOE dataset 10.17882/86630 (Oceaneye's own publication). Files were not downloaded.
+
+**802 vs 1,145 — explained by the IDs.** The archived version (NCEI title: "…collected by the Oceaneye Association from 2011-08-31 to 2021-10-05"; abstract: 802 sampling efforts; received 2023-01-06, OAS edit 2023-01-26, metadata v10, page last modified 2023-07-09, no revision notes) matches the portal exactly: UniqueIDs `0276422-0000001…0000802` are the 802 rows dated ≤ 2021-10-05. UniqueIDs `…0000803…0001145` are **343 rows, 2021-12-12 → 2024-10-23**, all "Unpublished", added later under the same accession. **No archive metadata reachable here describes those 343 rows** (version, method notes, licence). GPT saw a revised title to 2024-09-01 elsewhere; not seen in these two records. 673 portal rows fall within SEANOE's 2011-08-31 → 2020-11-26.
+
+**Units.** NCEI lists the archived parameter in **pieces/m³** as submitted. SEANOE documents a manta net 0.6 m × 0.15 m, mesh 0.33 mm, with a **Hydrobios flowmeter** — i.e. a measured filtered volume, so per-m³ values plausibly come from Oceaneye, not from an NCEI area→volume conversion. Stated as plausible, not established: SEANOE's page gives no units and the files were not opened.
+
+**Size range.** NCEI: plastics "less than 5 mm". SEANOE: "micro- and mesolitter" with 0.33 mm as the lower limit, upper bound not stated. Whether the NCEI values are the < 5 mm fraction only of a micro+meso count is not established.
+
+**Method / quality.** Manta net, trained volunteer groups and citizen scientists (NCEI abstract). The portal layer labels every row Study_Type "Professional Science" — **inconsistent with NCEI's own abstract**; recorded, not resolved. SEANOE marks its file "quality controlled data" with data-quality estimates; no flags in the portal layer.
+
+**Reuse, per material:**
+| Material | Terms found |
+|---|---|
+| NCEI compiled database values (what the portal serves) | CC0 (database paper: NCEI applies CC0 to the compiled product) |
+| NCEI archive 0276422 | use/access constraints **blank — unstated** |
+| SEANOE 10.17882/86630 (2011–2020 original) | **CC BY 4.0**; citation: Hagmann, P., Potter, G. (2022). Oceaneye's microlitter data 2011-2020. SEANOE. https://doi.org/10.17882/86630. Oceaneye asks to be co-author on *articles* based on unpublished data |
+| 343 post-2021 rows | no licence text found anywhere |
+Safest consistent practice if we publish NCEI-harmonized values: CC0 basis, cite NCEI (collection + paper), the NCEI accession citation (Faure, Saini, Potter, Galgani, de Alencastro, Hagmann 2023, NCEI Accession 0276422) and SEANOE; label post-2021 rows as NCEI-held additions without documented licence. Commercial use: yes for the compiled CC0 product; source-level terms recorded, not assumed.
+
+**Still open:** opening the archive spreadsheet / SEANOE ODV file (a download — Chad's yes first) to confirm units, size classes and per-sample quality; documentation for the 343 later rows (possibly a question to NCEI or Oceaneye — Chad's call, not required to proceed).
