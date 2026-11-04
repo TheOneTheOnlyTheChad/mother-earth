@@ -140,8 +140,8 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 5 min — failur
   await page.evaluate(() => { const s = document.querySelector('.sheet, #readings'); if (s && s.tagName === 'DETAILS') s.open = true; });
   await page.evaluate(() => document.querySelector('[data-layer="plastic"]').scrollIntoView());
   await on(page); x = await R(page);
-  const tb = await page.evaluate(() => { const b = document.querySelector('[data-layer="plastic"]').getBoundingClientRect(); const leg = document.getElementById('leg-plastic'); return { h: b.height, legVisible: leg.offsetParent !== null && getComputedStyle(leg).display !== 'none', scroll: document.documentElement.scrollWidth - innerWidth > 1 }; });
-  ok('12 phone: toggle ≥ 44 px, legend line visible while on, no horizontal scroll beyond main\'s pre-existing 1 px', tb.h >= 44 && tb.legVisible && !tb.scroll, tb);
+  const tb = await page.evaluate(() => { const b = document.querySelector('[data-layer="plastic"]').getBoundingClientRect(); const leg = document.getElementById('ps-plastic') || document.getElementById('leg-plastic'); return { h: b.height, legVisible: leg.offsetParent !== null && getComputedStyle(leg).display !== 'none', scroll: document.documentElement.scrollWidth - innerWidth > 1 }; });
+  ok('12 phone: toggle ≥ 44 px, plastic disclosure visible while on (mobile pass: the "Dated samples" line beside the closed Key), no horizontal scroll beyond main\'s pre-existing 1 px', tb.h >= 44 && tb.legVisible && !tb.scroll, tb);
   await ctx.close();
 
   await browser.close(); clearTimeout(wd);

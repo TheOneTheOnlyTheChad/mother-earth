@@ -274,11 +274,13 @@ function agreement(before, after, probes) {
     ok('overlay works at phone width', await page.evaluate(() => ME.nightState().on) === true);
     // the legend line is the ONLY indication of the overlay's state once Explore is collapsed, so it must
     // survive the phone breakpoint that hides the other .cov legend rows (found on the live page, 2 Nov)
-    ok('the legend line is VISIBLE at phone width', await page.locator('#night-legend').isVisible(),
-      await page.evaluate(() => { const e = document.getElementById('night-legend'); return { hidden: e.hidden, display: getComputedStyle(e).display, text: e.textContent }; }));
-    ok('and it still carries the computed time', /Day\/night now · computed · \d\d:\d\d:\d\d UTC/.test(await page.locator('#night-legend').innerText()));
+    // mobile pass (4 Nov): on phones the state line is the persistent disclosure beside the closed Key (#ps-night)
+    const NL = (await page.locator('#ps-night').count()) ? '#ps-night' : '#night-legend';
+    ok('the legend line is VISIBLE at phone width', await page.locator(NL).isVisible(),
+      await page.evaluate(sel => { const e = document.querySelector(sel); return { hidden: e.hidden, display: getComputedStyle(e).display, text: e.textContent }; }, NL));
+    ok('and it still carries the computed time', /Day\/night( now)? · computed · \d\d:\d\d:\d\d UTC/.test(await page.locator(NL).innerText()));
     await page.click('#tgl-night'); await page.waitForTimeout(300);
-    ok('and it disappears again when the overlay is off at phone width', await page.locator('#night-legend').isHidden());
+    ok('and it disappears again when the overlay is off at phone width', await page.locator(NL).isHidden());
     ok('no scrollbar nested inside the sheet', await page.evaluate(() => ['.ovl', '#card-explore', '.exp-body'].map(q => document.querySelector(q)).filter(Boolean)
       .filter(e => { const o = getComputedStyle(e).overflowY; return (o === 'auto' || o === 'scroll') && e.scrollHeight > e.clientHeight + 1; }).length) === 0);
     ok('the panel does not overflow horizontally', await page.evaluate(() => { const e = document.getElementById('card-explore'); return e.scrollWidth - e.clientWidth <= 1; }));

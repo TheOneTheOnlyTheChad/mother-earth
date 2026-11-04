@@ -253,7 +253,7 @@ const close = (a, b) => a && b && a.length === 3 && a.every((v, i) => Math.abs(v
     const h = await page.$$eval('#orb-tgls [data-g]', bs => bs.map(b => b.getBoundingClientRect().height));
     ok('K phone: three toggles, each ≥ 44 px tall', h.length === 3 && h.every(x => x >= 44), h);
     await turn(page, 'debris', true);
-    ok('K phone: legend line visible with the layer on', await page.locator('#orb-legend').isVisible());
+    ok('K phone: legend line visible with the layer on', await page.locator((await page.locator('#ps-orb').count()) ? '#ps-orb' : '#orb-legend').isVisible());   // mobile pass: the persistent line beside the closed Key
     ok('K phone: no horizontal scroll', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     await ctx.close();
   }
