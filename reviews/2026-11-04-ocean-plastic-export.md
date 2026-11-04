@@ -8,13 +8,13 @@ NOAA GeoPlatform (ArcGIS org `C8EMgrsFcRFL6LrL`, item metadata "NOAA National Ce
 | Service | Rows | Sample dates | Data last edited | Page size |
 |---|---|---|---|---|
 | `Marine_Microplastics_WGS84` (GPT's find) | 22,530 (ocean water 15,534 · beach 671 · Nurdle Patrol 5,817 · sediment 508) | 1972-04-20 → **2022-11-30** (ocean water) | 2026-06-09 | 2,000 |
-| `Hub_Microplastics_Replace` — item title "Global Marine Microplastics Observations" | **29,076** | 1972-04-20 → **2026-04-28** | **2026-10-15** | — |
+| `Hub_Microplastics_Replace` — item title "Global Marine Microplastics Observations" | **29,076** | 1972-04-20 → 2026-04-28 **(all media; 2026-04-28 is Nurdle Patrol — ocean water ends 2024-10-23, see §7)** | **2026-10-15** | — |
 | `Ocean_Surface_Microplastics_(PS)` — professional science | 14,580 | 1972-04-20 → 2024-10-23 | 2026-10-15 | **1,000** |
 | `Ocean_Surface_Microplastics_(CS)` — citizen science | 1,603 | 2013-07-01 → 2021-05-23 | 2026-10-15 | — |
 | `Ocean_Subsurface_Microplastics_(PS)` | 805 | 2013-01-06 → 2019-10-21 | 2026-10-15 | — |
 
 - The portal's app item "Microplastics Hub Web App CURRENT" was modified 2 Oct 2026; the hub web map 15 Oct 2026. The end date 2026-04-28 equals the temporal end in the data.gov record for the **Harmonized Database, NCEI Accession 0306475** (issued 22 Jul 2025, quarterly updates). That is evidence, not proof, that `Hub_Microplastics_Replace` + the split layers are the current harmonized product. Which layers the CURRENT app actually reads was not opened.
-- **Recommendation:** use the current split layer `Ocean_Surface_Microplastics_(PS)` (and `Hub_Microplastics_Replace` for discovery), not `Marine_Microplastics_WGS84`. The current layers carry **`UniqueID`** = NCEI accession + sequence (e.g. `0211007-0000201`) and **`Study_Type`**; the older service has only OBJECTID/GlobalID.
+- **Recommendation (portal link verified in §7):** use the current split layer `Ocean_Surface_Microplastics_(PS)` (and `Hub_Microplastics_Replace` for discovery), not `Marine_Microplastics_WGS84`. The current layers carry **`UniqueID`** = NCEI accession + sequence (e.g. `0211007-0000201`) and **`Study_Type`**; the older service has only OBJECTID/GlobalID.
 
 ## 2. The export inspected — one study, one method
 **Filter:** `NCEI_Accession_No = 211007` on `Ocean_Surface_Microplastics_(PS)` (also pulled from the older service for comparison).
@@ -76,3 +76,22 @@ NOAA GeoPlatform (ArcGIS org `C8EMgrsFcRFL6LrL`, item metadata "NOAA National Ce
 4. If built: the hub would store one validated copy of the chosen subset (~8 MB raw JSON → far smaller trimmed), refreshed rarely (quarterly source updates); size and cadence to be measured first.
 
 Sources: ncei.noaa.gov/products/microplastics · catalog.data.gov (Harmonized Database, NCEI Accession 0306475) · nature.com/articles/s41597-023-02632-y · ncei.noaa.gov geoportal metadata gov.noaa.nodc:0211007 · services2.arcgis.com/C8EMgrsFcRFL6LrL (REST, read 4 Nov 2026) · arcgis.com sharing search (orgid C8EMgrsFcRFL6LrL).
+
+## 7. Corrections and additions after GPT's review (4 Nov, ~10:40 UTC)
+1. **Dataset dates, by setting** (`Hub_Microplastics_Replace`, grouped by Medium): ocean water 16,988 rows, 1972-04-20 → **2024-10-23** · Nurdle Patrol 10,615, 2018-11-07 → **2026-04-28** · beach 893, 2015-06-04 → 2023-02-12 · ocean sediment 580, 2017-03-21 → 2022-07-11. **The newest surface-water observation is 23 Oct 2024**, not April 2026. Newest professional surface-water studies (rows dated 2022+): Oceaneye 0276422 (340, to 2024-10-23), Russell & Webster 2021 (52, to 2022-11-30), Kalangutkar et al. (bucket samples, to 2023-12-08), Arteaga et al. 2024 (bongo, 2022-07-11).
+2. **Portal link verified.** Item `fb22ec5ed745408c8b0278829842b12d` "Microplastics Hub Web App CURRENT" (https://experience.arcgis.com/experience/fb22ec5ed745408c8b0278829842b12d, modified 2026-10-02) references two web maps:
+   - `b22fab7929ac4504b6ed7bcf7fb14be6` "Microplastics Hub Map" (modified 2026-10-15) — layers: Ocean Surface (CS), Nurdle Patrol (CS), **Ocean Surface (PS)** `…/Ocean_Surface_Microplastics_(PS)/FeatureServer/0`, Ocean Subsurface (PS), Ocean Sediment (PS), Beach (PS), and "Entire Microplastics Collection" `…/Hub_Microplastics_Replace/FeatureServer/0`.
+   - `e9e277106c1b40808911a5cf9af49a7d` "Clustering Microplastics" (modified 2025-05-23) — single layer `…/Marine_Microplastics_WGS84/FeatureServer/0` (GPT's service; older content, see §1).
+   Read from the items' `/data` JSON (arcgis.com sharing API). So the current app does read the split layers; the older service is still referenced by a clustering map last changed May 2025. "Authoritative" stays NCEI's archive; the layers are NCEI's published view of it.
+3. **6,135 vs 6,136.** The service count = retrieved count establishes **retrieval completeness for that selection only**. GPT reports Law et al. 2010 describes 6,136 tows; the layer holds 6,135. One-record discrepancy recorded; cause not investigated (needs the 0211007 archive files). No row assumed missing or corrupt.
+4. **Units.** GPT read Law et al. 2010: concentrations published in **pieces/km²** (recorded on GPT's reading; Claude has not read the paper). The conversion to NOAA's pieces/m³ remains **unestablished**; `Water_Sample_Depth__m_ = 0` is the sampling position, **not** the effective sampled thickness a conversion would need — no depth will be back-calculated from the values. **Size range:** the paper discusses pieces larger than 5 mm; whether NOAA's values count only < 5 mm is not established, so these values are not labelled "microplastics < 5 mm" until checked.
+5. **Reuse, precisely.** NCEI applies CC0 to its **compiled database product**; that supports using the compiled values under CC0. It does **not** license the original paper, its figures, or the raw archive files. The 0211007 archive licence is **unstated** and stays recorded as unstated. Citation is courtesy and provenance, not a substitute for permission where permission is needed.
+6. **Movement.** Law et al. used historical drifter statistics and a transport model to study accumulation pathways — a research lead for Chad's movement goal, filed separately. It does not justify moving these sample points along today's buoy tracks.
+
+### Oceaneye (NCEI 0276422) — profiled from `Ocean_Surface_Microplastics_(PS)`
+- **1,145 rows** (unique UniqueID), **2011-08-31 → 2024-10-23** — the archive abstract's "802 samples ending in 2021" (GPT) is outdated relative to the layer. By year: 15 (2011) … 142 (2018) … 135 (2022), 112 (2023), 93 (2024).
+- All Manta net, mesh 0.33 mm, depth 0, pieces/m³ (same NOAA conversion question as Law), Study_Type "Professional Science".
+- Global: Atlantic 896 (Mediterranean 434), Pacific 141, Arctic 71, Indian 37; 55.8 °S → 79.0 °N.
+- 75 zeros, 0 nulls; median 0.116, P90 0.91, max 51.8 pieces/m³.
+- References: "Unpublished" 1,107, Faure et al. 2015 38.
+- Next: inspect its archive (original units, size classes, licence, the 802 vs 1,145 versions) — needs ncei.noaa.gov approval in the pane.
