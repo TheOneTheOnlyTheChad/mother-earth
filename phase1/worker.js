@@ -47,7 +47,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.3.5';
+const COLLECTOR_VERSION = '0.3.6';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -497,6 +497,13 @@ async function collectCo2(env, scheduledMs) {
 *  03/09/15/21 UTC on the hourly job. Daily files are ~1.9 MB with 48 years of rows → tail-parsed. */
 function doyOf(dateStr) { const d = Date.parse(dateStr + 'T00:00:00Z'); return Math.floor((d - Date.UTC(new Date(d).getUTCFullYear(), 0, 1)) / 86400e3) + 1; }
 
+// NSIDC's required citation (2025 form, CITATION tab of nsidc.org/data/g02135/versions/4, read 4 Nov 2026; REGISTER).
+// NSIDC's placeholders filled by us: the subset used, and the access date = this run's date, in NSIDC's own MM-DD-YYYY form.
+function nsidcCitation(ms) {
+  const [y, m, d] = new Date(ms).toISOString().slice(0, 10).split('-');
+  return 'Fetterer, F., Knowles, K., Meier, W. N., Savoie, M., Windnagel, A. K. & Stafford, T. (2025). Sea Ice Index. (G02135, Version 4). [Data Set]. Boulder, Colorado USA. National Snow and Ice Data Center. https://doi.org/10.7265/a98x-0f50. Daily sea-ice extent, Northern and Southern Hemispheres, and the 1981–2010 daily climatology. Date Accessed ' + `${m}-${d}-${y}.`;
+}
+
 async function collectSeaIce(env, scheduledMs) {
   const layer = 'seaice';
   const out = {}; const notes = [];
@@ -529,7 +536,7 @@ async function collectSeaIce(env, scheduledMs) {
     { index: { name: 'sea-ice extent, NSIDC Sea Ice Index v4', north: n, south: s, source_age_s: ageS },
       comparison: { basis: 'source-provided baseline: NSIDC 1981–2010 daily climatology for the same day of year (average and percentiles). The subtraction (today minus average) is computed by this collector; the baseline is NSIDC\'s.' },
       map_layer: false, source_notes: notes,
-      citation: 'Fetterer, F., K. Knowles, W. N. Meier, M. Savoie, and A. K. Windnagel. Sea Ice Index, Version 4. Boulder, Colorado USA. NSIDC: National Snow and Ice Data Center. https://nsidc.org/data/g02135',
+      citation: nsidcCitation(scheduledMs),
       quantity: 'daily sea-ice extent per hemisphere, million km² (area of ocean with ≥15% ice concentration, passive microwave) — one number per hemisphere, not a map layer' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
   await logRun(env, layer, scheduledMs, status, 200, recs.length, bytes, `N=${n.value} S=${s.value} date=${n.date} dN=${n.difference_from_average} dS=${s.difference_from_average}`);
