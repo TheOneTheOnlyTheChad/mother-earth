@@ -1,3 +1,12 @@
+# Mother Earth — status (4 Nov 2026 — thread 12)
+
+## 4 Nov 09:30 UTC — **NSIDC citation corrected (hub + page), verified.** Chad's go: "lets go on both".
+- **Hub 0.3.6** (`c89c30b`, worker.js sha256 `8cc7a273…` matched, content-only API, HTTP 200, 07:11 UTC; `/` and `/status` report 0.3.6). Sea-ice citation = NSIDC's required 2025 form (Stafford, 2025, DOI 10.7265/a98x-0f50); NSIDC's placeholders filled: subset "daily sea-ice extent, N + S, and the 1981–2010 daily climatology"; access date = UTC date of the actual fetch (`fetchedMs`, same moment as `retrieved_at`), MM-DD-YYYY as NSIDC writes it. A failed run never rewrites `latest/seaice.json`, so an older snapshot keeps its own date (GPT's point; existing `writeDown` behaviour). Hub suites: drifters 12 · ships-fallback 7 · ships-late 7 · ships-probe 11 · spacetrack-probe 11 · satellites 12 · orbital-hub 13 · duration contract — pass. No binding, secret, cron or retention change; no manual run (the hourly job is broader than sea ice — verified on the next scheduled slot instead).
+- **Page** main `1d0bf41`, assets `?v=202611051200` (Pages deploy success 07:13 UTC): `app.js` built-in NSIDC credit in the 2025 form with no invented date ("Date accessed: the retrieval date of the snapshot shown"); terms "citation required as a condition of use".
+- **Verified:** scheduled sea-ice run 09:07:58 UTC ok (330 records; N 8.135, S 15.699, data date 2 Nov); `/snapshot/seaice` collector 0.3.6, retrieved 09:08:08, citation ends "Date Accessed 11-04-2026"; live Sources & Details shows the new citation row and terms, old form absent.
+- Leftover remote branch `nsidc-page` (= main) could not be deleted through the session proxy; harmless.
+- **Next:** ocean plastic — inspect ONE NCEI Global Marine Microplastics surface-water export (age, methods, units, reuse standing, coverage) before anything is built. Then mobile pass.
+
 # Mother Earth — status (4 Nov 2026 — thread 11)
 
 ## 4 Nov 05:53 UTC — **UX ROUND 1 PUBLIC.** main `ab8abb8` (fast-forward of `ux-round-1`), assets `?v=202611050900`. Chad's go: "lets publish".
