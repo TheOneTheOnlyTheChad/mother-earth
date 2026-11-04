@@ -2,6 +2,8 @@
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §5a testing), then this file, then `STATUS.md` (newest first). Not a fresh sandbox.
 
+**Access (Chad, 4 Nov):** Claude has full access to everything — GitHub (push), Cloudflare, Space-Track, the Mac's Mother Earth folder and `~/mother-earth`, the browser pane. Chad opens the browser pane as soon as the thread kicks off. He enters secrets himself; Claude never creates accounts.
+
 ## 0. State at the end of thread 11 (4 Nov ~06:00 UTC) — LIVE
 - **Page:** main `ab8abb8`, assets `?v=202611050900` — UX round 1 public (compact cards, Observed/Computed labels, Optional layers group, credits bar below the globe, inspector source links, "What Mother Earth keeps"). Details and evidence: STATUS top section.
 - **Hub 0.3.5** unchanged (sha256 `68fca7b4…`). Bindings, crons, retention unchanged.
@@ -9,12 +11,12 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §5a testing), then this
 - Branch `ux-round-1` = main (merged, can be deleted when convenient).
 
 ## 1. Next (Chad's calls first)
-1. **GPT reviews the live site** (Chad sends the link); Claude judges the feedback, Chad decides what to fix. Spec of record: `~/Documents/ChatGPT/Mother Earth/outputs/UX-ROUND-1-SPEC.md`.
-2. **NSIDC citation in the hub** — `worker.js` carries the older form; NSIDC's required 2025 form is in REGISTER verbatim. One-line hub change + content-only deploy: Chad's go.
-3. **Ocean plastic research:** NCEI Global Marine Microplastics DB — inspect ONE measured surface-water export first: age, methods, units, reuse standing (licence fields were blank on the archive page), coverage. Dated samples labelled not live; buoy drift stays separate from any modelled transport; own toggle off on load.
-4. **Mobile pass** (agreed later): legend + imagery chip still cover the top of the globe on phones; real-phone check (Galaxy) still pending.
-5. Open decisions: attribution placement (REGISTER top note); sea-ice history table (none kept today); GFW human-readable source page (link is the Data API JSON record).
-6. Backlog unchanged: aircraft (522 + OpenSky feeder), FIRMS CPU attribution, CO₂ truncated-200 guard, physical long-sleep test, probe endpoints removal, Possible futures (research only — first subject to be chosen by Chad).
+0. **UX round 1 is CLOSED.** GPT reviewed the live site 4 Nov: no new blocking issue (verified globe room, Optional layers off in one group, drifters 1,302 → off without the warning, Explore contents, FIRMS inspector layout, `#kept` wording). He did not rerun suites or recheck mobile. His brief's stale sections (orbital unreleased, CelesTrak toggle live, hub 0.3.0) were reconciled in thread 11.
+1. **NSIDC citation in the hub** — `worker.js` carries the older form; NSIDC's required 2025 form is in REGISTER verbatim. One-line hub change + content-only deploy: Chad's go.
+2. **Ocean plastic research:** NCEI Global Marine Microplastics DB — inspect ONE measured surface-water export first: age, methods, units, reuse standing (licence fields were blank on the archive page), coverage. Dated samples labelled not live; buoy drift stays separate from any modelled transport; own toggle off on load.
+3. **Mobile pass** (agreed later): legend + imagery chip still cover the top of the globe on phones; real-phone check (Galaxy) still pending.
+4. Open decisions: attribution placement (REGISTER top note); sea-ice history table (none kept today); GFW human-readable source page (link is the Data API JSON record).
+5. Backlog unchanged: aircraft (522 + OpenSky feeder), FIRMS CPU attribution, CO₂ truncated-200 guard, physical long-sleep test, probe endpoints removal, Possible futures (research only — first subject to be chosen by Chad).
 
 ## 2. Measured / learned in thread 11
 | | |

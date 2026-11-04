@@ -48,14 +48,14 @@ Chad sees it as the first page of something broader — a way for people to see 
 - Live globe: https://theonetheonlythechad.github.io/mother-earth/ (GitHub Pages; **pushing `main` publishes it** — unreleased page work lives on branches)
 - Repo: https://github.com/TheOneTheOnlyTheChad/mother-earth (`STATUS.md` newest-first, `START-HERE.md`, `REGISTER.md`, `docs/SPEC-v0.3.md`, `docs/SPEC-orbital-layers.md`, `reviews/`)
 - Hub (Cloudflare Worker): https://mother-earth.chadoberholzer.workers.dev — public `/status`, `/snapshot/<layer>`, `/cells/<layer>`, `/elements/satellites`, `/elements/orbital`
-- Branches in flight: `orbital-rc` (orbital panel), `aircraft-rc` (aircraft, not public), `bench-orbital` (benchmark evidence)
+- Branches: everything released is on `main`. Unreleased: `aircraft-rc` (aircraft, not public, pre-orbital base), `bench-orbital` (benchmark evidence). `ux-round-1` merged 4 Nov.
 
 ### 5. Architecture (as built)
 - **Page:** static `index.html` + `sources.html` + shared `app.js`/`style.css` on GitHub Pages, globe.gl 2.45.0 pinned. Reads only the hub; never calls a data source (imagery tiles excepted, dated). Polls `latest` snapshots.
-- **Hub:** one Cloudflare Worker (collector **0.3.0**), **Workers Paid** ($5/month, enabled 3 Nov 2026). Cron triggers: `*/5` (quakes), `*/15` (fires), `11,41` (forest; orbital rides :41 in odd UTC hours), `7 * * * *` (hourly: Kp, CO₂, sea ice, satellites on odd hours, D1 aggregation).
+- **Hub:** one Cloudflare Worker (collector **0.3.5**), **Workers Paid** ($5/month, enabled 3 Nov 2026). Cron triggers: `*/5` (quakes), `*/15` (fires; ships cloud fallback check), `11,41` (forest; orbital rides :41 in odd UTC hours), `7 * * * *` (hourly: Kp, CO₂, sea ice, drifting buoys, D1 aggregation). The CelesTrak satellites job is stopped (`SATELLITES_ENABLED=0`).
 - **Storage:** **R2** holds `latest/` snapshots (what the page reads), small `state/` files per collector, and 48-hour history prefixes (`raw/`, `snapshots/`, `cells/`) under lifecycle rules. **D1** holds `collector_runs` (feeds `/status`) and hourly aggregates (the phase-3 baseline). **No KV.**
-- **External collectors:** ships come from Chad's Mac (launchd, ~every 30 min while awake) and post to the hub's authenticated `/ingest`. Aircraft collection, if released, would also run off-Cloudflare (Cloudflare egress gets HTTP 522 from OpenSky). **Rule:** public features must not depend on the Mac or a browser being open; the Mac is acceptable only where no alternative exists, and that dependency is disclosed.
-- **Storage rule (MVP):** one current validated snapshot per replaceable feed — validate, publish new with matching metadata, then delete the previous. On any failure, keep serving the last good snapshot with its original timestamps. No temp files left behind. Retention changes are Chad's call.
+- **External collectors:** ships come from Chad's Mac (launchd, ~every 30 min while awake) and post to the hub's authenticated `/ingest`; when no Mac sample has arrived for 40 min the hub samples aisstream itself (cloud fallback, hears ~half the vessels; the card says so). Aircraft collection, if released, would also run off-Cloudflare (Cloudflare egress gets HTTP 522 from OpenSky). **Rule:** public features must not depend on the Mac or a browser being open; the Mac is acceptable only where no alternative exists, and that dependency is disclosed.
+- **Storage rule:** one current validated snapshot per replaceable feed — validate, publish new with matching metadata, then delete the previous. On any failure, keep serving the last good snapshot with its original timestamps. No temp files left behind. **History is now collected deliberately** (Chad, 3 Nov): D1 aggregates kept with no end date set; raw files 2 days; what is kept is published on Sources & Details `#kept`. Retention and spend changes are Chad's call.
 
 ### 6. Layers
 | Layer | Source | Status |
@@ -64,12 +64,13 @@ Chad sees it as the first page of something broader — a way for people to see 
 | Fires | NASA FIRMS VIIRS (today UTC so far) | live |
 | Kp (index) | NOAA SWPC | live |
 | CO₂ (index) | NOAA GML Mauna Loa | live |
-| Sea ice (index) | NSIDC Sea Ice Index | live |
-| Ships | aisstream.io via Chad's Mac | live, sampled ~30 min |
+| Sea ice (index) | NSIDC Sea Ice Index | live — hub still carries NSIDC's older citation; required 2025 form in REGISTER; fix pending Chad's go |
+| Ships | aisstream.io via Chad's Mac (cloud fallback) | live, sampled ~30 min |
 | Forest disturbance | Global Forest Watch integrated alerts (CC BY 4.0) | live |
-| Day/night | computed (no source) | live, optional |
-| Satellites | CelesTrak "active" (~16,850) | live toggle, off by default; CelesTrak refresh intermittent (522 × 3, then ok at 13:08 UTC 3 Nov); failures keep the last good file with its time |
-| Orbital (replaces Satellites) | Space-Track GP (Chad's account) | hub job live and verified (first scheduled run 3 Nov 13:41 ok); page panel on `orbital-rc`, not public |
+| Drifting buoys | NOAA OSMC ERDDAP (WMO GTS, CC0) | live since 3 Nov, hourly, ~1,300 buoys, Optional layers group, off on load |
+| Day/night | computed (no source) | live, Optional layers group, off on load |
+| Orbital (Payloads · Rocket bodies · Debris) | Space-Track GP (Chad's account) | live since 3 Nov 14:49 UTC, Optional layers group, each off on load; payload status deliberately left mixed |
+| Satellites (CelesTrak) | — | **retired** 3 Nov: replaced by Orbital; job stopped |
 | Aircraft | OpenSky | built on `aircraft-rc`, not public — Chad is checking OpenSky's wording (only record: ticket #837506 — hobbyist use within credits; a public site must also feed; no cloud whitelisting) |
 
 ### 7. Orbital decisions (3 Nov 2026)
@@ -95,7 +96,8 @@ Chad sees it as the first page of something broader — a way for people to see 
 - **Evidence:** 10 suites, 559 checks green on the merged build. New `ux-round1.test.cjs` (34) fails 24 on main's layout; drifters off-warning check fails on main. Deliberate breaks on the branch: switch listener removed → terminator-ui 3 FAIL + terminator-behaviour 8 FAIL; relocated block hidden → terminator-ui aborts (switch not clickable); off-as-withheld → drifters-ui FAIL.
 - **REGISTER:** NSIDC use condition + required 2025 citation filed (read 4 Nov). Gap: the hub carries the older citation (fix = one-line hub change, Chad's go). NSIDC dataset now on a "Basic" level of service (watch). Attribution placement recorded as an open question with each source's stated requirement.
 - **Chad's direction (4 Nov):** Mother Earth is page one of a broader bridge across fields (sciences, news, art…), built on data not opinion. A later **Possible futures** view: published model projections under stated scenarios, each with its own supported horizon — never extrapolated to fill a 50/100-year control; "projections", not forecasts. Truth not doom: show damage and repair where data exists, never netted without a method. Stay light: collection is deliberate; any working window is chosen for a defined use.
-- **Next:** GPT reviews the live site → Chad decides on fixes → ocean plastic research (one measured surface-water export first; buoy drift stays separate from any modelled transport).
+- **GPT's live review (4 Nov):** no new blocking issue; UX round 1 closed. Mobile overlay work retained for a later pass. GPT did not rerun the suites or recheck mobile.
+- **Next:** (1) NSIDC citation update in the hub — pending Chad's go; (2) ocean plastic research (one measured surface-water export first; buoy drift stays separate from any modelled transport); (3) mobile pass later.
 
 ### 10. Open items outside the next list
 - FIRMS CPU attribution; CO₂ truncated-200 guard; physical long-sleep test of the Mac collector; Android phone as collector; aircraft (Cloudflare 522 + OpenSky feeder requirement; other open ADS-B networks untested); submarine cables (CC BY-SA decision first).
