@@ -928,7 +928,7 @@ const PLASTIC = {
 };
 /** NOAA stores a date-only value as US local midnight (05:00/06:00 UTC, measured 4 Nov 2026); +12 h names the day. Pure. */
 function plDay(ms) { return new Date(ms + 12 * 3600e3).toISOString().slice(0, 10); }
-async function sha256Hex(buf) { return [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join(''); }
+async function sha256Bytes(buf) { return [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join(''); }
 /** Minimal zip reader (stored + deflate entries, local headers). Returns [{name, text}] (latin1 for stored, utf-8 for deflated). */
 async function unzipText(u8) {
   const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength); const out = []; let p = 0;
@@ -1042,7 +1042,7 @@ async function plasticOriginal(env) {
     if (!r.ok) return { problem: 'original file: http ' + r.status };
     buf = new Uint8Array(await r.arrayBuffer()); fetched = true;
   }
-  const sha = await sha256Hex(buf);
+  const sha = await sha256Bytes(buf);
   if (sha !== PLASTIC.zipSha256) return { problem: `original file changed (sha256 ${sha.slice(0, 12)}…, pinned ${PLASTIC.zipSha256.slice(0, 12)}…): checks paused until reviewed` };
   if (fetched) await env.R2.put(PLASTIC.zipKey, buf, { httpMetadata: { contentType: 'application/zip' } });
   return { files: await unzipText(buf), sha, fetched };
