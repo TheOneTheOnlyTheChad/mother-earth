@@ -47,12 +47,12 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.3.6';
+const COLLECTOR_VERSION = '0.4.0';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
-const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600, orbital: 8 * 3600, drifters: 4 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
+const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600, orbital: 8 * 3600, drifters: 4 * 3600, plastic: 72 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_DAY_BOUNDARY_H = 4;             // before 04:00 UTC an empty FIRMS file is the day boundary, not an outage (measured 1 Nov 2026: first rows at 04:00)
 const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
 
@@ -908,6 +908,201 @@ async function collectDrifters(env, scheduledMs) {
   await logRun(env, layer, scheduledMs, 'ok', res.status, b.rows.length, bytes, `buoys=${b.rows.length} refused=${refusedN} ${JSON.stringify(r)} newest=${b.newest}`);
 }
 
+// ---------------------------------------------------------------- Microplastic samples — dated (0.4.0)
+/* Oceaneye surface manta-net samples as PUBLISHED BY NOAA NCEI (Marine Microplastics, Accession 0276422; compiled product
+ * CC0), shown as dated samples — never current positions. Research: reviews/2026-11-04-ocean-plastic-export.md (§8–10).
+ * Each run: (1) page NOAA's current layer at 1,000 rows and require retrieved = NOAA's own count; validate every row;
+ * (2) re-check every record from scratch against Oceaneye's original file (SEANOE 10.17882/86630, CC BY 4.0), held once
+ * in R2 and pinned to its SHA-256 — nothing from an earlier check is carried over, so a changed NOAA date, position or
+ * value can never keep an old "reproduced"; a changed original file pauses every check until reviewed.
+ * Storage: one current snapshot (latest/plastic.json + latest-cells/plastic.json) and the pinned original (ref/). */
+const PLASTIC = {
+  service: 'https://services2.arcgis.com/C8EMgrsFcRFL6LrL/arcgis/rest/services/Ocean_Surface_Microplastics_(PS)/FeatureServer/0',
+  where: 'NCEI_Accession_No=276422', accession: 276422,
+  fields: 'UniqueID,Date__MM_DD_YYYY_,Latitude__degree_,Longitude_degree_,Microplastics_measurement,Unit,Medium,Sampling_Method,Mesh_size__mm_,Water_Sample_Depth__m_,NCEI_Accession_No',
+  page: 1000, minRows: 1000, minFrac: 0.9, maxPages: 10,
+  zipUrl: 'https://www.seanoe.org/data/00754/86630/data/94022.zip', zipKey: 'ref/oceaneye-seanoe-94022.zip',
+  zipSha256: '89f1018bfaad7d23d014144b65e0bbd566b1681d35edd0b18c4cbb7c5c40c424', zipBytes: 96249,
+  tol: 0.005, netWidthM: 0.6, everyMs: 20 * 3600e3, sameTowDeg: 0.01, samePlaceDeg: 0.001,
+  SIZE: { 'SDN:H03::H0300008': '1-5 mm', 'SDN:H03::H0300009': '5-25 mm', 'SDN:H03::H0300010': '0.3-5 mm', 'SDN:H03::H0300011': '0.1-0.5 mm' },
+};
+/** NOAA stores a date-only value as US local midnight (05:00/06:00 UTC, measured 4 Nov 2026); +12 h names the day. Pure. */
+function plDay(ms) { return new Date(ms + 12 * 3600e3).toISOString().slice(0, 10); }
+async function sha256Hex(buf) { return [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join(''); }
+/** Minimal zip reader (stored + deflate entries, local headers). Returns [{name, text}] (latin1 for stored, utf-8 for deflated). */
+async function unzipText(u8) {
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength); const out = []; let p = 0;
+  while (p + 30 <= u8.length && dv.getUint32(p, true) === 0x04034b50) {
+    const method = dv.getUint16(p + 8, true), flags = dv.getUint16(p + 6, true), cs = dv.getUint32(p + 18, true), nl = dv.getUint16(p + 26, true), el = dv.getUint16(p + 28, true);
+    if (flags & 8) throw new Error('zip uses data descriptors (unsupported)');
+    const name = new TextDecoder().decode(u8.subarray(p + 30, p + 30 + nl)); const s = p + 30 + nl + el; const data = u8.subarray(s, s + cs);
+    let text; if (method === 0) text = new TextDecoder('latin1').decode(data);
+    else if (method === 8) text = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
+    else throw new Error('zip method ' + method + ' unsupported');
+    out.push({ name, text }); p = s + cs;
+  }
+  if (!out.length) throw new Error('not a zip file');
+  return out;
+}
+/** SeaDataNet ODV microlitter files → one entry per sample, sea only (lake/river files excluded). Pure. */
+function odvSamples(files) {
+  const all = []; const lakesRivers = [];
+  for (const f of files) {
+    if (/Lakes|Rivers/i.test(f.name)) { lakesRivers.push(f.name); continue; }
+    const L = f.text.split(/\r?\n/).filter(l => l && !l.startsWith('//')); if (!L.length) continue;
+    const H = L[0].split('\t'); const ix = n => H.findIndex(h => h.startsWith(n));
+    const I = { id: ix('SampleID'), dist: ix('SamplingEffort'), net: ix('Net_opening'), dmax: ix('MaximumObservationDepth'), sz: ix('Microlitter_Size'), cnt: ix('Microlitter_Count'), t: ix('YYYY-MM-DD'), lon: ix('Longitude'), lat: ix('Latitude'), et: ix('ENDX8601'), elon: ix('ENDXXLON'), elat: ix('ENDXXLAT'), prot: ix('SAMPPROT'), cruise: ix('Cruise'), mesh: ix('Mesh_size') };
+    if (Object.values(I).some(i => i < 0)) throw new Error('unexpected ODV header in ' + f.name);
+    let cur = null; const by = {};
+    for (const l of L.slice(1)) {
+      const c = l.split('\t'); if (c[I.t]) cur = { cruise: c[I.cruise], t: c[I.t], lat: +c[I.lat], lon: +c[I.lon] };
+      if (!cur) continue;
+      const id = c[I.id]; const num = v => v === '' || v === undefined ? null : +v;
+      const s = by[id] || (by[id] = { file: f.name, cruise: cur.cruise, sample: id, start: cur.t.slice(0, 16), start_pos: [cur.lat, cur.lon],
+        end: c[I.et] || null, end_pos: num(c[I.elat]) === null ? null : [+c[I.elat], +c[I.elon]], distance_km: num(c[I.dist]), net_cm: num(c[I.net]),
+        depth_max_m: num(c[I.dmax]), mesh_um: num(c[I.mesh]), distance_method: ((c[I.prot] || '').match(/Distance measurement method:\s*([^,]+)/) || [])[1] || null, counts: {} });
+      const k = PLASTIC.SIZE[c[I.sz]] || c[I.sz]; s.counts[k] = (s.counts[k] || 0) + (+c[I.cnt]);
+    }
+    all.push(...Object.values(by));
+  }
+  // the same sample filed in two regional files (3 found, 4 Nov 2026): merge when identical apart from file and a blank method
+  const key = s => JSON.stringify({ ...s, file: 0, distance_method: 0 }); const merged = new Map(); const kept = [];
+  for (const s of all) {
+    const k = key(s), m = merged.get(k);
+    if (m) { m.also_in_file = s.file; if (m.distance_method !== s.distance_method) { m.method_note = `distance method ${m.distance_method || 'blank'} in ${m.file}, ${s.distance_method || 'blank'} in ${s.file}`; m.distance_method = m.distance_method || s.distance_method; } continue; }
+    merged.set(k, s); kept.push(s);
+  }
+  return { samples: kept, entries: all.length, lakes_rivers_files: lakesRivers.length };
+}
+/** Validate NOAA's rows; refused rows are counted, never drawn. Pure. */
+function plasticValidate(features, retrievedMs) {
+  const refused = { bad_id: 0, duplicate: 0, bad_date: 0, bad_position: 0, bad_value: 0, wrong_unit: 0, wrong_medium: 0, wrong_accession: 0 };
+  const seen = new Set(), rows = [];
+  for (const f of features) {
+    const a = f && f.attributes || {};
+    if (!/^0276422-\d{7}$/.test(String(a.UniqueID || ''))) { refused.bad_id++; continue; }
+    if (seen.has(a.UniqueID)) { refused.duplicate++; continue; }
+    if (a.NCEI_Accession_No !== PLASTIC.accession) { refused.wrong_accession++; continue; }
+    if (a.Unit !== 'pieces/m3') { refused.wrong_unit++; continue; }
+    if (a.Medium !== 'Ocean water') { refused.wrong_medium++; continue; }
+    const t = a.Date__MM_DD_YYYY_; if (!Number.isFinite(t) || t < Date.UTC(1972, 0, 1) || t > retrievedMs) { refused.bad_date++; continue; }
+    const lat = a.Latitude__degree_, lng = a.Longitude_degree_;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) { refused.bad_position++; continue; }
+    const v = a.Microplastics_measurement; if (!Number.isFinite(v) || v < 0) { refused.bad_value++; continue; }
+    seen.add(a.UniqueID);
+    rows.push({ id: a.UniqueID, lat, lng, day: plDay(t), value: v, method: a.Sampling_Method || null, mesh_mm: Number.isFinite(a.Mesh_size__mm_) ? a.Mesh_size__mm_ : null, depth_m: Number.isFinite(a.Water_Sample_Depth__m_) ? a.Water_Sample_Depth__m_ : null });
+  }
+  return { rows, refused };
+}
+/** Re-check every NOAA row against the original samples, from scratch. Pure; real-data result 4 Nov 2026: 647 / 11 / 1. */
+function plasticVerify(rows, samples) {
+  const byDay = new Map(); for (const r of rows) (byDay.get(r.day) || byDay.set(r.day, []).get(r.day)).push(r);
+  const claims = new Map();   // NOAA id → [{status, sample, computed}]
+  const unclaimed = [];
+  for (const s of samples) {
+    const micro = '1-5 mm' in s.counts ? '1-5 mm' : '0.3-5 mm' in s.counts ? '0.3-5 mm' : null;
+    const n = micro ? s.counts[micro] : null;
+    const vol = s.distance_km > 0 && s.net_cm > 0 && s.depth_max_m > 0 ? s.distance_km * 1000 * (s.net_cm / 100) * s.depth_max_m : null;
+    const computed = vol && n !== null ? n / vol : null;
+    const agrees = v => computed !== null && ((v === 0 && n === 0) || (v > 0 && Math.abs(computed - v) / v < PLASTIC.tol));
+    const day = s.start.slice(0, 10);
+    const same = (byDay.get(day) || []).filter(r => Math.abs(r.lat - s.start_pos[0]) < PLASTIC.sameTowDeg && Math.abs(r.lng - s.start_pos[1]) < PLASTIC.sameTowDeg);
+    let hit = null, status;
+    if (same.length === 1) { hit = same[0]; status = agrees(hit.value) ? 'reproduced' : 'not_reproduced'; }
+    else if (same.length > 1) { unclaimed.push({ sample: s.sample, why: 'several NOAA rows on the same day and place' }); continue; }
+    else {
+      const c = rows.filter(r => Math.abs(r.lat - s.start_pos[0]) < PLASTIC.samePlaceDeg && Math.abs(r.lng - s.start_pos[1]) < PLASTIC.samePlaceDeg && agrees(r.value));
+      if (c.length !== 1) { unclaimed.push({ sample: s.sample, why: c.length ? 'several possible NOAA rows' : 'no NOAA row found' }); continue; }
+      hit = c[0]; status = 'possible_date_conflict';
+    }
+    const orig = { sample: s.sample, file: s.file, also_in_file: s.also_in_file || null, method_note: s.method_note || null, cruise: s.cruise,
+      start: s.start, end: s.end, start_pos: s.start_pos, end_pos: s.end_pos,
+      distance_m: s.distance_km === null ? null : Math.round(s.distance_km * 10000) / 10, distance_method: s.distance_method,
+      net_width_m: s.net_cm === null ? null : s.net_cm / 100, depth_m: s.depth_max_m, mesh_um: s.mesh_um,
+      size_class: micro, count: n, count_5_25mm: s.counts['5-25 mm'] ?? null, computed: computed === null ? null : +computed.toPrecision(7),
+      checked_against: { date: hit.day, lat: hit.lat, lng: hit.lng, value: hit.value }, tolerance: PLASTIC.tol };
+    if (status === 'possible_date_conflict') orig.end_date_matches_noaa = !!(s.end && s.end.slice(0, 10) === hit.day);
+    (claims.get(hit.id) || claims.set(hit.id, []).get(hit.id)).push({ status, orig });
+  }
+  const out = new Map(); const counts = { reproduced: 0, not_reproduced: 0, possible_date_conflict: 0, ambiguous: 0, no_original: 0 };
+  for (const r of rows) {
+    const c = claims.get(r.id);
+    if (!c) { out.set(r.id, { check: 'no_original', original: null }); counts.no_original++; continue; }
+    if (c.length > 1) { out.set(r.id, { check: 'ambiguous', original: null }); counts.ambiguous++; continue; }
+    out.set(r.id, { check: c[0].status, original: c[0].orig }); counts[c[0].status]++;
+  }
+  return { byId: out, counts, unclaimed };
+}
+async function plasticOriginal(env) {
+  // the pinned original: from R2 if held, else ONE download, kept only when the hash matches
+  let o = await env.R2.get(PLASTIC.zipKey), buf = o ? new Uint8Array(await o.arrayBuffer()) : null, fetched = false;
+  if (!buf) {
+    const r = await fetch(PLASTIC.zipUrl, { headers: { 'User-Agent': UA } });
+    if (!r.ok) return { problem: 'original file: http ' + r.status };
+    buf = new Uint8Array(await r.arrayBuffer()); fetched = true;
+  }
+  const sha = await sha256Hex(buf);
+  if (sha !== PLASTIC.zipSha256) return { problem: `original file changed (sha256 ${sha.slice(0, 12)}…, pinned ${PLASTIC.zipSha256.slice(0, 12)}…): checks paused until reviewed` };
+  if (fetched) await env.R2.put(PLASTIC.zipKey, buf, { httpMetadata: { contentType: 'application/zip' } });
+  return { files: await unzipText(buf), sha, fetched };
+}
+async function collectPlastic(env, scheduledMs) {
+  const layer = 'plastic', retrievedMs = Date.now();
+  const q = p => `${PLASTIC.service}/query?f=json&where=${encodeURIComponent(PLASTIC.where)}&${p}`;
+  let meta, count, features = [], pages = 0;
+  try {
+    meta = await (await fetch(PLASTIC.service + '?f=json', { headers: { 'User-Agent': UA } })).json();
+    const cj = await (await fetch(q('returnCountOnly=true'), { headers: { 'User-Agent': UA } })).json();
+    count = cj && cj.count;
+    if (!Number.isInteger(count)) return writeDown(env, layer, scheduledMs, 'count query gave no count', 200);
+    for (let off = 0; pages < PLASTIC.maxPages; off += PLASTIC.page) {
+      const j = await (await fetch(q(`outFields=${PLASTIC.fields}&orderByFields=ObjectId&returnGeometry=false&resultOffset=${off}&resultRecordCount=${PLASTIC.page}`), { headers: { 'User-Agent': UA } })).json();
+      pages++;
+      if (!j || j.error || !Array.isArray(j.features)) return writeDown(env, layer, scheduledMs, 'page ' + pages + ': ' + JSON.stringify(j && j.error || 'no features').slice(0, 160), 200);
+      features.push(...j.features);
+      if (!j.exceededTransferLimit) break;
+    }
+  } catch (e) { return writeDown(env, layer, scheduledMs, 'fetch failed: ' + e, 0); }
+  if (features.length !== count) return writeDown(env, layer, scheduledMs, `refused: retrieved ${features.length} rows, NOAA reports ${count}`, 200);
+  const v = plasticValidate(features, retrievedMs);
+  const prev = await getJson(env, `latest-cells/${layer}.json`); const prevN = prev && prev.rows_published;
+  if (v.rows.length < PLASTIC.minRows) return writeDown(env, layer, scheduledMs, `refused: ${v.rows.length} valid rows < ${PLASTIC.minRows} ${JSON.stringify(v.refused)}`, 200);
+  if (prevN && v.rows.length < prevN * PLASTIC.minFrac) return writeDown(env, layer, scheduledMs, `refused: ${v.rows.length} rows, previously ${prevN} (below ${PLASTIC.minFrac * 100} %)`, 200);
+  let ver, origNote = null;
+  try { const o = await plasticOriginal(env); if (o.problem) origNote = o.problem; else { const od = odvSamples(o.files); ver = { ...plasticVerify(v.rows, od.samples), sea_samples: od.samples.length, entries: od.entries, lakes_rivers_files: od.lakes_rivers_files, fetched: o.fetched }; } }
+  catch (e) { origNote = 'original file unreadable: ' + String(e).slice(0, 120); }
+  const cells = {}; const recs = [];
+  const grade = 'partial', evidence = 'dated_samples;one_programme_routes;not_current;tow_start_positions';
+  for (const r of v.rows) {
+    const chk = ver ? ver.byId.get(r.id) : { check: 'original_unavailable', original: null };
+    recs.push([r.id, r.lat, r.lng, r.day, r.value, chk.check, chk.original, r.method, r.mesh_mm, r.depth_m]);
+    const cid = cellId(r.lat, r.lng); (cells[cid] || (cells[cid] = { count: 0, coverage: { grade, evidence, observed_fraction: null } })).count++;
+  }
+  const days = v.rows.map(r => r.day).sort();
+  const fields = ['id', 'lat', 'lng', 'sampled_on', 'pieces_m3', 'check', 'original', 'method', 'mesh_mm', 'depth_m'];
+  const e = envelope(layer, scheduledMs, days[0], days[days.length - 1], 'ok', cells, fields, recs, {
+    coverage_default: { grade, evidence, observed_fraction: null },
+    quantity: 'dated surface microplastic samples (pieces/m³, < 5 mm) as published by NOAA NCEI — one marker per sample at its tow-start location; not current positions',
+    rows_published: v.rows.length, noaa_count: count, pages, refused: v.refused,
+    source: { name: 'NOAA NCEI Marine Microplastics — Ocean Surface (Professional Science), Accession 0276422 (Oceaneye Association)', url: PLASTIC.service, filter: PLASTIC.where, data_last_edit: meta && meta.editingInfo ? new Date(meta.editingInfo.dataLastEditDate).toISOString() : null, licence: 'CC0 (NCEI compiled product)' },
+    verification: ver ? { status: 'checked', rule: 'count in the < 5 mm class ÷ (tow distance [km] × 1,000 m/km × net width [m] × sampled depth [m]); reproduced = within 0.5 % of the published value (zero = zero); recomputed from scratch on every run',
+      original: { name: "Oceaneye's microlitter data 2011-2020 (SEANOE)", doi: '10.17882/86630', file: '94022.zip', sha256: PLASTIC.zipSha256, licence: 'CC BY 4.0', sea_samples: ver.sea_samples, entries: ver.entries, lakes_rivers_files_excluded: ver.lakes_rivers_files },
+      counts: ver.counts, unclaimed: ver.unclaimed } : { status: 'unavailable', reason: origNote },
+    citation: 'NOAA NCEI Marine Microplastics: Nyadjro, E., et al. (2018), The NOAA NCEI Global Marine Microplastics Data Collection (1972-present), NOAA National Centers for Environmental Information, https://www.ncei.noaa.gov/archive/accession/NCEI-Marine-Microplastics; Nyadjro, E. S., et al. (2023), Scientific Data 10, https://doi.org/10.1038/s41597-023-02632-y. Dataset: Faure, F., Saini, C., Potter, G., Galgani, F., de Alencastro, L. F., Hagmann, P. (2023), NCEI Accession 0276422. Original counts: Hagmann, P., Potter, G. (2022), Oceaneye\'s microlitter data 2011-2020, SEANOE, https://doi.org/10.17882/86630 (CC BY 4.0).',
+    map_layer: true,
+  });
+  const cellsOnly = { ...e, records: undefined, record_fields: undefined, record_format: undefined };
+  const bytes = await putJson(env, `latest/${layer}.json`, e);
+  await putJson(env, `latest-cells/${layer}.json`, cellsOnly);
+  const rf = Object.values(v.refused).reduce((a, x) => a + x, 0);
+  await logRun(env, layer, scheduledMs, 'ok', 200, v.rows.length, bytes, `rows=${v.rows.length}/${count} refused=${rf} checks=${ver ? JSON.stringify(ver.counts) : 'unavailable: ' + origNote}`);
+}
+async function plasticDue(env, ms, manual) {
+  if (manual) return true;
+  const prev = await getJson(env, 'latest-cells/plastic.json');
+  return !prev || !prev.retrieved_at || ms - Date.parse(prev.retrieved_at) > PLASTIC.everyMs;
+}
+
 // ---------------------------------------------------------------- Ships from the Worker — PRIVATE probe (0.3.3)
 /* Question (Chad, 3 Nov 2026): on Workers Paid, can the hub take the ships sample itself instead of the Mac?
  * ONE bounded listen to aisstream.io from the Worker, measured and stored privately: nothing published, no latest/,
@@ -1304,7 +1499,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters };
+export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1402,6 +1597,7 @@ const JOBS = {
   },
   orbital: async (env, ms) => guarded(env, 'orbital', ms, (e, m) => collectOrbital(e, m, true)),   // manual: /admin/run/orbital (same guards)
   satellites: async (env, ms) => guarded(env, 'satellites', ms, collectSatellites),
+  plastic: async (env, ms) => guarded(env, 'plastic', ms, collectPlastic),   // manual: /admin/run/plastic (no gate)
   drifters: async (env, ms) => guarded(env, 'drifters', ms, collectDrifters),   // manual: /admin/run/drifters (no gate: one ~100 KB request)   // manual: /admin/run/satellites (same stamp gate)
   hourly: async (env, ms, manual) => {
     const k = await guarded(env, 'swpc', ms, collectSwpc);          // Kp is a 3-hourly product; hourly matches NWS's "know your refresh frequency" (REGISTER.md)
@@ -1410,8 +1606,9 @@ const JOBS = {
     const i = (manual || hr % 6 === 3) ? await guarded(env, 'seaice', ms, collectSeaIce) : 'seaice:skipped (runs 03/09/15/21 UTC)';   // NSIDC updates once a day
     const s = env.SATELLITES_ENABLED !== '1' ? 'satellites:not scheduled (SATELLITES_ENABLED unset)' : (!manual && hr % 2 === 1) ? await guarded(env, 'satellites', ms, collectSatellites) : 'satellites:skipped (odd UTC hours only)';
     const d = env.DRIFTERS_ENABLED !== '1' ? 'drifters:not scheduled (DRIFTERS_ENABLED unset)' : await guarded(env, 'drifters', ms, collectDrifters);
+    const p = env.PLASTIC_ENABLED !== '1' ? 'plastic:not scheduled (PLASTIC_ENABLED unset)' : (await plasticDue(env, ms, false)) ? await guarded(env, 'plastic', ms, collectPlastic) : 'plastic:skipped (refreshed within 20 h)';
     const b = await hourlyBatch(env, ms);
-    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, batch: b };
+    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, batch: b };
   },
 };
 
@@ -1426,7 +1623,7 @@ function jobForCron(cron) {
 }
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization' };
-const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest', 'satellites', 'orbital', 'drifters'];   // GET-readable; ships/lightning arrive via /ingest (D11)
+const LAYERS = ['usgs', 'swpc', 'opensky', 'opensky-bbox', 'firms', 'co2', 'seaice', 'mock', 'ships', 'lightning', 'forest', 'satellites', 'orbital', 'drifters', 'plastic'];   // GET-readable; ships/lightning arrive via /ingest (D11)
 const INGEST_LAYERS = ['mock', 'opensky', 'ships', 'lightning'];   // D11: external collectors (Mac/Pi) publish these through /ingest
 const INGEST_MAX_BYTES = 5 * 1024 * 1024;
 
