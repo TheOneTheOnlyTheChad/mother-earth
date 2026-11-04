@@ -1,5 +1,9 @@
 # Mother Earth — status (4 Nov 2026 — thread 12)
 
+## 4 Nov 12:30 UTC — **MICROPLASTIC SAMPLES PUBLIC.** main `8330a35` (rebased `plastic-rc`, page files byte-identical to the tested RC `c70c9d6`), assets `?v=202611061000`, Pages deploy success 12:28 UTC. Chad's go: "i think we deploy".
+- **Public smoke (pane, visible):** served `?v=202611061000`; off on load, 0 plastic requests; on → 2 requests, 1,145 paired (1,070 markers + 75 rings), 277 outline cells; card line present; off → all cleared, other layers identical (18,868 points before and after). Sources: `#plastic` section, counts, kept row, tier row, contents link.
+- **Next:** GPT reviews the live layer. Then: NCEI v2.2 check (503 today); mobile pass (legend length now worse on phones while plastic is on).
+
 ## 4 Nov 12:30 UTC — **Ocean plastic: hub 0.4.0 LIVE (collecting), page RC on `plastic-rc` (`c70c9d6`), NOT public.** Chad's go: "go" + re-confirmation.
 - **Hub 0.4.0** (`7ef3747`, worker.js sha256 `f8335c3b…`), content-only. `PLASTIC_ENABLED=1` (plain text, Production; 16 bindings intact). Job on the hourly tick, runs when the last success is > 20 h old (≈ daily); `/admin/run/plastic` manual.
 - **Incident, fixed:** adding the variable through a Settings page loaded BEFORE the code deploy created version 44 on the OLD code (0.3.6) one minute after 0.4.0 went out (version 43). Caught at 12:14 (`/` said 0.3.6); 0.4.0 re-applied 12:15 (same commit, sha matched; variable kept). Rule added to START-HERE §4.

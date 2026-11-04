@@ -79,7 +79,7 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Citation (on the page):** Nyadjro et al. (2018) collection + Nyadjro et al. (2023) paper; Faure, Saini, Potter, Galgani, de Alencastro, Hagmann (2023) NCEI Accession 0276422; Hagmann & Potter (2022) SEANOE doi:10.17882/86630.
 - **Caveats carried:** NOAA's comparability warning; dated samples, not current positions; NOAA concentration classes database-relative (not shown); 11 possible date conflicts and 1 non-reproducible value shown per sample; GPT reports NCEI v2.2 (4 Dec 2025) documents general methods — not verified (NCEI 503 on 4 Nov 2026).
 - **Automated use:** ArcGIS REST, page size 1,000; one refresh a day (source updates quarterly). SEANOE file fetched once and pinned by SHA-256.
-- **Status:** ⚠️ release candidate (branch `plastic-rc`), not public.
+- **Status:** ✅ public 4 Nov 2026 12:28 UTC (optional layer, off on load).
 - **Commercial use:** yes for the NCEI compiled product (CC0); SEANOE original CC BY 4.0 (attribution); NCEI archive licence unstated — not assumed.
 
 ## OpenSky Network — states API
