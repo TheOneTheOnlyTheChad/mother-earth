@@ -68,6 +68,14 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Shallow clone:** a `--depth=1` fetch can cut parent links ("unrelated histories"); `git fetch --deepen=5 origin main <branch>` restores them. Remote refspec is `+refs/heads/*:refs/remotes/origin/*` so branch tracking resolves (the stop hook checks it).
 - Mac folder access in a new thread: `device_request_folder_access ["~/Documents/Mother Earth"]` (one prompt); KEYS.md line 8 admin key, line 16 aisstream (3 connections per account).
 
+## 4c. Thread 11 operating facts (4 Nov 2026)
+- **Layout (UX round 1):** left column = core observed cards → Aircraft (not shown) → Explore (search + jump buttons). Right column = indices (Kp, CO₂, sea ice) → **Optional layers** group `#card-optional` (drifters `#card-drifters`, day/night `.opt-night` with `#tgl-night`, orbital `#card-orb`). Credits are a `<footer id="credits">` below the globe inside `.centre`; `.gwrap` wraps `#globe`, `#imgdate`, `#legend` (transparent below 1100 px). A clone of the credits (`.credits.m`) is appended to the phone readings sheet.
+- **Evidence labels:** `.evl` line with `.ev.obs` / `.ev.comp`. `Projected` is reserved for a future Possible futures view — never on current layers.
+- **Kept wording:** `ME.KEPT` in app.js is the single per-layer statement of what the hub keeps; update it (and Sources `#kept`) from D1/R2 reads whenever retention changes.
+- **Inspector rows:** a third element `'more'` puts a row behind "Method and full explanation" (`#insp-more`).
+- **Previewing a branch on live data:** see HANDOVER §2 (blob-URL injection into a github.io tab).
+- **Local test server:** start it with the Bash tool's `run_in_background`; `pkill -f "http.server 8899"` kills the calling shell too (its own command line matches) — record the pid instead.
+
 ## 4a. Measuring Worker CPU and cleaning R2 (added thread 8, 3 Nov 2026)
 - **Per-invocation CPU is readable** (invocation logs are on): from a `dash.cloudflare.com` tab, `POST /api/v4/accounts/<acct>/workers/observability/telemetry/query` with header `x-atok: window.bootstrap.atok` and body `{queryId:'adhoc', timeframe:{from,to}, view:'events', limit, parameters:{filters:[{key:'$workers.scriptName',operation:'eq',type:'string',value:'mother-earth'}]}}`. Each `cf-worker-event` carries `$workers.cpuTimeMs`, `wallTimeMs`, `outcome`, `eventType`, `event.cron`. Events take ~20 s to appear. A cron invocation runs every job of that tick, so its CPU is shared (forest + orbital on the :41 odd-hour tick).
 - **Plan:** Workers Paid ($5/month) since 3 Nov — read from `GET /api/v4/accounts/<acct>/subscriptions`. Paid CPU limits: 30 s per request (default), 15 min for crons at ≥ 1-hour intervals, 30 s below.
