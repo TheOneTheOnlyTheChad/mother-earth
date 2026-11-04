@@ -127,3 +127,28 @@ File: SEANOE 10.17882/86630, `94022.zip` (96,249 B), 30 SeaDataNet ODV text file
 - **Quality flags:** QV 0 (no QC performed, SeaDataNet L20) on 24,382 values; QV 9 (missing value) on 34, all in the protocol field. No value flagged good or bad — "quality controlled" on SEANOE's file table is not reflected per value.
 - **Comparability inside Oceaneye:** two size-class labels (1–5 mm vs 0.3–5 mm) under one 0.33 mm mesh. Whether that is a coding choice or a real 1 mm lower bound for 497 samples is not established (needs the methodology PDF). Until then the honest label is "pieces < 5 mm retained by a 0.33 mm net; lower size bound recorded as 1 mm or 0.3 mm per sample".
 - **For the post-2021 343 rows:** not in this file; same conversion cannot be checked.
+
+## 10. Corrections after GPT's second review (4 Nov, ~12:00 UTC)
+1. **NCEI archive version.** GPT reports the accession page now lists **v2.2, published 4 Dec 2025**, with a revision entry and methods: net opening 0.6 × 0.15 m, GPS distance before 2015 and flowmeter after, sieving at 5 mm / 1 mm / 300 µm. **Not verified by Claude:** at ~12:00 UTC the landing page and download returned **503**, the geoportal item 404 (NCEI cloud migration). §8's "no documentation for the 343 later rows" is withdrawn as a conclusion and becomes: *documentation not reached; GPT reports v2.2 describes general methods.* General methods still do not establish each row's protocol. Re-check when NCEI answers.
+2. **Conversion — bounded.** Join SEANOE → portal (same date, position within 0.01°): 648 of 659 sea samples matched; 645 reproduce within 0.5 % as (count in class 08 or 10) ÷ (tow distance [km] × 1,000 m/km × 0.60 m × 0.15 m). This covers **645 rows, not the 802 archived and not the 1,145 published**. Matching arithmetic does not establish who performed the calculation; the value is described as **"published by NOAA NCEI"**. The three disagreements, kept as they are:
+   - `0276422-0000300` (BON_26, 2017-04-09): published 0.049438 = **exactly half** of 24 ÷ (2,697 m × 0.09 m²) = 0.098875.
+   - `0276422-0000274` (MAU_14, 2017-08-13): published 0.058471 = **exactly half** of 14 ÷ (1,330.2 m × 0.09 m²) = 0.116941.
+   - `0276422-0000560` (TMF_2019_11, 2019-08-01): SEANOE tow distance **0 km**, 4 pieces; published 0.022234 (implies ~2.0 km). Not reconstructable from this file.
+   Cause of the halves not established (a second tow, a different distance or a different area are all possible).
+3. **The eleven "unmatched" are date disagreements.** Each has an identical position and identical concentration in both sources but a **different date**:
+   | SEANOE ID | SEANOE date | NOAA date | NOAA UniqueID |
+   |---|---|---|---|
+   | OE_108 | 2013-04-06 | 2014-04-06 | 0276422-0000099 |
+   | OE_109 | 2013-04-06 | 2014-04-06 | 0276422-0000100 |
+   | OE_78 | 2013-09-19 | 2013-09-18 | 0276422-0000070 |
+   | OE_146 | 2014-08-14 | 2014-08-04 | 0276422-0000137 |
+   | PAC_195 | 2019-03-22 | 2019-04-22 | 0276422-0000496 |
+   | PAC_196 | 2019-03-24 | 2019-04-24 | 0276422-0000497 |
+   | MAU_39 | 2019-08-18 | 2018-08-18 | 0276422-0000511 |
+   | PAC_50 | 2016-05-15 | 2016-04-15 | 0276422-0000194 |
+   | PAC_51 | 2016-05-16 | 2016-04-16 | 0276422-0000195 |
+   | PAC_107 | 2017-09-21 | 2017-09-20 | 0276422-0000376 |
+   | SE_8 | 2018-05-17 | 2018-07-17 | 0276422-0000347 |
+   Which source is right is not established (OE_78 differs by one day — possibly a time-zone or end-time effect; the others by a month or a year look like transcription). For a layer whose point is the date, these 11 get a visible note.
+4. **QC wording.** SEANOE files encode QV 0 on 24,382 values and QV 9 (missing value) on 34 (protocol field). In the SeaDataNet scheme 0 means no quality control was recorded **in that flag**; it does not establish that no laboratory or other checks took place. SEANOE's page describes the file as quality-controlled data; Oceaneye states its staff analysed all samples.
+5. **Coverage wording.** A missing marker means only that this selection shows no sample there; a tow covers a route and the marker is its start.
