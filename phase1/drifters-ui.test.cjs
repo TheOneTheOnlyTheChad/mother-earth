@@ -84,6 +84,8 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 5 min — failur
   await off(page); const nReq = count(/drifters/); x = await R(page);
   ok('4 off: no points, no cells, no legend, card says off, records cleared', x.r.driftPoints === 0 && x.r.driftCells === 0 && !x.leg && x.st === 'off' && x.d.points === 0, x);
   ok('4 off: other layers unchanged', x.r.points === basePts, x.r);
+  // UX round 1 (4 Nov 2026): 'off' is the switch's state, not records being withheld — no warning line after switching off
+  ok('4 off: no "Records withheld" warning for a layer that is simply off', await page.locator('#p-drifters').isHidden(), await page.locator('#p-drifters').textContent());
   await page.evaluate(() => ME.REFRESH_MS);   // no-op read
   await page.evaluate(async () => { await new Promise(r => setTimeout(r, 50)); });
   ok('4 off: no further drifter requests', count(/drifters/) === nReq, hits.filter(h => /drifters/.test(h)));

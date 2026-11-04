@@ -405,6 +405,7 @@ function inspectRecord(layer, r) {
   if (layer === 'drifters') rows.push(['Caveat', 'this buoy\'s latest fix as relayed over the WMO GTS; where it is now is unknown; reports are not quality-controlled (delayed-mode QC data lag by years)']);
   if (layer === 'ships') rows.push(['Caveat', 'latest position received for this MMSI during the sample; where it was between samples is unknown; terrestrial AIS only']);
   if (layer === 'usgs' && r.src && /^https:\/\/earthquake\.usgs\.gov\//.test(r.src)) rows.push(['At the source', `<a href="${esc(r.src)}" target="_blank" rel="noopener">USGS event page</a>`]);
+  else if (layer === 'drifters' && /^[A-Za-z0-9]{1,16}$/.test(String(r.buoy || ''))) rows.push(['At the source', `<a href="https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.htmlTable?platform_code,time,latitude,longitude,sst&platform_code=%22${encodeURIComponent(r.buoy)}%22&time%3E=now-1day" target="_blank" rel="noopener">this buoy's reports at NOAA OSMC</a> <span class="q">(live query: shows its last 24 h as of when you open it, not this snapshot)</span>`]);
   else if (SRC_LINK[layer]) rows.push(['At the source', srcLink(layer)]);
   openInspector(`${LABEL[layer]} · one record`, rows);
 }
@@ -412,10 +413,10 @@ function inspectRecord(layer, r) {
 // Source pages per layer (UX spec §8): an individual record page only where the source publishes one (USGS);
 // otherwise the dataset page, labelled as such. No third-party vessel trackers, no invented per-record URLs.
 const SRC_LINK = {
-  usgs: ['https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php', 'USGS real-time feeds (dataset)'],
+  usgs: ['https://earthquake.usgs.gov/earthquakes/feed/v1.0/', 'USGS real-time feeds (dataset)'],
   firms: ['https://firms.modaps.eosdis.nasa.gov/', 'NASA FIRMS (dataset — no page per detection)'],
   ships: ['https://aisstream.io/documentation', 'aisstream.io documentation (no page per vessel)'],
-  forest: ['https://data-api.globalforestwatch.org/dataset/gfw_integrated_alerts', 'GFW integrated alerts dataset (no page per alert)'],
+  forest: ['https://data-api.globalforestwatch.org/dataset/gfw_integrated_alerts', 'GFW Data API record for the integrated alerts dataset (JSON: licence, citation, versions; no page per alert)'],
   drifters: ['https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html', 'NOAA OSMC dataset (no page per buoy)'],
 };
 const srcLink = layer => `<a href="${SRC_LINK[layer][0]}" target="_blank" rel="noopener">${esc(SRC_LINK[layer][1])}</a>`;
@@ -1011,7 +1012,8 @@ const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $
 const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
 function pairNote(layer) {
   const e = $('p-' + layer); if (!e) return;
-  const why = unusableWhy(layer), show = !!why && why !== 'not read yet';
+  // 'off' is the layer's own switch, already stated on the card: it is not records being withheld (found 4 Nov 2026, live too)
+  const why = unusableWhy(layer), show = !!why && why !== 'not read yet' && why !== 'off';
   e.hidden = !show; if (show) e.innerHTML = `<b>Records withheld:</b> ${esc(why)}`;
 }
 function cards() {
