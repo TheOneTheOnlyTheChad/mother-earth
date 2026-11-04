@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611041900">
+<link rel="stylesheet" href="style.css?v=202611050900">
 </head>
 <body class="doc">
 <header class="top">
@@ -24,7 +24,7 @@
 <main>
   <p class="small"><a href="index.html">← World View</a></p>
   <nav class="toc" aria-label="Sections">
-    <a href="#report">Status report</a> · <a href="#sources">Sources &amp; attribution</a> · <a href="#measures">What each layer measures</a> · <a href="#windows">Windows &amp; cadence</a> · <a href="#dates">Observation vs retrieval</a> · <a href="#coverage">Coverage</a> · <a href="#comparisons">Comparisons</a> · <a href="#tiers">Classification</a> · <a href="#imagery">Imagery</a> · <a href="#daynight">Day/night overlay</a> · <a href="#search">Search</a> · <a href="#limits">Limitations</a>
+    <a href="#report">Status report</a> · <a href="#sources">Sources &amp; attribution</a> · <a href="#measures">What each layer measures</a> · <a href="#windows">Windows &amp; cadence</a> · <a href="#dates">Observation vs retrieval</a> · <a href="#coverage">Coverage</a> · <a href="#kept">What is kept</a> · <a href="#comparisons">Comparisons</a> · <a href="#tiers">Classification</a> · <a href="#imagery">Imagery</a> · <a href="#daynight">Day/night overlay</a> · <a href="#search">Search</a> · <a href="#limits">Limitations</a>
   </nav>
 
   <h2 id="report">Full status report</h2>
@@ -50,7 +50,20 @@
   <table id="t-coverage"><tr><th>Layer</th><th>Rule in force</th></tr></table>
 
   <h2 id="comparisons">Comparison methods and baseline dates</h2>
-  <p><b>Mother Earth's own baselines</b> accumulate from 30 Oct 2026 (hourly per-cell aggregates kept in the hub's database). No comparison of ours is shown yet; descriptive comparisons come in phase 3 and probabilistic highlights only after a held-out validation with a measured false-highlight rate. <b>Source-provided baselines</b> (NOAA's CO₂ weekly comparison, NSIDC's 1981–2010 sea-ice climatology) are shown now and labelled as the source's; where a subtraction is ours, it says so.</p>
+  <p><b>Mother Earth's own comparisons</b>: none shown yet (what is kept is listed under <a href="#kept">What Mother Earth keeps</a>); descriptive comparisons come in phase 3 and probabilistic highlights only after a held-out validation with a measured false-highlight rate. <b>Source-provided baselines</b> (NOAA's CO₂ weekly comparison, NSIDC's 1981–2010 sea-ice climatology) are shown now and labelled as the source's; where a subtraction is ours, it says so.</p>
+
+  <h2 id="kept">What Mother Earth keeps</h2>
+  <p>Mother Earth keeps a deliberate record of what it observes, starting from its first day. <b>None of it is shown on this site yet</b>: every reading on World View is the latest snapshot.</p>
+  <table id="t-kept"><tr><th>What</th><th>Layers</th><th>Kept</th></tr>
+    <tr><td>Hourly counts per layer and per 4° cell, with each hour's coverage and collection status</td><td>Earthquakes, fire detections (since 30 Oct 2026); ships (per cell since 1 Nov 2026)</td><td>no end date set</td></tr>
+    <tr><td>Every Kp value</td><td>Kp index (since 30 Oct 2026)</td><td>no end date set</td></tr>
+    <tr><td>One daily value, as NOAA publishes it (days NOAA omits are absent, not filled)</td><td>CO₂ (since 29 Oct 2026)</td><td>no end date set</td></tr>
+    <tr><td>Daily alert counts per cell, by confidence</td><td>Forest disturbance (since 1 Nov 2026)</td><td>no end date set</td></tr>
+    <tr><td>A log of every collector run and its outcome</td><td>all layers (since 30 Oct 2026)</td><td>no end date set</td></tr>
+    <tr><td>Raw source files, full snapshots and per-run cell files</td><td>most layers</td><td>2 days, then deleted by a storage rule (deletion can lag up to a day)</td></tr>
+    <tr><td>Current file only — no history</td><td>Drifting buoys, orbital objects, sea ice</td><td>replaced on each successful update</td></tr>
+  </table>
+  <p class="small">Read from the hub's database and storage rules on 4 Nov 2026. "No end date set" describes the current configuration; it is not a promise of permanent storage.</p>
   <table id="t-cmp"><tr><th>Layer</th><th>Comparison shown</th><th>Whose baseline</th></tr></table>
 
   <h2 id="tiers">Observation / analysis / model classification</h2>
@@ -115,7 +128,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611041900"></script>
+<script src="app.js?v=202611050900"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -136,8 +149,8 @@ function renderAll() {
   fill('t-windows', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].window), esc(R[l].cadence)])));
   fill('t-dates', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].observed || '–'), R[l].retrieved ? esc(R[l].retrieved.replace('T', ' ').slice(0, 19) + ' UTC (' + ago(R[l].retrieved) + ')') : '–', esc(rep.states[l])])));
   fill('t-coverage', LAYERS.map(l => row([esc(LABEL[l]), esc((rules.find(x => x.section === l && x.k === 'Coverage rule') || {}).v || R[l].coverage) + ' — ' + esc(R[l].coverage)])));
-  fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || 'none shown; Mother Earth\'s baseline accumulating since 30 Oct 2026')])));
-  fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Aircraft', 'observation — not shown'])]);
+  fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || ('none shown; ' + (ME.KEPT[l] || 'no history kept')))])));
+  fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Orbital objects', 'computed — positions calculated (SGP4) from published orbital elements; not observed (model-based method)']), row(['Day/night', 'computed — astronomical context, from the clock']), row(['Aircraft', 'observation — not shown'])]);
   $('p-imagery').textContent = (rules.find(x => x.section === 'imagery') || {}).v || '';
   $('limits-body').innerHTML = [
     `<p><b>Aircraft — not shown.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,

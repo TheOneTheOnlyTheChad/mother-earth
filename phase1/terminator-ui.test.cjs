@@ -129,13 +129,14 @@ function agreement(before, after, probes) {
   // ===================================================== A. default state, enable, acceptance pixels, picking
   {
     const { ctx, page, perr, shot } = await harness(browser);
-    ok('toggle lives in Explore and adds no card', await page.locator('#exp-body #tgl-night').count() === 1 && await page.locator('#card-explore .ovl').count() === 1);
+    // UX round 1 (4 Nov 2026): day/night moved from Explore to the Optional layers group; still not a card of its own
+    ok('toggle lives in the Optional layers group, not in Explore, and adds no card', await page.locator('#card-optional > .opt-night #tgl-night').count() === 1 && await page.locator('#card-explore #tgl-night').count() === 0 && await page.locator('.card:has(> #tgl-night)').count() === 0);
     ok('OFF on load, with no mesh', await page.evaluate(() => ME.nightState().on) === false && await page.evaluate(() => ME.nightState().hasMesh) === false);
     ok('legend line hidden while off', await page.locator('#night-legend').isHidden());
     ok('it is a switch, unchecked', await page.locator('#tgl-night').getAttribute('role') === 'switch' && await page.locator('#tgl-night').getAttribute('aria-checked') === 'false');
     ok('the short clarification is always visible', /Current sunlight geometry—not observation coverage\./.test(await page.locator('#night-note').innerText()));
     ok('the long explanation is behind a closed disclosure', await page.evaluate(() => !document.querySelector('#night-scope').open));
-    ok('the disclosure carries the FIRMS warning', /VIIRS detects thermal anomalies by day and by night/.test(await page.locator('#night-scope').innerText()));
+    ok('the disclosure carries the FIRMS warning', /VIIRS detects thermal anomalies by day and by night/.test(await page.locator('#night-scope').textContent()));
 
     await page.click('#exp-btn');
     const before = await shot();

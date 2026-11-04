@@ -5,7 +5,7 @@
   --quake:#ff5a3c; --fire:#ff9b2e; --plane:#7fd3ff; --ship:#5fe3c8; --space:#c58bff; --carbon:#9ad0a4; --ice:#bfe6ff; --forest:#6fd37a; --drift:#ffd86b;
   --ok:#b9ff6b; --warn:#ffd166; --bad:#ff5a3c;
   --display:"Barlow Condensed",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --col:300px; --header:56px; --gap:12px;
+  --col:284px; --header:56px; --gap:12px;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -39,22 +39,23 @@ body.world{height:100vh;height:100dvh;overflow:hidden;display:grid;grid-template
 .col.left{grid-column:1;grid-row:1} .centre{grid-column:2;grid-row:1} .col.right{grid-column:3;grid-row:1}
 .col{min-height:0;overflow:auto;padding:var(--gap);display:flex;flex-direction:column;gap:var(--gap);background:var(--panel);scrollbar-width:thin}
 .col.left{border-right:1px solid var(--line)} .col.right{border-left:1px solid var(--line)}
-.centre{position:relative;min-width:0;min-height:0}
+.centre{position:relative;min-width:0;min-height:0;display:flex;flex-direction:column}
+.gwrap{position:relative;flex:1 1 auto;min-height:0}
 #globe{position:absolute;inset:0}
 #globe canvas{display:block}
 .imgdate{position:absolute;left:12px;bottom:12px;font-size:11px;color:#c9d3e0;background:rgba(7,10,15,.7);padding:4px 8px;border:1px solid var(--line);pointer-events:none;max-width:calc(48% - 18px)}
-.legend{position:absolute;right:12px;bottom:12px;max-width:min(360px,calc(52% - 18px));font-size:11px;color:var(--dim);line-height:1.5;padding:8px 10px;border:1px solid var(--line);background:rgba(7,10,15,.7)}
+.legend{position:absolute;right:12px;bottom:12px;max-width:min(330px,calc(52% - 18px));font-size:11px;color:var(--dim);line-height:1.5;padding:8px 10px;border:1px solid var(--line);background:rgba(7,10,15,.7)}
 .legend b{color:var(--fg);font-weight:500}
 .sw{display:inline-block;width:18px;height:10px;vertical-align:-1px;margin-right:6px;border:1px solid #9fb3c8}
 .sw.partial{border-style:dashed;border-color:#7f8da3}
 .sw.unknown{border-style:dotted;border-color:#ff5a3c}
 .sw.forest{background:rgba(111,211,122,.35);border-color:rgba(111,211,122,.7)}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:0;margin-right:6px;background:var(--c)}
-.credits{position:absolute;left:12px;right:12px;top:12px;font-size:10.5px;color:#aab6c6;line-height:1.4;background:rgba(7,10,15,.55);padding:4px 8px;border:1px solid var(--line);pointer-events:auto}
+.credits{flex:none;font-size:10.5px;color:#aab6c6;line-height:1.4;background:var(--panel);padding:6px 12px;border-top:1px solid var(--line)}
 .credits a{color:#c9d3e0}
 
 /* ---------- cards */
-.card{border:1px solid var(--line);background:var(--card);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.card{border:1px solid var(--line);background:var(--card);padding:8px 10px;display:flex;flex-direction:column;gap:4px}
 .card.off{opacity:.5}
 .card .head{display:flex;align-items:center;gap:8px}
 .card .pip{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
@@ -62,7 +63,7 @@ body.world{height:100vh;height:100dvh;overflow:hidden;display:grid;grid-template
 .card .name{font:600 16px/1 var(--display);letter-spacing:.05em;text-transform:uppercase;flex:1}
 .card .state{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);text-align:right;white-space:nowrap}
 .card .state.ok{color:var(--ok)} .card .state.warn{color:var(--warn)} .card .state.bad{color:var(--bad)}
-.card .value{font:700 28px/1 var(--display);color:var(--c);font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.card .value{font:700 25px/1 var(--display);color:var(--c);font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
 .card .value small{font:600 12px var(--mono);color:var(--dim)}
 .card .value .lbl{font:500 12px var(--mono);color:var(--dim)}
 .card .meta{font-size:11px;color:var(--dim);line-height:1.45}
@@ -152,13 +153,13 @@ button.res.go .rt{color:var(--fg)}
 .card .more{font-size:11px}
 .card.toggle{cursor:pointer}
 .card.toggle:hover{border-color:var(--line-strong)}
-.card button.tgl{all:unset;display:flex;align-items:center;gap:8px;cursor:pointer;width:100%;min-height:44px}
+.card button.tgl{all:unset;display:flex;align-items:center;gap:8px;cursor:pointer;width:100%;min-height:36px}
 .card button.tgl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .card.locked{border-style:dashed} .card.locked .name{color:var(--dim)}
 .bar{height:4px;width:100%;background:rgba(197,139,255,.15);position:relative}
 .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--space)}
 .twin{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.twin>div .value{font-size:24px}
+.twin>div .value{font-size:22px}
 
 /* ---------- inspector */
 .inspector{position:absolute;top:12px;right:12px;width:340px;max-width:calc(100% - 24px);padding:14px 16px;border:1px solid var(--line-strong);background:var(--panel);display:none;max-height:calc(100% - 24px);overflow:auto;z-index:20}
@@ -197,11 +198,12 @@ body.doc{overflow:auto}
 
 /* ---------- tablet / small desktop: two rows, page scrolls, nothing overlaps the globe */
 @media (max-width:1100px){
+  .gwrap{display:contents}
   body.world{height:auto;overflow:auto;display:block}
   .stage{display:block}
   .centre{display:flex;flex-direction:column;height:auto;padding:0 12px}
   #globe{position:relative;height:56vh;min-height:320px;order:1}
-  .credits{position:static;order:0;margin:12px 0 8px}
+  .credits{order:4;margin:12px 0 8px;border:1px solid var(--line)}
   .imgdate{position:static;order:2;margin:8px 0 0;max-width:none}
   .legend{position:static;order:3;margin:8px 0 0;max-width:none}
   .inspector{top:60px}
@@ -237,7 +239,8 @@ body.doc{overflow:auto}
   .imgdate{position:absolute;bottom:auto;top:12px;left:12px;margin:0;max-width:40%;font-size:10.5px}
   .credits{display:none}
   .inspector{top:60px;left:12px;right:12px;width:auto;max-height:45%}
-  .card .cav{font-size:11.5px;color:rgba(127,141,163,.9)}   /* 10.5px measured too small on a 390 px phone (1 Nov 2026) */
+  .card .cav{font-size:11.5px;color:rgba(127,141,163,.9)}
+  .card button.tgl{min-height:44px}   /* touch target: 36 px is desktop-only (UX round 1) */   /* 10.5px measured too small on a 390 px phone (1 Nov 2026) */
   /* the sheet is the only scrolling surface: results extend it rather than scrolling inside it */
   .exp-body .hint,.rnotes,.exp-body details.scope>div,button.res .rw,button.res .rx{font-size:11.5px}
   .exp-body details.scope summary{font-size:12px;min-height:44px}
@@ -257,3 +260,30 @@ body.doc{overflow:auto}
 .orb-card .ovl-tgl[aria-busy="true"]{opacity:.6;cursor:progress}
 .orb-g{border-left:3px solid var(--oc,var(--space));padding-left:6px}
 .orb-sw{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--oc);margin:0 4px 0 2px;vertical-align:middle}
+
+/* ---------- UX round 1 (4 Nov 2026): evidence labels, compact details, optional-layers group, quieter legend */
+.evl{font-size:10.5px;color:var(--dim);line-height:1.35}
+.ev{display:inline-block;font:600 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 5px;margin-right:4px;border:1px solid currentColor;vertical-align:1px}
+.ev.obs{color:#9fd8ff}
+.ev.comp{color:#d7b6ff;border-style:dashed}   /* computed: dashed outline as well as colour, so the text label never depends on colour */
+details.cd>summary{font-size:10.5px;color:rgba(255,179,71,.85);cursor:pointer;list-style:none;min-height:24px;display:flex;align-items:center}
+details.cd>summary::-webkit-details-marker{display:none}
+details.cd>summary::before{content:"▸ ";color:var(--dim)}
+details.cd[open]>summary::before{content:"▾ "}
+details.cd>.cav{margin-top:2px}
+.card.optgroup{border-color:var(--line-strong);gap:8px}
+.optgroup .opt-head .name{font:600 16px/1 var(--display);letter-spacing:.05em;text-transform:uppercase}
+.optgroup>.card{border:0;border-top:1px dashed var(--line);background:none;padding:8px 0 0}
+.optgroup>.ovl{border-top:1px dashed var(--line);padding-top:8px;margin-top:0}
+.optgroup .ovl-h{display:flex;align-items:center;gap:6px}
+.optgroup .ovl-h .ev{font-size:9.5px;letter-spacing:.06em}
+.optgroup .orb-card .ovl-h{font:600 15px/1.2 var(--display);letter-spacing:.06em;color:var(--fg)}
+.optgroup .opt-night .ovl-h{font:600 15px/1.2 var(--display);letter-spacing:.06em;color:var(--fg)}
+.optgroup .opt-night .ovl-tgl .t{font-size:12.5px}
+.legend details.covkey>summary{cursor:pointer;color:rgba(255,179,71,.85);min-height:24px;display:flex;align-items:center}
+.legend details.covkey[open]>summary{margin-bottom:2px}
+.credits.m{display:none}
+@media (max-width:720px){.credits.m{display:block;border:1px solid var(--line);font-size:11px}}
+#t-kept td:first-child{white-space:normal;color:#c9d3e0}
+/* found 4 Nov 2026 (UX round 1, 360 px check): title + clock + menu ran 31 px past a 360 px screen on main too */
+@media (max-width:380px){.top{gap:8px;padding:0 10px}.top h1{font-size:17px}.top .clock{font-size:14px}.top .clock span{margin-left:3px}.menu>button{padding:0 10px}}
