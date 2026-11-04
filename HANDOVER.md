@@ -1,36 +1,38 @@
-# Mother Earth — handover to thread 12 (4 Nov 2026, end of thread 11)
+# Mother Earth — handover to thread 13 (4 Nov 2026, end of thread 12)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §5a testing), then this file, then `STATUS.md` (newest first). Not a fresh sandbox.
 
-**Access (Chad, 4 Nov):** Claude has full access to everything — GitHub (push), Cloudflare, Space-Track, the Mac's Mother Earth folder and `~/mother-earth`, the browser pane. Chad opens the browser pane as soon as the thread kicks off. He enters secrets himself; Claude never creates accounts.
+**Access (Chad, 4 Nov):** Claude has full access — GitHub (push), Cloudflare (dashboard session in the browser pane), Space-Track, the Mac's Mother Earth folder and `~/mother-earth`, the browser pane. Chad enters secrets himself; Claude never creates accounts. Every deploy, schedule change and push to main that changes the public page needs his explicit go. **Tell Chad up front whenever his screen must be on the Claude app** (standing preference, 4 Nov).
 
-## 0. State at the end of thread 11 (4 Nov ~06:00 UTC) — LIVE
-- **Page:** main `ab8abb8`, assets `?v=202611050900` — UX round 1 public (compact cards, Observed/Computed labels, Optional layers group, credits bar below the globe, inspector source links, "What Mother Earth keeps"). Details and evidence: STATUS top section.
-- **Hub 0.3.5** unchanged (sha256 `68fca7b4…`). Bindings, crons, retention unchanged.
-- **Ships:** Mac primary (launchd), cloud fallback on. Last checked Mac sample 18:22 UTC 3 Nov (3,437 vessels).
-- Branch `ux-round-1` = main (merged, can be deleted when convenient).
+## 0. State at the end of thread 12 (4 Nov ~12:45 UTC) — LIVE
+- **Page:** main `e49c8a2`, assets `?v=202611061400`. New since thread 11: NSIDC 2025 citation form; **Microplastic samples — dated** optional layer (public 12:28 UTC; badge "loaded" since ~12:40).
+- **Hub 0.4.0** (`7ef3747`, worker.js sha256 `f8335c3b…`). Bindings 16 incl. `PLASTIC_ENABLED=1`. Plastic job on the hourly tick when the last success is > 20 h old (≈ daily); first run 4 Nov 12:16 UTC: 1,145 rows, 647 reproduced / 11 possible date conflict / 1 not reproduced / 486 no original; 40 ms CPU, 8.4 s wall. Pinned Oceaneye original in R2 `ref/oceaneye-seanoe-94022.zip` (96,249 B, sha256 `89f1018b…`).
+- **NSIDC:** hub citation = NSIDC 2025 form, access date = actual fetch date; verified on the 09:07 run.
+- Ships: Mac primary + cloud fallback, unchanged. Retention unchanged.
+- Leftover remote branches `nsidc-page`, `plastic-rc`, `plastic-loaded` are merged; the session proxy refuses branch deletes — delete when convenient.
 
 ## 1. Next (Chad's calls first)
-0. **UX round 1 is CLOSED.** GPT reviewed the live site 4 Nov: no new blocking issue (verified globe room, Optional layers off in one group, drifters 1,302 → off without the warning, Explore contents, FIRMS inspector layout, `#kept` wording). He did not rerun suites or recheck mobile. His brief's stale sections (orbital unreleased, CelesTrak toggle live, hub 0.3.0) were reconciled in thread 11.
-1. **NSIDC citation in the hub** — `worker.js` carries the older form; NSIDC's required 2025 form is in REGISTER verbatim. One-line hub change + content-only deploy: Chad's go.
-2. **Ocean plastic research:** NCEI Global Marine Microplastics DB — inspect ONE measured surface-water export first: age, methods, units, reuse standing (licence fields were blank on the archive page), coverage. Dated samples labelled not live; buoy drift stays separate from any modelled transport; own toggle off on load.
-3. **Mobile pass** (agreed later): legend + imagery chip still cover the top of the globe on phones; real-phone check (Galaxy) still pending.
-4. Open decisions: attribution placement (REGISTER top note); sea-ice history table (none kept today); GFW human-readable source page (link is the Data API JSON record).
-5. Backlog unchanged: aircraft (522 + OpenSky feeder), FIRMS CPU attribution, CO₂ truncated-200 guard, physical long-sleep test, probe endpoints removal, Possible futures (research only — first subject to be chosen by Chad).
+1. **NCEI v2.2 check** (accession 0276422 page returned 503 on 4 Nov): GPT reports v2.2 published 4 Dec 2025 with methods (net 0.6 × 0.15 m, GPS before 2015 then flowmeter, 5 mm / 1 mm / 300 µm sieving). Read it; if it documents the 343 post-2021 rows or the size classes, update the Sources `#plastic` text and REGISTER.
+2. **Mobile pass** (agreed): legend + imagery chip cover the top of the globe on phones — now worse while plastic is on (its legend line is long). Real-phone check (Galaxy) still pending.
+3. Plastic follow-ups (research, no build without Chad): Law 2010 stays a reference candidate (6,135 vs paper's 6,136; pieces/km² conversion unestablished); 72-hour hypothetical drift experiment (OpenDrift/PlasticParcels + Copernicus currents) — needs Python + runtime measurement, not the Worker; AOMI / The Ocean Cleanup ADIS as later sources (AOMI asks to be contacted before publication).
+4. Open decisions unchanged: attribution placement (REGISTER top note); sea-ice history table; GFW human-readable source page.
+5. Backlog unchanged: aircraft (OpenSky feeder), FIRMS CPU attribution, CO₂ truncated-200 guard, physical long-sleep test, probe endpoints removal, Possible futures (research only).
 
-## 2. Measured / learned in thread 11
+## 2. Learned in thread 12
 | | |
 |---|---|
-| D1 size / rows | 2.6 MB; see STATUS 4 Nov for per-table first dates and counts |
-| Pane injection of a branch build | fetch `index.html`, `style.css`, `app.js` from `raw.githubusercontent.com/…/<commit>/`, swap the css/js links for blob URLs, add `<base href=".../mother-earth/">`, `document.write` it into a github.io tab — live hub data, branch layout, nothing published |
-| Source links checked in the pane | aisstream /documentation ✓ · USGS /earthquakes/feed/v1.0/ ✓ (geojson.php is the format doc) · FIRMS ✓ · OSMC per-buoy htmlTable query ✓ · GFW data-api dataset = JSON ✓ |
-| `.ovl[hidden]` | does NOT hide (class display:flex wins) — use `display:none` or a `[hidden]{display:none}` rule if ever needed |
+| Settings form after a code deploy | a Variables form opened BEFORE a code deploy saves onto the OLD code (version 44 rolled 0.4.0 → 0.3.6). Reload Settings first; check `/` after any settings change |
+| `node --check` | missed a duplicate function declaration in the ES module; load it: `node --input-type=module -e "await import('./phase1/worker.js')"` |
+| Session safety check | blocked one content-only deploy despite Chad's go; went through after his explicit re-confirmation. Don't route around it |
+| ArcGIS paging | `Ocean_Surface_Microplastics_(PS)` maxRecordCount 1,000 (`Marine_Microplastics_WGS84` 2,000); dates stored as US local midnight (05:00/06:00 UTC) |
+| Mac folder writes | `mv` replace = delete (blocked). Sync with `curl -fsS raw…/<commit>/<file> -o $HOME/me.tmp && cat $HOME/me.tmp > <file>` via device_bash (the Mac VM reaches raw.githubusercontent.com) |
+| KEYS.md | line 8 = ADMIN_KEY (format `| ADMIN_KEY | <key> | …`) |
+| Pane fetches | ArcGIS REST and the NERC vocab server are CORS-open; NCEI pages slow/503 during migration; seanoe.org and ncei.noaa.gov granted in the pane |
+| Shallow clone refspec | was main-only (hook couldn't see branches) — set `+refs/heads/*:refs/remotes/origin/*` |
 
 ## 3. Where things are
 | | |
 |---|---|
-| Page | main `ab8abb8`, `?v=202611050900` |
-| Hub | 0.3.5 |
-| New tests | `phase1/ux-round1.test.cjs` (34; hub routed to 404; structure only) · drifters-ui +1 (off ≠ withheld) · terminator-ui relocation assertion |
-| Screenshots | before/after sets were sent in thread 11 chat (container `/home/claude/ux/`, gone with the container) |
-| Test setup in a new container | as thread 10 (`/home/claude/spike` npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine; `node phase1/orbital-fixture.build.mjs`); start the local server with the Bash tool's **run_in_background** (a `nohup … &` server dies between turns) |
+| Plastic research | `reviews/2026-11-04-ocean-plastic-export.md` (§1–10), `reviews/2026-11-04-plastic-experience-proposal.md` |
+| Plastic tests | `node phase1/plastic-hub.test.mjs` (11) · `node phase1/plastic-ui.test.cjs` (29; needs the 8899 server + /home/claude/spike globe.gl 2.45.0) |
+| Test setup, new container | `/home/claude/spike`: `npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine`; `mkdir -p /home/claude/fixtures && node phase1/orbital-fixture.build.mjs`; server via Bash `run_in_background` |

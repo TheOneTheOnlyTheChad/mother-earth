@@ -1,5 +1,9 @@
 # Mother Earth — status (4 Nov 2026 — thread 12)
 
+## 4 Nov ~12:45 UTC — thread 12 close. Badge "loaded" live; handover written.
+- GPT reviewed the live plastic layer (4 Nov): all checks passed (off on load, wording, reproduced 31 Aug 2011, conflict 6 Apr 2014 Marseille, not reproduced 1 Aug 2019 Norway, zero without original 11 Apr 2023, cell 33_46 = 100 entries, Sources). One correction adopted: plastic badge **"loaded"** instead of "current" (retrieval freshness beside old samples read as current observations). main `e49c8a2`, `?v=202611061400`; plastic-ui 29/29 (+ badge assertion), drifters-ui 25, ux-round1 34; public check: plastic "loaded", earthquakes "current".
+- **Next:** HANDOVER.md §1.
+
 ## 4 Nov 12:30 UTC — **MICROPLASTIC SAMPLES PUBLIC.** main `8330a35` (rebased `plastic-rc`, page files byte-identical to the tested RC `c70c9d6`), assets `?v=202611061000`, Pages deploy success 12:28 UTC. Chad's go: "i think we deploy".
 - **Public smoke (pane, visible):** served `?v=202611061000`; off on load, 0 plastic requests; on → 2 requests, 1,145 paired (1,070 markers + 75 rings), 277 outline cells; card line present; off → all cleared, other layers identical (18,868 points before and after). Sources: `#plastic` section, counts, kept row, tier row, contents link.
 - **Next:** GPT reviews the live layer. Then: NCEI v2.2 check (503 today); mobile pass (legend length now worse on phones while plastic is on).
