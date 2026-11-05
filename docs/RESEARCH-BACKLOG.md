@@ -14,7 +14,7 @@ Tiers are GPT's recommended order (5 Nov 2026), not approvals. "Gate" = the firs
 
 | ID | Candidate | Source | Tier | Gate status (5 Nov) | Next step |
 |---|---|---|---|---|---|
-| R2 | Reported fireballs | NASA/JPL CNEOS | **1 — first** | **Partly through** — GPT retrieved the full catalogue (1,074 events, 94.6 KB), units + reuse read; `vel` field discrepancy open | Claude re-checks independently; lightcurve sample; revision matching |
+| R2 | Reported fireballs | NASA/JPL CNEOS | **1 — first** | **Gate 1 done for catalogue + one lightcurve** — Claude re-checked GPT independently (identical response), `vel` characterised, lightcurve sample parsed (5 Nov, §C) | Chad's call: revision matching research, or stop here |
 | R3 | Earth rotation / polar motion | USNO / IERS | **1 — first** | Not started | Sample `finals2000A`; flags, blanks, uncertainties |
 | R4 | Argo ocean profiles | Argo GDAC | **1 — first** | Not started | One profile sample; T/S + QC flags; payload |
 | R5 | Coral heat stress (DHW) | NOAA Coral Reef Watch | 2 — next | Not started | Product + derived-label check |
@@ -94,13 +94,35 @@ Public API, `vel-comp=true`. Response **94,649 bytes**, API version **1.2**, **1
 - Candidate layer: **"Reported fireballs"** — dated markers, energy, altitude, calculated speed where available; an accessible list for the unlocated records.
 - Never: empty cells as zero events, landing locations, historical reports shown as live falling objects, catalogue counts as true event rates, every event as an explosion or ground impact.
 
-### B. Outstanding — lightcurves (offering verified, no file retrieved or validated)
-CNEOS advertises raw numerical `.txt` lightcurves for most events. Next gate:
-1. Retrieve one example: columns, units, time reference, sampling.
-2. Calibration, uncertainty and missing-data conventions.
-3. Coverage, file sizes, reliable links to catalogue events.
-4. Reuse/access terms for these files.
-5. Version differences — CNEOS warns lightcurve reports can carry revisions not yet in the main catalogue.
+### B. Lightcurves — superseded by §C (one file retrieved and validated 5 Nov)
+
+### C. Claude's independent re-check — 5 Nov 2026, ~13:11 UTC (research only; browser pane, read-only)
+Two catalogue requests in total, one at a time (`fireball.api?vel-comp=true`), plus the lightcurve index and one `.txt`. Nothing stored outside this note; no hub, schedule, D1 or Cloudflare change.
+
+**1. GPT's catalogue findings — confirmed.** Response byte-identical in size to GPT's (**94,649 B**), sha256 `8b1561636e1e3c59…59bbd` on both requests; signature version **1.2** (= doc version 1.2, July 2025); `count` arrives as the **string** `"1074"`; 1,074 events, 15 Apr 1988 – 4 Oct 2026, sorted newest first, no duplicate timestamps, all in `YYYY-MM-DD hh:mm:ss`. Field counts match GPT exactly: date/energy/impact-e 1,074 · location 888 (all four fields together or none — 0 partial) · alt 602 · vel + vx/vy/vz 363 (always all four together). Values are strings or `null`; **no empty strings**. Genuine zeros exist and must stay zeros, not missing: lat `0.0` once, vx once, vz once. Response has **no** `Last-Modified` or `Cache-Control`.
+- Field order in the response (`date, energy, impact-e, lat, lat-dir, lon, lon-dir, alt, vel, vx, vy, vz`) differs from the doc's sample — confirms GPT's rule: read positions from `fields`, never fixed indexes.
+- **Precision varies by era**: components appear as `18`, `6.30`, `14.8`. Integer-rounded components (e.g. 2009, 2010) carry up to ±0.5 km/s each.
+
+**2. The `vel` field — characterised (cause still unverified).**
+- The API doc's change log (v1.1, Mar 2024) says the derived velocity magnitude was **removed** (with `vel-min`, `vel-max`, `req-vel`) — yet the field is still returned, and `sort` still lists `"vel"`. CNEOS operational notes (23 Jun 2025) separately removed "Total Velocity" from the web table and say to compute it from the components. So `vel` is a field the provider's own documentation says no longer exists.
+- Measured over all 363 records: **354 agree** with the component magnitude to rounding (|vel − |v|| ≤ 0.05 km/s; median −0.002) → for these, `vel` is the rounded magnitude. **9 disagree, all with `vel` smaller** (by 0.45 to 18.4 km/s): 2026-10-04 (13.8 vs 15.24), 2026-08-14 (12.2 vs 22.90), 2023-06-21 (16.5 vs 18.06), 2018-12-18 (13.6 vs 31.97), 2014-08-23, 2014-06-28, 2014-05-16, 2010-12-25 (18.1 vs 18.55), 2009-10-08 (19.2 vs 22.09). The 2010 and 2009 cases have integer components, so rounding could explain them; the other seven it cannot.
+- Not established: which value is right for the 7, or why. Plausible but **unverified**: `vel` is a stale stored value not updated when components were revised (two are the newest events). **Rule unchanged and now evidenced:** never use `vel`; show only a magnitude **calculated from supplied components**, labelled so, with the components' precision carried.
+
+**3. Lightcurve collection — index measured.** `cneos.jpl.nasa.gov/fireballs/lc/lc_files.json` (186 KB, `Last-Modified` 8 Jan 2026): **969 events**, 969 PDFs, **818 `.txt`** (first `.txt` 22 Mar 1998); newest **3 Jun 2024**, so the 78 catalogue events after that have no lightcurve, and 27 earlier events have none either. File names are exactly `YYYY.DOY.hhmmss` of peak brightness (969/969). **All 969 join to a catalogue event by exact peak time; 0 differences** in impact energy, location or altitude — consistent with CNEOS's statement that the table columns come from the current catalogue, not from the newer reports.
+
+**4. One lightcurve validated — `2023.172.193912.txt`** (21 Jun 2023 19:39:12 UT, 12.4°N 62.8°E; one of the 9 `vel` mismatches). 32,088 B, `text/plain`.
+- Format: a prose header (location, peak intensity **4.77e+10 W/sr**, total radiated energy **5.47e+11 J, 6000 K blackbody model**), then a Python-style list `(time, intensity)`; stated columns: time, intensity (W/sr). Not CSV — needs its own parser.
+- **957 points**, t = −0.999 to 2.498 s. Peak at **t = 0.891 s**, so t = 0 is **not** peak brightness; the header time is whole seconds only. The time reference is **not stated** in the file (likely the header second — unverified).
+- Sampling **irregular**: steps 3 ms (550), 4 ms (326), 6–7 ms (77), 10 ms (2); final row **duplicated** (one 0-step).
+- **230 negative intensities** (24 %) — background-subtracted noise; must not be clipped or treated as missing without a stated rule.
+- Header degree sign is a **non-UTF-8 byte** (renders as �) — decode as Latin-1/Windows-1252, verify.
+- No velocity, altitude, uncertainty, calibration or sensor ID in the file.
+- **Cross-check (our calculation, labelled):** 4π × ∫I dt = **5.42e+11 J** vs stated 5.47e+11 (−1 %) and catalogue `energy` 54.7 × 10¹⁰ J — the file is consistent with the catalogue's radiated energy under an isotropic assumption.
+
+**5. Reuse.** SSD FAQ, read 5 Nov: data on "this site" are public domain, no permission needed, no endorsement implied. That statement is on **ssd.jpl.nasa.gov**; the lightcurve files are on **cneos.jpl.nasa.gov** — **no CNEOS-specific reuse statement found yet** (not searched exhaustively). The lightcurve page repeats: U.S. Government sensor data, released for public use, not verified or reanalysed by CNEOS, revised when updates arrive.
+- Access note: the API answered a request from the `cneos.jpl.nasa.gov` origin but not from a third-party page — consistent with the stated no-embedding policy; a hub-cached copy stays the only route considered.
+
+**Still open (research, no build):** revision matching (no event ID or revision number in either source; peak time is the only join key and itself revisable); the 7 unexplained `vel` cases (only by asking CNEOS — **contact needs Chad's go**); lightcurve time reference; CNEOS reuse wording for the lightcurve files.
 
 **GLM bolides** (GOES Geostationary Lightning Mapper) are a separate potential source: own assessment, including overlap and duplicate handling.
 
