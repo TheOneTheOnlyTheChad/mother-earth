@@ -1,46 +1,51 @@
-# Mother Earth — handover (updated 5 Nov 2026, thread 14; thread-13 sections below still stand)
+# Mother Earth — handover to thread 15 (5 Nov 2026, end of thread 14)
 
-Read `START-HERE.md` (§2 constitution · §4 deploy · §5a testing, incl. the new clean-session method), then this file, then `STATUS.md` (newest first). Not a fresh sandbox.
+Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 schema changes · §5a testing), then this file, then `STATUS.md` (newest first). **Not a fresh sandbox, and do not repeat the reviews below: they are done.**
 
-**Access (Chad, 4 Nov):** "you have full access — GitHub (push), Cloudflare, Space-Track, my Mac's Mother Earth folder and ~/mother-earth, browser pane. I enter secrets myself; you never create accounts. Tell me up front whenever my screen must be on the app." **Every deploy, schedule change and push to main that changes the public page needs his explicit go.** Not Overwatch: presentation lessons only. No surveillance, ever.
+**Access (Chad, 4 Nov):** "you have full access — GitHub (push), Cloudflare, Space-Track, my Mac's Mother Earth folder and ~/mother-earth, browser pane. I enter secrets myself; you never create accounts. Tell me up front whenever my screen must be on the app." **Every deploy, schedule or variable change, D1 schema change and push to main that changes the public page needs Chad's explicit go.** GPT reviews; **the approvals are Chad's**. Not Overwatch: presentation lessons only. No surveillance, ever.
 
-## 0. State at the end of thread 13 (4 Nov ~15:20 UTC) — LIVE
-- **Page:** main `b04a930` (+ docs `5460030`+), assets `?v=202611071000`. New this thread: **mobile pass** (public ~15:15 UTC, Chad's go "you can go"):
-  - Phones ≤ 720 px: legend behind **Key · N layers** (44 px, aria-expanded, Enter/Space/Escape). N = layers actually drawn (loading, failed or switched-off layers never count; day/night once; each orbital category once, when drawn).
-  - Persistent strip while drawn: "Dated samples · 2011–2024" · "Day/night · computed · HH:MM:SS UTC" · "Orbital · computed · enlarged, not to scale". Imagery chip one line "Imagery DD Mon · not live"; the full sentence with year opens at the top of the Key.
-  - Key and inspector close each other; both stop above the Readings sheet (inspector bound was a pre-existing 37 px overlap of the Readings button).
-  - Landscape phones (780–932 px) and desktop unchanged (tablet layout, full legend).
-- **Hub 0.4.0** unchanged (`7ef3747`), `PLASTIC_ENABLED=1`, plastic daily. Ships Mac primary + cloud fallback, unchanged. Retention unchanged.
-- **REGISTER (Oceaneye/NCEI):** v2.2 claim withdrawn (GPT); methods are "documented in older NCEI accession metadata (v1.1, 26 Jan 2023, 802 efforts); live availability and applicability to later additions unconfirmed". NCEI pages all 503 on 4 Nov. SEANOE 94022 = 86630's file (net 0.6×0.15 m, 0.33 mm mesh confirmed).
-- Plastic badge **LOADED** confirmed live; GPT settled it.
-- Leftover merged remote branches (`mobile-pass`, `nsidc-page`, `plastic-rc`, `plastic-loaded`): proxy refuses deletes — Chad can delete when convenient.
+## 0. State at the end of thread 14 (5 Nov 09:41 UTC) — LIVE
+| | State |
+|---|---|
+| **Page** | main = **`8c8633d`**, assets **`?v=202611111000`**, published 09:39 UTC (served hashes checked: index `bdc44df5d2e6`, app `fc2133f7f088`, style `e10935d03acb`, sources `dd2e63e59484`). New: **place view** ("Everything here" from a cell's details or any globe point; `/place` per cell; optional layers load for the panel only); **"What Mother Earth keeps" follows the hub** (`ME.historyLine`, `keptState()` in sources.html); Sources `fill()` refresh fix; desktop-overflow fix (`3a2fcb2`, published earlier the same day). |
+| **Hub** | **0.5.1** (`8c8633d`, worker.js sha256 `1f34554b2e53…`) since 09:28 UTC; 16 bindings; **`HISTORY_ENABLED` absent**. New endpoints/fields: `GET /place/g4/<row>_<col>[?layers=drifters,plastic]`; `GET /` and `/status` → `history: {collecting, retained:{exists, first, last, layers}}`; `/status` → `archive_health {pending, gaps, last_completed, recent_failures, retry_window}`. FIRMS missing FRP is `null` (was 0). Snapshots carry R2 metadata `retrieved_at`. |
+| **D1** | **9 history tables + 8 indexes** created 09:28 UTC from `8c8633d` (live schema = commit, 9/9 via `PRAGMA table_info`): `archive_versions`, `archive_checkpoints`, `quake_revisions`, `fires_daily`, `drifter_fixes`, `seaice_daily`, `orbital_population`, `history_activity`, `archive_gaps`. **All empty** (09:41 UTC). |
+| **History** | **OFF.** Hub reports `collecting:false, retained:{exists:false}`; `archive_health` empty; 0 history rows; 0 R2 `archive/` objects; no `state/history-*` (that design was removed). |
+| **Branch** | `place-view` (= main + docs); the reviews are at `reviews/2026-11-05-place-view-candidate.md` (§9 deploy verification, §11 public checks, §12 who checked what) and `…-place-view-and-history.md` (proposal rev 5; §5 = what the code keeps). |
 
-## 1. Next (Chad's calls first)
-0. **Thread 14 (5 Nov):** desktop overflow fixed and public (`3a2fcb2`, `?v=202611081000`) — see STATUS. New small item: **orbital-browser 103/2 on main** (stale/beyond-GEO vs reference for payload-alone and debris-alone; likely time-dependent fixture) — investigate the test, not the page.
-1. **Real-phone check** of the mobile pass (Galaxy) — only emulation so far (GPT checked the public site in a browser on 5 Nov). Watch: plastic takes > 20 s to load on the live hub, so the Key count and strip appear late.
-2. ~~Desktop 1280 px 8 px horizontal overflow~~ — **fixed 5 Nov** (it was fonts-dependent; real bug at 1,101–1,186 px).
-3. **NCEI recheck** when ncei.noaa.gov answers (accession 0276422; does any later revision document the 343 post-2021 rows / size classes?). Research only; any schedule needs Chad's go.
-4. Plastic follow-ups stay research only: Law 2010 reference candidate; 72-h hypothetical drift (OpenDrift/PlasticParcels, Python, not the Worker); AOMI / ADIS later (AOMI asks to be contacted before publication).
-5. Open decisions unchanged: attribution placement (REGISTER top note); sea-ice history table; GFW human-readable source page.
-6. Backlog unchanged: aircraft (OpenSky feeder), FIRMS CPU attribution, CO₂ truncated-200 guard, physical long-sleep test, probe endpoints removal, Possible futures (research only). Small-phone density: with all three orbital categories on, a 360 px globe is very busy (pre-existing, not this pass).
+## 1. Next
+1. **History trial: awaiting Chad's separate go (not given).** When given:
+   - Reload the Settings page **after** any code deploy before using the form (START-HERE §4). Add `HISTORY_ENABLED=1`, plain text, Production. Verify 16 → 17 bindings and that `/` still says 0.5.1.
+   - Watch the next usgs (every 5 min), firms (every 15 min) and hourly (:07) runs. Expect: `quake_revisions` rows; `history_activity` rows for firms and usgs; `drifter_fixes`; version rows for co2/seaice/orbital/plastic as their jobs run; `seaice_daily` at 03/09/15/21 UTC; `orbital_population` at :41 in odd hours.
+   - The hub report should flip to `collecting:true, retained:{exists:true…}`, and the public Sources page with it ("collecting; retained since …").
+   - Read the CPU of each tick from the invocation log (START-HERE §4a), plus D1 rows written and R2 `archive/` objects.
+   - Turning it off = remove the variable. Retained history is **not** deleted, and the page then says "retained … collection off — not deleted".
+2. **Then one full UTC day with history on,** including the **first midnight checkpoint**. A day is due at **00:30 UTC** (end of day + 30 min grace) and runs on the next firms/usgs tick.
+   - Verify `archive_checkpoints` for firms and usgs (cutoff = the day's last snapshot by full `retrieved_at`), `fires_daily` rows (FRP null where none), `archive_health` (no pending after the tick, no gaps).
+   - Measure the open cost item: **drifter_fixes rows/day** (1,300 to 31,000 measured range; OSMC delivers in batches) and bytes. Record everything in STATUS.
+3. **orbital-browser: 2 pre-existing failures** (same on main): "B payload alone" and "B debris alone: stale and beyond-GEO counts match the reference". It passed 105/105 in thread 9; likely a time-dependent fixture (`phase1/orbital-fixture.build.mjs` built today versus the reference instant). Investigate the test, not the page.
+4. Small cleanup: the unreachable `'no history kept'` fallback text in `sources.html` (t-cmp) and `index.html` (inspector Comparison rows). Every layer has a kept line, so it never displays.
+5. Carried over: real-phone check of the mobile pass (Galaxy); NCEI accession recheck; plastic research follow-ups; attribution placement; Possible futures (research only).
 
-## 2. Learned in thread 13
+## 2. Learned in thread 14
 | | |
 |---|---|
-| Disc coverage measure | **camera-based** radius R = (H/2)/tan(25°)/sqrt((1+alt)²−1), alt from `ME.cameraAt()`; measure the persist strip by its visible children, not its transparent container. **Supersedes the earlier 0.45×min(w,h) estimates** (they were too generous). |
-| Coverage results | everything on, Readings open: 360×640 20.6 % (reported, text kept at 10.5 px; 0.4 % with sheet down) · 360×780 8.5 % · 390×844 5.4 % · 430×932 2.3 %; at load 0 %. Before: 58–70 %. |
-| Clean RC session | fresh pane tab on a plain-text github.io file (`app.js?clean-rcN`) so no page scripts ever run; fetch RC files from raw.githubusercontent at the commit, check sha256, swap in blob URLs + `<base href>`, `document.write`. Overwriting a live page left old timers painting (false "off" badge, duplicate-Three.js warning). |
-| Pane hidden | orbital build waits on requestAnimationFrame → stalls when the pane is hidden. Ask Chad for the pane before orbital or screenshot checks. |
-| main worktree | `main` is checked out in `/home/claude/me-main`; merge/push main from there (`git checkout main` in the clone fails). |
-| github.io from the container | blocked (403); verify deployed files' sha256 from the pane with `fetch(...,{cache:'no-store'})` + `crypto.subtle.digest`. `gh api …/pages/builds` is also refused through the proxy. |
-| Comments in index.html | a `//` comment on a line joined with code swallowed a `}` and broke the page — parse-check index.html scripts after edits. |
-| Tests in the container | GIBS must be fulfilled with a PNG (pngjs) or day/night refuses to draw; wait for orbital `aria-busy` to clear between clicks. |
+| Fake clocks in tests | the hub stamps times with `new Date()`; faking only `Date.now` makes a test pass only on the day it was written (plastic-hub only passed on 4 Nov). Fake the no-argument `Date` constructor too (see history-hub / plastic-hub). |
+| Mutable state + overlap | a single R2 state pointer failed four ways (failed write, out-of-order runs, overlapping runs, finished work later called lost). Replaced with append-only D1 facts + a completion marker checked first and written last, and inputs chosen afresh by full timestamp. Apply the same pattern to any future recoverable job. |
+| `+''` is 0 | a missing CSV value parsed with `+x` becomes 0; FIRMS FRP was published as 0 MW. Parse empties as `null`. |
+| SQLite MIN+MAX | one query with both MIN and MAX scans the whole index; two single lookups are index searches. Check `EXPLAIN QUERY PLAN` (node:sqlite) for any query on a growing table. |
+| `insertAdjacentHTML('beforeend', '<tr>…')` on a `<table>` | the rows land in a new `<tbody>`, so `tr:not(:first-child)` leaves one stale row per refresh. Remove `[...t.querySelectorAll('tr')].slice(1)`. |
+| `data-layer` | already the page's toggle attribute; new buttons must not reuse it (the place view uses `data-place-layer`). |
+| Fonts in the container | Google Fonts are blocked, so container width measurements are the **fallback-font** case; use `@fontsource` (spike) for the real faces. |
+| Hidden pane | `resize_window` to 390 gave a 588 px page while the pane was hidden; ask Chad for the app in front for an exact phone-size visual check. |
+| D1 from the dashboard | `POST /api/v4/accounts/<acct>/d1/database/<id>/query` with `x-atok` runs one statement (database id from the Worker settings' `DB` binding); see START-HERE §4d. |
 
 ## 3. Where things are
 | | |
 |---|---|
-| Mobile tests | `node phase1/mobile-pass.test.cjs` (130; `MODE=before` for measurements against main; `SHOTS=<dir>` saves screenshots). Needs 8899 server + /home/claude/spike + fixtures |
-| Comparison shots | sent to Chad in thread 13 (cmp-360/390/390b/land, live-360-all, live-360-key, live-844-inspector) |
-| Plastic research | `reviews/2026-11-04-ocean-plastic-export.md`, `reviews/2026-11-04-plastic-experience-proposal.md` |
-| Plastic tests | `node phase1/plastic-hub.test.mjs` (11) · `node phase1/plastic-ui.test.cjs` (29) |
-| Test setup, new container | `/home/claude/spike`: `npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine @fontsource/ibm-plex-mono@5 @fontsource/barlow-condensed@5` (fontsource = real webfonts for desktop-overflow; Google Fonts is blocked in the container, so any width measurement without them is the fallback case); `mkdir -p /home/claude/fixtures && node phase1/orbital-fixture.build.mjs`; server via Bash `run_in_background` |
+| History + place hub tests | `node --no-warnings phase1/history-hub.test.mjs` (27; real SQLite via `node:sqlite` + `schema.sql`) |
+| Place UI | `node --no-warnings phase1/place-ui.test.cjs` (30; the page's `/place` answered by the real `worker.js`) · `node phase1/place-rows.test.mjs` (7) |
+| Retention wording | `node --no-warnings phase1/kept-ui.test.cjs` (19; off/on/off-after-trial/unreadable + transitions; table-growth check) |
+| Desktop overflow | `node phase1/desktop-overflow.test.cjs` (112; needs `@fontsource/ibm-plex-mono@5` + `@fontsource/barlow-condensed@5` in /home/claude/spike) |
+| Test setup, new container | `/home/claude/spike`: `npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine @fontsource/ibm-plex-mono@5 @fontsource/barlow-condensed@5`; `mkdir -p /home/claude/fixtures && node phase1/orbital-fixture.build.mjs`; static server `python3 -m http.server 8899 --bind 127.0.0.1` via Bash `run_in_background` (with a long `timeout`, or it stops after 30 min) |
+| Reviews | `reviews/2026-11-05-landscape-comparison.md` (rev 2) · `…-place-view-and-history.md` (rev 5) · `…-place-view-candidate.md` (§1–§12) |

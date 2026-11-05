@@ -1,8 +1,13 @@
 # Mother Earth — Place view and what we keep from now on (proposal rev 5, 5 Nov 2026)
 
-Prepared by Claude for Chad and GPT (thread 14). **A proposal for decision. Nothing here is built, deployed or scheduled.** Every decision in §7 is Chad's.
+> **State as of 5 Nov 2026 09:41 UTC (end of thread 14)**
+> - **Deployed:** hub **0.5.1** (`8c8633d`, 09:28 UTC) with `HISTORY_ENABLED` **absent**. The **9 history tables + 8 indexes** were created in D1 at 09:28 UTC and are **empty**. The page release (place view + hub-driven "What Mother Earth keeps") is **published**: main = `8c8633d`, assets `?v=202611111000`, served 09:39 UTC.
+> - **Pending:** the history trial (`HISTORY_ENABLED=1`) needs **Chad's separate go**. It is followed by one full UTC-day measurement including the first midnight checkpoint.
+> - Approvals: every deploy, table creation and publish in this work was **Chad's go**, given after GPT's reviews.
 
-**Rev 5 (5 Nov):** checkpoint design made stateless after GPT's re-check of `482ffb0` (four probes); history reported as two facts (collecting now / retained); public wording split accordingly — candidate report §8. **Rev 4 (5 Nov):** §5 reconciled with the implemented behaviour after GPT's independent review of the branch (three defects fixed — see the candidate report §7). **Rev 3 (5 Nov, GPT's go to build on a branch):** four wording details adopted (§10), and the build's deviations from rev 2 recorded (§11). Candidate results: `reviews/2026-11-05-place-view-candidate.md`.
+Prepared by Claude for Chad and GPT (thread 14). *Written as a proposal; §5 (rev 4–5) describes what is now deployed, with history collection off. Every decision is Chad's.*
+
+**Rev 5 (5 Nov):** checkpoint design made stateless after GPT's re-check of `482ffb0` (four probes); history reported as two facts (collecting now / retained); public wording split accordingly — candidate report §8. **Rev 4 (5 Nov):** §5 reconciled with the implemented behaviour after GPT's independent review of the branch (three defects fixed — see the candidate report §7). **Rev 3 (5 Nov, Chad's go to build on a branch, after GPT's review):** four wording details adopted (§10), and the build's deviations from rev 2 recorded (§11). Candidate results: `reviews/2026-11-05-place-view-candidate.md`.
 
 **Rev 2** takes GPT's six corrections (5 Nov), all adopted. Changes are listed in §9. The biggest: the archive promise is now what the implementation actually delivers, defined per layer. Collection evidence is kept apart from coverage. The grid is a reference, not the definition of a place. The place view goes first, on data we already hold. Cost is stated as meters to measure, not a conclusion.
 
