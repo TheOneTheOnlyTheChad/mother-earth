@@ -6,6 +6,8 @@
 - **D1 at 11:10:** quake_revisions 40 (30 on the first run; later runs write only new quakes and revisions — e.g. us7000tw7b automatic → reviewed); history_activity 2 (firms + usgs for 5 Nov); drifter_fixes **1,304** (first hourly batch, 11:08); archive_versions 1 (co2 "first", 3,284 B gz in R2 `archive/versions/co2/…`). checkpoints, fires_daily, seaice_daily, orbital_population, archive_gaps 0 — none due yet.
 - Hub report: retained since 10:25:08 UTC; `archive_health` pending/gaps/failures empty.
 - **11:41 orbital tick (forest + orbital share it):** 184 ms CPU / 72.4 s wall, ok (3 Nov reference 173 ms, history off). orbital_population 1 row (32,584 objects: payload 19,675 · rocket body 2,207 · debris 10,163 · unknown type 539; elements sha `3bfcf743…`) + archive_versions orbital "first" (1,220 B). usgs ticks 11–14 ms.
+- **12:07 hourly tick:** 84 ms / 17.1 s, ok. co2 unchanged → no new version (same row, `retrievals: 2`). drifter_fixes **+1,187** (1,304 buoys reported; only new buoy-fix pairs are written) → 2,491 total. firms 12:00 126 ms; usgs 9 ms; forest 12:11 28 ms. archive_health still empty. **Early drifter rate ≈ 1,200 rows/hour ⇒ up to ~29,000/day if it holds** (top of the 1,300–31,000 range); full-day figure at the midnight read.
+- **Plastic:** the daily job last ran 09:07 UTC (before history was on), so its first version is due with the next run, ~05:07–06:07 UTC 6 Nov.
 - **Still to see:** plastic version (daily, last success > 20 h ≈ 12:07); seaice_daily at 15:07; **first midnight checkpoint 00:30 UTC 6 Nov** (firms + usgs: archive_checkpoints, fires_daily); **drifter_fixes rows/day + bytes** (open cost item) over the full UTC day.
 - To stop: remove the variable (Chad's click). Retained history is not deleted.
 
