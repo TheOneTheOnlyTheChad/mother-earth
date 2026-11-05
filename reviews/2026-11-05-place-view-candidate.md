@@ -66,7 +66,13 @@ Prepared by Claude for Chad and GPT (thread 14). **Branch `place-view` only.** N
 - an absent collection record was printed as "0 of 24 h" (now "unknown");
 - the forest source's zero now says "source-reported zero".
 
-**Not yet done:** a visual live check of the panel on the globe (needs Chad at the screen), and the collection block against the live D1 (needs the deploy).
+**Live RC check, clean session (pane, 06:33–06:40 UTC, app in front):** the branch page files and `worker.js` (commit `928c9e0`; sha256 index `5abc1a9bc973`, app `71c88df49a83`, style `e10935d03acb`, worker `f3c73447c5b6`) ran against the live hub. Only `/place` was answered by the branch hub code in the page, reading the same public files; the database was stubbed.
+- The page loaded live (8,408 points; quakes, fires and ships paired).
+- A real click on the North Sea opened the fires cell inspector, which now carries the **"Everything we hold for this cell, all layers"** link. That link opened the panel for 35_46: ships 888, fires 31, quakes "not a statement that none occurred", forest "not covered", buoys and plastic "layer off".
+- **Load** for plastic made one request. 3 dated samples were listed, each "check: reproduced". The **globe was unchanged** (8,408 points, 0 plastic markers or cells) and the plastic toggle stayed off (`aria-pressed=false`).
+- **Phone 390×844:** no sideways scroll, panel bottom 422 above the Readings sheet at 434, scrolls inside itself, Load button 70 px tall. **Found:** the two-column layout left the text in a narrow strip. Fixed in `928c9e0` (label over text, place panel only, phones only), re-checked live, and mobile-pass still passes 131/131.
+
+**Not yet done:** the collection block against the live D1. That needs the deploy; with the stubbed database it correctly reads "unknown".
 
 ## 4. Measurements (offline / read-only; nothing written)
 ### 4a. Bytes, from today's real published files (gzipped in the browser exactly as the hub would)
