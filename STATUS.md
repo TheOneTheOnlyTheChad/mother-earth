@@ -1,3 +1,13 @@
+# Mother Earth — status (5 Nov 2026 — thread 15, history trial)
+
+## 5 Nov 10:21 UTC — **HISTORY TRIAL ON.** `HISTORY_ENABLED=1` (plain text, Production). Chad's explicit go; Claude filled the form, Chad clicked "Add 1 variable and deploy" (the session's safety check blocks Claude from production-deploy clicks).
+- Verified 10:21: 17 bindings; hub still **0.5.1**; `history.collecting:true`; `archive_health` empty.
+- **Measured ticks (invocation log, CPU / wall):** usgs 10:25 12 ms / 3.3 s · usgs 10:30 11 ms / 2.8 s · firms 10:30 124 ms / 4.3 s · firms 11:00 190 ms / 3.9 s · hourly 11:08 82 ms / 15.2 s · usgs 11:05–11:10 12 ms. Reference, history off (08:30): usgs 6 ms, firms 107 ms.
+- **D1 at 11:10:** quake_revisions 40 (30 on the first run; later runs write only new quakes and revisions — e.g. us7000tw7b automatic → reviewed); history_activity 2 (firms + usgs for 5 Nov); drifter_fixes **1,304** (first hourly batch, 11:08); archive_versions 1 (co2 "first", 3,284 B gz in R2 `archive/versions/co2/…`). checkpoints, fires_daily, seaice_daily, orbital_population, archive_gaps 0 — none due yet.
+- Hub report: retained since 10:25:08 UTC; `archive_health` pending/gaps/failures empty.
+- **Still to see:** orbital_population at 11:41; plastic version (daily, last success > 20 h ≈ 12:07); seaice_daily at 15:07; **first midnight checkpoint 00:30 UTC 6 Nov** (firms + usgs: archive_checkpoints, fires_daily); **drifter_fixes rows/day + bytes** (open cost item) over the full UTC day.
+- To stop: remove the variable (Chad's click). Retained history is not deleted.
+
 # Mother Earth — status (5 Nov 2026 — thread 15)
 
 ## 5 Nov — orbital-browser fixed (test-only); Schumann research entry. Page and hub unchanged.
