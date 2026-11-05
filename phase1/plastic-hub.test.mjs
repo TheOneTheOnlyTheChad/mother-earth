@@ -80,6 +80,9 @@ function noaaRows(over = {}) {
     Unit: x.unit || 'pieces/m3', Medium: 'Ocean water', Sampling_Method: 'Manta net', Mesh_size__mm_: 0.33, Water_Sample_Depth__m_: 0, NCEI_Accession_No: 276422 } }));
 }
 const NOW = Date.parse('2026-11-04T12:07:00Z'); Date.now = () => NOW;
+{ const RealDate = Date;   // 5 Nov: the hub stamps retrieved_at with `new Date()`; without this the test used the real clock and only passed on 4 Nov
+  globalThis.Date = class extends RealDate { constructor(...a) { if (a.length) super(...a); else super(Date.now()); } static now() { return Date.now(); } };
+  const setNow = globalThis.Date; Object.defineProperty(setNow, 'now', { writable: true, value: () => NOW }); }
 
 await t('A. plDay names the day of NOAA\'s US-local-midnight dates (05:00 and 06:00 UTC) and of UTC midnight', () => {
   assert.equal(plDay(Date.parse('2014-04-06T05:00:00Z')), '2014-04-06'); assert.equal(plDay(Date.parse('2014-11-06T06:00:00Z')), '2014-11-06'); assert.equal(plDay(Date.parse('2014-04-06T00:00:00Z')), '2014-04-06');

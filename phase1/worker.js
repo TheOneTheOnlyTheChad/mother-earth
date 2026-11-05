@@ -47,7 +47,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.4.0';
+const COLLECTOR_VERSION = '0.5.0';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -112,6 +112,7 @@ async function logRun(env, layer, startedMs, status, http, records, bytes, note)
 async function writeSnapshot(env, layer, scheduledMs, envelope) {
   const stamp = isoMinute(scheduledMs);
   const cellsOnly = { ...envelope, records: undefined, record_fields: undefined, record_format: undefined };
+  if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpoint(env, layer, envelope));   // before latest/ is replaced
   const full = await putJson(env, `snapshots/${layer}/${stamp}.json`, envelope);
   await putJson(env, `cells/${layer}/${stamp}.json`, cellsOnly);
   await putJson(env, `latest/${layer}.json`, envelope);
@@ -178,6 +179,7 @@ async function collectUsgs(env, scheduledMs) {
       coverage_default: { grade, evidence, observed_fraction: fresh ? 1 : 0 },
       quantity: 'earthquakes M2.5+ in the last 24 h (count) and M4.5+ (count_m45), deduplicated by USGS id' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
+  await hist(env, 'usgs-revisions', () => histQuakes(env, j.features, e.retrieved_at));
   await logRun(env, layer, scheduledMs, status, res.status, rows.length, bytes, 'generated_age_s=' + Math.round(ageS || -1));
 }
 
@@ -408,7 +410,8 @@ function firmsParse(text) {
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
     const t = c[iTime].padStart(4, '0');
     const observedAt = c[iDate] + 'T' + t.slice(0, 2) + ':' + t.slice(2) + ':00Z';
-    rows.push([lat, lng, observedAt, c[iConf], +c[iFrp], c[iSat], c[iDn]]);
+    const fv = iFrp < 0 || c[iFrp] === undefined || c[iFrp].trim() === '' ? null : +c[iFrp];   // a missing FRP is null (not provided), never 0 (found 5 Nov: +'' === 0)
+    rows.push([lat, lng, observedAt, c[iConf], Number.isFinite(fv) ? fv : null, c[iSat], c[iDn]]);
     const id = cellId(lat, lng);
     (cells[id] || (cells[id] = { count: 0 })).count++;
     const h = observedAt.slice(0, 13);
@@ -487,6 +490,7 @@ async function collectCo2(env, scheduledMs) {
       quantity: 'daily mean CO2 mole fraction (ppm) at Mauna Loa, Hawaii — one station, not a map layer; recent months preliminary' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
   try { await env.DB.prepare('INSERT OR IGNORE INTO co2_daily (date, ppm, retrieved_at) VALUES (?,?,?)').bind(last[0], last[1], nowIso()).run(); } catch (err) { console.log('co2 insert', String(err)); }
+  await hist(env, 'co2-version', () => histVersion(env, layer, e));
   await logRun(env, layer, scheduledMs, status, 200, dRows.length, bytes, `ppm=${last[1]} date=${last[0]} 1y=${lw[6]} 10y=${lw[7]}`);
 }
 
@@ -541,6 +545,7 @@ async function collectSeaIce(env, scheduledMs) {
       citation: nsidcCitation(fetchedMs),
       quantity: 'daily sea-ice extent per hemisphere, million km² (area of ocean with ≥15% ice concentration, passive microwave) — one number per hemisphere, not a map layer' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
+  await hist(env, 'seaice-version', () => histVersion(env, layer, e)); await hist(env, 'seaice-daily', () => histSeaIce(env, e));
   await logRun(env, layer, scheduledMs, status, 200, recs.length, bytes, `N=${n.value} S=${s.value} date=${n.date} dN=${n.difference_from_average} dS=${s.difference_from_average}`);
 }
 
@@ -904,6 +909,7 @@ async function collectDrifters(env, scheduledMs) {
   const cellsOnly = { ...e, records: undefined, record_fields: undefined, record_format: undefined };
   const bytes = await putJson(env, `latest/${layer}.json`, e);       // one current snapshot (records)
   await putJson(env, `latest-cells/${layer}.json`, cellsOnly);        // and its counts — same run, same retrieved_at
+  await hist(env, 'drifter-fixes', () => histDrifters(env, e));
   const r = b.refused; const refusedN = Object.values(r).reduce((a, x) => a + x, 0);
   await logRun(env, layer, scheduledMs, 'ok', res.status, b.rows.length, bytes, `buoys=${b.rows.length} refused=${refusedN} ${JSON.stringify(r)} newest=${b.newest}`);
 }
@@ -1095,6 +1101,7 @@ async function collectPlastic(env, scheduledMs) {
   const cellsOnly = { ...e, records: undefined, record_fields: undefined, record_format: undefined };
   const bytes = await putJson(env, `latest/${layer}.json`, e);
   await putJson(env, `latest-cells/${layer}.json`, cellsOnly);
+  await hist(env, 'plastic-version', () => histVersion(env, layer, e));
   const rf = Object.values(v.refused).reduce((a, x) => a + x, 0);
   await logRun(env, layer, scheduledMs, 'ok', 200, v.rows.length, bytes, `rows=${v.rows.length}/${count} refused=${rf} checks=${ver ? JSON.stringify(ver.counts) : 'unavailable: ' + origNote}`);
 }
@@ -1500,7 +1507,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic };
+export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpoint, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1569,9 +1576,216 @@ async function collectOrbital(env, scheduledMs, manual) {
   try { await putJson(env, ORBF.metaKey, meta); }
   catch (e) { try { if (!prevMeta || prevMeta.elements.key !== csvKey) await env.R2.delete(csvKey); } catch (_) {} return record('down', 200, 'publication failed (meta write): ' + String(e).slice(0, 160), { gp_request: true }); }
   if (prevMeta && prevMeta.elements && prevMeta.elements.key && prevMeta.elements.key !== csvKey) { try { await env.R2.delete(prevMeta.elements.key); } catch (e) { console.log('orbital: previous CSV not deleted', String(e)); } }
+  await hist(env, 'orbital-version', () => histVersion(env, layer, meta)); await hist(env, 'orbital-population', () => histOrbital(env, meta));
   state.last_success = { at: retrievedAt, rows: b.rows, bytes: b.csv.length, sha256: sha };
   const c = b.counts;
   return record('ok', 200, `published ${b.rows} objects (payload ${c.payload_status_unavailable + c.active + c.inactive + c.payload_status_unknown + c.payload_unmatched}, rocket body ${c.rocket_body}, debris ${c.debris}, unknown type ${c.unknown_type}), ${b.csv.length} B from ${text.length} B`, { gp_request: true, rows: b.rows, bytes: b.csv.length });
+}
+
+// ---------------------------------------------------------------- History (0.5.0) — OFF unless HISTORY_ENABLED=1
+/* Proposal rev 2 (reviews/2026-11-05-place-view-and-history.md). Nothing here runs unless the Worker variable
+ * HISTORY_ENABLED is exactly '1' (Chad's go). Every step is wrapped: a history failure never stops or changes publishing.
+ * Three kinds of retention, kept apart:
+ *  - VERSIONS (small layers + plastic): an object is kept only when the source DATA or our PROCESSING/CHECK results
+ *    changed; a repeat retrieval of the same content only updates that version's retrieval log (count, last time, run).
+ *  - CHECKPOINTS (firms, usgs): when the UTC day changes, the last published snapshot of the previous day is kept,
+ *    labelled with its actual cutoff (its own retrieved_at). Intermediate versions of a day are NOT kept.
+ *  - MEASUREMENTS (D1): quake revisions (append-only on USGS `updated`), fires per cell per day (as of the last pull of
+ *    that day), drifter fixes (sampled hourly; identical buoy+time+values repeats ignored, corrections kept),
+ *    sea-ice values per data date (corrections kept), orbital population per published element file.
+ * Every kept row/object carries run_ref (<layer>@<retrieved_at>) and the collector version. Ships: aggregates only. */
+const HIST = { versions: 'archive/versions/', checkpoints: 'archive/checkpoints/', checkpointLayers: ['firms', 'usgs'],
+  volatile: new Set(['retrieved_at', 'scheduled_for', 'source_age_s', 'collector_version', 'schema_version', 'stale_after_s', 'window_end', 'citation', 'interruptions', 'raw', 'raw_bytes', 'fetched']) };
+const histOn = env => env.HISTORY_ENABLED === '1';
+const runRef = (layer, retrievedAt) => layer + '@' + retrievedAt;
+async function gzipText(text) { return new Uint8Array(await new Response(new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer()); }
+/** Drop fields that change on every retrieval without the content changing (times, versions, our own fetch metadata). Pure. */
+function stripVolatile(x) {
+  if (Array.isArray(x)) return x.map(stripVolatile);
+  if (x && typeof x === 'object') { const o = {}; for (const k of Object.keys(x).sort()) if (!HIST.volatile.has(k)) o[k] = stripVolatile(x[k]); return o; }
+  return x;
+}
+/** Split an envelope into the source's data and our processing results, per layer. Pure; tested in history-hub.test.mjs. */
+function versionParts(layer, e) {
+  if (layer === 'plastic') {
+    const f = e.record_fields || [], D = ['id', 'lat', 'lng', 'sampled_on', 'pieces_m3', 'method', 'mesh_mm', 'depth_m'].map(k => f.indexOf(k)), P = ['id', 'check', 'original'].map(k => f.indexOf(k));
+    return { data: { rows: (e.records || []).map(r => D.map(i => r[i])), noaa_count: e.noaa_count, data_last_edit: e.source && e.source.data_last_edit },
+      proc: { checks: (e.records || []).map(r => P.map(i => r[i])), verification: stripVolatile(e.verification || null), refused: e.refused || null } };
+  }
+  if (layer === 'orbital') return { data: { sha256: e.elements && e.elements.sha256, rows: e.elements && e.elements.rows }, proc: stripVolatile({ counts: e.counts, classification: e.classification }) };
+  const { records, cells, ...rest } = e;
+  return { data: { records: records || null }, proc: stripVolatile({ cells: cells || null, ...rest }) };
+}
+async function histVersion(env, layer, e) {
+  const { data, proc } = versionParts(layer, e);
+  const dh = await sha256Hex(JSON.stringify(data)), ph = await sha256Hex(JSON.stringify(proc));
+  const at = e.retrieved_at, ref = runRef(layer, at);
+  const cur = await env.DB.prepare('SELECT id, data_hash, proc_hash FROM archive_versions WHERE layer = ? ORDER BY id DESC LIMIT 1').bind(layer).first();
+  if (cur && cur.data_hash === dh && cur.proc_hash === ph) {
+    await env.DB.prepare('UPDATE archive_versions SET last_retrieved_at = ?, last_run_ref = ?, retrievals = retrievals + 1 WHERE id = ?').bind(at, ref, cur.id).run();
+    return 'repeat';
+  }
+  const change = !cur ? 'first' : (cur.data_hash !== dh && cur.proc_hash !== ph) ? 'data+processing' : cur.data_hash !== dh ? 'data' : 'processing';
+  const key = `${HIST.versions}${layer}/${at.replace(/[:.]/g, '-')}-${dh.slice(0, 12)}-${ph.slice(0, 12)}.json.gz`;
+  const gz = await gzipText(JSON.stringify(e));
+  await env.R2.put(key, gz, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { data_hash: dh, proc_hash: ph, run_ref: ref, collector_version: COLLECTOR_VERSION, change } });
+  await env.DB.prepare('INSERT INTO archive_versions (layer, data_hash, proc_hash, change, r2_key, bytes, first_retrieved_at, last_retrieved_at, retrievals, first_run_ref, last_run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,1,?,?,?)')
+    .bind(layer, dh, ph, change, key, gz.length, at, at, ref, ref, COLLECTOR_VERSION).run();
+  return change;
+}
+/** Fires per cell for one UTC day, from the last snapshot published for that day. Pure. */
+function firesDaily(e) {
+  const f = e.record_fields || [], iLat = f.indexOf('lat'), iLng = f.indexOf('lng'), iFrp = f.indexOf('frp_mw'), iDn = f.indexOf('daynight');
+  const by = {};
+  for (const r of e.records || []) {
+    const id = cellId(r[iLat], r[iLng]); const c = by[id] || (by[id] = { n: 0, frpSum: 0, frpMax: null, frpN: 0, day: 0, night: 0 });
+    c.n++; const v = r[iFrp];
+    if (typeof v === 'number' && Number.isFinite(v)) { c.frpSum += v; c.frpN++; c.frpMax = c.frpMax === null ? v : Math.max(c.frpMax, v); }
+    if (r[iDn] === 'D') c.day++; else if (r[iDn] === 'N') c.night++;
+  }
+  return by;
+}
+/** Before a checkpoint layer's new snapshot replaces latest/: if the UTC day changed, keep the previous day's last snapshot. */
+async function histCheckpoint(env, layer, next) {
+  const stKey = `state/history-${layer}.json`; const st = (await getJson(env, stKey)) || {};
+  const nextDay = (next.retrieved_at || '').slice(0, 10);
+  if (st.day === nextDay) return 'same day';
+  const o = await env.R2.get(`latest/${layer}.json`);
+  if (o && st.day) {
+    const text = await o.text(); const prev = JSON.parse(text); const pDay = (prev.retrieved_at || '').slice(0, 10);
+    if (pDay && pDay < nextDay) {
+      const key = `${HIST.checkpoints}${layer}/${pDay}.json.gz`; const gz = await gzipText(text);
+      await env.R2.put(key, gz, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: prev.retrieved_at, window_start: String(prev.window_start), window_end: String(prev.window_end), run_ref: runRef(layer, prev.retrieved_at), collector_version: String(prev.collector_version) } });
+      await env.DB.prepare('INSERT OR IGNORE INTO archive_checkpoints (layer, day, cutoff, r2_key, bytes, records, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?)')
+        .bind(layer, pDay, prev.retrieved_at, key, gz.length, (prev.records || []).length, runRef(layer, prev.retrieved_at), String(prev.collector_version)).run();
+      if (layer === 'firms' && prev.source_status === 'ok') {
+        const by = firesDaily(prev); const ref = runRef(layer, prev.retrieved_at);
+        const stmts = Object.entries(by).map(([id, c]) => env.DB.prepare('INSERT OR IGNORE INTO fires_daily (cell_id, day, detections, frp_sum_mw, frp_max_mw, frp_n, day_n, night_n, cutoff, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+          .bind(id, pDay, c.n, Math.round(c.frpSum * 10) / 10, c.frpMax, c.frpN, c.day, c.night, prev.retrieved_at, ref, String(prev.collector_version)));
+        for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
+      }
+    }
+  }
+  await putJson(env, stKey, { day: nextDay, at: nowIso() });
+  return 'checkpointed';
+}
+async function histQuakes(env, features, retrievedAt) {
+  const ref = runRef('usgs', retrievedAt);
+  const stmts = (features || []).filter(f => f && f.id && f.geometry && f.properties && Number.isFinite(f.properties.updated)).map(f => {
+    const p = f.properties, [lng, lat, depth] = f.geometry.coordinates;
+    return env.DB.prepare('INSERT OR IGNORE INTO quake_revisions (usgs_id, source_updated, received_at, observed_at, lat, lng, depth_km, mag, mag_type, place, status, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')
+      .bind(f.id, new Date(p.updated).toISOString(), retrievedAt, new Date(p.time).toISOString(), lat, lng, depth ?? null, p.mag ?? null, p.magType || null, p.place || null, p.status || null, ref, COLLECTOR_VERSION);
+  });
+  for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
+  return stmts.length;
+}
+async function histDrifters(env, e) {
+  const f = e.record_fields, ix = k => f.indexOf(k), ref = runRef('drifters', e.retrieved_at);
+  const stmts = (e.records || []).map(r => { const sst = r[ix('sst_c')];
+    return env.DB.prepare('INSERT OR IGNORE INTO drifter_fixes (buoy_id, fix_time, lat, lng, sst_key, sst_c, first_received_at, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?)')
+      .bind(String(r[ix('id')]), r[ix('observed_at')], r[ix('lat')], r[ix('lng')], sst === null || sst === undefined ? 'na' : String(sst), sst ?? null, e.retrieved_at, ref, COLLECTOR_VERSION); });
+  for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
+  return stmts.length;
+}
+async function histSeaIce(env, e) {
+  const ref = runRef('seaice', e.retrieved_at), ix = e.index || {};
+  const rows = [['north', ix.north], ['south', ix.south]].filter(([, h]) => h && h.date && Number.isFinite(h.value));
+  await env.DB.batch(rows.map(([hemi, h]) => env.DB.prepare('INSERT OR IGNORE INTO seaice_daily (hemisphere, data_date, extent_mkm2, clim_average_mkm2, first_received_at, run_ref, collector_version) VALUES (?,?,?,?,?,?,?)')
+    .bind(hemi, h.date, h.value, h.climatology_1981_2010 ? h.climatology_1981_2010.average : null, e.retrieved_at, ref, COLLECTOR_VERSION)));
+  return rows.length;
+}
+async function histOrbital(env, meta) {
+  await env.DB.prepare('INSERT OR IGNORE INTO orbital_population (elements_sha256, first_retrieved_at, rows, counts_json, query, filter, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?)')
+    .bind(meta.elements.sha256, meta.retrieved_at, meta.elements.rows, JSON.stringify(meta.counts), meta.source.query, meta.source.filter, runRef('orbital', meta.retrieved_at), COLLECTOR_VERSION).run();
+}
+/** Run one history step; never throws into the collector. */
+async function hist(env, label, fn) {
+  if (!histOn(env)) return label + ':off';
+  try { const r = await fn(); return label + ':' + r; } catch (e) { console.log('history', label, 'failed', String(e)); return label + ':failed ' + String(e).slice(0, 80); }
+}
+
+// ---------------------------------------------------------------- Place view (0.5.0): GET /place/g4/<row>_<col>
+/* Everything the hub holds for one 4° cell, one section per layer, each from ONE collector run (records and counts
+ * paired on retrieved_at, re-read once, else withheld). Optional layers (drifters, plastic) are returned only when named
+ * in ?layers= — the page asks for them only while that layer is on, or after the visitor presses "Load" for this place.
+ * Read-only: no writes, no upstream requests. Collection evidence from D1 is labelled as such — never as coverage. */
+const PLACE = {
+  record: ['usgs', 'firms', 'ships'], optional: ['drifters', 'plastic'], listMax: 8,
+  notPlace: { swpc: 'one planetary index for the whole Earth', co2: 'one station (Mauna Loa) — a background indicator, not a value for this place', seaice: 'one number per hemisphere', orbital: 'objects in orbit pass over every place; positions are computed, not tied to a cell', daynight: 'computed for the whole globe from the clock' },
+  hourly: ['usgs', 'firms', 'ships'],
+};
+const placeCache = {};   // per isolate: { [layer]: { etag, byCell } } — the record index is rebuilt only when the file changes
+function cellAreaKm2(id) { const b = cellBounds(id), R = 6371.0088, rad = Math.PI / 180; return Math.round(R * R * (b.e - b.w) * rad * Math.abs(Math.sin(b.n * rad) - Math.sin(b.s * rad))); }
+function validCell(id) { const m = /^(\d{1,2})_(\d{1,2})$/.exec(id || ''); return !!m && +m[1] >= 0 && +m[1] < 180 / CELL_DEG && +m[2] >= 0 && +m[2] < 360 / CELL_DEG; }
+async function placeRecords(env, layer) {
+  const o = await env.R2.get(`latest/${layer}.json`); if (!o) return null;
+  const c = placeCache[layer];
+  if (c && c.etag && c.etag === o.httpEtag) { if (o.body && o.body.cancel) try { o.body.cancel(); } catch (_) {} return c; }
+  const snap = await o.json(); const f = snap.record_fields || [], iLat = f.indexOf('lat'), iLng = f.indexOf('lng');
+  const byCell = {}; for (const r of snap.records || []) { const id = cellId(r[iLat], r[iLng]); (byCell[id] || (byCell[id] = [])).push(r); }
+  const entry = { etag: o.httpEtag, retrieved_at: snap.retrieved_at, fields: f, byCell }; placeCache[layer] = entry; return entry;
+}
+async function placeSection(env, layer, id) {
+  const meta = l => ({ layer: l });
+  let cells = await getJson(env, `latest-cells/${layer}.json`);
+  if (!cells) return { ...meta(layer), state: 'unavailable', note: 'no snapshot published yet' };
+  const base = { ...meta(layer), retrieved_at: cells.retrieved_at, run_ref: runRef(layer, cells.retrieved_at), collector_version: cells.collector_version, source_status: cells.source_status, stale_after_s: cells.stale_after_s,
+    window_start: cells.window_start, window_end: cells.window_end, quantity: cells.quantity || null, coverage_default: cells.coverage_default || null, coverage_note: cells.coverage_note || null, note: cells.note || null };
+  if (layer === 'forest') {
+    if (!FOREST_CELLS.includes(id)) return { ...base, state: 'not_covered', why: 'outside the swept tropical land cells (alert systems run between 30°N and 30°S only)' };
+    const c = cells.cells && cells.cells[id];
+    if (!c) return { ...base, state: 'pending', why: 'in the sweep, not answered yet' };
+    return { ...base, state: 'ok', cell: c };
+  }
+  if (cells.source_status === 'down' && !cells.cells) return { ...base, state: 'down' };
+  let rec = await placeRecords(env, layer);
+  if (rec && rec.retrieved_at !== cells.retrieved_at) {   // a collector wrote between the two reads: re-read both once
+    cells = await getJson(env, `latest-cells/${layer}.json`); rec = await placeRecords(env, layer);
+  }
+  const cell = cells && cells.cells ? cells.cells[id] : undefined;
+  if (!rec || !cells || rec.retrieved_at !== cells.retrieved_at) {
+    return { ...base, state: 'withheld', why: `records and counts are not from the same collector run (records ${rec ? rec.retrieved_at : 'unreadable'}, counts ${cells ? cells.retrieved_at : 'unreadable'})`, cell: cell || null };
+  }
+  const recs = rec.byCell[id] || [];
+  const iT = rec.fields.indexOf('observed_at') >= 0 ? rec.fields.indexOf('observed_at') : rec.fields.indexOf('sampled_on');
+  const sorted = recs.slice().sort((a, b) => String(b[iT]).localeCompare(String(a[iT])));
+  return { ...base, state: recs.length ? 'ok' : 'no_records', count: recs.length, cell: cell || null, record_fields: rec.fields,
+    records: layer === 'plastic' ? sorted : sorted.slice(0, PLACE.listMax), records_total: recs.length };
+}
+async function placeCollection(env, id, nowMs) {
+  const h24 = hourKey(nowMs - 24 * 3600e3), h7 = hourKey(nowMs - 7 * 86400e3), cur = hourKey(nowMs);
+  const q = [];
+  for (const l of PLACE.hourly) {
+    q.push(env.DB.prepare('SELECT MIN(hour_utc) AS retention_start, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? THEN 1 ELSE 0 END) AS agg24, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? AND snapshots_ok > 0 THEN 1 ELSE 0 END) AS ran24, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? THEN 1 ELSE 0 END) AS agg7, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? AND snapshots_ok > 0 THEN 1 ELSE 0 END) AS ran7 FROM layer_hourly WHERE layer = ?').bind(h24, cur, h24, cur, h7, cur, h7, cur, l));
+    q.push(env.DB.prepare('SELECT MIN(hour_utc) AS first_report, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? THEN 1 ELSE 0 END) AS rep24, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? THEN 1 ELSE 0 END) AS rep7 FROM cell_hourly WHERE layer = ? AND cell_id = ?').bind(h24, cur, h7, cur, l, id));
+    q.push(env.DB.prepare('SELECT MIN(hour_utc) AS cell_table_start FROM cell_hourly WHERE layer = ?').bind(l));
+  }
+  q.push(env.DB.prepare('SELECT MIN(date) AS first_query, MAX(date) AS last_query, COUNT(*) AS queries FROM forest_daily WHERE cell_id = ?').bind(id));
+  const r = await env.DB.batch(q); const row = i => (r[i] && r[i].results && r[i].results[0]) || {};
+  const out = {};
+  PLACE.hourly.forEach((l, k) => { const a = row(3 * k), b = row(3 * k + 1), c = row(3 * k + 2);
+    out[l] = { collection_ran: { last_24h: { hours_with_a_usable_sample: a.ran24 || 0, hours_aggregated: a.agg24 || 0, hours: 24 }, last_7d: { hours_with_a_usable_sample: a.ran7 || 0, hours_aggregated: a.agg7 || 0, hours: 168 }, retention_start: a.retention_start || null },
+      records_reached_us_here: { last_24h_hours: b.rep24 || 0, last_7d_hours: b.rep7 || 0, first_report_retained: b.first_report || null, retention_start: c.cell_table_start || null } }; });
+  const f = row(3 * PLACE.hourly.length); out.forest = { queries_retained: f.queries || 0, first_query: f.first_query || null, last_query: f.last_query || null };
+  return out;
+}
+async function place(env, url, id) {
+  if (!validCell(id)) return json({ error: 'cell id must be <row>_<col> on the 4° grid (row 0–44, col 0–89)' }, 400);
+  const want = (url.searchParams.get('layers') || '').split(',').map(s => s.trim()).filter(l => PLACE.optional.includes(l));
+  const nowMs = Date.now(); const b = cellBounds(id);
+  const layers = {};
+  for (const l of [...PLACE.record, 'forest']) { try { layers[l] = await placeSection(env, l, id); } catch (e) { layers[l] = { layer: l, state: 'unavailable', note: 'read failed: ' + String(e).slice(0, 120) }; } }
+  for (const l of PLACE.optional) {
+    if (!want.includes(l)) { layers[l] = { layer: l, state: 'off_not_requested' }; continue; }
+    try { layers[l] = await placeSection(env, l, id); } catch (e) { layers[l] = { layer: l, state: 'unavailable', note: 'read failed: ' + String(e).slice(0, 120) }; }
+  }
+  let collection = null, collectionNote = null;
+  try { collection = await placeCollection(env, id, nowMs); } catch (e) { collectionNote = 'collection records unreadable: ' + String(e).slice(0, 120); }
+  return json({ schema: 'place/1', grid: 'g4', cell: { id, ref: 'g4:' + id, west: b.w, south: b.s, east: b.e, north: b.n, area_km2: cellAreaKm2(id) },
+    generated_at: new Date(nowMs).toISOString(), collector_version: COLLECTOR_VERSION,
+    statement: 'Listed together because they share this 4° cell. Nothing here states a connection between them.',
+    layers, not_place_based: PLACE.notPlace, collection, collection_note: collectionNote,
+    collection_meaning: 'collection_ran = our collector produced a usable sample in that hour (all places at once); records_reached_us_here = hours in which at least one record for this cell reached us. Neither is the source\'s geographic coverage. retention_start = the first hour we retain for that layer; first_report_retained = the first retained hour with a record for this cell.' });
 }
 
 // ---------------------------------------------------------------- dispatch
@@ -1788,6 +2002,8 @@ export default {
       return new Response(o.body, { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Cache-Control': 'public, max-age=600', 'ETag': o.httpEtag, 'X-Elements-SHA256': (o.customMetadata && o.customMetadata.sha256) || '', 'Access-Control-Expose-Headers': 'ETag, X-Elements-SHA256', ...CORS } });
     }
 
+    if (p[0] === 'place' && p[1] === 'g4') return place(env, url, p[2] || '');
+
     if (p[0] === 'status') {
       const runs = await env.DB.prepare('SELECT layer, started_at, status, http_status, records, bytes, note FROM collector_runs WHERE id IN (SELECT MAX(id) FROM collector_runs GROUP BY layer)').all();
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
@@ -1829,7 +2045,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/elements/satellites', '/elements/orbital', '/status'], layers: LAYERS,
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status'], layers: LAYERS,
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };

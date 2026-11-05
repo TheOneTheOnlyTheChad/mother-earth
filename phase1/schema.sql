@@ -104,3 +104,108 @@ CREATE TABLE IF NOT EXISTS forest_daily (
   retrieved_at TEXT NOT NULL,
   PRIMARY KEY (cell_id, date)
 );
+
+-- ---------------------------------------------------------------- History (collector 0.5.0) — proposal rev 2
+-- Written only when the Worker variable HISTORY_ENABLED=1. Every row carries run_ref (<layer>@<retrieved_at>) and the
+-- collector version. Created by hand in the D1 console (Chad's go) before HISTORY_ENABLED is set.
+
+-- Distinct versions of small published layers and the plastic dataset. A new row only when the source DATA or our
+-- PROCESSING/CHECK results changed; a repeat retrieval of the same content only updates last_* and retrievals.
+CREATE TABLE IF NOT EXISTS archive_versions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  layer TEXT NOT NULL,
+  data_hash TEXT NOT NULL,          -- sha256 of the source's data part (layer-specific; see versionParts in worker.js)
+  proc_hash TEXT NOT NULL,          -- sha256 of our processing/check results (volatile fields stripped)
+  change TEXT NOT NULL,             -- first | data | processing | data+processing
+  r2_key TEXT NOT NULL,             -- archive/versions/<layer>/...json.gz (the full envelope as published)
+  bytes INTEGER NOT NULL,
+  first_retrieved_at TEXT NOT NULL,
+  last_retrieved_at TEXT NOT NULL,
+  retrievals INTEGER NOT NULL,      -- how many retrievals returned exactly this content
+  first_run_ref TEXT NOT NULL,
+  last_run_ref TEXT NOT NULL,
+  collector_version TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS archive_versions_layer ON archive_versions (layer, id);
+
+-- Daily checkpoints of large layers: the last snapshot published for a UTC day, labelled with its actual cutoff.
+-- Intermediate versions of that day are not kept.
+CREATE TABLE IF NOT EXISTS archive_checkpoints (
+  layer TEXT NOT NULL,
+  day TEXT NOT NULL,                -- UTC day of the snapshot's retrieved_at
+  cutoff TEXT NOT NULL,             -- that snapshot's retrieved_at
+  r2_key TEXT NOT NULL,
+  bytes INTEGER NOT NULL,
+  records INTEGER NOT NULL,
+  run_ref TEXT NOT NULL,
+  collector_version TEXT NOT NULL,
+  PRIMARY KEY (layer, day)
+);
+
+-- Earthquakes: every distinct USGS revision we received (append-only; a new row only when USGS `updated` changes).
+CREATE TABLE IF NOT EXISTS quake_revisions (
+  usgs_id TEXT NOT NULL,
+  source_updated TEXT NOT NULL,     -- USGS properties.updated
+  received_at TEXT NOT NULL,        -- retrieved_at of the run that first received this revision
+  observed_at TEXT NOT NULL,        -- USGS origin time
+  lat REAL NOT NULL, lng REAL NOT NULL, depth_km REAL, mag REAL, mag_type TEXT, place TEXT, status TEXT,
+  run_ref TEXT NOT NULL,
+  collector_version TEXT NOT NULL,
+  PRIMARY KEY (usgs_id, source_updated)
+);
+
+-- Fires per 4° cell per UTC day, from the LAST snapshot published for that day (FIRMS day_range=1). Detections FIRMS
+-- processes for that day after our last pull of it are not included; `cutoff` says when that pull was.
+CREATE TABLE IF NOT EXISTS fires_daily (
+  cell_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  detections INTEGER NOT NULL,
+  frp_sum_mw REAL NOT NULL,         -- sum over detections that carry an FRP value (frp_n of them)
+  frp_max_mw REAL,                  -- null when no detection carried a value (never 0)
+  frp_n INTEGER NOT NULL,
+  day_n INTEGER NOT NULL,
+  night_n INTEGER NOT NULL,
+  cutoff TEXT NOT NULL,
+  run_ref TEXT NOT NULL,
+  collector_version TEXT NOT NULL,
+  PRIMARY KEY (cell_id, day)
+);
+
+-- Drifting buoys: a SAMPLED track — the latest fix per buoy as returned by each hourly OSMC query. Identical
+-- buoy + fix time + values repeats are ignored; a correction (same buoy + fix time, different position or SST) is a new row.
+CREATE TABLE IF NOT EXISTS drifter_fixes (
+  buoy_id TEXT NOT NULL,
+  fix_time TEXT NOT NULL,
+  lat REAL NOT NULL, lng REAL NOT NULL,
+  sst_key TEXT NOT NULL,            -- SST as text, 'na' when not provided (so a missing value de-duplicates)
+  sst_c REAL,
+  first_received_at TEXT NOT NULL,
+  run_ref TEXT NOT NULL,
+  collector_version TEXT NOT NULL,
+  PRIMARY KEY (buoy_id, fix_time, lat, lng, sst_key)
+);
+
+-- Sea ice: each distinct value per hemisphere per data date (a revised value is a new row).
+CREATE TABLE IF NOT EXISTS seaice_daily (
+  hemisphere TEXT NOT NULL,
+  data_date TEXT NOT NULL,
+  extent_mkm2 REAL NOT NULL,
+  clim_average_mkm2 REAL,           -- NSIDC 1981–2010 average for that day of year (theirs)
+  first_received_at TEXT NOT NULL,
+  run_ref TEXT NOT NULL,
+  collector_version TEXT NOT NULL,
+  PRIMARY KEY (hemisphere, data_date, extent_mkm2)
+);
+
+-- Orbital: the population in OUR catalogue query (Space-Track GP: not decayed, epoch within 10 days) per published
+-- element file. Changes can come from filtering, classification or element freshness, not only launches and reentries.
+CREATE TABLE IF NOT EXISTS orbital_population (
+  elements_sha256 TEXT PRIMARY KEY,
+  first_retrieved_at TEXT NOT NULL,
+  rows INTEGER NOT NULL,
+  counts_json TEXT NOT NULL,
+  query TEXT NOT NULL,
+  filter TEXT NOT NULL,
+  run_ref TEXT NOT NULL,
+  collector_version TEXT NOT NULL
+);
