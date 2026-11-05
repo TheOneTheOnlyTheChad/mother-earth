@@ -47,7 +47,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.5.0';
+const COLLECTOR_VERSION = '0.5.1';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -90,9 +90,9 @@ async function fetchText(url, init = {}) {
   return { status: r.status, ok: r.ok, text, headers: r.headers };
 }
 
-async function putJson(env, key, obj) {
+async function putJson(env, key, obj, meta) {
   const body = JSON.stringify(obj);
-  await env.R2.put(key, body, { httpMetadata: { contentType: 'application/json' } });
+  await env.R2.put(key, body, { httpMetadata: { contentType: 'application/json' }, ...(meta ? { customMetadata: meta } : {}) });
   return body.length;
 }
 async function getJson(env, key) {
@@ -112,11 +112,11 @@ async function logRun(env, layer, startedMs, status, http, records, bytes, note)
 async function writeSnapshot(env, layer, scheduledMs, envelope) {
   const stamp = isoMinute(scheduledMs);
   const cellsOnly = { ...envelope, records: undefined, record_fields: undefined, record_format: undefined };
-  const full = await putJson(env, `snapshots/${layer}/${stamp}.json`, envelope);
+  const full = await putJson(env, `snapshots/${layer}/${stamp}.json`, envelope, { retrieved_at: String(envelope.retrieved_at) });   // retrieved_at lets a listing order snapshots by full timestamp
   await putJson(env, `cells/${layer}/${stamp}.json`, cellsOnly);
   await putJson(env, `latest/${layer}.json`, envelope);
   await putJson(env, `latest-cells/${layer}.json`, cellsOnly);
-  if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpoint(env, layer, envelope, `snapshots/${layer}/${stamp}.json`));   // after publishing; reads the retained snapshots/ copy
+  if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpointsDue(env, layer, Date.now()));   // after publishing; no mutable state (see histCheckpointsDue)
   return full;
 }
 
@@ -1507,7 +1507,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpoint, histCheckpointOne, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1646,49 +1646,73 @@ function firesDaily(e) {
   }
   return by;
 }
-/** Daily checkpoint of a checkpoint layer (firms, usgs), recoverable.
- * Runs AFTER publishing (never blocks or changes it). The input is the previous day's last snapshot as already stored under
- * snapshots/<layer>/<stamp>.json (kept 2 days by the storage rule) — not latest/, which publishing replaces.
- * On a day change the previous day is added to a DURABLE pending list in state/history-<layer>.json BEFORE any archive work;
- * every later run retries pending days until done, or until the stored snapshot has expired (then recorded as lost, with
- * the reason — never invented). Writes are idempotent (same R2 key; INSERT OR IGNORE), and the archive_checkpoints row is
- * written LAST as the completion marker, so a partial failure (R2 put done, some D1 batches done) is simply finished by a retry. */
-async function histCheckpointOne(env, layer, item) {
-  const o = await env.R2.get(item.key);
+/** Daily checkpoints (firms, usgs) — STATELESS and safe under overlapping runs (rev 5, after GPT's re-check).
+ * There is no mutable pointer to roll back. Durable facts only, all in D1 and all written idempotently:
+ *   history_activity(layer, day)       — "history ran for this layer on this UTC day" (INSERT OR IGNORE, every run)
+ *   archive_checkpoints(layer, day)    — the completion marker, written LAST
+ *   archive_gaps(layer, day)           — a day that cannot be completed, with the reason
+ * A day D is due when history ran on D, D is CLOSED (now ≥ end of D + grace), and it has neither a marker nor a gap.
+ * Its input is chosen afresh every attempt: list the retained snapshots/<layer>/ objects (kept 2 days) and take the one
+ * whose FULL retrieved_at is the latest on D — so a failed write, a late run with an earlier timestamp, or an overlapping
+ * run cannot point it at the wrong file. Two overlapping attempts choose the same input and write the same bytes/rows.
+ * Completed work is recognised first (marker), so an expired input never turns a finished day into "lost". */
+const HIST_GRACE_MS = 30 * 60e3;   // a closed day gets 30 min for any in-flight run of that day to finish publishing
+async function listSnapshots(env, layer) {
+  const out = []; let cursor;
+  do {
+    const r = await env.R2.list({ prefix: `snapshots/${layer}/`, cursor, include: ['customMetadata'] });
+    for (const o of r.objects || []) {
+      let at = o.customMetadata && o.customMetadata.retrieved_at;
+      if (!at) { const g = await env.R2.get(o.key); if (g) { try { at = (await g.json()).retrieved_at; } catch (_) {} } }   // objects written before 0.5.0 carry no metadata
+      if (at) out.push({ key: o.key, retrieved_at: at });
+    }
+    cursor = r.truncated ? r.cursor : undefined;
+  } while (cursor);
+  return out;
+}
+async function histCheckpointOne(env, layer, day, chosen) {
+  const done = await env.DB.prepare('SELECT 1 AS x FROM archive_checkpoints WHERE layer = ? AND day = ?').bind(layer, day).first();
+  if (done) return 'already done';   // completed work is recognised before anything else
+  const o = await env.R2.get(chosen.key);
   if (!o) return 'source_gone';
-  const text = await o.text(); const prev = JSON.parse(text); const pDay = item.day;
-  const key = `${HIST.checkpoints}${layer}/${pDay}.json.gz`; const gz = await gzipText(text); const ref = runRef(layer, prev.retrieved_at);
-  await env.R2.put(key, gz, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: prev.retrieved_at, window_start: String(prev.window_start), window_end: String(prev.window_end), run_ref: ref, collector_version: String(prev.collector_version), source_key: item.key } });
+  const text = await o.text(); const prev = JSON.parse(text);
+  if (prev.retrieved_at !== chosen.retrieved_at) throw new Error('snapshot changed under us: ' + chosen.key);
+  const key = `${HIST.checkpoints}${layer}/${day}.json.gz`; const gz = await gzipText(text); const ref = runRef(layer, prev.retrieved_at);
+  await env.R2.put(key, gz, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: prev.retrieved_at, window_start: String(prev.window_start), window_end: String(prev.window_end), run_ref: ref, collector_version: String(prev.collector_version), source_key: chosen.key } });
   if (layer === 'firms' && prev.source_status === 'ok') {
     const by = firesDaily(prev);
     const stmts = Object.entries(by).map(([id, c]) => env.DB.prepare('INSERT OR IGNORE INTO fires_daily (cell_id, day, detections, frp_sum_mw, frp_max_mw, frp_n, day_n, night_n, cutoff, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
-      .bind(id, pDay, c.n, c.frpSum === null ? null : Math.round(c.frpSum * 10) / 10, c.frpMax, c.frpN, c.day, c.night, prev.retrieved_at, ref, String(prev.collector_version)));
+      .bind(id, day, c.n, c.frpSum === null ? null : Math.round(c.frpSum * 10) / 10, c.frpMax, c.frpN, c.day, c.night, prev.retrieved_at, ref, String(prev.collector_version)));
     for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
   }
   await env.DB.prepare('INSERT OR IGNORE INTO archive_checkpoints (layer, day, cutoff, r2_key, bytes, records, run_ref, collector_version, source_key) VALUES (?,?,?,?,?,?,?,?,?)')
-    .bind(layer, pDay, prev.retrieved_at, key, gz.length, (prev.records || []).length, ref, String(prev.collector_version), item.key).run();   // completion marker, last
+    .bind(layer, day, prev.retrieved_at, key, gz.length, (prev.records || []).length, ref, String(prev.collector_version), chosen.key).run();   // completion marker, last
   return 'done';
 }
-async function histCheckpoint(env, layer, next, nextKey) {
-  const stKey = `state/history-${layer}.json`; const st = (await getJson(env, stKey)) || {};
-  st.pending = st.pending || []; st.lost = st.lost || [];
-  const nextDay = (next.retrieved_at || '').slice(0, 10);
-  if (st.day && st.day < nextDay && st.last_key && !st.pending.some(p => p.day === st.day))
-    st.pending.push({ day: st.day, key: st.last_key, cutoff: st.last_at, queued_at: nowIso(), attempts: 0 });
-  if (!st.day || st.day <= nextDay) { st.day = nextDay; st.last_key = nextKey; st.last_at = next.retrieved_at; }
-  await putJson(env, stKey, st);   // the pending day is durable before any archive work starts
-  const out = [];
-  for (const item of st.pending.slice()) {
-    item.attempts++;
-    try {
-      const r = await histCheckpointOne(env, layer, item);
-      if (r === 'done') { st.pending = st.pending.filter(p => p !== item); out.push(item.day + ':done'); }
-      else { st.pending = st.pending.filter(p => p !== item); st.lost.push({ ...item, lost_at: nowIso(), reason: 'stored snapshot no longer available (2-day storage rule) before the checkpoint completed' }); out.push(item.day + ':lost'); }
-    } catch (e) { item.last_error = String(e).slice(0, 160); item.last_try = nowIso(); out.push(item.day + ':retry later'); }
+async function histCheckpointsDue(env, layer, nowMs) {
+  const today = dayKey(nowMs);
+  await env.DB.prepare('INSERT OR IGNORE INTO history_activity (layer, day, first_seen) VALUES (?,?,?)').bind(layer, today, new Date(nowMs).toISOString()).run();
+  const due = (await env.DB.prepare('SELECT a.day FROM history_activity a WHERE a.layer = ? AND a.day < ? AND NOT EXISTS (SELECT 1 FROM archive_checkpoints c WHERE c.layer = a.layer AND c.day = a.day) AND NOT EXISTS (SELECT 1 FROM archive_gaps g WHERE g.layer = a.layer AND g.day = a.day) ORDER BY a.day').bind(layer, today).all()).results
+    .map(r => r.day).filter(d => nowMs >= Date.parse(d + 'T00:00:00Z') + 86400e3 + HIST_GRACE_MS);
+  if (!due.length) return 'nothing due';
+  const snaps = await listSnapshots(env, layer); const out = [];
+  for (const d of due) {
+    const c = snaps.filter(x => x.retrieved_at.slice(0, 10) === d).sort((a, b) => a.retrieved_at < b.retrieved_at ? -1 : a.retrieved_at > b.retrieved_at ? 1 : a.key < b.key ? -1 : 1);
+    let r = c.length ? await histCheckpointOne(env, layer, d, c[c.length - 1]) : 'source_gone';
+    if (r === 'source_gone') {
+      const doneNow = await env.DB.prepare('SELECT 1 AS x FROM archive_checkpoints WHERE layer = ? AND day = ?').bind(layer, d).first();
+      if (doneNow) r = 'already done';
+      else {
+        const reason = nowMs - (Date.parse(d + 'T00:00:00Z') + 86400e3) >= 86400e3
+          ? 'the retained snapshots for this day expired (2-day storage rule) before a checkpoint completed'
+          : 'no retained snapshot carries a retrieval time on this UTC day';
+        await env.DB.prepare('INSERT OR IGNORE INTO archive_gaps (layer, day, reason, detected_at) VALUES (?,?,?,?)').bind(layer, d, reason, new Date(nowMs).toISOString()).run();
+        r = 'gap';
+      }
+    }
+    out.push(d + ':' + r);
   }
-  st.lost = st.lost.slice(-30);
-  await putJson(env, stKey, st);
-  return out.length ? out.join(',') : 'nothing pending';
+  return out.join(',');
 }
 async function histQuakes(env, features, retrievedAt) {
   const ref = runRef('usgs', retrievedAt);
@@ -1722,16 +1746,49 @@ async function histOrbital(env, meta) {
 /** Run one history step; never throws into the collector. */
 async function hist(env, label, fn) {
   if (!histOn(env)) return label + ':off';
-  try { const r = await fn(); return label + ':' + r; } catch (e) { console.log('history', label, 'failed', String(e)); return label + ':failed ' + String(e).slice(0, 80); }
+  try { const r = await fn(); return label + ':' + r; }
+  catch (e) { console.log('history', label, 'failed', String(e)); try { await logRun(env, 'history:' + label, Date.now(), 'down', 0, 0, 0, String(e).slice(0, 300)); } catch (_) {} return label + ':failed ' + String(e).slice(0, 80); }
 }
 
-/** What the hub is retaining right now — read by the page so "What Mother Earth keeps" changes when retention changes. */
+/** What the hub reports about history — two separate facts (rev 5):
+ *  collecting: is NEW history being collected right now (HISTORY_ENABLED=1)?
+ *  retained:   what history already exists, per layer (first/last), whether or not collection is on now.
+ * Switching collection off does not delete anything; an unreadable database is reported as unknown, never as "none". */
+const HIST_RANGES = {   // [table, column, extra filter] — first and last are read as two single-value index lookups (one MIN, one MAX)
+  usgs: ['quake_revisions', 'received_at', 'received_at', ''], firms: ['fires_daily', 'day', 'day', ''],
+  drifters: ['drifter_fixes', 'first_received_at', 'first_received_at', ''], seaice: ['seaice_daily', 'first_received_at', 'first_received_at', ''],
+  orbital: ['orbital_population', 'first_retrieved_at', 'first_retrieved_at', ''],
+  co2: ['archive_versions', 'first_retrieved_at', 'last_retrieved_at', "WHERE layer = 'co2'"], plastic: ['archive_versions', 'first_retrieved_at', 'last_retrieved_at', "WHERE layer = 'plastic'"],
+};
 async function historyState(env) {
-  if (!histOn(env)) return { enabled: false };
+  const collecting = histOn(env);
   try {
-    const r = await env.DB.prepare('SELECT MIN(t) AS since FROM (SELECT MIN(received_at) AS t FROM quake_revisions UNION ALL SELECT MIN(first_received_at) FROM drifter_fixes UNION ALL SELECT MIN(first_retrieved_at) FROM archive_versions UNION ALL SELECT MIN(cutoff) FROM archive_checkpoints)').first();
-    return { enabled: true, since: (r && r.since) || null };
-  } catch (e) { return { enabled: true, since: null, problem: 'history tables unreadable: ' + String(e).slice(0, 120) }; }
+    const keys = Object.keys(HIST_RANGES);
+    const r = await env.DB.batch(keys.flatMap(k => { const [t, cf, cl, w] = HIST_RANGES[k]; return [env.DB.prepare(`SELECT MIN(${cf}) AS f FROM ${t} ${w}`), env.DB.prepare(`SELECT MAX(${cl}) AS l FROM ${t} ${w}`)]; }));
+    const retained = {}; let first = null, last = null;
+    keys.forEach((k, i) => { const x = { f: ((r[2 * i] && r[2 * i].results && r[2 * i].results[0]) || {}).f, l: ((r[2 * i + 1] && r[2 * i + 1].results && r[2 * i + 1].results[0]) || {}).l };
+      retained[k] = x.f ? { first: x.f, last: x.l } : null;
+      if (x.f && (!first || x.f < first)) first = x.f; if (x.l && (!last || x.l > last)) last = x.l; });
+    return { collecting, enabled: collecting, retained: first ? { exists: true, first, last, layers: retained } : { exists: false }, since: first };
+  } catch (e) {
+    if (/no such table/i.test(String(e))) return { collecting, enabled: collecting, retained: { exists: false, note: 'history tables not created' }, since: null };
+    return { collecting, enabled: collecting, retained: { exists: null, problem: 'history records unreadable: ' + String(e).slice(0, 120) }, since: null };
+  }
+}
+/** Archive health for /status: pending (closed, not completed) days, recorded gaps, last completed checkpoint, recent history failures. */
+async function archiveHealth(env, nowMs) {
+  try {
+    const today = dayKey(nowMs);
+    const r = await env.DB.batch([
+      env.DB.prepare('SELECT a.layer, a.day FROM history_activity a WHERE a.day < ? AND NOT EXISTS (SELECT 1 FROM archive_checkpoints c WHERE c.layer = a.layer AND c.day = a.day) AND NOT EXISTS (SELECT 1 FROM archive_gaps g WHERE g.layer = a.layer AND g.day = a.day) ORDER BY a.day').bind(today),
+      env.DB.prepare('SELECT layer, day, reason, detected_at FROM archive_gaps ORDER BY day DESC LIMIT 20'),
+      env.DB.prepare('SELECT layer, MAX(day) AS day, MAX(cutoff) AS cutoff FROM archive_checkpoints GROUP BY layer'),
+      env.DB.prepare("SELECT layer, started_at, note FROM collector_runs WHERE layer LIKE 'history:%' AND status = 'down' ORDER BY id DESC LIMIT 10"),
+    ]);
+    const res = i => (r[i] && r[i].results) || [];
+    return { pending: res(0).map(x => ({ layer: x.layer, day: x.day, hours_since_day_closed: Math.round((nowMs - Date.parse(x.day + 'T00:00:00Z') - 86400e3) / 36e5 * 10) / 10 })),
+      gaps: res(1), last_completed: res(2), recent_failures: res(3), retry_window: 'inputs are the retained snapshots (2-day storage rule); a day not completed within that window is recorded as a gap' };
+  } catch (e) { return /no such table/i.test(String(e)) ? { note: 'history tables not created' } : { problem: 'unreadable: ' + String(e).slice(0, 120) }; }
 }
 
 // ---------------------------------------------------------------- Place view (0.5.0): GET /place/g4/<row>_<col>
@@ -2044,7 +2101,7 @@ export default {
       const runs = await env.DB.prepare('SELECT layer, started_at, status, http_status, records, bytes, note FROM collector_runs WHERE id IN (SELECT MAX(id) FROM collector_runs GROUP BY layer)').all();
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
-      return json({ now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch }, 200, { 'Cache-Control': 'no-store' });
+      return json({ now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch, history: await historyState(env), archive_health: await archiveHealth(env, Date.now()) }, 200, { 'Cache-Control': 'no-store' });
     }
 
     if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'ships') {   // 0.3.3: private Worker listen to aisstream; publishes nothing

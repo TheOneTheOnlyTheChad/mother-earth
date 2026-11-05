@@ -129,8 +129,9 @@ CREATE TABLE IF NOT EXISTS archive_versions (
 CREATE INDEX IF NOT EXISTS archive_versions_layer ON archive_versions (layer, id);
 
 -- Daily checkpoints of large layers: the last snapshot published for a UTC day, labelled with its actual cutoff.
--- Intermediate versions of that day are not kept. Made from the retained snapshots/ copy (2-day storage rule); a failed
--- attempt stays pending in state/history-<layer>.json and is retried each run. This row is written LAST (completion marker).
+-- Intermediate versions of that day are not kept. Made from the retained snapshots/ object with the latest full retrieved_at
+-- on that day (2-day storage rule). Due days are derived, never stored as mutable state (history_activity minus markers and
+-- gaps); every run retries them. This row is written LAST and is the only completion marker.
 CREATE TABLE IF NOT EXISTS archive_checkpoints (
   layer TEXT NOT NULL,
   day TEXT NOT NULL,                -- UTC day of the snapshot's retrieved_at
@@ -211,3 +212,28 @@ CREATE TABLE IF NOT EXISTS orbital_population (
   run_ref TEXT NOT NULL,
   collector_version TEXT NOT NULL
 );
+
+-- "History ran for this layer on this UTC day" — one idempotent row per layer per day (rev 5). With archive_checkpoints
+-- (done) and archive_gaps (cannot be done) it defines the due days; no mutable pointer exists to roll back.
+CREATE TABLE IF NOT EXISTS history_activity (
+  layer TEXT NOT NULL,
+  day TEXT NOT NULL,
+  first_seen TEXT NOT NULL,
+  PRIMARY KEY (layer, day)
+);
+-- A day whose checkpoint cannot be completed, with the reason (e.g. retained snapshots expired). Never invented data.
+CREATE TABLE IF NOT EXISTS archive_gaps (
+  layer TEXT NOT NULL,
+  day TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  detected_at TEXT NOT NULL,
+  PRIMARY KEY (layer, day)
+);
+-- Indexes so the hub's history report reads first/last values without scanning (MIN/MAX on an index).
+CREATE INDEX IF NOT EXISTS quake_revisions_received ON quake_revisions (received_at);
+CREATE INDEX IF NOT EXISTS fires_daily_day ON fires_daily (day);
+CREATE INDEX IF NOT EXISTS drifter_fixes_received ON drifter_fixes (first_received_at);
+CREATE INDEX IF NOT EXISTS seaice_daily_received ON seaice_daily (first_received_at);
+CREATE INDEX IF NOT EXISTS orbital_population_retrieved ON orbital_population (first_retrieved_at);
+CREATE INDEX IF NOT EXISTS archive_versions_layer_first ON archive_versions (layer, first_retrieved_at);
+CREATE INDEX IF NOT EXISTS archive_versions_layer_last ON archive_versions (layer, last_retrieved_at);

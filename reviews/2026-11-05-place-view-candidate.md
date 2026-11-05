@@ -152,3 +152,41 @@ GPT reproduced three failures that the original 16 hub checks missed. All three 
 - Proposal §5 rewritten to match the implementation exactly (rev 4), including what is **not** kept (orbital stale/beyond-GEO, Kp versions, F2).
 
 **Asset version** `?v=202611101000`.
+
+## 8. GPT's re-check of `482ffb0` — checkpoint recovery and wording reworked (rev 5, hub 0.5.1)
+GPT accepted fixes 1 (place metadata) and 2 (FRP). Checkpoint recovery failed four independent probes, all of them caused by **one mutable state file**. Rather than patching four symptoms, the state file is gone.
+
+**Design:**
+- Each run with history on records an idempotent fact: `history_activity(layer, day)`.
+- A day is **due** when history ran on it, it is **closed** (end of day + 30 min grace), and it has neither a completion marker nor a recorded gap.
+- Its input is chosen afresh at every attempt: the retained snapshot with the **latest full `retrieved_at`** on that day. Snapshots now carry `retrieved_at` as R2 metadata, so a listing can order them.
+- The marker is checked first and written last. A day that can't be done becomes a **gap with the reason**.
+- Health is reported in **`/status` → `archive_health`**: pending days with their age, gaps, last completed, and recent history failures. Failures are also logged as `history:<step>` rows in `collector_runs`.
+- The 2-day retry window is unchanged and stated. Keeping inputs longer is Chad's decision; nothing was silently extended.
+
+| GPT probe on `482ffb0` | Regression check | `482ffb0` | 0.5.1 |
+|---|---|---|---|
+| first state write fails → an earlier snapshot archived (22:00 instead of 23:55) | **P1** | FAIL | pass |
+| out of order within the day (a 23:40 run replaces 23:55) | **P2** (a real later run with an earlier timestamp) | FAIL | pass |
+| overlapping runs roll state back | **P3** (one attempt paused mid-way, the other completes, the first resumes → one marker, consistent rows) | FAIL | pass |
+| finished work later marked lost | **P4** (marker present, input expired → stays done; the step checks the marker before touching the input) | FAIL | pass |
+| — | **P5** archive health in `/status` | FAIL | pass |
+
+history-hub: **27/27** on 0.5.1. On `482ffb0` the same file gives **17 passed, 10 failed**.
+
+**Query cost:** every new D1 read is an index search (SQLite plans checked). The history report reads first/last as separate MIN and MAX lookups, because one query doing both scans the whole index.
+
+**Wording:** the hub reports **two facts**: `collecting` (now) and `retained` (what exists; `exists: null` when unreadable).
+- Base lines say only what is always true ("the current file").
+- The history line has four states:
+  - collecting, retained since …;
+  - retained for … to …, collection is off now, retained history is not deleted;
+  - no further history collected;
+  - could not be read just now.
+- The broad "None of it is shown" sentence is replaced; the place view is named as the exception.
+- The Oceaneye row's "samples are not kept" clause is removed.
+- kept-ui **19/19** covers off+none, on, the on → off transition (retained, not deleted), on → unreadable hub, readable hub with unreadable history (both unknown) and World View.
+
+**Found on the way (pre-existing, on the live Sources page):** `fill()` removed rows with `tr:not(:first-child)`, but each redraw's rows land in their own `<tbody>`. So every 5-minute refresh left one stale row in every redrawn table. Fixed; kept-ui checks that 3 refreshes leave every table's row count unchanged, and that check fails with main's `fill()`.
+
+Assets `?v=202611111000`. Hub version **0.5.1** (not deployed; live is still 0.5.0 with history off).

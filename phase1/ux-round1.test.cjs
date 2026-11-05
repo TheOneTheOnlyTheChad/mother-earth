@@ -66,9 +66,9 @@ const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log(
     await page.route(/workers\.dev|fonts\.g/, r => r.fulfill({ status: 404, body: '' }));
     await page.goto(BASE + '/sources.html'); await page.waitForTimeout(800);
     const txt = await T(page.locator('body'));
-    ok('"What Mother Earth keeps" section present', await page.locator('#kept').count() === 1 && /None of it is shown on this site yet/.test(txt));
+    ok('"What Mother Earth keeps" section present; the record is not shown as readings, with the place view named as the one exception (5 Nov wording)', await page.locator('#kept').count() === 1 && /the record is not shown as readings/.test(txt) && /One exception: the place view/.test(txt) && !/None of it is shown/.test(txt));
     ok('kept rows say "no end date set" and the 2-day raw window', /no end date set/.test(txt) && /2 days, then deleted/.test(txt));
-    ok('drifters, orbital and sea ice listed as current file only', /Drifting buoys, orbital objects, sea ice/.test(txt));
+    ok('the current published file row names drifting buoys, orbital objects, sea ice and microplastic samples (no absolute "no history" claim)', /drifting buoys, orbital objects, sea ice and microplastic samples included/.test(txt) && !/Current file only — no history/.test(txt));
     ok('day/night no longer claimed as the only computed thing', !/only thing on this page that is computed/.test(txt));
     ok('no "baselines accumulate" phrasing left', !/baselines? accumulat/i.test(txt));
     await ctx.close();

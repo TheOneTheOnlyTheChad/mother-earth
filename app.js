@@ -8,20 +8,32 @@ const CELL_DEG = ME.CELL_DEG = 4;
 const REFRESH_MS = ME.REFRESH_MS = 5 * 60e3;
 const BASELINE_SINCE = '30 Oct 2026';
 // What the hub keeps per layer (read from D1 + R2 lifecycle rules, 4 Nov 2026). Shown wherever a comparison is mentioned.
-// What the hub retains is reported by the hub itself (GET / → history: {enabled, since}); the wording follows it, so it
-// changes when retention changes — never ahead of it, never after. Unknown hub state → the base wording (what runs without history).
+// History, as REPORTED by the hub (GET / → history: {collecting, retained:{exists, first, last, layers}}) — two separate facts:
+// whether new history is being collected now, and what history already exists. Collection off never means "deleted";
+// an unreadable hub means unknown, never "none" (GPT re-check, 5 Nov). Base lines (KEPT) state only what is always true.
 ME.HISTORY = null;
-ME.loadHistory = async () => { try { const j = await getJson('/'); ME.HISTORY = (j && j.history) || { enabled: false }; } catch (e) { ME.HISTORY = null; } return ME.HISTORY; };
+ME.loadHistory = async () => { try { const j = await getJson('/'); ME.HISTORY = (j && j.history) || null; } catch (e) { ME.HISTORY = null; } return ME.HISTORY; };
+const HIST_LAYERS = ME.HIST_LAYERS = ['usgs', 'firms', 'seaice', 'co2', 'drifters', 'plastic', 'orbital'];
 const KEPT_WITH_HISTORY = ME.KEPT_WITH_HISTORY = {
-  usgs: 'hourly per-cell counts kept since 30 Oct 2026; every revision of every event we receive, and the last published file of each UTC day',
-  firms: 'hourly per-cell counts kept since 30 Oct 2026; per-cell daily totals as of our last pull of each UTC day (later-processed detections not included), and that day\'s last published file',
+  usgs: 'every revision of every event we receive, and the last published file of each UTC day',
+  firms: 'per-cell daily totals as of our last pull of each UTC day (later-processed detections not included), and that day\'s last published file',
   seaice: 'each daily value per hemisphere with NSIDC\'s climatology value for that day, and each changed published file',
-  co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026; each changed published file',
-  drifters: 'each buoy fix as returned by our hourly query (a sampled track, not every fix the buoy reported); corrections kept',
-  plastic: 'each changed version of NOAA\'s published data or of our check results, plus Oceaneye\'s original file used for the checks',
+  co2: 'each changed published file',
+  drifters: 'each buoy fix as returned by our hourly query (a sampled track, not every fix the buoy reported; corrections kept)',
+  plastic: 'each changed version of NOAA\'s published data or of our check results',
+  orbital: 'the population in our catalogue query per published element file (counts by object type)',
 };
-ME.kept = layer => { const h = ME.HISTORY; if (h && h.enabled && KEPT_WITH_HISTORY[layer]) return KEPT_WITH_HISTORY[layer] + (h.since ? ` (history retention since ${h.since.slice(0, 10)})` : ''); return KEPT[layer]; };
-const KEPT = ME.KEPT = { usgs: 'hourly per-cell counts kept since 30 Oct 2026', firms: 'hourly per-cell counts kept since 30 Oct 2026', ships: 'hourly per-cell counts kept since 1 Nov 2026', forest: 'daily per-cell alert counts kept since 1 Nov 2026', swpc: 'every Kp value kept since 30 Oct 2026', co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026', seaice: 'no history kept — current file only', drifters: 'no history kept — current file only', plastic: 'no history kept — the current NOAA file only, plus Oceaneye\'s original file used for the checks' };
+const d10 = x => String(x || '').slice(0, 10);
+ME.historyLine = layer => {
+  const h = ME.HISTORY; if (!HIST_LAYERS.includes(layer)) return null;
+  if (!h || !h.retained || typeof h.retained.exists !== 'boolean') return 'whether further history is kept could not be read just now';
+  const r = h.retained.layers && h.retained.layers[layer], what = KEPT_WITH_HISTORY[layer];
+  if (h.collecting) return r ? `${what} (collecting; retained since ${d10(r.first)})` : `${what} (collecting; nothing retained for this layer yet)`;
+  if (r) return `${what}: retained for ${d10(r.first)} to ${d10(r.last)}; collection is off now — retained history is not deleted`;
+  return 'no further history collected';
+};
+ME.kept = layer => { const b = KEPT[layer], hl = ME.historyLine(layer); return b && hl ? `${b}; ${hl}` : (b || hl); };
+const KEPT = ME.KEPT = { usgs: 'hourly per-cell counts kept since 30 Oct 2026', firms: 'hourly per-cell counts kept since 30 Oct 2026', ships: 'hourly per-cell counts kept since 1 Nov 2026; no vessel position kept beyond 2 days', forest: 'daily per-cell alert counts kept since 1 Nov 2026', swpc: 'every Kp value kept since 30 Oct 2026', co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026', seaice: 'the current file', drifters: 'the current file', plastic: 'the current NOAA file, plus Oceaneye\'s original file used for the checks' };   // always-true base facts; history is added by ME.historyLine
 const IMG_DAY = ME.IMG_DAY = new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10);
 const IMG_LABEL = ME.IMG_LABEL = new Date(IMG_DAY).toUTCString().slice(5, 16);
 // Operating mode of the home collector. Change only when a schedule has been installed AND verified from logs (brief §5).

@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611101000">
+<link rel="stylesheet" href="style.css?v=202611111000">
 </head>
 <body class="doc">
 <header class="top">
@@ -53,26 +53,25 @@
   <p><b>Mother Earth's own comparisons</b>: none shown yet (what is kept is listed under <a href="#kept">What Mother Earth keeps</a>); descriptive comparisons come in phase 3 and probabilistic highlights only after a held-out validation with a measured false-highlight rate. <b>Source-provided baselines</b> (NOAA's CO₂ weekly comparison, NSIDC's 1981–2010 sea-ice climatology) are shown now and labelled as the source's; where a subtraction is ours, it says so.</p>
 
   <h2 id="kept">What Mother Earth keeps</h2>
-  <p>Mother Earth keeps a deliberate record of what it observes, starting from its first day. <b>None of it is shown on this site yet</b>: every reading on World View is the latest snapshot.</p>
+  <p>Mother Earth keeps a deliberate record of what it observes, starting from its first day. Every reading on World View is the latest snapshot; the record is not shown as readings. <b>One exception:</b> the place view ("Everything here") shows, for a cell, in how many hours our collection ran and in which hours records for that cell reached us — taken from the hourly records below.</p>
   <table id="t-kept"><tr><th>What</th><th>Layers</th><th>Kept</th></tr>
     <tr><td>Hourly counts per layer and per 4° cell, with each hour's coverage and collection status</td><td>Earthquakes, fire detections (since 30 Oct 2026); ships (per cell since 1 Nov 2026)</td><td>no end date set</td></tr>
     <tr><td>Every Kp value</td><td>Kp index (since 30 Oct 2026)</td><td>no end date set</td></tr>
     <tr><td>One daily value, as NOAA publishes it (days NOAA omits are absent, not filled)</td><td>CO₂ (since 29 Oct 2026)</td><td>no end date set</td></tr>
     <tr><td>Daily alert counts per cell, by confidence</td><td>Forest disturbance (since 1 Nov 2026)</td><td>no end date set</td></tr>
-    <tr><td>Oceaneye's original microlitter file (96 KB, CC BY 4.0), held so each refresh can re-check NOAA NCEI's published values; the samples themselves are not kept beyond the current file</td><td>Microplastic samples (since the layer's first run)</td><td>replaced only after review if the source file changes</td></tr>
+    <tr><td>Oceaneye's original microlitter file (96 KB, CC BY 4.0), held so each refresh can re-check NOAA NCEI's published values</td><td>Microplastic samples (since the layer's first run)</td><td>replaced only after review if the source file changes</td></tr>
     <tr><td>A log of every collector run and its outcome</td><td>all layers (since 30 Oct 2026)</td><td>no end date set</td></tr>
     <tr><td>Raw source files, full snapshots and per-run cell files</td><td>most layers</td><td>2 days, then deleted by a storage rule (deletion can lag up to a day)</td></tr>
-    <tr class="hist-off"><td>Current file only — no history</td><td>Drifting buoys, orbital objects, sea ice</td><td>replaced on each successful update</td></tr>
-    <tr class="hist-on" hidden><td>Every revision of every earthquake we receive (USGS id, USGS update time, when we received it), and the last published file of each UTC day</td><td>Earthquakes</td><td>no end date set</td></tr>
-    <tr class="hist-on" hidden><td>Per-cell daily totals as of our last pull of each UTC day (detections FIRMS processes later for that day are not included; FRP summed only over detections that carry a value), and that day's last published file</td><td>Fire detections</td><td>no end date set</td></tr>
-    <tr class="hist-on" hidden><td>Each buoy fix as returned by our hourly query — a sampled track, not every fix the buoy reported; identical repeats are not stored again, corrections are kept</td><td>Drifting buoys</td><td>no end date set</td></tr>
-    <tr class="hist-on" hidden><td>Each daily value per hemisphere, with NSIDC's climatology value for that day</td><td>Sea ice</td><td>no end date set</td></tr>
-    <tr class="hist-on" hidden><td>The population in our catalogue query (Space-Track: not decayed, elements within 10 days) per published element file — counts by object type; changes can come from filtering, classification or element freshness, not only launches and reentries</td><td>Orbital objects</td><td>no end date set</td></tr>
-    <tr class="hist-on" hidden><td>Each changed version of a published file — kept only when the source's data or our processing/check results changed; a repeat retrieval stores nothing new and is only counted</td><td>CO₂, sea ice, orbital objects, microplastic samples (incl. revised check results)</td><td>no end date set</td></tr>
-    <tr class="hist-on" hidden><td>Current file only — no history</td><td>none of the layers above</td><td>—</td></tr>
+    <tr><td>The current published file</td><td>every layer (drifting buoys, orbital objects, sea ice and microplastic samples included)</td><td>replaced on each successful update</td></tr>
+    <tr class="hist-row" data-hl="usgs" hidden><td>Every revision of every earthquake we receive (USGS id, USGS update time, when we received it), and the last published file of each UTC day</td><td>Earthquakes</td><td class="hk"></td></tr>
+    <tr class="hist-row" data-hl="firms" hidden><td>Per-cell daily totals as of our last pull of each UTC day (detections FIRMS processes later for that day are not included; FRP summed only over detections that carry a value), and that day's last published file</td><td>Fire detections</td><td class="hk"></td></tr>
+    <tr class="hist-row" data-hl="drifters" hidden><td>Each buoy fix as returned by our hourly query — a sampled track, not every fix the buoy reported; identical repeats are not stored again, corrections are kept</td><td>Drifting buoys</td><td class="hk"></td></tr>
+    <tr class="hist-row" data-hl="seaice" hidden><td>Each daily value per hemisphere, with NSIDC's climatology value for that day</td><td>Sea ice</td><td class="hk"></td></tr>
+    <tr class="hist-row" data-hl="orbital" hidden><td>The population in our catalogue query (Space-Track: not decayed, elements within 10 days) per published element file — counts by object type; changes can come from filtering, classification or element freshness, not only launches and reentries</td><td>Orbital objects</td><td class="hk"></td></tr>
+    <tr class="hist-row" data-hl="co2 plastic seaice orbital" hidden><td>Each changed version of a published file — kept only when the source's data or our processing/check results changed; a repeat retrieval stores nothing new and is only counted</td><td>CO₂, sea ice, orbital objects, microplastic samples (incl. revised check results)</td><td class="hk"></td></tr>
   </table>
-  <p class="small" id="kept-state">History retention: reading the hub…</p>
-  <p class="small">Base rows read from the hub's database and storage rules on 4 Nov 2026; the history rows appear only while the hub reports history retention on. "No end date set" describes the current configuration; it is not a promise of permanent storage. Ships: hourly counts only — no vessel positions are kept beyond the 2-day storage rule.</p>
+  <p class="small" id="kept-state">History: reading the hub…</p>
+  <p class="small">Base rows read from the hub's database and storage rules on 4 Nov 2026. History rows appear while the hub reports history being collected, or history already retained (switching collection off does not delete what was kept). "No end date set" describes the current configuration; it is not a promise of permanent storage. Ships: hourly counts only — no vessel position is kept beyond the 2-day storage rule.</p>
   <table id="t-cmp"><tr><th>Layer</th><th>Comparison shown</th><th>Whose baseline</th></tr></table>
 
   <h2 id="tiers">Observation / analysis / model classification</h2>
@@ -156,14 +155,14 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611101000"></script>
+<script src="app.js?v=202611111000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
 ME.menu(); ME.clock();
 const anchor = (layer) => `<a id="${layer}"></a>${LABEL[layer]}`;
 const row = cells => '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
-function fill(id, rows) { const t = $(id); t.querySelectorAll('tr:not(:first-child)').forEach(r => r.remove()); t.insertAdjacentHTML('beforeend', rows.join('')); }
+function fill(id, rows) { const t = $(id); [...t.querySelectorAll('tr')].slice(1).forEach(r => r.remove()); t.insertAdjacentHTML('beforeend', rows.join('')); }   // every row after the header: inserted rows land in their own tbody, so ':first-child' kept one stale row per refresh (found 5 Nov)
 
 function renderAll() {
   const R = ME.readings(), rep = ME.report(R), rules = ME.rules(R);
@@ -194,13 +193,21 @@ function renderAll() {
   $('rules-body').innerHTML = groups.map(g => { const rs = rules.filter(r => r.section === g); if (!rs.length) return ''; return `<h3>${esc(LABEL[g] || g)}</h3><table>${rs.map(r => `<tr><td>${esc(r.k)}</td><td class="${r.fixed ? 'fixed' : ''}">${esc(r.v)}${r.fixed ? ' <span class="fixed">(fixed)</span>' : ''}</td></tr>`).join('')}</table>`; }).join('');
   if (location.hash) { const el = document.querySelector(location.hash); if (el) el.scrollIntoView(); }
 }
-function keptState() {   // the table follows what the hub reports, at the moment it reports it
-  const h = ME.HISTORY, on = !!(h && h.enabled);
-  document.querySelectorAll('#t-kept .hist-on').forEach(r => r.hidden = !on); document.querySelectorAll('#t-kept .hist-off').forEach(r => r.hidden = on);
-  $('kept-state').textContent = h === null ? 'History retention: the hub could not be read just now — the rows above describe what runs without it.'
-    : on ? `History retention: on (reported by the hub${h.since ? '; first retained record ' + h.since.replace('T', ' ').slice(0, 16) + ' UTC' : ''}).` : 'History retention: off (reported by the hub) — only the rows above are kept.';
+function keptState() {   // two facts, reported by the hub: collecting now, and what is already retained
+  const h = ME.HISTORY, known = !!(h && h.retained && typeof h.retained.exists === 'boolean');
+  const L = known && h.retained.layers || {}, d = x => String(x || '').slice(0, 10);
+  document.querySelectorAll('#t-kept .hist-row').forEach(r => {
+    const ls = r.dataset.hl.split(' '), ret = ls.map(l => L[l]).filter(Boolean);
+    r.hidden = !known || !(h.collecting || ret.length);
+    const first = ret.map(x => x.first).sort()[0], last = ret.map(x => x.last).sort().pop();
+    r.querySelector('.hk').textContent = !known ? '' : h.collecting ? (ret.length ? `no end date set (collecting; retained since ${d(first)})` : 'no end date set (collecting; nothing retained yet)') : `retained for ${d(first)} to ${d(last)}; collection off — not deleted`;
+  });
+  $('kept-state').textContent = !known
+    ? 'History: the hub could not be read just now — whether history is being collected, and what history is retained, is unknown. The base rows above run regardless.'
+    : `History collection now: ${h.collecting ? 'on' : 'off'} (reported by the hub). Retained history: ${h.retained.exists ? `from ${h.retained.first.replace('T', ' ').slice(0, 16)} UTC to ${String(h.retained.last).replace('T', ' ').slice(0, 16)}${String(h.retained.last).length > 10 ? ' UTC' : ''}` : 'none'}.`;
 }
 async function tick() { await Promise.all([ME.loadCells(), ME.loadHistory()]); renderAll(); keptState(); }
+ME.sourcesTick = tick;   // test aid: one refresh, same path as the timer
 tick(); setInterval(tick, ME.REFRESH_MS);
 })();
 </script>

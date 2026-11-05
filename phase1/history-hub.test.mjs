@@ -34,7 +34,7 @@ function makeEnv(extra = {}, d1opts = {}) {
     async delete(k) { store.delete(k); },
     async get(k) { gets.push(k); const v = store.get(k); if (!v) return null; const b = v.body;
       return { body: b, httpEtag: v.etag, customMetadata: v.meta.customMetadata, async json() { return JSON.parse(b); }, async text() { return String(b); } }; },
-    async list({ prefix } = {}) { return { objects: [...store.keys()].filter(k => !prefix || k.startsWith(prefix)).map(key => ({ key })), truncated: false }; },
+    async list({ prefix, include } = {}) { return { objects: [...store.keys()].filter(k => !prefix || k.startsWith(prefix)).map(key => ({ key, ...(include && include.includes('customMetadata') ? { customMetadata: (store.get(key).meta || {}).customMetadata } : {}) })), truncated: false }; },
   };
   const d = makeD1(d1opts);
   return { env: { R2, DB: d.D1, ADMIN_KEY: 'k', FIRMS_MAP_KEY: 'x', ...extra }, store, db: d.db, gets: () => gets, resetGets: () => { gets = []; }, writes: d.writes, r2fail, d1opts };
@@ -72,7 +72,8 @@ await t('A2. HISTORY_ENABLED=1 through the real scheduled jobs: usgs revisions w
   const { env, store, db } = makeEnv({ HISTORY_ENABLED: '1' }); setFirms([firmsRow(-20, 30, 12.5, 'D')]);
   await runFive(env); await runFirms(env);
   assert.equal(rows(db, 'SELECT COUNT(*) n FROM quake_revisions')[0].n, 2);
-  assert.ok(store.has('state/history-firms.json') && store.has('state/history-usgs.json'));
+  assert.deepEqual(rows(db, 'SELECT layer FROM history_activity ORDER BY layer').map(r => r.layer), ['firms', 'usgs'], 'history ran for both checkpoint layers today (no mutable state file)');
+  assert.ok(![...store.keys()].some(k => k.startsWith('state/history-')), 'no state file is used any more');
 });
 
 // ================= B. earthquakes: append-only revisions
@@ -84,7 +85,7 @@ await t('B1. same revision received again → no duplicate row; a new USGS `upda
   usgsFeatures = [quake('us1', 5000, 3.4), quake('us2', 2000, 4.6, 10, 10)]; NOW += 300e3; await runFive(env);
   const r = rows(db, "SELECT source_updated, mag, received_at, run_ref, collector_version FROM quake_revisions WHERE usgs_id='us1' ORDER BY source_updated");
   assert.equal(r.length, 2); assert.deepEqual(r.map(x => x.mag), [3.1, 3.4]);
-  assert.ok(r[1].run_ref.startsWith('usgs@') && r[1].collector_version === '0.5.0' && r[1].received_at > r[0].received_at);
+  assert.ok(r[1].run_ref.startsWith('usgs@') && /^0\.5\./.test(r[1].collector_version) && r[1].received_at > r[0].received_at);
   NOW -= 600e3;
 });
 
@@ -95,6 +96,8 @@ await t('C1. day D pulled twice, then D+1: checkpoint = D\'s LAST snapshot (cuto
   NOW = Date.parse('2026-11-05T23:45:00Z'); setFirms([firmsRow(-20, 30, 10, 'D'), firmsRow(-20.5, 30.5, 40, 'N'), firmsRow(5, 5, '', 'N')]); await runFirms(env);
   const lastD = JSON.parse(store.get('latest/firms.json').body).retrieved_at;
   NOW = Date.parse('2026-11-06T00:15:00Z'); setFirms([firmsRow(1, 1, 3, 'N')]); await runFirms(env);
+  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 0, 'D is not closed until end of day + 30 min grace');
+  NOW = Date.parse('2026-11-06T00:30:00Z'); await runFirms(env);
   const cp = rows(db, 'SELECT * FROM archive_checkpoints WHERE layer = ?', 'firms');
   assert.equal(cp.length, 1); assert.equal(cp[0].day, '2026-11-05'); assert.equal(cp[0].cutoff, lastD); assert.equal(cp[0].records, 3);
   const obj = await gunzip(store.get(cp[0].r2_key).body); assert.equal(obj.retrieved_at, lastD); assert.equal(obj.records.length, 3);
@@ -103,8 +106,8 @@ await t('C1. day D pulled twice, then D+1: checkpoint = D\'s LAST snapshot (cuto
   const a = fd.find(r => r.cell_id === W.cellAreaKm2 && false) || fd.find(r => r.detections === 2);
   assert.ok(a, JSON.stringify(fd)); assert.equal(a.frp_sum_mw, 50); assert.equal(a.frp_max_mw, 40); assert.equal(a.day_n, 1); assert.equal(a.night_n, 1); assert.equal(a.cutoff, lastD);
   const b = fd.find(r => r.detections === 1); assert.equal(b.frp_max_mw, null, 'no FRP value → null, never 0'); assert.equal(b.frp_n, 0); assert.equal(b.frp_sum_mw, null, 'no FRP value → sum null, never 0 (GPT #2)');
-  NOW = Date.parse('2026-11-06T00:30:00Z'); await runFirms(env);
-  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 1, 'same day: no second checkpoint');
+  NOW = Date.parse('2026-11-06T00:45:00Z'); await runFirms(env);
+  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 1, 'done once: no second checkpoint');
   NOW = Date.parse('2026-11-05T10:00:00Z');
 });
 await t('C2. the first run ever (no previous day known) keeps nothing — no invented checkpoint', async () => {
@@ -269,50 +272,104 @@ await t('R2. (GPT #2) fires daily FRP: none valid → sum and max null; a report
   assert.equal(mixed.frpSum, 12.5); assert.equal(mixed.frpN, 2); assert.equal(mixed.n, 3); assert.equal(mixed.frpMax, 7.5);
 });
 const dayRun = async (env, iso, lines) => { NOW = Date.parse(iso); setFirms(lines); await runFirms(env); };
-await t('R3. (GPT #3) the first archive write on D+1 fails → publishing continues; the next run completes D\'s checkpoint from the retained snapshot (cutoff = D\'s last pull)', async () => {
+const latestAt = store => JSON.parse(store.get('latest/firms.json').body).retrieved_at;
+await t('R3. (GPT #3) the archive write fails at the first attempt → publishing continues; the next run completes D from the retained snapshot (cutoff = D\'s last pull)', async () => {
   const { env, store, db, r2fail } = makeEnv({ HISTORY_ENABLED: '1' });
   await dayRun(env, '2026-11-05T22:00:00Z', [firmsRow(-20, 30, 10, 'D')]);
-  await dayRun(env, '2026-11-05T23:45:00Z', [firmsRow(-20, 30, 10, 'D'), firmsRow(-20.5, 30.5, 40, 'N')]);
-  const lastD = JSON.parse(store.get('latest/firms.json').body).retrieved_at;
-  r2fail.re = /^archive\/checkpoints\//;   // the checkpoint object write fails once
-  await dayRun(env, '2026-11-06T00:15:00Z', [firmsRow(1, 1, 3, 'N')]);
-  assert.equal(JSON.parse(store.get('latest/firms.json').body).retrieved_at.slice(0, 10), '2026-11-06', 'publishing went ahead');
-  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 0, 'not marked complete');
-  const st = JSON.parse(store.get('state/history-firms.json').body); assert.equal(st.pending.length, 1); assert.equal(st.pending[0].day, '2026-11-05'); assert.match(st.pending[0].last_error, /forced put failure/);
+  await dayRun(env, '2026-11-05T23:45:00Z', [firmsRow(-20, 30, 10, 'D'), firmsRow(-20.5, 30.5, 40, 'N')]); const lastD = latestAt(store);
+  r2fail.re = /^archive\/checkpoints\//;
   await dayRun(env, '2026-11-06T00:30:00Z', [firmsRow(1, 1, 3, 'N')]);
-  const cp = rows(db, 'SELECT * FROM archive_checkpoints'); assert.equal(cp.length, 1); assert.equal(cp[0].day, '2026-11-05'); assert.equal(cp[0].cutoff, lastD); assert.equal(cp[0].records, 2);
+  assert.equal(latestAt(store).slice(0, 10), '2026-11-06', 'publishing went ahead');
+  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 0, 'not marked complete');
+  assert.ok(rows(db, "SELECT COUNT(*) n FROM collector_runs WHERE layer = 'history:firms-checkpoint' AND status = 'down'")[0].n >= 1, 'the failure is logged where /status shows it');
+  await dayRun(env, '2026-11-06T00:45:00Z', [firmsRow(1, 1, 3, 'N')]);
+  const cp = rows(db, 'SELECT * FROM archive_checkpoints'); assert.equal(cp.length, 1); assert.equal(cp[0].cutoff, lastD); assert.equal(cp[0].records, 2);
   assert.equal(rows(db, "SELECT SUM(detections) n FROM fires_daily WHERE day='2026-11-05'")[0].n, 2);
-  assert.equal(JSON.parse(store.get('state/history-firms.json').body).pending.length, 0);
-  NOW = Date.parse('2026-11-05T10:00:00Z');
 });
-await t('R4. (GPT #3) a partial D1 failure (checkpoint object written, fires_daily batch fails) is finished by the next run — no duplicates, marker only after completion', async () => {
+await t('R4. (GPT #3) partial D1 failure (object written, fires_daily batch fails) → finished next run; no duplicates; marker only after completion', async () => {
   const { env, store, db, d1opts } = makeEnv({ HISTORY_ENABLED: '1' });
   await dayRun(env, '2026-11-05T23:45:00Z', [firmsRow(-20, 30, 10, 'D'), firmsRow(10, 10, 4, 'N')]);
   d1opts.failOnce = /INSERT OR IGNORE INTO fires_daily/;
-  await dayRun(env, '2026-11-06T00:15:00Z', [firmsRow(1, 1, 3, 'N')]);
-  assert.ok([...store.keys()].some(k => k === 'archive/checkpoints/firms/2026-11-05.json.gz'), 'object written before the failure');
-  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 0, 'no completion marker after a partial failure');
   await dayRun(env, '2026-11-06T00:30:00Z', [firmsRow(1, 1, 3, 'N')]);
+  assert.ok(store.has('archive/checkpoints/firms/2026-11-05.json.gz')); assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 0);
+  await dayRun(env, '2026-11-06T00:45:00Z', [firmsRow(1, 1, 3, 'N')]);
   assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 1);
-  assert.equal(rows(db, "SELECT COUNT(*) n, SUM(detections) d FROM fires_daily WHERE day='2026-11-05'")[0].d, 2);
-  assert.equal(rows(db, "SELECT COUNT(*) n FROM fires_daily WHERE day='2026-11-05'")[0].n, 2, 'two cells, no duplicate rows');
-  NOW = Date.parse('2026-11-05T10:00:00Z');
+  const fr = rows(db, "SELECT COUNT(*) n, SUM(detections) d FROM fires_daily WHERE day='2026-11-05'")[0]; assert.equal(fr.n, 2); assert.equal(fr.d, 2);
 });
-await t('R5. a pending day whose retained snapshot has expired is recorded as LOST with the reason — no checkpoint invented', async () => {
+await t('R5. a due day whose retained snapshots have expired becomes a GAP with the reason — no checkpoint invented', async () => {
   const { env, store, db, r2fail } = makeEnv({ HISTORY_ENABLED: '1' });
   await dayRun(env, '2026-11-05T23:45:00Z', [firmsRow(-20, 30, 10, 'D')]);
-  r2fail.re = /^archive\/checkpoints\//; await dayRun(env, '2026-11-06T00:15:00Z', [firmsRow(1, 1, 3, 'N')]);
-  for (const k of [...store.keys()]) if (k.startsWith('snapshots/firms/2026-11-05')) store.delete(k);   // the 2-day rule removed it
-  await dayRun(env, '2026-11-06T00:30:00Z', [firmsRow(1, 1, 3, 'N')]);
-  const st = JSON.parse(store.get('state/history-firms.json').body);
-  assert.equal(st.pending.length, 0); assert.equal(st.lost.length, 1); assert.match(st.lost[0].reason, /no longer available/);
-  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 0); assert.equal(rows(db, 'SELECT COUNT(*) n FROM fires_daily')[0].n, 0);
-  NOW = Date.parse('2026-11-05T10:00:00Z');
+  r2fail.re = /^archive\/checkpoints\//; await dayRun(env, '2026-11-06T00:30:00Z', [firmsRow(1, 1, 3, 'N')]);
+  for (const k of [...store.keys()]) if (k.startsWith('snapshots/firms/2026-11-05')) store.delete(k);
+  await dayRun(env, '2026-11-07T06:00:00Z', [firmsRow(1, 1, 3, 'N')]);
+  const g = rows(db, 'SELECT * FROM archive_gaps'); assert.equal(g.length, 1); assert.equal(g[0].day, '2026-11-05'); assert.match(g[0].reason, /expired/);
+  assert.equal(rows(db, "SELECT COUNT(*) n FROM archive_checkpoints WHERE day='2026-11-05'")[0].n, 0); assert.equal(rows(db, "SELECT COUNT(*) n FROM fires_daily WHERE day='2026-11-05'")[0].n, 0);
+  assert.equal(rows(db, "SELECT COUNT(*) n FROM archive_checkpoints WHERE day='2026-11-06'")[0].n, 1, 'the next day, whose snapshot exists, completes normally');
 });
-await t('R6. the hub reports what it retains: history off → {enabled:false}; on → enabled with the first retained time', async () => {
-  const a = makeEnv(); assert.deepEqual((await (await get(a.env, '/')).json()).history, { enabled: false });
+// ---- GPT's four probes of 482ffb0 (5 Nov), as regression checks
+await t('P1. (GPT probe) a history write fails on the LAST run of D → the checkpoint still uses D\'s latest snapshot (23:55), not an earlier one (22:00)', async () => {
+  const { env, store, db, d1opts, r2fail } = makeEnv({ HISTORY_ENABLED: '1' });
+  await dayRun(env, '2026-11-05T22:00:00Z', [firmsRow(-20, 30, 10, 'D')]);
+  // the 23:55 run's FIRST history write fails — whatever the design writes first (a state file, or the activity row)
+  r2fail.re = /^state\/history-/; d1opts.failOnce = /INSERT OR IGNORE INTO history_activity/;
+  await dayRun(env, '2026-11-05T23:55:00Z', [firmsRow(-20, 30, 10, 'D'), firmsRow(1, 1, 2, 'N')]); const last = latestAt(store);
+  await dayRun(env, '2026-11-06T00:30:00Z', [firmsRow(1, 1, 3, 'N')]);
+  const cp = rows(db, 'SELECT * FROM archive_checkpoints'); assert.equal(cp.length, 1); assert.equal(cp[0].cutoff, last); assert.equal(cp[0].records, 2);
+});
+await t('P2. (GPT probe) out of order within D: a run with an EARLIER full timestamp (23:40) written after 23:55 never becomes the checkpoint input', async () => {
+  const { env, store, db } = makeEnv({ HISTORY_ENABLED: '1' });
+  await dayRun(env, '2026-11-05T23:55:00Z', [firmsRow(-20, 30, 10, 'D'), firmsRow(1, 1, 2, 'N')]); const at55 = latestAt(store);
+  // a run with an EARLIER full timestamp completes afterwards (GPT's reproduction: 23:40 after 23:55)
+  await dayRun(env, '2026-11-05T23:40:00Z', [firmsRow(5, 5, 1, 'N')]);
+  await dayRun(env, '2026-11-06T00:30:00Z', [firmsRow(1, 1, 3, 'N')]);
+  const cp = rows(db, 'SELECT * FROM archive_checkpoints'); assert.equal(cp[0].cutoff, at55); assert.equal(cp[0].records, 2);
+});
+await t('P3. (GPT probe) overlapping attempts for the same day (one paused mid-way, the other completes, the first resumes) → one marker, one consistent result, nothing rolled back', async () => {
+  const { env, store, db } = makeEnv({ HISTORY_ENABLED: '1' });
+  await dayRun(env, '2026-11-05T23:45:00Z', [firmsRow(-20, 30, 10, 'D'), firmsRow(10, 10, 4, 'N')]);
+  NOW = Date.parse('2026-11-06T00:31:00Z');
+  const realGet = env.R2.get.bind(env.R2); let release; const gate = new Promise(r => { release = r; }); let paused = false;
+  env.R2.get = async k => { if (!paused && k.startsWith('snapshots/firms/2026-11-05')) { paused = true; await gate; } return realGet(k); };
+  const older = W.histCheckpointsDue(env, 'firms', NOW);              // pauses while reading its input
+  await new Promise(r => setTimeout(r, 10));
+  const newer = await W.histCheckpointsDue(env, 'firms', NOW + 60e3);   // completes the day meanwhile
+  release(); const olderResult = await older;
+  assert.match(newer, /2026-11-05:done/); assert.match(olderResult, /2026-11-05:(already done|done)/);
+  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 1);
+  const fr = rows(db, "SELECT COUNT(*) n, SUM(detections) d FROM fires_daily WHERE day='2026-11-05'")[0]; assert.equal(fr.n, 2); assert.equal(fr.d, 2);
+  assert.equal(rows(db, "SELECT COUNT(*) n FROM history_activity WHERE layer='firms'")[0].n, 2, 'activity rows are append-only facts');
+});
+await t('P4. (GPT probe) completed work is recognised: marker present and input since expired → stays done, never becomes a gap', async () => {
+  const { env, store, db } = makeEnv({ HISTORY_ENABLED: '1' });
+  await dayRun(env, '2026-11-05T23:45:00Z', [firmsRow(-20, 30, 10, 'D')]);
+  await dayRun(env, '2026-11-06T00:30:00Z', [firmsRow(1, 1, 3, 'N')]);
+  assert.equal(rows(db, 'SELECT COUNT(*) n FROM archive_checkpoints')[0].n, 1);
+  for (const k of [...store.keys()]) if (k.startsWith('snapshots/firms/2026-11-05')) store.delete(k);
+  await dayRun(env, '2026-11-08T06:00:00Z', [firmsRow(1, 1, 3, 'N')]);
+  assert.equal(rows(db, "SELECT COUNT(*) n FROM archive_gaps WHERE day='2026-11-05'")[0].n, 0); assert.equal(rows(db, "SELECT COUNT(*) n FROM archive_checkpoints WHERE day='2026-11-05'")[0].n, 1);
+  // and the stand-alone step: a marker written by another run is checked BEFORE the input is touched
+  assert.equal(await W.histCheckpointOne(env, 'firms', '2026-11-05', { key: 'snapshots/firms/gone.json', retrieved_at: 'x' }), 'already done');
+});
+await t('P5. archive health in /status: pending (closed, not completed) days with their age, gaps with reasons, last completed, recent history failures', async () => {
+  const { env, db, r2fail } = makeEnv({ HISTORY_ENABLED: '1' });
+  await dayRun(env, '2026-11-05T23:45:00Z', [firmsRow(-20, 30, 10, 'D')]);
+  r2fail.re = /^archive\/checkpoints\//; await dayRun(env, '2026-11-06T02:30:00Z', [firmsRow(1, 1, 3, 'N')]);
+  let h = (await (await get(env, '/status')).json()).archive_health;
+  assert.equal(h.pending.length, 1); assert.equal(h.pending[0].day, '2026-11-05'); assert.equal(h.pending[0].hours_since_day_closed, 2.5);
+  assert.ok(h.recent_failures.some(f => f.layer === 'history:firms-checkpoint')); assert.match(h.retry_window, /2-day storage rule/);
+  await dayRun(env, '2026-11-06T02:45:00Z', [firmsRow(1, 1, 3, 'N')]);
+  h = (await (await get(env, '/status')).json()).archive_health;
+  assert.equal(h.pending.length, 0); assert.equal(h.last_completed.find(x => x.layer === 'firms').day, '2026-11-05');
+});
+await t('R6. the hub reports collecting-now and retained-history SEPARATELY: off+none, on, off-after-trial (retained, not deleted), unreadable → unknown', async () => {
+  const a = makeEnv(); let h = (await (await get(a.env, '/')).json()).history;
+  assert.equal(h.collecting, false); assert.equal(h.retained.exists, false);
   const b = makeEnv({ HISTORY_ENABLED: '1' }); usgsFeatures = [quake('us1', 1000)]; await runFive(b.env);
-  const h = (await (await get(b.env, '/')).json()).history; assert.equal(h.enabled, true); assert.match(h.since, /^\d{4}-\d\d-\d\dT/);
+  h = (await (await get(b.env, '/')).json()).history; assert.equal(h.collecting, true); assert.equal(h.retained.exists, true); assert.match(h.retained.layers.usgs.first, /^\d{4}-/);
+  b.env.HISTORY_ENABLED = undefined;   // trial ends: collection off, nothing deleted
+  h = (await (await get(b.env, '/')).json()).history; assert.equal(h.collecting, false); assert.equal(h.retained.exists, true, 'switching collection off does not make retained history disappear');
+  const c = makeEnv({ HISTORY_ENABLED: '1' }); c.env.DB = { prepare: () => { throw new Error('D1 unavailable'); }, async batch() { throw new Error('D1 unavailable'); } };
+  h = await W.historyState(c.env); assert.equal(h.retained.exists, null, 'unreadable → unknown, never "none"'); assert.match(h.retained.problem, /unreadable/);
 });
 
 console.log(`\nhistory-hub: ${passed} passed, ${failed} failed`); process.exit(failed ? 1 : 0);
