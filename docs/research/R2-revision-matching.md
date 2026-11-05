@@ -1,5 +1,13 @@
 # R2 fireballs — recognising a corrected event (proposal, rev 3, research only)
 
+> **PARKED — 5 Nov 2026 (Chad).** Research handover: this proposal plus the evidence folder `~/Documents/Mother Earth/research/fireballs/2026-11-05-claude/` (README, raw files, scripts, outputs). GPT accepted rev 3's reasoning; **the archived-index counts and historical pairings remain Claude's findings, not independently reproduced by GPT.** No implementation, collector, schedule, deployment, page change or third-party contact is authorised. No further research round needed now.
+>
+> **Open design notes for when R2 resumes**
+> 1. **Count disclosure:** the illustrative "1,071–1,074 events" range in §4.4 needs a worked derivation before use. Possible revisions across historical snapshots do not automatically reduce the current response's event count. For now, prefer **source-record counts plus a separate count of unresolved relationships**.
+> 2. **Validation consistency:** negative coordinates are currently classified both as invalid (coordinate ranges, §3) and as reviewable (hemisphere letters, §3) — choose one treatment before implementation. If a future policy accepts good rows from a partly invalid response, that partial acceptance must **not** justify absence conclusions about omitted or rejected records.
+>
+> **Still open:** acceptance rules and thresholds (§4.5); review authority; lightcurve reuse and timing (R2 §C.4–C.5, §D); the unexplained velocity discrepancies (R2 §C.2).
+
 5 Nov 2026 · Claude · rev 3: GPT accepted rev 2 as a research proposal; rev 3 adds the clarifications needed before it could become a build specification. **Not a build specification yet.** **Research and documentation only: no matching code, collector, schedule, storage, page change, deployment or third-party contact.**
 
 **Attribution.** The archived-index counts, historical pairings and worked examples below are **Claude's results; GPT has reviewed the reasoning but has not independently reproduced them.** The catalogue checks and the velocity arithmetic in R2 §C.1–C.2 are confirmed by both.
