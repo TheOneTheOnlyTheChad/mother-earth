@@ -14,7 +14,7 @@ Tiers are GPT's recommended order (5 Nov 2026), not approvals. "Gate" = the firs
 
 | ID | Candidate | Source | Tier | Gate status (5 Nov) | Next step |
 |---|---|---|---|---|---|
-| R2 | Reported fireballs | NASA/JPL CNEOS | **1 — first** | **Partially complete** — catalogue re-checked independently (GPT + Claude, identical bytes); `vel` arithmetic agreed (GPT, reproduced by Claude); one lightcurve read (Claude only). Open: lightcurve reuse, time reference, report-vs-catalogue contents, `vel` cause | Revision-matching proposal rev 2 (§E) — Chad's review. Lightcurve work parked |
+| R2 | Reported fireballs | NASA/JPL CNEOS | **1 — first** | **Partially complete** — catalogue re-checked independently (GPT + Claude, identical bytes); `vel` arithmetic agreed (GPT, reproduced by Claude); one lightcurve read (Claude only). Open: lightcurve reuse, time reference, report-vs-catalogue contents, `vel` cause | Revision-matching proposal rev 3 (§E) — open decisions listed before any build spec. Lightcurve work parked |
 | R3 | Earth rotation / polar motion | USNO / IERS | **1 — first** | Not started | Sample `finals2000A`; flags, blanks, uncertainties |
 | R4 | Argo ocean profiles | Argo GDAC | **1 — first** | Not started | One profile sample; T/S + QC flags; payload |
 | R5 | Coral heat stress (DHW) | NOAA Coral Reef Watch | 2 — next | Not started | Product + derived-label check |
@@ -152,8 +152,8 @@ Attribution: **C.1–C.2 confirmed by both GPT and Claude**; **C.3–C.4 are Cla
 - **Interpretation:** the 8 unexplained `vel` cases (cause — only CNEOS could say; **contact needs Chad's go**); negative lightcurve values; report contents vs catalogue values.
 - Archived **API** responses: the Archive's capture index for `fireball.api` returned an error (503) on 5 Nov — retry before concluding none exist.
 
-### E. Revision matching — proposal rev 2 (research only, no code)
-[`docs/research/R2-revision-matching.md`](research/R2-revision-matching.md) — validate every fetch before classifying; separate representation changes from record changes; time-shift matches stay **review candidates** with both records kept; absent records labelled "not present in the source response retrieved on [date]". Evidence is **lightcurve-index only** (Archive capture 12 Jun 2024 vs today, 853 events): 503 unchanged, 217 differ at the same time, 133 time-shift candidates (1–9 s, inferred pairs), 64 newly listed reports. **Claude's counts; GPT reviewed the reasoning, not reproduced the counts.**
+### E. Revision matching — proposal rev 3 (research only, no code; accepted by GPT as a research proposal at rev 2, not a build specification)
+[`docs/research/R2-revision-matching.md`](research/R2-revision-matching.md) — validate structure **and values** before classifying (all-or-none location, ranges, hemisphere letters, finite numbers, genuine zeros kept); compare against the **last successfully validated** response, shown with its retrieval time and any newer failed or held fetch; candidates (same-time and time-shift) acquire no identity or combined history until accepted; unresolved pairs never inflate counts; acceptance rules, thresholds and window listed as **open decisions**; separate representation changes from record changes; time-shift matches stay **review candidates** with both records kept; absent records labelled "not present in the source response retrieved on [date]". Evidence is **lightcurve-index only** (Archive capture 12 Jun 2024 vs today, 853 events): 503 unchanged, 217 differ at the same time, 133 time-shift candidates (1–9 s, inferred pairs), 64 newly listed reports. **Claude's counts; GPT reviewed the reasoning, not reproduced the counts.**
 
 **GLM bolides** (GOES Geostationary Lightning Mapper) are a separate potential source: own assessment, including overlap and duplicate handling.
 

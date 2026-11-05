@@ -1,6 +1,6 @@
-# R2 fireballs — recognising a corrected event (proposal, rev 2, research only)
+# R2 fireballs — recognising a corrected event (proposal, rev 3, research only)
 
-5 Nov 2026 · Claude · rev 2 after GPT's review. **Research and documentation only: no matching code, collector, schedule, storage, page change, deployment or third-party contact.**
+5 Nov 2026 · Claude · rev 3: GPT accepted rev 2 as a research proposal; rev 3 adds the clarifications needed before it could become a build specification. **Not a build specification yet.** **Research and documentation only: no matching code, collector, schedule, storage, page change, deployment or third-party contact.**
 
 **Attribution.** The archived-index counts, historical pairings and worked examples below are **Claude's results; GPT has reviewed the reasoning but has not independently reproduced them.** The catalogue checks and the velocity arithmetic in R2 §C.1–C.2 are confirmed by both.
 
@@ -52,7 +52,11 @@ The closest two catalogue events are **494 s** apart (2011-03-23, both unlocated
 
 ## 3. Step one on every fetch — validate before classifying
 
-A successful HTTP response is not enough. **A response judged invalid or potentially incomplete must not produce any addition, correction or absence conclusion**; the last valid response stays current.
+A successful HTTP response is not enough. **A response judged invalid or potentially incomplete must not produce any addition, correction or absence conclusion.**
+
+**Comparison baseline = the last successfully validated response**, always shown with its own retrieval time. If a newer fetch failed or was held, that is recorded beside it ("last successfully validated: retrieved [date time]; latest fetch [date time] held for review / rejected: [reason]"). Keeping an older snapshot as the baseline must never make it look freshly confirmed.
+
+**Structure checks**
 
 | Check | Verified fault (response rejected) | Anomaly (held for review; no event conclusions until reviewed) |
 |---|---|---|
@@ -64,11 +68,28 @@ A successful HTTP response is not enough. **A response judged invalid or potenti
 | Query scope | parameters differ from the comparison basis (e.g. `vel-comp`, date or `limit` filters) | — |
 | Range | — | the earliest or latest date moves unexpectedly; many old records absent at once |
 | Transport | non-200; body not JSON; truncated body | — |
+| Field names | a duplicate name in `fields` | — |
 
-The 5 Nov response passes every check: version 1.2, 12 fields, 1,074 rows reported and received, every row 12 values, no duplicate timestamps.
+**Value checks** (a failing row is a verified fault unless marked anomaly; whether one bad row rejects the whole response or only holds that row is an **open decision**, §4.5)
+
+| Check | Verified invalid | Anomaly (review) |
+|---|---|---|
+| Required non-null | `date`, `energy` or `impact-e` null (the doc guarantees all three) | — |
+| Dates | not `YYYY-MM-DD hh:mm:ss`, or not a real calendar time | in the future relative to retrieval; earlier than the catalogue has ever started |
+| Numbers | a value that does not parse as a finite number (NaN, Inf, text) | — |
+| Location all-or-none | some of `lat`, `lat-dir`, `lon`, `lon-dir` present and others null (documented rule) | — |
+| Coordinate ranges | `lat` outside 0–90 or `lon` outside 0–180 (values are unsigned; the sign is in the direction letter) | — |
+| Hemisphere letters | `lat-dir` not N/S, `lon-dir` not E/W | a signed (negative) `lat`/`lon` alongside a direction letter |
+| Velocity all-or-none | some of `vx`, `vy`, `vz` present and others null | — |
+| Physical plausibility | — | `energy` or `impact-e` ≤ 0; `alt` far outside the range seen so far (14.0–90.5 km on 5 Nov) |
+| **Genuine zeros** | — | none: `"0"`/`"0.0"` is a valid value and is **never** treated as missing (5 Nov: lat 0.0 on 2014-03-18, vx 0 on 2024-10-05, vz 0 on 2025-09-09) |
+
+Thresholds for "far outside" and "in the future" are open decisions (§4.5).
+
+The 5 Nov response passes every check (Claude, `catalogue-gpt-1133Z.json`): version 1.2; 12 distinct field names; 1,074 rows reported and received; every row 12 values; no duplicate timestamps; required values all non-null; every number finite; lat 0.0–88.5, lon 0.1–180.0; all directions N/S/E/W; location and velocity all-or-none; energy and impact energy all > 0.
 
 ## 4. Proposed classification (for discussion — no code)
-Compared with the **last valid retained response**, never with what the page shows.
+Compared with the **last successfully validated response** (§3), never with what the page shows.
 
 ### 4.1 Response level
 1. **Unchanged bytes** — identical response hash. Record the retrieval time only.
@@ -81,20 +102,37 @@ Compared with the **last valid retained response**, never with what the page sho
 | Class | Condition | Outcome |
 |---|---|---|
 | **A. Unchanged at an existing timestamp** | same `date`, all values identical | current join confirmed; no new version |
-| **B. Candidate correction at an existing timestamp** | same `date`, some values differ | **retain both versions**; record which fields changed. Exact time is a strong join, **not guaranteed identity**. Review if location moves more than a stated distance, the hemisphere flips, or energy changes beyond a stated factor |
+| **B. Candidate correction at an existing timestamp** | same `date`, some values differ | **retain both versions**; record which fields changed. Exact time is a strong join, **not guaranteed identity**. Flag for review if location moves beyond a distance threshold, the hemisphere flips, or energy changes beyond a factor (both open, §4.5). **How a B candidate becomes an accepted revision is an open decision (§4.5)** — until accepted it does not acquire an established identity or a combined history |
 | **C. Time-shift candidate** | an old time absent **and** a new time present, mutual nearest, one-to-one, within an experimental window | **review candidate**. Both source records kept separately; histories not combined until the relationship is accepted |
 | **D. Newly listed** | a time with no prior record and no absent partner | dated by **occurrence** (peak time), never presented as just happening; "newly listed in the source response retrieved on [date]" |
-| **E. Not present in the latest response** | an old time with no partner, in a valid response | record kept; shown as **"not present in the source response retrieved on [date]"**, never as still listed by CNEOS; absence alone does not establish withdrawal |
+| **E. Not present in the latest response** | an old time with no partner, in a successfully validated response | record kept; shown as **"not present in the source response retrieved on [date]"**, never as still listed by CNEOS; absence alone does not establish withdrawal |
 | **F. Structural ambiguity** | many-to-one, one-to-many, chained shifts, two candidates in the window | **review**; no automatic split or merge |
 
 ### 4.3 Identity is a decision, not a match
 - Mother Earth would hold **its own internal event identifier** (ours, labelled as ours). Each source record keeps its own peak time, values and retrieval time.
-- A link between two source records is a **recorded decision**: the evidence (time offset, location, altitude, report file name), who or what proposed it, who accepted it, when, and the remaining uncertainty. Until accepted, both records stay separate.
+- Applies to **every** link, B and C alike. A link between two source records is a **recorded decision**: the evidence (time offset, location, altitude, report file name), who or what proposed it, who accepted it, when, and the remaining uncertainty. Until accepted, both records stay separate.
 - **Duplicate timestamps within one response** (none observed): rows sharing a `date` are never collapsed and never joined by time alone; they are held for review and can only be told apart by their other values.
 - **Window:** observed offsets were ≤ 9 s. Any proposed window is **experimental**, derived from this one index-only comparison, and only nominates review candidates; it never establishes identity.
 
-### 4.4 Values shown (a presentation proposal, not a finding)
-For a future display, catalogue values could remain the displayed values, with any conflicting report value retained separately and attributed ("lightcurve report, file …, retrieved …"). That is a presentation choice, not a finding that the catalogue is always scientifically preferable.
+### 4.4 Presentation while identity is unresolved (a proposal; no UI requested)
+- **Values:** catalogue values could remain the displayed values, with any conflicting report value retained separately and attributed ("lightcurve report, file …, retrieved …"). A presentation choice, not a finding that the catalogue is always scientifically preferable.
+- **Unresolved relationships:** both source records stay retained as evidence, but are **not presented as two confirmed events**. Proposed: one entry marked "possible revision — under review", showing both source times and values with their retrieval dates, until the link is accepted or rejected.
+- **Counts:** totals are never silently inflated by unresolved pairs. Proposed: a count states its basis — e.g. "1,074 records in the source response retrieved on [date]; 3 possible revisions under review" — or gives a range ("1,071–1,074 events") with the reason, rather than one number that hides the uncertainty.
+- **Absent records** (class E) are excluded from "currently listed" counts and shown with their dated wording; they are not counted as listed by the source.
+- **Freshness:** anything shown says which response it comes from and when that response was retrieved and validated (§3).
+
+### 4.5 Open decisions (unresolved by design at this research stage)
+| Decision | Status |
+|---|---|
+| Acceptance rule for B candidates (same timestamp, values differ) — e.g. automatic when only non-flagged fields change, or always reviewed | **open** — to be proposed and approved before any build |
+| Acceptance rule for C candidates (time shift) | **open**; until decided, every C stays a review candidate |
+| Who or what may accept a link, and how a rejection is recorded | **open** |
+| Distance threshold that flags a location change | **open** |
+| Energy-change factor that flags a change | **open** |
+| Experimental time window for nominating C candidates | **open** (observed offsets ≤ 9 s; no window chosen) |
+| One invalid row: reject the whole response, or hold the row and accept the rest | **open** |
+| Plausibility limits for anomaly checks (altitude, future dates) | **open** |
+| Wording and form of count disclosure (§4.4) | **open** |
 
 ## 5. Worked examples (index only; real except where marked)
 
@@ -104,10 +142,10 @@ For a future display, catalogue values could remain the displayed values, with a
 | B | 25 Jul 2018, 76.9° N 69.0° W | 21:55:26 · file 21:55:24 · 2.1 kt | 21:55:23 · file 21:55:23 · 1.4 kt | **C — review candidate**: three different times across the index and file names; identical location. Shows how one-second matching would fail. |
 | C | 28 Nov 2014 11:47:18 | 45.8° S **172.7° W** | 46.1° S **172.7° E** | **B — candidate correction at an existing timestamp**, flagged: ≈ 1,128 km hemisphere flip, altitude and energy unchanged. A location-based matcher would have separated them. |
 | D | 8 Apr 2015 04:06:31 | 25.5° S 51.5° E · 0.49 kt | 20.4° S 51.5° E · 0.57 kt | **B — flagged**: ≈ 567 km move plus an energy change. |
-| E | 22 May 1997 08:30:15, no location | 0.15 kt | 0.68 kt | **B — candidate correction at an existing timestamp.** Only the time links them; the ×4.5 change is beyond any plausible review factor. Not a definite correction. |
+| E | 22 May 1997 08:30:15, no location | 0.15 kt | 0.68 kt | **B — candidate correction at an existing timestamp**, flagged for review: only the time links them, and the energy changes ×4.5. Not a definite correction. |
 | F | 6 Aug 1995, no location | 04:38:09 · 0.18 kt · file `…043808` | 04:38:08 · 0.18 kt | **C — review candidate** on time, unchanged energy and the 2024 file name alone (5 such unlocated cases). |
 | G | 23 Mar 2011 04:16:32 and 04:24:46, both unlocated | both listed | both listed | Two catalogue events 494 s apart. **Never merged for being close.** Illustrates why the window cannot be a safety bound. |
-| H | 19 Apr 2018 13:39:38 → 13:39:39; another event at 14:02:27, 8,202 km away | — | — | **C**; the second event is ruled out by location, not by time. Without locations this would be **F**. |
+| H | 19 Apr 2018 13:39:38 → 13:39:39; another event at 14:02:27, 8,202 km away | — | — | **C.** The 1 h radius was this research's search radius, not a proposed matching window; the event 23 min later is a competing match only if a future window (open, §4.5) were that wide. If it were, location separates them (8,202 km); without locations it would be **F**. |
 | I | 64 index rows with no 2024 counterpart (e.g. 1996-03-30, 2000-02-17) | absent | listed | **D for the index** — newly listed lightcurve reports, dated by occurrence. Whether they were new to the catalogue is unknown. |
 | J | **Hypothetical — not observed:** a record absent from a later valid response, no candidate | — | — | **E**: kept, labelled "not present in the source response retrieved on [date]". |
 | K | **Hypothetical — not observed:** a response reporting `count` 1,074 but delivering 1,050 rows | — | — | **Rejected at validation (§3)**: no absence conclusions for the 24 missing rows. |
@@ -124,8 +162,8 @@ For a future display, catalogue values could remain the displayed values, with a
 
 ## 7. What this does not establish
 - No stable identifier was found **in the inspected sources**; it is not claimed that none exists.
-- An exact timestamp match is a current join, not identity.
+- An exact timestamp match is a current join, not identity; no acceptance rule for candidates exists yet (§4.5).
 - The 133 pairings are inferred, unaccepted and not confirmed by the source.
-- Everything in §2 and §5 is about the **lightcurve index**; catalogue-only events and events after Aug 2022 are unobserved.
+- The **historical comparison** (§2.1–2.3 and the historical examples in §5) concerns the **lightcurve index** only; catalogue-only events and events after Aug 2022 are unobserved there. The **event-spacing analysis** (§2.4, Example G) uses **today's catalogue**, at one point in time.
 - The 494 s minimum separation is not a safe window.
 - Only CNEOS could confirm how corrections are made; **no contact without Chad's go.**
