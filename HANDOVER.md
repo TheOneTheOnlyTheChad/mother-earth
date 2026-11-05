@@ -1,4 +1,4 @@
-# Mother Earth — handover to thread 14 (4 Nov 2026, end of thread 13)
+# Mother Earth — handover (updated 5 Nov 2026, thread 14; thread-13 sections below still stand)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §5a testing, incl. the new clean-session method), then this file, then `STATUS.md` (newest first). Not a fresh sandbox.
 
@@ -16,8 +16,9 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §5a testing, incl. the 
 - Leftover merged remote branches (`mobile-pass`, `nsidc-page`, `plastic-rc`, `plastic-loaded`): proxy refuses deletes — Chad can delete when convenient.
 
 ## 1. Next (Chad's calls first)
-1. **Real-phone check** of the mobile pass (Galaxy) — only emulation so far. Watch: plastic takes > 20 s to load on the live hub, so the Key count and strip appear late.
-2. **Desktop 1280 px 8 px horizontal overflow** (pre-existing on main; header/stage/right column). Small, separate fix; needs Chad's go to publish.
+0. **Thread 14 (5 Nov):** desktop overflow fixed and public (`3a2fcb2`, `?v=202611081000`) — see STATUS. New small item: **orbital-browser 103/2 on main** (stale/beyond-GEO vs reference for payload-alone and debris-alone; likely time-dependent fixture) — investigate the test, not the page.
+1. **Real-phone check** of the mobile pass (Galaxy) — only emulation so far (GPT checked the public site in a browser on 5 Nov). Watch: plastic takes > 20 s to load on the live hub, so the Key count and strip appear late.
+2. ~~Desktop 1280 px 8 px horizontal overflow~~ — **fixed 5 Nov** (it was fonts-dependent; real bug at 1,101–1,186 px).
 3. **NCEI recheck** when ncei.noaa.gov answers (accession 0276422; does any later revision document the 343 post-2021 rows / size classes?). Research only; any schedule needs Chad's go.
 4. Plastic follow-ups stay research only: Law 2010 reference candidate; 72-h hypothetical drift (OpenDrift/PlasticParcels, Python, not the Worker); AOMI / ADIS later (AOMI asks to be contacted before publication).
 5. Open decisions unchanged: attribution placement (REGISTER top note); sea-ice history table; GFW human-readable source page.
@@ -42,4 +43,4 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §5a testing, incl. the 
 | Comparison shots | sent to Chad in thread 13 (cmp-360/390/390b/land, live-360-all, live-360-key, live-844-inspector) |
 | Plastic research | `reviews/2026-11-04-ocean-plastic-export.md`, `reviews/2026-11-04-plastic-experience-proposal.md` |
 | Plastic tests | `node phase1/plastic-hub.test.mjs` (11) · `node phase1/plastic-ui.test.cjs` (29) |
-| Test setup, new container | `/home/claude/spike`: `npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine`; `mkdir -p /home/claude/fixtures && node phase1/orbital-fixture.build.mjs`; server via Bash `run_in_background` |
+| Test setup, new container | `/home/claude/spike`: `npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine @fontsource/ibm-plex-mono@5 @fontsource/barlow-condensed@5` (fontsource = real webfonts for desktop-overflow; Google Fonts is blocked in the container, so any width measurement without them is the fallback case); `mkdir -p /home/claude/fixtures && node phase1/orbital-fixture.build.mjs`; server via Bash `run_in_background` |
