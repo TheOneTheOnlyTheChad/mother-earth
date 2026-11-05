@@ -14,7 +14,7 @@ Tiers are GPT's recommended order (5 Nov 2026), not approvals. "Gate" = the firs
 
 | ID | Candidate | Source | Tier | Gate status (5 Nov) | Next step |
 |---|---|---|---|---|---|
-| R2 | Reported fireballs | NASA/JPL CNEOS | **1 — first** | **Partially complete** — catalogue re-checked independently (GPT + Claude, identical bytes); `vel` arithmetic agreed (GPT, reproduced by Claude); one lightcurve read (Claude only). Open: lightcurve reuse, time reference, report-vs-catalogue contents, `vel` cause | Revision-matching proposal written (§E) — Chad's review. Lightcurve work parked |
+| R2 | Reported fireballs | NASA/JPL CNEOS | **1 — first** | **Partially complete** — catalogue re-checked independently (GPT + Claude, identical bytes); `vel` arithmetic agreed (GPT, reproduced by Claude); one lightcurve read (Claude only). Open: lightcurve reuse, time reference, report-vs-catalogue contents, `vel` cause | Revision-matching proposal rev 2 (§E) — Chad's review. Lightcurve work parked |
 | R3 | Earth rotation / polar motion | USNO / IERS | **1 — first** | Not started | Sample `finals2000A`; flags, blanks, uncertainties |
 | R4 | Argo ocean profiles | Argo GDAC | **1 — first** | Not started | One profile sample; T/S + QC flags; payload |
 | R5 | Coral heat stress (DHW) | NOAA Coral Reef Watch | 2 — next | Not started | Product + derived-label check |
@@ -128,11 +128,11 @@ Attribution: **C.1–C.2 confirmed by both GPT and Claude**; **C.3–C.4 are Cla
 | 2009-10-08 02:57:14 | 19.2 | 14, −16, −6 | 22.091 | −2.891 | 21.278–22.907 | no |
 
 - 8 Oct 2009 is **not** explainable by rounding: integer components allow ±0.5 each, giving ≈ 21.28–22.91 km/s against `vel` 19.2.
-- Observation, not a cause: of the 8 unexplained, 3 had their peak time shifted between the 2024 archived index and today (2018-12-18, 2014-06-28, 2014-05-16), 1 was unchanged, 4 were not in that index. **"Stale stored value" remains a hypothesis only** — nothing here establishes it.
+- Observation, not a cause: of the 8 unexplained, 3 are time-shift candidates between the 2024 archived lightcurve index and today's (2018-12-18, 2014-06-28, 2014-05-16 — inferred pairs, Claude only), 1 was unchanged, 4 were not in that index. **"Stale stored value" remains a hypothesis only** — nothing here establishes it.
 - **Display rule (unchanged):** do not use the undocumented `vel`; any magnitude is labelled **"calculated from supplied components"**, carrying the components' printed precision.
 
 **C.3 Lightcurve index (Claude only).** 969 entries · 969 PDFs · 818 `.txt` (first `.txt` 22 Mar 1998) · newest 3 Jun 2024; 78 catalogue events after that have no entry, 27 earlier events have none. Today's file names equal `YYYY.DOY.hhmmss` of the index's own peak time (969/969). All 969 index rows match a catalogue event by exact peak time, with **0 differences in the index's columns** (impact energy, location, altitude).
-- **What that does and does not show:** the index's columns are **taken from the catalogue** (CNEOS says so), so agreement here is expected and verifies the join only. It does **not** verify the contents of the linked reports — CNEOS warns those reports can carry revisions not yet incorporated in the catalogue (§E.2 finds evidence of exactly that for timestamps).
+- **What that does and does not show:** the index's columns are **taken from the catalogue** (CNEOS says so), so agreement here is expected and verifies the join only. It does **not** verify the contents of the linked reports — CNEOS warns those reports can carry revisions not yet incorporated in the catalogue (the index comparison in §E is consistent with that for timestamps: 127 of 133 candidate pairs had the later time in the 2024 file name).
 
 **C.4 One lightcurve read — `2023.172.193912.txt` (Claude only).** 32,088 B, `text/plain`.
 - Prose header (location to 0.1°, peak intensity 4.77e+10 W/sr, total radiated energy 5.47e+11 J under a 6000 K blackbody model), then a Python-style list of `(time, intensity)`; stated columns time, intensity (W/sr). Not CSV.
@@ -152,8 +152,8 @@ Attribution: **C.1–C.2 confirmed by both GPT and Claude**; **C.3–C.4 are Cla
 - **Interpretation:** the 8 unexplained `vel` cases (cause — only CNEOS could say; **contact needs Chad's go**); negative lightcurve values; report contents vs catalogue values.
 - Archived **API** responses: the Archive's capture index for `fireball.api` returned an error (503) on 5 Nov — retry before concluding none exist.
 
-### E. Revision matching — proposal (research only, no code)
-Full proposal with worked examples: [`docs/research/R2-revision-matching.md`](research/R2-revision-matching.md). Headline evidence (Claude only): between the Archive's 2024 copy of the lightcurve index (853 events) and today's, **503 rows unchanged, 217 changed at the same peak time, 133 changed peak time** (by 1–9 s; 114 by exactly 1 s); 0 disappeared; 64 rows added for pre-Aug-2022 events.
+### E. Revision matching — proposal rev 2 (research only, no code)
+[`docs/research/R2-revision-matching.md`](research/R2-revision-matching.md) — validate every fetch before classifying; separate representation changes from record changes; time-shift matches stay **review candidates** with both records kept; absent records labelled "not present in the source response retrieved on [date]". Evidence is **lightcurve-index only** (Archive capture 12 Jun 2024 vs today, 853 events): 503 unchanged, 217 differ at the same time, 133 time-shift candidates (1–9 s, inferred pairs), 64 newly listed reports. **Claude's counts; GPT reviewed the reasoning, not reproduced the counts.**
 
 **GLM bolides** (GOES Geostationary Lightning Mapper) are a separate potential source: own assessment, including overlap and duplicate handling.
 

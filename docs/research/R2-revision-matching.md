@@ -1,85 +1,131 @@
-# R2 fireballs — recognising a corrected event (proposal, research only)
+# R2 fireballs — recognising a corrected event (proposal, rev 2, research only)
 
-5 Nov 2026 · Claude · **research only: no matching code, collector, schedule, storage or deployment.** Evidence and scripts: `~/Documents/Mother Earth/research/fireballs/2026-11-05-claude/` (README there gives URLs, retrieval times, sha256). Results below are **Claude's, not yet independently reproduced**, except where marked.
+5 Nov 2026 · Claude · rev 2 after GPT's review. **Research and documentation only: no matching code, collector, schedule, storage, page change, deployment or third-party contact.**
 
-**The question:** on a later fetch, how does Mother Earth tell a new event, a corrected event, an unchanged re-fetch and a record that is no longer listed — without silently creating a duplicate or merging two different events?
+**Attribution.** The archived-index counts, historical pairings and worked examples below are **Claude's results; GPT has reviewed the reasoning but has not independently reproduced them.** The catalogue checks and the velocity arithmetic in R2 §C.1–C.2 are confirmed by both.
 
-## 1. What the sources give us to identify an event
+**Evidence and scripts:** `~/Documents/Mother Earth/research/fireballs/2026-11-05-claude/` — the README there gives every file's URL, retrieval time and sha256. Counts here come from `revision_check.py` (→ `revision-comparison-2024-vs-2026.csv`), `revision_followup.py` and `spacing_check.py`, run with Python 3 standard library from that folder.
 
-| Candidate identity evidence | Where | Verdict |
+**The question:** on a later fetch, how could Mother Earth tell a new event, a corrected event, an unchanged re-fetch and a record that is no longer listed — without silently creating a duplicate or merging two different events? **Plausible matches must stay distinguishable from accepted event identities.**
+
+## 1. Identity evidence in the inspected sources
+
+**No stable identifier was found in the inspected sources:** the Fireball API v1.2 documentation and responses; CNEOS's Introduction, Lightcurves and Operational Notes pages; the lightcurve index; one lightcurve `.txt` header.
+
+| Candidate identity evidence | Where | Assessment |
 |---|---|---|
-| Stable event ID | Fireball API v1.2, CNEOS Introduction, Lightcurves, Operational Notes pages | **None documented.** No ID, revision number, first-published time or last-changed time in any response or page read. |
-| Peak-brightness time | catalogue `date`; index `peak_date` | **The only join key, and it is itself revised** (§2.2). A current join, not a permanent identifier. |
-| Lightcurve file name `YYYY.DOY.hhmmss` | index `filename`, `filename_txt` | **Not stable.** The naming scheme changed (2024: `bolide.YYYY.DOY.hhmmss.pdf`; now no prefix), and the time inside it has moved in both directions relative to the catalogue (§2.3). Evidence of *a* report time, not an ID. |
-| Report header | `.txt` header (one read) | Time to the whole second plus location to 0.1°. Gives a second, independent-looking timestamp — but it has the same precision problem and only one header has been read. |
-| Location, energy, altitude, velocity | catalogue | Supporting evidence only. All of them are revised too (§2.2), and 186 of 1,074 events have no location at all. |
-| `impact-e` | catalogue | **Not independent of `energy`:** CNEOS's Introduction gives it as an empirical function of radiated energy. A change in one implies the other; never count them as two pieces of evidence. |
+| Stable event ID, revision number, first-published or last-changed time | — | None found in the sources above. |
+| Peak-brightness time | catalogue `date`; index `peak_date` | The only available join key, and it is itself revised (§2.2). **An exact match establishes a current join, not identity** (§4.3). |
+| Lightcurve file name `YYYY.DOY.hhmmss` | index `filename`, `filename_txt` | Not stable: the naming scheme changed (2024 `bolide.…pdf`; now no prefix), and the time inside it has moved ahead of and behind the catalogue's (§2.3). Evidence of a report time, not an identifier. |
+| Report header | `.txt` (one read) | Time to the whole second, location to 0.1°. Only one header read; its relation to the catalogue is unverified. |
+| Location, energy, altitude, velocity | catalogue | Supporting evidence only. All are revised (§2.2); 186 of 1,074 events have no location. |
+| `impact-e` | catalogue | **Not independent of `energy`**: CNEOS's Introduction gives it as an empirical function of radiated energy. Never counted as a second piece of evidence. |
 
-## 2. Evidence of real corrections
+## 2. Evidence of changes — lightcurve index only
 
-### 2.1 Source of the evidence, and its limits
-The Internet Archive holds **one** copy of CNEOS's lightcurve index (`lc_files.json`), captured 12 Jun 2024 (original Last-Modified 1 Apr 2024). Its columns come from the catalogue, so it is a partial record of what the catalogue said at that time. Compared with today's index (`revision_check.py`).
+### 2.1 Scope (carried through every conclusion below)
+The Internet Archive holds **one** capture of CNEOS's **lightcurve index** (`lc_files.json`, captured 12 Jun 2024, original Last-Modified 1 Apr 2024). Its columns are taken from the catalogue, so it shows what the catalogue said **for events that had a lightcurve report listed in the index** at that time. Compared with today's index.
 
-Limits, kept explicit:
-- It covers only events that had a lightcurve report: **853 events**, newest 21 Aug 2022. Today's catalogue has 939 events up to that date — revisions to the other ~86 are invisible here.
-- One before/after pair; intermediate revisions, and revisions to events after Aug 2022, are not seen.
-- No archived **API** response was checked (the Archive's capture index returned 503 on 5 Nov — retry before concluding none exist).
-- **Pairing a 2024 row with a 2026 row at a different time is my inference** (nearest time, mutual, one-to-one), not something the source states.
+- **Index only**: 853 events, newest 21 Aug 2022. Today's catalogue has 939 events up to that date; changes to events missing from the 2024 index are not observed. Nothing here describes the catalogue as a whole.
+- One before/after pair: intermediate changes and anything after Aug 2022 are not observed.
+- No archived **API** response was examined (the Archive's capture index returned 503 on 5 Nov; to retry).
+- **Pairing a 2024 row with a 2026 row at a different time is an inference** (mutual nearest time, one-to-one) — supporting evidence, not proof (§4).
 
-### 2.2 What changed between the 2024 copy and today
+### 2.2 What differs between the 2024 index and today's index
 
-| Outcome for the 853 rows of 2024 | Rows |
+| Outcome for the 853 rows of the 2024 index | Rows |
 |---|---:|
-| Same peak time, every column identical | **503** |
-| Same peak time, one or more columns changed | **217** — impact energy 206; location 8 (incl. lat/lon/hemisphere); location + energy 3 |
-| Peak time changed (paired by nearest time) | **133** — by 1 s (114), 2 s (9), 3 s (5), 4 s (2), 6, 7, 9 s (one each). Of these, 67 also changed impact energy, 2 changed location |
+| Same peak time, every compared column identical | **503** |
+| Same peak time, one or more columns differ | **217** — impact energy 206; location 8; location + impact energy 3 |
+| No row at the same time; a **candidate** at a nearby time (mutual nearest, one-to-one) | **133** — offsets 1 s (114), 2 s (9), 3 s (5), 4 s (2), 6, 7, 9 s (one each); 67 also differ in impact energy, 2 in location |
 | No candidate within 1 h | **0** |
-| The 2024 time still present in today's catalogue | **0** of the 133 — CNEOS replaced, it did not duplicate |
-| Today's index rows (≤ 21 Aug 2022) with no 2024 counterpart | **64** — reports released later, for events from 1996–2022 |
+| The 2024 time present in today's catalogue, among the 133 | **0** — **consistent with replacement among these inferred pairs**; not a finding about how CNEOS handles records generally |
+| Today's index rows (≤ 21 Aug 2022) with no 2024 counterpart | **64** — **newly listed lightcurve reports** for events from 1996–2022. Whether those events were also new to the *catalogue* is not observable from the index. |
 
-Largest corrections observed: a longitude hemisphere flip (≈ 1,128 km), a latitude change of 5.1° (≈ 567 km), impact energy changes of up to ×4.5 (0.15 → 0.68 kt) and ÷3.4 (0.48 → 0.14 kt).
+Largest differences at the same time: a longitude hemisphere flip (≈ 1,128 km) and a 5.1° latitude change (≈ 567 km). Impact-energy differences up to ×4.5 (0.15 → 0.68 kt) and ÷3.4 (0.48 → 0.14 kt).
 
-### 2.3 Report names lead (and sometimes trail) the catalogue
-In the 2024 copy, **132** file names already carried a different time from the row's own `peak_date`. For **127 of the 133** events whose catalogue time later changed, the 2024 file name already held the time the catalogue uses today — the reports were ahead of the catalogue, as CNEOS warns. But it runs both ways: 2010-04-17's file was named `…022159` in 2024 while the catalogue said 02:21:58 then and now; today the file is renamed `…022158`. So neither the file name nor the catalogue time is the authority; both are evidence.
+### 2.3 Report file names vs catalogue times (index only)
+In the 2024 index, **132** file names carried a different time from that row's `peak_date`. For **127 of the 133** candidate pairs, the 2024 file name already held the time today's index uses — consistent with CNEOS's warning that reports can be ahead of the catalogue. The relation also runs the other way: 2010-04-17's file was `…022159` in 2024 while the index said 02:21:58 then and now; today's file is `…022158`. Neither the file name nor the catalogue time is treated as authoritative; both are evidence.
 
-## 3. Worked examples (all real except where marked)
+### 2.4 Event spacing (today's catalogue)
+The closest two catalogue events are **494 s** apart (2011-03-23, both unlocated); 4 consecutive pairs fall within 1 h. **This does not establish a safe matching window**: future or unreported events could be closer, and these are only the events CNEOS lists.
 
-| # | Case | 2024 copy | Today | What a matcher should conclude |
+## 3. Step one on every fetch — validate before classifying
+
+A successful HTTP response is not enough. **A response judged invalid or potentially incomplete must not produce any addition, correction or absence conclusion**; the last valid response stays current.
+
+| Check | Verified fault (response rejected) | Anomaly (held for review; no event conclusions until reviewed) |
+|---|---|---|
+| API version | `signature.version` ≠ the version the rules were written for (1.2) | — |
+| Required fields | `date`, `energy`, `impact-e` missing from `fields`; the requested `vx/vy/vz` missing | an extra or unexpected field (e.g. `vel` disappearing or new fields appearing) |
+| Row structure | a row whose length ≠ `fields` length; a non-string, non-null value; a malformed date | — |
+| Reported vs received count | `count` ≠ number of rows | a total count that falls compared with the last valid response |
+| Duplicate timestamps | — | two or more rows with the same `date` (none in any inspected file) |
+| Query scope | parameters differ from the comparison basis (e.g. `vel-comp`, date or `limit` filters) | — |
+| Range | — | the earliest or latest date moves unexpectedly; many old records absent at once |
+| Transport | non-200; body not JSON; truncated body | — |
+
+The 5 Nov response passes every check: version 1.2, 12 fields, 1,074 rows reported and received, every row 12 values, no duplicate timestamps.
+
+## 4. Proposed classification (for discussion — no code)
+Compared with the **last valid retained response**, never with what the page shows.
+
+### 4.1 Response level
+1. **Unchanged bytes** — identical response hash. Record the retrieval time only.
+2. **Same parsed records, different representation** — hashes differ but the parsed records are identical after canonicalisation. **No event revision is inferred.** Real examples of representation-only variation: the API's field order differs from its documented sample; in today's lightcurve index the key order differs **between rows of the same file**.
+3. **Records differ** → continue to 4.2.
+
+**Comparison rules** (canonicalisation must not erase meaning): records keyed by `fields` names, not positions; row order ignored; **values compared as the source's strings** — `"6.30"` ≠ `"6.3"` is recorded as a precision change, never silently equalised; `null` ≠ `"0"` ≠ `"0.0"` treated with the same care; whitespace inside values not trimmed without recording it.
+
+### 4.2 Record level
+| Class | Condition | Outcome |
+|---|---|---|
+| **A. Unchanged at an existing timestamp** | same `date`, all values identical | current join confirmed; no new version |
+| **B. Candidate correction at an existing timestamp** | same `date`, some values differ | **retain both versions**; record which fields changed. Exact time is a strong join, **not guaranteed identity**. Review if location moves more than a stated distance, the hemisphere flips, or energy changes beyond a stated factor |
+| **C. Time-shift candidate** | an old time absent **and** a new time present, mutual nearest, one-to-one, within an experimental window | **review candidate**. Both source records kept separately; histories not combined until the relationship is accepted |
+| **D. Newly listed** | a time with no prior record and no absent partner | dated by **occurrence** (peak time), never presented as just happening; "newly listed in the source response retrieved on [date]" |
+| **E. Not present in the latest response** | an old time with no partner, in a valid response | record kept; shown as **"not present in the source response retrieved on [date]"**, never as still listed by CNEOS; absence alone does not establish withdrawal |
+| **F. Structural ambiguity** | many-to-one, one-to-many, chained shifts, two candidates in the window | **review**; no automatic split or merge |
+
+### 4.3 Identity is a decision, not a match
+- Mother Earth would hold **its own internal event identifier** (ours, labelled as ours). Each source record keeps its own peak time, values and retrieval time.
+- A link between two source records is a **recorded decision**: the evidence (time offset, location, altitude, report file name), who or what proposed it, who accepted it, when, and the remaining uncertainty. Until accepted, both records stay separate.
+- **Duplicate timestamps within one response** (none observed): rows sharing a `date` are never collapsed and never joined by time alone; they are held for review and can only be told apart by their other values.
+- **Window:** observed offsets were ≤ 9 s. Any proposed window is **experimental**, derived from this one index-only comparison, and only nominates review candidates; it never establishes identity.
+
+### 4.4 Values shown (a presentation proposal, not a finding)
+For a future display, catalogue values could remain the displayed values, with any conflicting report value retained separately and attributed ("lightcurve report, file …, retrieved …"). That is a presentation choice, not a finding that the catalogue is always scientifically preferable.
+
+## 5. Worked examples (index only; real except where marked)
+
+| # | Case | 2024 index | Today's index / catalogue | Classification under §4 |
 |---|---|---|---|---|
-| A | **Time correction, large** — 15 Feb 2013 (54.8° N 61.1° E) | 03:20:33 · 440 kt · file `bolide.2013.046.032026` | 03:20:26 · 441 kt · file `2013.046.032026` | Same event, time corrected by −7 s. Supported by: identical location and altitude, the 2024 file name already carrying 03:20:26, mutual-nearest pairing, old time gone. **Correction, high support.** |
-| B | **Three times for one event** — 25 Jul 2018 (76.9° N 69.0° W) | index 21:55:26 · file 21:55:24 · 2.1 kt | 21:55:23 · file 21:55:23 · 1.4 kt (impact energy revised) | Same event; the source gave three different times across two years. Pair by mutual nearest time + identical location. **Correction, high support** — but proves a 1 s window is too narrow. |
-| C | **Location correction at the same time** — 28 Nov 2014 11:47:18 | 45.8° S **172.7° W** | 46.1° S **172.7° E** | Same event (time, altitude 26.1 km, energy 1.7 kt unchanged), moved ≈ 1,128 km across the date line. A location-based matcher would have called it a different event. **Correction — flag for review** (large move). |
-| D | **Large latitude change** — 8 Apr 2015 04:06:31 | 25.5° S 51.5° E · 0.49 kt | 20.4° S 51.5° E · 0.57 kt | Same time, ≈ 567 km move, energy revised. **Correction — review.** |
-| E | **Energy-only correction** — 22 May 1997 08:30:15 (no location) | 0.15 kt | 0.68 kt | Same time, no other evidence. **Correction by time alone** — low support; record it, never as a new event. |
-| F | **No-location time shift** — 6 Aug 1995 | 04:38:09 · 0.18 kt · file `…043808` | 04:38:08 · 0.18 kt | Only time + energy to go on (5 such cases). Pairing rests on the 1 s gap, unchanged energy and the 2024 file name. **Probable correction — review.** |
-| G | **Two real events 8 min apart, no locations** — 23 Mar 2011 04:16:32 and 04:24:46 | both present | both present, energies 2.85 and 3.49 (×10¹⁰ J) | The closest pair of distinct events in the catalogue (494 s). **Must never be merged** for being close. Shows the safe ceiling of any time window. |
-| H | **Nearby distinct event** — 19 Apr 2018 13:39:38 → 13:39:39; another event at 14:02:27, 8,202 km away | — | — | The only shift with a second candidate within 1 h. Mutual-nearest picks 13:39:39; the other is 23 min and a hemisphere away. **Correction; the second candidate is ruled out by distance, not time alone.** |
-| I | **Hypothetical — not observed:** an event present in one fetch and absent in the next with no nearby replacement | — | — | Record **"not in latest response"**, keep the record, re-check on later fetches. **Never delete; never assume it was withdrawn** — it may be a fetch fault, a filter, or a real retraction, and the source does not say which. |
-| J | **Hypothetical — not observed:** one old event replaced by two new ones within seconds (split), or two old by one (merge) | — | — | **Always review.** No automatic merge or split. Not seen in the 2024→2026 data (0 many-to-one targets). |
+| A | 15 Feb 2013, 54.8° N 61.1° E | 03:20:33 · 440 kt · file `bolide.2013.046.032026` | 03:20:26 · 441 kt · file `2013.046.032026` | **C — time-shift candidate**, strong supporting evidence (−7 s; identical location and altitude; 2024 file name already 03:20:26; mutual nearest; old time absent today). Held for review; not merged automatically. |
+| B | 25 Jul 2018, 76.9° N 69.0° W | 21:55:26 · file 21:55:24 · 2.1 kt | 21:55:23 · file 21:55:23 · 1.4 kt | **C — review candidate**: three different times across the index and file names; identical location. Shows how one-second matching would fail. |
+| C | 28 Nov 2014 11:47:18 | 45.8° S **172.7° W** | 46.1° S **172.7° E** | **B — candidate correction at an existing timestamp**, flagged: ≈ 1,128 km hemisphere flip, altitude and energy unchanged. A location-based matcher would have separated them. |
+| D | 8 Apr 2015 04:06:31 | 25.5° S 51.5° E · 0.49 kt | 20.4° S 51.5° E · 0.57 kt | **B — flagged**: ≈ 567 km move plus an energy change. |
+| E | 22 May 1997 08:30:15, no location | 0.15 kt | 0.68 kt | **B — candidate correction at an existing timestamp.** Only the time links them; the ×4.5 change is beyond any plausible review factor. Not a definite correction. |
+| F | 6 Aug 1995, no location | 04:38:09 · 0.18 kt · file `…043808` | 04:38:08 · 0.18 kt | **C — review candidate** on time, unchanged energy and the 2024 file name alone (5 such unlocated cases). |
+| G | 23 Mar 2011 04:16:32 and 04:24:46, both unlocated | both listed | both listed | Two catalogue events 494 s apart. **Never merged for being close.** Illustrates why the window cannot be a safety bound. |
+| H | 19 Apr 2018 13:39:38 → 13:39:39; another event at 14:02:27, 8,202 km away | — | — | **C**; the second event is ruled out by location, not by time. Without locations this would be **F**. |
+| I | 64 index rows with no 2024 counterpart (e.g. 1996-03-30, 2000-02-17) | absent | listed | **D for the index** — newly listed lightcurve reports, dated by occurrence. Whether they were new to the catalogue is unknown. |
+| J | **Hypothetical — not observed:** a record absent from a later valid response, no candidate | — | — | **E**: kept, labelled "not present in the source response retrieved on [date]". |
+| K | **Hypothetical — not observed:** a response reporting `count` 1,074 but delivering 1,050 rows | — | — | **Rejected at validation (§3)**: no absence conclusions for the 24 missing rows. |
+| L | **Hypothetical — not observed:** two rows with the same `date` | — | — | Held for review (§4.3); never collapsed. |
+| M | **Hypothetical — not observed:** one old record replaced by two within seconds | — | — | **F — review**; no automatic split or merge. |
 
-## 4. Proposed classification on each new fetch (for discussion — no code)
-Compare the new response with the **last retained response** (not with whatever is shown on the page).
+## 6. Inherently ambiguous — needs review
+- Time-shift candidates without location on either side (5 in this comparison; 186 catalogue events lack location).
+- Large location changes at an existing timestamp (C, D).
+- More than one candidate; splits, merges, chains (B, H, M).
+- Report vs catalogue conflicts (B; 2010-04-17) — kept explicit and attributed.
+- Absence: withdrawal and transient omission look the same in the data.
+- Why so many offsets are exactly 1 s (114 of 133) — reprocessing or rounding are plausible; **unverified.**
 
-1. **Unchanged re-fetch** — identical response hash. Record the retrieval time only.
-2. **Unchanged event** — same peak time, every field identical.
-3. **Corrected in place** — same peak time, some fields differ. Keep the earlier values as a prior version; never overwrite silently. **Review** if location moves more than a stated distance (C, D) or the hemisphere flips.
-4. **Probable time correction** — an old time vanished **and** a new time appeared, **mutual nearest**, **one-to-one**, within a short window, with no conflicting location. Observed shifts were ≤ 9 s; distinct events have never been closer than 494 s. A window of the order of tens of seconds would cover every observed correction with a wide margin — **a proposal derived from one comparison, not a validated threshold.** Supporting evidence, recorded with the pairing: same location (where both have one), same altitude, report file name carrying the new time. **Review** when: no location on either side (F), more than one candidate (H), energy changes by more than a stated factor, or location also moved.
-5. **New to the catalogue** — a time with no vanished partner. Not necessarily a new occurrence: CNEOS adds historical events (64 back-filled reports in this comparison). Label it by peak time, not as "just happened".
-6. **Not in latest response** — an old time with no partner. Keep, flag, re-check (I). Never deleted on absence.
-7. **Anything many-to-one, one-to-many, or chained** (B's three times across fetches) — **review**, never automatic.
-
-Mother Earth would then need **its own internal identifier** per event (ours, labelled as ours), carrying the chain of source peak times it has been seen under, each with retrieval time and how the link was made (exact, probable correction, reviewed). That is a design note, not an approval to build.
-
-## 5. Inherently ambiguous — needs a person
-- Time shifts with **no location** on either side (5 in this comparison; 186 catalogue events have no location).
-- Large **location** corrections at the same time (C, D) — the match is by time; distance alone would split them.
-- Two candidates within the window, or a split/merge (H, J).
-- Report vs catalogue **conflicts** (B; 2010-04-17): which value to show is not decidable from the data — show the catalogue's, record the conflict.
-- **Absence**: no way, from the data alone, to tell a withdrawn event from a transient omission.
-- Why times shift by exactly 1 s so often (114 of 133) — reprocessing or rounding are plausible; **unverified.**
-
-## 6. What this does not establish
-- **No permanent identifier exists in the data.** Exact timestamp matches in today's files establish a current join only.
-- The pairings in §2.2 are inferred, mutual-nearest, and have not been confirmed by the source.
-- Behaviour of catalogue-only events (no lightcurve) and of events after Aug 2022 is unobserved.
+## 7. What this does not establish
+- No stable identifier was found **in the inspected sources**; it is not claimed that none exists.
+- An exact timestamp match is a current join, not identity.
+- The 133 pairings are inferred, unaccepted and not confirmed by the source.
+- Everything in §2 and §5 is about the **lightcurve index**; catalogue-only events and events after Aug 2022 are unobserved.
+- The 494 s minimum separation is not a safe window.
 - Only CNEOS could confirm how corrections are made; **no contact without Chad's go.**
