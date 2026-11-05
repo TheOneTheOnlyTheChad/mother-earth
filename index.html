@@ -572,7 +572,7 @@ function inspectCell(p) {
   const recs = paired ? points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, p.layer === 'plastic' ? Infinity : 8) : [];   // plastic: every sample reachable, collocated ones included
   inspCtx = { layer: p.layer, recs };
   const rows = [
-    ['Everything here', `<button type="button" class="reclink placelink" data-cell="${esc(p.id)}">Everything we hold for this cell, all layers</button>`],
+    ['Everything here', `<button type="button" class="placelink" data-cell="${esc(p.id)}">Everything we hold for this cell, all layers</button>`],
     ['Selected', `one ${ME.CELL_DEG}° × ${ME.CELL_DEG}° coverage cell — totals for the cell, not a single record`],
     ['Cell total', `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
     ['Quantity', esc(snap.quantity || '')],

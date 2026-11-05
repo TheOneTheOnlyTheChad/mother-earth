@@ -168,14 +168,14 @@ button.res.go .rt{color:var(--fg)}
 .inspector dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:8px 0 0;font-size:12px}
 .inspector dt{color:var(--dim)} .inspector dd{margin:0;font-variant-numeric:tabular-nums;word-break:break-word}
 .inspector dd .q{color:var(--dim)}
-.inspector button.reclink{all:unset;display:block;width:100%;min-height:32px;padding:3px 0;cursor:pointer;color:var(--accent);text-align:left;word-break:break-word}
-.inspector button.reclink:hover{text-decoration:underline}
+.inspector button.reclink,.inspector button.placelink{all:unset;display:block;width:100%;min-height:32px;padding:3px 0;cursor:pointer;color:var(--accent);text-align:left;word-break:break-word}
+.inspector button.reclink:hover,.inspector button.placelink:hover{text-decoration:underline}
 .inspector .plist{margin:3px 0 0;padding-left:16px}
 .inspector .plist li{margin:1px 0;word-break:break-word}
 .inspector .pstmt{font-weight:600;color:var(--fg)}
 .inspector button.placeload{all:unset;cursor:pointer;color:var(--accent);text-decoration:underline;min-height:32px}
 @media (max-width:720px){.inspector button.placeload{min-height:44px;display:inline-block}}
-@media (max-width:720px){.inspector button.reclink{min-height:44px;padding:8px 0}}
+@media (max-width:720px){.inspector button.reclink,.inspector button.placelink{min-height:44px;padding:8px 0}}
 .inspector .x{position:absolute;top:4px;right:4px;background:none;border:0;color:var(--dim);font:18px var(--mono);cursor:pointer;min-width:44px;min-height:44px}
 .globe-fail{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:#7f8da3;font:14px/1.6 var(--mono)}
 .globe-fail b{color:var(--accent)}
