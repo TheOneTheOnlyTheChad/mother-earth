@@ -1,3 +1,11 @@
+# Mother Earth — status (5 Nov 2026 — thread 15)
+
+## 5 Nov — orbital-browser fixed (test-only); Schumann research entry. Page and hub unchanged.
+- **orbital-browser 2 failures — cause:** the reference counted stale over all rows; the page's worker over objects whose elements initialise successfully. Fixture epochs are pinned to 3 Nov 13:00 and the suite runs on the wall clock; by 5 Nov 6 payload and 6 debris init failures were past 3 days (rocket bodies 0), exactly the 6/6 gap. **Fix:** reference uses the worker's definition. 105/105; still fails on `draws-all-groups` (6) and on a stale threshold one day short (3). Stale and failed are not mutually exclusive. GPT agreed; Chad's go to merge to main. Page behaviour unchanged.
+- **Open:** shared fixed calculation time for browser + reference with 3-day boundary cases (GPT), real timers kept.
+- **Research backlog** `docs/RESEARCH-BACKLOG.md` → R1 Schumann resonance / ELF stations, research only (GPT confirmed it captures his findings and the restrictions).
+- **Still waiting on Chad's separate go:** history trial; public-page cleanup of the unreachable "no history kept" text.
+
 # Mother Earth — status (5 Nov 2026 — thread 14 close)
 
 ## 5 Nov 09:41 UTC — **PAGE RELEASE PUBLISHED; HISTORY OFF; TRIAL PENDING.** Chad's go, after GPT's review.

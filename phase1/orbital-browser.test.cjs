@@ -99,9 +99,10 @@ function reference(at) {
     const c = L[i].split(','); const g = GROUP_OF[c[iC]]; if (!g) continue;
     const r = out[g] || (out[g] = { rows: 0, drawn: 0, stale: 0, beyond: 0, first: null }); r.rows++;
     const o = {}; h.forEach((k, j) => { if (k !== 'CLASS') o[k] = NUM.has(k) ? +c[j] : c[j]; });
-    // Same definition as the page's worker: stale is counted over objects whose elements initialise (an init failure is
-    // counted as failed, never as stale). Counting all rows made this suite pass only while no init-failed object was
-    // past 3 days — i.e. only near the fixture's 3 Nov reference instant (found 5 Nov, thread 15).
+    // Same definition as the page's worker: the stale population is the objects whose elements initialise successfully.
+    // Stale and failed are NOT mutually exclusive: an object that initialises but fails propagation can be in both counts.
+    // Counting stale over all rows made this suite pass only while no init-failed object was past 3 days — i.e. only near
+    // the fixture's 3 Nov reference instant (found 5 Nov, thread 15).
     let p = null; try { const s = satellite.json2satrec(o); if (s && !s.error) { if (t - Date.parse(o.EPOCH + 'Z') > 3 * 86400e3) r.stale++; const pv = satellite.propagate(s, d); p = pv && pv.position; } } catch (_) { }
     if (!p || typeof p !== 'object' || !isFinite(p.x)) continue;
     const q = satellite.eciToGeodetic(p, gm); r.drawn++; if (q.height > 35786) r.beyond++;
