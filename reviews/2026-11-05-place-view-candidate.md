@@ -91,9 +91,9 @@ Prepared by Claude for Chad and GPT (thread 14). **Branch `place-view` only.** N
 ### 4b. D1 rows (written)
 | Table | Rows/day | Basis |
 |---|---|---|
-| quake_revisions | DRIFT_Q | QUAKE_BASIS |
+| quake_revisions | **~50–100** | USGS M2.5+ day feed, re-read 06:14 and 07:10 UTC: 31 → 30 events; **2 new revisions in 56 min** (≈ 50/day) plus each new event's first revision (~30/day) |
 | fires_daily | ~1,000–2,800 | one per cell with detections at the day's last pull. 170 cells at 06:00 UTC (partial day); a uniform synthetic full day gives 2,790 (upper bound) |
-| drifter_fixes | DRIFT_ROWS | DRIFT_BASIS |
+| drifter_fixes | **~1,300 to ~31,000** (one interval measured; a full day decides) | snapshots compared one hour apart (06:08 → 07:08 UTC): at 06:08 every buoy's latest fix was the same age (7.1 h), so that pull would have added nothing; at 07:08 a new batch had arrived and **1,293 of 1,304** fixes were new (ages 1.2–2.1 h), **0 corrections**. OSMC delivers in batches, so the daily figure depends on how many batches a day bring new fixes. At ~120 B/row incl. key ≈ **0.15–3.7 MB/day** (≈ 0.06–1.4 GB/year); within the 5 GB included, but the upper end is the largest single item, so the trial day measures it before the go |
 | seaice_daily | 2–8 | 2 hemispheres × distinct values (4 runs/day) |
 | orbital_population | 12 | one per published element file |
 | archive_versions / checkpoints | ~15 + 2 | plus retrieval-count updates on repeats |
