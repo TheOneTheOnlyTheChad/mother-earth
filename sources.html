@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611111000">
+<link rel="stylesheet" href="style.css?v=202611121000">
 </head>
 <body class="doc">
 <header class="top">
@@ -155,7 +155,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611111000"></script>
+<script src="app.js?v=202611121000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -176,7 +176,7 @@ function renderAll() {
   fill('t-windows', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].window), esc(R[l].cadence)])));
   fill('t-dates', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].observed || '–'), R[l].retrieved ? esc(R[l].retrieved.replace('T', ' ').slice(0, 19) + ' UTC (' + ago(R[l].retrieved) + ')') : '–', esc(rep.states[l])])));
   fill('t-coverage', LAYERS.map(l => row([esc(LABEL[l]), esc((rules.find(x => x.section === l && x.k === 'Coverage rule') || {}).v || R[l].coverage) + ' — ' + esc(R[l].coverage)])));
-  fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || ('none shown; ' + (ME.kept(l) || 'no history kept')))])));
+  fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || ('none shown' + (ME.kept(l) ? '; ' + ME.kept(l) : '')))])));
   fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Orbital objects', 'computed — positions calculated (SGP4) from published orbital elements; not observed (model-based method)']), row(['Day/night', 'computed — astronomical context, from the clock']), row(['Microplastic samples', esc(TIER.plastic)]), row(['Aircraft', 'observation — not shown'])]);
   $('p-imagery').textContent = (rules.find(x => x.section === 'imagery') || {}).v || '';
   $('limits-body').innerHTML = [

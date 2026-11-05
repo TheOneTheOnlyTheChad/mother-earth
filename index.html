@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611111000">
+<link rel="stylesheet" href="style.css?v=202611121000">
 </head>
 <body class="world">
 <header class="top">
@@ -235,7 +235,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611111000"></script>
+<script src="app.js?v=202611121000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -582,7 +582,7 @@ function inspectCell(p) {
     ['Coverage', `${p.grade} — ${esc(p.cell.coverage ? p.cell.coverage.evidence : MISSING)}`],
     ['Collector', `${fresh.grade} — ${esc(fresh.why)}`],
     ['Retrieved', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : '–'],
-    ['Comparison', 'none of ours shown yet — ' + (ME.kept(p.layer) || 'no history kept')],
+    ['Comparison', 'none of ours shown yet' + (ME.kept(p.layer) ? ' — ' + ME.kept(p.layer) : '')],
   ];
   if (p.layer === 'drifters') rows.push(['Caveat', 'buoys are sparse: a cell with no buoy is not evidence of anything about that water']);
   if (p.layer === 'plastic') rows.push(['Caveat', 'dated samples at tow-start locations, not current positions; a missing marker does not establish plastic-free water']);

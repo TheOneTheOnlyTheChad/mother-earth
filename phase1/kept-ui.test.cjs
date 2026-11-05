@@ -42,6 +42,11 @@ let mode = 'offNone';
   ok('static: no "None of it is shown" sentence; the place-view exception is stated', !/None of it is shown/.test(r.intro) && /One exception: the place view/.test(r.intro), r.intro);
   ok('static: the Oceaneye row no longer says the samples are not kept', !/not kept beyond the current file/.test(r.table), r.table.slice(0, 200));
   ok('static: no absolute "no history" claim anywhere in the table', !/no history/i.test(r.table), r.table);
+  // Every layer that reaches a Comparison line (Sources t-cmp: ME.LAYERS; inspector: map + optional layers) has a kept statement,
+  // and no page text falls back to an absolute "no history kept" (fallback removed 5 Nov, thread 15).
+  const keptAll = await page.evaluate(() => [...ME.LAYERS, 'drifters', 'plastic'].map(l => [l, !!ME.kept(l)]));
+  ok('every layer with a Comparison line has a kept statement', keptAll.every(([, v]) => v), keptAll);
+  ok('no "no history kept" text in the comparison table', !/no history kept/.test(r.cmp), r.cmp.slice(0, 300));
   ok('off + none: "History collection now: off … Retained history: none."; no history row', /History collection now: off .* Retained history: none\./.test(r.state) && r.rows.length === 0, r);
   ok('off + none: comparison lines say "no further history collected" (not "no history kept")', /no further history collected/.test(r.cmp) && !/no history kept/.test(r.cmp), r.cmp.slice(0, 300));
   mode = 'on'; await page.evaluate(() => ME.sourcesTick()); r = await read(page);
