@@ -26,7 +26,9 @@ All outcomes ok.
 - `archive_checkpoints`, `fires_daily`, `seaice_daily`, `archive_gaps` 0 — none due yet.
 - R2 `archive/`: 2 objects, ≈ 4.5 KB. Hub report: retained since 10:25:08 UTC; `archive_health` pending / gaps / failures empty at every read.
 
-**Still to see:** `seaice_daily` at 15:07 UTC; **first midnight checkpoint 00:30 UTC 6 Nov** (firms + usgs: `archive_checkpoints`, `fires_daily`); **drifter rows/day + bytes** (5 Nov is partial — from 10:21); plastic's first version with its next daily run ~05:07–06:07 UTC 6 Nov (its 5 Nov run was 09:07, before history was on). Read-only checks are scheduled in the session at 15:12 and 00:50 UTC.
+**15:07–15:15 UTC read:** first **`seaice_daily`** rows (2, data date 4 Nov: N 8.241 / clim 9.935, S 15.563 / clim 17.153 M km²) + seaice version "first" (3,908 B). New versions as sources moved: orbital 13:42 and co2 14:08, each `data+processing` — expected: "processing" is our derived output (counts, cells, index), not code, so new source data changes both hashes. Totals: quake_revisions 52 · **drifter_fixes 5,863** (per hourly run 1,304 / 1,187 / 933 / 1,214 / 1,225 → mean ≈ 1,170/h ⇒ ~28,000/day if it holds) · archive_versions 5 · orbital_population 2 · seaice_daily 2. R2 `archive/` 5 objects, 12.9 KB. CPU: hourly 110 ms / 22.5 s · firms 156 ms · usgs 10–17 ms · forest 31 ms — all ok. `archive_health` empty.
+
+**Still to see:** **first midnight checkpoint 00:30 UTC 6 Nov** (firms + usgs: `archive_checkpoints`, `fires_daily`); **drifter rows/day + bytes** (5 Nov is partial — from 10:21); plastic's first version with its next daily run ~05:07–06:07 UTC 6 Nov (its 5 Nov run was 09:07, before history was on). Read-only checks are scheduled in the session at 15:12 and 00:50 UTC.
 
 ## Page cleanup published — main `bd17401`, assets `?v=202611121000` (Chad's go)
 - Removed the unreachable `'no history kept'` fallback (inspector Comparison row in `index.html`, Sources t-cmp in `sources.html`). A missing kept statement now adds nothing rather than an absolute claim. Visible text is unchanged today (every layer has a kept line).
