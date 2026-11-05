@@ -25,7 +25,8 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 schema changes �
    - Measure the open cost item: **drifter_fixes rows/day** (1,300 to 31,000 measured range; OSMC delivers in batches) and bytes. Record everything in STATUS.
 3. **orbital-browser: 2 pre-existing failures** (same on main): "B payload alone" and "B debris alone: stale and beyond-GEO counts match the reference". It passed 105/105 in thread 9; likely a time-dependent fixture (`phase1/orbital-fixture.build.mjs` built today versus the reference instant). Investigate the test, not the page.
 4. Small cleanup: the unreachable `'no history kept'` fallback text in `sources.html` (t-cmp) and `index.html` (inspector Comparison rows). Every layer has a kept line, so it never displays.
-5. Carried over: real-phone check of the mobile pass (Galaxy); NCEI accession recheck; plastic research follow-ups; attribution placement; Possible futures (research only).
+5. **Research backlog** (`docs/RESEARCH-BACKLOG.md`, research only — no build, collector, schedule, deploy or third-party contact): **R1 Schumann resonance / ELF stations** (added 5 Nov, thread 15; next gate = one recent BGS Eskdalemuir numerical sample + access/redistribution terms + delay and size).
+6. Carried over: real-phone check of the mobile pass (Galaxy); NCEI accession recheck; plastic research follow-ups; attribution placement; Possible futures (research only).
 
 ## 2. Learned in thread 14
 | | |
