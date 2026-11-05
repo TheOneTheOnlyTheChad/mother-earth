@@ -8,6 +8,19 @@ const CELL_DEG = ME.CELL_DEG = 4;
 const REFRESH_MS = ME.REFRESH_MS = 5 * 60e3;
 const BASELINE_SINCE = '30 Oct 2026';
 // What the hub keeps per layer (read from D1 + R2 lifecycle rules, 4 Nov 2026). Shown wherever a comparison is mentioned.
+// What the hub retains is reported by the hub itself (GET / → history: {enabled, since}); the wording follows it, so it
+// changes when retention changes — never ahead of it, never after. Unknown hub state → the base wording (what runs without history).
+ME.HISTORY = null;
+ME.loadHistory = async () => { try { const j = await getJson('/'); ME.HISTORY = (j && j.history) || { enabled: false }; } catch (e) { ME.HISTORY = null; } return ME.HISTORY; };
+const KEPT_WITH_HISTORY = ME.KEPT_WITH_HISTORY = {
+  usgs: 'hourly per-cell counts kept since 30 Oct 2026; every revision of every event we receive, and the last published file of each UTC day',
+  firms: 'hourly per-cell counts kept since 30 Oct 2026; per-cell daily totals as of our last pull of each UTC day (later-processed detections not included), and that day\'s last published file',
+  seaice: 'each daily value per hemisphere with NSIDC\'s climatology value for that day, and each changed published file',
+  co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026; each changed published file',
+  drifters: 'each buoy fix as returned by our hourly query (a sampled track, not every fix the buoy reported); corrections kept',
+  plastic: 'each changed version of NOAA\'s published data or of our check results, plus Oceaneye\'s original file used for the checks',
+};
+ME.kept = layer => { const h = ME.HISTORY; if (h && h.enabled && KEPT_WITH_HISTORY[layer]) return KEPT_WITH_HISTORY[layer] + (h.since ? ` (history retention since ${h.since.slice(0, 10)})` : ''); return KEPT[layer]; };
 const KEPT = ME.KEPT = { usgs: 'hourly per-cell counts kept since 30 Oct 2026', firms: 'hourly per-cell counts kept since 30 Oct 2026', ships: 'hourly per-cell counts kept since 1 Nov 2026', forest: 'daily per-cell alert counts kept since 1 Nov 2026', swpc: 'every Kp value kept since 30 Oct 2026', co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026', seaice: 'no history kept — current file only', drifters: 'no history kept — current file only', plastic: 'no history kept — the current NOAA file only, plus Oceaneye\'s original file used for the checks' };
 const IMG_DAY = ME.IMG_DAY = new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10);
 const IMG_LABEL = ME.IMG_LABEL = new Date(IMG_DAY).toUTCString().slice(5, 16);
@@ -283,24 +296,24 @@ ME.readings = function () {
   const u = state.usgs, fu = ME.freshness('usgs');
   R.usgs = { label: LABEL.usgs, source: SOURCE.usgs, fresh: fu, value: fu.grade !== 'unknown' ? ME.total(u) : null, unit: 'M2.5+ in the last 24 h',
     observed: u ? `feed generated ${hhmm(u.source_generated_at)}, ${Math.round(u.source_age_s || 0)} s old at retrieval` : '', retrieved: u && u.retrieved_at,
-    coverage: 'M2.5 completeness is regional (USGS documents global completeness at M4.5+); cells shown partial', quantity: u && u.quantity, window: '24 h rolling window; events keep their age inside it', cadence: 'collected every 5 min', comparison: `none of ours shown yet — ${KEPT.usgs}` };
+    coverage: 'M2.5 completeness is regional (USGS documents global completeness at M4.5+); cells shown partial', quantity: u && u.quantity, window: '24 h rolling window; events keep their age inside it', cadence: 'collected every 5 min', comparison: `none of ours shown yet — ${ME.kept('usgs')}` };
   const f = state.firms, ff = ME.freshness('firms');
   R.firms = { label: LABEL.firms, source: SOURCE.firms, fresh: ff, value: ff.grade !== 'unknown' ? ME.total(f) : null, unit: 'detections so far today (UTC)',
     observed: f ? `VIIRS NOAA-20, ${f.scope || 'world'}; passes since 00:00 UTC that NRT has processed (~2–3 h behind)` : '', retrieved: f && f.retrieved_at,
-    coverage: 'pass schedule not yet wired; cloud may hide detections; one detection per pass, not one fire', quantity: f && f.quantity, window: 'today (UTC) so far — FIRMS day_range=1 is the current UTC date, not a rolling 24 h; the count resets at 00:00 UTC and is lowest in the first hours of the day', cadence: 'collected every 15 min', comparison: `none of ours shown yet — ${KEPT.firms}`,
+    coverage: 'pass schedule not yet wired; cloud may hide detections; one detection per pass, not one fire', quantity: f && f.quantity, window: 'today (UTC) so far — FIRMS day_range=1 is the current UTC date, not a rolling 24 h; the count resets at 00:00 UTC and is lowest in the first hours of the day', cadence: 'collected every 15 min', comparison: `none of ours shown yet — ${ME.kept('firms')}`,
     caveat: 'NASA: not for tactical decisions or local-scale conditions' };
   const s = state.ships, fs = ME.freshness('ships');
   const lastCount = s ? ME.total(s) : null;
   R.ships = { label: LABEL.ships, source: SOURCE.ships, fresh: fs, value: fs.grade !== 'unknown' ? lastCount : null, lastSample: lastCount, unit: `vessel identities in a ${s ? s.window_s : 60} s AIS sample`,
     sampleEnd: s && s.window_end, observed: s ? `sample ended ${hhmm(s.window_end)}; ${s.class_a} Class A + ${s.class_b} Class B; socket connected ${num(s.socket_connected_s ?? s.socket_up_s, 0)} s of ${s.window_s} s` : '', retrieved: s && s.retrieved_at,
     mode: s && /cloud/.test(s.collected_by || '') ? ME.SHIPS_CLOUD_TEXT : SHIPS_MODE.text, coverage: 'terrestrial AIS only — a cell with no vessels is not an empty sea; positions between samples unknown', quantity: s && s.quantity,
-    window: s ? `${s.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (s.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours shown yet — ${KEPT.ships}` };
+    window: s ? `${s.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (s.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours shown yet — ${ME.kept('ships')}` };
   const fo = state.forest, ffo = ME.freshness('forest');
   const fsum = fo ? Object.values(fo.cells || {}).reduce((a, c) => { a.n += c.count || 0; a.hi += (c.confidence && c.confidence.highest) || 0; a.cells++; return a; }, { n: 0, hi: 0, cells: 0 }) : { n: 0, hi: 0, cells: 0 };
   R.forest = { label: LABEL.forest, source: SOURCE.forest, fresh: ffo, value: ffo.grade !== 'unknown' ? fsum.n : null, highest: fsum.hi, cells: fsum.cells, sweep: fo && fo.sweep, unit: 'alert pixels (10 m) · published in the last 7 days',
     observed: fo && fo.sweep ? `${fo.sweep.answered} of ${fo.sweep.cells_total} tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset ${fo.source_version || 'latest'}` : '', retrieved: fo && fo.retrieved_at,
     coverage: 'alert systems operate between 30°N and 30°S only — cells outside are unknown by definition, not zero; inside, cloud and alert-system coverage vary (partial); counts can fall when low-confidence alerts are retracted', quantity: fo && fo.quantity,
-    window: 'alerts whose detection date falls in the 7 days before each cell\'s query; detection date ≠ clearing date', cadence: '6 cells every 30 min (one GFW query each, sequential); full sweep ≈ 2 days', comparison: `none of ours shown yet — ${KEPT.forest}`,
+    window: 'alerts whose detection date falls in the 7 days before each cell\'s query; detection date ≠ clearing date', cadence: '6 cells every 30 min (one GFW query each, sequential); full sweep ≈ 2 days', comparison: `none of ours shown yet — ${ME.kept('forest')}`,
     caveat: 'GFW: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment' };
   const k = state.swpc, fk = ME.freshness('swpc');
   R.swpc = { label: LABEL.swpc, source: SOURCE.swpc, fresh: fk, value: k && k.index && fk.grade !== 'unknown' ? k.index.value : null, unit: 'planetary Kp (0–9)',

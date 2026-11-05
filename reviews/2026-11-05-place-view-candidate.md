@@ -131,3 +131,24 @@ Workers Paid includes 25 bn rows read/month and 10 M Class B/month free. These a
 - **The FIRMS FRP fix changes published data** (a missing value stops being 0). Correct by our rules; flagged because it is a hub data change.
 - **"Load this layer's data for this place"** is per panel: reopening the panel asks again. GPT's condition was that it be deliberate; it is.
 - `orbital-browser` 2 known failures stay a separate item.
+
+## 7. GPT's independent review of the branch (5 Nov) — three defects, fixed
+GPT reproduced three failures that the original 16 hub checks missed. All three were real.
+
+| # | Defect | Fix | Regression check |
+|---|---|---|---|
+| 1 | `placeSection()` built the section's metadata (retrieval time, run ref, version…) **before** re-reading a mismatched pair. When the re-read found a newer matching pair, the records were new but the metadata was from the superseded first read. | Metadata built by `placeMeta()` from the **final** cells file. Each section also carries `records_run_ref`, which must equal `run_ref`. | history-hub **R1**: first cells read old, records new, re-read new → checks retrieval time, run ref, version **and** the records all come from the new run. |
+| 2 | `firesDaily()` started the FRP sum at 0, so a cell where no detection carried an FRP stored `frp_sum_mw = 0` (with `frp_n = 0`). | Sum and max start as null and stay null when no valid FRP exists; a reported 0 stays 0; for mixed cells the sum covers only valid values (`frp_n` says how many). Schema: `frp_sum_mw` nullable. | **R2** (pure: all missing / reported zero / mixed); **C1** now also asserts the stored row's `frp_sum_mw` is null. |
+| 3 | The day-boundary checkpoint read `latest/` just before publishing replaced it. A failed archive write was never retried and the input was gone, so that day's checkpoint and fires rows stayed missing for good. | Runs **after** publishing, from the retained `snapshots/<layer>/` copy (2-day storage rule). The day goes onto a **durable pending list** before any work, and every run retries. Writes are idempotent; the `archive_checkpoints` row is written **last** as the completion marker. A day whose stored snapshot expires first is recorded **lost, with the reason**. | **R3**: first archive write on D+1 fails → publishing continues → next run completes D (cutoff = D's last pull). **R4**: partial D1 failure (object written, `fires_daily` batch fails) → finished next run, no duplicates, marker only after completion. **R5**: snapshot expired before the retry → recorded lost, nothing invented. |
+
+**Shown to fail on the old code:** the same test file run against the pre-fix hub (`5914a6d`) gives **15 passed, 7 failed** (C1, R1–R6). On the fix: **22/22**.
+
+**Retention wording (GPT's last point).**
+- The hub now reports what it retains: `GET /` → `history: { enabled, since }`, where `since` is the first retained record.
+- Sources & Details "What Mother Earth keeps" shows the seven history rows **only while the hub reports retention on**, plus a state line ("on … first retained record …" / "off" / "hub could not be read — the rows above describe what runs without it").
+- The World View "kept" lines follow the same report.
+- So the public wording changes **when retention changes**, whenever the page is published, and an unreadable hub never claims retention.
+- New **kept-ui** suite: **10/10**, shown to fail on 2 deliberate breaks (history rows always shown; wording ignoring the hub).
+- Proposal §5 rewritten to match the implementation exactly (rev 4), including what is **not** kept (orbital stale/beyond-GEO, Kp versions, F2).
+
+**Asset version** `?v=202611101000`.

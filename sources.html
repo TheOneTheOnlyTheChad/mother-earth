@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611091000">
+<link rel="stylesheet" href="style.css?v=202611101000">
 </head>
 <body class="doc">
 <header class="top">
@@ -62,9 +62,17 @@
     <tr><td>Oceaneye's original microlitter file (96 KB, CC BY 4.0), held so each refresh can re-check NOAA NCEI's published values; the samples themselves are not kept beyond the current file</td><td>Microplastic samples (since the layer's first run)</td><td>replaced only after review if the source file changes</td></tr>
     <tr><td>A log of every collector run and its outcome</td><td>all layers (since 30 Oct 2026)</td><td>no end date set</td></tr>
     <tr><td>Raw source files, full snapshots and per-run cell files</td><td>most layers</td><td>2 days, then deleted by a storage rule (deletion can lag up to a day)</td></tr>
-    <tr><td>Current file only — no history</td><td>Drifting buoys, orbital objects, sea ice</td><td>replaced on each successful update</td></tr>
+    <tr class="hist-off"><td>Current file only — no history</td><td>Drifting buoys, orbital objects, sea ice</td><td>replaced on each successful update</td></tr>
+    <tr class="hist-on" hidden><td>Every revision of every earthquake we receive (USGS id, USGS update time, when we received it), and the last published file of each UTC day</td><td>Earthquakes</td><td>no end date set</td></tr>
+    <tr class="hist-on" hidden><td>Per-cell daily totals as of our last pull of each UTC day (detections FIRMS processes later for that day are not included; FRP summed only over detections that carry a value), and that day's last published file</td><td>Fire detections</td><td>no end date set</td></tr>
+    <tr class="hist-on" hidden><td>Each buoy fix as returned by our hourly query — a sampled track, not every fix the buoy reported; identical repeats are not stored again, corrections are kept</td><td>Drifting buoys</td><td>no end date set</td></tr>
+    <tr class="hist-on" hidden><td>Each daily value per hemisphere, with NSIDC's climatology value for that day</td><td>Sea ice</td><td>no end date set</td></tr>
+    <tr class="hist-on" hidden><td>The population in our catalogue query (Space-Track: not decayed, elements within 10 days) per published element file — counts by object type; changes can come from filtering, classification or element freshness, not only launches and reentries</td><td>Orbital objects</td><td>no end date set</td></tr>
+    <tr class="hist-on" hidden><td>Each changed version of a published file — kept only when the source's data or our processing/check results changed; a repeat retrieval stores nothing new and is only counted</td><td>CO₂, sea ice, orbital objects, microplastic samples (incl. revised check results)</td><td>no end date set</td></tr>
+    <tr class="hist-on" hidden><td>Current file only — no history</td><td>none of the layers above</td><td>—</td></tr>
   </table>
-  <p class="small">Read from the hub's database and storage rules on 4 Nov 2026. "No end date set" describes the current configuration; it is not a promise of permanent storage.</p>
+  <p class="small" id="kept-state">History retention: reading the hub…</p>
+  <p class="small">Base rows read from the hub's database and storage rules on 4 Nov 2026; the history rows appear only while the hub reports history retention on. "No end date set" describes the current configuration; it is not a promise of permanent storage. Ships: hourly counts only — no vessel positions are kept beyond the 2-day storage rule.</p>
   <table id="t-cmp"><tr><th>Layer</th><th>Comparison shown</th><th>Whose baseline</th></tr></table>
 
   <h2 id="tiers">Observation / analysis / model classification</h2>
@@ -148,7 +156,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611091000"></script>
+<script src="app.js?v=202611101000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -169,7 +177,7 @@ function renderAll() {
   fill('t-windows', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].window), esc(R[l].cadence)])));
   fill('t-dates', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].observed || '–'), R[l].retrieved ? esc(R[l].retrieved.replace('T', ' ').slice(0, 19) + ' UTC (' + ago(R[l].retrieved) + ')') : '–', esc(rep.states[l])])));
   fill('t-coverage', LAYERS.map(l => row([esc(LABEL[l]), esc((rules.find(x => x.section === l && x.k === 'Coverage rule') || {}).v || R[l].coverage) + ' — ' + esc(R[l].coverage)])));
-  fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || ('none shown; ' + (ME.KEPT[l] || 'no history kept')))])));
+  fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || ('none shown; ' + (ME.kept(l) || 'no history kept')))])));
   fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Orbital objects', 'computed — positions calculated (SGP4) from published orbital elements; not observed (model-based method)']), row(['Day/night', 'computed — astronomical context, from the clock']), row(['Microplastic samples', esc(TIER.plastic)]), row(['Aircraft', 'observation — not shown'])]);
   $('p-imagery').textContent = (rules.find(x => x.section === 'imagery') || {}).v || '';
   $('limits-body').innerHTML = [
@@ -186,7 +194,13 @@ function renderAll() {
   $('rules-body').innerHTML = groups.map(g => { const rs = rules.filter(r => r.section === g); if (!rs.length) return ''; return `<h3>${esc(LABEL[g] || g)}</h3><table>${rs.map(r => `<tr><td>${esc(r.k)}</td><td class="${r.fixed ? 'fixed' : ''}">${esc(r.v)}${r.fixed ? ' <span class="fixed">(fixed)</span>' : ''}</td></tr>`).join('')}</table>`; }).join('');
   if (location.hash) { const el = document.querySelector(location.hash); if (el) el.scrollIntoView(); }
 }
-async function tick() { await ME.loadCells(); renderAll(); }
+function keptState() {   // the table follows what the hub reports, at the moment it reports it
+  const h = ME.HISTORY, on = !!(h && h.enabled);
+  document.querySelectorAll('#t-kept .hist-on').forEach(r => r.hidden = !on); document.querySelectorAll('#t-kept .hist-off').forEach(r => r.hidden = on);
+  $('kept-state').textContent = h === null ? 'History retention: the hub could not be read just now — the rows above describe what runs without it.'
+    : on ? `History retention: on (reported by the hub${h.since ? '; first retained record ' + h.since.replace('T', ' ').slice(0, 16) + ' UTC' : ''}).` : 'History retention: off (reported by the hub) — only the rows above are kept.';
+}
+async function tick() { await Promise.all([ME.loadCells(), ME.loadHistory()]); renderAll(); keptState(); }
 tick(); setInterval(tick, ME.REFRESH_MS);
 })();
 </script>

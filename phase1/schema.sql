@@ -129,7 +129,8 @@ CREATE TABLE IF NOT EXISTS archive_versions (
 CREATE INDEX IF NOT EXISTS archive_versions_layer ON archive_versions (layer, id);
 
 -- Daily checkpoints of large layers: the last snapshot published for a UTC day, labelled with its actual cutoff.
--- Intermediate versions of that day are not kept.
+-- Intermediate versions of that day are not kept. Made from the retained snapshots/ copy (2-day storage rule); a failed
+-- attempt stays pending in state/history-<layer>.json and is retried each run. This row is written LAST (completion marker).
 CREATE TABLE IF NOT EXISTS archive_checkpoints (
   layer TEXT NOT NULL,
   day TEXT NOT NULL,                -- UTC day of the snapshot's retrieved_at
@@ -139,6 +140,7 @@ CREATE TABLE IF NOT EXISTS archive_checkpoints (
   records INTEGER NOT NULL,
   run_ref TEXT NOT NULL,
   collector_version TEXT NOT NULL,
+  source_key TEXT,                  -- the retained snapshots/ object the checkpoint was made from
   PRIMARY KEY (layer, day)
 );
 
@@ -160,7 +162,7 @@ CREATE TABLE IF NOT EXISTS fires_daily (
   cell_id TEXT NOT NULL,
   day TEXT NOT NULL,
   detections INTEGER NOT NULL,
-  frp_sum_mw REAL NOT NULL,         -- sum over detections that carry an FRP value (frp_n of them)
+  frp_sum_mw REAL,                  -- sum over ONLY the detections that carry a valid FRP (frp_n of them); null when none do (never 0); a reported 0 stays 0
   frp_max_mw REAL,                  -- null when no detection carried a value (never 0)
   frp_n INTEGER NOT NULL,
   day_n INTEGER NOT NULL,

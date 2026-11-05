@@ -112,11 +112,11 @@ async function logRun(env, layer, startedMs, status, http, records, bytes, note)
 async function writeSnapshot(env, layer, scheduledMs, envelope) {
   const stamp = isoMinute(scheduledMs);
   const cellsOnly = { ...envelope, records: undefined, record_fields: undefined, record_format: undefined };
-  if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpoint(env, layer, envelope));   // before latest/ is replaced
   const full = await putJson(env, `snapshots/${layer}/${stamp}.json`, envelope);
   await putJson(env, `cells/${layer}/${stamp}.json`, cellsOnly);
   await putJson(env, `latest/${layer}.json`, envelope);
   await putJson(env, `latest-cells/${layer}.json`, cellsOnly);
+  if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpoint(env, layer, envelope, `snapshots/${layer}/${stamp}.json`));   // after publishing; reads the retained snapshots/ copy
   return full;
 }
 
@@ -1507,7 +1507,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpoint, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpoint, histCheckpointOne, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1638,36 +1638,57 @@ function firesDaily(e) {
   const f = e.record_fields || [], iLat = f.indexOf('lat'), iLng = f.indexOf('lng'), iFrp = f.indexOf('frp_mw'), iDn = f.indexOf('daynight');
   const by = {};
   for (const r of e.records || []) {
-    const id = cellId(r[iLat], r[iLng]); const c = by[id] || (by[id] = { n: 0, frpSum: 0, frpMax: null, frpN: 0, day: 0, night: 0 });
+    const id = cellId(r[iLat], r[iLng]); const c = by[id] || (by[id] = { n: 0, frpSum: null, frpMax: null, frpN: 0, day: 0, night: 0 });
     c.n++; const v = r[iFrp];
-    if (typeof v === 'number' && Number.isFinite(v)) { c.frpSum += v; c.frpN++; c.frpMax = c.frpMax === null ? v : Math.max(c.frpMax, v); }
+    // sum and max cover ONLY detections with a valid FRP (frpN of them); none valid → null (not provided), never 0; a reported 0 stays 0
+    if (typeof v === 'number' && Number.isFinite(v)) { c.frpSum = (c.frpSum ?? 0) + v; c.frpN++; c.frpMax = c.frpMax === null ? v : Math.max(c.frpMax, v); }
     if (r[iDn] === 'D') c.day++; else if (r[iDn] === 'N') c.night++;
   }
   return by;
 }
-/** Before a checkpoint layer's new snapshot replaces latest/: if the UTC day changed, keep the previous day's last snapshot. */
-async function histCheckpoint(env, layer, next) {
-  const stKey = `state/history-${layer}.json`; const st = (await getJson(env, stKey)) || {};
-  const nextDay = (next.retrieved_at || '').slice(0, 10);
-  if (st.day === nextDay) return 'same day';
-  const o = await env.R2.get(`latest/${layer}.json`);
-  if (o && st.day) {
-    const text = await o.text(); const prev = JSON.parse(text); const pDay = (prev.retrieved_at || '').slice(0, 10);
-    if (pDay && pDay < nextDay) {
-      const key = `${HIST.checkpoints}${layer}/${pDay}.json.gz`; const gz = await gzipText(text);
-      await env.R2.put(key, gz, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: prev.retrieved_at, window_start: String(prev.window_start), window_end: String(prev.window_end), run_ref: runRef(layer, prev.retrieved_at), collector_version: String(prev.collector_version) } });
-      await env.DB.prepare('INSERT OR IGNORE INTO archive_checkpoints (layer, day, cutoff, r2_key, bytes, records, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?)')
-        .bind(layer, pDay, prev.retrieved_at, key, gz.length, (prev.records || []).length, runRef(layer, prev.retrieved_at), String(prev.collector_version)).run();
-      if (layer === 'firms' && prev.source_status === 'ok') {
-        const by = firesDaily(prev); const ref = runRef(layer, prev.retrieved_at);
-        const stmts = Object.entries(by).map(([id, c]) => env.DB.prepare('INSERT OR IGNORE INTO fires_daily (cell_id, day, detections, frp_sum_mw, frp_max_mw, frp_n, day_n, night_n, cutoff, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
-          .bind(id, pDay, c.n, Math.round(c.frpSum * 10) / 10, c.frpMax, c.frpN, c.day, c.night, prev.retrieved_at, ref, String(prev.collector_version)));
-        for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
-      }
-    }
+/** Daily checkpoint of a checkpoint layer (firms, usgs), recoverable.
+ * Runs AFTER publishing (never blocks or changes it). The input is the previous day's last snapshot as already stored under
+ * snapshots/<layer>/<stamp>.json (kept 2 days by the storage rule) — not latest/, which publishing replaces.
+ * On a day change the previous day is added to a DURABLE pending list in state/history-<layer>.json BEFORE any archive work;
+ * every later run retries pending days until done, or until the stored snapshot has expired (then recorded as lost, with
+ * the reason — never invented). Writes are idempotent (same R2 key; INSERT OR IGNORE), and the archive_checkpoints row is
+ * written LAST as the completion marker, so a partial failure (R2 put done, some D1 batches done) is simply finished by a retry. */
+async function histCheckpointOne(env, layer, item) {
+  const o = await env.R2.get(item.key);
+  if (!o) return 'source_gone';
+  const text = await o.text(); const prev = JSON.parse(text); const pDay = item.day;
+  const key = `${HIST.checkpoints}${layer}/${pDay}.json.gz`; const gz = await gzipText(text); const ref = runRef(layer, prev.retrieved_at);
+  await env.R2.put(key, gz, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: prev.retrieved_at, window_start: String(prev.window_start), window_end: String(prev.window_end), run_ref: ref, collector_version: String(prev.collector_version), source_key: item.key } });
+  if (layer === 'firms' && prev.source_status === 'ok') {
+    const by = firesDaily(prev);
+    const stmts = Object.entries(by).map(([id, c]) => env.DB.prepare('INSERT OR IGNORE INTO fires_daily (cell_id, day, detections, frp_sum_mw, frp_max_mw, frp_n, day_n, night_n, cutoff, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+      .bind(id, pDay, c.n, c.frpSum === null ? null : Math.round(c.frpSum * 10) / 10, c.frpMax, c.frpN, c.day, c.night, prev.retrieved_at, ref, String(prev.collector_version)));
+    for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
   }
-  await putJson(env, stKey, { day: nextDay, at: nowIso() });
-  return 'checkpointed';
+  await env.DB.prepare('INSERT OR IGNORE INTO archive_checkpoints (layer, day, cutoff, r2_key, bytes, records, run_ref, collector_version, source_key) VALUES (?,?,?,?,?,?,?,?,?)')
+    .bind(layer, pDay, prev.retrieved_at, key, gz.length, (prev.records || []).length, ref, String(prev.collector_version), item.key).run();   // completion marker, last
+  return 'done';
+}
+async function histCheckpoint(env, layer, next, nextKey) {
+  const stKey = `state/history-${layer}.json`; const st = (await getJson(env, stKey)) || {};
+  st.pending = st.pending || []; st.lost = st.lost || [];
+  const nextDay = (next.retrieved_at || '').slice(0, 10);
+  if (st.day && st.day < nextDay && st.last_key && !st.pending.some(p => p.day === st.day))
+    st.pending.push({ day: st.day, key: st.last_key, cutoff: st.last_at, queued_at: nowIso(), attempts: 0 });
+  if (!st.day || st.day <= nextDay) { st.day = nextDay; st.last_key = nextKey; st.last_at = next.retrieved_at; }
+  await putJson(env, stKey, st);   // the pending day is durable before any archive work starts
+  const out = [];
+  for (const item of st.pending.slice()) {
+    item.attempts++;
+    try {
+      const r = await histCheckpointOne(env, layer, item);
+      if (r === 'done') { st.pending = st.pending.filter(p => p !== item); out.push(item.day + ':done'); }
+      else { st.pending = st.pending.filter(p => p !== item); st.lost.push({ ...item, lost_at: nowIso(), reason: 'stored snapshot no longer available (2-day storage rule) before the checkpoint completed' }); out.push(item.day + ':lost'); }
+    } catch (e) { item.last_error = String(e).slice(0, 160); item.last_try = nowIso(); out.push(item.day + ':retry later'); }
+  }
+  st.lost = st.lost.slice(-30);
+  await putJson(env, stKey, st);
+  return out.length ? out.join(',') : 'nothing pending';
 }
 async function histQuakes(env, features, retrievedAt) {
   const ref = runRef('usgs', retrievedAt);
@@ -1704,6 +1725,15 @@ async function hist(env, label, fn) {
   try { const r = await fn(); return label + ':' + r; } catch (e) { console.log('history', label, 'failed', String(e)); return label + ':failed ' + String(e).slice(0, 80); }
 }
 
+/** What the hub is retaining right now — read by the page so "What Mother Earth keeps" changes when retention changes. */
+async function historyState(env) {
+  if (!histOn(env)) return { enabled: false };
+  try {
+    const r = await env.DB.prepare('SELECT MIN(t) AS since FROM (SELECT MIN(received_at) AS t FROM quake_revisions UNION ALL SELECT MIN(first_received_at) FROM drifter_fixes UNION ALL SELECT MIN(first_retrieved_at) FROM archive_versions UNION ALL SELECT MIN(cutoff) FROM archive_checkpoints)').first();
+    return { enabled: true, since: (r && r.since) || null };
+  } catch (e) { return { enabled: true, since: null, problem: 'history tables unreadable: ' + String(e).slice(0, 120) }; }
+}
+
 // ---------------------------------------------------------------- Place view (0.5.0): GET /place/g4/<row>_<col>
 /* Everything the hub holds for one 4° cell, one section per layer, each from ONE collector run (records and counts
  * paired on retrieved_at, re-read once, else withheld). Optional layers (drifters, plastic) are returned only when named
@@ -1725,31 +1755,34 @@ async function placeRecords(env, layer) {
   const byCell = {}; for (const r of snap.records || []) { const id = cellId(r[iLat], r[iLng]); (byCell[id] || (byCell[id] = [])).push(r); }
   const entry = { etag: o.httpEtag, retrieved_at: snap.retrieved_at, fields: f, byCell }; placeCache[layer] = entry; return entry;
 }
-async function placeSection(env, layer, id) {
-  const meta = l => ({ layer: l });
-  let cells = await getJson(env, `latest-cells/${layer}.json`);
-  if (!cells) return { ...meta(layer), state: 'unavailable', note: 'no snapshot published yet' };
-  const base = { ...meta(layer), retrieved_at: cells.retrieved_at, run_ref: runRef(layer, cells.retrieved_at), collector_version: cells.collector_version, source_status: cells.source_status, stale_after_s: cells.stale_after_s,
+function placeMeta(layer, cells) {   // section metadata, always built from the cells file the section's data came from
+  return { layer, retrieved_at: cells.retrieved_at, run_ref: runRef(layer, cells.retrieved_at), collector_version: cells.collector_version, source_status: cells.source_status, stale_after_s: cells.stale_after_s,
     window_start: cells.window_start, window_end: cells.window_end, quantity: cells.quantity || null, coverage_default: cells.coverage_default || null, coverage_note: cells.coverage_note || null, note: cells.note || null };
+}
+async function placeSection(env, layer, id) {
+  let cells = await getJson(env, `latest-cells/${layer}.json`);
+  if (!cells) return { layer, state: 'unavailable', note: 'no snapshot published yet' };
   if (layer === 'forest') {
+    const base = placeMeta(layer, cells);
     if (!FOREST_CELLS.includes(id)) return { ...base, state: 'not_covered', why: 'outside the swept tropical land cells (alert systems run between 30°N and 30°S only)' };
     const c = cells.cells && cells.cells[id];
     if (!c) return { ...base, state: 'pending', why: 'in the sweep, not answered yet' };
     return { ...base, state: 'ok', cell: c };
   }
-  if (cells.source_status === 'down' && !cells.cells) return { ...base, state: 'down' };
+  if (cells.source_status === 'down' && !cells.cells) return { ...placeMeta(layer, cells), state: 'down' };
   let rec = await placeRecords(env, layer);
   if (rec && rec.retrieved_at !== cells.retrieved_at) {   // a collector wrote between the two reads: re-read both once
-    cells = await getJson(env, `latest-cells/${layer}.json`); rec = await placeRecords(env, layer);
+    const again = await getJson(env, `latest-cells/${layer}.json`); if (again) cells = again; rec = await placeRecords(env, layer);
   }
-  const cell = cells && cells.cells ? cells.cells[id] : undefined;
-  if (!rec || !cells || rec.retrieved_at !== cells.retrieved_at) {
-    return { ...base, state: 'withheld', why: `records and counts are not from the same collector run (records ${rec ? rec.retrieved_at : 'unreadable'}, counts ${cells ? cells.retrieved_at : 'unreadable'})`, cell: cell || null };
+  const base = placeMeta(layer, cells);   // from the FINAL cells file — never from a superseded first read
+  const cell = cells.cells ? cells.cells[id] : undefined;
+  if (!rec || rec.retrieved_at !== cells.retrieved_at) {
+    return { ...base, state: 'withheld', why: `records and counts are not from the same collector run (records ${rec ? rec.retrieved_at : 'unreadable'}, counts ${cells.retrieved_at})`, cell: cell || null, records_run_ref: rec ? runRef(layer, rec.retrieved_at) : null };
   }
   const recs = rec.byCell[id] || [];
   const iT = rec.fields.indexOf('observed_at') >= 0 ? rec.fields.indexOf('observed_at') : rec.fields.indexOf('sampled_on');
   const sorted = recs.slice().sort((a, b) => String(b[iT]).localeCompare(String(a[iT])));
-  return { ...base, state: recs.length ? 'ok' : 'no_records', count: recs.length, cell: cell || null, record_fields: rec.fields,
+  return { ...base, state: recs.length ? 'ok' : 'no_records', count: recs.length, cell: cell || null, record_fields: rec.fields, records_run_ref: runRef(layer, rec.retrieved_at),
     records: layer === 'plastic' ? sorted : sorted.slice(0, PLACE.listMax), records_total: recs.length };
 }
 async function placeCollection(env, id, nowMs) {
@@ -2048,7 +2081,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status'], layers: LAYERS,
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status'], layers: LAYERS,
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };

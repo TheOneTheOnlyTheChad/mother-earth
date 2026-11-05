@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611091000">
+<link rel="stylesheet" href="style.css?v=202611101000">
 </head>
 <body class="world">
 <header class="top">
@@ -235,7 +235,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611091000"></script>
+<script src="app.js?v=202611101000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -503,7 +503,7 @@ function inspectRecord(layer, r) {
     ['This run', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING]);
   if (layer === 'firms') rows.push(['NASA', 'not for tactical decisions or local-scale conditions']);
   if (layer === 'firms') rows.push(['What FRP is', 'Pixel-integrated fire radiative power estimated at the satellite observation time; not fire size, spread or severity. It is a power (MW), not an amount of energy, and it is not a comparison between fires. Cloud decides what could be detected at all. NASA: not for tactical decisions or local-scale conditions.', 'more']);
-  if (ME.KEPT[layer]) rows.push(['Comparison', 'none of ours shown yet — ' + ME.KEPT[layer]]);
+  if (ME.kept(layer)) rows.push(['Comparison', 'none of ours shown yet — ' + ME.kept(layer)]);
   if (layer === 'drifters') rows.push(['Caveat', 'this buoy\'s latest fix as relayed over the WMO GTS; where it is now is unknown; reports are not quality-controlled (delayed-mode QC data lag by years)']);
   if (layer === 'ships') rows.push(['Caveat', 'latest position received for this MMSI during the sample; where it was between samples is unknown; terrestrial AIS only']);
   if (layer === 'usgs' && r.src && /^https:\/\/earthquake\.usgs\.gov\//.test(r.src)) rows.push(['At the source', `<a href="${esc(r.src)}" target="_blank" rel="noopener">USGS event page</a>`]);
@@ -582,7 +582,7 @@ function inspectCell(p) {
     ['Coverage', `${p.grade} — ${esc(p.cell.coverage ? p.cell.coverage.evidence : MISSING)}`],
     ['Collector', `${fresh.grade} — ${esc(fresh.why)}`],
     ['Retrieved', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : '–'],
-    ['Comparison', 'none of ours shown yet — ' + (ME.KEPT[p.layer] || 'no history kept')],
+    ['Comparison', 'none of ours shown yet — ' + (ME.kept(p.layer) || 'no history kept')],
   ];
   if (p.layer === 'drifters') rows.push(['Caveat', 'buoys are sparse: a cell with no buoy is not evidence of anything about that water']);
   if (p.layer === 'plastic') rows.push(['Caveat', 'dated samples at tow-start locations, not current positions; a missing marker does not establish plastic-free water']);
@@ -1271,6 +1271,7 @@ sheetBtn.addEventListener('click', () => { const c = sheet.classList.toggle('col
 // ---------- one polling loop per page load (navigation is a full page load, so no duplicates)
 // Request count per cycle is unchanged: 4 cell-only layers + 3 record layers × (cells + records) = 10, as before.
 async function tick() {
+  ME.loadHistory();   // what the hub retains right now (wording only; never blocks the readings)
   await ME.loadCells(CELL_ONLY_LAYERS);   // layers that publish no records of their own
   cards(); render();
   for (const layer of RECORD_LAYERS) { await refreshPair(layer); cards(); render(); }   // each commits its own validated pair
