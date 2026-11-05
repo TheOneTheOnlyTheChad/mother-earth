@@ -5,7 +5,8 @@
 - **Measured ticks (invocation log, CPU / wall):** usgs 10:25 12 ms / 3.3 s · usgs 10:30 11 ms / 2.8 s · firms 10:30 124 ms / 4.3 s · firms 11:00 190 ms / 3.9 s · hourly 11:08 82 ms / 15.2 s · usgs 11:05–11:10 12 ms. Reference, history off (08:30): usgs 6 ms, firms 107 ms.
 - **D1 at 11:10:** quake_revisions 40 (30 on the first run; later runs write only new quakes and revisions — e.g. us7000tw7b automatic → reviewed); history_activity 2 (firms + usgs for 5 Nov); drifter_fixes **1,304** (first hourly batch, 11:08); archive_versions 1 (co2 "first", 3,284 B gz in R2 `archive/versions/co2/…`). checkpoints, fires_daily, seaice_daily, orbital_population, archive_gaps 0 — none due yet.
 - Hub report: retained since 10:25:08 UTC; `archive_health` pending/gaps/failures empty.
-- **Still to see:** orbital_population at 11:41; plastic version (daily, last success > 20 h ≈ 12:07); seaice_daily at 15:07; **first midnight checkpoint 00:30 UTC 6 Nov** (firms + usgs: archive_checkpoints, fires_daily); **drifter_fixes rows/day + bytes** (open cost item) over the full UTC day.
+- **11:41 orbital tick (forest + orbital share it):** 184 ms CPU / 72.4 s wall, ok (3 Nov reference 173 ms, history off). orbital_population 1 row (32,584 objects: payload 19,675 · rocket body 2,207 · debris 10,163 · unknown type 539; elements sha `3bfcf743…`) + archive_versions orbital "first" (1,220 B). usgs ticks 11–14 ms.
+- **Still to see:** plastic version (daily, last success > 20 h ≈ 12:07); seaice_daily at 15:07; **first midnight checkpoint 00:30 UTC 6 Nov** (firms + usgs: archive_checkpoints, fires_daily); **drifter_fixes rows/day + bytes** (open cost item) over the full UTC day.
 - To stop: remove the variable (Chad's click). Retained history is not deleted.
 
 # Mother Earth — status (5 Nov 2026 — thread 15)
