@@ -20,7 +20,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 3. **Plastic's first archived version** comes with its next daily run (~05:07–06:07 UTC 6 Nov); check it on the next read after that.
 4. **orbital-browser clock (open, not built):** shared fixed calculation time for browser + reference, cases either side of the 3-day boundary; real timers kept (GPT).
 5. **Mac copies of STATUS / HANDOVER / START-HERE are behind** (folder not granted since thread 13) — one `device_request_folder_access ["~/Documents/Mother Earth"]` prompt for Chad, then copy.
-6. **Research backlog** (`docs/RESEARCH-BACKLOG.md`, research only): R1 Schumann/ELF; R2–R9 (first: CNEOS fireballs, USNO/IERS Earth rotation, Argo). One first gate: representative numerical sample + units/timestamps/missing/flags/reuse + payload and processing measured. No build, collector, schedule, deploy, purchase or contact without Chad's go.
+6. **Research backlog** (`docs/RESEARCH-BACKLOG.md`, research only): R1 Schumann/ELF; R2–R9 (first: CNEOS fireballs — GPT retrieved the full catalogue 5 Nov, velocity-field discrepancy open, lightcurves outstanding; USNO/IERS Earth rotation; Argo); R10 solar flares / X-ray. One first gate: representative numerical sample + units/timestamps/missing/flags/reuse + payload and processing measured. No build, collector, schedule, deploy, purchase or contact without Chad's go.
 7. Carried over: real-phone check of the mobile pass (Galaxy); NCEI accession recheck; plastic research follow-ups; attribution placement; Possible futures (research only).
 
 ## 2. Done in thread 15 (details in STATUS)

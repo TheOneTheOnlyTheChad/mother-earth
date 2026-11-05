@@ -2,7 +2,7 @@
 
 Research-only items. An entry here authorises **no** implementation, collector, schedule, deployment, page change, purchase or third-party contact. Each item moves forward only on Chad's explicit go, one gate at a time.
 
-**Priorities are GPT's recommendations, not implementation approvals.** Source notes in R1–R9 are **GPT's source checks** (relayed by Chad, 5 Nov 2026), not integrations Claude has verified.
+**Priorities are GPT's recommendations, not implementation approvals.** Source notes in R1–R10 are **GPT's source checks** (relayed by Chad, 5 Nov 2026), not integrations Claude has verified.
 
 ### First gate for every candidate
 Retrieve a representative numerical sample; verify units, timestamps, missing values, quality/processing flags and reuse terms; measure payload and processing requirements before choosing infrastructure.
@@ -15,6 +15,7 @@ Retrieve a representative numerical sample; verify units, timestamps, missing va
 | First priorities | R2 fireballs · R3 Earth rotation / polar motion · R4 Argo profiles |
 | Next candidates | R5 coral heat stress · R6 ozone · R7 coastal water level vs predicted tide |
 | Later feasibility | R8 ionospheric TEC (GloTEC) · R9 neutron monitors (NMDB) |
+| Added later | R10 solar flares / X-ray (5 Nov) |
 | Added earlier | R1 Schumann resonance / ELF (5 Nov) |
 
 ---
@@ -50,10 +51,44 @@ Retrieve a representative numerical sample; verify units, timestamps, missing va
 
 ## R2. Reported fireball detections — NASA/JPL CNEOS  *(first priority — first feasibility study)*
 **Added:** 5 Nov 2026. **Merged with** the earlier mention in `reviews/2026-11-05-landscape-comparison.md` §3 ("Fireballs / meteors", NASA CNEOS, also shown on overwatch.earth).
-**Sources:** [Data and limitations](https://cneos.jpl.nasa.gov/fireballs/) · [API](https://ssd-api.jpl.nasa.gov/doc/fireball.html)
-- Do **not** describe every event as an explosion or a ground impact.
-- Reports are **incomplete, delayed and revisable**; **locations may be missing** (no location → no marker, stated as such).
-- Keep **approximate radiated energy** separate from **calculated impact energy**.
+**Status:** research only — no implementation, collector, schedule, deployment or third-party contact.
+**Sources:** [Fireball API](https://ssd-api.jpl.nasa.gov/doc/fireball.html) · [API fair-use policy](https://ssd-api.jpl.nasa.gov/doc/) · [SSD reuse statement](https://ssd.jpl.nasa.gov/faq.html) · [CNEOS catalogue and limitations](https://cneos.jpl.nasa.gov/fireballs/) · [Energy definitions](https://cneos.jpl.nasa.gov/fireballs/intro.html) · [Velocity operational notes](https://cneos.jpl.nasa.gov/fireballs/notes.html) · [Lightcurve collection](https://cneos.jpl.nasa.gov/fireballs/lc/)
+
+### A. Independently checked by GPT — full catalogue retrieved 5 Nov 2026, 11:33 UTC
+Public API, `vel-comp=true`. Response **94,649 bytes**, API version **1.2**, **1,074 events**, **15 Apr 1988 – 4 Oct 2026**. GPT's research note and the raw response are on Chad's Mac: `~/Documents/ChatGPT/Mother Earth/research/fireballs-2026-11-05/` (`RESEARCH.md`, `nasa-fireballs.json`). *Not yet re-checked by Claude.*
+
+| Fields present | Records |
+|---|---:|
+| Peak-brightness date/time, radiated energy, estimated impact energy | 1,074 |
+| Latitude and longitude | 888 (186 unlocated) |
+| Altitude | 602 |
+| All three entry-velocity components | 363 |
+
+- Read positions from the response's `fields` array. Values arrive as **strings**; missing values are **null** (never 0). Coordinate signs come separately as N/S and E/W.
+- `energy` = approximate **optical radiated** energy, in **10¹⁰ J**. `impact-e` = empirically **estimated total impact energy**, kt TNT — not measured ground damage. Keep the two apart.
+- Location and altitude are at **peak brightness** — not a landing site or trajectory. Altitude is km above the reference geoid.
+- `vx`, `vy`, `vz` = entry-velocity components, km/s, geocentric Earth-fixed frame.
+- Example (latest): 4 Oct 2026 03:14:45 UT · 41.8° S, 173.1° W · 26.9 km · radiated ≈ 5.4 × 10¹⁰ J · impact ≈ 0.18 kt.
+
+**Open issue — velocity discrepancy (keep explicit).** The response carries an **undocumented `vel` field**. Latest event: `vel = 13.8`; components 14.8, 2.9, 2.2 km/s → magnitude ≈ **15.24 km/s**. Don't assume `vel` is the magnitude or silently choose between them. CNEOS's June 2025 notes say "Total Velocity" was removed and speed can be calculated from the components. For any later build: use the documented components; label any magnitude **"calculated from supplied components"**. Cause unverified.
+
+**Reuse and access (published terms, as GPT read them).** SSD FAQ: data public domain, no permission needed; CNEOS supplies these records for public release. Attribute **NASA/JPL CNEOS and the underlying U.S. Government sensor reports**, record retrieval dates, identify transformations, imply no endorsement. Does not clear unrelated images or logos. API conditions: cache, reasonable frequency, **one request at a time**, back off on errors, application-specific User-Agent with product/version/contact, check the response version. **Direct embedding in websites is prohibited** (stated CORS policy) → a future hub collector serving a cached file is the proposed approach. **No schedule approved or being created.**
+
+**Reliability and presentation limits.**
+- Incomplete, delayed and revisable; CNEOS does not independently verify or reanalyse the reports.
+- Newest event ≈ 32 days before retrieval — **not a measured publication delay**. No first-publication time, stable event ID, revision number or per-record uncertainty in this response. **Revision matching needs research before any build.**
+- Candidate layer: **"Reported fireballs"** — dated markers, energy, altitude, calculated speed where available; an accessible list for the unlocated records.
+- Never: empty cells as zero events, landing locations, historical reports shown as live falling objects, catalogue counts as true event rates, every event as an explosion or ground impact.
+
+### B. Outstanding — lightcurves (offering verified, no file retrieved or validated)
+CNEOS advertises raw numerical `.txt` lightcurves for most events. Next gate:
+1. Retrieve one example: columns, units, time reference, sampling.
+2. Calibration, uncertainty and missing-data conventions.
+3. Coverage, file sizes, reliable links to catalogue events.
+4. Reuse/access terms for these files.
+5. Version differences — CNEOS warns lightcurve reports can carry revisions not yet in the main catalogue.
+
+**GLM bolides** (GOES Geostationary Lightning Mapper) are a separate potential source: own assessment, including overlap and duplicate handling.
 
 ## R3. Earth rotation and polar motion — USNO / IERS  *(first priority)*
 **Sources:** [Daily products](https://maia.usno.navy.mil/products/daily.htm) · [File format](https://maia.usno.navy.mil/ser7/readme.finals2000A)
@@ -96,3 +131,28 @@ Retrieve a representative numerical sample; verify units, timestamps, missing va
 - Inspected temporary-service notice: **an account is required** and **real-time files are unavailable**.
 - Data are **provider-owned**; non-commercial access is subject to individual restrictions.
 - **Recheck service status and intended reuse** before going further (no account creation, no contact without Chad's go).
+
+## R10. Solar flares / solar X-ray observations  *(candidate — added 5 Nov 2026)*
+**Status:** research only — no implementation, collector, schedule, deployment or third-party contact. GPT checked the primary sources and one actual NOAA event feed: numerical availability confirmed; feasibility and reuse checks outstanding. *Not yet re-checked by Claude.* Related: NOAA SWPC is already a registered source (Kp).
+
+**Sources**
+1. **NOAA GOES / SWPC X-ray observations** — [product](https://www.spaceweather.gov/products/goes-x-ray-flux); first lead. Two wavelength bands; published plots use one-minute averages. **[Recent-flare JSON](https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json)**: start, peak, end, class, peak flux, integrated flux, observing satellite; some fields nullable. Verified example: **C2.2, 4 Nov 2026, 17:23 / 17:34 / 17:38 UTC, GOES-18** — confirms accessible numerical records, not continuous availability or a measured delay.
+2. **NASA CCMC DONKI** — [tool](https://ccmc.gsfc.nasa.gov/tools/DONKI/); catalogued flares, analyses, links to other space-weather events. Context only; don't assume it lists every detected flare. Migrated Sep 2026 — use current documentation and endpoints, not old `kauai` URLs.
+3. **NOAA NCEI solar-flare archives** — [legacy data](https://www.ncei.noaa.gov/products/space-weather/legacy-data/solar-flares-events); historical, for possible long-term comparison. Coverage and documentation vary; never treat historical and current as one series without a compatibility check.
+
+**Possible presentation:** a solar-activity panel or timeline — measured X-ray flux beside identified flare events, with source, satellite, observation time, retrieval time and quality information. **Not on the globe's cells:** a flare's solar location is not an Earth location. Any Earth-effects view needs its own supported observations or clearly labelled modelling. A flare alone does not establish that an Earth-directed CME or a geomagnetic storm will follow.
+
+Keep explicit: continuous measurements vs detected/catalogued events · observations vs forecasts/modelled effects · flare class vs peak flux vs integrated flux vs total emitted energy (class = peak soft X-ray flux in a band, **not** total energy) · flares vs CMEs vs particle events vs geomagnetic storms.
+
+**Outstanding checks**
+- Retain representative event and X-ray samples; schemas, units, wavelength bands, timestamp conventions.
+- Detection thresholds, catalogue inclusion rules, provisional/final status, revisions, identifier stability.
+- Missing values, quality flags, eclipse periods, instrument issues, incomplete events.
+- Measured freshness, publication delay, payload sizes, rolling-feed coverage (not inferred from filenames).
+- Automated-access and numerical redistribution terms, separately for NOAA and NASA: attribution, caching, request limits.
+- Primary/secondary satellite selection and transitions — no duplicates or silent changes on a switch.
+- Historical coverage, calibration changes, compatibility before any baseline or trend.
+- DONKI links: observed associations vs analysis, forecasts, model output.
+- Collection and retention cost before any schedule (project target: no new running cost; Workers Paid $5/month since 3 Nov).
+
+**Research order:** NOAA recent-event feed + matching X-ray measurements → DONKI context → historical comparisons once measurement definitions and continuity are understood.
