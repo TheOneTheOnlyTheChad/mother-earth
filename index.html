@@ -423,7 +423,7 @@ function closeInspector() {
   if (!$('insp').classList.contains('show')) return;
   $('insp').classList.remove('show');
   if (lastFocus && document.contains(lastFocus) && typeof lastFocus.focus === 'function') lastFocus.focus();
-  lastFocus = null; inspCtx = null; placeCtx = null;
+  lastFocus = null; inspCtx = null; placeCtx = null; $('insp').classList.remove('placeview');
 }
 $('insp-x').onclick = closeInspector;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInspector(); });
@@ -441,6 +441,7 @@ let placeCtx = null, placeSeq = 0;
 ME.placeLog = [];   // test aid: every /place request path, in order
 function openPlace(id) {
   placeCtx = { id, extra: new Set() };
+  $('insp').classList.add('placeview');
   openInspector(`Everything here · cell ${id}`, [['Loading', 'reading what the hub holds for this cell…']]);
   loadPlace();
 }
@@ -469,6 +470,7 @@ function recordTitle(layer, r) {
 
 // one record on its own — never a cell total (review round 5)
 function inspectRecord(layer, r) {
+  $('insp').classList.remove('placeview'); placeCtx = null;
   if (layer === 'plastic') return inspectSample(r);
   const snap = state[layer];
   const rows = [['Selected', 'one record from the loaded snapshot — not a cell total']];
@@ -567,6 +569,7 @@ const SRC_LINK = {
 const srcLink = layer => `<a href="${SRC_LINK[layer][0]}" target="_blank" rel="noopener">${esc(SRC_LINK[layer][1])}</a>`;
 
 function inspectCell(p) {
+  $('insp').classList.remove('placeview'); placeCtx = null;
   const snap = state[p.layer]; const fresh = ME.freshness(p.layer);
   const paired = p.layer !== 'forest' && usable(p.layer);
   const recs = paired ? points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, p.layer === 'plastic' ? Infinity : 8) : [];   // plastic: every sample reachable, collocated ones included
