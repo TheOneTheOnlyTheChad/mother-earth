@@ -1,4 +1,4 @@
-# Mother Earth — handover (5 Nov 2026, thread 15, ~12:30 UTC)
+# Mother Earth — handover (5 Nov 2026, thread 15, ~15:45 UTC)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.**
 
@@ -15,18 +15,18 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | **Branches** | Leftover remote branches (e.g. `orbital-test-stale`, `place-view`, `nsidc-page`) are merged or superseded; the proxy can't delete them — Chad's call on GitHub. |
 
 ## 1. Next
-1. **Watch the history day (read-only, through the browser pane — app open, Mac awake; Chad not needed at the screen).** Scheduled checks in the session: **15:12 UTC** (first `seaice_daily`) and **00:50 UTC 6 Nov**: the first midnight checkpoint — `archive_checkpoints` for firms + usgs (cutoff = the day's last snapshot by full `retrieved_at`), `fires_daily` (FRP null where none), `archive_health` (no pending after the tick, no gaps), CPU of the 00:30–00:45 ticks.
-2. **Open cost item: drifter rows/day + bytes.** Early rate ≈ 1,200 rows/hour (≤ ~29,000/day). 5 Nov is a partial day (from 10:21); **6 Nov is the first full day** — measure it at 00:50 UTC 7 Nov.
-3. **Plastic's first archived version** comes with its next daily run (~05:07–06:07 UTC 6 Nov); check it on the next read after that.
-4. **orbital-browser clock (open, not built):** shared fixed calculation time for browser + reference, cases either side of the 3-day boundary; real timers kept (GPT).
-5. **Mac copies of STATUS / HANDOVER / START-HERE are behind** (folder not granted since thread 13) — one `device_request_folder_access ["~/Documents/Mother Earth"]` prompt for Chad, then copy.
-6. **Research backlog** (`docs/RESEARCH-BACKLOG.md`, research only): R1 Schumann/ELF; R2–R9 (first: CNEOS fireballs — GPT retrieved the full catalogue 5 Nov, velocity-field discrepancy open, lightcurves outstanding; USNO/IERS Earth rotation; Argo); R10 solar flares / X-ray. One first gate: representative numerical sample + units/timestamps/missing/flags/reuse + payload and processing measured. No build, collector, schedule, deploy, purchase or contact without Chad's go.
-7. Carried over: real-phone check of the mobile pass (Galaxy); NCEI accession recheck; plastic research follow-ups; attribution placement; Possible futures (research only).
+1. **History day — HUB FREEZE until the midnight read is in STATUS.** No deploy, variable, schedule or D1 change. Thread 15 holds a scheduled read at **00:50 UTC 6 Nov** (02:50 SAST). It checks: `archive_checkpoints` for firms + usgs (5 Nov; cutoff = the day's last snapshot by full `retrieved_at`), `fires_daily` (FRP null where none), `archive_health` (no pending after the tick, no gaps), CPU of the 00:30–00:45 ticks. **If STATUS has no "midnight checkpoint" entry by the time you start, do the read yourself** (method: START-HERE §4a/§4d via the dashboard tab; data persists in D1).
+2. **Drifter rows/day + bytes (open cost item).** 5 Nov is partial (from 10:21): mean ≈ 1,170 rows/hour ⇒ ~28,000/day if it holds. **6 Nov is the first full day** — measure it after 00:30 UTC 7 Nov.
+3. **Plastic's first archived version** comes with its next daily run (~05:07–06:07 UTC 6 Nov).
+4. **Research backlog** (`docs/RESEARCH-BACKLOG.md`, research only — index table at the top). **R2 fireballs PARKED** (Chad, 5 Nov; `docs/research/R2-revision-matching.md` rev 3 + evidence on the Mac at `~/Documents/Mother Earth/research/fireballs/2026-11-05-claude/`). Next tier-1 items: **R3 Earth rotation (USNO/IERS)**, **R4 Argo**. Same first gate for every item. No build, collector, schedule, deploy, purchase or third-party contact without Chad's go.
+5. **Mac copies of STATUS / HANDOVER / START-HERE are behind** — one folder approval from Chad, then copy.
+6. Carried over: real-phone check of the mobile pass (Galaxy); NCEI accession recheck; plastic research follow-ups; attribution placement; Possible futures (research only).
 
 ## 2. Done in thread 15 (details in STATUS)
 - History trial on (10:21 UTC), measured tick by tick.
 - "no history kept" fallback removed from the public page (`bd17401`), with a guard test.
-- orbital-browser 2 failures fixed in the test (`66c1a8c`, `e5bac15`); page unchanged.
+- orbital-browser: 2 failures fixed (`66c1a8c`, `e5bac15`), then a shifted fixed-start clock + 3-day boundary cases (`32a29b0`) — **113/113**; page unchanged.
+- R2 fireballs: independent re-check, revision-matching proposal rev 3, parked (other thread, same day).
 - Research backlog R1–R9.
 - STATUS trimmed: threads 1–13 moved verbatim to `docs/STATUS-ARCHIVE.md`.
 
@@ -56,7 +56,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | Desktop overflow | `node phase1/desktop-overflow.test.cjs` (112; needs `@fontsource/ibm-plex-mono@5` + `@fontsource/barlow-condensed@5` in /home/claude/spike) |
 | Test setup, new container | `/home/claude/spike`: `npm i globe.gl@2.45.0 satellite.js@6.0.2 pngjs astronomy-engine @fontsource/ibm-plex-mono@5 @fontsource/barlow-condensed@5`; `mkdir -p /home/claude/fixtures && node phase1/orbital-fixture.build.mjs`; static server `python3 -m http.server 8899 --bind 127.0.0.1` via Bash `run_in_background` (with a long `timeout`, or it stops after 30 min) |
 | Reviews | `reviews/2026-11-05-landscape-comparison.md` (rev 2) · `…-place-view-and-history.md` (rev 5) · `…-place-view-candidate.md` (§1–§12) |
-| Orbital browser | `node phase1/orbital-browser.test.cjs /home/claude/fixtures` (105; stale = objects whose elements initialise) |
+| Orbital browser | `node phase1/orbital-browser.test.cjs /home/claude/fixtures` (113; stale = objects whose elements initialise; fixed calculation time + 3-day boundary cases) |
 | Research backlog | `docs/RESEARCH-BACKLOG.md` (R1–R9, research only) |
 | Older status | `docs/STATUS-ARCHIVE.md` (threads 1–13, verbatim) |
 
