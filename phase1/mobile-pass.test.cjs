@@ -186,7 +186,7 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 8 min — failur
       const s = await page.evaluate(() => ({ key: getComputedStyle(document.getElementById('key-btn')).display, persist: getComputedStyle(document.getElementById('persist')).display, legend: getComputedStyle(document.getElementById('legend')).display,
         long: getComputedStyle(document.querySelector('.img-long')).display, short: getComputedStyle(document.querySelector('.img-short')).display, orb: !document.getElementById('orb-legend').hidden, plasticLeg: !document.getElementById('leg-plastic').hidden }));
       ok(`${tag}: no Key button / persist strip; full legend and imagery text as before`, s.key === 'none' && s.persist === 'none' && s.legend !== 'none' && s.long !== 'none' && s.short === 'none' && s.orb && s.plasticLeg, s);
-      if (vp.width < 1100) ok(`${tag}: no horizontal scroll`, !m.hscroll, m);   // 1280: an 8 px overflow exists on main too (header/stage/right column) — separate item, not this pass
+      ok(`${tag}: no horizontal scroll`, !m.hscroll, m);   // 1280 included since the desktop-overflow fix (5 Nov); see desktop-overflow.test.cjs
       // inspector closable in landscape with everything on
       await page.evaluate(k => ME.openCell('plastic', k), cellOf(42.75, 4.13)); await page.waitForTimeout(200);
       const x = await page.evaluate(() => { const b = document.getElementById('insp-x').getBoundingClientRect(); return document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2) === document.getElementById('insp-x'); });
