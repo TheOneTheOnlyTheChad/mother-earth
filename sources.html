@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611081000">
+<link rel="stylesheet" href="style.css?v=202611091000">
 </head>
 <body class="doc">
 <header class="top">
@@ -128,6 +128,17 @@
   <p><b>"No matching loaded records" describes the loaded snapshot and nothing else.</b> It does not establish absence. A layer that is hidden, whose state is unknown, or whose records are withheld by the records-and-cells pairing rule is not searched at all, and the panel names each one with the reason.</p>
   <p><b>A result stays tied to what it was found under.</b> Every result carries its layer and the collector run it came from. If that run is replaced, or the layer is hidden, or the layer's state lapses to unknown, or its records are withheld, the result is marked and refused rather than opened — the page never attaches an old record to a newer run. Each result is judged on its own layer, so one layer refreshing does not invalidate another's results. Nothing moves the view and nothing is selected without a click. <b>If this browser cannot show the globe</b> there is no view to move, and the panel says so instead of reporting a movement that did not happen; searching and opening records still work.</p>
 
+  <h2 id="place">Everything here — one place, all layers</h2>
+  <p>Selecting any point on the globe (or "Everything we hold for this cell" in a cell's details) lists what the hub holds for that 4° grid cell, one layer per row. Each row keeps its own date, evidence and limits; the rows are listed together only because they share the cell — <b>nothing in the list states a connection between them</b>.</p>
+  <ul>
+    <li><b>Any place can be selected</b>, including one with no visible records. A layer with nothing for the cell says what that does and does not mean (e.g. "not a statement that none occurred", "not an empty sea") — never zero.</li>
+    <li><b>Records and counts come from the same collector run</b> for each layer; if they do not, that layer is withheld with the reason, and the other layers are unaffected.</li>
+    <li><b>Optional layers that are off are not fetched.</b> Each has a "Load this layer's data for this place" button; that fetches its data for the panel only — the layer stays off on the globe.</li>
+    <li><b>Collection evidence is labelled as such.</b> "Our collector produced a usable sample" (all places at once) and "records for this cell reached us" (this place) are different statements, and neither is the source's geographic coverage. "Retained since" is when our record for that layer starts; "first retained report here" is the first retained hour with a record for this cell.</li>
+    <li><b>Cells differ in size</b>: a 4° cell covers about 198,000 km² at the equator and far less toward the poles; the area is stated for each cell.</li>
+    <li>Kp, CO₂, sea ice, orbital objects and day/night have no per-place value and are listed with the reason.</li>
+  </ul>
+
   <h2 id="limits">Limitations, disclaimers and currently unavailable layers</h2>
   <div id="limits-body"></div>
 
@@ -137,7 +148,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611081000"></script>
+<script src="app.js?v=202611091000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;

@@ -1,6 +1,8 @@
-# Mother Earth — Place view and what we keep from now on (proposal rev 2, 5 Nov 2026)
+# Mother Earth — Place view and what we keep from now on (proposal rev 3, 5 Nov 2026)
 
 Prepared by Claude for Chad and GPT (thread 14). **A proposal for decision. Nothing here is built, deployed or scheduled.** Every decision in §7 is Chad's.
+
+**Rev 3 (5 Nov, GPT's go to build on a branch):** four wording details adopted (§10), and the build's deviations from rev 2 recorded (§11). Candidate results: `reviews/2026-11-05-place-view-candidate.md`.
 
 **Rev 2** takes GPT's six corrections (5 Nov), all adopted. Changes are listed in §9. The biggest: the archive promise is now what the implementation actually delivers, defined per layer. Collection evidence is kept apart from coverage. The grid is a reference, not the definition of a place. The place view goes first, on data we already hold. Cost is stated as meters to measure, not a conclusion.
 
@@ -22,15 +24,17 @@ Context: GPT's direction (5 Nov) is to make *"understand what is changing here"*
 | Raw files, every snapshot, every cell file | R2 `raw/` `snapshots/` `cells/` | — | deleted after 48 h |
 | Sea ice, drifters, orbital, individual quakes, plastic revisions | `latest/` only | — | no history |
 
-D1 was 2.6 MB on 4 Nov; writes measured ~10k/day on 1 Nov. So individual quakes, buoy positions, the orbital population over time and our own sea-ice series cannot be rebuilt for any date before this lands.
+D1 was 2.6 MB on 4 Nov; writes measured ~10k/day on 1 Nov. **We do not currently retain a lasting history of these records** (individual quakes, buoy positions, the orbital population, our own sea-ice series).
 
 ## 3. Three things kept apart (GPT #3)
 Each answers a different question, and none stands in for another:
 | | Question | Evidence we hold | Never read as |
 |---|---|---|---|
-| **Collection ran** | Did our sample/request run, and for how long? | `layer_hourly`, `collector_runs`, sample windows | coverage |
-| **Records received** | What reached us, where? | counts per cell, receipts (first/last *report* in a cell) | first/last *coverage* of the cell |
+| **Collection ran** (collector uptime — all places at once) | Did our sample/request run, and for how long? | `layer_hourly`, `collector_runs`, sample windows | coverage; records reaching us for a particular cell |
+| **Records received here** | In which hours did at least one record for *this cell* reach us? | `cell_hourly` rows for the cell | collector uptime; first/last *coverage* of the cell |
 | **Source coverage** | Where could the source's network observe at all? | only what the source documents (e.g. "terrestrial AIS", GFW's 30°N–30°S, FIRMS swath/clouds) | something our own logs establish |
+
+**Two different start dates, kept apart:** *retention start* = the first hour we retain for that layer at all; *first retained report here* = the first retained hour with a record for this cell. A late first report here may only mean nothing reached us from this cell earlier.
 
 "Fewer ships here" can be qualified by the first two: we sampled less, or nothing reached us. It **cannot** be settled as a world change or a receiver change by our records alone. The place view and any comparison say exactly that.
 
@@ -65,7 +69,9 @@ Each answers a different question, and none stands in for another:
 - Keyboard and phone (inside the inspector sheet).
 
 ## 5. Proposal B — what we keep, defined per layer (GPT #2, #4)
-**Rules for every retained row or file:** source run ID (`collector_runs`), collector/processing version, source time(s) and our received time. Append, never overwrite, wherever the source revises.
+**Rules for every retained row or file:** source run reference (`<layer>@<retrieved_at>`), collector/processing version, source time(s) and our received time. Append, never overwrite, wherever the source revises.
+
+**Three kinds of change, kept apart (GPT, rev 3):** a **data revision** (the source's values changed), a **processing change** (our check/derived results changed — e.g. a plastic verification result — with the same source data), and a **repeat retrieval** (nothing changed but the retrieval time). A new version is stored only for the first two, labelled `data`, `processing` or `data+processing`; a repeat retrieval stores nothing new and only advances that version's retrieval count, last retrieval time and last run reference — so provenance is complete without duplicating unchanged datasets.
 
 **Archive promise, stated per layer** (replaces "everything published"):
 | Layer | Measurement kept (definition) | Archive kind | Not recoverable from it |
@@ -74,7 +80,7 @@ Each answers a different question, and none stands in for another:
 | **Fires** | **Daily per cell: detections as of our last successful pull of UTC day D**, with that pull's time. FIRMS `day_range=1` resets at 00:00 UTC, so detections processed for D after our last pull are **not** in it; the row says so. *Option F2 (measure first):* one `day_range=2` pull at ~06:00 UTC on D+1 to record the late-processed total for D as a second, labelled figure. FRP sum/max, day/night split. | daily row (D1) + **daily checkpoint** of the last file of D (R2, labelled with its cutoff) | intermediate 15-min versions; detections FIRMS publishes later |
 | **Ships** | **Aggregates only** (existing `cell_hourly`, `layer_hourly`, sample windows, A/B class counts). No positions are retained beyond 48 h. | none beyond aggregates | any vessel's position or track; any finer-than-cell answer |
 | **Forest** | existing `forest_daily` (per cell per query, with GFW version) | as is | pixel locations within a cell |
-| **Drifting buoys** | **Sampled track:** the latest fix per buoy as returned by each hourly OSMC query, de-duplicated on buoy + fix time. *Not* every fix the buoy reported. | R2 daily file (`history/drifters/<date>.ndjson.gz`) | fixes between our hourly samples |
+| **Drifting buoys** | **Sampled track:** the latest fix per buoy as returned by each hourly OSMC query. Identical repeats (same buoy + fix time + position + SST) are suppressed; a **correction** — same buoy + fix time with a different position or SST — is kept as its own row with the time we first received it. *Not* every fix the buoy reported. | D1 `drifter_fixes` (see §11) | fixes between our hourly samples |
 | **Sea ice** | every distinct daily value (data date) for N and S, with NSIDC's climatology value for that day, run ID | D1 | — (NSIDC holds the full series; ours records what we published) |
 | **Kp, CO₂** | existing tables + run ID going forward | as is | — |
 | **Orbital** | **population in our selected catalogue query** (Space-Track GP: not decayed, epoch within 10 days), by object type, plus stale and beyond-GEO counts, the query string and file sha. Changes can come from filtering, classification or element freshness as well as launches and reentries; the row says so. | D1 daily row | positions; objects outside the query |
@@ -133,3 +139,21 @@ No figure is promised until measured. The earlier line "the only recurring line 
 - Cloudflare D1 limits — https://developers.cloudflare.com/d1/platform/limits/
 - Cloudflare R2 pricing — https://developers.cloudflare.com/r2/pricing/
 - Current tables: `phase1/schema.sql`; retention: STATUS 4 Nov; D9: STATUS Decisions
+
+## 10. Rev 3 wording changes (GPT, 5 Nov)
+| # | Change |
+|---|---|
+| 1 | data revision vs processing/check change vs repeat retrieval defined (§5); unchanged datasets are not duplicated; revised plastic verification results are preserved |
+| 2 | drifters: identical buoy + fix-time repeats suppressed; corrections under the same key preserved (§5) |
+| 3 | collector uptime kept apart from hours when records reached us for a particular cell; retention start kept apart from first report for that cell (§3) |
+| 4 | "cannot be rebuilt for any date before this lands" → "we do not currently retain a lasting history of these records" (§2) |
+
+## 11. Where the build differs from rev 2 (and why)
+| Rev 2 said | Built | Why |
+|---|---|---|
+| per-cell slices for plastic/drifters written when those jobs run | an in-memory per-cell index inside the hub, rebuilt only when the file changes | zero extra writes; measured cost in the candidate report |
+| drifter fixes as a daily R2 file | D1 table `drifter_fixes` | de-duplication and correction semantics are enforced by the table's key; size measured before any go |
+| orbital row with stale and beyond-GEO counts | counts by class, row count, query, filter, file sha | stale/beyond-GEO are computed on the page at view time; the hub does not propagate |
+| B7: extend `cell_receipts` to ships | nothing new | "records reached us here" and "first report here" come from the existing `cell_hourly` |
+| forest daily checkpoint | none | `forest_daily` already keeps every query per cell with its dataset version |
+| — | **FIRMS parser fix**: a missing FRP is now null ("not provided"), not 0 | found by the new tests; today's hub turns an empty FRP into 0 MW |

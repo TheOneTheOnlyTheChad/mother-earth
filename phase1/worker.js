@@ -1753,20 +1753,23 @@ async function placeSection(env, layer, id) {
     records: layer === 'plastic' ? sorted : sorted.slice(0, PLACE.listMax), records_total: recs.length };
 }
 async function placeCollection(env, id, nowMs) {
+  // Every query is bounded: window sums read at most 168 rows per layer (primary-key range), start dates read one row from an index.
   const h24 = hourKey(nowMs - 24 * 3600e3), h7 = hourKey(nowMs - 7 * 86400e3), cur = hourKey(nowMs);
   const q = [];
   for (const l of PLACE.hourly) {
-    q.push(env.DB.prepare('SELECT MIN(hour_utc) AS retention_start, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? THEN 1 ELSE 0 END) AS agg24, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? AND snapshots_ok > 0 THEN 1 ELSE 0 END) AS ran24, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? THEN 1 ELSE 0 END) AS agg7, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? AND snapshots_ok > 0 THEN 1 ELSE 0 END) AS ran7 FROM layer_hourly WHERE layer = ?').bind(h24, cur, h24, cur, h7, cur, h7, cur, l));
-    q.push(env.DB.prepare('SELECT MIN(hour_utc) AS first_report, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? THEN 1 ELSE 0 END) AS rep24, SUM(CASE WHEN hour_utc >= ? AND hour_utc < ? THEN 1 ELSE 0 END) AS rep7 FROM cell_hourly WHERE layer = ? AND cell_id = ?').bind(h24, cur, h7, cur, l, id));
+    q.push(env.DB.prepare('SELECT MIN(hour_utc) AS retention_start FROM layer_hourly WHERE layer = ?').bind(l));
+    q.push(env.DB.prepare('SELECT SUM(CASE WHEN hour_utc >= ? THEN 1 ELSE 0 END) AS agg24, SUM(CASE WHEN hour_utc >= ? AND snapshots_ok > 0 THEN 1 ELSE 0 END) AS ran24, COUNT(*) AS agg7, SUM(CASE WHEN snapshots_ok > 0 THEN 1 ELSE 0 END) AS ran7 FROM layer_hourly WHERE layer = ? AND hour_utc >= ? AND hour_utc < ?').bind(h24, h24, l, h7, cur));
+    q.push(env.DB.prepare('SELECT MIN(hour_utc) AS first_report FROM cell_hourly WHERE layer = ? AND cell_id = ?').bind(l, id));
+    q.push(env.DB.prepare('SELECT SUM(CASE WHEN hour_utc >= ? THEN 1 ELSE 0 END) AS rep24, COUNT(*) AS rep7 FROM cell_hourly WHERE layer = ? AND cell_id = ? AND hour_utc >= ? AND hour_utc < ?').bind(h24, l, id, h7, cur));
     q.push(env.DB.prepare('SELECT MIN(hour_utc) AS cell_table_start FROM cell_hourly WHERE layer = ?').bind(l));
   }
   q.push(env.DB.prepare('SELECT MIN(date) AS first_query, MAX(date) AS last_query, COUNT(*) AS queries FROM forest_daily WHERE cell_id = ?').bind(id));
   const r = await env.DB.batch(q); const row = i => (r[i] && r[i].results && r[i].results[0]) || {};
-  const out = {};
-  PLACE.hourly.forEach((l, k) => { const a = row(3 * k), b = row(3 * k + 1), c = row(3 * k + 2);
-    out[l] = { collection_ran: { last_24h: { hours_with_a_usable_sample: a.ran24 || 0, hours_aggregated: a.agg24 || 0, hours: 24 }, last_7d: { hours_with_a_usable_sample: a.ran7 || 0, hours_aggregated: a.agg7 || 0, hours: 168 }, retention_start: a.retention_start || null },
-      records_reached_us_here: { last_24h_hours: b.rep24 || 0, last_7d_hours: b.rep7 || 0, first_report_retained: b.first_report || null, retention_start: c.cell_table_start || null } }; });
-  const f = row(3 * PLACE.hourly.length); out.forest = { queries_retained: f.queries || 0, first_query: f.first_query || null, last_query: f.last_query || null };
+  const out = {}, N = 5;
+  PLACE.hourly.forEach((l, k) => { const a = row(N * k), b = row(N * k + 1), c = row(N * k + 2), d = row(N * k + 3), e = row(N * k + 4);
+    out[l] = { collection_ran: { last_24h: { hours_with_a_usable_sample: b.ran24 || 0, hours_aggregated: b.agg24 || 0, hours: 24 }, last_7d: { hours_with_a_usable_sample: b.ran7 || 0, hours_aggregated: b.agg7 || 0, hours: 168 }, retention_start: a.retention_start || null },
+      records_reached_us_here: { last_24h_hours: d.rep24 || 0, last_7d_hours: d.rep7 || 0, first_report_retained: c.first_report || null, retention_start: e.cell_table_start || null } }; });
+  const f = row(N * PLACE.hourly.length); out.forest = { queries_retained: f.queries || 0, first_query: f.first_query || null, last_query: f.last_query || null };
   return out;
 }
 async function place(env, url, id) {

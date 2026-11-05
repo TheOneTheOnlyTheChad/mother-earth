@@ -636,5 +636,61 @@ ME.menu = function () {
   // the menu must not reach the globe
   ['pointerdown', 'pointermove', 'wheel', 'touchstart', 'touchmove'].forEach(t => btn.parentElement.addEventListener(t, e => e.stopPropagation(), { passive: true }));
 };
+// ---------- Place view (§ proposal rev 2): everything the hub holds for one 4° cell. Pure: the hub's /place envelope → inspector rows.
+// Each layer keeps its own date, evidence label, coverage statement and limits; nothing links layers; nothing absent becomes zero.
+ME.PLACE_ORDER = ['usgs', 'firms', 'ships', 'forest', 'drifters', 'plastic'];
+ME.PLACE_OPTIONAL = ['drifters', 'plastic'];
+ME.PLACE_NONE = {
+  usgs: 'none in the feed window (M2.5+, last 24 h) reached us for this cell — not a statement that none occurred',
+  firms: 'no detection reached us for this cell so far today (UTC) — not “no fires”: satellite passes, cloud and processing decide what can be detected',
+  ships: 'no vessel heard in this cell in the latest sample — terrestrial AIS only; not an empty sea',
+  drifters: 'no buoy\'s latest fix is in this cell — buoys are sparse; this says nothing about the water',
+  plastic: 'no dated sample in this cell — a missing sample does not establish plastic-free water',
+};
+ME.placeRecordLine = (layer, o) => {
+  const n = (x, dp) => has(x) ? Number(x).toLocaleString('en', { maximumFractionDigits: dp }) : MISSING;
+  if (layer === 'usgs') return `M${has(o.mag) ? Number(o.mag).toFixed(1) : '?'} · ${when(o.observed_at)} · ${o.title || ''}`;
+  if (layer === 'firms') return `${when(o.observed_at)} · FRP ${has(o.frp_mw) ? n(o.frp_mw, 1) + ' MW' : MISSING} · ${o.daynight === 'D' ? 'day pass' : o.daynight === 'N' ? 'night pass' : 'pass ' + MISSING}`;
+  if (layer === 'ships') return `MMSI ${o.mmsi || MISSING}${o.name ? ' · ' + o.name : ''} · ${when(o.observed_at)}`;
+  if (layer === 'drifters') return `Buoy ${o.id || MISSING} · fix ${when(o.observed_at)} · SST ${has(o.sst_c) ? n(o.sst_c, 2) + ' °C' : MISSING}`;
+  if (layer === 'plastic') return `${o.sampled_on || MISSING} · ${o.pieces_m3 === 0 ? 'reported zero' : n(o.pieces_m3, 4) + ' pieces/m³'} · check: ${(o.check || MISSING).replace(/_/g, ' ')}`;
+  return '';
+};
+ME.placeRows = function (P, nowMs = Date.now()) {
+  const rows = [], c = P.cell || {};
+  const lat = (a, b) => `${Math.abs(a)}°${a < 0 ? 'S' : 'N'}–${Math.abs(b)}°${b < 0 ? 'S' : 'N'}`, lng = (a, b) => `${Math.abs(a)}°${a < 0 ? 'W' : 'E'}–${Math.abs(b)}°${b < 0 ? 'W' : 'E'}`;
+  rows.push(['Selected', `4° cell ${esc(c.id)} (${esc(c.ref)}) · ${lat(c.south, c.north)}, ${lng(c.west, c.east)} · about ${Number(c.area_km2).toLocaleString('en')} km² (cells shrink toward the poles)`]);
+  rows.push(['Read this first', `<b class="pstmt">${esc(P.statement)}</b>`]);
+  for (const l of ME.PLACE_ORDER) {
+    const s = (P.layers || {})[l] || { state: 'unavailable' }; const name = LABEL[l];
+    if (s.state === 'off_not_requested') { rows.push([name, `layer off · <button type="button" class="placeload" data-place-layer="${l}">Load this layer's data for this place</button> <span class="q">fetches data for this panel only; the layer stays off on the globe</span>`]); continue; }
+    const stale = s.retrieved_at && s.stale_after_s && (nowMs - Date.parse(s.retrieved_at)) / 1000 > s.stale_after_s;
+    const meta = s.retrieved_at ? ` <span class="q">· retrieved ${esc(when(s.retrieved_at))}${stale ? ' · <b>stale</b>: older than its refresh limit' : ''}</span>` : '';
+    if (s.state === 'withheld') { rows.push([name, `withheld — ${esc(s.why)}${meta}`]); continue; }
+    if (s.state === 'unavailable' || s.state === 'down') { rows.push([name, `unknown — ${esc(s.note || 'the collector reported down')}${meta}`]); continue; }
+    if (s.state === 'not_covered') { rows.push([name, `not covered — ${esc(s.why)}${meta}`]); continue; }
+    if (s.state === 'pending') { rows.push([name, `unknown — ${esc(s.why)}${meta}`]); continue; }
+    if (s.state === 'no_records') { rows.push([name, `${esc(ME.PLACE_NONE[l] || 'no records reached us for this cell')}${meta}`]); continue; }
+    if (l === 'forest') { const cf = (s.cell && s.cell.confidence) || {};
+      rows.push([name, `${fmt(s.cell.count, { zeroNote: null })} alert pixels (10 m) published in the 7 days from ${esc(s.cell.since || MISSING)} · nominal ${fmt(cf.nominal, { zeroNote: null })} · high ${fmt(cf.high, { zeroNote: null })} · highest ${fmt(cf.highest, { zeroNote: null })} · queried ${esc(when(s.cell.queried_at))} <span class="q">· pixels, not hectares or trends</span>${meta}`]); continue; }
+    const objs = rowsToObjects({ record_fields: s.record_fields, records: s.records });
+    const cov = (s.cell && s.cell.coverage) || s.coverage_default;
+    const head = `${s.records_total} ${l === 'plastic' ? 'dated sample' + (s.records_total === 1 ? '' : 's') + ' (2011–2024 programme; not current water)' : l === 'drifters' ? 'buoy' + (s.records_total === 1 ? '' : 's') + ' with a latest fix here (each at its own time)' : l === 'ships' ? 'vessel' + (s.records_total === 1 ? '' : 's') + ' heard in the latest sample' : l === 'firms' ? 'detection' + (s.records_total === 1 ? '' : 's') + ' so far today (UTC)' : 'event' + (s.records_total === 1 ? '' : 's') + ' in the feed window'}`;
+    const list = objs.map(o => `<li>${esc(ME.placeRecordLine(l, o))}</li>`).join('');
+    const more = s.records_total > objs.length ? `<li class="q">${s.records_total - objs.length} more in this cell, not listed</li>` : '';
+    rows.push([name, `${head}${cov ? ` <span class="q">· coverage ${esc(cov.grade || MISSING)}</span>` : ''}${meta}<ul class="plist">${list}${more}</ul>`]);
+  }
+  const C = P.collection;
+  if (C) for (const l of ['usgs', 'firms', 'ships']) { const x = C[l]; if (!x) continue; const a = x.collection_ran, b = x.records_reached_us_here;
+    const part = (o, h) => `${o.hours_with_a_usable_sample} of ${h} h` + (o.hours_aggregated < h ? ` (${o.hours_aggregated} of ${h} h aggregated so far)` : '');
+    rows.push(['Collection · ' + LABEL[l], `our collector produced a usable sample in ${part(a.last_24h, 24)} of the last 24 h and ${part(a.last_7d, 168)} of the last 7 days (all places at once); records for this cell reached us in ${b.last_24h_hours} of the last 24 h and ${b.last_7d_hours} h of the last 7 days. Retained since ${esc(b.retention_start || a.retention_start || MISSING)}; first retained report here: ${esc(b.first_report_retained || 'none retained')}. <span class="q">Neither is the source's geographic coverage.</span>`]); }
+  if (C && C.forest) rows.push(['Collection · ' + LABEL.forest, C.forest.queries_retained ? `${C.forest.queries_retained} queries of this cell retained (${esc(C.forest.first_query)} to ${esc(C.forest.last_query)})` : 'no query of this cell retained']);
+  if (!C && P.collection_note) rows.push(['Collection', `unknown — ${esc(P.collection_note)}`]);
+  rows.push(['Not place-based', 'Kp index, CO₂, sea ice, orbital objects and day/night have no value for a single cell — details below']);
+  rows.push(['Why not per place', Object.entries(P.not_place_based || {}).map(([k, v]) => `${esc(LABEL[k] || (k === 'orbital' ? 'Orbital objects' : k === 'daynight' ? 'Day/night' : k))}: ${esc(v)}`).join('<br>'), 'more']);
+  if (P.collection_meaning) rows.push(['Collection, defined', esc(P.collection_meaning), 'more']);
+  rows.push(['Generated', `${esc(when(P.generated_at))} by the hub (${esc(P.collector_version)}) — each layer above keeps its own time`, 'more']);
+  return rows;
+};
 ME.clock = function () { const c = $('clock'); if (c) setInterval(() => { c.firstChild.textContent = new Date().toISOString().slice(11, 19); }, 1000); };
 })();

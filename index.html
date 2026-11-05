@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611081000">
+<link rel="stylesheet" href="style.css?v=202611091000">
 </head>
 <body class="world">
 <header class="top">
@@ -235,7 +235,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611081000"></script>
+<script src="app.js?v=202611091000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, fmt, has, snapId, samePair, MISSING } = ME;
@@ -290,7 +290,8 @@ if (noWebGL) {
       .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonSideColor(() => 'rgba(0,0,0,0)').polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
       .polygonLabel(p => p.label)
       .pathsData([]).pathPoints('pts').pathPointLat(q => q[0]).pathPointLng(q => q[1]).pathPointAlt(() => .003).pathColor(() => 'rgba(206,222,236,.95)').pathTransitionDuration(0)
-      .onPolygonClick(p => inspectCell(p));
+      .onPolygonClick(p => inspectCell(p))
+      .onGlobeClick(({ lat, lng }) => openPlace(ME.cellId(lat, lng)));   // any place, including one with no visible records
     globe.pointOfView({ lat: -10, lng: 25, altitude: innerWidth <= 720 ? 2.8 : 2.2 });   // phones: the whole sphere fits above the readings sheet
     globe.controls().autoRotate = !reduced; globe.controls().autoRotateSpeed = .25;
     globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
@@ -405,28 +406,58 @@ let inspCtx = null;            // { layer, recs } so a listed record can be open
 function openInspector(title, rows) {
   closeKey(false);   // the Key and the inspector never overlap: opening one closes the other
   lastFocus = document.activeElement;
+  fillInspector(title, rows);
+  $('insp').classList.add('show');
+  if (globeOk) globe.controls().autoRotate = false;
+  $('insp-x').focus();
+}
+function fillInspector(title, rows) {   // content only: no focus change (used when a place view's data arrives)
   $('insp-h').textContent = title;
   // rows tagged 'more' (long method text) go behind one disclosure so the measurement, time, place and source stay findable
   const dl = r => r.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('');
   const main = rows.filter(r => r && r[2] !== 'more'), more = rows.filter(r => r && r[2] === 'more');
   $('insp-dl').innerHTML = dl(main);
   $('insp-more').innerHTML = more.length ? `<details class="imore"><summary>Method and full explanation</summary><dl>${dl(more)}</dl></details>` : '';
-  $('insp').classList.add('show');
-  if (globeOk) globe.controls().autoRotate = false;
-  $('insp-x').focus();
 }
 function closeInspector() {
   if (!$('insp').classList.contains('show')) return;
   $('insp').classList.remove('show');
   if (lastFocus && document.contains(lastFocus) && typeof lastFocus.focus === 'function') lastFocus.focus();
-  lastFocus = null; inspCtx = null;
+  lastFocus = null; inspCtx = null; placeCtx = null;
 }
 $('insp-x').onclick = closeInspector;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInspector(); });
 $('insp-dl').addEventListener('click', e => {
+  const pl = e.target.closest('button.placelink'); if (pl) { openPlace(pl.dataset.cell); return; }
+  const ld = e.target.closest('button.placeload'); if (ld && placeCtx) { placeCtx.extra.add(ld.dataset.placeLayer); loadPlace(); return; }
   const b = e.target.closest('button.reclink'); if (!b || !inspCtx) return;
   const r = inspCtx.recs[Number(b.dataset.i)]; if (r) inspectRecord(inspCtx.layer, r);
 });
+
+// ---------- Place view: everything the hub holds for one 4° cell (proposal rev 2). Read-only for the page: it never
+// touches `on`, `state`, `points`, `pmeta`, globe data or toggles. Optional layers are requested only while that layer is on,
+// or after the visitor presses "Load this layer's data for this place" for this place (panel only; the layer stays off).
+let placeCtx = null, placeSeq = 0;
+ME.placeLog = [];   // test aid: every /place request path, in order
+function openPlace(id) {
+  placeCtx = { id, extra: new Set() };
+  openInspector(`Everything here · cell ${id}`, [['Loading', 'reading what the hub holds for this cell…']]);
+  loadPlace();
+}
+async function loadPlace() {
+  const ctx = placeCtx; if (!ctx) return; const seq = ++placeSeq;
+  const want = OPTIONAL_LAYERS.filter(l => on[l] || ctx.extra.has(l));
+  const path = '/place/g4/' + encodeURIComponent(ctx.id) + (want.length ? '?layers=' + want.join(',') : '');
+  ME.placeLog.push(path);
+  let P, err = null;
+  try { P = await ME.getJson(path); } catch (e) { err = e; }
+  if (placeCtx !== ctx || seq !== placeSeq || !$('insp').classList.contains('show')) return;   // closed or superseded meanwhile
+  if (err || !P || !P.layers) { fillInspector(`Everything here · cell ${ctx.id}`, [['Unknown', `the hub could not be read for this cell (${esc(String(err && err.message || 'no data'))}) — nothing is shown rather than a guess`]]); return; }
+  fillInspector(`Everything here · cell ${ctx.id}`, ME.placeRows(P));
+}
+ME.openPlace = id => openPlace(id);   // test/console aid: same path as a click
+ME.placeState = () => placeCtx ? { id: placeCtx.id, extra: [...placeCtx.extra] } : null;
+ME.pointView = (lat, lng) => { if (!globeOk) return false; globe.controls().autoRotate = false; globe.pointOfView({ lat, lng, altitude: 2 }, 0); return true; };   // test aid: centre the camera
 
 function recordTitle(layer, r) {
   if (layer === 'usgs') return has(r.mag) ? `M${Number(r.mag).toFixed(1)}` : 'magnitude ' + MISSING;
@@ -541,6 +572,7 @@ function inspectCell(p) {
   const recs = paired ? points[p.layer].filter(x => x.cellId === p.id).sort((a, b) => (Date.parse(b.observed_at) || 0) - (Date.parse(a.observed_at) || 0)).slice(0, p.layer === 'plastic' ? Infinity : 8) : [];   // plastic: every sample reachable, collocated ones included
   inspCtx = { layer: p.layer, recs };
   const rows = [
+    ['Everything here', `<button type="button" class="reclink placelink" data-cell="${esc(p.id)}">Everything we hold for this cell, all layers</button>`],
     ['Selected', `one ${ME.CELL_DEG}° × ${ME.CELL_DEG}° coverage cell — totals for the cell, not a single record`],
     ['Cell total', `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
     ['Quantity', esc(snap.quantity || '')],
