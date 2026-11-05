@@ -9,9 +9,23 @@ Retrieve a representative numerical sample; verify units, timestamps, missing va
 - Prefer existing **source baselines** where suitable. "How unusual is it?" stays optional until a defensible reference and comparison method exist.
 - Free source data does not establish zero processing cost; effort and additional running costs stay unmeasured until measured.
 
-### Order (GPT's recommendation)
-| Tier | Items |
-|---|---|
+### Index
+Tiers are GPT's recommended order (5 Nov 2026), not approvals. "Gate" = the first gate above.
+
+| ID | Candidate | Source | Tier | Gate status (5 Nov) | Next step |
+|---|---|---|---|---|---|
+| R2 | Reported fireballs | NASA/JPL CNEOS | **1 — first** | **Partly through** — GPT retrieved the full catalogue (1,074 events, 94.6 KB), units + reuse read; `vel` field discrepancy open | Claude re-checks independently; lightcurve sample; revision matching |
+| R3 | Earth rotation / polar motion | USNO / IERS | **1 — first** | Not started | Sample `finals2000A`; flags, blanks, uncertainties |
+| R4 | Argo ocean profiles | Argo GDAC | **1 — first** | Not started | One profile sample; T/S + QC flags; payload |
+| R5 | Coral heat stress (DHW) | NOAA Coral Reef Watch | 2 — next | Not started | Product + derived-label check |
+| R6 | Seasonal ozone | NASA Ozone Watch | 2 — next | Not started | Exact product, instrument history, gaps |
+| R7 | Water level vs predicted tide | NOAA CO-OPS | 2 — next | Not started | Pick pilot stations; datum + preliminary/verified |
+| R10 | Solar flares / X-ray | NOAA SWPC (+ DONKI, NCEI) | 2 — next *(Claude's placement; GPT gave no tier)* | **Partly** — GPT confirmed a numerical event feed (one C2.2 record) | Retain event + flux samples; thresholds, revisions, satellite switches |
+| R1 | Schumann resonance / ELF | BGS Eskdalemuir (+ others) | 3 — later | Not started — no recent numerical sample; access/redistribution unresolved | One recent BGS sample + terms |
+| R8 | Ionospheric TEC | NOAA GloTEC | 3 — later | Not started | Model label; obs counts + quality |
+| R9 | Neutron monitors | NMDB | 3 — later | Blocked — account required, real-time files unavailable | Recheck service status + reuse |
+
+---|---|
 | First priorities | R2 fireballs · R3 Earth rotation / polar motion · R4 Argo profiles |
 | Next candidates | R5 coral heat stress · R6 ozone · R7 coastal water level vs predicted tide |
 | Later feasibility | R8 ionospheric TEC (GloTEC) · R9 neutron monitors (NMDB) |
