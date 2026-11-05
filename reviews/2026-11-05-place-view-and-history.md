@@ -73,7 +73,7 @@ Each answers a different question, and none stands in for another:
 
 **Three kinds of change, kept apart (GPT, rev 3):** a **data revision** (the source's values changed), a **processing change** (our check/derived results changed — e.g. a plastic verification result — with the same source data), and a **repeat retrieval** (nothing changed but the retrieval time). A new version is stored only for the first two, labelled `data`, `processing` or `data+processing`; a repeat retrieval stores nothing new and only advances that version's retrieval count, last retrieval time and last run reference — so provenance is complete without duplicating unchanged datasets.
 
-**Archive promise, stated per layer — reconciled with the implementation (rev 4, 5 Nov; `phase1/worker.js` 0.5.0 on `place-view`, tables in `phase1/schema.sql`).** Nothing below runs unless `HISTORY_ENABLED=1`.
+**Archive promise, stated per layer — reconciled with the implementation (rev 4–5, 5 Nov; `phase1/worker.js` 0.5.1 on `place-view`, tables in `phase1/schema.sql`).** Nothing below runs unless `HISTORY_ENABLED=1`.
 | Layer | Kept (definition) | Where | Not recoverable from it |
 |---|---|---|---|
 | **Earthquakes** | **Every distinct revision** of every event we received: USGS id, USGS `updated`, our received time, run ref, collector version; origin time, lat/lng, depth, magnitude, mag type, place text, status. Append-only: a new row only when USGS `updated` changes. **Plus** a daily checkpoint (below). | D1 `quake_revisions`; R2 `archive/checkpoints/usgs/<day>.json.gz` | events outside the M2.5+ day feed |

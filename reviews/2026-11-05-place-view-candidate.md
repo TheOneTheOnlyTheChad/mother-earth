@@ -5,10 +5,10 @@ Prepared by Claude for Chad and GPT (thread 14). **Branch `place-view` only.** N
 ## 1. What is in the candidate
 | Part | What it does | Live effect if deployed |
 |---|---|---|
-| **Hub 0.5.0 — `GET /place/g4/<row>_<col>`** | One envelope per cell: a section per layer, each from ONE collector run (records and counts compared on `retrieved_at`, re-read once, else **withheld** with the reason); optional layers only when named in `?layers=`; collection evidence from D1; cell bounds and area. Read-only: no writes, no upstream requests. | a new read endpoint |
-| **Hub 0.5.0 — history** | Everything in proposal §5, behind **`HISTORY_ENABLED=1`** (unset = no-op; tested). | **none until Chad sets the variable** |
+| **Hub 0.5.1 — `GET /place/g4/<row>_<col>`** | One envelope per cell: a section per layer, each from ONE collector run (records and counts compared on `retrieved_at`, re-read once, else **withheld** with the reason); optional layers only when named in `?layers=`; collection evidence from D1; cell bounds and area. Read-only: no writes, no upstream requests. | a new read endpoint |
+| **Hub 0.5.1 — history** | Everything in proposal §5, behind **`HISTORY_ENABLED=1`** (unset = no-op; tested). | **none until Chad sets the variable** |
 | **Hub fix (found by the new tests)** | FIRMS parser: a missing FRP becomes `null` ("not provided"), not `0`. JavaScript turns `+''` into 0; today's hub publishes a missing FRP as 0 MW. | affected fire records read "FRP not provided" instead of "0 MW" |
-| **D1 schema** | 7 new tables (`phase1/schema.sql`, History section). | Chad/Claude run the `CREATE TABLE` statements in the D1 console (his go) before the variable |
+| **D1 schema** | 9 new tables + 8 indexes (`phase1/schema.sql`, History section; 17 statements). | **Created 5 Nov 09:28 UTC** (GPT's go) — see §9. Originally: Chad/Claude run the `CREATE TABLE` statements in the D1 console (his go) before the variable |
 | **Page** | Click **any** point on the globe, or "Everything we hold for this cell, all layers" in a cell's details → **Everything here** panel (inspector). Sources & Details `#place`. Assets `?v=202611091000`. | new panel; nothing else changes |
 
 ### The panel, row by row
@@ -114,17 +114,12 @@ Prepared by Claude for Chad and GPT (thread 14). **Branch `place-view` only.** N
 
 Workers Paid includes 25 bn rows read/month and 10 M Class B/month free. These are stated as **to be measured** on the trial day; the trial will read the Worker invocation log and the D1/R2 dashboards.
 
-## 5. What a go would mean, step by step (each its own go)
-1. **D1:** run the 7 `CREATE TABLE` statements in the D1 console. Additive; existing tables untouched.
-2. **Deploy hub 0.5.0** (content-only API, file from GitHub at the branch commit, sha checked) with `HISTORY_ENABLED` **unset**. Effects:
-   - `/place` becomes available;
-   - FIRMS missing-FRP fix;
-   - no history written.
-   - Check `/`, `/status` and one `/place` call; read CPU from the invocation log.
-3. **Trial:** set `HISTORY_ENABLED=1`. Watch the next runs of usgs (5 min), firms (15 min) and the hourly job (drifters, CO₂, sea ice). Read the rows written, the R2 objects and CPU. Turning it off is one variable.
-4. **One full UTC day** with history on: measure the day-change checkpoint, fires_daily and drifter rows. Record everything in STATUS.
-5. **Page:** live RC check of the panel in a clean session (Chad at the screen), then merge `place-view` → main (publishes).
-6. Sources & Details "What Mother Earth keeps" (`ME.KEPT` + `#kept`) updated the same day history goes on.
+## 5. What a go would mean, step by step (each its own go) — current as of 5 Nov 09:30 UTC
+1. ~~**D1:** create the history tables~~ — **done 09:28 UTC** (GPT's go): 9 tables + 8 indexes from commit `8c8633d`, all `IF NOT EXISTS`, additive; existing tables untouched; verified identical to the commit, all empty (§9).
+2. ~~**Deploy hub 0.5.1** with `HISTORY_ENABLED` unset~~ — **done 09:28 UTC** (GPT's go): worker.js sha256 `1f34554b2e53…` from GitHub at `8c8633d`, content-only API; 16 bindings unchanged (§9).
+3. **Publish the page release** (`place-view` → main): the place view and the hub-driven "What Mother Earth keeps" wording. With history off, the page says *"History collection now: off … Retained history: none"*. **Published before collection starts** (GPT), so the public wording is already following the hub when history begins. Chad's go; live RC check in a clean session first (§10).
+4. **Trial:** set `HISTORY_ENABLED=1` (Settings form; reload the Settings page first, START-HERE §4). Watch the next usgs (5 min), firms (15 min) and hourly runs: rows written, R2 objects, CPU, `/status` → `archive_health`. Turning it off is one variable, and retained history is not deleted (the wording then says so). **GPT's separate go.**
+5. **One full UTC day** with history on, including the first day-change checkpoint (due 00:30 UTC + next firms/usgs run). Measure fires_daily and drifter rows. Record in STATUS.
 
 ## 6. Open points for Chad / GPT
 - **Drifters in D1 rather than an R2 file** (rev 3 §11): the key does the de-duplication and correction work. Cost per §4b.
@@ -145,7 +140,7 @@ GPT reproduced three failures that the original 16 hub checks missed. All three 
 
 **Retention wording (GPT's last point).**
 - The hub now reports what it retains: `GET /` → `history: { enabled, since }`, where `since` is the first retained record.
-- Sources & Details "What Mother Earth keeps" shows the seven history rows **only while the hub reports retention on**, plus a state line ("on … first retained record …" / "off" / "hub could not be read — the rows above describe what runs without it").
+- Sources & Details "What Mother Earth keeps" shows the history rows **only while the hub reports retention on**, plus a state line ("on … first retained record …" / "off" / "hub could not be read — the rows above describe what runs without it").
 - The World View "kept" lines follow the same report.
 - So the public wording changes **when retention changes**, whenever the page is published, and an unreadable hub never claims retention.
 - New **kept-ui** suite: **10/10**, shown to fail on 2 deliberate breaks (history rows always shown; wording ignoring the hub).
@@ -189,4 +184,26 @@ history-hub: **27/27** on 0.5.1. On `482ffb0` the same file gives **17 passed, 1
 
 **Found on the way (pre-existing, on the live Sources page):** `fill()` removed rows with `tr:not(:first-child)`, but each redraw's rows land in their own `<tbody>`. So every 5-minute refresh left one stale row in every redrawn table. Fixed; kept-ui checks that 3 refreshes leave every table's row count unchanged, and that check fails with main's `fill()`.
 
-Assets `?v=202611111000`. Hub version **0.5.1** (not deployed; live is still 0.5.0 with history off).
+Assets `?v=202611111000`. Hub version **0.5.1** (deployed 5 Nov 09:28 UTC with history off — §9).
+
+## 9. Schema + hub 0.5.1 deployed, history OFF (5 Nov 09:28 UTC, GPT's go) — verification
+- **D1:** the 17 statements of the History section of `phase1/schema.sql` at `8c8633d` (9 tables + 8 indexes, all `IF NOT EXISTS`) executed one by one through the dashboard API, 17/17 ok. Before: none of the nine existed. After: each table's columns, NOT NULL flags and primary keys were read live (`PRAGMA table_info`) and compared with the same readout from the commit's schema on SQLite: **9/9 identical**. All 9 empty; 8 new indexes present; existing tables untouched.
+- **Hub:** worker.js from GitHub at `8c8633d`, sha256 `1f34554b2e539e97…` checked before upload, content-only API, HTTP 200. **Bindings unchanged: 16; `HISTORY_ENABLED` absent** (checked before and after).
+- `/` and `/status` = **0.5.1**. History report (both): `collecting: false`, `retained: {exists: false}`. This is read from the real, empty tables (not "tables not created"), so the report path is exercised.
+- `/status` → `archive_health`: pending [], gaps [], last_completed [], recent_failures [], retry window stated.
+- `/place`: North Sea 35_46 (ships 848, fires 31, every record section same-run; ships collection 22/24 aggregated hours), plastic cell 33_46 with `?layers=plastic,drifters` (plastic 100, all same-run).
+- **First scheduled runs on 0.5.1:** usgs 09:30:07 ok (29); firms 09:30:40 ok (20,332). History tables: **0 rows in all nine**. R2 `archive/`: 0 objects; `state/history-*`: 0. No history failures. New snapshots carry R2 metadata `retrieved_at` (e.g. `snapshots/firms/2026-11-05T09-30Z.json` → `2026-11-05T09:30:42.818Z`), which the checkpoint design orders by.
+
+## 10. The retention-wording release (page) — ready for GPT's review and Chad's go to publish
+`place-view` page files at `8c8633d` (sha256 index `bdc44df5d2e6`, app `fc2133f7f088`, style `e10935d03acb`, sources `dd2e63e59484`; assets `?v=202611111000`) contain the place view and the hub-driven "What Mother Earth keeps". **Live RC check, clean session, against the live 0.5.1 hub (no stand-ins), 5 Nov 09:29–09:31 UTC:**
+- **Sources & Details:**
+  - state line *"History collection now: off (reported by the hub). Retained history: none."*;
+  - 0 history rows shown;
+  - comparison lines *"…; no further history collected"*;
+  - intro names the place view as the one exception;
+  - Oceaneye row without the "samples are not kept" clause;
+  - no "no history kept" text anywhere;
+  - every table the same size after two extra refreshes (the `fill()` fix).
+- **World View:** the place panel for 35_46 loads from the live `/place` (one request). Ships 848 with records, and real collection evidence: *"our collector produced a usable sample in 22 of 24 aggregated hours … records for this cell reached us in 22 h …"*. Fires: 16 of 24 h, consistent with FIRMS's empty early-UTC hours.
+- **Publishing this before history starts** means the public wording is already following the hub when collection begins: it will switch to *"collecting; retained since …"* by itself on the first history write.
+- Publishing = merge `place-view` → main (Chad's go), then served-file hash check and a public smoke test.
