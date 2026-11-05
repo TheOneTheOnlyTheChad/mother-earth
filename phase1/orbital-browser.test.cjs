@@ -11,6 +11,11 @@
  *         node /home/claude/fixtures/build-orbital-fixture.mjs   (writes orbital.csv + orbital-meta.json)
  * Run:    node phase1/orbital-browser.test.cjs <fixture dir> [BREAK=<name>]
  * BREAK serves a deliberately broken page (string edits below) — the suite must FAIL for each one.
+ *
+ * Clock (thread 16, 5 Nov 2026): every page runs on a clock that STARTS at a fixed instant (CALC_AT, near the fixture's
+ * pinned epochs) and advances in real time; timers and performance.now stay real. The page hands that time to the worker, and the Node reference is computed at the
+ * same instant (the pass's own `at`), so results no longer depend on the day the suite is run. Section L tests the
+ * 3-day stale boundary: one pass just before and one just after an isolated object's epoch + 3 days.
  */
 const { chromium } = require('playwright');
 const fs = require('fs'); const crypto = require('crypto');
@@ -33,6 +38,8 @@ const BREAKS = {
   'timers-left-running': ['index.html', "if (!orb.on.size) { orbStopTimers(); orb.at = null; }", "if (!orb.on.size) { orb.at = null; }"],
   'no-checksum':       ['app.js', "if ((await ME.sha256Hex(csv)) !== meta.elements.sha256) return 'the element file does not match its published checksum", "if (false) return 'the element file does not match its published checksum"],
   'unknown-drawn':     ['app.js', "NOT_DRAWN_BY_TYPE: ['unknown_type'],", "NOT_DRAWN_BY_TYPE: [],"],
+  'stale-4-days':      ['app.js', "UPDATE_MS: 2000, META_RECHECK_MS: 30 * 60e3, STALE_DAYS: 3,", "UPDATE_MS: 2000, META_RECHECK_MS: 30 * 60e3, STALE_DAYS: 4,"],
+  'worker-own-clock':  ['app.js', "const t = m.t, d = new Date(t)", "const t = Date.now(), d = new Date(t)"],
   'fail-touches-pairs':['index.html', "orb.on.clear(); orb.last = {}; orb.at = null; orb.busy = false; orb.why = 'Orbital layers not shown: ' + why + '.';", "orb.on.clear(); orb.last = {}; orb.at = null; orb.busy = false; orb.why = 'Orbital layers not shown: ' + why + '.'; for (const k in state) delete state[k];"],
 };
 if (BREAK && !BREAKS[BREAK]) { console.log('unknown BREAK', BREAK, Object.keys(BREAKS)); process.exit(2); }
@@ -44,12 +51,17 @@ let pass = 0, fail = 0;
 const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 500)}` : ''}`); } };
 const T0 = Date.now(); const mark = t => console.log(`   [${((Date.now() - T0) / 1000).toFixed(0)}s] ${t}`);
 const RUN = '2026-11-03T13:50:00Z';
+const CALC_AT = '2026-11-03T13:50:00.000Z';   // fixed calculation time for every page (fixture epochs are pinned to 3 Nov 13:00)
 const GROUP_OF = { active: 'payload', inactive: 'payload', payload_status_unknown: 'payload', payload_unmatched: 'payload', payload_status_unavailable: 'payload', rocket_body: 'rocket_body', debris: 'debris', unknown_type: null };
 const META_COUNT = { payload: 18954, rocket_body: 2205, debris: 10118 };
 
 async function harness(browser, o = {}) {
-  const { viewport = { width: 1280, height: 860 }, isMobile = false, orbital = {} } = o;
+  const { viewport = { width: 1280, height: 860 }, isMobile = false, orbital = {}, at = CALC_AT } = o;
   const ctx = await browser.newContext({ viewport, isMobile, hasTouch: isMobile, reducedMotion: 'reduce' });
+  // Shifted clock: Date.now and no-argument new Date() start at `at` and then advance in real time; timers and
+  // performance.now are untouched. A frozen Date (tried first, 5 Nov) breaks globe.gl's debounced resize, which waits for
+  // Date.now to advance, so the canvas never shrinks to its column and covers the toggles.
+  await ctx.addInitScript(start => { const R = Date, off = start - R.now(); class F extends R { constructor(...a) { if (a.length === 0) super(R.now() + off); else super(...a); } static now() { return R.now() + off; } } globalThis.Date = F; }, Date.parse(at));
   const hits = { meta: 0, csv: 0, status: 0, satjs: 0, spacetrack: 0, celestrak: 0 };
   const cur = { metaStatus: 200, meta: META, csvBody: CSV, csvHeader: META.elements.sha256, blockSatjs: false, lastRun: { layer: 'orbital', started_at: '2026-11-03T13:41:05.000Z', status: 'ok', note: 'published' }, ...orbital };
   for (const f of ['index.html', 'app.js']) await ctx.route(BASE + '/' + f + '*', r => r.fulfill({ status: 200, contentType: f.endsWith('.js') ? 'application/javascript' : 'text/html', body: served(f) }));
@@ -259,6 +271,37 @@ const close = (a, b) => a && b && a.length === 3 && a.every((v, i) => Math.abs(v
     ok('K phone: legend line visible with the layer on', await page.locator((await page.locator('#ps-orb').count()) ? '#ps-orb' : '#orb-legend').isVisible());   // mobile pass: the persistent line beside the closed Key
     ok('K phone: no horizontal scroll', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     await ctx.close();
+  }
+
+  // ---------------------------------------------------------------- L. the 3-day stale boundary, on a fixed clock
+  {
+    // One initialising debris object whose epoch has no other debris epoch within 2 s, so exactly one object crosses.
+    const Lc = CSV.trim().split('\n'); const h = Lc[0].split(','); const iC = h.indexOf('CLASS'), iE = h.indexOf('EPOCH');
+    const NUM = new Set(['MEAN_MOTION', 'ECCENTRICITY', 'INCLINATION', 'RA_OF_ASC_NODE', 'ARG_OF_PERICENTER', 'MEAN_ANOMALY', 'EPHEMERIS_TYPE', 'NORAD_CAT_ID', 'ELEMENT_SET_NO', 'REV_AT_EPOCH', 'BSTAR', 'MEAN_MOTION_DOT', 'MEAN_MOTION_DDOT']);
+    const ep = [];
+    for (let i = 1; i < Lc.length; i++) { const c = Lc[i].split(','); if (GROUP_OF[c[iC]] !== 'debris') continue;
+      const o = {}; h.forEach((k, j) => { if (k !== 'CLASS') o[k] = NUM.has(k) ? +c[j] : c[j]; });
+      try { const sr = satellite.json2satrec(o); if (sr && !sr.error) ep.push(Date.parse(c[iE] + 'Z')); } catch (_) { } }
+    ep.sort((a, b) => a - b);
+    const k = ep.findIndex((e, i) => i > ep.length / 2 && e - ep[i - 1] > 2000 && (i + 1 >= ep.length || ep[i + 1] - e > 2000));
+    const E = ep[k], B = E + 3 * 86400e3;
+    ok('L boundary object chosen (isolated epoch, initialises)', k > 0 && isFinite(E), { k, E });
+    // The clock runs, so the pass lands a little after load: start 120 s before the boundary (the first pass comes within
+    // seconds) and 1 s after it. Each pass is checked against the reference at the pass's own time.
+    const got = {};
+    for (const [name, start, side] of [['before', B - 120e3, -1], ['after', B + 1000, 1]]) {
+      const at0 = new Date(start).toISOString();
+      const meta = { ...META, retrieved_at: new Date(start - 60e3).toISOString() };   // element file fresh at that instant
+      const { ctx, page } = await harness(browser, { at: at0, orbital: { meta } });
+      const s2 = await turn(page, 'debris', true); mark('boundary ' + name);
+      const p = s2.last.debris, t = p && Date.parse(p.at), ref = p && reference(p.at).debris;
+      got[name] = { t, stale: p && p.stale, ref };
+      ok(`L ${name}: the pass ran ${name} the boundary on the page's clock`, p && (side < 0 ? t < B : t > B), { at: p && p.at, boundary: new Date(B).toISOString() });
+      ok(`L ${name}: stale count equals the reference at the pass's time`, p && p.stale === ref.stale, { page: p && p.stale, ref: ref && ref.stale });
+      ok(`L ${name}: drawn equals the reference`, p && p.drawn === ref.drawn, { page: p && p.drawn, ref: ref && ref.drawn });
+      await ctx.close();
+    }
+    ok('L the chosen object moves into the stale count across the boundary (reference after ≥ before + 1)', got.before.ref && got.after.ref && got.after.ref.stale >= got.before.ref.stale + 1, { before: got.before.ref && got.before.ref.stale, after: got.after.ref && got.after.ref.stale });
   }
 
   await browser.close(); clearTimeout(watchdog);
