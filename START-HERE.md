@@ -6,7 +6,7 @@ Written 31 Oct 2026 at the end of build day one; §3–§5 revised in thread 2 (
 One browser globe showing the latest observations of the planet from open live feeds. The promise, verbatim and on the page: **"See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage."** Build spec is SPEC-v0.3 with deviations D1–D14 logged in `docs/STATUS-ARCHIVE.md` (moved from STATUS.md 5 Nov). Phase 1 is live.
 
 - Page: https://theonetheonlythechad.github.io/mother-earth/ (GitHub Pages, repo root `index.html`). **Pushing `main` publishes it** — unreleased page work lives on a branch (e.g. `aircraft-rc`) until Chad approves.
-- Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/cells/<layer>`, `/snapshot/<layer>`, `/elements/satellites`, `/elements/orbital`, `/admin/run/<job>?key=ADMIN_KEY` (Workers Paid since 3 Nov 2026)
+- Hub/collector: https://mother-earth.chadoberholzer.workers.dev — `/`, `/status`, `/health/<runs|publication|archive|coverage>/<usgs|firms>` (hub ≥ 0.5.3: 200 ok / 503 failing, fail closed, no-store; watched by UptimeRobot every 5 min with push to Chad's phone), `/cells/<layer>`, `/snapshot/<layer>`, `/elements/satellites`, `/elements/orbital`, `/admin/run/<job>?key=ADMIN_KEY` (Workers Paid since 3 Nov 2026)
 - Repo: https://github.com/TheOneTheOnlyTheChad/mother-earth — push straight to `main` (no branches unless there is a reason; say the reason and let Chad decide)
 - Orbital (Space-Track via the hub): Payloads · Rocket bodies · Debris toggles on the page since 3 Nov 14:49 UTC; replaced the Satellites card.
 - **Place view + hub-driven retention wording** public (main `bd17401`, `?v=202611121000`). **Hub 0.5.1:** `/place/g4/<row>_<col>`, history report, archive health; **history ON since 5 Nov 10:21 UTC (`HISTORY_ENABLED=1`, Chad's go) — keep on while the trial runs** (HANDOVER §1). Production deploy clicks are Chad's: the session blocks Claude's (HANDOVER §3).
@@ -75,6 +75,11 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - `workers_get_worker_code` returns the live script wrapped in multipart. Strip the header and boundary before hashing to compare with a commit.
 - **Cannot:** deploy code, change variables, secrets or crons, read or write R2 objects (bucket metadata only), read telemetry or metrics. Those stay on the browser-pane flow (§4, §4a) with Approve lines.
 - The server marks itself deprecated (successor: Cloudflare API MCP at mcp.cloudflare.com/mcp).
+
+## 4f. Monitoring (added 6 Nov 2026)
+- **UptimeRobot Free** ($0, Chad's account): 8 monitors (runs, publication, archive, coverage × usgs, firms), HEAD every 5 min, alerting by email and iPhone push. Tested 6 Nov with the Mac lid closed: alerts arrive within ~1 s of a failed check.
+- The endpoints judge pipeline facts (successful publication, run streaks, checkpoint completion, coverage), not just whether the hub answers. A red monitor is a finding. Never alter evidence to turn one green. Known case: "coverage firms" shows red while the previous day's coverage is stale (e.g. 5 Nov during 6 Nov).
+- With monitoring live, routine overnight check-ins are optional (Chad's call). The connector (§4e) reads D1 with the Mac closed. Telemetry (CPU, memory) still needs the browser pane.
 
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.

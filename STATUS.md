@@ -4,10 +4,22 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov ~16:35 UTC — **hub 0.5.3 LIVE + UptimeRobot monitoring LIVE** (from the hub-health thread; Chad's Approve line)
+- **Hub 0.5.3** deployed **15:38:04 UTC**, content only, from `hub-health` `88e0399`. `phase1/worker.js` sha256 `61c8e05262a3d265dda937dbfc0730af7f553c50bffb2d8f17f7636b566d0692`; the connector read-back is identical.
+  - Rollback = 0.5.2 `70307d5f…` (main `909e8cd`), with an Approve line.
+  - **New:** read-only `GET|HEAD /health/<runs|publication|archive|coverage>/<usgs|firms>`: 200 ok, 503 failing, fail closed, no-store. `/status` notes are now redacted (secret values and long tokens in note/reason fields only).
+  - No change to collection, checkpoints, bindings, variables, crons or schema. First runs on 0.5.3 all ok (usgs 15:40/15:45, firms 15:45, 30,644 records).
+- **UptimeRobot (Free, $0, Chad's account): 8 monitors** = runs, publication, archive and coverage × usgs and firms. Every 5 min, HEAD, alerts by email and to Chad's iPhone.
+  - **Mac-closed acceptance test PASSED:** up push 18:18:46, down push 18:21:58 SAST, received on the phone over 5G with the lid closed. Alerts land within ~1 s of the failed check.
+  - **Expected tonight:** "ME coverage firms" is DOWN (503). That is 5 Nov's preserved stale coverage while 5 Nov is "yesterday". It should go UP at ~00:00–00:05 UTC 7 Nov. Evidence is not to be altered to clear it.
+- **Branch `hub-health` @ `3b742c5` NOT merged:** main's `worker.js` is still 0.5.2 while live is 0.5.3. Merging is Chad's go (no page files change).
+  - Docs on the branch: `reviews/2026-11-06-hub-health.md` (rev 2 + deploy + acceptance) and `docs/FIRMS-MEMORY-DESIGN.md` (rev 3, design only, awaiting GPT).
+- **Routine overnight check-ins:** Chad decides when to retire them, now that alerts reach his phone without the Mac.
+
 ## 6 Nov 16:08 UTC — recheck (FIRMS) + **hub 0.5.3 found live** (read-only)
 - **Production is hub 0.5.3**, Cloudflare version 50, uploaded via the dashboard at **15:38:04 UTC**.
   - Live code = `hub-health` `phase1/worker.js` sha256 `61c8e05262a3d265…` (identical in branch commits `88e0399`, `2fe320b`, `6bb3c27`; checked by containment in the live multipart).
-  - Not recorded by this thread. The hub-health thread's 15:15 note said "not deployed", so the deploy came after it; who approved it is to be confirmed by Chad.
+  - Deployed by the hub-health thread with Chad's Approve line (confirmed in its 16:35 note, entry above).
   - Rollback = version 49 `cd3e1ffa` (0.5.2, `70307d5f…`).
   - main is still 0.5.2 (`70307d5f…`): the branch is not merged.
 - FIRMS since 14:15: 8 runs, all ok. 30,640 records, raw 2,554,030 B at 16:00, so **still under 4 MB**; the over-4 MB case is not yet seen on 0.5.2 or 0.5.3. No more rechecks booked; the 00:50 check covers the day.
