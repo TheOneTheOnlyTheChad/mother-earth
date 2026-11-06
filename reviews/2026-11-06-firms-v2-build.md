@@ -442,3 +442,10 @@ D1 is real SQLite with foreign keys ON and a transaction per batch, loaded with 
 
 - Bench results: run 1 148/152 (all 4 failures are in the expected places: 64 MiB at 48 MB, and the legacy transition below 80 MB); runs 2–3 82/82; negative controls 6/6 FAIL as required.
 - Bench files: `phase1/bench-firms-memory/{bench-v2.mjs, run-v2.sh, run-v2-repeat.sh, run-v2-extra.sh, summarise-v2.py, results-*.jsonl}`. The data is rebuilt from the real file as described in the bench README method; it is not committed.
+
+---
+
+## Production stage log
+| Stage | Approved (Chad) | Done (UTC) | Evidence |
+|---|---|---|---|
+| 1 — D1 additive schema | `Approve: D1 additive schema … (schema.sql @ db2f357, sha256 0c964327…a0d2)` | **2026-11-06 19:59:43–20:00:03** (one 8-statement call via the Cloudflare D1 connector) | Before: no `firms_%` objects. File hash re-checked from git `db2f357`. After: 5 tables + 3 indexes (`firms_inputs_eligible`, `firms_outputs_eligible`, `firms_outputs_day`), all tables at 0 rows. Production D1 reports `PRAGMA foreign_keys = 1` (the design assumed this; now confirmed). Next FIRMS run 20:00:40 → ok, 48,561 records, `raw_bytes=4066921`; USGS 20:00 ok. No other table touched. |
