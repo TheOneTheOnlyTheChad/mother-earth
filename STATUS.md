@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 16
 
+## 6 Nov ~07:00 UTC — thread 16 handover
+- **Production approvals:** the session's auto-mode safety check passes a production action only when Chad's message names that exact action (deploy passed; R2 copy after a bare "go" refused). From now on Claude ends such messages with an `Approve: …` line for Chad to send back. Standing trust rules drafted for Chad's Mac (`~/Documents/Mother Earth/setup/`: `automode-mother-earth.json`, `apply-automode.py`, tested on a scratch home folder: keeps existing settings, backs up first); whether they reach cloud sessions is unknown — the next production action will show.
+- Monitoring check-ins (14:20 UTC, 00:50 UTC 7 Nov) **cancelled here**; the next thread schedules its own (HANDOVER §1.1).
+- 5 Nov recovery review with GPT.
+
 ## 6 Nov ~06:40 UTC — **5 Nov fires recovery BUILT in the workspace** (Chad's go: build only; no D1/R2/hub write) — review `reviews/2026-11-06-firms-recovery-5nov.md`
 - **Inputs preserved** (Mac `~/Documents/Mother Earth/research/firms-recovery/2026-11-05/`, hash-checked against R2): the 23:45 raw file (`c3487dcc…`, the day's latest retrieval), the original checkpoint (`1a61adf2…`) and the 15:30 raw behind it (`de6c5397…`). The R2 expiry no longer matters.
 - **Method:** the hub's own `firmsParse` / `firesDaily` / `checkpointCoverage` from `2ee3a62` (0.5.2), test exports only; two runs byte-identical.
