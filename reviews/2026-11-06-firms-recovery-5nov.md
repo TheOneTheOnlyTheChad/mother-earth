@@ -194,3 +194,6 @@ D1 calls in the procedure are SELECT only (the mock rejects anything else). The 
 | 4 untouched | ≈08:20 | **ok.** The checkpoint object and all three D1 reads are identical to the 08:11 state. The only object under `archive/recoveries/` is the one key; no folder placeholders were created. |
 
 **For a future write of this kind:** the bytes need a route into the page that does not pass through tool-call text. Options: a dashboard upload as here, or a page fetch from a hash-pinned source. Fix this in the procedure before reusing it.
+
+**Input copy (6 Nov 10:41:46 UTC, Chad's Approve line):** the recovery input `raw/firms/2026-11-05T23-45Z.csv` was copied in R2 to `recovery/firms/2026-11-05/2026-11-05T23-45Z.csv`. Read-back sha256 `c3487dcc…`, 5,311,642 B, no overwrite. `recovery/` is not under any lifecycle rule, so the input now sits in R2 next to the record, as well as on the Mac.
+

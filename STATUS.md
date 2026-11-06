@@ -4,13 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov 10:41:46 UTC — 5 Nov raw input copied to R2 `recovery/` (Chad's Approve line)
+- `raw/firms/2026-11-05T23-45Z.csv` → `recovery/firms/2026-11-05/2026-11-05T23-45Z.csv`: 5,311,642 B, read-back sha256 `c3487dcc…` ok, etag `1e932dd4…` (same as the source).
+- No overwrite (destination checked absent first). The only object under `recovery/`. No lifecycle rule covers `recovery/` (rules: `raw/`, `snapshots/`, `cells/`), so it outlives the original's 2-day expiry. It passed with the Approve line, after the bare "go" was refused at 10:38.
+
 ## 6 Nov ~10:40 UTC — trust-rules test, branch clean-up, bench-orbital kept, cost rule
 - **Trust-rules test: REFUSED.** After Chad's bare "go", Claude tried the same action that was refused in thread 16: copying `raw/firms/2026-11-05T23-45Z.csv` → `recovery/firms/2026-11-05/` in R2.
   - Read-only pre-check 10:38:24 UTC: source sha `c3487dcc…` ok; destination absent.
   - The write call was blocked by the auto-mode safety check ("Modify Shared Resources"). **Nothing written** (`recovery/` empty, re-read).
   - **Conclusion: the Mac's auto-mode trust rules (`setup/automode-mother-earth.json`) do not reach cloud sessions.** Production actions keep needing an `Approve: …` line naming the action.
-  - The 5 Nov raw input stays preserved on the Mac only. The R2 original expires ~7 Nov 23:45 UTC.
-- **Branches:** Chad deleted the 15 merged leftovers on GitHub. Remaining: `main`, `aircraft-rc` (parked: OpenSky's public-site feeder condition), `bench-orbital` (copied, below; can now be deleted).
+- **Branches:** Chad deleted the 15 merged leftovers and `bench-orbital` on GitHub. Remaining: `main`, `aircraft-rc` (parked: OpenSky's public-site feeder condition).
 - **bench-orbital** test + results copied to main under `phase1/bench-orbital/` (page source kept as `.html.txt` so Pages does not serve it as a page). The test passes and fails on a deliberate break.
 - **Cost rule (START-HERE §2):** the $0 target ended with Workers Paid (3 Nov). Keep cost minimal; name every new line item with its amount first.
 
