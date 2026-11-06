@@ -112,3 +112,10 @@ The new wording stays true whether history collection is on or off. Retention it
 
 ## 8. For Chad
 After GPT's review, the go is a fast-forward merge of `smoke-fixes` into main, which publishes the page (~1 min Pages build). I then hash-check the served files against the table above and repeat the live checks on the public page.
+
+## 9. Published
+**6 Nov 2026 10:03:40 UTC, main `e107c1d`** (fast-forward; GPT's review, Chad's go).
+- Before merging, main (`87173cb`, docs only) was merged into the branch; the page hashes were unchanged and smoke-fixes 52/52, desktop-overflow 112/0 and mobile-pass 131/0 passed again.
+- Served files hash-equal to §0.
+- Public checks: listed in STATUS (10:05 UTC). All passed, no console errors.
+

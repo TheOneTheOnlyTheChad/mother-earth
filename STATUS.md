@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov 10:03:40 UTC — **smoke-review fixes PUBLISHED** (main `e107c1d`, fast-forward; GPT review + Chad's go)
+- `smoke-fixes` brought up to date with main (docs only; page hashes unchanged). Re-run on the updated branch: smoke-fixes 52/52, desktop-overflow 112/0, mobile-pass 131/0.
+- **Served files hash-equal to the reviewed values:** index `158587d8a6ac`, sources `b5810ac66023`, app `89f89ee6a192`, style `e4c9547d99bf`; assets `?v=202611131000`.
+- **Public checks (10:05 UTC, FIRMS run 10:00:42, 1,087 records, 339 under 1 MW):**
+  - cell 33_25 reads source 0.68 / 0.5, cell list 0.68 MW · 0.5 MW, record 0.68 MW, place view FRP 0.68 MW · FRP 0.5 MW;
+  - place view stacked, descriptions 366 px;
+  - World View 1280 wide;
+  - Sources at 1280 (page 1280, widest table 985) and at 360 (page 360, widest table 340): no label split mid-word, ships' full code present;
+  - buoy wording revised and linked to What Mother Earth keeps;
+  - no console errors on either page.
+- Leftover branch `smoke-fixes` (= main) can be deleted on GitHub.
+
 ## 6 Nov ~09:30 UTC — GPT live smoke review: 4 page fixes on branch `smoke-fixes` (NOT public)
 - Review `reviews/2026-11-06-smoke-fixes.md`. The four fixes:
   - FRP shown as delivered via one formatter `ME.frp`. It was rounded to whole MW; **272 of 906 live records were under 1 MW**, shown as "0 MW" or "1 MW".
