@@ -1,26 +1,36 @@
-# Mother Earth — handover (5 Nov 2026, thread 15, ~15:45 UTC)
+# Mother Earth — handover (6 Nov 2026, end of thread 15, ~05:45 UTC)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.**
 
 **Access (Chad, 4–5 Nov):** full access — GitHub (push), Cloudflare, Space-Track, the Mac's Mother Earth folder and `~/mother-earth`, browser pane. Chad enters secrets himself; Claude never creates accounts. **Every deploy, schedule or variable change, D1 schema change and push to main that changes the public page needs Chad's explicit go.** Production deploy clicks are Chad's (§3). **Say up front whenever Chad must be at the screen with the app in front** (standing rule). GPT reviews; approvals are Chad's. Not Overwatch: presentation lessons only. No surveillance, ever.
 
-## 0. Live state (5 Nov ~12:30 UTC)
+## 0. Live state (6 Nov ~05:45 UTC)
 | | State |
 |---|---|
-| **Page** | main **`bd17401`**, assets **`?v=202611121000`**: place view, hub-driven "What Mother Earth keeps" (now reads "collecting"), the unreachable "no history kept" fallback removed. |
-| **Hub** | **0.5.1** (`8c8633d`, worker.js sha256 `1f34554b2e53…`); **17 bindings incl. `HISTORY_ENABLED=1`** (since 10:21 UTC). Endpoints: `/place/g4/<row>_<col>`; `/` and `/status` → `history`; `/status` → `archive_health`. |
-| **History** | **ON — keep on (Chad: the full day is the test).** Retained since 10:25:08 UTC. 12:14 UTC: quake_revisions 42 · drifter_fixes 2,491 · archive_versions 2 · orbital_population 1 · history_activity 2 · the rest 0. `archive_health` empty. Figures in STATUS. |
-| **D1** | 9 history tables + 8 indexes (live = `8c8633d` schema). |
-| **Tests** | All suites pass on main (STATUS lists them); orbital-browser 105/105 after the stale-definition fix. |
-| **Branches** | Leftover remote branches (e.g. `orbital-test-stale`, `place-view`, `nsidc-page`) are merged or superseded; the proxy can't delete them — Chad's call on GitHub. |
+| **Page** | main, assets **`?v=202611121000`** (`bd17401` page files; later main commits are docs/tests only). |
+| **Hub** | **0.5.1 still live** (`8c8633d`, worker.js sha256 `1f34554b2e53…`); 17 bindings incl. `HISTORY_ENABLED=1`. **0.5.2 (`2ee3a62`) reviewed by GPT, Chad's go given — deploy pending (§1.1).** |
+| **D1** | 9 history tables + 8 indexes **+ `archive_checkpoint_coverage` (empty) + index `collector_runs_layer_finished`** (both created 6 Nov 05:37 UTC, live = `2ee3a62` schema). |
+| **History** | ON since 5 Nov 10:21 UTC — keep on. First midnight checkpoint (5 Nov) completed; **fires part is partial** (input 15:30 UTC: the 4 MB guard skipped 15:45–23:45). Details STATUS. |
+| **FIRMS** | Guard trips every afternoon on 0.5.1 → public fires layer stale until 0.5.2 is live. |
+| **Branch** | `firms-guard` @ `2ee3a62`: hub 0.5.2, tests (`firms-guard.test.mjs` 19/19), bench (`phase1/bench-firms-memory/`, 72/72 verified), review `reviews/2026-11-06-firms-guard.md` rev 3. Not merged to main yet. |
+| **Tests** | All hub suites pass on the branch; orbital-browser 113/113 on main. |
 
 ## 1. Next
-1. **Midnight checkpoint read — DONE 6 Nov 02:47 UTC** (STATUS). Checkpoints ran, no gaps. **Hub freeze lifted** (any hub change still needs Chad's go). History stays on.
-2. **⚠ FIRMS guard fix — branch `firms-guard` rev 3 (`2ee3a62`), hub 0.5.2, limit 8 MiB, NOT deployed.** Review `reviews/2026-11-06-firms-guard.md` (rev 3; verified bench 72/72) + `phase1/bench-firms-memory/`. Order, each Chad's go after GPT's re-review: create `archive_checkpoint_coverage` + index `collector_runs_layer_finished` (D1, §4d) → deploy 0.5.2 → confirm on the Memory chart + Exceeded Memory + invocation log on the first firms runs > 4 MB. **5 Nov raw files expire from ~7 Nov 15:45 UTC** — recovery is Chad's call (not built). The fires layer goes stale every afternoon until deployed. Also: **drifter first full day (6 Nov)** — measure after 00:30 UTC 7 Nov.
-3. **Plastic's first archived version** comes with its next daily run (~05:07–06:07 UTC 6 Nov).
-4. **Research backlog** (`docs/RESEARCH-BACKLOG.md`, research only — index table at the top). **R2 fireballs PARKED** (Chad, 5 Nov; `docs/research/R2-revision-matching.md` rev 3 + evidence on the Mac at `~/Documents/Mother Earth/research/fireballs/2026-11-05-claude/`). Next tier-1 items: **R3 Earth rotation (USNO/IERS)**, **R4 Argo**. Same first gate for every item. No build, collector, schedule, deploy, purchase or third-party contact without Chad's go.
-5. **Mac copies of STATUS / HANDOVER / START-HERE are behind** — one folder approval from Chad, then copy.
-6. Carried over: real-phone check of the mobile pass (Galaxy); NCEI accession recheck; plastic research follow-ups; attribution placement; Possible futures (research only).
+1. **DEPLOY HUB 0.5.2 — Chad's explicit go is given (6 Nov), after GPT's sign-off.** The D1 additions are **already done** (05:37 UTC; STATUS). Do only the deploy, then monitor.
+   - **Chad (6 Nov):** "its a go from me … lets get this thing live now"; full access to GitHub, Cloudflare and the browser pane; the browser will be open and he signs in to anything needed.
+   - **What:** branch `firms-guard` @ **`2ee3a62`**, `phase1/worker.js` **sha256 `70307d5fc2a9afed5f04fb1929468a9b60d55f51e412e55d590d7c6e8596824a`**, `COLLECTOR_VERSION = '0.5.2'`, `FIRMS_MAX_PARSE_BYTES = 8 MiB`. Content-only: bindings, secrets, crons unchanged (17 bindings incl. `HISTORY_ENABLED=1`).
+   - **How (START-HERE §4):** in a `dash.cloudflare.com` pane tab, fetch `https://raw.githubusercontent.com/TheOneTheOnlyTheChad/mother-earth/2ee3a62/phase1/worker.js`, refuse on any sha256 mismatch, `PUT /api/v4/accounts/0538d0fe34d9fd261a2eac11583f8972/workers/scripts/mother-earth/content` (multipart `metadata` `{"main_module":"worker.js"}` + part `worker.js` `application/javascript+module`, header `x-atok: window.bootstrap.atok`).
+   - **If the session's safety check refuses Claude's deploy** (it did in thread 15, twice — a rule on Claude's own actions; do not try to route around it): Chad deploys by hand in the pane — tab 1 = the raw GitHub URL above (Claude checks it shows sha `70307d5f…` first), **Cmd+A, Cmd+C**; tab 2 = `https://dash.cloudflare.com/0538d0fe34d9fd261a2eac11583f8972/workers/services/edit/mother-earth/production`, click in the code, **Cmd+A, Cmd+V**, wait, **Deploy**. Tell Chad up front he must be at the screen for this.
+   - **Verify after (read-only):** `GET …/workers/scripts/mother-earth/content/v2` (or the current script content endpoint) → sha256 must equal `70307d5f…` (if the editor changed whitespace on paste, report it — do not redeploy without Chad); `GET /` on the hub → `version: 0.5.2`; Worker settings → 17 bindings, `HISTORY_ENABLED=1` present; `/status` → `archive_health.collection.firms` and `.usgs` present.
+   - **Monitor (GPT's step 3):** the first FIRMS runs **over 4 MB** (today's file passes 4 MB by early-to-mid afternoon UTC): `collector_runs` firms `ok` with records, not "resource guard"; Worker Metrics **Memory** chart + **Exceeded Memory = 0**; invocation-log CPU per firms tick; `/status` `collection.firms` (last success, no failing streak). Then the **next midnight checkpoint (00:30 UTC 7 Nov)**: `archive_checkpoints` + `archive_checkpoint_coverage` for 6 Nov with `assessed_with_checkpoint = 1`; 5 Nov coverage row backfilled with `assessed_with_checkpoint = 0`.
+   - Production memory is **not** guaranteed by the bench (one sampled 112 MB heap peak at 8 MiB under overlap; the 80 MB local V8 cap is not a production reserve). If Exceeded Memory appears: tell Chad; rollback = redeploy 0.5.1 from `8c8633d` (`1f34554b…`), Chad's go.
+2. **5 Nov fires recovery — separate decision, NOT part of the deploy.** Raw files expire from **~7 Nov 15:45 UTC**. Deploying 0.5.2 does not restore the 5 Nov evening or complete its checkpoint. Ask Chad; build nothing without his go.
+3. **Merge `firms-guard` → `main`** once 0.5.2 is verified live (docs + tests + bench travel with it; no page files change). Chad's go.
+4. **Drifter first full day (6 Nov)** — rows/day + bytes after 00:30 UTC 7 Nov (the 5 Nov partial-day estimate ~23,700/day is provisional).
+5. **Plastic's first archived version** comes with its next daily run (~05:07–06:07 UTC 6 Nov).
+6. **Research backlog** (`docs/RESEARCH-BACKLOG.md`, research only — index table at the top). **R2 fireballs PARKED** (Chad, 5 Nov; `docs/research/R2-revision-matching.md` rev 3 + evidence on the Mac at `~/Documents/Mother Earth/research/fireballs/2026-11-05-claude/`). Next tier-1 items: **R3 Earth rotation (USNO/IERS)**, **R4 Argo**. Same first gate for every item. No build, collector, schedule, deploy, purchase or third-party contact without Chad's go.
+7. **Mac copies of STATUS / HANDOVER / START-HERE are behind** — one folder approval from Chad, then copy.
+8. Carried over: real-phone check of the mobile pass (Galaxy); NCEI accession recheck; plastic research follow-ups; attribution placement; Possible futures (research only).
 
 ## 2. Done in thread 15 (details in STATUS)
 - History trial on (10:21 UTC), measured tick by tick.

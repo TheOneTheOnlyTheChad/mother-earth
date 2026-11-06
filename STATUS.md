@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 5 Nov 2026 — thread 15
 
+## 6 Nov ~05:40 UTC — **D1 additions DONE; hub deploy PENDING** (Chad's explicit go for both, after GPT's sign-off on `2ee3a62`)
+- **D1 (done 05:37 UTC):** `archive_checkpoint_coverage` (table) + `collector_runs_layer_finished` (index) created from `2ee3a62`'s `schema.sql`, one statement each; checked absent before; live `PRAGMA table_info` / `index_info` identical to the commit's schema read through local SQLite (13 columns; index layer, finished_at). Bindings 17. Empty table until 0.5.2 runs.
+- **Deploy NOT done:** the session's automatic safety check refused Claude's content-only upload (as it refused the variable click on 5 Nov) — a policy on Claude's own actions, not a permissions or login issue. Handed to the next thread with a fallback where Chad pastes and clicks Deploy (HANDOVER §1.1).
+- Hub still **0.5.1**; history on; fires goes stale each afternoon until 0.5.2 is live.
+
 ## 6 Nov — firms-guard **rev 3** (`2ee3a62`) — NOT deployed
 GPT confirmed rev 2's clock and truncation fixes (firms-guard 19/19, history-hub 27/27) but found the memory bench's verdict only checked survival — the hub swallows collection/checkpoint errors, so a failed checkpoint write read as "pass". Rev 3: the bench asserts every scenario's outputs (publication + record count; checkpoint marker, object, daily aggregates, coverage; backfill row; both stress collects; usgs; exact `/place` firms section + `/snapshot`; no history failures); 4 negative controls each FAIL; **real 5.3 MB + 8 MiB, 6 scenarios × 3 runs, caps 128 and 80 MB: 72/72 verified passes** (tested `worker.js` sha `70307d5fc2a9afed…`). No hub code change. Wording: an 80 MB local V8 cap is not a measured production reserve. Pending: GPT's re-review → Chad's go for D1 (table + index) → deploy.
 
