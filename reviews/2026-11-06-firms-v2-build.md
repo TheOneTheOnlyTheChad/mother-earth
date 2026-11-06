@@ -1,5 +1,152 @@
 # FIRMS memory v2 — branch build, tests, benchmarks (for GPT review)
 
+## Rev 2 — fixes after GPT's production review (6 Nov, evening). READ THIS FIRST; the rev-1 sections below are kept for the record.
+**Nothing in production has changed.** No schema, deploy, probe, variable, merge or activation.
+
+| | |
+|---|---|
+| Commit | `0f3f5fd` (fixes; rev-2 tests G1a–G5c, rev-2 breaks) + the rev-2 doc/bench commit on top (hash in Chad's message). Branch `firms-memory`. |
+| Worker | `phase1/worker.js` 0.6.0, sha256 **`9c2a1a1e65feef20fe1890cf19fbe7558054463e4bba7d97184cc5e4a35871d5`**. The bench copy (export line stripped) is `3046da881c106039…` and matches. `schema.sql` is unchanged from rev 1 (`0c964327…a0d2`). |
+| Diff since rev 1 | `git diff 5644926 0f3f5fd` — worker +159/−33, tests, breaks, bench script |
+
+### The five findings and their fixes
+| # | GPT finding | Fix (implementation only; the design's procedures are unchanged except the one rule flagged in G1) |
+|---|---|---|
+| G1 | After a rollback, the checkpoint chose the 23:00 v2 file over the 23:45 legacy file, because the cutover filter excluded it. | **The day's input is the latest publication of either kind:** a committed v2 output, or a legacy-key snapshot by its exact `retrieved_at`. **The cutover is no longer an eligibility filter.** It is still written, for audit. *This changes one rule in design §9.* A legacy object after the cutover is a complete legacy publication (a rollback, or an old isolate during the deploy), so excluding it gives the wrong day. **Until v2 has ever run** (flag off and no cutover row), the checkpoint and backfill run **exactly the legacy code**: they never read a `firms_*` table, so "deploy 0.6.0 with v2 off" leaves the daily archive untouched (G2e). |
+| G2 | A failed committed-output read was swallowed and recorded as "no retained snapshot", leaving a permanent gap. | Unreadable state now raises: the committed-output read, the v2-state (cutover) read, the completion-marker read and the `fires_daily` batches. `hist()` logs the failure, and the day stays due with **no gap and no marker**. The next run completes it. The one tolerated case: the tables don't exist while v2 is off, which means no v2 output can exist. |
+| G3 | A sidecar with the right run but the wrong attempt, token and counts was accepted, so a 1-record snapshot got a 999-record marker. | The sidecar is checked against the **committed output row**: run, attempt, token, retrieved_at, records, stored size, and the sums of `by_cell`, `cells` and `by_hour`. If any check fails, it is **rebuilt by streaming the committed snapshot**, with its SHA-256 and size checked against the commit and a `firms:recovery` row logged. A snapshot whose object no longer matches the commit (size, run, token) is **refused**, and so is one whose bytes fail the committed hash. The checkpoint hashes the bytes as it streams them into gzip, and on a mismatch deletes the object before any D1 write. The marker carries the committed count. **Publication applies the same checks before anything is published.** |
+| G4 | After a counts repair one interval later, the fresh `firms ok` log disagreed with the records upload time, giving a 503. | For a v2 (`lines/1`) publication, `/health/publication/firms` compares the run log with **the pair's completion** (`firms_outputs.cells_at`). The **age still counts from the records upload**, so a repair never makes old data look fresh (G4b: it fails at 09:50:40 as it would without a repair). It also reports a pair whose counts are not complete, and an ok log that belongs to another run (G4c). |
+| G5 | A multipart part failure left an upload open while the object listing was empty. | **`fvWriter` aborts its own multipart upload on any failure** (write, part, complete). This covers every v2 write path, not only the probe. The probe tracks every upload it starts, aborts any still open, then deletes its objects. `cleaned` = no open upload **and** no object. |
+
+### Evidence (rev 2)
+- **`firms-v2.test.mjs`: 62 / 62.**
+  - 44 rev-1 cases (L1 updated to the G1 rule).
+  - 18 new: G1a, G1b, G2a–G2e, G3a–G3d, G4a–G4c, G5a–G5c, G6.
+  - **G6** (run with `OLD_WORKER` = `main:phase1/worker.js`, the live 0.5.3): rollback *by redeploy* works. 0.5.3 checkpoints a v2-written day correctly (2 records, v2 snapshot, `fires_daily` = 2), collects and publishes again, and its health is 200. Without `OLD_WORKER`, G6 reports SKIP rather than passing.
+- **GPT's own probe file**, `2026-11-06-firms-v2-production-review-probes.mjs`, run unchanged apart from its paths: **5 / 5 pass**. G1 picks 23:45 with 2 records; G2 defers with no gap; G3 marker 1; G4 200; G5 0 open uploads.
+- **`firms-v2-breaks.mjs`: 38 / 38 caught**: the 26 from rev 1 plus 12 new ones, each caught by the case meant for it.
+  - Checkpoint prefers committed output: G1a, G2d, L1.
+  - Swallows a D1 read: G2a, G2c.
+  - Sidecar never validated: G3a, G3b, G3d.
+  - Hash not checked: G3c.
+  - Publication uses the sidecar unchecked: G3d.
+  - Snapshot not matched to the commit: G3c, G3d.
+  - Health compares with the records upload: G4a, G4b.
+  - Health takes age from the repair: G4a, G4b.
+  - Health ignores the run of the ok log: G4c.
+  - Writer doesn't self-abort: G5c.
+  - Probe doesn't abort tracked uploads: G5b.
+  - v2 path before v2 ever ran: G2d, G2e.
+  - Cutover read failure treated as "never ran": G2d.
+- **Existing suites:**
+
+  | Suite | Result |
+  |---|---|
+  | firms-guard | 19/19 |
+  | health-hub | 29/29 |
+  | health-breaks | 19/19 |
+  | history-hub | 27/27 |
+  | place-rows | 7 |
+  | drifters | 12 |
+  | plastic | 11 |
+  | satellites | 12 |
+  | orbital-hub | 13/13 |
+  | orbital-ui | 38 |
+  | search | 111 |
+  | search.realdata | 50 |
+  | ships | 7 / 7 / 11 |
+  | spacetrack | 11/11 |
+  | duration-contract | pass |
+
+- **Benchmarks repeated** (`results-v2-fix.jsonl`, final worker): **141 of 144 pass.** The changes touch the checkpoint (hashing on the read path), publication (validation and possible rebuild) and the writer. The new scenario `checkpoint-rebuild` replaces the sidecar with a wrong one and requires a correct, rebuilt checkpoint.
+  - Every real, 8 MiB and dense scenario, including `checkpoint-rebuild`, passes at **all four caps (48/64/80/128)**. Checkpoint, rebuild and overlap pass **3 of 3 at 80 and 128**.
+  - 64 MiB passes everything at 48, 80 and 128, including the rebuild. One overlap run failed at 64. That size is only reachable in the bench copy with the guard raised; production keeps 8 MiB. Rev 1 had the mirror image: 64 MiB failed at 48 and passed at 64. So 64 MiB overlap sits at the edge of 48–64 MB.
+  - legacy-transition: fails at 48 and 64, passes 3 of 3 at 80 and 3 of 3 at 128. This is unchanged, as required.
+  - Sampled peaks (lower bounds): ≤ 37 MB at ≤ 8 MiB (dense overlap) and ≤ 51 MB at 64 MiB. Rebuild peaks equal the normal checkpoint's.
+| file | scenario | cap 48 MB | cap 64 MB | cap 80 MB | cap 128 MB | max sampled heap MB | max wall ms |
+|---|---|---|---|---|---|---|---|
+| real.csv | collect | p | p | p | p | 9.7 | 2876 |
+| real.csv | checkpoint | p | p | ppp | ppp | 11.0 | 1309 |
+| real.csv | checkpoint-rebuild | p | p | ppp | ppp | 11.1 | 1934 |
+| real.csv | overlap | p | p | ppp | ppp | 12.5 | 4296 |
+| real.csv | stress-2-collects | p | p | p | p | 12.6 | 3863 |
+| real.csv | injected-reset-cl | p | p | p | p | 10.8 | 6148 |
+| real.csv | injected-truncated-row | p | p | p | p | 10.8 | 1944 |
+| real.csv | legacy-transition | F | F | ppp | ppp | 110.5 | 4575 |
+| 8mib.csv | collect | p | p | p | p | 12.7 | 4183 |
+| 8mib.csv | checkpoint | p | p | ppp | ppp | 13.7 | 1768 |
+| 8mib.csv | checkpoint-rebuild | p | p | ppp | ppp | 13.5 | 2321 |
+| 8mib.csv | overlap | p | p | ppp | ppp | 15.1 | 5594 |
+| 8mib.csv | stress-2-collects | p | p | p | p | 16.9 | 7069 |
+| 8mib.csv | injected-truncated-row | p | p | p | p | 13.5 | 3015 |
+| dense-8mib.csv | collect | p | p | p | p | 22.2 | 5491 |
+| dense-8mib.csv | checkpoint | p | p | ppp | ppp | 22.7 | 2283 |
+| dense-8mib.csv | checkpoint-rebuild | p | p | ppp | ppp | 22.3 | 2683 |
+| dense-8mib.csv | overlap | p | p | ppp | ppp | 37.2 | 8719 |
+| dense-8mib.csv | stress-2-collects | p | p | p | p | 35.2 | 9617 |
+| dense-8mib.csv | injected-truncated-row | p | p | p | p | 22.3 | 3367 |
+| 64mib.csv | collect | p | p | p | p | 50.8 | 26637 |
+| 64mib.csv | checkpoint | p | p | p | p | 48.0 | 8861 |
+| 64mib.csv | checkpoint-rebuild | p | p | p | p | 48.2 | 12241 |
+| 64mib.csv | overlap | p | F | p | p | 47.7 | 37505 |
+| 64mib.csv | stress-2-collects | p | p | p | p | 47.8 | 46430 |
+| 64mib.csv | injected-truncated-row | p | p | p | p | 49.8 | 18305 |
+
+141 of 144 runs pass.
+
+Failures:
+- real.csv legacy-transition --max-heap-size=48: alive=False err=TypeError: fetch failed fail=[]
+- 64mib.csv overlap --max-heap-size=64: alive=True err=TypeError: fetch failed fail=[]
+- real.csv legacy-transition --max-heap-size=64: alive=False err=TypeError: fetch failed fail=[]
+
+- **Negative controls** (`results-v2-fix-negative.jsonl`, cap 128). Each broken copy must fail; **7 of 7 that break final outputs FAIL**:
+
+  | Broken copy | Why it failed |
+  |---|---|
+  | commit fenced | 0 collects |
+  | records truncated | not the complete publication |
+  | published cells wrong *(new)* | cell counts differ from the CSV |
+  | checkpoint aggregates wrong *(new)* | detections 64,255 ≠ 63,614 |
+  | rebuild wrong *(new)* | detections 127,228 |
+  | `/place` scan throws | final `/place` withheld |
+  | legacy checkpoint skipped | no marker |
+
+  **Two rev-1 negative controls now PASS by design:** a wrong `by_hour` and a wrong sidecar count were both introduced *in the sidecar*. The G3 validation now rejects such a sidecar and rebuilds it from the committed snapshot, so the published counts and `fires_daily` come out correct. That is the fix working. The two new controls break the published or archived outputs directly, so the bench's checks are still shown to bite.
+
+### Revised rollout (each step needs Chad's `Approve:` line; nothing before GPT re-reviews; nothing in the other thread's window 23:30 UTC 6 Nov → 01:15 UTC 7 Nov, or until its "window clear" note)
+0. **Read-only:** dashboard → R2 `mother-earth` → lifecycle rules. Confirm `raw/`, `snapshots/` and `cells/` expire after 2 days.
+1. **D1 additive schema** (5 tables + 3 indexes; the live 0.5.3 never reads them):
+   `Approve: D1 additive schema — create firms_settings, firms_identity, firms_inputs, firms_attempts, firms_outputs + 3 indexes (schema.sql @ <commit>, sha256 0c964327…a0d2)`
+   Record the exact UTC time it was created (the other thread asked for this).
+2. **Deploy 0.6.0 with v2 OFF** (content only). Until v2 first runs, the checkpoint and backfill are the legacy code (G2e).
+   - Differences from 0.5.3 in this mode, none reachable at today's sizes or with no v2 files: `/place` withholds a legacy `latest/` over 12 MiB; the listing never parses an unmetadata'd object over 12 MiB; the new admin probe route; version 0.6.0 in `/status`.
+   - Watch 2 FIRMS runs: all 8 monitors stay up and `/status` shows 0.6.0.
+
+   `Approve: deploy hub commit <commit> (firms-memory, 0.6.0, phase1/worker.js sha256 9c2a1a1e…71d5, content only, FIRMS_PIPELINE unset)`
+3. **Production R2 probe**, once: `all_as_designed` must be true and `uploads_open_after: 0`.
+   `Approve: run /admin/probe/r2-conditional once on production (probe/ keys only, uploads aborted and objects deleted in the same request)`
+4. `Approve: set Worker variable FIRMS_CREATE_ONLY=verified` (only if step 3 is all true)
+5. `Approve: set Worker variable FIRMS_PIPELINE=v2`. Watch 2 runs:
+   - `lines/1` with `run_id` on both files;
+   - `publish_state = published` with `cells_at`;
+   - `/place` ok;
+   - all `/health/*` up, with `v2_publication` facts present.
+6. Next day after 00:30 UTC (no action): the checkpoint `source_key` is the v2 snapshot, `fires_daily` is present, and `/health/archive/firms` is up.
+
+### Revised rollback (tested)
+- **R1 — unset `FIRMS_PIPELINE`** (one variable change, needs Approve). The legacy collector runs from the next run. Because v2 has run, the checkpoint keeps the v2 selection, which takes the **latest publication of either kind** (G1a, G1b), so a mixed or rollback day is archived correctly. Health accepts the legacy file: no `run_id`, so the legacy rules apply.
+- **R2 — redeploy 0.5.3** (`61c8e052…6d0692`, needs Approve). Tested in G6: 0.5.3 checkpoints a v2-written day correctly (it reads `lines/1` as JSON; unbounded parse, but fine at today's sizes), collects, publishes, and health is 200. The `firms_*` tables are simply unused.
+- Neither rollback needs any data change.
+
+### Remaining limitations (unchanged from rev 1 §6, plus)
+- G3: the rebuild streams the whole committed snapshot, so its CPU is about one more read of the file. It happens only when a sidecar is rejected; the bench shows memory equal to a normal checkpoint.
+- G4: health now reads one `firms_outputs` row per `/health/publication/firms` call, which is 1 D1 read every 5 minutes from UptimeRobot (negligible).
+- The design doc §9 eligibility text should be updated to match G1 (cutover = audit only) once GPT agrees. Not done yet, so as not to edit the signed-off design without review.
+
+---
+
+## Rev 1 (as first submitted)
+
 6 Nov 2026 · branch `firms-memory` · built to design rev 6 (`docs/FIRMS-MEMORY-DESIGN.md` @ `48a0f63`, signed off by GPT).
 **Nothing in production has changed.** There has been no deploy, no D1 schema change, no variable change, no R2 write, no merge, and the 8 MiB guard is the same. Chad's go covered read-only measurements, local platform checks and the branch build only.
 

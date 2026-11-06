@@ -8,7 +8,7 @@ for d in rows:
     cap = (d.get('tested', {}).get('v8_flags') or '').replace('--max-heap-size=', '')
     cell[(d.get('file', '?').split('/')[-1], d.get('scenario'), cap)].append(d)
 files = ['real.csv', '8mib.csv', 'dense-8mib.csv', '16mib.csv', '32mib.csv', '64mib.csv']
-scen = ['collect', 'checkpoint', 'overlap', 'stress-2-collects', 'injected-reset', 'injected-reset-cl', 'injected-truncated-row', 'legacy-transition']
+scen = ['collect', 'checkpoint', 'checkpoint-rebuild', 'overlap', 'stress-2-collects', 'injected-reset', 'injected-reset-cl', 'injected-truncated-row', 'legacy-transition']
 caps = sorted({k[2] for k in cell}, key=lambda c: int(c) if c.isdigit() else 0)
 print('| file | scenario | ' + ' | '.join(f'cap {c} MB' for c in caps) + ' | max sampled heap MB | max wall ms |')
 print('|---|---|' + '---|' * len(caps) + '---|---|')

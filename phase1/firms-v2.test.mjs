@@ -575,6 +575,19 @@ await t('G5c. the writer itself never leaves an upload open: complete() failing 
   assert.equal(q(E.db, "SELECT status FROM collector_runs WHERE layer='firms'").pop().status, 'down');
 });
 
+await t('G6. ROLLBACK BY REDEPLOY: the live 0.5.3 code (OLD_WORKER = main:phase1/worker.js) checkpoints a v2-written day correctly and keeps collecting/publishing, health up', async () => {
+  const oldPath = process.env.OLD_WORKER; if (!oldPath || !fs.existsSync(oldPath)) skip('set OLD_WORKER to a copy of main:phase1/worker.js (git show main:phase1/worker.js > /tmp/w053.mjs)');
+  const OLD = await import(oldPath);
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06'), row(-19, 31, '1300', '3.34', 'D', '2026-11-06')]) };
+  await runFirmsAt(E.env, '2026-11-06T23:00:00Z', '2026-11-06T23:00:40Z'); const env = { ...E.env, FIRMS_PIPELINE: undefined };
+  NOW = Date.parse('2026-11-07T00:31:00Z'); assert.equal(await OLD.histCheckpointsDue(env, 'firms', NOW), '2026-11-06:done');
+  const cp = cpRow(E); assert.equal(cp.records, 2); assert.match(cp.source_key, /-a1-/); assert.equal(one(E.db, "SELECT SUM(detections) n FROM fires_daily WHERE day='2026-11-06'").n, 2);
+  FIRMS = { status: 200, body: csv([row(-20, 30)]) }; NOW = Date.parse('2026-11-07T09:00:40Z');
+  await OLD.default.scheduled({ cron: '*/15 * * * *', scheduledTime: Date.parse('2026-11-07T09:00:00Z') }, env, { waitUntil() {} });
+  assert.equal(q(E.db, "SELECT status FROM collector_runs WHERE layer='firms'").pop().status, 'ok'); assert.equal(jsonOf(E, LATEST).run_id, undefined, 'legacy file back on latest/');
+  assert.equal((await OLD.default.fetch(new Request('https://hub/health/publication/firms'), env)).status, 200);
+});
+
 // =====================================================================================================================
 // 5. Legacy transition and bounds (L_json = 12 MiB)
 const legacySnap = (n, at) => JSON.stringify({ schema_version: 1, layer: 'firms', retrieved_at: at, source_status: 'ok', window_start: at.slice(0, 10) + 'T00:00:00.000Z', window_end: at, collector_version: '0.5.3', record_fields: ['lat', 'lng', 'observed_at', 'confidence', 'frp_mw', 'satellite', 'daynight'], records: Array.from({ length: n }, () => [-20, 30, at.slice(0, 10) + 'T13:00:00Z', 'n', 3.3, 'N20', 'D']), cells: { [W.cellId(-20, 30)]: { count: n } } });
