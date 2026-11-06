@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov 19:59:43–20:00:03 UTC — additive D1 schema for FIRMS v2 (from the FIRMS memory thread; Chad's go)
+- New tables, all empty: `firms_settings`, `firms_identity`, `firms_inputs`, `firms_attempts`, `firms_outputs`, plus 3 indexes. No existing table touched. The next FIRMS run (20:00:40) was ok. 0.5.3 never reads them, so the 6 Nov checkpoint runs on unchanged code.
+- **Agreed window:** no deploy, variable change or R2 probe from 23:30 UTC 6 Nov to 01:15 UTC 7 Nov. Hub 0.6.0 (branch `firms-memory`, under GPT review) deploys only after this thread's "window clear" note following the 00:50 check. 0.6.0 changes the checkpoint code path even with the pipeline off.
+
 ## 6 Nov ~16:45 UTC — `hub-health` merged to main (`59f4cda`, Chad)
 - main's `phase1/worker.js` = live 0.5.3 (sha256 `61c8e05262a3…`, checked). No page files changed. Branches left: `main`, `aircraft-rc`, `hub-health` (can be deleted on GitHub).
 
