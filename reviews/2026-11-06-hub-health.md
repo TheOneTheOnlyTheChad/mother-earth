@@ -166,3 +166,17 @@ Then, as the brief says, the routine overnight check-ins can be retired once Cha
 - **`/status` publishes run notes unredacted.** In test H8 a fetch error message that contained the FIRMS URL put the key into `/status`. That error text is the test's own; whether the Workers runtime's real fetch errors ever include the URL is **not known**. Proposal: pass `/status` notes through the same `healthNote()` redaction — a one-line change, waiting for Chad's go.
 - Manual `/admin/run/<job>` runs are logged like scheduled ones, so a manual run can make `runs/<layer>` look alive for one window while the trigger is stopped. Rare; stated.
 - The `hourly` job (Kp, CO₂, sea ice, drifters, plastic, D1 aggregation), forest and orbital have no health check yet. Out of this brief's FIRMS scope; the same pattern extends to them.
+
+## Rev 2 — deployed and accepted (6 Nov 2026)
+**Deploy (Chad's Approve line):** hub 0.5.3, `phase1/worker.js` from `88e0399`, sha256 `61c8e05262a3…6d0692`, content-only API from the dashboard pane, HTTP 200 at **15:38:04 UTC**. Read back through the Cloudflare connector: same sha256. Before: 0.5.2 `70307d5f…` (rollback).
+**Checks after deploy (15:38 UTC):** `/` and `/status` report 0.5.3, `/status` shape unchanged (no note needed redacting); all 8 `/health/*` checks answer GET and HEAD with the same status, HEAD body empty, `Cache-Control: no-store, max-age=0`; 7 × 200, `coverage/firms` 503 — 5 Nov's preserved stale coverage (cutoff 15:30:44, 33 failed runs), expected while 5 Nov is "yesterday" (clears 00:00 UTC 7 Nov); evidence untouched. Unknown check 404, POST 405. First runs on 0.5.3: usgs 15:40 + 15:45 ok, firms 15:45 ok (30,644 records, 2,554,353 B raw).
+**UptimeRobot (Free, Chad's account, created by Chad 6 Nov ~15:55 UTC):** 8 HTTP(s) monitors, 5-min interval, default method HEAD, up = 2xx/3xx (seen in the monitor form). Alert contacts: email + iPhone push on all 8 ("2 channels" each). Monitors were added by Claude in the pane on Chad's instruction ("you add them"). The form also confirmed on Free: email alerts, push via the iOS app, HEAD default with method selection paid.
+**First real alert:** `ME coverage firms` went down (503) right after creation — the correct 5 Nov condition.
+**Notification acceptance test — PASSED (times SAST = UTC+2):**
+| Step | Mac | Event | Push sent | Email sent | Received |
+|---|---|---|---|---|---|
+| test monitor `ME alert test` → `/health/test/firms` (404) | open | down 18:11:54 | 18:11:54 | 18:11:56 | yes |
+| URL changed to `/health/runs/firms` in the iPhone app | **closed** | resolved 18:18:45 | 18:18:46 | 18:18:47 | **popped up on the phone** |
+| URL changed back to `/health/test/firms` | **closed** | down 18:21:57 | 18:21:58 | 18:21:59 | **popped up on the phone** |
+Phone on mobile data (5G), Mac lid closed (the device bridge disconnected, confirming it). Detection to push ≤ 1 s after UptimeRobot's check; UptimeRobot confirmed the 404 from a second location (Nuremberg) before alerting. `ME alert test` deleted after the test.
+**Next (Chad):** merge `hub-health` → `main` (no page change) with his go; decide when to retire routine overnight check-ins.
