@@ -417,9 +417,18 @@ await t('F5. multipart part failure while archiving raw → upload aborted, noth
 
 await t('F6. a download that stalls after the headers is aborted at the download limit: down "download timed out", nothing registered, no raw left', async () => {
   const E = makeEnv(); const keep = W.FV.fetchMs; W.FV.fetchMs = 200; FIRMS = { stall: true };
-  try { NOW = Date.parse('2026-11-07T09:45:40Z'); await Promise.race([W.collectFirmsV2(E.env, Date.parse('2026-11-07T09:45:00Z')), new Promise((_, rej) => setTimeout(() => rej(new Error('the job is still waiting on the download after 5 s')), 5000).unref())]); } finally { W.FV.fetchMs = keep; }
+  try { NOW = Date.parse('2026-11-07T09:45:40Z'); await Promise.race([W.collectFirmsV2(E.env, Date.parse('2026-11-07T09:45:00Z')), new Promise((_, rej) => setTimeout(() => rej(new Error('the job is still waiting on the download after 5 s')), 5000))]); } finally { W.FV.fetchMs = keep; }
   assert.match(q(E.db, "SELECT note FROM collector_runs WHERE layer='firms'").pop().note, /^fetch failed: Error: download timed out after 0.2 s/);
   assert.equal(one(E.db, 'SELECT COUNT(*) n FROM firms_inputs').n, 0); assert.ok(![...E.m.keys()].some(k => k.startsWith('raw/firms/'))); assert.equal(E.stats.mpuOpen, 0);
+});
+
+await t('F7. /admin/probe/r2-conditional: admin key required; every check true on R2 semantics; nothing left under probe/', async () => {
+  const E = makeEnv(); assert.equal((await worker.fetch(new Request('http://x/admin/probe/r2-conditional'), E.env)).status, 403);
+  const r = await (await worker.fetch(new Request('http://x/admin/probe/r2-conditional?key=k'), E.env)).json();
+  assert.equal(r.all_as_designed, true, JSON.stringify(r)); assert.ok(![...E.m.keys()].some(k => k.startsWith('probe/')));
+  // the probe must detect a bucket WITHOUT conditional puts: a stub that ignores onlyIf → not as designed
+  const F = makeEnv(); const put = F.env.R2.put; F.env.R2 = { ...F.env.R2, put: (k, v, o = {}) => put(k, v, { ...o, onlyIf: undefined }) };
+  const r2 = await (await worker.fetch(new Request('http://x/admin/probe/r2-conditional?key=k'), F.env)).json(); assert.equal(r2.all_as_designed, false); assert.equal(r2.createPresent, false);
 });
 
 // =====================================================================================================================
@@ -476,11 +485,12 @@ await t('B1. /place scan cap: 2 concurrent scans per isolate; a 3rd waits ≤ 2 
   const s = await W.fvPlaceSection(E.env, id, cj); globalThis.Date.now = realNow; W.fvPlace.scans = 0;
   assert.equal(s.state, 'busy'); assert.equal(s.cell.count, cj.cells[id].count); assert.ok(!s.records);
 });
-await t('B2. /place answer cache stays ≤ 256 KB (LRU) across 300 distinct cells; repeat answers equal fresh scans', async () => {
-  const E = makeEnv(); const rows = []; for (let i = 0; i < 300; i++) for (let k = 0; k < 9; k++) rows.push(row(-88 + Math.floor(i / 89) * 4 + 0.5, -179 + (i % 89) * 4 + 0.5 + k * 0.01, String(1000 + k)));
+await t('B2. /place answer cache stays ≤ 256 KB (LRU) across 1,200 distinct cells (≈ 0.6 MB of answers); repeat answers equal fresh scans', async () => {
+  const E = makeEnv(); const rows = []; for (let i = 0; i < 1200; i++) for (let k = 0; k < 9; k++) rows.push(row(-88 + Math.floor(i / 89) * 4 + 0.5, -179 + (i % 89) * 4 + 0.5 + k * 0.01, String(1000 + k)));
   FIRMS = { status: 200, body: csv(rows) }; await runFirmsAt(E.env, '2026-11-07T09:45:00Z', '2026-11-07T09:45:40Z'); W.fvPlace.cache.clear(); W.fvPlace.bytes = 0;
-  const cells = jsonOf(E, CELLS); const ids = Object.keys(cells.cells); assert.ok(ids.length >= 290);
-  let maxB = 0; for (const id of ids) { const s = await W.fvPlaceSection(E.env, id, cells); assert.equal(s.records.length, 8); assert.equal(s.records_total, 9); maxB = Math.max(maxB, W.fvPlace.bytes); }
+  const cells = jsonOf(E, CELLS); const ids = Object.keys(cells.cells); assert.ok(ids.length >= 1150, 'cells ' + ids.length); let total = 0;
+  let maxB = 0; for (const id of ids) { const s = await W.fvPlaceSection(E.env, id, cells); assert.equal(s.records.length, 8); assert.equal(s.records_total, 9); total += JSON.stringify(s.records).length; maxB = Math.max(maxB, W.fvPlace.bytes); }
+  assert.ok(total > 2 * W.FV.placeCacheBytes, 'the answers exceed the cache: ' + total);
   assert.ok(maxB <= W.FV.placeCacheBytes, 'cache bytes ' + maxB); const fresh = await W.fvPlaceSection(E.env, ids[5], cells); W.fvPlace.cache.clear(); W.fvPlace.bytes = 0;
   assert.deepEqual(await W.fvPlaceSection(E.env, ids[5], cells), fresh);
 });

@@ -16,6 +16,7 @@
  *   GET /admin/run/<job>?key=ADMIN_KEY   run a job now (jobs: five, minute, firms, forest, hourly)
  *   GET /admin/probe/spacetrack?key=ADMIN_KEY   ONE bounded Space-Track check (0.2.3; 0.2.4 also stages the GP body privately at staging/spacetrack-gp.csv; not scheduled)
  *   GET /admin/probe/orbital-build?key=ADMIN_KEY  run the orbital build on the staged copy (0.2.4; no upstream request, writes nothing)
+ *   GET /admin/probe/r2-conditional?key=ADMIN_KEY  (0.6.0) the R2 behaviours FIRMS v2 relies on, checked on this bucket; probe/ keys only, deleted after
  *   GET /snapshot/orbital, /elements/orbital   orbital meta + classified element CSV (0.3.0; job gated by ORBITAL_ENABLED=1, odd UTC hours at :41)
  *
  * Bindings (set in dashboard → Worker → Settings → Bindings):
@@ -25,6 +26,9 @@
  * Plain vars (optional): OPENSKY_ENABLED = "1" to run the OpenSky pulls (parked 31 Oct 2026: Cloudflare egress 522 + public site must feed; unset = skip silently)
 *                        OPENSKY_BBOX = "lamin,lomin,lamax,lomax"  (default southern Africa)
  *                        FIRMS_REGION = "west,south,east,north"   (default: world; set only if the Free plan's CPU limit forces it)
+ *                        FIRMS_PIPELINE = "v2"  (0.6.0) streaming FIRMS pipeline with D1 run state (FIRMS v2 section; needs the firms_* tables); unset = legacy
+ *                        FIRMS_CREATE_ONLY = "verified"  (0.6.0) allow v2 to CREATE latest/ or latest-cells/ when absent — set only after
+ *                                         /admin/probe/r2-conditional reports all_as_designed on this bucket
  *
  * Deviations from v0.3 to be recorded as a v0.4 diff (reasons in GUIDE-step1.md §6):
  *   D1  one Worker instead of one per layer (packaging only; same code path, fewer dashboard steps)
@@ -846,6 +850,27 @@ async function fvBoundedGunzip(env, key, limit) {
   const rd = (gz ? fvBody(o).pipeThrough(new DecompressionStream('gzip')) : fvBody(o)).getReader(); const dec = new TextDecoder(); let n = 0, out = '';
   for (;;) { const { value, done } = await rd.read(); if (done) break; n += value.length; if (n > limit) { try { await rd.cancel(); } catch (_) {} return null; } out += dec.decode(value, { stream: true }); }
   return out + dec.decode();
+}
+/** Production check of the R2 semantics v2 depends on (design §5, §3), run once by hand before FIRMS_CREATE_ONLY=verified.
+ * Uses fresh keys under probe/firms-v2/<random>/ only; every key written is deleted at the end (deletes and aborts are free). */
+async function fvProbeR2(env) {
+  const base = 'probe/firms-v2/' + fvRand() + '/', out = { base, at: nowIso() }, keys = [];
+  const put = async (k, v, o) => { keys.push(base + k); const r = await env.R2.put(base + k, v, o); return r ? r.etag : null; };
+  try {
+    out.createAbsent = await put('a', 'one', { onlyIf: { etagDoesNotMatch: '*' } }) !== null;
+    out.createPresent = await put('a', 'two', { onlyIf: { etagDoesNotMatch: '*' } }) === null;
+    out.createKeptOriginal = (await (await env.R2.get(base + 'a')).text()) === 'one';
+    const e1 = (await env.R2.head(base + 'a')).etag; await put('a', 'three');
+    out.casStale = await put('a', 'four', { onlyIf: { etagMatches: e1 } }) === null;
+    out.casCurrent = await put('a', 'five', { onlyIf: { etagMatches: (await env.R2.head(base + 'a')).etag } }) !== null;
+    await put('src', new Uint8Array(FV.part + 7).fill(65));
+    await put('copy', (await env.R2.get(base + 'src')).body); out.objectBodyCopy = (await env.R2.head(base + 'copy')).size === FV.part + 7;
+    const w = fvWriter(env, base + 'mp', { customMetadata: { run_id: 'probe' } }); keys.push(base + 'mp'); await w.write(new Uint8Array(FV.part + 10).fill(66)); const r = await w.close();
+    const hm = await env.R2.head(base + 'mp'); out.multipart = r.multipart === true && hm.size === FV.part + 10 && hm.customMetadata.run_id === 'probe';
+    const ab = await env.R2.createMultipartUpload(base + 'ab'); await ab.uploadPart(1, new Uint8Array(FV.part)); await ab.abort(); out.abortLeavesNothing = (await env.R2.head(base + 'ab')) === null;
+  } finally { for (const k of [...new Set(keys)]) try { await env.R2.delete(k); } catch (_) {} out.cleaned = (await env.R2.list({ prefix: base })).objects.length === 0; }
+  const must = ['createAbsent', 'createPresent', 'createKeptOriginal', 'casStale', 'casCurrent', 'objectBodyCopy', 'multipart', 'abortLeavesNothing', 'cleaned'];
+  out.all_as_designed = must.every(k => out[k] === true); return out;
 }
 // ---- step E: /place firms section over a lines/1 latest/ (8 rows + count; byte-capped cache; scan cap)
 const fvPlace = { scans: 0, cache: new Map(), bytes: 0 };
@@ -1931,7 +1956,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -2783,6 +2808,12 @@ export default {
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
       return json(redactStatus(env, { now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch, history: await historyState(env), archive_health: await archiveHealth(env, Date.now()) }), 200, { 'Cache-Control': 'no-store' });   // 0.5.3: notes redacted
+    }
+
+    if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'r2-conditional') {   // 0.6.0: the R2 behaviours FIRMS v2 relies on, on THIS bucket; writes only probe/ keys, deletes them
+      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+      try { return json(await fvProbeR2(env), 200, { 'Cache-Control': 'no-store' }); }
+      catch (e) { return json({ error: String(e).slice(0, 200) }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
     if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'ships') {   // 0.3.3: private Worker listen to aisstream; publishes nothing
