@@ -492,7 +492,7 @@ await t('G2d. cutover-state read failure after a ROLLBACK (v2 off, v2 has run): 
   await assert.rejects(W.histCheckpointsDue(E.env, 'firms', NOW), /v2 state read failed; checkpoint deferred/); assert.equal(cpRow(E), undefined); assert.deepEqual(gapsOf(E), []);
   assert.equal(await W.histCheckpointsDue(E.env, 'firms', NOW), '2026-11-06:done'); assert.equal(cpRow(E).cutoff, '2026-11-06T23:45:40.000Z');
 });
-await t('G2e. v2 never ran and is off (the "deploy 0.6.0 with v2 off" state): the checkpoint runs the legacy code — it never reads a firms_* table (a failing read there changes nothing)', async () => {
+await t('G2e. v2 never ran and is off (the "deploy 0.6.0 with v2 off" state): the checkpoint runs the legacy selection — its only firms_* access is one firms_settings read; it never reads firms_outputs/inputs/attempts/identity', async () => {
   const E = makeEnv({ FIRMS_PIPELINE: undefined }); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
   const seen = []; const prep = E.env.DB.prepare; E.env.DB = { ...E.env.DB, prepare: sql => { if (/firms_(outputs|inputs|attempts|identity)/.test(sql)) seen.push(sql); return prep(sql); }, batch: E.env.DB.batch };
   NOW = Date.parse('2026-11-07T00:31:00Z'); assert.equal(await W.histCheckpointsDue(E.env, 'firms', NOW), '2026-11-06:done');

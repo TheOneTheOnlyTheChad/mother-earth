@@ -12,9 +12,13 @@
 ### The five findings and their fixes
 | # | GPT finding | Fix (implementation only; the design's procedures are unchanged except the one rule flagged in G1) |
 |---|---|---|
-| G1 | After a rollback, the checkpoint chose the 23:00 v2 file over the 23:45 legacy file, because the cutover filter excluded it. | **The day's input is the latest publication of either kind:** a committed v2 output, or a legacy-key snapshot by its exact `retrieved_at`. **The cutover is no longer an eligibility filter.** It is still written, for audit. *This changes one rule in design §9.* A legacy object after the cutover is a complete legacy publication (a rollback, or an old isolate during the deploy), so excluding it gives the wrong day. **Until v2 has ever run** (flag off and no cutover row), the checkpoint and backfill run **exactly the legacy code**: they never read a `firms_*` table, so "deploy 0.6.0 with v2 off" leaves the daily archive untouched (G2e). |
+| G1 | After a rollback, the checkpoint chose the 23:00 v2 file over the 23:45 legacy file, because the cutover filter excluded it. | **The day's input is the latest publication of either kind:** a committed v2 output, or a legacy-key snapshot by its exact `retrieved_at`. **The cutover is no longer an eligibility filter.** It is still written, for audit. *This changes one rule in design §9.* A legacy object after the cutover is a complete legacy publication (a rollback, or an old isolate during the deploy), so excluding it gives the wrong day. **Until v2 has ever run** (flag off and no cutover row), the checkpoint and backfill run **the legacy selection**. Their only `firms_*` access is **one read of `firms_settings`** (is there a cutover row?), which decides between the two paths; they never read `firms_outputs`, `firms_inputs`, `firms_attempts` or `firms_identity` (G2e). If that one read fails, the checkpoint is deferred (G2d). So deploying 0.6.0 with v2 off selects exactly the files 0.5.3 would. *(Corrected after GPT's rev-2 review: rev 2 said "never read a `firms_*` table".)* |
 | G2 | A failed committed-output read was swallowed and recorded as "no retained snapshot", leaving a permanent gap. | Unreadable state now raises: the committed-output read, the v2-state (cutover) read, the completion-marker read and the `fires_daily` batches. `hist()` logs the failure, and the day stays due with **no gap and no marker**. The next run completes it. The one tolerated case: the tables don't exist while v2 is off, which means no v2 output can exist. |
-| G3 | A sidecar with the right run but the wrong attempt, token and counts was accepted, so a 1-record snapshot got a 999-record marker. | The sidecar is checked against the **committed output row**: run, attempt, token, retrieved_at, records, stored size, and the sums of `by_cell`, `cells` and `by_hour`. If any check fails, it is **rebuilt by streaming the committed snapshot**, with its SHA-256 and size checked against the commit and a `firms:recovery` row logged. A snapshot whose object no longer matches the commit (size, run, token) is **refused**, and so is one whose bytes fail the committed hash. The checkpoint hashes the bytes as it streams them into gzip, and on a mismatch deletes the object before any D1 write. The marker carries the committed count. **Publication applies the same checks before anything is published.** |
+| G3 | A sidecar with the right run but the wrong attempt, token and counts was accepted, so a 1-record snapshot got a 999-record marker. | The sidecar is checked against the **committed output row**: run, attempt, token, retrieved_at, records, stored size, and the sums of `by_cell`, `cells` and `by_hour`. If any check fails, it is **rebuilt by streaming the committed snapshot**, with its SHA-256 and size checked against the commit and a `firms:recovery` row logged. Two kinds of check apply, at different points:
+- **Object check** (size, run, token), against the commit, at both publication and checkpoint. A snapshot that fails it is **refused**.
+- **Full SHA-256 of the snapshot bytes**, only during **checkpointing** (hashed as they stream into gzip; on a mismatch the object is deleted before any D1 write) and during a **sidecar rebuild**.
+
+Normal publication with a valid sidecar does the object check and the sidecar validation, but **does not re-hash the snapshot bytes**. The copy to `latest/` is a stream copy of the committed per-attempt object, which is never rewritten. The marker carries the committed count. *(Wording narrowed after GPT's rev-2 review.)* |
 | G4 | After a counts repair one interval later, the fresh `firms ok` log disagreed with the records upload time, giving a 503. | For a v2 (`lines/1`) publication, `/health/publication/firms` compares the run log with **the pair's completion** (`firms_outputs.cells_at`). The **age still counts from the records upload**, so a repair never makes old data look fresh (G4b: it fails at 09:50:40 as it would without a repair). It also reports a pair whose counts are not complete, and an ok log that belongs to another run (G4c). |
 | G5 | A multipart part failure left an upload open while the object listing was empty. | **`fvWriter` aborts its own multipart upload on any failure** (write, part, complete). This covers every v2 write path, not only the probe. The probe tracks every upload it starts, aborts any still open, then deletes its objects. `cleaned` = no open upload **and** no object. |
 
@@ -113,6 +117,8 @@ Failures:
 
   **Two rev-1 negative controls now PASS by design:** a wrong `by_hour` and a wrong sidecar count were both introduced *in the sidecar*. The G3 validation now rejects such a sidecar and rebuilds it from the committed snapshot, so the published counts and `fires_daily` come out correct. That is the fix working. The two new controls break the published or archived outputs directly, so the bench's checks are still shown to bite.
 
+**Rev-2 review outcome (GPT):** the code is signed off for the staged rollout below, and the revised cutover rule is accepted. Each stage goes back to Chad with its exact `Approve:` line, target commit/hash and the previous stage's evidence. Three wording corrections were applied here (`firms_settings` read, hashing scope, monitor baseline) and design §9 was updated.
+
 ### Revised rollout (each step needs Chad's `Approve:` line; nothing before GPT re-reviews; nothing in the other thread's window 23:30 UTC 6 Nov → 01:15 UTC 7 Nov, or until its "window clear" note)
 0. **Read-only:** dashboard → R2 `mother-earth` → lifecycle rules. Confirm `raw/`, `snapshots/` and `cells/` expire after 2 days.
 1. **D1 additive schema** (5 tables + 3 indexes; the live 0.5.3 never reads them):
@@ -120,7 +126,7 @@ Failures:
    Record the exact UTC time it was created (the other thread asked for this).
 2. **Deploy 0.6.0 with v2 OFF** (content only). Until v2 first runs, the checkpoint and backfill are the legacy code (G2e).
    - Differences from 0.5.3 in this mode, none reachable at today's sizes or with no v2 files: `/place` withholds a legacy `latest/` over 12 MiB; the listing never parses an unmetadata'd object over 12 MiB; the new admin probe route; version 0.6.0 in `/status`.
-   - Watch 2 FIRMS runs: all 8 monitors stay up and `/status` shows 0.6.0.
+   - Watch 2 FIRMS runs: **no unexpected deterioration from the recorded baseline** (each monitor's state is recorded before the deploy) and `/status` shows 0.6.0. The known historical alert on "ME coverage firms" (5 Nov) is part of the baseline and is not a new failure.
 
    `Approve: deploy hub commit 7408fc7 (firms-memory, 0.6.0, phase1/worker.js sha256 9c2a1a1e…71d5, content only, FIRMS_PIPELINE unset)`
 3. **Production R2 probe**, once: `all_as_designed` must be true and `uploads_open_after: 0`.
@@ -130,7 +136,7 @@ Failures:
    - `lines/1` with `run_id` on both files;
    - `publish_state = published` with `cells_at`;
    - `/place` ok;
-   - all `/health/*` up, with `v2_publication` facts present.
+   - `/health/*`: no unexpected deterioration from the recorded baseline (the known coverage alert excepted), with `v2_publication` facts present.
 6. Next day after 00:30 UTC (no action): the checkpoint `source_key` is the v2 snapshot, `fires_daily` is present, and `/health/archive/firms` is up.
 
 ### Revised rollback (tested)
@@ -366,7 +372,7 @@ D1 is real SQLite with foreign keys ON and a transaction per batch, loaded with 
 0. **Read-only:** in the Cloudflare dashboard, open R2 → `mother-earth` → Settings → Object lifecycle rules and confirm the rules for `raw/`, `snapshots/` and `cells/`. No approval needed; reading only.
 1. **D1 schema (additive):** run the 21 new lines of `phase1/schema.sql` (5 `CREATE TABLE IF NOT EXISTS` + 3 `CREATE INDEX IF NOT EXISTS`) on D1 `mother-earth`. They touch no existing table.
    `Approve: D1 additive schema — create firms_settings, firms_identity, firms_inputs, firms_attempts, firms_outputs + 3 indexes (schema.sql @ 77eeb22, sha256 0c964327…a0d2)`
-2. **Deploy 0.6.0 with v2 OFF** (content only, as for 0.5.3): `phase1/worker.js` sha256 `71de6094…7eae07`. Behaviour stays legacy. Check `/status` shows 0.6.0 and all 8 health monitors stay up for 2 FIRMS runs. Rollback: 0.5.3 sha256 `61c8e052…6d0692`.
+2. **Deploy 0.6.0 with v2 OFF** (content only, as for 0.5.3): `phase1/worker.js` sha256 `71de6094…7eae07`. Behaviour stays legacy. Check `/status` shows 0.6.0 and the 8 health monitors stay up for 2 FIRMS runs. Rollback: 0.5.3 sha256 `61c8e052…6d0692`.
    `Approve: deploy hub commit 77eeb22 (firms-memory, 0.6.0, phase1/worker.js sha256 71de6094…7eae07, content only, FIRMS_PIPELINE unset)`
 3. **Production R2 probe** (writes and deletes only `probe/firms-v2/<random>/` keys): `GET /admin/probe/r2-conditional?key=…`. All checks must return true and `cleaned` must be true.
    `Approve: run /admin/probe/r2-conditional once on production (probe/ keys only, deleted in the same request)`
