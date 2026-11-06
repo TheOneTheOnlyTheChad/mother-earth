@@ -159,12 +159,13 @@ Float **WMO 1902040** (SOLO II, serial 8727, US Argo / Scripps; data centre AOML
 7. Independent reproduction of the compact payload sizes, pressure-to-depth calculation and directory-history checks.
 
 ## 11. Follow-up investigation of the open questions (rev 3, 6 Nov 2026, Chad's go)
-Research only; read-only fetches from the Coriolis GDAC and primary documents (13:45–13:56 UTC). **Claude's results only — not independently reproduced.** R4 stays parked after this pass.
+Research only; read-only fetches from the Coriolis GDAC and primary documents (13:45–13:56 UTC). **Rev 4 (6 Nov, GPT review):** labels corrected below. **GPT has not independently reproduced the global-index totals or the additional profile-file counts — those are Claude's only.**
+**Evidence preservation (honest gap):** the global index (59,012,910 B, Last-Modified 13:25:00 GMT, header date 20261106132415), the weekly index and the ten extra profile files were **streamed and analysed in the browser and not saved; no hashes were recorded**. **These figures must not be used for infrastructure sizing** until they are recomputed from a preserved, hashed copy of the index with a saved script.
 
 ### 11.1 Access terms
-- **Verified (Registry of Open Data on AWS, Euro-Argo managed):** the GDAC copy on S3 (`argo-gdac-sandbox`, eu-west-3, no sign-in) is listed as "Open data, there are no restrictions on the use of this data", licence **CC BY 4.0**, updated daily, with a citation including "accessed on DATE" and DOI `10.17882/42182`.
+- **Verified (Registry of Open Data on AWS, Euro-Argo managed):** the GDAC copy on S3 (`argo-gdac-sandbox`, eu-west-3, no sign-in) is listed as "Open data, there are no restrictions on the use of this data", licence **CC BY 4.0** (so its attribution condition applies to that copy), updated daily, with a citation including "accessed on DATE" and DOI `10.17882/42182`. **This applies to the AWS copy only; it establishes nothing about Coriolis's automated-access or request limits.**
 - **Coriolis HTTPS server:** no terms page, rate limit or `robots.txt` (404) found; the 2017 readme carries only the acknowledgment request.
-- *Interpretation:* reuse is supported by three statements (argo.ucsd.edu, the Coriolis readme, the AWS listing with CC BY 4.0). **Still open:** an explicit automated-access/rate policy for `data-argo.ifremer.fr` and US GODAE; the SEANOE landing page could not be opened with my tools. Not integration clearance.
+- *Interpretation:* reuse is supported by three separate statements (argo.ucsd.edu, the Coriolis readme, and — for the AWS copy — CC BY 4.0); each distribution's terms stay separate. **Still open:** an explicit automated-access/rate policy for `data-argo.ifremer.fr` and US GODAE; the SEANOE landing page could not be opened with my tools. Not integration clearance.
 
 ### 11.2 Error interpretation
 - **Verified (Argo QC manual for CTD and trajectory data, v3.9, Feb 2025, doi 10.13155/33951):**
@@ -180,13 +181,13 @@ Research only; read-only fetches from the Coriolis GDAC and primary documents (1
 |---|---|
 | Index file | `ar_index_global_prof.txt.gz`, 59,012,910 B, Last-Modified 6 Nov 13:25:00 GMT, header "Date of update 20261106132415"; streamed and parsed in the browser in ~28 s |
 | Profiles listed | **3,433,783** core profile files: **2,957,449 D** · **476,334 R**; 19,383 without an observation date |
-| Observed per day, Oct 2026 (as listed today) | **458–527 per day** (≈ 14,900 for 1–31 Oct). Recent days are still filling (6 Nov: 181 so far) |
-| File updates, 7 Oct – 6 Nov | **55,119** profile files with a `date_update` in that window; **39,414** of them observed before Oct 2026 |
+| Profiles currently indexed per observation date, Oct 2026 | **458–527 per day** (≈ 14,900 for 1–31 Oct) — a count of **files indexed today** by observation date, **not a daily arrival rate**; recent dates are still filling (6 Nov: 181) |
+| Files whose **latest** `date_update` is 7 Oct – 6 Nov | **55,119** files (39,414 of them observed before Oct 2026) — **not a count of update events**: a file updated several times shows only its latest date, and earlier updates are invisible |
 | Weekly index | 10,058 profiles at 13:24 UTC (10,268 at ~11:45) — a rolling window, not a fixed weekly count: 6,461 R · 3,597 D; 306 descending |
-| Real-time lag (weekly index, R files, date → date_update, < 10 days) | median **2.9 h**, 10th pct 0.85 h, 90th pct 237 h |
-- *Interpretation:* about **500 new profiles a day** plus **~1,800 file updates a day**, most of them to older profiles — an incremental reader would follow `date_update` in the index, not file listings. One 30-day window from one index snapshot; not a long-term rate.
+| Observation → latest indexed update, surviving R files in the weekly index, filtered to 0–10 days (n = 3,705) | median **2.9 h**, 10th pct 0.85 h, 90th pct 237 h — **not first-publication latency**: it measures to the latest update of files still present as R; **first availability remains unknown** |
+- *Interpretation (narrowed):* roughly **500 profiles per observation day** are indexed for October, and **at least 55,119 files** had their latest update in the last 30 days, most of them older profiles. Actual arrival rates and update-event counts are **unmeasured**. An incremental reader would follow `date_update` in the index rather than file listings, but any sizing waits for preserved inputs (above).
 
-### 11.4 Revisions and identity stability (float 1902040, 11 files read in the browser with a minimal NetCDF-3 reader)
+### 11.4 Revisions and identity stability (float 1902040: 11 files requested, **10 read** — `D1902040_001.nc` returned 404; 6 D + 4 R; read in the browser with a minimal NetCDF-3 reader; files not preserved or hashed)
 | Files | `N_PROF` | Profiles (by sampling scheme) | Config mission |
 |---|---|---|---|
 | D 050, 100, 150, 200, 258, 259 | 2 | Primary · Near-surface | 6 (≤ 200), 7 (258–259) |
@@ -202,7 +203,8 @@ Research only; read-only fetches from the Coriolis GDAC and primary documents (1
 2. Confidence level of `_ADJUSTED_ERROR`.
 3. Revision pattern in values (needs repeated copies; the R 297 baseline exists).
 4. Whether recent R-file structure (3 profiles) carries into delayed mode.
-5. Longer-term volume (one 30-day window measured).
+5. Arrival rates, update events and longer-term volume — recompute from a preserved, hashed index with a saved script before any sizing.
+6. Independent reproduction of §11.3–§11.4.
 
 ## Sources
 - [Argo — About](https://argo.ucsd.edu/about/) · [How to use Argo files](https://argo.ucsd.edu/data/how-to-use-argo-files/) · [Data FAQ](https://argo.ucsd.edu/data/data-faq/) · [Acknowledging Argo](https://argo.ucsd.edu/data/acknowledging-argo/)
