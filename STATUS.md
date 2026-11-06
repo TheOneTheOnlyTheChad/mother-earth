@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov ~15:30 UTC — Cloudflare connector connected; branch `hub-health` (from the hub-health thread)
+- **Cloudflare Developer Platform connector** (Chad, 6 Nov). D1 read queries run directly: database_id `53fced06-fcaa-48e4-a08b-5776125e0293`. No browser pane and no Mac needed; checked from both threads.
+  - Live worker code is readable too (strip the multipart wrapper before hashing). 15:10 UTC: live = main 0.5.2, sha256 `70307d5fc2a9…`.
+  - It cannot deploy code, change variables, secrets or crons, read or write R2 objects, or read telemetry. Those stay on the pane flow.
+  - It has delete tools and the query tool can write: **SELECT only**; writes still need an Approve line.
+  - The server marks itself deprecated (successor: Cloudflare API MCP).
+- FIRMS 15:00 UTC: 30,620 records, raw 2,552,302 B, ok (connector read). Growing towards the old 4 MB line.
+- **Branch `hub-health` @ `80a380a` (hub 0.5.3 candidate; NOT deployed, NOT merged)**, from GPT's brief `docs/briefs/2026-11-06-monitoring-and-memory.md`:
+  - read-only `GET|HEAD /health/<runs|publication|archive|coverage>/<layer>`, answering 200/503 and failing closed;
+  - health-hub 23/23; 12/12 breaks bite; 9 hub suites pass.
+  - Docs: `reviews/2026-11-06-hub-health.md`, `docs/FIRMS-MEMORY-DESIGN.md`.
+  - With GPT. No deploy, UptimeRobot account or monitor until Chad's go.
+
 ## 6 Nov 14:21 UTC — check-in 1 (FIRMS on 0.5.2), read-only
 - **FIRMS caught up at 13:30 UTC.** A thin morning: the file peaked at 1,087 detections / 88 KB (10:00), then FIRMS **removed two whole passes** (04h: 344, 06h: 145) between 10:45 and 12:45, leaving 598 / 49 KB. At 13:30 it jumped to **22,762 records / 1.90 MB**; 14:15 shows 22,771 / 1.90 MB. Cause unknown (no NASA notice found). Source behaviour → R11.
 - **Still under the old 4 MB guard**, so the memory test of 0.5.2 above 4 MB has not happened yet. Recheck booked 16:05 UTC. The 00:50 check covers the rest.

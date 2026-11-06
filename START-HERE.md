@@ -69,6 +69,13 @@ Bump `COLLECTOR_VERSION` on every deploy. Jobs: five, minute, firms, forest, hou
 D1 console: dashboard → D1 → mother-earth → Console; Chad or Claude runs `CREATE TABLE` statements there (schema.sql holds them).
 Metrics: `…/workers/services/view/mother-earth/production/metrics` — read with `get_page_text`. Free plan: 10 ms CPU soft limit per invocation; measured medians ~1 ms; worst offenders were whole-file parses (fixed by `tail()`).
 
+## 4e. Cloudflare connector (added 6 Nov 2026, thread 17)
+- Connector "Cloudflare Developer Platform": load with ToolSearch `select:mcp__Cloudflare_Developer_Platform__d1_database_query,mcp__Cloudflare_Developer_Platform__workers_get_worker_code,mcp__Cloudflare_Developer_Platform__r2_bucket_get`.
+- **D1 reads without the Mac:** `d1_database_query` with database_id `53fced06-fcaa-48e4-a08b-5776125e0293` (mother-earth). Use it for collector_runs, checkpoints, coverage, fires_daily, drifter counts. **SELECT only.** The tool can write and the server has delete tools; any write needs Chad's Approve line.
+- `workers_get_worker_code` returns the live script wrapped in multipart. Strip the header and boundary before hashing to compare with a commit.
+- **Cannot:** deploy code, change variables, secrets or crons, read or write R2 objects (bucket metadata only), read telemetry or metrics. Those stay on the browser-pane flow (§4, §4a) with Approve lines.
+- The server marks itself deprecated (successor: Cloudflare API MCP at mcp.cloudflare.com/mcp).
+
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.
 - **Optional layers** on the page go through `OPTIONAL_LAYERS` in index.html (fetched only while on, cleared on off, `refreshPair` + `usable()` as for the always-on record layers). `ME.renderState()` and `ME.openCell(layer, id)` are the read-only test/console aids.
