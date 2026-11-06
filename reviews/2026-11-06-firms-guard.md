@@ -1,6 +1,8 @@
-# FIRMS resource guard + checkpoint coverage — candidate for review, **rev 2** (6 Nov 2026)
+# FIRMS resource guard + checkpoint coverage — candidate for review, **rev 3** (6 Nov 2026)
 
 Branch `firms-guard`, hub **0.5.2** candidate. **Not deployed; no live database or settings change.** Needs, each with Chad's separate go: (a) one additive D1 table + one additive index, (b) the hub deploy. Page unchanged.
+
+**Rev 3 (after GPT's review of `5570b82`, which confirmed firms-guard 19/19, history-hub 27/27 and that the clock and truncation probes are fixed):** the memory bench's verdict only checked survival, while the hub catches collection and checkpoint errors internally — GPT reproduced a failed checkpoint write reported as "pass". The bench now **asserts every scenario's outputs** (publication with the expected record count; checkpoint marker, object, daily aggregates, coverage; backfill row; both collects in the stress case; usgs; exact `/place` firms section and `/snapshot`; no history failures), **four negative controls each FAIL**, and the real-file and 8 MiB scenarios were rerun: **72/72 pass with outputs verified** at the 128 MB and 80 MB total-heap caps, 3 runs each (§3). No hub code changed in rev 3.
 
 **Rev 2 (after GPT's review of `908ff8d`, which reproduced firms-guard 10/10 and history-hub 27/27 on Node 24):**
 1. **Memory ceiling re-measured in the Workers runtime** under a total-heap cap, natural GC, real payload, overlapping invocations → **limit lowered 12 MiB → 8 MiB**. 12 MiB is not supported (§3). The earlier wording that transient peaks were "merely reclaimable" is withdrawn: before a collection runs, transient allocations count against the limit as much as retained objects do.
@@ -45,7 +47,9 @@ Branch `firms-guard`, hub **0.5.2** candidate. **Not deployed; no live database 
 | collect + checkpoint overlap | 64 | **80** | 96 | 112 |
 | stress (2 collects) | 64 | 64 | 80 | **fails at 128 (1 of 2)** |
 
-- **Decision proposed: 8 MiB** (1.6× the largest file seen). Every scenario passes 2/2 at an 80 MB cap — **48 MB below the 128 MB limit**; every scenario except collect + checkpoint overlap passes at 64 MB.
+- *The table above is survival-only (rev 2): it shows where the runtime died, not that the work completed.*
+- **Verified rerun (rev 3, decisive):** real 5.3 MB and 8 MiB, all six scenarios, 3 runs each, at total-heap caps **128** and **80** MB, every output asserted — **72/72 pass** (`phase1/bench-firms-memory/results-verified-2026-11-06.jsonl`; tested `worker.js` sha256 `70307d5fc2a9afed…`, flags recorded per run). Negative controls (checkpoint-marker write failure, collect parse failure ×2 scenarios, `/place` read failure) each **FAIL**.
+- **Decision proposed: 8 MiB** (1.6× the largest file seen). Passing at an 80 MB **local V8 heap cap** shows margin in the local runtime; it is **not** a measured production reserve (production counts the whole isolate footprint).
 - **12 MiB is not supported:** the two-collect case fails under the production cap; others need up to 112 MB.
 - **Uncapped run** (no limit, kept as `results-uncapped-…`): without a heap limit V8 collects lazily, so the heap kept growing across phases (up to 342 MB used at 12 MiB). Shown only to explain why the cap is required for a meaningful test.
 
@@ -83,6 +87,8 @@ FIRMS sends no row count or content length, so **no check here proves a complete
 | **6b–6d** | out-of-order completion (failure scheduled 23:30 ending 23:46 counts; one ending 23:45:20 does not); out-of-order success (later-retrieved snapshot wins; earlier-ended failure not counted → current); midnight (day-D run failing 00:00:20 counts for D; a D+1 run does not) |
 | **6e** | `/status` streak by actual end time |
 | **7a–7d** | **GPT's case:** final `D` cut → refused; FRP cut (13 fields), invalid daynight, invalid HHMM, latitude out of range → refused with the field named; genuine zeros kept, empty FRP → null; cut between rows still passes (stated limit) |
+
+**Memory bench (rev 3):** 72/72 verified passes; 4 negative controls each FAIL (§3).
 
 **Each of 8 breaks fails the suite:** `old-limit` (1, 2a) · `no-truncation` (2c, 7b) · `no-content-check` (7a, 7b) · `scheduled-clock` — the rev-1 comparison (6a, 6b) · `no-coverage` (7) · `coverage-blind` (3) · `down-no-checkpoint` (8) · `reassess-history` (5).
 **Regressions (rev 2):** history-hub 27 · plastic-hub 11 · drifters-hub 12 · ships-fallback 7 · ships-late 7 · ships-probe 11 · orbital-hub 13 · spacetrack-probe 11 · satellites-hub 12 · place-rows 7 · duration contract — all pass. place-ui 30 (the page's `/place` answered by the rev-2 `worker.js`).
