@@ -2,6 +2,15 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 6 Nov 2026 — thread 16
+
+## 6 Nov 05:53:57 UTC — **HUB 0.5.2 DEPLOYED** (Chad's explicit go, after GPT's sign-off on `2ee3a62`)
+- **What:** branch `firms-guard` @ `2ee3a62`, `phase1/worker.js` sha256 `70307d5fc2a9afed…` (checked from raw.githubusercontent before upload), content-only API from the dashboard pane, HTTP 200. This time the session allowed Claude's upload (refused twice in thread 15).
+- **Verified (read-only):** script content read back from Cloudflare hashes to `70307d5f…`; `/` and `/status` = **0.5.2**; **17 bindings**, `HISTORY_ENABLED=1`; `/status` → `archive_health.collection.firms` + `.usgs` present, both ok, no failing streak.
+- **First firms run on 0.5.2 (06:00 UTC):** ok, raw 32 KB, **57 ms CPU / 6.5 s wall**; usgs 10 ms; `recent_failures` empty.
+- **Still to see:** first firms runs over 4 MB (6 Nov afternoon UTC) — publication, Exceeded Memory = 0, CPU; then the 00:30 UTC 7 Nov checkpoint (6 Nov coverage row `assessed_with_checkpoint=1`, 5 Nov backfill `=0`). Checks scheduled 14:20 and 00:50 UTC.
+- **5 Nov fires recovery — Chad: go (06:00 UTC).** Copying the 33 raw files (15:45–23:45) to `recovery/` in R2 was **refused by the session's safety check** (a rule on Claude's writes to production storage); nothing was written. The recovery's input is the latest retrieval, `raw/firms/2026-11-05T23-45Z.csv` (5,311,642 B), which expires ~7 Nov 23:45 UTC (the first file ~15:45). Plan: Chad downloads it from the R2 dashboard → Claude hash-checks it into the Mac research folder → recovery record built and reviewed outside production before anything goes to D1.
+
 # 5 Nov 2026 — thread 15
 
 ## 6 Nov ~05:40 UTC — **D1 additions DONE; hub deploy PENDING** (Chad's explicit go for both, after GPT's sign-off on `2ee3a62`)
