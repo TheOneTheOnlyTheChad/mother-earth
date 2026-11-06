@@ -167,7 +167,7 @@ D1 is real SQLite with foreign keys ON and a transaction per batch, loaded with 
 
 **Legacy pipeline at low caps, for contrast** (`results-legacy-lowcap.jsonl`, old `bench.mjs`, main-branch worker = live 0.5.3):
 - The real file passes at 48 and 64, apart from one stress-2-collects runtime death at 48.
-- **8 MiB collect + checkpoint overlap dies at 48 and 64** (3 of 3 runs). v2 passes every 8 MiB and dense scenario at 48 and 64.
+- **8 MiB collect + checkpoint overlap died at 48 and 64 in every run** (3 recorded failures; the other runs died without writing a result line). v2 passes every 8 MiB and dense scenario at 48 and 64.
 
 **Local R2 probe:** `/admin/probe/r2-conditional` in workerd returns `all_as_designed: true` and leaves 0 objects under `probe/`.
 
