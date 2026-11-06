@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 5 Nov 2026 — thread 15
 
+## 6 Nov — FIRMS guard fix on branch `firms-guard` (`908ff8d`), hub 0.5.2 candidate — NOT deployed
+Review: `reviews/2026-11-06-firms-guard.md` (for GPT + Chad). Limit 4 → **12 MiB**, chosen on **memory** (128 MB per isolate; held ≈ 4× file: 5.3 MB → 31 MB, 12 → 49, 16 → 62; real Worker P999 17.4 MB on ≤ 3.8 MB files) — CPU on the real 5.3 MB file 80–173 ms. Truncated rows refused. New `archive_checkpoint_coverage` table + `/status` `collection` health: every checkpoint states its input's retrieval time, latest detection, age at day end, failed runs after it and reasons; 5 Nov gets a later-assessed row (labelled). Failed runs now trigger the checkpoint step. firms-guard 10/10; 6 breaks each fail it; all hub regressions pass. **Correction:** the "00:31 firms checkpoint 243 ms" was the ships fallback in the same invocation; the firms checkpoint was written 02:16:10 on the first successful run. **Needs Chad's go:** D1 table → deploy. **Time-limited:** 5 Nov raw files expire from ~7 Nov 15:45 UTC (recovery not built).
+
 ## History trial — ON since 10:21 UTC (Chad's go)
 `HISTORY_ENABLED=1` (plain text, Production). Claude filled the form; Chad clicked "Add 1 variable and deploy" (the session's safety check blocks Claude from production-deploy clicks). Verified 10:21: 17 bindings, hub still **0.5.1**, `history.collecting:true`, `archive_health` empty. **Chad, 5 Nov: keep it on — the full day is the test.** To stop: remove the variable (Chad's click); retained history is not deleted.
 
