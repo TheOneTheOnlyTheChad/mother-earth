@@ -1,15 +1,20 @@
-# FIRMS pipeline — memory design (rev 2, 6 Nov 2026, branch `hub-health`)
+# FIRMS pipeline — memory design (rev 3, 6 Nov 2026, branch `hub-health`)
 
-> **Rev 2 (GPT's review of rev 1):** §2a (bounded `/place`), §2b (concurrency), §2c (old-format transition), §2d (manifests and verification), §2e (limits) and §3a (expiry warning) are new; Step C's failure claim, §4 and §7 are corrected. Platform facts marked *stated* in rev 2 were read from Cloudflare's R2 docs through the Cloudflare connector on 6 Nov. GPT's verdict stands until re-review: **"independent of file size" is a design target, not an established property** — §8 is how it would be established.
+**Design only.** No parser rewrite, no production write, no retention change, no deployment is authorised by this document. Brief: `docs/briefs/2026-11-06-monitoring-and-memory.md` §2. Evidence: `reviews/2026-11-06-firms-guard.md` (§3 bench, §5 truncation), `phase1/bench-firms-memory/README.md`, hub 0.5.2 `worker.js` (sha256 `70307d5fc2a9…`).
+Labels: **measured** = from those sources; **estimate** = reasoned, to be measured; ***stated*** = a Cloudflare documentation fact (R2 Workers API reference and "Upload objects", read through the Cloudflare connector on 6 Nov); **verify** = a platform behaviour to confirm in local workerd before relying on it.
 
-Brief: `docs/briefs/2026-11-06-monitoring-and-memory.md` §2. **Design only — no parser rewrite, no code, no deploy.** Evidence base: `reviews/2026-11-06-firms-guard.md` (§3 bench, §5 truncation), `phase1/bench-firms-memory/README.md`, hub 0.5.2 `worker.js` (sha256 `70307d5fc2a9…`). Figures marked **measured** come from those; **estimate** = reasoned, to be measured; **verify** = a platform fact not yet confirmed in the docs read today.
+**Rev history.** Rev 1: first draft. Rev 2 (GPT): bounded `/place`, compare-and-swap publication, legacy transition, manifests, limits, expiry warning. **Rev 3 (GPT's re-review of `2fe320b`)** — this version is rewritten as **one procedure**; earlier sections are superseded, not appended to:
+1. **Retry discovery:** separate *input ready* and *output complete* records, with bounded, concurrency-safe attempt accounting (§2, §6). Manifests are replaced by these records (§2).
+2. **Publication repair:** a run is recognised by its **identity** (`run_id`), so a retry repairs a missing counts publication without overwriting a newer run; the unconditional first write is removed (§5).
+3. **Legacy bounds:** the limits are on the actual **JSON bytes and decompressed bytes**, enforced while reading, and the legacy and new paths are tested together under overlap; nothing is inferred from the old bench (§9, §15).
+4. **Format and lifecycle:** `cells` and `by_hour` are written one entry per line so every line has a bound (§3); dense valid inputs are tested; the object layout uses only prefixes that already have lifecycle rules, and the plan says so explicitly (§3, §14).
 
 ## 0. Bottom line
-- Today's pipeline holds the **whole file several times at once**: the raw text, ~63k parsed row arrays, two full `JSON.stringify` copies, and — when a checkpoint runs inside the same collect — the previous snapshot's text **and** its fully parsed records, while `/place` keeps a third parsed copy resident for the isolate's life. That is why 12 MiB fails the two-collect case under the 128 MB cap and why the guard sits at 8 MiB (measured).
-- Streaming the CSV parse alone does not fix it: the rows array, the output strings, the checkpoint's `JSON.parse` and the `/place` cache would all still scale with the file.
-- **Proposed (smallest workable):** make the stored raw file the one input; process it from R2 as a stream; write outputs as streams in bounded parts; carry the small per-cell results (counts, hourly counts, daily fire aggregates, last observation) in a **sidecar** so the checkpoint never parses the snapshot; let `/place` scan the published file per request instead of keeping it resident. The target is peak memory set by **declared limits** — part size, maximum line length, concurrent scans, cache bytes, the grid (≤ 4,050 cells) — not by the file (§2e). Not yet established: §8. Page and API shapes stay as they are (§5).
-- Cost: a handful of extra R2 Class A operations per run only when a file is larger than one part (§7). Named, not incurred.
-- Nothing here changes retention, rewrites a completed archive, or touches previous-day closure (research-first) or recoveries from a different input (reviewed decisions).
+- Today the whole file is held several times at once (raw text, ~63k parsed rows, two JSON strings, and during a checkpoint the previous snapshot's text and full parse), while `/place` keeps another parsed copy resident (§1). Streaming the CSV alone would not change that.
+- Proposed: the stored raw file is the one input; it is processed from R2 as a stream into outputs written in bounded parts; small per-cell results go to a sidecar so the checkpoint never parses a snapshot; `/place` scans per request keeping 8 rows; run state lives in three small D1 tables so retries and repairs are found and bounded without guessing.
+- The aim is peak memory set by **declared limits** (§10), not by the file. **That is a target until §15's measurements establish it.**
+- Production changes it would need (each a separate Approve line, later): an additive D1 schema change (3 tables, §2) and a content-only deploy. **No new R2 prefix and no lifecycle-rule change** (§3, §14).
+- Cost: R2 operations scale with file size above 5 MiB and with uncached `/place` views; worked examples, not ceilings, in §14.
 
 ## 1. Where memory goes today (hub 0.5.2), stage by stage
 N = raw size (5.3 MB on 5 Nov, 63,614 rows). "Live" = still referenced when the next stage runs.
@@ -31,134 +36,193 @@ Measured consequence (local workerd, total-heap cap, verified outputs): the real
 
 **Why "stream the parser" is not enough:** if only stage 3 streamed, `rows` (stage 3), the two output strings (5), the checkpoint's parse (6) and the place cache (8) would all still grow with N. Backpressure matters too: a `tee()` of the fetch body into "upload" and "parse" buffers **without limit** behind the slower branch, so a stalled R2 upload would pull the whole file into memory anyway.
 
-## 2. Design (smallest workable)
-Five steps per run; each step's input is immutable and named, each output is written whole before anything points at it.
 
-**Step A — Fetch → raw (bounded).** Read the fetch body as a stream and write it to `raw/firms/<stamp>.csv` **without holding the file**: accumulate up to one part (P = 5 MiB: R2's minimum part size, all parts but the last the same size, max 10,000 parts — *stated*). If the stream ends within the first part → one `put` (as today). Otherwise → R2 multipart upload, one part buffered at a time; **abort** the upload on any error. While streaming: SHA-256 of the bytes (incremental), byte count, `Content-Length` if FIRMS sends one (**verify** — unknown today; if present, a short body is a detected truncation, which closes part of §6's gap). These go into the run's **manifest** (§2d) — with multipart they cannot go into the object's own metadata, which is fixed before streaming starts. Key: unique per run (§2b). Peak: P + stream buffers. R2 `put` needs a stream of known length (*stated*), which is why the bounded-part approach is used rather than piping the response straight in.
+## 2. Run state: three D1 tables (replace rev 2's manifests)
+Rev 2 made a manifest written *after* processing the only thing retries could find, so a raw file stored by a run that then failed was invisible to retries (GPT). Rev 3 records each stage when it finishes, in D1, where unique keys make concurrent writers safe. **No `manifests/` prefix is used** (rev 2's is withdrawn).
 
-**Step B — Raw → snapshot (streaming parse + streaming write).** Re-open `raw/…csv` from R2 as a stream (`TextDecoderStream` → line splitter with a carry buffer for a line split across chunks). Per line: today's checks unchanged (`firmsRowProblem`, field count). For each valid row, **emit** it straight into the output writer as one JSON array on its own line; keep only:
-- `cells` (≤ 4,050 entries), `byHour` (≤ 24 × cells touched), and the **daily sidecar**: per cell `n, frpSum, frpMax, frpN, day, night` (exactly `firesDaily`'s fields) + `last_observation_at` + `records` count.
-The output is the same envelope written in this order: header fields → `"record_fields"` → `"records":[` + one row per line + `]` → `"cells"` → `"by_hour"` → closing fields. Still one valid JSON object; only the key order changes. Written to `snapshots/firms/<stamp>.json` through the same bounded writer as step A (single put if ≤ P, else multipart; abort on error). A malformed row → abort the upload, `writeDown` as today, nothing published. Peak: one input chunk + one output part + the small maps — **independent of N**.
+```sql
+-- "raw input ready": written once the raw object is complete and its size verified by head()
+CREATE TABLE IF NOT EXISTS firms_inputs (
+  run_id TEXT PRIMARY KEY,            -- <scheduled stamp>-<retrieved ms>-<6 random chars>; unique per invocation
+  raw_key TEXT NOT NULL UNIQUE,       -- raw/firms/<run_id>.csv
+  scheduled_at TEXT NOT NULL, retrieved_at TEXT NOT NULL,
+  bytes INTEGER NOT NULL, sha256 TEXT NOT NULL, content_length INTEGER,   -- content_length null when FIRMS sent none
+  created_at TEXT NOT NULL, collector_version TEXT NOT NULL);
+-- "processed output complete": written once snapshot + sidecar are complete and size-verified
+CREATE TABLE IF NOT EXISTS firms_outputs (
+  run_id TEXT PRIMARY KEY REFERENCES firms_inputs(run_id),
+  snapshot_key TEXT NOT NULL, snapshot_bytes INTEGER NOT NULL, records INTEGER NOT NULL,
+  aux_key TEXT NOT NULL, aux_bytes INTEGER NOT NULL, format TEXT NOT NULL,   -- 'lines/1'
+  completed_at TEXT NOT NULL,
+  latest_at TEXT, cells_at TEXT,      -- when this run's latest/ and latest-cells/ publications succeeded (null until then)
+  superseded_at TEXT);                -- a newer run owns latest/: this run will not publish
+-- attempt accounting: one row per attempt to process (step B) or publish (step C) a given input
+CREATE TABLE IF NOT EXISTS firms_attempts (
+  run_id TEXT NOT NULL REFERENCES firms_inputs(run_id),
+  attempt INTEGER NOT NULL,           -- 1, 2, 3 — the bound
+  invocation TEXT NOT NULL, started_at TEXT NOT NULL, finished_at TEXT, outcome TEXT, note TEXT,
+  PRIMARY KEY (run_id, attempt));
+```
+- **Claiming an attempt is the concurrency guard:** `INSERT INTO firms_attempts (run_id, attempt, …) SELECT ?, COALESCE(MAX(attempt), 0) + 1, … FROM firms_attempts WHERE run_id = ? HAVING COALESCE(MAX(attempt), 0) < 3`. Two invocations that try at the same moment compute the same number; the primary key lets one insert succeed and the other fail, and the loser does nothing. At most 3 attempts per input, ever (the original + 2 retries).
+- An attempt that never records `finished_at` (the invocation died) still counts toward the bound. An unfinished attempt younger than 15 min blocks a new claim (it may still be running); older ones do not.
+- `firms_outputs` is `INSERT OR IGNORE`: if two attempts on the same input both finish, the first record stands; the second attempt's objects are never referenced and expire with their prefix (§3).
+- These tables replace nothing that exists today; `collector_runs` keeps one row per invocation as now (health checks and coverage read it unchanged). Rows per run: ≤ 1 input + ≤ 1 output + ≤ 3 attempts.
 
-**Step C — Validate, then publish.** Read back the snapshot's metadata (`head()`: size) and check it against what was written (bytes and record count counted while streaming, raw sha256 — all held in the run's manifest, §2d). Then, in today's order:
-1. `snapshots-aux/firms/<stamp>.json` — the sidecar (small; carries `raw_sha256`, `snapshot key`, `retrieved_at`, `records`).
-2. `cells/firms/<stamp>.json`, then `latest/firms.json` = a **stream copy** of the snapshot (`get` → `put` of a body whose length is known from the object size; **verify** that an `R2ObjectBody` stream satisfies the known-length rule, otherwise a `FixedLengthStream` of that size). There is no server-side copy in the Workers binding (*stated*: methods are head/get/put/delete/list/multipart).
-3. `latest-cells/firms.json` last (small) — readers pair records and counts by `retrieved_at` (`/place` withholds a mismatch), as today.
-4. Ordering is enforced by a compare-and-swap, not a check-then-write — §2b.
-If the `latest/` write fails, `latest/` still holds the last good snapshot (a `put` is all-or-nothing) and `latest-cells/` is not advanced: the pair stays consistent. **If the `latest-cells/` write fails after `latest/` succeeded, the pair is mismatched** (records new, counts old) until the next successful step C. Two objects cannot be written atomically; readers already pair on `retrieved_at` (`/place` withholds the section; the page keeps its last good pair), so the mismatch is visible and safe, not hidden (corrected in rev 2; §4 row C3 already said so). The run is logged `down` with the step named.
+## 3. Objects and format
+| Object | Key | Written by | Lifecycle (existing rules) |
+|---|---|---|---|
+| raw CSV | `raw/firms/<run_id>.csv` | step A | `raw/` — 2 days (unchanged) |
+| snapshot | `snapshots/firms/<run_id>.json` | step B | `snapshots/` — 2 days (unchanged) |
+| sidecar | `snapshots/firms-aux/<run_id>.json` | step B | `snapshots/` — 2 days (unchanged; outside the `snapshots/firms/` listing the checkpoint uses) |
+| cells file | `cells/firms/<run_id>.json` | step C | `cells/` — 2 days (unchanged) |
+| published | `latest/firms.json`, `latest-cells/firms.json` | step C (CAS, §5) | none — kept until replaced (unchanged) |
+| checkpoint | `archive/checkpoints/firms/<day>.json.gz` | step D | none — kept (unchanged) |
+**No new prefix, no lifecycle-rule change, no `manifests/`.** Incomplete multipart uploads are aborted by R2 after 7 days by default (*stated*); every failed write also calls `abort()`.
+Custom metadata on `latest/` and `latest-cells/`: `run_id`, `retrieved_at`, `format` (well under R2's 8,192-byte metadata cap, *stated*). Multipart objects cannot carry final hashes in their own metadata (it is fixed before streaming starts) — the hashes and counts live in D1 (§2).
 
-**Step D — Checkpoint without parsing.** For a closed day, choose the input exactly as today (latest full `retrieved_at` on that day among retained snapshots; marker checked first, written last). Then:
-- **stream** the snapshot through `CompressionStream('gzip')` into `archive/checkpoints/firms/<day>.json.gz` with the bounded writer (gzip output length is unknown in advance → bounded parts, never a whole-buffer `gzipText`);
-- `fires_daily` rows and the coverage's `last_observation_at` come from the **sidecar**, which must name the same snapshot key and `retrieved_at` (and raw sha256) — a mismatch stops the checkpoint (retried next run);
-- no sidecar (snapshots written before this change, or a lost sidecar write): rebuild it with **one streaming pass** over the snapshot (our own one-row-per-line format makes this a line scan), never a `JSON.parse` of the whole file. Before this change lands, old snapshots use today's path, which stays behind the 8 MiB guard.
-- D1 writes, coverage before marker, marker last — unchanged.
+**Format `lines/1` — every line has a bound.** The writer emits the envelope as valid JSON in which each line holds exactly one of: one top-level field with a scalar or a small object (header fields: version, times, scope, quantity, coverage_default, window_rule …), one `records` row, one `cells` entry (`"12_34":{"count":7,"coverage":{…}}`), one `by_hour` entry (one cell's count inside its hour's object, `"12_34":5`), or structural punctuation. Order: header fields → `record_fields` → `records` → `cells` → `by_hour`.
+- **Line limit 4 KiB, enforced by both writer and reader.** The writer fails the run if any line it would emit exceeds it (no header field comes close: the longest today is `window_rule`, ~170 B). The reader fails if it meets a longer line and never buffers past it.
+- **`by_hour` keeps its shape.** Rev 2 would have written each hour's object on one line, which exceeds 4 KiB in a busy hour (hundreds of cells). `lines/1` writes `"by_hour":{`, then for each hour `"2026-11-06T08":{`, one `"12_34":5,` line per cell, and `},` — the same nested object, one cell entry per line.
+- **Dense bound:** grid 45 × 90 = 4,050 cells; a `day_range=1` file covers ≤ 24 hours → ≤ 4,050 `cells` lines and ≤ 97,200 `by_hour` lines. The in-memory maps behind them are bounded by the same numbers (§10).
+- Any `JSON.parse` consumer (the page, `/snapshot/firms`) sees the same object; only key order and whitespace differ from today (§12).
+
+## 4. One run, start to finish
+Each step's input is immutable and named; each step records completion in D1 before the next depends on it.
+
+**Step A — fetch → raw.** Stream the response body. Buffer at most one part (P = 5 MiB, R2's minimum part size; all parts but the last equal; ≤ 10,000 parts — *stated*). Ends within the first part → one `put`; otherwise multipart, one part buffered at a time, `abort()` on any error. While streaming: incremental SHA-256, byte count, and `Content-Length` if sent (**verify** whether FIRMS sends it; if it does, a short body is a detected truncation). After completion: `head()` size must equal the byte count. Then insert `firms_inputs` (input ready). Peak: one part + stream buffers.
+
+**Step B — raw → snapshot + sidecar.** Claim an attempt (§2). Stream `raw/…` from R2 through `TextDecoderStream` and a line splitter (carry ≤ 4 KiB). Per line: today's checks unchanged (`firmsRowProblem`, field count). Each valid row is written straight into the `lines/1` snapshot writer (bounded parts, as step A) and folded into small maps: `cells`, `by_hour`, and the sidecar's per-cell day aggregates (`n, frpSum, frpMax, frpN, day, night` — exactly `firesDaily`'s fields) plus `last_observation_at` and `records`. After the rows: `cells` and `by_hour` lines; complete the upload; write the sidecar (small; `put`). `head()` sizes must match. Insert `firms_outputs` (output complete). Any malformed row or line over the limit → `abort()`, attempt `outcome = 'failed'`, `writeDown` as today; nothing published. Peak: one input chunk + one output part + the maps (§10).
+
+**Step C — publish** (§5). **Step D — checkpoint** (§7). **Step E — readers** (§8).
+
+**Where each run starts:** a scheduled run first looks for unfinished work (§6) and does at most one piece of it, then fetches. A manual `/admin/run/firms` behaves the same.
+
+## 5. Publication: compare-and-swap with run identity
+`latest/firms.json` (records) and `latest-cells/firms.json` (counts) are the two shared objects. Each carries `run_id` and `retrieved_at` in custom metadata. R2 `put` accepts `onlyIf: { etagMatches }` and returns `null` without storing when the condition fails (*stated*).
+
+**Ordering rule:** an object belongs to the newer run by `retrieved_at`; equal `retrieved_at` with a different `run_id` is ordered by `run_id` (deterministic). A **legacy** object (no `run_id` metadata — everything written before this change) is older than our run if its `head().uploaded` is earlier than our `retrieved_at` (a file is uploaded after it was retrieved, so an earlier upload means an earlier retrieval); otherwise it is treated as newer. No body read is needed.
+
+**C1 — records (`latest/`)**, up to 3 rounds:
+1. `h = head(latest/firms.json)`.
+2. `h` is **ours** (`run_id` equal) → C1 already done (this is the repair path) → go to C2.
+3. `h` is **newer** than ours → set `firms_outputs.superseded_at`, stop: the newer run owns publication. (Its own C2 publishes its counts.)
+4. `h` is older → `put(latest/…, stream copy of our snapshot, { onlyIf: { etagMatches: h.etag }, customMetadata })`. `null` → another writer won between 1 and 4 → next round. Success → `latest_at` in D1.
+5. `h` is **absent** (empty bucket) → create-only `put` with `onlyIf: { etagDoesNotMatch: "*" }`. R2 says conditional headers other than `If-Range` are supported (*stated*); the `*` form is **verify** in local workerd. **If it cannot be verified, the run refuses to publish** and logs "no latest/firms.json: one-time seeding needed" — **there is no unconditional first write** (rev 2's fallback removed). Production already has both objects, so this path only matters for a fresh bucket; seeding would be its own Approve line.
+After 3 lost rounds → `outcome = 'contended'`; the attempt ends; nothing is overwritten.
+
+**C2 — counts (`latest-cells/`)**, only once `latest/` holds ours, up to 3 rounds:
+1. `hc = head(latest-cells/firms.json)`.
+2. `hc` is ours → done.
+3. `hc` is newer than ours → stop. This includes a newer **down** run's cells file (today's `writeDown` replaces `latest-cells/` with a down envelope; that stays, and goes through the same CAS): the newer information is that the source is down, and the page shows that, as it does today.
+4. `hc` older → `put(…, { onlyIf: { etagMatches: hc.etag } })`; `null` → next round. Success → `cells_at` in D1.
+
+**Repair after a partial publication (GPT's case).** C1 succeeded, C2 failed (`latest_at` set, `cells_at` null). The retry (§6) re-enters C: C1 step 2 sees **its own** `run_id` on `latest/` — it does not "skip because equal", it recognises the same run — and proceeds to C2, which writes only the counts, conditional on the etag it just read. If a newer run published meanwhile, C1 step 3 stops the repair and nothing is overwritten. Between the failure and the repair the pair is mismatched; readers already pair on `retrieved_at` (`/place` withholds the firms section; the page keeps its last good pair), so the mismatch is visible and safe.
+
+**`writeDown` and other writers** of `latest-cells/` (and `/ingest`, which does not publish firms) use the same CAS and metadata from this change on, so every writer of a shared object obeys one rule.
+
+## 6. Retries: discovery, bound, concurrency
+At the start of each run, one query finds at most one piece of unfinished work, newest first:
+- **Unprocessed input:** a `firms_inputs` row with no `firms_outputs` row, fewer than 3 attempts, no unfinished attempt younger than 15 min, `retrieved_at` newer than the current `latest/` (`head()` metadata, legacy rule as §5), and its raw object still present (`head()`, it may have expired) → claim an attempt, run step B, then C.
+- **Unpublished or half-published output:** a `firms_outputs` row with `latest_at` or `cells_at` null, not `superseded_at`, fewer than 3 attempts → claim an attempt, run step C (the repair path in §5).
+- Older unfinished work behind a newer publication is never retried: it would only be superseded (C1 step 3). It stays recorded in D1 with its attempts.
+- Every attempt is recorded (`invocation`, times, `outcome`, `note`) and also logged in `collector_runs` as today, with the `run_id` and attempt number in the note — so `/health/*` and coverage see retries like any run.
+- Not included: re-processing a **different** input for a closed day (a historical recovery — reviewed decision), previous-day closure (research-first, R11), extending retention.
+
+**Warning before inputs expire** (built and tested with this change; extends `/health/archive/firms`): a reason when (a) a **pending** checkpoint day's newest retained snapshot is older than 36 h (12 h before the 2-day rule removes it), or (b) an unprocessed input that is still the newest is older than 36 h. The reason names the key and its expiry time. No retention is extended automatically; copying to `recovery/` stays an Approve-line decision.
+
+## 7. Checkpoint (step D) without parsing
+For a closed day, input selection is unchanged (latest full `retrieved_at` on that day among retained snapshots in `snapshots/firms/`; marker checked first, written last; `INSERT OR IGNORE`; completed days never rewritten).
+- **New-format input** (`firms_outputs` row, `format = 'lines/1'`): stream the snapshot through `CompressionStream('gzip')` into the checkpoint object with the bounded writer (gzip length is unknown in advance, so bounded parts, never a whole-buffer `gzipText`); `fires_daily` and the coverage's `last_observation_at` come from the sidecar, whose `run_id` must match the snapshot's; mismatch or a missing sidecar → rebuild the sidecar with one streaming line pass over the snapshot (§3 makes that a line scan), never `JSON.parse`.
+- **Legacy input:** §9.
 Peak: one gzip part + chunk buffers + the sidecar.
 
-**Step E — `/place` and `/snapshot` while all this runs.**
-- `/snapshot/firms`: unchanged (streams the stored object).
-- `/place`: drop the resident full index — replaced in rev 2 by §2a (bounded selection, not "every row of the cell").
-- Records and counts still paired by `retrieved_at`; withheld on mismatch, as today.
+## 8. Readers (step E)
+- `/snapshot/firms`: unchanged — streams the stored object.
+- `/place` firms section: stream `latest/firms.json` (new format) and keep, for the asked cell, a **fixed 8-slot top list by `observed_at`** (ties in today's sort order) and a **count**. Answer shape unchanged: `records` (8, newest first), `records_total`, `count`, `cell`. Memory: 8 rows + one chunk + the line carry — independent of the cell and the file.
+- Records and counts paired by `retrieved_at`; withheld on mismatch (unchanged).
+- Answer cache keyed by `(etag, cell)`, capped at **256 KB** total (LRU by bytes); cleared when the etag changes.
+- At most **2** concurrent firms scans per isolate; a third waits up to 2 s, then the firms section answers `unavailable` ("busy, try again"). No unbounded queue.
 
-## 2a. `/place` with a fixed memory bound (rev 2, GPT)
-Rev 1 kept every matching row of the asked cell, which grows with a busy cell. But the firms section only ever **returns** `PLACE.listMax` = 8 records (newest first) plus `records_total`.
-- Per request: stream `latest/firms.json`; for the asked cell keep a **top-8 by `observed_at`** (ties broken by the existing sort's order) in a fixed 8-slot buffer, and a **count**. Memory = 8 rows + one chunk + the line carry (§2e) — independent of the cell and the file.
-- Answer shape unchanged: `records` (8, newest first), `records_total`, `count`, `cell`. Plastic is not a FIRMS concern (its records are small and capped by the source file); unchanged.
-- Cache: keyed by `(etag, cell)`, storing only that answer (≈ 8 rows ≈ 1 KB), capped by **bytes** (e.g. 256 KB total, LRU), not by entry count. Cleared when the etag changes.
-- **Concurrent scans** are capped per isolate (e.g. 2). A request over the cap waits up to a short bound, then answers the firms section as `unavailable` ("busy, try again") — never an unbounded queue of full scans.
+## 9. Legacy objects: bounded by their real sizes, not by the CSV guard
+GPT's point: the 8 MiB guard limits the **CSV**; the JSON written from it is larger (GPT's valid synthetic file: JSON ≈ **1.48 ×** the CSV), and a checkpoint is gzip-compressed, so its **decompressed** size is what a reader holds. Rev 2 inferred safety from the guard; rev 3 enforces limits on the bytes actually read.
+- **Where legacy objects appear:** `snapshots/firms/` (gone within 2 days of the switch by the existing rule), `latest/` (replaced by the first new publication, normally within 15 minutes), archived `archive/checkpoints/firms/*.json.gz` (kept for good; read only by coverage backfill, which reads them only when a coverage row is missing — today none is missing for firms).
+- **Limits enforced while reading** (abort before parsing, never after):
+  - legacy JSON (snapshot or `latest/`): `head().size` ≤ **L_json**; refused otherwise;
+  - legacy checkpoint: compressed size from `head()`, then decompression through a counting stream that **aborts at L_json decompressed bytes**, before `JSON.parse`.
+  - **L_json is set from measurements, not from the guard:** (1) the largest legacy snapshot and checkpoint actually stored (one read-only R2 listing — sizes only; checkpoints decompressed in the workspace), (2) the ratio JSON/CSV on the real 5 Nov file and on dense synthetic files, (3) the bench below at that limit. The working proposal is **L_json = 12 MiB** (8 MiB × 1.48 ≈ 11.8 MiB, rounded up) **only if** (3) passes.
+- **Bench (new, local workerd, outputs asserted):** at L_json, the legacy paths (legacy `latest/` in `/place`, legacy snapshot checkpoint, legacy checkpoint backfill) **overlapping** the new paths (a new-format collect + publish, a new checkpoint, `/place` scans at the concurrency cap) in one isolate, at total-heap caps 80 and 128 MB, 3 runs each; plus negative controls (an object 1 byte over L_json is refused with nothing parsed). If it fails at L_json, L_json comes down and anything above it is refused — the transition never parses an unbounded legacy object.
+- A refused legacy object leaves the previous state standing (the last good `latest/`, or a checkpoint attempt that records the refusal and is retried / becomes a gap by the existing rules).
 
-## 2b. Concurrent publication and overlapping invocations (rev 2, GPT)
-Rev 1's "check `retrieved_at`, then write" is a race: an older run can check, pause, and overwrite a newer publication.
-- **Unique keys for everything a run writes privately:** `raw/firms/<stamp>-<retrievedMs>-<rand6>.csv`, `snapshots/firms/<stamp>-<retrievedMs>-<rand6>.json`, sidecar and manifest likewise. Two invocations for the same scheduled minute (cron + manual, or a retry) can never write the same key. Readers that list a day's snapshots already choose by full `retrieved_at` (unchanged).
-- **Compare-and-swap for the shared keys** (`latest/firms.json`, `latest-cells/firms.json`): R2 `put` accepts `onlyIf: { etagMatches }` and returns `null` without storing when the condition fails (*stated*). Procedure:
-  1. `head(latest/firms.json)` → current etag E and its `retrieved_at` (kept in the object's custom metadata from now on).
-  2. If current `retrieved_at` ≥ ours → do not publish (we are older); log "superseded", success for monitoring purposes is the newer run's.
-  3. Else `put(latest/…, body, { onlyIf: { etagMatches: E } })`. `null` → someone published between 1 and 3 → go back to 1 (at most 3 rounds, then log "contended" and leave the newer publication standing).
-  4. Same CAS for `latest-cells/` against its own etag, with the rule that it only advances to the `retrieved_at` now in `latest/`.
-  An older run therefore cannot overwrite a newer publication: either its condition fails, or it sees the newer `retrieved_at` first.
-- First publication (no object yet): `onlyIf: { etagDoesNotMatch: "*" }` is the create-only form of the standard conditional headers R2 supports (*stated* that conditional headers other than `If-Range` are supported; the `*` form specifically — **verify** in local workerd before relying on it; the fallback is the old unconditional first write, which happens once).
-
-## 2c. The old-format transition (rev 2, GPT)
-Snapshots written before this change are compact JSON (all records on one line), not one-record-per-line. They must never be scanned as lines.
-- New objects carry `customMetadata.format = "lines/1"`; anything without it is **legacy**.
-- **Legacy objects are bounded by construction:** every legacy snapshot and `latest/` was produced under the 8 MiB guard (0.5.2 parses nothing larger), and the legacy path for them is exactly today's verified one (72/72 bench passes at 5.3 MB and 8 MiB). So the fallback is "today's code, only for legacy objects, which are all ≤ 8 MiB" — it does not recreate an unbounded problem. A legacy object over 8 MiB is refused (logged), not parsed.
-- Where legacy objects appear: `snapshots/firms/` (gone within 2 days by the lifecycle rule), `latest/` (until the first new publication — minutes), archived checkpoints (`archive/checkpoints/firms/*.json.gz`, kept; read only by coverage backfill, which already has its 3-per-run cap). `/place` and the checkpoint branch on `format`.
-- Legacy archived checkpoints stay as they are (never rewritten).
-
-## 2d. Hashes, counts and when they are known (rev 2, GPT)
-With multipart, custom metadata is fixed at `createMultipartUpload` — **before** the content is streamed — so the final sha256, byte count and record count cannot go into the object's own metadata. (Custom metadata is also capped at 8,192 bytes, *stated*.)
-- Each run writes a small **manifest** last: `manifests/firms/<run-id>.json` = `{raw: {key, bytes, sha256, content_length}, snapshot: {key, bytes, sha256, records, format}, sidecar: {key, sha256}, retrieved_at, collector_version, state: "complete"}`. Single-put objects may also carry their hashes in metadata; the manifest is the one place that always has them.
-- **The manifest is the commit record.** Steps C (publication), D (checkpoint) and retries only use a snapshot that has a complete manifest whose sizes match `head()` of each object. An object without a manifest is an unfinished run: ignored, expired by its prefix's lifecycle rule.
-- Verification after writing: compare `head().size` with the bytes counted while streaming (cheap, every run). A full read-back re-hash costs one more Class B read and one more pass of CPU; proposed only for the raw object, and only when `Content-Length` was absent (when it is present, the byte count already matches it).
-- Incomplete multipart uploads are aborted by R2 after 7 days by default (*stated*); a failed run also calls `abort()` itself.
-
-## 2e. Declared limits (rev 2, GPT)
-| Limit | Proposed | On breach |
+## 10. Declared limits
+| Limit | Value | On breach |
 |---|---|---|
-| Part size (all streams) | 5 MiB | — (R2 minimum) |
-| Maximum line length (CSV and our line format) | 4 KiB (real FIRMS rows ≈ 80 B) | the run fails "line too long" — never buffers further |
-| Concurrent `/place` scans per isolate | 2 | §2a "busy" answer |
-| `/place` answer cache | 256 KB total, LRU | evict |
-| Cells, hours | grid ≤ 4,050 cells; ≤ 24 h per file | structural |
-| Legacy parse path | 8 MiB (today's guard) | refuse |
-| Raw size the new path accepts | **no new guard proposed until §8's measurements**; the 8 MiB guard stays in force until then | — |
-Peak per collect ≈ 2 × part + chunk buffers + line carry + the small maps; peak per `/place` ≈ chunk + carry + 8 rows. These are arithmetic from the limits, **to be measured** (§8), not results.
+| Part size (every stream written) | 5 MiB | — (R2 minimum) |
+| Line length (CSV in, `lines/1` out, `lines/1` read) | 4 KiB | run fails "line too long"; the reader never buffers further |
+| Cells | ≤ 4,050 (grid) | structural |
+| `by_hour` entries | ≤ 24 × 4,050 = 97,200 | structural |
+| Attempts per input | 3 | no further claims; recorded |
+| Publication CAS rounds | 3 per step | `contended`; nothing overwritten |
+| Concurrent `/place` firms scans per isolate | 2 (+2 s wait) | "busy" |
+| `/place` answer cache | 256 KB | LRU eviction |
+| Legacy JSON / decompressed checkpoint | L_json (§9; 12 MiB proposed, to be measured) | refused before parsing |
+| Raw CSV accepted by the new path | the 8 MiB guard stays until §15 measures the new path | — |
+Peak per collect ≈ 2 × part + chunk buffers + 4 KiB carry + the maps (dense worst case: 4,050 cell objects + 97,200 `by_hour` counters + 4,050 sidecar aggregates — **estimate** a few MB; measure on the dense file). Peak per `/place` scan ≈ chunk + carry + 8 rows. **These are arithmetic from the limits, not results.**
 
-## 3. Retries of the same retained input (bounded, idempotent)
-- The unit of work is **one raw object** (`raw/firms/<stamp>.csv`, sha256 in its metadata). Steps B–C can be re-run on it without fetching again.
-- **When:** if step B or C fails, the next scheduled run first retries the **most recent** unprocessed raw — only if no newer raw has been processed since (a newer success supersedes it), at most **2** retries per raw, and only while the raw is retained (2-day rule, unchanged; no retention is extended).
-- **Idempotent:** outputs are keyed by the raw's stamp; a snapshot already complete for that raw (custom metadata `raw_sha256` matches and the sidecar exists) is reused, not rewritten; publication applies the ordering guard; checkpoints keep marker-first / marker-last and never rewrite a completed day (`INSERT OR IGNORE`, object keyed by day, already-done check first).
-- **Record:** each attempt is a `collector_runs` row whose note names the raw stamp and the attempt number, so the health checks and coverage see it like any run.
-- Retries pick inputs by **manifest** (§2d), never by a guessed key.
-- Not included: re-processing a **different** input for a closed day (that is a historical recovery — a reviewed decision), and previous-day closure (research-first, R11).
-
-## 3a. Warning before a retry input expires (rev 2, GPT)
-- Retained inputs expire by the R2 lifecycle rules (`raw/`, `snapshots/`: 2 days, unchanged). A retry, or a pending checkpoint, can only use an input while it exists.
-- Proposed: the archive health check (`/health/archive/<layer>`) adds a reason when a **pending** day's newest retained input is within **12 h** of its 2-day expiry (age > 36 h), naming the key and its expiry time — so Chad hears about it while a recovery from the same input is still possible. Built and tested with the memory change, not in the monitoring branch.
-- No retention is extended automatically; extending it (e.g. copying to `recovery/`) stays a reviewed decision with an Approve line, as on 6 Nov.
-
-## 4. Failure halfway through each stage
-| Fails during | What remains | What the reader sees | Next run |
+## 11. Failure part-way through each stage
+| Fails during | What remains | Reader sees | Next |
 |---|---|---|---|
-| A (fetch/raw upload) | multipart aborted; no raw object (or none completed) | last good publication | fresh fetch |
-| B (parse/snapshot write) | raw kept; snapshot upload aborted | last good publication | bounded retry of that raw (§3) or newer fetch |
-| C1 sidecar | snapshot exists, not published | last good | retry from step C (snapshot reused) |
-| C2 latest copy | `latest/` unchanged (put is all-or-nothing) | last good, consistent pair | retry C |
-| C3 latest-cells | `latest/` new, `latest-cells/` old → **mismatched pair** (not consistent; Step C text corrected in rev 2) | `/place` withholds firms; page pairs on `retrieved_at` (`refreshPair`) and keeps the last good pair | retry C3 (idempotent, CAS) |
-| C (CAS lost) | a newer run published in between | the newer publication | nothing to do; logged "superseded" |
-| any (manifest not written) | objects without a manifest | last good publication | ignored; expired by lifecycle |
-| D gzip/archive | archive upload aborted; no marker | — | retried next run; gap only after the 2-day retention rule, as today |
-| D sidecar mismatch | no marker | — | sidecar rebuilt by a streaming pass, then retried |
-| E `/place` read | — | firms section `unavailable`/`withheld` | — |
+| A fetch / raw upload | multipart aborted; no `firms_inputs` row | last good publication | fresh fetch next run |
+| A after upload, before the D1 insert | a raw object with no input record | last good | not retried (unknown to D1); expires in 2 days; the next fetch supersedes it |
+| B parse / snapshot / sidecar | input recorded; no output; attempt `failed` | last good | §6 retry (≤ 3 attempts) while it is the newest input |
+| B done, D1 output insert fails | objects without an output record | last good | §6 retry re-runs B (objects keyed by `run_id`; second write replaces the first unreferenced copy) |
+| C1 `latest/` | output recorded; `latest_at` null | last good, consistent | §6 retry → C |
+| C1 CAS lost / newer run | `superseded_at` or `contended` | the newer run | nothing; never overwritten |
+| C2 `latest-cells/` | `latest/` ours, counts old → **mismatched pair** | `/place` withholds firms; page keeps its last good pair | §6 repair (C1 recognises ours → C2 only) |
+| D gzip / archive / marker | no marker | — | retried next run; a gap only by the existing 2-day rule |
+| D sidecar mismatch / missing | no marker yet | — | sidecar rebuilt by a line pass, then retried |
+| Legacy object over L_json | refusal recorded | previous state | stays refused; a gap if a checkpoint cannot complete in time |
+| E `/place` scan | — | firms section `unavailable` / `withheld` | — |
 
-## 5. Page and API behaviour
-- **Unchanged:** every URL; the envelope's fields and their meaning; `records` row shape and `record_fields`; `/snapshot/firms` bytes are valid JSON with the same content; `/place` answer shape; `/status`; the new `/health/*`.
-- **Changed, explicitly:** key order inside the envelope (records before cells and by_hour); whitespace (one row per line). Any consumer using `JSON.parse` is unaffected; a consumer relying on key order or exact bytes would be — none known (the page parses JSON). Two new R2 prefixes: `snapshots-aux/firms/` (needs the 2-day lifecycle rule like `snapshots/` — **a production setting, needs Chad's go**) and multipart uploads (aborted ones are cleaned up by R2; **verify** the default abort/expiry behaviour for incomplete uploads).
-- Envelope gains: `raw_sha256`, `raw_bytes` (already present), `content_length` (if FIRMS sends one).
+## 12. Page and API behaviour
+- **Unchanged:** every URL; the envelope's fields and meaning; `records` row shape and `record_fields`; `by_hour` and `cells` shapes; `/snapshot/firms` is valid JSON with the same content; the `/place` answer shape; `/status`; `/health/*`.
+- **Changed, explicitly:** key order and whitespace inside the snapshot JSON (`lines/1`); new custom metadata on the two published objects; new D1 tables; `/place` may answer the firms section "busy" under load. Any `JSON.parse` consumer is unaffected; a consumer relying on key order or exact bytes would be — none known.
 
-## 6. Truncation and record counts (unchanged limits)
+## 13. Truncation and record counts (unchanged limits)
 - FIRMS sends no row count. A response cut **exactly between rows** is still undetectable by content checks. If FIRMS sends `Content-Length`, a short body becomes detectable (step A) — to be measured, not assumed.
 - A drop in record count versus the previous publication is an **anomaly signal**, recorded in the run note and the sidecar (`records_previous`, `delta`), **never** a reason to refuse: FIRMS legitimately removes passes (6 Nov: two whole passes, 344 + 145 detections, removed between 10:45 and 12:45 UTC; 5 Nov: 23 rows removed).
 
-## 7. Cost (named before anything is incurred)
-- Files ≤ one part (P ≈ 5 MiB): R2 operations per run as today (raw, snapshot, cells, latest, latest-cells: 5 Class A) **+1** (sidecar) **+1 Class B** (the read-back of raw in step B) **+1 Class B** (latest copy reads the snapshot).
-- Files > P: each multipart upload = create + parts + complete (Class A). At 10 MB: raw 4 + snapshot ~4 + checkpoint (once a day) small. Roughly **+10 Class A per run** at that size → 96 runs/day ≈ 29,000/month.
-- R2 (*stated*, pricing page read 6 Nov): Class A 1 M/month free then **$4.50/M**; Class B 10 M/month free then **$0.36/M**; list is Class A. Whether the account stays inside the free 1 M depends on today's total, **which has not been measured** — read the R2 usage page before building. Worst case at 10 MB files: ~29,000 extra Class A ≈ **$0.13/month** if already over the free tier.
-- **Per-visitor reads (rev 2, GPT):** the $0.13 above is **an example for the stated collector workload, not a cost ceiling.** Each uncached `/place` request adds one R2 Class B read of `latest/firms.json` and one scan of it in CPU. Formula: extra Class B per month ≈ uncached place requests per month (Class B: 10 M/month included, then $0.36/M, *stated*); extra CPU ≈ uncached requests × scan time (to be measured; 30 M CPU-ms/month included, then $0.02 per million ms). At 10,000 uncached place views a month that is ~10,000 Class B (inside the free 10 M) and, if a scan were 100 ms, 1 M CPU-ms (inside the included 30 M). The cache and the scan cap bound bursts, not monthly totals; current visitor numbers are not measured.
-- CPU: a streaming parse costs about what today's parse costs (80–173 ms on 5.3 MB, measured in the pane) plus the `/place` per-request scan; inside the 30 M ms included on Workers Paid at today's traffic (**estimate**).
+## 14. Cost, lifecycle and approval scope
+**Lifecycle.** Every object this design writes sits under a prefix that already has a 2-day rule (`raw/`, `snapshots/`, `cells/`) or is already kept by design (`latest/`, `latest-cells/`, `archive/checkpoints/`). **No new prefix, no rule added or changed.** Rev 2's `manifests/` prefix is withdrawn (§2); rev 2's `snapshots-aux/` becomes `snapshots/firms-aux/`, inside the existing `snapshots/` rule. R2's default 7-day abort covers incomplete multipart uploads (*stated*).
 
-## 8. Verification plan (before any deploy; outputs asserted, not survival)
-**Inputs:** the real 5 Nov file (5,311,642 B, sha256 `c3487dcc…`, on the Mac); scale-ups of its own rows to 8 MiB, 16, 32 and 64 MiB (to show memory is flat in N); a file with the 23 duplicate lines; a header-only file; files cut mid-row and between rows.
-**Equivalence (correct contents):** for each input, the new pipeline's `latest/firms.json` parsed = today's `firmsParse` envelope parsed (records deep-equal in order; `cells`, `by_hour` equal); sidecar = today's `firesDaily` on the same envelope; checkpoint object gunzipped = the snapshot bytes; `fires_daily` rows and coverage equal to today's; `/place` firms sections equal for every cell with records (incl. the busiest).
-**Overlap:** two collects + a checkpoint + `/place` (cold and warm) + `/snapshot` in one isolate; both collects complete; final pair consistent. **Race (rev 2):** an older run paused between its check and its write while a newer run publishes → the older run's CAS fails and the newer publication stands (deterministic test with a controllable R2 stub); two invocations for the same minute write distinct raw/snapshot keys.
-**Transition (rev 2):** a legacy `latest/` and legacy snapshots read through the legacy path; a legacy object over 8 MiB refused; a new object without `format` never line-scanned; mixed legacy/new snapshots on one day choose by `retrieved_at` correctly.
-**Limits (rev 2):** a 5 KiB line fails the run; a third concurrent `/place` scan gets "busy"; the cache never exceeds its byte cap; the busiest real cell answers 8 rows + the exact total.
-**Expiry warning (rev 2):** a pending day whose newest input is 36 h old → archive health reason names it; at 35 h it does not.
-**Injected failures:** at every row of §4's table (abort part N of M, fail the sidecar, fail the latest copy, fail latest-cells, sidecar mismatch, gzip part failure, marker failure) — assert last good publication byte-identical, no partial object visible under a published key, the next run's bounded retry completes and nothing completed is rewritten.
-**Memory (local, labelled local):** the existing workerd bench (`phase1/bench-firms-memory/`) with total-heap caps 48 / 64 / 80 MB, 3 runs each, every output asserted; pass criterion = all scenarios at 64 MB for every size up to 64 MiB (the flatness claim). Negative controls must FAIL.
-**Production (labelled production, after a separate deploy go):** Worker metrics memory P50/P99/P999 and Exceeded Memory for 48 h; CPU per firms tick; R2 Class A/B counts from the usage page; `/health/*` all green. The guard stays at 8 MiB until production confirms; raising it is its own decision.
+**R2 operations per run** (Class A = writes/lists, Class B = reads/heads, *stated*):
+| | Today (0.5.2) | Rev 3, CSV ≤ 5 MiB and JSON ≤ 5 MiB | Rev 3, 10 MB CSV (JSON ≈ 15 MB at 1.48×) |
+|---|---|---|---|
+| Class A | 5 puts (raw, snapshot, cells, latest, latest-cells) | 6 (+ sidecar) | raw multipart 4 (create, 2 parts, complete) + snapshot 5 (create, 3 parts, complete) + sidecar, cells, latest, latest-cells 4 = **13** |
+| Class B | 0–1 | ~7 (heads after writes, raw read in B, snapshot read for the `latest/` copy, CAS heads) | ~7 |
+| Per month (96 runs/day) | ~14,400 A | ~17,300 A · ~20,200 B | ~37,400 A · ~20,200 B |
+R2 free tier: 1 M Class A and 10 M Class B per month; then **$4.50 / M** Class A and **$0.36 / M** Class B (*stated*, pricing page). **Worked example, not a ceiling:** if the account were already past the free Class A tier, the 10 MB case adds ~23,000 Class A/month ≈ **$0.10/month**. The account's current R2 usage has **not** been measured — read it before building.
+**Per visitor:** each uncached `/place` view adds 1 Class B read and one scan of `latest/firms.json` in CPU. Extra Class B/month ≈ uncached views/month; extra CPU ≈ uncached views × scan time (to measure). At 10,000 uncached views/month and a 100 ms scan (assumed): 10,000 Class B (free tier) and 1 M CPU-ms (Workers Paid includes 30 M/month; then $0.02 per million ms). Visitor numbers are not measured; the cache and the scan cap bound bursts, not monthly totals.
+**D1:** ≤ ~6 rows written per run (input, attempt insert + finish, output, `latest_at`, `cells_at`) ≈ 17,000/month (Workers Paid includes 50 M rows written/month); reads are single-row lookups by primary key or a small newest-first scan.
+**CPU:** a streaming parse costs about what today's parse costs (80–173 ms on 5.3 MB, measured in the pane), plus gzip in the daily checkpoint and the `/place` scans above.
 
-## 9. Order of work (each a separate go) — after GPT's re-review of rev 2
-1. Measure first: does FIRMS send `Content-Length`; today's R2 Class A/B monthly usage; the known-length behaviour of an `R2ObjectBody` stream and the `etagDoesNotMatch: "*"` form in local workerd; the busiest real cell and a `/place` scan's CPU on the 5 Nov file.
-2. Build steps A–E on a branch with the tests in §8; bench.
-3. Review (GPT) → Chad's go → deploy content-only + the `snapshots-aux/` lifecycle rule (Approve lines).
-4. Watch production 48 h; then decide on raising the guard.
+**Approval scope (when implementation is later authorised — each its own `Approve:` line):**
+1. D1: create `firms_inputs`, `firms_outputs`, `firms_attempts` (additive, `IF NOT EXISTS`, procedure of START-HERE §4d).
+2. Deploy the hub version that implements this (content only; no binding, secret, schedule or variable change).
+3. Nothing else: **no R2 lifecycle change, no new prefix, no retention change.** Raising the 8 MiB guard is a separate, later decision after production measurement.
+
+## 15. Verification (before any deploy; outputs asserted, never just survival)
+**Inputs:** the real 5 Nov file (5,311,642 B, sha256 `c3487dcc…`, on the Mac); scale-ups of its own rows to 8 MiB, 16, 32 and 64 MiB; **dense synthetic files** that touch all 4,050 cells in all 24 hours (the `cells` / `by_hour` worst case) at 8 MiB and above; the 23-duplicate-line file; header-only; cut mid-row and between rows; a line of 4,097 bytes.
+**Equivalence:** for every input, the new `latest/firms.json` parsed = today's `firmsParse` envelope parsed (records deep-equal in order; `cells`, `by_hour` equal); every emitted line ≤ 4 KiB, including the dense files; sidecar = today's `firesDaily` on the same envelope; checkpoint object gunzipped = the snapshot bytes; `fires_daily` rows and coverage equal to today's; `/place` firms answers equal to today's for every cell with records, including the busiest real cell and the densest synthetic cell.
+**State and concurrency (deterministic, controllable R2/D1 stubs):** two invocations claiming the same input at once → one attempt row, one does nothing; a 4th claim refused; an attempt that died without `finished_at` counts toward the bound and blocks for 15 min; raw stored then B fails → the next run finds and retries it; B done but the output insert fails → retried; two invocations for the same minute write distinct keys.
+**Publication:** an older run paused between `head()` and `put` while a newer run publishes → the older `put` returns `null`, the newer publication stands; `latest/` ok + `latest-cells/` failure → the retry recognises its own `run_id`, writes only the counts, and stops if a newer run published first; a newer down run's `latest-cells/` is not overwritten by an older success; an empty bucket with create-only unverified → refusal, nothing written; legacy published objects ordered by upload time.
+**Legacy + new together:** §9's bench at L_json, overlapping, both caps, 3 runs, with negative controls.
+**Injected failures:** every row of §11 — assert the last good publication byte-identical where it should be, no published key pointing at an incomplete object, retries bounded, nothing completed rewritten.
+**Memory (local, labelled local):** the workerd bench (`phase1/bench-firms-memory/`), total-heap caps 48 / 64 / 80 MB, 3 runs each, outputs asserted, for every size up to 64 MiB and the dense files. **The "independent of file size" claim is made only if every new-path scenario passes at the same cap across all sizes.** Negative controls must FAIL.
+**Production (labelled production; after a separate deploy approval):** Worker memory P50/P99/P999 and Exceeded Memory for 48 h; CPU per firms tick; R2 Class A/B from the usage page; D1 rows; `/health/*` green. The guard stays at 8 MiB until then.
+
+## 16. Order of work (each a separate go)
+1. GPT re-review of this rev 3.
+2. Measure first: whether FIRMS sends `Content-Length`; the account's current R2 Class A/B usage; the largest stored legacy snapshot and checkpoint (sizes only, read-only listing); the JSON/CSV ratio on real and dense files; `etagDoesNotMatch: "*"` and `R2ObjectBody` known-length behaviour in local workerd; the busiest real cell and a `/place` scan's CPU on the 5 Nov file.
+3. Build on a branch with §15's tests and bench.
+4. GPT review → Chad's Approve lines (§14: D1 tables, then deploy).
+5. Watch production 48 h; decide on the guard separately.
