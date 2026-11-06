@@ -24,12 +24,13 @@ Tiers are GPT's recommended order (5 Nov 2026), not approvals. "Gate" = the firs
 | R1 | Schumann resonance / ELF | BGS Eskdalemuir (+ others) | 3 — later | Not started — no recent numerical sample; access/redistribution unresolved | One recent BGS sample + terms |
 | R8 | Ionospheric TEC | NOAA GloTEC | 3 — later | Not started | Model label; obs counts + quality |
 | R9 | Neutron monitors | NMDB | 3 — later | Blocked — account required, real-time files unavailable | Recheck service status + reuse |
+| R11 | FIRMS: previous-day observations arriving after midnight | NASA FIRMS (existing layer) | — internal data-quality item *(not a new source; no tier)* | Not started — one data point only (5 Nov latest observation 21:36 UTC) | Measure across several days; compare `day_range=2` with an explicit previous-date query (payload, cost) |
 
 ---|---|
 | First priorities | R2 fireballs · R3 Earth rotation / polar motion · R4 Argo profiles |
 | Next candidates | R5 coral heat stress · R6 ozone · R7 coastal water level vs predicted tide |
 | Later feasibility | R8 ionospheric TEC (GloTEC) · R9 neutron monitors (NMDB) |
-| Added later | R10 solar flares / X-ray (5 Nov) |
+| Added later | R10 solar flares / X-ray (5 Nov) · R11 FIRMS previous-day arrivals after midnight (6 Nov) |
 | Added earlier | R1 Schumann resonance / ELF (5 Nov) |
 
 ---
@@ -223,3 +224,22 @@ Keep explicit: continuous measurements vs detected/catalogued events · observat
 - Collection and retention cost before any schedule (project target: no new running cost; Workers Paid $5/month since 3 Nov).
 
 **Research order:** NOAA recent-event feed + matching X-ray measurements → DONKI context → historical comparisons once measurement definitions and continuity are understood.
+
+---
+
+## R11. FIRMS — previous-day observations arriving after midnight
+
+**Added:** 6 Nov 2026 (thread 17), from GPT's review of the 5 Nov fires recovery, on Chad's instruction.
+**Status:** research only. **No collector, schedule, query or deploy change.** An entry here authorises nothing.
+
+**What is known (one data point):** the hub fetches FIRMS with `day_range=1`, which returns the current UTC date only (6 Nov's files hold only 6 Nov acquisition dates — checked on `raw/firms/2026-11-06T06-00Z.csv`, 396 rows). On 5 Nov the latest observation in the day's last file (23:45 retrieval) was **21:36 UTC**. That is one file on one day. It does **not** establish a fixed end-of-day gap for every day; how late each day's observations end, and how many arrive only after midnight, is unmeasured.
+
+**Questions:**
+1. Across several days, how many detections with acquisition date D first appear in files retrieved after 00:00 UTC on D+1, and until when do they keep arriving?
+2. Options to investigate, each with payload size and cost measured before any choice:
+   - `day_range=2` fetched once after midnight (returns D and D+1; larger payload, overlaps the next day's own fetch);
+   - an **explicit previous-date query** (the API's date parameter for D, `day_range=1`) fetched after midnight — previous day only, no overlap.
+3. How the daily checkpoint should word a day's end: `last_observation_at` (0.5.2) already records it per day; whether `input_status` ("current", which measures retrieval) needs a companion statement about observations.
+
+**First gate:** from retained raw files and read-only fetches, measure late arrivals for ≥ 3 days; payload of each option; Worker CPU/memory implications against the 8 MiB guard. Report before any design.
+

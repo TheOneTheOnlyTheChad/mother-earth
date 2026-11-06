@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov ~08:15 UTC — 5 Nov fires recovery **rev 2 prepared** (GPT's review; R2-only) — nothing written
+- GPT independently verified rev 1's figures. Rev 2 (`reviews/2026-11-06-firms-recovery-5nov.md`):
+  - the record carries its own limitations;
+  - observation, R2-upload and creation times are separate, and retrieval time is null (unavailable);
+  - the reference is labelled recovery-generated;
+  - run history is "not assessed" and the guard-skipped input run is described separately; the dummy coverage call is removed;
+  - the source-lag wording now covers this file only, and **R11** is opened in the research backlog (`day_range=2` vs an explicit previous-date query; research only).
+- **Validation gate:** `recover.mjs` writes `out/` only if every pinned figure matches. 5 negative controls stop with nothing written. Two runs byte-identical.
+- **Record to write:** `archive/recoveries/firms/2026-11-05.json.gz`, 659,639 B, sha256 `624ecf2ed864…` (created 08:06:37 UTC).
+- **R2-only procedure:** `phase1/recovery-firms-2026-11-05/r2-write.js`: precheck, sha-checked bytes, no-overwrite put (identical = no-op, different = stop), read-back verify, originals-untouched check, log. Offline test 6/6.
+- **D1 recovery tables deferred** until a querying requirement is agreed.
+- **Waiting on Chad's go.** The dashboard pane tab is signed out (Chad signs in first).
+
 ## 6 Nov ~08:05 UTC — firms-guard merged to main (Chad's go)
 - `firms-guard` @ `2ee3a62` merged into main (`909e8cd`, no-ff). No overlap with main's docs; **no page files change**. `phase1/worker.js` on main = live 0.5.2 (sha256 `70307d5fc2a9afed…`). firms-guard 19/19, history-hub 27/27 on the merge (Node 22.23.4).
 - Monitoring check-ins scheduled in this session: 14:20 UTC 6 Nov, 00:50 UTC 7 Nov.
