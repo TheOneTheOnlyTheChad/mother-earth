@@ -105,7 +105,8 @@ const GLOBE = () => { const store = {}; const g = new Proxy(function () { return
     ok('place view 1280: each label sits above its description', m.stacked, m);
     ok('place view 1280: no page overflow', m.scroll <= m.w, m);
     // a record panel keeps the two-column layout
-    await page.keyboard.press('Escape'); await page.evaluate(() => ME.openCell('firms', '14_49')); await page.waitForTimeout(200);
+    await page.waitForFunction(() => ME.pairState('firms').firms.usable, null, { timeout: 20000 });   // the fire cell must exist before it can open
+    ok('fire cell opens (click path)', await page.evaluate(() => ME.openCell('firms', '14_49'))); await page.waitForFunction(() => document.getElementById('insp').classList.contains('show') && !document.getElementById('insp').classList.contains('placeview'), null, { timeout: 5000 });
     const two = await page.evaluate(() => { const dt = [...document.querySelectorAll('#insp-dl dt')].find(d => d.textContent === 'Quantity'), dd = dt && dt.nextElementSibling;
       return { cls: document.getElementById('insp').className, dtL: dt && dt.getBoundingClientRect().left, ddL: dd && dd.getBoundingClientRect().left, ddT: dd && dd.getBoundingClientRect().top, dtT: dt && dt.getBoundingClientRect().top }; });
     ok('cell panel keeps label and value side by side', two.ddL > two.dtL + 20 && Math.abs(two.ddT - two.dtT) < 4, two);
