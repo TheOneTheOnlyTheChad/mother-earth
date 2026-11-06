@@ -229,6 +229,25 @@ CREATE TABLE IF NOT EXISTS archive_gaps (
   detected_at TEXT NOT NULL,
   PRIMARY KEY (layer, day)
 );
+-- What a daily checkpoint's input covered (0.5.2, after the 5 Nov FIRMS guard finding). Separate from archive_checkpoints so the
+-- original checkpoint is never rewritten. Derived from collector_runs (never pruned) and the checkpoint's own records.
+-- assessed_with_checkpoint = 1: written in the same step as the checkpoint; 0: assessed later (e.g. 5 Nov), with assessed_at.
+CREATE TABLE IF NOT EXISTS archive_checkpoint_coverage (
+  layer TEXT NOT NULL,
+  day TEXT NOT NULL,
+  cutoff TEXT NOT NULL,                 -- the checkpoint input's retrieval time (= archive_checkpoints.cutoff)
+  last_observation_at TEXT,             -- latest observation time inside that input (a different quantity from the cutoff)
+  input_age_at_day_end_s INTEGER NOT NULL,   -- end of the UTC day minus the cutoff
+  failed_runs_after_cutoff INTEGER NOT NULL, -- runs of this layer later on the same day that did not publish
+  failure_first_at TEXT,
+  failure_last_at TEXT,
+  failure_reasons TEXT,                 -- distinct reasons, shortened (JSON array)
+  input_status TEXT NOT NULL,           -- 'current' | 'stale'
+  assessed_at TEXT NOT NULL,
+  assessed_with_checkpoint INTEGER NOT NULL,
+  collector_version TEXT NOT NULL,
+  PRIMARY KEY (layer, day)
+);
 -- Indexes so the hub's history report reads first/last values without scanning (MIN/MAX on an index).
 CREATE INDEX IF NOT EXISTS quake_revisions_received ON quake_revisions (received_at);
 CREATE INDEX IF NOT EXISTS fires_daily_day ON fires_daily (day);

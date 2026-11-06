@@ -47,14 +47,19 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.5.1';
+const COLLECTOR_VERSION = '0.5.2';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
 const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600, orbital: 8 * 3600, drifters: 4 * 3600, plastic: 72 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_DAY_BOUNDARY_H = 4;             // before 04:00 UTC an empty FIRMS file is the day boundary, not an outage (measured 1 Nov 2026: first rows at 04:00)
-const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;  // guard: beyond this, keep raw only. Measured 30 Oct 2026: 1.3 MB ≈ 15 ms CPU on the Free plan (soft 10 ms)
+/* FIRMS resource guard: beyond this, keep raw only (D14 wording). 4 MB (30 Oct, Free plan) tripped daily from 3 Nov (file 5.3 MB by
+ * 5 Nov evening). The binding limit on Paid is MEMORY, not CPU: 128 MB per isolate, shared by concurrent requests (Cloudflare limits
+ * page, read 6 Nov 2026). Held memory of the collect + checkpoint path measured ≈ 4× the file (Node, real FIRMS row shapes, forced GC):
+ * 5.3 MB → 31 MB · 8 → 33 · 12 → 49 · 16 → 62 · 24 → 98. Live Worker memory P999 17.4 MB on ≤ 3.8 MB files (dashboard, 6 Nov).
+ * 12 MB keeps the held peak near 50 MB (≈ 40 % of the isolate). CPU on the real 5.3 MB file: parse 80–170 ms (V8, pane). */
+const FIRMS_MAX_PARSE_BYTES = 12 * 1024 * 1024;
 
 const URLS = {
   usgs: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson',
@@ -142,6 +147,8 @@ async function writeDown(env, layer, scheduledMs, note, http) {
   // latest/<layer>.json is NOT overwritten: viewer keeps the last good snapshot, and its retrieved_at
   // ages past stale_after → layer Unknown (§3.3). The cells file above carries the 'down' status.
   await logRun(env, layer, scheduledMs, 'down', http || 0, 0, 0, note);
+  // A closed day's checkpoint must not wait for this layer's next SUCCESS (5 Nov: firms down 15:45→02:15, checkpoint written only at 02:16).
+  if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpointsDue(env, layer, Date.now()));
 }
 
 // ---------------------------------------------------------------- USGS
@@ -399,13 +406,16 @@ function firmsParse(text) {
   const iLat = ix('latitude'), iLng = ix('longitude'), iDate = ix('acq_date'), iTime = ix('acq_time'), iConf = ix('confidence'), iFrp = ix('frp'), iSat = ix('satellite'), iDn = ix('daynight');
   if (iLat < 0 || iLng < 0 || iDate < 0 || iTime < 0) throw new Error('unexpected FIRMS header: ' + header.join(','));
   const fields = ['lat', 'lng', 'observed_at', 'confidence', 'frp_mw', 'satellite', 'daynight'];
-  const rows = []; const cells = {}; const byHour = {};
+  const nCols = header.length;   // every real row has exactly the header's field count (checked 6 Nov on 3 real files, 0 exceptions; no quoting)
+  const rows = []; const cells = {}; const byHour = {}; let lineNo = 1;
   let pos = nl + 1; const len = text.length;
   while (pos < len) {
     let end = text.indexOf('\n', pos); if (end < 0) end = len;
-    const line = text.slice(pos, end); pos = end + 1;
+    const line = text.slice(pos, end); pos = end + 1; lineNo++;
     if (!line) continue;
     const c = line.split(',');
+    // a body cut mid-row (or a malformed row) is refused whole — never published as a partial day. A cut exactly between rows is NOT detectable here.
+    if (c.length !== nCols) throw new Error(`truncated or malformed response: line ${lineNo} has ${c.length} fields, header has ${nCols}`);
     const lat = +c[iLat], lng = +c[iLng];
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
     const t = c[iTime].padStart(4, '0');
@@ -1507,7 +1517,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1670,6 +1680,36 @@ async function listSnapshots(env, layer) {
   } while (cursor);
   return out;
 }
+const CHECKPOINT_CADENCE_S = { firms: 900, usgs: 300 };   // scheduled cadence; a cutoff older than 2 × cadence + 5 min at day end is stale
+/** What a checkpoint's input covered. Pure apart from one collector_runs read. Never rewrites the checkpoint. */
+async function checkpointCoverage(env, layer, day, cutoff, records, fields, nowMs, withCheckpoint) {
+  const dayEnd = Date.parse(day + 'T00:00:00Z') + 86400e3, iObs = (fields || []).indexOf('observed_at');
+  let lastObs = null; if (iObs >= 0) for (const r of records || []) { const o = r[iObs]; if (typeof o === 'string' && (!lastObs || o > lastObs)) lastObs = o; }
+  const fails = (await env.DB.prepare("SELECT started_at, note FROM collector_runs WHERE layer = ? AND status != 'ok' AND started_at > ? AND started_at < ? ORDER BY started_at")
+    .bind(layer, cutoff, new Date(dayEnd).toISOString()).all()).results || [];
+  const reasons = [...new Set(fails.map(f => String(f.note || '').replace(/\(\d+ bytes > \d+\)/, '(size > limit)').replace(/\d+ bytes/, 'N bytes').slice(0, 120)))].slice(0, 5);
+  const age = Math.round((dayEnd - Date.parse(cutoff)) / 1000), cad = CHECKPOINT_CADENCE_S[layer] || 3600;
+  return { layer, day, cutoff, last_observation_at: lastObs, input_age_at_day_end_s: age, failed_runs_after_cutoff: fails.length,
+    failure_first_at: fails.length ? fails[0].started_at : null, failure_last_at: fails.length ? fails[fails.length - 1].started_at : null,
+    failure_reasons: reasons, input_status: fails.length || age > 2 * cad + 300 ? 'stale' : 'current',
+    assessed_at: new Date(nowMs).toISOString(), assessed_with_checkpoint: withCheckpoint ? 1 : 0 };
+}
+async function writeCoverage(env, c) {
+  await env.DB.prepare('INSERT OR IGNORE INTO archive_checkpoint_coverage (layer, day, cutoff, last_observation_at, input_age_at_day_end_s, failed_runs_after_cutoff, failure_first_at, failure_last_at, failure_reasons, input_status, assessed_at, assessed_with_checkpoint, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(c.layer, c.day, c.cutoff, c.last_observation_at, c.input_age_at_day_end_s, c.failed_runs_after_cutoff, c.failure_first_at, c.failure_last_at, JSON.stringify(c.failure_reasons), c.input_status, c.assessed_at, c.assessed_with_checkpoint, COLLECTOR_VERSION).run();
+}
+/** Checkpoints completed before 0.5.2 (or whose coverage write failed) get a coverage row assessed afterwards — labelled as such. */
+async function backfillCoverage(env, layer, nowMs) {
+  const miss = (await env.DB.prepare('SELECT c.day, c.cutoff, c.r2_key FROM archive_checkpoints c WHERE c.layer = ? AND NOT EXISTS (SELECT 1 FROM archive_checkpoint_coverage v WHERE v.layer = c.layer AND v.day = c.day) ORDER BY c.day LIMIT 3').bind(layer).all()).results || [];
+  for (const m of miss) {
+    const o = await env.R2.get(m.r2_key); if (!o) continue;
+    const raw = await o.arrayBuffer(); let text;
+    try { text = await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); } catch (_) { text = new TextDecoder().decode(raw); }   // stored gzip-encoded; a runtime may already have decoded it
+    const prev = JSON.parse(text);
+    await writeCoverage(env, await checkpointCoverage(env, layer, m.day, m.cutoff, prev.records, prev.record_fields, nowMs, false));
+  }
+  return miss.length;
+}
 async function histCheckpointOne(env, layer, day, chosen) {
   const done = await env.DB.prepare('SELECT 1 AS x FROM archive_checkpoints WHERE layer = ? AND day = ?').bind(layer, day).first();
   if (done) return 'already done';   // completed work is recognised before anything else
@@ -1678,13 +1718,16 @@ async function histCheckpointOne(env, layer, day, chosen) {
   const text = await o.text(); const prev = JSON.parse(text);
   if (prev.retrieved_at !== chosen.retrieved_at) throw new Error('snapshot changed under us: ' + chosen.key);
   const key = `${HIST.checkpoints}${layer}/${day}.json.gz`; const gz = await gzipText(text); const ref = runRef(layer, prev.retrieved_at);
-  await env.R2.put(key, gz, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: prev.retrieved_at, window_start: String(prev.window_start), window_end: String(prev.window_end), run_ref: ref, collector_version: String(prev.collector_version), source_key: chosen.key } });
+  const cov = await checkpointCoverage(env, layer, day, prev.retrieved_at, prev.records, prev.record_fields, Date.now(), true);
+  await env.R2.put(key, gz, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: prev.retrieved_at, window_start: String(prev.window_start), window_end: String(prev.window_end), run_ref: ref, collector_version: String(prev.collector_version), source_key: chosen.key,
+    input_status: cov.input_status, failed_runs_after_cutoff: String(cov.failed_runs_after_cutoff), last_observation_at: String(cov.last_observation_at), input_age_at_day_end_s: String(cov.input_age_at_day_end_s) } });
   if (layer === 'firms' && prev.source_status === 'ok') {
     const by = firesDaily(prev);
     const stmts = Object.entries(by).map(([id, c]) => env.DB.prepare('INSERT OR IGNORE INTO fires_daily (cell_id, day, detections, frp_sum_mw, frp_max_mw, frp_n, day_n, night_n, cutoff, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
       .bind(id, day, c.n, c.frpSum === null ? null : Math.round(c.frpSum * 10) / 10, c.frpMax, c.frpN, c.day, c.night, prev.retrieved_at, ref, String(prev.collector_version)));
     for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
   }
+  await writeCoverage(env, cov);   // what the input covered — before the marker, so a completed checkpoint always has it (else backfilled, labelled)
   await env.DB.prepare('INSERT OR IGNORE INTO archive_checkpoints (layer, day, cutoff, r2_key, bytes, records, run_ref, collector_version, source_key) VALUES (?,?,?,?,?,?,?,?,?)')
     .bind(layer, day, prev.retrieved_at, key, gz.length, (prev.records || []).length, ref, String(prev.collector_version), chosen.key).run();   // completion marker, last
   return 'done';
@@ -1694,7 +1737,8 @@ async function histCheckpointsDue(env, layer, nowMs) {
   await env.DB.prepare('INSERT OR IGNORE INTO history_activity (layer, day, first_seen) VALUES (?,?,?)').bind(layer, today, new Date(nowMs).toISOString()).run();
   const due = (await env.DB.prepare('SELECT a.day FROM history_activity a WHERE a.layer = ? AND a.day < ? AND NOT EXISTS (SELECT 1 FROM archive_checkpoints c WHERE c.layer = a.layer AND c.day = a.day) AND NOT EXISTS (SELECT 1 FROM archive_gaps g WHERE g.layer = a.layer AND g.day = a.day) ORDER BY a.day').bind(layer, today).all()).results
     .map(r => r.day).filter(d => nowMs >= Date.parse(d + 'T00:00:00Z') + 86400e3 + HIST_GRACE_MS);
-  if (!due.length) return 'nothing due';
+  const back = await backfillCoverage(env, layer, nowMs);
+  if (!due.length) return back ? 'coverage backfilled:' + back : 'nothing due';
   const snaps = await listSnapshots(env, layer); const out = [];
   for (const d of due) {
     const c = snaps.filter(x => x.retrieved_at.slice(0, 10) === d).sort((a, b) => a.retrieved_at < b.retrieved_at ? -1 : a.retrieved_at > b.retrieved_at ? 1 : a.key < b.key ? -1 : 1);
@@ -1784,10 +1828,24 @@ async function archiveHealth(env, nowMs) {
       env.DB.prepare('SELECT layer, day, reason, detected_at FROM archive_gaps ORDER BY day DESC LIMIT 20'),
       env.DB.prepare('SELECT layer, MAX(day) AS day, MAX(cutoff) AS cutoff FROM archive_checkpoints GROUP BY layer'),
       env.DB.prepare("SELECT layer, started_at, note FROM collector_runs WHERE layer LIKE 'history:%' AND status = 'down' ORDER BY id DESC LIMIT 10"),
+      env.DB.prepare('SELECT v.layer, v.day, v.cutoff, v.last_observation_at, v.input_age_at_day_end_s, v.failed_runs_after_cutoff, v.failure_first_at, v.failure_last_at, v.failure_reasons, v.input_status, v.assessed_at, v.assessed_with_checkpoint FROM archive_checkpoint_coverage v WHERE v.day = (SELECT MAX(day) FROM archive_checkpoint_coverage w WHERE w.layer = v.layer)'),
+      ...HIST.checkpointLayers.flatMap(l => [
+        env.DB.prepare("SELECT started_at, finished_at FROM collector_runs WHERE layer = ? AND status = 'ok' ORDER BY id DESC LIMIT 1").bind(l),
+        env.DB.prepare('SELECT started_at, status, note FROM collector_runs WHERE layer = ? ORDER BY id DESC LIMIT 1').bind(l),
+        env.DB.prepare("SELECT COUNT(*) AS n, MIN(started_at) AS since FROM collector_runs WHERE layer = ? AND status != 'ok' AND id > COALESCE((SELECT MAX(id) FROM collector_runs WHERE layer = ? AND status = 'ok'), 0)").bind(l, l),
+      ]),
     ]);
     const res = i => (r[i] && r[i].results) || [];
+    const cov = Object.fromEntries(res(4).map(c => [c.layer, { ...c, failure_reasons: (() => { try { return JSON.parse(c.failure_reasons || '[]'); } catch (_) { return []; } })(), assessed_with_checkpoint: !!c.assessed_with_checkpoint }]));
+    const collection = {};
+    HIST.checkpointLayers.forEach((l, i) => { const ok = res(5 + 3 * i)[0], last = res(6 + 3 * i)[0], f = res(7 + 3 * i)[0] || {};
+      collection[l] = { last_successful_run: ok ? { scheduled_at: ok.started_at, finished_at: ok.finished_at, age_s: Math.round((nowMs - Date.parse(ok.finished_at)) / 1000) } : null,
+        latest_run: last ? { scheduled_at: last.started_at, status: last.status, note: String(last.note || '').slice(0, 160) } : null,
+        failing: f.n ? { since: f.since, runs: f.n } : null }; });
     return { pending: res(0).map(x => ({ layer: x.layer, day: x.day, hours_since_day_closed: Math.round((nowMs - Date.parse(x.day + 'T00:00:00Z') - 86400e3) / 36e5 * 10) / 10 })),
-      gaps: res(1), last_completed: res(2), recent_failures: res(3), retry_window: 'inputs are the retained snapshots (2-day storage rule); a day not completed within that window is recorded as a gap' };
+      gaps: res(1), last_completed: res(2).map(x => ({ ...x, coverage: cov[x.layer] && cov[x.layer].day === x.day ? cov[x.layer] : null })), recent_failures: res(3), collection,
+      note: 'a completed checkpoint means the day was archived, not that collection covered it: see last_completed[].coverage (input_status, failed_runs_after_cutoff) and collection',
+      retry_window: 'inputs are the retained snapshots (2-day storage rule); a day not completed within that window is recorded as a gap' };
   } catch (e) { return /no such table/i.test(String(e)) ? { note: 'history tables not created' } : { problem: 'unreadable: ' + String(e).slice(0, 120) }; }
 }
 
