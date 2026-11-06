@@ -61,7 +61,10 @@ export const FIND_UNPROCESSED = `SELECT i.run_id, i.retrieved_at FROM firms_inpu
   WHERE i.state = 'ready' AND i.attempts_used < 3 AND i.retrieved_at > ?1
   ORDER BY i.retrieved_at DESC LIMIT 1`;
 export const FIND_UNPUBLISHED = `SELECT run_id, retrieved_at FROM firms_outputs
-  WHERE publish_state = 'pending' AND publish_attempts < 3 AND retrieved_at > ?1 ORDER BY retrieved_at DESC LIMIT 1`;
+  WHERE publish_state = 'pending' AND publish_attempts < 3 AND retrieved_at >= ?1 ORDER BY retrieved_at DESC LIMIT 1`;
+// rev 6: ?1 = the retrieved_at of the CURRENT records publication (latest/ metadata; legacy: its upload time). ">=" includes the
+// current run's own pending repair (records published, counts or D1 completion not); retrieved_at is unique per run, so equality
+// means that run. Older runs are excluded here and retired by the superseded sweep ("<" — the current run is never swept).
 export const CHECKPOINT_INPUT = `SELECT run_id, snapshot_key, aux_key, retrieved_at FROM firms_outputs WHERE day = ?1 ORDER BY retrieved_at DESC, run_id DESC LIMIT 1`;
 // §2.5 identity: one statement per try; the caller re-stamps (+1 ms) and retries at most 3 times for DOWN runs only.
 export const IDENTITY = `INSERT OR IGNORE INTO firms_identity (retrieved_at, run_id, kind, actual_at) VALUES (?1, ?2, ?3, ?4)`;

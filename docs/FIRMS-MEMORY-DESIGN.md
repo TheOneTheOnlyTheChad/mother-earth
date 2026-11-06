@@ -1,28 +1,18 @@
-# FIRMS pipeline — memory design (rev 5, 6 Nov 2026)
+# FIRMS pipeline — memory design (rev 6, 6 Nov 2026)
 
 **Design only.** No parser rewrite, no production write, no retention change, no deployment is authorised by this document. Brief: `docs/briefs/2026-11-06-monitoring-and-memory.md` §2. Evidence: `reviews/2026-11-06-firms-guard.md` (§3 bench, §5 truncation), `phase1/bench-firms-memory/README.md`, hub 0.5.2 `worker.js` (sha256 `70307d5fc2a9…`).
 Labels: **measured** = from those sources; **estimate** = reasoned, to be measured; ***stated*** = a Cloudflare documentation fact (R2 Workers API reference and "Upload objects", read through the Cloudflare connector on 6 Nov); **verify** = a platform behaviour to confirm in local workerd before relying on it.
 
-**Rev 5 (GPT's review of rev 4, 6 Nov).** Evidence: `docs/design-checks/` — `firms-state.sql.mjs` (the SQL), `firms-state.check.mjs` (**20/20**, real SQLite) and `firms-publish.check.mjs` (**11/11**, a reference model of §5/§2.6 on real SQLite + an R2 stub with R2's conditional-put semantics). Breaks bite: removing the failure fence fails P1; leaving exhausted rows in either eligible index fails C15. These are design evidence, not hub code.
-1. **Retry discovery over ineligible backlogs:** eligible-work partial indexes that exclude exhausted rows by expression (`attempts_used < 3`, `publish_attempts < 3`) and superseded / expired / done / published rows by state; two sweeps per run move rows out; discovery reads only those indexes (§2.1, §6). C15 builds 1k / 10k / 100k ineligible rows of every class, all **newer** than the one eligible row (the worst case), and the query time stays flat; C16 reproduces GPT's rev-4 growth (0.1 → ~17 ms). **Rev 4's "every query is an index search / flat timing" is withdrawn:** C13 measured an *empty* pending index; the corrected claim is "discovery reads only the eligible indexes, whose size is the eligible backlog" (C15).
-2. **Stale failure publication fenced (§2.6):** an attempt reports a failure publicly only if it is still the latest attempt with no output (`FAIL_FENCE`, C17–C18); otherwise it is recorded as `fenced-failure` and publishes nothing. A processing failure's down file is ordered by **its input's retrieval time**, never stamped "now", with the real failure time in the body (`failed_at`) — so even a bypassed fence cannot replace newer counts (P1–P3).
-3. **Timestamps:** the identity stamp and the actual time are separate columns (`retrieved_at` vs `actual_at`). Collecting runs are **never** re-stamped (C20). Only runs with no input (fetch failures) re-stamp +1 ms, ≤ 3 tries, then refuse; tested across UTC midnight (C19).
-4. **Cutover** is written in the batch that registers the first input, before the input row; legacy eligibility = legacy key format **and** exact `retrieved_at` < cutover timestamp (§9, C21).
-5. **Recovery when R2 succeeded but D1 did not** (`latest_at` / `cells_at` update failed): the next publication attempt recognises its own `run_id` on each object, reconciles D1, and rewrites nothing that is already its own — P4 (latest_at lost: one counts write only), P5 (cells_at lost: zero R2 writes). Also P6–P11: partial repair, newer run stops repair, paused older writer, both/one shared object absent with create-only verified/unverified, legacy ordering uncertain.
-Claim and commit stay single atomic statements (GPT confirmed); identity + cutover + input registration are one batch.
+**Current specification: rev 6 (6 Nov 2026).** This document is one current specification; earlier revisions' text has been removed or replaced, not kept alongside. **The SQL is authoritative in `docs/design-checks/firms-state.sql.mjs`**; the SQL quoted here is copied from it, and the procedures in §5–§6 are the reference model in `docs/design-checks/firms-publish.check.mjs`. Design evidence (not hub code): `firms-state.check.mjs` **20/20** (real SQLite) and `firms-publish.check.mjs` **16/16** (the model on real SQLite + an R2 stub with R2's conditional-put semantics). Deliberate breaks bite (§15).
 
-**Rev 4 (GPT's review of rev 3, 6 Nov).** Rewritten where GPT found gaps; the rest of rev 3 stands. The SQL of §2 is **executed against real SQLite** in `docs/design-checks/firms-state.check.mjs` (13/13; it also reproduces GPT's rev-3 race, check C1) — design evidence, not hub code.
-1. **Exclusive claim:** the active-attempt condition is inside the single atomic `INSERT … SELECT`, together with the bound; the caller proceeds only when the statement inserted a row (§2.2).
-2. **Stale attempts:** a lease expiring proves nothing about the original invocation, so the **commit is fenced** — only the latest attempt, by token, can record an output; every attempt writes **its own immutable keys**; the one committed `firms_outputs` row names the winning keys and is the only thing ever published or checkpointed (§2.3, §3).
-3. **Checkpoint discovery** reads committed outputs from D1, never an object listing, for new-format data; an uncommitted new object can never fall through to the legacy path (§7, §9).
-4. **Reader pairing by run identity:** every writer of a shared FIRMS object first claims a **unique `retrieved_at`** in D1 (`firms_identity`), so one timestamp means one run and the existing timestamp pairing *is* identity pairing — **no page change needed**; the hub's `/place` additionally compares `run_id` when both files carry it (§8).
-5. **Tests** for each rule, incl. real-SQLite interleavings, both shared objects absent, and bounded reads at 100k rows (§15). Legacy ordering when the upload is *after* our retrieval is labelled **uncertain** (deferred, not "newer") and tested (§5).
-
-**Rev history.** Rev 1: first draft. Rev 2 (GPT): bounded `/place`, compare-and-swap publication, legacy transition, manifests, limits, expiry warning. **Rev 3 (GPT's re-review of `2fe320b`)** — this version is rewritten as **one procedure**; earlier sections are superseded, not appended to:
-1. **Retry discovery:** separate *input ready* and *output complete* records, with bounded, concurrency-safe attempt accounting (§2, §6). Manifests are replaced by these records (§2).
-2. **Publication repair:** a run is recognised by its **identity** (`run_id`), so a retry repairs a missing counts publication without overwriting a newer run; the unconditional first write is removed (§5).
-3. **Legacy bounds:** the limits are on the actual **JSON bytes and decompressed bytes**, enforced while reading, and the legacy and new paths are tested together under overlap; nothing is inferred from the old bench (§9, §15).
-4. **Format and lifecycle:** `cells` and `by_hour` are written one entry per line so every line has a bound (§3); dense valid inputs are tested; the object layout uses only prefixes that already have lifecycle rules, and the plan says so explicitly (§3, §14).
+| Rev | Reviewer finding → change |
+|---|---|
+| 1 | first draft |
+| 2 | bounded `/place`, compare-and-swap publication, legacy transition, limits, expiry warning |
+| 3 | one procedure; D1 run state instead of manifests; legacy limits on real JSON/decompressed bytes; `lines/1` format |
+| 4 | exclusive atomic claim; commit fence + immutable per-attempt keys; checkpoints from committed outputs only; unique `retrieved_at` as run identity |
+| 5 | eligible-work indexes + sweeps; fenced failure path ordered by input time; identity stamp vs actual time; cutover in the registration batch |
+| **6** | **(a) counts ordering is (run, status): within one run a committed success replaces that run's down file, and a down file never replaces that run's success — matching `run_id` alone is not "ours"; (b) discovery includes the current publication's own pending repair (`retrieved_at >= current`), proven through the normal sweep → discovery → claim → publication path; (c) leftover rev-4/5 text removed (`superseded_at` SQL, the withdrawn C13 timing claim)** |
 
 ## 0. Bottom line
 - Today the whole file is held several times at once (raw text, ~63k parsed rows, two JSON strings, and during a checkpoint the previous snapshot's text and full parse), while `/place` keeps another parsed copy resident (§1). Streaming the CSV alone would not change that.
@@ -52,10 +42,10 @@ Measured consequence (local workerd, total-heap cap, verified outputs): the real
 **Why "stream the parser" is not enough:** if only stage 3 streamed, `rows` (stage 3), the two output strings (5), the checkpoint's parse (6) and the place cache (8) would all still grow with N. Backpressure matters too: a `tee()` of the fetch body into "upload" and "parse" buffers **without limit** behind the slower branch, so a stalled R2 upload would pull the whole file into memory anyway.
 
 
-## 2. Run state in D1 (rev 5)
+## 2. Run state in D1
 Every rule below is one SQL statement, executed whole by D1's single writer (each statement is atomic; a `batch()` is one transaction and rolls back as a whole, *stated*). **Proven against real SQLite:** `docs/design-checks/firms-state.check.mjs` (13/13).
 
-### 2.1 Tables (rev 5; additive; no existing table changes) — the exact SQL is `docs/design-checks/firms-state.sql.mjs`
+### 2.1 Tables (additive; no existing table changes)
 ```sql
 CREATE TABLE firms_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);   -- format_cutover_at (§9)
 CREATE TABLE firms_identity (retrieved_at TEXT PRIMARY KEY, run_id TEXT NOT NULL UNIQUE, kind TEXT NOT NULL,   -- kind: input | down
@@ -123,7 +113,7 @@ INSERT INTO firms_outputs (run_id, attempt, token, retrieved_at, day, snapshot_k
 Publication needs no lease: it only ever publishes the committed output (by CAS, §5), so two publishers of the same output converge. Its retries are bounded by
 ```sql
 UPDATE firms_outputs SET publish_attempts = publish_attempts + 1
-  WHERE run_id = ?1 AND publish_attempts < 3 AND cells_at IS NULL AND superseded_at IS NULL;   -- proceed iff changes === 1
+  WHERE run_id = ?1 AND publish_state = 'pending' AND publish_attempts < 3;   -- proceed iff changes === 1
 ```
 (C9: three succeed, the fourth does not; the third claim takes the row out of the eligible index.) Completion records are reconciled from R2 identity (§5): `latest_at = COALESCE(latest_at, now)`, then `cells_at` and `publish_state = 'published'`.
 
@@ -134,7 +124,7 @@ UPDATE firms_outputs SET publish_attempts = publish_attempts + 1
 - **Processing failures of an input** use **that input's identity** (§2.6), so they never claim a new one.
 
 ### 2.6 Failure path — fenced, and ordered by the input it describes
-Step B's failure (read, parse, upload or commit error) used to call `writeDown`, which stamps "now" and overwrites `latest-cells/` — a stale attempt could replace a newer success. Rev 5:
+Step B's failure (read, parse, upload or commit error) must not call today's `writeDown`, which stamps "now" and overwrites `latest-cells/` — a stale attempt could replace a newer success. Instead:
 ```sql
 UPDATE firms_attempts SET finished_at = ?2, outcome = 'failed', note = ?3
  WHERE token = ?1 AND finished_at IS NULL
@@ -159,7 +149,7 @@ Custom metadata on `latest/` and `latest-cells/`: `run_id`, `retrieved_at`, `for
 
 **Format `lines/1` — every line has a bound.** The writer emits the envelope as valid JSON in which each line holds exactly one of: one top-level field with a scalar or a small object (header fields: version, times, scope, quantity, coverage_default, window_rule …), one `records` row, one `cells` entry (`"12_34":{"count":7,"coverage":{…}}`), one `by_hour` entry (one cell's count inside its hour's object, `"12_34":5`), or structural punctuation. Order: header fields → `record_fields` → `records` → `cells` → `by_hour`.
 - **Line limit 4 KiB, enforced by both writer and reader.** The writer fails the run if any line it would emit exceeds it (no header field comes close: the longest today is `window_rule`, ~170 B). The reader fails if it meets a longer line and never buffers past it.
-- **`by_hour` keeps its shape.** Rev 2 would have written each hour's object on one line, which exceeds 4 KiB in a busy hour (hundreds of cells). `lines/1` writes `"by_hour":{`, then for each hour `"2026-11-06T08":{`, one `"12_34":5,` line per cell, and `},` — the same nested object, one cell entry per line.
+- **`by_hour` keeps its shape.** Writing each hour's object on one line would exceed 4 KiB in a busy hour (hundreds of cells). `lines/1` writes `"by_hour":{`, then for each hour `"2026-11-06T08":{`, one `"12_34":5,` line per cell, and `},` — the same nested object, one cell entry per line.
 - **Dense bound:** grid 45 × 90 = 4,050 cells; a `day_range=1` file covers ≤ 24 hours → ≤ 4,050 `cells` lines and ≤ 97,200 `by_hour` lines. The in-memory maps behind them are bounded by the same numbers (§10).
 - Any `JSON.parse` consumer (the page, `/snapshot/firms`) sees the same object; only key order and whitespace differ from today (§12).
 
@@ -174,43 +164,43 @@ Each step's input is immutable and named; each step records completion in D1 bef
 
 **Where each run starts:** a scheduled run first looks for unfinished work (§6) and does at most one piece of it, then fetches. A manual `/admin/run/firms` behaves the same.
 
-## 5. Publication: compare-and-swap with run identity
-Input: the committed `firms_outputs` row only (§2.3). Claim a publication attempt (§2.4). `latest/firms.json` (records) and `latest-cells/firms.json` (counts) carry `run_id` and `retrieved_at` in custom metadata (and `run_id` in the envelope). R2 `put` accepts `onlyIf: { etagMatches }` and returns `null` without storing when the condition fails (*stated*).
+## 5. Publication: compare-and-swap with run identity and status
+Input: the committed `firms_outputs` row only (§2.3). Claim a publication attempt (§2.4). Every write to `latest/firms.json` (records) or `latest-cells/firms.json` (counts) carries custom metadata `run_id`, `retrieved_at`, `status` (`ok` | `down`), `token` (ok: the committed output's token) and `format`; envelopes also carry `run_id`. R2 `put` accepts `onlyIf: { etagMatches }` / `{ etagDoesNotMatch: "*" }` and returns `null` without storing when the condition fails (*stated*).
 
-**Ordering of an existing shared object relative to ours:**
-| Existing object | Ordered as | Basis |
+**Ordering of an existing shared object relative to what we are about to write** (model: `order()`):
+| Existing object | Result | Basis |
 |---|---|---|
-| carries `run_id` = ours | **ours** | identity |
-| carries `run_id`, other run, `retrieved_at` > ours | **newer** | `retrieved_at` is unique per run (§2.5), so no ties |
-| carries `run_id`, other run, `retrieved_at` < ours | **older** | same |
-| **legacy** (no `run_id`), `head().uploaded` < our `retrieved_at` | **older — established** | an object is uploaded after its data was retrieved, so an earlier upload proves an earlier retrieval |
-| **legacy**, `head().uploaded` ≥ our `retrieved_at` | **uncertain → defer** | its retrieval could be earlier or later; we cannot tell without reading it. Treated conservatively: we do not overwrite; logged as "deferred: legacy object of uncertain order", not as "newer". The next run (retrieved later still) normally resolves it. |
+| same `run_id`, same status (ok: same committed `token`) | **ours** — write nothing | identity **and** state |
+| same `run_id`, existing **down**, ours **ok** | **older** — replace | within a run the committed success supersedes that input's failure file (P12) |
+| same `run_id`, existing **ok**, ours **down** | **newer** — stop | a delayed failure never replaces its own run's success (P14, P15) |
+| other run, `retrieved_at` > ours | **newer** — stop | `retrieved_at` is unique per run (§2.5) |
+| other run, `retrieved_at` < ours | **older** — replace | same |
+| legacy (no `run_id`), `head().uploaded` < our `retrieved_at` | **older — established** | uploaded after its data was retrieved |
+| legacy, `head().uploaded` ≥ our `retrieved_at` | **uncertain** — stop, deferred, logged; *not* treated as newer, not "superseded" | cannot tell without reading it (P11) |
+| absent | create-only `put` (`etagDoesNotMatch: "*"`) if verified; else **refused** — no unconditional write exists (P9, P10) | |
+Rev 5's rule "same `run_id` ⇒ ours" let a successful retry record `published` while the counts file still said down (GPT; P13 reproduces it).
 
-**C1 — records (`latest/`)**, up to 3 rounds per publication attempt:
-1. `h = head(latest/firms.json)`.
-2. ours → go to C2 (repair path).
-3. newer → `superseded_at` in D1, stop. Uncertain (legacy) → stop, deferred.
-4. older → claim identity is already ours (§2.5); `put(latest/…, stream copy of the committed snapshot, { onlyIf: { etagMatches: h.etag }, customMetadata })`. `null` → next round. Success → `latest_at`.
-5. **absent** → create-only `put` with `onlyIf: { etagDoesNotMatch: "*" }` (**verify** in local workerd that `*` means "only if absent"). If that cannot be verified, **refuse to publish** and log "latest/firms.json absent: one-time seeding needed". **No unconditional write exists in this design.**
-After 3 lost rounds → `contended`; nothing overwritten.
+**C1 — records (`latest/`)**, up to 3 CAS rounds: `ours` → go to C2; `newer` → `publish_state = 'superseded'`, stop; `uncertain` → stop (deferred; stays pending, retried, expires by the sweep); `older` / `absent` → conditional put; `null` → next round; success or `ours` → `latest_at = COALESCE(latest_at, now)`.
+**C2 — counts (`latest-cells/`)**, only when C1 ended `written` or `ours`, same rounds and table: success or `ours` → `cells_at = COALESCE(cells_at, now)`, `publish_state = 'published'`.
 
-**C2 — counts (`latest-cells/`)**, only when `latest/` holds ours, up to 3 rounds:
-1. `hc = head(latest-cells/firms.json)`. 2. ours → done. 3. newer (incl. a newer **down** run's file) → stop; uncertain legacy → stop, deferred. 4. older → `put(…, { onlyIf: { etagMatches: hc.etag } })`; `null` → next round; success → `cells_at`. 5. **absent** → the same create-only rule as C1 step 5, or refuse.
+**Repair and reconciliation** — all through the normal path (§6):
+- records published, counts write failed → the next run's discovery returns this output (its `retrieved_at` equals the current publication's), C1 finds `ours`, C2 writes the counts only (P16);
+- R2 records written, D1 `latest_at` update lost → same path; C1 `ours` records `latest_at`; C2 writes the counts (P17);
+- both R2 writes done, D1 `cells_at` update lost → C1 and C2 both `ours`: D1 reconciled, **zero R2 writes** (P18);
+- a newer run published meanwhile → the older output is no longer discoverable (`retrieved_at` < current) and is swept `superseded`; nothing overwritten (P19);
+- the counts write keeps failing → 3 publication claims, then the row leaves discovery (P20).
 
-**Repair after a partial publication.** `latest_at` set, `cells_at` null → a later publication attempt (bounded, §2.4) re-enters C: C1 step 2 recognises **its own `run_id`**, so it goes straight to C2 and writes only the counts, conditional on the etag just read; a newer run publishing meanwhile stops it at C1 step 3. Nothing is overwritten by an older run, ever.
-
-**Other writers** of `latest-cells/firms.json`: processing failures per §2.6 (fenced, input identity); runs with no input per §2.5 (own identity, +1 ms ≤ 3). Both go through this CAS; neither ever stamps "now" over a newer file.
-
-**Reconciling D1 after R2 succeeded.** If the R2 write succeeded but the D1 completion update did not, the next publication attempt (bounded, §2.4) finds **its own `run_id`** on the object, writes nothing to it, and records the missing `latest_at` / `cells_at` (P4: `latest_at` lost → only the counts file is written; P5: `cells_at` lost → zero R2 writes).
+**Down files** (the only other writer of `latest-cells/firms.json`): processing failures per §2.6 — fenced, `status: down`, ordered by the input's identity; runs with no input per §2.5 — their own identity. Both go through this CAS and table, so neither can stamp "now" over a newer file nor over its own run's success.
 
 ## 6. Retries: sweeps, discovery, bound, concurrency
 At the start of each run:
 1. **Sweeps** (cheap, eligible-index only): ready inputs and pending outputs older than the current publication → `superseded`; older than now − 36 h → `expired` (§2.1 table).
 2. **Discovery** — at most one piece of work, newest first, `LIMIT 1`, reading only an eligible index:
-   - unprocessed input: `WHERE state = 'ready' AND attempts_used < 3 AND retrieved_at > <current publication> ORDER BY retrieved_at DESC LIMIT 1` → `head()` the raw → claim (§2.2); `0` → someone else has it or it is spent; move on;
-   - unpublished output: `WHERE publish_state = 'pending' AND publish_attempts < 3 AND retrieved_at > <current publication> ORDER BY retrieved_at DESC LIMIT 1` → publication claim (§2.4) → §5.
+   - otherwise unprocessed input: `WHERE state = 'ready' AND attempts_used < 3 AND retrieved_at > <current publication> ORDER BY retrieved_at DESC LIMIT 1` → `head()` the raw → claim (§2.2); `0` → someone else has it or it is spent; move on;
+   - unpublished output **first**: `WHERE publish_state = 'pending' AND publish_attempts < 3 AND retrieved_at >= <current publication> ORDER BY retrieved_at DESC LIMIT 1` → publication claim (§2.4) → §5. `>=` includes the current publication's own pending repair (equal `retrieved_at` means that run, §2.5); older outputs are excluded here and retired by the superseded sweep, which uses `<` and so never sweeps the current run.
 3. Then the run's own fetch.
-**Bounded reads, as evidenced:** C15 holds 1k / 10k / 100k rows in every ineligible class (exhausted processing, exhausted publication, superseded, expired, done, published), all newer than the single eligible row, and both discovery queries stay at ~0.01 ms (local SQLite, not D1); with exhausted rows left in either index (the rev-4 shape, C16, or the break in §15) the same query grows ~0.03 → ~4 ms. The claim is about what is read — the eligible index, whose size is the eligible backlog — not that time is constant on D1.
+<current publication> = `retrieved_at` from `latest/firms.json`'s metadata (legacy: its upload time; absent: the epoch).
+**Bounded reads, as evidenced:** C15 holds 1k / 10k / 100k rows in every ineligible class (exhausted processing, exhausted publication, superseded, expired, done, published), all newer than the single eligible row, and both discovery queries stay at ~0.01 ms (local SQLite, not D1); with exhausted rows left in either index the same query grows (C16; the breaks in §15). The claim is about what is read — the eligible index, whose size is the eligible backlog — not that time is constant on D1.
 Every attempt is also logged in `collector_runs` (run_id + attempt in the note), so `/health/*` and coverage see retries like any run. Not included: a different input for a closed day (historical recovery), previous-day closure (R11), extending retention.
 
 **Warning before inputs expire** (extends `/health/archive/firms`): (a) a pending checkpoint day whose newest committed output's snapshot is older than 36 h; (b) the newest unprocessed input older than 36 h — i.e. a row the expiry sweep is about to retire. The reason names the key and its expiry. Nothing is extended automatically.
@@ -226,13 +216,13 @@ Peak: one gzip part + chunk buffers + the sidecar.
 ## 8. Readers (step E)
 - `/snapshot/firms`: unchanged — streams the stored object.
 - `/place` firms section: stream `latest/firms.json` (new format) and keep, for the asked cell, a **fixed 8-slot top list by `observed_at`** (ties in today's sort order) and a **count**. Answer shape unchanged: `records` (8, newest first), `records_total`, `count`, `cell`. Memory: 8 rows + one chunk + the line carry — independent of the cell and the file.
-- **Pairing by run identity (rev 4).** Because every writer of a shared FIRMS object holds a unique `retrieved_at` (§2.5), two files with the same `retrieved_at` are from the same run: the existing timestamp pairing — the page's `refreshPair`/`usable()` and `/place` — already pairs by identity. **No page change is needed.** In addition, the hub's `/place` compares `run_id` when both files carry one; one carrying it and the other not (a file written before the change, the other after) is treated as a mismatch → withheld. Legacy pairs (neither carries `run_id`) are paired by `retrieved_at` exactly as today. Optional later, and not required: the page could also compare `run_id`; that would be its own reviewed page change.
+- **Pairing by run identity.** Because every writer of a shared FIRMS object holds a unique `retrieved_at` (§2.5), two files with the same `retrieved_at` are from the same run: the existing timestamp pairing — the page's `refreshPair`/`usable()` and `/place` — already pairs by identity. **No page change is needed.** In addition, the hub's `/place` compares `run_id` when both files carry one; one carrying it and the other not (a file written before the change, the other after) is treated as a mismatch → withheld. Legacy pairs (neither carries `run_id`) are paired by `retrieved_at` exactly as today. Optional later, and not required: the page could also compare `run_id`; that would be its own reviewed page change.
 - Answer cache keyed by `(etag, cell)`, capped at **256 KB** total (LRU by bytes); cleared when the etag changes.
 - At most **2** concurrent firms scans per isolate; a third waits up to 2 s, then the firms section answers `unavailable` ("busy, try again"). No unbounded queue.
 
 ## 9. Legacy objects: bounded by their real sizes, not by the CSV guard
-GPT's point: the 8 MiB guard limits the **CSV**; the JSON written from it is larger (GPT's valid synthetic file: JSON ≈ **1.48 ×** the CSV), and a checkpoint is gzip-compressed, so its **decompressed** size is what a reader holds. Rev 2 inferred safety from the guard; rev 3 enforces limits on the bytes actually read.
-- **Cutover (rev 5):** `firms_settings.format_cutover_at` is written by `INSERT OR IGNORE` in the **same batch** that registers the first input (cutover → identity → input, one transaction), with that input's `retrieved_at` — so it exists before, and only with, the first committed registration; a failed registration batch leaves it unset (C21). **Legacy eligibility = legacy key format (`YYYY-MM-DDTHH-MMZ.json`) AND that object's exact `retrieved_at` < `format_cutover_at`** — a timestamp comparison, not a day comparison, so legacy records from earlier on the cutover day are eligible and nothing at or after the cutover is. While `format_cutover_at` is unset, no new-format input exists, so every legacy object is eligible. An old-code invocation still running across the deploy that writes a legacy object with `retrieved_at` ≥ cutover is ignored (conservative; logged). A new-format object is never read as legacy, whatever is missing about it (§7).
+GPT's point: the 8 MiB guard limits the **CSV**; the JSON written from it is larger (GPT's valid synthetic file: JSON ≈ **1.48 ×** the CSV), and a checkpoint is gzip-compressed, so its **decompressed** size is what a reader holds. An earlier revision inferred safety from the guard; this one enforces limits on the bytes actually read.
+- **Cutover:** `firms_settings.format_cutover_at` is written by `INSERT OR IGNORE` in the **same batch** that registers the first input (cutover → identity → input, one transaction), with that input's `retrieved_at` — so it exists before, and only with, the first committed registration; a failed registration batch leaves it unset (C21). **Legacy eligibility = legacy key format (`YYYY-MM-DDTHH-MMZ.json`) AND that object's exact `retrieved_at` < `format_cutover_at`** — a timestamp comparison, not a day comparison, so legacy records from earlier on the cutover day are eligible and nothing at or after the cutover is. While `format_cutover_at` is unset, no new-format input exists, so every legacy object is eligible. An old-code invocation still running across the deploy that writes a legacy object with `retrieved_at` ≥ cutover is ignored (conservative; logged). A new-format object is never read as legacy, whatever is missing about it (§7).
 - **Where legacy objects appear:** `snapshots/firms/` (gone within 2 days of the switch by the existing rule), `latest/` (replaced by the first new publication, normally within 15 minutes), archived `archive/checkpoints/firms/*.json.gz` (kept for good; read only by coverage backfill, which reads them only when a coverage row is missing — today none is missing for firms).
 - **Limits enforced while reading** (abort before parsing, never after):
   - legacy JSON (snapshot or `latest/`): `head().size` ≤ **L_json**; refused otherwise;
@@ -268,9 +258,11 @@ Peak per collect ≈ 2 × part + chunk buffers + 4 KiB carry + the maps (dense w
 | B done, commit fenced (stale) | this attempt's objects, unreferenced | last good | nothing; the winner's output stands; the objects expire |
 | B done, commit fails (D1 error) | objects, no output row | last good | retry by a new attempt, new keys |
 | C1 `latest/` | output committed; `latest_at` null | last good, consistent | publication retry (≤ 3) |
-| C1 newer run / uncertain legacy | `superseded_at` / deferred | the newer or existing publication | nothing overwritten |
-| C R2 write ok, D1 `latest_at` / `cells_at` update failed | objects ours, D1 behind | the published pair | next publication attempt reconciles D1 from R2 identity; no rewrite (P4, P5) |
-| C2 `latest-cells/` | `latest/` ours, counts old → mismatched pair | `/place` withholds firms; page keeps its last good pair | repair: C1 recognises ours → C2 only |
+| C1 newer run / uncertain legacy | `publish_state = 'superseded'` / deferred (stays pending) | the newer or existing publication | nothing overwritten |
+| C R2 write ok, D1 `latest_at` / `cells_at` update failed | objects ours, D1 behind | the published pair | next run's discovery → reconcile from R2 identity + status; no rewrite (P17, P18) |
+| C2 `latest-cells/` | `latest/` ours, counts old (or that input's down file) → mismatched pair | `/place` withholds firms; page keeps its last good pair | next run's discovery (`>=` current) → C1 `ours` → C2 only (P16) |
+| a successful retry after the same input's down file | counts file still down | down | C2 sees same run, existing down, ours ok → **older** → replaced (P12) |
+| a delayed failure after the same input's success | — | ok | C2 sees same run, existing ok, ours down → **newer** → stop (P14, P15) |
 | C absent shared object, create-only unverified | refusal | — | one-time seeding (Approve line) |
 | D committed output missing for the day | no new-format candidate | — | legacy candidate if pre-cutover; else the day waits / gap by the existing 2-day rule |
 | D gzip / archive / marker | no marker | — | retried next run |
@@ -290,7 +282,7 @@ Peak per collect ≈ 2 × part + chunk buffers + 4 KiB carry + the maps (dense w
 **Lifecycle.** Every object this design writes sits under a prefix that already has a 2-day rule (`raw/`, `snapshots/`, `cells/`) or is already kept by design (`latest/`, `latest-cells/`, `archive/checkpoints/`). **No new prefix, no rule added or changed.** Rev 2's `manifests/` prefix is withdrawn (§2); rev 2's `snapshots-aux/` becomes `snapshots/firms-aux/`, inside the existing `snapshots/` rule. R2's default 7-day abort covers incomplete multipart uploads (*stated*).
 
 **R2 operations per run** (Class A = writes/lists, Class B = reads/heads, *stated*):
-| | Today (0.5.2) | Rev 4, CSV ≤ 5 MiB and JSON ≤ 5 MiB | Rev 4, 10 MB CSV (JSON ≈ 15 MB at 1.48×) |
+| | Today (0.5.2) | This design, CSV ≤ 5 MiB and JSON ≤ 5 MiB | This design, 10 MB CSV (JSON ≈ 15 MB at 1.48×) |
 |---|---|---|---|
 | Class A | 5 puts (raw, snapshot, cells, latest, latest-cells) | 6 (+ sidecar) | raw multipart 4 (create, 2 parts, complete) + snapshot 5 (create, 3 parts, complete) + sidecar, cells, latest, latest-cells 4 = **13** |
 | Class B | 0–1 | ~7 (heads after writes, raw read in B, snapshot read for the `latest/` copy, CAS heads) | ~7 |
@@ -308,20 +300,18 @@ R2 free tier: 1 M Class A and 10 M Class B per month; then **$4.50 / M** Class A
 ## 15. Verification (before any deploy; outputs asserted, never just survival)
 **Inputs:** the real 5 Nov file (5,311,642 B, sha256 `c3487dcc…`, on the Mac); scale-ups of its own rows to 8 MiB, 16, 32 and 64 MiB; **dense synthetic files** that touch all 4,050 cells in all 24 hours (the `cells` / `by_hour` worst case) at 8 MiB and above; the 23-duplicate-line file; header-only; cut mid-row and between rows; a line of 4,097 bytes.
 **Equivalence:** for every input, the new `latest/firms.json` parsed = today's `firmsParse` envelope parsed (records deep-equal in order; `cells`, `by_hour` equal); every emitted line ≤ 4 KiB, including the dense files; sidecar = today's `firesDaily` on the same envelope; checkpoint object gunzipped = the snapshot bytes; `fires_daily` rows and coverage equal to today's; `/place` firms answers equal to today's for every cell with records, including the busiest real cell and the densest synthetic cell.
-**Rev 5 evidence (run):** `firms-state.check.mjs` 20/20 (C1–C12 kept, C13 replaced by C14–C21) and `firms-publish.check.mjs` 11/11 (P1–P11); breaks bite (no failure fence → P1 fails; exhausted rows kept in either eligible index → C15 fails, ~4 ms vs ~0.01 ms at 100k). Rev 4's C13 claim of "flat timing" was measured on an empty pending index and is withdrawn.
-**State and concurrency — real SQLite (`node:sqlite` + the real schema), deterministic interleavings.** Already run as design evidence (`docs/design-checks/firms-state.check.mjs`, 13/13): rev-3 race reproduced (C1); exclusive claim (C2); bound (C3); committed output blocks claims (C4); **stale attempt resumes after its replacement commits → fenced** (C5); stale resumes before the replacement commits → fenced (C6); overrun without replacement may commit (C7); duplicate commit (C8); publication bound (C9); **two runs, one `retrieved_at` → second refused** (C10); **newest snapshot without an output-complete record is not a checkpoint candidate** (C11); retry discovery (C12); **100,000 runs: every query an index search, flat timing** (C13). The build repeats them through the real `worker.js` and adds:
-- the same interleavings with the R2 stub: the fenced attempt's objects are never published or checkpointed; the winner's keys are byte-identical before and after the stale attempt resumes;
-- raw stored, then B fails → found and retried with new keys; commit D1 error → retried;
-- a new-format snapshot present with no output row **and** a legacy candidate on the same day → the legacy path is not used for the new object; the day uses only committed or pre-cutover legacy inputs.
-**Publication (R2 stub with real conditional semantics):** older run paused between `head()` and `put` while a newer run publishes → `null`, newer stands; `latest/` ok + `latest-cells/` failure → retry recognises its own `run_id`, writes only counts, stops if a newer run published first; newer down run's `latest-cells/` not overwritten; **both shared objects absent**, and each one absent alone, with create-only verified (writes once, a second create returns `null`) and unverified (refusal, nothing written); legacy object uploaded **before** our retrieval → replaced; legacy uploaded **after** our retrieval → **deferred and logged as uncertain**, not overwritten, not called newer.
-**Pairing:** two runs forced to the same millisecond → the second cannot publish (identity refused), so no reader can combine their files; `/place` with `run_id` on both and different → withheld; one with and one without `run_id` → withheld; legacy pair → paired by `retrieved_at` as today; the page's existing `refreshPair` tests still pass unchanged.
+**Run now (design evidence; real SQLite; the model on an R2 stub):**
+- `firms-state.check.mjs` 20/20 — claim: rev-3 race reproduced (C1), exclusive (C2), bound (C3), blocked after commit (C4); commit fence: stale after/before replacement (C5, C6), overrun without replacement (C7), duplicate (C8); publication bound (C9); identity collision (C10); checkpoint candidates = committed outputs only (C11); discovery (C12); sweeps (C14); **growing ineligible backlogs, 1k/10k/100k per class, all newer than the eligible row → flat** (C15); rev-4 growth reproduced (C16); failure fence (C17, C18); down-run identity: repeated collisions, refusal after 3, across UTC midnight, actual time kept (C19); collecting runs never re-stamped (C20); cutover (C21).
+- `firms-publish.check.mjs` 16/16 — stale failure fenced (P1); input-time ordering (P2); genuine latest failure (P3); paused older writer (P8); create-only both absent (P9) and **unverified** (P10); legacy older/uncertain (P11); **down → success, same input, through the normal path (P12)**; rev-5 "same run = ours" bug reproduced (P13); **success → delayed failure, fence passed then paused (P14) and racing at the put (P15)**; **discovery repair of the current run's counts (P16), lost D1 `latest_at` (P17), lost D1 `cells_at` with zero R2 writes (P18)**; older run's repair excluded and swept (P19); repair bound through the normal path (P20).
+- **Breaks bite:** no failure fence → P1 fails; "same run_id = ours" → P12–P15 fail; `FIND_UNPUBLISHED` with `>` → P16–P20 fail; a failure allowed to replace its own run's success → P14, P15 fail; exhausted rows kept in either eligible index → C15 fails.
+**Build-time, through the real `worker.js`:** the same cases, plus raw stored then B fails → retried with new keys; a commit D1 error → retried; two runs forced to one millisecond → the second cannot publish; `/place` with `run_id`s that differ, or one missing → withheld; legacy pair → paired by `retrieved_at` as today; the page's existing `refreshPair` tests unchanged.
 **Legacy + new together:** §9's bench at L_json, overlapping, both caps, 3 runs, with negative controls.
 **Injected failures:** every row of §11 — assert the last good publication byte-identical where it should be, no published key pointing at an incomplete object, retries bounded, nothing completed rewritten.
 **Memory (local, labelled local):** the workerd bench (`phase1/bench-firms-memory/`), total-heap caps 48 / 64 / 80 MB, 3 runs each, outputs asserted, for every size up to 64 MiB and the dense files. **The "independent of file size" claim is made only if every new-path scenario passes at the same cap across all sizes.** Negative controls must FAIL.
 **Production (labelled production; after a separate deploy approval):** Worker memory P50/P99/P999 and Exceeded Memory for 48 h; CPU per firms tick; R2 Class A/B from the usage page; D1 rows; `/health/*` green. The guard stays at 8 MiB until then.
 
 ## 16. Order of work (each a separate go)
-1. GPT re-review of this rev 5.
+1. GPT re-review of this rev 6.
 2. Measure first: whether FIRMS sends `Content-Length`; the account's current R2 Class A/B usage; the largest stored legacy snapshot and checkpoint (sizes only, read-only listing); the JSON/CSV ratio on real and dense files; `etagDoesNotMatch: "*"` and `R2ObjectBody` known-length behaviour in local workerd; the busiest real cell and a `/place` scan's CPU on the 5 Nov file.
 3. Build on a branch with §15's tests and bench.
 4. GPT review → Chad's Approve lines (§14: D1 tables, then deploy).
