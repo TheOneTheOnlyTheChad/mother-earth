@@ -195,7 +195,7 @@ await t('H4c. history stopped writing activity yesterday (e.g. every history ste
   const h = await healthyHub(); const { env, db } = h;
   db.prepare("DELETE FROM history_activity WHERE layer='firms' AND day='2026-11-05'").run();
   db.prepare("DELETE FROM archive_checkpoints WHERE layer='firms' AND day='2026-11-05'").run();
-  const a = await check(env, '/health/archive/firms'); assert.equal(a.status, 503); assert.match(a.body.reasons.join(' '), /no firms history activity was recorded for 2026-11-05/);
+  const a = await check(env, '/health/archive/firms'); assert.equal(a.status, 503); assert.match(a.body.reasons.join(' '), /firms 2026-11-05 has neither a checkpoint nor a recorded gap .* missed silently/);
 });
 await t('H4d. history switched off: archive checks fail closed with the reason (pause the monitor if intended)', async () => {
   const { env } = await healthyHub(); env.HISTORY_ENABLED = '0';
@@ -227,7 +227,7 @@ await t('H6b. tables missing (schema not loaded) → 503, never 200', async () =
 await t('H6c. empty database (no runs ever) → 503 for runs/publication; archive 200 only because nothing is due (stated in facts)', async () => {
   const { env } = makeEnv({ HISTORY_ENABLED: '1' });
   for (const p of ['/health/runs/usgs', '/health/runs/firms', '/health/publication/usgs', '/health/publication/firms']) { const g = await check(env, p); assert.equal(g.status, 503, p); assert.match(g.body.reasons[0], /ever/); }
-  const a = await check(env, '/health/archive/firms'); assert.equal(a.status, 200); assert.equal(a.body.facts.history_since, null, 'stated: history has never run, so nothing is due');
+  const a = await check(env, '/health/archive/firms'); assert.equal(a.status, 200); assert.equal(a.body.facts.established_before_yesterday, false, 'stated: no evidence that history ever ran, so nothing is due');
 });
 await t('H6d. R2 head() throws, latest/ file missing, or a run time is unparsable → 503', async () => {
   let h = await healthyHub(); h.r2.failHead = true; assert.equal((await check(h.env, '/health/publication/firms')).status, 503);
@@ -248,13 +248,14 @@ await t('H7. recovery: after 70 min of HTTP 500 the first good FIRMS run turns p
 });
 
 // ================= H8 nothing secret, nothing admin
-await t('H8. a run note carrying the FIRMS key (fetch error with the URL) is redacted; no env secret appears in any answer', async () => {
+await t('H8. a run note carrying the FIRMS key (fetch error with the URL) is redacted in every health answer AND in /status', async () => {
   const { env } = await healthyHub(); firmsMode = 'throw'; await runUntil(env, '2026-11-06T10:00:00Z'); firmsMode = 'ok';
   const st = await check(env, '/status');
-  const leaked = st.text.includes(env.FIRMS_MAP_KEY);   // pre-existing behaviour of /status, reported, not changed here
+  assert.ok(!st.text.includes(env.FIRMS_MAP_KEY) && !st.text.includes(env.ADMIN_KEY), '/status no longer exposes the key (rev 2)');
+  assert.match(st.text, /fetch failed: TypeError: network connection lost while fetching .*\[redacted\]/, 'the note survives, minus the key');
+  assert.match(st.text, /"collector_version":"0\.5\.3"/, 'non-note strings are intact');
   for (const p of ALL) { const g = await check(env, p); for (const v of [env.FIRMS_MAP_KEY, env.ADMIN_KEY]) assert.ok(!g.text.includes(v), p + ' leaks a secret'); }
   const p = await check(env, '/health/publication/firms'); assert.match(p.text, /\[redacted\]/);
-  console.log('   note: /status (unchanged) exposes the key in a fetch-error note:', leaked);
 });
 
 // ================= H9 routing
@@ -275,6 +276,58 @@ await t('H10. EXPLAIN QUERY PLAN: no health query scans collector_runs or the ar
     const plan = db.prepare('EXPLAIN QUERY PLAN ' + sql).all(...Array((sql.match(/\?\d?/g) || []).length ? [...new Set(sql.match(/\?\d*/g))].length : 0).fill('firms')).map(r => r.detail).join(' | ');
     assert.ok(!/SCAN (collector_runs|archive_gaps|archive_checkpoints|archive_checkpoint_coverage)\b(?! USING)/.test(plan), sql.slice(0, 90) + ' → ' + plan);
   }
+});
+
+
+// ================= P. GPT's independent probes (6 Nov, rev 1 → all six returned green); each must now fail closed
+await t('P1. corrupt coverage evidence (unparsable cutoff / assessed_at, unreadable failure_reasons) with input_status "current" → 503', async () => {
+  const h = await healthyHub(); const { env, db } = h;
+  db.prepare("UPDATE archive_checkpoint_coverage SET cutoff='not-a-time', assessed_at='not-a-time', failure_reasons='{bad json' WHERE layer='firms' AND day='2026-11-05'").run();
+  const r = await check(env, '/health/coverage/firms'); assert.equal(r.status, 503, r.text); assert.match(r.body.reasons.join(' '), /unreadable or does not match/);
+  for (const [col, val] of [['failure_reasons', '"just a string"'], ['input_status', "'fine'"], ['failed_runs_after_cutoff', '3']]) {
+    const h2 = await healthyHub(); h2.db.prepare(`UPDATE archive_checkpoint_coverage SET ${col}=${col === 'failure_reasons' ? "'" + val + "'" : val} WHERE layer='firms' AND day='2026-11-05'`).run();
+    assert.equal((await check(h2.env, '/health/coverage/firms')).status, 503, col + ' corrupt/contradictory must fail');
+  }
+});
+await t('P2. a NEW gap for an OLD day is found even with five newer gaps in the display list', async () => {
+  const { env, db } = await healthyHub();
+  for (const d of ['2026-10-02', '2026-10-03', '2026-10-04', '2026-10-05', '2026-10-06']) db.prepare('INSERT INTO archive_gaps (layer, day, reason, detected_at) VALUES (?,?,?,?)').run('firms', d, 'old gap', '2026-10-20T00:00:00.000Z');
+  db.prepare('INSERT INTO archive_gaps (layer, day, reason, detected_at) VALUES (?,?,?,?)').run('firms', '2026-09-01', 'found today', '2026-11-06T08:00:00.000Z');
+  const r = await check(env, '/health/archive/firms'); assert.equal(r.status, 503, r.text); assert.match(r.body.reasons.join(' '), /new archive gap: firms 2026-09-01/);
+  assert.equal(r.body.facts.recorded_gaps.length, 5, 'display list unchanged (5)');
+});
+await t('P3. established hub loses ALL activity records and yesterday\'s checkpoint → 503 (other evidence shows history ran)', async () => {
+  const { env, db } = await healthyHub();
+  db.prepare("DELETE FROM history_activity WHERE layer='firms'").run(); db.prepare("DELETE FROM archive_checkpoints WHERE layer='firms' AND day='2026-11-05'").run();
+  const r = await check(env, '/health/archive/firms'); assert.equal(r.status, 503, r.text); assert.match(r.body.reasons.join(' '), /2026-11-05 has neither a checkpoint nor a recorded gap/);
+  assert.equal(r.body.facts.established_before_yesterday, true);
+  const { env: e2, db: d2 } = await healthyHub();   // even with the earlier checkpoints gone too, fires_daily rows remain as evidence
+  d2.prepare("DELETE FROM history_activity WHERE layer='firms'").run(); d2.prepare("DELETE FROM archive_checkpoints WHERE layer='firms'").run(); d2.prepare("DELETE FROM fires_daily WHERE day >= '2026-11-05'").run();
+  assert.equal((await check(e2, '/health/archive/firms')).status, 503, 'fires_daily before yesterday is independent evidence');
+});
+await t('P4. a run (or published file) timestamped in the future → 503, never a negative age', async () => {
+  let h = await healthyHub(); h.db.prepare("INSERT INTO collector_runs (layer, started_at, finished_at, status, http_status, records, bytes, note) VALUES ('firms','2026-11-06T09:00:00.000Z','2099-11-06T09:00:00.000Z','ok',200,3,1,'raw_bytes=174')").run();
+  for (const p of ['/health/runs/firms', '/health/publication/firms']) { const r = await check(h.env, p); assert.equal(r.status, 503, p + ' ' + r.text); assert.match(r.body.reasons[0], /time in the future/); }
+  h = await healthyHub(); h.store.get('latest/firms.json').uploaded = new Date(Date.parse('2099-01-01T00:00:00Z'));
+  assert.equal((await check(h.env, '/health/publication/firms')).status, 503, 'future upload time');
+  h = await healthyHub(); h.db.prepare('INSERT INTO archive_gaps (layer, day, reason, detected_at) VALUES (?,?,?,?)').run('firms', '2026-11-01', 'x', '2099-01-01T00:00:00.000Z');
+  assert.equal((await check(h.env, '/health/archive/firms')).status, 503, 'future gap time');
+  h = await healthyHub(); h.db.prepare("INSERT INTO collector_runs (layer, started_at, finished_at, status, http_status, records, bytes, note) VALUES ('firms','2026-11-06T09:00:00.000Z','2026-11-06T09:04:00.000Z','ok',200,3,1,'skew')").run();
+  assert.equal((await check(h.env, '/health/runs/firms')).status, 200, 'up to 5 min of clock skew is tolerated');
+});
+await t('P5. guard at 09:15 then HTTP 500 at 09:30: stays 503 (never green) until a successful publication, then 200', async () => {
+  const { env } = await healthyHub();
+  firmsMode = 'body'; firmsBody = 'latitude,longitude,acq_date,acq_time,confidence,frp,satellite,daynight\n' + 'x'.repeat(W.FIRMS_MAX_PARSE_BYTES + 10);
+  await runUntil(env, '2026-11-06T09:16:00Z'); assert.equal((await check(env, '/health/publication/firms')).status, 503);
+  firmsMode = 'http500'; await runUntil(env, '2026-11-06T09:31:00Z');
+  const r = await check(env, '/health/publication/firms'); assert.equal(r.status, 503, r.text); assert.match(r.body.reasons.join(' '), /resource guard at 2026-11-06T09:15/);
+  firmsMode = 'ok'; await runUntil(env, '2026-11-06T09:46:00Z');
+  assert.equal((await check(env, '/health/publication/firms')).status, 200, 'resolved by the 09:45 publication');
+});
+await t('P6. coverage row describing a different cutoff from the actual checkpoint → 503', async () => {
+  const { env, db } = await healthyHub();
+  db.prepare("UPDATE archive_checkpoint_coverage SET cutoff='2026-11-05T15:30:00.000Z' WHERE layer='firms' AND day='2026-11-05'").run();
+  const r = await check(env, '/health/coverage/firms'); assert.equal(r.status, 503, r.text); assert.match(r.body.reasons.join(' '), /is not the checkpoint's cutoff/);
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);

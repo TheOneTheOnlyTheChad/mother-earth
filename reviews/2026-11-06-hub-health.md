@@ -1,4 +1,23 @@
-# Hub health for an external monitor (UptimeRobot) — branch `hub-health`, hub 0.5.3 — rev 1, 6 Nov 2026
+# Hub health for an external monitor (UptimeRobot) — branch `hub-health`, hub 0.5.3 — rev 2, 6 Nov 2026
+
+## Rev 2 — GPT's review of rev 1 (`80a380a`)
+GPT reproduced rev 1 (23/23, 12/12 breaks, 9 regressions) and ran six probes that all came back **green when they should be red**. Each is now a test (`P1`–`P6` in `health-hub.test.mjs`); **rev 1's `worker.js` fails all six** (checked by running the suite with `WORKER=` set to the rev-1 file), rev 2 passes them.
+| Probe | Rev 1 | Fix in rev 2 |
+|---|---|---|
+| P1 corrupt coverage evidence (unparsable `cutoff`/`assessed_at`, unreadable `failure_reasons`) with `input_status = current` | 200 | Coverage evidence is validated before "current" can mean healthy: times parse and are not in the future, `failure_reasons` is a JSON list, `input_status` is `current`/`stale`, `failed_runs_after_cutoff` is a count, and "current" with failures > 0 is a contradiction → 503 |
+| P2 a new gap for an old day, hidden behind five newer gaps | 200 | Recent gaps are found by **when they were recorded** (`detected_at` within 24 h, any day) in their own query; the 5-row list is display only. A gap with no readable `detected_at` counts as recent (fail closed) |
+| P3 established hub loses all activity rows + yesterday's checkpoint | 200 | "Established" is decided from **independent evidence**: any checkpoint, gap or activity row before yesterday, or the layer's data table (`fires_daily` / `quake_revisions`) before yesterday. On an established hub, yesterday must have a checkpoint or a gap by 02:00 UTC, judged from those tables — not from the activity row that makes a day "due". Stated limit: if every one of those sources is lost together, the hub is indistinguishable from a new installation |
+| P4 a run finished in 2099 → negative age → green | 200 | Every time used as evidence goes through `tAt()`: unparsable **or more than 5 min in the future** → 503 "health data unreadable". 4 min of skew is tolerated (tested) |
+| P5 guard 09:15, then HTTP 500 09:30 → red, then green | 503 → 200 | A resource-guard skip **after the last publication** keeps `publication/firms` failing until a new publication, whatever runs come in between |
+| P6 coverage row describing a different cutoff from the checkpoint | 200 | The coverage `cutoff` must equal the checkpoint's `cutoff` |
+| (agreed with GPT) `/status` notes | unredacted | `/status` now passes through `redactStatus()`: note/reason/failure_reasons fields get the full redaction (secret values + long tokens); every other string loses secret values only, so keys, hashes and times stay intact. GPT's point stands: the leak shown is from a **synthetic** error; it does not establish that a real key has ever leaked |
+
+**Tests (rev 2):** `health-hub.test.mjs` **29/29**; `health-breaks.mjs` **19/19** breaks caught (7 new: P1–P6 + `/status`; the checker now counts P-test failures too — before that fix 6 breaks looked "missed" because only H-test failures were counted). Regressions unchanged: history-hub 27 · firms-guard 19 · place-rows 7 · drifters-hub 12 · plastic-hub 11 · ships-fallback 7 · ships-late 7 · satellites-hub 12 · orbital-hub 13.
+**UptimeRobot push on Free:** GPT cites UptimeRobot's help article on mobile-app push as confirming it on Free. I could not open that article from here (blocked); UptimeRobot's mobile-app page says every plan can use the app. Delivery is still proven only by the Mac-closed acceptance test (§7).
+**Still for Chad:** nothing deployed. Sections below are rev 1 text with the thresholds unchanged; where they conflict, this section wins.
+
+---
+
 
 Brief: `docs/briefs/2026-11-06-monitoring-and-memory.md` (GPT, relayed by Chad). Authorised: branch work, local tests, documentation. **Nothing deployed, no account created, no monitor configured, no production read or write.** STATUS.md / HANDOVER.md untouched (another thread owns them until its 00:50 UTC 7 Nov handover).
 

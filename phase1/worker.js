@@ -1538,7 +1538,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1895,13 +1895,30 @@ const HEALTH = {
   boundaryNote: 'no detections processed yet for today',   // collectFirms' expected-empty note before FIRMS_DAY_BOUNDARY_H
 };
 const healthAllowS = layer => HEALTH.missedSlots * HEALTH.cadenceS[layer] + HEALTH.marginS;
-/** Cut a run note for a public answer: no secret value (any env string of 16+ chars), no long token, 160 chars. */
-function healthNote(env, s) {
+/** Remove secrets from text: every env string of 16+ chars (all the secrets); with `tokens`, also any 32+ char token. No cut. */
+function redactText(env, s, tokens = true) {
   let t = String(s == null ? '' : s);
   for (const v of Object.values(env || {})) if (typeof v === 'string' && v.length >= 16) t = t.split(v).join('[redacted]');
-  return t.replace(/[A-Za-z0-9_\-]{32,}/g, '[redacted]').slice(0, 160);
+  return tokens ? t.replace(/[A-Za-z0-9_\-]{32,}/g, '[redacted]') : t;
 }
-const tMs = s => { const v = Date.parse(s); if (!Number.isFinite(v)) throw new Error('unparsable time in health data: ' + String(s).slice(0, 40)); return v; };
+/** Cut a run note for a public health answer: redacted, 160 chars. */
+function healthNote(env, s) { return redactText(env, s).slice(0, 160); }
+/** /status (0.5.3, rev 2): free-text fields (note, reason, failure_reasons) get the full redaction; every other string loses
+ * secret values only (keys, hashes and times stay intact). Lengths unchanged otherwise. */
+function redactStatus(env, x, key) {
+  if (Array.isArray(x)) return x.map(v => redactStatus(env, v, key));
+  if (x && typeof x === 'object') { const o = {}; for (const k of Object.keys(x)) o[k] = redactStatus(env, x[k], k); return o; }
+  if (typeof x === 'string') return redactText(env, x, ['note', 'reason', 'failure_reasons'].includes(key));
+  return x;
+}
+const HEALTH_SKEW_MS = 5 * 60e3;   // a recorded time more than 5 min after "now" is corrupt evidence, never fresh evidence
+/** A time from health evidence: unparsable or in the future → throw (the check answers 503 "health data unreadable"). */
+function tAt(s, nowMs, what) {
+  const v = s instanceof Date ? s.getTime() : Date.parse(s);
+  if (!Number.isFinite(v)) throw new Error(`unparsable time in health data (${what}): ` + String(s).slice(0, 40));
+  if (v > nowMs + HEALTH_SKEW_MS) throw new Error(`time in the future in health data (${what}): ` + new Date(v).toISOString());
+  return v;
+}
 /** FIRMS only: the day_range=1 file is legitimately empty from 00:00 until ~FIRMS_DAY_BOUNDARY_H UTC (collectFirms logs those runs
  * with HEALTH.boundaryNote). A publication deadline that falls inside that window is counted instead from the window's LAST slot
  * (03:45 UTC), as if that slot had published — the same moment the "last acceptable run" rule reaches, so the two agree. Pure. */
@@ -1914,7 +1931,7 @@ function healthDeadline(layer, pubMs) {
 async function healthRuns(env, layer, nowMs) {
   const last = await env.DB.prepare('SELECT started_at, finished_at, status, note FROM collector_runs WHERE layer = ? ORDER BY finished_at DESC LIMIT 1').bind(layer).first();
   if (!last) return { healthy: false, reasons: [`no ${layer} run has ever been recorded`] };
-  const age = Math.round((nowMs - tMs(last.finished_at)) / 1000), allow = healthAllowS(layer);
+  const age = Math.round((nowMs - tAt(last.finished_at, nowMs, 'latest run finished_at')) / 1000), allow = healthAllowS(layer);
   const facts = { latest_run: { scheduled_at: last.started_at, finished_at: last.finished_at, status: last.status, note: healthNote(env, last.note) }, age_s: age, allow_s: allow };
   return age > allow ? { healthy: false, reasons: [`no ${layer} run has completed for ${age} s (allowed ${allow} s = ${HEALTH.missedSlots} scheduled slots + ${HEALTH.marginS} s): scheduling stopped or every run is dying before it is logged`], facts } : { healthy: true, reasons: [], facts };
 }
@@ -1930,34 +1947,51 @@ async function healthPublication(env, layer, nowMs) {
   if (!ok) reasons.push(`no successful ${layer} publication has ever been logged`);
   if (!head) reasons.push(`latest/${layer}.json is missing: nothing is published`);
   if (!ok || !head) return { healthy: false, reasons, facts: { latest_run: last ? { finished_at: last.finished_at, status: last.status, note: healthNote(env, last.note) } : null } };
-  const logMs = tMs(ok.finished_at), fileMs = head.uploaded instanceof Date ? head.uploaded.getTime() : tMs(head.uploaded);
+  const logMs = tAt(ok.finished_at, nowMs, 'last ok run finished_at'), fileMs = tAt(head.uploaded, nowMs, 'published file uploaded');
+  if (last) tAt(last.finished_at, nowMs, 'latest run finished_at'); if (acc) tAt(acc.finished_at, nowMs, 'last acceptable run finished_at');
   const pubMs = Math.min(logMs, fileMs);   // conservative: the older of "the log says ok" and "the file was written"
+  // rev 2 (GPT P5): a resource-guard skip AFTER the last publication keeps this check failing until a new publication —
+  // a later run of another kind (e.g. an HTTP 500) must not close the guard incident.
+  const guard = await env.DB.prepare("SELECT finished_at FROM collector_runs WHERE layer = ? AND status != 'ok' AND finished_at > ? AND note LIKE '%resource guard%' ORDER BY finished_at DESC LIMIT 1").bind(layer, ok.finished_at).first();
   const due = healthDeadline(layer, pubMs);
   const facts = { last_publication: { logged_ok_finished_at: ok.finished_at, file_uploaded_at: new Date(fileMs).toISOString(), records: ok.records, age_s: Math.round((nowMs - pubMs) / 1000) },
-    overdue_from: new Date(due).toISOString(), allow_s: allow,
+    overdue_from: new Date(due).toISOString(), allow_s: allow, guard_skip_since_publication: guard ? guard.finished_at : null,
     latest_run: last ? { scheduled_at: last.started_at, finished_at: last.finished_at, status: last.status, note: healthNote(env, last.note) } : null };
   if (Math.abs(logMs - fileMs) > 10 * 60e3) reasons.push(`the run log and the published file disagree by ${Math.round(Math.abs(logMs - fileMs) / 1000)} s (log ${ok.finished_at}, file ${facts.last_publication.file_uploaded_at})`);
-  if (last && last.status !== 'ok' && /resource guard/i.test(last.note || '')) reasons.push('the latest run was skipped by the resource guard: the source answered but was not processed or published');
+  if (guard) reasons.push(`a run was skipped by the resource guard at ${guard.finished_at} and nothing has been published since: the source answered but was not processed`);
   if (nowMs > due) reasons.push(`no ${layer} publication since ${new Date(pubMs).toISOString()} (overdue from ${facts.overdue_from})` + (last && last.status !== 'ok' ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));
-  else if (!acc || nowMs - tMs(acc.finished_at) > allow * 1000) reasons.push(`no ${layer} run has ended with a publication or an expected empty file for over ${allow} s` + (last ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));
+  else if (!acc || nowMs - tAt(acc.finished_at, nowMs, 'last acceptable run') > allow * 1000) reasons.push(`no ${layer} run has ended with a publication or an expected empty file for over ${allow} s` + (last ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));
   return { healthy: !reasons.length, reasons, facts };
 }
+// rev 2 (GPT P3): independent evidence that history is ESTABLISHED for a layer before yesterday — any one of these is enough.
+// A hub that has none of them is indistinguishable from a new installation (stated limit: if all of them are lost together, too).
+const HEALTH_EST = {
+  firms: "SELECT (SELECT 1 FROM archive_checkpoints WHERE layer = ?1 AND day < ?2 LIMIT 1) AS cp, (SELECT 1 FROM archive_gaps WHERE layer = ?1 AND day < ?2 LIMIT 1) AS gp, (SELECT 1 FROM history_activity WHERE layer = ?1 AND day < ?2 LIMIT 1) AS ha, (SELECT 1 FROM fires_daily WHERE day < ?2 LIMIT 1) AS data",
+  usgs: "SELECT (SELECT 1 FROM archive_checkpoints WHERE layer = ?1 AND day < ?2 LIMIT 1) AS cp, (SELECT 1 FROM archive_gaps WHERE layer = ?1 AND day < ?2 LIMIT 1) AS gp, (SELECT 1 FROM history_activity WHERE layer = ?1 AND day < ?2 LIMIT 1) AS ha, (SELECT 1 FROM quake_revisions WHERE received_at < ?2 LIMIT 1) AS data",
+};
 async function healthArchive(env, layer, nowMs) {
   if (!histOn(env)) return { healthy: false, reasons: ['history collection is off (HISTORY_ENABLED is not 1): pause this monitor if that is intended'] };
   const today = dayKey(nowMs), y = dayKey(nowMs - 86400e3), since = new Date(nowMs - HEALTH.newGapS * 1000).toISOString();
-  const [pendR, gapR, firstR, yR] = await env.DB.batch([
+  const [pendR, recentR, listR, yR, estR] = await env.DB.batch([
     env.DB.prepare('SELECT a.day FROM history_activity a WHERE a.layer = ? AND a.day < ? AND NOT EXISTS (SELECT 1 FROM archive_checkpoints c WHERE c.layer = a.layer AND c.day = a.day) AND NOT EXISTS (SELECT 1 FROM archive_gaps g WHERE g.layer = a.layer AND g.day = a.day) ORDER BY a.day').bind(layer, today),
+    // rev 2 (GPT P2): recent incidents are found by WHEN they were recorded, for any day — not from the 5-row display list
+    env.DB.prepare('SELECT day, reason, detected_at FROM archive_gaps WHERE layer = ? AND (detected_at >= ? OR detected_at IS NULL OR length(detected_at) < 20) ORDER BY day').bind(layer, since),
     env.DB.prepare('SELECT day, reason, detected_at FROM archive_gaps WHERE layer = ? ORDER BY day DESC LIMIT 5').bind(layer),
-    env.DB.prepare('SELECT MIN(day) AS d FROM history_activity WHERE layer = ?').bind(layer),
     env.DB.prepare('SELECT (SELECT 1 FROM history_activity WHERE layer = ?1 AND day = ?2) AS ran, (SELECT 1 FROM archive_checkpoints WHERE layer = ?1 AND day = ?2) AS done, (SELECT 1 FROM archive_gaps WHERE layer = ?1 AND day = ?2) AS gap').bind(layer, y),
+    env.DB.prepare(HEALTH_EST[layer]).bind(layer, y),
   ]);
-  const pend = (pendR.results || []).map(r => r.day), gaps = gapR.results || [], first = ((firstR.results || [])[0] || {}).d || null, yy = (yR.results || [])[0] || {};
-  const reasons = [];
+  const pend = (pendR.results || []).map(r => r.day), recent = recentR.results || [], gaps = listR.results || [], yy = (yR.results || [])[0] || {}, est = (estR.results || [])[0] || {};
+  const established = !!(est.cp || est.gp || est.ha || est.data);
+  const reasons = [], dayClosedS = Math.round((nowMs - Date.parse(today + 'T00:00:00Z')) / 1000);
   for (const d of pend) { const late = Math.round((nowMs - Date.parse(d + 'T00:00:00Z') - 86400e3) / 1000);
     if (late > HEALTH.checkpointOverdueS) reasons.push(`${layer} checkpoint for ${d} is not complete ${(late / 3600).toFixed(1)} h after the day closed (failing from ${HEALTH.checkpointOverdueS / 3600} h)`); }
-  for (const g of gaps) if (g.detected_at && g.detected_at >= since) reasons.push(`new archive gap: ${layer} ${g.day} — ${healthNote(env, g.reason)} (recorded ${g.detected_at})`);
-  if (first && first < y && !yy.ran) reasons.push(`no ${layer} history activity was recorded for ${y} although history ran before it: that day can never become due, so it would be missed silently`);
-  return { healthy: !reasons.length, reasons, facts: { pending: pend, history_since: first, yesterday: { day: y, history_ran: !!yy.ran, checkpoint: !!yy.done, gap: !!yy.gap }, recorded_gaps: gaps.map(g => ({ ...g, reason: healthNote(env, g.reason) })),
+  for (const g of recent) { tAt(g.detected_at, nowMs, 'gap detected_at'); reasons.push(`new archive gap: ${layer} ${g.day} — ${healthNote(env, g.reason)} (recorded ${g.detected_at})`); }
+  // rev 2 (GPT P3): on an established hub, yesterday must be COMPLETE or a recorded gap by 2 h after midnight — judged from the
+  // checkpoint and gap tables themselves, so it does not depend on the activity record that makes a day "due".
+  if (established && !yy.done && !yy.gap && !pend.includes(y) && dayClosedS > HEALTH.checkpointOverdueS)
+    reasons.push(`${layer} ${y} has neither a checkpoint nor a recorded gap ${(dayClosedS / 3600).toFixed(1)} h after it closed, and no activity record makes it due: it would be missed silently`);
+  return { healthy: !reasons.length, reasons, facts: { pending: pend, established_before_yesterday: established, evidence: { checkpoints: !!est.cp, gaps: !!est.gp, activity: !!est.ha, data_rows: !!est.data },
+    yesterday: { day: y, history_ran: !!yy.ran, checkpoint: !!yy.done, gap: !!yy.gap }, recent_gaps: recent.map(g => ({ ...g, reason: healthNote(env, g.reason) })), recorded_gaps: gaps.map(g => ({ ...g, reason: healthNote(env, g.reason) })),
     gap_alert_window_s: HEALTH.newGapS, note: 'a gap stays listed here and in /status for good; it fails this check only for 24 h after it was recorded' } };
 }
 async function healthCoverage(env, layer, nowMs) {
@@ -1969,9 +2003,18 @@ async function healthCoverage(env, layer, nowMs) {
   const c = (covR.results || [])[0], cp = (cpR.results || [])[0];
   if (!cp) return { healthy: true, reasons: [], facts: { day: y, state: 'not assessed yet: the checkpoint for this day is not complete (the archive check covers that)' } };
   if (!c) return { healthy: false, reasons: [`${layer} checkpoint for ${y} is complete but has no coverage record (it is written before the marker, so this should not happen)`], facts: { day: y } };
-  let why = []; try { why = JSON.parse(c.failure_reasons || '[]'); } catch (_) { why = ['(unreadable)']; }
-  const facts = { day: y, cutoff: c.cutoff, input_status: c.input_status, failed_runs_after_cutoff: c.failed_runs_after_cutoff, input_age_at_day_end_s: c.input_age_at_day_end_s,
-    failure_reasons: why.map(r => healthNote(env, r)), assessed_at: c.assessed_at, assessed_with_checkpoint: !!c.assessed_with_checkpoint };
+  // rev 2 (GPT P1, P6): the evidence must be readable, self-consistent and about THIS checkpoint before "current" can mean healthy.
+  const bad = [];
+  let why = null; try { why = JSON.parse(c.failure_reasons || '[]'); } catch (_) {} if (!Array.isArray(why)) bad.push('failure_reasons is not a readable list');
+  for (const [k, v] of [['cutoff', c.cutoff], ['assessed_at', c.assessed_at]]) { try { tAt(v, nowMs, k); } catch (e) { bad.push(String(e.message)); } }
+  try { tAt(cp.cutoff, nowMs, 'checkpoint cutoff'); } catch (e) { bad.push(String(e.message)); }
+  if (c.cutoff !== cp.cutoff) bad.push(`coverage cutoff ${String(c.cutoff).slice(0, 40)} is not the checkpoint's cutoff ${String(cp.cutoff).slice(0, 40)}`);
+  if (!['current', 'stale'].includes(c.input_status)) bad.push(`input_status "${String(c.input_status).slice(0, 20)}" is not current|stale`);
+  if (!Number.isInteger(c.failed_runs_after_cutoff) || c.failed_runs_after_cutoff < 0) bad.push('failed_runs_after_cutoff is not a count');
+  else if (c.input_status === 'current' && c.failed_runs_after_cutoff > 0) bad.push(`input_status "current" contradicts ${c.failed_runs_after_cutoff} failed runs after the cutoff`);
+  const facts = { day: y, cutoff: c.cutoff, checkpoint_cutoff: cp.cutoff, input_status: c.input_status, failed_runs_after_cutoff: c.failed_runs_after_cutoff, input_age_at_day_end_s: c.input_age_at_day_end_s,
+    failure_reasons: Array.isArray(why) ? why.map(r => healthNote(env, r)) : null, assessed_at: c.assessed_at, assessed_with_checkpoint: !!c.assessed_with_checkpoint };
+  if (bad.length) return { healthy: false, reasons: bad.map(b => `${layer} coverage for ${y} is unreadable or does not match its checkpoint: ${healthNote(env, b)}`), facts };
   if (c.input_status === 'current') return { healthy: true, reasons: [], facts };
   return { healthy: false, reasons: [`${layer} checkpoint for ${y} was built from a ${c.input_status} input (cutoff ${c.cutoff}; ${c.failed_runs_after_cutoff} failed runs after it)`], facts };
 }
@@ -2303,7 +2346,7 @@ export default {
       const runs = await env.DB.prepare('SELECT layer, started_at, status, http_status, records, bytes, note FROM collector_runs WHERE id IN (SELECT MAX(id) FROM collector_runs GROUP BY layer)').all();
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
-      return json({ now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch, history: await historyState(env), archive_health: await archiveHealth(env, Date.now()) }, 200, { 'Cache-Control': 'no-store' });
+      return json(redactStatus(env, { now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch, history: await historyState(env), archive_health: await archiveHealth(env, Date.now()) }), 200, { 'Cache-Control': 'no-store' });   // 0.5.3: notes redacted
     }
 
     if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'ships') {   // 0.3.3: private Worker listen to aisstream; publishes nothing
