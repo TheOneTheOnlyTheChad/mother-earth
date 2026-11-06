@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 16
 
+## 6 Nov ~06:40 UTC — **5 Nov fires recovery BUILT in the workspace** (Chad's go: build only; no D1/R2/hub write) — review `reviews/2026-11-06-firms-recovery-5nov.md`
+- **Inputs preserved** (Mac `~/Documents/Mother Earth/research/firms-recovery/2026-11-05/`, hash-checked against R2): the 23:45 raw file (`c3487dcc…`, the day's latest retrieval), the original checkpoint (`1a61adf2…`) and the 15:30 raw behind it (`de6c5397…`). The R2 expiry no longer matters.
+- **Method:** the hub's own `firmsParse` / `firesDaily` / `checkpointCoverage` from `2ee3a62` (0.5.2), test exports only; two runs byte-identical.
+- **Validation:** on the original's input the harness gives 555 cells · 46,009 · day 37,899 / night 8,110 · max 746.34 MW = STATUS's D1 figures; 0.5.2 re-parses the 15:30 file to the 0.5.1 records **identically**.
+- **Recovery:** 63,614 detections (63,591 distinct) · **641 cells** (+86, none lost) · day 48,826 / night 14,788 · last detection 21:36 UTC · cutoff 23:45:43.250Z (raw upload time).
+- **Source behaviour found:** FIRMS **removed 23 rows** between 15:30 and 23:45 (NOAA-20, N. America, 10:05–11:47 UTC; 4 cells lose 1–5); the 23:45 file has **23 exact duplicate lines** (17:59 pass, Venezuela/Colombia) — counted as delivered, like the hub.
+- **General finding:** `day_range=1` resets at 00:00 UTC, so **every** daily FIRMS checkpoint ends ~2–2.5 h before midnight (detections processed after midnight never arrive); `input_status` says "current" because it measures retrieval. Research item proposed, no build.
+- **Proposal (not done):** R2 `archive/recoveries/firms/2026-11-05.json.gz` + D1 `archive_recoveries` + `fires_daily_recovered`; hub reads neither; original untouched. 5 open decisions (review §8). Next: GPT review → Chad's go.
+
 ## 6 Nov 05:53:57 UTC — **HUB 0.5.2 DEPLOYED** (Chad's explicit go, after GPT's sign-off on `2ee3a62`)
 - **What:** branch `firms-guard` @ `2ee3a62`, `phase1/worker.js` sha256 `70307d5fc2a9afed…` (checked from raw.githubusercontent before upload), content-only API from the dashboard pane, HTTP 200. This time the session allowed Claude's upload (refused twice in thread 15).
 - **Verified (read-only):** script content read back from Cloudflare hashes to `70307d5f…`; `/` and `/status` = **0.5.2**; **17 bindings**, `HISTORY_ENABLED=1`; `/status` → `archive_health.collection.firms` + `.usgs` present, both ok, no failing streak.
