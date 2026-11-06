@@ -2,6 +2,13 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 6 Nov 2026 — thread 17
+
+## 6 Nov ~08:05 UTC — firms-guard merged to main (Chad's go)
+- `firms-guard` @ `2ee3a62` merged into main (`909e8cd`, no-ff). No overlap with main's docs; **no page files change**. `phase1/worker.js` on main = live 0.5.2 (sha256 `70307d5fc2a9afed…`). firms-guard 19/19, history-hub 27/27 on the merge (Node 22.23.4).
+- Monitoring check-ins scheduled in this session: 14:20 UTC 6 Nov, 00:50 UTC 7 Nov.
+- Baseline 07:54 UTC (read-only): hub 0.5.2, history collecting; firms 07:30 ok (43.7 KB raw), usgs ok; no pending/gaps/failures. **5 Nov coverage backfilled** by 0.5.2 (`assessed_with_checkpoint:false`, stale, 33 failed runs after cutoff, guard reason). **Plastic's first archived version 06:08 UTC.**
+
 # 6 Nov 2026 — thread 16
 
 ## 6 Nov ~07:00 UTC — thread 16 handover
