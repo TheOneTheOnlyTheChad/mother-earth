@@ -1,6 +1,6 @@
 # Live smoke review fixes — candidate for review (6 Nov 2026)
 
-**Branch `smoke-fixes` @ `876061e`. NOT public.** Main and the live page are unchanged. Publishing means merging to main, which needs Chad's go after this review. Source: GPT's live smoke review, 6 Nov ~08:31 UTC (four findings). Page files only; no hub, D1, R2 or schedule change. Assets `?v=202611121000` → `?v=202611131000`.
+**Branch `smoke-fixes` @ `876061e` (page files; later branch commits are test + this review). NOT public.** Main and the live page are unchanged. Publishing means merging to main, which needs Chad's go after this review. Source: GPT's live smoke review, 6 Nov ~08:31 UTC (four findings). Page files only; no hub, D1, R2 or schedule change. Assets `?v=202611121000` → `?v=202611131000`.
 
 | file | sha256 (branch) |
 |---|---|
@@ -66,22 +66,44 @@ Sources & Details, Drifting buoys, Collection paragraph:
 The new wording stays true whether history collection is on or off. Retention itself is unchanged. No other Sources paragraph makes a "keeps … only" claim (searched).
 
 ## 5. Tests
-**New: `phase1/smoke-fixes.test.cjs`, 51 checks, 51 pass on the branch.**
+**New: `phase1/smoke-fixes.test.cjs`, 52 checks, 52 pass on the branch (three consecutive runs).**
 - `ME.frp` on 11 values;
 - the place view line;
 - World View cell list, record detail and Highest FRP note on a fixture cell (5.8 · 2.33 · 0.8 · 0.4 · reported 0 · missing);
 - place view at 1280 (description ≥ 300 px, stacked; cell panel still side by side);
 - Sources at 360 and 1280 with the real long codes (no page overflow, tables inside the width, no label split inside a word, code text intact, break hints, buoy wording).
 
-**Run against main: 33 of 51 fail.** That covers every finding, including Sources overflow at 1280. Main lacks `ME.frp`, so the formatter checks fail by construction; the browser checks fail on behaviour.
+**Run against main: 33 of 51 fail** (the 52nd check, "fire cell opens", was added afterwards and checks the test path, not the page). That covers every finding, including Sources overflow at 1280. Main lacks `ME.frp`, so the formatter checks fail by construction; the browser checks fail on behaviour.
 
 **Regressions on the branch:** see §6. Test-only adjustments made while writing the suite are fixes to the test itself, not to the page:
 - the record header was never meant to carry FRP;
 - the Highest FRP button sits in the collapsed Explore card;
 - the "What Mother Earth keeps" table's first column is prose, not a label.
 
-## 6. Regression results (branch)
-*(filled in below when the run completes)*
+**One flaky check found and fixed in the test.** The "cell panel side by side" check failed once in four runs: it reopened the cell before the fixture's fire layer had loaded, and relied on Escape. It now waits for the fire data and checks the open succeeded. Three consecutive runs pass 52/52.
+
+## 6. Regression results (branch, Node 22.23.4, Chromium via Playwright)
+| suite | result |
+|---|---|
+| smoke-fixes (new) | 52/52 ×3 |
+| desktop-overflow | 112/0 |
+| mobile-pass | 131/0 |
+| search-ui | 104/0 |
+| ux-round1 | 34/0 |
+| place-ui | 30/0 |
+| plastic-ui | 29/0 |
+| drifters-ui | 25/0 |
+| kept-ui | 21/0 |
+| terminator-ui | 19/0 |
+| terminator-behaviour | 47/0 |
+| orbital-ui | 38/0 |
+| orbital-browser | 113/0 |
+| place-rows | 7/0 |
+| search | 111/0 |
+| search.realdata | 50/0 |
+| solar | 26/0 |
+| hub suites (unchanged code): firms-guard 19 · history-hub 27 · drifters-hub 12 · plastic-hub 11 · orbital-hub 13 · satellites-hub 12 · ships-fallback 7 · ships-late 7 · ships-probe 11 · spacetrack-probe 11 · duration-contract | all pass |
+| `orbital.test.mjs` | **not run.** It needs a private Space-Track GP file that is not in the repo (unchanged by this branch). |
 
 ## 7. Limits
 - Emulated viewports in Chromium only; not a physical Galaxy or iPhone, and not Safari or Firefox.
