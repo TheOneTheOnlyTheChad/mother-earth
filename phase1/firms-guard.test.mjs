@@ -12,6 +12,8 @@ const BREAK = process.env.BREAK || '';
 const BREAKS = {   // [find, replace] in worker.js — each a plausible mistake
   'old-limit':        ['const FIRMS_MAX_PARSE_BYTES = 12 * 1024 * 1024;', 'const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;'],
   'no-truncation':    ["    if (c.length !== nCols) throw new Error(", "    if (false) throw new Error("],
+  'no-content-check': ["    if (bad) throw new Error(", "    if (false) throw new Error("],
+  'scheduled-clock':  ["AND started_at >= ? AND started_at < ? AND finished_at > ? ORDER BY finished_at\")\n    .bind(layer, day + 'T00:00:00.000Z', new Date(dayEnd).toISOString(), cutoff)", "AND started_at > ? AND started_at < ? AND finished_at > '' ORDER BY finished_at\")\n    .bind(layer, cutoff, new Date(dayEnd).toISOString())"],
   'no-coverage':      ['  await writeCoverage(env, cov);   // what the input covered', '  // await writeCoverage(env, cov);   // what the input covered'],
   'coverage-blind':   ["input_status: fails.length || age > 2 * cad + 300 ? 'stale' : 'current',", "input_status: 'current',"],
   'down-no-checkpoint': ["  if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpointsDue(env, layer, Date.now()));\n}", '}'],
@@ -67,6 +69,10 @@ globalThis.fetch = async url => { url = String(url);
   if (url.includes('earthquake.usgs.gov')) return new Response(JSON.stringify({ metadata: { generated: NOW - 60e3 }, features: [] }), { status: 200 });
   return new Response('stub', { status: 503 }); };
 const runFirms = env => worker.scheduled({ cron: '*/15 * * * *', scheduledTime: NOW }, env, { waitUntil() {} });
+/** A run SCHEDULED at `sched` that ENDS at `end` (the hub stamps finished_at and retrieved_at from the clock). */
+const runFirmsAt = async (env, sched, end) => { NOW = Date.parse(end); await worker.scheduled({ cron: '*/15 * * * *', scheduledTime: Date.parse(sched) }, env, { waitUntil() {} }); };
+const GOOD = () => ({ status: 200, body: csv([row(-20, 30, '2300')]) }), BAD = () => ({ status: 503, body: 'down' }), EMPTY = () => ({ status: 200, body: HEAD });
+const coverage = db => q(db, "SELECT * FROM archive_checkpoint_coverage WHERE layer='firms' AND day='2026-11-05'")[0];
 const status = async env => (await (await worker.fetch(new Request('https://hub/status'), env)).json()).archive_health;
 const LIMIT = W.FIRMS_MAX_PARSE_BYTES;
 
@@ -120,7 +126,7 @@ await t('3. after a good run, each failure keeps latest/firms.json (its own retr
   assert.equal(c.last_successful_run.scheduled_at, new Date(goodAt).toISOString());
   assert.equal(c.last_successful_run.age_s, Math.round((NOW - Date.parse(c.last_successful_run.finished_at)) / 1000));
   assert.ok(c.last_successful_run.age_s >= 3 * 900, 'age covers the failed interval: ' + c.last_successful_run.age_s);
-  assert.equal(c.failing.runs, 3); assert.equal(c.failing.since, new Date(goodAt + 900e3).toISOString());
+  assert.equal(c.failing.runs, 3); assert.equal(c.failing.since_scheduled, new Date(goodAt + 900e3).toISOString());
   assert.equal(c.latest_run.status, 'down');
 });
 
@@ -183,6 +189,71 @@ await t('5b. a checkpoint made before 0.5.2 (no coverage row, like 5 Nov) is ass
   assert.ok(v, 'assessed'); assert.equal(v.assessed_with_checkpoint, 0); assert.equal(v.assessed_at, '2026-11-06T02:15:40.000Z');
   assert.equal(v.input_status, 'stale'); assert.equal(v.failed_runs_after_cutoff, 1); assert.equal(v.last_observation_at, '2026-11-05T13:00:00Z');
   assert.equal(JSON.stringify(q(db, 'SELECT * FROM archive_checkpoints')), cpBefore, 'original checkpoint row unchanged');
+});
+
+// ================= 6. clocks: scheduled time decides the day; actual end time is compared with the snapshot's retrieval time
+await t('6a. GPT\'s case: snapshot retrieved 23:45:40; another run scheduled 23:45:00 fails at 23:46:00 → 1 failure after the snapshot, stale', async () => {
+  const { env, db } = makeEnv();
+  FIRMS = GOOD(); await runFirmsAt(env, '2026-11-05T23:45:00Z', '2026-11-05T23:45:40Z');
+  FIRMS = BAD();  await runFirmsAt(env, '2026-11-05T23:45:00Z', '2026-11-05T23:46:00Z');
+  FIRMS = EMPTY(); await runFirmsAt(env, '2026-11-06T00:30:00Z', '2026-11-06T00:30:40Z');
+  const v = coverage(db);
+  assert.equal(v.cutoff, '2026-11-05T23:45:40.000Z'); assert.equal(v.failed_runs_after_cutoff, 1); assert.equal(v.input_status, 'stale');
+  assert.equal(v.failure_first_at, '2026-11-05T23:46:00.000Z', 'reported as the actual end time');
+});
+await t('6b. out-of-order completion: a failure scheduled 23:30 ending 23:46 counts; one scheduled 23:45 ending 23:45:20 (before the snapshot) does not', async () => {
+  const { env, db } = makeEnv();
+  FIRMS = BAD();  await runFirmsAt(env, '2026-11-05T23:45:00Z', '2026-11-05T23:45:20Z');   // superseded by the later snapshot
+  FIRMS = GOOD(); await runFirmsAt(env, '2026-11-05T23:45:00Z', '2026-11-05T23:45:40Z');
+  FIRMS = BAD();  await runFirmsAt(env, '2026-11-05T23:30:00Z', '2026-11-05T23:46:00Z');   // scheduled earlier, ended later
+  FIRMS = EMPTY(); await runFirmsAt(env, '2026-11-06T00:30:00Z', '2026-11-06T00:30:40Z');
+  const v = coverage(db); assert.equal(v.failed_runs_after_cutoff, 1); assert.equal(v.failure_first_at, '2026-11-05T23:46:00.000Z');
+});
+await t('6c. out-of-order success: the later-RETRIEVED snapshot is the input; a failure that ended before it is not counted → current', async () => {
+  const { env, db } = makeEnv();
+  FIRMS = BAD();  await runFirmsAt(env, '2026-11-05T23:45:00Z', '2026-11-05T23:46:00Z');
+  FIRMS = GOOD(); await runFirmsAt(env, '2026-11-05T23:30:00Z', '2026-11-05T23:47:00Z');   // scheduled earlier, retrieved later
+  FIRMS = EMPTY(); await runFirmsAt(env, '2026-11-06T00:30:00Z', '2026-11-06T00:30:40Z');
+  const v = coverage(db); assert.equal(v.cutoff, '2026-11-05T23:47:00.000Z'); assert.equal(v.failed_runs_after_cutoff, 0); assert.equal(v.input_status, 'current');
+});
+await t('6d. midnight: a day-D run (scheduled 23:45) failing at 00:00:20 counts for D; a run scheduled 00:00 on D+1 does not', async () => {
+  const { env, db } = makeEnv();
+  FIRMS = GOOD(); await runFirmsAt(env, '2026-11-05T23:30:00Z', '2026-11-05T23:30:40Z');
+  FIRMS = BAD();  await runFirmsAt(env, '2026-11-05T23:45:00Z', '2026-11-06T00:00:20Z');
+  FIRMS = BAD();  await runFirmsAt(env, '2026-11-06T00:00:00Z', '2026-11-06T00:00:30Z');
+  FIRMS = EMPTY(); await runFirmsAt(env, '2026-11-06T00:30:00Z', '2026-11-06T00:30:40Z');
+  const v = coverage(db); assert.equal(v.failed_runs_after_cutoff, 1); assert.equal(v.failure_last_at, '2026-11-06T00:00:20.000Z');
+});
+await t('6e. /status failing streak follows actual end times: a failure that ended before the last success ended is not in the streak', async () => {
+  const { env } = makeEnv();
+  FIRMS = BAD();  await runFirmsAt(env, '2026-11-05T12:15:00Z', '2026-11-05T12:15:30Z');
+  FIRMS = GOOD(); await runFirmsAt(env, '2026-11-05T12:00:00Z', '2026-11-05T12:16:00Z');   // older slot, finished last
+  let c = (await status(env)).collection.firms; assert.equal(c.failing, null); assert.equal(c.last_successful_run.finished_at, '2026-11-05T12:16:00.000Z');
+  FIRMS = BAD();  await runFirmsAt(env, '2026-11-05T12:30:00Z', '2026-11-05T12:30:30Z');
+  c = (await status(env)).collection.firms; assert.equal(c.failing.runs, 1); assert.equal(c.failing.since_scheduled, '2026-11-05T12:30:00.000Z'); assert.equal(c.failing.since_finished, '2026-11-05T12:30:30.000Z');
+});
+
+// ================= 7. content checks: cuts inside the final field; genuine zeros and legitimately missing values kept
+await t('7a. GPT\'s case: the final "D" removed from an otherwise valid last row (still 14 fields) → refused, not published', async () => {
+  const { env, store, db } = makeEnv(); const body = csv([row(-20, 30), row(-21, 31)]);
+  assert.ok(body.endsWith(',D')); FIRMS = { status: 200, body: body.slice(0, -1) }; NOW = Date.parse('2026-11-05T12:00:40Z'); await runFirms(env);
+  assert.ok(!store.has('latest/firms.json'));
+  assert.match(q(db, "SELECT note FROM collector_runs WHERE layer='firms'")[0].note, /truncated or malformed response: line 3 daynight ""/);
+});
+await t('7b. cuts inside the last row\'s FRP (13 fields) and an invalid code are refused; reasons name the field', async () => {
+  for (const [body, re] of [[csv([row(-20, 30)]).replace(/,5\.20,D$/, ',5.2'), /has 13 fields/], [csv([row(-20, 30, '1200', '5.20', 'X')]), /daynight "X"/], [csv([row(-20, 30, '1275')]), /acq_time "1275"/], [csv([row(95, 30)]), /latitude "95"/]]) {
+    const { env, store, db } = makeEnv(); FIRMS = { status: 200, body }; NOW = Date.parse('2026-11-05T12:00:40Z'); await runFirms(env);
+    assert.ok(!store.has('latest/firms.json'), String(re)); assert.match(q(db, "SELECT note FROM collector_runs WHERE layer='firms'")[0].note, re);
+  }
+});
+await t('7c. genuine zeros (acq_time "0", FRP "0") and an EMPTY FRP are accepted; the empty FRP is published as null, the zero as 0', async () => {
+  const { env } = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '0', '0'), row(-21, 31, '0', '', 'N')]) }; NOW = Date.parse('2026-11-05T12:00:40Z'); await runFirms(env);
+  const e = await readJson(env, 'latest/firms.json'), iF = e.record_fields.indexOf('frp_mw'), iO = e.record_fields.indexOf('observed_at');
+  assert.equal(e.source_status, 'ok'); assert.deepEqual(e.records.map(r => r[iF]), [0, null]); assert.equal(e.records[0][iO], '2026-11-05T00:00:00Z');
+});
+await t('7d. stated limit, unchanged: a cut exactly between rows still passes every check (not proof of completeness)', async () => {
+  const { env } = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30), row(-21, 31), row(-22, 32)]).split('\n').slice(0, 3).join('\n') }; NOW = Date.parse('2026-11-05T12:00:40Z'); await runFirms(env);
+  const e = await readJson(env, 'latest/firms.json'); assert.equal(e.source_status, 'ok'); assert.equal(e.records.length, 2);
 });
 
 console.log(`\nfirms-guard: ${passed} passed, ${failed} failed${BREAK ? `  (BREAK=${BREAK})` : ''}`);

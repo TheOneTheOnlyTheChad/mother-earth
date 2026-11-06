@@ -398,6 +398,22 @@ async function collectOpenskyBbox(env, scheduledMs) {
 
 // ---------------------------------------------------------------- FIRMS
 
+/** Content check of the fields we use, from the values seen in real files (6 Nov: 125,294 rows over 3 files, no empty value in any
+ * column; acq_time "0" and FRP "0" are genuine). Returns a reason or null. Genuine zeros pass; an EMPTY FRP is a legitimate missing
+ * value (published as null, never 0); an empty required field (e.g. a cut-off final "D") is refused. */
+function firmsRowProblem(c, iLat, iLng, iDate, iTime, iConf, iFrp, iSat, iDn) {
+  const lat = c[iLat], lng = c[iLng], d = c[iDate], t = c[iTime];
+  if (lat === '' || !Number.isFinite(+lat) || Math.abs(+lat) > 90) return `latitude "${lat}"`;
+  if (lng === '' || !Number.isFinite(+lng) || Math.abs(+lng) > 180) return `longitude "${lng}"`;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d || '')) return `acq_date "${d}"`;
+  if (!/^\d{1,4}$/.test(t || '') || +t % 100 > 59 || +t > 2359) return `acq_time "${t}"`;
+  if (iConf >= 0 && !/^([nlh]|\d{1,3})$/.test(c[iConf] || '')) return `confidence "${c[iConf]}"`;
+  if (iFrp >= 0 && c[iFrp] !== '' && !(Number.isFinite(+c[iFrp]) && +c[iFrp] >= 0)) return `frp "${c[iFrp]}"`;
+  if (iSat >= 0 && !c[iSat]) return 'satellite empty';
+  if (iDn >= 0 && !/^[DN]$/.test(c[iDn] || '')) return `daynight "${c[iDn]}"`;
+  return null;
+}
+
 /** Lean CSV scan: only the columns we need. Header: latitude,longitude,bright_ti4,scan,track,acq_date,acq_time,satellite,instrument,confidence,version,bright_ti5,frp,daynight */
 function firmsParse(text) {
   const nl = text.indexOf('\n');
@@ -414,8 +430,12 @@ function firmsParse(text) {
     const line = text.slice(pos, end); pos = end + 1; lineNo++;
     if (!line) continue;
     const c = line.split(',');
-    // a body cut mid-row (or a malformed row) is refused whole — never published as a partial day. A cut exactly between rows is NOT detectable here.
+    // Refuse the whole response on a malformed row — never publish a partial day. These checks catch MOST cuts (field count, then the
+    // content of every field we use), not all: a cut exactly between rows passes, and so would a cut inside a numeric field if FIRMS ever
+    // put one last. Passing them is NOT proof of a complete download (FIRMS sends no row count or length).
     if (c.length !== nCols) throw new Error(`truncated or malformed response: line ${lineNo} has ${c.length} fields, header has ${nCols}`);
+    const bad = firmsRowProblem(c, iLat, iLng, iDate, iTime, iConf, iFrp, iSat, iDn);
+    if (bad) throw new Error(`truncated or malformed response: line ${lineNo} ${bad}`);
     const lat = +c[iLat], lng = +c[iLng];
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
     const t = c[iTime].padStart(4, '0');
@@ -1517,7 +1537,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1685,12 +1705,17 @@ const CHECKPOINT_CADENCE_S = { firms: 900, usgs: 300 };   // scheduled cadence; 
 async function checkpointCoverage(env, layer, day, cutoff, records, fields, nowMs, withCheckpoint) {
   const dayEnd = Date.parse(day + 'T00:00:00Z') + 86400e3, iObs = (fields || []).indexOf('observed_at');
   let lastObs = null; if (iObs >= 0) for (const r of records || []) { const o = r[iObs]; if (typeof o === 'string' && (!lastObs || o > lastObs)) lastObs = o; }
-  const fails = (await env.DB.prepare("SELECT started_at, note FROM collector_runs WHERE layer = ? AND status != 'ok' AND started_at > ? AND started_at < ? ORDER BY started_at")
-    .bind(layer, cutoff, new Date(dayEnd).toISOString()).all()).results || [];
+  /* Which failures belong after the selected snapshot (rev 2, GPT 6 Nov). Two clocks, never compared with each other:
+   *   collector_runs.started_at  = the run's SCHEDULED time  → decides the DAY a run belongs to (its slot): [day start, day end)
+   *   collector_runs.finished_at = when the run actually ended → compared with the snapshot's retrieval time (also an actual time)
+   * A failure belongs after the snapshot when it ended after the snapshot was retrieved — including a run scheduled earlier that
+   * overlapped and failed later, and a day-D run that failed after midnight. Conservative: such a failure is disclosed, not hidden. */
+  const fails = (await env.DB.prepare("SELECT started_at, finished_at, note FROM collector_runs WHERE layer = ? AND status != 'ok' AND started_at >= ? AND started_at < ? AND finished_at > ? ORDER BY finished_at")
+    .bind(layer, day + 'T00:00:00.000Z', new Date(dayEnd).toISOString(), cutoff).all()).results || [];
   const reasons = [...new Set(fails.map(f => String(f.note || '').replace(/\(\d+ bytes > \d+\)/, '(size > limit)').replace(/\d+ bytes/, 'N bytes').slice(0, 120)))].slice(0, 5);
   const age = Math.round((dayEnd - Date.parse(cutoff)) / 1000), cad = CHECKPOINT_CADENCE_S[layer] || 3600;
   return { layer, day, cutoff, last_observation_at: lastObs, input_age_at_day_end_s: age, failed_runs_after_cutoff: fails.length,
-    failure_first_at: fails.length ? fails[0].started_at : null, failure_last_at: fails.length ? fails[fails.length - 1].started_at : null,
+    failure_first_at: fails.length ? fails[0].finished_at : null, failure_last_at: fails.length ? fails[fails.length - 1].finished_at : null,   // actual end times
     failure_reasons: reasons, input_status: fails.length || age > 2 * cad + 300 ? 'stale' : 'current',
     assessed_at: new Date(nowMs).toISOString(), assessed_with_checkpoint: withCheckpoint ? 1 : 0 };
 }
@@ -1830,9 +1855,9 @@ async function archiveHealth(env, nowMs) {
       env.DB.prepare("SELECT layer, started_at, note FROM collector_runs WHERE layer LIKE 'history:%' AND status = 'down' ORDER BY id DESC LIMIT 10"),
       env.DB.prepare('SELECT v.layer, v.day, v.cutoff, v.last_observation_at, v.input_age_at_day_end_s, v.failed_runs_after_cutoff, v.failure_first_at, v.failure_last_at, v.failure_reasons, v.input_status, v.assessed_at, v.assessed_with_checkpoint FROM archive_checkpoint_coverage v WHERE v.day = (SELECT MAX(day) FROM archive_checkpoint_coverage w WHERE w.layer = v.layer)'),
       ...HIST.checkpointLayers.flatMap(l => [
-        env.DB.prepare("SELECT started_at, finished_at FROM collector_runs WHERE layer = ? AND status = 'ok' ORDER BY id DESC LIMIT 1").bind(l),
-        env.DB.prepare('SELECT started_at, status, note FROM collector_runs WHERE layer = ? ORDER BY id DESC LIMIT 1').bind(l),
-        env.DB.prepare("SELECT COUNT(*) AS n, MIN(started_at) AS since FROM collector_runs WHERE layer = ? AND status != 'ok' AND id > COALESCE((SELECT MAX(id) FROM collector_runs WHERE layer = ? AND status = 'ok'), 0)").bind(l, l),
+        env.DB.prepare("SELECT started_at, finished_at FROM collector_runs WHERE layer = ? AND status = 'ok' ORDER BY finished_at DESC LIMIT 1").bind(l),
+        env.DB.prepare('SELECT started_at, finished_at, status, note FROM collector_runs WHERE layer = ? ORDER BY finished_at DESC LIMIT 1').bind(l),
+        env.DB.prepare("SELECT COUNT(*) AS n, MIN(started_at) AS since_scheduled, MIN(finished_at) AS since_finished FROM collector_runs WHERE layer = ? AND status != 'ok' AND finished_at > COALESCE((SELECT MAX(finished_at) FROM collector_runs WHERE layer = ? AND status = 'ok'), '')").bind(l, l),
       ]),
     ]);
     const res = i => (r[i] && r[i].results) || [];
@@ -1840,8 +1865,8 @@ async function archiveHealth(env, nowMs) {
     const collection = {};
     HIST.checkpointLayers.forEach((l, i) => { const ok = res(5 + 3 * i)[0], last = res(6 + 3 * i)[0], f = res(7 + 3 * i)[0] || {};
       collection[l] = { last_successful_run: ok ? { scheduled_at: ok.started_at, finished_at: ok.finished_at, age_s: Math.round((nowMs - Date.parse(ok.finished_at)) / 1000) } : null,
-        latest_run: last ? { scheduled_at: last.started_at, status: last.status, note: String(last.note || '').slice(0, 160) } : null,
-        failing: f.n ? { since: f.since, runs: f.n } : null }; });
+        latest_run: last ? { scheduled_at: last.started_at, finished_at: last.finished_at, status: last.status, note: String(last.note || '').slice(0, 160) } : null,
+        failing: f.n ? { since_scheduled: f.since_scheduled, since_finished: f.since_finished, runs: f.n } : null }; });   // streak = failures that ENDED after the last success ended
     return { pending: res(0).map(x => ({ layer: x.layer, day: x.day, hours_since_day_closed: Math.round((nowMs - Date.parse(x.day + 'T00:00:00Z') - 86400e3) / 36e5 * 10) / 10 })),
       gaps: res(1), last_completed: res(2).map(x => ({ ...x, coverage: cov[x.layer] && cov[x.layer].day === x.day ? cov[x.layer] : null })), recent_failures: res(3), collection,
       note: 'a completed checkpoint means the day was archived, not that collection covered it: see last_completed[].coverage (input_status, failed_runs_after_cutoff) and collection',

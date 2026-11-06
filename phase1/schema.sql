@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS collector_runs (
   note TEXT
 );
 CREATE INDEX IF NOT EXISTS collector_runs_layer ON collector_runs (layer, id);
+-- 0.5.2: /status collection health orders a layer's runs by when they actually ENDED (finished_at), not by insertion order.
+CREATE INDEX IF NOT EXISTS collector_runs_layer_finished ON collector_runs (layer, finished_at);
 
 -- OpenSky credit budget per UTC day (§4.3). Costs are measured from X-Rate-Limit-Remaining, not assumed.
 CREATE TABLE IF NOT EXISTS opensky_spend (
