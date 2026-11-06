@@ -61,6 +61,17 @@ const fmt = ME.fmt = (x, { dp = 0, unit = '', zeroNote = 'source-reported zero' 
   return n === 0 && zeroNote ? `${s} (${zeroNote})` : s;
 };
 
+// FRP as delivered (smoke review 6 Nov): FIRMS reports FRP to 2 decimals, so it is shown to 2 decimals at most and is never
+// rounded to a whole number. A positive value can never read as 0, a reported 0 is labelled as the source's, and a missing
+// value is "not provided".
+const frp = ME.frp = x => {
+  if (!has(x)) return MISSING;
+  const v = +x;
+  if (v === 0) return fmt(0, { unit: 'MW' });
+  if (v > 0 && v < 0.005) return '< 0.01 MW';
+  return v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' MW';
+};
+
 // ---------- snapshot identity (review round 5): cells and records are only ever combined when they come from the SAME run.
 // retrieved_at is written once per collector run and copied into both latest/<layer>.json and latest-cells/<layer>.json.
 const snapId = ME.snapId = snap => (snap && snap.retrieved_at) || null;
@@ -675,7 +686,7 @@ ME.PLACE_NONE = {
 ME.placeRecordLine = (layer, o) => {
   const n = (x, dp) => has(x) ? Number(x).toLocaleString('en', { maximumFractionDigits: dp }) : MISSING;
   if (layer === 'usgs') return `M${has(o.mag) ? Number(o.mag).toFixed(1) : '?'} · ${when(o.observed_at)} · ${o.title || ''}`;
-  if (layer === 'firms') return `${when(o.observed_at)} · FRP ${has(o.frp_mw) ? n(o.frp_mw, 1) + ' MW' : MISSING} · ${o.daynight === 'D' ? 'day pass' : o.daynight === 'N' ? 'night pass' : 'pass ' + MISSING}`;
+  if (layer === 'firms') return `${when(o.observed_at)} · FRP ${frp(o.frp_mw)} · ${o.daynight === 'D' ? 'day pass' : o.daynight === 'N' ? 'night pass' : 'pass ' + MISSING}`;
   if (layer === 'ships') return `MMSI ${o.mmsi || MISSING}${o.name ? ' · ' + o.name : ''} · ${when(o.observed_at)}`;
   if (layer === 'drifters') return `Buoy ${o.id || MISSING} · fix ${when(o.observed_at)} · SST ${has(o.sst_c) ? n(o.sst_c, 2) + ' °C' : MISSING}`;
   if (layer === 'plastic') return `${o.sampled_on || MISSING} · ${o.pieces_m3 === 0 ? 'reported zero' : n(o.pieces_m3, 4) + ' pieces/m³'} · check: ${(o.check || MISSING).replace(/_/g, ' ')}`;
