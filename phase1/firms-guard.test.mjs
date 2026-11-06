@@ -10,7 +10,7 @@ import { DatabaseSync } from 'node:sqlite';
 
 const BREAK = process.env.BREAK || '';
 const BREAKS = {   // [find, replace] in worker.js — each a plausible mistake
-  'old-limit':        ['const FIRMS_MAX_PARSE_BYTES = 12 * 1024 * 1024;', 'const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;'],
+  'old-limit':        ['const FIRMS_MAX_PARSE_BYTES = 8 * 1024 * 1024;', 'const FIRMS_MAX_PARSE_BYTES = 4 * 1024 * 1024;'],
   'no-truncation':    ["    if (c.length !== nCols) throw new Error(", "    if (false) throw new Error("],
   'no-content-check': ["    if (bad) throw new Error(", "    if (false) throw new Error("],
   'scheduled-clock':  ["AND started_at >= ? AND started_at < ? AND finished_at > ? ORDER BY finished_at\")\n    .bind(layer, day + 'T00:00:00.000Z', new Date(dayEnd).toISOString(), cutoff)", "AND started_at > ? AND started_at < ? AND finished_at > '' ORDER BY finished_at\")\n    .bind(layer, cutoff, new Date(dayEnd).toISOString())"],
@@ -77,8 +77,8 @@ const status = async env => (await (await worker.fetch(new Request('https://hub/
 const LIMIT = W.FIRMS_MAX_PARSE_BYTES;
 
 // ================= 1–2. the limit, just below/above, failed and truncated downloads
-await t('1. the limit is 12 MiB and the 5 Nov evening file size (5,311,642 B) is now processed', async () => {
-  assert.equal(LIMIT, 12 * 1024 * 1024);
+await t('1. the limit is 8 MiB and the 5 Nov evening file size (5,311,642 B) is now processed', async () => {
+  assert.equal(LIMIT, 8 * 1024 * 1024);
   const { env } = makeEnv(); FIRMS = { status: 200, body: csvOfSize(5311642) }; await runFirms(env);
   const e = await readJson(env, 'latest/firms.json'); assert.equal(e.source_status, 'ok'); assert.ok(e.records.length > 60000, 'rows parsed: ' + e.records.length);
 });
@@ -88,7 +88,7 @@ await t('2a. exactly at the limit → processed; one byte over → "raw archived
   assert.equal((await readJson(env, 'latest/firms.json')).source_status, 'ok');
   NOW += 900e3; FIRMS = { status: 200, body: csvOfSize(LIMIT + 1) }; await runFirms(env);
   const last = q(db, "SELECT status, note FROM collector_runs WHERE layer='firms' ORDER BY id DESC LIMIT 1")[0];
-  assert.equal(last.status, 'down'); assert.match(last.note, /raw archived; processing skipped: resource guard \(\d+ bytes > 12582912\)/);
+  assert.equal(last.status, 'down'); assert.match(last.note, /raw archived; processing skipped: resource guard \(\d+ bytes > 8388608\)/);
   assert.equal([...store.keys()].filter(k => k.startsWith('raw/firms/')).length, 2, 'both raw files archived');
 });
 await t('2b. failed downloads (network error, HTTP 500, HTML error page) → down with the reason; nothing published', async () => {

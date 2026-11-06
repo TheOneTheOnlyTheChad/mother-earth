@@ -54,12 +54,13 @@ const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
 const WORLD_COST_DEFAULT = 4;
 const STALE_AFTER_S = { usgs: 900, swpc: 2 * 3600, opensky: 600, firms: 2400, co2: 2 * 3600, seaice: 8 * 3600, mock: 600, ships: 3 * 3600, lightning: 900, forest: 4 * 3600, satellites: 26 * 3600, orbital: 8 * 3600, drifters: 4 * 3600, plastic: 72 * 3600 }; // §3.3 collector freshness (co2: daily product, collected hourly)
 const FIRMS_DAY_BOUNDARY_H = 4;             // before 04:00 UTC an empty FIRMS file is the day boundary, not an outage (measured 1 Nov 2026: first rows at 04:00)
-/* FIRMS resource guard: beyond this, keep raw only (D14 wording). 4 MB (30 Oct, Free plan) tripped daily from 3 Nov (file 5.3 MB by
- * 5 Nov evening). The binding limit on Paid is MEMORY, not CPU: 128 MB per isolate, shared by concurrent requests (Cloudflare limits
- * page, read 6 Nov 2026). Held memory of the collect + checkpoint path measured ≈ 4× the file (Node, real FIRMS row shapes, forced GC):
- * 5.3 MB → 31 MB · 8 → 33 · 12 → 49 · 16 → 62 · 24 → 98. Live Worker memory P999 17.4 MB on ≤ 3.8 MB files (dashboard, 6 Nov).
- * 12 MB keeps the held peak near 50 MB (≈ 40 % of the isolate). CPU on the real 5.3 MB file: parse 80–170 ms (V8, pane). */
-const FIRMS_MAX_PARSE_BYTES = 12 * 1024 * 1024;
+/* FIRMS resource guard: beyond this, keep raw only (D14 wording). 4 MB (30 Oct, Free-plan CPU) tripped daily from 3 Nov (5.3 MB by
+ * 5 Nov evening). On Paid the binding limit is MEMORY: 128 MB per isolate, shared by concurrent requests (Cloudflare limits page,
+ * read 6 Nov). Chosen from a pass/fail bench in workerd 2026-07-30 under a TOTAL-heap cap (--max-heap-size), natural GC, the real
+ * 5 Nov file + scale-ups of its own rows, 6 scenarios incl. a resident /place index, collect + checkpoint overlap and two collects,
+ * 2 runs each (phase1/bench-firms-memory/): 8 MiB passes every scenario at an 80 MB cap (48 MB headroom); 12 MiB fails the
+ * two-collect case at 128 MB. Larger files need allocation reductions first (proposed in reviews/2026-11-06-firms-guard.md §3). */
+const FIRMS_MAX_PARSE_BYTES = 8 * 1024 * 1024;
 
 const URLS = {
   usgs: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson',
