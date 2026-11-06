@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov ~16:45 UTC — `hub-health` merged to main (`59f4cda`, Chad)
+- main's `phase1/worker.js` = live 0.5.3 (sha256 `61c8e05262a3…`, checked). No page files changed. Branches left: `main`, `aircraft-rc`, `hub-health` (can be deleted on GitHub).
+
 ## 6 Nov ~16:35 UTC — **hub 0.5.3 LIVE + UptimeRobot monitoring LIVE** (from the hub-health thread; Chad's Approve line)
 - **Hub 0.5.3** deployed **15:38:04 UTC**, content only, from `hub-health` `88e0399`. `phase1/worker.js` sha256 `61c8e05262a3d265dda937dbfc0730af7f553c50bffb2d8f17f7636b566d0692`; the connector read-back is identical.
   - Rollback = 0.5.2 `70307d5f…` (main `909e8cd`), with an Approve line.
