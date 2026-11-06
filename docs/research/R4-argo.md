@@ -158,7 +158,54 @@ Float **WMO 1902040** (SOLO II, serial 8727, US Argo / Scripps; data centre AOML
 6. A compatible baseline before any comparison.
 7. Independent reproduction of the compact payload sizes, pressure-to-depth calculation and directory-history checks.
 
+## 11. Follow-up investigation of the open questions (rev 3, 6 Nov 2026, Chad's go)
+Research only; read-only fetches from the Coriolis GDAC and primary documents (13:45–13:56 UTC). **Claude's results only — not independently reproduced.** R4 stays parked after this pass.
+
+### 11.1 Access terms
+- **Verified (Registry of Open Data on AWS, Euro-Argo managed):** the GDAC copy on S3 (`argo-gdac-sandbox`, eu-west-3, no sign-in) is listed as "Open data, there are no restrictions on the use of this data", licence **CC BY 4.0**, updated daily, with a citation including "accessed on DATE" and DOI `10.17882/42182`.
+- **Coriolis HTTPS server:** no terms page, rate limit or `robots.txt` (404) found; the 2017 readme carries only the acknowledgment request.
+- *Interpretation:* reuse is supported by three statements (argo.ucsd.edu, the Coriolis readme, the AWS listing with CC BY 4.0). **Still open:** an explicit automated-access/rate policy for `data-argo.ifremer.fr` and US GODAE; the SEANOE landing page could not be opened with my tools. Not integration clearance.
+
+### 11.2 Error interpretation
+- **Verified (Argo QC manual for CTD and trajectory data, v3.9, Feb 2025, doi 10.13155/33951):**
+  - PRES: 2.4 dbar "is the recommended error to quote", the manufacturer's quoted sensor accuracy.
+  - TEMP: can be the manufacturer's quoted accuracy at deployment, 0.002 °C.
+  - PSAL: maximum of the combined adjustment uncertainties (root-sum-square of each adjustment's error) and **0.01**; if no adjustment, maximum of adjustment uncertainty and 0.01; the uncertainties listed include sensor-drift and thermal-mass adjustments.
+- This matches the sample: PSAL 0.010 floor on 1,005 levels, 0.010835 where the combined term exceeds it.
+- **Not found:** any stated confidence level or multiplier (1σ, 2σ) for the supplied errors. **Remains open** — do not present as confidence intervals.
+- Timing in the same manual: drift-adjusted delayed-mode salinity is available "6+ months after a profile" (12-month default evaluation window); delayed-mode files "may be revised" when new data arrive, and changes "may be made … at any time".
+
+### 11.3 Scale (Coriolis global profile index, retrieved 13:51:51–13:52:19 UTC)
+| | |
+|---|---|
+| Index file | `ar_index_global_prof.txt.gz`, 59,012,910 B, Last-Modified 6 Nov 13:25:00 GMT, header "Date of update 20261106132415"; streamed and parsed in the browser in ~28 s |
+| Profiles listed | **3,433,783** core profile files: **2,957,449 D** · **476,334 R**; 19,383 without an observation date |
+| Observed per day, Oct 2026 (as listed today) | **458–527 per day** (≈ 14,900 for 1–31 Oct). Recent days are still filling (6 Nov: 181 so far) |
+| File updates, 7 Oct – 6 Nov | **55,119** profile files with a `date_update` in that window; **39,414** of them observed before Oct 2026 |
+| Weekly index | 10,058 profiles at 13:24 UTC (10,268 at ~11:45) — a rolling window, not a fixed weekly count: 6,461 R · 3,597 D; 306 descending |
+| Real-time lag (weekly index, R files, date → date_update, < 10 days) | median **2.9 h**, 10th pct 0.85 h, 90th pct 237 h |
+- *Interpretation:* about **500 new profiles a day** plus **~1,800 file updates a day**, most of them to older profiles — an incremental reader would follow `date_update` in the index, not file listings. One 30-day window from one index snapshot; not a long-term rate.
+
+### 11.4 Revisions and identity stability (float 1902040, 11 files read in the browser with a minimal NetCDF-3 reader)
+| Files | `N_PROF` | Profiles (by sampling scheme) | Config mission |
+|---|---|---|---|
+| D 050, 100, 150, 200, 258, 259 | 2 | Primary · Near-surface | 6 (≤ 200), 7 (258–259) |
+| R 260 | 2 | Primary · Near-surface | 7 |
+| R 280, 296, 297 | 3 | Primary · Near-surface · **Secondary** | 7 |
+- The **primary profile was index 0 in every file read**, but the number of profiles changed (a secondary profile appears in recent R files, same config mission). *Interpretation:* select the primary profile by its sampling scheme; whether the secondary profile survives into the D files is **unknown** until one of these cycles reaches delayed mode.
+- `N_LEVELS` varies by cycle (1007–1011).
+- **File dates vs observation dates (in-file):** R 260 observed 30 Oct 2025, `DATE_CREATION` = `DATE_UPDATE` = 19 Dec 2025; R 280 observed 16 May 2026, created 27 May 2026; R 296 observed 22 Oct 2026, created 1 Nov 2026 13:21:53 (two seconds before R 297). Creation dates later than observation show later processing/publication; whether earlier versions existed or values changed is **unresolved without earlier copies**.
+- **Baseline for a later revision check:** the preserved `R1902040_297.nc` (sha256 `c67e5053…`) is the reference; re-fetching it after it changes, or after it becomes `D1902040_297.nc`, would show real value changes. No schedule set up.
+
+### 11.5 What stays open after this pass
+1. Explicit automated-access/rate terms for the GDAC servers.
+2. Confidence level of `_ADJUSTED_ERROR`.
+3. Revision pattern in values (needs repeated copies; the R 297 baseline exists).
+4. Whether recent R-file structure (3 profiles) carries into delayed mode.
+5. Longer-term volume (one 30-day window measured).
+
 ## Sources
 - [Argo — About](https://argo.ucsd.edu/about/) · [How to use Argo files](https://argo.ucsd.edu/data/how-to-use-argo-files/) · [Data FAQ](https://argo.ucsd.edu/data/data-faq/) · [Acknowledging Argo](https://argo.ucsd.edu/data/acknowledging-argo/)
+- [Argo QC manual for CTD and trajectory data v3.9](https://doi.org/10.13155/33951) · [Registry of Open Data on AWS — Argo GDAC](https://registry.opendata.aws/argo-gdac-marinedata/)
 - [Argo user manual — reference tables](https://oneargo.github.io/argo-format-user-manual/chapter3.html) · [Data access / file naming](https://oneargo.github.io/argo-format-user-manual/chapter4.html) · [DAC–GDAC data management](https://oneargo.github.io/argo-format-user-manual/chapter6.html)
 - Coriolis GDAC (browser pane, 6 Nov 2026 11:45–12:09 UTC): [readme_before_using_the_data.txt](https://data-argo.ifremer.fr/readme_before_using_the_data.txt) · [ar_index_this_week_prof.txt](https://data-argo.ifremer.fr/ar_index_this_week_prof.txt) · [float 1902040](https://data-argo.ifremer.fr/dac/aoml/1902040/)
