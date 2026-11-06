@@ -47,7 +47,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.5.2';
+const COLLECTOR_VERSION = '0.5.3';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -1538,7 +1538,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1875,6 +1875,120 @@ async function archiveHealth(env, nowMs) {
   } catch (e) { return /no such table/i.test(String(e)) ? { note: 'history tables not created' } : { problem: 'unreadable: ' + String(e).slice(0, 120) }; }
 }
 
+// ---------------------------------------------------------------- Health (0.5.3): GET|HEAD /health/<check>/<layer>
+/* For an EXTERNAL monitor (UptimeRobot Free, branch hub-health, 6 Nov 2026). The verdict is the HTTP STATUS CODE:
+ * 200 = healthy, 503 = failing, 404 = no such check — so a plain HTTP monitor works on any plan (its default request is
+ * HEAD, which gets the same status with no body). Rules:
+ *   - FAIL CLOSED: an exception, a missing table, no rows, an unparsable time or a missing published file is a 503, never a 200.
+ *   - READ-ONLY and cheap: indexed D1 lookups + one R2 head() (metadata only, no body). No upstream request, no write.
+ *   - no-store on every answer; the body carries checked_at so a cached copy would show its age.
+ *   - nothing secret: notes are cut to 160 chars and every secret-length env value is redacted from them; no admin route.
+ * One check per URL, so an incident already open on one cannot hide a new failure of another kind (one monitor each).
+ * Collection freshness (runs complete), publication freshness (a validated snapshot reached latest/), checkpoint completion,
+ * and checkpoint coverage are separate checks. Observation age / source latency are NOT pass/fail here (see the review). */
+const HEALTH = {
+  cadenceS: { usgs: 300, firms: 900 },   // the scheduled slots: */5 (five) and */15 (firms)
+  missedSlots: 3, marginS: 300,          // overdue = 3 consecutive slots without the thing + 5 min for an in-flight run
+  checkpointOverdueS: 2 * 3600,          // a closed day is due at end + 30 min (HIST_GRACE_MS); failing from end + 2 h
+  newGapS: 24 * 3600,                    // a gap counts as a NEW incident for 24 h after it was recorded; it stays listed after that
+  checks: { runs: ['usgs', 'firms'], publication: ['usgs', 'firms'], archive: HIST.checkpointLayers, coverage: HIST.checkpointLayers },
+  boundaryNote: 'no detections processed yet for today',   // collectFirms' expected-empty note before FIRMS_DAY_BOUNDARY_H
+};
+const healthAllowS = layer => HEALTH.missedSlots * HEALTH.cadenceS[layer] + HEALTH.marginS;
+/** Cut a run note for a public answer: no secret value (any env string of 16+ chars), no long token, 160 chars. */
+function healthNote(env, s) {
+  let t = String(s == null ? '' : s);
+  for (const v of Object.values(env || {})) if (typeof v === 'string' && v.length >= 16) t = t.split(v).join('[redacted]');
+  return t.replace(/[A-Za-z0-9_\-]{32,}/g, '[redacted]').slice(0, 160);
+}
+const tMs = s => { const v = Date.parse(s); if (!Number.isFinite(v)) throw new Error('unparsable time in health data: ' + String(s).slice(0, 40)); return v; };
+/** FIRMS only: the day_range=1 file is legitimately empty from 00:00 until ~FIRMS_DAY_BOUNDARY_H UTC (collectFirms logs those runs
+ * with HEALTH.boundaryNote). A publication deadline that falls inside that window is counted instead from the window's LAST slot
+ * (03:45 UTC), as if that slot had published — the same moment the "last acceptable run" rule reaches, so the two agree. Pure. */
+function healthDeadline(layer, pubMs) {
+  const allow = healthAllowS(layer) * 1000; let due = pubMs + allow;
+  if (layer === 'firms') { const d0 = Date.parse(dayKey(due) + 'T00:00:00Z'), bEnd = d0 + FIRMS_DAY_BOUNDARY_H * 3600e3;
+    if (due >= d0 && due < bEnd) due = bEnd - HEALTH.cadenceS.firms * 1000 + allow; }
+  return due;
+}
+async function healthRuns(env, layer, nowMs) {
+  const last = await env.DB.prepare('SELECT started_at, finished_at, status, note FROM collector_runs WHERE layer = ? ORDER BY finished_at DESC LIMIT 1').bind(layer).first();
+  if (!last) return { healthy: false, reasons: [`no ${layer} run has ever been recorded`] };
+  const age = Math.round((nowMs - tMs(last.finished_at)) / 1000), allow = healthAllowS(layer);
+  const facts = { latest_run: { scheduled_at: last.started_at, finished_at: last.finished_at, status: last.status, note: healthNote(env, last.note) }, age_s: age, allow_s: allow };
+  return age > allow ? { healthy: false, reasons: [`no ${layer} run has completed for ${age} s (allowed ${allow} s = ${HEALTH.missedSlots} scheduled slots + ${HEALTH.marginS} s): scheduling stopped or every run is dying before it is logged`], facts } : { healthy: true, reasons: [], facts };
+}
+async function healthPublication(env, layer, nowMs) {
+  const [okR, lastR, accR] = await env.DB.batch([
+    env.DB.prepare("SELECT started_at, finished_at, records, note FROM collector_runs WHERE layer = ? AND status = 'ok' ORDER BY finished_at DESC LIMIT 1").bind(layer),
+    env.DB.prepare('SELECT started_at, finished_at, status, note FROM collector_runs WHERE layer = ? ORDER BY finished_at DESC LIMIT 1').bind(layer),
+    env.DB.prepare("SELECT finished_at FROM collector_runs WHERE layer = ? AND (status = 'ok' OR (status = 'down' AND note LIKE ?)) ORDER BY finished_at DESC LIMIT 1").bind(layer, HEALTH.boundaryNote + '%'),
+  ]);
+  const ok = okR.results && okR.results[0], last = lastR.results && lastR.results[0], acc = accR.results && accR.results[0];
+  const head = await env.R2.head(`latest/${layer}.json`);   // the file the page actually reads: metadata only
+  const reasons = [], allow = healthAllowS(layer);
+  if (!ok) reasons.push(`no successful ${layer} publication has ever been logged`);
+  if (!head) reasons.push(`latest/${layer}.json is missing: nothing is published`);
+  if (!ok || !head) return { healthy: false, reasons, facts: { latest_run: last ? { finished_at: last.finished_at, status: last.status, note: healthNote(env, last.note) } : null } };
+  const logMs = tMs(ok.finished_at), fileMs = head.uploaded instanceof Date ? head.uploaded.getTime() : tMs(head.uploaded);
+  const pubMs = Math.min(logMs, fileMs);   // conservative: the older of "the log says ok" and "the file was written"
+  const due = healthDeadline(layer, pubMs);
+  const facts = { last_publication: { logged_ok_finished_at: ok.finished_at, file_uploaded_at: new Date(fileMs).toISOString(), records: ok.records, age_s: Math.round((nowMs - pubMs) / 1000) },
+    overdue_from: new Date(due).toISOString(), allow_s: allow,
+    latest_run: last ? { scheduled_at: last.started_at, finished_at: last.finished_at, status: last.status, note: healthNote(env, last.note) } : null };
+  if (Math.abs(logMs - fileMs) > 10 * 60e3) reasons.push(`the run log and the published file disagree by ${Math.round(Math.abs(logMs - fileMs) / 1000)} s (log ${ok.finished_at}, file ${facts.last_publication.file_uploaded_at})`);
+  if (last && last.status !== 'ok' && /resource guard/i.test(last.note || '')) reasons.push('the latest run was skipped by the resource guard: the source answered but was not processed or published');
+  if (nowMs > due) reasons.push(`no ${layer} publication since ${new Date(pubMs).toISOString()} (overdue from ${facts.overdue_from})` + (last && last.status !== 'ok' ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));
+  else if (!acc || nowMs - tMs(acc.finished_at) > allow * 1000) reasons.push(`no ${layer} run has ended with a publication or an expected empty file for over ${allow} s` + (last ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));
+  return { healthy: !reasons.length, reasons, facts };
+}
+async function healthArchive(env, layer, nowMs) {
+  if (!histOn(env)) return { healthy: false, reasons: ['history collection is off (HISTORY_ENABLED is not 1): pause this monitor if that is intended'] };
+  const today = dayKey(nowMs), y = dayKey(nowMs - 86400e3), since = new Date(nowMs - HEALTH.newGapS * 1000).toISOString();
+  const [pendR, gapR, firstR, yR] = await env.DB.batch([
+    env.DB.prepare('SELECT a.day FROM history_activity a WHERE a.layer = ? AND a.day < ? AND NOT EXISTS (SELECT 1 FROM archive_checkpoints c WHERE c.layer = a.layer AND c.day = a.day) AND NOT EXISTS (SELECT 1 FROM archive_gaps g WHERE g.layer = a.layer AND g.day = a.day) ORDER BY a.day').bind(layer, today),
+    env.DB.prepare('SELECT day, reason, detected_at FROM archive_gaps WHERE layer = ? ORDER BY day DESC LIMIT 5').bind(layer),
+    env.DB.prepare('SELECT MIN(day) AS d FROM history_activity WHERE layer = ?').bind(layer),
+    env.DB.prepare('SELECT (SELECT 1 FROM history_activity WHERE layer = ?1 AND day = ?2) AS ran, (SELECT 1 FROM archive_checkpoints WHERE layer = ?1 AND day = ?2) AS done, (SELECT 1 FROM archive_gaps WHERE layer = ?1 AND day = ?2) AS gap').bind(layer, y),
+  ]);
+  const pend = (pendR.results || []).map(r => r.day), gaps = gapR.results || [], first = ((firstR.results || [])[0] || {}).d || null, yy = (yR.results || [])[0] || {};
+  const reasons = [];
+  for (const d of pend) { const late = Math.round((nowMs - Date.parse(d + 'T00:00:00Z') - 86400e3) / 1000);
+    if (late > HEALTH.checkpointOverdueS) reasons.push(`${layer} checkpoint for ${d} is not complete ${(late / 3600).toFixed(1)} h after the day closed (failing from ${HEALTH.checkpointOverdueS / 3600} h)`); }
+  for (const g of gaps) if (g.detected_at && g.detected_at >= since) reasons.push(`new archive gap: ${layer} ${g.day} — ${healthNote(env, g.reason)} (recorded ${g.detected_at})`);
+  if (first && first < y && !yy.ran) reasons.push(`no ${layer} history activity was recorded for ${y} although history ran before it: that day can never become due, so it would be missed silently`);
+  return { healthy: !reasons.length, reasons, facts: { pending: pend, history_since: first, yesterday: { day: y, history_ran: !!yy.ran, checkpoint: !!yy.done, gap: !!yy.gap }, recorded_gaps: gaps.map(g => ({ ...g, reason: healthNote(env, g.reason) })),
+    gap_alert_window_s: HEALTH.newGapS, note: 'a gap stays listed here and in /status for good; it fails this check only for 24 h after it was recorded' } };
+}
+async function healthCoverage(env, layer, nowMs) {
+  const y = dayKey(nowMs - 86400e3);
+  const [covR, cpR] = await env.DB.batch([
+    env.DB.prepare('SELECT day, cutoff, input_status, failed_runs_after_cutoff, failure_reasons, input_age_at_day_end_s, assessed_at, assessed_with_checkpoint FROM archive_checkpoint_coverage WHERE layer = ? AND day = ?').bind(layer, y),
+    env.DB.prepare('SELECT cutoff FROM archive_checkpoints WHERE layer = ? AND day = ?').bind(layer, y),
+  ]);
+  const c = (covR.results || [])[0], cp = (cpR.results || [])[0];
+  if (!cp) return { healthy: true, reasons: [], facts: { day: y, state: 'not assessed yet: the checkpoint for this day is not complete (the archive check covers that)' } };
+  if (!c) return { healthy: false, reasons: [`${layer} checkpoint for ${y} is complete but has no coverage record (it is written before the marker, so this should not happen)`], facts: { day: y } };
+  let why = []; try { why = JSON.parse(c.failure_reasons || '[]'); } catch (_) { why = ['(unreadable)']; }
+  const facts = { day: y, cutoff: c.cutoff, input_status: c.input_status, failed_runs_after_cutoff: c.failed_runs_after_cutoff, input_age_at_day_end_s: c.input_age_at_day_end_s,
+    failure_reasons: why.map(r => healthNote(env, r)), assessed_at: c.assessed_at, assessed_with_checkpoint: !!c.assessed_with_checkpoint };
+  if (c.input_status === 'current') return { healthy: true, reasons: [], facts };
+  return { healthy: false, reasons: [`${layer} checkpoint for ${y} was built from a ${c.input_status} input (cutoff ${c.cutoff}; ${c.failed_runs_after_cutoff} failed runs after it)`], facts };
+}
+async function health(req, env, check, layer) {
+  const fn = { runs: healthRuns, publication: healthPublication, archive: healthArchive, coverage: healthCoverage }[check];
+  const nowMs = Date.now(), hdr = { 'Cache-Control': 'no-store, max-age=0' };
+  const known = fn && (HEALTH.checks[check] || []).includes(layer);
+  let out;
+  if (!known) out = { status: 404, body: { error: 'no such health check', checks: Object.entries(HEALTH.checks).flatMap(([k, ls]) => ls.map(l => `/health/${k}/${l}`)) } };
+  else {
+    let r; try { r = await fn(env, layer, nowMs); } catch (e) { r = { healthy: false, reasons: ['health data unreadable: ' + healthNote(env, String(e && e.message || e))] }; }
+    out = { status: r.healthy ? 200 : 503, body: { check: `${check}/${layer}`, healthy: r.healthy, verdict: r.healthy ? 'ok' : 'failing', reasons: r.reasons, checked_at: new Date(nowMs).toISOString(), collector_version: COLLECTOR_VERSION, facts: r.facts || null } };
+  }
+  if (req.method === 'HEAD') return new Response(null, { status: out.status, headers: { 'Content-Type': 'application/json', ...CORS, ...hdr, 'X-Health': out.body.verdict || 'unknown-check' } });
+  return json(out.body, out.status, { ...hdr, 'X-Health': out.body.verdict || 'unknown-check' });
+}
+
 // ---------------------------------------------------------------- Place view (0.5.0): GET /place/g4/<row>_<col>
 /* Everything the hub holds for one 4° cell, one section per layer, each from ONE collector run (records and counts
  * paired on retrieved_at, re-read once, else withheld). Optional layers (drifters, plastic) are returned only when named
@@ -2154,6 +2268,10 @@ export default {
       if (req.method !== 'POST') return json({ error: 'POST only (this can write history)' }, 405);
       return reaggregate(req, env, url, p[2] || '');
     }
+    if (p[0] === 'health') {   // 0.5.3: external monitor checks; HEAD is the UptimeRobot HTTP monitor's default request
+      if (req.method !== 'GET' && req.method !== 'HEAD') return json({ error: 'GET or HEAD only' }, 405, { 'Cache-Control': 'no-store' });
+      return health(req, env, p[1] || '', p[2] || '');
+    }
     if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
     if (p[0] === 'snapshot' || p[0] === 'cells') {
@@ -2222,7 +2340,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status'], layers: LAYERS,
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>'], layers: LAYERS,
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };
