@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov ~10:40 UTC — trust-rules test, branch clean-up, bench-orbital kept, cost rule
+- **Trust-rules test: REFUSED.** After Chad's bare "go", Claude tried the same action that was refused in thread 16: copying `raw/firms/2026-11-05T23-45Z.csv` → `recovery/firms/2026-11-05/` in R2.
+  - Read-only pre-check 10:38:24 UTC: source sha `c3487dcc…` ok; destination absent.
+  - The write call was blocked by the auto-mode safety check ("Modify Shared Resources"). **Nothing written** (`recovery/` empty, re-read).
+  - **Conclusion: the Mac's auto-mode trust rules (`setup/automode-mother-earth.json`) do not reach cloud sessions.** Production actions keep needing an `Approve: …` line naming the action.
+  - The 5 Nov raw input stays preserved on the Mac only. The R2 original expires ~7 Nov 23:45 UTC.
+- **Branches:** Chad deleted the 15 merged leftovers on GitHub. Remaining: `main`, `aircraft-rc` (parked: OpenSky's public-site feeder condition), `bench-orbital` (copied, below; can now be deleted).
+- **bench-orbital** test + results copied to main under `phase1/bench-orbital/` (page source kept as `.html.txt` so Pages does not serve it as a page). The test passes and fails on a deliberate break.
+- **Cost rule (START-HERE §2):** the $0 target ended with Workers Paid (3 Nov). Keep cost minimal; name every new line item with its amount first.
+
 ## 6 Nov 10:03:40 UTC — **smoke-review fixes PUBLISHED** (main `e107c1d`, fast-forward; GPT review + Chad's go)
 - `smoke-fixes` brought up to date with main (docs only; page hashes unchanged). Re-run on the updated branch: smoke-fixes 52/52, desktop-overflow 112/0, mobile-pass 131/0.
 - **Served files hash-equal to the reviewed values:** index `158587d8a6ac`, sources `b5810ac66023`, app `89f89ee6a192`, style `e4c9547d99bf`; assets `?v=202611131000`.

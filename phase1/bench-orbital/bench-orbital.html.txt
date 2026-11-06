@@ -1,0 +1,201 @@
+<title>Orbital Classes Bench</title>
+<style>
+html,body{height:100%;margin:0;background:#070a0f;color:#dfe6ee;font:12px ui-monospace,Menlo,monospace}
+#globe{position:absolute;inset:0}
+#out{position:absolute;left:8px;bottom:8px;right:8px;max-height:40%;overflow:auto;background:rgba(7,10,15,.85);padding:6px;white-space:pre-wrap}
+</style>
+<div id="globe"></div><pre id="out">waiting for data…</pre>
+<div id="pick" style="position:absolute;top:10px;left:10px;z-index:5;background:#101722;border:1px solid #c9b6ff;padding:10px;font:14px system-ui"><b>Choose the Space-Track CSV from Downloads</b><br><input type="file" id="file" accept=".csv,text/csv"><div id="pst" style="margin-top:6px;color:#8a98aa">status data: waiting</div></div>
+<script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
+<script>
+'use strict';
+/* Orbital-classes bench 1.0 (3 Nov 2026, thread 7). PRIVATE measurement page, never linked from the site.
+ * Data arrives by postMessage from a space-track.org tab (Chad's session): {csv, status:{norad:code}, meta}. Nothing is
+ * stored or re-published; the page holds it in memory only. Workload = the LIVE hub layers (quakes, fires, ships, forest
+ * cells), fetched as the public page does. Design under test = the released satellites design extended to three classes:
+ * one worker, one shared dataset, three particle sets created ONCE with capacity headroom, positions written in place,
+ * visibility toggled, propagation every 2 s only while any class is on.
+ * PASS CRITERIA — written before any real run:
+ *  C1 all three on: median frame ms ≤ baseline median + 4 ms, and p95 ≤ baseline p95 + 8 ms (same page, same session)
+ *  C2 worker: one full propagation pass ≤ 150 ms median
+ *  C3 toggles: after 10 on/off cycles per class and 10 all-together: exactly 3 particle objects; 0 visible when all off;
+ *     renderer geometry count within ±10 of the count right after creation
+ *  C4 when the last class turns off, no further propagation for 6 s
+ *  C5 0 uncaught errors; page visible throughout every timed phase (else the run is INVALID, not failed)
+ */
+const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
+const SATJS = 'https://cdn.jsdelivr.net/npm/satellite.js@6.0.2/dist/satellite.min.js';
+const R_KM = 6371, GEO = 35786, STALE_MS = 3 * 86400e3, HEADROOM = 0.25;
+const COL = { active: '#c9b6ff', inactive: '#ffcf70', debris: '#ff7a6a' };
+const out = document.getElementById('out'); const say = s => { out.textContent = s; };
+const B = window.__orb = { version: 'orbital-1.1', errors: [], phases: [], env: {}, counts: null, done: false };
+addEventListener('error', e => B.errors.push(String(e.message || e)));
+addEventListener('unhandledrejection', e => B.errors.push('rejection: ' + String(e.reason && e.reason.message || e.reason)));
+let hidden = false; document.addEventListener('visibilitychange', () => { if (document.hidden) hidden = true; });
+const q = (a, p) => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return +s[Math.min(s.length - 1, Math.floor(p * (s.length - 1)))].toFixed(2); };
+const stats = a => a.length ? { n: a.length, median: q(a, .5), p95: q(a, .95), p99: q(a, .99), max: q(a, 1), over50: a.filter(x => x > 50).length } : { n: 0 };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const frames2 = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+// ---------- classification (what the hub would publish). Every row lands in exactly one class.
+function classify(csv, status) {
+  const L = csv.trim().split(/\r?\n/); const h = L[0].split(','); const ix = k => h.indexOf(k);
+  const iType = ix('OBJECT_TYPE'), iId = ix('NORAD_CAT_ID'), iEp = ix('EPOCH');
+  const cls = new Array(L.length - 1); const c = { rows: L.length - 1, quoted: 0, by_type: {}, active: 0, inactive_payload: 0, rocket_body: 0, debris: 0,
+    unknown_type: 0, payload_unmatched: 0, payload_status_unknown: 0, payload_status_decayed_conflict: 0, status_codes: {}, payload_total: 0, payload_matched: 0 };
+  for (let i = 1; i < L.length; i++) {
+    const line = L[i]; if (line.includes('"')) { c.quoted++; cls[i - 1] = 'skip_quoted'; continue; }
+    const f = line.split(','); const t = (f[iType] || '').trim(); const id = +f[iId];
+    c.by_type[t || '(blank)'] = (c.by_type[t || '(blank)'] || 0) + 1;
+    let k;
+    if (t === 'PAYLOAD') {
+      c.payload_total++; const s = status[id];
+      if (s === undefined) { k = 'payload_unmatched'; }
+      else { c.payload_matched++; c.status_codes[s || '(blank)'] = (c.status_codes[s || '(blank)'] || 0) + 1;
+        if (['+', 'P', 'B', 'S', 'X'].includes(s)) k = 'active';
+        else if (s === '-') k = 'inactive_payload';
+        else if (s === 'D') k = 'payload_status_decayed_conflict';
+        else k = 'payload_status_unknown'; }      // '?', blank, anything else — never 'inactive'
+    } else if (t === 'ROCKET BODY') k = 'rocket_body';
+    else if (t === 'DEBRIS') k = 'debris';
+    else k = 'unknown_type';
+    c[k]++; cls[i - 1] = k;
+  }
+  return { cls, c, header: h };
+}
+const LAYER_OF = { active: 'active', inactive_payload: 'inactive', rocket_body: 'inactive', debris: 'debris' };
+
+// ---------- worker: same arithmetic as the released satellites worker; returns xyz per class + ages
+const WSRC = `importScripts(${JSON.stringify(SATJS)});
+const NUM=new Set(['MEAN_MOTION','ECCENTRICITY','INCLINATION','RA_OF_ASC_NODE','ARG_OF_PERICENTER','MEAN_ANOMALY','EPHEMERIS_TYPE','NORAD_CAT_ID','ELEMENT_SET_NO','REV_AT_EPOCH','BSTAR','MEAN_MOTION_DOT','MEAN_MOTION_DDOT']);
+const D2R=Math.PI/180,RKM=${R_KM},GEO=${GEO},STALE=${STALE_MS};let recs=[],ep=[],lay=[];
+onmessage=e=>{const m=e.data;
+ if(m.type==='init'){const t0=performance.now();const L=m.csv.trim().split(/\\r?\\n/);const h=L[0].split(',');let fail=0;recs=[];ep=[];lay=[];
+  for(let i=1;i<L.length;i++){const k=m.layerOf[i-1];if(!k)continue;const c=L[i].split(',');const o={};h.forEach((n,j)=>o[n]=NUM.has(n)?+c[j]:c[j]);
+   try{const s=satellite.json2satrec(o);if(!s||s.error){fail++;continue;}recs.push(s);ep.push(Date.parse(o.EPOCH+'Z'));lay.push(k);}catch(x){fail++;}}
+  postMessage({type:'ready',n:recs.length,initFail:fail,ms:performance.now()-t0});}
+ if(m.type==='prop'){const t0=performance.now();const d=new Date(m.t),gm=satellite.gstime(d),GR=m.globeR;const out={active:[],inactive:[],debris:[]};const st={active:{drawn:0,failed:0,stale:0,beyond:0},inactive:{drawn:0,failed:0,stale:0,beyond:0},debris:{drawn:0,failed:0,stale:0,beyond:0}};
+  for(let i=0;i<recs.length;i++){const k=lay[i],S=st[k];if(m.t-ep[i]>STALE)S.stale++;let pv;try{pv=satellite.propagate(recs[i],d);}catch(x){pv=null;}const p=pv&&pv.position;
+   if(!p||typeof p!=='object'||!isFinite(p.x)){S.failed++;continue;}const g=satellite.eciToGeodetic(p,gm);const lat=g.latitude/D2R,lng=g.longitude/D2R,h=g.height;if(!isFinite(lat)||!isFinite(h)){S.failed++;continue;}
+   if(h>GEO)S.beyond++;const r=GR*(1+h/RKM),phi=(90-lat)*D2R,th=(90-lng)*D2R;out[k].push(r*Math.sin(phi)*Math.cos(th),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(th));S.drawn++;}
+  const x={};for(const k in out)x[k]=new Float32Array(out[k]);postMessage({type:'pos',seq:m.seq,xyz:x,st,ms:performance.now()-t0},Object.values(x).map(a=>a.buffer));}};`;
+
+let globe, worker, layers = {}, onSet = new Set(), timer = null, seq = 0, inflight = false, propMs = [], last = null;
+function propagateOnce() { if (inflight || !onSet.size) return; inflight = true; worker.postMessage({ type: 'prop', t: Date.now(), seq: ++seq, globeR: globe.getGlobeRadius() }); }
+function apply(m) {
+  inflight = false; propMs.push(m.ms); last = m;
+  for (const k of ['active', 'inactive', 'debris']) { const L = layers[k]; if (!L) continue; const a = L.geometry.attributes.position; const n = Math.min(m.xyz[k].length / 3, L.cap);
+    a.array.set(m.xyz[k].subarray(0, n * 3), 0); L.geometry.setDrawRange(0, n); a.needsUpdate = true; }
+}
+function setOn(k, on) {
+  if (on) onSet.add(k); else onSet.delete(k);
+  layers[k].visible = on;
+  if (onSet.size && !timer) { propagateOnce(); timer = setInterval(propagateOnce, 2000); }
+  if (!onSet.size && timer) { clearInterval(timer); timer = null; }       // last one off → propagation stops
+}
+function particleObjects() { const r = { n: 0, v: 0 }; globe.scene().traverse(o => { if (o.type === 'Points' && o.__globeObjType === 'particles') { r.n++; if (o.visible) r.v++; } }); return r; }
+
+let frames = [], lastT = 0, run = false;
+function rafLoop() { const f = t => { if (!run) return; if (lastT) frames.push(t - lastT); lastT = t; requestAnimationFrame(f); }; requestAnimationFrame(f); }
+async function phase(name, ms) {
+  hidden = document.hidden; frames = []; lastT = 0; propMs = []; run = true; rafLoop(); await sleep(ms); run = false;
+  const p = { name, seconds: ms / 1000, frame_ms: stats(frames), worker_prop_ms: stats(propMs), on: [...onSet], visible_throughout: !hidden && !document.hidden, last_counts: last && last.st };
+  B.phases.push(p); say(JSON.stringify(B.phases.map(x => [x.name, x.frame_ms.median, x.frame_ms.p95, x.visible_throughout]), null, 0)); return p;
+}
+
+async function start(data) {
+  const t0 = performance.now();
+  B.env = { ua: navigator.userAgent, dpr: devicePixelRatio, viewport: innerWidth + 'x' + innerHeight, cores: navigator.hardwareConcurrency };
+  const { cls, c } = classify(data.csv, data.status); B.counts = c; B.meta = data.meta;
+  const layerOf = cls.map(k => LAYER_OF[k] || null);
+  const capOf = k => Math.ceil(layerOf.filter(x => x === k).length * (1 + HEADROOM)) || 1;
+  // live workload, as the public page draws it
+  const get = p => fetch(HUB + p, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
+  const rows = s => s ? (s.records || []).map(r => Object.fromEntries((s.record_fields || []).map((k, i) => [k, r[i]]))) : [];
+  const [su, sf, ss, cf] = await Promise.all([get('/snapshot/usgs'), get('/snapshot/firms'), get('/snapshot/ships'), get('/cells/forest')]);
+  const pts = [...rows(su).map(q => ({ lat: q.lat, lng: q.lng, col: '#ff5a3c', alt: .002 + q.mag * .004, r: .12 + q.mag * .1 })), ...rows(sf).map(d => ({ lat: d.lat, lng: d.lng, col: '#ff9b2e', alt: .004, r: .05 })), ...rows(ss).map(v => ({ lat: v.lat, lng: v.lng, col: '#5fe3c8', alt: .003, r: .05 }))];
+  const polys = Object.keys((cf && cf.cells) || {}).map(id => { const [r, cc] = id.split('_').map(Number); const a = r * 4 - 90, b = cc * 4 - 180; return { geom: { type: 'Polygon', coordinates: [[[b, a], [b, a + 4], [b + 4, a + 4], [b + 4, a], [b, a]]] } }; });
+  B.workload = { points: pts.length, polygons: polys.length };
+  const el = document.getElementById('globe');
+  globe = Globe()(el).width(el.clientWidth).height(el.clientHeight).backgroundColor('#070a0f')
+    .globeImageUrl('https://unpkg.com/three-globe@2.31.1/example/img/earth-blue-marble.jpg')
+    .pointsData(pts).pointLat('lat').pointLng('lng').pointColor('col').pointAltitude('alt').pointRadius('r').pointsMerge(true)
+    .polygonsData(polys).polygonGeoJsonGeometry('geom').polygonCapColor(() => 'rgba(111,211,122,.2)').polygonSideColor(() => 'rgba(0,0,0,0)').polygonAltitude(.006);
+  globe.pointOfView({ lat: -10, lng: 25, altitude: 2.6 }); globe.controls().autoRotate = true; globe.controls().autoRotateSpeed = .25;
+  await sleep(3000);
+  // worker + shared dataset (one init for all three classes)
+  worker = new Worker(URL.createObjectURL(new Blob([WSRC], { type: 'text/javascript' })));
+  const ready = await new Promise(res => { worker.onmessage = e => res(e.data); worker.postMessage({ type: 'init', csv: data.csv, layerOf }); });
+  worker.onmessage = e => { if (e.data.type === 'pos') apply(e.data); };
+  B.worker_init = ready;
+  // three particle sets, created ONCE, hidden, with headroom
+  const sets = ['active', 'inactive', 'debris'].map(k => { const d = Array.from({ length: capOf(k) }, () => ({ lat: 0, lng: 0, alt: -0.9 })); d.cls = k; return d; });
+  globe.particlesList(d => d).particleLat('lat').particleLng('lng').particleAltitude('alt').particlesSize(2.5).particlesSizeAttenuation(false).particlesColor(d => COL[d.cls]).particlesData(sets);
+  for (let i = 0; i < 120; i++) { let n = 0; globe.scene().traverse(o => { if (o.type === 'Points' && o.__globeObjType === 'particles') n++; }); if (n === 3) break; await frames2(); }
+  globe.scene().traverse(o => { if (o.type === 'Points' && o.__globeObjType === 'particles') { const k = o.__data && o.__data.cls; if (k) { o.frustumCulled = false; o.raycast = () => {}; o.visible = false; o.geometry.setDrawRange(0, 0); o.cap = o.geometry.attributes.position.count; layers[k] = o; } } });
+  B.created = { sets: Object.keys(layers), caps: Object.fromEntries(Object.entries(layers).map(([k, o]) => [k, o.cap])), setup_ms: Math.round(performance.now() - t0) };
+  if (Object.keys(layers).length !== 3) B.errors.push('could not find the three particle sets: ' + Object.keys(layers).join(','));
+  await frames2(); const geoAfterCreate = globe.renderer().info.memory.geometries;
+
+  // ----- timed phases
+  await phase('1 baseline: live workload only', 15000);
+  for (const k of ['active', 'inactive', 'debris']) setOn(k, true);
+  await sleep(2500);
+  await phase('2 all three on, default view', 20000);
+  globe.pointOfView({ lat: -10, lng: 25, altitude: 13.5 }, 0); await sleep(1000);
+  await phase('3 all three on, geostationary view', 15000);
+  globe.pointOfView({ lat: -10, lng: 25, altitude: 2.6 }, 0);
+  for (const k of ['active', 'inactive', 'debris']) { setOn(k, false); await sleep(200); }
+  // ----- toggle stress (C3)
+  for (const k of ['active', 'inactive', 'debris']) for (let i = 0; i < 10; i++) { setOn(k, true); await sleep(250); setOn(k, false); await sleep(150); }
+  for (let i = 0; i < 10; i++) { for (const k of ['active', 'inactive', 'debris']) setOn(k, true); await sleep(300); for (const k of ['active', 'inactive', 'debris']) setOn(k, false); await sleep(150); }
+  await frames2(); await sleep(500);
+  const po = particleObjects(); const geoAfter = globe.renderer().info.memory.geometries;
+  const s0 = seq; await sleep(6000); const s1 = seq;
+  B.toggles = { particle_objects: po.n, visible_when_all_off: po.v, geometries_after_create: geoAfterCreate, geometries_after_toggles: geoAfter, timer_running: !!timer, seq_during_6s_off: s1 - s0 };
+  // ----- verdicts
+  const P = n => B.phases.find(p => p.name.startsWith(n));
+  const base = P('1'), all = P('2');
+  B.verdict = {
+    valid: B.phases.every(p => p.visible_throughout),
+    C1: !!(base.frame_ms.median != null && all.frame_ms.median <= base.frame_ms.median + 4 && all.frame_ms.p95 <= base.frame_ms.p95 + 8),
+    C2: !!(all.worker_prop_ms.median != null && all.worker_prop_ms.median <= 150),
+    C3: po.n === 3 && po.v === 0 && Math.abs(geoAfter - geoAfterCreate) <= 10,
+    C4: !timer && s1 === s0,
+    C5: B.errors.length === 0,
+  };
+  B.done = true; say('done ' + JSON.stringify(B.verdict));
+}
+// Inputs: element sets from a local file the person picks (never uploaded anywhere); CelesTrak status by postMessage
+// from the space-track.org tab that already holds it (so CelesTrak is not downloaded twice). Starts when both are present.
+const IN = { csv: null, status: null, meta: {} };
+// Space-Track CSV quotes every field. Re-emit unquoted (classifier + worker split on commas); a comma inside a field
+// becomes ';' and is counted, so nothing is silently dropped. (orbital-1.1: 1.0 skipped quoted lines → 0 classified.)
+function unquoteCsv(csv) {
+  if (!csv.includes('"')) return { csv, fields_with_comma: 0, quoted: false };
+  let o = [], line = [], f = '', q = false, commas = 0;
+  for (let i = 0; i < csv.length; i++) { const ch = csv[i];
+    if (q) { if (ch === '"') { if (csv[i + 1] === '"') { f += '"'; i++; } else q = false; } else if (ch === ',') { f += ';'; commas++; } else if (ch === '\n' || ch === '\r') f += ' '; else f += ch; }
+    else if (ch === '"') q = true; else if (ch === ',') { line.push(f); f = ''; } else if (ch === '\n') { line.push(f); o.push(line.join(',')); line = []; f = ''; } else if (ch !== '\r') f += ch; }
+  if (f || line.length) { line.push(f); o.push(line.join(',')); }
+  return { csv: o.join('\n') + '\n', fields_with_comma: commas, quoted: true };
+}
+function maybeStart() {
+  if (B.started || !IN.csv || !IN.status) return;
+  B.started = true; const pk = document.getElementById('pick'); if (pk) pk.remove();
+  const u = unquoteCsv(IN.csv); IN.csv = u.csv; IN.meta.csv_form = { quoted: u.quoted, fields_with_comma: u.fields_with_comma };
+  say('data: ' + IN.csv.length + ' chars; starting');
+  start(IN).catch(err => { B.errors.push('start: ' + err.message); say('failed: ' + err.message); });
+}
+addEventListener('message', e => {
+  if ((e.origin !== 'https://www.space-track.org' && !/[?&]test\b/.test(location.search)) || !e.data) return;
+  if (e.data.status) { IN.status = e.data.status; IN.meta = { ...IN.meta, ...(e.data.meta || {}) }; const pst = document.getElementById('pst'); if (pst) pst.textContent = 'status data: ' + Object.keys(IN.status).length + ' objects'; }
+  if (e.data.csv) IN.csv = e.data.csv;
+  maybeStart();
+});
+document.getElementById('file').addEventListener('change', async ev => {
+  const f = ev.target.files[0]; if (!f) return;
+  IN.csv = await f.text(); IN.meta.file = { name: f.name, bytes: f.size, last_modified: new Date(f.lastModified).toISOString() };
+  maybeStart();
+});
+</script>
