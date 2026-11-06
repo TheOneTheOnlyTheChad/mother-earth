@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov 14:21 UTC — check-in 1 (FIRMS on 0.5.2), read-only
+- **FIRMS caught up at 13:30 UTC.** A thin morning: the file peaked at 1,087 detections / 88 KB (10:00), then FIRMS **removed two whole passes** (04h: 344, 06h: 145) between 10:45 and 12:45, leaving 598 / 49 KB. At 13:30 it jumped to **22,762 records / 1.90 MB**; 14:15 shows 22,771 / 1.90 MB. Cause unknown (no NASA notice found). Source behaviour → R11.
+- **Still under the old 4 MB guard**, so the memory test of 0.5.2 above 4 MB has not happened yet. Recheck booked 16:05 UTC. The 00:50 check covers the rest.
+- All 10 firms runs since 12:00 ok. Telemetry (last 3 h, 434 events): every outcome ok, no exceeded-memory. Firms tick CPU 15–308 ms (308 at 14:00 on the 1.9 MB file); wall 3–14 s.
+- `/status`: firms not failing; pending, gaps and recent_failures all empty.
+
 ## 6 Nov 10:41:46 UTC — 5 Nov raw input copied to R2 `recovery/` (Chad's Approve line)
 - `raw/firms/2026-11-05T23-45Z.csv` → `recovery/firms/2026-11-05/2026-11-05T23-45Z.csv`: 5,311,642 B, read-back sha256 `c3487dcc…` ok, etag `1e932dd4…` (same as the source).
 - No overwrite (destination checked absent first). The only object under `recovery/`. No lifecycle rule covers `recovery/` (rules: `raw/`, `snapshots/`, `cells/`), so it outlives the original's 2-day expiry. It passed with the Approve line, after the bare "go" was refused at 10:38.
