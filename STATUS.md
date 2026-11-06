@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov 16:08 UTC — recheck (FIRMS) + **hub 0.5.3 found live** (read-only)
+- **Production is hub 0.5.3**, Cloudflare version 50, uploaded via the dashboard at **15:38:04 UTC**.
+  - Live code = `hub-health` `phase1/worker.js` sha256 `61c8e05262a3d265…` (identical in branch commits `88e0399`, `2fe320b`, `6bb3c27`; checked by containment in the live multipart).
+  - Not recorded by this thread. The hub-health thread's 15:15 note said "not deployed", so the deploy came after it; who approved it is to be confirmed by Chad.
+  - Rollback = version 49 `cd3e1ffa` (0.5.2, `70307d5f…`).
+  - main is still 0.5.2 (`70307d5f…`): the branch is not merged.
+- FIRMS since 14:15: 8 runs, all ok. 30,640 records, raw 2,554,030 B at 16:00, so **still under 4 MB**; the over-4 MB case is not yet seen on 0.5.2 or 0.5.3. No more rechecks booked; the 00:50 check covers the day.
+- Telemetry (last ~2.2 h, 500 events): every outcome ok, no exceeded-memory. Firms tick CPU 132–239 ms.
+- `/status`: firms not failing; pending, gaps and recent_failures empty.
+
 ## 6 Nov ~15:30 UTC — Cloudflare connector connected; branch `hub-health` (from the hub-health thread)
 - **Cloudflare Developer Platform connector** (Chad, 6 Nov). D1 read queries run directly: database_id `53fced06-fcaa-48e4-a08b-5776125e0293`. No browser pane and no Mac needed; checked from both threads.
   - Live worker code is readable too (strip the multipart wrapper before hashing). 15:10 UTC: live = main 0.5.2, sha256 `70307d5fc2a9…`.
@@ -11,7 +21,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - It has delete tools and the query tool can write: **SELECT only**; writes still need an Approve line.
   - The server marks itself deprecated (successor: Cloudflare API MCP).
 - FIRMS 15:00 UTC: 30,620 records, raw 2,552,302 B, ok (connector read). Growing towards the old 4 MB line.
-- **Branch `hub-health` @ `80a380a` (hub 0.5.3 candidate; NOT deployed, NOT merged)**, from GPT's brief `docs/briefs/2026-11-06-monitoring-and-memory.md`:
+- **Branch `hub-health` @ `80a380a` (hub 0.5.3 candidate; at 15:15 NOT deployed, NOT merged — superseded 15:38, see 16:08 entry)**, from GPT's brief `docs/briefs/2026-11-06-monitoring-and-memory.md`:
   - read-only `GET|HEAD /health/<runs|publication|archive|coverage>/<layer>`, answering 200/503 and failing closed;
   - health-hub 23/23; 12/12 breaks bite; 9 hub suites pass.
   - Docs: `reviews/2026-11-06-hub-health.md`, `docs/FIRMS-MEMORY-DESIGN.md`.
