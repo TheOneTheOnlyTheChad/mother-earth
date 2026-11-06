@@ -565,19 +565,23 @@ function fvHasher() {
 }
 /** Write bytes to `key` holding at most ONE part (5 MiB) in memory. Ends within the first part → one put; else multipart, aborted on error. */
 function fvWriter(env, key, putOpts = {}) {
-  let buf = new Uint8Array(FV.part), n = 0, mpu = null, parts = [], bytes = 0, full = false; const h = fvHasher();
-  const flush = async () => { if (!mpu) mpu = await env.R2.createMultipartUpload(key, putOpts); parts.push(await mpu.uploadPart(parts.length + 1, buf.slice(0, n))); n = 0; full = false; };
+  let buf = new Uint8Array(FV.part), n = 0, mpu = null, parts = [], bytes = 0, full = false, open = false; const h = fvHasher();   // open: a multipart upload neither completed nor aborted
+  const flush = async () => { if (!mpu) { mpu = await env.R2.createMultipartUpload(key, putOpts); open = true; } parts.push(await mpu.uploadPart(parts.length + 1, buf.slice(0, n))); n = 0; full = false; };
+
+  const abort = async () => { buf = null; if (mpu && open) { open = false; try { await mpu.abort(); } catch (_) {} } };
+  const guard = async fn => { try { return await fn(); } catch (e) { await abort(); throw e; } };   // rev-6 build fix (GPT G5): never leave an upload open
   return {
-    async write(u8) {
+    async write(u8) { return guard(async () => {
       await h.update(u8); bytes += u8.length; let i = 0;
       while (i < u8.length) { if (full) await flush(); const k = Math.min(FV.part - n, u8.length - i); buf.set(u8.subarray(i, i + k), n); n += k; i += k; if (n === FV.part) full = true; }
-    },
-    async close() {
+    }); },
+    async close() { return guard(async () => {
       const sha256 = await h.hex();
       if (!mpu) { await env.R2.put(key, buf.slice(0, n), putOpts); buf = null; return { bytes, sha256, multipart: false }; }
-      parts.push(await mpu.uploadPart(parts.length + 1, buf.slice(0, n))); buf = null; await mpu.complete(parts); return { bytes, sha256, multipart: true, parts: parts.length };
-    },
-    async abort() { buf = null; if (mpu) try { await mpu.abort(); } catch (_) {} },
+      parts.push(await mpu.uploadPart(parts.length + 1, buf.slice(0, n))); buf = null; await mpu.complete(parts); open = false; return { bytes, sha256, multipart: true, parts: parts.length };
+    }); },
+    abort,
+    get uploadOpen() { return open; },
   };
 }
 /** A text sink over fvWriter that batches small strings into ~64 KiB encodes (bounded). */
@@ -727,12 +731,12 @@ async function fvPublish(env, runId) {
   const out = await env.DB.prepare('SELECT * FROM firms_outputs WHERE run_id = ?').bind(runId).first(); if (!out) return 'no-output';
   const c = await env.DB.prepare(FVSQL.PUBLISH_CLAIM).bind(runId).run(); if (!c.meta || c.meta.changes !== 1) return 'publish-bound';
   const me = { run_id: runId, retrieved_at: out.retrieved_at, status: 'ok', token: out.token, format: 'lines/1' };
-  const hs = await env.R2.head(out.snapshot_key); if (!hs || hs.size !== out.snapshot_bytes) return 'snapshot-missing';
+  try { await fvSnapshotCheck(env, out); } catch (e) { await logRun(env, 'firms:recovery', Date.now(), 'down', 0, 0, 0, String(e).slice(0, 300)); return 'stop:snapshot-mismatch'; }
+  const aux = await fvAuxFor(env, out, 'publication');   // validated against the commit, or rebuilt from the committed snapshot — BEFORE anything is published
   const r1 = await fvCas(env, FV.latest, async () => fvBody(await env.R2.get(out.snapshot_key)), me);
   if (r1 === 'newer') { await env.DB.prepare("UPDATE firms_outputs SET publish_state = 'superseded' WHERE run_id = ? AND publish_state = 'pending'").bind(runId).run(); return 'stop:newer'; }
   if (r1 !== 'written' && r1 !== 'ours') return 'stop:' + r1;
   await env.DB.prepare(FVSQL.PUBLISHED).bind(runId, nowIso(), null).run();
-  const aux = await getJson(env, out.aux_key); if (!aux) return 'aux-missing';
   const dayStart = new Date(aux.scheduled_for); dayStart.setUTCHours(0, 0, 0, 0); aux.window_start = dayStart.toISOString();
   const cellsEnv = fvCellsEnvelope(aux, 'ok', { quantity: 'VIIRS NOAA-20 NRT thermal detections so far today (UTC), per cell (detections per pass, not a fire census)', window_rule: 'today (UTC) so far: FIRMS day_range=1 returns the current UTC date only; resets at 00:00 UTC; NRT processing lands ~2–3 h after the pass' });
   const r2 = await fvCas(env, FV.cells, async () => JSON.stringify(cellsEnv), { ...me, format: 'cells' });
@@ -812,34 +816,114 @@ async function collectFirmsV2Run(env, scheduledMs) {
   return trace.join('; ');
 }
 // ---- step D: checkpoint input selection for firms (§7, §9) and the streaming new-format checkpoint
-async function fvCutover(env) { try { const r = await env.DB.prepare("SELECT value FROM firms_settings WHERE key = 'format_cutover_at'").first(); return r ? r.value : null; } catch (_) { return null; } }
+/* Checkpoint input (design §7, §9; build fixes after GPT's production review, G1/G2):
+ *  - Unreadable state is an ERROR, never "nothing there": a failed D1 read propagates, so hist() logs the failure and the day stays
+ *    due (no gap, no marker) until a later run reads it. The one tolerated case: the firms_* tables do not exist while v2 is off
+ *    (then no committed output can exist).
+ *  - Legacy eligibility = legacy key format + its retrieval time; the format cutover is NOT a filter any more. A legacy object
+ *    written after the cutover is a complete legacy publication (rollback: FIRMS_PIPELINE unset; or an old isolate across the
+ *    deploy), and the day's input is the latest publication of either kind. format_cutover_at is still written (audit). */
+/** Has v2 ever been active here? Until it has, the checkpoint/backfill run EXACTLY the legacy code (deploying 0.6.0 with v2 off changes
+ * nothing about the daily archive). After it has — including after a rollback — the v2 selection is used, so mixed days are right.
+ * Unreadable state is an error (defer), except a missing table (schema not applied → v2 cannot have run). */
+async function fvEverRan(env) {
+  if (env.FIRMS_PIPELINE === 'v2') return true;
+  try { return !!(await env.DB.prepare("SELECT value FROM firms_settings WHERE key = 'format_cutover_at'").first()); }
+  catch (e) { if (/no such table/i.test(String(e))) return false; throw new Error('v2 state read failed; checkpoint deferred: ' + String(e).slice(0, 160)); }
+}
 async function fvCheckpointCandidate(env, day, legacySnaps) {
-  let newer = null; try { newer = await env.DB.prepare(FVSQL.CHECKPOINT_INPUT).bind(day).first(); } catch (_) {}
-  const cut = await fvCutover(env);
-  const legacy = legacySnaps.filter(x => FV.legacyKey.test(x.key) && x.retrieved_at.slice(0, 10) === day && (!cut || x.retrieved_at < cut))
+  let newer = null;
+  try { newer = await env.DB.prepare(FVSQL.CHECKPOINT_INPUT).bind(day).first(); }
+  catch (e) { if (!(env.FIRMS_PIPELINE !== 'v2' && /no such table/i.test(String(e)))) throw new Error('committed-output read failed; checkpoint deferred: ' + String(e).slice(0, 160)); }
+  const legacy = legacySnaps.filter(x => FV.legacyKey.test(x.key) && x.retrieved_at.slice(0, 10) === day)
     .sort((a, b) => a.retrieved_at < b.retrieved_at ? -1 : a.retrieved_at > b.retrieved_at ? 1 : a.key < b.key ? -1 : 1).pop() || null;
   if (newer && (!legacy || newer.retrieved_at > legacy.retrieved_at)) return { kind: 'new', out: newer };
   return legacy ? { kind: 'legacy', snap: legacy } : null;
 }
-async function fvCheckpointNew(env, day, out) {
+async function fvCheckpointNew(env, day, sel) {
   const done = await env.DB.prepare("SELECT 1 AS x FROM archive_checkpoints WHERE layer = 'firms' AND day = ?").bind(day).first(); if (done) return 'already done';
-  const aux = await getJson(env, out.aux_key); const hs = await env.R2.head(out.snapshot_key);
-  if (!hs || !aux || aux.run_id !== out.run_id) throw new Error('committed snapshot/sidecar missing or mismatched for ' + out.run_id);
+  const out = await env.DB.prepare('SELECT * FROM firms_outputs WHERE run_id = ?').bind(sel.run_id).first();   // the full committed row (sizes, hash, token)
+  if (!out) throw new Error('committed output vanished: ' + sel.run_id);
+  await fvSnapshotCheck(env, out);
+  const aux = await fvAuxFor(env, out, 'checkpoint');
   const key = `${HIST.checkpoints}firms/${day}.json.gz`, ref = runRef('firms', out.retrieved_at);
   const cov = await checkpointCoverage(env, 'firms', day, out.retrieved_at, null, null, Date.now(), true, aux.last_observation_at || null);
   const w = fvWriter(env, key, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: out.retrieved_at, run_ref: ref, collector_version: COLLECTOR_VERSION, source_key: out.snapshot_key,
     input_status: cov.input_status, failed_runs_after_cutoff: String(cov.failed_runs_after_cutoff), last_observation_at: String(cov.last_observation_at), input_age_at_day_end_s: String(cov.input_age_at_day_end_s), format: 'lines/1' } });
-  try { const rd = fvBody(await env.R2.get(out.snapshot_key)).pipeThrough(new CompressionStream('gzip')).getReader();
+  const hr = fvHashing();   // the snapshot bytes are hashed on the way through and must equal the committed hash
+  try { const rd = fvBody(await env.R2.get(out.snapshot_key)).pipeThrough(hr.stream).pipeThrough(new CompressionStream('gzip')).getReader();
     for (;;) { const { value, done: d } = await rd.read(); if (d) break; await w.write(value); } }
   catch (e) { await w.abort(); throw e; }
   const g = await w.close();
+  const got = await hr.result();
+  if (got.bytes !== out.snapshot_bytes || got.sha256 !== out.snapshot_sha256) { try { await env.R2.delete(key); } catch (_) {} throw new Error(`snapshot ${out.snapshot_key} does not match its committed hash/size (${got.bytes} B); checkpoint refused`); }
   const stmts = Object.entries(aux.by_cell).map(([id, c]) => env.DB.prepare('INSERT OR IGNORE INTO fires_daily (cell_id, day, detections, frp_sum_mw, frp_max_mw, frp_n, day_n, night_n, cutoff, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
     .bind(id, day, c.n, c.frpSum === null ? null : Math.round(c.frpSum * 10) / 10, c.frpMax, c.frpN, c.day, c.night, out.retrieved_at, ref, COLLECTOR_VERSION));
   for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
   await writeCoverage(env, cov);
   await env.DB.prepare('INSERT OR IGNORE INTO archive_checkpoints (layer, day, cutoff, r2_key, bytes, records, run_ref, collector_version, source_key) VALUES (?,?,?,?,?,?,?,?,?)')
-    .bind('firms', day, out.retrieved_at, key, g.bytes, aux.records, ref, COLLECTOR_VERSION, out.snapshot_key).run();
-  return 'done';
+    .bind('firms', day, out.retrieved_at, key, g.bytes, out.records, ref, COLLECTOR_VERSION, out.snapshot_key).run();   // the COMMITTED count
+  return aux.rebuilt ? 'done (sidecar rebuilt from the committed snapshot)' : 'done';
+}
+/** A passthrough stream that counts and hashes the bytes it carries (bounded: one chunk at a time). */
+function fvHashing() {
+  const h = fvHasher(); let bytes = 0;
+  return { stream: new TransformStream({ async transform(c, ctl) { await h.update(c); bytes += c.length; ctl.enqueue(c); } }), result: async () => ({ bytes, sha256: await h.hex() }) };
+}
+/** The committed snapshot object must be the one the commit recorded: size and the attempt's own token/run in its metadata. */
+async function fvSnapshotCheck(env, out) {
+  const h = await env.R2.head(out.snapshot_key), md = (h && h.customMetadata) || {};
+  if (!h || h.size !== out.snapshot_bytes || md.run_id !== out.run_id || md.token !== out.token || md.retrieved_at !== out.retrieved_at)
+    throw new Error(`snapshot object for ${out.run_id} does not match the committed output (size ${h ? h.size : 'missing'} / token / run); refused`);
+}
+/** The sidecar is trusted only if it is THIS committed attempt's and internally consistent; otherwise it is rebuilt from the committed
+ * snapshot (streamed, hash-checked). Nothing downstream ever uses an unvalidated sidecar. */
+function fvAuxProblem(aux, out, size) {
+  if (!aux) return 'missing';
+  if (size !== out.aux_bytes) return `size ${size} ≠ committed ${out.aux_bytes}`;
+  for (const k of ['run_id', 'token', 'attempt', 'retrieved_at', 'records']) if (aux[k] !== out[k]) return `${k} ${JSON.stringify(aux[k])} ≠ committed ${JSON.stringify(out[k])}`;
+  const sum = o => Object.values(o || {}).reduce((a, v) => a + (typeof v === 'number' ? v : v && typeof v.n === 'number' ? v.n : v && typeof v.count === 'number' ? v.count : NaN), 0);
+  if (sum(aux.by_cell) !== out.records) return 'by_cell does not sum to the committed records';
+  if (sum(aux.cells) !== out.records) return 'cells do not sum to the committed records';
+  if (Object.values(aux.by_hour || {}).reduce((a, h) => a + sum(h), 0) !== out.records) return 'by_hour does not sum to the committed records';
+  return null;
+}
+async function fvAuxFor(env, out, purpose) {
+  const o = await env.R2.get(out.aux_key); let aux = null; try { aux = o ? await o.json() : null; } catch (_) {}
+  const why = fvAuxProblem(aux, out, o ? o.size : -1);
+  if (!why) return aux;
+  const rebuilt = await fvAuxFromSnapshot(env, out);
+  await logRun(env, 'firms:recovery', Date.now(), 'ok', 0, out.records, 0, `${purpose}: sidecar of ${out.run_id} rejected (${why}); rebuilt from the committed snapshot`);
+  return rebuilt;
+}
+/** Rebuild the sidecar from the committed lines/1 snapshot: same maps as step B, hash and size checked against the commit. */
+async function fvAuxFromSnapshot(env, out) {
+  const o = await env.R2.get(out.snapshot_key); if (!o) throw new Error('committed snapshot missing: ' + out.snapshot_key);
+  const hr = fvHashing(), hdr = {}; let fields = null, inRec = false, records = 0, lastObs = null; const agg = {}, cells = {}, byHour = {};
+  for await (const line of fvLines(fvBody(o).pipeThrough(hr.stream))) {
+    if (inRec === false) {
+      if (line === '"records":[') { inRec = true; continue; }
+      if (line.startsWith('"record_fields":')) { fields = JSON.parse(line.slice(16, -1)); continue; }
+      const m = /^("[a-z_]+"):(.*),$/.exec(line); if (m) { try { hdr[JSON.parse(m[1])] = JSON.parse(m[2]); } catch (_) {} }
+      continue;
+    }
+    if (line === '],') { inRec = null; continue; }   // past the records: keep reading (unparsed) so the hash covers every byte
+    if (inRec === null) continue;
+    const r = JSON.parse(line.endsWith(',') ? line.slice(0, -1) : line), f = n => fields.indexOf(n);
+    const lat = r[f('lat')], lng = r[f('lng')], obs = r[f('observed_at')], frp = r[f('frp_mw')], dn = r[f('daynight')];
+    const id = cellId(lat, lng); records++;
+    (cells[id] || (cells[id] = { count: 0, coverage: FV_COVERAGE })).count++;
+    const hb = byHour[obs.slice(0, 13)] || (byHour[obs.slice(0, 13)] = {}); hb[id] = (hb[id] || 0) + 1;
+    const g = agg[id] || (agg[id] = { n: 0, frpSum: null, frpMax: null, frpN: 0, day: 0, night: 0 }); g.n++;
+    if (typeof frp === 'number') { g.frpSum = (g.frpSum ?? 0) + frp; g.frpN++; g.frpMax = g.frpMax === null ? frp : Math.max(g.frpMax, frp); }
+    if (dn === 'D') g.day++; else if (dn === 'N') g.night++;
+    if (!lastObs || obs > lastObs) lastObs = obs;
+  }
+  const got = await hr.result();
+  if (got.bytes !== out.snapshot_bytes || got.sha256 !== out.snapshot_sha256) throw new Error(`snapshot ${out.snapshot_key} does not match its committed hash/size; sidecar not rebuilt`);
+  if (records !== out.records) throw new Error(`snapshot ${out.snapshot_key} holds ${records} records, the commit says ${out.records}; refused`);
+  return { run_id: out.run_id, token: out.token, attempt: out.attempt, retrieved_at: out.retrieved_at, records, last_observation_at: lastObs, by_cell: agg, cells, by_hour: byHour,
+    scheduled_for: hdr.scheduled_for, raw: hdr.raw, raw_bytes: hdr.raw_bytes, scope: hdr.scope, rebuilt: true };
 }
 /** Decompress an R2 object, counting bytes; null as soon as the output passes `limit` (nothing parsed). Handles an object a runtime
  * already served decoded (not gzip). */
@@ -854,7 +938,7 @@ async function fvBoundedGunzip(env, key, limit) {
 /** Production check of the R2 semantics v2 depends on (design §5, §3), run once by hand before FIRMS_CREATE_ONLY=verified.
  * Uses fresh keys under probe/firms-v2/<random>/ only; every key written is deleted at the end (deletes and aborts are free). */
 async function fvProbeR2(env) {
-  const base = 'probe/firms-v2/' + fvRand() + '/', out = { base, at: nowIso() }, keys = [];
+  const base = 'probe/firms-v2/' + fvRand() + '/', out = { base, at: nowIso() }, keys = [], uploads = [];   // uploads: every multipart this probe started
   const put = async (k, v, o) => { keys.push(base + k); const r = await env.R2.put(base + k, v, o); return r ? r.etag : null; };
   try {
     out.createAbsent = await put('a', 'one', { onlyIf: { etagDoesNotMatch: '*' } }) !== null;
@@ -865,10 +949,18 @@ async function fvProbeR2(env) {
     out.casCurrent = await put('a', 'five', { onlyIf: { etagMatches: (await env.R2.head(base + 'a')).etag } }) !== null;
     await put('src', new Uint8Array(FV.part + 7).fill(65));
     await put('copy', (await env.R2.get(base + 'src')).body); out.objectBodyCopy = (await env.R2.head(base + 'copy')).size === FV.part + 7;
-    const w = fvWriter(env, base + 'mp', { customMetadata: { run_id: 'probe' } }); keys.push(base + 'mp'); await w.write(new Uint8Array(FV.part + 10).fill(66)); const r = await w.close();
+    const w = fvWriter(env, base + 'mp', { customMetadata: { run_id: 'probe' } }); keys.push(base + 'mp'); uploads.push({ abort: () => w.abort(), isOpen: () => w.uploadOpen });
+    await w.write(new Uint8Array(FV.part + 10).fill(66)); const r = await w.close();
     const hm = await env.R2.head(base + 'mp'); out.multipart = r.multipart === true && hm.size === FV.part + 10 && hm.customMetadata.run_id === 'probe';
-    const ab = await env.R2.createMultipartUpload(base + 'ab'); await ab.uploadPart(1, new Uint8Array(FV.part)); await ab.abort(); out.abortLeavesNothing = (await env.R2.head(base + 'ab')) === null;
-  } finally { for (const k of [...new Set(keys)]) try { await env.R2.delete(k); } catch (_) {} out.cleaned = (await env.R2.list({ prefix: base })).objects.length === 0; }
+    keys.push(base + 'ab'); const ab = await env.R2.createMultipartUpload(base + 'ab'); let abOpen = true; uploads.push({ abort: async () => { if (abOpen) { abOpen = false; await ab.abort(); } }, isOpen: () => abOpen });
+    await ab.uploadPart(1, new Uint8Array(FV.part)); abOpen = false; await ab.abort(); out.abortLeavesNothing = (await env.R2.head(base + 'ab')) === null;
+  } finally {
+    // abort every upload still open (an empty object listing does NOT show open uploads), then delete every completed object
+    for (const u of uploads) if (u.isOpen()) try { await u.abort(); } catch (_) {}
+    out.uploads_open_after = uploads.filter(u => u.isOpen()).length;
+    for (const k of [...new Set(keys)]) try { await env.R2.delete(k); } catch (_) {}
+    out.cleaned = out.uploads_open_after === 0 && (await env.R2.list({ prefix: base })).objects.length === 0;
+  }
   const must = ['createAbsent', 'createPresent', 'createKeptOriginal', 'casStale', 'casCurrent', 'objectBodyCopy', 'multipart', 'abortLeavesNothing', 'cleaned'];
   out.all_as_designed = must.every(k => out[k] === true); return out;
 }
@@ -2147,7 +2239,7 @@ async function writeCoverage(env, c) {
 async function backfillCoverage(env, layer, nowMs) {
   const miss = (await env.DB.prepare('SELECT c.day, c.cutoff, c.r2_key FROM archive_checkpoints c WHERE c.layer = ? AND NOT EXISTS (SELECT 1 FROM archive_checkpoint_coverage v WHERE v.layer = c.layer AND v.day = c.day) ORDER BY c.day LIMIT 3').bind(layer).all()).results || [];
   for (const m of miss) {
-    if (layer === 'firms') {   // v2 rule (design §9): never an unbounded parse
+    if (layer === 'firms' && await fvEverRan(env)) {   // v2 rule (design §9): never an unbounded parse
       const h = await env.R2.head(m.r2_key); if (!h) continue;
       if (h.customMetadata && h.customMetadata.format === 'lines/1') { const lo = h.customMetadata.last_observation_at;
         await writeCoverage(env, await checkpointCoverage(env, layer, m.day, m.cutoff, null, null, nowMs, false, lo && lo !== 'null' ? lo : null)); continue; }
@@ -2196,7 +2288,7 @@ async function histCheckpointsDue(env, layer, nowMs) {
   const snaps = await listSnapshots(env, layer); const out = [];
   for (const d of due) {
     let r;
-    if (layer === 'firms') {   // v2 (design §7, §9): the latest of {committed output, eligible legacy snapshot}; legacy only within L_json
+    if (layer === 'firms' && await fvEverRan(env)) {   // v2 (design §7, §9) — only once v2 is on or has ever registered an input: the latest of {committed output, eligible legacy snapshot}; legacy only within L_json
       const cand = await fvCheckpointCandidate(env, d, snaps);
       if (!cand) r = 'source_gone';
       else if (cand.kind === 'new') r = await fvCheckpointNew(env, d, cand.out);
@@ -2390,14 +2482,25 @@ async function healthPublication(env, layer, nowMs) {
   const logMs = tAt(ok.finished_at, nowMs, 'last ok run finished_at'), fileMs = tAt(head.uploaded, nowMs, 'published file uploaded');
   if (last) tAt(last.finished_at, nowMs, 'latest run finished_at'); if (acc) tAt(acc.finished_at, nowMs, 'last acceptable run finished_at');
   const pubMs = Math.min(logMs, fileMs);   // conservative: the older of "the log says ok" and "the file was written"
+  /* 0.6.0 (GPT G4): a v2 publication is complete when its COUNTS land (firms_outputs.cells_at), which may be one run after the records
+   * (discovery repair). The run log is compared with that completion time, not with the records upload; the publication's AGE still
+   * comes from the records upload (pubMs above), so a repair never makes stale data look fresh. */
+  const md = (head && head.customMetadata) || {}; let cmpMs = fileMs, pair = null;
+  if (layer === 'firms' && md.format === 'lines/1' && md.run_id) {
+    const o = await env.DB.prepare('SELECT latest_at, cells_at, publish_state FROM firms_outputs WHERE run_id = ?').bind(md.run_id).first();
+    pair = { run_id: md.run_id, records_published_at: o ? o.latest_at : null, counts_published_at: o ? o.cells_at : null };
+    if (!o || !o.cells_at) reasons.push(`the records of run ${md.run_id} are published but its counts are not complete yet (publication pending repair)`);
+    else cmpMs = tAt(o.cells_at, nowMs, 'publication completed (cells_at)');
+    if (!String(ok.note || '').includes('run=' + md.run_id)) reasons.push(`the latest successful run log is not for the published run ${md.run_id} (log note: ${healthNote(env, ok.note)})`);
+  }
   // rev 2 (GPT P5): a resource-guard skip AFTER the last publication keeps this check failing until a new publication —
   // a later run of another kind (e.g. an HTTP 500) must not close the guard incident.
   const guard = await env.DB.prepare("SELECT finished_at FROM collector_runs WHERE layer = ? AND status != 'ok' AND finished_at > ? AND note LIKE '%resource guard%' ORDER BY finished_at DESC LIMIT 1").bind(layer, ok.finished_at).first();
   const due = healthDeadline(layer, pubMs);
   const facts = { last_publication: { logged_ok_finished_at: ok.finished_at, file_uploaded_at: new Date(fileMs).toISOString(), records: ok.records, age_s: Math.round((nowMs - pubMs) / 1000) },
-    overdue_from: new Date(due).toISOString(), allow_s: allow, guard_skip_since_publication: guard ? guard.finished_at : null,
+    overdue_from: new Date(due).toISOString(), allow_s: allow, guard_skip_since_publication: guard ? guard.finished_at : null, ...(pair ? { v2_publication: pair } : {}),
     latest_run: last ? { scheduled_at: last.started_at, finished_at: last.finished_at, status: last.status, note: healthNote(env, last.note) } : null };
-  if (Math.abs(logMs - fileMs) > 10 * 60e3) reasons.push(`the run log and the published file disagree by ${Math.round(Math.abs(logMs - fileMs) / 1000)} s (log ${ok.finished_at}, file ${facts.last_publication.file_uploaded_at})`);
+  if (Math.abs(logMs - cmpMs) > 10 * 60e3) reasons.push(`the run log and the published file disagree by ${Math.round(Math.abs(logMs - cmpMs) / 1000)} s (log ${ok.finished_at}, ${pair ? 'publication completed ' + new Date(cmpMs).toISOString() : 'file ' + facts.last_publication.file_uploaded_at})`);
   if (guard) reasons.push(`a run was skipped by the resource guard at ${guard.finished_at} and nothing has been published since: the source answered but was not processed`);
   if (nowMs > due) reasons.push(`no ${layer} publication since ${new Date(pubMs).toISOString()} (overdue from ${facts.overdue_from})` + (last && last.status !== 'ok' ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));
   else if (!acc || nowMs - tAt(acc.finished_at, nowMs, 'last acceptable run') > allow * 1000) reasons.push(`no ${layer} run has ended with a publication or an expected empty file for over ${allow} s` + (last ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));

@@ -26,12 +26,25 @@ const BREAKS = {
   'gunzip not bounded': ['if (n > limit) { try { await rd.cancel(); } catch (_) {} return null; }', ''],
   'v2 uncaught → legacy writeDown': ["if (layer === 'firms' && env.FIRMS_PIPELINE === 'v2') { try {", "if (false) { try {"],
   'sidecar FRP count wrong': ["g.frpSum = (g.frpSum ?? 0) + row[4]; g.frpN++;", "g.frpSum = (g.frpSum ?? 0) + row[4];"],
-  'checkpoint ignores the cutover': ["&& (!cut || x.retrieved_at < cut))", ')'],
   'checkpoint always prefers legacy': ["if (newer && (!legacy || newer.retrieved_at > legacy.retrieved_at)) return", "if (newer && !legacy) return"],
   'publication error not left for repair': ["try { return { r: await fvPublish(env, runId), records: p.records, bytes: p.bytes }; } catch (e) { return { r: 'publication error (pending repair): ' + String(e).slice(0, 160) }; }", "return { r: await fvPublish(env, runId), records: p.records, bytes: p.bytes };"],
   'empty-file note changed': ["const why = new Date().getUTCHours() < FIRMS_DAY_BOUNDARY_H ? `${FV.boundary} (UTC)", "const why = new Date().getUTCHours() < FIRMS_DAY_BOUNDARY_H ? `nothing yet (UTC)"],
   'counts written before records commit (no CAS on latest/)': ["const r1 = await fvCas(env, FV.latest, async () => fvBody(await env.R2.get(out.snapshot_key)), me);", "const r1 = 'written';"],
   'download never times out': ['const ac = new AbortController(), timer = setTimeout(() => ac.abort(', 'const ac = new AbortController(), timer = setTimeout(() => ('],
+  // GPT production-review fixes (G1–G5)
+  'checkpoint always prefers the committed output (rollback wrong)': ["if (newer && (!legacy || newer.retrieved_at > legacy.retrieved_at)) return", "if (newer) return"],
+  'checkpoint swallows a failed D1 read (gap instead of defer)': ["catch (e) { if (!(env.FIRMS_PIPELINE !== 'v2' && /no such table/i.test(String(e)))) throw new Error('committed-output read failed; checkpoint deferred: ' + String(e).slice(0, 160)); }", "catch (e) { }"],
+  'sidecar never validated': ["function fvAuxProblem(aux, out, size) {\n  if (!aux) return 'missing';", "function fvAuxProblem(aux, out, size) {\n  return null;"],
+  'snapshot hash not checked at checkpoint': ["if (got.bytes !== out.snapshot_bytes || got.sha256 !== out.snapshot_sha256) { try { await env.R2.delete(key); }", "if (false) { try { await env.R2.delete(key); }"],
+  'publication uses the sidecar unchecked': ["const aux = await fvAuxFor(env, out, 'publication');", "const aux = await getJson(env, out.aux_key);"],
+  'snapshot object not matched to the commit': ["if (!h || h.size !== out.snapshot_bytes || md.run_id !== out.run_id || md.token !== out.token || md.retrieved_at !== out.retrieved_at)", "if (!h)"],
+  'health compares the log with the records upload (G4 false alarm)': ["else cmpMs = tAt(o.cells_at, nowMs, 'publication completed (cells_at)');", "else void 0;"],
+  'health takes the age from the repair log (stale data looks fresh)': ["const pubMs = Math.min(logMs, fileMs);", "const pubMs = logMs;"],
+  'health ignores which run the ok log is for': ["if (!String(ok.note || '').includes('run=' + md.run_id)) reasons.push(", "if (false) reasons.push("],
+  'writer does not abort on its own failure': ["const guard = async fn => { try { return await fn(); } catch (e) { await abort(); throw e; } };", "const guard = async fn => fn();"],
+  'probe does not abort the uploads it tracks': ["for (const u of uploads) if (u.isOpen()) try { await u.abort(); } catch (_) {}", ""],
+  'v2 path used before v2 ever ran (deploy with v2 off changes the checkpoint)': ["if (env.FIRMS_PIPELINE === 'v2') return true;\n  try {", "if (true) return true;\n  try {"],
+  'cutover-state read failure treated as "never ran"': ["catch (e) { if (/no such table/i.test(String(e))) return false; throw new Error('v2 state read failed", "catch (e) { if (true) return false; throw new Error('v2 state read failed"],
 };
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'firms-v2-breaks-'));
 let bit = 0; const missed = [];

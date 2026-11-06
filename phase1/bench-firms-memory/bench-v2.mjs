@@ -83,6 +83,8 @@ const collect = () => sched('*/15 * * * *', Date.now());
 const SC = {
   'collect': { setup: async () => {}, run: collect, expect: { collects: 1 } },
   'checkpoint': { setup: async () => { await collect(); await closeDayOfLastOutput('2026-11-05'); firmsBody = Buffer.from(HEAD); }, run: collect, expect: { collects: 0, checkpoint: '2026-11-05' } },
+  // the sidecar is replaced by a wrong one: the checkpoint must reject it and rebuild from the committed snapshot (streamed) — memory of the rebuild
+  'checkpoint-rebuild': { setup: async () => { await collect(); await closeDayOfLastOutput('2026-11-05'); const o = (await q('SELECT aux_key FROM firms_outputs'))[0]; await r2.put(o.aux_key, '{"run_id":"x","records":1}'); firmsBody = Buffer.from(HEAD); }, run: collect, expect: { collects: 0, checkpoint: '2026-11-05', rebuilt: true } },
   'overlap': { setup: async () => { await collect(); await closeDayOfLastOutput('2026-11-05'); await place(); },
     run: () => Promise.all([collect(), place(), place(), place(), snapshot(), sched('*/5 * * * *', Date.now())]), expect: { collects: 1, checkpoint: '2026-11-05', usgs: 1 } },
   'stress-2-collects': { setup: async () => { await collect(); await place(); }, run: () => Promise.all([collect(), sched('*/15 * * * *', Date.now() - 1000), place(), place(), snapshot()]), expect: { collects: 2 } },
@@ -142,6 +144,7 @@ if (alive && !setupErr) { try {
   }
   if (X.checkpoint) { const n = X.legacyCheckpoint ? LEGACY_N : EXP.n; const c = await checkpointDone(X.checkpoint, n); checks.checkpoint = c;
     if (!c.marker || !c.object || !c.aggregates || c.coverage_with_checkpoint !== 1) fail.push('checkpoint incomplete: ' + JSON.stringify(c)); }
+  if (X.rebuilt) { const n = (await q("SELECT COUNT(*) n FROM collector_runs WHERE layer='firms:recovery' AND note LIKE '%rebuilt from the committed snapshot%'"))[0].n; checks.rebuilt_logged = n; if (n < 1) fail.push('sidecar rebuild not recorded'); }
   if (X.backfill) { const v = (await q("SELECT assessed_with_checkpoint w, last_observation_at lo FROM archive_checkpoint_coverage WHERE layer='firms' AND day=?", X.backfill))[0]; checks.backfill = v || null; if (!v || v.w !== 0 || !v.lo) fail.push('legacy checkpoint backfill not assessed'); }
   if (X.usgs) { const u = (await q("SELECT COUNT(*) n FROM collector_runs WHERE layer='usgs' AND status='ok'"))[0].n; checks.usgs_ok_new = u - usgsBefore; if (u - usgsBefore < 1) fail.push('usgs run did not complete ok'); }
   if (X.downNote) { const d = fresh.find(r => r.status === 'down'); checks.down = d && d.note; if (!d || !X.downNote.test(d.note)) fail.push('expected a down run matching ' + X.downNote);

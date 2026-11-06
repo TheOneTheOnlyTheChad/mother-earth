@@ -72,7 +72,7 @@ function makeR2() {
     async createMultipartUpload(k, o = {}) { stats.mpuOpen++; const parts = new Map(); let done = false;
       return { key: k,
         async uploadPart(n, data) { if (done) throw new Error('upload finished'); if (fail.put && fail.put(k + '#part')) { fail.put = null; throw new Error('R2 stub: forced part failure ' + k); } const b = await bytesOf(data); parts.set(n, b); return { partNumber: n, etag: 'p' + n }; },
-        async complete(list) { const ps = list.map(p => parts.get(p.partNumber)); const first = ps[0].length;
+        async complete(list) { if (fail.put && fail.put(k + '#complete')) { fail.put = null; throw new Error('R2 stub: forced complete failure ' + k); } const ps = list.map(p => parts.get(p.partNumber)); const first = ps[0].length;
           ps.forEach((b, i) => { if (i < ps.length - 1 && (b.length < PART || b.length !== first)) throw new Error(`R2 stub: part ${i + 1} is ${b.length} bytes; non-last parts must be equal and ≥ 5 MiB`); });
           const all = new Uint8Array(ps.reduce((a, b) => a + b.length, 0)); let off = 0; for (const b of ps) { all.set(b, off); off += b.length; }
           const v = { bytes: all, etag: 'e' + (++seq), uploaded: NOW, customMetadata: o.customMetadata, httpMetadata: o.httpMetadata }; m.set(k, v); done = true; stats.mpuOpen--;
@@ -432,15 +432,161 @@ await t('F7. /admin/probe/r2-conditional: admin key required; every check true o
 });
 
 // =====================================================================================================================
+// 4b. GPT production-review probes (6 Nov), as behavioural regressions
+const cpRow = E => one(E.db, "SELECT cutoff, records, source_key FROM archive_checkpoints WHERE layer='firms' AND day='2026-11-06'");
+const gapsOf = E => q(E.db, "SELECT day, reason FROM archive_gaps WHERE layer='firms'");
+const histFails = E => q(E.db, "SELECT note FROM collector_runs WHERE layer='history:firms-checkpoint' AND status='down'");
+await t('G1a. ROLLBACK: v2 publishes 23:00, FIRMS_PIPELINE unset, legacy publishes 23:45 → the checkpoint is the 23:45 legacy file (2 records)', async () => {
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:00:00Z', '2026-11-06T23:00:40Z');
+  E.env.FIRMS_PIPELINE = undefined; FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06'), row(-19, 31, '1300', '3.34', 'D', '2026-11-06')]) };
+  await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+  NOW = Date.parse('2026-11-07T00:31:00Z'); await W.histCheckpointsDue(E.env, 'firms', NOW);
+  const cp = cpRow(E); assert.equal(cp.cutoff, '2026-11-06T23:45:40.000Z'); assert.equal(cp.records, 2); assert.equal(cp.source_key, 'snapshots/firms/2026-11-06T23-45Z.json');
+  assert.equal(one(E.db, "SELECT SUM(detections) n FROM fires_daily WHERE day='2026-11-06'").n, 2);
+});
+await t('G1b. mixed day the other way: legacy 22:00, v2 re-enabled, v2 23:00 → the v2 output; then a legacy-only next day after another rollback → legacy', async () => {
+  const E = makeEnv({ FIRMS_PIPELINE: undefined }); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) };
+  await runFirmsAt(E.env, '2026-11-06T22:00:00Z', '2026-11-06T22:00:40Z');
+  E.env.FIRMS_PIPELINE = 'v2'; FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06'), row(-19, 31, '1300', '3.34', 'D', '2026-11-06'), row(-18, 32, '1300', '3.34', 'D', '2026-11-06')]) };
+  await runFirmsAt(E.env, '2026-11-06T23:00:00Z', '2026-11-06T23:00:40Z');
+  E.env.FIRMS_PIPELINE = undefined; FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-07')]) };
+  await runFirmsAt(E.env, '2026-11-07T10:00:00Z', '2026-11-07T10:00:40Z');
+  NOW = Date.parse('2026-11-08T00:31:00Z'); await W.histCheckpointsDue(E.env, 'firms', NOW);
+  const d6 = cpRow(E); assert.equal(d6.cutoff, '2026-11-06T23:00:40.000Z'); assert.equal(d6.records, 3); assert.match(d6.source_key, /-a1-/);
+  const d7 = one(E.db, "SELECT cutoff, records, source_key FROM archive_checkpoints WHERE day='2026-11-07'"); assert.equal(d7.source_key, 'snapshots/firms/2026-11-07T10-00Z.json'); assert.equal(d7.records, 1);
+});
+await t('G2a. a failed committed-output read DEFERS the checkpoint (history failure logged, no gap, no marker); the next run completes it from the committed snapshot', async () => {
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+  E.d1fail.re = /FROM firms_outputs WHERE day/; FIRMS = { status: 200, body: HEAD }; await runFirmsAt(E.env, '2026-11-07T00:30:00Z', '2026-11-07T00:31:00Z');
+  assert.deepEqual(gapsOf(E), []); assert.equal(cpRow(E), undefined); assert.match(histFails(E).pop().note, /committed-output read failed; checkpoint deferred/);
+  await runFirmsAt(E.env, '2026-11-07T00:45:00Z', '2026-11-07T00:46:00Z');
+  const cp = cpRow(E); assert.equal(cp.records, 1); assert.match(cp.source_key, /-a1-/); assert.deepEqual(gapsOf(E), []);
+});
+await t('G2b. other unreadable state defers too: the completion-marker read, and a fires_daily batch failing half-way (no marker; retry completes, rows not doubled)', async () => {
+  for (const re of [/FROM archive_checkpoints WHERE layer = 'firms' AND day/, /INSERT OR IGNORE INTO fires_daily/]) {
+    const E = makeEnv(); const rows = Array.from({ length: 120 }, (_, i) => row(-80 + i, -170 + i * 2.5, '1300', '3.34', 'D', '2026-11-06'));
+    FIRMS = { status: 200, body: csv(rows) }; await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+    E.d1fail.re = re; E.d1fail.nth = /fires_daily/.test(String(re)) ? 60 : 1; FIRMS = { status: 200, body: HEAD };
+    await runFirmsAt(E.env, '2026-11-07T00:30:00Z', '2026-11-07T00:31:00Z');
+    assert.equal(cpRow(E), undefined, String(re)); assert.deepEqual(gapsOf(E), []); assert.ok(histFails(E).length >= 1);
+    await runFirmsAt(E.env, '2026-11-07T00:45:00Z', '2026-11-07T00:46:00Z');
+    assert.equal(cpRow(E).records, 120); assert.equal(one(E.db, "SELECT SUM(detections) n, COUNT(*) c FROM fires_daily WHERE day='2026-11-06'").n, 120);
+  }
+});
+await t('G2c. the checkpoint never reads the cutover setting: a failing firms_settings read changes nothing; missing tables with v2 OFF = no committed outputs; with v2 ON = deferred', async () => {
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+  E.d1fail.re = /firms_settings/; NOW = Date.parse('2026-11-07T00:31:00Z'); assert.equal(await W.histCheckpointsDue(E.env, 'firms', NOW), '2026-11-06:done');
+  for (const pipeline of [undefined, 'v2']) {
+    const L = makeEnv({ FIRMS_PIPELINE: undefined }); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(L.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+    for (const tb of ['firms_attempts', 'firms_outputs', 'firms_inputs', 'firms_identity', 'firms_settings']) L.db.exec('DROP TABLE ' + tb);
+    L.env.FIRMS_PIPELINE = pipeline; NOW = Date.parse('2026-11-07T00:31:00Z');
+    if (pipeline) { await assert.rejects(W.histCheckpointsDue(L.env, 'firms', NOW), /committed-output read failed/); assert.equal(cpRow(L), undefined); assert.deepEqual(gapsOf(L), []); }
+    else { assert.equal(await W.histCheckpointsDue(L.env, 'firms', NOW), '2026-11-06:done'); assert.equal(cpRow(L).source_key, 'snapshots/firms/2026-11-06T23-45Z.json'); }
+  }
+});
+await t('G2d. cutover-state read failure after a ROLLBACK (v2 off, v2 has run): the checkpoint is deferred — no gap, no marker; next run completes with the right input', async () => {
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:00:00Z', '2026-11-06T23:00:40Z');
+  E.env.FIRMS_PIPELINE = undefined; FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06'), row(-19, 31, '1300', '3.34', 'D', '2026-11-06')]) };
+  await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+  E.d1fail.re = /FROM firms_settings/; NOW = Date.parse('2026-11-07T00:31:00Z');
+  await assert.rejects(W.histCheckpointsDue(E.env, 'firms', NOW), /v2 state read failed; checkpoint deferred/); assert.equal(cpRow(E), undefined); assert.deepEqual(gapsOf(E), []);
+  assert.equal(await W.histCheckpointsDue(E.env, 'firms', NOW), '2026-11-06:done'); assert.equal(cpRow(E).cutoff, '2026-11-06T23:45:40.000Z');
+});
+await t('G2e. v2 never ran and is off (the "deploy 0.6.0 with v2 off" state): the checkpoint runs the legacy code — it never reads a firms_* table (a failing read there changes nothing)', async () => {
+  const E = makeEnv({ FIRMS_PIPELINE: undefined }); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+  const seen = []; const prep = E.env.DB.prepare; E.env.DB = { ...E.env.DB, prepare: sql => { if (/firms_(outputs|inputs|attempts|identity)/.test(sql)) seen.push(sql); return prep(sql); }, batch: E.env.DB.batch };
+  NOW = Date.parse('2026-11-07T00:31:00Z'); assert.equal(await W.histCheckpointsDue(E.env, 'firms', NOW), '2026-11-06:done');
+  assert.deepEqual(seen, [], 'no v2 table read'); assert.equal(cpRow(E).source_key, 'snapshots/firms/2026-11-06T23-45Z.json');
+});
+await t('G3a. a sidecar with the right run but wrong attempt/token/counts is REJECTED and rebuilt from the committed snapshot: marker 1 record, fires_daily = firesDaily(snapshot)', async () => {
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '7.5', 'N', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+  const o = one(E.db, 'SELECT * FROM firms_outputs'); const aux = jsonOf(E, o.aux_key); aux.token = 'wrong-token'; aux.attempt = 99; aux.records = 999; for (const c of Object.values(aux.by_cell)) c.n = 999;
+  await E.R2.put(o.aux_key, JSON.stringify(aux)); NOW = Date.parse('2026-11-07T00:31:00Z');
+  assert.match(await W.fvCheckpointNew(E.env, '2026-11-06', o), /sidecar rebuilt/);
+  assert.equal(cpRow(E).records, 1); const fd = one(E.db, "SELECT detections, frp_sum_mw, frp_max_mw, frp_n, day_n, night_n FROM fires_daily WHERE day='2026-11-06'");
+  assert.deepEqual(fd, { detections: 1, frp_sum_mw: 7.5, frp_max_mw: 7.5, frp_n: 1, day_n: 0, night_n: 1 });
+  assert.match(q(E.db, "SELECT note FROM collector_runs WHERE layer='firms:recovery'").pop().note, /token .* ≠ committed|size .* ≠ committed/);
+});
+await t('G3b. every sidecar fault is caught (size, run, token, attempt, retrieved_at, records, by_cell/cells/by_hour sums); a missing sidecar is rebuilt', async () => {
+  const faults = [a => { a.extra = 'x'.repeat(10); }, a => { a.run_id = 'other'; }, a => { a.records = 2; }, a => { a.retrieved_at = '2026-11-06T00:00:00.000Z'; },
+    a => { for (const c of Object.values(a.by_cell)) c.n += 1; }, a => { for (const c of Object.values(a.cells)) c.count += 1; }, a => { const h = Object.values(a.by_hour)[0]; h[Object.keys(h)[0]] += 1; }, null];
+  for (const f of faults) {
+    const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+    const o = one(E.db, 'SELECT * FROM firms_outputs'); if (f) { const a = jsonOf(E, o.aux_key); f(a); await E.R2.put(o.aux_key, JSON.stringify(a)); } else E.m.delete(o.aux_key);
+    NOW = Date.parse('2026-11-07T00:31:00Z'); assert.match(await W.fvCheckpointNew(E.env, '2026-11-06', o), /sidecar rebuilt/, String(f)); assert.equal(cpRow(E).records, 1);
+  }
+});
+await t('G3c. a committed snapshot whose bytes no longer match its commit → checkpoint REFUSED: no marker, no fires_daily, no checkpoint object; also refused when its metadata token differs', async () => {
+  for (const mode of ['bytes', 'token']) {
+    const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30, '1300', '3.34', 'D', '2026-11-06')]) }; await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+    const o = one(E.db, 'SELECT * FROM firms_outputs'), v = E.m.get(o.snapshot_key);
+    if (mode === 'bytes') { const b = v.bytes.slice(); b[b.length - 5] = b[b.length - 5] === 49 ? 50 : 49; v.bytes = b; } else v.customMetadata = { ...v.customMetadata, token: 'other' };
+    NOW = Date.parse('2026-11-07T00:31:00Z'); await assert.rejects(W.fvCheckpointNew(E.env, '2026-11-06', o), mode === 'bytes' ? /does not match its committed hash/ : /does not match the committed output/);
+    assert.equal(cpRow(E), undefined); assert.equal(one(E.db, "SELECT COUNT(*) n FROM fires_daily").n, 0); assert.ok(!E.m.has('archive/checkpoints/firms/2026-11-06.json.gz'));
+  }
+});
+await t('G3d. publication applies the same checks: a wrong sidecar → counts rebuilt from the committed snapshot; a snapshot with another token → nothing published', async () => {
+  const E = makeEnv(); const r = await addInput(E, '2026-11-07T09:45:00Z', '2026-11-07T09:45:40Z', csv([row(-20, 30), row(10, 10)]));
+  E.fail.put = k => k === CELLS; await W.fvWork(E.env, r, 'world');   // records published, counts pending
+  const o = one(E.db, 'SELECT * FROM firms_outputs'); const a = jsonOf(E, o.aux_key); a.cells = { '0_0': { count: 2 } }; a.token = 'x'; await E.R2.put(o.aux_key, JSON.stringify(a));
+  assert.equal(await W.fvPublish(E.env, r), 'published'); const c = jsonOf(E, CELLS);
+  assert.deepEqual(Object.fromEntries(Object.entries(c.cells).map(([k, v]) => [k, v.count])), { [W.cellId(-20, 30)]: 1, [W.cellId(10, 10)]: 1 });
+  const F = makeEnv(); const r2 = await addInput(F, '2026-11-07T09:45:00Z', '2026-11-07T09:45:40Z');
+  F.hooks.beforeHead = async k => { if (k.startsWith('snapshots/firms/')) { const v = F.m.get(k); v.customMetadata = { ...v.customMetadata, token: 'other' }; } };
+  // tamper right after commit: run the steps by hand
+  const w = await W.fvWork(F.env, r2, 'world'); assert.equal(w.r, 'stop:snapshot-mismatch'); assert.ok(!F.m.has(LATEST) && !F.m.has(CELLS));
+});
+await t('G4a. GPT case: records published, counts put fails; next run repairs counts then its fresh fetch fails → /health/publication/firms 200 (log agrees with the pair completion)', async () => {
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30)]) }; E.fail.put = k => k === CELLS;
+  await runFirmsAt(E.env, '2026-11-07T09:00:00Z', '2026-11-07T09:00:40Z');
+  let h = await worker.fetch(new Request('https://hub/health/publication/firms'), E.env); assert.equal(h.status, 503); assert.match(await h.text(), /counts are not complete yet|no successful firms publication/);
+  FIRMS = { status: 500, body: 'Internal error' }; await runFirmsAt(E.env, '2026-11-07T09:15:00Z', '2026-11-07T09:15:40Z');
+  h = await worker.fetch(new Request('https://hub/health/publication/firms'), E.env); const b = await h.json(); assert.equal(h.status, 200, JSON.stringify(b.reasons));
+  assert.equal(b.facts.last_publication.age_s, 900, 'age counts from the records upload (09:00:40), not from the repair');
+  assert.equal(b.facts.v2_publication.counts_published_at, '2026-11-07T09:15:40.000Z');
+});
+await t('G4b. …and the age is NOT reset: if fresh fetches keep failing, the check fails once the 09:00 data is overdue (09:50:40), exactly as without a repair', async () => {
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30)]) }; E.fail.put = k => k === CELLS;
+  await runFirmsAt(E.env, '2026-11-07T09:00:00Z', '2026-11-07T09:00:40Z');
+  FIRMS = { status: 500, body: 'Internal error' };
+  for (const m of ['09:15', '09:30', '09:45']) await runFirmsAt(E.env, `2026-11-07T${m}:00Z`, `2026-11-07T${m}:40Z`);
+  NOW = Date.parse('2026-11-07T09:50:30Z'); assert.equal((await worker.fetch(new Request('https://hub/health/publication/firms'), E.env)).status, 200);
+  await runFirmsAt(E.env, '2026-11-07T10:00:00Z', '2026-11-07T10:00:40Z');
+  const h = await worker.fetch(new Request('https://hub/health/publication/firms'), E.env); assert.equal(h.status, 503); assert.match(await h.text(), /no firms publication since 2026-11-07T09:00:40/);
+});
+await t('G4c. a v2 publication whose latest ok log is for ANOTHER run is reported, not hidden', async () => {
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30)]) }; await runFirmsAt(E.env, '2026-11-07T09:00:00Z', '2026-11-07T09:00:40Z');
+  E.db.exec("UPDATE collector_runs SET note = 'raw_bytes=1 run=someone-else' WHERE layer='firms' AND status='ok'");
+  const h = await worker.fetch(new Request('https://hub/health/publication/firms'), E.env); assert.equal(h.status, 503); assert.match(await h.text(), /not for the published run/);
+});
+await t('G5a. GPT case: probe multipart PART failure → rejects, every upload aborted, nothing left (uploads tracked, not inferred from a listing)', async () => {
+  const E = makeEnv(); E.fail.put = k => k.includes('/mp#part');
+  await assert.rejects(W.fvProbeR2(E.env), /forced part failure/); assert.equal(E.stats.mpuOpen, 0); assert.ok(![...E.m.keys()].some(k => k.startsWith('probe/')));
+});
+await t('G5b. probe failure at multipart COMPLETE, at the abort test\'s part, and at a plain put → each rejects with 0 uploads open and 0 probe objects', async () => {
+  for (const f of [k => k.endsWith('/mp#complete'), k => k.endsWith('/ab#part'), k => k.endsWith('/copy')]) {
+    const E = makeEnv(); E.fail.put = f; await assert.rejects(W.fvProbeR2(E.env), /forced/); assert.equal(E.stats.mpuOpen, 0, String(f)); assert.ok(![...E.m.keys()].some(k => k.startsWith('probe/')), String(f));
+  }
+});
+await t('G5c. the writer itself never leaves an upload open: complete() failing during a collect → upload aborted, run down, nothing registered', async () => {
+  const E = makeEnv(); const big = HEAD + (row(-20, 30) + '\n').repeat(Math.ceil((6 * 1024 * 1024) / 76)); FIRMS = { status: 200, body: big };
+  E.fail.put = k => /^raw\/firms\/.*#complete$/.test(k); await runFirmsAt(E.env, '2026-11-07T09:45:00Z', '2026-11-07T09:45:40Z');
+  assert.equal(E.stats.mpuOpen, 0); assert.equal(E.stats.mpuAborted, 1); assert.equal(one(E.db, 'SELECT COUNT(*) n FROM firms_inputs').n, 0);
+  assert.equal(q(E.db, "SELECT status FROM collector_runs WHERE layer='firms'").pop().status, 'down');
+});
+
+// =====================================================================================================================
 // 5. Legacy transition and bounds (L_json = 12 MiB)
 const legacySnap = (n, at) => JSON.stringify({ schema_version: 1, layer: 'firms', retrieved_at: at, source_status: 'ok', window_start: at.slice(0, 10) + 'T00:00:00.000Z', window_end: at, collector_version: '0.5.3', record_fields: ['lat', 'lng', 'observed_at', 'confidence', 'frp_mw', 'satellite', 'daynight'], records: Array.from({ length: n }, () => [-20, 30, at.slice(0, 10) + 'T13:00:00Z', 'n', 3.3, 'N20', 'D']), cells: { [W.cellId(-20, 30)]: { count: n } } });
-await t('L1. checkpoint across the switch: legacy snapshot (before cutover) newer than nothing → used; after cutover the committed output is used; legacy at/after cutover never eligible', async () => {
+await t('L1. checkpoint input = the LATEST publication of either kind (legacy key + retrieval time; the cutover is not a filter)', async () => {
   const E = makeEnv(); NOW = Date.parse('2026-11-07T09:00:00Z');
   await E.R2.put('snapshots/firms/2026-11-07T09-00Z.json', legacySnap(3, '2026-11-07T09:00:40.000Z'), { customMetadata: { retrieved_at: '2026-11-07T09:00:40.000Z' } });
   const snaps = await W.listSnapshots(E.env, 'firms'); assert.equal((await W.fvCheckpointCandidate(E.env, '2026-11-07', snaps)).kind, 'legacy');
   FIRMS = { status: 200, body: csv([row(-20, 30)]) }; await runFirmsAt(E.env, '2026-11-07T09:45:00Z', '2026-11-07T09:45:40Z');
-  await E.R2.put('snapshots/firms/2026-11-07T10-00Z.json', legacySnap(9, '2026-11-07T10:00:40.000Z'), { customMetadata: { retrieved_at: '2026-11-07T10:00:40.000Z' } });   // a legacy writer after the cutover
-  const c = await W.fvCheckpointCandidate(E.env, '2026-11-07', await W.listSnapshots(E.env, 'firms')); assert.equal(c.kind, 'new'); assert.equal(c.out.retrieved_at, '2026-11-07T09:45:40.000Z');
+  let c = await W.fvCheckpointCandidate(E.env, '2026-11-07', await W.listSnapshots(E.env, 'firms')); assert.equal(c.kind, 'new'); assert.equal(c.out.retrieved_at, '2026-11-07T09:45:40.000Z');
+  await E.R2.put('snapshots/firms/2026-11-07T10-00Z.json', legacySnap(9, '2026-11-07T10:00:40.000Z'), { customMetadata: { retrieved_at: '2026-11-07T10:00:40.000Z' } });   // a legacy publication after the cutover (rollback / old isolate)
+  c = await W.fvCheckpointCandidate(E.env, '2026-11-07', await W.listSnapshots(E.env, 'firms')); assert.equal(c.kind, 'legacy'); assert.equal(c.snap.retrieved_at, '2026-11-07T10:00:40.000Z');
+  assert.ok(one(E.db, "SELECT value FROM firms_settings WHERE key='format_cutover_at'").value, 'cutover still recorded (audit)');
 });
 await t('L2. legacy-only day: legacy snapshot checkpointed by the legacy path; fires_daily from it', async () => {
   const E = makeEnv(); NOW = Date.parse('2026-11-07T09:00:00Z');
