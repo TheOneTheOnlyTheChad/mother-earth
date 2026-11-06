@@ -18,7 +18,7 @@ One browser globe showing the latest observations of the planet from open live f
 ## 2. How Chad works (observe these; they are standing)
 - **Baby steps, click-by-click.** One key, one dialog, one action at a time. He reads code; he does not write it.
 - **Measure, don't assume.** Every limit/cost claim gets measured on the real platform and the number written down with the date.
-- **$0/month target.** Name every non-zero line item explicitly before it is incurred.
+- **Running cost as low as possible (updated 6 Nov 2026).** The $0 target ended when Cloudflare Workers Paid ($5/month) started on 3 Nov. Cost is now accepted where it buys something, kept to the minimum. Name every new line item, with its amount, before it is incurred; Chad decides.
 - **MVP lives in the now.** Page reads `latest/*` only; history accumulates cheaply for phase-3 baselines.
 - **Keys are shared and recorded.** He is fine with Claude knowing them. Record: `~/Documents/Mother Earth/KEYS.md` (gitignored). Secrets can't be read back from Cloudflare, so the value goes into KEYS.md *first*, then into Cloudflare.
 - **Reviews (updated 1 Nov 2026):** GPT and Gemini are watching the site grow and want to assist, but they do not weigh in on every decision — Chad pulls them in when he sees something worth a three-way chat; otherwise Claude judges and builds. Claude stays sole code writer/deployer.
