@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov ~09:30 UTC — GPT live smoke review: 4 page fixes on branch `smoke-fixes` (NOT public)
+- Review `reviews/2026-11-06-smoke-fixes.md`. The four fixes:
+  - FRP shown as delivered via one formatter `ME.frp`. It was rounded to whole MW; **272 of 906 live records were under 1 MW**, shown as "0 MW" or "1 MW".
+  - Sources tables wrap on phones: 360 px wide, was 1,371. Main also overflowed at 1280.
+  - The place view is stacked on desktop: descriptions 366 px, were ~131.
+  - The buoy collection wording points to the hub's retention report.
+- Guard suite `smoke-fixes` 52/52 (33 of 51 fail on main). All regressions pass. Live-checked on real data in a clean pane tab.
+- **Next:** GPT review → Chad's go → fast-forward merge to main (publishes the page).
+
 ## 6 Nov 08:19:35 UTC — **5 Nov fires recovery WRITTEN to R2 and verified** (Chad's Approve line)
 - One object: `archive/recoveries/firms/2026-11-05.json.gz`, 659,639 B, sha256 `624ecf2ed864…`, etag `4e3b3d61…`. Uploaded by Chad through the R2 dashboard. This was the procedure's fallback: the base64 transfer step was not practical at 660 KB, a flaw in §7.
 - Pre-check 08:11 (destination absent), read-back verify (18/18), originals untouched (checkpoint object + 3 D1 reads identical). Review §10.
