@@ -1,6 +1,6 @@
 # 5 Nov 2026 fires — recovery record (review, rev 2)
 
-**Status: prepared in Claude's workspace only. Nothing has been written to R2, D1 or the hub.** The R2 write in §7 waits for Chad's explicit go.
+**Status: WRITTEN to R2 on 6 Nov 2026 08:19:35 UTC (Chad's go) and verified — see §10.** One object only; nothing written to D1, the hub or the page.
 
 **Changes since rev 1** (GPT's review, 6 Nov 2026). GPT independently verified the rev 1 calculations against the preserved inputs and the hub's functions: original 46,009 records, identical fields and rows; recovery 63,614 rows, 63,591 distinct parsed records, 641 cells; 23 original records absent; latest observation 21:36 UTC; records and per-cell aggregates match. Rev 2 changes:
 - **Metadata.** The record now carries its own limitations, separates observation, upload and creation times, sets the retrieval time to null (unavailable), and labels its reference as recovery-generated.
@@ -183,4 +183,14 @@ D1 calls in the procedure are SELECT only (the mock rejects anything else). The 
 - The reason the 23 records are absent is unknown. The recovery reflects the source file as of its 23:45 upload, not a union of the day's files.
 
 ## 10. Write log
-*Empty — no write has been made.*
+**Approval (Chad, 6 Nov ~08:10 UTC):** "Approve: write one R2 object archive/recoveries/firms/2026-11-05.json.gz (659,639 B, sha256 624ecf2e…) via r2-write.js — no overwrite, no D1, no hub or page change".
+
+| step | time (UTC) | result |
+|---|---|---|
+| load `r2-write.js` | 08:11 | fetched from GitHub at `5f68d8e`; sha256 `2dae92e6…` matched before running |
+| 0 precheck | 08:11:16 | **destination absent**. Lifecycle: `cells-48h`, `raw-48h`, `snapshots-48h` (prefixes `cells/`, `raw/`, `snapshots/`) plus Cloudflare's *Default Multipart Abort Rule* (no prefix; it only aborts unfinished multipart uploads and never deletes stored objects). Before-state recorded: checkpoint object 507,004 B, etag `1c24bb71698efcd5de2c4d135e7327ec`, last_modified 02:16:10.930Z; `archive_checkpoints` firms 5 Nov (46,009 records, cutoff 15:30:44.382Z); coverage row (stale, 33 failed after cutoff, assessed 06:00:45.551Z); `fires_daily` 555 cells / 46,009 detections / max 746.34 MW |
+| 1–2 transfer + write | **08:19:35.374Z** (R2 `last_modified`) | **Deviation from §7:** step 1 (base64 through Claude's tool calls) was not practical at 660 KB (~880 k characters), so the procedure's own fallback was used. **Chad uploaded the Mac file** `upload/2026-11-05.json.gz` (a copy of `out/recovery-firms-2026-11-05.json.gz`, sha256 checked on the Mac first) through the R2 dashboard into `archive/recoveries/firms/`. The script's in-page no-overwrite re-check did not run for this upload; the 08:11 precheck had shown the destination absent. |
+| 3 verify | 08:2x | **ok, all 18 checks.** Read-back sha256 `624ecf2ed864465137cb20ddc999d594cbbdeefcce7b9f0f682aede75678096e`, 659,639 B, listed size equal. After gunzip, every content field matches the pins. etag `4e3b3d614ce5f7625248bffb6876b6e1`. The dashboard set content type `application/x-gzip` (planned `application/gzip`; bytes stored as-is, no content-encoding). |
+| 4 untouched | 08:2x | **ok.** The checkpoint object and all three D1 reads are identical to the 08:11 state. The only object under `archive/recoveries/` is the one key; no folder placeholders were created. |
+
+**For a future write of this kind:** the bytes need a route into the page that does not pass through tool-call text. Options: a dashboard upload as here, or a page fetch from a hash-pinned source. Fix this in the procedure before reusing it.

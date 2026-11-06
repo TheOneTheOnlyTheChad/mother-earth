@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 6 Nov 2026 — thread 17
 
+## 6 Nov 08:19:35 UTC — **5 Nov fires recovery WRITTEN to R2 and verified** (Chad's Approve line)
+- One object: `archive/recoveries/firms/2026-11-05.json.gz`, 659,639 B, sha256 `624ecf2ed864…`, etag `4e3b3d61…`. Uploaded by Chad through the R2 dashboard. This was the procedure's fallback: the base64 transfer step was not practical at 660 KB, a flaw in §7.
+- Pre-check 08:11 (destination absent), read-back verify (18/18), originals untouched (checkpoint object + 3 D1 reads identical). Review §10.
+- No D1, hub or page change. The hub does not read `archive/recoveries/`.
+
 ## 6 Nov ~08:15 UTC — 5 Nov fires recovery **rev 2 prepared** (GPT's review; R2-only) — nothing written
 - GPT independently verified rev 1's figures. Rev 2 (`reviews/2026-11-06-firms-recovery-5nov.md`):
   - the record carries its own limitations;
