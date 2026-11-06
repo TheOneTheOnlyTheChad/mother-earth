@@ -5,7 +5,7 @@
 
 | | |
 |---|---|
-| Commit | `0f3f5fd` (fixes; rev-2 tests G1a–G5c, rev-2 breaks) + the rev-2 doc/bench commit on top (hash in Chad's message). Branch `firms-memory`. |
+| Commit | `0f3f5fd` (fixes; rev-2 tests G1a–G5c, rev-2 breaks) + `7408fc7` (rev-2 doc, bench results). Branch `firms-memory`. |
 | Worker | `phase1/worker.js` 0.6.0, sha256 **`9c2a1a1e65feef20fe1890cf19fbe7558054463e4bba7d97184cc5e4a35871d5`**. The bench copy (export line stripped) is `3046da881c106039…` and matches. `schema.sql` is unchanged from rev 1 (`0c964327…a0d2`). |
 | Diff since rev 1 | `git diff 5644926 0f3f5fd` — worker +159/−33, tests, breaks, bench script |
 
@@ -116,13 +116,13 @@ Failures:
 ### Revised rollout (each step needs Chad's `Approve:` line; nothing before GPT re-reviews; nothing in the other thread's window 23:30 UTC 6 Nov → 01:15 UTC 7 Nov, or until its "window clear" note)
 0. **Read-only:** dashboard → R2 `mother-earth` → lifecycle rules. Confirm `raw/`, `snapshots/` and `cells/` expire after 2 days.
 1. **D1 additive schema** (5 tables + 3 indexes; the live 0.5.3 never reads them):
-   `Approve: D1 additive schema — create firms_settings, firms_identity, firms_inputs, firms_attempts, firms_outputs + 3 indexes (schema.sql @ <commit>, sha256 0c964327…a0d2)`
+   `Approve: D1 additive schema — create firms_settings, firms_identity, firms_inputs, firms_attempts, firms_outputs + 3 indexes (schema.sql @ 7408fc7, sha256 0c964327…a0d2)`
    Record the exact UTC time it was created (the other thread asked for this).
 2. **Deploy 0.6.0 with v2 OFF** (content only). Until v2 first runs, the checkpoint and backfill are the legacy code (G2e).
    - Differences from 0.5.3 in this mode, none reachable at today's sizes or with no v2 files: `/place` withholds a legacy `latest/` over 12 MiB; the listing never parses an unmetadata'd object over 12 MiB; the new admin probe route; version 0.6.0 in `/status`.
    - Watch 2 FIRMS runs: all 8 monitors stay up and `/status` shows 0.6.0.
 
-   `Approve: deploy hub commit <commit> (firms-memory, 0.6.0, phase1/worker.js sha256 9c2a1a1e…71d5, content only, FIRMS_PIPELINE unset)`
+   `Approve: deploy hub commit 7408fc7 (firms-memory, 0.6.0, phase1/worker.js sha256 9c2a1a1e…71d5, content only, FIRMS_PIPELINE unset)`
 3. **Production R2 probe**, once: `all_as_designed` must be true and `uploads_open_after: 0`.
    `Approve: run /admin/probe/r2-conditional once on production (probe/ keys only, uploads aborted and objects deleted in the same request)`
 4. `Approve: set Worker variable FIRMS_CREATE_ONLY=verified` (only if step 3 is all true)
