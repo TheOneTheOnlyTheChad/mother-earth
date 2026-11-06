@@ -53,7 +53,7 @@ Kept on the Mac: `~/Documents/Mother Earth/research/R6/2026-11-06/` with `PROVEN
 | Gaps (bad orbits, polar night) | **filled with assimilated ozone data** — MERRA (1979–Jun 2016), MERRA-2 (Jul 2016–Aug 2017), **GEOS FP** (from Sep 2017) | **no interpolation**: "determined only from data actually contained in the processed satellite data" |
 | Disclaimers page | interpolated values "are only used for visualization and for calculating the ozone hole area" | interpolated values "are never used in quantities such as minimum ozone" |
 - **Satellite sources by period:** TOMS (Nimbus-7 1979–92, Meteor-3 1993–94, Earth Probe 1996–Oct 2004), OMI on Aura (Nov 2004–Jun 2016), **OMPS on Suomi NPP from Jul 2016**.
-- **Coverage limit of the minimum:** it is the minimum among the retrievals that exist; areas without data (bad orbits, polar night) may hold lower ozone, so the reported minimum **can be too high** (NASA's caution, per GPT's reading of the source page; not re-checked in this pass). It does **not** imply complete coverage south of 40° S.
+- **Coverage limit of the minimum:** it is the minimum among the retrievals that exist; areas without data (bad orbits, polar night) may hold lower ozone, so the reported minimum **can be too high** (NASA's caution — **verified by GPT against NASA's SH methodology page**; Claude did not re-check it in the rev-2 pass). It does **not** imply complete coverage south of 40° S.
 - *Interpretation:* **minimum ozone is satellite-derived only** (an observed statistic over available retrievals, with gaps left as missing); **area is a statistic computed from satellite data with assimilated gap-filling** — partly model-informed, so it must not be labelled purely Observed. The daily files do not say how much of a given day's area came from gap-filling (**Open**).
 - **Inconsistency to flag:** the SH page title reads "2026 Antarctic OMPS and MERRA-2 Ozone" while the methodology names GEOS FP for gap-filling since Sep 2017. **Open** which is current for 2026.
 - **Instrument history** spans five instruments and a 1995 gap (none listed between Meteor-3 1994 and Earth Probe 1996) — any long comparison crosses instrument changes.
@@ -65,7 +65,7 @@ Kept on the Mac: `~/Documents/Mother Earth/research/R6/2026-11-06/` with `PROVEN
 
 ## 5. Payload and processing (measured)
 
-- Two files, **~29 KB each** for a full year; parsing = split lines, 9 numeric columns, map −9999.0 to missing. Trivial per file. Update cadence observed once (daily-looking); **Open**.
+- Two files, **~29 KB each** for a full year; parsing = split lines, one date plus eight numeric fields, map −9999.0 to missing. Trivial per file. Update cadence observed once (daily-looking); **Open**.
 
 ## 6. Reuse and access (primary sources)
 
@@ -88,7 +88,6 @@ Kept on the Mac: `~/Documents/Mother Earth/research/R6/2026-11-06/` with `PROVEN
 4. Licence / automated-access terms beyond the credit line.
 5. Current OMPS platform for 2026 (Suomi NPP vs NOAA-20/21) — the page lists Suomi NPP from Jul 2016.
 6. Numerical map products (separate gate).
-7. NASA's wording on the minimum's coverage limit — quote it from the page in a later pass.
 
 ## Sources
 - [NASA Ozone Watch — SH meteorology / methodology](https://ozonewatch.gsfc.nasa.gov/meteorology/SH.html) · [Disclaimers](https://ozonewatch.gsfc.nasa.gov/disclaimers.html) — read 6 Nov 2026 (WebFetch + browser pane)
