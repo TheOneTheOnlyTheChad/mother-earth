@@ -118,3 +118,10 @@ The Life sample was also sent to Chad in the conversation at 10:58 UTC (same gz 
   - **Total transferred 1,500,912 B across 22 requests, all measured** (DevTools sees cross-origin sizes).
   - Hub requests sequential, 1.52 → 7.45 s.
   - Window width not yet recorded.
+- 13:43 — **Desktop-width runs (Chad, same Chrome 156 Guest window, DevTools undocked; viewport 1470 × 835, DPR 2; warm; no throttling)**:
+  - desk1 13:40:17Z: DCL 0.91 s · load 0.91 s · last 6.20 s · 908,896 B.
+  - desk2 13:41:33Z: DCL 0.77 s · load 0.77 s · last 4.96 s · 908,752 B.
+  - desk3 13:42:11Z: DCL 0.69 s · load 2.93 s · last 5.18 s · 943,366 B (css and js re-fetched).
+  - Every warm load still downloads ~0.9 MB (GIBS backdrop ~450 kB + hub data ~420 kB, fetched fresh each time).
+  - HARs saved without bodies; summary in .
+  - **Still pending: iPhone (Chad, phone charging); direct interactivity (not measured by HAR).**

@@ -29,4 +29,8 @@ b567c8c338af0d1d8a20a902b74ac8b6a3aec247730df259a97ec66fda263cea  ./life/gbif-sa
 eeafa61299dd83eaca38b06039d7c1497da3e7ddef362c297586f952c0c5e37b  ./life/subset.py
 f99e1fe95132e7b18391e2d5c1c6c83fab7a964db81462f173dd764b8f03913d  ./planet/cold1-chrome-guest-network.png
 d8cf0d3eb28f6fea4fefc30e1823b1e05b342291d5d9ec591a185bf12d6eaf91  ./planet/cold1-chrome-guest.har
+640c132de9b9fe357f22a51f3d823206c258bf213f569b28ccdb5d13d3a5384d  ./planet/desk1-chrome-guest-1470px.har
+6f372efe5377b449d2fd0fda1fde1484854152b19fc7257cc9a5246509692af7  ./planet/desk2-chrome-guest-1470px.har
+b171074214087929ad6f67df35875b9de78fc260fc6dbc9345351de276a1e23b  ./planet/desk3-chrome-guest-1470px.har
+73a2d44ddf3015ce105f0b7f09e698c83e8c33a7e68034ea5840d1a3dc3582e5  ./planet/desktop-runs-2026-11-07.json
 bb7ad48775aa2aea95631e01496cc6807428767f65156bbeb1329f922381b4bc  ./planet/runs-2026-11-07.json

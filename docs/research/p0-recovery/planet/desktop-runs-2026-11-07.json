@@ -1,0 +1,62 @@
+{
+ "label": "Planet desktop-width runs (Chad, Chrome Guest window, 7 Nov 2026)",
+ "conditions": {
+  "browser": "Google Chrome 156 (UA-CH), macOS, Guest window (fresh profile opened for the cold run at 13:32; same window reused)",
+  "viewport": [
+   1470,
+   835
+  ],
+  "dpr": 2,
+  "layout": "desktop (above the 1,100 px breakpoint)",
+  "devtools": "undocked into its own window before desk1; Network panel open; cache NOT disabled; no throttling",
+  "cache": "warm: after the cold run in the same Guest window",
+  "network": "Chad's home connection, unthrottled; not measured"
+ },
+ "method": "Navigate to ?baseline=deskN in the same window, wait 20 s, export HAR from the Network panel. Sizes = response _transferSize (0 = served from cache). DOMContentLoaded/onLoad = HAR pageTimings; last = latest response end relative to navigation start.",
+ "runs": {
+  "desk1": {
+   "start": "2026-11-07T13:40:17.349Z",
+   "dcl": 907,
+   "load": 910,
+   "last": 6197,
+   "requests": 21,
+   "transfer": 908896,
+   "network": 13,
+   "zero_transfer": 8,
+   "hub_first": 889,
+   "hub_last": 6197,
+   "gibs_end": 3917
+  },
+  "desk2": {
+   "start": "2026-11-07T13:41:33.331Z",
+   "dcl": 769,
+   "load": 771,
+   "last": 4958,
+   "requests": 21,
+   "transfer": 908752,
+   "network": 13,
+   "zero_transfer": 8,
+   "hub_first": 761,
+   "hub_last": 4958,
+   "gibs_end": 2702
+  },
+  "desk3": {
+   "start": "2026-11-07T13:42:11.086Z",
+   "dcl": 685,
+   "load": 2928,
+   "last": 5179,
+   "requests": 21,
+   "transfer": 943366,
+   "network": 15,
+   "zero_transfer": 6,
+   "hub_first": 623,
+   "hub_last": 5179,
+   "gibs_end": 2927
+  }
+ },
+ "notes": [
+  "Every warm load still downloads ~0.9 MB: the GIBS backdrop (~450 kB) and all hub data (~420 kB) are fetched fresh each time; code and fonts come from cache.",
+  "desk3 re-fetched style.css and app.js (\u224834 kB), which pushed its load event to 2.93 s.",
+  "No direct interactivity, frame timing or input latency in these runs (HAR only)."
+ ]
+}
