@@ -125,3 +125,8 @@ The Life sample was also sent to Chad in the conversation at 10:58 UTC (same gz 
   - Every warm load still downloads ~0.9 MB (GIBS backdrop ~450 kB + hub data ~420 kB, fetched fresh each time).
   - HARs saved without bodies; summary in `planet/desktop-runs-2026-11-07.json`.
   - **Still pending: iPhone (Chad, phone charging); direct interactivity (not measured by HAR).**
+- ~13:55 — **Accepted (Chad, after GPT):** cold-load transfer and desktop-width results accepted.
+  - Conditions kept separate: the cold run's viewport was not recorded; the three desktop runs were warm. Neither establishes direct input response, and neither is directly comparable with the earlier pane runs.
+  - **RESUME POINT: `bad819a`** (HARs, screenshot, desktop results, original export hashes).
+  - **Tomorrow, when Chad is available:** iPhone Safari runs (screen recordings) and direct interactivity.
+  - **No more Phase 0 work tonight.** Arts scoped-cleared but unselected; Life stopped; aircraft parked; no prototype, domain selection or Phase A start. The FIRMS overnight arrangement is unchanged (02:40–03:00 SAST pane reservation).
