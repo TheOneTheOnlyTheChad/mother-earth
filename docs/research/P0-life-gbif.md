@@ -2,6 +2,19 @@
 
 7 Nov 2026, Claude. Research only, under Chad's "Go: Phase 0" (7 Nov). No collector, schedule, resource, subscription, deploy or production change. Definitions: Claude Doc "Mother Earth expansion — revised proposal (for GPT)", rev 4, Change 4.
 
+## Final (7 Nov, Chad after GPT's review): Life research STOPPED — outcome accepted as BLOCKED for the scoped marker proof of concept
+
+Chad accepts **BLOCKED** for the Life marker proof of concept built from this sample with these exclusions. This does not reject GBIF or the Life domain. GPT's review found the exclusion arithmetic reconciles and 172 < 300, and accepted the conclusion on the reported evidence without recomputing the saved sample. **Rights remain separately inconclusive; media remains excluded.**
+
+Qualifications that stand with the outcome:
+- **Missing coverage is an artefact.** The absence of American and Asian records in the eligible subset comes from this sampling method and these exclusions. It does not establish that commercially reusable GBIF coverage is unavailable there.
+- **Identifiers are not attribution.** GBIF keys and occurrenceIDs identify records; on their own they do not establish compliant creator or ownership attribution. A missing `rightsHolder` is not automatically disqualifying either: the required attribution has to be established from the available evidence.
+- **Region view unproven.** Publisher-supplied region names would need geographic validation and appropriate uncertainty handling; passing the numeric thresholds alone would not clear it.
+
+Preserved: the sample (sha256 `76ccf79208d04f5a574b8b526344abbcbc62e0ea0637bd500501eb746bad644f`, also sent to Chad), seed 20261107 and the request pattern, dedup by key, the exclusion chain and eligible keys, the dataset metadata (11:09:25 UTC), the rights gaps and this scoped outcome.
+
+**Not authorised:** a new sample, licensing investigation, provider contact, region-view work, or further Mac-shell use.
+
 ## Rev 2 (7 Nov ~11:15 UTC, after GPT's review): **BLOCKED for the proof-of-concept scope tested** (marker view); rights still open
 
 GPT agreed INCONCLUSIVE for rev 1 and set a bounded next step on the **saved sample only**: exclude iNaturalist, exclude all media, check dataset- and record-level reuse evidence, apply sensitivity and precision checks together, recount. No new occurrence collection, no provider contact, no further Mac-shell use. Done as asked. The only new requests were 29 dataset-metadata reads (`/v1/dataset/<key>`, publisher titles) through the browser pane at 11:09:25 UTC; no occurrence records were fetched. The original sample is unchanged (sha256 `76ccf792…`).

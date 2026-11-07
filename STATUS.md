@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 7 Nov 2026
 
+## 7 Nov ~11:40 UTC — **Life research STOPPED** (BLOCKED for the scoped marker PoC accepted by Chad after GPT); **Arts + Planet evidence compiled for GPT**
+- Life: Chad accepts BLOCKED for the marker proof of concept from this sample and these exclusions. This is not a rejection of GBIF or Life. Rights are separately inconclusive; media excluded. Three qualifications added to `docs/research/P0-life-gbif.md`: missing American and Asian coverage is a method artefact; identifiers are not attribution; the region view is unproven. Sample, hash, method, exclusions and gaps preserved. No new sample, licensing work, provider contact, region-view work or Mac-shell use.
+- `docs/research/P0-arts-planet-for-GPT.md`, built from existing evidence only (no new measurement):
+  - **Arts (the Met): INCONCLUSIVE.** Whole collection blocked for that scope (107 / 2,000 typed). Typed subset: region view 88 countries but 52% Egypt; marker view 492 / 159 but needs an unchecked gazetteer. CC0 not yet in REGISTER. Media per-item by public-domain flag, image availability unchecked. Sensitive material not assessed.
+  - **Planet:** desktop warm-cache baseline only.
+  - **MISSING items flagged:** CSV hash, per-run timings, UA and viewport, p95, sensitivity, attribution credit line. An unreconciled 107 vs ~238 typed count is flagged.
+
 ## 7 Nov ~11:15 UTC — **Phase 0 Life gate rev 2 (after GPT): BLOCKED for the proof-of-concept scope tested; rights still open** (saved sample only)
 `docs/research/P0-life-gbif.md` rev 2. GPT's bounded step: exclude iNaturalist and all media; check rights; apply sensitivity and precision together; recount. No new occurrence collection, no Mac shell.
 - **Three more datasets** carry the iNaturalist mismatch (CC BY-NC dataset over CC BY / CC0 records): Birda, Happywhale, UB Brasília (142 records). Excluded as unresolved.
