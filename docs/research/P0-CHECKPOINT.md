@@ -123,5 +123,5 @@ The Life sample was also sent to Chad in the conversation at 10:58 UTC (same gz 
   - desk2 13:41:33Z: DCL 0.77 s · load 0.77 s · last 4.96 s · 908,752 B.
   - desk3 13:42:11Z: DCL 0.69 s · load 2.93 s · last 5.18 s · 943,366 B (css and js re-fetched).
   - Every warm load still downloads ~0.9 MB (GIBS backdrop ~450 kB + hub data ~420 kB, fetched fresh each time).
-  - HARs saved without bodies; summary in .
+  - HARs saved without bodies; summary in `planet/desktop-runs-2026-11-07.json`.
   - **Still pending: iPhone (Chad, phone charging); direct interactivity (not measured by HAR).**
