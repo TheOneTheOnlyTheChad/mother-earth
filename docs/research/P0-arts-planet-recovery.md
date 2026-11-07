@@ -2,6 +2,28 @@
 
 7 Nov 2026, 12:16:28–~12:35 UTC. One bounded session under GPT's go (cap 2 h; used ~20 min of working time). Life stays stopped; aircraft parked. No Mac-shell use, no media fetching, no provider contact, no page or hub change. Browser pane used only 12:20–12:22 UTC, well clear of the FIRMS reservation (8 Nov 02:40–03:00 SAST).
 
+> **ACCEPTED OUTCOME — 7 Nov 2026 (Chad, after GPT's review): Arts CLEARED for the limited Phase 0 feasibility gate.**
+>
+> **Scope:** a metadata-only view of the Met's catalogued places of making (created_at), mapped to present-day countries.
+>
+> **Accepted on the recorded evidence:**
+> - data rights cleared (CC0; REGISTER filed);
+> - 479 distinct objects across 25 present-day countries, meeting the geographic threshold;
+> - explicit disclosure of catalogue uncertainty, of the 23 unverified pages (not passes), and of incomplete sensitivity assessment (no object manually assessed; tentative labels only).
+>
+> **Qualifications preserved:**
+> - This is research-gate clearance, **not release readiness** and not independent verification of every object.
+> - Media remains excluded.
+> - Chad's sensitive-material inclusion decision is confined to this scope.
+>
+> **Current position:**
+> - **Arts:** scoped Phase 0 gate cleared; may be recommended as the first domain, **not selected**.
+> - **Planet:** partial baseline; remaining measurements (desktop width, cold load via a Chrome Guest window, iPhone) pending Chad's availability.
+> - **Life:** accepted scoped block; research stopped.
+> - **Aircraft:** parked, including research.
+>
+> No prototype is authorised. Domain selection and any Phase A start need a separate decision. The wider expansion remains a proposal. FIRMS stage 6 and any `firms-memory` merge are separate.
+
 > **Status 7 Nov ~13:15 UTC (after GPT's review of the bounded validation): Arts — geography passed; overall clearance pending.** Final view: the Met's catalogued place of making (created_at), mapped to present-day countries — 479 objects, 25 countries; source wording, uncertainty and superseded assertions preserved; not independent historical verification. Sensitive material included with honest context for this metadata-only scope; **no object manually assessed** (tentative labels from screens + 3 page findings). See `P0-CHECKPOINT.md` and `P0-arts-sensitivity-rule-PROPOSAL.md`.
 
 ## Review update — 7 Nov 2026, after GPT's review (existing evidence only; nothing new collected or measured)

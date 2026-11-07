@@ -2,6 +2,28 @@
 
 Written 7 Nov 2026 ~12:50 UTC at the start of Chad's "Go: bounded Arts validation and the remaining Planet baseline measurements". Updated as each step completes (see the log at the end).
 
+> **ACCEPTED OUTCOME — 7 Nov 2026 (Chad, after GPT's review): Arts CLEARED for the limited Phase 0 feasibility gate.**
+>
+> **Scope:** a metadata-only view of the Met's catalogued places of making (created_at), mapped to present-day countries.
+>
+> **Accepted on the recorded evidence:**
+> - data rights cleared (CC0; REGISTER filed);
+> - 479 distinct objects across 25 present-day countries, meeting the geographic threshold;
+> - explicit disclosure of catalogue uncertainty, of the 23 unverified pages (not passes), and of incomplete sensitivity assessment (no object manually assessed; tentative labels only).
+>
+> **Qualifications preserved:**
+> - This is research-gate clearance, **not release readiness** and not independent verification of every object.
+> - Media remains excluded.
+> - Chad's sensitive-material inclusion decision is confined to this scope.
+>
+> **Current position:**
+> - **Arts:** scoped Phase 0 gate cleared; may be recommended as the first domain, **not selected**.
+> - **Planet:** partial baseline; remaining measurements (desktop width, cold load via a Chrome Guest window, iPhone) pending Chad's availability.
+> - **Life:** accepted scoped block; research stopped.
+> - **Aircraft:** parked, including research.
+>
+> No prototype is authorised. Domain selection and any Phase A start need a separate decision. The wider expansion remains a proposal. FIRMS stage 6 and any `firms-memory` merge are separate.
+
 ## Authority and limits (Chad, 7 Nov)
 - **Effort cap:** 2 h of active work across this follow-up (validation, measurement and write-up count; waiting for Chad doesn't), plus one GPT review round. At the cap: stop, save, report unfinished items. No automatic extension, no new sample.
 - **Arts:** existing R1 sample and pinned file only.
@@ -84,3 +106,4 @@ The Life sample was also sent to Chad in the conversation at 10:58 UTC (same gz 
   - **Clarification answered:** none of the 479 were manually assessed; labels = screens + 3 page findings.
   - **Wording revised (existing evidence only):** decision scoped to this metadata-only view; tentative label names; "sensitivity not fully assessed" on every object; view described as "the Met's catalogued place of making, mapped to present-day countries", not independent historical verification.
   - **Arts status: geography passed; overall clearance pending (GPT review).**
+- ~13:25 — **Accepted outcome recorded** (Chad, after GPT): Arts cleared for the limited Phase 0 feasibility gate, qualifications preserved; no further Arts research this round. Planet pending Chad. This pass is otherwise closed.
