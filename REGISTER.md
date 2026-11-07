@@ -143,3 +143,11 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Status:** ⚠️ endpoint + sample dated (browser only); Worker reachability not yet measured (collector 0.2.2 awaiting deploy); access n/a (no key); terms: no explicit grant, no prohibition found, decision recorded; coverage ✓ (as stated above).
 - **Commercial use:** **unknown — both sources silent.** CelesTrak states free availability to all users; Space-Track's approval is conditioned on citation and does not address commercial use. Recorded here per the constitution; decision Chad's.
 
+
+## The Met — Open Access collection data, `MetObjects.csv` (Arts, Phase 0 research only) — ⏳ PENDING Chad's paste, not on the page
+- **Reviewed:** 7 Nov 2026 by Claude (Phase 0 recovery pass) — https://www.metmuseum.org/policies/image-resources (no last-updated date shown) and https://github.com/metmuseum/openaccess README + LICENSE at commit `e39487871a5512abaa4e21fd8cfdff7d7e3ee1ea` (2 Nov 2026). GPT verified the same two sources.
+- **What the sources say (paraphrased; operative sentence to be pasted by Chad):** collection data are released under CC0 1.0 (the README says the Met has waived all copyright and related rights) for unrestricted commercial and non-commercial use, without permission or fee. The data cover the whole online collection, including works under copyright; images are not part of the dataset, and image rights are separate (CC0 only for works the Met treats as public domain).
+- **Attribution:** not required. The README asks users to consider attributing or citing the Met's CC0 datasets.
+- **Commercial use:** yes (stated on both pages).
+- **Media:** excluded from Phase 0 (metadata only; no images fetched).
+- **Status:** ⏳ pending — Chad opens the policy page and pastes the operative sentence here; until then this entry is research evidence, not clearance.

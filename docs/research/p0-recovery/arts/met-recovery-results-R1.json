@@ -1,0 +1,406 @@
+{
+ "input": {
+  "file": "met/MetObjects.csv",
+  "rows": 503073
+ },
+ "subset_definition": "Geography Type has >=1 segment mapping to a relationship (not empty / \"(none assigned)\") AND Country non-empty",
+ "subset_size": 59137,
+ "seed": 20261107,
+ "sample_size": 2000,
+ "geography_type_populated_in_file": 60353,
+ "relations": {
+  "associated_with": 1021,
+  "created_at": 646,
+  "attributed_to": 241,
+  "found_at": 159,
+  "unknown": 1
+ },
+ "certainty": {
+  "certain": 1699,
+  "uncertain": 369
+ },
+ "alignment_records": {
+  "aligned": 1956,
+  "single-country": 44
+ },
+ "country_match": {
+  "iso3166-1": 1859,
+  "unresolved-name": 74,
+  "alias (ISO rename)": 40,
+  "unresolved-multiple": 25,
+  "iso3166-2 subdivision": 52,
+  "iso3166-1 (Met \"present-day\")": 18
+ },
+ "unmatched_names": [
+  [
+   "Byzantine Egypt",
+   54
+  ],
+  [
+   "Egypt or Syria",
+   4
+  ],
+  [
+   "Nubia (Sudan)",
+   4
+  ],
+  [
+   "South Netherlands",
+   3
+  ],
+  [
+   "Northern France",
+   3
+  ],
+  [
+   "Egypt and Sudan",
+   2
+  ],
+  [
+   "Iran or present-day Uzbekistan",
+   2
+  ],
+  [
+   "Iran or Central Asia",
+   2
+  ],
+  [
+   "probably Egypt or Syria",
+   1
+  ],
+  [
+   "Central or Southern India or Sri Lanka",
+   1
+  ],
+  [
+   "United States or Canada",
+   1
+  ],
+  [
+   "Morocco or Algeria",
+   1
+  ],
+  [
+   "Germany or the Netherlands",
+   1
+  ],
+  [
+   "Iran or Turkey",
+   1
+  ],
+  [
+   "probably western India",
+   1
+  ],
+  [
+   "Northwestern Iran or Baghdad",
+   1
+  ],
+  [
+   "Germany (present day France)",
+   1
+  ],
+  [
+   "Alamania",
+   1
+  ],
+  [
+   "Armenia or Turkey",
+   1
+  ],
+  [
+   "Northern India",
+   1
+  ],
+  [
+   "Spain or France",
+   1
+  ],
+  [
+   "China or present-day Uzbekistan",
+   1
+  ],
+  [
+   "Scandinavia",
+   1
+  ],
+  [
+   "Netherlands or France",
+   1
+  ],
+  [
+   "Northern or Central India",
+   1
+  ],
+  [
+   "Russia",
+   1
+  ],
+  [
+   "Eastern Islamic lands",
+   1
+  ],
+  [
+   "present-day Afghanistan or Turkmenistan",
+   1
+  ],
+  [
+   "Eastern India",
+   1
+  ],
+  [
+   "France or Germany",
+   1
+  ],
+  [
+   "Palestine",
+   1
+  ],
+  [
+   "Iraq or Syria",
+   1
+  ],
+  [
+   "Modern cast of 39.40.39a",
+   1
+  ]
+ ],
+ "historic_names": [],
+ "country_view_any": {
+  "records": 1905,
+  "countries": 32,
+  "top_share": 0.561,
+  "top": [
+   [
+    "EGY",
+    1069
+   ],
+   [
+    "USA",
+    292
+   ],
+   [
+    "IRN",
+    212
+   ],
+   [
+    "GBR",
+    52
+   ],
+   [
+    "FRA",
+    52
+   ],
+   [
+    "TUR",
+    40
+   ],
+   [
+    "IND",
+    34
+   ],
+   [
+    "CHN",
+    28
+   ],
+   [
+    "DEU",
+    26
+   ],
+   [
+    "SYR",
+    17
+   ]
+  ]
+ },
+ "country_view_aligned": {
+  "records": 1905,
+  "countries": 32,
+  "top_share": 0.561,
+  "top": [
+   [
+    "EGY",
+    1069
+   ],
+   [
+    "USA",
+    292
+   ],
+   [
+    "IRN",
+    212
+   ],
+   [
+    "GBR",
+    52
+   ],
+   [
+    "FRA",
+    52
+   ],
+   [
+    "TUR",
+    40
+   ],
+   [
+    "IND",
+    34
+   ],
+   [
+    "CHN",
+    28
+   ],
+   [
+    "DEU",
+    26
+   ],
+   [
+    "SYR",
+    17
+   ]
+  ]
+ },
+ "country_view_certain_aligned": {
+  "records": 1611,
+  "countries": 27,
+  "top_share": 0.611,
+  "top": [
+   [
+    "EGY",
+    985
+   ],
+   [
+    "USA",
+    250
+   ],
+   [
+    "IRN",
+    154
+   ],
+   [
+    "FRA",
+    47
+   ],
+   [
+    "GBR",
+    30
+   ],
+   [
+    "CHN",
+    28
+   ],
+   [
+    "DEU",
+    25
+   ],
+   [
+    "ESP",
+    13
+   ],
+   [
+    "TUR",
+    13
+   ],
+   [
+    "IRQ",
+    11
+   ]
+  ]
+ },
+ "country_view_certain_aligned_no_sensitivity_flag": {
+  "records": 1454,
+  "countries": 27,
+  "top_share": 0.572,
+  "top": [
+   [
+    "EGY",
+    832
+   ],
+   [
+    "USA",
+    250
+   ],
+   [
+    "IRN",
+    153
+   ],
+   [
+    "FRA",
+    46
+   ],
+   [
+    "GBR",
+    30
+   ],
+   [
+    "CHN",
+    28
+   ],
+   [
+    "DEU",
+    23
+   ],
+   [
+    "ESP",
+    13
+   ],
+   [
+    "TUR",
+    13
+   ],
+   [
+    "IRQ",
+    11
+   ]
+  ]
+ },
+ "sensitivity": {
+  "funerary": 144,
+  "human_remains": 8,
+  "sacred_ritual": 9
+ },
+ "sensitivity_records": 159,
+ "sensitivity_found_at_records": 159,
+ "sensitivity_by_department": [
+  [
+   "Egyptian Art",
+   153
+  ],
+  [
+   "Medieval Art",
+   3
+  ],
+  [
+   "Islamic Art",
+   2
+  ],
+  [
+   "The Cloisters",
+   1
+  ]
+ ],
+ "departments": [
+  [
+   "Egyptian Art",
+   955
+  ],
+  [
+   "Islamic Art",
+   493
+  ],
+  [
+   "The American Wing",
+   406
+  ],
+  [
+   "Medieval Art",
+   105
+  ],
+  [
+   "The Cloisters",
+   41
+  ]
+ ],
+ "public_domain": 1320,
+ "wikidata": 1080
+}
