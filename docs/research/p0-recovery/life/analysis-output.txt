@@ -1,0 +1,34 @@
+N 2000 distinct keys 2000
+per stratum Counter({'AFRICA': 286, 'ANTARCTICA': 286, 'ASIA': 286, 'EUROPE': 286, 'NORTH_AMERICA': 286, 'OCEANIA': 285, 'SOUTH_AMERICA': 285})
+licence Counter({'http://creativecommons.org/licenses/by/4.0/legalcode': 1580, 'http://creativecommons.org/publicdomain/zero/1.0/legalcode': 420})
+uncertainty [('<=10 m', '492 (24.6%)'), ('<=100 m', '284 (14.2%)'), ('<=1 km', '211 (10.6%)'), ('<=10 km', '133 (6.7%)'), ('<=100 km', '116 (5.8%)'), ('>100 km', '6 (0.3%)'), ('not stated', '758 (37.9%)')]
+coordinatePrecision stated 95
+basisOfRecord [('HUMAN_OBSERVATION', 1912), ('PRESERVED_SPECIMEN', 62), ('MATERIAL_SAMPLE', 25), ('MACHINE_OBSERVATION', 1)]
+taxonKey present 1995 (99.8%) acceptedTaxonKey 1995 (99.8%)
+rank [('SPECIES', 1808), ('GENUS', 65), ('SUBSPECIES', 61), ('FAMILY', 29), ('VARIETY', 13), ('ORDER', 12), (None, 5), ('FORM', 5), ('CLASS', 2)]
+kingdom [('Animalia', 1356), ('Plantae', 544), ('Fungi', 71), ('Bacteria', 23), (None, 5), ('Chromista', 1)]
+informationWithheld 133 [('Event and/or parent event of this occurrence has had one or more occurrences withheld or disassociated by identifier obsfucation.', 45), ('Location and/or personally identifiable information withheld.', 24), ('Location and/or personally identifiable information withheld. Event and/or parent event of this occurrence has had one or more occurrences withheld or disassociated by identifier obsfucation.', 6), ('Coordinate uncertainty increased to 28181m at the request of the observer', 3), ('Coordinate uncertainty increased to 29066m at the request of the observer', 3), ('Coordinate uncertainty increased to 28620m to protect threatened taxon', 2), ('Personally identifiable information withheld.', 2), ('Coordinate uncertainty increased to 28090m at the request of the observer', 2)]
+dataGeneralizations 3 [('coordinates given in decimalLatitude, decimalLongitude, easting and northing have been rounded to 0.1 DEG. Time has been removed from startDateTime and endDateTime. The observer name has been changed to a unique User ID Record is NSW Category 2 Conservation Protected in New South Wales. Generalised to 10km by NSW OEH.', 2), ('coordinates given in decimalLatitude, decimalLongitude, easting and northing have been rounded to 0.01 DEG. Time has been removed from startDateTime and endDateTime. The observer name has been changed to a unique User ID Record is NSW Category 3 Conservation Protected in New South Wales. Generalised to 1km by NSW OEH.', 1)]
+issues top [('CONTINENT_DERIVED_FROM_COORDINATES', 1767), ('COORDINATE_ROUNDED', 1289), ('TAXON_ID_NOT_FOUND', 1258), ('TAXON_CONCEPT_ID_NOT_FOUND', 422), ('GEODETIC_DATUM_ASSUMED_WGS84', 240), ('COUNTRY_DERIVED_FROM_COORDINATES', 76), ('OCCURRENCE_STATUS_INFERRED_FROM_INDIVIDUAL_COUNT', 71), ('INSTITUTION_COLLECTION_MISMATCH', 56), ('TAXON_MATCH_HIGHERRANK', 52), ('COORDINATE_PRECISION_INVALID', 28), ('SCIENTIFIC_NAME_ID_NOT_FOUND', 22), ('INSTITUTION_MATCH_FUZZY', 21), ('TAXON_MATCH_FUZZY', 5), ('TAXON_MATCH_NONE', 4), ('INSTITUTION_MATCH_NONE', 2)]
+records with any issue 1943 (97.2%)
+records with media 1303 (65.2%) media items 2562 Counter({'StillImage': 2549, 'Sound': 8, 'MovingImage': 3, None: 2}) [('http://creativecommons.org/licenses/by/4.0/', 1529), ('http://creativecommons.org/publicdomain/zero/1.0/', 365), ('http://creativecommons.org/licenses/by-nc/4.0/', 287), (None, 261), ('http://creativecommons.org/licenses/by-nc-sa/4.0/', 38), ('http://creativecommons.org/licenses/by-sa/4.0/', 37), ('http://creativecommons.org/licenses/by-nc-nd/4.0/', 26), ('http://creativecommons.org/licenses/by-nd/4.0/', 9), ('© all rights reserved', 2), ('Copyright by the creator. For license and creator details, see https://nabu-naturgucker-beobachtungen.de/?sprache=en&bild=-511624363.', 1)]
+occurrenceID present 1956 (97.8%)
+datasets 30 publishers 26
+top datasets [('50c9509d', 1159), ('4fa7b334', 123), ('7ebef267', 80), ('6ff8b3b0', 67), ('a4d53b24', 60), ('a1d3149a', 54), ('e0b8cb67', 51), ('acf9b46d', 40), ('38b4c89f', 40), ('7948250c', 35)]
+top-dataset share 1159 (58.0%) top-5 share 1489 (74.5%)
+countries 76 [('AQ', 242), ('US', 237), ('AU', 210), ('ZA', 189), ('FI', 153), ('BR', 102), ('AR', 93), ('TW', 69), ('RU', 68), ('NZ', 62)]
+1deg cells 657
+4deg cells 310
+stratum vs continent mismatch 0
+marker usable unc<=1000m & not generalised: 986 (49.3%) countries 63 1deg cells 439 4deg cells 243 per stratum {'AFRICA': 196, 'ANTARCTICA': 62, 'ASIA': 126, 'EUROPE': 105, 'NORTH_AMERICA': 176, 'OCEANIA': 111, 'SOUTH_AMERICA': 210}
+marker usable unc<=10000m & not generalised: 1117 (55.9%) countries 64 1deg cells 457 4deg cells 248 per stratum {'AFRICA': 208, 'ANTARCTICA': 80, 'ASIA': 129, 'EUROPE': 187, 'NORTH_AMERICA': 182, 'OCEANIA': 116, 'SOUTH_AMERICA': 215}
+if unstated uncertainty counted (unc unknown): 1875 (93.8%)
+AFRICA countries 21 1deg 85 top ds share 0.79
+ANTARCTICA countries 2 1deg 28 top ds share 0.43
+ASIA countries 24 1deg 102 top ds share 0.77
+EUROPE countries 6 1deg 65 top ds share 0.21
+NORTH_AMERICA countries 5 1deg 174 top ds share 0.93
+OCEANIA countries 8 1deg 84 top ds share 0.56
+SOUTH_AMERICA countries 12 1deg 119 top ds share 1.0
+rounded-coordinate decimals (<=2dp): 23 (1.1%)
+timing ms median 548 max 3280 pages 170
