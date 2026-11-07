@@ -111,3 +111,10 @@ The Life sample was also sent to Chad in the conversation at 10:58 UTC (same gz 
   - Every row shows a downloaded size; none "(disk cache)".
   - **22 requests · 1.5 MB transferred · 4.7 MB resources · Finish 7.45 s.** Largest: globe.gl 499 kB, GIBS backdrop 450 kB, firms snapshot 302 kB, ships snapshot 94.8 kB, HTML 34.4 kB, app.js 27.0 kB, forest cells 11.5 kB; favicon.ico 404 (5.4 kB).
   - Evidence: `planet/cold1-chrome-guest-network.png`. DOMContentLoaded and Load were cut off in the screenshot; a HAR export (`cold1.har`) has been asked for. Browser, window width and exact time to be recorded from the HAR / Chad.
+- 13:36 — **Cold-load HAR received** (export sha256 `04d2f4e0…9ffc`, 5,354,422 B; saved with content bodies removed as `planet/cold1-chrome-guest.har`; sizes, timings, headers and statuses kept; no cookies or auth headers present).
+  - Browser: Google Chrome 156 (UA-CH), macOS, Guest window.
+  - Navigation started 2026-11-07T13:32:08.315Z.
+  - **DOMContentLoaded 1,523 ms · load 5,085 ms · last response end 7.45 s.**
+  - **Total transferred 1,500,912 B across 22 requests, all measured** (DevTools sees cross-origin sizes).
+  - Hub requests sequential, 1.52 → 7.45 s.
+  - Window width not yet recorded.
