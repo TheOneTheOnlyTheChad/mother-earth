@@ -109,6 +109,7 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - Wait timers: a background `sleep` defaults to a 30-min limit — pass a longer `timeout` for longer waits.
 
 ## 5. Browser pane facts
+- **Data hosts (7 Nov, Phase 0):** both shells (workspace and Mac `device_bash`) are refused at the proxy (403 on CONNECT) for api.gbif.org even with network access set to "All domains"; the pane's `javascript_tool` reached it (200). Long-running pane loops: wrap each fetch in an AbortController (~25 s) and retry with backoff; slow responses were cut at ~15 s. Avoid parallel bursts (about half of 84 parallel calls failed).
 - **The browser pane renders only while it is visible in the Claude app.** Hidden (side panel showing something else, or Chad in another app) = keystrokes still land but screenshots freeze or time out; `tabs_context` says "hidden". Ask Chad to show it (Cmd+Shift+B) before any deploy verification.
 - **If the Claude desktop window is covered (Chad in another app), the pane stops drawing: screenshots repeat the same frame and nothing looks typed — but keystrokes still land.** Ask Chad to bring Claude to the front, then screenshot again before deciding anything. Never retype on the strength of a frozen screenshot; probe with one character first and delete it after.
 - The R2 lifecycle "Add rule" form opens with "Delete uploaded objects after" already ticked — fill name, prefix, days; do not click the checkbox.

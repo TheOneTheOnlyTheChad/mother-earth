@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 7 Nov 2026
 
+## 7 Nov 10:43–11:00 UTC — **Phase 0, Life gate (GBIF): INCONCLUSIVE on rights; geography met** (research only; Chad's "Go: Phase 0")
+Full write-up: `docs/research/P0-life-gbif.md`.
+- **Reachability:** workspace curl 10:43:25 and Mac `device_bash` curl 10:44:05 both HTTP 000 / exit 56 / proxy 403 on CONNECT (unchanged by "All domains"). **Browser pane `javascript_tool` fetch 10:44:01: HTTP 200.** The gate ran through the pane.
+- **Sample:** 2,000 records (CC0 / CC BY, year 2025, coordinates, no geospatial issue), 7 continents × ~286, continent × seeded month, seeded offsets < 2,000, pages of 20, seed 20261107; sha256 `76ccf792…`. Deviation: offsets 5k–10k timed out (~15 s cut), so month sub-strata replaced deep offsets.
+- **Geography (marker view): met.** 986 records ≤ 1 km uncertainty and not generalised, 63 countries, 439 one-degree cells. 37.9% state no uncertainty.
+- **Rights: open.** 58% of the sample is iNaturalist (dataset licence CC BY-NC; each record states CC0 / CC BY). Which level governs is unresolved; operative sentence not yet in REGISTER.
+- **Media:** 13.8% of media items NC / ND / rights-reserved, 10.2% unlicensed → exclude media or filter per item (Chad).
+- **Sensitive locations:** 6.7% carry `informationWithheld` (incl. ~28 km generalisation), 3 `dataGeneralizations`; honoured by never drawing finer than stated uncertainty.
+- **Next:** HANDOVER §1 item 0.
+
 ## 7 Nov 04:01–05:17 UTC — **hub 0.6.0 LIVE, FIRMS memory v2 ON** (FIRMS memory thread; one Approve line from Chad per stage; GPT accepted stages 1–5)
 Full evidence: `reviews/2026-11-06-firms-v2-build.md` (branch `firms-memory`, stage log). Design: `docs/FIRMS-MEMORY-DESIGN.md` rev 6.1.
 - **Stage 1, D1 additive schema:** 6 Nov 19:59:43–20:00:03 UTC. Five `firms_*` tables + 3 indexes. Production D1 has `foreign_keys = 1`.
