@@ -469,3 +469,19 @@ Stage 6 (00:30 UTC 8 Nov, no action): 7 Nov is a mixed day (legacy files until 0
 - the midnight header-only runs follow the boundary path and the retained records are preserved.
 
 **Standing limitation (confirmed in production):** FIRMS sends no `Content-Length`, so a download cut exactly between rows is undetectable. The 8 MiB guard is unchanged.
+
+**Source condition (recorded 7 Nov ~12:40 UTC, before stage 6):** NASA Earthdata has an active "VIIRS processing delay" alert: Level-0 gaps since 27 Oct affecting SNPP, NOAA-20 and NOAA-21. The Phase 0 thread measured missing NOAA-20 swaths in the GIBS true-colour backdrop: 30°S–30°N black was 0.2% on 4 Nov, 13.1% on 5 Nov and 25.6% on 6 Nov. SNPP has been off since 2 Nov.
+
+FIRMS (NOAA-20) records at the same times, read-only from `collector_runs`:
+
+| Day | 06:00 UTC | 09:00 UTC | 12:00 UTC |
+|---|---|---|---|
+| 3 Nov | 3,180 | 9,353 | 11,852 |
+| 4 Nov | 1,387 | 11,597 | 14,467 |
+| 5 Nov | 4,873 | 20,279 | 22,936 |
+| **6 Nov** | **396** | **906** | **743** |
+| 7 Nov | 1,942 | 11,914 | 14,147 |
+
+6 Nov still closed at 50,634 detections (5 Nov: 46,009), so its passes arrived **late**, not lost. That is consistent with the processing delay, but it is a correlation only.
+
+**Stage 6 judges internal consistency** (checkpoint = the last v2 publication; cutoff, records, `fires_daily` and coverage agree). It does not judge absolute counts. A low 7 Nov total would be a source condition, not a pipeline fault.
