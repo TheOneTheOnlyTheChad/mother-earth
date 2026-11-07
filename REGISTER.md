@@ -56,6 +56,12 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Coverage statement:** daily composite; the page labels it "previous day, not live" with the date. Not an observation layer; never graded.
 - **Status:** ✅ cleared.
 - **Commercial use:** yes — as FIRMS (same LANCE terms).
+- **⚠ Coverage concern (unconfirmed cause; no backdrop change authorised), 7 Nov 2026, measured read-only from the live page's request (`VIIRS_NOAA20_CorrectedReflectance_TrueColor`, WMS EPSG:4326, near-black pixel share):**
+  - 6 Nov: 30.5% of the image black. About 15% is polar night (north of ~66°N, normal in November); the rest is missing swaths.
+  - 30°S–30°N band, NOAA-20: 6 Nov 25.6% · 5 Nov 13.1% · 4 Nov 0.2%.
+  - Same day, 6 Nov: NOAA-21 (`VIIRS_NOAA21_CorrectedReflectance_TrueColor`) 16.9% overall / 3.3% in 30°S–30°N; Suomi NPP 100% black (NASA: SNPP stopped delivering new data 2 Nov 2026, 15:40 UTC — https://www.earthdata.nasa.gov/news/blog/transitioning-from-suomi-npp-noaa-20-noaa-21-what-lance-users-need-know).
+  - NASA's active VIIRS processing-delay alert (Level-0 gaps from 27 Oct; all three satellites; resolution TBD — https://www.earthdata.nasa.gov/data/alerts-outages/viirs-processing-delay) does not name GIBS layers; cause not established.
+  - FIRMS (same satellite) shows a late-arriving 6 Nov (R11). Options (switch to NOAA-21; or a measured completeness rule) are proposals only, after FIRMS stage 6 and Chad's go.
 
 ## NSIDC — Sea Ice Index v4 (G02135), daily extent + 1981–2010 climatology, NOAA mirror
 - **Read:** 30 Oct 2026 by Claude — directory listing and file headers at https://noaadata.apps.nsidc.org/NOAA/G02135/ (open; no Earthdata login).

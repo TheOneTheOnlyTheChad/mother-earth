@@ -244,3 +244,14 @@ Keep explicit: continuous measurements vs detected/catalogued events · observat
 
 **First gate:** from retained raw files and read-only fetches, measure late arrivals for ≥ 3 days; payload of each option; Worker CPU/memory implications against the 8 MiB guard. Report before any design.
 
+**Added 7 Nov 2026 (from the FIRMS memory thread's collector_runs read; read-only): 6 Nov arrived LATE, not lost.** Records at the same times of day:
+
+| Day | 06:00 UTC | 09:00 UTC | 12:00 UTC |
+|---|---|---|---|
+| 3 Nov | 3,180 | 9,353 | 11,852 |
+| 4 Nov | 1,387 | 11,597 | 14,467 |
+| 5 Nov | 4,873 | 20,279 | 22,936 |
+| 6 Nov | 396 | 906 | 743 |
+| 7 Nov | 1,942 | 11,914 | 14,147 |
+
+6 Nov still closed at 50,634 detections (5 Nov: 46,009), so its NOAA-20 passes arrived late. This fits NASA's active VIIRS processing-delay alert (Level-0 gaps from 27 Oct; SNPP, NOAA-20, NOAA-21; resolution TBD — https://www.earthdata.nasa.gov/data/alerts-outages/viirs-processing-delay) and the 6 Nov pass removals above. **Correlation only; cause unconfirmed.** The same days show NOAA-20 swath gaps in the GIBS backdrop (REGISTER, GIBS entry). Recorded in the FIRMS v2 stage log (`firms-memory` 6f5667f) as a source condition.

@@ -2,6 +2,80 @@
 
 7 Nov 2026, 12:16:28–~12:35 UTC. One bounded session under GPT's go (cap 2 h; used ~20 min of working time). Life stays stopped; aircraft parked. No Mac-shell use, no media fetching, no provider contact, no page or hub change. Browser pane used only 12:20–12:22 UTC, well clear of the FIRMS reservation (8 Nov 02:40–03:00 SAST).
 
+## Review update — 7 Nov 2026, after GPT's review (existing evidence only; nothing new collected or measured)
+
+**Status after review**
+- **Life:** stopped. BLOCKED for the accepted marker scope; rights separately inconclusive.
+- **Arts:** INCONCLUSIVE. Data rights accepted as **cleared** (CC0; REGISTER filed). Media excluded. GPT did not rerun the artefacts.
+- **Planet:** a **partial** baseline.
+
+**Correction.** The earlier line "what stops Arts clearing overall are decisions, not research" was wrong, and is withdrawn. Sensitive-material handling needs **both** an agreed rule **and** enough validation that the retained subset follows it. A keyword screen does not establish complete detection; the Met's own policies are unexamined, and excavation provenance is unresolved.
+
+### Recommended first view (GPT's scope recommendation; not a selection of Arts, not approval to build): `created_at` only, source uncertainty preserved
+These are **distinct-object counts** from the existing R1 sample (`met-recovery-sample-R1.json`, sha256 `c4046fd3…3762`). Object lists are saved in `created-at-view-object-ids-R1.json`; no figure is derived by subtracting relationship totals.
+
+| Step | Distinct objects |
+|---|---|
+| Any `created_at` assignment | 630 |
+| Certain + aligned + ISO-resolved `created_at` | 492 |
+| − sensitivity-flagged | 488 |
+| − country reached **only** through a superseded wording ("Formerly considered made in") | **485** |
+
+- The last row is a **validation finding**: the rules treated "Formerly considered made in" as a certain `created_at`. Three objects (204280, 204292, 204302) entered the view only as "made in Peru", whereas the Met's current wording is "Probably made in Ecuador". They are now excluded, and the rule list gains superseded wording (formerly, previously, once thought, traditionally). Object 204304 stays: it is "Made in Ecuador".
+- Excluded before sensitivity: 138 `created_at` objects (69 unresolved country name, 69 hedged).
+- **Result: 485 objects, 25 present-day countries; USA 240 (49.5%).** Then France 46, UK 30, China 28, Iran 26, Egypt 23, Germany 23, Türkiye 13, Spain 12, Mexico 8, Italy 7, India 6, Austria 4, Syria 3, Afghanistan 3, Netherlands 3, Uzbekistan 2, and one each for Pakistan, Ukraine, Czechia, Iraq, Japan, Morocco, Canada and Ecuador. No object has more than one `created_at` country.
+- Numbers against the criterion: ≥ 300 objects ✓, ≥ 20 places ✓. **Not cleared**: concentration is high (USA half), the long tail is thin (8 countries have 1 object), and the validation below is outstanding.
+- Departments: American Wing 326 · Islamic Art 81 · Medieval 41 · Cloisters 37. Egyptian Art drops out entirely; its places are almost all "From". 11 objects also carry other relationships, which stay labelled and outside this view.
+- Wordings behind the view: "Made in" 469 · "Country of Origin" 12 · "Minted in" 9, plus a few multi-segment records whose `created_at` segment is certain.
+  - **"Country of Origin" (12) is not yet validated** as meaning place of making.
+- Precision: 265 / 485 also name a city and 47 a state or region. The view is country-level only.
+- How the countries were matched: ISO 3166-1 direct 431, ISO 3166-2 country-type subdivision 30 (England etc.), ISO rename alias 13 (Türkiye), Met "present-day" wording 11.
+
+### `associated_with` ("From")
+A potentially valid relationship, kept and explicitly labelled. It is **outside the recommended first view**, not rejected.
+
+### Presenting historical geography
+- The country is a **present-day location reference**, not a nationality or a historical polity. For example, a 13th-century object "Made in Iran" is placed in present-day Iran; that says nothing about the maker's nationality or the state of the time.
+- Any view would show the Met's **verbatim** wording (Geography Type, Country, City as given, e.g. "Byzantine Egypt", "present-day Uzbekistan") beside the ISO country, with the match rule used.
+- Hedged, attributed and superseded wordings stay visible as such.
+- Unresolved names (e.g. "Byzantine Egypt", "Nubia (Sudan)", "X or Y") are kept as source text and never mapped.
+
+### Representation limit (prominent)
+- Typed geography exists in **five departments only** (Egyptian, Islamic, American Wing, Medieval, Cloisters); the `created_at` view draws on four of them.
+- **"Arts of Africa, Oceania and the Americas" is an excluded department.** Its records carry Country without a Geography Type, so they fall outside any typed view.
+- That is **not** evidence that Africa, Oceania or the Americas are absent from the view. Records placed in those regions do appear through other departments (e.g. USA, Mexico, Canada, Ecuador, Morocco, Egypt).
+
+### Planet (restated)
+**Partial baseline.** The three documented runs are a **warm / mixed-cache reference for a 588 px Mac pane** (phone layout).
+
+They do **not** establish:
+- desktop-width behaviour;
+- actual iPhone behaviour (a phone-width Mac layout is no substitute);
+- a demonstrated cold load;
+- total initial transfer (13 opaque resources stay unmeasured, kept distinct from measured transfer);
+- direct interactivity (long-task and frame figures are proxies only).
+
+Production headers will **not** be changed to complete a measurement.
+
+### Backdrop (separate, unconfirmed coverage concern)
+- The GIBS NOAA-20 true-colour backdrop shows growing swath gaps (30°S–30°N black: 0.2% on 4 Nov → 13.1% on 5 Nov → 25.6% on 6 Nov). NOAA-21 is near-complete on 6 Nov; Suomi NPP has ceased.
+- **Cause not established. No backdrop change authorised.** Recorded in REGISTER (GIBS entry) and R11 (FIRMS 6 Nov arrived late, not lost).
+
+### Smallest proposed follow-ups (NOT started; each needs Chad's decision)
+**Arts validation (on the existing R1 sample and pinned file; no new sample):**
+1. **Relationship check.** Manually review a seeded random 50 of the 485 view objects against their public Met object pages (Link Resource): does the page's place wording match the CSV and the assigned `created_at` country? Also check all 12 "Country of Origin" objects. Report the error rate with an interval.
+2. **Rule-list check.** List every distinct Geography Type segment in the typed subset (not just R1) and classify each as created / found / associated / attributed / superseded / hedged, so rare wordings like "Formerly considered" are handled by rule, not by luck. Desk work on the pinned file.
+3. **Sensitive-material check.** Read the Met's published policies on human remains and cultural property (desk). Then review the 485 view objects for sensitive material by hand, not keywords: a full pass is feasible at this size. Record exclusions and unresolved cases, without inferring ownership legitimacy.
+4. **Rule.** Chad agrees the sensitive-material rule. The check in step 3 then shows the retained subset follows it.
+
+**Planet (measurement only; no production change):**
+5. **Desktop width.** One run set with the pane widened to ≥ 1,101 px (desktop layout), same method, three runs. Needs Chad at the screen.
+6. **Cold load.** Demonstrated by clearing the pane's site data for the page's hosts (Chad, in the app's settings, if available) or by a fresh browser profile, then showing transferSize > 0 on every visible resource. Otherwise it stays pending.
+7. **iPhone.** Three loads with Chad on the phone (Safari): time to globe visible and to first drag response, by screen recording. Stays pending until Chad is available.
+8. Direct interactivity and opaque sizes stay unmeasured unless a no-production-change method is found.
+
+---
+
 ## Durable evidence locations (repo `main`, mirrored to the project docs)
 | What | Where | sha256 |
 |---|---|---|
@@ -187,7 +261,7 @@ Resource state is classified as:
 
 ## Recommendation
 - **Arts: INCONCLUSIVE, but narrowed.** Rights are documented, and a validated, uncertainty-preserving country view meets the numbers. That holds most cleanly for created/found only: 641 records, 27 countries, no country above 38%.
-  - Rights are now cleared (REGISTER filed 7 Nov). What stops "cleared" overall is an agreed sensitive-material rule and the choice of relationship set ("From" in or out). Both are decisions, not research.
+  - Rights are now cleared (REGISTER filed 7 Nov). *(Superseded by the review update at the top: what remains is an agreed sensitive-material rule **and** validation that the retained subset follows it, plus validation of the retained place relationships.)*
   - The representation gap (five departments) should be stated with any view, not hidden.
 - **Planet:** usable only as a preliminary desktop-pane reference. Phase A's iPhone checks still have no baseline.
 - Neither recovery nor a cleared gate selects Arts or authorises a prototype. That stays with Chad.

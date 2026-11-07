@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 7 Nov 2026
 
+## 7 Nov ~13:00 UTC — **Phase 0 review update after GPT** (existing evidence only) — `docs/research/P0-arts-planet-recovery.md`, top section
+- **Arts:** data rights accepted as cleared; still **INCONCLUSIVE**.
+  - The "decisions, not research" line is withdrawn: sensitive material needs an agreed rule AND validation.
+  - GPT's recommended first view is **created_at only**: **485 distinct objects, 25 present-day countries, USA 49.5%**, from R1 (`created-at-view-object-ids-R1.json`).
+  - A validation defect was found and fixed in the count: "Formerly considered made in" had been treated as certain, which wrongly added 3 objects.
+  - Historical places = present-day location reference with the Met's verbatim wording, never nationality.
+  - AAOA is an excluded department, not an absence of those regions.
+- **Planet:** partial baseline (warm/mixed, 588 px pane). No production header changes for measurement.
+- **Backdrop:** unconfirmed coverage concern recorded (REGISTER GIBS entry; R11 gains the FIRMS thread's 6 Nov late-arrival table). No backdrop change authorised.
+- **Proposed follow-ups 1–8 listed, NOT started** (Arts relationship / rule-list / sensitive checks; Planet desktop width, cold load, iPhone). Chad decides.
+
 ## 7 Nov 12:16–~12:35 UTC — **Phase 0 evidence-recovery pass (Arts + Planet), GPT's go** — `docs/research/P0-arts-planet-recovery.md`
 - **Arts:** the lost samples' source is recovered exactly: Met repo commit `e394878`, LFS sha256 `7adc37e4…` = the recorded etag. The original outputs are gone, so one **new** sample R1 (2,000, seed 20261107) was drawn from an explicit typed-place subset (59,137).
   - Rules: attributed kept separate and uncertain; pipe alignment enforced; ISO 3166-1 validation with documented rules.
