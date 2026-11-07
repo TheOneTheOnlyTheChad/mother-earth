@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 7 Nov 2026
 
+## 7 Nov ~11:15 UTC — **Phase 0 Life gate rev 2 (after GPT): BLOCKED for the proof-of-concept scope tested; rights still open** (saved sample only)
+`docs/research/P0-life-gbif.md` rev 2. GPT's bounded step: exclude iNaturalist and all media; check rights; apply sensitivity and precision together; recount. No new occurrence collection, no Mac shell.
+- **Three more datasets** carry the iNaturalist mismatch (CC BY-NC dataset over CC BY / CC0 records): Birda, Happywhale, UB Brasília (142 records). Excluded as unresolved.
+- 2,000 → 841 (iNaturalist) → 699 (NC datasets) → 619 (withheld / generalised) → 239 (uncertainty stated) → **172 at ≤ 1 km**: 8 countries, 48 cells, 11 datasets, no Americas or Asia. **Fails ≥ 300.** The looser withheld rule gives 184; ≤ 10 km gives 277.
+- Region view: 13 countries (fails 20); admin-1 names give 384 / 31 but are unverified.
+- Retained 26 datasets: dataset = record licence (CC BY / CC0), DOIs and citations captured. Per-record `rightsHolder` not in the saved sample (gap). REGISTER paste pending.
+- Corrections: Download API wording; timeouts not attributed to rate limiting; Mac-shell use (10:44 reachability curl + doc copy) recorded as a deviation. No further Mac-shell use is approved.
+
 ## 7 Nov 10:43–11:00 UTC — **Phase 0, Life gate (GBIF): INCONCLUSIVE on rights; geography met** (research only; Chad's "Go: Phase 0")
 Full write-up: `docs/research/P0-life-gbif.md`.
 - **Reachability:** workspace curl 10:43:25 and Mac `device_bash` curl 10:44:05 both HTTP 000 / exit 56 / proxy 403 on CONNECT (unchanged by "All domains"). **Browser pane `javascript_tool` fetch 10:44:01: HTTP 200.** The gate ran through the pane.
