@@ -24,6 +24,19 @@
 >
 > No prototype is authorised. Domain selection and any Phase A start need a separate decision. The wider expansion remains a proposal. FIRMS stage 6 and any `firms-memory` merge are separate.
 
+> **Planet update — 7 Nov 2026, 13:32–13:43 UTC (Chad, Chrome 156 Guest window on the Mac; no throttling; evidence in `docs/research/p0-recovery/planet/`):**
+> - **Cold load DEMONSTRATED** (fresh Guest profile; every resource downloaded, none from cache; DevTools docked, so the viewport was narrower and not recorded):
+>   - 22 requests, **1,500,912 B transferred (all measured, including cross-origin)**, 4.7 MB unpacked;
+>   - DOMContentLoaded 1.52 s · load 5.08 s · last response 7.45 s;
+>   - largest: globe.gl 499 kB, GIBS backdrop 450 kB, firms snapshot 302 kB, ships 95 kB.
+>   - `cold1-chrome-guest.har`, `cold1-chrome-guest-network.png`.
+> - **Desktop width** (1470 × 835, DPR 2, desktop layout; DevTools undocked; warm, same window):
+>   - DCL 0.91 / 0.77 / 0.69 s · load 0.91 / 0.77 / 2.93 s · last 6.20 / 4.96 / 5.18 s;
+>   - 909 / 909 / 943 kB per load: the GIBS backdrop and all hub data are fetched fresh every time; code and fonts come from cache.
+>   - `desk{1,2,3}-chrome-guest-1470px.har`, `desktop-runs-2026-11-07.json`.
+> - **Still pending:** iPhone Safari runs (Chad, another day) and direct interactivity (HAR timings are network and document events, not input response).
+> - Different browser from the earlier pane runs (Chrome 156 vs the pane's Chromium 152), so the two sets are not directly comparable.
+
 > **Status 7 Nov ~13:15 UTC (after GPT's review of the bounded validation): Arts — geography passed; overall clearance pending.** Final view: the Met's catalogued place of making (created_at), mapped to present-day countries — 479 objects, 25 countries; source wording, uncertainty and superseded assertions preserved; not independent historical verification. Sensitive material included with honest context for this metadata-only scope; **no object manually assessed** (tentative labels from screens + 3 page findings). See `P0-CHECKPOINT.md` and `P0-arts-sensitivity-rule-PROPOSAL.md`.
 
 ## Review update — 7 Nov 2026, after GPT's review (existing evidence only; nothing new collected or measured)

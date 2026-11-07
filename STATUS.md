@@ -4,6 +4,8 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 7 Nov 2026
 
+## 7 Nov 13:32–13:43 UTC — **Planet: cold load demonstrated + desktop-width runs** (Chad, Chrome 156 Guest window). Cold: 1,500,912 B / 22 requests (all measured), DCL 1.52 s, load 5.08 s, last 7.45 s. Desktop 1470×835 warm ×3: DCL 0.69–0.91 s, last 4.96–6.20 s, ~0.9 MB per load (backdrop + hub data re-fetched each time). Pending: iPhone, direct interactivity.
+
 ## 7 Nov ~13:25 UTC — **Phase 0: Arts CLEARED for the limited feasibility gate** (Chad, after GPT): a metadata-only view of the Met's catalogued places of making mapped to present-day countries; 479 objects / 25 countries; data rights cleared; catalogue uncertainty, 23 unverified pages and incomplete sensitivity assessment disclosed. Research-gate clearance only, not release readiness. Arts may be recommended as the first domain, **not selected**. Planet partial (pending Chad). Life: scoped block, stopped. Aircraft parked. No prototype; domain selection and Phase A need a separate decision.
 
 ## 7 Nov 12:44 UTC — **Phase 0 validation + measurement pass started** (Chad's go; 2 h cap). Checkpoint `f91ccc5`: Life sample + scripts + attribution and the created_at view script moved into the repo; `docs/research/p0-recovery/MANIFEST.sha256` verified against a fresh clone (14/14 OK). Resume file `docs/research/P0-CHECKPOINT.md`.
