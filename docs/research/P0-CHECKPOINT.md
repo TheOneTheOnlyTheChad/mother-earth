@@ -59,3 +59,10 @@ The Life sample was also sent to Chad in the conversation at 10:58 UTC (same gz 
 
 ## Log (UTC)
 - 12:44 — follow-up started (effort clock starts). Checkpoint: Life files and created_at view script moved from workspace-only into the repo; verified against a fresh clone (see next entry).
+- 12:58 — **Step 1 (policies) read**: the Met's "Stewardship of Human Remains" guidelines (as of 22 Apr 2025, https://www.metmuseum.org/policies/human-remains-guidelines) and "About the Met's collecting practices" (provenance, NAGPRA, repatriation; https://www.metmuseum.org/policies/about-the-mets-collecting-practices). Rule proposal drafted for Chad (not applied).
+- 13:05 — **Step 2 done**: all 30 distinct Geography Type segments in the pinned file classified by explicit table (`arts/validate_v2.py`; segment counts `arts/geotype-segments-pinned.json`).
+  - Fixes vs R1 rules: "Formerly considered made in" = superseded; "Made for" / "Probably made for" = destination, not making; "Designed in", "Published in", "Retailed in", "Depicted" = not created_at; "Presumably from" = uncertain; "Country of Origin" = unvalidated, held out until the targeted check.
+  - Re-classified the EXISTING R1 records (no redraw): created_at candidates **479 objects, 25 countries, USA 49.9%** (before sensitivity; 4 keyword-flagged still inside). "Country of Origin" objects in R1: 13 (targeted).
+  - Validation sample: seed 20261108, 50 IDs in `arts/validate-v2-results.json`.
+  - Outputs: `met-R1-assignments-v2.json`, `created-at-candidates-v2.json`, `validate-v2-results.json`.
+- 13:06 — **Step 3 access**: Met object pages and the collection API are refused from the cloud shell and from direct fetch (not on the allowlist). The search-then-fetch route is under test. The Mac pane is not used (Mac closed).

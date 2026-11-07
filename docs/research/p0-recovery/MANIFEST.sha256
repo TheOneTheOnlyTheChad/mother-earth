@@ -1,9 +1,16 @@
 8665dd4a4d495d36aee378bd46b61dbc2ef1a674ba33c15709556110243e7e88  ./arts/SOURCE.md
+492caf4ec48c98e7af7cc7fdb0b17593be6c818dfae83d7cfa9fb15ba6e74880  ./arts/__pycache__/arts_recovery_iso.cpython-313.pyc
 367c00e02076055ba29eec9c2860f40c744250ea2f547337b1ea344d8abaf264  ./arts/arts_recovery.py
+98095a91895ebcf1f21beb65a791e86c9a0e966be1fd545aedaca713548dee2c  ./arts/arts_recovery_iso.py
+a2025fb18b319384b0ca0ae9f40acf91d4a6196eda3155fb3d12a9d4ac2603b5  ./arts/created-at-candidates-v2.json
 eae0aae9dcc4c505fe6fb160e0a6d6e888cb1f1ff3cd87a2d32134cb0612d7e6  ./arts/created-at-view-object-ids-R1.json
 1d44daeaf7decccc2fff76b2ad4675a0597b1f3af4db98febad497d9f4afd257  ./arts/created_at_view.py
+8eb69766185e934e9c57c3ff30f0dc2fec59975996570b699a75bc9ceddb2290  ./arts/geotype-segments-pinned.json
+9c9ce0a5643a8f8bf0cc08ee4f7f6e129dcc5987dfa4001db350046c0bb25512  ./arts/met-R1-assignments-v2.json
 6304a84835610d1f94a434ebf9cc17c670dc7c11a4bd06b8ae4efdf4c18f5e88  ./arts/met-recovery-results-R1.json
 c4046fd373ff1afe1cbf4b2565c41a32d3e059c13dd2256a57b6a50253758762  ./arts/met-recovery-sample-R1.json
+d1d2d6cdc2718cd8f5ff21678fc9dd31074b3b8b175f0ba24a6e16dfa0b62fbe  ./arts/validate-v2-results.json
+d62af991659b61a38eee4dfebbce8daa43cb33596bdfd39c4270b1bf7e2c4769  ./arts/validate_v2.py
 dcfb219df00c5db4bff8784052b41df169e80d88323eabfa71e45864995b302b  ./life/ATTRIBUTION.md
 7c126cb76ff782f8c9b6585773f599eb3b298bb63f8441f4a3ae96cbdc0bb25c  ./life/analyse.py
 90e45ae938cbd31a9d78dcd4586c14bba2407710ff76ffa350d19d96ebd8d4f8  ./life/analysis-output.txt
