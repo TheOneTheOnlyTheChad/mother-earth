@@ -4,6 +4,8 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 7 Nov 2026
 
+## 7 Nov 12:44 UTC — **Phase 0 validation + measurement pass started** (Chad's go; 2 h cap). Checkpoint `f91ccc5`: Life sample + scripts + attribution and the created_at view script moved into the repo; `docs/research/p0-recovery/MANIFEST.sha256` verified against a fresh clone (14/14 OK). Resume file `docs/research/P0-CHECKPOINT.md`.
+
 ## 7 Nov ~13:00 UTC — **Phase 0 review update after GPT** (existing evidence only) — `docs/research/P0-arts-planet-recovery.md`, top section
 - **Arts:** data rights accepted as cleared; still **INCONCLUSIVE**.
   - The "decisions, not research" line is withdrawn: sensitive material needs an agreed rule AND validation.
