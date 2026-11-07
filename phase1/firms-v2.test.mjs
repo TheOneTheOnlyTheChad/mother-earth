@@ -588,6 +588,27 @@ await t('G6. ROLLBACK BY REDEPLOY: the live 0.5.3 code (OLD_WORKER = main:phase1
   assert.equal((await OLD.default.fetch(new Request('https://hub/health/publication/firms'), env)).status, 200);
 });
 
+const HEADER_ONLY_NO_NL = HEAD.slice(0, -1);   // FIRMS's real post-midnight file: 122 bytes, no trailing newline (raw/firms/2026-11-07T00-00Z.csv)
+await t('N1. header-only FIRMS file WITHOUT a trailing newline (the real 122-byte post-midnight file): legacy parse = 0 rows, not "malformed line 2"', async () => {
+  assert.equal(enc.encode(HEADER_ONLY_NO_NL).length, 122);
+  for (const body of [HEADER_ONLY_NO_NL, HEAD, HEAD.replace('\n', '\r\n')]) { const p = W.firmsParse(body); assert.equal(p.rows.length, 0, JSON.stringify(body.slice(-3))); }
+  const one1 = W.firmsParse(HEAD + row(-20, 30)); assert.equal(one1.rows.length, 1, 'a last row without newline still parses');
+});
+await t('N2. the nightly case end to end, both pipelines: 00:00 UTC header-only (no newline) → down with the boundary note, health/publication stays 200 (expected empty day), records kept', async () => {
+  for (const pipe of [undefined, 'v2']) {
+    const E = makeEnv({ FIRMS_PIPELINE: pipe }); FIRMS = { status: 200, body: csv([row(-20, 30, '2300', '3.34', 'D', '2026-11-06')]) };
+    await runFirmsAt(E.env, '2026-11-06T23:45:00Z', '2026-11-06T23:45:40Z');
+    for (const body of [HEADER_ONLY_NO_NL, HEAD]) {
+      FIRMS = { status: 200, body }; NOW += 15 * 60e3; await runFirmsAt(E.env, iso(NOW - 40e3), iso(NOW));
+      const last = q(E.db, "SELECT status, note FROM collector_runs WHERE layer='firms' ORDER BY id").pop();
+      assert.equal(last.status, 'down', String(pipe)); assert.match(last.note, /^no detections processed yet for today \(UTC\)/, String(pipe) + ' ' + last.note);
+      assert.doesNotMatch(last.note, /malformed/);
+    }
+    const h = await worker.fetch(new Request('https://hub/health/publication/firms'), E.env); assert.equal(h.status, 200, String(pipe) + ' ' + await h.clone().text());
+    assert.equal(jsonOf(E, LATEST).records.length, 1, 'yesterday\'s records kept');
+  }
+});
+
 // =====================================================================================================================
 // 5. Legacy transition and bounds (L_json = 12 MiB)
 const legacySnap = (n, at) => JSON.stringify({ schema_version: 1, layer: 'firms', retrieved_at: at, source_status: 'ok', window_start: at.slice(0, 10) + 'T00:00:00.000Z', window_end: at, collector_version: '0.5.3', record_fields: ['lat', 'lng', 'observed_at', 'confidence', 'frp_mw', 'satellite', 'daynight'], records: Array.from({ length: n }, () => [-20, 30, at.slice(0, 10) + 'T13:00:00Z', 'n', 3.3, 'N20', 'D']), cells: { [W.cellId(-20, 30)]: { count: n } } });

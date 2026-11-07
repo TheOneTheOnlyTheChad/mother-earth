@@ -421,7 +421,10 @@ function firmsRowProblem(c, iLat, iLng, iDate, iTime, iConf, iFrp, iSat, iDn) {
 
 /** Lean CSV scan: only the columns we need. Header: latitude,longitude,bright_ti4,scan,track,acq_date,acq_time,satellite,instrument,confidence,version,bright_ti5,frp,daynight */
 function firmsParse(text) {
-  const nl = text.indexOf('\n');
+  // 0.6.0 fix (7 Nov, found by the monitoring thread): FIRMS's post-midnight header-only file has NO trailing newline (122 B). indexOf
+  // gave -1, the header was cut by one character and then re-read as data "line 2" → run down as "malformed" every night. A text with
+  // no newline is header-only: 0 rows → the existing empty-day path.
+  const nl0 = text.indexOf('\n'), nl = nl0 < 0 ? text.length : nl0;
   const header = text.slice(0, nl).trim().split(',');
   const ix = (n) => header.indexOf(n);
   const iLat = ix('latitude'), iLng = ix('longitude'), iDate = ix('acq_date'), iTime = ix('acq_time'), iConf = ix('confidence'), iFrp = ix('frp'), iSat = ix('satellite'), iDn = ix('daynight');

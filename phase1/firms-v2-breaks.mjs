@@ -45,6 +45,7 @@ const BREAKS = {
   'probe does not abort the uploads it tracks': ["for (const u of uploads) if (u.isOpen()) try { await u.abort(); } catch (_) {}", ""],
   'v2 path used before v2 ever ran (deploy with v2 off changes the checkpoint)': ["if (env.FIRMS_PIPELINE === 'v2') return true;\n  try {", "if (true) return true;\n  try {"],
   'cutover-state read failure treated as "never ran"': ["catch (e) { if (/no such table/i.test(String(e))) return false; throw new Error('v2 state read failed", "catch (e) { if (true) return false; throw new Error('v2 state read failed"],
+  'header-only file without a newline re-read as data (7 Nov nightly bug)': ["const nl0 = text.indexOf('\\n'), nl = nl0 < 0 ? text.length : nl0;", "const nl = text.indexOf('\\n');"],
 };
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'firms-v2-breaks-'));
 let bit = 0; const missed = [];
