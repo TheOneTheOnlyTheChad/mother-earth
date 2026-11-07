@@ -1,0 +1,1161 @@
+{
+ "summary": {
+  "random_drawn": 50,
+  "random_checked": 27,
+  "random_not_reached": 23,
+  "random_disagree": 0,
+  "random_error_rate": 0.0,
+  "wilson95": [
+   0.0,
+   0.125
+  ],
+  "targeted_coo_drawn": 13,
+  "targeted_coo_checked": 6
+ },
+ "rows": [
+  {
+   "kind": "random",
+   "id": "6405",
+   "csv_geography_type": "Made in",
+   "csv_country": "Netherlands",
+   "csv_city": "Delft",
+   "assigned": [
+    [
+     "created_at",
+     "NLD",
+     "Netherlands"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Delft, South Holland, Netherlands",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "9775",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Wheeling",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "4267",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Boston",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Boston, Massachusetts, United States",
+   "page_notes": "Medium: Paper, mica, pearls, wood, glass.",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "717572",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Alaska, United States",
+   "page_notes": "SENSITIVE: Native American ceremonial mask, 'worn during dance ceremonies'; NOT keyword-flagged",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "5803",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "East Liverpool",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in East Liverpool, Ohio, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "7674",
+   "csv_geography_type": "Made in",
+   "csv_country": "China",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "CHN",
+     "China"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "19014",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "594",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Norwich",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "17398",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Made in New York, United States",
+   "page_notes": "label prefix not returned",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "465639",
+   "csv_geography_type": "Made in",
+   "csv_country": "Germany",
+   "csv_city": "Niederbreisig",
+   "assigned": [
+    [
+     "created_at",
+     "DEU",
+     "Germany"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "450929",
+   "csv_geography_type": "Made in",
+   "csv_country": "Syria",
+   "csv_city": "Raqqa",
+   "assigned": [
+    [
+     "created_at",
+     "SYR",
+     "Syria"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Syria, Raqqa",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "8773",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Made in Pennsylvania, United States",
+   "page_notes": "label prefix not returned",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "1734",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "New York",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "search matched the year 1734",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "471897",
+   "csv_geography_type": "Made in",
+   "csv_country": "France",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "FRA",
+     "France"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Elbeuf, France",
+   "page_notes": "stained glass from the choir of the Church of Saint-Etienne, Elbeuf (ecclesiastical)",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "454643",
+   "csv_geography_type": "Made in",
+   "csv_country": "Spain",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "ESP",
+     "Spain"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "2181",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Jersey City",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "137",
+   "csv_geography_type": "Made in",
+   "csv_country": "England",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "GBR",
+     "England"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in England",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "7492",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "New York",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in New York, New York, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "450461",
+   "csv_geography_type": "Made in",
+   "csv_country": "Iran",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "IRN",
+     "Iran"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Iran",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "8178",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Philadelphia",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Philadelphia, Pennsylvania, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "468147",
+   "csv_geography_type": "Made in",
+   "csv_country": "Italy",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "ITA",
+     "Italy"
+    ]
+   ],
+   "page_status": "fetch failed",
+   "page_geography": "",
+   "page_notes": "search found the page (Textile with Fleur-De-Lis Motif - Italian); fetch client_error",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "13747",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Newport",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Newport, Rhode Island, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "1739",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Philadelphia",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "search matched the year 1739",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "5268",
+   "csv_geography_type": "Made in",
+   "csv_country": "England",
+   "csv_city": "London",
+   "assigned": [
+    [
+     "created_at",
+     "GBR",
+     "England"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in London, England",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "470659",
+   "csv_geography_type": "Made in",
+   "csv_country": "present-day France",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "FRA",
+     "present-day France"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "454502",
+   "csv_geography_type": "Made in",
+   "csv_country": "Iran",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "IRN",
+     "Iran"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "773289",
+   "csv_geography_type": "Made in",
+   "csv_country": "Iran",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "IRN",
+     "Iran"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Iran",
+   "page_notes": "religious subject (depiction), not a sacred object",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "818842",
+   "csv_geography_type": "Made in",
+   "csv_country": "Iran",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "IRN",
+     "Iran"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Made in Iran",
+   "page_notes": "religious subject painting used as backdrop for recitations; label prefix not confirmed",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "19952",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Durham",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Durham, New Hampshire, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "6572",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Brooklyn",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "3781",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Pittsburgh",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "9197",
+   "csv_geography_type": "Made in",
+   "csv_country": "Mexico",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "MEX",
+     "Mexico"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Mexico",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "7882",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "14146",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "New Lebanon",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "446648",
+   "csv_geography_type": "Made in",
+   "csv_country": "Turkey",
+   "csv_city": "Iznik",
+   "assigned": [
+    [
+     "created_at",
+     "TUR",
+     "Turkey"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Turkey, Iznik",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "3472",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "New Lebanon",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Made in New Lebanon, New York, United States",
+   "page_notes": "label prefix not confirmed",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "410",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Beverly",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Beverly, Massachusetts, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "466013",
+   "csv_geography_type": "Made in",
+   "csv_country": "France",
+   "csv_city": "Troyes",
+   "assigned": [
+    [
+     "created_at",
+     "FRA",
+     "France"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "471365",
+   "csv_geography_type": "Made in",
+   "csv_country": "France",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "FRA",
+     "France"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Normandy, France",
+   "page_notes": "ecclesiastical woodwork (choir stalls)",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "8137",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Boston",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "454495",
+   "csv_geography_type": "Made in",
+   "csv_country": "Iran",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "IRN",
+     "Iran"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "466497",
+   "csv_geography_type": "Made in",
+   "csv_country": "France",
+   "csv_city": "Paris",
+   "assigned": [
+    [
+     "created_at",
+     "FRA",
+     "France"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "14289",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Wheeling",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "454492",
+   "csv_geography_type": "Made in",
+   "csv_country": "Iran",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "IRN",
+     "Iran"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "2049",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "New York",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in New York, New York, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "470860",
+   "csv_geography_type": "Made in",
+   "csv_country": "present-day France",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "FRA",
+     "present-day France"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "10021",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Philadelphia",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Philadelphia, Pennsylvania, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "457510",
+   "csv_geography_type": "Excavated in|Minted in",
+   "csv_country": "Iran",
+   "csv_city": "Nishapur|Zaranj",
+   "assigned": [
+    [
+     "created_at",
+     "IRN",
+     "Iran"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "random",
+   "id": "14279",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Pittsburgh",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Pittsburgh, Pennsylvania, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "random",
+   "id": "1593",
+   "csv_geography_type": "Made in",
+   "csv_country": "United States",
+   "csv_city": "Philadelphia",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in Philadelphia, Pennsylvania, United States",
+   "page_notes": "",
+   "verdict": "agree"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "443222",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Egypt",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "EGY",
+     "Egypt"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "892739",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Iran",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "IRN",
+     "Iran"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Country of Origin Iran",
+   "page_notes": "description: likely made in Abadeh (prose, not a field)",
+   "verdict": "page shows Country of Origin as in CSV"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "457871",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Egypt possibly",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "EGY",
+     "Egypt possibly"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "457757",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Turkey",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "TUR",
+     "Turkey"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "443213",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Egypt",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "EGY",
+     "Egypt"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "443259",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Egypt",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "EGY",
+     "Egypt"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "631270",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "United States",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Country of Origin United States",
+   "page_notes": "painting; artist born Istanbul; subject Anatolia; Country of Origin = United States",
+   "verdict": "page shows Country of Origin as in CSV"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "16758",
+   "csv_geography_type": "Made in|Country of Origin",
+   "csv_country": "United States|United States",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ],
+    [
+     "country_of_origin",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in New York, United States; Country of Origin United States",
+   "page_notes": "",
+   "verdict": "page shows Country of Origin as in CSV"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "825639",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "India",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "IND",
+     "India"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Country of Origin India",
+   "page_notes": "description text: created in Bijapur in the Deccan (place of making in prose, not a geography field)",
+   "verdict": "page shows Country of Origin as in CSV"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "644519",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Turkey",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "TUR",
+     "Turkey"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "443180",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Egypt",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "EGY",
+     "Egypt"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Country of Origin Egypt",
+   "page_notes": "Islamic Art; glass, stamped",
+   "verdict": "page shows Country of Origin as in CSV"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "16170",
+   "csv_geography_type": "Made in|Country of Origin",
+   "csv_country": "United States|United States",
+   "csv_city": "",
+   "assigned": [
+    [
+     "created_at",
+     "USA",
+     "United States"
+    ],
+    [
+     "country_of_origin",
+     "USA",
+     "United States"
+    ]
+   ],
+   "page_status": "ok",
+   "page_geography": "Geography: Made in New York, United States; Country of Origin United States",
+   "page_notes": "",
+   "verdict": "page shows Country of Origin as in CSV"
+  },
+  {
+   "kind": "targeted_coo",
+   "id": "698679",
+   "csv_geography_type": "Country of Origin",
+   "csv_country": "Turkey",
+   "csv_city": "",
+   "assigned": [
+    [
+     "country_of_origin",
+     "TUR",
+     "Turkey"
+    ]
+   ],
+   "page_status": "page not found via search",
+   "page_geography": "",
+   "page_notes": "",
+   "verdict": "not checked (page not reached)"
+  }
+ ]
+}

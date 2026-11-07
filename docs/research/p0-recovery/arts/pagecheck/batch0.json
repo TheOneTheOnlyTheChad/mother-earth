@@ -1,0 +1,164 @@
+[
+ {
+  "id": "6405",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/6405",
+  "title": "Plate",
+  "date": "1740–60",
+  "culture": "Dutch",
+  "geography_lines": [
+   "Geography: Made in Delft, South Holland, Netherlands"
+  ],
+  "notes": ""
+ },
+ {
+  "id": "5803",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/5803",
+  "title": "Pitcher",
+  "date": "ca. 1846–52",
+  "culture": "American",
+  "geography_lines": [
+   "Geography: Made in East Liverpool, Ohio, United States"
+  ],
+  "notes": ""
+ },
+ {
+  "id": "17398",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/17398",
+  "title": "Design for Paneled Lampshade",
+  "date": "1900–10",
+  "culture": "American",
+  "geography_lines": [
+   "Made in New York, United States"
+  ],
+  "notes": "label prefix not returned"
+ },
+ {
+  "id": "1734",
+  "status": "page not found via search",
+  "url": "",
+  "geography_lines": [],
+  "notes": "search matched the year 1734"
+ },
+ {
+  "id": "137",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/137",
+  "title": "Argand lamp",
+  "date": "1800–1815",
+  "culture": "British",
+  "geography_lines": [
+   "Geography: Made in England"
+  ],
+  "notes": ""
+ },
+ {
+  "id": "468147",
+  "status": "fetch failed",
+  "url": "https://www.metmuseum.org/art/collection/search/468147",
+  "geography_lines": [],
+  "notes": "search found the page (Textile with Fleur-De-Lis Motif - Italian); fetch client_error"
+ },
+ {
+  "id": "470659",
+  "status": "page not found via search",
+  "url": "",
+  "geography_lines": [],
+  "notes": ""
+ },
+ {
+  "id": "19952",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/19952",
+  "title": "Bowl",
+  "date": "ca. 1940–50",
+  "culture": "American",
+  "geography_lines": [
+   "Geography: Made in Durham, New Hampshire, United States"
+  ],
+  "notes": ""
+ },
+ {
+  "id": "7882",
+  "status": "page not found via search",
+  "url": "",
+  "geography_lines": [],
+  "notes": ""
+ },
+ {
+  "id": "410",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/410",
+  "title": "Beaker",
+  "date": "ca. 1832–39",
+  "culture": "American",
+  "geography_lines": [
+   "Geography: Made in Beverly, Massachusetts, United States"
+  ],
+  "notes": ""
+ },
+ {
+  "id": "454495",
+  "status": "page not found via search",
+  "url": "",
+  "geography_lines": [],
+  "notes": ""
+ },
+ {
+  "id": "2049",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/2049",
+  "title": "Child's Cup",
+  "date": "ca. 1860",
+  "culture": "American",
+  "geography_lines": [
+   "Geography: Made in New York, New York, United States"
+  ],
+  "notes": ""
+ },
+ {
+  "id": "14279",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/14279",
+  "title": "Salt Dish",
+  "date": "ca. 1878–90",
+  "culture": "American",
+  "geography_lines": [
+   "Geography: Made in Pittsburgh, Pennsylvania, United States"
+  ],
+  "notes": ""
+ },
+ {
+  "id": "457871",
+  "status": "page not found via search",
+  "url": "",
+  "geography_lines": [],
+  "notes": ""
+ },
+ {
+  "id": "631270",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/631270",
+  "title": "History of Anatolian Folk Music, 2000–2001",
+  "date": "2000–2001",
+  "culture": "",
+  "geography_lines": [
+   "Geography: Country of Origin United States"
+  ],
+  "notes": "painting; artist born Istanbul; subject Anatolia; Country of Origin = United States"
+ },
+ {
+  "id": "443180",
+  "status": "ok",
+  "url": "https://www.metmuseum.org/art/collection/search/443180",
+  "title": "Coin Weight",
+  "date": "13th–14th century",
+  "culture": "",
+  "geography_lines": [
+   "Geography: Country of Origin Egypt"
+  ],
+  "notes": "Islamic Art; glass, stamped"
+ }
+]
