@@ -16,7 +16,7 @@ Authority: Chad's "Go: Phase 0" (7 Nov). Research only. Life is closed (`P0-life
   - MISSING: the file's sha256 and byte size; the full etag; the download time.
 - **Sample A:** random 2,000 rows from the whole collection, Python `random` with seed 20261107.
 - **Sample B:** random 2,000 rows from the 59,924 records with a typed place relationship (Geography Type populated).
-  - MISSING: confirmation that sample B used the same seed (the code shows `random.sample(typed, 2000)` after seeding, but the seed line is not visible in the surviving transcript).
+  - Seed **confirmed**: the code calls `random.seed(20261107)` before `random.sample(typed, 2000)` (recovered from the earlier thread's transcript).
 - Effort: well within the ~4 h cap (exact time not recorded).
 
 ### Geographic usability
@@ -25,14 +25,15 @@ Authority: Chad's "Go: Phase 0" (7 Nov). Research only. Life is closed (`P0-life
 - "Found/Excavated" → `found_at`
 - "From" → `associated_with`
 - Hedged wordings ("possibly", "probably", "said to be", "attributed") are counted separately.
+- Sample B's classifier reads the **first `|` segment** of Geography Type, and treats "attributed" wording as `created_at` (also counted as hedged).
+- Sample A's script (`met_gate.py`) counted only made-in / found records with a place. It classed "From" as `other:from` and excluded it. Sample B's script (`met_gate_b.py`) includes "From" as `associated_with`.
 - The Met's `Country` field means created *or* found, so a country with no geography type cannot be given a typed relationship.
 
-**Precision classes:** settlement (City), region (state, county or region fields), country, none.
-- MISSING: the exact field-to-precision mapping as run. The surviving code calls a `prec()` function whose body was not captured.
+**Precision classes (`prec()`, recovered):** City → settlement; else State / County / Region / Subregion → region; else Country → country; else none.
 
 | Scope | Result |
 |---|---|
-| Sample A (whole collection) | Only **107 / 2,000** records have a typed place relationship. **Fails** the geography criterion for a whole-collection proof of concept. |
+| Sample A (whole collection) | Only **107 / 2,000** records have a made-in or found place relationship ("From" excluded in this count). **Fails** the geography criterion for a whole-collection proof of concept. |
 | Sample B, relationships | 871 `created_at` · 144 `found_at` · 985 `associated_with`; **369 hedged** |
 | Sample B, region view (country) | 2,000 records across **88 countries**. Meets ≥ 300 / ≥ 20, **but 52% are Egypt**. |
 | Sample B, marker view (created or found, with a city) | **492 records across 159 places.** Meets the numbers, **but the Met gives city names, not coordinates.** Placing them needs a place-name lookup source (gazetteer), which has not been checked. **Inconclusive.** |
@@ -64,7 +65,9 @@ MISSING: the precision mix for sample B (counts per class); the hedged share wit
 - Storage: CC0 places no conditions on copying or storage. The repository's own terms for the LFS file were not recorded (MISSING).
 
 ### Limitations
-- **Unreconciled figure:** 59,924 / 503,073 = 11.9% of the collection is recorded as typed, so a random 2,000 should hold about 238 typed records, not 107 (5.4%). The two counts probably use different definitions: "Geography Type populated" for the 59,924, and "maps to a typed relationship with a place value" for the 107. The definitions as run were not preserved, so this can't be settled from the surviving evidence. It does not change sample A's verdict (both fall far short of 300 per 2,000), but the figures as recorded don't agree.
+- **107 vs 59,924 — reconciled.** Sample A counted only made-in / found records with a place. The 59,924 includes "From" (`associated_with`), which is 49% of sample B. So the expected made-in / found count in a random 2,000 is ≈ 238 × 0.51 ≈ 121; the recorded 107 is within sampling noise (≈ 1.3 sd).
+  - Caveat: sample A's printed output is not in the transcript. 107 most plausibly maps to its `typed_usable_any_precision` field.
+  - The verdict is unchanged: either way it is far below 300 per 2,000.
 - Sample B is drawn only from records with typed places, so it says nothing about the 88% of the collection without one (59,924 / 503,073 = 11.9% typed).
 - The region view is dominated by Egypt (52%), which reflects the Met's holdings. A region view built from it would be one cluster plus a scatter.
 - The marker view depends on an unchecked gazetteer. City names are ambiguous and some are historical.
