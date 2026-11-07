@@ -107,3 +107,7 @@ The Life sample was also sent to Chad in the conversation at 10:58 UTC (same gz 
   - **Wording revised (existing evidence only):** decision scoped to this metadata-only view; tentative label names; "sensitivity not fully assessed" on every object; view described as "the Met's catalogued place of making, mapped to present-day countries", not independent historical verification.
   - **Arts status: geography passed; overall clearance pending (GPT review).**
 - ~13:25 — **Accepted outcome recorded** (Chad, after GPT): Arts cleared for the limited Phase 0 feasibility gate, qualifications preserved; no further Arts research this round. Planet pending Chad. This pass is otherwise closed.
+- 13:34 — **Planet cold load (Chad, Chrome Guest window on the Mac; fresh, empty profile; Network panel open, cache NOT disabled, no throttling)**: `?baseline=cold1`.
+  - Every row shows a downloaded size; none "(disk cache)".
+  - **22 requests · 1.5 MB transferred · 4.7 MB resources · Finish 7.45 s.** Largest: globe.gl 499 kB, GIBS backdrop 450 kB, firms snapshot 302 kB, ships snapshot 94.8 kB, HTML 34.4 kB, app.js 27.0 kB, forest cells 11.5 kB; favicon.ico 404 (5.4 kB).
+  - Evidence: `planet/cold1-chrome-guest-network.png`. DOMContentLoaded and Load were cut off in the screenshot; a HAR export (`cold1.har`) has been asked for. Browser, window width and exact time to be recorded from the HAR / Chad.
