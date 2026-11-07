@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 7 Nov 2026
 
+## 7 Nov 12:16–~12:35 UTC — **Phase 0 evidence-recovery pass (Arts + Planet), GPT's go** — `docs/research/P0-arts-planet-recovery.md`
+- **Arts:** the lost samples' source is recovered exactly: Met repo commit `e394878`, LFS sha256 `7adc37e4…` = the recorded etag. The original outputs are gone, so one **new** sample R1 (2,000, seed 20261107) was drawn from an explicit typed-place subset (59,137).
+  - Rules: attributed kept separate and uncertain; pipe alignment enforced; ISO 3166-1 validation with documented rules.
+  - Country view (certain, aligned, ISO, sensitivity-flagged excluded): **1,454 records / 27 countries, Egypt 57%**. Created/found only: **641 / 27, USA 37%**.
+  - Typed geography is confined to 5 departments; Africa, Oceania and the Americas are absent.
+  - Sensitivity: 159 candidates (mostly Egyptian funerary; 1 human-hair object, 5 burial wrappings) excluded and unresolved.
+  - Rights documented (CC0, commercial use); REGISTER entry added, ⏳ pending Chad's paste.
+  - Evidence in `docs/research/p0-recovery/arts/`.
+- **Planet:** three replacement runs, 12:21–12:22 UTC, hub 0.6.0, pane at 588 × 834 DPR 2 (phone layout). FCP 960 / 640 / 176 ms; hub last response 8.0 / 4.7 / 3.8 s; frames ≈ 35 ms; ~1.1 s blocking after FCP.
+  - Cold load **not demonstrated**; 13 of 17–21 resources opaque (no Timing-Allow-Origin); iPhone pending.
+  - `docs/research/p0-recovery/planet/runs-2026-11-07.json`.
+- No page or hub change, no Mac shell; pane used 12:20–12:22 UTC only.
+
 ## 7 Nov ~11:40 UTC — **Life research STOPPED** (BLOCKED for the scoped marker PoC accepted by Chad after GPT); **Arts + Planet evidence compiled for GPT**
 - Life: Chad accepts BLOCKED for the marker proof of concept from this sample and these exclusions. This is not a rejection of GBIF or Life. Rights are separately inconclusive; media excluded. Three qualifications added to `docs/research/P0-life-gbif.md`: missing American and Asian coverage is a method artefact; identifiers are not attribution; the region view is unproven. Sample, hash, method, exclusions and gaps preserved. No new sample, licensing work, provider contact, region-view work or Mac-shell use.
 - `docs/research/P0-arts-planet-for-GPT.md`, built from existing evidence only (no new measurement):

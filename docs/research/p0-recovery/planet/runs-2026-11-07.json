@@ -1,0 +1,37 @@
+{
+ "label": "Planet baseline — replacement measurements (recovery pass), NOT the lost 08:25–08:30 UTC originals",
+ "conditions": {
+  "page": "https://theonetheonlythechad.github.io/mother-earth/?baseline=rec{1,2,3}",
+  "assets": ["style.css?v=202611131000", "app.js?v=202611131000", "unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"],
+  "hub_version_each_run": "0.6.0 (fetched from hub / with cache:no-store at the end of each run)",
+  "browser": "Claude desktop app built-in browser pane; UA 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Claude/4.23118.0 Chrome/152.0.7977.167 Safari/537.36'; UA-CH: Chromium 152.0.7977.167, platform macOS 26.5.2, architecture arm, model ''",
+  "device": "Chad's Mac (Apple silicon per UA-CH 'arm'); navigator.hardwareConcurrency 8, deviceMemory 8 (browser-capped value)",
+  "viewport": [588, 834], "dpr": 2,
+  "layout_note": "588 px wide is below the page's 720 px breakpoint, so all three runs rendered the PHONE layout (header, globe, Readings sheet) at DPR 2 — not the desktop layout",
+  "pane_visibility": "visible (Chad brought the pane forward); document.hasFocus() false",
+  "network_reported_by_browser": "NetInfo effectiveType '3g', rtt 300–400 ms, downlink 0.35 Mbps — Chromium's coarse estimate, NOT a measured link; observed hub requests took ~0.25–0.7 s each",
+  "throttling": "none",
+  "cache": "persistent pane profile; no way to clear it from here. Run 1 = first load of this page in this session; runs 2–3 = immediate reloads (navigate with a new query string)."
+ },
+ "method": "navigate to ?baseline=recN; wait until 12 s after navigation start; read Navigation/Resource/Paint timing and buffered PerformanceObserver entries for largest-contentful-paint and longtask; then 120 requestAnimationFrame intervals; then fetch hub / for its version. Resource state: 'network' = transferSize>0; 'cache' = transferSize 0 and decodedBodySize>0; 'opaque' = cross-origin without Timing-Allow-Origin (sizes and cache state hidden by the browser). No size estimates are made in this file.",
+ "runs": [
+  {"label":"rec1","measuredAtUTC":"2026-11-07T12:21:03.910Z","navType":"navigate","docResponseEnd":468,"dcl":992,"load":4442,"firstPaint":960,"fcp":960,"lcp":960,
+   "longtasks":{"count":10,"afterFcp":8,"blockingAfterFcpMs":1088,"lastLongTaskEndMs":8874},
+   "hub":{"requests":11,"firstStart":969,"lastEnd":8041},"gibsEnd":4441,
+   "frames":{"n":120,"medianMs":34.9,"p95Ms":35.7,"maxMs":36.2},"canvas":[1176,746],
+   "resources":{"count":17,"network":3,"cache":1,"opaque":13,"transferMeasuredB":68683,"decodedMeasuredB":217514},
+   "notable":"document network (new connection, h2); style.css 7,271 B and app.js 27,114 B over the network; Google Fonts CSS from cache; globe.gl opaque, 52 ms (consistent with cache, not provable); no fonts.gstatic entries recorded"},
+  {"label":"rec2","measuredAtUTC":"2026-11-07T12:21:36.196Z","navType":"navigate","docResponseEnd":506,"dcl":593,"load":593,"firstPaint":640,"fcp":640,"lcp":640,
+   "longtasks":{"count":5,"afterFcp":5,"blockingAfterFcpMs":1167,"lastLongTaskEndMs":5524},
+   "hub":{"requests":11,"firstStart":592,"lastEnd":4696},"gibsEnd":2958,
+   "frames":{"n":120,"medianMs":35.4,"p95Ms":36.3,"maxMs":37.6},"canvas":[1176,746],
+   "resources":{"count":21,"network":1,"cache":7,"opaque":13,"transferMeasuredB":34298,"decodedMeasuredB":267358},
+   "notable":"only the HTML document over the network (34,298 B); css, app.js, fonts from cache; globe.gl opaque, 0 ms"},
+  {"label":"rec3","measuredAtUTC":"2026-11-07T12:22:03.911Z","navType":"navigate","docResponseEnd":87,"dcl":149,"load":149,"firstPaint":176,"fcp":176,"lcp":176,
+   "longtasks":{"count":5,"afterFcp":5,"blockingAfterFcpMs":1147,"lastLongTaskEndMs":4608},
+   "hub":{"requests":11,"firstStart":148,"lastEnd":3776},"gibsEnd":2610,
+   "frames":{"n":120,"medianMs":35.6,"p95Ms":36.3,"maxMs":37.4},
+   "resources":{"count":21,"network":1,"cache":7,"opaque":13,"transferMeasuredB":34298,"decodedMeasuredB":267358}}
+ ],
+ "hub_request_order_rec3_ms": "/ 148–363; cells/forest 148–404; GIBS 153–2610; cells/swpc 407–676; co2 678–1040; seaice 1041–1289; usgs 1296–1560; snapshot/usgs 1561–1870; cells/firms 1878–2139; snapshot/firms 2142–2609; cells/ships 2623–2866; snapshot/ships 3403–3776 (requests are sequential)"
+}
