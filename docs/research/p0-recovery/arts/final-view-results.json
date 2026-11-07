@@ -1,5 +1,8 @@
 {
- "rule": "Chad, 7 Nov 2026: include sensitive material; do not exclude; label honestly ('that is the truth, we are not here to bury the truth')",
+ "view": "The Met's catalogued place of making (created_at), mapped to present-day countries; source wording, uncertainty and superseded assertions preserved; not independent historical verification",
+ "sensitivity_handling": "For this metadata-only scope: sensitive material included with honest context (Chad, 7 Nov 2026: 'no include it that is the truth we are not here to bury the truth'); source restrictions and uncertainty preserved; inclusion is not a claim about ownership legitimacy",
+ "sensitivity_coverage": "NOT manually assessed: 0 of the objects were individually assessed under the rule. Labels = keyword screen + extended keyword screen + 3 page-check findings; tentative; the missed Yup'ik ceremonial mask (found only by page check) shows they are not comprehensive; an unlabelled object does not mean not sensitive",
+ "status": "geography passed; overall clearance pending (GPT review)",
  "objects": 479,
  "countries": 25,
  "criterion_300_objects": true,
@@ -140,11 +143,11 @@
    1
   ]
  ],
- "objects_labelled": 11,
- "label_counts": {
-  "sacred_ritual": 9,
-  "funerary": 3,
-  "indigenous_source_community": 2
+ "objects_with_tentative_labels": 11,
+ "tentative_label_counts": {
+  "potential_sacred_ritual_association": 9,
+  "potential_funerary_association": 3,
+  "potential_indigenous_source_community": 2
  },
  "departments": {
   "The American Wing": 326,

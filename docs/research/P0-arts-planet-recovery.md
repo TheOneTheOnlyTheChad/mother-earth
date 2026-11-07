@@ -2,6 +2,8 @@
 
 7 Nov 2026, 12:16:28–~12:35 UTC. One bounded session under GPT's go (cap 2 h; used ~20 min of working time). Life stays stopped; aircraft parked. No Mac-shell use, no media fetching, no provider contact, no page or hub change. Browser pane used only 12:20–12:22 UTC, well clear of the FIRMS reservation (8 Nov 02:40–03:00 SAST).
 
+> **Status 7 Nov ~13:15 UTC (after GPT's review of the bounded validation): Arts — geography passed; overall clearance pending.** Final view: the Met's catalogued place of making (created_at), mapped to present-day countries — 479 objects, 25 countries; source wording, uncertainty and superseded assertions preserved; not independent historical verification. Sensitive material included with honest context for this metadata-only scope; **no object manually assessed** (tentative labels from screens + 3 page findings). See `P0-CHECKPOINT.md` and `P0-arts-sensitivity-rule-PROPOSAL.md`.
+
 ## Review update — 7 Nov 2026, after GPT's review (existing evidence only; nothing new collected or measured)
 
 **Status after review**

@@ -1,21 +1,30 @@
 # Sensitive-material rule — Arts created_at country view
 
-## ✅ DECIDED by Chad, 7 Nov 2026 — proposal NOT adopted
+## ✅ DECIDED by Chad, 7 Nov 2026 — proposal NOT adopted (wording revised after GPT's review, same day)
 Chad's decision, verbatim: **"no include it that is the truth we are not here to bury the truth"**.
 
-**Rule applied:**
-- Sensitive material is **included, never excluded**, and **labelled honestly**: human remains, funerary, sacred/ritual, Indigenous source community.
-- Labels describe; they never remove an object.
-- Provenance and ownership are still never inferred.
-- Metadata only; media stays excluded.
+**How it is applied (this metadata-only scope only; not a general or permanent rule):**
+- Sensitive material is **included with honest context** in the metadata-only, created_at country view.
+- Source restrictions and uncertainty are preserved.
+- Inclusion is **not** a claim about ownership legitimacy; provenance is never inferred.
+- Media stays excluded.
+- Any other scope or view needs its own decision.
 
-**Applied in** `docs/research/p0-recovery/arts/final_view.py` → `final-view-objects.json` / `final-view-results.json`.
+**Coverage, stated plainly: NO object was manually assessed under this rule.** Labels come only from:
+- the R1 keyword screen;
+- an extended keyword screen (the Met's human-remains terms and culture names);
+- three findings from the blind page check (717572, 471897, 818842).
 
-**Result on the 479 candidates:**
-- 11 objects carry at least one label: sacred/ritual 9, funerary 3, Indigenous source community 2.
-- **0 human-remains labels** among them, so that part of the decision doesn't arise in this view.
-- The labels come from a keyword screen extended with the Met's own terms and culture names, plus three page-check findings. Some are imprecise: a memorial-window design, and a "temple pendant" that is jewellery.
-- Labels are candidates for display wording, not verified classifications.
+The Yup'ik ceremonial mask (717572) was missed by the screens and found only by the page check, so **the labels are not comprehensive**.
+
+**Label wording:** labels are tentative: "potential sacred/ritual association", "potential funerary association", "potential Indigenous source community", "potential human remains". Every object carries "sensitivity not fully assessed". **An unlabelled object is not "not sensitive".**
+
+**Result on the 479:**
+- 11 objects carry at least one tentative label: potential sacred/ritual 9, potential funerary 3, potential Indigenous source community 2.
+- 0 potential human-remains labels — but because coverage is a screen, that does not establish the absence of human remains.
+- Some labels are imprecise: a memorial-window design; a "temple pendant" that is jewellery.
+
+Applied in `docs/research/p0-recovery/arts/final_view.py` → `final-view-objects.json` / `final-view-results.json`.
 
 The original proposal below is kept for the record.
 
