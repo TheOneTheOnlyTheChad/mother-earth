@@ -2,6 +2,27 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 7 Nov 2026
+
+## 7 Nov 00:51 UTC — check-in 2 (6 Nov checkpoint), read-only — **checkpoint GOOD; new hub bug after midnight**
+- **6 Nov checkpoint (first full day on the fixed guard), written by 0.5.3:**
+  - firms: cutoff **23:45:42**, **50,634 records** / 592 cells (day 37,287 · night 13,347; max FRP 616.04 MW), 560,392 B gz.
+  - firms coverage row: `assessed_with_checkpoint = 1`, input_status **current**, 0 failed runs after cutoff, latest observation **21:18 UTC**, age at day end 858 s.
+  - usgs: 31 records, cutoff 23:55:08, coverage current.
+  - 5 Nov coverage row unchanged (backfilled, `= 0`, stale, 33 failed).
+  - The 5 empty `firms_*` tables (created 19:59–20:00 UTC) existed but were unused.
+- **Over-4 MB case OBSERVED on 0.5.3:** 23:30 and 23:45 UTC files of **4,242,222 / 4,241,977 B** (> 4,194,304), both processed ok. 23:45 tick: CPU 335 ms, wall 2.8 s, outcome ok. **No exceeded-memory in the last 90 min of telemetry** (every outcome ok). 00:30 checkpoint ticks: */15 209 ms / 30.0 s, */5 105 ms / 34.0 s, ok.
+- **Drifters, first full UTC day (6 Nov, by first_received_at):** **17,915 rows** from 1,302 buoys, ≈ **2.1 MB** of row content (D1 overhead not included). The partial-day estimate of ~23,700/day was high; one day is not yet an operating figure.
+- **⚠ NEW BUG (0.5.2+): header-only FIRMS file after midnight is recorded as a failure.**
+  - From 00:00 UTC every firms run is `down`: "truncated or malformed response: line 2 latitude "latitude"".
+  - FIRMS's normal post-midnight file is the header only, 122 B, **with no trailing newline** (identical on 6 Nov 00:00, which 0.5.1 handled).
+  - `firmsParse` takes `indexOf('\n') = -1`, so it reads the header again as data row "line 2", and the 0.5.2 content checks reject it.
+  - **No data harm:** the file has no rows, and the last good publication (23:45) stays up.
+  - **But** it is logged as malformed instead of "no detections processed yet", `/status` shows a failing streak (4 at 00:45), and **`/health/publication/firms` = 503**, so the **UptimeRobot "ME publication firms" alert fired (~00:50 UTC)**. It self-clears when FIRMS delivers rows (~02:15–04:00 UTC typical), and **recurs every night** until fixed.
+  - **Fix (hub change, needs review + Approve):** in `firmsParse`, treat a file without `\n` as header-only (no rows). Add a guard test with the real 122-byte file. 0.6.0 with the pipeline off still uses this path.
+- Other monitors: runs, archive and coverage (firms + usgs) 200; **coverage/firms flipped to ok** for day 6 Nov as expected; publication/usgs 200. Pending, gaps and recent_failures empty.
+- **Window clear (01:00 UTC):** the 6 Nov checkpoint is written and measured. Deploys may proceed (Chad's go), with the bug above taken into account.
+
 # 6 Nov 2026 — thread 17
 
 ## 6 Nov 19:59:43–20:00:03 UTC — additive D1 schema for FIRMS v2 (from the FIRMS memory thread; Chad's go)
