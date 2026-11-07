@@ -1,0 +1,6254 @@
+[
+{
+"object_id": "1001",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Bread plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1001"
+},
+{
+"object_id": "10021",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Writing table",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/10021"
+},
+{
+"object_id": "1031",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Buckle",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1031"
+},
+{
+"object_id": "105935",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Dress",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/105935"
+},
+{
+"object_id": "1076",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cabinet",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1076"
+},
+{
+"object_id": "1083",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cabinet",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1083"
+},
+{
+"object_id": "1085",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cabinet",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1085"
+},
+{
+"object_id": "1089",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Cachepot",
+"culture": "British (American market)",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1089"
+},
+{
+"object_id": "1107",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Brooch",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1107"
+},
+{
+"object_id": "1115",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Locket",
+"culture": "French",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1115"
+},
+{
+"object_id": "1225",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Candlestick",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1225"
+},
+{
+"object_id": "125694",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Dress",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/125694"
+},
+{
+"object_id": "1259",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Candlestick",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1259"
+},
+{
+"object_id": "127239",
+"countries": [
+"IRQ"
+],
+"met_wording": "Made in",
+"met_country": "Iraq",
+"object_name": "Robe",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/127239"
+},
+{
+"object_id": "12928",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Painting",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/12928"
+},
+{
+"object_id": "13455",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Ewer",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/13455"
+},
+{
+"object_id": "1352",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Candlestick",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1352"
+},
+{
+"object_id": "13662",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Curtain",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/13662"
+},
+{
+"object_id": "137",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Argand lamp",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/137"
+},
+{
+"object_id": "13718",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Length",
+"culture": "American, Shaker",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/13718"
+},
+{
+"object_id": "13747",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Embroidered picture",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/13747"
+},
+{
+"object_id": "13880",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Quilt",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/13880"
+},
+{
+"object_id": "13965",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Rug",
+"culture": "Caucasian",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/13965"
+},
+{
+"object_id": "1398",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cann",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1398"
+},
+{
+"object_id": "13983",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Rug",
+"culture": "French",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/13983"
+},
+{
+"object_id": "14005",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sample",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14005"
+},
+{
+"object_id": "14033",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sample",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14033"
+},
+{
+"object_id": "14044",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sampler",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14044"
+},
+{
+"object_id": "14049",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sampler",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14049"
+},
+{
+"object_id": "14113",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Towel",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14113"
+},
+{
+"object_id": "14114",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Towel",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14114"
+},
+{
+"object_id": "14117",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Towel",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14117"
+},
+{
+"object_id": "14146",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Listing tape",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14146"
+},
+{
+"object_id": "14164",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tapestry",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14164"
+},
+{
+"object_id": "14177",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Valance",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14177"
+},
+{
+"object_id": "14206",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14206"
+},
+{
+"object_id": "1422",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Card table",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1422"
+},
+{
+"object_id": "14279",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Salt dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14279"
+},
+{
+"object_id": "14289",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sugar bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14289"
+},
+{
+"object_id": "14442",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Stained glass window",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14442"
+},
+{
+"object_id": "14467",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Wallpaper",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14467"
+},
+{
+"object_id": "14792",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plateau",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14792"
+},
+{
+"object_id": "14804",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Bowl and stand",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14804"
+},
+{
+"object_id": "1488",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Medallion",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1488"
+},
+{
+"object_id": "14928",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Screen",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/14928"
+},
+{
+"object_id": "1509",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Celery vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1509"
+},
+{
+"object_id": "15388",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Card table",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/15388"
+},
+{
+"object_id": "15390",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sculpture",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/15390"
+},
+{
+"object_id": "15401",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Soup plate",
+"culture": "French, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/15401"
+},
+{
+"object_id": "15913",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Plate",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/15913"
+},
+{
+"object_id": "1592",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1592"
+},
+{
+"object_id": "1593",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1593"
+},
+{
+"object_id": "15978",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Theorem painting",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/15978"
+},
+{
+"object_id": "16170",
+"countries": [
+"USA"
+],
+"met_wording": "Made in|Country of Origin",
+"met_country": "United States|United States",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16170"
+},
+{
+"object_id": "16314",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Spoon",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16314"
+},
+{
+"object_id": "16413",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16413"
+},
+{
+"object_id": "166",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Armchair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/166"
+},
+{
+"object_id": "16678",
+"countries": [
+"MEX"
+],
+"met_wording": "Made in",
+"met_country": "Mexico",
+"object_name": "Sand shaker",
+"culture": "Mexican",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16678"
+},
+{
+"object_id": "16756",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16756"
+},
+{
+"object_id": "16758",
+"countries": [
+"USA"
+],
+"met_wording": "Made in|Country of Origin",
+"met_country": "United States|United States",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16758"
+},
+{
+"object_id": "16829",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pin",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16829"
+},
+{
+"object_id": "16831",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pin",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16831"
+},
+{
+"object_id": "16848",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pin",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16848"
+},
+{
+"object_id": "16965",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/16965"
+},
+{
+"object_id": "1704",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side Chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1704"
+},
+{
+"object_id": "17067",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/17067"
+},
+{
+"object_id": "17150",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cup and saucer",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/17150"
+},
+{
+"object_id": "17303",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/17303"
+},
+{
+"object_id": "17306",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Photograph",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/17306"
+},
+{
+"object_id": "1734",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side Chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1734"
+},
+{
+"object_id": "1739",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side Chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1739"
+},
+{
+"object_id": "17398",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/17398"
+},
+{
+"object_id": "17431",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Drawing",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/17431"
+},
+{
+"object_id": "1818",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side Chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1818"
+},
+{
+"object_id": "1841",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side Chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1841"
+},
+{
+"object_id": "1864",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side Chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1864"
+},
+{
+"object_id": "1887",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side Chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1887"
+},
+{
+"object_id": "18877",
+"countries": [
+"USA"
+],
+"met_wording": "Made in|Possibly made in",
+"met_country": "United States|United States",
+"object_name": "Spoon",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/18877"
+},
+{
+"object_id": "19014",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Painting, miniature",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19014"
+},
+{
+"object_id": "1955",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Chandelier",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/1955"
+},
+{
+"object_id": "19692",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Ring",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19692"
+},
+{
+"object_id": "19903",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19903"
+},
+{
+"object_id": "19907",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19907"
+},
+{
+"object_id": "19913",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19913"
+},
+{
+"object_id": "19942",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19942"
+},
+{
+"object_id": "19952",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19952"
+},
+{
+"object_id": "19988",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19988"
+},
+{
+"object_id": "19991",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/19991"
+},
+{
+"object_id": "20023",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/20023"
+},
+{
+"object_id": "2003",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Chest of drawers",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2003"
+},
+{
+"object_id": "20035",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/20035"
+},
+{
+"object_id": "20082",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/20082"
+},
+{
+"object_id": "20230",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Claret",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/20230"
+},
+{
+"object_id": "204304",
+"countries": [
+"ECU"
+],
+"met_wording": "Made in|Formerly considered made in",
+"met_country": "Ecuador|Ecuador",
+"object_name": "Statuette",
+"culture": "Ecuadoran",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/204304"
+},
+{
+"object_id": "2049",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cup",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2049"
+},
+{
+"object_id": "20569",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Earrings",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/20569"
+},
+{
+"object_id": "2059",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Chocolate Pot",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2059"
+},
+{
+"object_id": "20590",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/20590"
+},
+{
+"object_id": "2080",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Pin",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2080"
+},
+{
+"object_id": "20895",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/20895"
+},
+{
+"object_id": "2130",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Coffeepot",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2130"
+},
+{
+"object_id": "2137",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Coffeepot",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2137"
+},
+{
+"object_id": "2153",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Coffeepot",
+"culture": "Chinese",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2153"
+},
+{
+"object_id": "21625",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/21625"
+},
+{
+"object_id": "21627",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sketch",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/21627"
+},
+{
+"object_id": "21637",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Charger",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/21637"
+},
+{
+"object_id": "21790",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tray",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/21790"
+},
+{
+"object_id": "2181",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Communion cup",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2181"
+},
+{
+"object_id": "2224",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Compote",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2224"
+},
+{
+"object_id": "2244",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Condiment dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2244"
+},
+{
+"object_id": "2255",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Rattle, whistle, and bells",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2255"
+},
+{
+"object_id": "2277",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Couch",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2277"
+},
+{
+"object_id": "2367",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2367"
+},
+{
+"object_id": "2407",
+"countries": [
+"NLD"
+],
+"met_wording": "Made in",
+"met_country": "Netherlands",
+"object_name": "Jar",
+"culture": "Dutch",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2407"
+},
+{
+"object_id": "2504",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sugar bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2504"
+},
+{
+"object_id": "2510",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sugar bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2510"
+},
+{
+"object_id": "2566",
+"countries": [
+"NLD"
+],
+"met_wording": "Made in",
+"met_country": "Netherlands",
+"object_name": "Vase",
+"culture": "Dutch",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2566"
+},
+{
+"object_id": "2572",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Vase",
+"culture": "Chinese",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2572"
+},
+{
+"object_id": "2578",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Figure",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2578"
+},
+{
+"object_id": "268",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Armchair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/268"
+},
+{
+"object_id": "2693",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cream pot",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2693"
+},
+{
+"object_id": "2698",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cream pot",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2698"
+},
+{
+"object_id": "2701",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cream pot",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2701"
+},
+{
+"object_id": "2707",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cream pitcher",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2707"
+},
+{
+"object_id": "2718",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cream pot",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2718"
+},
+{
+"object_id": "2748",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cruet stand",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2748"
+},
+{
+"object_id": "2755",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cruet",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2755"
+},
+{
+"object_id": "276",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Armchair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/276"
+},
+{
+"object_id": "2815",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Cup",
+"culture": "French",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2815"
+},
+{
+"object_id": "2816",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Cup",
+"culture": "French",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/2816"
+},
+{
+"object_id": "3043",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Custard cup",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3043"
+},
+{
+"object_id": "3046",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Custard cup",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3046"
+},
+{
+"object_id": "3120",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Demitasse cup and saucer",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3120"
+},
+{
+"object_id": "3208",
+"countries": [
+"MEX"
+],
+"met_wording": "Made in",
+"met_country": "Mexico",
+"object_name": "Dish",
+"culture": "Mexican",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3208"
+},
+{
+"object_id": "3212",
+"countries": [
+"MEX"
+],
+"met_wording": "Made in",
+"met_country": "Mexico",
+"object_name": "Plate",
+"culture": "Mexican",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3212"
+},
+{
+"object_id": "3220",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3220"
+},
+{
+"object_id": "3251",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3251"
+},
+{
+"object_id": "3288",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3288"
+},
+{
+"object_id": "3305",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3305"
+},
+{
+"object_id": "3311",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3311"
+},
+{
+"object_id": "3330",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Dish",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3330"
+},
+{
+"object_id": "3340",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Dish",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3340"
+},
+{
+"object_id": "3350",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Door and hardware",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3350"
+},
+{
+"object_id": "3356",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Door",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3356"
+},
+{
+"object_id": "3393",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dough board scraper",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3393"
+},
+{
+"object_id": "3399",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dower chest",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3399"
+},
+{
+"object_id": "3410",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Fraktur",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3410"
+},
+{
+"object_id": "3453",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Drop-leaf table",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3453"
+},
+{
+"object_id": "3472",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Dust mop",
+"culture": "American, Shaker",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3472"
+},
+{
+"object_id": "3480",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Easy chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3480"
+},
+{
+"object_id": "3530",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Embroidery frame",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3530"
+},
+{
+"object_id": "3532",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Encaustic tile",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3532"
+},
+{
+"object_id": "3621",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Finger bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3621"
+},
+{
+"object_id": "3669",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Fireman's helmet",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3669"
+},
+{
+"object_id": "3726",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Flask",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3726"
+},
+{
+"object_id": "3731",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pint flask",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3731"
+},
+{
+"object_id": "3754",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Flip glass",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3754"
+},
+{
+"object_id": "378",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Beaker",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/378"
+},
+{
+"object_id": "3781",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tumbler",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3781"
+},
+{
+"object_id": "3784",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tumbler",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3784"
+},
+{
+"object_id": "3803",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Fork",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3803"
+},
+{
+"object_id": "3875",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Chandelier",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3875"
+},
+{
+"object_id": "3910",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Drop-leaf table",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3910"
+},
+{
+"object_id": "3939",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Bust",
+"culture": "British (American market)",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3939"
+},
+{
+"object_id": "3944",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Medal",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3944"
+},
+{
+"object_id": "3982",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Girandole",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/3982"
+},
+{
+"object_id": "400",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Beaker",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/400"
+},
+{
+"object_id": "4001",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Fragment",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4001"
+},
+{
+"object_id": "410",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Beaker",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/410"
+},
+{
+"object_id": "4113",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Goblet",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4113"
+},
+{
+"object_id": "4130",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Goblet",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4130"
+},
+{
+"object_id": "4267",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Coat of arms",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4267"
+},
+{
+"object_id": "442972",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/442972"
+},
+{
+"object_id": "443271",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443271"
+},
+{
+"object_id": "443283",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443283"
+},
+{
+"object_id": "443284",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443284"
+},
+{
+"object_id": "443373",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443373"
+},
+{
+"object_id": "443403",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443403"
+},
+{
+"object_id": "443408",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443408"
+},
+{
+"object_id": "443449",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443449"
+},
+{
+"object_id": "443474",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443474"
+},
+{
+"object_id": "443551",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/443551"
+},
+{
+"object_id": "445037",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Panel",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/445037"
+},
+{
+"object_id": "445437",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/445437"
+},
+{
+"object_id": "446220",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Robe",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/446220"
+},
+{
+"object_id": "446282",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Bowl",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/446282"
+},
+{
+"object_id": "446399",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Ceramic fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/446399"
+},
+{
+"object_id": "446427",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Ceramic fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/446427"
+},
+{
+"object_id": "446435",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Ceramic fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/446435"
+},
+{
+"object_id": "446608",
+"countries": [
+"AFG"
+],
+"met_wording": "Made in",
+"met_country": "present-day Afghanistan",
+"object_name": "Folio from an illustrated manuscript",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/446608"
+},
+{
+"object_id": "446648",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Dish",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/446648"
+},
+{
+"object_id": "4468",
+"countries": [
+"MEX"
+],
+"met_wording": "Made in",
+"met_country": "Mexico",
+"object_name": "Apothecary jar",
+"culture": "Mexican",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4468"
+},
+{
+"object_id": "446967",
+"countries": [
+"IND"
+],
+"met_wording": "Made in",
+"met_country": "India",
+"object_name": "Hanging",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/446967"
+},
+{
+"object_id": "447272",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/447272"
+},
+{
+"object_id": "447318",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Oyah (Bibilia)",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/447318"
+},
+{
+"object_id": "447678",
+"countries": [
+"SYR"
+],
+"met_wording": "Made in",
+"met_country": "Syria",
+"object_name": "Jar",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/447678"
+},
+{
+"object_id": "448203",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Tile",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/448203"
+},
+{
+"object_id": "449658",
+"countries": [
+"IRN"
+],
+"met_wording": "Excavated in|Minted in",
+"met_country": "Iran|Iran",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/449658"
+},
+{
+"object_id": "450436",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Tile",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/450436"
+},
+{
+"object_id": "450461",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Bowl",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/450461"
+},
+{
+"object_id": "450929",
+"countries": [
+"SYR"
+],
+"met_wording": "Made in",
+"met_country": "Syria",
+"object_name": "Jar",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/450929"
+},
+{
+"object_id": "451365",
+"countries": [
+"SYR"
+],
+"met_wording": "Made in",
+"met_country": "Syria",
+"object_name": "Jar",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/451365"
+},
+{
+"object_id": "451437",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Dish",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/451437"
+},
+{
+"object_id": "4516",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Jardiniere",
+"culture": "Chinese",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4516"
+},
+{
+"object_id": "451730",
+"countries": [
+"AFG"
+],
+"met_wording": "Made in",
+"met_country": "present-day Afghanistan",
+"object_name": "Folio from an illustrated manuscript",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/451730"
+},
+{
+"object_id": "452669",
+"countries": [
+"AFG"
+],
+"met_wording": "Attributed to|Made in",
+"met_country": "present-day Uzbekistan|present-day Afghanistan",
+"object_name": "Illustrated manuscript",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/452669"
+},
+{
+"object_id": "452706",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/452706"
+},
+{
+"object_id": "453502",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Pen box",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/453502"
+},
+{
+"object_id": "454429",
+"countries": [
+"IND"
+],
+"met_wording": "Made in",
+"met_country": "India",
+"object_name": "Illustrated single work",
+"culture": "",
+"department": "Islamic Art",
+"labels": [
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/454429"
+},
+{
+"object_id": "454492",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/454492"
+},
+{
+"object_id": "454495",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/454495"
+},
+{
+"object_id": "454502",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/454502"
+},
+{
+"object_id": "454519",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/454519"
+},
+{
+"object_id": "454553",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/454553"
+},
+{
+"object_id": "454581",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Textile fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/454581"
+},
+{
+"object_id": "454616",
+"countries": [
+"CHN"
+],
+"met_wording": "Excavated in|Made in",
+"met_country": "Iran|China",
+"object_name": "Fragment",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/454616"
+},
+{
+"object_id": "454643",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Abacus",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/454643"
+},
+{
+"object_id": "457128",
+"countries": [
+"IRN"
+],
+"met_wording": "From|Minted in",
+"met_country": "Iran|Iran",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457128"
+},
+{
+"object_id": "457133",
+"countries": [
+"UZB"
+],
+"met_wording": "From|Minted in",
+"met_country": "Iran|present-day Uzbekistan",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457133"
+},
+{
+"object_id": "457148",
+"countries": [
+"IRN"
+],
+"met_wording": "From|Minted in",
+"met_country": "Iran|Iran",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457148"
+},
+{
+"object_id": "457153",
+"countries": [
+"UZB"
+],
+"met_wording": "From|Minted in",
+"met_country": "Iran|present-day Uzbekistan",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457153"
+},
+{
+"object_id": "457216",
+"countries": [
+"IRN"
+],
+"met_wording": "From|Minted in",
+"met_country": "Iran",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457216"
+},
+{
+"object_id": "4573",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Jug",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4573"
+},
+{
+"object_id": "457371",
+"countries": [
+"IRN"
+],
+"met_wording": "Excavated in|Minted in",
+"met_country": "Iran",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457371"
+},
+{
+"object_id": "457510",
+"countries": [
+"IRN"
+],
+"met_wording": "Excavated in|Minted in",
+"met_country": "Iran",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457510"
+},
+{
+"object_id": "457524",
+"countries": [
+"IRN"
+],
+"met_wording": "Excavated in|Minted in",
+"met_country": "Iran",
+"object_name": "Coin",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457524"
+},
+{
+"object_id": "457791",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Tile",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/457791"
+},
+{
+"object_id": "458738",
+"countries": [
+"CAN"
+],
+"met_wording": "Made in",
+"met_country": "Canada",
+"object_name": "Painting",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/458738"
+},
+{
+"object_id": "4592",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Kast",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4592"
+},
+{
+"object_id": "4625",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Knife box",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4625"
+},
+{
+"object_id": "463292",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Textile fragment",
+"culture": "German",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/463292"
+},
+{
+"object_id": "463555",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Relief",
+"culture": "German",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/463555"
+},
+{
+"object_id": "463576",
+"countries": [
+"AUT"
+],
+"met_wording": "Made in",
+"met_country": "Austria",
+"object_name": "Statue",
+"culture": "Austrian",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/463576"
+},
+{
+"object_id": "463687",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Plate",
+"culture": "Spanish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/463687"
+},
+{
+"object_id": "463717",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Sculpture",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/463717"
+},
+{
+"object_id": "463718",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Frame",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/463718"
+},
+{
+"object_id": "463755",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Relief",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/463755"
+},
+{
+"object_id": "464399",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Plaque",
+"culture": "German",
+"department": "Medieval Art",
+"labels": [
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/464399"
+},
+{
+"object_id": "464401",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Capital",
+"culture": "German",
+"department": "Medieval Art",
+"labels": [
+"funerary",
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/464401"
+},
+{
+"object_id": "464460",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Plaque",
+"culture": "Ottonian",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/464460"
+},
+{
+"object_id": "464483",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Chasse",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/464483"
+},
+{
+"object_id": "464577",
+"countries": [
+"UKR"
+],
+"met_wording": "Made in",
+"met_country": "Ukraine",
+"object_name": "Temple pendant",
+"culture": "Kyivan Rus’",
+"department": "Medieval Art",
+"labels": [
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/464577"
+},
+{
+"object_id": "464649",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Medallion",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/464649"
+},
+{
+"object_id": "464709",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Hat ornament",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/464709"
+},
+{
+"object_id": "464775",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Plaque",
+"culture": "Catalan",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/464775"
+},
+{
+"object_id": "464978",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Plaque",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/464978"
+},
+{
+"object_id": "465449",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Tweezers",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465449"
+},
+{
+"object_id": "465514",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Mount",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465514"
+},
+{
+"object_id": "465559",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in|Made in",
+"met_country": "Germany",
+"object_name": "Ferret",
+"culture": "Late Roman",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465559"
+},
+{
+"object_id": "465576",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in|Made in|Made in",
+"met_country": "Alamania|Northern France|Germany",
+"object_name": "Ring",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465576"
+},
+{
+"object_id": "465604",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Brooch",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465604"
+},
+{
+"object_id": "465639",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Comb",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465639"
+},
+{
+"object_id": "465658",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Comb",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465658"
+},
+{
+"object_id": "465677",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Buckle",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465677"
+},
+{
+"object_id": "465806",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Wire",
+"culture": "Frankish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/465806"
+},
+{
+"object_id": "466013",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Fragment",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/466013"
+},
+{
+"object_id": "466228",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Jug",
+"culture": "German",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/466228"
+},
+{
+"object_id": "466497",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Fragment",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/466497"
+},
+{
+"object_id": "466504",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Fragment",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/466504"
+},
+{
+"object_id": "466554",
+"countries": [
+"ITA"
+],
+"met_wording": "Made in",
+"met_country": "Italy",
+"object_name": "Capital",
+"culture": "South Italian",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/466554"
+},
+{
+"object_id": "466750",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Antiphonary; Manuscript leaf",
+"culture": "German",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/466750"
+},
+{
+"object_id": "467080",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Plate",
+"culture": "Spanish",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/467080"
+},
+{
+"object_id": "467418",
+"countries": [
+"ITA"
+],
+"met_wording": "Made in",
+"met_country": "Italy",
+"object_name": "Antiphonary; Manuscript cutting",
+"culture": "Italian",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/467418"
+},
+{
+"object_id": "467643",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Plaque",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/467643"
+},
+{
+"object_id": "468147",
+"countries": [
+"ITA"
+],
+"met_wording": "Made in",
+"met_country": "Italy",
+"object_name": "Textile",
+"culture": "Italian",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468147"
+},
+{
+"object_id": "468167",
+"countries": [
+"ITA"
+],
+"met_wording": "Made in",
+"met_country": "Italy",
+"object_name": "Jar",
+"culture": "Italian",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468167"
+},
+{
+"object_id": "468304",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Gemellion",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468304"
+},
+{
+"object_id": "468320",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Triptych panel",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468320"
+},
+{
+"object_id": "468396",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Flask",
+"culture": "British",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468396"
+},
+{
+"object_id": "468517",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Plate",
+"culture": "Spanish",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468517"
+},
+{
+"object_id": "468538",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Chasuble",
+"culture": "German",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468538"
+},
+{
+"object_id": "468637",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Statuette",
+"culture": "Catalan",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468637"
+},
+{
+"object_id": "468835",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Key",
+"culture": "Catalan",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/468835"
+},
+{
+"object_id": "469835",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Statue",
+"culture": "French",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/469835"
+},
+{
+"object_id": "469865",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Panel",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/469865"
+},
+{
+"object_id": "469922",
+"countries": [
+"ITA"
+],
+"met_wording": "Made in",
+"met_country": "Italy",
+"object_name": "Diptych",
+"culture": "Italian",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/469922"
+},
+{
+"object_id": "470312",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Ewer",
+"culture": "German",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470312"
+},
+{
+"object_id": "470313",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Doorway",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470313"
+},
+{
+"object_id": "470659",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "present-day France",
+"object_name": "Base",
+"culture": "Catalan",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470659"
+},
+{
+"object_id": "470660",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "present-day France",
+"object_name": "Base",
+"culture": "Catalan",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470660"
+},
+{
+"object_id": "470721",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "present-day France",
+"object_name": "Column shaft",
+"culture": "Catalan",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470721"
+},
+{
+"object_id": "470746",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "present-day France",
+"object_name": "Arch",
+"culture": "Catalan",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470746"
+},
+{
+"object_id": "470849",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "present-day France",
+"object_name": "Column base",
+"culture": "Catalan",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470849"
+},
+{
+"object_id": "470860",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "present-day France",
+"object_name": "Column base",
+"culture": "Catalan",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470860"
+},
+{
+"object_id": "470873",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Painting",
+"culture": "Spanish",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470873"
+},
+{
+"object_id": "470874",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Painting",
+"culture": "Spanish",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470874"
+},
+{
+"object_id": "470882",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Panel",
+"culture": "German",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470882"
+},
+{
+"object_id": "470990",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Capital",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/470990"
+},
+{
+"object_id": "471068",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Roundel",
+"culture": "German",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471068"
+},
+{
+"object_id": "471161",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Arcade",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471161"
+},
+{
+"object_id": "471328",
+"countries": [
+"AUT"
+],
+"met_wording": "Made in",
+"met_country": "Austria",
+"object_name": "Chest",
+"culture": "Austrian",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471328"
+},
+{
+"object_id": "471333",
+"countries": [
+"ITA"
+],
+"met_wording": "Made in",
+"met_country": "Italy",
+"object_name": "Capital",
+"culture": "Italian",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471333"
+},
+{
+"object_id": "471365",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Panel",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471365"
+},
+{
+"object_id": "471367",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Panel",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471367"
+},
+{
+"object_id": "471432",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Statue",
+"culture": "German",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471432"
+},
+{
+"object_id": "471433",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Statue",
+"culture": "German",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471433"
+},
+{
+"object_id": "471755",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Pharmacy jar",
+"culture": "Spanish",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471755"
+},
+{
+"object_id": "471789",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Dish",
+"culture": "Spanish",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471789"
+},
+{
+"object_id": "471897",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Panel",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/471897"
+},
+{
+"object_id": "471937",
+"countries": [
+"AUT"
+],
+"met_wording": "Made in",
+"met_country": "Austria",
+"object_name": "Panel",
+"culture": "Austrian",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471937"
+},
+{
+"object_id": "471975",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Diptych",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/471975"
+},
+{
+"object_id": "4720",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Lamp",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4720"
+},
+{
+"object_id": "472162",
+"countries": [
+"AUT"
+],
+"met_wording": "Made in",
+"met_country": "Austria",
+"object_name": "Panel",
+"culture": "Austrian",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/472162"
+},
+{
+"object_id": "472240",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Capital",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/472240"
+},
+{
+"object_id": "4727",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Lamp shade",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4727"
+},
+{
+"object_id": "473395",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Lute",
+"culture": "Roman/Byzantine",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/473395"
+},
+{
+"object_id": "473682",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Arch",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/473682"
+},
+{
+"object_id": "473769",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Statue",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/473769"
+},
+{
+"object_id": "473806",
+"countries": [
+"ESP"
+],
+"met_wording": "Made in",
+"met_country": "Spain",
+"object_name": "Capital",
+"culture": "Spanish",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/473806"
+},
+{
+"object_id": "4743",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Lantern",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4743"
+},
+{
+"object_id": "4768",
+"countries": [
+"MEX"
+],
+"met_wording": "Made in",
+"met_country": "Mexico",
+"object_name": "Lavatory",
+"culture": "Mexican",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4768"
+},
+{
+"object_id": "478801",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Block",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/478801"
+},
+{
+"object_id": "479673",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Statuette",
+"culture": "German",
+"department": "The Cloisters",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/479673"
+},
+{
+"object_id": "4800",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Lithophane",
+"culture": "German",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4800"
+},
+{
+"object_id": "4823",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Armchair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/4823"
+},
+{
+"object_id": "5068",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Medal",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5068"
+},
+{
+"object_id": "5071",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Medal",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5071"
+},
+{
+"object_id": "5166",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Plaque",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5166"
+},
+{
+"object_id": "5168",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Medallion",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5168"
+},
+{
+"object_id": "5178",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Milk bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5178"
+},
+{
+"object_id": "5197",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Ladle",
+"culture": "British (American market)",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5197"
+},
+{
+"object_id": "5202",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Clock",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5202"
+},
+{
+"object_id": "5231",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mosaic plaque",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5231"
+},
+{
+"object_id": "5268",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Figure",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5268"
+},
+{
+"object_id": "5328",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mug",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5328"
+},
+{
+"object_id": "5329",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mug",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5329"
+},
+{
+"object_id": "5340",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mug",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5340"
+},
+{
+"object_id": "5373",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cann",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5373"
+},
+{
+"object_id": "5378",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mug",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5378"
+},
+{
+"object_id": "5382",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mug",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5382"
+},
+{
+"object_id": "5391",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mug",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5391"
+},
+{
+"object_id": "5401",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Necklace",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5401"
+},
+{
+"object_id": "5501",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Panel",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5501"
+},
+{
+"object_id": "5507",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mantelpiece",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5507"
+},
+{
+"object_id": "5515",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Paper weight",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5515"
+},
+{
+"object_id": "5559",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pedestal",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5559"
+},
+{
+"object_id": "5603",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Pickle dish",
+"culture": "British (American market)",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5603"
+},
+{
+"object_id": "5609",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pie dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5609"
+},
+{
+"object_id": "5647",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pint decanter",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5647"
+},
+{
+"object_id": "5652",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pipe tongs",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5652"
+},
+{
+"object_id": "5692",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pitcher",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5692"
+},
+{
+"object_id": "5803",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pitcher",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5803"
+},
+{
+"object_id": "5908",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plaque",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5908"
+},
+{
+"object_id": "594",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Bottle",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/594"
+},
+{
+"object_id": "5949",
+"countries": [
+"MEX"
+],
+"met_wording": "Made in",
+"met_country": "Mexico",
+"object_name": "Plate",
+"culture": "Mexican",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5949"
+},
+{
+"object_id": "5978",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5978"
+},
+{
+"object_id": "5984",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/5984"
+},
+{
+"object_id": "6046",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6046"
+},
+{
+"object_id": "6105",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6105"
+},
+{
+"object_id": "6111",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Platter",
+"culture": "British (American market)",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6111"
+},
+{
+"object_id": "614",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Bottle",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/614"
+},
+{
+"object_id": "6149",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Plate",
+"culture": "British (American market)",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6149"
+},
+{
+"object_id": "6187",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Plate",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6187"
+},
+{
+"object_id": "6208",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6208"
+},
+{
+"object_id": "6250",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6250"
+},
+{
+"object_id": "6260",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6260"
+},
+{
+"object_id": "6287",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6287"
+},
+{
+"object_id": "633",
+"countries": [
+"CZE"
+],
+"met_wording": "Made in",
+"met_country": "Czech Republic",
+"object_name": "Bottle",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/633"
+},
+{
+"object_id": "6343",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6343"
+},
+{
+"object_id": "638281",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Bookend",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/638281"
+},
+{
+"object_id": "6405",
+"countries": [
+"NLD"
+],
+"met_wording": "Made in",
+"met_country": "Netherlands",
+"object_name": "Plate",
+"culture": "Dutch",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6405"
+},
+{
+"object_id": "6438",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6438"
+},
+{
+"object_id": "648924",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pendant",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/648924"
+},
+{
+"object_id": "6552",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Platter",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6552"
+},
+{
+"object_id": "656005",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Label",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/656005"
+},
+{
+"object_id": "6565",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Platter",
+"culture": "French",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6565"
+},
+{
+"object_id": "6572",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Platter",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6572"
+},
+{
+"object_id": "6573",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Roast platter",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6573"
+},
+{
+"object_id": "6616",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pocket flask",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6616"
+},
+{
+"object_id": "667481",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/667481"
+},
+{
+"object_id": "668726",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Pitcher",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/668726"
+},
+{
+"object_id": "669093",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Jar",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/669093"
+},
+{
+"object_id": "6694",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Porringer",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6694"
+},
+{
+"object_id": "670605",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Ribbon",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/670605"
+},
+{
+"object_id": "6860",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Watch",
+"culture": "French",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6860"
+},
+{
+"object_id": "6867",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Ring",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6867"
+},
+{
+"object_id": "6873",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Rocking chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6873"
+},
+{
+"object_id": "6895",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Rose bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6895"
+},
+{
+"object_id": "691",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Bowl",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/691"
+},
+{
+"object_id": "6961",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Spoon",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/6961"
+},
+{
+"object_id": "700489",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Miniature",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/700489"
+},
+{
+"object_id": "7059",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Salt",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7059"
+},
+{
+"object_id": "7064",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Salt",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7064"
+},
+{
+"object_id": "7070",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Salt",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7070"
+},
+{
+"object_id": "708",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Bowl",
+"culture": "British (American market)",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/708"
+},
+{
+"object_id": "7112",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sauce dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7112"
+},
+{
+"object_id": "715528",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Bottle",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/715528"
+},
+{
+"object_id": "716913",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/716913"
+},
+{
+"object_id": "717572",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Mask",
+"culture": "Yup'ik, Native American",
+"department": "The American Wing",
+"labels": [
+"indigenous_source_community",
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/717572"
+},
+{
+"object_id": "718090",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/718090"
+},
+{
+"object_id": "7188",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sauce dish",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7188"
+},
+{
+"object_id": "722",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Bowl",
+"culture": "Chinese",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/722"
+},
+{
+"object_id": "724722",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Illustrated single work",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/724722"
+},
+{
+"object_id": "7252",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Saucer",
+"culture": "Chinese",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7252"
+},
+{
+"object_id": "7254",
+"countries": [
+"JPN"
+],
+"met_wording": "Made in",
+"met_country": "Japan",
+"object_name": "Saucer",
+"culture": "American, Japanese",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7254"
+},
+{
+"object_id": "7262",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Saucer",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7262"
+},
+{
+"object_id": "7302",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Saucer",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7302"
+},
+{
+"object_id": "7317",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Saucer",
+"culture": "French",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7317"
+},
+{
+"object_id": "7377",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Spoon",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7377"
+},
+{
+"object_id": "746761",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plaque",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/746761"
+},
+{
+"object_id": "7492",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Shovel",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7492"
+},
+{
+"object_id": "751505",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Shoulder bag",
+"culture": "Seminole, Native American",
+"department": "The American Wing",
+"labels": [
+"indigenous_source_community"
+],
+"link": "http://www.metmuseum.org/art/collection/search/751505"
+},
+{
+"object_id": "7559",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Cup",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7559"
+},
+{
+"object_id": "7564",
+"countries": [
+"DEU"
+],
+"met_wording": "Made in",
+"met_country": "Germany",
+"object_name": "Snuffbox",
+"culture": "German",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7564"
+},
+{
+"object_id": "7606",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Solar lamp",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7606"
+},
+{
+"object_id": "7632",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Soup dish",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7632"
+},
+{
+"object_id": "7669",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Soup plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7669"
+},
+{
+"object_id": "767",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/767"
+},
+{
+"object_id": "7674",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Soup plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7674"
+},
+{
+"object_id": "773289",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Illustrated single work",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/773289"
+},
+{
+"object_id": "7828",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Spoon",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7828"
+},
+{
+"object_id": "7851",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Spoon holder",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7851"
+},
+{
+"object_id": "7882",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tilt-top stand",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7882"
+},
+{
+"object_id": "7884",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Stand",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7884"
+},
+{
+"object_id": "788933",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/788933"
+},
+{
+"object_id": "788934",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Side Chair",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/788934"
+},
+{
+"object_id": "7994",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Sugar Bowl",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/7994"
+},
+{
+"object_id": "8084",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Table",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8084"
+},
+{
+"object_id": "8137",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Spoon",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8137"
+},
+{
+"object_id": "8154",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tall clock",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8154"
+},
+{
+"object_id": "81713",
+"countries": [
+"MAR"
+],
+"met_wording": "Made in",
+"met_country": "Morocco",
+"object_name": "Burnus",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/81713"
+},
+{
+"object_id": "8178",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tankard",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8178"
+},
+{
+"object_id": "818842",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Painting",
+"culture": "",
+"department": "Islamic Art",
+"labels": [
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/818842"
+},
+{
+"object_id": "820",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Bowl",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/820"
+},
+{
+"object_id": "8230",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tankard",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8230"
+},
+{
+"object_id": "823310",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Tile",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/823310"
+},
+{
+"object_id": "823334",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Plate",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/823334"
+},
+{
+"object_id": "8253",
+"countries": [
+"MEX"
+],
+"met_wording": "Made in",
+"met_country": "Mexico",
+"object_name": "Cup",
+"culture": "Mexican",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8253"
+},
+{
+"object_id": "8263",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tea Caddy",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8263"
+},
+{
+"object_id": "8266",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Tea caddy",
+"culture": "Chinese",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8266"
+},
+{
+"object_id": "8285",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tea table",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8285"
+},
+{
+"object_id": "8331",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Teapot",
+"culture": "British (American market)",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8331"
+},
+{
+"object_id": "834048",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "Reliquary",
+"culture": "French",
+"department": "The Cloisters",
+"labels": [
+"funerary",
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/834048"
+},
+{
+"object_id": "8365",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Teapot",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8365"
+},
+{
+"object_id": "8435",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Spoon",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8435"
+},
+{
+"object_id": "8542",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Tile",
+"culture": "British",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8542"
+},
+{
+"object_id": "85522",
+"countries": [
+"PAK"
+],
+"met_wording": "Made in",
+"met_country": "Pakistan",
+"object_name": "Wedding kurta",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/85522"
+},
+{
+"object_id": "85543",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Robe",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/85543"
+},
+{
+"object_id": "85652",
+"countries": [
+"EGY"
+],
+"met_wording": "Made in",
+"met_country": "Egypt",
+"object_name": "Jlaleb",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/85652"
+},
+{
+"object_id": "86177",
+"countries": [
+"IND"
+],
+"met_wording": "Made in",
+"met_country": "India",
+"object_name": "Coat",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/86177"
+},
+{
+"object_id": "86186",
+"countries": [
+"IND"
+],
+"met_wording": "Made in",
+"met_country": "India",
+"object_name": "Shirt",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/86186"
+},
+{
+"object_id": "86223",
+"countries": [
+"IND"
+],
+"met_wording": "Made in",
+"met_country": "India",
+"object_name": "Shirt",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/86223"
+},
+{
+"object_id": "86567",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Robe",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/86567"
+},
+{
+"object_id": "86569",
+"countries": [
+"TUR"
+],
+"met_wording": "Made in",
+"met_country": "Turkey",
+"object_name": "Ensemble",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/86569"
+},
+{
+"object_id": "8732",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tongs",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8732"
+},
+{
+"object_id": "874",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Bowl",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/874"
+},
+{
+"object_id": "876",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Bowl",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/876"
+},
+{
+"object_id": "8773",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tray",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8773"
+},
+{
+"object_id": "8799",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Tray",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/8799"
+},
+{
+"object_id": "889",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Bowl",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/889"
+},
+{
+"object_id": "890",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Bowl",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/890"
+},
+{
+"object_id": "899797",
+"countries": [
+"FRA"
+],
+"met_wording": "Made in",
+"met_country": "France",
+"object_name": "",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/899797"
+},
+{
+"object_id": "899886",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/899886"
+},
+{
+"object_id": "900380",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Pen box",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/900380"
+},
+{
+"object_id": "9055",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tumbler",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9055"
+},
+{
+"object_id": "9133",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Tumbler",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9133"
+},
+{
+"object_id": "919240",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Four alternative designs for rounded arch geometric window",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/919240"
+},
+{
+"object_id": "919258",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Design of frame for memorial window",
+"culture": "American",
+"department": "The American Wing",
+"labels": [
+"funerary"
+],
+"link": "http://www.metmuseum.org/art/collection/search/919258"
+},
+{
+"object_id": "919280",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Four designs for a single lancet window",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/919280"
+},
+{
+"object_id": "9197",
+"countries": [
+"MEX"
+],
+"met_wording": "Made in",
+"met_country": "Mexico",
+"object_name": "Vase",
+"culture": "Mexican",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9197"
+},
+{
+"object_id": "9225",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9225"
+},
+{
+"object_id": "9240",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Vase",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9240"
+},
+{
+"object_id": "929276",
+"countries": [
+"ITA"
+],
+"met_wording": "Made in",
+"met_country": "Italy",
+"object_name": "Manuscript Cutting",
+"culture": "Italian",
+"department": "Medieval Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/929276"
+},
+{
+"object_id": "9335",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9335"
+},
+{
+"object_id": "935834",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Reverse glass painting",
+"culture": "",
+"department": "Islamic Art",
+"labels": [
+"sacred_ritual"
+],
+"link": "http://www.metmuseum.org/art/collection/search/935834"
+},
+{
+"object_id": "935840",
+"countries": [
+"IRN"
+],
+"met_wording": "Made in",
+"met_country": "Iran",
+"object_name": "Reverse glass painting",
+"culture": "",
+"department": "Islamic Art",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/935840"
+},
+{
+"object_id": "937",
+"countries": [
+"GBR"
+],
+"met_wording": "Made in",
+"met_country": "England",
+"object_name": "Box",
+"culture": "",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/937"
+},
+{
+"object_id": "9402",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9402"
+},
+{
+"object_id": "9449",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9449"
+},
+{
+"object_id": "9485",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Vase",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9485"
+},
+{
+"object_id": "9739",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Slop bowl",
+"culture": "Chinese",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9739"
+},
+{
+"object_id": "9770",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Water pitcher",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9770"
+},
+{
+"object_id": "9775",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Water pitcher",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9775"
+},
+{
+"object_id": "9793",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Whimsy pitcher",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9793"
+},
+{
+"object_id": "980",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Bread plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/980"
+},
+{
+"object_id": "9827",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Window Stool",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9827"
+},
+{
+"object_id": "983",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Bread plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/983"
+},
+{
+"object_id": "985",
+"countries": [
+"CHN"
+],
+"met_wording": "Made in",
+"met_country": "China",
+"object_name": "Bread plate",
+"culture": "Chinese, for American market",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/985"
+},
+{
+"object_id": "9997",
+"countries": [
+"USA"
+],
+"met_wording": "Made in",
+"met_country": "United States",
+"object_name": "Architectural elements",
+"culture": "American",
+"department": "The American Wing",
+"labels": [],
+"link": "http://www.metmuseum.org/art/collection/search/9997"
+}
+]

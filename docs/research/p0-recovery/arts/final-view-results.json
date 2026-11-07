@@ -1,0 +1,155 @@
+{
+ "rule": "Chad, 7 Nov 2026: include sensitive material; do not exclude; label honestly ('that is the truth, we are not here to bury the truth')",
+ "objects": 479,
+ "countries": 25,
+ "criterion_300_objects": true,
+ "criterion_20_places": true,
+ "top": [
+  [
+   "USA",
+   239
+  ],
+  [
+   "FRA",
+   47
+  ],
+  [
+   "GBR",
+   30
+  ],
+  [
+   "CHN",
+   28
+  ],
+  [
+   "IRN",
+   26
+  ]
+ ],
+ "top_share": 0.499,
+ "countries_with_1_object": [
+  "CAN",
+  "CZE",
+  "ECU",
+  "IRQ",
+  "JPN",
+  "MAR",
+  "PAK",
+  "UKR"
+ ],
+ "countries_with_le_3_objects": 12,
+ "all_counts": [
+  [
+   "USA",
+   239
+  ],
+  [
+   "FRA",
+   47
+  ],
+  [
+   "GBR",
+   30
+  ],
+  [
+   "CHN",
+   28
+  ],
+  [
+   "IRN",
+   26
+  ],
+  [
+   "DEU",
+   25
+  ],
+  [
+   "EGY",
+   19
+  ],
+  [
+   "ESP",
+   12
+  ],
+  [
+   "TUR",
+   10
+  ],
+  [
+   "MEX",
+   8
+  ],
+  [
+   "ITA",
+   7
+  ],
+  [
+   "IND",
+   5
+  ],
+  [
+   "AUT",
+   4
+  ],
+  [
+   "NLD",
+   3
+  ],
+  [
+   "AFG",
+   3
+  ],
+  [
+   "SYR",
+   3
+  ],
+  [
+   "UZB",
+   2
+  ],
+  [
+   "IRQ",
+   1
+  ],
+  [
+   "ECU",
+   1
+  ],
+  [
+   "CAN",
+   1
+  ],
+  [
+   "UKR",
+   1
+  ],
+  [
+   "CZE",
+   1
+  ],
+  [
+   "JPN",
+   1
+  ],
+  [
+   "MAR",
+   1
+  ],
+  [
+   "PAK",
+   1
+  ]
+ ],
+ "objects_labelled": 11,
+ "label_counts": {
+  "sacred_ritual": 9,
+  "funerary": 3,
+  "indigenous_source_community": 2
+ },
+ "departments": {
+  "The American Wing": 326,
+  "Islamic Art": 72,
+  "Medieval Art": 43,
+  "The Cloisters": 38
+ }
+}

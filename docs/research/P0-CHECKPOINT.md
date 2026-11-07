@@ -73,3 +73,10 @@ The Life sample was also sent to Chad in the conversation at 10:58 UTC (same gz 
   - **Targeted "Country of Origin" (13 in R1):** 6 reached. All 6 pages show "Country of Origin <country>" exactly as the CSV. The meaning is not defined on the pages: 2 descriptions say made there (825639 Bijapur/India; 892739 likely Abadeh/Iran); 2 pair it with a matching "Made in" (16758, 16170); 1 ambiguous (631270: Istanbul-born artist, Country of Origin United States); 1 no evidence (443180). **Decision: "Country of Origin" stays its own relationship, outside the created_at view.**
   - **Sensitivity finding (recall):** object **717572 is a Yup'ik (Native American) ceremonial dance mask**, inside the created_at candidates and **not keyword-flagged**. It would fall under proposed rule part 3. Also seen: 471897 stained glass from a church choir; 818842 a Karbala painting used as a recitation backdrop. These are for the rule decision, not auto-excluded.
 - **State now:** created_at candidates 479 objects / 25 countries (USA 49.9%), sensitivity NOT applied. **Step 4 waits on Chad's agreement of the rule.** Step 5 (final recount) follows step 4. Planet waits for Chad (Mac closed).
+- ~13:00 — **Chad's rule decision (verbatim): "no include it that is the truth we are not here to bury the truth".** Proposal not adopted: include all sensitive material, never exclude, label honestly.
+- ~13:01 — **Steps 4–5 done** (`arts/final_view.py` → `final-view-objects.json`, `final-view-results.json`).
+  - Final created_at view (v2 rules, rule applied): **479 distinct objects, 25 present-day countries → ≥ 300 ✓, ≥ 20 ✓.**
+  - Concentration: USA 239 (49.9%), then France 47, UK 30, China 28, Iran 26, Germany 25, Egypt 19.
+  - Thin tail: 8 countries with 1 object (CAN, CZE, ECU, IRQ, JPN, MAR, PAK, UKR); 12 countries with ≤ 3.
+  - Labels: 11 objects (sacred/ritual 9, funerary 3, Indigenous source community 2; human remains 0).
+  - **Arts work in this pass is complete.** Remaining: GPT review; Planet (Chad, later).

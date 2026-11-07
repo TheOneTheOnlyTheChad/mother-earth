@@ -1,4 +1,27 @@
-# Proposed sensitive-material rule — Arts created_at country view (FOR CHAD'S AGREEMENT; NOT APPLIED)
+# Sensitive-material rule — Arts created_at country view
+
+## ✅ DECIDED by Chad, 7 Nov 2026 — proposal NOT adopted
+Chad's decision, verbatim: **"no include it that is the truth we are not here to bury the truth"**.
+
+**Rule applied:**
+- Sensitive material is **included, never excluded**, and **labelled honestly**: human remains, funerary, sacred/ritual, Indigenous source community.
+- Labels describe; they never remove an object.
+- Provenance and ownership are still never inferred.
+- Metadata only; media stays excluded.
+
+**Applied in** `docs/research/p0-recovery/arts/final_view.py` → `final-view-objects.json` / `final-view-results.json`.
+
+**Result on the 479 candidates:**
+- 11 objects carry at least one label: sacred/ritual 9, funerary 3, Indigenous source community 2.
+- **0 human-remains labels** among them, so that part of the decision doesn't arise in this view.
+- The labels come from a keyword screen extended with the Met's own terms and culture names, plus three page-check findings. Some are imprecise: a memorial-window design, and a "temple pendant" that is jewellery.
+- Labels are candidates for display wording, not verified classifications.
+
+The original proposal below is kept for the record.
+
+---
+
+## (Superseded) Proposal as drafted for Chad's agreement
 
 7 Nov 2026, Claude. Scope: a metadata-only, created_at-only, country-level view of Met Open Access records. No images. Nothing here is applied until Chad agrees it. GPT reviews.
 
