@@ -4,6 +4,24 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 7 Nov 2026
 
+## 7 Nov 04:01–05:17 UTC — **hub 0.6.0 LIVE, FIRMS memory v2 ON** (FIRMS memory thread; one Approve line from Chad per stage; GPT accepted stages 1–5)
+Full evidence: `reviews/2026-11-06-firms-v2-build.md` (branch `firms-memory`, stage log). Design: `docs/FIRMS-MEMORY-DESIGN.md` rev 6.1.
+- **Stage 1, D1 additive schema:** 6 Nov 19:59:43–20:00:03 UTC. Five `firms_*` tables + 3 indexes. Production D1 has `foreign_keys = 1`.
+- **Parser fix folded in before deploy:** the header-only file without a newline is now an empty day, which fixes the 00:51 bug below (`5b487ff`). Tests N1/N2; breaks 39/39; GPT signed off.
+- **Stage 2, deploy 0.6.0 with v2 off:** 04:01:54 UTC.
+  - `phase1/worker.js` from `firms-memory` `5b487ff`, sha256 `ac173d8ac0dd9d1b9584c3eaf771adabe5e215d993d34487edad12d8932758ea`. Content-only API; read back identical.
+  - Runs 04:15 and 04:30 ok in legacy format; health 8/8 against the 03:59 baseline.
+- **Stage 3, production R2 probe** (`/admin/probe/r2-conditional`, Chad entered the key): 04:40:39 UTC, `all_as_designed`, 0 open uploads, cleaned. Independent `probe/` listing = 0 objects.
+  - Lifecycle rules confirmed: `raw/`, `snapshots/` and `cells/` deleted at 48 h; multipart uploads aborted at 7 d.
+- **Stage 4, `FIRMS_CREATE_ONLY=verified`:** ~04:44 UTC.
+- **Stage 5, `FIRMS_PIPELINE=v2`:** ~04:51 UTC. Format cutover 05:00:43.092Z.
+  - v2 runs 05:00 (1,193 records) and 05:15 (1,881): published pairs matched (`run_id` + `retrieved_at`); cells and by_hour sums = records; `/place` = counts; health 8/8 with `v2_publication` facts.
+- **Measured:** FIRMS sends **no Content-Length**, so a cut exactly between rows stays undetectable.
+- **Open, stage 6:** the FIRMS memory thread verifies the 7 Nov mixed-day checkpoint at **00:45 UTC 8 Nov**: source = last v2 output, cutoff/records/`fires_daily`/coverage agree, archive health up, midnight header-only runs on the boundary path. GPT reviews it, then the rollout closes.
+- **Rollback:** delete the `FIRMS_PIPELINE` variable (legacy from the next run, tested). **Not** unchanged 0.5.3, which reintroduces the nightly parser bug.
+- **main is behind the live hub:** main's `worker.js` = 0.5.3. Merging `firms-memory` → main needs Chad's go. It changes no page files.
+- **Unchanged:** 8 MiB guard (raising it is a separate decision); UptimeRobot monitors.
+
 ## 7 Nov 00:51 UTC — check-in 2 (6 Nov checkpoint), read-only — **checkpoint GOOD; new hub bug after midnight**
 - **6 Nov checkpoint (first full day on the fixed guard), written by 0.5.3:**
   - firms: cutoff **23:45:42**, **50,634 records** / 592 cells (day 37,287 · night 13,347; max FRP 616.04 MW), 560,392 B gz.
