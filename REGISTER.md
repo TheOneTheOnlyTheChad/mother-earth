@@ -144,10 +144,14 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Commercial use:** **unknown — both sources silent.** CelesTrak states free availability to all users; Space-Track's approval is conditioned on citation and does not address commercial use. Recorded here per the constitution; decision Chad's.
 
 
-## The Met — Open Access collection data, `MetObjects.csv` (Arts, Phase 0 research only) — ⏳ PENDING Chad's paste, not on the page
+## The Met — Open Access collection data, `MetObjects.csv` (Arts, Phase 0 research only) — ✅ operative sentence filed 7 Nov 2026; not on the page
 - **Reviewed:** 7 Nov 2026 by Claude (Phase 0 recovery pass) — https://www.metmuseum.org/policies/image-resources (no last-updated date shown) and https://github.com/metmuseum/openaccess README + LICENSE at commit `e39487871a5512abaa4e21fd8cfdff7d7e3ee1ea` (2 Nov 2026). GPT verified the same two sources.
 - **What the sources say (paraphrased; operative sentence to be pasted by Chad):** collection data are released under CC0 1.0 (the README says the Met has waived all copyright and related rights) for unrestricted commercial and non-commercial use, without permission or fee. The data cover the whole online collection, including works under copyright; images are not part of the dataset, and image rights are separate (CC0 only for works the Met treats as public domain).
 - **Attribution:** not required. The README asks users to consider attributing or citing the Met's CC0 datasets.
 - **Commercial use:** yes (stated on both pages).
 - **Media:** excluded from Phase 0 (metadata only; no images fetched).
-- **Status:** ⏳ pending — Chad opens the policy page and pastes the operative sentence here; until then this entry is research evidence, not clearance.
+- **Operative sentences (pasted by Chad from https://www.metmuseum.org/policies/image-resources, 7 Nov 2026; filed verbatim):**
+  - "It also makes available data from the entire online collection―both works it believes to be in the public domain and those under copyright or other restrictions―including basic information such as title, artist, date, medium, and dimensions. This data is available to all in accordance with the Creative Commons Zero (CC0) designation."
+  - "You can download, share, modify, and distribute the data for any purpose, including commercial and noncommercial use, free of charge and without requiring permission from the Museum."
+- **Also on the page:** record completeness varies ("cataloguing is ongoing"); digital images are not in the dataset; the CSV on GitHub "is updated on a weekly basis" (so any use pins a commit and hash, as Phase 0 did: `e394878`, `7adc37e4…`). Images of public-domain works are CC0 under the site's Terms and Conditions; copyrighted or restricted images are licensed through Art Resource for a fee — media excluded here.
+- **Status:** ✅ reuse terms filed (data: CC0, commercial use yes, attribution not required). Not on the page; Phase 0 research only.

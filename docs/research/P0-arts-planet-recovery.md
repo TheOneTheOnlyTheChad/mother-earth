@@ -86,13 +86,13 @@ The screen is a keyword search over Object Name / Title / Medium / Classificatio
 - Policy page (https://www.metmuseum.org/policies/image-resources, no date shown): collection data CC0; usable for any purpose, including commercial, without permission. Images are separate (CC0 only for public-domain works), and they are not in the dataset.
 - Repo README + LICENSE at the pinned commit: the Met has waived all copyright and related rights under CC0 1.0 for unrestricted commercial and non-commercial use; it asks users to *consider* attribution.
 - GPT verified the same two sources.
-- **REGISTER:** entry added and marked ⏳ **pending Chad's paste** of the operative sentence (the existing process).
+- **REGISTER:** Chad pasted the policy page on 7 Nov 2026 and the two operative sentences are filed verbatim (✅). The page also says the CSV is updated weekly, so any use pins a commit and hash.
 - Media: excluded. Metadata only; nothing fetched.
 
 ### Arts requirement table (after recovery)
 | Requirement | State |
 |---|---|
-| Reuse rights | **Documented** (CC0, commercial use, two official sources, GPT-verified). Clearance waits on Chad's REGISTER paste. |
+| Reuse rights | **Cleared** (data). CC0, commercial use, no permission needed. Operative sentences pasted by Chad and filed verbatim in REGISTER.md, 7 Nov 2026. GPT verified the same sources. |
 | Media | **Excluded** (metadata-only proof of concept) |
 | Geography, country view | **Meets the numbers with uncertainty retained.** Certain/aligned/ISO-validated: 1,454 records, 27 countries, Egypt 57%. Created/found only: 641 records, 27 countries, USA 37%. GPT/Chad to choose which relationship set the view uses. |
 | Geography, marker view | Not assessed (no geocoding this pass) |
@@ -179,7 +179,7 @@ Resource state is classified as:
 - Earlier (carried): two Arts samples where one was planned; earlier Mac-shell use (Life); none in this pass.
 
 ## Remaining gaps
-- Chad's REGISTER paste (Met).
+- ~~Chad's REGISTER paste (Met)~~ filed 7 Nov.
 - An agreed sensitive-material review rule; the Met's own human-remains / cultural-property policy (not consulted); keyword-screen recall.
 - Choice of relationship set for the country view ("From" in or out).
 - Representation gap: no typed geography outside five departments.
@@ -187,7 +187,7 @@ Resource state is classified as:
 
 ## Recommendation
 - **Arts: INCONCLUSIVE, but narrowed.** Rights are documented, and a validated, uncertainty-preserving country view meets the numbers. That holds most cleanly for created/found only: 641 records, 27 countries, no country above 38%.
-  - What stops "cleared" is the REGISTER paste and an agreed sensitive-material rule. Both are decisions, not research.
+  - Rights are now cleared (REGISTER filed 7 Nov). What stops "cleared" overall is an agreed sensitive-material rule and the choice of relationship set ("From" in or out). Both are decisions, not research.
   - The representation gap (five departments) should be stated with any view, not hidden.
 - **Planet:** usable only as a preliminary desktop-pane reference. Phase A's iPhone checks still have no baseline.
 - Neither recovery nor a cleared gate selects Arts or authorises a prototype. That stays with Chad.

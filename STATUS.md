@@ -10,7 +10,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - Country view (certain, aligned, ISO, sensitivity-flagged excluded): **1,454 records / 27 countries, Egypt 57%**. Created/found only: **641 / 27, USA 37%**.
   - Typed geography is confined to 5 departments; Africa, Oceania and the Americas are absent.
   - Sensitivity: 159 candidates (mostly Egyptian funerary; 1 human-hair object, 5 burial wrappings) excluded and unresolved.
-  - Rights documented (CC0, commercial use); REGISTER entry added, ⏳ pending Chad's paste.
+  - Rights: CC0, commercial use. **REGISTER filed** (Chad pasted the policy page, 7 Nov); data rights cleared.
   - Evidence in `docs/research/p0-recovery/arts/`.
 - **Planet:** three replacement runs, 12:21–12:22 UTC, hub 0.6.0, pane at 588 × 834 DPR 2 (phone layout). FCP 960 / 640 / 176 ms; hub last response 8.0 / 4.7 / 3.8 s; frames ≈ 35 ms; ~1.1 s blocking after FCP.
   - Cold load **not demonstrated**; 13 of 17–21 resources opaque (no Timing-Allow-Origin); iPhone pending.
