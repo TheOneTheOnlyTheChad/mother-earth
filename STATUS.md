@@ -4,7 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
-## 8 Nov ~18:40 UTC — **R2 fireballs terms/access review rev 1 (read-only; Chad's go, R2 only)** — `docs/research/R2-terms-access.md`, for GPT
+## 8 Nov ~19:15 UTC — **R2 terms review rev 2 (GPT's review of `f6b8093` adopted; docs only)** — `docs/research/R2-terms-access.md`
+- **X1:** GPT's direct extraction + browser reading of SSD FAQ #a05: "No permissions are needed. The data provided on this site are considered public domain." (+ no endorsement, cite SSD with retrieval date/title/URL, identify modifications, fair-use guidance). **The accepted 5 Nov reading is restored as corroborated.** Rev 1's contrary reading came from Claude fetch summaries — kept only as an uncorroborated extraction discrepancy; no claim the site changed or the earlier review was wrong.
+- **X2:** general Caltech/JPL notice (documents may be protected; reproduction may require permission; Caltech manages JPL) recorded alongside, not substituted for, the specific SSD data statement. **X3:** CNEOS catalogue + lightcurve pages — government-sensor data for public release, not verified/reanalysed, revisable; no separate commercial statement. **X4:** citation/modifications/no-endorsement are provider-stated (FAQ); crediting CNEOS + underlying sensors is a project choice.
+- API conditions verified (caching "where practical"; no-embedding concerns the APIs, not publishing downloaded data; no numerical limit).
+- Scope as interpretation: S1 (API catalogue) plausibly covered; S2 (lightcurve files) not established. Research-only REGISTER draft §4, **not filed**. Identity/validation gates open.
+
+## 8 Nov ~18:40 UTC — *(superseded by rev 2 below: the FAQ conflict was an uncorroborated Claude fetch summary)* **R2 fireballs terms/access review rev 1 (read-only; Chad's go, R2 only)** — `docs/research/R2-terms-access.md`, for GPT
 - Products/routes already sampled: Fireball API v1.2 (`ssd-api`), CNEOS lightcurve index + one report (`cneos`). No sampling, contact, route selection or implementation; identity and validation gates open.
 - **⚠ Conflict found:** the SSD FAQ (8 Nov, two fetches) answers the publishing-permission question "The short answer is yes", places most content under JPL's copyright statement, prefers links, and has **no "public domain" wording**. This contradicts the accepted 5 Nov reading ("public domain, no permission needed"), which is now **not relied on** pending verbatim extraction (X1, X2). Marked in RESEARCH-BACKLOG §R2 A.
 - API fair-use conditions explicit (one request at a time, reasonably necessary, cache, User-Agent with contact, back off, no website embedding; JPL may rate-limit/throttle/block); no licence text; **no numerical limit found (≠ unlimited)**.

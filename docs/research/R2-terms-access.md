@@ -1,72 +1,91 @@
-# R2 fireballs — terms and access review (rev 1, 8 Nov 2026, research only) — for GPT
+# R2 fireballs — terms and access review (rev 2, 8 Nov 2026, research only) — for GPT
 
 **Chad's go (8 Nov 2026):** bounded, read-only terms/access review of R2 only. **No data sampled or fetched, no provider contact, no route selection, no implementation, schedules, resources, deployment or page change.** R2's identity and validation gates (`R2-revision-matching.md`, rev 3) stay open; R4's filed entry, R3 (reply pending) and R6 (accepted unresolved draft, unfiled) are unchanged.
 
-**Starting point:** R2's accepted first gate (`RESEARCH-BACKLOG.md` §R2 A, C.5, D) and the revision-matching proposal rev 3. **Products and routes already sampled (5 Nov):**
+**Rev 2 (GPT's review of rev 1 at `f6b8093`, adopted):** X1–X4 verified by **GPT on Chad's behalf** (web extraction and browser, 8 Nov). The accepted 5 Nov FAQ reading is **restored as corroborated**; rev 1's contrary reading is kept only as an uncorroborated extraction discrepancy (§1.5). The pack now separates: (A) the explicit SSD public-domain statement, (B) its applicability to the two sampled routes, (C) operational access conditions, (D) project attribution choices.
+
+**Products and routes already sampled (5 Nov):**
 | # | Product | Route | Sampled by |
 |---|---|---|---|
 | S1 | Fireball catalogue, API v1.2 (`vel-comp=true`) | `ssd-api.jpl.nasa.gov/fireball.api` | GPT (5 Nov 11:33 UTC); re-checked by Claude |
 | S2 | Lightcurve index `lc_files.json` + one report `2023.172.193912.txt` | `cneos.jpl.nasa.gov/fireballs/lc/` | Claude (5 Nov) |
 | — | Internet Archive capture of the 2024 lightcurve index | `web.archive.org` | Evidence only (revision research), **not a route** |
 
-**Evidence status labels:** *Claude (fetch summary, 8 Nov)* = read with Claude's web-fetch tool, which returns a summary with quotations, provisional until extracted · *Accepted 5 Nov* = R2 first-gate wording · *Pending extraction* = Claude's tool refused or could not resolve the page; **GPT may extract it on Chad's behalf**. Nothing here is labelled as a page Chad personally read.
+**Evidence status labels:** *GPT (read, 8 Nov)* = GPT inspected the page on Chad's behalf · *Claude (fetch summary, 8 Nov)* = Claude's web-fetch tool, which returns a summary with quotations · *Accepted 5 Nov* = R2 first-gate wording. Nothing here is labelled as a page Chad personally read.
 
-## 1. Evidence, separated by question
+## 1. Evidence
 
-### A. Reuse / commercial terms
-| # | Statement | Page | Applies to | Status |
-|---|---|---|---|---|
-| A1 | **⚠ Conflicts with the accepted 5 Nov reading.** To "I'd like to publish information from your site on my site. Do I need permission?": **"The short answer is yes."** At the very least JPL would like to know what information is used and how; it prefers a direct link, especially for numerical parameters that may be updated frequently; **"Most of the content on our site is covered under JPL's copyright statement"** (linked); use does not imply endorsement. **No "public domain" wording on the page** (asked twice; both fetches agree). | [SSD FAQ](https://ssd.jpl.nasa.gov/faq.html) | `ssd.jpl.nasa.gov` content as worded; **whether it governs the API's data (S1) is not stated** | Claude (fetch summary, 8 Nov, two fetches) — **pending extraction (X1)** |
-| A2 | Accepted 5 Nov: "SSD FAQ: data on that site public domain, no permission needed" (as GPT read it; Claude re-read the FAQ 5 Nov). | RESEARCH-BACKLOG §R2 A | — | **Contradicted by A1; not relied on** until X1 resolves which reading is correct (or whether the page changed). |
-| A3 | Lightcurve page (accepted 5 Nov): data come from U.S. Government sensors, are **provided for public release**, are not verified or reanalysed by CNEOS, and are revised when updates arrive. No CNEOS-specific reuse statement found then. | [CNEOS lightcurves](https://cneos.jpl.nasa.gov/fireballs/lc/) | S2 | Accepted 5 Nov · re-check pending (X3) |
-| A4 | CNEOS introduction: "chronological data summary of fireball and bolide events provided by U.S. Government sensors". **No reuse, licence, copyright, credit or commercial-use statement.** Footer links: Privacy → `https://www.jpl.nasa.gov/caltechjpl-privacy-policies-and-important-notices`; Image Policy → `https://www.jpl.nasa.gov/jpl-image-use-policy`. Manager: Steve Chesley. | [CNEOS intro](https://cneos.jpl.nasa.gov/fireballs/intro.html) | CNEOS fireball pages | Claude (fetch summary, 8 Nov) |
-| A5 | JPL Image Use Policy: **images and video** on JPL public sites "may be used for any purpose without prior permission", subject to special cases (identifiable people; third-party material with commercial-use restrictions); no endorsement by Caltech, JPL or NASA; logos need written approval; credit "Courtesy NASA/JPL-Caltech". **No statement about data or website text.** (`jpl.nasa.gov/copyrights.php` redirects here.) | [JPL Image Use Policy](https://jpl.nasa.gov/jpl-image-use-policy) | **Images and video only; not applied to S1/S2** | Claude (fetch summary, 8 Nov) |
-| A6 | data.gov record "Fireball And Bolide Reports": publisher data.nasa.gov; `accessLevel` "public"; **no licence field**; first published 2015-04-07, updated 2025-05-29; distributions are legacy `data.nasa.gov/docs/legacy/…` files. | [catalog.data.gov](https://catalog.data.gov/dataset/fireball-and-bolide-reports) | A **different distribution** (legacy copy), not S1/S2. "Public" access level is not a licence | Claude (fetch summary, 8 Nov) |
+### 1.1 (A) The explicit SSD public-domain statement
+| # | Statement | Page | Status |
+|---|---|---|---|
+| A1 | Opening of the FAQ answer: **"No permissions are needed. The data provided on this site are considered public domain."** The answer then disclaims NASA/Caltech/JPL endorsement, recommends citing SSD with retrieval date, page title and URL, says modifications should be identified, and refers readers to fair-use guidance. It contains no permission-required answer and no link to a copyright statement within that answer. | [SSD FAQ #a05](https://ssd.jpl.nasa.gov/faq.html#a05) | **GPT (read, 8 Nov; web extraction + browser)** · Accepted 5 Nov (GPT; Claude re-read) — **corroborated** |
+| A2 | General JPL notice, copyright section: documents may be protected and reproduction may require permission. The notice also states **Caltech's management of JPL**. | [Caltech/JPL Privacy Policies and Important Notices](https://www.jpl.nasa.gov/caltechjpl-privacy-policies-and-important-notices/) | GPT (read, 8 Nov) |
+- **Both are recorded; neither substitutes for the other.** A2 is a general site-wide notice; A1 is the more specific statement about the data on the SSD site.
+- A2 sources Caltech's management of JPL (replacing rev 1's "general knowledge" label). It **does not establish the authorship of every underlying sensor report.**
 
-### B. Attribution
-- **A1:** no credit line; asks to know the use and prefers a link; no implied endorsement.
-- **A5:** "Courtesy NASA/JPL-Caltech" — **for images and video**; not established for data.
-- **Accepted 5 Nov guidance** (RESEARCH-BACKLOG §R2 A): attribute NASA/JPL CNEOS and the underlying U.S. Government sensor reports, record retrieval dates, identify transformations, imply no endorsement. **The page that states this was not named in the 5 Nov record — pending re-identification (X4).**
+### 1.2 (B) Scope evidence for the two sampled routes
+| # | Finding | Page | Status |
+|---|---|---|---|
+| B1 | Catalogue page and lightcurve page: data from **government sensors supplied to CNEOS for public release**; not independently verified or reanalysed; may be revised; caution in use. **No separate commercial-use statement** on either page. | [CNEOS fireballs](https://cneos.jpl.nasa.gov/fireballs/) · [CNEOS lightcurves](https://cneos.jpl.nasa.gov/fireballs/lc/) | GPT (read, 8 Nov) · Accepted 5 Nov (lightcurves) |
+| B2 | The API documentation and the CNEOS pages **link the catalogue to the API** (relevant scope evidence). | SSD API docs; CNEOS pages | GPT (read, 8 Nov) |
+| B3 | CNEOS introduction: "chronological data summary of fireball and bolide events provided by U.S. Government sensors"; footer links the JPL notice (A2) and the JPL Image Use Policy. | [CNEOS intro](https://cneos.jpl.nasa.gov/fireballs/intro.html) | Claude (fetch summary, 8 Nov) |
+- **The FAQ (A1) does not explicitly name either sampled route** (`ssd-api…/fireball.api`, `cneos…/lc/`). Any conclusion about its reach is interpretation (§2).
 
-### C. Automated-access guidance (explicit, S1 route)
-From the [SSD API Fair Use Policy](https://ssd-api.jpl.nasa.gov/doc/) (Claude, fetch summary, 8 Nov; consistent with the accepted 5 Nov reading):
-- "You agree to limit requests to those reasonably necessary for your application or use case."
-- "Automated processes must not make unnecessarily frequent, repetitive, or redundant requests."
-- "You agree to submit only one API request at a time (no simultaneous requests)."
-- Cache and reuse results "rather than repeatedly requesting unchanged or predictably changing data".
-- Automated connections must send "a valid, application-specific User-Agent request header" with "correct product name, version, and contact information".
-- "You may not embed these APIs in your website (per NASA CORS policy)."
-- Handle errors, rate limits and unavailability "by backing off or reducing request rates rather than repeatedly retrying failed requests".
-- "JPL may rate-limit, throttle, or block access that places an unreasonable load on the service"; best-effort service; formats can change without notice; check the response `version`; no guarantee any API stays available.
-- **No licence, copyright, credit or commercial-use text** on that page.
-- S2 (lightcurve files on `cneos.jpl.nasa.gov`): **no automated-access guidance found**; the API conditions are not extended to it.
+### 1.3 (C) Operational access conditions (S1 route; not a licence)
+[SSD API documentation, Fair Use Policy](https://ssd-api.jpl.nasa.gov/doc/) — **GPT (read, 8 Nov)** confirms Claude's summary as substantially correct:
+- limit requests to those reasonably necessary; automated processes must not make unnecessarily frequent, repetitive or redundant requests;
+- **one API request at a time** (no simultaneous requests);
+- **cache and reuse results where practical**, rather than repeatedly requesting unchanged or predictably changing data;
+- automated connections send an application-specific User-Agent with product name, version and contact information;
+- handle errors, rate limits and unavailability by backing off, not repeated retries;
+- **the APIs may not be embedded in a website** (per NASA CORS policy). *This concerns the APIs; it is not a prohibition on publishing data downloaded from them;*
+- JPL may rate-limit, throttle or block unreasonable load; best-effort service; formats may change without notice; check the response `version`.
+- **No numerical rate limit** on that page. S2 (lightcurve files): no automated-access guidance found; the API conditions are not extended to it.
 
-### D. Numerical limits
-- **No numerical rate, cadence or load limit found** in the pages inspected on 8 Nov 2026: SSD API documentation (fair-use policy), SSD API About, SSD FAQ, CNEOS introduction, JPL Image Use Policy, data.gov record. The policy states JPL **may** rate-limit, throttle or block unreasonable load — a stated enforcement right without a number. **Not evidence of unlimited access.**
+### 1.4 (D) Attribution — provider statements vs project choices
+- **Provider-stated (A1, SSD FAQ):** recommended citation of SSD with **retrieval date, page title and URL**; **identify modifications**; **no implied endorsement** by NASA, Caltech or JPL.
+- **Project choice (not found as a provider requirement):** credit **NASA/JPL CNEOS and the underlying U.S. Government sensor reports**. Sensible attribution based on the product's provenance (B1, B3); GPT did not find that complete formulation stated by the provider.
+- Not applied: the JPL Image Use Policy's "Courtesy NASA/JPL-Caltech" (images and video only).
 
-## 2. Pending extraction (GPT may extract on Chad's behalf)
-Required:
-- **X1. SSD FAQ** <https://ssd.jpl.nasa.gov/faq.html>: the full permission Q&A verbatim, and whether "public domain" appears anywhere — to resolve the conflict between A1 (8 Nov) and A2 (accepted 5 Nov). If the page changed, record that.
-- **X2. The JPL copyright statement the FAQ links** ("toward the bottom of that page"; probably the Caltech/JPL privacy policies and important notices page, `https://www.jpl.nasa.gov/caltechjpl-privacy-policies-and-important-notices`, which Claude's tool refused): holder, what may be used without permission, data vs text vs images, commercial use, endorsement, credit.
-- **X3. CNEOS fireball and lightcurve pages** <https://cneos.jpl.nasa.gov/fireballs/>, <https://cneos.jpl.nasa.gov/fireballs/lc/>: the public-release sentence(s) verbatim and any reuse or credit text.
-- **X4. Source of the 5 Nov attribution guidance** (§1 B): which page states it, verbatim.
-Supplementary:
-- **X5. data.nasa.gov landing page** for "Fireball And Bolide Reports": any licence or rights field (different distribution; context only).
+### 1.5 Extraction discrepancy (recorded, uncorroborated)
+- Rev 1 reported, from **two Claude fetch summaries on 8 Nov**, that the FAQ answered "The short answer is yes", referred to "JPL's copyright statement" and contained no "public domain" wording. **GPT's direct extraction and browser reading on the same day show the opposite (A1).** The fetch summaries are **uncorroborated** and are not relied on.
+- This record does **not** claim that the website changed, nor that the 5 Nov review was wrong.
 
-## 3. Interpretation (open to challenge)
-- **Public availability, distribution and credit are not commercial-reuse permission.** A3's "provided for public release", A6's "public" access level, and the API's public service each support public access/distribution only.
-- **A1 is potentially restrictive** if confirmed: it says publishing from the SSD site needs permission and places most content under JPL's copyright statement. Until X1–X2, **the 5 Nov "public domain, no permission needed" reading (A2) is not relied on**, and no conclusion either way is drawn on S1's reuse.
-- **U.S.-government-work inference is not available here as a default.** *General knowledge, not from the inspected pages:* JPL is a NASA federally funded research and development centre managed by Caltech, so JPL-produced content is not automatically a U.S. Government work; A1's reference to "JPL's copyright statement" points the same way. The **underlying sensor reports** are described as U.S. Government sensor data provided for public release (A3, A4); how that bears on JPL's catalogue and lightcurve products is unestablished.
-- **Routes and products kept separate:** the API fair-use conditions (C) are explicit operational rules for S1; they are not a licence. A5 covers images and video only; A6 is a different, legacy distribution.
+### 1.6 Context, not applied
+- [JPL Image Use Policy](https://jpl.nasa.gov/jpl-image-use-policy): images and video only (Claude, fetch summary).
+- [data.gov, Fireball And Bolide Reports](https://catalog.data.gov/dataset/fireball-and-bolide-reports): a different, legacy data.nasa.gov distribution; access level "public"; no licence field (Claude, fetch summary).
 
-## 4. Unanswered questions
-1. What the SSD FAQ actually says today and on 5 Nov (A1 vs A2), and what JPL's copyright statement says about data (X1, X2).
-2. Whether any statement covers the **API data** (S1) and the **lightcurve files** (S2) specifically.
-3. Commercial reuse of S1 and S2: **unresolved** — not a finding of permission or prohibition.
-4. Polling: explicit conditions exist (one at a time, cache, User-Agent, back off, no embedding); no numerical limit found; not unlimited.
+### 1.7 Numerical limits
+- **No numerical rate, cadence or load limit found** in the pages inspected on 8 Nov 2026 (SSD API documentation and About; SSD FAQ; CNEOS fireball, lightcurve and introduction pages; JPL notice). JPL reserves the right to throttle or block. **Not evidence of unlimited access.**
 
-## 5. REGISTER draft — not prepared
-Not warranted yet: the operative reuse statement (A1 vs A2) is in conflict and must be extracted verbatim first. A research-only draft follows once X1–X4 are in and GPT has reviewed this pack.
+## 2. Interpretation (open to challenge)
+- **S1, catalogue via the API — interpretation:** the explicit statement covers "the data provided on this site" (`ssd.jpl.nasa.gov`). The API is the SSD/CNEOS API service, and the catalogue is linked to it (B2). On that reading, A1 plausibly covers the API's fireball data. **The FAQ does not name the API or its host**, so this remains an interpretation, not an explicit grant for S1.
+- **S2, lightcurve files on `cneos.jpl.nasa.gov` — interpretation:** separately hosted; the pages state public release (B1) but give no separate reuse or commercial statement. Whether A1 reaches them is **not established**.
+- **General notice vs specific statement:** A2 (documents may be protected; reproduction may require permission) is general; A1 is specific to the SSD site's data. *Interpretation:* where A1 applies, it is the operative statement for that data; A2 is not overridden for other content.
+- **Underlying sensor reports:** described as government-sensor data supplied for public release; their authorship is not established by A2 or B1.
+- **Public release, public access level and credit requests are not, by themselves, commercial-reuse permission.** The commercial position rests on A1's public-domain statement and its scope.
 
-## Sources (read 8 Nov 2026 by Claude, fetch summaries)
-[SSD API documentation / fair-use policy](https://ssd-api.jpl.nasa.gov/doc/) · [SSD/CNEOS API About](https://ssd-api.jpl.nasa.gov/about) · [SSD FAQ](https://ssd.jpl.nasa.gov/faq.html) · [CNEOS fireball introduction](https://cneos.jpl.nasa.gov/fireballs/intro.html) · [JPL Image Use Policy](https://jpl.nasa.gov/jpl-image-use-policy) · [data.gov: Fireball And Bolide Reports](https://catalog.data.gov/dataset/fireball-and-bolide-reports)
+## 3. Unanswered questions
+1. Whether A1 is meant to cover the API's fireball data (S1) — interpretation only.
+2. Whether any statement covers the lightcurve files (S2) beyond public release.
+3. Authorship of the underlying sensor reports.
+4. Polling: explicit operational conditions exist; no numerical limit found; not unlimited.
+
+## 4. Proposed REGISTER entry — research-only DRAFT for review (NOT filed)
+```
+## NASA/JPL CNEOS — reported fireballs: catalogue (Fireball API v1.2) and lightcurve files — research only, not on the page
+- **Read:** 5 Nov 2026 (GPT; Claude re-read the SSD FAQ) and 8 Nov 2026 by GPT on Chad's behalf: SSD FAQ #a05; Caltech/JPL Privacy Policies and Important Notices; CNEOS fireballs and lightcurve pages; SSD API documentation (fair-use policy). 8 Nov 2026 by Claude (fetch summaries): CNEOS introduction, JPL Image Use Policy, data.gov record. Research record: docs/research/R2-terms-access.md (rev 2); RESEARCH-BACKLOG §R2.
+- **SSD data statement (verbatim, SSD FAQ #a05):** "No permissions are needed. The data provided on this site are considered public domain." The answer also disclaims NASA/Caltech/JPL endorsement, recommends citing SSD with retrieval date, page title and URL, and asks that modifications be identified.
+- **General JPL notice:** documents may be protected and reproduction may require permission (Caltech/JPL Important Notices; Caltech manages JPL). Recorded alongside, not substituted for the SSD statement.
+- **Scope (interpretation, labelled):** the FAQ does not name the sampled routes. S1 (catalogue via ssd-api fireball.api): plausibly covered, as SSD/CNEOS API data linked to the catalogue — interpretation. S2 (lightcurve files on cneos.jpl.nasa.gov): separately hosted; "provided for public release"; no separate reuse statement; coverage not established.
+- **Provider statements on the data:** government-sensor data supplied to CNEOS for public release; not independently verified or reanalysed; may be revised; caution in use.
+- **Access conditions (S1, operational, not a licence):** one request at a time; only reasonably necessary requests; cache and reuse where practical; application-specific User-Agent with product, version and contact; back off on errors; the APIs may not be embedded in a website (NASA CORS policy) — not a prohibition on publishing downloaded data; JPL may throttle or block. No numerical limit found (8 Nov 2026) — not unlimited.
+- **Attribution:** provider-stated (SSD FAQ): cite SSD with retrieval date, page title and URL; identify modifications; no implied endorsement. Project choice: credit NASA/JPL CNEOS and the underlying U.S. Government sensor reports.
+- **Coverage statement:** none filed (R2 identity and validation gates open).
+- **Status:** ⛔ research only; not cleared for building.
+- **Commercial use:** S1 — public-domain statement for SSD site data; application to the API's fireball data is an interpretation pending review (not an explicit grant for that route). S2 — UNRESOLVED (public release only; no applicable statement established). Neither is a finding of prohibition.
+```
+
+## Sources
+Read by GPT on Chad's behalf, 8 Nov 2026: [SSD FAQ #a05](https://ssd.jpl.nasa.gov/faq.html#a05) · [Caltech/JPL Privacy Policies and Important Notices](https://www.jpl.nasa.gov/caltechjpl-privacy-policies-and-important-notices/) · [CNEOS fireballs](https://cneos.jpl.nasa.gov/fireballs/) · [CNEOS lightcurves](https://cneos.jpl.nasa.gov/fireballs/lc/) · [SSD API documentation](https://ssd-api.jpl.nasa.gov/doc/)
+Read by Claude (fetch summaries), 8 Nov 2026: [SSD/CNEOS API About](https://ssd-api.jpl.nasa.gov/about) · [CNEOS introduction](https://cneos.jpl.nasa.gov/fireballs/intro.html) · [JPL Image Use Policy](https://jpl.nasa.gov/jpl-image-use-policy) · [data.gov record](https://catalog.data.gov/dataset/fireball-and-bolide-reports)
