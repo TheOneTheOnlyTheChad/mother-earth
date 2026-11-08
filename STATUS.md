@@ -18,7 +18,8 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - "What this is and is not" opens (1,294 chars). Debris off → hidden, draw range 0, the others stay on. Markers visible on the globe.
   - Orbital markers have no per-object inspector by design, so "every inspector" reduces to the card and its explainer.
 - Console: no messages.
-- **Still open from the smoke test:** actual-phone test, noon UTC rollover (booked 11:50 UTC), browser HTTP status codes.
+- **Standing of this evidence (Chad, after GPT, 8 Nov):** completed in Claude's browser pane at 588 px, 05:47–05:50 UTC. It **supplements** GPT's smoke test; **GPT has not independently repeated or reviewed it**. It does **not** establish real-phone behaviour or exhaustive orbital-inspector coverage.
+- **Still open from the smoke test:** actual-phone test, noon UTC imagery rollover (booked 11:50 UTC), uncaptured browser HTTP status codes.
 - **Mac copies synced** (`~/Documents/Mother Earth`, Chad granted the folder): 96 files copied (83 new, 13 older versions, each confirmed to be an earlier committed version, not a local edit). 167/167 tracked files identical to main `c151306`.
 
 ## 8 Nov ~05:30–06:00 UTC — harness fix on a branch; noon check booked; Phase 0 recommendation drafted (Chad's go; no production change)
