@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~09:40 UTC — **GPT technical sign-off: `kp-degraded` @ `86134b8`**
+- Independently verified by GPT:
+  - kp-degraded 29/29 and health-hub 29/29;
+  - the SHIPS_ROUNDED break fails the intended generated-fields test;
+  - app syntax and worker module loading;
+  - worker sha256 `f38296a0183d14d958d5815d7926254cb4275be7ca00b384334974fad5b12cc8`.
+- No blocking issue found. Broader regressions remain Claude-supplied; **no live validation yet**.
+- Policy and order stand: provisional 7.5 h; 5 min skew tolerance; **separately approved hub deploy → live RC check → separately approved page release**.
+- This is technical sign-off, not Chad's merge or production approval.
+
 ## 8 Nov ~09:20 UTC — **Kp/degraded fix rev 3 on `kp-degraded` @ `86134b8`** (focused, after GPT's review of `0513aa7`; NOT merged, NOT deployed)
 - **GPT verified `0513aa7`:** kp-degraded 28/28, health-hub 29/29, app syntax, full worker hash. The Kp rendering, USGS unknown age and evidence corrections address its findings.
 - **The one remaining issue, fixed:** the cloud collector rounded its reason fields before publishing (75.04 s → 75; 0.8999 → 0.9), which contradicted the stated condition.
