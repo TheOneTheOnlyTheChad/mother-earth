@@ -4,6 +4,8 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov 05:07:54 UTC — **PAGE RELEASED: GIBS backdrop → NOAA-21** (main `3375e91`, Chad's Approve line, after GPT's review). Served hashes verified 05:09:53 UTC; live check 05:10:24 UTC: NOAA-21 requested for 2026-11-06; labels/credit name NOAA-21, "dated, not live", dark-area cause not established; fires still NOAA-20. Assets `?v=202611141000`. Improves the current images (NOAA-21 was worse on 4–5 Nov); not a completeness fix. New guard `phase1/backdrop-layer.test.cjs` (27). place-ui 28/30 = 2 pre-existing harness failures (`env.R2.head` missing in its fake R2 since the FIRMS merge). Outstanding: real-phone check; any fallback rule is a separate proposal (hub work).
+
 ## 8 Nov — **FIRMS v2 rollout CLOSED; `firms-memory` merged into main** (FIRMS memory thread; Chad's Approve line)
 - **Stage 6 (read-only, 00:45:42–00:47 UTC):** the 7 Nov mixed-day checkpoint used the **latest** publication, v2 run `2026-11-07T23-45Z-…46a4be89350f` (cutoff 23:45:42.788Z).
   - Marker records 56,536 = that output = its run log.

@@ -7,7 +7,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 ## 0. Live state (updated 8 Nov by the FIRMS memory thread: rollout closed, merged; rest as of 6–7 Nov)
 | | State |
 |---|---|
-| **Page** | main, assets **`?v=202611131000`** (`e107c1d`: smoke-review fixes, 6 Nov 10:03 UTC). |
+| **Page** | main, assets **`?v=202611141000`** (`3375e91`: GIBS backdrop NOAA-21, released 8 Nov 05:07:54 UTC; served hashes verified). |
 | **Hub** | **0.6.0 live since 7 Nov 04:01:54 UTC, FIRMS v2 ON since ~04:51 UTC; rollout CLOSED 8 Nov (GPT, after stage 6).** worker.js sha256 `ac173d8a…58ea`; **main = live** (merge `0891d13`). Variables `FIRMS_PIPELINE=v2`, `FIRMS_CREATE_ONLY=verified` (19 bindings). Includes the v2 streaming FIRMS pipeline, `/admin/probe/r2-conditional` and the header-only parser fix. **Rollback = delete `FIRMS_PIPELINE`** (tested). Do not redeploy unchanged 0.5.3: nightly parser bug. |
 | **D1** | **+ 5 `firms_*` tables + 3 indexes (6 Nov 19:59:43–20:00:03 UTC, FIRMS v2 state).** 9 history tables + 8 indexes **+ `archive_checkpoint_coverage` (empty) + index `collector_runs_layer_finished`** (both created 6 Nov 05:37 UTC, live = `2ee3a62` schema). |
 | **History** | ON since 5 Nov 10:21 UTC — keep on. First midnight checkpoint (5 Nov) completed; **fires part is partial** (input 15:30 UTC: the 4 MB guard skipped 15:45–23:45). Details STATUS. |
@@ -26,7 +26,8 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 3d. ~~FIRMS memory v2 rollout~~ **CLOSED 8 Nov** (stage 6 passed, GPT accepted; merged `0891d13`). Left open by decision:
    - the bounded empty-input retry (refining it needs its own review);
    - raising the 8 MiB guard (a separate decision; bench: v2 completed 16/32/64 MiB within 64 MB in a bench copy);
-   - the GIBS backdrop fix (a page change after Chad's go; recommendation NOAA-21 first).
+   - ~~the GIBS backdrop fix~~ **NOAA-21 switch RELEASED 8 Nov** (`3375e91`); a measured fallback rule stays a separate proposal (hub work, own review and go); real-phone check outstanding.
+   - place-ui harness: 2 pre-existing failures (its fake R2 lacks `head()`, used by hub 0.6.0) — a small test-only fix, not yet done.
 4. ~~Drifter first full day~~ **6 Nov: 17,915 rows / 1,302 buoys / ≈2.1 MB content** (STATUS 7 Nov).
 4b. **Drifter first full day (6 Nov)** — rows/day + bytes after 00:30 UTC 7 Nov (the 5 Nov partial-day estimate ~23,700/day is provisional).
 5. ~~Plastic's first archived version~~ **arrived 6 Nov 06:08 UTC.**

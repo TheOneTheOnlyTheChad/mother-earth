@@ -62,6 +62,10 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
   - Same day, 6 Nov: NOAA-21 (`VIIRS_NOAA21_CorrectedReflectance_TrueColor`) 16.9% overall / 3.3% in 30°S–30°N; Suomi NPP 100% black (NASA: SNPP stopped delivering new data 2 Nov 2026, 15:40 UTC — https://www.earthdata.nasa.gov/news/blog/transitioning-from-suomi-npp-noaa-20-noaa-21-what-lance-users-need-know).
   - NASA's active VIIRS processing-delay alert (Level-0 gaps from 27 Oct; all three satellites; resolution TBD — https://www.earthdata.nasa.gov/data/alerts-outages/viirs-processing-delay) does not name GIBS layers; cause not established.
   - FIRMS (same satellite) shows a late-arriving 6 Nov (R11). Options (switch to NOAA-21; or a measured completeness rule) are proposals only, after FIRMS stage 6 and Chad's go.
+- **8 Nov 2026: the page backdrop switched to `VIIRS_NOAA21_CorrectedReflectance_TrueColor`** (main `3375e91`, Chad's Approve line; review `reviews/2026-11-08-gibs-noaa21.md`).
+  - Measured 8 Nov: NOAA-21 had far fewer near-black pixels for 6–7 Nov (30°S–30°N: 3.3% / 0.2% vs NOAA-20 25.8% / 8.0%), but more for 4–5 Nov (6.2% / 37.0% vs 0.1% / 13.2%). This improves the current images; it does not guarantee completeness.
+  - The page credits "NASA GIBS, VIIRS NOAA-21 true colour" and says dark areas may reflect insufficient sunlight or unavailable imagery, with the cause not established.
+  - Same terms (LANCE/GIBS open). A measured fallback rule stays a separate proposal.
 
 ## NSIDC — Sea Ice Index v4 (G02135), daily extent + 1981–2010 climatology, NOAA mirror
 - **Read:** 30 Oct 2026 by Claude — directory listing and file headers at https://noaadata.apps.nsidc.org/NOAA/G02135/ (open; no Earthdata login).
