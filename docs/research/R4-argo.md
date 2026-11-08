@@ -1,8 +1,8 @@
 # R4 — Argo ocean profiles (temperature, salinity, pressure) — first research gate
 
 **Gate:** first gate only. **Research only** — no implementation, collector, schedule, deployment, page change, purchase or third-party contact. Written 6 Nov 2026 for Chad's review.
-**Status: core T/S/P numerical feasibility verified; reuse explicit with an acknowledgment request; automated-access terms unresolved — not integration clearance.**
-**Rev 5 (8 Nov 2026): bounded terms/access review, §12 — for GPT; pastes pending; still parked for building.**
+**Status: core T/S/P numerical feasibility verified; reuse under CC BY 4.0 on the dataset's DOI record; automated access offered (rsync, AWS sync), no numerical cadence/load limit found — not integration clearance.**
+**Rev 6 (8 Nov 2026): terms/access review §12, corrected after GPT's review of rev 5; Chad's pastes pending; REGISTER unfiled; still parked for building.**
 **PARKED 6 Nov 2026 (Chad, after GPT's review) — first-gate handover, rev 2.** No implementation clearance; any next gate needs Chad's separate go.
 **Independent check:** GPT independently inspected both preserved NetCDF files — sizes and full sha256 match, and the core numerical findings hold (including the corrected QC counts and error values in §3). **GPT has not reproduced** the compact payload sizes (§7), the pressure-to-depth calculation (§6) or the directory-history checks (§5); those are Claude's only.
 **Rev 2 corrections (GPT review, adopted):** delayed-mode QC counts (§3); error fields described as source-supplied adjusted-value error estimates, not constant (§3); timestamp resolution per field and file (§2, §4); revision claims narrowed (§5); profile identity provisional + no silent fallback to raw (§4, §5); citation uses the general DOI (§8); volume figure dated 2024 (§7).
@@ -166,7 +166,7 @@ Research only; read-only fetches from the Coriolis GDAC and primary documents (1
 ### 11.1 Access terms
 - **Verified (Registry of Open Data on AWS, Euro-Argo managed):** the GDAC copy on S3 (`argo-gdac-sandbox`, eu-west-3, no sign-in) is listed as "Open data, there are no restrictions on the use of this data", licence **CC BY 4.0** (so its attribution condition applies to that copy), updated daily, with a citation including "accessed on DATE" and DOI `10.17882/42182`. **This applies to the AWS copy only; it establishes nothing about Coriolis's automated-access or request limits.**
 - **Coriolis HTTPS server:** no terms page, rate limit or `robots.txt` (404) found; the 2017 readme carries only the acknowledgment request.
-- *Interpretation:* reuse is supported by three separate statements (argo.ucsd.edu, the Coriolis readme, and — for the AWS copy — CC BY 4.0); each distribution's terms stay separate. **Still open:** an explicit automated-access/rate policy for `data-argo.ifremer.fr` and US GODAE; the SEANOE landing page could not be opened with my tools. Not integration clearance.
+- *Interpretation:* reuse is supported by three separate statements (argo.ucsd.edu, the Coriolis readme, and — for the AWS copy — CC BY 4.0); each distribution's terms stay separate. **Still open:** an explicit automated-access/rate policy for `data-argo.ifremer.fr` and US GODAE; the SEANOE landing page could not be opened with my tools. Not integration clearance. *(Superseded 8 Nov by §12.)*
 
 ### 11.2 Error interpretation
 - **Verified (Argo QC manual for CTD and trajectory data, v3.9, Feb 2025, doi 10.13155/33951):**
@@ -207,66 +207,72 @@ Research only; read-only fetches from the Coriolis GDAC and primary documents (1
 5. Arrival rates, update events and longer-term volume — recompute from a preserved, hashed index with a saved script before any sizing.
 6. Independent reproduction of §11.3–§11.4.
 
-## 12. Terms and access review (rev 5, 8 Nov 2026, Chad's go: bounded, read-only, R4 only)
-**Scope:** only the existing terms/access questions (§8 "Not found", §10.1, §11.1, §11.5.1). No new sampling, no data files fetched, no provider contact, no implementation, resources or production change. R2, R3 and R6 not touched. **Terms clarification alone does not clear R4 for building**; the non-terms open items (§11.5.2–6) are untouched by this pass.
-**Method and its limit:** pages read 8 Nov 2026 with Claude's web-fetch tool. That tool returns a summary that includes quotations, not the raw page. **Every quotation below is therefore provisional until Chad's paste confirms it** (§12.4); none is filed in REGISTER yet.
+## 12. Terms and access review (rev 6, 8 Nov 2026; Chad's go: bounded, read-only, R4 only)
+**Scope:** only the existing terms/access questions (§8 "Not found", §10.1, §11.1, §11.5.1). No new sampling, no data files fetched, no provider contact, no route selection, no implementation, resources or production change. R2, R3 and R6 not touched. **Terms clarification alone does not clear R4 for building.** The non-terms gates (§11.5.2–6, §10.6) and all parked/stopped decisions are unchanged.
+**Rev 6 (GPT's review of rev 5 at `5b33a52`, adopted):** automated access is evidenced (rsync, AWS sync); only a numerical cadence/load limit is unfound (§12.2). Licence scope is reassessed through SEANOE's link to the GDAC; missing per-file wording is not a separate blocker (§12.3). Sextant fields corrected (§12.1 T2). Attribution follows CC BY 4.0 in full (§12.6). Evidence status per page now distinguishes GPT's reading from Chad's required confirmation (§12.1).
+**Evidence status labels:** *Claude (fetch summary)* = read with Claude's web-fetch tool, which returns a summary with quotations, not the raw page · *GPT (read)* = GPT independently inspected the official page, 8 Nov 2026 · *Chad (paste)* = the operative sentence pasted by Chad, which REGISTER requires. **No row has a Chad paste yet; REGISTER stays unfiled.**
 
 ### 12.1 What was read (official pages)
-| # | Page (owner) | What it says on terms/access (provisional quotation) | Applies to |
-|---|---|---|---|
-| T1 | SEANOE DOI landing page, [doi 10.17882/42182](https://seanoe.org/data/00311/42182) (SEANOE / Ifremer) | Licence section shows **the CC BY icon linking to `creativecommons.org/licenses/by/4.0/`** (an icon and link, no licence wording; checked by a second fetch). Files "Open access". Asks users to acknowledge Argo "preferably with the DOI", with the standard sentence beginning "These data were collected and made freely available by the international Argo project". Citation form: "Argo (2026). Argo float data and metadata from Global Data Assembly Centre (Argo GDAC). SEANOE." **No statement on automated download or rate limits.** | The DOI record (the dataset as published on SEANOE, incl. monthly snapshots). **New:** in rev 3 this page "could not be opened". |
-| T2 | Ifremer catalogue (Sextant) ISO record for the same dataset, [record 3df904de…](https://sextant.ifremer.fr/geonetwork/srv/api/records/3df904de-e47d-4bf9-85a0-7c0942aff8b6), revised 18 Dec 2025 | "No limitations on public access" appears beside the constraint labels; the page lists the labels without pairing them to values, so its field (most likely Other constraints) is **unconfirmed** (second fetch). Use limitation: the acknowledgment sentence + "A user of Argo data is expected to read and understand this manual…". **Access-constraint, use-constraint and licence fields empty.** Distribution links include `https://data-argo.ifremer.fr/` (GDAC), `ftp://ftp.ifremer.fr/ifremer/argo/`, Ifremer ERDDAP, and the DOI. | The GDAC dataset as catalogued by Ifremer, **including the HTTPS server we sampled**. |
-| T3 | Ifremer data-dissemination policy, *Instruction relative à la politique d'ouverture et de diffusion des données publiques de l'Ifremer*, ref. DG/2023.0550, 29 Dec 2023 ([PDF](https://data-sismer.ifremer.fr/rda_wcs_coretrustseal/Instruction%20PDG%202023-0550%20Politique%20de%20diffusion%20des%20donn%c3%a9es.pdf)) | Access and reuse of data "libres et gratuits" (free, no charge); public data reusable by anyone "quelle que soit la finalité d'usage" (whatever the purpose); reuse carries "une obligation de mention de la source et de la date de dernière mise à jour" (credit the source and the date of last update); access "toujours dans les limites des possibilités techniques de l'administration" (within the administration's technical capacity). Scope: Ifremer public data "produit ou reçu"; unvalidated, unprocessed data fall outside the open-data scope. **No rate-limit or automated-access rule.** | Ifremer's public data in general — **whether it governs the Argo GDAC files is Interpretation (§12.2)**. |
-| T4 | Argo, [Data from GDACs](https://argo.ucsd.edu/?p=1826) (argo.ucsd.edu) | "For users interested in using the official Argo NetCDF files, the GDACs should be the route to access Argo data." Offers **rsync synchronisation** (server `vdmzrs.ifremer.fr`, module `argo/`, examples for one float or the whole `dac` folder). Only terms text: "Please make sure to cite Argo data properly." **No licence, restriction or rate limit.** | Access routes (programme guidance). |
-| T5 | [Registry of Open Data on AWS](https://registry.opendata.aws/argo-gdac-marinedata/) (re-read) | "Open data, there are no restrictions on the use of this data", licence CC BY 4.0, "Data is updated daily", managed by Euro-Argo, bucket `argo-gdac-sandbox` (eu-west-3). **No usage limits stated.** Same as §11.1. | The AWS copy only. |
-| T6 | [IOC Assembly Resolution XX-6](https://argo.ucsd.edu/wp-content/uploads/sites/361/2021/09/IOC-ASSEMBLY-RESOLUTION-XX-6.pdf) "The Argo Project" | Float data and derived products "will be freely available in real-time and delayed mode". | Programme policy (states/implementers). |
-| T7 | [IOC Resolution EC-XLI.4](https://argo.ucsd.edu/wp-content/uploads/sites/361/2024/10/Resolution_EC-XLI_4-en.pdf) (guidelines for floats in the high seas) | Data from floats once in an EEZ are made freely available, "with the exception of data of direct significance for the exploration and exploitation of natural resources". | Obligations on float implementers and coastal states. *Interpretation:* not a condition on users of GDAC data; recorded so GPT can judge. |
-| T8 | [Euro-Argo data selection website policies](https://euro-argo.eu/PoliciesEADS), last modified 29 Nov 2024 | CC BY 4.0 for content of `dataselection.euro-argo.eu`; personal, free, non-exclusive right to use **that website**; no rate rules. | The selection website only, **not the GDAC**. Not our route. |
+| # | Page (owner) | What it says on terms/access | Applies to | Evidence status |
+|---|---|---|---|---|
+| T1 | SEANOE DOI landing page, [doi 10.17882/42182](https://seanoe.org/data/00311/42182) (SEANOE / Ifremer) | Licence section: the CC BY icon linking to `creativecommons.org/licenses/by/4.0/` (icon + link, no licence wording). Files "Open access". Acknowledgment requested "preferably with the DOI", standard sentence "These data were collected and made freely available by the international Argo project and the national programs that contribute to it." Citation form "Argo (2026). Argo float data and metadata from Global Data Assembly Centre (Argo GDAC). SEANOE." **Links `data-argo.ifremer.fr` as additional access to the dataset** (GPT; Claude's summary also lists a GDAC site among the access routes). No numerical rate or cadence limit. | The GDAC dataset, incl. the access routes it links (§12.3) | Claude (fetch summary) · GPT (read) |
+| T2 | Ifremer catalogue (Sextant) ISO record, [3df904de…](https://sextant.ifremer.fr/geonetwork/srv/api/records/3df904de-e47d-4bf9-85a0-7c0942aff8b6), revised 18 Dec 2025 | **Access constraints: "Other restrictions"** · **Other constraints: "No limitations on public access"** · **Use constraints: empty** (field pairing as rendered, resolved by GPT; rev 5 wrongly said access constraints were empty). **Use limitation (kept separately):** the acknowledgment sentence, and "A user of Argo data is expected to read and understand this manual" and the NetCDF attribute documentation "as these contain essential information about data quality and accuracy". Distribution links include GDAC `https://data-argo.ifremer.fr/`, `ftp://ftp.ifremer.fr/ifremer/argo/`, Ifremer ERDDAP, the DOI. | The GDAC dataset as catalogued by Ifremer | Claude (fetch summary) · GPT (read, field pairing) |
+| T3 | Argo Data Management, [Data Access](https://www.argodatamgt.org/DataAccess.html) | **Explicitly offers Ifremer rsync and AWS synchronisation, with examples for floats and for index files** (GPT). No numerical rate or cadence limit found. | Access routes (programme guidance) | GPT (read) · Claude could not open it (tool allowlist) |
+| T4 | Argo, [Data from GDACs](https://argo.ucsd.edu/?p=1826) | "For users interested in using the official Argo NetCDF files, the GDACs should be the route to access Argo data." rsync server `vdmzrs.ifremer.fr`, module `argo/`, examples for one float and the whole `dac` folder. Terms text only "Please make sure to cite Argo data properly." | Access routes | Claude (fetch summary) |
+| T5 | US GODAE Argo page and its linked disclaimer | GPT has read both. The disclaimer contains a **general public-domain statement with its own scope and exceptions**. **That general statement is not used here to override dataset-specific terms** (T1, T2). Its exact scope and exceptions are to be preserved verbatim from Chad's paste (§12.5, S3), not paraphrased here. No numerical rate or cadence limit reported. | The US GODAE server only, within the disclaimer's own scope | GPT (read) · Claude could not open it (tool allowlist) |
+| T6 | Ifremer data-dissemination policy, ref. DG/2023.0550, 29 Dec 2023 ([PDF](https://data-sismer.ifremer.fr/rda_wcs_coretrustseal/Instruction%20PDG%202023-0550%20Politique%20de%20diffusion%20des%20donn%c3%a9es.pdf)) | **Provisional wording:** access and reuse "libres et gratuits"; reuse "quelle que soit la finalité d'usage"; "une obligation de mention de la source et de la date de dernière mise à jour"; access "dans les limites des possibilités techniques de l'administration"; unvalidated / unprocessed data outside the open-data scope. | Ifremer public data generally; **application to Argo GDAC files, and to real-time files in particular, is open** (§12.4) | Claude (fetch summary) only. **GPT has not verified it.** |
+| T7 | [Registry of Open Data on AWS](https://registry.opendata.aws/argo-gdac-marinedata/) | "Open data, there are no restrictions on the use of this data"; CC BY 4.0; updated daily; managed by Euro-Argo; bucket `argo-gdac-sandbox` (eu-west-3). | The AWS copy | Claude (fetch summary, 6 + 8 Nov) |
+| T8 | [IOC Resolution XX-6](https://argo.ucsd.edu/wp-content/uploads/sites/361/2021/09/IOC-ASSEMBLY-RESOLUTION-XX-6.pdf), [EC-XLI.4](https://argo.ucsd.edu/wp-content/uploads/sites/361/2024/10/Resolution_EC-XLI_4-en.pdf) | Data "freely available in real-time and delayed mode" (XX-6); EEZ guideline with an exception for data of direct significance to resource exploration/exploitation (EC-XLI.4). | Obligations on implementers and states, not conditions on GDAC users (Interpretation) | Claude (fetch summary); context only |
+| T9 | [Euro-Argo data selection website policies](https://euro-argo.eu/PoliciesEADS) | CC BY 4.0 and a personal-use right for that website's content. | The selection website only, not the GDAC; not a route considered | Claude (fetch summary); context only |
 
-**Not reachable with my tools (in the paste session, §12.4):** `argodatamgt.org/DataAccess.html` (the Argo Data Management access page that T4 points to for HTTPS/FTP/rsync/DOI details) and the US GODAE GDAC pages (`usgodae.org`); both refused by the fetch tool's allowlist. Previously read and unchanged: the Coriolis `readme_before_using_the_data.txt` (2017) and argo.ucsd.edu "Acknowledging Argo" (§8).
+Previously read and unchanged: Coriolis `readme_before_using_the_data.txt` (2017) and argo.ucsd.edu "Acknowledging Argo" (§8).
 
-### 12.2 What this changes, and what it does not
-- **Verified (provisional on paste):** the general DOI record carries an explicit **CC BY 4.0** licence (T1). Rev 3's "SEANOE landing page could not be opened" is closed.
-- **Verified (provisional on paste):** Ifremer's own catalogue record for the GDAC dataset, which lists the exact HTTPS server sampled on 6 Nov, says "No limitations on public access" and leaves access/use constraints empty (T2).
-- **Interpretation (open to challenge):** reuse, including commercial reuse, is supported **with attribution** by four separate statements: argo.ucsd.edu "freely available without restriction" (§8), the DOI record's CC BY 4.0 (T1), the AWS copy's CC BY 4.0 (T5), and Ifremer's "whatever the purpose" policy (T3). **The live HTTPS files themselves carry no licence statement**; CC BY 4.0 is stated on the DOI record and the AWS copy. Whether that licence governs files fetched live from `data-argo.ifremer.fr` is not stated anywhere read. Each distribution's terms stay separate (as in §11.1).
-- **Interpretation:** T3 applies to data Ifremer "produces or receives", which would include files it hosts from other DACs (e.g. AOML). But its open-data scope excludes unvalidated, unprocessed data, and **real-time (R) files carry only automated QC**. Whether Ifremer treats R files as inside that scope is **not stated**. This matters only if T3, rather than T1/T5, is relied on.
-- **Still not found anywhere: an automated-access or rate policy for the GDAC servers.** What exists instead: the programme recommends the GDACs for official files (T4); it offers rsync for synchronising whole folders (T4); and Ifremer conditions access on its "technical capacity" (T3). *Interpretation:* bulk, repeated synchronisation is an offered route, not a prohibited one. But **no written limit, cadence or courtesy rule exists**, so any later collector design states its own cadence and records that no limit was published. This is not a clearance.
-- **Attribution requirements now differ by distribution** (Interpretation): CC BY 4.0 (T1, T5) and Ifremer's CRPA rule (T3: source + date of last update) are conditions; argo.ucsd.edu's sentence is a **request**. A later register line would carry the acknowledgment sentence, the DOI, and the file's `DATE_UPDATE` (which also meets T3's "date of last update").
+### 12.2 Automated access
+- **Supported automated access has evidence.** The programme's Data Access page offers Ifremer rsync and AWS synchronisation, with examples for floats and for index files (T3, GPT). argo.ucsd.edu repeats the rsync route and names the GDACs as the route for official files (T4).
+- **Narrower open question:** **no numerical rate, cadence or load limit was found in the pages inspected** on 8 Nov 2026: SEANOE DOI landing (T1), Ifremer Sextant record (T2), Argo Data Management Data Access (T3), argo.ucsd.edu Data from GDACs (T4), US GODAE Argo page and disclaimer (T5), Ifremer policy DG/2023.0550 (T6; its "technical capacity" line is not a limit), AWS registry (T7). Earlier: Coriolis readme (2017) and the absent `robots.txt` (6 Nov, §11.1).
+- Which limits apply depends on the route a later design proposes; **no route is selected here.** Any later proposal states its cadence and load, and records that no numerical limit was found in these pages on this date.
 
-### 12.3 Remaining blockers (for GPT)
-**Terms/access (this pass):**
-1. **Paste confirmation** of every quotation in §12.1 (§12.4). Until then the register entry stays proposed.
-2. **Licence for the live HTTPS files.** CC BY 4.0 is stated on the DOI record and the AWS copy, not on the server. A route that inherits a stated licence exists: AWS (T5) or a monthly DOI snapshot (T1). Choosing a route is a later design decision, not made here.
-3. **No published automated-access/rate policy** for Coriolis or US GODAE (§12.2). Unresolved; recorded as "none published", not as "permitted without limit".
-4. **US GODAE terms unread** (allowlist), and the Argo Data Management access page unread (allowlist): both in the paste session.
-5. **Ifremer policy scope for real-time files** (§12.2), relevant only if T3 is relied on.
+### 12.3 Licence scope
+- **Assessment (Interpretation, open to challenge):** the CC BY 4.0 licence is attached to the **dataset** at its DOI record (T1). The same record links `data-argo.ifremer.fr` as additional access to that dataset, and Ifremer's catalogue record for the dataset lists the same server (T2). So the live GDAC files are a documented access route to the licensed dataset. **A licence need not be embedded in every NetCDF file, so missing per-file wording is not, by itself, a separate licensing blocker and does not call for switching routes.** (Rev 5's blocker 2 is withdrawn.)
+- **Scope uncertainty that remains explicit:**
+  - SEANOE's licence is shown as an icon and link, with no wording on the page; Chad's paste confirms the link target.
+  - Real-time (R) files on the live server change daily. Whether the record's licence statement is meant to cover the live, changing collection as well as the DOI snapshots is **not stated in words**. The record's linking of the live server is the evidence that it does. No statement read contradicts it.
+  - The US GODAE disclaimer's general public-domain statement (T5) is **not** used to override the dataset's CC BY terms; its scope and exceptions are preserved separately.
 
-**Unchanged by this pass (not terms; each needs its own go):** revisions in values (§11.5.3), identity across modes (§11.5.4), `_ADJUSTED_ERROR` confidence level (§11.5.2), scale from a preserved hashed index (§11.5.5), independent reproduction (§11.5.6), a compatible baseline (§10.6).
+### 12.4 Ifremer policy (T6): provisional
+- GPT has **not verified** the PDF. Its exact wording, and whether it applies to the Argo GDAC files, stay **provisional**.
+- **Real-time files:** the policy excludes unvalidated, unprocessed data from the open-data scope. **Automated QC alone does not settle what the policy means by "unvalidated"**, so whether R files fall inside or outside is open. It matters only if T6 is relied on; the licence evidence is T1.
 
-### 12.4 Paste session for Chad (one sitting, ~10 min; Chad at the screen)
-Open each page and paste the sentence(s) named; Claude files them verbatim with the date read.
-1. **SEANOE** <https://seanoe.org/data/00311/42182>: what the Licence section shows (icon/link and any words; hover the icon), and the full acknowledgment sentence ("These data were collected and made freely available by…").
-2. **Sextant** (T2 link): the "No limitations on public access" line, and which label it sits under.
-3. **Argo Data Management, Data Access** <https://www.argodatamgt.org/DataAccess.html>: any sentence on terms, licence, limits or rsync/HTTPS use (or "none on the page").
-4. **US GODAE GDAC** (via the US GDAC link on that page): any terms, usage or system notice (or "none").
-5. **Ifremer policy DG/2023.0550** (T3 PDF): the "libres et gratuits" sentence and the "mention de la source" sentence.
-6. **AWS registry** (T5 link): the License line.
-7. **Acknowledging Argo** <https://argo.ucsd.edu/data/acknowledging-argo/>: the "freely available without restriction" sentence.
+### 12.5 Paste pack for Chad (shortest for the REGISTER rule; Chad at the screen, ~5 min)
+**Required licence evidence (REGISTER can't be filed without it):**
+- **R1. SEANOE** <https://seanoe.org/data/00311/42182>: (a) the Licence section: hover the icon and paste where it links; (b) the acknowledgment sentence; (c) the line that links `data-argo.ifremer.fr` (as shown on the page).
 
-### 12.5 Proposed REGISTER entry (NOT filed; pending §12.4 and GPT)
+**Supplementary policy evidence (strengthens the entry; not the licence):**
+- **S1. Sextant** (T2 link): the Access constraints, Other constraints and Use limitation lines as rendered.
+- **S2. Argo Data Management, Data Access** <https://www.argodatamgt.org/DataAccess.html>: the sentence(s) offering rsync and AWS synchronisation.
+- **S3. US GODAE disclaimer** (via the US GODAE Argo page): its public-domain sentence **with its scope and exceptions**, in full.
+- **S4. Ifremer policy DG/2023.0550** (T6 PDF): the "libres et gratuits" sentence, the "mention de la source" sentence, and the sentence excluding unvalidated data.
+
+### 12.6 Proposed REGISTER entry (NOT filed; pending R1, the supplementary pastes and the corrected review)
 ```
-## Argo GDAC — core profile files (T/S/P), Coriolis GDAC + DOI 10.17882/42182 — ⚠️ PROPOSED, research only, not on the page
-- **Read:** 8 Nov 2026 by Claude (web-fetch summaries) + Chad's pastes [date]: SEANOE DOI landing; Ifremer Sextant ISO record 3df904de…; Ifremer DG/2023.0550; argo.ucsd.edu Data from GDACs + Acknowledging Argo; AWS Registry; Argo Data Management Data Access; US GODAE [pending].
-- **Licence (verbatim, SEANOE DOI record):** [paste 1]
-- **Access (verbatim, Ifremer Sextant record):** [paste 2]
-- **Reuse (verbatim, Ifremer policy DG/2023.0550):** [paste 5]
-- **Programme statement (verbatim, argo.ucsd.edu):** [paste 7]
-- **AWS copy (verbatim):** [paste 6]
-- **Attribution:** acknowledgment sentence [paste 1] + DOI 10.17882/42182 (or the monthly snapshot DOI if a snapshot is used) + the file's DATE_UPDATE.
-- **Automated use:** no automated-access or rate policy published for the GDAC servers (Coriolis, US GODAE [paste 3/4]); rsync offered by the programme for synchronisation; Ifremer access "within technical capacity". Any collector states its own cadence. Not assumed unlimited.
-- **Coverage statement:** none filed (R4 research gates open: revisions, identity, error confidence, scale).
+## Argo GDAC — core profile files (T/S/P), Coriolis GDAC, dataset DOI 10.17882/42182 — ⚠️ PROPOSED, research only, not on the page
+- **Read:** 8 Nov 2026 by Claude (web-fetch summaries) and GPT (official pages); Chad's pastes [date]. Pages: SEANOE DOI landing; Ifremer Sextant ISO record 3df904de…; Argo Data Management Data Access; argo.ucsd.edu Data from GDACs; US GODAE Argo page + disclaimer; Ifremer DG/2023.0550 (provisional); AWS Registry.
+- **Licence (verbatim, SEANOE DOI record):** [R1a] — CC BY 4.0, https://creativecommons.org/licenses/by/4.0/
+- **Licence scope:** licence on the dataset's DOI record, which links data-argo.ifremer.fr as additional access [R1c]; not embedded per file (not required). Whether it is meant for the live, changing collection as well as DOI snapshots is not stated in words; the record's link to the live server is the evidence.
+- **Access (verbatim, Ifremer Sextant):** [S1: Access constraints / Other constraints]
+- **Use limitation (verbatim, Ifremer Sextant):** [S1: use limitation, incl. read-the-manual and NetCDF attributes]
+- **Automated access:** supported routes offered by the programme: Ifremer rsync and AWS synchronisation, incl. floats and index files [S2]. No numerical rate/cadence/load limit found in the pages listed above (8 Nov 2026). Any collector states its own cadence and load.
+- **US GODAE:** disclaimer [S3, with its scope and exceptions]; not used to override the dataset's CC BY terms.
+- **Ifremer policy (provisional):** [S4]; application to real-time files open.
+- **Attribution (CC BY 4.0 + the source's request), on the page with any shown profile:**
+  - credit: [R1b acknowledgment sentence] (Argo / the international Argo project and contributing national programs);
+  - licence: CC BY 4.0, linked to https://creativecommons.org/licenses/by/4.0/;
+  - dataset link: https://doi.org/10.17882/42182 (or the monthly snapshot DOI if a snapshot is used);
+  - modifications, where applicable: e.g. "Primary profile selected and reformatted by Mother Earth; values not altered" (exact wording to match what is done);
+  - per profile: float WMO, cycle, DATA_MODE, the file's DATE_UPDATE and retrieval time (DATE_UPDATE also meets the Ifremer policy's "date of last update", provisional).
+- **Coverage statement:** none filed (R4 non-terms gates open: revisions, identity, error confidence, scale, baseline).
 - **Status:** ⛔ research only; terms clarified, NOT cleared for building.
-- **Commercial use:** with attribution — CC BY 4.0 stated on the DOI record and the AWS copy; live HTTPS files carry no licence statement of their own (not assumed to inherit).
+- **Commercial use:** with attribution — CC BY 4.0 on the dataset (DOI record), which links the GDAC server as an access route.
 ```
 
 ## Sources

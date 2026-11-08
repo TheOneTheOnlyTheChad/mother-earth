@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~14:15 UTC — **R4 terms review rev 6 (GPT's review of `5b33a52` adopted; docs only)** — `docs/research/R4-argo.md` §12
+- GPT independently inspected the official sources: useful bounded progress; **no building clearance**.
+- Corrections: (1) automated access is evidenced (Data Access page offers Ifremer rsync and AWS sync, incl. floats and indexes); the open point is **no numerical rate/cadence/load limit found in the pages inspected** (named, dated). (2) Licence scope: CC BY 4.0 on the DOI record, which links `data-argo.ifremer.fr` as additional access; missing per-file wording is not a separate blocker; live-collection scope uncertainty kept explicit. (3) Sextant: Access constraints "Other restrictions", Other constraints "No limitations on public access", Use constraints empty; use limitation kept separately. (4) Attribution per CC BY 4.0: credit, licence link, DOI/dataset link, modifications where applicable. (5) Evidence status per page: GPT read Data Access + US GODAE (disclaimer's scope/exceptions preserved, not used to override dataset terms); Ifremer policy PDF unverified by GPT, provisional, incl. its application to real-time files.
+- Paste pack cut to 1 required (SEANOE) + 4 supplementary. REGISTER unfiled. Non-terms gates and parked/stopped decisions unchanged.
+
 ## 8 Nov ~13:30 UTC — **R4 Argo terms/access review rev 5 (read-only; Chad's go, R4 only)** — `docs/research/R4-argo.md` §12, for GPT
 - Read 8 official pages (web-fetch summaries, so quotations are provisional until Chad pastes them). No data files, sampling, provider contact, implementation, resource or production change. R2, R3, R6 not touched.
 - **New:** the general DOI record (SEANOE 10.17882/42182) states **CC BY 4.0**; Ifremer's catalogue record for the GDAC (listing `data-argo.ifremer.fr`) says "No limitations on public access"; Ifremer policy DG/2023.0550 allows reuse for any purpose with source + last-update date credited.
