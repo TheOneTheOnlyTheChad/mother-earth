@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~15:50 UTC — **R3 Earth rotation terms/access review rev 3 (read-only; Chad's go, R3 only)** — `docs/research/R3-earth-rotation.md` §9, for GPT
+- Evidence separated into reuse/commercial, attribution, automated-access guidance and numerical limits; evidence, interpretation and unanswered questions kept apart. No data fetched, no provider contact, no route selection, no implementation.
+- Read 8 Nov (Claude fetch summaries): NASA Earthdata data-use guidance (non-NASA data via CDDIS follow the sponsoring organisation's terms); USNO AA and navy.mil notices ("public information… unless otherwise specified"), **scoped to their own sites, not extended to `maia`**; an IAG/GGOS post on the IERS site relaunch (secondary).
+- **No numerical rate/cadence/load limit found** in the pages inspected (≠ unlimited).
+- **Pending extraction (Claude's tools refused by allowlist):** IERS data-centre EOP page, IERS legal/terms, USNO `maia` site notice (required); data-centre metadata and USNO FAQ (supplementary). GPT may extract on Chad's behalf. No REGISTER entry drafted until then.
+- Mac sync rule added to START-HERE §3: preserve differing destination copies before overwriting; report differences; a post-copy hash match proves nothing about earlier local edits.
+
 ## 8 Nov ~15:15 UTC — **R4 Argo: terms round CLOSED; REGISTER entry FILED** (docs only; Chad: "Approve: make these documentation corrections and file the corrected Argo REGISTER entry")
 - **GPT's review of rev 7:** accepted the dataset-level CC BY evidence and GDAC linkage, supported synchronisation routes, the narrowly stated absence of a numerical limit, the attribution plan and the preserved non-terms gates. S4 (Ifremer policy) supplementary, not needed while not relied on.
 - **Rev 8 corrections:** provenance throughout = "GPT independently read/extracted the evidence; Chad delegated extraction and relayed the packet" (Chad did not personally inspect the pages); §12.4's Ifremer exclusion now stated as Claude's unverified fetch summary, unestablished, not relied on; §§8, 10.1, 11.1, 11.5.1 marked historical, superseded by §12.
