@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov 07:58:25 UTC — **HUB 0.6.1 DEPLOYED** (Chad: "Approve: deploy hub 0.6.1 from 86134b8 (content only)")
+- **What:** `phase1/worker.js` from `kp-degraded` @ `86134b8`.
+  - sha256 `f38296a0183d14d958d5815d7926254cb4275be7ca00b384334974fad5b12cc8`, checked in the pane from raw.githubusercontent before upload.
+  - Content-only API from the dashboard pane, HTTP 200, etag `b231d47a…`. Claude's upload passed on the Approve line.
+- **Verified (read-only, pane):**
+  - read-back worker.js part sha256 = `f38296a0…` (exact);
+  - `/` = **0.6.1**, history collecting;
+  - health **8/8** (07:59:01; baseline 07:57:58 on 0.6.0 also 8/8);
+  - **19 bindings unchanged**; variables as before (`FIRMS_PIPELINE=v2`, `FIRMS_CREATE_ONLY=verified`, `HISTORY_ENABLED=1`, …).
+- **Baseline before the deploy:** swpc `degraded` at 07:07 (value 03:00 UTC, 4.1 h past its interval start: the false signal being fixed).
+- **Pending:** first 0.6.1 swpc run (08:07 UTC) and the other layers' first runs; then the live RC check of the page against 0.6.1.
+- **Rollback** = redeploy 0.6.0 (`ac173d8a…`, = main's worker.js), with an Approve line. **main is now behind the live hub** until `kp-degraded` is merged (the page release).
+
 ## 8 Nov ~09:40 UTC — **GPT technical sign-off: `kp-degraded` @ `86134b8`**
 - Independently verified by GPT:
   - kp-degraded 29/29 and health-hub 29/29;
