@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~14:45 UTC — **R4 terms review rev 7: Chad's pastes filed (docs only)** — `docs/research/R4-argo.md` §12.5–12.6
+- **R1 (required, SEANOE, checked 8 Nov):** Licence section links to CC BY 4.0; acknowledgment sentence verbatim; additional-access GDAC link to `https://data-argo.ifremer.fr/`.
+- **S1 Sextant** (field values verbatim; use-limitation paragraph a summary) · **S2 Data Access** ("The synchronization service is available from Ifremer 'rsync' and from 'aws s3 sync'.") · **S3 US GODAE disclaimer** (public-domain sentence with "unless otherwise specified" preserved; not used to override dataset terms).
+- **S4 Ifremer policy: PENDING, unverified.** Recorded URL 404; corrected filename `R2-D1-Instruction PDG 2023-0550 …pdf` (GPT); no readable text yet. The provisional French quotations are not filed as verified.
+- Proposed REGISTER entry updated from the pastes; **not filed**. No route selection, build clearance or other research.
+
 ## 8 Nov ~14:15 UTC — **R4 terms review rev 6 (GPT's review of `5b33a52` adopted; docs only)** — `docs/research/R4-argo.md` §12
 - GPT independently inspected the official sources: useful bounded progress; **no building clearance**.
 - Corrections: (1) automated access is evidenced (Data Access page offers Ifremer rsync and AWS sync, incl. floats and indexes); the open point is **no numerical rate/cadence/load limit found in the pages inspected** (named, dated). (2) Licence scope: CC BY 4.0 on the DOI record, which links `data-argo.ifremer.fr` as additional access; missing per-file wording is not a separate blocker; live-collection scope uncertainty kept explicit. (3) Sextant: Access constraints "Other restrictions", Other constraints "No limitations on public access", Use constraints empty; use limitation kept separately. (4) Attribution per CC BY 4.0: credit, licence link, DOI/dataset link, modifications where applicable. (5) Evidence status per page: GPT read Data Access + US GODAE (disclaimer's scope/exceptions preserved, not used to override dataset terms); Ifremer policy PDF unverified by GPT, provisional, incl. its application to real-time files.
