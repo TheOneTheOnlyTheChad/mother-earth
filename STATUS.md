@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~08:30 UTC — **Kp/degraded fix rev 2 on `kp-degraded` @ `0513aa7`** (after GPT's independent review of `67140b0`; NOT merged, NOT deployed)
+- **GPT verified on `67140b0`:** kp-degraded 21/21, health-hub 29, history-hub 27, firms-guard 19, firms-v2 57+7 skipped, ships-late 7, the old-rule break, syntax/module load and the worker hash. GPT stopped ships-fallback early; no result claimed. Other browser regressions remain Claude-supplied.
+- **Fixed per GPT:**
+  1. Invalid or future Kp timestamps leaked into the card and summary. `ME.kpWhen` now guards interval + age together: "interval time unknown — …" or "timestamp later than our clock". Tested on the real readings/report output.
+  2. A missing USGS generation time was described as expired. It now has its own reason, `feed_age_unknown` (still degraded), with unknown-age wording, plus a collector-to-page test.
+  3. Ships rounding hid the condition (76 s → "1 min", 89.9% → "90%"). Now seconds with limit-aware precision, the percentage rounded down, and "below our 90% standard"; cloud and Mac both tested at the boundaries.
+  - Also: exact 300 s / 301 s skew boundary tests. The withdrawn "source on schedule" claim is removed from the worker comment; the synthetic-ages test is renamed (not a replay of the 102 runs).
+- **Tests:** kp-degraded 28/28.
+  - Breaks: `67140b0` → 10 fail; main's app.js → 13 fail; old rule → 8 fail.
+  - All regressions pass except the known place-ui 28/30.
+- **Policy (GPT):** 7.5 h = a provisional Mother Earth policy, not a NOAA deadline; 5 min = an explicit skew tolerance. Release order: hub → live RC check → separately approved page.
+- **Next:** GPT re-review of `0513aa7` → `Approve: deploy hub 0.6.1 from 0513aa7 (content only)`.
+
 ## 8 Nov ~07:45 UTC — **Kp/degraded fix built on branch `kp-degraded` @ `67140b0`** (Chad's go; NOT merged, NOT deployed) — review `reviews/2026-11-08-kp-degraded-fix.md` (on the branch)
 - **Hub 0.6.1:**
   - `kpStatus`: degraded at ≥ 7.5 h past the interval start (provisional); invalid or future `time_tag` → degraded with its own reason.
