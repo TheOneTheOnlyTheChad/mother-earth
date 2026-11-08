@@ -1,10 +1,10 @@
-# Mother Earth — handover (8 Nov 2026 ~12:30 UTC, end of the Kp / smoke-test thread)
+# Mother Earth — handover (8 Nov 2026 ~17:10 UTC, end of the backlog thread; main `692455a`)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.** This thread's full record is STATUS 8 Nov.
 
 **Access (Chad, 4–5 Nov):** full access — GitHub (push), Cloudflare, Space-Track, the Mac's Mother Earth folder and `~/mother-earth`, browser pane. Chad enters secrets himself; Claude never creates accounts. **Every deploy, schedule or variable change, D1 schema change and push to main that changes the public page needs Chad's explicit go.** Production deploy clicks are Chad's (§3). **Say up front whenever Chad must be at the screen with the app in front** (standing rule). **Production approvals (thread 16): the session's auto-mode safety check lets a production action through only when Chad's message names that exact action — a bare "go" is not enough. So end any message that needs a production action with a ready line, e.g. `Approve: deploy hub commit <sha> (content only)` or `Approve: copy <files> into R2 recovery/`, and Chad replies with it.** Non-production work: "go" is fine. GPT reviews; approvals are Chad's. Not Overwatch: presentation lessons only. No surveillance, ever.
 
-## 0. Live state (8 Nov ~12:30 UTC; **main = live**)
+## 0. Live state (unchanged since 12:30 UTC 8 Nov; **main = live**; the backlog thread made docs-only commits, no production change)
 | | State |
 |---|---|
 | **Page** | main `ad4002b`+ (docs since), assets **`?v=202611151000`**. Released 8 Nov 08:11:22 UTC: Kp shown as an interval; honest "degraded" wording (our rule named, never "the source flagged"). Before that: `3375e91` GIBS backdrop NOAA-21 (05:07:54 UTC). Served hashes verified (index `b9d4649e1ac6`, app `e3f4a3854113`, sources `7d66228f07b8`, style `e4c9547d99bf`). |
@@ -23,7 +23,31 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 - **Claude, 11:53–12:06 UTC:** noon rollover PASS on fresh loads (06 → 7 Nov). An already-open page keeps its date until reloaded (current behaviour). GPT independently confirmed the post-noon state.
 - **Still open:** real-phone / Safari test; browser HTTP status codes. **No degraded path has been seen live:** no layer was degraded and GPT did not inject state; the wording rests on the reviewed tests (kp-degraded 29/29).
 
-## 1. Next (for the new thread: the backlog)
+## 1. Next (from the backlog thread, 8 Nov ~17:10 UTC)
+**Production unchanged all thread** (hub 0.6.1, page `ad4002b` assets `?v=202611151000`, health 8/8 at last read). Every commit since `114f9f5` is docs/evidence only.
+
+**Where each backlog item stands (details in STATUS 8 Nov, newest first):**
+| Item | State | Doc |
+|---|---|---|
+| R4 Argo terms | **CLOSED; REGISTER entry FILED** (Chad's Approve line, after GPT). CC BY 4.0 on the dataset DOI record (links the GDAC); rsync / `aws s3 sync` supported; no numerical limit found (≠ unlimited). Technical gates open. | `docs/research/R4-argo.md` §12 |
+| R3 Earth rotation terms | Rev 4 + research-only REGISTER draft, **not filed**; commercial use UNRESOLVED. **Chad emailed `eopcp@us.navy.mil` 8 Nov — reply pending; no permission inferred from sending or silence.** No follow-up without Chad's go. | `docs/research/R3-earth-rotation.md` §9 |
+| R6 ozone terms | Rev 5; GPT accepted the research-only REGISTER draft as an **unresolved evidence record — not filed, not authorised**. | `docs/research/R6-ozone.md` §9 |
+| R2 fireballs terms | **Rev 2 awaiting GPT's review** (SSD FAQ public-domain statement corroborated by GPT; reach to the API = interpretation; lightcurve files not established; research-only REGISTER draft, not filed). Identity/validation gates open. | `docs/research/R2-terms-access.md` |
+| GIBS stage 1 bench | **CLOSED, accepted by GPT** (rev 2, `cca33e6`). PNG promising; no tie margin, byte cap or eligibility rule adopted; Worker CPU/memory/cost unverified. No shadow record authorised. | `reviews/2026-11-08-gibs-stage1-bench.md` |
+
+**Next, all on Chad's go:**
+1. GPT's review of R2 rev 2 → corrections if any; filing only on Chad's separate authorisation.
+2. Remaining backlog: new first gates (R5 coral, R7 tides, R10 solar flares); Phase 0 domain decision (rec. rev 3); GIBS beyond the bench (shadow record / implementation) each a separate decision.
+3. Still left open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
+
+**Learned this thread (keep):**
+- **Fetch summaries are leads, not evidence, for operative wording.** Twice Claude's web-fetch summaries were wrong on key text (SSD FAQ, R2 rev 1). Operative terms are filed only from a direct extraction (GPT's or Chad's), labelled with who read it.
+- **Provenance wording:** when GPT extracts on Chad's behalf, write "GPT independently read/extracted the evidence; Chad delegated extraction and relayed the packet" — never imply Chad read the page.
+- **"Not found" is bounded** to the named pages and date; no limit found ≠ unlimited; public release / credit request ≠ commercial permission.
+- **Mac sync preserves first** (START-HERE §3): differing destination files go to `_sync-preserved/<UTC>/` before overwrite; each is compared with the previous commit. All of this thread's preserved copies matched the previous commit.
+- Claude's web-fetch tool refuses some hosts (allowlist: e.g. argodatamgt.org, usgodae.org, datacenter.iers.org, ozonewatch.gsfc.nasa.gov) — list those for GPT extraction rather than working around it.
+
+## 1-old. Next as of 12:30 UTC 8 Nov (superseded by §1; kept for the record)
 1. **Chad chooses the next piece of work** from `docs/BACKLOG-VIEW-2026-11-08.md` (rev 2; GPT agrees Kp first, now done):
    - **(a) a bounded terms review** of R2/R3/R4/R6, read-only. It reads each provider's reuse terms and files the operative sentences in REGISTER. It may clarify rights but **clears no source**, and R2 also has open identity, validation and acceptance rules.
    - **(b) the GIBS bench + shadow record** (`docs/GIBS-FALLBACK-PROPOSAL.md` rev 3), read-only in the workspace or pane: PNG served?, ranking agreement across resolution/format, CPU, ~7 days of shares. A hub job is a separate rollout.
