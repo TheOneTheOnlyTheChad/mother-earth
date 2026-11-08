@@ -2,6 +2,27 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 8 Nov 2026
+
+## 8 Nov — **FIRMS v2 rollout CLOSED; `firms-memory` merged into main** (FIRMS memory thread; Chad's Approve line)
+- **Stage 6 (read-only, 00:45:42–00:47 UTC):** the 7 Nov mixed-day checkpoint used the **latest** publication, v2 run `2026-11-07T23-45Z-…46a4be89350f` (cutoff 23:45:42.788Z).
+  - Marker records 56,536 = that output = its run log.
+  - The checkpoint object read back with sha256 `e82f96cc…` = the committed snapshot.
+  - `fires_daily` 600 cells, Σ 56,536. Coverage current, `assessed_with_checkpoint` 1. No gaps.
+  - Midnight header-only runs (00:00–00:45) took the boundary path ("no detections processed yet"), records retained. Health 8/8.
+  - Evidence: `reviews/2026-11-06-firms-v2-build.md` stage log (`b1758cd`).
+- **GPT accepted stage 6; the rollout is closed** (stages 1–5 already accepted). Acceptance rests on the reported evidence, not an independent live inspection.
+- **Merge:** `firms-memory` → main as **`0891d13`**. Before the merge: no overlapping files, no page-file changes, no worker change on main.
+  - main's `phase1/worker.js` sha256 = **`ac173d8ac0dd9d1b9584c3eaf771adabe5e215d993d34487edad12d8932758ea`** = the live code, so **main = live**.
+  - Tests on the merged tree: firms-v2 64/64 (rollback to 0.5.3 included), guard 19/19, health 29/29, health-breaks 19/19, history 27/27, place 7.
+  - **No deploy, variable, schema, schedule, guard or page change.**
+- **Unchanged by decision:**
+  - The bounded empty-input retry (an empty header-only input is retried ≤ 3 times, then swept or expired; logs `firms:recovery` rows). Any refinement needs its own review.
+  - The 8 MiB guard.
+  - Aircraft parked, research included.
+  - Expansion: no prototype or Phase A start authorised.
+- Branch `firms-memory` can be deleted on GitHub (Chad; the session proxy refuses ref deletes). Hub work now branches from main.
+
 # 7 Nov 2026
 
 ## 7 Nov 13:32–13:43 UTC — **Planet: cold load demonstrated + desktop-width runs** (Chad, Chrome 156 Guest window). Cold: 1,500,912 B / 22 requests (all measured), DCL 1.52 s, load 5.08 s, last 7.45 s. Desktop 1470×835 warm ×3: DCL 0.69–0.91 s, last 4.96–6.20 s, ~0.9 MB per load (backdrop + hub data re-fetched each time). Pending: iPhone, direct interactivity.
