@@ -1,4 +1,4 @@
-# Mother Earth — handover (6 Nov 2026, end of thread 16, ~07:00 UTC)
+# Mother Earth — handover (8 Nov 2026, end of the Phase 0 / backdrop thread, ~05:30 UTC; §0 table partly from 6–8 Nov)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.**
 
@@ -16,6 +16,18 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | **Tests** | All hub suites pass on the branch; orbital-browser 113/113 on main. |
 
 ## 1. Next
+**Ordered for the next thread (8 Nov ~05:30 UTC):**
+1. **GPT's live smoke test** of main `3375e91` (requested 8 Nov). Act on findings only through a branch, review and Chad's exact Approve line. The page is live with the NOAA-21 backdrop (see STATUS 8 Nov).
+2. **Phase 0 Planet, with Chad:** three iPhone Safari loads, screen-recorded (time to globe visible, time to first drag response) plus direct interactivity. Then a short **Phase 0 recommendation** comparing the gates, for Chad's separate domain-selection decision. Resume point `bad819a` + `docs/research/P0-CHECKPOINT.md`.
+   - Arts: scoped gate cleared, not selected. Life: scoped block, stopped. Aircraft: parked (research included).
+   - No prototype, collector, resource, production change, deploy or merge.
+3. **place-ui harness fix (test only):** its fake R2 lacks `head()`, which hub 0.6.0 uses, giving 2 pre-existing failures (28/30, identical before and after the backdrop release). Branch → small review → merge with Chad's go. No hub code change.
+4. **GIBS measured fallback rule — proposal only.** Most complete of NOAA-21 / NOAA-20, latest day, else the previous day, chosen by a small hub job (not the browser). Hub work: its own review and Chad's go. Evidence: `reviews/2026-11-08-gibs-noaa21.md`, REGISTER GIBS entry.
+5. Left open by decision (each needs its own review and go): FIRMS empty-input retry; raising the 8 MiB guard.
+6. GitHub branch clean-up (Chad; the session proxy can't delete refs): `gibs-noaa21` (= main ancestor), `firms-memory` (merged). `aircraft-rc` stays parked — never deploy it as-is.
+7. Mac copies of STATUS / HANDOVER / START-HERE and the Phase 0 files were **not** synced this thread (no Mac-shell use was approved during Phase 0). Sync at the next handover if Chad grants `~/Documents/Mother Earth` and approves the Mac shell. Stale extras on the Mac: `~/Claude/phase0-life/P0-life-gbif.md` (rev 1) and `_to_delete/me-sync` (Chad bins).
+
+**Older items below are kept for the record.**
 0. **Phase 0 position (7 Nov ~13:25 UTC):** Arts CLEARED for the limited feasibility gate (metadata-only view of the Met's catalogued places of making, 479 objects / 25 countries; qualifications in `docs/research/P0-arts-planet-recovery.md` and `P0-CHECKPOINT.md`); may be recommended first, not selected. Planet cold load and desktop width DONE 7 Nov 13:32–13:43 UTC (Chrome Guest; `docs/research/p0-recovery/planet/`). **Next action: iPhone Safari runs (Chad, another day; screen recordings), then a Phase 0 recommendation for Chad's separate domain-selection decision. Life stopped; aircraft parked; no prototype, collector, resource, production change, deploy or merge. The pane belongs to the FIRMS thread when the Mac is open; 8 Nov 02:40–03:00 SAST reserved.
 1. **Monitor 0.5.2 (deployed 6 Nov 05:53:57 UTC, verified) — schedule these in the new session (thread 16's check-ins were cancelled at handover):** **~14:20 UTC 6 Nov** — first FIRMS runs over 4 MB: `collector_runs` firms ok with records (not "resource guard"), raw sizes in `raw/firms/2026-11-06*`, Exceeded Memory = 0 (Worker metrics / telemetry), CPU per firms tick, `/status` `collection.firms`; if still under 4 MB, check again ~16:00. **~00:50 UTC 7 Nov** — `archive_checkpoints` + `archive_checkpoint_coverage` for 6 Nov (`assessed_with_checkpoint = 1`), 5 Nov coverage backfilled (`= 0`), `fires_daily` 6 Nov, drifter full day (rows + bytes), CPU of the 00:30 ticks. All read-only. If Exceeded Memory appears: tell Chad; rollback = redeploy 0.5.1 from `8c8633d` (`1f34554b…`), with an Approve line. Production memory is not guaranteed by the bench (one sampled 112 MB heap peak at 8 MiB under overlap).
 2. ~~5 Nov fires recovery~~ **WRITTEN to R2 6 Nov 08:19:35 UTC and verified** (`archive/recoveries/firms/2026-11-05.json.gz`, sha256 `624ecf2e…`; review §10). D1 recovery tables wait for an agreed querying requirement. The procedure's byte-transfer step needs fixing before reuse (review §10). Showing recovered data anywhere is a separate, later decision.
