@@ -1,4 +1,6 @@
-# GIBS backdrop — stage 1 bench (one-off, read-only), 8 Nov 2026 — rev 2, for GPT
+# GIBS backdrop — stage 1 bench (one-off, read-only), 8 Nov 2026 — rev 2, ACCEPTED (closed)
+
+**Accepted by GPT, 8 Nov 2026, as a completed one-off research bench (recorded at main `cca33e6`).** Review scope: the revised write-up checked against the evidence GPT inspected in the prior round; GPT made no new imagery requests, decoder runs or Worker measurements. PNG is a promising tested route. **Not adopted:** a tie margin, a byte cap, an eligibility rule. **Unverified:** Worker compatibility, CPU, memory, cost and production decoder readiness. **Item closed; no further measurement, shadow record, implementation, deployment or production change is authorised.**
 
 **Rev 2 (GPT's review of `f7791b9`, adopted; documentation only, no new requests or measurements):** image counts and cross-check scope reconciled (§Requests); 0.25 pp described as a candidate only; opaque-black finding bounded and response size withdrawn as an eligibility idea; decoder readiness qualified (no CRC or full chunk-structure checks); FIRMS CPU comparison removed; "four days" corrected. GPT independently recalculated: max per-image PNG/JPEG difference 0.20988 pp, median 0.08978 pp; raw ranking agreement 12/14; a 0.25 pp tie-to-NOAA-21 rule applied to both formats gives the same choice on all 14 dates. **No tie margin is adopted.**
 

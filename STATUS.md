@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~17:00 UTC — **GIBS stage 1 bench ACCEPTED by GPT and CLOSED** (`reviews/2026-11-08-gibs-stage1-bench.md` rev 2, recorded at `cca33e6`)
+- Completed one-off research bench. GPT checked the revised write-up against the evidence it inspected earlier (no new requests, decoder runs or Worker measurements by GPT).
+- PNG = promising tested route. Eligibility handling unresolved; **no tie margin or byte cap adopted**. Worker compatibility, CPU, memory, cost and production decoder readiness unverified.
+- Bench item closed. Nothing further authorised (no measurement, shadow record, implementation, deployment or production change). All other approvals and parked/stopped decisions stand.
+
 ## 8 Nov ~16:45 UTC — **GIBS stage 1 bench rev 2 (GPT's review of `f7791b9` adopted; documentation only)**
 - GPT inspected the saved evidence and independently recalculated: max per-image PNG/JPEG difference 0.20988 pp, median 0.08978 pp; raw ranking 12/14; a 0.25 pp tie-to-NOAA-21 rule gives the same choice in both formats on all 14 dates.
 - Corrections: exact counts (36 PNG + 28 JPEG requests; **32 distinct PNG images**, all with recorded alpha 255; pixel cross-check on the **28** main-run PNGs only); **0.25 pp is a candidate, not a minimum or error bound** (largest signed-gap change ≈ 0.288 pp) — **no margin adopted**; opaque-black finding bounded (alpha cannot detect the unavailable-date case; not every case established; response size withdrawn; eligibility unresolved); decoder = feasibility only (no CRC / full chunk-structure checks); FIRMS CPU comparison removed — Worker compatibility, CPU, memory and cost unverified; "four days" → five.
