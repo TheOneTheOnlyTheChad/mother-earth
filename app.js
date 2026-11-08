@@ -319,19 +319,29 @@ ME.freshness = function (layer) {
 // collector freshness (when we last retrieved; handled above via stale_after_s). Ships' degraded state is a sampling-quality
 // fact, never "late". Unknown or missing reasons get a neutral collection-quality sentence, never a cause.
 const span = s => !Number.isFinite(s) ? 'unknown' : s >= 2 * 86400 ? (s / 86400).toFixed(1).replace(/\.0$/, '') + ' days' : dur(Math.round(s));
-ME.kpInterval = t => { const a = Date.parse(t); return Number.isFinite(a) ? `${t.slice(11, 16)}–${new Date(a + 3 * 3600e3).toISOString().slice(11, 16)} UTC` : 'unknown interval'; };
+ME.kpInterval = t => { const a = typeof t === 'string' ? Date.parse(t) : NaN; return Number.isFinite(a) ? `${new Date(a).toISOString().slice(11, 16)}–${new Date(a + 3 * 3600e3).toISOString().slice(11, 16)} UTC` : null; };
+// Kp timing in one place for the card and the report: the interval and the relative time are guarded together, so an unusable
+// timestamp never renders as "unknown interval (began NaN h ago)" and a future one never as a negative age.
+ME.kpWhen = t => { const iv = ME.kpInterval(t); if (!iv) return 'interval time unknown — the source\'s timestamp could not be read';
+  return Date.parse(t) > Date.now() ? `interval ${iv}, timestamp later than our clock` : `interval ${iv}, began ${ago(t)}`; };
+const secs = (x, limit) => { if (!Number.isFinite(x)) return 'an unknown time'; let v = x.toFixed(1); if (Number.isFinite(limit) && x > limit && +v <= limit) v = x.toFixed(2); return v.replace(/\.0+$/, '') + ' s'; };
+const pct = f => (Math.floor(f * 1000) / 10).toFixed(1).replace(/\.0$/, '') + '%';   // rounded DOWN: 89.95% shows 89.9%, never "90%" for a fraction below 90%
 ME.degradedWhy = function (layer, snap) {
   const r = snap && snap.status_reason;
+  if (r && (r.code === 'feed_age_unknown' || (r.code === 'feed_not_refreshed' && !Number.isFinite(r.age_s)))) return `the feed gave no usable generation time, so its age is unknown and our ${span(r.limit_s)} feed-age limit could not be applied — marked by our collector, not by the source`;
+  if (r && r.code === 'observation_older_than_limit' && !Number.isFinite(r.age_s)) return `the age of the newest value is unknown (the source gave no usable time for it), so our ${span(r.limit_s)} observation-age limit could not be applied — marked by our collector, not by the source`;
   if (r && r.code === 'observation_older_than_limit') return `older than our observation-age limit: the newest value is ${span(r.age_s)} old, measured from ${layer === 'swpc' ? 'the start of its 3-hour interval' : 'its date'} (our limit: ${span(r.limit_s)}${layer === 'swpc' ? ', provisional' : ''}) — marked by our collector, not by the source`;
   if (r && r.code === 'feed_not_refreshed') return `the feed was generated ${span(r.age_s)} before our retrieval, beyond our ${span(r.limit_s)} feed-age limit — marked by our collector, not by the source`;
   if (r && r.code === 'time_tag_invalid') return `the source's timestamp for the newest value could not be read, so its age is unknown — marked by our collector`;
   if (r && r.code === 'time_tag_in_future') return `the source's timestamp for the newest value is later than our clock, so its age cannot be judged — marked by our collector`;
-  if (r && r.code === 'sample_overlong') return `the sample ran ${span(r.elapsed_s)} against a ${span(r.window_s)} window (over our 1.25× limit), so it is not counted as a full sample — our sampling standard, not a statement about the source or the sea`;
-  if (r && r.code === 'sample_flow_below_standard') return `messages flowed for ${Math.round((r.fraction || 0) * 100)}% of the ${span(r.window_s)} sample (inferred from arrival gaps; our standard is 90%) — our sampling standard, not a statement about the source or the sea`;
+  const overlongWhy = (el, w) => `the sample ran ${secs(el, 1.25 * w)} against a ${secs(w)} window, over our ${secs(1.25 * w)} limit (1.25 × the window), so it is not counted as a full sample — our sampling standard, not a statement about the source or the sea`;
+  const flowWhy = (f, w) => `messages flowed for ${pct(f)} of the ${secs(w)} sample (inferred from arrival gaps), below our 90% standard — our sampling standard, not a statement about the source or the sea`;
+  if (r && r.code === 'sample_overlong') return overlongWhy(r.elapsed_s, r.window_s);
+  if (r && r.code === 'sample_flow_below_standard') return flowWhy(r.fraction || 0, r.window_s);
   if (layer === 'ships' && snap) {                     // the Mac collector's envelope carries the facts but no reason code
     const w = snap.window_s, f = snap.connection_fraction_of_sample;
-    if (snap.overlong_sample) return `the sample ran ${span(snap.elapsed_wall_s)} against a ${span(w)} window (over our 1.25× limit), so it is not counted as a full sample — our sampling standard, not a statement about the source or the sea`;
-    if (Number.isFinite(f) && f < 0.9) return `messages flowed for ${Math.round(f * 100)}% of the ${span(w)} sample (inferred from arrival gaps; our standard is 90%) — our sampling standard, not a statement about the source or the sea`;
+    if (snap.overlong_sample) return overlongWhy(snap.elapsed_wall_s, w);
+    if (Number.isFinite(f) && f < 0.9) return flowWhy(f, w);
   }
   return 'below our collection-quality standard for this layer — marked by our collector, not by the source';
 };
@@ -365,7 +375,7 @@ ME.readings = function () {
     caveat: 'GFW: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment' };
   const k = state.swpc, fk = ME.freshness('swpc');
   R.swpc = { label: LABEL.swpc, source: SOURCE.swpc, fresh: fk, value: k && k.index && fk.grade !== 'unknown' ? k.index.value : null, unit: 'planetary Kp (0–9)',
-    observedAt: k && k.index && k.index.time_tag, observed: k && k.index ? `interval ${ME.kpInterval(k.index.time_tag)} (began ${ago(k.index.time_tag)}); 3-hourly product, timestamped at the interval start` : '', retrieved: k && k.retrieved_at,
+    observedAt: k && k.index && k.index.time_tag, observed: k && k.index ? `${ME.kpWhen(k.index.time_tag)}; 3-hourly product, timestamped at the interval start` : '', retrieved: k && k.retrieved_at,
     coverage: 'planetary index, not a map layer', quantity: k && k.quantity, window: '3-hourly index', cadence: 'collected hourly', comparison: 'none' };
   const c = state.co2, fc = ME.freshness('co2'); const cm = (c && c.comparison) || {};
   const wk = (cm.basis || '').match(/week starting (\d{4}-\d\d-\d\d)/);
@@ -393,7 +403,7 @@ ME.report = function (R) {
   parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections so far today, UTC (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'marked degraded by our collector; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
   parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
   parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels published in the last 7 days across ${R.forest.cells} queried cells (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; sweep ${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells; 10 m pixels, not hectares; detection date ≠ clearing date; not for area or trend)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
-  parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value} for ${ME.kpInterval(R.swpc.observedAt)} (began ${ago(R.swpc.observedAt)}; NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; marked degraded by our collector' : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
+  parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value}, ${ME.kpWhen(R.swpc.observedAt)} (NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; marked degraded by our collector' : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa on ${R.co2.date} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
   parts.push(R.seaice.north !== null ? `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km² (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
   parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; none installed');

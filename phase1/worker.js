@@ -186,7 +186,9 @@ async function collectUsgs(env, scheduledMs) {
   const evidence = fresh ? 'feed_fresh;m2.5_completeness_map_pending;m4.5_global_complete' : 'feed_stale_' + Math.round(ageS || -1) + 's';
   for (const id in cells) cells[id].coverage = { grade, evidence, observed_fraction: fresh ? 1 : 0 };
   const status = fresh ? 'ok' : 'degraded';
-  const statusReason = fresh ? null : { code: 'feed_not_refreshed', rule: 'our feed-age limit', reference: 'feed generated time (metadata.generated)', limit_s: 600, age_s: ageS === null ? null : Math.round(ageS) };
+  const statusReason = fresh ? null : !Number.isFinite(ageS)
+    ? { code: 'feed_age_unknown', rule: 'our feed-age limit cannot be applied: the feed gave no usable generation time', reference: 'feed generated time (metadata.generated)', limit_s: 600 }
+    : { code: 'feed_not_refreshed', rule: 'our feed-age limit', reference: 'feed generated time (metadata.generated)', limit_s: 600, age_s: Math.round(ageS) };
   const e = envelope(layer, scheduledMs, new Date(Date.now() - 86400e3).toISOString(), nowIso(), status, cells, fields, rows,
     { source_generated_at: generated ? new Date(generated).toISOString() : null, source_age_s: ageS, status_reason: statusReason,
       coverage_default: { grade, evidence, observed_fraction: fresh ? 1 : 0 },
@@ -200,7 +202,7 @@ async function collectUsgs(env, scheduledMs) {
 
 // Kp status (0.6.1, 8 Nov 2026 — reviews/2026-11-08-kp-degraded-finding.md). Each Kp value covers a 3-hour interval and its
 // time_tag is the interval START (measured: values first reach us 3.13 h after time_tag, 31 of 33; 4.13 h for 2). The old
-// "< 4 h from time_tag" rule marked ~2 of every 3 hourly runs degraded while the source was on schedule.
+// "< 4 h from time_tag" rule marked ~2 of every 3 hourly runs degraded during 4–8 Nov (ages 4.13–6.13 h, before the next value).
 // PROVISIONAL candidate policy (not a source deadline): degraded once the newest value is >= 7.5 h past its interval start,
 // i.e. the next value is overdue. With hourly polling a missing value is first flagged ~2 h after it was due (~8.13 h).
 // Reference point: time_tag (interval start). Invalid or future time_tags are degraded with their own reason, never 'ok'.
