@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov 08:09–08:12 UTC — **hub 0.6.1 first runs verified + live RC check of the page branch: PASS** (read-only)
+- **First 0.6.1 Kp run (08:07:59 UTC): `ok`** for the value 03:00 UTC at **5.13 h** past its interval start. The old rule called this degraded (07:07 run, 4.13 h).
+  - Envelope: `status_reason: null`, `interval_end 06:00Z`, `age_reference "interval start (time_tag)"`.
+- **D1, every run since the deploy is `ok`:** swpc 1, usgs 2 (`status_reason: null`), firms v2 1 (08:00, 1.1 MB raw), co2 1, drifters 1.
+  - forest, seaice and Mac ships not yet run on 0.6.1 (next scheduled ticks).
+- Health **8/8** at 08:09.
+- **Live RC check** (clean pane tab; `kp-degraded` @ `86134b8` files from raw.githubusercontent, sha256 matched: index `b9d4649e1ac6`, app `e3f4a3854113`, style `e4c9547d99bf`; blob-injected; the live page untouched) against live 0.6.1 data:
+  - Kp card: "interval 03:00–06:00 UTC, began 5.2 h ago; 3-hourly product, timestamped at the interval start", **current**;
+  - summary: "Kp 3.33, interval 03:00–06:00 UTC, began 5.2 h ago (NOAA SWPC)";
+  - no "source flagged/degraded" and no "NaN" anywhere on the page; all layers current (forest partial by design); no console errors.
+  - Pane hidden (Chad away), so this checks text and logic, not rendered pixels.
+  - The degraded wording paths are covered by the tests, not seen live: no layer is degraded right now, which is the expected outcome.
+- **Next:** Chad's `Approve: push kp-degraded to main (page change: Kp interval + honest degraded wording)`, then served-hash check + live read.
+
 ## 8 Nov 07:58:25 UTC — **HUB 0.6.1 DEPLOYED** (Chad: "Approve: deploy hub 0.6.1 from 86134b8 (content only)")
 - **What:** `phase1/worker.js` from `kp-degraded` @ `86134b8`.
   - sha256 `f38296a0183d14d958d5815d7926254cb4275be7ca00b384334974fad5b12cc8`, checked in the pane from raw.githubusercontent before upload.
