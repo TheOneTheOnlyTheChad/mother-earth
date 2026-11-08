@@ -4,6 +4,23 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov 05:47–05:50 UTC — **two of the smoke test's open checks done (read-only, Claude, browser pane)**; Mac copies synced
+- **Conditions:** Claude desktop browser pane (Chromium), 588 × 834 = the phone layout, **not a real phone**; live page main `3375e91` assets, hub 0.6.0. Pane visible.
+- **"Everything here" cell selection — PASS.** A real click on the globe opened a forest cell inspector (cell 17_35). Its "Everything we hold for this cell, all layers" link opened **Everything here · cell 17_35** with the expected rows:
+  - the qualified "none / not a statement that none occurred" wording for quakes, fires and ships, and the forest source-reported zero;
+  - drifters and plastic as "layer off · Load this layer's data for this place";
+  - collection lines and "Not place-based".
+  - "Load" for drifters filled the drifters row ("no buoy's latest fix is in this cell…"), left plastic off, and left the globe's drifters toggle off. No page overflow.
+  - A direct click on bare ocean (no cell polygon) was not separately exercised.
+- **Orbital — all three categories PASS.** Rocket bodies, Debris and Payloads each switched on.
+  - Drawn counts match the card: payloads 19,702 of 19,706; rocket bodies 2,213 of 2,213; debris 10,185 of 10,187.
+  - 19,706 + 2,213 + 10,187 + 548 not drawn (type unknown) = 32,654 = file total. Element file retrieved 05:42 UTC.
+  - "What this is and is not" opens (1,294 chars). Debris off → hidden, draw range 0, the others stay on. Markers visible on the globe.
+  - Orbital markers have no per-object inspector by design, so "every inspector" reduces to the card and its explainer.
+- Console: no messages.
+- **Still open from the smoke test:** actual-phone test, noon UTC rollover (booked 11:50 UTC), browser HTTP status codes.
+- **Mac copies synced** (`~/Documents/Mother Earth`, Chad granted the folder): 96 files copied (83 new, 13 older versions, each confirmed to be an earlier committed version, not a local edit). 167/167 tracked files identical to main `c151306`.
+
 ## 8 Nov ~05:30–06:00 UTC — harness fix on a branch; noon check booked; Phase 0 recommendation drafted (Chad's go; no production change)
 - **place-ui harness** (branch `place-ui-harness` @ `601b899`, **not merged**): its fake R2 gains `head()` (hub 0.6.0 reads it before the place firms section). 28/30 → **30/30**; a break (head reports 1e9 bytes) fails the same two tests. Related suites all pass; `worker.js` untouched (= live). Review: `reviews/2026-11-08-place-ui-harness.md` — for GPT, then Chad's go to merge.
 - **Noon UTC imagery rollover** (read-only): `IMG_DAY` = now − 36 h, so the date rolls 7 → 8 Nov at 12:00 UTC. Check booked in this session for 11:50 UTC (before/after reads of label + actual GIBS request). Needs the Mac awake with the Claude app open.
