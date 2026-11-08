@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov 08:11:22 UTC — **PAGE RELEASED: Kp interval + honest degraded wording** (main `ad4002b`, no-ff merge of `kp-degraded` @ `86134b8`; Chad: "Approve: push kp-degraded to main (page change: Kp interval + honest degraded wording)")
+- No overlap with main's docs-only changes. Merged page files = the reviewed commit (index `b9d4649e1ac6`, app `e3f4a3854113`, sources `7d66228f07b8`, style unchanged `e4c9547d99bf`); kp-degraded 29/29 on the merge.
+- **main's `phase1/worker.js` = live 0.6.1** (`f38296a0…`), so **main = live** again.
+- **Served hashes verified** 08:13:11 UTC (pane, no-store): all four = the reviewed values; assets `?v=202611151000`.
+- **Live read** 08:13:42 UTC:
+  - Kp card "interval 03:00–06:00 UTC, began 5.2 h ago; 3-hourly product, timestamped at the interval start", **current**;
+  - summary "Kp 3.33, interval 03:00–06:00 UTC, began 5.2 h ago (NOAA SWPC)";
+  - no "source flagged/degraded" and no NaN on the page; no console errors; imagery chip unchanged (06 Nov, NOAA-21).
+  - Pane hidden (Chad away): text and logic checked, not pixels. The degraded wording is proven by tests, not yet seen live (no layer degraded).
+- **Rollback:** page = revert `ad4002b` on main (Approve line); hub = redeploy 0.6.0 `ac173d8a…` (Approve line). The two are independent.
+- Branch `kp-degraded` can be deleted on GitHub (Chad). `place-ui-harness` is still awaiting Chad's merge decision.
+
 ## 8 Nov 08:09–08:12 UTC — **hub 0.6.1 first runs verified + live RC check of the page branch: PASS** (read-only)
 - **First 0.6.1 Kp run (08:07:59 UTC): `ok`** for the value 03:00 UTC at **5.13 h** past its interval start. The old rule called this degraded (07:07 run, 4.13 h).
   - Envelope: `status_reason: null`, `interval_end 06:00Z`, `age_reference "interval start (time_tag)"`.
