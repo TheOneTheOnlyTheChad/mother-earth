@@ -3,7 +3,7 @@
 **Gate:** first gate only (sample, format, flags, timing, terms, plain-language meaning, presentation assessment). **Research only** — no collector, schedule, deploy, page change, purchase or third-party contact. Written 6 Nov 2026 (thread 18) for Chad's review.
 **PARKED 6 Nov 2026 (Chad, after GPT confirmed rev 2) — first-gate research handover accepted.** Any next research gate needs Chad's separate go; no implementation, collector, schedule, deployment, page change or third-party contact.
 **Status (rev 2, 6 Nov 2026): numerical feasibility verified; reuse/access checks unresolved.** This is not integration clearance.
-**Rev 3 (8 Nov 2026): bounded terms/access review, §9 — for GPT; IERS and `maia` site terms pending extraction; no REGISTER entry yet; still parked for building.**
+**Rev 4 (8 Nov 2026): terms/access review §9 complete (E1–E5 read by GPT on Chad's behalf); public distribution supported, commercial reuse unresolved (not prohibited); research-only REGISTER draft for review, NOT filed; still parked for building.**
 **Open questions retained:** consecutive-release revisions · publication timing · Bulletin B column updates · publisher-checksum verification · IERS terms · extended history · polar-motion axis conventions · error-field meaning · independent reproduction of the Bulletin B comparison (details §8).
 **Independent check:** GPT independently checked the preserved sample — 34,028 bytes, matching full sha256, 181 records of 187 characters, 89 supplied LOD values and 92 LOD blanks, 25 rows with Bulletin B values and 156 without, the genuine predicted dY zero, and the rapid-value ranges in §6. **GPT has not independently reproduced the Bulletin B comparison figures in §4** — those are Claude's only.
 **Rev 2 corrections (GPT review, adopted):** mixed flags separated from missing quantities (§3); the 15 Oct 2026 method change described as a processing change from those releases, not an observation-date break (§4, §7); "rapid estimate" instead of "measured" (§3, §6, §7); freshness assessed per quantity (§3a); error-field meaning left unresolved (§2, §3); terms/access kept unresolved (§5).
@@ -173,68 +173,80 @@ No further fetching or investigation was done in the rev-2 correction pass.
 8. **Error-field interpretation:** what each supplied error value represents, before any is shown.
 9. Independent reproduction of the Bulletin B comparison figures (§4).
 
-## 9. Terms and access review (rev 3, 8 Nov 2026; Chad's go: bounded, read-only, R3 only) — for GPT
-**Scope:** only the recorded terms/access questions: §5 "Not found" (USNO licence, citation, automated-access policy; IERS terms) and §8 item 5. **No data fetched or sampled, no provider contact, no route selection, no implementation, resources, schedules, deploy or page change.** R6, GIBS and other gates not started. **Terms clarification alone does not clear R3 for building**; the technical items in §8 (revisions, timing, Bulletin B columns, checksums, extended file, axis conventions, error fields, reproduction) are untouched.
-**Evidence status labels:** *Claude (fetch summary)* = read 8 Nov 2026 with Claude's web-fetch tool, which returns a summary with quotations, not the raw page; quotations are provisional until extracted · *Claude (6 Nov)* = read in the rev-1 pass (§5) · *Pending extraction* = Claude's tools could not open the page; **GPT may independently read/extract it on Chad's behalf**. Nothing here is labelled as a page Chad personally read.
+## 9. Terms and access review (rev 4, 8 Nov 2026; Chad's go: bounded, read-only, R3 only) — for GPT
+**Scope:** only the recorded terms/access questions: §5 "Not found" (USNO licence, citation, automated-access policy; IERS terms) and §8 item 5. **No data fetched or sampled, no provider contact, no route selection, no implementation, resources, schedules, deploy or page change.** R6, GIBS and other gates not started. **Terms clarification alone does not clear R3 for building**; the technical items in §8 (revisions, timing, Bulletin B columns, checksums, extended file, axis conventions, error fields, reproduction) and all accepted technical findings are unchanged.
+**Rev 4 (8 Nov 2026):** the bounded extraction is complete. E1–E5 were independently inspected by GPT on Chad's behalf (GPT is the reader; Chad did not personally inspect them). A6's IAG-terms claim is **withdrawn** (§9.2). Interpretation and unanswered questions revised (§9.4–9.5); research-only REGISTER draft for review (§9.6).
+**Evidence status labels:** *Claude (6 Nov)* = read in the rev-1 pass (§5) · *Claude (fetch summary)* = read 8 Nov with Claude's web-fetch tool, which returns a summary with quotations · *GPT (read, 8 Nov)* = GPT independently inspected the page on Chad's behalf.
 
 ### 9.1 Distributions in play (no route selected)
-| Route | Operator | Evidence that it is an official distribution |
+| Route | Operator | Evidence |
 |---|---|---|
-| `maia.usno.navy.mil` | USNO, IERS Rapid Service/Prediction Centre (RS/PC) | Bulletin A names it the primary source (Claude, 6 Nov, §5) |
-| `datacenter.iers.org` | IERS Central Bureau / data centre (hosted by BKG, Germany — *not yet confirmed from an IERS page*) | Bulletin A lists it as an alternative (Claude, 6 Nov, §5); the rev-1 sample came from it |
-| NASA CDDIS | NASA (ESDIS) | Bulletin A lists it as an alternative (Claude, 6 Nov, §5) |
+| `maia.usno.navy.mil` | USNO, IERS Rapid Service/Prediction Centre (RS/PC) | Bulletin A names it the primary source (Claude, 6 Nov); the IERS metadata's `dataSetURI` points to `https://maia.usno.navy.mil/ser7/finals2000A.daily` (E4, GPT) |
+| `datacenter.iers.org` | IERS data centre. BKG is the responsible federal authority for the **IERS website** (E2, GPT); the data centre's **server-hosting arrangement is not established** | Bulletin A lists it as an alternative (Claude, 6 Nov); the rev-1 sample came from it |
+| NASA CDDIS | NASA (ESDIS) | Bulletin A lists it as an alternative (Claude, 6 Nov) |
+- *Interpretation:* the IERS and CDDIS copies are **distribution routes** for a USNO product. A mirror does not automatically establish a different underlying data licence. Product rights, website/service conditions and the route are kept separate below.
 
 ### 9.2 Evidence, separated by question
-**A. Reuse / commercial terms**
+**A. Product rights and reuse / commercial terms**
 | # | Statement | Page | Applies to | Status |
 |---|---|---|---|---|
-| A1 | "Distribution Statement A. Approved for public release: distribution unlimited." | USNO daily products page; Bulletin A (5 Nov 2026) | USNO products, as marked | Claude (6 Nov) |
-| A2 | Fees "free of charge"; originator USNO; update "daily" | IERS data-centre metadata for `finals2000A.daily` | The IERS copy (cost only; says nothing about reuse) | Claude (6 Nov) |
-| A3 | NASA ESDIS: NASA-mission data CC0 unless marked; **"Non-NASA data available through the ESDIS project is subject to the license arrangements of the sponsoring organization."** | [NASA Earthdata, Data Use and Citation Guidance](https://www.earthdata.nasa.gov/earth-observation-data/data-use-policy) (site updated 6 Nov 2026) | The CDDIS route. *Interpretation:* USNO EOP data are non-NASA, so CDDIS defers to USNO's terms (A1); the CC0 line does **not** apply to them | Claude (fetch summary) |
-| A4 | "All information on this site is considered public information and may be distributed or copied unless otherwise specified." | [USNO Astronomical Applications privacy/security notice](https://aa.usno.navy.mil/about/PrivacyNotice) | **`aa.usno.navy.mil` only** — a different USNO department's site, not `maia`. Context; not extended to the EOP products | Claude (fetch summary) |
-| A5 | Same wording ("…considered public information… may be distributed or copied unless otherwise specified") | [navy.mil privacy policy](https://www.navy.mil/Privacy-Policy/) | **`www.navy.mil` only**. Context; not extended to `maia` | Claude (fetch summary) |
-| A6 | IERS site terms: the relaunched `www.iers.org` footer links "Terms of Use / Privacy Policy" to the **IAG website's terms page**, not an IERS-specific one (per a [GGOS/IAG news post](https://geodesy.science/2025/iers-relaunch-website/), not an IERS page) | IERS website | Website content; **applicability to data-centre products unknown** | Claude (fetch summary of a secondary page) — **pending extraction from IERS itself** |
+| A1 | "Distribution Statement A. Approved for public release: distribution unlimited." | USNO `maia` site, incl. [daily products](https://maia.usno.navy.mil/products/daily.htm); Bulletin A (5 Nov 2026) | USNO products as marked | Claude (6 Nov) · **GPT (read, 8 Nov, E3)** |
+| A2 | fees "free of charge"; `dataSetURI` `https://maia.usno.navy.mil/ser7/finals2000A.daily`; metadata `dateStamp` 2026-11-07; **no** `resourceConstraints`, `MD_LegalConstraints`, `useLimitation`, `accessConstraints`, `useConstraints` or `otherConstraints` elements | [IERS XML metadata](https://datacenter.iers.org/products/eop/rapid/daily/metadata/finals2000A.daily.me.xml) | The IERS copy. Cost only; **absent constraint elements do not establish unrestricted reuse** | Claude (6 Nov, fees) · **GPT (read, 8 Nov, E4)** |
+| A3 | NASA-mission data CC0 unless marked; "Non-NASA data available through the ESDIS project is subject to the license arrangements of the sponsoring organization." | [NASA Earthdata Data Use and Citation Guidance](https://www.earthdata.nasa.gov/earth-observation-data/data-use-policy) | The CDDIS route; *Interpretation:* defers to USNO, CC0 not applicable | Claude (fetch summary) |
+| A4 | "…considered public information and may be distributed or copied unless otherwise specified" | [USNO AA notice](https://aa.usno.navy.mil/about/PrivacyNotice), [navy.mil privacy policy](https://www.navy.mil/Privacy-Policy/) | **Those sites only.** Not imported to `maia` (no `maia` notice exists, E3) | Claude (fetch summary); context only |
+| ~~A6~~ | ~~IERS footer links to IAG terms~~ — **withdrawn (rev 4):** the IAG/GGOS news article's own footer was misattributed to IERS. The current IERS footer links to its own legal notice (E2). | — | — | Withdrawn |
 
-**B. Attribution**
-- USNO EOP pages: **no citation requirement found** (Claude, 6 Nov, §5). A4/A5 request "appropriate byline/photo/image credits" on their own sites only.
-- NASA ESDIS (A3) strongly urges citing data and acknowledging the source — for the CDDIS route, and alongside the sponsoring organisation's terms.
-- IERS data centre / IERS website: **pending extraction**.
+**B. Website / service conditions**
+| # | Finding | Page | Status |
+|---|---|---|---|
+| B1 | The data-centre homepage's "Legal and Privacy" link points to `https://www.iers.org/IERS/EN/Service/Imprint/imprint_node.html`, which **returns 404**. The EOP page offers downloads and product metadata. No reuse licence, citation requirement or numerical download limit on the inspected index pages. | [datacenter.iers.org](https://datacenter.iers.org/), [eop.php](https://datacenter.iers.org/eop.php) | GPT (read, 8 Nov, E1) |
+| B2 | Current IERS legal notice (reached from the current IERS homepage footer): **BKG is the responsible federal authority**; liability and privacy information. **No data-reuse licence, commercial-use grant, citation condition or numerical access limit.** Verifies BKG's responsibility for the website only; the website copyright footer is **not** evidence that linked data products belong to BKG. | [iers.org legal notice](https://www.iers.org/iers/en/service/imprint) | GPT (read, 8 Nov, E2) |
+| B3 | `maia`: no separate privacy/security/reuse-notice link on the homepage, daily-products, products or FAQ pages. | [maia](https://maia.usno.navy.mil/) | GPT (read, 8 Nov, E3) |
 
-**C. Automated-access guidance**
-- USNO `ser7/readme`: the daily files are "[Recommended for highest accuracy real-time applications]" (Claude, 6 Nov). *Interpretation:* real-time use is an intended use; this is not an access rule.
-- A4/A5: traffic monitored for unauthorised attempts to upload/change information or cause damage, "to ensure that this service remains available to all users" — on those sites only; no rule on scripted reading.
-- A3: no login or download-limit statement on that page.
-- `maia` and IERS data centre: **no automated-access guidance found** in the pages read on 6 Nov; site-level notices **pending extraction**.
+**C. Attribution**
+- No citation requirement found on USNO (Claude, 6 Nov; GPT E3, E5) or IERS pages (GPT E1, E2), nor in the IERS metadata (E4).
+- NASA ESDIS (A3) strongly urges citing data, for the CDDIS route.
 
-**D. Numerical limits**
-- **No numerical rate, cadence or load limit found** in the pages inspected: USNO daily, products, FAQ, `ser7/readme`, `readme.finals2000A` (6 Nov); IERS data-centre file metadata (6 Nov); NASA Earthdata Data Use and Citation Guidance, USNO AA notice, navy.mil privacy policy (8 Nov). **This is not evidence of unlimited access.** The pages pending extraction (9.3) have not been checked for limits.
+**D. Automated-access guidance**
+- USNO products and FAQ pages document downloads, alternative distribution and **publisher-checksum links**; **no scripted-download rule** (GPT, E5).
+- USNO `ser7/readme`: daily files "[Recommended for highest accuracy real-time applications]" (Claude, 6 Nov). **Intended real-time use does not establish a particular polling allowance** (GPT).
 
-### 9.3 Pending extraction (Claude's tools could not open these on 8 Nov — allowlist; GPT may extract on Chad's behalf)
-Required for the terms question:
-- **E1. IERS data centre**, <https://datacenter.iers.org/eop.php>: any terms, licence, legal/imprint link (exact URL), citation request, and any download/automation note.
-- **E2. IERS legal/imprint and terms** (the link E1 gives; previously recorded as `iers.org/…/Imprint/imprint_node.html`; the relaunched site may have moved it): copyright and reuse lines, operator, and whether they cover data products or only the website.
-- **E3. USNO `maia` site notice**: any privacy/security/disclaimer page linked from <https://maia.usno.navy.mil/> (its own scope sentence, public-information/copying line with exceptions, credit request, any traffic/automation rule).
+**E. Numerical limits**
+- **No numerical rate, cadence or load limit found** in the pages inspected: USNO `maia` homepage, daily, products, FAQ, `ser7/readme`, `readme.finals2000A`; IERS data-centre homepage and EOP page, IERS legal notice, IERS XML metadata; NASA Earthdata guidance (6–8 Nov 2026). **Not evidence of unlimited access.**
 
-Supplementary:
-- **E4. IERS data-centre file metadata** for `finals2000A.daily` (`…/metadata/finals2000A.daily.me.xml`): any use/access constraint fields beyond "free of charge".
-- **E5. USNO FAQ / products** pages: any sentence on scripted download, mirrors or checksums usage.
+### 9.3 Extraction record (E1–E5)
+Completed 8 Nov 2026 by GPT on Chad's behalf (findings in §9.2: E1 → B1; E2 → B2, A6 withdrawn; E3 → A1, B3; E4 → A2; E5 → D). The E4 metadata inspection is not a new numerical sample or a revision comparison.
 
 ### 9.4 Interpretation (open to challenge)
-- **USNO products:** "Distribution unlimited" (A1) is a public-release marking, positive evidence for redistribution of the products so marked. **Copyright status remains an assumption** (U.S. Government work), not a statement found (§5). Whether `maia` has its own "public information… unless otherwise specified" notice is pending (E3); the AA and navy.mil notices (A4, A5) are **not** extended to it.
-- **IERS copy:** carries only "free of charge" so far. If E1/E2 show IERS terms of their own, they govern the IERS copy separately from USNO's marking — each distribution's terms kept separate.
-- **CDDIS copy:** defers to USNO's terms (A3); NASA's CC0 does not apply to these data.
-- **Attribution:** no binding requirement found yet; §5's project practice stands (credit IERS RS/PC, USNO, Bulletin A; record URL and retrieval time), plus whatever E1–E3 require.
+- **Public distribution is positively supported** (A1, on `maia` itself).
+- **Commercial reuse is not yet established** by this evidence. **That is not a finding that reuse is prohibited.** No page states a licence, commercial-use grant or prohibition for the product.
+- **U.S.-government-work reasoning:** that the USNO files carry no U.S. copyright because they are works of the U.S. Government is an **inference requiring assessment**. No page read states it; A4's notices cover other sites and are not imported.
+- **Routes:** the IERS copy's metadata adds cost and provenance (`dataSetURI` to `maia`) but no constraints; the IERS legal notice governs the website, not demonstrably the products. CDDIS defers to USNO. *Interpretation:* the product's rights follow USNO under every route found; no route-specific licence was found.
+- **Attribution:** no binding requirement found; project practice (§5) stands.
 
 ### 9.5 Unanswered questions
-1. IERS data-centre and IERS website terms, and whether they cover products (E1, E2).
-2. USNO `maia` site-level notice and its scope (E3).
-3. Copyright status of the USNO files (assumption only).
-4. Any automated-access guidance or numerical limit on `maia` or the IERS data centre (none found so far; not unlimited).
+1. The **commercial-reuse position** for the USNO product (A1 supports public distribution; no grant, licence or prohibition found).
+2. Assessment of the **U.S.-government-work inference** (who assesses, against what source).
+3. The data centre's **server-hosting arrangement** (not established by E2).
+4. Any **polling allowance**: none stated; any later proposal states its own cadence; not unlimited.
 
-### 9.6 Proposed REGISTER entry — not drafted yet
-Held until E1–E3 are extracted and GPT has reviewed this pack: the licence/reuse line for the IERS copy (the route sampled) cannot be written from current evidence.
+### 9.6 Proposed REGISTER entry — research-only DRAFT for review (NOT filed)
+```
+## USNO / IERS — Earth orientation parameters, finals2000A.daily (IERS Rapid Service/Prediction Centre, USNO) — research only, not on the page
+- **Read:** 6 Nov 2026 by Claude (USNO daily, products, FAQ, ser7/readme, readme.finals2000A; IERS data-centre metadata; Bulletin A); 8 Nov 2026 by GPT on Chad's behalf (E1 IERS data centre + EOP page; E2 IERS legal notice; E3 USNO maia homepage + daily products; E4 IERS XML metadata; E5 USNO products + FAQ); 8 Nov 2026 by Claude (NASA Earthdata guidance). Research record: docs/research/R3-earth-rotation.md §5, §9.
+- **Product marking (verbatim, USNO maia + Bulletin A):** "Distribution Statement A. Approved for public release: distribution unlimited."
+- **IERS copy (metadata, dateStamp 2026-11-07):** fees "free of charge"; dataSetURI https://maia.usno.navy.mil/ser7/finals2000A.daily; no constraint elements (absence ≠ unrestricted reuse).
+- **Website conditions:** IERS legal notice (BKG responsible for the website; liability/privacy; no data licence, citation condition or limit) — website only, not product rights. Data-centre "Legal and Privacy" link 404. USNO maia: no separate site notice.
+- **CDDIS route:** non-NASA data follow the sponsoring organisation's terms (NASA Earthdata guidance); NASA CC0 not applicable.
+- **Attribution:** no requirement found. Project practice: credit "IERS Rapid Service/Prediction Centre, U.S. Naval Observatory (IERS Bulletin A)"; record the URL used and retrieval time.
+- **Automated use:** downloads, alternative distribution and publisher checksums documented; daily files recommended for real-time applications. No scripted-download rule and no numerical rate/cadence/load limit found in the pages inspected (6–8 Nov 2026) — not unlimited; any proposal states its own cadence.
+- **Coverage statement:** none filed (R3 technical gates open).
+- **Status:** ⛔ research only; not cleared for building.
+- **Commercial use:** UNRESOLVED — public distribution is supported (Distribution Statement A); no licence, commercial-use grant or prohibition found. The U.S.-government-work reasoning is an inference requiring assessment. Not a finding that reuse is prohibited.
+```
 
 ## Sources
-- Terms pass, 8 Nov 2026 (Claude fetch summaries): [NASA Earthdata Data Use and Citation Guidance](https://www.earthdata.nasa.gov/earth-observation-data/data-use-policy) · [USNO AA privacy/security notice](https://aa.usno.navy.mil/about/PrivacyNotice) · [navy.mil privacy policy](https://www.navy.mil/Privacy-Policy/) · [IAG/GGOS post on the IERS website relaunch](https://geodesy.science/2025/iers-relaunch-website/)
+- Terms pass, 8 Nov 2026 (Claude fetch summaries): [NASA Earthdata Data Use and Citation Guidance](https://www.earthdata.nasa.gov/earth-observation-data/data-use-policy) · [USNO AA privacy/security notice](https://aa.usno.navy.mil/about/PrivacyNotice) · [navy.mil privacy policy](https://www.navy.mil/Privacy-Policy/) · ~~IAG/GGOS post on the IERS relaunch~~ (withdrawn as evidence, rev 4)
+- Read by GPT on Chad's behalf, 8 Nov 2026: [IERS data centre](https://datacenter.iers.org/) · [EOP page](https://datacenter.iers.org/eop.php) · [IERS legal notice](https://www.iers.org/iers/en/service/imprint) · [maia](https://maia.usno.navy.mil/) · [IERS XML metadata](https://datacenter.iers.org/products/eop/rapid/daily/metadata/finals2000A.daily.me.xml) · [USNO products](https://maia.usno.navy.mil/products/eo-products) · [USNO FAQ](https://maia.usno.navy.mil/information/eo-faq)
 - [USNO daily products](https://maia.usno.navy.mil/products/daily.htm) · [readme.finals2000A](https://maia.usno.navy.mil/ser7/readme.finals2000A) · [ser7/readme](https://maia.usno.navy.mil/ser7/readme) · [USNO products](https://maia.usno.navy.mil/products/eo-products) · [USNO FAQ](https://maia.usno.navy.mil/information/eo-faq) — read via WebFetch, 6 Nov 2026
 - IERS data centre (browser pane, 6 Nov 2026 ~11:09–11:36 UTC): [finals2000A.daily](https://datacenter.iers.org/products/eop/rapid/daily/finals2000A.daily) · [file metadata](https://datacenter.iers.org/products/eop/rapid/daily/metadata/finals2000A.daily.me.xml) · [Bulletin A, 5 Nov 2026](https://datacenter.iers.org/data/latestVersion/bulletinA.txt) · [Bulletin B 465](https://datacenter.iers.org/data/latestVersion/bulletinB.txt) · [EOP index](https://datacenter.iers.org/eop.php)

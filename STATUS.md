@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~16:30 UTC — **R3 terms review rev 4: extraction complete; research-only REGISTER draft for review (docs only)** — `docs/research/R3-earth-rotation.md` §9
+- E1–E5 independently inspected by **GPT on Chad's behalf** (GPT is the reader). Data-centre "Legal and Privacy" link 404; current IERS legal notice: BKG responsible for the website, no data licence/citation/limit (website only, not product rights); `maia` carries "Distribution Statement A… distribution unlimited" and has no separate site notice; IERS XML metadata: free of charge, `dataSetURI` → `maia`, no constraint elements (≠ unrestricted); products/FAQ: downloads, alternatives, checksums, no scripted-download rule or limit.
+- **A6 (IAG terms) withdrawn:** a news article's own footer was misattributed to IERS.
+- Position: public distribution supported; **commercial reuse not yet established (not a finding of prohibition)**; U.S.-government-work reasoning an inference requiring assessment; product rights kept separate from website conditions and route.
+- §9.6 REGISTER draft, commercial use UNRESOLVED; **not filed**. No route, provider contact, other investigation, R6 or GIBS.
+
 ## 8 Nov ~15:50 UTC — **R3 Earth rotation terms/access review rev 3 (read-only; Chad's go, R3 only)** — `docs/research/R3-earth-rotation.md` §9, for GPT
 - Evidence separated into reuse/commercial, attribution, automated-access guidance and numerical limits; evidence, interpretation and unanswered questions kept apart. No data fetched, no provider contact, no route selection, no implementation.
 - Read 8 Nov (Claude fetch summaries): NASA Earthdata data-use guidance (non-NASA data via CDDIS follow the sponsoring organisation's terms); USNO AA and navy.mil notices ("public information… unless otherwise specified"), **scoped to their own sites, not extended to `maia`**; an IAG/GGOS post on the IERS site relaunch (secondary).
