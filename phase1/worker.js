@@ -51,7 +51,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.0';
+const COLLECTOR_VERSION = '0.6.1';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -186,8 +186,11 @@ async function collectUsgs(env, scheduledMs) {
   const evidence = fresh ? 'feed_fresh;m2.5_completeness_map_pending;m4.5_global_complete' : 'feed_stale_' + Math.round(ageS || -1) + 's';
   for (const id in cells) cells[id].coverage = { grade, evidence, observed_fraction: fresh ? 1 : 0 };
   const status = fresh ? 'ok' : 'degraded';
+  const statusReason = fresh ? null : !Number.isFinite(ageS)
+    ? { code: 'feed_age_unknown', rule: 'our feed-age limit cannot be applied: the feed gave no usable generation time', reference: 'feed generated time (metadata.generated)', limit_s: 600 }
+    : { code: 'feed_not_refreshed', rule: 'our feed-age limit', reference: 'feed generated time (metadata.generated)', limit_s: 600, age_s: Math.round(ageS) };
   const e = envelope(layer, scheduledMs, new Date(Date.now() - 86400e3).toISOString(), nowIso(), status, cells, fields, rows,
-    { source_generated_at: generated ? new Date(generated).toISOString() : null, source_age_s: ageS,
+    { source_generated_at: generated ? new Date(generated).toISOString() : null, source_age_s: ageS, status_reason: statusReason,
       coverage_default: { grade, evidence, observed_fraction: fresh ? 1 : 0 },
       quantity: 'earthquakes M2.5+ in the last 24 h (count) and M4.5+ (count_m45), deduplicated by USGS id' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
@@ -196,6 +199,30 @@ async function collectUsgs(env, scheduledMs) {
 }
 
 // ---------------------------------------------------------------- SWPC Kp
+
+// Kp status (0.6.1, 8 Nov 2026 — reviews/2026-11-08-kp-degraded-finding.md). Each Kp value covers a 3-hour interval and its
+// time_tag is the interval START (measured: values first reach us 3.13 h after time_tag, 31 of 33; 4.13 h for 2). The old
+// "< 4 h from time_tag" rule marked ~2 of every 3 hourly runs degraded during 4–8 Nov (ages 4.13–6.13 h, before the next value).
+// PROVISIONAL candidate policy (not a source deadline): degraded once the newest value is >= 7.5 h past its interval start,
+// i.e. the next value is overdue. With hourly polling a missing value is first flagged ~2 h after it was due (~8.13 h).
+// Reference point: time_tag (interval start). Invalid or future time_tags are degraded with their own reason, never 'ok'.
+const KP = { intervalS: 3 * 3600, lateAfterS: 7.5 * 3600, futureSkewS: 300 };
+// Cloud ships reason (0.6.1 rev 3). The measured values are published UNROUNDED: a reason exists to explain the condition, and
+// rounding 75.04 s to 75 or 0.8999 to 0.9 would publish a number that contradicts it (GPT, 8 Nov). The page formats them.
+function shipsReason(wallS, upFrac, windowS, overlong) {
+  if (!overlong && upFrac >= 0.9) return null;
+  return overlong
+    ? { code: 'sample_overlong', rule: 'our sampling standard: elapsed time over 1.25 × the window', elapsed_s: wallS, window_s: windowS, limit_s: 1.25 * windowS, also_low_flow: upFrac < 0.9 }
+    : { code: 'sample_flow_below_standard', rule: 'our sampling standard: messages flowing for at least 90% of the window (inferred from arrival gaps)', fraction: upFrac, window_s: windowS };
+}
+function kpStatus(timeTag, nowMs) {
+  const t = typeof timeTag === 'string' ? Date.parse(timeTag) : NaN;
+  if (!Number.isFinite(t)) return { status: 'degraded', reason: { code: 'time_tag_invalid', rule: 'source timestamp unusable', reference: 'interval start (time_tag)' } };
+  const ageS = (nowMs - t) / 1000;
+  if (ageS < -KP.futureSkewS) return { status: 'degraded', age_s: ageS, reason: { code: 'time_tag_in_future', rule: 'source timestamp later than our clock', reference: 'interval start (time_tag)', age_s: Math.round(ageS) } };
+  if (ageS >= KP.lateAfterS) return { status: 'degraded', age_s: ageS, reason: { code: 'observation_older_than_limit', rule: 'our observation-age limit (provisional)', reference: 'interval start (time_tag)', limit_s: KP.lateAfterS, age_s: Math.round(ageS) } };
+  return { status: 'ok', age_s: ageS, reason: null };
+}
 
 async function collectSwpc(env, scheduledMs) {
   const layer = 'swpc';
@@ -219,11 +246,14 @@ async function collectSwpc(env, scheduledMs) {
   const last = rows[rows.length - 1];
   const timeTag = last[0];                                               // §3.4 health: last row time_tag
   const kp = Number.isFinite(last[1]) ? last[1] : null;
-  const ageS = timeTag ? (Date.now() - Date.parse(timeTag)) / 1000 : null;
-  const status = ageS !== null && ageS < 4 * 3600 ? 'ok' : 'degraded';   // Kp is 3-hourly; > 4 h is late
+  const ks = kpStatus(timeTag, Date.now());
+  const ageS = Number.isFinite(ks.age_s) ? ks.age_s : null;
+  const status = ks.status;
+  const intervalEnd = Number.isFinite(Date.parse(timeTag)) ? new Date(Date.parse(timeTag) + KP.intervalS * 1000).toISOString() : null;
   const fields = ['time_tag', 'kp', 'a_running', 'station_count'];
   const e = envelope(layer, scheduledMs, rows[0] ? rows[0][0] : null, timeTag, status, {}, fields, rows,
-    { index: { name: 'planetary K-index', value: kp, time_tag: timeTag, source_age_s: ageS }, map_layer: false,
+    { index: { name: 'planetary K-index', value: kp, time_tag: timeTag, interval_start: timeTag, interval_end: intervalEnd, source_age_s: ageS, age_reference: 'interval start (time_tag)' }, map_layer: false,
+      status_reason: ks.reason,
       quantity: 'NOAA planetary Kp, 3-hourly index (not a map layer)' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
   // Index goes straight to D1 when a new 3-hour value appears (8 writes/day) — no hourly batch needed.
@@ -1024,10 +1054,11 @@ async function collectCo2(env, scheduledMs) {
   const last = dRows[dRows.length - 1], lw = wRows[wRows.length - 1];
   const ageS = (Date.now() - Date.parse(last[0] + 'T00:00:00Z')) / 1000;
   const status = ageS < 7 * 86400 ? 'ok' : 'degraded';                      // daily product; > 7 days behind is late
+  const statusReason = status === 'ok' ? null : { code: 'observation_older_than_limit', rule: 'our observation-age limit', reference: 'latest daily value date', limit_s: 7 * 86400, age_s: Math.round(ageS) };
   const weekStart = `${lw[0]}-${lw[1].padStart(2, '0')}-${lw[2].padStart(2, '0')}`;
   const num = x => (Number.isFinite(+x) && +x > 0 ? +x : null);
   const e = envelope(layer, scheduledMs, dRows[Math.max(0, dRows.length - 366)][0], last[0], status, {}, ['date', 'ppm'], dRows.slice(-366),
-    { index: { name: 'CO2, Mauna Loa Observatory', value: last[1], unit: 'ppm', date: last[0], source_age_s: ageS, preliminary: true },
+    { index: { name: 'CO2, Mauna Loa Observatory', value: last[1], unit: 'ppm', date: last[0], source_age_s: ageS, preliminary: true }, status_reason: statusReason,
       comparison: { basis: 'source-provided: NOAA GML weekly file, same week 1 year ago (365 days) and 10 years ago (3,653 days), week starting ' + weekStart,
         week_average: num(lw[4]), days_in_week: +lw[5], one_year_ago: num(lw[6]), ten_years_ago: num(lw[7]), increase_since_1800: num(lw[8]) },
       map_layer: false, source_notes: notes, citation: 'Lan, X., Tans, P. and Thoning, K.W.: Trends in globally-averaged CO2 determined from NOAA Global Monitoring Laboratory measurements. NOAA GML, gml.noaa.gov/ccgg/trends/',
@@ -1080,10 +1111,11 @@ async function collectSeaIce(env, scheduledMs) {
   const n = out.north, s = out.south;
   const ageS = (Date.now() - Date.parse(n.date + 'T00:00:00Z')) / 1000;
   const status = ageS < 5 * 86400 ? 'ok' : 'degraded';                     // daily product with ~1 day latency; > 5 days behind is late
+  const statusReason = status === 'ok' ? null : { code: 'observation_older_than_limit', rule: 'our observation-age limit', reference: 'latest daily value date (northern hemisphere)', limit_s: 5 * 86400, age_s: Math.round(ageS) };
   const recs = n.last_366.map((r, i) => [r[0], r[1], (s.last_366[i] || [])[1] ?? null]);
   delete n.last_366; delete s.last_366;
   const e = envelope(layer, scheduledMs, recs[0][0], n.date, status, {}, ['date', 'north_extent', 'south_extent'], recs,
-    { index: { name: 'sea-ice extent, NSIDC Sea Ice Index v4', north: n, south: s, source_age_s: ageS },
+    { index: { name: 'sea-ice extent, NSIDC Sea Ice Index v4', north: n, south: s, source_age_s: ageS }, status_reason: statusReason,
       comparison: { basis: 'source-provided baseline: NSIDC 1981–2010 daily climatology for the same day of year (average and percentiles). The subtraction (today minus average) is computed by this collector; the baseline is NSIDC\'s.' },
       map_layer: false, source_notes: notes,
       citation: nsidcCitation(fetchedMs),
@@ -1782,6 +1814,7 @@ async function collectShipsFallback(env, scheduledMs) {
   if (!L.confirmed || !L.messages) { await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'down', reason: L.sourceError || 'no messages', close: L.closeInfo }); await writeDown(env, layer, scheduledMs, 'cloud fallback: ' + (L.sourceError || 'no subscription confirmation or no messages'), L.upgradeStatus); return 'ships-fallback:down'; }
   const overlong = L.wallS > 1.25 * SF.windowS;
   const status = upFrac >= 0.9 && !overlong ? 'ok' : 'degraded';
+  const statusReason = shipsReason(L.wallS, upFrac, SF.windowS, overlong);
   const fields = ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'];
   const cov = { grade: 'partial', evidence: 'messages_flowing_inferred_from_arrival_gaps;not_a_measure_of_reception;not_geographic_coverage;receipt_history_pending;terrestrial_ais_only;cloud_fallback_connection', observed_fraction: upFrac };
   const cells = {}; for (const r of L.rows) { const id = cellId(r[1], r[2]); (cells[id] || (cells[id] = { count: 0, coverage: { ...cov } })).count++; }
@@ -1789,7 +1822,7 @@ async function collectShipsFallback(env, scheduledMs) {
   const e = envelope(layer, scheduledMs, new Date(now).toISOString(), nowIso(), status, cells, fields, L.rows, {
     coverage_default: cov,
     quantity: `vessel identities (MMSI) with a Class A or B position report received during a ${SF.windowS} s AIS sample, per cell; latest received position per vessel — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell; positions between samples unknown`,
-    collected_by: 'cloud hub (fallback: no home sample in the last 40 min)',
+    collected_by: 'cloud hub (fallback: no home sample in the last 40 min)', status_reason: statusReason,
     scope: 'world', window_s: SF.windowS, socket_connected_s: Math.round(L.socketS * 10) / 10, message_gap_s: Math.round(L.gapS * 10) / 10,
     elapsed_wall_s: Math.round(L.wallS * 10) / 10, messages_flowing_s: Math.round(flowingS * 10) / 10, connection_fraction_of_sample: upFrac,
     messages: L.messages, class_a: rowsA, class_b: L.rows.length - rowsA, records_without_source_time: L.noSourceTime, older_reports_ignored: L.olderIgnored,
@@ -2051,7 +2084,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 

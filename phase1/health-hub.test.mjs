@@ -253,7 +253,7 @@ await t('H8. a run note carrying the FIRMS key (fetch error with the URL) is red
   const st = await check(env, '/status');
   assert.ok(!st.text.includes(env.FIRMS_MAP_KEY) && !st.text.includes(env.ADMIN_KEY), '/status no longer exposes the key (rev 2)');
   assert.match(st.text, /fetch failed: TypeError: network connection lost while fetching .*\[redacted\]/, 'the note survives, minus the key');
-  assert.match(st.text, /"collector_version":"0\.6\.0"/, 'non-note strings are intact');
+  assert.match(st.text, /"collector_version":"\d+\.\d+\.\d+"/, 'non-note strings are intact');
   for (const p of ALL) { const g = await check(env, p); for (const v of [env.FIRMS_MAP_KEY, env.ADMIN_KEY]) assert.ok(!g.text.includes(v), p + ' leaks a secret'); }
   const p = await check(env, '/health/publication/firms'); assert.match(p.text, /\[redacted\]/);
 });
