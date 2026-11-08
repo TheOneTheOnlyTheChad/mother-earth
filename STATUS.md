@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov 11:53–12:06 UTC — **Noon UTC imagery rollover: PASS** (read-only; smoke-test open item; browser pane, Mac unattended)
+- Live page = main `ad4002b` (assets `?v=202611151000`). The booked prompt said `3375e91`; the imagery logic is unchanged between the two.
+- **Correction:** `IMG_DAY` = now − 36 h rolls **6 → 7 Nov** at 12:00 UTC on 8 Nov, not 7 → 8 as Claude's booking note said.
+- **Before noon** (fresh load, 11:53:21): `IMG_DAY` 2026-11-06, label "Imagery 06 Nov / NOAA-21 · not live". The one GIBS request: `TIME=2026-11-06`, `VIIRS_NOAA21_CorrectedReflectance_TrueColor`. They match.
+- **After noon** (fresh load, 12:05:30): `IMG_DAY` 2026-11-07, label "Imagery 07 Nov / NOAA-21 · not live", request `TIME=2026-11-07`, 2048×1024. Label and request rolled together.
+- **The image itself** (same URL, no-store, 12:05:40): HTTP 200, `image/jpeg`, 546,723 B, 2048×1024. Near-black (R, G, B < 12): 30°S–30°N **0.2%** (= the 8 Nov review's 7 Nov NOAA-21 figure), 66.5°S–66.5°N 2.8%, global 15.2% (incl. polar night).
+- **Open page (confirms GPT's point):** a tab loaded at 11:53 still showed 06 Nov at 12:05:02, with label and request still agreeing. An already-open page does not roll over until reloaded. That is current behaviour, already noted in the GIBS proposal rev 3 §4; no fix authorised or made.
+- Smoke-test items still open: actual-phone test, browser HTTP status codes.
+
 ## 8 Nov ~08:30 UTC — **`place-ui-harness` merged into main** (`96c52a1`, no-ff of `601b899`; Chad's go; GPT technical sign-off)
 - Test-only: `phase1/place-ui.test.cjs` + its review. No page, hub or production change.
 - **place-ui 30/30 on main** (was 28/30 since the FIRMS merge); kp-degraded 29/29 on the merge.
