@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~05:30–06:00 UTC — harness fix on a branch; noon check booked; Phase 0 recommendation drafted (Chad's go; no production change)
+- **place-ui harness** (branch `place-ui-harness` @ `601b899`, **not merged**): its fake R2 gains `head()` (hub 0.6.0 reads it before the place firms section). 28/30 → **30/30**; a break (head reports 1e9 bytes) fails the same two tests. Related suites all pass; `worker.js` untouched (= live). Review: `reviews/2026-11-08-place-ui-harness.md` — for GPT, then Chad's go to merge.
+- **Noon UTC imagery rollover** (read-only): `IMG_DAY` = now − 36 h, so the date rolls 7 → 8 Nov at 12:00 UTC. Check booked in this session for 11:50 UTC (before/after reads of label + actual GIBS request). Needs the Mac awake with the Claude app open.
+- **Phase 0 recommendation DRAFT**: `docs/research/P0-RECOMMENDATION-DRAFT.md`, from accepted findings only. Arts (the Met, cleared scope) recommended as the only candidate first domain, not selected; Life block kept; suggests taking the domain decision after the iPhone runs. **iPhone measurements outstanding** (skipped today, Chad). For GPT's review.
+- Not authorised: domain selection, prototype, new research, backlog implementation. Aircraft parked.
+
 ## 8 Nov 05:14–05:20 UTC — **GPT live smoke test of main `3375e91`: no blocking regression found in the checks completed** (not an exhaustive pass)
 - **Conditions:** Codex in-app browser (exact version not captured); imagery date shown 6 Nov 2026. Report + evidence on Chad's Mac: `~/Documents/ChatGPT/Mother Earth/outputs/2026-11-08-live-smoke/` (not copied into the repo).
 - **Passed:**
