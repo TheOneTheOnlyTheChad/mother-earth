@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~16:10 UTC — **GIBS stage 1 bench (one-off, read-only; Chad's go)** — `reviews/2026-11-08-gibs-stage1-bench.md`, for GPT
+- Browser pane (Chad's Mac), 15:55–15:59 UTC; 25 Oct – 7 Nov, NOAA-20 vs NOAA-21, 512×256 PNG vs the page's 2048×1024 JPEG (~60 GIBS requests, once). Evidence `reviews/evidence/2026-11-08-gibs-stage1-bench/`.
+- **PNG served:** HTTP 200 `image/png`, 8-bit RGBA, 202–287 KB. **Alpha always 255**; a day with no imagery (9 Nov) = 1,204 B, 100 % opaque black → no-data is not signalled by alpha; dark-area score = near-black share; ineligibility needs another signal (§5 revision for review).
+- **Ranking agreed 12/14**; flips on 28 and 29 Oct, both with satellite gaps ≤ 0.22 pp; per-image PNG–JPEG difference ≤ 0.21 pp (median 0.09). Provisional tie-margin indication ≥ ~0.25 pp (Chad/GPT to set).
+- **Decoder** (DecompressionStream + un-filter) exact vs the browser on all 30 PNGs; bounded-decoding negative controls rejected. Time per image: pane median 3.2 ms; local Node median 10.0 ms wall / 10.4 ms CPU. **Cloudflare Worker CPU not measured** (needs a deployment).
+- 7 Nov images changed between the 03:56 and 15:55 reads (N20 8.8 % → 6.9 %), supporting re-measurement after the decision.
+- No shadow record, threshold, fallback, branch, deploy, resource, schedule or page change. Bench code kept as a temporary research tool in the evidence folder.
+
 ## 8 Nov ~19:15 UTC — **R2 terms review rev 2 (GPT's review of `f6b8093` adopted; docs only)** — `docs/research/R2-terms-access.md`
 - **X1:** GPT's direct extraction + browser reading of SSD FAQ #a05: "No permissions are needed. The data provided on this site are considered public domain." (+ no endorsement, cite SSD with retrieval date/title/URL, identify modifications, fair-use guidance). **The accepted 5 Nov reading is restored as corroborated.** Rev 1's contrary reading came from Claude fetch summaries — kept only as an uncorroborated extraction discrepancy; no claim the site changed or the earlier review was wrong.
 - **X2:** general Caltech/JPL notice (documents may be protected; reproduction may require permission; Caltech manages JPL) recorded alongside, not substituted for, the specific SSD data statement. **X3:** CNEOS catalogue + lightcurve pages — government-sensor data for public release, not verified/reanalysed, revisable; no separate commercial statement. **X4:** citation/modifications/no-endorsement are provider-stated (FAQ); crediting CNEOS + underlying sensors is a project choice.
