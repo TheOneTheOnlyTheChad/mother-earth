@@ -224,6 +224,10 @@ Completed 8 Nov 2026 by GPT on Chad's behalf (findings in §9.2: E1 → B1; E2 �
 - **Routes:** the IERS copy's metadata adds cost and provenance (`dataSetURI` to `maia`) but no constraints; the IERS legal notice governs the website, not demonstrably the products. CDDIS defers to USNO. *Interpretation:* the product's rights follow USNO under every route found; no route-specific licence was found.
 - **Attribution:** no binding requirement found; project practice (§5) stands.
 
+### 9.4a Provider enquiry (recorded 8 Nov 2026)
+- **Sent by Chad, 8 Nov 2026**, to `eopcp@us.navy.mil` (the contact Bulletin A gives): asking about commercial reuse; storage, reformatting and redistribution; the IERS mirror; attribution; and one automated download per day. **Reply pending.**
+- **No permission is inferred from sending the email or from silence.** The reuse position stays UNRESOLVED (§9.4, §9.6). No follow-up contact or further R3 work without Chad's go.
+
 ### 9.5 Unanswered questions
 1. The **commercial-reuse position** for the USNO product (A1 supports public distribution; no grant, licence or prohibition found).
 2. Assessment of the **U.S.-government-work inference** (who assesses, against what source).
@@ -242,6 +246,7 @@ Completed 8 Nov 2026 by GPT on Chad's behalf (findings in §9.2: E1 → B1; E2 �
 - **Automated use:** downloads, alternative distribution and publisher checksums documented; daily files recommended for real-time applications. No scripted-download rule and no numerical rate/cadence/load limit found in the pages inspected (6–8 Nov 2026) — not unlimited; any proposal states its own cadence.
 - **Coverage statement:** none filed (R3 technical gates open).
 - **Status:** ⛔ research only; not cleared for building.
+- **Provider enquiry:** sent by Chad to eopcp@us.navy.mil, 8 Nov 2026; reply pending; no permission inferred from the email or from silence.
 - **Commercial use:** UNRESOLVED — public distribution is supported (Distribution Statement A); no licence, commercial-use grant or prohibition found. The U.S.-government-work reasoning is an inference requiring assessment. Not a finding that reuse is prohibited.
 ```
 

@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~17:00 UTC — **R6 ozone terms/access review rev 3 (read-only; Chad's go, R6 only)** — `docs/research/R6-ozone.md` §9, for GPT; **USNO email recorded (R3)**
+- **R3:** Chad sent the USNO enquiry to `eopcp@us.navy.mil` on 8 Nov (commercial reuse; storage/reformatting/redistribution; IERS mirror; attribution; one automated download per day). **Reply pending; no permission inferred from sending or silence**; R3 reuse stays UNRESOLVED (`R3` §9.4a). No follow-up or further R3 work.
+- **R6:** evidence split into reuse, attribution, automated access, numerical limits. Ozone Watch's credit request confirmed ("Please credit all material to "NASA Ozone Watch" unless otherwise noted."); no licence found. NASA's CC0 (ESDIS-scoped), the OMPS input record and NASA media guidelines read but **not applied to the derived files** (scope). No numerical limit found (≠ unlimited). Commercial use not established; not a finding of prohibition.
+- **Pending extraction (allowlist):** Ozone Watch disclaimers, the footer's NASA notices target, Ozone Watch homepage (required); contacts, GMAO input terms (supplementary). GPT may extract on Chad's behalf. No REGISTER draft yet.
+
 ## 8 Nov ~16:30 UTC — **R3 terms review rev 4: extraction complete; research-only REGISTER draft for review (docs only)** — `docs/research/R3-earth-rotation.md` §9
 - E1–E5 independently inspected by **GPT on Chad's behalf** (GPT is the reader). Data-centre "Legal and Privacy" link 404; current IERS legal notice: BKG responsible for the website, no data licence/citation/limit (website only, not product rights); `maia` carries "Distribution Statement A… distribution unlimited" and has no separate site notice; IERS XML metadata: free of charge, `dataSetURI` → `maia`, no constraint elements (≠ unrestricted); products/FAQ: downloads, alternatives, checksums, no scripted-download rule or limit.
 - **A6 (IAG terms) withdrawn:** a news article's own footer was misattributed to IERS.
