@@ -7,7 +7,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 ## 8 Nov ~08:30 UTC — **`place-ui-harness` merged into main** (`96c52a1`, no-ff of `601b899`; Chad's go; GPT technical sign-off)
 - Test-only: `phase1/place-ui.test.cjs` + its review. No page, hub or production change.
 - **place-ui 30/30 on main** (was 28/30 since the FIRMS merge); kp-degraded 29/29 on the merge.
-- Branches: `kp-degraded` deleted by Chad. Still to delete (Chad): `gibs-noaa21`, `place-ui-harness` (both 0 ahead). `aircraft-rc` stays parked.
+- Branches: Chad deleted `kp-degraded`, `gibs-noaa21` and `place-ui-harness`; GitHub now shows only `main` and the parked `aircraft-rc` (checked ~08:35 UTC).
 
 ## 8 Nov 08:11:22 UTC — **PAGE RELEASED: Kp interval + honest degraded wording** (main `ad4002b`, no-ff merge of `kp-degraded` @ `86134b8`; Chad: "Approve: push kp-degraded to main (page change: Kp interval + honest degraded wording)")
 - No overlap with main's docs-only changes. Merged page files = the reviewed commit (index `b9d4649e1ac6`, app `e3f4a3854113`, sources `7d66228f07b8`, style unchanged `e4c9547d99bf`); kp-degraded 29/29 on the merge.
