@@ -32,8 +32,9 @@ function makeEnv(extra = {}, d1opts = {}) {
   const R2 = {
     async put(k, body, o = {}) { if (r2fail.re && r2fail.re.test(k)) { r2fail.re = null; throw new Error('R2 stub: forced put failure (once)'); } store.set(k, { body: body instanceof Uint8Array ? body : String(body), meta: o, etag: '"' + Math.random().toString(36).slice(2) + '"' }); },
     async delete(k) { store.delete(k); },
+    async head(k) { const v = store.get(k); if (!v) return null; const b = v.body; return { key: k, size: typeof b === 'string' ? new TextEncoder().encode(b).length : b.byteLength, etag: v.etag || '', uploaded: new Date(), customMetadata: (v.meta || {}).customMetadata }; },   // 0.6.0: the hub's bounded legacy reads use head()
     async get(k) { gets.push(k); const v = store.get(k); if (!v) return null; const b = v.body;
-      return { body: b, httpEtag: v.etag, customMetadata: v.meta.customMetadata, async json() { return JSON.parse(b); }, async text() { return String(b); } }; },
+      return { body: b, httpEtag: v.etag, customMetadata: v.meta.customMetadata, async json() { return JSON.parse(b); }, async text() { return String(b); }, async arrayBuffer() { return b instanceof Uint8Array ? b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) : new TextEncoder().encode(b).buffer; } }; },
     async list({ prefix, include } = {}) { return { objects: [...store.keys()].filter(k => !prefix || k.startsWith(prefix)).map(key => ({ key, ...(include && include.includes('customMetadata') ? { customMetadata: (store.get(key).meta || {}).customMetadata } : {}) })), truncated: false }; },
   };
   const d = makeD1(d1opts);
@@ -85,7 +86,7 @@ await t('B1. same revision received again → no duplicate row; a new USGS `upda
   usgsFeatures = [quake('us1', 5000, 3.4), quake('us2', 2000, 4.6, 10, 10)]; NOW += 300e3; await runFive(env);
   const r = rows(db, "SELECT source_updated, mag, received_at, run_ref, collector_version FROM quake_revisions WHERE usgs_id='us1' ORDER BY source_updated");
   assert.equal(r.length, 2); assert.deepEqual(r.map(x => x.mag), [3.1, 3.4]);
-  assert.ok(r[1].run_ref.startsWith('usgs@') && /^0\.5\./.test(r[1].collector_version) && r[1].received_at > r[0].received_at);
+  assert.ok(r[1].run_ref.startsWith('usgs@') && /^0\.6\./.test(r[1].collector_version) && r[1].received_at > r[0].received_at);
   NOW -= 600e3;
 });
 

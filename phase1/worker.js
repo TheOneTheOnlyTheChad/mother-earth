@@ -16,6 +16,7 @@
  *   GET /admin/run/<job>?key=ADMIN_KEY   run a job now (jobs: five, minute, firms, forest, hourly)
  *   GET /admin/probe/spacetrack?key=ADMIN_KEY   ONE bounded Space-Track check (0.2.3; 0.2.4 also stages the GP body privately at staging/spacetrack-gp.csv; not scheduled)
  *   GET /admin/probe/orbital-build?key=ADMIN_KEY  run the orbital build on the staged copy (0.2.4; no upstream request, writes nothing)
+ *   GET /admin/probe/r2-conditional?key=ADMIN_KEY  (0.6.0) the R2 behaviours FIRMS v2 relies on, checked on this bucket; probe/ keys only, deleted after
  *   GET /snapshot/orbital, /elements/orbital   orbital meta + classified element CSV (0.3.0; job gated by ORBITAL_ENABLED=1, odd UTC hours at :41)
  *
  * Bindings (set in dashboard → Worker → Settings → Bindings):
@@ -25,6 +26,9 @@
  * Plain vars (optional): OPENSKY_ENABLED = "1" to run the OpenSky pulls (parked 31 Oct 2026: Cloudflare egress 522 + public site must feed; unset = skip silently)
 *                        OPENSKY_BBOX = "lamin,lomin,lamax,lomax"  (default southern Africa)
  *                        FIRMS_REGION = "west,south,east,north"   (default: world; set only if the Free plan's CPU limit forces it)
+ *                        FIRMS_PIPELINE = "v2"  (0.6.0) streaming FIRMS pipeline with D1 run state (FIRMS v2 section; needs the firms_* tables); unset = legacy
+ *                        FIRMS_CREATE_ONLY = "verified"  (0.6.0) allow v2 to CREATE latest/ or latest-cells/ when absent — set only after
+ *                                         /admin/probe/r2-conditional reports all_as_designed on this bucket
  *
  * Deviations from v0.3 to be recorded as a v0.4 diff (reasons in GUIDE-step1.md §6):
  *   D1  one Worker instead of one per layer (packaging only; same code path, fewer dashboard steps)
@@ -47,7 +51,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.5.3';
+const COLLECTOR_VERSION = '0.6.0';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -417,7 +421,10 @@ function firmsRowProblem(c, iLat, iLng, iDate, iTime, iConf, iFrp, iSat, iDn) {
 
 /** Lean CSV scan: only the columns we need. Header: latitude,longitude,bright_ti4,scan,track,acq_date,acq_time,satellite,instrument,confidence,version,bright_ti5,frp,daynight */
 function firmsParse(text) {
-  const nl = text.indexOf('\n');
+  // 0.6.0 fix (7 Nov, found by the monitoring thread): FIRMS's post-midnight header-only file has NO trailing newline (122 B). indexOf
+  // gave -1, the header was cut by one character and then re-read as data "line 2" → run down as "malformed" every night. A text with
+  // no newline is header-only: 0 rows → the existing empty-day path.
+  const nl0 = text.indexOf('\n'), nl = nl0 < 0 ? text.length : nl0;
   const header = text.slice(0, nl).trim().split(',');
   const ix = (n) => header.indexOf(n);
   const iLat = ix('latitude'), iLng = ix('longitude'), iDate = ix('acq_date'), iTime = ix('acq_time'), iConf = ix('confidence'), iFrp = ix('frp'), iSat = ix('satellite'), iDn = ix('daynight');
@@ -484,6 +491,512 @@ async function collectFirms(env, scheduledMs) {
       quantity: 'VIIRS NOAA-20 NRT thermal detections so far today (UTC), per cell (detections per pass, not a fire census)' });
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);
   await logRun(env, layer, scheduledMs, 'ok', res.status, parsed.rows.length, bytes, 'raw_bytes=' + res.text.length);
+}
+
+// ---------------------------------------------------------------- FIRMS v2 (0.6.0, design rev 6: docs/FIRMS-MEMORY-DESIGN.md)
+/* Streaming FIRMS pipeline with D1 run state. OFF unless FIRMS_PIPELINE = 'v2' (a variable: switching it on is a production step).
+ * Memory: no stage holds the whole file — raw and snapshot are written in ≤ 5 MiB parts, parsing is line by line, the checkpoint
+ * streams the snapshot through gzip, /place scans keeping 8 rows. State: firms_settings / firms_identity / firms_inputs /
+ * firms_attempts / firms_outputs (schema.sql). SQL below = docs/design-checks/firms-state.sql.mjs (checked by firms-v2.test.mjs). */
+const FV = {
+  part: 5 * 1024 * 1024, maxLine: 4096, leaseMs: 15 * 60e3, expireMs: 36 * 3600e3, legacyMaxJson: 12 * 1024 * 1024,
+  fetchMs: 180e3,   // whole FIRMS download (headers + body); a stalled body is aborted, never waited on forever (bench: a reset with Content-Length hung locally)
+  placeScans: 2, placeWaitMs: 2000, placeCacheBytes: 256 * 1024, downStampTries: 3,
+  legacyKey: /^snapshots\/firms\/\d{4}-\d\d-\d\dT\d\d-\d\dZ\.json$/, latest: 'latest/firms.json', cells: 'latest-cells/firms.json',
+  boundary: 'no detections processed yet for today',
+};
+const FVSQL = {
+  CLAIM: `INSERT INTO firms_attempts (run_id, attempt, token, invocation, started_at, lease_until)
+  SELECT ?1, COALESCE(MAX(a.attempt), 0) + 1, ?2, ?3, ?4, ?5 FROM firms_attempts a WHERE a.run_id = ?1
+  HAVING COALESCE(MAX(a.attempt), 0) < 3
+     AND NOT EXISTS (SELECT 1 FROM firms_attempts b WHERE b.run_id = ?1 AND b.finished_at IS NULL AND b.lease_until > ?4)
+     AND NOT EXISTS (SELECT 1 FROM firms_outputs o WHERE o.run_id = ?1)`,
+  CLAIM_COUNT: `UPDATE firms_inputs SET attempts_used = attempts_used + 1
+  WHERE run_id = ?1 AND EXISTS (SELECT 1 FROM firms_attempts WHERE token = ?2)`,
+  COMMIT: `INSERT INTO firms_outputs (run_id, attempt, token, retrieved_at, day, snapshot_key, snapshot_bytes, snapshot_sha256, records,
+    aux_key, aux_bytes, format, completed_at)
+  SELECT a.run_id, a.attempt, a.token, i.retrieved_at, substr(i.retrieved_at, 1, 10), ?2, ?3, ?4, ?5, ?6, ?7, 'lines/1', ?8
+  FROM firms_attempts a JOIN firms_inputs i ON i.run_id = a.run_id
+  WHERE a.token = ?1 AND a.finished_at IS NULL
+    AND a.attempt = (SELECT MAX(attempt) FROM firms_attempts m WHERE m.run_id = a.run_id)
+    AND NOT EXISTS (SELECT 1 FROM firms_outputs o WHERE o.run_id = a.run_id)`,
+  COMMIT_DONE: `UPDATE firms_inputs SET state = 'done' WHERE run_id = (SELECT run_id FROM firms_outputs WHERE token = ?1)`,
+  FAIL_FENCE: `UPDATE firms_attempts SET finished_at = ?2, outcome = 'failed', note = ?3
+  WHERE token = ?1 AND finished_at IS NULL
+    AND attempt = (SELECT MAX(attempt) FROM firms_attempts m WHERE m.run_id = firms_attempts.run_id)
+    AND NOT EXISTS (SELECT 1 FROM firms_outputs o WHERE o.run_id = firms_attempts.run_id)`,
+  FAIL_STALE: `UPDATE firms_attempts SET finished_at = ?2, outcome = 'fenced-failure', note = ?3 WHERE token = ?1 AND finished_at IS NULL`,
+  PUBLISH_CLAIM: `UPDATE firms_outputs SET publish_attempts = publish_attempts + 1
+  WHERE run_id = ?1 AND publish_state = 'pending' AND publish_attempts < 3`,
+  PUBLISHED: `UPDATE firms_outputs SET latest_at = COALESCE(latest_at, ?2), cells_at = ?3,
+  publish_state = CASE WHEN ?3 IS NOT NULL THEN 'published' ELSE publish_state END WHERE run_id = ?1`,
+  SWEEP_INPUTS_SUPERSEDED: `UPDATE firms_inputs SET state = 'superseded' WHERE state = 'ready' AND attempts_used < 3 AND retrieved_at < ?1`,
+  SWEEP_INPUTS_EXPIRED: `UPDATE firms_inputs SET state = 'expired' WHERE state = 'ready' AND attempts_used < 3 AND retrieved_at < ?1`,
+  SWEEP_OUTPUTS_SUPERSEDED: `UPDATE firms_outputs SET publish_state = 'superseded' WHERE publish_state = 'pending' AND publish_attempts < 3 AND retrieved_at < ?1`,
+  SWEEP_OUTPUTS_EXPIRED: `UPDATE firms_outputs SET publish_state = 'expired' WHERE publish_state = 'pending' AND publish_attempts < 3 AND retrieved_at < ?1`,
+  FIND_UNPROCESSED: `SELECT i.run_id, i.retrieved_at FROM firms_inputs i
+  WHERE i.state = 'ready' AND i.attempts_used < 3 AND i.retrieved_at > ?1
+  ORDER BY i.retrieved_at DESC LIMIT 1`,
+  FIND_UNPUBLISHED: `SELECT run_id, retrieved_at FROM firms_outputs
+  WHERE publish_state = 'pending' AND publish_attempts < 3 AND retrieved_at >= ?1 ORDER BY retrieved_at DESC LIMIT 1`,
+  CHECKPOINT_INPUT: `SELECT run_id, snapshot_key, aux_key, retrieved_at FROM firms_outputs WHERE day = ?1 ORDER BY retrieved_at DESC, run_id DESC LIMIT 1`,
+  IDENTITY: `INSERT OR IGNORE INTO firms_identity (retrieved_at, run_id, kind, actual_at) VALUES (?1, ?2, ?3, ?4)`,
+  CUTOVER: `INSERT OR IGNORE INTO firms_settings (key, value) VALUES ('format_cutover_at', ?1)`,
+  INPUT: `INSERT INTO firms_inputs (run_id, raw_key, scheduled_at, retrieved_at, bytes, sha256, content_length, created_at, collector_version)
+  VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)`,
+};
+const fvRand = () => [...crypto.getRandomValues(new Uint8Array(6))].map(b => b.toString(16).padStart(2, '0')).join('');
+const fvBody = o => (o && o.body && typeof o.body.getReader === 'function') ? o.body : new Blob([o && o.body !== undefined ? o.body : '']).stream();
+/** Incremental SHA-256: crypto.DigestStream on Workers; a small pure-JS fallback elsewhere (tests in Node). */
+function fvHasher() {
+  if (typeof crypto !== 'undefined' && typeof crypto.DigestStream === 'function') {
+    const ds = new crypto.DigestStream('SHA-256'), w = ds.getWriter();
+    return { async update(u8) { await w.write(u8); }, async hex() { await w.close(); return [...new Uint8Array(await ds.digest)].map(b => b.toString(16).padStart(2, '0')).join(''); } };
+  }
+  const K = new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+  const H = new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]), W = new Uint32Array(64), buf = new Uint8Array(64); let bl = 0, len = 0;
+  const block = b => { for (let i = 0; i < 16; i++) W[i] = (b[i*4] << 24) | (b[i*4+1] << 16) | (b[i*4+2] << 8) | b[i*4+3];
+    for (let i = 16; i < 64; i++) { const x = W[i-15], y = W[i-2]; W[i] = (((x>>>7)|(x<<25)) ^ ((x>>>18)|(x<<14)) ^ (x>>>3)) + W[i-16] + (((y>>>17)|(y<<15)) ^ ((y>>>19)|(y<<13)) ^ (y>>>10)) + W[i-7]; }
+    let [a, b2, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) { const t1 = h + (((e>>>6)|(e<<26)) ^ ((e>>>11)|(e<<21)) ^ ((e>>>25)|(e<<7))) + ((e & f) ^ (~e & g)) + K[i] + W[i] | 0;
+      const t2 = (((a>>>2)|(a<<30)) ^ ((a>>>13)|(a<<19)) ^ ((a>>>22)|(a<<10))) + ((a & b2) ^ (a & c) ^ (b2 & c)) | 0; h = g; g = f; f = e; e = d + t1 | 0; d = c; c = b2; b2 = a; a = t1 + t2 | 0; }
+    H[0] += a; H[1] += b2; H[2] += c; H[3] += d; H[4] += e; H[5] += f; H[6] += g; H[7] += h; };
+  return { async update(u8) { len += u8.length; let i = 0; while (i < u8.length) { const n = Math.min(64 - bl, u8.length - i); buf.set(u8.subarray(i, i + n), bl); bl += n; i += n; if (bl === 64) { block(buf); bl = 0; } } },
+    async hex() { const bits = len * 8; buf[bl++] = 0x80; if (bl > 56) { buf.fill(0, bl); block(buf); bl = 0; } buf.fill(0, bl, 56);
+      const hi = Math.floor(bits / 2 ** 32), lo = bits >>> 0; buf[56] = hi >>> 24; buf[57] = hi >>> 16; buf[58] = hi >>> 8; buf[59] = hi; buf[60] = lo >>> 24; buf[61] = lo >>> 16; buf[62] = lo >>> 8; buf[63] = lo; block(buf);
+      return [...H].map(x => (x >>> 0).toString(16).padStart(8, '0')).join(''); } };
+}
+/** Write bytes to `key` holding at most ONE part (5 MiB) in memory. Ends within the first part → one put; else multipart, aborted on error. */
+function fvWriter(env, key, putOpts = {}) {
+  let buf = new Uint8Array(FV.part), n = 0, mpu = null, parts = [], bytes = 0, full = false, open = false; const h = fvHasher();   // open: a multipart upload neither completed nor aborted
+  const flush = async () => { if (!mpu) { mpu = await env.R2.createMultipartUpload(key, putOpts); open = true; } parts.push(await mpu.uploadPart(parts.length + 1, buf.slice(0, n))); n = 0; full = false; };
+
+  const abort = async () => { buf = null; if (mpu && open) { open = false; try { await mpu.abort(); } catch (_) {} } };
+  const guard = async fn => { try { return await fn(); } catch (e) { await abort(); throw e; } };   // rev-6 build fix (GPT G5): never leave an upload open
+  return {
+    async write(u8) { return guard(async () => {
+      await h.update(u8); bytes += u8.length; let i = 0;
+      while (i < u8.length) { if (full) await flush(); const k = Math.min(FV.part - n, u8.length - i); buf.set(u8.subarray(i, i + k), n); n += k; i += k; if (n === FV.part) full = true; }
+    }); },
+    async close() { return guard(async () => {
+      const sha256 = await h.hex();
+      if (!mpu) { await env.R2.put(key, buf.slice(0, n), putOpts); buf = null; return { bytes, sha256, multipart: false }; }
+      parts.push(await mpu.uploadPart(parts.length + 1, buf.slice(0, n))); buf = null; await mpu.complete(parts); open = false; return { bytes, sha256, multipart: true, parts: parts.length };
+    }); },
+    abort,
+    get uploadOpen() { return open; },
+  };
+}
+/** A text sink over fvWriter that batches small strings into ~64 KiB encodes (bounded). */
+function fvTextSink(w) {
+  const enc = new TextEncoder(); let pend = [], pl = 0;
+  const out = async () => { if (pl) { const s = pend.join(''); pend = []; pl = 0; await w.write(enc.encode(s)); } };
+  return { async line(s) { if (s.length + 1 > FV.maxLine) throw new Error(`line too long for lines/1 (${s.length} chars > ${FV.maxLine - 1})`); pend.push(s, '\n'); pl += s.length + 1; if (pl >= 65536) await out(); }, flush: out };
+}
+/** Lines of a byte stream, each ≤ FV.maxLine, carry bounded; throws on a longer line. */
+async function* fvLines(stream) {
+  const rd = stream.pipeThrough(new TextDecoderStream()).getReader(); let carry = '';
+  for (;;) { const { value, done } = await rd.read(); if (done) break;
+    let s = carry + value, p = 0, q;
+    while ((q = s.indexOf('\n', p)) >= 0) { const ln = s.slice(p, q); if (ln.length > FV.maxLine) throw new Error(`line longer than ${FV.maxLine} chars`); yield ln; p = q + 1; }
+    carry = s.slice(p); if (carry.length > FV.maxLine) throw new Error(`line longer than ${FV.maxLine} chars`); }
+  if (carry) yield carry;
+}
+// ---- ordering (§5)
+function fvOrder(head, me) {
+  if (!head) return 'absent';
+  const md = head.customMetadata || {};
+  if (!md.run_id) return new Date(head.uploaded).getTime() < Date.parse(me.retrieved_at) ? 'older' : 'uncertain';
+  if (md.run_id !== me.run_id) return md.retrieved_at > me.retrieved_at ? 'newer' : 'older';
+  if (md.status === me.status) return me.status === 'ok' && md.token !== me.token ? 'mismatch' : 'ours';
+  return md.status === 'down' && me.status === 'ok' ? 'older' : 'newer';
+}
+async function fvCas(env, key, makeBody, me, contentType = 'application/json') {
+  for (let round = 0; round < 3; round++) {
+    const h = await env.R2.head(key), o = fvOrder(h, me);
+    if (o === 'ours') return 'ours';
+    if (o === 'newer' || o === 'uncertain' || o === 'mismatch') return o;
+    if (o === 'absent' && env.FIRMS_CREATE_ONLY !== 'verified') return 'refused-absent';   // §5: create-only only once verified on production R2
+    const meta = { run_id: me.run_id, retrieved_at: me.retrieved_at, status: me.status, token: me.token || '', format: me.format || 'cells' };
+    const res = await env.R2.put(key, await makeBody(), { onlyIf: o === 'absent' ? { etagDoesNotMatch: '*' } : { etagMatches: h.etag }, customMetadata: meta, httpMetadata: { contentType } });
+    if (res) return 'written';
+  }
+  return 'contended';
+}
+// ---- envelope pieces (same fields as collectFirms; lines/1 order: header → record_fields → records → cells → by_hour)
+const FV_COVERAGE = { grade: 'partial', evidence: 'pass_schedule_pending;cloud_may_hide_detections', observed_fraction: 1 };
+function fvHeader(scheduledMs, retrievedAt, rawKey, rawBytes, scope, runId) {
+  const dayStart = new Date(scheduledMs); dayStart.setUTCHours(0, 0, 0, 0);
+  return { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer: 'firms', window_start: dayStart.toISOString(), window_end: retrievedAt, retrieved_at: retrievedAt,
+    scheduled_for: new Date(scheduledMs).toISOString(), source_status: 'ok', interruptions: [], stale_after_s: STALE_AFTER_S.firms, record_format: 'rows',
+    raw: rawKey, raw_bytes: rawBytes, scope, coverage_default: FV_COVERAGE,
+    window_rule: 'today (UTC) so far: FIRMS day_range=1 returns the current UTC date only; resets at 00:00 UTC; NRT processing lands ~2–3 h after the pass',
+    quantity: 'VIIRS NOAA-20 NRT thermal detections so far today (UTC), per cell (detections per pass, not a fire census)', run_id: runId, format: 'lines/1' };
+}
+// ---- step A + registration
+async function fvFetchToRaw(env, scheduledMs) {
+  const region = (env.FIRMS_REGION || '').trim() || null;
+  const ac = new AbortController(), timer = setTimeout(() => ac.abort(new Error(`download timed out after ${FV.fetchMs / 1000} s`)), FV.fetchMs);
+  try { return await fvFetchBody(env, scheduledMs, region, ac.signal); } finally { clearTimeout(timer); }
+}
+async function fvFetchBody(env, scheduledMs, region, signal) {
+  let r; try { r = await fetch(URLS.firms(env.FIRMS_MAP_KEY, region), { headers: { 'User-Agent': UA }, signal }); } catch (e) { return { down: 'fetch failed: ' + e, http: 0 }; }
+  if (!r.ok) { const t = (await r.text()).slice(0, 100); return { down: 'http ' + r.status + ' ' + t, http: r.status }; }
+  const runId = isoMinute(scheduledMs) + '-' + Date.now() + '-' + fvRand(), rawKey = `raw/firms/${runId}.csv`;
+  const w = fvWriter(env, rawKey, { httpMetadata: { contentType: 'text/csv' } }); const rd = r.body.getReader(); let first = null;
+  try { for (;;) { const { value, done } = await rd.read(); if (done) break; if (!first) first = new TextDecoder().decode(value.subarray(0, 32)); await w.write(value); } }
+  catch (e) { await w.abort(); return { down: 'fetch failed: ' + e, http: r.status }; }
+  if (first && (first.startsWith('Invalid') || first.startsWith('<'))) { await w.abort(); return { down: 'http ' + r.status + ' ' + first.slice(0, 100), http: r.status }; }
+  const res = await w.close(); const retrievedAt = nowIso();
+  const head = await env.R2.head(rawKey); if (!head || head.size !== res.bytes) return { down: 'raw upload size mismatch', http: r.status };
+  const cl = Number(r.headers.get('content-length')); const contentLength = Number.isFinite(cl) && cl > 0 ? cl : null;
+  if (contentLength !== null && contentLength !== res.bytes) return { down: `truncated response: ${res.bytes} bytes of Content-Length ${contentLength}`, http: r.status, rawKey };
+  return { runId, rawKey, retrievedAt, bytes: res.bytes, sha256: res.sha256, contentLength, http: r.status, scope: region ? 'region ' + region : 'world' };
+}
+async function fvRegister(env, scheduledMs, a) {
+  try { await env.DB.batch([
+    env.DB.prepare(FVSQL.CUTOVER).bind(a.retrievedAt),
+    env.DB.prepare(FVSQL.IDENTITY).bind(a.retrievedAt, a.runId, 'input', a.retrievedAt),
+    env.DB.prepare(FVSQL.INPUT).bind(a.runId, a.rawKey, new Date(scheduledMs).toISOString(), a.retrievedAt, a.bytes, a.sha256, a.contentLength, nowIso(), COLLECTOR_VERSION),
+  ]);
+  // IDENTITY is INSERT OR IGNORE (shared with down runs): confirm the identity row is OURS — a collision must abandon, never re-stamp
+  const own = await env.DB.prepare('SELECT run_id FROM firms_identity WHERE retrieved_at = ?').bind(a.retrievedAt).first();
+  if (!own || own.run_id !== a.runId) return 'identity taken by ' + (own ? own.run_id : 'nothing');
+  return true; } catch (e) { return String(e); }   // INPUT's FK / UNIQUE fails on a collision → the whole batch rolls back
+}
+// ---- step B: raw → lines/1 snapshot + sidecar (per-attempt immutable keys) → commit fence
+async function fvProcess(env, runId, token, attempt, scope) {
+  const inp = await env.DB.prepare('SELECT raw_key, retrieved_at, scheduled_at, bytes FROM firms_inputs WHERE run_id = ?').bind(runId).first();
+  const scheduledMs = Date.parse(inp.scheduled_at);
+  const raw = await env.R2.get(inp.raw_key); if (!raw) throw new Error('raw input expired: ' + inp.raw_key);
+  const snapKey = `snapshots/firms/${runId}-a${attempt}-${token}.json`, auxKey = `snapshots/firms-aux/${runId}-a${attempt}-${token}.json`;
+  const meta = { run_id: runId, retrieved_at: inp.retrieved_at, token, format: 'lines/1' };
+  const w = fvWriter(env, snapKey, { httpMetadata: { contentType: 'application/json' }, customMetadata: meta }); const out = fvTextSink(w);
+  const cells = {}, byHour = {}, agg = {}; let records = 0, lastObs = null, header = null, nCols = 0, ix = null, lineNo = 0;
+  try {
+    const hdr = fvHeader(scheduledMs, inp.retrieved_at, inp.raw_key, inp.bytes, scope, runId);
+    await out.line('{'); for (const [k, v] of Object.entries(hdr)) await out.line(JSON.stringify(k) + ':' + JSON.stringify(v) + ',');
+    await out.line('"record_fields":' + JSON.stringify(['lat', 'lng', 'observed_at', 'confidence', 'frp_mw', 'satellite', 'daynight']) + ',');
+    await out.line('"records":[');
+    let prev = null;
+    for await (const line of fvLines(fvBody(raw))) {
+      lineNo++;
+      if (!header) { header = line.trim().split(','); nCols = header.length; const f = n => header.indexOf(n);
+        ix = { lat: f('latitude'), lng: f('longitude'), date: f('acq_date'), time: f('acq_time'), conf: f('confidence'), frp: f('frp'), sat: f('satellite'), dn: f('daynight') };
+        if (ix.lat < 0 || ix.lng < 0 || ix.date < 0 || ix.time < 0) throw new Error('unexpected FIRMS header: ' + header.join(','));
+        continue; }
+      if (!line) continue;
+      const c = line.split(',');
+      if (c.length !== nCols) throw new Error(`truncated or malformed response: line ${lineNo} has ${c.length} fields, header has ${nCols}`);
+      const bad = firmsRowProblem(c, ix.lat, ix.lng, ix.date, ix.time, ix.conf, ix.frp, ix.sat, ix.dn); if (bad) throw new Error(`truncated or malformed response: line ${lineNo} ${bad}`);
+      const lat = +c[ix.lat], lng = +c[ix.lng]; if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      const t = c[ix.time].padStart(4, '0'), obs = c[ix.date] + 'T' + t.slice(0, 2) + ':' + t.slice(2) + ':00Z';
+      const fv = ix.frp < 0 || c[ix.frp] === undefined || c[ix.frp].trim() === '' ? null : +c[ix.frp];
+      const row = [lat, lng, obs, c[ix.conf], Number.isFinite(fv) ? fv : null, c[ix.sat], c[ix.dn]];
+      if (prev !== null) await out.line(prev + ','); prev = JSON.stringify(row); records++;
+      const id = cellId(lat, lng); (cells[id] || (cells[id] = { count: 0 })).count++;
+      const hb = byHour[obs.slice(0, 13)] || (byHour[obs.slice(0, 13)] = {}); hb[id] = (hb[id] || 0) + 1;
+      const g = agg[id] || (agg[id] = { n: 0, frpSum: null, frpMax: null, frpN: 0, day: 0, night: 0 }); g.n++;
+      if (typeof row[4] === 'number') { g.frpSum = (g.frpSum ?? 0) + row[4]; g.frpN++; g.frpMax = g.frpMax === null ? row[4] : Math.max(g.frpMax, row[4]); }
+      if (row[6] === 'D') g.day++; else if (row[6] === 'N') g.night++;
+      if (!lastObs || obs > lastObs) lastObs = obs;
+    }
+    if (!header) throw new Error('empty response (no header)');
+    if (prev !== null) await out.line(prev);
+    await out.line('],');
+    for (const id in cells) cells[id].coverage = FV_COVERAGE;
+    const cellIds = Object.keys(cells); await out.line('"cells":{');
+    for (let k = 0; k < cellIds.length; k++) await out.line(JSON.stringify(cellIds[k]) + ':' + JSON.stringify(cells[cellIds[k]]) + (k < cellIds.length - 1 ? ',' : ''));
+    await out.line('},'); const hours = Object.keys(byHour); await out.line('"by_hour":{');
+    for (let k = 0; k < hours.length; k++) { await out.line(JSON.stringify(hours[k]) + ':{'); const ids = Object.keys(byHour[hours[k]]);
+      for (let m = 0; m < ids.length; m++) await out.line(JSON.stringify(ids[m]) + ':' + byHour[hours[k]][ids[m]] + (m < ids.length - 1 ? ',' : ''));
+      await out.line('}' + (k < hours.length - 1 ? ',' : '')); }
+    await out.line('}'); await out.line('}'); await out.flush();
+  } catch (e) { await w.abort(); throw e; }
+  if (records === 0) { await w.abort(); return { empty: true }; }
+  const s = await w.close();
+  const aux = JSON.stringify({ run_id: runId, token, attempt, retrieved_at: inp.retrieved_at, records, last_observation_at: lastObs, by_cell: agg, cells, by_hour: byHour, scheduled_for: new Date(scheduledMs).toISOString(), raw: inp.raw_key, raw_bytes: inp.bytes, scope });
+  await env.R2.put(auxKey, aux, { httpMetadata: { contentType: 'application/json' }, customMetadata: meta });
+  const hs = await env.R2.head(snapKey), ha = await env.R2.head(auxKey);
+  if (!hs || hs.size !== s.bytes || !ha) throw new Error('snapshot/sidecar size check failed');
+  const r = await env.DB.batch([env.DB.prepare(FVSQL.COMMIT).bind(token, snapKey, s.bytes, s.sha256, records, auxKey, ha.size, nowIso()), env.DB.prepare(FVSQL.COMMIT_DONE).bind(token)]);
+  const committed = r[0] && r[0].meta && r[0].meta.changes === 1;
+  await env.DB.prepare("UPDATE firms_attempts SET finished_at = ?, outcome = ? WHERE token = ? AND finished_at IS NULL").bind(nowIso(), committed ? 'committed' : 'fenced', token).run();
+  return { committed, records, snapKey, bytes: s.bytes };
+}
+// ---- step C: publication (§5)
+function fvCellsEnvelope(aux, status, extra = {}) {
+  return { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer: 'firms', window_start: aux.window_start || null, window_end: aux.retrieved_at, retrieved_at: aux.retrieved_at,
+    scheduled_for: aux.scheduled_for, source_status: status, interruptions: [], stale_after_s: STALE_AFTER_S.firms, cells: aux.cells || {}, by_hour: aux.by_hour,
+    raw: aux.raw, raw_bytes: aux.raw_bytes, scope: aux.scope, coverage_default: FV_COVERAGE, run_id: aux.run_id, ...extra };
+}
+async function fvPublish(env, runId) {
+  const out = await env.DB.prepare('SELECT * FROM firms_outputs WHERE run_id = ?').bind(runId).first(); if (!out) return 'no-output';
+  const c = await env.DB.prepare(FVSQL.PUBLISH_CLAIM).bind(runId).run(); if (!c.meta || c.meta.changes !== 1) return 'publish-bound';
+  const me = { run_id: runId, retrieved_at: out.retrieved_at, status: 'ok', token: out.token, format: 'lines/1' };
+  try { await fvSnapshotCheck(env, out); } catch (e) { await logRun(env, 'firms:recovery', Date.now(), 'down', 0, 0, 0, String(e).slice(0, 300)); return 'stop:snapshot-mismatch'; }
+  const aux = await fvAuxFor(env, out, 'publication');   // validated against the commit, or rebuilt from the committed snapshot — BEFORE anything is published
+  const r1 = await fvCas(env, FV.latest, async () => fvBody(await env.R2.get(out.snapshot_key)), me);
+  if (r1 === 'newer') { await env.DB.prepare("UPDATE firms_outputs SET publish_state = 'superseded' WHERE run_id = ? AND publish_state = 'pending'").bind(runId).run(); return 'stop:newer'; }
+  if (r1 !== 'written' && r1 !== 'ours') return 'stop:' + r1;
+  await env.DB.prepare(FVSQL.PUBLISHED).bind(runId, nowIso(), null).run();
+  const dayStart = new Date(aux.scheduled_for); dayStart.setUTCHours(0, 0, 0, 0); aux.window_start = dayStart.toISOString();
+  const cellsEnv = fvCellsEnvelope(aux, 'ok', { quantity: 'VIIRS NOAA-20 NRT thermal detections so far today (UTC), per cell (detections per pass, not a fire census)', window_rule: 'today (UTC) so far: FIRMS day_range=1 returns the current UTC date only; resets at 00:00 UTC; NRT processing lands ~2–3 h after the pass' });
+  const r2 = await fvCas(env, FV.cells, async () => JSON.stringify(cellsEnv), { ...me, format: 'cells' });
+  if (r2 !== 'written' && r2 !== 'ours') return 'cells:' + r2;
+  await putJson(env, `cells/firms/${runId}.json`, cellsEnv);   // per-run archive, as today (cells/ 2-day rule)
+  await env.DB.prepare(FVSQL.PUBLISHED).bind(runId, nowIso(), nowIso()).run();
+  return r1 === 'ours' && r2 === 'ours' ? 'reconciled-only' : 'published';
+}
+// ---- down files: input failures (§2.6, fenced, input identity) and no-input runs (§2.5, own identity, +1 ms ≤ 3)
+async function fvDownForInput(env, runId, token, note) {
+  const fenced = await env.DB.prepare(FVSQL.FAIL_FENCE).bind(token, nowIso(), note.slice(0, 300)).run();
+  if (!fenced.meta || fenced.meta.changes !== 1) { await env.DB.prepare(FVSQL.FAIL_STALE).bind(token, nowIso(), note.slice(0, 300)).run(); return 'fenced: no public down'; }
+  const inp = await env.DB.prepare('SELECT retrieved_at FROM firms_inputs WHERE run_id = ?').bind(runId).first();
+  const env2 = { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer: 'firms', window_start: null, window_end: null, retrieved_at: inp.retrieved_at, failed_at: nowIso(),
+    scheduled_for: null, source_status: 'down', interruptions: [], stale_after_s: STALE_AFTER_S.firms, cells: {}, note, run_id: runId };
+  return 'down:' + await fvCas(env, FV.cells, async () => JSON.stringify(env2), { run_id: runId, retrieved_at: inp.retrieved_at, status: 'down', token });
+}
+async function fvDownNoInput(env, scheduledMs, note) {
+  const actual = nowIso(), runId = 'down-' + isoMinute(scheduledMs) + '-' + fvRand(); let stamp = null;
+  for (let k = 0, t = Date.parse(actual); k < FV.downStampTries; k++, t++) {
+    const r = await env.DB.prepare(FVSQL.IDENTITY).bind(new Date(t).toISOString(), runId, 'down', actual).run();
+    if (r.meta && r.meta.changes === 1) { stamp = new Date(t).toISOString(); break; } }
+  if (!stamp) return 'identity refused';
+  const env2 = { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer: 'firms', window_start: null, window_end: null, retrieved_at: stamp, failed_at: actual,
+    scheduled_for: new Date(scheduledMs).toISOString(), source_status: 'down', interruptions: [], stale_after_s: STALE_AFTER_S.firms, cells: {}, note, run_id: runId };
+  return 'down:' + await fvCas(env, FV.cells, async () => JSON.stringify(env2), { run_id: runId, retrieved_at: stamp, status: 'down' });
+}
+async function fvCurrent(env) {
+  const h = await env.R2.head(FV.latest); if (!h) return '1970-01-01T00:00:00.000Z';
+  return (h.customMetadata && h.customMetadata.retrieved_at) || new Date(h.uploaded).toISOString();
+}
+/** Claim and process one input; publish if committed; failure path fenced. Returns a short result string. */
+async function fvWork(env, runId, scope) {
+  const token = fvRand() + fvRand(), now = Date.now();
+  const cl = await env.DB.batch([env.DB.prepare(FVSQL.CLAIM).bind(runId, token, 'firms@' + nowIso(), new Date(now).toISOString(), new Date(now + FV.leaseMs).toISOString()), env.DB.prepare(FVSQL.CLAIM_COUNT).bind(runId, token)]);
+  if (!cl[0] || !cl[0].meta || cl[0].meta.changes !== 1) return { r: 'claim lost' };
+  const at = await env.DB.prepare('SELECT attempt FROM firms_attempts WHERE token = ?').bind(token).first();
+  let p;
+  try { p = await fvProcess(env, runId, token, at.attempt, scope); }
+  catch (e) { const why = String(e).slice(0, 300); return { r: await fvDownForInput(env, runId, token, why), failed: why }; }
+  if (p.empty) { const why = new Date().getUTCHours() < FIRMS_DAY_BOUNDARY_H ? `${FV.boundary} (UTC): FIRMS day_range=1 resets at 00:00 UTC and NRT runs ~2–3 h behind (header only)` : `empty response (header only) at ${new Date().getUTCHours()}:xx UTC: not a validated zero`;
+    const r = await fvDownForInput(env, runId, token, why); return { r, failed: why, empty: true }; }
+  if (!p.committed) return { r: 'fenced' };
+  // a publication error leaves the output pending for discovery's repair (§6); it is never reported as a down counts file
+  try { return { r: await fvPublish(env, runId), records: p.records, bytes: p.bytes }; } catch (e) { return { r: 'publication error (pending repair): ' + String(e).slice(0, 160) }; }
+}
+/** The FIRMS job (v2): sweeps → one piece of unfinished work → fetch → register → process → publish. Logs collector_runs as before. */
+async function collectFirmsV2(env, scheduledMs) {
+  const t = await collectFirmsV2Run(env, scheduledMs);
+  return t + '; ' + await hist(env, 'firms-checkpoint', () => histCheckpointsDue(env, 'firms', Date.now()));
+}
+async function collectFirmsV2Run(env, scheduledMs) {
+  const layer = 'firms', trace = [];
+  const cur = await fvCurrent(env), exp = new Date(Date.now() - FV.expireMs).toISOString();
+  await env.DB.batch([env.DB.prepare(FVSQL.SWEEP_INPUTS_EXPIRED).bind(exp), env.DB.prepare(FVSQL.SWEEP_OUTPUTS_EXPIRED).bind(exp), env.DB.prepare(FVSQL.SWEEP_INPUTS_SUPERSEDED).bind(cur), env.DB.prepare(FVSQL.SWEEP_OUTPUTS_SUPERSEDED).bind(cur)]);
+  const pub = await env.DB.prepare(FVSQL.FIND_UNPUBLISHED).bind(cur).first();
+  if (pub) { let r; try { r = await fvPublish(env, pub.run_id); } catch (e) { r = 'publication error (pending repair): ' + String(e).slice(0, 160); } trace.push('repair ' + pub.run_id + ': ' + r);
+    if (r === 'published' || r === 'reconciled-only') { const o = await env.DB.prepare('SELECT records, snapshot_bytes FROM firms_outputs WHERE run_id = ?').bind(pub.run_id).first(); await logRun(env, layer, scheduledMs, 'ok', 200, o.records, o.snapshot_bytes, `repair run=${pub.run_id}`); }
+    else await logRun(env, 'firms:recovery', scheduledMs, 'down', 0, 0, 0, `repair run=${pub.run_id} ${r}`); }
+  else { const inp = await env.DB.prepare(FVSQL.FIND_UNPROCESSED).bind(cur).first();
+    if (inp && await env.R2.head((await env.DB.prepare('SELECT raw_key FROM firms_inputs WHERE run_id = ?').bind(inp.run_id).first()).raw_key)) {
+      const w = await fvWork(env, inp.run_id, (env.FIRMS_REGION || '').trim() ? 'region ' + env.FIRMS_REGION.trim() : 'world'); trace.push('retry ' + inp.run_id + ': ' + w.r);
+      if (w.r === 'published' || w.r === 'reconciled-only') await logRun(env, layer, scheduledMs, 'ok', 200, w.records, w.bytes, `retry run=${inp.run_id}`);
+      else await logRun(env, 'firms:recovery', scheduledMs, 'down', 0, 0, 0, `retry run=${inp.run_id} ${w.failed || w.r}`); } }
+  // the run's own fetch
+  if (!env.FIRMS_MAP_KEY) { await logRun(env, layer, scheduledMs, 'down', 0, 0, 0, 'no FIRMS key set'); trace.push(await fvDownNoInput(env, scheduledMs, 'no FIRMS key set')); return trace.join('; '); }
+  const a = await fvFetchToRaw(env, scheduledMs);
+  if (a.down) { await logRun(env, layer, scheduledMs, 'down', a.http || 0, 0, 0, a.down); trace.push(await fvDownNoInput(env, scheduledMs, a.down)); return trace.join('; '); }
+  if (a.bytes > FIRMS_MAX_PARSE_BYTES) { const why = `raw archived; processing skipped: resource guard (${a.bytes} bytes > ${FIRMS_MAX_PARSE_BYTES})`;
+    await logRun(env, layer, scheduledMs, 'down', a.http, 0, 0, why); trace.push(await fvDownNoInput(env, scheduledMs, why)); return trace.join('; '); }
+  const reg = await fvRegister(env, scheduledMs, a);
+  if (reg !== true) { await logRun(env, layer, scheduledMs, 'down', a.http, 0, 0, 'identity collision: ' + String(reg).slice(0, 120)); trace.push('identity refused'); return trace.join('; '); }
+  const w = await fvWork(env, a.runId, a.scope); trace.push('run ' + a.runId + ': ' + w.r);
+  if (w.failed) await logRun(env, layer, scheduledMs, 'down', a.http, 0, 0, w.failed);
+  else if (w.r === 'published' || w.r === 'reconciled-only') await logRun(env, layer, scheduledMs, 'ok', a.http, w.records, w.bytes, 'raw_bytes=' + a.bytes + ' run=' + a.runId);
+  else await logRun(env, layer, scheduledMs, 'down', a.http, 0, 0, 'publication ' + w.r + ' run=' + a.runId);
+  return trace.join('; ');
+}
+// ---- step D: checkpoint input selection for firms (§7, §9) and the streaming new-format checkpoint
+/* Checkpoint input (design §7, §9; build fixes after GPT's production review, G1/G2):
+ *  - Unreadable state is an ERROR, never "nothing there": a failed D1 read propagates, so hist() logs the failure and the day stays
+ *    due (no gap, no marker) until a later run reads it. The one tolerated case: the firms_* tables do not exist while v2 is off
+ *    (then no committed output can exist).
+ *  - Legacy eligibility = legacy key format + its retrieval time; the format cutover is NOT a filter any more. A legacy object
+ *    written after the cutover is a complete legacy publication (rollback: FIRMS_PIPELINE unset; or an old isolate across the
+ *    deploy), and the day's input is the latest publication of either kind. format_cutover_at is still written (audit). */
+/** Has v2 ever been active here? Until it has, the checkpoint/backfill run EXACTLY the legacy code (deploying 0.6.0 with v2 off changes
+ * nothing about the daily archive). After it has — including after a rollback — the v2 selection is used, so mixed days are right.
+ * Unreadable state is an error (defer), except a missing table (schema not applied → v2 cannot have run). */
+async function fvEverRan(env) {
+  if (env.FIRMS_PIPELINE === 'v2') return true;
+  try { return !!(await env.DB.prepare("SELECT value FROM firms_settings WHERE key = 'format_cutover_at'").first()); }
+  catch (e) { if (/no such table/i.test(String(e))) return false; throw new Error('v2 state read failed; checkpoint deferred: ' + String(e).slice(0, 160)); }
+}
+async function fvCheckpointCandidate(env, day, legacySnaps) {
+  let newer = null;
+  try { newer = await env.DB.prepare(FVSQL.CHECKPOINT_INPUT).bind(day).first(); }
+  catch (e) { if (!(env.FIRMS_PIPELINE !== 'v2' && /no such table/i.test(String(e)))) throw new Error('committed-output read failed; checkpoint deferred: ' + String(e).slice(0, 160)); }
+  const legacy = legacySnaps.filter(x => FV.legacyKey.test(x.key) && x.retrieved_at.slice(0, 10) === day)
+    .sort((a, b) => a.retrieved_at < b.retrieved_at ? -1 : a.retrieved_at > b.retrieved_at ? 1 : a.key < b.key ? -1 : 1).pop() || null;
+  if (newer && (!legacy || newer.retrieved_at > legacy.retrieved_at)) return { kind: 'new', out: newer };
+  return legacy ? { kind: 'legacy', snap: legacy } : null;
+}
+async function fvCheckpointNew(env, day, sel) {
+  const done = await env.DB.prepare("SELECT 1 AS x FROM archive_checkpoints WHERE layer = 'firms' AND day = ?").bind(day).first(); if (done) return 'already done';
+  const out = await env.DB.prepare('SELECT * FROM firms_outputs WHERE run_id = ?').bind(sel.run_id).first();   // the full committed row (sizes, hash, token)
+  if (!out) throw new Error('committed output vanished: ' + sel.run_id);
+  await fvSnapshotCheck(env, out);
+  const aux = await fvAuxFor(env, out, 'checkpoint');
+  const key = `${HIST.checkpoints}firms/${day}.json.gz`, ref = runRef('firms', out.retrieved_at);
+  const cov = await checkpointCoverage(env, 'firms', day, out.retrieved_at, null, null, Date.now(), true, aux.last_observation_at || null);
+  const w = fvWriter(env, key, { httpMetadata: { contentType: 'application/json', contentEncoding: 'gzip' }, customMetadata: { cutoff: out.retrieved_at, run_ref: ref, collector_version: COLLECTOR_VERSION, source_key: out.snapshot_key,
+    input_status: cov.input_status, failed_runs_after_cutoff: String(cov.failed_runs_after_cutoff), last_observation_at: String(cov.last_observation_at), input_age_at_day_end_s: String(cov.input_age_at_day_end_s), format: 'lines/1' } });
+  const hr = fvHashing();   // the snapshot bytes are hashed on the way through and must equal the committed hash
+  try { const rd = fvBody(await env.R2.get(out.snapshot_key)).pipeThrough(hr.stream).pipeThrough(new CompressionStream('gzip')).getReader();
+    for (;;) { const { value, done: d } = await rd.read(); if (d) break; await w.write(value); } }
+  catch (e) { await w.abort(); throw e; }
+  const g = await w.close();
+  const got = await hr.result();
+  if (got.bytes !== out.snapshot_bytes || got.sha256 !== out.snapshot_sha256) { try { await env.R2.delete(key); } catch (_) {} throw new Error(`snapshot ${out.snapshot_key} does not match its committed hash/size (${got.bytes} B); checkpoint refused`); }
+  const stmts = Object.entries(aux.by_cell).map(([id, c]) => env.DB.prepare('INSERT OR IGNORE INTO fires_daily (cell_id, day, detections, frp_sum_mw, frp_max_mw, frp_n, day_n, night_n, cutoff, run_ref, collector_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(id, day, c.n, c.frpSum === null ? null : Math.round(c.frpSum * 10) / 10, c.frpMax, c.frpN, c.day, c.night, out.retrieved_at, ref, COLLECTOR_VERSION));
+  for (let i = 0; i < stmts.length; i += BATCH_SIZE) await env.DB.batch(stmts.slice(i, i + BATCH_SIZE));
+  await writeCoverage(env, cov);
+  await env.DB.prepare('INSERT OR IGNORE INTO archive_checkpoints (layer, day, cutoff, r2_key, bytes, records, run_ref, collector_version, source_key) VALUES (?,?,?,?,?,?,?,?,?)')
+    .bind('firms', day, out.retrieved_at, key, g.bytes, out.records, ref, COLLECTOR_VERSION, out.snapshot_key).run();   // the COMMITTED count
+  return aux.rebuilt ? 'done (sidecar rebuilt from the committed snapshot)' : 'done';
+}
+/** A passthrough stream that counts and hashes the bytes it carries (bounded: one chunk at a time). */
+function fvHashing() {
+  const h = fvHasher(); let bytes = 0;
+  return { stream: new TransformStream({ async transform(c, ctl) { await h.update(c); bytes += c.length; ctl.enqueue(c); } }), result: async () => ({ bytes, sha256: await h.hex() }) };
+}
+/** The committed snapshot object must be the one the commit recorded: size and the attempt's own token/run in its metadata. */
+async function fvSnapshotCheck(env, out) {
+  const h = await env.R2.head(out.snapshot_key), md = (h && h.customMetadata) || {};
+  if (!h || h.size !== out.snapshot_bytes || md.run_id !== out.run_id || md.token !== out.token || md.retrieved_at !== out.retrieved_at)
+    throw new Error(`snapshot object for ${out.run_id} does not match the committed output (size ${h ? h.size : 'missing'} / token / run); refused`);
+}
+/** The sidecar is trusted only if it is THIS committed attempt's and internally consistent; otherwise it is rebuilt from the committed
+ * snapshot (streamed, hash-checked). Nothing downstream ever uses an unvalidated sidecar. */
+function fvAuxProblem(aux, out, size) {
+  if (!aux) return 'missing';
+  if (size !== out.aux_bytes) return `size ${size} ≠ committed ${out.aux_bytes}`;
+  for (const k of ['run_id', 'token', 'attempt', 'retrieved_at', 'records']) if (aux[k] !== out[k]) return `${k} ${JSON.stringify(aux[k])} ≠ committed ${JSON.stringify(out[k])}`;
+  const sum = o => Object.values(o || {}).reduce((a, v) => a + (typeof v === 'number' ? v : v && typeof v.n === 'number' ? v.n : v && typeof v.count === 'number' ? v.count : NaN), 0);
+  if (sum(aux.by_cell) !== out.records) return 'by_cell does not sum to the committed records';
+  if (sum(aux.cells) !== out.records) return 'cells do not sum to the committed records';
+  if (Object.values(aux.by_hour || {}).reduce((a, h) => a + sum(h), 0) !== out.records) return 'by_hour does not sum to the committed records';
+  return null;
+}
+async function fvAuxFor(env, out, purpose) {
+  const o = await env.R2.get(out.aux_key); let aux = null; try { aux = o ? await o.json() : null; } catch (_) {}
+  const why = fvAuxProblem(aux, out, o ? o.size : -1);
+  if (!why) return aux;
+  const rebuilt = await fvAuxFromSnapshot(env, out);
+  await logRun(env, 'firms:recovery', Date.now(), 'ok', 0, out.records, 0, `${purpose}: sidecar of ${out.run_id} rejected (${why}); rebuilt from the committed snapshot`);
+  return rebuilt;
+}
+/** Rebuild the sidecar from the committed lines/1 snapshot: same maps as step B, hash and size checked against the commit. */
+async function fvAuxFromSnapshot(env, out) {
+  const o = await env.R2.get(out.snapshot_key); if (!o) throw new Error('committed snapshot missing: ' + out.snapshot_key);
+  const hr = fvHashing(), hdr = {}; let fields = null, inRec = false, records = 0, lastObs = null; const agg = {}, cells = {}, byHour = {};
+  for await (const line of fvLines(fvBody(o).pipeThrough(hr.stream))) {
+    if (inRec === false) {
+      if (line === '"records":[') { inRec = true; continue; }
+      if (line.startsWith('"record_fields":')) { fields = JSON.parse(line.slice(16, -1)); continue; }
+      const m = /^("[a-z_]+"):(.*),$/.exec(line); if (m) { try { hdr[JSON.parse(m[1])] = JSON.parse(m[2]); } catch (_) {} }
+      continue;
+    }
+    if (line === '],') { inRec = null; continue; }   // past the records: keep reading (unparsed) so the hash covers every byte
+    if (inRec === null) continue;
+    const r = JSON.parse(line.endsWith(',') ? line.slice(0, -1) : line), f = n => fields.indexOf(n);
+    const lat = r[f('lat')], lng = r[f('lng')], obs = r[f('observed_at')], frp = r[f('frp_mw')], dn = r[f('daynight')];
+    const id = cellId(lat, lng); records++;
+    (cells[id] || (cells[id] = { count: 0, coverage: FV_COVERAGE })).count++;
+    const hb = byHour[obs.slice(0, 13)] || (byHour[obs.slice(0, 13)] = {}); hb[id] = (hb[id] || 0) + 1;
+    const g = agg[id] || (agg[id] = { n: 0, frpSum: null, frpMax: null, frpN: 0, day: 0, night: 0 }); g.n++;
+    if (typeof frp === 'number') { g.frpSum = (g.frpSum ?? 0) + frp; g.frpN++; g.frpMax = g.frpMax === null ? frp : Math.max(g.frpMax, frp); }
+    if (dn === 'D') g.day++; else if (dn === 'N') g.night++;
+    if (!lastObs || obs > lastObs) lastObs = obs;
+  }
+  const got = await hr.result();
+  if (got.bytes !== out.snapshot_bytes || got.sha256 !== out.snapshot_sha256) throw new Error(`snapshot ${out.snapshot_key} does not match its committed hash/size; sidecar not rebuilt`);
+  if (records !== out.records) throw new Error(`snapshot ${out.snapshot_key} holds ${records} records, the commit says ${out.records}; refused`);
+  return { run_id: out.run_id, token: out.token, attempt: out.attempt, retrieved_at: out.retrieved_at, records, last_observation_at: lastObs, by_cell: agg, cells, by_hour: byHour,
+    scheduled_for: hdr.scheduled_for, raw: hdr.raw, raw_bytes: hdr.raw_bytes, scope: hdr.scope, rebuilt: true };
+}
+/** Decompress an R2 object, counting bytes; null as soon as the output passes `limit` (nothing parsed). Handles an object a runtime
+ * already served decoded (not gzip). */
+async function fvBoundedGunzip(env, key, limit) {
+  const o = await env.R2.get(key); if (!o) return null;
+  const head = new Uint8Array(await (await env.R2.get(key, { range: { offset: 0, length: 2 } })).arrayBuffer());
+  const gz = head[0] === 0x1f && head[1] === 0x8b;
+  const rd = (gz ? fvBody(o).pipeThrough(new DecompressionStream('gzip')) : fvBody(o)).getReader(); const dec = new TextDecoder(); let n = 0, out = '';
+  for (;;) { const { value, done } = await rd.read(); if (done) break; n += value.length; if (n > limit) { try { await rd.cancel(); } catch (_) {} return null; } out += dec.decode(value, { stream: true }); }
+  return out + dec.decode();
+}
+/** Production check of the R2 semantics v2 depends on (design §5, §3), run once by hand before FIRMS_CREATE_ONLY=verified.
+ * Uses fresh keys under probe/firms-v2/<random>/ only; every key written is deleted at the end (deletes and aborts are free). */
+async function fvProbeR2(env) {
+  const base = 'probe/firms-v2/' + fvRand() + '/', out = { base, at: nowIso() }, keys = [], uploads = [];   // uploads: every multipart this probe started
+  const put = async (k, v, o) => { keys.push(base + k); const r = await env.R2.put(base + k, v, o); return r ? r.etag : null; };
+  try {
+    out.createAbsent = await put('a', 'one', { onlyIf: { etagDoesNotMatch: '*' } }) !== null;
+    out.createPresent = await put('a', 'two', { onlyIf: { etagDoesNotMatch: '*' } }) === null;
+    out.createKeptOriginal = (await (await env.R2.get(base + 'a')).text()) === 'one';
+    const e1 = (await env.R2.head(base + 'a')).etag; await put('a', 'three');
+    out.casStale = await put('a', 'four', { onlyIf: { etagMatches: e1 } }) === null;
+    out.casCurrent = await put('a', 'five', { onlyIf: { etagMatches: (await env.R2.head(base + 'a')).etag } }) !== null;
+    await put('src', new Uint8Array(FV.part + 7).fill(65));
+    await put('copy', (await env.R2.get(base + 'src')).body); out.objectBodyCopy = (await env.R2.head(base + 'copy')).size === FV.part + 7;
+    const w = fvWriter(env, base + 'mp', { customMetadata: { run_id: 'probe' } }); keys.push(base + 'mp'); uploads.push({ abort: () => w.abort(), isOpen: () => w.uploadOpen });
+    await w.write(new Uint8Array(FV.part + 10).fill(66)); const r = await w.close();
+    const hm = await env.R2.head(base + 'mp'); out.multipart = r.multipart === true && hm.size === FV.part + 10 && hm.customMetadata.run_id === 'probe';
+    keys.push(base + 'ab'); const ab = await env.R2.createMultipartUpload(base + 'ab'); let abOpen = true; uploads.push({ abort: async () => { if (abOpen) { abOpen = false; await ab.abort(); } }, isOpen: () => abOpen });
+    await ab.uploadPart(1, new Uint8Array(FV.part)); abOpen = false; await ab.abort(); out.abortLeavesNothing = (await env.R2.head(base + 'ab')) === null;
+  } finally {
+    // abort every upload still open (an empty object listing does NOT show open uploads), then delete every completed object
+    for (const u of uploads) if (u.isOpen()) try { await u.abort(); } catch (_) {}
+    out.uploads_open_after = uploads.filter(u => u.isOpen()).length;
+    for (const k of [...new Set(keys)]) try { await env.R2.delete(k); } catch (_) {}
+    out.cleaned = out.uploads_open_after === 0 && (await env.R2.list({ prefix: base })).objects.length === 0;
+  }
+  const must = ['createAbsent', 'createPresent', 'createKeptOriginal', 'casStale', 'casCurrent', 'objectBodyCopy', 'multipart', 'abortLeavesNothing', 'cleaned'];
+  out.all_as_designed = must.every(k => out[k] === true); return out;
+}
+// ---- step E: /place firms section over a lines/1 latest/ (8 rows + count; byte-capped cache; scan cap)
+const fvPlace = { scans: 0, cache: new Map(), bytes: 0 };
+async function fvPlaceFirms(env, id, cellsEnv) {
+  const h = await env.R2.head(FV.latest); if (!h) return null;
+  const ck = h.etag + '|' + id, hit = fvPlace.cache.get(ck); if (hit) { fvPlace.cache.delete(ck); fvPlace.cache.set(ck, hit); return hit.v; }
+  const t0 = Date.now(); while (fvPlace.scans >= FV.placeScans) { if (Date.now() - t0 > FV.placeWaitMs) return { busy: true }; await new Promise(r => setTimeout(r, 50)); }
+  fvPlace.scans++;
+  try {
+    const o = await env.R2.get(FV.latest); if (!o || o.etag !== h.etag) return { changed: true };
+    let fields = null, retrievedAt = null, runId = null, inRec = false, count = 0, iLat = 0, iLng = 1, iT = 2; const top = [];
+    for await (const line of fvLines(fvBody(o))) {
+      if (!inRec) {
+        if (line.startsWith('"retrieved_at":')) retrievedAt = JSON.parse(line.slice(15, -1));
+        else if (line.startsWith('"run_id":')) runId = JSON.parse(line.slice(9, -1));
+        else if (line.startsWith('"record_fields":')) { fields = JSON.parse(line.slice(16, -1)); iLat = fields.indexOf('lat'); iLng = fields.indexOf('lng'); iT = fields.indexOf('observed_at'); }
+        else if (line === '"records":[') inRec = true;
+        continue; }
+      if (line === '],') break;
+      const r = JSON.parse(line.endsWith(',') ? line.slice(0, -1) : line);
+      if (cellId(r[iLat], r[iLng]) !== id) continue;
+      count++; const k = String(r[iT]);
+      // keep the 8 newest; ties keep file order (= today's stable sort)
+      let pos = top.length; while (pos > 0 && String(top[pos - 1][iT]) < k) pos--;
+      if (pos < PLACE.listMax) { top.splice(pos, 0, r); if (top.length > PLACE.listMax) top.pop(); }
+    }
+    const v = { fields, retrieved_at: retrievedAt, run_id: runId, records: top, count };
+    const sz = JSON.stringify(v).length; fvPlace.cache.set(ck, { v, sz }); fvPlace.bytes += sz;
+    while (fvPlace.bytes > FV.placeCacheBytes && fvPlace.cache.size) { const [k0, e0] = fvPlace.cache.entries().next().value; fvPlace.cache.delete(k0); fvPlace.bytes -= e0.sz; }
+    return v;
+  } finally { fvPlace.scans--; }
 }
 
 
@@ -1538,7 +2051,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -1694,8 +2207,8 @@ async function listSnapshots(env, layer) {
     const r = await env.R2.list({ prefix: `snapshots/${layer}/`, cursor, include: ['customMetadata'] });
     for (const o of r.objects || []) {
       let at = o.customMetadata && o.customMetadata.retrieved_at;
-      if (!at) { const g = await env.R2.get(o.key); if (g) { try { at = (await g.json()).retrieved_at; } catch (_) {} } }   // objects written before 0.5.0 carry no metadata
-      if (at) out.push({ key: o.key, retrieved_at: at });
+      if (!at && !(layer === 'firms' && o.size > FV.legacyMaxJson)) { const g = await env.R2.get(o.key); if (g) { try { at = (await g.json()).retrieved_at; } catch (_) {} } }   // objects written before 0.5.0 carry no metadata (firms: never parsed above L_json)
+      if (at) out.push({ key: o.key, retrieved_at: at, size: o.size });
     }
     cursor = r.truncated ? r.cursor : undefined;
   } while (cursor);
@@ -1703,9 +2216,10 @@ async function listSnapshots(env, layer) {
 }
 const CHECKPOINT_CADENCE_S = { firms: 900, usgs: 300 };   // scheduled cadence; a cutoff older than 2 × cadence + 5 min at day end is stale
 /** What a checkpoint's input covered. Pure apart from one collector_runs read. Never rewrites the checkpoint. */
-async function checkpointCoverage(env, layer, day, cutoff, records, fields, nowMs, withCheckpoint) {
+async function checkpointCoverage(env, layer, day, cutoff, records, fields, nowMs, withCheckpoint, lastObsKnown) {
   const dayEnd = Date.parse(day + 'T00:00:00Z') + 86400e3, iObs = (fields || []).indexOf('observed_at');
-  let lastObs = null; if (iObs >= 0) for (const r of records || []) { const o = r[iObs]; if (typeof o === 'string' && (!lastObs || o > lastObs)) lastObs = o; }
+  let lastObs = lastObsKnown === undefined ? null : lastObsKnown;   // v2: from the sidecar / checkpoint metadata, never by parsing the records
+  if (lastObsKnown === undefined && iObs >= 0) for (const r of records || []) { const o = r[iObs]; if (typeof o === 'string' && (!lastObs || o > lastObs)) lastObs = o; }
   /* Which failures belong after the selected snapshot (rev 2, GPT 6 Nov). Two clocks, never compared with each other:
    *   collector_runs.started_at  = the run's SCHEDULED time  → decides the DAY a run belongs to (its slot): [day start, day end)
    *   collector_runs.finished_at = when the run actually ended → compared with the snapshot's retrieval time (also an actual time)
@@ -1728,6 +2242,15 @@ async function writeCoverage(env, c) {
 async function backfillCoverage(env, layer, nowMs) {
   const miss = (await env.DB.prepare('SELECT c.day, c.cutoff, c.r2_key FROM archive_checkpoints c WHERE c.layer = ? AND NOT EXISTS (SELECT 1 FROM archive_checkpoint_coverage v WHERE v.layer = c.layer AND v.day = c.day) ORDER BY c.day LIMIT 3').bind(layer).all()).results || [];
   for (const m of miss) {
+    if (layer === 'firms' && await fvEverRan(env)) {   // v2 rule (design §9): never an unbounded parse
+      const h = await env.R2.head(m.r2_key); if (!h) continue;
+      if (h.customMetadata && h.customMetadata.format === 'lines/1') { const lo = h.customMetadata.last_observation_at;
+        await writeCoverage(env, await checkpointCoverage(env, layer, m.day, m.cutoff, null, null, nowMs, false, lo && lo !== 'null' ? lo : null)); continue; }
+      const text = await fvBoundedGunzip(env, m.r2_key, FV.legacyMaxJson);
+      if (text === null) { await logRun(env, 'history:firms-checkpoint', nowMs, 'down', 0, 0, 0, `coverage backfill refused for ${m.day}: legacy checkpoint over ${FV.legacyMaxJson} bytes decompressed`); continue; }
+      const prev = JSON.parse(text);
+      await writeCoverage(env, await checkpointCoverage(env, layer, m.day, m.cutoff, prev.records, prev.record_fields, nowMs, false)); continue;
+    }
     const o = await env.R2.get(m.r2_key); if (!o) continue;
     const raw = await o.arrayBuffer(); let text;
     try { text = await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).text(); } catch (_) { text = new TextDecoder().decode(raw); }   // stored gzip-encoded; a runtime may already have decoded it
@@ -1767,8 +2290,20 @@ async function histCheckpointsDue(env, layer, nowMs) {
   if (!due.length) return back ? 'coverage backfilled:' + back : 'nothing due';
   const snaps = await listSnapshots(env, layer); const out = [];
   for (const d of due) {
+    let r;
+    if (layer === 'firms' && await fvEverRan(env)) {   // v2 (design §7, §9) — only once v2 is on or has ever registered an input: the latest of {committed output, eligible legacy snapshot}; legacy only within L_json
+      const cand = await fvCheckpointCandidate(env, d, snaps);
+      if (!cand) r = 'source_gone';
+      else if (cand.kind === 'new') r = await fvCheckpointNew(env, d, cand.out);
+      else { const sz = cand.snap.size;   // from the listing (sizes only)
+        if (sz > FV.legacyMaxJson) {
+          await env.DB.prepare('INSERT OR IGNORE INTO archive_gaps (layer, day, reason, detected_at) VALUES (?,?,?,?)').bind(layer, d, `the day's legacy snapshot is ${sz} bytes, over the bounded-read limit (${FV.legacyMaxJson}); refused, not parsed`, new Date(nowMs).toISOString()).run();
+          r = 'gap'; out.push(d + ':' + r); continue; }
+        r = await histCheckpointOne(env, layer, d, cand.snap); }
+    } else {
     const c = snaps.filter(x => x.retrieved_at.slice(0, 10) === d).sort((a, b) => a.retrieved_at < b.retrieved_at ? -1 : a.retrieved_at > b.retrieved_at ? 1 : a.key < b.key ? -1 : 1);
-    let r = c.length ? await histCheckpointOne(env, layer, d, c[c.length - 1]) : 'source_gone';
+    r = c.length ? await histCheckpointOne(env, layer, d, c[c.length - 1]) : 'source_gone';
+    }
     if (r === 'source_gone') {
       const doneNow = await env.DB.prepare('SELECT 1 AS x FROM archive_checkpoints WHERE layer = ? AND day = ?').bind(layer, d).first();
       if (doneNow) r = 'already done';
@@ -1950,14 +2485,25 @@ async function healthPublication(env, layer, nowMs) {
   const logMs = tAt(ok.finished_at, nowMs, 'last ok run finished_at'), fileMs = tAt(head.uploaded, nowMs, 'published file uploaded');
   if (last) tAt(last.finished_at, nowMs, 'latest run finished_at'); if (acc) tAt(acc.finished_at, nowMs, 'last acceptable run finished_at');
   const pubMs = Math.min(logMs, fileMs);   // conservative: the older of "the log says ok" and "the file was written"
+  /* 0.6.0 (GPT G4): a v2 publication is complete when its COUNTS land (firms_outputs.cells_at), which may be one run after the records
+   * (discovery repair). The run log is compared with that completion time, not with the records upload; the publication's AGE still
+   * comes from the records upload (pubMs above), so a repair never makes stale data look fresh. */
+  const md = (head && head.customMetadata) || {}; let cmpMs = fileMs, pair = null;
+  if (layer === 'firms' && md.format === 'lines/1' && md.run_id) {
+    const o = await env.DB.prepare('SELECT latest_at, cells_at, publish_state FROM firms_outputs WHERE run_id = ?').bind(md.run_id).first();
+    pair = { run_id: md.run_id, records_published_at: o ? o.latest_at : null, counts_published_at: o ? o.cells_at : null };
+    if (!o || !o.cells_at) reasons.push(`the records of run ${md.run_id} are published but its counts are not complete yet (publication pending repair)`);
+    else cmpMs = tAt(o.cells_at, nowMs, 'publication completed (cells_at)');
+    if (!String(ok.note || '').includes('run=' + md.run_id)) reasons.push(`the latest successful run log is not for the published run ${md.run_id} (log note: ${healthNote(env, ok.note)})`);
+  }
   // rev 2 (GPT P5): a resource-guard skip AFTER the last publication keeps this check failing until a new publication —
   // a later run of another kind (e.g. an HTTP 500) must not close the guard incident.
   const guard = await env.DB.prepare("SELECT finished_at FROM collector_runs WHERE layer = ? AND status != 'ok' AND finished_at > ? AND note LIKE '%resource guard%' ORDER BY finished_at DESC LIMIT 1").bind(layer, ok.finished_at).first();
   const due = healthDeadline(layer, pubMs);
   const facts = { last_publication: { logged_ok_finished_at: ok.finished_at, file_uploaded_at: new Date(fileMs).toISOString(), records: ok.records, age_s: Math.round((nowMs - pubMs) / 1000) },
-    overdue_from: new Date(due).toISOString(), allow_s: allow, guard_skip_since_publication: guard ? guard.finished_at : null,
+    overdue_from: new Date(due).toISOString(), allow_s: allow, guard_skip_since_publication: guard ? guard.finished_at : null, ...(pair ? { v2_publication: pair } : {}),
     latest_run: last ? { scheduled_at: last.started_at, finished_at: last.finished_at, status: last.status, note: healthNote(env, last.note) } : null };
-  if (Math.abs(logMs - fileMs) > 10 * 60e3) reasons.push(`the run log and the published file disagree by ${Math.round(Math.abs(logMs - fileMs) / 1000)} s (log ${ok.finished_at}, file ${facts.last_publication.file_uploaded_at})`);
+  if (Math.abs(logMs - cmpMs) > 10 * 60e3) reasons.push(`the run log and the published file disagree by ${Math.round(Math.abs(logMs - cmpMs) / 1000)} s (log ${ok.finished_at}, ${pair ? 'publication completed ' + new Date(cmpMs).toISOString() : 'file ' + facts.last_publication.file_uploaded_at})`);
   if (guard) reasons.push(`a run was skipped by the resource guard at ${guard.finished_at} and nothing has been published since: the source answered but was not processed`);
   if (nowMs > due) reasons.push(`no ${layer} publication since ${new Date(pubMs).toISOString()} (overdue from ${facts.overdue_from})` + (last && last.status !== 'ok' ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));
   else if (!acc || nowMs - tAt(acc.finished_at, nowMs, 'last acceptable run') > allow * 1000) reasons.push(`no ${layer} run has ended with a publication or an expected empty file for over ${allow} s` + (last ? `; latest run ${last.status}: ${healthNote(env, last.note)}` : ''));
@@ -2068,6 +2614,12 @@ async function placeSection(env, layer, id) {
     return { ...base, state: 'ok', cell: c };
   }
   if (cells.source_status === 'down' && !cells.cells) return { ...placeMeta(layer, cells), state: 'down' };
+  if (layer === 'firms') {
+    const h = await env.R2.head('latest/firms.json');
+    if (h && h.customMetadata && h.customMetadata.format === 'lines/1') return fvPlaceSection(env, id, cells);
+    if (h && h.size > FV.legacyMaxJson) return { ...placeMeta(layer, cells), state: 'withheld', why: `the published records file (${h.size} bytes) is over the bounded-read limit`, cell: (cells.cells && cells.cells[id]) || null };
+    if (cells.run_id) return { ...placeMeta(layer, cells), state: 'withheld', why: 'counts carry a run id and the records do not: not from the same collector run', cell: (cells.cells && cells.cells[id]) || null };
+  }
   let rec = await placeRecords(env, layer);
   if (rec && rec.retrieved_at !== cells.retrieved_at) {   // a collector wrote between the two reads: re-read both once
     const again = await getJson(env, `latest-cells/${layer}.json`); if (again) cells = again; rec = await placeRecords(env, layer);
@@ -2082,6 +2634,17 @@ async function placeSection(env, layer, id) {
   const sorted = recs.slice().sort((a, b) => String(b[iT]).localeCompare(String(a[iT])));
   return { ...base, state: recs.length ? 'ok' : 'no_records', count: recs.length, cell: cell || null, record_fields: rec.fields, records_run_ref: runRef(layer, rec.retrieved_at),
     records: layer === 'plastic' ? sorted : sorted.slice(0, PLACE.listMax), records_total: recs.length };
+}
+/** /place firms over a lines/1 latest/: same answer shape; paired by run_id AND retrieved_at, re-read once, else withheld. */
+async function fvPlaceSection(env, id, cells) {
+  const scan = async () => { try { return await fvPlaceFirms(env, id); } catch (e) { return { error: String(e).slice(0, 120) }; } };
+  let rec = await scan();
+  const same = (r, c) => r && r.retrieved_at === c.retrieved_at && r.run_id && r.run_id === c.run_id;
+  if (rec && !rec.busy && !same(rec, cells)) { const again = await getJson(env, 'latest-cells/firms.json'); if (again) cells = again; rec = await scan(); }
+  const base = placeMeta('firms', cells), cell = cells.cells ? cells.cells[id] : undefined;
+  if (rec && rec.busy) return { ...base, state: 'busy', why: 'too many concurrent record scans; counts are shown, records are not', cell: cell || null };
+  if (!rec || rec.changed || !same(rec, cells)) return { ...base, state: 'withheld', why: `records and counts are not from the same collector run (records ${rec && rec.retrieved_at ? rec.retrieved_at + ' ' + (rec.run_id || 'no run id') : 'unreadable'}, counts ${cells.retrieved_at} ${cells.run_id || 'no run id'})`, cell: cell || null, records_run_ref: rec && rec.retrieved_at ? runRef('firms', rec.retrieved_at) : null };
+  return { ...base, state: rec.count ? 'ok' : 'no_records', count: rec.count, cell: cell || null, record_fields: rec.fields, records_run_ref: runRef('firms', rec.retrieved_at), records: rec.records, records_total: rec.count };
 }
 async function placeCollection(env, id, nowMs) {
   // Every query is bounded: window sums read at most 168 rows per layer (primary-key range), start dates read one row from an index.
@@ -2127,7 +2690,11 @@ async function place(env, url, id) {
 /** Run a collector so that an unexpected throw is recorded as a 'down' run and never takes the others with it. */
 async function guarded(env, layer, ms, fn) {
   try { await fn(env, ms); return layer + ':ran'; }
-  catch (e) { try { await writeDown(env, layer, ms, 'uncaught: ' + String(e).slice(0, 200), 0); } catch (_) {} return layer + ':threw ' + String(e).slice(0, 80); }
+  catch (e) {
+    const note = 'uncaught: ' + String(e).slice(0, 200);
+    if (layer === 'firms' && env.FIRMS_PIPELINE === 'v2') { try { await logRun(env, layer, ms, 'down', 0, 0, 0, note); await fvDownNoInput(env, ms, note); } catch (_) {} }   // v2 never calls the unconditional writeDown
+    else try { await writeDown(env, layer, ms, note, 0); } catch (_) {}
+    return layer + ':threw ' + String(e).slice(0, 80); }
 }
 
 const JOBS = {
@@ -2136,7 +2703,7 @@ const JOBS = {
     env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky', ms, collectOpenskyWorld) : 'opensky:parked',
   ])).join('; '),
   minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
-  firms: async (env, ms) => { const f = await guarded(env, 'firms', ms, collectFirms); let s; try { s = await collectShipsFallback(env, ms); } catch (e) { s = 'ships-fallback:threw ' + String(e).slice(0, 80); } return f + '; ' + s; },
+  firms: async (env, ms) => { const f = await guarded(env, 'firms', ms, env.FIRMS_PIPELINE === 'v2' ? collectFirmsV2 : collectFirms); let s; try { s = await collectShipsFallback(env, ms); } catch (e) { s = 'ships-fallback:threw ' + String(e).slice(0, 80); } return f + '; ' + s; },
   'ships-fallback': async (env, ms) => collectShipsFallback(env, ms),   // manual: /admin/run/ships-fallback (same gates)
   forest: async (env, ms) => {
     const f = await guarded(env, 'forest', ms, collectForest);
@@ -2347,6 +2914,12 @@ export default {
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
       return json(redactStatus(env, { now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch, history: await historyState(env), archive_health: await archiveHealth(env, Date.now()) }), 200, { 'Cache-Control': 'no-store' });   // 0.5.3: notes redacted
+    }
+
+    if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'r2-conditional') {   // 0.6.0: the R2 behaviours FIRMS v2 relies on, on THIS bucket; writes only probe/ keys, deletes them
+      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+      try { return json(await fvProbeR2(env), 200, { 'Cache-Control': 'no-store' }); }
+      catch (e) { return json({ error: String(e).slice(0, 200) }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
     if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'ships') {   // 0.3.3: private Worker listen to aisstream; publishes nothing

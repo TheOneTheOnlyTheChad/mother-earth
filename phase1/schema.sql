@@ -258,3 +258,24 @@ CREATE INDEX IF NOT EXISTS seaice_daily_received ON seaice_daily (first_received
 CREATE INDEX IF NOT EXISTS orbital_population_retrieved ON orbital_population (first_retrieved_at);
 CREATE INDEX IF NOT EXISTS archive_versions_layer_first ON archive_versions (layer, first_retrieved_at);
 CREATE INDEX IF NOT EXISTS archive_versions_layer_last ON archive_versions (layer, last_retrieved_at);
+
+-- FIRMS v2 run state (0.6.0; design docs/FIRMS-MEMORY-DESIGN.md rev 6 §2; SQL = docs/design-checks/firms-state.sql.mjs).
+-- Used only when FIRMS_PIPELINE = 'v2'. Creating these tables in production is its own approved step.
+CREATE TABLE IF NOT EXISTS firms_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS firms_identity (retrieved_at TEXT PRIMARY KEY, run_id TEXT NOT NULL UNIQUE, kind TEXT NOT NULL, actual_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS firms_inputs (run_id TEXT PRIMARY KEY REFERENCES firms_identity(run_id), raw_key TEXT NOT NULL UNIQUE,
+  scheduled_at TEXT NOT NULL, retrieved_at TEXT NOT NULL UNIQUE, bytes INTEGER NOT NULL, sha256 TEXT NOT NULL,
+  content_length INTEGER, created_at TEXT NOT NULL, collector_version TEXT NOT NULL,
+  state TEXT NOT NULL DEFAULT 'ready' CHECK (state IN ('ready','done','superseded','expired')), attempts_used INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS firms_attempts (run_id TEXT NOT NULL REFERENCES firms_inputs(run_id), attempt INTEGER NOT NULL,
+  token TEXT NOT NULL UNIQUE, invocation TEXT NOT NULL, started_at TEXT NOT NULL, lease_until TEXT NOT NULL,
+  finished_at TEXT, outcome TEXT, note TEXT, PRIMARY KEY (run_id, attempt));
+CREATE TABLE IF NOT EXISTS firms_outputs (run_id TEXT PRIMARY KEY REFERENCES firms_inputs(run_id), attempt INTEGER NOT NULL, token TEXT NOT NULL,
+  retrieved_at TEXT NOT NULL UNIQUE, day TEXT NOT NULL,
+  snapshot_key TEXT NOT NULL UNIQUE, snapshot_bytes INTEGER NOT NULL, snapshot_sha256 TEXT NOT NULL, records INTEGER NOT NULL,
+  aux_key TEXT NOT NULL UNIQUE, aux_bytes INTEGER NOT NULL, format TEXT NOT NULL, completed_at TEXT NOT NULL,
+  publish_state TEXT NOT NULL DEFAULT 'pending' CHECK (publish_state IN ('pending','published','superseded','expired')),
+  publish_attempts INTEGER NOT NULL DEFAULT 0, latest_at TEXT, cells_at TEXT);
+CREATE INDEX IF NOT EXISTS firms_inputs_eligible ON firms_inputs (retrieved_at) WHERE state = 'ready' AND attempts_used < 3;
+CREATE INDEX IF NOT EXISTS firms_outputs_eligible ON firms_outputs (retrieved_at) WHERE publish_state = 'pending' AND publish_attempts < 3;
+CREATE INDEX IF NOT EXISTS firms_outputs_day ON firms_outputs (day, retrieved_at);

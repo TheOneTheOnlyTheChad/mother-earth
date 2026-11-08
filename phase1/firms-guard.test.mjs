@@ -39,7 +39,8 @@ function makeEnv(extra = {}) {
   const D1 = { prepare: prep, async batch(st) { const o = []; for (const s of st) { if (/^\s*SELECT/i.test(s.sql)) o.push(await s.all()); else { await s.run(); o.push({ results: [] }); } } return o; } };
   const store = new Map();
   const R2 = { async put(k, b, o = {}) { store.set(k, { body: b instanceof Uint8Array ? b : String(b), meta: o }); }, async delete(k) { store.delete(k); },
-    async get(k) { const v = store.get(k); if (!v) return null; const b = v.body; return { customMetadata: (v.meta || {}).customMetadata, async json() { return JSON.parse(b); }, async text() { return String(b); }, async arrayBuffer() { return b instanceof Uint8Array ? b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) : new TextEncoder().encode(b).buffer; } }; },
+    async head(k) { const v = store.get(k); if (!v) return null; const b = v.body; return { key: k, size: typeof b === 'string' ? new TextEncoder().encode(b).length : b.byteLength, etag: v.etag || '', uploaded: new Date(), customMetadata: (v.meta || {}).customMetadata }; },   // 0.6.0: the hub's bounded legacy reads use head()
+    async get(k) { const v = store.get(k); if (!v) return null; const b = v.body; return { body: b, customMetadata: (v.meta || {}).customMetadata, async json() { return JSON.parse(b); }, async text() { return String(b); }, async arrayBuffer() { return b instanceof Uint8Array ? b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) : new TextEncoder().encode(b).buffer; } }; },
     async list({ prefix, include } = {}) { return { objects: [...store.keys()].filter(k => !prefix || k.startsWith(prefix)).map(key => ({ key, ...(include && include.includes('customMetadata') ? { customMetadata: (store.get(key).meta || {}).customMetadata } : {}) })), truncated: false }; } };
   return { env: { R2, DB: D1, ADMIN_KEY: 'k', FIRMS_MAP_KEY: 'x', HISTORY_ENABLED: '1', ...extra }, store, db };
 }
