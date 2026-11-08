@@ -30,7 +30,7 @@ One page over everything open: the research backlog (`docs/RESEARCH-BACKLOG.md`,
 **Pattern worth seeing (corrected in rev 2):** R3, R4 and R6 are parked with **terms or access** among their main open items; **R2 also has unresolved identity, validation and acceptance rules**. A bounded "terms review" (reading each provider's reuse terms and filing the operative sentences in REGISTER, as for the Met) **may clarify rights without clearing any source**: each item's other open questions remain.
 
 ## C. Bigger decisions (separate, Chad's)
-- **Domain selection (Phase 0):** recommendation drafted (`docs/research/P0-RECOMMENDATION-DRAFT.md`); waits on GPT's revisions and the iPhone runs.
+- **Domain selection (Phase 0):** recommendation drafted (`docs/research/P0-RECOMMENDATION-DRAFT.md`, rev 3), ready for Chad's separate decision. The iPhone measurements are pending Chad's availability; the recommendation does not depend on them.
 - **Aircraft:** parked, research included (OpenSky feeder condition; ADS-B receiver not yet needed).
 - **Polar-cap imagery, Possible futures, Schumann view:** recorded ideas, no gate set.
 

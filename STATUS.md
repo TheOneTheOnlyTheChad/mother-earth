@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~07:10 UTC — **GPT's second review of `add3206` applied (docs only)**
+- GPT accepted the main Phase 0, Kp and backlog corrections; harness sign-off confirmed tied to `601b899`; Arts department counts confirmed against the saved results.
+- Five remaining edits applied:
+  1. Phase 0 §3 is now "Outstanding measurements — pending Chad's availability". The Backlog §C dependency on the iPhone runs is removed. Claude's pane cell-selection check (588 px) is kept distinct from the pending actual-phone check.
+  2. Kp inventory: Mac ships are degraded on **either** a flowing fraction < 90% **or** an overlong sample (both in `collector-mac.mjs`).
+  3. GIBS: `IMG_DAY` is computed once at page load, so open pages don't roll over. The proposal now specifies recompute + re-read `/backdrop` on the 5-min refresh tick (or reload-only, Chad/GPT to choose). Rollback and "immediate default" timings are qualified for open pages.
+  4. GIBS wording matches the rule, including the tie case ("NOAA-21 kept by our rule…", even if slightly higher). The **dark-area score** (near-black + no-data) is named separately from the raw near-black share. The band is 66.5°S–66.5°N throughout; the 8 Nov 30°S–30°N evidence is labelled as motivation only.
+  5. HANDOVER item 4: the old "most complete… else previous day" idea is marked SUPERSEDED.
+- GPT: the Kp branch work is a sensible next step **for Chad to authorise**, with implementation and wording returned for review before merge or production approval. This review starts no work. No iPhone session today; no prototype or Phase A.
+
 ## 8 Nov ~06:45 UTC — **GPT's review of the morning's work applied (docs only; nothing authorised beyond)**
 - **place-ui harness `601b899`: GPT technical sign-off.** The fake `head()` supplies the UTF-8 size and metadata the legacy-reader checks need. Worker hash = live 0.6.0; no production or page change. Syntax checked independently by GPT; suite results and the break check remain Claude-supplied evidence. **Merge awaits Chad's decision.**
 - **Smoke follow-up:** qualifications confirmed by GPT. It supplements GPT's independent test, and GPT has not repeated those browser checks.

@@ -1,6 +1,6 @@
 # Phase 0 — recommendation (DRAFT, 8 Nov 2026)
 
-**Status: draft rev 2 (after GPT's review, 8 Nov) for Chad's separate decision.** Rev 2 applies GPT's six requested revisions only; no accepted gate is reopened. Built from accepted findings only (`P0-CHECKPOINT.md`, `P0-arts-planet-recovery.md`, `P0-life-gbif.md`). No new research, sample or measurement went into it. **The iPhone measurements are outstanding** (§3) and remain pending Chad's availability.
+**Status: draft rev 3 (after GPT's reviews, 8 Nov) for Chad's separate decision.** Rev 2 applied GPT's six requested revisions; rev 3 renames §3 and separates the completed pane check from the pending actual-phone check. No accepted gate is reopened. Built from accepted findings only (`P0-CHECKPOINT.md`, `P0-arts-planet-recovery.md`, `P0-life-gbif.md`). No new research, sample or measurement went into it. **The iPhone measurements are outstanding** (§3) and remain pending Chad's availability.
 
 This document recommends; it does not select. Domain selection, any prototype and any Phase A start each need Chad's separate decision. Aircraft stays parked, research included.
 
@@ -43,11 +43,11 @@ These are the **7 Nov, pre-NOAA-21 baseline**. They establish transfer and load 
 3. **Planet's baseline covers transfer and load on desktop (7 Nov, pre-NOAA-21), not input responsiveness and not the phone.** Checks that name the iPhone ("first switch into a domain", touch response) have no baseline until the runs in §3 are done. A VoiceOver baseline is a separate measurement: the planned load/drag recordings do not establish one.
 4. **Suggested order (a suggestion, not a prerequisite):** taking the domain decision after the iPhone runs would let any later "no worse than Planet" check on the phone be measured against a baseline. It is not an accepted prerequisite for domain selection or for documenting this recommendation.
 
-## 3. Outstanding — must be done before this draft is final
+## 3. Outstanding measurements — pending Chad's availability
 - **iPhone Safari × 3, screen-recorded (Chad):** time to globe visible; time to first drag response.
 - **Direct interactivity:** input response on the phone (the desktop figures don't cover it).
 - Not covered by those recordings: a VoiceOver baseline (separate, if wanted).
-- Also open from GPT's 8 Nov smoke test (not Phase 0 gates, but phone-adjacent): actual-phone layout check; the "Everything here" cell-selection tap.
+- Related, from GPT's 8 Nov smoke test (not Phase 0 gates): the **actual-phone** check is pending. The "Everything here" cell selection was completed **in Claude's browser pane at 588 px** (8 Nov 05:47–05:50 UTC). That is not a real-phone result and does not replace the actual-phone check.
 
 ## 4. What this draft does not do
 No domain selection, prototype, collector, schedule, resource, deploy, merge, new research or provider contact. No change to the Arts clearance or the Life block. Aircraft parked, research included.

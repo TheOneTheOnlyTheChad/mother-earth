@@ -2,6 +2,8 @@
 
 **Status: finding only. No hub, page or production change.** Any fix needs its own review and Chad's specific approval.
 
+**Rev 3 (8 Nov):** Mac-ships row now lists both of its degraded conditions (flowing fraction < 90%, overlong), per GPT.
+
 **Rev 2 (after GPT's review, 8 Nov):**
 - Measurements qualified.
 - The unsupported 7.1 h maximum removed; detection timing corrected.
@@ -41,7 +43,7 @@ The swpc (Kp) layer alternates between `ok` and `degraded` through the day, and 
 | **seaice** | latest daily value ≥ 5 days old | our freshness rule | latest value older than our limit |
 | **forest** | every due cell still pending in a sweep | sweep progress (the page already labels it "partial"/"sweeping") | sweep incomplete; keep the existing specific label |
 | **ships (cloud fallback)** | < 90% of the window with messages flowing, or overlong | **sampling quality**, not age | sample incomplete or overlong; **not** "late by our freshness rule" |
-| **ships (Mac collector)** | overlong sample (> 1.25 × window), per the duration contract | **sampling quality** | sample overlong; not usable as a full sample |
+| **ships (Mac collector)** | either condition: flowing fraction < 90% of the window (messages_flowing_s, inferred from arrival gaps), **or** overlong sample (> 1.25 × window, per the duration contract) | **sampling quality** | say which condition applied: messages flowing for under 90% of the window, or sample overlong (not usable as a full sample) |
 | opensky | source time not advancing | parked layer, not public | — |
 
 The fix keeps **observation age** (how old the source's value is) separate from **collector freshness** (when we last retrieved, `stale_after_s`). Where a cause is established it uses a specific explanation; otherwise it uses a neutral collection-quality wording. Exact sentences are for review.

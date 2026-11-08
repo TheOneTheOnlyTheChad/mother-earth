@@ -1,6 +1,12 @@
-# GIBS backdrop — measured selection rule (PROPOSAL rev 2, 8 Nov 2026)
+# GIBS backdrop — measured selection rule (PROPOSAL rev 3, 8 Nov 2026)
 
 **Status: proposal only (HANDOVER item 4).** Nothing is built, deployed or changed, and no bench or shadow record is authorised. It touches the hub **and** the page.
+
+**Rev 3 (after GPT's second review, 8 Nov):**
+- Rollback and the immediate default now account for already-open pages: `IMG_DAY` is computed once at load today, so the page must recompute it and re-read `/backdrop` (§4, §8).
+- The page wording matches the rule, including the tie case.
+- The score that includes no-data is named and kept separate from the raw near-black count.
+- The band is 66.5°S–66.5°N everywhere.
 
 **Rev 2 (after GPT's review, 8 Nov):**
 - "More complete" and "completeness" are replaced with the measured criterion.
@@ -15,6 +21,8 @@
 ## 1. Why
 Since 8 Nov the backdrop is a fixed choice: NASA GIBS `VIIRS_NOAA21_CorrectedReflectance_TrueColor` for `IMG_DAY` = now − 36 h (`3375e91`). On 4–7 Nov, neither satellite had the lower near-black share every day (`reviews/2026-11-08-gibs-noaa21.md`). 30°S–30°N:
 
+*(The 8 Nov evidence below used the page's JPEG and the 30°S–30°N band: raw near-black share only, no no-data handling. It motivates the proposal; the rule itself uses the 66.5°S–66.5°N dark-area score.)*
+
 | Day | NOAA-20 | NOAA-21 | Lower near-black share |
 |---|---|---|---|
 | 4 Nov | 0.1% | 6.2% | NOAA-20 |
@@ -25,13 +33,13 @@ Since 8 Nov the backdrop is a fixed choice: NASA GIBS `VIIRS_NOAA21_CorrectedRef
 The cause of the dark areas is not established (NASA's VIIRS processing-delay alert; SNPP ended 2 Nov; REGISTER GIBS entry, R11).
 
 ## 2. The criterion, and what it does not measure
-- **Measured criterion:** the **near-black pixel share** (R, G and B all < 12; the 8 Nov method), inside a fixed band, **66.5°S–66.5°N**.
+- **Measured criterion:** the **dark-area score**: the share of pixels inside a fixed band, **66.5°S–66.5°N**, that are either near-black (R, G and B all < 12; the 8 Nov method) or no-data (§5). The raw **near-black share** (near-black pixels only) is reported alongside, separately, and is not the score.
 - **It measures appearance, not completeness.** A near-black pixel can be missing imagery, night or low sun, a dark surface, or deep shadow. The criterion does not tell these apart. The page must not call the result "complete" or "more complete".
 - **Illumination is not equalised.** The fixed band leaves out the polar caps but does not establish equal illumination across candidates. The two satellites cross at different times, so the sunlit area each image covers can differ. Comparing satellites on the same date limits the difference; it does not remove it. A solar-geometry mask is an open alternative (§10).
 
 ## 3. The rule (stage 1: same date only)
 - **Candidates:** the page's current date (`IMG_DAY`), NOAA-21 and NOAA-20.
-- **Choose:** the candidate with the **lower near-black share**.
+- **Choose:** the candidate with the **lower dark-area score**, except under the tie margin below.
   - A tie goes to NOAA-21, today's fixed default, so the backdrop doesn't change on measurement noise.
   - The **tie margin is not fixed here.** It is set from the bench (§6): it must be at least the share difference that the resolution/format comparison shows can flip a ranking. Until that is measured there is no justified number. Rev 1's 0.5 pp is withdrawn.
 - **No threshold *T* in stage 1.** Choosing between two same-date candidates needs only their ranking.
@@ -42,11 +50,16 @@ The cause of the dark areas is not established (NASA's VIIRS processing-delay al
 The hub is the product; the page is a client.
 - **Hub job `backdrop`**, on the existing hourly cron (no new trigger).
   - It decides after 12:00 UTC (when `IMG_DAY` rolls), then re-measures a few times that day, because GIBS layers can fill in late. Exact times are set after the bench.
-- **Publishes `latest/backdrop.json`** (~1 KB): `{ date, layer, sat, near_black_share_by_candidate, criterion, band, measured_at, rule_version }`.
+- **Publishes `latest/backdrop.json`** (~1 KB): `{ date, layer, sat, by_candidate: { dark_area_score, near_black_share, near_black, no_data, valid }, tie_margin, decided_by: 'lower_score' | 'tie_kept_default', band: '66.5S-66.5N', measured_at, rule_version }`.
   - Written only after both candidates were measured successfully.
   - On any failure, the last good file stays, with its own timestamps.
 - **Hub endpoint:** `GET /backdrop`, read-only.
 - **Page:** requests exactly the `layer` + `date` given. If the file is missing, unreadable, or for a date other than the page's current `IMG_DAY`, it uses the fixed default (NOAA-21) and says so.
+- **Open pages and the rollover.** Today `IMG_DAY` is computed once when `app.js` loads, so an open page keeps its date until reloaded. That is current behaviour, not new. For the selection, an open page must also pick up new decisions and the noon rollover. Proposed:
+  - on its existing refresh tick (`ME.REFRESH_MS`, 5 min) and on returning to the tab, the page **recomputes `IMG_DAY`** and **re-reads `/backdrop`**;
+  - if the date or the selection changed, it swaps the backdrop image and its label together.
+  - An open page then follows a change within about one refresh interval.
+  - The simpler alternative, **changes take effect on reload only**, is for Chad/GPT to choose. In that case the label must not imply the image is current beyond its stated date, and every rollback timing in §8 becomes "on the viewer's next reload".
 
 ## 5. Measuring inside a Worker
 Workers have no canvas, so the image is decoded in code.
@@ -54,7 +67,10 @@ Workers have no canvas, so the image is decoded in code.
 - **Bounded decoding:** fixed request size; reject any response over a byte cap before decoding; check PNG dimensions against the request before allocating; cap decompressed bytes at width × height × channels; abort on any mismatch.
 - **No-data / transparency:**
   - If GIBS returns an alpha channel, transparent pixels are counted **separately as no-data**, not as near-black.
-  - The criterion reports `near_black`, `no_data` and `valid` counts. The share is computed over the band's pixels with no-data counted as dark, the conservative choice for appearance, and stated so.
+  - The measurement reports `near_black`, `no_data` and `valid` counts for the band. Two figures follow from them:
+    - the **dark-area score** = (near_black + no_data) / band pixels, the conservative choice for appearance and the figure the rule uses;
+    - the **near-black share** = near_black / band pixels, reported separately.
+    The page and the record name which figure they show.
   - A candidate that is all no-data is ineligible.
 - **Failed responses:** non-200, a non-image content type, an XML service exception (GIBS returns these with 200 on some errors), a timeout or a decode failure all make that candidate **unmeasured**.
   - If either candidate is unmeasured, no new selection is published; the last good file stands.
@@ -76,7 +92,8 @@ Workers have no canvas, so the image is decoded in code.
 
 ## 7. What the page says
 - The label, chip and Sources name the satellite and the date, as now, plus one line:
-  - **"chosen by our measurement: lower dark-area share of NOAA-21 / NOAA-20 for this date (N% vs M%, 66°S–66°N, measured HH:MM UTC); dark areas may be night, low sun or missing imagery"**.
+  - when one candidate is lower beyond the tie margin: **"chosen by our measurement rule: lower dark-area score of NOAA-21 / NOAA-20 for this date (N% vs M%, 66.5°S–66.5°N; score counts near-black and no-data pixels; measured HH:MM UTC); dark areas may be night, low sun or missing imagery"**;
+  - when the two are within the tie margin: **"NOAA-21 kept by our rule: the two satellites' dark-area scores were within our tie margin (N% vs M%, …)"**. This holds even if NOAA-21's score is slightly higher, and the page says so rather than claiming "lower".
 - In fallback mode: **"fixed default (NOAA-21); our measured selection is unavailable"**.
 - Unchanged: "dated, not live"; "cause of gaps not established"; tier `imagery (dated; not live)`. The selection is labelled **computed** and ours.
 
@@ -85,7 +102,12 @@ Workers have no canvas, so the image is decoded in code.
 2. Variable on: publishing starts. Compare `/backdrop` with pane measurements for at least one rollover.
 3. Page release reading `/backdrop`, under a guard test like `backdrop-layer` that must fail on today's page.
 
-**Rollback (fixed in rev 2):** removing `BACKDROP_ENABLED` stops new selections. The page **ignores any file whose date is not the page's current `IMG_DAY`**, so a stale selection is used for **at most the rest of that image day** (until the next 12:00 UTC rollover), not 36 h. For an **immediate** return to the default there are two options, for Chad to choose which exists before stage 3:
+**Rollback (rev 3):** removing `BACKDROP_ENABLED` stops new selections. The page **ignores any file whose date is not its current `IMG_DAY`**.
+- With the recompute-on-refresh design (§4), a stale selection is used for at most the rest of that image day, until the next 12:00 UTC rollover. **Open pages drop it within about one refresh interval after noon.**
+- With reload-only, open pages keep it until the viewer reloads.
+- Neither is 36 h; neither is guaranteed instant for a page that is already open.
+
+For a return to the default **without waiting for the rollover**, Chad chooses which option exists before stage 3. Either way, open pages apply it only when they next re-read `/backdrop` (within about one refresh interval with §4's design; on reload otherwise). New page loads apply it at once.
 - **(a)** a hub variable `BACKDROP_FORCE_DEFAULT=1`, which makes `/backdrop` answer "default"; a variable change is its own Approve line;
 - **(b)** deleting `latest/backdrop.json`, a resource delete with its own Approve line.
 
