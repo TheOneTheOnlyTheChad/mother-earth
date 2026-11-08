@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~13:30 UTC — **R4 Argo terms/access review rev 5 (read-only; Chad's go, R4 only)** — `docs/research/R4-argo.md` §12, for GPT
+- Read 8 official pages (web-fetch summaries, so quotations are provisional until Chad pastes them). No data files, sampling, provider contact, implementation, resource or production change. R2, R3, R6 not touched.
+- **New:** the general DOI record (SEANOE 10.17882/42182) states **CC BY 4.0**; Ifremer's catalogue record for the GDAC (listing `data-argo.ifremer.fr`) says "No limitations on public access"; Ifremer policy DG/2023.0550 allows reuse for any purpose with source + last-update date credited.
+- **Still open:** no published automated-access/rate policy for Coriolis or US GODAE; the live HTTPS files carry no licence of their own; US GODAE and argodatamgt.org Data Access unread (tool allowlist) → paste session §12.4 (7 items, Chad at the screen).
+- Proposed REGISTER entry in §12.5, **not filed**. Terms clarification does not clear R4 for building; non-terms gates unchanged.
+- **GIBS summary corrected** (backlog view row): proposal rev 3, stage 1 = same-date selection with no threshold *T*; day-before fallback a later, separate decision; bench and shadow record not authorised.
+
 ## 8 Nov 12:10–12:19 UTC — **GPT independent live smoke test of `ad4002b` + hub 0.6.1: no blocking regression in the checks completed** (not exhaustive)
 - Confirmed:
   - hub 0.6.1; all four served page files = reviewed `86134b8`; all eight health endpoints HTTP 200, healthy=true;
