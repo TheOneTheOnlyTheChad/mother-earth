@@ -334,13 +334,18 @@ ME.degradedWhy = function (layer, snap) {
   if (r && r.code === 'feed_not_refreshed') return `the feed was generated ${span(r.age_s)} before our retrieval, beyond our ${span(r.limit_s)} feed-age limit — marked by our collector, not by the source`;
   if (r && r.code === 'time_tag_invalid') return `the source's timestamp for the newest value could not be read, so its age is unknown — marked by our collector`;
   if (r && r.code === 'time_tag_in_future') return `the source's timestamp for the newest value is later than our clock, so its age cannot be judged — marked by our collector`;
-  const overlongWhy = (el, w) => `the sample ran ${secs(el, 1.25 * w)} against a ${secs(w)} window, over our ${secs(1.25 * w)} limit (1.25 × the window), so it is not counted as a full sample — our sampling standard, not a statement about the source or the sea`;
+  // reportedTenths: the Mac collector publishes elapsed_wall_s rounded to 0.1 s. If that rounded figure does not exceed the limit,
+  // the precision is gone: say the sample exceeded the limit and call the figure rounded, never invent the lost digits.
+  const overlongWhy = (el, w, reportedTenths) => { const lim = 1.25 * w, tail = ', so it is not counted as a full sample — our sampling standard, not a statement about the source or the sea';
+    const shown = secs(el, lim);
+    if (Number.isFinite(el) && parseFloat(shown) > lim) return `the sample ran ${shown} against a ${secs(w)} window, over our ${secs(lim)} limit (1.25 × the window)${tail}`;
+    return `the sample exceeded our ${secs(lim)} limit (1.25 × the ${secs(w)} window)${reportedTenths && Number.isFinite(el) ? `; its reported duration, ${secs(el)}, is rounded to 0.1 s` : ''}${tail}`; };
   const flowWhy = (f, w) => `messages flowed for ${pct(f)} of the ${secs(w)} sample (inferred from arrival gaps), below our 90% standard — our sampling standard, not a statement about the source or the sea`;
   if (r && r.code === 'sample_overlong') return overlongWhy(r.elapsed_s, r.window_s);
   if (r && r.code === 'sample_flow_below_standard') return flowWhy(r.fraction || 0, r.window_s);
   if (layer === 'ships' && snap) {                     // the Mac collector's envelope carries the facts but no reason code
     const w = snap.window_s, f = snap.connection_fraction_of_sample;
-    if (snap.overlong_sample) return overlongWhy(snap.elapsed_wall_s, w);
+    if (snap.overlong_sample) return overlongWhy(snap.elapsed_wall_s, w, true);
     if (Number.isFinite(f) && f < 0.9) return flowWhy(f, w);
   }
   return 'below our collection-quality standard for this layer — marked by our collector, not by the source';

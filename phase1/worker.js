@@ -207,6 +207,14 @@ async function collectUsgs(env, scheduledMs) {
 // i.e. the next value is overdue. With hourly polling a missing value is first flagged ~2 h after it was due (~8.13 h).
 // Reference point: time_tag (interval start). Invalid or future time_tags are degraded with their own reason, never 'ok'.
 const KP = { intervalS: 3 * 3600, lateAfterS: 7.5 * 3600, futureSkewS: 300 };
+// Cloud ships reason (0.6.1 rev 3). The measured values are published UNROUNDED: a reason exists to explain the condition, and
+// rounding 75.04 s to 75 or 0.8999 to 0.9 would publish a number that contradicts it (GPT, 8 Nov). The page formats them.
+function shipsReason(wallS, upFrac, windowS, overlong) {
+  if (!overlong && upFrac >= 0.9) return null;
+  return overlong
+    ? { code: 'sample_overlong', rule: 'our sampling standard: elapsed time over 1.25 × the window', elapsed_s: wallS, window_s: windowS, limit_s: 1.25 * windowS, also_low_flow: upFrac < 0.9 }
+    : { code: 'sample_flow_below_standard', rule: 'our sampling standard: messages flowing for at least 90% of the window (inferred from arrival gaps)', fraction: upFrac, window_s: windowS };
+}
 function kpStatus(timeTag, nowMs) {
   const t = typeof timeTag === 'string' ? Date.parse(timeTag) : NaN;
   if (!Number.isFinite(t)) return { status: 'degraded', reason: { code: 'time_tag_invalid', rule: 'source timestamp unusable', reference: 'interval start (time_tag)' } };
@@ -1806,9 +1814,7 @@ async function collectShipsFallback(env, scheduledMs) {
   if (!L.confirmed || !L.messages) { await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'down', reason: L.sourceError || 'no messages', close: L.closeInfo }); await writeDown(env, layer, scheduledMs, 'cloud fallback: ' + (L.sourceError || 'no subscription confirmation or no messages'), L.upgradeStatus); return 'ships-fallback:down'; }
   const overlong = L.wallS > 1.25 * SF.windowS;
   const status = upFrac >= 0.9 && !overlong ? 'ok' : 'degraded';
-  const statusReason = status === 'ok' ? null : overlong
-    ? { code: 'sample_overlong', rule: 'our sampling standard: elapsed time over 1.25 × the window', elapsed_s: Math.round(L.wallS * 10) / 10, window_s: SF.windowS, also_low_flow: upFrac < 0.9 }
-    : { code: 'sample_flow_below_standard', rule: 'our sampling standard: messages flowing for at least 90% of the window (inferred from arrival gaps)', fraction: Math.round(upFrac * 1000) / 1000, window_s: SF.windowS };
+  const statusReason = shipsReason(L.wallS, upFrac, SF.windowS, overlong);
   const fields = ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'];
   const cov = { grade: 'partial', evidence: 'messages_flowing_inferred_from_arrival_gaps;not_a_measure_of_reception;not_geographic_coverage;receipt_history_pending;terrestrial_ais_only;cloud_fallback_connection', observed_fraction: upFrac };
   const cells = {}; for (const r of L.rows) { const id = cellId(r[1], r[2]); (cells[id] || (cells[id] = { count: 0, coverage: { ...cov } })).count++; }
@@ -2078,7 +2084,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { kpStatus, KP, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 

@@ -96,14 +96,26 @@ await t('ships (Mac envelope): overlong → overlong wording (not described as l
 await t('ships (cloud fallback reason codes): both conditions worded from the hub reason', () => {
   assert.match(why('ships', { status_reason: { code: 'sample_flow_below_standard', fraction: 0.5, window_s: 60 } }).why, /messages flowed for 50% of the 60 s sample/);
   assert.match(why('ships', { status_reason: { code: 'sample_overlong', elapsed_s: 80, window_s: 60 } }).why, /ran 80 s against a 60 s window, over our 75 s limit/); });
-await t('ships near the boundaries (cloud reason AND Mac envelope): 76 s, 75.04 s, 89.9%, 89.99% keep the condition visible', () => {
-  const cloud = r => why('ships', { status_reason: r }).why, mac = x => why('ships', { window_s: 60, ...x }).why;
-  for (const w of [cloud({ code: 'sample_overlong', elapsed_s: 76, window_s: 60 }), mac({ overlong_sample: true, elapsed_wall_s: 76, connection_fraction_of_sample: 1 })]) {
-    assert.match(w, /ran 76 s against a 60 s window, over our 75 s limit/); assert.doesNotMatch(w, /1 min/); }
-  for (const w of [cloud({ code: 'sample_overlong', elapsed_s: 75.04, window_s: 60 }), mac({ overlong_sample: true, elapsed_wall_s: 75.04, connection_fraction_of_sample: 1 })]) {
-    assert.match(w, /ran 75\.04 s against a 60 s window, over our 75 s limit/); }
-  for (const f of [0.899, 0.8999]) for (const w of [cloud({ code: 'sample_flow_below_standard', fraction: f, window_s: 60 }), mac({ overlong_sample: false, elapsed_wall_s: 60, connection_fraction_of_sample: f })]) {
-    assert.match(w, /messages flowed for 89\.9% of the 60 s sample/); assert.match(w, /below our 90% standard/); assert.doesNotMatch(w, /for 90%/); } });
+// Cloud: the reason is built by the hub's own shipsReason and JSON round-tripped (as published) before the renderer sees it.
+// SHIPS_ROUNDED=1 swaps in rev 2's rounding (elapsed to 0.1 s, fraction to 0.001) — the break that GPT reproduced; must FAIL.
+const genReason = (wallS, upFrac, w = 60) => { const overlong = wallS > 1.25 * w;
+  const r = process.env.SHIPS_ROUNDED ? (overlong ? { code: 'sample_overlong', elapsed_s: Math.round(wallS * 10) / 10, window_s: w } : upFrac < 0.9 ? { code: 'sample_flow_below_standard', fraction: Math.round(upFrac * 1000) / 1000, window_s: w } : null)
+    : W.shipsReason(wallS, upFrac, w, overlong);
+  return JSON.parse(JSON.stringify(r)); };
+await t('cloud ships, generated fields → renderer: 76 s, 75.04 s, 75.0001 s overlong; 0.899, 0.8999 flow — condition never contradicted', () => {
+  const cloud = (wallS, f) => why('ships', { status_reason: genReason(wallS, f) }).why;
+  assert.equal(genReason(60, 0.95), null, 'ok sample has no reason');
+  assert.match(cloud(76, 1), /ran 76 s against a 60 s window, over our 75 s limit/);
+  assert.match(cloud(75.04, 1), /ran 75\.04 s against a 60 s window, over our 75 s limit/);
+  const tiny = cloud(75.0001, 1); assert.match(tiny, /exceeded our 75 s limit/); assert.doesNotMatch(tiny, /ran 75(\.0+)? s/);
+  for (const f of [0.899, 0.8999]) { const w = cloud(60, f); assert.match(w, /messages flowed for 89\.9% of the 60 s sample/); assert.match(w, /below our 90% standard/); assert.doesNotMatch(w, /for 90%/); }
+  for (const [x, f] of [[76, 1], [75.04, 1], [75.0001, 1], [60, 0.899], [60, 0.8999]]) assert.doesNotMatch(cloud(x, f), /ran 75 s|for 90%/); });
+await t('Mac ships (elapsed_wall_s published to 0.1 s, collector unchanged): 76.3 s states it; a rounded 75.0 s says "exceeded" + "rounded to 0.1 s", no invented digits', () => {
+  const mac = x => why('ships', { window_s: 60, ...x }).why;
+  assert.match(mac({ overlong_sample: true, elapsed_wall_s: 76.3, connection_fraction_of_sample: 1 }), /ran 76\.3 s against a 60 s window, over our 75 s limit/);
+  const r = mac({ overlong_sample: true, elapsed_wall_s: 75, connection_fraction_of_sample: 1 });
+  assert.match(r, /the sample exceeded our 75 s limit \(1\.25 × the 60 s window\); its reported duration, 75 s, is rounded to 0\.1 s/); assert.doesNotMatch(r, /ran 75|75\.0\d/);
+  for (const f of [0.899, 0.8999]) { const w = mac({ overlong_sample: false, elapsed_wall_s: 60, connection_fraction_of_sample: f }); assert.match(w, /messages flowed for 89\.9%/); assert.match(w, /below our 90% standard/); } });
 await t('unknown reason / no reason (older hub): neutral collection-quality wording, no cause invented, never "source flagged"', () => {
   for (const [layer, extra] of [['co2', {}], ['swpc', { status_reason: { code: 'something_new' } }], ['usgs', {}]]) {
     const f = why(layer, extra); assert.match(f.why, /below our collection-quality standard/); assert.doesNotMatch(f.why, NEVER); } });

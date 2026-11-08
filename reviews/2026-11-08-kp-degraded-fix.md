@@ -1,4 +1,35 @@
-# Kp / "degraded" fix — hub 0.6.1 + page wording — review (8 Nov 2026), rev 2
+# Kp / "degraded" fix — hub 0.6.1 + page wording — review (8 Nov 2026), rev 3
+
+## Rev 3 — after GPT's review of `0513aa7` (8 Nov): collector-to-page precision only
+GPT independently verified kp-degraded 28/28, health-hub 29/29, app syntax and the full worker hash on `0513aa7`. It found one remaining issue: **the cloud collector rounded its reason fields before publishing** (75.04 s → `elapsed_s: 75`; 0.8999 → `fraction: 0.9`). The page then said "ran 75 s … over our 75 s limit" and "flowed for 90% … below our 90% standard". Rev 2's page tests fed unrounded fields directly, so they missed it.
+
+**Changes:**
+- **Hub:** the cloud reason is now built by one exported function, `shipsReason(wallS, upFrac, windowS, overlong)`, used by `collectShipsFallback`.
+  - It publishes the measured values **unrounded** (`elapsed_s`, `fraction`) plus `limit_s`; the page formats them.
+  - Nothing else in the cloud envelope changed. The top-level `elapsed_wall_s` etc. keep their existing rounding.
+- **Mac collector unchanged** (it publishes `elapsed_wall_s` to 0.1 s). On the page, when `overlong_sample` is true but the reported tenths value does not exceed the limit, the sentence states that the sample **exceeded** the limit and that the reported figure is **rounded to 0.1 s**, with no invented digits.
+  - The same "exceeded" wording, without the rounding note, is used if a cloud value is so close to the limit that two decimals still don't show it above (e.g. 75.0001 s).
+- **Tests through the generated fields:**
+  - Cloud cases are now built by the hub's own `shipsReason`, JSON round-tripped as published, then rendered: 76, 75.04 and 75.0001 s overlong; 0.899 and 0.8999 flow.
+  - Mac cases use only tenths values (76.3 s; a rounded 75.0 s with `overlong_sample: true`; 0.899 / 0.8999 flow).
+  - The rev 2 test that supplied unrounded fields directly is replaced by these two.
+
+**Rendered (rev 3):**
+- Cloud 75.04 s: "the sample ran 75.04 s against a 60 s window, over our 75 s limit (1.25 × the window), so it is not counted as a full sample — …".
+- Cloud 75.0001 s: "the sample exceeded our 75 s limit (1.25 × the 60 s window), so it is not counted as a full sample — …".
+- Cloud 0.8999: "messages flowed for 89.9% of the 60 s sample (inferred from arrival gaps), below our 90% standard — …".
+- Mac reported 75.0 s (overlong): "the sample exceeded our 75 s limit (1.25 × the 60 s window); its reported duration, 75 s, is rounded to 0.1 s, so it is not counted as a full sample — …".
+
+**Tests (rev 3):**
+- kp-degraded **29/29**.
+- Breaks:
+  - `SHIPS_ROUNDED=1` (rev 2's rounding swapped into the generated reason) → the generated-fields test **fails**;
+  - rev 2's `app.js` (`0513aa7`) → **2 fail** (cloud generated fields; Mac rounded 75.0 s).
+- Regressions: all hub suites pass (ships-fallback 7/7, which exercises `collectShipsFallback`; health-hub 29; firms-v2 57 + 7 skipped; the rest as in rev 2); UI backdrop-layer 27, desktop-overflow 112, drifters-ui 25, kept-ui 21, mobile-pass 131, orbital-browser 113, plastic-ui 29, search-ui 104, smoke-fixes 52, terminator-behaviour 47, terminator-ui 19, ux-round1 34; place-ui 28/30 = the known harness failures. Run on the final rev 3 tree; container results remain Claude-supplied evidence.
+- worker.js sha256 `f38296a0183d14d958d5815d7926254cb4275be7ca00b384334974fad5b12cc8`.
+
+---
+
 
 ## Rev 2 — after GPT's review of `67140b0` (8 Nov)
 GPT verified kp-degraded 21/21, health-hub 29, history-hub 27, firms-guard 19, firms-v2 57 (+7 skipped), ships-late 7, the old-rule break (7 fail), syntax/module load and the worker hash. It asked for three fixes and two evidence corrections before release sign-off. All are done:
