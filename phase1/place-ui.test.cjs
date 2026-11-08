@@ -33,7 +33,8 @@ const cellOf = (lat, lng) => `${Math.floor((lat + 90) / 4)}_${Math.floor((lng + 
   for (const [l, v] of Object.entries(L)) { store.set(`latest/${l}.json`, JSON.stringify(v.snap)); store.set(`latest-cells/${l}.json`, JSON.stringify(v.cells)); }
   store.set('latest-cells/forest.json', JSON.stringify(env0('forest', { cells: { '22_46': { count: 12, confidence: { nominal: 9, high: 3, highest: 0 }, since: '2026-10-29', queried_at: RUN, version: 'v1', coverage: { grade: 'partial', evidence: 'e' } } }, sweep: { answered: 1, cells_total: 559, oldest_queried_at: RUN } })));
   let etag = 0;
-  const R2 = { async get(k) { const b = store.get(k); if (b === undefined) return null; return { body: b, httpEtag: '"' + k + (etag) + '"', async json() { return JSON.parse(b); }, async text() { return b; } }; }, async put(k, b) { store.set(k, String(b)); }, async delete(k) { store.delete(k); }, async list() { return { objects: [] }; } };
+  const R2 = { async get(k) { const b = store.get(k); if (b === undefined) return null; return { body: b, httpEtag: '"' + k + (etag) + '"', async json() { return JSON.parse(b); }, async text() { return b; } }; }, async head(k) { const b = store.get(k); if (b === undefined) return null; return { key: k, size: new TextEncoder().encode(b).length, etag: k + (etag), httpEtag: '"' + k + (etag) + '"', uploaded: new Date(), customMetadata: undefined }; },   // hub >= 0.6.0 reads head() before the place firms section; fixtures are legacy format (no lines/1 metadata)
+    async put(k, b) { store.set(k, String(b)); }, async delete(k) { store.delete(k); }, async list() { return { objects: [] }; } };
   const db = new DatabaseSync(':memory:'); db.exec(fs.readFileSync(__dirname + '/schema.sql', 'utf8'));
   const now = Date.now();
   const lh = db.prepare('INSERT INTO layer_hourly (layer, hour_utc, snapshots_expected, snapshots_ok, source_status, adequate_cells, updated_at) VALUES (?,?,?,?,?,?,?)');
