@@ -31,10 +31,15 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 4 min'); process
     ok('desktop: exactly one GIBS request', gibs.length === 1, gibs);
     const u = gibs[0] ? new URL(gibs[0]) : null;
     ok('desktop: GIBS request asks for NOAA-21 true colour', u && u.searchParams.get('LAYERS') === WANT, u && u.searchParams.get('LAYERS'));
-    ok('desktop: GIBS request date = ME.IMG_DAY (previous day)', u && u.searchParams.get('TIME') === r.day, [u && u.searchParams.get('TIME'), r.day]);
+    ok('desktop: GIBS request date = ME.IMG_DAY', u && u.searchParams.get('TIME') === r.day, [u && u.searchParams.get('TIME'), r.day]);
     ok('desktop: request format unchanged (EPSG:4326 2048×1024 jpeg)', u && u.searchParams.get('CRS') === 'EPSG:4326' && u.searchParams.get('WIDTH') === '2048' && u.searchParams.get('HEIGHT') === '1024' && u.searchParams.get('FORMAT') === 'image/jpeg');
     ok('desktop: label names VIIRS NOAA-21, the date and "not live"', /VIIRS NOAA-21/.test(r.long) && r.long.includes(r.label) && /not live/.test(r.long), r.long);
     ok('desktop: no imagery text still says NOAA-20', !/NOAA-20/.test(r.long) && !/NOAA-20/.test(r.full), [r.long, r.full]);
+    // GPT review 8 Nov: no "previous day" (now − 36 h can be two days back), no categorical cause of dark areas
+    const BAD = /previous day|polar night|not missing data|gaps in the satellite/i;
+    ok('desktop: label says "dated, not live" and makes no categorical claim about dark areas', /dated, not live/.test(r.long) && !BAD.test(r.long) && /cause of gaps not established/.test(r.long), r.long);
+    const help = await page.evaluate(() => document.body.innerText);
+    ok('desktop: day/night help text no longer says the imagery is "from a previous day"', !/from a previous day/i.test(help));
     ok('desktop: fire detections still labelled NOAA-20 (different satellite, unchanged)', /VIIRS NOAA-20/.test(r.firms), r.firms);
     ok('desktop: no page errors', perr.length === 0, perr);
     await ctx.close(); }
@@ -55,6 +60,10 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 4 min'); process
   { const { ctx, page, perr } = await open('/sources.html', { width: 1280, height: 860 });
     const t = await page.evaluate(() => document.body.innerText);
     ok('sources: imagery credit names VIIRS NOAA-21', /NASA GIBS, VIIRS NOAA-21 true colour/.test(t), (t.match(/Imagery[^\n]{0,120}/) || [''])[0]);
+    const tier = await page.evaluate(() => ME.TIER.gibs), row = await page.evaluate(() => (ME.rules(ME.readings()).find(x => x.section === 'imagery') || {}).v || '');
+    ok('sources: imagery tier = "imagery (dated; not live)"', tier === 'imagery (dated; not live)', tier);
+    ok('sources: imagery explanation is qualified (may reflect…; cause not established; fires use NOAA-20 separately)', /Dark areas may reflect insufficient sunlight or unavailable imagery; the cause of individual gaps has not been established/.test(row) && /Fire detections use NOAA-20 separately/.test(row) && /VIIRS NOAA-21/.test(row) && !/previous day|polar night|not missing data|gaps in the satellite/i.test(row), row);
+    ok('sources: no "previous day" anywhere on the page', !/previous day/i.test(t));
     ok('sources: no page errors', perr.length === 0, perr);
     await ctx.close(); }
 

@@ -198,7 +198,7 @@
                 <p>It is <b>not</b> a record of whether anything was observed in daylight. The records on this globe were observed at many different times, not at the time shown.</p>
                 <p>It is not satellite coverage, not cloud, not visibility, and <b>not evidence of absence</b>.</p>
                 <p><b>It does not explain fire-detection counts.</b> VIIRS detects thermal anomalies by day and by night, and each detection carries its own day/night flag.</p>
-                <p>The imagery beneath this shading is from a previous day and is dated separately; every record carries its own observation time. Three different clocks, kept apart.</p>
+                <p>The imagery beneath this shading is dated imagery, not live, and its date is shown separately; every record carries its own observation time. Three different clocks, kept apart.</p>
                 <p>Geometric boundary only: the Sun's centre on the horizon, with no refraction and no solar disc, so this is <b>not</b> sunrise or sunset. Twilight is not shown.</p>
                 <p><a href="sources.html#daynight">Full rules on Sources &amp; Details →</a></p>
               </div>
@@ -243,9 +243,9 @@ ME.menu(); ME.clock();
 { const c = $('credits').cloneNode(true); c.removeAttribute('id'); c.classList.add('m'); c.setAttribute('aria-label', 'Data sources and acknowledgments (phone)'); $('sheet-scroll').append(c); }
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ---------- imagery skin: NASA GIBS true colour, previous day, dated on the globe (§7.1)
+// ---------- imagery skin: NASA GIBS true colour, dated (IMG_DAY = now − 36 h, UTC date), dated on the globe (§7.1)
 const gibs = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&FORMAT=image/jpeg&WIDTH=2048&HEIGHT=1024&CRS=EPSG:4326&BBOX=-90,-180,90,180&TIME=' + IMG_DAY + '&LAYERS=' + IMG_LAYER.id;
-{ const full = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS ' + IMG_LAYER.sat + ') — not live · Arctic dark = polar night';
+{ const full = 'Imagery: ' + IMG_LABEL + ' (NASA GIBS, VIIRS ' + IMG_LAYER.sat + ') — dated, not live · dark areas: low sunlight or no imagery; cause of gaps not established';
   $('imgdate').innerHTML = `<span class="img-long">${esc(full)}</span><span class="img-short">Imagery ${esc(IMG_LABEL.slice(0, 6))}<br>${esc(IMG_LAYER.sat)} · not live</span>`;
   $('img-full').textContent = full; }
 

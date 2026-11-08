@@ -36,8 +36,9 @@ ME.kept = layer => { const b = KEPT[layer], hl = ME.historyLine(layer); return b
 const KEPT = ME.KEPT = { usgs: 'hourly per-cell counts kept since 30 Oct 2026', firms: 'hourly per-cell counts kept since 30 Oct 2026', ships: 'hourly per-cell counts kept since 1 Nov 2026; no vessel position kept beyond 2 days', forest: 'daily per-cell alert counts kept since 1 Nov 2026', swpc: 'every Kp value kept since 30 Oct 2026', co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026', seaice: 'the current file', drifters: 'the current file', plastic: 'the current NOAA file, plus Oceaneye\'s original file used for the checks' };   // always-true base facts; history is added by ME.historyLine
 const IMG_DAY = ME.IMG_DAY = new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10);
 const IMG_LABEL = ME.IMG_LABEL = new Date(IMG_DAY).toUTCString().slice(5, 16);
-// Backdrop imagery layer (8 Nov 2026): NOAA-21. NOAA-20 true colour showed growing swath gaps from ~5 Nov (30°S–30°N black:
-// 0.2% 4 Nov → 25.6% 6 Nov; NASA VIIRS processing-delay alert) and SNPP ended 2 Nov. One place to change it; the page names it.
+// Backdrop imagery layer (8 Nov 2026): NOAA-21. Measured 8 Nov: NOAA-21 had far fewer near-black pixels than NOAA-20 for 6–7 Nov
+// (the dates the page shows now), but more for 4–5 Nov — this improves the current images, it does not guarantee completeness.
+// A later fallback rule is a separate proposal. One place to change it; the page names it.
 const IMG_LAYER = ME.IMG_LAYER = { id: 'VIIRS_NOAA21_CorrectedReflectance_TrueColor', sat: 'NOAA-21' };
 // Operating mode of the home collector. Change only when a schedule has been installed AND verified from logs (brief §5).
 /* Cloud fallback (hub 0.3.5, 3 Nov 2026): taken only when no home sample arrived for 40 min. Measured once so far: the cloud
@@ -281,7 +282,7 @@ const SOURCE = ME.SOURCE = {
   drifters: { name: 'NOAA OSMC', url: 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html', credit: 'NOAA Observing System Monitoring Center (OSMC) — drifting-buoy reports relayed over the WMO GTS', terms: 'CC0 1.0 (public domain dedication)' },
   gibs: { name: 'NASA GIBS', url: 'https://earthdata.nasa.gov/gibs', credit: `Imagery: NASA GIBS, VIIRS ${IMG_LAYER.sat} true colour`, terms: 'open; dated; not live' },
 };
-const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', forest: 'observation (satellite-derived alert pixels, published; three alert systems with their own confidence rules)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated, previous day)', drifters: 'observation (each buoy\'s latest reported fix; positions at different times, not one moment)', plastic: 'observation (dated samples 2011–2024; concentrations as published by NOAA NCEI; not current positions)' };
+const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', forest: 'observation (satellite-derived alert pixels, published; three alert systems with their own confidence rules)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated; not live)', drifters: 'observation (each buoy\'s latest reported fix; positions at different times, not one moment)', plastic: 'observation (dated samples 2011–2024; concentrations as published by NOAA NCEI; not current positions)' };
 
 // ---------- state
 const state = ME.state = { usgs: null, firms: null, ships: null, forest: null, swpc: null, co2: null, seaice: null, drifters: null, plastic: null };
@@ -409,7 +410,7 @@ ME.rules = function (R) {
     if (layer === 'seaice') add(layer, 'Map layer', 'not shown. Measured 30 Oct 2026: GIBS VIIRS sea ice paints 0.76% of the globe (polar night, cloud); AMSR2 concentration ended 1 Sep 2025; GHRSST MUR is an L4 analysis (model tier). Decision pending.', true);
   }
   add('aircraft', 'Status', 'not shown. OpenSky permits public sites only if they feed the network (reply 30 Oct 2026); cloud collectors are not whitelisted; a home ADS-B receiver in Cape Town is under consideration (site promising, reception unmeasured).', true);
-  add('imagery', 'Imagery', `NASA GIBS VIIRS ${IMG_LAYER.sat} true colour, ${IMG_DAY} (previous day; the only direct source call). This is a different satellite from the fire detections (VIIRS NOAA-20). The Arctic appears empty in the northern winter because it is in polar night — a daylight sensor sees nothing there; this is not missing data. Other black stripes are gaps in the satellite's daily coverage.`);
+  add('imagery', 'Imagery', `Dated true-colour imagery from NASA GIBS, VIIRS ${IMG_LAYER.sat}, image date ${IMG_DAY} — not live (the only direct source call). Fire detections use NOAA-20 separately. Dark areas may reflect insufficient sunlight or unavailable imagery; the cause of individual gaps has not been established.`);
   return rows;
 };
 
