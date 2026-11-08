@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~06:00 UTC — **Finding: Kp "degraded" is a false signal** (read-only; no change) — `reviews/2026-11-08-kp-degraded-finding.md`
+- 69% of swpc runs since 4 Nov (70/102) were `degraded` while NOAA delivered on schedule. The 4 h rule ignores that `time_tag` is the interval start: on-time values appear at 3.13 h (31/33; 2 at 4.13 h) and age to ~6.1 h.
+- The page says "the source flagged this observation as degraded" / "source degraded". The flag is our hub's rule, not NOAA's, so that wording is untrue. The same reason text applies to every layer the hub marks degraded.
+- Values and dates shown are correct; no swpc monitor exists, so no false alerts. Fix options (threshold ~7.5 h; honest wording) in the finding; each needs review + Chad's approval.
+
 ## 8 Nov 05:47–05:50 UTC — **two of the smoke test's open checks done (read-only, Claude, browser pane)**; Mac copies synced
 - **Conditions:** Claude desktop browser pane (Chromium), 588 × 834 = the phone layout, **not a real phone**; live page main `3375e91` assets, hub 0.6.0. Pane visible.
 - **"Everything here" cell selection — PASS.** A real click on the globe opened a forest cell inspector (cell 17_35). Its "Everything we hold for this cell, all layers" link opened **Everything here · cell 17_35** with the expected rows:
