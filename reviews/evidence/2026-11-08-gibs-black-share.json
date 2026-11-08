@@ -1,0 +1,13 @@
+{"method":"Browser pane (Claude app, Chromium), plain-text github.io tab (no page scripts), fetch GIBS WMS GetMap exactly as the page requests it (EPSG:4326, 2048x1024, image/jpeg, cache no-store), decode, count near-black pixels (R,G,B all < 12) — same definition as Phase 0. Bands by pixel-row centre latitude.",
+ "measured_utc":["2026-11-08T03:56:50.067Z","2026-11-08T03:57:06.741Z"],
+ "layers":{"N20":"VIIRS_NOAA20_CorrectedReflectance_TrueColor","N21":"VIIRS_NOAA21_CorrectedReflectance_TrueColor"},
+ "rows":[
+ {"day":"2026-11-04","sat":"N20","status":200,"bytes":564194,"black_all":15.2,"black_30S_30N":0.1,"black_66S_66N":2.3,"black_N_of_66N":100,"black_S_of_66S":3.2},
+ {"day":"2026-11-04","sat":"N21","status":200,"bytes":543732,"black_all":17.4,"black_30S_30N":6.2,"black_66S_66N":5.8,"black_N_of_66N":100,"black_S_of_66S":0},
+ {"day":"2026-11-05","sat":"N20","status":200,"bytes":511405,"black_all":23.3,"black_30S_30N":13.2,"black_66S_66N":13.5,"black_N_of_66N":100,"black_S_of_66S":1.5},
+ {"day":"2026-11-05","sat":"N21","status":200,"bytes":375107,"black_all":40.3,"black_30S_30N":37.0,"black_66S_66N":35.2,"black_N_of_66N":100,"black_S_of_66S":9.4},
+ {"day":"2026-11-06","sat":"N20","status":200,"bytes":449038,"black_all":30.4,"black_30S_30N":25.8,"black_66S_66N":23.5,"black_N_of_66N":100,"black_S_of_66S":0.2},
+ {"day":"2026-11-06","sat":"N21","status":200,"bytes":541781,"black_all":16.9,"black_30S_30N":3.3,"black_66S_66N":5.2,"black_N_of_66N":100,"black_S_of_66S":0},
+ {"day":"2026-11-07","sat":"N20","status":200,"bytes":514913,"black_all":20.2,"black_30S_30N":8.0,"black_66S_66N":8.8,"black_N_of_66N":100,"black_S_of_66S":5.0},
+ {"day":"2026-11-07","sat":"N21","status":200,"bytes":544843,"black_all":15.5,"black_30S_30N":0.2,"black_66S_66N":2.9,"black_N_of_66N":100,"black_S_of_66S":2.2}],
+ "note":"North of 66.5N is 100% black on every image (polar night). The page shows IMG_DAY = now - 36 h (UTC date): at 03:57 UTC 8 Nov that is 2026-11-06; from 12:00 UTC 8 Nov it is 2026-11-07."}

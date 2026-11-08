@@ -36,6 +36,9 @@ ME.kept = layer => { const b = KEPT[layer], hl = ME.historyLine(layer); return b
 const KEPT = ME.KEPT = { usgs: 'hourly per-cell counts kept since 30 Oct 2026', firms: 'hourly per-cell counts kept since 30 Oct 2026', ships: 'hourly per-cell counts kept since 1 Nov 2026; no vessel position kept beyond 2 days', forest: 'daily per-cell alert counts kept since 1 Nov 2026', swpc: 'every Kp value kept since 30 Oct 2026', co2: 'daily values kept as NOAA publishes them, since 29 Oct 2026', seaice: 'the current file', drifters: 'the current file', plastic: 'the current NOAA file, plus Oceaneye\'s original file used for the checks' };   // always-true base facts; history is added by ME.historyLine
 const IMG_DAY = ME.IMG_DAY = new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10);
 const IMG_LABEL = ME.IMG_LABEL = new Date(IMG_DAY).toUTCString().slice(5, 16);
+// Backdrop imagery layer (8 Nov 2026): NOAA-21. NOAA-20 true colour showed growing swath gaps from ~5 Nov (30°S–30°N black:
+// 0.2% 4 Nov → 25.6% 6 Nov; NASA VIIRS processing-delay alert) and SNPP ended 2 Nov. One place to change it; the page names it.
+const IMG_LAYER = ME.IMG_LAYER = { id: 'VIIRS_NOAA21_CorrectedReflectance_TrueColor', sat: 'NOAA-21' };
 // Operating mode of the home collector. Change only when a schedule has been installed AND verified from logs (brief §5).
 /* Cloud fallback (hub 0.3.5, 3 Nov 2026): taken only when no home sample arrived for 40 min. Measured once so far: the cloud
  * connection heard 1,873 vessels in 60 s vs the home collector's 3,408 — stated, never hidden; update after more samples. */
@@ -276,7 +279,7 @@ const SOURCE = ME.SOURCE = {
   seaice: { name: 'NSIDC', url: 'https://nsidc.org/data/g02135', credit: 'Fetterer, F., Knowles, K., Meier, W. N., Savoie, M., Windnagel, A. K. & Stafford, T. (2025). Sea Ice Index. (G02135, Version 4). [Data Set]. Boulder, Colorado USA. National Snow and Ice Data Center. https://doi.org/10.7265/a98x-0f50. Daily sea-ice extent, Northern and Southern Hemispheres, and the 1981–2010 daily climatology. Date accessed: the retrieval date of the snapshot shown.', terms: 'open (NOAA mirror); citation required as a condition of use' },
   plastic: { name: 'Oceaneye via NOAA NCEI', url: 'https://www.ncei.noaa.gov/products/microplastics', credit: 'NOAA NCEI Marine Microplastics (Nyadjro et al. 2018; Nyadjro et al. 2023, Scientific Data, doi:10.1038/s41597-023-02632-y); dataset NCEI Accession 0276422 (Faure, Saini, Potter, Galgani, de Alencastro, Hagmann 2023); original counts Hagmann & Potter (2022), SEANOE doi:10.17882/86630', terms: 'NCEI compiled product CC0; Oceaneye original CC BY 4.0; NCEI archive licence unstated' },
   drifters: { name: 'NOAA OSMC', url: 'https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html', credit: 'NOAA Observing System Monitoring Center (OSMC) — drifting-buoy reports relayed over the WMO GTS', terms: 'CC0 1.0 (public domain dedication)' },
-  gibs: { name: 'NASA GIBS', url: 'https://earthdata.nasa.gov/gibs', credit: 'Imagery: NASA GIBS, VIIRS NOAA-20 true colour', terms: 'open; dated; not live' },
+  gibs: { name: 'NASA GIBS', url: 'https://earthdata.nasa.gov/gibs', credit: `Imagery: NASA GIBS, VIIRS ${IMG_LAYER.sat} true colour`, terms: 'open; dated; not live' },
 };
 const TIER = ME.TIER = { usgs: 'observation', firms: 'observation (per satellite pass; NRT product)', ships: 'observation (sampled, not continuous)', forest: 'observation (satellite-derived alert pixels, published; three alert systems with their own confidence rules)', swpc: 'observation (index, not a map layer)', co2: 'observation (one station index, not a map layer; recent months preliminary)', seaice: 'observation (passive-microwave extent; index per hemisphere, not a map layer)', gibs: 'imagery (dated, previous day)', drifters: 'observation (each buoy\'s latest reported fix; positions at different times, not one moment)', plastic: 'observation (dated samples 2011–2024; concentrations as published by NOAA NCEI; not current positions)' };
 
@@ -406,7 +409,7 @@ ME.rules = function (R) {
     if (layer === 'seaice') add(layer, 'Map layer', 'not shown. Measured 30 Oct 2026: GIBS VIIRS sea ice paints 0.76% of the globe (polar night, cloud); AMSR2 concentration ended 1 Sep 2025; GHRSST MUR is an L4 analysis (model tier). Decision pending.', true);
   }
   add('aircraft', 'Status', 'not shown. OpenSky permits public sites only if they feed the network (reply 30 Oct 2026); cloud collectors are not whitelisted; a home ADS-B receiver in Cape Town is under consideration (site promising, reception unmeasured).', true);
-  add('imagery', 'Imagery', `NASA GIBS VIIRS NOAA-20 true colour, ${IMG_DAY} (previous day; the only direct source call). The Arctic appears empty in late October because it is in polar night — a daylight sensor sees nothing there; this is not missing data.`);
+  add('imagery', 'Imagery', `NASA GIBS VIIRS ${IMG_LAYER.sat} true colour, ${IMG_DAY} (previous day; the only direct source call). This is a different satellite from the fire detections (VIIRS NOAA-20). The Arctic appears empty in the northern winter because it is in polar night — a daylight sensor sees nothing there; this is not missing data. Other black stripes are gaps in the satellite's daily coverage.`);
   return rows;
 };
 
