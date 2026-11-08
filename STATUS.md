@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~17:40 UTC — **R6 terms review rev 4: extraction complete; corrected packet for GPT (docs only)** — `docs/research/R6-ozone.md` §9
+- P1–P5 read by **GPT on Chad's behalf**. Disclaimers: no commercial-reuse grant or limit; methods may change, versions not all archived; interpolation for visualisation/area only, never minimum; research-only caution = GMAO GEOS forecasts only. Footer notice → redirect to nasa.gov/privacy (not licence evidence). Homepage credit request verified. Contacts: affiliations establish neither authorship nor copyright. GMAO: no applicable grant; products-page login is that page's limitation only.
+- Corrections: §9.4 now separates the requested credit from permission for commercial redistribution; the rev-3 authorship inference from a contact's affiliation is withdrawn.
+- **Commercial reuse UNRESOLVED — no applicable grant established in the inspected sources; not a finding of prohibition.** No numerical limit found in the named pages/dates (≠ unlimited). Research-only REGISTER draft §9.6, **not filed**. R3 email reply-pending; silence grants nothing.
+
 ## 8 Nov ~17:00 UTC — **R6 ozone terms/access review rev 3 (read-only; Chad's go, R6 only)** — `docs/research/R6-ozone.md` §9, for GPT; **USNO email recorded (R3)**
 - **R3:** Chad sent the USNO enquiry to `eopcp@us.navy.mil` on 8 Nov (commercial reuse; storage/reformatting/redistribution; IERS mirror; attribution; one automated download per day). **Reply pending; no permission inferred from sending or silence**; R3 reuse stays UNRESOLVED (`R3` §9.4a). No follow-up or further R3 work.
 - **R6:** evidence split into reuse, attribution, automated access, numerical limits. Ozone Watch's credit request confirmed ("Please credit all material to "NASA Ozone Watch" unless otherwise noted."); no licence found. NASA's CC0 (ESDIS-scoped), the OMPS input record and NASA media guidelines read but **not applied to the derived files** (scope). No numerical limit found (≠ unlimited). Commercial use not established; not a finding of prohibition.
