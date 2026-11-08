@@ -81,6 +81,14 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - The endpoints judge pipeline facts (successful publication, run streaks, checkpoint completion, coverage), not just whether the hub answers. A red monitor is a finding. Never alter evidence to turn one green. Known case: "coverage firms" shows red while the previous day's coverage is stale (e.g. 5 Nov during 6 Nov).
 - With monitoring live, routine overnight check-ins are optional (Chad's call). The connector (§4e) reads D1 with the Mac closed. Telemetry (CPU, memory) still needs the browser pane.
 
+## 4g. Thread facts (8 Nov 2026, Kp thread)
+- **Deploy read-back, exact:** in the dashboard tab, `GET /api/v4/accounts/<acct>/workers/scripts/mother-earth/content/v2` (header `x-atok`) returns multipart; `await r.formData()` → `get('worker.js')` gives the script itself, whose sha256 must equal the commit's. No wrapper stripping needed. Bindings: `GET …/settings` (19 on 0.6.1).
+- **The content-only upload passed on Chad's exact Approve line** (0.6.1, 8 Nov). Keep the pattern: fetch from raw.githubusercontent at the commit, sha-check in the tab, PUT, read back.
+- **Release pattern that worked:** branch → GPT review rounds → `Approve: deploy hub …` → first scheduled runs read in D1 → live RC check in a clean pane tab against the deployed hub → `Approve: push <branch> to main (page change: …)` → no-ff merge (check overlap first) → served-hash check → live read.
+- **GitHub in the pane:** Chad is signed in; `github.com/<repo>/branches/all` read with `get_page_text` shows ahead/behind per branch. Only Chad deletes refs (the session proxy refuses).
+- **Open pages keep their imagery date:** `IMG_DAY` (now − 36 h) is computed once when `app.js` loads, so a tab open across 12:00 UTC keeps the old date (label and request still agree) until reloaded. Confirmed live 8 Nov.
+- **Test pattern for page wording:** `app.js` loads in Node (`globalThis.window = globalThis; globalThis.document = {}; new Function(src)()`), then set `ME.state[layer]` and read `ME.freshness`, `ME.readings()`, `ME.report(R).text`. Test **generated** hub fields (export the builder, JSON round-trip) through the renderer, not hand-written fields.
+
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.
 - **Optional layers** on the page go through `OPTIONAL_LAYERS` in index.html (fetched only while on, cleared on off, `refreshPair` + `usable()` as for the always-on record layers). `ME.renderState()` and `ME.openCell(layer, id)` are the read-only test/console aids.

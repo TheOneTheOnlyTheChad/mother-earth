@@ -4,6 +4,25 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov 12:10–12:19 UTC — **GPT independent live smoke test of `ad4002b` + hub 0.6.1: no blocking regression in the checks completed** (not exhaustive)
+- Confirmed:
+  - hub 0.6.1; all four served page files = reviewed `86134b8`; all eight health endpoints HTTP 200, healthy=true;
+  - Kp card and Sources agree (3.33, interval 09:00–12:00 UTC, current); wording fits at 360/390/430/1280 px without page overflow;
+  - no obsolete "source flagged/degraded" wording or NaN in inspected rendered text;
+  - coordinate search, ship/fire inspectors, 0.51 MW precision;
+  - real globe click → Everything here; panel-only buoy loading leaves the globe layer off;
+  - buoys, microplastic, computed day/night load;
+  - all three orbital categories render and switch off; counts reconcile to the current 32,645-object file, with 6 propagation failures and 547 unknown-type disclosed;
+  - fresh post-noon imagery label and request both 7 Nov NOAA-21;
+  - no warning/error entries in inspected logs.
+- **Limits:**
+  - no naturally degraded path and no injected browser-state test: those paths rest on the reviewed local tests;
+  - no real-phone/Safari test;
+  - Claude's before/after-noon transition remains Claude-supplied; GPT independently confirmed the post-noon state.
+- No production changes. Existing approvals and accepted gates stand.
+
+## 8 Nov ~12:30 UTC — **thread handover** (Kp / smoke-test thread → backlog thread). HANDOVER rewritten (§0 live state, §0a smoke testing, §1 next).
+
 ## 8 Nov 11:53–12:06 UTC — **Noon UTC imagery rollover: PASS** (read-only; smoke-test open item; browser pane, Mac unattended)
 - Live page = main `ad4002b` (assets `?v=202611151000`). The booked prompt said `3375e91`; the imagery logic is unchanged between the two.
 - **Correction:** `IMG_DAY` = now − 36 h rolls **6 → 7 Nov** at 12:00 UTC on 8 Nov, not 7 → 8 as Claude's booking note said.
