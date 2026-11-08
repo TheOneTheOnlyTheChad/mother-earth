@@ -4,7 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
-## 8 Nov ~14:45 UTC — **R4 terms review rev 7: Chad's pastes filed (docs only)** — `docs/research/R4-argo.md` §12.5–12.6
+## 8 Nov ~15:15 UTC — **R4 Argo: terms round CLOSED; REGISTER entry FILED** (docs only; Chad: "Approve: make these documentation corrections and file the corrected Argo REGISTER entry")
+- **GPT's review of rev 7:** accepted the dataset-level CC BY evidence and GDAC linkage, supported synchronisation routes, the narrowly stated absence of a numerical limit, the attribution plan and the preserved non-terms gates. S4 (Ifremer policy) supplementary, not needed while not relied on.
+- **Rev 8 corrections:** provenance throughout = "GPT independently read/extracted the evidence; Chad delegated extraction and relayed the packet" (Chad did not personally inspect the pages); §12.4's Ifremer exclusion now stated as Claude's unverified fetch summary, unestablished, not relied on; §§8, 10.1, 11.1, 11.5.1 marked historical, superseded by §12.
+- **REGISTER.md:** Argo GDAC entry filed, with the labelled licence-scope inference, CC BY attribution (credit, licence link, DOI, modifications), supported routes (rsync, `aws s3 sync`) and "no numerical limit found" (not unlimited). Research only.
+- Accepts the scoped terms conclusion only: no route, collector, build, resource, schedule, deploy or page change. R4 technical gates open; R2, R3, R6 untouched; other approvals and parked/stopped decisions stand.
+
+## 8 Nov ~14:45 UTC — **R4 terms review rev 7: evidence packet filed (docs only)** *(provenance corrected in rev 8: GPT independently read/extracted the evidence; Chad delegated extraction and relayed the packet)* — `docs/research/R4-argo.md` §12.5–12.6
 - **R1 (required, SEANOE, checked 8 Nov):** Licence section links to CC BY 4.0; acknowledgment sentence verbatim; additional-access GDAC link to `https://data-argo.ifremer.fr/`.
 - **S1 Sextant** (field values verbatim; use-limitation paragraph a summary) · **S2 Data Access** ("The synchronization service is available from Ifremer 'rsync' and from 'aws s3 sync'.") · **S3 US GODAE disclaimer** (public-domain sentence with "unless otherwise specified" preserved; not used to override dataset terms).
 - **S4 Ifremer policy: PENDING, unverified.** Recorded URL 404; corrected filename `R2-D1-Instruction PDG 2023-0550 …pdf` (GPT); no readable text yet. The provisional French quotations are not filed as verified.

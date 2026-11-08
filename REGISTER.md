@@ -165,3 +165,24 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
   - "You can download, share, modify, and distribute the data for any purpose, including commercial and noncommercial use, free of charge and without requiring permission from the Museum."
 - **Also on the page:** record completeness varies ("cataloguing is ongoing"); digital images are not in the dataset; the CSV on GitHub "is updated on a weekly basis" (so any use pins a commit and hash, as Phase 0 did: `e394878`, `7adc37e4…`). Images of public-domain works are CC0 under the site's Terms and Conditions; copyrighted or restricted images are licensed through Art Resource for a fee — media excluded here.
 - **Status:** ✅ reuse terms filed (data: CC0, commercial use yes, attribution not required). Not on the page; Phase 0 research only.
+
+## Argo GDAC — core profile files (T/S/P), Coriolis GDAC, dataset DOI 10.17882/42182 — research only, not on the page
+- **Read:** 8 Nov 2026 — evidence R1, S1–S3: GPT independently read/extracted the evidence; Chad delegated extraction and relayed the packet. Claude: web-fetch summaries (supporting only). Pages: SEANOE DOI landing https://www.seanoe.org/data/00311/42182/; Ifremer Sextant ISO record 3df904de-e47d-4bf9-85a0-7c0942aff8b6; Argo Data Management Data Access https://www.argodatamgt.org/DataAccess.html; argo.ucsd.edu Data from GDACs; US GODAE disclaimer https://usgodae.org/disclaimer.html; AWS Registry. Ifremer policy DG/2023.0550: pending, unverified.
+- **Licence (SEANOE DOI record):** the Licence section links to https://creativecommons.org/licenses/by/4.0/ (CC BY 4.0).
+- **Licence scope (Interpretation, labelled):** the licence is on the dataset's DOI record, whose additional-access section links https://data-argo.ifremer.fr/ (the GDAC). Not embedded per file (not required). Whether it is meant for the live, changing collection as well as the DOI snapshots is not stated in words; the record's link to the live server is the evidence.
+- **Access (Ifremer Sextant):** Access constraints "Other restrictions"; Other constraints "No limitations on public access"; Use constraints empty.
+- **Use limitation (Ifremer Sextant, summary):** acknowledgment requested; users must understand the manual and the NetCDF attribute documentation.
+- **Automated access (verbatim, Argo Data Management):** "The synchronization service is available from Ifremer 'rsync' and from 'aws s3 sync'." Examples for floats and index files. No numerical rate/cadence/load limit found in the pages inspected (SEANOE, Sextant, Data Access, Data from GDACs, US GODAE disclaimer, AWS Registry; 8 Nov 2026). Any collector states its own cadence and load. No route selected.
+- **US GODAE (verbatim):** "All information on this site is public domain and may be distributed or copied unless otherwise specified." Credits requested. Exception preserved; not used to override the dataset's CC BY terms.
+- **Ifremer policy DG/2023.0550:** PENDING — not verified; not relied on.
+- **Attribution (CC BY 4.0 + the source's request), with any shown profile:**
+  - credit (verbatim, SEANOE): "These data were collected and made freely available by the international Argo project and the national programs that contribute to it.";
+  - licence: CC BY 4.0, linked to https://creativecommons.org/licenses/by/4.0/;
+  - dataset: https://doi.org/10.17882/42182 (or the monthly snapshot DOI if a snapshot is used);
+  - modifications, where applicable (e.g. "Primary profile selected and reformatted by Mother Earth; values not altered" — wording to match what is done);
+  - per profile: float WMO, cycle, DATA_MODE, the file's DATE_UPDATE and retrieval time.
+- **Coverage statement:** none filed (R4 non-terms gates open: revisions, identity, error confidence, scale, baseline).
+- **Filed:** 8 Nov 2026 — GPT accepted the scoped terms conclusion (rev 7 review); Chad authorised filing ("Approve: make these documentation corrections and file the corrected Argo REGISTER entry"). Acceptance covers the terms conclusion only, not a route, collector or build.
+- **Status:** ⛔ research only; terms clarified, NOT cleared for building. R4 technical gates open (revisions, identity, error confidence, scale, baseline). No numerical limit found ≠ unlimited access.
+- **Commercial use:** with attribution — CC BY 4.0 on the dataset (DOI record), which links the GDAC server as an access route.
+- **Research record:** `docs/research/R4-argo.md` §12 (rev 8).
