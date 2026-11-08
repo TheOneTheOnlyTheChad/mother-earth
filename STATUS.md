@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~06:15 UTC — **GIBS measured fallback rule: PROPOSAL written** (HANDOVER item 4; design only) — `docs/GIBS-FALLBACK-PROPOSAL.md`
+- Hub job picks the more complete of NOAA-21 / NOAA-20 (near-black share, 66.5°S–66.5°N) for the latest day, else the day before. It publishes `latest/backdrop.json` + `GET /backdrop`; the page follows, or uses the fixed NOAA-21 default if it is unavailable.
+- Threshold *T* is not chosen: it needs a bench (PNG decode in a Worker, small-vs-full agreement, CPU) and a ~7-day shadow record first, each on Chad's go.
+- Staged rollout with Approve lines; rollback = remove `BACKDROP_ENABLED`. Expected cost $0 (to be measured). Open questions §9. For GPT.
+
 ## 8 Nov ~06:00 UTC — **Finding: Kp "degraded" is a false signal** (read-only; no change) — `reviews/2026-11-08-kp-degraded-finding.md`
 - 69% of swpc runs since 4 Nov (70/102) were `degraded` while NOAA delivered on schedule. The 4 h rule ignores that `time_tag` is the interval start: on-time values appear at 3.13 h (31/33; 2 at 4.13 h) and age to ~6.1 h.
 - The page says "the source flagged this observation as degraded" / "source degraded". The flag is our hub's rule, not NOAA's, so that wording is untrue. The same reason text applies to every layer the hub marks degraded.
