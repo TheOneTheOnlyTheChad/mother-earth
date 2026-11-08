@@ -12,12 +12,12 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | **D1** | **+ 5 `firms_*` tables + 3 indexes (6 Nov 19:59:43–20:00:03 UTC, FIRMS v2 state).** 9 history tables + 8 indexes **+ `archive_checkpoint_coverage` (empty) + index `collector_runs_layer_finished`** (both created 6 Nov 05:37 UTC, live = `2ee3a62` schema). |
 | **History** | ON since 5 Nov 10:21 UTC — keep on. First midnight checkpoint (5 Nov) completed; **fires part is partial** (input 15:30 UTC: the 4 MB guard skipped 15:45–23:45). Details STATUS. |
 | **FIRMS** | 8 MiB guard live; first 0.5.2 run 06:00 UTC ok (57 ms CPU). First runs over 4 MB due 6 Nov afternoon UTC — check scheduled 14:20 UTC. |
-| **Branch** | `firms-memory` **merged into main** (8 Nov) and can be deleted on GitHub (Chad). Its tests, bench and review are on main: `phase1/firms-v2.test.mjs` 64/64 (with `OLD_WORKER`), `phase1/firms-v2-breaks.mjs` 39/39, `phase1/bench-firms-memory/`, `reviews/2026-11-06-firms-v2-build.md`. `aircraft-rc` is parked and predates 0.6.0: rebuild it on main, never deploy it as-is. |
+| **Branch** | `firms-memory` **merged into main** (8 Nov); deleted on GitHub (gone by 8 Nov ~06:00 UTC). Its tests, bench and review are on main: `phase1/firms-v2.test.mjs` 64/64 (with `OLD_WORKER`), `phase1/firms-v2-breaks.mjs` 39/39, `phase1/bench-firms-memory/`, `reviews/2026-11-06-firms-v2-build.md`. `aircraft-rc` is parked and predates 0.6.0: rebuild it on main, never deploy it as-is. |
 | **Tests** | All hub suites pass on the branch; orbital-browser 113/113 on main. |
 
 ## 1. Next
 **Ordered for the next thread (8 Nov ~05:30 UTC):**
-1. **GPT's live smoke test** of main `3375e91` (requested 8 Nov). Act on findings only through a branch, review and Chad's exact Approve line. The page is live with the NOAA-21 backdrop (see STATUS 8 Nov).
+1. ~~GPT's live smoke test~~ **DONE 8 Nov 05:14–05:20 UTC: no blocking regression in the checks completed (not exhaustive; STATUS 8 Nov).** Still open from it: actual-phone test, imagery-date rollover at noon UTC, "Everything here" cell-selection UI, orbital categories beyond payloads. No fix or further testing authorised; any proposal needs review + Chad's specific approval.
 2. **Phase 0 Planet, with Chad:** three iPhone Safari loads, screen-recorded (time to globe visible, time to first drag response) plus direct interactivity. Then a short **Phase 0 recommendation** comparing the gates, for Chad's separate domain-selection decision. Resume point `bad819a` + `docs/research/P0-CHECKPOINT.md`.
    - Arts: scoped gate cleared, not selected. Life: scoped block, stopped. Aircraft: parked (research included).
    - No prototype, collector, resource, production change, deploy or merge.

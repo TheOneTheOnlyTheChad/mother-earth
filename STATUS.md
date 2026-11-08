@@ -4,6 +4,25 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov 05:14–05:20 UTC — **GPT live smoke test of main `3375e91`: no blocking regression found in the checks completed** (not an exhaustive pass)
+- **Conditions:** Codex in-app browser (exact version not captured); imagery date shown 6 Nov 2026. Report + evidence on Chad's Mac: `~/Documents/ChatGPT/Mother Earth/outputs/2026-11-08-live-smoke/` (not copied into the repo).
+- **Passed:**
+  - NOAA-21 imagery rendered; GIBS request date = label; qualified wording present; fires still NOAA-20.
+  - Phone 360/390/430 px: two-line chip unclipped, full explanation in Key, no page overflow. Desktop 1280×860: imagery label clear of the legend.
+  - Main cards populated; buoys, microplastic, day/night and orbital payloads loaded; Kp degradation and partial forest coverage disclosed.
+  - Coordinate search and record inspectors worked; a 0.51 MW fire kept its precision in search and inspector.
+  - Sources tables populated at 360/1280 with imagery credits and retention wording, no overflow.
+  - Browser reads: hub 0.6.0; all eight health bodies healthy (verdict ok, no reasons); `/place` returned the documented structure.
+  - No warning/error entries in the inspected browser logs on either page.
+- **Not covered / remaining:**
+  - Actual-phone testing.
+  - Imagery-date rollover at noon UTC.
+  - "Everything here" cell-selection UI (browser-control timeouts; the direct `/place` endpoint worked).
+  - Orbital: payloads only, not every category or inspector.
+  - Browser HTTP status codes not separately captured.
+- **Environment note:** GPT's direct command-line hub requests got 403 while browser access worked — an access limitation of that environment, not a demonstrated outage.
+- **No fix or further testing authorised.** Any proposed fix comes back for review and Chad's specific approval before publishing or any production change. Aircraft parked (research included); expansion permissions unchanged (no prototype, no Phase A).
+
 ## 8 Nov 05:07:54 UTC — **PAGE RELEASED: GIBS backdrop → NOAA-21** (main `3375e91`, Chad's Approve line, after GPT's review). Served hashes verified 05:09:53 UTC; live check 05:10:24 UTC: NOAA-21 requested for 2026-11-06; labels/credit name NOAA-21, "dated, not live", dark-area cause not established; fires still NOAA-20. Assets `?v=202611141000`. Improves the current images (NOAA-21 was worse on 4–5 Nov); not a completeness fix. New guard `phase1/backdrop-layer.test.cjs` (27). place-ui 28/30 = 2 pre-existing harness failures (`env.R2.head` missing in its fake R2 since the FIRMS merge). Outstanding: real-phone check; any fallback rule is a separate proposal (hub work).
 
 ## 8 Nov — **FIRMS v2 rollout CLOSED; `firms-memory` merged into main** (FIRMS memory thread; Chad's Approve line)
