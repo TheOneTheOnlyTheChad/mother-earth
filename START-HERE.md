@@ -176,4 +176,5 @@ Deterministic test of the hard boundary: `node phase1/duration-contract.test.mjs
 - Ships via the Mac collector (aisstream WebSocket → `/ingest/ships`), then show on the page. R2 48 h retention job (D12). NSIDC citation paste. Polar-cap imagery decision. ADS-B receiver basket. Week-one FIRMS CPU review.
 
 ## 9. Handover rule for every thread
+**Timestamps (Chad, 8 Nov):** every STATUS/HANDOVER time is either a measured reading (a real clock: tool output, `date -u`, a log) or a git commit time labelled "commit time". Never an estimate. A file cannot hold its own commit's sha, so write the handover header's sha after committing (second commit) or say "this commit".
 Before a thread ends: update STATUS.md (all three copies + project doc), update this file if an operating fact changed, and leave the next concrete action as item 1 of STATUS → Next. The new thread's first act is to read START-HERE then STATUS — Chad has put that instruction in the Project's custom instructions so it happens without being asked.

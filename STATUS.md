@@ -4,17 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
-## 8 Nov ~17:00 UTC — **GIBS stage 1 bench ACCEPTED by GPT and CLOSED** (`reviews/2026-11-08-gibs-stage1-bench.md` rev 2, recorded at `cca33e6`)
+*Timestamps (corrected 8 Nov, Chad): entry stamps marked "commit time" come from `git log` (the commit lands after the work); stamps without that label are measured readings. The earlier "~HH:MM" stamps on this day were estimates, 1–3 h out, and have been replaced.*
+
+## 8 Nov 16:10 UTC (commit time, `692455a`) — **GIBS stage 1 bench ACCEPTED by GPT and CLOSED** (`reviews/2026-11-08-gibs-stage1-bench.md` rev 2, recorded at `cca33e6`)
 - Completed one-off research bench. GPT checked the revised write-up against the evidence it inspected earlier (no new requests, decoder runs or Worker measurements by GPT).
 - PNG = promising tested route. Eligibility handling unresolved; **no tie margin or byte cap adopted**. Worker compatibility, CPU, memory, cost and production decoder readiness unverified.
 - Bench item closed. Nothing further authorised (no measurement, shadow record, implementation, deployment or production change). All other approvals and parked/stopped decisions stand.
 
-## 8 Nov ~16:45 UTC — **GIBS stage 1 bench rev 2 (GPT's review of `f7791b9` adopted; documentation only)**
+## 8 Nov 16:08 UTC (commit time, `cca33e6`) — **GIBS stage 1 bench rev 2 (GPT's review of `f7791b9` adopted; documentation only)**
 - GPT inspected the saved evidence and independently recalculated: max per-image PNG/JPEG difference 0.20988 pp, median 0.08978 pp; raw ranking 12/14; a 0.25 pp tie-to-NOAA-21 rule gives the same choice in both formats on all 14 dates.
 - Corrections: exact counts (36 PNG + 28 JPEG requests; **32 distinct PNG images**, all with recorded alpha 255; pixel cross-check on the **28** main-run PNGs only); **0.25 pp is a candidate, not a minimum or error bound** (largest signed-gap change ≈ 0.288 pp) — **no margin adopted**; opaque-black finding bounded (alpha cannot detect the unavailable-date case; not every case established; response size withdrawn; eligibility unresolved); decoder = feasibility only (no CRC / full chunk-structure checks); FIRMS CPU comparison removed — Worker compatibility, CPU, memory and cost unverified; "four days" → five.
 - No shadow record, threshold, implementation, deployment or production change.
 
-## 8 Nov ~16:10 UTC — **GIBS stage 1 bench (one-off, read-only; Chad's go)** — `reviews/2026-11-08-gibs-stage1-bench.md`, for GPT
+## 8 Nov 16:00 UTC (commit time, `f7791b9`; run measured 15:55–15:59) — **GIBS stage 1 bench (one-off, read-only; Chad's go)** — `reviews/2026-11-08-gibs-stage1-bench.md`, for GPT
 - Browser pane (Chad's Mac), 15:55–15:59 UTC; 25 Oct – 7 Nov, NOAA-20 vs NOAA-21, 512×256 PNG vs the page's 2048×1024 JPEG (~60 GIBS requests, once). Evidence `reviews/evidence/2026-11-08-gibs-stage1-bench/`.
 - **PNG served:** HTTP 200 `image/png`, 8-bit RGBA, 202–287 KB. **Alpha always 255**; a day with no imagery (9 Nov) = 1,204 B, 100 % opaque black → no-data is not signalled by alpha; dark-area score = near-black share; ineligibility needs another signal (§5 revision for review).
 - **Ranking agreed 12/14**; flips on 28 and 29 Oct, both with satellite gaps ≤ 0.22 pp; per-image PNG–JPEG difference ≤ 0.21 pp (median 0.09). 0.25 pp = a candidate only *(rev 2: not adopted, not an error bound)*.
@@ -22,69 +24,71 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - 7 Nov images changed between the 03:56 and 15:55 reads (N20 8.8 % → 6.9 %), supporting re-measurement after the decision.
 - No shadow record, threshold, fallback, branch, deploy, resource, schedule or page change. Bench code kept as a temporary research tool in the evidence folder.
 
-## 8 Nov ~19:15 UTC — **R2 terms review rev 2 (GPT's review of `f6b8093` adopted; docs only)** — `docs/research/R2-terms-access.md`
+## 8 Nov 15:50 UTC (commit time, `ab8e14c`) — **R2 terms review rev 2 (GPT's review of `f6b8093` adopted; docs only)** — `docs/research/R2-terms-access.md`
 - **X1:** GPT's direct extraction + browser reading of SSD FAQ #a05: "No permissions are needed. The data provided on this site are considered public domain." (+ no endorsement, cite SSD with retrieval date/title/URL, identify modifications, fair-use guidance). **The accepted 5 Nov reading is restored as corroborated.** Rev 1's contrary reading came from Claude fetch summaries — kept only as an uncorroborated extraction discrepancy; no claim the site changed or the earlier review was wrong.
 - **X2:** general Caltech/JPL notice (documents may be protected; reproduction may require permission; Caltech manages JPL) recorded alongside, not substituted for, the specific SSD data statement. **X3:** CNEOS catalogue + lightcurve pages — government-sensor data for public release, not verified/reanalysed, revisable; no separate commercial statement. **X4:** citation/modifications/no-endorsement are provider-stated (FAQ); crediting CNEOS + underlying sensors is a project choice.
 - API conditions verified (caching "where practical"; no-embedding concerns the APIs, not publishing downloaded data; no numerical limit).
 - Scope as interpretation: S1 (API catalogue) plausibly covered; S2 (lightcurve files) not established. Research-only REGISTER draft §4, **not filed**. Identity/validation gates open.
 
-## 8 Nov ~18:40 UTC — *(superseded by rev 2 below: the FAQ conflict was an uncorroborated Claude fetch summary)* **R2 fireballs terms/access review rev 1 (read-only; Chad's go, R2 only)** — `docs/research/R2-terms-access.md`, for GPT
+## 8 Nov 15:46 UTC (commit time, `f6b8093`) — *(superseded by rev 2 above: the FAQ conflict was an uncorroborated Claude fetch summary)* **R2 fireballs terms/access review rev 1 (read-only; Chad's go, R2 only)** — `docs/research/R2-terms-access.md`, for GPT
 - Products/routes already sampled: Fireball API v1.2 (`ssd-api`), CNEOS lightcurve index + one report (`cneos`). No sampling, contact, route selection or implementation; identity and validation gates open.
 - **⚠ Conflict found:** the SSD FAQ (8 Nov, two fetches) answers the publishing-permission question "The short answer is yes", places most content under JPL's copyright statement, prefers links, and has **no "public domain" wording**. This contradicts the accepted 5 Nov reading ("public domain, no permission needed"), which is now **not relied on** pending verbatim extraction (X1, X2). Marked in RESEARCH-BACKLOG §R2 A.
 - API fair-use conditions explicit (one request at a time, reasonably necessary, cache, User-Agent with contact, back off, no website embedding; JPL may rate-limit/throttle/block); no licence text; **no numerical limit found (≠ unlimited)**.
 - JPL Image Use Policy = images/video only (not applied); data.gov record = a different legacy distribution, access "public", no licence field. Public release / public access / credit ≠ commercial permission. U.S.-government-work default not available (JPL is Caltech-managed; general knowledge, labelled).
 - Pending extraction X1–X4 (FAQ verbatim; JPL copyright statement; CNEOS fireball + lightcurve pages; source of the 5 Nov attribution guidance), X5 supplementary. **No REGISTER draft** until the conflict is resolved.
 
-## 8 Nov ~18:00 UTC — **R6 terms review rev 5: GPT wording corrections (docs only)**
+## 8 Nov 15:40 UTC (commit time, `643e309`) — **R6 terms review rev 5: GPT wording corrections (docs only)**
 - §9.1: an evidence gap, not an absent route ("…does not establish that these two files are distributed through ESDIS or covered by its data-use guidance"). §9.4: applicability of the ESDIS guidance and NASA media guidelines not established; input terms not by themselves permission; privacy notice no applicable grant. Carried into the table and REGISTER draft; §6's older "likely free to reuse with credit" assumption replaced by a cross-reference to §9.
 - GPT: the research-only REGISTER draft is technically acceptable as an unresolved evidence record. **Not filed; not authorised**; clears no commercial reuse, cadence, integration or building. Technical gates unchanged; R3 reply-pending.
 
-## 8 Nov ~17:40 UTC — **R6 terms review rev 4: extraction complete; corrected packet for GPT (docs only)** — `docs/research/R6-ozone.md` §9
+## 8 Nov 14:08 UTC (commit time, `4b43c1b`) — **R6 terms review rev 4: extraction complete; corrected packet for GPT (docs only)** — `docs/research/R6-ozone.md` §9
 - P1–P5 read by **GPT on Chad's behalf**. Disclaimers: no commercial-reuse grant or limit; methods may change, versions not all archived; interpolation for visualisation/area only, never minimum; research-only caution = GMAO GEOS forecasts only. Footer notice → redirect to nasa.gov/privacy (not licence evidence). Homepage credit request verified. Contacts: affiliations establish neither authorship nor copyright. GMAO: no applicable grant; products-page login is that page's limitation only.
 - Corrections: §9.4 now separates the requested credit from permission for commercial redistribution; the rev-3 authorship inference from a contact's affiliation is withdrawn.
 - **Commercial reuse UNRESOLVED — no applicable grant established in the inspected sources; not a finding of prohibition.** No numerical limit found in the named pages/dates (≠ unlimited). Research-only REGISTER draft §9.6, **not filed**. R3 email reply-pending; silence grants nothing.
 
-## 8 Nov ~17:00 UTC — **R6 ozone terms/access review rev 3 (read-only; Chad's go, R6 only)** — `docs/research/R6-ozone.md` §9, for GPT; **USNO email recorded (R3)**
+## 8 Nov 13:59 UTC (commit time, `132b646`) — **R6 ozone terms/access review rev 3 (read-only; Chad's go, R6 only)** — `docs/research/R6-ozone.md` §9, for GPT; **USNO email recorded (R3)**
 - **R3:** Chad sent the USNO enquiry to `eopcp@us.navy.mil` on 8 Nov (commercial reuse; storage/reformatting/redistribution; IERS mirror; attribution; one automated download per day). **Reply pending; no permission inferred from sending or silence**; R3 reuse stays UNRESOLVED (`R3` §9.4a). No follow-up or further R3 work.
 - **R6:** evidence split into reuse, attribution, automated access, numerical limits. Ozone Watch's credit request confirmed ("Please credit all material to "NASA Ozone Watch" unless otherwise noted."); no licence found. NASA's CC0 (ESDIS-scoped), the OMPS input record and NASA media guidelines read but **not applied to the derived files** (scope). No numerical limit found (≠ unlimited). Commercial use not established; not a finding of prohibition.
 - **Pending extraction (allowlist):** Ozone Watch disclaimers, the footer's NASA notices target, Ozone Watch homepage (required); contacts, GMAO input terms (supplementary). GPT may extract on Chad's behalf. No REGISTER draft yet.
 
-## 8 Nov ~16:30 UTC — **R3 terms review rev 4: extraction complete; research-only REGISTER draft for review (docs only)** — `docs/research/R3-earth-rotation.md` §9
+## 8 Nov 13:36 UTC (commit time, `cb1e7e7`) — **R3 terms review rev 4: extraction complete; research-only REGISTER draft for review (docs only)** — `docs/research/R3-earth-rotation.md` §9
 - E1–E5 independently inspected by **GPT on Chad's behalf** (GPT is the reader). Data-centre "Legal and Privacy" link 404; current IERS legal notice: BKG responsible for the website, no data licence/citation/limit (website only, not product rights); `maia` carries "Distribution Statement A… distribution unlimited" and has no separate site notice; IERS XML metadata: free of charge, `dataSetURI` → `maia`, no constraint elements (≠ unrestricted); products/FAQ: downloads, alternatives, checksums, no scripted-download rule or limit.
 - **A6 (IAG terms) withdrawn:** a news article's own footer was misattributed to IERS.
 - Position: public distribution supported; **commercial reuse not yet established (not a finding of prohibition)**; U.S.-government-work reasoning an inference requiring assessment; product rights kept separate from website conditions and route.
 - §9.6 REGISTER draft, commercial use UNRESOLVED; **not filed**. No route, provider contact, other investigation, R6 or GIBS.
 
-## 8 Nov ~15:50 UTC — **R3 Earth rotation terms/access review rev 3 (read-only; Chad's go, R3 only)** — `docs/research/R3-earth-rotation.md` §9, for GPT
+## 8 Nov 13:29 UTC (commit time, `4c53d3a`) — **R3 Earth rotation terms/access review rev 3 (read-only; Chad's go, R3 only)** — `docs/research/R3-earth-rotation.md` §9, for GPT
 - Evidence separated into reuse/commercial, attribution, automated-access guidance and numerical limits; evidence, interpretation and unanswered questions kept apart. No data fetched, no provider contact, no route selection, no implementation.
 - Read 8 Nov (Claude fetch summaries): NASA Earthdata data-use guidance (non-NASA data via CDDIS follow the sponsoring organisation's terms); USNO AA and navy.mil notices ("public information… unless otherwise specified"), **scoped to their own sites, not extended to `maia`**; an IAG/GGOS post on the IERS site relaunch (secondary).
 - **No numerical rate/cadence/load limit found** in the pages inspected (≠ unlimited).
 - **Pending extraction (Claude's tools refused by allowlist):** IERS data-centre EOP page, IERS legal/terms, USNO `maia` site notice (required); data-centre metadata and USNO FAQ (supplementary). GPT may extract on Chad's behalf. No REGISTER entry drafted until then.
 - Mac sync rule added to START-HERE §3: preserve differing destination copies before overwriting; report differences; a post-copy hash match proves nothing about earlier local edits.
 
-## 8 Nov ~15:15 UTC — **R4 Argo: terms round CLOSED; REGISTER entry FILED** (docs only; Chad: "Approve: make these documentation corrections and file the corrected Argo REGISTER entry")
+## 8 Nov 13:19 UTC (commit time, `d4f86c7`) — **R4 Argo: terms round CLOSED; REGISTER entry FILED** (docs only; Chad: "Approve: make these documentation corrections and file the corrected Argo REGISTER entry")
 - **GPT's review of rev 7:** accepted the dataset-level CC BY evidence and GDAC linkage, supported synchronisation routes, the narrowly stated absence of a numerical limit, the attribution plan and the preserved non-terms gates. S4 (Ifremer policy) supplementary, not needed while not relied on.
 - **Rev 8 corrections:** provenance throughout = "GPT independently read/extracted the evidence; Chad delegated extraction and relayed the packet" (Chad did not personally inspect the pages); §12.4's Ifremer exclusion now stated as Claude's unverified fetch summary, unestablished, not relied on; §§8, 10.1, 11.1, 11.5.1 marked historical, superseded by §12.
 - **REGISTER.md:** Argo GDAC entry filed, with the labelled licence-scope inference, CC BY attribution (credit, licence link, DOI, modifications), supported routes (rsync, `aws s3 sync`) and "no numerical limit found" (not unlimited). Research only.
 - Accepts the scoped terms conclusion only: no route, collector, build, resource, schedule, deploy or page change. R4 technical gates open; R2, R3, R6 untouched; other approvals and parked/stopped decisions stand.
 
-## 8 Nov ~14:45 UTC — **R4 terms review rev 7: evidence packet filed (docs only)** *(provenance corrected in rev 8: GPT independently read/extracted the evidence; Chad delegated extraction and relayed the packet)* — `docs/research/R4-argo.md` §12.5–12.6
+## 8 Nov 13:13 UTC (commit time, `43e4881`) — **R4 terms review rev 7: evidence packet filed (docs only)** *(provenance corrected in rev 8: GPT independently read/extracted the evidence; Chad delegated extraction and relayed the packet)* — `docs/research/R4-argo.md` §12.5–12.6
 - **R1 (required, SEANOE, checked 8 Nov):** Licence section links to CC BY 4.0; acknowledgment sentence verbatim; additional-access GDAC link to `https://data-argo.ifremer.fr/`.
 - **S1 Sextant** (field values verbatim; use-limitation paragraph a summary) · **S2 Data Access** ("The synchronization service is available from Ifremer 'rsync' and from 'aws s3 sync'.") · **S3 US GODAE disclaimer** (public-domain sentence with "unless otherwise specified" preserved; not used to override dataset terms).
 - **S4 Ifremer policy: PENDING, unverified.** Recorded URL 404; corrected filename `R2-D1-Instruction PDG 2023-0550 …pdf` (GPT); no readable text yet. The provisional French quotations are not filed as verified.
 - Proposed REGISTER entry updated from the pastes; **not filed**. No route selection, build clearance or other research.
 
-## 8 Nov ~14:15 UTC — **R4 terms review rev 6 (GPT's review of `5b33a52` adopted; docs only)** — `docs/research/R4-argo.md` §12
+## 8 Nov 12:44 UTC (commit time, `0939710`) — **R4 terms review rev 6 (GPT's review of `5b33a52` adopted; docs only)** — `docs/research/R4-argo.md` §12
 - GPT independently inspected the official sources: useful bounded progress; **no building clearance**.
 - Corrections: (1) automated access is evidenced (Data Access page offers Ifremer rsync and AWS sync, incl. floats and indexes); the open point is **no numerical rate/cadence/load limit found in the pages inspected** (named, dated). (2) Licence scope: CC BY 4.0 on the DOI record, which links `data-argo.ifremer.fr` as additional access; missing per-file wording is not a separate blocker; live-collection scope uncertainty kept explicit. (3) Sextant: Access constraints "Other restrictions", Other constraints "No limitations on public access", Use constraints empty; use limitation kept separately. (4) Attribution per CC BY 4.0: credit, licence link, DOI/dataset link, modifications where applicable. (5) Evidence status per page: GPT read Data Access + US GODAE (disclaimer's scope/exceptions preserved, not used to override dataset terms); Ifremer policy PDF unverified by GPT, provisional, incl. its application to real-time files.
 - Paste pack cut to 1 required (SEANOE) + 4 supplementary. REGISTER unfiled. Non-terms gates and parked/stopped decisions unchanged.
 
-## 8 Nov ~13:30 UTC — **R4 Argo terms/access review rev 5 (read-only; Chad's go, R4 only)** — `docs/research/R4-argo.md` §12, for GPT
+## 8 Nov 12:35 UTC (commit time, `5b33a52`) — **R4 Argo terms/access review rev 5 (read-only; Chad's go, R4 only)** — `docs/research/R4-argo.md` §12, for GPT
 - Read 8 official pages (web-fetch summaries, so quotations are provisional until Chad pastes them). No data files, sampling, provider contact, implementation, resource or production change. R2, R3, R6 not touched.
 - **New:** the general DOI record (SEANOE 10.17882/42182) states **CC BY 4.0**; Ifremer's catalogue record for the GDAC (listing `data-argo.ifremer.fr`) says "No limitations on public access"; Ifremer policy DG/2023.0550 allows reuse for any purpose with source + last-update date credited.
 - **Still open:** no published automated-access/rate policy for Coriolis or US GODAE; the live HTTPS files carry no licence of their own; US GODAE and argodatamgt.org Data Access unread (tool allowlist) → paste session §12.4 (7 items, Chad at the screen).
 - Proposed REGISTER entry in §12.5, **not filed**. Terms clarification does not clear R4 for building; non-terms gates unchanged.
 - **GIBS summary corrected** (backlog view row): proposal rev 3, stage 1 = same-date selection with no threshold *T*; day-before fallback a later, separate decision; bench and shadow record not authorised.
+
+## 8 Nov 12:22 UTC (commit time, `114f9f5`) — **thread handover** (Kp / smoke-test thread → backlog thread). HANDOVER rewritten (§0 live state, §0a smoke testing, §1 next).
 
 ## 8 Nov 12:10–12:19 UTC — **GPT independent live smoke test of `ad4002b` + hub 0.6.1: no blocking regression in the checks completed** (not exhaustive)
 - Confirmed:
@@ -103,8 +107,6 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - Claude's before/after-noon transition remains Claude-supplied; GPT independently confirmed the post-noon state.
 - No production changes. Existing approvals and accepted gates stand.
 
-## 8 Nov ~12:30 UTC — **thread handover** (Kp / smoke-test thread → backlog thread). HANDOVER rewritten (§0 live state, §0a smoke testing, §1 next).
-
 ## 8 Nov 11:53–12:06 UTC — **Noon UTC imagery rollover: PASS** (read-only; smoke-test open item; browser pane, Mac unattended)
 - Live page = main `ad4002b` (assets `?v=202611151000`). The booked prompt said `3375e91`; the imagery logic is unchanged between the two.
 - **Correction:** `IMG_DAY` = now − 36 h rolls **6 → 7 Nov** at 12:00 UTC on 8 Nov, not 7 → 8 as Claude's booking note said.
@@ -114,10 +116,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Open page (confirms GPT's point):** a tab loaded at 11:53 still showed 06 Nov at 12:05:02, with label and request still agreeing. An already-open page does not roll over until reloaded. That is current behaviour, already noted in the GIBS proposal rev 3 §4; no fix authorised or made.
 - Smoke-test items still open: actual-phone test, browser HTTP status codes.
 
-## 8 Nov ~08:30 UTC — **`place-ui-harness` merged into main** (`96c52a1`, no-ff of `601b899`; Chad's go; GPT technical sign-off)
+## 8 Nov 08:16 UTC (commit time, `96c52a1`) — **`place-ui-harness` merged into main** (`96c52a1`, no-ff of `601b899`; Chad's go; GPT technical sign-off)
 - Test-only: `phase1/place-ui.test.cjs` + its review. No page, hub or production change.
 - **place-ui 30/30 on main** (was 28/30 since the FIRMS merge); kp-degraded 29/29 on the merge.
-- Branches: Chad deleted `kp-degraded`, `gibs-noaa21` and `place-ui-harness`; GitHub now shows only `main` and the parked `aircraft-rc` (checked ~08:35 UTC).
+- Branches: Chad deleted `kp-degraded`, `gibs-noaa21` and `place-ui-harness`; GitHub now shows only `main` and the parked `aircraft-rc` (recorded in `c2eb13d`, 08:17 UTC commit time).
 
 ## 8 Nov 08:11:22 UTC — **PAGE RELEASED: Kp interval + honest degraded wording** (main `ad4002b`, no-ff merge of `kp-degraded` @ `86134b8`; Chad: "Approve: push kp-degraded to main (page change: Kp interval + honest degraded wording)")
 - No overlap with main's docs-only changes. Merged page files = the reviewed commit (index `b9d4649e1ac6`, app `e3f4a3854113`, sources `7d66228f07b8`, style unchanged `e4c9547d99bf`); kp-degraded 29/29 on the merge.
@@ -158,7 +160,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Pending:** first 0.6.1 swpc run (08:07 UTC) and the other layers' first runs; then the live RC check of the page against 0.6.1.
 - **Rollback** = redeploy 0.6.0 (`ac173d8a…`, = main's worker.js), with an Approve line. **main is now behind the live hub** until `kp-degraded` is merged (the page release).
 
-## 8 Nov ~09:40 UTC — **GPT technical sign-off: `kp-degraded` @ `86134b8`**
+## 8 Nov 07:56 UTC (commit time, `9882b71`) — **GPT technical sign-off: `kp-degraded` @ `86134b8`**
 - Independently verified by GPT:
   - kp-degraded 29/29 and health-hub 29/29;
   - the SHIPS_ROUNDED break fails the intended generated-fields test;
@@ -168,7 +170,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - Policy and order stand: provisional 7.5 h; 5 min skew tolerance; **separately approved hub deploy → live RC check → separately approved page release**.
 - This is technical sign-off, not Chad's merge or production approval.
 
-## 8 Nov ~09:20 UTC — **Kp/degraded fix rev 3 on `kp-degraded` @ `86134b8`** (focused, after GPT's review of `0513aa7`; NOT merged, NOT deployed)
+## 8 Nov 07:33 UTC (commit time, `86134b8`) — **Kp/degraded fix rev 3 on `kp-degraded` @ `86134b8`** (focused, after GPT's review of `0513aa7`; NOT merged, NOT deployed)
 - **GPT verified `0513aa7`:** kp-degraded 28/28, health-hub 29/29, app syntax, full worker hash. The Kp rendering, USGS unknown age and evidence corrections address its findings.
 - **The one remaining issue, fixed:** the cloud collector rounded its reason fields before publishing (75.04 s → 75; 0.8999 → 0.9), which contradicted the stated condition.
   - New `shipsReason` publishes them unrounded.
@@ -177,7 +179,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Tests:** kp-degraded 29/29. Breaks: rev 2 rounding → fail; rev 2 app.js → 2 fail. All regressions pass except the known place-ui 28/30. worker.js sha256 `f38296a0…`.
 - GPT: the provisional threshold, skew tolerance and release order remain acceptable. **Next:** GPT re-review of `86134b8` → `Approve: deploy hub 0.6.1 from 86134b8 (content only)`.
 
-## 8 Nov ~08:30 UTC — **Kp/degraded fix rev 2 on `kp-degraded` @ `0513aa7`** (after GPT's independent review of `67140b0`; NOT merged, NOT deployed)
+## 8 Nov 07:04 UTC (commit time, `0513aa7`) — **Kp/degraded fix rev 2 on `kp-degraded` @ `0513aa7`** (after GPT's independent review of `67140b0`; NOT merged, NOT deployed)
 - **GPT verified on `67140b0`:** kp-degraded 21/21, health-hub 29, history-hub 27, firms-guard 19, firms-v2 57+7 skipped, ships-late 7, the old-rule break, syntax/module load and the worker hash. GPT stopped ships-fallback early; no result claimed. Other browser regressions remain Claude-supplied.
 - **Fixed per GPT:**
   1. Invalid or future Kp timestamps leaked into the card and summary. `ME.kpWhen` now guards interval + age together: "interval time unknown — …" or "timestamp later than our clock". Tested on the real readings/report output.
@@ -190,7 +192,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Policy (GPT):** 7.5 h = a provisional Mother Earth policy, not a NOAA deadline; 5 min = an explicit skew tolerance. Release order: hub → live RC check → separately approved page.
 - **Next:** GPT re-review of `0513aa7` → `Approve: deploy hub 0.6.1 from 0513aa7 (content only)`.
 
-## 8 Nov ~07:45 UTC — **Kp/degraded fix built on branch `kp-degraded` @ `67140b0`** (Chad's go; NOT merged, NOT deployed) — review `reviews/2026-11-08-kp-degraded-fix.md` (on the branch)
+## 8 Nov 06:34 UTC (commit time, `67140b0`) — **Kp/degraded fix built on branch `kp-degraded` @ `67140b0`** (Chad's go; NOT merged, NOT deployed) — review `reviews/2026-11-08-kp-degraded-fix.md` (on the branch)
 - **Hub 0.6.1:**
   - `kpStatus`: degraded at ≥ 7.5 h past the interval start (provisional); invalid or future `time_tag` → degraded with its own reason.
   - Envelopes carry `status_reason` (swpc, usgs, co2, seaice, cloud ships); Kp's `index` gains `interval_start`/`interval_end`.
@@ -203,7 +205,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - health-hub H8 version pin loosened (the test's intent kept).
 - **Next:** GPT review → Approve: hub 0.6.1 deploy → live RC check → Approve: page release. 7.5 h stays provisional.
 
-## 8 Nov ~07:10 UTC — **GPT's second review of `add3206` applied (docs only)**
+## 8 Nov 06:13 UTC (commit time, `9d2adab`) — **GPT's second review of `add3206` applied (docs only)**
 - GPT accepted the main Phase 0, Kp and backlog corrections; harness sign-off confirmed tied to `601b899`; Arts department counts confirmed against the saved results.
 - Five remaining edits applied:
   1. Phase 0 §3 is now "Outstanding measurements — pending Chad's availability". The Backlog §C dependency on the iPhone runs is removed. Claude's pane cell-selection check (588 px) is kept distinct from the pending actual-phone check.
@@ -213,7 +215,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   5. HANDOVER item 4: the old "most complete… else previous day" idea is marked SUPERSEDED.
 - GPT: the Kp branch work is a sensible next step **for Chad to authorise**, with implementation and wording returned for review before merge or production approval. This review starts no work. No iPhone session today; no prototype or Phase A.
 
-## 8 Nov ~06:45 UTC — **GPT's review of the morning's work applied (docs only; nothing authorised beyond)**
+## 8 Nov 06:06 UTC (commit time, `add3206`) — **GPT's review of the morning's work applied (docs only; nothing authorised beyond)**
 - **place-ui harness `601b899`: GPT technical sign-off.** The fake `head()` supplies the UTF-8 size and metadata the legacy-reader checks need. Worker hash = live 0.6.0; no production or page change. Syntax checked independently by GPT; suite results and the break check remain Claude-supplied evidence. **Merge awaits Chad's decision.**
 - **Smoke follow-up:** qualifications confirmed by GPT. It supplements GPT's independent test, and GPT has not repeated those browser checks.
 - **Phase 0 recommendation → rev 2** (GPT's six revisions):
@@ -242,15 +244,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - order: Kp correctness first, then a choice between the terms review and the GIBS bench (neither started).
 - Not authorised by this review: implementation, research restart, merge, deploy, shadow job, resource creation. FIRMS closed; Arts scoped-cleared, unselected; Life stopped; aircraft parked (research included); no prototype or Phase A.
 
-## 8 Nov ~06:25 UTC — **Backlog view written** — `docs/BACKLOG-VIEW-2026-11-08.md` (for Chad's choice; nothing started)
+## 8 Nov 06:00 UTC (commit time, `57debf2`) — **Backlog view written** — `docs/BACKLOG-VIEW-2026-11-08.md` (for Chad's choice; nothing started)
 - One page over R1–R11 plus the open hub/page items. Observation: R2, R3, R4 and R6 all parked on terms/access, not data. Claude's suggested order: Kp fix → a read-only terms pass over R2/R3/R4/R6 → GIBS bench + shadow week → new first gates.
 
-## 8 Nov ~06:15 UTC — **GIBS measured fallback rule: PROPOSAL written** (HANDOVER item 4; design only) — `docs/GIBS-FALLBACK-PROPOSAL.md`
+## 8 Nov 05:59 UTC (commit time, `5013943`) — **GIBS measured fallback rule: PROPOSAL written** (HANDOVER item 4; design only) — `docs/GIBS-FALLBACK-PROPOSAL.md`
 - Hub job picks the more complete of NOAA-21 / NOAA-20 (near-black share, 66.5°S–66.5°N) for the latest day, else the day before. It publishes `latest/backdrop.json` + `GET /backdrop`; the page follows, or uses the fixed NOAA-21 default if it is unavailable.
 - Threshold *T* is not chosen: it needs a bench (PNG decode in a Worker, small-vs-full agreement, CPU) and a ~7-day shadow record first, each on Chad's go.
 - Staged rollout with Approve lines; rollback = remove `BACKDROP_ENABLED`. Expected cost $0 (to be measured). Open questions §9. For GPT.
 
-## 8 Nov ~06:00 UTC — **Finding: Kp "degraded" is a false signal** (read-only; no change) — `reviews/2026-11-08-kp-degraded-finding.md`
+## 8 Nov 05:58 UTC (commit time, `5f877e9`) — **Finding: Kp "degraded" is a false signal** (read-only; no change) — `reviews/2026-11-08-kp-degraded-finding.md`
 - 69% of swpc runs since 4 Nov (70/102) were `degraded` while NOAA delivered on schedule. The 4 h rule ignores that `time_tag` is the interval start: on-time values appear at 3.13 h (31/33; 2 at 4.13 h) and age to ~6.1 h.
 - The page says "the source flagged this observation as degraded" / "source degraded". The flag is our hub's rule, not NOAA's, so that wording is untrue. The same reason text applies to every layer the hub marks degraded.
 - Values and dates shown are correct; no swpc monitor exists, so no false alerts. Fix options (threshold ~7.5 h; honest wording) in the finding; each needs review + Chad's approval.
@@ -273,7 +275,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Still open from the smoke test:** actual-phone test, noon UTC imagery rollover (booked 11:50 UTC), uncaptured browser HTTP status codes.
 - **Mac copies synced** (`~/Documents/Mother Earth`, Chad granted the folder): 96 files copied (83 new, 13 older versions, each confirmed to be an earlier committed version, not a local edit). 167/167 tracked files identical to main `c151306`.
 
-## 8 Nov ~05:30–06:00 UTC — harness fix on a branch; noon check booked; Phase 0 recommendation drafted (Chad's go; no production change)
+## 8 Nov 05:33–05:34 UTC (commit times, `601b899` / `c151306`) — harness fix on a branch; noon check booked; Phase 0 recommendation drafted (Chad's go; no production change)
 - **place-ui harness** (branch `place-ui-harness` @ `601b899`, **not merged**): its fake R2 gains `head()` (hub 0.6.0 reads it before the place firms section). 28/30 → **30/30**; a break (head reports 1e9 bytes) fails the same two tests. Related suites all pass; `worker.js` untouched (= live). Review: `reviews/2026-11-08-place-ui-harness.md` — for GPT, then Chad's go to merge.
 - **Noon UTC imagery rollover** (read-only): `IMG_DAY` = now − 36 h, so the date rolls 7 → 8 Nov at 12:00 UTC. Check booked in this session for 11:50 UTC (before/after reads of label + actual GIBS request). Needs the Mac awake with the Claude app open.
 - **Phase 0 recommendation DRAFT**: `docs/research/P0-RECOMMENDATION-DRAFT.md`, from accepted findings only. Arts (the Met, cleared scope) recommended as the only candidate first domain, not selected; Life block kept; suggests taking the domain decision after the iPhone runs. **iPhone measurements outstanding** (skipped today, Chad). For GPT's review.
@@ -300,7 +302,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 ## 8 Nov 05:07:54 UTC — **PAGE RELEASED: GIBS backdrop → NOAA-21** (main `3375e91`, Chad's Approve line, after GPT's review). Served hashes verified 05:09:53 UTC; live check 05:10:24 UTC: NOAA-21 requested for 2026-11-06; labels/credit name NOAA-21, "dated, not live", dark-area cause not established; fires still NOAA-20. Assets `?v=202611141000`. Improves the current images (NOAA-21 was worse on 4–5 Nov); not a completeness fix. New guard `phase1/backdrop-layer.test.cjs` (27). place-ui 28/30 = 2 pre-existing harness failures (`env.R2.head` missing in its fake R2 since the FIRMS merge). Outstanding: real-phone check; any fallback rule is a separate proposal (hub work).
 
-## 8 Nov — **FIRMS v2 rollout CLOSED; `firms-memory` merged into main** (FIRMS memory thread; Chad's Approve line)
+## 8 Nov 02:34 UTC (commit time, `0891d13`) — **FIRMS v2 rollout CLOSED; `firms-memory` merged into main** (FIRMS memory thread; Chad's Approve line)
 - **Stage 6 (read-only, 00:45:42–00:47 UTC):** the 7 Nov mixed-day checkpoint used the **latest** publication, v2 run `2026-11-07T23-45Z-…46a4be89350f` (cutoff 23:45:42.788Z).
   - Marker records 56,536 = that output = its run log.
   - The checkpoint object read back with sha256 `e82f96cc…` = the committed snapshot.
