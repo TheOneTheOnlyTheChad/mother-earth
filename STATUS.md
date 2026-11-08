@@ -6,6 +6,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 *Timestamps (corrected 8 Nov, Chad): entry stamps marked "commit time" come from `git log` (the commit lands after the work); stamps without that label are measured readings. The earlier "~HH:MM" stamps on this day were estimates, 1–3 h out, and have been replaced.*
 
+## 8 Nov 16:29 UTC (clock reading at write) — **Inspiration list filed** (docs only; Chad's go) — `docs/INSPIRATION-50-SITES.md`
+- Chad's original 50-site list kept as inspiration, **outside the research backlog; queues no work**. Each item: suggested experience, evidenced connection, status (live / parked / researched-not-adopted / inspiration only). Six domains recorded as an organisational idea, not approved builds.
+- Checked: **no feature is reviewed and authorised for implementation, and no completed candidate awaits production approval.**
+
 ## 8 Nov 16:10 UTC (commit time, `692455a`) — **GIBS stage 1 bench ACCEPTED by GPT and CLOSED** (`reviews/2026-11-08-gibs-stage1-bench.md` rev 2, recorded at `cca33e6`)
 - Completed one-off research bench. GPT checked the revised write-up against the evidence it inspected earlier (no new requests, decoder runs or Worker measurements by GPT).
 - PNG = promising tested route. Eligibility handling unresolved; **no tie margin or byte cap adopted**. Worker compatibility, CPU, memory, cost and production decoder readiness unverified.
