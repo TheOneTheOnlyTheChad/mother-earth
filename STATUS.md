@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~06:25 UTC — **Backlog view written** — `docs/BACKLOG-VIEW-2026-11-08.md` (for Chad's choice; nothing started)
+- One page over R1–R11 plus the open hub/page items. Observation: R2, R3, R4 and R6 all parked on terms/access, not data. Claude's suggested order: Kp fix → a read-only terms pass over R2/R3/R4/R6 → GIBS bench + shadow week → new first gates.
+
 ## 8 Nov ~06:15 UTC — **GIBS measured fallback rule: PROPOSAL written** (HANDOVER item 4; design only) — `docs/GIBS-FALLBACK-PROPOSAL.md`
 - Hub job picks the more complete of NOAA-21 / NOAA-20 (near-black share, 66.5°S–66.5°N) for the latest day, else the day before. It publishes `latest/backdrop.json` + `GET /backdrop`; the page follows, or uses the fixed NOAA-21 default if it is unavailable.
 - Threshold *T* is not chosen: it needs a bench (PNG decode in a Worker, small-vs-full agreement, CPU) and a ~7-day shadow record first, each on Chad's go.
