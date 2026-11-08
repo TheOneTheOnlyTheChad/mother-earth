@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~07:45 UTC — **Kp/degraded fix built on branch `kp-degraded` @ `67140b0`** (Chad's go; NOT merged, NOT deployed) — review `reviews/2026-11-08-kp-degraded-fix.md` (on the branch)
+- **Hub 0.6.1:**
+  - `kpStatus`: degraded at ≥ 7.5 h past the interval start (provisional); invalid or future `time_tag` → degraded with its own reason.
+  - Envelopes carry `status_reason` (swpc, usgs, co2, seaice, cloud ships); Kp's `index` gains `interval_start`/`interval_end`.
+  - No other rule or threshold changed; Mac collector unchanged.
+- **Page:** "the source flagged…" and "source degraded" removed. The fires summary had the same phrase, found by the new test. `ME.degradedWhy` names our rule per layer; ships say which sampling condition applied, never "late"; an unknown reason gets neutral wording. Kp shown as an interval. Assets `?v=202611151000`.
+- **Tests:**
+  - new `kp-degraded` 21/21, including the boundaries, invalid and future time_tags;
+  - breaks: old 4 h rule → 7 fail; main's app.js → 8 fail;
+  - all hub + UI regressions pass, except the known place-ui 28/30 (harness fix on its own branch);
+  - health-hub H8 version pin loosened (the test's intent kept).
+- **Next:** GPT review → Approve: hub 0.6.1 deploy → live RC check → Approve: page release. 7.5 h stays provisional.
+
 ## 8 Nov ~07:10 UTC — **GPT's second review of `add3206` applied (docs only)**
 - GPT accepted the main Phase 0, Kp and backlog corrections; harness sign-off confirmed tied to `601b899`; Arts department counts confirmed against the saved results.
 - Five remaining edits applied:
