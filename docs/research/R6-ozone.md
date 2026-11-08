@@ -3,7 +3,7 @@
 **Gate:** first gate only, daily **ozone-hole area** and **Southern Hemisphere minimum ozone**. Numerical map products are a separate later step. **Research only** — no implementation, collector, schedule, deployment, page change, purchase or third-party contact. Written 6 Nov 2026 for Chad's review.
 **PARKED 6 Nov 2026 (Chad, after GPT's review) — first-gate handover, rev 2.** Any next gate needs Chad's separate go; no implementation clearance.
 **Status: numerical feasibility verified for the two daily series; reuse/access terms partly explicit (credit line) and otherwise unresolved — not integration clearance.**
-**Rev 4 (8 Nov 2026): terms/access review §9 — P1–P5 read by GPT on Chad's behalf; credit request established; commercial reuse UNRESOLVED (no applicable grant found; not prohibited); research-only REGISTER draft for review, NOT filed; still parked for building.**
+**Rev 5 (8 Nov 2026, GPT wording corrections): terms/access review §9 — P1–P5 read by GPT on Chad's behalf; credit request established; commercial reuse UNRESOLVED (no applicable grant found; not prohibited); research-only REGISTER draft for review, NOT filed; still parked for building.**
 **Independent check:** GPT independently checked both preserved files — full sha256 and byte sizes match; 365 calendar rows each; area 301 supplied values, minimum 300; area 139 source-reported zero days; nine area and ten minimum dates missing through 6 Nov; latest values 18.75 million km² and 143 DU on 3 Nov; area maximum 27.06 on 18 Sep.
 **Rev 2 corrections (GPT review, adopted):** tied minimum (114 DU on 4 and 8 Oct); minimum described as the lowest among available retrievals; zero wording; format and missing-value categories (§2, §3).
 **Labels:** **Verified** = checked against the retrieved bytes or a named primary page · **Interpretation** = Claude's reading · **Open** = not yet checked.
@@ -72,7 +72,7 @@ Kept on the Mac: `~/Documents/Mother Earth/research/R6/2026-11-06/` with `PROVEN
 
 - **Explicit:** every Ozone Watch page footer: "Please credit all material to 'NASA Ozone Watch' unless otherwise noted."
 - **Explicit:** the disclaimers on updates, missing data and experimental forecasts (§3, §4); forecasts are "for research purposes only" (not in scope here).
-- **Not found (Open):** a licence statement, an automated-access or rate policy, or a NASA-wide data-use statement applied to these files. *Assumption, not a permission:* as NASA Goddard products they are likely free to reuse with credit — **not verified**.
+- *Historical (6 Nov); superseded by §9 (8 Nov):* the licence, automated-access and NASA-wide questions, and the earlier assumption about reuse with credit, are answered by §9 — credit request established; commercial reuse unresolved (no applicable grant established); no numerical limit found in the named pages.
 
 ## 7. What Mother Earth could honestly show (research direction, not a UI design)
 
@@ -90,13 +90,14 @@ Kept on the Mac: `~/Documents/Mother Earth/research/R6/2026-11-06/` with `PROVEN
 5. Current OMPS platform for 2026 (Suomi NPP vs NOAA-20/21) — the page lists Suomi NPP from Jul 2016.
 6. Numerical map products (separate gate).
 
-## 9. Terms and access review (rev 4, 8 Nov 2026; Chad's go: bounded, read-only, R6 only) — for GPT
+## 9. Terms and access review (rev 5, 8 Nov 2026; Chad's go: bounded, read-only, R6 only) — for GPT
 **Scope:** only the recorded terms/access question (§6 "Not found", §8 item 4) for the two daily files (`to3areas_…`, `to3mins_…`). **No data fetched or sampled, no provider contact, no route selection, no implementation, resources, schedules, deploy or page change.** GIBS and other gates untouched. **Terms clarification alone does not clear R6 for building**; §8 items 1–3, 5–6 and all accepted technical findings are unchanged.
+**Rev 5 (8 Nov 2026):** GPT's two wording corrections (§9.1 evidence gap, §9.4 applicability not established) carried into the table and the REGISTER draft; §6's older assumption replaced by a cross-reference to §9.
 **Rev 4 (8 Nov 2026):** required extraction complete. P1–P5 were read by **GPT on Chad's behalf** (GPT is the reader; these are not Chad's personal pastes). §9.4's "reuse with credit… is supported" and its authorship inference are corrected; the evidence table is complete.
 **Evidence status labels:** *Claude (6 Nov)* = read in the rev-1 pass (§6) · *Claude (fetch summary)* = read 8 Nov with Claude's web-fetch tool (summary with quotations) · *GPT (read, 8 Nov)* = GPT inspected the page on Chad's behalf.
 
 ### 9.1 What the product is (for terms purposes)
-- The two files are **Ozone Watch's own derived daily statistics** (area, minimum), computed from OMPS (Suomi NPP) retrievals, with the area's gaps filled from assimilated data (GMAO; MERRA-2 vs GEOS FP open, §3). They are published on `ozonewatch.gsfc.nasa.gov`, a NASA Goddard site, not through an Earthdata data centre (DAAC).
+- The two files are **Ozone Watch's own derived daily statistics** (area, minimum), computed from OMPS (Suomi NPP) retrievals, with the area's gaps filled from assimilated data (GMAO; MERRA-2 vs GEOS FP open, §3). Published on Ozone Watch's NASA Goddard site; the inspected evidence does not establish that these two files are distributed through ESDIS or covered by its data-use guidance.
 - Product rights, website/service conditions and upstream inputs are kept separate. **Upstream terms are not permission for Ozone Watch's derived files.**
 
 ### 9.2 Evidence table
@@ -106,9 +107,9 @@ Kept on the Mac: `~/Documents/Mother Earth/research/R6/2026-11-06/` with `PROVEN
 | A1 | No explicit commercial-reuse grant (and no numerical polling limit). Data and processing/rendering methods may change; previous versions are not all archived. | [Ozone Watch Disclaimers](https://ozonewatch.gsfc.nasa.gov/disclaimers.html) (P1) | Ozone Watch data | GPT (read in full, 8 Nov) · Claude (6 Nov, updates) |
 | A2 | Old footer "Privacy Policy & Important Notices" URL (`nasa.gov/about/highlights/HP_Privacy.html`) **redirects to** <https://www.nasa.gov/privacy/> — a privacy/security notice; **no applicable data-reuse grant**. Recorded as a redirect, **not licence evidence**. | P2 | NASA websites (privacy/security) | GPT (read, 8 Nov) · Claude (fetch summary) |
 | A3 | GMAO homepage, reanalysis and weather-analysis/prediction pages: **no applicable reuse grant**. The GMAO products URL redirected to a login page — an access limitation **for that page only**, not evidence that Ozone Watch's public files need authentication. | GMAO pages (P5, conditional check applicable because Ozone Watch links GMAO) | Upstream assimilation inputs | GPT (read, 8 Nov) |
-| A4 | NASA ESDIS: NASA-mission data CC0 unless marked; non-NASA data follow the sponsor's licence. | [NASA Earthdata guidance](https://www.earthdata.nasa.gov/earth-observation-data/data-use-policy) | ESDIS-distributed data; **not applied** to the R6 files | Claude (fetch summary) |
+| A4 | NASA ESDIS: NASA-mission data CC0 unless marked; non-NASA data follow the sponsor's licence. | [NASA Earthdata guidance](https://www.earthdata.nasa.gov/earth-observation-data/data-use-policy) | ESDIS-distributed data; **applicability to the R6 files not established** | Claude (fetch summary) |
 | A5 | OMPS L2 input (GES DISC, DOI 10.5067/0WF4HAAZ0VHK): "openly shared, without restriction" under the EOSDIS guidance | [Earthdata record](https://www.earthdata.nasa.gov/data/catalog/ges-disc-omps-npp-nmto3-l2-2) | **Input dataset only**; not permission for the derived files | Claude (fetch summary) |
-| A6 | NASA media (images, audio, video, 3-D media) "generally are not subject to copyright in the United States"; no implied endorsement; credit NASA; third-party and insignia exceptions | [NASA media guidelines](https://nasa.gov/nasa-brand-center/images-and-media) | Media types listed; **not established as a licence for these two plain-text datasets** | Claude (fetch summary) |
+| A6 | NASA media (images, audio, video, 3-D media) "generally are not subject to copyright in the United States"; no implied endorsement; credit NASA; third-party and insignia exceptions | [NASA media guidelines](https://nasa.gov/nasa-brand-center/images-and-media) | Media types listed; **applicability to these two derived files not established** | Claude (fetch summary) |
 
 **B. Attribution**
 - **Verified (P3):** homepage footer: "Please credit all material to "NASA Ozone Watch" unless otherwise noted." (<https://ozonewatch.gsfc.nasa.gov/>; GPT read, 8 Nov; also Claude, 6 + 8 Nov.) This establishes the **requested credit**. **A request for attribution does not itself establish permission for commercial redistribution** of the two derived files.
@@ -134,7 +135,7 @@ P1–P5 completed 8 Nov 2026 by GPT on Chad's behalf (P1 → A1, C; P2 → A2; P
 
 ### 9.4 Interpretation (open to challenge; corrected in rev 4)
 - **Attribution:** the requested credit is established (B). It does **not** by itself establish permission for commercial redistribution.
-- **Commercial reuse: UNRESOLVED — no applicable grant established in the inspected sources.** NASA's CC0 (ESDIS-scoped), the input's open sharing, the media guidelines and the privacy notice are each outside the derived files' scope or not licence evidence. **Not a finding that reuse is prohibited.**
+- **Commercial reuse: UNRESOLVED — no applicable grant established in the inspected sources.** Applicability of the ESDIS guidance and NASA media guidelines to these two derived files has not been established; the input dataset's terms do not by themselves establish permission for the derived files; the privacy notice supplies no applicable reuse grant. **Not a finding that reuse is prohibited.**
 - **Federal-work reasoning:** that the files carry no U.S. copyright as NASA work remains **explicitly unverified**. Rev 3's suggestion that a university-affiliated contact implies non-federal authorship is **withdrawn**: affiliations establish neither authorship nor copyright status in either direction.
 - **Upstream vs product:** GMAO and OMPS input terms are separate from permission for Ozone Watch's derived files.
 
@@ -143,18 +144,19 @@ P1–P5 completed 8 Nov 2026 by GPT on Chad's behalf (P1 → A1, C; P2 → A2; P
 2. Authorship and copyright status of the files (unverified; not inferable from contacts).
 3. Any polling allowance or numerical limit — none found in the named pages on the named dates; not unlimited.
 
-### 9.6 Proposed REGISTER entry — research-only DRAFT for review (NOT filed, not cleared)
+### 9.6 Proposed REGISTER entry — research-only DRAFT (NOT filed, not cleared)
+GPT (8 Nov 2026, rev 5 wording): technically acceptable as an unresolved evidence record. **Not authorised for filing**; clears neither commercial reuse, access cadence, integration nor building.
 ```
 ## NASA Ozone Watch — daily Antarctic ozone-hole area + SH minimum ozone (to3areas_/to3mins_YYYY_toms+omi+omps.txt) — research only, not on the page
 - **Read:** 6 Nov 2026 by Claude (SH meteorology/methodology, Disclaimers, data files); 8 Nov 2026 by GPT on Chad's behalf (P1 Disclaimers in full; P2 footer notice redirect; P3 homepage; P4 Contacts; P5 GMAO homepage, reanalysis, weather-analysis/prediction pages); 8 Nov 2026 by Claude (fetch summaries: NASA Earthdata guidance, OMPS record, NASA media guidelines). Research record: docs/research/R6-ozone.md §6, §9.
 - **Credit (verbatim, Ozone Watch footer):** "Please credit all material to "NASA Ozone Watch" unless otherwise noted." — requested credit; not itself a reuse permission.
 - **Disclaimers (summary, GPT):** data and methods may change, earlier versions not all archived; interpolation fills gaps for visualisation and area only, never for minimum ozone; the research-only caution applies to GMAO GEOS forecasts, not to these statistics.
 - **Website notice:** footer link redirects to https://www.nasa.gov/privacy/ (privacy/security notice; not licence evidence).
-- **Upstream (kept separate):** OMPS L2 input openly shared under EOSDIS guidance; GMAO pages show no applicable grant; neither is permission for the derived files.
+- **Upstream and NASA-wide guidance (kept separate):** OMPS L2 input openly shared under EOSDIS guidance — the input's terms do not by themselves establish permission for the derived files; GMAO pages show no applicable grant. Applicability of the ESDIS data-use guidance and NASA media guidelines to these two files has not been established; the inspected evidence does not establish that the files are distributed through ESDIS.
 - **Automated use:** plain-text files described as suitable for program input; no scripted-download rule and no numerical rate/cadence/load limit found in the pages inspected (6–8 Nov 2026) — not unlimited; machine-readable format is not a polling allowance.
 - **Coverage statement:** none filed (R6 technical gates open: climatology definition, gap-fill share, publication timing, OMPS platform).
 - **Status:** ⛔ research only; not cleared for building.
-- **Commercial use:** UNRESOLVED — no applicable grant established in the inspected sources; federal-work status unverified. Not a finding that reuse is prohibited.
+- **Commercial use:** UNRESOLVED — no applicable grant established in the inspected sources (ESDIS guidance and NASA media guidelines: applicability not established; input terms: not by themselves permission; privacy notice: no applicable grant); federal-work status unverified. Not a finding that reuse is prohibited.
 ```
 
 ## Sources

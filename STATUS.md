@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~18:00 UTC — **R6 terms review rev 5: GPT wording corrections (docs only)**
+- §9.1: an evidence gap, not an absent route ("…does not establish that these two files are distributed through ESDIS or covered by its data-use guidance"). §9.4: applicability of the ESDIS guidance and NASA media guidelines not established; input terms not by themselves permission; privacy notice no applicable grant. Carried into the table and REGISTER draft; §6's older "likely free to reuse with credit" assumption replaced by a cross-reference to §9.
+- GPT: the research-only REGISTER draft is technically acceptable as an unresolved evidence record. **Not filed; not authorised**; clears no commercial reuse, cadence, integration or building. Technical gates unchanged; R3 reply-pending.
+
 ## 8 Nov ~17:40 UTC — **R6 terms review rev 4: extraction complete; corrected packet for GPT (docs only)** — `docs/research/R6-ozone.md` §9
 - P1–P5 read by **GPT on Chad's behalf**. Disclaimers: no commercial-reuse grant or limit; methods may change, versions not all archived; interpolation for visualisation/area only, never minimum; research-only caution = GMAO GEOS forecasts only. Footer notice → redirect to nasa.gov/privacy (not licence evidence). Homepage credit request verified. Contacts: affiliations establish neither authorship nor copyright. GMAO: no applicable grant; products-page login is that page's limitation only.
 - Corrections: §9.4 now separates the requested credit from permission for commercial redistribution; the rev-3 authorship inference from a contact's affiliation is withdrawn.
