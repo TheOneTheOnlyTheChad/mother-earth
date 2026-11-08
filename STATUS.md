@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~09:20 UTC — **Kp/degraded fix rev 3 on `kp-degraded` @ `86134b8`** (focused, after GPT's review of `0513aa7`; NOT merged, NOT deployed)
+- **GPT verified `0513aa7`:** kp-degraded 28/28, health-hub 29/29, app syntax, full worker hash. The Kp rendering, USGS unknown age and evidence corrections address its findings.
+- **The one remaining issue, fixed:** the cloud collector rounded its reason fields before publishing (75.04 s → 75; 0.8999 → 0.9), which contradicted the stated condition.
+  - New `shipsReason` publishes them unrounded.
+  - The Mac collector is unchanged. When its tenths-rounded duration equals the limit, the page says "exceeded our 75 s limit … reported duration rounded to 0.1 s", with no invented digits.
+  - Tests now run the hub-generated, JSON round-tripped fields through the renderer.
+- **Tests:** kp-degraded 29/29. Breaks: rev 2 rounding → fail; rev 2 app.js → 2 fail. All regressions pass except the known place-ui 28/30. worker.js sha256 `f38296a0…`.
+- GPT: the provisional threshold, skew tolerance and release order remain acceptable. **Next:** GPT re-review of `86134b8` → `Approve: deploy hub 0.6.1 from 86134b8 (content only)`.
+
 ## 8 Nov ~08:30 UTC — **Kp/degraded fix rev 2 on `kp-degraded` @ `0513aa7`** (after GPT's independent review of `67140b0`; NOT merged, NOT deployed)
 - **GPT verified on `67140b0`:** kp-degraded 21/21, health-hub 29, history-hub 27, firms-guard 19, firms-v2 57+7 skipped, ships-late 7, the old-rule break, syntax/module load and the worker hash. GPT stopped ships-fallback early; no result claimed. Other browser regressions remain Claude-supplied.
 - **Fixed per GPT:**
