@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~18:40 UTC — **R2 fireballs terms/access review rev 1 (read-only; Chad's go, R2 only)** — `docs/research/R2-terms-access.md`, for GPT
+- Products/routes already sampled: Fireball API v1.2 (`ssd-api`), CNEOS lightcurve index + one report (`cneos`). No sampling, contact, route selection or implementation; identity and validation gates open.
+- **⚠ Conflict found:** the SSD FAQ (8 Nov, two fetches) answers the publishing-permission question "The short answer is yes", places most content under JPL's copyright statement, prefers links, and has **no "public domain" wording**. This contradicts the accepted 5 Nov reading ("public domain, no permission needed"), which is now **not relied on** pending verbatim extraction (X1, X2). Marked in RESEARCH-BACKLOG §R2 A.
+- API fair-use conditions explicit (one request at a time, reasonably necessary, cache, User-Agent with contact, back off, no website embedding; JPL may rate-limit/throttle/block); no licence text; **no numerical limit found (≠ unlimited)**.
+- JPL Image Use Policy = images/video only (not applied); data.gov record = a different legacy distribution, access "public", no licence field. Public release / public access / credit ≠ commercial permission. U.S.-government-work default not available (JPL is Caltech-managed; general knowledge, labelled).
+- Pending extraction X1–X4 (FAQ verbatim; JPL copyright statement; CNEOS fireball + lightcurve pages; source of the 5 Nov attribution guidance), X5 supplementary. **No REGISTER draft** until the conflict is resolved.
+
 ## 8 Nov ~18:00 UTC — **R6 terms review rev 5: GPT wording corrections (docs only)**
 - §9.1: an evidence gap, not an absent route ("…does not establish that these two files are distributed through ESDIS or covered by its data-use guidance"). §9.4: applicability of the ESDIS guidance and NASA media guidelines not established; input terms not by themselves permission; privacy notice no applicable grant. Carried into the table and REGISTER draft; §6's older "likely free to reuse with credit" assumption replaced by a cross-reference to §9.
 - GPT: the research-only REGISTER draft is technically acceptable as an unresolved evidence record. **Not filed; not authorised**; clears no commercial reuse, cadence, integration or building. Technical gates unchanged; R3 reply-pending.
