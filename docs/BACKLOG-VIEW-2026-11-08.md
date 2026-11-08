@@ -1,16 +1,16 @@
-# Backlog view — 8 Nov 2026 (for Chad's choice; nothing here is started)
+# Backlog view — 8 Nov 2026, rev 2 after GPT's review (for Chad's choice; nothing here is started)
 
 One page over everything open: the research backlog (`docs/RESEARCH-BACKLOG.md`, R1–R11) plus the open hub/page items from HANDOVER. **No item is authorised by appearing here.** Tiers are GPT's 5 Nov recommendations. Effort figures are Claude's rough estimates, not measurements.
 
 ## A. Fixes and improvements to what is already live
 | Item | What it is | State | Next step (needs Chad's go) | Rough effort |
 |---|---|---|---|---|
-| **Kp false "degraded"** | 69% of Kp runs marked degraded while NOAA is on time; page blames "the source" | **Finding** 8 Nov (`reviews/2026-11-08-kp-degraded-finding.md`) | GPT review → fix: hub threshold (~7.5 h) + honest wording (check every layer's degraded rule) → Approve lines | small (hub + page) |
-| **GIBS fallback rule** | Pick the more complete of NOAA-21/NOAA-20 by measurement | **Proposal** 8 Nov (`docs/GIBS-FALLBACK-PROPOSAL.md`) | GPT review → bench (read-only) → ~7-day shadow record → build | medium |
+| **Kp false "degraded"** | 69% of Kp runs marked degraded by our 4 h rule (interval-start timestamps); page attributes the flag to "the source" on every active layer | **Finding** 8 Nov (`reviews/2026-11-08-kp-degraded-finding.md`) | Finding rev 2 (GPT: diagnosis supported, threshold provisional) → fix on a branch: provisional threshold + boundary tests + wording across all affected active layers → review → Approve lines | small (hub + page) |
+| **GIBS measured selection** | Pick NOAA-21 or NOAA-20 for the same date by lower near-black share (appearance, not completeness) | **Proposal rev 2** 8 Nov (`docs/GIBS-FALLBACK-PROPOSAL.md`) | Workspace/pane bench + shadow record (read-only, Chad's go) → hub rollout (separate) | medium |
 | **FIRMS empty-input retry** | Nightly header-only retries are logged as `firms:recovery down` rows (expected, but noisy) | Left open by decision | Review whether to refine the retry/logging | small |
 | **FIRMS 8 MiB guard** | Raise the size guard (bench: v2 handled 16/32/64 MiB within 64 MB) | Left open by decision | Decide whether needed; FIRMS files peaked ~5.3 MB so far | small |
-| **R11 FIRMS late arrivals** | `day_range=1` resets at 00:00 UTC, so detections processed after midnight never reach that day's checkpoint | Not started (one data point) | Measure across several days; compare `day_range=2` | small–medium |
-| **place-ui harness** | Test-only fix, 30/30 | On branch; GPT sign-off reported by Chad 8 Nov (reply text not yet in the thread) | Chad's Approve line to merge | done, merge only |
+| **R11 FIRMS late arrivals** | An unmeasured question: whether detections processed after midnight are missing from that day's checkpoint (`day_range=1` resets at 00:00 UTC). No quantity of lost detections is established | Not started (one data point) | Measure across several days; compare `day_range=2` | small–medium |
+| **place-ui harness** | Test-only fix, 30/30 | On branch; **GPT technical sign-off 8 Nov** | Chad's Approve line to merge | done, merge only |
 | **Smoke checks left** | Real phone; noon rollover; HTTP status codes | Noon booked 11:50 UTC today | Real phone with Chad (with the Phase 0 iPhone runs) | — |
 
 ## B. New sources (research only, R1–R10)
@@ -27,7 +27,7 @@ One page over everything open: the research backlog (`docs/RESEARCH-BACKLOG.md`,
 | R8 | Ionospheric TEC (GloTEC) | 3 | Not started | Model label; quality |
 | R9 | Neutron monitors (NMDB) | 3 | Blocked: account required | Recheck service + reuse |
 
-**Pattern worth seeing:** the four parked tier-1/2 items (R2, R3, R4, R6) all stopped on **terms or access**, not on the data. A single "terms pass" across them could unblock more than any new first gate. That means reading each provider's reuse terms and filing the operative sentences in REGISTER, as for the Met.
+**Pattern worth seeing (corrected in rev 2):** R3, R4 and R6 are parked with **terms or access** among their main open items; **R2 also has unresolved identity, validation and acceptance rules**. A bounded "terms review" (reading each provider's reuse terms and filing the operative sentences in REGISTER, as for the Met) **may clarify rights without clearing any source**: each item's other open questions remain.
 
 ## C. Bigger decisions (separate, Chad's)
 - **Domain selection (Phase 0):** recommendation drafted (`docs/research/P0-RECOMMENDATION-DRAFT.md`); waits on GPT's revisions and the iPhone runs.
@@ -35,7 +35,6 @@ One page over everything open: the research backlog (`docs/RESEARCH-BACKLOG.md`,
 - **Polar-cap imagery, Possible futures, Schumann view:** recorded ideas, no gate set.
 
 ## Claude's suggestion (Chad decides)
-1. **Kp fix**: it removes a false public signal and an untrue sentence. Small, and it meets the "honesty over polish" bar.
-2. **Terms pass over R2/R3/R4/R6**, read-only: the cheapest way to move four parked items at once.
-3. **GIBS bench + shadow week**: runs in the background while 1 and 2 happen.
-4. New first gates (R5, R7, R10) only after that.
+1. **Kp correctness first** (GPT agrees): it removes a false public signal and an untrue sentence across layers.
+2. **Then choose one:** a bounded terms review over R2/R3/R4/R6 (read-only; clarifies rights, clears nothing), **or** the revised GIBS bench + shadow record (read-only, workspace/pane). Neither is started.
+3. New first gates (R5, R7, R10) after that.

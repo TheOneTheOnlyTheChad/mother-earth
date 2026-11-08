@@ -4,6 +4,35 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 8 Nov 2026
 
+## 8 Nov ~06:45 UTC — **GPT's review of the morning's work applied (docs only; nothing authorised beyond)**
+- **place-ui harness `601b899`: GPT technical sign-off.** The fake `head()` supplies the UTF-8 size and metadata the legacy-reader checks need. Worker hash = live 0.6.0; no production or page change. Syntax checked independently by GPT; suite results and the break check remain Claude-supplied evidence. **Merge awaits Chad's decision.**
+- **Smoke follow-up:** qualifications confirmed by GPT. It supplements GPT's independent test, and GPT has not repeated those browser checks.
+- **Phase 0 recommendation → rev 2** (GPT's six revisions):
+  - "only cleared expansion candidate among those assessed in this round";
+  - per-object "sensitivity not fully assessed", source restrictions, present-day countries ≠ historical nationality;
+  - 5 typed departments vs 4 in the final view (American Wing 326, Islamic 72, Medieval 43, Cloisters 38);
+  - Planet = 7 Nov pre-NOAA-21 transfer/load baseline, not input responsiveness or tolerances;
+  - waiting for the iPhone is a suggestion, not a prerequisite;
+  - unsupported phone-cost claim removed; VoiceOver baseline separate.
+  - No gate reopened; the 5.09 s cold load confirmed as correctly rounded.
+- **Kp finding → rev 2** (GPT: diagnosis supported, threshold provisional). GPT's smoke report ("Kp degradation explicitly disclosed") is preserved unchanged; this finding is appended to it.
+  - `kp_index.retrieved_at` = our first retrieval, not NOAA's publication time. The "every degraded run on schedule" claim is withdrawn.
+  - The 7.1 h maximum was unsupported and is removed; the largest observed age is 6.13 h.
+  - 7.5 h past interval start is a provisional candidate, not a source deadline. With hourly polling a missing value is first flagged ~2 h after it was due (~8.13 h). Boundary/invalid/future test cases listed.
+  - Inventory of `degraded` on every active layer (usgs, swpc, co2, seaice = freshness rules; forest = sweep; ships = sampling quality): wording to be fixed across all of them, ships keeping its own reason.
+  - Kp's timestamp described as the interval start.
+- **GIBS proposal → rev 2:**
+  - the measured criterion is "near-black share" (appearance, not completeness); illumination not equalised;
+  - no-data / failure / bounded-decoding handling specified; rankings compared, not just percentages; tie margin set from the bench (0.5 pp withdrawn);
+  - same-date selection only (day-before = Chad's later decision);
+  - rollback bounded to the current image day, with an immediate-default option (a) or (b) for Chad;
+  - pane/workspace shadow record separated from a deployed hub job; 7 days = provisional only; cost unverified; D1 history optional.
+- **Backlog view → rev 2:**
+  - R2 also has open identity/validation/acceptance rules, and a terms review clears nothing;
+  - R11 is an unmeasured question;
+  - order: Kp correctness first, then a choice between the terms review and the GIBS bench (neither started).
+- Not authorised by this review: implementation, research restart, merge, deploy, shadow job, resource creation. FIRMS closed; Arts scoped-cleared, unselected; Life stopped; aircraft parked (research included); no prototype or Phase A.
+
 ## 8 Nov ~06:25 UTC — **Backlog view written** — `docs/BACKLOG-VIEW-2026-11-08.md` (for Chad's choice; nothing started)
 - One page over R1–R11 plus the open hub/page items. Observation: R2, R3, R4 and R6 all parked on terms/access, not data. Claude's suggested order: Kp fix → a read-only terms pass over R2/R3/R4/R6 → GIBS bench + shadow week → new first gates.
 
