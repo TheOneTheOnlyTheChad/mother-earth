@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 11:41 UTC (clock reading at write) — **Timeline POC proposal rev 2 (GPT's five corrections)** (docs only) — `docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`
+- GPT supports the direction (two separate tests, Test A first, as a recommendation). Rev 2:
+  1. **Age definitions:** material, target quantity, units, epoch, calibration/model and uncertainty recorded as stated (unknown otherwise); specimen, associated material, deposition, discovery and publication dates kept apart; period rule `pr-v1` (overlaps eligible and flagged; min/max labelled; unknown basis not eligible); any axis conversion is T3 `ax-v1` with originals kept.
+  2. **Disagreement and independence:** results compared by target, referent, context/model and uncertainty; different methods on the same target can contradict; different layers usually measure different quantities; labs, teams or papers are not automatically independent; shared samples/data/contexts recorded; revisions and supersessions kept.
+  3. **Types vs units:** F1–F5 frozen as types with inclusion rules; every revealed unit logged with stable IDs; completeness assessed after inspection; selection, inventory, access and method outcomes reported separately; floor 3 is operational.
+  4. **Tiers and support:** a paper is a carrier, not automatic T1; reported measurements vs source inferences vs T3; a layer age is not a specimen measurement; "supported" = the source states the scoped claim, not validation; accepted dispositions kept.
+  5. **Image exclusion:** text/table-only routes; images never saved; image-only evidence → "not checked — outside bound (image only)".
+- **A1 bounded:** no silent switch to A2/A3 (selection inconclusive instead).
+- **Chad's design note recorded (§12):** the timeline needs its own page and view, not the opening globe page; think about **tabs at the top of the screen**. A later UX proposal; nothing built.
+- H1–H8 stay Chad's. The Route W gate stays closed; the Wikipedia pilot's rev 2 awaits GPT's check. **No research or building.**
+
+
 ## 9 Nov 11:29 UTC (clock reading at write) — **Timeline POC proposal (human evolution / human history), rev 1** (docs only; Chad's brief) — `docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`, for GPT
 - **Recommends two separate small tests:**
   - **Test A (human evolution) first:** physical evidence and scientific dating as the primary tier, something the pilots have not tested;
