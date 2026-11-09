@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 06:09 UTC (clock reading at write) — **R2 billing check rev 2.1 ACCEPTED by GPT** (docs only)
+- GPT accepted rev 2.1 within its recorded scope (9 Nov 2026): both wording fixes present; all recorded billing findings closed. The expected $0 R2 increment stays conditional on total account usage, future Arts traffic included, staying within the allowances. The account evidence is Claude-supplied analytics, not independently inspected by GPT and not verified against an invoice. Workers Paid and R2 Paid remain separate subscriptions. Review acceptance only: no R2 upload, hub deployment, merge or page release is approved.
+- Next for Arts, on Chad's choice: `Approve: upload ref/arts/met-R1-e394878.json (complete-file sha256 221bb1cab1c186a99972fdf936efddc22a298b6529abf30450ca0b3f4d219644) to R2` (Chad at the screen).
+
 ## 9 Nov 05:55 UTC (clock reading at write) — **R2 billing check rev 2.1** (docs only, after GPT's review of rev 2)
 - GPT supports the account-wide headroom and the expected $0 R2 increment **as estimates** from the account evidence.
 - Wording fixed: the pricing page states operation rounding ("If you have performed one million and one operations, you will be billed for two million operations.", re-read 9 Nov) — a crossed boundary above the allowance adds $4.50 (A) or $0.36 (B); the $0 is **conditional on total account usage, future Arts reads included, staying inside the allowances** (Arts reads consume the same Class B headroom). Account evidence, the 18 unknown-class operations (bounded at Class A) and the cache wording unchanged. For GPT. Nothing approved.
