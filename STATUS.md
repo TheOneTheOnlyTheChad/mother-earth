@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov (commit time) — **ENQUIRIES rev 7: OpenSky second reply LINKED** (docs only)
+- Chad supplied his exact sent follow-up (screenshot, displayed 10:22 AM, not converted). Q1–Q3 filed verbatim; his email address is omitted.
+- **"3. Yes" answers follow-up Q3:** hosting the aggregated snapshots on our own public site (counts per area, no aircraft identifiers or individual tracks), under the ~10 requests/day arrangement. Recorded as **affirmative for that specific arrangement only, within the standing hobbyist, feeder and credit conditions**. Not blanket redistribution; the feeder condition is not waived.
+- **Account link (follow-up Q2):** automatic on OpenSky's side if feeding for 30%+ of the preceding month. The measurement and the linking mechanism are not stated, and our account does not qualify now (no receiver).
+- **Feeder qualification (follow-up Q1):** only the 30%+ criterion is stated, by contextual reading.
+- No REGISTER change. Aircraft scope unchanged (no purchase, installation, build or deployment).
+
+
 ## 9 Nov 10:45:13–10:54:21 UTC (Mac clock) — **Wikipedia-led discovery and source-tracing pilot RUN** (research only; Chad's Go) — packet `research/timeline-wikipedia-pilot/2026-11-09-claude/` on the Mac (not in the repo)
 - **Protocol** `wp-pilot-v1`, fixed at 10:45:30 before any discovery:
   - route 1 = Category:Floods in Pennsylvania (+ subcategories at depth 1);

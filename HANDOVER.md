@@ -42,7 +42,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 - 2 articles: Johnstown (baseline) and the Great Flood of 1913.
 - 9 claims: qualifying support 0, repetition 1, unsupported 2, inaccessible 1, no reference given 5.
 - **Next:** GPT's one review (paths only), then Chad decides.
-- **OpenSky:** ENQUIRIES rev 6 recorded Martin's second reply; **linking "3. Yes" needs Chad's sent follow-up** (a screenshot).
+- **OpenSky:** ENQUIRIES **rev 7** links Martin's second reply to Chad's sent follow-up. Q3 (aggregated snapshots, no identifiers or tracks) = **yes, for that arrangement, within the standing conditions**; account link automatic at 30%+ feeding of the preceding month. For GPT's review. No REGISTER change.
 - Selection is inconclusive (1 eligible item). Full source-link/timing assessment and coverage are incomplete.
 - Not a feasibility, coverage, route or build clearance.
 - **Next is Chad's choice, nothing started:** a new gate with a different discovery method; a source-reading L pass; Route L on the same ground; or parking the timeline.
