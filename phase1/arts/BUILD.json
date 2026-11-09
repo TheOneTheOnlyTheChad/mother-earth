@@ -1,0 +1,12 @@
+{
+ "file": "met-R1-e394878.json",
+ "r2_key": "ref/arts/met-R1-e394878.json",
+ "published_file_generated_at": "2026-11-09T04:47:20Z",
+ "file_bytes": 127887,
+ "file_sha256": "221bb1cab1c186a99972fdf936efddc22a298b6529abf30450ca0b3f4d219644",
+ "records_bytes": 122227,
+ "records_sha256": "067211d996b6f9a35bf50354a179f77fed076a0c14b98e9dc9c175b22c616cb2",
+ "file_gzip9_bytes_python": 10031,
+ "gzip_tool": "Python 3.13.18 gzip.compress(compresslevel=9, mtime=0); not the served transfer size",
+ "input_final_view_sha256": "d682cb96e34071b6a668e26c9bd2af43ad65d06ce9b5d7e49f8255ac84588bc5"
+}

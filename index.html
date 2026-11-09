@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611151000">
+<link rel="stylesheet" href="style.css?v=202611161000">
 </head>
 <body class="world">
 <header class="top">
@@ -49,7 +49,7 @@
       <div class="keydef" id="key-def">“Key · N layers” counts layers drawn on the globe right now: each map layer that is switched on and showing data (earthquakes, fires, vessels, forest, drifting buoys, microplastic samples), day/night as one, and each orbital category (payloads, rocket bodies, debris) as one. Indices (Kp, CO₂, sea ice), switched-off layers and layers still loading or unavailable are not counted.</div>
       </div>
     </div>
-    <footer class="credits" id="credits" aria-label="Data sources and acknowledgments">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · orbital element sets <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> (US Space Force 18th/19th Space Defense Squadrons) · drifting buoys <a href="https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html" target="_blank" rel="noopener">NOAA OSMC</a> (WMO GTS reports; CC0) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></footer>
+    <footer class="credits" id="credits" aria-label="Data sources and acknowledgments">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · orbital element sets <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> (US Space Force 18th/19th Space Defense Squadrons) · drifting buoys <a href="https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html" target="_blank" rel="noopener">NOAA OSMC</a> (WMO GTS reports; CC0) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a> · Collection data: <a href="https://github.com/metmuseum/openaccess" target="_blank" rel="noopener">The Metropolitan Museum of Art Open Access</a> (CC0), source CSV of 2 Nov 2026 (commit e394878). We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></footer>
     <div class="inspector" id="insp" role="dialog" aria-labelledby="insp-h"><button class="x" id="insp-x" type="button" aria-label="Close">×</button><h2 id="insp-h">—</h2><dl id="insp-dl"></dl><div id="insp-more"></div></div>
   </div>
 
@@ -228,6 +228,33 @@
               </details>
             </div>
           </div>
+          <div class="ovl opt-arts" id="card-arts">
+            <div class="ovl-h">Met catalogue sample — places of making <span class="ev cat">Catalogued</span></div>
+            <div class="evl">what the Met's catalogue states, dated — not observed, not computed; nothing drawn on the globe</div>
+            <button class="ovl-tgl" type="button" id="tgl-arts" role="switch" aria-checked="false" aria-describedby="arts-note"><span class="box" aria-hidden="true"></span><span class="t">Show the list by present-day country</span></button>
+            <div class="value"><span id="v-arts">–</span></div>
+            <div class="cav" id="arts-note">479 objects retained from a seeded 2,000-record sample of 59,137 Met records with typed geography. This filtered view draws from four departments; it does not represent the Met's whole collection or the world's art. The Met's catalogued place of making, mapped to present-day countries — not historical nationality. Sensitivity not fully assessed.</div>
+            <div class="src" id="m-arts">Source: Met Open Access CSV of 2 Nov 2026 (commit e394878) · view prepared 7 Nov 2026</div>
+            <div class="obs" id="o-arts" aria-live="polite">off — switch on to load the list</div>
+            <div class="arts-list" id="arts-list" hidden></div>
+            <details class="scope" id="arts-scope">
+              <summary>What this is and is not</summary>
+              <div>
+                <p>479 objects retained from a seeded 2,000-record sample of 59,137 Met records with typed geography. This filtered view draws from four departments; it does not represent the Met's whole collection or the world's art.</p>
+                <p>Arts of Africa, Oceania and the Americas is an excluded department, not an absence of those regions.</p>
+                <p>The Met's catalogued place of making, mapped to present-day countries — a location reference only, not historical nationality.</p>
+                <p>"Country of Origin" is its own relationship and is kept outside this view; superseded wording ("Formerly considered made in") never places an object. The Met's wording is shown verbatim.</p>
+                <p>Concentration: United States 239 of 479 (49.9%); 8 countries have one object; 12 have three or fewer.</p>
+                <p>Random page check: 0 of 27 reached Met pages disagree (95% interval for the error rate 0–12.5%); 23 pages were not reached and are unverified, not passes.</p>
+                <p>The Met's catalogue, not independent historical verification; the Met says cataloguing is ongoing.</p>
+                <p>Sensitivity not fully assessed: no object was manually assessed; 11 carry tentative labels; an unlabelled object is not established as not sensitive.</p>
+                <p>A fixed snapshot: the Met updates its CSV weekly; every figure here is tied to the source CSV of 2 Nov 2026 (commit e394878).</p>
+                <p>Sensitive material is included with honest context for this metadata-only scope; inclusion is not a claim about ownership legitimacy, and source restrictions are kept. Tentative labels come from keyword screens and three page findings and are not comprehensive.</p>
+                <p>No images or other media are shown or fetched here; each object links to its page on the Met's own site.</p>
+                <p><a href="sources.html#arts">Full details on Sources &amp; Details →</a></p>
+              </div>
+            </details>
+          </div>
         </div>
       </section>
     </div>
@@ -235,7 +262,8 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611151000"></script>
+<script src="app.js?v=202611161000"></script>
+<script src="arts.js?v=202611161000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
