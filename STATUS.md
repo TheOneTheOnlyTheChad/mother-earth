@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 14:44 UTC (clock reading at write) — **Timeline entry build proposal rev 2 after GPT's review** (docs only)
+- GPT: direction good; four points, all applied in `docs/concepts/TIMELINE-ENTRY-BUILD-PROPOSAL.md` rev 2:
+  1. **Back/focus:** one shareable fragment `#e-pliny-ep-6-16`; shortcut expander in history state; Back/Forward return focus to the exact opener; direct link focuses the detail heading; explicit Close clears the fragment and focuses the card title (fallback `<h1>`); Back after a direct link goes to the real previous page (tested with a genuine prior entry); 721–1100 px layout and the phone sheet's modal keyboard/focus behaviour specified.
+  2. **Date and attribution:** 24 August = our conversion of the checked reading (1 September = day one), shelf only; Misenum attributed to Pliny, Bay of Naples = our present-day reference; seasonal hour = our model, clock time unset; §22 caveat; S3 authors and DOI named; one historical account.
+  3. **Source link / no-JS:** Book 6 page with Letter 6.16 and §§4–5, 22 beside it; no jump promised unless a working fragment is verified; date, hash, conversion and debate in static HTML; the hash identifies the checked copy, the live page can change; no inline Latin.
+  4. **Release gate:** EGU licence = CC BY as reported by OpenAlex, publisher verification a release condition (R1); non-public pinned-candidate preview (R2); actual header diff in the pre-release review (R3); GPT candidate review (R4).
+- Recommended (GPT and Claude): T1 page-only, exception reviewed before a second entry or an axis; T2 English only; T3 omit search; T4 four named entities only, unresolved recorded (Chad's call); T5 page and tabs together.
+- **Not approved:** branch build (line A), live page/navigation release (line B). Opening-page/Met audit separate; completed research stays closed.
+
 ## 9 Nov 14:30 UTC (clock reading at write) — **Timeline entry BUILD PROPOSAL rev 1** (docs only) — `docs/concepts/TIMELINE-ENTRY-BUILD-PROPOSAL.md`
 - One entry (Pliny, *Letters* 6.16) from UX rev 2. Pins S1 (Latin Library page sha256 `b59e819a…e281`, retrieved 14:00:36 UTC) and S3 (EGU21-16222, attributed) from the Mac packet; packet re-checked 14:28 UTC (4 files exact; LOG = hashed original + appended closure line).
 - Carry-forward specified: source link with the checked copy's date and hash and a "may have changed" line; Back/focus for card-opened and direct-link paths, tested at 1280 and 390 px.
