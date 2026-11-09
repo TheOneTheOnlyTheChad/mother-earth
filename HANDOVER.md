@@ -37,6 +37,15 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | Inspiration list | Chad's 50 sites, kept separate from the research backlog; queues no work. | `docs/INSPIRATION-50-SITES.md` |
 | CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
 
+**NEXT THREAD STARTS HERE (9 Nov, end of the timeline research thread):**
+- **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. All of today's work was docs and research.
+- **Pending with GPT:**
+  - **(a)** timeline POC proposal **rev 3** (`docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`, sent 9 Nov; H1–H8 + H8b are Chad's);
+  - **(b)** the Wikipedia-led pilot **rev 2** (`research/timeline-wikipedia-pilot/2026-11-09-claude/rev2/` on the Mac), awaiting GPT's check.
+- **Closed:** Route W gate (rev 2 accepted); ENQUIRIES rev 7 (OpenSky, accepted).
+- **Design note (Chad):** the timeline needs its own page and view, via **tabs at the top of the screen**, not the opening globe page. A later UX proposal; nothing built. A parallel docs-only opening-page / Met placement review is referenced by GPT but not held in this repo.
+- **No research run, build or production action is approved.**
+
 **NEXT (Route W gate closed, 9 Nov):** **GPT accepted rev 2** as the corrected evidence record of an inconclusive run (`research/timeline-route-w/2026-11-09-claude/rev2/REPORT-rev2.md` on the Mac; wording tidy-up done).
 **Then (9 Nov 10:45–10:54 UTC):** the Wikipedia-led pilot ran; **rev 2** applied GPT's three corrections (**awaiting GPT's check of rev 2**) (`research/timeline-wikipedia-pilot/2026-11-09-claude/rev2/REPORT-rev2.md`).
 - 9 units, partial inventory: qualifying 0, repetition 1, unsupported 2 (both not stated), inaccessible 1, no reference given 5.

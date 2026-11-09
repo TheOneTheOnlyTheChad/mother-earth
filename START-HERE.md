@@ -99,6 +99,16 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Docs added:** `docs/INSPIRATION-50-SITES.md` (not the backlog), `docs/concepts/TIMELINE-CONCEPT.md` (concept only), `docs/research/ENQUIRIES-2026-11.md` (provider emails; no personal contact details in the repo).
 - **Test suites added:** `node --no-warnings phase1/arts-hub.test.mjs` (54; `BREAK=records-only|no-records-check|serve-on-fail`), `node phase1/arts-ui.test.cjs` (90; 8899 server + /home/claude/spike; `BREAK=no-consistency|eager|no-warning|no-aria|show-retrieval|css-hidden`). Both are on main since the merge (`6d5ca55`).
 
+## 4i. Thread facts (9 Nov 2026, timeline research thread)
+- **Reaching Wikimedia and source hosts:** the workspace shell is refused at the proxy for wikidata.org, wikipedia.org and query.wikidata.org. The **browser pane** reaches them; Chad granted pane site access to wikidata.org, wikipedia.org, waterdata.usgs.gov, nwis.waterdata.usgs.gov, water.noaa.gov, web.archive.org and archive.org (scope site).
+  - Requests are sent **one at a time**, with `Api-User-Agent: MotherEarthResearch/0.1 (https://github.com/TheOneTheOnlyTheChad/mother-earth)` (no personal email) and `maxlag=5` on Action API reads.
+  - The WDQS limits are in the Route W terms record rev 2.
+- **The pane tool's 45 s cap leaves scripts running.** A timed-out `javascript_tool` call keeps executing, and on 9 Nov it overlapped later queries. Background a long request explicitly (`window.__p = …`), then poll in later calls.
+- **Wayback tabs fake the clock:** page JavaScript on a web.archive.org replay reports the archived time. Never take a timestamp from such a tab; use the Mac or workspace clock. Use `Memento-Datetime` (HEAD on the `id_` URL) for capture times.
+- **Moving pane data to the Mac:** gzip + base64 in the pane, then `base64 -d | gunzip` in `device_bash`, then hash-check both sides. Pane working memory is lost when a tab navigates away, so save before navigating.
+- **Research packets live in the Mac folder** (`research/timeline-route-w/…`, `research/timeline-wikipedia-pilot/…`). The repo gets IDs, revisions, hashes and dispositions only.
+- **Corrections go in a `rev2/` folder** beside the frozen originals. The LOG is append-only.
+
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.
 - **Optional layers** on the page go through `OPTIONAL_LAYERS` in index.html (fetched only while on, cleared on off, `refreshPair` + `usable()` as for the always-on record layers). `ME.renderState()` and `ME.openCell(layer, id)` are the read-only test/console aids.
