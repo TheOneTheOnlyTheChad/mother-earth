@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 15:20 UTC (clock reading at write) — **Timeline candidate BUILT on branch `timeline-rc` @ `31fab7d`** (Chad's Approve line A; NOT merged, NOT served; no hub, R2 or D1 change) — packet `reviews/2026-11-09-timeline-rc.md` (on the branch)
+- **Built:** `timeline.html` (entry pre-rendered from `phase1/timeline/entry-pliny-ep-6-16.json` by `build_timeline.py`), `timeline.js` (panel/sheet, history and focus; 9,021 B, over the 8 KB target), header tabs Earth now · Timeline on index and sources, REGISTER rows (EGU licence pending publisher verification, R1).
+- **Read-only checks (pane):** Wikidata 14:47:26–28 UTC — Misenum Q19900818, Vesuvius Q524, Pliny the Younger Q168707, *Epistulae* Q2099521 (all resolved). Latin Library 14:47:44 UTC — page hash unchanged (`b59e819a…`), **no anchors**, so no jump link.
+- **Tests:** timeline-ui **426/0**; nine breaks each fail; all other suites pass except **mobile-pass 130/1**: at 390×844 with everything on and Readings open, overlays cover **8.3% of the globe disc vs 5.4% on main** (the phone tab row makes the header 56 → 104 px). Open decision (a/b/c in the packet §4); not changed. Fixed during the build: 1101 px fallback-font header clip, a `.sheet` class clash, direct-link focus, same-page fragments.
+- **For GPT (R4):** packet + smoke-test routes; a hash-checked review copy is in the Mac folder `_review/timeline-rc/` (serve it with `python3 -m http.server`).
+- **Still before release B:** GPT review, R1 (publisher licence pasted into REGISTER), R2 non-public preview against the live hub (Chad present), the finding-2 decision. **Not approved:** merge, release, nav change on the public site.
+
 ## 9 Nov 14:44 UTC (clock reading at write) — **Timeline entry build proposal rev 2 after GPT's review** (docs only)
 - GPT: direction good; four points, all applied in `docs/concepts/TIMELINE-ENTRY-BUILD-PROPOSAL.md` rev 2:
   1. **Back/focus:** one shareable fragment `#e-pliny-ep-6-16`; shortcut expander in history state; Back/Forward return focus to the exact opener; direct link focuses the detail heading; explicit Close clears the fragment and focuses the card title (fallback `<h1>`); Back after a direct link goes to the real previous page (tested with a genuine prior entry); 721–1100 px layout and the phone sheet's modal keyboard/focus behaviour specified.

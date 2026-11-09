@@ -37,7 +37,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | Inspiration list | Chad's 50 sites, kept separate from the research backlog; queues no work. | `docs/INSPIRATION-50-SITES.md` |
 | CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
 
-**9 Nov 14:44 UTC (build-proposal thread):** build proposal **rev 2** (after GPT's review of rev 1) in `docs/concepts/TIMELINE-ENTRY-BUILD-PROPOSAL.md`; awaits Chad's T4 choice and Approve line A (branch build). Release B only after R1–R4. Nothing built.
+**9 Nov 15:20 UTC (build thread):** Timeline candidate on branch `timeline-rc` @ `31fab7d` (Approve line A). Packet `reviews/2026-11-09-timeline-rc.md` → GPT. Open: mobile-pass 8.3% vs 8% at 390 (tab row; Chad decides a/b/c), R1 EGU licence paste, R2 preview. Release = line B only after those. Mac review copy `_review/timeline-rc/`.
 
 **NEXT THREAD STARTS HERE (9 Nov 14:26 UTC clock reading, end of the timeline-tests thread):**
 - **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. Every commit this thread is docs-only.
