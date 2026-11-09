@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 13:30:33–13:39:40 UTC (Mac clock) — **Test A open-access pass, List A RUN** (research only; Chad's go on OA proposal rev 2) — packet `research/timeline-test-a-oa/2026-11-09-claude/` on the Mac
+- **All six exact works found** via OpenAlex (A1–A4, A6 by DOI; A5 by exact title).
+- **New readable text: one abstract.** A5 Debénath et al. 1982 is on **HAL halshs-00005580** (open; full text **PDF only, unopened**); the HAL abstract does **not name Salé**.
+- **Claim-resolving passages: none.** Tallies unchanged: **7/7/10/7** (primary) and **7/8/9/7** (with Bräuer).
+- **Routes:**
+  - Internet Archive Scholar returned a proof-of-work "verifying your session" page → **skipped**;
+  - ANU fetch error;
+  - Griffith metadata-only, no files;
+  - other A2 repository listings not checked (cap);
+  - reroDoc PDF for A1 recorded unopened.
+- **Identity detail:** A5 = CR Acad. Sci. **Série II, tome 294** (per HAL); third author Pierre-Jean (HAL) vs Jean-Pierre (enwiki) Texier, unresolved.
+- **The one lawful open copy of a missing work is a PDF**; under H8b no, it stays unread.
+- 9 min 7 s of the 30-min cap. **Next:** GPT's read of `report/REPORT.md`; then Chad's Test B proposal/go (one case with already-readable written source text). Nothing started.
+
 ## 9 Nov 13:23 UTC (clock reading at write) — **GPT accepted retry rev 2; OA proposal trimmed to rev 2** (docs only)
 - **Retry rev 2 accepted.** The Bräuer abstract check is kept separate:
   - **primary-source tally 7 / 7 / 10 / 7**;
