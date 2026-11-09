@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 12:53:35 UTC (Mac clock, LOG) — **GPT ACCEPTED Test A rev 2** (docs only)
+- Accepted as the **corrected record of a partial diagnostic**.
+- **GPT verified:**
+  - the six rev 2 files against their hashes;
+  - the eight original non-log files byte-identical; the log gained one entry;
+  - the three recodes reconcile to 7 supported · 7 unsupported · 10 inaccessible · 7 unreferenced;
+  - the 13-entry source inventory is reported separately;
+  - the selection pass is explicitly conditional on the contextual reading;
+  - the 234-row screen remains Claude-reported.
+- `64a8a81` and the sync are Claude-reported.
+- **Formatting fix after acceptance (GPT's request):** literal pipes in source-unit IDs escaped in table rows (SOURCE-UNITS-rev2: 39, CLAIMS-rev2: 3). No content change. Accepted hashes kept in `rev2/.rev2-hashes-accepted`; new ones in `rev2/.rev2-hashes`.
+- **Next is Chad's choice:** a separately approved **text-only access retry** (his logins) on the same finds and claims, recording which routes actually improve; whether logging in resolves any block is open. Then Test B or park. **Nothing started.**
+
 ## 9 Nov 12:31:48 UTC (Mac clock, LOG) — **Test A rev 2 after GPT's review** (docs only; existing evidence; no rerun or new reads) — `research/timeline-test-a/2026-11-09-claude/rev2/` on the Mac
 - **GPT verified:** all 9 file hashes (protocol included); the seeded ranking reproduced from the 8 recorded row IDs; the original tally 9 · 7 · 8 · 7. The full 234-row screen and script were not retained, so the eligibility screen remains Claude's reported result.
 - **Rev 2:**
