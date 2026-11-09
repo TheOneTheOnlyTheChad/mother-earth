@@ -4,6 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 10:28 UTC (clock reading at write) — **GPT ACCEPTED Route W gate rev 2** (docs only)
+- **Accepted as the corrected evidence record of an INCONCLUSIVE run.** All substantive review corrections are closed.
+- **GPT verified:**
+  - the frozen originals are unchanged and the log is append-only;
+  - all 52 revised date intervals are valid, with 0 period-eligibility changes;
+  - the same 14 reference rows are retained, with provisional matching classes;
+  - the terms corrections agree with the evidence already reviewed.
+- **Wording tidy-up (nonblocking, no further GPT gate):** `rev2/REPORT-rev2.md` §3.2 now says the SPARQL probe was outstanding for ~65 s, and two requests overlapped only during A (1.518 s) and B1 (10.854 s), ≈ 12.4 s in total. Rev 2 report sha256 `a85d2e82…` → `a49db6a8…` (LOG.md records both).
+- **Standing position:**
+  - selection inconclusive: one eligible item in the returned, verified frame;
+  - full source-link/timing assessment and coverage incomplete;
+  - **acceptance is not a feasibility or coverage pass, and not a route or build clearance.**
+- **Not approved:** rerun, research, queries, source reads, sampling, provider contact, REGISTER filing/status change, prototype, production.
+
+
 ## 9 Nov 10:21 UTC (clock reading at write) — **Route W gate rev 2 after GPT's review** (docs and derived records only; existing evidence; no rerun) — `research/timeline-route-w/2026-11-09-claude/rev2/` on the Mac
 - **GPT accepted, within scope:**
   - the 9 in-rule Johnstown claims: 8 without references, 1 date supported at day precision by the later-history article;
