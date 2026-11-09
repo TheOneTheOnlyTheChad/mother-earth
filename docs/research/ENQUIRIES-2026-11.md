@@ -7,12 +7,13 @@ Personal contact details (phone, precise home address) that Chad included are **
 *Rev 3, 9 Nov 2026: OpenSky's substantive reply on ticket #837506 recorded (section below). The earlier acknowledgement and its conditions are unchanged.*
 *Rev 4, 9 Nov 2026: Chad supplied his exact sent enquiry; the reply is now linked to it, with a bounded reading (section below). Personal details in that email are not reproduced.*
 *Rev 5, 9 Nov 2026 (GPT's direct review of rev 4): the Q2 rationale corrected (Q3 is also a yes/no question; Q2 stays a plausible contextual interpretation, not a uniquely established answer); the closing-line reading labelled as contextual interpretation. Rev 3's acceptance as an evidence record stands; rev 4 was not accepted verbatim.*
+*Rev 6, 9 Nov 2026: OpenSky's second reply on ticket #837506 recorded verbatim (section below). Its link to the sent follow-up is PENDING: the exact sent follow-up is not yet on record. Earlier correspondence and readings unchanged.*
 *Rev 5 ACCEPTED by GPT (9 Nov 2026) as a bounded evidence/interpretation record: Q1b, Q1c and Q3 remain unresolved; Q2 remains a contextual reading, not an explicit answer; the existing feeder, credit and cloud conditions stand. No aircraft clearance and no REGISTER change.*
 
 | Sent (as confirmed by Chad) | To | Asked about | Reply |
 |---|---|---|---|
 | 8 Nov 2026 | USNO, `eopcp@us.navy.mil` (R3 Earth rotation) | commercial reuse; storage, reformatting, redistribution; IERS mirror; attribution; one automated download/day | **pending** (`R3-earth-rotation.md` §9.4a) |
-| confirmed 9 Nov 2026 | OpenSky Network, ticket **#837506** (aircraft) | feeder equipment and eligibility; about ten home-connection REST pulls/day; permission to host aggregated snapshots | **acknowledgement supplied** — conditions below; **substantive reply received 9 Nov** (Martin Strohmeier) — linked to the sent enquiry (rev 4), bounded reading below |
+| confirmed 9 Nov 2026 | OpenSky Network, ticket **#837506** (aircraft) | feeder equipment and eligibility; about ten home-connection REST pulls/day; permission to host aggregated snapshots | **acknowledgement supplied** — conditions below; **substantive reply received 9 Nov** (Martin Strohmeier) — linked to the sent enquiry (rev 4), bounded reading below; **second reply 9 Nov ("…30%+ of the preceeding month" / "3. Yes") recorded rev 6, linkage PENDING the sent follow-up** |
 | confirmed 9 Nov 2026 | adsb.lol (aircraft) | contributing receiver coverage from Cape Town; recommended equipment; whole-network access; historical alternatives; operational limits; ODbL obligations | **pending** |
 | confirmed 9 Nov 2026 | NASA Ozone Watch (R6 ozone) | reuse of the two daily files (area, minimum); public/API redistribution; commercial use; attribution; once-daily retrieval | **pending** (`R6-ozone.md` §9.4a) |
 | confirmed 9 Nov 2026 | CNEOS, `contact-cneos@jpl.nasa.gov` (R2 fireballs) | (as sent by Chad; text not in this repo) | **pending** (`R2-terms-access.md`) |
@@ -66,5 +67,34 @@ This is a summary relayed by Chad (via GPT's review packet); the verbatim text i
 - It does **not** establish unlimited credits or any change to applicable credits.
 - It does **not** grant blanket redistribution permission, or permission for any arrangement not stated in the exact sent enquiry.
 - "Normal connections need no whitelisting" is recorded as stated. It does not say cloud servers will be whitelisted, and the earlier "no whitelisting of cloud servers" condition stands; "normal" is read against Chad's closing line (his own connection); the message does not define it further.
+
+## OpenSky ticket #837506 — second reply (9 Nov 2026) — rev 6
+**Source and reader:** Chad supplied a screenshot of the message in his Gmail; Claude read the message body from it. **Gmail's AI overview (Gemini) shown above the message was not used.**
+- Sender "Martin Strohmeier via Opensky", to Chad.
+- Subject "RE: Written agreement request — non-commercial public globe, ~10 REST pulls/day [Ticket#837506]".
+- The header displays **"11:35 AM (1 hour ago)"** on 9 Nov, as Gmail shows it in Chad's local time. Not converted to UTC; not a measured reading.
+
+**Body, verbatim** (including the sender's spelling "preceeding"):
+> It's automatic on our side, if you've been feeding for 30%+ of the preceeding month.
+> 3. Yes
+>
+> Best,
+> Martin
+> --
+> The OpenSky Network
+> https://opensky-network.org
+
+**What it states (recorded, not extended):**
+- **"It's automatic on our side, if you've been feeding for 30%+ of the preceeding month."** This is OpenSky's statement of an automatic, provider-side mechanism, with the criterion **feeding for 30%+ of the preceding month**.
+  - The reply does not say what "it" is. It most plausibly refers to feeder status or its link to the API account, which the follow-up was meant to ask about (Q1b, Q1c). **Which question it answers is not verified** until the sent follow-up is on record.
+  - **Not inferred:** that Chad's account already qualifies (he does not feed today; no receiver exists); how "30%" is measured (uptime, share of time, messages); how feeding is linked to an account; or what "automatic" grants.
+- **"3. Yes"** answers question 3 of the message Martin was replying to.
+
+**Linkage status: PENDING (cannot be verified from the records).**
+- The follow-up was drafted for Chad to send. **Its exact sent text, and so its numbering, are not in any saved record.** The rev 4/5 records hold the *original* enquiry's Q3 verbatim: "Does that allowance include hosting the resulting aggregated snapshots ourselves, without aircraft identifiers or individual tracking?" That is the same topic the follow-up was to re-ask.
+- **Until Chad supplies the exact sent follow-up** (a screenshot, as for rev 4), "3. Yes" stays **unlinked**, and the earlier status of Q3 (unresolved) is **not changed**.
+- **If** the sent follow-up's question 3 is the aggregated-snapshot hosting question, this will be recorded as an **affirmative answer for that specific arrangement** (hosting our aggregated snapshots, without aircraft identifiers or individual tracking), **within the standing hobbyist, feeder and credit conditions**. That is not a blanket redistribution permission, and the feeder condition is not waived.
+
+**Unchanged:** the acknowledgement's conditions (the public site must be a feeder; no whitelisting of cloud servers; applicable credits), the rev 3–5 readings, and the aircraft scope (terms/access and feeder clarification only). No REGISTER filing or status change. No purchase, installation, build or deployment.
 
 **Aircraft scope (Chad, 9 Nov 2026):** reopened **only** for bounded terms/access and feeder clarification. No building, purchase, receiver installation, prototype or deployment. Branch `aircraft-rc` stays parked; never deploy it as-is.
