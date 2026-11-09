@@ -1,4 +1,4 @@
-# Timeline POC — human evolution and human history: bounded test proposal (rev 2, 9 Nov 2026)
+# Timeline POC — human evolution and human history: bounded test proposal (rev 3, 9 Nov 2026)
 
 **Status: proposal only (docs).** Chad's brief, 9 Nov: orient the next timeline proof-of-concept toward human history and evolution, using the accepted timeline concept (`docs/concepts/TIMELINE-CONCEPT.md` rev 3.1), the project records and the lessons of the completed pilots.
 
@@ -9,6 +9,12 @@
 - **Related records:**
   - the completed **Route W gate stays closed** (rev 2 accepted by GPT);
   - the **Wikipedia-led pilot**: rev 1 findings recorded; **rev 2 corrections written after GPT's review and awaiting GPT's check of rev 2** — its status is not otherwise changed here.
+
+**Rev 3 (GPT's review of rev 2, relayed by Chad, 9 Nov; docs only).** Rev 2's accepted improvements are kept. Changes:
+1. `pr-v1` now has explicit **inside / overlapping / outside / unknown–incomparable** outcomes. On a comparable basis, a minimum-only age above 350 ka and a maximum-only age below 100 ka are outside. Missing endpoints stay unknown. `ax-v1` assumes no 1950 reference where the basis is unstated. A midpoint is a labelled display aid only (§5).
+2. Comparability before contradiction. Non-overlapping ranges indicate tension, not proof. Source-stated disagreement is recorded separately (§7).
+3. Image scope made consistent: the default is strictly text-only (direct text/XML or unrendered HTML without fetching image resources). Unrendered PDF ingestion is a **separate option needing Chad's explicit choice**, acknowledging that the PDF's embedded image bytes are transferred (§9, H8).
+4. Selection cap: **30 min for A1 frame discovery and selection, inside the 3 h total**; stop and report if the frame is unusable or insufficient (§3, §4).
 
 **Rev 2 (GPT's review of rev 1, relayed by Chad, 9 Nov; docs only).** GPT supports the direction: two separate small tests, Test A first, as a recommendation. Five corrections:
 1. Scientific age definitions and the period rule (§5, §6).
@@ -53,7 +59,7 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 | Period | Ages within roughly **350,000–100,000 years ago**, under the period rule in §5 |
 | Geography | **Africa**, recorded per site as **present-day country + site**, at the precision stated. Present-day country is a location reference, never ancestry or nationality [record: Arts rules] |
 | Entries | **≤ 5 finds**. **Operational floor 3** (a working minimum for a useful report, **not a statistical threshold**) |
-| Effort cap | **3 h** total, incl. selection, access/rights checks, tracing and report; real-clock times; one GPT review outside the cap; stop at the cap and report what is unfinished |
+| Effort cap | **3 h** total, incl. selection, access/rights checks, tracing and report; real-clock times; one GPT review outside the cap; stop at the cap and report what is unfinished. **Selection sub-cap: 30 min for A1 frame discovery and selection, inside the 3 h (not added to it).** |
 | Sources per claim | ≤ 3, in a predeclared order |
 
 **[unverified candidate] examples** (background knowledge only; **none checked, none selected**): Jebel Irhoud (Morocco), Omo Kibish (Ethiopia), Herto (Ethiopia), Florisbad (South Africa), Klasies River (South Africa).
@@ -69,7 +75,7 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 - **Selection:** all eligible finds if ≤ 5; otherwise the first 5 by `SHA-256("<seed>|HA|" + stable row identifier)`.
 - **Recorded before assessment:** route, list identity and revision, the exact rules, the seed, row identifiers.
 
-**No silent switch.** If no usable frame is found within the selection sub-cap of a later authorised run, or it yields fewer than 3 eligible finds, **selection is reported inconclusive**. The run does not move to A2 or A3; either would be a separate decision by Chad.
+**No silent switch, no extension.** Frame discovery and selection get **at most 30 minutes, inside the 3 h total**. If within that time no usable frame is found, or it yields fewer than 3 eligible finds (an operational floor, not a statistical one), **selection stops and is reported inconclusive**. The run does not move to A2 or A3; either would be a separate decision by Chad.
 - **A2** (alternative for Chad): a named review article as the frame.
 - **A3** (alternative for Chad): Chad names the finds, recorded as his choice.
 
@@ -89,15 +95,24 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 - the **discovery date** (an event in recent history);
 - the **publication, update and copyright dates** of the source.
 
-**Period rule (eligibility only, versioned `pr-v1`):**
-- A result is **inside** if its stated range (value ± stated uncertainty, at the stated basis) lies wholly within 350–100 ka.
-- **Overlapping** if any part lies inside → the find is **listed as "boundary — overlaps the period edge"** and **is eligible** (recommendation: include, flagged, so edge cases are tested rather than hidden).
-- A **minimum age** (≥ X) is eligible if X ≤ 350 ka and the source gives no upper bound beyond the period; otherwise boundary.
-- A **maximum age** (≤ Y) is eligible if Y ≥ 100 ka, flagged "maximum only".
-- **Unknown basis** (a number with no stated uncertainty, or an unclear quantity) → **"basis unknown — listed, not eligible"**.
-- Eligibility at selection is judged from the **discovery frame row**. The papers may later show a different basis; that difference is recorded, and **selection is not redone**.
+**Period rule (eligibility only, versioned `pr-v1`).** Each dating result is first checked for a **comparable basis**: a stated quantity, stated units, and a stated or determinable reference (e.g. "ka" with its "before present" definition). Then exactly one outcome:
 
-**Our axis (T3, versioned `ax-v1`):** any conversion onto the timeline axis (e.g. ka → years before 1950, or a midpoint for placement) is our computation, method-versioned, with the **original values preserved beside it**. Display never shows only the converted figure.
+| Outcome | Rule (period 350–100 ka) |
+|---|---|
+| **Inside** | the stated range (value ± stated uncertainty, at the stated basis) lies wholly within 350–100 ka |
+| **Overlapping** | part of the stated range lies inside and part outside → **eligible, flagged "boundary — overlaps the period edge"** |
+| **Outside** | the whole stated range lies outside. **Minimum-only (≥ X):** outside if X > 350 ka. **Maximum-only (≤ Y):** outside if Y < 100 ka. |
+| **Unknown / incomparable** | no comparable basis (unstated quantity, units or reference; no uncertainty for a range test), **or** a one-sided bound that still overlaps the period: a minimum-only X ≤ 350 ka or a maximum-only Y ≥ 100 ka, whose missing endpoint stays **unknown** → **listed, not eligible**, with the reason |
+
+- **Missing endpoints are never filled in.** A minimum-only age has an unknown upper end, and a maximum-only age an unknown lower end.
+- A find is eligible if **any** of its frame-stated results is inside or overlapping. All its results and their outcomes are listed.
+- **Eligibility is judged at selection from the discovery frame row.** If the papers later show a different basis, that difference is recorded, and **selection is not redone**.
+
+**Our axis (T3, versioned `ax-v1`):**
+- Placement on the timeline axis is our computation, method-versioned.
+- **The original values, bounds, units and basis are always preserved and shown.**
+- **No reference date is assumed:** where a source's "before present" basis is unstated, **no conversion to calendar years is made** (e.g. no assumed 1950 reference). The value is placed on its own stated scale with "basis unstated", or not placed.
+- **A midpoint, if used for placement, is a labelled display aid:** never a measured age, and never a replacement for the range. A result with a missing endpoint gets no midpoint.
 
 ## 6. Claim types, result units and inventory
 **F1–F5 are frozen as claim *types*,** with inclusion rules:
@@ -134,12 +149,14 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 - **reference-level observations** kept;
 - **one counted outcome per claim unit.**
 
-**Disagreement:**
-- Two results are compared only after recording each one's **target quantity, referent (which material/layer/specimen), context/model and uncertainty**.
-- **Different methods may estimate the same target.** If they do, and their stated ranges are incompatible, that **is** a contradiction, recorded side by side and not resolved.
-- **Different layers or materials usually concern different quantities.** That is not a contradiction unless a source asserts they estimate the same thing.
-- **Unclear referent:** recorded as "comparison not established", never forced either way (the floods-pilot lesson).
-- A source-stated **revision or supersession** ("this re-dating supersedes…") is kept, dated, with the earlier result still shown as recorded.
+**Comparability before contradiction:**
+- Two results are compared only when **comparability is established**: the same **target quantity** and **referent** (the same material/layer/specimen), and compatible **units, reference dates, context/model and uncertainty meaning** (e.g. 1σ vs 2σ, range type).
+- **Comparison not established:** wherever any of these cannot be established. Never forced either way (the floods-pilot lesson).
+- **Comparable but non-overlapping:** stated ranges that do not overlap are recorded as **"tension"**. Tension does **not** prove a contradiction, and does not show which estimate is wrong.
+- **Contradicted** (the disposition reason) is used only when a source's statement for the **same unit and referent** is incompatible with the claim as scoped. Our own range comparison never makes that call on its own.
+- **Source-stated disagreement** (a paper saying it disagrees with, or revises, another result) is recorded **separately**, attributed to that source, apart from our tension observation.
+- **Different methods may estimate the same target** (comparable, so tension is possible). **Different layers or materials usually concern different quantities** (comparison not established, unless a source asserts they estimate the same thing).
+- A source-stated **revision or supersession** is kept, dated, with the earlier result still shown as recorded.
 
 **Independence:**
 - Different laboratories, teams, methods or papers **do not automatically** establish independence.
@@ -152,14 +169,15 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 - Four date families kept apart (the pilots' lesson): event/age · discovery · publication · update/copyright. Copyright years and "last updated" dates are never treated as publication dates.
 
 ## 9. Tracing, access, rights and the image exclusion
-**Text- and table-only access (operational image exclusion):**
-- Prefer **text-only routes:**
-  - repository or publisher full-text HTML read as text (page text extraction, not rendering screenshots);
-  - plain-text or XML full-text versions where offered;
-  - abstracts and metadata pages;
-  - for PDFs, text extraction only.
-- **No specimen images are fetched or stored by us.** Ordinary HTML or PDF access may load or contain images; the test does not save, view, describe or screenshot them, and no image file is kept in the packet. PDFs are processed in memory to text, and **only the text is saved**.
-- **If needed evidence exists only in excluded imagery** (a figure, a photo, an image-only scan or table rendered as an image), the unit is **"not checked — outside bound (image only)"**. If the text route itself is blocked, it is **inaccessible**. **The rule is not relaxed silently.**
+**Default: strictly text-only access (operational image exclusion).**
+- Allowed: **direct text or XML full text**, metadata/abstract pages, and **unrendered HTML** (the page's HTML fetched as text) **without fetching any image resources it references**.
+- No image bytes are requested, transferred, stored, viewed, described or screenshotted.
+- **If needed evidence is unavailable through these routes** (only in a PDF, a figure, an image-only table or a scan): the unit is **"not checked — outside bound (image only / text route unavailable)"**, or **inaccessible** if the text route itself is blocked. **The rule is not relaxed silently.**
+
+**Separate option — NOT authorised by default; needs Chad's explicit choice (H8b):**
+- Unrendered PDF ingestion: the PDF file is fetched and processed in memory to text, and only the text is saved.
+- This **does transfer the PDF's embedded image bytes** (including any specimen images) to our tool, even though they are never rendered, viewed, described or stored.
+- Chosen only by Chad, per run.
 
 **Routes:**
 - Open-access versions and archive captures, reached without account or purchase.
@@ -199,18 +217,20 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 |---|---|---|
 | H1 | Two separate tests vs one shared | Two; Test A first |
 | H2 | Test A question | §2 |
-| H3 | Period, geography, period rule | ~350–100 ka; Africa; present-day country + site; `pr-v1` (overlaps eligible and flagged; unknown basis not eligible) |
+| H3 | Period, geography, period rule | ~350–100 ka; Africa; present-day country + site; `pr-v1` (inside / overlapping eligible; outside and unknown–incomparable not eligible) |
 | H4 | Entries | ≤ 5; operational floor 3 |
-| H5 | Discovery route | A1, with no automatic fallback; A2/A3 only by a separate decision |
+| H5 | Discovery route and selection cap | A1, ≤ 30 min inside the 3 h; stop and report if unusable/insufficient; no automatic A2/A3 or extension |
 | H6 | Claim types and units | F1–F5 frozen as types (§6); every revealed unit logged; completeness assessed after inspection |
 | H7 | Effort cap | 3 h + one GPT review |
-| H8 | Sensitivity and image handling | text/table-only routes; image-only evidence → outside bound; terms quoted as the source's |
+| H8 | Sensitivity and image handling | strictly text-only (direct text/XML, unrendered HTML without image resources); otherwise outside bound / inaccessible; terms quoted as the source's |
+| H8b | Unrendered PDF ingestion (transfers embedded image bytes) | **not recommended by default**; only by Chad's explicit choice |
 
 ## 12. Chad's design note — a separate page and view (recorded; nothing built)
 - Chad (9 Nov): a timeline experience like this **needs its own page and view and cannot sit on the Mother Earth opening page**. He suggests starting to think about **tabs at the top of the screen**.
 - Recorded as a **design direction for a later UX proposal**: the opening globe stays as it is, and future views (timeline, and perhaps others) would each be a separate page reached by top-level navigation.
 - This fits the constitution's "the hub is the product; the page is a client" [record: START-HERE §2].
 - **Not part of Test A** (a research test, not a prototype). No page, tab, navigation or code work is proposed or authorised here.
+- **Separately:** a docs-only review of the opening page and the Met card's placement is running in parallel. It is referenced in the review relayed by Chad on 9 Nov, is not held in this repo, and is not changed by this proposal.
 
 ## 13. Test B (human history) — sketch only, for a later separate proposal
 - **Shape:** one event with both contemporary written accounts and physical evidence, to test how those tiers sit together and how a disputed date is shown.

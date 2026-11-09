@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 11:51 UTC (clock reading at write) — **Timeline POC proposal rev 3 (GPT's three targeted corrections + selection cap)** (docs only)
+- **`pr-v1` completed:** explicit inside / overlapping / outside / unknown–incomparable outcomes. On a comparable basis, minimum-only > 350 ka is outside and maximum-only < 100 ka is outside. A one-sided bound that overlaps the period is unknown (not eligible). Missing endpoints are never filled.
+- **`ax-v1`:** no assumed 1950 reference where the basis is unstated; originals and bounds always shown; a midpoint is a labelled display aid only.
+- **Comparability before contradiction:** same target, referent, units, reference date, context and uncertainty meaning required. Non-overlap = "tension", not proof. Source-stated disagreement is recorded separately. Otherwise "comparison not established".
+- **Image scope:** the default is strictly text-only (direct text/XML, unrendered HTML without image resources); otherwise outside bound / inaccessible. Unrendered PDF ingestion (which transfers embedded image bytes) is a separate option, **H8b, Chad's explicit choice only**.
+- **Selection cap:** A1 frame discovery and selection ≤ 30 min **inside** the 3 h; stop and report if unusable or insufficient; no A2/A3 switch or extension.
+- §12 (separate page / top tabs) kept. The parallel docs-only opening-page / Met placement review is noted as separate (not held in this repo).
+- **No research or pilot run approved.** H1–H8 (+ H8b) are Chad's.
+
+
 ## 9 Nov 11:41 UTC (clock reading at write) — **Timeline POC proposal rev 2 (GPT's five corrections)** (docs only) — `docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`
 - GPT supports the direction (two separate tests, Test A first, as a recommendation). Rev 2:
   1. **Age definitions:** material, target quantity, units, epoch, calibration/model and uncertainty recorded as stated (unknown otherwise); specimen, associated material, deposition, discovery and publication dates kept apart; period rule `pr-v1` (overlaps eligible and flagged; min/max labelled; unknown basis not eligible); any axis conversion is T3 `ax-v1` with originals kept.

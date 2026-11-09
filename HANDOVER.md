@@ -42,7 +42,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 - 9 units, partial inventory: qualifying 0, repetition 1, unsupported 2 (both not stated), inaccessible 1, no reference given 5.
 - The flood/Pennsylvania/1870–1927 case was a method test only. Chad is considering a human-history or evolution theme for any future test; **nothing is selected.**
 - **OpenSky:** ENQUIRIES rev 7 **accepted by GPT**. Aggregate hosting (counts per area, no identifiers or tracks) = yes within the standing conditions; account link automatic at 30%+ feeding. No REGISTER, purchase, install, build or production approval.
-- **Timeline POC proposal rev 2** (`docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`, GPT's five corrections applied): two separate tests, Test A (human evolution) first. For GPT, then Chad's H1–H8. **Chad's design note:** the timeline needs its own page and view, via **tabs at the top of the screen**, not the opening globe page (later UX proposal; nothing built).
+- **Timeline POC proposal rev 3** (`docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`; GPT's rev 1 and rev 2 corrections applied; rev 3 awaits GPT): two separate tests, Test A (human evolution) first. For GPT, then Chad's H1–H8. **Chad's design note:** the timeline needs its own page and view, via **tabs at the top of the screen**, not the opening globe page (later UX proposal; nothing built).
 - **Next is Chad's choice.**
 - Selection is inconclusive (1 eligible item). Full source-link/timing assessment and coverage are incomplete.
 - Not a feasibility, coverage, route or build clearance.
