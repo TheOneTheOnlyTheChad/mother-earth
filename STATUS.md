@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
-## 9 Nov (commit time) — **ENQUIRIES rev 7: OpenSky second reply LINKED** (docs only)
+## 9 Nov 10:57 UTC (commit time, `61c3cd6`) — **ENQUIRIES rev 7: OpenSky second reply LINKED** (docs only)
 - Chad supplied his exact sent follow-up (screenshot, displayed 10:22 AM, not converted). Q1–Q3 filed verbatim; his email address is omitted.
 - **"3. Yes" answers follow-up Q3:** hosting the aggregated snapshots on our own public site (counts per area, no aircraft identifiers or individual tracks), under the ~10 requests/day arrangement. Recorded as **affirmative for that specific arrangement only, within the standing hobbyist, feeder and credit conditions**. Not blanket redistribution; the feeder condition is not waived.
 - **Account link (follow-up Q2):** automatic on OpenSky's side if feeding for 30%+ of the preceding month. The measurement and the linking mechanism are not stated, and our account does not qualify now (no receiver).
