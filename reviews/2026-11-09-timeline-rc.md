@@ -1,4 +1,132 @@
-# Timeline candidate `timeline-rc` — review packet for GPT (9 Nov 2026)
+# Timeline candidate `timeline-rc` — review packet for GPT — **rev 2 (9 Nov 2026, 16:01 UTC clock reading)**
+
+## Rev 2 — GPT's two smoke findings fixed, phone header reworked (read this first)
+**Candidate: branch `timeline-rc` @ `c3498bc`** (fix commit `9949177` + asset-version bump `c3498bc`). The packet below is rev 1 (`31fab7d`), kept for the record; where they differ, rev 2 governs. Production unchanged. R2 (non-public preview) and the release approval stay separate.
+
+**1. Switching title/shortcut while the entry is open (GPT finding 1).** At 1280 px, title → (Julian) used to push a second history entry, so one Back only collapsed the conversion. Now a title or shortcut used while the entry is open **updates the open history entry** (`replaceState`, same key, same direct flag); no entry is added. Rule for focus: Close, Esc or Back returns focus to **the most recently used card control**. After a direct link with no card control used, focus still goes to the card title.
+- New tests (1280 and 900 px; title→(Julian), (Julian)→⚑, ⚑→title, title→⚑; each via Back and via Close): history length unchanged by the switch; state and expander updated; **one Back closes the panel** and focus lands on the last-used control; **Forward** reopens with the last expander and focuses the heading; Close after Forward → focus on the last-used control, fragment cleared; the next Back leaves for the real previous page (index.html).
+- **Direct link then a shortcut** ((Julian)/⚑; Close, Esc, Back): no new entry; state stays direct with the new expander; Close/Esc clears the fragment and focuses that shortcut; Back returns to the previous page.
+- New break `switch-pushes` (the old push behaviour) → **102 fail**.
+
+**2. Timeline CSS leaking into Readings (GPT finding 2).** Confirmed before the fix: `#card-usgs` = `12px 14px` with the strong border on the branch vs `8px 10px` / `rgba(140,170,200,.16)` on main. **Every Timeline rule is now scoped under `body.tl`** (cards, entry, expanders, panel/sheet). New test: on index.html `#card-usgs` keeps `8px 10px` and its own border, and no globe card picks up the Timeline style. New break `unscoped-card` → **2 fail**.
+
+**3. Phone header (390 × 844 overlay check).** Rebuilt as a fixed two-row grid: title · clock · Menu, then the two tabs. Rows 44 + 44 px (all touch targets 44 px), 2 px row gap, 2 px top/bottom padding → **header 94 px** (rev 1: 104 px; main without tabs: 56 px).
+- **Found on the way:** in rev 1 the wrapping row split into three lines at 390 px with fallback fonts and pushed the title 7 px above the header. The grid fixes it: title, Menu and tabs all inside the header at 360/390/430.
+- **Measured (mobile-pass harness, everything on, Readings open):**
+
+| Viewport | main (no tabs) | rev 1 (104 px) | **rev 2 (94 px)** | target |
+|---|---|---|---|---|
+| 390 × 844 | 5.4% | 8.3% ✗ | **7.2% ✓** | ≤ 8% |
+| 430 × 932 | — | 3.6% | **3.5%** | ≤ 8% |
+| 360 × 780 | — | 12.3% | **11.9%** | report only |
+| 360 × 640 | — | 26.8% | **24.6%** | report only |
+
+  **mobile-pass 131/0.** The phone globe still has less room than on main (7.2% vs 5.4% at 390); that is the cost of the U1 tab row.
+
+**4. Smaller changes:** expander buttons 40 → 44 px; the `shortcut-fragment` break's anchor was stale after the refactor (it had stopped with "break anchor missing" rather than testing) — fixed, now 38 fail; asset version `?v=202611181000` so a browser that loaded the first preview cannot reuse its cached CSS/JS. `timeline.js` 9,814 B (over the 8 KB target).
+
+**Tests on `c3498bc`:** timeline-ui **578/0**; **11 breaks each fail** (switch-pushes 102 · unscoped-card 2 · no-focus-return 68 · close-keeps-fragment 10 · shortcut-fragment 38 · no-inert 3 · axis-79 2 · inline-passage 1 · script-only 15 then exit 2 · no-aria-current 1 · whole-card 1). **All 35 regression suites pass**, incl. desktop-overflow 112/0 and mobile-pass 131/0; `orbital.test.mjs` is a data probe needing a `gp.csv` (same on main).
+
+### Rev 2 page-file hashes (`c3498bc`)
+| File | sha256 | bytes | |
+|---|---|---|---|
+| `index.html` | `d826964ae3131e97ffae7862805bceb1b39666b70d6bdfe15a77b6531c30856b` | 110,786 | changed since rev 1 (`6a7cd23a…`) |
+| `sources.html` | `8fbadc9048b3ee9f5c4486cde2ef1ed614be7b308e74df19e83f9fc90d7e585e` | 43,647 | changed since rev 1 (`13ba4176…`) |
+| `timeline.html` | `27829c71bba69c5945fea18a66c0d23934697dd89b5fb12a933ab77b7e52e378` | 8,724 | changed since rev 1 (`75dba225…`) |
+| `app.js` | `e3f4a38541132b289663945f74612db80e12d35f906a0ecc778d7a39b8391680` | 81,781 | same as rev 1 |
+| `arts.js` | `58773cef35e6e947960100cedd59c8bff349a16333a89f3c4ae7abda5595928d` | 5,759 | same as rev 1 |
+| `timeline.js` | `66b5e0320e835cfda4c4568703d2b44dfdb10b6130b8ec779e89eb20352eced6` | 9,814 | changed since rev 1 (`c0464935…`) |
+| `style.css` | `20a8bce94adaeaed230ce14d32105682621fd87d272fd0a6a6f84122fdd86f47` | 34,470 | changed since rev 1 (`c6b6c71e…`) |
+
+### Rev 2 header diff vs main (R3, actual)
+```diff
+diff --git a/index.html b/index.html
+index 7ab5ba5..7b56282 100644
+--- a/index.html
++++ b/index.html
+@@ -6,17 +6,22 @@
+ <title>Mother Earth</title>
+ <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
+ <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+-<link rel="stylesheet" href="style.css?v=202611161000">
++<link rel="stylesheet" href="style.css?v=202611181000">
+ </head>
+ <body class="world">
+ <header class="top">
+   <h1>Mother Earth</h1>
+   <div class="promise">See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.</div>
++  <nav class="tabs" aria-label="Views">
++    <a href="index.html" data-view="earth" aria-current="page">Earth now</a>
++    <a href="timeline.html" data-view="timeline">Timeline</a>
++  </nav>
+   <div class="clock" id="clock">--:--:--<span>UTC</span></div>
+   <nav class="menu" aria-label="Pages">
+     <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
+     <ul id="menu-list" role="menu">
+       <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
++      <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
+       <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
+     </ul>
+   </nav>
+@@ -262,8 +267,8 @@
+ </div>
+ 
+ <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
+-<script src="app.js?v=202611161000"></script>
+-<script src="arts.js?v=202611161000"></script>
++<script src="app.js?v=202611181000"></script>
++<script src="arts.js?v=202611181000"></script>
+ <script>
+ (() => {
+ const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
+diff --git a/sources.html b/sources.html
+index d93f820..5102791 100644
+--- a/sources.html
++++ b/sources.html
+@@ -6,17 +6,22 @@
+ <title>Mother Earth — Sources &amp; Details</title>
+ <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
+ <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+-<link rel="stylesheet" href="style.css?v=202611161000">
++<link rel="stylesheet" href="style.css?v=202611181000">
+ </head>
+ <body class="doc">
+ <header class="top">
+   <h1>Mother Earth</h1>
+   <div class="promise">Sources &amp; Details</div>
++  <nav class="tabs" aria-label="Views">
++    <a href="index.html" data-view="earth">Earth now</a>
++    <a href="timeline.html" data-view="timeline">Timeline</a>
++  </nav>
+   <div class="clock" id="clock">--:--:--<span>UTC</span></div>
+   <nav class="menu" aria-label="Pages">
+     <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
+     <ul id="menu-list" role="menu">
+       <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
++      <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
+       <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
+     </ul>
+   </nav>
+@@ -169,7 +174,7 @@
+ 
+   <p class="back"><a href="index.html">← Back to World View</a></p>
+ </main>
+-<script src="app.js?v=202611161000"></script>
++<script src="app.js?v=202611181000"></script>
+ <script>
+ (() => {
+ const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
+```
+The header CSS (tabs; 721–1200 px spacing; the phone grid) is the first block of the `style.css` diff: `git diff origin/main..c3498bc -- style.css`.
+
+### Where to smoke test rev 2
+The shared copy `~/Documents/Mother Earth/_review/timeline-rc/` now holds **`c3498bc`** with a new `SHA256SUMS` (rev 1's copy is kept at `_review/timeline-rc-31fab7d/`). Chad restarts the server from that folder (Ctrl+C, then the same command):
+`cd ~/Documents/"Mother Earth"/_review/timeline-rc && python3 -m http.server 8899 --bind 127.0.0.1` → `http://127.0.0.1:8899/timeline.html`. A hard reload is still wise.
+**Suggested re-checks:** finding 1's sequence (title → (Julian) → Back / Close / Forward, and `timeline.html#e-pliny-ep-6-16` → shortcut → Close / Back); `#card-usgs` on index at 1280; the phone header at 360/390/430 and the 390 × 844 overlay case; plus the rev 1 checklist (§7) for anything not yet covered.
+
+---
+
+## Rev 1 (31fab7d, kept for the record)
 
 **Written 15:19 UTC (clock reading).** Branch `timeline-rc` on GitHub; **candidate = the commit that adds this file** (`git log -1 -- reviews/2026-11-09-timeline-rc.md` on the branch; the sha is in STATUS on main). Built on Chad's Approve line A (9 Nov): *"Timeline entry build per TIMELINE-ENTRY-BUILD-PROPOSAL rev 2 — T1 page-only, T2 English only, T3 omit, T4 four entities only; build timeline-rc on a branch only — no merge, no nav change on main, no hub, R2 or D1 change."*
 **Not merged, not served, no hub/R2/D1 change. Production unchanged** (hub 0.6.2, page `6d5ca55`).
