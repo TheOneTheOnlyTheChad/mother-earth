@@ -39,6 +39,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **NEXT THREAD STARTS HERE (9 Nov, end of the timeline research thread):**
 - **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. All of today's work was docs and research.
+- **9 Nov 13:28 UTC:** retry rev 2 (no improvement in access to primary reports; 'binding constraint' withdrawn; SALE-F4 labelled) → for GPT. **OA-search proposal rev 1** (`docs/concepts/TIMELINE-TEST-A-OA-SEARCH-PROPOSAL.md`; O1–O5 Chad's) → for GPT/Chad. **Search not approved.**
 - **TEST A ACCESS RETRY DONE 9 Nov 13:00–13:06 UTC** (Mac `research/timeline-test-a-retry/2026-11-09-claude/`): logins did not open subscription text; ScienceDirect blocks the pane; one re-code (SALE-F4). **Awaiting GPT review**; then Chad: Test B, another source strategy, or park.
 - **TEST A REV 2 ACCEPTED by GPT (9 Nov 12:53 UTC)** as the corrected record of a partial diagnostic; pipe-escape formatting fix applied. **Next (Chad's go only):** text-only access retry with Chad's logins on the same finds/claims, then Test B or park.
 - **TEST A REV 2 (9 Nov 12:31 UTC)** after GPT's review: selection pass under the applied contextual reading; 31 list-row assertions, 14 checked (corrected) → 7 · 7 · 10 · 7; access 1 · 2 · 1 · 2 across six primary reports. **Awaiting GPT's sign-off** (`research/timeline-test-a/2026-11-09-claude/rev2/`). Then possibly a separately approved logged-in text-only retry (Chad's offer). Nothing started.

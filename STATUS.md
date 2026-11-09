@@ -4,6 +4,22 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 13:28 UTC (clock reading at write) — **Retry rev 2 (wording) + OA-search PROPOSAL** (docs only)
+- **GPT read the retry packet** (three hashes matched).
+- **Retry rev 2** (`research/timeline-test-a-retry/2026-11-09-claude/rev2/RETRY-REPORT-rev2.md`):
+  - conclusion = **no improvement in access to primary reports through the routes tried**;
+  - per-site facts kept (Nature still subscription content after sign-in; ScienceDirect 403 before sign-in; De Gruyter empty 202, login skipped; Springer abstract in an already signed-in session, cause not isolable);
+  - the "binding constraint" claim is **withdrawn**.
+  - SALE-F4 is labelled "not stated in the inspected abstract; chapter unchecked" (one more partial check; no new evidence on the classification). Its rule basis is flagged for GPT (a review as an attributed-classification source rests on rev 2's treatment; it reverts if judged outside `ta-v1`).
+- **Proposal** `docs/concepts/TIMELINE-TEST-A-OA-SEARCH-PROPOSAL.md` (rev 1):
+  - same 5 finds and 31 claims;
+  - **list A**: lawful copies of the 6 identified sources by exact DOI/title;
+  - **list B**: exact-specimen evidence leads, coded separately;
+  - routes OpenAlex, Europe PMC, IA Scholar, HAL; CORE and Unpaywall excluded (account key / email);
+  - text only (PDF-only copies recorded, not opened); 90 min cap;
+  - decisions O1–O5 are Chad's.
+- **Not approved:** the search, PDFs, Test B, any production action.
+
 ## 9 Nov 13:00:44–13:06:23 UTC (Mac clock) — **Test A access retry RUN** (research only; Chad: "Approve: Test A access retry — text-only, same finds and claims, Chad signs in") — packet `research/timeline-test-a-retry/2026-11-09-claude/` on the Mac
 - **Protocol `ta-r1`** fixed before any request (sha256 `f9f41126…`). Same 5 finds, 31 claims, rules. **Chad created and signed in to accounts himself**; Claude typed no credentials. No purchase, PDF, image or bypass.
 - **Routes:**
