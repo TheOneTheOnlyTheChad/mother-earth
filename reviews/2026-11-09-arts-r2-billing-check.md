@@ -1,4 +1,6 @@
-# Arts — read-only R2 billing check before the upload approval (rev 2, 9 Nov 2026)
+# Arts — read-only R2 billing check before the upload approval (rev 2.1, 9 Nov 2026)
+
+**Rev 2.1 (GPT's review of rev 2; docs-only wording):** (1) operation rounding is stated on the pricing page — one million and one operations are billed as two million — so the "unit not stated" claims are removed (§1, §4, §5); (2) the expected $0 increment is conditional on **total** account usage, Arts viewer reads included, staying inside the allowances; Arts reads can themselves consume Class B headroom (§4). Account evidence, the 18 operations' unknown classification and the cache wording are unchanged.
 
 **Rev 2 (GPT's review of rev 1; targeted read-only check 05:44 UTC + documentation correction):** (1) account-wide usage established (§3a); (2) proportional estimates separated from possible invoice increments under billing-unit rounding (§4); (3) the 18 unclassified operations left unknown and bounded at the Class A price (§1, §3); (4) cache wording corrected: `arts.js` fetches with `cache: 'no-store'`, so no browser-cache saving is assumed (§4). GPT independently confirmed the published Standard allowances and rates and reproduced the rev 1 operation totals and 30-day projections; the subscription and dashboard readings remain Claude-supplied evidence.
 
@@ -13,10 +15,11 @@ Cloudflare R2 pricing page, https://developers.cloudflare.com/r2/pricing/ ("Last
 | Class B operations | 10 million | $0.36 / million |
 | Egress | free | — |
 - "A GB-month is calculated by averaging the *peak* storage per day over a billing period (30 days)." "Cloudflare rounds up your usage to the next billing unit."
+- Operations are billed in whole millions: "If you have performed one million and one operations, you will be billed for two million operations." (re-read 9 Nov 2026 via web fetch; also confirmed by GPT)
 - The free tier applies to **Standard** storage only (not Infrequent Access).
 - Class A includes `PutObject`, `ListObjects`, `ListBuckets`, `PutBucket`, `ListMultipartUploads`, `PutBucketLifecycleConfiguration` (and others). Class B includes `GetObject`, `HeadObject`, `HeadBucket`, `GetBucketCors`, `GetBucketLifecycleConfiguration` (and others). Free: `DeleteObject`, `DeleteBucket`, `AbortMultipartUpload`.
 - **The page does not say R2 is included in Workers Paid.** It says the bucket allowance "applies regardless of your Workers plan".
-- Not stated on the page: whether a "GB" here is decimal or binary (both shown below); the billing unit for operations (prices are quoted per million; whether a crossing is billed as a whole million is not stated in what was read); the class of `GetBucketSippyConfiguration` and `GetBucketNotificationConfiguration` (**classification unknown**; bounded below at the Class A price, the more expensive one).
+- Not stated on the page: whether a "GB" here is decimal or binary (both shown below); the class of `GetBucketSippyConfiguration` and `GetBucketNotificationConfiguration` (**classification unknown**; bounded below at the Class A price, the more expensive one).
 
 ## 2. The account (read 9 Nov 2026)
 - **Subscriptions** (`GET /accounts/<acct>/subscriptions`), all monthly, current period **30 Oct 2026 11:09:40 UTC → 30 Nov 2026 00:00 UTC**:
@@ -56,19 +59,18 @@ Cloudflare R2 pricing page, https://developers.cloudflare.com/r2/pricing/ ("Last
 | Upload procedure (once) | 1 PutObject (Class A) + ~2 reads for the absence pre-check and read-back (Class B) |
 | Viewer reads | **1 GetObject (Class B) per `/snapshot/arts` request that reaches the hub.** `arts.js` fetches with `cache: 'no-store'`, so no browser-cache saving is assumed; every switch-on that reaches the hub is one Class B read |
 
-**Possible invoice increments** (kept separate from the proportional figures above). The pricing page says usage is rounded up to the next billing unit (its example: 1.1 GB-month is billed as 2). So an increment is not the proportional cost; it can be a whole unit, and only if the usage crosses a boundary above the free allowance:
+**Possible invoice increments** (kept separate from the proportional figures above). The pricing page says usage is rounded up to the next billing unit: 1.1 GB-month is billed as 2, and one million and one operations are billed as two million. So an increment is not the proportional cost; it is a whole unit, charged when the account's total usage crosses a boundary above the free allowance:
 | Meter | At today's account-wide usage (estimate) | If usage were at or past the free allowance |
 |---|---|---|
 | Storage | inside the 10 GB-month allowance (~0.77 projected) → **$0.00** | the file could move the rounded total across a whole-unit boundary → at most **+1 GB-month = $0.015** for that period |
-| Class A (the upload's 1 PutObject) | ~7.5 % of the allowance → **$0.00** | if that one operation crossed a billing-unit boundary, up to one whole unit; **if the unit is a million (not stated), up to $4.50** |
-| Class B (reads) | ~1 % of the allowance → **$0.00**; ~9.9 M further reads a month before the allowance is reached | each boundary crossed adds up to one whole unit; **if the unit is a million, up to $0.36 per crossing** |
+| Class A (the upload's 1 PutObject) | ~7.5 % of the allowance → **$0.00** | if that one operation crossed a million boundary above the allowance: **+1 million = $4.50** |
+| Class B (reads, Arts viewer reads included) | ~1 % of the allowance → **$0.00**; ~9.9 M further reads a month (from any source, Arts included) before the allowance is reached | each million boundary crossed above the allowance: **+1 million = $0.36** |
 
-**Corrected conclusion (estimate, not a guarantee):** at the account's current usage, the Arts upload and its reads are expected to add **$0.00** to the R2 invoice. Every meter is far from its allowance (storage ~8 %, Class A ~7.5 %, Class B ~1 %, projected), and the file's own increment is negligible against each. A non-zero increment would require the account to reach a free allowance from other usage first; it would then be bounded by whole units, as above, not by the tiny proportional figures. The allowances and prices are as published on 30 Oct 2026 and can change.
+**Corrected conclusion (estimate, not a guarantee):** at the account's current usage, the Arts upload and its reads are expected to add **$0.00** to the R2 invoice. Every meter is far from its allowance (storage ~8 %, Class A ~7.5 %, Class B ~1 %, projected), and the file's own increment is negligible against each. **This $0 is conditional on the account's total usage — including future Arts traffic — staying inside the allowances.** Arts viewer reads count against the same Class B allowance as everything else, so Arts traffic could itself use up headroom; there is no separate allowance for it. Once total usage is above an allowance, each crossed boundary is billed as a whole unit, as above, not at the tiny proportional figures. The allowances and prices are as published on 30 Oct 2026 and can change.
 
 ## 5. Unknowns and what this check does not cover
 - The invoice for this period (not read; analytics only).
 - Whether "GB" is decimal or binary (both shown; it changes nothing here).
-- The billing unit for operations (prices are per million; whole-unit billing at a crossing is assumed only as a bound).
 - The class of two bucket-configuration actions (18 requests; left unknown, bounded at the Class A price; too few to change the conclusion).
 - **Worker side, not R2:** each `/snapshot/arts` request is also a Worker request with some CPU (0.6 ms median locally; production unmeasured). Workers Paid allowances were **not** re-read in this check, so that line is unassessed here.
 - Actual future traffic to the card (unknown; the estimates assume today's rate for everything else).
