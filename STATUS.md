@@ -4,6 +4,22 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 11:29 UTC (clock reading at write) — **Timeline POC proposal (human evolution / human history), rev 1** (docs only; Chad's brief) — `docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`, for GPT
+- **Recommends two separate small tests:**
+  - **Test A (human evolution) first:** physical evidence and scientific dating as the primary tier, something the pilots have not tested;
+  - **Test B (human history) later**, sketched only;
+  - no forced link or implied progression between them.
+- **Test A question:** for ≤ 5 early *Homo sapiens* finds (~350–100 ka, Africa; candidates labelled unverified), can the timeline show each find with its dating method, material, range and uncertainty, keep attribution disputes as separate attributed claims, and trace each to its primary report, without implying ancestry?
+- **Method:**
+  - claim units F1–F5 fixed before tracing (each dating result its own unit);
+  - inventory declared complete or partial;
+  - contradictions only for the same unit and referent;
+  - age, discovery, publication and update/copyright dates kept apart;
+  - images of human remains excluded;
+  - 3 h cap + one GPT review.
+- Decisions H1–H8 are Chad's. **No research, lookups or selection done.** The Route W gate stays closed; the Wikipedia pilot's findings and rev 2 stand.
+
+
 ## 9 Nov 11:23 UTC (clock reading at write) — **Wikipedia-led pilot rev 2 after GPT's review** + **GPT accepted ENQUIRIES rev 7** (docs only)
 - **Pilot rev 2** (`research/timeline-wikipedia-pilot/2026-11-09-claude/rev2/` on the Mac; originals unchanged, hashes in `rev2/.orig-hashes`):
   1. **G-PA1:** `contradicted` → **`not stated`**. The source's 26 March low-pressure centre and 27 March trough are different features, and the lead's "the storm" has an uncertain referent. No one-day contradiction is established, and 27 March is not a correction. Unsupported reasons are now not stated 2 · contradicted 0.
