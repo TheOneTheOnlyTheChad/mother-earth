@@ -39,7 +39,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **NEXT THREAD STARTS HERE (9 Nov, end of the timeline research thread):**
 - **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. All of today's work was docs and research.
-- **9 Nov 13:45 UTC:** List A CLOSED by GPT (corrections recorded). **Test B proposal rev 1** (Vesuvius, Pliny Letters 6.16; readability flagged; T1–T6 Chad's) → run needs Chad's go.
+- **9 Nov 13:45 UTC:** List A CLOSED by GPT (corrections recorded). **Test B proposal rev 2** (Vesuvius, Pliny Letters 6.16; Latin text the only gate; every entry field traceable) → run needs Chad's go.
 - **OA PASS (List A) DONE 9 Nov 13:30–13:39 UTC:** all 6 works found; only new text = Debénath 1982 HAL abstract (no Salé); full text PDF-only (unopened); no claim resolved; tallies unchanged. **Next:** GPT read → Test B proposal (Chad's go).
 - **9 Nov 13:23 UTC:** retry rev 2 **ACCEPTED** (primary-source tally 7/7/10/7; with the Bräuer abstract 7/8/9/7). **OA proposal rev 2: 30-min List A pass** awaits Chad's go; List B parked; then one Test B case with readable text (own go).
 - **9 Nov 13:14 UTC:** retry rev 2 (no improvement in access to primary reports; 'binding constraint' withdrawn; SALE-F4 labelled) → for GPT. **OA-search proposal rev 1** (`docs/concepts/TIMELINE-TEST-A-OA-SEARCH-PROPOSAL.md`; O1–O5 Chad's) → for GPT/Chad. **Search not approved.**

@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 13:56 UTC (clock reading at write) — **GPT confirmed List A closure; Test B proposal rev 2** (docs only)
+- **GPT:** the original OA report is byte-identical, the closure entry is appended to the log; **List A closed**.
+- **Test B proposal rev 2** (`docs/concepts/TIMELINE-TEST-B-PROPOSAL.md`):
+  - B1 = date of the **reported sighting/notice** of the cloud: pinned Latin edition, exact wording, stated inclusive-counting rule, result labelled as a conversion of that edition's reading; year unset;
+  - Roman hour kept as written, with a modern range only if its assumptions are established;
+  - mock entry separates Pliny's own recollection / others reported / learned later, and every field traces to a passage, a conversion or a visible gap;
+  - **the Latin text is the only readability gate** (≤ 10 min; unreadable → inconclusive); the translation is optional;
+  - one scholarly date check ≤ 5 min (else "not assessed"); 6.20 out; 45 min.
+- **Not approved:** the Test B run (Chad's go).
+
 ## 9 Nov 13:45 UTC (clock reading at write) — **List A CLOSED (GPT) + corrections; Test B PROPOSAL** (docs only)
 - **GPT checked the OA report and log** (hashes matched): List A closed — 6 works identified, 1 new abstract, 0 claims resolved, tallies unchanged.
 - **Corrections** (`research/timeline-test-a-oa/2026-11-09-claude/rev2/CORRECTIONS-rev2.md`):

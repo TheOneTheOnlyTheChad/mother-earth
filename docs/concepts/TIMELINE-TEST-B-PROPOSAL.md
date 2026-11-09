@@ -1,73 +1,92 @@
-# Timeline Test B — one written-history case: PROPOSAL (rev 1, 9 Nov 2026)
+# Timeline Test B — one written-history case: PROPOSAL (rev 2, 9 Nov 2026)
 
-**Status: proposal only. Nothing read or searched.** Chad's brief (9 Nov): one written-history case where the relevant source text can be reached, so we can point to the exact passage behind an entry. **The question: what can Mother Earth actually show someone?** The run needs its own go.
+**Status: proposal only. Nothing read or searched.** Chad's brief (9 Nov): one written-history case where the relevant source text can be reached and **each field of a timeline entry can be traced to the exact passage, our stated conversion, or a gap left visible.** The question: **what can Mother Earth actually show someone?** The run needs its own go.
 
-**Labels:** [general knowledge, unverified] = background knowledge, not yet checked; to be read in the run. Nothing here rests on it being right.
+**Rev 2 (Chad, after GPT, 9 Nov):**
+- the claim is the **reported sighting/notice of the cloud**;
+- the Latin edition is pinned, with its date wording kept exact;
+- the conversion rule is stated and the result labelled as a conversion of that edition's reading;
+- the Roman hour is kept as written, with a modern range only if justified;
+- the mock entry separates Pliny's own recollection, what he reports others did or said, and what he says was learned later;
+- **the Latin text is the only readability gate**;
+- one scholarly date check is capped at 5 min;
+- letter 6.20 is out.
 
-## 1. Readability: flagged
-**No written-history source in this project is yet known to be readable.** The Wikipedia pilot read only later compilations (T2-h) and a catalogue description (T2-s), not a contemporary or eyewitness account. So **readability is the first step of the run, with a stop rule** (§5).
+**Labels:** [general knowledge, unverified] = background knowledge, to be read in the run; nothing rests on it being right.
 
-## 2. The candidate: the eruption of Vesuvius, as told in Pliny the Younger's letter to Tacitus (Letters 6.16)
-**Why this one [general knowledge, unverified]:**
-- Its Latin text is public domain and is commonly published as plain web text. Public-domain English translations exist.
-- It contains exactly the things a timeline entry must keep apart:
-  - a **calendar date in Roman form** (a day and month), whose conversion is **ours**;
-  - an **hour of the day in Roman seasonal hours**, whose conversion is ours and uncertain;
-  - **places** (Misenum, where the observation was made);
-  - a statement that **the mountain was identified only later** as Vesuvius, a source-stated retrospective identification;
-  - **no year**: the letter is not expected to state 79 CE, so the year would come from elsewhere and must be shown as not stated by this source.
-- It is a **later written account**: a letter written years after the event at the historian Tacitus's request, partly relaying others (the writer's mother and uncle). That makes it **T2-r**, not a contemporary record.
-- It is the case sketched for Test B in the Test A proposal (§13). The eruption's traditional date is disputed in later scholarship. **That dispute is not shown unless a readable source in the run states it** (§4, T5).
+## 1. Case and readability
+- **Case:** the eruption of Vesuvius as told in Pliny the Younger, *Letters* 6.16 (to Tacitus). **One passage, one mock entry.**
+- **Readability: flagged.** No written-history source in this project is yet known to be readable. **The only gate is the Latin text** (§4 step 1). The English translation is not a gate: if it is unavailable, the run carries on with the Latin.
+- **Why this case [general knowledge, unverified]:**
+  - the letter gives a Roman calendar date and a Roman hour for when the cloud was noticed;
+  - it says who noticed it (the writer's mother, telling his uncle);
+  - it says the mountain was identified only later;
+  - it is not expected to state a year.
 
-## 3. Sources (predeclared order; text only)
+  So one passage exercises the source's wording, our conversion, the writer's sourcing, and a visible gap.
+
+## 2. Sources (fixed order; text only)
 | Key | Role | Candidate route [unverified] | Use |
 |---|---|---|---|
-| S1 | **The source**: Latin text of Letters 6.16, a public-domain edition | a plain-HTML text (e.g. The Latin Library or Latin Wikisource), with the edition named on the page | the evidence: passages quoted from here (under 15 words each, Mac only) |
-| S2 | **A display translation**: a public-domain English translation | e.g. English Wikisource or Perseus (an early-20th-century translation) | display only, credited by translator and year. **Not evidence**; where it and S1 differ, S1 governs |
-| S3 (optional, T5) | **One readable scholarly statement on the date question** | open-access text, found by one bounded exact search | only to support an "uncertainty" line; otherwise none is shown |
+| **S1** | **The source**: a public-domain Latin edition of *Letters* 6.16 | plain-HTML text (e.g. The Latin Library, Latin Wikisource) | **the evidence and the only readability gate**. The edition is **pinned**: editor/edition and year as the page states, plus URL, retrieval time, and page hash or revision. If no edition is named, that is recorded as **"edition not stated by the host"**. Its **date and hour wording is kept exactly**. Passages under 15 words, Mac only |
+| S2 | A public-domain English translation | e.g. English Wikisource, Perseus | **display only**, credited (translator, year). **Not evidence**; S1 governs. If unavailable: carry on, and the entry shows Latin only |
+| S3 | **One scholarly statement on the date question** | one bounded exact search for open, readable text | **≤ 5 min inside the 45-min cap.** Shown only if readable and on point. **If nothing usable: "date question: not assessed"** |
 
-Text only, no PDF, no images, no login or purchase (as in Test A). One request at a time; site approvals by Chad.
+Text only, no PDF, no images, no login or purchase. One request at a time; site approvals by Chad. **Letter 6.20 is out of scope.**
 
-## 4. Claims to check (5, fixed before reading)
-| ID | Claim (as a timeline would state it) | Expected in S1 [unverified] | What we would infer (T3, labelled ours) |
+## 3. Claims (fixed before reading)
+| ID | Claim (what the entry would state) | What S1 is expected to give [unverified] | Ours (T3), only under the stated rule |
 |---|---|---|---|
-| B1 | **Date**: the day the cloud was first seen | a Roman calendar expression (day before the Kalends of a month) | its Julian-calendar equivalent, by our stated rule |
-| B2 | **Year** | **not stated** in the letter | none from S1; shown as "year not stated by this source" |
-| B3 | **Time of day**: when the cloud was first seen | a Roman hour expression ("about the n-th hour") | an approximate clock-time **range**, using seasonal hours; method stated, uncertainty kept |
-| B4 | **Place of observation**: Misenum | named in the letter, with the uncle's role there | present-day location reference (Bay of Naples, Italy), labelled as ours |
-| B5 | **Which mountain** | the source says it was learned **later** that the cloud came from Vesuvius | none: kept as the source's own retrospective statement |
+| **B1** | **Date of the reported sighting/notice of the cloud**, as the letter reports it. Called "first sighting" or "start of the eruption" **only if the passage says so** | a Roman calendar expression (*a.d.* N *Kal.* [month]), kept **verbatim from the pinned edition** | **Conversion rule:** Roman inclusive counting back from the Kalends of the named month (the Kalends = day 1, counted as day 1 of N), giving a **day and month in the Julian calendar**. Labelled "**conversion of [edition]'s reading**". No proleptic or Gregorian equivalent is given. |
+| **B2** | **Year** | **not stated** | **left unset**: "year not stated by this source" |
+| **B3** | **Time of day** of the reported notice | a Roman hour expression, **kept as written** ("about the n-th hour") | **a modern clock-time range only if justified.** It would need the converted day (B1), Misenum's latitude, a stated seasonal-hour model (daylight divided into twelve hours from sunrise) and the word "about". **If any of these is not established, no range is given and the gap is shown.** |
+| **B4** | **Place**: where the uncle was when the cloud was noticed (Misenum, with his command) | named in the letter | present-day location reference (Bay of Naples, Italy), labelled ours |
+| **B5** | **Which mountain** | the source says it was **learned later** that the cloud came from Vesuvius | none: kept as the source's own retrospective statement |
 
-**Dispositions:** as in Test A: supported / not stated / contradicted, inaccessible, not checked. Each is matched to the **exact passage**, located by letter and section. **Statement classes:** the source's wording · our inference (T3) · uncertainty.
+**Dispositions** as in Test A (supported · not stated · contradicted · inaccessible · not checked), matched to the exact passage by letter and section.
 
-## 5. Run shape and caps [recommendation]
-1. **Readability check (≤ 10 min):** reach S1 and S2 as text and record the edition, route and rights as observed. **Stop rule:** if S1 is not readable as text, stop and report Test B inconclusive (no switch of case).
-2. **Passage tracing (≤ 20 min):** locate each claim's passage in S1 and code B1–B5.
-3. **Sample entry and write-up (≤ 15 min):** write the entry below for real, from what was read.
+**Voice of each statement**, recorded per claim:
+- **(a) Pliny's own recollection**;
+- **(b) what he reports others did or said**, e.g. his mother pointing the cloud out, his uncle's actions;
+- **(c) what he says was learned later**.
 
-- **Cap 45 min total.** Mac clock; packet in the Mac folder; the repo gets IDs, routes and dispositions only.
-- No page, tab or build work: the sample entry is a **text mock-up in the report**, not a page.
+## 4. Run shape and caps (45 min total)
+1. **Latin readability gate, ≤ 10 min:** reach S1 as text and pin the edition. **If S1 is unreadable: stop, Test B inconclusive** (no switch of case).
+2. **S2 translation, inside step 1's or step 3's time:** if not reached, carry on.
+3. **Passage tracing, ≤ 20 min:** code B1–B5 against S1 and record the voice of each.
+4. **S3 scholarly date check, ≤ 5 min.**
+5. **Mock entry and write-up, the remainder (≥ 10 min).**
 
-## 6. What a sample timeline entry would show (mock-up, to be filled from the run)
-> **Eruption cloud seen from Misenum** · *Campania, Italy (present-day reference)*
+Mac clock; packet in the Mac folder; the repo gets IDs, routes and dispositions only. The mock entry is **text in the report, not a page**: no page, tab or build work.
+
+## 5. The mock entry: every field traceable
+> **Cloud reported over the Bay of Naples, seen from Misenum** · *present-day reference: Bay of Naples, Italy (ours)* · field source: **S1 §[n]**
 >
-> **The source says** — Pliny the Younger, *Letters* 6.16 (Latin, [edition]), §[n]: «[short Latin phrase for the date and hour]» · *trans. [translator, year]:* "[short English rendering]"
+> **When, as the source says:** «[Latin date phrase, exact, pinned edition]» · «[Latin hour phrase, exact]» → **S1 §[n]**
+> **When, our conversion:** [day month], Julian calendar: *conversion of [edition]'s reading* by the stated rule → **method note** · **hour:** [modern range, or "no range given: [missing assumption]"] → **method note / gap**
+> **Year:** **not stated by this source** → **gap (visible)**
 >
-> **We infer** (our computation, method shown) — day: [Julian date] from the Roman calendar expression · time: roughly [range], from seasonal hours · **year: not stated by this source**
+> **Who says what:**
+> - *Pliny reports others:* [his mother's notice to his uncle; his uncle's actions at Misenum] → **S1 §[n]**
+> - *Pliny's own recollection:* [what he says of himself in 6.16, if anything] → **S1 §[n]** or "none in this passage"
+> - *Learned later, per Pliny:* the cloud's mountain was Vesuvius → **S1 §[n]**
 >
-> **Uncertain** — the letter is a later written account (T2-r), partly relaying others · the mountain is identified "later", as the source itself says · [date dispute: shown only if S3 is read; otherwise "not assessed in this test"]
+> **Uncertain:** a later written account (T2-r), partly relaying others → **S1 §[n]** · **date question:** [one readable scholarly statement, attributed → **S3**] **or "not assessed"** → **gap**
 >
-> **Evidence grade** — written account, later recollection (T2-r) · 1 source · no independent corroboration counted
+> **Evidence grade:** written account, later recollection (T2-r) · 1 source · no independent corroboration counted
+>
+> *Display translation:* [translator, year], or "Latin only: no translation reached" → **S2 / gap**
 
-Every field links to its passage (S1 §) or to our method note. Nothing is drawn as fact that the source does not state.
+**Rule:** every field ends in one of three things: an **exact passage** (S1 §), **our stated conversion** (method note), or a **visible gap**. Nothing is shown as fact that the source does not state.
 
-## 7. Decisions for Chad
-| | Decision | Recommendation |
+## 6. Decisions (rev 2 reflects Chad's direction)
+| | Decision | Now |
 |---|---|---|
 | T1 | Case | Vesuvius, Pliny *Letters* 6.16 |
-| T2 | Claims | B1–B5 as above |
-| T3 | Sources | S1 Latin public-domain text (evidence) + S2 public-domain translation (display only) |
-| T4 | Cap and stop rule | 45 min; stop if S1 is not readable as text |
-| T5 | S3 (one readable scholarly statement on the date) | **include, bounded** (one exact search, ≤ 5 min inside the cap); shown only if readable |
-| T6 | Letter 6.20 (the writer's own experience at Misenum) | **exclude** for this first case (keep it small) |
+| T2 | Claims | B1–B5 as above (B1 = reported sighting/notice) |
+| T3 | Sources | S1 Latin (evidence; the only gate) + S2 translation (display; optional) |
+| T4 | Cap and stop rule | 45 min; stop only if S1 is unreadable (≤ 10 min) |
+| T5 | S3 scholarly date check | included, ≤ 5 min; nothing usable → "not assessed" |
+| T6 | Letter 6.20 | out |
 
 *This proposal authorises nothing beyond its own writing.*
