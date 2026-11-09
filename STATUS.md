@@ -4,6 +4,27 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 11:23 UTC (clock reading at write) — **Wikipedia-led pilot rev 2 after GPT's review** + **GPT accepted ENQUIRIES rev 7** (docs only)
+- **Pilot rev 2** (`research/timeline-wikipedia-pilot/2026-11-09-claude/rev2/` on the Mac; originals unchanged, hashes in `rev2/.orig-hashes`):
+  1. **G-PA1:** `contradicted` → **`not stated`**. The source's 26 March low-pressure centre and 27 March trough are different features, and the lead's "the storm" has an uncertain referent. No one-day contradiction is established, and 27 March is not a correction. Unsupported reasons are now not stated 2 · contradicted 0.
+  2. **Inventory: partial.** The leads hold further date/place assertions (e.g. flooding in named cities on 25 March, Maryland). The 9 units are kept, completeness is incomplete/unassessed, and rates are bounded to the 9. Nothing is split or added.
+  3. **Provenance:** copyright years and last-updated dates are separated from publication dates (Storms, Rivers, WDL description: original publication date not established). Sources are described as "reached through the inspected archive routes". The access-dominated effort claim is withdrawn; the observed obstacles are reported instead.
+- **GPT's answers recorded:**
+  - the Austin exclusion is defensible;
+  - the 20-state compound claim may stay intact;
+  - Perkins is a candidate citation of uncertain scope;
+  - the WDL description is T2-s;
+  - request-completion pin times are the right source.
+  - **GPT independently observed the Rivers page's copyright footer**: new GPT verification, not Claude's capture or reuse clearance.
+- **Scope (Chad):** floods / Pennsylvania / 1870–1927 were only the pilot test case. A theme closer to human history or evolution is being considered for any future test; **nothing is selected or authorised.**
+- **ENQUIRIES rev 7 ACCEPTED by GPT** as the bounded evidence/linking record:
+  - "3. Yes" confirms the specific public aggregate-hosting arrangement (counts per area, no aircraft identifiers or individual tracks), within the standing hobbyist, feeder, credit and attribution conditions;
+  - the automatic account link is conditional on feeding 30%+ of the preceding month; measurement, window and receiver association are unspecified;
+  - feeder qualification is only partly addressed.
+  - No REGISTER change, purchase, installation, aircraft build or production approval.
+- **Not approved:** rerun, research, queries, source reads, sampling, provider contact, REGISTER, prototype, production. The Route W gate stays closed.
+
+
 ## 9 Nov 10:57 UTC (commit time, `61c3cd6`) — **ENQUIRIES rev 7: OpenSky second reply LINKED** (docs only)
 - Chad supplied his exact sent follow-up (screenshot, displayed 10:22 AM, not converted). Q1–Q3 filed verbatim; his email address is omitted.
 - **"3. Yes" answers follow-up Q3:** hosting the aggregated snapshots on our own public site (counts per area, no aircraft identifiers or individual tracks), under the ~10 requests/day arrangement. Recorded as **affirmative for that specific arrangement only, within the standing hobbyist, feeder and credit conditions**. Not blanket redistribution; the feeder condition is not waived.
