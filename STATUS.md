@@ -4,6 +4,25 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 06:58 UTC (clock reading at write) — **GPT independent live smoke test of the Arts release: no blocking defect within the checks completed** (GPT, ~06:44–06:52 UTC, read-only; relayed by Chad; recorded here, docs only)
+**GPT's observations (kept separate from Claude's release evidence in the 06:20 entry below):**
+- Hub reports 0.6.2. The browser-delivered Arts snapshot matches the approved file: 127,887 B, sha256 `221bb1ca…9644`.
+- 25 country rows sum to 479; all 479 expanded entries show the sensitivity warning; exactly 11 carry tentative labels; rendered titles, Met wording and country strings match the snapshot.
+- The card starts off, loads when enabled, clears when disabled, keeps the accepted caveats, dates and limitations, and leaves the map key unchanged.
+- Country button / ARIA relationships and Enter, Space and Tab behaviour checked.
+- No page overflow and no inner Arts-list scrollbar at 360, 390, 430 and 1280 px.
+- All eight health response bodies report healthy. Served stylesheet hash matches.
+- Bounded regression checks passed: core layers, search, ship/earthquake/fire inspectors, Everything here, optional layers, all three orbital categories. Captured console warning/error log empty. No Met-host resources in the inspected resource inventories.
+- **Minor, non-blocking, no fix requested:** the Sources attribution-table row reads "Met catalogue sample" without the word "catalogued"; the Arts section and the tiers row classify it as catalogued.
+**GPT's stated verification limits:**
+- No independent no-store hashes for index.html, app.js, arts.js or sources.html; the stylesheet export's cache mode was not observable.
+- Raw HTTP status codes and exact request counts not captured: healthy bodies do not establish verified HTTP 200s, and the `/cells/arts` unknown-layer body does not establish a verified 404.
+- Resource inventories deduplicate URLs: they support the lazy-loading and no-Met-resource findings but are not a complete network trace.
+- Actual iPhone/Safari and screen-reader announcements unverified (iPhone check deferred with Chad).
+- Production Worker CPU, transfer size and a live cold-load "before" unmeasured. Not an exhaustive regression pass and not a rerun of Claude's 90 browser tests.
+- GPT saved its evidence and updated its own reviewer ledger/handover (outside this repo).
+**Nothing approved:** no fixes, upload, deployment, merge, page release, schedule or other production change.
+
 ## 9 Nov 06:20:18 UTC — **PAGE RELEASED: Met catalogue sample card** (main `6d5ca55`, no-ff merge of `arts-met-rc` @ `c5005c3`; Chad: "Approve: push arts-met-rc to main (page change: Met catalogue sample card)")
 - **Live RC check before the merge (06:19–06:20 UTC, clean pane tab, branch files from raw.githubusercontent at `c5005c3`, sha256 matched: index `e30b04f7`, app `e3f4a385` (unchanged), arts `58773cef`, style `6a54e0b1`), against live hub 0.6.2:** off on load with no Arts request; on → one request, status ok, 25 rows summing to 479, headings correct; Iran expanded: 26 objects visible, each with the sensitivity warning; Key count unchanged (4); no Met image requests; no script errors; no overflow at 588 px. Transfer size not readable (no Timing-Allow-Origin).
 - **Merge:** no overlap with main's docs; merged page and hub files = the reviewed hashes; arts-hub 54/54 on the merge. **main's `phase1/worker.js` = live 0.6.2 (`4b5b6aa3…`), so main = live again.**
