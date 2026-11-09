@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 06:13:19 UTC — **HUB 0.6.2 DEPLOYED** (Chad: "Approve: deploy hub 0.6.2 from 4c4bbb9 (content only)")
+- **Before (06:13:05 UTC):** live worker.js = 0.6.1 `f38296a0…2cc8` (the pinned rollback target); 19 bindings; health 8/8 (all 200). Code fetched from raw.githubusercontent at `4c4bbb9`: 274,031 B, sha256 `4b5b6aa3c953afbce197586b8007a54da5191d83f4b317b28a48b4b1661a003f` (= the reviewed branch file).
+- **Deploy:** content-only API from the dashboard tab, HTTP 200, success, etag `32b879f9…0ccb`, modified 06:13:19.209Z. Bindings, secrets, variables and crons untouched.
+- **Verified (06:13:48 UTC):** read-back worker.js sha256 = `4b5b6aa3…003f` (exact); **19 bindings, identical list**; `/` = **0.6.2**, `catalogues.arts` listed, history collecting; health **8/8** (200); **`/snapshot/arts` 200**, 127,887 B, sha256 `221bb1ca…9644` (= the R2 object), `snapshot_id` `067211d9…16cb2`, 479 objects / 25 countries, `Cache-Control: public, max-age=60`, `application/json`; `/cells/arts` 404; `/snapshot/usgs` 200.
+- **First scheduled runs on 0.6.2 (D1):** usgs 06:15:07 ok (46 records), firms 06:15:40 ok (3,196 records, v2 run). `collector_runs` has **no `arts` rows** (as designed).
+- **Finding (no functional effect):** the ETag reaches the browser as **weak** — `W/"221bb1ca…9644"` — though the hub sets a strong one. Most likely Cloudflare's edge compression weakening it; not investigated. The page does not use the ETag; the hash value is unchanged.
+- **Public page unchanged:** main still `ad4002b` (?v=202611151000); the card exists only on branch `arts-met-rc`. Served transfer size and production CPU for `/snapshot/arts`: not yet measured.
+- **Rollback (own Approve line):** redeploy 0.6.1 `f38296a0…2cc8` (main's `phase1/worker.js` is still 0.6.1, so main ≠ live hub until the branch merges). Page-first order applies once the page is released.
+- **Next:** live RC check of the page branch against the deployed hub (clean pane tab; 5 page files incl. `arts.js`; read-only) → `Approve: push arts-met-rc to main (page change: Met catalogue sample card)`.
+
 ## 9 Nov 06:11:12 UTC — **R2 UPLOAD DONE: `ref/arts/met-R1-e394878.json`** (Chad: "Approve: upload ref/arts/met-R1-e394878.json (complete-file sha256 221bb1cab1c186a99972fdf936efddc22a298b6529abf30450ca0b3f4d219644) to R2")
 - **Pre-checks (06:10:58 UTC, dashboard tab):** destination absent (404 "The specified key does not exist"); nothing under `ref/arts/`. Source fetched from raw.githubusercontent at branch commit `4c4bbb9`: HTTP 200, 127,887 B, sha256 `221bb1ca…9644` = the approved hash. Absence re-checked immediately before the write.
 - **Upload:** dashboard R2 objects API `PUT`, HTTP 200, size 127,887, storage class Standard, etag `018c5530041ede986508980c688b577d`, version `7e5e41115f0f148786da0d15470293b1`, uploaded **06:11:12.285Z**.
