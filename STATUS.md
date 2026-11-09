@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
-## 9 Nov 13:28 UTC (clock reading at write) — **Retry rev 2 (wording) + OA-search PROPOSAL** (docs only)
+## 9 Nov 13:14 UTC (clock reading at write; corrected from a mistyped 13:28) — **Retry rev 2 (wording) + OA-search PROPOSAL** (docs only)
 - **GPT read the retry packet** (three hashes matched).
 - **Retry rev 2** (`research/timeline-test-a-retry/2026-11-09-claude/rev2/RETRY-REPORT-rev2.md`):
   - conclusion = **no improvement in access to primary reports through the routes tried**;
