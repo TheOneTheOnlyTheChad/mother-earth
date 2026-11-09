@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 08:07 UTC (clock reading at write) — **Route W gate proposal rev 4 + ENQUIRIES rev 5** (docs only; after GPT's direct review in the shared folder)
+- **Proposal rev 4:** claims outside the checking rule = "not checked — outside rule", references kept but not evaluated; roll-up only for within-rule claims. Matching clock separate from the selection clock: matching interval from documented timing, else a provisional 30-day window after the selection value; candidates **C = (T AND (A OR R)) OR L** (source link stated separately); uncertain episode/crest relationships stay unresolved (`match-v3`). Property mapping verified within the gate by meaning/description, datatype and presence on the frozen items before inventory, corrections recorded, frozen as `map-v2` before checking, unresolved membership and coverage limits kept. GPT's acceptance of support-first precedence recorded (measures whether a source states a claim; not truth or agreement); `contradicted by` and `coarser only` now separate fields and separate report lines. One open point for GPT (30-day window).
+- **ENQUIRIES rev 5:** Q2 rationale corrected (Q3 is also yes/no; Q2 = plausible contextual interpretation, not uniquely established); closing-line reading labelled contextual interpretation ("normal" undefined by OpenSky); cloud, feeder and credit conditions restated. Rev 3's acceptance stands; rev 4 was not accepted verbatim.
+- Standing: GPT reads current files directly from `/Users/chadobie/Documents/Mother Earth`.
+- **Not approved:** research, queries, sampling, downloads, route or parameter selection, provider contact, REGISTER change, prototype, connector/permission change, production action.
+
 ## 9 Nov 07:58:46 UTC — **Mac folder synced to main `7de48f4`** (raw.githubusercontent route; preserve-first)
 - 5 files: STATUS, HANDOVER, TIMELINE-CONCEPT, ENQUIRIES (each preserved to `_sync-preserved/20261109T075846Z/`, all four = `0f7ec67`, so no local edits) and the new TIMELINE-ROUTE-W-GATE-PROPOSAL; every copy hash-checked against the commit. The Mac shell can't `git clone` GitHub today but can `curl` raw files (START-HERE §3). Standing (Chad): GPT reads the folders, so messages to GPT point to paths.
 

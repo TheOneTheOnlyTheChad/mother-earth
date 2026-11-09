@@ -6,6 +6,7 @@ Personal contact details (phone, precise home address) that Chad included are **
 *Rev 2, 9 Nov 2026 (GPT's corrections relayed by Chad): CNEOS added; adsb.fi recorded as prepared, not sent; OpenSky's acknowledgement recorded as supplied.*
 *Rev 3, 9 Nov 2026: OpenSky's substantive reply on ticket #837506 recorded (section below). The earlier acknowledgement and its conditions are unchanged.*
 *Rev 4, 9 Nov 2026: Chad supplied his exact sent enquiry; the reply is now linked to it, with a bounded reading (section below). Personal details in that email are not reproduced.*
+*Rev 5, 9 Nov 2026 (GPT's direct review of rev 4): the Q2 rationale corrected (Q3 is also a yes/no question; Q2 stays a plausible contextual interpretation, not a uniquely established answer); the closing-line reading labelled as contextual interpretation. Rev 3's acceptance as an evidence record stands; rev 4 was not accepted verbatim.*
 
 | Sent (as confirmed by Chad) | To | Asked about | Reply |
 |---|---|---|---|
@@ -53,9 +54,9 @@ This is a summary relayed by Chad (via GPT's review packet); the verbatim text i
 | Q1a — recommended receiver and antenna | Pi 3B/4 + RTL-SDR; basic outdoor antenna; active antenna (product not vouched for); adsb.im image | **Answered** (provider advice, unverified) |
 | Q1b — contribution and uptime that qualify a feeder | — | **Not answered** |
 | Q1c — how feeder status links to the API account | — | **Not answered** |
-| Q2 — ~10 REST requests/day from the home connection for a public aircraft-distribution globe | "That works for us." | **Most plausibly answers Q2** — it is the only yes/no proposal in the message stated as a question of acceptability. **Interpretation, not explicit.** Read within the conditions Chad's own message cites (the hobbyist acknowledgement and the feeder route), not as replacing them. |
+| Q2 — ~10 REST requests/day from the home connection for a public aircraft-distribution globe | "That works for us." | **Plausible contextual interpretation only.** The sentence opens a reply to a message whose Q2 and Q3 are both yes/no questions; Q2 is a reasonable reading of what "that" accepts, but the reply does **not** state which question it answers, so this is **not an explicit or uniquely established answer**. Read within the conditions Chad's own message cites (the hobbyist acknowledgement and the feeder route), not as replacing them. |
 | Q3 — whether that allowance includes hosting aggregated snapshots ourselves, without identifiers or individual tracking | not addressed separately | **Unresolved.** "That works for us" may or may not extend to Q3; the reply does not say. Not read as permission to host or redistribute. |
-| Closing line — own connection, not cloud-server whitelisting | "Normal connections need no whitelisting." | **Answered:** collection from Chad's own connection needs no whitelisting. The cloud-server condition is unchanged. |
+| Closing line — own connection, not cloud-server whitelisting | "Normal connections need no whitelisting." | **Contextual interpretation:** read against Chad's closing line, it most plausibly means collection from his own home connection needs no whitelisting. Martin did **not** define "normal", so applying it to the home connection is our reading, not his statement. The earlier conditions are unchanged: no whitelisting of cloud servers, the public site must be a feeder, and applicable credits apply. |
 
 **Open after this reply:** Q1b, Q1c and Q3. Whether to ask again is Chad's decision; nothing is sent automatically.
 

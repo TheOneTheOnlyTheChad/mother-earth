@@ -1,10 +1,16 @@
-# Timeline Route W — bounded first gate: parameters proposal (rev 3, 9 Nov 2026)
+# Timeline Route W — bounded first gate: parameters proposal (rev 4, 9 Nov 2026)
 
 **Status: proposal only (docs).** Chad's brief, 9 Nov: bring forward TIMELINE-CONCEPT rev 3.1, especially Route W (Wikipedia/Wikidata first, library work later deepening or challenging it). This document recommends the parameters of the gate in concept §5A.4: period, region, language, event cap, effort cap, the claim-checking rule, and whether to include an independent reference list.
 
 **Written from the accepted concept and saved project records only.** No provider research, queries, sampling, downloads, accounts, contact, REGISTER filing, prototype or production change. **Route selection, parameter selection and running the gate stay Chad's separate decisions.** The completed Arts reviews stay closed. The actual-iPhone check stays deferred.
 
-**Rev 3 (GPT's review of rev 2, relayed by Chad, 9 Nov; docs only).** Rev 2's improvements are kept. Four targeted corrections:
+**Rev 4 (GPT's direct review of rev 3 in the shared folder, relayed by Chad, 9 Nov; docs only).** Rev 3 kept. Three corrections:
+1. Claims outside the checking rule are "not checked — outside rule", their references preserved but not evaluated; the roll-up applies only to within-rule claims (§4.3, §4.3a).
+2. The matching clock is separate from the selection clock: candidates come from (temporal condition AND (shared area OR shared river)) OR a source link, with an episode window that keeps a Monday-start flood and a Wednesday crest together until identity is checked (§6.3).
+3. Property mapping is verified within the gate by meaning/description and datatype, and against the properties actually present on the frozen items, before inventory; corrections recorded; frozen before support checking (§4.1).
+Also recorded: GPT accepts support-first precedence for measuring whether a source states a claim, with contradictions, coarser-only support and partial checking kept visible and separate (§4.3a, §8).
+
+**Rev 3 (GPT's review of rev 2, relayed by Chad, 9 Nov; docs only, `7de48f4`).** Rev 2's improvements are kept. Four targeted corrections:
 1. **Event identity:** date overlap plus a shared area or river only *generates candidates*; identity needs documented evidence; even one weak candidate stays unresolved; flood episodes are kept apart from gauge crests, with many-to-one relationships recorded; identity matching is separate from selection eligibility (§6.3).
 2. **Coverage counts:** no "at least" labels. Exact current classes within the fixed reference subset, labelled provisional where discovery is incomplete, summing to the subset size; stable source-row identifiers and tie-breaking for subsetting keys (§6.2, §6.4).
 3. **Multiple references and external reuse:** a predeclared roll-up from reference-level observations to one claim disposition, keeping contradictory and partially checked references and counting each claim once; circular-only repetition never becomes qualifying support (§4.3, §4.4). Accepting Wikidata/Wikipedia terms does not clear external works; quotation length is not rights clearance (§5).
@@ -150,7 +156,11 @@ Each row is a separate decision for Chad (§9).
 ### 4.1 What counts as a claim
 For each selected event, every statement whose property is in the frozen mapping below is one claim, recorded with its value, precision, rank, qualifiers, statement ID and references exactly as at the pinned revision.
 
-**Property → claim group (frozen at gate start; method version `map-v1`).** The property IDs below are **[general knowledge, unverified]**. At gate start each ID's label is read from its pinned property page and recorded; any ID whose label does not match is logged and the mapping corrected **before** inventory begins, never afterwards.
+**Property → claim group (starting mapping `map-v1`; verified and frozen as `map-v2` before inventory).** The property IDs below are **[general knowledge, unverified]**. A label match alone is not enough. Within an authorised gate, after the event sample is frozen (rule V) and **before inventory**:
+1. **Meaning check:** for each mapped property, the pinned property page's **label, description and datatype** are read and recorded (revision ID, retrieval time). A property whose meaning or datatype does not fit its group is corrected or removed.
+2. **Presence check:** every property actually present on the frozen items is tallied (property ID, label, datatype, number of items, number of statements). Each present property is either mapped to a group, logged as unmapped (below), or counted only, **with the reason recorded**.
+3. **Corrections** (added, removed or regrouped properties) are recorded with their rationale. The result is frozen as `map-v2` and saved **before any support checking**. It is never changed after checking begins.
+4. **Unresolved membership** (a property whose group cannot be decided) is recorded as such, its statements logged, not checked, and the resulting **coverage limitation** stated in the report.
 
 | Group | Properties (ID — expected label) |
 |---|---|
@@ -159,6 +169,8 @@ For each selected event, every statement whose property is in the frozen mapping
 | **Scale** | P1120 number of deaths · P1339 number of injured · P2630 cost of damage |
 | **Relationship** | P361 part of · P828 has cause · P1542 has effect · P155 follows · P156 followed by · P793 significant event |
 | **Type** (recorded, not checked) | P31 instance of |
+
+*(Starting list only; the gate uses the verified `map-v2`.)*
 
 - **Unmapped but possibly relevant statements are logged, not dropped.** Any statement outside the mapping whose value is a date, a quantity, a place item or another event item goes into an "unmapped, possibly relevant" log (property ID, label, value, statement ID). It is not a claim in this gate, but the log is reported, so a missing property (e.g. a displaced-persons figure) is visible.
 - Other statements (labels, images, external identifiers) are counted only.
@@ -186,14 +198,19 @@ For each selected event, every statement whose property is in the frozen mapping
 | Imported reference: the Wikimedia source was reached at the edition and revision it names (or, if it names none, at a revision recorded by us and labelled as our choice) | as above | support kind `repetition` if it repeats the assertion. **A Wikimedia source repeating an assertion is never qualifying support.** |
 | Cited work could not be reached without an account, a purchase, contact, or a download outside the bounded set | **inaccessible** | named, with why |
 | No reference of any kind | **no reference given** | lead recorded if a Wikipedia footnote exists |
-| Outside the rule, or cap reached | **not checked** | reason `outside rule` / `cap reached` |
+| Claim outside the checking rule (§4.2) | **not checked** | reason `outside rule`. Its references are **preserved as recorded but not evaluated**; no reference-level observations are made |
+| Claim inside the rule, not reached before the sub-cap ended | **not checked** | reason `cap reached` |
 
 **A qualifying source must itself be classified on its own terms.** If the cited work is an encyclopedia that prints a contemporary letter, the letter passage may be T2-c (qualifying), while the encyclopedia's own narrative is T2-s (§1).
 
 **Imported reference with no named revision:** a revision chosen by the checker is acceptable **only as explicitly dated T2-s repetition evidence** ("Wikipedia, revision …, read …, repeats the assertion"). It is **not** a reconstruction of the unspecified revision the statement was originally imported from.
 
 ### 4.3a Roll-up: from references to one disposition per claim (method version `roll-v1`, fixed before checking)
-The table above describes one reference. A claim may carry several, so each reference gets a **reference-level observation** first:
+**Scope:** the roll-up applies only to claims **inside the checking rule**. A claim outside the rule is "not checked — outside rule"; its references stay in the inventory as recorded and are not evaluated, so it never receives reference-level observations.
+
+**What the roll-up measures:** whether the cited sources **state** a claim. It does not establish historical truth, nor agreement among sources (GPT, 9 Nov).
+
+The table above describes one reference. A claim inside the rule may carry several, so each reference gets a **reference-level observation** first:
 
 `qualifying support` · `repetition support` · `coarser only` · `not stated` · `contradicts` · `inaccessible` · `not checked (cap)`
 
@@ -203,13 +220,13 @@ All observations are kept and reported. **None is discarded because another refe
 |---|---|---|---|
 | 1 | there are none | **no reference given** | lead, if any |
 | 2 | none was reached (all `not checked (cap)`) | **not checked** — `cap reached` | — |
-| 3 | at least one `qualifying support` | **checked — supported**, kind `qualifying` | `also repeated` if any repetition support; **`conflict`** listing every `contradicts` / `coarser only` reference; `partially checked (n of m)` if any reference was not reached |
-| 4 | else at least one `repetition support` | **checked — supported**, kind `repetition` | same `conflict` and `partially checked` fields |
+| 3 | at least one `qualifying support` | **checked — supported**, kind `qualifying` | `also repeated` if any repetition support; **`contradicted by`** listing every `contradicts` reference; **`coarser only`** listing, separately, every reference that supports only a coarser value (with that value); `partially checked (n of m)` if any reference was not reached |
+| 4 | else at least one `repetition support` | **checked — supported**, kind `repetition` | same `contradicted by`, `coarser only` and `partially checked` fields |
 | 5 | else at least one `contradicts`, `coarser only` or `not stated` | **checked — unsupported**, reason = the strongest present (contradicted > precision not supported > not stated) | `partially checked` if any reference was not reached; the coarser supported value, if any |
 | 6 | else (everything reached was `inaccessible`) | **inaccessible** | `partially checked` if any were not reached |
 
 - **Each claim is counted once** in every rate (§4.5), whatever its number of references.
-- A supported claim carrying a `conflict` sub-field is reported in its own line beside the rates ("supported, with conflicting references: n"). The conflict is shown side by side, not resolved.
+- Supported claims with a `contradicted by` field and supported claims with a `coarser only` field are reported on **two separate lines** beside the rates. **Coarser-only support is not a contradiction** and is never counted as one. Contradictions are shown side by side, not resolved.
 - `partially checked` claims are reported as a count beside checking coverage, so a claim decided on one of three references is never presented as fully checked.
 
 ### 4.4 Lineage
@@ -226,7 +243,7 @@ For each step and overall, the report shows:
 - **All-support rate:** (qualifying + repetition) ÷ (supported + unsupported), shown **only beside** the qualifying rate, never alone.
 - **Unsupported, by reason:** precision not supported · not stated · contradicted.
 - **Beside them:** inaccessible, no reference given, not checked (each by reason).
-- **Also beside them:** claims supported with conflicting references; claims decided while partially checked (§4.3a). Each claim is counted once, whatever its number of references.
+- **Also beside them:** claims supported despite a contradicting reference; claims supported with a coarser-only reference (a separate line); claims decided while partially checked (§4.3a). Each claim is counted once, whatever its number of references.
 - **N/A** wherever the denominator is zero. No rate is shown without its coverage figures.
 - Rates **describe the selected sample only**; they are not estimates for Wikidata generally or for the state.
 
@@ -277,7 +294,22 @@ For each step and overall, the report shows:
 ### 6.3 Identity matching (a T3 computation by our method, version `match-v2`)
 Identity matching is **separate from selection eligibility**. It runs against every item in the candidate frame (eligible, excluded and type-outside-rule alike), uses the pinned data (rule V), and never changes the selection.
 
-**Step 1 — candidates.** An item is a **candidate** for a list entry when the entry's date interval (per its precision) overlaps the item's selection-date interval, **and** they share an administrative area (the entry's place is one of the item's place values or on its chain) **or** a river (the item names that river or the gauge's locality). **This only generates candidates; it does not establish that they are the same flood.** Name similarity alone does not even make a candidate.
+**The matching clock is not the selection clock.** Rule D uses an item's start (or point-in-time) date only to decide eligibility. Matching needs the whole episode: a flood that starts on a Monday and a gauge crest on the Wednesday may be the same episode. So matching uses its own interval, defined here.
+
+**Matching interval of an item** (method version `match-v3`):
+- **Documented timing first:** if the item, or a source cited on it, documents the episode's timing (an end time, a latest date, or a dated crest or peak), the interval runs from the earliest to the latest documented value, each read at its precision.
+- **Otherwise, a provisional window:** from the start of the selection value's precision interval to **30 days after its end**. The 30 days is our candidate-generation boundary, not evidence that the episode lasted that long, and not identity evidence.
+- The interval used, and which of the two ways produced it, is recorded per item.
+
+**Step 1 — candidates.** An item is a candidate for a list entry when:
+
+**C = ( T AND ( A OR R ) ) OR L**, where:
+- **T (temporal):** the entry's date interval (at its stated precision) overlaps the item's matching interval;
+- **A (shared area):** the entry's place is one of the item's place values or lies on that value's administrative chain;
+- **R (shared river):** the item names the entry's river, or the gauge's locality, as a place;
+- **L (source link), stated separately:** the item or a source cited on it explicitly refers to the list's record, the gauge record, or the same named event, whatever T, A and R say.
+
+**This only generates candidates; it does not establish that they are the same flood.** Name similarity alone makes no candidate. A pair that fails T only because of the 30-day window, but is linked by L, is still a candidate. The condition that admitted each pair (T∧A, T∧R, L, or several) is recorded.
 
 **Step 2 — identity.** A candidate becomes a **same-event match** only with **documented identity evidence**, recorded per pair, such as:
 - the item, or a source cited on it, names the gauge, its locality or the list's own record of the event, with a consistent date; or
@@ -290,6 +322,8 @@ Identity matching is **separate from selection eligibility**. It runs against ev
 - `crest within episode` — the crest is one observation of the episode
 - `episode contains several listed crests` — **many-to-one**: several entries map to one item; each entry is classed separately and the shared item is noted
 - `unclear` — treated as unresolved
+
+An uncertain episode/crest relationship is never forced into a match: if the timing cannot place the crest inside the episode on documented evidence, the pair stays **unresolved**.
 
 ### 6.4 Outcome classes (each entry gets exactly one; reported as counts and lists)
 | Class | Meaning |
@@ -326,16 +360,19 @@ Identity matching is **separate from selection eligibility**. It runs against ev
 
 ---
 
-## 8. GPT's answers to rev 2's points (recorded) and open points
-**Answered by GPT (9 Nov), now in the text:**
+## 8. GPT's answers (recorded) and open points
+**GPT's answers to rev 2's points (9 Nov), applied in the text:**
 1. Type 4 hops, place 6 hops and 40 reference entries are reasonable **provisional effort boundaries**, with no completeness claims (§3.3, §6.2).
 2. Start-time precedence is acceptable **for eligibility**; it does not settle historical disagreement (§3.3 rule D).
 3. A reviewer-chosen Wikipedia revision is acceptable as **explicitly dated T2-s repetition evidence**, not as reconstruction of the unspecified import revision (§4.3).
 4. **Step A first;** Step B uses only the remaining checking budget under the predeclared rule, otherwise "not checked — cap reached" (§4.2).
 
-**Open for GPT's review of rev 3:**
-1. The roll-up order in §4.3a: a claim with one qualifying reference and one contradicting reference is "checked — supported" with a `conflict` field, not "unsupported". Is that the right precedence, given that the conflict is always reported beside the rates?
-2. The property mapping in §4.1 is from general knowledge and verified only by label at gate start. Is label verification enough, or should the mapping also be checked against the properties actually present on the frozen items before inventory?
+**GPT's answers to rev 3's points (9 Nov), applied in the text:**
+1. **Support-first precedence** is accepted for measuring whether a source states a claim, provided contradictions and partial checking stay visible. It does not establish historical truth or agreement. Coarser-only support stays distinct from an actual contradiction (§4.3a).
+2. **Label verification alone is insufficient:** meaning/description, datatype and presence on the frozen items are checked within the gate, before inventory (§4.1).
+
+**Open for GPT's review of rev 4:**
+1. The 30-day provisional matching window (§6.3) is Claude's choice, not measured. It only widens candidate generation; identity still needs documented evidence. Is 30 days a reasonable provisional boundary?
 
 ---
 
@@ -356,6 +393,6 @@ Identity matching is **separate from selection eligibility**. It runs against ev
 
 **Bounded wording, if and when Chad chooses (not now):**
 
-`Go: timeline Route W first gate per TIMELINE-CONCEPT rev 3.1 §5A.4 and TIMELINE-ROUTE-W-GATE-PROPOSAL rev <n> — research only, cap 6 h + one GPT review; water/floods, Pennsylvania fixed (no national fallback), 1870–1927, English; ≤ 30 events (operational floor 10); rules §3.3 (incl. V), checking §4.2–§4.3a, seed 20261109; reference list yes; no downloads beyond the bounded set, no media, no accounts, no provider contact, no REGISTER filing, no prototype.`
+`Go: timeline Route W first gate per TIMELINE-CONCEPT rev 3.1 §5A.4 and TIMELINE-ROUTE-W-GATE-PROPOSAL rev <n> — research only, cap 6 h + one GPT review; water/floods, Pennsylvania fixed (no national fallback), 1870–1927, English; ≤ 30 events (operational floor 10); rules §3.3 (incl. V), mapping §4.1 (`map-v2`), checking §4.2–§4.3a, matching §6.3, seed 20261109; reference list yes; no downloads beyond the bounded set, no media, no accounts, no provider contact, no REGISTER filing, no prototype.`
 
 This proposal itself authorises nothing beyond its own writing.
