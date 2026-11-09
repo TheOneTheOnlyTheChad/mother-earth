@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611151000">
+<link rel="stylesheet" href="style.css?v=202611161000">
 </head>
 <body class="doc">
 <header class="top">
@@ -119,6 +119,20 @@
   <p><b>Cadence and data path.</b> The hub signs in to Space-Track with the project's own account and makes one trimmed request at :41 in odd UTC hours (two-hourly, off-peak, within Space-Track's limit of one such request an hour). It validates every row before publishing (18 fields, known object type, ISO epoch, unique catalogue number, final newline, row floors) and on any failure keeps the previous valid file with its own times. Your browser reads only the hub (a small description, the hub's last run, and the element file, checked against its published checksum) and never contacts Space-Track. While any layer is on, positions for the layers that are on are recomputed every 2 seconds in a background worker, only while the tab is visible; turning the last layer off stops the updates.</p>
   <p><b>Source standing.</b> Space-Track.org (User Agreement and "Redistribution of Basic SSA Information", read 2 Nov 2026): USSPACECOM gives an express blanket approval to redistribute basic SSA data — element sets included — accessed via www.Space-Track.org, conditioned on appropriate citation. Commercial use is not addressed. Credit: Space-Track.org; elements from the US Space Force 18th/19th Space Defense Squadrons.</p>
 
+  <h2 id="arts">Met catalogue sample — places of making (catalogued, optional card)</h2>
+  <p><b>What it is.</b> A fixed snapshot of what The Metropolitan Museum of Art's catalogue states about where some of its objects were made. 479 objects retained from a seeded 2,000-record sample of 59,137 Met records with typed geography. This filtered view draws from four departments; it does not represent the Met's whole collection or the world's art. It is a list on World View, <b>off unless you switch it on</b>; nothing is drawn on the globe. Classification: <span class="fixed">catalogued — a record of what an institution states, dated; not observed, not computed</span>.</p>
+  <p><b>How the 479 were reached.</b> The Met's <code>MetObjects.csv</code> at commit <code>e394878</code> (source CSV of 2 Nov 2026) holds 503,073 records. 59,137 of them have a typed geography that maps to a relationship and a country, in five departments (Egyptian Art, Islamic Art, The American Wing, Medieval Art, The Cloisters). A seeded random sample of 2,000 was drawn from those (seed 20261107). Keeping only a certain catalogued place of making, aligned with its country and resolved to an ISO 3166-1 code, leaves 479 objects in four departments: The American Wing 326, Islamic Art 72, Medieval Art 43, The Cloisters 38. The view was prepared on 7 Nov 2026; the published file was generated later and carries its own generation time.</p>
+  <p>Arts of Africa, Oceania and the Americas is an excluded department, not an absence of those regions.</p>
+  <p>The Met's catalogued place of making, mapped to present-day countries — a location reference only, not historical nationality.</p>
+  <p>"Country of Origin" is its own relationship and is kept outside this view; superseded wording ("Formerly considered made in") never places an object. The Met's wording is shown verbatim.</p>
+  <p>Concentration: United States 239 of 479 (49.9%); 8 countries have one object; 12 have three or fewer.</p>
+  <p>Random page check: 0 of 27 reached Met pages disagree (95% interval for the error rate 0–12.5%); 23 pages were not reached and are unverified, not passes.</p>
+  <p>The Met's catalogue, not independent historical verification; the Met says cataloguing is ongoing.</p>
+  <p>Sensitivity not fully assessed: no object was manually assessed; 11 carry tentative labels; an unlabelled object is not established as not sensitive.</p>
+  <p>A fixed snapshot: the Met updates its CSV weekly; every figure here is tied to the source CSV of 2 Nov 2026 (commit e394878).</p>
+  <p><b>Sensitivity.</b> Every object is marked "sensitivity not fully assessed". Eleven carry tentative labels (sacred/ritual 9, funerary 3, Indigenous source community 2; human remains 0) from keyword screens and three page findings; an unlabelled object is not established as not sensitive. Sensitive material is included with honest context for this metadata-only scope; inclusion is not a claim about ownership legitimacy, and source restrictions are kept.</p>
+  <p><b>Terms and credit.</b> The Met releases its collection data under CC0 1.0: download, share, modify and distribute for any purpose, including commercial use, without permission. Attribution is not required; credit given: Collection data: The Metropolitan Museum of Art Open Access (CC0), source CSV of 2 Nov 2026 (commit e394878). Images are not part of the data and are not shown or fetched here; each object links to its page on the Met's site, which shows its own images under its own terms.</p>
+  <p><b>Data path.</b> Your browser reads only the hub's <code>/snapshot/arts</code>. The hub serves the file only if the complete stored file matches the hash pinned in its code; otherwise the card says it is unavailable and why. The file never changes: fetching it again does not make the catalogue newer. It is not a collected layer and has no freshness grade.</p>
   <h2 id="search">Search — what it covers and what it cannot</h2>
   <p>The Explore panel on World View searches <b>only the records your browser has already loaded</b> from each layer's latest published snapshot. It issues no request of any kind: no geocoder, no place-name dataset, no country boundaries, no history. It is not a search of the world, and not a search of everything a source holds.</p>
   <table>
@@ -155,7 +169,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611151000"></script>
+<script src="app.js?v=202611161000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -171,6 +185,7 @@ function renderAll() {
   $('report-states').innerHTML = Object.entries(rep.states).map(([k, v]) => `<b>${esc(LABEL[k])}</b>: ${esc(v)}`).join(' · ');
   fill('t-sources', [...LAYERS.map(l => row([anchor(l), `<a href="${SOURCE[l].url}" target="_blank" rel="noopener">${esc(SOURCE[l].name)}</a>`, esc(SOURCE[l].terms), esc(SOURCE[l].credit)])),
     row(['<a id="gibs"></a>Imagery', `<a href="${SOURCE.gibs.url}" target="_blank" rel="noopener">${esc(SOURCE.gibs.name)}</a>`, esc(SOURCE.gibs.terms), esc(SOURCE.gibs.credit)]),
+    row(['<a id="met"></a>Met catalogue sample', '<a href="https://github.com/metmuseum/openaccess" target="_blank" rel="noopener">The Metropolitan Museum of Art Open Access</a>', 'CC0 1.0 (collection data; commercial use yes; attribution not required); fixed snapshot, source CSV of 2 Nov 2026 (commit e394878); media excluded', 'Collection data: The Metropolitan Museum of Art Open Access (CC0), source CSV of 2 Nov 2026 (commit e394878)']),
     row(['<a id="aircraft"></a>Aircraft', '<a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a>', 'hobbyist use within credits; a public-facing website must additionally feed the network; cloud servers not whitelisted (reply 30 Oct 2026)', 'not shown'])]);
   fill('t-measures', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].quantity || 'no snapshot yet')])));
   fill('t-windows', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].window), esc(R[l].cadence)])));
@@ -180,7 +195,7 @@ function renderAll() {
   const brk = t => String(t).split(/(?<=[;_])/).map(esc).join('<wbr>');
   fill('t-coverage', LAYERS.map(l => row([esc(LABEL[l]), brk((rules.find(x => x.section === l && x.k === 'Coverage rule') || {}).v || R[l].coverage) + ' — ' + esc(R[l].coverage)])));
   fill('t-cmp', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].comparison), esc(R[l].comparisonWho || ('none shown' + (ME.kept(l) ? '; ' + ME.kept(l) : '')))])));
-  fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Orbital objects', 'computed — positions calculated (SGP4) from published orbital elements; not observed (model-based method)']), row(['Day/night', 'computed — astronomical context, from the clock']), row(['Microplastic samples', esc(TIER.plastic)]), row(['Aircraft', 'observation — not shown'])]);
+  fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Orbital objects', 'computed — positions calculated (SGP4) from published orbital elements; not observed (model-based method)']), row(['Day/night', 'computed — astronomical context, from the clock']), row(['Microplastic samples', esc(TIER.plastic)]), row(['Met catalogue sample', 'catalogued — a record of what an institution states, dated; not observed, not computed']), row(['Aircraft', 'observation — not shown'])]);
   $('p-imagery').textContent = (rules.find(x => x.section === 'imagery') || {}).v || '';
   $('limits-body').innerHTML = [
     `<p><b>Aircraft — not shown.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,

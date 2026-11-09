@@ -337,3 +337,24 @@ details.cd>.cav{margin-top:2px}
   .inspector{max-height:calc(48% - 72px)}
   .stage:has(.sheet.collapsed) .inspector{max-height:calc(100% - 48px - 72px)}
 }
+/* Met catalogue sample (Arts release proposal rev 2.1) — a list, nothing on the globe */
+.ev.cat{color:#e7c98f;border-style:dotted}   /* catalogued: dotted outline as well as colour, so the label never depends on colour */
+.optgroup .opt-arts .ovl-h{font:600 15px/1.2 var(--display);letter-spacing:.06em;color:var(--fg);flex-wrap:wrap}
+.opt-arts .value{font-size:13px}
+.opt-arts .obs.bad{color:var(--warn)}
+.arts-list{display:flex;flex-direction:column;gap:2px}   /* no inner scrollbar: the column / phone sheet is the one scrolling surface (rule at "results" above) */
+.arts-sum{font-size:10.5px;color:var(--dim);padding:2px 0 4px}
+.arts-row{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;min-height:44px;padding:4px 2px;cursor:pointer;border-top:1px dotted var(--line)}
+.arts-row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.arts-row .nm{font-size:12.5px;color:var(--fg);overflow-wrap:anywhere;margin-right:auto;text-align:left}
+.arts-row .iso{font:500 10px/1 var(--mono);color:var(--dim);margin-left:4px}
+.arts-row .n{font:500 12px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--fg)}
+.arts-row::before{content:"▸";color:var(--dim);margin-right:2px}
+.arts-row[aria-expanded="true"]::before{content:"▾"}
+.arts-list[hidden],.arts-objs[hidden]{display:none}   /* display:flex below would otherwise override the hidden attribute */
+.arts-objs{list-style:none;margin:0 0 6px;padding:0 0 0 12px;display:flex;flex-direction:column;gap:8px}
+.arts-o{font-size:11.5px;line-height:1.4;color:var(--fg);overflow-wrap:anywhere}
+.arts-o .arts-met .v{font-family:var(--mono);font-size:11px}
+.arts-o .arts-lab{color:#e7c98f}
+.arts-o .arts-warn{color:var(--dim);font-size:10.5px}
+.arts-o .arts-link{color:rgba(255,179,71,.85);display:inline-block;min-height:24px;padding:2px 0}
