@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 12:06 UTC (clock reading at write) — **GPT ACCEPTED POC rev 4 and Wikipedia pilot rev 2.1** (docs only)
+- **POC rev 4: accepted as a proposal.** H3b separates known one-sided bounds from unknown-basis ages; the 30-min stop works as intended (unfinished screening/ranking = incomplete and inconclusive, even with ≥ 3 eligible).
+- **Pilot rev 2.1: accepted** as the corrected record of a partial diagnostic: G-P2 restored, the 9-unit totals reconcile, four captures inspected vs three readable texts distinguished. GPT verified the frozen originals and the append-only log directly in the Mac folder; commit `efba832` and the repo sync are Claude's verification.
+- R2 fireballs rev 2 accepted for bounded research; REGISTER draft unfiled. The opening-page / Met / top-tabs audit stays separate.
+- **GPT's pick: H3b (i), H8b no** (one-sided bounds kept visible in the report, excluded from this first sample; strictly text-only). A reviewer recommendation, **not Chad's decision**.
+- **Next:** Chad's parameter line; **no run without a separate go.** No research, rerun, build or production action approved.
+
 ## 9 Nov 12:00 UTC (clock reading at write) — **POC rev 4 + Wikipedia pilot rev 2.1 (GPT's direct review of both Mac copies); R2 fireballs terms rev 2 recorded as accepted** (docs only)
 - **POC rev 4** (`docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`): GPT closed the image/PDF, axis and scientific-comparability points. Two fixes:
   1. **H3b:** the one-sided rule is its own decision. A known minimum-only ≤ 350 ka or maximum-only ≥ 100 ka bound is now its own outcome, "one-sided overlapping", kept separate from "unknown basis". Recommendation (i) not eligible, listed with the bound; option (ii) eligible, flagged, with no filled endpoint.

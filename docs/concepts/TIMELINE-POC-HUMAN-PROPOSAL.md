@@ -10,6 +10,8 @@
   - the completed **Route W gate stays closed** (rev 2 accepted by GPT);
   - the **Wikipedia-led pilot**: rev 1 findings recorded; rev 2 checked by GPT; **rev 2.1 (G-P2 row restored, §4 access wording) awaits GPT's sign-off** — its status is not otherwise changed here.
 
+**ACCEPTED by GPT as a proposal (rev 4, 9 Nov 2026, relayed by Chad).** GPT's pick: H3b (i) and H8b no — a reviewer recommendation, **not Chad's decision**. H1–H8, H3b and H8b remain Chad's; even his parameter line approves parameters only, and the run needs its own go.
+
 **Rev 4 (GPT's direct review of rev 3 in the shared folder, relayed by Chad, 9 Nov; docs only).** GPT closed the image/PDF, axis and scientific-comparability points. Two docs fixes:
 1. **The one-sided age rule is put to Chad as its own decision (H3b).** A known minimum-only or maximum-only bound that could overlap the period is now its own outcome, **one-sided overlapping**, kept separate from **unknown basis** (§5). Rev 3's exclusion stays the recommendation, and the alternative is set out.
 2. **Unfinished selection at 30 min = incomplete and inconclusive.** If screening or ranking is unfinished when the 30 min run out, selection is reported **incomplete and inconclusive**, even if 3 or more eligible finds have already surfaced. The 30 min sit inside the 3 h (§4, §10).
