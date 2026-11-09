@@ -39,6 +39,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **NEXT THREAD STARTS HERE (9 Nov, end of the timeline research thread):**
 - **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. All of today's work was docs and research.
+- **TEST A RUN DONE 9 Nov 12:12–12:23 UTC** (Mac packet `research/timeline-test-a/2026-11-09-claude/`): selection pass (Omo, Salé, EH 06, LH 18, Jebel Irhoud); 31 row claims → 9 supported / 7 unsupported / 8 inaccessible / 7 no reference; access was the limit (1 of 6 primary texts in full). **Next: GPT's review of REPORT.md (paths only), then Chad decides** (e.g. a logged-in access run, Test B, or park). Nothing else approved.
 - **PARAMETERS DECIDED 9 Nov 12:10 UTC (Chad):** H1–H8 as recommended, H3b (i), H8b no. Parameters only; **Test A run not started — needs its own go.**
 - **CLOSED 9 Nov (GPT, relayed by Chad):** POC **rev 4 accepted as a proposal**; Wikipedia pilot **rev 2.1 accepted** as the corrected record of a partial diagnostic (GPT verified the frozen originals and append-only log). GPT's pick: H3b (i), H8b no. **Next is Chad's parameter line** (suggested: "H1–H8 as recommended, H3b (i), H8b no. Parameters only."); **the run needs its own go.**
 - *Superseded record —* **Pending with GPT (9 Nov, after GPT's direct review of both Mac copies):**

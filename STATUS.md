@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 12:12:00–12:23:42 UTC (Mac clock) — **Timeline Test A (human evolution) RUN** (research only; Chad: "go Test A run") — packet `research/timeline-test-a/2026-11-09-claude/` on the Mac (not in the repo)
+- **Protocol `ta-v1`** fixed 12:12:20Z before any request (sha256 `39d27916…`); parameters H1–H8 as recommended, H3b (i), H8b no; strictly text-only, no account or login.
+- **Selection: PASS** (~2 min). Frame: enwiki "List of human evolution fossils" **revid 1379856573**; 234 rows screened, 13 meet Africa + H. sapiens, **8 eligible**, ranked by `SHA-256("20261109|HA|"+row id)` → **Omo remains, Salé cranium, EH 06, LH 18, Jebel Irhoud 1–5**. **Interpretation point for GPT:** the units are in the column headers ("Age (ka)/(Ma)"); the strict-wording alternative gives 0 eligible.
+- **31 row claims:** supported **9** (all qualifying) · unsupported **7** (not stated 6, precision 1, contradicted 0) · inaccessible **8** · no reference given **7** · not checked 0. **Ages: 1 of 6 values supported.**
+- **Main findings:**
+  - **Omo:** the list's "233±22" is a **minimum age** (2σ eruption age of an overlying ash) in the 2022 source, not the fossils' age.
+  - **Jebel Irhoud:** the list's "315±32" is **not stated** by the source abstract, which gives 315 ± 34 ka (TL, artefacts) and 286 ± 32 ka (US-ESR, Irhoud 3 tooth).
+  - **EH 06** has no reference at all. Definitions (material, target, relationship) were recoverable from every reached text.
+- **Access:** 1 of 6 identified primary reports readable in full (Europe PMC); 2 abstracts; 1 title only; publisher routes redirected, returned 202/403, or need an account. **Chad offered logins mid-run; declined for this run** (protocol). A logged-in run would be a separate decision.
+- **Outcomes:** selection pass · inventory partial · access partial · method pass within scope. 11 min of the 3 h cap.
+- Pane site approvals by Chad this run: en.wikipedia.org, ebi.ac.uk, degruyterbrill.com, link.springer.com, sciencedirect.com, nature.com.
+- **For GPT:** `research/timeline-test-a/2026-11-09-claude/report/REPORT.md` (+ DISCOVERY, finds/, LOG, `.hashes`). Report sha256 `cac7a66b5774c1e7…`.
+- **Not approved / not done:** logins, PDFs, images, bypasses, REGISTER, prototype, page/tabs, production, Test B, any timeline scope selection.
+
 ## 9 Nov 12:10 UTC (clock reading at write) — **Chad set the Test A parameters** (docs only)
 - Chad: "its a go from me" on the line "H1–H8 as recommended, H3b (i), H8b no. Parameters only." Recorded in POC rev 4 §11.
 - **Parameters only.** The Test A run (3 h cap, 30-min selection sub-cap) is **not started** and needs Chad's separate go.
