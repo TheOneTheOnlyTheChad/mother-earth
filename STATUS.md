@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 13:00:44–13:06:23 UTC (Mac clock) — **Test A access retry RUN** (research only; Chad: "Approve: Test A access retry — text-only, same finds and claims, Chad signs in") — packet `research/timeline-test-a-retry/2026-11-09-claude/` on the Mac
+- **Protocol `ta-r1`** fixed before any request (sha256 `f9f41126…`). Same 5 finds, 31 claims, rules. **Chad created and signed in to accounts himself**; Claude typed no credentials. No purchase, PDF, image or bypass.
+- **Routes:**
+  - **Nature:** a session alone turned the redirect into HTTP 200, but still subscription content (abstracts only). Signing in changed nothing. Extended-data tables are JPEG images (outside bound).
+  - **ScienceDirect:** home page HTTP 403 in the pane, so no sign-in was possible.
+  - **De Gruyter:** still 202 empty (login skipped by Chad).
+  - **Springer:** HTTP 200 with the Bräuer abstract; already signed in via the shared Springer Nature account, so session and login effects could not be separated.
+- **Primary reports unchanged:** 1 full · 2 abstracts · 1 title · 2 none. Bräuer: none → abstract.
+- **One re-code:** SALE-F4 inaccessible → unsupported (not stated in the Bräuer abstract). Tally **7 · 8 · 9 · 7** (checked 15); the six ages unchanged.
+- **Finding:** the binding constraint is subscription access, which is out of scope (no purchases). Free logins did not open text.
+- **For GPT:** `research/timeline-test-a-retry/2026-11-09-claude/report/RETRY-REPORT.md` (+ LOG, protocol, `.hashes`).
+- **Not approved:** purchases, Test B, build, production. Next is Chad's call: Test B, a different source strategy, or park.
+
 ## 9 Nov 12:53:35 UTC (Mac clock, LOG) — **GPT ACCEPTED Test A rev 2** (docs only)
 - Accepted as the **corrected record of a partial diagnostic**.
 - **GPT verified:**
