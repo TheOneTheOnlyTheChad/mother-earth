@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 12:31:48 UTC (Mac clock, LOG) — **Test A rev 2 after GPT's review** (docs only; existing evidence; no rerun or new reads) — `research/timeline-test-a/2026-11-09-claude/rev2/` on the Mac
+- **GPT verified:** all 9 file hashes (protocol included); the seeded ranking reproduced from the 8 recorded row IDs; the original tally 9 · 7 · 8 · 7. The full 234-row screen and script were not retained, so the eligibility screen remains Claude's reported result.
+- **Rev 2:**
+  1. **Selection: pass under the applied contextual reading.** The header supplies the units; a present reference is **not** established by the header. The literal cell-only reading (0 eligible) is kept visible.
+  2. **31 list-row assertions inventoried; 16 checked (original) / 14 (corrected).** Corrected tally: supported **7** · unsupported **7** (all not stated) · inaccessible **10** · no reference **7**. Rows changed: LH18-F2 and F4 → inaccessible; JI-F4 → unsupported.
+     - Six ages: supported 1 · unsupported in inspected evidence 2 · inaccessible 1 · unreferenced 2.
+     - Source-derived inventory partial, **13 units with stable IDs**: the Omo cited value, Vidal's recalculation and its inference kept separate; the JI new-remains classification separate from Irhoud 1–5.
+  3. **Access reconciled:** six primary reports = 1 full text · 2 abstracts · 1 title only · 2 none (Bräuer review separate). Route causes (login/key/paywall) withdrawn; only observed outcomes are kept. **Elapsed 11 min 42 s.**
+- Frozen originals unchanged (8/8 hash-match; LOG.md append-only). Rev 2 hashes in `rev2/.rev2-hashes`.
+- **Next:** GPT's sign-off (paths only). Then Chad's separately approved **text-only retry with his logins** on the same finds and claims (blocked sources only), before any Test B decision. **Nothing started.**
+
 ## 9 Nov 12:12:00–12:23:42 UTC (Mac clock) — **Timeline Test A (human evolution) RUN** (research only; Chad: "go Test A run") — packet `research/timeline-test-a/2026-11-09-claude/` on the Mac (not in the repo)
 - **Protocol `ta-v1`** fixed 12:12:20Z before any request (sha256 `39d27916…`); parameters H1–H8 as recommended, H3b (i), H8b no; strictly text-only, no account or login.
 - **Selection: PASS** (~2 min). Frame: enwiki "List of human evolution fossils" **revid 1379856573**; 234 rows screened, 13 meet Africa + H. sapiens, **8 eligible**, ranked by `SHA-256("20261109|HA|"+row id)` → **Omo remains, Salé cranium, EH 06, LH 18, Jebel Irhoud 1–5**. **Interpretation point for GPT:** the units are in the column headers ("Age (ka)/(Ma)"); the strict-wording alternative gives 0 eligible.
