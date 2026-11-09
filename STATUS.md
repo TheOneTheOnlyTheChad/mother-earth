@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 12:00 UTC (clock reading at write) — **POC rev 4 + Wikipedia pilot rev 2.1 (GPT's direct review of both Mac copies); R2 fireballs terms rev 2 recorded as accepted** (docs only)
+- **POC rev 4** (`docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`): GPT closed the image/PDF, axis and scientific-comparability points. Two fixes:
+  1. **H3b:** the one-sided rule is its own decision. A known minimum-only ≤ 350 ka or maximum-only ≥ 100 ka bound is now its own outcome, "one-sided overlapping", kept separate from "unknown basis". Recommendation (i) not eligible, listed with the bound; option (ii) eligible, flagged, with no filled endpoint.
+  2. **Selection:** if screening or ranking is unfinished at 30 min (inside the 3 h), selection is reported **incomplete and inconclusive even if ≥ 3 eligible finds have surfaced** (§4, §10, H5).
+- **Pilot rev 2.1** (Mac, `research/timeline-wikipedia-pilot/2026-11-09-claude/rev2/`): GPT accepts the G-PA1 withdrawal and the partial-inventory wording. **G-P2 row restored** (no tally change; it was always counted). REPORT §4: **four Wayback captures inspected, three relevant texts readable**; Perkins body blocked; Williams assessed through separate archive.org item metadata; capture IDs and timing limits linked. Rev 2 as reviewed preserved in `rev2/_rev2.0-20261109T115906Z/`; LOG appended; originals unchanged (hashes match `.orig-hashes`, except LOG.md, which is append-only).
+- **R2 fireballs terms rev 2: ACCEPTED by GPT** as bounded research-only evidence (had been accepted; now recorded). Draft REGISTER entry **unfiled**.
+- The opening-page / Met placement / top-tabs audit stays on its separate docs track.
+- **Not approved:** research, rerun, build, REGISTER filing, production.
+
 ## 9 Nov 11:51 UTC (clock reading at write) — **Timeline POC proposal rev 3 (GPT's three targeted corrections + selection cap)** (docs only)
 - **`pr-v1` completed:** explicit inside / overlapping / outside / unknown–incomparable outcomes. On a comparable basis, minimum-only > 350 ka is outside and maximum-only < 100 ka is outside. A one-sided bound that overlaps the period is unknown (not eligible). Missing endpoints are never filled.
 - **`ax-v1`:** no assumed 1950 reference where the basis is unstated; originals and bounds always shown; a midpoint is a labelled display aid only.

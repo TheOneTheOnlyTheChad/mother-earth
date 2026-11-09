@@ -1,4 +1,4 @@
-# Timeline POC — human evolution and human history: bounded test proposal (rev 3, 9 Nov 2026)
+# Timeline POC — human evolution and human history: bounded test proposal (rev 4, 9 Nov 2026)
 
 **Status: proposal only (docs).** Chad's brief, 9 Nov: orient the next timeline proof-of-concept toward human history and evolution, using the accepted timeline concept (`docs/concepts/TIMELINE-CONCEPT.md` rev 3.1), the project records and the lessons of the completed pilots.
 
@@ -8,7 +8,11 @@
 - This proposal **selects neither the final timeline scope nor a research route**, and it is a research test, **not a prototype**. All parameters are recommendations for Chad's decision (§11), after GPT's review.
 - **Related records:**
   - the completed **Route W gate stays closed** (rev 2 accepted by GPT);
-  - the **Wikipedia-led pilot**: rev 1 findings recorded; **rev 2 corrections written after GPT's review and awaiting GPT's check of rev 2** — its status is not otherwise changed here.
+  - the **Wikipedia-led pilot**: rev 1 findings recorded; rev 2 checked by GPT; **rev 2.1 (G-P2 row restored, §4 access wording) awaits GPT's sign-off** — its status is not otherwise changed here.
+
+**Rev 4 (GPT's direct review of rev 3 in the shared folder, relayed by Chad, 9 Nov; docs only).** GPT closed the image/PDF, axis and scientific-comparability points. Two docs fixes:
+1. **The one-sided age rule is put to Chad as its own decision (H3b).** A known minimum-only or maximum-only bound that could overlap the period is now its own outcome, **one-sided overlapping**, kept separate from **unknown basis** (§5). Rev 3's exclusion stays the recommendation, and the alternative is set out.
+2. **Unfinished selection at 30 min = incomplete and inconclusive.** If screening or ranking is unfinished when the 30 min run out, selection is reported **incomplete and inconclusive**, even if 3 or more eligible finds have already surfaced. The 30 min sit inside the 3 h (§4, §10).
 
 **Rev 3 (GPT's review of rev 2, relayed by Chad, 9 Nov; docs only).** Rev 2's accepted improvements are kept. Changes:
 1. `pr-v1` now has explicit **inside / overlapping / outside / unknown–incomparable** outcomes. On a comparable basis, a minimum-only age above 350 ka and a maximum-only age below 100 ka are outside. Missing endpoints stay unknown. `ax-v1` assumes no 1950 reference where the basis is unstated. A midpoint is a labelled display aid only (§5).
@@ -75,7 +79,12 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 - **Selection:** all eligible finds if ≤ 5; otherwise the first 5 by `SHA-256("<seed>|HA|" + stable row identifier)`.
 - **Recorded before assessment:** route, list identity and revision, the exact rules, the seed, row identifiers.
 
-**No silent switch, no extension.** Frame discovery and selection get **at most 30 minutes, inside the 3 h total**. If within that time no usable frame is found, or it yields fewer than 3 eligible finds (an operational floor, not a statistical one), **selection stops and is reported inconclusive**. The run does not move to A2 or A3; either would be a separate decision by Chad.
+**No silent switch, no extension.** Frame discovery and selection get **at most 30 minutes, inside the 3 h total** (not added to it). Selection stops and is reported **inconclusive** if, within that time:
+- no usable frame is found; or
+- the frame yields fewer than 3 eligible finds (an operational floor, not a statistical one); or
+- **screening of the frame rows or the ranking is still unfinished at 30 min.** Then selection is reported **incomplete and inconclusive, even if 3 or more eligible finds have already surfaced**. Finds seen so far are listed as seen, not as selected, and nothing goes on to tracing.
+
+ The run does not move to A2 or A3; either would be a separate decision by Chad.
 - **A2** (alternative for Chad): a named review article as the frame.
 - **A3** (alternative for Chad): Chad names the finds, recorded as his choice.
 
@@ -102,10 +111,12 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 | **Inside** | the stated range (value ± stated uncertainty, at the stated basis) lies wholly within 350–100 ka |
 | **Overlapping** | part of the stated range lies inside and part outside → **eligible, flagged "boundary — overlaps the period edge"** |
 | **Outside** | the whole stated range lies outside. **Minimum-only (≥ X):** outside if X > 350 ka. **Maximum-only (≤ Y):** outside if Y < 100 ka. |
-| **Unknown / incomparable** | no comparable basis (unstated quantity, units or reference; no uncertainty for a range test), **or** a one-sided bound that still overlaps the period: a minimum-only X ≤ 350 ka or a maximum-only Y ≥ 100 ka, whose missing endpoint stays **unknown** → **listed, not eligible**, with the reason |
+| **One-sided overlapping** | a **known** one-sided bound on a comparable basis that could overlap the period: a minimum-only X ≤ 350 ka, or a maximum-only Y ≥ 100 ka. The missing endpoint stays **unknown**. **Recommendation: listed, not eligible** (rev 3's rule); the alternative is in H3b |
+| **Unknown basis** | no comparable basis: unstated quantity, units or reference, or no uncertainty for a range test → **listed, not eligible**, with the reason. Kept separate from one-sided overlapping: here the age itself cannot be placed, while there the bound is known and only one end is missing |
 
 - **Missing endpoints are never filled in.** A minimum-only age has an unknown upper end, and a maximum-only age an unknown lower end.
-- A find is eligible if **any** of its frame-stated results is inside or overlapping. All its results and their outcomes are listed.
+- **H3b, the one-sided rule, is Chad's decision.** Option (i), recommended: one-sided overlapping results are **not eligible**; they are listed with their bound. Option (ii): they are **eligible, flagged "one-sided — other end unknown"**, never given a filled-in endpoint or a midpoint. (ii) would admit finds whose age may lie wholly outside the period.
+- A find is eligible if **any** of its frame-stated results is inside or overlapping (or one-sided overlapping, under H3b option ii only). All its results and their outcomes are listed.
 - **Eligibility is judged at selection from the discovery frame row.** If the papers later show a different basis, that difference is recorded, and **selection is not redone**.
 
 **Our axis (T3, versioned `ax-v1`):**
@@ -204,7 +215,7 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 **Four outcomes, reported separately (one does not imply another):**
 | Outcome | Pass | Partial | Inconclusive |
 |---|---|---|---|
-| **Selection** | ≥ 3 eligible finds from the fixed frame, selected by the rule | — | frame not found within the sub-cap, or < 3 eligible (**no switch to A2/A3**) |
+| **Selection** | ≥ 3 eligible finds from the fixed frame, screened and ranked by the rule **within the 30 min** | — | frame not found within the sub-cap; or < 3 eligible; or **screening/ranking unfinished at 30 min — reported incomplete and inconclusive even if ≥ 3 eligible have surfaced** (**no switch to A2/A3**) |
 | **Inventory** | all revealed units of the frozen types logged, completeness assessed per find | some sources not reached or the cap hit; missing parts named | completeness cannot be assessed |
 | **Access** | text routes reached for the primary reports | some inaccessible or image-only (named) | most primary reports inaccessible |
 | **Method** | every logged unit has one disposition; ages carry their definitions; disagreements compared only on a recorded referent; no T3 link implies ancestry; within the cap | cap reached with units not checked | method could not be applied honestly |
@@ -217,9 +228,10 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 |---|---|---|
 | H1 | Two separate tests vs one shared | Two; Test A first |
 | H2 | Test A question | §2 |
-| H3 | Period, geography, period rule | ~350–100 ka; Africa; present-day country + site; `pr-v1` (inside / overlapping eligible; outside and unknown–incomparable not eligible) |
+| H3 | Period, geography, period rule | ~350–100 ka; Africa; present-day country + site; `pr-v1` (inside / overlapping eligible; outside and unknown basis not eligible) |
+| H3b | One-sided bounds that could overlap the period (minimum-only ≤ 350 ka, maximum-only ≥ 100 ka) | (i) **not eligible, listed with the bound** [recommended]; or (ii) eligible, flagged "one-sided — other end unknown", no filled endpoint or midpoint |
 | H4 | Entries | ≤ 5; operational floor 3 |
-| H5 | Discovery route and selection cap | A1, ≤ 30 min inside the 3 h; stop and report if unusable/insufficient; no automatic A2/A3 or extension |
+| H5 | Discovery route and selection cap | A1, ≤ 30 min inside the 3 h; stop and report if unusable/insufficient, **or incomplete and inconclusive if screening/ranking is unfinished at 30 min**; no automatic A2/A3 or extension |
 | H6 | Claim types and units | F1–F5 frozen as types (§6); every revealed unit logged; completeness assessed after inspection |
 | H7 | Effort cap | 3 h + one GPT review |
 | H8 | Sensitivity and image handling | strictly text-only (direct text/XML, unrendered HTML without image resources); otherwise outside bound / inaccessible; terms quoted as the source's |

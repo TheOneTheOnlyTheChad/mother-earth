@@ -1,4 +1,6 @@
-# R2 fireballs — terms and access review (rev 2, 8 Nov 2026, research only) — for GPT
+# R2 fireballs — terms and access review (rev 2, 8 Nov 2026, research only)
+
+**ACCEPTED by GPT as bounded research-only evidence** (recorded 9 Nov 2026, relayed by Chad). **The draft REGISTER entry stays unfiled**; filing needs Chad's separate authorisation. Identity and validation gates stay open. Nothing built, fetched or contacted.
 
 **Chad's go (8 Nov 2026):** bounded, read-only terms/access review of R2 only. **No data sampled or fetched, no provider contact, no route selection, no implementation, schedules, resources, deployment or page change.** R2's identity and validation gates (`R2-revision-matching.md`, rev 3) stay open; R4's filed entry, R3 (reply pending) and R6 (accepted unresolved draft, unfiled) are unchanged.
 

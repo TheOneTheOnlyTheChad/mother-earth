@@ -33,15 +33,16 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | Timeline concept | **Rev 3.1 accepted by GPT as a concept only. Route W gate parameters proposal **rev 4 ACCEPTED by GPT 9 Nov**; **first gate RUN 9 Nov 08:34–09:01 UTC; GPT review → rev 2 **accepted by GPT** (deviation recorded, coverage incomplete, selection inconclusive; not a feasibility/coverage pass or route clearance)** (`docs/concepts/TIMELINE-ROUTE-W-GATE-PROPOSAL.md`; route and parameters D1–D8 are Chad's).** Route L (library first) and Route W (Wikipedia/Wikidata first), each with a bounded gate; GPT suggests considering W first. No route selected; the gate was its only authorised research. | `docs/concepts/TIMELINE-CONCEPT.md` |
 | Provider enquiries | USNO, adsb.lol, Ozone Watch, CNEOS sent — replies pending; OpenSky #837506 acknowledgement supplied + **substantive reply 9 Nov, linked to Chad's sent enquiry (ENQUIRIES rev 5, **accepted by GPT**): Q2 a contextual reading only; Q1b, Q1c, Q3 unanswered** (conditions beside REGISTER; not blanket permission); adsb.fi prepared, **not sent**. | `docs/research/ENQUIRIES-2026-11.md` |
 | Aircraft | Reopened **only** for bounded terms/access and feeder clarification. `aircraft-rc` parked. | — |
-| R2 fireballs terms | Rev 2 still awaiting GPT's review (unchanged since 8 Nov). | `docs/research/R2-terms-access.md` |
+| R2 fireballs terms | **Rev 2 ACCEPTED by GPT** as bounded research-only evidence (recorded 9 Nov); draft REGISTER entry **unfiled**. | `docs/research/R2-terms-access.md` |
 | Inspiration list | Chad's 50 sites, kept separate from the research backlog; queues no work. | `docs/INSPIRATION-50-SITES.md` |
 | CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
 
 **NEXT THREAD STARTS HERE (9 Nov, end of the timeline research thread):**
 - **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. All of today's work was docs and research.
-- **Pending with GPT:**
-  - **(a)** timeline POC proposal **rev 3** (`docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`, sent 9 Nov; H1–H8 + H8b are Chad's);
-  - **(b)** the Wikipedia-led pilot **rev 2** (`research/timeline-wikipedia-pilot/2026-11-09-claude/rev2/` on the Mac), awaiting GPT's check.
+- **Pending with GPT (9 Nov, after GPT's direct review of both Mac copies):**
+  - **(a)** timeline POC proposal **rev 4** (`docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`): H3b one-sided rule put to Chad; selection incomplete/inconclusive if unfinished at 30 min. H1–H8 + H3b + H8b are Chad's.
+  - **(b)** the Wikipedia-led pilot **rev 2.1** (`research/timeline-wikipedia-pilot/2026-11-09-claude/rev2/` on the Mac): G-P2 row restored; §4 access wording.
+  - The opening-page / Met placement / top-tabs audit stays on its own docs track.
 - **Closed:** Route W gate (rev 2 accepted); ENQUIRIES rev 7 (OpenSky, accepted).
 - **Design note (Chad):** the timeline needs its own page and view, via **tabs at the top of the screen**, not the opening globe page. A later UX proposal; nothing built. A parallel docs-only opening-page / Met placement review is referenced by GPT but not held in this repo.
 - **No research run, build or production action is approved.**
@@ -69,7 +70,7 @@ Selection stays **inconclusive** (1 event). **Next:** GPT's check of rev 2 (path
 **Next, each on Chad's go:**
 1. **R2 upload DONE 9 Nov 06:11:12 UTC** (Chad's Approve line): `ref/arts/met-R1-e394878.json`, read back sha256 `221bb1ca…9644` exact. No public effect while the hub is 0.6.1. **Rollback target pinned:** live hub 0.6.1, worker.js sha256 `f38296a0…2cc8`.
 2. **Hub 0.6.2 DEPLOYED 9 Nov 06:13:19 UTC** and **page RELEASED 06:20:18 UTC** (main `6d5ca55`), verified (served hashes, live read). **GPT's independent live smoke test (~06:44–06:52 UTC): no blocking defect within the checks completed** (limits in STATUS 9 Nov: GPT did not independently hash index/app/arts/sources or capture raw HTTP status codes; one non-blocking wording note on the Sources table row, no fix requested). **Closed by Claude's tidy-up (06:59 UTC, STATUS):** no-store served hashes for all five page files, raw HTTP status codes (`/cells/arts` 404, health 8/8 200), production Worker CPU (1 ms per `/snapshot/arts`). **Outstanding:** iPhone Safari check (Chad); cold-load after-measurement (Chad, fresh profile; no live "before" any more); served transfer size; optional VoiceOver. Rollback page-first: revert `6d5ca55` → hub 0.6.1 `f38296a0…` → R2 object, each its own Approve line.
-3. GPT's review of R2 fireballs terms rev 2.
+3. ~~GPT's review of R2 fireballs terms rev 2~~ **accepted** (bounded research-only evidence); REGISTER draft unfiled.
 4. Later, each a separate decision: timeline route/gate; remaining backlog first gates (R5, R7, R10); Phase 0 domain decision; GIBS beyond the bench.
 5. Still open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
 
