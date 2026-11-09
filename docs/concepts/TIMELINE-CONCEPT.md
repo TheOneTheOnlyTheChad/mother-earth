@@ -1,6 +1,8 @@
-# Evidence-linked historical timeline — concept proposal (rev 3, 9 Nov 2026)
+# Evidence-linked historical timeline — concept proposal (rev 3.1, 9 Nov 2026)
 
 **Status: concept only.** Written from Chad's brief (9 Nov 2026) and existing project records. No provider research, downloads, sampling, accounts, emails, parsing, prototype, building, resources or deployment. **Separate from Arts and from the active research backlog** (`docs/RESEARCH-BACKLOG.md`). It does not select History, start Phase 0 work for it, or authorise Phase A. All existing approvals, accepted reviews and parked/stopped decisions are unchanged.
+
+**Rev 3.1 (GPT's review of rev 3; docs only):** effort wording made unmeasured-honest (§5B); written accounts classified individually by their relationship to the event — contemporary, later recollection, later history or summary — never by format (§3.1, §5B); claim dispositions and a reconciled publication rule (§5A.1, §5A.4, §5B). GPT supports Route W as the first option to consider, with library work later deepening or challenging it — a recommendation, not a route selection or research approval.
 
 **Rev 3 (Chad, 9 Nov; docs only):** a second possible starting route — **Route W, Wikipedia/Wikidata first** — added alongside the library-first route (now **Route L**): source roles and rules (§5A), separate reuse questions (§4.1), a bounded first gate (§5A.4, not run), a comparison of the two routes and how later book mining could deepen or challenge a Route W timeline (§5B). T2 split into contemporary accounts and encyclopedic/structured assertions (§3.1). **No source is adopted or cleared by adding the option.**
 
@@ -27,11 +29,16 @@ It fits the constitution (1 Nov) as written: **live data, real things** (provena
 | Tier | What it is | Example wording | Labelled as |
 |---|---|---|---|
 | **T1 — Physical evidence and dated events** | Measurements and material evidence with their own dating: instrument records, excavations, sediment or geological layers, dated artefacts. **Every date derived from material evidence keeps its dating method and its stated uncertainty** (e.g. the method and its ± range as the source reports them); a T1 date is never shown without them. | "River gauge recorded a crest of … on …"; "layer dated to … ± … by <method>" | Observed / dated (with method and uncertainty) |
-| **T2 — What a source records or claims** | A passage in a book, newspaper, chronicle, letter or oral-history record; quoted or summarised with its page reference | "This 1712 book recounts a flood in …" | Recorded by <source> |
+| **T2 — What a source records or claims** | A passage in a book, newspaper, chronicle, letter, recorded interview or reference work; quoted or summarised with its page reference | "This 1712 book recounts a flood in …" | Recorded by <source> |
 | **T3 — Our computed matches and proposed connections** | Theme matches, date/place alignments and proposed links made by our method | "Our method matches these two passages to one event (basis: …)" | Computed by Mother Earth |
 
 **Rules that follow from the brief:**
-- **T2 has two kinds, always labelled:** **T2-c — contemporary or near-contemporary accounts** (a newspaper report of the day, a chronicle, a letter, an oral-history record) and **T2-s — summaries and structured assertions** made later about the event (encyclopedia articles, Wikidata statements, later histories). A T2-s item points to its references; it is never treated as a contemporary account or as physical evidence.
+- **Each T2 item is classified individually by its relationship to the event, always labelled:**
+  - **T2-c — contemporary or near-contemporary account:** written or recorded at or close to the time by someone placed to know (a report of the day, a letter, a diary entry, a chronicle entry made at the time);
+  - **T2-r — later recollection:** a participant's or witness's own account recorded later (a memoir, a later interview), with the gap between event and recording stated;
+  - **T2-h — later history:** an account by someone not present, written later from other sources;
+  - **T2-s — summary or structured assertion:** an encyclopedia article, a Wikidata statement, a digest or compilation.
+  **Format alone never decides the category:** a book can print a contemporary diary, a newspaper can print a recollection decades later, an encyclopedia can quote a contemporary letter. Where the relationship cannot be established, the item says "relationship to the event unknown" rather than guessing. T2-r, T2-h and T2-s items point to their sources where they give them; none is treated as physical evidence.
 - **A recorded story is evidence that the story exists**, not automatically proof of the event it describes. A T2 item never becomes T1 by repetition.
 - **Copies are not corroboration.** Several books (or reprinted newspaper columns) carrying one account count as **one** account. Each pair or group of T2 accounts carries one of **three lineage states**:
   - **independent, with supporting evidence** — the evidence for independence is stated (e.g. different observers, places and details, with no shared text); the absence of a *known* common source is **not** proof of independence;
@@ -117,7 +124,7 @@ Same shape as Phase 0: an effort cap set by Chad, one GPT review, research only.
 ### 5A.1 Roles
 - **Wikidata:** a candidate source for **identifiers** (the shared-key direction), **events, dates, places and relationships** as structured assertions (T2-s), each with its stated precision, qualifiers and references.
 - **Wikipedia:** **explanatory context, alternative names and references** (T2-s). Its text is not published as the evidence for a claim.
-- **Supporting sources:** every historical claim we **publish** rests on the supporting sources it can be traced to (T2-c, T1, or a named later work), not on the encyclopedia statement alone. Where no supporting source can be traced, the item says so.
+- **Supporting sources and the publication rule:** a claim is shown **as an established event** only when it is traced to supporting sources (T1, T2-c, or a named T2-r/T2-h work), each shown with its category. An assertion that has **not** been traced may be displayed only **explicitly as an unverified source assertion** — "Wikidata (revision …) states …; not traced to a supporting source" — never as an established event, and never counted as corroboration.
 
 ### 5A.2 Rules
 - **Pinned revisions:** every Wikidata item and Wikipedia article used is recorded with its **exact revision ID**, the **retrieval date** and the **date we last checked** it. What we show is tied to that revision, not to "the current page".
@@ -135,28 +142,34 @@ Same shape as Phase 0: an effort cap set by Chad, one GPT review, research only.
 Same theme, period and region as Route L would use (water/flood events, one bounded period and region), so the two routes could later be compared on the same ground.
 1. **Bounded selection:** within the cap, a small set of candidate flood events (e.g. ≤ 30) identified from Wikidata by a **stated, recorded selection rule** (item type, date range, place), with the rule, the item IDs, revision IDs and retrieval dates recorded. If no workable set is established within the cap, the gate ends **blocked or inconclusive**.
 2. **Per event:** dates with their precision and qualifiers, place with its uncertainty, the references attached to each claim, the Wikipedia article revision used for context (if any).
-3. **Tracing:** for a bounded subset whose cited works are reachable (named, not assumed), check whether the cited page or passage supports the claim; classify each reference as contemporary account, later work, encyclopedic, or none; group references by lineage (§3.1).
-4. **Reports (pass / blocked / inconclusive, each part separately):** a **research-only terms record** for the four materials in §4.1 with **draft REGISTER wording — nothing filed**; the share of checked claims that are supported, unsupported or not checkable, against the checked subset only; lineage groups and how many accounts are independent *with supporting evidence*; date/place uncertainty as stated; gaps as unassessed coverage; sensitivity flags for Chad.
+3. **Claim inventory and dispositions:** **every selected event and every claim** (date, place, scale, relationship) is listed. Which claims are checked is decided by a **rule recorded before checking** (e.g. all claims of every event, or a seeded random subset of claims), and the rule is reported. Every claim ends with exactly one disposition:
+   - **checked — supported** (the cited page or passage supports it; category of the supporting source stated, §3.1);
+   - **checked — unsupported** (the cited work was reached and does not support it, or contradicts it);
+   - **inaccessible** (selected for checking, but the cited work could not be reached; named, with why);
+   - **no reference given** (the claim cites nothing);
+   - **not checked** (outside the checking rule).
+   References are grouped by lineage (§3.1).
+4. **Reports (pass / blocked / inconclusive, each part separately):** a **research-only terms record** for the four materials in §4.1 with **draft REGISTER wording — nothing filed**; the full claim inventory with dispositions and the checking rule; **support rates computed over checked claims only** (supported ÷ (supported + unsupported)), with the inaccessible, no-reference and not-checked counts shown beside them and never folded in; lineage groups and how many accounts are independent *with supporting evidence*; date/place uncertainty as stated; gaps as unassessed coverage; sensitivity flags for Chad.
 5. **Evaluation limits:** the gate measures claim support **among the events selected**; it does **not** measure which events Wikidata lacks (missed events stay unmeasured unless an independent reference list is chosen as an option, as in §5.3).
 6. **Limits:** effort cap set by Chad, one GPT review, research only. No downloads beyond the bounded set, no accounts, no provider contact, no REGISTER filing, no prototype. A cleared gate selects nothing.
 
 ## 5B. Comparing the two starting routes
 | | Route L — library first | Route W — Wikipedia/Wikidata first |
 |---|---|---|
-| Starts from | digitised contemporary material (T2-c), page by page | structured assertions and summaries (T2-s), item by item |
+| Starts from | digitised printed material, page by page, each passage classified by its relationship to the event (§3.1) | structured assertions and summaries (T2-s), item by item |
 | First output | a few hand-checked passages with page references, lineage and dates | a small event skeleton with IDs, dates, places and references |
 | Tests best | the evidence model on primary material: copy chains, two dates, OCR, gaps | identifiers and shared keys; how far published claims can be traced to supporting sources |
 | Main risks | volume, page-image access, OCR quality, rights per item | editor-driven coverage, over-precise dates, circular or missing references, revision churn |
 | Coverage statement | measured for our corpus only | unassessed beyond the selected items |
-| Effort to first result | higher (source selection, hand-checking page images) | lower to a skeleton; tracing references adds effort |
+| Effort to first result | **not measured**; source selection and hand-checking page images are expected to be the main work | **not measured**; expected to need less initial extraction work to reach a skeleton, but reference tracing could dominate the effort |
 
 **How later book mining could deepen or challenge a Route W timeline:**
-- **Deepen:** passages found in books attach to an existing event's ID as T2-c accounts, with page references and their own dates, adding detail the encyclopedia lacks.
+- **Deepen:** passages found in books attach to an existing event's ID, each **classified individually** (§3.1) as a contemporary account, later recollection, later history or summary according to its relationship to the event, with page references and its own publication and event dates. Being in a book does not make a passage contemporary.
 - **Corroborate, carefully:** a book account raises the count only if its independence from the encyclopedia's references is supported by evidence (§3.1); many encyclopedia citations come from the same few books.
 - **Challenge:** contemporary accounts can disagree with an encyclopedia's date, place or scale. The disagreement is shown side by side with sources, not resolved by preferring either.
-- **Fill or expose gaps:** events found in books but absent from Wikidata are added with their own evidence. A Wikidata event with no traceable contemporary account stays shown as an encyclopedic assertion only.
+- **Fill or expose gaps:** events found in books but absent from Wikidata are added with their own evidence and category. A Wikidata event not traced to a supporting source stays displayed only as an **unverified source assertion** (§5A.1), not as an established event.
 
-**Claude's suggestion (for Chad's decision, not a selection):** Route W's gate is the cheaper first look and builds the shared-key spine; Route L's gate is the real test of the evidence model. Running W first and then L on the same theme, period and region would show how much book mining adds or overturns. Either order, or one route only, is a valid choice.
+**Claude's suggestion (for Chad's decision, not a selection):** Route W's gate is expected to need less initial extraction work and builds the shared-key spine, though reference tracing could dominate its effort; Route L's gate is the real test of the evidence model. Neither route's actual time or cost has been measured. GPT also supports Route W as the first option to consider, with library work later deepening or challenging it. Running W first and then L on the same theme, period and region would show how much book mining adds or overturns. Either order, or one route only, is a valid choice.
 
 ## 6. Decisions for Chad (none taken)
 1. Whether to run a first feasibility gate at all, which route (L, W, or both in an order), and when, relative to Arts and the research backlog.
