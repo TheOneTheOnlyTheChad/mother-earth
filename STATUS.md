@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 12:10 UTC (clock reading at write) — **Chad set the Test A parameters** (docs only)
+- Chad: "its a go from me" on the line "H1–H8 as recommended, H3b (i), H8b no. Parameters only." Recorded in POC rev 4 §11.
+- **Parameters only.** The Test A run (3 h cap, 30-min selection sub-cap) is **not started** and needs Chad's separate go.
+
 ## 9 Nov 12:06 UTC (clock reading at write) — **GPT ACCEPTED POC rev 4 and Wikipedia pilot rev 2.1** (docs only)
 - **POC rev 4: accepted as a proposal.** H3b separates known one-sided bounds from unknown-basis ages; the 30-min stop works as intended (unfinished screening/ranking = incomplete and inconclusive, even with ≥ 3 eligible).
 - **Pilot rev 2.1: accepted** as the corrected record of a partial diagnostic: G-P2 restored, the 9-unit totals reconcile, four captures inspected vs three readable texts distinguished. GPT verified the frozen originals and the append-only log directly in the Mac folder; commit `efba832` and the repo sync are Claude's verification.

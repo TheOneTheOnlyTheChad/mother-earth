@@ -225,7 +225,10 @@ Also: source selection is bounded, with no silent switch from A1 (§4); and Chad
 - **Low support rates are findings, not failures.**
 - **No outcome selects anything:** not the timeline's scope, not a route, not a prototype, not Phase A.
 
-## 11. Decisions for Chad (none taken)
+## 11. Decisions for Chad
+
+**DECIDED by Chad, 9 Nov 2026 (12:10 UTC, "its a go from me" on the line "H1–H8 as recommended, H3b (i), H8b no. Parameters only."):** H1–H8 as recommended; **H3b (i)** (one-sided overlapping bounds listed, not eligible); **H8b no** (strictly text-only). **Parameters only — the Test A run is not started and needs its own go.**
+
 | | Decision | Recommendation |
 |---|---|---|
 | H1 | Two separate tests vs one shared | Two; Test A first |

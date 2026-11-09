@@ -39,6 +39,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **NEXT THREAD STARTS HERE (9 Nov, end of the timeline research thread):**
 - **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. All of today's work was docs and research.
+- **PARAMETERS DECIDED 9 Nov 12:10 UTC (Chad):** H1–H8 as recommended, H3b (i), H8b no. Parameters only; **Test A run not started — needs its own go.**
 - **CLOSED 9 Nov (GPT, relayed by Chad):** POC **rev 4 accepted as a proposal**; Wikipedia pilot **rev 2.1 accepted** as the corrected record of a partial diagnostic (GPT verified the frozen originals and append-only log). GPT's pick: H3b (i), H8b no. **Next is Chad's parameter line** (suggested: "H1–H8 as recommended, H3b (i), H8b no. Parameters only."); **the run needs its own go.**
 - *Superseded record —* **Pending with GPT (9 Nov, after GPT's direct review of both Mac copies):**
   - **(a)** timeline POC proposal **rev 4** (`docs/concepts/TIMELINE-POC-HUMAN-PROPOSAL.md`): H3b one-sided rule put to Chad; selection incomplete/inconclusive if unfinished at 30 min. H1–H8 + H3b + H8b are Chad's.
