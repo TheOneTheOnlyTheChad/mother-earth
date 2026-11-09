@@ -44,7 +44,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 **Next, all on Chad's go:**
 1. GPT's review of R2 rev 2 → corrections if any; filing only on Chad's separate authorisation.
 1a. Arts release proposal **rev 2.1** → Chad's D1–D8 (Approve line in §8). GPT supports it as the basis for a branch-only build.
-1b. Timeline concept (`docs/concepts/TIMELINE-CONCEPT.md`): concept only; any first gate needs Chad's go.
+1b. Timeline concept **rev 2** (`docs/concepts/TIMELINE-CONCEPT.md`, after GPT): concept only; any first gate needs Chad's go.
 2. Remaining backlog: new first gates (R5 coral, R7 tides, R10 solar flares); Phase 0 domain decision (rec. rev 3); GIBS beyond the bench (shadow record / implementation) each a separate decision.
 3. Still left open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
 
