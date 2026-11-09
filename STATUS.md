@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 16:26 UTC (clock reading at write) — **Timeline candidate `9dce186`: withdrawn abstract shown (Chad's (a)); R1 closed; R2 preview PASS** (branch only; release awaits line B)
+- **R1:** Chad pasted the publisher pages: EGU21-16222 is **CC BY 4.0**, and was **withdrawn by its authors on 8 Mar 2021** (new finding; filed verbatim in REGISTER on the branch). Chad chose (a): the card reads "Date note · withdrawn abstract"; the note opens with "2021 EGU conference abstract, withdrawn on 8 March 2021." before the October proposal (also without JS); provenance of the copy read (OpenAlex, 14:03:45 UTC) kept. timeline-ui 584/0; break `no-withdrawal` fails; desktop-overflow 112/0; mobile-pass 131/0.
+- **R2 non-public preview (16:24–16:26 UTC, browser pane, Chad present; files from raw.githubusercontent at `9dce186`, sha256 checked, blob-injected into clean github.io tabs; live site untouched):**
+  - timeline.html at phone width: "Date note · withdrawn abstract" opens the sheet (dialog, modal, background inert) with the withdrawal line first; browser Back closes it, focus on that shortcut, inert/scroll lock released.
+  - at 1280: title open, then (Julian) while open → history length unchanged, state updated; one Back closes the panel, focus on (Julian). No console errors.
+  - index.html against the **live hub**: live readings at 1280 (header 56 px, tabs, Earth now current, `#card-usgs` 8px 10px with its own border) and 390 (header 94 px, Menu and tabs 44 px, no overflow). No console errors.
+  - Limits: cross-page tab navigation goes to the live pages (the Timeline page is not live yet), so moving between pages is checked after release; the pane is not a real phone.
+- **Dry-run merge with main: no overlap; merged page files = the candidate hashes.** Release = Chad's line B.
+
 ## 9 Nov 16:01 UTC (clock reading at write) — **timeline-rc rev 2 @ `c3498bc`: GPT's two smoke findings fixed; phone header 94 px** (branch only; packet rev 2 at `412b8a8`)
 - GPT smoke-tested `31fab7d` on Chad's localhost server (Terminal, `_review/timeline-rc/`) and confirmed two findings:
   1. title → (Julian) while open pushed a second history entry (one Back only collapsed the conversion). **Fixed:** a switch updates the open history entry; focus returns to the most recently used card control. New tests incl. direct link + shortcut; break `switch-pushes` 102 fail.
