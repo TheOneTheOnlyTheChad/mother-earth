@@ -194,8 +194,15 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Use on the page:** **linked only.** Nothing from the page is reproduced; the entry shows our English paraphrase, our conversion and our model, with the checked copy's date and hash beside the link.
 - **Commercial use:** not applicable while linked only. Quoting the text inline needs a separate clearance (e.g. Perseus, CC BY-SA 3.0 US, with attribution and share-alike).
 
-## EGU General Assembly 2021 abstract EGU21-16222 (D'Auria, De Micco, Di Pasquale), doi 10.5194/egusphere-egu21-16222 — Timeline scholarly note (branch `timeline-rc`; not on the page)
-- **Read:** 9 Nov 2026 by Claude via OpenAlex's stored abstract (14:03:45 UTC), not the publisher page; GPT confirmed the wording on an author-hosted copy.
-- **Licence:** **CC BY as reported by OpenAlex (9 Nov 2026). The publisher's own licence statement has NOT been read.** ⚠️ **Release condition R1** (build proposal rev 2 §8): Chad pastes the publisher's operative licence sentence here, or GPT extracts it on his behalf (labelled so), before the Timeline page is released.
-- **Use on the page:** attributed paraphrase (authors, conference, year, DOI link), in a separate scholarly note marked "Not adjudicated by Mother Earth"; not counted as evidence for the entry.
-- **Commercial use:** with attribution — **pending publisher verification (R1).**
+## EGU General Assembly 2021 abstract EGU21-16222 (D'Auria, De Micco, Di Pasquale), doi 10.5194/egusphere-egu21-16222 — Timeline scholarly note (branch `timeline-rc`; not on the page) — ⚠️ ABSTRACT WITHDRAWN 8 Mar 2021
+- **First read:** 9 Nov 2026 by Claude via OpenAlex's stored abstract (14:03:45 UTC), not the publisher page; GPT confirmed the wording on an author-hosted copy. OpenAlex reported the licence as CC BY.
+- **Publisher page read:** 9 Nov 2026, **pasted by Chad** from https://meetingorganizer.copernicus.org/EGU21/EGU21-16222.html (header "EGU21-16222, updated on 04 Mar 2021"):
+  - **Licence line (verbatim):** "© Author(s) 2021. This work is distributed under the Creative Commons Attribution 4.0 License."
+  - **Status line (verbatim):** "This abstract has been withdrawn on 08 Mar 2021."
+- **EGU21 "Licence and copyright" page** (pasted by Chad, 9 Nov 2026; URL not recorded in the paste), operative sentences (verbatim):
+  - "Authors grant any third party the right to use the abstract and its uploaded display materials freely as long as its original authors and citation details are identified."
+  - "The abstract and its display materials are distributed under the Creative Commons Attribution 4.0 International License (CC BY 4.0)."
+- **R1 (licence): closed — CC BY 4.0, confirmed on the publisher's pages.**
+- **⚠️ New finding (9 Nov 2026):** the abstract was **withdrawn by its authors on 8 Mar 2021**. Neither OpenAlex nor the Test B and GPT checks recorded this. The candidate page presents it as a plain conference abstract. **Release held** until Chad decides: (a) show the withdrawal in the note; (b) replace the source after a bounded search (own go); (c) release without the note (departs from the accepted UX; needs GPT).
+- **Use on the page (candidate):** attributed paraphrase (authors, conference, year, DOI link), separate scholarly note, "Not adjudicated by Mother Earth"; not counted as evidence for the entry.
+- **Commercial use:** with attribution (CC BY 4.0: credit, licence link, indicate changes). **Use of this particular abstract pending the withdrawal decision.**
