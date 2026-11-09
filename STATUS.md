@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 14:30 UTC (clock reading at write) — **Timeline entry BUILD PROPOSAL rev 1** (docs only) — `docs/concepts/TIMELINE-ENTRY-BUILD-PROPOSAL.md`
+- One entry (Pliny, *Letters* 6.16) from UX rev 2. Pins S1 (Latin Library page sha256 `b59e819a…e281`, retrieved 14:00:36 UTC) and S3 (EGU21-16222, attributed) from the Mac packet; packet re-checked 14:28 UTC (4 files exact; LOG = hashed original + appended closure line).
+- Carry-forward specified: source link with the checked copy's date and hash and a "may have changed" line; Back/focus for card-opened and direct-link paths, tested at 1280 and 390 px.
+- Decisions T1–T5 for Chad: **T1 page-only (recommended, a bounded dated deviation from "the page is a client") vs the Arts hub pattern**; T2 English-only conversion rule; T3 no search box; T4 Wikidata IDs looked up during build; T5 release order.
+- Approve lines in §10: A = build on branch `timeline-rc` only; B = push to main with the header tabs (the live nav change).
+- **Not approved:** build, nav change, REGISTER filing, any production action.
+
 ## 9 Nov 14:26 UTC (clock reading at write) — **Timeline UX rev 2 ACCEPTED as design direction (GPT + Chad); thread handover** (docs only)
 - **Accepted:** the partial-date shelf, one-action evidence controls and no-JavaScript fallback are specified.
 - **Carry forward into the build proposal** (recorded at the top of the UX doc):
