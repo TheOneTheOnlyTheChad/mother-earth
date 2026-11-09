@@ -38,6 +38,11 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
 
 **NEXT (Route W gate closed, 9 Nov):** **GPT accepted rev 2** as the corrected evidence record of an inconclusive run (`research/timeline-route-w/2026-11-09-claude/rev2/REPORT-rev2.md` on the Mac; wording tidy-up done).
+**Then (9 Nov 10:45–10:54 UTC):** Chad's Go ran the **Wikipedia-led discovery and source-tracing pilot** (`research/timeline-wikipedia-pilot/2026-11-09-claude/report/REPORT.md` on the Mac).
+- 2 articles: Johnstown (baseline) and the Great Flood of 1913.
+- 9 claims: qualifying support 0, repetition 1, unsupported 2, inaccessible 1, no reference given 5.
+- **Next:** GPT's one review (paths only), then Chad decides.
+- **OpenSky:** ENQUIRIES rev 6 recorded Martin's second reply; **linking "3. Yes" needs Chad's sent follow-up** (a screenshot).
 - Selection is inconclusive (1 eligible item). Full source-link/timing assessment and coverage are incomplete.
 - Not a feasibility, coverage, route or build clearance.
 - **Next is Chad's choice, nothing started:** a new gate with a different discovery method; a source-reading L pass; Route L on the same ground; or parking the timeline.

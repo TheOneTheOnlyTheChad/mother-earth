@@ -4,6 +4,33 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 10:45:13–10:54:21 UTC (Mac clock) — **Wikipedia-led discovery and source-tracing pilot RUN** (research only; Chad's Go) — packet `research/timeline-wikipedia-pilot/2026-11-09-claude/` on the Mac (not in the repo)
+- **Protocol** `wp-pilot-v1`, fixed at 10:45:30 before any discovery:
+  - route 1 = Category:Floods in Pennsylvania (+ subcategories at depth 1);
+  - single fallback = search `flood Pennsylvania`, first 50;
+  - eligibility from the pinned lead and infobox (flood event, date in 1870–1927, Pennsylvania stated);
+  - selection all if ≤ 5, else SHA-256 order;
+  - claims = event date and place in the infobox and lead;
+  - ≤ 3 sources per claim.
+- **Discovery:** 16 category members, 2 eligible; the fallback added none. **Austin Dam failure (1911) excluded as a boundary case** (lead and infobox describe the dam; neither states flooding), flagged for GPT.
+- **Selected:** Johnstown Flood (pageid 454915, rev 1380111733, **baseline-labelled**) and Great Flood of 1913 (41070003, rev 1383070635).
+- **9 claims:**
+  - **qualifying support 0**;
+  - repetition 1 (J-D1 date, World Digital Library description, T2-s);
+  - unsupported 2 (G-P1: the cited source names 17 states, not 20, but does state Pennsylvania; G-PA1: the lead's Wed 26 Mar is contradicted by the cited source's Thu 27 Mar, which matches the article's own timeline);
+  - inaccessible 1 (J-P2, *Science News* subscriber-only);
+  - **no reference given 5**.
+  - The **Great Flood of 1913 lead and infobox have no footnotes at all.** No independent corroboration is counted (all lineage unknown).
+- **Sources:** WDL item 9571, Silver Jackets/MRCC "Storms" and "Rivers" (2013, T2-h), all read via Internet Archive captures. *Science News* 2009 is paywalled; *Washed Away* (2013) is borrow-only on archive.org. Chad granted pane access to archive.org.
+- **Effort:** about 9 min of the 3 h cap. Effort was dominated by access routes; small because the case set is small.
+- **For GPT:** `research/timeline-wikipedia-pilot/2026-11-09-claude/report/REPORT.md` (+ `articles/EVIDENCE-TABLE.md`, `sources/SOURCES.md`, `discovery/DISCOVERY.md`, `protocol/PROTOCOL.md`, `LOG.md`).
+- **Not approved / not done:** History selection, Phase A, publication, prototype, REGISTER, provider contact, accounts or borrowing, production.
+
+## 9 Nov 10:44 UTC (commit time, `bb71e56`) — **ENQUIRIES rev 6: OpenSky second reply recorded verbatim** (docs only)
+- Martin (ticket #837506), header "11:35 AM" as Gmail displays it (not converted): "It's automatic on our side, if you've been feeding for 30%+ of the preceeding month." / "3. Yes". Read from Chad's screenshot; Gmail's AI overview not used.
+- **The link to the sent follow-up is PENDING:** the exact sent follow-up (and so its numbering) is not on record. Q3 stays unresolved until Chad supplies it. Nothing is inferred about qualification, measurement or account linking. No REGISTER change; aircraft scope unchanged.
+
+
 ## 9 Nov 10:28 UTC (clock reading at write) — **GPT ACCEPTED Route W gate rev 2** (docs only)
 - **Accepted as the corrected evidence record of an INCONCLUSIVE run.** All substantive review corrections are closed.
 - **GPT verified:**
