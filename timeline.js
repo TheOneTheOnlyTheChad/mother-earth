@@ -3,7 +3,9 @@
  *  - turns the pre-rendered entry into a detail panel (> 720 px, non-modal) or bottom sheet (≤ 720 px, modal);
  *  - keeps ONE shareable fragment per entry (#e-…); a shortcut's expander lives in history state;
  *  - returns focus to the exact opener (title or shortcut) on Close, Esc, handle or Back;
- *  - direct link: focus the detail heading; explicit Close clears the fragment and focuses the card title.
+ *  - direct link: focus the detail heading; explicit Close clears the fragment and focuses the card title
+ *    (or the card control last used to switch the open entry);
+ *  - a title/shortcut used while the entry is open updates the open history entry; it never adds one.
  * No fetch, no third-party request. Menu and clock behave as on the other pages (this page does not load app.js). */
 (() => {
 'use strict';
@@ -94,9 +96,19 @@ const focusHeading = id => { const h = $(id + '-h'); if (h) h.focus(); };
 document.addEventListener('click', ev => {
   const a = ev.target.closest('a[data-entry]'); if (!a || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
   ev.preventDefault();
-  const id = a.dataset.entry, x = a.dataset.x || null, k = ++seq;
+  const id = a.dataset.entry, x = a.dataset.x || null, opener = a.dataset.opener || 'title';
+  if (cur && !detail.hidden && history.state && history.state.entry === cur.id) {
+    // already open: switching title/shortcut UPDATES the open history entry (no new entry), keeps its key and
+    // direct flag; focus on close then returns to this, the most recently used card control
+    openers.set(cur.k, a);
+    history.replaceState({ entry: id, x, opener, direct: cur.direct, k: cur.k }, '', '#' + id);
+    cur = { id, x, k: cur.k, direct: cur.direct };
+    if (show(id, x)) focusHeading(id);
+    return;
+  }
+  const k = ++seq;
   openers.set(k, a);
-  history.pushState({ entry: id, x, opener: a.dataset.opener || 'title', k }, '', '#' + id);
+  history.pushState({ entry: id, x, opener, k }, '', '#' + id);
   cur = { id, x, k, direct: false };
   if (show(id, x)) focusHeading(id);
 });
@@ -105,9 +117,9 @@ document.addEventListener('click', ev => {
 function userClose() {
   if (!cur) return;
   if (!cur.direct && history.state && history.state.entry === cur.id) { history.back(); return; }   // popstate closes and restores focus
-  const id = cur.id;
+  const id = cur.id, k = cur.k;
   history.replaceState(null, '', location.pathname + location.search);   // clears the fragment
-  hide(cardTitle(id));
+  hide(openers.get(k) || cardTitle(id));   // a card control used after a direct link, else the card title
 }
 $('d-close').addEventListener('click', userClose);
 $('d-handle').addEventListener('click', userClose);

@@ -5,7 +5,7 @@
  *   needs a static server on the repo (default http://127.0.0.1:8899). Hub, unpkg, GIBS and Google Fonts are aborted:
  *   this tests the Timeline page, its history/focus behaviour and the header tabs, not live data.
  * Breaks (each must make the suite fail): BREAK=no-focus-return|close-keeps-fragment|shortcut-fragment|no-inert|
- *   axis-79|inline-passage|script-only|no-aria-current|whole-card
+ *   axis-79|inline-passage|script-only|no-aria-current|whole-card|switch-pushes|unscoped-card
  */
 const { chromium } = require('playwright');
 const { execFileSync } = require('child_process');
@@ -20,12 +20,15 @@ const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log(
 // ---------- deliberate breaks, served in place of the real files
 const JS = fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8');
 const HTML = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8');
+const CSSF = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8');
 const must = (s, a, b) => { if (!s.includes(a)) throw new Error('break anchor missing: ' + a.slice(0, 60)); return s.replace(a, b); };
 function brokenJs() {
   if (BREAK === 'no-focus-return') return must(JS, '(focusEl || pageHeading()).focus();', 'pageHeading().focus();');
   if (BREAK === 'close-keeps-fragment') return must(JS, "history.replaceState(null, '', location.pathname + location.search);   // clears the fragment", '');
-  if (BREAK === 'shortcut-fragment') return must(JS, "history.pushState({ entry: id, x, opener: a.dataset.opener || 'title', k }, '', '#' + id);", "history.pushState({ entry: id, x, opener: a.dataset.opener || 'title', k }, '', '#' + id + (x ? '-' + x : ''));");
+  if (BREAK === 'shortcut-fragment') return must(must(JS, "history.pushState({ entry: id, x, opener, k }, '', '#' + id);", "history.pushState({ entry: id, x, opener, k }, '', '#' + id + (x ? '-' + x : ''));"),
+    "history.replaceState({ entry: id, x, opener, direct: cur.direct, k: cur.k }, '', '#' + id);", "history.replaceState({ entry: id, x, opener, direct: cur.direct, k: cur.k }, '', '#' + id + (x ? '-' + x : ''));");
   if (BREAK === 'no-inert') return must(JS, 'others().forEach(n => { n.inert = phone; });', 'others().forEach(n => { n.inert = false; });');
+  if (BREAK === 'switch-pushes') return must(JS, 'if (cur && !detail.hidden && history.state && history.state.entry === cur.id) {', 'if (false) {');
   if (BREAK === 'whole-card') return JS + "\ndocument.querySelectorAll('.card').forEach(c => c.addEventListener('click', ev => { if (!ev.target.closest('a')) c.querySelector('.ctitle a').click(); }));";
   return null;
 }
@@ -37,13 +40,15 @@ function brokenHtml() {
   if (BREAK === 'no-aria-current') return must(HTML, '<a href="timeline.html" data-view="timeline" aria-current="page">', '<a href="timeline.html" data-view="timeline">');
   return null;
 }
-const BJ = brokenJs(), BH = brokenHtml();
+const brokenCss = () => BREAK === 'unscoped-card' ? must(CSSF, 'body.tl .card{', '.card{') : null;
+const BJ = brokenJs(), BH = brokenHtml(), BC = brokenCss();
 
 async function ctx(b, o = {}) {
   const c = await b.newContext(o);
   await c.route(/fonts\.googleapis|workers\.dev|unpkg|gibs|jsdelivr|thelatinlibrary|doi\.org/, r => r.abort());
   if (BJ) await c.route(/timeline\.js/, r => r.fulfill({ contentType: 'application/javascript', body: BJ }));
   if (BH) await c.route(/timeline\.html/, r => r.fulfill({ contentType: 'text/html', body: BH }));
+  if (BC) await c.route(/style\.css/, r => r.fulfill({ contentType: 'text/css', body: BC }));
   return c;
 }
 const W = { 1280: 860, 900: 860, 390: 844 };
@@ -163,6 +168,74 @@ const st = p => p.evaluate(id => {
     }
   }
 
+
+  // ---------- 3b. switching title/shortcut while the entry is open updates the open history entry (GPT, 9 Nov)
+  const SW = [['title', 'julian'], ['julian', 'debated'], ['debated', 'title'], ['title', 'debated']];
+  for (const w of [1280, 900]) for (const [first, then] of SW) for (const how of ['back', 'close']) {
+    const tag = `switch ${w} ${first}→${then} ${how}`;
+    const c = await ctx(b, { viewport: { width: w, height: W[w] } }); const p = await c.newPage();
+    await p.goto(BASE + '/index.html').catch(() => {});
+    await p.goto(BASE + '/timeline.html');
+    await p.click(OPENERS[first]); await p.waitForTimeout(80);
+    const len1 = await p.evaluate(() => history.length);
+    await p.focus(OPENERS[then]); await p.keyboard.press('Enter'); await p.waitForTimeout(80);
+    let s = await st(p);
+    const len2 = await p.evaluate(() => history.length);
+    ok(`${tag}: no new history entry`, len2 === len1, [len1, len2]);
+    ok(`${tag}: open state updated`, s.open && s.hash === '#' + ID && s.state && s.state.x === XFOR[then] && s.state.opener === then, s.state);
+    ok(`${tag}: right expander open`, s.conv === String(XFOR[then] === 'conv') && s.debate === String(XFOR[then] === 'debate'), [s.conv, s.debate]);
+    if (how === 'back') {
+      await p.goBack(); await p.waitForTimeout(120); s = await st(p);
+      ok(`${tag}: one Back closes the panel`, !s.open && s.hash === '' && p.url().endsWith('/timeline.html'), [s.open, s.hash, p.url()]);
+      ok(`${tag}: focus on the last-used control`, s.activeOpener === then, s.active);
+      await p.goForward(); await p.waitForTimeout(120); s = await st(p);
+      ok(`${tag}: Forward reopens with the last expander`, s.open && s.conv === String(XFOR[then] === 'conv') && s.debate === String(XFOR[then] === 'debate'), s);
+      ok(`${tag}: Forward focuses the detail heading`, s.active === ID + '-h', s.active);
+      await p.click('#d-close'); await p.waitForTimeout(120); s = await st(p);
+      ok(`${tag}: Close after Forward → focus on the last-used control`, !s.open && s.activeOpener === then && s.hash === '', s);
+      await p.goBack().catch(() => {}); await p.waitForTimeout(200);
+      ok(`${tag}: next Back leaves for the previous page`, p.url().endsWith('/index.html'), p.url());
+    } else {
+      await p.click('#d-close'); await p.waitForTimeout(120); s = await st(p);
+      ok(`${tag}: Close closes, fragment cleared`, !s.open && s.hash === '', s);
+      ok(`${tag}: focus on the last-used control`, s.activeOpener === then, s.active);
+      await p.goBack().catch(() => {}); await p.waitForTimeout(200);
+      ok(`${tag}: next Back leaves for the previous page`, p.url().endsWith('/index.html'), p.url());
+    }
+    await c.close();
+  }
+  // direct entry link, then a shortcut
+  for (const w of [1280, 900]) for (const [sc, how] of [['julian', 'close'], ['debated', 'close'], ['julian', 'back'], ['debated', 'esc']]) {
+    const tag = `direct+shortcut ${w} ${sc} ${how}`;
+    const c = await ctx(b, { viewport: { width: w, height: W[w] } }); const p = await c.newPage();
+    await p.goto(BASE + '/index.html').catch(() => {});
+    await p.goto(`${BASE}/timeline.html#${ID}`); await p.waitForTimeout(120);
+    const len1 = await p.evaluate(() => history.length);
+    await p.click(OPENERS[sc]); await p.waitForTimeout(80);
+    let s = await st(p);
+    ok(`${tag}: no new history entry`, (await p.evaluate(() => history.length)) === len1);
+    ok(`${tag}: still the direct entry, expander switched`, s.open && s.state && s.state.direct === true && s.state.x === XFOR[sc] && s.hash === '#' + ID, s.state);
+    if (how === 'back') {
+      await p.goBack().catch(() => {}); await p.waitForTimeout(200);
+      ok(`${tag}: Back returns to the previous page`, p.url().endsWith('/index.html'), p.url());
+    } else {
+      if (how === 'close') await p.click('#d-close'); else { await p.focus('#d-close'); await p.keyboard.press('Escape'); }
+      await p.waitForTimeout(120); s = await st(p);
+      ok(`${tag}: closes and clears the fragment`, !s.open && s.hash === '', s);
+      ok(`${tag}: focus on the shortcut used`, s.activeOpener === sc, s.active);
+    }
+    await c.close();
+  }
+  // Timeline styles do not reach the globe page (values measured on main d3f5f88, 9 Nov)
+  {
+    const c = await ctx(b, { viewport: { width: 1280, height: 860 } }); const p = await c.newPage();
+    await p.goto(BASE + '/index.html').catch(() => {}); await p.waitForTimeout(200);
+    const cs = await p.evaluate(() => [...document.querySelectorAll('.card')].map(n => { const s = getComputedStyle(n); return [n.id, s.padding, s.borderTopColor]; }));
+    const u = cs.find(x => x[0] === 'card-usgs');
+    ok('globe page: #card-usgs keeps padding 8px 10px and its own border', u && u[1] === '8px 10px' && u[2] === 'rgba(140, 170, 200, 0.16)', u);
+    ok('globe page: no card picks up the Timeline card style', cs.every(x => !(x[1] === '12px 14px' && x[2] === 'rgba(140, 170, 200, 0.4)')), cs.filter(x => x[1] === '12px 14px'));
+    await c.close();
+  }
   // ---------- 4. direct link
   for (const w of [1280, 390]) {
     const c = await ctx(b, { viewport: { width: w, height: W[w] } }); const p = await c.newPage();
