@@ -63,7 +63,11 @@
 - **Local only:** `artsSnapshot` CPU in Node 22 on the generated file: median 0.59 ms, p95 0.86 ms, max 1.39 ms (200 runs). **Cloudflare Worker CPU is not measured** (needs the deploy).
 - **Page bytes (raw files, not transfer):** `arts.js` 5,759 B new; `index.html` 106,770 → 110,497 B; `sources.html` 38,920 → 43,378 B; `style.css` 26,619 → 28,489 B (final branch files). `app.js` unchanged, but its `?v=` is bumped, so returning visitors re-download it. **Cold-load before/after is not measured** (fresh-profile method, Chad).
 - **Not verified:** served transfer size of `/snapshot/arts`; R2 billing allowances (to be checked before the upload approval); behaviour on the deployed hub (live RC check); **actual iPhone Safari** (Chad); **what a screen reader announces** (accessibility-tree checks only; VoiceOver optional); the fonts in the screenshots are the container fallbacks (Google Fonts blocked).
-- **Rollback note:** a 200 from `/snapshot/arts` may be cached for up to 60 s (`max-age=60`), so after removing the R2 object a browser can show the card for up to a minute before it reads "unavailable". Release order (R2 → hub → RC check → page) and rollback order (page first) stand.
+- **Rollback / withdrawal — two different lifetimes (corrected after GPT's review, 9 Nov):**
+  - **Response-cache lifetime:** a 200 from `/snapshot/arts` may be reused from a cache for up to 60 s (`max-age=60`). So after the R2 object or the hub route is removed, a **new** fetch (switching the card on) can still receive the old file for up to about a minute before it reads "unavailable".
+  - **Displayed-content lifetime:** the page fetches only when the card is switched on. A list **already rendered** in an open page stays on screen until the viewer switches the card off or reloads; removing the R2 object does not make it disappear, within a minute or at any time.
+  - **Page revert:** a reverted page reaches a viewer only on their next load. An already-open page keeps running the old page code (and any list it shows) until reloaded.
+  - Release order (R2 → hub → RC check → page) and rollback order (**page first**) stand.
 
 ## 6. Next steps (each on its own Approve line, only when reached; none sent yet)
 1. GPT's independent implementation review of this branch.
@@ -71,6 +75,14 @@
 3. Pin the live hub version + sha256 as the rollback target, then: `Approve: deploy hub 0.6.2 from <commit> (content only)`
 4. Live RC check against the deployed hub (clean pane tab, served hashes incl. `arts.js`).
 5. `Approve: push arts-met-rc to main (page change: Met catalogue sample card)` → served-hash check, live read, cold-load before/after, iPhone check, REGISTER Met status → "on the page (fixed snapshot)".
+
+## 6a. GPT's independent implementation review (9 Nov 2026, relayed by Chad)
+- Reproduced the complete 127,887-byte file byte for byte, sha256 `221bb1ca…9644`; confirmed the worker and page-file hashes.
+- Passed arts-hub 54/54, health-hub 29/29, history-hub 27/27, kp-degraded 29/29; confirmed all three weakened hub versions fail as expected.
+- **No blocking defect found within that code and test scope.** The added `unreadable` reason is accepted.
+- The 90 browser checks remain **Claude-supplied evidence**; GPT did not rerun them.
+- Correction applied: response-cache lifetime vs displayed-content lifetime (§5).
+- Still outstanding: R2 billing allowances, live hub and RC checks, served transfer size, performance measurements, actual-phone checks. No upload, deploy, merge or page release is authorised by the review.
 
 ## 7. File hashes on the branch (sha256, for the served-hash checks at release)
 | File | sha256 |
