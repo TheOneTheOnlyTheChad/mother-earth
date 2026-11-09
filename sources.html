@@ -6,17 +6,22 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611161000">
+<link rel="stylesheet" href="style.css?v=202611171000">
 </head>
 <body class="doc">
 <header class="top">
   <h1>Mother Earth</h1>
   <div class="promise">Sources &amp; Details</div>
+  <nav class="tabs" aria-label="Views">
+    <a href="index.html" data-view="earth">Earth now</a>
+    <a href="timeline.html" data-view="timeline">Timeline</a>
+  </nav>
   <div class="clock" id="clock">--:--:--<span>UTC</span></div>
   <nav class="menu" aria-label="Pages">
     <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
     <ul id="menu-list" role="menu">
       <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
+      <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
       <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
     </ul>
   </nav>
@@ -169,7 +174,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611161000"></script>
+<script src="app.js?v=202611171000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;

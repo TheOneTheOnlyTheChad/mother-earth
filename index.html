@@ -6,17 +6,22 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611161000">
+<link rel="stylesheet" href="style.css?v=202611171000">
 </head>
 <body class="world">
 <header class="top">
   <h1>Mother Earth</h1>
   <div class="promise">See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.</div>
+  <nav class="tabs" aria-label="Views">
+    <a href="index.html" data-view="earth" aria-current="page">Earth now</a>
+    <a href="timeline.html" data-view="timeline">Timeline</a>
+  </nav>
   <div class="clock" id="clock">--:--:--<span>UTC</span></div>
   <nav class="menu" aria-label="Pages">
     <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
     <ul id="menu-list" role="menu">
       <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
+      <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
       <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
     </ul>
   </nav>
@@ -262,8 +267,8 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611161000"></script>
-<script src="arts.js?v=202611161000"></script>
+<script src="app.js?v=202611171000"></script>
+<script src="arts.js?v=202611171000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;

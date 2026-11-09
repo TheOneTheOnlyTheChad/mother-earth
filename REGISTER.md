@@ -187,3 +187,15 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Status:** ⛔ research only; terms clarified, NOT cleared for building. R4 technical gates open (revisions, identity, error confidence, scale, baseline). No numerical limit found ≠ unlimited access.
 - **Commercial use:** with attribution — CC BY 4.0 on the dataset (DOI record), which links the GDAC server as an access route.
 - **Research record:** `docs/research/R4-argo.md` §12 (rev 8).
+
+## The Latin Library — Pliny, *Letters* Book 6, `pliny.ep6.html` — Timeline entry (branch `timeline-rc`; not on the page)
+- **Read:** 9 Nov 2026 by Claude (Test B, 14:00:36 UTC; fragment check 14:47:44 UTC). Page sha256 `b59e819a2793d7e8a7ddfeb5ce716619acbb88390615ba2530e28d3aafcfe281` both times; `Last-Modified` 6 Mar 2017; 58,933 B.
+- **Terms:** none stated on the page. Edition not stated by the host. No anchors on the page (0 id/name attributes), so the link cannot jump to letter 16.
+- **Use on the page:** **linked only.** Nothing from the page is reproduced; the entry shows our English paraphrase, our conversion and our model, with the checked copy's date and hash beside the link.
+- **Commercial use:** not applicable while linked only. Quoting the text inline needs a separate clearance (e.g. Perseus, CC BY-SA 3.0 US, with attribution and share-alike).
+
+## EGU General Assembly 2021 abstract EGU21-16222 (D'Auria, De Micco, Di Pasquale), doi 10.5194/egusphere-egu21-16222 — Timeline scholarly note (branch `timeline-rc`; not on the page)
+- **Read:** 9 Nov 2026 by Claude via OpenAlex's stored abstract (14:03:45 UTC), not the publisher page; GPT confirmed the wording on an author-hosted copy.
+- **Licence:** **CC BY as reported by OpenAlex (9 Nov 2026). The publisher's own licence statement has NOT been read.** ⚠️ **Release condition R1** (build proposal rev 2 §8): Chad pastes the publisher's operative licence sentence here, or GPT extracts it on his behalf (labelled so), before the Timeline page is released.
+- **Use on the page:** attributed paraphrase (authors, conference, year, DOI link), in a separate scholarly note marked "Not adjudicated by Mother Earth"; not counted as evidence for the entry.
+- **Commercial use:** with attribution — **pending publisher verification (R1).**
