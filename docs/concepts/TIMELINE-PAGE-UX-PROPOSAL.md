@@ -1,6 +1,13 @@
-# Timeline page — UX proposal (rev 1, 9 Nov 2026)
+# Timeline page — UX proposal (rev 2, 9 Nov 2026)
 
-**Status: docs-only proposal, for review. Nothing built; no navigation change.** Chad's brief (9 Nov): a **separate Timeline page reached through the top navigation**, shown with the one accepted Test B entry: how someone finds it, what they see at a glance, and what opens when they select it.
+**Status: docs-only proposal, for review. Nothing built; no navigation change.**
+
+**Rev 2 (review relayed by Chad, 9 Nov).** The core UX is kept: a separate page, an easy-to-find "Dates without a year" shelf, and "24 August (Julian) · year unstated" on the card. Three points are tightened before any build proposal:
+1. **The interaction is explicit** (§5a): the **title opens the entry**; the three evidence items are each one action from there; card shortcuts are separate controls; closing returns focus to the opening control.
+2. **The plain-list fallback is specified** (§7a): the Timeline URL shows the entry and usable evidence links with JavaScript off.
+3. **Source access is separated from inline quotation** (§5b): a direct source link is the default; inline text appears only once cleared; the evidence is labelled "**one historical account**", kept apart from the scholarly date note.
+
+The build and the live navigation change each need their own approval. The opening-page / Met audit stays on its separate track. Chad's brief (9 Nov): a **separate Timeline page reached through the top navigation**, shown with the one accepted Test B entry: how someone finds it, what they see at a glance, and what opens when they select it.
 
 **Requirements:**
 - "**24 August (Julian) · year unstated**" visible on the entry;
@@ -57,14 +64,17 @@
 │ │ noticed at Misenum                           │                                 │
 │ │ 24 August (Julian) · year unstated           │                                 │
 │ │ Misenum · Bay of Naples (present-day ref.)   │                                 │
-│ │ ▣ Written account · later recollection · 1 src│                                │
+│ │ ▣ One historical account · later recollection │                                │
 │ │ ⚑ Date debated                                │                                │
 │ └──────────────────────────────────────────────┘                                 │
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 - **The card shows "24 August (Julian) · year unstated"** as its date line, verbatim.
-- **"(Julian)"** links (hover/focus tooltip, click to open) to the conversion rule.
-- **"⚑ Date debated"** is a chip, not a verdict; it opens the attributed dispute.
+- **The title is the control that opens the entry** (a link to the entry's own address, e.g. `timeline.html#e-pliny-ep-6-16`). The card as a whole is **not** one big click target.
+- **Card shortcuts are separate controls**, each its own button next to the date line or chip:
+  - **"(Julian)"** opens the entry with **How we converted** already expanded;
+  - **"⚑ Date debated"** opens it with **See the debate** already expanded.
+  - Neither is a verdict, and neither replaces the title as the way in.
 - **The shelf is ordered by month and day only** (a day-of-year order, labelled as such). Nothing implies a year.
 
 ## 4. At a glance: phone (390 px)
@@ -83,7 +93,7 @@
 │ │ at Misenum               │ │
 │ │ 24 August (Julian) ·     │ │
 │ │ year unstated            │ │
-│ │ ▣ Written · later recoll.│ │
+│ │ ▣ One historical account │ │
 │ │ ⚑ Date debated           │ │
 │ └──────────────────────────┘ │
 │ DATED (0)                    │
@@ -103,8 +113,9 @@
 │ 24 August (Julian) · year unstated                   │
 ├──────────────────────────────────────────────────────┤
 │ WHEN — AS THE SOURCE SAYS                            │
-│ «Nonum Kal. Septembres hora fere septima»            │
-│ Pliny, Letters 6.16 §4 · [Read the passage ›]   (1)  │
+│ Pliny, Letters 6.16 §4: a Roman calendar date and    │
+│ "about the seventh hour" · [Read the passage ›] (1)  │
+│ (inline Latin wording only once cleared — §5b)       │
 │                                                      │
 │ WHEN — OUR CONVERSION                                │
 │ 24 August, Julian calendar — our conversion of this  │
@@ -125,28 +136,50 @@
 │   detail is which (§22)                              │
 │                                                      │
 │ UNCERTAIN                                            │
-│ ⚑ The date is debated — a 2021 scholarly abstract    │
-│   attributes 24 August to the classical reading and  │
-│   reports a proposed 24 October · [See the debate ›] │
-│                                                 (3)  │
 │ · Written after his uncle's death; how long after is │
 │   not stated (§1)                                    │
 │                                                      │
+│ SCHOLARLY NOTE ON THE DATE (separate, attributed)    │
+│ ⚑ A 2021 conference abstract reports that the        │
+│   classical reading gives 24 August and that some    │
+│   scholars propose 24 October · [See the debate ›](3)│
+│                                                      │
 │ EVIDENCE                                             │
-│ Written account · later recollection · 1 source ·    │
-│ no independent corroboration                         │
+│ One historical account (Pliny, Letters 6.16) ·       │
+│ later recollection · no independent corroboration    │
 │ Latin only — no translation reached                  │
-│ Sources: S1 Latin Library page (edition not stated)  │
-│          S3 EGU 2021 abstract (attributed)           │
+│ Source link: Latin Library page, Book 6 (edition not │
+│   stated by the host) ↗                              │
 └──────────────────────────────────────────────────────┘
 ```
 
 **The three required items, each one click or tap from the open entry:**
 | (n) | Control | Opens (inline expander on desktop; the same expander inside the sheet on phone) |
 |---|---|---|
-| (1) | **Read the passage** | Letter 6.16 §4–5 (and §22) in Latin from the pinned page, with the date and hour phrase **highlighted**, the § numbers, the host, the retrieval date, and the page hash; "edition not stated by the host" |
+| (1) | **Read the passage** | **Default (public build): a direct source link** to the pinned page (Letters Book 6, letter 16, §4–5 and §22), with the § numbers, the host, the retrieval date, the page hash and "edition not stated by the host". **Inline Latin** with the phrase highlighted appears **only once cleared** (§5b) |
 | (2) | **How we converted** | the rule in one paragraph: "nonum Kal. Septembres" = the ninth day before the Kalends of September, counted inclusively; Kalends = day 1 → day 9 = **24 August**; Julian calendar; **no Gregorian or proleptic date given**; labelled **ours (T3)** |
-| (3) | **See the debate** | the S3 statement, **attributed** (authors, 2021, conference abstract, CC BY, where it was read): the classical reading gives 24 August; some scholars propose 24 October; a probable medieval copying error. **"Not adjudicated by Mother Earth."** |
+| (3) | **See the debate** (scholarly note; kept apart from the historical account) | the S3 statement, **attributed** (authors, 2021, conference abstract, CC BY, where it was read): the classical reading gives 24 August; some scholars propose 24 October; a probable medieval copying error. **"Not adjudicated by Mother Earth."** |
+
+## 5a. Interaction, step by step (desktop and phone)
+| Step | Desktop | Phone |
+|---|---|---|
+| Open the entry | activate the **card title** (click, or Enter on focus) → right panel opens; the shelf and axis stay visible | tap the **card title** → bottom sheet opens at full height |
+| Shortcut (optional) | "(Julian)" or "⚑ Date debated" → the same panel, with that expander already open | the same, in the sheet |
+| Read the passage / How we converted / See the debate | **one action each** from the open panel | **one tap each** in the sheet |
+| Close | ✕, Esc, or selecting another entry | ✕, the drag handle, or the system back gesture |
+| **Focus after closing** | **returns to the control that opened it** (the title, or the shortcut used) | **returns to the control that opened the sheet** (the title, or the shortcut used) |
+
+- The entry's address updates when it opens (`#e-pliny-ep-6-16`), so it can be linked and reopened.
+- The browser Back button closes the panel or sheet first.
+
+## 5b. Source access vs inline quotation (public build)
+- **Default: a direct source link.** The panel names the passage (work, letter, §) and links straight to the pinned host page, with its retrieval date and page hash. That is enough to trace every field.
+- **Inline quotation is conditional on clearance.** The test kept excerpts in the private Mac packet. Before a public page quotes the Latin inline, the host's text terms are recorded in REGISTER (e.g. The Latin Library: no terms seen; Perseus: CC BY-SA 3.0 US, which would need attribution and share-alike). **Until cleared:** no inline excerpt; the link only.
+- **Our own words are always allowed:** the card date line, the conversion rule and the "what Pliny reports" summaries are our paraphrase and computation, labelled as such.
+- **Evidence labels:**
+  - the account itself = "**one historical account**";
+  - the date dispute = "**scholarly note on the date**" (attributed, separate section);
+  - the two are never merged into one count.
 
 **Gaps are visible, not hidden:** "Why ›" next to the clock time and the year opens a single sentence each. Clock time: daylight at Misenum was not established. Year: no year in the letter (whole-letter check).
 
@@ -164,8 +197,27 @@ A later proposal could let a reader **choose** to see "where scholars place it".
 - **Keyboard:** tabs, search, filters, cards, and the three expanders all reachable. Enter/Space opens. Esc closes the panel or sheet and returns focus to the card.
 - **Screen readers:** the card reads as "Cloud reported over the Bay of Naples, noticed at Misenum; 24 August, Julian; year unstated; date debated; button". Expanders carry `aria-expanded`. The shelf has a heading with its count.
 - **Phone:** the sheet has a drag handle and a close button. Its content scrolls, not the page. No horizontal scroll at 360 px.
-- **No-JS / list fallback:** the shelf and entries render as a plain list.
-- **Performance:** text only; no images; nothing loads until the Timeline tab is opened.
+- **No-JS / list fallback:** see §7a.
+- **Performance:** text only; no images. The Timeline's data loads **when someone opens the Timeline page**, and nothing loads on the globe page.
+
+## 7a. Plain-list fallback (JavaScript off)
+The Timeline URL works with JavaScript off. The page ships its entries **already in the HTML**, generated at release from the same entry data. Script then enhances them into the axis, shelf and panel. With JavaScript off, a reader sees:
+
+```
+Timeline
+Dates without a year (1)
+  Cloud reported over the Bay of Naples, noticed at Misenum
+  24 August (Julian) · year unstated
+  Misenum · Bay of Naples (present-day reference)
+  One historical account: Pliny, Letters 6.16 — read at the source ↗ (§4–5, §22)
+  How we converted (anchor: the rule, in plain text below)
+  Scholarly note on the date (anchor: attributed, in plain text below)
+  Year not stated by this source · clock time not given (why, in plain text)
+Dated entries (0)
+```
+- Each entry is a heading with its own anchor (`#e-pliny-ep-6-16`).
+- **Evidence links work without script:** the source link goes to the host; "How we converted" and "Scholarly note" are in-page anchors to plain sections.
+- No content is hidden behind script. Script only changes the layout and adds the panel/sheet.
 
 ## 8. Decisions for review
 | | Decision | Proposed |
@@ -174,9 +226,11 @@ A later proposal could let a reader **choose** to see "where scholars place it".
 | U2 | Partial dates | a separate "**Dates without a year**" shelf, never on the axis; ordered by day of year; count shown |
 | U3 | Date line on the card | "**24 August (Julian) · year unstated**", verbatim |
 | U4 | Detail surface | desktop right panel; phone bottom sheet |
-| U5 | The three one-step items | Read the passage · How we converted · See the debate, as inline expanders |
+| U5 | The three one-step items | Read the passage · How we converted · See the debate, one action each from the opened entry; the **title opens the entry**; shortcuts are separate controls; focus returns to the opener |
+| U7 | Source access | **direct source link by default**; inline quotation only after clearance in REGISTER; evidence labelled "one historical account", with the scholarly date note separate |
+| U8 | No-JS | entries pre-rendered in the Timeline page's HTML with working links and anchors; data loads only on the Timeline page |
 | U6 | Translation | "Latin only — no translation reached" shown until a translation source is cleared |
 
-**Not proposed:** any build, page file, hub endpoint, navigation change on the live site, or change to the globe page. A build would follow review, with its own proposal and approvals.
+**Not proposed:** any build, page file, hub endpoint, navigation change on the live site, or change to the globe page. **The build and the live navigation change each need their own approval**, after a separate build proposal. The opening-page / Met audit stays on its own track.
 
 *This proposal authorises nothing beyond its own writing.*

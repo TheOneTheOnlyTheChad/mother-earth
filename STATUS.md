@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 14:23 UTC (clock reading at write) — **Test B closure verified; Timeline UX proposal rev 2** (docs only)
+- **Chad verified** the four original non-log Test B files and the appended closure entry. Test B is closed: 4 supported + 1 absence finding, §22 caveat intact.
+- **UX rev 2** (`docs/concepts/TIMELINE-PAGE-UX-PROPOSAL.md`). The core is kept; three points tightened:
+  1. **Interaction (§5a):** the title opens the entry; the three evidence items are one action each; card shortcuts ("(Julian)", "⚑ Date debated") are separate controls; closing returns focus to the opener; the entry has its own anchor; Back closes first.
+  2. **No-JS fallback (§7a):** entries are pre-rendered in the Timeline page's HTML, with a working source link and in-page anchors; data loads only on the Timeline page.
+  3. **Source access vs quotation (§5b):** a direct source link by default; inline Latin only after clearance in REGISTER; evidence labelled "**one historical account**", with the scholarly date note separate.
+  - New decisions U7, U8.
+- **Not approved:** build, live navigation change. The opening-page/Met audit stays separate.
+
 ## 9 Nov 14:19 UTC (clock reading at write) — **Test B CLOSED (GPT) + corrections; Timeline page UX PROPOSAL** (docs only)
 - **GPT accepted Test B as a one-entry text mock-up:**
   - 5 hashes matched; the Latin Library passage was checked directly;
