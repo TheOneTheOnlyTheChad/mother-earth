@@ -12,7 +12,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | **D1** | **+ 5 `firms_*` tables + 3 indexes (6 Nov 19:59:43–20:00:03 UTC, FIRMS v2 state).** 9 history tables + 8 indexes **+ `archive_checkpoint_coverage` (empty) + index `collector_runs_layer_finished`** (both created 6 Nov 05:37 UTC, live = `2ee3a62` schema). |
 | **History** | ON since 5 Nov 10:21 UTC — keep on. First midnight checkpoint (5 Nov) completed; **fires part is partial** (input 15:30 UTC: the 4 MB guard skipped 15:45–23:45). Details STATUS. |
 | **Monitoring** | UptimeRobot 8 monitors (runs, publication, archive, coverage × usgs, firms), all 200 at the last reads. No monitor on swpc. |
-| **Branches** | GitHub: `main` + parked `aircraft-rc` only (never deploy it as-is). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
+| **Branches** | GitHub: `main` + parked `aircraft-rc` (never deploy it as-is) + **`arts-met-rc`** (Arts candidate, awaiting GPT's review; not merged, not deployed). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
 | **Tests on main** | kp-degraded 29/29 · place-ui 30/30 · health-hub 29 · history-hub 27 · firms-guard 19 · firms-v2 57 (+7 need `OLD_WORKER`) · all UI suites pass (container). |
 | **Mac copies** | Synced at each step this thread (`~/Documents/Mother Earth` granted 8 Nov; clone in the Mac shell at `$HOME/me-sync`, then cp + cmp over `git ls-files`). |
 
@@ -43,7 +43,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **Next, all on Chad's go:**
 1. GPT's review of R2 rev 2 → corrections if any; filing only on Chad's separate authorisation.
-1a. Arts release proposal **rev 2.1** → Chad's D1–D8 (Approve line in §8). GPT supports it as the basis for a branch-only build.
+1a. **Arts: candidate built on branch `arts-met-rc` @ `4c4bbb9`** (Chad's branch-only Approve, after GPT accepted rev 2.1). File sha256 `221bb1ca…9644`; hub 0.6.2 on the branch only. Next: GPT's implementation review (`reviews/2026-11-09-arts-met-rc.md` on the branch) → R2 upload, hub deploy and page release, each on its own Approve line (wording in the review §6). Unreleased page code stays off main.
 1b. Timeline concept **rev 2** (`docs/concepts/TIMELINE-CONCEPT.md`, after GPT): concept only; any first gate needs Chad's go.
 2. Remaining backlog: new first gates (R5 coral, R7 tides, R10 solar flares); Phase 0 domain decision (rec. rev 3); GIBS beyond the bench (shadow record / implementation) each a separate decision.
 3. Still left open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
