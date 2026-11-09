@@ -4,6 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 13:45 UTC (clock reading at write) — **List A CLOSED (GPT) + corrections; Test B PROPOSAL** (docs only)
+- **GPT checked the OA report and log** (hashes matched): List A closed — 6 works identified, 1 new abstract, 0 claims resolved, tallies unchanged.
+- **Corrections** (`research/timeline-test-a-oa/2026-11-09-claude/rev2/CORRECTIONS-rev2.md`):
+  - the cap was **not reached** (search 8 min 41 s; write-up end 9 min 7 s; remaining listings unattempted);
+  - HAL was queried before IA Scholar (order deviation);
+  - A1 ANU fetch failed, kept separate from the A2 ANU listing (not tried).
+- The Debénath PDF stayed unopened; whether it would resolve a Salé claim is unknown.
+- **Test B proposal rev 1** (`docs/concepts/TIMELINE-TEST-B-PROPOSAL.md`):
+  - one case: **Vesuvius, Pliny the Younger, Letters 6.16**;
+  - S1 a public-domain Latin text (evidence) + S2 a public-domain translation (display only);
+  - 5 claims (date, year not stated, hour, Misenum, the "later identified" mountain);
+  - a sample entry separating the source's wording / our inference / uncertainty.
+  - **Readability flagged** (no written-history source yet known readable); stop rule; 45 min. T1–T6 are Chad's.
+- **Not approved:** the Test B run.
+
 ## 9 Nov 13:30:33–13:39:40 UTC (Mac clock) — **Test A open-access pass, List A RUN** (research only; Chad's go on OA proposal rev 2) — packet `research/timeline-test-a-oa/2026-11-09-claude/` on the Mac
 - **All six exact works found** via OpenAlex (A1–A4, A6 by DOI; A5 by exact title).
 - **New readable text: one abstract.** A5 Debénath et al. 1982 is on **HAL halshs-00005580** (open; full text **PDF only, unopened**); the HAL abstract does **not name Salé**.
