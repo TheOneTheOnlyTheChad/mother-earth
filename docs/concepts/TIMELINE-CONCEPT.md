@@ -1,6 +1,8 @@
-# Evidence-linked historical timeline — concept proposal (rev 2, 9 Nov 2026)
+# Evidence-linked historical timeline — concept proposal (rev 2.1, 9 Nov 2026)
 
 **Status: concept only.** Written from Chad's brief (9 Nov 2026) and existing project records. No provider research, downloads, sampling, accounts, emails, parsing, prototype, building, resources or deployment. **Separate from Arts and from the active research backlog** (`docs/RESEARCH-BACKLOG.md`). It does not select History, start Phase 0 work for it, or authorise Phase A. All existing approvals, accepted reviews and parked/stopped decisions are unchanged.
+
+**Rev 2.1 (GPT accepted rev 2 as a separate concept, 9 Nov):** §2 aligned with §3.3 — conflicting dates are disagreements, not gaps. Acceptance authorises no research, downloads, sampling, parsing, provider contact, REGISTER filing, prototype or building.
 
 **Rev 2 (GPT's review of rev 1; docs only):** evaluation limited to what it can measure, with an optional independent reference set (§5.3); three lineage states, unknown never counted (§3.1); gaps split into measured, externally documented and unassessed (§3.3); the gate produces a research-only terms record and draft REGISTER wording, filing separate (§5.2); bounded source selection first, blocked/inconclusive allowed (§5.1); dating method and uncertainty kept for material evidence (§3.1, §3.2). GPT supports the separate evidence categories, the two dates, source-linked connections and a later deep-time scope.
 
@@ -13,7 +15,8 @@ It fits the constitution (1 Nov) as written: **live data, real things** (provena
 - **A time axis paired with the globe.** Deep time to now on one axis, stretched where records are dense (the last few thousand years) and compressed where they are sparse. The scale is stated on screen, never hidden. Choosing a span shows what is placed there on the globe, each place drawn at its stated uncertainty (a region or a broad area, not a pin, when that is all the evidence supports).
 - **Every item opens its evidence.** One panel, three clearly separated tiers (§3): what physical evidence or dated measurement exists; what each source records or claims, with page references; and what *we* computed (theme matches, proposed connections), labelled as ours.
 - **Connections are opt-in and graded.** A line between two items appears only with its stated basis and grade ("same event, two independent accounts", "theme match by our method, not a causal claim"). Nothing implies a cause without saying so.
-- **Gaps are drawn, not hidden.** Coverage bands along the axis and on the globe show where our corpus has no digitised material, no material in a language, poor OCR, or conflicting dates — the timeline equivalent of the globe's "unknown coverage".
+- **Gaps are drawn, not hidden.** Coverage bands along the axis and on the globe show the three kinds of gap in §3.3 (measured coverage of our corpus, externally documented missing material, unassessed coverage) — the timeline equivalent of the globe's "unknown coverage".
+- **Disagreements are shown side by side.** Conflicting dates or accounts are disagreements, not gaps: each is shown with its source (§3.1).
 - **Two dates, always.** "Event: about 1607–1610 (source states)" and "Recorded: printed 1712" never collapse into one date.
 - **Themes as lenses, not verdicts.** "Water and floods" shows what our method matched, with its rules one click away; it never ranks or concludes.
 
