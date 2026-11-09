@@ -4,6 +4,24 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 14:19 UTC (clock reading at write) — **Test B CLOSED (GPT) + corrections; Timeline page UX PROPOSAL** (docs only)
+- **GPT accepted Test B as a one-entry text mock-up:**
+  - 5 hashes matched; the Latin Library passage was checked directly;
+  - the scholarly wording was confirmed on an author-hosted copy;
+  - the conference page and the Perseus route were not independently verified.
+- **Corrections** (`research/timeline-test-b/2026-11-09-claude/rev2/CORRECTIONS-rev2.md`):
+  - **4 supported + 1 absence finding** (year not stated);
+  - 24 August stays our conversion; the dispute is attributed separately; the clock time is unset;
+  - attribution "Pliny reports that his mother pointed out the cloud", per §22, where Pliny combines what he witnessed with what he heard soon afterwards without marking which detail is which.
+- **UX proposal rev 1** (`docs/concepts/TIMELINE-PAGE-UX-PROPOSAL.md`):
+  - top tabs **Earth now | Timeline**;
+  - a "**Dates without a year**" shelf, so the entry is not placed at 79 CE;
+  - the card shows "24 August (Julian) · year unstated";
+  - a desktop right panel / phone bottom sheet with three one-step expanders: passage · conversion rule · attributed debate;
+  - desktop and phone wireframes; U1–U6 for review.
+  - Separate from the opening-page/Met audit.
+- **Not approved:** any build or navigation change.
+
 ## 9 Nov 14:00:17–14:04:40 UTC (Mac clock) — **Timeline Test B RUN** (research only; Chad's go on rev 2) — packet `research/timeline-test-b/2026-11-09-claude/` on the Mac
 - **Latin gate passed** in under a minute. S1 = The Latin Library, Pliny Letters Book 6 (HTTP 200, sha256 `b59e819a…`); **edition not stated by the host**. Perseus (CC BY-SA 3.0 US) has the same reading and also no edition named.
 - **Translation not reached** → Latin only. **S3:** one open-access EGU 2021 conference abstract (CC BY, via OpenAlex), read in its 5-min window: the date is debated (24 Aug classical reading vs a 24 Oct hypothesis; probable medieval copying error).
