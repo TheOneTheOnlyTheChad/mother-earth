@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 07:00 UTC (clock reading at write) — **Arts release tidy-up checks (Claude, read-only; closes two of GPT's stated limits)**
+- **Served page files, no-store (06:59:46 UTC, pane tab on the live site):** all five HTTP 200 and = the reviewed hashes — index `e30b04f7ee5a` (110,497 B), app `e3f4a3854113` (81,781 B), arts `58773cef35e6` (5,759 B), sources `33074c2d17d3` (43,378 B), style `6a54e0b17cbd` (28,489 B).
+- **Raw HTTP status codes (same read):** `/` 200; `/snapshot/arts` **200**, 127,887 B, sha256 = `221bb1ca…9644`; `/cells/arts` **404** (body "unknown layer"); `/snapshot/usgs` 200; all eight `/health/<runs|publication|archive|coverage>/<usgs|firms>` **200**.
+- **Production Worker CPU for `/snapshot/arts` (telemetry, 06:13:19–06:59:58 UTC, 539 events returned):** 6 `/snapshot/arts` invocations, all outcome ok, **CPU 1 ms each** (telemetry reports whole milliseconds), wall 209–243 ms (412 ms on the first request right after the deploy). Telemetry may not list every request (the newest take ~20 s to appear), so the count is not a complete request tally.
+- **Still unmeasured:** served transfer size (the hub sends no Timing-Allow-Origin, and compression is not observable from the page); cold-load "after" (Chad, fresh profile); actual iPhone Safari (Chad); screen-reader announcement (optional VoiceOver).
+- These are Claude-supplied checks; GPT has not reviewed them. No production change.
+
 ## 9 Nov 06:58 UTC (clock reading at write) — **GPT independent live smoke test of the Arts release: no blocking defect within the checks completed** (GPT, ~06:44–06:52 UTC, read-only; relayed by Chad; recorded here, docs only)
 **GPT's observations (kept separate from Claude's release evidence in the 06:20 entry below):**
 - Hub reports 0.6.2. The browser-delivered Arts snapshot matches the approved file: 127,887 B, sha256 `221bb1ca…9644`.
