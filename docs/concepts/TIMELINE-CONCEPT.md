@@ -2,6 +2,8 @@
 
 **Status: concept only.** Written from Chad's brief (9 Nov 2026) and existing project records. No provider research, downloads, sampling, accounts, emails, parsing, prototype, building, resources or deployment. **Separate from Arts and from the active research backlog** (`docs/RESEARCH-BACKLOG.md`). It does not select History, start Phase 0 work for it, or authorise Phase A. All existing approvals, accepted reviews and parked/stopped decisions are unchanged.
 
+**Follow-on (9 Nov, docs only):** recommended parameters for the Route W gate in §5A.4 are proposed in `docs/concepts/TIMELINE-ROUTE-W-GATE-PROPOSAL.md` (rev 1, for GPT). The concept text below is unchanged; no route is selected.
+
 **Rev 3.1 (GPT's review of rev 3; docs only):** effort wording made unmeasured-honest (§5B); written accounts classified individually by their relationship to the event — contemporary, later recollection, later history or summary — never by format (§3.1, §5B); claim dispositions and a reconciled publication rule (§5A.1, §5A.4, §5B). GPT supports Route W as the first option to consider, with library work later deepening or challenging it — a recommendation, not a route selection or research approval.
 
 **Rev 3 (Chad, 9 Nov; docs only):** a second possible starting route — **Route W, Wikipedia/Wikidata first** — added alongside the library-first route (now **Route L**): source roles and rules (§5A), separate reuse questions (§4.1), a bounded first gate (§5A.4, not run), a comparison of the two routes and how later book mining could deepen or challenge a Route W timeline (§5B). T2 split into contemporary accounts and encyclopedic/structured assertions (§3.1). **No source is adopted or cleared by adding the option.**

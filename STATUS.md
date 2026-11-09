@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 07:24 UTC (clock reading at write) — **Timeline Route W first-gate parameters: PROPOSAL rev 1** (docs only; Chad's go for a proposal only) — `docs/concepts/TIMELINE-ROUTE-W-GATE-PROPOSAL.md`, for GPT
+- Brings forward TIMELINE-CONCEPT rev 3.1 §5A.4 with recommended parameters: water/floods · **1870–1927** · **one US state, Pennsylvania (candidate)**, pre-recorded fallback to the contiguous US if < 10 events · **English** (cited works in any language checkable) · **≤ 30 events, ≥ 10 workable** · **6 h incl. write-up** in fixed sub-caps (terms 0.75 · reference list 1 · selection 0.75 · inventory 0.75 · checking 2 · report 0.75) + one GPT review · seed `20261109`.
+- **Checking rule:** all date and place claims of every selected event, then all scale/relationship claims of a seeded 10, in a saved seeded order; claims not reached = "not checked — cap reached" (a sub-field; the five dispositions unchanged). Wikipedia footnotes recorded as leads, not checked.
+- **Independent reference list recommended** (1 h sub-cap, fixed before the Wikidata selection is seen; measures missed events for the state only; a gauge-crest list would double as a Route L T1 anchor). Without it, missed events stay unmeasured.
+- Rev 3.1 rules restated unchanged: T2-s labelling, unverified-assertion display, pinned revisions, kept uncertainty, two dates, lineage states, support rate over checked claims only, terms record with nothing filed. Copied Wikidata/Wikipedia/cited content stays out of the public repo until the terms record is accepted.
+- Region reasons are labelled general knowledge, unverified. Four open points for GPT (§8). Decisions D1–D8 for Chad; route not selected.
+- **Nothing run:** no provider research, queries, sampling, downloads, accounts, contact, REGISTER filing, prototype or production change. Arts reviews stay closed; actual-iPhone check deferred.
+- Operating note: on 9 Nov 07:14 UTC the Mac shell's `git clone` of GitHub was refused (proxy 403), so the START-HERE §3 Mac-sync route did not work; the Mac copy was spot-checked from the workspace side (8 key files = main `0f7ec67`).
+
 ## 9 Nov 07:00 UTC (clock reading at write) — **Arts release tidy-up checks (Claude, read-only; closes two of GPT's stated limits)**
 - **Served page files, no-store (06:59:46 UTC, pane tab on the live site):** all five HTTP 200 and = the reviewed hashes — index `e30b04f7ee5a` (110,497 B), app `e3f4a3854113` (81,781 B), arts `58773cef35e6` (5,759 B), sources `33074c2d17d3` (43,378 B), style `6a54e0b17cbd` (28,489 B).
 - **Raw HTTP status codes (same read):** `/` 200; `/snapshot/arts` **200**, 127,887 B, sha256 = `221bb1ca…9644`; `/cells/arts` **404** (body "unknown layer"); `/snapshot/usgs` 200; all eight `/health/<runs|publication|archive|coverage>/<usgs|firms>` **200**.
