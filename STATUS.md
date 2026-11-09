@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 07:54 UTC (clock reading at write) — **Route W gate proposal rev 3 (GPT's four targeted corrections; docs only)**; GPT accepted ENQUIRIES rev 3
+- **GPT (relayed by Chad):** accepts `ENQUIRIES-2026-11.md` **rev 3** as a bounded evidence record (reply quoted accurately, earlier conditions intact, equipment advice labelled unverified); no aircraft clearance or REGISTER change. **Rev 4** (the reply linked to Chad's sent enquiry, `fd58543`) has not yet been reviewed by GPT. Rev 2 of the proposal: most findings addressed.
+- **Proposal rev 3** (`docs/concepts/TIMELINE-ROUTE-W-GATE-PROPOSAL.md`), rev 2's improvements kept:
+  1. identity matching (§6.3, `match-v2`): candidates ≠ identity; documented identity evidence required; a single weak candidate stays unresolved; episodes vs gauge crests with many-to-one recorded; separate from eligibility;
+  2. coverage counts (§6.2, §6.4): no "at least"; exact classes in the fixed subset, provisional where discovery/verification is incomplete, summing to the subset size; stable source-row IDs + tie-break;
+  3. roll-up (§4.3a, `roll-v1`): reference-level observations → one disposition per claim, contradictory and partially checked references kept, each claim counted once; circular-only repetition never qualifying (§4.4); accepting Wikidata/Wikipedia terms does not clear external works; quotation length ≠ rights clearance (§5);
+  4. frozen protocol: property-ID → group mapping (`map-v1`, IDs from general knowledge, label-verified at gate start) with unmapped-but-relevant statements logged (§4.1); rule V — eligibility re-evaluated on pinned item data before the sample is frozen, hierarchy provenance and query/item discrepancies kept, unverifiable frame reported incomplete with reproducibility limits (§3.3).
+- GPT's answers to rev 2's four points recorded in §8 (hop limits and the 40-entry cap = provisional effort boundaries; start-time precedence for eligibility only; reviewer-chosen revision = dated T2-s repetition evidence; Step A first, Step B on the remaining budget). Two new points for GPT.
+- **Not approved:** research, queries, sampling, downloads, route or parameter selection, provider contact, REGISTER filing/status change, prototype, connector/permission change, production work.
+
 ## 9 Nov 07:47 UTC (clock reading at write) — **OpenSky reply linked to Chad's exact sent enquiry** (docs only; `ENQUIRIES-2026-11.md` rev 4)
 - Chad supplied his sent message (screenshot, read by Claude); Q1–Q3 and the closing line filed verbatim, personal details (address, phone, building role) kept out of the repo.
 - **Bounded reading (Claude's, for GPT and Chad):** "That works for us" most plausibly answers **Q2** (~10 REST requests/day from the home connection for a public aircraft-distribution globe), within the hobbyist/feeder conditions Chad's own message cites — interpretation, not explicit. "Normal connections need no whitelisting" answers the own-connection line. Equipment advice answers Q1a. **Not answered:** Q1b (feeder contribution/uptime), Q1c (feeder ↔ API account), Q3 (hosting aggregated snapshots). No waived feeder condition, unlimited credits or redistribution permission inferred. REGISTER unchanged; no follow-up sent.

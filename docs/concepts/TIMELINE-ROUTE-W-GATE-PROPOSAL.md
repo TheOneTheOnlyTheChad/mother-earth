@@ -1,10 +1,18 @@
-# Timeline Route W — bounded first gate: parameters proposal (rev 2, 9 Nov 2026)
+# Timeline Route W — bounded first gate: parameters proposal (rev 3, 9 Nov 2026)
 
 **Status: proposal only (docs).** Chad's brief, 9 Nov: bring forward TIMELINE-CONCEPT rev 3.1, especially Route W (Wikipedia/Wikidata first, library work later deepening or challenging it). This document recommends the parameters of the gate in concept §5A.4: period, region, language, event cap, effort cap, the claim-checking rule, and whether to include an independent reference list.
 
 **Written from the accepted concept and saved project records only.** No provider research, queries, sampling, downloads, accounts, contact, REGISTER filing, prototype or production change. **Route selection, parameter selection and running the gate stay Chad's separate decisions.** The completed Arts reviews stay closed. The actual-iPhone check stays deferred.
 
-**Rev 2 (GPT's review of rev 1, relayed by Chad, 9 Nov; docs only).** Six corrections:
+**Rev 3 (GPT's review of rev 2, relayed by Chad, 9 Nov; docs only).** Rev 2's improvements are kept. Four targeted corrections:
+1. **Event identity:** date overlap plus a shared area or river only *generates candidates*; identity needs documented evidence; even one weak candidate stays unresolved; flood episodes are kept apart from gauge crests, with many-to-one relationships recorded; identity matching is separate from selection eligibility (§6.3).
+2. **Coverage counts:** no "at least" labels. Exact current classes within the fixed reference subset, labelled provisional where discovery is incomplete, summing to the subset size; stable source-row identifiers and tie-breaking for subsetting keys (§6.2, §6.4).
+3. **Multiple references and external reuse:** a predeclared roll-up from reference-level observations to one claim disposition, keeping contradictory and partially checked references and counting each claim once; circular-only repetition never becomes qualifying support (§4.3, §4.4). Accepting Wikidata/Wikipedia terms does not clear external works; quotation length is not rights clearance (§5).
+4. **Frozen protocol:** property-ID → claim-group table with unmapped statements logged; eligibility re-evaluated on pinned item data before the sample is frozen; hierarchy provenance and query/item discrepancies kept; an unverifiable candidate frame is reported incomplete with its reproducibility limits (§3.3, §4.1).
+
+GPT's answers to rev 2's four points are recorded in §8.
+
+**Rev 2 (GPT's review of rev 1, relayed by Chad, 9 Nov; docs only, `3c3f321`).** Six corrections:
 1. Imported references are references: import provenance is kept as a separate field, and dependency is not treated as circularity without evidence (§4.3, §4.4).
 2. A claim stated more precisely than its source supports is "checked — unsupported"; the coarser supported value is recorded beside it (§4.3).
 3. Coverage claims are bounded: five outcome classes, list size and matching rules fixed beforehand, gauge comparisons kept to the gauge's own coverage (§6). The national fallback is now an option, not the recommendation (§3.2).
@@ -97,7 +105,7 @@ Each row is a separate decision for Chad (§9).
 
 ### 3.3 Selection rules (recorded verbatim at gate start, before any results are seen; method version `sel-v1`)
 
-**Rule T — type.** The item has an *instance of* value that is the flood class or a subclass of it reached through *subclass of* links, up to **4 hops**. The class list is **frozen at gate start**: each class ID with its revision ID and retrieval time. Items typed only by a class outside the frozen list are not eligible; if discovery shows them (e.g. an item about a flood typed as "disaster"), they are listed as "type outside rule" for the coverage report (§6), not added.
+**Rule T — type.** The item has an *instance of* value that is the flood class or a subclass of it reached through *subclass of* links, up to **4 hops** (a provisional effort boundary, not a completeness claim). The class list is **frozen at gate start**: each class ID with its revision ID and retrieval time, and the *subclass of* path that put it on the list (**hierarchy provenance**). Items typed only by a class outside the frozen list are not eligible; if discovery shows them (e.g. an item about a flood typed as "disaster"), they are listed as "type outside rule" for the coverage report (§6), not added.
 
 **Rule D — date.**
 - **Selection date**, by precedence:
@@ -109,10 +117,10 @@ Each row is a separate decision for Chad (§9).
 - **Eligible** only if the selection value's whole interval lies within 1 Jan 1870 – 31 Dec 1927.
 - **Boundary:** an interval that overlaps the period but extends outside it is listed "boundary — precision or qualifiers span the period edge — excluded". Never silently dropped.
 - **Conflicts:** if the chosen rank holds two or more values for the same property, the item is eligible only if **every** such value is wholly inside the period; otherwise it is listed "conflicting dates — excluded". All values are recorded either way, side by side.
-- **Start vs point in time disagreeing** (both present): the start time governs eligibility; the disagreement is recorded as a claim pair for checking.
+- **Start vs point in time disagreeing** (both present): the start time governs **eligibility only**; that does not settle the historical disagreement, which is recorded as a claim pair for checking.
 
 **Rule P — place.**
-- Each *location* and *located in the administrative territorial entity* value is followed upward through *located in the administrative territorial entity* links, up to **6 hops**, to see whether it reaches the Pennsylvania item (ID recorded at gate start).
+- Each *location* and *located in the administrative territorial entity* value is followed upward through *located in the administrative territorial entity* links, up to **6 hops** (provisional effort boundary, not a completeness claim), to see whether it reaches the Pennsylvania item (ID recorded at gate start). Every hop is recorded with the item ID and the revision read (**hierarchy provenance**).
 - **Eligible** if at least one place value reaches it. The full path is recorded per item; other places (e.g. a flood spanning two states) are recorded too.
 - **Not eligible, listed with the reason:** country-only place ("place too coarse"); coordinates only, with no administrative chain ("coordinates only — not resolved; no point-in-polygon computation in this gate"); a chain that stops before a state ("chain unresolved"); a historical entity whose chain does not reach the state item ("historical entity — chain does not reach the state item", recorded verbatim, not mapped by us).
 
@@ -126,30 +134,40 @@ Each row is a separate decision for Chad (§9).
 
 **Rule X — discovery completeness.**
 - The discovery method is recorded in full: endpoint, exact query text or request, time sent, row count, and any limit, timeout, error or partial result.
-- If anything suggests truncation or incompleteness (a hit limit, a timeout, an error, a result count equal to a page size), discovery is reported **incomplete**. The eligible set is then "at least these", and every coverage statement says so.
-- Query-service results can lag the live items **[general knowledge, unverified]**, so each selected item's statements are read from the item at a pinned revision, not from the query result. Any difference between the two is recorded.
+- If anything suggests truncation or incompleteness (a hit limit, a timeout, an error, a result count equal to a page size), discovery is reported **incomplete**, and every result that depends on it is labelled **provisional** (§6.4).
+- Discovery output is the **candidate frame**: everything returned, before eligibility is judged.
+
+**Rule V — verify on pinned data, then freeze (before rule S runs).**
+- Query-service results can lag the live items **[general knowledge, unverified]**. So every candidate in the frame is read from its item at a **pinned revision** (ID and retrieval time recorded), and rules T, D and P are **re-evaluated on that pinned data**. Eligibility is decided by the pinned data, never by the query result.
+- Every **query/item discrepancy** (a candidate the query called eligible that the pinned data does not, or the reverse; a differing date, place or type) is kept in a discrepancy log.
+- Only then is the eligible set frozen, sorted (rule O) and sampled (rule S). The frozen set, the pinned revisions and the keys are saved before inventory begins.
+- **If the frame cannot be verified within the selection sub-cap** (too many candidates to pin, or reads failing), selection is reported **incomplete**: which candidates were verified on pinned data, which were judged only from query results, and the **reproducibility limit** that follows (the sample cannot be recomputed exactly from pinned data alone). Unverified candidates are never silently treated as verified.
 
 ---
 
 ## 4. Claim inventory, checking and dispositions
 
 ### 4.1 What counts as a claim
-For each selected event, every statement on its item that bears on the timeline is one claim, recorded with its value, precision, rank, qualifiers, statement ID and references exactly as at the pinned revision:
+For each selected event, every statement whose property is in the frozen mapping below is one claim, recorded with its value, precision, rank, qualifiers, statement ID and references exactly as at the pinned revision.
 
-| Group | Covers |
+**Property → claim group (frozen at gate start; method version `map-v1`).** The property IDs below are **[general knowledge, unverified]**. At gate start each ID's label is read from its pinned property page and recorded; any ID whose label does not match is logged and the mapping corrected **before** inventory begins, never afterwards.
+
+| Group | Properties (ID — expected label) |
 |---|---|
-| **Date** | start, end, point in time, earliest/latest dates |
-| **Place** | location, located-in, coordinates, country |
-| **Scale** | deaths, injured, displaced, damage, area, height and similar figures |
-| **Relationship** | part of, cause, effect, follows/followed by, significant event, and similar links |
+| **Date** | P580 start time · P582 end time · P585 point in time · P1319 earliest date · P1326 latest date (the last two also as qualifiers) |
+| **Place** | P276 location · P131 located in the administrative territorial entity · P625 coordinate location · P17 country · P206 located in or next to body of water |
+| **Scale** | P1120 number of deaths · P1339 number of injured · P2630 cost of damage |
+| **Relationship** | P361 part of · P828 has cause · P1542 has effect · P155 follows · P156 followed by · P793 significant event |
+| **Type** (recorded, not checked) | P31 instance of |
 
-- Other statements (labels, images, external identifiers) are counted, not inventoried.
+- **Unmapped but possibly relevant statements are logged, not dropped.** Any statement outside the mapping whose value is a date, a quantity, a place item or another event item goes into an "unmapped, possibly relevant" log (property ID, label, value, statement ID). It is not a claim in this gate, but the log is reported, so a missing property (e.g. a displaced-persons figure) is visible.
+- Other statements (labels, images, external identifiers) are counted only.
 - **Wikipedia article text is context, not claims** (§5A.1). If the article cites a source for a fact that the Wikidata claim leaves unreferenced, the footnote is recorded as a **lead** (article revision ID + footnote) beside the claim. Leads are not checked in this gate (decision D6).
 
 ### 4.2 Checking rule (recorded before checking; method version `chk-v1`)
 1. **Order:** each claim gets the key `SHA-256("20261109|C|" + statement ID)`; claims are taken in key order within each step. The ordered list is saved before the first check.
 2. **Step A:** all date and place claims of all selected events.
-3. **Step B:** all scale and relationship claims of 10 events chosen by key `SHA-256("20261109|B|" + Qid)` (all events if fewer than 10), cap permitting.
+3. **Step B:** all scale and relationship claims of 10 events chosen by key `SHA-256("20261109|B|" + Qid)` (all events if fewer than 10). **Step A always runs first; Step B uses only what remains of the checking sub-cap.** Step B claims not reached are "not checked — cap reached".
 4. **Cap reached:** a claim inside the rule not reached before the checking sub-cap ends is **not checked**, with reason **"cap reached"**, distinct from "outside the rule".
 
 ### 4.3 Dispositions and sub-fields
@@ -172,10 +190,33 @@ For each selected event, every statement on its item that bears on the timeline 
 
 **A qualifying source must itself be classified on its own terms.** If the cited work is an encyclopedia that prints a contemporary letter, the letter passage may be T2-c (qualifying), while the encyclopedia's own narrative is T2-s (§1).
 
+**Imported reference with no named revision:** a revision chosen by the checker is acceptable **only as explicitly dated T2-s repetition evidence** ("Wikipedia, revision …, read …, repeats the assertion"). It is **not** a reconstruction of the unspecified revision the statement was originally imported from.
+
+### 4.3a Roll-up: from references to one disposition per claim (method version `roll-v1`, fixed before checking)
+The table above describes one reference. A claim may carry several, so each reference gets a **reference-level observation** first:
+
+`qualifying support` · `repetition support` · `coarser only` · `not stated` · `contradicts` · `inaccessible` · `not checked (cap)`
+
+All observations are kept and reported. **None is discarded because another reference decided the claim.** The claim then gets **exactly one** disposition, by the first rule that applies:
+
+| # | If, among the claim's references… | Claim disposition | Sub-fields always recorded |
+|---|---|---|---|
+| 1 | there are none | **no reference given** | lead, if any |
+| 2 | none was reached (all `not checked (cap)`) | **not checked** — `cap reached` | — |
+| 3 | at least one `qualifying support` | **checked — supported**, kind `qualifying` | `also repeated` if any repetition support; **`conflict`** listing every `contradicts` / `coarser only` reference; `partially checked (n of m)` if any reference was not reached |
+| 4 | else at least one `repetition support` | **checked — supported**, kind `repetition` | same `conflict` and `partially checked` fields |
+| 5 | else at least one `contradicts`, `coarser only` or `not stated` | **checked — unsupported**, reason = the strongest present (contradicted > precision not supported > not stated) | `partially checked` if any reference was not reached; the coarser supported value, if any |
+| 6 | else (everything reached was `inaccessible`) | **inaccessible** | `partially checked` if any were not reached |
+
+- **Each claim is counted once** in every rate (§4.5), whatever its number of references.
+- A supported claim carrying a `conflict` sub-field is reported in its own line beside the rates ("supported, with conflicting references: n"). The conflict is shown side by side, not resolved.
+- `partially checked` claims are reported as a count beside checking coverage, so a claim decided on one of three references is never presented as fully checked.
+
 ### 4.4 Lineage
 - References are grouped by the work they cite, after resolving editions where the record allows; a group is one account.
 - **Dependency is recorded only with evidence:** e.g. an import reference shows the Wikidata statement was taken from a Wikipedia edition (known dependent between those two); a cited work that names the same source as another reference (known dependent).
 - **Circularity is recorded only with evidence of a loop:** e.g. a cited work that itself cites the Wikipedia article or the Wikidata item. Dependency alone is not circularity.
+- **Circular-only repetition is never qualifying support.** If a passage's only basis is shown to be the Wikipedia article or the Wikidata item, its observation is `repetition support`, even when the work carrying it is a later history (T2-h). The carrying work's category does not turn repeated encyclopedia content into historical support.
 - States per §3.1. "Independent" needs the evidence written down. Unknown is shown as unknown and never counted.
 
 ### 4.5 Rates and coverage, reported together
@@ -185,6 +226,7 @@ For each step and overall, the report shows:
 - **All-support rate:** (qualifying + repetition) ÷ (supported + unsupported), shown **only beside** the qualifying rate, never alone.
 - **Unsupported, by reason:** precision not supported · not stated · contradicted.
 - **Beside them:** inaccessible, no reference given, not checked (each by reason).
+- **Also beside them:** claims supported with conflicting references; claims decided while partially checked (§4.3a). Each claim is counted once, whatever its number of references.
 - **N/A** wherever the denominator is zero. No rate is shown without its coverage figures.
 - Rates **describe the selected sample only**; they are not estimates for Wikidata generally or for the state.
 
@@ -198,7 +240,7 @@ For each step and overall, the report shows:
 |---|---|---|---|
 | 0 | **Terms record** (see below) | 0.75 h | Unresolved terms reported as unresolved |
 | 1 | **Independent reference list** (if chosen, §6), fixed and saved **before** step 2 | 1 h | Missed events reported "unmeasured" |
-| 2 | **Discovery and selection** (§3.3) | 0.75 h | Discovery reported **incomplete** (rule X); selection over what was found, labelled "at least" |
+| 2 | **Discovery, verification on pinned data and selection** (§3.3, rules X and V) | 0.75 h | Discovery or frame verification reported **incomplete**, with which candidates were verified and the reproducibility limit; dependent results labelled **provisional** |
 | 3 | **Inventory** (§4.1) of all selected events; ordered claim list saved | 0.75 h | Reported **incomplete**: events inventoried, events not inventoried, **remainder of claims unknown**. No statement of complete claim coverage. Checking applies only to inventoried claims. |
 | 4 | **Checking** (§4.2) | 2 h | Unreached claims "not checked — cap reached" |
 | 5 | **Report** (§7) | 0.75 h | — |
@@ -211,7 +253,9 @@ For each step and overall, the report shows:
 - **(c) Media:** recorded as **excluded, not assessed**. No media is fetched or stored.
 - **(d) Referenced external works:** **not cleared up front.** Each work reached during checking has its own conditions recorded **as encountered** (text rights, scan rights, access conditions). Step 0 grants nothing for works discovered later. A citation in Wikipedia or Wikidata grants nothing for the cited work.
 
-**Public-repo rule:** until the terms record for (a) and (b) is accepted, the repo holds only IDs, revision IDs, statement IDs, retrieval times, our dispositions, keys and page references. Copied statement values, article text and passages from cited works stay in the Mac research folder, as for the earlier fireballs research **[record: HANDOVER §1-old item 6]**. Quotations from cited works are short (under 15 words) and only where wording decides support.
+**Accepting the Wikidata/Wikipedia terms does not clear external works.** Text, scans and passages copied from cited works stay subject to **their own reviewed reuse basis**, and to separate publication and REGISTER-filing authorisations from Chad. Nothing from an external work is published because it was reached through Wikidata or Wikipedia.
+
+**Public-repo rule:** until the terms record for (a) and (b) is accepted, the repo holds only IDs, revision IDs, statement IDs, retrieval times, our dispositions, keys and page references. Copied statement values, article text and passages from cited works stay in the Mac research folder, as for the earlier fireballs research **[record: HANDOVER §1-old item 6]**. Even after acceptance, external-work content follows the rule above. Quotations are kept short (under 15 words) and used only where wording decides support; **the length limit is a working habit, not rights clearance.**
 
 ---
 
@@ -226,29 +270,41 @@ For each step and overall, the report shows:
 - **Independence:** compiled by a named source that does not draw its list from Wikipedia or Wikidata. The source, and why it counts as independent of them in selection, is recorded. (Independence of *selection* is what coverage needs. Whether the list's source can also corroborate a claim is a separate lineage question, §4.4.)
 - **Own coverage stated first:** the list's geographic coverage (a state, a river reach, a single gauge) and its event definition (e.g. "crest above flood stage at gauge G") are recorded verbatim. **Comparisons are restricted to that coverage:** a single-gauge list speaks only for floods at that gauge as it defines them, not for the state.
 - **Scope filter:** only entries whose stated date and place fall inside the selection period and Pennsylvania (and inside the list's own coverage) are used.
-- **Size and subsetting:** if ≤ 40 entries remain, all are used. If more, each gets the key `SHA-256("20261109|R|" + entry key)`, where the entry key is the list's own entry ID or, if it has none, the entry's date and place exactly as printed. The first 40 by key are used; the rest are recorded as "not in the subset".
+- **Stable source-row identifiers:** when the list is fixed, every entry gets a row ID: the list's own entry ID where it has one; otherwise `<source document ID>|<page or table>|<row position as printed>`. Row IDs are unique by construction, so two entries with the same date and place never share a key.
+- **Size and subsetting:** if ≤ 40 entries remain (a provisional effort boundary), all are used. If more, each gets the key `SHA-256("20261109|R|" + row ID)`; ties, if any, are broken by row position as printed. The first 40 by key form the **fixed reference subset**; the rest are recorded as "not in the subset".
 - **Saved with a real-clock time** before step 2 begins.
 
-### 6.3 Matching rule (a T3 computation by our method, version `match-v1`)
-A list entry matches a Wikidata item when **all** hold:
-- the entry's date interval (per its stated precision) overlaps the item's selection-date interval (§3.3 rule D);
-- the entry's place is the same entity as one of the item's place values, or lies on that value's administrative chain, or (for a river or gauge entry) the item names that river or the gauge's locality as a place;
-- the item passes rule T, or is one of the items listed "type outside rule".
+### 6.3 Identity matching (a T3 computation by our method, version `match-v2`)
+Identity matching is **separate from selection eligibility**. It runs against every item in the candidate frame (eligible, excluded and type-outside-rule alike), uses the pinned data (rule V), and never changes the selection.
 
-Name similarity alone never makes a match. More than one candidate is **unresolved**, with the candidates listed. The match basis is recorded per pair.
+**Step 1 — candidates.** An item is a **candidate** for a list entry when the entry's date interval (per its precision) overlaps the item's selection-date interval, **and** they share an administrative area (the entry's place is one of the item's place values or on its chain) **or** a river (the item names that river or the gauge's locality). **This only generates candidates; it does not establish that they are the same flood.** Name similarity alone does not even make a candidate.
+
+**Step 2 — identity.** A candidate becomes a **same-event match** only with **documented identity evidence**, recorded per pair, such as:
+- the item, or a source cited on it, names the gauge, its locality or the list's own record of the event, with a consistent date; or
+- the list's source names the event in a way that resolves to the item (e.g. the same named flood, with a consistent date and place).
+
+**Without such evidence the pair stays unresolved, even if it is the only candidate.**
+
+**Episodes and crests are different things.** A gauge list records **crests** (a peak at one gauge on one date); a Wikidata item usually describes a **flood episode** (an event over days and places). Each pair records its relationship:
+- `same episode`
+- `crest within episode` — the crest is one observation of the episode
+- `episode contains several listed crests` — **many-to-one**: several entries map to one item; each entry is classed separately and the shared item is noted
+- `unclear` — treated as unresolved
 
 ### 6.4 Outcome classes (each entry gets exactly one; reported as counts and lists)
 | Class | Meaning |
 |---|---|
-| **matched — selected** | matches an item in the ≤ 30 sample |
-| **matched — omitted by the sample cap** | matches an eligible item that rule S did not sample |
-| **matched — excluded by the rule** | matches a discovered item excluded by rule T, D or P (reason given) |
-| **unresolved** | more than one candidate, or the match basis is incomplete |
-| **not found in our discovery results** | no match among everything discovery returned (eligible, excluded and type-outside-rule items) |
+| **matched — selected** | identity established (§6.3) with an item in the ≤ 30 sample |
+| **matched — omitted by the sample cap** | identity established with an eligible item that rule S did not sample |
+| **matched — excluded by the rule** | identity established with a frame item excluded by rule T, D or P (reason given) |
+| **unresolved** | at least one candidate, but identity not established (including a single weak candidate, several candidates, or an `unclear` relationship) |
+| **not found in our discovery results** | no candidate in the candidate frame |
 
 - **"Not found in our discovery results" does not establish absence from Wikidata.** Wikidata may hold the event under another type, without a resolvable place, or outside what discovery returned. The statement is bounded to the rules, the discovery record (rule X), the revisions and the date.
 - **Absence from the ≤ 30-event sample says nothing about Wikidata.** That is why "omitted by the sample cap" is its own class.
-- If discovery was incomplete (rule X), every class is reported as "at least", and "not found" is labelled as such.
+- **Counts are exact and sum to the size of the fixed reference subset.** Each entry's class is its current classification on the frame as verified.
+- If discovery or frame verification was incomplete (rules X and V), **every class is labelled provisional.** Further discoveries could move an entry from "not found" to a candidate, or turn a match into "unresolved" if a competing candidate appears; they could also change the other classes. Nothing is reported as a lower bound.
+- Many-to-one relationships are listed beside the counts (which entries share an item); they do not change the per-entry counts.
 
 ---
 
@@ -258,11 +314,11 @@ Name similarity alone never makes a match. More than one candidate is **unresolv
 |---|---|---|
 | **Terms** | (a) and (b) have operative wording extracted and labelled, with draft REGISTER wording (nothing filed); (c) recorded as excluded; (d) conditions recorded per work encountered | Unresolved items listed |
 | **Discovery** | Method recorded; no sign of truncation (rule X) | **Incomplete**, with what was seen |
-| **Selection** | ≥ 10 eligible events (operational floor), selected by rules T, D, P, O, S; every exclusion listed with its reason | **Inconclusive** if < 10; national option only if Chad chose it |
-| **Inventory** | All selected events inventoried, all fields recorded | **Incomplete**, with the unknown remainder stated |
+| **Selection** | Frame verified on pinned data (rule V); ≥ 10 eligible events (operational floor), selected by rules T, D, P, O, S; every exclusion and discrepancy listed | **Incomplete** if the frame could not be verified (reproducibility limits stated); **inconclusive** if < 10; national option only if Chad chose it |
+| **Inventory** | All selected events inventoried by the frozen mapping; unmapped-but-possibly-relevant log produced | **Incomplete**, with the unknown remainder stated |
 | **Checking** | The rule ran in the saved order; every inventoried claim has one disposition and its sub-fields | Explained |
 | **Lineage** | Every reference grouped, with evidence for any dependency, circularity or independence | Incomplete groups listed |
-| **Coverage** (if chosen) | List fixed before selection; all entries classed per §6.4 | No list established → missed events unmeasured |
+| **Coverage** (if chosen) | List and row IDs fixed before selection; every entry in the fixed subset classed per §6.4, counts summing to the subset size | No list established → missed events unmeasured; incomplete frame → classes provisional |
 | **Gaps** | Stated in the three kinds of §3.3, bounded to rules, revisions, region, language and date | — |
 | **Sensitivity** | Flags raised for Chad (deaths and displacement are likely); none decided by Claude | — |
 
@@ -270,11 +326,16 @@ Name similarity alone never makes a match. More than one candidate is **unresolv
 
 ---
 
-## 8. Points for GPT's re-review
-1. Hop limits (type 4, place 6) and the 40-entry reference cap are Claude's choices, not measured.
-2. Rule D governs eligibility by start time when it and point in time disagree; the alternative (exclude on any disagreement) is stricter but may empty a sparse set.
-3. Whether reaching an imported reference's Wikipedia edition at a revision chosen by us (when the reference names none) is acceptable, given that it is labelled as our choice.
-4. Whether Step B (10 events) is still worth its share of the 2 h checking sub-cap once Step A's size is known.
+## 8. GPT's answers to rev 2's points (recorded) and open points
+**Answered by GPT (9 Nov), now in the text:**
+1. Type 4 hops, place 6 hops and 40 reference entries are reasonable **provisional effort boundaries**, with no completeness claims (§3.3, §6.2).
+2. Start-time precedence is acceptable **for eligibility**; it does not settle historical disagreement (§3.3 rule D).
+3. A reviewer-chosen Wikipedia revision is acceptable as **explicitly dated T2-s repetition evidence**, not as reconstruction of the unspecified import revision (§4.3).
+4. **Step A first;** Step B uses only the remaining checking budget under the predeclared rule, otherwise "not checked — cap reached" (§4.2).
+
+**Open for GPT's review of rev 3:**
+1. The roll-up order in §4.3a: a claim with one qualifying reference and one contradicting reference is "checked — supported" with a `conflict` field, not "unsupported". Is that the right precedence, given that the conflict is always reported beside the rates?
+2. The property mapping in §4.1 is from general knowledge and verified only by label at gate start. Is label verification enough, or should the mapping also be checked against the properties actually present on the frozen items before inventory?
 
 ---
 
@@ -295,6 +356,6 @@ Name similarity alone never makes a match. More than one candidate is **unresolv
 
 **Bounded wording, if and when Chad chooses (not now):**
 
-`Go: timeline Route W first gate per TIMELINE-CONCEPT rev 3.1 §5A.4 and TIMELINE-ROUTE-W-GATE-PROPOSAL rev <n> — research only, cap 6 h + one GPT review; water/floods, Pennsylvania fixed (no national fallback), 1870–1927, English; ≤ 30 events (operational floor 10); rules §3.3, checking §4.2, seed 20261109; reference list yes; no downloads beyond the bounded set, no media, no accounts, no provider contact, no REGISTER filing, no prototype.`
+`Go: timeline Route W first gate per TIMELINE-CONCEPT rev 3.1 §5A.4 and TIMELINE-ROUTE-W-GATE-PROPOSAL rev <n> — research only, cap 6 h + one GPT review; water/floods, Pennsylvania fixed (no national fallback), 1870–1927, English; ≤ 30 events (operational floor 10); rules §3.3 (incl. V), checking §4.2–§4.3a, seed 20261109; reference list yes; no downloads beyond the bounded set, no media, no accounts, no provider contact, no REGISTER filing, no prototype.`
 
 This proposal itself authorises nothing beyond its own writing.
