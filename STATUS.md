@@ -4,6 +4,43 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 08:34:48–09:01:03 UTC (Mac clock) — **Timeline Route W first feasibility gate RUN** (research only; Chad's "go" on rev 4's parameters) — packet in the Mac folder `research/timeline-route-w/2026-11-09-claude/` (not in the repo)
+- **Protocol:** `docs/concepts/TIMELINE-ROUTE-W-GATE-PROPOSAL.md` rev 4.
+  - Pennsylvania fixed · 1870–1927 · English · ≤ 30 / floor 10 · reference list ≤ 40 · seed 20261109 · `map-v2`, `roll-v1`, `match-v3`.
+  - Cap 6 h with fixed sub-caps. No national fallback; D3b yes.
+  - **Clock time used: 26 min** (terms 1 · reference list 4 · selection 12 · inventory 2 · checking 2 · report ~1).
+- **Access:** the workspace shell is refused at the proxy for Wikidata and Wikipedia. Every read went through the browser pane: serial requests, `Api-User-Agent` = repo URL, `maxlag=5`. Chad granted pane site access to wikidata.org, wikipedia.org, waterdata.usgs.gov, nwis.waterdata.usgs.gov, water.noaa.gov and web.archive.org.
+- **Terms (pass, research record, nothing filed):**
+  - Wikidata:Copyright rev 1523614187 (CC0);
+  - Wikipedia:Copyrights rev 1378669134 (CC BY-SA 4.0 / GFDL);
+  - WMF Terms of Use rev 598588 and User-Agent policy rev 564705;
+  - extracted directly by Claude; GPT has not checked them.
+- **Reference list (`ref-v1`), fixed 08:41:33 UTC before any flood query:**
+  - source: USGS 01570500 (Susquehanna at Harrisburg) annual peaks with gauge height ≥ 17 ft, the NWS minor flood stage at HARP1;
+  - **14 entries, 1886–1926**;
+  - list sha256 `01ca635a…f66f`, source file `4ad3a8d5…e544`.
+- **Discovery / selection (`sel-v1`):**
+  - 34 flood classes;
+  - frame 67, verified on pinned data, 0 discrepancies;
+  - **1 eligible: Q691404 Johnstown Flood** (rev 2540961062) → **selection INCONCLUSIVE** (< 10);
+  - exclusions: 19 with no date, 38 outside the period, 9 with country only (incl. Q16982566 Great Flood of 1913).
+  - The first single query hit our 65 s client timeout and was replaced by a logged A + B + A2 split.
+  - File sha256 `9e6677cb…eabd`.
+- **Inventory:** `map-v2` = `map-v1` (no corrections). 9 claims in the rule (A 7, B 2) + 2 type statements. File `4500f965…2d5e`.
+- **Checking:**
+  - P585 → **checked — supported, qualifying** (American Heritage 2006 article, T2-h, lineage unknown; Wayback capture 2010-12-05);
+  - **the other 8 claims: no reference given** (leads from enwiki rev 1380111733);
+  - coverage 1/9, qualifying rate 1/1 (one claim; little information).
+  - File `0f363c41…adbb`.
+- **Matching (`match-v3`):** 14/14 entries "not found in our discovery results" (discovery complete; not provisional). Near misses: Johnstown (documented interval 31 May 1889 vs the Harrisburg crest on 2 Jun); Great Flood of 1913 (23–26 Mar vs 28 Mar; no PA place or river).
+- **Sensitivity flag for Chad:** deaths are 2,209 in Wikidata (unreferenced); enwiki body 2,209 with a footnote, enwiki infobox 2,208 with none; the 2006 article says "2,200-plus".
+- **For GPT (one review):** `research/timeline-route-w/2026-11-09-claude/report/REPORT.md` and the packet beside it. Points to look at:
+  - our reading of "shared area";
+  - the L check, bounded to frame items' own text;
+  - the discovery split;
+  - the reference-list event definition (our T3).
+- **Not approved / not done:** route or History selection, prototype, Phase A, REGISTER filing, provider contact, any production change. Nothing from Wikidata, Wikipedia or the cited article is in the repo.
+
 ## 9 Nov 08:20 UTC (clock reading at write) — **GPT accepted Route W gate proposal rev 4 and ENQUIRIES rev 5** (docs only)
 - **Proposal rev 4:** accepted within its recorded scope; all requested corrections addressed. The 30-day matching window = provisional, unmeasured candidate-generation boundary (not episode duration or identity evidence); documented timing and source links take priority; negative results bounded to the method. Editorial tidy-up after acceptance: §6.3 heading `match-v2` → `match-v3` (label only; no further review needed, per GPT).
 - **ENQUIRIES rev 5:** accepted as a bounded evidence/interpretation record. Q1b, Q1c, Q3 unresolved; Q2 a contextual reading only; feeder, credit and cloud conditions stand.
