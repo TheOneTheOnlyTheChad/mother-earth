@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 16:01 UTC (clock reading at write) — **timeline-rc rev 2 @ `c3498bc`: GPT's two smoke findings fixed; phone header 94 px** (branch only; packet rev 2 at `412b8a8`)
+- GPT smoke-tested `31fab7d` on Chad's localhost server (Terminal, `_review/timeline-rc/`) and confirmed two findings:
+  1. title → (Julian) while open pushed a second history entry (one Back only collapsed the conversion). **Fixed:** a switch updates the open history entry; focus returns to the most recently used card control. New tests incl. direct link + shortcut; break `switch-pushes` 102 fail.
+  2. Timeline `.card` rules restyled the globe's Readings cards (`#card-usgs` 12px 14px, strong border; main 8px 10px). **Fixed:** all Timeline CSS scoped under `body.tl`; test + break `unscoped-card`.
+- **Phone header:** two-row grid, 44 px targets, 2 px gap/padding → **94 px** (rev 1 104 px). Overlay check at 390×844, everything on, Readings open: **7.2%** (rev 1 8.3%, main 5.4%, target ≤ 8%); mobile-pass 131/0. Also fixed: rev 1's wrapping header pushed the title above the header at 390 px with fallback fonts.
+- **Tests:** timeline-ui 578/0; 11 breaks each fail (a stale break anchor found and fixed); all 35 regression suites pass. Asset `?v=202611181000`.
+- **Shared copy refreshed** (`_review/timeline-rc/` = `c3498bc`, new SHA256SUMS; rev 1 kept at `_review/timeline-rc-31fab7d/`). Chad restarts the localhost server for GPT's re-check.
+- Still before release B: GPT's re-check, R1, R2 (separate), Chad's release line.
+
 ## 9 Nov 15:20 UTC (clock reading at write) — **Timeline candidate BUILT on branch `timeline-rc` @ `31fab7d`** (Chad's Approve line A; NOT merged, NOT served; no hub, R2 or D1 change) — packet `reviews/2026-11-09-timeline-rc.md` (on the branch)
 - **Built:** `timeline.html` (entry pre-rendered from `phase1/timeline/entry-pliny-ep-6-16.json` by `build_timeline.py`), `timeline.js` (panel/sheet, history and focus; 9,021 B, over the 8 KB target), header tabs Earth now · Timeline on index and sources, REGISTER rows (EGU licence pending publisher verification, R1).
 - **Read-only checks (pane):** Wikidata 14:47:26–28 UTC — Misenum Q19900818, Vesuvius Q524, Pliny the Younger Q168707, *Epistulae* Q2099521 (all resolved). Latin Library 14:47:44 UTC — page hash unchanged (`b59e819a…`), **no anchors**, so no jump link.
