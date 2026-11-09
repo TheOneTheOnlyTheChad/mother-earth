@@ -14,7 +14,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | **Monitoring** | UptimeRobot 8 monitors (runs, publication, archive, coverage × usgs, firms), all 200 at the last reads. No monitor on swpc. |
 | **Branches** | GitHub: `main` + parked `aircraft-rc` (never deploy it as-is) + **`arts-met-rc`** (Arts candidate, awaiting GPT's review; not merged, not deployed). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
 | **Tests on main** | kp-degraded 29/29 · place-ui 30/30 · health-hub 29 · history-hub 27 · firms-guard 19 · firms-v2 57 (+7 need `OLD_WORKER`) · all UI suites pass (container). |
-| **Mac copies** | Last full sync 8 Nov (backlog thread). 9 Nov thread: see STATUS 9 Nov handover entry for whether the end-of-thread sync ran (needs Chad's folder grant). |
+| **Mac copies** | **Synced 9 Nov 05:47–05:50 UTC** (end of the Arts/timeline thread): 185/185 tracked files = main; 6 older committed versions preserved to `_sync-preserved/20261109T054755Z/`. Branch-only Arts files are not on the Mac by design. Next thread: grant `~/Documents/Mother Earth` again to sync. |
 
 ## 0a. Smoke testing, 8 Nov (GPT + Claude)
 - **GPT, 05:14–05:20 UTC** (on `3375e91`) and **GPT, 12:10–12:19 UTC** (on `ad4002b` + hub 0.6.1): no blocking regression in the checks completed; **not exhaustive**.
