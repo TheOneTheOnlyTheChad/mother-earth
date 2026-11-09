@@ -2,6 +2,14 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 9 Nov 2026
+
+## 9 Nov 03:38 UTC (clock reading at write) — **Arts release proposal rev 1 (proposal only) + provider enquiries recorded** (docs only)
+- **Enquiries (Chad):** OpenSky (ticket #837506), adsb.lol and NASA Ozone Watch sent; USNO (8 Nov) still pending. **Replies pending; sending grants no permission.** Record: `docs/research/ENQUIRIES-2026-11.md`. Chad's address and phone are kept out of this public repo. No duplicate or automatic follow-ups.
+- **Aircraft reopened only for bounded terms/access and feeder clarification** (Chad). No building, purchase, installation or deployment; `aircraft-rc` stays parked.
+- **Arts:** `docs/research/P0-ARTS-RELEASE-PROPOSAL.md` rev 1, for GPT. Recommends an off-on-load optional card with a list by present-day country (nothing drawn on the globe), a **fixed snapshot** pinned to Met commit `e394878`, served by the hub from R2 `ref/` (constitution). Every accepted limitation carried, including that the 479 are a **seeded sample** of the 59,137 typed-geography records. Published fields measured: 122,227 B JSON / 7,207 B gzip. Decisions D1–D8 open. **Arts unselected; no prototype, Phase A, branch or production change.**
+- Unchanged: Life stopped; GIBS bench closed, no shadow record; inspiration list separate from the research backlog; all accepted reviews and approvals stand.
+
 # 8 Nov 2026
 
 *Timestamps (corrected 8 Nov, Chad): entry stamps marked "commit time" come from `git log` (the commit lands after the work); stamps without that label are measured readings. The earlier "~HH:MM" stamps on this day were estimates, 1–3 h out, and have been replaced.*

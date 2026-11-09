@@ -139,6 +139,9 @@ P1–P5 completed 8 Nov 2026 by GPT on Chad's behalf (P1 → A1, C; P2 → A2; P
 - **Federal-work reasoning:** that the files carry no U.S. copyright as NASA work remains **explicitly unverified**. Rev 3's suggestion that a university-affiliated contact implies non-federal authorship is **withdrawn**: affiliations establish neither authorship nor copyright status in either direction.
 - **Upstream vs product:** GMAO and OMPS input terms are separate from permission for Ozone Watch's derived files.
 
+### 9.4a Provider enquiry (reported by Chad 9 Nov 2026)
+- Chad emailed NASA Ozone Watch about reuse of the two daily files (area, minimum), public/API redistribution, commercial use, attribution and once-daily retrieval. **Reply pending. No permission is inferred from sending or from silence**; the position in §9.4 stands. Record: `docs/research/ENQUIRIES-2026-11.md`.
+
 ### 9.5 Unanswered questions
 1. Licence / commercial-reuse position for the two derived files (no applicable grant found).
 2. Authorship and copyright status of the files (unverified; not inferable from contacts).

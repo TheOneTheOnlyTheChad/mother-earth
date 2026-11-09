@@ -12,7 +12,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | **D1** | **+ 5 `firms_*` tables + 3 indexes (6 Nov 19:59:43–20:00:03 UTC, FIRMS v2 state).** 9 history tables + 8 indexes **+ `archive_checkpoint_coverage` (empty) + index `collector_runs_layer_finished`** (both created 6 Nov 05:37 UTC, live = `2ee3a62` schema). |
 | **History** | ON since 5 Nov 10:21 UTC — keep on. First midnight checkpoint (5 Nov) completed; **fires part is partial** (input 15:30 UTC: the 4 MB guard skipped 15:45–23:45). Details STATUS. |
 | **Monitoring** | UptimeRobot 8 monitors (runs, publication, archive, coverage × usgs, firms), all 200 at the last reads. No monitor on swpc. |
-| **Branches** | GitHub: `main` + parked `aircraft-rc` only (never deploy it as-is). |
+| **Branches** | GitHub: `main` + parked `aircraft-rc` only (never deploy it as-is). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
 | **Tests on main** | kp-degraded 29/29 · place-ui 30/30 · health-hub 29 · history-hub 27 · firms-guard 19 · firms-v2 57 (+7 need `OLD_WORKER`) · all UI suites pass (container). |
 | **Mac copies** | Synced at each step this thread (`~/Documents/Mother Earth` granted 8 Nov; clone in the Mac shell at `$HOME/me-sync`, then cp + cmp over `git ls-files`). |
 
@@ -35,8 +35,14 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | R2 fireballs terms | **Rev 2 awaiting GPT's review** (SSD FAQ public-domain statement corroborated by GPT; reach to the API = interpretation; lightcurve files not established; research-only REGISTER draft, not filed). Identity/validation gates open. | `docs/research/R2-terms-access.md` |
 | GIBS stage 1 bench | **CLOSED, accepted by GPT** (rev 2, `cca33e6`). PNG promising; no tie margin, byte cap or eligibility rule adopted; Worker CPU/memory/cost unverified. No shadow record authorised. | `reviews/2026-11-08-gibs-stage1-bench.md` |
 
+**9 Nov additions:**
+- Provider enquiries sent by Chad (OpenSky #837506, adsb.lol, Ozone Watch; USNO from 8 Nov) — **all replies pending; no permission from sending or silence**; record and filing rule in `docs/research/ENQUIRIES-2026-11.md`. No duplicate or automatic follow-ups; draft sign-off "Ta". Keep Chad's address/phone out of the repo.
+- **Aircraft: reopened only for bounded terms/access and feeder clarification** (no building, purchase, installation, deployment; `aircraft-rc` parked).
+- **Arts release proposal rev 1** (`docs/research/P0-ARTS-RELEASE-PROPOSAL.md`) awaits GPT's review and Chad's decisions D1–D8. Arts stays unselected; nothing built.
+
 **Next, all on Chad's go:**
 1. GPT's review of R2 rev 2 → corrections if any; filing only on Chad's separate authorisation.
+1a. GPT's review of the Arts release proposal rev 1 (docs only) → Chad's D1–D8.
 2. Remaining backlog: new first gates (R5 coral, R7 tides, R10 solar flares); Phase 0 domain decision (rec. rev 3); GIBS beyond the bench (shadow record / implementation) each a separate decision.
 3. Still left open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
 
