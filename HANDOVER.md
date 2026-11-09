@@ -43,8 +43,8 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **Next, all on Chad's go:**
 1. GPT's review of R2 rev 2 → corrections if any; filing only on Chad's separate authorisation.
-1a. **Arts: candidate built on branch `arts-met-rc` @ `4c4bbb9`** (Chad's branch-only Approve, after GPT accepted rev 2.1). File sha256 `221bb1ca…9644`; hub 0.6.2 on the branch only. Next: GPT's implementation review (`reviews/2026-11-09-arts-met-rc.md` on the branch) → R2 upload, hub deploy and page release, each on its own Approve line (wording in the review §6). Unreleased page code stays off main.
-1b. Timeline concept **rev 2** (`docs/concepts/TIMELINE-CONCEPT.md`, after GPT): concept only; any first gate needs Chad's go.
+1a. **Arts: candidate built on branch `arts-met-rc` @ `4c4bbb9`** (Chad's branch-only Approve, after GPT accepted rev 2.1). File sha256 `221bb1ca…9644`; hub 0.6.2 on the branch only. **GPT's implementation review done 9 Nov: no blocking defect in its code/test scope** (browser checks Claude-supplied); rollback wording corrected on the branch (`c5005c3`, docs only). Next, each on its own Approve line (wording in the review §6): R2 allowances check → R2 upload → hub deploy (pin the pre-deploy version first) → live RC → page release. Unreleased page code stays off main.
+1b. Timeline concept **rev 3** (`docs/concepts/TIMELINE-CONCEPT.md`): Route L and Route W, each with a bounded first gate; concept only; any gate needs Chad's go.
 2. Remaining backlog: new first gates (R5 coral, R7 tides, R10 solar flares); Phase 0 domain decision (rec. rev 3); GIBS beyond the bench (shadow record / implementation) each a separate decision.
 3. Still left open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
 
