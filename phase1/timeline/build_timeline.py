@@ -32,7 +32,7 @@ def card(x):
         <p class="dline">{e(d['day'])} <a class="sc" href="#{i}-conv" data-entry="{i}" data-x="conv" data-opener="julian" aria-label="{e(d['day'])} {e(d['calendar_label'])}: how we converted">{e(d['calendar_label'])}</a> · {e(d['year_label'])}</p>
         <p class="cplace">Misenum · Bay of Naples (present-day reference)</p>
         <p class="chip">▣ {e(x['evidence']['label'])} · {e(x['evidence']['kind'])}</p>
-        <p class="cflag"><a class="sc" href="#{i}-debate" data-entry="{i}" data-x="debate" data-opener="debated" aria-label="Date debated: see the scholarly note">⚑ Date debated</a></p>
+        <p class="cflag"><a class="sc" href="#{i}-debate" data-entry="{i}" data-x="debate" data-opener="debated" aria-label="{e(x['card_flag']['aria'])}">{e(x['card_flag']['text'])}</a></p>
       </li>'''
 
 
@@ -86,8 +86,10 @@ def entry(x):
       <section class="es xp note" id="{i}-debate" aria-labelledby="{i}-debate-h">
         <h4 id="{i}-debate-h">Scholarly note on the date <span class="sub">(separate, attributed)</span></h4>
         <div class="xb" id="{i}-debate-b">
-          <p>⚑ {e(n['text'])}</p>
-          <p><a href="https://doi.org/{e(n['doi'])}" target="_blank" rel="noopener">doi {e(n['doi'])} <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(n['licence'])} · read via the {e(n['read'])}.</p>
+          <p class="withdrawn"><b>{e(n['status_line'])}</b></p>
+          <p>{e(n['text'])}</p>
+          <p><a href="https://doi.org/{e(n['doi'])}" target="_blank" rel="noopener">doi {e(n['doi'])} <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(n['licence'])}.</p>
+          <p class="srcnote">{e(n['read'])}</p>
           <p><b>{e(n['verdict'])}</b></p>
         </div>
       </section>

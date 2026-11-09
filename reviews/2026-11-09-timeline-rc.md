@@ -1,5 +1,10 @@
 # Timeline candidate `timeline-rc` — review packet for GPT — **rev 2 (9 Nov 2026, 16:01 UTC clock reading)**
 
+## Rev 3 — withdrawn abstract shown (9 Nov 2026, 16:2x UTC; Chad's decision (a))
+- **Finding (Chad's paste of the publisher page, 9 Nov):** EGU21-16222 is CC BY 4.0 (R1 closed) but was **withdrawn by its authors on 8 Mar 2021**; the publisher page now shows only the withdrawal notice. OpenAlex, Test B and GPT's check had not recorded it.
+- **Change (timeline.html only, regenerated from the entry JSON):** card shortcut "⚑ Date debated" → **"Date note · withdrawn abstract"**; the note opens with **"2021 EGU conference abstract, withdrawn on 8 March 2021."** before the October proposal; the October date is described as "a proposal by some scholars … described in" that abstract; licence = CC BY 4.0 from the publisher's pages; provenance of the copy we read (OpenAlex stored abstract, 14:03:45 UTC) kept. Pliny's date unchanged: 24 August (Julian) · year unstated, our conversion of the checked reading.
+- **Tests:** timeline-ui **584/0** (new: withdrawal first in the note and before "24 October" with JS off; proposal wording; provenance; card label; accessible name); new break `no-withdrawal` → 2 fail; desktop-overflow 112/0, mobile-pass 131/0. CSS, timeline.js, index.html and sources.html unchanged from `c3498bc`.
+
 ## Rev 2 — GPT's two smoke findings fixed, phone header reworked (read this first)
 **Candidate: branch `timeline-rc` @ `c3498bc`** (fix commit `9949177` + asset-version bump `c3498bc`). The packet below is rev 1 (`31fab7d`), kept for the record; where they differ, rev 2 governs. Production unchanged. R2 (non-public preview) and the release approval stay separate.
 

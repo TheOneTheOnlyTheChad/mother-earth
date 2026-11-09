@@ -194,7 +194,7 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 - **Use on the page:** **linked only.** Nothing from the page is reproduced; the entry shows our English paraphrase, our conversion and our model, with the checked copy's date and hash beside the link.
 - **Commercial use:** not applicable while linked only. Quoting the text inline needs a separate clearance (e.g. Perseus, CC BY-SA 3.0 US, with attribution and share-alike).
 
-## EGU General Assembly 2021 abstract EGU21-16222 (D'Auria, De Micco, Di Pasquale), doi 10.5194/egusphere-egu21-16222 — Timeline scholarly note (branch `timeline-rc`; not on the page) — ⚠️ ABSTRACT WITHDRAWN 8 Mar 2021
+## EGU General Assembly 2021 abstract EGU21-16222 (D'Auria, De Micco, Di Pasquale), doi 10.5194/egusphere-egu21-16222 — Timeline date note (branch `timeline-rc`; not on the page) — ⚠️ ABSTRACT WITHDRAWN 8 Mar 2021, shown on the page
 - **First read:** 9 Nov 2026 by Claude via OpenAlex's stored abstract (14:03:45 UTC), not the publisher page; GPT confirmed the wording on an author-hosted copy. OpenAlex reported the licence as CC BY.
 - **Publisher page read:** 9 Nov 2026, **pasted by Chad** from https://meetingorganizer.copernicus.org/EGU21/EGU21-16222.html (header "EGU21-16222, updated on 04 Mar 2021"):
   - **Licence line (verbatim):** "© Author(s) 2021. This work is distributed under the Creative Commons Attribution 4.0 License."
@@ -203,6 +203,6 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
   - "Authors grant any third party the right to use the abstract and its uploaded display materials freely as long as its original authors and citation details are identified."
   - "The abstract and its display materials are distributed under the Creative Commons Attribution 4.0 International License (CC BY 4.0)."
 - **R1 (licence): closed — CC BY 4.0, confirmed on the publisher's pages.**
-- **⚠️ New finding (9 Nov 2026):** the abstract was **withdrawn by its authors on 8 Mar 2021**. Neither OpenAlex nor the Test B and GPT checks recorded this. The candidate page presents it as a plain conference abstract. **Release held** until Chad decides: (a) show the withdrawal in the note; (b) replace the source after a bounded search (own go); (c) release without the note (departs from the accepted UX; needs GPT).
+- **⚠️ New finding (9 Nov 2026):** the abstract was **withdrawn by its authors on 8 Mar 2021**. Neither OpenAlex nor the Test B and GPT checks recorded this. The candidate page presents it as a plain conference abstract. **Chad's decision (9 Nov 2026): (a)** — the withdrawal is shown: the card reads "Date note · withdrawn abstract", and the note opens with "2021 EGU conference abstract, withdrawn on 8 March 2021." before the October proposal (also with JavaScript off). The October date is described as a proposal in that abstract; the provenance of the copy we read (OpenAlex stored abstract, 9 Nov 2026 14:03:45 UTC) is kept, since the publisher page now shows only the withdrawal notice.
 - **Use on the page (candidate):** attributed paraphrase (authors, conference, year, DOI link), separate scholarly note, "Not adjudicated by Mother Earth"; not counted as evidence for the entry.
-- **Commercial use:** with attribution (CC BY 4.0: credit, licence link, indicate changes). **Use of this particular abstract pending the withdrawal decision.**
+- **Commercial use:** with attribution (CC BY 4.0: credit, licence link, indicate changes). Used under decision (a), with the withdrawal shown.

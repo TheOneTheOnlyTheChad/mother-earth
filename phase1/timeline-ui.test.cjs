@@ -5,7 +5,7 @@
  *   needs a static server on the repo (default http://127.0.0.1:8899). Hub, unpkg, GIBS and Google Fonts are aborted:
  *   this tests the Timeline page, its history/focus behaviour and the header tabs, not live data.
  * Breaks (each must make the suite fail): BREAK=no-focus-return|close-keeps-fragment|shortcut-fragment|no-inert|
- *   axis-79|inline-passage|script-only|no-aria-current|whole-card|switch-pushes|unscoped-card
+ *   axis-79|inline-passage|script-only|no-aria-current|whole-card|switch-pushes|unscoped-card|no-withdrawal
  */
 const { chromium } = require('playwright');
 const { execFileSync } = require('child_process');
@@ -37,6 +37,7 @@ function brokenHtml() {
     '<ul class="cards"><li class="card">Cloud reported over the Bay of Naples · 79 CE</li></ul>');
   if (BREAK === 'inline-passage') return must(HTML, '<p class="dline">24 August (Julian) · year unstated</p>', '<p class="dline">24 August (Julian) · year unstated</p><blockquote lang="la">nonum Kal. Septembres hora fere septima</blockquote>');
   if (BREAK === 'script-only') return HTML.replace(/<section id="entries"[\s\S]*?<\/section>\n  <!-- TIMELINE:END -->/, '<section id="entries" class="entries"></section>\n  <!-- TIMELINE:END -->');
+  if (BREAK === 'no-withdrawal') return must(HTML, '<p class="withdrawn"><b>2021 EGU conference abstract, withdrawn on 8 March 2021.</b></p>', '');
   if (BREAK === 'no-aria-current') return must(HTML, '<a href="timeline.html" data-view="timeline" aria-current="page">', '<a href="timeline.html" data-view="timeline">');
   return null;
 }
@@ -80,7 +81,7 @@ const st = p => p.evaluate(id => {
       return { h2: t('#tl-heading'), shelf: t('#shelf-h'), card: t(`#card-${id} .dline`), entry: !!document.getElementById(id), heading: t(`#${id}-h`),
         src: src && src.getAttribute('href'), srcnote: [...document.querySelectorAll(`#${id} .srcnote`)].map(n => n.textContent).join(' '),
         convHref: (document.querySelector(`#card-${id} a.sc[data-x="conv"]`) || {}).getAttribute?.('href'), conv: t(`#${id}-conv`), debate: t(`#${id}-debate`),
-        evidence: t(`#${id}-evidence`), visible: !!(document.getElementById(id) || {}).offsetParent, body: document.body.textContent };
+        evidence: t(`#${id}-evidence`), cardAll: t(`#card-${id}`), visible: !!(document.getElementById(id) || {}).offsetParent, body: document.body.textContent };
     }, ID);
     ok('no-JS: page heading', m.h2.trim() === 'Timeline', m.h2);
     ok('no-JS: shelf heading with count (1)', /Dates without a year\s*\(1\)/.test(m.shelf), m.shelf);
@@ -94,7 +95,12 @@ const st = p => p.evaluate(id => {
     ok('no-JS: conversion in static HTML (1 September as day one)', /1 September as day one/.test(m.conv) && /our conversion of the checked page/.test(m.conv), m.conv);
     ok('no-JS: shortcut anchors to a plain section', m.convHref === `#${ID}-conv`, m.convHref);
     ok('no-JS: scholarly note with authors and DOI', /D’Auria, De Micco &amp;|D’Auria, De Micco & Di Pasquale/.test(m.debate) && m.debate.includes('10.5194/egusphere-egu21-16222') && /Not adjudicated by Mother Earth/.test(m.debate), m.debate);
-    ok('no-JS: licence as reported by OpenAlex, publisher not verified', /as reported by OpenAlex/.test(m.debate) && /not yet verified/.test(m.debate));
+    ok('no-JS: licence from the publisher (CC BY 4.0)', /CC BY 4\.0 \(publisher’s pages/.test(m.debate), m.debate);
+    const wi = m.debate.indexOf('2021 EGU conference abstract, withdrawn on 8 March 2021.'), oi = m.debate.indexOf('24 October');
+    ok('no-JS: withdrawal stated first in the note, before the October proposal', wi >= 0 && oi > wi, [wi, oi]);
+    ok('no-JS: October date described as a proposal in that abstract', /describes a proposal by some scholars to date the eruption to 24 October/.test(m.debate));
+    ok('no-JS: provenance of the copy we read kept', /via OpenAlex’s stored copy on 9 Nov 2026 at 14:03:45 UTC/.test(m.debate) && /withdrawal notice without the abstract text/.test(m.debate));
+    ok('no-JS: card says "Date note · withdrawn abstract"', /Date note · withdrawn abstract/.test(m.cardAll), m.cardAll);
     ok('no-JS: one historical account', /One historical account/.test(m.evidence));
     ok('no-JS: no inline Latin', !/\bKal(?:endas|\.)|Septembres|\bhora\b/i.test(m.body));
     await c.close();
@@ -296,7 +302,7 @@ const st = p => p.evaluate(id => {
     ok('placement: one card on the shelf', m.shelfCards === 1);
     ok('placement: no 79 outside the attributed note', !m.outside79 && m.noteHas79, m.card);
     for (const s of ['Misenum — as Pliny states (§4).', 'Bay of Naples — our present-day reference.', 'Our model: Roman hours divided daylight', 'Modern clock time: unset',
-      'without saying which details are which (§22)', 'One historical account', 'Year: not stated by this source', 'Not adjudicated by Mother Earth.', 'The scholarly note is not counted as evidence'])
+      'without saying which details are which (§22)', 'One historical account', 'Year: not stated by this source', 'Not adjudicated by Mother Earth.', 'The scholarly note is not counted as evidence', 'Date note · withdrawn abstract', '2021 EGU conference abstract, withdrawn on 8 March 2021.'])
       ok(`wording: "${s}"`, m.all.includes(s));
     // interactions, then requests
     await p.click(`#card-${ID} .chip`); await p.waitForTimeout(80);
@@ -332,7 +338,7 @@ const st = p => p.evaluate(id => {
     await p.goto(BASE + '/timeline.html');
     ok('a11y: shelf heading with count', await p.getByRole('heading', { name: /Dates without a year \(1\)/ }).count() === 1);
     ok('a11y: card title is a link with the entry name', await p.getByRole('link', { name: 'Cloud reported over the Bay of Naples, noticed at Misenum' }).count() === 1);
-    ok('a11y: shortcuts named', await p.getByRole('link', { name: '24 August (Julian): how we converted' }).count() === 1 && await p.getByRole('link', { name: 'Date debated: see the scholarly note' }).count() === 1);
+    ok('a11y: shortcuts named', await p.getByRole('link', { name: '24 August (Julian): how we converted' }).count() === 1 && await p.getByRole('link', { name: 'Date note, withdrawn abstract: see the scholarly note' }).count() === 1);
     await p.click(OPENERS.title); await p.waitForTimeout(80);
     ok('a11y: panel is a region named by the entry', await p.getByRole('region', { name: 'Cloud reported over the Bay of Naples, noticed at Misenum' }).count() === 1);
     ok('a11y: expanders are buttons with collapsed state', await p.getByRole('button', { name: /How we converted/, expanded: false }).count() === 1 && await p.getByRole('button', { name: /Scholarly note on the date/, expanded: false }).count() === 1);

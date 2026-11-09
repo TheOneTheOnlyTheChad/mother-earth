@@ -1,30 +1,120 @@
 {
   "id": "e-pliny-ep-6-16",
   "built_from": "docs/concepts/TIMELINE-ENTRY-BUILD-PROPOSAL.md rev 2; Test B packet research/timeline-test-b/2026-11-09-claude/ (Mac, closed)",
-  "placement": { "kind": "no-year-shelf", "day_of_year_order": { "month": 8, "day": 24, "calendar": "Julian", "basis": "conversion" }, "axis": null },
-  "title": { "text": "Cloud reported over the Bay of Naples, noticed at Misenum", "basis": ["passage", "reference"], "ref": "S1 §4" },
-  "date_line": { "day": "24 August", "calendar_label": "(Julian)", "year_label": "year unstated", "basis": ["conversion", "gap"] },
-  "when_source": { "text": "Pliny, Letters 6.16 §4, gives a Roman calendar date and “about the seventh hour”.", "basis": "passage", "ref": "S1 §4" },
-  "conversion": { "text": "24 August, Julian calendar — our conversion of the checked page’s reading. The letter gives the ninth day before the Kalends of September; counting back inclusively with 1 September as day one, the ninth day is 24 August. No Gregorian or proleptic date is given.", "basis": "conversion", "ref": "S1 §4; rule ours (T3)" },
-  "hour": { "as_given": "“about the seventh hour”, as Pliny gives it.", "model": "Our model: Roman hours divided daylight into twelve seasonal hours, so the seventh hour began at local midday.", "clock": "Modern clock time: unset — daylight at Misenum on that date was not established.", "basis": ["passage", "model", "gap"], "ref": "S1 §4" },
-  "year": { "text": "Year: not stated by this source (the whole letter, §1–22, was checked).", "basis": "gap", "ref": "S1 §1–22" },
-  "place": { "stated": "Misenum — as Pliny states (§4).", "reference": "Bay of Naples — our present-day reference.", "basis": ["passage", "reference"], "ref": "S1 §4" },
-  "reports": [
-    { "text": "Pliny reports that his mother pointed out the cloud to his uncle, who commanded the fleet at Misenum (§4).", "basis": "passage", "ref": "S1 §4" },
-    { "text": "He writes that it was learned later that the cloud came from Vesuvius (§5).", "basis": "passage", "ref": "S1 §5" }
-  ],
-  "caveat": { "text": "Pliny says he set down what he witnessed and what he heard soon afterwards, without saying which details are which (§22).", "basis": "passage", "ref": "S1 §22" },
-  "uncertain": { "text": "Written after his uncle’s death; how long after is not stated (§1).", "basis": ["passage", "gap"], "ref": "S1 §1" },
-  "scholarly_note": {
-    "text": "D’Auria, De Micco & Di Pasquale (EGU General Assembly 2021, conference abstract) report that the classical reading of Pliny’s account gives 24 August, that some scholars propose 24 October, and that the discrepancy is probably a medieval copying error. They refer to the eruption as AD 79; that year is their statement, not Pliny’s.",
-    "verdict": "Not adjudicated by Mother Earth.",
-    "authors": ["D’Auria", "De Micco", "Di Pasquale"],
-    "doi": "10.5194/egusphere-egu21-16222",
-    "licence": "CC BY as reported by OpenAlex (9 Nov 2026); publisher’s licence statement not yet verified",
-    "read": "OpenAlex stored abstract, 9 Nov 2026 14:03:45 UTC",
-    "basis": "attributed", "ref": "S3"
+  "placement": {
+    "kind": "no-year-shelf",
+    "day_of_year_order": {
+      "month": 8,
+      "day": 24,
+      "calendar": "Julian",
+      "basis": "conversion"
+    },
+    "axis": null
   },
-  "evidence": { "label": "One historical account", "account": "Pliny, Letters 6.16", "kind": "later recollection", "corroboration": "no independent corroboration", "language": "Latin only — no translation reached", "note_not_counted": "The scholarly note is not counted as evidence for this entry." },
+  "title": {
+    "text": "Cloud reported over the Bay of Naples, noticed at Misenum",
+    "basis": [
+      "passage",
+      "reference"
+    ],
+    "ref": "S1 §4"
+  },
+  "date_line": {
+    "day": "24 August",
+    "calendar_label": "(Julian)",
+    "year_label": "year unstated",
+    "basis": [
+      "conversion",
+      "gap"
+    ]
+  },
+  "when_source": {
+    "text": "Pliny, Letters 6.16 §4, gives a Roman calendar date and “about the seventh hour”.",
+    "basis": "passage",
+    "ref": "S1 §4"
+  },
+  "conversion": {
+    "text": "24 August, Julian calendar — our conversion of the checked page’s reading. The letter gives the ninth day before the Kalends of September; counting back inclusively with 1 September as day one, the ninth day is 24 August. No Gregorian or proleptic date is given.",
+    "basis": "conversion",
+    "ref": "S1 §4; rule ours (T3)"
+  },
+  "hour": {
+    "as_given": "“about the seventh hour”, as Pliny gives it.",
+    "model": "Our model: Roman hours divided daylight into twelve seasonal hours, so the seventh hour began at local midday.",
+    "clock": "Modern clock time: unset — daylight at Misenum on that date was not established.",
+    "basis": [
+      "passage",
+      "model",
+      "gap"
+    ],
+    "ref": "S1 §4"
+  },
+  "year": {
+    "text": "Year: not stated by this source (the whole letter, §1–22, was checked).",
+    "basis": "gap",
+    "ref": "S1 §1–22"
+  },
+  "place": {
+    "stated": "Misenum — as Pliny states (§4).",
+    "reference": "Bay of Naples — our present-day reference.",
+    "basis": [
+      "passage",
+      "reference"
+    ],
+    "ref": "S1 §4"
+  },
+  "reports": [
+    {
+      "text": "Pliny reports that his mother pointed out the cloud to his uncle, who commanded the fleet at Misenum (§4).",
+      "basis": "passage",
+      "ref": "S1 §4"
+    },
+    {
+      "text": "He writes that it was learned later that the cloud came from Vesuvius (§5).",
+      "basis": "passage",
+      "ref": "S1 §5"
+    }
+  ],
+  "caveat": {
+    "text": "Pliny says he set down what he witnessed and what he heard soon afterwards, without saying which details are which (§22).",
+    "basis": "passage",
+    "ref": "S1 §22"
+  },
+  "uncertain": {
+    "text": "Written after his uncle’s death; how long after is not stated (§1).",
+    "basis": [
+      "passage",
+      "gap"
+    ],
+    "ref": "S1 §1"
+  },
+  "scholarly_note": {
+    "text": "D’Auria, De Micco & Di Pasquale’s abstract reports that the classical reading of Pliny’s account gives 24 August, and describes a proposal by some scholars to date the eruption to 24 October instead; it suggests the discrepancy is probably a medieval copying error. It refers to the eruption as AD 79; that year is the abstract’s statement, not Pliny’s.",
+    "verdict": "Not adjudicated by Mother Earth.",
+    "authors": [
+      "D’Auria",
+      "De Micco",
+      "Di Pasquale"
+    ],
+    "doi": "10.5194/egusphere-egu21-16222",
+    "licence": "CC BY 4.0 (publisher’s pages, read 9 Nov 2026)",
+    "read": "We read the abstract text via OpenAlex’s stored copy on 9 Nov 2026 at 14:03:45 UTC. The publisher’s page now shows the withdrawal notice without the abstract text (read 9 Nov 2026).",
+    "basis": "attributed",
+    "ref": "S3",
+    "status_line": "2021 EGU conference abstract, withdrawn on 8 March 2021.",
+    "withdrawn": {
+      "date": "2021-03-08",
+      "source": "publisher page https://meetingorganizer.copernicus.org/EGU21/EGU21-16222.html, pasted by Chad 9 Nov 2026"
+    }
+  },
+  "evidence": {
+    "label": "One historical account",
+    "account": "Pliny, Letters 6.16",
+    "kind": "later recollection",
+    "corroboration": "no independent corroboration",
+    "language": "Latin only — no translation reached",
+    "note_not_counted": "The scholarly note is not counted as evidence for this entry."
+  },
   "source": {
     "host": "The Latin Library",
     "url": "https://www.thelatinlibrary.com/pliny.ep6.html",
@@ -33,13 +123,46 @@
     "edition": "edition not stated by the host",
     "checked_at": "2026-11-09T14:00:36Z",
     "checked_sha256": "b59e819a2793d7e8a7ddfeb5ce716619acbb88390615ba2530e28d3aafcfe281",
-    "fragment": { "checked_at": "2026-11-09T14:47:44Z", "result": "no anchors on the page (0 id or name attributes); page sha256 unchanged", "used": false }
+    "fragment": {
+      "checked_at": "2026-11-09T14:47:44Z",
+      "result": "no anchors on the page (0 id or name attributes); page sha256 unchanged",
+      "used": false
+    }
   },
   "wikidata": {
     "looked_up": "2026-11-09T14:47:26Z–14:47:28Z, wbsearchentities, one request at a time",
-    "Misenum": { "id": "Q19900818", "label": "Misenum", "description": "harbour city in Italy in Roman period", "status": "resolved", "not_chosen": ["Q401231 Miseno (present-day frazione)", "Q1765171 Misenum (titular see)", "Q929659 Cape Miseno"] },
-    "Mount Vesuvius": { "id": "Q524", "label": "Mount Vesuvius", "description": "active stratovolcano in the Gulf of Naples, Italy", "status": "resolved" },
-    "Pliny the Younger": { "id": "Q168707", "label": "Pliny the Younger", "description": "Roman lawyer, author and magistrate (61 – c.113)", "status": "resolved" },
-    "Letters": { "id": "Q2099521", "label": "Epistulae by Pliny the Younger", "description": "series of personal missives by Pliny the Younger directed to his friends", "status": "resolved" }
+    "Misenum": {
+      "id": "Q19900818",
+      "label": "Misenum",
+      "description": "harbour city in Italy in Roman period",
+      "status": "resolved",
+      "not_chosen": [
+        "Q401231 Miseno (present-day frazione)",
+        "Q1765171 Misenum (titular see)",
+        "Q929659 Cape Miseno"
+      ]
+    },
+    "Mount Vesuvius": {
+      "id": "Q524",
+      "label": "Mount Vesuvius",
+      "description": "active stratovolcano in the Gulf of Naples, Italy",
+      "status": "resolved"
+    },
+    "Pliny the Younger": {
+      "id": "Q168707",
+      "label": "Pliny the Younger",
+      "description": "Roman lawyer, author and magistrate (61 – c.113)",
+      "status": "resolved"
+    },
+    "Letters": {
+      "id": "Q2099521",
+      "label": "Epistulae by Pliny the Younger",
+      "description": "series of personal missives by Pliny the Younger directed to his friends",
+      "status": "resolved"
+    }
+  },
+  "card_flag": {
+    "text": "Date note · withdrawn abstract",
+    "aria": "Date note, withdrawn abstract: see the scholarly note"
   }
 }
