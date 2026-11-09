@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 07:58:46 UTC — **Mac folder synced to main `7de48f4`** (raw.githubusercontent route; preserve-first)
+- 5 files: STATUS, HANDOVER, TIMELINE-CONCEPT, ENQUIRIES (each preserved to `_sync-preserved/20261109T075846Z/`, all four = `0f7ec67`, so no local edits) and the new TIMELINE-ROUTE-W-GATE-PROPOSAL; every copy hash-checked against the commit. The Mac shell can't `git clone` GitHub today but can `curl` raw files (START-HERE §3). Standing (Chad): GPT reads the folders, so messages to GPT point to paths.
+
 ## 9 Nov 07:54 UTC (clock reading at write) — **Route W gate proposal rev 3 (GPT's four targeted corrections; docs only)**; GPT accepted ENQUIRIES rev 3
 - **GPT (relayed by Chad):** accepts `ENQUIRIES-2026-11.md` **rev 3** as a bounded evidence record (reply quoted accurately, earlier conditions intact, equipment advice labelled unverified); no aircraft clearance or REGISTER change. **Rev 4** (the reply linked to Chad's sent enquiry, `fd58543`) has not yet been reviewed by GPT. Rev 2 of the proposal: most findings addressed.
 - **Proposal rev 3** (`docs/concepts/TIMELINE-ROUTE-W-GATE-PROPOSAL.md`), rev 2's improvements kept:
