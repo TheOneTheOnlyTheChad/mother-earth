@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 06:11:12 UTC — **R2 UPLOAD DONE: `ref/arts/met-R1-e394878.json`** (Chad: "Approve: upload ref/arts/met-R1-e394878.json (complete-file sha256 221bb1cab1c186a99972fdf936efddc22a298b6529abf30450ca0b3f4d219644) to R2")
+- **Pre-checks (06:10:58 UTC, dashboard tab):** destination absent (404 "The specified key does not exist"); nothing under `ref/arts/`. Source fetched from raw.githubusercontent at branch commit `4c4bbb9`: HTTP 200, 127,887 B, sha256 `221bb1ca…9644` = the approved hash. Absence re-checked immediately before the write.
+- **Upload:** dashboard R2 objects API `PUT`, HTTP 200, size 127,887, storage class Standard, etag `018c5530041ede986508980c688b577d`, version `7e5e41115f0f148786da0d15470293b1`, uploaded **06:11:12.285Z**.
+- **Read-back (06:11:25 UTC):** HTTP 200, 127,887 B, **sha256 `221bb1ca…9644` (exact)**. `ref/` now holds this file and the existing Oceaneye original. No lifecycle rule covers `ref/` (rules: `raw/`, `snapshots/`, `cells/`), so it does not expire.
+- **No public effect:** the live hub is still **0.6.1** and answers `/snapshot/arts` with 404 "unknown layer". The file is served only once hub 0.6.2 is deployed (separate approval).
+- **Rollback target pinned for the hub deploy (06:11:42 UTC, read back from Cloudflare):** live worker.js = **0.6.1, sha256 `f38296a0183d14d958d5815d7926254cb4275be7ca00b384334974fad5b12cc8`** (271,271 B).
+- R2 cost: one Class A write and three Class B reads (pre-check, absence re-check, read-back), well inside the allowances (billing check rev 2.1). Removing the object would be a separate action with its own Approve line.
+- **Next (each on its own Approve line):** `Approve: deploy hub 0.6.2 from 4c4bbb9 (content only)` → live RC check → page release.
+
 ## 9 Nov 06:09 UTC (clock reading at write) — **R2 billing check rev 2.1 ACCEPTED by GPT** (docs only)
 - GPT accepted rev 2.1 within its recorded scope (9 Nov 2026): both wording fixes present; all recorded billing findings closed. The expected $0 R2 increment stays conditional on total account usage, future Arts traffic included, staying within the allowances. The account evidence is Claude-supplied analytics, not independently inspected by GPT and not verified against an invoice. Workers Paid and R2 Paid remain separate subscriptions. Review acceptance only: no R2 upload, hub deployment, merge or page release is approved.
 - Next for Arts, on Chad's choice: `Approve: upload ref/arts/met-R1-e394878.json (complete-file sha256 221bb1cab1c186a99972fdf936efddc22a298b6529abf30450ca0b3f4d219644) to R2` (Chad at the screen).

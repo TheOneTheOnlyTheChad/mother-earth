@@ -38,8 +38,8 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
 
 **Next, each on Chad's go:**
-1. Billing check rev 2.1 accepted by GPT. If Chad chooses: `Approve: upload ref/arts/met-R1-e394878.json (complete-file sha256 221bb1cab1c186a99972fdf936efddc22a298b6529abf30450ca0b3f4d219644) to R2` (Chad at the screen; browser pane).
-2. Then, in order, each on its own Approve line: pin the live hub version + sha256 as the rollback target → `Approve: deploy hub 0.6.2 from <commit> (content only)` → live RC check (clean pane tab; served hashes incl. **`arts.js`**) → `Approve: push arts-met-rc to main (page change: Met catalogue sample card)` → served-hash check, live read, cold-load before/after (Chad, fresh profile), iPhone Safari check (Chad), Worker CPU and served size measured, REGISTER Met status → "on the page (fixed snapshot)".
+1. **R2 upload DONE 9 Nov 06:11:12 UTC** (Chad's Approve line): `ref/arts/met-R1-e394878.json`, read back sha256 `221bb1ca…9644` exact. No public effect while the hub is 0.6.1. **Rollback target pinned:** live hub 0.6.1, worker.js sha256 `f38296a0…2cc8`.
+2. Then, in order, each on its own Approve line: `Approve: deploy hub 0.6.2 from 4c4bbb9 (content only)` (re-confirm the live hash = `f38296a0…` just before) → live RC check (clean pane tab; served hashes incl. **`arts.js`**) → `Approve: push arts-met-rc to main (page change: Met catalogue sample card)` → served-hash check, live read, cold-load before/after (Chad, fresh profile), iPhone Safari check (Chad), Worker CPU and served size measured, REGISTER Met status → "on the page (fixed snapshot)".
 3. GPT's review of R2 fireballs terms rev 2.
 4. Later, each a separate decision: timeline route/gate; remaining backlog first gates (R5, R7, R10); Phase 0 domain decision; GIBS beyond the bench.
 5. Still open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
