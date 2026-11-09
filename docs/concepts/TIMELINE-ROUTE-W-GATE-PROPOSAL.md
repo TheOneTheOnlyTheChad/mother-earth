@@ -4,6 +4,8 @@
 
 **Written from the accepted concept and saved project records only.** No provider research, queries, sampling, downloads, accounts, contact, REGISTER filing, prototype or production change. **Route selection, parameter selection and running the gate stay Chad's separate decisions.** The completed Arts reviews stay closed. The actual-iPhone check stays deferred.
 
+**ACCEPTED by GPT (rev 4, 9 Nov 2026), within its recorded scope:** all requested corrections addressed. The 30-day matching window is accepted as a provisional, unmeasured candidate-generation boundary — not evidence of episode duration or event identity; documented timing and source links take priority; negative results stay bounded to the method. **Acceptance selects nothing:** not Route W, not its parameters, and it authorises no research, queries, sampling, downloads, provider contact, REGISTER change, prototype or production change. *Editorial tidy-up after acceptance (no further review needed, per GPT): §6.3 heading label `match-v2` → `match-v3`.*
+
 **Rev 4 (GPT's direct review of rev 3 in the shared folder, relayed by Chad, 9 Nov; docs only).** Rev 3 kept. Three corrections:
 1. Claims outside the checking rule are "not checked — outside rule", their references preserved but not evaluated; the roll-up applies only to within-rule claims (§4.3, §4.3a).
 2. The matching clock is separate from the selection clock: candidates come from (temporal condition AND (shared area OR shared river)) OR a source link, with an episode window that keeps a Monday-start flood and a Wednesday crest together until identity is checked (§6.3).
@@ -291,7 +293,7 @@ For each step and overall, the report shows:
 - **Size and subsetting:** if ≤ 40 entries remain (a provisional effort boundary), all are used. If more, each gets the key `SHA-256("20261109|R|" + row ID)`; ties, if any, are broken by row position as printed. The first 40 by key form the **fixed reference subset**; the rest are recorded as "not in the subset".
 - **Saved with a real-clock time** before step 2 begins.
 
-### 6.3 Identity matching (a T3 computation by our method, version `match-v2`)
+### 6.3 Identity matching (a T3 computation by our method, version `match-v3`)
 Identity matching is **separate from selection eligibility**. It runs against every item in the candidate frame (eligible, excluded and type-outside-rule alike), uses the pinned data (rule V), and never changes the selection.
 
 **The matching clock is not the selection clock.** Rule D uses an item's start (or point-in-time) date only to decide eligibility. Matching needs the whole episode: a flood that starts on a Monday and a gauge crest on the Wednesday may be the same episode. So matching uses its own interval, defined here.

@@ -7,6 +7,7 @@ Personal contact details (phone, precise home address) that Chad included are **
 *Rev 3, 9 Nov 2026: OpenSky's substantive reply on ticket #837506 recorded (section below). The earlier acknowledgement and its conditions are unchanged.*
 *Rev 4, 9 Nov 2026: Chad supplied his exact sent enquiry; the reply is now linked to it, with a bounded reading (section below). Personal details in that email are not reproduced.*
 *Rev 5, 9 Nov 2026 (GPT's direct review of rev 4): the Q2 rationale corrected (Q3 is also a yes/no question; Q2 stays a plausible contextual interpretation, not a uniquely established answer); the closing-line reading labelled as contextual interpretation. Rev 3's acceptance as an evidence record stands; rev 4 was not accepted verbatim.*
+*Rev 5 ACCEPTED by GPT (9 Nov 2026) as a bounded evidence/interpretation record: Q1b, Q1c and Q3 remain unresolved; Q2 remains a contextual reading, not an explicit answer; the existing feeder, credit and cloud conditions stand. No aircraft clearance and no REGISTER change.*
 
 | Sent (as confirmed by Chad) | To | Asked about | Reply |
 |---|---|---|---|
