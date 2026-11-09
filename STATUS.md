@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 13:23 UTC (clock reading at write) — **GPT accepted retry rev 2; OA proposal trimmed to rev 2** (docs only)
+- **Retry rev 2 accepted.** The Bräuer abstract check is kept separate:
+  - **primary-source tally 7 / 7 / 10 / 7**;
+  - **with the secondary abstract-only check: 7 / 8 / 9 / 7**;
+  - the Salé chapter is still unchecked.
+- **OA proposal rev 2** (`docs/concepts/TIMELINE-TEST-A-OA-SEARCH-PROPOSAL.md`):
+  - **one 30-min pass incl. write-up, List A only** (A1–A5 + A6 Bräuer separate);
+  - full Debénath 1982 citation recorded verbatim (enwiki rev 1360734129, from the Test A fetch);
+  - route order OpenAlex → IA Scholar → HAL → a listed repository/author page; skip anything unavailable or credentialed;
+  - text only, PDF-only copies recorded unopened;
+  - results in three stages: exact work found / readable text reached / a passage that resolves a claim.
+  - **List B parked.**
+- **Next (each its own go):** the 30-min pass; then one Test B case with already-readable source text (Chad's preference). Nothing started.
+
 ## 9 Nov 13:14 UTC (clock reading at write; corrected from a mistyped 13:28) — **Retry rev 2 (wording) + OA-search PROPOSAL** (docs only)
 - **GPT read the retry packet** (three hashes matched).
 - **Retry rev 2** (`research/timeline-test-a-retry/2026-11-09-claude/rev2/RETRY-REPORT-rev2.md`):

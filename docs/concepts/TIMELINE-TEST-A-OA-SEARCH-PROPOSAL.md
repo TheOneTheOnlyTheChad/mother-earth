@@ -1,98 +1,59 @@
-# Test A — bounded open-access search: PROPOSAL (rev 1, 9 Nov 2026)
+# Test A — open-access pass, List A only: PROPOSAL (rev 2, 9 Nov 2026)
 
-**Status: proposal only. Nothing searched.** Chad's brief (9 Nov): before Test B, a small open-access pass on the **same five finds and 31 list-row assertions**. Search by exact DOI or title for lawful copies; where the cited paper does not address a claim, look for a source that names the exact specimen or group, labelled as a **separate evidence lead**. The search needs Chad's separate go.
+**Status: proposal only. Nothing searched.** The pass needs Chad's separate go. **Test B is separate** and also needs its own go.
 
-**Baseline:** Test A rev 2 (accepted) and the access retry rev 2 (`research/timeline-test-a*/2026-11-09-claude/` on the Mac). Neither is edited.
+**Rev 2 (Chad, 9 Nov, after GPT accepted the retry rev 2):** trimmed to **one 30-minute pass, write-up included, on List A only**. The broader List B (exact-specimen evidence leads) is **parked**. Rev 1's §1B, CORE/Unpaywall options and 90-minute cap are withdrawn.
 
-**Principles carried over:**
-- **Wikipedia stays a finder only.**
-- **Evidence is matched to the exact claim.** For Omo, 233 ± 22 kyr dates an eruption; the minimum age for the fossil is the authors' inference from the overlying ash. For Jebel Irhoud, a dating paper tells us what was measured on the flint or a tooth; a classification claim about **Irhoud 1–5** needs a source that discusses that group.
+**Baseline (unchanged):** Test A rev 2 and retry rev 2, both accepted.
+- **Primary-source tally 7 / 7 / 10 / 7** (supported / unsupported / inaccessible / no reference).
+- **With the secondary abstract-only Bräuer check included: 7 / 8 / 9 / 7.** The Salé chapter is still unchecked.
+- Same five finds and 31 list-row assertions. Wikipedia stays a finder only.
 
-## 1. What is searched (two lists, fixed before any request)
-**A. Lawful copies of the sources already identified (exact DOI or exact title):**
-
-| Key | Source | Find | Current readable text |
+## 1. The works searched (fixed; exact identity only)
+| Key | Work | Exact identifier used | Current readable text |
 |---|---|---|---|
-| A1 | McDougall et al. 2005, *Nature*, 10.1038/nature03258 | Omo | abstract |
-| A2 | Richter et al. 2017, *Nature*, 10.1038/nature22335 | Jebel Irhoud | abstract |
-| A3 | Magori & Day 1983, *J. Hum. Evol.*, 10.1016/S0047-2484(83)80130-4 | LH 18 | title |
-| A4 | Jaeger 1975, *After the Australopithecines*, 10.1515/9783110878837.399 | Salé | none |
-| A5 | Debénath, Reynal & Texier 1982, *CR Acad. Sci.* (no DOI known) | Salé | none |
-| A6 | Bräuer 2012 (review), 10.1007/978-94-007-2929-2_15 — **kept separate** | Salé (attribution) | abstract |
+| A1 | McDougall, Brown & Fleagle 2005, *Nature* 433:733–736 | DOI 10.1038/nature03258 | abstract |
+| A2 | Richter et al. 2017, *Nature* 546:293–296 | DOI 10.1038/nature22335 | abstract |
+| A3 | Magori & Day 1983, *J. Hum. Evol.* 12(8):747–753 | DOI 10.1016/S0047-2484(83)80130-4 | title |
+| A4 | Jaeger 1975, "The mammalian faunas and hominid fossils of the Middle Pleistocene of the Maghreb", in Butzer & Isaac (eds), *After the Australopithecines*, pp. 399–418 | DOI 10.1515/9783110878837.399 | none |
+| A5 | Debénath, André; Reynal, Jean-Paul; Texier, Jean-Pierre (1982). "Position stratigraphique des restes humains paléolithiques marocains sur la base des travaux récents". *Comptes Rendus de l'Académie des Sciences*. 2: 1247–1250. | **exact title** (no DOI known) | none |
+| **A6 (separate)** | Bräuer 2012, review chapter in Hublin & McPherron (eds), *Modern Origins*, pp. 221–240 | DOI 10.1007/978-94-007-2929-2_15 | abstract |
 
-Vidal et al. 2022 is already full text and is not searched.
+- **A5's citation** is recorded **verbatim as printed** in enwiki "Salé cranium" rev 1360734129 (reference 7, read from the Test A fetch at 12:15:38Z; no new request). The series and volume behind "2" are **not established**. The same reference links a ResearchGate page, which is login-gated and excluded.
+- **A6 is reported separately.** It is a review, and its result never enters the primary-source tally.
+- Vidal 2022 is already full text and is not searched.
 
-**B. Exact-claim evidence leads**, only for claims the cited paper does not address or that have no source. Each lead must **name the exact specimen or group** in the claim:
+## 2. Route order (per work, stop at the first readable text)
+1. **OpenAlex** (no key): exact DOI, or exact title for A5 → listed OA locations (host, version, licence, URL type).
+2. **Internet Archive Scholar**: exact DOI or title.
+3. **HAL** (open API): exact title.
+4. **A repository or author page**, only if routes 1–3 list one for that exact work.
 
-| Claim(s) | Why a lead is needed | Lead must name |
-|---|---|---|
-| JI-F1, JI-F4, JI-F5a/b | Richter 2017's abstract treats new remains and Irhoud 3, not the 1–5 group | "Irhoud 1" … "Irhoud 5" (or the group as one) |
-| JI-F3 | the list's "315±32" matches no result stated as written | the Jebel Irhoud hominin fossils' age, with the value as stated |
-| LH18-F2, F3, F5a/b | only the title is readable | "LH 18" / "Laetoli Hominid 18" / "Ngaloba" |
-| SALE (all six) | no primary text reached; the age cell is unreferenced | "Salé" cranium / hominid |
-| EH06 (all six) | the row gives no reference; no article | "EH 06" (or the Eyasi specimen designation as printed) |
-| OMO-F5b | discoverer not stated in the sources read | "Omo I" with the discoverer |
+- Europe PMC and the publisher routes are **not repeated**; their Test A and retry results stand.
+- **Skip, and record as skipped, anything** that is unavailable, errors, or needs credentials, a key, an email in the request, a login or a purchase.
+- One request at a time, in the pane. Chad approves new sites as they come.
 
-## 2. Where it searches (lawful, no-account routes only) [recommendation]
-| Route | Use | Note |
-|---|---|---|
-| **OpenAlex API** (no key) | exact DOI/title → OA locations: repository, version (submitted / accepted / published), licence, landing URL | primary finder for list A |
-| **Europe PMC** | exact DOI/title; **full-text search of the open-access subset** for exact specimen names (list B) | already used; text XML |
-| **Internet Archive Scholar** (scholar.archive.org) | exact title/DOI for archived OA copies | lawful archive |
-| **HAL** (French national OA repository) API | A4, A5 (French institutions and journals) | likely relevant to Moroccan/French work [general knowledge, unverified] |
-| **University/institutional repositories and author pages** | only when OpenAlex or a search result points to them | no blind crawling |
-| **Crossref** | identity only (as before) | — |
+## 3. Rules
+- **Text only:** direct text/XML or unrendered HTML; **no PDF** (H8b no); no images; no login or purchase.
+- **A PDF-only copy is recorded as "found — PDF only, unopened"**, with host, version and licence as listed.
+- **Lawfulness:** the host and its own statement are recorded. A copy whose lawfulness the host does not state is recorded and **not used for coding**. Shadow libraries are excluded.
+- **Version recorded:** published / accepted / submitted / other / unknown. **Coding uses only the version actually read, labelled.**
+- Coding rules, dispositions and bounds are unchanged from Test A rev 2. **A disposition changes only where a passage is read that states, or fails to state, the exact claim.**
+- Short quotes under 15 words, in the Mac folder only. The repo gets IDs, versions and dispositions only.
 
-**Excluded:**
-- shadow libraries (Sci-Hub, LibGen, Anna's Archive);
-- sites that need a login to read: ResearchGate, Academia.edu (a copy there is recorded as "found, login-gated" if a finder lists it, and not opened);
-- **CORE** and **Unpaywall**. CORE's API needs a registered key (an account). Unpaywall requires an email address in every request, and we put no personal email in requests. Each is Chad's option (**O2**).
-
-## 3. Rules (unchanged from Test A unless stated)
-- **Text only:** direct text/XML or unrendered HTML; **no PDF** (H8b no); no images.
-  - **Expect many lawful copies to be PDFs only.** Those are recorded as "**found — PDF only → outside bound (text route unavailable)**", with version and route, and not opened.
-  - Whether to allow unrendered PDF ingestion for this pass is a **separate decision for Chad (H8b)**. This proposal does not change it.
-- **Lawful copy only:**
-  - the version and the host's own statement are recorded (publisher OA, repository accepted manuscript, author archive, preprint);
-  - a copy whose lawfulness the host does not state is recorded as **"lawfulness not established"** and not used for coding.
-- **Version recorded for every copy:** published version / accepted manuscript / submitted preprint / other. **Coding uses only the version read, labelled.** An accepted manuscript can differ from the published text.
-- **Evidence leads (list B) are separate:**
-  - a lead is **not** the row's cited source, so it never changes the row's rev 2 disposition directly;
-  - it gets its own field: "**lead: states / does not state / not checked**" for the exact claim, with lineage recorded (dependent / unknown);
-  - an F4 classification in a lead is that lead's attributed claim.
-- **Coding changes only where new text is read.** Tallies are kept beside Test A rev 2 and the retry. Short quotes under 15 words, in the Mac folder only.
-- One request at a time; the pane for all reads; site approvals by Chad as they come; no purchase; no bypass.
-
-## 4. Bounds [recommendation]
-- **Cap 90 min** total, including the write-up.
-- **List A:** ≤ 4 routes per source, in the §2 order.
-- **List B:** ≤ 3 queries per claim group and **≤ 3 leads recorded per claim**.
+## 4. Cap
+- **30 minutes total, including the write-up.**
+- Suggested split: ~20 min searching (A1–A5 in key order, then A6) and ~10 min writing.
 - Stop at the cap and report what is unfinished.
-- **No new finds, claims or frame.** Test B not started.
 
-## 5. Deliverable
-| Field | Per copy or lead |
-|---|---|
-| identity | DOI/title, authors, year |
-| version found | published / accepted / submitted / other / unknown |
-| route and host | repository or index, URL type (landing / text / PDF) |
-| lawfulness as observed | host statement, licence |
-| usable text under current rules | **yes** (text/HTML read) · **PDF only** · **login-gated** · **not found** |
-| claim(s) it could help resolve | unit IDs, with the specific gap it addresses |
-| outcome | disposition change (list A, text read) or lead field (list B) |
+## 5. Results (three stages, reported separately)
+| Work | **Exact work found** (identity matched by DOI or exact title; host, version, licence) | **Readable text reached** (under text-only rules: yes / PDF only, unopened / login- or key-gated, skipped / none) | **Passage that helps resolve a claim** (unit ID; states / does not state; disposition change) |
+|---|---|---|---|
 
-**Outcomes reported separately:**
-- **found** (any lawful copy);
-- **usable** (text under current rules);
-- **resolving** (changed a disposition, or a lead that states the exact claim).
+- **Tallies:** a primary-source tally beside 7 / 7 / 10 / 7, and A6 shown separately beside 7 / 8 / 9 / 7.
+- **No List B leads, no new finds or claims, no Test B.**
 
-## 6. Decisions for Chad
-| | Decision | Recommendation |
-|---|---|---|
-| O1 | Routes | OpenAlex, Europe PMC (incl. OA full-text search), Internet Archive Scholar, HAL; repositories/author pages only via those |
-| O2 | CORE (needs an account key) and Unpaywall (needs an email in requests) | **exclude** for this pass; revisit only if O1 finds little |
-| O3 | Cap | 90 min |
-| O4 | Leads | ≤ 3 per claim, exact specimen/group named, coded separately |
-| O5 | PDFs | stay excluded (H8b no); a PDF-only copy is recorded, not opened. Any change is a separate decision |
+## 6. After this pass (not part of it)
+Chad's stated preference: **one Test B case where the relevant written source text is already readable**, to see what an evidence-backed timeline entry looks like. It needs its own proposal and go.
 
 *This proposal authorises nothing beyond its own writing.*
