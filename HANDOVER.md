@@ -37,7 +37,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | Inspiration list | Chad's 50 sites, kept separate from the research backlog; queues no work. | `docs/INSPIRATION-50-SITES.md` |
 | CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
 
-**9 Nov 16:01 UTC (build thread):** Timeline candidate **rev 2** on branch `timeline-rc` @ `c3498bc` (packet `reviews/2026-11-09-timeline-rc.md` @ `412b8a8`, rev 2 section first). GPT's two smoke findings fixed; phone header 94 px, overlay 7.2% at 390×844. Mac review copy `_review/timeline-rc/` (served by Chad from Terminal: `python3 -m http.server 8899 --bind 127.0.0.1`). Open: GPT re-check, R1 EGU licence paste, R2 preview; release = line B.
+**9 Nov 16:33 UTC — TIMELINE LIVE (build thread):** main `4b23518` (merge of `timeline-rc` @ `9dce186`), served hashes verified 16:36 UTC. **Page = seven files** (index, sources, timeline, app, arts, timeline.js, style), assets `?v=202611181000`. Hub unchanged 0.6.2. **Next:** real-site smoke test with Chad on desktop + phone (header, Earth now ↔ Timeline ↔ Sources, Pliny entry, Back); real iPhone Safari. Rollback = revert `4b23518` (Approve line). Page-only exception (T1) reviewed before a second entry or an axis. Delete branch `timeline-rc` on GitHub (Chad). Mac review copies `_review/` can be removed by Chad.
 
 **NEXT THREAD STARTS HERE (9 Nov 14:26 UTC clock reading, end of the timeline-tests thread):**
 - **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. Every commit this thread is docs-only.

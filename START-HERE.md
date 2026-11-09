@@ -34,6 +34,7 @@ One browser globe showing the latest observations of the planet from open live f
 - **The hub is the product; the page is a client.** All future surfaces read the hub API; history stays private and accumulates from day one; paid features (later) are hub endpoints, never page code.
 - **Code is AGPL-3.0** (switched 1 Nov 2026 from MIT; earlier commits remain MIT). Forks run as a service must publish their changes.
 - **Every source's commercial standing is in the register** before it goes live (column: commercial use yes / with attribution / needs agreement).
+- **Bounded exception (live 9 Nov 2026, Timeline T1):** the Timeline page holds its one entry itself (pre-rendered from `phase1/timeline/entry-*.json` by `build_timeline.py`; no hub route, no fetch). Reviewed before a second entry or an axis is added; either needs its own proposal that decides the hub route.
 
 ## 3. Where the files live (three copies, keep them in sync)
 | What | Repo path (clone at `/home/claude/mother-earth`) | Mac path |
@@ -129,6 +130,13 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
   - **Claude never types credentials; logins are Chad's.**
 - **Text-only rule (H8b no):** no PDF is fetched or opened; a PDF-only copy is recorded as "found, unopened".
 - **Pane working memory survives in a tab until it navigates.** Data already fetched can be re-read from it without a new request; record that you did.
+
+## 4k. Thread facts (9 Nov 2026, Timeline build thread)
+- **Timeline page LIVE 16:33 UTC 9 Nov** (main `4b23518`). Files: `timeline.html` (entry between `<!-- TIMELINE:BEGIN/END -->`, generated — edit the JSON, run `python3 phase1/timeline/build_timeline.py`, check with `--check`), `timeline.js` (history/focus; no fetch; does not load app.js), styles scoped under `body.tl` in `style.css`. Header tabs on all three pages; phone header = two-row grid, `--header:94px`. **Served-hash checks now cover seven page files.**
+- **Tests:** `node phase1/timeline-ui.test.cjs` (584; `BREAK=` 12 breaks incl. switch-pushes, unscoped-card, no-withdrawal); desktop-overflow and mobile-pass must be rerun on any header change (the 390×844 overlay figure was 7.2% at release vs 8% target).
+- **GPT smoke tests a branch** from a hash-checked copy in the Mac folder `_review/<branch>/`, served by Chad in Terminal: `python3 -m http.server 8899 --bind 127.0.0.1` (GPT's shell cannot start a server; its browser rejects `file://`). Bump `?v=` between review rounds so cached CSS/JS cannot mask a fix.
+- **Source status can change after a check:** EGU21-16222 was found withdrawn (8 Mar 2021) only when Chad read the publisher page for R1; OpenAlex did not flag it. For any attributed source, read the publisher's landing page before release.
+- **Pane with Chad's screen locked:** fetch-based checks (served hashes, page reads) still worked (16:36 UTC 9 Nov).
 
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.

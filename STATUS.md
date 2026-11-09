@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 16:33:11 UTC (commit time) — **PAGE RELEASED: Timeline page (first entry, Pliny *Letters* 6.16) + Earth now · Timeline header tabs** (main `4b23518`, no-ff merge of `timeline-rc` @ `9dce186`; Chad: "Approve: push timeline-rc @ 9dce186 to main (page change: Timeline page + Earth now · Timeline header tabs)")
+- **Served hashes verified 16:36:27 UTC** (browser pane, no-store, Chad's screen locked): all seven page files HTTP 200 and = the reviewed values — index `d826964ae313`, sources `8fbadc9048b3`, timeline `1c9770492c27`, app `e3f4a3854113`, arts `58773cef35e6`, timeline.js `66b5e0320e83`, style `20a8bce94ada`; assets `?v=202611181000`. **Seven page files now.**
+- **Live read 16:36:41 UTC (pane, phone-width):** card "24 August (Julian) · year unstated" and "Date note · withdrawn abstract"; title opens the sheet (dialog), focus on the heading, `#e-pliny-ep-6-16`; Back closes, clears the fragment, focus on the title; Timeline tab current.
+- **Announcement (Chad's wording):** we've added the first Timeline entry, based on Pliny's account of the cloud noticed at Misenum; a date note cites a 2021 EGU conference abstract describing a proposed October date, and that abstract was withdrawn on 8 March 2021.
+- **Constitution exception in force (T1):** the Timeline entry is page-only (pre-rendered, no hub route); reviewed before a second entry or an axis (START-HERE §2).
+- **Still to do (Chad present):** real-site smoke test on desktop and phone — globe with the new header, moving between Earth now / Timeline / Sources, the Pliny entry, Back. Real iPhone Safari check.
+- **Rollback (own Approve line):** revert `4b23518` on main; no hub, R2 or D1 involved. Branch `timeline-rc` can be deleted on GitHub (Chad).
+
 ## 9 Nov 16:26 UTC (clock reading at write) — **Timeline candidate `9dce186`: withdrawn abstract shown (Chad's (a)); R1 closed; R2 preview PASS** (branch only; release awaits line B)
 - **R1:** Chad pasted the publisher pages: EGU21-16222 is **CC BY 4.0**, and was **withdrawn by its authors on 8 Mar 2021** (new finding; filed verbatim in REGISTER on the branch). Chad chose (a): the card reads "Date note · withdrawn abstract"; the note opens with "2021 EGU conference abstract, withdrawn on 8 March 2021." before the October proposal (also without JS); provenance of the copy read (OpenAlex, 14:03:45 UTC) kept. timeline-ui 584/0; break `no-withdrawal` fails; desktop-overflow 112/0; mobile-pass 131/0.
 - **R2 non-public preview (16:24–16:26 UTC, browser pane, Chad present; files from raw.githubusercontent at `9dce186`, sha256 checked, blob-injected into clean github.io tabs; live site untouched):**
