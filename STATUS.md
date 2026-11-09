@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 05:55 UTC (clock reading at write) — **R2 billing check rev 2.1** (docs only, after GPT's review of rev 2)
+- GPT supports the account-wide headroom and the expected $0 R2 increment **as estimates** from the account evidence.
+- Wording fixed: the pricing page states operation rounding ("If you have performed one million and one operations, you will be billed for two million operations.", re-read 9 Nov) — a crossed boundary above the allowance adds $4.50 (A) or $0.36 (B); the $0 is **conditional on total account usage, future Arts reads included, staying inside the allowances** (Arts reads consume the same Class B headroom). Account evidence, the 18 unknown-class operations (bounded at Class A) and the cache wording unchanged. For GPT. Nothing approved.
+
 ## 9 Nov 05:46 UTC (clock reading at write) — **thread handover** (Arts/timeline thread → next); R2 billing check rev 2; timeline rev 3.1 accepted
 - **R2 billing check rev 2** (`reviews/2026-11-09-arts-r2-billing-check.md`, targeted read-only re-read 05:44 UTC): **account-wide** — one bucket (`mother-earth`; connector list and dashboard API agree); account-wide analytics show only it (Infrequent Access 0 B) plus 19 bucketless ListBuckets. 9.774 days: Standard peak 0.83 GB, Class A 24,355, Class B 31,802, **18 unclassified (left unknown; bounded at the Class A price)**. Projections: A ~7.5 %, B ~1 %, storage ~0.77 GB-month. Proportional estimates kept apart from **whole-unit invoice increments** (storage ≤ $0.015 per crossed GB-month; operations, if billed per million, ≤ $4.50 A / $0.36 B per crossing — only once an allowance is reached). Cache wording corrected (`arts.js` uses `no-store`: one Class B per request reaching the hub). Corrected conclusion: **expected $0.00, estimate, not verified against an invoice.** For GPT.
 - GPT accepted **timeline rev 3.1** as a concept only (no route selected, no research).
