@@ -4,6 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 10:21 UTC (clock reading at write) — **Route W gate rev 2 after GPT's review** (docs and derived records only; existing evidence; no rerun) — `research/timeline-route-w/2026-11-09-claude/rev2/` on the Mac
+- **GPT accepted, within scope:**
+  - the 9 in-rule Johnstown claims: 8 without references, 1 date supported at day precision by the later-history article;
+  - packet hashes, sampling and order keys reproduced;
+  - USGS derivation reproduced: 39 in-period rows → 14 selected reference rows.
+- **GPT did not accept the unconditional method/discovery/coverage pass.** Six corrections, all applied in rev 2 (frozen originals unchanged):
+  1. **Shared-area predicate:** the rev 1 code reversed the frozen rule's direction. It is now recorded as a **deviation**, with both predicates evaluated (they differ on Q691404 and Q22023013; no candidate under either).
+  2. **Source-link (L) check:** it was a metadata screen only. Full L/source-timing is **uncompleted**, the 14 classes are **provisional**, and coverage is **incomplete/inconclusive**.
+  3. **Request log:** A+B is the split replacement for the main query. A2 and two probes are identified separately; **two** queries aborted. The aborted SPARQL probe (08:44:01.8–08:45:06.8) overlapped A and B1, so **"serial throughout" is withdrawn**. "Completed with no detected truncation"; one eligible item in the returned, verified frame; no quota inference either way.
+  4. **Reference list:** "14 selected reference rows" (our T3 threshold). Row 5's 19.02 ft (1886-01-06) and 20.81 ft (1886-02-01) are each kept with their own date. Matching failures are no longer an "externally documented" gap.
+  5. **Terms:** the WDQS numerical limits are added (60 s processing per 60 s per client, 30 error queries/min, 5 parallel per IP, 429 + Retry-After), taken from manual rev 8632351 text already retrieved; their omission was Claude's error. USGS/NWS reuse UNRESOLVED. American Heritage wording corrected (observed notice + no project approval, not a legal claim). Nothing filed.
+  6. **Month-end arithmetic:** 7 invalid endpoints corrected (GPT's count confirmed; an 8th sat in a non-governing, unrecorded statement). 0 eligibility flips.
+- **Selection stays inconclusive.** Not approved: rerun, queries, source reads, research, route adoption, REGISTER, prototype, production.
+
+
 ## 9 Nov 08:34:48–09:01:03 UTC (Mac clock) — **Timeline Route W first feasibility gate RUN** (research only; Chad's "go" on rev 4's parameters) — packet in the Mac folder `research/timeline-route-w/2026-11-09-claude/` (not in the repo)
 - **Protocol:** `docs/concepts/TIMELINE-ROUTE-W-GATE-PROPOSAL.md` rev 4.
   - Pennsylvania fixed · 1870–1927 · English · ≤ 30 / floor 10 · reference list ≤ 40 · seed 20261109 · `map-v2`, `roll-v1`, `match-v3`.
