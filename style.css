@@ -365,6 +365,7 @@ details.cd>.cav{margin-top:2px}
 .tabs a+a{border-left:1px solid var(--line-strong)}
 .tabs a:hover,.tabs a:focus-visible{background:rgba(140,170,200,.12)}
 .tabs a[aria-current="page"]{background:rgba(255,179,71,.14);color:var(--accent)}
+@media (min-width:721px) and (max-width:1200px){.top{gap:12px}.tabs a{padding:0 8px;letter-spacing:.04em}}
 @media (max-width:720px){
   :root{--header:104px}
   .top{flex-wrap:wrap;align-content:center;row-gap:6px;padding-top:6px;padding-bottom:6px}
