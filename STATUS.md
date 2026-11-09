@@ -12,7 +12,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **REGISTER:** Met entry status → on the page (fixed snapshot).
 - **Still outstanding:** actual iPhone Safari check (Chad); cold-load measurement (a true before is no longer available live — the 7 Nov baseline is historical and pre-NOAA-21; an after measurement can still be taken, Chad, fresh profile); served transfer size; Worker CPU for `/snapshot/arts` (readable from telemetry); screen-reader announcement (optional VoiceOver). GPT has not independently checked the live release.
 - **Rollback (each its own Approve line; page first):** revert `6d5ca55` on main (an open page keeps the old code until reloaded); then, if wanted, hub → 0.6.1 `f38296a0…`; then the R2 object.
-- Branch `arts-met-rc` can be deleted on GitHub (Chad; the session proxy refuses ref deletes).
+- Branch `arts-met-rc` deleted by Chad on GitHub after the release; checked: remote heads are `main` and the parked `aircraft-rc` only.
 
 ## 9 Nov 06:13:19 UTC — **HUB 0.6.2 DEPLOYED** (Chad: "Approve: deploy hub 0.6.2 from 4c4bbb9 (content only)")
 - **Before (06:13:05 UTC):** live worker.js = 0.6.1 `f38296a0…2cc8` (the pinned rollback target); 19 bindings; health 8/8 (all 200). Code fetched from raw.githubusercontent at `4c4bbb9`: 274,031 B, sha256 `4b5b6aa3c953afbce197586b8007a54da5191d83f4b317b28a48b4b1661a003f` (= the reviewed branch file).

@@ -12,7 +12,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | **D1** | **+ 5 `firms_*` tables + 3 indexes (6 Nov 19:59:43–20:00:03 UTC, FIRMS v2 state).** 9 history tables + 8 indexes **+ `archive_checkpoint_coverage` (empty) + index `collector_runs_layer_finished`** (both created 6 Nov 05:37 UTC, live = `2ee3a62` schema). |
 | **History** | ON since 5 Nov 10:21 UTC — keep on. First midnight checkpoint (5 Nov) completed; **fires part is partial** (input 15:30 UTC: the 4 MB guard skipped 15:45–23:45). Details STATUS. |
 | **Monitoring** | UptimeRobot 8 monitors (runs, publication, archive, coverage × usgs, firms), all 200 at the last reads. No monitor on swpc. |
-| **Branches** | GitHub: `main` + parked `aircraft-rc` (never deploy it as-is) + `arts-met-rc` (**merged** as `6d5ca55`; Chad can delete it). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
+| **Branches** | GitHub: `main` + parked `aircraft-rc` (never deploy it as-is) + `arts-met-rc` merged as `6d5ca55` and **deleted by Chad 9 Nov** (checked: GitHub shows only `main` + `aircraft-rc`). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
 | **Tests on main** | kp-degraded 29/29 · place-ui 30/30 · health-hub 29 · history-hub 27 · firms-guard 19 · firms-v2 57 (+7 need `OLD_WORKER`) · all UI suites pass (container). |
 | **Mac copies** | **Synced 9 Nov 05:47–05:50 UTC** (end of the Arts/timeline thread): 185/185 tracked files = main; 6 older committed versions preserved to `_sync-preserved/20261109T054755Z/`. Branch-only Arts files are not on the Mac by design. Next thread: grant `~/Documents/Mother Earth` again to sync. |
 
