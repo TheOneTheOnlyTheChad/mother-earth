@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 06:20:18 UTC — **PAGE RELEASED: Met catalogue sample card** (main `6d5ca55`, no-ff merge of `arts-met-rc` @ `c5005c3`; Chad: "Approve: push arts-met-rc to main (page change: Met catalogue sample card)")
+- **Live RC check before the merge (06:19–06:20 UTC, clean pane tab, branch files from raw.githubusercontent at `c5005c3`, sha256 matched: index `e30b04f7`, app `e3f4a385` (unchanged), arts `58773cef`, style `6a54e0b1`), against live hub 0.6.2:** off on load with no Arts request; on → one request, status ok, 25 rows summing to 479, headings correct; Iran expanded: 26 objects visible, each with the sensitivity warning; Key count unchanged (4); no Met image requests; no script errors; no overflow at 588 px. Transfer size not readable (no Timing-Allow-Origin).
+- **Merge:** no overlap with main's docs; merged page and hub files = the reviewed hashes; arts-hub 54/54 on the merge. **main's `phase1/worker.js` = live 0.6.2 (`4b5b6aa3…`), so main = live again.**
+- **Served hashes verified 06:22:23 UTC** (no-store): index, app, arts, style, sources all = the reviewed values; assets `?v=202611161000`.
+- **Live read (06:22–06:23 UTC, public page):** hub 0.6.2; card on → ok, "479 objects · 25 present-day countries", label Catalogued, "loaded — source CSV of 2 Nov 2026 (commit e394878) · view prepared 7 Nov 2026"; China expanded: 28 objects, all with the warning; off → cleared; Key 4 layers throughout; footer credit present; Sources `#arts` present; no Met requests; no errors. Pane at 588 px (phone layout), **not a real phone**.
+- **REGISTER:** Met entry status → on the page (fixed snapshot).
+- **Still outstanding:** actual iPhone Safari check (Chad); cold-load measurement (a true before is no longer available live — the 7 Nov baseline is historical and pre-NOAA-21; an after measurement can still be taken, Chad, fresh profile); served transfer size; Worker CPU for `/snapshot/arts` (readable from telemetry); screen-reader announcement (optional VoiceOver). GPT has not independently checked the live release.
+- **Rollback (each its own Approve line; page first):** revert `6d5ca55` on main (an open page keeps the old code until reloaded); then, if wanted, hub → 0.6.1 `f38296a0…`; then the R2 object.
+- Branch `arts-met-rc` can be deleted on GitHub (Chad; the session proxy refuses ref deletes).
+
 ## 9 Nov 06:13:19 UTC — **HUB 0.6.2 DEPLOYED** (Chad: "Approve: deploy hub 0.6.2 from 4c4bbb9 (content only)")
 - **Before (06:13:05 UTC):** live worker.js = 0.6.1 `f38296a0…2cc8` (the pinned rollback target); 19 bindings; health 8/8 (all 200). Code fetched from raw.githubusercontent at `4c4bbb9`: 274,031 B, sha256 `4b5b6aa3c953afbce197586b8007a54da5191d83f4b317b28a48b4b1661a003f` (= the reviewed branch file).
 - **Deploy:** content-only API from the dashboard tab, HTTP 200, success, etag `32b879f9…0ccb`, modified 06:13:19.209Z. Bindings, secrets, variables and crons untouched.

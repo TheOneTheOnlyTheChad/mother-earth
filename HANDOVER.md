@@ -7,12 +7,12 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 ## 0. Live state (production unchanged since the 08:11:22 UTC 8 Nov page release (hub 07:58:25); **main = live**; the backlog and Arts/timeline threads made docs-only commits on main; Arts code lives only on branch `arts-met-rc`)
 | | State |
 |---|---|
-| **Page** | main `ad4002b`+ (docs since), assets **`?v=202611151000`**. Released 8 Nov 08:11:22 UTC: Kp shown as an interval; honest "degraded" wording (our rule named, never "the source flagged"). Before that: `3375e91` GIBS backdrop NOAA-21 (05:07:54 UTC). Served hashes verified (index `b9d4649e1ac6`, app `e3f4a3854113`, sources `7d66228f07b8`, style `e4c9547d99bf`). |
+| **Page** | **main `6d5ca55`, assets `?v=202611161000` — Met catalogue sample card released 9 Nov 06:20:18 UTC** (served hashes verified: index `e30b04f7ee5a`, app `e3f4a3854113`, arts `58773cef35e6`, sources `33074c2d17d3`, style `6a54e0b17cbd`; **five page files**). Before that: main `ad4002b`, assets `?v=202611151000`. Released 8 Nov 08:11:22 UTC: Kp shown as an interval; honest "degraded" wording (our rule named, never "the source flagged"). Before that: `3375e91` GIBS backdrop NOAA-21 (05:07:54 UTC). Served hashes verified (index `b9d4649e1ac6`, app `e3f4a3854113`, sources `7d66228f07b8`, style `e4c9547d99bf`). |
 | **Hub** | **0.6.2 since 9 Nov 06:13:19 UTC** (adds the fixed `/snapshot/arts` catalogue route; from branch `arts-met-rc` @ `4c4bbb9`, worker.js sha256 `4b5b6aa3…003f`; rollback = 0.6.1 `f38296a0…`). Before that: **0.6.1 since 8 Nov 07:58:25 UTC.** worker.js sha256 `f38296a0183d14d958d5815d7926254cb4275be7ca00b384334974fad5b12cc8` (= main). Kp degraded only when ≥ 7.5 h past its interval start (provisional policy, not a NOAA deadline; 5 min future-skew tolerance). Envelopes carry `status_reason` (swpc, usgs, co2, seaice, cloud ships). FIRMS v2 ON (`FIRMS_PIPELINE=v2`, `FIRMS_CREATE_ONLY=verified`); 19 bindings. **Rollback:** hub = redeploy 0.6.0 `ac173d8a…58ea`; page = revert `ad4002b`. Each needs its own Approve line; the two are independent. Never redeploy 0.5.3. |
 | **D1** | **+ 5 `firms_*` tables + 3 indexes (6 Nov 19:59:43–20:00:03 UTC, FIRMS v2 state).** 9 history tables + 8 indexes **+ `archive_checkpoint_coverage` (empty) + index `collector_runs_layer_finished`** (both created 6 Nov 05:37 UTC, live = `2ee3a62` schema). |
 | **History** | ON since 5 Nov 10:21 UTC — keep on. First midnight checkpoint (5 Nov) completed; **fires part is partial** (input 15:30 UTC: the 4 MB guard skipped 15:45–23:45). Details STATUS. |
 | **Monitoring** | UptimeRobot 8 monitors (runs, publication, archive, coverage × usgs, firms), all 200 at the last reads. No monitor on swpc. |
-| **Branches** | GitHub: `main` + parked `aircraft-rc` (never deploy it as-is) + **`arts-met-rc`** (Arts candidate, awaiting GPT's review; not merged, not deployed). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
+| **Branches** | GitHub: `main` + parked `aircraft-rc` (never deploy it as-is) + `arts-met-rc` (**merged** as `6d5ca55`; Chad can delete it). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
 | **Tests on main** | kp-degraded 29/29 · place-ui 30/30 · health-hub 29 · history-hub 27 · firms-guard 19 · firms-v2 57 (+7 need `OLD_WORKER`) · all UI suites pass (container). |
 | **Mac copies** | **Synced 9 Nov 05:47–05:50 UTC** (end of the Arts/timeline thread): 185/185 tracked files = main; 6 older committed versions preserved to `_sync-preserved/20261109T054755Z/`. Branch-only Arts files are not on the Mac by design. Next thread: grant `~/Documents/Mother Earth` again to sync. |
 
@@ -24,7 +24,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 - **Still open:** real-phone / Safari test; browser HTTP status codes. **No degraded path has been seen live:** no layer was degraded and GPT did not inject state; the wording rests on the reviewed tests (kp-degraded 29/29).
 
 ## 1. Next (from the Arts/timeline thread, 9 Nov 2026)
-**Production unchanged all thread** (hub 0.6.1, page `ad4002b` assets `?v=202611151000`). Main: docs only. **Nothing is approved for upload, deploy, merge or page release.**
+**Arts released this thread, each step on Chad's own Approve line:** R2 upload 06:11:12 UTC → hub 0.6.2 06:13:19 UTC → live RC check → page release 06:20:18 UTC (main `6d5ca55`). **main = live** (hub 0.6.2 `4b5b6aa3…`, page assets `?v=202611161000`).
 
 **Where things stand:**
 | Item | State | Doc |
@@ -39,7 +39,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **Next, each on Chad's go:**
 1. **R2 upload DONE 9 Nov 06:11:12 UTC** (Chad's Approve line): `ref/arts/met-R1-e394878.json`, read back sha256 `221bb1ca…9644` exact. No public effect while the hub is 0.6.1. **Rollback target pinned:** live hub 0.6.1, worker.js sha256 `f38296a0…2cc8`.
-2. **Hub 0.6.2 DEPLOYED 9 Nov 06:13:19 UTC** (Chad's Approve line), verified (sha `4b5b6aa3…`, 19 bindings, health 8/8, `/snapshot/arts` serves the R2 file exactly; first runs ok; ETag arrives weak at the edge). **main's worker.js is still 0.6.1, so main ≠ live hub until the branch merges.** Rollback = redeploy 0.6.1 `f38296a0…`. Then → live RC check (clean pane tab; served hashes incl. **`arts.js`**) → `Approve: push arts-met-rc to main (page change: Met catalogue sample card)` → served-hash check, live read, cold-load before/after (Chad, fresh profile), iPhone Safari check (Chad), Worker CPU and served size measured, REGISTER Met status → "on the page (fixed snapshot)".
+2. **Hub 0.6.2 DEPLOYED 9 Nov 06:13:19 UTC** and **page RELEASED 06:20:18 UTC** (main `6d5ca55`), verified (served hashes, live read). **Outstanding:** iPhone Safari check (Chad); cold-load after-measurement (Chad, fresh profile; no live "before" any more); served transfer size; Worker CPU for `/snapshot/arts` (telemetry); optional VoiceOver; GPT's look at the live release if wanted. Rollback page-first: revert `6d5ca55` → hub 0.6.1 `f38296a0…` → R2 object, each its own Approve line.
 3. GPT's review of R2 fireballs terms rev 2.
 4. Later, each a separate decision: timeline route/gate; remaining backlog first gates (R5, R7, R10); Phase 0 domain decision; GIBS beyond the bench.
 5. Still open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
