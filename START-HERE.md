@@ -109,6 +109,27 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Research packets live in the Mac folder** (`research/timeline-route-w/…`, `research/timeline-wikipedia-pilot/…`). The repo gets IDs, revisions, hashes and dispositions only.
 - **Corrections go in a `rev2/` folder** beside the frozen originals. The LOG is append-only.
 
+## 4j. Thread facts (9 Nov 2026, timeline-tests thread)
+- **Research packets** (Mac folder, not the repo): `research/timeline-test-a/`, `timeline-test-a-retry/`, `timeline-test-a-oa/`, `timeline-test-b/` (each `2026-11-09-claude/`, with `LOG.md`, `.hashes`, and a `rev2/` folder for corrections).
+  - **Pattern:** protocol fixed and hashed before any request; real-clock LOG, append-only; corrections in `rev2/` with `.orig-hashes`; originals never edited.
+- **Routes that worked (pane):**
+  - Europe PMC REST (full-text XML for PMC open-access; abstracts otherwise);
+  - OpenAlex and Crossref APIs: cross-origin fetch from the ebi.ac.uk tab works;
+  - HAL API (cross-origin);
+  - the Wikipedia Action API;
+  - The Latin Library and Perseus (`/hopper/xmlchunk`, `/hopper/dltext`) as same-origin text.
+- **Routes that did not:**
+  - ScienceDirect serves HTTP 403 to the pane even on its home page (the error page shows the pane's User-Agent);
+  - De Gruyter Brill returns an empty HTTP 202;
+  - Internet Archive Scholar returns a proof-of-work "verifying your session" page. **Not solved** (bot detection);
+  - nature.com articles: HTTP 200 with a normal session, but subscription content even signed in;
+  - Springer chapter pages: HTTP 200, abstract.
+- **Pane site approvals Chad granted this thread** (scope site): en.wikipedia.org, ebi.ac.uk, degruyterbrill.com, link.springer.com, sciencedirect.com, nature.com, scholar.archive.org, openresearch-repository.anu.edu.au, research-repository.griffith.edu.au, thelatinlibrary.com, en.wikisource.org, perseus.tufts.edu.
+  - Chad also holds a Springer Nature account (Google sign-in) in the pane.
+  - **Claude never types credentials; logins are Chad's.**
+- **Text-only rule (H8b no):** no PDF is fetched or opened; a PDF-only copy is recorded as "found, unopened".
+- **Pane working memory survives in a tab until it navigates.** Data already fetched can be re-read from it without a new request; record that you did.
+
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.
 - **Optional layers** on the page go through `OPTIONAL_LAYERS` in index.html (fetched only while on, cleared on off, `refreshPair` + `usable()` as for the always-on record layers). `ME.renderState()` and `ME.openCell(layer, id)` are the read-only test/console aids.

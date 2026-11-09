@@ -1,4 +1,4 @@
-# Mother Earth — handover (9 Nov 2026, end of the Arts/timeline thread; main = the commit that carries this file, see `git log -1 -- HANDOVER.md`)
+# Mother Earth — handover (9 Nov 2026, end of the timeline-tests thread; main = the commit that carries this file, see `git log -1 -- HANDOVER.md`)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.** This thread's full record is STATUS 8 Nov (from 16:15 UTC) and 9 Nov.
 
@@ -37,7 +37,21 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | Inspiration list | Chad's 50 sites, kept separate from the research backlog; queues no work. | `docs/INSPIRATION-50-SITES.md` |
 | CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
 
-**NEXT THREAD STARTS HERE (9 Nov, end of the timeline research thread):**
+**NEXT THREAD STARTS HERE (9 Nov 14:26 UTC clock reading, end of the timeline-tests thread):**
+- **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. Every commit this thread is docs-only.
+- **Next task: a BUILD PROPOSAL for one Timeline entry** (the Pliny Letters 6.16 entry), from the accepted design `docs/concepts/TIMELINE-PAGE-UX-PROPOSAL.md` rev 2.
+  - **Carry forward** (written at the top of that doc): "Read the passage" goes straight to the source (the hash identifies the checked copy; the live link may change), and Back/keyboard focus is tested both ways (from a card; from a direct entry link).
+  - **Implementation and the live navigation change each need their own approval.** The opening-page / Met placement audit is a separate track.
+- **Timeline research, all closed and accepted** (packets on the Mac under `research/`; the repo holds IDs/dispositions only):
+  - **Route W gate** (rev 2), **Wikipedia pilot** (rev 2.1).
+  - **Test A**: human evolution, rev 2. Primary-source tally **7/7/10/7**; with the separate Bräuer abstract **7/8/9/7**. Lesson: preserve what was dated vs what the authors inferred (Omo 233 ± 22 kyr = eruption age → the authors' minimum-age inference).
+  - **Access retry** (rev 2): no improvement in access to primary reports through the routes tried.
+  - **OA List A**: 6 works found, 1 new abstract, 0 claims resolved. List B parked.
+  - **Test B**: Pliny Letters 6.16, 4 supported + 1 absence finding (year); 24 Aug = our Julian conversion of the pinned Latin Library reading; date dispute attributed to an EGU 2021 abstract.
+- **Inline quotation of the Latin needs clearance in REGISTER first** (Latin Library: no terms seen; Perseus: CC BY-SA 3.0 US). Until then the build links to the source.
+- **Not approved:** build, live nav change, Test B extensions, List B, PDFs (H8b no stands).
+
+**NEXT THREAD STARTED HERE EARLIER (9 Nov, end of the timeline research thread) — kept for the record:**
 - **Production unchanged all thread:** hub 0.6.2, page `6d5ca55`. All of today's work was docs and research.
 - **9 Nov 13:45 UTC:** List A CLOSED by GPT (corrections recorded). **Test B proposal rev 2**, **RUN DONE 14:00–14:04 UTC** (Mac `research/timeline-test-b/2026-11-09-claude/`): Latin gate passed (edition unnamed), no translation, S3 date check done, B1–B5 supported, mock entry fully traceable. **CLOSED by GPT** (4 supported + 1 absence finding). **Timeline page UX proposal rev 2** (`docs/concepts/TIMELINE-PAGE-UX-PROPOSAL.md`; title opens entry, no-JS list, source link by default) → for review; build and nav change each need their own approval.
 - **OA PASS (List A) DONE 9 Nov 13:30–13:39 UTC:** all 6 works found; only new text = Debénath 1982 HAL abstract (no Salé); full text PDF-only (unopened); no claim resolved; tallies unchanged. **Next:** GPT read → Test B proposal (Chad's go).

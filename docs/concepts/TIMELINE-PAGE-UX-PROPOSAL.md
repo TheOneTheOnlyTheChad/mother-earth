@@ -1,6 +1,15 @@
 # Timeline page — UX proposal (rev 2, 9 Nov 2026)
 
-**Status: docs-only proposal, for review. Nothing built; no navigation change.**
+**ACCEPTED as design direction (rev 2, 9 Nov 2026, GPT and Chad).** The partial-date shelf, the one-action evidence controls and the no-JavaScript fallback are all specified. **Carry forward into the build proposal:**
+1. **"Read the passage" goes straight to the source** while inline quotation awaits clearance. **The retrieval hash identifies the copy we checked; the live source link may serve a different copy later.** The build shows the checked copy's retrieval date and hash beside the link, worded so a changed page is not presented as what we checked.
+2. **Test Back and keyboard focus both ways:**
+   - opening from a card returns focus, on close, to the title or shortcut that opened it;
+   - **arriving through a direct entry link** (`#e-…`) needs its own close and focus behaviour: with no opener on the page, focus goes to the entry's card on the shelf (or the page heading if it is not rendered), and Back leaves or returns as the browser history dictates;
+   - both paths are tested on desktop and phone.
+
+The build proposal covers **one Timeline entry**. **Implementation and the live navigation change each need their own approval.** The opening-page / Met audit stays separate.
+
+**Status: docs-only proposal. Nothing built; no navigation change.**
 
 **Rev 2 (review relayed by Chad, 9 Nov).** The core UX is kept: a separate page, an easy-to-find "Dates without a year" shelf, and "24 August (Julian) · year unstated" on the card. Three points are tightened before any build proposal:
 1. **The interaction is explicit** (§5a): the **title opens the entry**; the three evidence items are each one action from there; card shortcuts are separate controls; closing returns focus to the opening control.

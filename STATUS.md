@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 14:26 UTC (clock reading at write) — **Timeline UX rev 2 ACCEPTED as design direction (GPT + Chad); thread handover** (docs only)
+- **Accepted:** the partial-date shelf, one-action evidence controls and no-JavaScript fallback are specified.
+- **Carry forward into the build proposal** (recorded at the top of the UX doc):
+  1. "Read the passage" goes straight to the source while inline quotation awaits clearance; the retrieval hash identifies the checked copy, and the live link may serve a different copy later.
+  2. Test Back and keyboard focus both ways: from a card (focus returns to the opener) and from a direct entry link (its own close and focus behaviour).
+- **Handover:** HANDOVER "NEXT THREAD STARTS HERE" rewritten (next task = **build proposal for one Timeline entry**; implementation and live nav each need their own approval; the opening-page/Met audit stays separate). START-HERE §4j added (routes, approvals, packet pattern).
+- Production unchanged all thread (hub 0.6.2, page `6d5ca55`).
+
 ## 9 Nov 14:23 UTC (clock reading at write) — **Test B closure verified; Timeline UX proposal rev 2** (docs only)
 - **Chad verified** the four original non-log Test B files and the appended closure entry. Test B is closed: 4 supported + 1 absence finding, §22 caveat intact.
 - **UX rev 2** (`docs/concepts/TIMELINE-PAGE-UX-PROPOSAL.md`). The core is kept; three points tightened:
