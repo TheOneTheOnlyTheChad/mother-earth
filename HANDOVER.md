@@ -38,12 +38,13 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 **9 Nov additions:**
 - Provider enquiries (rev 2): USNO, adsb.lol, Ozone Watch, CNEOS sent — **replies pending**; OpenSky #837506 acknowledgement **supplied** (conditions filed beside REGISTER; not blanket permission); adsb.fi prepared, **not sent**. No permission from sending or silence; record and filing rule in `docs/research/ENQUIRIES-2026-11.md`. No duplicate or automatic follow-ups; draft sign-off "Ta". Keep Chad's address/phone out of the repo.
 - **Aircraft: reopened only for bounded terms/access and feeder clarification** (no building, purchase, installation, deployment; `aircraft-rc` parked).
-- **Arts release proposal rev 2** (`docs/research/P0-ARTS-RELEASE-PROPOSAL.md`, after GPT's review of rev 1) awaits Chad's D1–D8; exact Approve line in its §8. Arts stays unselected; nothing built.
+- **Arts release proposal rev 2.1** (`docs/research/P0-ARTS-RELEASE-PROPOSAL.md`, after GPT's reviews of rev 1 and rev 2) awaits Chad's D1–D8; exact Approve line in its §8. Arts stays unselected; nothing built.
 - CO₂: GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started.
 
 **Next, all on Chad's go:**
 1. GPT's review of R2 rev 2 → corrections if any; filing only on Chad's separate authorisation.
-1a. Arts release proposal rev 2 → Chad's D1–D8 (Approve line in §8).
+1a. Arts release proposal **rev 2.1** → Chad's D1–D8 (Approve line in §8). GPT supports it as the basis for a branch-only build.
+1b. Timeline concept (`docs/concepts/TIMELINE-CONCEPT.md`): concept only; any first gate needs Chad's go.
 2. Remaining backlog: new first gates (R5 coral, R7 tides, R10 solar flares); Phase 0 domain decision (rec. rev 3); GIBS beyond the bench (shadow record / implementation) each a separate decision.
 3. Still left open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
 
