@@ -1,10 +1,10 @@
-# Mother Earth — handover (8 Nov 2026 16:11 UTC commit time, end of the backlog thread; main `5e37402`)
+# Mother Earth — handover (9 Nov 2026, end of the Arts/timeline thread; main = the commit that carries this file, see `git log -1 -- HANDOVER.md`)
 
-Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.** This thread's full record is STATUS 8 Nov.
+Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.** This thread's full record is STATUS 8 Nov (from 16:15 UTC) and 9 Nov.
 
 **Access (Chad, 4–5 Nov):** full access — GitHub (push), Cloudflare, Space-Track, the Mac's Mother Earth folder and `~/mother-earth`, browser pane. Chad enters secrets himself; Claude never creates accounts. **Every deploy, schedule or variable change, D1 schema change and push to main that changes the public page needs Chad's explicit go.** Production deploy clicks are Chad's (§3). **Say up front whenever Chad must be at the screen with the app in front** (standing rule). **Production approvals (thread 16): the session's auto-mode safety check lets a production action through only when Chad's message names that exact action — a bare "go" is not enough. So end any message that needs a production action with a ready line, e.g. `Approve: deploy hub commit <sha> (content only)` or `Approve: copy <files> into R2 recovery/`, and Chad replies with it.** Non-production work: "go" is fine. GPT reviews; approvals are Chad's. Not Overwatch: presentation lessons only. No surveillance, ever.
 
-## 0. Live state (production unchanged since the 08:11:22 UTC 8 Nov page release (hub 07:58:25); **main = live**; the backlog thread made docs-only commits, no production change)
+## 0. Live state (production unchanged since the 08:11:22 UTC 8 Nov page release (hub 07:58:25); **main = live**; the backlog and Arts/timeline threads made docs-only commits on main; Arts code lives only on branch `arts-met-rc`)
 | | State |
 |---|---|
 | **Page** | main `ad4002b`+ (docs since), assets **`?v=202611151000`**. Released 8 Nov 08:11:22 UTC: Kp shown as an interval; honest "degraded" wording (our rule named, never "the source flagged"). Before that: `3375e91` GIBS backdrop NOAA-21 (05:07:54 UTC). Served hashes verified (index `b9d4649e1ac6`, app `e3f4a3854113`, sources `7d66228f07b8`, style `e4c9547d99bf`). |
@@ -14,7 +14,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | **Monitoring** | UptimeRobot 8 monitors (runs, publication, archive, coverage × usgs, firms), all 200 at the last reads. No monitor on swpc. |
 | **Branches** | GitHub: `main` + parked `aircraft-rc` (never deploy it as-is) + **`arts-met-rc`** (Arts candidate, awaiting GPT's review; not merged, not deployed). Aircraft reopened 9 Nov for terms/access + feeder clarification only. |
 | **Tests on main** | kp-degraded 29/29 · place-ui 30/30 · health-hub 29 · history-hub 27 · firms-guard 19 · firms-v2 57 (+7 need `OLD_WORKER`) · all UI suites pass (container). |
-| **Mac copies** | Synced at each step this thread (`~/Documents/Mother Earth` granted 8 Nov; clone in the Mac shell at `$HOME/me-sync`, then cp + cmp over `git ls-files`). |
+| **Mac copies** | Last full sync 8 Nov (backlog thread). 9 Nov thread: see STATUS 9 Nov handover entry for whether the end-of-thread sync ran (needs Chad's folder grant). |
 
 ## 0a. Smoke testing, 8 Nov (GPT + Claude)
 - **GPT, 05:14–05:20 UTC** (on `3375e91`) and **GPT, 12:10–12:19 UTC** (on `ad4002b` + hub 0.6.1): no blocking regression in the checks completed; **not exhaustive**.
@@ -23,7 +23,37 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 - **Claude, 11:53–12:06 UTC:** noon rollover PASS on fresh loads (06 → 7 Nov). An already-open page keeps its date until reloaded (current behaviour). GPT independently confirmed the post-noon state.
 - **Still open:** real-phone / Safari test; browser HTTP status codes. **No degraded path has been seen live:** no layer was degraded and GPT did not inject state; the wording rests on the reviewed tests (kp-degraded 29/29).
 
-## 1. Next (from the backlog thread, 8 Nov, handover commit 16:11 UTC)
+## 1. Next (from the Arts/timeline thread, 9 Nov 2026)
+**Production unchanged all thread** (hub 0.6.1, page `ad4002b` assets `?v=202611151000`). Main: docs only. **Nothing is approved for upload, deploy, merge or page release.**
+
+**Where things stand:**
+| Item | State | Doc |
+|---|---|---|
+| **Arts (the Met) card** | Proposal rev 2.1 accepted by GPT → Chad's branch-only Approve → **candidate built on `arts-met-rc` @ `4c4bbb9`** (+ `c5005c3` docs). GPT's independent implementation review: **no blocking defect in its code/test scope**; reproduced the file (127,887 B, sha256 `221bb1ca…9644`), worker/page hashes, arts-hub 54/54, the three hub breaks; `unreadable` accepted. The 90 browser checks are Claude-supplied. **R2 billing check rev 2** done (account-wide, one bucket; expected $0.00, estimate; whole-unit invoice bounds) — **awaiting GPT's look at rev 2** before Chad's upload approval. | `docs/research/P0-ARTS-RELEASE-PROPOSAL.md`, `reviews/2026-11-09-arts-met-rc.md` (branch; copy in project), `reviews/2026-11-09-arts-r2-billing-check.md` |
+| Timeline concept | **Rev 3.1 accepted by GPT as a concept only.** Route L (library first) and Route W (Wikipedia/Wikidata first), each with a bounded gate; GPT suggests considering W first. No route selected, no research authorised. | `docs/concepts/TIMELINE-CONCEPT.md` |
+| Provider enquiries | USNO, adsb.lol, Ozone Watch, CNEOS sent — replies pending; OpenSky #837506 acknowledgement supplied (conditions beside REGISTER; not blanket permission); adsb.fi prepared, **not sent**. | `docs/research/ENQUIRIES-2026-11.md` |
+| Aircraft | Reopened **only** for bounded terms/access and feeder clarification. `aircraft-rc` parked. | — |
+| R2 fireballs terms | Rev 2 still awaiting GPT's review (unchanged since 8 Nov). | `docs/research/R2-terms-access.md` |
+| Inspiration list | Chad's 50 sites, kept separate from the research backlog; queues no work. | `docs/INSPIRATION-50-SITES.md` |
+| CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
+
+**Next, each on Chad's go:**
+1. GPT's look at the R2 billing check rev 2 → then, if Chad chooses: `Approve: upload ref/arts/met-R1-e394878.json (complete-file sha256 221bb1cab1c186a99972fdf936efddc22a298b6529abf30450ca0b3f4d219644) to R2` (Chad at the screen; browser pane).
+2. Then, in order, each on its own Approve line: pin the live hub version + sha256 as the rollback target → `Approve: deploy hub 0.6.2 from <commit> (content only)` → live RC check (clean pane tab; served hashes incl. **`arts.js`**) → `Approve: push arts-met-rc to main (page change: Met catalogue sample card)` → served-hash check, live read, cold-load before/after (Chad, fresh profile), iPhone Safari check (Chad), Worker CPU and served size measured, REGISTER Met status → "on the page (fixed snapshot)".
+3. GPT's review of R2 fireballs terms rev 2.
+4. Later, each a separate decision: timeline route/gate; remaining backlog first gates (R5, R7, R10); Phase 0 domain decision; GIBS beyond the bench.
+5. Still open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
+
+**Learned this thread (keep):**
+- **Visual checks find what tests miss:** screenshots caught a borrowed country heading ("China / Iran") after 86 passing browser checks; the Tab-order test caught `display:flex` overriding `hidden`. Test what is rendered (`offsetParent`, size), not just properties, and look at the page.
+- **Two hashes, two jobs:** a records hash identifies *what* is published; a complete-file hash is what the hub must validate (provenance, dates and limitations included). The approval names the file hash.
+- **Cache lifetime ≠ displayed lifetime:** `max-age` bounds what a *new* fetch can receive; an already-rendered list stays until switched off or reloaded; a page revert reaches viewers only on their next load.
+- **R2 is billed separately** (R2 Paid subscription, $0 base, usage-billed), not inside Workers Paid. Read the account's usage from the dashboard GraphQL (`r2StorageAdaptiveGroups`, `r2OperationsAdaptiveGroups`, no bucket filter for account-wide) and keep proportional estimates apart from whole-unit invoice increments.
+- **Accessibility-tree checks** verify names, roles, expanded states and relationships, not screen-reader announcements.
+- **Public repo:** never write Chad's phone number or precise home address into it.
+- **Classify accounts by relationship to the event, not format** (timeline T2-c / T2-r / T2-h / T2-s).
+
+## 1-prev. Next as of the backlog thread handover (8 Nov 16:11 UTC commit time; superseded by §1, kept for the record)
 **Production unchanged all thread** (hub 0.6.1, page `ad4002b` assets `?v=202611151000`, health 8/8 at last read). Every commit since `114f9f5` is docs/evidence only.
 
 **Where each backlog item stands (details in STATUS 8 Nov, newest first):**
