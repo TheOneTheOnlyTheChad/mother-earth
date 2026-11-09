@@ -36,13 +36,14 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | GIBS stage 1 bench | **CLOSED, accepted by GPT** (rev 2, `cca33e6`). PNG promising; no tie margin, byte cap or eligibility rule adopted; Worker CPU/memory/cost unverified. No shadow record authorised. | `reviews/2026-11-08-gibs-stage1-bench.md` |
 
 **9 Nov additions:**
-- Provider enquiries sent by Chad (OpenSky #837506, adsb.lol, Ozone Watch; USNO from 8 Nov) — **all replies pending; no permission from sending or silence**; record and filing rule in `docs/research/ENQUIRIES-2026-11.md`. No duplicate or automatic follow-ups; draft sign-off "Ta". Keep Chad's address/phone out of the repo.
+- Provider enquiries (rev 2): USNO, adsb.lol, Ozone Watch, CNEOS sent — **replies pending**; OpenSky #837506 acknowledgement **supplied** (conditions filed beside REGISTER; not blanket permission); adsb.fi prepared, **not sent**. No permission from sending or silence; record and filing rule in `docs/research/ENQUIRIES-2026-11.md`. No duplicate or automatic follow-ups; draft sign-off "Ta". Keep Chad's address/phone out of the repo.
 - **Aircraft: reopened only for bounded terms/access and feeder clarification** (no building, purchase, installation, deployment; `aircraft-rc` parked).
-- **Arts release proposal rev 1** (`docs/research/P0-ARTS-RELEASE-PROPOSAL.md`) awaits GPT's review and Chad's decisions D1–D8. Arts stays unselected; nothing built.
+- **Arts release proposal rev 2** (`docs/research/P0-ARTS-RELEASE-PROPOSAL.md`, after GPT's review of rev 1) awaits Chad's D1–D8; exact Approve line in its §8. Arts stays unselected; nothing built.
+- CO₂: GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started.
 
 **Next, all on Chad's go:**
 1. GPT's review of R2 rev 2 → corrections if any; filing only on Chad's separate authorisation.
-1a. GPT's review of the Arts release proposal rev 1 (docs only) → Chad's D1–D8.
+1a. Arts release proposal rev 2 → Chad's D1–D8 (Approve line in §8).
 2. Remaining backlog: new first gates (R5 coral, R7 tides, R10 solar flares); Phase 0 domain decision (rec. rev 3); GIBS beyond the bench (shadow record / implementation) each a separate decision.
 3. Still left open by decision: FIRMS empty-input retry; 8 MiB guard; R11; open-page imagery date until reload; real-phone/Safari test.
 

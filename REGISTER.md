@@ -95,6 +95,7 @@ Rule (1 Nov 2026): every row ends with a **Commercial use** line — yes / with 
 ## OpenSky Network — states API
 - **Read:** 30 Oct 2026 (Terms §3(iii)/(vi) + reply Ticket#837506 by Chad).
 - **Terms:** automated/public use needs written licence; hobbyist use OK within credits; public site requires being a feeder; no cloud whitelisting.
+- **Ticket #837506 acknowledgement (relayed by Chad, 9 Nov 2026; summary, verbatim not in repo):** for the hobbyist / public-site case — no commercial entity or payments; site must be a feeder; applicable credits apply; no further written confirmation needed for those cases; no cloud-server whitelisting. Not blanket permission for other redistribution arrangements. Record: `docs/research/ENQUIRIES-2026-11.md`.
 - **Status:** ⛔ parked until a receiver feeds the network. Page says "not shown" with reason.
 - **Commercial use:** needs agreement — Terms §3 non-commercial by default; written licence required for commercial/operational use.
 

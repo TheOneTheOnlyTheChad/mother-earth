@@ -89,3 +89,6 @@
 ## Sources
 Read by GPT on Chad's behalf, 8 Nov 2026: [SSD FAQ #a05](https://ssd.jpl.nasa.gov/faq.html#a05) · [Caltech/JPL Privacy Policies and Important Notices](https://www.jpl.nasa.gov/caltechjpl-privacy-policies-and-important-notices/) · [CNEOS fireballs](https://cneos.jpl.nasa.gov/fireballs/) · [CNEOS lightcurves](https://cneos.jpl.nasa.gov/fireballs/lc/) · [SSD API documentation](https://ssd-api.jpl.nasa.gov/doc/)
 Read by Claude (fetch summaries), 8 Nov 2026: [SSD/CNEOS API About](https://ssd-api.jpl.nasa.gov/about) · [CNEOS introduction](https://cneos.jpl.nasa.gov/fireballs/intro.html) · [JPL Image Use Policy](https://jpl.nasa.gov/jpl-image-use-policy) · [data.gov record](https://catalog.data.gov/dataset/fireball-and-bolide-reports)
+
+## Provider enquiry (confirmed sent by Chad, 9 Nov 2026)
+- Chad emailed CNEOS at `contact-cneos@jpl.nasa.gov`. **Reply pending. No permission is inferred from sending or from silence**; this review's positions stand. Record: `docs/research/ENQUIRIES-2026-11.md`.
