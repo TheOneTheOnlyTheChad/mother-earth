@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 9 Nov 2026
 
+## 9 Nov 14:00:17–14:04:40 UTC (Mac clock) — **Timeline Test B RUN** (research only; Chad's go on rev 2) — packet `research/timeline-test-b/2026-11-09-claude/` on the Mac
+- **Latin gate passed** in under a minute. S1 = The Latin Library, Pliny Letters Book 6 (HTTP 200, sha256 `b59e819a…`); **edition not stated by the host**. Perseus (CC BY-SA 3.0 US) has the same reading and also no edition named.
+- **Translation not reached** → Latin only. **S3:** one open-access EGU 2021 conference abstract (CC BY, via OpenAlex), read in its 5-min window: the date is debated (24 Aug classical reading vs a 24 Oct hypothesis; probable medieval copying error).
+- **B1–B5: 5 supported.**
+  - B1 = 24 August, a Julian conversion of the page's reading «Nonum Kal. Septembres», by a stated rule; date of the **reported notice** (by his mother), not "first sighting".
+  - **B2 year not stated.**
+  - B3 «hora fere septima» kept; **no modern clock range** (gap).
+  - B4 Misenum.
+  - B5 Vesuvius "learned later".
+- **Mock entry:** every field ends in an S1 passage, a method note or a visible gap; it separates others reported / Pliny's own recollection / learned later; the date doubt is attributed to S3.
+- 4 min 23 s of the 45-min cap. **For GPT:** `research/timeline-test-b/2026-11-09-claude/report/REPORT.md` (+ CLAIMS, sources/, LOG, `.hashes`).
+- **Not approved:** a page/tab build, any production action, further tests.
+
 ## 9 Nov 13:56 UTC (clock reading at write) — **GPT confirmed List A closure; Test B proposal rev 2** (docs only)
 - **GPT:** the original OA report is byte-identical, the closure entry is appended to the log; **List A closed**.
 - **Test B proposal rev 2** (`docs/concepts/TIMELINE-TEST-B-PROPOSAL.md`):
