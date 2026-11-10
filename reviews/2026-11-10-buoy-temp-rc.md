@@ -112,3 +112,16 @@
 1. **The card's own accent** (the pip and the count) still uses the old drifter yellow `--drift`. GPT asked only that the main map key stop implying one buoy colour. Should the card accent change too? (It is the card's identity colour, like every other card's.)
 2. **Coldest class contrast** on the real backdrop (§2, §4).
 3. **Observation, outside this branch:** one failed upstream hour (OSMC 522) blanks the buoy layer ("unknown, records withheld") until the next good run, although the last good pair is still on the hub. Recorded only; any change would be its own proposal.
+
+## 6. GPT's smoke test (relayed by Chad, 10 Nov 2026)
+- **Desktop smoke test PASSED**, no release blocker. Preview `_review/buoy-temp-rc/`:
+  - 1,303 buoys loaded; the temperature scale shown in both keys;
+  - buoy `1601749` showed 19.55 °C at its 16:00 UTC fix;
+  - switching off cleared both keys;
+  - the three changed page files match this packet's hashes;
+  - unit suite 37/37.
+- **Answers to §5:**
+  1. Keep the yellow pip and count: they read as the card's identity, and the multicolour key makes the dot encoding clear.
+  2. Keep `#3b528b` for this RC. The cold end is faint at whole-globe scale. GPT did not itself identify a sub-zero buoy on the rendered globe and relies on the packet's targeted checks; not a release condition.
+  3. OSMC 522: a separate reliability follow-up. Suggested shape if revisited: serve a coherent last-good pair with its original timestamp plus a separate feed-down label.
+- Release: awaits Chad's `Approve: merge buoy-temp-rc to main (page change: buoy dots coloured by water temperature)`.
