@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611241000">
+<link rel="stylesheet" href="style.css?v=202611251000">
 </head>
 <body class="world">
 <header class="top">
@@ -64,7 +64,7 @@
       </div>
       <div class="legend" id="legend" role="region" aria-label="Map key">
       <div class="imgfull" id="img-full"></div>
-      <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample) · <span id="leg-drifters" hidden><span class="dot" style="--c:var(--drift)"></span>drifting buoy (latest fix) · </span><span id="leg-plastic" hidden><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero) · </span><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</div>
+      <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample) · <span id="leg-drifters" hidden><span id="leg-drifters-sw"></span>drifting buoy · coloured by water temperature (see card) · </span><span id="leg-plastic" hidden><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero) · </span><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</div>
       <div class="cov nightleg" id="night-legend" hidden></div>
       <div class="cov nightleg" id="orb-legend" hidden></div>
       <details class="covkey">
@@ -203,6 +203,7 @@
             <div class="obs" id="o-drifters">off — switch on to load the latest fixes</div>
             <div class="src" id="m-drifters">NOAA OSMC · GTS</div>
             <div class="pair" id="p-drifters" hidden></div>
+            <div class="src sstkey" id="sstkey-drifters" hidden><div class="sstcap">Water temperature at each buoy's latest reported fix (°C). Fix times vary. Not compared with normal.</div><div id="sstkey-drifters-sw"></div></div>
             <details class="cd"><summary>Details</summary><div class="cav">Each dot is one buoy at its own last reported time, not one moment; buoys are few and far apart, so empty ocean is not evidence of anything. <a class="more" href="sources.html#drifters">details</a></div></details>
           </div>
           <div class="card toggle off" id="card-plastic" style="--c:var(--plastic)">
@@ -342,10 +343,10 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611241000"></script>
-<script src="arts.js?v=202611241000"></script>
-<script src="sky.js?v=202611241000"></script>
-<script src="skyscene.js?v=202611241000"></script>
+<script src="app.js?v=202611251000"></script>
+<script src="arts.js?v=202611251000"></script>
+<script src="sky.js?v=202611251000"></script>
+<script src="skyscene.js?v=202611251000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
@@ -367,6 +368,7 @@ const points = { usgs: [], firms: [], ships: [], forest: [], drifters: [], plast
 const pmeta = { usgs: { id: null, ok: false, fields: [], why: 'not read yet' }, firms: { id: null, ok: false, fields: [], why: 'not read yet' }, ships: { id: null, ok: false, fields: [], why: 'not read yet' }, drifters: { id: null, ok: false, fields: [], why: 'off' }, plastic: { id: null, ok: false, fields: [], why: 'off' } };
 const on = { usgs: true, firms: true, ships: true, forest: true, drifters: false, plastic: false };   // drifters: OPTIONAL layer, off on load, fetched only while on
 const OPTIONAL_LAYERS = ['drifters', 'plastic'];
+$('sstkey-drifters-sw').innerHTML = ME.sstKeyHtml(); $('leg-drifters-sw').innerHTML = ME.sstSwatchHtml();   // buoy temperature keys: built once from ME.SST_* (one source of truth)
 const shownRecordLayers = () => RECORD_LAYERS.concat(OPTIONAL_LAYERS.filter(l => on[l]));
 const shownMapLayers = () => MAP_LAYERS.concat(OPTIONAL_LAYERS.filter(l => on[l]));
 const optLoading = {};
@@ -1317,6 +1319,7 @@ function cards() {
 
 function driftCard() {
   $('leg-drifters').hidden = !on.drifters;
+  $('sstkey-drifters').hidden = !on.drifters;   // card legend only while the layer is on
   const st = $('s-drifters');
   if (!on.drifters) { st.textContent = 'off'; st.className = 'state'; st.title = ''; $('v-drifters').textContent = '–'; $('o-drifters').textContent = 'off — switch on to load the latest fixes'; $('m-drifters').textContent = 'NOAA OSMC · GTS'; return; }
   if (optLoading.drifters && !state.drifters) { st.textContent = 'loading'; st.className = 'state'; $('o-drifters').textContent = 'loading the latest fixes from the hub…'; return; }
@@ -1343,7 +1346,7 @@ function plasticCard() {
 const toPoints = {
   usgs: s => ME.rowsToObjects(s).map(q => ({ lat: q.lat, lng: q.lng, mag: q.mag, mag_type: q.mag_type, depth_km: q.depth_km, title: q.title, src: q.src, observed_at: q.observed_at, cellId: ME.cellId(q.lat, q.lng), col: '#ff5a3c', alt: .002 + q.mag * .004, r: .12 + q.mag * .1, rr: q.mag * 1.2 })),
   firms: s => ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, frp_mw: d.frp_mw, confidence: d.confidence, daynight: d.daynight, satellite: d.satellite, observed_at: d.observed_at, cellId: ME.cellId(d.lat, d.lng), col: d.frp_mw > 50 ? '#ff6a1a' : '#ff9b2e', alt: .004, r: .04 + Math.min(d.frp_mw || 0, 300) / 3000 })),
-  drifters: s => ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, buoy: d.id, sst_c: d.sst_c, platform_type: d.platform_type, country: d.country, observed_at: d.observed_at, cellId: ME.cellId(d.lat, d.lng), col: '#ffd86b', alt: .003, r: .07 })),
+  drifters: s => ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, buoy: d.id, sst_c: d.sst_c, platform_type: d.platform_type, country: d.country, observed_at: d.observed_at, cellId: ME.cellId(d.lat, d.lng), col: ME.sstColour(d.sst_c), alt: .003, r: .07 })),   // colour = reported water temperature (ME.sstClass); null → grey, never a class
   plastic: s => ME.rowsToObjects(s).map(d => ({ lat: d.lat, lng: d.lng, id: d.id, sampled_on: d.sampled_on, pieces_m3: d.pieces_m3, zero: d.pieces_m3 === 0, check: d.check, original: d.original, method: d.method, mesh_mm: d.mesh_mm, observed_at: d.sampled_on ? d.sampled_on + 'T12:00:00Z' : null, cellId: ME.cellId(d.lat, d.lng), col: '#cedeec', alt: .003, r: .07 })),
   ships: s => ME.rowsToObjects(s).map(v => ({ lat: v.lat, lng: v.lng, mmsi: v.mmsi, name: v.name, sog_kn: v.sog_kn, cls: v.class, observed_at: v.observed_at, received_at: v.received_at, cellId: ME.cellId(v.lat, v.lng), col: '#5fe3c8', alt: .003, r: .05 })),
 };

@@ -264,6 +264,26 @@ ME.webglMissing = function () {
   }
 };
 const rowsToObjects = ME.rowsToObjects = snap => { const f = snap.record_fields || []; return (snap.records || []).map(r => Object.fromEntries(f.map((k, i) => [k, r[i]]))); };
+// ---- drifting buoys: colour by the water temperature each buoy reported (BUOY-TEMPERATURE-PROPOSAL rev 2).
+// One source of truth for the globe dots, the card legend and the main-key swatch. Absolute °C on a SEQUENTIAL
+// scale (viridis 0.25–1.0, lightness ordered L* 36→91), deliberately unlike Ocean Heat's diverging anomaly scale and
+// clear of the fire / earthquake colours (measured ΔE, packet §2). `null` (none reported, or withheld by the hub's
+// −3…40 °C range check) is grey and NEVER a class: 0 °C is class 1, not grey.
+ME.SST_BREAKS = [0, 5, 10, 15, 20, 25, 30];   // class i covers [BREAKS[i-1], BREAKS[i]); class 0 < 0; class 7 ≥ 30
+ME.SST_COLOURS = ['#3b528b', '#2e6e8e', '#24878e', '#1fa187', '#3aba76', '#73d056', '#b8de29', '#fde725'];
+ME.SST_NONE = '#54545a';
+ME.sstClass = t => {
+  if (t === null || t === undefined || t === '' || typeof t === 'boolean') return -1;
+  const v = Number(t); if (!Number.isFinite(v)) return -1;
+  let i = 0; while (i < ME.SST_BREAKS.length && v >= ME.SST_BREAKS[i]) i++;
+  return i;
+};
+ME.sstColour = t => { const i = ME.sstClass(t); return i < 0 ? ME.SST_NONE : ME.SST_COLOURS[i]; };
+ME.sstSwatchHtml = () => '<span class="sstsw" aria-hidden="true">' + ME.SST_COLOURS.map(c => `<span class="dot" style="--c:${c};margin-right:0;width:5px;height:8px;border-radius:2px"></span>`).join('') + '</span> ';
+ME.sstLabel = i => i === 0 ? 'below 0' : i === ME.SST_COLOURS.length - 1 ? `${ME.SST_BREAKS[i - 1]} and above` : `${ME.SST_BREAKS[i - 1]} to ${ME.SST_BREAKS[i]}`;
+ME.sstKeyHtml = () => '<span class="sstbar" role="img" aria-label="Water temperature classes from below 0 to 30 and above degrees Celsius; grey means temperature unavailable">' +
+  ME.SST_COLOURS.map((c, i) => `<span class="dot" style="--c:${c};margin-right:1px" title="${esc(ME.sstLabel(i))} °C"></span>`).join('') +
+  `</span> <span class="sstends">below 0 → 30 °C and above</span> · <span class="dot" style="--c:${ME.SST_NONE}"></span>Temperature unavailable`;
 ME.cellId = (lat, lng) => { const r = Math.max(0, Math.min(44, Math.floor((lat + 90) / CELL_DEG))), c = Math.max(0, Math.min(89, Math.floor((lng + 180) / CELL_DEG))); return r + '_' + c; };
 ME.total = snap => Object.values((snap && snap.cells) || {}).reduce((n, c) => n + (c.count || 0), 0);
 
