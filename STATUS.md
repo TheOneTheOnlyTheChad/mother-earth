@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 06:09:15 UTC — **HUB 0.6.3 DEPLOYED** (Chad: "Approve: deploy hub 0.6.3 from 0f67fca (content only)")
+- **Before (06:08:46–06:09:00 UTC):** live worker.js = 0.6.2 `4b5b6aa3…003f` (the pinned rollback target); 19 bindings; health 8/8 (200). Code fetched from raw.githubusercontent at `0f67fca`: 276,411 B, sha256 `94a6b2b263468c910e91d13f6437514cf77ae3e9556f1b686d7a5f31925caf93` (= the reviewed branch file, rev 3 §6). Hash re-checked immediately before the write.
+- **Deploy:** content-only API from the dashboard tab, HTTP 200, success, etag `19de98d2…f8af`, modified 06:09:15.541Z. Bindings, secrets, variables and crons untouched.
+- **Verified (06:09:29 UTC):** read-back worker.js sha256 = `94a6b2b2…af93` (exact); **19 bindings, identical list**; `/` = **0.6.3**, `catalogues.timeline` listed (revision `tl-2026-11-R1`) beside `catalogues.arts`; history collecting; health **8/8** (200); `/snapshot/arts` and `/snapshot/usgs` 200; **`/catalogue/timeline` 200, 15,656 B, sha256 `096ae648…0fbe` (= the R2 object and the page's pin)**, `application/json`, `Cache-Control: public, max-age=60`, ETag weak `W/"096ae648…"` (same edge weakening as Arts; the page doesn't use it). The cross-origin read from the dashboard origin succeeded (the code sends `Access-Control-Allow-Origin: *`; the header itself is not script-readable). `/catalogue/timeline/x` falls through to the root listing, as other unknown paths do.
+- **Public page unchanged:** main's page is still `4b23518` (?v=202611181000); the axis exists only on branch `timeline-deep-rc`.
+- **Rollback (own Approve line):** redeploy 0.6.2 `4b5b6aa3…003f` (= main's `phase1/worker.js`; main ≠ live hub until the branch merges).
+- **Next:** live RC from the GitHub Pages origin (incl. CORS; read-only, branch page against the deployed hub) → `Approve: merge timeline-deep-rc to main (page change: deep-time axis on the Timeline page)`.
+
 ## 10 Nov 06:06:51 UTC — **R2 UPLOAD DONE: `ref/timeline/tl-2026-11-R1.json`** (Chad: "Approve: upload ref/timeline/tl-2026-11-R1.json (complete-file sha256 096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe, 15,656 B) to R2")
 - **Pre-checks (06:06:36 UTC, dashboard tab):** destination absent (404 "The specified key does not exist"); nothing under `ref/timeline/`. Source fetched from raw.githubusercontent at branch commit `0f67fca`: HTTP 200, 15,656 B, sha256 `096ae648…0fbe` = the approved hash. Hash and absence re-checked immediately before the write.
 - **Upload:** dashboard R2 objects API `PUT`, HTTP 200, size 15,656, storage class Standard, etag `9e8b864bc64fe3baff1b801750677319`, version `7e5e3beefe0d7b1ab9c05a54496c7c60`, uploaded **06:06:51.433Z**.
