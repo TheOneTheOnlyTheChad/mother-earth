@@ -1,8 +1,9 @@
-# R2 fireballs — terms and access review (rev 2, 8 Nov 2026, research only)
+# R2 fireballs — terms and access review (rev 3, 10 Nov 2026, research only; rev 2 of 8 Nov kept below)
 
 **Rev 3 (10 Nov 2026, Chad's go, docs only): CNEOS replied** (Shantanu P. Naidu, JPL; Gmail-displayed 9 Nov, 10:43 PM): "You are free to use the data for this purpose with the citation." API cadence preference: under 1 request every 10 minutes; the fireball database changes around once a month. **Still open pending the follow-up:** explicit commercial-use confirmation, lightcurve reuse scope (S2), automated lightcurve retrieval guidance. §3, §4 and the provider-enquiry section updated; the REGISTER draft stays NOT filed pending GPT's review and Chad's separate approval. Record: `ENQUIRIES-2026-11.md` rev 8.
+**Rev 3.1 (10 Nov 2026, GPT's editorial points, relayed by Chad):** GPT accepted rev 3 and ENQUIRIES rev 8 as provider evidence records. Heading and REGISTER draft cross-reference now say rev 3; S1's applicability stays labelled a contextual reading. Explicit commercial-use confirmation, lightcurve reuse scope and automated lightcurve retrieval guidance stay open. Draft **NOT filed**.
 
-**ACCEPTED by GPT as bounded research-only evidence** (recorded 9 Nov 2026, relayed by Chad). **The draft REGISTER entry stays unfiled**; filing needs Chad's separate authorisation. Identity and validation gates stay open. Nothing built, fetched or contacted.
+**ACCEPTED by GPT (rev 2) as bounded research-only evidence** (recorded 9 Nov 2026, relayed by Chad). **The draft REGISTER entry stays unfiled**; filing needs Chad's separate authorisation. Identity and validation gates stay open. Nothing built, fetched or contacted.
 
 **Chad's go (8 Nov 2026):** bounded, read-only terms/access review of R2 only. **No data sampled or fetched, no provider contact, no route selection, no implementation, schedules, resources, deployment or page change.** R2's identity and validation gates (`R2-revision-matching.md`, rev 3) stay open; R4's filed entry, R3 (reply pending) and R6 (accepted unresolved draft, unfiled) are unchanged.
 
@@ -78,7 +79,7 @@
 ## 4. Proposed REGISTER entry — research-only DRAFT for review (NOT filed)
 ```
 ## NASA/JPL CNEOS — reported fireballs: catalogue (Fireball API v1.2) and lightcurve files — research only, not on the page
-- **Read:** 5 Nov 2026 (GPT; Claude re-read the SSD FAQ) and 8 Nov 2026 by GPT on Chad's behalf: SSD FAQ #a05; Caltech/JPL Privacy Policies and Important Notices; CNEOS fireballs and lightcurve pages; SSD API documentation (fair-use policy). 8 Nov 2026 by Claude (fetch summaries): CNEOS introduction, JPL Image Use Policy, data.gov record. Research record: docs/research/R2-terms-access.md (rev 2); RESEARCH-BACKLOG §R2.
+- **Read:** 5 Nov 2026 (GPT; Claude re-read the SSD FAQ) and 8 Nov 2026 by GPT on Chad's behalf: SSD FAQ #a05; Caltech/JPL Privacy Policies and Important Notices; CNEOS fireballs and lightcurve pages; SSD API documentation (fair-use policy). 8 Nov 2026 by Claude (fetch summaries): CNEOS introduction, JPL Image Use Policy, data.gov record. Research record: docs/research/R2-terms-access.md (rev 3); ENQUIRIES-2026-11.md rev 8; RESEARCH-BACKLOG §R2.
 - **SSD data statement (verbatim, SSD FAQ #a05):** "No permissions are needed. The data provided on this site are considered public domain." The answer also disclaims NASA/Caltech/JPL endorsement, recommends citing SSD with retrieval date, page title and URL, and asks that modifications be identified.
 - **General JPL notice:** documents may be protected and reproduction may require permission (Caltech/JPL Important Notices; Caltech manages JPL). Recorded alongside, not substituted for the SSD statement.
 - **Scope (interpretation, labelled):** the FAQ does not name the sampled routes. S1 (catalogue via ssd-api fireball.api): plausibly covered, as SSD/CNEOS API data linked to the catalogue — interpretation. S2 (lightcurve files on cneos.jpl.nasa.gov): separately hosted; "provided for public release"; no separate reuse statement; coverage not established.
@@ -88,7 +89,7 @@
 - **Provider reply (Shantanu P. Naidu, JPL; Gmail-displayed 9 Nov 2026, 10:43 PM; read by Claude from text and a screenshot Chad supplied 10 Nov 2026), to Chad's 8 Nov enquiry on storing, reformatting and publicly redistributing the numerical data through a website and shared API:** "You are free to use the data for this purpose with the citation." API cadence: "we would prefer that you keep the requests under 1 every 10 minutes"; the fireball database changes around once a month. Record: docs/research/ENQUIRIES-2026-11.md rev 8.
 - **Coverage statement:** none filed (R2 identity and validation gates open).
 - **Status:** ⛔ research only; not cleared for building.
-- **Commercial use:** S1 — public-domain statement for SSD site data, and the provider's reply permits use "for this purpose with the citation"; explicit commercial-use confirmation OPEN pending follow-up. S2 — UNRESOLVED (lightcurve scope not addressed by the reply). Neither is a finding of prohibition.
+- **Commercial use:** S1 — public-domain statement for SSD site data, and the provider's reply permits use "for this purpose with the citation"; that either applies to the API's fireball data is a contextual reading (neither names the route); explicit commercial-use confirmation OPEN pending follow-up. S2 — UNRESOLVED (lightcurve scope not addressed by the reply). Neither is a finding of prohibition.
 - **Access (S1, provider preference):** fewer than one API request every 10 minutes; catalogue changes roughly monthly. S2 retrieval guidance: none (open).
 ```
 
