@@ -23,6 +23,9 @@
  *                           0.6.4: this legacy URL is pinned to TIMELINE_LEGACY (tl-2026-11-R1) permanently, never to "current".
  *   GET /catalogue/timeline/<revision> (0.6.4; TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1) that exact published revision, same rules;
  *                           an id not in TIMELINE_REVISIONS (exact key match) → 404 without any R2 read.
+ *   GET /catalogue/sky/<revision> (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a) the FIXED Sky catalogue (Moon/Sun daily distances, NASA/JPL
+ *                           Horizons): versioned only — an id not in SKY_REVISIONS (exact key match), a malformed path or the bare
+ *                           /catalogue/sky → 404 without any R2 read; a known revision whose stored bytes are missing or fail the pin → 503.
  *   GET /snapshot/arts      (0.6.2) the FIXED Met catalogue snapshot (Arts release proposal rev 2.1): served from R2 ref/arts/ only if the complete
  *                           stored file hashes to ARTS.fileSha256 and its snapshot_id = ARTS.recordsSha256; else 503 unavailable. Not a collector.
  *
@@ -58,7 +61,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.4';
+const COLLECTOR_VERSION = '0.6.5';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2091,7 +2094,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -2971,6 +2974,48 @@ async function timelineCatalogue(env, pin = TIMELINE) {
   return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'ETag': '"' + pin.fileSha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
 }
 
+// ===== Sky catalogue (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a; T3 compatibility contract) =====
+// Same rules as the Timeline revisions: outside LAYERS, cron, D1, /status collection, /health and history; generated once
+// (phase1/sky/build_sky.py) from hand-taken Horizons exports and pinned by the complete file's sha256. Revisions are
+// IMMUTABLE: a refresh gets a new revision id and a new object key; old pins and objects stay. There is no unversioned URL.
+const SKY_REVISIONS = Object.freeze({
+  'sky-2026-11-R1': Object.freeze({
+    key: 'ref/sky/sky-2026-11-R1.json',
+    revision: 'sky-2026-11-R1',
+    fileSha256: 'f851f16438415bc1e05b392e3e1616052b6347c637ee5ea98df307052058368a',
+    bytes: 71925,
+  }),
+});
+const SKY_CURRENT = 'sky-2026-11-R1';   // discovery metadata only; no route serves "current" implicitly
+function skyPin(rev, table = SKY_REVISIONS) {
+  return typeof rev === 'string' && Object.prototype.hasOwnProperty.call(table, rev) ? table[rev] : null;
+}
+/** Route /catalogue/sky/<revision> on the RAW pathname: exactly one non-empty segment after /catalogue/sky/; anything
+ *  else (bare /catalogue/sky, repeated or leading separators, trailing slash, extra segments) or an unknown id → 404, no R2 read. */
+async function skyRoute(env, rawPath, table = SKY_REVISIONS) {
+  const m = typeof rawPath === 'string' ? rawPath.match(/^\/catalogue\/sky\/([^/]+)$/) : null;
+  let rev = null;
+  if (m) { try { rev = decodeURIComponent(m[1]); } catch (e) { rev = null; } }
+  const pin = skyPin(rev, table);
+  if (!pin) return json({ kind: 'catalogue', catalogue: 'sky', status: 'unknown revision' }, 404, { 'Cache-Control': 'no-store' });
+  return skyCatalogue(env, pin);
+}
+/** Serve the pinned Sky catalogue byte for byte, or 503 {status:'unavailable', reason}. reason: missing | unreadable | integrity | invalid. */
+async function skyCatalogue(env, pin) {
+  const no = reason => json({ kind: 'catalogue', catalogue: 'sky', status: 'unavailable', reason }, 503, { 'Cache-Control': 'no-store' });
+  let o;
+  try { o = await env.R2.get(pin.key); } catch (e) { return no('unreadable'); }
+  if (!o) return no('missing');
+  let buf;
+  try { buf = await o.arrayBuffer(); } catch (e) { return no('unreadable'); }
+  if (await sha256Bytes(buf) !== pin.fileSha256) return no('integrity');
+  let j;
+  try { j = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(buf)); } catch (e) { return no('invalid'); }
+  const ok = b => b && Array.isArray(b.rows) && b.rows.length > 0;
+  if (!j || j.catalogue !== 'sky' || j.catalogue_revision !== pin.revision || !j.bodies || !ok(j.bodies.moon) || !ok(j.bodies.sun) || !j.coverage) return no('invalid');
+  return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'ETag': '"' + pin.fileSha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
+}
+
 function json(obj, status = 200, extra = {}) {
   return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...CORS, ...extra } });
 }
@@ -3004,6 +3049,7 @@ export default {
 
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
+    if (p[0] === 'catalogue' && p[1] === 'sky') return skyRoute(env, url.pathname);   // 0.6.5 versioned only; outside LAYERS
 
     if (p[0] === 'snapshot' || p[0] === 'cells') {
       const layer = p[1];
@@ -3077,7 +3123,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) } },
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>', '/catalogue/sky/<revision>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) }, sky: { kind: 'fixed catalogue', versioned_path: '/catalogue/sky/<revision>', current: SKY_CURRENT, revisions: Object.keys(SKY_REVISIONS) } },
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };

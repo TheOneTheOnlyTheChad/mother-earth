@@ -1,0 +1,21 @@
+{
+ "revision": "sky-2026-11-R1",
+ "start": "2026-06-01",
+ "end": "2027-12-31",
+ "refresh_by": "2027-06-01",
+ "retrieval_date_words": "2026 November 10",
+ "raw": {
+  "moon": "raw/hz-moon-ut-20261110.txt",
+  "sun": "raw/hz-sun-ut-20261110.txt",
+  "cross": "raw/hz-moon-tdb-crosscheck-20261110.txt",
+  "cross_epochs": "raw/crosscheck-epochs.json"
+ },
+ "retrieved": {
+  "moon": "2026-11-10T08:41:13.097Z",
+  "sun": "2026-11-10T08:41:36.425Z",
+  "cross": "2026-11-10T08:41:50.780Z"
+ },
+ "leap_second_source": "IERS Bulletin C 72 (Paris, 06 July 2026): no leap second at the end of December 2026; UTC-TAI = -37 s",
+ "utc_established_through": "2027-06-30",
+ "first_date_affected_by_unresolved_leap_second": "2027-07-01"
+}
