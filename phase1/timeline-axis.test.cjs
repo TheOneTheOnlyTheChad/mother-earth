@@ -4,7 +4,8 @@
  * (GitHub Pages origin → Worker): Playwright-fulfilled responses are not subject to CORS.
  *
  * Run: node phase1/timeline-axis.test.cjs [base-url]   (static server on the repo, default http://127.0.0.1:8899)
- * Breaks (each must make the suite fail): BREAK=no-hash-check|no-build-check|no-validate|focusable-empties|no-timeout|no-guard|hover-only-periods
+ * Breaks (each must make the suite fail): BREAK=no-hash-check|no-build-check|no-validate|focusable-empties|no-timeout|no-guard|hover-only-periods|fetch-unversioned
+ * F (0.6.4, TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1): the page asks the hub for ITS OWN revision.
  */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
@@ -27,6 +28,7 @@ const JS = (() => {
   if (BREAK === 'no-timeout') return must(JS0, 'const TIMEOUT_MS = 10000;', 'const TIMEOUT_MS = 600000;');
   if (BREAK === 'no-guard') return must(JS0, "try { bad = validate(c); } catch (err) { bad = 'malformed'; }", 'bad = validate(c);');
   if (BREAK === 'hover-only-periods') return must(JS0, '+ periods\n', '\n');
+  if (BREAK === 'fetch-unversioned') return must(JS0, "fetch(HUB + '/catalogue/timeline/' + encodeURIComponent(wrap.dataset.catalogueRev || '')", "fetch(HUB + '/catalogue/timeline'");
   return JS0;
 })();
 const ID = { o: 'e-big5-end-ordovician', ff: 'e-big5-frasnian-famennian', p: 'e-big5-end-permian', t: 'e-big5-end-triassic', k: 'e-big5-end-cretaceous' };
@@ -270,6 +272,17 @@ const axisInfo = p => p.evaluate(() => {
     ok('no-JS: permalinks point at the pre-rendered entries', m.permalinks.join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].map(i => '#' + i).join(), m.permalinks);
     await p.goto(BASE + '/timeline.html#' + ID.p);
     ok('no-JS: a permalink lands on its entry', await p.evaluate(id => { const r = document.getElementById(id).getBoundingClientRect(); return r.top >= -2 && r.top < innerHeight; }, ID.p));
+    await c.close();
+  }
+
+  // ---------- F. 0.6.4: the page requests /catalogue/timeline/<its own data-catalogue-rev>
+  for (const [label, html, rev] of [['real page', null, 'tl-2026-11-R1'], ['page built for another revision', page({ rev: 'tl-2026-12-R2' }), 'tl-2026-12-R2']]) {
+    const urls = [];
+    const c = await ctx(b, { html, hub: r => { urls.push(r.request().url()); return serve(CAT)(r); } });
+    const p = await c.newPage();
+    await p.goto(BASE + '/timeline.html'); await settle(p);
+    ok(`F ${label}: exactly one catalogue request, to /catalogue/timeline/${rev}`, urls.length === 1 && urls[0] === 'https://mother-earth.chadoberholzer.workers.dev/catalogue/timeline/' + rev, urls);
+    if (!html) ok('F real page: axis on from the versioned URL', (await p.evaluate(() => window.TL_AXIS.state)) === 'on');
     await c.close();
   }
 
