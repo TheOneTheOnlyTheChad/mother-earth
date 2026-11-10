@@ -14,7 +14,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202611191000';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202611201000';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
@@ -200,6 +200,7 @@ const LANE_IDS = ['earth-life', 'extinctions', 'relatives', 'history'];
 const WHEN = { interval: ['from_ma', 'to_ma'], bound: ['ma'], interval_modelled: ['from_ma', 'to_ma', 'mid_ma'], measured: ['ma', 'pm'],
   approx_point: ['ma'], point: ['ma'], tied: [], boundary_age: ['ma'] };
 const CLUSTER_PX = 16;          // marks closer than this share one cluster control
+const TRUE_PX = 4;              // an interval at least this wide is drawn at its true endpoints
 const wrap = $('axis-wrap'), axis = $('axis'), axisOff = $('axis-off');
 const axisState = { state: 'pending', reason: null };
 window.TL_AXIS = axisState;     // read-only test/console aid
@@ -236,17 +237,19 @@ function markOf(e) {
   const tied = by('extinction_placement_tied');
   if (tied) desc.push(tied.label);
   let ma, shape;
-  if (by('extinction_interval_approx')) { const w = by('extinction_interval_approx').when; ma = (w.from_ma + w.to_ma) / 2; shape = 'int-approx'; }
-  else if (by('boundary_age_range_modelled')) { ma = by('boundary_age_range_modelled').when.mid_ma; shape = by('boundary_age_bound') ? 'modelled bound' : 'modelled'; }
+  let span = 0;
+  if (by('extinction_interval_approx')) { const w = by('extinction_interval_approx').when; ma = (w.from_ma + w.to_ma) / 2; span = w.from_ma - w.to_ma; shape = 'int-approx'; }
+  else if (by('boundary_age_range_modelled')) { ma = by('boundary_age_range_modelled').when.mid_ma; shape = 'modelled'; }   // one mark at the modelled range; the bound is in the panel (GPT, rev 2)
   else if (by('boundary_age_bound')) { ma = by('boundary_age_bound').when.ma; shape = 'bound'; }
   else if (by('extinction_onset_estimate')) { ma = by('extinction_onset_estimate').when.ma; shape = 'measured'; }
   else if (by('extinction_horizon_approx')) { ma = by('extinction_horizon_approx').when.ma; shape = 'approx'; }
   else if (by('dated_event_age')) { ma = by('dated_event_age').when.ma; shape = 'point' + (tied ? ' tied' : ''); }
   else { const w = ax[0].when; ma = w.ma != null ? w.ma : w.mid_ma; shape = 'point'; }
-  return { id: e.id, title: e.title, short: e.short, ma, shape, label: `${e.title}. ${desc.join('. ')}.` };
+  return { id: e.id, title: e.title, short: e.short, ma, span, shape, label: `${e.title}. ${desc.join('. ')}.` };
 }
 
 let CAT = null;
+let periodsOpen = false;
 const pct = (ma, W) => (W - ma) / W * 100;   // older on the left
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 function draw() {
@@ -259,19 +262,25 @@ function draw() {
     const x = pct(m.ma, W) / 100 * laneW, g = groups[groups.length - 1];
     if (g && x - g.x1 < CLUSTER_PX) { g.items.push(m); g.x1 = x; } else groups.push({ x0: x, x1: x, items: [m] });
   }
-  const mk = (m, inCluster) => `<a class="mk mk-${m.shape.replace(/ /g, ' mk-')}" href="#${esc(m.id)}" data-entry="${esc(m.id)}" data-opener="mark"`
-    + (inCluster ? '' : ` style="left:${pct(m.ma, W).toFixed(3)}%"`) + ` aria-label="${esc(m.label)}"><span class="gw" aria-hidden="true">${/\bbound\b/.test(m.shape) ? '<span class="gb"></span>' : ''}<span class="g"></span></span>`
+  // an interval is drawn at its true endpoints once it is at least TRUE_PX wide; below that, a compact symbol (GPT, rev 2)
+  const trueW = m => m.span ? m.span / W * laneW : 0;
+  const mk = (m, inCluster) => `<a class="mk mk-${m.shape.replace(/ /g, ' mk-')}${!inCluster && trueW(m) >= TRUE_PX ? ' mk-true' : ''}" href="#${esc(m.id)}" data-entry="${esc(m.id)}" data-opener="mark"`
+    + (inCluster ? '' : ` style="left:${pct(m.ma, W).toFixed(3)}%${trueW(m) >= TRUE_PX ? `;--w:${trueW(m).toFixed(2)}px` : ''}"`) + ` aria-label="${esc(m.label)}"><span class="gw" aria-hidden="true"><span class="g"></span></span>`
     + `<span class="ml" aria-hidden="true">${esc(m.short)}</span>${inCluster ? `<span class="cn">${esc(m.title)}</span>` : ''}</a>`;
   const markHtml = groups.map((g, i) => g.items.length === 1 ? mk(g.items[0], false)
     : `<div class="cl" data-has="${esc(g.items.map(m => m.id).join(' '))}" style="left:${pct((g.items[0].ma + g.items[g.items.length - 1].ma) / 2, W).toFixed(3)}%">`
       + `<button type="button" aria-expanded="false" aria-controls="cl-${i}" aria-label="${g.items.length} entries close together: ${esc(g.items.map(m => m.title).join(', '))}">${g.items.length}</button>`
       + `<ul id="cl-${i}" hidden>${g.items.map(m => `<li>${mk(m, true)}</li>`).join('')}</ul></div>`).join('');
-  const bands = c.chart.periods.map(p => `<span class="band" style="left:${pct(p.begin.ma, W).toFixed(3)}%;width:${(pct(p.end.ma, W) - pct(p.begin.ma, W)).toFixed(3)}%"`
-    + ` title="${esc(p.name)}, ${p.begin.approximate ? '~' : ''}${p.begin.ma}–${p.end.ma} Ma"><i style="background:${esc(p.colour)}"></i><b>${esc(p.code)}</b></span>`).join('');
+  // bands to scale; a code is written only where it fits (names and ages are in the period list, reachable by tap and keyboard)
+  const bands = c.chart.periods.map(p => { const wpx = (p.begin.ma - p.end.ma) / W * laneW;
+    return `<span class="band" style="left:${pct(p.begin.ma, W).toFixed(3)}%;width:${(pct(p.end.ma, W) - pct(p.begin.ma, W)).toFixed(3)}%"><i style="background:${esc(p.colour)}"></i><b>${wpx >= 16 ? esc(p.code) : ''}</b></span>`; }).join('');
+  const edge = x => `${x.approximate ? '~' : ''}${x.ma_text || x.ma}${x.margin != null ? ' ± ' + (x.margin_text || x.margin) : ''}`;   // as the chart writes them
+  const periods = `<div class="plist"><button type="button" id="periods-btn" aria-expanded="${periodsOpen}" aria-controls="periods-list">Periods on the chart (${c.chart.periods.length})</button>`
+    + `<ul id="periods-list"${periodsOpen ? '' : ' hidden'}>${c.chart.periods.map(p => `<li><i style="background:${esc(p.colour)}" aria-hidden="true"></i>${esc(p.name)} <span class="pc">(${esc(p.code)})</span> · ${edge(p.begin)} to ${edge(p.end)} Ma</li>`).join('')}</ul></div>`;
   const ticks = [500, 400, 300, 200, 100, 0].map(t => `<span class="tk${t === 0 ? ' last' : ''}" style="left:${pct(t, W).toFixed(3)}%">${t}</span>`).join('');
   const key = [['measured', 'dated, uncertainty stated'], ['point', 'dated, uncertainty not stated'], ['point mk-tied', 'placed at a dated event'], ['approx', 'approximate'],
-    ['int-approx', 'approximate interval'], ['modelled', 'modelled range'], ['bound', 'no older than']]
-    .map(([k, t]) => k === 'bound' ? `<span class="gb" aria-hidden="true"></span>${t}` : `<span class="mk mk-${k}"><span class="g" aria-hidden="true"></span></span>${t}`).join(' ');
+    ['int-approx', 'approximate interval'], ['modelled', 'modelled range']]
+    .map(([k, t]) => `<span class="mk mk-${k}" aria-hidden="true"><span class="g"></span></span>${t}`).join(' · ');
   const boundaryTicks = c.entries.map(e => e.claims.find(k => k.claim_type === 'chart_boundary')).filter(Boolean)
     .map(k => `<span class="cb" style="left:${pct(k.when.ma, W).toFixed(3)}%" title="${esc(k.label + ': ' + k.when_text)}"></span>`).join('');
   const lane = l => l.status === 'active'
@@ -282,11 +291,11 @@ function draw() {
     + `<span class="ovl">Overview</span><div class="ovbar"><span class="ovwin" style="left:${(100 - W / O * 100).toFixed(3)}%;width:${(W / O * 100).toFixed(3)}%"></span></div>`
     + `<span class="ove"><span>${O} Ma</span><span>today</span></span></div>`
     + `<p class="win">This release: the last ${c.chart.window.approximate ? '~' : ''}${W} million years. Older on the left.</p>`
-    + `<div class="bands" aria-hidden="true">${bands}${boundaryTicks}</div>`
+    + `<div class="bands" aria-hidden="true">${bands}${boundaryTicks}</div>` + periods
     + c.lanes.filter(l => l.status === 'active').map(lane).join('')
     + `<div class="scale" aria-hidden="true">${ticks}<span class="unit">Ma</span></div>`
     + `<div class="empties">${c.lanes.filter(l => l.status !== 'active').map(lane).join('')}</div>`
-    + `<p class="key" aria-hidden="true">Key:${key}. Lines in the period bar: ICS chart boundaries.</p>`;
+    + `<p class="key">Key: ${key}. Lines in the period bar: ICS chart boundaries.</p>`;
 }
 function layoutKey() { const w = axis.clientWidth; return CAT ? CAT.entries.length + ':' + Math.round(w / 8) : ''; }
 let lastKey = '';
@@ -297,8 +306,10 @@ addEventListener('resize', () => {
   draw(); lastKey = k;
   if (had) { const t = backTarget(had); if (t) t.focus(); }
 });
-// cluster control: opens its list in place (one action), Esc closes it
+// cluster control and period list: each opens in place (one action), Esc closes a cluster
 axis.addEventListener('click', ev => {
+  const pb = ev.target.closest('#periods-btn');
+  if (pb) { periodsOpen = pb.getAttribute('aria-expanded') !== 'true'; pb.setAttribute('aria-expanded', String(periodsOpen)); $('periods-list').hidden = !periodsOpen; return; }
   const b = ev.target.closest('.cl > button'); if (!b) return;
   const on = b.getAttribute('aria-expanded') !== 'true';
   b.setAttribute('aria-expanded', String(on)); $(b.getAttribute('aria-controls')).hidden = !on;
@@ -332,7 +343,9 @@ async function loadAxis() {
   if (sha !== wrap.dataset.catalogueSha) return off('revision mismatch');
   let c;
   try { c = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(buf)); } catch (err) { return off('parse'); }
-  const bad = validate(c); if (bad) return off('validation: ' + bad);
+  let bad;
+  try { bad = validate(c); } catch (err) { bad = 'malformed'; }   // a nested null or wrong type never escapes the fallback (GPT, rev 2)
+  if (bad) return off('validation: ' + bad);
   CAT = c;
   try { axis.hidden = false; draw(); lastKey = layoutKey(); } catch (err) { CAT = null; return off('draw'); }
   axisOff.hidden = true; wrap.classList.add('on');

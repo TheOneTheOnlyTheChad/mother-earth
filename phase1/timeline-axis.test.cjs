@@ -4,7 +4,7 @@
  * (GitHub Pages origin → Worker): Playwright-fulfilled responses are not subject to CORS.
  *
  * Run: node phase1/timeline-axis.test.cjs [base-url]   (static server on the repo, default http://127.0.0.1:8899)
- * Breaks (each must make the suite fail): BREAK=no-hash-check|no-build-check|no-validate|focusable-empties|no-timeout
+ * Breaks (each must make the suite fail): BREAK=no-hash-check|no-build-check|no-validate|focusable-empties|no-timeout|no-guard|hover-only-periods
  */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
@@ -25,6 +25,8 @@ const JS = (() => {
   if (BREAK === 'no-validate') return must(JS0, "const bad = validate(c); if (bad) return off('validation: ' + bad);", '');
   if (BREAK === 'focusable-empties') return must(JS0, '`<div class="lr empty">', '`<div class="lr empty" tabindex="0">');
   if (BREAK === 'no-timeout') return must(JS0, 'const TIMEOUT_MS = 10000;', 'const TIMEOUT_MS = 600000;');
+  if (BREAK === 'no-guard') return must(JS0, "try { bad = validate(c); } catch (err) { bad = 'malformed'; }", 'bad = validate(c);');
+  if (BREAK === 'hover-only-periods') return must(JS0, '+ periods\n', '\n');
   return JS0;
 })();
 const ID = { o: 'e-big5-end-ordovician', ff: 'e-big5-frasnian-famennian', p: 'e-big5-end-permian', t: 'e-big5-end-triassic', k: 'e-big5-end-cretaceous' };
@@ -72,6 +74,12 @@ const axisInfo = p => p.evaluate(() => {
     ok(`${w}: three empty lanes, zero Tab stops`, e.rows === 3 && e.focusables === 0, e);
     ok(`${w}: empty lane wording`, e.text.join('|') === 'Earth systems and life · No entries yet|Human relatives · No entries yet|Human history · No dated entries on the axis yet', e.text);
     if (w === 390) ok('390×844: three empty rows ≤ 96 CSS px together', e.h <= 96, e.h);
+    const bc = await p.evaluate(() => [...document.querySelectorAll('#axis .band b')].map(x => ({ t: x.textContent, clip: x.scrollWidth > x.clientWidth + 1 })));
+    ok(`${w}: no period code is clipped (codes only where they fit)`, bc.length === 12 && bc.every(x => !x.clip), bc.filter(x => x.clip));
+    await p.focus('#periods-btn'); await p.keyboard.press('Enter'); await p.waitForTimeout(80);
+    const pl = await p.evaluate(() => ({ exp: document.getElementById('periods-btn').getAttribute('aria-expanded'), items: [...document.querySelectorAll('#periods-list li')].map(l => l.textContent) }));
+    ok(`${w}: period list opens by keyboard with all 12 names and ages (Quaternary included)`, pl.exp === 'true' && pl.items.length === 12 && pl.items.some(t => /^Quaternary \(Q\) · 2\.58 to 0 Ma$/.test(t)) && pl.items.some(t => /^Cambrian \(Ep\) · ~538\.8 ± 0\.6 to ~486\.85 ± 1\.5 Ma$/.test(t)), pl.items.slice(0, 2).concat(pl.items.slice(-1)));
+    await p.keyboard.press('Enter'); await p.waitForTimeout(60);
     if (w === 390) {
       // larger text: rows wrap and grow, no clipping, no horizontal scroll
       await p.addStyleTag({ content: 'body.tl .axis .lr.empty{font-size:26px !important;line-height:34px !important}' });
@@ -82,7 +90,7 @@ const axisInfo = p => p.evaluate(() => {
     if (w === 1280) {
       const cls = Object.fromEntries(a.marks.map(m => [m.id, m.cls]));
       ok('shape: end-Ordovician = approximate interval', /mk-int-approx/.test(cls[ID.o]), cls[ID.o]);
-      ok('shape: Frasnian–Famennian = modelled range glyph + bound marker', /mk-modelled/.test(cls[ID.ff]) && /mk-bound/.test(cls[ID.ff]), cls[ID.ff]);
+      ok('shape: Frasnian–Famennian = one mark at the modelled range (no second tick on the scale)', /mk-modelled/.test(cls[ID.ff]) && !/mk-bound/.test(cls[ID.ff]) && (await p.evaluate(() => document.querySelectorAll('#axis .gb').length)) === 0, cls[ID.ff]);
       ok('shape: end-Permian = measured point', /mk-measured/.test(cls[ID.p]), cls[ID.p]);
       ok('shape: end-Triassic = approximate point', /mk-approx\b/.test(cls[ID.t]) && !/int-approx/.test(cls[ID.t]), cls[ID.t]);
       ok('shape: end-Cretaceous = point (no uncertainty) tied to the dated impact', /mk-point/.test(cls[ID.k]) && /mk-tied/.test(cls[ID.k]), cls[ID.k]);
@@ -99,7 +107,9 @@ const axisInfo = p => p.evaluate(() => {
       ok('Pliny is never on the axis', !d.pliny);
       ok('overview strip with the explorable window marked; window line says "this release"', d.ov && /This release: the last ~538\.8 million years/.test(d.win), d.win);
       ok('12 period bands from the chart; 5 chart-boundary lines', d.bands === 12 && d.cb === 5, [d.bands, d.cb]);
-      ok('key explains every glyph', ['uncertainty stated', 'uncertainty not stated', 'placed at a dated event', 'approximate interval', 'modelled range', 'no older than'].every(s => d.key.includes(s)), d.key);
+      ok('key explains every glyph on the axis', ['uncertainty stated', 'uncertainty not stated', 'placed at a dated event', 'approximate interval', 'modelled range'].every(s => d.key.includes(s)) && !d.key.includes('no older than'), d.key);
+      const ka = await p.evaluate(() => { const k = document.querySelector('#axis .key'); return { hidden: k.closest('[aria-hidden="true"]') !== null, glyphsHidden: [...k.querySelectorAll('.g')].every(g => g.closest('[aria-hidden="true"]')) }; });
+      ok('key text exposed to screen readers; its symbols hidden', !ka.hidden && ka.glyphsHidden, ka);
       ok('static lane list hidden once the axis is drawn (one view, not two)', d.lanesHidden);
     }
     await c.close();
@@ -113,7 +123,7 @@ const axisInfo = p => p.evaluate(() => {
     let s = await p.evaluate(() => ({ open: !document.getElementById('detail').hidden, hash: location.hash, active: document.activeElement.id, role: document.getElementById('detail').getAttribute('role') }));
     ok(`${w}: Enter on a mark opens its entry (heading focused)`, s.open && s.hash === '#' + ID.p && s.active === ID.p + '-h' && s.role === (w <= 720 ? 'dialog' : 'region'), s);
     const types = await p.evaluate(id => [...document.querySelectorAll(`#d-body #${id} section.claim`)].map(x => x.dataset.claimType), ID.p);
-    ok(`${w}: the open entry shows the onset, the context items and the chart boundary separately`, types.join() === 'extinction_onset_estimate,context,context,chart_boundary', types);
+    ok(`${w}: the open entry shows the onset and the chart boundary separately (no Herz/Dai context)`, types.join() === 'extinction_onset_estimate,chart_boundary', types);
     await p.goBack(); await p.waitForTimeout(150);
     s = await p.evaluate(() => ({ open: !document.getElementById('detail').hidden, act: document.activeElement.dataset ? document.activeElement.dataset.entry : null, cls: document.activeElement.className }));
     ok(`${w}: Back closes and returns focus to the mark`, !s.open && s.act === 'e-big5-end-permian' && /\bmk\b/.test(s.cls), s);
@@ -124,8 +134,8 @@ const axisInfo = p => p.evaluate(() => {
     // keyboard order: marks are reachable with Tab; nothing in the empty lanes takes focus
     await p.focus('#axis-h').catch(() => {}); await p.evaluate(() => document.getElementById('axis-h').setAttribute('tabindex', '-1')); await p.focus('#axis-h');
     const seen = [];
-    for (let i = 0; i < 12; i++) { await p.keyboard.press('Tab'); seen.push(await p.evaluate(() => (document.activeElement.dataset && document.activeElement.dataset.entry) || document.activeElement.className || document.activeElement.tagName)); }
-    ok(`${w}: Tab reaches the five marks in order`, seen.slice(0, 5).join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].join(), seen);
+    for (let i = 0; i < 12; i++) { await p.keyboard.press('Tab'); seen.push(await p.evaluate(() => (document.activeElement.dataset && document.activeElement.dataset.entry) || document.activeElement.id || document.activeElement.className || document.activeElement.tagName)); }
+    ok(`${w}: Tab reaches the period list, then the five marks in order`, seen[0] === 'periods-btn' || seen[0] === '' ? seen.slice(1, 6).join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].join() : false, seen);
     await c.close();
   }
 
@@ -146,6 +156,10 @@ const axisInfo = p => p.evaluate(() => {
   const bad3 = Buffer.from(JSON.stringify(J3)); cases.push(['hash matches but a value is outside the window', { hub: serve(bad3), html: page({ sha: sha(bad3) }) }, /validation: outside window/]);
   const J4 = JSON.parse(CAT.toString('utf8')); J4.shelf[0].axis = true;
   const bad4 = Buffer.from(JSON.stringify(J4)); cases.push(['hash matches but Pliny marked for the axis', { hub: serve(bad4), html: page({ sha: sha(bad4) }) }, /validation: shelf/]);
+  for (const [nm, mut] of [['a null period', j => { j.chart.periods[3] = null; }], ['a null claim', j => { j.entries[1].claims[0] = null; }], ['a null entry', j => { j.entries[2] = null; }], ['a claim with a string time', j => { j.entries[0].claims[0].when = 'old'; }]]) {
+    const jj = JSON.parse(CAT.toString('utf8')); mut(jj); const bb = Buffer.from(JSON.stringify(jj));
+    cases.push([`hash matches but malformed (${nm})`, { hub: serve(bb), html: page({ sha: sha(bb) }) }, /^validation: /]);
+  }
   for (const [name, o, why] of cases) {
     const c = await ctx(b, o); const p = await c.newPage();
     await p.goto(BASE + '/timeline.html'); await settle(p);
@@ -222,6 +236,21 @@ const axisInfo = p => p.evaluate(() => {
     const a6 = await axisInfo(p6);
     ok('pulses fixture: an undated-pulse shape is refused (no numeric pulse marks in this release); list stays usable', a6.state === 'off' && /claim time/.test(a6.reason) && a6.listCards === 5, [a6.state, a6.reason]);
     await c6.close();
+  }
+
+  { // true endpoints: an interval wide enough (fixture: 445–425 Ma) is drawn at its endpoints, a narrow one as a symbol
+    const J7 = JSON.parse(CAT.toString('utf8')); J7.entries[0].claims[0].when.to_ma = 425; const fx7 = Buffer.from(JSON.stringify(J7));
+    const c7 = await ctx(b, { hub: serve(fx7), html: page({ sha: sha(fx7) }) }); const p7 = await c7.newPage();
+    await p7.goto(BASE + '/timeline.html'); await settle(p7);
+    const t7 = await p7.evaluate(() => { const a = document.querySelector('#axis a.mk[data-entry="e-big5-end-ordovician"]'), g = a.querySelector('.g'), tr = document.querySelector('#axis .track');
+      const r = g.getBoundingClientRect(), T = tr.getBoundingClientRect(); return { cls: a.className, w: r.width, left: r.left - T.left, right: r.right - T.left, laneW: T.width }; });
+    const W = 538.8, exp = x => (W - x) / W * t7.laneW;
+    ok('true endpoints: a ≥ 4 px interval spans its own ages', /mk-true/.test(t7.cls) && Math.abs(t7.left - exp(445)) < 1.5 && Math.abs(t7.right - exp(425)) < 1.5, t7);
+    await c7.close();
+    const c8 = await ctx(b, { viewport: { width: 1280, height: 860 } }); const p8 = await c8.newPage();
+    await p8.goto(BASE + '/timeline.html'); await settle(p8);
+    ok('true endpoints: the real 2-Myr interval (< 4 px here) stays a compact symbol', await p8.evaluate(() => !document.querySelector('#axis a.mk[data-entry="e-big5-end-ordovician"]').classList.contains('mk-true')));
+    await c8.close();
   }
 
   // ---------- E. JavaScript off: list names all four lanes; every claim type pre-rendered with its label

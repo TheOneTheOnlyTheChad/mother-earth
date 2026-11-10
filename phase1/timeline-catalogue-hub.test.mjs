@@ -57,6 +57,7 @@ ok('the release values are as checked', (() => {
     && v('e-big5-end-permian', 'extinction_onset_estimate').pm === 0.037 && v('e-big5-end-triassic', 'extinction_horizon_approx').ma === 201.5
     && v('e-big5-end-cretaceous', 'dated_event_age').ma === 66.02 && v('e-big5-end-cretaceous', 'dated_event_age').pm === null;
 })());
+ok('Herz and Dai are not in the public catalogue (research record only); end-Permian = onset + chart boundary', !/herz2026|dai2025|251\.906|251\.867/.test(FILE.toString('utf8')) && J.entries.find(e => e.id === 'e-big5-end-permian').claims.map(c => c.claim_type).join() === 'extinction_onset_estimate,chart_boundary');
 ok('no causes, no percentage-loss figures in the catalogue', !/\d\s?%/.test(FILE.toString('utf8')) && !types.includes('cause'));
 ok('no duration claimed for the F–F boundary values', J.entries.find(e => e.id === 'e-big5-frasnian-famennian').claims.every(c => !c.when || c.when.type !== 'interval'));
 

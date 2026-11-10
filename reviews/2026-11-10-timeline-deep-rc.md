@@ -1,8 +1,24 @@
 # Review packet — Timeline deep-time axis, branch `timeline-deep-rc` (candidate)
 
+## Rev 2 (10 Nov 2026) — after GPT's review of rev 1 (relayed by Chad)
+**GPT on rev 1:** local preview works; all ten manifest hashes verified; 1280: five marks, Back/Forward with focus return; 390×844: empty lanes 69 px, no overflow, keyboard Close returns to the mark; exact candidate keeps evidence reachable with the axis unavailable; Back from a direct link returned to Sources. Worker in-memory checks passed (exact bytes, ETag, CORS headers, missing/unreadable/tampered). Deployed CORS and the full regression suite remain separate checks. Asked for one small branch revision before R2/deploy.
+
+**Applied in rev 2:**
+1. **F–F:** one selectable mark anchored at the modelled range; the 372.4 Ma bound is in its evidence panel only (the offset tick is gone, and the key no longer lists it).
+2. **End-Ordovician:** drawn at its true endpoints when the rendered interval is ≥ 4 CSS px; below that, the compact symbol with the full range in its label and panel. (The real 2-Myr interval stays a symbol at every width in this layout; the true-endpoint path is tested with a fixture.)
+3. **Herz and Dai** removed from the public catalogue and page; kept in the research record. End-Permian card = Burgess onset + chart boundary.
+4. **Key** kept; its text is now exposed to screen readers; its symbols are hidden from them.
+5. **Period labels:** bands stay to scale and decorative; a code is written in a band only where it fits (no clipping — Quaternary's `Q` and others move to the list); a **"Periods on the chart (12)" list** opens by tap or keyboard with every name, code and age, written as the chart writes them (e.g. 1.0, 66.00).
+6. **Malformed catalogue:** validation is guarded, so a nested `null` or wrong type in a hash-matching catalogue goes to the unavailable message with the list usable (tested: null period, null claim, null entry, string time).
+7. Asset version bumped to `?v=202611201000` for this review round; catalogue regenerated (same revision id `tl-2026-11-R1`, never published) and the hub pin updated.
+8. Candidate and hashes pinned together in §6.
+
+**Rev 1 record below, unchanged except §6.**
+
+
 **Built 10 Nov 2026 on Chad's line:** "Approve: build timeline-deep-rc on a branch only — catalogue generator, hub 0.6.3 route, page axis per TIMELINE-DEEP-TIME-BUILD-PROPOSAL rev 1.1; no merge, R2 write, hub deploy or page change."
 **Not done (each needs its own Approve line):** REGISTER filing, R2 upload, hub deploy, merge to main / page release. Main and production are unchanged (hub 0.6.2, page `4b23518`).
-**Candidate commit:** `14628bf` (commit time 2026-11-10 04:46:07 UTC); this packet's §6 was filled in the next commit.
+**Rev 1 candidate:** `14628bf` (packet hashes filled in `539b785`). **Rev 2 candidate: see §6.**
 
 ## 1. What was built
 | Part | Files | Notes |
@@ -56,7 +72,7 @@ Hub pin `TIMELINE.fileSha256` = the catalogue's sha256 above (17,127 B). Hub `CO
 **All suites on `14628bf` (container, 10 Nov 2026):** timeline-catalogue-hub 24/0 · timeline-axis 78/0 · timeline-ui 585/0 · arts-hub 54/0 · arts-ui 90 · backdrop-layer 27 · desktop-overflow 112/0 · drifters-ui 25 · kept-ui 21 · mobile-pass 131/0 · orbital-ui 38 · orbital-browser 113 · place-ui 30 · plastic-ui 29 · search-ui 104 · smoke-fixes 52 · terminator-behaviour 47 · terminator-ui 19 · ux-round1 34 · health-hub 29 · history-hub 27 · firms-guard 19 · firms-v2 57 (+7 skipped, need `OLD_WORKER`) · kp-degraded 29 · drifters-hub 12 · orbital-hub 13 · plastic-hub 11 · satellites-hub 12 · search 111 · search real-data 50 · ships-fallback 7 · ships-late 7 · solar 26 · place-rows 7 · duration-contract pass. (`orbital.test.mjs`, `ships-probe`, `spacetrack-probe` need live inputs and were not run.)
 
 
-## 7. Open points for GPT
+## 7. Open points for GPT (rev 1; answered — see Rev 2 above)
 1. F–F composite glyph (§2): acceptable, or draw the bound tick at its own position under a cluster rule?
 2. End-Ordovician at 1280 px is ~4 px wide: keep the glyph, or draw true endpoints at ≥ 4 px as the proposal allows?
 3. Herz 2026 and Dai 2025 appear as context with "publisher page not read" — acceptable as context, or drop them?

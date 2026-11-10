@@ -34,7 +34,9 @@ def edge(b, which):
     if not m: return None
     v = re.search(r'ischart:inMYA\s+([0-9.]+)', m.group(1)); e = re.search(r'schema:marginOfError\s+([0-9.]+)', m.group(1))
     ma = float(v.group(1))
-    return {'ma': ma, 'margin': float(e.group(1)) if e else None, 'approximate': ma in APPROX_VALUES}
+    # *_text keep the chart's own writing (66.00, 1.0) for display; numbers are for placement
+    return {'ma': ma, 'margin': float(e.group(1)) if e else None, 'approximate': ma in APPROX_VALUES,
+            'ma_text': v.group(1), 'margin_text': e.group(1) if e else None}
 
 
 def main():
