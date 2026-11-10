@@ -4,6 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 17:46 UTC (clock reading at write) — **Ocean Heat proposal rev 4.1 + record rev 2.1** (docs only; Chad's corrections after GPT's review of rev 4)
+- **§9a / C6 — the exact files vs the OSTIA notice:**
+  - the SSTA 1991–2020 and climatology files carry only Coral Reef Watch's unrestricted-use statement (credit + DOI);
+  - the OSTIA notice in CoralTemp is labelled 1985–2002;
+  - **no text read extends it to the derived files**;
+  - **GPT withdrew the OSTIA release hold for this snapshot** (supersedes rev 4's "blocks any public release").
+- **Credit:** "NOAA Coral Reef Watch". **DOI:** no dataset DOI is listed for the 1991–2020 anomaly or climatology (citation and product pages read, text); the citation page's reference doi:10.3390/rs12233856 (Skirving et al. 2020, an article DOI) is used and labelled as such.
+- **§2 / §5 corrected (packet `REPORT-C2-C5-correction-1.md`; script `c4b_blocks.py`, 17:44Z):**
+  - mask 0 ⇔ valid anomaly ⇔ valid climatology;
+  - **valid SST also occurs under masks 2 (991,557) and 4 (3,367,803)**;
+  - **land = mask 1**; the literal SST fill −32768 covers all 8,722,205 land cells **plus 4,655 ice cells**, so it never decides land.
+  - Rev 2 of the record and the rev 2 report had both equivalences wrong as worded.
+- **§8:** expected 0.25° / 0.5° block values for every tap point (sums identity exact); Gulf of Maine changes class with the grid (6 → 7); a near-normal block (−0.25, 124.25) at +0.03; a **synthetic seam fixture** (col 0 −2.50 class 2 vs col 719 +2.50 class 8); a real seam pair (row 61, class 6 vs 7).
+- **Open:** the md5 sidecars; the STAR disclaimer read; the REGISTER filing (Chad's line); O7 build (Chad's go).
+
 ## 10 Nov 17:34 UTC (clock reading at write) — **Ocean Heat proposal rev 4** (docs only), after C0–C5; `buoy-temp-rc` deleted by Chad
 - GPT accepted the C2–C5 results (relayed by Chad).
 - **Rev 4** (`docs/concepts/OCEAN-HEAT-PROPOSAL.md`):

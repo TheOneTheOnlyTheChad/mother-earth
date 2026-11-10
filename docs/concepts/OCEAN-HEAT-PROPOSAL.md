@@ -1,4 +1,4 @@
-# Ocean Heat — proof-of-concept proposal, rev 4 (docs only)
+# Ocean Heat — proof-of-concept proposal, rev 4.1 (docs only)
 
 **For:** GPT's review of rev 4, then Chad's O7 (branch build) and C6 (REGISTER draft) lines.
 **Brief:** `docs/concepts/OCEAN-HEAT-BRIEF.md` (Chad's spec, filed verbatim 10 Nov 2026).
@@ -26,6 +26,10 @@
   - **§7:** status recorded; the md5 check stays open.
   - **§8:** a concrete coordinate table from the files; new breaks (missing flip, identity disabled).
   - **New §9a, Terms:** the OSTIA question, unresolved, blocking any public release but not the preview.
+- **Rev 4.1** — 10 Nov 2026, Chad's corrections after GPT's review:
+  - **§9a / C6:** the distinction between the exact files and the OSTIA notice is recorded; GPT's withdrawal of the OSTIA release hold for this snapshot; credit and the cited DOI.
+  - **§2 / §5:** corrected mask invariants. Valid SST also occurs under masks 2 and 4. Land = mask 1, checked against the literal SST fill, which also occurs on 4,655 ice cells.
+  - **§8:** expected display-block values at 0.25° and 0.5°; a seam fixture with visibly different classes; a real seam pair.
 
 Evidence tags used below:
 - **[NOAA page]** = NOAA's public product pages, read as text through Claude's fetch tool on 10 Nov 2026 (the tool's summary, not a verbatim copy); GPT checked the same pages independently.
@@ -69,8 +73,9 @@ The proof of concept succeeds if a visitor can turn on **Ocean Heat**, spin to C
 - **Data date:** the SST and SSTA reference time is 9 Nov 12:00 UTC; coverage is 9 Nov 00:00–24:00 UTC. The climatology has no time; its title names the calendar day ("November 09 … 1991-2020").
 - **Baseline:** 1991–2020 in all the file metadata. The page's "2000" is a typo.
 - **Presence: the SSTA file's `mask`** (0 valid-water, 1 land, 2 missing, 4 ice), which the climatology repeats.
-  - valid anomaly ⇔ mask 0 ⇔ valid SST ⇔ valid climatology (12,833,780 cells, no exception);
-  - land (mask 1) ⇔ CoralTemp SST fill;
+  - **mask 0 ⇔ valid anomaly ⇔ valid climatology** (12,833,780 cells, no exception);
+  - **mask 0 ⇒ valid SST, but valid SST also occurs under masks 2 and 4** (991,557 and 3,367,803 cells);
+  - **land = mask 1** (8,722,205). Every land cell has the literal SST fill −32768, but that fill also occurs on 4,655 ice cells, so it never decides land on its own;
   - **mask 4 = sea ice now** (ice fraction > 0 in every such cell);
   - **mask 2 = no 1991–2020 normal** (the climatology is masked as ice-in-baseline; SST is valid).
 - **Valid anomaly with missing SST:** occurs in 0 cells.
@@ -149,7 +154,12 @@ The proof of concept succeeds if a visitor can turn on **Ocean Heat**, spin to C
 - **Generator assertions (each a hard stop, each with a break that must fail):**
   - CoralTemp latitude is ascending → flip to north-first. After the flip, the lat and lon arrays of all three inputs are **bitwise identical**.
   - The SST and SSTA `time_coverage_start` are the same day; the climatology title names that calendar day and "1991-2020".
-  - Mask invariants: valid anomaly ⇔ mask 0 ⇔ valid SST ⇔ valid climatology; mask 1 ⇔ SST fill; mask values ⊆ {0, 1, 2, 4}.
+  - Mask invariants, each checked against the **literal** sentinels (`_FillValue` −32768; mask values from the file):
+    - mask values ⊆ {0, 1, 2, 4};
+    - mask 0 ⇔ anomaly ≠ −32768 ⇔ climatology ≠ −32768;
+    - mask 0 ⇒ SST ≠ −32768 and within −200…5000 (valid SST elsewhere, under masks 2 and 4, is allowed and expected);
+    - mask 1 ⇒ SST = −32768 literally.
+  - **Land is taken from mask 1 only, never from the SST fill.** Expected counts for the pinned inputs are asserted exactly: 12,833,780 / 8,722,205 / 991,557 / 3,372,458, and 4,655 ice cells with SST fill.
   - **Stored SST − anomaly − climatology = 0 exactly** in every mask-0 cell. A change in NOAA's packing stops the build rather than being absorbed into a tolerance.
   - Input sha256 = the pinned values (C2–C5 inputs; table in §7).
 
@@ -202,7 +212,7 @@ Because a texel never straddles two blocks, its colour can never disagree with w
 
 ## 7. Source-file check (O6, its own go) — what each step establishes
 
-**Status: C0–C5 DONE (10 Nov 2026), accepted by GPT.** Record: `docs/research/OCEAN-HEAT-SOURCE-CHECK.md` rev 2. **Open:** the md5 sidecar check (the sidecars were not downloaded) and C6.
+**Status: C0–C5 DONE (10 Nov 2026), accepted by GPT; correction 1 (masks) and C6 credit in record rev 2.1.** Record: `docs/research/OCEAN-HEAT-SOURCE-CHECK.md`. **Open:** the md5 sidecar check (the sidecars were not downloaded) and the REGISTER filing.
 
 **The pinned inputs (2026-11-09):**
 
@@ -223,7 +233,7 @@ Because a texel never straddles two blocks, its colour can never disagree with w
 | **C3 Arrays** | Decode the actual time and coordinate arrays of all three files | **SST and SSTA times = the snapshot date; the climatology = that calendar day** (it represents the reference period, not a year); latitude order; spacing; bounds or derived edges (cell edges at ±180°, so the wrap and block alignment hold); identical grids across the three; **which field distinguishes land from unavailable ocean. If none does reliably, the check stops there and nothing proceeds to O7.** |
 | **C4 Masks** | Global cross-tabulation of land × valid-anomaly × valid-SST × missing | Whether "valid anomaly, missing SST" occurs naturally (else a fixture); whether current ice and missing baseline climatology are separable; Cape Point's mixed blocks at 0.25° and 0.5°, and at P2's 0.1° texels |
 | **C5 Consistency** | Independently decoded SST − SSTA vs the official climatology file, at several valid cells | That packing and baseline were read correctly. Reports **the packing-derived tolerance and the actual residuals**, plus one example where the climatology is unavailable |
-| **C6 Terms** | Read the citation and disclaimer pages (text) | The attribution and use record (a REGISTER draft, filed only on Chad's line) |
+| **C6 Terms** | Read the citation and disclaimer pages (text) | **Done for credit and DOI (§9a)**; the STAR disclaimer is still to read. The attribution and use record (REGISTER entry, filed only on Chad's line) |
 | **C7 (optional)** | Compare with NOAA's browse PNG for that date | A flipped-map sanity check only; the numbers come from C3–C5 |
 
 ## 8. Done: tests, "smooth", and the GPT preview
@@ -238,7 +248,7 @@ Because a texel never straddles two blocks, its colour can never disagree with w
 A 390 × 844 emulation is viewport evidence on the host GPU only; physical phone performance stays unverified. The phone run is **emulated** unless Chad runs a physical device (that test is currently deferred). The report says which it was.
 
 **Coordinate table.** Expected values are computed **from the native files, independently of the page**:
-- **Native-cell values from C5** (SST / anomaly / normal, °C). The page shows block values, so the table gives the native value and the block value computed independently from the native files:
+- **Native-cell values from C5** (SST / anomaly / normal, °C), for the generator's own checks:
 
   | Cell | Expected |
   |---|---|
@@ -253,7 +263,34 @@ A 390 × 844 emulation is viewport evidence on the host GPU only; physical phone
   | Weddell Sea (−69.975, −40.025) | **Sea ice** |
   | Baffin Bay (71.575, −58.175) | **No 1991–2020 normal** (SST 0.63 valid) |
 
-- The 0.5° Cape Point block (−34.0…−34.5, 18.0…18.5): 91 water + 9 land, mean anomaly −0.078 °C. P2 texels `CCCMM / CCCMM / CCCCM / CCCCC / CCCCC`. Tapped on its land, its water and a mixed texel.
+- **Expected display-block values** (what a tap shows). Computed straight from the native files (`C4b-blocks.json`, packet), never from page output; every block's integer sums satisfy SST − anomaly − normal = 0.
+  - Format: *n*/*N* contributing · SST / anomaly / normal (°C) · class (§4 legend).
+  - No tap point straddles a block edge except the deliberate seam points.
+
+  | Tap point | 0.25° block | 0.5° block |
+  |---|---|---|
+  | Atlantic off Cape Point (−34.40, 18.40) | 25/25 · 17.71 / +0.71 / 17.00 · class 6 | 91/100 (9 land) · 16.71 / −0.08 / 16.79 · class 5 |
+  | Cape Point tip (−34.357, 18.497) | same block as above (the tip is water at 5 km) | same block as above |
+  | False Bay (−34.25, 18.65) | 25/25 · 17.95 / +1.15 / 16.80 · class 7 | 72/100 (28 land) · 18.05 / +1.33 / 16.72 · class 7 |
+  | Cape Town (−33.95, 18.60) | 0/25 — all land: transparent, "land" | 0/100 — all land |
+  | Open Pacific (0.0, −140.0) | 25/25 · 30.57 / +5.09 / 25.48 · class 9 | 100/100 · 30.58 / +5.12 / 25.46 · class 9 |
+  | Off Cornwall (50.0, −6.0) | 25/25 · 13.95 / +0.96 / 12.99 · class 6 | 100/100 · 13.76 / +0.79 / 12.97 · class 6 |
+  | Gulf of Maine (43.0, −69.0) | 25/25 · 11.38 / +0.84 / 10.54 · class 6 | 100/100 · 11.71 / +1.06 / 10.66 · **class 7** |
+  | Seam W (−17.0, −179.9) | col 0 · 25/25 · 25.95 / −0.92 / 26.88 · class 4 | col 0 · 100/100 · 25.98 / −0.92 / 26.90 · class 4 |
+  | Seam E (−17.0, +179.9) | col 1439 · 25/25 · 25.77 / −0.93 / 26.71 · class 4 | col 719 · 100/100 · 25.78 / −0.91 / 26.68 · class 4 |
+  | **Exactly +180** and **exactly −180** (−17.0) | **col 0** (same as Seam W) | **col 0** (same as Seam W) |
+  | Weddell Sea (−70.0, −40.0) | 0/25 · 25 ice → "Sea ice" | 0/100 · 100 ice → "Sea ice" |
+  | Baffin Bay (71.575, −58.175) | 0/25 · 25 no-normal → "No 1991–2020 normal …" | 0/100 · 100 no-normal |
+  | **Near normal** (−0.25, 124.25) | — | 100/100 · 29.55 / +0.03 / 29.51 · **class 5** |
+
+- **Gulf of Maine changes class with the grid** (class 6 at 0.25°, class 7 at 0.5°): a check that the displayed class follows the chosen grid.
+- **The 0.5° Cape Point block's** P2 texels: `CCCMM / CCCMM / CCCCM / CCCCC / CCCCC`. Tapped on its land, its water and a mixed texel.
+- **The real seam at −17° is the same class on both sides** (class 4 / 4), so it cannot show a visible seam error. Two additions:
+  - **Seam fixture (synthetic, visibly different classes):** a manifest-valid fixture snapshot in which the westmost value column (col 0, −180…−179.5) is all water at **−2.50 °C (class 2, blue)** and the eastmost (col 719, 179.5…180) is all water at **+2.50 °C (class 8, orange)**, every other block land.
+    - **Rendered check:** sample the texture or canvas on each side of the 180° meridian and assert blue west, orange east.
+    - **Tap checks:** −179.9 and **exactly −180 and +180** → −2.50; +179.9 → +2.50.
+    - **Breaks:** the no-wrap formula (+180 lands out of range or in col 719), a one-texel shift, and a mirrored longitude must each fail.
+  - **Real seam pair with different classes** (0.5°; 54 such rows exist): row 61 (59.5…59.0° N): col 0 +0.85 (class 6) vs col 719 +1.01 (class 7). Taps either side must return each own value.
 - **Exactly +180° and −180°** both resolve to column 0 (−179.975), plus 179.9° E and 179.9° W.
 - A near-normal cell (|anomaly| < 0.2), picked from the file at build and named in the packet.
 - **Fixtures:** valid anomaly with missing SST (C4: none occurs naturally); mismatched date, grid and hash, each rejected.
@@ -293,19 +330,21 @@ A 390 × 844 emulation is viewport evidence on the host GPU only; physical phone
   - Follow the Swell (backlog);
   - any public release.
 
-## 9a. Terms (C6) — unresolved; blocks any public release, not the preview
-- **CoralTemp's `license` attribute** (read in full in C2) has three parts:
-  - (1) **OSTIA usage statement (1985–2002):** pure academic research only, no commercial or other application, Met Office terms, a 5-year maximum, a reproduction-licence application, Crown copyright notice;
-  - (2) **GHRSST (2002–present):** free and open;
-  - (3) **Coral Reef Watch:** use without restriction, with credit to NOAA Coral Reef Watch and the dataset DOI.
-- **The SSTA and climatology files** carry only statement (3).
-- **The question:** the 1991–2020 climatology is computed from CoralTemp 1991–2020, whose 1991–2002 part is OSTIA data. Whether statement (1) reaches NOAA's derived climatology and anomaly is **not stated in any text read**.
-  - The heat-stress baseline (1985–2012 data) would raise the same question, so O1 does not avoid it.
-  - The 9 Nov SST value itself comes from the 2017–present near-real-time part, under (2) and (3).
-- **Proposed:**
-  - C6 reads the CRW citation page and the STAR disclaimer (text) and drafts a research-only REGISTER entry recording the three statements and the open question, filed only on Chad's line;
-  - a provider enquiry to Coral Reef Watch, whether derived products carry the OSTIA terms, sent by Chad himself if he wants one;
-  - the private preview may proceed. **No public release, and no commercial assumption, until the question is answered or Chad decides on it.**
+## 9a. Terms (C6) — the exact files vs the OSTIA notice
+- **The exact files this snapshot uses** (licence attributes read in full in C2):
+  - the **SSTA 1991–2020** file and the **day-1109 climatology** file carry only Coral Reef Watch's statement: the data "are available for use without restriction", with credit and courtesy to **NOAA Coral Reef Watch** and the appropriate DOI;
+  - the **CoralTemp** file adds the **OSTIA notice, explicitly labelled 1985–2002** (academic research only, no commercial use, Met Office terms), and a **GHRSST 2002–present "free and open"** notice. The 9 Nov 2026 SST is from the 2017–present near-real-time part.
+- **The distinction:** the OSTIA notice is labelled for the 1985–2002 CoralTemp data. **No text read extends it to the derived anomaly or climatology files.** Texts read:
+  - the three files' attributes;
+  - NOAA's methodology, climatology and 1991–2020 product pages;
+  - the Coral Reef Watch citation page.
+- **The release hold is withdrawn for this snapshot:** GPT withdrew the OSTIA hold (relayed by Chad, 10 Nov), so it no longer blocks a public release of this 9 Nov snapshot. A later refresh re-reads the exact files' attributes, and any new source or wording is re-checked.
+- **Credit (on the card date line, the inspector method row, Sources and the page footer):**
+  - **"NOAA Coral Reef Watch"**: the citation page asks that credit and courtesy be given to NOAA Coral Reef Watch.
+  - **DOI:** the files ask for "the appropriate DOI associated with this dataset" but carry no DOI attribute, and neither the citation page nor the 1991–2020 product page lists a dataset DOI for the 1991–2020 anomaly or the climatology.
+  - The citation page's reference for CoralTemp and the 5 km v3.1 suite is used and labelled as an article: Skirving, W., et al. (2020). *CoralTemp and the Coral Reef Watch Coral Bleaching Heat Stress Product Suite Version 3.1.* Remote Sensing 12(23):3856. **doi:10.3390/rs12233856**.
+  - If NOAA or NCEI publishes a dataset DOI for these products, it replaces or joins this in the next revision. Not checked: NCEI archive accession pages.
+- **C6 output:** a REGISTER entry recording the three statements, this distinction, GPT's withdrawal of the hold, the credit and the DOI. **Filed only on Chad's line.**
 
 ## 10. Decisions
 
@@ -315,6 +354,6 @@ A 390 × 844 emulation is viewport evidence on the host GPU only; physical phone
 - **O4:** display grid by measurement (≤ 1.5 MB and §8 "smooth").
 - **O5:** blocks qualify on any contributing cell; painting and tapping follow the native masks; P1 (0.25° or 0.5°) or P2 + 0.5° by the renderer's limit and measurement.
 - **O6:** source-file check C0–C5 **DONE** (GPT accepted). md5 sidecars open.
-- **C6:** terms reading + research-only REGISTER draft: its own line.
+- **C6:** terms read (§9a); REGISTER entry to be filed on Chad's line.
 - **O7:** branch build (preview only, on the pinned 9 Nov inputs): its own go, after GPT's review of rev 4.
-- **O8:** the OSTIA terms question (§9a): answer it or decide on it before any public release.
+- **O8:** OSTIA hold **withdrawn for this snapshot** (GPT, relayed by Chad); §9a records the distinction, credit and DOI. REGISTER filing on Chad's line.

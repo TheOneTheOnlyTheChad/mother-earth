@@ -1,4 +1,4 @@
-# Ocean Heat — source-file check record (rev 2: C0–C5)
+# Ocean Heat — source-file check record (rev 2.1: C0–C5, correction 1, C6 credit)
 
 **Go (Chad, 10 Nov 2026):** "Go: Ocean Heat source-file check C0–C1 per OCEAN-HEAT-PROPOSAL rev 3 — route probes and listings, bounded reads capped at 64 KiB, no full download."
 **Packet (Mac, not in the repo):** `research/ocean-heat/2026-11-10-claude/`
@@ -67,9 +67,11 @@
 - Edges fall on 0.05° multiples from −180°.
 - The first C3–C5 script compared unflipped rows; its output is kept and marked void, and rev 2 flips first.
 
-**C4 — Masks.**
-- Valid anomaly ⇔ mask 0 ⇔ valid SST ⇔ valid climatology (12,833,780 cells).
-- Land (mask 1, 8,722,205) ⇔ SST fill.
+**C4 — Masks** (as corrected by correction 1, 10 Nov; packet `REPORT-C2-C5-correction-1.md`).
+- **Mask 0 ⇔ valid anomaly ⇔ valid climatology** (12,833,780 cells; the anomaly and climatology fill occur exactly where mask ≠ 0).
+- **Mask 0 ⇒ valid SST, but valid SST also occurs under mask 2 (all 991,557) and mask 4 (3,367,803 of 3,372,458).**
+- **Land = mask 1** (8,722,205). Every land cell has the literal SST fill −32768, but the fill also occurs on **4,655 ice cells**, so the SST fill never classifies land on its own.
+- *(Rev 2 stated "valid anomaly ⇔ mask 0 ⇔ valid SST" and "land ⇔ SST fill"; both were wrong as worded.)*
 - Unavailable ocean is two separable states:
   - **ice now** (mask 4, 3,372,458; ice fraction > 0);
   - **no 1991–2020 normal** (mask 2, 991,557; climatology masked as ice; SST valid).
@@ -82,13 +84,17 @@
 - At 0.25° its block is 25/25 water: the tip is water in NOAA's 5 km mask.
 - At 0.5°: 91 water + 9 land; P2 texels give 4 mixed, 21 block colour.
 
-**Terms (unresolved, for GPT and Chad).**
-- CoralTemp's licence attribute has three parts:
-  - **OSTIA 1985–2002:** academic research only, no commercial use, Met Office terms;
-  - **GHRSST 2002–present:** free and open;
-  - **Coral Reef Watch:** use without restriction, with credit and DOI.
-- The SSTA and climatology files carry only the Coral Reef Watch statement.
-- Whether the OSTIA restriction reaches the 1991–2020 climatology (built partly from 1991–2002) is not stated in any text read.
+**Terms (C6, 10 Nov; Chad's instruction after GPT).**
+- **The exact files this snapshot uses:**
+  - the SSTA 1991–2020 file and the day-1109 climatology file each carry only Coral Reef Watch's statement: **use without restriction**, with credit and courtesy to **NOAA Coral Reef Watch** and the appropriate DOI;
+  - CoralTemp's own attribute adds the OSTIA notice, **explicitly labelled 1985–2002**, and a GHRSST "free and open" notice for 2002–present. The 9 Nov 2026 SST is from the 2017–present part.
+- **No text read** (the three files' attributes; NOAA's methodology, climatology and 1991–2020 product pages; the citation page) **extends the OSTIA notice to the derived anomaly or climatology files.**
+- **GPT withdrew the OSTIA release hold for this snapshot** (relayed by Chad, 10 Nov).
+- **Credit:**
+  - NOAA's citation page: "Credit and courtesy should be given to NOAA Coral Reef Watch".
+  - **No dataset DOI** is listed for the 1991–2020 anomaly or the climatology, on that page or the product page, and the files carry no DOI attribute.
+  - The citation page's reference for CoralTemp and the 5 km v3.1 suite: Skirving et al. 2020, *Remote Sensing* 12(23):3856, **doi:10.3390/rs12233856** (an article DOI, not a dataset DOI).
+- The REGISTER entry is still to be filed on Chad's line.
 
 **For proposal rev 4:**
 - flip with an assertion;
@@ -99,4 +105,4 @@
 - the coastline note;
 - the terms question in the REGISTER draft.
 
-**Not approved:** C6 / REGISTER filing, O7 build.
+**Not approved:** REGISTER filing, O7 build.
