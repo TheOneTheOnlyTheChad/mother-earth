@@ -415,6 +415,68 @@ body.tl .xbtn[aria-expanded="true"]::after{content:" ⌄"}
 body.tl .xb{padding:6px 10px 2px}
 /* with script: entries live in the detail surface; without script they stay in the page */
 body.tl.js .entries{display:none}
+/* deep-time axis (build proposal rev 1.1 §1–§2); everything scoped to the Timeline page */
+body.tl .axiswrap{margin-top:14px;border-top:1px solid var(--line);padding-top:4px}
+body.tl .axiswrap .coverage{color:var(--dim);max-width:72ch;margin:2px 0 8px}
+body.tl .axiswrap .credit{color:var(--dim);font-size:11px;max-width:90ch;margin:10px 0 0}
+body.tl .axisoff{border:1px solid var(--line-strong);background:var(--card);padding:8px 10px;margin:8px 0;max-width:72ch}
+body.tl .axisoff[hidden]{display:none}
+body.tl .axiswrap.on .lanes{display:none}
+body.tl .lanes{list-style:none;padding:0;margin:8px 0 0}
+body.tl .lanes .lane{padding:2px 0;color:var(--dim)}
+body.tl .axis{position:relative;margin:6px 0 0}
+body.tl .axis[hidden]{display:none}
+body.tl .axis .ov{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;font-size:11px;color:var(--dim)}
+body.tl .axis .ovl{grid-row:1/3}
+body.tl .axis .ovbar{position:relative;height:6px;background:var(--line);border:1px solid var(--line-strong)}
+body.tl .axis .ovwin{position:absolute;top:-3px;bottom:-3px;background:var(--accent)}
+body.tl .axis .ove{display:flex;justify-content:space-between;font-size:10px}
+body.tl .axis .win{margin:8px 0 4px;font-size:12px}
+body.tl .axis .bands{position:relative;height:26px;border-bottom:1px solid var(--line)}
+body.tl .axis .band{position:absolute;top:0;bottom:0;overflow:hidden;border-left:1px solid var(--bg)}
+body.tl .axis .band i{display:block;height:6px;opacity:.85}
+body.tl .axis .band b{display:block;text-align:center;font:500 10px/16px var(--mono);color:var(--dim);white-space:nowrap}
+body.tl .axis .cb{position:absolute;top:0;bottom:-2px;width:1px;background:var(--fg);opacity:.55}
+body.tl .axis .lr{display:block}
+body.tl .axis .lr.act .ln{display:block;font:600 13px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase;margin:6px 0 0}
+body.tl .axis .track{position:relative;height:48px;border-bottom:1px solid var(--line)}
+body.tl .axis .mk{position:absolute;top:2px;transform:translateX(-50%);min-width:30px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;text-decoration:none;color:var(--fg)}
+body.tl .axis .mk:focus-visible{outline:2px solid var(--accent);outline-offset:0}
+body.tl .axis .g{position:relative;display:block;width:12px;height:12px}
+body.tl .axis .ml{font-size:10px;color:var(--dim);margin-top:5px;white-space:nowrap}
+body.tl .axis .mk-measured .g{border-radius:50%;background:var(--accent)}
+body.tl .axis .mk-point .g{border-radius:50%;background:var(--fg)}
+body.tl .axis .mk-tied .g{box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--fg)}
+body.tl .axis .mk-approx .g{border-radius:50%;border:2px solid var(--fg);box-sizing:border-box}
+body.tl .axis .mk-approx .g::after{content:"~";position:absolute;left:12px;top:-6px;font-size:12px;color:var(--fg)}
+body.tl .axis .mk-int-approx .g{width:16px;height:6px;margin-top:3px;background:linear-gradient(90deg,transparent,var(--fg) 30%,var(--fg) 70%,transparent)}
+body.tl .axis .mk-int-approx .g::after{content:"~";position:absolute;left:3px;top:-14px;font-size:12px;color:var(--fg)}
+body.tl .axis .mk-modelled .g{width:10px;height:10px;margin-top:1px;transform:rotate(45deg);border:2px solid var(--fg);box-sizing:border-box;background:repeating-linear-gradient(45deg,var(--fg) 0 1px,transparent 1px 3px)}
+body.tl .axis .gw{position:relative;display:block}
+body.tl .axis .gb{position:absolute;left:-15px;top:-1px;width:12px;height:14px}
+body.tl .axis .gb::before{content:"";position:absolute;left:0;top:0;width:2px;height:14px;background:var(--fg)}
+body.tl .axis .gb::after{content:"";position:absolute;left:3px;top:3px;border:4px solid transparent;border-left:6px solid var(--fg)}
+body.tl .axis .key .gw{display:inline-block;vertical-align:middle;margin:0 4px 0 10px}
+body.tl .axis .key .gb{position:relative;display:inline-block;left:0;top:2px;vertical-align:middle;margin:0 4px 0 10px}
+body.tl .axis .cl{position:absolute;top:2px;transform:translateX(-50%)}
+body.tl .axis .cl>button{min-width:30px;min-height:30px;margin-top:6px;border:1px solid var(--line-strong);background:var(--card);color:var(--fg);font:600 12px var(--mono);cursor:pointer}
+body.tl .axis .cl>ul{position:absolute;top:40px;left:50%;transform:translateX(-50%);z-index:5;list-style:none;margin:0;padding:6px;min-width:220px;background:var(--panel);border:1px solid var(--line-strong)}
+body.tl .axis .cl>ul[hidden]{display:none}
+body.tl .axis .cl .mk{position:static;transform:none;flex-direction:row;gap:8px;height:auto;min-height:44px;padding:4px;align-items:center}
+body.tl .axis .cl .mk .ml{display:none}
+body.tl .axis .cn{font-size:12px}
+body.tl .axis .scale{position:relative;height:28px;font-size:10px;color:var(--dim)}
+body.tl .axis .tk{position:absolute;transform:translateX(-50%)}
+body.tl .axis .tk.last{transform:translateX(-100%)}
+body.tl .axis .unit{position:absolute;right:0;top:13px}
+body.tl .axis .key{font-size:11px;color:var(--dim);margin:14px 0 0;line-height:1.7}
+body.tl .axis .key .g{display:inline-block;vertical-align:middle;margin:0 4px 0 10px}
+body.tl .axis .key span.mk{position:static;transform:none;display:inline;height:auto;min-width:0;padding:0}
+body.tl .axis .key .mk-approx .g{margin-right:16px}
+body.tl .axis .empties{margin-top:10px}
+body.tl .axis .lr.empty{font-size:12px;line-height:16px;padding:3px 0;color:var(--dim);border-bottom:1px dashed var(--line)}
+body.tl .axis .lr.empty .ln{color:var(--fg)}
+
 body.tl .detail{position:fixed;z-index:60;background:#0b1119;border-left:1px solid var(--line-strong);display:flex;flex-direction:column}
 body.tl .detail[hidden]{display:none}
 body.tl .detail .dbar{display:flex;justify-content:flex-end;gap:8px;padding:6px 8px;border-bottom:1px solid var(--line)}

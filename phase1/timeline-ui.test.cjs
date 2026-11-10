@@ -15,6 +15,7 @@ const ROOT = path.resolve(__dirname, '..');
 const BREAK = process.env.BREAK || '';
 const ID = 'e-pliny-ep-6-16';
 let pass = 0, fail = 0;
+const document_has_pliny_in_dated = m => (m.datedIds || []).some(i => i.includes('pliny'));
 const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log('FAIL', name, info === undefined ? '' : JSON.stringify(info)); } };
 
 // ---------- deliberate breaks, served in place of the real files
@@ -33,8 +34,8 @@ function brokenJs() {
   return null;
 }
 function brokenHtml() {
-  if (BREAK === 'axis-79') return must(HTML, '<p class="note">Entries are placed at the precision their sources support. There are none yet.</p>',
-    '<ul class="cards"><li class="card">Cloud reported over the Bay of Naples · 79 CE</li></ul>');
+  if (BREAK === 'axis-79') return must(HTML, '<p class="note">Entries are placed at the precision their sources support. Mass extinctions, oldest first.</p>',
+    '<p class="note">Entries are placed at the precision their sources support.</p><ul class="cards"><li class="card">Cloud reported over the Bay of Naples · 79 CE</li></ul>');
   if (BREAK === 'inline-passage') return must(HTML, '<p class="dline">24 August (Julian) · year unstated</p>', '<p class="dline">24 August (Julian) · year unstated</p><blockquote lang="la">nonum Kal. Septembres hora fere septima</blockquote>');
   if (BREAK === 'script-only') return HTML.replace(/<section id="entries"[\s\S]*?<\/section>\n  <!-- TIMELINE:END -->/, '<section id="entries" class="entries"></section>\n  <!-- TIMELINE:END -->');
   if (BREAK === 'no-withdrawal') return must(HTML, '<p class="withdrawn"><b>2021 EGU conference abstract, withdrawn on 8 March 2021.</b></p>', '');
@@ -296,9 +297,9 @@ const st = p => p.evaluate(id => {
       const clone = document.querySelector('main').cloneNode(true); clone.querySelectorAll(`[id="${id}-debate"], code.hash`).forEach(n => n.remove());
       const outsideNote = clone.textContent;
       return { datedHead: document.getElementById('dated-h').textContent, datedCards: dated.querySelectorAll('.card,li').length, shelfCards: document.querySelectorAll('#shelf .card').length,
-        card: document.getElementById('card-' + id).textContent, outside79: /\b79\b/.test(outsideNote), noteHas79: /\bAD 79\b/.test(document.getElementById(id + '-debate').textContent), all };
+        card: document.getElementById('card-' + id).textContent, datedIds: [...dated.querySelectorAll('.card')].map(c => c.id), outside79: /\b79\b/.test(outsideNote), noteHas79: /\bAD 79\b/.test(document.getElementById(id + '-debate').textContent), all };
     }, ID);
-    ok('placement: Dated entries (0), nothing on the axis', /\(0\)/.test(m.datedHead) && m.datedCards === 0, m);
+    ok('placement: Dated entries (5), all mass extinctions; Pliny not among them', /\(5\)/.test(m.datedHead) && m.datedCards === 5 && !document_has_pliny_in_dated(m), m.datedHead);
     ok('placement: one card on the shelf', m.shelfCards === 1);
     ok('placement: no 79 outside the attributed note', !m.outside79 && m.noteHas79, m.card);
     for (const s of ['Misenum — as Pliny states (§4).', 'Bay of Naples — our present-day reference.', 'Our model: Roman hours divided daylight', 'Modern clock time: unset',
@@ -308,8 +309,9 @@ const st = p => p.evaluate(id => {
     await p.click(`#card-${ID} .chip`); await p.waitForTimeout(80);
     ok('whole card is not one click target', !(await st(p)).open);
     await p.click(OPENERS.debated); await p.waitForTimeout(80); await p.click('#d-close'); await p.waitForTimeout(80);
-    const bad = reqs.filter(u => !u.startsWith(BASE) && !/fonts\.googleapis/.test(u));
-    ok('requests: only this site (and the font stylesheet)', bad.length === 0, bad);
+    const bad = reqs.filter(u => !u.startsWith(BASE) && !/fonts\.googleapis/.test(u) && u !== 'https://mother-earth.chadoberholzer.workers.dev/catalogue/timeline');
+    ok('requests: only this site, the font stylesheet and the hub catalogue route', bad.length === 0, bad);
+    ok('requests: the catalogue is requested exactly once', reqs.filter(u => /\/catalogue\/timeline$/.test(u)).length === 1, reqs.filter(u => /workers/.test(u)));
     ok('requests: no fetch of data on the Timeline page', reqs.filter(u => u.startsWith(BASE)).every(u => /timeline\.(html|js)|style\.css|\/$/.test(u)), reqs);
     const p2 = await c.newPage(); const r2 = []; p2.on('request', r => r2.push(r.url()));
     await p2.goto(BASE + '/index.html').catch(() => {}); await p2.waitForTimeout(500);

@@ -1,0 +1,234 @@
+{
+ "source": {
+  "name": "ICS International Chronostratigraphic Chart",
+  "tag": "v2026-06.5",
+  "commit": "44d1043ecf29",
+  "file": "chart.ttl",
+  "file_sha256": "0158959e8fdae2a8bdbb14ca3e424d2370362cd8dfc8af86e7be73c74368b355",
+  "licence": "CC BY 4.0",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "citation": "Cohen K, Harper D, Gibbard P, Car N. The ICS international chronostratigraphic chart this decade. Episodes 2025;48:105-115. https://doi.org/10.18814/epiiugs/2025/025001",
+  "chart_page": "https://stratigraphy.org/chart/",
+  "units": "Ma",
+  "margin_meaning": "as stated by ICS (meaning not given in the data read)"
+ },
+ "window": {
+  "ma": 538.8,
+  "margin": 0.6,
+  "approximate": true
+ },
+ "overview": {
+  "ma": 4567.0,
+  "margin": null,
+  "approximate": false
+ },
+ "periods": [
+  {
+   "name": "Cambrian",
+   "code": "Ep",
+   "colour": "#7FA056",
+   "begin": {
+    "ma": 538.8,
+    "margin": 0.6,
+    "approximate": true
+   },
+   "end": {
+    "ma": 486.85,
+    "margin": 1.5,
+    "approximate": true
+   }
+  },
+  {
+   "name": "Ordovician",
+   "code": "O",
+   "colour": "#009270",
+   "begin": {
+    "ma": 486.85,
+    "margin": 1.5,
+    "approximate": true
+   },
+   "end": {
+    "ma": 443.1,
+    "margin": 1.0,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Silurian",
+   "code": "S",
+   "colour": "#B3E1B6",
+   "begin": {
+    "ma": 443.1,
+    "margin": 1.0,
+    "approximate": false
+   },
+   "end": {
+    "ma": 419.62,
+    "margin": 1.36,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Devonian",
+   "code": "D",
+   "colour": "#CB8C37",
+   "begin": {
+    "ma": 419.62,
+    "margin": 1.36,
+    "approximate": false
+   },
+   "end": {
+    "ma": 358.86,
+    "margin": 0.19,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Carboniferous",
+   "code": "C",
+   "colour": "#67A599",
+   "begin": {
+    "ma": 358.86,
+    "margin": 0.19,
+    "approximate": false
+   },
+   "end": {
+    "ma": 298.9,
+    "margin": 0.15,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Permian",
+   "code": "P",
+   "colour": "#F04028",
+   "begin": {
+    "ma": 298.9,
+    "margin": 0.15,
+    "approximate": false
+   },
+   "end": {
+    "ma": 251.902,
+    "margin": 0.024,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Triassic",
+   "code": "T",
+   "colour": "#812B92",
+   "begin": {
+    "ma": 251.902,
+    "margin": 0.024,
+    "approximate": false
+   },
+   "end": {
+    "ma": 201.4,
+    "margin": 0.2,
+    "approximate": true
+   }
+  },
+  {
+   "name": "Jurassic",
+   "code": "J",
+   "colour": "#34B2C9",
+   "begin": {
+    "ma": 201.4,
+    "margin": 0.2,
+    "approximate": true
+   },
+   "end": {
+    "ma": 143.1,
+    "margin": 0.6,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Cretaceous",
+   "code": "K",
+   "colour": "#7FC64E",
+   "begin": {
+    "ma": 143.1,
+    "margin": 0.6,
+    "approximate": false
+   },
+   "end": {
+    "ma": 66.0,
+    "margin": null,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Paleogene",
+   "code": "E",
+   "colour": "#FD9A52",
+   "begin": {
+    "ma": 66.0,
+    "margin": null,
+    "approximate": false
+   },
+   "end": {
+    "ma": 23.04,
+    "margin": null,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Neogene",
+   "code": "N",
+   "colour": "#FFE619",
+   "begin": {
+    "ma": 23.04,
+    "margin": null,
+    "approximate": false
+   },
+   "end": {
+    "ma": 2.58,
+    "margin": null,
+    "approximate": false
+   }
+  },
+  {
+   "name": "Quaternary",
+   "code": "Q",
+   "colour": "#F9F97F",
+   "begin": {
+    "ma": 2.58,
+    "margin": null,
+    "approximate": false
+   },
+   "end": {
+    "ma": 0.0,
+    "margin": null,
+    "approximate": false
+   }
+  }
+ ],
+ "boundaries": {
+  "ordovician-silurian": {
+   "ma": 443.1,
+   "margin": 1.0,
+   "approximate": false
+  },
+  "frasnian-famennian": {
+   "ma": 372.15,
+   "margin": 0.46,
+   "approximate": false
+  },
+  "permian-triassic": {
+   "ma": 251.902,
+   "margin": 0.024,
+   "approximate": false
+  },
+  "triassic-jurassic": {
+   "ma": 201.4,
+   "margin": 0.2,
+   "approximate": true
+  },
+  "cretaceous-paleogene": {
+   "ma": 66.0,
+   "margin": null,
+   "approximate": false
+  }
+ }
+}
