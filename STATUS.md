@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 04:47 UTC (clock reading at write) — **Timeline deep-time candidate BUILT on branch `timeline-deep-rc` @ `539b785`** (Chad's Approve line: branch only; NOT merged, NOT deployed, no R2 write) — packet `reviews/2026-11-10-timeline-deep-rc.md` (on the branch)
+- **Built:** chart extractor (pinned `chart.ttl` hash) → `chart-v2026-06.5.json`; `big5.json` (five episodes, ten sources, values as checked); generator → catalogue `tl-2026-11-R1.json` (17,127 B, sha256 `cab2ac93…552e`) + pre-rendered list with embedded hash/revision/build; **hub 0.6.3** `GET /catalogue/timeline` (Arts pattern, pin = that hash); page axis (overview strip, 538.8 Ma window, chart bands + 5 boundary lines, Mass extinctions lane, three empty lanes 69 px at 390×844, glyph key), every §4a failure → list only, §4b permalinks. Asset `?v=202611191000`.
+- **Tests:** timeline-catalogue-hub 24/0 (3 breaks fail), timeline-axis 78/0 (5 breaks fail), timeline-ui 585/0, all other suites pass (desktop-overflow 112, mobile-pass 131). CORS is checked in the live RC (not testable with fulfilled routes).
+- **For GPT:** Mac `_review/timeline-deep-rc/` (exact branch copy, SHA256SUMS) and `_review/timeline-deep-rc-axis-preview/` (one-line change so the axis reads the local catalogue before hub 0.6.3 exists; README). Open points in the packet §7.
+- **Not approved:** REGISTER filing, R2 upload, hub deploy, merge/page release.
+
 ## 10 Nov 04:16 UTC (clock reading at write) — **Build proposal rev 1.1 (GPT's review); E1 publisher check complete** (docs only)
 - **E1:** Chad pasted the Oxford page for Harper 2024 (sha256 `fab9abba…0bbb`): no correction/retraction/EoC text, CC BY 4.0 → all five episodes confirmed; release carries the Big Five (GPT's four-episode freeze kept as the fallback rule).
 - **Rev 1.1:** mismatch/failure table widened (open tabs and caches, HTML/JS from different builds via `build_id`, 10 s timeout, parse/validation failure, CORS from the Pages origin; "impossible" replaced by "reduces version skew"); E2 drawn as a modelled-range glyph at the midpoint plus a directional marker at ≤ 372.4 Ma (no fading bar); claim types as separate labelled fields; permalinks always reach pre-rendered evidence (loading / unavailable / clustered).
