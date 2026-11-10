@@ -53,7 +53,27 @@ Permalinks `#e-big5-…` open the pre-rendered entry whether the axis is ready, 
 - Regression suites: see §6.
 - `build_timeline.py --check`: passes.
 
-## 6. Hashes and regression results
+## 6. Hashes and regression results — REV 2 (supersedes the rev 1 table)
+**Final candidate: the commit that carries this packet** (`git log -1 -- reviews/2026-11-10-timeline-deep-rc.md` on the branch). Its served and hub files are **byte-identical to `4482045`** (the rev 2 code commit, 2026-11-10 05:05:08 UTC commit time); the only other change is `phase1/timeline-axis.test.cjs` (a stale break anchor and stuck-state handling, test-only).
+| File | Bytes | sha256 |
+|---|---|---|
+| `index.html` | 110786 | `95eeb025e00bc60eeed110f16092bc0b3b72fc8aa86be1142ce510d5a6a8ad0f` |
+| `sources.html` | 43647 | `bce09241e6894426c87847de66ec569a64bc17ad5a7521a1fc47a65dbba717d0` |
+| `timeline.html` | 26731 | `f69a98c1c2e4d1f51568a86e0f83ed72a8230e29f24214018705bd2dab76dbbd` |
+| `app.js` | 81781 | `e3f4a38541132b289663945f74612db80e12d35f906a0ecc778d7a39b8391680` |
+| `arts.js` | 5759 | `58773cef35e6e947960100cedd59c8bff349a16333a89f3c4ae7abda5595928d` |
+| `timeline.js` | 23607 | `823f185e96069e17d6d3f7fb95a9e7e0f2c5761b57cb4a5786e09e9612afea42` |
+| `style.css` | 40215 | `30bc06b371239660b9d046d51b351c668d7c6c8951ea6dc7cfc4123d42fa2f80` |
+| `phase1/worker.js` | 276411 | `46b296b256c8d55a3ae6c29aa60b8499d154be8b2e52f96e3fdf1ae1c7530b63` |
+| `phase1/timeline/catalogue/tl-2026-11-R1.json` | 16648 | `ebf7c6e1d55d330d8d0ff9f288e4e168e73b755e6131936592e949dc1072c1ab` |
+
+Hub pin `TIMELINE.fileSha256` = the catalogue's sha256 above (16,648 B); `COLLECTOR_VERSION` 0.6.3; assets `?v=202611201000`.
+
+**Every suite on `4482045`, tree clean (container, 10 Nov 2026 ~05:05–05:30 UTC):** timeline-catalogue-hub 25/0 · timeline-axis 93/0 · timeline-ui 585/0 · arts-hub 54/0 · arts-ui 90 · backdrop-layer 27 · desktop-overflow 112/0 · drifters-ui 25 · kept-ui 21 · mobile-pass 131/0 · orbital-ui 38 · orbital-browser 113 · place-ui 30 · plastic-ui 29 · search-ui 104 · smoke-fixes 52 · terminator-behaviour 47 · terminator-ui 19 · ux-round1 34 · health-hub 29 · history-hub 27 · firms-guard 19 · firms-v2 57 (+7 skipped) · kp-degraded 29 · drifters-hub 12 · orbital-hub 13 · plastic-hub 11 · satellites-hub 12 · search 111 · search real-data 50 · ships-fallback 7 · ships-late 7 · solar 26 · place-rows 7 · duration-contract pass. `build_timeline.py --check` passes.
+**Breaks (each fails its suite):** hub `no-hash`, `serve-on-missing`, `no-validate`; axis `no-hash-check` (2), `no-build-check` (1), `focusable-empties` (4), `no-timeout` (1), and after the test-only fix `no-validate` (8), `no-guard` (3), `hover-only-periods` (6); Pliny suite `axis-79` (2). timeline-axis 93/0 rerun after the fix.
+**Not covered here:** deployed CORS (live RC from the GitHub Pages origin against the Worker); real phone; screen-reader announcements.
+
+### Rev 1 table (superseded; kept for the record)
 Files at `14628bf` (seven page files as before; `arts.js` and `app.js` unchanged from main):
 | File | Bytes | sha256 |
 |---|---|---|

@@ -22,7 +22,7 @@ const must = (s, a, b) => { if (!s.includes(a)) throw new Error('break anchor mi
 const JS = (() => {
   if (BREAK === 'no-hash-check') return must(JS0, "if (sha !== wrap.dataset.catalogueSha) return off('revision mismatch');", '');
   if (BREAK === 'no-build-check') return must(JS0, "if (wrap.dataset.build !== BUILD) return off('build');", '');
-  if (BREAK === 'no-validate') return must(JS0, "const bad = validate(c); if (bad) return off('validation: ' + bad);", '');
+  if (BREAK === 'no-validate') return must(JS0, "  if (bad) return off('validation: ' + bad);", '');
   if (BREAK === 'focusable-empties') return must(JS0, '`<div class="lr empty">', '`<div class="lr empty" tabindex="0">');
   if (BREAK === 'no-timeout') return must(JS0, 'const TIMEOUT_MS = 10000;', 'const TIMEOUT_MS = 600000;');
   if (BREAK === 'no-guard') return must(JS0, "try { bad = validate(c); } catch (err) { bad = 'malformed'; }", 'bad = validate(c);');
@@ -50,7 +50,7 @@ async function ctx(b, { hub = serve(CAT), html = null, viewport = { width: 1280,
   if (html) await c.route(/timeline\.html/, r => r.fulfill({ contentType: 'text/html', body: html }));
   return c;
 }
-const settle = p => p.waitForFunction(() => window.TL_AXIS && window.TL_AXIS.state !== 'pending', null, { timeout: 20000 });
+const settle = p => p.waitForFunction(() => window.TL_AXIS && window.TL_AXIS.state !== 'pending', null, { timeout: 20000 }).catch(() => {});   // a stuck state is then reported by the checks, not a crash
 const axisInfo = p => p.evaluate(() => {
   const ax = document.getElementById('axis'), off = document.getElementById('axis-off');
   return { state: window.TL_AXIS.state, reason: window.TL_AXIS.reason, axisHidden: ax.hidden, offShown: !off.hidden && !!off.offsetParent,
@@ -76,8 +76,8 @@ const axisInfo = p => p.evaluate(() => {
     if (w === 390) ok('390×844: three empty rows ≤ 96 CSS px together', e.h <= 96, e.h);
     const bc = await p.evaluate(() => [...document.querySelectorAll('#axis .band b')].map(x => ({ t: x.textContent, clip: x.scrollWidth > x.clientWidth + 1 })));
     ok(`${w}: no period code is clipped (codes only where they fit)`, bc.length === 12 && bc.every(x => !x.clip), bc.filter(x => x.clip));
-    await p.focus('#periods-btn'); await p.keyboard.press('Enter'); await p.waitForTimeout(80);
-    const pl = await p.evaluate(() => ({ exp: document.getElementById('periods-btn').getAttribute('aria-expanded'), items: [...document.querySelectorAll('#periods-list li')].map(l => l.textContent) }));
+    const hasPl = await p.$('#periods-btn'); if (hasPl) { await p.focus('#periods-btn'); await p.keyboard.press('Enter'); await p.waitForTimeout(80); }
+    const pl = await p.evaluate(() => ({ exp: (document.getElementById('periods-btn') || { getAttribute: () => null }).getAttribute('aria-expanded'), items: [...document.querySelectorAll('#periods-list li')].map(l => l.textContent) }));
     ok(`${w}: period list opens by keyboard with all 12 names and ages (Quaternary included)`, pl.exp === 'true' && pl.items.length === 12 && pl.items.some(t => /^Quaternary \(Q\) · 2\.58 to 0 Ma$/.test(t)) && pl.items.some(t => /^Cambrian \(Ep\) · ~538\.8 ± 0\.6 to ~486\.85 ± 1\.5 Ma$/.test(t)), pl.items.slice(0, 2).concat(pl.items.slice(-1)));
     await p.keyboard.press('Enter'); await p.waitForTimeout(60);
     if (w === 390) {
