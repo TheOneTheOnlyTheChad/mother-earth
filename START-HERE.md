@@ -138,6 +138,20 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Source status can change after a check:** EGU21-16222 was found withdrawn (8 Mar 2021) only when Chad read the publisher page for R1; OpenAlex did not flag it. For any attributed source, read the publisher's landing page before release.
 - **Pane with Chad's screen locked:** fetch-based checks (served hashes, page reads) still worked (16:36 UTC 9 Nov).
 
+## 4l. Thread facts (10 Nov 2026, Sky on Two Clocks thread)
+- **Sky card LIVE 10:43 UTC 10 Nov** (main `a1c3ed6`; hub 0.6.5).
+  - Page logic in `sky.js` (new page file), so **served-hash checks now cover eight page files**.
+  - The catalogue is a fixed, versioned file, `/catalogue/sky/<revision>`. The hub pins its own key and hash (`SKY_REVISIONS`); the page pins its revision and sha256.
+  - Generator `phase1/sky/build_sky.py --manifest revisions/<rev>.json [--base DIR --out-dir DIR] [--check]`. Revision ids `sky-YYYY-MM-[RT]n`: T = rehearsal, never published.
+- **Horizons is reachable only from the pane** (a tab on `ssd.jpl.nasa.gov`). The workspace and Mac shells get proxy 403.
+  - Recipe: GET `/api/horizons.api` VECTORS, `CSV_FORMAT='NO'` (CSV drops the vector columns), `TIME_TYPE='UT'`.
+  - Cross-check: File API (`/api/horizons_file.api`, POST multipart `format`+`input`, one TLIST epoch per line, lines < 80 chars) with our own UTC→TDB epochs.
+  - Raw bytes come back to the workspace through the tool output: base64, or gzip+base64 via `CompressionStream`. The sha256 is checked on both sides.
+  - Never click "I Accept the Terms Above" on ssd-api.
+- **Refresh:** due by 2027-06-01. Run step 0 (Bulletin C, `hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat`) first, then follow the T1 rehearsal (Mac `research/sky-two-clocks/2026-11-10-claude-rehearsal-T1/`) as the worked example.
+- **Pages-origin checks:** the hub's responses carry no `Timing-Allow-Origin`, so transfer size reads 0 from the Pages tab. Measure it from a tab on the hub's own origin (R1 was zstd, 26,819 B).
+- **Branch page against the live hub:** fetch the page files by commit from raw.githubusercontent, check hashes, then blob-inject them into a clean Pages-origin tab with `document.write`.
+
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.
 - **Optional layers** on the page go through `OPTIONAL_LAYERS` in index.html (fetched only while on, cleared on off, `refreshPair` + `usable()` as for the always-on record layers). `ME.renderState()` and `ME.openCell(layer, id)` are the read-only test/console aids.
