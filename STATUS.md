@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 05:55 UTC (clock reading at write) — **timeline-deep-rc rev 3: candidate `0f67fca`** (branch only; code = `7cad90c` + packet)
+- GPT's rev 2 review complete; ready for Chad's approval to file the seven sources. Applied GPT's pre-upload point: end-Triassic context (Bos 2024, Trudgill 2025) removed from the public catalogue and page (research record only), as with Herz/Dai. **Public sources = the ICS chart + Harper, Percival, Burgess, He, Wilf, O'Connor** (hub test checks the set).
+- Page, catalogue and Worker regenerated and pinned together: catalogue `096ae648…0fbe` (15,656 B) = hub pin; `?v=202611211000`. Every suite passes on `7cad90c`; every break fails. Packet §6 rev 3 table. Mac `_review/timeline-deep-rc-r3/` (+ `-axis-preview`).
+- **Next, each on its own Approve line:** GPT's focused re-check of the replacement hashes → REGISTER filing (seven sources) → R2 upload → hub deploy → live RC (incl. CORS from the Pages origin) → page release.
+
 ## 10 Nov 05:25 UTC (clock reading at write) — **timeline-deep-rc rev 2 after GPT's review: candidate `569e6e2`** (branch only; code = `4482045`, then a test-only fix + packet)
 - GPT verified rev 1 (ten hashes; preview at 1280 and 390×844; fallbacks; Worker in-memory checks) and asked for one small revision. Applied: one F–F mark at the modelled range (bound in the panel); intervals at true endpoints when ≥ 4 CSS px; Herz/Dai off the public card (research record only); key text exposed, symbols hidden; bands to scale with codes only where they fit, plus a keyboard/tap **period list** (ages as the chart writes them); guarded validation (nested nulls → unavailable message, list usable). `?v=202611201000`; catalogue `ebf7c6e1…c1ab` (16,648 B) = hub pin.
 - **Every suite on `4482045`** passes (timeline-axis 93, timeline-catalogue-hub 25, timeline-ui 585, desktop-overflow 112, mobile-pass 131, …); every break fails its suite. Packet §6 pins candidate + hashes together.
