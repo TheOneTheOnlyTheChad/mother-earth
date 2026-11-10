@@ -18,6 +18,8 @@
  *   GET /admin/probe/orbital-build?key=ADMIN_KEY  run the orbital build on the staged copy (0.2.4; no upstream request, writes nothing)
  *   GET /admin/probe/r2-conditional?key=ADMIN_KEY  (0.6.0) the R2 behaviours FIRMS v2 relies on, checked on this bucket; probe/ keys only, deleted after
  *   GET /snapshot/orbital, /elements/orbital   orbital meta + classified element CSV (0.3.0; job gated by ORBITAL_ENABLED=1, odd UTC hours at :41)
+ *   GET /catalogue/timeline (0.6.3) the FIXED Timeline catalogue (deep-time build proposal rev 1.1 §4): served from R2 ref/timeline/ only if
+ *                           the complete stored file hashes to TIMELINE.fileSha256 and validates; else 503 unavailable. Not a collector.
  *   GET /snapshot/arts      (0.6.2) the FIXED Met catalogue snapshot (Arts release proposal rev 2.1): served from R2 ref/arts/ only if the complete
  *                           stored file hashes to ARTS.fileSha256 and its snapshot_id = ARTS.recordsSha256; else 503 unavailable. Not a collector.
  *
@@ -53,7 +55,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.2';
+const COLLECTOR_VERSION = '0.6.3';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2086,7 +2088,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { ARTS, artsSnapshot, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { ARTS, artsSnapshot, TIMELINE, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -2917,6 +2919,31 @@ async function artsSnapshot(env, pin = ARTS) {
   return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'ETag': '"' + pin.fileSha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
 }
 
+// ===== Timeline catalogue (0.6.3; TIMELINE-DEEP-TIME-BUILD-PROPOSAL rev 1.1 §4) =====
+// Same rules as Arts: outside LAYERS, cron, D1, /status collection, /health and history; generated once
+// (phase1/timeline/build_timeline.py) and pinned by the complete file's sha256. Nothing partial is ever served.
+// Earlier catalogue objects stay in R2 (ref/ has no lifecycle rule); rollback = re-pin an earlier revision.
+const TIMELINE = {
+  key: 'ref/timeline/tl-2026-11-R1.json',
+  revision: 'tl-2026-11-R1',
+  fileSha256: '096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe',
+  bytes: 15656,
+};
+/** Serve the pinned Timeline catalogue byte for byte, or 503 {status:'unavailable', reason}. reason: missing | unreadable | integrity | invalid. */
+async function timelineCatalogue(env, pin = TIMELINE) {
+  const no = reason => json({ kind: 'catalogue', catalogue: 'timeline', status: 'unavailable', reason }, 503, { 'Cache-Control': 'no-store' });
+  let o;
+  try { o = await env.R2.get(pin.key); } catch (e) { return no('unreadable'); }
+  if (!o) return no('missing');
+  let buf;
+  try { buf = await o.arrayBuffer(); } catch (e) { return no('unreadable'); }
+  if (await sha256Bytes(buf) !== pin.fileSha256) return no('integrity');                     // the WHOLE catalogue file (timeline)
+  let j;
+  try { j = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(buf)); } catch (e) { return no('invalid'); }
+  if (!j || j.catalogue !== 'timeline' || j.catalogue_revision !== pin.revision || !Array.isArray(j.entries) || !Array.isArray(j.shelf) || !j.chart) return no('invalid');
+  return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'ETag': '"' + pin.fileSha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
+}
+
 function json(obj, status = 200, extra = {}) {
   return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...CORS, ...extra } });
 }
@@ -2949,6 +2976,7 @@ export default {
     if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
+    if (p[0] === 'catalogue' && p[1] === 'timeline' && p.length === 2) return timelineCatalogue(env);   // 0.6.3: fixed catalogue, outside LAYERS
 
     if (p[0] === 'snapshot' || p[0] === 'cells') {
       const layer = p[1];
@@ -3022,7 +3050,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' } },
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE.revision } },
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };
