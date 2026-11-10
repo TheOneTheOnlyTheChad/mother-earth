@@ -1,4 +1,4 @@
-# Mother Earth — handover (10 Nov 2026, end of the Sky on Two Clocks thread; main = the commit that carries this file, see `git log -1 -- HANDOVER.md`)
+# Mother Earth — handover (10 Nov 2026, end of the Sky zoom-out thread; main = the commit that carries this file, see `git log -1 -- HANDOVER.md`)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.** This thread's full record is STATUS 8 Nov (from 16:15 UTC) and 9 Nov.
 
@@ -41,7 +41,17 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **Timeline maintenance and expansion — captured 10 Nov on Chad's request (backlog §T, `docs/BACKLOG-VIEW-2026-11-08.md`; nothing started):** T1 discovery inbox, T2 evidence review (keep the dates-without-a-year shelf), T3 versioned releases (stable links, new revision IDs, older catalogues retained, page + catalogue as matched pairs with the existing hash checks), T4 public "What changed" (old/new ranges + evidence; page "last updated" separate from entry "last reviewed"), T5 release cadence (batch routine additions; corrections and withdrawals sooner). **First deliverables: T1 discovery inbox and T4 public changelog.** **Real iPhone Safari check: deferred by Chad (site first).**
 
-**NEXT THREAD STARTS HERE (10 Nov, end of the Sky on Two Clocks thread):**
+**NEXT THREAD STARTS HERE (10 Nov, end of the Sky zoom-out thread):**
+- **Live, main = live:** hub **0.6.6** (`4231114d…f078`, since 14:26:01 UTC); page = merge `5d01462` (page files = `860ed35`, `?v=202611241000`, timeline.html `202611221000`). **Sky zoom-out view public since 15:56:33 UTC** (push time; served hashes of nine page files verified 15:57:56Z; live smoke test 15:58:09Z). R2: `ref/sky/sky-2026-11-R1.json`, `ref/sky/sky-scene-2026-11-R1.json` (`d4605c3d…ae29`), `ref/timeline/tl-2026-11-R1.json`.
+- **Rollback:** page = revert `5d01462`; hub = 0.6.5 `1073d15d…ec94`. Each needs its own Approve line, and they are independent.
+- **This thread:** proposal revs 1 → 2.2 (GPT); text-only source pass (record rev 1.1, GPT accepted); REGISTER (Horizons entry live + scene use; ERFA entry, ten files); branch build; R2 + hub 0.6.6 + Pages-origin RC; GPT smoke test found Earth lost mid-pull-back → fixed at `860ed35` + intermediate-frame check; GPT retest passed; merge. Packet: `reviews/2026-11-10-sky-zoom-rc.md` (§3 breaks + regression, §4 build deviations, §6 the fix).
+- **Open for GPT:** the `fixed-direction` break passes by design (no minimum disc size under the agreed checks). GPT to say whether that warrants a check.
+- **Not done:** real phone / Safari (deferred by Chad); screen-reader pass; hardware depth measurement (GPT: after the rendered candidate, optional).
+- **Sky refresh due by 2027-06-01:** card + scene as a pair; Bulletin C step 0 + Bulletin A check (START-HERE §4m).
+- **Other open items unchanged:** T1/R1 −2.234 ms observation; timeline backlog §T (T1 inbox, T4 changelog); fires "down" wording; provider replies; OpenSky kit (Chad ordering; record what was bought).
+- **Close-out:** see STATUS for the §9 checklist results.
+
+**(superseded) NEXT THREAD STARTS HERE (10 Nov, end of the Sky on Two Clocks thread):**
 - **Live, main = live:** hub **0.6.5** (`1073d15d…`, since 10:12:09 UTC); page main **`a1c3ed6`** (`?v=202611231000`). R2 holds `ref/sky/sky-2026-11-R1.json` (`f851f164…368a`) and `ref/timeline/tl-2026-11-R1.json`. Everything after `a1c3ed6` is docs only.
 - **Released this thread, each step on Chad's own line:**
   - Proposal revs 1–3 (GPT).
