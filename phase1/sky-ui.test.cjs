@@ -5,7 +5,7 @@
  * what a screen reader announces.
  * Run:   node phase1/sky-ui.test.cjs        (needs `python3 -m http.server 8899 --bind 127.0.0.1` in the repo and /home/claude/spike)
  * Break: BREAK=local-date | extrema-full-bundle | no-recompute | diff-in-rr-mode | rr-fallback | nearest-sample | skip-schema |
- *              merge-gap-states | no-key-activation | hide-text-equivalent | label-swap | eager      → each must FAIL
+ *              merge-gap-states | no-key-activation | hide-text-equivalent | label-swap | eager | no-time-check      → each must FAIL
  */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
@@ -27,6 +27,7 @@ const BREAKS = {
   'merge-gap-states': ["    const outside = today < cov.start || today > cov.end;", "    const outside = false;"],
   'no-key-activation': ["  $('tgl-sky').addEventListener('click', () => setOn(!st.on));", "  $('tgl-sky').addEventListener('click', e => { if (e.detail === 0) return; setOn(!st.on); }); $('sky-tabs').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ' || e.key.startsWith('Arrow')) e.stopImmediatePropagation(); }, true); $('sky-tabs').addEventListener('click', e => { if (e.detail === 0) e.stopImmediatePropagation(); }, true);"],
   'hide-text-equivalent': ["<div class=\"sky-te\">${esc(textEq(s))}</div>", "<div class=\"sky-te\" aria-hidden=\"true\">${esc(textEq(s))}</div>"],
+  'no-time-check': ["    if (!t || !iso(t.horizons_ut_tilde_from) || !iso(t.first_date_affected_by_unresolved_leap_second)) return false;", "    // (break) time fields not validated"],
   'eager': ["  $('tgl-sky').addEventListener('click', () => setOn(!st.on));", "  $('tgl-sky').addEventListener('click', () => setOn(!st.on)); setOn(true);"],
 };
 const B = process.env.BREAK;
@@ -179,12 +180,15 @@ const RUN = '2026-11-10T08:00:00Z';
   }
   const deepReadable = async page => { await page.click('#sky-tab-deep'); return page.evaluate(() => !document.getElementById('sky-deep').hidden && /3\.8 cm a year/.test(document.getElementById('sky-deep').textContent) && /roughly a centimetre a year/.test(document.getElementById('sky-deep').textContent)); };
   for (const [label, opts] of [['hub 503 missing', { status: 503 }], ['network failure', { abort: true }], ['one changed byte (page hash check)', { body: FILE.replace('"sky-2026-11-R1"', '"sky-2026-11-R2"') }],
+    ['catalogue without its time block (matching hash) is rejected before rendering', (() => { const b = mutate(j => { delete j.time; }); return { body: b, pinOverride: sha(b) }; })()],
+    ['time field not a date (matching hash) is rejected before rendering', (() => { const b = mutate(j => { j.time.first_date_affected_by_unresolved_leap_second = 'July'; }); return { body: b, pinOverride: sha(b) }; })()],
     ['malformed data with a matching hash reaches the schema check', (() => { const b = mutate(j => { j.bodies.moon.rows[3][1] = 'oops'; }); return { body: b, pinOverride: sha(b) }; })()]]) {
-    const { ctx, page } = await run({ time: '2026-11-10T12:00:00Z', ...opts });
+    const { ctx, page, perr } = await run({ time: '2026-11-10T12:00:00Z', ...opts });
     await on(page);
     const r = await R(page);
     ok(`${label} → Now unavailable, no rows drawn`, r.s.status === 'unavailable' && /Distances unavailable/.test(r.o) && r.moon.hidden && r.sun.hidden, [r.s, r.o]);
     ok(`${label} → Deep Time fully readable`, await deepReadable(page));
+    ok(`${label} → no page errors`, perr.length === 0, perr);
     await ctx.close();
   }
 

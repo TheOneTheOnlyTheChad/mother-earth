@@ -39,7 +39,11 @@
       for (const r of rows) if (!Array.isArray(r) || r.length !== 4 || !/^\d{4}-\d\d-\d\d$/.test(r[0]) || typeof r[1] !== 'number' || !isFinite(r[1]) || r[1] <= 0
         || (r[2] !== null && (typeof r[2] !== 'number' || !isFinite(r[2]))) || !['UTC', 'UT~'].includes(r[3])) return false;
     }
-    return /^\d{4}-\d\d-\d\d$/.test(j.coverage.start) && /^\d{4}-\d\d-\d\d$/.test(j.coverage.end);
+    const iso = v => typeof v === 'string' && /^\d{4}-\d\d-\d\d$/.test(v);
+    // every field the renderer reads, checked before anything is shown (GPT, 10 Nov: a catalogue without `time` passed and then threw)
+    const t = j.time;
+    if (!t || !iso(t.horizons_ut_tilde_from) || !iso(t.first_date_affected_by_unresolved_leap_second)) return false;
+    return iso(j.coverage.start) && iso(j.coverage.end) && j.coverage.start <= j.coverage.end;
   }
 
   // ---- one row

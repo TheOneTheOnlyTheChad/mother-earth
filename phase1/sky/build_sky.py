@@ -5,31 +5,29 @@ Reads the raw NASA/JPL Horizons text exports (GET API, VECTORS, labelled text, T
 Sun, plus the route-1 cross-check (File API, our own TDB epochs), validates every fact the proposal requires, and
 writes one catalogue JSON. Nothing is fetched here: the exports are taken by hand (proposal §5.1).
 
+Every revision is described by a manifest, revisions/<rev>.json (window, refresh-by date, raw export files, retrieval
+times, leap-second basis). A refresh = new exports + a new manifest + a new revision id; published revisions never change.
+
 Usage:
-  python3 phase1/sky/build_sky.py                 # regenerate catalogue/<rev>.json and BUILD.json
+  python3 phase1/sky/build_sky.py                 # R1 (default manifest): regenerate catalogue/<rev>.json and BUILD.json
   python3 phase1/sky/build_sky.py --check         # regenerate in memory and compare byte for byte with the committed files
-  --generated-at 2026-11-10T09:00:00Z             # pins the bytes (default: the value already in BUILD.json)
+  --manifest revisions/<rev>.json                 # another revision (paths in it are relative to the manifest's base, --base)
+  --base DIR                                      # where the manifest's raw paths are resolved (default: this folder)
+  --out-dir DIR                                   # where catalogue/<rev>.json and BUILD.json are written (default: this folder)
+  --generated-at 2026-11-10T09:00:00Z             # pins the bytes (default: the value already in the output BUILD.json)
 
 Any failed check raises SkyError and writes nothing.
 """
 import argparse, datetime as dt, hashlib, json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REV = 'sky-2026-11-R1'
-START, END = dt.date(2026, 6, 1), dt.date(2027, 12, 31)
-N = (END - START).days + 1                     # 579
 PINS = {'get': 'API VERSION: 1.2', 'file': 'API VERSION: 1.0'}   # rev 3 §3.3 — separate pins
-RAW = {
-    'moon': ('raw/hz-moon-ut-20261110.txt', '301', 'Moon (301)'),
-    'sun': ('raw/hz-sun-ut-20261110.txt', '10', 'Sun (10)'),
-}
-CROSS = 'raw/hz-moon-tdb-crosscheck-20261110.txt'
-CROSS_EPOCHS = 'raw/crosscheck-epochs.json'
+TARGET = {'moon': ('301', 'Moon (301)'), 'sun': ('10', 'Sun (10)')}
 CROSS_MAX_M = 1.0          # route-1 vs route-2 range agreement tolerance (first export: 0.166 m)
-RETRIEVED = {'moon': '2026-11-10T08:41:13.097Z', 'sun': '2026-11-10T08:41:36.425Z', 'cross': '2026-11-10T08:41:50.780Z'}
+DEFAULT_MANIFEST = 'revisions/sky-2026-11-R1.json'
 URL = ("https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='{c}'&OBJ_DATA='NO'&MAKE_EPHEM='YES'&EPHEM_TYPE='VECTORS'"
        "&CENTER='500%40399'&REF_PLANE='FRAME'&REF_SYSTEM='ICRF'&VEC_TABLE='3'&VEC_CORR='NONE'&OUT_UNITS='KM-S'&CSV_FORMAT='NO'"
-       "&TIME_TYPE='UT'&START_TIME='2026-06-01'&STOP_TIME='2027-12-31'&STEP_SIZE='1%20d'")
+       "&TIME_TYPE='UT'&START_TIME='{start}'&STOP_TIME='{end}'&STEP_SIZE='1%20d'")
 ROW = re.compile(r'(\d+\.\d+) = A\.D\. (\d{4}-\w{3}-\d{2}) (\d\d:\d\d:\d\d\.\d+) (\S+)\s*\n'
                  r'\s*X =.*\n\s*VX=.*\n\s*LT=\s*(\S+)\s+RG=\s*(\S+)\s+RR=\s*(\S+)')
 
@@ -70,14 +68,21 @@ def parse_export(text, target_name, pin, scale_word):
     return rows
 
 
-def build(generated_at):
+def build(generated_at, man, base=HERE):
+    REV = man['revision']
+    need(re.fullmatch(r'sky-\d{4}-\d\d-[RT]\d+', REV or ''), 'bad revision id (sky-YYYY-MM-R<n>; T<n> = rehearsal, never published)')
+    START, END = dt.date.fromisoformat(man['start']), dt.date.fromisoformat(man['end'])
+    need(START <= END, 'window start after end')
+    N = (END - START).days + 1
+    RAW = {b: (man['raw'][b],) + TARGET[b] for b in ('moon', 'sun')}
+    CROSS, CROSS_EPOCHS, RETRIEVED = man['raw']['cross'], man['raw']['cross_epochs'], man['retrieved']
     out = {}
     raws = {}
     for body, (path, cmd, name) in RAW.items():
-        b = open(os.path.join(HERE, path), 'rb').read()
+        b = open(os.path.join(base, path), 'rb').read()
         raws[body] = (path, b)
         rows = parse_export(b.decode('utf-8'), name, PINS['get'], 'UT')
-        rows = [r for r in rows if r[0] != dt.date(2028, 1, 1)]          # endpoint rule (none in the first export)
+        rows = [r for r in rows if r[0] != END + dt.timedelta(1)]        # endpoint rule (none in the first export)
         need(len(rows) == N, f'{body}: {len(rows)} rows, expected {N}')
         need([r[0] for r in rows] == [START + dt.timedelta(i) for i in range(N)], f'{body}: dates not continuous {START}..{END}')
         need(all(r[1] == '00:00:00.0000' for r in rows), f'{body}: a row is not at 00:00:00')
@@ -85,9 +90,9 @@ def build(generated_at):
         out[body] = rows
 
     # route-1 cross-check (File API, our TDB epochs) — rev 3 §3.2
-    cb = open(os.path.join(HERE, CROSS), 'rb').read()
+    cb = open(os.path.join(base, CROSS), 'rb').read()
     crows = parse_export(cb.decode('utf-8'), 'Moon (301)', PINS['file'], 'TDB')
-    ep = json.load(open(os.path.join(HERE, CROSS_EPOCHS)))
+    ep = json.load(open(os.path.join(base, CROSS_EPOCHS)))
     need(len(crows) == N and len(ep) == N, 'cross-check: row count')
     need(all(crows[i][5] == ep[i]['jd_tdb'] for i in range(N)), 'cross-check: an epoch was not echoed exactly')
     need(all(ep[i]['utc_date'] == out['moon'][i][0].isoformat() for i in range(N)), 'cross-check: epoch dates do not match')
@@ -95,7 +100,8 @@ def build(generated_at):
     need(max(diffs) <= CROSS_MAX_M, f'cross-check: range differs by {max(diffs):.3f} m')
 
     flags = {b: {f: sum(r[2] == f for r in out[b]) for f in ('UTC', 'UT~')} for b in out}
-    first_tilde = {b: next(r[0].isoformat() for r in out[b] if r[2] == 'UT~') for b in out}
+    first_tilde = {b: next((r[0].isoformat() for r in out[b] if r[2] == 'UT~'), None) for b in out}
+    need(first_tilde['moon'] and first_tilde['moon'] == first_tilde['sun'], 'UT~ flag start missing or differs between bodies')
     sha = lambda x: hashlib.sha256(x).hexdigest()
     cat = {
         'catalogue': 'sky',
@@ -106,15 +112,15 @@ def build(generated_at):
         'attribution': 'Calculated orbital distances · NASA/JPL Horizons',
         'quantity': 'geometric distance from the centre of the Earth to the centre of the body (km); range rate (km/s), positive = moving away',
         'sample_time': '00:00:00 UTC daily',
-        'coverage': {'start': START.isoformat(), 'end': END.isoformat(), 'samples_per_body': N, 'refresh_by': '2027-06-01'},
+        'coverage': {'start': START.isoformat(), 'end': END.isoformat(), 'samples_per_body': N, 'refresh_by': man['refresh_by']},
         'direction_method': 'range_rate',
         'time': {
             'export_time_type': 'UT',
             'flags': {'UTC': 'Horizons labels the time UTC', 'UT~': 'Horizons holds the last known leap second constant (future leap seconds not yet known)'},
             'horizons_ut_tilde_from': first_tilde['moon'],
-            'leap_second_source': 'IERS Bulletin C 72 (Paris, 06 July 2026): no leap second at the end of December 2026; UTC-TAI = -37 s',
-            'utc_established_through': '2027-06-30',
-            'first_date_affected_by_unresolved_leap_second': '2027-07-01',
+            'leap_second_source': man['leap_second_source'],
+            'utc_established_through': man['utc_established_through'],
+            'first_date_affected_by_unresolved_leap_second': man['first_date_affected_by_unresolved_leap_second'],
         },
         'bodies': {
             b: {'target': RAW[b][1], 'name': RAW[b][2].split(' (')[0], 'fields': ['date', 'range_km', 'range_rate_kms', 'time_flag'],
@@ -126,32 +132,36 @@ def build(generated_at):
             'ephemeris': 'DE441', 'centre': 'Earth (399), BODY CENTER', 'correction': 'NONE (geometric)', 'table': 'VECTORS table 3',
             'units': 'KM-S', 'frame': 'ICRF', 'api_version': PINS['get'],
             'request_method': "operator-triggered browser requests from the Claude desktop browser pane, default User-Agent (recorded in the research packet)",
-            'exports': [{'body': b, 'url': URL.format(c=RAW[b][1]), 'retrieved': RETRIEVED[b], 'raw_file': RAW[b][0], 'raw_sha256': sha(raws[b][1]),
+            'exports': [{'body': b, 'url': URL.format(c=RAW[b][1], start=START.isoformat(), end=END.isoformat()), 'retrieved': RETRIEVED[b], 'raw_file': RAW[b][0], 'raw_sha256': sha(raws[b][1]),
                          'rows': N, 'first': out[b][0][0].isoformat(), 'last': out[b][-1][0].isoformat(), 'flags': flags[b]} for b in ('moon', 'sun')],
             'crosscheck': {'route': 'File API, TIME_TYPE TDB, TLIST of our UTC->TDB epochs (one per line), CSV off', 'api_version': PINS['file'],
                            'raw_file': CROSS, 'raw_sha256': sha(cb), 'retrieved': RETRIEVED['cross'], 'epochs_echoed': N,
                            'max_range_diff_m': round(max(diffs), 3),
                            'note': 'agreement under the shared leap-second assumption; no timing bound claimed'},
-            'citation': 'NASA/JPL Solar System Dynamics. Data retrieved on 2026 November 10. Horizons System (API). https://ssd.jpl.nasa.gov',
+            'citation': f"NASA/JPL Solar System Dynamics. Data retrieved on {man['retrieval_date_words']}. Horizons System (API). https://ssd.jpl.nasa.gov",
             'modifications': 'daily 00:00 UTC samples selected; range and range rate kept as exported; values rounded for display only',
             'register': 'REGISTER.md — NASA/JPL Horizons entry (filed 10 Nov 2026)',
             'research_record': 'docs/research/SKY-SOURCE-CHECK.md rev 2',
         },
     }
     data = (json.dumps(cat, ensure_ascii=False, indent=None, separators=(',', ':')) + '\n').encode('utf-8')
-    return cat, data
+    return cat, data, REV, CROSS
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--check', action='store_true')
     ap.add_argument('--generated-at')
+    ap.add_argument('--manifest', default=DEFAULT_MANIFEST)
+    ap.add_argument('--base', default=HERE)
+    ap.add_argument('--out-dir', default=HERE)
     a = ap.parse_args()
-    bpath = os.path.join(HERE, 'BUILD.json')
+    man = json.load(open(a.manifest if os.path.isabs(a.manifest) else os.path.join(a.base, a.manifest)))
+    bpath = os.path.join(a.out_dir, 'BUILD.json')
     prev = json.load(open(bpath)) if os.path.exists(bpath) else {}
     gen = a.generated_at or prev.get('generated_at') or dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     try:
-        cat, data = build(gen)
+        cat, data, REV, CROSS = build(gen, man, a.base)
     except SkyError as e:
         print('REJECTED:', e, file=sys.stderr)
         sys.exit(2)
@@ -159,7 +169,8 @@ def main():
     build_json = (json.dumps({'revision': REV, 'generated_at': gen, 'file': f'catalogue/{REV}.json', 'bytes': len(data), 'file_sha256': fsha,
                               'raw': {e['raw_file']: e['raw_sha256'] for e in cat['provenance']['exports']} | {CROSS: cat['provenance']['crosscheck']['raw_sha256']}},
                              indent=1) + '\n').encode()
-    cpath = os.path.join(HERE, 'catalogue', f'{REV}.json')
+    os.makedirs(os.path.join(a.out_dir, 'catalogue'), exist_ok=True)
+    cpath = os.path.join(a.out_dir, 'catalogue', f'{REV}.json')
     if a.check:
         ok = open(cpath, 'rb').read() == data and open(bpath, 'rb').read() == build_json
         print('check', 'OK' if ok else 'MISMATCH', fsha, len(data))

@@ -45,6 +45,17 @@ for (const [name, file, f, want] of CASES) {
   const cat = fs.readFileSync(path.join(d, 'catalogue/sky-2026-11-R1.json'));
   ok(`${name}: nothing written`, cat.equals(fs.readFileSync(path.join(SKY, 'catalogue/sky-2026-11-R1.json'))));
 }
+// manifest-driven windows (refresh path): a manifest whose window does not match its exports is rejected
+for (const [name, patch, want] of [
+  ['manifest window shorter than the exports', m => { m.end = '2027-12-30'; }, /rows, expected 578|not continuous/],
+  ['manifest with a malformed revision id', m => { m.revision = 'sky-R1'; }, /bad revision id/],
+  ['manifest start after end', m => { m.start = '2028-01-01'; }, /start after end/],
+]) {
+  const d = copy(); const mp = path.join(d, 'revisions/sky-2026-11-R1.json');
+  const m = JSON.parse(fs.readFileSync(mp, 'utf8')); patch(m); fs.writeFileSync(mp, JSON.stringify(m));
+  r = run(d);
+  ok(`${name}: REJECTED`, r.status === 2 && want.test(r.stderr), [r.status, r.stderr.trim()]);
+}
 // endpoint rule: a returned 2028-01-01 row is trimmed, not counted
 {
   const d = copy(); const p = path.join(d, MOON); let t = fs.readFileSync(p, 'utf8');
