@@ -4,6 +4,27 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 16:41 UTC (clock reading at write) — **GPT's second review: Ocean Heat rev 3 (ready for O6); buoy temperature rev 2 (ready for B3)** (docs only)
+- GPT (relayed by Chad) verified both local sha256 prefixes; it could not tie the files to a commit (the Mac folder has no git).
+- **Ocean Heat rev 3:**
+  - P2 paired with 0.5° values only (0.1° texels nest in 10 × 10 blocks; with 0.25° they straddle);
+  - separate no-data vs mixed styles;
+  - P1 tile-join tests and allocation report;
+  - C1 capped at 64 KiB per bounded read, aborting if `Range` is ignored;
+  - C3: climatology matched to its calendar day; land / unavailable indistinguishable = stop before O7;
+  - C5 reports tolerance and residuals;
+  - §8: layer-off baseline, measured taps, renderer limits recorded.
+  - **GPT: ready for the source-file check (O6). O7 held until source results.**
+- **Buoy temperature rev 2:**
+  - legend "Water temperature at each buoy's latest reported fix (°C). Fix times vary.";
+  - grey = "Temperature unavailable";
+  - range-check sentence for Sources;
+  - main map key `#leg-drifters` no longer one fixed yellow;
+  - palette picked on the globe with night shading;
+  - tests at exactly 0 °C and both sides of each boundary.
+  - **Ready for Chad's branch-build decision (B3).**
+- **Not approved:** O6, the download line, O7, B3.
+
 ## 10 Nov 16:35 UTC (clock reading at write) — **Ocean Heat rev 2 after GPT's review; O1 DECIDED; buoy-temperature proposal rev 1** (docs only)
 - **GPT's review of rev 1 (relayed by Chad):**
   - recommended O1(b) and O2 with shorter wording;

@@ -1,8 +1,8 @@
-# Buoy water temperature — colour the drifting buoys by what they measure (proposal rev 1, docs only)
+# Buoy water temperature — colour the drifting buoys by what they measure (proposal rev 2, docs only)
 
-**For:** GPT's review, then Chad's go to build on a branch.
+**For:** Chad's go to build on a branch (B3). GPT reviewed rev 1 (relayed by Chad, 10 Nov): it can proceed to the branch-build decision with the copy and legend changes made in rev 2.
 **Asked by:** Chad, 10 Nov 2026 ("that would be cool, very cool actually").
-**Written:** 10 Nov 2026 (docs only; nothing built).
+**Written:** 10 Nov 2026 (docs only; nothing built). **Rev 2:** GPT's legend and copy changes, the main map key, grey = "Temperature unavailable", palette chosen on the actual globe, and the boundary tests.
 **Approved so far:** nothing. No branch, page change or release is approved.
 
 ## 1. What and why
@@ -26,7 +26,8 @@ This proposal colours each buoy by its reported water temperature. It is the **l
 - **Range guard:** `sst` outside −3…40 °C is set to `null` (counted as `sst_out_of_range`). An empty value or `NaN` is also `null`. A missing temperature never becomes zero.
 - **Timing:** one row per buoy, each buoy's own latest fix within 24 h, so different buoys report at different times. The card already says so.
 - **No hub change is needed:** `sst_c` is already in the drifters envelope and the page already reads it.
-- **No further quality control is ours.** Values are as relayed over the GTS, apart from the range guard. Sensor depth and quality flags are not in the fields we read [not checked]. Sources will say "near the surface, as reported; not quality-controlled by Mother Earth".
+- **No further quality control is ours.** Sensor depth and quality flags are not in the fields we read [not checked]. Sources will say: **"Mother Earth applies a range check. It performs no further quality checks on the reported temperature."**
+- **Fix age:** the 24-hour query is the collection window. A fix being viewed from a cached snapshot can be older than 24 hours, so no copy claims "within 24 h"; the fix time stays in the inspector.
 
 ## 3. What the visitor sees
 
@@ -43,10 +44,13 @@ This proposal colours each buoy by its reported water temperature. It is the **l
   | 6 | 20 ≤ t < 25 |
   | 7 | 25 ≤ t < 30 |
   | 8 | ≥ 30 |
-  | — | **no temperature reported**: a neutral grey dot, never a class colour |
+  | — | **Temperature unavailable**: a neutral grey dot, never a class colour. This covers both "none reported" and "rejected by the hub's range check". |
 
-  The palette is perceptually ordered (dark → light), checked for colour-vision deficiency at build.
-- **A small legend in the drifters card:** "Water temperature reported by each buoy (°C) · each at its own latest time, up to 24 h old · not compared with normal". Grey = "no temperature reported".
+  - The palette is sequential with ordered lightness, checked for colour-vision deficiency.
+  - **Chosen on the actual globe at map size**, with day/night shading on (and Ocean Heat, once that exists on a branch), so the darkest dots don't vanish.
+  - Grey is checked to be distinct from every class.
+- **A small legend in the drifters card:** **"Water temperature at each buoy's latest reported fix (°C). Fix times vary."**, plus "Not compared with normal". Grey = **"Temperature unavailable"**.
+- **The main map key (`#leg-drifters`)** today shows one fixed yellow dot for "drifting buoy (latest fix)". It changes to a small gradient swatch: "drifting buoy · coloured by water temperature (see card)". It must not imply one fixed buoy colour.
 - **Inspector:** unchanged ("Sea-surface temperature 18.42 °C", with the fix time). The "Observed" evidence line stays.
 - **Accessibility:** colour is not the only channel. The value is in the inspector, and the legend has a text equivalent.
 
@@ -56,10 +60,12 @@ This proposal colours each buoy by its reported water temperature. It is the **l
   - No hub, D1, R2 or cron change; no new request.
   - $0.
 - **Tests** (existing pattern: `app.js` in Node + a browser suite):
-  - class edges at exactly 0, 5, … 30;
+  - **exactly 0 °C is class 2, never grey**;
   - `null` → grey;
   - a negative value → class 1;
-  - the legend appears only while the layer is on;
+  - both sides of every boundary (e.g. 4.99 / 5.00, 29.99 / 30.00);
+  - the legend and main-key swatch appear only while the layer is on;
+  - card and main key checked together with the ocean layers on (drifters + day/night now; Ocean Heat too if it exists on a branch by then);
   - toggling off restores nothing stale;
   - render check: real fixture buoys get their expected colours.
 - **Breaks** (each must fail):
@@ -81,6 +87,6 @@ This proposal colours each buoy by its reported water temperature. It is the **l
 
 ## 6. Decisions for Chad (after GPT)
 
-- **B1:** the class breaks and the sequential (not diverging) palette.
-- **B2:** the "not quality-controlled by Mother Earth" wording.
+- **B1:** eight classes kept (GPT agrees); sequential palette picked on the globe.
+- **B2:** GPT's wording (fix time, "Temperature unavailable", range-check sentence).
 - **B3:** go to build on a branch.

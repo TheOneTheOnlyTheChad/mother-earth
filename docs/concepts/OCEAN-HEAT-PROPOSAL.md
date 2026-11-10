@@ -1,6 +1,6 @@
-# Ocean Heat — proof-of-concept proposal, rev 2 (docs only)
+# Ocean Heat — proof-of-concept proposal, rev 3 (docs only)
 
-**For:** GPT's re-review, then Chad's next decisions (O3–O7).
+**For:** Chad's O6 decision (source-file check). O7 (build) follows the source results.
 **Brief:** `docs/concepts/OCEAN-HEAT-BRIEF.md` (Chad's spec, filed verbatim 10 Nov 2026).
 **Approved so far:** nothing beyond O1 (decided below). No source-file download, build, branch, R2, hub or page change is approved.
 
@@ -13,6 +13,12 @@
   - **§6:** seam tests at exactly ±180°; polygon-tap coordinates are verified on the pinned build.
   - **§8:** "smooth" is defined before testing.
   - **§7:** three named inputs; C0–C5 rewritten as GPT asked.
+- **Rev 3** — 10 Nov 2026, after GPT's second review (relayed by Chad). GPT: ready for the source-file check once C1's byte limit is explicit; O7 held until P2's texture mapping is defined. Changes:
+  - **§5 — P2 is now paired with 0.5° values.** 0.1° texels (2 × 2 native cells) nest exactly inside 0.5° blocks (10 × 10). With 0.25° blocks (5 × 5), texels straddle blocks, so a baked colour could disagree with what a tap reports.
+  - **§5 — separate styles:** wholly unavailable ocean gets its own no-data style; the mixed style is only for genuinely mixed texels.
+  - **§5 — P1:** tile joins tested, and texture allocation reported.
+  - **§7 — C1:** a byte cap per bounded read, aborting if `Range` is ignored. **C3:** SST and SSTA matched to the snapshot date, the climatology to its calendar day; failure to tell land from unavailable ocean = **stop before O7**. **C5:** report the tolerance and the actual residuals.
+  - **§8:** a layer-off baseline, several measured taps, and browser / GPU / max-texture recorded; emulation = host-GPU evidence only.
 
 Evidence tags used below:
 - **[NOAA page]** = NOAA's public product pages, read as text through Claude's fetch tool on 10 Nov 2026 (the tool's summary, not a verbatim copy); GPT checked the same pages independently.
@@ -126,15 +132,28 @@ The proof of concept succeeds if a visitor can turn on **Ocean Heat**, spin to C
   - Painting and tapping both read these planes. A native cell is coloured with its block's value only if it is itself a contributing cell. Land stays transparent and unavailable ocean gets the no-data style, even inside a block that has a value.
   - Size [desk]: 2 planes × 26 M bits = ~6.5 MB raw. Coastlines and ice edges are long, coherent runs, so the planes should compress far better than the values do. **Measured at build, not assumed.**
 
-**The phone texture problem this creates.** Exact painting needs 7200 × 3600 texels. That exceeds the 4096 maximum texture size many phones report, and as RGBA it is ~104 MB of GPU memory. Options, all measured and reported at build:
-- **P1 — Tiled native texture.** Several sphere-segment meshes, each within 4096 (the sphere geometry takes `phiStart` / `phiLength`, already copied from the globe mesh in `buildNight()` [code]). Exact, but heavy; the GPU memory figure is reported.
-- **P2 — Reduced texture, never over-painting.** A 0.1° texture (3600 × 1800, within 4096). A texel takes the block colour only if **all** native cells under it contribute; land-only texels stay transparent; any other texel gets a distinct **"mixed coast or ice edge — tap for detail"** style.
-  - It never paints land or unavailable ocean as water.
-  - Its cost is that thin water features (< 0.1°) show as mixed rather than coloured.
-  - Taps still read the native planes, so the inspector stays exact.
-- **Lean: P2 on phones, P1 on desktop only if it measures well.** Otherwise P2 everywhere, with the texture resolution disclosed in the UI. Cape Point is shown at both settings.
+**The phone texture problem this creates.** Exact painting needs 7200 × 3600 texels. That exceeds the 4096 maximum texture size many phones report, and as RGBA it is ~104 MB of GPU memory [desk]. The path is chosen from the **renderer's actual `MAX_TEXTURE_SIZE`**, read at run time and recorded in the report. Allowed pairings:
 
-**Display grid for values (O4).** Measure 0.25° and 0.5° with the masks included (values + planes + manifest). Ship 0.25° if first-enable transfer ≤ **1.5 MB** (GPT: a reasonable preview budget) and it meets §8's "smooth"; otherwise 0.5° if that does; if neither does, bring the measurements back.
+| Pairing | Texture | Values | Tap |
+|---|---|---|---|
+| **P1 + 0.25°** or **P1 + 0.5°** | Native 0.05°, tiled into sphere-segment meshes each within the renderer's limit (`phiStart` / `phiLength`, as `buildNight()` already copies [code]) | Block colour on each contributing native cell | Native planes + block values |
+| **P2 + 0.5°** (only) | 0.1° (3600 × 1800). Each texel = 2 × 2 native cells, nested exactly inside one 10 × 10 block | See the texel rule below | Native planes + block values (exact) |
+
+**P2 texel rule.** A texel is:
+- the **block colour** if all four native cells contribute;
+- **transparent** if all four are land;
+- the **no-data style** if all four are water without a valid anomaly;
+- the **mixed style** ("mixed coast or ice edge — a tap shows the cell underneath") otherwise.
+
+Because a texel never straddles two blocks, its colour can never disagree with what a tap reports. P2 is **not** paired with 0.25° values: 5 × 5 blocks don't divide into 2 × 2 texels.
+
+**P1 checks:**
+- tile joins tested like the date line: distinct values either side, each landing on its own side;
+- combined texture allocation reported, measured or clearly labelled as an estimate.
+
+**Lean:** P2 + 0.5° wherever the renderer's limit is below 7200, P1 only where it fits and measures well. The UI discloses the texture and value resolution. Cape Point is shown under each pairing used.
+
+**Display grid for values (O4).** Measure the pairings above, with the masks included (values + planes + manifest). Use the finest pairing whose first-enable transfer is ≤ **1.5 MB** and which meets §8's "smooth"; if none does, bring the measurements back.
 
 **Encoding.**
 - `manifest.json`: product and version; data date; grids (value grid and native mask grid: resolution, origin, rows, columns, row order); encodings and sentinels; the three input URLs with their sha256 and byte counts; the sha256 of each binary.
@@ -172,23 +191,24 @@ These are binary NetCDF data files, which the text-only research rule didn't con
 | Step | What we do | What it establishes |
 |---|---|---|
 | **C0 Route** | One HEAD request each from the workspace shell, the Mac shell and the pane to `www.star.nesdis.noaa.gov` | Reachability only |
-| **C1 Bounded read + listing** | Read the three directory listings; one small `Range` read on each actual file URL, where supported | That the route serves the real files; their exact names and byte sizes for the download line. On the approved download: complete bytes, sha256 recorded. ERDDAP subsets may diagnose a route or decoder, but **global coverage and mask checks need the complete grids**. |
+| **C1 Bounded read + listing** | Read the three directory listings; one `Range: bytes=0-4095` read on each actual file URL. **The client consumes at most 64 KiB per request and aborts if the server ignores `Range`** (no `206` / `Content-Range`, or a body over the cap). No full file is fetched before the download line. | That the route serves the real files; their exact names and byte sizes for the download line. On the approved download: complete bytes, sha256 recorded. ERDDAP subsets may diagnose a route or decoder, but **global coverage and mask checks need the complete grids**. |
 | **C2 Header** | Metadata only | Variables, units, packed types, `_FillValue`, `valid_min/max`, `scale_factor` / `add_offset`, version and baseline attributes (settles "2000" vs "2020"), any land, ice or gap-fill flag fields |
-| **C3 Arrays** | Decode the actual time and coordinate arrays of all three files | Decoded time = the named date; latitude order; spacing; bounds or derived edges (cell edges at ±180°, so the wrap and block alignment hold); identical grids across the three; **which field distinguishes land from unavailable ocean** |
+| **C3 Arrays** | Decode the actual time and coordinate arrays of all three files | **SST and SSTA times = the snapshot date; the climatology = that calendar day** (it represents the reference period, not a year); latitude order; spacing; bounds or derived edges (cell edges at ±180°, so the wrap and block alignment hold); identical grids across the three; **which field distinguishes land from unavailable ocean. If none does reliably, the check stops there and nothing proceeds to O7.** |
 | **C4 Masks** | Global cross-tabulation of land × valid-anomaly × valid-SST × missing | Whether "valid anomaly, missing SST" occurs naturally (else a fixture); whether current ice and missing baseline climatology are separable; Cape Point's mixed blocks at 0.25° and 0.5°, and at P2's 0.1° texels |
-| **C5 Consistency** | Independently decoded SST − SSTA vs the official climatology file, at several valid cells | That packing and baseline were read correctly, within an explicit tolerance derived from the packing; plus one example where the climatology is unavailable |
+| **C5 Consistency** | Independently decoded SST − SSTA vs the official climatology file, at several valid cells | That packing and baseline were read correctly. Reports **the packing-derived tolerance and the actual residuals**, plus one example where the climatology is unavailable |
 | **C6 Terms** | Read the citation and disclaimer pages (text) | The attribution and use record (a REGISTER draft, filed only on Chad's line) |
 | **C7 (optional)** | Compare with NOAA's browse PNG for that date | A flipped-map sanity check only; the numbers come from C3–C5 |
 
 ## 8. Done: tests, "smooth", and the GPT preview
 
-**"Smooth", defined before testing.** All on the same setup for both grids and both painting options, desktop and 390 × 844:
+**"Smooth", defined before testing.** All on the same setup for every pairing measured, desktop and 390 × 844, **with a layer-off baseline run first**:
 - a 5 s scripted rotation with the layer on: median frame interval ≤ 33 ms (≥ 30 fps), p95 ≤ 50 ms;
-- tap-to-inspector ≤ 200 ms;
+- tap-to-inspector ≤ 200 ms, measured from input to visible inspector over several taps (median and max reported);
 - first-enable transfer and time-to-layer reported alongside;
-- for P1, GPU texture memory too.
+- for P1, GPU texture memory too;
+- browser, GPU / renderer string and `MAX_TEXTURE_SIZE` recorded.
 
-The phone run is **emulated** unless Chad runs a physical device (that test is currently deferred). The report says which it was.
+A 390 × 844 emulation is viewport evidence on the host GPU only; physical phone performance stays unverified. The phone run is **emulated** unless Chad runs a physical device (that test is currently deferred). The report says which it was.
 
 **Coordinate table.** Expected values are computed **from the native files, independently of the page**:
 - Cape Point: Atlantic water, False Bay water, nearby land, and **a mixed block, tapped on its land, its valid water and its unavailable water**;
@@ -211,6 +231,8 @@ The phone run is **emulated** unless Chad runs a physical device (that test is c
 - a nearest-valid-water lookup;
 - missing → 0;
 - block colour painted on non-contributing native cells (rev 1's flaw);
+- (P2) a texel coloured although one of its native cells doesn't contribute;
+- (P1) a tile join offset by one texel;
 - drawing before the hash check;
 - drawing after switch-off;
 - SST averaged over a different cell set from the anomaly;
@@ -237,6 +259,6 @@ The phone run is **emulated** unless Chad runs a physical device (that test is c
 - **O2:** GPT's wording.
 - **O3:** preview branch only.
 - **O4:** display grid by measurement (≤ 1.5 MB and §8 "smooth").
-- **O5:** blocks qualify on any contributing cell; painting and tapping follow the native masks; P1 / P2 by measurement.
-- **O6:** source-file check C0–C6 (C7 optional): its own go, then a download line naming the three files and sizes.
+- **O5:** blocks qualify on any contributing cell; painting and tapping follow the native masks; P1 (0.25° or 0.5°) or P2 + 0.5° by the renderer's limit and measurement.
+- **O6:** source-file check C0–C6 (C7 optional): its own go. A separate download line follows, naming the three files and sizes. **Ready (GPT, rev 3).**
 - **O7:** branch build after the source results: its own go.
