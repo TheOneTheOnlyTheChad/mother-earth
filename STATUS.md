@@ -4,6 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 16:35 UTC (clock reading at write) — **Ocean Heat rev 2 after GPT's review; O1 DECIDED; buoy-temperature proposal rev 1** (docs only)
+- **GPT's review of rev 1 (relayed by Chad):**
+  - recommended O1(b) and O2 with shorter wording;
+  - **build hold on §5**: a coarse block could paint over land and over unavailable water;
+  - seam tests at exactly ±180°; three named inputs; C0–C5 tightened.
+- **O1 DECIDED (Chad): (b) NOAA's 1991–2020 anomaly** (`3.1-clim19912020-v1`).
+- **Proposal rev 2** (`docs/concepts/OCEAN-HEAT-PROPOSAL.md`):
+  - values averaged in blocks; painting and tapping from native 5 km land / valid bit-planes;
+  - the phone texture limit (7200 × 3600 > 4096) handled by P1 (tiled native) / P2 (0.1° texture with a "mixed" style, never over-painting), chosen by measurement;
+  - "smooth" defined (≥ 30 fps median, p95 ≤ 50 ms, tap ≤ 200 ms);
+  - C0–C7 rewritten.
+- **Chad asked whether live sea-temperature sources exist. They do, and we already collect one:** drifters carry `sst_c` hourly. D1 read 16:29 UTC, last 24 h: 1,259 of 1,303 buoys reported a temperature; 14,413 fixes; −1.55 to 35.94 °C. The page shows it only on tap.
+- **New:** `docs/concepts/BUOY-TEMPERATURE-PROPOSAL.md` rev 1 (Chad's ask). Colour drifter dots by reported water temperature on a sequential scale; grey = none reported; page-only; no hub change; $0.
+- **Not approved:** Ocean Heat source-file check (O6) or build (O7); buoy branch build (B3).
+
 ## 10 Nov 16:20 UTC (clock reading at write) — **Ocean Heat: Chad's spec filed; proposal rev 1 for GPT** (docs only)
 - New thread (Sky zoom-out handover). Mac folder re-granted; Mac already matched main `3873ce5` (268/268 files by sha256, 16:14 UTC); nothing copied.
 - Chad's spec filed verbatim: `docs/concepts/OCEAN-HEAT-BRIEF.md` (one dated global SST-anomaly snapshot on the globe; $0; no backend, ingestion or production deploy; docs-only proposal first).
