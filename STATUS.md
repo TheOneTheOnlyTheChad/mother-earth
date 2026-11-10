@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 15:56:33 UTC (push time) — **PAGE RELEASED: Sky zoom-out view (Earth → Moon → Sun)** (main merge `5d01462` of `sky-zoom-rc` @ `3739284`, page = `860ed35`; pushed with `e8eb30e`, `ddf7020`; Chad: "Approve: merge sky-zoom-rc to main (page change: Sky zoom-out view)")
+- **Before the push:** the last break reruns on the new camera path. endpoint-only (2), pinch-off (1), near-default (3) failed as they should. **near-by-distance PASSED** (test gap: the near check compared the camera with the page's own reported depth). Chad was told; the test now computes forward depth independently (camera world direction + drawn meshes): near-by-distance 15 failed, near-default 15, clean 333/333 (`ddf7020`).
+- Merge: no conflicts; the ten page/Worker files are byte-identical to `860ed35`; `build_sky --check`, `build_scene --check`, `build_timeline --check` OK. Main's worker.js = live hub 0.6.6 (`4231114d…`), so **main = live**. An accidentally committed `__pycache__` file was removed (`e8eb30e`).
+- **Served hashes: all nine page files exact at 15:57:56Z** (index `5193cb51`, sources `fb682867`, timeline.html `d7c37d5f`, app `e3f4a385`, arts `58773cef`, sky `2056da8d`, **skyscene `5e00ad77`**, style `fad92f02`, timeline.js `ae87c6a1`).
+- **Live smoke test on the public page (15:58:09Z):** scripts load with `?v=202611241000`; zero catalogue requests on load; card → R1; zoom → scene (exactly those two); view open for 10 Nov; stop C: Earth, Moon, Sun all in frame, none occluded, scale line correct; Back to Earth restores.
+- **Rollback:** page = revert the merge `5d01462` (own Approve line); hub = 0.6.5 `1073d15d…` (own line; harmless to leave, since the old page ignores the scene).
+
 ## 10 Nov 15:40 UTC (clock reading at write) — **GPT retest PASSED at `860ed35`; Pages-origin RC at `860ed35` PASSED; merge awaits Chad's line**
 - GPT's first smoke test (preview, port 8899): the wheel pull-back lost Earth before the Moon came into frame (four sampled positions showed neither body). **Fixed at `860ed35`:** the target and swing follow the distance covered, plus containment (the target slides back toward Earth just enough to keep it in the safe area). New intermediate-frame check (201 positions × 3 canvases × 4 dates). Breaks `target-by-s` (11 fail) and `no-containment` (3 fail). Clean suite 333/333. Packet §6.
 - **GPT retest (relayed by Chad):** desktop wheel passed; Earth's centre visible and clear of the controls at all 25 sampled positions; + Sun framed all three; Back to Earth closed the view and returned focus. Mobile pinch is covered by Claude's regression. GPT is comfortable releasing after a Pages-origin check of this exact revision.
