@@ -65,7 +65,7 @@ const BUILD = JSON.parse(fs.readFileSync(path.join(HERE, 'sky/BUILD.json'), 'utf
 ok('hub pin = sha256 and size of the committed catalogue = BUILD.json', PIN.fileSha256 === sha(FILE) && PIN.bytes === FILE.length && BUILD.file_sha256 === sha(FILE) && BUILD.bytes === FILE.length, [PIN, sha(FILE)]);
 const skyjs = fs.readFileSync(path.join(HERE, '..', 'sky.js'), 'utf8');
 ok('page (sky.js) pins the same revision and hash', skyjs.includes(`'${PIN.revision}'`) && skyjs.includes(`'${sha(FILE)}'`));
-ok('real table: one revision, current = R1, frozen', Object.keys(W.SKY_REVISIONS).join() === 'sky-2026-11-R1' && W.SKY_CURRENT === 'sky-2026-11-R1' && Object.isFrozen(W.SKY_REVISIONS) && Object.isFrozen(PIN));
+ok('real table: R1 pin unchanged + the 0.6.6 scene pin, current = R1, frozen', Object.keys(W.SKY_REVISIONS).join() === 'sky-2026-11-R1,sky-scene-2026-11-R1' && PIN.key === 'ref/sky/sky-2026-11-R1.json' && PIN.fileSha256 === 'f851f16438415bc1e05b392e3e1616052b6347c637ee5ea98df307052058368a' && PIN.bytes === 71925 && W.SKY_CURRENT === 'sky-2026-11-R1' && Object.isFrozen(W.SKY_REVISIONS) && Object.isFrozen(PIN) && Object.isFrozen(W.SKY_REVISIONS['sky-scene-2026-11-R1']));
 const J = JSON.parse(FILE.toString('utf8'));
 ok('catalogue: 579 rows per body, 2026-06-01..2027-12-31, range_rate method', ['moon', 'sun'].every(b => J.bodies[b].rows.length === 579 && J.bodies[b].rows[0][0] === '2026-06-01' && J.bodies[b].rows[578][0] === '2027-12-31') && J.direction_method === 'range_rate');
 ok('raw time flags kept: UTC 248, UT~ 331, UT~ from 2027-02-04', ['moon', 'sun'].every(b => J.bodies[b].rows.filter(r => r[3] === 'UTC').length === 248 && J.bodies[b].rows.filter(r => r[3] === 'UT~').length === 331) && J.time.horizons_ut_tilde_from === '2027-02-04' && J.time.first_date_affected_by_unresolved_leap_second === '2027-07-01');
@@ -121,7 +121,7 @@ ok('fixture: unknown id does not serve current', r.status === 404 && reads.lengt
 
 // ---- index lists the route; other catalogues untouched
 const idx = await (await get(env(), '/')).json();
-ok('hub 0.6.5; index lists /catalogue/sky/<revision> and catalogues.sky', idx.version === '0.6.5' && idx.endpoints.includes('/catalogue/sky/<revision>') && idx.catalogues.sky && idx.catalogues.sky.revisions.join() === 'sky-2026-11-R1' && idx.catalogues.timeline && idx.catalogues.arts);
+ok('hub >= 0.6.5 (numeric; sky-zoom-rc: 0.6.6); index lists /catalogue/sky/<revision> and catalogues.sky (R1 current; the 0.6.6 scene listed as scene)', (v => { const x = String(v).split('.').map(Number), y = [0, 6, 5]; for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i]; return true; })(idx.version) && idx.endpoints.includes('/catalogue/sky/<revision>') && idx.catalogues.sky && idx.catalogues.sky.current === 'sky-2026-11-R1' && idx.catalogues.sky.revisions.includes('sky-2026-11-R1') && idx.catalogues.timeline && idx.catalogues.arts);
 
 console.log(`sky-hub: ${pass} passed, ${fail} failed${B ? ` (BREAK=${B})` : ''}`);
 process.exit(fail ? 1 : 0);

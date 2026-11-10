@@ -1,0 +1,10 @@
+{
+ "revision": "sky-scene-2026-11-R1",
+ "file": "catalogue/sky-scene-2026-11-R1.json",
+ "bytes": 67778,
+ "file_sha256": "d4605c3d4abc2c022aef6d5df4d2e92f7c29a01c583b43fa7efdbbaf9901ae29",
+ "pairs_with": {
+  "catalogue_revision": "sky-2026-11-R1",
+  "fileSha256": "f851f16438415bc1e05b392e3e1616052b6347c637ee5ea98df307052058368a"
+ }
+}

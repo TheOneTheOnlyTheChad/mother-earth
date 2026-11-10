@@ -4,6 +4,36 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 15:40 UTC (clock reading at write) — **GPT retest PASSED at `860ed35`; Pages-origin RC at `860ed35` PASSED; merge awaits Chad's line**
+- GPT's first smoke test (preview, port 8899): the wheel pull-back lost Earth before the Moon came into frame (four sampled positions showed neither body). **Fixed at `860ed35`:** the target and swing follow the distance covered, plus containment (the target slides back toward Earth just enough to keep it in the safe area). New intermediate-frame check (201 positions × 3 canvases × 4 dates). Breaks `target-by-s` (11 fail) and `no-containment` (3 fail). Clean suite 333/333. Packet §6.
+- **GPT retest (relayed by Chad):** desktop wheel passed; Earth's centre visible and clear of the controls at all 25 sampled positions; + Sun framed all three; Back to Earth closed the view and returned focus. Mobile pinch is covered by Claude's regression. GPT is comfortable releasing after a Pages-origin check of this exact revision.
+- **Pages-origin RC at `860ed35` (15:39–15:40Z, pane, 588 px, real hub 0.6.6):** six page files hash-exact; requests = R1, then the scene only; **201-position sweep: Earth never lost or covered**; stops B and C all bodies in frame, no forced tags, no occlusion, camera near = rule; Back to Earth → near 0.05, focus restored.
+- Mac `_review/sky-zoom-rc/` = `860ed35` (270 files, digest `adaf3067`); preview `skyscene.js` identical to the commit.
+
+## 10 Nov 14:53 UTC (clock reading at write) — **Candidate final at `0ce5415`; all tests done; live RC repeated at `0ce5415` PASSED; merge awaits Chad's line**
+- Since `96bcc5e`: one page line (`skyscene.js`, `zoomState` reports the camera's actual near plane, so the near-default break now fails), test hardening, packet §3 (results). Break runs: 22/25 fail cleanly, 2 more after test hardening, near-default after the reporting fix; **fixed-direction passes by design under the agreed checks (no minimum size), recorded for GPT**. Full regression green (orbital-browser 113/113 on a quiet machine; 112/113 only under parallel load, timing).
+- Live RC at `0ce5415` (14:52Z, pane, Pages origin, real hub 0.6.6): six page files hash-exact; card → R1, zoom → scene (exactly those two requests); stops B and C all bodies in frame, no forced tags, no occlusion; camera near = rule (1,440.08 / 4,781.68); Back to Earth → near 0.05, focus restored.
+- Mac `_review/sky-zoom-rc/` refreshed to `0ce5415` (270 files, digest of the hash list matches the commit); preview copy updated. GPT's smoke test paused by Chad (Terminal server stopped).
+
+## 10 Nov 14:27 UTC (clock reading at write) — **R2 UPLOAD + HUB 0.6.6 DEPLOYED (no public page change); live RC from the Pages origin PASSED** — branch `sky-zoom-rc` @ `96bcc5e`
+- **R2** (Chad: "Approve: upload ref/sky/sky-scene-2026-11-R1.json (complete-file sha256 d4605c3d…ae29, 67,778 B) to R2"):
+  - source fetched from raw.githubusercontent at `96bcc5e`, sha256 exact; destination absent at 14:25:23Z;
+  - PUT 14:25:24Z → 200, uploaded 14:25:25.732Z, etag `84ce4411eba28bfb0323ebabb5ee4ce1`, version `7e5e3a26895847bcb2f8cbf884eb8e1c`;
+  - read-back 14:25:35Z: 67,778 B, sha256 exact.
+- **Hub** (Chad: "Approve: deploy hub 0.6.6 from 96bcc5e (content only)"):
+  - live before = 0.6.5 `1073d15d…ec94` (rollback target);
+  - code from raw.githubusercontent at `96bcc5e`, 283,352 B, sha256 `4231114d21cdc004427fde072755776539db108fce5994efdad408db4168f078`;
+  - content-only PUT 14:25:58Z → 200, etag `8a189d7f…ad9a`, modified 14:26:01.776Z. Bindings, secrets, variables, crons untouched.
+  - **Verified 14:26:16Z:** read-back `4231114d…f078` exact; 19 bindings; `/` = **0.6.6**, `catalogues.sky.scene` = `sky-scene-2026-11-R1`, current still R1.
+  - Routes: `/catalogue/sky/sky-scene-2026-11-R1` 200, 67,778 B, `d4605c3d…`; R1 200 `f851f164…`; unknown scene id 404; timeline 200 `096ae648…`; arts 200 `221bb1ca…`; `/snapshot/usgs` 200.
+- **Live RC from the Pages origin (14:26:40–14:27:30Z, pane):**
+  - branch page files (index, app, sky, skyscene, style, arts) fetched by commit with exact hashes, blob-injected into a clean github.io tab;
+  - no catalogue request on load; card on → only R1; "Zoom out" → exactly one more request, the scene file;
+  - view open for 10 Nov; stop C: Earth, Moon, Sun all in frame with tags, none occluded; scale line, strip (with "Imagery: 09 Nov 2026") and text equivalent correct;
+  - Back to Earth restored near 0.05, target (0,0,0), sheet, focus.
+- **Public page unchanged** (main `a1c3ed6` page files; the live page never requests the scene). Rollback for the hub alone: 0.6.5 `1073d15d…ec94` (own Approve line).
+- **Held for GPT:** the smoke test of `_review/sky-zoom-rc-preview/`; then `Approve: merge sky-zoom-rc to main (page change: Sky zoom-out view)`.
+
 ## 10 Nov 12:01 UTC (clock reading at write) — **Source pass accepted by GPT; record rev 1.1; Sky zoom-out proposal rev 2.2** (docs only)
 - GPT (relayed by Chad): the pass supports the frame, the radii (IAU Moon 1,737.4 km, Sun 695,700 km) and the build-time transform; **no repeat export needed**. GPT reproduced the 365-row Bulletin A maxima (0.26843 s; joint 0.50474″) and found the hashes matching and the repo record byte-identical to the corrected packet result. GPT could not rerun ERFA.
 - **Record rev 1.1:**

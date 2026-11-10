@@ -61,7 +61,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.5';
+const COLLECTOR_VERSION = '0.6.6';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2985,8 +2985,17 @@ const SKY_REVISIONS = Object.freeze({
     fileSha256: 'f851f16438415bc1e05b392e3e1616052b6347c637ee5ea98df307052058368a',
     bytes: 71925,
   }),
+  // 0.6.6 (SKY-ZOOM-OUT-PROPOSAL rev 2.2 §7): the zoom-out SCENE file, built by phase1/sky/build_scene.py from the same raw
+  // exports as R1 and paired with it (pairs_with = R1 + its sha256; the page refuses any other pair). Same envelope rules.
+  'sky-scene-2026-11-R1': Object.freeze({
+    key: 'ref/sky/sky-scene-2026-11-R1.json',
+    revision: 'sky-scene-2026-11-R1',
+    fileSha256: 'd4605c3d4abc2c022aef6d5df4d2e92f7c29a01c583b43fa7efdbbaf9901ae29',
+    bytes: 67778,
+  }),
 });
 const SKY_CURRENT = 'sky-2026-11-R1';   // discovery metadata only; no route serves "current" implicitly
+const SKY_SCENE_CURRENT = 'sky-scene-2026-11-R1';   // discovery metadata only (0.6.6)
 function skyPin(rev, table = SKY_REVISIONS) {
   return typeof rev === 'string' && Object.prototype.hasOwnProperty.call(table, rev) ? table[rev] : null;
 }
@@ -3123,7 +3132,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>', '/catalogue/sky/<revision>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) }, sky: { kind: 'fixed catalogue', versioned_path: '/catalogue/sky/<revision>', current: SKY_CURRENT, revisions: Object.keys(SKY_REVISIONS) } },
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>', '/catalogue/sky/<revision>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) }, sky: { kind: 'fixed catalogue', versioned_path: '/catalogue/sky/<revision>', current: SKY_CURRENT, scene: SKY_SCENE_CURRENT, revisions: Object.keys(SKY_REVISIONS) } },
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };
