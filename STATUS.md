@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 14:53 UTC (clock reading at write) — **Candidate final at `0ce5415`; all tests done; live RC repeated at `0ce5415` PASSED; merge awaits Chad's line**
+- Since `96bcc5e`: one page line (`skyscene.js`, `zoomState` reports the camera's actual near plane, so the near-default break now fails), test hardening, packet §3 (results). Break runs: 22/25 fail cleanly, 2 more after test hardening, near-default after the reporting fix; **fixed-direction passes by design under the agreed checks (no minimum size), recorded for GPT**. Full regression green (orbital-browser 113/113 on a quiet machine; 112/113 only under parallel load, timing).
+- Live RC at `0ce5415` (14:52Z, pane, Pages origin, real hub 0.6.6): six page files hash-exact; card → R1, zoom → scene (exactly those two requests); stops B and C all bodies in frame, no forced tags, no occlusion; camera near = rule (1,440.08 / 4,781.68); Back to Earth → near 0.05, focus restored.
+- Mac `_review/sky-zoom-rc/` refreshed to `0ce5415` (270 files, digest of the hash list matches the commit); preview copy updated. GPT's smoke test paused by Chad (Terminal server stopped).
+
 ## 10 Nov 14:27 UTC (clock reading at write) — **R2 UPLOAD + HUB 0.6.6 DEPLOYED (no public page change); live RC from the Pages origin PASSED** — branch `sky-zoom-rc` @ `96bcc5e`
 - **R2** (Chad: "Approve: upload ref/sky/sky-scene-2026-11-R1.json (complete-file sha256 d4605c3d…ae29, 67,778 B) to R2"):
   - source fetched from raw.githubusercontent at `96bcc5e`, sha256 exact; destination absent at 14:25:23Z;
