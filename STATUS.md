@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 06:06:51 UTC — **R2 UPLOAD DONE: `ref/timeline/tl-2026-11-R1.json`** (Chad: "Approve: upload ref/timeline/tl-2026-11-R1.json (complete-file sha256 096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe, 15,656 B) to R2")
+- **Pre-checks (06:06:36 UTC, dashboard tab):** destination absent (404 "The specified key does not exist"); nothing under `ref/timeline/`. Source fetched from raw.githubusercontent at branch commit `0f67fca`: HTTP 200, 15,656 B, sha256 `096ae648…0fbe` = the approved hash. Hash and absence re-checked immediately before the write.
+- **Upload:** dashboard R2 objects API `PUT`, HTTP 200, size 15,656, storage class Standard, etag `9e8b864bc64fe3baff1b801750677319`, version `7e5e3beefe0d7b1ab9c05a54496c7c60`, uploaded **06:06:51.433Z**.
+- **Read-back (06:06:52 UTC):** HTTP 200, 15,656 B, **sha256 `096ae648…0fbe` (exact)**. No lifecycle rule covers `ref/`, so it does not expire.
+- **No public effect:** the live hub is still **0.6.2** and has no timeline route (`/catalogue/timeline` falls through to the hub's root listing, 06:07:07 UTC).
+- **Rollback target pinned for the hub deploy (06:07 UTC, read back from Cloudflare, multipart wrapper removed):** live worker.js = **0.6.2, sha256 `4b5b6aa3c953afbce197586b8007a54da5191d83f4b317b28a48b4b1661a003f`** (274,031 B) = main.
+- R2 cost: one Class A write and a few Class B reads, inside the allowances. Removing the object would be a separate action with its own Approve line.
+- **Next (each on its own Approve line):** `Approve: deploy hub 0.6.3 from 0f67fca (content only)` → live RC from the Pages origin (incl. CORS) → page release.
+
 ## 10 Nov 06:02 UTC (clock reading at write) — **timeline REGISTER entries FILED** (docs only)
 - On Chad's line "Approve: file the timeline REGISTER entries — ICS chart (v2026-06.5, CC BY 4.0) and the six episode sources (Harper 2024, Percival 2018, Burgess 2017, He 2020, Wilf 2023, O'Connor 2024), research record docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md".
 - REGISTER: one entry for the ICS chart (tag `v2026-06.5`, commit `44d1043ecf29`, chart.ttl `0158959e…b355`, citation as the chart gives it) and one entry with a line per article (DOI, who read the publisher page, notice status as of 10 Nov). All CC BY 4.0, commercial use with attribution. Herz, Dai, Bos, Trudgill listed as not filed (research record only). Source-check doc marked filed.
