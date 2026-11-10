@@ -1,4 +1,4 @@
-# Ocean Heat — source-file check record (rev 1: C0–C1)
+# Ocean Heat — source-file check record (rev 2: C0–C5)
 
 **Go (Chad, 10 Nov 2026):** "Go: Ocean Heat source-file check C0–C1 per OCEAN-HEAT-PROPOSAL rev 3 — route probes and listings, bounded reads capped at 64 KiB, no full download."
 **Packet (Mac, not in the repo):** `research/ocean-heat/2026-11-10-claude/`
@@ -35,4 +35,68 @@
   - the three inputs exist with the sizes above.
 - **File names only, not yet metadata:** the climatology is named `source19912020`, consistent with the "2000" on NOAA's page being a typo. C2 confirms or refutes it.
 - **Download route, for Chad's line:** (D1) Chad downloads the three files and two md5 sidecars himself into the Mac packet's `inputs/` folder (lean); or (D2) decode inside the pane (adds a dependency).
-- **Not approved:** download, C2–C7, O7.
+- (C0–C1 dispositions as above.)
+
+---
+
+## C2–C5 (rev 2)
+
+**Line (Chad, 10 Nov 2026):** "Approve: Ocean Heat C2–C5 on the three 9 Nov files I downloaded (…) — hash and md5-check them, read headers and arrays, masks and consistency; no other download, no build."
+
+**Inputs.** Chad downloaded the files himself; they were copied unchanged into the Mac packet's `inputs/`. Report: `REPORT-C2-C5.md` (packet).
+
+| File | sha256 |
+|---|---|
+| CoralTemp | `57de86e9…5b92` |
+| SSTA | `7b97760a…1033` |
+| Climatology day1109 | `1495ac58…592e` |
+
+- Each file's first 4,096 B matches the C1 bounded read.
+- **The md5 sidecar check is pending:** the sidecars were not downloaded, and no other download was made.
+
+**C2 — Headers.**
+- NetCDF4; 3600 × 7200 grid centres at 0.05°.
+- int16 SST and anomaly, scale 0.01 °C, fill −32768.
+- SSTA and climatology carry `mask` (0 valid-water, 1 land, 2 missing, 4 ice); CoralTemp has `sea_ice_fraction` and no mask.
+- The baseline is **1991–2020** in the file metadata (the page's "2000" is a typo).
+- There is no per-cell gap-fill flag.
+
+**C3 — Arrays.**
+- SST / SSTA reference time 2026-11-09T12:00Z, coverage 9 Nov 00–24 UTC; the climatology = calendar day 9 Nov.
+- **CoralTemp rows are south-first; SSTA and climatology are north-first.** The grids are bitwise identical after flipping CoralTemp.
+- Edges fall on 0.05° multiples from −180°.
+- The first C3–C5 script compared unflipped rows; its output is kept and marked void, and rev 2 flips first.
+
+**C4 — Masks.**
+- Valid anomaly ⇔ mask 0 ⇔ valid SST ⇔ valid climatology (12,833,780 cells).
+- Land (mask 1, 8,722,205) ⇔ SST fill.
+- Unavailable ocean is two separable states:
+  - **ice now** (mask 4, 3,372,458; ice fraction > 0);
+  - **no 1991–2020 normal** (mask 2, 991,557; climatology masked as ice; SST valid).
+- **Land vs unavailable ocean: reliably separable (no stop).**
+- Valid anomaly with missing SST: **0 cells** (fixture-only).
+
+**C5 — Consistency.** Stored SST − anomaly − climatology = **0 exactly in all 12,833,780 valid cells** (packing tolerance ±0.01 °C).
+
+**Cape Point.**
+- At 0.25° its block is 25/25 water: the tip is water in NOAA's 5 km mask.
+- At 0.5°: 91 water + 9 land; P2 texels give 4 mixed, 21 block colour.
+
+**Terms (unresolved, for GPT and Chad).**
+- CoralTemp's licence attribute has three parts:
+  - **OSTIA 1985–2002:** academic research only, no commercial use, Met Office terms;
+  - **GHRSST 2002–present:** free and open;
+  - **Coral Reef Watch:** use without restriction, with credit and DOI.
+- The SSTA and climatology files carry only the Coral Reef Watch statement.
+- Whether the OSTIA restriction reaches the 1991–2020 climatology (built partly from 1991–2002) is not stated in any text read.
+
+**For proposal rev 4:**
+- flip with an assertion;
+- name the two unavailable states;
+- a fixture for missing SST;
+- assert a residual of exactly 0;
+- the data-date wording;
+- the coastline note;
+- the terms question in the REGISTER draft.
+
+**Not approved:** C6 / REGISTER filing, O7 build.

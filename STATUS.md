@@ -4,6 +4,23 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 17:25 UTC (clock reading at write) — **Ocean Heat C2–C5 DONE** (Chad's Approve line; research only) — `docs/research/OCEAN-HEAT-SOURCE-CHECK.md` rev 2; packet `research/ocean-heat/2026-11-10-claude/REPORT-C2-C5.md`
+- **Inputs:** Chad downloaded the 3 files to ~/Downloads (granted this thread); copied to `inputs/`. Sizes match C1; first-4 KiB hashes match the C1 bounded reads. **md5 check pending** (the sidecars were not downloaded).
+- **C2:**
+  - `mask` flags (0 water, 1 land, 2 missing, 4 ice) in SSTA and the climatology;
+  - baseline **1991–2020** confirmed in the metadata;
+  - no gap-fill flag;
+  - **licence finding:** CoralTemp's attribute includes an OSTIA 1985–2002 academic-only / no-commercial statement. Whether it reaches the derived 1991–2020 climatology is unresolved (for GPT and Chad).
+- **C3:**
+  - time 9 Nov 12:00Z ref (coverage 9 Nov); the climatology is the 9 Nov calendar day;
+  - **CoralTemp rows south-first vs SSTA / climatology north-first.** Identical after the flip. The first script run compared unflipped rows (void, kept); rev 2 flips first.
+- **C4:**
+  - land vs unavailable ocean **separable (no stop)**;
+  - unavailable = ice now (3.37 M) or no 1991–2020 normal (0.99 M);
+  - valid-anomaly-missing-SST = 0 (fixture).
+- **C5:** SST − anomaly − climatology = 0 exactly in 12,833,780 cells.
+- **Next (Chad, after GPT):** proposal rev 4 (flip assertion, two unavailable states, exact-zero identity, terms question), then O7 (build) and C6 (REGISTER draft) each on its own line.
+
 ## 10 Nov 17:19 UTC (clock reading at write) — **Buoy temperature candidate BUILT on branch `buoy-temp-rc` @ `61d0504`** (Chad's Approve line: branch only; no merge or page change) — packet `reviews/2026-11-10-buoy-temp-rc.md` (on the branch, `0e08fa8`)
 - Page only:
   - drifter dots coloured by `sst_c`, viridis 0.25–1.0 in 8 classes; grey `#b0b0b8` = Temperature unavailable; exactly 0 °C is a class;
