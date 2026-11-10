@@ -5,7 +5,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 # 10 Nov 2026
 
 ## 10 Nov 11:52 UTC (clock reading at write) — **Sky zoom-out source pass DONE** (text only, no export; Chad: "Go: Sky zoom-out source pass — text only via the pane, no export (…)") — `docs/research/SKY-ZOOM-OUT-SOURCE-CHECK.md`; packet on the Mac `research/sky-zoom-out/2026-11-10-claude/`
-- Run 11:42:31–11:49 UTC (Mac clock); protocol fixed first; **5 requests** (cap 6), one at a time, from the pane. Horizons requests were `MAKE_EPHEM='NO'` (body data only); the "I Accept" control was not clicked; no PDF; no fallback.
+- Run 11:42:31–11:50:48 UTC (Mac clock, protocol hash to the LOG entry closing request #5); protocol fixed first; **5 requests** (cap 6), one at a time, from the pane. Horizons requests were `MAKE_EPHEM='NO'` (body data only); the "I Accept" control was not clicked; no PDF; no fallback.
 - **Frame (Horizons manual):** DE440/441 "taken to be indistinguishable from the ICRF"; ICRF vs FK5/J2000 "at most 0.02 arcseconds". The GCRS-axes reading stays labelled (IERS via ERFA).
 - **Radii (Horizons body data):** Moon "Radius (IAU), km = 1737.4" (vol. mean 1737.53±0.03); Sun "Solar radius (IAU2015)= 695700 km" (photosphere 696500).
 - **UT1−UTC: Bulletin C 72 does not state the 0.9 s bound** (stays [GK], no longer needed). Bulletin A (5 Nov 2026, No. 045): max |UT1−UTC| 0.26843 s (2027-06-02) over predictions to 2027-11-05; ~0.30 s at 2027-12-31 by its formula. Effect ≤ 0.00125° [desk, `sensitivity.py`].

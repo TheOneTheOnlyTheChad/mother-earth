@@ -1,6 +1,6 @@
 # Sky zoom-out — source pass record (rev 1)
 
-- **Run:** 10 Nov 2026, 11:42:31–11:49 UTC (Mac clock), on Chad's line: "Go: Sky zoom-out source pass — text only via the pane, no export (Horizons manual frame wording, Moon/Sun radii from Horizons body data, IERS UT1−UTC bound, polar-motion size)".
+- **Run:** 10 Nov 2026, 11:42:31–11:50:48 UTC (Mac clock: protocol hash to the LOG entry closing request #5), on Chad's line: "Go: Sky zoom-out source pass — text only via the pane, no export (Horizons manual frame wording, Moon/Sun radii from Horizons body data, IERS UT1−UTC bound, polar-motion size)".
 - **Written:** from 11:51 UTC (clock reading).
 - **Proposal:** `docs/concepts/SKY-ZOOM-OUT-PROPOSAL.md` rev 2.1 (main `17162bf`), §13 step 2.
 - **For GPT's review.** Nothing is filed, built, uploaded or deployed; REGISTER and the proposal are unchanged. Proposal changes are **listed in §5, not applied**.
