@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 07:56:29 UTC — **PAGE RELEASED: timeline fetches its own catalogue revision** (main `cc91165`, merge of `timeline-revs-rc` @ `4728907`/code `1d31df6`; Chad: "Approve: merge timeline-revs-rc to main (page change: timeline fetches its own catalogue revision)")
+- Merge: no conflicts; merged files = packet hashes; generator `--check` passes. Pages build success 07:58:30 UTC.
+- **Served hashes (no-store, 07:58:38 UTC), all 7 = candidate:** index `fc8f1fa209d8`, sources `c63f89041d74`, timeline `d7c37d5f3057`, app `e3f4a3854113`, arts `58773cef35e6`, timeline.js `ae87c6a1f2ef`, style `30bc06b37123`.
+- **Live page:**
+  - Fresh load (07:59:02 UTC): build `202611221000`, axis on, exactly one hub request, to `/catalogue/timeline/tl-2026-11-R1`; End-Cretaceous mark → its card, Back → focus on the mark; no overflow.
+  - **A cached old page** (07:58:50, build `202611211000`, legacy URL) also drew on 0.6.4: the two page generations coexist, which is the point of T3.
+- **main = live:** hub 0.6.4 `7d46edf3…` = main's worker.js; page = main.
+- **Rollback:** revert `cc91165` (page; legacy URL still served). Prefer keeping hub 0.6.4; hub to 0.6.3 only on its own line (new-page tabs would then fall back to the list).
+- Backlog T3 (versioned releases): serving mechanism done; the release rule is in the code and proposal rev 1.1.
+
 ## 10 Nov 07:54:38 UTC — **HUB 0.6.4 DEPLOYED** (Chad: "Approve: deploy hub 0.6.4 from 1d31df6 (content only).")
 - **Before (07:54:26 UTC):** live worker.js = 0.6.3 `94a6b2b2…af93` (rollback target); 19 bindings; health 8/8. Code fetched from raw.githubusercontent at `1d31df6`: 279,110 B, sha256 `7d46edf36e6f8c8d03293ad862e4d8b8b49fa48e72ca4aa5cf29f7945c0a7987` (= packet rev 2). Hash re-checked immediately before the write.
 - **Deploy:** content-only API from the dashboard tab, HTTP 200, success, etag `2a179043…770a`, modified 07:54:38.493Z. Bindings, secrets, variables and crons untouched.
