@@ -4,6 +4,34 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 16:20 UTC (clock reading at write) — **Ocean Heat: Chad's spec filed; proposal rev 1 for GPT** (docs only)
+- New thread (Sky zoom-out handover). Mac folder re-granted; Mac already matched main `3873ce5` (268/268 files by sha256, 16:14 UTC); nothing copied.
+- Chad's spec filed verbatim: `docs/concepts/OCEAN-HEAT-BRIEF.md` (one dated global SST-anomaly snapshot on the globe; $0; no backend, ingestion or production deploy; docs-only proposal first).
+- **Proposal rev 1:** `docs/concepts/OCEAN-HEAT-PROPOSAL.md`. Read NOAA's product pages as text (fetch tool summary). Found:
+  - CoralTemp is a **gap-free blended analysis**, so it needs an analysed label (O2);
+  - a parallel **1991–2020-baseline SSTA** (v3.1-clim19912020-v1, Jun 2026) exists beside the spec's heat-stress baseline (1985–1990 + 1993), so the baseline is a decision (O1, lean 1991–2020);
+  - NOAA's own ±0.2 °C near-normal mask is confirmed.
+- Design reuses the day/night overlay mesh channel (nearest filtering, one tap mapping with a seam `mod`). Bundled snapshot on a preview branch only (O3). 0.25° or 0.5° grid chosen by measurement (O4). Coastal rule (O5). Source-file check C0–C7 listed with what each establishes (O6, needs binary NetCDF downloads, its own go).
+- **Not approved:** source-file check, downloads, REGISTER, branch, build.
+
+## 10 Nov 16:20 UTC (clock reading at write) — **OpenSky feeder kit ORDERED by Chad** (his purchase; recorded from his screenshots)
+- **Standing feeder conditions (REGISTER, ENQUIRIES rev 7):**
+  - public site must be a feeder;
+  - hobbyist, non-commercial;
+  - credits and attribution apply;
+  - no cloud whitelisting;
+  - account link automatic at 30%+ feeding of the preceding month;
+  - aggregated counts per area (no identifiers or tracks) OK within those conditions.
+- **Order 1, total R3,567.60** (sub-total R2,997.91 + flat shipping R104.35 + VAT R465.34):
+  - Raspberry Pi 4 Model B 3GB, R1,426.00;
+  - FlightAware Pro Stick Plus (USB SDR ADS-B receiver), R1,304.26;
+  - Raspberry Pi 4 official USB-C power supply 5.1 V 3 A (15.3 W), R139.04;
+  - 3 dBi ADS-B 1090 MHz SMA antenna with magnetic base, R128.61.
+- **Order 2, R199:** SanDisk Ultra microSDHC 32 GB Class 10; "delivery by Wed 11 Nov", not yet shipped at the screenshot.
+- **Kit total R3,766.60** (one-off; no recurring line item).
+- **Note against OpenSky's equipment advice** (Pi 3B/4 + RTL-SDR, outdoor antenna, adsb.im image; provider advice, unverified): the kit matches the Pi/SDR part. The antenna is a 3 dBi magnetic-base whip, not an outdoor one. Placement and reach are to be measured once running.
+- **Not approved by the purchase:** installation, feeding, account linking, REGISTER change or any aircraft build. `aircraft-rc` stays parked; each step is Chad's go.
+
 ## 10 Nov 16:11 UTC — Close-out (START-HERE §9), Sky zoom-out thread
 - `_review/sky-zoom-rc` and `_review/sky-zoom-rc-preview` moved (mv) to `_to_delete/20261110T160032Z/` on the Mac. `_review/` is empty.
 - Branch `sky-zoom-rc` deleted by Chad. `git fetch -p`: remote has only `main` and `aircraft-rc`.
