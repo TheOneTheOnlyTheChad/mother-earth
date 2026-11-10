@@ -152,9 +152,10 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
     const items = want.map(k => L.items.find(i => i.k === k)), tags = want.map(k => L.tags.find(t => t.k === k));
     const ringBox = it => { const r = Math.max(6, it.rpx + 4); return { x: it.x - r, y: it.y - r, w: 2 * r, h: 2 * r }; };
     ok(`${label}: every intended body drawn, in frame, with its tag inside the canvas`, items.every(i => i && i.inFrame) && tags.every(t => t && !t.forced && inside(t, L.W, L.H)), { items: L.items.map(i => [i.k, Math.round(i.x), Math.round(i.y), i.inFrame]), tags: L.tags });
-    ok(`${label}: no two tags overlap; no tag over another body's ring`, tags.every((t, i) => tags.every((u, k) => k === i || !ov(t, u)) && items.every((it, k) => k === i || !ov(t, ringBox(it)))));
-    ok(`${label}: no body hides another (check 21)`, items.every(i => !i.occludedBy), items.map(i => [i.k, i.occludedBy]));
-    ok(`${label}: strip and stop bar cover no marker or tag`, items.every(i => !ov(ringBox(i), L.strip) && !ov(ringBox(i), L.bar)) && tags.every(t => !ov(t, L.strip) && !ov(t, L.bar)), { strip: L.strip, bar: L.bar });
+    const all = items.every(Boolean) && tags.every(Boolean);   // a missing body or tag fails every check below (never a crash)
+    ok(`${label}: no two tags overlap; no tag over another body's ring`, all && tags.every((t, i) => tags.every((u, k) => k === i || !ov(t, u)) && items.every((it, k) => k === i || !ov(t, ringBox(it)))));
+    ok(`${label}: no body hides another (check 21)`, all && items.every(i => !i.occludedBy), items.map(i => i && [i.k, i.occludedBy]));
+    ok(`${label}: strip and stop bar cover no marker or tag`, all && items.every(i => !ov(ringBox(i), L.strip) && !ov(ringBox(i), L.bar)) && tags.every(t => !ov(t, L.strip) && !ov(t, L.bar)), { strip: L.strip, bar: L.bar });
     ok(`${label}: scale line matches what is drawn (check 10)`, L.scale === (stop === 'C' ? 'Earth and Moon to scale. Sun drawn closer and resized. Labels show actual distances.' : 'Earth and Moon to scale. Labels show actual distances.'), L.scale);
   };
   for (const vp of CANV) for (const date of DATES) {
