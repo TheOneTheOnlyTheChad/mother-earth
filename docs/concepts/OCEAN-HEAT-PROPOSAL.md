@@ -1,6 +1,6 @@
-# Ocean Heat — proof-of-concept proposal, rev 4.1 (docs only)
+# Ocean Heat — proof-of-concept proposal, rev 4.2 (docs only)
 
-**For:** GPT's review of rev 4, then Chad's O7 (branch build) and C6 (REGISTER draft) lines.
+**For:** Chad's O7 line (preview build on a branch). GPT cleared rev 4.1 for O7 (relayed by Chad, 10 Nov); rev 4.2 applies GPT's two build notes and the credit wording. REGISTER filing: its own line.
 **Brief:** `docs/concepts/OCEAN-HEAT-BRIEF.md` (Chad's spec, filed verbatim 10 Nov 2026).
 **Approved so far:** O1 (decided below); the source-file check C0–C5 (done, accepted by GPT). No build, branch, REGISTER filing, R2, hub or page change is approved.
 
@@ -30,6 +30,11 @@
   - **§9a / C6:** the distinction between the exact files and the OSTIA notice is recorded; GPT's withdrawal of the OSTIA release hold for this snapshot; credit and the cited DOI.
   - **§2 / §5:** corrected mask invariants. Valid SST also occurs under masks 2 and 4. Land = mask 1, checked against the literal SST fill, which also occurs on 4,655 ice cells.
   - **§8:** expected display-block values at 0.25° and 0.5°; a seam fixture with visibly different classes; a real seam pair.
+- **Rev 4.2** — 10 Nov 2026. GPT cleared rev 4.1 for the O7 preview-build approval (relayed by Chad), with two build notes and a credit note:
+  - **§8:**
+    - several rev 4.1 tap points sat on grid edges (e.g. (0, −140)). Visual taps now use **confirmed interior points** (packet `C4c-interior.json`: off every 0.05° / 0.25° / 0.5° edge, the expected native cell type, the same blocks as the values table), and exact edges are kept as **deliberate lookup tests**;
+    - the synthetic seam is checked **on the rendered globe**, so a correctly painted texture mounted backwards still fails.
+  - **§9a:** link the exact products; label `10.3390/rs12233856` as the **methods article DOI**. GPT found NCEI dataset DOIs only for the separate heat-stress archive, none verifiable for this 1991–2020 anomaly or its climatology.
 
 Evidence tags used below:
 - **[NOAA page]** = NOAA's public product pages, read as text through Claude's fetch tool on 10 Nov 2026 (the tool's summary, not a verbatim copy); GPT checked the same pages independently.
@@ -265,29 +270,39 @@ A 390 × 844 emulation is viewport evidence on the host GPU only; physical phone
 
 - **Expected display-block values** (what a tap shows). Computed straight from the native files (`C4b-blocks.json`, packet), never from page output; every block's integer sums satisfy SST − anomaly − normal = 0.
   - Format: *n*/*N* contributing · SST / anomaly / normal (°C) · class (§4 legend).
-  - No tap point straddles a block edge except the deliberate seam points.
+  - **Tap points are interior** (rev 4.2; packet `C4c-interior.json`): none lies on a 0.05°, 0.25° or 0.5° edge; each sits on the native cell type shown; each falls in the same blocks as the values below.
 
   | Tap point | 0.25° block | 0.5° block |
   |---|---|---|
-  | Atlantic off Cape Point (−34.40, 18.40) | 25/25 · 17.71 / +0.71 / 17.00 · class 6 | 91/100 (9 land) · 16.71 / −0.08 / 16.79 · class 5 |
-  | Cape Point tip (−34.357, 18.497) | same block as above (the tip is water at 5 km) | same block as above |
-  | False Bay (−34.25, 18.65) | 25/25 · 17.95 / +1.15 / 16.80 · class 7 | 72/100 (28 land) · 18.05 / +1.33 / 16.72 · class 7 |
-  | Cape Town (−33.95, 18.60) | 0/25 — all land: transparent, "land" | 0/100 — all land |
-  | Open Pacific (0.0, −140.0) | 25/25 · 30.57 / +5.09 / 25.48 · class 9 | 100/100 · 30.58 / +5.12 / 25.46 · class 9 |
-  | Off Cornwall (50.0, −6.0) | 25/25 · 13.95 / +0.96 / 12.99 · class 6 | 100/100 · 13.76 / +0.79 / 12.97 · class 6 |
-  | Gulf of Maine (43.0, −69.0) | 25/25 · 11.38 / +0.84 / 10.54 · class 6 | 100/100 · 11.71 / +1.06 / 10.66 · **class 7** |
-  | Seam W (−17.0, −179.9) | col 0 · 25/25 · 25.95 / −0.92 / 26.88 · class 4 | col 0 · 100/100 · 25.98 / −0.92 / 26.90 · class 4 |
-  | Seam E (−17.0, +179.9) | col 1439 · 25/25 · 25.77 / −0.93 / 26.71 · class 4 | col 719 · 100/100 · 25.78 / −0.91 / 26.68 · class 4 |
-  | **Exactly +180** and **exactly −180** (−17.0) | **col 0** (same as Seam W) | **col 0** (same as Seam W) |
-  | Weddell Sea (−70.0, −40.0) | 0/25 · 25 ice → "Sea ice" | 0/100 · 100 ice → "Sea ice" |
-  | Baffin Bay (71.575, −58.175) | 0/25 · 25 no-normal → "No 1991–2020 normal …" | 0/100 · 100 no-normal |
-  | **Near normal** (−0.25, 124.25) | — | 100/100 · 29.55 / +0.03 / 29.51 · **class 5** |
+  | Atlantic off Cape Point (−34.4125, 18.4125), native water | 25/25 · 17.71 / +0.71 / 17.00 · class 6 | 91/100 (9 land) · 16.71 / −0.08 / 16.79 · class 5 |
+  | Cape Point tip (−34.357, 18.497), native water | same block as above (the tip is water at 5 km) | same block as above |
+  | False Bay (−34.375, 18.625), native water | 25/25 · 17.95 / +1.15 / 16.80 · class 7 | 72/100 (28 land) · 18.05 / +1.33 / 16.72 · class 7 |
+  | Cape Town (−33.9625, 18.6125), native land | 0/25 — all land: transparent, "land" | 0/100 — all land |
+  | Open Pacific (−0.125, −139.875), native water | 25/25 · 30.57 / +5.09 / 25.48 · class 9 | 100/100 · 30.58 / +5.12 / 25.46 · class 9 |
+  | Off Cornwall (49.875, −5.875), native water | 25/25 · 13.95 / +0.96 / 12.99 · class 6 | 100/100 · 13.76 / +0.79 / 12.97 · class 6 |
+  | Gulf of Maine (42.875, −68.875), native water | 25/25 · 11.38 / +0.84 / 10.54 · class 6 | 100/100 · 11.71 / +1.06 / 10.66 · **class 7** |
+  | Seam W (−17.125, −179.9125), native water | col 0 · 25/25 · 25.95 / −0.92 / 26.88 · class 4 | col 0 · 100/100 · 25.98 / −0.92 / 26.90 · class 4 |
+  | Seam E (−17.125, +179.9125), native water | col 1439 · 25/25 · 25.77 / −0.93 / 26.71 · class 4 | col 719 · 100/100 · 25.78 / −0.91 / 26.68 · class 4 |
+  | **Exactly +180** and **exactly −180** (−17.125), lookup test | **col 0** (same as Seam W) | **col 0** (same as Seam W) |
+  | Weddell Sea (−70.125, −39.875), native ice | 0/25 · 25 ice → "Sea ice" | 0/100 · 100 ice → "Sea ice" |
+  | Baffin Bay (71.575, −58.175), native no-normal | 0/25 · 25 no-normal → "No 1991–2020 normal …" | 0/100 · 100 no-normal |
+  | **Near normal** (−0.125, 124.125), 0.5° only; block all water | — | 100/100 · 29.55 / +0.03 / 29.51 · **class 5** |
 
 - **Gulf of Maine changes class with the grid** (class 6 at 0.25°, class 7 at 0.5°): a check that the displayed class follows the chosen grid.
+- **Edge lookup tests (deliberate, not visual).** The lookup is `floor` on (90 − lat) and on wrapped (lon + 180), so a point exactly on an edge belongs to the block **south of** a latitude edge and **east of** a longitude edge. Exact-edge points assert this:
+  - (0, −140) → the 0.25° block lat 0…−0.25, lon −140…−139.75; same block as Open Pacific;
+  - (50, −6) → Off Cornwall's blocks; (43, −69) → Gulf of Maine's blocks;
+  - (−34.25, 18.65) → False Bay's blocks; (−17, ±180) → col 0;
+  - exactly lat −90 → the last row (clamped).
+  - **Breaks:** `round` for `floor`, and `ceil` for `floor`, must each fail.
 - **The 0.5° Cape Point block's** P2 texels: `CCCMM / CCCMM / CCCCM / CCCCC / CCCCC`. Tapped on its land, its water and a mixed texel.
 - **The real seam at −17° is the same class on both sides** (class 4 / 4), so it cannot show a visible seam error. Two additions:
   - **Seam fixture (synthetic, visibly different classes):** a manifest-valid fixture snapshot in which the westmost value column (col 0, −180…−179.5) is all water at **−2.50 °C (class 2, blue)** and the eastmost (col 719, 179.5…180) is all water at **+2.50 °C (class 8, orange)**, every other block land.
-    - **Rendered check:** sample the texture or canvas on each side of the 180° meridian and assert blue west, orange east.
+    - **Rendered check on the globe itself:**
+      - turn the camera to face the 180° meridian;
+      - project points just west and just east of it to screen with `getScreenCoords`;
+      - sample the **rendered canvas** there and assert blue west, orange east.
+      - Sampling the texture alone is not enough: a correctly painted texture mounted backwards (mirrored, or rotated 180° on the sphere) must fail. **Breaks:** a mirrored mesh scale and a π offset in the mesh rotation must each fail this check.
     - **Tap checks:** −179.9 and **exactly −180 and +180** → −2.50; +179.9 → +2.50.
     - **Breaks:** the no-wrap formula (+180 lands out of range or in col 719), a one-texel shift, and a mirrored longitude must each fail.
   - **Real seam pair with different classes** (0.5°; 54 such rows exist): row 61 (59.5…59.0° N): col 0 +0.85 (class 6) vs col 719 +1.01 (class 7). Taps either side must return each own value.
@@ -341,9 +356,14 @@ A 390 × 844 emulation is viewport evidence on the host GPU only; physical phone
 - **The release hold is withdrawn for this snapshot:** GPT withdrew the OSTIA hold (relayed by Chad, 10 Nov), so it no longer blocks a public release of this 9 Nov snapshot. A later refresh re-reads the exact files' attributes, and any new source or wording is re-checked.
 - **Credit (on the card date line, the inspector method row, Sources and the page footer):**
   - **"NOAA Coral Reef Watch"**: the citation page asks that credit and courtesy be given to NOAA Coral Reef Watch.
+  - **Link the exact products** (Sources and the footer):
+    - CoralTemp v3.1 daily SST: https://coralreefwatch.noaa.gov/product/5km/index_5km_sst.php
+    - SSTA, 1991–2020 baseline: https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta_clim19912020.php
+    - the daily 1991–2020 climatology, from the same product page.
+    - The exact file URLs and sha256 values go in Sources' provenance table.
   - **DOI:** the files ask for "the appropriate DOI associated with this dataset" but carry no DOI attribute, and neither the citation page nor the 1991–2020 product page lists a dataset DOI for the 1991–2020 anomaly or the climatology.
-  - The citation page's reference for CoralTemp and the 5 km v3.1 suite is used and labelled as an article: Skirving, W., et al. (2020). *CoralTemp and the Coral Reef Watch Coral Bleaching Heat Stress Product Suite Version 3.1.* Remote Sensing 12(23):3856. **doi:10.3390/rs12233856**.
-  - If NOAA or NCEI publishes a dataset DOI for these products, it replaces or joins this in the next revision. Not checked: NCEI archive accession pages.
+  - The citation page's reference for CoralTemp and the 5 km v3.1 suite is shown as **"Methods article DOI: 10.3390/rs12233856"**: Skirving, W., et al. (2020). *CoralTemp and the Coral Reef Watch Coral Bleaching Heat Stress Product Suite Version 3.1.* Remote Sensing 12(23):3856. It is never labelled a dataset DOI.
+  - **Dataset DOI:** none verified for this exact 1991–2020 anomaly or its daily climatology. GPT found NCEI dataset DOIs only for the separate heat-stress archive, which does not cover these files. If NOAA or NCEI publishes one, it is added in a later revision.
 - **C6 output:** a REGISTER entry recording the three statements, this distinction, GPT's withdrawal of the hold, the credit and the DOI. **Filed only on Chad's line.**
 
 ## 10. Decisions
@@ -355,5 +375,5 @@ A 390 × 844 emulation is viewport evidence on the host GPU only; physical phone
 - **O5:** blocks qualify on any contributing cell; painting and tapping follow the native masks; P1 (0.25° or 0.5°) or P2 + 0.5° by the renderer's limit and measurement.
 - **O6:** source-file check C0–C5 **DONE** (GPT accepted). md5 sidecars open.
 - **C6:** terms read (§9a); REGISTER entry to be filed on Chad's line.
-- **O7:** branch build (preview only, on the pinned 9 Nov inputs): its own go, after GPT's review of rev 4.
+- **O7:** branch build (preview only, on the pinned 9 Nov inputs): **cleared by GPT (rev 4.1); Chad's go.**
 - **O8:** OSTIA hold **withdrawn for this snapshot** (GPT, relayed by Chad); §9a records the distinction, credit and DOI. REGISTER filing on Chad's line.
