@@ -1,16 +1,16 @@
 # Buoy water temperature — release-candidate packet (`buoy-temp-rc`)
 
 **Approval:** Chad, 10 Nov 2026: "Approve: build buoy-temp-rc on a branch only — drifter dots coloured by water temperature per BUOY-TEMPERATURE-PROPOSAL rev 2; no merge or page change."
-**Candidate:** branch `buoy-temp-rc` @ `4064de1` (code). This packet is committed after it.
+**Candidate:** branch `buoy-temp-rc` @ **`61d0504`** (code; rev 2, grey changed after the live RC). First build `4064de1`. This packet is committed after it.
 **Scope:** page only. No hub, D1, R2, cron or new request. The public page is unchanged (main is untouched).
 
 ## 1. What changed
 
 | File | Change | sha256 at `4064de1` |
 |---|---|---|
-| `app.js` | `ME.SST_BREAKS`, `ME.SST_COLOURS`, `ME.SST_NONE`, `ME.sstClass`, `ME.sstColour`, `ME.sstLabel`, `ME.sstKeyHtml`, `ME.sstSwatchHtml`: one source of truth | `4e1759472ab6b56c…` |
-| `index.html` | Drifter `col` = `ME.sstColour(sst_c)` (was fixed `#ffd86b`); card key `#sstkey-drifters` (shown only while on); main key `#leg-drifters` uses an 8-colour swatch + "coloured by water temperature (see card)"; `?v=202611251000` | `ccf6da372000501b…` |
-| `sources.html` | Drifters SST paragraph: classes, grey = Temperature unavailable (none reported or range-withheld), fix times vary, not compared with normal, GPT's range-check sentence; `?v=` bump | `89cb351b90f2e95c…` |
+| `app.js` | `ME.SST_BREAKS`, `ME.SST_COLOURS`, `ME.SST_NONE`, `ME.sstClass`, `ME.sstColour`, `ME.sstLabel`, `ME.sstKeyHtml`, `ME.sstSwatchHtml`: one source of truth | `161b53cc2086b5cc…` |
+| `index.html` | Drifter `col` = `ME.sstColour(sst_c)` (was fixed `#ffd86b`); card key `#sstkey-drifters` (shown only while on); main key `#leg-drifters` uses an 8-colour swatch + "coloured by water temperature (see card)"; `?v=202611261000` | `c1797d721ed84618…` |
+| `sources.html` | Drifters SST paragraph: classes, grey = Temperature unavailable (none reported or range-withheld), fix times vary, not compared with normal, GPT's range-check sentence; `?v=` bump | `e469e0f58d03c85c…` |
 | `phase1/buoy-temp.test.mjs` | New unit suite (37) | — |
 | `phase1/buoy-temp-ui.test.cjs` | New browser suite (33) | — |
 
@@ -34,8 +34,17 @@
   - min ΔE 22.9 to dark ocean (`#10233a`);
   - nearest other ocean-dot colour: vessels, ΔE 18.7;
   - no warm hue, so nothing reads as Ocean Heat's "warmer than usual" orange.
-- **Grey `#54545a`** (Temperature unavailable): the grey that maximises the minimum ΔE to every class across normal vision, deuteranomaly and tritanomaly. Min 15.7; ΔE 24.6 to the dark ocean.
-- **Known weakness:** the coldest class `#3b528b` is the lowest-contrast dot on dark ocean (visible in the offline close-up, faint). It is judged on the real backdrop in the live RC (§4). If it fails there, the fallback is to start viridis at 0.35.
+- **Grey, first build `#54545a`:** the grey that maximised the minimum ΔE to every class across normal vision, deuteranomaly and tritanomaly (min 15.7; ΔE 24.6 to the desk dark-ocean colour).
+- **Grey, rev 2 `#b0b0b8`, chosen on the real globe.** In the live RC, `#54545a` nearly vanished on night-side and dark ocean: globe.gl shades each 3D dot darker than its declared colour, so the desk ΔE overstated it.
+  - Four greys were compared on the same real buoys through the page's own render path: `#54545a`, `#808088`, `#a4a4ac`, `#b0b0b8`.
+  - `#b0b0b8` read clearly on night-side ocean, over cloud, and in Arctic polar night.
+  - Desk figures for `#b0b0b8`:
+    - min ΔE 12.7 to every class under all three vision types;
+    - 14.8 to the plastic markers (deuteranomaly; 15.6 normal);
+    - 26.2 to vessels, 40.7 to earthquakes;
+    - 68.9 to near-black night ocean;
+    - its weakest backdrops are mid-grey cloud (14.5) and white cloud (18.1).
+- **Coldest class `#3b528b`:** the faintest class. In the live RC it was readable on grey cloud (Southern Ocean) and in Arctic polar night. Kept. The fallback, if GPT or Chad finds it too faint, is to start viridis at 0.35.
 
 ## 3. Tests
 
@@ -86,7 +95,17 @@
   - Cause (D1 `collector_runs`, read-only): the **16:07 drifters run failed upstream, OSMC HTTP 522**. The hub served counts from the failed 16:08 write and records from the last good run (15:08); the page's pairing rule withheld the mismatched records.
   - This is **existing live behaviour, not the branch**: the public site showed the same state for that hour. The RC is repeated after the next run (see below).
 
-*(RC result after the 17:07 run: appended below.)*
+- **17:08:45Z — repeat at `4064de1`**, after the 17:07 run succeeded (1,303 buoys, D1).
+  - Pair usable (cells and records both 17:08:09Z); state current.
+  - **All 1,303 buoys drawn**; colour ≠ `ME.sstColour(sst_c)` for 0 of them.
+  - Classes: below 0: 6; 0–5: 35; 5–10: 86; 10–15: 104; 15–20: 231; 20–25: 357; 25–30: 400; ≥ 30: 38; unavailable: 46.
+  - Visual on the real backdrop with day/night on: coloured dots read on dark ocean and cloud; **the grey nearly vanished on night-side ocean** → rev 2 (§2).
+- **17:17:13Z — repeat at `61d0504`** (rev 2). All six page files hash-exact (index `c1797d72`, app `161b53cc`; style, arts, sky, skyscene equal to live).
+  - Zero drifter requests before switch-on; exactly `/cells/drifters` + `/snapshot/drifters` after.
+  - 1,303 drawn, 0 colour mismatches, 46 grey `#b0b0b8`.
+  - The card key reads GPT's wording; the main key reads "drifting buoy · coloured by water temperature (see card)".
+  - Screenshots looked at: night-side ocean and cloud (mid-Atlantic, 26° N), Arctic polar night (77° N): grey and all classes visible, coldest faintest.
+- The public page was untouched throughout (injection into a clean tab only).
 
 ## 5. Open for GPT
 
