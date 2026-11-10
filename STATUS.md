@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 16:46 UTC (clock reading at write) — **Ocean Heat C0–C1 DONE** (Chad's Go; research only) — `docs/research/OCEAN-HEAT-SOURCE-CHECK.md`; packet on the Mac `research/ocean-heat/2026-11-10-claude/`
+- 16:43:31–16:45:36Z; 16 requests (cap 30); no full file, nothing decoded.
+- **Route:** both shells refused at the proxy; **the pane works** (Chad granted `star.nesdis.noaa.gov`, scope site).
+- **Inputs for 2026-11-09** (sizes from `Content-Range`):
+  - CoralTemp SST, 11,418,321 B;
+  - SSTA 1991–2020, 10,399,448 B;
+  - day-1109 climatology, 6,349,472 B.
+- Bounded reads: 206 / 4,096 B each; HDF5 signature on all three.
+- **Next (Chad): the download line.** Route D1 (Chad downloads the 3 files + 2 md5 sidecars into the packet's `inputs/`), then C2–C5.
+
 ## 10 Nov 16:41 UTC (clock reading at write) — **GPT's second review: Ocean Heat rev 3 (ready for O6); buoy temperature rev 2 (ready for B3)** (docs only)
 - GPT (relayed by Chad) verified both local sha256 prefixes; it could not tie the files to a commit (the Mac folder has no git).
 - **Ocean Heat rev 3:**
