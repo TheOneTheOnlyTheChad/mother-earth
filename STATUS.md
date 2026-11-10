@@ -4,6 +4,26 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 17:19 UTC (clock reading at write) — **Buoy temperature candidate BUILT on branch `buoy-temp-rc` @ `61d0504`** (Chad's Approve line: branch only; no merge or page change) — packet `reviews/2026-11-10-buoy-temp-rc.md` (on the branch, `0e08fa8`)
+- Page only:
+  - drifter dots coloured by `sst_c`, viridis 0.25–1.0 in 8 classes; grey `#b0b0b8` = Temperature unavailable; exactly 0 °C is a class;
+  - card key (GPT's wording) and main-key swatch, built from one source in `app.js`;
+  - Sources wording; `?v=202611261000`.
+  - No hub change. Served-hash checks stay at nine files.
+- **Tests:**
+  - `buoy-temp.test.mjs` 37; breaks 4/4 fail;
+  - `buoy-temp-ui.test.cjs` 33 (rendered pixels included); breaks 3/3 fail;
+  - regression 11 suites green;
+  - emulation only.
+- **Palette chosen by measurement.** Plasma and magma rejected (their oranges and reds are within ΔE 4–10 of fire and earthquake dots).
+- **Live RC** (Pages origin, live hub, real backdrop):
+  - **16:57Z: the drifters layer was "unknown, records withheld" on the live site too.** The 16:07 run failed upstream (OSMC HTTP 522); the hub served counts from the failed write and records from 15:08, and the page withheld the mismatched pair. Recovered at 17:08 (1,303 buoys). **Observation, not changed:** one failed upstream hour blanks the layer although the last good pair exists; any change needs its own proposal.
+  - **17:08Z:** 1,303 drawn, 0 colour mismatches. The first grey `#54545a` nearly vanished on night-side ocean (globe.gl shades dots darker) → **rev 2 grey `#b0b0b8`**, compared against 3 other greys on the real globe.
+  - **17:17Z at `61d0504`:** 6 page files hash-exact; zero drifter requests before switch-on; 1,303 drawn; grey and classes visible on night ocean, cloud and Arctic polar night (coldest class faintest).
+- **GPT preview:** Mac `_review/buoy-temp-rc/` = `0e08fa8` (275 files hash-matched). Served by Chad in Terminal as before.
+- **Open for GPT:** (1) whether the card accent (pip, count) should also leave the old yellow; (2) coldest-class contrast; (3) the OSMC 522 observation.
+- **Not approved:** merge (`Approve: merge buoy-temp-rc to main (page change: buoy dots coloured by water temperature)`).
+
 ## 10 Nov 16:46 UTC (clock reading at write) — **Ocean Heat C0–C1 DONE** (Chad's Go; research only) — `docs/research/OCEAN-HEAT-SOURCE-CHECK.md`; packet on the Mac `research/ocean-heat/2026-11-10-claude/`
 - 16:43:31–16:45:36Z; 16 requests (cap 30); no full file, nothing decoded.
 - **Route:** both shells refused at the proxy; **the pane works** (Chad granted `star.nesdis.noaa.gov`, scope site).
