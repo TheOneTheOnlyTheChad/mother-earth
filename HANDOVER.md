@@ -41,7 +41,27 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **Timeline maintenance and expansion — captured 10 Nov on Chad's request (backlog §T, `docs/BACKLOG-VIEW-2026-11-08.md`; nothing started):** T1 discovery inbox, T2 evidence review (keep the dates-without-a-year shelf), T3 versioned releases (stable links, new revision IDs, older catalogues retained, page + catalogue as matched pairs with the existing hash checks), T4 public "What changed" (old/new ranges + evidence; page "last updated" separate from entry "last reviewed"), T5 release cadence (batch routine additions; corrections and withdrawals sooner). **First deliverables: T1 discovery inbox and T4 public changelog.** **Real iPhone Safari check: deferred by Chad (site first).**
 
-**NEXT THREAD STARTS HERE (10 Nov 02:27 UTC clock reading, end of the Timeline build thread):**
+**NEXT THREAD STARTS HERE (10 Nov 08:03 UTC clock reading, end of the deep-time Timeline thread):**
+- **Live, main = live:** hub **0.6.4** (`7d46edf3…`, since 07:54:38 UTC); page main **`cc91165`** (`?v=202611221000`); R2 holds `ref/timeline/tl-2026-11-R1.json` (`096ae648…0fbe`). Everything after `cc91165` is docs only.
+- **Released this thread, each step on Chad's own Approve line:**
+  - REGISTER: the ICS chart + six Big Five sources.
+  - R2 upload of the catalogue.
+  - Hub 0.6.3, then the deep-time page (main `57d07c2`).
+  - GPT's live smoke test 10/10.
+  - T3 versioned route: hub 0.6.4, then the page fetches its own revision (main `cc91165`).
+  - Branches `timeline-deep-rc` and `timeline-revs-rc` deleted (only `aircraft-rc`, unmerged, and `main` remain).
+- **Open, Chad's choice:**
+  1. Backlog §T, first deliverables **T1 discovery inbox** and **T4 public "What changed"** (proposal first).
+  2. GPT's "extinction horizon" wording, batched into the first real R2 catalogue revision (new ID + new key; old pins stay).
+  3. Real iPhone Safari check: **deferred by Chad** (site first).
+  4. Screen reader not tested.
+  5. Chad said he has more specs to bring.
+- **Chad's standing notes:**
+  - His Gmail address in REGISTER's GFW access line stays for now (his call, 10 Nov); don't raise it again.
+  - Branch deletions are his: open the GitHub branches page in the pane when asked.
+- **Previous handover block (02:27 UTC) kept below for the record.**
+
+**(superseded) NEXT THREAD STARTS HERE (10 Nov 02:27 UTC clock reading, end of the Timeline build thread):**
 - **Live:** hub 0.6.2; page main `4b23518` = Timeline page + Earth now · Timeline tabs (seven page files, hashes above). Everything since is docs only. Health monitors green at the last read (10 Nov 02:23 UTC).
 - **Open from the release (each needs Chad):**
   1. **Real-site smoke test** on desktop + phone, with Chad: globe with the new header, Earth now ↔ Timeline ↔ Sources (tabs and Menu), the Pliny entry, Back/Forward. **GPT's live smoke test is recorded (STATUS 10 Nov):** desktop + 390 × 844 navigation, Back/Forward, focus, withdrawal disclosure and phone sheet all worked; an initial earthquake-snapshot miss loaded on the follow-up (cause not established); fires Unknown after the daily reset (expected). Remaining: real iPhone Safari.
