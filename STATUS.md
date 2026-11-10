@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 10:43:31 UTC — **PAGE RELEASED: Sky on Two Clocks card** (main `a1c3ed6`, merge of `sky-rc` @ `22f5aa9`, code `2da37b2`; Chad: "Approve: merge sky-rc to main (page change: Sky on Two Clocks card)")
+- **Merge:** no conflicts. Merged files equal the candidate: index `95d0828c…`, app `e3f4a385…`, sky `175be00b…`, style `f7ea6e9c…`, arts `58773cef…`, sources `a524dbd8…`, timeline.html `d7c37d5f…`, timeline.js `ae87c6a1…`, worker `1073d15d…`. `build_sky.py --check` OK (`f851f164…368a`); `build_timeline.py --check` OK. The full regression (41 suites) passed on the code at 10:30 UTC.
+- GPT's recheck of the corrected page at rev 3 was requested (note at 10:31 UTC). Chad sent the merge line; no GPT result was relayed in this thread before it.
+- **Pages build** success 10:44:20 UTC.
+- **Served hashes:** all **eight** page files exact (10:44:39 UTC).
+- **Live smoke test (10:44:53 UTC, public page):**
+  - Card present under the Sky heading, off on load, no sky request before switch-on.
+  - Switch on → exactly one request, `/catalogue/sky/sky-2026-11-R1`; status ok. No JPL request.
+  - Moon 399,770 km "Getting farther at sample time"; Sun 148.2 million km "Getting closer at sample time"; both "at 00:00 UTC, 10 Nov 2026". Charts and text equivalents present; R1 note shown.
+  - Deep Time readable.
+- **Rollback:** page = revert `a1c3ed6` (own Approve line); hub = 0.6.4 `7d46edf3…a7987` (own line; not needed, since the old page ignores the sky route).
+- **Follow-on (Chad, 10 Nov):** Moon and Sun drawn in the 3D view when zoomed out — phase two, new thread, own proposal → GPT. Needs a sky-direction source (Horizons) and a scale decision (true scale is Moon ~60, Sun ~23,000 Earth radii).
+- **Open:** `sky-rc` branch deletion (Chad's, GitHub branches page); HANDOVER / START-HERE at thread end.
+
 ## 10 Nov 10:12:09 UTC — **HUB 0.6.5 DEPLOYED** (Chad: "Approve: deploy hub 0.6.5 from 2da37b2 (content only)")
 - **Before (10:11:32 UTC):** live worker.js = 0.6.4 `7d46edf3…a7987` (rollback target), 279,110 B; 19 bindings. Code from raw.githubusercontent at `2da37b2`: 282,755 B, sha256 `1073d15d0743171909debb95900141fefcf7f41185f2c0eb7646afd53665ec94` (same Worker as packet rev 1/2; the option (b) change touched only the generator and the page). Hash re-checked in the tab immediately before the write.
 - **Deploy:** content-only PUT from the dashboard tab 10:11:48Z → HTTP 200, success, etag `03a5a98e…ed25`, modified 10:11:51.293Z. Bindings, secrets, variables and crons untouched.
