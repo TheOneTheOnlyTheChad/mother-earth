@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611241000">
+<link rel="stylesheet" href="style.css?v=202611261000">
 </head>
 <body class="doc">
 <header class="top">
@@ -106,7 +106,7 @@
   <p>Each point is one drifting buoy at its <b>own latest reported fix</b> in the 24 hours before the hub's run. The fixes were taken at different times, so the layer is not a picture of one moment; every buoy's inspector shows its own fix time. Where a buoy is now is unknown.</p>
   <p><b>Source:</b> NOAA Observing System Monitoring Center (OSMC) ERDDAP, dataset <code>OSMC_flattened</code> — observations relayed over the WMO Global Telecommunication System (GTS); platform types "DRIFTING BUOYS" and "DRIFTING BUOYS (GENERIC)". Licence stated in the dataset: CC0 1.0 (public domain dedication). These are real-time reports, not the Global Drifter Program's quality-controlled data, which are published years later.</p>
   <p><b>Collection:</b> the hub makes one request each hour (about 100 KB, about 1,300 buoys, measured 3 Nov 2026) and publishes one current snapshot, which replaces the previous one on the globe. What the hub retains beyond that is stated, from the hub's own report, in <a href="#kept">What Mother Earth keeps</a>. Before anything is shown it checks the header and units, each row's time, position and buoy id, and that the count has not collapsed (at least 200 buoys, and at least half the previous count). A report stamped <b>in the future</b> (10 buoys on 3 Nov 2026) is refused and counted, never drawn. If a run fails, the previous snapshot stays with its own times and the layer goes Unknown after 4 hours.</p>
-  <p><b>Sea-surface temperature</b> is shown as the buoy reported it (°C); a missing value is shown as not provided, never as zero, and a value outside −3 to 40 °C is withheld and counted.</p>
+  <p><b>Sea-surface temperature</b> is shown as the buoy reported it (°C), in each buoy's inspector and as the colour of its dot on the globe: eight 5 °C classes from below 0 to 30 °C and above, on a scale that runs from dark blue (cold) to yellow (warm). A grey dot means <b>temperature unavailable</b>: either the buoy reported none, or the value was outside −3 to 40 °C and the hub withheld it (it is counted, never shown as zero). The colour is the temperature at that buoy's own latest fix, so neighbouring dots can be hours apart, and it is <b>not compared with any normal</b>. Mother Earth applies a range check. It performs no further quality checks on the reported temperature.</p>
   <p><b>Coverage:</b> buoys are few and far apart. A cell with no buoy says nothing about that water. The layer is off when the page loads and is fetched only while it is switched on.</p>
   <h2 id="plastic">Microplastic samples — dated (observation, optional layer)</h2>
   <p><b>What it is.</b> 1,145 surface-water samples taken with manta nets (0.33 mm mesh) by Oceaneye volunteers and analysed by Oceaneye staff, <b>2011–2024</b> (newest 23 Oct 2024), as <b>published by NOAA NCEI</b> in its Marine Microplastics collection (Accession 0276422). Each marker is one sample at the place the tow started, on its own sampling date. <b>It is not where plastic is now</b>, and it is one programme's routes — mostly Atlantic and Mediterranean — not global coverage. <b>A missing marker does not establish plastic-free water.</b> The layer is off when the page opens and is fetched only while switched on.</p>
@@ -193,7 +193,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202611241000"></script>
+<script src="app.js?v=202611261000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
