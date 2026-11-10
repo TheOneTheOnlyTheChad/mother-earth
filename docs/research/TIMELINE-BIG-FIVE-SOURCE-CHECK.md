@@ -11,7 +11,9 @@
 | E4 end-Triassic | TIMING CANDIDATE — publisher page blocked (bot challenge) | approximate point; other approximations differ | doi:10.1126/sciadv.abb6704 · CC BY 4.0 · Crossref 0 notices, Europe PMC no corrections |
 | E5 end-Cretaceous | PASS with labelled placement | impact age 66.02 Ma; extinction placed at it, labelled "tied to the dated impact" (synchrony: doi:10.1126/sciadv.ado5478); causes off this slice | doi:10.1017/ext.2023.13 · CC BY 4.0 · publisher page read, no notices |
 
-**Open:** E1 and E4 publisher pages (Chad or GPT to read; the pane got a Cloudflare challenge and did not bypass it); full-text XML not retained (Mac shell refused at Europe PMC/NCBI/Crossref; passages + hashes kept). REGISTER entries proposed, not filed.
+**GPT's review of rev 2 (10 Nov, relayed by Chad):** all five rev 2 hashes matched, original log prefix intact, retained chart matched and contains both window bounds. **GPT opened the science.org pages for E4 (He 2020) and O'Connor 2024: no correction, retraction or expression-of-concern notice in the article text GPT inspected.** E4 → timing confirmed for the build. **E1 stays provisional and off the release axis** until the Oxford page is read. Build proposal may proceed with E1 conditional.
+
+**Open (superseded in part above):** E1 and E4 publisher pages (Chad or GPT to read; the pane got a Cloudflare challenge and did not bypass it); full-text XML not retained (Mac shell refused at Europe PMC/NCBI/Crossref; passages + hashes kept). REGISTER entries proposed, not filed.
 
 ## Original record (superseded by rev 2)
 

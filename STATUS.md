@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 04:10 UTC (clock reading at write) — **Timeline deep-time BUILD PROPOSAL rev 1** (docs only) — `docs/concepts/TIMELINE-DEEP-TIME-BUILD-PROPOSAL.md`
+- GPT reviewed source check rev 2 (hashes matched) and read the science.org pages for E4 and O'Connor (no notices). **E1 provisional, off the release axis** until the Oxford page is read.
+- Proposal: overview strip + 538.8 Ma window; Mass extinctions lane with E2–E5 (E1 per B1); three empty lanes ≤ 96 px; a drawing rule per shape (one-sided bar never closed, modelled hatched, approximate "~", no-uncertainty point, chart boundary beside the source value); one versioned catalogue served by hub 0.6.3 at `/catalogue/timeline` (Arts pattern), no-JS list from the same revision, mismatch → list only; tests; REGISTER before release; rollback page first.
+- **R2 read 04:08:55 UTC** (dashboard GraphQL, read-only): Class A 26,777, Class B 38,550 over 10.708 days → ~7.6 % / ~1.1 % of allowances projected; storage peak 0.877 GB. Expected increment $0.00 (estimate, conditional).
+- Decisions B1–B6 for Chad. **Nothing built, uploaded, deployed or filed.**
+
 ## 10 Nov 04:02 UTC (clock reading at write) — **Big Five source check rev 2 after GPT's review** (research only; packet `rev2/` on the Mac; originals unchanged)
 - GPT accepted the packet as a bounded evidence record and revised the blanket PASS. Rev 2: **C0 reconciled** (tag `v2026-06.5` = `44d1043ecf29`; chart.ttl re-fetched by the Mac = same sha256, now retained); **E3 switched** to Burgess et al. 2017 (onset 251.941 ± 0.037 Ma, CC BY 4.0) because Herz's ~251.906 Ma is not in Dai's readable text; **E2** labelled boundary-age evidence, duration unset; **E5** extinction placed at the dated impact with O'Connor 2024 as synchrony evidence, causes off; **E1** pulses as attributed text.
 - Publisher pages read for E2, E3, E5 (no notices). **E1 (OUP) and E4 (Science) blocked by a bot challenge — not bypassed; open.** Pane site access granted by Chad: academic.oup.com, cambridge.org, science.org.
