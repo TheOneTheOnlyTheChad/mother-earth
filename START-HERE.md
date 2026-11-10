@@ -239,4 +239,11 @@ Deterministic test of the hard boundary: `node phase1/duration-contract.test.mjs
 
 ## 9. Handover rule for every thread
 **Timestamps (Chad, 8 Nov):** every STATUS/HANDOVER time is either a measured reading (a real clock: tool output, `date -u`, a log) or a git commit time labelled "commit time". Never an estimate. A file cannot hold its own commit's sha, so write the handover header's sha after committing (second commit) or say "this commit".
-Before a thread ends: update STATUS.md (all three copies + project doc), update this file if an operating fact changed, and leave the next concrete action as item 1 of STATUS → Next. The new thread's first act is to read START-HERE then STATUS — Chad has put that instruction in the Project's custom instructions so it happens without being asked.
+Before a thread ends: update STATUS.md (all three copies + project doc), update this file if an operating fact changed, and leave the next concrete action as item 1 of STATUS → Next.
+**Close-out checklist (Chad, 10 Nov; every thread, before the handover note):**
+1. **Mac `_review/`:** move every review copy (`_review/<branch>*`) into `~/Documents/Mother Earth/_to_delete/`. Deletes are blocked in the Mac folder, so use `mv`, never `rm`; if a name already exists there, leave it and say so. Chad empties `_to_delete/` himself. `_review/` should be empty at the end of the thread.
+2. **Branches:** a merged release branch is deleted by Chad. Open the GitHub branches page in the pane and ask him. Confirm with `git fetch -p` that only `main` and the parked `aircraft-rc` remain (or name any other branch and why it stays).
+3. **Mac sync** of the whole repo at the final commit, preserve-first. Every preserved copy must match an earlier commit; report any that don't.
+4. **Clean checkouts:** `git status` is empty in every worktree, and everything is pushed.
+5. **Research packets stay** (`research/…`). Never move them to `_to_delete/` without Chad saying so.
+6. Then write HANDOVER's "NEXT THREAD STARTS HERE" block and give Chad the copy-and-paste handover note. The new thread's first act is to read START-HERE then STATUS — Chad has put that instruction in the Project's custom instructions so it happens without being asked.
