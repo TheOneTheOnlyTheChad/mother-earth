@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 12:01 UTC (clock reading at write) — **Source pass accepted by GPT; record rev 1.1; Sky zoom-out proposal rev 2.2** (docs only)
+- GPT (relayed by Chad): the pass supports the frame, the radii (IAU Moon 1,737.4 km, Sun 695,700 km) and the build-time transform; **no repeat export needed**. GPT reproduced the 365-row Bulletin A maxima (0.26843 s; joint 0.50474″) and found the hashes matching and the repo record byte-identical to the corrected packet result. GPT could not rerun ERFA.
+- **Record rev 1.1:**
+  - the two protocol clock readings explained (11:42:31 `date -u` in the writing/hashing command; 11:42:37 the first LOG entry; first request 11:42:38);
+  - UT1−UTC values marked as estimates; with the bulletin's seasonal term, −0.2909 s at 2027-12-31 (GPT's −0.291 s reproduced); −0.30 s is a rounded scenario;
+  - the polar-motion input called conservative (largest x and y from different dates, 0.5408″), ~0.00015° a sensitivity estimate, no bound for the full window;
+  - the 0.9 s convention attributed to the IERS glossary (GPT's citation, not read here).
+- **Proposal rev 2.2:** carries these in, plus the explicit ICRF→GCRS-input assumption, sourced radii, the body sheets as radius sources (REGISTER text, proposed), Bulletin A summary-figure citation only (R3 separate), and a Bulletin A check in the refresh. Scene design unchanged.
+- **Next, Chad's (separate lines):** REGISTER filing (§10.1 texts) and the branch build `sky-zoom-rc`.
+
 ## 10 Nov 11:52 UTC (clock reading at write) — **Sky zoom-out source pass DONE** (text only, no export; Chad: "Go: Sky zoom-out source pass — text only via the pane, no export (…)") — `docs/research/SKY-ZOOM-OUT-SOURCE-CHECK.md`; packet on the Mac `research/sky-zoom-out/2026-11-10-claude/`
 - Run 11:42:31–11:50:48 UTC (Mac clock, protocol hash to the LOG entry closing request #5); protocol fixed first; **5 requests** (cap 6), one at a time, from the pane. Horizons requests were `MAKE_EPHEM='NO'` (body data only); the "I Accept" control was not clicked; no PDF; no fallback.
 - **Frame (Horizons manual):** DE440/441 "taken to be indistinguishable from the ICRF"; ICRF vs FK5/J2000 "at most 0.02 arcseconds". The GCRS-axes reading stays labelled (IERS via ERFA).

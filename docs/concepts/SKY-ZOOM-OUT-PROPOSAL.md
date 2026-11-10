@@ -1,13 +1,24 @@
-# Sky zoom-out view (Earth → Moon → Sun) — proposal rev 2.1 (docs only)
+# Sky zoom-out view (Earth → Moon → Sun) — proposal rev 2.2 (docs only)
 
 - **Rev 1:** written 10 Nov 2026, 11:03 UTC clock reading (start of writing), commit `49678eb`.
 - **Rev 2:** written from 11:26 UTC clock reading (start of writing), after GPT's review of rev 1 (relayed by Chad, 10 Nov).
 - **Rev 2.1:** written 11:37 UTC clock reading, after GPT's recheck of rev 2 (relayed by Chad, 10 Nov; GPT reviewed the Mac copy `d0b39140…31ea`). GPT: rev 2 **closes the Worker-schema and alignment findings** and is ready for Chad's separate source-pass decision. Rev 2.1 tightens the camera acceptance tests and the ERFA notice wording before the branch build.
+- **Rev 2.2:** written 12:01 UTC clock reading, carrying in the text-only source pass (`docs/research/SKY-ZOOM-OUT-SOURCE-CHECK.md` rev 1.1) and GPT's review of it (relayed by Chad, 10 Nov). GPT: the pass supports the frame, the radii and the build-time transform; no repeat export is needed. Rev 2.2 changes no part of the scene design.
 - Built from GPT's brief (relayed by Chad), recorded in `docs/concepts/SKY-ZOOM-OUT-BRIEF.md`.
 - Nothing in this document is built, exported, uploaded, filed or deployed. Each later step needs its own approval (§13).
 - Builds on `SKY-TWO-CLOCKS-PROPOSAL.md` rev 3 and the live card (main `a1c3ed6`, hub 0.6.5).
 
 **Question the view answers:** where are the Moon and the Sun, relative to the Earth, at the card's sample instant, and how far away are they?
+
+## Rev 2.2 changes (source pass + GPT's review of it)
+| # | Change | Where |
+|---|---|---|
+| 1 | Horizons manual frame wording quoted. **The Earth-centred ICRF axes are aligned with the transform's GCRS input: stated as an explicit implementation assumption.** Horizons' −53 mas note concerns its own true-of-date route, not ours. | §3.1, §3.2 |
+| 2 | **UT1 − UTC from IERS Bulletin A**, replacing the unsourced "[GK < 0.9 s]". Max predicted 0.268 s to 2027-11-05; ~−0.291 s at 2027-12-31 by the bulletin's formula with its seasonal term. Both are **estimates**. −0.30 s is a rounded **scenario**, with sensitivity ≤ 0.00125°. The 0.9 s figure is the IERS glossary convention (GPT's citation), not a Bulletin C statement. | §3.3, §3.4 |
+| 3 | **Polar motion:** sensitivity estimate ~0.00015° from a conservative input (largest x and largest y from different dates, 0.541″; the largest predicted joint offset is 0.505″). No measured bound for the full window. | §3.3, §3.4 |
+| 4 | **Radii sourced** from the Horizons body sheets: Moon 1,737.4 km "Radius (IAU)", Sun 695,700 km "Solar radius (IAU2015)". | §4 |
+| 5 | REGISTER (proposed): the body sheets recorded as the radius-input sources; Bulletin A cited for summary figures only; R3 kept separate. | §10.1 |
+| 6 | Refresh adds a **Bulletin A check** (UT1−UTC and polar-motion sizes over the new coverage) beside the Bulletin C step 0. | §13 |
 
 ## Rev 2.1 changes (GPT's recheck of rev 2)
 | # | Change | Where |
@@ -50,7 +61,8 @@ Every number below carries one of these tags:
   - GPT reproduced the 0.0119° Sun/day-night comparison from `subpoints.json`, and confirmed all 579 vectors per body reproduce their exported ranges. GPT could not rerun ERFA or astronomy-engine (dependencies not in its workspace).
 - **[src]**: **external source text read** in this thread: ERFA files and LICENSE from `raw.githubusercontent.com/liberfa/erfa` (§3.2), text only. This is reading documentation and code, separate from the desk check.
 - **[code]**: read from the library code the page loads (§3.5, §4.1).
-- **[GK]**: general knowledge. Not to be quoted on the page until the source pass (§13 step 2) confirms it.
+- **[pass]** (rev 2.2): from the text-only source pass, `docs/research/SKY-ZOOM-OUT-SOURCE-CHECK.md` rev 1.1. Five requests, 11:42:31–11:50:48 UTC, no export; packet on the Mac `research/sky-zoom-out/2026-11-10-claude/`.
+- **[GK]**: general knowledge. Not to be quoted on the page.
 
 As with Two Clocks, every figure is **agreement with a named reference over a stated range**, never a claim of absolute accuracy.
 
@@ -107,6 +119,7 @@ A list, always in the DOM (for screen readers, and on screen through "Show as te
 ### 3.1 The problem
 - The Horizons vectors are **ICRF** (geocentric; `REF_PLANE='FRAME'`, `REF_SYSTEM='ICRF'`: `build_sky.py` line 29 and the export headers).
 - The globe's texture is **Earth-fixed**.
+- **Implementation assumption (rev 2.2, explicit):** the Earth-centred ICRF axes of the exports are taken as aligned with the transform's GCRS input. Horizons says its DE440/441 frame is "taken to be indistinguishable from the ICRF" [pass]; the GCRS alignment is a reading via IERS/ERFA, not a Horizons statement.
 - The IERS chain is **[TRS] = RPOM · R₃(ERA) · RC2I · [CRS]** [src: ERFA `c2t06a.c` note 3, citing IERS Conventions 2003]:
   - RC2I = precession–nutation,
   - ERA = Earth rotation angle (from UT1),
@@ -120,7 +133,10 @@ A list, always in the DOM (for screen readers, and on screen through "Show as te
   - `pmat06.c` note 2: "V(date) = rbp · V(GCRS) … mean equatorial triad of the given date" (bias + precession, no nutation).
   - Also fetched: `pnm06a.c`, `c2ixys.c`, `sp00.c`, `ee06a.c`.
   - **`LICENSE`** (sha256 `b1858f9a…`): BSD-3 terms (§10.1).
-- **Not reachable from Claude's fetch tool:** the Horizons manual. It was read in the pane in the Two Clocks pass (REGISTER); the frame wording is re-read in the source pass.
+- **Horizons manual** (read in the pane in the source pass, `document.lastModified` 11/05/2026) [pass]:
+  - "All underlying calculations in Horizons are done in the reference frame of the planetary ephemeris (DE440/441), taken to be indistinguishable from the ICRF using currently available measurements."
+  - "…the ICRF is thought to differ from the previous FK5/J2000 dynamical system by at most 0.02 arcseconds."
+  - Its "about -53 mas" note concerns Horizons' own IAU76/80 true-of-date route, which we do not use.
 
 ### 3.3 Desk check [desk]
 **(a) Shortcuts against the full chain:** Sun direction over all 579 dates (2026-06-01 → 2027-12-31). Full chain = `c2t06a`, polar motion 0, UT1 = UTC.
@@ -130,7 +146,10 @@ A list, always in the DOM (for screen readers, and on screen through "Show as te
 | GMST straight on the ICRF vector (no precession) | 0.369°–0.392° |
 | ERA only (no precession–nutation) | 0.059°–0.156° |
 | **Proposed: IAU 2006 bias-precession + GMST 2006, no nutation** | **0.0004°–0.0023°** |
-| Full chain with UT1 − UTC = 0.9 s instead of 0 | 0.0035°–0.0038° |
+| Full chain with UT1 − UTC = 0.9 s instead of 0 (IERS glossary convention, per GPT's citation) | 0.0035°–0.0038° |
+| Full chain with UT1 − UTC = −0.26843 s (Bulletin A max predicted) [pass] | ≤ 0.00112° |
+| Full chain with UT1 − UTC = −0.30 s (rounded scenario) [pass] | ≤ 0.00125° |
+| Full chain with polar motion (0.2676″, 0.4699″) (conservative combined input) [pass] | Sun ≤ 0.000093°, Moon ≤ 0.00015° (sensitivity estimate) |
 
 **(b) The proposed method, both bodies, against both references** (new in rev 2; `method.py`, `cmp.mjs` with `METHOD=1`). Measured with ERFA's own `pmat06`/`gmst06`, so this checks the **method**. The build repeats it on the generator's own output (§3.6).
 
@@ -153,7 +172,11 @@ The `ME.subsolar` figure includes that formula's low precision and the geometric
 ### 3.4 Proposed method — decision Z3 (Chad; GPT: reasonable v1)
 **Z3a: rotate in the generator.**
 - `build_sky.py` gains a plain-Python IAU 2006 bias-precession (Fukushima–Williams angles) + GMST 2006, with coefficients transcribed from ERFA with attribution and the BSD-3 notice in the file (§10.1).
-- **Assumptions, stated in code, file and Sources:** no nutation; polar motion 0; UT1 = UTC. The bound on UT1 − UTC is to be confirmed in the source pass [GK < 0.9 s]; the measured effect of 0.9 s is ≤ 0.0038°.
+- **Assumptions, stated in code, file and Sources:** no nutation; polar motion 0; UT1 = UTC; Earth-centred ICRF axes = GCRS input (§3.1).
+- **What the assumptions cost** (IERS Bulletin A, 5 Nov 2026, Vol. XXXIX No. 045 [pass]; desk sensitivity, `sensitivity.py`):
+  - **UT1 = UTC:** Bulletin A's predictions put |UT1 − UTC| at most 0.268 s to 2027-11-05. Its extension formula, with the seasonal term, gives ~−0.291 s at 2027-12-31. These are **estimates**, not measurements. Sensitivity for the rounded −0.30 s **scenario**: ≤ 0.00125°.
+  - **Polar motion 0:** sensitivity estimate ~0.00015°, from a deliberately conservative input (largest x and largest y from different dates, magnitude 0.541″; the largest predicted joint offset is 0.505″, 2027-06-01). The prediction table ends 2027-11-05, so **no measured bound covers the full window**.
+  - Bulletin A's figures are cited as summary figures only, in docs and Sources; no IERS series is shipped (§10.1).
 - pyerfa and astronomy-engine are **test-only** dependencies. The page does no astronomy.
 
 ### 3.5 Globe axes [code]
@@ -180,9 +203,9 @@ The `ME.subsolar` figure includes that formula's low precision and the geometric
 - Sun range 147.10–152.10 million km = **23,064–23,847 R⊕**.
 - R⊕ = 6,378.137 km, from the export header.
 
-Radii [GK; to be confirmed from Horizons body data in the source pass]:
-- Moon ~1,737.4 km (0.272 R⊕).
-- Sun ~695,700 km.
+Radii [pass, Horizons body data]:
+- Moon **1,737.4 km** (0.272 R⊕), "Radius (IAU)". The sheet's volumetric mean, 1,737.53 ± 0.03 km, differs by 0.007% (no visible effect).
+- Sun **695,700 km**, "Solar radius (IAU2015)". The photosphere value is 696,500 km.
 
 ### 4.1 Camera today [code]
 - three.js `PerspectiveCamera` with default vertical field of view **50°**.
@@ -192,7 +215,7 @@ Radii [GK; to be confirmed from Horizons body data in the source pass]:
 ### 4.2 Options
 - **Z2a (lean; GPT supports): true scale for Earth and Moon, Sun drawn closer and resized.**
   - Stop B is fully to scale. The Moon at true size measures **7.7–16 px across** at stop B, depending on canvas and date [desk, `framing-tags.json`]. Small but visible, with a marker ring.
-  - Stop C draws the Sun at **200 R⊕** (rev 1 said 400; §4.3) along its calculated direction, with radius 200 × 695,700 / range. That makes its angular size as seen from Earth's centre the same as the real Sun's: 0.91–0.95 R⊕ drawn [desk ranges / GK radius].
+  - Stop C draws the Sun at **200 R⊕** (rev 1 said 400; §4.3) along its calculated direction, with radius 200 × 695,700 / range. That makes its angular size as seen from Earth's centre the same as the real Sun's: 0.91–0.95 R⊕ drawn [desk ranges / pass radius].
   - At stop C on a 390-px phone, Earth is ~8 px and the Moon ~2 px across [desk, from the worst-case framing distance]. So both keep marker rings and tags.
 - **Z2b:** enlarged bodies, labelled ×N.
 - **Z2c:** log spacing. Not recommended.
@@ -312,6 +335,9 @@ The test set includes the worst dates from `framing-tags.json`, the near-opposit
   - Modifications to state: our transform; values rounded; the Sun drawn closer and resized.
   - The existing reuse interpretation ("public domain" statement; scope reading labelled) and attribution are unchanged.
 - The "research only" line is kept as history, with its date.
+- **Rev 2.2:** add the two Horizons body data sheets (Moon 301, Sun 10; `OBJ_DATA='YES'&MAKE_EPHEM='NO'`, retrieved 10 Nov 2026) as the **sources for the radius inputs**.
+
+**IERS Bulletin A (rev 2.2; note, not a data source entry):** cited only for summary figures bounding our UT1 = UTC and polar-motion-0 assumptions, in docs and Sources. The bulletin states "Distribution statement A: Approved for public release: distribution unlimited." No IERS time series is shipped to the page. The pending R3 (USNO) enquiry stays separate.
 
 **New entry "ERFA (liberfa/erfa)":**
 - Code/coefficients only, no data. BSD-3-Clause, `LICENSE` at `1a8044c` (sha256 `b1858f9a…`), read 10 Nov 2026.
@@ -361,7 +387,7 @@ GPT's answers (10 Nov, relayed by Chad): 1. no minimum disc diameter; test overl
 
 ## 13. Steps (each its own approval) and what is not approved
 1. ~~GPT rechecks rev 2~~ **done** (10 Nov): ready for the source-pass decision; rev 2.1 applies its test and notice changes.
-2. **Source pass**, text only, in the pane, **no export**:
+2. ~~**Source pass**~~ **done** (10 Nov 11:42–11:51 UTC, record rev 1.1; GPT accepted, no repeat export needed). It was text only, in the pane, **no export**:
    - the Horizons manual's frame wording,
    - Moon and Sun radii from Horizons body data,
    - the IERS |UT1 − UTC| bound,
@@ -375,6 +401,6 @@ GPT's answers (10 Nov, relayed by Chad): 1. no minimum disc diameter; test overl
 9. Live RC from the Pages origin.
 10. `Approve: merge sky-zoom-rc to main (page change: Sky zoom-out view)`
 
-**Refresh by 2027-06-01:** the card and scene are regenerated, uploaded and pinned as a pair (§7). Checks 1–4 and 20 are added to the refresh procedure.
+**Refresh by 2027-06-01:** the card and scene are regenerated, uploaded and pinned as a pair (§7). Checks 1–4 and 20 are added to the refresh procedure, plus a **Bulletin A check** (re-read the UT1 − UTC and polar-motion sizes over the new coverage; rerun `sensitivity.py`) beside the existing Bulletin C step 0.
 
-**Not approved:** the source pass, the REGISTER update, any build, any R2 write, any hub deploy, any page change.
+**Not approved:** the REGISTER update, any build, any R2 write, any hub deploy, any page change. (The source pass ran on Chad's Go, 10 Nov.)
