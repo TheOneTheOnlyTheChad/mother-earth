@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 07:40 UTC (clock reading at write) — **timeline-revs-rc built: hub 0.6.4 versioned catalogue route (branch only)** (Chad: "Approve: build timeline-revs-rc on a branch only — hub 0.6.4 versioned catalogue route + page fetches its own revision, per TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1; no merge, R2 write, hub deploy or page change.")
+- Proposal rev 1 → GPT review (versioned route and 404/503 split accepted; four points) → **rev 1.1** (legacy URL pinned to R1 permanently, `current` = metadata only; immutable revisions; qualified rollback; legacy-vs-current fixture test) → Chad's branch go.
+- **Candidate `timeline-revs-rc` @ `c98cb24`** (code `4310d54` + packet `reviews/2026-11-10-timeline-revs-rc.md`). Hub 0.6.4 `a4cd5c91…9eca0`; page fetches `/catalogue/timeline/<its revision>`; `?v=202611221000`. **Catalogue unchanged (`096ae648…0fbe`), so no R2 write.**
+- Tests: hub 57/57 (fixture R1 + R2 with R2 current: legacy still R1; 16 malformed ids → 404 with no R2 read), axis 96/96, timeline-ui 585/585; full regression green; 15 breaks each fail (new: legacy-follows-current, serve-unknown-as-current, no-per-revision-hash, fetch-unversioned).
+- Mac: `_review/timeline-revs-rc/` (exact, SHA256SUMS) + `_review/timeline-revs-rc-axis-preview/` (HUB='.' only; README).
+- **Next (each its own Approve line):** GPT review → `Approve: deploy hub 0.6.4 from 4310d54 (content only)` → live RC (both R1 routes + CORS from the Pages origin) → `Approve: merge timeline-revs-rc to main (page change: timeline fetches its own catalogue revision)`.
+
 ## 10 Nov 06:53 UTC (clock reading at write) — **GPT's live smoke test of the deep-time release: PASSED, no rollback indicated** (relayed by Chad)
 - All 7 served page/asset hashes = rev 3. 10/10 checks pass: hub root 0.6.3 + `catalogues.timeline`; `/catalogue/timeline` 200, 15,656 B, exact sha256; CORS (`Access-Control-Allow-Origin: *`, page used the cross-origin catalogue); axis drawn, build/revision match; all 5 marks open their evidence, Back returns focus each time; periods list (keyboard + click, 12, `1.0`/`66.00`); public sources = ICS + 6 articles, Herz/Dai/Bos/Trudgill absent; empty lanes not focusable; 390×844 no overflow; regressions clear (Pliny shelf, Earth now readings, Arts, health 8/8).
 - **ETag:** GPT saw a strong ETag; Claude saw a weak `W/"…"` at 06:09 (dashboard tab). Likely depends on the request's compression; no effect (the page doesn't use it).

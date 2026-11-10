@@ -37,6 +37,8 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 | Inspiration list | Chad's 50 sites, kept separate from the research backlog; queues no work. | `docs/INSPIRATION-50-SITES.md` |
 | CO₂ | GPT's bounded review supports the current card; a historical chart is a possible later proposal, not started. | STATUS 9 Nov |
 
+**T3 brought forward (10 Nov): versioned catalogue route.** Proposal `docs/concepts/TIMELINE-CATALOGUE-REVISIONS-PROPOSAL.md` rev 1.1 (GPT-reviewed). Candidate branch `timeline-revs-rc` @ `c98cb24` (code `4310d54`; hub 0.6.4 `a4cd5c91…`; no R2 write). Next: GPT review → hub deploy → live RC → page release, each on its own Approve line (STATUS 07:40).
+
 **Timeline maintenance and expansion — captured 10 Nov on Chad's request (backlog §T, `docs/BACKLOG-VIEW-2026-11-08.md`; nothing started):** T1 discovery inbox, T2 evidence review (keep the dates-without-a-year shelf), T3 versioned releases (stable links, new revision IDs, older catalogues retained, page + catalogue as matched pairs with the existing hash checks), T4 public "What changed" (old/new ranges + evidence; page "last updated" separate from entry "last reviewed"), T5 release cadence (batch routine additions; corrections and withdrawals sooner). **First deliverables: T1 discovery inbox and T4 public changelog.** **Real iPhone Safari check: deferred by Chad (site first).**
 
 **NEXT THREAD STARTS HERE (10 Nov 02:27 UTC clock reading, end of the Timeline build thread):**
