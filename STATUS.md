@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 03:39 UTC (clock reading at write) — **Big Five source check RUN: chart + all five episodes PASS under §11a** (research only) — `docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md`; packet on the Mac `research/timeline-big-five/2026-11-10-claude/`
+- 03:27:47–03:39:11Z (Mac clock), 11 min 24 s of the 3 h cap; browser pane, text only (Europe PMC XML, Crossref, stratigraphy.org, jsDelivr). Chad granted pane access to stratigraphy.org.
+- **C0:** ICS chart CC BY 4.0, data tag 2026-06.5 pinned by file hash. **E1–E5:** one CC BY source each with a timing passage; Crossref shows no update notices.
+- **Findings:** no numerically dated pulses (fixture test needed); chart and sources differ at every boundary (shown, not reconciled); E3 has two flags (secondary statement of a CC BY-NC-ND result; licence version unstated); E5 cause contested (impact vs Deccan as attributed claims); E2 covers the Frasnian–Famennian event only.
+- **Not done:** publisher landing pages (before release); REGISTER entries proposed, not filed. **For GPT's review.**
+
 ## 10 Nov 03:27 UTC (clock reading at write) — **Chad decided the Timeline deep-time proposal (D1–D7) and gave the go for the Big Five source check** (research only)
 - Chad: "D1–D4 and D6 as written, D5 show all four lanes, D7 3 h incl. write-up, text only. Go: Big Five source check per §11a." Packet will be on the Mac at `research/timeline-big-five/2026-11-10-claude/` (protocol fixed and hashed before any request; append-only LOG; repo gets IDs, hashes and dispositions only).
 
