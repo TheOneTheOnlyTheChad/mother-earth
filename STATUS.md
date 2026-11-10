@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 02:58 UTC (clock reading at write) — **Timeline deep-time proposal rev 1** (docs only) — `docs/concepts/TIMELINE-DEEP-TIME-PROPOSAL.md`
+- From Chad's vision (a real timeline across deep time: mass extinctions, life over time, human relatives, human history) and GPT's review of Claude's brief.
+- First slice: **the Big Five mass extinctions** on a Phanerozoic zoom window with a full-span overview; the ICS chart supplies the clock, the extinction literature the events; boundary / interval / pulses / partial date kept distinct; no percentage-loss figures; Pliny stays on the shelf.
+- **Ends the T1 exception** in the same release: a versioned catalogue on the hub (Arts pattern), with the no-JS list generated from the same pinned revision.
+- Decisions D1–D7 for Chad. **Nothing researched, built or approved.** Housekeeping: `timeline-rc` deleted on GitHub by Chad; Mac `_review/` folders moved to `_to_delete/_review/`.
+
 ## 10 Nov 02:43 UTC (clock reading at write) — **REGISTER: Ozone Watch and CNEOS entries FILED** (Chad's two Approve lines, after GPT accepted the provider records)
 - **Ozone Watch:** R6 §9.6 rev 6.1, scoped to `to3areas_2026_toms+omi+omps.txt` and `to3mins_2026_toms+omi+omps.txt` only (public domain per provider; credit line; one retrieval per file per day; no bulk pulls; best-effort availability).
 - **CNEOS:** R2 §4 rev 3.1 ("for this purpose with the citation"; API under 1 request/10 min; S1 applicability a contextual reading). **Commercial use, lightcurve scope and lightcurve retrieval stay open.**
