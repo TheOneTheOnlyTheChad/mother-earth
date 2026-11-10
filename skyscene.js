@@ -143,13 +143,38 @@
     const fB = frameFor([E, M], W, H, pt, pb), fC = frameFor([E, M, S], W, H, pt, pb);
     const p0 = [cam.position.x, cam.position.y, cam.position.z], t0 = g.controls().target, tg0 = [t0.x, t0.y, t0.z];
     const d0 = V.len(V.sub(p0, tg0)), u0 = V.norm(V.sub(p0, tg0));
-    st.path = { W, H, k: [{ u: u0, d: d0, t: tg0 }, fB && { u: fB.u, d: fB.d, t: fB.tgt }, fC && { u: fC.u, d: fC.d, t: fC.tgt }] };
+    st.path = { W, H, pt, pb, R: E.r, k: [{ u: u0, d: d0, t: tg0 }, fB && { u: fB.u, d: fB.d, t: fB.tgt }, fC && { u: fC.u, d: fC.d, t: fC.tgt }] };
     return !!(fB && fC);
   }
+  // Between stops the camera distance grows geometrically with s, but the orbit target and the swing follow the DISTANCE
+  // actually covered (w), not s. Moving the target by s pulled it far from Earth while the camera was still close, and Earth
+  // left the frame mid-pull-back (GPT, 10 Nov smoke test: four sampled positions showed neither body). With w, the target's
+  // offset relative to the camera distance never exceeds its value at the stop the camera is heading for, where Earth is
+  // framed by construction; the intermediate-frame check (sky-zoom-ui check 22) holds the rule at every step.
   function at(s) {
     const k = st.path.k, i = s <= 1 ? 0 : 1, t = s <= 1 ? s : s - 1, a = k[i], b = k[i + 1];
     const d = Math.exp(Math.log(a.d) * (1 - t) + Math.log(b.d) * t);
-    return { u: slerp(a.u, b.u, t), d, t: lerp(a.t, b.t, t) };
+    const w = Math.abs(b.d - a.d) < 1e-9 ? t : Math.max(0, Math.min(1, (d - a.d) / (b.d - a.d)));
+    const v = { u: slerp(a.u, b.u, w), d, t: lerp(a.t, b.t, w) };
+    if (t <= 0 || t >= 1 || earthSafe(v)) return v;
+    // containment (GPT smoke test, 10 Nov): slide the target back toward Earth's centre just enough to keep Earth in the safe
+    // area; at f = 0 Earth is on the view axis, so a solution always exists. The stops themselves are never altered.
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (earthSafe({ u: v.u, d, t: V.mul(v.t, m) })) lo = m; else hi = m; }
+    return { u: v.u, d, t: V.mul(v.t, lo) };
+  }
+  // Earth's centre inside the canvas less the 6% inset, the stop bar and the strip; when Earth is small on screen, its whole
+  // marker ring and tag too (a large Earth filling the view is visible anyway)
+  function earthSafe(v) {
+    const P = st.path, cam = ME.globe().camera(), tv = Math.tan(cam.fov * Math.PI / 360), th = tv * P.W / P.H;
+    const f = V.mul(v.u, -1), rt = V.norm(V.cross(f, [0, 1, 0])), up = V.cross(rt, f);
+    const c = V.add(v.t, V.mul(v.u, v.d)), q = V.mul(c, -1), z = V.dot(q, f);
+    if (z <= P.R) return false;
+    const x = V.dot(q, rt) / z, y = V.dot(q, up) / z;
+    const xLim = th * (1 - INSET), yTop = tv * (1 - 2 * (P.H * INSET + P.pt) / P.H), yBot = -tv * (1 - 2 * (P.H * INSET + P.pb) / P.H);
+    const rpx = P.R / z / tv * (P.H / 2), small = rpx + 4 < 0.25 * Math.min(P.W, P.H);
+    const ex = small ? (Math.max(6, rpx + 4) + 4) / (P.H / 2) * tv : 0, lw = small ? TAG.w / (P.W / 2) * th : 0, lh = small ? TAG.h / (P.H / 2) * tv : 0;
+    return Math.abs(x) + ex + lw <= xLim && y + ex + lh <= yTop && y - ex - lh >= yBot;
   }
   function place(view) {
     const g = ME.globe(), cam = g.camera(), c = g.controls();
@@ -234,8 +259,9 @@
     g.scene().remove(st.meshes.moon); g.scene().remove(st.meshes.sun);
     for (const [o, v] of sv.layers) o.visible = v;
     cam.near = sv.near; cam.updateProjectionMatrix();
-    c.minDistance = sv.minD; c.maxDistance = sv.maxD; c.enableZoom = sv.zoom; c.enablePan = sv.pan; c.enableDamping = sv.damp;
-    c.target.copy(sv.target); cam.position.copy(sv.pos); c.update(); c.autoRotate = sv.auto;
+    c.minDistance = sv.minD; c.maxDistance = sv.maxD; c.enableZoom = sv.zoom; c.enablePan = sv.pan;
+    // damping is still off here: an OrbitControls update with damping on applies a leftover pan offset to the target (1e-14 drift)
+    c.target.copy(sv.target); cam.position.copy(sv.pos); c.update(); c.target.copy(sv.target); c.autoRotate = sv.auto; c.enableDamping = sv.damp;
     $('zoom-ui').hidden = true; document.body.classList.remove('sky-zoom'); $('zoom-svg').innerHTML = ''; $('tgl-zoom').textContent = 'Zoom out to the Moon and Sun';
     if (sv.sheetWasOpen && $('sheet').classList.contains('collapsed')) $('sheet-btn').click();
     st.open = false; st.saved = null; st.last = null; st.target = null;

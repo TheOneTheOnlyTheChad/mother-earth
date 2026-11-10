@@ -84,3 +84,16 @@
 3. `Approve: deploy hub 0.6.6 from <commit> (content only)`
 4. Live RC from the Pages origin.
 5. `Approve: merge sky-zoom-rc to main (page change: Sky zoom-out view)`
+
+## 6. GPT smoke test finding and fix (10 Nov, after `0ce5415`)
+- **GPT (port 8899 preview, relayed by Chad):** "The wheel pull-back still loses Earth before the Moon comes into frame. Four sampled positions showed neither body." The stop buttons and Back to Earth worked.
+- **Cause:** between stops the orbit target moved toward the next stop's framing centre in step with s, while the camera distance grows geometrically in s. Early in the pull-back the target was far from Earth with the camera still close, and Earth left the frame. Check 22 had only required a tag on every body *in* frame, not that Earth *stays* in frame.
+- **Fix (`skyscene.js` `at()` / `earthSafe()`):**
+  - (1) the target and the swing follow the distance actually covered, not s;
+  - (2) **containment:** at every intermediate position, if Earth's centre (or, when Earth is small on screen, its ring and tag) would leave the safe area, the target is slid back toward Earth just enough (binary search on the target's scale; at 0 Earth is on the view axis, so a solution always exists). The stops themselves are unchanged.
+- **New regression check, intermediate frames:** 201 positions per run (A→C→A in steps of 0.02, the same code path as the wheel), on 390×844, 360×640 and 1280×900, on 4 dates (10 Nov, near-opposite 2027-02-21, near-conjunctions 2026-09-11 and 2027-12-28). Earth's centre must be in frame and never under the strip or stop bar at every position.
+- **Breaks:**
+  - `target-by-s` (the old behaviour): 11 checks fail;
+  - `no-containment` (distance-tying alone): 3 fail; distance-tying alone still lost Earth on 2027-02-21 and 2026-09-11 (phone) and 2027-12-28 (desktop);
+  - clean suite **333/333**.
+- **Restore exactness:** check 9 found the orbit target drifting ~2.6e-14 units per entry/exit cycle (OrbitControls, after the restore; ~1e-13 km). The exit now updates the controls with damping still off and re-copies the saved target. The check compares the target within 1e-9 units (every other field exactly). Break `no-restore-layers` still fails.

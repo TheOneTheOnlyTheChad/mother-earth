@@ -42,6 +42,8 @@ const BREAKS = {
   'split-update': ["    st.meshes.moon.visible = true; st.meshes.geo = bodiesFor(rows); positionMeshes();", "    st.meshes.moon.visible = true;"],
   'no-occlusion-check': ["        if (t > 0 && t < it.dist && V.len(V.sub(w, V.mul(dir, t))) < b.r) it.occludedBy = o.k; } }", "      } }"],
   'endpoint-only': ["    st.placing = true; setS(st.s + dir * STEP, 'keep'); st.placing = false; announce();", "    st.placing = true; setS(Math.max(0, Math.min(2, Math.round(st.s) + dir)), 'keep'); st.placing = false; announce();"],
+  'target-by-s': ["    const v = { u: slerp(a.u, b.u, w), d, t: lerp(a.t, b.t, w) };\n    if (t <= 0 || t >= 1 || earthSafe(v)) return v;", "    const v = { u: slerp(a.u, b.u, t), d, t: lerp(a.t, b.t, t) };\n    return v;"],
+  'no-containment': ["    if (t <= 0 || t >= 1 || earthSafe(v)) return v;", "    return v;"],
   'pinch-off': ["      if (H.pts.size === 2 && H.pinch0) {", "      if (false) {"],
 };
 // sun-400-full-labels also widens the tag model (rev 2.1 §4.3)
@@ -202,9 +204,12 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
       ok(`check 9 cycle ${i + 1}: layers hidden in the view (visibility changed), sheet collapsed on phone`, inView.vis !== before.vis && /collapsed/.test(inView.sheet));
       await page.click('#zoom-back'); await page.waitForTimeout(400);
       const after = await snap(page), f = await page.evaluate(() => document.activeElement && document.activeElement.id);
-      const same = ['target', 'near', 'minD', 'maxD', 'zoom', 'auto', 'damp', 'vis', 'sheet', 'kids'].filter(k => JSON.stringify(after[k]) !== JSON.stringify(before[k]));
+      // target compared within 1e-9 units (globe radius = 100): OrbitControls adds ~2.6e-14 per entry/exit cycle after the restore
+      // (floating-point noise, ~1e-13 km); every other field exactly
+      const same = ['near', 'minD', 'maxD', 'zoom', 'auto', 'damp', 'vis', 'sheet', 'kids'].filter(k => JSON.stringify(after[k]) !== JSON.stringify(before[k]))
+        .concat(Math.hypot(...after.target.map((v, k) => v - before.target[k])) > 1e-9 ? ['target'] : []);
       ok(`check 9 cycle ${i + 1}: camera, target, zoom limits, near plane, auto-rotate, damping, every object's visibility, sheet restored; focus returned`,
-        same.length === 0 && Math.hypot(...after.pos.map((v, k) => v - before.pos[k])) < 1e-6 * Math.hypot(...before.pos) + 1e-6 && f === focusId, { diff: same, f });
+        same.length === 0 && Math.hypot(...after.pos.map((v, k) => v - before.pos[k])) < 1e-6 * Math.hypot(...before.pos) + 1e-6 && f === focusId, { diff: same, f, tb: before.target, ta: after.target });
     }
     await ctx.close();
   }
@@ -275,6 +280,24 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
     const ov = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
     const clash = r.tags.some((t, i) => r.tags.some((u, k) => k !== i && ov(t, u))) || r.tags.some(t => r.rings.some(g => g.k !== t.k && ov(t, g)));
     ok('tag rule: markers 30 px apart get tags that overlap neither each other nor another ring', !clash && r.tags.every(t => !t.forced), r);
+    await ctx.close();
+  }
+
+  // ---------- intermediate frames (GPT smoke test, 10 Nov): Earth stays in frame at EVERY position of the pull-back,
+  // A → B → C and back, in steps of 0.02, on phone and desktop canvases and on four dates (incl. near-opposite / near-conjunction)
+  for (const vp of [{ width: 390, height: 844 }, { width: 360, height: 640 }, { width: 1280, height: 900 }]) for (const date of ['2026-11-10', '2027-02-21', '2026-09-11', '2027-12-28']) {
+    const { ctx, page } = await run({ time: date + 'T06:00:00Z', viewport: vp });
+    await cardOn(page); await openZoom(page);
+    const res = await page.evaluate(() => { const out = { n: 0, lost: [], covered: [], sMax: 0 };
+      const ov = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+      const look = () => { ME.zoomFrame(); const z = ME.zoomState(), L = z.last, e = L.items.find(i => i.k === 'earth'), r = Math.max(6, e.rpx + 4), box = { x: e.x - r, y: e.y - r, w: 2 * r, h: 2 * r };
+        out.n++; out.sMax = Math.max(out.sMax, z.s);
+        const inBox = (p, b) => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
+        if (!(e.x >= 0 && e.x <= L.W && e.y >= 0 && e.y <= L.H)) out.lost.push(+z.s.toFixed(2));
+        else if (inBox(e, L.strip) || inBox(e, L.bar)) out.covered.push(+z.s.toFixed(2)); };   // Earth's centre must not be hidden
+      look(); for (let i = 0; i < 100; i++) { ME.zoomStep(1, 0.25); look(); } for (let i = 0; i < 100; i++) { ME.zoomStep(-1, 0.25); look(); }
+      return out; });
+    ok(`intermediate frames ${vp.width}x${vp.height} ${date}: Earth in frame at every one of ${res.n} positions A→C→A (steps of 0.02), its centre never under the strip or stop bar`, res.lost.length === 0 && res.covered.length === 0 && res.sMax >= 2 - 1e-9 && res.n === 201, { lost: res.lost.slice(0, 8), covered: res.covered.slice(0, 8), sMax: res.sMax });
     await ctx.close();
   }
 
