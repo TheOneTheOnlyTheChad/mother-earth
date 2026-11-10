@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 16:11 UTC — Close-out (START-HERE §9), Sky zoom-out thread
+- `_review/sky-zoom-rc` and `_review/sky-zoom-rc-preview` moved (mv) to `_to_delete/20261110T160032Z/` on the Mac. `_review/` is empty.
+- Branch `sky-zoom-rc` deleted by Chad. `git fetch -p`: remote has only `main` and `aircraft-rc`.
+- HANDOVER "NEXT THREAD STARTS HERE" block and START-HERE §4m written (`e1ea255`). Mac sync of the whole repo at the final commit (preserve-first). Research packets stay. Project docs updated.
+
 ## 10 Nov 15:56:33 UTC (push time) — **PAGE RELEASED: Sky zoom-out view (Earth → Moon → Sun)** (main merge `5d01462` of `sky-zoom-rc` @ `3739284`, page = `860ed35`; pushed with `e8eb30e`, `ddf7020`; Chad: "Approve: merge sky-zoom-rc to main (page change: Sky zoom-out view)")
 - **Before the push:** the last break reruns on the new camera path. endpoint-only (2), pinch-off (1), near-default (3) failed as they should. **near-by-distance PASSED** (test gap: the near check compared the camera with the page's own reported depth). Chad was told; the test now computes forward depth independently (camera world direction + drawn meshes): near-by-distance 15 failed, near-default 15, clean 333/333 (`ddf7020`).
 - Merge: no conflicts; the ten page/Worker files are byte-identical to `860ed35`; `build_sky --check`, `build_scene --check`, `build_timeline --check` OK. Main's worker.js = live hub 0.6.6 (`4231114d…`), so **main = live**. An accidentally committed `__pycache__` file was removed (`e8eb30e`).
