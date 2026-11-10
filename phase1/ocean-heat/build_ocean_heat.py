@@ -20,7 +20,8 @@ Land is taken from mask 1 only — never from the SST fill.
 
 Usage:  python3 build_ocean_heat.py --inputs DIR --out DIR [--check]
   --check   rebuild in memory and compare byte-for-byte with what is in --out (exit 1 on any difference)
-Breaks (test only; each must make the build stop): BREAK=no-flip | shift-one | land-from-fill | loose-identity | wrong-hash
+Fault fixtures and breaks (test only; comma-separated): BREAK=no-flip | shift-one | land-from-fill | wrong-hash each make a correct build STOP;
+loose-identity is a code break: with it, the shift-one fixture no longer stops (phase1/ocean-heat/test_generator.sh checks both).
 """
 import argparse, hashlib, json, os, sys, zlib
 import numpy as np
@@ -44,7 +45,8 @@ INPUTS = {
 EXPECT = {'mask0': 12833780, 'mask1': 8722205, 'mask2': 991557, 'mask4': 3372458, 'ice_with_sst_fill': 4655}
 FILL = -32768
 NONE16 = -32768          # block value sentinel: no contributing cell / unavailable
-BREAK = os.environ.get('BREAK', '')
+BREAKS = set(filter(None, os.environ.get('BREAK', '').split(',')))
+BREAK = os.environ.get('BREAK', '')   # kept for single-break checks below
 
 
 def stop(msg):
@@ -73,7 +75,7 @@ def build(inputs_dir):
         p = os.path.join(inputs_dir, v['name'])
         if not os.path.isfile(p):
             stop(f'missing input {v["name"]}')
-        want = v['sha256'] if not (BREAK == 'wrong-hash' and k == 'clim') else '0' * 64
+        want = v['sha256'] if not ('wrong-hash' in BREAKS and k == 'clim') else '0' * 64
         got = sha256(p)
         if got != want:
             stop(f'{v["name"]} sha256 {got} ≠ pinned {want}')
@@ -97,7 +99,7 @@ def build(inputs_dir):
     lat_sst = np.array(ds['sst']['lat'][:])
     if not lat_sst[0] < lat_sst[-1]:
         stop('CoralTemp latitude is no longer ascending — the flip rule no longer applies')
-    flip = BREAK != 'no-flip'
+    flip = 'no-flip' not in BREAKS
     lat_sst_nf = lat_sst[::-1] if flip else lat_sst
     for k in ('ssta', 'clim'):
         if not (np.array_equal(lat_sst_nf, ds[k]['lat'][:]) and np.array_equal(ds['sst']['lon'][:], ds[k]['lon'][:])):
@@ -115,7 +117,7 @@ def build(inputs_dir):
     ssta = np.array(ds['ssta']['sea_surface_temperature_anomaly'][0]).astype(np.int32)
     clim = np.array(ds['clim']['analysed_sst'][:]).astype(np.int32)
     mask = np.array(ds['ssta']['mask'][0])
-    if BREAK == 'shift-one':
+    if 'shift-one' in BREAKS:
         i, j = np.argwhere(mask == 0)[len(np.argwhere(mask == 0)) // 2]
         ssta[i, j] += 1
     sst32 = sst.astype(np.int32)
@@ -128,7 +130,7 @@ def build(inputs_dir):
         stop('mask 0 ⇎ valid anomaly ⇎ valid climatology')
     if not np.all((sst[w] != FILL) & (sst[w] >= -200) & (sst[w] <= 5000)):
         stop('mask 0 cell without a valid SST')
-    land = (sst == FILL) if BREAK == 'land-from-fill' else (mask == 1)
+    land = (sst == FILL) if 'land-from-fill' in BREAKS else (mask == 1)
     if not np.all(sst[mask == 1] == FILL):
         stop('a land (mask 1) cell has an SST value')
     counts = {'mask0': int(w.sum()), 'mask1': int(land.sum()), 'mask2': int((mask == 2).sum()), 'mask4': int((mask == 4).sum()),
@@ -138,7 +140,7 @@ def build(inputs_dir):
 
     # ---------- exact identity on stored values
     resid = (sst32 - ssta - clim)[w]
-    tol = 1 if BREAK == 'loose-identity' else 0
+    tol = 1 if 'loose-identity' in BREAKS else 0
     if np.any(np.abs(resid) > tol):
         stop(f'SST − anomaly − climatology ≠ 0 in {int(np.count_nonzero(resid))} water cells')
 
@@ -159,7 +161,8 @@ def build(inputs_dir):
         def bsum(a):
             return np.where(wb, a.reshape(R, k, C, k), 0).astype(np.int64).sum(axis=(1, 3))
         s_s, a_s, c_s = bsum(sst32), bsum(ssta), bsum(clim)
-        if np.any((s_s - a_s - c_s)[n > 0] != 0):
+        btol = n if 'loose-identity' in BREAKS else 0     # the break loosens BOTH identity checks
+        if np.any(np.abs(s_s - a_s - c_s)[n > 0] > (btol[n > 0] if 'loose-identity' in BREAKS else 0)):
             stop(f'block identity Σ SST − Σ anomaly − Σ climatology ≠ 0 at {res}°')
         # SST only if every contributing cell has a valid SST (always true here: mask 0 ⇒ valid SST — kept as the rule)
         sst_ok = (np.where(wb, ~((sst.reshape(R, k, C, k) != FILL)), False).sum(axis=(1, 3)) == 0)
