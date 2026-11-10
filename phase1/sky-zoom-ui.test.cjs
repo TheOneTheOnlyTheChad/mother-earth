@@ -82,6 +82,12 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
     const page = await ctx.newPage(); const perr = []; page.on('pageerror', e => perr.push(String(e).slice(0, 300)));
     await page.clock.install({ time: new Date(time) });
     await page.goto(BASE + '/index.html', { waitUntil: 'domcontentloaded' });
+    // INDEPENDENT near-plane expectation (not the page's own report): forward depth from the camera's actual world direction to
+    // the drawn meshes' actual positions/scales (Earth: globe radius x 1.2, the rule's atmosphere margin); hidden meshes skipped
+    await page.addScriptTag({ content: `window.__expectNear = () => { const g = ME.globe(), cam = g.camera(), f = cam.getWorldDirection(cam.position.clone()), c = cam.position;
+      const bodies = [{ p: [0, 0, 0], r: g.getGlobeRadius() * 1.2 }]; g.scene().traverse(o => { if (o.__skyScene && o.visible) bodies.push({ p: [o.position.x, o.position.y, o.position.z], r: o.scale.x }); });
+      let m = Infinity; for (const b of bodies) { const z = (b.p[0] - c.x) * f.x + (b.p[1] - c.y) * f.y + (b.p[2] - c.z) * f.z - b.r; if (z > 0) m = Math.min(m, z); }
+      return { expected: Math.max(0.05, isFinite(m) ? 0.2 * m : 0.05), actual: cam.near }; };` });
     await page.waitForFunction(() => window.ME && ME.globe && ME.zoomState && ME.skyState, null, { timeout: 30000 });
     return { ctx, page, perr, hits };
   };
@@ -245,7 +251,7 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
       await doStep(dir); steps++;
       const z = await Z(page), L = z.last; sMax = Math.max(sMax, z.s); seen.add(Math.round(z.s * 4) / 4);
       const drawn = L.items.filter(i => i.inFrame);
-      const nearOk = Math.abs(L.near - Math.max(0.05, isFinite(L.minForwardDepth) ? 0.2 * L.minForwardDepth : 0.05)) <= 1e-9 * Math.max(1, L.near);   // the rule exactly, not merely a bound
+      const xn = await page.evaluate(() => window.__expectNear()), nearOk = Math.abs(xn.actual - xn.expected) <= 1e-6 * Math.max(1, xn.expected);   // the camera's near vs an independent forward-depth computation
       const noClip = L.items.every(i => i.k === 'sun' && !L.sunShown || i.inFrame === false || i.dist - 0 > L.near);
       const tagsOk = drawn.every(i => L.tags.some(t => t.k === i.k));
       const scaleOk = L.scale === (L.sunShown ? 'Earth and Moon to scale. Sun drawn closer and resized. Labels show actual distances.' : 'Earth and Moon to scale. Labels show actual distances.');
@@ -261,8 +267,8 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
     await cardOn(page); await openZoom(page); await page.evaluate(() => ME.zoomGo(2));
     const c = await page.evaluate(() => { const r = ME.globe().renderer().domElement.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     await page.mouse.move(c.x, c.y); await page.mouse.down(); for (let i = 1; i <= 10; i++) { await page.mouse.move(c.x + i * 15, c.y + i * 5); await page.waitForTimeout(20); } await page.mouse.up();
-    const z = await Z(page), L = z.last;
-    ok('check 16 free orbit: dragging makes the view free, near plane exactly the forward-depth rule (and > the default at stop C)', z.free && Math.abs(L.near - Math.max(0.05, 0.2 * L.minForwardDepth)) <= 1e-9 * L.near && L.near > 1, { free: z.free, near: L.near, m: L.minForwardDepth });
+    const z = await Z(page), L = z.last, xn = await page.evaluate(() => window.__expectNear());
+    ok('check 16 free orbit (independent forward depth): dragging makes the view free, near plane exactly the forward-depth rule (and > the default at stop C)', z.free && Math.abs(xn.actual - xn.expected) <= 1e-6 * xn.expected && xn.actual > 1, { free: z.free, xn });
     ok('Re-frame button shown while free', await page.evaluate(() => !document.getElementById('zoom-reframe').hidden));
     await page.click('#zoom-reframe');
     ok('Re-frame returns to the path at stop C', !(await Z(page)).free && (await Z(page)).stop === 'C');
@@ -291,13 +297,13 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
     const res = await page.evaluate(() => { const out = { n: 0, lost: [], covered: [], sMax: 0 };
       const ov = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
       const look = () => { ME.zoomFrame(); const z = ME.zoomState(), L = z.last, e = L.items.find(i => i.k === 'earth'), r = Math.max(6, e.rpx + 4), box = { x: e.x - r, y: e.y - r, w: 2 * r, h: 2 * r };
-        out.n++; out.sMax = Math.max(out.sMax, z.s);
+        out.n++; out.sMax = Math.max(out.sMax, z.s); const xn = window.__expectNear(); if (Math.abs(xn.actual - xn.expected) > 1e-6 * Math.max(1, xn.expected)) out.nearBad = (out.nearBad || 0) + 1;
         const inBox = (p, b) => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
         if (!(e.x >= 0 && e.x <= L.W && e.y >= 0 && e.y <= L.H)) out.lost.push(+z.s.toFixed(2));
         else if (inBox(e, L.strip) || inBox(e, L.bar)) out.covered.push(+z.s.toFixed(2)); };   // Earth's centre must not be hidden
       look(); for (let i = 0; i < 100; i++) { ME.zoomStep(1, 0.25); look(); } for (let i = 0; i < 100; i++) { ME.zoomStep(-1, 0.25); look(); }
       return out; });
-    ok(`intermediate frames ${vp.width}x${vp.height} ${date}: Earth in frame at every one of ${res.n} positions A→C→A (steps of 0.02), its centre never under the strip or stop bar`, res.lost.length === 0 && res.covered.length === 0 && res.sMax >= 2 - 1e-9 && res.n === 201, { lost: res.lost.slice(0, 8), covered: res.covered.slice(0, 8), sMax: res.sMax });
+    ok(`intermediate frames ${vp.width}x${vp.height} ${date}: Earth in frame at every one of ${res.n} positions A→C→A (steps of 0.02), its centre never under the strip or stop bar; near plane = independent forward-depth rule at each`, res.lost.length === 0 && res.covered.length === 0 && res.sMax >= 2 - 1e-9 && res.n === 201 && !res.nearBad, { lost: res.lost.slice(0, 8), covered: res.covered.slice(0, 8), sMax: res.sMax, nearBad: res.nearBad });
     await ctx.close();
   }
 
