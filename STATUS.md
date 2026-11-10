@@ -4,6 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 10:12:09 UTC — **HUB 0.6.5 DEPLOYED** (Chad: "Approve: deploy hub 0.6.5 from 2da37b2 (content only)")
+- **Before (10:11:32 UTC):** live worker.js = 0.6.4 `7d46edf3…a7987` (rollback target), 279,110 B; 19 bindings. Code from raw.githubusercontent at `2da37b2`: 282,755 B, sha256 `1073d15d0743171909debb95900141fefcf7f41185f2c0eb7646afd53665ec94` (same Worker as packet rev 1/2; the option (b) change touched only the generator and the page). Hash re-checked in the tab immediately before the write.
+- **Deploy:** content-only PUT from the dashboard tab 10:11:48Z → HTTP 200, success, etag `03a5a98e…ed25`, modified 10:11:51.293Z. Bindings, secrets, variables and crons untouched.
+- **Verified (10:12:04–10:12:09 UTC):** read-back `1073d15d…ec94` (exact); 19 bindings, identical list; `/` = **0.6.5**, `catalogues.sky` = `{kind:'fixed catalogue', current:'sky-2026-11-R1', revisions:['sky-2026-11-R1'], versioned_path:'/catalogue/sky/<revision>'}`; history collecting; `/status` collector 0.6.5.
+  - `/catalogue/sky/sky-2026-11-R1` → 200, 71,925 B, sha256 `f851f164…368a` exact, ETag = file hash, max-age=60.
+  - `/catalogue/sky`, `/catalogue/sky/`, `/sky-2026-11-R9`, `/sky-2026-11-T1`, `//sky-2026-11-R1`, `/sky-2026-11-R1/` → 404 `unknown revision`, no-store.
+  - Unchanged routes: `/catalogue/timeline/tl-2026-11-R1` 200 `096ae648…`; `/snapshot/arts` 200 `221bb1ca…`; `/snapshot/usgs` 200.
+- **Live RC from the Pages origin (10:12:51–10:13:58 UTC):**
+  - Sky route `type: cors`, 200, sha256 exact; unknown revision `cors` 404.
+  - Served size (same-origin tab, where timing is visible): zstd, 26,819 B encoded / 27,119 B transferred for the 71,925 B file; `access-control-allow-origin: *`.
+  - **Branch page** `2da37b2` (index, app, sky, style, arts fetched by commit with exact hashes, blob-injected into a clean Pages-origin tab): off on load, zero sky requests; switch on → exactly one request, `/catalogue/sky/sky-2026-11-R1`; status ok; Moon 399,770 km "Getting farther", Sun 148.2 million km "Getting closer", both "at 00:00 UTC, 10 Nov 2026"; R1 time note exact; no JPL request.
+  - The live page (main, `?v=202611221000`) still loads on 0.6.5 (no Sky card).
+- **Public page unchanged.** Rollback for the hub alone: 0.6.4 `7d46edf3…a7987` (own Approve line).
+- **Merge held (GPT):** corrected page recheck (option (b) at `2da37b2`), T1 rerun (done, Mac packet), this Pages-origin check (done). Then `Approve: merge sky-rc to main (page change: Sky on Two Clocks card)`.
+
 ## 10 Nov 10:01 UTC (clock reading at write) — **R1 catalogue IN R2 (no public effect); GPT fixes on `sky-rc` @ `770e4fb`; refresh rehearsal T1 RUN — generator REJECTED the short window (finding)**
 - **GPT candidate review** (relayed by Chad): R1 catalogue and Worker passed; merge held for three fixes, applied on the branch: page schema validates the `time` block (`horizons_ut_tilde_from`, leap-second date, coverage order; new fixtures + `no-time-check` break); Sources cross-check sentence now Moon-only ("agreed with the Moon export to within 0.17 m on every date"); timeline hub version check numeric ≥ 0.6.4. Tests: sky-hub 46, sky-build 33, sky-ui 66; all breaks fail.
 - **R2 write** (Chad: "Approve: upload ref/sky/sky-2026-11-R1.json (complete-file sha256 f851f164…368a, 71,925 B) to R2"): destination absent at 09:49:57Z; PUT 09:50:15Z → 200, uploaded 09:50:16.417Z, etag `634a44d8fc2f4430bab23e2ce0410d98`, version `7e5e3b2272dd178150b2aa704d145f67`; read-back 71,925 B, sha256 exact. Live hub is 0.6.4 (no sky route), so nothing public changed.
