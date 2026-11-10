@@ -58,6 +58,8 @@ ok('the release values are as checked', (() => {
     && v('e-big5-end-cretaceous', 'dated_event_age').ma === 66.02 && v('e-big5-end-cretaceous', 'dated_event_age').pm === null;
 })());
 ok('Herz and Dai are not in the public catalogue (research record only); end-Permian = onset + chart boundary', !/herz2026|dai2025|251\.906|251\.867/.test(FILE.toString('utf8')) && J.entries.find(e => e.id === 'e-big5-end-permian').claims.map(c => c.claim_type).join() === 'extinction_onset_estimate,chart_boundary');
+ok('end-Triassic: horizon age + chart boundary only; Bos and Trudgill not in the public catalogue', !/bos2024|trudgill2025|201\.3|s41467-024-47922-0|s41467-025-61344-6/.test(FILE.toString('utf8')) && J.entries.find(e => e.id === 'e-big5-end-triassic').claims.map(c => c.claim_type).join() === 'extinction_horizon_approx,chart_boundary');
+ok('public sources = the seven proposed for REGISTER', [...new Set(J.entries.flatMap(e => e.claims.flatMap(c => [c.source, c.also]).filter(Boolean).map(s => s.key)))].sort().join() === 'burgess2017,harper2024,he2020,oconnor2024,percival2018,wilf2023');
 ok('no causes, no percentage-loss figures in the catalogue', !/\d\s?%/.test(FILE.toString('utf8')) && !types.includes('cause'));
 ok('no duration claimed for the F–F boundary values', J.entries.find(e => e.id === 'e-big5-frasnian-famennian').claims.every(c => !c.when || c.when.type !== 'interval'));
 

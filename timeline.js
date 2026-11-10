@@ -14,7 +14,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202611201000';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202611211000';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 

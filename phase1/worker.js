@@ -2926,8 +2926,8 @@ async function artsSnapshot(env, pin = ARTS) {
 const TIMELINE = {
   key: 'ref/timeline/tl-2026-11-R1.json',
   revision: 'tl-2026-11-R1',
-  fileSha256: 'ebf7c6e1d55d330d8d0ff9f288e4e168e73b755e6131936592e949dc1072c1ab',
-  bytes: 16648,
+  fileSha256: '096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe',
+  bytes: 15656,
 };
 /** Serve the pinned Timeline catalogue byte for byte, or 503 {status:'unavailable', reason}. reason: missing | unreadable | integrity | invalid. */
 async function timelineCatalogue(env, pin = TIMELINE) {

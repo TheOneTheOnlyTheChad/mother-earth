@@ -29,20 +29,6 @@
    "status": "No correction, retraction or expression of concern in the article text on the publisher's page (checked 10 Nov 2026)",
    "checked": "2026-11-10"
   },
-  "bos2024": {
-   "citation": "Bos R et al. (2024) Climate-forced Hg-remobilization associated with fern mutagenesis in the aftermath of the end-Triassic extinction. Nature Communications",
-   "doi": "10.1038/s41467-024-47922-0",
-   "licence": "CC BY 4.0",
-   "status": "Context only; publisher page not read",
-   "checked": "2026-11-10"
-  },
-  "trudgill2025": {
-   "citation": "Trudgill M et al. (2025) Pulses of ocean acidification at the Triassic–Jurassic boundary. Nature Communications",
-   "doi": "10.1038/s41467-025-61344-6",
-   "licence": "CC BY 4.0",
-   "status": "Context only; publisher page not read",
-   "checked": "2026-11-10"
-  },
   "wilf2023": {
    "citation": "Wilf P, Carvalho MR, Stiles E (2023) The end-Cretaceous plant extinction: Heterogeneity, ecosystem transformation, and insights for the future. Cambridge Prisms: Extinction 1: e14",
    "doi": "10.1017/ext.2023.13",
@@ -170,13 +156,6 @@
      "text": "In all three sections studied, a large sulfur-isotope shift at about 201.5 million years ago coincides with the extinction horizon.",
      "source": "he2020",
      "locator": "Results, sulfate sulfur-isotope trends"
-    },
-    {
-     "claim_type": "context",
-     "text": "Other recent papers give slightly different round figures for the extinction: about 201.3 and 201.5 million years (both in one 2024 paper) and about 201 million years (2025).",
-     "source": "bos2024",
-     "locator": "Abstract and Introduction",
-     "also": "trudgill2025"
     }
    ]
   },

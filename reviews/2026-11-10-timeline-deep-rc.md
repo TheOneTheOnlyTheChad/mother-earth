@@ -1,6 +1,10 @@
 # Review packet — Timeline deep-time axis, branch `timeline-deep-rc` (candidate)
 
-## Rev 2 (10 Nov 2026) — after GPT's review of rev 1 (relayed by Chad)
+## Rev 3 (10 Nov 2026) — after GPT's review of rev 2 (relayed by Chad)
+**GPT on rev 2:** review complete; ready for Chad's separate approval to file the seven sources (build proposal §6). Before R2 upload: reconcile the end-Triassic context — Bos 2024 and Trudgill 2025 were outside the proposed REGISTER set and their publisher pages unchecked.
+**Applied:** the end-Triassic context (Bos 2024, Trudgill 2025) is removed from the public catalogue and page and kept in the research record, as with Herz and Dai. The plotted age (~201.5 Ma, He et al. 2020) and its source are unchanged. **The public catalogue now cites exactly the seven proposed REGISTER sources:** the ICS chart plus Harper 2024, Percival 2018, Burgess 2017, He 2020, Wilf 2023, O'Connor 2024 (hub test checks the set). Page, catalogue and Worker regenerated and pinned together; asset `?v=202611211000`. Replacement hashes in §6 (rev 3 table).
+
+
 **GPT on rev 1:** local preview works; all ten manifest hashes verified; 1280: five marks, Back/Forward with focus return; 390×844: empty lanes 69 px, no overflow, keyboard Close returns to the mark; exact candidate keeps evidence reachable with the axis unavailable; Back from a direct link returned to Sources. Worker in-memory checks passed (exact bytes, ETag, CORS headers, missing/unreadable/tampered). Deployed CORS and the full regression suite remain separate checks. Asked for one small branch revision before R2/deploy.
 
 **Applied in rev 2:**
