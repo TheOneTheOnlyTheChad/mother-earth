@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 07:52 UTC (clock reading at write) — **timeline-revs-rc rev 2: routing fix after GPT's review** (branch only)
+- GPT: core design passed (all 10 manifest hashes matched; GPT's own fixture confirmed legacy = R1 with R2 current, per-revision bytes/ETag, swapped object → 503 integrity, unknown ids → 404 with zero reads). One fix: the shared parser drops empty segments, so `/catalogue/timeline//` and `//tl-2026-11-R1` returned 200 and read R2.
+- Applied `1d31df6`: the Timeline route matches the raw path (one trailing slash = the R1 alias, as 0.6.3; any other loose separator → 404, no read). Hub 66/66; full regression green on `1d31df6`; 16 breaks fail (new `loose-separators` → 8). **Replacement worker.js `7d46edf3…a7987`** (279,110 B); page files and catalogue unchanged. Packet rev 2 at `4728907`.
+- Mac: `_review/timeline-revs-rc-r2/` (exact + test sources + SHA256SUMS) and `-r2-axis-preview/`.
+- **Next:** GPT's hash recheck → `Approve: deploy hub 0.6.4 from 1d31df6 (content only)` → live RC (both R1 routes + CORS from the Pages origin) → page merge on its own line. No R2 upload needed.
+
 ## 10 Nov 07:30 UTC (clock reading at write) — **timeline-revs-rc built: hub 0.6.4 versioned catalogue route (branch only)** (Chad: "Approve: build timeline-revs-rc on a branch only — hub 0.6.4 versioned catalogue route + page fetches its own revision, per TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1; no merge, R2 write, hub deploy or page change.")
 - Proposal rev 1 → GPT review (versioned route and 404/503 split accepted; four points) → **rev 1.1** (legacy URL pinned to R1 permanently, `current` = metadata only; immutable revisions; qualified rollback; legacy-vs-current fixture test) → Chad's branch go.
 - **Candidate `timeline-revs-rc` @ `c98cb24`** (code `4310d54` + packet `reviews/2026-11-10-timeline-revs-rc.md`). Hub 0.6.4 `a4cd5c91…9eca0`; page fetches `/catalogue/timeline/<its revision>`; `?v=202611221000`. **Catalogue unchanged (`096ae648…0fbe`), so no R2 write.**
