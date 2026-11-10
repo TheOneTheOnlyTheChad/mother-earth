@@ -81,7 +81,7 @@ Route 1 (#7) requested my own 579 UTC→TDB epochs (IERS 37 s + 32.184 s + the s
 3. **Numbers:** 1 AU × 6.13 × 10⁻¹⁴ = **0.92 cm/yr** (0.70–1.14 across ±1.47) → **0.92 m per century**. The paper's expected mass loss −(0.9–1.1) × 10⁻¹³ gives 1.35–1.65 cm/yr: that is M1's "1.5 centimeters, per year per AU", the earlier theoretical figure.
 4. **Public wording supported:** "roughly a centimetre a year" and "roughly a metre over a century", as order-of-magnitude statements at today's rate. The 0.92 cm/yr is **Mother Earth's estimate** from the fitted rate, using a·GM ≈ constant in the slow-change, two-body approximation. Card wording (GPT): **"Estimated from changes in Mercury's orbit consistent with solar mass loss."** Not "measured", which could make Earth's widening sound directly measured.
 
-## 5. Draft REGISTER wording (NOT filed — for GPT, then Chad's Approve line)
+## 5. REGISTER wording — FILED 10 Nov 2026 (Chad's Approve line), text as below
 
 > **NASA/JPL Horizons (Solar System Dynamics) — Moon and Sun geocentric range and range rate, daily — research only, not on the page**
 > - **Read:** 10 Nov 2026 by Claude in the browser pane: SSD FAQ (publish-permission entry), SSD API Fair Use Policy, Horizons manual, Horizons API doc v1.3, File API doc v1.0, batch instructions. Research record: docs/research/SKY-SOURCE-CHECK.md (rev 1); packet on the Mac.

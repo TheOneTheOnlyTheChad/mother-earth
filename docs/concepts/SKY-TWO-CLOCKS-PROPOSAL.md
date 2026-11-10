@@ -224,11 +224,11 @@ Plus, at release: served-hash checks cover the new page file (`sky.js`), and a l
 - **S3** direction method for the dataset: range rate (recommended) or day-over-day.
 - **S4** coverage 2026-06-01 → 2027-12-31 and refresh by 2027-06-01.
 - ~~**S5**~~ done 10 Nov (record rev 2).
-- GPT's recommendation (relayed by Chad, not yet his decision): S1a, S2a, S3 range rate, S4 as proposed.
+- **DECIDED by Chad, 10 Nov 2026 08:56 UTC:** "S1a existing hub, S2a beside Orbital Objects under a Sky heading, S3 range rate, S4 coverage 2026-06-01 to 2027-12-31 with refresh by 2027-06-01".
 
 Approve lines, in order (wording settled after S1):
 1. ~~`Approve: Sky source pass + first Horizons export …`~~ done.
-2. `Approve: file the Horizons REGISTER entry per SKY-SOURCE-CHECK rev 2 §5 (research only)`
+2. ~~`Approve: file the Horizons REGISTER entry per SKY-SOURCE-CHECK rev 2 §5 (research only)`~~ filed 10 Nov.
 3. `Approve: build sky-rc on a branch only — no merge, R2 write, hub deploy or page change`
 4. (S1a) `Approve: upload ref/sky/<rev>.json (sha256 …) to R2` → `Approve: deploy hub 0.6.5 from <sha> (content only)`
 5. `Approve: merge sky-rc to main (page change: Sky on Two Clocks card)`
@@ -237,4 +237,4 @@ Approve lines, in order (wording settled after S1):
 **The Sun doesn't spin as one piece:** two markers start at the same solar longitude, different latitudes; the equatorial one pulls ahead. Labelled as an illustration of differential rotation. Its own proposal and source pass, after this card.
 
 ## 11. Not approved
-REGISTER filing, branch build, R2 write, hub deploy, page change. (Source pass and first export: done under Chad's S5 Approve line.) The opening-page / Met placement audit is untouched.
+Branch build, R2 write, hub deploy, page change. (Done: source pass + first export under S5; REGISTER entry filed; S1–S4 decided.) The opening-page / Met placement audit is untouched.

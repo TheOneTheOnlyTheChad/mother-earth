@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 08:56 UTC (clock reading at write) — **Horizons REGISTER entry FILED; Sky S1–S4 DECIDED** (docs only)
+- Chad: "Approve: file the Horizons REGISTER entry per SKY-SOURCE-CHECK rev 2 §5 (research only)" → filed in REGISTER.md (research only, not on the page).
+- Chad: "S1a existing hub, S2a beside Orbital Objects under a Sky heading, S3 range rate, S4 coverage 2026-06-01 to 2027-12-31 with refresh by 2027-06-01" → recorded in proposal rev 3 §9.
+- **Next (own Approve line):** branch build `sky-rc` — no merge, R2 write, hub deploy or page change.
+
 ## 10 Nov 08:51 UTC (clock reading at write) — **GPT passed the Horizons exports for research use; source record rev 2; proposal rev 3** (docs only)
 - GPT matched the record hash, verified the protocol and all 29 packet hashes, reproduced the check output and parsed all 7 raw responses (Mac copy). Six qualifications applied in `SKY-SOURCE-CHECK.md` rev 2: CSV isolation by #3 vs #5 and #2 vs #7 (deviations recorded); `UT~` from 2027-02-04 and the July leap-second uncertainty from 2027-07-01 kept separate, "~2 ms" withdrawn; API pins 1.2 (GET) / 1.0 (File API); widening "Estimated from changes in Mercury's orbit consistent with solar mass loss"; card keeps "hundreds of millions of years" (~650 Myr in Sources); REGISTER draft records the operator-triggered pane requests and default User-Agent. Packet: `rev2/CORRECTIONS-rev2.md`, originals unchanged.
 - **Proposal rev 3** (`SKY-TWO-CLOCKS-PROPOSAL.md`): tested recipe (UT route + route-1 cross-check, CSV off, raw flags kept, version pins), Deep Time wording from the sources, real after-apogee fixtures, refresh step 0 = Bulletin C check.
