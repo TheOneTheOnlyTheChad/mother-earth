@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 06:02 UTC (clock reading at write) — **timeline REGISTER entries FILED** (docs only)
+- On Chad's line "Approve: file the timeline REGISTER entries — ICS chart (v2026-06.5, CC BY 4.0) and the six episode sources (Harper 2024, Percival 2018, Burgess 2017, He 2020, Wilf 2023, O'Connor 2024), research record docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md".
+- REGISTER: one entry for the ICS chart (tag `v2026-06.5`, commit `44d1043ecf29`, chart.ttl `0158959e…b355`, citation as the chart gives it) and one entry with a line per article (DOI, who read the publisher page, notice status as of 10 Nov). All CC BY 4.0, commercial use with attribution. Herz, Dai, Bos, Trudgill listed as not filed (research record only). Source-check doc marked filed.
+- Terms only: nothing uploaded, deployed or released. **Next, each on its own Approve line:** R2 upload of `ref/timeline/tl-2026-11-R1.json` → hub 0.6.3 deploy → live RC (incl. CORS from the Pages origin) → page release.
+
 ## 10 Nov 05:55 UTC (clock reading at write) — **timeline-deep-rc rev 3: candidate `0f67fca`** (branch only; code = `7cad90c` + packet)
 - GPT's rev 2 review complete; ready for Chad's approval to file the seven sources. Applied GPT's pre-upload point: end-Triassic context (Bos 2024, Trudgill 2025) removed from the public catalogue and page (research record only), as with Herz/Dai. **Public sources = the ICS chart + Harper, Percival, Burgess, He, Wilf, O'Connor** (hub test checks the set).
 - Page, catalogue and Worker regenerated and pinned together: catalogue `096ae648…0fbe` (15,656 B) = hub pin; `?v=202611211000`. Every suite passes on `7cad90c`; every break fails. Packet §6 rev 3 table. Mac `_review/timeline-deep-rc-r3/` (+ `-axis-preview`).

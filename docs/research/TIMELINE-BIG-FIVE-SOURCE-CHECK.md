@@ -15,7 +15,7 @@
 
 **E1 publisher check completed (10 Nov 04:16Z):** Chad opened the Oxford page in his own browser and pasted its text (sha256 `fab9abba…0bbb`); Claude found no correction, retraction, erratum or expression-of-concern text, "Published: 18 December 2023", CC BY 4.0. E1 → timing confirmed for the build. Bound: the paste is the text Chad copied.
 
-**Open (superseded in part above):** E1 and E4 publisher pages (Chad or GPT to read; the pane got a Cloudflare challenge and did not bypass it); full-text XML not retained (Mac shell refused at Europe PMC/NCBI/Crossref; passages + hashes kept). REGISTER entries proposed, not filed.
+**Open (superseded in part above):** E1 and E4 publisher pages (Chad or GPT to read; the pane got a Cloudflare challenge and did not bypass it); full-text XML not retained (Mac shell refused at Europe PMC/NCBI/Crossref; passages + hashes kept). REGISTER entries proposed, not filed. **→ Filed 10 Nov 2026 06:02 UTC on Chad's line (ICS chart + Harper, Percival, Burgess, He, Wilf, O'Connor); see REGISTER.md.**
 
 ## Original record (superseded by rev 2)
 
