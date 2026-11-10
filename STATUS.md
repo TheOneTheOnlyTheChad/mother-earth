@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 05:25 UTC (clock reading at write) — **timeline-deep-rc rev 2 after GPT's review: candidate `569e6e2`** (branch only; code = `4482045`, then a test-only fix + packet)
+- GPT verified rev 1 (ten hashes; preview at 1280 and 390×844; fallbacks; Worker in-memory checks) and asked for one small revision. Applied: one F–F mark at the modelled range (bound in the panel); intervals at true endpoints when ≥ 4 CSS px; Herz/Dai off the public card (research record only); key text exposed, symbols hidden; bands to scale with codes only where they fit, plus a keyboard/tap **period list** (ages as the chart writes them); guarded validation (nested nulls → unavailable message, list usable). `?v=202611201000`; catalogue `ebf7c6e1…c1ab` (16,648 B) = hub pin.
+- **Every suite on `4482045`** passes (timeline-axis 93, timeline-catalogue-hub 25, timeline-ui 585, desktop-overflow 112, mobile-pass 131, …); every break fails its suite. Packet §6 pins candidate + hashes together.
+- **For GPT:** Mac `_review/timeline-deep-rc-r2/` (exact, SHA256SUMS) and `_review/timeline-deep-rc-r2-axis-preview/` (README; start the server from that folder). Rev 1 folders kept for the record.
+- **Not approved:** REGISTER filing, R2 upload, hub deploy, page release.
+
 ## 10 Nov 04:47 UTC (clock reading at write) — **Timeline deep-time candidate BUILT on branch `timeline-deep-rc` @ `539b785`** (Chad's Approve line: branch only; NOT merged, NOT deployed, no R2 write) — packet `reviews/2026-11-10-timeline-deep-rc.md` (on the branch)
 - **Built:** chart extractor (pinned `chart.ttl` hash) → `chart-v2026-06.5.json`; `big5.json` (five episodes, ten sources, values as checked); generator → catalogue `tl-2026-11-R1.json` (17,127 B, sha256 `cab2ac93…552e`) + pre-rendered list with embedded hash/revision/build; **hub 0.6.3** `GET /catalogue/timeline` (Arts pattern, pin = that hash); page axis (overview strip, 538.8 Ma window, chart bands + 5 boundary lines, Mass extinctions lane, three empty lanes 69 px at 390×844, glyph key), every §4a failure → list only, §4b permalinks. Asset `?v=202611191000`.
 - **Tests:** timeline-catalogue-hub 24/0 (3 breaks fail), timeline-axis 78/0 (5 breaks fail), timeline-ui 585/0, all other suites pass (desktop-overflow 112, mobile-pass 131). CORS is checked in the live RC (not testable with fulfilled routes).
