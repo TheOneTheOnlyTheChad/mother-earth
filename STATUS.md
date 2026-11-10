@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 02:43 UTC (clock reading at write) — **REGISTER: Ozone Watch and CNEOS entries FILED** (Chad's two Approve lines, after GPT accepted the provider records)
+- **Ozone Watch:** R6 §9.6 rev 6.1, scoped to `to3areas_2026_toms+omi+omps.txt` and `to3mins_2026_toms+omi+omps.txt` only (public domain per provider; credit line; one retrieval per file per day; no bulk pulls; best-effort availability).
+- **CNEOS:** R2 §4 rev 3.1 ("for this purpose with the citation"; API under 1 request/10 min; S1 applicability a contextual reading). **Commercial use, lightcurve scope and lightcurve retrieval stay open.**
+- Both research only: no building, collector, page or production change.
+
 ## 10 Nov 02:41 UTC (clock reading at write) — **GPT accepted the provider records; editorial fixes; GPT's live Timeline smoke test recorded** (docs only)
 - **GPT accepted** ENQUIRIES rev 8, R6 rev 6 and R2 rev 3 (Mac copies) as provider evidence records. Editorial fixes applied: R6 §9.6 draft heading names the exact two 2026 files (no clearance for future years); the rev 5 note labelled historical; modification notice = our own practice. R2 heading and REGISTER cross-reference → rev 3; S1 applicability kept as a contextual reading; commercial use, lightcurve scope and lightcurve retrieval stay open. **Both drafts NOT filed** — Chad's separate Approve line each.
 - **GPT's live smoke test of the Timeline release (main `4b23518`, hub 0.6.2; relayed by Chad):** at desktop and 390 × 844, moving between Earth now, Timeline and Sources worked, as did Back, Forward and focus return. The withdrawal disclosure showed on the card and before the October claim in the note. Phone header and modal sheet: no horizontal overflow.
