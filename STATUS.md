@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 02:37 UTC (clock reading at write) — **Provider replies recorded: NASA Ozone Watch (R6) and CNEOS (R2)** (docs only; Chad's go) — `docs/research/ENQUIRIES-2026-11.md` rev 8, `R6-ozone.md` rev 6, `R2-terms-access.md` rev 3
+- **Ozone Watch** (Leslie R. Lait, NASA, ARC-SG, Code 614, Goddard Space Flight Center; Paul A. Newman copied, per Chad; Gmail-displayed 9 Nov, 10:45 PM): the two named 2026 files (`to3areas_`, `to3mins_`) are **public domain as U.S. Government products; no licence or permission applies** (the question named public redistribution and commercial use); no third-party rights or extra conditions; suggested credit "Data are courtesy of the NASA Ozone Watch website ( https://ozonewatch.gsfc.nasa.gov)"; **one automated retrieval per file per day fine**. Carried forward: no bulk pulls; as-is, best-effort availability (a shutdown could stop updates). Bounded to those two 2026 files. R6 technical gates open; no building clearance.
+- **CNEOS** (Shantanu P. Naidu, JPL; Gmail-displayed 9 Nov, 10:43 PM): "You are free to use the data for this purpose with the citation." — preserved alongside the exact sent enquiry. API cadence: **stated preference of fewer than one request every 10 minutes**; the catalogue changes roughly monthly. **Open pending the follow-up:** explicit commercial-use confirmation, lightcurve reuse scope, automated lightcurve retrieval guidance.
+- Times are Gmail-displayed, no timezone assigned. Screenshots, email addresses, phone numbers and the office address are not in the repo; Gmail's summary feature not used.
+- **REGISTER drafts updated in R6 §9.6 and R2 §4, NOT filed.** Next: GPT's review (paths only); filing only on Chad's separate Approve line afterwards. No production change.
+
 ## 10 Nov 02:23 UTC — **Fires card UNKNOWN after midnight: expected FIRMS daily reset, no fault** (read-only; Chad asked; D1 via connector, hub + page via pane)
 - Every firms run since 00:00 UTC (00:00–02:15, 10 runs) got today's header-only file: `down`, note "no detections processed yet for today (UTC) … (header only)". Last full file 9 Nov 23:45 UTC: **61,660 records**, 5.15 MB.
 - First rows of the day over 4–9 Nov: 04:15 · 03:45 · 02:16 · 03:45 · 03:00 · 03:30 UTC.

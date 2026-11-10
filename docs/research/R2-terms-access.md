@@ -1,5 +1,7 @@
 # R2 fireballs — terms and access review (rev 2, 8 Nov 2026, research only)
 
+**Rev 3 (10 Nov 2026, Chad's go, docs only): CNEOS replied** (Shantanu P. Naidu, JPL; Gmail-displayed 9 Nov, 10:43 PM): "You are free to use the data for this purpose with the citation." API cadence preference: under 1 request every 10 minutes; the fireball database changes around once a month. **Still open pending the follow-up:** explicit commercial-use confirmation, lightcurve reuse scope (S2), automated lightcurve retrieval guidance. §3, §4 and the provider-enquiry section updated; the REGISTER draft stays NOT filed pending GPT's review and Chad's separate approval. Record: `ENQUIRIES-2026-11.md` rev 8.
+
 **ACCEPTED by GPT as bounded research-only evidence** (recorded 9 Nov 2026, relayed by Chad). **The draft REGISTER entry stays unfiled**; filing needs Chad's separate authorisation. Identity and validation gates stay open. Nothing built, fetched or contacted.
 
 **Chad's go (8 Nov 2026):** bounded, read-only terms/access review of R2 only. **No data sampled or fetched, no provider contact, no route selection, no implementation, schedules, resources, deployment or page change.** R2's identity and validation gates (`R2-revision-matching.md`, rev 3) stay open; R4's filed entry, R3 (reply pending) and R6 (accepted unresolved draft, unfiled) are unchanged.
@@ -67,11 +69,11 @@
 - **Underlying sensor reports:** described as government-sensor data supplied for public release; their authorship is not established by A2 or B1.
 - **Public release, public access level and credit requests are not, by themselves, commercial-reuse permission.** The commercial position rests on A1's public-domain statement and its scope.
 
-## 3. Unanswered questions
-1. Whether A1 is meant to cover the API's fireball data (S1) — interpretation only.
-2. Whether any statement covers the lightcurve files (S2) beyond public release.
-3. Authorship of the underlying sensor reports.
-4. Polling: explicit operational conditions exist; no numerical limit found; not unlimited.
+## 3. Unanswered questions (updated rev 3, after the CNEOS reply)
+1. Whether A1 covers the API's fireball data (S1): the reply says "You are free to use the data for this purpose with the citation." "This purpose" is the enquiry's stated use (storing, reformatting, public redistribution via a website and shared API). The reply does not name a route; S1 was the API catalogue the cadence sentence addresses, so the reply most plausibly includes S1 — **contextual reading**. **Commercial use is not confirmed explicitly** (the enquiry asked "non-commercial or commercial"). **Open pending the follow-up.**
+2. Lightcurve files (S2): **not addressed. Open pending the follow-up.**
+3. Authorship of the underlying sensor reports: not addressed.
+4. Polling: S1 — **stated preference of fewer than one API request every 10 minutes**, with the catalogue changing roughly monthly, beside the published fair-use conditions. S2 — **no guidance; open pending the follow-up.**
 
 ## 4. Proposed REGISTER entry — research-only DRAFT for review (NOT filed)
 ```
@@ -83,9 +85,11 @@
 - **Provider statements on the data:** government-sensor data supplied to CNEOS for public release; not independently verified or reanalysed; may be revised; caution in use.
 - **Access conditions (S1, operational, not a licence):** one request at a time; only reasonably necessary requests; cache and reuse where practical; application-specific User-Agent with product, version and contact; back off on errors; the APIs may not be embedded in a website (NASA CORS policy) — not a prohibition on publishing downloaded data; JPL may throttle or block. No numerical limit found (8 Nov 2026) — not unlimited.
 - **Attribution:** provider-stated (SSD FAQ): cite SSD with retrieval date, page title and URL; identify modifications; no implied endorsement. Project choice: credit NASA/JPL CNEOS and the underlying U.S. Government sensor reports.
+- **Provider reply (Shantanu P. Naidu, JPL; Gmail-displayed 9 Nov 2026, 10:43 PM; read by Claude from text and a screenshot Chad supplied 10 Nov 2026), to Chad's 8 Nov enquiry on storing, reformatting and publicly redistributing the numerical data through a website and shared API:** "You are free to use the data for this purpose with the citation." API cadence: "we would prefer that you keep the requests under 1 every 10 minutes"; the fireball database changes around once a month. Record: docs/research/ENQUIRIES-2026-11.md rev 8.
 - **Coverage statement:** none filed (R2 identity and validation gates open).
 - **Status:** ⛔ research only; not cleared for building.
-- **Commercial use:** S1 — public-domain statement for SSD site data; application to the API's fireball data is an interpretation pending review (not an explicit grant for that route). S2 — UNRESOLVED (public release only; no applicable statement established). Neither is a finding of prohibition.
+- **Commercial use:** S1 — public-domain statement for SSD site data, and the provider's reply permits use "for this purpose with the citation"; explicit commercial-use confirmation OPEN pending follow-up. S2 — UNRESOLVED (lightcurve scope not addressed by the reply). Neither is a finding of prohibition.
+- **Access (S1, provider preference):** fewer than one API request every 10 minutes; catalogue changes roughly monthly. S2 retrieval guidance: none (open).
 ```
 
 ## Sources
@@ -93,4 +97,7 @@ Read by GPT on Chad's behalf, 8 Nov 2026: [SSD FAQ #a05](https://ssd.jpl.nasa.go
 Read by Claude (fetch summaries), 8 Nov 2026: [SSD/CNEOS API About](https://ssd-api.jpl.nasa.gov/about) · [CNEOS introduction](https://cneos.jpl.nasa.gov/fireballs/intro.html) · [JPL Image Use Policy](https://jpl.nasa.gov/jpl-image-use-policy) · [data.gov record](https://catalog.data.gov/dataset/fireball-and-bolide-reports)
 
 ## Provider enquiry (confirmed sent by Chad, 9 Nov 2026)
-- Chad emailed CNEOS at `contact-cneos@jpl.nasa.gov`. **Reply pending. No permission is inferred from sending or from silence**; this review's positions stand. Record: `docs/research/ENQUIRIES-2026-11.md`.
+- Chad emailed CNEOS at `contact-cneos@jpl.nasa.gov` (quoted header: Sunday 8 Nov 2026, 7:39 PM, as displayed).
+- **Reply (rev 3):** Shantanu P. Naidu, JPL, Gmail-displayed 9 Nov, 10:43 PM (no timezone assigned). Verbatim: "You are free to use the data for this purpose with the citation." / "For API query cadence, we would prefer that you keep the requests under 1 every 10 minutes. As guidance, the fireball database changes around once a month, so it doesn't make sense to query it too frequently."
+- **Recorded:** permission "for this purpose with the citation", preserved alongside the exact sent enquiry (`ENQUIRIES-2026-11.md` rev 8); "the citation" most plausibly means the citation the enquiry described (SSD/CNEOS with retrieval date, page title and URL) — contextual reading. API cadence = a **stated preference**, fewer than one request every 10 minutes.
+- **Open pending the follow-up:** explicit commercial-use confirmation; lightcurve reuse scope; automated lightcurve retrieval guidance. Any follow-up is Chad's decision.

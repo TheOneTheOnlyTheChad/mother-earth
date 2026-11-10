@@ -2,7 +2,8 @@
 
 **Gate:** first gate only, daily **ozone-hole area** and **Southern Hemisphere minimum ozone**. Numerical map products are a separate later step. **Research only** — no implementation, collector, schedule, deployment, page change, purchase or third-party contact. Written 6 Nov 2026 for Chad's review.
 **PARKED 6 Nov 2026 (Chad, after GPT's review) — first-gate handover, rev 2.** Any next gate needs Chad's separate go; no implementation clearance.
-**Status: numerical feasibility verified for the two daily series; reuse/access terms partly explicit (credit line) and otherwise unresolved — not integration clearance.**
+**Status: numerical feasibility verified for the two daily series; reuse/access terms answered by the provider for the two named 2026 files (rev 6, §9.4a) — not integration clearance; technical gates open.**
+**Rev 6 (10 Nov 2026, Chad's go, docs only): NASA Ozone Watch replied (Leslie R. Lait; Gmail-displayed 9 Nov, 10:45 PM): the two named 2026 files are public domain as U.S. Government products, no licence or permission applies (Q1 asked about public redistribution and commercial use), no third-party rights or additional conditions; suggested credit line; one automated retrieval per file per day fine; no bulk pulls; best-effort availability. §9.4–§9.6 updated; the REGISTER draft stays NOT filed pending GPT's review and Chad's separate approval. Record: `ENQUIRIES-2026-11.md` rev 8.**
 **Rev 5 (8 Nov 2026, GPT wording corrections): terms/access review §9 — P1–P5 read by GPT on Chad's behalf; credit request established; commercial reuse UNRESOLVED (no applicable grant found; not prohibited); research-only REGISTER draft for review, NOT filed; still parked for building.**
 **Independent check:** GPT independently checked both preserved files — full sha256 and byte sizes match; 365 calendar rows each; area 301 supplied values, minimum 300; area 139 source-reported zero days; nine area and ten minimum dates missing through 6 Nov; latest values 18.75 million km² and 143 DU on 3 Nov; area maximum 27.06 on 18 Sep.
 **Rev 2 corrections (GPT review, adopted):** tied minimum (114 DU on 4 and 8 Oct); minimum described as the lowest among available retrievals; zero wording; format and missing-value categories (§2, §3).
@@ -133,33 +134,44 @@ Kept on the Mac: `~/Documents/Mother Earth/research/R6/2026-11-06/` with `PROVEN
 ### 9.3 Extraction record
 P1–P5 completed 8 Nov 2026 by GPT on Chad's behalf (P1 → A1, C; P2 → A2; P3 → B; P4 → F; P5 → A3).
 
-### 9.4 Interpretation (open to challenge; corrected in rev 4)
+### 9.4 Interpretation (open to challenge; corrected in rev 4; superseded for the two named 2026 files by the provider's reply, §9.4a)
+*The bullets below are the rev 5 position before the reply, kept as written.*
 - **Attribution:** the requested credit is established (B). It does **not** by itself establish permission for commercial redistribution.
 - **Commercial reuse: UNRESOLVED — no applicable grant established in the inspected sources.** Applicability of the ESDIS guidance and NASA media guidelines to these two derived files has not been established; the input dataset's terms do not by themselves establish permission for the derived files; the privacy notice supplies no applicable reuse grant. **Not a finding that reuse is prohibited.**
 - **Federal-work reasoning:** that the files carry no U.S. copyright as NASA work remains **explicitly unverified**. Rev 3's suggestion that a university-affiliated contact implies non-federal authorship is **withdrawn**: affiliations establish neither authorship nor copyright status in either direction.
 - **Upstream vs product:** GMAO and OMPS input terms are separate from permission for Ozone Watch's derived files.
 
-### 9.4a Provider enquiry (reported by Chad 9 Nov 2026)
-- Chad emailed NASA Ozone Watch about reuse of the two daily files (area, minimum), public/API redistribution, commercial use, attribution and once-daily retrieval. **Reply pending. No permission is inferred from sending or from silence**; the position in §9.4 stands. Record: `docs/research/ENQUIRIES-2026-11.md`.
+### 9.4a Provider enquiry and reply (enquiry reported by Chad 9 Nov 2026; reply recorded rev 6, 10 Nov 2026)
+- Chad emailed NASA Ozone Watch about reuse of the two daily files (area, minimum), public/API redistribution, commercial use, attribution and once-daily retrieval (quoted header: Sunday 8 Nov 2026, 10:36 PM, as displayed).
+- **Reply** from Leslie R. Lait (NASA, ARC-SG, Code 614, Goddard Space Flight Center), Paul A. Newman copied (as stated by Chad); received 9 Nov, 10:45 PM as Gmail displays it (no timezone assigned). Full text, the sent questions and the question-by-question linkage: `ENQUIRIES-2026-11.md` rev 8.
+- **Reuse:** "As products of the United State Government, these data are in the public domain. There are no licenses or permissions that apply, aside from the general ethical standards of the scientific community regarding proper credit, transparency, etc." (verbatim). Q1 asked specifically about public redistribution and commercial use; the answer makes no exception for either. **Public domain, including public redistribution and commercial use, for the two named 2026 files**, per the provider.
+- **Third parties:** "No third-party rights or additional conditions apply." (verbatim).
+- **Credit (provider's suggestion):** "Data are courtesy of the NASA Ozone Watch website ( https://ozonewatch.gsfc.nasa.gov)" "should be sufficient". Modification notices were not addressed separately; identifying our transformations stays our stated practice.
+- **Access:** "One automated retrieval per file per day would be fine", with any tool. **Carried forward:** do not transfer large portions of the site at once ("sip", not "chugalug"); no numerical limit beyond that is stated.
+- **Availability (carried forward as a source limitation):** as-is, best-effort, no availability guarantee; a U.S. Government shutdown (December given as an example) could delay updates or take the site down.
+- **Bounds:** the two named **2026** files only (not other files, other years' files, or images/maps); a provider reply, not a legal opinion. R6's technical gates (§8) stay open; **no building clearance.**
 
-### 9.5 Unanswered questions
-1. Licence / commercial-reuse position for the two derived files (no applicable grant found).
-2. Authorship and copyright status of the files (unverified; not inferable from contacts).
-3. Any polling allowance or numerical limit — none found in the named pages on the named dates; not unlimited.
+### 9.5 Unanswered questions (updated rev 6)
+1. ~~Licence / commercial-reuse position for the two derived files~~ — **answered by the provider for the two named 2026 files** (§9.4a). Whether the same holds for other years' files (e.g. the 2027 files when they appear) is **not** stated.
+2. ~~Authorship and copyright status~~ — the provider states the files are U.S. Government products in the public domain (§9.4a); recorded as the provider's statement.
+3. Polling: **one automated retrieval per file per day stated as fine**; no bulk or simultaneous large-scale transfers; no other numerical limit stated.
 
 ### 9.6 Proposed REGISTER entry — research-only DRAFT (NOT filed, not cleared)
 GPT (8 Nov 2026, rev 5 wording): technically acceptable as an unresolved evidence record. **Not authorised for filing**; clears neither commercial reuse, access cadence, integration nor building.
+**Rev 6 (10 Nov 2026):** draft updated with the provider's reply (Read, Reuse, Credit, Automated use, Availability, Commercial use lines). **Still NOT filed** — for GPT's review, then Chad's separate approval. Rev 5 draft text: git history at `66735b1`.
 ```
 ## NASA Ozone Watch — daily Antarctic ozone-hole area + SH minimum ozone (to3areas_/to3mins_YYYY_toms+omi+omps.txt) — research only, not on the page
+- **Provider reply (Leslie R. Lait, NASA, ARC-SG, Code 614, Goddard Space Flight Center; Gmail-displayed 9 Nov 2026, 10:45 PM; read by Claude from text and a screenshot Chad supplied 10 Nov 2026):** for to3areas_2026_toms+omi+omps.txt and to3mins_2026_toms+omi+omps.txt — "As products of the United State Government, these data are in the public domain. There are no licenses or permissions that apply, aside from the general ethical standards of the scientific community regarding proper credit, transparency, etc."; "No third-party rights or additional conditions apply." Record: docs/research/ENQUIRIES-2026-11.md rev 8.
 - **Read:** 6 Nov 2026 by Claude (SH meteorology/methodology, Disclaimers, data files); 8 Nov 2026 by GPT on Chad's behalf (P1 Disclaimers in full; P2 footer notice redirect; P3 homepage; P4 Contacts; P5 GMAO homepage, reanalysis, weather-analysis/prediction pages); 8 Nov 2026 by Claude (fetch summaries: NASA Earthdata guidance, OMPS record, NASA media guidelines). Research record: docs/research/R6-ozone.md §6, §9.
-- **Credit (verbatim, Ozone Watch footer):** "Please credit all material to "NASA Ozone Watch" unless otherwise noted." — requested credit; not itself a reuse permission.
+- **Credit (verbatim, Ozone Watch footer):** "Please credit all material to "NASA Ozone Watch" unless otherwise noted." **Provider's suggested wording (reply):** "Data are courtesy of the NASA Ozone Watch website ( https://ozonewatch.gsfc.nasa.gov)" — "should be sufficient". Our transformations identified (project practice; modification notices not addressed separately by the provider).
 - **Disclaimers (summary, GPT):** data and methods may change, earlier versions not all archived; interpolation fills gaps for visualisation and area only, never for minimum ozone; the research-only caution applies to GMAO GEOS forecasts, not to these statistics.
 - **Website notice:** footer link redirects to https://www.nasa.gov/privacy/ (privacy/security notice; not licence evidence).
 - **Upstream and NASA-wide guidance (kept separate):** OMPS L2 input openly shared under EOSDIS guidance — the input's terms do not by themselves establish permission for the derived files; GMAO pages show no applicable grant. Applicability of the ESDIS data-use guidance and NASA media guidelines to these two files has not been established; the inspected evidence does not establish that the files are distributed through ESDIS.
-- **Automated use:** plain-text files described as suitable for program input; no scripted-download rule and no numerical rate/cadence/load limit found in the pages inspected (6–8 Nov 2026) — not unlimited; machine-readable format is not a polling allowance.
+- **Automated use (provider reply):** "One automated retrieval per file per day would be fine", any tool; do not transfer large portions of the site's files at once (small server; "sip", not "chugalug"). No other numerical limit stated.
+- **Availability (provider reply):** as-is, best-effort, no guarantee of availability; a U.S. Government shutdown may delay updates or take the site down.
 - **Coverage statement:** none filed (R6 technical gates open: climatology definition, gap-fill share, publication timing, OMPS platform).
 - **Status:** ⛔ research only; not cleared for building.
-- **Commercial use:** UNRESOLVED — no applicable grant established in the inspected sources (ESDIS guidance and NASA media guidelines: applicability not established; input terms: not by themselves permission; privacy notice: no applicable grant); federal-work status unverified. Not a finding that reuse is prohibited.
+- **Commercial use:** YES for the two named 2026 files, per the provider's reply (public domain; no licence or permission applies; the question asked named public redistribution and commercial use). Other files and other years' files: not covered by the reply.
 ```
 
 ## Sources
