@@ -13,7 +13,7 @@ const BREAK = process.env.BREAK || '';
 const brk = (from, to) => { if (!src.includes(from)) { console.log('BREAK pattern not found: ' + from); process.exit(2); } src = src.replace(from, to); };
 if (BREAK === 'null-zero') brk("if (t === null || t === undefined || t === '' || typeof t === 'boolean') return -1;", "if (t === undefined || t === '' || typeof t === 'boolean') return -1;");   // Number(null) = 0 → class 1
 if (BREAK === 'edge') brk('v >= ME.SST_BREAKS[i]', 'v > ME.SST_BREAKS[i]');
-if (BREAK === 'grey-class') brk("ME.SST_NONE = '#54545a';", "ME.SST_NONE = '#24878e';");   // grey made identical to a class colour
+if (BREAK === 'grey-class') brk("ME.SST_NONE = '#b0b0b8';", "ME.SST_NONE = '#24878e';");   // grey made identical to a class colour
 if (BREAK === 'no-none') brk('return i < 0 ? ME.SST_NONE : ME.SST_COLOURS[i];', 'return ME.SST_COLOURS[Math.max(0, i)];');
 globalThis.window = globalThis; globalThis.document = { getElementById: () => null };
 new Function(src)();

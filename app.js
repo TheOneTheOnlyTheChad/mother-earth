@@ -271,7 +271,7 @@ const rowsToObjects = ME.rowsToObjects = snap => { const f = snap.record_fields 
 // −3…40 °C range check) is grey and NEVER a class: 0 °C is class 1, not grey.
 ME.SST_BREAKS = [0, 5, 10, 15, 20, 25, 30];   // class i covers [BREAKS[i-1], BREAKS[i]); class 0 < 0; class 7 ≥ 30
 ME.SST_COLOURS = ['#3b528b', '#2e6e8e', '#24878e', '#1fa187', '#3aba76', '#73d056', '#b8de29', '#fde725'];
-ME.SST_NONE = '#54545a';
+ME.SST_NONE = '#b0b0b8';   // chosen on the real globe (live RC 10 Nov): #54545a nearly vanished on night-side ocean
 ME.sstClass = t => {
   if (t === null || t === undefined || t === '' || typeof t === 'boolean') return -1;
   const v = Number(t); if (!Number.isFinite(v)) return -1;

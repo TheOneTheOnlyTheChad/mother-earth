@@ -29,9 +29,9 @@ const BUOYS = [
   // three close together for the pixel check (cold, warm, unavailable), on the side the camera is turned to below
   ['P-COLD', -2.0, 0.0, FIX, -1.5, 'DRIFTING BUOYS', 'X'], ['P-WARM', 0.0, 2.0, FIX, 33.0, 'DRIFTING BUOYS', 'X'], ['P-NONE', 2.0, 0.0, FIX, null, 'DRIFTING BUOYS', 'X'],
 ];
-// expected colour per buoy, written out by hand (viridis classes; grey #54545a for none)
+// expected colour per buoy, written out by hand (viridis classes; grey #b0b0b8 for none)
 const WANT = { 'B-NEG': '#3b528b', 'B-ZERO': '#2e6e8e', 'B-499': '#2e6e8e', 'B-500': '#24878e', 'B-1748': '#3aba76', 'B-2999': '#b8de29',
-  'B-3000': '#fde725', 'B-NULL': '#54545a', 'P-COLD': '#3b528b', 'P-WARM': '#fde725', 'P-NONE': '#54545a' };
+  'B-3000': '#fde725', 'B-NULL': '#b0b0b8', 'P-COLD': '#3b528b', 'P-WARM': '#fde725', 'P-NONE': '#b0b0b8' };
 const cellOf = (lat, lng) => `${Math.floor((lat + 90) / 4)}_${Math.floor((lng + 180) / 4)}`;
 const dCells = {}; for (const b of BUOYS) { const k = cellOf(b[1], b[2]); (dCells[k] = dCells[k] || { count: 0, coverage: { grade: 'partial', evidence: 'buoy_positions_only', observed_fraction: null } }).count++; }
 const dEnv = rec => ({ layer: 'drifters', retrieved_at: DRUN, window_start: FIX, window_end: FIX, stale_after_s: 14400, source_status: 'ok', quantity: 'drifting buoys with a reported fix in the last 24 h (latest fix per buoy)', cells: dCells, refused: { future: 0, bad_time: 0, bad_position: 0, field_count: 0, duplicate: 0, too_old: 0 },
