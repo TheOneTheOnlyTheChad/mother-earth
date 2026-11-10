@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 15:40 UTC (clock reading at write) — **GPT retest PASSED at `860ed35`; Pages-origin RC at `860ed35` PASSED; merge awaits Chad's line**
+- GPT's first smoke test (preview, port 8899): the wheel pull-back lost Earth before the Moon came into frame (four sampled positions showed neither body). **Fixed at `860ed35`:** the target and swing follow the distance covered, plus containment (the target slides back toward Earth just enough to keep it in the safe area). New intermediate-frame check (201 positions × 3 canvases × 4 dates). Breaks `target-by-s` (11 fail) and `no-containment` (3 fail). Clean suite 333/333. Packet §6.
+- **GPT retest (relayed by Chad):** desktop wheel passed; Earth's centre visible and clear of the controls at all 25 sampled positions; + Sun framed all three; Back to Earth closed the view and returned focus. Mobile pinch is covered by Claude's regression. GPT is comfortable releasing after a Pages-origin check of this exact revision.
+- **Pages-origin RC at `860ed35` (15:39–15:40Z, pane, 588 px, real hub 0.6.6):** six page files hash-exact; requests = R1, then the scene only; **201-position sweep: Earth never lost or covered**; stops B and C all bodies in frame, no forced tags, no occlusion, camera near = rule; Back to Earth → near 0.05, focus restored.
+- Mac `_review/sky-zoom-rc/` = `860ed35` (270 files, digest `adaf3067`); preview `skyscene.js` identical to the commit.
+
 ## 10 Nov 14:53 UTC (clock reading at write) — **Candidate final at `0ce5415`; all tests done; live RC repeated at `0ce5415` PASSED; merge awaits Chad's line**
 - Since `96bcc5e`: one page line (`skyscene.js`, `zoomState` reports the camera's actual near plane, so the near-default break now fails), test hardening, packet §3 (results). Break runs: 22/25 fail cleanly, 2 more after test hardening, near-default after the reporting fix; **fixed-direction passes by design under the agreed checks (no minimum size), recorded for GPT**. Full regression green (orbital-browser 113/113 on a quiet machine; 112/113 only under parallel load, timing).
 - Live RC at `0ce5415` (14:52Z, pane, Pages origin, real hub 0.6.6): six page files hash-exact; card → R1, zoom → scene (exactly those two requests); stops B and C all bodies in frame, no forced tags, no occlusion; camera near = rule (1,440.08 / 4,781.68); Back to Earth → near 0.05, focus restored.
