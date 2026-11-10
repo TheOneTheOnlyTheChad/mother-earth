@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
-## 10 Nov 07:40 UTC (clock reading at write) — **timeline-revs-rc built: hub 0.6.4 versioned catalogue route (branch only)** (Chad: "Approve: build timeline-revs-rc on a branch only — hub 0.6.4 versioned catalogue route + page fetches its own revision, per TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1; no merge, R2 write, hub deploy or page change.")
+## 10 Nov 07:30 UTC (clock reading at write) — **timeline-revs-rc built: hub 0.6.4 versioned catalogue route (branch only)** (Chad: "Approve: build timeline-revs-rc on a branch only — hub 0.6.4 versioned catalogue route + page fetches its own revision, per TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1; no merge, R2 write, hub deploy or page change.")
 - Proposal rev 1 → GPT review (versioned route and 404/503 split accepted; four points) → **rev 1.1** (legacy URL pinned to R1 permanently, `current` = metadata only; immutable revisions; qualified rollback; legacy-vs-current fixture test) → Chad's branch go.
 - **Candidate `timeline-revs-rc` @ `c98cb24`** (code `4310d54` + packet `reviews/2026-11-10-timeline-revs-rc.md`). Hub 0.6.4 `a4cd5c91…9eca0`; page fetches `/catalogue/timeline/<its revision>`; `?v=202611221000`. **Catalogue unchanged (`096ae648…0fbe`), so no R2 write.**
 - Tests: hub 57/57 (fixture R1 + R2 with R2 current: legacy still R1; 16 malformed ids → 404 with no R2 read), axis 96/96, timeline-ui 585/585; full regression green; 15 breaks each fail (new: legacy-follows-current, serve-unknown-as-current, no-per-revision-hash, fetch-unversioned).
