@@ -43,8 +43,21 @@
   - **Breaks:** 25 (listed in the file). Results in §3.
 - **Full regression:** §3.
 
-## 3. Break and regression results
-(Filled in after the runs; see the commit that carries this section.)
+## 3. Break and regression results (10 Nov, 13:48–14:55 UTC clock readings)
+**Page-suite breaks (25), run against the final code** (`8a9d132`/`96bcc5e` page; parallel batches of 6):
+- **22 fail the suite cleanly** (failed checks in brackets): no-pin-check (1), schema-off (2), no-pair-check (1), antipode (9), swap-axes (9), mirror-lng (9), nearest-day (1), eager (2), no-restore-layers (1), no-restore-near (6), no-restore-focus (5), no-scale-label (26), stale-text (fails), tags-same-side (1), sun-400-full-labels (5; the view refuses "too small to frame"), strip-over-scene (43), near-by-distance (1), split-update (1), no-occlusion-check (1), endpoint-only (2), pinch-off (1).
+- **animate-always and fixed-distance** first failed with a crash in the test (a missing tag read as `undefined`) after recording real failures. The test was hardened (a missing body or tag fails each framing check). Rerun: animate-always 223 failed, fixed-distance 192 failed.
+- **near-default** at first PASSED. That was a real gap: `ME.zoomState().last.near` reported the near value the rule computed, not the camera's. It now reports the camera's actual `near`, and the computed value moves to `nearRule`. Rerun: near-default 3 failed. Clean suite 321/321.
+- **fixed-direction PASSES. Recorded, not "fixed": for GPT.** A single view direction for all dates (camera distance still searched) satisfies every agreed framing check on all 8 dates and 3 canvases; only the bodies come out smaller. The rev 2.1 rule set has no minimum disc size (GPT: deliberately), so this is not a defect under the agreed acceptance. The swing between stops is a size and readability choice (`framing-joint.json`: a fixed direction needs up to 715 R⊕ on a phone). GPT to say whether that warrants a check.
+- First-round findings that led to test fixes (before the final run): the fixed-direction break was originally mis-specified (camera distance still searched); the tag-collision rule had never been exercised (now a forced 30-px fixture); the near plane was asserted as a bound, not the rule.
+
+**Full regression (44 suite files):**
+- All pass. The new ones: sky-scene-build.py 14, sky-scene-ref 7, sky-scene-hub 7. Unchanged counts: sky-ui 79, sky-hub 46, sky-build 35, desktop-overflow 112, mobile-pass 131, orbital-browser 113, timeline-ui (pass), arts-ui 90, and so on.
+- Environment notes for this fresh container:
+  - backdrop-layer and desktop-overflow first stopped on missing dev fonts (`@fontsource/*`; installed).
+  - mobile-pass and orbital-browser needed the synthetic fixture from `phase1/orbital-fixture.build.mjs` (regenerated; seeded).
+  - `orbital.test.mjs` is a manual tool (needs a GP CSV argument), not a regression suite.
+- **orbital-browser 112/113 under load**, while six break runs shared the machine: one marker was ~0.2 units (~1.6 s of motion) from its reference. **On a quiet machine the branch passes 113/113 twice**, the same as main `71fb5d9` on the same machine. This is a timing artefact of load, not the change.
 
 ## 4. Deviations and findings from the build (for GPT)
 1. **globe.gl resets the orbit target to Earth's centre on every camera change** (its own `change` handler: "Keep orbit target on center").

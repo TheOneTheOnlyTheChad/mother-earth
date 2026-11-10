@@ -336,7 +336,7 @@
     for (const t of tags) { const it = items.find(i => i.k === t.k); svg += `<text class="zt" x="${(t.x + 3).toFixed(1)}" y="${(t.y + 13).toFixed(1)}">${it.name}</text>`; }
     $('zoom-svg').innerHTML = svg;
     const strip = $('zoom-strip').getBoundingClientRect(), gr = el.getBoundingClientRect();
-    st.last = { W, H: Hh, near: nr.near, minForwardDepth: nr.minForwardDepth, items, tags, rings,
+    st.last = { W, H: Hh, near: cam.near, nearRule: nr.near, minForwardDepth: nr.minForwardDepth, items, tags, rings,   // near = the CAMERA's actual value
       strip: { x: strip.left - gr.left, y: strip.top - gr.top, w: strip.width, h: strip.height },
       bar: (r => ({ x: r.left - gr.left, y: r.top - gr.top, w: r.width, h: r.height }))($('zoom-bar').getBoundingClientRect()),
       cam: cp, sunShown: st.sunShown, scale: $('zoom-scale').textContent };
