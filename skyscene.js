@@ -296,6 +296,19 @@
     return { near, minForwardDepth: m };
   }
   function overlaps(a, b) { return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h; }
+  // tags: right, left, above, below of the ring — first placement overlapping no other tag or ring and inside the canvas
+  function placeTags(items, W, Hh) {
+    const tags = [], rings = items.map(it => ({ k: it.k, x: it.x - Math.max(6, it.rpx + 4), y: it.y - Math.max(6, it.rpx + 4), w: 2 * Math.max(6, it.rpx + 4), h: 2 * Math.max(6, it.rpx + 4) }));
+    for (const it of items) { if (!it.inFrame) continue;
+      const rr = Math.max(6, it.rpx + 4), opts = [[it.x + rr + 4, it.y - TAG.h / 2], [it.x - rr - 4 - TAG.w, it.y - TAG.h / 2], [it.x - TAG.w / 2, it.y - rr - 4 - TAG.h], [it.x - TAG.w / 2, it.y + rr + 4]];
+      let pick = null;
+      for (const [x, y] of opts) { const box = { k: it.k, x, y, w: TAG.w, h: TAG.h };
+        if (x < 0 || y < 0 || x + TAG.w > W || y + TAG.h > Hh) continue;
+        if (tags.some(t => overlaps(t, box)) || rings.some(r => r.k !== it.k && overlaps(r, box))) continue; pick = box; break; }
+      tags.push(pick || { k: it.k, x: opts[0][0], y: opts[0][1], w: TAG.w, h: TAG.h, forced: true });
+    }
+    return { tags, rings };
+  }
   function frame() {
     if (!st.open) return;
     const g = ME.globe(), cam = g.camera(), el = $('globe'), W = el.clientWidth, Hh = el.clientHeight, geo = st.meshes.geo;
@@ -312,16 +325,7 @@
     for (const it of items) { it.occludedBy = null;
       for (const o of items) { if (o === it) continue; const b = geo[o.k], dir = V.norm(V.sub(geo[it.k].pos, cp)), w = V.sub(b.pos, cp), t = V.dot(w, dir);
         if (t > 0 && t < it.dist && V.len(V.sub(w, V.mul(dir, t))) < b.r) it.occludedBy = o.k; } }
-    // tags: right, left, above, below of the ring — first placement overlapping no other tag or ring and inside the canvas
-    const tags = [], rings = items.map(it => ({ k: it.k, x: it.x - Math.max(6, it.rpx + 4), y: it.y - Math.max(6, it.rpx + 4), w: 2 * Math.max(6, it.rpx + 4), h: 2 * Math.max(6, it.rpx + 4) }));
-    for (const it of items) { if (!it.inFrame) continue;
-      const rr = Math.max(6, it.rpx + 4), opts = [[it.x + rr + 4, it.y - TAG.h / 2], [it.x - rr - 4 - TAG.w, it.y - TAG.h / 2], [it.x - TAG.w / 2, it.y - rr - 4 - TAG.h], [it.x - TAG.w / 2, it.y + rr + 4]];
-      let pick = null;
-      for (const [x, y] of opts) { const box = { k: it.k, x, y, w: TAG.w, h: TAG.h };
-        if (x < 0 || y < 0 || x + TAG.w > W || y + TAG.h > Hh) continue;
-        if (tags.some(t => overlaps(t, box)) || rings.some(r => r.k !== it.k && overlaps(r, box))) continue; pick = box; break; }
-      tags.push(pick || { k: it.k, x: opts[0][0], y: opts[0][1], w: TAG.w, h: TAG.h, forced: true });
-    }
+    const { tags, rings } = placeTags(items, W, Hh);
     const c0 = items[0];
     let svg = '';
     for (const it of items.slice(1)) {
@@ -393,5 +397,5 @@
     sunShown: st.sunShown, rows: st.rows, geo: st.meshes && st.meshes.geo ? { moon: st.meshes.geo.moon.pos, sun: st.meshes.geo.sun.pos, R: st.meshes.geo.R } : null,
     meshWorld: st.meshes && st.open ? { moon: st.meshes.moon.position.toArray(), sun: st.meshes.sun.position.toArray() } : null,
     path: st.path, last: st.last });
-  ME.zoomStep = step; ME.zoomGo = goStop; ME.zoomRollover = rollover; ME.zoomFrame = frame;
+  ME.zoomPlaceTags = placeTags; ME.zoomStep = step; ME.zoomGo = goStop; ME.zoomRollover = rollover; ME.zoomFrame = frame;
 })();

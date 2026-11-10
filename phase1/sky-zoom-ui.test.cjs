@@ -32,7 +32,7 @@ const BREAKS = {
   'animate-always': ["  function goStop(n) { if (!st.open || !st.path) return; st.placing = true; setS(n); st.placing = false; }",
     "  function goStop(n) { if (!st.open || !st.path) return; setTimeout(() => { st.placing = true; setS(n); st.placing = false; }, 400); }"],
   'fixed-distance': ["      if (!best || z < best.d) best = { u, d: z, tgt };", "      if (!best) best = { u, d: 40 * list[0].r, tgt };"],
-  'fixed-direction': ["      if (!best || z < best.d) best = { u, d: z, tgt };", "      if (!best) best = { u: [0.6, 0.0, 0.8], d: z, tgt };"],
+  'fixed-direction': ["    for (let i = 0; i < n; i++) { const y = 1 - 2 * (i + 0.5) / n, r = Math.sqrt(1 - y * y), t = g * i; if (Math.abs(y) < 0.97) out.push([Math.cos(t) * r, y, Math.sin(t) * r]); }", "    out.push([0.6, 0.0, 0.8]);"],
   'tags-same-side': ["        if (tags.some(t => overlaps(t, box)) || rings.some(r => r.k !== it.k && overlaps(r, box))) continue; pick = box; break; }", "        pick = box; break; }"],
   'sun-400-full-labels': ["  const SUN_SCENE_R = 200;", "  const SUN_SCENE_R = 400;"],
   'strip-over-scene': ["    const pt = $('zoom-bar').offsetHeight + 8, pb = $('zoom-strip').offsetHeight + 8;", "    const pt = $('zoom-bar').offsetHeight + 8, pb = 0;"],
@@ -239,7 +239,7 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
       await doStep(dir); steps++;
       const z = await Z(page), L = z.last; sMax = Math.max(sMax, z.s); seen.add(Math.round(z.s * 4) / 4);
       const drawn = L.items.filter(i => i.inFrame);
-      const nearOk = L.near >= 0.05 && L.near <= Math.max(0.05, 0.2 * L.minForwardDepth) + 1e-6;
+      const nearOk = Math.abs(L.near - Math.max(0.05, isFinite(L.minForwardDepth) ? 0.2 * L.minForwardDepth : 0.05)) <= 1e-9 * Math.max(1, L.near);   // the rule exactly, not merely a bound
       const noClip = L.items.every(i => i.k === 'sun' && !L.sunShown || i.inFrame === false || i.dist - 0 > L.near);
       const tagsOk = drawn.every(i => L.tags.some(t => t.k === i.k));
       const scaleOk = L.scale === (L.sunShown ? 'Earth and Moon to scale. Sun drawn closer and resized. Labels show actual distances.' : 'Earth and Moon to scale. Labels show actual distances.');
@@ -256,12 +256,24 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
     const c = await page.evaluate(() => { const r = ME.globe().renderer().domElement.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     await page.mouse.move(c.x, c.y); await page.mouse.down(); for (let i = 1; i <= 10; i++) { await page.mouse.move(c.x + i * 15, c.y + i * 5); await page.waitForTimeout(20); } await page.mouse.up();
     const z = await Z(page), L = z.last;
-    ok('check 16 free orbit: dragging makes the view free, near plane still by forward depth, nothing clipped', z.free && L.near <= Math.max(0.05, 0.2 * L.minForwardDepth) + 1e-6 && L.near >= 0.05, { free: z.free, near: L.near, m: L.minForwardDepth });
+    ok('check 16 free orbit: dragging makes the view free, near plane exactly the forward-depth rule (and > the default at stop C)', z.free && Math.abs(L.near - Math.max(0.05, 0.2 * L.minForwardDepth)) <= 1e-9 * L.near && L.near > 1, { free: z.free, near: L.near, m: L.minForwardDepth });
     ok('Re-frame button shown while free', await page.evaluate(() => !document.getElementById('zoom-reframe').hidden));
     await page.click('#zoom-reframe');
     ok('Re-frame returns to the path at stop C', !(await Z(page)).free && (await Z(page)).stop === 'C');
     await page.click('#zoom-back'); await page.waitForTimeout(300);
     ok('check 16: near plane restored to globe.gl\'s 0.05 on exit', await page.evaluate(() => ME.globe().camera().near) === 0.05);
+    await ctx.close();
+  }
+
+  // ---------- tag placement rule itself: two markers side by side (30 px apart) must get non-overlapping tags (checks 14, 15)
+  {
+    const { ctx, page } = await run({});
+    await page.waitForFunction(() => ME.zoomPlaceTags);
+    const r = await page.evaluate(() => { const items = [{ k: 'moon', x: 200, y: 200, rpx: 2, inFrame: true }, { k: 'sun', x: 230, y: 200, rpx: 2, inFrame: true }, { k: 'earth', x: 200, y: 260, rpx: 3, inFrame: true }];
+      const { tags, rings } = ME.zoomPlaceTags(items, 800, 600); return { tags, rings }; });
+    const ov = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+    const clash = r.tags.some((t, i) => r.tags.some((u, k) => k !== i && ov(t, u))) || r.tags.some(t => r.rings.some(g => g.k !== t.k && ov(t, g)));
+    ok('tag rule: markers 30 px apart get tags that overlap neither each other nor another ring', !clash && r.tags.every(t => !t.forced), r);
     await ctx.close();
   }
 
