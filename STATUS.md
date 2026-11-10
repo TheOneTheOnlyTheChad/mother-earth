@@ -2,6 +2,15 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 10 Nov 2026
+
+## 10 Nov 02:23 UTC — **Fires card UNKNOWN after midnight: expected FIRMS daily reset, no fault** (read-only; Chad asked; D1 via connector, hub + page via pane)
+- Every firms run since 00:00 UTC (00:00–02:15, 10 runs) got today's header-only file: `down`, note "no detections processed yet for today (UTC) … (header only)". Last full file 9 Nov 23:45 UTC: **61,660 records**, 5.15 MB.
+- First rows of the day over 4–9 Nov: 04:15 · 03:45 · 02:16 · 03:45 · 03:00 · 03:30 UTC.
+- Page (live): fires card **UNKNOWN**, count "–", the header-only reason shown, and **"Records withheld: records are from a different collector run (records 23:45 UTC, counts 02:15 UTC)"** — the pair rule working as designed. `/snapshot/firms` 200 (the 23:45 publication, retained); `/health/publication/firms` and `/health/runs/firms` 200 ok.
+- **Observation:** "collector reported down" reads as breakage for an expected daily state. A wording change would be a page change (own proposal + Approve). Nothing changed.
+- **Thread handover** written (HANDOVER "NEXT THREAD STARTS HERE", 10 Nov).
+
 # 9 Nov 2026
 
 ## 9 Nov 16:33:11 UTC (commit time) — **PAGE RELEASED: Timeline page (first entry, Pliny *Letters* 6.16) + Earth now · Timeline header tabs** (main `4b23518`, no-ff merge of `timeline-rc` @ `9dce186`; Chad: "Approve: push timeline-rc @ 9dce186 to main (page change: Timeline page + Earth now · Timeline header tabs)")
