@@ -162,6 +162,17 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **globe.gl quirks found:** its own controls `change` handler resets the orbit target to Earth's centre (a view needing another target re-sets it in a later-registered handler); damping is on (0.1). The globe mesh appears only once globe.gl has finished building (wait for it). The page has no three.js Line/Basic material constructors (harvest Mesh/Sphere/Phong from the globe mesh; draw lines as SVG from `getScreenCoords`).
 - **Break discipline that paid off:** a break that passes means the test can't see the defect. Three did this today (tag rule never exercised; near check compared the page with itself, twice). Check each against an independent computation, not the page's own report.
 
+## 4n. Thread facts (10 Nov 2026, buoy temperature + Ocean Heat thread)
+- **Buoy temperature colours LIVE 17:29 UTC 10 Nov** (merge `28d6047`).
+  - One source of truth in `app.js`: `ME.SST_BREAKS`, `ME.SST_COLOURS` (viridis 0.25–1.0, 8 classes) and `ME.SST_NONE` `#b0b0b8` ("Temperature unavailable"). `ME.sstClass(t)` returns −1 for null and for anything non-finite; 0 °C is a class.
+  - Keys built from it: `#sstkey-drifters` (card) and `#leg-drifters-sw` (main key).
+  - Tests: `node phase1/buoy-temp.test.mjs` (37; `BREAK=null-zero|edge|grey-class|no-none`); `node phase1/buoy-temp-ui.test.cjs` (33; `BREAK=fixed-yellow|key-always|null-zero`; serves a dark-ocean PNG for GIBS so the globe builds).
+- **Lesson: pick dot colours on the real globe.** globe.gl shades 3D dots darker than their declared colour, so desk ΔE overstates visibility on night-side ocean (the first grey `#54545a` nearly vanished). The real backdrop is often cloud (white/grey), not dark ocean. Compare candidates through the page's own render path in a Pages-origin RC tab; points set by hand with `pointsData()` did not render.
+- **Playwright:** `require('playwright')` resolves from `/opt/npm-tools/node_modules`. Run suites with `NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules`.
+- **NOAA STAR file share** (`www.star.nesdis.noaa.gov`): reachable **only from the pane** (Chad granted the site); both shells get proxy 403. Byte ranges are honoured. Large files: Chad downloads them in his browser; Claude reads them from a granted `~/Downloads` and works in the Mac shell (`pip install --break-system-packages netCDF4` works there; Python 3.10, so no `-P`; keep scripts in a folder apart from the data).
+- **CoralTemp rows are south-first; the CRW SSTA and climatology files are north-first.** Same grid otherwise. Flip and assert before comparing.
+- **OSMC 522 (16:07 run):** one failed upstream hour blanks the live buoy layer ("unknown, records withheld") although the last good records exist. A separate reliability follow-up (GPT's shape: a coherent last-good pair with its original time, plus a feed-down label).
+
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.
 - **Optional layers** on the page go through `OPTIONAL_LAYERS` in index.html (fetched only while on, cleared on off, `refreshPair` + `usable()` as for the always-on record layers). `ME.renderState()` and `ME.openCell(layer, id)` are the read-only test/console aids.

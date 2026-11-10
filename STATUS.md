@@ -4,6 +4,30 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 17:29:25 UTC (push time) — **PAGE RELEASED: buoy dots coloured by water temperature** (main merge `28d6047` of `buoy-temp-rc` @ `52fa1eb`, code `61d0504`; Chad: "Approve: merge buoy-temp-rc to main (page change: buoy dots coloured by water temperature)")
+- **Merge:** no overlap (main side: STATUS and the Ocean Heat record only). All nine page files and `worker.js` are byte-identical to `61d0504`. `worker.js` = live hub 0.6.6 `4231114d…`, so **main = live**. Unit suite 37/37 on the merge.
+- **Served hashes: all nine page files exact at 17:30:10Z:**
+
+  | File | sha256 (first 16) |
+  |---|---|
+  | index | `c1797d72` |
+  | app | `161b53cc` |
+  | sources | `e469e0f5` |
+  | style | `fad92f02` |
+  | arts | `58773cef` |
+  | sky | `2056da8d` |
+  | skyscene | `5e00ad77` |
+  | timeline.html | `d7c37d5f` |
+  | timeline.js | `ae87c6a1` |
+
+- **Live smoke test on the public page (17:30:43Z):**
+  - scripts `?v=202611261000`;
+  - drifters off on load: 0 drifter requests, keys hidden;
+  - on: 1,303 buoys from the 17:08 pair, 0 colour mismatches, 46 grey, 0 old yellow; card key and main key shown;
+  - off: both hidden.
+- **Rollback:** revert the merge `28d6047` (own Approve line). No hub change.
+- **GPT:** approved the Ocean Heat C2–C5 results too (relayed by Chad; detail not relayed in this thread).
+
 ## 10 Nov 17:28 UTC (clock reading at write) — **GPT's smoke test of `buoy-temp-rc` PASSED** (relayed by Chad; docs only)
 - 1,303 buoys; both keys; buoy `1601749` 19.55 °C at its 16:00 UTC fix; off clears both keys; the three changed page files match the packet hashes; unit suite 37/37.
 - GPT: keep the yellow card pip and count; keep `#3b528b` (not a release condition); **the OSMC 522 blank-layer behaviour is a separate reliability follow-up** (shape if revisited: serve a coherent last-good pair with its original timestamp plus a separate feed-down label).
