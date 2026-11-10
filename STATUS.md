@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
-## 10 Nov 11:12 UTC (clock reading at write) — **Sky zoom-out proposal rev 1 written (docs only)** — `docs/concepts/SKY-ZOOM-OUT-PROPOSAL.md`, for GPT
+## 10 Nov 11:05 UTC (clock reading at write) — **Sky zoom-out proposal rev 1 written (docs only)** — `docs/concepts/SKY-ZOOM-OUT-PROPOSAL.md`, for GPT
 - New thread; Mac folder re-granted. Mac already matched main `65306ac` (238/238 files by sha256, 10:58 UTC); nothing copied.
 - **Frame alignment sourced** from ERFA (BSD-3 reimplementation of IAU SOFA, master `1a8044c`: `era00.c`, `c2t06a.c`, `gmst06.c`, `pnm06a.c`; text only). The Horizons manual was unreachable from Claude's fetch tool, so it goes on the source-pass list.
 - **Desk check on committed raw exports only (no request)**, 579 dates, script + outputs in `docs/concepts/sky-zoom-out-desk-check/`:
