@@ -1,12 +1,22 @@
-# Sky zoom-out view (Earth → Moon → Sun) — proposal rev 2 (docs only)
+# Sky zoom-out view (Earth → Moon → Sun) — proposal rev 2.1 (docs only)
 
 - **Rev 1:** written 10 Nov 2026, 11:03 UTC clock reading (start of writing), commit `49678eb`.
 - **Rev 2:** written from 11:26 UTC clock reading (start of writing), after GPT's review of rev 1 (relayed by Chad, 10 Nov).
-- Built from GPT's brief (relayed by Chad), recorded in `docs/concepts/SKY-ZOOM-OUT-BRIEF.md`. **For GPT's focused recheck of §1, §3.6, §4, §7 and §11.**
+- **Rev 2.1:** written 11:37 UTC clock reading, after GPT's recheck of rev 2 (relayed by Chad, 10 Nov; GPT reviewed the Mac copy `d0b39140…31ea`). GPT: rev 2 **closes the Worker-schema and alignment findings** and is ready for Chad's separate source-pass decision. Rev 2.1 tightens the camera acceptance tests and the ERFA notice wording before the branch build.
+- Built from GPT's brief (relayed by Chad), recorded in `docs/concepts/SKY-ZOOM-OUT-BRIEF.md`.
 - Nothing in this document is built, exported, uploaded, filed or deployed. Each later step needs its own approval (§13).
 - Builds on `SKY-TWO-CLOCKS-PROPOSAL.md` rev 3 and the live card (main `a1c3ed6`, hub 0.6.5).
 
 **Question the view answers:** where are the Moon and the Sun, relative to the Earth, at the card's sample instant, and how far away are they?
+
+## Rev 2.1 changes (GPT's recheck of rev 2)
+| # | Change | Where |
+|---|---|---|
+| 1 | Framing acceptance now runs on the **actual rendered viewport**: no tag overlap, no body hidden behind another, the strip covering no body or tag. Readable, distinct Earth and Moon markers and tags at stop C. **No minimum diameter for the physical discs** (that would constrain the true-scale view). Test dates add the near-conjunctions **2026-Sep-11** (2.38° apart) and **2027-Dec-28** (2.82°), beside 2027-Feb-21 (178.86°). | §4.3, §11 checks 14, 15, 21 |
+| 2 | **One complete wheel sequence and one complete pinch sequence** through A → B → C (and back), checked at every step, not only at the endpoints. | §11 check 22 |
+| 3 | **Near plane by forward depth in camera space** (an off-axis body can be far in straight-line distance yet close to the near plane). Clipping checked during the pull-back and free orbit as well as at both stops; Earth + atmosphere inspected at stop C; the original near plane restored on exit. | §4.4, §11 check 16 |
+| 4 | **ERFA notices:** the generator retains the complete file-level notice from each pinned source file ported (all six carry one identical notice, © 2013-2023), plus LICENSE; full non-endorsement clause verbatim. Sources credit alongside. | §10.1 |
+| 5 | GPT reproduced the method figures (0.00229° Sun, 0.00249° Moon vs full chain; 0.01148° vs `ME.subsolar`) from the saved point sets, and ran a fixture of the proposed envelope through the existing Worker: 200, and 503 with an empty Sun row set. Actual-byte and pairing checks stay for the candidate. | §0, §7 |
 
 ## Rev 2 changes (GPT's review of rev 1)
 | # | Change | Where |
@@ -208,14 +218,31 @@ Radii [GK; to be confirmed from Horizons body data in the source pass]:
   All of these are inside the far plane once the farthest body is added (≤ 241 + 200 R⊕ ≪ 1,250 R⊕). That includes the near-opposite configuration. → **Sun at 200 R⊕** keeps the phone camera closest, so Earth and Moon stay largest.
 - **One fixed direction for the whole pull-back** (`framing-joint.py`, 83 dates) costs up to **715 R⊕** at stop C on a phone (Earth ~3 px). → **The direction swings between stops** during the same gesture (§2). It is not fixed.
 
-**In the build:** the page computes each stop's framing the same way: a fixed, ordered candidate list, so the result is deterministic. Acceptance checks 14–15 (§11) assert that the intended bodies, their tags and the strip are in frame on all three canvases, on all dates in the test set, including 2027-Feb-21.
+**What the desk model does not check** (GPT, rev 2 recheck): whether tags overlap each other, whether a body is hidden behind another, and whether the strip covers part of the scene. It also treats the label sizes and canvases as estimates.
+
+**In the build:** the page computes each stop's framing the same way: a fixed, ordered candidate list, so the result is deterministic. Acceptance is on the **actual rendered viewport** (checks 14, 15, 21, 22):
+- every intended body's marker and tag inside the canvas;
+- no two tags overlapping, and no tag over another body's marker;
+- no body hidden behind another from the camera (the line of sight to each marker is clear);
+- the strip covers no marker or tag;
+- at stop C, Earth's and the Moon's **markers and tags readable and distinct** (separate, non-overlapping hit areas). There is **no minimum diameter for the physical discs**: the true-scale view sets those.
+
+The test set includes the worst dates from `framing-tags.json`, the near-opposite **2027-Feb-21** and the near-conjunctions **2026-Sep-11** and **2027-Dec-28** [desk, `method-subpoints.json`]. In a conjunction the tag placement rule must move the Moon's and Sun's tags apart (e.g. opposite sides), and the check fails if it can't.
 
 ### 4.4 Depth range (new in rev 2)
 - With today's near plane (0.05 units) and a camera 241 R⊕ away, depth resolution at Earth's distance is about 7 R⊕ for a 24-bit depth buffer. The estimate is Δz ≈ z² / (near · 2²⁴), a standard approximation, not measured on hardware.
 - That is far coarser than the 0.18 R⊕ gap between the atmosphere shell and the surface, so they would collide.
-- **In the view:** `near = max(0.05 units, 0.2 × distance from the camera to the nearest drawn body surface)`. Restored on exit. With the nearest drawn surface at least 50 R⊕ from the camera (so near ≥ 10 R⊕), this gives ~0.0004 R⊕ resolution at Earth at stop C with 24-bit depth, and ~0.09 R⊕ at 16-bit (same approximation).
+- **In the view (rev 2.1, GPT):** the rule uses **forward depth in camera space**, not straight-line distance. A body off to the side can be far away in a straight line and still sit close to the near plane.
+  - For each drawn body: its centre's depth along the camera's viewing axis, minus its radius → the nearest forward depth of its surface. Bodies behind the camera are ignored.
+  - `near = max(0.05 units, 0.2 × the smallest of those depths)`, recomputed whenever the camera moves (pull-back, stop jump, free orbit).
+  - The original near plane is saved on entry and restored on exit.
+  - With the nearest forward surface depth at least 50 R⊕ (so near ≥ 10 R⊕), this gives ~0.0004 R⊕ resolution at Earth at stop C with 24-bit depth, and ~0.09 R⊕ at 16-bit (same approximation).
 - **The far plane is not changed.**
-- Acceptance check 16 asserts the near-plane rule and the restore. A rendered screenshot at stop C on the emulated phone is inspected for surface artefacts (Chad or GPT, in the smoke test).
+- Acceptance check 16 asserts:
+  - the near-plane rule at every step of the pull-back sequence (check 22), at both stops, and through a scripted free orbit;
+  - **no clipping**: every drawn body's nearest forward surface depth stays greater than `near` at every step;
+  - the restore on exit.
+- A rendered screenshot of Earth and its atmosphere at stop C on the emulated phone is inspected for surface artefacts (Chad or GPT, in the smoke test). The hardware depth measurement waits for the rendered candidate (GPT).
 
 ## 5. Which date and instant — decision Z4 (Chad; GPT supports)
 - **The same sample as Two Clocks:** today's UTC date on the device clock, at 00:00 UTC, matched exactly.
@@ -288,11 +315,13 @@ Radii [GK; to be confirmed from Horizons body data in the source pass]:
 
 **New entry "ERFA (liberfa/erfa)":**
 - Code/coefficients only, no data. BSD-3-Clause, `LICENSE` at `1a8044c` (sha256 `b1858f9a…`), read 10 Nov 2026.
-- Condition 1 (verbatim): "Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer". The notice reads "Copyright (C) 2013-2021, NumFOCUS Foundation. All rights reserved."
-- Condition 3: no endorsement by the SOFA Board or the IAU.
+- **Files to be ported, pinned at `1a8044c`** (read 10 Nov 2026 via raw.githubusercontent; sha256 prefixes): `pmat06.c` `f8c33e0f`, `pfw06.c` `085f4986`, `fw2m.c` `480d1ae7`, `obl06.c` `55026087`, `gmst06.c` `5adeede2`, `era00.c` `91c092c3`.
+- **File-level notice:** each of the six ends with the same notice block (checked identical): "Copyright (C) 2013-2023, NumFOCUS Foundation. All rights reserved.", the SOFA-derivation paragraphs, the TERMS AND CONDITIONS 1–3 and the disclaimer. Each file's header also says "Derived, with permission, from the SOFA library. See notes at end of file." The top-level `LICENSE` carries the same terms with "2013-2021".
+- Condition 1 (verbatim): "Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer."
+- Condition 3, in full (verbatim, to be retained as is): "Neither the name of the Standards Of Fundamental Astronomy Board, the International Astronomical Union nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission."
 - ERFA's note: acknowledge "a library derived from SOFA, rather than SOFA itself".
-- **Our obligation:** the generator file carries the notice, conditions and disclaimer verbatim. Sources credits ERFA in those terms.
-- Commercial use: permitted by the licence terms. The AGPL-3.0 repo can include BSD-3 code with the notice kept [GK reading; GPT to confirm].
+- **Our obligation (rev 2.1, GPT):** the generator's transcribed code and coefficients sit beside the **complete applicable notices, verbatim**: the file-level notice block from the pinned files (one copy, naming the six files and their hashes, since the blocks are identical) and the `LICENSE` text, including the full non-endorsement clause. A Sources credit ("uses code derived from ERFA, a library derived from SOFA") sits alongside, never instead.
+- Commercial use: permitted by the licence terms. BSD-3 code can be incorporated into the AGPL-3.0 project with its notices preserved (GPT, rev 2 recheck).
 
 ## 11. Acceptance checks — each with a break that must fail it
 | # | Check | Break that must fail it |
@@ -310,24 +339,28 @@ Radii [GK; to be confirmed from Horizons body data in the source pass]:
 | 11 | Text equivalent present and matches the drawn positions and date | `stale-text` |
 | 12 | No horizontal overflow (360/390/430/1280); 390 × 844 overlay ≤ 8% | existing `desktop-overflow` / `mobile-pass` breaks |
 | 13 | Reduced motion: no animated transitions | `animate-always` |
-| 14 | **Stop B framing:** Earth, Moon and both tags inside the canvas (6% inset), the strip readable, on 390 × 844, 360 × 640 and desktop, test set incl. the stop-B worst dates | `fixed-distance` (one camera distance for all dates) |
-| 15 | **Stop C framing:** Earth, Moon, Sun, three tags and the strip inside, same canvases, test set incl. 2027-Feb-21 and the stop-C worst dates | `sun-400-full-labels`, `fixed-direction` |
-| 16 | Near plane follows §4.4 in the view and is restored on exit | `near-default` |
+| 14 | **Stop B framing, rendered viewport:** Earth and Moon markers and tags inside the canvas (6% inset), no tag overlap, no body occluded, strip clear of markers and tags; 390 × 844, 360 × 640, desktop; test set incl. the stop-B worst dates and the §4.3 dates | `fixed-distance`, `tags-same-side` |
+| 15 | **Stop C framing, rendered viewport:** as check 14 for Earth, Moon and Sun; Earth and Moon markers and tags readable and distinct; test set incl. 2027-Feb-21, 2026-Sep-11, 2027-Dec-28 and the stop-C worst dates | `sun-400-full-labels`, `fixed-direction`, `strip-over-scene` |
+| 16 | Near plane follows §4.4 (forward depth) at every step of check 22, at both stops and through a scripted free orbit; no body clipped; restored on exit | `near-default`, `near-by-distance` (straight-line rule), `no-restore-near` |
 | 17 | UTC rollover while open: bodies, distances, date line and text change in one update; never mixed | `split-update` |
 | 18 | **Hub:** actual scene + R1 bytes 200 through `skyRoute`/`skyCatalogue`; missing `bodies.sun.rows` 503 `invalid`; unknown id 404 with no R2 read | `serve-on-fail`, `no-envelope-check` |
 | 19 | Page refuses a scene whose `pairs_with` ≠ the card's pinned R1 | `no-pair-check` |
 | 20 | Build refuses to emit a card/scene pair from different raw exports or generator commits | `unpaired-refresh` |
+| 21 | **Occlusion:** no drawn body hides another's marker from the camera at either stop, on the §4.3 dates | `no-occlusion-check` (a fixture where the drawn Sun sits behind Earth must fail) |
+| 22 | **Full gesture sequences:** one complete wheel sequence and one complete pinch sequence (emulated touch) from A through B to C and back to A; at every step the camera stays between the stop framings, any body in frame has its tag, the scale line matches what is drawn, and checks 16 and 21 hold | `endpoint-only` (framing applied only at the stops, jumping in between), `pinch-off` |
 
 The full regression (41 suites today) runs on the candidate.
 
-## 12. Questions for GPT (focused recheck)
+## 12. Questions for GPT (rev 2 recheck — answered)
 1. Is the framing method (§4.3) and its acceptance (checks 14–15) enough, or should a minimum on-screen size for Earth and Moon at stop C be a pass condition too?
 2. Sun at 200 R⊕ rather than 400: any objection on honesty grounds? It is labelled either way.
 3. Is the near-plane rule (§4.4) acceptable as computed, with a visual check in the smoke test? Or must a hardware depth measurement come first?
 4. The REGISTER texts in §10.1, especially the ERFA notice placement and the AGPL/BSD reading.
 
+GPT's answers (10 Nov, relayed by Chad): 1. no minimum disc diameter; test overlap, occlusion and strip coverage on the rendered viewport instead, plus readable, distinct markers and tags (rev 2.1 #1). 2. 200 R⊕ fine with the revised label. 3. Arithmetic checks out; hardware measurement can wait for the rendered candidate; use forward depth (rev 2.1 #3). 4. Horizons wording ready for Chad's filing decision; ERFA: keep the complete file-level notices (rev 2.1 #4).
+
 ## 13. Steps (each its own approval) and what is not approved
-1. **GPT rechecks rev 2** (docs only).
+1. ~~GPT rechecks rev 2~~ **done** (10 Nov): ready for the source-pass decision; rev 2.1 applies its test and notice changes.
 2. **Source pass**, text only, in the pane, **no export**:
    - the Horizons manual's frame wording,
    - Moon and Sun radii from Horizons body data,

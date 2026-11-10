@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 11:37 UTC (clock reading at write) — **Sky zoom-out proposal rev 2.1 after GPT's recheck** (docs only)
+- GPT (relayed by Chad; reviewed Mac copy `d0b39140…31ea`): rev 2 **closes the Worker-schema and alignment findings**; ready for Chad's separate text-only source-pass decision. GPT keeps Z1a–Z5a; Sun at 200 R⊕ fine; hardware depth measurement can wait for the rendered candidate. GPT reproduced the method figures from the saved point sets and ran a fixture of the proposed envelope through the existing Worker (200; empty Sun rows → 503).
+- Rev 2.1 applies GPT's tightening:
+  - framing checked on the rendered viewport (tag overlap, occlusion, strip coverage, readable distinct Earth/Moon markers at stop C; no minimum disc diameter), with near-conjunction dates 2026-Sep-11 (2.38°) and 2027-Dec-28 (2.82°) added beside 2027-Feb-21;
+  - full wheel and pinch sequences through both stops;
+  - near plane by forward camera-space depth, clipping checked during the pull-back and free orbit;
+  - ERFA: complete file-level notice from the six pinned files (identical blocks, © 2013-2023; hashes listed) plus LICENSE, full non-endorsement clause.
+- **Next, Chad's:** the text-only source pass (no export). REGISTER filing and the branch build stay separate approvals.
+
 ## 10 Nov 11:28 UTC (clock reading at write) — **Sky zoom-out proposal rev 2 after GPT's review** (docs only) — `docs/concepts/SKY-ZOOM-OUT-PROPOSAL.md`
 - GPT (relayed by Chad) kept the five defaults and asked for three changes plus evidence work. All applied:
   1. **Scene file fits the Worker's existing envelope check** (`catalogue:"sky"`, pinned revision, `coverage`, non-empty `bodies.moon.rows`/`bodies.sun.rows`); no route code change; `pairs_with` the card's R1; card and scene pinned as a pair at refresh; tests through the real Worker functions.
