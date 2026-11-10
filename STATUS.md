@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 03:15 UTC (clock reading at write) — **Timeline deep-time proposal rev 1.2: Chad decided D5 = show all four lanes** (docs only)
+- Lanes with no entries collapse to a thin labelled row, "No entries yet — this lane fills as its evidence is checked"; nothing unchecked is drawn; each lane fills only through its own slice and source check (§3a). Answers GPT's phone-space concern. **For GPT's review.** Other decisions and the source-check go still open.
+
 ## 10 Nov 03:02 UTC (clock reading at write) — **Timeline deep-time proposal ACCEPTED by GPT as a concept; rev 1.1** (docs only)
 - GPT (read the Mac copy, relayed by Chad) recommends D1–D4 and D6 as written, **D5 hide empty axis lanes**, D7 3 h incl. write-up, text only. Added §11a (source-check pass rules: readable passage for the timing shown, source version and status, terms evidence; unresolved at the cap stays unresolved; chart never supplies a missing event date; pulses tested with a fixture if unsupported) and §11b (before a build: approximate and one-sided ages, version-mismatch fallback with the previous catalogue kept, fresh R2 headroom read).
 - **Chad's decision line and the source-check go are still separate.**

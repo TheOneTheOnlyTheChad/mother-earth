@@ -2,7 +2,9 @@
 
 **Rev 1, 10 Nov 2026 (docs only).** Written from Chad's vision (10 Nov) and GPT's review of Claude's brief (10 Nov, relayed by Chad). **Nothing is built, researched, sampled or approved.** Every step after this document needs Chad's separate go; production steps need their own Approve lines.
 
-**Rev 1.1, 10 Nov 2026 (docs only): ACCEPTED by GPT as a concept** (GPT read the Mac copy of rev 1; relayed by Chad). GPT recommends D1–D4 and D6 as written, **D5 = hide the empty axis lanes**, D7 = 3 h including write-up, text only. Its two carry-forward points are added as §11a (source-check pass rules) and §11b (before a build). §3 updated for D5. **Chad's decisions and the source-check go are still separate.**
+**Rev 1.1, 10 Nov 2026 (docs only): ACCEPTED by GPT as a concept** (GPT read the Mac copy of rev 1; relayed by Chad). GPT recommends D1–D4 and D6 as written, **D5 = hide the empty axis lanes** (superseded by Chad's decision in rev 1.2: show them), D7 = 3 h including write-up, text only. Its two carry-forward points are added as §11a (source-check pass rules) and §11b (before a build). §3 updated for D5. **Chad's decisions and the source-check go are still separate.**
+
+**Rev 1.2, 10 Nov 2026 (docs only): Chad decided D5 = SHOW all four lanes** (his reason: there is enough evidence to be found to fill them, so the page should show where the timeline is going). §3 and D5 rewritten; GPT's phone-space concern is answered with a compact rule for the lanes that have no entries yet (§3a). Each lane still fills only through its own slice and source check. For GPT's review.
 
 **Related:** `TIMELINE-CONCEPT.md` (concept rev 3.1), `TIMELINE-PAGE-UX-PROPOSAL.md` (rev 2, the shelf and evidence controls), `TIMELINE-ENTRY-BUILD-PROPOSAL.md` (rev 2, the Pliny entry), START-HERE §2 (constitution; T1 exception).
 
@@ -28,8 +30,15 @@ What is live today (main `4b23518`) is one carefully sourced entry (Pliny, *Lett
 - **Overview strip:** the full Earth span (~4.5 billion years to now) as a thin bar, with a marked window showing which part the main view covers. Its purpose is scale: at the widest view you see how much of Earth's history sits before the later chapters.
 - **Main view: a labelled Phanerozoic zoom window** (roughly the last ~540 million years; the exact bounds come from the pinned chart, §5) with the **five mass-extinction episode cards** on the Mass extinctions lane, against the chart's period/era bands.
 - **Coverage statement, always visible:** what this release covers (five episodes, one chart revision) and that **empty stretches are not periods where nothing happened** — they are not yet shown.
-- **Other lanes: hidden** until their slice exists (D5, GPT's recommendation). Mass extinctions is the only active lane; one line states that this release covers five episodes.
+- **All four lanes shown** (D5, Chad's decision, rev 1.2): Earth systems and life · Mass extinctions · Human relatives · Human history. Mass extinctions is the active lane with the five episode cards; the other three are visible and labelled, with no entries yet (§3a). One line states that this release covers five episodes.
 - **Overview vs explorable window:** the page says plainly that the full-Earth strip is an overview and the Phanerozoic window is the part visitors can explore in this release.
+### 3a. Lanes with no entries yet (rev 1.2)
+- Each shows its name and one short line: **"No entries yet — this lane fills as its evidence is checked."** Nothing is drawn in it: no placeholder marks, sample dates or illustrative shapes, because nothing unchecked is shown (constitution).
+- **Phone space (GPT's concern):** lanes with no entries collapse to a single thin labelled row (about one line of text high), so the active lane keeps the room for dates and evidence. A lane expands to full height only once it has entries.
+- **Keyboard and screen readers:** each empty lane is a labelled region stating it has no entries yet; it is not a focus trap and adds one stop at most.
+- **The no-JS list** names all four lanes, with the same "no entries yet" line under the empty ones.
+- Showing a lane is **not** a claim that its evidence exists or has been checked; each lane still needs its own slice proposal and source check (§11) before anything appears in it.
+
 - **Pliny:** on the shelf as today; its public link (`#e-pliny-ep-6-16`) stays stable.
 - **Opening an episode:** the same panel/sheet pattern as Pliny (desktop panel, phone sheet, Back closes), with the evidence items one action each.
 
@@ -129,6 +138,6 @@ Rules:
 - **D2** First slice = Big Five on a Phanerozoic zoom window with a full-span overview; Human relatives second. *Recommended.*
 - **D3** Lane labels: Earth systems and life · Mass extinctions · Human relatives · Human history. *Recommended.*
 - **D4** No percentage-loss figures in this slice. *Recommended.*
-- **D5** Empty lanes: **hide them until their slice exists** (GPT's recommendation, rev 1.1; Claude had leaned to showing them, and accepts GPT's phone-space reason). One line states the release covers five episodes. *Chad's call.*
+- **D5** Lanes: **DECIDED by Chad (rev 1.2): show all four lanes.** Lanes without entries collapse to a labelled thin row with "No entries yet" (§3a). *Superseded:* rev 1.1 recorded GPT's recommendation to hide them (phone space); §3a answers that concern.
 - **D6** Cosmos before Earth: a separate later view. *Recommended.*
 - **D7** Source check cap: 3 h incl. write-up, text only (no PDFs unless Chad decides otherwise). *Suggested.*
