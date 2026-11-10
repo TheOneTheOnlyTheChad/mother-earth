@@ -2943,11 +2943,15 @@ const TIMELINE = TIMELINE_REVISIONS[TIMELINE_LEGACY];   // = the legacy pin (kep
 function timelinePin(rev, table = TIMELINE_REVISIONS) {
   return typeof rev === 'string' && Object.prototype.hasOwnProperty.call(table, rev) ? table[rev] : null;
 }
-/** Route /catalogue/timeline[/<revision>]: legacy → TIMELINE_LEGACY; versioned → that pin; unknown → 404, no R2 read. */
-async function timelineRoute(env, parts, table = TIMELINE_REVISIONS, legacy = TIMELINE_LEGACY) {
-  if (parts.length === 2) return timelineCatalogue(env, table[legacy]);
+/** Route /catalogue/timeline[/<revision>] on the RAW pathname (the shared parser drops empty segments, so it is not used here).
+ *  Exactly '/catalogue/timeline' or '/catalogue/timeline/' (one trailing slash, as 0.6.3) → TIMELINE_LEGACY;
+ *  exactly '/catalogue/timeline/<one non-empty segment>' → that pin; anything else (repeated or leading separators,
+ *  a trailing slash after a revision, extra segments) or an unknown id → 404, no R2 read. */
+async function timelineRoute(env, rawPath, table = TIMELINE_REVISIONS, legacy = TIMELINE_LEGACY) {
+  if (rawPath === '/catalogue/timeline' || rawPath === '/catalogue/timeline/') return timelineCatalogue(env, table[legacy]);
+  const m = typeof rawPath === 'string' ? rawPath.match(/^\/catalogue\/timeline\/([^/]+)$/) : null;
   let rev = null;
-  if (parts.length === 3) { try { rev = decodeURIComponent(parts[2]); } catch (e) { rev = null; } }
+  if (m) { try { rev = decodeURIComponent(m[1]); } catch (e) { rev = null; } }
   const pin = timelinePin(rev, table);
   if (!pin) return json({ kind: 'catalogue', catalogue: 'timeline', status: 'unknown revision' }, 404, { 'Cache-Control': 'no-store' });
   return timelineCatalogue(env, pin);
@@ -2999,7 +3003,7 @@ export default {
     if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
-    if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, p);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
+    if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
 
     if (p[0] === 'snapshot' || p[0] === 'cells') {
       const layer = p[1];

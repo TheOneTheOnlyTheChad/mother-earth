@@ -4,7 +4,7 @@
  * A second copy of worker.js is loaded with a FIXTURE table (R1 + a fixture R2, R2 marked current) — the case that
  * would have broken pages built before 0.6.4.
  * Run:   node --no-warnings phase1/timeline-catalogue-hub.test.mjs
- * Break: BREAK=no-hash | serve-on-missing | no-validate | legacy-follows-current | serve-unknown-as-current | no-per-revision-hash
+ * Break: BREAK=no-hash | serve-on-missing | no-validate | legacy-follows-current | serve-unknown-as-current | no-per-revision-hash | loose-separators
  *        — each loads a weakened copy of worker.js; the suite must FAIL on every one.
  */
 import fs from 'node:fs';
@@ -21,7 +21,8 @@ const BREAKS = {
   'serve-on-missing': ["  if (!o) return no('missing');\n  let buf;\n  try { buf = await o.arrayBuffer(); } catch (e) { return no('unreadable'); }\n  if (await sha256Bytes(buf) !== pin.fileSha256) return no('integrity');                     // the WHOLE catalogue file (timeline)",
     "  if (!o) return json({ catalogue: 'timeline', entries: [] });\n  let buf;\n  try { buf = await o.arrayBuffer(); } catch (e) { return no('unreadable'); }\n  if (await sha256Bytes(buf) !== pin.fileSha256) return no('integrity');                     // the WHOLE catalogue file (timeline)"],
   'no-validate': ["  if (!j || j.catalogue !== 'timeline' || j.catalogue_revision !== pin.revision || !Array.isArray(j.entries) || !Array.isArray(j.shelf) || !j.chart) return no('invalid');", "  // (break) validation removed"],
-  'legacy-follows-current': ["  if (parts.length === 2) return timelineCatalogue(env, table[legacy]);", "  if (parts.length === 2) return timelineCatalogue(env, table[TIMELINE_CURRENT]);"],
+  'legacy-follows-current': ["  if (rawPath === '/catalogue/timeline' || rawPath === '/catalogue/timeline/') return timelineCatalogue(env, table[legacy]);", "  if (rawPath === '/catalogue/timeline' || rawPath === '/catalogue/timeline/') return timelineCatalogue(env, table[TIMELINE_CURRENT]);"],
+  'loose-separators': ["return timelineRoute(env, url.pathname);", "return timelineRoute(env, '/' + p.join('/'));"],
   'serve-unknown-as-current': ["  if (!pin) return json({ kind: 'catalogue', catalogue: 'timeline', status: 'unknown revision' }, 404, { 'Cache-Control': 'no-store' });", "  if (!pin) return timelineCatalogue(env, table[TIMELINE_CURRENT]);"],
   'no-per-revision-hash': ["  return timelineCatalogue(env, pin);\n}", "  return timelineCatalogue(env, { ...pin, fileSha256: table[legacy].fileSha256 });\n}"],
 };
@@ -127,6 +128,15 @@ for (const id of BAD_IDS) {
   ok('dot segment "%2E%2E" is normalised away: no revision lookup, no R2 read, not a catalogue', reads.length === 0 && !('entries' in j) && j.status !== 'unknown revision', [x.status, reads]);
   dbTouched.length = before;   // the hub index it fell through to reads D1 for its history summary; not the route
 }
+// repeated / leading / trailing separators (GPT, 10 Nov): the shared parser drops empty segments, so the Timeline route
+// checks the raw path. One trailing slash on the legacy URL stays an alias for R1 (0.6.3 behaviour); nothing else loose.
+for (const bad of ['/catalogue/timeline//', '/catalogue/timeline//tl-2026-11-R1', '/catalogue/timeline/tl-2026-11-R1/', '/catalogue/timeline///', '//catalogue/timeline', '/catalogue//timeline', '/catalogue//timeline/tl-2026-11-R1', '/catalogue/timeline/tl-2026-11-R1//']) {
+  reads.length = 0;
+  const x = await get(env(FILE), bad); const j = await x.json().catch(() => null);
+  ok(`loose separators "${bad}" → 404 unknown revision, no R2 read`, x.status === 404 && j && j.status === 'unknown revision' && reads.length === 0, [x.status, j && j.status, reads]);
+}
+reads.length = 0; r = await get(env(FILE), '/catalogue/timeline/'); body = Buffer.from(await r.arrayBuffer());
+ok('single trailing slash on the legacy URL → R1 (alias kept, one read)', r.status === 200 && sha(body) === sha(FILE) && reads.length === 1);
 ok('timelinePin: exact own keys only', W.timelinePin('tl-2026-11-R1') === W.TIMELINE && W.timelinePin('__proto__') === null && W.timelinePin('toString') === null && W.timelinePin(undefined) === null && W.timelinePin(1) === null);
 
 // ---- 0.6.4: the bug this release prevents — R2 published and marked current; pages built for R1 must still get R1
