@@ -8,6 +8,8 @@
 
 **Rev 1.3, 10 Nov 2026 (docs only): GPT ACCEPTED rev 1.2 for concept approval** (Mac copy; relayed by Chad): all four lanes stay visible. Applied: a measurable phone target in §10 (GPT's proposed build target, pending measurement); empty rows add **zero** Tab stops; short phone row text with the explanation once in the coverage note; Human history reads "No dated entries on the axis yet" (Pliny is on the shelf).
 
+**DECIDED 10 Nov 2026 (Chad):** "D1–D4 and D6 as written, D5 show all four lanes, D7 3 h incl. write-up, text only. Go: Big Five source check per §11a." Research only; build, R2, hub and page steps each still need their own Approve lines.
+
 **Related:** `TIMELINE-CONCEPT.md` (concept rev 3.1), `TIMELINE-PAGE-UX-PROPOSAL.md` (rev 2, the shelf and evidence controls), `TIMELINE-ENTRY-BUILD-PROPOSAL.md` (rev 2, the Pliny entry), START-HERE §2 (constitution; T1 exception).
 
 ---
