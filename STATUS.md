@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 11:12 UTC (clock reading at write) — **Sky zoom-out proposal rev 1 written (docs only)** — `docs/concepts/SKY-ZOOM-OUT-PROPOSAL.md`, for GPT
+- New thread; Mac folder re-granted. Mac already matched main `65306ac` (238/238 files by sha256, 10:58 UTC); nothing copied.
+- **Frame alignment sourced** from ERFA (BSD-3 reimplementation of IAU SOFA, master `1a8044c`: `era00.c`, `c2t06a.c`, `gmst06.c`, `pnm06a.c`; text only). The Horizons manual was unreachable from Claude's fetch tool, so it goes on the source-pass list.
+- **Desk check on committed raw exports only (no request)**, 579 dates, script + outputs in `docs/concepts/sky-zoom-out-desk-check/`:
+  - Sun direction vs the full ERFA chain (`c2t06a`, polar motion 0, UT1 = UTC): GMST on ICRF (no precession) 0.369–0.392°; ERA only 0.059–0.156°; **IAU 2006 precession + GMST 0.0004–0.0023°**; UT1 − UTC = 0.9 s changes it by ≤ 0.0038°.
+  - Independent agreement: Sun vs the page's `ME.subsolar` max 0.0119°; Sun vs astronomy-engine max 0.00053°; Moon vs astronomy-engine max 0.0013°.
+- **globe.gl axes read from code:** +y north, +z (0°, 0°), +x (0°, 90° E). Camera limits: maxDistance 100 R⊕, far 1,250 R⊕. So the Moon fits at true distance; the Sun (~23,000 R⊕) cannot.
+- **Leans (decisions Z1–Z5 Chad's after GPT):** explicit mode with Back to Earth; true-scale Earth–Moon, Sun drawn at 400 R⊕ with true apparent size and exact direction, labelled; same 00:00 UTC sample as Two Clocks; layers hidden in the mode (they show "now"); separate fixed scene file `sky-scene-2026-11-R1` on the existing route (R1 untouched); rotation done in the generator.
+- **Not approved:** source pass, build, R2, hub, page.
+
 ## 10 Nov 10:49 UTC (clock reading at write) — **Sky thread closed: handover written; Mac synced; next = Sky zoom-out proposal (docs only)**
 - `sky-rc` deleted by Chad (GitHub now: `main` + parked `aircraft-rc`).
 - GPT's brief for the next Sky feature (zoom-out Earth → Moon → Sun) recorded in `docs/concepts/SKY-ZOOM-OUT-BRIEF.md`, with facts from this thread and the questions the proposal must answer. **Docs-only proposal next; nothing approved.**

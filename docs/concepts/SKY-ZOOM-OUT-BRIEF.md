@@ -1,6 +1,6 @@
 # Sky zoom-out view (Earth → Moon → Sun) — brief for the next proposal
 
-**Status:** brief only, captured 10 Nov 2026 at the end of the Sky on Two Clocks thread. Nothing has been researched, built or approved. The next step is a **docs-only proposal** for GPT's review. Each later step (source pass, build, deploy, page release) gets its own approval.
+**Status (10 Nov 11:12 UTC):** proposal rev 1 written — `SKY-ZOOM-OUT-PROPOSAL.md` (for GPT). Originally: brief only, captured 10 Nov 2026 at the end of the Sky on Two Clocks thread. Nothing has been researched, built or approved. The next step is a **docs-only proposal** for GPT's review. Each later step (source pass, build, deploy, page release) gets its own approval.
 
 ## 1. GPT's brief (relayed by Chad, 10 Nov 2026, verbatim)
 > The next Sky feature is a zoom-out view of Earth, the Moon and the Sun. I want to pull back from the existing Earth globe, see the Moon come into view, then pull back farther and see the Sun too. Give me a clear way back to the Earth view.
