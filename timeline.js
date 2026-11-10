@@ -1,6 +1,6 @@
 /* Mother Earth — Timeline page enhancement (entry proposal rev 2 §5–§6; deep-time build proposal rev 1.1 §2–§4).
  * The entries are already in the HTML (works with JavaScript off). This script:
- *  - draws the deep-time axis from the hub catalogue (/catalogue/timeline) ONLY when the catalogue's sha256 equals the
+ *  - draws the deep-time axis from the hub catalogue (/catalogue/timeline/<its own revision>, hub ≥ 0.6.4) ONLY when the catalogue's sha256 equals the
  *    page's data-catalogue-sha, its revision and build match, and it validates; any other outcome leaves the list
  *    as the only view and says so (§4a). Dates from two revisions are never mixed;
  *  - turns the pre-rendered entry into a detail panel (> 720 px, non-modal) or bottom sheet (≤ 720 px, modal);
@@ -14,7 +14,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202611211000';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202611221000';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
@@ -332,7 +332,7 @@ async function loadAxis() {
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), TIMEOUT_MS);
   let buf;
   try {
-    const r = await fetch(HUB + '/catalogue/timeline', { cache: 'no-store', signal: ctl.signal });
+    const r = await fetch(HUB + '/catalogue/timeline/' + encodeURIComponent(wrap.dataset.catalogueRev || ''), { cache: 'no-store', signal: ctl.signal });   // its OWN revision (hub ≥ 0.6.4)
     if (!r.ok) return off('http ' + r.status);
     buf = await r.arrayBuffer();
   } catch (err) { return off(ctl.signal.aborted ? 'timeout' : 'network'); }

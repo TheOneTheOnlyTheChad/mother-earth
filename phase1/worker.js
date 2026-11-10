@@ -19,7 +19,10 @@
  *   GET /admin/probe/r2-conditional?key=ADMIN_KEY  (0.6.0) the R2 behaviours FIRMS v2 relies on, checked on this bucket; probe/ keys only, deleted after
  *   GET /snapshot/orbital, /elements/orbital   orbital meta + classified element CSV (0.3.0; job gated by ORBITAL_ENABLED=1, odd UTC hours at :41)
  *   GET /catalogue/timeline (0.6.3) the FIXED Timeline catalogue (deep-time build proposal rev 1.1 §4): served from R2 ref/timeline/ only if
- *                           the complete stored file hashes to TIMELINE.fileSha256 and validates; else 503 unavailable. Not a collector.
+ *                           the complete stored file hashes to its pin's fileSha256 and validates; else 503 unavailable. Not a collector.
+ *                           0.6.4: this legacy URL is pinned to TIMELINE_LEGACY (tl-2026-11-R1) permanently, never to "current".
+ *   GET /catalogue/timeline/<revision> (0.6.4; TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1) that exact published revision, same rules;
+ *                           an id not in TIMELINE_REVISIONS (exact key match) → 404 without any R2 read.
  *   GET /snapshot/arts      (0.6.2) the FIXED Met catalogue snapshot (Arts release proposal rev 2.1): served from R2 ref/arts/ only if the complete
  *                           stored file hashes to ARTS.fileSha256 and its snapshot_id = ARTS.recordsSha256; else 503 unavailable. Not a collector.
  *
@@ -55,7 +58,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.3';
+const COLLECTOR_VERSION = '0.6.4';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2088,7 +2091,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { ARTS, artsSnapshot, TIMELINE, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -2922,13 +2925,37 @@ async function artsSnapshot(env, pin = ARTS) {
 // ===== Timeline catalogue (0.6.3; TIMELINE-DEEP-TIME-BUILD-PROPOSAL rev 1.1 §4) =====
 // Same rules as Arts: outside LAYERS, cron, D1, /status collection, /health and history; generated once
 // (phase1/timeline/build_timeline.py) and pinned by the complete file's sha256. Nothing partial is ever served.
-// Earlier catalogue objects stay in R2 (ref/ has no lifecycle rule); rollback = re-pin an earlier revision.
-const TIMELINE = {
-  key: 'ref/timeline/tl-2026-11-R1.json',
-  revision: 'tl-2026-11-R1',
-  fileSha256: '096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe',
-  bytes: 15656,
-};
+// 0.6.4 (TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1): published revisions are IMMUTABLE — a pin (key, sha256, bytes)
+// never changes once published; changed bytes get a new revision id AND a new object key. Old pins and objects stay so
+// older pages can still fetch the bytes they expect (ref/ has no lifecycle rule). Removing one is a separate approval.
+const TIMELINE_REVISIONS = Object.freeze({
+  'tl-2026-11-R1': Object.freeze({
+    key: 'ref/timeline/tl-2026-11-R1.json',
+    revision: 'tl-2026-11-R1',
+    fileSha256: '096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe',
+    bytes: 15656,
+  }),
+});
+const TIMELINE_LEGACY = 'tl-2026-11-R1';    // what the unversioned /catalogue/timeline serves — permanently (pages built before 0.6.4 expect it)
+const TIMELINE_CURRENT = 'tl-2026-11-R1';   // discovery metadata only; no route serves "current" implicitly
+const TIMELINE = TIMELINE_REVISIONS[TIMELINE_LEGACY];   // = the legacy pin (kept for the 0.6.3 name)
+/** The pin for an exact revision id, or null. Own-property lookup only: no pattern-built R2 keys, so no path tricks. */
+function timelinePin(rev, table = TIMELINE_REVISIONS) {
+  return typeof rev === 'string' && Object.prototype.hasOwnProperty.call(table, rev) ? table[rev] : null;
+}
+/** Route /catalogue/timeline[/<revision>] on the RAW pathname (the shared parser drops empty segments, so it is not used here).
+ *  Exactly '/catalogue/timeline' or '/catalogue/timeline/' (one trailing slash, as 0.6.3) → TIMELINE_LEGACY;
+ *  exactly '/catalogue/timeline/<one non-empty segment>' → that pin; anything else (repeated or leading separators,
+ *  a trailing slash after a revision, extra segments) or an unknown id → 404, no R2 read. */
+async function timelineRoute(env, rawPath, table = TIMELINE_REVISIONS, legacy = TIMELINE_LEGACY) {
+  if (rawPath === '/catalogue/timeline' || rawPath === '/catalogue/timeline/') return timelineCatalogue(env, table[legacy]);
+  const m = typeof rawPath === 'string' ? rawPath.match(/^\/catalogue\/timeline\/([^/]+)$/) : null;
+  let rev = null;
+  if (m) { try { rev = decodeURIComponent(m[1]); } catch (e) { rev = null; } }
+  const pin = timelinePin(rev, table);
+  if (!pin) return json({ kind: 'catalogue', catalogue: 'timeline', status: 'unknown revision' }, 404, { 'Cache-Control': 'no-store' });
+  return timelineCatalogue(env, pin);
+}
 /** Serve the pinned Timeline catalogue byte for byte, or 503 {status:'unavailable', reason}. reason: missing | unreadable | integrity | invalid. */
 async function timelineCatalogue(env, pin = TIMELINE) {
   const no = reason => json({ kind: 'catalogue', catalogue: 'timeline', status: 'unavailable', reason }, 503, { 'Cache-Control': 'no-store' });
@@ -2976,7 +3003,7 @@ export default {
     if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
-    if (p[0] === 'catalogue' && p[1] === 'timeline' && p.length === 2) return timelineCatalogue(env);   // 0.6.3: fixed catalogue, outside LAYERS
+    if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
 
     if (p[0] === 'snapshot' || p[0] === 'cells') {
       const layer = p[1];
@@ -3050,7 +3077,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE.revision } },
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) } },
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };

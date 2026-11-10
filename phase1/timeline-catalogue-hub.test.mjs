@@ -1,7 +1,11 @@
-/* Mother Earth — Timeline catalogue, hub side (0.6.3; TIMELINE-DEEP-TIME-BUILD-PROPOSAL rev 1.1 §4, §5).
+/* Mother Earth — Timeline catalogue, hub side (0.6.3 TIMELINE-DEEP-TIME-BUILD-PROPOSAL rev 1.1 §4, §5;
+ * 0.6.4 TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1: versioned route, legacy URL pinned to R1, immutable revisions).
  * Real worker.js, fake R2 holding the generated catalogue phase1/timeline/catalogue/tl-2026-11-R1.json. Nothing networked.
+ * A second copy of worker.js is loaded with a FIXTURE table (R1 + a fixture R2, R2 marked current) — the case that
+ * would have broken pages built before 0.6.4.
  * Run:   node --no-warnings phase1/timeline-catalogue-hub.test.mjs
- * Break: BREAK=no-hash | serve-on-missing | no-validate  — each loads a weakened copy of worker.js; the suite must FAIL on every one.
+ * Break: BREAK=no-hash | serve-on-missing | no-validate | legacy-follows-current | serve-unknown-as-current | no-per-revision-hash | loose-separators
+ *        — each loads a weakened copy of worker.js; the suite must FAIL on every one.
  */
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -17,6 +21,10 @@ const BREAKS = {
   'serve-on-missing': ["  if (!o) return no('missing');\n  let buf;\n  try { buf = await o.arrayBuffer(); } catch (e) { return no('unreadable'); }\n  if (await sha256Bytes(buf) !== pin.fileSha256) return no('integrity');                     // the WHOLE catalogue file (timeline)",
     "  if (!o) return json({ catalogue: 'timeline', entries: [] });\n  let buf;\n  try { buf = await o.arrayBuffer(); } catch (e) { return no('unreadable'); }\n  if (await sha256Bytes(buf) !== pin.fileSha256) return no('integrity');                     // the WHOLE catalogue file (timeline)"],
   'no-validate': ["  if (!j || j.catalogue !== 'timeline' || j.catalogue_revision !== pin.revision || !Array.isArray(j.entries) || !Array.isArray(j.shelf) || !j.chart) return no('invalid');", "  // (break) validation removed"],
+  'legacy-follows-current': ["  if (rawPath === '/catalogue/timeline' || rawPath === '/catalogue/timeline/') return timelineCatalogue(env, table[legacy]);", "  if (rawPath === '/catalogue/timeline' || rawPath === '/catalogue/timeline/') return timelineCatalogue(env, table[TIMELINE_CURRENT]);"],
+  'loose-separators': ["return timelineRoute(env, url.pathname);", "return timelineRoute(env, '/' + p.join('/'));"],
+  'serve-unknown-as-current': ["  if (!pin) return json({ kind: 'catalogue', catalogue: 'timeline', status: 'unknown revision' }, 404, { 'Cache-Control': 'no-store' });", "  if (!pin) return timelineCatalogue(env, table[TIMELINE_CURRENT]);"],
+  'no-per-revision-hash': ["  return timelineCatalogue(env, pin);\n}", "  return timelineCatalogue(env, { ...pin, fileSha256: table[legacy].fileSha256 });\n}"],
 };
 const B = process.env.BREAK;
 if (B) { const [a, b] = BREAKS[B]; if (!src.includes(a)) throw new Error('break anchor missing: ' + B); src = src.replace(a, b); }
@@ -26,17 +34,33 @@ const W = await import(pathToFileURL(tmp).href), worker = W.default;
 
 const FILE = fs.readFileSync(path.join(HERE, 'timeline/catalogue/tl-2026-11-R1.json'));
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
+// FIXTURE R2: same shape, its own revision id, key and bytes. Loaded into a second worker copy whose table holds R1 + R2
+// and whose TIMELINE_CURRENT is R2 (the legacy pin stays R1). Nothing here is published.
+const R2ID = 'tl-2026-12-R2', R2KEY = 'ref/timeline/tl-2026-12-R2.json';
+const FILE2 = Buffer.from(JSON.stringify({ ...JSON.parse(FILE.toString('utf8')), catalogue_revision: R2ID, generated_at: '2026-12-01T00:00:00Z' }));
+const tableAnchor = "  }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';";
+if (!src.includes(tableAnchor)) throw new Error('fixture anchor missing (revision table)');
+let src2 = src.replace(tableAnchor, `  }),\n  '${R2ID}': Object.freeze({ key: '${R2KEY}', revision: '${R2ID}', fileSha256: '${sha(FILE2)}', bytes: ${FILE2.length} }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';`);
+const curAnchor = "const TIMELINE_CURRENT = 'tl-2026-11-R1';";
+if (!src2.includes(curAnchor)) throw new Error('fixture anchor missing (current)');
+src2 = src2.replace(curAnchor, `const TIMELINE_CURRENT = '${R2ID}';`);
+const tmp2 = path.join(path.dirname(tmp), 'worker-fixture.mjs');
+fs.writeFileSync(tmp2, src2);
+const W2 = await import(pathToFileURL(tmp2).href), worker2 = W2.default;
 let pass = 0, fail = 0;
 const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 300)}` : ''}`); } };
 
 const dbTouched = [];
 const fakeDB = { prepare(q) { dbTouched.push(q); const st = { bind: () => st, first: async () => null, all: async () => ({ results: [] }), run: async () => ({}) }; return st; } };
+const reads = [];
 const r2 = (bytes, opts = {}) => ({
-  get: async key => { if (opts.throws) throw new Error('R2 down'); if (key !== W.TIMELINE.key || bytes == null) return null;
-    return { arrayBuffer: async () => { if (opts.readFails) throw new Error('read'); return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength); } }; },
+  get: async key => { reads.push(key); if (opts.throws) throw new Error('R2 down');
+    const b = opts.objects ? opts.objects[key] : (key === W.TIMELINE.key ? bytes : null);
+    if (b == null) return null;
+    return { arrayBuffer: async () => { if (opts.readFails) throw new Error('read'); return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength); } }; },
 });
 const env = (bytes, opts) => ({ R2: r2(bytes, opts), DB: fakeDB });
-const get = (e, p = '/catalogue/timeline', method = 'GET') => worker.fetch(new Request('https://hub.test' + p, { method }), e);
+const get = (e, p = '/catalogue/timeline', method = 'GET', w = worker) => w.fetch(new Request('https://hub.test' + p, { method }), e);
 
 // ---- the generated file and the pin
 ok('generator --check passes (page, catalogue, BUILD)', (() => { try { execFileSync('python3', [path.join(HERE, 'timeline/build_timeline.py'), '--check']); return true; } catch (e) { return false; } })());
@@ -83,10 +107,64 @@ ok('hash matches but wrong revision → 503 invalid', rb.status === 503 && (awai
 const notJson = Buffer.from('not json'); const rn = await W.timelineCatalogue(env(notJson), { ...W.TIMELINE, fileSha256: sha(notJson) });
 ok('hash matches but not JSON → 503 invalid', rn.status === 503 && (await rn.json()).reason === 'invalid');
 
+// ---- 0.6.4: versioned route on the real table
+ok('real table: one revision, legacy = current = tl-2026-11-R1, pin unchanged', Object.keys(W.TIMELINE_REVISIONS).join() === 'tl-2026-11-R1' && W.TIMELINE_LEGACY === 'tl-2026-11-R1' && W.TIMELINE_CURRENT === 'tl-2026-11-R1' && W.TIMELINE === W.TIMELINE_REVISIONS['tl-2026-11-R1']);
+ok('published pins are frozen (immutable)', Object.isFrozen(W.TIMELINE_REVISIONS) && Object.isFrozen(W.TIMELINE_REVISIONS['tl-2026-11-R1']));
+r = await get(env(FILE), '/catalogue/timeline/tl-2026-11-R1'); body = Buffer.from(await r.arrayBuffer());
+ok('/catalogue/timeline/tl-2026-11-R1 → 200, exact R1 bytes, same headers', r.status === 200 && sha(body) === sha(FILE) && r.headers.get('ETag') === `"${sha(FILE)}"` && r.headers.get('Access-Control-Allow-Origin') === '*', r.status);
+r = await get(env(FILE), '/catalogue/timeline/'); body = Buffer.from(await r.arrayBuffer());
+ok('trailing slash = the legacy URL (R1)', r.status === 200 && sha(body) === sha(FILE));
+[s, why] = await (async () => { const x = await get(env(null), '/catalogue/timeline/tl-2026-11-R1'); return [x.status, (await x.json()).reason]; })();
+ok('known revision, object missing → 503 missing (not 404)', s === 503 && why === 'missing', [s, why]);
+const BAD_IDS = ['tl-2026-11-R9', 'TL-2026-11-R1', 'tl-2026-11-R1%2Fx', '..%2F..%2Fsecret', '%2E%2E%2Fref%2Ftimeline%2Ftl-2026-11-R1.json', '%E0%A4%A', '%20', '__proto__', 'constructor', 'toString', 'hasOwnProperty', 'x'.repeat(600), 'tl-2026-11-R1/extra', 'tl-2026-11-R1.json', 'ref%2Ftimeline%2Ftl-2026-11-R1.json'];
+for (const id of BAD_IDS) {
+  reads.length = 0;
+  const x = await get(env(FILE), '/catalogue/timeline/' + id); const j = await x.json().catch(() => null);
+  ok(`unknown/malformed revision "${id.slice(0, 40)}" → 404 unknown revision, no R2 read, no-store`, x.status === 404 && j && j.status === 'unknown revision' && reads.length === 0 && x.headers.get('Cache-Control') === 'no-store', [x.status, j, reads]);
+}
+{ // dot segments are normalised by the URL parser before routing (WHATWG): '/catalogue/timeline/%2E%2E' becomes '/catalogue/' and never reaches a revision
+  const before = dbTouched.length; reads.length = 0;
+  const x = await get(env(FILE), '/catalogue/timeline/%2E%2E'); const j = await x.json();
+  ok('dot segment "%2E%2E" is normalised away: no revision lookup, no R2 read, not a catalogue', reads.length === 0 && !('entries' in j) && j.status !== 'unknown revision', [x.status, reads]);
+  dbTouched.length = before;   // the hub index it fell through to reads D1 for its history summary; not the route
+}
+// repeated / leading / trailing separators (GPT, 10 Nov): the shared parser drops empty segments, so the Timeline route
+// checks the raw path. One trailing slash on the legacy URL stays an alias for R1 (0.6.3 behaviour); nothing else loose.
+for (const bad of ['/catalogue/timeline//', '/catalogue/timeline//tl-2026-11-R1', '/catalogue/timeline/tl-2026-11-R1/', '/catalogue/timeline///', '//catalogue/timeline', '/catalogue//timeline', '/catalogue//timeline/tl-2026-11-R1', '/catalogue/timeline/tl-2026-11-R1//']) {
+  reads.length = 0;
+  const x = await get(env(FILE), bad); const j = await x.json().catch(() => null);
+  ok(`loose separators "${bad}" → 404 unknown revision, no R2 read`, x.status === 404 && j && j.status === 'unknown revision' && reads.length === 0, [x.status, j && j.status, reads]);
+}
+reads.length = 0; r = await get(env(FILE), '/catalogue/timeline/'); body = Buffer.from(await r.arrayBuffer());
+ok('single trailing slash on the legacy URL → R1 (alias kept, one read)', r.status === 200 && sha(body) === sha(FILE) && reads.length === 1);
+ok('timelinePin: exact own keys only', W.timelinePin('tl-2026-11-R1') === W.TIMELINE && W.timelinePin('__proto__') === null && W.timelinePin('toString') === null && W.timelinePin(undefined) === null && W.timelinePin(1) === null);
+
+// ---- 0.6.4: the bug this release prevents — R2 published and marked current; pages built for R1 must still get R1
+const fx = () => env(null, { objects: { [W.TIMELINE.key]: FILE, [R2KEY]: FILE2 } });
+ok('fixture: table R1 + R2, current = R2, legacy = R1', Object.keys(W2.TIMELINE_REVISIONS).join() === `tl-2026-11-R1,${R2ID}` && W2.TIMELINE_CURRENT === R2ID && W2.TIMELINE_LEGACY === 'tl-2026-11-R1');
+r = await get(fx(), '/catalogue/timeline', 'GET', worker2); body = Buffer.from(await r.arrayBuffer());
+ok('fixture: LEGACY URL still returns R1 exact bytes while R2 is current', r.status === 200 && sha(body) === sha(FILE), [r.status, sha(body).slice(0, 12)]);
+r = await get(fx(), '/catalogue/timeline/tl-2026-11-R1', 'GET', worker2); body = Buffer.from(await r.arrayBuffer());
+ok('fixture: /catalogue/timeline/tl-2026-11-R1 returns R1 exact bytes', r.status === 200 && sha(body) === sha(FILE), [r.status, sha(body).slice(0, 12)]);
+r = await get(fx(), '/catalogue/timeline/' + R2ID, 'GET', worker2); body = Buffer.from(await r.arrayBuffer());
+ok('fixture: /catalogue/timeline/<R2> returns R2 exact bytes (checked against its own pin)', r.status === 200 && sha(body) === sha(FILE2) && r.headers.get('ETag') === `"${sha(FILE2)}"`, [r.status, sha(body).slice(0, 12)]);
+reads.length = 0;
+r = await get(fx(), '/catalogue/timeline/tl-2026-13-R3', 'GET', worker2);
+ok('fixture: unknown revision → 404, no R2 read', r.status === 404 && reads.length === 0, [r.status, reads]);
+const d0 = dbTouched.length; const root2 = await (await get(fx(), '/', 'GET', worker2)).json(); dbTouched.length = d0;   // the index reads D1 for its history summary; not the route
+ok('fixture root: path/revision describe the legacy response (R1); current names R2; both revisions listed', root2.catalogues.timeline.path === '/catalogue/timeline' && root2.catalogues.timeline.revision === 'tl-2026-11-R1' && root2.catalogues.timeline.current === R2ID && root2.catalogues.timeline.revisions.join() === `tl-2026-11-R1,${R2ID}`, root2.catalogues.timeline);
+const swapped = { [W.TIMELINE.key]: FILE2, [R2KEY]: FILE };
+r = await get(env(null, { objects: swapped }), '/catalogue/timeline/' + R2ID, 'GET', worker2);
+ok('fixture: R2 key holding R1 bytes → 503 integrity (each revision checked against its own pin)', r.status === 503 && (await r.json()).reason === 'integrity');
+
+// ---- the page asks for its own revision
+const js = fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8');
+ok('timeline.js fetches /catalogue/timeline/<its data-catalogue-rev>', js.includes("fetch(HUB + '/catalogue/timeline/' + encodeURIComponent(wrap.dataset.catalogueRev || '')") && !js.includes("fetch(HUB + '/catalogue/timeline',"));
+
 // ---- outside the collector
 ok('no D1 touched by the route', dbTouched.length === 0, dbTouched);
 const root = await (await get(env(FILE), '/')).json().catch(() => null);
-ok('/ lists the catalogue and its revision; version 0.6.3', root && root.version === '0.6.3' && root.catalogues.timeline.path === '/catalogue/timeline' && root.catalogues.timeline.revision === 'tl-2026-11-R1' && root.endpoints.includes('/catalogue/timeline'), root && root.catalogues);
+ok('/ lists the catalogue: legacy path + revision (R1), current, versioned path, revisions; version 0.6.4', root && root.version === '0.6.4' && root.catalogues.timeline.path === '/catalogue/timeline' && root.catalogues.timeline.revision === 'tl-2026-11-R1' && root.catalogues.timeline.current === 'tl-2026-11-R1' && root.catalogues.timeline.versioned_path === '/catalogue/timeline/<revision>' && root.catalogues.timeline.revisions.join() === 'tl-2026-11-R1' && root.endpoints.includes('/catalogue/timeline') && root.endpoints.includes('/catalogue/timeline/<revision>'), root && root.catalogues);
 ok('not a layer (no cells route)', (await get(env(FILE), '/cells/timeline')).status === 404);
 ok('/catalogue/<other> is not a catalogue (falls through to the hub index)', await (async () => { const j = await (await get(env(FILE), '/catalogue/arts')).json(); return j.name === 'Mother Earth collector' && !('entries' in j); })());
 
