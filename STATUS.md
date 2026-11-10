@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 07:54:38 UTC — **HUB 0.6.4 DEPLOYED** (Chad: "Approve: deploy hub 0.6.4 from 1d31df6 (content only).")
+- **Before (07:54:26 UTC):** live worker.js = 0.6.3 `94a6b2b2…af93` (rollback target); 19 bindings; health 8/8. Code fetched from raw.githubusercontent at `1d31df6`: 279,110 B, sha256 `7d46edf36e6f8c8d03293ad862e4d8b8b49fa48e72ca4aa5cf29f7945c0a7987` (= packet rev 2). Hash re-checked immediately before the write.
+- **Deploy:** content-only API from the dashboard tab, HTTP 200, success, etag `2a179043…770a`, modified 07:54:38.493Z. Bindings, secrets, variables and crons untouched.
+- **Verified (07:54:52 UTC):** read-back `7d46edf3…a7987` (exact); 19 bindings, identical list; `/` = **0.6.4**, `catalogues.timeline` = `{path:'/catalogue/timeline', revision:'tl-2026-11-R1', current:'tl-2026-11-R1', versioned_path, revisions:['tl-2026-11-R1']}`; history collecting; health 8/8; `/snapshot/arts`, `/snapshot/usgs` 200.
+  - Routes: `/catalogue/timeline`, `/catalogue/timeline/` and `/catalogue/timeline/tl-2026-11-R1` → 200, `096ae648…0fbe`, max-age=60.
+  - `/tl-2026-11-R9`, `//`, `//tl-2026-11-R1` and `/tl-2026-11-R1/` → 404 `unknown revision`, no-store.
+- **Live RC from the Pages origin (07:55:08–07:55:32 UTC):**
+  - **Both R1 routes:** `type: cors`, 200, 15,656 B, sha256 exact.
+  - **Branch page:** files fetched by `1d31df6` with exact hashes, injected into a clean tab; it draws (`TL_AXIS.state = on`, build `202611221000`, 5 marks) and made exactly one hub request, to `/catalogue/timeline/tl-2026-11-R1`.
+  - **The live page** (main, build `202611211000`, legacy URL) still draws on 0.6.4.
+- **Public page unchanged** (main `57d07c2` page). Rollback for the hub alone: 0.6.3 `94a6b2b2…af93` (own Approve line).
+- **Next:** `Approve: merge timeline-revs-rc to main (page change: timeline fetches its own catalogue revision)`.
+
 ## 10 Nov 07:52 UTC (clock reading at write) — **timeline-revs-rc rev 2: routing fix after GPT's review** (branch only)
 - GPT: core design passed (all 10 manifest hashes matched; GPT's own fixture confirmed legacy = R1 with R2 current, per-revision bytes/ETag, swapped object → 503 integrity, unknown ids → 404 with zero reads). One fix: the shared parser drops empty segments, so `/catalogue/timeline//` and `//tl-2026-11-R1` returned 200 and read R2.
 - Applied `1d31df6`: the Timeline route matches the raw path (one trailing slash = the R1 alias, as 0.6.3; any other loose separator → 404, no read). Hub 66/66; full regression green on `1d31df6`; 16 breaks fail (new `loose-separators` → 8). **Replacement worker.js `7d46edf3…a7987`** (279,110 B); page files and catalogue unchanged. Packet rev 2 at `4728907`.
