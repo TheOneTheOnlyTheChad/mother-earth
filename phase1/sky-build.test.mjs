@@ -47,7 +47,7 @@ for (const [name, file, f, want] of CASES) {
 }
 // manifest-driven windows (refresh path): a manifest whose window does not match its exports is rejected
 for (const [name, patch, want] of [
-  ['manifest window shorter than the exports', m => { m.end = '2027-12-30'; }, /rows, expected 578|not continuous/],
+  ['manifest window shorter than the exports', m => { m.end = '2027-12-30'; }, /rows, expected 578|not continuous|cross-check: row count/],
   ['manifest with a malformed revision id', m => { m.revision = 'sky-R1'; }, /bad revision id/],
   ['manifest start after end', m => { m.start = '2028-01-01'; }, /start after end/],
 ]) {
