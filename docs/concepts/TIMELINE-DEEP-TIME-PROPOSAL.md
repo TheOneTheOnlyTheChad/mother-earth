@@ -2,6 +2,8 @@
 
 **Rev 1, 10 Nov 2026 (docs only).** Written from Chad's vision (10 Nov) and GPT's review of Claude's brief (10 Nov, relayed by Chad). **Nothing is built, researched, sampled or approved.** Every step after this document needs Chad's separate go; production steps need their own Approve lines.
 
+**Rev 1.1, 10 Nov 2026 (docs only): ACCEPTED by GPT as a concept** (GPT read the Mac copy of rev 1; relayed by Chad). GPT recommends D1–D4 and D6 as written, **D5 = hide the empty axis lanes**, D7 = 3 h including write-up, text only. Its two carry-forward points are added as §11a (source-check pass rules) and §11b (before a build). §3 updated for D5. **Chad's decisions and the source-check go are still separate.**
+
 **Related:** `TIMELINE-CONCEPT.md` (concept rev 3.1), `TIMELINE-PAGE-UX-PROPOSAL.md` (rev 2, the shelf and evidence controls), `TIMELINE-ENTRY-BUILD-PROPOSAL.md` (rev 2, the Pliny entry), START-HERE §2 (constitution; T1 exception).
 
 ---
@@ -26,7 +28,8 @@ What is live today (main `4b23518`) is one carefully sourced entry (Pliny, *Lett
 - **Overview strip:** the full Earth span (~4.5 billion years to now) as a thin bar, with a marked window showing which part the main view covers. Its purpose is scale: at the widest view you see how much of Earth's history sits before the later chapters.
 - **Main view: a labelled Phanerozoic zoom window** (roughly the last ~540 million years; the exact bounds come from the pinned chart, §5) with the **five mass-extinction episode cards** on the Mass extinctions lane, against the chart's period/era bands.
 - **Coverage statement, always visible:** what this release covers (five episodes, one chart revision) and that **empty stretches are not periods where nothing happened** — they are not yet shown.
-- **Other lanes:** visible as labelled, empty lanes with the same "not yet shown" wording, or hidden until their slice exists (decision D5).
+- **Other lanes: hidden** until their slice exists (D5, GPT's recommendation). Mass extinctions is the only active lane; one line states that this release covers five episodes.
+- **Overview vs explorable window:** the page says plainly that the full-Earth strip is an overview and the Phanerozoic window is the part visitors can explore in this release.
 - **Pliny:** on the shelf as today; its public link (`#e-pliny-ep-6-16`) stays stable.
 - **Opening an episode:** the same panel/sheet pattern as Pliny (desktop panel, phone sheet, Back closes), with the evidence items one action each.
 
@@ -104,11 +107,28 @@ Stable ID · the claim · what was actually dated (material/horizon) · method w
 3. **Build proposal** (docs): exact catalogue schema, route name, page layout wireframes, cost figures.
 4. **Branch build** (own Approve line) → GPT review → R2 upload → hub deploy → live RC → page release, each its own Approve line.
 
+### 11a. Source check — what counts as a pass (GPT, 10 Nov; to fix before the source-check go)
+Per episode, a **pass** needs all three:
+1. a **readable passage** (text, not a PDF unless Chad decides otherwise) that supports the timing shown on the card, with its locator;
+2. the **source version and status** recorded (live / corrected / withdrawn, with the checked date);
+3. **terms evidence for the intended use** (storing, reformatting, displaying and serving the cited facts and short attributed wording through the hub), recorded with who read it.
+
+Rules:
+- **3 h including write-up is a cap, not a target.** An episode not resolved at the cap is recorded **unresolved**, and stays off the axis.
+- **The chart can supply a reference boundary but never a missing event date.** An episode with only a chart boundary is shown as a boundary marker labelled as such, or not at all (decided in the build proposal), never with an inferred event interval.
+- **Publish only the shape the evidence supports.** If no source supports a multi-pulse entry, the pulse rendering is still built and tested with a **fixture**, and the real entry uses the shape its source does support.
+- The chart release itself: licence read directly and the exact release pinned (revision, date, file hash).
+
+### 11b. Before a build (GPT, 10 Nov; to be specified in the build proposal)
+- **Approximate ages and one-sided intervals:** how "~", "at least", "before" and an open start or end render, on the axis and in the list. An open bound is drawn as open, never closed off.
+- **Hub/page version mismatch:** with one fixed route serving one revision, an old page can briefly fall back to the list during a deployment or rollback. That is consistent with §6 **if the fallback is tested and the previous catalogue object is retained in R2** for rollback.
+- **R2 headroom for this release:** re-read the account's current usage. The Arts billing check covered its own review window only.
+
 ## 12. Decisions for Chad
 - **D1** End the T1 exception with this first axis release (catalogue on the hub; no-JS list generated from it). *Recommended (GPT + Claude).*
 - **D2** First slice = Big Five on a Phanerozoic zoom window with a full-span overview; Human relatives second. *Recommended.*
 - **D3** Lane labels: Earth systems and life · Mass extinctions · Human relatives · Human history. *Recommended.*
 - **D4** No percentage-loss figures in this slice. *Recommended.*
-- **D5** Empty lanes: show them labelled "not yet shown", or hide them until their slice exists. *Claude leans to showing them (it signals the plan honestly); Chad's call.*
+- **D5** Empty lanes: **hide them until their slice exists** (GPT's recommendation, rev 1.1; Claude had leaned to showing them, and accepts GPT's phone-space reason). One line states the release covers five episodes. *Chad's call.*
 - **D6** Cosmos before Earth: a separate later view. *Recommended.*
 - **D7** Source check cap: 3 h incl. write-up, text only (no PDFs unless Chad decides otherwise). *Suggested.*

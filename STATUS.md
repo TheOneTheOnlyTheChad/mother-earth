@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 03:02 UTC (clock reading at write) — **Timeline deep-time proposal ACCEPTED by GPT as a concept; rev 1.1** (docs only)
+- GPT (read the Mac copy, relayed by Chad) recommends D1–D4 and D6 as written, **D5 hide empty axis lanes**, D7 3 h incl. write-up, text only. Added §11a (source-check pass rules: readable passage for the timing shown, source version and status, terms evidence; unresolved at the cap stays unresolved; chart never supplies a missing event date; pulses tested with a fixture if unsupported) and §11b (before a build: approximate and one-sided ages, version-mismatch fallback with the previous catalogue kept, fresh R2 headroom read).
+- **Chad's decision line and the source-check go are still separate.**
+
 ## 10 Nov 02:58 UTC (clock reading at write) — **Timeline deep-time proposal rev 1** (docs only) — `docs/concepts/TIMELINE-DEEP-TIME-PROPOSAL.md`
 - From Chad's vision (a real timeline across deep time: mass extinctions, life over time, human relatives, human history) and GPT's review of Claude's brief.
 - First slice: **the Big Five mass extinctions** on a Phanerozoic zoom window with a full-span overview; the ICS chart supplies the clock, the extinction literature the events; boundary / interval / pulses / partial date kept distinct; no percentage-loss figures; Pliny stays on the shelf.
