@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 04:02 UTC (clock reading at write) — **Big Five source check rev 2 after GPT's review** (research only; packet `rev2/` on the Mac; originals unchanged)
+- GPT accepted the packet as a bounded evidence record and revised the blanket PASS. Rev 2: **C0 reconciled** (tag `v2026-06.5` = `44d1043ecf29`; chart.ttl re-fetched by the Mac = same sha256, now retained); **E3 switched** to Burgess et al. 2017 (onset 251.941 ± 0.037 Ma, CC BY 4.0) because Herz's ~251.906 Ma is not in Dai's readable text; **E2** labelled boundary-age evidence, duration unset; **E5** extinction placed at the dated impact with O'Connor 2024 as synchrony evidence, causes off; **E1** pulses as attributed text.
+- Publisher pages read for E2, E3, E5 (no notices). **E1 (OUP) and E4 (Science) blocked by a bot challenge — not bypassed; open.** Pane site access granted by Chad: academic.oup.com, cambridge.org, science.org.
+- Full-text XML not retained (Mac shell refused at Europe PMC/NCBI/Crossref); passages + hashes kept. REGISTER entries proposed, not filed.
+
 ## 10 Nov 03:39 UTC (clock reading at write) — **Big Five source check RUN: chart + all five episodes PASS under §11a** (research only) — `docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md`; packet on the Mac `research/timeline-big-five/2026-11-10-claude/`
 - 03:27:47–03:39:11Z (Mac clock), 11 min 24 s of the 3 h cap; browser pane, text only (Europe PMC XML, Crossref, stratigraphy.org, jsDelivr). Chad granted pane access to stratigraphy.org.
 - **C0:** ICS chart CC BY 4.0, data tag 2026-06.5 pinned by file hash. **E1–E5:** one CC BY source each with a timing passage; Crossref shows no update notices.

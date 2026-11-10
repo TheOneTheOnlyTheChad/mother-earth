@@ -1,5 +1,20 @@
 # Timeline — Big Five source check (record: IDs, hashes, dispositions only)
 
+**Rev 2 (10 Nov 2026, after GPT's review): the blanket PASS is withdrawn; the rev 2 table below supersedes the original one** (kept underneath for the record). Packet `rev2/` (REPORT-rev2.md sha256 `f44c8c70…aed4`; `.rev2-hashes`); originals unchanged.
+
+| ID | Rev 2 disposition | Shape | Source (identifier · licence) · status |
+|---|---|---|---|
+| C0 | PASS — release reconciled, bytes retained | boundary markers; Phanerozoic 538.8 ± 0.6 Ma, Earth 4567 Ma | ICS chart, GitHub tag `v2026-06.5` = commit `44d1043ecf29`; `chart.ttl` sha256 `0158959e…b355` retained on the Mac · CC BY 4.0 |
+| E1 end-Ordovician | TIMING CANDIDATE — publisher page blocked (bot challenge) | approximate interval; pulse model as attributed text; pulses only in a fixture | doi:10.1093/nsr/nwad319 · CC BY 4.0 · Crossref 0 notices, Europe PMC no corrections |
+| E2 Frasnian–Famennian extinction (Late Devonian) | PASS as boundary-age evidence | one-sided bound + modelled interval; extinction duration unset; Hangenberg out of scope | doi:10.1038/s41598-018-27847-7 · CC BY 4.0 · publisher page read, no notices |
+| E3 end-Permian | PASS — **source switched** | onset 251.941 ± 0.037 Ma; newer estimates shown as differing context | doi:10.1038/s41467-017-00083-9 (Burgess, Muirhead, Bowring 2017) · CC BY 4.0 · publisher page read, no notices. Herz 2026's ~251.906 Ma not traced in Dai 2025's readable text |
+| E4 end-Triassic | TIMING CANDIDATE — publisher page blocked (bot challenge) | approximate point; other approximations differ | doi:10.1126/sciadv.abb6704 · CC BY 4.0 · Crossref 0 notices, Europe PMC no corrections |
+| E5 end-Cretaceous | PASS with labelled placement | impact age 66.02 Ma; extinction placed at it, labelled "tied to the dated impact" (synchrony: doi:10.1126/sciadv.ado5478); causes off this slice | doi:10.1017/ext.2023.13 · CC BY 4.0 · publisher page read, no notices |
+
+**Open:** E1 and E4 publisher pages (Chad or GPT to read; the pane got a Cloudflare challenge and did not bypass it); full-text XML not retained (Mac shell refused at Europe PMC/NCBI/Crossref; passages + hashes kept). REGISTER entries proposed, not filed.
+
+## Original record (superseded by rev 2)
+
 Run 10 Nov 2026 on Chad's go ("D1–D4 and D6 as written, D5 show all four lanes, D7 3 h incl. write-up, text only. Go: Big Five source check per §11a."). Protocol `bf-v1` fixed 03:27:47Z (sha256 `9a6c30f4…181f`), run closed 03:39:11Z: **11 min 24 s of the 3 h cap.** Packet on the Mac: `research/timeline-big-five/2026-11-10-claude/` (`report/REPORT.md` sha256 `a9640fda…2c82`; `.hashes` lists all six files). Excerpts and quotations stay in the packet; nothing from the sources is copied here beyond identifiers.
 
 | ID | Disposition | Shape the evidence supports | Source (identifier · licence) |
