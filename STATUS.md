@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 03:18 UTC (clock reading at write) — **Timeline deep-time proposal: GPT accepted rev 1.2 for concept approval; rev 1.3 wording** (docs only)
+- All four lanes visible (Chad's D5). Applied GPT's points: §10 build target ≤ 96 CSS px for the three empty rows at 390 × 844 (pending measurement; wrap and grow at larger text, no clipping); zero Tab stops for empty rows; short phone text, explanation once in the coverage note; Human history "No dated entries on the axis yet".
+- **Open:** Chad's decision line and the source-check go.
+
 ## 10 Nov 03:15 UTC (clock reading at write) — **Timeline deep-time proposal rev 1.2: Chad decided D5 = show all four lanes** (docs only)
 - Lanes with no entries collapse to a thin labelled row, "No entries yet — this lane fills as its evidence is checked"; nothing unchecked is drawn; each lane fills only through its own slice and source check (§3a). Answers GPT's phone-space concern. **For GPT's review.** Other decisions and the source-check go still open.
 

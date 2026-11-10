@@ -6,6 +6,8 @@
 
 **Rev 1.2, 10 Nov 2026 (docs only): Chad decided D5 = SHOW all four lanes** (his reason: there is enough evidence to be found to fill them, so the page should show where the timeline is going). §3 and D5 rewritten; GPT's phone-space concern is answered with a compact rule for the lanes that have no entries yet (§3a). Each lane still fills only through its own slice and source check. For GPT's review.
 
+**Rev 1.3, 10 Nov 2026 (docs only): GPT ACCEPTED rev 1.2 for concept approval** (Mac copy; relayed by Chad): all four lanes stay visible. Applied: a measurable phone target in §10 (GPT's proposed build target, pending measurement); empty rows add **zero** Tab stops; short phone row text with the explanation once in the coverage note; Human history reads "No dated entries on the axis yet" (Pliny is on the shelf).
+
 **Related:** `TIMELINE-CONCEPT.md` (concept rev 3.1), `TIMELINE-PAGE-UX-PROPOSAL.md` (rev 2, the shelf and evidence controls), `TIMELINE-ENTRY-BUILD-PROPOSAL.md` (rev 2, the Pliny entry), START-HERE §2 (constitution; T1 exception).
 
 ---
@@ -33,9 +35,9 @@ What is live today (main `4b23518`) is one carefully sourced entry (Pliny, *Lett
 - **All four lanes shown** (D5, Chad's decision, rev 1.2): Earth systems and life · Mass extinctions · Human relatives · Human history. Mass extinctions is the active lane with the five episode cards; the other three are visible and labelled, with no entries yet (§3a). One line states that this release covers five episodes.
 - **Overview vs explorable window:** the page says plainly that the full-Earth strip is an overview and the Phanerozoic window is the part visitors can explore in this release.
 ### 3a. Lanes with no entries yet (rev 1.2)
-- Each shows its name and one short line: **"No entries yet — this lane fills as its evidence is checked."** Nothing is drawn in it: no placeholder marks, sample dates or illustrative shapes, because nothing unchecked is shown (constitution).
+- Each row reads **"<Lane name> · No entries yet"**; Human history reads **"Human history · No dated entries on the axis yet"** (Pliny is already on the page, on the separate partial-date shelf). The longer explanation ("this lane fills as its evidence is checked") appears **once**, in the coverage note. Nothing is drawn in a lane: no placeholder marks, sample dates or illustrative shapes, because nothing unchecked is shown (constitution).
 - **Phone space (GPT's concern):** lanes with no entries collapse to a single thin labelled row (about one line of text high), so the active lane keeps the room for dates and evidence. A lane expands to full height only once it has entries.
-- **Keyboard and screen readers:** each empty lane is a labelled region stating it has no entries yet; it is not a focus trap and adds one stop at most.
+- **Keyboard and screen readers:** empty rows add **zero Tab stops**; their names and status are available to screen readers (as text in the reading order), and keyboard users tab straight to the controls that do something.
 - **The no-JS list** names all four lanes, with the same "no entries yet" line under the empty ones.
 - Showing a lane is **not** a claim that its evidence exists or has been checked; each lane still needs its own slice proposal and source check (§11) before anything appears in it.
 
@@ -107,6 +109,7 @@ Stable ID · the claim · what was actually dated (material/horizon) · method w
 - A **boundary marker**, an **interval**, a **multi-pulse entry** and **Pliny's unplaced date** each render correctly and distinctly; Pliny never appears on the axis.
 - Overview + zoom on phone (390 × 844) and desktop; no horizontal overflow; keyboard access to every mark; a list view reachable without the axis.
 - The no-JS fallback carries every entry, its dates and evidence.
+- **Empty-lane rows (rev 1.3, GPT's proposed build target, pending measurement):** at 390 × 844 with default text size, the three empty rows together use **≤ 96 CSS px**, gaps and padding included. At larger text sizes or narrower widths they wrap and grow **without clipping or horizontal scrolling**. They add zero Tab stops (§3a).
 - Revision consistency through rollout and rollback (hash mismatch → list only, never mixed data); hub-unavailable state.
 - Tests break-checked as before (each guard fails when its fix is removed).
 
