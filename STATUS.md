@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 08:18 UTC (clock reading at write) — **Sky on Two Clocks: build proposal rev 1** (docs only; Chad's spec) — `docs/concepts/SKY-TWO-CLOCKS-PROPOSAL.md`, for GPT
+- One compact card (Now: Moon/Sun geometric centre-to-centre distance at 00:00 UTC with 35-day / 1-year charts; Deep Time: measured lunar recession, estimated widening from solar mass loss). Horizons VECTORS recipe pinned (301/10 from 500@399, VEC_TABLE 3, VEC_CORR NONE, KM-S, daily; time scale UT-or-TDB settled by the first export's header). Coverage 2026-06-01 → 2027-12-31, manual refresh before 2027-06-01.
+- **No source read:** the workspace shell and Claude's fetch tool could not reach JPL or nasa.gov (08:10–08:15 UTC); numbers marked [GK] until a text-only pane pass. Solar mass-loss trace written out (≈0.9 cm/yr from the ~6.1e-14/yr rate [GK]); a possible mismatch with the NASA article's own figure flagged for that pass.
+- Decisions S1 (hub fixed catalogue vs page-bundled — constitution point) to S5 for Chad after GPT. **Not approved:** source pass, export, REGISTER, build, any production action. Opening-page / Met audit untouched.
+
 ## 10 Nov 07:56:29 UTC — **PAGE RELEASED: timeline fetches its own catalogue revision** (main `cc91165`, merge of `timeline-revs-rc` @ `4728907`/code `1d31df6`; Chad: "Approve: merge timeline-revs-rc to main (page change: timeline fetches its own catalogue revision)")
 - Merge: no conflicts; merged files = packet hashes; generator `--check` passes. Pages build success 07:58:30 UTC.
 - **Served hashes (no-store, 07:58:38 UTC), all 7 = candidate:** index `fc8f1fa209d8`, sources `c63f89041d74`, timeline `d7c37d5f3057`, app `e3f4a3854113`, arts `58773cef35e6`, timeline.js `ae87c6a1f2ef`, style `30bc06b37123`.
