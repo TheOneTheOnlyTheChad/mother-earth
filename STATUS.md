@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 10:49 UTC (clock reading at write) — **Sky thread closed: handover written; Mac synced; next = Sky zoom-out proposal (docs only)**
+- `sky-rc` deleted by Chad (GitHub now: `main` + parked `aircraft-rc`).
+- GPT's brief for the next Sky feature (zoom-out Earth → Moon → Sun) recorded in `docs/concepts/SKY-ZOOM-OUT-BRIEF.md`, with facts from this thread and the questions the proposal must answer. **Docs-only proposal next; nothing approved.**
+- HANDOVER (new "NEXT THREAD STARTS HERE" block; §0 live state) and START-HERE §4l (Sky facts: eight page files, Horizons via the pane only, refresh by 2027-06-01, Pages-origin size measurement) updated at `5ea33c4`.
+- **Mac sync at `5ea33c4`** (10:49:32 UTC, preserve-first): 238 repo files, 7 updated + 14 new; every preserved copy matched an earlier commit (no local edits); all 238 byte-identical afterwards. Preserved under `_sync-preserved/20261110T104932Z/`.
+
 ## 10 Nov 10:43:31 UTC — **PAGE RELEASED: Sky on Two Clocks card** (main `a1c3ed6`, merge of `sky-rc` @ `22f5aa9`, code `2da37b2`; Chad: "Approve: merge sky-rc to main (page change: Sky on Two Clocks card)")
 - **Merge:** no conflicts. Merged files equal the candidate: index `95d0828c…`, app `e3f4a385…`, sky `175be00b…`, style `f7ea6e9c…`, arts `58773cef…`, sources `a524dbd8…`, timeline.html `d7c37d5f…`, timeline.js `ae87c6a1…`, worker `1073d15d…`. `build_sky.py --check` OK (`f851f164…368a`); `build_timeline.py --check` OK. The full regression (41 suites) passed on the code at 10:30 UTC.
 - GPT's recheck of the corrected page at rev 3 was requested (note at 10:31 UTC). Chad sent the merge line; no GPT result was relayed in this thread before it.
