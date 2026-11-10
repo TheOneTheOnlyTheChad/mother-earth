@@ -164,16 +164,24 @@ def build(inputs_dir):
         # SST only if every contributing cell has a valid SST (always true here: mask 0 ⇒ valid SST — kept as the rule)
         sst_ok = (np.where(wb, ~((sst.reshape(R, k, C, k) != FILL)), False).sum(axis=(1, 3)) == 0)
         den = np.maximum(n, 1)
-        anom = np.where(n > 0, round_half_away(a_s, den), NONE16).astype('<i2')
-        sstm = np.where((n > 0) & sst_ok, round_half_away(s_s, den), NONE16).astype('<i2')
+        has_sst = (n > 0) & sst_ok
+        anom = np.where(n > 0, round_half_away(a_s, den), 0).astype(np.int32)      # 0 where n = 0: presence is the n plane
+        sstm = np.where(has_sst, round_half_away(s_s, den), 0).astype(np.int32)    # 0 where unavailable: presence is the sst_ok plane
         landc = land.reshape(R, k, C, k).sum(axis=(1, 3)).astype(np.uint8)
         nn = n.astype(np.uint8)
-        raw = anom.tobytes() + sstm.tobytes() + nn.tobytes() + landc.tobytes()
+        def delta_split(x):   # row-wise difference (first column absolute), int16, then low bytes then high bytes
+            d = np.diff(x, axis=1, prepend=0)
+            if d.min() < -32768 or d.max() > 32767:
+                stop('delta out of int16 range')
+            b = d.astype('<i2').view(np.uint8).reshape(-1)
+            return b[0::2].tobytes() + b[1::2].tobytes()
+        raw = delta_split(anom) + delta_split(sstm) + nn.tobytes() + landc.tobytes() + has_sst.astype(np.uint8).tobytes()
         return raw, dict(res=res, rows=R, cols=C, cells_per_block=k * k,
-                         planes=[{'name': 'anomaly_c100', 'type': 'int16le', 'none': NONE16},
-                                 {'name': 'sst_c100', 'type': 'int16le', 'none': NONE16},
+                         planes=[{'name': 'anomaly_c100', 'encoding': 'row delta, int16 split into low-byte plane then high-byte plane; value present only where n_contributing > 0'},
+                                 {'name': 'sst_c100', 'encoding': 'as anomaly; value present only where sst_ok = 1'},
                                  {'name': 'n_contributing', 'type': 'uint8'},
-                                 {'name': 'n_land', 'type': 'uint8'}],
+                                 {'name': 'n_land', 'type': 'uint8'},
+                                 {'name': 'sst_ok', 'type': 'uint8', 'meaning': '1 = every contributing cell has a valid SST'}],
                          rounding='nearest 0.01 °C of the exact integer mean, ties away from zero')
 
     files = {}
