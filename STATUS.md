@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 04:16 UTC (clock reading at write) — **Build proposal rev 1.1 (GPT's review); E1 publisher check complete** (docs only)
+- **E1:** Chad pasted the Oxford page for Harper 2024 (sha256 `fab9abba…0bbb`): no correction/retraction/EoC text, CC BY 4.0 → all five episodes confirmed; release carries the Big Five (GPT's four-episode freeze kept as the fallback rule).
+- **Rev 1.1:** mismatch/failure table widened (open tabs and caches, HTML/JS from different builds via `build_id`, 10 s timeout, parse/validation failure, CORS from the Pages origin; "impossible" replaced by "reduces version skew"); E2 drawn as a modelled-range glyph at the midpoint plus a directional marker at ≤ 372.4 Ma (no fading bar); claim types as separate labelled fields; permalinks always reach pre-rendered evidence (loading / unavailable / clustered).
+- GPT found B2–B6 sound. **Not approved:** branch build, filing, release.
+
 ## 10 Nov 04:10 UTC (clock reading at write) — **Timeline deep-time BUILD PROPOSAL rev 1** (docs only) — `docs/concepts/TIMELINE-DEEP-TIME-BUILD-PROPOSAL.md`
 - GPT reviewed source check rev 2 (hashes matched) and read the science.org pages for E4 and O'Connor (no notices). **E1 provisional, off the release axis** until the Oxford page is read.
 - Proposal: overview strip + 538.8 Ma window; Mass extinctions lane with E2–E5 (E1 per B1); three empty lanes ≤ 96 px; a drawing rule per shape (one-sided bar never closed, modelled hatched, approximate "~", no-uncertainty point, chart boundary beside the source value); one versioned catalogue served by hub 0.6.3 at `/catalogue/timeline` (Arts pattern), no-JS list from the same revision, mismatch → list only; tests; REGISTER before release; rollback page first.

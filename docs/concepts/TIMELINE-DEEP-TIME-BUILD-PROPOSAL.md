@@ -1,6 +1,6 @@
 # Timeline — deep-time axis, first release: BUILD PROPOSAL (rev 1)
 
-**Rev 1, 10 Nov 2026 (docs only).** Nothing is built, uploaded, deployed or filed. Every step in §10 needs its own Approve line.
+**Rev 1.1, 10 Nov 2026 (docs only), after GPT's review of rev 1** (relayed by Chad): mismatch/failure cases widened (§4a); E2 glyphs corrected (§2); claim types separated in the schema (§3); direct-link behaviour pinned (§4b); E1 publisher check **completed** (Chad read the Oxford page; no notice) — so the release carries **five** episodes, with GPT's four-episode freeze rule kept as the fallback (B1). GPT found B2–B6 sound (short codes checked against the retained ICS file). Nothing is built, uploaded, deployed or filed. Every step in §10 needs its own Approve line.
 
 **Built on:** the concept `TIMELINE-DEEP-TIME-PROPOSAL.md` (rev 1.3, Chad's decisions D1–D7: hub catalogue ends the T1 exception; Big Five first; four lanes shown; no percentage-loss figures; cosmos later; source check done) and the source check `docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md` (rev 2, after GPT's two reviews).
 
@@ -12,20 +12,20 @@
 | E3 end-Permian | **estimated extinction onset 251.941 ± 0.037 Ma**; Dai 2025's revised boundary age and Herz 2026's untraced secondary estimate kept **separate** as context | Burgess, Muirhead, Bowring 2017 (CC BY 4.0) |
 | E4 end-Triassic | approximate ~201.5 Ma for the horizon; other approximations differ | He et al. 2020 (CC BY 4.0) |
 | E5 end-Cretaceous | **impact age 66.02 Ma**; extinction placement **tied to it** through the cited synchrony evidence; causes off this slice | Wilf et al. 2023; O'Connor et al. 2024 (both CC BY 4.0) |
-| E1 end-Ordovician | **provisional — off the release axis** until the Oxford publisher page is checked; ~445–443 Ma interval and the attributed pulse models are ready to go on once it is | Harper 2024 (CC BY 4.0) |
+| E1 end-Ordovician | ~445–443 Ma approximate interval; the source's three models (two pulses / single phase / earlier Katian phase) as attributed text; pulses fixture-only | Harper 2024 (CC BY 4.0). **Publisher page checked 10 Nov** (Chad's paste of the Oxford page, sha256 `fab9abba…0bbb`: no correction/retraction/EoC text; CC BY 4.0) |
 | Pliny | stays on the "Dates without a year" shelf; link `#e-pliny-ep-6-16` stable | as live |
 
-Publisher pages checked: Percival, Burgess 2017, Wilf (Claude); He, O'Connor (GPT). Open: Harper (security challenge to both).
+Publisher pages checked: Percival, Burgess 2017, Wilf (Claude); He, O'Connor (GPT); Harper (Chad, in his own browser; paste checked by Claude). None open.
 
 ## 1. What visitors get in this release
 - **Overview strip:** Earth's whole span, 4567 Ma → today, as one thin bar with a marked window. Labelled **"Overview"**.
 - **Explorable window:** 538.8 Ma → today (the Phanerozoic), labelled **"This release: the last 538.8 million years"**, with the chart's period bands across the top.
 - **Four lanes** (D5):
-  - **Mass extinctions** (active): E2, E3, E4, E5 — plus E1 only if its check completes before the branch build (decision B1).
+  - **Mass extinctions** (active): E1–E5 (B1: E1's check is complete).
   - **Earth systems and life · No entries yet**
   - **Human relatives · No entries yet**
   - **Human history · No dated entries on the axis yet**
-- **Coverage note** (one line, always visible): "This release shows four of the five largest mass extinctions [or "the five", per B1], placed on the ICS chart. Empty stretches are not periods where nothing happened. Lanes fill as their evidence is checked."
+- **Coverage note** (one line, always visible): "This release shows the conventional Big Five mass extinctions, placed on the ICS chart. Empty stretches are not periods where nothing happened. Lanes fill as their evidence is checked." (Fallback if E1 were withdrawn before build: "four of the conventional Big Five", with E1 excluded from both the catalogue and the pre-rendered list.)
 - **Pliny shelf** unchanged below the axis.
 - **Opening an episode:** the existing panel (desktop) / sheet (phone), Back closes, focus returns to the mark.
 
@@ -36,8 +36,8 @@ Phone (390 × 844):
 Overview  4567 ───────────────────[■]── 0 Ma
 This release: the last 538.8 million years
 | band | band | band | … |   period bands (chart short codes on phone, names on focus/tap)
-Mass extinctions   ·    ◇         ●       ~●        ▲
-                        F–F      P–T     T–J       K–Pg
+Mass extinctions  ~▬    ◆|◁       ●       ○~        ●
+                  O–S    F–F      P–T     T–J       K–Pg
 Earth systems and life · No entries yet          ┐
 Human relatives · No entries yet                 ├ ≤ 96 px together
 Human history · No dated entries on the axis yet ┘
@@ -53,9 +53,9 @@ Desktop (1280): the same, lanes full width; period names written out; the panel 
 | Measured point ± uncertainty (E3) | solid dot; whisker for the stated uncertainty, drawn only if ≥ 1 px (at 390 px, 1 px ≈ 1.5 Myr, so E3's ± 0.037 Myr is not drawn and the panel says so) | "251.941 ± 0.037 Ma (onset; uncertainty as stated by the source)" |
 | Approximate point (E4) | hollow dot, "~" in the label | "~201.5 Ma (approximate, as stated); other sources give ~201.3 and ~201" |
 | Point, uncertainty not stated (E5) | solid dot, no whisker | "Impact 66.02 Ma (uncertainty not stated by the source); extinction placed at the impact — synchrony per O'Connor et al. 2024" |
-| One-sided bound (E2) | open-ended bar from 372.4 Ma toward the present, fading out, **never closed** | "Boundary no older than 372.4 Ma" |
-| Modelled interval (E2) | hatched bar 371.93–371.78 Ma (drawn as one mark at phone scale), labelled "modelled" | "Modelled boundary age 371.93–371.78 Ma, assuming …" (the source's three assumptions) |
-| Approximate interval (E1, when admitted) | soft-edged bar, "~" | "~445–443 Ma; the source describes three models: two pulses, a single phase, or an additional earlier phase" |
+| One-sided bound (E2) | **directional marker at the bound** (a short tick at 372.4 Ma with an arrowhead pointing toward younger ages) — not a bar, so it cannot read as an event continuing through time | "Boundary no older than 372.4 Ma" |
+| Modelled boundary-age range (E2) | a **distinct "modelled range" glyph (◆) at the midpoint** 371.86 Ma: 0.15 Myr is ~0.1 CSS px at this scale. True endpoints are drawn only when a zoom makes the range ≥ 4 CSS px wide (no zoom in this release, so always the glyph) | accessible label and panel: "Modelled boundary-age range 371.93–371.78 Ma (Percival et al. 2018), assuming the cited age model is correct, the section is stratigraphically complete, and constant sedimentation between the Kellwasser horizons" |
+| Approximate interval (E1) | soft-edged bar, "~" | "~445–443 Ma; the source describes three models: two pulses, a single phase, or an additional earlier phase" |
 | Pulses | **fixture only** in this release (no numerically dated pulses found) | — |
 | Partial date (Pliny) | never on the axis | shelf, as live |
 | Chart boundary | thin line in the band row | "ICS boundary 251.902 ± 0.024 Ma (chart v2026-06)", shown **beside** the source's value, never merged |
@@ -73,7 +73,7 @@ Rules: no time position is shifted for room (overlaps cluster into a count marke
   "lanes": [ {"id": "earth-life", "label": "Earth systems and life"}, {"id": "extinctions", …}, {"id": "relatives", …}, {"id": "history", …} ],
   "entries": [ {
     "id": "e-big5-end-permian", "lane": "extinctions", "title": "End-Permian mass extinction", "axis": true,
-    "claims": [ { "kind": "timing", "what": "onset of the mass extinction",
+    "claims": [ { "kind": "timing", "claim_type": "extinction_onset_estimate", "what": "estimated onset of the mass extinction",
                   "when": {"type": "measured_age", "value": 251.941, "units": "Ma", "uncertainty": 0.037, "uncertainty_meaning": "as stated", "approximate": false},
                   "source": {"citation": "Burgess, Muirhead, Bowring (2017) Nat Commun 8: 164", "doi": "10.1038/s41467-017-00083-9", "licence": "CC BY 4.0",
                              "locator": "section 'A relative timing framework' (Europe PMC XML paragraph 8)", "status": "no notices (publisher page, 10 Nov 2026)", "checked": "2026-11-10"} },
@@ -83,6 +83,18 @@ Rules: no time position is shifted for room (overlaps cluster into a count marke
   "shelf": [ { "id": "e-pliny-ep-6-16", "lane": "history", "when": {"type": "partial_date", …}, … } ]
 }
 ```
+- **Claim types are separate fields with their own fixed labels**, so the renderer and the no-JS list can never merge them:
+  | `claim_type` | Used for | Label shown |
+  |---|---|---|
+  | `extinction_interval_approx` | E1 | "Approximate extinction interval" |
+  | `boundary_age_bound` | E2 (≤ 372.4 Ma) | "Boundary age: no older than" |
+  | `boundary_age_range_modelled` | E2 (371.93–371.78 Ma) | "Modelled boundary-age range" |
+  | `extinction_onset_estimate` | E3 | "Estimated extinction onset" |
+  | `extinction_horizon_approx` | E4 | "Approximate age of the extinction horizon" |
+  | `dated_event_age` | E5 impact | "Impact age" |
+  | `extinction_placement_tied` | E5 | "Extinction placed at the dated impact (synchrony evidence cited)" |
+  | `chart_boundary` | all | "ICS chart boundary (v2026-06)" |
+  | `context` | E3 (Dai, Herz), E4 (other approximations), E1 (models) | "Context" |
 - Generated by `phase1/timeline/build_timeline.py` (extended) from per-entry source files in `phase1/timeline/` plus the retained chart file; `--generated-at` pins the bytes; `--check` verifies `timeline.html` matches.
 - **Wording from sources is paraphrased** with citation; any quoted wording is short and attributed (CC BY: credit, licence link, changes indicated — the page says values are reformatted).
 - Each change bumps `catalogue_revision` and appends to the entry's `revisions` (previous value, what changed, why, source revision).
@@ -94,22 +106,33 @@ Rules: no time position is shifted for room (overlaps cluster into a count marke
 - **START-HERE §2** T1 line is replaced at release by "Timeline entries are served by the hub catalogue route".
 
 ### 4a. Version mismatch and failure (tested)
+In every failure case **the pre-rendered list stays fully usable and the axis is not drawn**; the page shows one line: "The timeline axis is unavailable right now; every entry, date and source is listed below." Dates from two revisions are never mixed.
 | Situation | Visitor sees |
 |---|---|
-| New page + new hub | axis + list |
-| Old page (Pliny-only) + new hub | the old page, unchanged (it never fetches) |
-| New page + old hub (0.6.2: route 404) | list only + "The timeline axis is unavailable right now; every entry, date and source is listed below." |
-| New page + hub serving a different revision (deploy/rollback window) | the same list-only message; **dates from two revisions are never mixed** |
-| Hub down / 503 | the same list-only message |
-Release order makes the "new page + old hub" case impossible in normal operation (hub first); rollback goes page first, so it is also avoided.
+| New page + new hub, hash matches, catalogue validates | axis + list |
+| Old page (Pliny-only), incl. an **already-open tab or a cached page**, + new hub | the old page, unchanged (it never fetches) |
+| New page (incl. an already-open tab or cached copy) + old hub (0.6.2: route 404) — possible during **rollback** | list only |
+| New page + hub serving a **different revision** (rollout/rollback window, open tab, edge cache ≤ 60 s) | list only |
+| **HTML and JavaScript from different builds** (cached `timeline.js` with new HTML or the reverse) | list only — both carry a `build_id`; the script draws nothing unless its own `build_id` equals the page's `data-build` |
+| Request **times out** (AbortController, 10 s) or network/CORS error | list only |
+| Hash matches but the catalogue **cannot be parsed or fails validation** (schema, claim types, lanes, chart pin) | list only |
+| Hub down / 503 | list only |
+The release order (hub before page; rollback page before hub) **reduces version skew**; it does not remove it for open tabs and caches, which is why every case above is handled on the page. **Tested from the GitHub Pages origin against the Worker**, including the CORS headers (live RC check), not only from a local server.
+
+### 4b. Direct links
+- Each episode has a stable permalink (`#e-big5-end-ordovician`, `…-frasnian-famennian`, `…-end-permian`, `…-end-triassic`, `…-end-cretaceous`); Pliny keeps `#e-pliny-ep-6-16`.
+- **The permalink always reaches pre-rendered evidence**: on load it scrolls to and focuses that entry in the list (works with no JavaScript, while the catalogue loads, and when the axis is unavailable).
+- Once the axis is drawn and validated, the same link opens the episode's panel/sheet; if the mark is in a cluster, the cluster opens with that entry focused.
+- Back closes the panel and returns focus to the mark (or the cluster, or the list entry when the axis is unavailable); a direct-link Back goes to the real previous page, as today.
+- Tested: direct open (axis ready / loading / unavailable / clustered), Back, Forward, focus return.
 
 ## 5. Tests (all with break checks)
 - **timeline-catalogue (hub):** exact bytes served; wrong hash / missing / unreadable / invalid → 503; route outside LAYERS/cron/health/history; `/` lists it. Breaks: serve-on-mismatch, records-only hash, missing-503.
-- **timeline-ui (extended from the 584-check suite):** every shape in §2 renders distinctly (fixtures include a pulses entry, an approximate interval, a one-sided bound, a no-uncertainty point); Pliny never on the axis; chart vs source values both visible in the panel; keyboard reaches every mark; **empty lanes add zero Tab stops and use ≤ 96 CSS px together at 390 × 844 at default text size**, wrapping without clipping at 200 % text; no horizontal overflow at 360/390/430/1280; no-JS list carries every entry, date and source; mismatch, 404 and 503 all fall back to the list; Back/Forward/focus as today.
+- **timeline-ui (extended from the 584-check suite):** every row of §4a (incl. build_id mismatch, timeout, parse/validation failure) and every case in §4b; every shape in §2 renders distinctly; claim-type labels never merged (fixtures include a pulses entry, an approximate interval, a one-sided bound, a no-uncertainty point); Pliny never on the axis; chart vs source values both visible in the panel; keyboard reaches every mark; **empty lanes add zero Tab stops and use ≤ 96 CSS px together at 390 × 844 at default text size**, wrapping without clipping at 200 % text; no horizontal overflow at 360/390/430/1280; no-JS list carries every entry, date and source; mismatch, 404 and 503 all fall back to the list; Back/Forward/focus as today.
 - **Reruns:** desktop-overflow, mobile-pass, all 35 regression suites.
 
 ## 6. Sources and REGISTER (before release)
-- **E1:** the Oxford publisher page read (Chad in his own browser, or GPT) → admitted to the axis; otherwise E1 stays out and the coverage note says four of five (B1).
+- **E1:** Oxford publisher page checked 10 Nov (Chad) → admitted (B1). If any source gains a notice before release, that entry is withdrawn from the catalogue and list, and the catalogue revision bumps.
 - **File REGISTER entries** (Chad's line): ICS chart (CC BY 4.0, tag v2026-06.5, citation as on the chart page); Percival 2018, Burgess 2017, He 2020, Wilf 2023, O'Connor 2024, and Harper 2024 if admitted (each CC BY 4.0).
 - **Credits on the page:** chart citation + "CC BY 4.0"; each entry's citation in its panel and in the list; "values reformatted by Mother Earth".
 
@@ -134,7 +157,7 @@ Page first: revert the page merge (the old Pliny-only page needs no hub route). 
 5. `Approve: upload ref/timeline/<revision>.json (file sha256 …) to R2` → `Approve: deploy hub 0.6.3 from <commit> (content only)` → live RC check → `Approve: push timeline-deep-rc to main (page change: deep-time axis, T1 exception ends)`.
 
 ## 11. Decisions for Chad
-- **B1** E1: admit to the axis only if the Oxford page is read before the branch build; otherwise ship four of five with the note. *Recommended.*
+- **B1** E1: **admitted** — its publisher check completed 10 Nov. Fallback rule kept: an episode whose check is not complete at branch build is excluded from both catalogue and list, and the note says "four of the conventional Big Five" (GPT). *Recommended.*
 - **B2** Period labels on phone: the chart's own short codes (`skos:notation`, e.g. "S" for Silurian, "T" for Triassic) with the full name on focus/tap. *Recommended* (names don't fit at 390 px).
 - **B3** Catalogue fetch `no-store` (as Arts) for strict revision consistency. *Recommended;* cost negligible (§7).
 - **B4** Hub version 0.6.3 and route name `/catalogue/timeline`. *Recommended.*

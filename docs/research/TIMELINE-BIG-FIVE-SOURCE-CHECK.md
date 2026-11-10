@@ -13,6 +13,8 @@
 
 **GPT's review of rev 2 (10 Nov, relayed by Chad):** all five rev 2 hashes matched, original log prefix intact, retained chart matched and contains both window bounds. **GPT opened the science.org pages for E4 (He 2020) and O'Connor 2024: no correction, retraction or expression-of-concern notice in the article text GPT inspected.** E4 → timing confirmed for the build. **E1 stays provisional and off the release axis** until the Oxford page is read. Build proposal may proceed with E1 conditional.
 
+**E1 publisher check completed (10 Nov 04:16Z):** Chad opened the Oxford page in his own browser and pasted its text (sha256 `fab9abba…0bbb`); Claude found no correction, retraction, erratum or expression-of-concern text, "Published: 18 December 2023", CC BY 4.0. E1 → timing confirmed for the build. Bound: the paste is the text Chad copied.
+
 **Open (superseded in part above):** E1 and E4 publisher pages (Chad or GPT to read; the pane got a Cloudflare challenge and did not bypass it); full-text XML not retained (Mac shell refused at Europe PMC/NCBI/Crossref; passages + hashes kept). REGISTER entries proposed, not filed.
 
 ## Original record (superseded by rev 2)
