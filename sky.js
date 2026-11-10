@@ -1,5 +1,6 @@
 /* Mother Earth — "The Sky on Two Clocks" card (SKY-TWO-CLOCKS-PROPOSAL rev 3; Chad's S1a/S2a/S3/S4, 10 Nov 2026).
- * Off on load: nothing is fetched until the switch is turned on. Nothing is drawn on the globe.
+ * Off on load: nothing is fetched until the switch is turned on. Nothing is drawn on the globe here; the zoom-out view
+ * (skyscene.js, SKY-ZOOM-OUT-PROPOSAL rev 2.2) draws computed positions for the same instant, only when opened.
  * Now: Moon and Sun distance from Earth's centre at 00:00 UTC today, from the hub's fixed catalogue
  *      /catalogue/sky/<this page's own revision> (hub ≥ 0.6.5). The page checks the complete file's sha256 against its pin
  *      and the catalogue's shape; any failure → "Distances unavailable", never a zero, a neighbour or an empty chart.
@@ -222,6 +223,6 @@
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && st.on && st.status === 'ok') render(); });
 
   // read-only aid for tests and the console
-  ME.skyState = () => ({ on: st.on, status: st.status, reason: st.reason, today: st.today, view: st.view, rev: REV });
+  ME.skyState = () => ({ on: st.on, status: st.status, reason: st.reason, today: st.today, view: st.view, rev: REV, sha: SHA });
   ME.skyRender = render;
 })();

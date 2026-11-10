@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611231000">
+<link rel="stylesheet" href="style.css?v=202611241000">
 </head>
 <body class="world">
 <header class="top">
@@ -32,6 +32,30 @@
     <div class="gwrap">
       <div id="globe"></div>
       <div class="imgdate" id="imgdate">Imagery: loading…</div>
+      <div class="zoom-ui" id="zoom-ui" hidden>
+        <svg class="zoom-svg" id="zoom-svg" aria-hidden="true"></svg>
+        <div class="zoom-bar" id="zoom-bar">
+          <div class="zoom-stops" role="group" aria-label="Zoom-out stops">
+            <button type="button" id="zoom-a" aria-pressed="false">Earth</button>
+            <button type="button" id="zoom-b" aria-pressed="false">+ Moon</button>
+            <button type="button" id="zoom-c" aria-pressed="false">+ Sun</button>
+            <button type="button" id="zoom-reframe" hidden>Re-frame</button>
+          </div>
+          <button type="button" class="zoom-back" id="zoom-back">Back to Earth</button>
+        </div>
+        <div class="zoom-strip" id="zoom-strip">
+          <div class="zoom-scale" id="zoom-scale" aria-live="polite"></div>
+          <div class="zoom-dist" id="zoom-dist"></div>
+          <div class="zoom-img" id="zoom-img"></div>
+          <div class="zoom-when"><span class="ev comp">Computed</span> <span id="zoom-when"></span>
+            <details class="zoom-how"><summary>How this is drawn</summary><div>
+              <p>Directions to the Moon and Sun at 00:00 UTC on this date, calculated from NASA/JPL Horizons vectors and turned to face the globe by our own calculation (IAU 2006 precession and sidereal time; small effects such as nutation and polar motion are left out). Not observed.</p>
+              <p>Earth and Moon are drawn to scale: true sizes and true distance. The Sun is drawn at 200 Earth radii instead of about 23,000, along its calculated direction, and resized so that, as seen from Earth's centre, it covers the same angle as the real Sun. How big it looks on your screen depends on where the camera is.</p>
+              <p>The globe's layers show their own times, so they are hidden here. The Earth imagery keeps its own date. <a href="sources.html#sky-scene">Full details on Sources &amp; Details →</a></p>
+            </div></details>
+          </div>
+        </div>
+      </div>
       <button type="button" class="keybtn" id="key-btn" aria-expanded="false" aria-controls="legend">Key · <span id="key-n">0 layers</span></button>
       <div class="persist" id="persist">
         <details class="pd" id="ps-plastic" hidden><summary>Dated samples · <span id="ps-plastic-yrs">2011–2024</span></summary><div>Each marker is one sample on its own date, at the place the tow started — not where plastic is now. A missing marker does not establish plastic-free water. Full explanation in the Key.</div></details>
@@ -237,7 +261,7 @@
           </div>
           <div class="ovl opt-sky" id="card-sky">
             <div class="ovl-h" id="sky-card-h">The Sky on Two Clocks <span class="ev comp">Computed</span></div>
-            <div class="evl">How far away are the Moon and Sun, and how does that change with the timescale? Calculated distances; nothing drawn on the globe.</div>
+            <div class="evl">How far away are the Moon and Sun, and how does that change with the timescale? Calculated distances; drawn on the globe only in the zoom-out view.</div>
             <button class="ovl-tgl" type="button" id="tgl-sky" role="switch" aria-checked="false" aria-controls="sky-body"><span class="box" aria-hidden="true"></span><span class="t">Show the two clocks</span></button>
             <div class="obs" id="o-sky" aria-live="polite">off — switch on to load the distances</div>
             <div id="sky-body" hidden>
@@ -250,6 +274,11 @@
                 <div class="cav">Horizons calculates these distances. Mother Earth shows a dated daily sample from an export, refreshed by hand.</div>
                 <div class="sky-row" id="sky-moon" hidden></div>
                 <div class="sky-row" id="sky-sun" hidden></div>
+                <div class="sky-zoom" id="sky-zoom">
+                  <button class="ovl-tgl zbtn" type="button" id="tgl-zoom" aria-describedby="o-zoom">Zoom out to the Moon and Sun</button>
+                  <div class="obs" id="o-zoom" aria-live="polite"></div>
+                  <div class="sky-zt" id="zoom-text"></div>
+                </div>
                 <details class="scope" id="sky-scope">
                   <summary>Details</summary>
                   <div>
@@ -313,9 +342,10 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611231000"></script>
-<script src="arts.js?v=202611231000"></script>
-<script src="sky.js?v=202611231000"></script>
+<script src="app.js?v=202611241000"></script>
+<script src="arts.js?v=202611241000"></script>
+<script src="sky.js?v=202611241000"></script>
+<script src="skyscene.js?v=202611241000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
@@ -376,6 +406,7 @@ if (noWebGL) {
     globe.controls().autoRotate = !reduced; globe.controls().autoRotateSpeed = .25;
     globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
     globeOk = true;
+    ME.globe = () => globe;   // read handle for the Sky zoom-out view (skyscene.js); the view saves and restores everything it touches
   } catch (e) {
     globeUnavailable('The 3-D globe could not start in this browser.', (e && e.message) || e);
   }
