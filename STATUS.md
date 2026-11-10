@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 08:25 UTC (clock reading at write) — **Sky on Two Clocks proposal rev 2 after GPT's review** (docs only)
+- GPT reviewed rev 1 (Mac copy `7112dfbf41c9…`): card design sound; targeted rev 2 asked for. Applied: UTC as an export requirement (TLIST of individually converted TDB epochs preferred; `TIME_TYPE='UT'` only if docs + header establish UTC; fixed offset only with residual, leap-second check and agreed tolerance); User-Agent reconciled with the browser route; reproducible export record, 2028-01-01 row trimmed, bundle hash pinned outside the bundle; one direction method per dataset (missing value ≠ method switch; check 2 fixture corrected to after apogee); partial Sun window and outside-coverage states; rollover by the next tick + on card open + on return to the page; one consistent solar mass-loss chain (fitted GM change vs mass-loss estimate); T3 contract carried over for S1(a); every acceptance check names a concrete break.
+- GPT confirmed: 579 days; full Sun window 30 Nov 2026 – 2 Jul 2027; 0.91 cm/yr and 0.91 m/century. **For GPT's focused recheck of §3, §4, §6.2, §8.** Nothing approved.
+
 ## 10 Nov 08:18 UTC (clock reading at write) — **Sky on Two Clocks: build proposal rev 1** (docs only; Chad's spec) — `docs/concepts/SKY-TWO-CLOCKS-PROPOSAL.md`, for GPT
 - One compact card (Now: Moon/Sun geometric centre-to-centre distance at 00:00 UTC with 35-day / 1-year charts; Deep Time: measured lunar recession, estimated widening from solar mass loss). Horizons VECTORS recipe pinned (301/10 from 500@399, VEC_TABLE 3, VEC_CORR NONE, KM-S, daily; time scale UT-or-TDB settled by the first export's header). Coverage 2026-06-01 → 2027-12-31, manual refresh before 2027-06-01.
 - **No source read:** the workspace shell and Claude's fetch tool could not reach JPL or nasa.gov (08:10–08:15 UTC); numbers marked [GK] until a text-only pane pass. Solar mass-loss trace written out (≈0.9 cm/yr from the ~6.1e-14/yr rate [GK]); a possible mismatch with the NASA article's own figure flagged for that pass.
