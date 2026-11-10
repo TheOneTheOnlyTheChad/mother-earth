@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 19:58 UTC (clock reading at write) — **Ocean Heat preview candidate BUILT on branch `ocean-heat-rc` @ `0130e4d`** (Chad: "Approve: build ocean-heat-rc on a branch only — Ocean Heat preview per OCEAN-HEAT-PROPOSAL rev 4.2 on the pinned 9 Nov inputs; no merge, R2, hub or page change.") — packet `reviews/2026-11-10-ocean-heat-rc.md` (on the branch)
+- **New:** `oceanheat.js` (page file 10 on a merge), snapshot `data/ocean-heat/oh-2026-11-09-R1/` (manifest `dcc34674…`; P1 first-enable 1,223,509 B), generator with hard stops (6/6), browser suite 79/79, all 10 code breaks caught at `0130e4d`; 16 regression suites green.
+- **Live RC (Pages origin, real Apple M3 GPU, `MAX_TEXTURE_SIZE` 16384), 19:28–19:37Z:** seven page files hash-exact; P1 7200 × 3600; zero requests while off, exactly three on enable; 12/12 taps match NOAA's exact sums; real tap through the handlers; Sky zoom-out hides and restores the layer; off clears everything.
+- **Not obtained:** §8 "smooth" and tap timing. The pane ran `requestAnimationFrame` at one frame per 2 s with the layer off as well as on. The layer adds ≈ 1 ms to a forced render. Open for GPT, with the sea-ice-in-polar-night tone and the ~99 MiB P1 texture.
+- **Unchanged:** main, the public page, hub 0.6.6, D1, R2.
+- **Next:** GPT reviews the packet and the `_review/ocean-heat-rc/` preview; Chad's lines for anything further.
+
 ## 10 Nov 18:30 UTC (clock reading at write) — **GPT cleared Ocean Heat rev 4.1 for O7; rev 4.2 applies the build notes** (docs only)
 - GPT (relayed by Chad): §2/§5 pass; §8 passes with two build notes; §9a/C6 pass. The OSTIA hold stays withdrawn for the 9 Nov snapshot.
 - **Rev 4.2:**
