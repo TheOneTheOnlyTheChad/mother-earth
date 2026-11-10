@@ -1,0 +1,12 @@
+{
+ "revision": "sky-2026-11-R1",
+ "generated_at": "2026-11-10T09:00:00Z",
+ "file": "catalogue/sky-2026-11-R1.json",
+ "bytes": 71925,
+ "file_sha256": "f851f16438415bc1e05b392e3e1616052b6347c637ee5ea98df307052058368a",
+ "raw": {
+  "raw/hz-moon-ut-20261110.txt": "26d8c2b5262efb31e12b1111f921abb2f1eeb6cd03b7ff2f432988e2a75054bb",
+  "raw/hz-sun-ut-20261110.txt": "ce2aaea51798a5089aa2a7f4871592b47468a40b63025c8c74845e97efe33341",
+  "raw/hz-moon-tdb-crosscheck-20261110.txt": "450c697ec74a04506cede4c6b232144619120838ea80fbe8cf46005e771b8289"
+ }
+}
