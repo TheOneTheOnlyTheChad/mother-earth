@@ -1,4 +1,4 @@
-# Backlog view — 8 Nov 2026, rev 2 after GPT's review (for Chad's choice; nothing here is started)
+# Backlog view — 8 Nov 2026, rev 2 after GPT's review; §T Timeline maintenance added 10 Nov (for Chad's choice; nothing here is started)
 
 One page over everything open: the research backlog (`docs/RESEARCH-BACKLOG.md`, R1–R11) plus the open hub/page items from HANDOVER. **No item is authorised by appearing here.** Tiers are GPT's 5 Nov recommendations. Effort figures are Claude's rough estimates, not measurements.
 
@@ -12,6 +12,7 @@ One page over everything open: the research backlog (`docs/RESEARCH-BACKLOG.md`,
 | **R11 FIRMS late arrivals** | An unmeasured question: whether detections processed after midnight are missing from that day's checkpoint (`day_range=1` resets at 00:00 UTC). No quantity of lost detections is established | Not started (one data point) | Measure across several days; compare `day_range=2` | small–medium |
 | **place-ui harness** | Test-only fix, 30/30 | On branch; **GPT technical sign-off 8 Nov** | Chad's Approve line to merge | done, merge only |
 | **Smoke checks left** | Real phone; noon rollover; HTTP status codes | Noon booked 11:50 UTC today | Real phone with Chad (with the Phase 0 iPhone runs) | — |
+| **Real iPhone Safari check** | Live site incl. the deep-time Timeline on a real iPhone (the pane is not a phone) | **Deferred by Chad 10 Nov** — site first | Chad, later | — |
 
 ## B. New sources (research only, R1–R10)
 | ID | Candidate | Tier | Where it stands | What its next gate needs |
@@ -28,6 +29,19 @@ One page over everything open: the research backlog (`docs/RESEARCH-BACKLOG.md`,
 | R9 | Neutron monitors (NMDB) | 3 | Blocked: account required | Recheck service + reuse |
 
 **Pattern worth seeing (corrected in rev 2):** R3, R4 and R6 are parked with **terms or access** among their main open items; **R2 also has unresolved identity, validation and acceptance rules**. A bounded "terms review" (reading each provider's reuse terms and filing the operative sentences in REGISTER, as for the Met) **may clarify rights without clearing any source**: each item's other open questions remain.
+
+## T. Timeline maintenance and expansion (added 10 Nov 2026 on Chad's request — captured only, nothing started)
+Captured from Chad's brief (10 Nov). The deep-time release (catalogue `tl-2026-11-R1`, hub 0.6.3, main `57d07c2`) is the base. **First deliverables: T1 discovery inbox and T4 public changelog.** Each item still needs its own proposal → GPT review → Chad's go; anything that changes the public page, R2 or the hub needs its own Approve line.
+
+| ID | Item | What Chad wants | State |
+|---|---|---|---|
+| **T1** | **Discovery inbox** *(first deliverable)* | Log new papers, newly uncovered or digitised records, corrections and reader tips, each with the source link and a short note on what it might add or change. A source scan may surface leads; **a person reviews each claim before publication**. | Not started |
+| **T2** | **Evidence review** | Record what the source actually supports, its date or range, the uncertainty, the citation, the licence, and when it was checked. Show credible disagreements where they matter. **Keep the dates-without-a-year shelf** for entries like Pliny. | Not started (today's record: `TIMELINE-BIG-FIVE-SOURCE-CHECK.md` + REGISTER) |
+| **T3** | **Versioned releases** | Keep event links stable. Each published catalogue gets a new revision ID; **older catalogues retained** for pages that still expect them; each page and catalogue released as a **matched pair using the existing hash checks**. | Not started (today the hub pins one revision; serving older revisions alongside is a hub change) |
+| **T4** | **Public change history ("What changed")** *(first deliverable)* | A small section for additions, revisions and withdrawals. If an event's date changes, show the **old and new ranges and the evidence behind the change**. Page "last updated" kept **separate** from each entry's "last reviewed". | Not started |
+| **T5** | **Release cadence** | Batch routine additions by lane or topic; move **material corrections and withdrawals sooner**. | Not started |
+
+Already queued against T2/T3/T5 (routine, batch with the next revision): GPT's wording note — "extinction horizon" → plainer wording (STATUS 10 Nov 06:53).
 
 ## C. Bigger decisions (separate, Chad's)
 - **Domain selection (Phase 0):** recommendation drafted (`docs/research/P0-RECOMMENDATION-DRAFT.md`, rev 3), ready for Chad's separate decision. The iPhone measurements are pending Chad's availability; the recommendation does not depend on them.
