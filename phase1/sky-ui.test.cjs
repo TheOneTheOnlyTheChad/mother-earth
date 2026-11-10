@@ -5,7 +5,8 @@
  * what a screen reader announces.
  * Run:   node phase1/sky-ui.test.cjs        (needs `python3 -m http.server 8899 --bind 127.0.0.1` in the repo and /home/claude/spike)
  * Break: BREAK=local-date | extrema-full-bundle | no-recompute | diff-in-rr-mode | rr-fallback | nearest-sample | skip-schema |
- *              merge-gap-states | no-key-activation | hide-text-equivalent | label-swap | eager | no-time-check      → each must FAIL
+ *              merge-gap-states | no-key-activation | hide-text-equivalent | label-swap | eager | no-time-check |
+ *              tilde-required | flag-sentence-always | caveat-always | no-flag-agreement      → each must FAIL
  */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
@@ -27,7 +28,11 @@ const BREAKS = {
   'merge-gap-states': ["    const outside = today < cov.start || today > cov.end;", "    const outside = false;"],
   'no-key-activation': ["  $('tgl-sky').addEventListener('click', () => setOn(!st.on));", "  $('tgl-sky').addEventListener('click', e => { if (e.detail === 0) return; setOn(!st.on); }); $('sky-tabs').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ' || e.key.startsWith('Arrow')) e.stopImmediatePropagation(); }, true); $('sky-tabs').addEventListener('click', e => { if (e.detail === 0) e.stopImmediatePropagation(); }, true);"],
   'hide-text-equivalent': ["<div class=\"sky-te\">${esc(textEq(s))}</div>", "<div class=\"sky-te\" aria-hidden=\"true\">${esc(textEq(s))}</div>"],
-  'no-time-check': ["    if (!t || !iso(t.horizons_ut_tilde_from) || !iso(t.first_date_affected_by_unresolved_leap_second)) return false;", "    // (break) time fields not validated"],
+  'no-time-check': ["    if (!t || !(t.horizons_ut_tilde_from === null || iso(t.horizons_ut_tilde_from)) || !iso(t.first_date_affected_by_unresolved_leap_second)) return false;", "    // (break) time fields not validated"],
+  'tilde-required': ["!(t.horizons_ut_tilde_from === null || iso(t.horizons_ut_tilde_from))", "!iso(t.horizons_ut_tilde_from)"],
+  'flag-sentence-always': ["    if (t.horizons_ut_tilde_from) out.push(", "    out.push("],
+  'caveat-always': ["    if (f <= st.cat.coverage.end) out.push(", "    out.push("],
+  'no-flag-agreement': ["    for (const b of ['moon', 'sun']) { const f = j.bodies[b].rows.find(r => r[3] === 'UT~'); if ((f ? f[0] : null) !== t.horizons_ut_tilde_from) return false; }", "    // (break) flag start not compared with the rows"],
   'eager': ["  $('tgl-sky').addEventListener('click', () => setOn(!st.on));", "  $('tgl-sky').addEventListener('click', () => setOn(!st.on)); setOn(true);"],
 };
 const B = process.env.BREAK;
@@ -182,6 +187,8 @@ const RUN = '2026-11-10T08:00:00Z';
   for (const [label, opts] of [['hub 503 missing', { status: 503 }], ['network failure', { abort: true }], ['one changed byte (page hash check)', { body: FILE.replace('"sky-2026-11-R1"', '"sky-2026-11-R2"') }],
     ['catalogue without its time block (matching hash) is rejected before rendering', (() => { const b = mutate(j => { delete j.time; }); return { body: b, pinOverride: sha(b) }; })()],
     ['time field not a date (matching hash) is rejected before rendering', (() => { const b = mutate(j => { j.time.first_date_affected_by_unresolved_leap_second = 'July'; }); return { body: b, pinOverride: sha(b) }; })()],
+    ['flag start null while rows carry UT~ (matching hash) is rejected', (() => { const b = mutate(j => { j.time.horizons_ut_tilde_from = null; }); return { body: b, pinOverride: sha(b) }; })()],
+    ['flag start disagrees with the rows (matching hash) is rejected', (() => { const b = mutate(j => { j.time.horizons_ut_tilde_from = '2027-02-05'; }); return { body: b, pinOverride: sha(b) }; })()],
     ['malformed data with a matching hash reaches the schema check', (() => { const b = mutate(j => { j.bodies.moon.rows[3][1] = 'oops'; }); return { body: b, pinOverride: sha(b) }; })()]]) {
     const { ctx, page, perr } = await run({ time: '2026-11-10T12:00:00Z', ...opts });
     await on(page);
@@ -199,6 +206,23 @@ const RUN = '2026-11-10T08:00:00Z';
     const r = await R(page);
     ok('Details separates the Horizons flag (4 Feb 2027) from the July leap-second uncertainty (1 Jul 2027)', /From 4 Feb 2027, Horizons marks the times as estimates/.test(r.time) && /samples from 1 Jul 2027 would be off by one second/.test(r.time), r.time);
     ok('a UT~ day is flagged next to its timestamp', /time estimated/.test(r.moon.ts), r.moon.ts);
+    ok('R1 note text unchanged by the all-UTC rule', r.time === 'Samples are at 00:00 UTC. From 4 Feb 2027, Horizons marks the times as estimates because future leap seconds are not yet known. A leap second at the end of June 2027 has not been decided; if one is added, samples from 1 Jul 2027 would be off by one second until the next refresh.', r.time);
+    await ctx.close();
+  }
+  // all-UTC catalogues (GPT, 10 Nov, rehearsal T1): no UT~ rows, horizons_ut_tilde_from null → valid; the Horizons flag sentence is omitted;
+  // the leap-second caveat stays only while the coverage reaches the first affected date
+  const allUtc = (lo, hi) => mutate(j => { for (const b of ['moon', 'sun']) j.bodies[b].rows = j.bodies[b].rows.filter(r => r[0] >= lo && r[0] <= hi).map(r => [r[0], r[1], r[2], 'UTC']);
+    j.coverage.start = lo; j.coverage.end = hi; j.coverage.samples_per_body = j.bodies.moon.rows.length; j.time.horizons_ut_tilde_from = null; });
+  for (const [label, lo, hi, when, want] of [
+    ['T1-shaped window (10–24 Nov 2026): note is the sample time only', '2026-11-10', '2026-11-24', '2026-11-12T06:00:00Z', 'Samples are at 00:00 UTC.'],
+    ['all-UTC flags over the full R1 coverage: no Horizons sentence, July caveat kept', '2026-06-01', '2027-12-31', '2027-03-01T06:00:00Z', 'Samples are at 00:00 UTC. A leap second at the end of June 2027 has not been decided; if one is added, samples from 1 Jul 2027 would be off by one second until the next refresh.']]) {
+    const body = allUtc(lo, hi);
+    const { ctx, page, perr } = await run({ time: when, body, pinOverride: sha(body) });
+    await on(page);
+    const r = await R(page), d = when.slice(0, 10), m = row('moon', d);
+    ok(`${label} → card renders (status ok, today's real value)`, r.s.status === 'ok' && r.moon.today === d && r.moon.val.includes(fmtKm(m[1])), [r.s, r.moon.val]);
+    ok(`${label} → note`, r.time === want, r.time);
+    ok(`${label} → no "time estimated" flag next to the timestamp; no page errors`, !/time estimated/.test(r.moon.ts) && !/time estimated/.test(r.sun.ts) && perr.length === 0, [r.moon.ts, perr]);
     await ctx.close();
   }
 

@@ -56,6 +56,18 @@ for (const [name, patch, want] of [
   r = run(d);
   ok(`${name}: REJECTED`, r.status === 2 && want.test(r.stderr), [r.status, r.stderr.trim()]);
 }
+// all-UTC windows (GPT, 10 Nov, rehearsal T1): no UT~ on either body → accepted, horizons_ut_tilde_from null; UT~ on one body only → rejected
+{
+  const d = copy(), SUN = 'raw/hz-sun-ut-20261110.txt';
+  for (const f of [MOON, SUN]) { const p = path.join(d, f); fs.writeFileSync(p, fs.readFileSync(p, 'utf8').replaceAll('00:00:00.0000 UT~', '00:00:00.0000 UTC')); }
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'sky-out-'));
+  r = run(d, ['--out-dir', out, '--generated-at', '2026-11-10T09:00:00Z']);
+  const cat = r.status === 0 ? JSON.parse(fs.readFileSync(path.join(out, 'catalogue/sky-2026-11-R1.json'), 'utf8')) : null;
+  ok('no UT~ rows on either body: accepted, horizons_ut_tilde_from null, every row UTC', r.status === 0 && cat.time.horizons_ut_tilde_from === null && ['moon', 'sun'].every(b => cat.bodies[b].rows.every(x => x[3] === 'UTC')), [r.status, r.stderr.trim()]);
+  const d2 = copy(); const p2 = path.join(d2, SUN); fs.writeFileSync(p2, fs.readFileSync(p2, 'utf8').replaceAll('00:00:00.0000 UT~', '00:00:00.0000 UTC'));
+  r = run(d2);
+  ok('UT~ on the Moon only: REJECTED (flag start differs between bodies)', r.status === 2 && /differs between bodies/.test(r.stderr), [r.status, r.stderr.trim()]);
+}
 // endpoint rule: a returned 2028-01-01 row is trimmed, not counted
 {
   const d = copy(); const p = path.join(d, MOON); let t = fs.readFileSync(p, 'utf8');

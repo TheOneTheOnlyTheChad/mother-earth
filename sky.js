@@ -15,6 +15,7 @@
   const TIMEOUT_MS = 10000;
   const WIN = { moon: 17, sun: 182 };
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const MONTHS_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const st = { on: false, status: 'off', reason: null, cat: null, index: null, token: 0, today: null, view: 'now' };
 
   // ---- dates (UTC only)
@@ -42,7 +43,9 @@
     const iso = v => typeof v === 'string' && /^\d{4}-\d\d-\d\d$/.test(v);
     // every field the renderer reads, checked before anything is shown (GPT, 10 Nov: a catalogue without `time` passed and then threw)
     const t = j.time;
-    if (!t || !iso(t.horizons_ut_tilde_from) || !iso(t.first_date_affected_by_unresolved_leap_second)) return false;
+    if (!t || !(t.horizons_ut_tilde_from === null || iso(t.horizons_ut_tilde_from)) || !iso(t.first_date_affected_by_unresolved_leap_second)) return false;
+    // the flag start must agree with the rows: each body's first UT~ date, or null when a body has none (GPT, 10 Nov: an all-UTC window is valid)
+    for (const b of ['moon', 'sun']) { const f = j.bodies[b].rows.find(r => r[3] === 'UT~'); if ((f ? f[0] : null) !== t.horizons_ut_tilde_from) return false; }
     return iso(j.coverage.start) && iso(j.coverage.end) && j.coverage.start <= j.coverage.end;
   }
 
@@ -135,10 +138,12 @@
     return `<div class="sky-name">${name}</div>${head}${chart(s)}<div class="sky-te">${esc(textEq(s))}</div>${note}`;
   }
 
+  // each sentence only when it applies to this catalogue: the Horizons flag only if some rows carry it; the leap-second caveat only if coverage reaches the first affected date
   function timeNote() {
-    const t = st.cat.time;
-    return `Samples are at 00:00 UTC. From ${nice(t.horizons_ut_tilde_from)}, Horizons marks the times as estimates because future leap seconds are not yet known. `
-      + `A leap second at the end of June 2027 has not been decided; if one is added, samples from ${nice(t.first_date_affected_by_unresolved_leap_second)} would be off by one second until the next refresh.`;
+    const t = st.cat.time, f = t.first_date_affected_by_unresolved_leap_second, eve = addDays(f, -1), out = ['Samples are at 00:00 UTC.'];
+    if (t.horizons_ut_tilde_from) out.push(`From ${nice(t.horizons_ut_tilde_from)}, Horizons marks the times as estimates because future leap seconds are not yet known.`);
+    if (f <= st.cat.coverage.end) out.push(`A leap second at the end of ${MONTHS_FULL[+eve.slice(5, 7) - 1]} ${eve.slice(0, 4)} has not been decided; if one is added, samples from ${nice(f)} would be off by one second until the next refresh.`);
+    return out.join(' ');
   }
 
   // ---- render / recompute

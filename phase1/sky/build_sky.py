@@ -101,7 +101,8 @@ def build(generated_at, man, base=HERE):
 
     flags = {b: {f: sum(r[2] == f for r in out[b]) for f in ('UTC', 'UT~')} for b in out}
     first_tilde = {b: next((r[0].isoformat() for r in out[b] if r[2] == 'UT~'), None) for b in out}
-    need(first_tilde['moon'] and first_tilde['moon'] == first_tilde['sun'], 'UT~ flag start missing or differs between bodies')
+    # an all-UTC window (no UT~ rows on either body) is valid: horizons_ut_tilde_from is then null (GPT, 10 Nov, rehearsal T1)
+    need(first_tilde['moon'] == first_tilde['sun'], 'UT~ flag start differs between bodies')
     sha = lambda x: hashlib.sha256(x).hexdigest()
     cat = {
         'catalogue': 'sky',
