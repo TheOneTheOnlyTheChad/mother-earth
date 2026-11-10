@@ -34,7 +34,7 @@ One browser globe showing the latest observations of the planet from open live f
 - **The hub is the product; the page is a client.** All future surfaces read the hub API; history stays private and accumulates from day one; paid features (later) are hub endpoints, never page code.
 - **Code is AGPL-3.0** (switched 1 Nov 2026 from MIT; earlier commits remain MIT). Forks run as a service must publish their changes.
 - **Every source's commercial standing is in the register** before it goes live (column: commercial use yes / with attribution / needs agreement).
-- **Bounded exception (live 9 Nov 2026, Timeline T1):** the Timeline page holds its one entry itself (pre-rendered from `phase1/timeline/entry-*.json` by `build_timeline.py`; no hub route, no fetch). Reviewed before a second entry or an axis is added; either needs its own proposal that decides the hub route.
+- **Timeline T1 exception ENDED 10 Nov 2026 (deep-time release, main `57d07c2`).** The Pliny entry stays pre-rendered in the page; the deep-time axis follows the fixed-catalogue pattern: `phase1/timeline/build_timeline.py` generates `catalogue/tl-<rev>.json` and the page; the page pins the catalogue sha256, revision and build; hub ≥ 0.6.3 serves `ref/timeline/<rev>.json` at `/catalogue/timeline` only if its whole-file sha256 matches the Worker pin (else 503). A new catalogue revision = regenerate, re-pin page + Worker together, R2 upload, hub deploy, page release — each on its own Approve line. (Was: T1 bounded exception, live 9 Nov — one entry held by the page itself, no hub route.)
 
 ## 3. Where the files live (three copies, keep them in sync)
 | What | Repo path (clone at `/home/claude/mother-earth`) | Mac path |

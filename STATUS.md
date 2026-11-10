@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 06:17:50 UTC — **PAGE RELEASED: deep-time axis on the Timeline page** (main `57d07c2`, merge of `timeline-deep-rc` @ `0f67fca`; Chad: "Approve: merge timeline-deep-rc to main (page change: deep-time axis on the Timeline page)")
+- **Live RC from the Pages origin first (06:16:26–06:17:31 UTC, clean pane tab on `timeline.js?clean-tl-rc3`):** timeline.html, timeline.js, style.css fetched by commit `0f67fca`, sha256 exact; **CORS: `fetch` of `/catalogue/timeline` from `https://theonetheonlythechad.github.io` → response type `cors`, 200, 15,656 B, sha256 `096ae648…0fbe`, ETag readable**; injected page: `TL_AXIS.state = on`, build `202611211000`, rev `tl-2026-11-R1`; 5 marks + "Periods on the chart (12)" (12 items); 1280×900 and 390×844 no horizontal overflow; all 5 mark targets present. (Clicking marks not tested in the injected copy — its `<base href>` resolves `#…` to the index; done on the live page instead.)
+- **Merge:** no conflicts; merged page/hub/catalogue files = the rev 3 hashes; generator `--check` passes on the merge.
+- **Pages build:** success 06:20:12 UTC. **Served hashes (no-store, 06:20:20 UTC), all 7 = rev 3:** index `df534c65f2b3`, sources `b9df5d546da3`, timeline `6be51fbfb828`, app `e3f4a3854113`, arts `58773cef35e6`, timeline.js `cf8522a23e45`, style `30bc06b37123`.
+- **Live page (06:20:33–06:20:45 UTC):** axis on, build `202611211000`; End-Permian mark → `#e-big5-end-permian`, focus on its card heading; browser Back → focus back on the mark, axis still on.
+- **main = live again:** hub 0.6.3 `94a6b2b2…af93` = main's worker.js; page = main.
+- **Rollback (page first, each its own Approve line):** revert `57d07c2` (page back to `4b23518`) → hub 0.6.2 `4b5b6aa3…003f` → R2 object removal (optional; unused without the route).
+- **START-HERE:** T1 exception line replaced with the fixed-catalogue rule for the timeline.
+- **Outstanding:** real iPhone Safari check (Chad); GPT's independent live smoke test if wanted; Chad's choice on the Gmail address in REGISTER's GFW access line.
+
 ## 10 Nov 06:09:15 UTC — **HUB 0.6.3 DEPLOYED** (Chad: "Approve: deploy hub 0.6.3 from 0f67fca (content only)")
 - **Before (06:08:46–06:09:00 UTC):** live worker.js = 0.6.2 `4b5b6aa3…003f` (the pinned rollback target); 19 bindings; health 8/8 (200). Code fetched from raw.githubusercontent at `0f67fca`: 276,411 B, sha256 `94a6b2b263468c910e91d13f6437514cf77ae3e9556f1b686d7a5f31925caf93` (= the reviewed branch file, rev 3 §6). Hash re-checked immediately before the write.
 - **Deploy:** content-only API from the dashboard tab, HTTP 200, success, etag `19de98d2…f8af`, modified 06:09:15.541Z. Bindings, secrets, variables and crons untouched.
