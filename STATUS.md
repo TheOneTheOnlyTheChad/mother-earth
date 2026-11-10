@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 09:35 UTC (clock reading at write) — **Sky candidate BUILT on branch `sky-rc` @ `eb78e1a`** (Chad's Approve line; branch only: no merge, R2 write, hub deploy or page change) — packet `reviews/2026-11-10-sky-rc.md` (on the branch)
+- **Catalogue** `sky-2026-11-R1` (71,925 B, sha256 `f851f164…368a`; generator `phase1/sky/build_sky.py --check`; raw Horizons exports in `phase1/sky/raw/`). **Hub 0.6.5** `/catalogue/sky/<revision>` (versioned only; unknown/malformed/bare → 404, zero R2 reads; bad bytes → 503). **Card** `sky.js` + Sky group (heading + Orbital objects + card) before the Met card; Deep Time pre-rendered; Sources `#sky`; assets `?v=202611231000` (timeline.html unchanged).
+- **Tests:** sky-hub 46/46, sky-build 30/30, sky-ui 56/56 (three timezones; real after-apogee day 2026-11-14); **all 21 breaks fail**. 41-suite regression run green (desktop-overflow 112, mobile-pass 131, orbital-browser 113, timeline-ui 585); timeline-catalogue-hub version pin loosened to ≥ 0.6.4 (66/66, breaks still fail).
+- Deviations for GPT (packet §6): no day-over-day mode (S3 = range rate); phone overlay measure can't see sheet cards; bundle 72 KB vs ~50 KB estimate.
+- Mac: `_review/sky-rc/` (exact, SHA256SUMS 236 files) + `_review/sky-rc-preview/` (one-line change: reads the local catalogue; README).
+- **Next (each its own Approve line):** GPT review → R2 upload → hub 0.6.5 deploy → live RC from the Pages origin → merge.
+
 ## 10 Nov 08:56 UTC (clock reading at write) — **Horizons REGISTER entry FILED; Sky S1–S4 DECIDED** (docs only)
 - Chad: "Approve: file the Horizons REGISTER entry per SKY-SOURCE-CHECK rev 2 §5 (research only)" → filed in REGISTER.md (research only, not on the page).
 - Chad: "S1a existing hub, S2a beside Orbital Objects under a Sky heading, S3 range rate, S4 coverage 2026-06-01 to 2027-12-31 with refresh by 2027-06-01" → recorded in proposal rev 3 §9.
