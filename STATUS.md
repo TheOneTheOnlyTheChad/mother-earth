@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 11:52 UTC (clock reading at write) — **Sky zoom-out source pass DONE** (text only, no export; Chad: "Go: Sky zoom-out source pass — text only via the pane, no export (…)") — `docs/research/SKY-ZOOM-OUT-SOURCE-CHECK.md`; packet on the Mac `research/sky-zoom-out/2026-11-10-claude/`
+- Run 11:42:31–11:49 UTC (Mac clock); protocol fixed first; **5 requests** (cap 6), one at a time, from the pane. Horizons requests were `MAKE_EPHEM='NO'` (body data only); the "I Accept" control was not clicked; no PDF; no fallback.
+- **Frame (Horizons manual):** DE440/441 "taken to be indistinguishable from the ICRF"; ICRF vs FK5/J2000 "at most 0.02 arcseconds". The GCRS-axes reading stays labelled (IERS via ERFA).
+- **Radii (Horizons body data):** Moon "Radius (IAU), km = 1737.4" (vol. mean 1737.53±0.03); Sun "Solar radius (IAU2015)= 695700 km" (photosphere 696500).
+- **UT1−UTC: Bulletin C 72 does not state the 0.9 s bound** (stays [GK], no longer needed). Bulletin A (5 Nov 2026, No. 045): max |UT1−UTC| 0.26843 s (2027-06-02) over predictions to 2027-11-05; ~0.30 s at 2027-12-31 by its formula. Effect ≤ 0.00125° [desk, `sensitivity.py`].
+- **Polar motion (Bulletin A):** max pole offset 0.5047″ (2027-06-01); effect ≤ 0.00015°.
+- Proposal changes listed (record §5), **not applied**. REGISTER unchanged. **For GPT's review.**
+
 ## 10 Nov 11:37 UTC (clock reading at write) — **Sky zoom-out proposal rev 2.1 after GPT's recheck** (docs only)
 - GPT (relayed by Chad; reviewed Mac copy `d0b39140…31ea`): rev 2 **closes the Worker-schema and alignment findings**; ready for Chad's separate text-only source-pass decision. GPT keeps Z1a–Z5a; Sun at 200 R⊕ fine; hardware depth measurement can wait for the rendered candidate. GPT reproduced the method figures from the saved point sets and ran a fixture of the proposed envelope through the existing Worker (200; empty Sun rows → 503).
 - Rev 2.1 applies GPT's tightening:
