@@ -1,0 +1,17 @@
+{
+ "revision": "sky-scene-2026-11-R1",
+ "pairs_with_manifest": "revisions/sky-2026-11-R1.json",
+ "pairs_with_sha256": "f851f16438415bc1e05b392e3e1616052b6347c637ee5ea98df307052058368a",
+ "radii_km": {
+  "earth_equatorial": 6378.137,
+  "moon": 1737.4,
+  "sun": 695700
+ },
+ "radii_sources": {
+  "earth_equatorial": "Horizons export header 'Center radii : 6378.137, 6378.137, 6356.752 km'",
+  "moon": "Horizons body data, Moon (301): 'Radius (IAU), km = 1737.4' (retrieved 10 Nov 2026)",
+  "sun": "Horizons body data, Sun (10): 'Solar radius (IAU2015)= 695700 km' (retrieved 10 Nov 2026)"
+ },
+ "earth_orientation_note": "IERS Bulletin A, 5 Nov 2026, Vol. XXXIX No. 045: max predicted |UT1-UTC| 0.268 s to 2027-11-05 (estimate); polar-motion sensitivity ~0.00015 deg (estimate, conservative input)",
+ "source_record": "docs/research/SKY-ZOOM-OUT-SOURCE-CHECK.md rev 1.1"
+}
