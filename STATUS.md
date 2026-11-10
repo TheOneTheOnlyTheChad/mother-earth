@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 11:28 UTC (clock reading at write) — **Sky zoom-out proposal rev 2 after GPT's review** (docs only) — `docs/concepts/SKY-ZOOM-OUT-PROPOSAL.md`
+- GPT (relayed by Chad) kept the five defaults and asked for three changes plus evidence work. All applied:
+  1. **Scene file fits the Worker's existing envelope check** (`catalogue:"sky"`, pinned revision, `coverage`, non-empty `bodies.moon.rows`/`bodies.sun.rows`); no route code change; `pairs_with` the card's R1; card and scene pinned as a pair at refresh; tests through the real Worker functions.
+  2. **Framing measured** [desk, committed files only]. Full labels beside bodies don't fit phones (875–1,215 R⊕ needed). Short tags + a text strip fit on all 579 dates. Worst stop C: 241 R⊕ on a 390×844 phone with the **Sun drawn at 200 R⊕ (was 400)**. A single fixed view direction would need 715 R⊕, so the camera swings between stops. Moon at stop B 7.7–16 px (rev 1's ~3 px was a guess). Near plane raised in the view (depth estimate).
+  3. **Signed 3D direction check** vs astronomy-engine, with `antipode`/`swap-axes`/`mirror-lng` breaks; test set includes 2027-Feb-21 (Sun and Moon 178.86° apart).
+- **Proposed method measured for both bodies:** vs full ERFA chain Sun 0.0023° / Moon 0.0025°; vs astronomy-engine 0.0025° / 0.0027°; Sun vs `ME.subsolar` 0.0115° (max over 579 dates).
+- Wording from GPT adopted ("Earth and Moon to scale. Sun drawn closer and resized. Labels show actual distances."; "Calculated point directly beneath …"; "direction exact" dropped).
+- REGISTER texts proposed, **not filed**: Horizons entry (live distances; proposed derived scene use) and a new ERFA entry (BSD-3 notice, LICENSE `b1858f9a…` read at `1a8044c`).
+- **Not approved:** source pass, REGISTER update, build, R2, hub, page.
+
 ## 10 Nov 11:05 UTC (clock reading at write) — **Sky zoom-out proposal rev 1 written (docs only)** — `docs/concepts/SKY-ZOOM-OUT-PROPOSAL.md`, for GPT
 - New thread; Mac folder re-granted. Mac already matched main `65306ac` (238/238 files by sha256, 10:58 UTC); nothing copied.
 - **Frame alignment sourced** from ERFA (BSD-3 reimplementation of IAU SOFA, master `1a8044c`: `era00.c`, `c2t06a.c`, `gmst06.c`, `pnm06a.c`; text only). The Horizons manual was unreachable from Claude's fetch tool, so it goes on the source-pass list.

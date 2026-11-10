@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 import * as A from '/home/claude/spike/node_modules/astronomy-engine/esm/astronomy.js';
 globalThis.window = {}; new Function(readFileSync(join(here,'..','..','..','app.js'),'utf8'))(); const ME = window.ME;
-const sp = JSON.parse(readFileSync(join(here,'subpoints.json'),'utf8'));
+const sp = JSON.parse(readFileSync(join(here, process.env.METHOD ? 'method-subpoints.json' : 'subpoints.json'),'utf8'));
 function refSub(body, d){ // geocentric, geometric (no aberration), of-date, apparent sidereal
   const t = A.MakeTime(d);
   const v = body==='sun' ? A.GeoVector(A.Body.Sun, t, false) : A.GeoMoon(t);

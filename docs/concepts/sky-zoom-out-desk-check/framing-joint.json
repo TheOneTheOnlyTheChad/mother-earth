@@ -1,0 +1,21 @@
+{
+ "sun_scene_distance_R": 200,
+ "rule": "single direction per date; stop-B distance within 1.5x of its own best",
+ "results": {
+  "phone 390x844": {
+   "stopB_worst_R": 68.9,
+   "stopC_worst_R": 714.9,
+   "stopC_worst_date": "2027-Mar-29"
+  },
+  "phone 360x640": {
+   "stopB_worst_R": 67.3,
+   "stopC_worst_R": 618.4,
+   "stopC_worst_date": "2027-Mar-29"
+  },
+  "desktop globe 760x640": {
+   "stopB_worst_R": 60.0,
+   "stopC_worst_R": 252.1,
+   "stopC_worst_date": "2027-Apr-26"
+  }
+ }
+}

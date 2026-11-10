@@ -1,0 +1,65 @@
+{
+ "labels": "short tag beside body, full text in a strip",
+ "camera": "three.js PerspectiveCamera fov 50 (vertical), up +y",
+ "label_box_px": [
+  56,
+  18
+ ],
+ "inset": 0.06,
+ "dates_sampled": 579,
+ "moon_sun_angle_from_earth_deg": {
+  "min": 2.38,
+  "max": 178.86,
+  "max_date": "2027-Feb-21"
+ },
+ "results": {
+  "S=400 | phone 390x844 (sheet collapsed)": {
+   "stopB_worst_cam_dist_R": 49.1,
+   "stopB_worst_date": "2027-Feb-28",
+   "stopC_worst_cam_dist_R": 344.6,
+   "stopC_worst_date": "2026-Sep-24",
+   "moon_disc_px_at_stopB_min": 10.03,
+   "moon_disc_px_at_stopB_max": 16.0
+  },
+  "S=400 | phone 360x640": {
+   "stopB_worst_cam_dist_R": 48.5,
+   "stopB_worst_date": "2027-Apr-02",
+   "stopC_worst_cam_dist_R": 344.1,
+   "stopC_worst_date": "2026-Sep-24",
+   "moon_disc_px_at_stopB_min": 7.71,
+   "moon_disc_px_at_stopB_max": 12.27
+  },
+  "S=400 | desktop globe 760x640": {
+   "stopB_worst_cam_dist_R": 41.4,
+   "stopB_worst_date": "2026-Jun-27",
+   "stopC_worst_cam_dist_R": 292.6,
+   "stopC_worst_date": "2026-Jul-31",
+   "moon_disc_px_at_stopB_min": 9.02,
+   "moon_disc_px_at_stopB_max": 12.77
+  },
+  "S=200 | phone 390x844 (sheet collapsed)": {
+   "stopB_worst_cam_dist_R": 49.1,
+   "stopB_worst_date": "2027-Feb-28",
+   "stopC_worst_cam_dist_R": 241.4,
+   "stopC_worst_date": "2027-Dec-06",
+   "moon_disc_px_at_stopB_min": 10.03,
+   "moon_disc_px_at_stopB_max": 16.0
+  },
+  "S=200 | phone 360x640": {
+   "stopB_worst_cam_dist_R": 48.5,
+   "stopB_worst_date": "2027-Apr-02",
+   "stopC_worst_cam_dist_R": 208.7,
+   "stopC_worst_date": "2027-Dec-07",
+   "moon_disc_px_at_stopB_min": 7.71,
+   "moon_disc_px_at_stopB_max": 12.27
+  },
+  "S=200 | desktop globe 760x640": {
+   "stopB_worst_cam_dist_R": 41.4,
+   "stopB_worst_date": "2026-Jun-27",
+   "stopC_worst_cam_dist_R": 166.4,
+   "stopC_worst_date": "2026-Jul-31",
+   "moon_disc_px_at_stopB_min": 9.02,
+   "moon_disc_px_at_stopB_max": 12.77
+  }
+ }
+}
