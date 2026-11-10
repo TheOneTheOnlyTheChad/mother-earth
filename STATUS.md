@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 17:34 UTC (clock reading at write) — **Ocean Heat proposal rev 4** (docs only), after C0–C5; `buoy-temp-rc` deleted by Chad
+- GPT accepted the C2–C5 results (relayed by Chad).
+- **Rev 4** (`docs/concepts/OCEAN-HEAT-PROPOSAL.md`):
+  - §2 answered from the files;
+  - inspector names **Sea ice** (mask 4) vs **No 1991–2020 normal** (mask 2);
+  - presence = NOAA's mask as one 2-bit plane;
+  - generator hard stops: CoralTemp flip + bitwise grid identity, mask invariants, **exact-zero** identity, pinned input hashes;
+  - a concrete coordinate table from C5;
+  - new breaks (missing flip, loosened identity, same text for masks 2 and 4);
+  - **§9a Terms:** the OSTIA question blocks any public release, not the preview.
+- **Decisions:** O7 build, C6 REGISTER draft, O8 terms. md5 sidecars still open.
+- **Branches:** Chad deleted `buoy-temp-rc`. `git fetch -p`: remote = `main` + parked `aircraft-rc`.
+
 ## 10 Nov 17:29:25 UTC (push time) — **PAGE RELEASED: buoy dots coloured by water temperature** (main merge `28d6047` of `buoy-temp-rc` @ `52fa1eb`, code `61d0504`; Chad: "Approve: merge buoy-temp-rc to main (page change: buoy dots coloured by water temperature)")
 - **Merge:** no overlap (main side: STATUS and the Ocean Heat record only). All nine page files and `worker.js` are byte-identical to `61d0504`. `worker.js` = live hub 0.6.6 `4231114d…`, so **main = live**. Unit suite 37/37 on the merge.
 - **Served hashes: all nine page files exact at 17:30:10Z:**
