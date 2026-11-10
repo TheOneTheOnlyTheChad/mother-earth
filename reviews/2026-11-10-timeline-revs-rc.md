@@ -1,5 +1,24 @@
 # timeline-revs-rc — versioned Timeline catalogue route (candidate, branch only)
 
+## Rev 2 (10 Nov 2026) — routing fix after GPT's review of `c98cb24`
+**GPT:** core design passed; all ten manifest hashes matched; GPT's own fixture (R2 current) confirmed legacy = R1, each versioned route its own bytes and ETag, swapped object → 503 integrity, unknown ids → 404 no-store with zero reads, and the page requests its own revision with the hash check and fallback intact. **One fix before deploy:** the shared path parser drops empty segments, so `/catalogue/timeline//` and `/catalogue/timeline//tl-2026-11-R1` returned 200 and read R2, which breaks the "malformed → 404 without a read" promise. Keep the single trailing slash `/catalogue/timeline/` as the R1 alias (0.6.3 behaviour).
+**Applied (`1d31df6`, worker + hub test only; page files and catalogue unchanged):**
+- `timelineRoute` now matches the raw `url.pathname`, not the parsed segments:
+  - exactly `/catalogue/timeline` or `/catalogue/timeline/` → R1;
+  - exactly `/catalogue/timeline/<one non-empty segment>` → that pin;
+  - anything else → 404 `unknown revision`, no-store, no R2 read.
+- Tests (hub 66/66, was 57):
+  - 8 loose-separator paths → 404 with zero reads: `/catalogue/timeline//`, `//tl-2026-11-R1`, `/tl-2026-11-R1/`, `///`, a leading `//catalogue/timeline`, `/catalogue//timeline`, `/catalogue//timeline/tl-2026-11-R1` and `/tl-2026-11-R1//`;
+  - the single trailing slash → R1 with exactly one read.
+  - **New break `loose-separators`** (routes on the parsed segments again) → 8 fail.
+- **Full regression on `1d31df6` (tree clean):** everything passes (hub 66, axis 96, timeline-ui 585, orbital-browser 113, the rest as rev 1); **16 breaks each fail** (hub: no-hash 2, serve-on-missing 2, no-validate 1, legacy-follows-current 1, serve-unknown-as-current 24, no-per-revision-hash 2, loose-separators 8; axis: as rev 1 incl. fetch-unversioned 2; timeline-ui axis-79 2).
+- **Replacement hash:** `phase1/worker.js` (0.6.4) **`7d46edf36e6f8c8d03293ad862e4d8b8b49fa48e72ca4aa5cf29f7945c0a7987`**, 279,110 B. All page files and the catalogue are byte-identical to rev 1 (§3).
+- Test sources are now in the Mac review copy (`phase1/timeline-catalogue-hub.test.mjs` `0e407bd8…`, `timeline-axis.test.cjs` `dbc93fde…`, `timeline-ui.test.cjs` `ac7f0e42…`).
+- **Deploy line becomes:** `Approve: deploy hub 0.6.4 from 1d31df6 (content only)`.
+
+**Rev 1 record below (its §3 worker hash and §4 deploy commit are superseded by rev 2).**
+
+
 **Built 10 Nov 2026 on Chad's line:** "Approve: build timeline-revs-rc on a branch only — hub 0.6.4 versioned catalogue route + page fetches its own revision, per TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1; no merge, R2 write, hub deploy or page change."
 **Not done (each needs its own Approve line):** hub deploy, merge to main / page release. **No R2 write is needed:** the catalogue file is unchanged. Main and production are unchanged (hub 0.6.3, page `57d07c2`).
 **Candidate:** branch `timeline-revs-rc` @ `4310d54` (code `25cf2eb` + a test-only expected-URL fix).
