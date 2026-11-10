@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 18:30 UTC (clock reading at write) — **GPT cleared Ocean Heat rev 4.1 for O7; rev 4.2 applies the build notes** (docs only)
+- GPT (relayed by Chad): §2/§5 pass; §8 passes with two build notes; §9a/C6 pass. The OSTIA hold stays withdrawn for the 9 Nov snapshot.
+- **Rev 4.2:**
+  - interior tap points (packet `C4c-interior.json`, all off 0.05° / 0.25° / 0.5° edges, the right native type, the same blocks), with exact edges kept as lookup tests (floor rule, `round` / `ceil` breaks);
+  - the seam fixture checked on the **rendered globe** (mirrored-mesh and π-rotation breaks);
+  - exact product links;
+  - "Methods article DOI: 10.3390/rs12233856"; no dataset DOI verified (GPT: NCEI DOIs only for the separate heat-stress archive).
+- **Next (Chad):** O7 line (preview build on a branch); REGISTER filing on its own line; md5 sidecars still open.
+
 ## 10 Nov 17:46 UTC (clock reading at write) — **Ocean Heat proposal rev 4.1 + record rev 2.1** (docs only; Chad's corrections after GPT's review of rev 4)
 - **§9a / C6 — the exact files vs the OSTIA notice:**
   - the SSTA 1991–2020 and climatology files carry only Coral Reef Watch's unrestricted-use statement (credit + DOI);
