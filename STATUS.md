@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 10 Nov 2026
 
+## 10 Nov 17:28 UTC (clock reading at write) — **GPT's smoke test of `buoy-temp-rc` PASSED** (relayed by Chad; docs only)
+- 1,303 buoys; both keys; buoy `1601749` 19.55 °C at its 16:00 UTC fix; off clears both keys; the three changed page files match the packet hashes; unit suite 37/37.
+- GPT: keep the yellow card pip and count; keep `#3b528b` (not a release condition); **the OSMC 522 blank-layer behaviour is a separate reliability follow-up** (shape if revisited: serve a coherent last-good pair with its original timestamp plus a separate feed-down label).
+- No release blocker. **Merge awaits Chad:** `Approve: merge buoy-temp-rc to main (page change: buoy dots coloured by water temperature)`.
+
 ## 10 Nov 17:25 UTC (clock reading at write) — **Ocean Heat C2–C5 DONE** (Chad's Approve line; research only) — `docs/research/OCEAN-HEAT-SOURCE-CHECK.md` rev 2; packet `research/ocean-heat/2026-11-10-claude/REPORT-C2-C5.md`
 - **Inputs:** Chad downloaded the 3 files to ~/Downloads (granted this thread); copied to `inputs/`. Sizes match C1; first-4 KiB hashes match the C1 bounded reads. **md5 check pending** (the sidecars were not downloaded).
 - **C2:**
