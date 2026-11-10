@@ -1,8 +1,20 @@
-# The Sky on Two Clocks — build proposal rev 2 (docs only, for GPT's focused recheck)
+# The Sky on Two Clocks — build proposal rev 3 (docs only)
 
-Rev 1 written 10 Nov 2026 08:16 UTC (clock reading). **Rev 2 written 10 Nov 2026 08:23 UTC (clock reading)** after GPT's review of rev 1 (Mac copy, sha256 `7112dfbf41c9…`; relayed by Chad). From Chad's spec of 10 Nov 2026 ("The Sky on Two Clocks"). **Nothing researched beyond reading the repo, nothing exported, built, filed, uploaded or deployed.** Implementation and every production action need their own approvals. The opening-page / Met placement audit stays on its own track. The differential-rotation idea is a separate follow-on (§10).
+Rev 1 written 10 Nov 2026 08:16 UTC (clock reading). Rev 2 written 08:23 UTC after GPT's review of rev 1; **GPT passed rev 2's focused recheck**. **Rev 3 written 10 Nov 2026 08:50 UTC (clock reading)** from the source pass and first export (`docs/research/SKY-SOURCE-CHECK.md` rev 2, which GPT passed for research use with six qualifications, all carried here). From Chad's spec of 10 Nov 2026 ("The Sky on Two Clocks"). **Nothing researched beyond reading the repo, nothing exported, built, filed, uploaded or deployed.** Implementation and every production action need their own approvals. The opening-page / Met placement audit stays on its own track. The differential-rotation idea is a separate follow-on (§10).
 
 **Question the card answers:** how far away are the Moon and the Sun, and how does that change depending on the timescale?
+
+## Rev 3 changes (source pass + GPT's review of it)
+| # | Change | Where |
+|---|---|---|
+| 1 | Sources read; [GK] markers replaced by source IDs from the record | §0, §1, §6 |
+| 2 | `CSV_FORMAT='NO'` (vector columns absent with CSV in the tested requests); labelled `RG=`/`RR=` parsed | §3.1 |
+| 3 | Route 2 (`TIME_TYPE='UT'`) is the export route; route 1 (own TDB epochs, File API, one epoch per line) is the cross-check at every export | §3.2 |
+| 4 | Raw `UTC`/`UT~` flag kept per row; Horizons flag (from 4 Feb 2027) and the July leap-second uncertainty (from 1 Jul 2027) kept as separate facts; Bulletin C 73 check before refresh | §3.2, §5.1, §7 |
+| 5 | API version pins 1.2 (GET text) and 1.0 (File API), separately; other versions rejected; header, epochs and fields always validated | §3.3, §8 |
+| 6 | Request method: operator-triggered pane requests with the default User-Agent, recorded; settled again before any scripted call | §3.1 |
+| 7 | Deep Time wording from the sources: mechanism per L1 (no "angular momentum"); card keeps "hundreds of millions of years", ~650 Myr attributed in Sources; widening "Estimated from changes in Mercury's orbit consistent with solar mass loss" | §1.2 |
+| 8 | Real after-apogee rows as check-2 fixtures; S3 range rate available (geometric RR present) | §4, §8 |
 
 ## Rev 2 changes (GPT's review of rev 1)
 | # | GPT's point | Where |
@@ -17,10 +29,9 @@ Rev 1 written 10 Nov 2026 08:16 UTC (clock reading). **Rev 2 written 10 Nov 2026
 | — | Every acceptance check now names a concrete break | §8 |
 
 ## 0. Evidence status of this document (read first)
-- **No source in §6 has been read.** On 10 Nov 08:10–08:15 UTC the workspace shell could not reach `ssd.jpl.nasa.gov` (HTTP 000 through the proxy) and Claude's fetch tool refused all six source-lead URLs (allowlist). Every number not computed from another number here is **general knowledge, unverified**, marked **[GK]**, and is checked in the source pass (§6.3) before any build.
-- The Horizons parameters in §3 are a **candidate** recipe from Claude's knowledge. The first export's header and the Horizons documentation together are the evidence; nothing in §3 is treated as established until then.
-- GPT's review covered the Mac copy only; the GitHub commit and the JPL/NASA sources remain unverified by GPT.
-- Fetch summaries are leads, not evidence. Operative wording is filed only from a direct extraction (the browser pane, text only, or GPT on Chad's behalf, labelled as such).
+- **Sources read 10 Nov 2026** in the browser pane, text only; record `docs/research/SKY-SOURCE-CHECK.md` rev 2 (packet on the Mac, `research/sky-two-clocks/2026-11-10-claude/`). Source IDs below (H1–H3, D1, L1, L2, M1, M1b, M2) refer to that record.
+- The §3 recipe is now the **tested** recipe: the first export (Moon #5, Sun #6) passed and GPT independently parsed it. Remaining [GK] items are marked.
+- GPT's checks covered the Mac packet, not the live pages, the GitHub commit or publisher full text.
 
 ## 1. What the visitor sees
 One compact card, **"The Sky on Two Clocks"**, with two views: **Now** (default) and **Deep Time**. It draws nothing on the globe. The globe stays visible on desktop and phone (§8 check 4).
@@ -34,7 +45,7 @@ Two rows, Moon then Sun. Each row:
 
 **Moon row:** about 35 days of the distance cycle (today −17 d … today +17 d). Line under the row, Chad's wording: "The Moon can be getting closer today even though its average orbit is growing over time."
 
-**Sun row:** about one year (today −182 d … today +182 d). The closest and farthest **daily samples in the displayed window** are marked and labelled "closest sample" / "farthest sample" — sampled extrema, not the instants of perihelion and aphelion. One line: Earth's distance from the Sun varies from roughly 147 to 152 million km over a year because its orbit is elliptical [GK; checked against D1 and against the bundle's own extrema].
+**Sun row:** about one year (today −182 d … today +182 d). The closest and farthest **daily samples in the displayed window** are marked and labelled "closest sample" / "farthest sample" — sampled extrema, not the instants of perihelion and aphelion. One line: Earth's distance from the Sun varies from roughly 147 to 152 million km over a year because its orbit is elliptical (D1; the export's sampled extrema are 147,104,596 km on 3 Jan 2027 and 152,100,460 km on 5 Jul 2027).
 
 Both today markers use the **same UTC date**. Parts of either chart after today are labelled **"calculated ahead"**. Days missing inside coverage are drawn as gaps, never joined. Parts of a window **outside the bundle's coverage** are labelled "outside the calculated range" and shaded differently from in-coverage gaps (§7).
 
@@ -43,10 +54,10 @@ Both today markers use the **same UTC date**. Parts of either chart after today 
 ### 1.2 Deep Time
 | Evidence label | What changes | Why it matters |
 |---|---|---|
-| **Measured lunar recession** | The Moon's average orbit grows by about 3.8 cm per year today, measured by lunar laser ranging [GK; L1]. Tides transfer angular momentum from Earth's spin to the Moon's orbit. | Earth's rotation slows and days lengthen. *Source's expectation, attributed in the same sentence:* "NASA's eclipse pages expect that, hundreds of millions of years from now, the Moon will look too small to cover the Sun fully, ending total solar eclipses." (broad timescale; no date) |
-| **Estimated widening from solar mass loss** | Earth's orbit widens by roughly a centimetre per year at today's solar mass-loss rate (traced in §6.2). The Sun loses mass as it radiates energy and through the solar wind. | Negligible for climate on human timescales. Over geological time the Sun's slow brightening matters far more: Earth can receive more energy even as its orbit widens [GK; M2]. |
+| **Measured lunar recession** | The Moon's mean distance grows by about 3.8 cm per year, measured by laser ranging to reflectors left on the Moon (L1, L2). Tides slow Earth's spin and move the Moon slowly outward; days lengthen by about 2.3 milliseconds per century at the current rate (L1). | *Attributed in the same sentence:* "NASA's eclipse pages estimate that, hundreds of millions of years from now, the Moon will look too small to cover the Sun fully, ending total solar eclipses." (L2; broad timescale; the ~650 million-year estimate goes in Sources with the archive link and capture date) |
+| **Estimated widening from solar mass loss** | Earth's orbit widens by roughly a centimetre per year at today's rate — **estimated from changes in Mercury's orbit consistent with solar mass loss** (M1b fitted rate; Mother Earth's estimate, §6.2). The Sun loses mass as it radiates energy and through the solar wind (M1b). | Negligible for climate on human timescales. Over billions of years the ageing Sun sends Earth more energy (M2), which matters far more: Earth can receive more energy even as its orbit widens. |
 
-So the **Measured** label covers the rate only; the future-eclipse sentence reads as the source's conclusion. Exact public wording follows the L2 extraction.
+So the **Measured** label covers the rate only; the future-eclipse sentence reads as the source's conclusion. Mechanism wording follows L1, not L2's explanation. No "angular momentum" wording (L1 describes energy transfer and a torque).
 
 Scale comparison beneath both, Chad's wording: "Over a year, Earth's distance from the Sun changes by about five million kilometres. Solar mass loss would widen Earth's orbit by roughly one metre over a century at today's rate."
 
@@ -72,10 +83,10 @@ Any layout change to the opening page is checked against the separate opening-pa
 
 ## 3. Horizons export contract
 
-### 3.1 Candidate request (all values to be confirmed by the first export)
-**Route:** the Horizons API (`https://ssd.jpl.nasa.gov/api/horizons.api`, `format=text`), one request at a time, run **by hand** in a browser-pane tab, because the workspace shell cannot reach it. The page never calls Horizons: the SSD API fair-use terms say the APIs may not be embedded in a website (REGISTER, CNEOS entry).
+### 3.1 Tested request (first export, 10 Nov 2026, requests #5 Moon and #6 Sun)
+**Route:** the Horizons GET API (`https://ssd.jpl.nasa.gov/api/horizons.api`, `format=text`), one request at a time, **operator-triggered by hand** in a browser-pane tab on the ssd.jpl.nasa.gov origin (neither the workspace shell nor the Mac shell can reach JPL; both refused at their proxies). The page never calls Horizons: the fair-use policy says the APIs may not be embedded in a website (H2b).
 
-**User-Agent (reconciled):** a browser `fetch` cannot set `User-Agent` (forbidden header). The request goes out with the pane browser's own User-Agent, which is recorded verbatim in the export log. No custom User-Agent is claimed. If the source pass shows SSD expects an identifying agent for manual browser use, the alternative is the Mac Terminal with `curl -A "MotherEarth/<v> (https://github.com/TheOneTheOnlyTheChad/mother-earth)"` (no personal email), decided at the gate.
+**Request method / User-Agent:** the research pass sent the pane's default User-Agent (recorded verbatim in `REQUESTS.md`); a browser `fetch` cannot set it. This describes what happened; JPL has not confirmed an exception. The policy calls for an application-specific User-Agent with contact details for automated connections (H2b), so **any scripted refresh settles the request method first**.
 
 | Parameter | Moon | Sun | Purpose |
 |---|---|---|---|
@@ -86,21 +97,22 @@ Any layout change to the opening page is checked against the separate opening-pa
 | `VEC_CORR` | `'NONE'` | same | **geometric** |
 | `OUT_UNITS` | `'KM-S'` | same | km, km/s |
 | `REF_SYSTEM` / `REF_PLANE` | `'ICRF'` / `'FRAME'` | same | recorded; RG and RR do not depend on them |
-| `CSV_FORMAT` | `'YES'` | same | parseable |
+| `CSV_FORMAT` | `'NO'` | same | labelled text (`RG=`, `RR=`); with `'YES'` the vector columns were absent in every tested request (#1–3; isolated by #3 vs #5 and #2 vs #7) |
 | `OBJ_DATA` | `'NO'` | same | |
-| epochs | §3.2 | §3.2 | 579 daily epochs, 2026-06-01 … 2027-12-31 at 00:00 UTC |
+| `TIME_TYPE` | `'UT'` | same | §3.2 |
+| `START_TIME` / `STOP_TIME` / `STEP_SIZE` | `'2026-06-01'` / `'2027-12-31'` / `'1 d'` | same | 579 daily epochs; no 2028 row returned |
 
 **Not used:** OBSERVER tables (quantity 20 delta/deldot is light-time corrected, not geometric).
 
-The first export must confirm, from its header and the documentation together: target, centre (Earth geocentre, not a topocentric site), correction = geometric, units, the exact RG and RR column names, and the **output time scale**.
+Confirmed by the first export's header (record §3.2): "Moon (301) {source: DE441}" / "Sun (10) {source: DE441}", "Earth (399) {source: DE441}", "BODY CENTER", "GEOMETRIC cartesian states", format 3, "KM-S", "ICRF", start/stop in "UT", step "1440 minutes". Every export after this one re-checks the same facts.
 
-### 3.2 UTC is a requirement
-Each retained sample must be at **00:00:00 UTC** on its date. Routes, in order of preference:
-1. **`TLIST` of individually converted TDB epochs (preferred).** For each date, convert 00:00:00 UTC → TDB with a stated, cited method (UTC→TAI with the leap-second table; TAI→TT +32.184 s; TT→TDB with the standard periodic term), and request those 579 epochs explicitly. The conversion code, its leap-second table source and its outputs are kept with the export. **Open check:** Horizons' limit on the number of `TLIST` epochs per request; if below 579, the window is split into consecutive requests, each recorded.
-2. **`TIME_TYPE='UT'`**, only if the vector endpoint accepts it **and** the documentation and the response header together establish that the epochs are UTC for these modern dates. Not assumed from the parameter being accepted.
-3. **Fixed offset** (daily `STEP_SIZE` starting at 2026-06-01 00:01:09.184 TDB): an approximation. Used only if: (a) no leap second occurs anywhere in 2026-06-01 … 2027-12-31, verified against the IERS leap-second record at export time; (b) the residual is stated — TDB−TT periodic term, up to ~1.7 ms [GK], giving under ~0.2 m in Moon distance at ~0.1 km/s [GK]; (c) GPT and Chad agree that tolerance before the samples are called midnight UTC.
-
-Why it matters: the Moon's range rate reaches about 0.1 km/s [GK], so a silent 69 s offset would move its distance by up to ~7 km.
+### 3.2 UTC is a requirement — export route and cross-check
+Each retained sample must be at **00:00:00 UTC** on its date.
+- **Export route: `TIME_TYPE='UT'`** (route 2). Established by the documentation (H1a: vector tables accept UT; "After 1962, UT means UTC"; H1b: vector tables TDB or UT) **and** by the response: every row at `00:00:00.0000` with a per-row scale flag.
+- **Per-row flags are kept raw.** In the first export: `UTC` on 248 rows to 2027-02-03 and `UT~` on 331 rows from 2027-02-04 (Horizons: the last known leap second is held constant over future intervals).
+- **The July uncertainty is a separate fact.** IERS Bulletin C 72 (H3) establishes UTC−TAI = −37 s through 2027-06-30. **2027-07-01** is the first sample date affected by the unresolved end-June 2027 leap-second decision.
+- **Cross-check at every export: route 1.** Request the same 579 instants as TDB Julian Dates converted by us (UTC→TAI by the current Bulletin C, +32.184 s to TT, TT→TDB by the short periodic term [GK]) through the File API, **one epoch per line** (input lines must stay under 80 characters, H1c), `CSV_FORMAT='NO'`. Pass condition: every requested epoch echoed exactly, and range agreement recorded (first export: max 0.166 m). This shows agreement **under the shared leap-second assumption**; no timing bound is claimed from it.
+- The fixed-offset route is dropped.
 
 ### 3.3 What each export records (reproducibility)
 Per body, in the research packet and summarised in the bundle's `provenance`:
@@ -111,7 +123,9 @@ Per body, in the research packet and summarised in the bundle's `provenance`:
 - for each retained row: the original epoch string as returned, its UTC date, and the conversion route (§3.2) that produced it;
 - first and last retained epoch and the row count.
 
-**Endpoint rule:** the window is 2026-06-01 … 2027-12-31 inclusive (579 epochs). If any request returns a 2028-01-01 row (inclusive `STOP_TIME`), that row is **trimmed** and the trim is logged. The generator fails if the retained count ≠ 579 per body unless missing dates are listed explicitly.
+**Endpoint rule:** the window is 2026-06-01 … 2027-12-31 inclusive (579 epochs). If any request returns a 2028-01-01 row, that row is **trimmed** and the trim is logged (the first export returned none). The generator fails if the retained count ≠ 579 per body unless missing dates are listed explicitly.
+
+**API version pins (validated, not trusted):** the first line of each response. GET text responses: **"API VERSION: 1.2"** (the document is at 1.3; its change log adds only the `TIME_TYPE` mention). File API (cross-check): **"API VERSION: 1.0"**. Pinned separately. Any other version → the generator rejects the export until reviewed. Header facts, epochs and row fields are validated even when the pin matches.
 
 **Bundle hash:** the bundle carries the raw exports' hashes. **Its own sha256 lives outside it**: in `phase1/sky/BUILD.json` (generator manifest), the page's pin and, under S1(a), the Worker's pin.
 
@@ -129,14 +143,14 @@ S3 chooses the method for the whole dataset; the bundle records it (`direction_m
 - Comparison uses the **stored values**, before display rounding.
 - Details: "Direction compared with the previous day's 00:00 UTC sample."
 
-Near a turning point the two methods can disagree. Example: just **after apogee**, RR < 0 while today's 00:00 distance can still exceed yesterday's (the maximum fell between the two samples). Check 2 uses this case.
+Near a turning point the two methods can disagree. Example: just **after apogee**, RR < 0 while today's 00:00 distance can still exceed yesterday's (the maximum fell between the two samples). The first export has **9 such days**, e.g. 2026-07-26, 2026-10-17, 2026-11-14 (record §3.5); check 2 uses them. RR is present and geometric in the export, so range-rate mode is available.
 
 ## 5. Coverage, bundle and refresh
 - **Coverage:** 2026-06-01 → 2027-12-31 inclusive, **579 daily samples per body** (GPT confirmed the count).
 - **Windows:** the centred Sun window (±182 d) is complete from **30 Nov 2026 to 2 Jul 2027**, given complete data (GPT confirmed). Before 30 Nov or after 2 Jul the Sun chart is **partial**, shown explicitly with the "outside the calculated range" state (§1.1). The Moon window (±17 d) is complete from 2026-06-18 to 2027-12-14.
 - **Expiry:** today's sample is unavailable after 2027-12-31.
 - **Refresh by 2027-06-01** (about a month before the Sun window turns partial). New window, new revision ID, procedure §5.1.
-- **File:** `sky/<rev>.json` (e.g. `sky-2026-11-R1`) with per body `{date, range_km, range_rate_kms}`, `direction_method`, `coverage {start, end}`, and `provenance` (§3.3 summary + raw export hashes). Size estimate ~50 KB raw [estimate; measured at build]. Values stored as exported; display rounds (Moon to 1 km; Sun to 0.1 million km in the row, 1,000 km in Details).
+- **File:** `sky/<rev>.json` (e.g. `sky-2026-11-R1`) with per body `{date, range_km, range_rate_kms, time_flag}` (`time_flag` = the raw `UTC` / `UT~` label), `direction_method`, `coverage {start, end}`, and `provenance` (§3.3 summary + raw export hashes). Size estimate ~50 KB raw [estimate; measured at build]. Values stored as exported; display rounds (Moon to 1 km; Sun to 0.1 million km in the row, 1,000 km in Details).
 - **Generator:** `phase1/sky/build_sky.py` (raw exports → bundle; `--check`; `--generated-at` pins bytes; validates every §3.1 header fact and fails on a wrong target, centre, correction, units or time scale). Raw exports in the Mac research packet; hashes in the repo.
 
 ### 5a. Where the bundle is served — decision S1 (Chad)
@@ -147,40 +161,37 @@ The spec says static site assets, manual refresh, no new Worker, no paid API, no
 Either way, Now depends on the file; Deep Time is static text in the page and never waits for it.
 
 ### 5.1 Manual refresh procedure
-1. In a pane tab (or Terminal per §3.1), run the requests of §3 for the new window; save raw text, request record and retrieval time to the Mac packet.
+0. Read the latest IERS Bulletin C (73 is due around Jan 2027). If the leap-second offset changed inside the window, every affected epoch is regenerated.
+1. Settle the request method (§3.1). Then run the export requests (§3.1) and the route-1 cross-check (§3.2) for the new window, one at a time; save raw text, request record and retrieval time to the Mac packet.
 2. Run `build_sky.py`; `--check`; new revision ID; record hashes in `BUILD.json`.
 3. Run `sky-build` and `sky-ui` tests against the new file.
 4. Release per S1 (a: R2 upload → hub deploy → page release; b: page release), each on its own Approve line.
 
 The refresh is rehearsed once end to end on a short test window before the first release (§8 check 5).
 
-## 6. Source evidence
+## 6. Source evidence (read 10 Nov 2026 — `docs/research/SKY-SOURCE-CHECK.md` rev 2)
 
-### 6.1 Sources to read (text only, before build)
-| ID | Source | What it must support |
+### 6.1 What the sources support
+| ID | Source | Supports |
 |---|---|---|
-| H1 | Horizons manual **and** Horizons API reference | VECTORS tables, `VEC_CORR` meanings, RG/RR definitions, time scales, `TIME_TYPE` for vectors, `TLIST` syntax and limits, `STOP_TIME` inclusivity, units, target/centre syntax |
-| H2 | SSD FAQ #a05 + SSD API fair-use page | reuse of Horizons output (applicability of the SSD public-domain statement to Horizons is an **interpretation** until checked); expectations for manual requests |
-| H3 | IERS leap-second record (Bulletin C) | leap seconds in the window (needed for §3.2 routes 1 and 3) |
-| D1 | APOD 4 Jan 2025, "Welcome to Perihelion" | 147–152 million km annual range, elliptical orbit |
-| L1 | GSFC "Secular acceleration of the Moon" | 3.8 cm/yr, lunar laser ranging, tidal angular-momentum transfer, day lengthening |
-| L2 | eclipse2017 "What's the very last solar eclipse" | broad timescale for the end of total solar eclipses |
-| M1 | NASA, "NASA team studies middle-aged Sun by tracking motion of Mercury" + the paper it reports (publisher landing page) | mass-loss figure and what it is (§6.2) |
-| M2 | NASA exoplanets "Life and death" ch. 5 | long-term brightening |
+| H1a–d | Horizons manual; API doc v1.3; batch instructions; File API doc v1.0 | VECTORS, `VEC_CORR='NONE'` = geometric, table 3 = range + range-rate; vector tables accept UT; "After 1962, UT means UTC"; future leap seconds held at the last known value (`UT~`); TLIST up to 10,000; input lines < 80 characters |
+| H2a–b | SSD FAQ; SSD API Fair Use Policy | data "considered public domain", citation form, no endorsement, modifications identified; one request at a time, cache, no embedding, application User-Agent for automated connections; visualization apps steered to local alternatives |
+| H3 | IERS Bulletin C 72 (06 Jul 2026) | no leap second end Dec 2026; UTC−TAI = −37 s |
+| D1 | APOD 4 Jan 2025 (Nemiroff & Bonnell) | ellipse; ~147 / ~152 million km |
+| L1 | NASA GSFC, Secular Acceleration of the Moon | 3.8 cm/yr by lunar laser ranging (Dickey et al. 1994); tides decelerate Earth's rotation; days lengthen ~2.3 ms per century |
+| L2 | Lou Mayo, "The Very Last Solar Eclipse!" (eclipse2017.nasa.gov; live page gone, Wayback capture 2025-01-04) | 3.8 cm/yr by laser ranging; "about 650 million years" to no total solar eclipses (uncited; Sources only) |
+| M1 | NASA, Mercury / middle-aged Sun article (2018) | 1.5 cm/yr per AU = the earlier theoretical prediction; the new value "slightly lower" |
+| M1b | Genova et al. 2018, Nat Commun 9, 289 (CC BY 4.0) | fitted GM change −(6.13 ± 1.47) × 10⁻¹⁴ /yr, "consistent with the expected solar mass loss" |
+| M2 | NASA Science, life-and-death ch. 5 | Earth receives increasing energy from the ageing Sun over billions of years (no rate) |
 
-Each gets: URL, retrieval time, who read it, the operative sentence (short), notice/correction status, and licence/credit wording.
+### 6.2 Solar mass-loss chain (settled; record §4)
+1. **Input:** M1b's fitted change in solar GM, consistent with mass loss (GṀ/GM = Ġ/G + Ṁ/M; |Ġ|/G < 4 × 10⁻¹⁴ /yr).
+2. **Relation (ours):** a·GM ≈ constant in the slow-change, two-body approximation [GK, standard; not stated in M1 or M1b].
+3. **Mother Earth's estimate:** 1 AU × 6.13 × 10⁻¹⁴ /yr ≈ 0.92 cm/yr (0.70–1.14) → ≈ 0.9 m per century. M1's 1.5 cm/yr per AU is the earlier theoretical figure (expected mass loss −(0.9–1.1) × 10⁻¹³ /yr).
+4. **Public wording:** "roughly a centimetre a year … roughly one metre over a century at today's rate", labelled **"Estimated from changes in Mercury's orbit consistent with solar mass loss."** Order of magnitude only.
 
-### 6.2 Solar mass-loss trace — one consistent chain (to be confirmed against M1 and its paper)
-Arithmetic (GPT confirmed): at 1 AU, 6.1 × 10⁻¹⁴ /yr × 1.496 × 10¹¹ m = **0.91 cm/yr**, **0.91 m per century**.
-
-What must be established, in this order, before any public number:
-1. **The input quantity.** Is the figure a **fitted change in the Sun's GM** (from Mercury ranging), or an estimate **attributed specifically to mass loss**? A GM change could in principle include a change in G; the paper's own treatment decides what the input may be called.
-2. **The relation used.** For slow, isotropic mass loss, a·M is conserved, so ȧ/a = −Ṁ/M [GK]. Record whether the article and paper use this relation or another.
-3. **The article's own figure.** If M1 states ~1.5 cm/yr per AU, that implies an input near 1.0 × 10⁻¹³ /yr, not 6.1 × 10⁻¹⁴. Both are on the centimetre scale, which **does not by itself reconcile them**. The record states which input, from which source, supports the public wording.
-4. **Public wording.** "Roughly a centimetre per year" and "roughly one metre over a century" are kept only if the chosen chain supports them at that precision; otherwise GPT and Chad decide new wording. Still labelled an order-of-magnitude estimate at today's rate.
-
-### 6.3 Gate
-Source pass (pane, text only, protocol fixed and hashed before any request, ~1 h cap incl. write-up, append-only log) + first Horizons export as specified in §3 (research only; raw files kept on the Mac). Output: `docs/research/SKY-SOURCE-CHECK.md` and draft REGISTER wording for Horizons (**not filed**). Needs Chad's go (S5); filing needs its own Approve line.
+### 6.3 Gate — done
+Source pass + first export ran 10 Nov 2026 08:28:54Z–08:43:20Z under Chad's S5 Approve line; GPT passed the exports for research use. REGISTER wording drafted (record §5), **not filed**.
 
 ## 7. Date rules (page)
 - **Today** = the UTC date of the viewer's clock (`new Date().toISOString().slice(0,10)`), never the local date.
@@ -189,6 +200,7 @@ Source pass (pane, text only, protocol fixed and hashed before any request, ~1 h
 - **Today outside coverage** (before start or after end): row shows "Today's distance unavailable — outside the calculated range (ends 31 Dec 2027)", plus "Last available: … at 00:00 UTC, …" when an earlier sample exists.
 - **Today missing inside coverage:** "Today's distance unavailable — no sample for this date", plus last available at or before today.
 - In both cases: no today marker, no direction label; the chart still draws whatever samples fall in its window.
+- **Time-scale note in Details** (generated from the bundle's flags and the Bulletin C used): "Samples are at 00:00 UTC. From 4 Feb 2027, Horizons marks the times as estimates because future leap seconds are not yet known. A leap second at the end of June 2027 has not been decided; if one is added, samples from 1 Jul 2027 would be off by one second until the next refresh." (Wording for GPT and Chad.)
 - **File fails to load, fails its hash or fails schema validation:** Now shows "Distances unavailable — the calculated data could not be loaded"; Deep Time unaffected.
 - **Viewer's clock wrong:** not detectable; stated in Details ("today is taken from your device's clock, in UTC").
 
@@ -198,10 +210,10 @@ Suites: `phase1/sky-ui.test.cjs` (Playwright, local server, fixture bundles, fak
 | Check | What passes | Break(s) that must fail it |
 |---|---|---|
 | **1. UTC date, rollover, charts** | In `Pacific/Kiritimati`, `Africa/Johannesburg` and `America/Los_Angeles`: at 2027-01-03T23:59:30Z both rows show 3 Jan; after the clock passes 00:00Z, both show 4 Jan **by the next tick**, immediately on card open, and immediately on `visibilitychange`. Timestamp, values and markers agree with the fixture. Moon and Sun scales are independent. Marked solar extrema = min/max of the **displayed** samples. | `local-date` (select the local date). `extrema-full-bundle` (compute extrema over the whole bundle, with a fixture whose bundle-wide extreme lies outside the window). `no-recompute` (no recompute on open or visibility). |
-| **2. Direction** | Apogee fixture (RR < 0, today > yesterday): RR mode → "Getting closer at sample time"; day-over-day mode → "Farther than yesterday". RR = 0 and equal-days neutral cases. RR mode with today's RR missing → no label. Day-over-day mode with the previous day missing → no label. Details text matches the mode. | `diff-in-rr-mode` (use the daily difference in RR mode; the apogee fixture gives the wrong label). `rr-fallback` (fall back to day-over-day when RR is missing in RR mode). `rounded-compare` (compare displayed values). |
+| **2. Direction** | Apogee fixture from the real export (e.g. 2026-11-14: RR < 0, today > yesterday): RR mode → "Getting closer at sample time"; day-over-day mode → "Farther than yesterday". RR = 0 and equal-days neutral cases. RR mode with today's RR missing → no label. Day-over-day mode with the previous day missing → no label. Details text matches the mode. | `diff-in-rr-mode` (use the daily difference in RR mode; the apogee fixture gives the wrong label). `rr-fallback` (fall back to day-over-day when RR is missing in RR mode). `rounded-compare` (compare displayed values). |
 | **3. Missing day, coverage, load failures** | Moon missing today, Sun present: only the Moon row is unavailable, shows its last available date, no marker, gap. Before-coverage and after-coverage clocks show the outside-range wording, distinct from missing-inside. Asset 404 and hash mismatch → Now unavailable, Deep Time fully readable. Malformed data with a **matching test hash** reaches the schema check and fails it. No neighbouring day ever shown as today (rendered text and marker x-position). | `nearest-sample` (substitute the nearest sample, past **and** future neighbour). `skip-schema` (accept malformed data once the hash matches). `merge-gap-states` (outside coverage rendered as a missing day). |
 | **4. Phone and keyboard** | At 390 × 844, Readings sheet open, card expanded in **Now and in Deep Time**: no horizontal overflow; globe overlay coverage, measured with the existing camera-based method, within the mobile-pass target (≤ 8%) in each view. Switch reachable by Tab, works with Enter/Space and touch, `aria-selected`/`aria-controls` correct. Text equivalents present in the accessibility tree. Desktop-overflow and mobile-pass rerun. (Screen-reader announcements are not verified, stated as before.) | `no-key-activation` (disable Enter/Space). `hide-text-equivalent` (`aria-hidden` on the text equivalent). |
-| **5. Evidence and operations** | Generator accepts the real exports and rejects bad headers; bundle `provenance` matches §3.3; the refresh is rehearsed end to end on a short test window, and that rehearsal's log is kept as reviewable evidence; the §6.2 chain is in the research record; public labels Computed / Measured / Estimated present and distinct. | `wrong-centre` and `wrong-timescale` (fixture header altered; the generator must reject it). `label-swap` (change a public evidence label; the UI check must fail). |
+| **5. Evidence and operations** | Generator accepts the real exports (pins 1.2 GET / 1.0 File API) and rejects bad headers, other API versions and missing `RG`/`RR` fields; bundle `provenance` matches §3.3; the refresh is rehearsed end to end on a short test window, and that rehearsal's log is kept as reviewable evidence; the §6.2 chain is in the research record; public labels Computed / Measured / Estimated present and distinct. | `wrong-centre`, `wrong-timescale`, `wrong-api-version`, `csv-columns-missing` (fixture altered; the generator must reject it). `label-swap` (change a public evidence label; the UI check must fail). |
 | **S1(a) only: hub route** | Two-revision fixture (R1 + R2, R2 current): each page build fetches its own revision; R1 still served; unknown or malformed IDs → 404 with zero R2 reads; a known revision with missing or altered bytes → 503. Before release: a live check from the **GitHub Pages origin** (CORS, response type `cors`, sha exact). | `serve-unknown-as-current`, `no-per-revision-hash`, `read-on-malformed` (one R2 read on a malformed ID must fail the test). |
 
 Plus, at release: served-hash checks cover the new page file (`sky.js`), and a live RC runs in a clean pane tab first.
@@ -211,11 +223,12 @@ Plus, at release: served-hash checks cover the new page file (`sky.js`), and a l
 - **S2** placement: (a) after Orbital with a "Sky" sub-heading (recommended), (b) a Sky group with Orbital moved, (c) Sources only.
 - **S3** direction method for the dataset: range rate (recommended) or day-over-day.
 - **S4** coverage 2026-06-01 → 2027-12-31 and refresh by 2027-06-01.
-- **S5** go for the source pass + first Horizons export (§6.3), research only.
+- ~~**S5**~~ done 10 Nov (record rev 2).
+- GPT's recommendation (relayed by Chad, not yet his decision): S1a, S2a, S3 range rate, S4 as proposed.
 
 Approve lines, in order (wording settled after S1):
-1. `Approve: Sky source pass + first Horizons export (research only, text only, per SKY-TWO-CLOCKS-PROPOSAL rev N §6.3)`
-2. `Approve: file the Horizons REGISTER entry (…)`
+1. ~~`Approve: Sky source pass + first Horizons export …`~~ done.
+2. `Approve: file the Horizons REGISTER entry per SKY-SOURCE-CHECK rev 2 §5 (research only)`
 3. `Approve: build sky-rc on a branch only — no merge, R2 write, hub deploy or page change`
 4. (S1a) `Approve: upload ref/sky/<rev>.json (sha256 …) to R2` → `Approve: deploy hub 0.6.5 from <sha> (content only)`
 5. `Approve: merge sky-rc to main (page change: Sky on Two Clocks card)`
@@ -224,4 +237,4 @@ Approve lines, in order (wording settled after S1):
 **The Sun doesn't spin as one piece:** two markers start at the same solar longitude, different latitudes; the equatorial one pulls ahead. Labelled as an illustration of differential rotation. Its own proposal and source pass, after this card.
 
 ## 11. Not approved
-Source reading, Horizons export, REGISTER filing, branch build, R2 write, hub deploy, page change. The opening-page / Met placement audit is untouched.
+REGISTER filing, branch build, R2 write, hub deploy, page change. (Source pass and first export: done under Chad's S5 Approve line.) The opening-page / Met placement audit is untouched.

@@ -1,20 +1,22 @@
-# Sky on Two Clocks — source pass + first Horizons export (research record, rev 1)
+# Sky on Two Clocks — source pass + first Horizons export (research record, rev 2)
 
 **Run:** 10 Nov 2026 (times are LOG entries, Mac clock; request times in `export/REQUESTS.md`, pane clock), 08:28:54Z (protocol fixed) → 08:43:20Z (last log entry), Mac clock. Research only, text only. Authority: Chad, "Approve: Sky source pass + first Horizons export (research only, text only, per SKY-TWO-CLOCKS-PROPOSAL rev 2 §6.3) …".
 **Packet (Mac, not in the repo):** `~/Documents/Mother Earth/research/sky-two-clocks/2026-11-10-claude/` — `PROTOCOL.md` (sha256 `0a4e2443…9dc5`, fixed before any request), append-only `LOG.md`, `sources/` (page text or verbatim excerpts with page hashes), `export/` (raw responses unedited, request files, `REQUESTS.md`, `check_export.py` + `.out.json`), `.hashes-pass` (29 files).
 **Reader:** Claude, in the Claude desktop browser pane. Chad granted pane site access during the run: hpiers.obspm.fr, science.nasa.gov, nasa.gov, eclipse.gsfc.nasa.gov, eclipse2017.nasa.gov. No login, no PDF, no image saved, no form submitted. The "I Accept the Terms Above" control on ssd-api.jpl.nasa.gov was **not** clicked; no request needed it.
 **Nothing filed, built, uploaded or deployed.** The REGISTER wording in §5 is a draft.
 
+**Rev 2 (10 Nov 2026, after GPT's review of rev 1):** GPT matched this record's sha256, verified the frozen protocol and all 29 packet hashes, reproduced `check_export.out.json` and independently parsed all seven raw responses (Mac copy; the GitHub commit, live Wayback replay and publisher full text were outside GPT's independent check). Exports pass for research use. Corrections applied: (1) CSV isolation attributed to the full-window pairs #3 vs #5 (GET) and #2 vs #7 (File API); #4 changed two variables; format change and File API diagnostics recorded as deviations from the frozen recipe; (2) UTC: Horizons' `UT~` flag from 2027-02-04 and the unresolved leap-second decision from 2027-07-01 kept as separate facts; the "~2 ms" timing claim withdrawn; (3) API version pins: 1.2 (GET text parser) and 1.0 (File API cross-check), separately; (4) widening wording "Estimated from changes in Mercury's orbit consistent with solar mass loss"; 0.92 cm/yr labelled Mother Earth's estimate; (5) card keeps "hundreds of millions of years", the attributed ~650 Myr goes to Sources; (6) REGISTER draft records the operator-triggered browser requests and default User-Agent. Frozen packet unchanged; corrections note at `rev2/CORRECTIONS-rev2.md` in the packet.
+
 ## 1. Results at a glance
 | Item | Result |
 |---|---|
 | Horizons export | **Accepted.** Moon and Sun, 579 daily samples each at 00:00:00 UTC, 2026-06-01 … 2027-12-31, geometric, Earth body centre, DE441, km and km/s, RG and RR present. Independently cross-checked (§3.4). |
-| Recipe change needed | `CSV_FORMAT='NO'` (CSV drops the vector columns — observed, §3.2). Route 2 (`TIME_TYPE='UT'`) accepted; route 1 used as the independent check. |
-| UTC caveat | Horizons labels rows from **2027-02-04** as `UT~` (last known leap second held constant). IERS Bulletin C 72 rules out a leap second at end-Dec 2026 only; end-June 2027 is not yet announced (§3.3). |
+| Recipe change needed | `CSV_FORMAT='NO'` (vector columns absent with CSV in these requests — observed, §3.2). Route 2 (`TIME_TYPE='UT'`) accepted; route 1 used as the independent check. Both changes are **deviations from the frozen recipe**. |
+| UTC caveat | Two separate facts (§3.3): Horizons flags rows from **2027-02-04** as `UT~`; and **2027-07-01** is the first sample date affected by the not-yet-announced end-June 2027 leap-second decision (Bulletin C 72 establishes the offset through 2027-06-30). |
 | Annual Sun range | Sampled extrema 147,104,596 km (2027-01-03) and 152,100,460 km (2027-07-05): **5.0 million km**. Matches D1 (147 / 152 million km). |
 | Lunar recession | 3.8 cm/yr by lunar laser ranging — L1 (Dickey et al. 1994) and L2. |
-| End of total solar eclipses | L2 (archived): "about 650 million years", uncited estimate. Supports Chad's "hundreds of millions of years". |
-| Solar mass loss | The 1.5 cm/yr in M1 is the **earlier theoretical prediction**. The measurement (M1b) is a **fitted change in the Sun's GM**, −(6.13 ± 1.47) × 10⁻¹⁴ /yr → **≈ 0.9 cm/yr (0.7–1.1) at 1 AU**, ≈ 0.9 m per century (§4). |
+| End of total solar eclipses | L2 (archived): "about 650 million years", an estimate attributed to Lou Mayo's archived NASA article, with no underlying citation. Card keeps "hundreds of millions of years"; the attributed figure goes in Sources with the archive link and capture date. |
+| Solar mass loss | The 1.5 cm/yr in M1 is the **earlier theoretical prediction**. M1b fitted a **change in the Sun's GM**, −(6.13 ± 1.47) × 10⁻¹⁴ /yr, consistent with mass loss. **Mother Earth's estimate** from it: ≈ 0.92 cm/yr (0.70–1.14) at 1 AU, ≈ 0.9 m per century (§4). |
 | Brightening | M2 supports "increasing amounts of energy … from the aging, expanding Sun" over billions of years; no rate. |
 | Reuse | SSD FAQ: data "considered public domain", citation recommended, no endorsement, modifications identified. Visualization apps are steered to local alternatives over repeated network calls — a bundled, hand-refreshed export fits (§5). |
 
@@ -53,17 +55,20 @@ User-Agent: the pane browser's own (recorded); a fetch cannot set it. The Mac sh
 ### 3.2 Header facts (both accepted exports; parsed by `check_export.py`)
 Target "Moon (301) {source: DE441}" / "Sun (10) {source: DE441}"; Center "Earth (399) {source: DE441}", site "BODY CENTER"; Output type "GEOMETRIC cartesian states"; format "3 (position, velocity, LT, range, range-rate)"; units "KM-S"; frame "ICRF"; start/stop "A.D. 2026-Jun-01 00:00:00.0000 UT" / "A.D. 2027-Dec-31 00:00:00.0000 UT"; step "1440 minutes"; EOP file "eop.261109.p270204", coverage "DATA-BASED 1962-JAN-20 TO 2026-NOV-09. PREDICTS-> 2027-FEB-03"; first line "API VERSION: 1.2".
 
-**CSV finding:** with `CSV_FORMAT='YES'` the API returned only the time columns for vectors (requests 1–3, both routes); with `'NO'` it returned X…RR (requests 4–7). Observed, not documented. The labelled text format has named `RG=` / `RR=` fields.
+**CSV finding (observed for these requests, not documented):** requests #1–3 returned epoch rows without vector values. The full-window pairs isolate CSV mode: **#3 vs #5** on the GET route (identical except `CSV_FORMAT`) and **#2 vs #7** on the File API route (identical input apart from `CSV_FORMAT`). #4 returned both days with `RG` and `RR` but changed two variables (CSV and date span), so it was a pointer, not the isolating test. The labelled text format has named `RG=` / `RR=` fields.
 
-**API version:** responses say 1.2; the API document says 1.3 (its change log: 1.3 "Update to mention TIME_TYPE setting"). The document warns that a mismatch carries no format guarantee. The generator must pin the version it was tested on.
+**Deviations from the frozen recipe (protocol `0a4e2443…`):** `CSV_FORMAT='NO'` instead of `'YES'`; the File API line-length correction (one epoch per line) between #1 and #2; diagnostic request #4; route 2 accepted after route 1 failed, with route 1 kept as the cross-check (#7).
+
+**API version:** GET responses say 1.2; the API document says 1.3 (change log: 1.3 "Update to mention TIME_TYPE setting"). File API responses say 1.0, matching its own document. Pins: **1.2** for the tested GET text parser and **1.0** for the File API cross-check, kept separate. The generator rejects any other version and validates header, epochs and row fields even when the pin matches.
 
 ### 3.3 Time scale
 - Every retained row is at `00:00:00.0000` on its date, dates continuous 2026-06-01 … 2027-12-31, 579 per body, no 2028 row.
 - Rows to **2027-02-03 are labelled `UTC`** (248); rows from **2027-02-04 are labelled `UT~`** (331). The response footer: conversion to UTC "has not been determined for UTC times after the next July or January 1st. Therefore, the last known leap-second is used as a constant over future intervals, a condition noted here as "UT~"."
-- IERS Bulletin C 72: no leap second at end Dec 2026. So UTC is established for every sample through **2027-06-30** at least; samples from 2027-07-01 assume no leap second at end June 2027 (a leap second there would shift those by 1 s ≈ ≤ 0.1 km for the Moon). Bulletin C 73 (due ~Jan 2027) settles it; the refresh-by date (1 Jun 2027) comes after it.
+- **Two separate facts, both kept:** (a) Horizons flags `UT~` from **2027-02-04** (the end of its EOP prediction); the raw flags are preserved per row. (b) IERS Bulletin C 72 establishes UTC−TAI = −37 s through **2027-06-30**; **2027-07-01** is the first sample date affected by the unresolved end-June 2027 leap-second decision (a leap second would shift those samples by 1 s, up to ~0.1 km for the Moon [GK rate]).
+- Before any refresh: check Bulletin C 73 (due ~Jan 2027); if the offset changes, regenerate the affected epochs.
 
 ### 3.4 Epoch check across the whole export (GPT's request)
-Route 1 (#7) requested my own 579 UTC→TDB epochs (IERS 37 s + 32.184 s + the short TDB−TT periodic term [GK]). Horizons returned each epoch exactly as requested (579/579 string match), and its range matched route 2's at the same dates to **max 0.166 m, mean 0.048 m**, range rate to 5.5 × 10⁻¹⁰ km/s. A 69 s error would show as up to ~7 km. Both routes therefore put the samples at the same instants to within ~2 ms. No TLIST split was needed (one request carried all 579).
+Route 1 (#7) requested my own 579 UTC→TDB epochs (IERS 37 s + 32.184 s + the short TDB−TT periodic term [GK]). Horizons echoed all 579 requested epochs exactly, and its range matched route 2's at the same dates to **max 0.166 m, mean 0.048 m**, range rate to 5.5 × 10⁻¹⁰ km/s. This verifies agreement between the two routes **under the shared leap-second assumption**. A range residual alone does not establish a timing bound near a turning point, so no timing figure is claimed (rev 1's "within ~2 ms" is withdrawn). No TLIST split was needed (one request carried all 579).
 
 ### 3.5 Values (for the build; not public yet)
 - Moon: 356,779 km (2026-12-24) … 406,570 km (2027-01-07). RR = 0 on no day.
@@ -74,7 +79,7 @@ Route 1 (#7) requested my own 579 UTC→TDB epochs (IERS 37 s + 32.184 s + the s
 1. **Input quantity:** a fitted change in the Sun's gravitational parameter, GṀ/GM = −(6.13 ± 1.47) × 10⁻¹⁴ /yr (M1b abstract), which the authors find "consistent with the expected solar mass loss". By their eq. (3) it is Ġ/G + Ṁ/M; they bound \|Ġ\|/G < 4 × 10⁻¹⁴ /yr. So it is a measured GM change, attributed to mass loss by consistency, not a direct mass measurement.
 2. **Relation (ours, not stated in M1b or M1):** for slow change, a·GM is conserved, so ȧ/a = −(GṀ/GM) [GK, standard]. Using GM directly means no assumption that G is constant.
 3. **Numbers:** 1 AU × 6.13 × 10⁻¹⁴ = **0.92 cm/yr** (0.70–1.14 across ±1.47) → **0.92 m per century**. The paper's expected mass loss −(0.9–1.1) × 10⁻¹³ gives 1.35–1.65 cm/yr: that is M1's "1.5 centimeters, per year per AU", the earlier theoretical figure.
-4. **Public wording supported:** "roughly a centimetre a year" and "roughly a metre over a century" are supported by the measured value, as order-of-magnitude statements at today's rate. The record should say "measured from Mercury's orbit, consistent with the Sun losing mass", not "measured mass loss".
+4. **Public wording supported:** "roughly a centimetre a year" and "roughly a metre over a century", as order-of-magnitude statements at today's rate. The 0.92 cm/yr is **Mother Earth's estimate** from the fitted rate, using a·GM ≈ constant in the slow-change, two-body approximation. Card wording (GPT): **"Estimated from changes in Mercury's orbit consistent with solar mass loss."** Not "measured", which could make Earth's widening sound directly measured.
 
 ## 5. Draft REGISTER wording (NOT filed — for GPT, then Chad's Approve line)
 
@@ -83,23 +88,24 @@ Route 1 (#7) requested my own 579 UTC→TDB epochs (IERS 37 s + 32.184 s + the s
 > - **SSD data statement (verbatim, SSD FAQ):** "No permissions are needed. The data provided on this site are considered public domain." Also: no NASA/Caltech/JPL endorsement implied; recommended citation "NASA/JPL Solar System Dynamics. Data retrieved on (Downloaded Year, Month, Date). (Title of the Page). https://ssd.jpl.nasa.gov"; modifications to be made clear.
 > - **Scope (interpretation, labelled):** the FAQ speaks of "data provided on this site"; Horizons output via ssd.jpl.nasa.gov/api is taken to be covered. Not separately confirmed.
 > - **Access conditions (operational, not a licence):** one request at a time; only necessary requests; cache and reuse; automated connections send an application User-Agent with contact; the APIs may not be embedded in a website; formats can change (check the API version field); best effort. The FAQ steers visualization apps to local alternatives over repeated network calls. Our use: one manual export per refresh, bundled as a static dataset; the page never calls Horizons.
+> - **Request method (research pass, 10 Nov 2026):** operator-triggered browser requests from the Claude desktop browser pane, sent with the pane's default User-Agent (recorded). This describes what happened; it does not claim JPL confirmed an exception. Future refreshes settle the request method before any scripted API call; the policy calls for an application-specific User-Agent with contact details for automated connections.
 > - **Attribution (our display):** "Calculated orbital distances · NASA/JPL Horizons", with the SSD citation (retrieval date, page title, URL) in Sources, and our modifications stated (daily 00:00 UTC samples selected; values rounded for display).
 > - **Commercial use:** the public-domain statement contains no use restriction; that it covers commercial redistribution is a reading of "public domain", not an explicit grant. Not a finding of prohibition.
 
 Other sources are used for facts with attribution only (no text reproduced on the page): D1 (APOD text; image excluded), L1, L2 (archived), M1, M2, and M1b (CC BY 4.0 — credit, licence link, DOI). They need a Sources-page credit, not a REGISTER data entry, unless GPT advises otherwise.
 
 ## 6. Consequences for the proposal (for rev 3, not yet applied)
-1. §3.1: `CSV_FORMAT='NO'`; parse labelled `RG=` / `RR=`; pin "API VERSION: 1.2" in the generator and fail on a different version until reviewed.
-2. §3.2: route 2 (`TIME_TYPE='UT'`) established by H1a/H1b **and** the per-row `UTC` / `UT~` labels; route 1 kept as the cross-check at each refresh (max range difference recorded). The 80-character line limit noted for any file-API use.
-3. §3.3: record the `UTC`/`UT~` split per row in the bundle; the card's Details say "dates from 4 Feb 2027 assume no new leap second", or similar (wording for GPT/Chad).
-4. §3.1: User-Agent — the pane's own, recorded; the Mac shell cannot reach JPL.
-5. §1.2: mechanism wording follows L1 (tides slow Earth's spin; days lengthen by about 2.3 ms per century), not "angular momentum"; eclipse sentence attributed to NASA's eclipse pages with "hundreds of millions of years (their estimate: about 650 million)" — Chad's call whether the figure appears.
-6. §1.2 widening: "measured from Mercury's orbit, consistent with the Sun losing mass" (§4).
+1. §3.1: `CSV_FORMAT='NO'`; parse labelled `RG=` / `RR=`; pin API 1.2 (GET text) and 1.0 (File API) separately; reject other versions; validate header, epochs and row fields even when the pin matches.
+2. §3.2: route 2 (`TIME_TYPE='UT'`) established by H1a/H1b **and** the per-row `UTC` / `UT~` labels; route 1 kept as the cross-check at each refresh (agreement under the shared leap-second assumption, no timing bound claimed). The 80-character line limit noted for any File API use.
+3. §3.3: keep the raw `UTC`/`UT~` flag per row in the bundle; Details wording distinguishes the Horizons flag (from 4 Feb 2027) from the July uncertainty (from 1 Jul 2027); Bulletin C 73 check before refresh.
+4. §3.1: request method — operator-triggered pane requests with the default User-Agent, recorded; settle the method before any scripted call.
+5. §1.2: mechanism wording follows L1 (tides slow Earth's spin; days lengthen by about 2.3 ms per century), not "angular momentum"; card keeps "hundreds of millions of years"; the ~650 Myr estimate attributed in Sources.
+6. §1.2 widening: "Estimated from changes in Mercury's orbit consistent with solar mass loss" (§4).
 7. §8 check 2: use the real after-apogee days (§3.5) as fixtures.
 8. S3 (direction method): RR is present and geometric in the export, so range-rate mode is available.
 
 ## 7. Limits
-- Text only; Claude read every source; GPT has not checked these extractions.
+- Text only; Claude read every source. GPT checked the packet (Mac copy) in its rev 1 review, not the live pages.
 - L2's live page no longer exists; the archived copy is from 4 Jan 2025.
 - M1b read on the publisher page; supplementary material not read.
 - The TDB−TT term in my route-1 epochs is a short approximation [GK]; its effect is bounded by the 0.166 m agreement.
