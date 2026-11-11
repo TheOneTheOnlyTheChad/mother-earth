@@ -3,7 +3,7 @@
  * with OSMC stubbed and a controllable clock. The new hub (this branch's worker.js) is on 8898; the old hub (main's worker.js,
  * 0.6.7) on 8897. The browser's clock is skewed to the hub's clock; timers stay real, and the page's own refresh (tick) and
  * its 30-second timer are captured and called directly, so "no data poll" can be asserted from the hub's request log.
- * Old page = main's index.html / app.js / sources.html served from git.
+ * Old page and old hub = index.html / app.js / sources.html / worker.js at commit 0386058 (the last main before this change), from git.
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/osmc-reliability-ui.test.cjs
  *      (8899 static server on the repo root). BREAK=drop-line | showing-without-records | no-redraw | keep-cells |
  *      missing-field-is-failure | failed-at-run | no-degraded | degraded-without-records | cells-without-records |
@@ -11,7 +11,7 @@
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const cp = require('child_process');
 const ROOT = path.join(__dirname, '..'), BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
-const BREAK = process.env.BREAK || '', MAIN = process.env.OLD_REF || 'main';
+const BREAK = process.env.BREAK || '', MAIN = process.env.OLD_REF || '0386058';   // the last page and hub (0.6.7) before this change; pinned, because after the merge 'main' IS the new code (needs that commit in the clone: git fetch --depth=60 origin main)
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 900)}` : ''}`); } };
 const wd = setTimeout(() => { console.log('FAIL  suite exceeded 8 min'); process.exit(1); }, 8 * 60e3);
 const git = f => cp.execFileSync('git', ['show', `${MAIN}:${f}`], { cwd: ROOT, maxBuffer: 64 << 20 }).toString();
