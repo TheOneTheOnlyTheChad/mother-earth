@@ -32,7 +32,7 @@ Fixture: 29 coverage cells over four layers with overlaps (up to three layers), 
 
 ### Regression suites
 
-(see §4 — filled in when the run completes)
+All green on the branch (§4).
 
 ## 3. Finding for Chad: B1 changes a few outline pixels
 
@@ -44,9 +44,14 @@ Removing the invisible side walls changes **only outline pixels**, never fills: 
 
 Reading: B1 shows the outlines as drawn, without walls nobody can see cutting them; it is arguably more correct than today. GPT predicted this class of change (proposal rev 1.1, R2). **Whether it is acceptable is Chad's call**, and the RC check repeats the comparison on the live page with real data (matched screenshots, limb, poles, dateline).
 
-## 4. Regression suites
+## 4. Regression suites (branch `globe-perf-rc`, container, swiftshader; 11 Nov 15:03–15:40 UTC)
 
-(pending)
+Every browser and hub suite in `phase1/` was run in sequence (the default page is B2a):
+
+- **Browser:** arts-ui 90 · backdrop-layer 27 · buoy-temp-ui 33 · cell-perf-ui 27 · desktop-overflow 112 · drifters-ui 25 · kept-ui 21 · mobile-pass 131 · oceanheat-ui 109 · orbital-browser 113 · place-ui 30 · plastic-ui 29 · search-ui 104 · sky-ui 79 · sky-zoom-ui 333 · smoke-fixes 52 · terminator-behaviour 47 · terminator-ui 19 · timeline-axis 96 · timeline-ui 585 · ux-round1 34 — **0 failed**.
+- **Hub and logic:** arts-hub 54 · buoy-temp 37 · drifters-hub 12 · duration-contract all · firms-guard 19 · firms-v2 57 (+7 skipped, need `OLD_WORKER`) · health-hub 29 · history-hub 27 · kp-degraded 29 · oceanheat-hub 48 · orbital-hub 13 · orbital-ui 38 · place-rows 7 · plastic-hub 11 · satellites-hub 12 · search 111 · ships-fallback 7 · ships-late 7 · ships-probe 11 · sky-build 35 · sky-hub 46 · sky-scene-hub 7 · sky-scene-ref 7 · solar 26 · spacetrack-probe 11 · timeline-catalogue-hub 66 — **0 failed**.
+- **Note:** buoy-temp-ui's first run stopped while writing a debug screenshot to a scratch path hard-coded by an earlier session (line 134); a rerun passed 33/33. Not a page failure.
+- Ocean Heat suites ran on `OH_SNAPSHOT_DIR` rebuilt from `db5eedd` (START-HERE §4o).
 
 ## 5. Next
 
