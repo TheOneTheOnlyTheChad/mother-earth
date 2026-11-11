@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 05:15 UTC (clock reading at write) — **STAR disclaimer READ; REGISTER entry FILED (C6); release candidate BUILT on branch `ocean-heat-release` @ `d4272a8`** (Chad's three lines; no merge, R2, hub or page change) — packet `reviews/2026-11-11-ocean-heat-release.md` (on the branch)
+- **STAR disclaimer:** free use with credit to the NOAA / NESDIS Center for Satellite Applications and Research; hosted data described as experimental, not official operational products. Recorded in `OCEAN-HEAT-SOURCE-CHECK.md` rev 2.2 and the REGISTER (main `50e9419`).
+- **Build:**
+  - hub 0.6.7 `GET /catalogue/oceanheat/<revision>/<file>` (pinned length + sha256; immutable 24 h on 200; `no-store` 404 / 503; no `Content-Encoding`);
+  - page `BASE` → hub, no forced revalidation, STAR credit (inspector, footer, Sources);
+  - `data/ocean-heat/` removed; build-time pin check consistent.
+- **Tests:**
+  - hub suite 45/45, 6/6 breaks;
+  - pin check 3/3 breaks;
+  - browser suite 109/109 on `OH_SNAPSHOT_DIR`, 14/14 breaks;
+  - 17 hub and 7 page regression suites green.
+- **Next:** GPT reviews (including the STAR wording); then the R2 upload, the hub 0.6.7 deploy, the live RC through the hub, and the merge, each on its own line.
+
 ## 11 Nov 04:19 UTC (clock reading at write) — **Ocean Heat release decisions RECORDED (Chad); release proposal rev 2** (docs only; main `7ba3660`)
 - **D1:** regression gate adopted for this release. §10 satisfies it for the tested Chrome setup (P1 and forced P2); physical phone unverified. Absolute targets kept for the globe performance work (coverage-cell polygons first).
 - **D2:** hub serving; `data/ocean-heat/` removed from the release branch; both suites take `OH_SNAPSHOT_DIR`, hash-check the four files at setup, and run with the branch copy absent.
