@@ -1,0 +1,6 @@
+visible samples 92342
+  self top: [('getParameters @globe.gl.min.js', 22.6), ('(anon) @globe.gl.min.js', 17.7), ('Je @globe.gl.min.js', 14.6), ('(program) @', 14.6), ('requestAnimationFrame @', 5.4), ('getProgramCacheKey @globe.gl.min.js', 4.7), ('bindVertexArray @', 2.0), ('setup @globe.gl.min.js', 2.0), ('Qe @globe.gl.min.js', 1.9), ('(garbage collector) @', 1.5), ('updateMatrixWorld @globe.gl.min.js', 1.4), ('Ze @globe.gl.min.js', 1.0), ('sort @globe.gl.min.js', 0.9), ('multiplyMatrices @globe.gl.min.js', 0.9)]
+  inclusive by file %: [('globe.gl.min.js', 83.2), ('content.js', 0.0), ('app.js?v=202611281000', 0.0), ('agent-visual-indicator.js-CrSVcjfK.js', 0.0)]
+hidden samples 97593
+  self top: [('(idle) @', 38.7), ('(program) @', 26.9), ('(anon) @globe.gl.min.js', 15.9), ('requestAnimationFrame @', 12.5), ('updateMatrixWorld @globe.gl.min.js', 2.5), ('(garbage collector) @', 1.4), ('multiplyMatrices @globe.gl.min.js', 0.6), ('yo @globe.gl.min.js', 0.1), ('l @globe.gl.min.js', 0.1), ('u @globe.gl.min.js', 0.1), ('Qe @globe.gl.min.js', 0.1), ('traverseVisible @globe.gl.min.js', 0.1), ('setTimeout @', 0.1), ('applyMatrix4 @globe.gl.min.js', 0.1)]
+  inclusive by file %: [('globe.gl.min.js', 31.7), ('content.js', 0.0), ('app.js?v=202611281000', 0.0), ('agent-visual-indicator.js-CrSVcjfK.js', 0.0)]
