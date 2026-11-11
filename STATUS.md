@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 19:27 UTC (clock reading at write) — **OSMC reliability: PAGE RELEASED (merge `7c3aa22`, 19:23:40 UTC commit time); hub 0.6.8 NOT deployed (live hub 0.6.7)**
+
+- GPT cleared rev 2 for Chad's page-first merge approval (all 312 manifest entries and the revised worker and index hashes verified; hub suite rerun independently 27/27, all 12 breaks failing as reported; browser assertions read; the 41/41 browser run and the full regression are Claude's evidence).
+- Merged on the line in Chad's message: "Approve: merge osmc-reliability-rc to main (page change: buoy card and place wording for a failed update)". Page and hub files on the merge equal the reviewed branch (`d28763d`). On the merge: osmc-reliability-hub 27/27, osmc-reliability-ui 41/41, drifters-ui 25/25.
+- **Test-only follow-up `51f87fc`:** the page suite took its "old page / old hub" from `main`, which after the merge is the new code (5 false failures). Pinned to `0386058`; 41/41. No page or hub file touched.
+- **Served hashes: all ten page files exact at 19:25:50 UTC** (index `59500752…3c8a`, app `9df9dce8…0c0b`, sources `44b6e42d…0917`; the other seven unchanged).
+- **Live read 19:26:47 UTC (pane, live hub 0.6.7):** `app.js?v=202611291000`; no buoy request while the layer is off; on → current, 1,302 buoys drawn, 728 cells, "retrieved 18 min ago", no `last_attempt` from the hub and no failure line (expected with 0.6.7); place view lists buoys with no clause; off → nothing drawn; no page errors.
+- **main ≠ live hub:** main's `phase1/worker.js` is 0.6.8 (`85737a48…c427`); production runs 0.6.7 (`53ede31e…fb9e43`). Until 0.6.8 is deployed a failed buoy run still blanks the layer as before.
+- **Rollback:** page = revert `7c3aa22` (Approve line). Hub: nothing to roll back yet.
+- **Next (Chad):** `Approve: deploy hub 0.6.8 from 51f87fc (content only)`; then read the first scheduled buoy run in D1. Branch `osmc-reliability-rc` is Chad's to delete.
+
 ## 11 Nov 19:18 UTC (clock reading at write) — **OSMC reliability candidate rev 2 on `osmc-reliability-rc` @ `d28763d`** (code `3df9c1a`; after GPT's review of `987f97e`; branch only) — packet §9
 
 - GPT (relayed by Chad): all 312 manifest entries verified; hub suite rerun independently 21/21 with all eight breaks failing as reported; browser run is Claude's evidence. **One defect:** `failed_at` was set after awaited storage calls (16:08:58 reported as 16:09:03). §3 rulings: 1, 2, 3, 5, 6 agreed; 4 = badge **unknown** when records are missing or mismatched.
