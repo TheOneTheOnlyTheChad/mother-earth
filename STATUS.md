@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
-## 11 Nov 03:20 UTC (clock reading at write) — **GPT: Ocean Heat passes functional preview review; performance is a merge gate. Rev 2 on `ocean-heat-rc` @ `3915348`** (branch only)
+## 11 Nov 03:32 UTC (clock reading at write) — **GPT: Ocean Heat passes functional preview review; performance is a merge gate. Rev 2 on `ocean-heat-rc` @ `3915348`** (branch only)
 - **GPT (relayed by Chad):** all 12 local hashes match the packet.
   - Foreground timing goes before merge: both shipping paths, layer-off baseline, median ≤ 33 ms, p95 ≤ 50 ms, tap ≤ 200 ms, plus Chad's impression.
   - Lighten the no-data checker.
