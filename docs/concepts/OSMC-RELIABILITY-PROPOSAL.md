@@ -11,7 +11,7 @@ Seen once so far:
 - **10 Nov, 16:07 UTC run:** OSMC answered HTTP 522 (run logged `down`, finished 16:08:42 UTC, about 30 s after it started).
 - The layer was blank on the live site at 16:57 UTC and came back with the 17:08 run (1,303 buoys). STATUS 10 Nov 17:19 has the observation.
 
-How often (D1 `collector_runs`, read 11 Nov 17:50 UTC, since 4 Nov 00:00 UTC):
+How often (D1 `collector_runs`, read 11 Nov between 17:44:39 and 17:49:07 UTC, since 4 Nov 00:00 UTC):
 
 | Layer | Runs | Down |
 |---|---|---|
