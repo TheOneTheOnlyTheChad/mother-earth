@@ -6,7 +6,10 @@
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node phase1/oceanheat-ui.test.cjs
  *      (8899 server in the repo; /home/claude/spike with globe.gl@2.45.0 + pngjs; python3 + numpy for the fixture)
  * Code breaks (each must make this suite fail): BREAK=no-wrap|linear|nearest-water|paint-noncontrib|p2-any-water|
- *      tile-shift|no-hash|no-gen|same-unavailable-text|round-lookup
+ *      tile-shift|no-hash|no-gen|same-unavailable-text|round-lookup|phone-p1|small-limit|p2-tile-x0
+ * Rev 2 (11 Nov, GPT's preview review): phone-sized viewports default to P2; texture limits handled explicitly
+ *      (P1 1 or 2 tiles, P2 1 or 2 tiles, below 1800 px unavailable); lighter no-data checker. Sections F (limits) and
+ *      C [P2 ×2] added; A5 and E updated.
  */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), { execFileSync } = require('child_process');
@@ -24,7 +27,7 @@ const OCEAN_PNG = PNG.sync.write(ocean);
 const RUN = new Date(Date.now() - 60e3).toISOString();
 const cellOf = (lat, lng) => `${Math.floor((lat + 90) / 4)}_${Math.floor((lng + 180) / 4)}`;
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 700)}` : ''}`); } };
-const wd = setTimeout(() => { console.log('FAIL  suite exceeded 15 min — failure, not a hang'); process.exit(1); }, 15 * 60e3);
+const wd = setTimeout(() => { console.log('FAIL  suite exceeded 20 min — failure, not a hang'); process.exit(1); }, 20 * 60e3);
 
 // ---------- expected text, computed here (rule: nearest hundredth of the exact integer mean, ties away from zero; then one decimal, ties away)
 const rha = (num, den) => Math.sign(num) * Math.floor((2 * Math.abs(num) + den) / (2 * den));
@@ -54,6 +57,9 @@ function breakJs(src) {
     case 'no-hash': b('if (got !== wantSha) throw', 'if (false) throw'); break;
     case 'no-gen': b("if (why === 'superseded' || gen !== st.gen || !st.on) return;", "if (why === 'superseded') return;"); b("if (gen !== st.gen) return 'superseded';", ''); break;
     case 'same-unavailable-text': b("if (code === 2) return [head, ['Here', 'No 1991–2020 normal for this location and day of year'], method, credit];", "if (code === 2) return [head, ['Here', 'Sea ice — no temperature difference shown'], method, credit];"); break;
+    case 'phone-p1': b('const p1 = o.forcePath ? o.forcePath === \'P1\' : (p1ok && !st.phone);', 'const p1 = o.forcePath ? o.forcePath === \'P1\' : p1ok;'); break;
+    case 'small-limit': b('if (mt < MIN_TEX) throw', 'if (false) throw'); break;
+    case 'p2-tile-x0': b('const r = 2 * tr, c = 2 * (x0 + tc),', 'const r = 2 * tr, c = 2 * tc,'); break;
     case 'round-lookup': b('row: Math.max(0, Math.min(Math.floor((90 - lat) / res), rows - 1)),', 'row: Math.max(0, Math.min(Math.round((90 - lat) / res), rows - 1)),'); break;
   }
   return src;
@@ -125,7 +131,7 @@ function breakJs(src) {
   ok('A2 enable → ready', s.status === 'ready', s);
   const want = s.path === 'P1' ? ['manifest.json', 'mask.bin.z', 'v025.bin.z'] : ['manifest.json', 'mask.bin.z', 'v050.bin.z'];
   ok(`A2 requests are exactly the manifest, the mask and one value file (${s.path}, ${s.valueRes}°)`, JSON.stringify(hits.map(h => h.split('/').pop()).sort()) === JSON.stringify(want.slice().sort()), hits);
-  ok('A2 path rule: P1 ⇔ renderer MAX_TEXTURE_SIZE ≥ 7200, paired with 0.25°; else P2 with 0.5°', s.maxTex >= 7200 ? (s.path === 'P1' && s.valueRes === 0.25) : (s.path === 'P2' && s.valueRes === 0.5), s);
+  ok('A2 path rule (desktop 1280 px, not phone-sized): P1 with 0.25° when MAX_TEXTURE_SIZE ≥ 3600 (1 texture at ≥ 7200, else 2 tiles)', s.phone === false && (s.maxTex >= 3600 ? (s.path === 'P1' && s.valueRes === 0.25 && s.tiles === (s.maxTex >= 7200 ? 1 : 2)) : s.path === 'P2'), s);
   ok('A2 legend and card key shown; date line names the source and the UTC day', await page.evaluate(() => !document.getElementById('oh-legend').hidden && /Dated snapshot · NOAA Coral Reef Watch · 9 Nov 2026 \(UTC day\)/.test(document.getElementById('oh-status').innerText) && /1991–2020 normal/.test(document.getElementById('oh-key').innerText)));
   ok('A2 Key counts ocean heat as one layer', await page.evaluate(k => document.getElementById('key-n').textContent !== k, keyN0));
   ok('A2 texture filtering is NEAREST on every mesh, no mipmaps', await page.evaluate(() => ME.oceanHeat.meshes().every(m => m.material.map.magFilter === 1003 && m.material.map.minFilter === 1003 && m.material.map.generateMipmaps === false)));
@@ -152,11 +158,11 @@ function breakJs(src) {
   if (s.path === 'P1' && s.tiles === 1) {
     const land = await texPx(page, 3968, 2480), ice = await texPx(page, Math.floor((180 - 39.875) / 0.05), Math.floor((90 + 70.125) / 0.05));
     ok('A5 texel: Cape Peninsula land (row 2480, col 3968) is transparent even inside a contributing square', land[3] === 0, land);
-    ok('A5 texel: Weddell Sea ice is the dark no-data fill, never a class colour', ice[3] === 220 && ice[0] < 70 && ice[2] < 90, ice);
+    ok('A5 texel: Weddell Sea ice is the no-data checker [128,140,160] / [100,112,130] at alpha 220, never a class colour', ice[3] === 220 && (JSON.stringify(ice.slice(0, 3)) === '[128,140,160]' || JSON.stringify(ice.slice(0, 3)) === '[100,112,130]'), ice);
   }
   // rendered no-data: Weddell Sea (daylit in November) reads dark, not near-normal pale
   { const [c] = await rendered(page, [[-70.125, -39.875]], { lat: -70, lng: -40, altitude: 0.6 });
-    ok('A5 rendered: Weddell Sea ice shows the dark no-data fill', Math.max(...c) < 110, c); }
+    ok('A5 rendered: Weddell Sea ice shows the slate no-data fill (blue-tinged grey, lighter than the dark ocean, not near-normal pale)', c[2] > c[0] + 10 && c[2] > 90 && Math.max(...c) < 200 && !isPale(c), c); }
   // real taps through the page's own handlers
   await page.evaluate(() => ME.globe().pointOfView({ lat: 49.9, lng: -5.9, altitude: 0.25 }, 0)); await page.waitForTimeout(1000);
   { const p = await page.evaluate(() => ME.screenAt(49.875, -5.875, 0)), el = await page.locator('#globe').boundingBox();
@@ -195,7 +201,7 @@ function breakJs(src) {
   await ctx.close();
 
   // ================= C. seam fixture — orientation on the RENDERED globe, P1 (1 and 2 tiles) and P2
-  for (const opts of [{ forcePath: 'P1', forceTiles: 1 }, { forcePath: 'P1', forceTiles: 2 }, { forcePath: 'P2' }]) {
+  for (const opts of [{ forcePath: 'P1', forceTiles: 1 }, { forcePath: 'P1', forceTiles: 2 }, { forcePath: 'P2' }, { forcePath: 'P2', forceTiles: 2 }]) {
     const tag = `${opts.forcePath}${opts.forceTiles ? ' ×' + opts.forceTiles : ''}`;
     ({ ctx, page, hits, perr } = await run({ width: 1280, height: 860 }, { snap: SEAM.dir, pin: SEAM.sha }));
     s = await enable(page, opts);
@@ -206,7 +212,13 @@ function breakJs(src) {
     ok(`C2 [${tag}] rendered: the 0° join — near-normal pale at −0.25°, orange at +0.25°`, isPale(jw) && isOrange(je), { jw, je });
     ok(`C3 [${tag}] taps either side of the seam: −179.75 → −2.5 cooler, +179.75 → +2.5 warmer, exactly ±180 → −2.5`,
       /−2\.5 °C cooler/.test(await rowsText(page, 0, -179.75)) && /\+2\.5 °C warmer/.test(await rowsText(page, 0, 179.75)) && /−2\.5 °C cooler/.test(await rowsText(page, 0, 180)) && /−2\.5 °C cooler/.test(await rowsText(page, 0, -180)));
-    if (opts.forceTiles === 2) {
+    if (opts.forcePath === 'P2' && opts.forceTiles === 2) {
+      // P2 tiles are 1800 texels wide; texel 1799 = native 3598–3599 (pale water), tile 1 texel 0 = native 3600–3601 (3601 is land → mixed), texel 1 = native 3602–3603 (orange)
+      const t0last = await texPx(page, 1799, 900, 0), t1first = await texPx(page, 0, 900, 1), t1second = await texPx(page, 1, 900, 1);
+      ok('C4 [P2 ×2] tile join: tile 0 last texel pale water, tile 1 texel 0 mixed (land at native col 3601), texel 1 orange water',
+        t0last[0] === 242 && t0last[3] === 230 && t1first[0] === 138 && t1first[3] === 140 && t1second[0] === 217 && t1second[3] === 230, { t0last, t1first, t1second });
+    }
+    if (opts.forcePath === 'P1' && opts.forceTiles === 2) {
       const t0last = await texPx(page, 3599, 1800, 0), t1first = await texPx(page, 0, 1800, 1), t1second = await texPx(page, 1, 1800, 1);
       ok('C4 [P1 ×2] tile join: tile 0 last texel = col 3599 (near-normal pale), tile 1 texel 0 = col 3600 (orange water), texel 1 = col 3601 (land, clear)',
         t0last[0] === 242 && t0last[2] === 235 && t0last[3] === 230 && t1first[0] === 217 && t1first[2] === 1 && t1first[3] === 230 && t1second[3] === 0, { t0last, t1first, t1second });
@@ -237,10 +249,45 @@ function breakJs(src) {
   // ================= E. phone width
   ({ ctx, page, hits, perr } = await run({ width: 390, height: 844 }));
   { const t = await page.evaluate(() => { const b = document.getElementById('tgl-oh'); b.scrollIntoView(); const r = b.getBoundingClientRect(); return { h: r.height, w: r.width }; });
-    s = await enable(page, { forcePath: 'P2' });
+    s = await enable(page);
+    ok('E phone 390 px: phone-sized → P2 by default (0.5° values, 3600 × 1800 texture, ~25 MiB), requests manifest + mask + v050 only',
+      s.phone === true && s.path === 'P2' && s.valueRes === 0.5 && s.texture === '3600x1800' && JSON.stringify(hits.map(h => h.split('/').pop()).sort()) === JSON.stringify(['manifest.json', 'mask.bin.z', 'v050.bin.z']), { s, hits });
+    { const e = EXP['Off Cornwall'], got = await rowsText(page, e.point[0], e.point[1]), w = expectText(e, 0.5);
+      ok('E phone tap off Cornwall at 0.5°: ' + w.join(' / '), got && w.every(x => got.includes(x)), got); }
     const fit = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1 && document.getElementById('oh-key').getBoundingClientRect().right <= window.innerWidth + 1);
     ok('E phone 390 px: toggle ≥ 44 px tall, layer ready, key fits, no horizontal scroll', t.h >= 44 && s.status === 'ready' && fit, { t, s: s.status, fit });
     ok('E no page errors', perr.length === 0, perr); }
+  await ctx.close();
+
+  // ================= F. texture limits and the phone rule (real snapshot, desktop viewport, limits simulated through the test aid)
+  ({ ctx, page, hits, perr } = await run({ width: 1280, height: 860 }));
+  const relay = async (opts) => { await page.evaluate(() => ME.oceanHeat.setOn(false)); hits.length = 0;
+    await page.evaluate(o => ME.oceanHeat.options(Object.assign({ forcePath: null, forceTiles: null, forceMaxTex: null, forcePhone: null }, o)), opts);
+    return enable(page); };
+  const files = () => JSON.stringify(hits.map(h => h.split('/').pop()).sort());
+  s = await relay({ forceMaxTex: 4096 });
+  ok('F1 limit 4096 (desktop): P1 as 2 tiles of 3600 × 3600, 0.25° values', s.status === 'ready' && s.path === 'P1' && s.tiles === 2 && s.texture === '3600x3600' && s.valueRes === 0.25, s);
+  { const e = EXP['Seam E (+179.9)'], got = await rowsText(page, e.point[0], e.point[1]); ok('F1 tap Seam E on the tiled P1', got && expectText(e, 0.25).every(x => got.includes(x)), got); }
+  s = await relay({ forceMaxTex: 2048 });
+  ok('F2 limit 2048 (desktop): P2 as 2 tiles of 1800 × 1800, 0.5° values, v050 fetched', s.status === 'ready' && s.path === 'P2' && s.tiles === 2 && s.texture === '1800x1800' && s.valueRes === 0.5 && /v050/.test(files()), { s, hits });
+  { const mixed = await texPx(page, 1984 - 1800, 1240, 1), water = await texPx(page, 1980 - 1800, 1244, 1);
+    ok('F2 P2 ×2: the Cape Peninsula coast texel (col 1984) sits in tile 1 at col 184 and is still the mixed style; its water neighbour is the block colour', mixed[3] === 140 && mixed[0] === 138 && water[3] === 230 && water[0] === 242, { mixed, water }); }
+  s = await relay({ forceMaxTex: 3600 });
+  ok('F3 limit 3600 exactly (desktop): P1 as 2 tiles', s.status === 'ready' && s.path === 'P1' && s.tiles === 2, s);
+  s = await relay({ forceMaxTex: 1024 });
+  const msg = await page.evaluate(() => document.getElementById('oh-status').innerText);
+  ok('F4 limit 1024: unavailable with its own reason, nothing drawn, no mask or value file fetched', s.status === 'unavailable' && s.meshes === 0 && !s.on && /1024 px/.test(msg) && /1800 px/.test(msg) && files() === JSON.stringify(['manifest.json']), { s, msg, hits });
+  s = await relay({ forceMaxTex: 1799 });
+  ok('F4 limit 1799 (one below a P2 tile): unavailable', s.status === 'unavailable' && s.meshes === 0, s);
+  s = await relay({ forceMaxTex: 1800 });
+  ok('F5 limit 1800 exactly: P2 as 2 tiles', s.status === 'ready' && s.path === 'P2' && s.tiles === 2, s);
+  s = await relay({ forcePhone: true });
+  ok('F6 phone-sized on a large-limit renderer: P2, 1 texture of 3600 × 1800', s.status === 'ready' && s.phone === true && s.path === 'P2' && s.tiles === 1 && s.texture === '3600x1800', s);
+  s = await relay({ forcePhone: true, forceMaxTex: 2048 });
+  ok('F6 phone-sized with limit 2048: P2 as 2 tiles', s.status === 'ready' && s.path === 'P2' && s.tiles === 2, s);
+  s = await relay({ forcePhone: false, forceMaxTex: 16384 });
+  ok('F7 not phone-sized, limit 16384: P1, 1 texture of 7200 × 3600', s.status === 'ready' && s.path === 'P1' && s.tiles === 1 && s.texture === '7200x3600', s);
+  ok('F8 no page errors', perr.length === 0, perr);
   await ctx.close();
 
   await browser.close(); clearTimeout(wd);

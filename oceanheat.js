@@ -5,8 +5,12 @@
  *
  * Identity: the page pins the manifest's sha256; the manifest pins every binary's sha256; nothing is drawn unless all
  * match and the manifest names the expected revision, date and grids. A load that completes after switch-off never draws.
- * Painting: P1 = native 0.05° texels (one texture, or tiles for a renderer limit below 7200), P2 = 0.1° texels with the
- * 0.5° values (a texel never straddles a block). Colour and tap read the SAME arrays through the SAME lookup.
+ * Painting: P1 = native 0.05° texels with the 0.25° values; P2 = 0.1° texels with the 0.5° values (a texel never straddles
+ * a block). Path rule (GPT preview review, 11 Nov): phone-sized viewports take P2 (~25 MiB texture, not ~99 MiB);
+ * otherwise P1 when the renderer's texture limit fits it. Limits are handled explicitly: P1 7200 × 3600 as 1 texture
+ * (limit ≥ 7200) or 2 tiles of 3600 (3600–7199); P2 3600 × 1800 as 1 texture (≥ 3600) or 2 tiles of 1800 (1800–3599);
+ * below 1800, or unreadable, the layer says so and downloads nothing more. Colour and tap read the SAME arrays through
+ * the SAME lookup.
  */
 (() => {
   const ME = window.ME; if (!ME) return;
@@ -24,11 +28,12 @@
       { hi: 20, inc: false, col: [242, 240, 235], label: 'near normal (−0.2 to +0.2)' }, { hi: 100, inc: false, col: [253, 208, 162], label: '+0.2 to +1.0' },
       { hi: 200, inc: false, col: [253, 141, 60], label: '+1.0 to +2.0' }, { hi: 300, inc: false, col: [217, 72, 1], label: '+2.0 to +3.0' },
       { hi: Infinity, inc: false, col: [127, 39, 4], label: '+3.0 or warmer' }],
-    ALPHA_WATER: 230, NODATA: [[59, 70, 84], [42, 50, 61]], ALPHA_NODATA: 220, MIXED: [138, 143, 150], ALPHA_MIXED: 140,
+    ALPHA_WATER: 230, NODATA: [[128, 140, 160], [100, 112, 130]], ALPHA_NODATA: 220,   // lightened after GPT's preview review (11 Nov): readable against polar-night land
+    MIXED: [138, 143, 150], ALPHA_MIXED: 140,
     ALT: 0.0003,
   };
   const st = { on: false, gen: 0, status: 'off', why: null, man: null, mask: null, vals: {}, path: null, valueRes: null, tiles: 1,
-    meshes: [], parent: null, maxTex: null, timings: {}, bytes: {}, opts: { forcePath: null, forceTiles: null } };
+    phone: null, meshes: [], parent: null, maxTex: null, timings: {}, bytes: {}, opts: { forcePath: null, forceTiles: null, forceMaxTex: null, forcePhone: null } };
 
   // ---------- pure lookups (shared by painting and tapping)
   const classOf = a => { for (let i = 0; i < OH.CLASSES.length; i++) { const c = OH.CLASSES[i]; if (c.inc ? a <= c.hi : a < c.hi) return i; } return OH.CLASSES.length - 1; };
@@ -70,14 +75,26 @@
   function rendererMaxTex() {
     try { const g = ME.globe(), r = g && g.renderer && g.renderer(); const gl = r && r.getContext && r.getContext(); return gl ? gl.getParameter(gl.MAX_TEXTURE_SIZE) : null; } catch (e) { return null; }
   }
+  // Phone-sized: the page's own phone breakpoint (≤ 720 CSS px wide), or a touch screen whose short side is ≤ 500 px
+  // (a phone held sideways). Decided once at switch-on.
+  function phoneSized() {
+    try { return innerWidth <= 720 || (matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) <= 500); }
+    catch (e) { return innerWidth <= 720; }
+  }
+  const MIN_TEX = OH.NATIVE.rows / 2;    // 1800: one P2 tile's height and width
   function choosePath() {
-    st.maxTex = rendererMaxTex();
-    const forced = st.opts.forcePath;
-    const p1 = forced ? forced === 'P1' : (st.maxTex || 0) >= OH.NATIVE.cols;
+    const o = st.opts;
+    st.maxTex = o.forceMaxTex != null ? o.forceMaxTex : rendererMaxTex();
+    st.phone = o.forcePhone != null ? o.forcePhone : phoneSized();
+    const mt = st.maxTex || 0;
+    if (mt < MIN_TEX) throw new Error(st.maxTex ? `this device's graphics texture limit (${st.maxTex} px) is below the ${MIN_TEX} px the layer needs` : "this browser did not report its graphics texture limit");
+    const p1ok = mt >= OH.NATIVE.rows;   // a P1 tile is 3600 tall
+    if (o.forcePath === 'P1' && !p1ok) throw new Error(`P1 needs a texture limit of ${OH.NATIVE.rows} px; this one is ${mt}`);
+    const p1 = o.forcePath ? o.forcePath === 'P1' : (p1ok && !st.phone);
     st.path = p1 ? 'P1' : 'P2';
     st.valueRes = p1 ? 0.25 : 0.5;        // P2 is paired with 0.5° only (texels nest in blocks)
-    st.tiles = p1 ? (st.opts.forceTiles || Math.max(1, Math.ceil(OH.NATIVE.cols / Math.max(1, st.maxTex || OH.NATIVE.cols)))) : 1;
-    if (p1 && OH.NATIVE.cols % st.tiles) st.tiles = 2;
+    const width = p1 ? OH.NATIVE.cols : OH.NATIVE.cols / 2;
+    st.tiles = o.forceTiles || (mt >= width ? 1 : 2);
   }
   async function load(gen) {
     const t0 = performance.now();
@@ -121,9 +138,9 @@
     if (tex === 'native') {
       for (let r = 0; r < H; r++) { const br = (r / k) | 0; for (let x = 0; x < W; x++) { const c = x0 + x, code = codeAt(r, c);
         u32[r * W + x] = code === 0 ? bc[br * V.cols + ((c / k) | 0)] : code === 1 ? 0 : (((r >> 1) + (c >> 1)) & 1 ? nd1 : nd0); } }
-    } else {   // P2: 0.1° texel = 2 × 2 native cells, nested inside one 0.5° block (k = 10)
+    } else {   // P2: 0.1° texel = 2 × 2 native cells, nested inside one 0.5° block (k = 10); x0 = first texel column of this tile
       for (let tr = 0; tr < H; tr++) { for (let tc = 0; tc < W; tc++) {
-        const r = 2 * tr, c = 2 * tc, a = codeAt(r, c), b = codeAt(r, c + 1), d = codeAt(r + 1, c), e = codeAt(r + 1, c + 1);
+        const r = 2 * tr, c = 2 * (x0 + tc), a = codeAt(r, c), b = codeAt(r, c + 1), d = codeAt(r + 1, c), e = codeAt(r + 1, c + 1);
         let v;
         if (a === 0 && b === 0 && d === 0 && e === 0) v = bc[((r / k) | 0) * V.cols + ((c / k) | 0)];
         else if (a === 1 && b === 1 && d === 1 && e === 1) v = 0;
@@ -138,8 +155,8 @@
     const h = harvest(); if (!h) return false;
     const t0 = performance.now(), p = h.gmesh.geometry.parameters || {}, R = h.g.getGlobeRadius() * (1 + OH.ALT);
     const NEAREST = 1003;   // three.js NearestFilter (stable constant); no mipmaps, so the GPU never blends texels
-    const tiles = st.path === 'P1' ? st.tiles : 1;
-    const W = st.path === 'P1' ? OH.NATIVE.cols / tiles : OH.NATIVE.cols / 2, H = st.path === 'P1' ? OH.NATIVE.rows : OH.NATIVE.rows / 2;
+    const tiles = st.tiles;
+    const W = (st.path === 'P1' ? OH.NATIVE.cols : OH.NATIVE.cols / 2) / tiles, H = st.path === 'P1' ? OH.NATIVE.rows : OH.NATIVE.rows / 2;
     const phi0 = p.phiStart != null ? p.phiStart : 0, phiL = p.phiLength != null ? p.phiLength : Math.PI * 2;
     for (let t = 0; t < tiles; t++) {
       const cv = paintTile(t * W, W, H, st.path === 'P1' ? 'native' : 'p2');
@@ -229,9 +246,9 @@
   const tgl = $('tgl-oh'); if (tgl) tgl.addEventListener('click', () => setOn(!st.on));
   ME.oceanHeat = {
     on: () => st.on && st.status === 'ready', setOn, rowsAt,
-    state: () => ({ on: st.on, status: st.status, why: st.why, path: st.path, valueRes: st.valueRes, tiles: st.tiles, maxTex: st.maxTex,
+    state: () => ({ on: st.on, status: st.status, why: st.why, path: st.path, valueRes: st.valueRes, tiles: st.tiles, maxTex: st.maxTex, phone: st.phone,
       meshes: st.meshes.length, texture: st.texW ? `${st.texW}x${st.texH}` : null, timings: { ...st.timings }, bytes: { ...st.bytes }, rev: st.man && st.man.revision }),
-    options: o => Object.assign(st.opts, o || {}),     // test aid: forcePath 'P1'|'P2', forceTiles n (before switching on)
+    options: o => Object.assign(st.opts, o || {}),     // test aid: forcePath 'P1'|'P2', forceTiles n, forceMaxTex px, forcePhone bool (before switching on)
     meshes: () => st.meshes.slice(),
   };
   paintLabels();
