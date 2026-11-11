@@ -1485,10 +1485,13 @@ function driftBuild(text, retrievedMs, prevCount) {
  *  - EVERY write here is conditional (etag of what was read, or create-only when absent), re-read once on a lost race.
  *  - Attempts are ordered by RUN timestamp (scheduled_for / last_attempt.run), never by retrieved_at or failed_at: if what is
  *    stored comes from this run or a later one, nothing is written. failed_at is for display only.
- *  - The raw error text never goes into latest-cells (reason is one of four fixed codes). */
+ *  - The raw error text never goes into latest-cells (reason is one of four fixed codes).
+ *  - failed_at is the time this handler was entered. Stored counts that cannot be read are left alone; stored counts that
+ *    read but are not JSON count as nothing good to keep. */
 const DRIFT_REASONS = { fetch_failed: 'request failed', http_error: 'http error', refused_by_checks: 'response refused by our checks', internal_error: 'internal error' };
 async function driftFail(env, scheduledMs, reason, note, http) {
   const layer = 'drifters', run = new Date(scheduledMs).toISOString();
+  const failedAt = nowIso();   // captured ONCE on entry, before any await: the log write, the per-run object and a retry must not move it
   if (!DRIFT_REASONS[reason]) reason = 'internal_error';
   await logRun(env, layer, scheduledMs, 'down', http || 0, 0, 0, note);   // logRun swallows its own errors
   const down = (extra) => { const e = envelope(layer, scheduledMs, null, null, 'down', {}, [], [], extra); return { ...e, records: undefined }; };
@@ -1497,14 +1500,19 @@ async function driftFail(env, scheduledMs, reason, note, http) {
   try {
     for (let round = 0; round < 2; round++) {
       const o = await env.R2.get(key); let cur = null;
-      if (o) { try { cur = await o.json(); } catch (_) { cur = null; } }
+      if (o) {
+        let text;   // a body that cannot be READ is not evidence about its content: leave the stored object alone
+        try { text = await o.text(); } catch (e) { console.log('driftFail: stored counts could not be read; left alone', String(e).slice(0, 120)); return 'left: stored counts unreadable'; }
+        try { cur = JSON.parse(text); } catch (_) { cur = null; }   // read fine but not JSON: nothing good to keep → replaced conditionally below
+        if (cur === null || typeof cur !== 'object') cur = null;
+      }
       if (cur) {
         const stored = [cur.scheduled_for, cur.last_attempt && cur.last_attempt.run].filter(Boolean).sort().pop();
         if (stored && stored >= run) return 'left: stored data is from this run or a later one';
       }
       const good = !!(cur && cur.source_status && cur.source_status !== 'down' && cur.cells && cur.retrieved_at);
       const body = good
-        ? { ...cur, last_attempt: { run, failed_at: nowIso(), status: 'down', http: http || null, reason, consecutive_failures: ((cur.last_attempt && cur.last_attempt.consecutive_failures) || 0) + 1 } }
+        ? { ...cur, last_attempt: { run, failed_at: failedAt, status: 'down', http: http || null, reason, consecutive_failures: ((cur.last_attempt && cur.last_attempt.consecutive_failures) || 0) + 1 } }
         : down({ note: DRIFT_REASONS[reason] + (reason === 'http_error' && http ? ' ' + http : ''), reason });
       const res = await env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: o ? { etagMatches: o.etag } : { etagDoesNotMatch: '*' } });
       if (res) return good ? 'kept last good counts' : 'down envelope';

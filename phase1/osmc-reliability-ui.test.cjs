@@ -6,7 +6,8 @@
  * Old page = main's index.html / app.js / sources.html served from git.
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/osmc-reliability-ui.test.cjs
  *      (8899 static server on the repo root). BREAK=drop-line | showing-without-records | no-redraw | keep-cells |
- *      missing-field-is-failure | failed-at-run | no-degraded  — each must fail. */
+ *      missing-field-is-failure | failed-at-run | no-degraded | degraded-without-records | cells-without-records |
+ *      count-without-records | positions-copy-without-records  — each must fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const cp = require('child_process');
 const ROOT = path.join(__dirname, '..'), BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
@@ -18,10 +19,14 @@ const BREAKS = {
   'drop-line': ['index.html', "const la = s && s.last_attempt; if (!la ||", "const la = null; if (!la ||"],
   'showing-without-records': ['index.html', "(usable('drifters') ? ` Showing buoys from", "(true ? ` Showing buoys from"],
   'no-redraw': ['index.html', "driftDrawnGrade !== null && ME.freshness('drifters').grade !== driftDrawnGrade) render();", "false) render();"],
-  'keep-cells': ['index.html', "if (layer === 'drifters' && snap.last_attempt && fresh.grade === 'unknown') continue;", ""],
+  'keep-cells': ['index.html', "(fresh.grade === 'unknown' || !usable('drifters'))) continue;", "(!usable('drifters'))) continue;"],
   'missing-field-is-failure': ['index.html', "const la = s && s.last_attempt; if (!la ||", "const la = (s && s.last_attempt) || (s && { failed_at: s.retrieved_at }); if (!la ||"],
   'failed-at-run': ['index.html', "return `Latest update failed at ${t(la.failed_at)}.`", "return `Latest update failed at ${t(la.run)}.`"],
-  'no-degraded': ['index.html', "if (fb) { st.textContent = 'degraded'; st.className = 'state warn'; st.title = fb; }", ""],
+  'no-degraded': ['index.html', "if (fb && shown) { st.textContent = 'degraded'; st.className = 'state warn'; st.title = fb; }", ""],
+  'degraded-without-records': ['index.html', "if (noRecords) { st.textContent = 'unknown'; st.className = 'state bad'; st.title = fb; }", "if (noRecords) { st.textContent = 'degraded'; st.className = 'state warn'; st.title = fb; }"],
+  'cells-without-records': ['index.html', "(fresh.grade === 'unknown' || !usable('drifters'))) continue;", "(fresh.grade === 'unknown')) continue;"],
+  'count-without-records': ['index.html', "f.grade !== 'unknown' && s && !noRecords ? ME.total(s)", "f.grade !== 'unknown' && s ? ME.total(s)"],
+  'positions-copy-without-records': ['index.html', "noRecords ? 'buoy positions not shown' : s && s.window_end", "s && s.window_end"],
 };
 const PORT_NEW = 8898, PORT_OLD = 8897;
 const ctl = async (port, q) => { const r = await fetch(`http://127.0.0.1:${port}/${q}`); return r.json(); };
@@ -61,7 +66,7 @@ const ctl = async (port, q) => { const r = await fetch(`http://127.0.0.1:${port}
   };
   const read = page => page.evaluate(() => { const t = id => document.getElementById(id); const b = t('m-drifters').querySelector('b'); const rs = ME.renderState();
     return { badge: t('s-drifters').textContent, cls: t('s-drifters').className, title: t('s-drifters').title, value: t('v-drifters').textContent, meta: t('m-drifters').textContent, bold: b ? b.textContent : '',
-      withheld: t('p-drifters').hidden ? '' : t('p-drifters').textContent, fresh: ME.freshness('drifters'), points: rs.driftPoints, cells: rs.driftCells, pair: ME.pairState('drifters').drifters,
+      withheld: t('p-drifters').hidden ? '' : t('p-drifters').textContent, obs: t('o-drifters').textContent, fresh: ME.freshness('drifters'), points: rs.driftPoints, cells: rs.driftCells, pair: ME.pairState('drifters').drifters,
       cellGrades: [...new Set((window.__polys ? window.__polys() : []))] }; });
   const fire = (page, which) => page.evaluate(async w => { for (const i of window.__iv) if (w === 'tick' ? i.name === 'tick' : i.ms === 30000) await i.fn(); }, which);
   const setNow = (page, iso) => page.evaluate(ms => window.__setNow(ms), Date.parse(iso));
@@ -111,7 +116,10 @@ const ctl = async (port, q) => { const r = await fetch(`http://127.0.0.1:${port}
   // ---- 3a. last_attempt present, records unreadable
   c = await seed(PORT_NEW); await ctl(PORT_NEW, '__del?key=latest/drifters.json');
   w = await open({ nowIso: '2026-11-10T16:20:00.000Z' }); r = await read(w.page);
-  ok('3a records unreadable: nothing drawn', r.points === 0 && !r.pair.usable, r);
+  ok('3a records unreadable: badge UNKNOWN (bad), not degraded', r.badge === 'unknown' && /\bbad\b/.test(r.cls) && !/\bwarn\b/.test(r.cls), [r.badge, r.cls]);
+  ok('3a records unreadable: no buoy points drawn', r.points === 0 && !r.pair.usable, r);
+  ok('3a records unreadable: no buoy cells drawn either', r.cells === 0, r.cells);
+  ok('3a records unreadable: no count shown, and no copy implying positions are shown', r.value === '–' && r.obs === 'buoy positions not shown' && !/each buoy shown/.test(r.obs), [r.value, r.obs]);
   ok('3a records unreadable: the card says only that the update failed — no "Showing buoys"', r.bold === 'Latest update failed at 16:08 UTC.' && !/Showing buoys/.test(r.meta + r.title), r.meta);
   ok('3a records unreadable: the existing withheld reason is shown', /^Records withheld:/.test(r.withheld), r.withheld);
   pr = await placeRow(w.page, cellsWith(c)[0]); ok('3a place: withheld, no clause', /^withheld — /.test(pr || '') && !/latest update failed at/.test(pr), pr);
@@ -122,7 +130,10 @@ const ctl = async (port, q) => { const r = await fetch(`http://127.0.0.1:${port}
   await ctl(PORT_NEW, '__now?at=2026-11-10T16:08:42.000Z'); c = await ctl(PORT_NEW, '__run?kind=partial&sched=2026-11-10T16:07:00Z');
   ok('3b seed: old counts + last_attempt internal_error', c.retrieved_at === '2026-11-10T15:08:15.000Z' && c.last_attempt && c.last_attempt.reason === 'internal_error', c.last_attempt);
   w = await open({ nowIso: '2026-11-10T16:20:00.000Z' }); r = await read(w.page);
-  ok('3b mismatched records: nothing drawn, no "Showing buoys", withheld reason shown', r.points === 0 && r.bold === 'Latest update failed at 16:08 UTC.' && !/Showing buoys/.test(r.meta + r.title) && /^Records withheld:.*different collector run/.test(r.withheld), r);
+  ok('3b mismatched records: badge UNKNOWN (bad), not degraded', r.badge === 'unknown' && /\bbad\b/.test(r.cls) && !/\bwarn\b/.test(r.cls), [r.badge, r.cls]);
+  ok('3b mismatched records: no buoy points and no buoy cells drawn', r.points === 0 && r.cells === 0, [r.points, r.cells]);
+  ok('3b mismatched records: no count, no positions copy', r.value === '–' && r.obs === 'buoy positions not shown', [r.value, r.obs]);
+  ok('3b mismatched records: failed-at line kept, no "Showing buoys", withheld reason shown', r.bold === 'Latest update failed at 16:08 UTC.' && r.title === 'Latest update failed at 16:08 UTC.' && !/Showing buoys/.test(r.meta + r.title) && /^Records withheld:.*different collector run/.test(r.withheld), r);
   await w.ctx.close();
 
   // ---- 4. ageing through 4 h in an already-open page, without a data poll

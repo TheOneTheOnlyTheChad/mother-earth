@@ -6,7 +6,7 @@
 // Run: node --no-warnings phase1/osmc-reliability-hub.test.mjs
 // BREAK=<name> weakens a copy of worker.js; every break must fail:
 //   stamp-failed-time | keep-after-good | unconditional | down-unconditional | order-by-retrieved | guarded-writedown |
-//   no-place-cutoff | raw-note-public
+//   no-place-cutoff | raw-note-public | failed-at-late | same-run-strict | raw-note-down | unreadable-as-empty
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import path from 'node:path'; import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -23,6 +23,10 @@ const BREAKS = {
   'guarded-writedown': ["else if (layer === 'drifters') { try { await driftFail(env, ms, 'internal_error', note, 0); } catch (_) {} }", "else if (layer === 'never') { }"],
   'no-place-cutoff': ["if (la && (Date.now() - Date.parse(cells.retrieved_at)) / 1000 > (cells.stale_after_s || STALE_AFTER_S.drifters)) {", "if (false) {"],
   'raw-note-public': ["? { ...cur, last_attempt: { run,", "? { ...cur, last_attempt: { note, run,"],
+  'failed-at-late': ["failed_at: failedAt, status: 'down'", "failed_at: nowIso(), status: 'down'"],
+  'same-run-strict': ["if (stored && stored >= run) return", "if (stored && stored > run) return"],
+  'raw-note-down': [": down({ note: DRIFT_REASONS[reason] + (reason === 'http_error' && http ? ' ' + http : ''), reason });", ": down({ note, reason });"],
+  'unreadable-as-empty': ["return 'left: stored counts unreadable'; }", "text = 'x'; }"],
 };
 const B = process.env.BREAK;
 if (B) { if (!BREAKS[B]) { console.log('unknown break ' + B); process.exit(2); } const [a, b] = BREAKS[B]; if (!src.includes(a)) { console.log('break anchor missing: ' + B); process.exit(2); } src = src.replace(a, b); }
@@ -52,28 +56,31 @@ globalThis.fetch = async (url) => { url = String(url); if (!url.includes('osmc.n
 const CELLS = 'latest-cells/drifters.json', LATEST = 'latest/drifters.json';
 const enc = new TextEncoder(), dec = new TextDecoder();
 function makeEnv(extra = {}) {
-  const m = new Map(), puts = [], runs = []; let seq = 0; const hooks = { beforePut: null }, fail = { put: null };
+  const m = new Map(), puts = [], runs = []; let seq = 0; const hooks = { beforePut: null }, fail = { put: null, after: null }, adv = { db: 0, put: 0 };   // adv: ms the clock moves during a D1 insert / an R2 put (slow storage)
   const obj = (k, v) => ({ key: k, size: v.b.length, etag: v.etag, httpEtag: '"' + v.etag + '"', uploaded: new Date(v.up), customMetadata: {}, httpMetadata: {} });
   const R2 = {
     async put(k, value, o = {}) {
       puts.push({ key: k, cond: o.onlyIf ? (o.onlyIf.etagMatches ? 'etag' : 'absent') : 'none', at: NOW });
       if (hooks.beforePut) { const h = hooks.beforePut; const r = await h(k, o); if (r === 'done') hooks.beforePut = null; }
       if (fail.put && fail.put(k, o)) throw new Error('R2 stub: forced put failure ' + k);
+      NOW += adv.put;
       const cur = m.get(k), c = o.onlyIf;
       if (c && c.etagDoesNotMatch === '*' && cur) return null;
       if (c && c.etagMatches && (!cur || cur.etag !== c.etagMatches)) return null;
-      const v = { b: enc.encode(String(value)), etag: 'e' + (++seq), up: NOW }; m.set(k, v); return obj(k, v);
+      const v = { b: enc.encode(String(value)), etag: 'e' + (++seq), up: NOW }; m.set(k, v);
+      if (fail.after && fail.after(k, o)) throw new Error('R2 stub: the write committed and the call then threw ' + k);
+      return obj(k, v);
     },
     async head(k) { const v = m.get(k); return v ? obj(k, v) : null; },
     async get(k) { const v = m.get(k); if (!v) return null; return { ...obj(k, v), body: new Blob([v.b]).stream(), async text() { return dec.decode(v.b); }, async json() { return JSON.parse(dec.decode(v.b)); } }; },
     async delete(k) { m.delete(k); },
     async list({ prefix } = {}) { return { objects: [...m.keys()].filter(k => !prefix || k.startsWith(prefix)).map(key => ({ key, uploaded: new Date() })), truncated: false }; },
   };
-  const stmt = (sql) => { const x = (a) => ({ async run() { if (/INSERT INTO collector_runs/.test(sql)) runs.push({ layer: a[0], started_at: a[1], finished_at: a[2], status: a[3], http: a[4], records: a[5], note: a[7] }); return {}; },
+  const stmt = (sql) => { const x = (a) => ({ async run() { if (/INSERT INTO collector_runs/.test(sql)) NOW += adv.db; if (/INSERT INTO collector_runs/.test(sql)) runs.push({ layer: a[0], started_at: a[1], finished_at: a[2], status: a[3], http: a[4], records: a[5], note: a[7] }); return {}; },
     async first() { return null; }, async all() { return /FROM collector_runs/.test(sql) ? { results: Object.values(Object.fromEntries(runs.map(r => [r.layer, r]))).map(r => ({ layer: r.layer, started_at: r.started_at, status: r.status, http_status: r.http, records: r.records, bytes: 0, note: r.note })) } : { results: [] }; } }); return { bind: (...a) => x(a), ...x([]) }; };
   const env = { R2, DB: { prepare: stmt, async batch() { return []; } }, ADMIN_KEY: 'k', DRIFTERS_ENABLED: '1', ...extra };
   const raw = k => { const v = m.get(k); return v ? dec.decode(v.b) : null; };
-  return { env, m, puts, runs, hooks, fail, raw, json: k => JSON.parse(raw(k)), etag: k => m.get(k) && m.get(k).etag, bruns: () => runs.filter(r => r.layer === 'drifters') };
+  return { env, m, puts, runs, hooks, fail, adv, raw, setRaw: (k, text) => m.set(k, { b: enc.encode(text), etag: 'x' + (++seq), up: NOW }), json: k => JSON.parse(raw(k)), etag: k => m.get(k) && m.get(k).etag, bruns: () => runs.filter(r => r.layer === 'drifters') };
 }
 const manual = (E) => worker.fetch(new Request('https://hub/admin/run/drifters?key=k'), E.env);
 const hourly = (E, iso) => worker.scheduled({ cron: '7 * * * *', scheduledTime: Date.parse(iso) }, E.env, { waitUntil() {} });
@@ -268,6 +275,59 @@ await t('10b. recovery during a place request: judged on the final counts envelo
   E.env.R2.get = async (k) => { if (armed && k === LATEST) { armed = false; osmc.unshift(good()); await manual(E); } return get(k); };
   const p = await place(E, id); E.env.R2.get = get;
   assert.notEqual(p.state, 'withheld'); assert.equal(p.last_attempt, undefined); assert.equal(p.retrieved_at, E.json(CELLS).retrieved_at); assert.equal(E.json(CELLS).last_attempt, undefined);
+});
+
+await t('13. failed_at is the moment of failure, not the end of slow storage: D1 log +2 s, each R2 write +3 s → still 16:08:58', async () => {
+  const E = await seeded(); at('2026-11-10T16:08:58.000Z'); osmc = [KINDS.http_error]; E.adv.db = 2000; E.adv.put = 3000;
+  await manual(E); E.adv.db = 0; E.adv.put = 0;   // a manual run runs the buoy job alone, so nothing else moves the clock first
+  const c = E.json(CELLS); assert.equal(c.last_attempt.failed_at, '2026-11-10T16:08:58.000Z'); assert.ok(NOW >= Date.parse('2026-11-10T16:09:03.000Z'), 'the clock really did move to 16:09:03 or later during the handler (GPT\'s reproduction)');
+});
+await t('13b. failed_at survives the conditional-write retry unchanged', async () => {
+  const E = await seeded(); at('2026-11-10T16:08:58.000Z'); osmc = [KINDS.http_error]; E.adv.put = 3000;
+  // an EARLIER run (15:50, slow) publishes good data between this failure's read and its write → the write is retried on B's counts
+  E.hooks.beforePut = async (k, o) => { if (k !== CELLS || !o.onlyIf) return; E.hooks.beforePut = null; osmc.unshift(good(1310, 7000)); await hourly(E, '2026-11-10T15:50:00Z'); return 'done'; };
+  await manual(E); E.adv.put = 0;
+  const c = E.json(CELLS); assert.equal(c.scheduled_for, '2026-11-10T15:50:00.000Z'); assert.equal(c.last_attempt.failed_at, '2026-11-10T16:08:58.000Z'); assert.equal(c.last_attempt.run, '2026-11-10T16:08:58.000Z');
+  assert.ok(E.puts.filter(p => p.key === CELLS && p.cond === 'etag').length >= 2, 'the write really was retried');
+});
+await t('14. same-run guard: both objects publish and the run then throws → the published pair stays intact, no last_attempt, the failure is logged', async () => {
+  const E = await seeded(); at('2026-11-10T16:08:10.000Z'); osmc = [good(1310, 3000)];
+  E.fail.after = (k, o) => k === CELLS && !o.onlyIf;   // the counts write commits, then the call throws
+  await hourly(E, '2026-11-10T16:07:00Z'); E.fail.after = null;
+  const c = await pj(E, '/cells/drifters'), s = await pj(E, '/snapshot/drifters');
+  assert.equal(c.retrieved_at, '2026-11-10T16:08:10.000Z'); assert.equal(s.retrieved_at, c.retrieved_at); assert.equal(c.scheduled_for, '2026-11-10T16:07:00.000Z');
+  assert.equal(c.last_attempt, undefined, 'a run\'s own good data is not labelled as a failed update'); assert.equal(c.source_status, 'ok');
+  const last = E.bruns().at(-1); assert.equal(last.status, 'down'); assert.match(last.note, /^uncaught: /);
+  const p = await place(E, firstCell(c)); assert.equal(p.state, 'ok'); assert.equal(p.last_attempt, undefined);
+});
+await t('15. cold failure with a distinctive raw error: the public down envelope and every data endpoint stay clean', async () => {
+  const E = makeEnv(); at('2026-11-10T16:08:42.000Z'); osmc = [KINDS.fetch_failed]; await hourly(E, '2026-11-10T16:07:00Z');
+  const c = await pj(E, '/cells/drifters'); assert.equal(c.source_status, 'down'); assert.equal(c.note, 'request failed'); assert.equal(c.reason, 'fetch_failed');
+  for (const p of ['/cells/drifters', '/place/g4/10_10?layers=drifters', '/']) assert.ok(!(await pub(E, p)).text.includes('SECRET-RAW'), 'raw text in ' + p);
+  assert.equal((await pub(E, '/snapshot/drifters')).status, 404);
+  assert.ok(E.bruns().at(-1).note.includes('SECRET-RAW')); assert.ok(E.raw('cells/drifters/2026-11-10T16-07Z.json').includes('SECRET-RAW'), 'kept in the private per-run object');
+  assert.ok((await pub(E, '/status')).text.includes('SECRET-RAW'), '/status: existing exception (latest run note, secret-redacted)');
+  // refused response whose body carries the text
+  const F = makeEnv(); at('2026-11-10T16:08:42.000Z'); osmc = [KINDS.refused_by_checks]; await hourly(F, '2026-11-10T16:07:00Z');
+  const f = await pj(F, '/cells/drifters'); assert.equal(f.note, 'response refused by our checks'); assert.ok(!F.raw(CELLS).includes('SECRET-RAW'));
+});
+await t('16. stored counts are malformed JSON: nothing good to keep → replaced by a down envelope, conditionally on the etag read', async () => {
+  const E = await seeded(); E.setRaw(CELLS, '{"layer":"drifters","cells":{'); const sRaw = E.raw(LATEST), before = E.puts.length;
+  at('2026-11-10T16:08:42.000Z'); osmc = [KINDS.http_error]; await hourly(E, '2026-11-10T16:07:00Z');
+  const c = E.json(CELLS); assert.equal(c.source_status, 'down'); assert.equal(c.note, 'http error 522'); assert.equal(c.last_attempt, undefined);
+  assert.deepEqual(E.puts.slice(before).filter(p => p.key === CELLS).map(p => p.cond), ['etag']); assert.equal(E.raw(LATEST), sRaw);
+  // …and it loses to a good publish that lands in between
+  const F = await seeded(); F.setRaw(CELLS, 'not json'); at('2026-11-10T16:08:42.000Z'); osmc = [KINDS.http_error];
+  F.hooks.beforePut = async (k, o) => { if (k !== CELLS || !o.onlyIf) return; F.hooks.beforePut = null; const keep = NOW; NOW = Date.parse('2026-11-10T16:08:43.000Z'); osmc.unshift(good()); await manual(F); NOW = keep; return 'done'; };
+  await hourly(F, '2026-11-10T16:07:00Z'); assert.equal(F.json(CELLS).source_status, 'ok'); assert.equal(F.json(CELLS).last_attempt, undefined);
+});
+await t('17. the stored counts body cannot be read (transient): left exactly as it was, the failure still logged', async () => {
+  const E = await seeded(); const cRaw = E.raw(CELLS), eC = E.etag(CELLS), before = E.puts.length;
+  at('2026-11-10T16:08:42.000Z'); osmc = [KINDS.http_error];
+  const get = E.env.R2.get; E.env.R2.get = async (k) => { const o = await get(k); if (o && k === CELLS) { o.text = async () => { throw new Error('body read reset'); }; o.json = async () => { throw new Error('body read reset'); }; } return o; };
+  await hourly(E, '2026-11-10T16:07:00Z'); E.env.R2.get = get;
+  assert.equal(E.raw(CELLS), cRaw); assert.equal(E.etag(CELLS), eC); assert.equal(E.puts.slice(before).filter(p => p.key === CELLS).length, 0, 'no write attempted');
+  assert.equal(E.bruns().at(-1).status, 'down'); assert.equal(E.bruns().at(-1).note, 'http 522');
 });
 
 await t('12. every failed run is logged, including the ones that left latest-* alone (cases 4, 6, 8b counted there); other layers still use writeDown', async () => {

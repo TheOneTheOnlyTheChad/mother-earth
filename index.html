@@ -505,7 +505,8 @@ function render() {
   for (const layer of shownMapLayers()) {
     const snap = state[layer]; if (!snap || !on[layer]) continue;
     const fresh = ME.freshness(layer);
-    if (layer === 'drifters' && snap.last_attempt && fresh.grade === 'unknown') continue;   // an expired fallback (last good run kept after a failed update) is not drawn at all
+    // buoys kept from the last good run after a failed update: not drawn at all once expired, or while that run's records are not readable and paired
+    if (layer === 'drifters' && snap.last_attempt && (fresh.grade === 'unknown' || !usable('drifters'))) continue;
     for (const [id, cell] of Object.entries(snap.cells || {})) {
       let grade = (cell.coverage && cell.coverage.grade) || 'unknown';
       if (fresh.grade === 'unknown') grade = 'unknown';
@@ -1400,12 +1401,14 @@ function driftCard() {
   const f = ME.freshness('drifters'), s = state.drifters; setState('drifters', f);
   // A failed update after a good run (hub ≥ 0.6.8 keeps the good run's counts and adds last_attempt). While the good run is inside its
   // limit: badge "degraded" = update status only (the good run's coverage and freshness are untouched) and a line saying why.
-  // "Showing buoys from…" only when that run's buoys really are shown (records read and paired). Past the limit: unknown, as ever.
-  const fb = driftFallback(s, f);
-  if (fb) { st.textContent = 'degraded'; st.className = 'state warn'; st.title = fb; }
-  $('v-drifters').textContent = f.grade !== 'unknown' && s ? ME.total(s).toLocaleString() : '–';
+  // "Showing buoys from…" and "degraded" only when that run's buoys really are shown (records read and paired). Past the limit: unknown, as ever.
+  // If the update failed and that run's records are missing or mismatched, nothing of the buoys is shown: badge unknown, no count, no cells.
+  const fb = driftFallback(s, f), shown = usable('drifters'), noRecords = !!fb && !shown;
+  if (fb && shown) { st.textContent = 'degraded'; st.className = 'state warn'; st.title = fb; }
+  if (noRecords) { st.textContent = 'unknown'; st.className = 'state bad'; st.title = fb; }
+  $('v-drifters').textContent = f.grade !== 'unknown' && s && !noRecords ? ME.total(s).toLocaleString() : '–';
   const ref = s && s.refused ? Object.values(s.refused).reduce((a, x) => a + x, 0) : 0;
-  $('o-drifters').textContent = s && s.window_end ? `newest fix ${hhmm(s.window_end)} (${ago(s.window_end)}); each buoy shown at its own last fix` + (ref ? ` · ${ref.toLocaleString()} reports refused (e.g. time in the future), not drawn` : '') : 'no snapshot from the hub';
+  $('o-drifters').textContent = noRecords ? 'buoy positions not shown' : s && s.window_end ? `newest fix ${hhmm(s.window_end)} (${ago(s.window_end)}); each buoy shown at its own last fix` + (ref ? ` · ${ref.toLocaleString()} reports refused (e.g. time in the future), not drawn` : '') : 'no snapshot from the hub';
   $('m-drifters').innerHTML = `NOAA OSMC · GTS · retrieved ${ago(s && s.retrieved_at)}${fb ? ` · <b>${esc(fb)}</b>` : warn(f)}`;
 }
 // The buoy card's fallback line, or '' when there is none to show. Times are UTC; both carry their date when the dates differ.
