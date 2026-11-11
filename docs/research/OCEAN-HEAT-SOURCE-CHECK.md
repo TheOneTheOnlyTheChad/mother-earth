@@ -1,4 +1,4 @@
-# Ocean Heat — source-file check record (rev 2.1: C0–C5, correction 1, C6 credit)
+# Ocean Heat — source-file check record (rev 2.2: C0–C5, correction 1, C6 credit, STAR disclaimer)
 
 **Go (Chad, 10 Nov 2026):** "Go: Ocean Heat source-file check C0–C1 per OCEAN-HEAT-PROPOSAL rev 3 — route probes and listings, bounded reads capped at 64 KiB, no full download."
 **Packet (Mac, not in the repo):** `research/ocean-heat/2026-11-10-claude/`
@@ -106,3 +106,21 @@
 - the terms question in the REGISTER draft.
 
 **Not approved:** REGISTER filing, O7 build.
+
+## C6 — NOAA STAR disclaimer (rev 2.2, 11 Nov 2026)
+
+**Go (Chad, 11 Nov 2026):** "Go: read the NOAA STAR disclaimer for Ocean Heat — text only via the pane, no download."
+
+- **Read:** 11 Nov 2026, about 04:25 UTC, by Claude in the browser pane, as text.
+  - Page: https://www.star.nesdis.noaa.gov/star/productdisclaimer.php, "Disclaimers & Notices", linked as "Disclaimers" from the STAR home page.
+  - Nothing downloaded.
+- **Why it applies:** the three input files were fetched from STAR's webserver (`https://www.star.nesdis.noaa.gov/pub/socd/mecb/crw/data/5km/…`, manifest `inputs[].url`).
+- **What it says (summary):**
+  - **Status of the data:** data and images on STAR's webservers are described as not official NOAA operational products. They are provided as examples for experimental use, may be interrupted, changed or cancelled without notice, and are not run to operational uptime standards. Operational products are pointed to NOAA OSPO.
+  - **Use and credit (verbatim):** "Users are free to use the images or information hosted on this site as they wish, as long as credit is given to the NOAA / NESDIS Center for Satellite Applications and Research."
+  - **External links:** an external link is not an endorsement.
+- **Consequences for Ocean Heat:**
+  1. **A second credit is required:** NOAA / NESDIS Center for Satellite Applications and Research (STAR), alongside "NOAA Coral Reef Watch" (the Coral Reef Watch citation page's request). The two do not conflict: Coral Reef Watch is a STAR programme. The page's credit wording on the release branch must name both. GPT reviews the wording in the build packet.
+  2. **Data status:** Sources should say that the files come from STAR's server, which describes its hosted data as not official NOAA operational products. That fits the layer's existing "dated snapshot, analysed, not live" framing. No claim is made here about the operational status of the Coral Reef Watch products themselves (not checked).
+  3. **Commercial use:** the sentence places no restriction on use beyond credit.
+- **Not read:** NOAA OSPO's pages on the operational status of the Coral Reef Watch 5 km products.
