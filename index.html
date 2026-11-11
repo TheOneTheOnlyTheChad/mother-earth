@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611261000">
+<link rel="stylesheet" href="style.css?v=202611281000">
 </head>
 <body class="world">
 <header class="top">
@@ -66,6 +66,7 @@
       <div class="imgfull" id="img-full"></div>
       <div><span class="dot" style="--c:var(--quake)"></span>earthquake · <span class="dot" style="--c:var(--fire)"></span>fire detection (per pass) · <span class="dot" style="--c:var(--ship)"></span>vessel (last sample) · <span id="leg-drifters" hidden><span id="leg-drifters-sw"></span>drifting buoy · coloured by water temperature (see card) · </span><span id="leg-plastic" hidden><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero) · </span><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</div>
       <div class="cov nightleg" id="night-legend" hidden></div>
+      <div class="cov nightleg" id="oh-legend" hidden></div>
       <div class="cov nightleg" id="orb-legend" hidden></div>
       <details class="covkey">
         <summary>Cell outlines — coverage key</summary>
@@ -75,10 +76,10 @@
         <div class="cov">No outline = no records in that cell; not evidence of absence.</div>
         <div><a href="sources.html#coverage">How coverage is graded →</a></div>
       </details>
-      <div class="keydef" id="key-def">“Key · N layers” counts layers drawn on the globe right now: each map layer that is switched on and showing data (earthquakes, fires, vessels, forest, drifting buoys, microplastic samples), day/night as one, and each orbital category (payloads, rocket bodies, debris) as one. Indices (Kp, CO₂, sea ice), switched-off layers and layers still loading or unavailable are not counted.</div>
+      <div class="keydef" id="key-def">“Key · N layers” counts layers drawn on the globe right now: each map layer that is switched on and showing data (earthquakes, fires, vessels, forest, drifting buoys, microplastic samples), day/night as one, ocean heat as one, and each orbital category (payloads, rocket bodies, debris) as one. Indices (Kp, CO₂, sea ice), switched-off layers and layers still loading or unavailable are not counted.</div>
       </div>
     </div>
-    <footer class="credits" id="credits" aria-label="Data sources and acknowledgments">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · orbital element sets <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> (US Space Force 18th/19th Space Defense Squadrons) · drifting buoys <a href="https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html" target="_blank" rel="noopener">NOAA OSMC</a> (WMO GTS reports; CC0) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a> · Collection data: <a href="https://github.com/metmuseum/openaccess" target="_blank" rel="noopener">The Metropolitan Museum of Art Open Access</a> (CC0), source CSV of 2 Nov 2026 (commit e394878) · Moon and Sun distances: <a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener">NASA/JPL Horizons</a> (calculated). We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></footer>
+    <footer class="credits" id="credits" aria-label="Data sources and acknowledgments">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · orbital element sets <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> (US Space Force 18th/19th Space Defense Squadrons) · drifting buoys <a href="https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html" target="_blank" rel="noopener">NOAA OSMC</a> (WMO GTS reports; CC0) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a> · Collection data: <a href="https://github.com/metmuseum/openaccess" target="_blank" rel="noopener">The Metropolitan Museum of Art Open Access</a> (CC0), source CSV of 2 Nov 2026 (commit e394878) · Moon and Sun distances: <a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener">NASA/JPL Horizons</a> (calculated). Ocean heat: <a href="https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta_clim19912020.php" target="_blank" rel="noopener">NOAA Coral Reef Watch</a> (CoralTemp v3.1 and SST anomaly, 1991–2020 baseline; methods article DOI 10.3390/rs12233856), files from the <a href="https://www.star.nesdis.noaa.gov/" target="_blank" rel="noopener">NOAA / NESDIS Center for Satellite Applications and Research</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></footer>
     <div class="inspector" id="insp" role="dialog" aria-labelledby="insp-h"><button class="x" id="insp-x" type="button" aria-label="Close">×</button><h2 id="insp-h">—</h2><dl id="insp-dl"></dl><div id="insp-more"></div></div>
   </div>
 
@@ -234,6 +235,23 @@
               </div>
             </details>
           </div>
+          <div class="ovl opt-oh" id="oh-card">
+            <div class="ovl-h">Ocean heat <span class="ev comp">Analysed</span></div>
+            <button class="ovl-tgl" type="button" id="tgl-oh" role="switch" aria-checked="false" aria-describedby="oh-note"><span class="box" aria-hidden="true"></span><span class="t">Ocean heat — 9 Nov 2026 snapshot</span></button>
+            <div class="cav" id="oh-note">Sea surface temperature and its difference from NOAA's 1991–2020 normal for this day of year. Satellite-based, with gaps filled by NOAA. A dated snapshot, not live.</div>
+            <div class="hint" id="oh-status" hidden></div>
+            <div class="cav" id="oh-key" hidden></div>
+            <details class="scope" id="oh-scope">
+              <summary>What this is and is not</summary>
+              <div>
+                <p>One day, <b>9 Nov 2026 (UTC)</b>, from NOAA Coral Reef Watch: CoralTemp v3.1 sea surface temperature and its difference from NOAA's <b>1991–2020 normal</b> for that location and day of year. Tap the water to read both.</p>
+                <p><b>Analysed, not observed:</b> a satellite-based estimate with gaps filled by NOAA's analysis. It describes the surface of a grid cell, can differ from a nearby beach or buoy, and says nothing about the water below.</p>
+                <p>One warm snapshot does not identify a marine heatwave or coral bleaching. Sea ice, and places with no 1991–2020 normal, are shown as no data — never as zero.</p>
+                <p>Coastlines follow NOAA's 5 km land mask; features narrower than a cell can read as water.</p>
+                <p><a href="sources.html#oceanheat">Sources &amp; Details →</a></p>
+              </div>
+            </details>
+          </div>
           <div class="sky-group" id="sky-group" role="group" aria-labelledby="sky-h">
             <div class="sky-head" id="sky-h">Sky</div>
           <div class="card sat-card orb-card" id="card-orb" style="--c:var(--space)">
@@ -343,10 +361,11 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611261000"></script>
-<script src="arts.js?v=202611261000"></script>
-<script src="sky.js?v=202611261000"></script>
-<script src="skyscene.js?v=202611261000"></script>
+<script src="app.js?v=202611281000"></script>
+<script src="arts.js?v=202611281000"></script>
+<script src="sky.js?v=202611281000"></script>
+<script src="skyscene.js?v=202611281000"></script>
+<script src="oceanheat.js?v=202611281000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
@@ -402,8 +421,8 @@ if (noWebGL) {
       .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonSideColor(() => 'rgba(0,0,0,0)').polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
       .polygonLabel(p => p.label)
       .pathsData([]).pathPoints('pts').pathPointLat(q => q[0]).pathPointLng(q => q[1]).pathPointAlt(() => .003).pathColor(() => 'rgba(206,222,236,.95)').pathTransitionDuration(0)
-      .onPolygonClick(p => inspectCell(p))
-      .onGlobeClick(({ lat, lng }) => openPlace(ME.cellId(lat, lng)));   // any place, including one with no visible records
+      .onPolygonClick((p, ev, c) => { ohTap = c && Number.isFinite(c.lat) && Number.isFinite(c.lng) ? { lat: c.lat, lng: c.lng } : null; inspectCell(p); })
+      .onGlobeClick(({ lat, lng }) => { ohTap = { lat, lng }; openPlace(ME.cellId(lat, lng)); });   // any place, including one with no visible records
     globe.pointOfView({ lat: -10, lng: 25, altitude: innerWidth <= 720 ? 2.8 : 2.2 });   // phones: the whole sphere fits above the readings sheet
     globe.controls().autoRotate = !reduced; globe.controls().autoRotateSpeed = .25;
     globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
@@ -481,6 +500,7 @@ function drawnLayers() {
     out.push(k);
   }
   try { if (night.on && night.at) out.push('daynight'); } catch (_) { /* declared later in this script */ }
+  if (ME.oceanHeat && ME.oceanHeat.on()) out.push('oceanheat');
   try { if (orb.at && !orb.why) for (const g of orbGroupsNow()) if (orb.on.has(g.id) && orb.last[g.id]) out.push('orbital:' + g.id); } catch (_) { }
   return out;
 }
@@ -494,6 +514,7 @@ function paintKey() {
   const og = d.filter(x => x.startsWith('orbital:')).map(x => x.slice(8)), po = $('ps-orb'); po.hidden = !og.length;
   try { if (og.length) po.innerHTML = `<b>Orbital</b> ${og.map(g => `<span class="orb-sw" style="--oc:${ME.orbColour(g)}"></span>`).join('')} · computed · enlarged, not to scale`; } catch (_) { }   // the pass time stays in the Key and on the card: one line on a 360 px phone
 }
+ME.paintKeyExternal = () => { try { paintKey(); } catch (_) { } };   // Ocean heat repaints the Key count when it switches
 const keyOpen = () => $('legend').classList.contains('open');
 function openKey() { closeInspector(); $('legend').classList.add('open'); $('key-btn').setAttribute('aria-expanded', 'true'); }
 function closeKey(focusBtn) { if (!keyOpen()) return; $('legend').classList.remove('open'); $('key-btn').setAttribute('aria-expanded', 'false'); if (focusBtn) $('key-btn').focus(); }
@@ -515,6 +536,7 @@ document.querySelectorAll('button.tgl').forEach(b => b.addEventListener('click',
 
 // ---------- inspector (§10.3): coverage cells AND individual records, through one open/close path
 let lastFocus = null;          // restored when the inspector closes
+var ohTap = null;              // Ocean heat: the tap's own lat/lng for the view it opened (var: assigned by globe handlers set up earlier)
 let inspCtx = null;            // { layer, recs } so a listed record can be opened on its own
 function openInspector(title, rows) {
   closeKey(false);   // the Key and the inspector never overlap: opening one closes the other
@@ -529,6 +551,9 @@ function fillInspector(title, rows) {   // content only: no focus change (used w
   // rows tagged 'more' (long method text) go behind one disclosure so the measurement, time, place and source stay findable
   const dl = r => r.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('');
   const main = rows.filter(r => r && r[2] !== 'more'), more = rows.filter(r => r && r[2] === 'more');
+  // Ocean heat (preview): only for views opened by a tap, read at the tap's own coordinates; omitted without trustworthy coordinates
+  const oh = ohTap && ME.oceanHeat ? ME.oceanHeat.rowsAt(ohTap.lat, ohTap.lng) : null;
+  if (oh) { main.push(...oh.filter(r => r[2] !== 'more').map((r, i) => i === 0 ? [r[0], r[1]] : r)); more.push(...oh.filter(r => r[2] === 'more')); }
   $('insp-dl').innerHTML = dl(main);
   $('insp-more').innerHTML = more.length ? `<details class="imore"><summary>Method and full explanation</summary><dl>${dl(more)}</dl></details>` : '';
 }
@@ -536,7 +561,7 @@ function closeInspector() {
   if (!$('insp').classList.contains('show')) return;
   $('insp').classList.remove('show');
   if (lastFocus && document.contains(lastFocus) && typeof lastFocus.focus === 'function') lastFocus.focus();
-  lastFocus = null; inspCtx = null; placeCtx = null; $('insp').classList.remove('placeview');
+  lastFocus = null; inspCtx = null; placeCtx = null; ohTap = null; $('insp').classList.remove('placeview');
 }
 $('insp-x').onclick = closeInspector;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInspector(); });
@@ -583,7 +608,7 @@ function recordTitle(layer, r) {
 
 // one record on its own — never a cell total (review round 5)
 function inspectRecord(layer, r) {
-  $('insp').classList.remove('placeview'); placeCtx = null;
+  $('insp').classList.remove('placeview'); placeCtx = null; ohTap = null;   // a record view is about the record, not the tapped point
   if (layer === 'plastic') return inspectSample(r);
   const snap = state[layer];
   const rows = [['Selected', 'one record from the loaded snapshot — not a cell total']];

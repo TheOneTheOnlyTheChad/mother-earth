@@ -2,7 +2,85 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 11 Nov 2026
+
+## 11 Nov 09:50 UTC — Ocean Heat: live RC through the hub passed
+
+- Chad's Chrome, Pages origin, branch `1b975a0` injected with its own hub BASE. Zero requests before the toggle; P1 manifest+mask+v025 and P2 manifest+mask+v050, all 200, all hash = pin, no cache override; immutable 24 h; repeats from browser cache (≤ 17 ms); weak manifest ETag harmless. Taps 12/12 on both paths. First enable 2.3 s (P1) / 2.5 s (P2, mask cached). Regression gate met (no repeatable layer cost; renders on ≈ off). Packet §8. Next: Chad's merge line.
+
+## 11 Nov 09:38 UTC — Ocean Heat: hub 0.6.7 live (from `1b975a0`)
+
+- Content-only deploy 09:36:49Z on Chad's line; read-back exact (`53ede31e…`); 19 bindings unchanged. Live: version 0.6.7; four files 200, byte-exact, immutable 24 h; bad paths 404 no-store. Manifest ETag arrives weak (edge compression of JSON; bytes exact). Page unchanged (main). Next: live RC, then merge line. Packet §7.
+
+## 11 Nov 09:24 UTC — Ocean Heat: R2 upload done; route fix on the branch; deploy awaits a new line
+
+- **R2:** the four `ref/oceanheat/oh-2026-11-09-R1/` objects uploaded 09:16 UTC on Chad's Approve line (destination empty first; sources from `db5eedd`, hash-checked; read-back exact). Not served yet (live hub 0.6.6).
+- **GPT's review:** STAR credit kept; Sources' experimental-status clause dropped; route now matches path segments literally (`/%6danifest.json` → 404, no R2 read). Branch `ocean-heat-release` at `1b975a0`: hub suite 48/48, breaks 7/7, pin check consistent, browser 109/109.
+- **Not done:** hub deploy (Chad's line named `d4272a8`; needs a line for `1b975a0`), live RC, merge. Packet §6.
+
+## 11 Nov 05:15 UTC (clock reading at write) — **STAR disclaimer READ; REGISTER entry FILED (C6); release candidate BUILT on branch `ocean-heat-release` @ `d4272a8`** (Chad's three lines; no merge, R2, hub or page change) — packet `reviews/2026-11-11-ocean-heat-release.md` (on the branch)
+- **STAR disclaimer:** free use with credit to the NOAA / NESDIS Center for Satellite Applications and Research; hosted data described as experimental, not official operational products. Recorded in `OCEAN-HEAT-SOURCE-CHECK.md` rev 2.2 and the REGISTER (main `50e9419`).
+- **Build:**
+  - hub 0.6.7 `GET /catalogue/oceanheat/<revision>/<file>` (pinned length + sha256; immutable 24 h on 200; `no-store` 404 / 503; no `Content-Encoding`);
+  - page `BASE` → hub, no forced revalidation, STAR credit (inspector, footer, Sources);
+  - `data/ocean-heat/` removed; build-time pin check consistent.
+- **Tests:**
+  - hub suite 45/45, 6/6 breaks;
+  - pin check 3/3 breaks;
+  - browser suite 109/109 on `OH_SNAPSHOT_DIR`, 14/14 breaks;
+  - 17 hub and 7 page regression suites green.
+- **Next:** GPT reviews (including the STAR wording); then the R2 upload, the hub 0.6.7 deploy, the live RC through the hub, and the merge, each on its own line.
+
+## 11 Nov 04:19 UTC (clock reading at write) — **Ocean Heat release decisions RECORDED (Chad); release proposal rev 2** (docs only; main `7ba3660`)
+- **D1:** regression gate adopted for this release. §10 satisfies it for the tested Chrome setup (P1 and forced P2); physical phone unverified. Absolute targets kept for the globe performance work (coverage-cell polygons first).
+- **D2:** hub serving; `data/ocean-heat/` removed from the release branch; both suites take `OH_SNAPSHOT_DIR`, hash-check the four files at setup, and run with the branch copy absent.
+- **Q1:** verified 200s `public, max-age=86400, immutable`; the page's pinned fetches drop `no-cache`; 404 and 503 `no-store`; byte changes get a new revision and pins.
+- **Q2:** the Worker checks length and SHA-256; a build-time check matches the manifest revision to the route and its file entries to the Worker pins; the page keeps its checks; `.bin.z` as `application/octet-stream` with no `Content-Encoding`; the Worker tests add `unreadable`.
+- **Final check:** Pages origin, against the deployed hub, with the candidate's actual `BASE`; exact requests and response hashes on both paths; tap readings; first-enable timing through the hub.
+- **Approval lines** (proposal §7, none given): STAR disclaimer Go; REGISTER filing; release branch build; R2 upload; hub 0.6.7 deploy; merge.
+
+## 11 Nov 04:11 UTC (clock reading at write) — **GPT: regression gate recommended and cleared on the timing run; Ocean Heat release proposal rev 1 written** (docs only)
+- GPT recommends (a), the regression gate (no repeatable slowdown against the layer-off baseline, both paths), as an explicit change to the merge criterion. The absolute targets stay for the globe's own performance work. Cleared for the tested Chrome setup; phone unverified. **Adoption is Chad's (D1).**
+- Remaining release check: the page fetches the pinned snapshot through the hub, after the separately approved route and upload.
+- `docs/concepts/OCEAN-HEAT-RELEASE-PROPOSAL.md` rev 1 (main): R2 `ref/oceanheat/oh-2026-11-09-R1/` (4 objects); hub 0.6.7 route `GET /catalogue/oceanheat/<revision>/<file>` (pinned, length + sha256, 404 without an R2 read for anything else); page `BASE` → hub; tests with breaks; live RC through the hub; steps 1–8, each its own line.
+- Still before release: REGISTER (C6), the STAR disclaimer read, the md5 sidecars.
+
+## 11 Nov 04:05 UTC (clock reading at write) — **Ocean Heat foreground timing run DONE (Chad's Chrome, M3): thresholds missed by the page itself, not the layer**; GPT cleared rev 2 for preview (branch only)
+- **GPT (relayed):** rev 2 clears the preview findings. Merge pending the timing run and a verified hub-backed release candidate.
+- **Run** (packet §10), branch `7cd43ac`, 7 files hash-exact; Chrome raw frame rate 16.7 ms:
+  - desktop: P1 layer on 100 ms median / 133 p95 vs layer-off baseline 117 / 267;
+  - P2 (forcePhone): 183 / 200 on and off alike;
+  - taps about 350 ms, on and off alike;
+  - **live public page without Ocean Heat: 117 / 133.**
+- **Cause:** the 782 coverage-cell polygons (1,564 meshes). A synchronous render took 31 ms in that sample, 3.5 ms with them hidden.
+- **Question for GPT and Chad:** is the gate regression (met) or absolute (needs separate page-performance work first)?
+
+## 11 Nov 03:32 UTC (clock reading at write) — **GPT: Ocean Heat passes functional preview review; performance is a merge gate. Rev 2 on `ocean-heat-rc` @ `3915348`** (branch only)
+- **GPT (relayed by Chad):** all 12 local hashes match the packet.
+  - Foreground timing goes before merge: both shipping paths, layer-off baseline, median ≤ 33 ms, p95 ≤ 50 ms, tap ≤ 200 ms, plus Chad's impression.
+  - Lighten the no-data checker.
+  - Phones default to P2; handle limits below 3,600 explicitly.
+  - Pages serving only if Chad chooses it for release (rev 4.2 names the hub as the public follow-on).
+- **Rev 2 (packet §9):**
+  - phone-sized (≤ 720 px, or a touch screen with short side ≤ 500) → P2;
+  - P1 / P2 in 1 or 2 tiles by limit; < 1800 → unavailable, nothing more fetched;
+  - checker `[128,140,160] / [100,112,130]`, ΔE to polar-night land 12.4 → 28.0;
+  - suite 101/101; 13/13 breaks caught (3 new);
+  - 5 page-loading regression suites green;
+  - looked at on the M3 (Arctic night, Weddell in sun, day/night on);
+  - the pane (588 px) chose P2 by default.
+- **Unchanged:** main, the public page, hub, D1, R2.
+- **Chad, 11 Nov (answers):** release data host = **hub, as in rev 4.2** (not Pages): the hub route and the R2 upload each need their own line before merge; the RC's relative `data/` path changes with it. Timing run in his Chrome: **yes**.
+- **Open (Chad):** the foreground timing run (Chrome extension was not reachable at first try); md5 sidecars; REGISTER (C6).
+
 # 10 Nov 2026
+
+## 10 Nov 19:55 UTC (clock reading at write) — **Ocean Heat preview candidate BUILT on branch `ocean-heat-rc` @ `0130e4d`** (Chad: "Approve: build ocean-heat-rc on a branch only — Ocean Heat preview per OCEAN-HEAT-PROPOSAL rev 4.2 on the pinned 9 Nov inputs; no merge, R2, hub or page change.") — packet `reviews/2026-11-10-ocean-heat-rc.md` (on the branch)
+- **New:** `oceanheat.js` (page file 10 on a merge), snapshot `data/ocean-heat/oh-2026-11-09-R1/` (manifest `dcc34674…`; P1 first-enable 1,223,509 B), generator with hard stops (6/6), browser suite 79/79, all 10 code breaks caught at `0130e4d`; 16 regression suites green.
+- **Live RC (Pages origin, real Apple M3 GPU, `MAX_TEXTURE_SIZE` 16384), 19:28–19:37Z:** seven page files hash-exact; P1 7200 × 3600; zero requests while off, exactly three on enable; 12/12 taps match NOAA's exact sums; real tap through the handlers; Sky zoom-out hides and restores the layer; off clears everything.
+- **Not obtained:** §8 "smooth" and tap timing. The pane ran `requestAnimationFrame` at one frame per 2 s with the layer off as well as on. The layer adds ≈ 1 ms to a forced render. Open for GPT, with the sea-ice-in-polar-night tone and the ~99 MiB P1 texture.
+- **Unchanged:** main, the public page, hub 0.6.6, D1, R2.
+- **Next:** GPT reviews the packet and the `_review/ocean-heat-rc/` preview; Chad's lines for anything further.
 
 ## 10 Nov 18:30 UTC (clock reading at write) — **GPT cleared Ocean Heat rev 4.1 for O7; rev 4.2 applies the build notes** (docs only)
 - GPT (relayed by Chad): §2/§5 pass; §8 passes with two build notes; §9a/C6 pass. The OSTIA hold stays withdrawn for the 9 Nov snapshot.

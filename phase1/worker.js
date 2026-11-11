@@ -26,6 +26,9 @@
  *   GET /catalogue/sky/<revision> (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a) the FIXED Sky catalogue (Moon/Sun daily distances, NASA/JPL
  *                           Horizons): versioned only — an id not in SKY_REVISIONS (exact key match), a malformed path or the bare
  *                           /catalogue/sky → 404 without any R2 read; a known revision whose stored bytes are missing or fail the pin → 503.
+ *   GET /catalogue/oceanheat/<revision>/<file> (0.6.7; OCEAN-HEAT-RELEASE-PROPOSAL rev 2 §2) one file of a FIXED Ocean Heat snapshot
+ *                           (NOAA Coral Reef Watch, dated): both segments must be exact keys in OCEANHEAT_REVISIONS, else 404 with no
+ *                           R2 read; served byte for byte only if the stored length and sha256 match the pin, else 503 (no-store).
  *   GET /snapshot/arts      (0.6.2) the FIXED Met catalogue snapshot (Arts release proposal rev 2.1): served from R2 ref/arts/ only if the complete
  *                           stored file hashes to ARTS.fileSha256 and its snapshot_id = ARTS.recordsSha256; else 503 unavailable. Not a collector.
  *
@@ -61,7 +64,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.6';
+const COLLECTOR_VERSION = '0.6.7';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2094,7 +2097,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -3025,6 +3028,50 @@ async function skyCatalogue(env, pin) {
   return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'ETag': '"' + pin.fileSha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
 }
 
+// ===== Ocean Heat snapshot files (0.6.7; OCEAN-HEAT-RELEASE-PROPOSAL rev 2 §2) =====
+// Same rules as Sky / Timeline: outside LAYERS, cron, D1, /status collection, /health and history. A revision is IMMUTABLE: any byte
+// change gets a new revision id, a new R2 prefix and new pins here and in the page. The Worker checks length and sha256 only; it never
+// parses or alters the files. The build-time check (phase1/ocean-heat/check_release_pins.mjs) ties these pins to the manifest and the
+// page. The .bin.z files are zlib streams the page inflates itself: served as application/octet-stream with NO Content-Encoding.
+const OCEANHEAT_REVISIONS = Object.freeze({
+  'oh-2026-11-09-R1': Object.freeze({
+    revision: 'oh-2026-11-09-R1',
+    files: Object.freeze({
+      'manifest.json': Object.freeze({ key: 'ref/oceanheat/oh-2026-11-09-R1/manifest.json', sha256: 'dcc3467428e38e76966508d10078d322b8d724ed784de3266ae0b62354f5af1b', bytes: 4585, type: 'application/json' }),
+      'mask.bin.z': Object.freeze({ key: 'ref/oceanheat/oh-2026-11-09-R1/mask.bin.z', sha256: '349fc0237d35443864ce58bebc221d19672440d14604e24a86df595ced10bb9c', bytes: 137652, type: 'application/octet-stream' }),
+      'v025.bin.z': Object.freeze({ key: 'ref/oceanheat/oh-2026-11-09-R1/v025.bin.z', sha256: '3e66d63c816b01c561a038f757fdc5628ec1be96857232f8ed62b8dac2be1ae0', bytes: 1081272, type: 'application/octet-stream' }),
+      'v050.bin.z': Object.freeze({ key: 'ref/oceanheat/oh-2026-11-09-R1/v050.bin.z', sha256: 'be418c11f7f7903c11bdd7e33454502fa95c5a58a564d606f8f4fdfbcc00c725', bytes: 323176, type: 'application/octet-stream' }),
+    }),
+  }),
+});
+const OCEANHEAT_CURRENT = 'oh-2026-11-09-R1';   // discovery metadata only; no route serves "current" implicitly
+const OCEANHEAT_CACHE_OK = 'public, max-age=86400, immutable';   // verified 200s only (Q1); 404 and 503 are no-store
+function oceanHeatPin(rev, file, table = OCEANHEAT_REVISIONS) {
+  const own = (o, k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k);
+  return own(table, rev) && own(table[rev].files, file) ? table[rev].files[file] : null;
+}
+/** Route /catalogue/oceanheat/<revision>/<file> on the RAW pathname: exactly two non-empty segments, each matched LITERALLY (never
+ *  percent-decoded) against an exact key; anything else (bare, partial, extra segment, trailing slash, repeated separators, any
+ *  percent-encoded spelling such as %2F or %6danifest.json, unknown id or file) → 404, no R2 read. */
+async function oceanHeatRoute(env, rawPath, table = OCEANHEAT_REVISIONS) {
+  const m = typeof rawPath === 'string' ? rawPath.match(/^\/catalogue\/oceanheat\/([^/]+)\/([^/]+)$/) : null;
+  const pin = m ? oceanHeatPin(m[1], m[2], table) : null;
+  if (!pin) return json({ kind: 'catalogue', catalogue: 'oceanheat', status: 'unknown revision or file' }, 404, { 'Cache-Control': 'no-store' });
+  return oceanHeatFile(env, pin);
+}
+/** Serve one pinned file byte for byte, or 503 {status:'unavailable', reason}. reason: missing | unreadable | size | integrity. */
+async function oceanHeatFile(env, pin) {
+  const no = reason => json({ kind: 'catalogue', catalogue: 'oceanheat', status: 'unavailable', reason }, 503, { 'Cache-Control': 'no-store' });
+  let o;
+  try { o = await env.R2.get(pin.key); } catch (e) { return no('unreadable'); }
+  if (!o) return no('missing');
+  let buf;
+  try { buf = await o.arrayBuffer(); } catch (e) { return no('unreadable'); }
+  if (buf.byteLength !== pin.bytes) return no('size');
+  if (await sha256Bytes(buf) !== pin.sha256) return no('integrity');
+  return new Response(buf, { headers: { 'Content-Type': pin.type, 'Cache-Control': OCEANHEAT_CACHE_OK, 'ETag': '"' + pin.sha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
+}
+
 function json(obj, status = 200, extra = {}) {
   return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', ...CORS, ...extra } });
 }
@@ -3059,6 +3106,7 @@ export default {
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'sky') return skyRoute(env, url.pathname);   // 0.6.5 versioned only; outside LAYERS
+    if (p[0] === 'catalogue' && p[1] === 'oceanheat') return oceanHeatRoute(env, url.pathname);   // 0.6.7 versioned files only; outside LAYERS
 
     if (p[0] === 'snapshot' || p[0] === 'cells') {
       const layer = p[1];
@@ -3132,7 +3180,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>', '/catalogue/sky/<revision>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) }, sky: { kind: 'fixed catalogue', versioned_path: '/catalogue/sky/<revision>', current: SKY_CURRENT, scene: SKY_SCENE_CURRENT, revisions: Object.keys(SKY_REVISIONS) } },
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>', '/catalogue/sky/<revision>', '/catalogue/oceanheat/<revision>/<file>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) }, sky: { kind: 'fixed catalogue', versioned_path: '/catalogue/sky/<revision>', current: SKY_CURRENT, scene: SKY_SCENE_CURRENT, revisions: Object.keys(SKY_REVISIONS) }, oceanheat: { kind: 'fixed snapshot files', versioned_path: '/catalogue/oceanheat/<revision>/<file>', current: OCEANHEAT_CURRENT, revisions: Object.keys(OCEANHEAT_REVISIONS) } },
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };
