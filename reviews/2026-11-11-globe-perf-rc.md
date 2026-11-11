@@ -44,7 +44,7 @@ Removing the invisible side walls changes **only outline pixels**, never fills: 
 
 Reading: B1 shows the outlines as drawn, without walls nobody can see cutting them; it is arguably more correct than today. GPT predicted this class of change (proposal rev 1.1, R2). **Whether it is acceptable is Chad's call**, and the RC check repeats the comparison on the live page with real data (matched screenshots, limb, poles, dateline).
 
-## 4. Regression suites (branch `globe-perf-rc`, container, swiftshader; 11 Nov 15:03–15:40 UTC)
+## 4. Regression suites (branch `globe-perf-rc`, container, swiftshader; run 11 Nov 15:02:05–15:27:03 UTC by file timestamps; buoy-temp-ui and terminator reruns after that)
 
 Every browser and hub suite in `phase1/` was run in sequence (the default page is B2a):
 
