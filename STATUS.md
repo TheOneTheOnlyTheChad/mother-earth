@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 04:28 UTC (clock reading at write) — **GPT: regression gate recommended and cleared on the timing run; Ocean Heat release proposal rev 1 written** (docs only)
+- GPT recommends (a), the regression gate (no repeatable slowdown against the layer-off baseline, both paths), as an explicit change to the merge criterion. The absolute targets stay for the globe's own performance work. Cleared for the tested Chrome setup; phone unverified. **Adoption is Chad's (D1).**
+- Remaining release check: the page fetches the pinned snapshot through the hub, after the separately approved route and upload.
+- `docs/concepts/OCEAN-HEAT-RELEASE-PROPOSAL.md` rev 1 (main): R2 `ref/oceanheat/oh-2026-11-09-R1/` (4 objects); hub 0.6.7 route `GET /catalogue/oceanheat/<revision>/<file>` (pinned, length + sha256, 404 without an R2 read for anything else); page `BASE` → hub; tests with breaks; live RC through the hub; steps 1–8, each its own line.
+- Still before release: REGISTER (C6), the STAR disclaimer read, the md5 sidecars.
+
 ## 11 Nov 04:05 UTC (clock reading at write) — **Ocean Heat foreground timing run DONE (Chad's Chrome, M3): thresholds missed by the page itself, not the layer**; GPT cleared rev 2 for preview (branch only)
 - **GPT (relayed):** rev 2 clears the preview findings. Merge pending the timing run and a verified hub-backed release candidate.
 - **Run** (packet §10), branch `7cd43ac`, 7 files hash-exact; Chrome raw frame rate 16.7 ms:

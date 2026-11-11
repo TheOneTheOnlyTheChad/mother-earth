@@ -244,3 +244,11 @@ Rerun 19:37–19:57 UTC at `0130e4d`, logs kept in the session. Clean: **79 pass
 - (b) **absolute gate:** blocks Ocean Heat until the page's own frame cost is fixed. That is its own piece of work: the 782 coverage-cell polygons are the measured bulk, and merging them into one mesh is the obvious candidate, subject to a proposal.
 
 Chad's hands-on impression is still useful alongside these numbers.
+
+**GPT on §10 (relayed by Chad, 11 Nov):**
+- Recommends **(a), the regression gate**, as an explicit change to the merge criterion. The absolute targets stay as targets for the globe's performance work.
+- GPT verified §10 and the `oceanheat.js` hash. The run shows no repeatable slowdown at this test's resolution: P2 on and off were essentially identical. P1's p95 varied between runs, but the slower layer-on result was not repeatable, and the first layer-off baseline was slower still.
+- This clears the regression gate **for the tested Chrome setup**; phone performance is unverified.
+- If (a) is adopted, this run is sufficient for the render-performance gate. The remaining release check is the page fetching the pinned snapshot **through the hub** after the separately approved route and upload (the first-enable times here used raw.githubusercontent).
+- The coverage polygons are the first lead for globe performance; the benefit of merging their meshes still needs measuring.
+- **Next:** `docs/concepts/OCEAN-HEAT-RELEASE-PROPOSAL.md` rev 1 (on main): the hub route, the R2 objects, the page `BASE`, the tests and the steps. D1 (adopting the gate) is Chad's.
