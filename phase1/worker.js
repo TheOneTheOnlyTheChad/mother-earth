@@ -64,7 +64,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.7';
+const COLLECTOR_VERSION = '0.6.8';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -1475,15 +1475,61 @@ function driftBuild(text, retrievedMs, prevCount) {
   if (prevCount && rows.length < prevCount * DRIFT.minFrac) return { problem: `buoy count fell to ${rows.length} from ${prevCount} (below ${DRIFT.minFrac * 100} %)`, refused };
   return { rows, cells, refused, sst_out_of_range: sstOut, newest: newest && new Date(newest).toISOString() };
 }
+/* A failed buoy run (0.6.8, docs/concepts/OSMC-RELIABILITY-PROPOSAL.md rev 2.1). Buoys never reach the generic writeDown.
+ *  - The run is ALWAYS logged (collector_runs row + the private per-run object cells/drifters/<minute>.json, raw note kept;
+ *    no public route serves that object), whether or not latest-cells is written.
+ *  - latest-cells/drifters.json: if it holds a good run's counts, they are rewritten UNCHANGED plus a last_attempt block
+ *    (retrieved_at, cells, source_status, scheduled_for … stay the good run's). latest/drifters.json is never touched here.
+ *    The hub does not claim a matched pair: the page and /place check the pair at read time, as before.
+ *  - Nothing good to keep (key absent, unreadable, or an empty down envelope): an empty down envelope with a fixed-phrase note.
+ *  - EVERY write here is conditional (etag of what was read, or create-only when absent), re-read once on a lost race.
+ *  - Attempts are ordered by RUN timestamp (scheduled_for / last_attempt.run), never by retrieved_at or failed_at: if what is
+ *    stored comes from this run or a later one, nothing is written. failed_at is for display only.
+ *  - The raw error text never goes into latest-cells (reason is one of four fixed codes).
+ *  - failed_at is the time this handler was entered. Stored counts that cannot be read are left alone; stored counts that
+ *    read but are not JSON count as nothing good to keep. */
+const DRIFT_REASONS = { fetch_failed: 'request failed', http_error: 'http error', refused_by_checks: 'response refused by our checks', internal_error: 'internal error' };
+async function driftFail(env, scheduledMs, reason, note, http) {
+  const layer = 'drifters', run = new Date(scheduledMs).toISOString();
+  const failedAt = nowIso();   // captured ONCE on entry, before any await: the log write, the per-run object and a retry must not move it
+  if (!DRIFT_REASONS[reason]) reason = 'internal_error';
+  await logRun(env, layer, scheduledMs, 'down', http || 0, 0, 0, note);   // logRun swallows its own errors
+  const down = (extra) => { const e = envelope(layer, scheduledMs, null, null, 'down', {}, [], [], extra); return { ...e, records: undefined }; };
+  try { await putJson(env, `cells/${layer}/${isoMinute(scheduledMs)}.json`, down({ note })); } catch (e) { console.log('driftFail per-run record failed', String(e).slice(0, 120)); }
+  const key = `latest-cells/${layer}.json`;
+  try {
+    for (let round = 0; round < 2; round++) {
+      const o = await env.R2.get(key); let cur = null;
+      if (o) {
+        let text;   // a body that cannot be READ is not evidence about its content: leave the stored object alone
+        try { text = await o.text(); } catch (e) { console.log('driftFail: stored counts could not be read; left alone', String(e).slice(0, 120)); return 'left: stored counts unreadable'; }
+        try { cur = JSON.parse(text); } catch (_) { cur = null; }   // read fine but not JSON: nothing good to keep → replaced conditionally below
+        if (cur === null || typeof cur !== 'object') cur = null;
+      }
+      if (cur) {
+        const stored = [cur.scheduled_for, cur.last_attempt && cur.last_attempt.run].filter(Boolean).sort().pop();
+        if (stored && stored >= run) return 'left: stored data is from this run or a later one';
+      }
+      const good = !!(cur && cur.source_status && cur.source_status !== 'down' && cur.cells && cur.retrieved_at);
+      const body = good
+        ? { ...cur, last_attempt: { run, failed_at: failedAt, status: 'down', http: http || null, reason, consecutive_failures: ((cur.last_attempt && cur.last_attempt.consecutive_failures) || 0) + 1 } }
+        : down({ note: DRIFT_REASONS[reason] + (reason === 'http_error' && http ? ' ' + http : ''), reason });
+      const res = await env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: o ? { etagMatches: o.etag } : { etagDoesNotMatch: '*' } });
+      if (res) return good ? 'kept last good counts' : 'down envelope';
+    }
+    console.log('driftFail: latest-cells changed twice while writing; left alone');
+    return 'left: contended';
+  } catch (e) { console.log('driftFail write failed', String(e).slice(0, 120)); return 'left: write failed'; }
+}
 async function collectDrifters(env, scheduledMs) {
   const layer = 'drifters', retrievedMs = Date.now();
   const since = new Date(retrievedMs - DRIFT.windowMs).toISOString().slice(0, 19) + 'Z';
   let res;
-  try { res = await fetchText(URLS.drifters(since)); } catch (e) { return writeDown(env, layer, scheduledMs, 'fetch failed: ' + e, 0); }
-  if (!res.ok) return writeDown(env, layer, scheduledMs, 'http ' + res.status, res.status);
+  try { res = await fetchText(URLS.drifters(since)); } catch (e) { return driftFail(env, scheduledMs, 'fetch_failed', 'fetch failed: ' + e, 0); }
+  if (!res.ok) return driftFail(env, scheduledMs, 'http_error', 'http ' + res.status, res.status);
   const prev = await getJson(env, `latest/${layer}.json`);
   const b = driftBuild(res.text, retrievedMs, prev && prev.records && prev.records.length);
-  if (b.problem) return writeDown(env, layer, scheduledMs, 'refused: ' + b.problem + (b.refused ? ' ' + JSON.stringify(b.refused) : ''), res.status);
+  if (b.problem) return driftFail(env, scheduledMs, 'refused_by_checks', 'refused: ' + b.problem + (b.refused ? ' ' + JSON.stringify(b.refused) : ''), res.status);
   const grade = 'partial', evidence = 'buoy_positions_only;sparse_platforms;gts_relay';
   for (const id in b.cells) b.cells[id].coverage = { grade, evidence, observed_fraction: null };
   const fields = ['id', 'lat', 'lng', 'observed_at', 'sst_c', 'platform_type', 'country'];
@@ -2675,11 +2721,17 @@ async function placeSection(env, layer, id) {
   if (!rec || rec.retrieved_at !== cells.retrieved_at) {
     return { ...base, state: 'withheld', why: `records and counts are not from the same collector run (records ${rec ? rec.retrieved_at : 'unreadable'}, counts ${cells.retrieved_at})`, cell: cell || null, records_run_ref: rec ? runRef(layer, rec.retrieved_at) : null };
   }
+  // 0.6.8 buoys: counts kept from the last good run after a failed update (last_attempt). Judged on the FINAL counts envelope,
+  // after the pairing re-read above. Past the layer's own limit the fallback is withheld here, so no page can keep listing it.
+  const la = layer === 'drifters' && cells.last_attempt ? cells.last_attempt : null;
+  if (la && (Date.now() - Date.parse(cells.retrieved_at)) / 1000 > (cells.stale_after_s || STALE_AFTER_S.drifters)) {
+    return { ...base, state: 'withheld', why: `the latest update failed and the last successful update is over ${Math.round((cells.stale_after_s || STALE_AFTER_S.drifters) / 3600)} h old`, last_attempt: la, cell: null, records_run_ref: runRef(layer, rec.retrieved_at) };
+  }
   const recs = rec.byCell[id] || [];
   const iT = rec.fields.indexOf('observed_at') >= 0 ? rec.fields.indexOf('observed_at') : rec.fields.indexOf('sampled_on');
   const sorted = recs.slice().sort((a, b) => String(b[iT]).localeCompare(String(a[iT])));
   return { ...base, state: recs.length ? 'ok' : 'no_records', count: recs.length, cell: cell || null, record_fields: rec.fields, records_run_ref: runRef(layer, rec.retrieved_at),
-    records: layer === 'plastic' ? sorted : sorted.slice(0, PLACE.listMax), records_total: recs.length };
+    records: layer === 'plastic' ? sorted : sorted.slice(0, PLACE.listMax), records_total: recs.length, ...(la ? { last_attempt: la } : {}) };
 }
 /** /place firms over a lines/1 latest/: same answer shape; paired by run_id AND retrieved_at, re-read once, else withheld. */
 async function fvPlaceSection(env, id, cells) {
@@ -2739,6 +2791,7 @@ async function guarded(env, layer, ms, fn) {
   catch (e) {
     const note = 'uncaught: ' + String(e).slice(0, 200);
     if (layer === 'firms' && env.FIRMS_PIPELINE === 'v2') { try { await logRun(env, layer, ms, 'down', 0, 0, 0, note); await fvDownNoInput(env, ms, note); } catch (_) {} }   // v2 never calls the unconditional writeDown
+    else if (layer === 'drifters') { try { await driftFail(env, ms, 'internal_error', note, 0); } catch (_) {} }   // 0.6.8: buoys never call the unconditional writeDown
     else try { await writeDown(env, layer, ms, note, 0); } catch (_) {}
     return layer + ':threw ' + String(e).slice(0, 80); }
 }

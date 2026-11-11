@@ -45,7 +45,8 @@ for (const n of NAMES) {
 }
 ok('setup: four local files match the pins (length + sha256)', true);
 ok('setup: the release branch carries no data/ocean-heat/ copy', !fs.existsSync(path.join(ROOT, 'data', 'ocean-heat')));
-ok('version 0.6.7; table frozen with one revision and four files', /COLLECTOR_VERSION = '0\.6\.7'/.test(src) && Object.isFrozen(W.OCEANHEAT_REVISIONS) && Object.keys(W.OCEANHEAT_REVISIONS).join() === REV && JSON.stringify(Object.keys(T.files)) === JSON.stringify(NAMES) && W.OCEANHEAT_CURRENT === REV);
+const verAtLeast = v => { const a = String(v).split('.').map(Number), b = [0, 6, 7]; for (let i = 0; i < 3; i++) if ((a[i] || 0) !== b[i]) return (a[i] || 0) > b[i]; return true; };   // loosened 11 Nov 2026 (hub 0.6.8): the route exists from 0.6.7 on
+ok('version ≥ 0.6.7; table frozen with one revision and four files', verAtLeast((/COLLECTOR_VERSION = '([\d.]+)'/.exec(src) || [])[1]) && Object.isFrozen(W.OCEANHEAT_REVISIONS) && Object.keys(W.OCEANHEAT_REVISIONS).join() === REV && JSON.stringify(Object.keys(T.files)) === JSON.stringify(NAMES) && W.OCEANHEAT_CURRENT === REV);
 
 const fakeDB = { prepare() { const st = { bind: () => st, first: async () => null, all: async () => ({ results: [] }), run: async () => ({}) }; return st; } };
 const reads = [];
@@ -97,7 +98,7 @@ res = await reason(env(swapped), 'v050.bin.z'); ok('another file stored under th
 let r = await get(env(), P('manifest.json'), 'POST'); ok('POST → 405', r.status === 405);
 r = await get(env(), P('manifest.json'), 'OPTIONS'); ok('OPTIONS → CORS preflight', r.status === 200 && r.headers.get('Access-Control-Allow-Origin') === '*');
 r = await get(env(), '/'); const meta = await r.json();
-ok('discovery: endpoint listed; catalogues.oceanheat current + revisions; version 0.6.7', meta.version === '0.6.7' && meta.endpoints.includes('/catalogue/oceanheat/<revision>/<file>') && meta.catalogues.oceanheat && meta.catalogues.oceanheat.current === REV && meta.catalogues.oceanheat.revisions.join() === REV, meta.catalogues && meta.catalogues.oceanheat);
+ok('discovery: endpoint listed; catalogues.oceanheat current + revisions; version ≥ 0.6.7', verAtLeast(meta.version) && meta.endpoints.includes('/catalogue/oceanheat/<revision>/<file>') && meta.catalogues.oceanheat && meta.catalogues.oceanheat.current === REV && meta.catalogues.oceanheat.revisions.join() === REV, meta.catalogues && meta.catalogues.oceanheat);
 ok('not a collector layer: absent from LAYERS', !(W.LAYERS || []).includes('oceanheat') && !/oceanheat/.test(JSON.stringify(meta.layers)));
 reads.length = 0; r = await get(env(), '/catalogue/sky/sky-2026-11-R1');
 ok('Sky route untouched (still served from its own key)', reads.length === 1 && reads[0] === 'ref/sky/sky-2026-11-R1.json', reads);

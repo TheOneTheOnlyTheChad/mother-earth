@@ -51,6 +51,7 @@ const esc = ME.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp
 const ago = ME.ago = iso => { if (!iso) return 'unknown'; const s = (Date.now() - Date.parse(iso)) / 1000; return s < 90 ? Math.round(s) + ' s ago' : s < 5400 ? Math.round(s / 60) + ' min ago' : (s / 3600).toFixed(1) + ' h ago'; };
 const dur = ME.dur = s => s < 3600 ? Math.round(s / 60) + ' min' : (s % 3600 === 0 ? (s / 3600) + ' h' : (s / 3600).toFixed(1) + ' h');   // plain-language limits: 10800 → "3 h"
 const hhmm = ME.hhmm = iso => iso ? iso.slice(11, 16) + ' UTC' : '–';
+ME.dayMonth = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.getUTCDate() + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getUTCMonth()]; };   // UTC "11 Nov"
 const when = ME.when = iso => iso ? iso.replace('T', ' ').slice(0, 16) + ' UTC' : 'source time not supplied';
 const num = (x, d = 2) => Number.isFinite(+x) ? (+x).toFixed(d) : '–';
 
@@ -774,7 +775,11 @@ ME.placeRows = function (P, nowMs = Date.now()) {
     const head = `${s.records_total} ${l === 'plastic' ? 'dated sample' + (s.records_total === 1 ? '' : 's') + ' (2011–2024 programme; not current water)' : l === 'drifters' ? 'buoy' + (s.records_total === 1 ? '' : 's') + ' with a latest fix here (each at its own time)' : l === 'ships' ? 'vessel' + (s.records_total === 1 ? '' : 's') + ' heard in the latest sample' : l === 'firms' ? 'detection' + (s.records_total === 1 ? '' : 's') + ' so far today (UTC)' : 'event' + (s.records_total === 1 ? '' : 's') + ' in the feed window'}`;
     const list = objs.map(o => `<li>${esc(ME.placeRecordLine(l, o))}</li>`).join('');
     const more = s.records_total > objs.length ? `<li class="q">${s.records_total - objs.length} more in this cell, not listed</li>` : '';
-    rows.push([name, `${head}${cov ? ` <span class="q">· coverage ${esc(cov.grade || MISSING)}</span>` : ''}${meta}<ul class="plist">${list}${more}</ul>`]);
+    // buoys kept from the last good run after a failed update (hub ≥ 0.6.8): said only here, where the section really lists that run's records
+    const la = l === 'drifters' && s.last_attempt && s.last_attempt.failed_at && s.retrieved_at ? s.last_attempt : null;
+    const lcross = la && la.failed_at.slice(0, 10) !== s.retrieved_at.slice(0, 10);
+    const fbk = la ? ` <span class="q">· <b>latest update failed at ${esc(hhmm(la.failed_at))}${lcross ? ', ' + esc(ME.dayMonth(la.failed_at)) : ''}</b>; from the ${esc(hhmm(s.retrieved_at))} run${lcross ? ', ' + esc(ME.dayMonth(s.retrieved_at)) : ''}</span>` : '';
+    rows.push([name, `${head}${cov ? ` <span class="q">· coverage ${esc(cov.grade || MISSING)}</span>` : ''}${meta}${fbk}<ul class="plist">${list}${more}</ul>`]);
   }
   const C = P.collection;
   if (C) for (const l of ['usgs', 'firms', 'ships']) { const x = C[l]; if (!x) continue; const a = x.collection_ran, b = x.records_reached_us_here;

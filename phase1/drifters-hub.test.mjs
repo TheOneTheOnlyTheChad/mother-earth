@@ -61,8 +61,8 @@ await t('F. implausible SST is blanked (null) and counted, the position still dr
 function makeEnv(extra = {}) {
   const store = new Map(); const runs = [];
   const R2 = {
-    async put(k, body) { store.set(k, String(body)); }, async delete(k) { store.delete(k); },
-    async get(k) { const b = store.get(k); return b === undefined ? null : { body: b, httpEtag: '"e"', async json() { return JSON.parse(b); }, async text() { return b; } }; },
+    async put(k, body) { store.set(k, String(body)); return { key: k }; }, async delete(k) { store.delete(k); },
+    async get(k) { const b = store.get(k); return b === undefined ? null : { body: b, etag: 'e', httpEtag: '"e"', async json() { return JSON.parse(b); }, async text() { return b; } }; },
     async list({ prefix } = {}) { return { objects: [...store.keys()].filter(k => !prefix || k.startsWith(prefix)).map(key => ({ key, uploaded: new Date() })), truncated: false }; },
   };
   const stmt = (sql) => { const x = (a) => ({ async run() { if (/INSERT INTO collector_runs/.test(sql)) runs.push(a); return {}; }, async first() { return null; }, async all() { return { results: [] }; } }); return { bind: (...a) => x(a), ...x([]) }; };
@@ -85,18 +85,20 @@ await t('H. a good run publishes ONE current snapshot (records + counts, same ru
   assert.equal(s.retrieved_at, c.retrieved_at); assert.equal(s.records.length, 1296); assert.equal(s.refused.future, 10);
   assert.deepEqual(s.record_fields, ['id', 'lat', 'lng', 'observed_at', 'sst_c', 'platform_type', 'country']);
   assert.equal(c.records, undefined); assert.equal(s.source.licence, 'CC0 1.0');
-  assert.deepEqual([...store.keys()].filter(k => k.includes('drifters')).sort(), ['latest-cells/drifters.json', 'latest/drifters.json']);
+  assert.deepEqual([...store.keys()].filter(k => k.includes('drifters')).sort(), ['latest-cells/drifters.json', 'latest/drifters.json']);   // a good run writes no per-run object
   assert.equal(runs.at(-1)[1] === 'drifters' || runs.at(-1)[0] === 'drifters', true);
   const r = await worker.fetch(new Request('https://hub/snapshot/drifters'), env); assert.equal(r.status, 200);
   assert.equal((await worker.fetch(new Request('https://hub/cells/drifters'), env)).status, 200);
 });
 for (const [name, body] of [['HTTP 500', () => new Response('err', { status: 500 })], ['HTML with 200', () => new Response('<html>x</html>', { status: 200 })], ['a count collapse', () => new Response(csv(synth(300)), { status: 200 })], ['a network error', () => { throw new Error('reset'); }]]) {
-  await t(`I. ${name} → down recorded; the previous valid snapshot stays served with its own times`, async () => {
-    const { env, store } = makeEnv(); osmcBody = () => new Response(GOOD, { status: 200 }); await admin(env);
+  await t(`I. ${name} → down recorded; the previous valid snapshot AND its counts stay served with their own times (0.6.8; races in osmc-reliability-hub.test.mjs)`, async () => {
+    const { env, store, runs } = makeEnv(); osmcBody = () => new Response(GOOD, { status: 200 }); await admin(env);
     const before = store.get('latest/drifters.json');
     osmcBody = body; Date.now = () => RETRIEVED + 3600e3; await admin(env); Date.now = () => RETRIEVED;
     assert.equal(store.get('latest/drifters.json'), before);
-    assert.equal(JSON.parse(store.get('latest-cells/drifters.json')).source_status, 'down');
+    const c = JSON.parse(store.get('latest-cells/drifters.json'));
+    assert.equal(c.source_status, 'ok'); assert.equal(c.retrieved_at, JSON.parse(before).retrieved_at); assert.equal(c.last_attempt.status, 'down'); assert.equal(c.last_attempt.consecutive_failures, 1);
+    assert.equal(runs.at(-1)[3], 'down');
   });
 }
 console.log(`\n${passed} passed`);

@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611281000">
+<link rel="stylesheet" href="style.css?v=202611291000">
 </head>
 <body class="world">
 <header class="top">
@@ -361,11 +361,11 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611281000"></script>
-<script src="arts.js?v=202611281000"></script>
-<script src="sky.js?v=202611281000"></script>
-<script src="skyscene.js?v=202611281000"></script>
-<script src="oceanheat.js?v=202611281000"></script>
+<script src="app.js?v=202611291000"></script>
+<script src="arts.js?v=202611291000"></script>
+<script src="sky.js?v=202611291000"></script>
+<script src="skyscene.js?v=202611291000"></script>
+<script src="oceanheat.js?v=202611291000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
@@ -499,11 +499,14 @@ ME.pairState = layer => Object.fromEntries((layer ? [layer] : RECORD_LAYERS.conc
   [k, { cells: snapId(state[k]), records: pmeta[k].id, ok: pmeta[k].ok, usable: usable(k), points: points[k].length }]));
 
 const ringAround = (lat, lng, r = .35, n = 24) => Array.from({ length: n + 1 }, (_, i) => { const a = 2 * Math.PI * i / n; return [lat + r * Math.sin(a), lng + r * Math.cos(a) / Math.max(.2, Math.cos(lat * Math.PI / 180))]; });
+let driftDrawnGrade = null;   // the buoy layer's freshness grade at its last draw (see the 30 s timer: a fallback that expires is redrawn without waiting for a data poll)
 function render() {
   const polys = [], matFor = cellMaterials();
   for (const layer of shownMapLayers()) {
     const snap = state[layer]; if (!snap || !on[layer]) continue;
     const fresh = ME.freshness(layer);
+    // buoys kept from the last good run after a failed update: not drawn at all once expired, or while that run's records are not readable and paired
+    if (layer === 'drifters' && snap.last_attempt && (fresh.grade === 'unknown' || !usable('drifters'))) continue;
     for (const [id, cell] of Object.entries(snap.cells || {})) {
       let grade = (cell.coverage && cell.coverage.grade) || 'unknown';
       if (fresh.grade === 'unknown') grade = 'unknown';
@@ -514,6 +517,7 @@ function render() {
     }
   }
   globe.polygonsData(polys);
+  driftDrawnGrade = on.drifters && state.drifters ? ME.freshness('drifters').grade : null;
   // first cells of the session: globe.gl builds them with its own materials; once one exists, redraw once with shared ones
   if (!matFor && polys.length && (CELL_PERF.mode === 'b2a' || CELL_PERF.mode === 'b2b') && !CELL_PERF.Ctor && !CELL_PERF.retry) { CELL_PERF.retry = true; requestAnimationFrame(() => requestAnimationFrame(() => { if (harvestCapMaterial()) render(); })); }
   const pts = [];
@@ -1395,10 +1399,24 @@ function driftCard() {
   if (!on.drifters) { st.textContent = 'off'; st.className = 'state'; st.title = ''; $('v-drifters').textContent = '–'; $('o-drifters').textContent = 'off — switch on to load the latest fixes'; $('m-drifters').textContent = 'NOAA OSMC · GTS'; return; }
   if (optLoading.drifters && !state.drifters) { st.textContent = 'loading'; st.className = 'state'; $('o-drifters').textContent = 'loading the latest fixes from the hub…'; return; }
   const f = ME.freshness('drifters'), s = state.drifters; setState('drifters', f);
-  $('v-drifters').textContent = f.grade !== 'unknown' && s ? ME.total(s).toLocaleString() : '–';
+  // A failed update after a good run (hub ≥ 0.6.8 keeps the good run's counts and adds last_attempt). While the good run is inside its
+  // limit: badge "degraded" = update status only (the good run's coverage and freshness are untouched) and a line saying why.
+  // "Showing buoys from…" and "degraded" only when that run's buoys really are shown (records read and paired). Past the limit: unknown, as ever.
+  // If the update failed and that run's records are missing or mismatched, nothing of the buoys is shown: badge unknown, no count, no cells.
+  const fb = driftFallback(s, f), shown = usable('drifters'), noRecords = !!fb && !shown;
+  if (fb && shown) { st.textContent = 'degraded'; st.className = 'state warn'; st.title = fb; }
+  if (noRecords) { st.textContent = 'unknown'; st.className = 'state bad'; st.title = fb; }
+  $('v-drifters').textContent = f.grade !== 'unknown' && s && !noRecords ? ME.total(s).toLocaleString() : '–';
   const ref = s && s.refused ? Object.values(s.refused).reduce((a, x) => a + x, 0) : 0;
-  $('o-drifters').textContent = s && s.window_end ? `newest fix ${hhmm(s.window_end)} (${ago(s.window_end)}); each buoy shown at its own last fix` + (ref ? ` · ${ref.toLocaleString()} reports refused (e.g. time in the future), not drawn` : '') : 'no snapshot from the hub';
-  $('m-drifters').innerHTML = `NOAA OSMC · GTS · retrieved ${ago(s && s.retrieved_at)}${warn(f)}`;
+  $('o-drifters').textContent = noRecords ? 'buoy positions not shown' : s && s.window_end ? `newest fix ${hhmm(s.window_end)} (${ago(s.window_end)}); each buoy shown at its own last fix` + (ref ? ` · ${ref.toLocaleString()} reports refused (e.g. time in the future), not drawn` : '') : 'no snapshot from the hub';
+  $('m-drifters').innerHTML = `NOAA OSMC · GTS · retrieved ${ago(s && s.retrieved_at)}${fb ? ` · <b>${esc(fb)}</b>` : warn(f)}`;
+}
+// The buoy card's fallback line, or '' when there is none to show. Times are UTC; both carry their date when the dates differ.
+function driftFallback(s, f) {
+  const la = s && s.last_attempt; if (!la || !la.failed_at || !s.retrieved_at || f.grade === 'unknown') return '';
+  const cross = la.failed_at.slice(0, 10) !== s.retrieved_at.slice(0, 10);
+  const t = iso => hhmm(iso) + (cross ? ', ' + ME.dayMonth(iso) : '');
+  return `Latest update failed at ${t(la.failed_at)}.` + (usable('drifters') ? ` Showing buoys from the ${hhmm(s.retrieved_at)} run${cross ? ', ' + ME.dayMonth(s.retrieved_at) : ''}.` : '');
 }
 
 function plasticCard() {
@@ -1463,7 +1481,11 @@ async function tick() {
   for (const layer of OPTIONAL_LAYERS) if (on[layer]) { await refreshPair(layer); if (!on[layer]) clearOptional(layer); cards(); render(); }   // optional layers: fetched only while on
 }
 tick(); setInterval(tick, ME.REFRESH_MS);
-setInterval(cards, 30e3);        // ages keep moving between refreshes
+setInterval(() => {              // ages keep moving between refreshes
+  cards();
+  // a buoy fallback that crosses its limit between data polls: redraw now, so the points and cells go when the badge does
+  if (on.drifters && state.drifters && state.drifters.last_attempt && driftDrawnGrade !== null && ME.freshness('drifters').grade !== driftDrawnGrade) render();
+}, 30e3);
 sizeGlobe();
 })();
 </script>
