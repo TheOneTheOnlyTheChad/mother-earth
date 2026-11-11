@@ -3,10 +3,15 @@
  * synthetic SEAM fixture (phase1/ocean-heat/build_fixture.py; the harness pins its manifest in the served oceanheat.js).
  * Expected tap values come from phase1/ocean-heat/expected-taps.json (exact integer sums from NOAA's native files, Mac
  * packet C4d) — never from the page. Rounding rule reimplemented here from the manifest's documented rule.
- * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node phase1/oceanheat-ui.test.cjs
+ * Release rev 3 (OCEAN-HEAT-RELEASE-PROPOSAL rev 2): the snapshot is served by the hub, so the four files come from an EXPLICIT
+ *      local folder (OH_SNAPSHOT_DIR), hash-checked against the Worker pins at setup, and are answered at the hub path
+ *      /catalogue/oceanheat/<rev>/<file> with the Worker's headers. The release branch carries no data/ocean-heat/ (asserted).
+ *      Section G: the page's pinned fetches carry no forced revalidation; a hub 503 says unavailable; and, in a context with
+ *      NO request routing, the real Worker (in node, mock R2) is cached by Chromium for its 24 h lifetime.
+ * Run: OH_SNAPSHOT_DIR=/path/to/oh-2026-11-09-R1 NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node phase1/oceanheat-ui.test.cjs
  *      (8899 server in the repo; /home/claude/spike with globe.gl@2.45.0 + pngjs; python3 + numpy for the fixture)
  * Code breaks (each must make this suite fail): BREAK=no-wrap|linear|nearest-water|paint-noncontrib|p2-any-water|
- *      tile-shift|no-hash|no-gen|same-unavailable-text|round-lookup|phone-p1|small-limit|p2-tile-x0
+ *      tile-shift|no-hash|no-gen|same-unavailable-text|round-lookup|phone-p1|small-limit|p2-tile-x0|no-cache-kept
  * Rev 2 (11 Nov, GPT's preview review): phone-sized viewports default to P2; texture limits handled explicitly
  *      (P1 1 or 2 tiles, P2 1 or 2 tiles, below 1800 px unavailable); lighter no-data checker. Sections F (limits) and
  *      C [P2 ×2] added; A5 and E updated.
@@ -18,7 +23,11 @@ const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
 const ROOT = path.join(__dirname, '..'), BREAK = process.env.BREAK || '';
 const EXP = JSON.parse(fs.readFileSync(path.join(__dirname, 'ocean-heat/expected-taps.json'), 'utf8'));
-const SNAP = path.join(ROOT, 'data/ocean-heat/oh-2026-11-09-R1');
+const SNAP = process.env.OH_SNAPSHOT_DIR;
+if (!SNAP || !fs.existsSync(SNAP)) { console.log('FAIL  setup: OH_SNAPSHOT_DIR unset or missing: ' + SNAP); process.exit(1); }
+const OH_REV = 'oh-2026-11-09-R1', OH_PATH = `/catalogue/oceanheat/${OH_REV}/`, OH_NAMES = ['manifest.json', 'mask.bin.z', 'v025.bin.z', 'v050.bin.z'];
+const sha256 = b => require('crypto').createHash('sha256').update(b).digest('hex');
+let OH_PINS = null, WORKER = null;   // filled at setup from the REAL worker.js (copied to .mjs and imported)
 const FIXDIR = '/tmp/claude-0/-home-claude/32477202-b637-51bb-86c4-956cd7b98c69/scratchpad/oh-test-fixtures';
 const fixture = (name, args = []) => { const d = path.join(FIXDIR, name); return { dir: d, sha: execFileSync('python3', [path.join(__dirname, 'ocean-heat/build_fixture.py'), d, ...args]).toString().trim() }; };
 const SEAM = fixture('seam'), BADDATE = fixture('baddate', ['--date', '2026-11-08']), BADGRID = fixture('badgrid', ['--rows-v050', '359']);
@@ -60,12 +69,21 @@ function breakJs(src) {
     case 'phone-p1': b('const p1 = o.forcePath ? o.forcePath === \'P1\' : (p1ok && !st.phone);', 'const p1 = o.forcePath ? o.forcePath === \'P1\' : p1ok;'); break;
     case 'small-limit': b('if (mt < MIN_TEX) throw', 'if (false) throw'); break;
     case 'p2-tile-x0': b('const r = 2 * tr, c = 2 * (x0 + tc),', 'const r = 2 * tr, c = 2 * tc,'); break;
+    case 'no-cache-kept': b('const r = await fetch(OH.BASE + name);', "const r = await fetch(OH.BASE + name, { cache: 'no-cache' });"); break;
     case 'round-lookup': b('row: Math.max(0, Math.min(Math.floor((90 - lat) / res), rows - 1)),', 'row: Math.max(0, Math.min(Math.round((90 - lat) / res), rows - 1)),'); break;
   }
   return src;
 }
 
 (async () => {
+  // ---------- setup: the explicit local folder, hash-checked against the REAL Worker pins; no copy in the branch
+  { const os = require('os'), { pathToFileURL } = require('url'); const d = fs.mkdtempSync(path.join(os.tmpdir(), 'oh-ui-'));
+    fs.writeFileSync(path.join(d, 'worker.mjs'), fs.readFileSync(path.join(ROOT, 'phase1/worker.js'), 'utf8'));
+    WORKER = await import(pathToFileURL(path.join(d, 'worker.mjs')).href); OH_PINS = WORKER.OCEANHEAT_REVISIONS[OH_REV].files; }
+  for (const n of OH_NAMES) { const p = path.join(SNAP, n); const b = fs.existsSync(p) ? fs.readFileSync(p) : null;
+    if (!b || b.length !== OH_PINS[n].bytes || sha256(b) !== OH_PINS[n].sha256) { console.log(`FAIL  setup: ${n} in OH_SNAPSHOT_DIR does not match the Worker pin`); process.exit(1); } }
+  ok('S setup: the four files in OH_SNAPSHOT_DIR match the Worker pins (length + sha256)', true);
+  ok('S setup: the release branch carries no data/ocean-heat/ copy', !fs.existsSync(path.join(ROOT, 'data', 'ocean-heat')));
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   // mode: { snap: dir, pin: sha | null, tamper: 'mask' | null }
   const run = async (viewport, mode = {}) => {
@@ -76,12 +94,6 @@ function breakJs(src) {
     await ctx.route('**/gibs.earthdata.nasa.gov/**', r => r.fulfill({ status: 200, contentType: 'image/png', body: OCEAN_PNG }));
     await ctx.route(BASE + '/**', route => {
       const p = new URL(route.request().url()).pathname;
-      if (p.startsWith('/data/ocean-heat/')) {
-        hits.push(p); const nm = p.split('/').pop(), dir = mode.snap || SNAP;
-        let body = fs.readFileSync(path.join(dir, nm));
-        if (mode.tamper === nm) { body = Buffer.from(body); body[body.length - 1] ^= 0xff; }
-        return route.fulfill({ status: 200, contentType: 'application/octet-stream', body });
-      }
       if (p === '/oceanheat.js') {
         let src = fs.readFileSync(path.join(ROOT, 'oceanheat.js'), 'utf8');
         if (mode.pin) src = src.replace(/MANIFEST_SHA256: '[0-9a-f]{64}'/, `MANIFEST_SHA256: '${mode.pin}'`);
@@ -91,6 +103,13 @@ function breakJs(src) {
     });
     await ctx.route(HUB + '/**', route => {
       const p = new URL(route.request().url()).pathname;
+      if (p.startsWith('/catalogue/oceanheat/')) {   // the hub route, answered with the Worker's headers from the local folder
+        hits.push(p); const nm = p.split('/').pop(), dir = mode.snap || SNAP;
+        if (mode.hub503 === nm) return route.fulfill({ status: 503, contentType: 'application/json', headers: { 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ kind: 'catalogue', catalogue: 'oceanheat', status: 'unavailable', reason: 'integrity' }) });
+        let body = fs.readFileSync(path.join(dir, nm));
+        if (mode.tamper === nm) { body = Buffer.from(body); body[body.length - 1] ^= 0xff; }
+        return route.fulfill({ status: 200, contentType: nm.endsWith('.json') ? 'application/json' : 'application/octet-stream', headers: { 'Cache-Control': 'public, max-age=86400, immutable', 'Access-Control-Allow-Origin': '*', 'ETag': '"' + sha256(body) + '"' }, body });
+      }
       const body = p === '/snapshot/usgs' ? { layer: 'usgs', retrieved_at: RUN, source_generated_at: RUN, source_age_s: 1, stale_after_s: 900, quantity: 'q', record_format: 'rows', record_fields: ['id', 'lat', 'lng', 'depth_km', 'mag', 'mag_type', 'observed_at', 'title', 'src'], records: [['q1', -34.9, 18.9, 10, 3.1, 'mb', RUN, 't', '']] }
         : p === '/cells/usgs' ? { layer: 'usgs', retrieved_at: RUN, source_generated_at: RUN, source_age_s: 1, stale_after_s: 900, quantity: 'q', cells: { [cellOf(-34.4125, 18.4125)]: { count: 1, coverage: { grade: 'adequate', evidence: 'e', observed_fraction: 1 } } } }
         : p.startsWith('/snapshot/orbital') || p.startsWith('/elements') || p.startsWith('/place') ? null
@@ -131,6 +150,7 @@ function breakJs(src) {
   ok('A2 enable → ready', s.status === 'ready', s);
   const want = s.path === 'P1' ? ['manifest.json', 'mask.bin.z', 'v025.bin.z'] : ['manifest.json', 'mask.bin.z', 'v050.bin.z'];
   ok(`A2 requests are exactly the manifest, the mask and one value file (${s.path}, ${s.valueRes}°)`, JSON.stringify(hits.map(h => h.split('/').pop()).sort()) === JSON.stringify(want.slice().sort()), hits);
+  ok('A2 every snapshot request goes to the hub route ' + OH_PATH, hits.length === 3 && hits.every(h => h.startsWith(OH_PATH)), hits);
   ok('A2 path rule (desktop 1280 px, not phone-sized): P1 with 0.25° when MAX_TEXTURE_SIZE ≥ 3600 (1 texture at ≥ 7200, else 2 tiles)', s.phone === false && (s.maxTex >= 3600 ? (s.path === 'P1' && s.valueRes === 0.25 && s.tiles === (s.maxTex >= 7200 ? 1 : 2)) : s.path === 'P2'), s);
   ok('A2 legend and card key shown; date line names the source and the UTC day', await page.evaluate(() => !document.getElementById('oh-legend').hidden && /Dated snapshot · NOAA Coral Reef Watch · 9 Nov 2026 \(UTC day\)/.test(document.getElementById('oh-status').innerText) && /1991–2020 normal/.test(document.getElementById('oh-key').innerText)));
   ok('A2 Key counts ocean heat as one layer', await page.evaluate(k => document.getElementById('key-n').textContent !== k, keyN0));
@@ -289,6 +309,42 @@ function breakJs(src) {
   ok('F7 not phone-sized, limit 16384: P1, 1 texture of 7200 × 3600', s.status === 'ready' && s.path === 'P1' && s.tiles === 1 && s.texture === '7200x3600', s);
   ok('F8 no page errors', perr.length === 0, perr);
   await ctx.close();
+
+  // ================= G. release: pinned fetches may be cached; a hub 503 draws nothing; the real Worker is cached by the browser
+  ({ ctx, page, hits, perr } = await run({ width: 1280, height: 860 }));
+  await page.evaluate(() => { const f = window.fetch; window.__ohInits = []; window.fetch = function (u, init) { if (/\/catalogue\/oceanheat\//.test(String(u))) window.__ohInits.push(init === undefined ? null : JSON.parse(JSON.stringify(init))); return f.apply(this, arguments); }; });
+  s = await enable(page);
+  { const inits = await page.evaluate(() => window.__ohInits);
+    ok('G1 the page\'s pinned fetches carry no cache override (no forced revalidation; the hub\'s 24 h lifetime applies)', s.status === 'ready' && inits.length === 3 && inits.every(x => x === null || x.cache === undefined || x.cache === 'default'), inits); }
+  await ctx.close();
+  ({ ctx, page, hits, perr } = await run({ width: 1280, height: 860 }, { hub503: 'v025.bin.z' }));
+  s = await enable(page);
+  { const msg = await page.evaluate(() => document.getElementById('oh-status').innerText);
+    ok('G2 hub 503 for a value file: unavailable with its reason, nothing drawn, toggle off', s.status === 'unavailable' && s.meshes === 0 && !s.on && /v025\.bin\.z: HTTP 503/.test(msg) && /Nothing is drawn/.test(msg), { s, msg }); }
+  await ctx.close();
+  { // G3: no request routing in this context (Playwright routing disables the HTTP cache) — the REAL Worker behind a local server
+    const http = require('http'); let served = 0;
+    const objects = Object.fromEntries(OH_NAMES.map(n => [OH_PINS[n].key, fs.readFileSync(path.join(SNAP, n))]));
+    const env = { R2: { get: async k => { const b = objects[k]; return b ? { arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) } : null; } }, DB: { prepare() { const st = { bind: () => st, first: async () => null, all: async () => ({ results: [] }), run: async () => ({}) }; return st; } } };
+    const srv = http.createServer(async (req, res) => {
+      if (req.url === '/t.html') { res.writeHead(200, { 'Content-Type': 'text/html' }); return res.end('<!doctype html><title>t</title>'); }
+      served++; const r = await WORKER.default.fetch(new Request('http://127.0.0.1' + req.url), env);
+      const h = {}; r.headers.forEach((v, k) => { h[k] = v; }); res.writeHead(r.status, h); res.end(Buffer.from(await r.arrayBuffer()));
+    });
+    await new Promise(r => srv.listen(8897, '127.0.0.1', r));
+    const c2 = await browser.newContext(); const p2 = await c2.newPage();
+    await p2.goto('http://127.0.0.1:8897/t.html');
+    const out = await p2.evaluate(async (base) => { const sha = async b => [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map(x => x.toString(16).padStart(2, '0')).join('');
+      const one = async n => { const r = await fetch(base + n); return { s: r.status, cc: r.headers.get('Cache-Control'), ce: r.headers.get('Content-Encoding'), sha: await sha(await r.arrayBuffer()) }; };
+      const a = await one('v025.bin.z'), b = await one('v025.bin.z');
+      const bad = await fetch(base + 'nope.bin'); const c = { s: bad.status, cc: bad.headers.get('Cache-Control') };
+      return { a, b, c }; }, '/catalogue/oceanheat/oh-2026-11-09-R1/');
+    const servedAfterTwo = served - 1;   // minus the 404
+    ok('G3 real Worker over HTTP: v025 200, immutable 24 h, no Content-Encoding, bytes = pin', out.a.s === 200 && out.a.cc === 'public, max-age=86400, immutable' && out.a.ce === null && out.a.sha === OH_PINS['v025.bin.z'].sha256, out);
+    ok('G3 Chromium reuses the cached response: the second fetch never reaches the hub', out.b.s === 200 && out.b.sha === out.a.sha && servedAfterTwo === 1, { served, out });
+    ok('G3 a 404 from the route is no-store', out.c.s === 404 && out.c.cc === 'no-store', out.c);
+    await c2.close(); await new Promise(r => srv.close(r));
+  }
 
   await browser.close(); clearTimeout(wd);
   console.log(`\n${pass} passed, ${fail} failed${BREAK ? `  (BREAK=${BREAK})` : ''}`); process.exit(fail ? 1 : 0);

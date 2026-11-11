@@ -1,4 +1,4 @@
-/* Mother Earth — Ocean Heat (OCEAN-HEAT-PROPOSAL rev 4.2). PREVIEW BRANCH ONLY.
+/* Mother Earth — Ocean Heat (OCEAN-HEAT-PROPOSAL rev 4.2; release per OCEAN-HEAT-RELEASE-PROPOSAL rev 2: files served by the hub).
  * One dated, global snapshot of NOAA Coral Reef Watch sea surface temperature and its difference from the 1991–2020
  * normal, painted on the globe and answered by a tap. Analysed (satellite-based, gaps filled by NOAA), never "observed".
  * Kept out of the observation path like day/night: it never touches state, points, pmeta, usable() or any globe.gl layer.
@@ -17,7 +17,7 @@
   const $ = ME.$, esc = ME.esc;
   const OH = {
     REV: 'oh-2026-11-09-R1',
-    BASE: 'data/ocean-heat/oh-2026-11-09-R1/',
+    BASE: 'https://mother-earth.chadoberholzer.workers.dev/catalogue/oceanheat/oh-2026-11-09-R1/',   // hub 0.6.7, pinned; immutable revision
     MANIFEST_SHA256: 'dcc3467428e38e76966508d10078d322b8d724ed784de3266ae0b62354f5af1b',
     DATE: '2026-11-09', DATE_TEXT: '9 Nov 2026 (UTC day)',
     NATIVE: { res: 0.05, rows: 3600, cols: 7200 },
@@ -52,7 +52,7 @@
     return new Uint8Array(await out.arrayBuffer());
   }
   async function getChecked(name, wantSha) {
-    const r = await fetch(OH.BASE + name, { cache: 'no-cache' });
+    const r = await fetch(OH.BASE + name);   // default cache: the hub marks verified files immutable for 24 h; the hash check below still runs
     if (!r.ok) throw new Error(`${name}: HTTP ${r.status}`);
     const buf = await r.arrayBuffer(); st.bytes[name] = buf.byteLength;
     const got = await sha256(buf);
@@ -227,7 +227,7 @@
     const nat = cellAt(lat, lng, OH.NATIVE.res, OH.NATIVE.rows, OH.NATIVE.cols), code = codeAt(nat.row, nat.col);
     const V = st.vals, b = cellAt(lat, lng, V.res, V.rows, V.cols), i = b.row * V.cols + b.col;
     const head = ['Ocean heat here', `<span class="q">dated snapshot · NOAA Coral Reef Watch · ${esc(OH.DATE_TEXT)}</span>`];
-    const credit = ['Source', `NOAA Coral Reef Watch — <a href="https://coralreefwatch.noaa.gov/product/5km/index_5km_sst.php" target="_blank" rel="noopener">CoralTemp v3.1</a> and <a href="https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta_clim19912020.php" target="_blank" rel="noopener">SST anomaly, 1991–2020 baseline</a>. Methods article DOI: <a href="https://doi.org/10.3390/rs12233856" target="_blank" rel="noopener">10.3390/rs12233856</a>`, 'more'];
+    const credit = ['Source', `NOAA Coral Reef Watch (files from the NOAA / NESDIS Center for Satellite Applications and Research) — <a href="https://coralreefwatch.noaa.gov/product/5km/index_5km_sst.php" target="_blank" rel="noopener">CoralTemp v3.1</a> and <a href="https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta_clim19912020.php" target="_blank" rel="noopener">SST anomaly, 1991–2020 baseline</a>. Methods article DOI: <a href="https://doi.org/10.3390/rs12233856" target="_blank" rel="noopener">10.3390/rs12233856</a>`, 'more'];
     const method = ['Method', 'Analysed · Satellite-based, with gaps filled by NOAA. An estimate for the surface of a grid cell; it can differ from a nearby beach or buoy reading, says nothing about the water below the surface, and one warm snapshot does not identify a marine heatwave or coral bleaching. NOAA notes anomalies are less reliable at high latitudes.', 'more'];
     if (code === 1) return [head, ['Here', 'Land — no sea temperature'], credit];
     if (code === 3) return [head, ['Here', 'Sea ice — no temperature difference shown'], method, credit];

@@ -47,5 +47,5 @@ reads.length = 0; r = await get(W, good, '/catalogue/sky/sky-scene-2026-11-R2');
 ok('unknown scene id: 404, no R2 read', r.status === 404 && reads.length === 0, [r.status, reads]);
 r = await get(W, good, '/');
 const idx = await r.json();
-ok('index: version 0.6.6, sky.scene = sky-scene-2026-11-R1, current still R1', idx.version === '0.6.6' && idx.catalogues.sky.scene === 'sky-scene-2026-11-R1' && idx.catalogues.sky.current === 'sky-2026-11-R1', idx.catalogues && idx.catalogues.sky);
+ok('index: version ≥ 0.6.6 (numeric; ocean-heat-release: 0.6.7), sky.scene = sky-scene-2026-11-R1, current still R1', idx.version.split('.').map(Number).reduce((a, x) => a * 1000 + x, 0) >= 6006 && idx.catalogues.sky.scene === 'sky-scene-2026-11-R1' && idx.catalogues.sky.current === 'sky-2026-11-R1', idx.catalogues && idx.catalogues.sky);
 console.log(`sky-scene-hub: ${pass} passed, ${fail} failed${BK ? ` (BREAK=${BK})` : ''}`); process.exit(fail ? 1 : 0);
