@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 15:30 UTC (clock reading at write) — **Globe performance B1+B2 BUILT on branch `globe-perf-rc` @ `2ca14e1`** (Chad's build line; no page release)
+
+- B1 no side walls, B2a shared DoubleSide cap materials per fill (branch default), B2b FrontSide; `?perf=main|b1|b2a|b2b` for the RC only. `index.html` only + new suite `phase1/cell-perf-ui.test.cjs` 27/27 (4 breaks each fail).
+- Draw calls on 29 test cells: main 147 · B1 89 · B2a 89 · B2b 60 (prediction confirmed on the pinned bundle). Hover winners identical to main in all steps (overlaps, edges, limb, dateline). B2a/B2b pixel-identical to B1.
+- **For Chad:** B1 is not pixel-identical to main — ~300 outline pixels per frame draw more completely where cells meet (the invisible walls were hiding them by writing depth); fills unchanged. Screenshots in the packet.
+- All regression suites green (packet §4). Packet `reviews/2026-11-11-globe-perf-rc.md` (branch); Mac `_review/globe-perf-rc/` hash-checked.
+- Next: GPT reviews; then `Go: globe performance RC check (Chad's Chrome)`.
+
 ## 11 Nov 14:36 UTC (clock reading at write) — **Globe performance build proposal rev 1.1** (GPT's review applied; docs only)
 
 - GPT: skip-the-spike accepted; §1 credible as a prediction; revise before the build go. Rev 1.1: B1 = no side geometry or side draws, with its own look/pick checks at grazing edges and the limb (invisible sides can write depth and be raycast today); B2 split into B2a (shared DoubleSide, same settings, materials made fresh per render pass) and B2b (FrontSide, tested alone); RC pairs matched on snapshot IDs, layers and cell counts, median + p95, interrupted pairs rerun; ship rule §3a (best passing step ships without B3 if its median ≤ 33 ms; B3 gets its own RC vs the best simpler step and main); no general edge rule yet (ME.cellId floors east), same-layer edge case added.
