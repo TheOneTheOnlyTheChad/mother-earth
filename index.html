@@ -1340,6 +1340,12 @@ ME.renderState = () => globeOk ? { points: globe.pointsData().length, driftPoint
 // ---------- cards
 const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = k === 'plastic' ? 'the hub\'s copy is fresh — says nothing about when the samples were taken; ' + f.why : f.why; };
 const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
+// Fires card copy only (11 Nov 2026). Early in the UTC day FIRMS serves a header-only file and the hub records the run as down with a
+// note starting "no detections processed yet for today (UTC)" (worker.js collectFirms). That is an expected daily state, so the card
+// says so plainly instead of "collector reported down: …". Coverage stays UNKNOWN and records stay withheld; every other down note
+// (fetch or processing failures, an empty file later in the day) keeps the existing wording. ME.freshness is unchanged.
+const FIRMS_NOT_YET = /^no detections processed yet for today \(UTC\)/, FIRMS_NOT_YET_COPY = 'Today’s detections aren’t available yet.';
+const firmsNotYet = () => { const s = state.firms; return !!(s && s.source_status === 'down' && FIRMS_NOT_YET.test(s.note || '')); };
 function pairNote(layer) {
   const e = $('p-' + layer); if (!e) return;
   // 'off' is the layer's own switch, already stated on the card: it is not records being withheld (found 4 Nov 2026, live too)
@@ -1353,7 +1359,8 @@ function cards() {
   $('m-usgs').innerHTML = `USGS · retrieved ${ago(R.usgs.retrieved)}${warn(R.usgs.fresh)}`;
   setState('firms', R.firms.fresh); $('v-firms').textContent = R.firms.value === null ? '–' : R.firms.value.toLocaleString();
   $('o-firms').textContent = R.firms.observed || 'no snapshot yet';
-  $('m-firms').innerHTML = `NASA FIRMS · VIIRS NOAA-20 · ${esc(state.firms ? state.firms.scope || 'world' : '')} · retrieved ${ago(R.firms.retrieved)}${warn(R.firms.fresh)}`;
+  const notYet = firmsNotYet(); if (notYet) $('s-firms').title = FIRMS_NOT_YET_COPY;
+  $('m-firms').innerHTML = `NASA FIRMS · VIIRS NOAA-20 · ${esc(state.firms ? state.firms.scope || 'world' : '')} · retrieved ${ago(R.firms.retrieved)}${notYet ? ` · <b>${esc(FIRMS_NOT_YET_COPY)}</b>` : warn(R.firms.fresh)}`;
   setState('ships', R.ships.fresh);
   if (R.ships.value !== null) { $('l-ships').textContent = ''; $('v-ships').textContent = R.ships.value.toLocaleString(); }
   else { $('l-ships').textContent = R.ships.lastSample !== null ? 'Last sample:' : ''; $('v-ships').textContent = R.ships.lastSample === null ? '–' : R.ships.lastSample.toLocaleString(); }
