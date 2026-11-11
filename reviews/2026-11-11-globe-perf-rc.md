@@ -61,12 +61,12 @@ Every browser and hub suite in `phase1/` was run in sequence (the default page i
 
 **Setup.** Chrome 156, Apple M3, 1470 × 745 CSS px, DPR 2, window in front and focused in every window. One tab, reloaded per window: **baseline = unmodified live main**; **candidate = branch `index.html` (`43b7b14b…`, commit `2ca14e1`) injected on the Pages origin** with `?perf=` in the tab URL; every other page file was served live and checked equal to the branch. Same harness as Stage 0 (time-based sweep, 10 s window after 2 s warm-up, render CPU wrap, draw calls). Each load waited until every cell was built and the count had held for 2 s. Raw: `reviews/evidence/2026-11-11-globe-perf-rc/chrome-rc-raw.json` (27,900 B, sha256 `de1c6a3d…a04ea`; same on Chad's Mac `~/Downloads/globe-perf-rc-2026-11-11.json`).
 
-**Matched pairs** (A = main, B = candidate; A–B–A–B then B–A–B–A; same snapshot IDs and the same 1,250 cells — usgs 25/26, firms 502, ships 164, forest 559 — in each pair; no window flagged):
+**Matched pairs** (A = main, B = candidate; A–B–A–B then B–A–B–A; the same 1,250 cells — usgs 25/26, firms 502, ships 164, forest 559 — in each pair; no window flagged). **Correction (GPT, 11 Nov):** one pair was not matched on snapshot IDs — the second forward B2a pair (main 15:54:56 UTC on the 15:50:09 USGS snapshot, B2a 15:55:19 on the 15:55:09 snapshot) straddled a USGS rollover although both had 25 USGS cells. It is marked **unmatched** and is not counted; B2a rests on its other three pairs. Every B1 and B2b pair matched on all snapshot IDs:
 
 | Step | Frame median / p95 (ms), 4 windows | Render CPU median (ms) | Draw calls | Main in the same pairs |
 |---|---|---|---|---|
 | B1 | 16.7 / 33.4–33.6 (all four) | 19.4–20.2 | 3,774 | 33.4 / 50–50.9; CPU 35.3–36.5; 6,274 |
-| B2a | 16.7 / 33.4 (all four) | 19.5–20.5 | 3,771–3,774 | 33.4 / 50; CPU 36.1–37.6; 6,271–6,274 |
+| B2a | 16.7 / 33.4 (three matched pairs; the unmatched pair read the same) | 19.5–20.5 | 3,771–3,774 | 33.4 / 50; CPU 36.1–37.6; 6,271–6,274 |
 | **B2b** | **16.7 / 16.7–16.8 (all four)** | **6.4–7.1** | 2,521–2,526 | 33.4 / 50–50.1; CPU 36.5–37.8; 6,271–6,279 |
 | hide-only on main (ceiling) | 16.7 / 17.9–18.2 (two) | 1.9–2.0 | 24 | — |
 
@@ -89,7 +89,7 @@ Every browser and hub suite in `phase1/` was run in sequence (the default page i
 
 **Tap → painted inspector (same six taps):** main 711–768 ms · B1 611–629 · B2a 619–647 · **B2b 482–545**. No step is worse than main (rev 2.1 §5 regression check: met). Progress toward 200 ms, reported separately: B2b is ~230 ms faster than main but still 2.4–2.7× the target.
 
-**Look (live data).** Matched zoomed screenshots, main vs B2b, same pose: the limb strip and southern Africa (dense fires and forest cells). No difference visible at that zoom: same fills, same outlines, no gaps or back-faces at the limb. (The images were captured by the browser extension and are not in the repo; the pixel-level evidence is the fixture comparison in §3.)
+**Look (live data).** Matched zoomed screenshots, main vs B2b, same pose: the limb strip and southern Africa (dense fires and forest cells). No difference visible at that zoom: same fills, same outlines, no gaps or back-faces at the limb. (The images were captured by the browser extension and are not in the repo; the pixel-level evidence is the fixture comparison in §3.) **The planned live pole and dateline views were not captured in this run;** they are part of the final smoke check (§10).
 
 ## 7. §3a reading (for Chad's decision)
 
@@ -100,7 +100,7 @@ Every browser and hub suite in `phase1/` was run in sequence (the default page i
 
 ## 8. Before a merge (not done; each its own step)
 
-1. **Remove the RC switch:** hard-wire B2b (no `?perf=`), keep `ME.cellPerf()` as a read-only aid; the test suite keeps its own main/B1/B2a comparisons by injecting the mode (test-only), so the released page has no switch (proposal §3). Rerun the suites.
+1. **Remove the RC switch:** done, §10.
 2. GPT reviews the RC results and the switch removal.
 3. `Approve: push globe-perf-rc to main (page change: globe performance B2b — no side walls, shared single-sided cell fills)`.
 
@@ -109,3 +109,11 @@ Every browser and hub suite in `phase1/` was run in sequence (the default page i
 1. GPT reviews this packet and the branch (`globe-perf-rc`, files in the Mac folder `_review/globe-perf-rc/`).
 2. `Go: globe performance RC check (Chad's Chrome)` — Chad at the screen, ~40 min: matched pairs against an unmodified tab of live main, both orders, median and p95, the hide-only ceiling, look and picks on real data, tap latency against main for the S0.7 cases (no worse than Stage 0, progress to 200 ms reported separately), the 33 ms threshold applied as written (proposal §3a).
 3. Then §3a decides: ship the best passing step, or B3.
+
+## 10. Switch removal (branch `b78f811`) — GPT: proceed with §8
+
+- **Diff (index.html only):** the `?perf=` reader is replaced by one constant, `const CELL_PERF = { mode: 'b2b', Ctor: null, pass: 0, mats: null };`; the B2b comment now says "the released step". No other line changed. Exact diff: `reviews/evidence/2026-11-11-globe-perf-rc/switch-removal.diff`.
+- **Final `index.html`:** sha256 `b5ac4ed148beee4c754ebec428ef877f133c74ad5825118a09ce1e96f4665d54`.
+- **Suite `cell-perf-ui` 43/43.** The comparison modes (main, B1, B2a) are served by rewriting that one constant in the served HTML (test-only, kept for fixture coverage). New **release checks on the untouched `index.html`**: at the ordinary URL and with `?perf=main`, `?perf=b1` and `?perf=b2a`, the page runs B2b (mode b2b, no side geometry, shared FrontSide caps, one material per fill), no page errors. New break `url-switch` (an old-style URL override put back) must fail.
+- Breaks and the full regression run: (pending).
+- **Final smoke check (Chad's Chrome, before the merge line):** live main vs the final B2b at the **north pole** and the **dateline**, for Chad's visual call.
