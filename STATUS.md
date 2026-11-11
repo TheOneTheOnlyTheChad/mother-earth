@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 10:16 UTC (clock reading at write) — **Ocean Heat thread closed: GPT smoke test passed; handover written; Mac synced**
+
+- **GPT's independent desktop smoke test (relayed by Chad): passed.** Starts off; enabling renders the 0.25° overlay and the 9 Nov 2026 legend; off clears the legend; re-enable restores it. STAR credit in footer and Sources. A different open-water cell: 26.0 °C, +1.1 °C warmer than usual, 25 of 25 source cells. Land and Antarctic sea ice show their messages. Chrome showed the live manifest (revision, date, three binary hashes). `/%6danifest.json` → "unknown revision or file". His shell requests timed out, so headers, bytes, request counts and cache reuse rest on Claude's checks (packet §8–§9). Desktop only.
+- **Close-out (START-HERE §9):** Mac `_review/` emptied (two Ocean Heat review copies → `_to_delete/`); branches deleted by Chad (remote `main` + `aircraft-rc`); START-HERE §4o (thread facts) and the HANDOVER block written; Mac synced at the final commit, preserve-first; Project docs updated.
+- **Next (suggested, Chad to choose):** docs-only globe performance proposal (coverage polygons). See HANDOVER.
+
 ## 11 Nov 10:06 UTC — Ocean Heat LIVE (merge `158e4b1`; hub 0.6.7 `53ede31e…`)
 
 - Merged on Chad's line 09:58:30 UTC. **Served hashes: all ten page files exact** (10:04:02Z; `oceanheat.js` `a45097ba` is the tenth). Four hub responses 200, byte-exact, immutable 24 h. Public-page smoke test in Chad's Chrome: the toggle loads P1 from the hub, Open Pacific tap 30.6 °C / +5.1 °C, legend and STAR credit present, off clean, no console errors. **main = live.**
