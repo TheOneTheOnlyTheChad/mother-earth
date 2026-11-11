@@ -280,3 +280,30 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **Our obligation:** the generator's transcribed code and coefficients sit beside the complete applicable notices, verbatim. That is the file-level notice block (one copy, naming the ten files and hashes; in `earth_orient.py`'s header) and the `LICENSE` text (verbatim in `phase1/sky/ERFA-LICENSE.txt`), including the full non-endorsement clause. A Sources credit ("uses code derived from ERFA, a library derived from SOFA") sits alongside, never instead.
 - **Commercial use:** permitted by the licence terms. BSD-3 code can be incorporated into the AGPL-3.0 project with its notices preserved (GPT, 10 Nov).
 - **Related, not a source entry:** IERS Bulletin A (5 Nov 2026, Vol. XXXIX No. 045) is cited only for summary figures bounding the UT1 = UTC and polar-motion-0 assumptions, in docs and Sources. Its statement: "Distribution statement A: Approved for public release: distribution unlimited." No IERS series is shipped. The R3 (USNO) enquiry stays separate.
+
+## NOAA Coral Reef Watch — CoralTemp v3.1 daily SST, 5 km SSTA (1991–2020 baseline) and daily 1991–2020 climatology; files from the NOAA/NESDIS STAR server — **not on the page** (release candidate on branch; preview `ocean-heat-rc`)
+- **Filed:** 11 Nov 2026 on Chad's line "Approve: file the Ocean Heat REGISTER entry (C6) as recorded in OCEAN-HEAT-PROPOSAL §9a." Text per OCEAN-HEAT-PROPOSAL rev 4.2 §9a and docs/research/OCEAN-HEAT-SOURCE-CHECK.md rev 2.2 (C6, including the STAR disclaimer read on Chad's Go the same day).
+- **Files (one dated snapshot, 9 Nov 2026 UTC day), from `https://www.star.nesdis.noaa.gov/pub/socd/mecb/crw/data/5km/`:**
+  - `v3.1_op/nc/v1.0/daily/sst/2026/coraltemp_v3.1_20261109.nc`: 11,418,321 B, sha256 `57de86e9…5b92`;
+  - `v3.1-clim19912020-v1/nc/v1.0/daily/ssta/2026/ct5km_ssta_v3.1-clim19912020-v1_20261109.nc`: 10,399,448 B, sha256 `7b97760a…1033`;
+  - `v3.1-clim19912020-v1/climatology/nc/ct5km_v3.1_clim-sst-mean-daily-window-01day-01grid-source19912020_day1109.nc`: 6,349,472 B, sha256 `1495ac58…592e`.
+  - Downloaded by Chad (10 Nov). Derived snapshot `oh-2026-11-09-R1`, manifest sha256 `dcc34674…f5af1b`.
+- **Read:** 10 Nov 2026 by Claude: the three files' licence attributes in full (C2), NOAA's methodology, climatology and 1991–2020 product pages, the Coral Reef Watch citation page. 11 Nov 2026: the STAR "Disclaimers & Notices" page (https://www.star.nesdis.noaa.gov/star/productdisclaimer.php).
+- **The three statements:**
+  1. **SSTA 1991–2020 and the day-1109 climatology** carry only Coral Reef Watch's statement: available for use without restriction, with credit and courtesy to NOAA Coral Reef Watch and the appropriate DOI.
+  2. **CoralTemp** adds the **OSTIA notice, explicitly labelled 1985–2002** (academic research only, no commercial use, Met Office terms) and a **GHRSST 2002–present "free and open"** notice. The 9 Nov 2026 SST is from the 2017–present near-real-time part.
+  3. **STAR disclaimer (verbatim):** "Users are free to use the images or information hosted on this site as they wish, as long as credit is given to the NOAA / NESDIS Center for Satellite Applications and Research." The same page describes data on STAR's webservers as not official NOAA operational products, provided for experimental use, and subject to interruption or change without notice.
+- **The distinction:** the OSTIA notice is labelled for the 1985–2002 CoralTemp data. No text read extends it to the derived anomaly or climatology files, or to the 2017–present SST.
+- **Release hold:** GPT withdrew the OSTIA hold for this snapshot (relayed by Chad, 10 Nov). A later refresh re-reads the exact files' attributes, and any new source or wording is re-checked.
+- **Attribution (our display):**
+  - "NOAA Coral Reef Watch", on the card date line, the inspector method row, Sources and the footer;
+  - **plus the NOAA / NESDIS Center for Satellite Applications and Research (STAR)**, required by the STAR disclaimer, in the release branch's wording (GPT reviews);
+  - product links: CoralTemp v3.1 daily SST https://coralreefwatch.noaa.gov/product/5km/index_5km_sst.php and SSTA 1991–2020 https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta_clim19912020.php;
+  - exact file URLs and sha256 values in Sources' provenance table.
+- **DOI:** "Methods article DOI: 10.3390/rs12233856" (Skirving et al. 2020, *Remote Sensing* 12(23):3856), never labelled a dataset DOI. No dataset DOI verified for this anomaly or its climatology; GPT found NCEI DOIs only for the separate heat-stress archive. Added in a later revision if NOAA or NCEI publishes one.
+- **Data status (shown in Sources):** a dated snapshot of analysed (satellite-based, gap-filled) values, never "observed". The source server calls its hosted data experimental and not official operational products.
+- **Coverage statement:** global 0.05° grid. Mask: 0 water, 1 land, 2 no 1991–2020 normal, 4 ice; valid SST also occurs under masks 2 and 4. NOAA notes anomalies are less reliable at high latitudes.
+- **Automated / public use:** none. One manual download per snapshot; the page never calls NOAA or STAR. On release, the derived snapshot is served from the hub (R2), not from NOAA.
+- **Not read:** NOAA OSPO's pages on the operational status of the Coral Reef Watch 5 km products.
+- **Commercial use:** with attribution. The anomaly and climatology: without restriction, with credit; the STAR server: free use with credit; CoralTemp: the 2017–present SST used here falls under no notice restricting commercial use. The OSTIA 1985–2002 restriction is not used here.
+
