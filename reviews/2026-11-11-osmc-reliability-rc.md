@@ -2,6 +2,8 @@
 
 11 Nov 2026. Built on Chad's line "Go: OSMC reliability build on a branch per rev 2.1 (H1; O1–O7 as recommended; no page release, no hub deploy)". Proposal: `docs/concepts/OSMC-RELIABILITY-PROPOSAL.md` rev 2.1. Branch only: not merged, nothing deployed, no R2 or D1 change. Live remains hub 0.6.7 and main's page.
 
+> **Rev 2 (code `3df9c1a`, 18:58:29 UTC commit time) supersedes the hashes and counts in §1–§6 below. See §9.** §1–§8 are kept as the rev 1 record GPT reviewed at `987f97e`.
+
 ## 1. Candidate
 
 Code commit `266683b` (18:20:05 UTC commit time). This packet is a later commit on the same branch; code files are unchanged after `266683b`.
@@ -130,3 +132,76 @@ Notes:
 4. Watch the next real failed buoy run (D1, R2, live page).
 
 Rollback as in the proposal §9.
+
+## 9. Rev 2 — after GPT's review of `987f97e` (relayed by Chad, 11 Nov)
+
+GPT verified all 312 manifest entries, reran the hub suite independently (21/21; all eight breaks failed with the packet's counts) and read the browser tests. The browser run and its mutations remain Claude's evidence. One fix was required before a page-first merge, plus rulings on §3.
+
+### 9.1 The defect GPT found
+
+`driftFail()` set `failed_at` after awaiting the D1 log, the private R2 write and the counts read, so slow storage moved the reported failure time (GPT reproduced 16:08:58 reported as 16:09:03). **Fixed:** `failed_at` is captured once on entry, before any await, and reused on the conditional-write retry.
+
+### 9.2 Changes
+
+| | Change |
+|---|---|
+| Hub | `failed_at` captured on entry. Stored counts whose body cannot be **read** are left alone and the failure logged; counts that read but are not JSON count as nothing good to keep and are replaced conditionally (§3.3). |
+| Page | **§3.4 ruling:** when the update failed and the good run's records are missing or mismatched, the badge is **unknown** (not degraded). In that state the card shows no count ("–"), the map draws no buoy cells, and the observation line reads "buoy positions not shown". The "Latest update failed at …" line and the "Records withheld: …" reason stay. "Degraded" appears only when a fresh, matched fallback is actually on screen. |
+| Unchanged | §3.1 same-run guard, §3.2 fixed public down notes (with the `/status` exception), §3.5 expiry, §3.6 place clause — all agreed by GPT. `app.js` and `sources.html` are byte-identical to rev 1. |
+
+Nothing of the good run stays visible without its records, so no "last-good counts" label was needed.
+
+### 9.3 Revised hashes (code commit `3df9c1a`)
+
+| File | sha256 |
+|---|---|
+| `phase1/worker.js` | `85737a48c97a0ee1817b3a70883ba4d334b82da4092135a367d25a676c17c427` (293,193 B) |
+| `index.html` | `59500752aef111f1a0744fe8fee6e4457734e1f5741d11c399fa167af0113c8a` |
+| `app.js` | `9df9dce8cb08234996313b0ddd78d2579216dca8ae62d94b5d1b0f4735de0c0b` (unchanged) |
+| `sources.html` | `44b6e42d5bb9a7fb5d4af7e006048b877294dc1a940d2ba88e76553eeb1a0917` (unchanged) |
+
+### 9.4 Hub suite: 27 passed, 0 failed (was 21)
+
+New cases, one per review point:
+
+| Case | Covers |
+|---|---|
+| 13 delayed storage: D1 log +2 s and each R2 write +3 s; failure at 16:08:58 is published as 16:08:58 while the clock passes 16:09:03 | the defect |
+| 13b `failed_at` unchanged across the conditional-write retry | the defect, retry path |
+| 14 both objects publish, then the run throws: published pair intact, no `last_attempt`, failure logged | §3.1 |
+| 15 cold failure with a distinctive raw error: public down envelope, `/cells`, `/place`, `/` clean; kept in D1, the private object and `/status` | §3.2 |
+| 16 stored counts are malformed JSON: conditional replacement; and it loses to a good publish landing in between | §3.3 |
+| 17 stored counts body cannot be read: object and etag unchanged, no write attempted, failure logged | §3.3 |
+
+Breaks, each fails (12 now):
+
+| Break | Failing cases |
+|---|---|
+| `failed-at-late` (new) | 2 (13, 13b) |
+| `same-run-strict` (new) | 1 (14) |
+| `raw-note-down` (new) | 3 (7, 15, 16) |
+| `unreadable-as-empty` (new) | 1 (17) |
+| `stamp-failed-time` | 9 |
+| `keep-after-good` | 4 |
+| `unconditional` | 9 |
+| `down-unconditional` | 4 |
+| `order-by-retrieved` | 4 |
+| `guarded-writedown` | 3 |
+| `no-place-cutoff` | 1 |
+| `raw-note-public` | 4 |
+
+### 9.5 Page suite: 41 passed, 0 failed (was 35)
+
+Cases 3a (records unreadable) and 3b (records from a different run) now each assert explicitly: badge unknown with the "bad" class and not "warn"; zero buoy points; zero buoy cells; no count; "buoy positions not shown"; the failed-at line on the card and tooltip; no "Showing buoys"; the withheld reason.
+
+Breaks, each fails (11 now): `degraded-without-records` 2 (new) · `cells-without-records` 2 (new) · `count-without-records` 2 (new) · `positions-copy-without-records` 2 (new) · `drop-line` 11 · `showing-without-records` 2 · `no-redraw` 1 · `keep-cells` 1 · `missing-field-is-failure` 2 · `failed-at-run` 6 · `no-degraded` 2.
+
+### 9.6 Regression on rev 2
+
+**Focused run on `3df9c1a` (finished 18:58:24 UTC), all green** — the suites that exercise the changed code:
+
+- Hub: osmc-reliability-hub 27 · drifters-hub 12 · health-hub 29 · history-hub 27 · firms-v2 57 (+7 skipped) · oceanheat-hub 48 · place-rows 7 · kp-degraded 29.
+- Browser: osmc-reliability-ui 41 · drifters-ui 25 · buoy-temp-ui 33 · place-ui 30 · cell-perf-ui 43 · mobile-pass 131 · desktop-overflow 112 · fires-wording-ui 35 · kept-ui 21 · smoke-fixes 52 · plastic-ui 29.
+
+**Remaining suites on rev 2: running at this commit; results in the next commit of this packet.**
+
