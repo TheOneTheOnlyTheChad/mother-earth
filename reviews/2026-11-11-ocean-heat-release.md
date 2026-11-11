@@ -158,3 +158,12 @@ Listing afterwards: exactly these four objects, sizes and content types as pinne
 **Tests at `1b975a0`:** hub suite 48/48 (was 45; +3 encoded spellings); breaks 7/7 fail (no-hash-check 1, no-size-check 2, loose-route 2, wrong-type 3, content-encoding 4, cache-on-error 5, decoded-segments 3). Pin check CONSISTENT, 0 mismatches. Browser suite 109/109. All 28 `phase1/*.test.mjs` suites exit 0.
 
 **Hashes at `1b975a0`:** worker.js `53ede31ebb976c1010c1a08a61889499563d719169f5b406544a302505fb9e43`; sources.html `50fa74e90f87c81829c879f933abf3c5171ef7063087407847cd193ece1ab4c3`; oceanheat.js and index.html unchanged (`a45097ba…`, `75420aa2…`).
+
+## 7. Hub deploy (Chad: "Approve: deploy hub 0.6.7 from 1b975a0 (content only: Ocean Heat route).")
+
+- **Before (09:36:28Z):** live script 0.6.6, 283,352 B, sha256 `4231114d…f078` = origin/main's `phase1/worker.js`; 19 bindings.
+- **Source:** raw.githubusercontent at `1b975a0`, 287,973 B, sha256 `53ede31e…fb9e43` (exact).
+- **Deploy:** content-only PUT `/workers/scripts/mother-earth/content` 09:36:47.156Z → 200 at 09:36:49.878Z, modified `2026-11-11T09:36:49.705612Z`. Read-back (`content/v2`) sha256 exact; 19 bindings, unchanged. Previous version stays in Cloudflare's history.
+- **Live smoke check from the Pages origin (09:37:08Z, `no-store` requests):** `/` reports 0.6.7 with `catalogues.oceanheat` (current `oh-2026-11-09-R1`). All four files 200, byte-identical to their pins, `Cache-Control: public, max-age=86400, immutable`, types as pinned. `/%6danifest.json`, the trailing-slash path, an unknown revision and `current/` → 404 `no-store`. `/status` 200.
+- **Seen in transit:** the manifest's ETag arrives weak (`W/"dcc34674…"`). Cloudflare's edge compressed the JSON response on the way out, and that weakens the Worker's strong ETag. Decoded bytes are exact (4,585 B, pinned sha256). The three `.bin.z` files keep strong ETags (not compressed). Content-Encoding can't be read cross-origin (not an exposed header). The live RC checks the browser cache with this in place.
+- **Not done:** the live RC (§4 of the proposal) and the merge.
