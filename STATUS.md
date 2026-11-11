@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 19:38:18 UTC — **HUB 0.6.8 DEPLOYED** (Chad: "Approve: deploy hub 0.6.8 from 51f87fc (content only)") — entry written 19:38 UTC
+
+- **Before (19:37:57 UTC, dashboard tab):** live worker.js = 0.6.7 `53ede31e…fb9e43` (287,973 B; the rollback target); 19 bindings.
+- **Source:** raw.githubusercontent at `51f87fc`: 293,193 B, sha256 `85737a48c97a0ee1817b3a70883ba4d334b82da4092135a367d25a676c17c427` (= the file GPT cleared at `d28763d`). Hash and the live 0.6.7 hash re-checked in the tab immediately before the write.
+- **Deploy:** content-only PUT 19:38:15Z → HTTP 200, success, etag `932239ee…918b`, modified 19:38:18.025Z. Bindings, secrets, variables and crons untouched.
+- **Verified 19:38:42 UTC:** read-back `85737a48…c427` exact; 19 bindings, identical list; `/` = **0.6.8**, history collecting; health 8/8 (200); `/cells/drifters` and `/snapshot/drifters` 200, same run (19:08:09, 1,302 buoys, written by 0.6.7), no `last_attempt`; `/place` buoy section ok; `/snapshot/usgs`, `/snapshot/arts`, sky, timeline and Ocean Heat catalogue routes 200.
+- **main = live again** (hub 0.6.8 `85737a48…`, page merge `7c3aa22`).
+- **Pending:** first scheduled buoy run on 0.6.8 (20:07 UTC job), to be read in D1. The failure path itself is proven by tests only until a real failed run occurs.
+- **Rollback:** hub = 0.6.7 `53ede31e…fb9e43`; page = revert `7c3aa22`; each its own Approve line, independent. A `last_attempt` already in R2 stays until the next run successfully replaces the envelope, normally within an hour.
+
 ## 11 Nov 19:27 UTC (clock reading at write) — **OSMC reliability: PAGE RELEASED (merge `7c3aa22`, 19:23:40 UTC commit time); hub 0.6.8 NOT deployed (live hub 0.6.7)**
 
 - GPT cleared rev 2 for Chad's page-first merge approval (all 312 manifest entries and the revised worker and index hashes verified; hub suite rerun independently 27/27, all 12 breaks failing as reported; browser assertions read; the 41/41 browser run and the full regression are Claude's evidence).
