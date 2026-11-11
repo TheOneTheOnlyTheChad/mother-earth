@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 14:36 UTC (clock reading at write) — **Globe performance build proposal rev 1.1** (GPT's review applied; docs only)
+
+- GPT: skip-the-spike accepted; §1 credible as a prediction; revise before the build go. Rev 1.1: B1 = no side geometry or side draws, with its own look/pick checks at grazing edges and the limb (invisible sides can write depth and be raycast today); B2 split into B2a (shared DoubleSide, same settings, materials made fresh per render pass) and B2b (FrontSide, tested alone); RC pairs matched on snapshot IDs, layers and cell counts, median + p95, interrupted pairs rerun; ship rule §3a (best passing step ships without B3 if its median ≤ 33 ms; B3 gets its own RC vs the best simpler step and main); no general edge rule yet (ME.cellId floors east), same-layer edge case added.
+- Next: Chad's `Go: globe performance build B1+B2 on a branch (no page release)` (no screen time).
+
 ## 11 Nov 14:28 UTC (clock reading at write) — **Globe performance build proposal rev 1** (Chad chose (b): no spike; docs only)
 
 - `docs/concepts/GLOBE-PERFORMANCE-BUILD-PROPOSAL.md`. New from reading globe.gl 2.45.0 / three-globe (three r181), not yet measured: the page's fully transparent `polygonSideColor` still makes globe.gl build and draw invisible side walls with a custom shader, and transparent DoubleSide draws twice → ~40 % of draw calls are invisible walls.

@@ -1,4 +1,4 @@
-# Globe performance — build proposal, rev 1
+# Globe performance — build proposal, rev 1.1
 
 **For:** GPT's review, then Chad's approval lines in §7. **Docs only.**
 **Written:** 11 Nov 2026 (14:28 UTC clock reading).
@@ -6,8 +6,20 @@
 - `reviews/2026-11-11-globe-perf-stage0.md` (Stage 0 record, with GPT's read: supports C1; C2 and C3 no case);
 - `docs/concepts/GLOBE-PERFORMANCE-PROPOSAL.md` rev 2.1 (§5: what any later build must keep).
 
+**Rev 1.1:** GPT's review of rev 1 (relayed by Chad, 11 Nov): skipping the spike is fine; revise before the branch-build go. Changes in the table below.
+
 **Chad's decision (11 Nov):** skip the throwaway Stage 1 spike. Go straight to a build proposal; GPT's C1 pass test is applied once, in the branch release-candidate check, with the Stage 0 harness.
 **Not approved:** the branch build, the RC check, the merge. Each is its own line (§7). No hub, R2, D1, cron or variable change in any step.
+
+## Rev 1.1 changes (GPT's review)
+
+| # | GPT's point | Change | Where |
+|---|---|---|---|
+| R1 | §1 is credible; keep ~2,276 side draws as a **prediction**; three-globe still allocates a default side material when it creates each polygon group | B1 worded as "no side geometry or side draw calls"; prediction labelled; the pinned bundle's internals confirmed in the RC | §1, §2 |
+| R2 | B1 can change pixels and picks: zero-alpha side fragments above the surface can still write depth, and side triangles can be raycast targets | B1 gets its own matched screenshots and hover/click checks at grazing edges and the limb, including an outline or point passing behind a cell edge | §2, §3 |
+| R3 | Shared `DoubleSide` caps first; `FrontSide` must earn its place; material lifetime: the removal path disposes attached materials, so a cache can hold a disposed material | B2 split into **B2a** (shared, `DoubleSide`, same colour/opacity/depth settings) and **B2b** (`FrontSide`, tested alone at limb, poles, dateline). Shared materials are made fresh for each `render()` pass, never cached across passes; lifetime checked through a toggle and a refresh | §2, §5 |
+| R4 | RC pairs need the same snapshot IDs, layers and cell counts, both settled and foreground; median and p95; rerun interrupted pairs; define what lets B1/B2 ship without B3; B3 needs its own RC against the best simpler step and main | §3 rewritten; ship rule in §3a | §3, §3a |
+| R5 | `ME.cellId` floors longitude, so an exact interior boundary maps **east**; the Stage 0 edge case (Earthquakes west, Ships east) can't separate a west-edge rule from layer precedence | No general edge rule codified; that case kept as a regression case; a **same-layer** edge case added; B3's edge rule decided by Chad after it is measured | §4 |
 
 ## 0. What Stage 0 says, in one paragraph
 
@@ -21,41 +33,52 @@ The page loads `globe.gl@2.45.0` (bundling three.js r181). Its polygon layer (th
 
 The page sets `polygonSideColor(() => 'rgba(0,0,0,0)')` to hide the sides. In three-globe a side colour that is **any non-empty value** means "build sides" (`hasSide = !!(sideColor || sideMaterial)`), so every cell still builds and draws fully transparent side walls with the custom shader. In three.js r181 a transparent `DoubleSide` material is drawn **twice** (back faces, then front). That accounts for Stage 0's 4 draw calls per cap mesh: **2 for invisible sides + 2 for the cap**.
 
-So about **2,276 of the 5,711 draw calls (~40 %)** are walls nobody can see, each with a custom shader program. This was not known when Stage 0 ran, so it is a hypothesis to measure, not a result.
+So about **2,276 of the 5,711 draw calls (~40 %)** are predicted to be walls nobody can see, each with a custom shader program. This is a **prediction** from the source GPT and Claude read (three-globe 2.43.0 / 2.45.6 public source); the exact pinned bundle's behaviour is confirmed in the RC by draw-call counts.
 
 ## 2. The build: three steps on one branch, smallest first
 
 | Step | Change | Expected draw calls (1,138-cell scene) | Behaviour risk |
 |---|---|---|---|
-| **B1 — no sides** | `polygonSideColor(() => null)` (one line). globe.gl then builds no side geometry and no side material | 5,711 → ~3,400 (−2 per cell) | **None expected:** the sides are fully transparent today. Picking, labels, precedence and the inspector all stay globe.gl's own |
-| **B2 — shared single-sided cap materials** | `polygonCapMaterial(p => shared(p.fill))`: one `MeshBasicMaterial` per distinct fill, `FrontSide`, `transparent`, same colour and opacity; constructor taken from a polygon's own default cap material once one exists (the harvest pattern already used by day/night and Ocean Heat) | ~3,400 → ~2,300 (−1 per cell); ~2,300 materials → tens | Low: one material per fill colour instead of one per cell. `FrontSide` must be checked against the limb (caps are on a sphere facing outward) |
+| **B1 — no sides** | `polygonSideColor(() => null)` (one line). globe.gl then builds **no side geometry and draws no side calls** (it still allocates a default side material per group) | 5,711 → ~3,400 (−2 per cell), predicted | **Low but real:** invisible sides can write depth above the surface and can be raycast targets today, so removing them can change pixels and picks at grazing edges and the limb. Picking, labels, precedence and the inspector otherwise stay globe.gl's own |
+| **B2a — shared cap materials** | `polygonCapMaterial(p => shared(p.fill))`: one `MeshBasicMaterial` per distinct fill, **`DoubleSide`**, same colour, opacity, `transparent` and depth settings as globe.gl's default; constructor taken from a polygon's own default cap material (the harvest pattern used by day/night and Ocean Heat). Made fresh in each `render()` pass (never cached across passes, so a material disposed with a removed polygon is never reused) | draw calls unchanged; ~2,300 materials → tens | Low: same look by construction; checks per §5 |
+| **B2b — single-sided caps** | B2a with `FrontSide` | ~3,400 → ~2,300 (−1 per cell) | Must earn its place: at altitude 0.006 caps near the limb can show their backs, and culling affects picking. Tested alone at the limb, poles and dateline |
 | **B3 — merged mesh (C1)** | Replace globe.gl's polygon layer for coverage cells with **one mesh for all fills and one line object for all outlines**, rebuilt when `render()` runs. Hover and click move to a coordinate lookup (`globe.toGlobeCoords` → `ME.cellId` → cell), reproducing Stage 0's observed picking | ~2,300 → **a handful** | Highest: picking, hover labels, overlap draw order and the line constructor (the page has no three.js constructors of its own; §4) all have to be rebuilt and tested |
 
-**Why in this order:** B1 and B2 keep every interaction exactly as globe.gl does it today, so they cost almost nothing in tests. If they bring the page close to the targets, B3 may not be worth its risk. If they don't, B3 is built on top.
+**Why in this order:** B1 and B2 keep interactions in globe.gl's hands, so they need far fewer new tests than B3. §3a says when B3 is built.
 
 **Not a scope change:** all three are changes to how the same cells are drawn. Nothing about what the page shows, says, fetches or keeps changes.
 
 ## 3. How it's measured (the RC check — one session, Chad's Chrome)
 
-- **Where:** a clean Pages-origin tab with the branch page files injected (the established pattern, START-HERE §5a), against the live hub. Chrome in front, DevTools closed, full width.
+- **Where:** a clean Pages-origin tab with the branch page files injected (START-HERE §5a), against the live hub; the baseline is an **unmodified tab** of live main in the same session. Chrome in front, DevTools closed, full width.
 - **Harness:** `reviews/evidence/2026-11-11-globe-perf-stage0/harness.js` (time-based sweep, render CPU, draw calls, forced completion, census), unchanged.
-- **Baseline:** an **unmodified tab** (live main) in the same session. Both orders (A–B–A–B, B–A–B–A); repeat once if the effect is close to the baseline spread. The **hide-only** result (polygons hidden on main) is run as the reference ceiling.
-- **Per step:** each built step that's on the branch (B1; B1+B2; and B1+B2+B3 if built) against the same baseline. The steps are switchable on the branch for the check only (`?perf=b1`, `b2`, `b3`), and the shipped page uses the chosen step with no switch.
-- **Pass (GPT's test):** a repeatable rotation-frame gain beyond the spread of its paired baselines, in both orders; **and** the look preserved: matched screenshots (same pose) of overlapping translucent fills and outlines, at the limb and the dateline.
-- **Also recorded:** tap → painted inspector for the S0.7 cases (open since Stage 0: does fewer objects help taps?); the S0.7 picking table must match exactly for B1/B2 and match or follow Chad's rule for B3.
-- **Chad's impression** of the rotation, alongside the numbers.
+- **Matched pairs:** each pair (candidate vs baseline) runs with the **same snapshot IDs, the same enabled layers and the same cell counts** in both tabs; both tabs settled and **foreground during their measured windows** (one tab measured at a time, the other idle). Both orders (A–B–A–B, B–A–B–A); repeated once if the effect is close to the baseline spread. **Median and p95** recorded. Any pair interrupted by a refresh, a cell-count change or focus loss is rerun. The **hide-only** result on main is run as the reference ceiling.
+- **Steps measured:** B1; B1 + B2a; B1 + B2a + B2b. Each is selectable on the branch for the check only (`?perf=b1|b2a|b2b`); the shipped page uses the chosen step with no switch.
+- **Draw-call counts** confirm or refute §1's prediction on the pinned bundle.
+- **Look and picks, per step (R2, R3):** matched screenshots (same pose) of overlapping translucent fills and outlines at the limb, poles and dateline; real hover and click at **grazing edges and the limb**, including where an **outline or a point passes behind a cell edge**, plus the Stage 0 S0.7 cases. B1 and B2a must reproduce today's screenshots and the S0.7 picking table; any difference is reported with its screenshot, and Chad decides whether it is acceptable.
+- **Also recorded:** tap → painted inspector for the S0.7 cases (open since Stage 0); Chad's impression of the rotation.
+
+## 3a. Ship rule (R4)
+
+- A step **passes** if it gives a rotation-frame gain beyond the spread of its paired baselines in both orders, with look and picks preserved (or differences Chad accepts).
+- **The best passing step ships without B3** if its rotation **median is ≤ 33 ms** (the D1 target) in the RC. Chad decides, with the numbers, whether a p95 above 50 ms is acceptable.
+- If no simpler step reaches a 33 ms median, Claude says so and B3 becomes a separate build go (§7). B3 then gets **its own RC before any merge**, measured against **the best passing simpler step and live main**, with GPT's C1 pass test.
+- If a simpler step passes but misses 33 ms, Chad chooses: ship it now and consider B3 later, or build B3 first.
 
 ## 4. B3 details (only if built)
 
 - **Constructors:** Mesh and geometry from the globe mesh (as `harvestThree()` does); `BufferAttribute` from the globe geometry's position attribute; `MeshBasicMaterial` from a polygon's default cap material (B2's harvest); `LineSegments` from a polygon outline. If B3 replaces the polygon layer, these are harvested **before** the last globe.gl polygon is removed and kept; if any is missing, the page keeps globe.gl's polygons and says nothing (fail closed to today's behaviour).
 - **Geometry:** each cell's cap as a small fan of triangles at altitude 0.006 on the sphere (same curvature resolution as now, 5°), vertex colours with alpha; outlines as segment pairs at 0.006 + 1e-4.
-- **Picking:** canvas `pointermove` / `click` → `globe.toGlobeCoords(x, y)` → `ME.cellId` → the cells at that id; winner by the Stage 0 precedence (Earthquakes > Fires > Ships > Forest); on an exact shared edge the west cell (as observed), unless Chad sets another rule. Points and open globe keep their current routing. `ohTap` keeps its lat/lng.
+- **Picking:** canvas `pointermove` / `click` → `globe.toGlobeCoords(x, y)` → `ME.cellId` → the cells at that id; winner by the Stage 0 precedence (Earthquakes > Fires > Ships > Forest). Points and open globe keep their current routing. `ohTap` keeps its lat/lng.
+- **Shared edges (R5):** no general edge rule is codified yet. `ME.cellId` floors, so an exact interior longitude boundary maps **east**, while Stage 0's edge case picked the west cell; that case had Earthquakes west and Ships east, so it can't tell a west-edge rule from layer precedence. It stays a **regression case**, and a **same-layer** edge case is added to the RC. B3's edge rule is set by Chad once both are measured.
 - **Tests:** the eight suites named in proposal rev 2.1 §5; `ME.openCell`, `ME.cellPolys`, `ME.renderState` give the same outputs; new breaks for picking precedence and the edge rule.
 
 ## 5. Tests for B1 and B2
 
 - Existing suites green (desktop-overflow, mobile-pass, place-ui, timeline-ui, orbital-browser, buoy-temp-ui, oceanheat-ui, sky-zoom-ui).
-- New checks: no polygon object carries a side group (B1); caps share materials by fill and are `FrontSide` (B2); `ME.cellPolys` unchanged; one break per step that puts the old behaviour back and must fail.
+- New checks: no polygon mesh has a side geometry group (B1); caps share materials by fill with globe.gl's default colour, opacity, transparency and depth settings (B2a); `FrontSide` only under `?perf=b2b` (B2b); `ME.cellPolys` unchanged.
+- **Material lifetime (R3):** after an optional-layer toggle and after a scheduled refresh, every rendered cap material is undisposed and in use, the material count follows the distinct fills, and no material outlives its pass.
+- One break per step that puts the old behaviour back and must fail.
 
 ## 6. Out of scope
 
@@ -63,13 +86,10 @@ Phones (still open), the hub, any other layer, what the inspector says, and the 
 
 ## 7. Approval lines (Chad)
 
-1. `Go: globe performance build B1+B2 on a branch (no page release)` — Claude builds and tests; no screen time needed.
-2. `Go: globe performance RC check (Chad's Chrome)` — needs Chad at the screen, ~30 min.
-3. Then, from the RC result: either `Go: globe performance build B3 on the same branch` or `Approve: push <branch> to main (page change: globe performance B1+B2)`.
+1. `Go: globe performance build B1+B2 on a branch (no page release)` — Claude builds and tests (B1, B2a, B2b behind `?perf=` for the check); no screen time needed.
+2. `Go: globe performance RC check (Chad's Chrome)` — needs Chad at the screen, ~40 min.
+3. Then, by §3a: either `Approve: push <branch> to main (page change: globe performance <step>)`, or `Go: globe performance build B3 on the same branch` followed by its own RC.
 
-## 8. For GPT
+## 8. GPT
 
-1. Is §1's reading of three-globe right: does a fully transparent `polygonSideColor` still build and draw sides, and does r181 draw transparent `DoubleSide` twice?
-2. Any reason B1 (sides off) could change what's visible (e.g. depth writes from the invisible sides hiding anything)?
-3. Is B2's `FrontSide` safe for caps at altitude 0.006, or should it stay `DoubleSide` and only share materials?
-4. Is the step-by-step RC (B1, B1+B2, then B3 only if needed) an acceptable way to apply your C1 pass test?
+Rev 1 review (relayed by Chad, 11 Nov): revise before the branch-build go; skipping the spike accepted; §1 credible as a prediction. Rev 1.1 applies R1–R5.
