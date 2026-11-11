@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
-## 11 Nov 04:10 UTC (clock reading at write) — **Ocean Heat foreground timing run DONE (Chad's Chrome, M3): thresholds missed by the page itself, not the layer**; GPT cleared rev 2 for preview (branch only)
+## 11 Nov 04:05 UTC (clock reading at write) — **Ocean Heat foreground timing run DONE (Chad's Chrome, M3): thresholds missed by the page itself, not the layer**; GPT cleared rev 2 for preview (branch only)
 - **GPT (relayed):** rev 2 clears the preview findings. Merge pending the timing run and a verified hub-backed release candidate.
 - **Run** (packet §10), branch `7cd43ac`, 7 files hash-exact; Chrome raw frame rate 16.7 ms:
   - desktop: P1 layer on 100 ms median / 133 p95 vs layer-off baseline 117 / 267;
