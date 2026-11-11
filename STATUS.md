@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 17:01 UTC (clock reading at write) — **Globe performance: switch removed, final code verified; ready for GPT's final review and Chad's merge line** (branch `globe-perf-rc` @ `06febc0`)
+
+- GPT: B2b meets §3a; proceed with §8; no B3 for this release. Packet correction applied (second forward B2a pair straddled a USGS rollover → unmatched; all B1/B2b pairs matched).
+- `index.html` fixed on B2b, no URL switch (final sha256 `b5ac4ed148beee4c…`; diff `reviews/evidence/2026-11-11-globe-perf-rc/switch-removal.diff`). Suite cell-perf-ui 43/43 incl. release checks on the untouched HTML (ordinary URL and former `?perf=` overrides all B2b); 6 breaks each fail (url-switch 10). Full regression green on the final code; oceanheat-ui rerun 109/109 after the local test server hit its 2-hour limit.
+- Final smoke check in Chad's Chrome (16:20–16:21 UTC): live main vs final B2b at the north pole and the dateline — no visible difference.
+- Next: GPT's final review; Chad's visual call (outline change) and `Approve: push globe-perf-rc to main (page change: globe performance B2b — no side walls, shared single-sided cell fills)`.
+
 ## 11 Nov 16:10 UTC (clock reading at write) — **Globe performance RC check DONE (Chad's Chrome, 15:48–16:07 UTC): B2b best; every step passes** — packet `reviews/2026-11-11-globe-perf-rc.md` §6–§8 on branch `globe-perf-rc` @ `01232f9`
 
 - GPT cleared `2ca14e1` for the RC; suite grown to 35 checks (B2b hover asserted, real clicks, R3 disposal through the page's own scheduled refresh; break `cache-across-passes` fails 7).
