@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 14:25 UTC (clock reading at write) — **GPT's read of Stage 0: supports a C1 merged-mesh spike only**; record tightened (docs only)
+
+- GPT (relayed by Chad) verified the hashes and reproduced the trace analysis; C2 and C3 no case. Two claims tightened in the record: the ~50 ms state had no matched hidden window and the GPU-process figure is host activity; the 433 ms tap latency is a polygons-visible baseline.
+- Chad doesn't want further measurement rounds for their own sake. Next is his choice: (a) the Stage 1 spike, or (b) skip it and write the build proposal, with GPT's C1 pass test applied in the branch release-candidate check using the Stage 0 harness.
+
 ## 11 Nov 14:11 UTC (clock reading at write) — **Globe performance Stage 0 DONE (measure only)** — record `reviews/2026-11-11-globe-perf-stage0.md`
 
 - On Chad's Stage 0 line; live page, his Chrome (M3), no code change. Served hashes = main (10:38:31 and 11:07 UTC).

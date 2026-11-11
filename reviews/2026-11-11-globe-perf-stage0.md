@@ -7,11 +7,14 @@
 
 ## 0. Findings (decision per proposal rev 2.1 §3)
 
+**GPT's read (relayed by Chad, 11 Nov 2026):** supports a **C1 merged-mesh spike only**; C2 and C3 have no case on this evidence (C3: refresh-transition cost untested). Verified the record, `tab2-raw.json` and the saved trace by hash and reproduced the trace analysis. Two claims tightened as asked: the ~50 ms state had no matched hidden window and the GPU-process figure is host activity (§4, §7, item 3); the tap latency is a polygons-visible baseline (item 5). GPT's pass test for C1: unmodified tab as baseline, both orders, hide-only kept as reference; a repeatable rotation gain beyond the spread of its paired baselines, with the look of overlapping fills and outlines preserved.
+
+
 1. **The coverage-cell polygons are the cost (Q2).** Hidden vs visible, both orders: frames 183–217 → **16.7 ms**, render CPU ~176–197 → ~4–5 ms, draw calls 5,711 → 22. The polygons are 2.8 % of the triangles and 99.6 % of the draw calls. Far outside the baseline spread; repeated across tab 1 and tab 2 and at two viewports.
 2. **Fills are most of it, outlines the rest (Q2).** Caps hidden → 1,160 draw calls, 33 ms frames; outlines hidden → 4,574 draw calls, ~3 ms less render CPU. Both together are needed to reach 16.7 ms.
-3. **The cost is CPU per object (Q1).** The trace shows the main thread 99.96 % busy with three.js per-object material/program bookkeeping (`getParameters`, `getProgramCacheKey`); the GPU process is ~28 % busy. Pixel ratio made no difference (rc §10). Rings are not a factor (S0.4).
+3. **The cost is CPU per object (Q1).** The trace shows the main thread 99.96 % busy with three.js per-object material/program bookkeeping (`getParameters`, `getProgramCacheKey`); Chrome's GPU-process main thread was busy ~28 % of the window (host activity, not GPU hardware utilisation). Pixel ratio made no difference (rc §10). Rings are not a factor (S0.4).
 4. **No leak (Q3).** Rebuilds (20 page toggles, 20 setter calls) and 30 min of natural refreshes leave counts flat; the scene grows only with the cell count (782 at 04:00 → 1,229 at 14:02 UTC).
-5. **Picking baseline (Q5):** hover and click agree; observed precedence Earthquakes > Fires > Ships > Forest; west cell on a shared edge; points not separately pickable; open globe → "Everything here". Tap → painted inspector 374–768 ms (median 433), against the ≤ 200 ms target, layer polygons visible.
+5. **Picking baseline (Q5):** hover and click agree; observed precedence Earthquakes > Fires > Ships > Forest; west cell on a shared edge; points not separately pickable; open globe → "Everything here". Tap → painted inspector 374–768 ms (median 433), against the ≤ 200 ms target. **This is a polygons-visible baseline only;** whether batching improves picking or inspector latency is open.
 
 **Decision under the rule:** a material, repeatable rotation-frame gain from hiding the polygons → **a C1 (merged mesh) spike is justified**. **C2: no case** (no growth without data growth). **C3:** nothing in the trace points to polygon transitions during rotation; not justified on this evidence. Stage 1 needs Chad's separate go and GPT's read of this record first.
 
@@ -152,7 +155,7 @@ Each case centred with `ME.pointView(lat, lng)` (altitude 2), then a real hover 
 | Polygons hidden | 5,069 ms; 38.7 % of samples idle | 222 ms | 31.7 % |
 
 - **Where the visible time goes (JS self-time samples):** `getParameters` 22.6 %, anonymous globe.gl frames 17.7 %, `Je` 14.6 %, native `(program)` 14.6 %, `requestAnimationFrame` 5.4 %, `getProgramCacheKey` 4.7 %, `bindVertexArray` 2.0 %, `setup` 2.0 %; garbage collection 1.5 %. `getParameters` and `getProgramCacheKey` are three.js's per-object material/program bookkeeping inside the bundled globe.gl.
-- **Reading:** with the polygons visible the main thread never idles. Its time is three.js doing per-object render setup for ~2,300 polygon meshes every frame — CPU work proportional to the number of objects, not to triangles or pixels (consistent with S0.2 and the pixel-ratio sample in rc §10). The GPU process is busy ~28 % of the window, so the GPU is not the bottleneck.
+- **Reading:** with the polygons visible the main thread never idles. Its time is three.js doing per-object render setup for ~2,300 polygon meshes every frame — CPU work proportional to the number of objects, not to triangles or pixels (consistent with S0.2 and the pixel-ratio sample in rc §10). Chrome's GPU-process main thread was busy ~28 % of the window; that is host-side activity, not GPU hardware utilisation, so it does not by itself show the GPU is idle.
 - With the polygons hidden the main thread is still ~50 % busy under tracing (globe.gl's per-frame tick, `updateMatrixWorld`, the trace's own overhead) but frames hold 16.7 ms.
 
 ## 5. S0.6 — natural refresh, 30-min foreground dwell (tab 2)
@@ -186,7 +189,7 @@ Same winners as before and after the Forest toggle. Over all 16 taps: tap → pa
 
 ## 7. Frame-state observation
 
-Visible-polygon frames sat in distinct states across the day: ~33 ms, ~50 ms (end of dwell), and ~185–230 ms, with the same draw calls; forced completion split the same way (38–46 vs 210–228 ms). No hidden-polygon window ever left 16.7 ms. Stage 0 does not identify what switches the state (the trace pair caught only the ~33 ms state). The S0.2 effect is the same in every state: hiding the polygons always reached 16.7 ms.
+Visible-polygon frames sat in distinct states across the day: ~33 ms, ~50 ms (end of dwell), and ~185–230 ms, with the same draw calls; forced completion split the same way (38–46 vs 210–228 ms). Every measured hidden-polygon window had a 16.7 ms median. The ~50 ms state (post-dwell baseline) had **no matched hidden window**, so the hide effect is shown for the ~33 ms and ~200 ms states only. What triggers the ~200 ms state remains open. Stage 0 does not identify what switches the state (the trace pair caught only the ~33 ms state). The S0.2 effect is the same in every state: hiding the polygons always reached 16.7 ms.
 
 ## 8. Evidence (`reviews/evidence/2026-11-11-globe-perf-stage0/`)
 
