@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 14:28 UTC (clock reading at write) — **Globe performance build proposal rev 1** (Chad chose (b): no spike; docs only)
+
+- `docs/concepts/GLOBE-PERFORMANCE-BUILD-PROPOSAL.md`. New from reading globe.gl 2.45.0 / three-globe (three r181), not yet measured: the page's fully transparent `polygonSideColor` still makes globe.gl build and draw invisible side walls with a custom shader, and transparent DoubleSide draws twice → ~40 % of draw calls are invisible walls.
+- Plan: B1 sides off (one line) → B2 shared FrontSide cap materials → B3 merged mesh only if needed; all measured in one RC check against an unmodified tab with the Stage 0 harness and GPT's pass test.
+- Next: GPT reviews (§8); then Chad's `Go: globe performance build B1+B2 on a branch (no page release)`.
+
 ## 11 Nov 14:25 UTC (clock reading at write) — **GPT's read of Stage 0: supports a C1 merged-mesh spike only**; record tightened (docs only)
 
 - GPT (relayed by Chad) verified the hashes and reproduced the trace analysis; C2 and C3 no case. Two claims tightened in the record: the ~50 ms state had no matched hidden window and the GPU-process figure is host activity; the 433 ms tap latency is a polygons-visible baseline.
