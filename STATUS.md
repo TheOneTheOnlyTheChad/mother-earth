@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 09:50 UTC — Ocean Heat: live RC through the hub passed
+
+- Chad's Chrome, Pages origin, branch `1b975a0` injected with its own hub BASE. Zero requests before the toggle; P1 manifest+mask+v025 and P2 manifest+mask+v050, all 200, all hash = pin, no cache override; immutable 24 h; repeats from browser cache (≤ 17 ms); weak manifest ETag harmless. Taps 12/12 on both paths. First enable 2.3 s (P1) / 2.5 s (P2, mask cached). Regression gate met (no repeatable layer cost; renders on ≈ off). Packet §8. Next: Chad's merge line.
+
 ## 11 Nov 09:38 UTC — Ocean Heat: hub 0.6.7 live (from `1b975a0`)
 
 - Content-only deploy 09:36:49Z on Chad's line; read-back exact (`53ede31e…`); 19 bindings unchanged. Live: version 0.6.7; four files 200, byte-exact, immutable 24 h; bad paths 404 no-store. Manifest ETag arrives weak (edge compression of JSON; bytes exact). Page unchanged (main). Next: live RC, then merge line. Packet §7.

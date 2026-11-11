@@ -167,3 +167,66 @@ Listing afterwards: exactly these four objects, sizes and content types as pinne
 - **Live smoke check from the Pages origin (09:37:08Z, `no-store` requests):** `/` reports 0.6.7 with `catalogues.oceanheat` (current `oh-2026-11-09-R1`). All four files 200, byte-identical to their pins, `Cache-Control: public, max-age=86400, immutable`, types as pinned. `/%6danifest.json`, the trailing-slash path, an unknown revision and `current/` → 404 `no-store`. `/status` 200.
 - **Seen in transit:** the manifest's ETag arrives weak (`W/"dcc34674…"`). Cloudflare's edge compressed the JSON response on the way out, and that weakens the Worker's strong ETag. Decoded bytes are exact (4,585 B, pinned sha256). The three `.bin.z` files keep strong ETags (not compressed). Content-Encoding can't be read cross-origin (not an exposed header). The live RC checks the browser cache with this in place.
 - **Not done:** the live RC (§4 of the proposal) and the merge.
+
+## 8. Live release candidate (Pages origin → deployed hub 0.6.7; Chad's Chrome, 11 Nov 09:42–09:48 UTC)
+
+**Setup:**
+- Chad's own Chrome 156 through Claude in Chrome, one new tab, window in front and focused (`visibilityState` visible and `hasFocus` true throughout). ANGLE Metal, Apple M3, `MAX_TEXTURE_SIZE` 16384. Viewport 1470 × 801 CSS px at DPR 2.
+- Clean tab on `…/mother-earth/sources.html`; its timers were cleared, then the seven branch page files were fetched by commit `1b975a0` from raw.githubusercontent. All seven were hash-exact (index `75420aa2`, oceanheat `a45097ba`; app, style, arts, sky and skyscene equal to main), then blob-injected (09:42:15Z).
+- **No BASE rewrite:** the injected `OH.BASE` is the page's own, `https://mother-earth.chadoberholzer.workers.dev/catalogue/oceanheat/oh-2026-11-09-R1/`.
+- A fetch wrapper logged each `/catalogue/oceanheat/` request (status, headers, bytes, sha256 against the pins, the page's own init). Its clone-and-hash adds time to each logged request, so the load times below are upper bounds.
+- **Before the toggle:** layer off, zero requests to `/catalogue/oceanheat/` (wrapper log and resource timing both empty).
+
+**Requests (all `init` null, i.e. no cache override; all from the hub host; all 200; every sha256 = pin):**
+
+| Enable | Path | Requests | Browser timing (resource duration) | Ready | Taps |
+|---|---|---|---|---|---|
+| 1st, cold (09:42:56Z) | P1, 0.25°, 1 tile, 7200 × 3600 | manifest 4,585 B + mask 137,652 B + v025 1,081,272 B | 374 / 637 / 805 ms | 2,301 ms (load 1,944, paint 164) | 12/12 |
+| 2nd | P1 | same three | 14 / 17 / 11 ms (**cache**) | 3,161 ms (load 1,812, paint 798) | 12/12 |
+| 3rd, `forcePhone` | P2, 0.5°, 1 tile, 3600 × 1800 | manifest + mask + v050 323,176 B | 10 / 9 ms (**cache**) / 346 ms (cold) | 2,493 ms (load 1,800, paint 292) | 12/12 |
+| 4th | P2 | same three | 3 / 3 / 3 ms (**cache**) | 1,652 ms (load 1,045, paint 175) | 12/12 |
+
+- **Headers on every response:**
+  - `Cache-Control: public, max-age=86400, immutable`;
+  - Content-Type `application/json` (manifest) or `application/octet-stream` (the three binaries);
+  - `Content-Encoding` reads null to the page (not an exposed header cross-origin);
+  - ETags: strong on the three binaries; **weak on the manifest** (edge compression of JSON, §7).
+- **Cache reuse with the weak manifest ETag:** confirmed. Repeat fetches finished in ≤ 17 ms by the browser's own timing (cold: 346–805 ms). `immutable` with max-age means no revalidation, so the ETag form does not matter.
+- **Taps:** `expected-taps.json` was fetched at `1b975a0` (sha256 `4b1cfd73…931e`, exact) and checked with the suite's `expectText` rule against `rowsAt`: **12/12 on P1 (0.25°) and 12/12 on P2 (0.5°)**, on both the first and the repeat enable.
+- Load times are wall-clock on the page's own path (fetch, inflate, hash checks, texture build) plus the wrapper's overhead. The cached repeats show that most of the remaining time is local work, not the network.
+
+**Regression gate (adopted D1): layer-off vs layer-on, foreground, 5 s scripted rotation each, order off / on / off / on per path (09:45:05–09:46:08Z):**
+
+| Path | off | on | off | on |
+|---|---|---|---|---|
+| P1 median / p95 (ms) | 150.0 / 183.4 | 149.9 / 184.3 | 166.7 / 200.0 | 150.0 / 199.5 |
+| P2 (`forcePhone`) median / p95 (ms) | 166.6 / 183.3 | 199.9 / 266.1 | 183.4 / 250.0 | 150.0 / 217.0 |
+
+**Forced synchronous renders (60 × `render` + 1-pixel readback, globe paused, 09:46–09:47Z):**
+- P1: off 43.0, on 43.2, off 99.1, on 42.7 ms.
+- P2: off 180.2, on 45.2, off 44.5, on 56.2 ms.
+- Chrome's own frame rate with the globe paused was 16.7 ms (60 Hz), so the browser was not throttled. The scene held 3,289 objects (2,379 this morning).
+
+**Reading:**
+- No repeatable slowdown from the layer on either path.
+- P1 on equals or beats both off runs.
+- P2's first on run (199.9 ms) was slower than its first off run, but the second on (150.0) was faster than both off runs.
+- The largest render times (99 and 180 ms) were layer-off.
+- Renders on vs off agree within ~1 ms on P1 and are within the off range on P2.
+- The whole page ran slower than this morning (150–200 ms frames, against 100–117), layer on and off alike; the scene has grown by about 900 objects since then.
+- **The regression gate is met on this run, at its resolution.** The absolute targets are still missed by the page itself (§10 of the rc review; the coverage polygons are the lead).
+
+**Off at the end:**
+- status off, 0 meshes, no ≥ 3600-wide texture in the scene;
+- `rowsAt` null, legend hidden, no further requests.
+
+No console errors in the tab. Tab closed.
+
+**Limits:**
+- P2 was exercised through `forcePhone` on the desktop viewport, not a phone-sized window or a physical phone.
+- The browser was driven through the extension.
+- The timing-run code was too long for one call and first ran once untracked (its results were lost); the recorded run is the second, repeated in full.
+
+**Side note:** before the injection I opened `…/mother-earth/LICENSE` as a would-be blank page. Chrome likely treated it as a file download (the tab reverted). The Pages 404 page was tried next; it blocks outside fetches, so the Sources page was used, as in the preview run.
+
+**Remaining:** the merge line, then the served-hash check after Pages publishes. That check covers ten page files with `oceanheat.js` added, plus the four hub responses.
