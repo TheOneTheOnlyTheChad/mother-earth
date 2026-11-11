@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 17:54 UTC (clock reading at write) — **OSMC reliability proposal rev 2** (GPT's review of rev 1 applied; docs only)
+
+- GPT (relayed by Chad): Mac copy matched the sha256; H1 is the right shape; cached-page behaviour acceptable; revise before a branch-build go. A docs-and-code review.
+- Rev 2 (`docs/concepts/OSMC-RELIABILITY-PROPOSAL.md`):
+  - every failure path named, including an unexpected throw caught by `guarded()` (buoys no longer reach the generic `writeDown`);
+  - the preserving write is conditional (R2 etag), and writes nothing when a newer run has already published, so a late failure cannot overwrite newer data;
+  - the hub applies the 4 h limit to the buoy place section for the fallback; the failure clause and the card's "Showing buoys" line appear only when records from the good run are actually shown;
+  - "degraded" as an update-status badge, good run's coverage and freshness intact, unknown after expiry; "failed at" = actual failure time (16:08), dates shown across midnight;
+  - H2 (retry) deferred; tests tightened (dispatch path and public endpoints, interleaved late failure, ageing in an open page, old page on the new hub); rollback residual in R2 documented.
+- GPT's recommendation for Chad: H1 only, degraded, four hours, refused responses included, the short place clause. O1–O6 stay Chad's; **O7 is new** (place cutoff: fallback only, or every buoy place section past 4 h).
+- **Not approved:** build, hub deploy, page change.
+
 ## 11 Nov 17:48 UTC (commit time, `e99b362`) — **OSMC reliability proposal rev 1 written** (docs only, on Chad's go) — `docs/concepts/OSMC-RELIABILITY-PROPOSAL.md`, for GPT
 
 - Chad deleted `fires-wording-rc` (remote: `main` + parked `aircraft-rc`, checked with `git fetch -p`).
