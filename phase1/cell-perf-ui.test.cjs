@@ -5,7 +5,7 @@
  * material lifetime through toggles (every rendered cap material belongs to the current pass); hover winners and pixels compared
  * with main on a fixed pose, including points near the limb.
  * Run: node --no-warnings phase1/cell-perf-ui.test.cjs   (8899 server + /home/claude/spike, as the other suites)
- * BREAK=keep-sides|per-cell|wrong-opacity|frontside-a  — each puts an old or wrong behaviour back and must fail. */
+ * BREAK=keep-sides|per-cell|wrong-opacity|frontside-a|cache-across-passes  — each puts an old or wrong behaviour back and must fail. */
 const { chromium } = require('playwright'); const fs = require('fs');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
@@ -15,7 +15,7 @@ const ocean = new PNG({ width: 64, height: 32 }); for (let i = 0; i < ocean.data
 const OCEAN_PNG = PNG.sync.write(ocean);   // a plain dark backdrop so globe.gl builds and draws the globe (START-HERE §4n)
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 600)}` : ''}`); } };
 const wd = setTimeout(() => { console.log('FAIL  suite exceeded 8 min'); process.exit(1); }, 8 * 60e3);
-const RUN = new Date(Date.now() - 60e3).toISOString();
+const RUN = new Date(Date.now() - 60e3).toISOString(), RUN2 = new Date(Date.now() - 30e3).toISOString();
 const cov = g => ({ grade: g, evidence: 'e', observed_fraction: g === 'adequate' ? 1 : .5 });
 // overlapping cells across layers (as on the live page), three grades, forest counts spanning its log fill, a dateline and a polar cell
 const CELLS = {
@@ -24,14 +24,17 @@ const CELLS = {
   ships: { '14_49': [9, 'partial'], '15_52': [4, 'partial'], '29_21': [6, 'adequate'], '36_12': [2, 'partial'], '30_53': [3, 'partial'], '32_53': [1, 'adequate'] },
   forest: { '20_53': [10, 'partial'], '15_52': [3000, 'partial'], '29_21': [90000, 'partial'], '27_28': [0, 'partial'], '17_89': [12, 'unknown'], '21_53': [400, 'partial'], '19_66': [50, 'partial'], '35_53': [7, 'partial'], '17_88': [30, 'partial'] },
 };
-const env = (layer, extra) => ({ layer, retrieved_at: RUN, source_generated_at: RUN, source_age_s: 1, stale_after_s: 10800, quantity: 'q',
-  cells: Object.fromEntries(Object.entries(CELLS[layer] || {}).map(([id, [n, g]]) => [id, { count: n, coverage: cov(g) }])), ...extra });
+let REFRESHED = false;   // after the scheduled refresh: firms gains 20_55, ships loses 36_12
+const cellsFor = layer => { const c = { ...(CELLS[layer] || {}) }; if (REFRESHED && layer === 'firms') c['20_55'] = [2, 'partial']; if (REFRESHED && layer === 'ships') delete c['36_12']; return c; };
+const env = (layer, extra) => ({ layer, retrieved_at: REFRESHED ? RUN2 : RUN, source_generated_at: RUN, source_age_s: 1, stale_after_s: 10800, quantity: 'q',
+  cells: Object.fromEntries(Object.entries(cellsFor(layer)).map(([id, [n, g]]) => [id, { count: n, coverage: cov(g) }])), ...extra });
 const REC = { record_format: 'rows', record_fields: ['id', 'lat', 'lng', 'observed_at'], records: [] };
 const serveIndex = html => {
   if (BREAK === 'keep-sides') html = html.replace("CELL_PERF.mode === 'main' ? 'rgba(0,0,0,0)' : null", "'rgba(0,0,0,0)'");
   if (BREAK === 'per-cell') html = html.replace('let m = mats.get(fill); if (m) return m;', 'let m;');
   if (BREAK === 'wrong-opacity') html = html.replace('m.opacity = c.a;', 'm.opacity = Math.min(1, c.a * 1.5);');
   if (BREAK === 'frontside-a') html = html.replace("side: CELL_PERF.mode === 'b2b' ? 0 : 2", 'side: 0');
+  if (BREAK === 'cache-across-passes') html = html.replace('const mats = new Map();', 'const mats = (CELL_PERF.keep = CELL_PERF.keep || new Map());');   // the R3 risk: a material kept across passes can be disposed while still attached
   return html;
 };
 const INDEX = serveIndex(fs.readFileSync('index.html', 'utf8'));
@@ -52,6 +55,7 @@ if (BREAK && INDEX === fs.readFileSync('index.html', 'utf8')) { console.log('FAI
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(env(layer, extra)) });
       }
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ layer, retrieved_at: RUN, stale_after_s: 10800, cells: {}, quantity: 'i', index: null }) }); });
+    await ctx.addInitScript(() => { const si = window.setInterval; window.__refresh = []; window.setInterval = function (fn, ms, ...a) { if (ms === 5 * 60e3 && fn && fn.name === 'tick') window.__refresh.push(fn); return si.call(this, fn, ms, ...a); }; });   // the page's own scheduled refresh (tick), captured, not reimplemented
     const page = await ctx.newPage(); const perr = []; page.on('pageerror', e => perr.push(String(e).slice(0, 200)));
     await page.goto(BASE + '/index.html' + (perf ? '?perf=' + perf : ''), { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.ME && ME.cellPolys && (ME.cellPolys('forest') || []).length > 0 && (ME.cellPolys('usgs') || []).length > 0 && (ME.cellPolys('firms') || []).length > 0 && (ME.cellPolys('ships') || []).length > 0, null, { timeout: 30000 });
@@ -89,7 +93,10 @@ if (BREAK && INDEX === fs.readFileSync('index.html', 'utf8')) { console.log('FAI
         return list.map(([lat, lng, tag]) => { const s = g.getScreenCoords(lat, lng, 0.006); return { tag, x: Math.round(rect.left + s.x), y: Math.round(rect.top + s.y) }; }); }, ps.pts);
       for (const p of pts) { await page.mouse.move(p.x, p.y); await page.waitForTimeout(250);
         const tip = await page.evaluate(() => { const t = document.querySelector('.float-tooltip-kap'); return t && getComputedStyle(t).display !== 'none' && t.textContent ? t.textContent.replace(/\s+/g, ' ').slice(0, 40) : null; });
-        res.push([p.tag, tip]); }
+        await page.mouse.click(p.x, p.y); await page.waitForTimeout(350);
+        const insp = await page.evaluate(() => { const h = document.getElementById('insp-h'), i = document.getElementById('insp'); const v = i && i.classList.contains('show') && h ? h.textContent.replace(/\s+/g, ' ').slice(0, 40) : null; const x = document.getElementById('insp-x'); if (x && i.classList.contains('show')) x.click(); return v; });
+        await page.waitForTimeout(150);
+        res.push([p.tag, tip, insp]); }
       await page.mouse.move(5, 5); await page.waitForTimeout(300);
       shots.push(await page.locator('#globe canvas').first().screenshot());
     }
@@ -103,6 +110,22 @@ if (BREAK && INDEX === fs.readFileSync('index.html', 'utf8')) { console.log('FAI
     const { ctx, page, perr } = await open(mode);
     const f = await facts(page); const pr = await probe(page);
     R[mode] = { f, pr, perr };
+    if (mode === 'b2a' || mode === 'b2b') {
+      // R3: material disposal through ONE real scheduled refresh (the page's own tick), with cells added and removed
+      await page.evaluate(() => { const C = ME.cellPerf().harvested && (() => { let k = null; ME.globe().scene().traverse(o => { if (!k && o.__globeObjType === 'polygon') { const m = o.children[0].material; k = (Array.isArray(m) ? m : [m]).find(x => x && x.__cellShared !== undefined); } }); return k && k.constructor; })();
+        if (C && !C.prototype.__wrapped) { const d = C.prototype.dispose; C.prototype.dispose = function () { this.__disposedAt = performance.now(); return d.call(this); }; C.prototype.__wrapped = true; } });
+      REFRESHED = true;
+      const nTicks = await page.evaluate(() => window.__refresh.length);
+      await page.evaluate(() => window.__refresh[0]());
+      await page.waitForFunction(() => (ME.cellPolys('firms') || []).some(c => c.id === '20_55') && !(ME.cellPolys('ships') || []).some(c => c.id === '36_12'), null, { timeout: 20000 });
+      await page.waitForTimeout(1500);
+      const dz = await page.evaluate(() => { const caps = []; ME.globe().scene().traverse(o => { if (o.__globeObjType === 'polygon') { const c = o.children[0], m = c.material, arr = Array.isArray(m) ? m : [m]; const ps = c.geometry && c.geometry.parameters || {}; caps.push(arr[ps.includeSides ? 1 : 0]); } });
+        return { n: caps.length, shared: caps.filter(m => m.__cellShared !== undefined).length, disposed: caps.filter(m => m.__disposedAt !== undefined).length, pass: ME.cellPerf().pass, stale: caps.filter(m => m.__cellShared !== ME.cellPerf().pass).length, mats: new Set(caps.map(m => m.uuid)).size, fills: new Set(ME.globe().polygonsData().map(p => p.fill)).size }; });
+      ok(`${mode} R3: the page's own scheduled refresh ran (captured once) and changed the cells`, nTicks === 1 && dz.n === 29, { nTicks, n: dz.n });
+      ok(`${mode} R3: after a real scheduled refresh no cap still attached to a cell has a disposed material`, dz.disposed === 0 && dz.shared === dz.n, dz);
+      ok(`${mode} R3: after the refresh every cap material is from the current pass, one per fill`, dz.stale === 0 && dz.mats === dz.fills, dz);
+      REFRESHED = false;
+    }
     if (mode === 'b2a') {
       // lifetime: Forest off → on through the page's own toggle, then an optional layer on (fetch + render), then off
       const before = f.perf.pass;
@@ -141,8 +164,10 @@ if (BREAK && INDEX === fs.readFileSync('index.html', 'utf8')) { console.log('FAI
   ok('b2b: FrontSide (0) on every cap, otherwise as b2a; one fewer draw call per cell than b2a', Bb.props.every(p => p.side === 0) && A.calls - Bb.calls === Bb.n, { calls: [A.calls, Bb.calls], n: Bb.n });
   // picking + pixels against main
   const winners = x => JSON.stringify(R[x].pr.res);
-  ok('b1: hover winners identical to main at every probe point (overlaps, edges, dateline, limb, open globe)', winners('b1') === winners('main'), R.b1.pr.res.filter((r, i) => JSON.stringify(r) !== JSON.stringify(R.main.pr.res[i])).concat(['main:']).concat(R.main.pr.res.filter((r, i) => JSON.stringify(r) !== JSON.stringify(R.b1.pr.res[i]))));
-  ok('b2a: hover winners identical to main', winners('b2a') === winners('main'), R.b2a.pr.res.filter((r, i) => JSON.stringify(r) !== JSON.stringify(R.main.pr.res[i])));
+  ok('b1: hover and click winners identical to main at every probe point (overlaps, edges, dateline, limb, open globe)', winners('b1') === winners('main'), R.b1.pr.res.filter((r, i) => JSON.stringify(r) !== JSON.stringify(R.main.pr.res[i])).concat(['main:']).concat(R.main.pr.res.filter((r, i) => JSON.stringify(r) !== JSON.stringify(R.b1.pr.res[i]))));
+  ok('b2a: hover and click winners identical to main', winners('b2a') === winners('main'), R.b2a.pr.res.filter((r, i) => JSON.stringify(r) !== JSON.stringify(R.main.pr.res[i])));
+  ok('b2b: hover and click winners identical to main', winners('b2b') === winners('main'), R.b2b.pr.res.filter((r, i) => JSON.stringify(r) !== JSON.stringify(R.main.pr.res[i])));
+  ok('clicks opened the expected targets on main (cells open their layer; open globe opens the place view)', R.main.pr.res.filter(r => r[1]).every(r => r[2] && r[2].split(' · ')[0] === r[1].split(' · ')[0]) && /Everything here/.test((R.main.pr.res.find(r => r[0] === 'open globe') || [])[2] || ''), R.main.pr.res.filter(r => !(r[2] && (!r[1] || r[2].split(' · ')[0] === r[1].split(' · ')[0]))));
   ok('probes hit cells at overlaps, edges, the limb and the dateline', R.main.pr.res.length === 22 && ['limb firms 19_65', 'limb firms+forest 19_66', 'north-limb forest 35_53', 'dateline 17_89 firms+forest', 'dateline 17_0 firms'].every(t => (R.main.pr.res.find(r => r[0] === t) || [])[1]), R.main.pr.res);
   const d1 = pixDiff(R.main.pr.shot, R.b1.pr.shot), d2 = pixDiff(R.b1.pr.shot, R.b2a.pr.shot), d3 = pixDiff(R.b2a.pr.shot, R.b2b.pr.shot);
   const e1 = pixDiff(R.main.pr.shot2, R.b1.pr.shot2), e2 = pixDiff(R.b1.pr.shot2, R.b2a.pr.shot2), e3 = pixDiff(R.b2a.pr.shot2, R.b2b.pr.shot2);
@@ -158,7 +183,6 @@ if (BREAK && INDEX === fs.readFileSync('index.html', 'utf8')) { console.log('FAI
   // B1 vs main is NOT pixel-identical: the invisible side walls wrote depth and hid parts of neighbouring outlines; without them
   // those outline pixels draw. Reported for Chad (rc packet, comparison images); the guard is that the change stays this small.
   ok('b1 vs main: only a sliver of pixels differs (< 0.1 % of the canvas on both poses; outline pixels, see packet)', d1.n < d1.total * 0.001 && e1.n < e1.total * 0.001 && d1.n > 0, [d1, e1]);
-  console.log('INFO  b2b hover winners differing from main:', JSON.stringify(R.b2b.pr.res.filter((r, i) => JSON.stringify(r) !== JSON.stringify(R.main.pr.res[i]))));
   await browser.close(); clearTimeout(wd);
   console.log(`${pass} passed, ${fail} failed${BREAK ? '  (BREAK=' + BREAK + ')' : ''}`); process.exit(fail ? 1 : 0);
 })().catch(e => { console.log('FAIL  ' + (e && e.stack || e)); process.exit(1); });
