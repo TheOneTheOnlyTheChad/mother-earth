@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 19:18 UTC (clock reading at write) — **OSMC reliability candidate rev 2 on `osmc-reliability-rc` @ `d28763d`** (code `3df9c1a`; after GPT's review of `987f97e`; branch only) — packet §9
+
+- GPT (relayed by Chad): all 312 manifest entries verified; hub suite rerun independently 21/21 with all eight breaks failing as reported; browser run is Claude's evidence. **One defect:** `failed_at` was set after awaited storage calls (16:08:58 reported as 16:09:03). §3 rulings: 1, 2, 3, 5, 6 agreed; 4 = badge **unknown** when records are missing or mismatched.
+- **Rev 2:** `failed_at` captured once on entry and reused on retry; stored counts that cannot be read are left alone (malformed JSON replaced conditionally); page shows unknown, no count, no buoy cells and "buoy positions not shown" when the good run's records are missing or mismatched, keeping the failed-at line and the withheld reason.
+- **Hashes:** worker.js `85737a48…c427`, index.html `59500752…3c8a`; app.js and sources.html unchanged from rev 1.
+- **Tests:** hub suite 27/27, 12 breaks each fail; page suite 41/41, 11 breaks each fail; all 22 hub-side and 22 browser suites green on rev 2 (finished 19:17 UTC).
+- Mac `_review/osmc-reliability-rc/` = rev 1 (`987f97e`); rev 2 copy in `_review/osmc-reliability-rc-r2/`.
+- **Next:** GPT's re-check; then page merge and hub 0.6.8 deploy, each on its own Approve line. Nothing merged or deployed.
+
 ## 11 Nov 18:42 UTC (clock reading at write) — **OSMC reliability candidate BUILT on branch `osmc-reliability-rc` @ `987f97e`** (code `266683b`; Chad's Go line; no merge, no deploy) — packet `reviews/2026-11-11-osmc-reliability-rc.md` (on the branch)
 
 - Chad: "Go: OSMC reliability build on a branch per rev 2.1 (H1; O1–O7 as recommended; no page release, no hub deploy)".
