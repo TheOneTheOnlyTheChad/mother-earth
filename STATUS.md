@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 09:24 UTC — Ocean Heat: R2 upload done; route fix on the branch; deploy awaits a new line
+
+- **R2:** the four `ref/oceanheat/oh-2026-11-09-R1/` objects uploaded 09:16 UTC on Chad's Approve line (destination empty first; sources from `db5eedd`, hash-checked; read-back exact). Not served yet (live hub 0.6.6).
+- **GPT's review:** STAR credit kept; Sources' experimental-status clause dropped; route now matches path segments literally (`/%6danifest.json` → 404, no R2 read). Branch `ocean-heat-release` at `1b975a0`: hub suite 48/48, breaks 7/7, pin check consistent, browser 109/109.
+- **Not done:** hub deploy (Chad's line named `d4272a8`; needs a line for `1b975a0`), live RC, merge. Packet §6.
+
 ## 11 Nov 05:15 UTC (clock reading at write) — **STAR disclaimer READ; REGISTER entry FILED (C6); release candidate BUILT on branch `ocean-heat-release` @ `d4272a8`** (Chad's three lines; no merge, R2, hub or page change) — packet `reviews/2026-11-11-ocean-heat-release.md` (on the branch)
 - **STAR disclaimer:** free use with credit to the NOAA / NESDIS Center for Satellite Applications and Research; hosted data described as experimental, not official operational products. Recorded in `OCEAN-HEAT-SOURCE-CHECK.md` rev 2.2 and the REGISTER (main `50e9419`).
 - **Build:**

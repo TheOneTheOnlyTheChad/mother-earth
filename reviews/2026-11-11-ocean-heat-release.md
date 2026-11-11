@@ -134,3 +134,27 @@ Proposal §4 sets the procedure. It uses the candidate's actual `BASE`, with no 
 1. **STAR credit wording** (§1, §2): inspector "NOAA Coral Reef Watch (files from the NOAA / NESDIS Center for Satellite Applications and Research)"; footer and Sources as in §2. Enough, or should the card's date line name STAR too?
 2. **Sources sentence on data status:** "describes the data it hosts as experimental, not official NOAA operational products". Accurate to the disclaimer, but OSPO's view of the Coral Reef Watch products was not checked. Keep it, or drop it?
 3. Anything missing before the R2 upload and hub deploy lines.
+
+## 6. After GPT's review (11 Nov, 09:14–09:24 UTC)
+
+**R2 upload (Chad: "Approve: upload the four ref/oceanheat/oh-2026-11-09-R1/ objects to R2 (exact bytes, hashes as pinned in OCEAN-HEAT-RELEASE-PROPOSAL rev 2 §1).")** Dashboard API from Chad's signed-in pane tab. Destination empty at 09:15:52Z (nothing under `ref/oceanheat/`), re-checked just before writing. Sources from raw.githubusercontent at `db5eedd` (ocean-heat-rc), each length and sha256 checked against the pin before any write.
+
+| Key (under ref/oceanheat/oh-2026-11-09-R1/) | PUT start → response (UTC) | Uploaded | etag | Read-back |
+|---|---|---|---|---|
+| manifest.json (application/json) | 09:16:20.815 → 09:16:21.579 | 09:16:21.680Z | 331ad345d168c570a51500a7bf8cdeba | 4,585 B, sha256 exact |
+| mask.bin.z (application/octet-stream) | 09:16:21.579 → 09:16:22.508 | 09:16:22.599Z | ae9fe10b25b7f81f252f2e8c54693a08 | 137,652 B, exact |
+| v025.bin.z (application/octet-stream) | 09:16:22.508 → 09:16:25.652 | 09:16:25.700Z | ff5b3592e9e069eb1e2dcbf7a25969f7 | 1,081,272 B, exact |
+| v050.bin.z (application/octet-stream) | 09:16:25.652 → 09:16:27.567 | 09:16:27.463Z | 06c1dac239b2a419355f0c8342d53f75 | 323,176 B, exact |
+
+Listing afterwards: exactly these four objects, sizes and content types as pinned. Not served: live hub 0.6.6 has no Ocean Heat route.
+
+**Hub deploy: NOT done.** Chad's line names `d4272a8`; GPT's route finding (below) changes worker.js, so the deploy needs a new line naming `1b975a0`.
+
+**GPT's points, applied at `1b975a0`:**
+1. STAR credit: kept as built (inspector, footer, Sources). No change.
+2. Sources: the experimental-status clause removed; the STAR notice link and credit stay. The full hosting notice stays in the research record (OCEAN-HEAT-SOURCE-CHECK rev 2.2).
+3. Route: segments are matched **literally** against the pin keys, no percent-decoding. `/%6danifest.json` (and `mask%2Ebin.z`, `oh%2D2026-11-09-R1`) now return 404 no-store with zero R2 reads. New break `decoded-segments` (the old decoding) fails 3.
+
+**Tests at `1b975a0`:** hub suite 48/48 (was 45; +3 encoded spellings); breaks 7/7 fail (no-hash-check 1, no-size-check 2, loose-route 2, wrong-type 3, content-encoding 4, cache-on-error 5, decoded-segments 3). Pin check CONSISTENT, 0 mismatches. Browser suite 109/109. All 28 `phase1/*.test.mjs` suites exit 0.
+
+**Hashes at `1b975a0`:** worker.js `53ede31ebb976c1010c1a08a61889499563d719169f5b406544a302505fb9e43`; sources.html `50fa74e90f87c81829c879f933abf3c5171ef7063087407847cd193ece1ab4c3`; oceanheat.js and index.html unchanged (`a45097ba…`, `75420aa2…`).
