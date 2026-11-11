@@ -385,13 +385,11 @@ const gibs = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=
 // B2a: caps share one material per distinct fill (same colour, opacity, transparency, depth and DoubleSide as globe.gl's
 //     own default cap material) instead of one material per cell. Made fresh for each render() pass and never kept
 //     across passes: globe.gl disposes a removed cell's materials, so a material is only ever used by the pass that made it.
-// B2b: as B2a with FrontSide (one draw per cap instead of two) — on trial only.
-// RC ONLY: ?perf=main|b1|b2a|b2b selects the step for the release-candidate check; the released page has no switch.
-const CELL_PERF = (() => {
-  let mode = 'b2a';
-  try { const q = new URLSearchParams(location.search).get('perf'); if (['main', 'b1', 'b2a', 'b2b'].includes(q)) mode = q; } catch (e) { }
-  return { mode, Ctor: null, pass: 0, mats: null };
-})();
+// B2b: as B2a with FrontSide (one draw per cap instead of two) — the released step.
+// Released step: B2b (RC check 11 Nov 2026, reviews/2026-11-11-globe-perf-rc.md §6–§7). There is no URL switch.
+// The other steps stay in the code only so the test suite can compare against them (phase1/cell-perf-ui.test.cjs rewrites
+// this one constant in the HTML it serves); 'main' reproduces the page before this change.
+const CELL_PERF = { mode: 'b2b', Ctor: null, pass: 0, mats: null };
 ME.cellPerf = () => ({ mode: CELL_PERF.mode, harvested: !!CELL_PERF.Ctor, pass: CELL_PERF.pass, materials: CELL_PERF.mats ? CELL_PERF.mats.size : 0 });   // read-only test aid
 const rgbaHex = c => { const m = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/.exec(c || ''); return m ? { hex: (+m[1] << 16) | (+m[2] << 8) | +m[3], a: m[4] == null ? 1 : +m[4] } : null; };
 // the MeshBasicMaterial constructor is not exposed by the UMD bundle; take it from a cell globe.gl has already built

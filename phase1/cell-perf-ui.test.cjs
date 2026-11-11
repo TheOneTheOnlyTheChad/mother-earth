@@ -1,11 +1,12 @@
-/* Globe performance build (proposal rev 1.1, 11 Nov 2026): how coverage cells are drawn, per ?perf= step.
+/* Globe performance build (proposal rev 1.1, 11 Nov 2026): how coverage cells are drawn, per step. The released page is B2b
+ * with no URL switch; the other steps are served by rewriting its one constant in the HTML (test-only).
  * main = today's page (transparent side colour); b1 = no side walls; b2a = b1 + shared DoubleSide cap materials per fill;
  * b2b = b2a with FrontSide. Checks: side geometry and draw calls per step; shared materials carry exactly the colour, opacity,
  * transparency and depth settings globe.gl gives a per-cell default; FrontSide only on b2b; ME.cellPolys identical across steps;
  * material lifetime through toggles (every rendered cap material belongs to the current pass); hover winners and pixels compared
  * with main on a fixed pose, including points near the limb.
  * Run: node --no-warnings phase1/cell-perf-ui.test.cjs   (8899 server + /home/claude/spike, as the other suites)
- * BREAK=keep-sides|per-cell|wrong-opacity|frontside-a|cache-across-passes  — each puts an old or wrong behaviour back and must fail. */
+ * BREAK=keep-sides|per-cell|wrong-opacity|frontside-a|cache-across-passes|url-switch  — each puts an old or wrong behaviour back and must fail. */
 const { chromium } = require('playwright'); const fs = require('fs');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
@@ -34,19 +35,24 @@ const serveIndex = html => {
   if (BREAK === 'per-cell') html = html.replace('let m = mats.get(fill); if (m) return m;', 'let m;');
   if (BREAK === 'wrong-opacity') html = html.replace('m.opacity = c.a;', 'm.opacity = Math.min(1, c.a * 1.5);');
   if (BREAK === 'frontside-a') html = html.replace("side: CELL_PERF.mode === 'b2b' ? 0 : 2", 'side: 0');
+  if (BREAK === 'url-switch') html = html.replace("const CELL_PERF = { mode: 'b2b', Ctor: null, pass: 0, mats: null };", "const CELL_PERF = { mode: (new URLSearchParams(location.search).get('perf') || 'b2b'), Ctor: null, pass: 0, mats: null };");   // an old-style URL override must fail the release checks
   if (BREAK === 'cache-across-passes') html = html.replace('const mats = new Map();', 'const mats = (CELL_PERF.keep = CELL_PERF.keep || new Map());');   // the R3 risk: a material kept across passes can be disposed while still attached
   return html;
 };
-const INDEX = serveIndex(fs.readFileSync('index.html', 'utf8'));
-if (BREAK && INDEX === fs.readFileSync('index.html', 'utf8')) { console.log('FAIL  BREAK did not apply: ' + BREAK); process.exit(1); }
+const RAW = fs.readFileSync('index.html', 'utf8'), MODE_LINE = "const CELL_PERF = { mode: 'b2b', Ctor: null, pass: 0, mats: null };";
+if (!RAW.includes(MODE_LINE)) { console.log('FAIL  release constant not found in index.html'); process.exit(1); }
+const INDEX = serveIndex(RAW);
+if (BREAK && INDEX === RAW) { console.log('FAIL  BREAK did not apply: ' + BREAK); process.exit(1); }
+// comparison modes for fixture coverage: the served HTML has its one constant rewritten (test-only); 'release' = untouched file
+const htmlFor = mode => mode === 'release' ? RAW : INDEX.replace(MODE_LINE, `const CELL_PERF = { mode: '${mode}', Ctor: null, pass: 0, mats: null };`);
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-  const open = async perf => {
+  const open = async (perf, query = '') => {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, reducedMotion: 'reduce' });
     await ctx.route('**/unpkg.com/globe.gl**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }));
     await ctx.route('**/fonts.googleapis.com/**', r => r.fulfill({ status: 200, contentType: 'text/css', body: '' }));
     await ctx.route('**/gibs.earthdata.nasa.gov/**', r => r.fulfill({ status: 200, contentType: 'image/png', body: OCEAN_PNG }));
-    await ctx.route(BASE + '/index.html*', r => r.fulfill({ status: 200, contentType: 'text/html', body: INDEX }));
+    await ctx.route(BASE + '/index.html*', r => r.fulfill({ status: 200, contentType: 'text/html', body: perf === 'release' && BREAK === 'url-switch' ? INDEX : htmlFor(perf) }));
     await ctx.route(HUB + '/**', route => { const p = new URL(route.request().url()).pathname, layer = p.split('/').pop();
       if (p === '/') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ name: 'x', history: { collecting: false, retained: { exists: false } } }) });
       if (CELLS[layer] || layer === 'drifters') {
@@ -57,7 +63,7 @@ if (BREAK && INDEX === fs.readFileSync('index.html', 'utf8')) { console.log('FAI
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ layer, retrieved_at: RUN, stale_after_s: 10800, cells: {}, quantity: 'i', index: null }) }); });
     await ctx.addInitScript(() => { const si = window.setInterval; window.__refresh = []; window.setInterval = function (fn, ms, ...a) { if (ms === 5 * 60e3 && fn && fn.name === 'tick') window.__refresh.push(fn); return si.call(this, fn, ms, ...a); }; });   // the page's own scheduled refresh (tick), captured, not reimplemented
     const page = await ctx.newPage(); const perr = []; page.on('pageerror', e => perr.push(String(e).slice(0, 200)));
-    await page.goto(BASE + '/index.html' + (perf ? '?perf=' + perf : ''), { waitUntil: 'domcontentloaded' });
+    await page.goto(BASE + '/index.html' + query, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.ME && ME.cellPolys && (ME.cellPolys('forest') || []).length > 0 && (ME.cellPolys('usgs') || []).length > 0 && (ME.cellPolys('firms') || []).length > 0 && (ME.cellPolys('ships') || []).length > 0, null, { timeout: 30000 });
     await page.waitForTimeout(1500);   // let globe.gl build the objects and the one harvest re-render land
     return { ctx, page, perr };
@@ -143,6 +149,13 @@ if (BREAK && INDEX === fs.readFileSync('index.html', 'utf8')) { console.log('FAI
       ok('b2a: programs stay few (shared materials compile to a handful of programs)', renders === null || renders < 40, renders);
     }
     ok(`${mode}: no page errors`, perr.length === 0, perr);
+    await ctx.close();
+  }
+  // the released page: the untouched index.html, at the ordinary URL and with former overrides that must change nothing
+  for (const [q, tag] of [['', 'ordinary URL'], ['?perf=main', '?perf=main'], ['?perf=b1', '?perf=b1'], ['?perf=b2a', '?perf=b2a']]) {
+    const { ctx, page, perr } = await open('release', q); const f = await facts(page);
+    ok(`release (${tag}): B2b active — mode b2b, no side geometry, shared FrontSide caps, one material per fill`, f.perf.mode === 'b2b' && f.withSides === 0 && f.props.every(p => p.side === 0) && f.distinctCapMats === f.distinctFills, { mode: f.perf.mode, withSides: f.withSides, sides: [...new Set(f.props.map(p => p.side))], mats: f.distinctCapMats, fills: f.distinctFills });
+    ok(`release (${tag}): no page errors`, perr.length === 0, perr);
     await ctx.close();
   }
   const M = R.main.f, B1 = R.b1.f, A = R.b2a.f, Bb = R.b2b.f;
