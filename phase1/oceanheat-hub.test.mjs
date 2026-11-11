@@ -3,7 +3,7 @@
  * (OH_SNAPSHOT_DIR), hash-checked against the pins at setup. The release branch carries no copy: this suite asserts that.
  * Run:   OH_SNAPSHOT_DIR=/path/to/oh-2026-11-09-R1 node --no-warnings phase1/oceanheat-hub.test.mjs
  * Breaks (each loads a weakened copy of worker.js; the suite must FAIL on every one):
- *   BREAK=no-hash-check | no-size-check | loose-route | wrong-type | content-encoding | cache-on-error
+ *   BREAK=no-hash-check | no-size-check | loose-route | wrong-type | content-encoding | cache-on-error | decoded-segments
  */
 import fs from 'node:fs';
 import os from 'node:os';
@@ -21,6 +21,7 @@ const BREAKS = {
   'loose-route': ["rawPath.match(/^\\/catalogue\\/oceanheat\\/([^/]+)\\/([^/]+)$/)", "rawPath.match(/^\\/catalogue\\/oceanheat\\/([^/]+)\\/([^/]+)/)"],
   'wrong-type': ["return new Response(buf, { headers: { 'Content-Type': pin.type, 'Cache-Control': OCEANHEAT_CACHE_OK,", "return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': OCEANHEAT_CACHE_OK,"],
   'content-encoding': ["'Content-Type': pin.type, 'Cache-Control': OCEANHEAT_CACHE_OK,", "'Content-Type': pin.type, 'Content-Encoding': 'deflate', 'Cache-Control': OCEANHEAT_CACHE_OK,"],
+  'decoded-segments': ["const pin = m ? oceanHeatPin(m[1], m[2], table) : null;", "let pin = null; if (m) { try { pin = oceanHeatPin(decodeURIComponent(m[1]), decodeURIComponent(m[2]), table); } catch (e) { pin = null; } }"],
   'cache-on-error': ["catalogue: 'oceanheat', status: 'unavailable', reason }, 503, { 'Cache-Control': 'no-store' });", "catalogue: 'oceanheat', status: 'unavailable', reason }, 503);"],
 };
 const B = process.env.BREAK;
@@ -72,7 +73,7 @@ ok('binaries are application/octet-stream, the manifest application/json', T.fil
 for (const p of ['/catalogue/oceanheat', '/catalogue/oceanheat/', `/catalogue/oceanheat/${REV}`, `/catalogue/oceanheat/${REV}/`, `/catalogue/oceanheat/${REV}/mask.bin.z/`,
   `/catalogue/oceanheat/${REV}/mask.bin.z/extra`, `/catalogue/oceanheat/${REV}//mask.bin.z`, `/catalogue/oceanheat//${REV}/mask.bin.z`, `/catalogue/oceanheat/oh-2026-11-09-R2/mask.bin.z`,
   `/catalogue/oceanheat/${REV}/other.bin.z`, `/catalogue/oceanheat/${REV}/v025.bin.zz`, `/catalogue/oceanheat/${REV}%2Fmask.bin.z`, `/catalogue/oceanheat/${REV}/..%2Fmanifest.json`,
-  `/catalogue/oceanheat/${REV}/%`, `/catalogue/oceanheat/current/manifest.json`, `/catalogue/oceanheat/${REV}/constructor`, `/catalogue/oceanheat/__proto__/manifest.json`]) {
+  `/catalogue/oceanheat/${REV}/%`, `/catalogue/oceanheat/${REV}/%6danifest.json`, `/catalogue/oceanheat/${REV}/mask%2Ebin.z`, `/catalogue/oceanheat/oh%2D2026-11-09-R1/manifest.json`, `/catalogue/oceanheat/current/manifest.json`, `/catalogue/oceanheat/${REV}/constructor`, `/catalogue/oceanheat/__proto__/manifest.json`]) {
   reads.length = 0;
   const r = await get(env(), p);
   ok(`404 + no-store + zero R2 reads: ${p}`, r.status === 404 && r.headers.get('Cache-Control') === 'no-store' && reads.length === 0, [r.status, r.headers.get('Cache-Control'), reads]);

@@ -3050,13 +3050,12 @@ function oceanHeatPin(rev, file, table = OCEANHEAT_REVISIONS) {
   const own = (o, k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k);
   return own(table, rev) && own(table[rev].files, file) ? table[rev].files[file] : null;
 }
-/** Route /catalogue/oceanheat/<revision>/<file> on the RAW pathname: exactly two non-empty segments, each an exact key; anything else
- *  (bare, partial, extra segment, trailing slash, repeated separators, an encoded slash, unknown id or file) → 404, no R2 read. */
+/** Route /catalogue/oceanheat/<revision>/<file> on the RAW pathname: exactly two non-empty segments, each matched LITERALLY (never
+ *  percent-decoded) against an exact key; anything else (bare, partial, extra segment, trailing slash, repeated separators, any
+ *  percent-encoded spelling such as %2F or %6danifest.json, unknown id or file) → 404, no R2 read. */
 async function oceanHeatRoute(env, rawPath, table = OCEANHEAT_REVISIONS) {
   const m = typeof rawPath === 'string' ? rawPath.match(/^\/catalogue\/oceanheat\/([^/]+)\/([^/]+)$/) : null;
-  let rev = null, file = null;
-  if (m) { try { rev = decodeURIComponent(m[1]); file = decodeURIComponent(m[2]); } catch (e) { rev = file = null; } }
-  const pin = oceanHeatPin(rev, file, table);
+  const pin = m ? oceanHeatPin(m[1], m[2], table) : null;
   if (!pin) return json({ kind: 'catalogue', catalogue: 'oceanheat', status: 'unknown revision or file' }, 404, { 'Cache-Control': 'no-store' });
   return oceanHeatFile(env, pin);
 }
