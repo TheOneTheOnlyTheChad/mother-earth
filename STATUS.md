@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 18:03 UTC (clock reading at write) — **OSMC reliability proposal rev 2.1** (GPT's re-check of rev 2 applied; docs only)
+
+- GPT (relayed by Chad): Mac copy matched; **H1 ready for Chad's branch-build decision once the write guard covers both failure paths**; partial-publish policy acceptable; O7 fallback-only recommended. A docs re-check.
+- Rev 2.1: the empty-down fallback is conditional too (etag, or create-if-absent); attempts ordered by run timestamp; a failing failure-handler cannot reach `writeDown`; place expiry judged on the final counts envelope; absent-key and existing-down race tests; open-page expiry without a data poll must remove the points and cells (the new page redraws the buoy layer at expiry on the 30-second timer; old pages keep the 5-minute cadence); rollback wording corrected.
+- Found while checking GPT's raw-error point: the public `/status` endpoint already shows each layer's latest run note (redacted). Existing behaviour, left unchanged and stated in §4.1; the data endpoints never carry the raw text.
+- **Not approved:** build, hub deploy, page change. O1–O7 are Chad's.
+
 ## 11 Nov 17:54 UTC (clock reading at write) — **OSMC reliability proposal rev 2** (GPT's review of rev 1 applied; docs only)
 
 - GPT (relayed by Chad): Mac copy matched the sha256; H1 is the right shape; cached-page behaviour acceptable; revise before a branch-build go. A docs-and-code review.
