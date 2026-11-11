@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 18:42 UTC (clock reading at write) — **OSMC reliability candidate BUILT on branch `osmc-reliability-rc` @ `987f97e`** (code `266683b`; Chad's Go line; no merge, no deploy) — packet `reviews/2026-11-11-osmc-reliability-rc.md` (on the branch)
+
+- Chad: "Go: OSMC reliability build on a branch per rev 2.1 (H1; O1–O7 as recommended; no page release, no hub deploy)".
+- **Hub 0.6.8 (branch):** `driftFail()` for every failed buoy run (incl. `guarded()`, reason `internal_error`); last good counts kept unchanged + `last_attempt`; every failure write conditional (etag or create-only), ordered by run timestamp; `/place` applies the 4 h limit to the fallback. worker.js `73317081…3802`.
+- **Page (branch):** buoy card badge "degraded" + "Latest update failed at HH:MM UTC. Showing buoys from the HH:MM UTC run." (dates across midnight; "Showing buoys" only with paired records); 30 s timer redraws an expired fallback; place clause; Sources sentence; `?v=202611291000`.
+- **Tests:** osmc-reliability-hub 21/21, 8 breaks each fail; osmc-reliability-ui 35/35, 7 breaks each fail (hub responses from the real hub code via a local fixture; old page on new hub and new page on old hub covered). Regression: 22 hub-side and 22 browser suites green (18:13–18:42 UTC).
+- **Differences from rev 2.1 for GPT (packet §3):** same-run rule (`>=`); the empty down envelope's public note is now a fixed phrase; badge "degraded" when records are missing or mismatched; expired fallback removes buoy cells; place clause only on sections listing records.
+- **Not done:** live check (nothing deployed), Worker CPU of the failure path, real phone.
+- **Next:** GPT reviews the candidate; then page merge and hub 0.6.8 deploy, each on its own Approve line.
+
 ## 11 Nov 18:03 UTC (clock reading at write) — **OSMC reliability proposal rev 2.1** (GPT's re-check of rev 2 applied; docs only)
 
 - GPT (relayed by Chad): Mac copy matched; **H1 ready for Chad's branch-build decision once the write guard covers both failure paths**; partial-publish policy acceptable; O7 fallback-only recommended. A docs re-check.
