@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 17:08 UTC (clock reading at write) — **Globe performance B2b LIVE (merge `a80bc49`, 17:03:37 UTC commit time)** — packet §11
+
+- On Chad's Approve line after GPT's final clearance (Chad's approve taken as acceptance of the outline change). Served hashes of all ten page files exact 17:04:19 UTC (index `b5ac4ed1…`).
+- Live: B2b active, 1,264 cells, no side walls, FrontSide caps, 40 shared materials, 2,559 draw calls (old page ~6,340), no errors.
+- **Post-release matched pairs caught the slow (~200 ms) state:** old page 216.7 / 234.3 ms median (render CPU ~214) vs live B2b 50 ms (CPU ~38) — ~4.5× faster; RC fast state was 33.4 → 16.7. Slow-state trigger still unknown; cells remain the residual cost (hidden → 16.7 ms), so B3 stays the lever if wanted.
+- Rollback: revert `a80bc49` (Approve line). Close-out next.
+
 ## 11 Nov 17:01 UTC (clock reading at write) — **Globe performance: switch removed, final code verified; ready for GPT's final review and Chad's merge line** (branch `globe-perf-rc` @ `06febc0`)
 
 - GPT: B2b meets §3a; proceed with §8; no B3 for this release. Packet correction applied (second forward B2a pair straddled a USGS rollover → unmatched; all B1/B2b pairs matched).

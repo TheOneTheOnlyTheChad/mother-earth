@@ -119,3 +119,21 @@ Every browser and hub suite in `phase1/` was run in sequence (the default page i
 - **Full regression on the final code (16:18:01–16:58:01 UTC, results-file timestamps):** every browser and hub suite in `phase1/` green — arts-ui 90 · backdrop-layer 27 · buoy-temp-ui 33 · desktop-overflow 112 · drifters-ui 25 · kept-ui 21 · mobile-pass 131 · orbital-browser 113 · place-ui 30 · plastic-ui 29 · search-ui 104 · sky-ui 79 · sky-zoom-ui 333 · smoke-fixes 52 · terminator-behaviour 47 · terminator-ui 19 · timeline-axis 96 · timeline-ui 585 · ux-round1 34; arts-hub 54 · buoy-temp 37 · drifters-hub 12 · duration-contract all · firms-guard 19 · firms-v2 57 (+7 skipped) · health-hub 29 · history-hub 27 · kp-degraded 29 · oceanheat-hub 48 · orbital-hub 13 · orbital-ui 38 · place-rows 7 · plastic-hub 11 · satellites-hub 12 · search 111 · ships-fallback 7 · ships-late 7 · ships-probe 11 · sky-build 35 · sky-hub 46 · sky-scene-hub 7 · sky-scene-ref 7 · solar 26 · spacetrack-probe 11 · timeline-catalogue-hub 66. **0 failed.**
 - **oceanheat-ui:** its first run in that sequence produced no result because the local test server reached its 2-hour background limit mid-suite (an environment stop, not a page failure); the server was restarted and the suite rerun alone on the same code: **109/109** (16:58:06–17:00:36 UTC).
 - **Final smoke check — DONE (Chad's Chrome, 16:20–16:21 UTC, 1470 × 745, focused):** live main (16:20:28 UTC, 1,248 cells) vs the final branch `index.html` injected on the Pages origin (sha256 `b5ac4ed148beee4c…` checked in the tab; 16:21:03 UTC, the same 1,248 cells, `ME.cellPerf()` = b2b, 40 shared materials). Same poses: **north pole** (lat 78°, lng 60°, altitude 1.8) and **dateline** (lat −15°, lng 180°, altitude 1.8), matched zoomed screenshots of the globe. **No visible difference at either view:** the cells around the polar-night area (outlines over the dark no-imagery disc), the limb ring, the dateline column of forest and fire cells and the outlines crossing 180° all draw the same; no missing or back-facing fills at the limb or the pole. (Screenshots taken by the browser extension; not in the repo.) Chad makes the visual call.
+
+## 11. Released — merge `a80bc49` (11 Nov 2026, 17:03:37 UTC commit time), on Chad's line
+
+- **Line:** `Approve: push globe-perf-rc to main (page change: globe performance B2b — no side walls, shared single-sided cell fills)`, after GPT's final clearance. Chad's approve taken as acceptance of the §3 outline change (stated in the reply; he can say otherwise).
+- **Overlap check before merge:** branch touched only `index.html`, `phase1/cell-perf-ui.test.cjs` and review files; main only `STATUS.md` since the base `6883d12`. No asset changed, so no `?v=` bump.
+- **Served hashes (Chad's Chrome, 17:04:19 UTC): all ten page files exact** — index `b5ac4ed148beee4c` (new), sources `50fa74e9`, timeline.html `d7c37d5f`, app `161b53cc`, arts `58773cef`, timeline.js `ae87c6a1`, style `fad92f02`, sky `2056da8d`, skyscene `5e00ad77`, oceanheat `a45097ba`.
+- **Live smoke (17:04:59 UTC, 1470 × 801, focused):** `ME.cellPerf()` = b2b, 1,264 cells, 0 cells with side geometry, all 1,264 caps FrontSide, 40 shared materials, 2,559 draw calls, no page errors.
+- **Post-release matched pairs, browser in its slow (~200 ms) state** — the state the RC's matched pairs never caught (old page injected on the Pages origin from `50a6d31`, sha256 `75420aa2…` checked; live B2b; same 1,264 cells; both orders):
+
+| Window (UTC) | Page | Frame median / p95 (ms) | Render CPU (ms) | Draw calls |
+|---|---|---|---|---|
+| 17:04:59, 17:05:33 ×2 | live B2b | 50 / 66.7–67.6 | 37.2–38.8 | 2,559 |
+| 17:06:10 | live B2b, polygons hidden (control) | 16.7 / 17.6 | 3.8 | 31 |
+| 17:06:54 | old page | 216.7 / 250 | 207.1 | 6,339 |
+| 17:07:36 | live B2b | 50 / 67.2 | 39.8 | 2,559 |
+| 17:08:02 | old page | 234.3 / 367.5 | 220.9 | 6,344 |
+
+**Reading:** in the slow state B2b is ~4.5× faster than the old page (50 vs 217–234 ms median; render CPU ~38 vs ~214). It does not reach 16.7 ms in that state; the remaining cost is still the cells (hidden → 16.7 ms), so B3 (merge) stays the lever if the slow state matters. What triggers the slow state is still unknown. **Rollback:** revert `a80bc49` (Approve line); no hub, R2 or D1 involved.
