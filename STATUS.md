@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 16:10 UTC (clock reading at write) — **Globe performance RC check DONE (Chad's Chrome, 15:48–16:07 UTC): B2b best; every step passes** — packet `reviews/2026-11-11-globe-perf-rc.md` §6–§8 on branch `globe-perf-rc` @ `01232f9`
+
+- GPT cleared `2ca14e1` for the RC; suite grown to 35 checks (B2b hover asserted, real clicks, R3 disposal through the page's own scheduled refresh; break `cache-across-passes` fails 7).
+- Matched pairs vs unmodified live main, both orders, same 1,250 cells: main 33.4 / 50 ms (render CPU ~36); B1 16.7 / 33.4 (~20); B2a 16.7 / 33.4 (~20, no gain over B1); **B2b 16.7 / 16.7 (~6.5)**; hide-only ceiling 16.7 / 18 (~2).
+- Picks on live data (overlap, mixed and same-layer edges, dot near an edge, limb, open globe): identical to main in every step. Taps: main 711–768 ms → B2b 482–545 (no regression; still above 200).
+- §3a: B2b ships without B3. Chad's calls: accept the outline change; ship B2b. Before merge: remove the RC switch (hard-wire B2b), rerun suites, GPT review, `Approve: push globe-perf-rc to main (page change: …)`.
+
 ## 11 Nov 15:30 UTC (clock reading at write) — **Globe performance B1+B2 BUILT on branch `globe-perf-rc` @ `2ca14e1`** (Chad's build line; no page release)
 
 - B1 no side walls, B2a shared DoubleSide cap materials per fill (branch default), B2b FrontSide; `?perf=main|b1|b2a|b2b` for the RC only. `index.html` only + new suite `phase1/cell-perf-ui.test.cjs` 27/27 (4 breaks each fail).
