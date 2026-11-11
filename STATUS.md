@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 10:06 UTC — Ocean Heat LIVE (merge `158e4b1`; hub 0.6.7 `53ede31e…`)
+
+- Merged on Chad's line 09:58:30 UTC. **Served hashes: all ten page files exact** (10:04:02Z; `oceanheat.js` `a45097ba` is the tenth). Four hub responses 200, byte-exact, immutable 24 h. Public-page smoke test in Chad's Chrome: the toggle loads P1 from the hub, Open Pacific tap 30.6 °C / +5.1 °C, legend and STAR credit present, off clean, no console errors. **main = live.**
+- Open: physical phone; globe performance (coverage polygons); md5 sidecars; OSPO status; OSMC 522; branch deletions (`ocean-heat-rc`, `ocean-heat-release`, Chad's). Packet §9.
+
 ## 11 Nov 09:50 UTC — Ocean Heat: live RC through the hub passed
 
 - Chad's Chrome, Pages origin, branch `1b975a0` injected with its own hub BASE. Zero requests before the toggle; P1 manifest+mask+v025 and P2 manifest+mask+v050, all 200, all hash = pin, no cache override; immutable 24 h; repeats from browser cache (≤ 17 ms); weak manifest ETag harmless. Taps 12/12 on both paths. First enable 2.3 s (P1) / 2.5 s (P2, mask cached). Regression gate met (no repeatable layer cost; renders on ≈ off). Packet §8. Next: Chad's merge line.

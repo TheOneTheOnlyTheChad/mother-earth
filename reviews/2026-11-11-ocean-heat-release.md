@@ -230,3 +230,16 @@ No console errors in the tab. Tab closed.
 **Side note:** before the injection I opened `…/mother-earth/LICENSE` as a would-be blank page. Chrome likely treated it as a file download (the tab reverted). The Pages 404 page was tried next; it blocks outside fetches, so the Sources page was used, as in the preview run.
 
 **Remaining:** the merge line, then the served-hash check after Pages publishes. That check covers ten page files with `oceanheat.js` added, plus the four hub responses.
+
+## 9. Merge and release (Chad: "Approve: merge ocean-heat-release to main (page change: Ocean Heat layer).")
+
+- **Merge:** no-ff `158e4b1`, pushed 09:58:30 UTC. Main had not moved since `50e9419` (clean, nothing to reconcile). `data/ocean-heat/` is not on main. `worker.js` on main = live hub 0.6.7 `53ede31e…`, so **main = live**.
+- **Served hashes (no-store, 10:04:02 UTC): all ten page files exact.** index `75420aa27f1f`, sources `50fa74e90f87`, timeline.html `d7c37d5f3057`, app `161b53cc2086`, arts `58773cef35e6`, sky `2056da8d8bf5`, skyscene `5e00ad77cec2`, style `fad92f02ba0f`, timeline.js `ae87c6a1f2ef`, **oceanheat `a45097baed58`**. The Pages build API is not reachable from this session; the served bytes are the check.
+- **Four hub responses (no-store, from the public page, 10:04:48 UTC):** all 200, byte-exact to their pins, `public, max-age=86400, immutable`.
+- **Public-page smoke test (Chad's Chrome, new tab):**
+  - Layer off on load, zero hub requests.
+  - The real toggle "Ocean heat — 9 Nov 2026 snapshot" was clicked: ready in 3,544 ms, P1, 0.25°, 7200 × 3600, rev `oh-2026-11-09-R1`. Three requests (manifest, mask, v025) came from the browser cache left by §8 (8–34 ms).
+  - Open Pacific tap: 30.6 °C, +5.1 °C warmer than usual.
+  - Legend shown; date line "Dated snapshot · NOAA Coral Reef Watch · 9 Nov 2026 (UTC day)"; footer names the NOAA / NESDIS Center for Satellite Applications and Research.
+  - Toggled off. No console errors. Tab closed.
+- **Open:** physical-phone check; globe performance (coverage polygons; absolute targets); md5 sidecars; OSPO status (not read); OSMC 522 follow-up; branch deletions (Chad: `ocean-heat-rc`, `ocean-heat-release`).
