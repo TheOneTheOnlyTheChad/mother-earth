@@ -203,5 +203,10 @@ Breaks, each fails (11 now): `degraded-without-records` 2 (new) · `cells-withou
 - Hub: osmc-reliability-hub 27 · drifters-hub 12 · health-hub 29 · history-hub 27 · firms-v2 57 (+7 skipped) · oceanheat-hub 48 · place-rows 7 · kp-degraded 29.
 - Browser: osmc-reliability-ui 41 · drifters-ui 25 · buoy-temp-ui 33 · place-ui 30 · cell-perf-ui 43 · mobile-pass 131 · desktop-overflow 112 · fires-wording-ui 35 · kept-ui 21 · smoke-fixes 52 · plastic-ui 29.
 
-**Remaining suites on rev 2: running at this commit; results in the next commit of this packet.**
+**Remaining suites on `3df9c1a` (finished 19:17 UTC), all green:**
+
+- Browser: ux-round1 34 · search-ui 104 · backdrop-layer 27 · terminator-ui (exit 0) · terminator-behaviour (exit 0) · arts-ui 90 · sky-ui 79 · oceanheat-ui 109 · timeline-ui 585 · timeline-axis 96 · sky-zoom-ui 333 · orbital-browser 113.
+- Hub: arts-hub 54 · buoy-temp 37 · duration-contract · firms-guard 19 · orbital-hub 13 · plastic-hub 11 · satellites-hub 12 · ships-fallback 7 · ships-late 7 · sky-hub 46 · sky-scene-hub 7 · timeline-catalogue-hub 66 · search 111 · solar 26.
+
+So every suite in §6 has now been run on rev 2: 22 hub-side and 22 browser suites, all green. Not rerun, as in §6: the Python generator suites, `sky-scene-ref`, `orbital-ui`, and the probe and real-data tools.
 
