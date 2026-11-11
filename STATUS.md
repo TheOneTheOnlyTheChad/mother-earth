@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 17:45 UTC (clock reading at write) — **Fires card wording for the daily FIRMS reset LIVE (merge `0386058`, 17:43:07 UTC commit time)**
+
+- New thread (globe performance handover). Chad's ask: when FIRMS returns a header-only file and the hub's note is "no detections processed yet for today (UTC)…", the Fires card says **"Today’s detections aren’t available yet."**; coverage stays UNKNOWN, records stay withheld; genuine fetch or processing errors keep "collector reported down: …". Card copy only.
+- Branch `fires-wording-rc` @ `39100b3`: `index.html` only (no `?v=` bump; `app.js`, `sources.html`, hub unchanged). The state word's tooltip carries the same sentence. `ME.freshness` is untouched, so the summary report, cell inspector, search notes and Sources keep the hub's full reason.
+- Tests: new `phase1/fires-wording-ui.test.cjs` 35/35 (down notes read from `worker.js`); breaks `match-all` 10 fail, `never-match` 4, `loose-prefix` 2. Regression green: kp-degraded 29, smoke-fixes 52, kept-ui 21, ux-round1 34, search-ui 104, place-ui 30, backdrop-layer 27, cell-perf-ui 43, desktop-overflow 112, mobile-pass 131, drifters-ui 25, plastic-ui 29, terminator-ui. Packet `reviews/2026-11-11-fires-wording-rc.md`. No GPT review of this change was relayed.
+- Merged on Chad's line "Approve: merge fires-wording-rc to main (page change: Fires card wording for the daily FIRMS reset)"; merged tree = branch tree; suite 35/35 on the merge.
+- **Served hashes: all ten page files exact 17:44:23 UTC** (index `50c8e0669e00d366`; the other nine unchanged). Live read 17:44:39 UTC: page carries the new code; fires card current (37,464), ordinary wording, no sentence (expected at this hour).
+- **Not yet seen live:** the header-only state itself (00:00 UTC until the day's first FIRMS rows, 02:16–04:15 UTC over 4–9 Nov).
+- Rollback: revert `0386058` (Approve line). No hub, R2 or D1 change; hub 0.6.7.
+- Next (Chad): OSMC 522 reliability.
+
 ## 11 Nov 17:08 UTC (clock reading at write) — **Globe performance B2b LIVE (merge `a80bc49`, 17:03:37 UTC commit time)** — packet §11
 
 - On Chad's Approve line after GPT's final clearance (Chad's approve taken as acceptance of the outline change). Served hashes of all ten page files exact 17:04:19 UTC (index `b5ac4ed1…`).
