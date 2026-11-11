@@ -1,7 +1,21 @@
-# Globe performance — Stage 0 record (measure only), 11 Nov 2026 — IN PROGRESS (S0.6 dwell, S0.T trace, evidence file still to come)
+# Globe performance — Stage 0 record (measure only), 11 Nov 2026
 
 **Authority:** Chad's line `Go: globe performance Stage 0 (measure only, Chad's Chrome, live page, no code change)`, 11 Nov 2026. Proposal: `docs/concepts/GLOBE-PERFORMANCE-PROPOSAL.md` rev 2.1 (main `b25da75`), GPT-cleared.
-**No code change:** nothing pushed to the page; no hub, R2, D1 or variable change. All instruments were console wraps in one tab of the live page, each restored and the restore checked.
+**No code change:** nothing pushed to the page; no hub, R2, D1 or variable change. All instruments were console wraps in a tab of the live page, each restored and the restore checked.
+**Two tabs:** tab 1 ran S0.1–S0.5 and S0.7 (10:38–11:01 UTC); it left the Claude tab group when DevTools was undocked for the trace and could not be reached again, so Chad closed it. Tab 2 (from 11:07 UTC, served hashes re-checked, all ten equal main) ran S0.T and S0.6.
+**Summary of findings: §0.**
+
+## 0. Findings (decision per proposal rev 2.1 §3)
+
+1. **The coverage-cell polygons are the cost (Q2).** Hidden vs visible, both orders: frames 183–217 → **16.7 ms**, render CPU ~176–197 → ~4–5 ms, draw calls 5,711 → 22. The polygons are 2.8 % of the triangles and 99.6 % of the draw calls. Far outside the baseline spread; repeated across tab 1 and tab 2 and at two viewports.
+2. **Fills are most of it, outlines the rest (Q2).** Caps hidden → 1,160 draw calls, 33 ms frames; outlines hidden → 4,574 draw calls, ~3 ms less render CPU. Both together are needed to reach 16.7 ms.
+3. **The cost is CPU per object (Q1).** The trace shows the main thread 99.96 % busy with three.js per-object material/program bookkeeping (`getParameters`, `getProgramCacheKey`); the GPU process is ~28 % busy. Pixel ratio made no difference (rc §10). Rings are not a factor (S0.4).
+4. **No leak (Q3).** Rebuilds (20 page toggles, 20 setter calls) and 30 min of natural refreshes leave counts flat; the scene grows only with the cell count (782 at 04:00 → 1,229 at 14:02 UTC).
+5. **Picking baseline (Q5):** hover and click agree; observed precedence Earthquakes > Fires > Ships > Forest; west cell on a shared edge; points not separately pickable; open globe → "Everything here". Tap → painted inspector 374–768 ms (median 433), against the ≤ 200 ms target, layer polygons visible.
+
+**Decision under the rule:** a material, repeatable rotation-frame gain from hiding the polygons → **a C1 (merged mesh) spike is justified**. **C2: no case** (no growth without data growth). **C3:** nothing in the trace points to polygon transitions during rotation; not justified on this evidence. Stage 1 needs Chad's separate go and GPT's read of this record first.
+
+**What this does not show:** what batching actually saves (Stage 1); behaviour on a phone or another GPU; whether tap latency improves with fewer objects (tap was measured only with the polygons visible).
 
 ## 1. Setup (measured)
 
@@ -124,11 +138,59 @@ Each case centred with `ME.pointView(lat, lng)` (altitude 2), then a real hover 
 - **On a shared edge** the west cell won.
 - **Points are not separately pickable** (merged): a click on a fire dot opens its cell.
 - **Tap → painted inspector:** 374–768 ms, median 432 ms over the 13 taps. Target ≤ 200 ms.
-- Repeat after a refresh: below (S0.6).
+- Repeat after a refresh: §6.
 
-## 4. Still to record
+## 4. S0.T — Chrome Performance trace (tab 2)
 
-- S0.6 natural refresh, 30-min dwell (started 10:55:50 UTC) and the repeated S0.1.
-- S0.7 repeat after a refresh.
-- S0.T Chrome Performance trace (Chad starts/stops).
-- Evidence JSON (one file saved from the tab, with Chad's permission).
+- Chad's Chrome, DevTools **docked** (viewport 915 × 745). Chad recorded; Claude marked a matched pair with `performance.mark`: visible window then all-polygons-hidden window.
+- First recording (pair 11:08:54–11:09:18 UTC: visible 33.4 ms median, hidden 16.7 ms) was left recording for over 30 min and could not be saved; discarded. Second recording: pair **13:29:21–13:29:45 UTC** (visible 34.2 / 50.8 ms, 245 frames, render CPU 35.4 ms, 5,898 draw calls; hidden 16.7 / 17.6 ms, 597 frames, render CPU 0.5 ms, 28 draw calls); saved as `~/Downloads/Performance_Trace` (gzip, 22,260,623 B, sha256 `9b08fed9…e63733`, 586,319 events; not committed).
+- Analysed on the Mac (`evidence/…/trace_a.py`, `trace_b.py`, `trace_c.py`) over the last 10 s before each end mark (the measured part after warm-up). Traced timings are kept apart from the headline A/B (the trace adds overhead).
+
+| Last 10 s of window | Renderer main thread busy | GPU process main busy | JS samples in globe.gl |
+|---|---|---|---|
+| Polygons visible | **9,996 ms (99.96 %)**, of which 9,626 ms self time in `FunctionCall` | 2,761 ms | **83.2 %** |
+| Polygons hidden | 5,069 ms; 38.7 % of samples idle | 222 ms | 31.7 % |
+
+- **Where the visible time goes (JS self-time samples):** `getParameters` 22.6 %, anonymous globe.gl frames 17.7 %, `Je` 14.6 %, native `(program)` 14.6 %, `requestAnimationFrame` 5.4 %, `getProgramCacheKey` 4.7 %, `bindVertexArray` 2.0 %, `setup` 2.0 %; garbage collection 1.5 %. `getParameters` and `getProgramCacheKey` are three.js's per-object material/program bookkeeping inside the bundled globe.gl.
+- **Reading:** with the polygons visible the main thread never idles. Its time is three.js doing per-object render setup for ~2,300 polygon meshes every frame — CPU work proportional to the number of objects, not to triangles or pixels (consistent with S0.2 and the pixel-ratio sample in rc §10). The GPU process is busy ~28 % of the window, so the GPU is not the bottleneck.
+- With the polygons hidden the main thread is still ~50 % busy under tracing (globe.gl's per-frame tick, `updateMatrixWorld`, the trace's own overhead) but frames hold 16.7 ms.
+
+## 5. S0.6 — natural refresh, 30-min foreground dwell (tab 2)
+
+- Two earlier attempts were stopped because the tab was hidden (tab 1: 10:57:56–11:00:51 UTC; tab 2: 13:32:47–13:34:51 UTC, Chad switching to the Claude app). Both are kept in the evidence as discarded.
+- **Clean dwell 13:37:01–14:07:06 UTC**: viewport 1470 × 745 → 801 height later (Chad's window), never hidden (`visibilitychange` logged nothing), focused throughout. Checkpoint every minute and before/after each update; 11 update events (5-min polls; snapshot IDs changed at 13:47:27 and 14:02:33, the rest were rebuilds with the same IDs).
+
+| Checkpoint (UTC) | Objects (no rings) | Polygon groups = caps = outlines | Per layer (usgs / firms / ships / forest) | Geometries |
+|---|---|---|---|---|
+| 13:37:01 start | 3,525 | 1,166 | 28 / 414 / 165 / 559 | 2,360 |
+| 13:42:26 after update | 3,522 | 1,165 | 27 / 414 / 165 / 559 | 2,366 |
+| 13:52:27 after update | 3,525 | 1,166 | 28 / 414 / 165 / 559 | 2,367 |
+| 14:02:27 after update | 3,525 | 1,166 | 28 / 414 / 165 / 559 | 2,360 |
+| 14:02:36 after update (new fires and ships runs) | **3,714** | **1,229** | 28 / **472** / **170** / 559 | **2,476** |
+| 14:07:06 end | 3,714 | 1,229 | 28 / 472 / 170 / 559 | 2,486 |
+
+- **Every change in object count matches a change in cell count:** +63 cells (58 fires, 5 ships) → +189 objects (3 per cell: group, cap, outline) and +116 to +126 geometries (2 per cell, plus ring churn of ±10). Between data changes the counts are flat through every rebuild.
+- **Over a longer span in tab 2** (no checkpoints between): 11:07 UTC 3,474 objects / 1,139 cells → 13:27 UTC 3,597 / 1,174 — again in step with the cells.
+- **Q3 answered: the scene grows only because the data grows. No retention, no leak. C2 has no case.**
+- **Baseline repeated after the dwell** (14:07:06–14:07:46 UTC, 1470 × 801): frames 50.0 / 50.1, 50.0 / 1,082 (flagged), 49.9 / 50.1 ms; render CPU 39.1, 37.3, 35.6 ms; draw calls ~6,170 (1,229 cells); forced completion 42.7 / 47.1 ms. Two of the three windows are flagged (non-ring object count changed mid-window; no polygon update was logged, so the likely cause is ring churn reaching the count — noted, not used).
+
+## 6. S0.7 — repeat after a real refresh (tab 1, 11:01 UTC, after the 11:00:51 update)
+
+| Case | Hover | Click | Tap → paint (ms) |
+|---|---|---|---|
+| 0 · 20_53 firms + forest | Fires | Fires | 456.8 |
+| 2 · 15_52 firms + ships + forest | Fires | Fires | 433.4 |
+| 5 · edge 36_11 │ 36_12 | Earthquakes 36_11 | Earthquakes 36_11 | 417.1 |
+
+Same winners as before and after the Forest toggle. Over all 16 taps: tap → painted inspector **374–768 ms, median 433 ms**.
+
+## 7. Frame-state observation
+
+Visible-polygon frames sat in distinct states across the day: ~33 ms, ~50 ms (end of dwell), and ~185–230 ms, with the same draw calls; forced completion split the same way (38–46 vs 210–228 ms). No hidden-polygon window ever left 16.7 ms. Stage 0 does not identify what switches the state (the trace pair caught only the ~33 ms state). The S0.2 effect is the same in every state: hiding the polygons always reached 16.7 ms.
+
+## 8. Evidence (`reviews/evidence/2026-11-11-globe-perf-stage0/`)
+
+- `harness.js` — the console code used (read-only), with block orders.
+- `tab2-raw.json` — tab 2's raw results as saved from the tab (both trace pairs, the clean dwell, the discarded tab-2 dwell): 36,720 B, sha256 `05007daa…7452c0cb`, the same on Chad's Mac (`~/Downloads/globe-perf-stage0-tab2-2026-11-11.json`).
+- Tab 1's raw objects were lost with the tab; its per-window numbers in §3 were read back from the tab during the run (tool output) and are transcribed here.
+- `trace-meta.json`, `trace-threads.json`, `trace-jsprofile.txt` and `trace_a.py`, `trace_b.py`, `trace_c.py` — the trace analysis (scripts identical on both sides by sha256). The 22 MB trace stays in Chad's Downloads.

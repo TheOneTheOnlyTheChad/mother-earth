@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 14:11 UTC (clock reading at write) — **Globe performance Stage 0 DONE (measure only)** — record `reviews/2026-11-11-globe-perf-stage0.md`
+
+- On Chad's Stage 0 line; live page, his Chrome (M3), no code change. Served hashes = main (10:38:31 and 11:07 UTC).
+- **Coverage-cell polygons are the cost:** hidden vs visible, both orders → frames 183–217 → 16.7 ms; draw calls 5,711 → 22 (2.8 % of triangles, 99.6 % of draw calls). Caps ≈ 4,550 calls, outlines ≈ 1,140. Rings: no effect.
+- **Trace (13:29 UTC pair):** main thread 99.96 % busy with three.js per-object material/program bookkeeping (`getParameters`, `getProgramCacheKey`); GPU process ~28 % → CPU per object, not pixels.
+- **No leak:** 20 page toggles, 20 setter calls and a clean 30-min dwell (13:37–14:07 UTC) — counts move only with the cell count (+63 cells → +189 objects). Cells 782 (04:00) → 1,229 (14:02).
+- **Picking baseline:** Earthquakes > Fires > Ships > Forest; west cell on an edge; points not pickable; tap → inspector median 433 ms (374–768).
+- **Decision under rev 2.1:** C1 merged-mesh spike justified; C2 no case; C3 not supported. Stage 1 needs GPT's read of the record and Chad's separate go.
+- Tab 1 lost when DevTools was undocked (START-HERE §4p); tab-1 numbers transcribed from read-back; tab-2 raw file hash-checked both sides.
+
 ## 11 Nov 10:36 UTC (clock reading at write) — **Globe performance proposal rev 2.1: GPT's re-review CLEARED it** (docs only)
 
 - GPT verified the Mac copy by sha256 (`37c05529…`); §3 covers G1–G5; recommends Chad give Stage 0 its separate go. Rev 2.1 applies the run-sheet points: camera set each frame with zero transition, fresh clock after warm-up; Forest disturbance for the rebuild toggle (Earthquakes fallback, ring counts logged); each update applied before the next; paused readback for the polygon comparisons too; tap-to-painted-inspector times in S0.7; within-spread = inconclusive.

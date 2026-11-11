@@ -187,6 +187,14 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Performance:** the regression gate (layer must not slow the page measurably) is the merge criterion, and it was met. The page itself misses the absolute targets (150–200 ms frames on 11 Nov, 3,289 scene objects); the coverage-cell polygons are the measured lead (§10 of `reviews/2026-11-10-ocean-heat-rc.md`).
 - **STAR notice:** free use with credit to the NOAA / NESDIS Center for Satellite Applications and Research; credited in the inspector, footer and Sources. The experimental-status wording stays in the research record only (GPT).
 
+## 4p. Thread facts (11 Nov 2026, globe performance Stage 0)
+- **Claude in Chrome loses its tab when DevTools is undocked:** the tab leaves the Claude tab group and can't be reached again (in-page state is lost). Keep DevTools **docked** for traces; record the narrower viewport.
+- **Traces: stop within a minute.** A Performance recording left running 30+ min could not be saved. Mark windows with `performance.mark`, tell Chad "STOP" right after, save to Downloads, read it on the Mac (`device_bash`, Python 3.10, gzip JSON).
+- **Claude in Chrome blocks base64-looking output and truncates `javascript_tool` results at ~1,000 chars.** Bulk results: `console.log` chunks of ~2,500 chars read with `read_console_messages` (full messages), or a blob download from the tab to Downloads (Chad's permission) then read on the Mac and hash-check.
+- **A hidden tab breaks a dwell:** timers throttle when Chrome is behind the Claude app. Log `visibilitychange` and restart if hidden; ask Chad not to switch apps.
+- **Stage 0 harness** (read-only, `reviews/evidence/2026-11-11-globe-perf-stage0/harness.js`): time-based sweep, render-CPU wrap, draw calls, forced completion, census, hide/restore. Reusable for Stage 1 and later performance checks.
+- **Measured (Stage 0):** coverage-cell polygons = 99.6 % of draw calls; hiding them → 16.7 ms frames; cost is three.js per-object CPU work (trace). Scene grows only with cell count (no leak). Picking precedence Earthquakes > Fires > Ships > Forest; tap → inspector median 433 ms.
+
 ## 4b. Thread 10 operating facts (3 Nov 2026)
 - **Worker outbound WebSockets work on Paid** (aisstream, 101 in ~2 s). Frames arrive as **Blob** — decode with `await data.arrayBuffer()`; never assume ArrayBuffer. Admin runs longer than the pane's 45 s cap: fire without awaiting (`window.__pr`), read in a second call.
 - **Optional layers** on the page go through `OPTIONAL_LAYERS` in index.html (fetched only while on, cleared on off, `refreshPair` + `usable()` as for the always-on record layers). `ME.renderState()` and `ME.openCell(layer, id)` are the read-only test/console aids.
