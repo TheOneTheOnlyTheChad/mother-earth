@@ -192,4 +192,55 @@ Rerun 19:37–19:57 UTC at `0130e4d`, logs kept in the session. Clean: **79 pass
   | **`small-limit`** (new: the < 1800 stop removed) | 2 | F4 at 1024 and 1799 |
   | **`p2-tile-x0`** (new: P2 tile offset dropped) | 4 | C2 [P2 ×2] seam and join, C4 [P2 ×2], F2 |
 - **Regression at `3915348`:** mobile-pass 131, desktop-overflow 112, sky-zoom-ui 333, smoke-fixes 52, terminator-ui 19, all passing (the suites that load the page; only `oceanheat.js` changed).
-- **Open (Chad's lines, unchanged by rev 2):** the foreground timing run (both paths: P1 on a desktop-sized window, P2 on a phone-sized one); Pages vs hub for release; the md5 sidecars; REGISTER filing (C6).
+- **Open after rev 2** (updated 11 Nov after GPT's rev-2 clearance):
+  - foreground timing: run, see §10;
+  - data host: **decided by Chad: the hub, as in rev 4.2.** The hub route and the R2 upload each need their own Approve line; then verify that the release page fetches the pinned snapshot through the hub;
+  - the md5 sidecars; REGISTER filing (C6).
+
+## 10. Foreground timing run (Chad's Chrome, 11 Nov 2026, 03:58–04:05 UTC)
+
+**GPT, rev-2 review (relayed by Chad):** rev 2 clears the preview findings. Keep the lighter checker; the render-path changes and their tests are accepted. Merge remains pending the foreground timing run and verification of the hub-backed release candidate.
+
+**Setup:**
+- Chad's own Chrome 156, through Claude in Chrome. The window was in front and focused (`visibilityState` visible, `hasFocus` true).
+- ANGLE Metal, **Apple M3**; `MAX_TEXTURE_SIZE` 16384.
+- Viewport 1200 × 655 CSS px at DPR 2 (canvas 1264 × 878).
+- One new tab on the Pages origin. The seven page files were fetched by commit `7cd43ac` and all seven were hash-exact (`oceanheat.js` `ee5331e4…`). They were blob-injected with the same one-string `BASE` rewrite as §6.
+- **Method:** a 5 s scripted rotation (one `pointOfView` step per frame), frame intervals from `requestAnimationFrame`. Order: layer-off baseline first; then switch on; layer on; mesh hidden (off again); on again. Then 8 synthetic taps over the open Pacific, timed from input to the inspector showing "Ocean heat here" plus one painted frame. Chrome's raw frame rate with the globe paused was **16.7 ms median** (60 Hz), so the browser itself was not throttled.
+
+**Results:**
+
+| Run | Path | Median (ms) | p95 (ms) | Taps median / max (ms) |
+|---|---|---|---|---|
+| Desktop · layer-off baseline | — | 116.6 | 266.5 | — |
+| Desktop · layer on | P1 × 1, 7200 × 3600 | 100.0 | 133.3 | 361.9 / 411.7 |
+| Desktop · off again (mesh hidden) | — | 100.0 | 133.3 | — |
+| Desktop · on again | P1 | 100.6 | 199.8 | — |
+| P2 · layer-off baseline | — | 183.3 | 200.0 | — |
+| P2 · layer on | P2 × 1, 3600 × 1800 | 183.3 | 200.0 | 353.0 / 375.9 |
+| P2 · off again / on again | — / P2 | 183.3 / 183.3 | 200.3 / 200.8 | — |
+| Tap baseline, layer off | — | — | — | 368.5 / 677.0 |
+| **Live public page (main), layer absent, new tab** | — | **116.6** | **133.4** | — |
+
+- Time to layer, first enable: **2,845 ms** for P1 (load 1,942, paint 655); **2,900 ms** for P2 (load 2,323, paint 271). Times include the fetch from raw.githubusercontent.
+
+**Thresholds not met. The cause is the existing page, not the layer.**
+- Every run misses median ≤ 33 ms, p95 ≤ 50 ms and tap ≤ 200 ms. But each layer-off baseline is the same as, or slower than, its layer-on run.
+- The **public live page, without Ocean Heat**, rotates at 116.6 ms median / 133.4 ms p95 in the same browser. The tap baseline with the layer off (median 368.5 ms) is as slow as with it on.
+- Forced synchronous renders (render plus a 1-pixel readback, globe paused) measured **120.1 ms with the layer on vs 122.6 ms with it hidden**: no measurable cost from Ocean Heat on either path.
+- **Where the time goes (live page, diagnostic only):**
+  - the scene holds 2,379 objects (about 362,000 vertices). 1,564 of them are the coverage-cell polygons: 782 cells, each a cap mesh plus an outline;
+  - in one sample, a synchronous render took 31 ms; hiding those polygons cut it to **3.5 ms**; hiding any other object type left it at about 33 ms;
+  - pixel ratio 1 instead of 2 made no difference (32.9 ms), so the cost is per object, not per pixel.
+
+  Sync render times varied from 31 to 122 ms across the session, and rotation frames slowed from about 100 to 183 ms over it, with the layer off as well as on.
+- **Limits of this run:**
+  - The window could not be narrowed (Chrome kept 1200 CSS px after a resize to 700), so **P2 was exercised through the test aid `forcePhone: true`** on the desktop viewport, not a phone-sized window.
+  - The browser was driven through the extension; whether that attachment adds overhead is unmeasured.
+  - No physical phone.
+
+**For GPT and Chad.** On this machine and browser, the agreed thresholds cannot be met by any Ocean Heat change: the page already misses them with the layer off. Two ways to read the merge gate:
+- (a) **regression gate:** Ocean Heat must not make the page measurably slower than its own layer-off baseline, on both paths. Met: the deltas are within run-to-run noise; renders were 120.1 vs 122.6 ms.
+- (b) **absolute gate:** blocks Ocean Heat until the page's own frame cost is fixed. That is its own piece of work: the 782 coverage-cell polygons are the measured bulk, and merging them into one mesh is the obvious candidate, subject to a proposal.
+
+Chad's hands-on impression is still useful alongside these numbers.

@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 04:10 UTC (clock reading at write) — **Ocean Heat foreground timing run DONE (Chad's Chrome, M3): thresholds missed by the page itself, not the layer**; GPT cleared rev 2 for preview (branch only)
+- **GPT (relayed):** rev 2 clears the preview findings. Merge pending the timing run and a verified hub-backed release candidate.
+- **Run** (packet §10), branch `7cd43ac`, 7 files hash-exact; Chrome raw frame rate 16.7 ms:
+  - desktop: P1 layer on 100 ms median / 133 p95 vs layer-off baseline 117 / 267;
+  - P2 (forcePhone): 183 / 200 on and off alike;
+  - taps about 350 ms, on and off alike;
+  - **live public page without Ocean Heat: 117 / 133.**
+- **Cause:** the 782 coverage-cell polygons (1,564 meshes). A synchronous render took 31 ms in that sample, 3.5 ms with them hidden.
+- **Question for GPT and Chad:** is the gate regression (met) or absolute (needs separate page-performance work first)?
+
 ## 11 Nov 03:32 UTC (clock reading at write) — **GPT: Ocean Heat passes functional preview review; performance is a merge gate. Rev 2 on `ocean-heat-rc` @ `3915348`** (branch only)
 - **GPT (relayed by Chad):** all 12 local hashes match the packet.
   - Foreground timing goes before merge: both shipping paths, layer-off baseline, median ≤ 33 ms, p95 ≤ 50 ms, tap ≤ 200 ms, plus Chad's impression.
