@@ -53,7 +53,58 @@ Every browser and hub suite in `phase1/` was run in sequence (the default page i
 - **Note:** buoy-temp-ui's first run stopped while writing a debug screenshot to a scratch path hard-coded by an earlier session (line 134); a rerun passed 33/33. Not a page failure.
 - Ocean Heat suites ran on `OH_SNAPSHOT_DIR` rebuilt from `db5eedd` (START-HERE §4o).
 
-## 5. Next
+## 5. Suite additions after GPT's review of `2ca14e1` (branch `b49671e`)
+
+`phase1/cell-perf-ui.test.cjs` now 35 checks: B2b hover asserted (not just logged); **real clicks** at every probe point in every step (winners identical to main); **R3 closed in the suite for B2a and B2b**: the page's own scheduled refresh (`tick`, captured from its `setInterval`, not reimplemented) runs with cells added and removed, and afterwards no cap attached to a cell carries a disposed material, every cap material is from the current pass, one per fill. New break `cache-across-passes` (materials kept across passes — the R3 risk) fails 7 checks. All breaks: keep-sides 3 · per-cell 5 · wrong-opacity 2 · frontside-a 3 · cache-across-passes 7 failures; clean run 35/35.
+
+## 6. RC check — Chad's Chrome, 11 Nov 2026, 15:48–16:07 UTC
+
+**Setup.** Chrome 156, Apple M3, 1470 × 745 CSS px, DPR 2, window in front and focused in every window. One tab, reloaded per window: **baseline = unmodified live main**; **candidate = branch `index.html` (`43b7b14b…`, commit `2ca14e1`) injected on the Pages origin** with `?perf=` in the tab URL; every other page file was served live and checked equal to the branch. Same harness as Stage 0 (time-based sweep, 10 s window after 2 s warm-up, render CPU wrap, draw calls). Each load waited until every cell was built and the count had held for 2 s. Raw: `reviews/evidence/2026-11-11-globe-perf-rc/chrome-rc-raw.json` (27,900 B, sha256 `de1c6a3d…a04ea`; same on Chad's Mac `~/Downloads/globe-perf-rc-2026-11-11.json`).
+
+**Matched pairs** (A = main, B = candidate; A–B–A–B then B–A–B–A; same snapshot IDs and the same 1,250 cells — usgs 25/26, firms 502, ships 164, forest 559 — in each pair; no window flagged):
+
+| Step | Frame median / p95 (ms), 4 windows | Render CPU median (ms) | Draw calls | Main in the same pairs |
+|---|---|---|---|---|
+| B1 | 16.7 / 33.4–33.6 (all four) | 19.4–20.2 | 3,774 | 33.4 / 50–50.9; CPU 35.3–36.5; 6,274 |
+| B2a | 16.7 / 33.4 (all four) | 19.5–20.5 | 3,771–3,774 | 33.4 / 50; CPU 36.1–37.6; 6,271–6,274 |
+| **B2b** | **16.7 / 16.7–16.8 (all four)** | **6.4–7.1** | 2,521–2,526 | 33.4 / 50–50.1; CPU 36.5–37.8; 6,271–6,279 |
+| hide-only on main (ceiling) | 16.7 / 17.9–18.2 (two) | 1.9–2.0 | 24 | — |
+
+- The effect is far beyond the baseline spread in both orders for every step (main's own windows: 33.4 / 50–50.9 throughout).
+- Frames are capped at the display's 16.7 ms, so B1 and B2a already sit at the floor in median; **render CPU and p95 separate them: B2a adds nothing over B1; B2b cuts render CPU by a further two-thirds and brings p95 to the floor.**
+- Main ran in its ~33 ms state for the whole matched session. The ~200 ms state appeared only in two unmatched trial reads before the log started (15:48–15:49 UTC: main 234 ms, then B1 133 ms, single windows, not used).
+
+**Picks on live data (real hover and click, same screen coordinates, pose lat −10°, lng 25°, altitude 2.0):**
+
+| Probe (chosen from the live cells) | main | B1 | B2a | B2b |
+|---|---|---|---|---|
+| overlap 19_51 (fires + forest) | Fires 19_51 | same | same | same |
+| mixed-layer edge 21_51 │ 21_52 | Fires 21_51 (west) | same | same | same |
+| same-layer edge, Forest 22_51 │ 22_52 | Forest 22_51 (west) | same | same | same |
+| fire dot 0.06° west of an edge (15_51 │ 15_52) | Fires 15_52 (east) | same | same | same |
+| limb, 75° from centre (aimed at 38_47) | Ships 36_48 | same | same | same |
+| open globe | none → "Everything here 14_46" | same | same | same |
+
+**Hover and click winners identical to live main in every step.** Two observations for B3 (not built): at the limb the click lands on a neighbouring cell, and a dot just west of an edge opens the east cell — this is what globe.gl does today, and any coordinate lookup would have to match or replace it on Chad's rule.
+
+**Tap → painted inspector (same six taps):** main 711–768 ms · B1 611–629 · B2a 619–647 · **B2b 482–545**. No step is worse than main (rev 2.1 §5 regression check: met). Progress toward 200 ms, reported separately: B2b is ~230 ms faster than main but still 2.4–2.7× the target.
+
+**Look (live data).** Matched zoomed screenshots, main vs B2b, same pose: the limb strip and southern Africa (dense fires and forest cells). No difference visible at that zoom: same fills, same outlines, no gaps or back-faces at the limb. (The images were captured by the browser extension and are not in the repo; the pixel-level evidence is the fixture comparison in §3.)
+
+## 7. §3a reading (for Chad's decision)
+
+- **Every step passes** GPT's test: a repeatable gain beyond the paired baselines in both orders, with picks identical to main and the look unchanged apart from §3's outline pixels.
+- **Best passing step: B2b** — median 16.7 ms (≤ 33 ms), p95 16.7 ms (≤ 50 ms), render CPU ~6.5 ms against main's ~36. **Under §3a it ships without B3.**
+- B2b "earned its place" (proposal R3): it adds the p95 and CPU gain, and its picks and look matched main on live data at the limb.
+- **Chad's calls:** (1) accept §3's outline change (B1 and everything built on it), (2) ship B2b.
+
+## 8. Before a merge (not done; each its own step)
+
+1. **Remove the RC switch:** hard-wire B2b (no `?perf=`), keep `ME.cellPerf()` as a read-only aid; the test suite keeps its own main/B1/B2a comparisons by injecting the mode (test-only), so the released page has no switch (proposal §3). Rerun the suites.
+2. GPT reviews the RC results and the switch removal.
+3. `Approve: push globe-perf-rc to main (page change: globe performance B2b — no side walls, shared single-sided cell fills)`.
+
+## 9. Next (superseded by §8)
 
 1. GPT reviews this packet and the branch (`globe-perf-rc`, files in the Mac folder `_review/globe-perf-rc/`).
 2. `Go: globe performance RC check (Chad's Chrome)` — Chad at the screen, ~40 min: matched pairs against an unmodified tab of live main, both orders, median and p95, the hide-only ceiling, look and picks on real data, tap latency against main for the S0.7 cases (no worse than Stage 0, progress to 200 ms reported separately), the 33 ms threshold applied as written (proposal §3a).
