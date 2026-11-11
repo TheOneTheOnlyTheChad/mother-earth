@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 10:33 UTC (clock reading at write) — **Globe performance proposal rev 2** (GPT's review of rev 1 applied; docs only)
+
+- GPT (relayed by Chad): revise Stage 0 before a measurement go. Rev 2 adds a short Chrome trace beside the render-CPU wrapper, both-order A/B with repeats and a time-based sweep over 10 s windows, the Earthquakes off→on toggle for the rebuild test (render() is inside the IIFE) plus a labelled setter-only test, natural-refresh checkpoints, real canvas hover/click for overlap picking, environment per block. Decision rule: a material, repeatable rotation gain justifies a C1 spike; a readback gain alone does not.
+- Next: GPT re-reviews rev 2 (§9); then Chad's Stage 0 go (at the screen ~30 min active + 30 min dwell).
+
 ## 11 Nov 10:26 UTC (clock reading at write) — **Globe performance measurement proposal rev 1 written** (docs only, on Chad's go)
 
 - `docs/concepts/GLOBE-PERFORMANCE-PROPOSAL.md` rev 1: Stage 0 = measure only on the live page in Chad's Chrome (frame/render split, coverage polygons A–B–A–B, caps vs outlines, scene growth, overlap clicks); Stage 1 = throwaway spike only on a separate go (C1 merged mesh, C2 stable data, C3 transition off). $0; nothing approved beyond the proposal.
