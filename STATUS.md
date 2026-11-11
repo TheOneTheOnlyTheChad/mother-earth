@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 10:26 UTC (clock reading at write) — **Globe performance measurement proposal rev 1 written** (docs only, on Chad's go)
+
+- `docs/concepts/GLOBE-PERFORMANCE-PROPOSAL.md` rev 1: Stage 0 = measure only on the live page in Chad's Chrome (frame/render split, coverage polygons A–B–A–B, caps vs outlines, scene growth, overlap clicks); Stage 1 = throwaway spike only on a separate go (C1 merged mesh, C2 stable data, C3 transition off). $0; nothing approved beyond the proposal.
+- Next: GPT reviews (§9 questions); then Chad's Stage 0 go (needs him at the screen, ~20 min + a 30 min idle step).
+
 ## 11 Nov 10:16 UTC (clock reading at write) — **Ocean Heat thread closed: GPT smoke test passed; handover written; Mac synced**
 
 - **GPT's independent desktop smoke test (relayed by Chad): passed.** Starts off; enabling renders the 0.25° overlay and the 9 Nov 2026 legend; off clears the legend; re-enable restores it. STAR credit in footer and Sources. A different open-water cell: 26.0 °C, +1.1 °C warmer than usual, 25 of 25 source cells. Land and Antarctic sea ice show their messages. Chrome showed the live manifest (revision, date, three binary hashes). `/%6danifest.json` → "unknown revision or file". His shell requests timed out, so headers, bytes, request counts and cache reuse rest on Claude's checks (packet §8–§9). Desktop only.
