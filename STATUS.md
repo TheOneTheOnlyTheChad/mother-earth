@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 04:19 UTC (clock reading at write) — **Ocean Heat release decisions RECORDED (Chad); release proposal rev 2** (docs only; main `7ba3660`)
+- **D1:** regression gate adopted for this release. §10 satisfies it for the tested Chrome setup (P1 and forced P2); physical phone unverified. Absolute targets kept for the globe performance work (coverage-cell polygons first).
+- **D2:** hub serving; `data/ocean-heat/` removed from the release branch; both suites take `OH_SNAPSHOT_DIR`, hash-check the four files at setup, and run with the branch copy absent.
+- **Q1:** verified 200s `public, max-age=86400, immutable`; the page's pinned fetches drop `no-cache`; 404 and 503 `no-store`; byte changes get a new revision and pins.
+- **Q2:** the Worker checks length and SHA-256; a build-time check matches the manifest revision to the route and its file entries to the Worker pins; the page keeps its checks; `.bin.z` as `application/octet-stream` with no `Content-Encoding`; the Worker tests add `unreadable`.
+- **Final check:** Pages origin, against the deployed hub, with the candidate's actual `BASE`; exact requests and response hashes on both paths; tap readings; first-enable timing through the hub.
+- **Approval lines** (proposal §7, none given): STAR disclaimer Go; REGISTER filing; release branch build; R2 upload; hub 0.6.7 deploy; merge.
+
 ## 11 Nov 04:11 UTC (clock reading at write) — **GPT: regression gate recommended and cleared on the timing run; Ocean Heat release proposal rev 1 written** (docs only)
 - GPT recommends (a), the regression gate (no repeatable slowdown against the layer-off baseline, both paths), as an explicit change to the merge criterion. The absolute targets stay for the globe's own performance work. Cleared for the tested Chrome setup; phone unverified. **Adoption is Chad's (D1).**
 - Remaining release check: the page fetches the pinned snapshot through the hub, after the separately approved route and upload.
