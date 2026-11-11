@@ -2,6 +2,25 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 11 Nov 2026
+
+## 11 Nov 03:20 UTC (clock reading at write) — **GPT: Ocean Heat passes functional preview review; performance is a merge gate. Rev 2 on `ocean-heat-rc` @ `3915348`** (branch only)
+- **GPT (relayed by Chad):** all 12 local hashes match the packet.
+  - Foreground timing goes before merge: both shipping paths, layer-off baseline, median ≤ 33 ms, p95 ≤ 50 ms, tap ≤ 200 ms, plus Chad's impression.
+  - Lighten the no-data checker.
+  - Phones default to P2; handle limits below 3,600 explicitly.
+  - Pages serving only if Chad chooses it for release (rev 4.2 names the hub as the public follow-on).
+- **Rev 2 (packet §9):**
+  - phone-sized (≤ 720 px, or a touch screen with short side ≤ 500) → P2;
+  - P1 / P2 in 1 or 2 tiles by limit; < 1800 → unavailable, nothing more fetched;
+  - checker `[128,140,160] / [100,112,130]`, ΔE to polar-night land 12.4 → 28.0;
+  - suite 101/101; 13/13 breaks caught (3 new);
+  - 5 page-loading regression suites green;
+  - looked at on the M3 (Arctic night, Weddell in sun, day/night on);
+  - the pane (588 px) chose P2 by default.
+- **Unchanged:** main, the public page, hub, D1, R2.
+- **Open (Chad):** foreground timing run (Claude in Chrome, his yes needed); Pages vs hub for release; md5 sidecars; REGISTER (C6).
+
 # 10 Nov 2026
 
 ## 10 Nov 19:55 UTC (clock reading at write) — **Ocean Heat preview candidate BUILT on branch `ocean-heat-rc` @ `0130e4d`** (Chad: "Approve: build ocean-heat-rc on a branch only — Ocean Heat preview per OCEAN-HEAT-PROPOSAL rev 4.2 on the pinned 9 Nov inputs; no merge, R2, hub or page change.") — packet `reviews/2026-11-10-ocean-heat-rc.md` (on the branch)

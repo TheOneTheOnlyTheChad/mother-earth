@@ -1,7 +1,7 @@
 # Ocean Heat — preview release-candidate packet (`ocean-heat-rc`)
 
 **Approval:** Chad, 10 Nov 2026: "Approve: build ocean-heat-rc on a branch only — Ocean Heat preview per OCEAN-HEAT-PROPOSAL rev 4.2 on the pinned 9 Nov inputs; no merge, R2, hub or page change."
-**Candidate:** branch `ocean-heat-rc` @ **`0130e4d`** (code and snapshot). Earlier commits: `3245f73`, `ec08df1`, `a56a5e3`. This packet is committed after it.
+**Candidate:** branch `ocean-heat-rc` @ **`3915348`** (rev 2 code, after GPT's preview review, §9); rev 1 code and snapshot `0130e4d`. Earlier commits: `3245f73`, `ec08df1`, `a56a5e3`. This packet is committed after it.
 **Scope:** the page and a static dated snapshot in the repo. No hub, D1, R2, cron, collector or new upstream request. Main and the public page are untouched.
 
 ## 1. What changed
@@ -128,3 +128,68 @@ Rerun 19:37–19:57 UTC at `0130e4d`, logs kept in the session. Clean: **79 pass
 2. **Sea ice in polar night** (§6): the no-data checker `[59,70,84]/[42,50,61]` at alpha 220 sits close to the near-black night land. Lighter checker, or leave it (the inspector says "Sea ice" on tap)?
 3. **P1 texture memory ≈ 99 MiB.** Phones with `MAX_TEXTURE_SIZE` ≥ 7200 (most current iPhones report 16384) also take P1. Keep the rule as written, or send phone-sized viewports to P2 (≈ 25 MiB)? Physical-phone performance is unverified.
 4. **Data path on merge:** the snapshot lives in the repo under `data/ocean-heat/`, served by Pages, as the proposal says. No R2.
+
+## 9. GPT's preview review (relayed by Chad, 11 Nov 2026) and rev 2
+
+**Verdict:** Ocean Heat **passes functional preview review**; **performance remains a merge gate**. GPT matched all 12 local file hashes to this packet, reviewed the recorded M3 run and the renderer-selection code, and did not rerun the browser suite.
+
+**Answers to §8:**
+1. **Foreground timing before merge.** On the final candidate, in foreground Chrome: the agreed rotation and tap checks, a layer-off baseline, **both shipping render paths** exercised; thresholds median frame interval ≤ 33 ms, p95 ≤ 50 ms, tap-to-visible-inspector ≤ 200 ms. Chad's hands-on impression alongside. The throttled pane run and the forced-render delta leave these unverified.
+2. **Lighten the no-data checker** so it reads apart from dark land first; keep it distinct from the anomaly colours; compare against Greenland and nearby sea ice with day/night on.
+3. **Phone-sized viewports default to P2** (≈ 25 MiB texture, not ≈ 99 MiB; a similar CPU canvas in each case). Keep P1 for larger viewports where it passes. Handle renderer limits below 3,600 px explicitly: the old fallback still attempted a 3,600 px texture on them.
+4. **Pages for this fixed snapshot is reasonable if Chad explicitly chooses it for release.** Rev 4.2 approves the bundled asset for the preview branch and describes hub serving as the public follow-on. Shipping `data/ocean-heat/` from Pages changes that decision. If Chad chooses Pages: verify the four snapshot files and the page assets on Pages, and smoke-test the relative data URL (the M3 run used a rewritten raw.githubusercontent URL).
+   - **Correction to §8 item 4 above:** it said Pages serving was "as the proposal says". It is not. Rev 4.2 names hub serving as the public follow-on; Pages would be a release decision of Chad's.
+
+**Rev 2 on the branch (`3915348`, code; `oceanheat.js` sha256 `ee5331e4…33ff90`).** Only `oceanheat.js` and the suite changed. `index.html`, `sources.html`, `app.js` and the snapshot are unchanged.
+- **Path rule.**
+  - *Phone-sized*: the page's own phone breakpoint (≤ 720 CSS px wide), or a touch screen whose short side is ≤ 500 px (a phone held sideways). Decided once at switch-on. Phone-sized → P2.
+  - *Not phone-sized* → P1 when the limit is ≥ 3,600.
+  - *Tiles by limit*: P1 7200 × 3600 as one texture (≥ 7,200) or two tiles of 3600 × 3600 (3,600–7,199); P2 3600 × 1800 as one texture (≥ 3,600) or two tiles of 1800 × 1800 (1,800–3,599).
+  - *Below 1,800, or unreadable*: "Ocean heat unavailable — this device's graphics texture limit (N px) is below the 1800 px the layer needs. Nothing is drawn." Only the 4.6 KB manifest has been fetched by then.
+  - P2 painting now takes a tile offset (it was single-texture only).
+- **No-data checker** `[128,140,160] / [100,112,130]` at alpha 220 (was `[59,70,84] / [42,50,61]`).
+  - Chosen from five candidates by CIELAB ΔE, over normal, deuteranomaly and tritanomaly (minimum across the three):
+
+    | vs | Old | New |
+    |---|---|---|
+    | polar-night land (black under the 0.40 night shade) | 12.4 | **28.0** |
+    | black land, day | 22.4 | 46.4 |
+    | daylit white land | 55.5 | 31.7 |
+    | nearest anomaly class | 10.1 | **19.3** |
+    | P2 mixed grey, over black / over white | 12.8 / 36.6 | 13.7 / 13.2 |
+
+  - The cost is against daylit white land (31.7) and P2's mixed grey (13.2–13.7). The mixed grey is solid and appears only at coasts and ice edges; the checker is a pattern.
+  - **Looked at on the real globe** (pane, M3, day/night on, 02:56Z):
+    - Arctic in night: sea ice slate grey, clearly apart from black Greenland and the Canadian islands; blue and orange anomaly classes clearly different.
+    - Weddell Sea in sun: slate checker apart from white Antarctica, in both the sunlit and the shaded band.
+- **On the M3 in the pane (588 CSS px wide = phone-sized):** default enable chose **P2**, 0.5°, 1 texture 3600 × 1800, `phone: true`; requests manifest + mask + v050 (465,413 B); load 1,001 ms, paint 94 ms (page throttled, so upper bounds). All seven page files hash-exact at `3915348` (the same one-string `BASE` rewrite as §6).
+- **Suite `phase1/oceanheat-ui.test.cjs` — 101 passed** (was 79):
+  - **F (new):** limits simulated through a test aid (`forceMaxTex`, `forcePhone`) on the real snapshot:
+    - 16384 → P1 × 1;
+    - 4096 and exactly 3600 → P1 × 2 (Seam E tap on the tiled P1);
+    - 2048 and exactly 1800 → P2 × 2 (Cape coast texel in tile 1 still mixed, its water neighbour the block colour);
+    - 1799 and 1024 → unavailable, own reason, nothing drawn, no mask or value file fetched;
+    - phone-sized → P2 × 1, and P2 × 2 at 2048.
+  - **C [P2 × 2] (new):** the seam fixture rendered on the globe with P2 in two tiles, plus the tile join texels (pale | mixed | orange) and the mirror and π-rotation sensitivity.
+  - **E:** 390 × 844 now enables with no forced path → P2, `3600x1800`, exactly manifest + mask + v050; Off Cornwall tap at 0.5°.
+  - **A5:** the texel is exactly one of the new checker colours; rendered Weddell is blue-tinged grey, not near-normal pale.
+  - **A2:** the path rule reads the phone flag.
+- **Code breaks at `3915348`:** all 13 fail the suite (exit 1); clean 101/0.
+
+  | Break | Failed | Caught by |
+  |---|---|---|
+  | `no-wrap` | 2 | A4 |
+  | `linear` | 1 | A2 |
+  | `nearest-water` | 2 | A3 / B2 Cape Town |
+  | `paint-noncontrib` | 2 | A5, C4 [P1 ×2] |
+  | `p2-any-water` | 3 | B3, C4 [P2 ×2], F2 |
+  | `tile-shift` | 2 | C4 [P1 ×2] and [P2 ×2] |
+  | `no-hash` | 2 | D |
+  | `no-gen` | 1 | A7 |
+  | `same-unavailable-text` | 3 | A3 / B2 Baffin, A4 |
+  | `round-lookup` | 13 | A3 / B2 / A4 / A6 / F1 |
+  | **`phone-p1`** (new: phone flag ignored) | 3 | E default P2, E tap at 0.5°, F6 |
+  | **`small-limit`** (new: the < 1800 stop removed) | 2 | F4 at 1024 and 1799 |
+  | **`p2-tile-x0`** (new: P2 tile offset dropped) | 4 | C2 [P2 ×2] seam and join, C4 [P2 ×2], F2 |
+- **Regression at `3915348`:** mobile-pass 131, desktop-overflow 112, sky-zoom-ui 333, smoke-fixes 52, terminator-ui 19, all passing (the suites that load the page; only `oceanheat.js` changed).
+- **Open (Chad's lines, unchanged by rev 2):** the foreground timing run (both paths: P1 on a desktop-sized window, P2 on a phone-sized one); Pages vs hub for release; the md5 sidecars; REGISTER filing (C6).
