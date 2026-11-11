@@ -379,6 +379,45 @@ const gibs = 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=
   $('imgdate').innerHTML = `<span class="img-long">${esc(full)}</span><span class="img-short">Imagery ${esc(IMG_LABEL.slice(0, 6))}<br>${esc(IMG_LAYER.sat)} · not live</span>`;
   $('img-full').textContent = full; }
 
+// ---------- coverage-cell drawing cost (globe performance build, proposal rev 1.1; Stage 0: reviews/2026-11-11-globe-perf-stage0.md)
+// B1: no side walls. A side colour of ANY value (even fully transparent) makes globe.gl build and draw invisible side
+//     walls for every cell (custom shader, drawn twice as transparent DoubleSide) — ~2 draw calls per cell for nothing.
+// B2a: caps share one material per distinct fill (same colour, opacity, transparency, depth and DoubleSide as globe.gl's
+//     own default cap material) instead of one material per cell. Made fresh for each render() pass and never kept
+//     across passes: globe.gl disposes a removed cell's materials, so a material is only ever used by the pass that made it.
+// B2b: as B2a with FrontSide (one draw per cap instead of two) — on trial only.
+// RC ONLY: ?perf=main|b1|b2a|b2b selects the step for the release-candidate check; the released page has no switch.
+const CELL_PERF = (() => {
+  let mode = 'b2a';
+  try { const q = new URLSearchParams(location.search).get('perf'); if (['main', 'b1', 'b2a', 'b2b'].includes(q)) mode = q; } catch (e) { }
+  return { mode, Ctor: null, pass: 0, mats: null };
+})();
+ME.cellPerf = () => ({ mode: CELL_PERF.mode, harvested: !!CELL_PERF.Ctor, pass: CELL_PERF.pass, materials: CELL_PERF.mats ? CELL_PERF.mats.size : 0 });   // read-only test aid
+const rgbaHex = c => { const m = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/.exec(c || ''); return m ? { hex: (+m[1] << 16) | (+m[2] << 8) | +m[3], a: m[4] == null ? 1 : +m[4] } : null; };
+// the MeshBasicMaterial constructor is not exposed by the UMD bundle; take it from a cell globe.gl has already built
+function harvestCapMaterial() {
+  if (CELL_PERF.Ctor) return CELL_PERF.Ctor;
+  if (!globeOk || typeof globe.scene !== 'function') return null;
+  globe.scene().traverse(o => { if (!CELL_PERF.Ctor && o.__globeObjType === 'polygon' && o.__defaultCapMaterial && o.__defaultCapMaterial.isMeshBasicMaterial) CELL_PERF.Ctor = o.__defaultCapMaterial.constructor; });
+  return CELL_PERF.Ctor;
+}
+// one pass's shared materials, keyed by fill; null = let globe.gl use its own per-cell default (main, b1, or not harvested yet)
+function cellMaterials() {
+  CELL_PERF.pass++;
+  if (CELL_PERF.mode === 'main' || CELL_PERF.mode === 'b1' || !harvestCapMaterial()) { CELL_PERF.mats = null; return null; }
+  const M = CELL_PERF.Ctor, tpl = (() => { let d = null; globe.scene().traverse(o => { if (!d && o.__globeObjType === 'polygon' && o.__defaultCapMaterial) d = o.__defaultCapMaterial; }); return d; })();
+  const mats = new Map();
+  CELL_PERF.mats = mats;
+  return fill => {
+    let m = mats.get(fill); if (m) return m;
+    const c = rgbaHex(fill); if (!c) return undefined;   // unparseable → globe.gl's own default for that cell
+    m = new M({ side: CELL_PERF.mode === 'b2b' ? 0 : 2, depthWrite: tpl ? tpl.depthWrite : true });   // 0 = FrontSide, 2 = DoubleSide (three.js constants)
+    m.color.setHex(c.hex); m.transparent = c.a < 1; m.opacity = c.a;   // exactly what globe.gl does with a cap colour
+    m.__cellShared = CELL_PERF.pass;
+    mats.set(fill, m); return m;
+  };
+}
+
 // ---------- globe (survives WebGL failure: readings and report still load)
 const RECORD_LAYERS = ['usgs', 'firms', 'ships'];            // publish individual records alongside their cell counts
 const CELL_ONLY_LAYERS = ['forest', 'swpc', 'co2', 'seaice']; // counts or indices only
@@ -418,7 +457,7 @@ if (noWebGL) {
       .showAtmosphere(true).atmosphereColor('#4a6a9a').atmosphereAltitude(.18)
       .pointsData([]).pointLat('lat').pointLng('lng').pointColor('col').pointAltitude('alt').pointRadius('r').pointsMerge(true)
       .ringsData([]).ringLat('lat').ringLng('lng').ringColor(() => t => `rgba(255,90,60,${1 - t})`).ringMaxRadius('rr').ringPropagationSpeed(2).ringRepeatPeriod(900)
-      .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonSideColor(() => 'rgba(0,0,0,0)').polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
+      .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonCapMaterial(p => p.mat).polygonSideColor(() => CELL_PERF.mode === 'main' ? 'rgba(0,0,0,0)' : null).polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
       .polygonLabel(p => p.label)
       .pathsData([]).pathPoints('pts').pathPointLat(q => q[0]).pathPointLng(q => q[1]).pathPointAlt(() => .003).pathColor(() => 'rgba(206,222,236,.95)').pathTransitionDuration(0)
       .onPolygonClick((p, ev, c) => { ohTap = c && Number.isFinite(c.lat) && Number.isFinite(c.lng) ? { lat: c.lat, lng: c.lng } : null; inspectCell(p); })
@@ -463,7 +502,7 @@ ME.pairState = layer => Object.fromEntries((layer ? [layer] : RECORD_LAYERS.conc
 
 const ringAround = (lat, lng, r = .35, n = 24) => Array.from({ length: n + 1 }, (_, i) => { const a = 2 * Math.PI * i / n; return [lat + r * Math.sin(a), lng + r * Math.cos(a) / Math.max(.2, Math.cos(lat * Math.PI / 180))]; });
 function render() {
-  const polys = [];
+  const polys = [], matFor = cellMaterials();
   for (const layer of shownMapLayers()) {
     const snap = state[layer]; if (!snap || !on[layer]) continue;
     const fresh = ME.freshness(layer);
@@ -472,11 +511,13 @@ function render() {
       if (fresh.grade === 'unknown') grade = 'unknown';
       // plastic: no shading, no value in the cell — a faint outline only, so the samples inside can be listed and opened
       const fill = layer === 'plastic' ? 'rgba(0,0,0,0)' : layer === 'forest' && grade !== 'unknown' ? forestFill(cell.count) : FILL[grade];
-      polys.push({ geom: cellGeom(id), layer, id, cell, grade, stroke: layer === 'plastic' ? 'rgba(206,222,236,.14)' : layer === 'forest' && grade !== 'unknown' ? 'rgba(111,211,122,.55)' : STROKE[grade], fill,
+      polys.push({ mat: matFor ? matFor(fill) : undefined, geom: cellGeom(id), layer, id, cell, grade, stroke: layer === 'plastic' ? 'rgba(206,222,236,.14)' : layer === 'forest' && grade !== 'unknown' ? 'rgba(111,211,122,.55)' : STROKE[grade], fill,
         label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL[layer]}</b> · cell ${id}<br>${cell.count} ${windowText(layer, snap)} · coverage: ${grade}<br><span style="color:#7f8da3">${esc(cell.coverage ? cell.coverage.evidence : '')}</span></div>` });
     }
   }
   globe.polygonsData(polys);
+  // first cells of the session: globe.gl builds them with its own materials; once one exists, redraw once with shared ones
+  if (!matFor && polys.length && (CELL_PERF.mode === 'b2a' || CELL_PERF.mode === 'b2b') && !CELL_PERF.Ctor && !CELL_PERF.retry) { CELL_PERF.retry = true; requestAnimationFrame(() => requestAnimationFrame(() => { if (harvestCapMaterial()) render(); })); }
   const pts = [];
   for (const layer of shownRecordLayers()) if (on[layer] && usable(layer) && ME.freshness(layer).grade !== 'unknown') pts.push(...points[layer].filter(q => !q.zero));
   globe.pointsData(pts);
