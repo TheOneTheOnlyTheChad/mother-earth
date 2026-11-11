@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 17:55 UTC (clock reading at write) — **OSMC reliability proposal rev 1 written** (docs only, on Chad's go) — `docs/concepts/OSMC-RELIABILITY-PROPOSAL.md`, for GPT
+
+- Chad deleted `fires-wording-rc` (remote: `main` + parked `aircraft-rc`, checked with `git fetch -p`).
+- Evidence (D1, read 17:50 UTC): buoys 186 runs since 4 Nov 00:00 UTC, **1 down** (10 Nov 16:07 run, HTTP 522). Cause of the blank hour: `writeDown` overwrites `latest-cells/drifters.json` with an empty down envelope while `latest/drifters.json` keeps the last good run, so the pair no longer matches.
+- Lean **H1**: on a failed buoy run the hub rewrites the last good counts unchanged plus a `last_attempt` block; the page keeps drawing the last good run (inside the 4 h limit) with a card line "Latest update failed at HH:MM UTC. Showing buoys from the HH:MM UTC run." Optional H2 (one retry); P1 page-only not recommended; leaving as is stays a fair choice. Buoys only. Decisions O1–O6 are Chad's; page-first release order.
+- **Not approved:** build, hub deploy, page change.
+
 ## 11 Nov 17:45 UTC (clock reading at write) — **Fires card wording for the daily FIRMS reset LIVE (merge `0386058`, 17:43:07 UTC commit time)**
 
 - New thread (globe performance handover). Chad's ask: when FIRMS returns a header-only file and the hub's note is "no detections processed yet for today (UTC)…", the Fires card says **"Today’s detections aren’t available yet."**; coverage stays UNKNOWN, records stay withheld; genuine fetch or processing errors keep "collector reported down: …". Card copy only.
