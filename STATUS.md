@@ -19,7 +19,8 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - looked at on the M3 (Arctic night, Weddell in sun, day/night on);
   - the pane (588 px) chose P2 by default.
 - **Unchanged:** main, the public page, hub, D1, R2.
-- **Open (Chad):** foreground timing run (Claude in Chrome, his yes needed); Pages vs hub for release; md5 sidecars; REGISTER (C6).
+- **Chad, 11 Nov (answers):** release data host = **hub, as in rev 4.2** (not Pages): the hub route and the R2 upload each need their own line before merge; the RC's relative `data/` path changes with it. Timing run in his Chrome: **yes**.
+- **Open (Chad):** the foreground timing run (Chrome extension was not reachable at first try); md5 sidecars; REGISTER (C6).
 
 # 10 Nov 2026
 
