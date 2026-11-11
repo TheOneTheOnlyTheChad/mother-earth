@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 20:12 UTC (clock reading at write) — **Hub 0.6.8: first scheduled runs all ok** (read-only, D1 via the connector, read ~20:12 UTC)
+
+- Runs finished after the 19:38:18 UTC deploy: **drifters 1 ok** (started 20:07:58.510, finished 20:08:10.352 UTC, HTTP 200, **1,303 buoys**, 0 refused, newest fix 19:04 UTC) · usgs 7 ok · firms 2 ok (44,140 records at 20:00) · swpc 1 ok · co2 1 ok · forest 1 ok · orbital 1 ok (32,663) · ships 1 ok. No down or degraded run on any layer.
+- The buoy failure path has not run on production (no failed buoy run since the deploy); it stays proven by tests until a real failure occurs.
+
 ## 11 Nov 19:38:18 UTC — **HUB 0.6.8 DEPLOYED** (Chad: "Approve: deploy hub 0.6.8 from 51f87fc (content only)") — entry written 19:38 UTC
 
 - **Before (19:37:57 UTC, dashboard tab):** live worker.js = 0.6.7 `53ede31e…fb9e43` (287,973 B; the rollback target); 19 bindings.
