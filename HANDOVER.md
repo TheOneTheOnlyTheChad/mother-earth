@@ -47,6 +47,7 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 - **Rollback:** revert `a80bc49` (Approve line).
 - **This thread:** Stage 0 measure-only (`reviews/2026-11-11-globe-perf-stage0.md`) → proposal rev 2.1 and build proposal rev 1.1 (GPT) → branch build B1/B2a/B2b → RC in Chad's Chrome → switch removal → GPT final → merge. Packet: `reviews/2026-11-11-globe-perf-rc.md` §1–§11; facts START-HERE §4p, §4q.
 - **Next concrete action (suggested, Chad to choose):** none required. Options: (a) B3 merged mesh only if the slow state matters to Chad (cells are still the residual cost there); (b) the open items below.
+- **Close-out done (START-HERE §9):** Mac `_review/` empty (`globe-perf-rc` moved to `_to_delete/` for Chad to empty); branch `globe-perf-rc` deleted by Chad (remote: `main` + parked `aircraft-rc`); Mac synced at `154055f`, preserve-first (12 files; 4 preserved in `_sync-preserved/20261111T171321Z/`, each matching an earlier commit); checkouts clean and pushed; research packets untouched.
 - **Open:** what triggers the slow (~200 ms) frame state; tap latency vs 200 ms; physical phone check (Ocean Heat and the new cell drawing); md5 sidecars; NOAA OSPO status; OSMC 522 reliability; older items unchanged.
 - **Chad's standing notes:** exact `Approve: …` lines for production; say when he's needed at the screen; real-clock timestamps; no phone/email/precise address in the public repo; Mac sync preserve-first; text only; logins and branch deletions are his; GPT reviews, Chad approves; GPT messages point to Mac paths.
 
