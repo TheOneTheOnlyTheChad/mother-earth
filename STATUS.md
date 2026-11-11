@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 11 Nov 2026
 
+## 11 Nov 10:36 UTC (clock reading at write) — **Globe performance proposal rev 2.1: GPT's re-review CLEARED it** (docs only)
+
+- GPT verified the Mac copy by sha256 (`37c05529…`); §3 covers G1–G5; recommends Chad give Stage 0 its separate go. Rev 2.1 applies the run-sheet points: camera set each frame with zero transition, fresh clock after warm-up; Forest disturbance for the rebuild toggle (Earthquakes fallback, ring counts logged); each update applied before the next; paused readback for the polygon comparisons too; tap-to-painted-inspector times in S0.7; within-spread = inconclusive.
+- Next: Chad's `Go: globe performance Stage 0` (at the screen ~30 min + 30 min dwell).
+
 ## 11 Nov 10:33 UTC (clock reading at write) — **Globe performance proposal rev 2** (GPT's review of rev 1 applied; docs only)
 
 - GPT (relayed by Chad): revise Stage 0 before a measurement go. Rev 2 adds a short Chrome trace beside the render-CPU wrapper, both-order A/B with repeats and a time-based sweep over 10 s windows, the Earthquakes off→on toggle for the rebuild test (render() is inside the IIFE) plus a labelled setter-only test, natural-refresh checkpoints, real canvas hover/click for overlap picking, environment per block. Decision rule: a material, repeatable rotation gain justifies a C1 spike; a readback gain alone does not.

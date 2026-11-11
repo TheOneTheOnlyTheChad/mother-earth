@@ -1,7 +1,7 @@
-# Globe performance — measurement proposal, rev 2
+# Globe performance — measurement proposal, rev 2.1
 
 **For:** GPT's re-review, then Chad's approval lines in §8. **Docs only.**
-**Rev 1:** 11 Nov 2026 (main `ae13189`). **Rev 2:** 11 Nov 2026, after GPT's independent review of rev 1 (relayed by Chad; verdict: revise Stage 0 before asking for a measurement go).
+**Rev 1:** 11 Nov 2026 (main `ae13189`). **Rev 2:** 11 Nov 2026 (main `0ab49fd`), after GPT's independent review of rev 1 (relayed by Chad; verdict: revise Stage 0 before asking for a measurement go). **Rev 2.1:** 11 Nov 2026, GPT's re-review of rev 2 (relayed by Chad): **proposal review cleared**; recommends Chad give Stage 0 its separate go; run-sheet details applied (table below).
 **Builds on:**
 - `reviews/2026-11-10-ocean-heat-rc.md` §10 (foreground timing run, 11 Nov 03:58–04:05 UTC; GPT's verdict on it);
 - `reviews/2026-11-11-ocean-heat-release.md` §8 (regression-gate run, 11 Nov 09:45–09:47 UTC);
@@ -20,6 +20,17 @@
 | G4 | `ME.openCell` bypasses picking | Overlap baseline from **real canvas hover and clicks**, logging camera, coordinates, candidates, hover winner and inspector winner; more case types; repeated after a refresh/toggle | S0.7, §5 |
 | G5 | Viewports differed between earlier packets; the later census doesn't show which objects grew | Record actual viewport and drawing-buffer size every block; census by type including polygon children | §3 instruments |
 | G6 | GPT could not verify the commit from the Mac copy (no git metadata) | The message to GPT carries this file's sha256 for the Mac copy | message, not this file |
+
+## Rev 2.1 changes (GPT's re-review of rev 2)
+
+| # | GPT's point | Change | Where |
+|---|---|---|---|
+| R1 | Keep 10 s at 36°/s; start clock and pose fresh after each warm-up; set the camera directly each frame with zero transition; repeat full sweeps if p95 or the paired effect is unstable; fixed poses only as follow-up | Rotation protocol worded that way | §3 |
+| R2 | Use **Forest disturbance** for S0.5a (default-on, cell-only, same render path, no fetch); Earthquakes also changes points and can restart rings | S0.5a uses Forest if it has visible cells after startup; Earthquakes is the fallback, with ring counts logged separately | S0.5a |
+| R3 | Let each toggle state and each setter update apply before the next, so 20 calls are 20 rebuilds | Wait for the update to apply (next frames + census) between steps | S0.5a, S0.5b |
+| R4 | Make the paused readback block explicit for the polygon comparisons too | Forced-completion block in S0.2 and S0.3 | S0.2, S0.3 |
+| R5 | S0.7 needs tap-to-painted-inspector timings for coverage-cell clicks | Recorded, as §5's latency baseline | S0.7 |
+| R6 | Effect within baseline spread after the repeat → inconclusive at this resolution | Added to the decision rule | §3 decision |
 
 ## 0. Why
 
@@ -73,8 +84,8 @@ The two runs did not record the same viewport, so they are not directly comparab
 - **Hiding:** `.visible = false` on the objects of one kind, then back; nothing removed or disposed.
 
 **Rotation protocol (G2):**
-- Auto-rotate off. Same start pose (`lat −10, lng 25, altitude 2.2`), same warm-up (2 s) per condition.
-- **Time-based sweep:** the camera longitude is a function of elapsed time (e.g. 36°/s), so a slow run covers the same path as a fast one. Window **10 s**, giving ~50–100 frames at today's speeds.
+- Auto-rotate off. Same start pose (`lat −10, lng 25, altitude 2.2`), same warm-up (2 s) per condition; the measured clock and the camera pose start fresh after each warm-up.
+- **Time-based sweep:** camera longitude = start + 36°/s × elapsed, set directly each frame with `pointOfView(…, 0)` (zero transition), at fixed latitude and altitude. Window **10 s** = one full turn, the same intended path every time; a slower window samples fewer poses (~50–100 frames at today's speeds). If p95 or the paired effect is unstable, repeat full sweeps at the same speed. Matched fixed poses only as a follow-up if one view seems to drive a difference.
 - Each comparison runs **A–B–A–B then B–A–B–A** in the same settled tab. If the paired effect is within the spread of the four visible baselines, run the pair again once.
 - A window that crosses a 5-min refresh or any scene-count change is flagged and rerun.
 
@@ -83,14 +94,14 @@ The two runs did not record the same viewport, so they are not directly comparab
 | # | What | Answers |
 |---|---|---|
 | S0.1 | Census; 3 visible rotation windows with frames, render CPU, draw calls; forced-completion block | Q1 baseline |
-| S0.2 | All coverage-polygon objects visible vs hidden, both orders | Q2 |
-| S0.3 | Caps hidden vs all visible; outlines hidden vs all visible (each against the same visible baseline), both orders | Q2 (which half) |
+| S0.2 | All coverage-polygon objects visible vs hidden, both orders; then a separate paused forced-completion block, visible vs hidden | Q2 |
+| S0.3 | Caps hidden vs all visible; outlines hidden vs all visible (each against the same visible baseline), both orders; then the paused forced-completion block for the same conditions | Q2 (which half) |
 | S0.4 | Rings hidden vs visible, both orders. Tests the rings' draw cost only; their animation keeps running (G1) | Q1 control |
 | S0.T | One Chrome Performance trace of a matched visible/hidden pair (Chad starts/stops) | Q1 |
-| S0.5a | **Rebuild through the page's own path:** after settle, toggle Earthquakes off → on (the toggle calls `render()`; it fetches nothing); compare settled on-state census at cycles 0, 1, 5 and 20; confirm snapshot IDs and cell keys unchanged throughout | Q3 |
-| S0.5b | **Setter-only, disposable tab:** pass fresh equivalent polygon objects to `ME.globe().polygonsData()` 20 times; census before/after. Labelled setter-only | Q3 |
+| S0.5a | **Rebuild through the page's own path:** after settle, toggle **Forest disturbance** off → on (default-on, cell-only; the toggle calls `render()` and fetches nothing), if it has visible cells after startup; otherwise Earthquakes, with ring counts logged separately. Let each off and on state apply (next frames + census) before the next toggle. Compare settled on-state census at cycles 0, 1, 5 and 20; confirm snapshot IDs and cell keys unchanged throughout | Q3 |
+| S0.5b | **Setter-only, disposable tab:** pass fresh equivalent polygon objects to `ME.globe().polygonsData()` 20 times, letting each update apply before the next so the 20 calls are 20 rebuilds; census before/after. Labelled setter-only | Q3 |
 | S0.6 | **Natural refresh, 30-min foreground dwell:** checkpoints just before and after each 5-min poll — enabled layers, snapshot IDs, per-layer cell counts and keys, census by type. Then repeat S0.1 | Q3, drift |
-| S0.7 | **Real picking (G4):** real canvas hover then click at listed coordinates: overlap interiors, shared cell edges, a dateline or polar case where data allows, a point over a cell, open globe. Log camera pose, screen and lat/lng, candidate layer/cell IDs, hover winner, inspector winner. Repeat representative cases after a refresh and after an Earthquakes off → on | Q5 |
+| S0.7 | **Real picking (G4):** real canvas hover then click at listed coordinates: overlap interiors, shared cell edges, a dateline or polar case where data allows, a point over a cell, open globe. Log camera pose, screen and lat/lng, candidate layer/cell IDs, hover winner, inspector winner. Record **tap-to-painted-inspector time** for representative coverage-cell clicks (the §5 latency baseline). Repeat representative cases after a refresh and after the S0.5a toggle | Q5 |
 
 **Reading the results:**
 - If geometry counters rise while the scene count is stable, that warrants a retention check before anyone calls it a leak.
@@ -103,6 +114,7 @@ The two runs did not record the same viewport, so they are not directly comparab
 - A forced-completion gain **alone** leaves the rotation bottleneck open and does not by itself justify C1.
 - Growth without input growth (S0.5/S0.6) points to C2.
 - Neither → report, and the next target comes from the trace.
+- An effect still within the visible-baseline spread after the repeat is reported as **inconclusive at this resolution**, not as "no effect".
 
 **Record:** `reviews/2026-11-1x-globe-perf-stage0.md` (real-clock times, environment per block, raw numbers, the script text used), evidence JSON in `reviews/evidence/`.
 
@@ -150,8 +162,6 @@ Neither is production; "go" is enough for each, but each is separate.
 1. `Go: globe performance Stage 0 (measure only, Chad's Chrome, live page, no code change)` — needs Chad at the screen (§3).
 2. `Go: globe performance Stage 1 spike (<candidates from Stage 0>; test tab only, nothing pushed to the page)` — only after Stage 0's record and GPT's read of it.
 
-## 9. For GPT (rev 2)
+## 9. GPT
 
-1. Do §3's protocol and decision rule now cover G1–G5 as you meant them?
-2. Is a 10 s window with a 36°/s time-based sweep a reasonable default, or would you fix the poses differently?
-3. S0.5a toggles Earthquakes (a default-on map layer whose toggle fetches nothing). Any reason another layer is the better choice?
+Rev 2 re-review (relayed by Chad, 11 Nov): §3 covers G1–G5; the proposal review is cleared; recommends Stage 0's separate go. Rev 2.1 applies the run-sheet details (R1–R6). Stage 0 and Stage 1 each still need Chad's own line.
