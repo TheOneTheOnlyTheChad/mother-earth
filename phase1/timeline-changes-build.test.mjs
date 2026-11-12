@@ -102,7 +102,9 @@ for (const [name, text] of [['catalogue', catBytes.toString('utf8')], ['timeline
 // asset versions
 const R1_JS_V = '202611221000', v = (page.match(/timeline\.js\?v=(\d+)/) || [])[1];
 ok('asset version: timeline.js ?v= is new, equals the page build id and the script BUILD', v && v !== R1_JS_V && page.includes(`data-build="${v}"`) && js.includes(`const BUILD = '${v}';`), v);
-ok('asset version: style.css ?v= bumped on all three pages together', ['timeline.html', 'index.html', 'sources.html'].every(f => fs.readFileSync(path.join(ROOT, f), 'utf8').includes(`style.css?v=${v}`)));
+{ // loosened for dustrgb-rc: a later release bumps style.css again, so pin "same on all three pages, and not older than this build" rather than "equal to this build"
+  const sv = ['timeline.html', 'index.html', 'sources.html'].map(f => (fs.readFileSync(path.join(ROOT, f), 'utf8').match(/style\.css\?v=(\d+)/) || [])[1]);
+  ok('asset version: style.css ?v= is the same on all three pages and not older than this build', sv.every(x => x && x === sv[0]) && Number(sv[0]) >= Number(v), sv); }
 
 // =====================================================================================================================
 // 2. the unchanged fixture builds, byte-identical to the committed catalogue (the fixture mechanism itself)

@@ -15,7 +15,8 @@
   const $ = ME.$, esc = ME.esc;
   const tgl = $('tgl-dustrgb'); if (!tgl) return;
   const DR = { META: ME.HUB + '/snapshot/dustrgb/meta', STALE_AFTER_H: 14, UNKNOWN_AFTER_H: 24, REFRESH_MS: 10 * 60e3, AGE_MS: 30e3,
-    ALT: 0.0006, OPACITY: 0.82, TEX: 2048, TEX_PHONE: 1024, OUTLINE: 'rgba(255,255,255,0.75)', OUTLINE_FRAC: 0.004 };
+    ALT: 0.0006, OPACITY: 0.82, TEX: 2048, TEX_PHONE: 1024, OUTLINE: 'rgba(255,255,255,0.9)', OUTLINE_FRAC: 0.006,
+    BUILD_WAIT_MS: 60000 };   // how long to wait for the globe's own picture (the layer borrows the globe's drawing classes from it)
   const st = { on: false, gen: 0, status: 'off', why: null, frame: null, meta: null, meshes: [], refreshFailed: false, lastAttempt: null,
     timer: null, ageTimer: null, loading: false, requests: [], opts: { now: null } };
   const now = () => (st.opts.now ? st.opts.now() : Date.now());
@@ -92,8 +93,8 @@
     const mask = await getFile(frame.mask); if (gen !== st.gen) return null;
     const cv = compose(pic, mask);
     let built = null;
-    for (let i = 0; i < 50 && !built; i++) { built = buildMesh(cv, frame.box); if (built) break; await new Promise(r => setTimeout(r, 100)); if (gen !== st.gen) return null; }
-    if (!built) throw new Error('this browser did not expose what the layer needs');
+    for (const t0 = Date.now(); !built;) { built = buildMesh(cv, frame.box); if (built) break; if (Date.now() - t0 > DR.BUILD_WAIT_MS) break; await new Promise(r => setTimeout(r, 200)); if (gen !== st.gen) return null; }
+    if (!built) throw new Error('the globe has not finished loading its own picture, so the layer cannot be drawn on it');
     return built;
   }
   /** Swap in one step: mesh, frame and labels together. */
@@ -150,7 +151,7 @@
       }
       if (!built || gen !== st.gen || !st.on) { if (built) { built.mesh.geometry.dispose(); built.mesh.material.map.dispose(); built.mesh.material.dispose(); } return; }   // switched off while loading: a late response never paints
       show(f, built); st.status = 'ready'; st.why = null;
-    } finally { st.loading = false; if (gen === st.gen) paint(); }
+    } finally { if (gen === st.gen) { st.loading = false; paint(); } }
   }
   function ageTick() {
     if (!st.on) return;

@@ -86,7 +86,9 @@ async function run(browser, worker, metaStatus) {
 (async () => {
   const cand = await loadWorker(fs.readFileSync(path.join(__dirname, 'worker.js'), 'utf8'), 'cand');
   const ctrl = await loadWorker(execFileSync('git', ['-C', path.join(__dirname, '..'), 'show', '143f531:phase1/worker.js'], { encoding: 'utf8' }), 'ctrl');
-  for (const f of ['index.html', 'app.js']) ok(`page file ${f} unchanged from main 143f531`, fs.readFileSync(path.join(__dirname, '..', f), 'utf8') === execFileSync('git', ['-C', path.join(__dirname, '..'), 'show', '143f531:' + f], { encoding: 'utf8' }));
+  // loosened for dustrgb-rc: index.html gains the Dust RGB card, so only app.js (which reads /status) stays pinned to the 0.6.10 release
+  ok('page file index.html still loads the same app.js build as main 143f531', (m => m && execFileSync('git', ['-C', path.join(__dirname, '..'), 'show', '143f531:index.html'], { encoding: 'utf8' }).includes(m[0]))(fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8').match(/app\.js\?v=\d+/)));
+  for (const f of ['app.js']) ok(`page file ${f} unchanged from main 143f531`, fs.readFileSync(path.join(__dirname, '..', f), 'utf8') === execFileSync('git', ['-C', path.join(__dirname, '..'), 'show', '143f531:' + f], { encoding: 'utf8' }));
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const rowOf = b => (JSON.parse(b).last_runs || []).find(x => x.layer === 'orbital');
   for (const [name, metaStatus] of [['A missing snapshot', 404], ['B usable snapshot + newer failed run', 200]]) {

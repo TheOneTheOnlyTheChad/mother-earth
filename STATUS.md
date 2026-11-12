@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 19:10 UTC (clock reading at write) — **dustrgb-rc candidate built** (hub 0.6.11 job + page layer; branch only; for GPT)
+
+Chad: "Go: build dustrgb-rc on a branch per DUST-RGB-LAYER-PROPOSAL rev 5 (hub job and page layer; no merge, no hub deploy)". **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.
+
+- Packet: `reviews/2026-11-12-dustrgb-rc.md`.
+- Hub: job `dustrgb` behind `DUSTRGB_ENABLED=1`, 06:07 and 18:07 UTC; picture 2048² JPEG + mask 160² PNG; validate, write, read back, then move the pointer; previous pair kept one run; 90 s request limit. `worker.js` 307,660 B `a8e3b51a…f6eb`.
+- Page: `dustrgb.js` 13,251 B `224e0221…fca4`; card, Sources section, credit. "Frame requested" wording; stale 14 h, cleared 24 h.
+- Tests: `dustrgb-hub` 101/101, 12 breaks fail; `dustrgb-ui` 53/53, 14 breaks fail. Regression: 52 passed, 3 failed first run — two release-pinned assertions loosened (packet §8), one `terminator-ui` check failed once and passed on three reruns, cause not found.
+- Real service check 18:42 UTC (browser pane, not the Worker): the hub's validators accept a live picture (672,352 B) and mask (65,156 B, two-valued alpha).
+- Not shown: a real hub run; a real frame on the real globe; iPhone/Safari.
+- Next, each on Chad's own line: deploy 0.6.11 + set the variable; REGISTER entry; page merge.
+
 ## 12 Nov 17:31 UTC (clock reading at write) — **Dust RGB proposal rev 5** (GPT's header probe; "Frame requested" is the supported claim; docs only)
 
 - **GPT (relayed by Chad; GPT's probe, Workers Playground preview, 17:26 UTC, the 16:50 frame, the identical mask request):** `Warning` absent in all four fetch modes (default, forced caching twice with `cf-cache-status: HIT`, `no-store`); full header list recorded by GPT; the two PNG sizes (64,726 and 64,840 B) appeared again for one address. Where the header is dropped is not known.

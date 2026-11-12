@@ -3,7 +3,7 @@
  * EUMETView. Nothing here reaches the network.
  * Run: node --no-warnings phase1/dustrgb-hub.test.mjs
  * BREAK=<name> weakens a copy of worker.js; each must fail:
- *   gate-ignored no-type-check no-readback no-mismatch keep-all move-on-fail any-frame mask-any generic-down refetch-same pointer-early */
+ *   gate-ignored no-type-check no-readback no-mismatch keep-all move-on-fail any-frame mask-any generic-down refetch-same pointer-early no-timeout */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
@@ -16,6 +16,7 @@ const BREAKS = {
   'move-on-fail': ['const body = cur && cur.frame ? { ...cur, last_attempt } :', 'const body = false ? { ...cur, last_attempt } :'],
   'any-frame': ['const fr = [cur.frame, cur.previous].find(f => f && f.id === p[2]);', 'const fr = cur.frame;'],
   'mask-any': ['if (!d || d.w !== spec.w || d.h !== spec.h || !d.alpha || !d.complete)', 'if (!d)'],
+  'no-timeout': [", signal: AbortSignal.timeout(DUSTRGB.TIMEOUT_MS) }", ' }'],
   'generic-down': ["    else if (layer === 'dustrgb') { try { await dustFail(env, ms, 'internal error', 0, note); } catch (_) {} }", ''],
   'refetch-same': ['if (cur && cur.frame && cur.frame.requested_time === T) {', 'if (false) {'],
   'pointer-early': ["  const dir = DUSTRGB.PREFIX + dustKeyOf(T) + '/';", "  const dir = DUSTRGB.PREFIX + dustKeyOf(T) + '/';\n  await putJson(env, DUSTRGB.POINTER, { schema: 1, layer: 'dustrgb', frame: { id: dustKeyOf(T), requested_time: T, picture: { file: 'picture.jpg', key: dir + 'picture.jpg' }, mask: { file: 'mask.png', key: dir + 'mask.png' } }, previous: null, last_attempt: null });"],
@@ -38,7 +39,7 @@ const caps = t => `<WMS_Capabilities><Capability><Layer><Layer queryable="1"><Na
 // ---------- fakes
 function world() {
   const store = new Map(), runs = [], reqs = [];
-  const w = { store, runs, reqs, latest: '2026-11-12T16:50:00Z', capStatus: 200, capBody: null, pic: null, mask: null, warn: undefined, picWarn: undefined, putFail: null, corruptRead: null, throwFetch: false };
+  const w = { store, runs, reqs, latest: '2026-11-12T16:50:00Z', capStatus: 200, capBody: null, pic: null, mask: null, warn: undefined, picWarn: undefined, putFail: null, corruptRead: null, throwFetch: false, throwOn: null, signals: [] };
   const R2 = {
     async put(key, body, opts = {}) { if (w.putFail && key.endsWith(w.putFail)) throw new Error('R2 put failed (test)'); const buf = typeof body === 'string' ? Buffer.from(body) : Buffer.from(body.buffer ? body.buffer.slice(body.byteOffset || 0, (body.byteOffset || 0) + body.byteLength) : body); store.set(key, { buf, opts }); return { key }; },
     async get(key) { const o = store.get(key); if (!o) return null; let buf = o.buf; if (w.corruptRead && key.endsWith(w.corruptRead)) { buf = Buffer.from(buf); buf[buf.length - 3] ^= 0xff; }
@@ -50,7 +51,8 @@ function world() {
   const DB = { prepare(sql) { return { bind(...a) { return { async run() { if (/INSERT INTO collector_runs/.test(sql)) runs.push({ layer: a[0], status: a[3], http: a[4], note: a[7] }); return {}; }, async first() { return null; }, async all() { return { results: [] }; } }; }, async first() { return null; }, async all() { return { results: [] }; }, async run() { return {}; } }; } };
   w.env = { R2, DB, DUSTRGB_ENABLED: '1' };
   w.fetch = async (url, init) => { const u = String(url); if (!u.includes('view.eumetsat.int')) throw new Error('unexpected fetch ' + u);
-    reqs.push(u); if (w.throwFetch) throw new Error('network down (test)');
+    reqs.push(u); w.signals.push(!!(init && init.signal)); if (w.throwFetch) throw new Error('network down (test)');
+    if (w.throwOn && w.throwOn.test(u)) throw new Error('The operation was aborted due to timeout (test)');
     if (/GetCapabilities/.test(u)) return new Response(w.capBody !== null ? w.capBody : caps(w.latest), { status: w.capStatus, headers: { 'content-type': 'text/xml' } });
     const isPic = /image\/jpeg/.test(u); const t = (u.match(/time=([^&]+)/) || [])[1];
     const spec = isPic ? (w.pic || { body: jpeg(2048, 2048, Date.parse(t) / 6e5), type: 'image/jpeg', status: 200 }) : (w.mask || { body: png(160, 160, 6, Date.parse(t) / 6e5), type: 'image/png', status: 200 });
@@ -147,6 +149,9 @@ await failing('served-time header names another frame (mask)', w => { w.warn = '
   const w = await failing('partial write (mask put fails)', w => { w.putFail = 'mask.png'; }, 'mask write failed', async w => ok('E partial write: the orphan picture exists but is not served (its frame is not in the pointer)', w.store.has('dustrgb/frames/20261112T1800Z/picture.jpg') && (await route(w, '/snapshot/dustrgb/20261112T1800Z/picture.jpg')).status === 404));
   w.putFail = null; w.latest = '2026-11-13T05:50:00Z'; await W.JOBS.dustrgb(w.env, at(6) + 864e5); const p = await pointer(w);
   ok('E after a partial write, the next good run publishes, clears last_attempt and removes the orphan', p.frame.id === '20261113T0550Z' && p.last_attempt === null && !w.store.has('dustrgb/frames/20261112T1800Z/picture.jpg'), [...w.store.keys()]); }
+await failing('picture request times out', w => { w.throwOn = /image\/jpeg/; }, 'picture request failed', async (w, b, kb) => ok('E picture times out: nothing written; no mask request follows', [...w.store.keys()].sort().join() === kb && imgReqs(w).length === 3, imgReqs(w)));
+await failing('mask request times out', w => { w.throwOn = /image\/png/; }, 'mask request failed');
+{ const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); ok('E both image requests carry a time limit (an abort signal); the limit is 90 s', imgReqs(w).length === 2 && w.signals.slice(-2).every(Boolean) && W.DUSTRGB.TIMEOUT_MS === 90000, w.signals); }
 await failing('read-back differs (picture)', w => { w.corruptRead = 'picture.jpg'; }, 'picture read-back differs');
 await failing('read-back differs (mask)', w => { w.corruptRead = 'mask.png'; }, 'mask read-back differs');
 { // an uncaught throw goes through guarded(): never the generic writeDown

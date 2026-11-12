@@ -2799,7 +2799,7 @@ const DUSTRGB = {
   MAP: 'https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&layers=mtg_fd:rgb_dust&styles=&crs=EPSG:4326&bbox=-80,-80,80,80',
   LAYER: 'rgb_dust', BOX: { south: -80, west: -80, north: 80, east: 80 },
   PICTURE: { w: 2048, h: 2048, maxBytes: 4 * 1024 * 1024 }, MASK: { w: 160, h: 160, maxBytes: 512 * 1024 },
-  RUN_HOURS_UTC: [6, 18], POINTER: 'dustrgb/current.json', PREFIX: 'dustrgb/frames/',
+  RUN_HOURS_UTC: [6, 18], TIMEOUT_MS: 90000, POINTER: 'dustrgb/current.json', PREFIX: 'dustrgb/frames/',
   CACHE_FILE: 'public, max-age=86400, immutable',
   SOURCE: { product: 'Dust RGB - MTG - 0 degree', collection: 'EO:EUM:DAT:0869', catalogue: 'https://user.eumetsat.int/catalogue/EO:EUM:DAT:0869', licence: 'CC BY 4.0',
     licence_url: 'https://creativecommons.org/licenses/by/4.0/', credit: 'Contains modified EUMETSAT Meteosat data', service: 'EUMETView WMS, layer mtg_fd:rgb_dust' },
@@ -2847,11 +2847,12 @@ const dustServed = w => { const m = /time=(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.\
 /** One file from EUMETView, validated. Returns { ok, buf, bytes, sha256, served, warn } or { ok:false, reason, http }. Reasons are fixed phrases (public). */
 async function dustFetch(what, url, spec) {
   let r;
-  try { r = await fetch(url, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 } }); } catch (e) { return { ok: false, reason: what + ' request failed', http: 0, detail: String(e).slice(0, 160) }; }
+  try { r = await fetch(url, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(DUSTRGB.TIMEOUT_MS) }); } catch (e) { return { ok: false, reason: what + ' request failed', http: 0, detail: String(e).slice(0, 160) }; }
   if (r.status !== 200) return { ok: false, reason: what + ' http error', http: r.status };
   const type = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
   if (type !== spec.type) return { ok: false, reason: what + ' not an image', http: 200, detail: type };   // EUMETView answers a bad TIME with HTTP 200 + XML
-  const buf = await r.arrayBuffer(), u8 = new Uint8Array(buf);
+  let buf; try { buf = await r.arrayBuffer(); } catch (e) { return { ok: false, reason: what + ' request failed', http: 200, detail: String(e).slice(0, 160) }; }   // cut off or timed out mid-body
+  const u8 = new Uint8Array(buf);
   if (!buf.byteLength || buf.byteLength > spec.maxBytes) return { ok: false, reason: what + ' size out of range', http: 200, detail: String(buf.byteLength) };
   if (spec.type === 'image/jpeg') { const d = jpegSize(u8); if (!d || d.w !== spec.w || d.h !== spec.h || u8[u8.length - 2] !== 0xff || u8[u8.length - 1] !== 0xd9) return { ok: false, reason: what + ' not a valid image', http: 200, detail: JSON.stringify(d) }; }
   else { const d = pngInfo(u8); if (!d || d.w !== spec.w || d.h !== spec.h || !d.alpha || !d.complete) return { ok: false, reason: what + ' not a valid image', http: 200, detail: JSON.stringify(d) }; }
