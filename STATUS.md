@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 12:10 UTC (clock reading at write) — **status-notes-rc BUILT on branch @ `3140533`** (code `32107f8`; hub 0.6.10, hub only; Chad's Go line; no merge, no hub deploy) — packet `reviews/2026-11-12-status-notes-rc.md` (on the branch)
+
+- GPT passed proposal rev 2 (projection verified in the SQL diff; route harness must honour selected columns; 0.6.9 control must really return the note). Chad: "Go: build status-notes-rc on a branch per STATUS-RUN-NOTES-PROPOSAL rev 2 (hub only; no merge, no hub deploy)".
+- **Change:** the `/status` `last_runs` SELECT drops `note`; version 0.6.10. worker.js `784939f8…a0da` (293,617 B). No page file changed.
+- **Tests:** status-notes-hub 6/6 (real SQLite D1; marker per row; archive_health FIRMS note at its exact path, redacted; D1 notes preserved); breaks `note-restored` → S2/S3, `drop-http` → S3; 0.6.9 control → S2. status-notes-ui 16/16 (unchanged globe page vs both hubs: missing snapshot → usual message; usable snapshot + newer failed run → previous-file line; identical text; control returned the note).
+- osmc-reliability-hub: two assertions flipped; **its fake D1 now honours the SELECT columns** (it returned `note` whatever was asked). health-hub H8 pinned to the archive_health path. Both fail on 0.6.9, pass on 0.6.10.
+- **Full regression 11:44–12:09 UTC:** 53 run, 52 green, 4 tools skipped; `arts-hub` failed on a single-digit version pattern (rejects 0.6.10), fixed numerically, 54/54.
+- Mac `_review/status-notes-rc/` = `3140533` (324 files, SHA256SUMS match the clone, 12:10 UTC). A first clone attempt into the folder failed (deletes blocked) and was moved to `_to_delete/`.
+- **Next:** GPT reviews the packet; then `Approve: deploy hub 0.6.10 from 3140533 (content only)`; then the merge. Live unchanged: hub 0.6.9, page `12ff4ff`.
+
 ## 12 Nov 11:36 UTC (clock reading at write) — **`/status` run-notes proposal rev 2: hub-only** (GPT's review of rev 1 applied; docs only)
 
 - GPT (relayed by Chad; Mac hash `5e0ae201…6147` verified): scope agreed; **drop the `app.js` edit** — `orbPaint()` calls `ME.orbPanel` only with usable meta, and a missing/invalid snapshot goes to `orbFail(problem)`, so the note branch is never displayed (confirmed in `index.html`). No page step, no page-first order, no cached-page outcome.
