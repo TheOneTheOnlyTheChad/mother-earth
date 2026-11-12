@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 11:36 UTC (clock reading at write) — **`/status` run-notes proposal rev 2: hub-only** (GPT's review of rev 1 applied; docs only)
+
+- GPT (relayed by Chad; Mac hash `5e0ae201…6147` verified): scope agreed; **drop the `app.js` edit** — `orbPaint()` calls `ME.orbPanel` only with usable meta, and a missing/invalid snapshot goes to `orbFail(problem)`, so the note branch is never displayed (confirmed in `index.html`). No page step, no page-first order, no cached-page outcome.
+- Rev 2: hub 0.6.10 only; tests by path with a marker per row (absent from every `last_runs` row; FIRMS note expected redacted at `archive_health.collection.firms.latest_run.note`; H8 pinned there); D1 preservation; projection check or SQL-diff review; break `note-restored`; the unchanged globe page run against the candidate hub (missing snapshot, and usable snapshot + newer failed run without a note).
+- **Not approved:** branch build, hub deploy. Live unchanged: hub 0.6.9, page `12ff4ff`. Lockdown parked.
+
 ## 12 Nov 11:33 UTC (clock reading at write) — **`/status` run-notes proposal rev 1 written** (docs only, on Chad's go) — `docs/concepts/STATUS-RUN-NOTES-PROPOSAL.md`, for GPT
 
 - Chad: "Go: draft the proposal for removing collector run notes from public /status." Scope: drop `last_runs[].note` from the public response only; full notes stay in D1; `/health/*` and collector behaviour outside.
