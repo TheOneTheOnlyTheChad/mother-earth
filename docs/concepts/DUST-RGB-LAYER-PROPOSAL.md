@@ -1,4 +1,4 @@
-# Dust RGB layer (EUMETSAT MTG) — proposal, rev 4 (12 Nov 2026, docs only)
+# Dust RGB layer (EUMETSAT MTG) — proposal, rev 5 (12 Nov 2026, docs only)
 
 **For:** GPT's review, then Chad's decisions (§9). Proposal only: no branch, build, REGISTER filing, hub deploy or page change is approved.
 **Sources:** `docs/research/DUST-LIVE-SOURCE-CHECK.md` rev 2, and the measurements in §6 (browser pane, 12 Nov 2026).
@@ -16,6 +16,10 @@
   - **The frame-time check in rev 3 does not work as written:** the Worker received no `Warning` header. §3a sets out what the hub can and cannot establish, with new measurements in §6e. **This is unresolved and blocks publishing frames.**
   - **A rev 2 finding is corrected:** the "off-grid time returned neither frame" result was confounded (§6e). It is withdrawn as evidence.
   - Cadence twice daily; UTC on the card; "Updated twice daily"; publication through a metadata pointer with a grace period; more tests.
+- **Rev 5 (12 Nov):** GPT's header probe (relayed by Chad) and its review of rev 4.
+  - The `Warning` header was absent from the Worker in all four fetch modes, cached and uncached (§3a).
+  - **The supported claim is "Frame requested".** The pixel-difference safeguard proposed in rev 4 is dropped, on GPT's reasoning.
+  - §3a is rewritten as a settled position with one open door; D9 becomes Chad's wording decision.
 
 ## 1. What it is, in one paragraph
 - **An optional globe layer, off on load.** It paints EUMETSAT's Dust RGB picture from Meteosat Third Generation onto the part of the globe that satellite sees.
@@ -73,27 +77,39 @@ A new collector job, `dustrgb`, gated by a plain variable `DUSTRGB_ENABLED` (abs
 - **No `Warning` header on either image in the cache-bypassed run, nor on the first JPEG response.**
 - Not yet checked from a Worker (GPT): full decode, mask alignment, and collector CPU. The hub is on Workers Paid, so the Free plan's cron CPU budget does not apply; CPU is still measured for the candidate.
 
-### 3a. Establishing the frame time — unresolved
-**What rev 3 assumed:** the hub reads the server's `Warning` header and refuses a mismatch.
-**What is now known (§6e):**
-- **In a browser on EUMETSAT's own site the header is always there.** Twelve image requests and four feature-info requests at 17:16–17:20 UTC all carried it, including the same 160 × 160 mask request GPT made (same size in bytes: 64,840).
-- **From the Worker it was absent** (GPT). Why is not known. Untested possibilities: something between EUMETSAT and the Worker removes it, or EUMETSAT sends it only to some clients.
-- **The response body carries no time.** A feature-info request returns band values only.
-- **Comparing pictures cannot establish the time either.** The same frame, requested repeatedly, comes back in **two different renderings** (§6e). So "identical bytes" proves nothing, and two frames ten minutes apart are not reliably told apart by their pixels at mask size.
+### 3a. The frame time: what the hub can and cannot say
+**The hub cannot confirm which frame EUMETSAT served.**
+- **In a browser on EUMETSAT's own site the `Warning` header naming the served frame is always there:** 16 of 16 responses at 17:16–17:20 UTC (Claude, §6e), including the identical 160 × 160 mask request.
+- **From a Worker it is never there (GPT's probe, 17:26 UTC 12 Nov, Workers Playground preview, the 16:50 frame, the identical request):**
 
-**So, as things stand, the hub can state only this:** it asked for a time taken from EUMETSAT's own list, and received a valid picture. It cannot confirm the server's choice.
+  | Worker fetch mode | `cf-cache-status` | PNG bytes | `Warning` |
+  |---|---|---|---|
+  | Default | DYNAMIC | 64,726 | absent |
+  | Forced caching, first request | HIT | 64,840 | absent |
+  | Forced caching, repeat | HIT | 64,840 | absent |
+  | `cache: 'no-store'` | DYNAMIC | 64,726 | absent |
 
-**Ways to close it (to settle before any frame is published):**
-1. **Find the header from a Worker.** GPT lists every response header the Worker receives for the identical request, with and without Cloudflare's cache. If the header can be obtained, rev 3's check stands: mismatch fails the run, and a missing header is counted separately.
-2. **Say exactly what is known.** The card reads "Frame requested: 12 Nov, 16:50 UTC" with a line in the details: "EUMETSAT's service can substitute the nearest available frame; Mother Earth cannot confirm which frame was served." Honest, and a weaker layer.
-3. **Bound the error instead of removing it.** Substitution, where observed, named an adjacent frame (10 minutes away). The hub can refuse a picture that is not clearly different from the previously published frame 12 hours earlier, which rules out a stale picture but not a neighbour.
-4. **Ask EUMETSAT** how a client should confirm the served frame time (Chad's enquiry, optional).
-- **Claude's recommendation:** try 1 first. If the header cannot be had, 2 with 3, since a ten-minute uncertainty on a twice-daily picture does not mislead a reader, and the card says so.
+  - GPT listed the complete headers received; none names a frame time. The responses carry `server: cloudflare`.
+  - **Where the header is dropped is not known.**
+  - The two byte sizes are the two renderings of §6e, seen again for one identical address.
+- **The response body carries no time** (feature-info returns band values only).
+- **Pictures cannot be compared to establish it:** the same frame comes back in two renderings (§6e).
+
+**The supported claim (GPT, and Claude agrees): "Frame requested".**
+- The hub asks for a time taken from EUMETSAT's own list of available frames and receives a valid picture. That is all it can state.
+- **Card:** "Frame requested: 12 Nov, 18:00 UTC · 5 h old".
+- **Details line:** "Mother Earth asks EUMETSAT for this frame by its time. EUMETSAT's service can return the nearest available frame instead, and does not tell us when it has."
+- **Dropped from rev 4:** refusing a picture that is too similar to the previous one. A second rendering differs from the previous image anyway, and the substitutions observed do not establish a ten-minute limit, so it would bound nothing (GPT).
+- **No claim is made about how far off a substituted frame could be.** In the pane, the header named the requested time on every advertised-time request; that is evidence the service usually serves what is asked, not a guarantee.
+
+**The open door**
+- If a reliable served-time signal is found later (the header from a Worker, or an answer from EUMETSAT's help desk), the label becomes "Frame" and the hub refuses a mismatch. The metadata file carries a field for the served time, empty until then.
+- An enquiry to EUMETSAT is optional and Chad's to send.
 
 ## 4. What moving it to the hub settles
 | GPT's open question (rev 2 review) | Browser-direct (rev 2) | Hub-collected (rev 3) |
 |---|---|---|
-| Is the picture the frame the card names? | The page cannot read the server's stated time. | **Not settled (§3a).** The Worker did not receive the server's stated time either. |
+| Is the picture the frame the card names? | The page cannot read the server's stated time. | **Not confirmable (§3a).** The card says "Frame requested" and explains why. |
 | Can a usable image be fetched at a useful size? | Large frames were slow and variable for the reader. | The hub waits; readers get a stored file from the hub. |
 | Request limits at public traffic | Unknown headroom, shared per address. | At most six requests a day in total. |
 | A week-long browser cache on images | A risk for default-time requests. | Each stored frame has its own address. |
@@ -104,8 +120,7 @@ A new collector job, `dustrgb`, gated by a plain variable `DUSTRGB_ENABLED` (abs
 ## 5. What the reader sees
 **Card** (Optional layers, after Ocean heat): heading "Dust RGB imagery", evidence tag **Observed**, described as "a false-colour infrared composite". One switch.
 - **Off:** "Off. Switch on to load the latest Dust RGB frame."
-- **On:** **"Frame 12 Nov, 18:00 UTC · 5 h old"**, "Meteosat (MTG) at 0°", and **"Updated twice daily."** UTC, to match the globe (D7, GPT).
-  - The word before the time depends on §3a: "Frame" if the time is confirmed, "Frame requested" if it is not.
+- **On:** **"Frame requested: 12 Nov, 18:00 UTC · 5 h old"**, "Meteosat (MTG) at 0°", and **"Updated twice daily."** UTC, to match the globe (D7, GPT). The wording is §3a's.
 - **Time and picture change together:** a newer frame is fetched and decoded in the background, and only then are the texture, the mask and the timestamp line swapped in one step.
 - **States** (the page's existing words), from the frame's age against the cadence:
   - **current:** younger than one run interval plus a margin;
@@ -243,7 +258,7 @@ Whole-world request, transparent PNG, 720 × 360 (0.5° per pixel):
 
 ## 8. Build shape (for a later Go; not requested now)
 **Order**
-1. **Settle §3a** (how the frame time is established). No frame is published before this.
+1. **Chad's decision on §3a's wording (D9).**
 2. **Hub:** the `dustrgb` job, the two routes, a `/status` row, the `DUSTRGB_ENABLED` gate, version bump. Outside history and the health monitors for the first release.
 3. **Page:** new file `dustrgb.js`, the card, scoped styles, Sources section. Painted by the Ocean Heat method: a texture on a sphere just above the surface, limited to the frame's box, masked to its footprint, partly transparent.
 4. **REGISTER** entry on its own line.
@@ -252,7 +267,7 @@ Whole-world request, transparent PNG, 720 × 360 (0.5° per pixel):
 - **Hub** (real job code, EUMETSAT stubbed, faked clock):
   - a good run publishes picture, mask and metadata that agree;
   - unchanged latest time → no image request;
-  - frame-time handling exactly as §3a is settled, with a stated-time mismatch and a missing header counted separately;
+  - the metadata records the requested time and leaves the served-time field empty; if a `Warning` header ever does arrive, a mismatch fails the run, and its presence or absence is logged per run;
   - **a bad mask (wrong type, wrong size, undecodable) → nothing published, pointer unchanged;**
   - **a partial write (picture stored, mask write fails, or the read-back differs) → pointer unchanged, the orphan cleaned up on the next run;**
   - the previous pair is still served for one run after a swap, then deleted;
@@ -287,4 +302,4 @@ Whole-world request, transparent PNG, 720 × 360 (0.5° per pixel):
 | **D6 Policy record** | GPT's labelled reading of Data Policy Articles 4–6 and Annex II, beside the product listing | GPT: ready as written |
 | **D7 Times on the card** | UTC, "Updated twice daily", frame date, time and age | GPT's recommendation; Chad to confirm |
 | **D8 Reachability** | answered by GPT's Playground test; the production probe is dropped | closed |
-| **D9 Frame time (new)** | settle §3a before publishing: first look for the header from a Worker; failing that, "Frame requested" wording with a stale-picture guard | **open; blocks publishing** |
+| **D9 Frame time** | **"Frame requested"** with the details line in §3a; no pixel safeguard; an EUMETSAT enquiry optional | GPT and Claude agree; **Chad to decide** |

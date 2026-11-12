@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 17:31 UTC (clock reading at write) — **Dust RGB proposal rev 5** (GPT's header probe; "Frame requested" is the supported claim; docs only)
+
+- **GPT (relayed by Chad; GPT's probe, Workers Playground preview, 17:26 UTC, the 16:50 frame, the identical mask request):** `Warning` absent in all four fetch modes (default, forced caching twice with `cf-cache-status: HIT`, `no-store`); full header list recorded by GPT; the two PNG sizes (64,726 and 64,840 B) appeared again for one address. Where the header is dropped is not known.
+- GPT agrees with withdrawing the off-grid conclusion, and recommends dropping rev 4's pixel-difference safeguard (a second rendering differs anyway; no ten-minute limit is established).
+- `docs/concepts/DUST-RGB-LAYER-PROPOSAL.md` rev 5: §3a rewritten: the hub cannot confirm the served frame; the card says **"Frame requested: … UTC"** with a details line; the metadata keeps an empty served-time field for a future signal. D9 is now Chad's wording decision.
+- Day log healthy at 17:24 UTC (5 rows; header present in the pane on each fetched frame). 2-minute sampler complete (16 readings).
+- **Not approved:** branch, build, REGISTER, hub deploy, page change. Live unchanged: hub 0.6.10, page `12ff4ff`.
+
 ## 12 Nov 17:22 UTC (clock reading at write) — **Dust RGB proposal rev 4** (GPT's Worker test; frame-time check unresolved; a rev 2 finding withdrawn; docs only)
 
 - **GPT (relayed by Chad; GPT's test, not Claude's):** from a Cloudflare Workers Playground preview (no production deploy, no storage write) the capabilities, a 2048 JPEG (670,624 B, 10.8 s) and the 160 PNG mask (64,840 B, 2.0 s) all returned HTTP 200. **No `Warning` header on the images.** Reachability is answered; the production probe is dropped.
