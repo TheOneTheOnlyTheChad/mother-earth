@@ -2,6 +2,14 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 12 Nov 2026
+
+## 12 Nov 01:41 UTC (clock reading at write) — **Fires wording seen live in the real header-only state; hub 0.6.8 clean overnight** (read-only; Chad asked for the status)
+
+- **Fires card, live page, 01:40:59 UTC (pane):** state UNKNOWN, count "–", "NASA FIRMS · VIIRS NOAA-20 · world · retrieved 10 min ago · Today’s detections aren’t available yet.", tooltip the same sentence, "Records withheld: records are from a different collector run (records 23:45 UTC, counts 01:30 UTC) — counts shown alone". This closes the "not yet seen live" item from the 11 Nov 17:44 entry. D1: 7 firms runs since 00:00 UTC logged down with the header-only note (the expected daily state).
+- **Hub 0.6.8 since the 19:38:18 UTC deploy (D1, read 01:40 UTC):** drifters 6 runs, 6 ok; usgs 73/73; swpc 6/6; co2 6/6; forest 12/12; ships 11/11; orbital 3/3; seaice 1/1; firms 17 ok + the 7 header-only. No buoy failure yet, so the new fallback has not run on production.
+- **Open, Chad's:** delete branch `osmc-reliability-rc` (still on GitHub); thread close-out (START-HERE §9) not yet done — Mac `_review/` holds `osmc-reliability-rc` and `osmc-reliability-rc-r2`.
+
 # 11 Nov 2026
 
 ## 11 Nov 20:12 UTC (clock reading at write) — **Hub 0.6.8: first scheduled runs all ok** (read-only, D1 via the connector, read ~20:12 UTC)
