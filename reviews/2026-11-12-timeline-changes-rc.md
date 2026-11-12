@@ -4,6 +4,8 @@
 
 Proposal: `docs/concepts/TIMELINE-INBOX-AND-CHANGES-PROPOSAL.md` rev 2.1 (main). **Branch only.** Nothing is merged, uploaded, deployed or released. Production is unchanged: hub 0.6.8, page merge `7c3aa22`.
 
+> **Rev 2 (code `eed6c28`, 12 Nov 10:56 UTC commit time) supersedes the `timeline.js` hash, the browser-suite counts and §3.5 below. See §9.** §1–§8 are kept as the rev 1 record GPT reviewed at `fe4cf18`; the rollback note in §8 is corrected in place and marked.
+
 ## 1. Candidate
 
 Code commit `9f31fb6` (09:51 UTC commit time; branched from main `95ffad0`). This packet is a later commit on the same branch; the files below are unchanged after `9f31fb6`.
@@ -122,4 +124,55 @@ What the browser suite covers, by GPT's points:
 2. `Approve: deploy hub 0.6.9 from <final branch commit> (content only)` → live RC from the Pages origin.
 3. `Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)`.
 
-**Rollback:** page = revert the merge (both pins kept, so cached R2 pages keep their axis). Hub = 0.6.8 `85737a48…c427`, a separate decision: it removes the R2 route, and cached R2 pages fall back to the static list.
+**Rollback** *(wording corrected in rev 2, GPT)*: page = revert the merge, keeping both pins. That preserves the axis **only for a reader who still holds a matched R2 page and R2 script** (both cached, or neither re-fetched). A reader whose cached R2 page has to fetch `timeline.js` again receives the reverted script; that mixed pair fails the build check and shows the static list until the page is reloaded. Fresh loads get the R1 page and R1 catalogue. Hub = 0.6.8 `85737a48…c427` is a separate decision: it removes the R2 route, and every cached R2 page falls back to the static list.
+
+## 9. Rev 2 — after GPT's review of `fe4cf18` (12 Nov 2026)
+
+**GPT's review (relayed by Chad):** hold the upload, deploy and merge lines pending a focused branch fix.
+- Accepted: the `entries` and `records` lists and the `releases` list (§3.1–§3.2); the guarded focus retry and the desktop Back behaviour; the narrowed privacy check (no private inbox id or path found in the shipped page, script, public changes data or R2 catalogue; the public proposal filename in the script comment is fine).
+- GPT's independent checks passed: 318 manifest entries, generator 45/45, hub 73/73, the exact candidate's static fallback, the preview's five axis marks; the Worker diff limited to the version and the Timeline pin and current metadata.
+- **Defect (GPT, reproduced on desktop and at 390×844 in Chrome, no reload):** Open End-Triassic → Changed in … → Open the entry → Changed in … → Back ×3. The third Back reopened the original entry but focused its heading instead of "Changed in …". Cause: rev 1 kept **one** jump in page memory (`jump`), so the second jump overwrote the first one's return target.
+- Asked for: the return target stored with each jump's history state; explicit transition data instead of inferring direction from numeric history keys across reloads; the repeated-jump regression and a reload-with-Forward-history case; the terminator result kept as intermittent with cause unverified; the rollback note qualified.
+
+**The fix (`timeline.js` only; `eed6c28`)**
+- **Each jump's history state carries its own return target:** `{ change, k, p, from: { entryK, link } }`. Back onto an entry reads the link from **the state being left**, so an older jump restores its own link. The single in-memory `jump` is gone.
+- **Explicit transition data:** every state the page pushes records `p`, the key of the history entry it was pushed from; entry states also record `oid`, the id of the control that opened them. "Back from an entry that was opened from this record" is now `left.entry && left.p === st.k`, read from the two states. **No rule compares the size of keys.**
+- **`at`** holds the state of the history entry the page is on. It starts from `history.state`, so it survives a reload; it is updated on every push, replace and `popstate`, and on `hashchange` (a plain fragment link adds an entry without `pushState`).
+- **Keys are unique across reloads of the tab:** they start from the clock, never below a key already in use. Rev 1's §3.5 limit (a possible misjudged direction after a reload in mid-history) no longer applies; that paragraph is superseded.
+- Unchanged: `closeVisual()`, the focus retry, the desktop panel behaviour, validation, every other file.
+
+**Hashes (rev 2).** Only `timeline.js` changed among served files:
+
+| File | sha256 |
+|---|---|
+| `timeline.js` | `713ecd4fad97908addc40d5767c961e76ec078e59b7523b61f2d8456810d8fad` (29,113 B) |
+| `timeline.html` | `2f5a246c31ac56f75d58e89ad6fa30d3f3c7b353a8681243420cda0a8e86fda5` (unchanged) |
+| `style.css` | `e48b3fc067ea755848fa9bfc822d7074743485e7ac74a9d134c48e2514febc69` (unchanged) |
+| `index.html` | `5d2d284c934628fb58f05d3a2d89da6b72b92b714f0cf32690b447539fef43aa` (unchanged) |
+| `sources.html` | `5c3e4a7e7dc00087c572ea0e2262f26bfd7f467a7d2fa25c0b23cf01f267f937` (unchanged) |
+| `phase1/worker.js` | `3e791a5c7ea501ac89c87e355aef1defed81456ef5bc6d80a0f8de1750d1c49d` (293,542 B, unchanged) |
+| `phase1/timeline/catalogue/tl-2026-11-R2.json` | `2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356` (18,120 B, unchanged) |
+
+**Release date rechecked at 10:56 UTC, 12 Nov:** `BUILD.json` still says release_date 2026-11-12, and the generator's `--check` passes on the committed page, catalogue and script build. The date holds only if the page is released today (latest start 22:00 UTC); otherwise it is rebuilt before any upload and the catalogue hash, the hub pin and `timeline.html` change. **The hashes must be rechecked again immediately before any approval line is acted on.**
+
+**Tests (rev 2, on `eed6c28`)**
+- **`timeline-changes-ui` 173 / 173** (was 135). New block F2, at 390×844 and 1280×860:
+  - GPT's sequence with all three Backs and three Forwards;
+  - reload on the entry with Forward history kept → Forward reaches the record, Back focuses the link;
+  - reload while on the record's history entry → "Open the entry" and Back, then Back to the entry with focus on the link;
+  - reload on an entry that was opened from the record → Back closes it onto the record's opener, Back again restores the original entry and its link;
+  - a plain fragment link after the jump does not disturb the return target.
+- **Breaks, each fails (14):** `single-jump-memory` 8 (rev 1's defect, re-created: the failures are exactly "Back 3" and the three reload cases, at both sizes) · `no-return-target` 20 · `fragment-only-link` 38 · `back-loses-entry` 20 · `close-handler-reused` 10 · `no-focus` 16 · `no-schema2-validate` 12 · `guard-off` 2 · `stale-js-version` 1 · `dropped-anchor` 3 · `review-date-from-release` 2 · `review-date-from-latest-source` 1 · `old-value-hidden` 3 · `snapshot-by-key` 3.
+- **`timeline-ui` 585 / 585.** Two of its break anchors pointed at lines this fix rewrote (`close-keeps-fragment`, `shortcut-fragment`); they were repointed, and all 12 breaks were rerun and fail (`script-only` fails with several failures and then stops on an exception, as it also does without this fix).
+- Rerun on `eed6c28` and green: `timeline-axis` 96, `timeline-changes-build` 45, `timeline-catalogue-hub` 73, `desktop-overflow` 112, `mobile-pass` 131, `terminator-ui` 19.
+- **Not rerun in full:** the other 44 suites. The change since the full run at `9f31fb6` is `timeline.js` and two test files; no other page loads `timeline.js`.
+- **`terminator-ui`:** still recorded as an intermittent failure (18 / 19 once in the full run), **cause unverified**.
+
+**Still not done:** live checks, Worker CPU, real phone, Safari, screen reader. Focus behaviour is asserted in headless Chromium only; GPT's reproduction was in Chrome.
+
+**For GPT (rev 2):** does the repeated-jump sequence now behave correctly in your Chrome, on desktop and at 390×844? Mac `_review/timeline-changes-rc-r2/` (exact, `SHA256SUMS`) and `_review/timeline-changes-rc-r2-preview/`.
+
+**Approval lines, updated (none given):**
+1. `Approve: upload ref/timeline/tl-2026-11-R2.json (complete-file sha256 2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356, 18,120 B) to R2`
+2. `Approve: deploy hub 0.6.9 from <final branch commit> (content only)` → live RC from the Pages origin.
+3. `Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)`.
