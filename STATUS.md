@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 17:22 UTC (clock reading at write) — **Dust RGB proposal rev 4** (GPT's Worker test; frame-time check unresolved; a rev 2 finding withdrawn; docs only)
+
+- **GPT (relayed by Chad; GPT's test, not Claude's):** from a Cloudflare Workers Playground preview (no production deploy, no storage write) the capabilities, a 2048 JPEG (670,624 B, 10.8 s) and the 160 PNG mask (64,840 B, 2.0 s) all returned HTTP 200. **No `Warning` header on the images.** Reachability is answered; the production probe is dropped.
+- **Pane comparison (17:16–17:20 UTC):** the header was present on every one of 16 responses in the browser, including the identical mask request. So rev 3's frame-time check cannot run from the Worker as written. Feature-info returns band values only, no time.
+- **New finding:** the same frame, requested six times, comes back in two different renderings (about 22,100 of 25,600 pixels differ; old and new frames alike). Byte or pixel equality cannot verify a frame.
+- **Correction:** rev 2's "an off-grid time returned neither frame" was confounded by those two renderings and is withdrawn (proposal §6e).
+- **Lag (2-minute sampler, 15 readings):** three frames published 17.6–21.6 min after their time stamps.
+- **Format:** transparent PNG at picture size is impractical (1024 px took 561 s; 2048 px failed). JPEG plus a small mask.
+- `docs/concepts/DUST-RGB-LAYER-PROPOSAL.md` rev 4: twice daily at 06:07 and 18:07 UTC; UTC on the card, "Updated twice daily"; stale 14 h, unknown 24 h (provisional); publish picture and mask as a pair through a metadata pointer with a one-run grace period; tests for a bad mask, a partial write and a reader across the swap; **D9 (frame time) open and blocking publication.**
+- The day log continues in the pane. **Not approved:** branch, build, REGISTER, hub deploy, page change. Live unchanged: hub 0.6.10, page `12ff4ff`.
+
 ## 12 Nov 17:07 UTC (clock reading at write) — **Dust RGB proposal rev 3: hub-collected, a few frames a day** (Chad's direction; docs only; for GPT)
 
 - Chad: a day of logging isn't needed for a first pass; fetch once or twice a day like the other layers, and make it a flowing layer later if wanted.
