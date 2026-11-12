@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 02:48 UTC (clock reading at write) — **Direction change (Chad): Mother Earth becomes a private control centre; migration proposal rev 1 written** (docs only; nothing changed)
+
+- **D1 decided by Chad:** the repository, the working record, the dashboard and general hub access are to be private, limited to Chad and the build and review workflows he authorises. Narrow allowances: the eight UptimeRobot health checks and the authenticated ships ingest. Products built from Mother Earth can have their own public pages and data endpoints where he chooses; kept at design level until a first product has a concrete data requirement.
+- **Separate decisions, not taken:** the future code licence; any cleanup of published history. Previously published copies are outside the lockdown.
+- **Proposal rev 1** for GPT, then Chad: `research/lockdown/2026-11-12-claude/LOCKDOWN-MIGRATION-PROPOSAL.md` in the Mac folder, and `claude/concepts/LOCKDOWN-MIGRATION-PROPOSAL.md` in the Claude Project (sha256 `ebefa16d…c283`). It is **not** filed in this repo, which is still public.
+- **Not approved:** research, any account, repository, hosting, licence or production change. The first two steps the proposal asks for are read-only (confirmations; audit of what was already public), each on Chad's own go.
+- Also this session: Chad is registering a domain separately.
+
 ## 12 Nov 01:49 UTC (clock reading at write) — **Thread close-out (START-HERE §9): Fires wording + OSMC reliability thread**
 
 - Mac `_review/` emptied 01:44:45 UTC (Mac clock): `osmc-reliability-rc` and `osmc-reliability-rc-r2` moved to `_to_delete/20261112T014445Z/` (313 files each) for Chad to empty.
