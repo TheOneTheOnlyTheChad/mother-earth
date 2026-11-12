@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 09:21 UTC (clock reading at write) — **Timeline inbox CREATED; TL-IN-0001 logged; review snapshot 1 frozen for GPT** (docs only, on Chad's Go line)
+
+- Chad: "Go: create the Timeline inbox (Mac research/timeline-inbox/ + Project) and log TL-IN-0001 (docs only)".
+- **Inbox** created in the Mac folder `research/timeline-inbox/` and mirrored to the Claude Project: README (rules), index, the item, evidence record 1 and review snapshot 1. All five Mac files hash-checked against the written copies at 09:21:28 UTC (Mac clock). **Its contents are not in this repo.**
+- **TL-IN-0001** (GPT's 10 Nov "extinction horizon" wording note): logged, triaged, **in evidence review**. The evidence record is an editorial check against the He et al. 2020 passage already in the Big Five research packet (no source opened; no date moves).
+- **Review snapshot 1** (frozen; the reference for approvals): sha256 `d7b895c5b0a5361e06ebbd05dacedd0a3727e27050ff5622b9f9938f2a405d8d`. Evidence record sha256 `fe176e16…d8c9`.
+- **Open point carried to GPT:** the packet's recorded excerpt says "In all sections" and gives no count; "three" is in the released R1 text and in GPT's review, but no excerpt on record states it. The snapshot offers the wording with "three" (option A) and without (option B).
+- **Next:** GPT reviews the snapshot. Then Chad's branch-build line naming the snapshot's sha256 (proposal §9 step 3). **Not approved:** branch build, R2 upload, hub deploy, page release. Live unchanged: hub 0.6.8, page `7c3aa22`.
+
 ## 12 Nov 09:18 UTC (clock reading at write) — **Timeline T1/T4 proposal rev 2.1** (GPT's re-check of rev 2 applied; docs only)
 
 - GPT (relayed by Chad): rev 2's sha256 verified; states, the three dates, the reduced validator, the 22:00 UTC cutoff and the phone Back behaviour agreed; **the private inbox setup is ready for Chad's docs-only Go**; C1–C5 remain Chad's. A docs re-check.
