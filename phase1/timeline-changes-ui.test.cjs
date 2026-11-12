@@ -9,7 +9,8 @@
  * Run:    node phase1/timeline-changes-ui.test.cjs [base-url]      (static server on the repo, default http://127.0.0.1:8899)
  *         needs commits cc91165 and 95ffad0 in the clone: git fetch --depth=400 origin main
  * Breaks (each must make the suite fail):
- *   BREAK=fragment-only-link | back-loses-entry | close-handler-reused | no-focus | no-schema2-validate | guard-off |
+ *   BREAK=fragment-only-link | back-loses-entry | close-handler-reused | no-focus | single-jump-memory | no-return-target |
+ *         no-schema2-validate | guard-off |
  *         stale-js-version | dropped-anchor | review-date-from-release | review-date-from-latest-source |
  *         old-value-hidden | snapshot-by-key
  */
@@ -37,7 +38,12 @@ const T = 'e-big5-end-triassic', LINK = `${T}-chg-${REV}-1`, REC = `change-${REV
 // ---- breaks on the served script / page
 const JS = (() => {
   if (BREAK === 'fragment-only-link') return must(JS0, "  const rec = $(a.dataset.change); if (!rec) return;   // no such record: the plain link is left to the browser", "  return;");
-  if (BREAK === 'back-loses-entry') return must(JS0, "  history.pushState({ change: a.dataset.change, k }, '', '#' + a.dataset.change); here = k;", "  history.replaceState({ change: a.dataset.change, k }, '', '#' + a.dataset.change); here = k;");
+  const PUT = "  put({ change: a.dataset.change, k: ++seq, p: at ? at.k : 0, from: from !== null ? { entryK: from, link: a.id } : null }, '#' + a.dataset.change);";
+  const BACKL = "const l = left && left.change && left.from && left.from.entryK === st.k ? $(left.from.link) : null;";
+  if (BREAK === 'back-loses-entry') return must(JS0, PUT, PUT.replace('  put(', '  swap('));
+  // the defect GPT found in fe4cf18: ONE remembered jump in page memory instead of a return target stored with each jump
+  if (BREAK === 'single-jump-memory') return must(must(JS0, PUT, PUT + ' window.__j = from !== null ? { entryK: from, link: a.id } : null;'), BACKL, 'const l = window.__j && window.__j.entryK === st.k && left && left.change ? $(window.__j.link) : null;');
+  if (BREAK === 'no-return-target') return must(JS0, PUT, PUT.replace('from: from !== null ? { entryK: from, link: a.id } : null', 'from: null'));
   if (BREAK === 'close-handler-reused') return must(JS0, "  if (from !== null && isPhone()) closeVisual();", "  if (from !== null && isPhone()) userClose();");
   if (BREAK === 'no-focus') return must(JS0, "function reveal(rec) { rec.scrollIntoView({ block: 'start' }); rec.focus({ preventScroll: true }); }", "function reveal(rec) { rec.scrollIntoView({ block: 'start' }); }");
   if (BREAK === 'no-schema2-validate') return must(JS0, "  // schema 2: the release, each entry's own review date, and the change records", "  return null;");
@@ -262,6 +268,58 @@ function fixture(edit) {
     ok(`${tag}: no script error`, errs.length === 0, errs);
     } catch (e) { ok(`${tag}: the Back/Forward sequence stays on the page`, false, String(e).slice(0, 200)); }
     await c.close();
+  }
+
+  // ================= F2. repeated jumps (GPT's sequence, fe4cf18 review), and reloads: every jump restores ITS OWN link
+  for (const [w, h] of [[390, 844], [1280, 860]]) {
+    const tag = `F2 ${w}`, phone = w <= 720; const errs = [];
+    const fresh = async () => { const c = await ctx({ viewport: { width: w, height: h } }); const p = await c.newPage(); p.on('pageerror', e => errs.push(String(e)));
+      await p.goto(BASE + '/timeline.html'); await settle(p); await p.click(`#card-${T} .ctitle a`); await wait(p); return [c, p]; };
+    const back = async p => { await p.goBack(); await wait(p); return st(p); }, fwd = async p => { await p.goForward(); await wait(p); return st(p); };
+    const reload = async p => { await p.reload(); await settle(p); await wait(p); return st(p); };
+    let c, p, s;
+    try {
+      // Open End-Triassic → Changed in … → Open the entry → Changed in … → Back ×3 (no reload)
+      [c, p] = await fresh();
+      await p.click('#' + LINK); await wait(p); await p.click('#' + OPEN); await wait(p); await p.click('#' + LINK); await wait(p); s = await st(p);
+      ok(`${tag} repeated: second jump lands on the record, focused`, s.active === REC && s.hash === '#' + REC, s);
+      s = await back(p); ok(`${tag} repeated: Back 1 → entry open, focus on "Changed in …"`, s.open && s.entry === T && s.active === LINK, s);
+      s = await back(p); ok(`${tag} repeated: Back 2 → the change record's entry, entry closed, focus on "Open the entry"`, !s.open && s.hash === '#' + REC && s.active === OPEN, s);
+      s = await back(p); ok(`${tag} repeated: Back 3 → the ORIGINAL entry open again, focus on "Changed in …" (not its heading)`, s.open && s.entry === T && s.hash === '#' + T && s.active === LINK, s);
+      s = await fwd(p); ok(`${tag} repeated: Forward → record, focused${phone ? ', sheet closed' : ''}`, s.active === REC && (phone ? !s.open && s.inert === 0 : true), s);
+      s = await fwd(p); ok(`${tag} repeated: Forward → the entry opened from the record`, s.open && s.entry === T && s.hash === '#' + T, s);
+      s = await fwd(p); ok(`${tag} repeated: Forward → the second jump's record, focused`, s.active === REC && s.hash === '#' + REC, s);
+      await c.close();
+      // reload on the entry with Forward history: Forward still reaches the jump, and Back still finds its link
+      [c, p] = await fresh();
+      await p.click('#' + LINK); await wait(p); await back(p); s = await reload(p);
+      ok(`${tag} reload on the entry (Forward history kept): the entry is open again`, s.open && s.entry === T && s.hash === '#' + T, s);
+      s = await fwd(p); ok(`${tag} reload → Forward: the change record, focused${phone ? ', sheet closed, nothing inert' : ''}`, s.active === REC && s.hash === '#' + REC && s.rec.inView && (phone ? !s.open && s.inert === 0 && !s.locked : true), s);
+      s = await back(p); ok(`${tag} reload → Forward → Back: entry open, focus on "Changed in …"`, s.open && s.entry === T && s.active === LINK, s);
+      await c.close();
+      // reload while ON the jump's history entry: Back still reopens the entry and focuses the stored link
+      [c, p] = await fresh();
+      await p.click('#' + LINK); await wait(p); s = await reload(p);
+      ok(`${tag} reload on the record: still there, nothing open or inert`, s.hash === '#' + REC && !s.open && s.inert === 0 && !s.locked && s.rec.inView, s);
+      await p.click('#' + OPEN); await wait(p); s = await back(p);
+      ok(`${tag} reload on the record → Open the entry → Back: closed, focus on "Open the entry"`, !s.open && s.hash === '#' + REC && s.active === OPEN, s);
+      s = await back(p); ok(`${tag} reload on the record → Back: the entry opens, focus on "Changed in …"`, s.open && s.entry === T && s.hash === '#' + T && s.active === LINK, s);
+      await c.close();
+      // reload on an entry that was opened FROM the record: Back closes it and returns to the record's opener
+      [c, p] = await fresh();
+      await p.click('#' + LINK); await wait(p); await p.click('#' + OPEN); await wait(p); s = await reload(p);
+      ok(`${tag} reload on the entry opened from the record: open`, s.open && s.entry === T, s);
+      s = await back(p); ok(`${tag} … → Back: closed, on the record's entry, focus on "Open the entry"`, !s.open && s.hash === '#' + REC && s.active === OPEN && s.inert === 0, s);
+      s = await back(p); ok(`${tag} … → Back: the original entry, focus on "Changed in …"`, s.open && s.entry === T && s.active === LINK, s);
+      await c.close();
+      // a plain fragment link in between does not confuse the return target
+      [c, p] = await fresh();
+      await p.click('#' + LINK); await wait(p); await p.evaluate(() => { location.hash = '#dated'; }); await wait(p);
+      s = await back(p); ok(`${tag} plain fragment after the jump → Back: on the record's entry`, s.hash === '#' + REC, s);
+      s = await back(p); ok(`${tag} … → Back: the entry, focus on "Changed in …"`, s.open && s.entry === T && s.active === LINK, s);
+      await c.close();
+    } catch (e) { ok(`${tag}: the sequence stays on the page`, false, String(e).slice(0, 200)); if (c) await c.close().catch(() => {}); }
+    ok(`${tag}: no script error`, errs.length === 0, errs);
   }
 
   // ================= G. fixture: a partial re-check (three different dates in three places)

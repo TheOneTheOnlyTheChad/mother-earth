@@ -64,9 +64,13 @@ function setX(sec, on) { const btn = sec.querySelector('.xbtn'), b = sec.querySe
 const xSection = (id, x) => x ? $(`${id}-${x}`) : null;
 
 let cur = null;               // {id, x, k, direct} of the open entry
-let seq = (history.state && history.state.k) || 0;   // keys keep rising across a reload of this history entry
-let here = (history.state && history.state.k) || 0;  // key of the history entry we are on
-let jump = null;              // {entryK, changeK, link}: the last "Changed in …" jump (page memory only)
+// History keys are unique across reloads of this tab (they start from the clock, never below a key already in use), and
+// every state we push records p, the key of the entry it was pushed FROM. Direction and return targets are read from
+// that stored data (and from the state being left), never inferred from the size of a key or from page memory.
+let seq = Math.max(Date.now(), (history.state && history.state.k) || 0);
+let at = history.state || null;   // the state of the history entry we are on (survives a reload: it IS history.state)
+const put = (st, hash) => { history.pushState(st, '', hash); at = st; };
+const swap = (st, url) => { history.replaceState(st, '', url); at = st; };
 const openers = new Map();    // history key -> the control that opened it (page memory only)
 const isPhone = () => innerWidth <= PHONE;
 const cardTitle = id => { const a = document.querySelector(`#card-${CSS.escape(id)} .ctitle a`); return a && a.offsetParent ? a : null; };
@@ -122,9 +126,8 @@ document.addEventListener('click', ev => {
   ev.preventDefault();
   const from = cur && !detail.hidden ? cur.k : null;
   if (from !== null && isPhone()) closeVisual();
-  const k = ++seq;
-  history.pushState({ change: a.dataset.change, k }, '', '#' + a.dataset.change); here = k;
-  jump = from !== null ? { entryK: from, changeK: k, link: a.id } : null;
+  // the jump's own history entry carries its return target: the entry it left and the link that was used
+  put({ change: a.dataset.change, k: ++seq, p: at ? at.k : 0, from: from !== null ? { entryK: from, link: a.id } : null }, '#' + a.dataset.change);
   reveal(rec);
 });
 
@@ -137,14 +140,14 @@ document.addEventListener('click', ev => {
     // already open: switching title/shortcut UPDATES the open history entry (no new entry), keeps its key and
     // direct flag; focus on close then returns to this, the most recently used card control
     openers.set(cur.k, a);
-    history.replaceState({ entry: id, x, opener, direct: cur.direct, k: cur.k }, '', '#' + id); here = cur.k;
+    swap({ entry: id, x, opener, oid: a.id || null, direct: cur.direct, k: cur.k, p: history.state.p || 0 }, '#' + id);
     cur = { id, x, k: cur.k, direct: cur.direct };
     if (show(id, x)) focusHeading(id);
     return;
   }
   const k = ++seq;
   openers.set(k, a);
-  history.pushState({ entry: id, x, opener, k }, '', '#' + id); here = k;
+  put({ entry: id, x, opener, oid: a.id || null, k, p: at ? at.k : 0 }, '#' + id);
   cur = { id, x, k, direct: false };
   if (show(id, x)) focusHeading(id);
 });
@@ -154,7 +157,7 @@ function userClose() {
   if (!cur) return;
   if (!cur.direct && history.state && history.state.entry === cur.id) { history.back(); return; }   // popstate closes and restores focus
   const id = cur.id, k = cur.k;
-  history.replaceState(null, '', location.pathname + location.search); here = 0;   // clears the fragment
+  swap(null, location.pathname + location.search);   // clears the fragment
   hide(openers.get(k) || backTarget(id));   // a control used after a direct link, else the mark / cluster / card title
 }
 $('d-close').addEventListener('click', userClose);
@@ -174,13 +177,14 @@ document.addEventListener('keydown', ev => {
 
 // Back / Forward
 addEventListener('popstate', ev => {
-  const st = ev.state, was = here;
-  here = (st && st.k) || 0;
+  const st = ev.state, left = at;                         // left = the state of the entry we came from
+  at = st || null;
   if (st && st.change) {                                  // onto a "Changed in …" jump
     const rec = $(st.change); if (!rec) return;
-    if (cur && cur.k > st.k) {                            // Back from an entry opened from the record: close it, focus its opener
-      const o = openers.get(cur.k); hide(visible(o) ? o : rec); if (!visible(o)) reveal(rec);
-    } else {                                              // Forward into the jump
+    if (left && left.entry && left.p === st.k) {          // Back from an entry that was opened FROM this record: close it, focus its opener
+      const o = visible(openers.get(left.k)) || visible(left.oid ? $(left.oid) : null);
+      hide(o || rec); if (!o) reveal(rec);
+    } else {                                              // Forward into the jump (or arriving from further away)
       if (cur && isPhone()) closeVisual();
       reveal(rec);
     }
@@ -189,7 +193,7 @@ addEventListener('popstate', ev => {
   if (st && st.entry && entries.has(st.entry)) {          // Forward (or Back onto an open state): reopen with the stored expander
     cur = { id: st.entry, x: st.x || null, k: st.k, direct: !!st.direct };
     show(st.entry, st.x);
-    const l = jump && jump.entryK === st.k && jump.changeK === was ? $(jump.link) : null;   // Back from the jump: focus the link used
+    const l = left && left.change && left.from && left.from.entryK === st.k ? $(left.from.link) : null;   // Back from a jump: the link THAT jump stored
     if (l) {   // focus again after the browser's own fragment handling, which can drop it (as in focusSoon)
       l.focus(); setTimeout(() => { if (cur && cur.k === st.k && !detail.hidden && document.activeElement !== l) l.focus(); }, 0);
     } else focusHeading(st.entry);
@@ -201,6 +205,8 @@ addEventListener('popstate', ev => {
 });
 
 addEventListener('resize', () => { if (!detail.hidden) applyMode(); });
+// a plain fragment link (#changes, #dated, …) adds a history entry without pushState: keep `at` on the entry we are really on
+addEventListener('hashchange', () => { at = history.state || null; });
 
 // direct link (page loaded at #e-…; also the no-JS section anchors #e-…-conv / #e-…-debate, folded into the one fragment)
 // focus again after the browser's own fragment handling (page load or a same-page fragment), which can drop an earlier focus()
@@ -211,7 +217,7 @@ const focusSoon = id => {
 };
 function direct(id, x) {
   const k = ++seq;
-  history.replaceState({ entry: id, x, opener: null, direct: true, k }, '', '#' + id); here = k;
+  swap({ entry: id, x, opener: null, direct: true, k, p: 0 }, '#' + id);
   cur = { id, x, k, direct: true };
   if (show(id, x)) focusSoon(id);
 }
