@@ -4,6 +4,31 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 13:45 UTC (clock reading at write) — **Follow the Dust rev 2** (GPT's review of rev 1 applied; D1–D6 decided; docs and research only)
+
+- GPT (relayed by Chad):
+  - **D1:** Optional layers, a list of event links, no switch, card copy "Dated satellite observations".
+  - **D2:** two callouts, worded by GPT; the third stays in a private working draft (Mac packet only).
+  - **D3:** the crop; the diagonal edge described as unexplained; "one pass" becomes "one published image / one dated view"; 12:25 UTC / 14:25 SAST labelled source-reported.
+  - **D4:** quoted wording + full credit + crop disclosure; the SI reading recorded as our interpretation; no NASA email.
+  - **D5:** browser download.
+  - **D6:** `#dust=orange-river-2019-09-25`, plus Back/Forward, cold-link close, unknown-ID and phone-sheet focus checks.
+  - Verified-bytes image loading (no `srcset`).
+  - First collection = three events through the same viewer.
+- **D5 done:**
+  - Chad downloaded NASA's JPEG; `~/Downloads` copy 13:41:59 (Mac file time).
+  - **SHA-256 `eb7c02e9…d2c7` exact at 13:42:47 UTC (Mac clock).** Copied to the Mac packet `originals/`.
+  - Crop and both positions rechecked on those bytes: confirmed (source check §2a).
+  - Crop fractions: callout 1 = 0.6895, 0.3967; callout 2 = 0.4211, 0.6000.
+- **Rev 2 docs:**
+  - `docs/research/FOLLOW-THE-DUST-SOURCE-CHECK.md` rev 2;
+  - `docs/concepts/FOLLOW-THE-DUST-PROPOSAL.md` rev 2: §4 verified loading (one derivative chosen, fetched, hashed, displayed from those bytes); §6 tests and breaks added.
+  - **Rev 1 (`2e9473b`) still carries callout 3's draft text and position in git history.**
+- **Mac packet:** rev-2 placement draft (drawn from the verified original), `markup_rev2.py`, `CALLOUT-3-WORKING-DRAFT.md` (private).
+  - The Mac became unreachable during the LOG/.hashes update at the end. To be checked and completed when it is back.
+- **Next:** Chad's branch-build line, e.g. `Go: build dust-rc on a branch per FOLLOW-THE-DUST-PROPOSAL rev 2 (page only; no merge)`. REGISTER filing and merge each need their own line.
+- Live unchanged: hub 0.6.10, page `12ff4ff`.
+
 ## 12 Nov 13:30 UTC (clock reading at write) — **Follow the Dust: brief filed, Orange River source packet + entry-point proposal rev 1** (docs and research only; for GPT)
 
 - **Chad paused the backlog picks.** Timeline, globe performance, GIBS and the remaining `/status` fields stay queued; sea ice stays on watch. He brought "Follow the Dust" spec v1 (written with GPT), filed verbatim: `docs/concepts/FOLLOW-THE-DUST-BRIEF.md`.
