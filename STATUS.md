@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 16:42 UTC (clock reading at write) — **Live-dust source check rev 2: EUMETSAT's licensing guide read** (docs only)
+
+- Chad signed in to the EUMETSAT User Portal in the pane; the licensing guide then loaded (V2.2, 4 Nov 2026; pane, 16:40 UTC).
+- **Finding:** Meteosat image data under 1 hour old is licensed (free only for non-commercial, non-operational personal/educational/research use; broadcasting images = EUR 8,000 a year). At 1 hour or older it may be used "for any purpose" with attribution, no fee; the original numerical data may not be redistributed. Core data are CC BY 4.0 (corrects rev 1's tool summary).
+- **Reading (ours):** a layer showing frames at least one hour old fits the free tier and $0. Not stated by EUMETSAT: that EUMETView pictures follow that rule, or that an unregistered public page may show them.
+- `docs/research/DUST-LIVE-SOURCE-CHECK.md` rev 2 (§1, §5a, §5b). No build approved; no enquiry sent. Live unchanged: hub 0.6.10, page `12ff4ff`.
+
 ## 12 Nov 16:39 UTC (clock reading at write) — **Historical Follow the Dust STOPPED by Chad; live-dust source check (EUMETSAT Dust RGB) rev 1** (docs only)
 
 - **Chad stopped the historical release** during the desktop Chrome check: "this isnt live feed … we want live feeds"; GPT agreed (relayed). **`dust-rc` stays unmerged** (branch at `4e0ffb5`, a work-in-progress save; last test run interrupted, not verified). Release checks cancelled (iPhone, VoiceOver, final hashes). The Orange River source work is kept for reference. Branch history: built `5eeb387`; GPT held it for a history fix; rev 2 `08019ba`; camera/panel tuning `87d6a9f`. The branch's own STATUS entries and packet (`reviews/2026-11-12-dust-rc.md`) are on the branch only.

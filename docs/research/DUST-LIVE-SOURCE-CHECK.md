@@ -1,4 +1,4 @@
-# Live dust — EUMETSAT Dust RGB source check (rev 1, 12 Nov 2026)
+# Live dust — EUMETSAT Dust RGB source check (rev 2, 12 Nov 2026)
 
 **For:** GPT and Chad. Source check only: nothing built, no layer added, no account created, no enquiry sent.
 **Why:** Chad stopped the historical Follow the Dust release on 12 Nov ("this isn't live feed … we want live feeds"). GPT agreed (relayed by Chad) and named EUMETSAT's Meteosat Dust RGB as the candidate. Dust comes back onto the globe only if a usable near-real-time satellite source is verified.
@@ -6,10 +6,13 @@
 
 Evidence tags: **[pane]** = read by Claude in the browser pane on `view.eumetsat.int`, pane clock in the same call. **[fetch]** = Claude's fetch tool, which returns a model summary, not page bytes (a lead, not a quotation). **[unopened]** = found, not opened (PDF; the project's text-only rule).
 
-## 1. Bottom line
+## 1. Bottom line (rev 2)
 - **Technically it fits:** the feed is real, fresh (20–25 minutes old when read), covers southern Africa, is already georeferenced for the globe, and can be read by a browser directly at no cost to us.
-- **Terms are NOT established, and this is the blocker.** EUMETSAT's own pages say satellite data are governed by its Data Policy, are not Creative Commons, and that imagery fresher than set delays has been licensed. The policy itself is a PDF, unopened. Whether a public site may display EUMETView's near-real-time Dust RGB is unanswered.
-- **Recommendation:** do not build until the terms question is answered (§5 gives three ways). If it cannot be answered in our favour, Dust stays off the globe.
+- **Terms, after reading EUMETSAT's licensing guide (§5a):** the freshest frames are the problem, not the feed.
+  - Meteosat image data **less than 1 hour old** is licensed. Free use is limited to personal, educational and research purposes that are non-commercial and non-operational; "broadcasting images based on the data" sits under a licence with an **annual fee of EUR 8,000**.
+  - Meteosat image data **1 hour old or more** may be used "for any purpose" with attribution, at no fee, with one prohibition: redistributing the original numerical data.
+- **Reading (ours, not EUMETSAT's statement):** a layer that always shows a frame **at least one hour old** fits the free tier and $0. A layer showing the newest frames on a public site does not.
+- **Still open:** the guide is written about data, and does not say in terms that EUMETView pictures follow the same latency rule, or that an unregistered public page may embed them. That is one question for EUMETSAT's help desk, if Chad wants certainty before building (§5b).
 
 ## 2. What the service offers [pane, WMS GetCapabilities, 16:35:28 UTC 12 Nov 2026]
 Endpoint `https://view.eumetsat.int/geoserver/ows` (WMS 1.3.0; capabilities 282,021 characters). Service-level fields: `AccessConstraints` "none", `Fees` "none". **These two fields are service metadata, not a licence.**
@@ -59,10 +62,36 @@ Request: EPSG:4326, bbox 40°S–15°S, 0°–35°E, 700 × 500 JPEG, latest fra
 - Anything about the MTG layer specifically (the 2019 item predates MTG) or the multimission ring.
 - EUMETSAT's User Portal licensing page would not load in the pane or in Chrome (stuck on "Loading"), so no HTML version of the rules was read.
 
-**Three ways to settle it (Chad's choice; none started):**
-1. **Lift the text-only rule for one document:** Claude (or GPT) opens the January 2026 Data Policy PDF and reads the Meteosat and imagery clauses.
-2. **Ask EUMETSAT:** a short enquiry to their user help desk, sent by Chad as with the other providers. Sending grants nothing.
-3. **Design inside the clearly free tier, if (1) confirms it:** e.g. show only the on-the-hour frame, or only frames at least three hours old. That is "today's dust", not "this minute's".
+## 5a. EUMETSAT's licensing guide (rev 2) [pane, read 16:40 UTC 12 Nov 2026, after Chad signed in to the User Portal]
+Page: "Data registration and licensing", **V2.2, 4 Nov 2026**, https://user.eumetsat.int/resources/user-guides/data-registration-and-licensing. Read as page text. It summarises the Data Policy; the policy PDF itself is still unopened.
+
+**Core data (verbatim):** "All EUMETSAT data and products declared as 'Core' by the EUMETSAT Council are made available without charge under a CC-BY-4.0 licence." Attribution form: "[Contains modified] EUMETSAT [Meteosat/Metop] [data/product] [Year of publication or distribution]" or "This service is based on EUMETSAT [Meteosat/Metop] [data/products] [Year of publication or distribution]."
+- This corrects §5's first bullet: the tool summary of the website Terms of Use said satellite data are "not released under Creative Commons". The dated guide says Core data are CC BY 4.0. The guide is the stronger evidence.
+
+**Recommended (licensed) data: Meteosat level 1 image data.** The tables list SEVIRI "Level 1.5 Image Data — 0 degrees" and "— Indian Ocean", and FCI "Level 1C Normal/High Resolution Image Data — 0 degree". These are the channels a Dust RGB is made from.
+
+| Latency | May | Must | Must not | Fee |
+|---|---|---|---|---|
+| **≥ 1 hour** | "Access and use for any purpose." | "Include attribution to EUMETSAT." | "Redistribute the Original Numerical Data." | "There is no licensing fee" |
+| **< 1 hour**, Personal / Educational / Research | "Use for non-commercial and non-operational personal, educational, research purposes." | attribution | redistribute original data; "Make any operational and commercial use, including broadcasting in any form of the data." | none |
+| **< 1 hour**, Service Provider / Broadcaster | "Provide Value Added Service to third parties and/or broadcasting images based on the data." | attribution | redistribute original data (with exceptions) | "Annual fee of EUR 8,000." |
+
+- The ≥ 1 hour licence is established by registering in the User Portal and accepting its terms ("To access these data, you need to register in the user portal and accept the related terms and conditions").
+- **EUMETView** (User Portal page, same reading): "The Open Geospatial Consortium (OGC) APIs allow you to integrate EUMETView in to other applications using the available Web Map Service (WMS), Web Coverage Service (WCS) and Web Feature Service (WFS)." Integration into other applications is an intended use. No usage limits are stated on that page.
+
+**What this does and does not establish**
+- **Establishes:** a one-hour line in EUMETSAT's rules for Meteosat image data; free any-purpose use beyond it; a paid licence for broadcasting images inside it.
+- **Does not establish (our interpretation fills the gap):**
+  - that a Dust RGB picture from EUMETView counts as "data" under these licences. A picture is not the original numerical data, which points toward the rules being no stricter for pictures; it is not stated.
+  - that an unregistered public page may show the ≥ 1 hour frames. The licence is described as accepted by a registered user; the WMS itself asks for no sign-in.
+  - anything about the multimission global ring (other agencies' data).
+- The Dust RGB does not appear in the guide's tables as a product in its own right, and the layers' WMS metadata carry no licence or catalogue link.
+- **Not read:** the Data Policy PDF; EUMETView's own product page (stuck on "Loading" in the pane); the Resources tab guides.
+
+## 5b. Ways forward (Chad's choice; none started)
+1. **Build to the free tier:** the layer always requests a frame at least one hour old (the WMS takes a time), labelled with its time, credited to EUMETSAT. Proposal for GPT first.
+2. **Ask EUMETSAT first:** one enquiry to the User Service Helpdesk, sent by Chad: may a public, free website display EUMETView Dust RGB frames ≥ 1 hour old via WMS with attribution, and does that need a registered licence? Sending grants nothing. Recommended as project practice, not shown to be required.
+3. **Leave Dust off the globe.**
 
 ## 6. If the terms clear, the first technical questions
 - Which layer: MTG (10 min, newest satellite), MSG (15 min, the one the 2019 statement is about), or the global ring (3 h).
