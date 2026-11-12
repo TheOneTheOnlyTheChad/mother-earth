@@ -4,6 +4,28 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 11:11:37 UTC — **HUB 0.6.9 DEPLOYED** (Chad: "Approve: deploy hub 0.6.9 from 281bb55 (content only)"); **live RC from the Pages origin PASSED** — entry written 11:16 UTC
+
+- **Before (11:11:12 UTC, dashboard tab):** live worker.js = 0.6.8 `85737a48c97a0ee1817b3a70883ba4d334b82da4092135a367d25a676c17c427` (293,193 B; the rollback target); 19 bindings; health 8/8 (200); `/` = 0.6.8.
+- **Source:** raw.githubusercontent at `281bb55`: 293,542 B, sha256 `3e791a5c7ea501ac89c87e355aef1defed81456ef5bc6d80a0f8de1750d1c49d` (= the file GPT passed at `eed6c28`). Source hash and the live 0.6.8 hash re-checked in the tab immediately before the write.
+- **Deploy:** content-only PUT 11:11:34.6Z → HTTP 200, success, etag `6196e51c…9475`, modified 11:11:37.160Z. Bindings, secrets, variables and crons untouched.
+- **Verified 11:11:48 UTC:** read-back `3e791a5c…c49d` exact; 19 bindings, identical list; `/` = **0.6.9**, history collecting; `catalogues.timeline` = legacy path + revision R1, **current `tl-2026-11-R2`**, revisions R1 and R2; health 8/8 (200).
+  - `/catalogue/timeline`, `/catalogue/timeline/` and `/catalogue/timeline/tl-2026-11-R1` → 200, 15,656 B, **R1's original bytes `096ae648…0fbe`**, max-age=60.
+  - `/catalogue/timeline/tl-2026-11-R2` → 200, 18,120 B, `2f39aa30…0356` exact, ETag = file hash (weak, as on the other catalogues).
+  - `/tl-2026-11-R3`, `/tl-2026-11-R2/`, `//tl-2026-11-R2` → 404 `unknown revision`, no-store.
+  - Unchanged routes 200: sky R1 `f851f164…`, arts `221bb1ca…`, Ocean Heat manifest `dcc34674…` (immutable), `/snapshot/usgs`, `/cells/drifters`, `/status`.
+- **First scheduled runs on 0.6.9 (D1, read 11:16:07 UTC):** usgs 11:15:10 ok; firms 11:15:46 ok (970,429 B raw); forest 11:12:36 ok (its tick started 11:11:37.5, at the moment of the deploy). No down or degraded run.
+- **Live RC from the Pages origin (11:12:30–11:13:06 UTC, pane tab on a plain-text github.io file, 588×834 = phone layout):**
+  - **CORS:** legacy URL, `/tl-2026-11-R1` and `/tl-2026-11-R2` each `type: cors`, 200, exact sha256, ETag readable; unknown revision `cors` 404.
+  - **Branch page** (timeline.html, timeline.js, style.css fetched by commit `281bb55`, hashes exact, blob-injected into the clean tab): axis **on**, build `202611301000`, revision R2, 5 marks; **exactly one hub request, to `/catalogue/timeline/tl-2026-11-R2`**; no page error; no horizontal overflow.
+  - Rendered text exact: "Timeline page updated 12 Nov 2026 · revision tl-2026-11-R2 · What changed"; both release headings; the R2 change record and the entry line word for word; the approved label on the card, the entry and the axis mark.
+  - **The jump, live:** open End-Triassic (sheet, page inert, locked) → "wording clarified" → sheet closed, nothing inert, record in view and focused → Back → the entry open again, **focus on the link** → Forward → record focused → Back and Close → closed, fragment cleared.
+  - **The live public page** (still the R1 page, build `202611221000`) on 0.6.9: axis on, 5 marks, one request, to `/catalogue/timeline/tl-2026-11-R1`. Unchanged for readers.
+- **Public page unchanged:** served `timeline.html` `d7c37d5f…`, `timeline.js` `ae87c6a1…`, `style.css` `fad92f02…`, `index.html` `59500752…`, `sources.html` `44b6e42d…` (11:12:30 UTC). **main ≠ live hub** until the branch merges (main's worker.js is 0.6.8).
+- **Limits:** the pane is not a real phone; desktop width not exercised live (covered by the suites); Worker CPU not measured.
+- **Rollback (own Approve line):** hub = 0.6.8 `85737a48…c427`. Harmless to leave: the live page asks only for R1.
+- **Next (Chad):** `Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)` — today, latest start 22:00 UTC, so the page's 12 Nov date is true.
+
 ## 12 Nov 11:09:38 UTC — **R2 UPLOAD DONE: `ref/timeline/tl-2026-11-R2.json`** (Chad: "Approve: upload ref/timeline/tl-2026-11-R2.json (complete-file sha256 2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356, 18,120 B) to R2")
 
 - **Pre-checks (11:09:16 UTC, dashboard tab):** destination absent (404 "The specified key does not exist"); `ref/timeline/` held only `tl-2026-11-R1.json` (15,656 B). Source fetched from raw.githubusercontent at branch commit `281bb55`: HTTP 200, 18,120 B, sha256 `2f39aa30…0356` = the approved hash. Source hash and absence re-checked immediately before the write.
