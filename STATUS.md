@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 11:33 UTC (clock reading at write) — **`/status` run-notes proposal rev 1 written** (docs only, on Chad's go) — `docs/concepts/STATUS-RUN-NOTES-PROPOSAL.md`, for GPT
+
+- Chad: "Go: draft the proposal for removing collector run notes from public /status." Scope: drop `last_runs[].note` from the public response only; full notes stay in D1; `/health/*` and collector behaviour outside.
+- Proposal: the `/status` query stops selecting `note`; `last_runs[]` keeps `layer, started_at, status, http_status, records, bytes`; hub 0.6.10.
+- **Consumer found:** the orbital card's no-snapshot line shows the note (`Latest hub attempt …: down (<note>).`). Proposed `app.js` change: `down (HTTP 500).` or `down.`; page reads no note; **page first, then hub**. Cached old pages show `down ().` in that rare case until reload (stated).
+- Other free text still on `/status` (archive_health notes/reasons, `last_batch.result`) listed as out of scope, not proposed.
+- Tests: new `status-notes-hub` (seeded marker notes absent from `/status`, structured fields present, D1 note kept, 4 breaks); orbital-ui/-browser updated; two osmc-reliability-hub assertions flip.
+- **Not approved:** branch build, page release, hub deploy. Live unchanged: hub 0.6.9, page `12ff4ff`. Lockdown parked.
+
 ## 12 Nov 11:28 UTC (clock reading at write) — **GPT's live desktop Chrome check of the Timeline release PASSED** (relayed by Chad; docs only); thread handed over
 
 - GPT, live release `12ff4ff`, desktop Chrome at 1470×801: `tl-2026-11-R2` drew all five axis marks with no horizontal overflow; "What changed" showed both release dates; the End-Triassic entry showed its separate 10 Nov evidence review date; **the repeated-jump test passed live** (the third Back reopened the original entry and restored focus to "Changed in …").
