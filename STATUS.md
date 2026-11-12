@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 10:58 UTC (clock reading at write) — **timeline-changes-rc rev 2 @ `6fbbad5`** (code `eed6c28`; focused fix after GPT's review of `fe4cf18`; branch only) — packet §9
+
+- **GPT (relayed by Chad): hold the upload, deploy and merge lines pending a focused branch fix.** Accepted: the `entries` / `records` / `releases` shapes, the focus retry, the desktop Back behaviour, the narrowed privacy check. GPT's independent checks passed (318 manifest entries, generator 45/45, hub 73/73, static fallback, the preview's five marks; Worker diff = version + Timeline pin and current only).
+- **Defect GPT reproduced (desktop and 390×844, Chrome, no reload):** Open End-Triassic → Changed in … → Open the entry → Changed in … → Back ×3: the third Back reopened the entry but focused its heading. Cause: one jump kept in page memory, overwritten by the second jump.
+- **Fix (`timeline.js` only):** each jump's history state carries its own return target (the entry key and the link id); every pushed state records the key of the entry it was pushed from, and direction is read from that, never from the size of a key; the current state is tracked from `history.state` (survives a reload) and refreshed on `hashchange`; keys are unique across reloads. timeline.js `713ecd4f…8fad` (29,113 B). **Every other served file, the catalogue (`2f39aa30…0356`) and worker.js (`3e791a5c…c49d`) are unchanged.**
+- **Tests on `eed6c28`:** timeline-changes-ui **173/173** (new block: GPT's sequence, three reload cases incl. reload with Forward history, a plain fragment in between); 14 breaks each fail, incl. `single-jump-memory`, which re-creates the defect and fails exactly on "Back 3" and the reload cases. timeline-ui 585 (two break anchors repointed; 12 breaks rerun, each fails), timeline-axis 96, timeline-changes-build 45, timeline-catalogue-hub 73, desktop-overflow 112, mobile-pass 131, terminator-ui 19. The other 44 suites were not rerun (only `timeline.js` and two test files changed since the full run).
+- **terminator-ui** stays recorded as intermittent (18/19 once in the full run), cause unverified.
+- **Release date rechecked 10:56 UTC:** still 2026-11-12; holds only if the page is released today (latest start 22:00 UTC), else rebuilt before any upload. Hashes to be rechecked again before any approval line.
+- **Rollback note qualified (GPT):** a page revert with both pins kept preserves the axis only for readers who still hold a matched R2 page and script.
+- **Mac:** `_review/timeline-changes-rc-r2/` = `6fbbad5` (318 files, every SHA256SUMS line OK, 10:57:47 UTC Mac clock) and `-r2-preview/`. Rev 1 folders kept.
+- **Next:** GPT's re-check; then the three lines, each its own. **Nothing uploaded, deployed or merged.** Live unchanged: hub 0.6.8, page `7c3aa22`.
+
 ## 12 Nov 10:23 UTC (clock reading at write) — **Timeline "What changed" candidate BUILT on branch `timeline-changes-rc` @ `fe4cf18`** (code `9f31fb6`; Chad's Approve line; no merge, R2 write, hub deploy or page change) — packet `reviews/2026-11-12-timeline-changes-rc.md` (on the branch)
 
 - Chad: "Approve: build timeline-changes-rc on a branch only — TL-IN-0001 option A, review snapshot sha256 d7b895c5b0a5361e06ebbd05dacedd0a3727e27050ff5622b9f9938f2a405d8d, What changed and evidence-last-reviewed per TIMELINE-INBOX-AND-CHANGES-PROPOSAL rev 2.1; no merge, R2 write, hub deploy or page change." Acceptance recorded in the private item (09:33:20 UTC, Mac clock); item now "built".
