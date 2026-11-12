@@ -8,7 +8,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 - Mac `_review/` emptied 01:44:45 UTC (Mac clock): `osmc-reliability-rc` and `osmc-reliability-rc-r2` moved to `_to_delete/20261112T014445Z/` (313 files each) for Chad to empty.
 - Branch `osmc-reliability-rc` deleted by Chad; `git fetch -p`: remote = `main` + parked `aircraft-rc`.
-- START-HERE: two live-state bullets and §4r (thread facts). HANDOVER: new "NEXT THREAD STARTS HERE" block. Project docs updated. Mac sync of the whole repo at the final commit, preserve-first (result in the next entry if anything differed from an earlier commit).
+- START-HERE: two live-state bullets and §4r (thread facts). HANDOVER: new "NEXT THREAD STARTS HERE" block. Project docs updated. **Mac sync at `68d9ad9`, 01:49:58 UTC (Mac clock), preserve-first:** 312 tracked files; 9 updated (HANDOVER, START-HERE, STATUS, app.js, index.html, sources.html, worker.js, drifters-hub and oceanheat-hub tests) and 4 new; every preserved copy matched an earlier commit (no local edits), kept under `_sync-preserved/20261112T014958Z/`; all 312 byte-identical afterwards (hash-list digest `b2805d25eabd6af8` both sides). This entry's own correction was then copied the same way.
 - Live unchanged: hub 0.6.8, page `7c3aa22`. Nothing pending approval.
 
 ## 12 Nov 01:41 UTC (clock reading at write) — **Fires wording seen live in the real header-only state; hub 0.6.8 clean overnight** (read-only; Chad asked for the status)
