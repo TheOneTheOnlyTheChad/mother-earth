@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 09:15 UTC (clock reading at write) — **Timeline T1/T4 proposal rev 2** (GPT's review of rev 1 applied; docs only)
+
+- GPT (relayed by Chad): rev 1's sha256 verified; **revise before branch build**; C1–C5 remain Chad's. A docs review.
+- Rev 2 (`docs/concepts/TIMELINE-INBOX-AND-CHANGES-PROPOSAL.md`):
+  1. **Inbox states:** "reviewed" and "accepted" each name the specific reviewed version (sha256), both recorded in the private item; a material change after review goes back through review; the branch-build go and the page-release approval are distinct; "released" only after the matched page and catalogue are verified live.
+  2. **No inbox reference in anything public:** the `inbox` field is dropped from the changes file and catalogue; the mapping to the public change ID lives in the private item.
+  3. **Three dates kept apart:** page release date, per-entry "evidence last reviewed" (entry-wide reviews only, recorded explicitly, never derived), per-source checked date. Rev 1's validator rule withdrawn (it would have rejected a partial re-check). Stated dates verified against the records: Big Five 10 Nov, Pliny 9 Nov. A differing-dates test asserts the rendered values. The date-change fixture keeps each side's own citation and checked date. Withdrawals deferred.
+  4. **Release day:** planned UTC day, no release started after 22:00 UTC, the actual live day verified and recorded; a date-only rebuild may keep the ID only before upload or pin, otherwise a new ID and key.
+  5. **Wording (GPT's, the C5 lean):** label "Approximate age of the extinction level in the rock record"; text "In each of the three sections studied, a large sulfur-isotope shift about 201.5 million years ago coincides with the level in the rock record that marks the extinction."
+  6. **Compatibility:** new `?v=` on `timeline.js` (and `style.css` where its bytes change); the real R1 page files (main `cc91165`; checked: `timeline.html` and `timeline.js` are unchanged since) tested against the candidate hub; R1 hashed against its known pin in its own test; links tested both ways across the phone sheet; Pliny `-conv` / `-debate` fragments in the anchor regression; rollback trade-off stated (page revert keeps cached R2 readers' axis; a hub rollback to 0.6.8 would not, and is a separate decision).
+- **Not approved:** inbox creation, branch build, R2 upload, hub deploy, page release. Live unchanged: hub 0.6.8, page `7c3aa22`.
+
 ## 12 Nov 09:10 UTC (clock reading at write) — **Timeline T1 inbox + T4 "What changed" proposal rev 1 written** (docs only, on Chad's go); sea ice recovered
 
 - New thread (lockdown-pass handover). Chad: "Go: draft the Timeline T1 discovery inbox and T4 public 'What changed' proposal for GPT review", small first delivery, proposal only.
