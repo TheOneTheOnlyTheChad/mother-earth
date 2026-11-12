@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 11:28 UTC (clock reading at write) — **GPT's live desktop Chrome check of the Timeline release PASSED** (relayed by Chad; docs only); thread handed over
+
+- GPT, live release `12ff4ff`, desktop Chrome at 1470×801: `tl-2026-11-R2` drew all five axis marks with no horizontal overflow; "What changed" showed both release dates; the End-Triassic entry showed its separate 10 Nov evidence review date; **the repeated-jump test passed live** (the third Back reopened the original entry and restored focus to "Changed in …").
+- GPT independently matched the live JavaScript hash. Its direct downloads of the HTML and the catalogue timed out, so **those byte checks rest on Claude's release record** (served hashes 11:19:47 UTC; hub read-back 11:11:48 UTC).
+- **Still open:** Safari, a real phone, screen-reader testing. This closes the "desktop width not read live" and "GPT has not checked the live release" items from the release entry.
+- HANDOVER's block updated to match. Nothing changed in production: hub 0.6.9, page `12ff4ff`.
+
 ## 12 Nov 11:27 UTC (clock reading at write) — **Thread close-out (START-HERE §9): Timeline inbox + What changed thread**
 
 - **Mac `_review/` emptied 11:26:06 UTC (Mac clock):** `timeline-changes-rc`, `-preview`, `-r2` and `-r2-preview` moved to `_to_delete/20261112T112606Z/_review/` for Chad to empty.

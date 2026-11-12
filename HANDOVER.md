@@ -51,8 +51,8 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
   - the first real failed buoy run on hub ≥ 0.6.8: `SELECT started_at, finished_at, status, http_status, note FROM collector_runs WHERE layer='drifters' AND status!='ok' AND finished_at > '2026-11-11T19:38'` (none up to 12 Nov 08:52 UTC);
   - sea ice: `SELECT started_at, status, http_status, note FROM collector_runs WHERE layer='seaice' AND status!='ok' AND finished_at > '2026-11-12T09:08'`.
 - **Open:**
-  - GPT has not checked the live What changed release (message offered to Chad).
-  - Not tested live: desktop width, Safari, a real phone, a screen reader. Worker CPU for 0.6.9 not measured.
+  - **GPT's live desktop Chrome check passed (12 Nov, 1470×801):** five marks, no overflow, both release dates, the separate 10 Nov review date, the repeated-jump Back ×3 focus. GPT matched the live JavaScript hash; the HTML and catalogue byte checks rest on Claude's release record (its downloads timed out).
+  - Not tested live: Safari, a real phone, a screen reader. Worker CPU for 0.6.9 not measured.
   - `terminator-ui` intermittent failure, cause unverified.
   - Left in `~/Downloads` for Chad to decide (not moved): `Performance_Trace` (the 11 Nov globe trace; the only copy), `index.html` (the 27 Oct "Earth Ops Room" first cut; no identical copy in the project), `credentials.json` (30 Oct; not opened).
   - Older items in the superseded blocks below (physical phone check; md5 sidecars; NOAA OSPO status; Sky refresh by 2027-06-01; provider replies; OpenSky kit).
