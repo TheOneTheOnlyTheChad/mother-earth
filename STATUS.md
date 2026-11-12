@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 11:09:38 UTC — **R2 UPLOAD DONE: `ref/timeline/tl-2026-11-R2.json`** (Chad: "Approve: upload ref/timeline/tl-2026-11-R2.json (complete-file sha256 2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356, 18,120 B) to R2")
+
+- **Pre-checks (11:09:16 UTC, dashboard tab):** destination absent (404 "The specified key does not exist"); `ref/timeline/` held only `tl-2026-11-R1.json` (15,656 B). Source fetched from raw.githubusercontent at branch commit `281bb55`: HTTP 200, 18,120 B, sha256 `2f39aa30…0356` = the approved hash. Source hash and absence re-checked immediately before the write.
+- **Upload:** dashboard R2 objects API `PUT` at 11:09:38.048Z → HTTP 200, success, size 18,120, storage class Standard, etag `329dd82ba7cdae4fb55ccf8b12b8d40c`, version `7e5e308d101a811bf2dafde871a58765`, uploaded **11:09:38.699Z**.
+- **Read-back (11:09:39 UTC):** HTTP 200, 18,120 B, **sha256 `2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356` (exact)**.
+- **R1 untouched:** the R1 object read back 15,656 B, `096ae648…0fbe`; its listing still shows its 10 Nov 06:06:51 upload.
+- **No public effect:** the live hub is still **0.6.8** (`/` read after the upload); `/catalogue/timeline/tl-2026-11-R2` → 404 "unknown revision"; `/catalogue/timeline/tl-2026-11-R1` → 200 with R1's exact bytes.
+- **Rollback target pinned for the hub deploy (11:09:52 UTC, read back from Cloudflare):** live worker.js = **0.6.8, sha256 `85737a48c97a0ee1817b3a70883ba4d334b82da4092135a367d25a676c17c427`** (293,193 B). Candidate at `281bb55`: 293,542 B, `3e791a5c7ea501ac89c87e355aef1defed81456ef5bc6d80a0f8de1750d1c49d`.
+- **The R2 object is now uploaded**, so by proposal §3.5 any change to the catalogue bytes (including a release-date slip past today) needs a **new revision ID and key**; this object would then stay, unused.
+- R2 cost: one Class A write and a few Class B reads, inside the allowances. Removing the object would be a separate action on its own Approve line.
+- **Next (each its own line):** `Approve: deploy hub 0.6.9 from 281bb55 (content only)` → live RC from the Pages origin → the page merge.
+
 ## 12 Nov 11:06 UTC (clock reading at write) — **GPT's re-check PASSED for timeline-changes-rc rev 2; release hold lifted; awaiting Chad's R2 upload line** (docs only)
 
 - GPT (relayed by Chad): passed for packet `6fbbad5` / code `eed6c28`. The repeated-jump focus defect is closed in Chrome on desktop and at 390×844; reload → Forward → Back also restored the correct link focus at 390×844. The browser re-check used the local preview in Chrome.
