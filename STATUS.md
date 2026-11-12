@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 10:23 UTC (clock reading at write) — **Timeline "What changed" candidate BUILT on branch `timeline-changes-rc` @ `fe4cf18`** (code `9f31fb6`; Chad's Approve line; no merge, R2 write, hub deploy or page change) — packet `reviews/2026-11-12-timeline-changes-rc.md` (on the branch)
+
+- Chad: "Approve: build timeline-changes-rc on a branch only — TL-IN-0001 option A, review snapshot sha256 d7b895c5b0a5361e06ebbd05dacedd0a3727e27050ff5622b9f9938f2a405d8d, What changed and evidence-last-reviewed per TIMELINE-INBOX-AND-CHANGES-PROPOSAL rev 2.1; no merge, R2 write, hub deploy or page change." Acceptance recorded in the private item (09:33:20 UTC, Mac clock); item now "built".
+- **Catalogue `tl-2026-11-R2`** (schema 2; 18,120 B; sha256 `2f39aa30…0356`): release block (release_date 2026-11-12, previous R1), change records (R1-1, R1-2, R2-1), `evidence_reviewed` per entry (Big Five 10 Nov, Pliny 9 Nov). Apart from the new fields and the one approved label and text, identical to R1 (tested). **R1 untouched** (`096ae648…0fbe`).
+- **Hub 0.6.9 (branch):** R2 pin added, current = R2, legacy = R1; no route code changed. worker.js `3e791a5c…c49d`.
+- **Page (branch):** "Timeline page updated … · What changed" line; "Evidence last reviewed" on every entry; What changed section; the "Changed in …" jump across the phone sheet (visual close only; Back reopens the entry with focus on the link). `timeline.js` and `style.css` `?v=202611301000`; `index.html` and `sources.html` change by that version string only.
+- **Tests:** timeline-changes-build 45/45 (8 breaks each fail); timeline-changes-ui 135/135 (12 breaks each fail; real hub code in-process; real R1 page files from `cc91165`); timeline-ui 585, timeline-axis 96 (8 breaks fail), timeline-catalogue-hub 73 (7 breaks fail).
+- **Full regression 09:51–10:16 UTC:** 51 suites run, 50 green, 4 manual/network tools skipped. **One failure not from this change:** terminator-ui 18/19 once (1 of 104 shading probes); 19/19 on four captured reruns alone. Cause not investigated.
+- **Found by the tests:** Chrome drops focus set during Back when it then handles the entry's fragment; the link is focused again on a zero-delay timer.
+- **Mac:** `_review/timeline-changes-rc/` = `fe4cf18` (318 files, every SHA256SUMS line OK, 10:23 UTC) and `_review/timeline-changes-rc-preview/` (one-line change so the axis reads the local catalogue; README).
+- **Not done:** live checks (nothing uploaded or deployed), Worker CPU, real phone, screen reader.
+- **Release date note:** the catalogue says 12 Nov. If the page is not released today (latest start 22:00 UTC) the date is rebuilt before anything is uploaded (new hash and pin).
+- **Next:** GPT reviews the candidate; then the R2 upload, the hub 0.6.9 deploy and the page merge, each on its own Approve line. Live unchanged: hub 0.6.8, page `7c3aa22`.
+
 ## 12 Nov 09:29 UTC (clock reading at write) — **GPT approved TL-IN-0001 review snapshot 1 (option A); item now "reviewed"** (docs only)
 
 - GPT (relayed by Chad): both supplied hashes verified. Claim label approved as written; **option A selected**; public change record and entry line approved as written.
