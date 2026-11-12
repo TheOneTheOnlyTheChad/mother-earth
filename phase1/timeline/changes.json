@@ -1,0 +1,62 @@
+{
+ "about": "Public change records for the Timeline page, written for readers. One record per change; never edited after its revision is released. Rules: docs/concepts/TIMELINE-INBOX-AND-CHANGES-PROPOSAL.md.",
+ "releases": [
+  {
+   "revision": "tl-2026-11-R1",
+   "release_date": "2026-11-10",
+   "note": "first release"
+  },
+  {
+   "revision": "tl-2026-11-R2",
+   "release_date": "2026-11-12"
+  }
+ ],
+ "changes": [
+  {
+   "id": "tl-2026-11-R1-1",
+   "revision": "tl-2026-11-R1",
+   "kind": "added",
+   "what": "entries",
+   "entries": [
+    "e-big5-end-ordovician",
+    "e-big5-frasnian-famennian",
+    "e-big5-end-permian",
+    "e-big5-end-triassic",
+    "e-big5-end-cretaceous"
+   ],
+   "text": "Added the conventional Big Five mass extinctions on the deep-time axis, placed on the ICS chart (v2026-06)."
+  },
+  {
+   "id": "tl-2026-11-R1-2",
+   "revision": "tl-2026-11-R1",
+   "kind": "added",
+   "what": "catalogue",
+   "entries": [
+    "e-pliny-ep-6-16"
+   ],
+   "text": "The Pliny entry (on this page since 9 Nov 2026) moved into the catalogue. It stays on the dates-without-a-year shelf."
+  },
+  {
+   "id": "tl-2026-11-R2-1",
+   "revision": "tl-2026-11-R2",
+   "kind": "revised",
+   "what": "wording",
+   "entries": [
+    "e-big5-end-triassic"
+   ],
+   "claim_type": "extinction_horizon_approx",
+   "title": "Wording clarified: End-Triassic mass extinction.",
+   "short": "wording clarified",
+   "before": {
+    "label": "Approximate age of the extinction horizon",
+    "text": "In all three sections studied, a large sulfur-isotope shift at about 201.5 million years ago coincides with the extinction horizon."
+   },
+   "after": {
+    "label": "Approximate age of the extinction level in the rock record",
+    "text": "In each of the three sections studied, a large sulfur-isotope shift about 201.5 million years ago coincides with the level in the rock record that marks the extinction."
+   },
+   "why": "plainer wording for a general reader",
+   "unchanged": "Dates, sources and the mark on the axis are unchanged."
+  }
+ ]
+}

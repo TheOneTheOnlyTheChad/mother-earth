@@ -164,5 +164,12 @@
   "card_flag": {
     "text": "Date note · withdrawn abstract",
     "aria": "Date note, withdrawn abstract: see the scholarly note"
+  },
+  "evidence_reviewed": {
+    "date": "2026-11-09",
+    "records": [
+      "REGISTER.md",
+      "docs/concepts/TIMELINE-ENTRY-BUILD-PROPOSAL.md"
+    ]
   }
 }

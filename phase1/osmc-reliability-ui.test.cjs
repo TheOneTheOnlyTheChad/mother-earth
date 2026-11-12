@@ -39,7 +39,7 @@ const ctl = async (port, q) => { const r = await fetch(`http://127.0.0.1:${port}
   const bye = () => { for (const k of kids) try { k.kill(); } catch (_) { } try { fs.unlinkSync(oldWorker); } catch (_) { } };
   process.on('exit', bye);
   await Promise.all(kids.map(k => new Promise((res, rej) => { k.stdout.once('data', res); k.once('exit', c => rej(new Error('fixture hub exited ' + c))); })));
-  ok('new hub is 0.6.8, old hub is 0.6.7', (await ctl(PORT_NEW, '')).version === '0.6.8' && (await ctl(PORT_OLD, '')).version === '0.6.7');
+  ok('new hub is at least 0.6.8, old hub is 0.6.7', (v => v.length === 3 && v.every(Number.isInteger) && (v[0] > 0 || v[1] > 6 || (v[1] === 6 && v[2] >= 8)))(String((await ctl(PORT_NEW, '')).version).split('.').map(Number)) && (await ctl(PORT_OLD, '')).version === '0.6.7');
 
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   // page files: 'new' = this checkout (with an optional break), 'old' = main

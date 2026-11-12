@@ -25,9 +25,9 @@ const CSSF = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8');
 const must = (s, a, b) => { if (!s.includes(a)) throw new Error('break anchor missing: ' + a.slice(0, 60)); return s.replace(a, b); };
 function brokenJs() {
   if (BREAK === 'no-focus-return') return must(JS, '(focusEl || pageHeading()).focus();', 'pageHeading().focus();');
-  if (BREAK === 'close-keeps-fragment') return must(JS, "history.replaceState(null, '', location.pathname + location.search);   // clears the fragment", '');
-  if (BREAK === 'shortcut-fragment') return must(must(JS, "history.pushState({ entry: id, x, opener, k }, '', '#' + id);", "history.pushState({ entry: id, x, opener, k }, '', '#' + id + (x ? '-' + x : ''));"),
-    "history.replaceState({ entry: id, x, opener, direct: cur.direct, k: cur.k }, '', '#' + id);", "history.replaceState({ entry: id, x, opener, direct: cur.direct, k: cur.k }, '', '#' + id + (x ? '-' + x : ''));");
+  if (BREAK === 'close-keeps-fragment') return must(JS, "swap(null, location.pathname + location.search);   // clears the fragment", '');
+  if (BREAK === 'shortcut-fragment') return must(must(JS, "put({ entry: id, x, opener, oid: a.id || null, k, p: at ? at.k : 0 }, '#' + id);", "put({ entry: id, x, opener, oid: a.id || null, k, p: at ? at.k : 0 }, '#' + id + (x ? '-' + x : ''));"),
+    "swap({ entry: id, x, opener, oid: a.id || null, direct: cur.direct, k: cur.k, p: history.state.p || 0 }, '#' + id);", "swap({ entry: id, x, opener, oid: a.id || null, direct: cur.direct, k: cur.k, p: history.state.p || 0 }, '#' + id + (x ? '-' + x : ''));");
   if (BREAK === 'no-inert') return must(JS, 'others().forEach(n => { n.inert = phone; });', 'others().forEach(n => { n.inert = false; });');
   if (BREAK === 'switch-pushes') return must(JS, 'if (cur && !detail.hidden && history.state && history.state.entry === cur.id) {', 'if (false) {');
   if (BREAK === 'whole-card') return JS + "\ndocument.querySelectorAll('.card').forEach(c => c.addEventListener('click', ev => { if (!ev.target.closest('a')) c.querySelector('.ctitle a').click(); }));";
@@ -309,7 +309,7 @@ const st = p => p.evaluate(id => {
     await p.click(`#card-${ID} .chip`); await p.waitForTimeout(80);
     ok('whole card is not one click target', !(await st(p)).open);
     await p.click(OPENERS.debated); await p.waitForTimeout(80); await p.click('#d-close'); await p.waitForTimeout(80);
-    const bad = reqs.filter(u => !u.startsWith(BASE) && !/fonts\.googleapis/.test(u) && u !== 'https://mother-earth.chadoberholzer.workers.dev/catalogue/timeline/tl-2026-11-R1');   // 0.6.4: the page asks for its own revision
+    const bad = reqs.filter(u => !u.startsWith(BASE) && !/fonts\.googleapis/.test(u) && u !== 'https://mother-earth.chadoberholzer.workers.dev/catalogue/timeline/' + JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'timeline/BUILD.json'), 'utf8')).catalogue_revision);   // 0.6.4: the page asks for its own revision
     ok('requests: only this site, the font stylesheet and the hub catalogue route', bad.length === 0, bad);
     ok('requests: the catalogue is requested exactly once', reqs.filter(u => /\/catalogue\/timeline(\/|$)/.test(u)).length === 1, reqs.filter(u => /workers/.test(u)));
     ok('requests: no fetch of data on the Timeline page', reqs.filter(u => u.startsWith(BASE)).every(u => /timeline\.(html|js)|style\.css|\/$/.test(u)), reqs);

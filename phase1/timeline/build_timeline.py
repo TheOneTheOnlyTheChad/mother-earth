@@ -5,6 +5,12 @@ Usage:
   python3 phase1/timeline/build_timeline.py          # write the catalogue file and the block between the markers
   python3 phase1/timeline/build_timeline.py --check  # exit 1 if timeline.html, the catalogue file or timeline.js's BUILD differ
   ... --check --page <file>                           # check another copy (used by the tests)
+  ... --src <dir> --page <file>                        # build from another source folder (test fixtures; never published)
+
+Since catalogue schema 2 (TIMELINE-INBOX-AND-CHANGES-PROPOSAL rev 2.1): changes.json holds the public change records;
+every entry carries evidence_reviewed (the entry-wide review date, set explicitly, never derived from source dates);
+BUILD.json carries release_date (the reader-facing page release day) and previous (the last reader-facing release).
+The previous revision's catalogue file is read as a frozen reference and is never rewritten.
 
 Deterministic: output depends only on the source JSON (chart-v2026-06.5.json, big5.json, entry-*.json, BUILD.json).
 The catalogue (phase1/timeline/catalogue/<revision>.json) is the single source for the hub route /catalogue/timeline
@@ -16,12 +22,13 @@ import hashlib, html, json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PAGE = ROOT / 'timeline.html'
-TL = ROOT / 'phase1/timeline'
+TL = pathlib.Path(sys.argv[sys.argv.index('--src') + 1]).resolve() if '--src' in sys.argv else ROOT / 'phase1/timeline'
 ENTRIES = [TL / 'entry-pliny-ep-6-16.json']
 JSF = ROOT / 'timeline.js'
 BUILD = json.loads((TL / 'BUILD.json').read_text(encoding='utf-8'))
 CHART = json.loads((TL / 'chart-v2026-06.5.json').read_text(encoding='utf-8'))
 BIG5 = json.loads((TL / 'big5.json').read_text(encoding='utf-8'))
+CHANGES = json.loads((TL / 'changes.json').read_text(encoding='utf-8'))
 LANES = [('earth-life', 'Earth systems and life'), ('extinctions', 'Mass extinctions'),
          ('relatives', 'Human relatives'), ('history', 'Human history')]
 EMPTY = {'earth-life': 'No entries yet', 'relatives': 'No entries yet', 'history': 'No dated entries on the axis yet'}
@@ -31,7 +38,7 @@ CLAIM_LABELS = {
     'boundary_age_bound': 'Boundary age: no older than',
     'boundary_age_range_modelled': 'Modelled boundary-age range',
     'extinction_onset_estimate': 'Estimated extinction onset',
-    'extinction_horizon_approx': 'Approximate age of the extinction horizon',
+    'extinction_horizon_approx': 'Approximate age of the extinction level in the rock record',
     'dated_event_age': 'Impact age',
     'extinction_placement_tied': 'Extinction placed at the dated impact (synchrony evidence cited)',
     'chart_boundary': 'ICS chart boundary (v2026-06)',
@@ -42,6 +49,26 @@ BOUNDARY_NAMES = {'ordovician-silurian': 'Ordovician–Silurian', 'frasnian-fame
                   'cretaceous-paleogene': 'Cretaceous–Paleogene'}
 BEGIN, END = '<!-- TIMELINE:BEGIN -->', '<!-- TIMELINE:END -->'
 e = lambda s: html.escape(s, quote=True)
+
+
+MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+
+def fmt_date(d):  # 2026-11-10 -> 10 Nov 2026
+    y, m, dd = d.split('-')
+    return f'{int(dd)} {MONTHS[int(m) - 1]} {y}'
+
+
+def tdate(d):
+    return f'<time datetime="{e(d)}">{e(fmt_date(d))}</time>'
+
+
+def rev_line(i, er, revs, changes):
+    """The entry's own line: when its evidence was last reviewed as a whole, and any revision that changed it."""
+    by = {c['id']: c for c in changes}
+    ch = ''.join(f' · Changed in revision {e(by[r]["revision"])}: <a class="chg" id="{i}-chg-{e(r)}" href="#change-{e(r)}" '
+                 f'data-change="change-{e(r)}">{e(by[r]["short"])}</a>' for r in revs)
+    return f'<p class="rev" id="{i}-rev">Evidence last reviewed: {tdate(er["date"])}{ch}</p>'
 
 
 def fmt_utc(iso):  # 2026-11-09T14:00:36Z -> 9 Nov 2026, 14:00:36 UTC
@@ -62,7 +89,7 @@ def card(x):
       </li>'''
 
 
-def entry(x):
+def entry(x, revs=(), changes=()):
     i, s, n = x['id'], x['source'], x['scholarly_note']
     d = x['date_line']
     reports = ''.join(f'\n          <li>{e(r["text"])}</li>' for r in x['reports'])
@@ -126,6 +153,7 @@ def entry(x):
         <p>{e(x['evidence']['language'])}.</p>
         <p>{e(x['evidence']['note_not_counted'])}</p>
       </section>
+      {rev_line(i, x['evidence_reviewed'], revs, changes)}
     </article>'''
 
 
@@ -172,6 +200,10 @@ def src_obj(key):
     return s
 
 
+def revisions_of(entry_id):  # change ids that REVISED this entry (its first appearance is not a revision)
+    return [c['id'] for c in CHANGES['changes'] if c['kind'] == 'revised' and entry_id in c['entries']]
+
+
 def catalogue():
     eps = []
     for ep in BIG5['episodes']:
@@ -194,16 +226,20 @@ def catalogue():
                        'text': 'Shown beside the source value, not merged with it. The chart supplies the boundary only, not the event date.',
                        'source': None, 'locator': None})
         eps.append({'id': ep['id'], 'lane': 'extinctions', 'title': ep['title'], 'short': ep['short'], 'axis': True,
-                    'scope': ep.get('scope'), 'claims': claims, 'revisions': []})
+                    'scope': ep.get('scope'), 'claims': claims, 'evidence_reviewed': ep.get('evidence_reviewed'),
+                    'revisions': revisions_of(ep['id'])})
     pliny = json.loads(ENTRIES[0].read_text(encoding='utf-8'))
     shelf = [{'id': pliny['id'], 'lane': 'history', 'title': pliny['title']['text'], 'axis': False,
               'when': {'type': 'partial_date', 'day': pliny['date_line']['day'],
                        'calendar': pliny['date_line']['calendar_label'].strip('()'), 'year': None},
-              'note': 'Day and month only; never placed on the axis.'}]
+              'note': 'Day and month only; never placed on the axis.', 'evidence_reviewed': pliny.get('evidence_reviewed'),
+              'revisions': revisions_of(pliny['id'])}]
     src = CHART['source']
     return {
         'catalogue': 'timeline', 'catalogue_revision': BUILD['catalogue_revision'], 'schema': BUILD['schema'],
         'generated_at': BUILD['generated_at'],
+        'release': {'revision': BUILD['catalogue_revision'], 'release_date': BUILD['release_date'], 'previous': BUILD['previous']},
+        'releases': CHANGES['releases'], 'changes': CHANGES['changes'],
         'chart': {'name': src['name'], 'tag': src['tag'], 'commit': src['commit'], 'file_sha256': src['file_sha256'],
                   'licence': src['licence'], 'licence_url': src['licence_url'], 'citation': src['citation'], 'units': 'Ma',
                   'margin_meaning': src['margin_meaning'], 'window': CHART['window'], 'overview': CHART['overview'],
@@ -219,10 +255,94 @@ def catalogue():
 
 
 def cat_bytes():
-    return (json.dumps(catalogue(), ensure_ascii=False, separators=(',', ':')) + '\n').encode('utf-8')
+    cat = catalogue()
+    cb = (json.dumps(cat, ensure_ascii=False, separators=(',', ':')) + '\n').encode('utf-8')
+    check_rules(cat, cb)
+    return cb
+
+
+def is_date(d):
+    if not isinstance(d, str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}', d):
+        return False
+    try:
+        import datetime
+        datetime.date.fromisoformat(d); return True
+    except ValueError:
+        return False
+
+
+def check_rules(cat, cb):
+    """Refuse a catalogue that breaks the release, date, change-record or privacy rules (proposal rev 2.1 §3.2–§3.5, §6)."""
+    def no(msg):
+        raise SystemExit('refused: ' + msg)
+    rel, rels, chs = cat['release'], cat['releases'], cat['changes']
+    # releases: valid, ascending, the last is this build, previous = the last reader-facing release before it
+    if not rels or any(not is_date(r.get('release_date')) for r in rels): no('a release has no valid date')
+    if [r['release_date'] for r in rels] != sorted(r['release_date'] for r in rels): no('releases are not in date order')
+    if len({r['revision'] for r in rels}) != len(rels): no('a revision is listed twice')
+    if rels[-1]['revision'] != rel['revision'] or rels[-1]['release_date'] != rel['release_date']: no('the last release is not this build')
+    if rel['previous'] != (rels[-2]['revision'] if len(rels) > 1 else None): no('previous is not the last reader-facing release')
+    day = rel['release_date']
+    # entries: an explicit entry-wide review date (never derived), no date after the release day
+    ids = set()
+    for x in cat['entries'] + cat['shelf']:
+        ids.add(x['id'])
+        er = x.get('evidence_reviewed')
+        if not er or not is_date(er.get('date')): no(f"{x['id']} has no evidence_reviewed date")
+        if er['date'] > day: no(f"{x['id']} evidence_reviewed {er['date']} is after the release day {day}")
+        recs = er.get('records')
+        if not recs: no(f"{x['id']} evidence_reviewed names no public record")
+        for r in recs:  # a public pointer: a file in the public repo, never a private research or inbox path
+            if r.startswith(('/', '~', 'research/')) or '..' in r or not (ROOT / r).is_file(): no(f"{x['id']} record {r!r} is not a file in the public repo")
+        for c in x.get('claims', []):
+            for s in (c.get('source'), c.get('also')):
+                if not s: continue
+                if not is_date(s.get('checked')): no(f"{x['id']} source {s.get('key')} has no checked date")
+                if s['checked'] > day: no(f"{x['id']} source {s['key']} checked {s['checked']} is after the release day {day}")
+                if f"(checked {fmt_date(s['checked'])})" not in s['status']: no(f"{x['id']} source {s['key']}: status text and checked date disagree")
+    # change records
+    seen, known = set(), {r['revision'] for r in rels}
+    for c in chs:
+        if 'inbox' in c: no(f"{c.get('id')} carries an inbox field")
+        if c['revision'] not in known: no(f"{c['id']} names an unreleased revision")
+        if not re.fullmatch(re.escape(c['revision']) + r'-[1-9]\d*', c['id']) or c['id'] in seen: no(f"bad or repeated change id {c['id']}")
+        seen.add(c['id'])
+        if c['kind'] not in ('added', 'revised'): no(f"{c['id']} kind {c['kind']!r}")
+        if not c.get('entries') or any(i not in ids for i in c['entries']): no(f"{c['id']} names an unknown entry")
+        if c['kind'] == 'revised':
+            if c['what'] not in ('wording', 'date') or not c.get('short') or not c.get('why') or len(c['entries']) != 1: no(f"{c['id']} is incomplete")
+            for side in ('before', 'after'):
+                v = c.get(side) or {}
+                if c['what'] == 'wording' and not (v.get('label') and v.get('text')): no(f"{c['id']} {side} wording missing")
+                if c['what'] == 'date':  # each side keeps its OWN evidence snapshot, copied in at the time of the change
+                    sn = v.get('source') or {}
+                    if not v.get('when_text') or not all(sn.get(k) for k in ('citation', 'url', 'licence', 'status')) or not is_date(sn.get('checked')):
+                        no(f"{c['id']} {side} value has no evidence snapshot of its own")
+            if c['revision'] == rel['revision']:  # a change made in THIS build must match the data on both sides
+                ent = next(x for x in cat['entries'] + cat['shelf'] if x['id'] == c['entries'][0])
+                cl = next((k for k in ent.get('claims', []) if k['claim_type'] == c.get('claim_type')), None)
+                if not cl: no(f"{c['id']} names a claim the entry does not have")
+                prev = json.loads((TL / 'catalogue' / (rel['previous'] + '.json')).read_text(encoding='utf-8'))
+                pe = next((x for x in prev['entries'] if x['id'] == ent['id']), None)
+                pc = next((k for k in (pe or {}).get('claims', []) if k['claim_type'] == c['claim_type']), None)
+                if not pc: no(f"{c['id']}: the previous release has no such claim")
+                if c['what'] == 'wording':
+                    if (c['after']['label'], c['after']['text']) != (cl['label'], cl['text']): no(f"{c['id']} 'after' is not what this catalogue says")
+                    if (c['before']['label'], c['before']['text']) != (pc['label'], pc['text']): no(f"{c['id']} 'before' is not what {rel['previous']} said")
+                else:
+                    if c['after']['when_text'] != cl['when_text']: no(f"{c['id']} 'after' is not the value this catalogue shows")
+                    if c['before']['when_text'] != pc['when_text']: no(f"{c['id']} 'before' is not the value {rel['previous']} showed")
+    for x in cat['entries'] + cat['shelf']:
+        if any(r not in seen for r in x['revisions']): no(f"{x['id']} lists an unknown change")
+    # privacy: inbox fields and private paths stay out of shipped data
+    low = cb.decode('utf-8').lower()
+    for bad in (r'tl-in-\d', r'timeline-inbox/', r'(?<!docs/)research/', r'_review/', r'/users/', r'_to_delete'):
+        if re.search(bad, low): no(f'shipped data contains a private reference ({bad})')
 
 
 CAT_PATH = TL / 'catalogue' / (BUILD['catalogue_revision'] + '.json')
+# for each revision, the releases before it (a date change says which revision showed the earlier value)
+REL_BEFORE = {r['revision']: CHANGES['releases'][:n] for n, r in enumerate(CHANGES['releases'])}
 
 
 def asset_version(page):
@@ -249,8 +369,16 @@ def src_line(s, locator):
             f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(s["licence"])}. {e(s["status"])}.</p>')
 
 
-def ep_article(ep):
+def snap_line(v):  # one side of a date change, with ITS OWN citation and checked date (not the entry's current source)
+    sn = v['source']
+    loc = f' · {e(sn["locator"])}' if sn.get('locator') else ''
+    return (f'{e(v["when_text"])} — {e(sn["citation"])}{loc}. <a href="{e(sn["url"])}" target="_blank" rel="noopener">source '
+            f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(sn["licence"])} · checked {tdate(sn["checked"])}')
+
+
+def ep_article(ep, changes=()):
     i = ep['id']; parts = []
+    by = {c['id']: c for c in changes}
     for n, c in enumerate(ep['claims']):
         cid = f'{i}-c{n}'
         val = f'<p class="cval">{e(c["when_text"])}</p>' if c.get('when_text') else ''
@@ -261,10 +389,48 @@ def ep_article(ep):
                      f'        {val}<p>{e(c["text"])}</p>{asm}\n'
                      f'        {src_line(c.get("source"), c.get("locator"))}{also}\n'
                      f'      </section>')
+    for r in ep['revisions']:  # an earlier date stays visible in the entry, labelled with the revision that showed it
+        c = by[r]
+        if c['what'] != 'date':
+            continue
+        was = next(x['revision'] for x in reversed(REL_BEFORE[c['revision']]))
+        parts.append(f'      <section class="es earlier" id="{i}-earlier-{e(r)}" aria-labelledby="{i}-earlier-{e(r)}-h">\n'
+                     f'        <h4 id="{i}-earlier-{e(r)}-h">Earlier dating</h4>\n'
+                     f'        <p>Shown in revision {e(was)}: <span class="was">{snap_line(c["before"])}</span>.</p>\n'
+                     f'      </section>')
     scope = f'\n      <p class="scope">{e(ep["scope"])}</p>' if ep.get('scope') else ''
     return (f'    <article class="entry ep" id="{i}" aria-labelledby="{i}-h">\n'
             f'      <h3 class="eh" id="{i}-h" tabindex="-1">{e(ep["title"])}</h3>{scope}\n'
-            + '\n'.join(parts) + '\n    </article>')
+            + '\n'.join(parts) + f'\n      {rev_line(i, ep["evidence_reviewed"], ep["revisions"], changes)}\n    </article>')
+
+
+def change_item(c, cat):
+    """One public change record, as a reader sees it."""
+    ents = {x['id']: x for x in cat['entries'] + cat['shelf']}
+    cid = 'change-' + c['id']
+    if c['kind'] == 'added':
+        return f'        <li class="chgrec" id="{e(cid)}" tabindex="-1">{e(c["text"])}</li>'
+    ent = ents[c['entries'][0]]
+    reviewed = f'The entry\'s evidence was last reviewed {tdate(ent["evidence_reviewed"]["date"])}.'
+    opener = (f'<a class="chgopen" id="{e(cid)}-open" href="#{e(ent["id"])}" data-entry="{e(ent["id"])}" data-opener="change">Open the entry</a>')
+    if c['what'] == 'wording':
+        body = (f'<b>{e(c["title"])}</b> The label "{e(c["before"]["label"])}" now reads "{e(c["after"]["label"])}", with the matching change '
+                f'in the entry text. Why: {e(c["why"])}. {e(c["unchanged"])} {reviewed} {opener}')
+    else:  # date: old and new side by side, each with its own citation and checked date
+        body = (f'<b>{e(c["title"])}</b> Was: <span class="was">{snap_line(c["before"])}</span>. Now: <span class="now">{snap_line(c["after"])}</span>. '
+                f'Why: {e(c["why"])}. {reviewed} {opener}')
+    return f'        <li class="chgrec" id="{e(cid)}" tabindex="-1">{body}</li>'
+
+
+def changes_section(cat):
+    out = ['  <section id="changes" class="changes" aria-labelledby="changes-h">', '    <h3 id="changes-h">What changed</h3>']
+    for r in reversed(cat['releases']):  # newest first
+        note = f' ({e(r["note"])})' if r.get('note') else ''
+        out += [f'    <section class="rel" id="rel-{e(r["revision"])}" aria-labelledby="rel-{e(r["revision"])}-h">',
+                f'      <h4 id="rel-{e(r["revision"])}-h">{tdate(r["release_date"])} — revision {e(r["revision"])}{note}</h4>', '      <ul>']
+        out += [change_item(c, cat) for c in cat['changes'] if c['revision'] == r['revision']]
+        out += ['      </ul>', '    </section>']
+    return out + ['  </section>']
 
 
 def render(page, cat, sha):
@@ -274,7 +440,10 @@ def render(page, cat, sha):
     eps = cat['entries']
     cards = '\n'.join(card(x) for x in shelf)
     ep_cards = '\n'.join(ep_card(x) for x in eps)
-    full = '\n'.join(entry(x) for x in xs) + '\n' + '\n'.join(ep_article(x) for x in eps)
+    srev = {x['id']: x['revisions'] for x in cat['shelf']}
+    full = ('\n'.join(entry(x, srev[x['id']], cat['changes']) for x in xs) + '\n'
+            + '\n'.join(ep_article(x, cat['changes']) for x in eps))
+    rel = cat['release']
     lanes = '\n'.join(f'      <li class="lane" data-lane="{l["id"]}">{e(l["label"])}'
                       + (f' <span class="n">({len(eps)})</span>' if l['status'] == 'active' else f' · {e(l["status"])}') + '</li>'
                       for l in cat['lanes'])
@@ -286,6 +455,7 @@ def render(page, cat, sha):
         f'data-catalogue-rev="{e(cat["catalogue_revision"])}" data-build="{v}">',
         '    <h3 id="axis-h">Deep time</h3>',
         f'    <p class="coverage">{e(cat["coverage"])}</p>',
+        f'    <p class="updated" id="tl-updated">Timeline page updated {tdate(rel["release_date"])} · revision {e(rel["revision"])} · <a id="tl-changes-link" href="#changes">What changed</a></p>',
         '    <div id="axis" class="axis" hidden></div>',
         '    <p id="axis-off" class="axisoff" role="status" hidden>The timeline axis is unavailable right now; every entry, date and source is listed below.</p>',
         '    <noscript><p class="axisoff">The timeline axis needs JavaScript; every entry, date and source is listed below.</p></noscript>',
@@ -317,6 +487,8 @@ def render(page, cat, sha):
         '  <section id="entries" class="entries" aria-label="Entries in full">',
         full,
         '  </section>',
+        '',
+        *changes_section(cat),
         '  ' + END])
 
 
@@ -342,7 +514,7 @@ def main():
     path.write_text(new, encoding='utf-8')
     if not m or m.group(1) != v:
         print(f'WARNING: timeline.js BUILD must be {v}')
-    print(f'timeline.html written; {CAT_PATH.relative_to(ROOT)} {len(cb)} B sha256 {sha}')
+    print(f'{path.name} written; {CAT_PATH.name} {len(cb)} B sha256 {sha}')
 
 
 if __name__ == '__main__':

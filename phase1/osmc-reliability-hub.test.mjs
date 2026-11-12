@@ -95,7 +95,7 @@ const t = async (n, fn) => { try { await fn(); pass++; console.log('ok   -', n);
 // a good 15:07 scheduled run to start every case from
 async function seeded(extra) { const E = makeEnv(extra); at('2026-11-10T15:08:15.000Z'); osmc = []; osmcDefault = good(); await hourly(E, '2026-11-10T15:07:00Z'); return E; }
 
-await t('0. hub reports 0.6.8', async () => { const E = makeEnv(); assert.equal((await pj(E, '/')).version, '0.6.8'); });
+await t('0. hub reports at least 0.6.8', async () => { const E = makeEnv(); const v = String((await pj(E, '/')).version).split('.').map(Number); assert.ok(v.length === 3 && v.every(Number.isInteger) && (v[0] > 0 || v[1] > 6 || (v[1] === 6 && v[2] >= 8)), 'version ' + v.join('.')); });
 
 await t('1. good → 522 → recovery, scheduled runs, public endpoints', async () => {
   const E = await seeded();

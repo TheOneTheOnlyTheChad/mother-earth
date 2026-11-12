@@ -8,13 +8,16 @@
  *  - returns focus to the exact opener (title or shortcut) on Close, Esc, handle or Back;
  *  - direct link: focus the detail heading; explicit Close clears the fragment and focuses the card title
  *    (or the card control last used to switch the open entry);
- *  - a title/shortcut used while the entry is open updates the open history entry; it never adds one.
+ *  - a title/shortcut used while the entry is open updates the open history entry; it never adds one;
+ *  - "Changed in …" inside an open entry jumps to its record under What changed (TIMELINE-INBOX-AND-CHANGES-PROPOSAL
+ *    rev 2.1 §5): on a phone the sheet is closed VISUALLY (the Close handler is not used: it would spend the history
+ *    entry Back needs), the record is revealed and focused, and Back reopens the same entry with focus on that link.
  * No fetch, no third-party request. Menu and clock behave as on the other pages (this page does not load app.js). */
 (() => {
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202611221000';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202611301000';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
@@ -61,7 +64,13 @@ function setX(sec, on) { const btn = sec.querySelector('.xbtn'), b = sec.querySe
 const xSection = (id, x) => x ? $(`${id}-${x}`) : null;
 
 let cur = null;               // {id, x, k, direct} of the open entry
-let seq = 0;
+// History keys are unique across reloads of this tab (they start from the clock, never below a key already in use), and
+// every state we push records p, the key of the entry it was pushed FROM. Direction and return targets are read from
+// that stored data (and from the state being left), never inferred from the size of a key or from page memory.
+let seq = Math.max(Date.now(), (history.state && history.state.k) || 0);
+let at = history.state || null;   // the state of the history entry we are on (survives a reload: it IS history.state)
+const put = (st, hash) => { history.pushState(st, '', hash); at = st; };
+const swap = (st, url) => { history.replaceState(st, '', url); at = st; };
 const openers = new Map();    // history key -> the control that opened it (page memory only)
 const isPhone = () => innerWidth <= PHONE;
 const cardTitle = id => { const a = document.querySelector(`#card-${CSS.escape(id)} .ctitle a`); return a && a.offsetParent ? a : null; };
@@ -101,6 +110,26 @@ function hide(focusEl) {
   (focusEl || pageHeading()).focus();
 }
 const focusHeading = id => { const h = $(id + '-h'); if (h) h.focus(); };
+// the visual half of closing, with no history call and no focus move (used by the "Changed in …" jump)
+function closeVisual() {
+  const art = body.firstElementChild; if (art) home.appendChild(art);
+  detail.hidden = true; document.body.classList.remove('dopen'); applyMode();   // inert and scroll lock released
+  cur = null;
+}
+function reveal(rec) { rec.scrollIntoView({ block: 'start' }); rec.focus({ preventScroll: true }); }
+
+// "Changed in …" inside an entry -> its record under What changed. The jump gets its own history entry, so Back
+// returns to the entry's own entry (still in history) and reopens it.
+document.addEventListener('click', ev => {
+  const a = ev.target.closest('a[data-change]'); if (!a || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+  const rec = $(a.dataset.change); if (!rec) return;   // no such record: the plain link is left to the browser
+  ev.preventDefault();
+  const from = cur && !detail.hidden ? cur.k : null;
+  if (from !== null && isPhone()) closeVisual();
+  // the jump's own history entry carries its return target: the entry it left and the link that was used
+  put({ change: a.dataset.change, k: ++seq, p: at ? at.k : 0, from: from !== null ? { entryK: from, link: a.id } : null }, '#' + a.dataset.change);
+  reveal(rec);
+});
 
 // open from a card control (title or shortcut)
 document.addEventListener('click', ev => {
@@ -111,14 +140,14 @@ document.addEventListener('click', ev => {
     // already open: switching title/shortcut UPDATES the open history entry (no new entry), keeps its key and
     // direct flag; focus on close then returns to this, the most recently used card control
     openers.set(cur.k, a);
-    history.replaceState({ entry: id, x, opener, direct: cur.direct, k: cur.k }, '', '#' + id);
+    swap({ entry: id, x, opener, oid: a.id || null, direct: cur.direct, k: cur.k, p: history.state.p || 0 }, '#' + id);
     cur = { id, x, k: cur.k, direct: cur.direct };
     if (show(id, x)) focusHeading(id);
     return;
   }
   const k = ++seq;
   openers.set(k, a);
-  history.pushState({ entry: id, x, opener, k }, '', '#' + id);
+  put({ entry: id, x, opener, oid: a.id || null, k, p: at ? at.k : 0 }, '#' + id);
   cur = { id, x, k, direct: false };
   if (show(id, x)) focusHeading(id);
 });
@@ -128,7 +157,7 @@ function userClose() {
   if (!cur) return;
   if (!cur.direct && history.state && history.state.entry === cur.id) { history.back(); return; }   // popstate closes and restores focus
   const id = cur.id, k = cur.k;
-  history.replaceState(null, '', location.pathname + location.search);   // clears the fragment
+  swap(null, location.pathname + location.search);   // clears the fragment
   hide(openers.get(k) || backTarget(id));   // a control used after a direct link, else the mark / cluster / card title
 }
 $('d-close').addEventListener('click', userClose);
@@ -148,10 +177,27 @@ document.addEventListener('keydown', ev => {
 
 // Back / Forward
 addEventListener('popstate', ev => {
-  const st = ev.state;
+  const st = ev.state, left = at;                         // left = the state of the entry we came from
+  at = st || null;
+  if (st && st.change) {                                  // onto a "Changed in …" jump
+    const rec = $(st.change); if (!rec) return;
+    if (left && left.entry && left.p === st.k) {          // Back from an entry that was opened FROM this record: close it, focus its opener
+      const o = visible(openers.get(left.k)) || visible(left.oid ? $(left.oid) : null);
+      hide(o || rec); if (!o) reveal(rec);
+    } else {                                              // Forward into the jump (or arriving from further away)
+      if (cur && isPhone()) closeVisual();
+      reveal(rec);
+    }
+    return;
+  }
   if (st && st.entry && entries.has(st.entry)) {          // Forward (or Back onto an open state): reopen with the stored expander
     cur = { id: st.entry, x: st.x || null, k: st.k, direct: !!st.direct };
-    show(st.entry, st.x); focusHeading(st.entry); return;
+    show(st.entry, st.x);
+    const l = left && left.change && left.from && left.from.entryK === st.k ? $(left.from.link) : null;   // Back from a jump: the link THAT jump stored
+    if (l) {   // focus again after the browser's own fragment handling, which can drop it (as in focusSoon)
+      l.focus(); setTimeout(() => { if (cur && cur.k === st.k && !detail.hidden && document.activeElement !== l) l.focus(); }, 0);
+    } else focusHeading(st.entry);
+    return;
   }
   const leaving = cur;
   if (leaving) hide((visible(openers.get(leaving.k)) ? openers.get(leaving.k) : null) || backTarget(leaving.id));
@@ -159,6 +205,8 @@ addEventListener('popstate', ev => {
 });
 
 addEventListener('resize', () => { if (!detail.hidden) applyMode(); });
+// a plain fragment link (#changes, #dated, …) adds a history entry without pushState: keep `at` on the entry we are really on
+addEventListener('hashchange', () => { at = history.state || null; });
 
 // direct link (page loaded at #e-…; also the no-JS section anchors #e-…-conv / #e-…-debate, folded into the one fragment)
 // focus again after the browser's own fragment handling (page load or a same-page fragment), which can drop an earlier focus()
@@ -169,7 +217,7 @@ const focusSoon = id => {
 };
 function direct(id, x) {
   const k = ++seq;
-  history.replaceState({ entry: id, x, opener: null, direct: true, k }, '', '#' + id);
+  swap({ entry: id, x, opener: null, direct: true, k, p: 0 }, '#' + id);
   cur = { id, x, k, direct: true };
   if (show(id, x)) focusSoon(id);
 }
@@ -190,7 +238,7 @@ const LABELS = {
   boundary_age_bound: 'Boundary age: no older than',
   boundary_age_range_modelled: 'Modelled boundary-age range',
   extinction_onset_estimate: 'Estimated extinction onset',
-  extinction_horizon_approx: 'Approximate age of the extinction horizon',
+  extinction_horizon_approx: 'Approximate age of the extinction level in the rock record',
   dated_event_age: 'Impact age',
   extinction_placement_tied: 'Extinction placed at the dated impact (synchrony evidence cited)',
   chart_boundary: 'ICS chart boundary (v2026-06)',
@@ -207,7 +255,7 @@ window.TL_AXIS = axisState;     // read-only test/console aid
 
 const isNum = v => typeof v === 'number' && isFinite(v);
 function validate(c) {
-  if (!c || c.catalogue !== 'timeline' || c.schema !== 1) return 'catalogue identity';
+  if (!c || c.catalogue !== 'timeline' || c.schema !== 2) return 'catalogue identity';
   if (c.catalogue_revision !== wrap.dataset.catalogueRev) return 'revision';
   const ch = c.chart;
   if (!ch || !ch.window || !isNum(ch.window.ma) || !ch.overview || !isNum(ch.overview.ma) || ch.overview.ma <= ch.window.ma) return 'chart bounds';
@@ -227,6 +275,27 @@ function validate(c) {
     if (!e.claims.some(k => k.axis)) return 'no axis claim ' + e.id;
   }
   if (!Array.isArray(c.shelf) || c.shelf.some(x => x.axis !== false)) return 'shelf';
+  // schema 2: the release, each entry's own review date, and the change records
+  const rel = c.release, isDate = d => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(Date.parse(d + 'T00:00:00Z'));
+  if (!rel || rel.revision !== c.catalogue_revision || !isDate(rel.release_date)) return 'release';
+  if (!Array.isArray(c.releases) || !c.releases.length || c.releases[c.releases.length - 1].revision !== rel.revision
+    || c.releases.some(r => !r || typeof r.revision !== 'string' || !isDate(r.release_date) || r.release_date > rel.release_date)) return 'releases';
+  const all = [...c.entries, ...c.shelf];
+  for (const e of all) {
+    if (!entries.has(e.id)) return 'entry ' + e.id;
+    if (!e.evidence_reviewed || !isDate(e.evidence_reviewed.date) || e.evidence_reviewed.date > rel.release_date) return 'evidence reviewed ' + e.id;
+    if (!Array.isArray(e.revisions)) return 'revisions ' + e.id;
+  }
+  if (!Array.isArray(c.changes)) return 'changes';
+  const known = new Set(c.releases.map(r => r.revision)), seen = new Set();
+  for (const ch of c.changes) {
+    if (!ch || typeof ch.id !== 'string' || seen.has(ch.id) || !known.has(ch.revision) || ch.id.indexOf(ch.revision + '-') !== 0) return 'change id';
+    seen.add(ch.id);
+    if (ch.kind !== 'added' && ch.kind !== 'revised') return 'change kind ' + ch.id;
+    if (!Array.isArray(ch.entries) || !ch.entries.length || ch.entries.some(i => !entries.has(i))) return 'change entry ' + ch.id;
+    if (!$('change-' + ch.id)) return 'change not on the page ' + ch.id;        // the pre-rendered record this catalogue describes
+  }
+  if (all.some(e => e.revisions.some(r => !seen.has(r)))) return 'unknown revision';
   return null;
 }
 

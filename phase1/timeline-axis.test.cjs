@@ -12,7 +12,8 @@ const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899';
 const ROOT = path.resolve(__dirname, '..');
 const BREAK = process.env.BREAK || '';
-const CAT = fs.readFileSync(path.join(ROOT, 'phase1/timeline/catalogue/tl-2026-11-R1.json'));
+const REV = JSON.parse(fs.readFileSync(path.join(ROOT, 'phase1/timeline/BUILD.json'), 'utf8')).catalogue_revision;   // the revision this page was built for
+const CAT = fs.readFileSync(path.join(ROOT, 'phase1/timeline/catalogue/' + REV + '.json'));
 const HTML = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8');
 const JS0 = fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8');
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
@@ -37,7 +38,7 @@ const ID = { o: 'e-big5-end-ordovician', ff: 'e-big5-frasnian-famennian', p: 'e-
 const page = (o = {}) => {
   let h = HTML;
   if (o.sha) h = h.replace(`data-catalogue-sha="${SHA}"`, `data-catalogue-sha="${o.sha}"`);
-  if (o.rev) h = h.replace('data-catalogue-rev="tl-2026-11-R1"', `data-catalogue-rev="${o.rev}"`);
+  if (o.rev) h = h.replace(`data-catalogue-rev="${REV}"`, `data-catalogue-rev="${o.rev}"`);
   if (o.build) h = h.replace(/data-build="\d+"/, `data-build="${o.build}"`);
   return h;
 };
@@ -137,7 +138,8 @@ const axisInfo = p => p.evaluate(() => {
     await p.focus('#axis-h').catch(() => {}); await p.evaluate(() => document.getElementById('axis-h').setAttribute('tabindex', '-1')); await p.focus('#axis-h');
     const seen = [];
     for (let i = 0; i < 12; i++) { await p.keyboard.press('Tab'); seen.push(await p.evaluate(() => (document.activeElement.dataset && document.activeElement.dataset.entry) || document.activeElement.id || document.activeElement.className || document.activeElement.tagName)); }
-    ok(`${w}: Tab reaches the period list, then the five marks in order`, seen[0] === 'periods-btn' || seen[0] === '' ? seen.slice(1, 6).join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].join() : false, seen);
+    // schema 2: the "What changed" link in the page-updated line is one Tab stop before the axis; then the period list, then the marks
+    ok(`${w}: Tab reaches the What changed link, the period list, then the five marks in order`, seen[0] === 'tl-changes-link' && seen[1] === 'periods-btn' && seen.slice(2, 7).join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].join(), seen);
     await c.close();
   }
 
@@ -147,7 +149,7 @@ const axisInfo = p => p.evaluate(() => {
     ['503 unavailable', { hub: r => r.fulfill({ status: 503, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: '{"status":"unavailable"}' }) }, /http 503/],
     ['network error', { hub: r => r.abort() }, /network/],
     // CORS is not enforced on Playwright-fulfilled responses, so the real CORS check is the live RC from the GitHub Pages origin against the Worker (§4a)
-    ['different revision served (one byte changed)', { hub: serve(Buffer.from(CAT.toString('utf8').replace('"tl-2026-11-R1"', '"tl-2026-11-R2"'))) }, /revision mismatch/],
+    ['different revision served (one byte changed)', { hub: serve(Buffer.from(CAT.toString('utf8').replace(`"catalogue_revision":"${REV}"`, '"catalogue_revision":"tl-2026-11-R9"'))) }, /revision mismatch/],
     ['page expects another revision', { html: page({ sha: 'a'.repeat(64) }) }, /revision mismatch/],
     ['HTML and script from different builds', { html: page({ build: '202601010000' }) }, /^build$/],
   ];
@@ -266,7 +268,7 @@ const axisInfo = p => p.evaluate(() => {
     ok('no-JS: four lanes named, three "no entries yet"', m.lanes.length === 4 && m.lanes.filter(l => /No (dated )?entries/.test(l)).length === 3, m.lanes);
     ok('no-JS: five episode entries pre-rendered', m.eps.join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].join(), m.eps);
     const want = { extinction_interval_approx: 'Approximate extinction interval', boundary_age_bound: 'Boundary age: no older than', boundary_age_range_modelled: 'Modelled boundary-age range',
-      extinction_onset_estimate: 'Estimated extinction onset', extinction_horizon_approx: 'Approximate age of the extinction horizon', dated_event_age: 'Impact age',
+      extinction_onset_estimate: 'Estimated extinction onset', extinction_horizon_approx: 'Approximate age of the extinction level in the rock record', dated_event_age: 'Impact age',
       extinction_placement_tied: 'Extinction placed at the dated impact (synchrony evidence cited)', chart_boundary: 'ICS chart boundary (v2026-06)', context: 'Context' };
     ok('no-JS: every claim carries its own fixed label', m.claims.length > 0 && m.claims.every(([t, l]) => want[t] === l) && Object.keys(want).every(t => m.claims.some(([x]) => x === t)), m.claims);
     ok('no-JS: permalinks point at the pre-rendered entries', m.permalinks.join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].map(i => '#' + i).join(), m.permalinks);
@@ -276,7 +278,7 @@ const axisInfo = p => p.evaluate(() => {
   }
 
   // ---------- F. 0.6.4: the page requests /catalogue/timeline/<its own data-catalogue-rev>
-  for (const [label, html, rev] of [['real page', null, 'tl-2026-11-R1'], ['page built for another revision', page({ rev: 'tl-2026-12-R2' }), 'tl-2026-12-R2']]) {
+  for (const [label, html, rev] of [['real page', null, REV], ['page built for another revision', page({ rev: 'tl-2026-12-R2' }), 'tl-2026-12-R2']]) {
     const urls = [];
     const c = await ctx(b, { html, hub: r => { urls.push(r.request().url()); return serve(CAT)(r); } });
     const p = await c.newPage();
