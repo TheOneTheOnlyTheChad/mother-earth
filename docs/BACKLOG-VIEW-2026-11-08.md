@@ -12,6 +12,7 @@ One page over everything open: the research backlog (`docs/RESEARCH-BACKLOG.md`,
 | **R11 FIRMS late arrivals** | An unmeasured question: whether detections processed after midnight are missing from that day's checkpoint (`day_range=1` resets at 00:00 UTC). No quantity of lost detections is established | Not started (one data point) | Measure across several days; compare `day_range=2` | small–medium |
 | **place-ui harness** | Test-only fix, 30/30 | On branch; **GPT technical sign-off 8 Nov** | Chad's Approve line to merge | done, merge only |
 | **Smoke checks left** | Real phone; noon rollover; HTTP status codes | Noon booked 11:50 UTC today | Real phone with Chad (with the Phase 0 iPhone runs) | — |
+| **Sea-ice last-good fallback** | One failed NSIDC fetch blanks the sea-ice tile until the next 6-hourly run, although the last good reading exists (as buoys did before hub 0.6.8) | **Backlog (Chad, 12 Nov)** — one failure seen (12 Nov 03:08 UTC, HTTP 521; recovered 09:08) | Only if failures recur: evidence + a sea-ice-only proposal | small (hub + page) |
 | **Real iPhone Safari check** | Live site incl. the deep-time Timeline on a real iPhone (the pane is not a phone) | **Deferred by Chad 10 Nov** — site first | Chad, later | — |
 
 ## B. New sources (research only, R1–R10)
@@ -35,10 +36,10 @@ Captured from Chad's brief (10 Nov). The deep-time release (catalogue `tl-2026-1
 
 | ID | Item | What Chad wants | State |
 |---|---|---|---|
-| **T1** | **Discovery inbox** *(first deliverable)* | Log new papers, newly uncovered or digitised records, corrections and reader tips, each with the source link and a short note on what it might add or change. A source scan may surface leads; **a person reviews each claim before publication**. | Not started |
+| **T1** | **Discovery inbox** *(first deliverable)* | Log new papers, newly uncovered or digitised records, corrections and reader tips, each with the source link and a short note on what it might add or change. A source scan may surface leads; **a person reviews each claim before publication**. | **Proposal rev 1** 12 Nov (`docs/concepts/TIMELINE-INBOX-AND-CHANGES-PROPOSAL.md`), for GPT |
 | **T2** | **Evidence review** | Record what the source actually supports, its date or range, the uncertainty, the citation, the licence, and when it was checked. Show credible disagreements where they matter. **Keep the dates-without-a-year shelf** for entries like Pliny. | Not started (today's record: `TIMELINE-BIG-FIVE-SOURCE-CHECK.md` + REGISTER) |
 | **T3** | **Versioned releases** | Keep event links stable. Each published catalogue gets a new revision ID; **older catalogues retained** for pages that still expect them; each page and catalogue released as a **matched pair using the existing hash checks**. | **Serving mechanism DONE 10 Nov** (hub 0.6.4 versioned route, legacy URL pinned to R1, immutable revisions; page fetches its own revision — main `cc91165`; `docs/concepts/TIMELINE-CATALOGUE-REVISIONS-PROPOSAL.md` rev 1.1). Stable event links already hold. |
-| **T4** | **Public change history ("What changed")** *(first deliverable)* | A small section for additions, revisions and withdrawals. If an event's date changes, show the **old and new ranges and the evidence behind the change**. Page "last updated" kept **separate** from each entry's "last reviewed". | Not started |
+| **T4** | **Public change history ("What changed")** *(first deliverable)* | A small section for additions, revisions and withdrawals. If an event's date changes, show the **old and new ranges and the evidence behind the change**. Page "last updated" kept **separate** from each entry's "last reviewed". | **Proposal rev 1** 12 Nov (same document), for GPT |
 | **T5** | **Release cadence** | Batch routine additions by lane or topic; move **material corrections and withdrawals sooner**. | Not started |
 
 Already queued against T2/T3/T5 (routine, batch with the next revision): GPT's wording note — "extinction horizon" → plainer wording (STATUS 10 Nov 06:53).

@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 09:10 UTC (clock reading at write) — **Timeline T1 inbox + T4 "What changed" proposal rev 1 written** (docs only, on Chad's go); sea ice recovered
+
+- New thread (lockdown-pass handover). Chad: "Go: draft the Timeline T1 discovery inbox and T4 public 'What changed' proposal for GPT review", small first delivery, proposal only.
+- **Proposal:** `docs/concepts/TIMELINE-INBOX-AND-CHANGES-PROPOSAL.md` rev 1 (main `4001a73`, sha256 `b03f51e6…6ad9`; Mac copy hash-checked 09:07:09 UTC, Mac clock; Claude Project copy written).
+  - **T1:** a private inbox (Mac `research/timeline-inbox/` + Project, outside the public repo); states logged → triaged → in evidence review → reviewed → accepted → released. Worked example **TL-IN-0001** = GPT's 10 Nov "extinction horizon" wording note on the end-Triassic entry.
+  - **T4:** a pre-rendered "What changed" section; per-entry "Evidence last reviewed" kept apart from the release date; old and new values side by side when a date changes (test fixture only in the first delivery).
+  - **Preserved:** entry IDs and anchors; R1's object, pin and both routes. The first delivery would be a new revision `tl-2026-11-R2`.
+  - Decisions C1–C5 are Chad's after GPT. Approval lines listed in §9; **none given**.
+- **Not approved:** inbox creation, branch build, R2 upload, hub deploy, page release.
+- **Sea ice (read-only, D1):** the 03:08 UTC run was down (NSIDC north daily file HTTP 521; climatology 200). **The 09:08 run recovered:** finished 09:08:12 UTC, ok, HTTP 200, data date 2026-11-10 (read at 09:10:08 UTC, D1 clock). One failed run in the last six.
+  - Sea ice still takes the generic failure write, so one failed run can blank the tile until the next 6-hourly run although the last good reading exists (the shape buoys had before hub 0.6.8). **Chad: keep the fallback on the backlog for now; if failures recur, bring back the evidence and a sea-ice-only scope.** Nothing changed.
+- **Buoy watch (read 08:52:57 UTC, D1 clock):** 13 of 13 runs ok since the 0.6.8 deploy; the fallback has still not run on production.
+- Live unchanged: hub 0.6.8, page `7c3aa22`.
+
 ## 12 Nov 08:50 UTC (clock reading at write) — **Lockdown pass closed and parked (Chad); back to the backlog** (docs only; nothing changed)
 
 - Chad paused the wider migration (12 Nov), asked for the remaining read-only access checks and a rehearsal plan for a narrower website-publishing restriction, then parked it: "Let's park the publishing restriction here and return to the backlog."
