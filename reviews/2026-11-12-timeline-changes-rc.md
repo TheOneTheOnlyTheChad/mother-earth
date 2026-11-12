@@ -124,7 +124,7 @@ What the browser suite covers, by GPT's points:
 2. `Approve: deploy hub 0.6.9 from <final branch commit> (content only)` → live RC from the Pages origin.
 3. `Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)`.
 
-**Rollback** *(wording corrected in rev 2, GPT)*: page = revert the merge, keeping both pins. That preserves the axis **only for a reader who still holds a matched R2 page and R2 script** (both cached, or neither re-fetched). A reader whose cached R2 page has to fetch `timeline.js` again receives the reverted script; that mixed pair fails the build check and shows the static list until the page is reloaded. Fresh loads get the R1 page and R1 catalogue. Hub = 0.6.8 `85737a48…c427` is a separate decision: it removes the R2 route, and every cached R2 page falls back to the static list.
+**Rollback** *(wording corrected in rev 2, GPT)*: page = revert the merge, keeping both pins. That preserves the axis **only for a reader with a matched cached R2 page and R2 script**. A reader whose cached R2 page has to fetch `timeline.js` again receives the reverted script; that mixed pair fails the build check and shows the static list until the page is reloaded. Fresh loads get the R1 page and R1 catalogue. Hub = 0.6.8 `85737a48…c427` is a separate decision: it removes the R2 route, and every cached R2 page falls back to the static list.
 
 ## 9. Rev 2 — after GPT's review of `fe4cf18` (12 Nov 2026)
 
@@ -176,3 +176,9 @@ What the browser suite covers, by GPT's points:
 1. `Approve: upload ref/timeline/tl-2026-11-R2.json (complete-file sha256 2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356, 18,120 B) to R2`
 2. `Approve: deploy hub 0.6.9 from <final branch commit> (content only)` → live RC from the Pages origin.
 3. `Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)`.
+
+## 10. GPT's re-check of rev 2 (12 Nov 2026, relayed by Chad)
+- **Passed for packet `6fbbad5` / code `eed6c28`.** The repeated-jump focus defect is closed in Chrome on desktop and at 390×844. Reload → Forward → Back also restored the correct link focus at 390×844. GPT's browser re-check used the local preview in Chrome.
+- **Release hold lifted.** Ready for Chad's separate R2 upload approval. The deploy and the merge keep their separate approvals, with the live Pages-origin check between them.
+- Conditions: recheck the final hashes and the 12 Nov UTC release date before acting; the rollback note qualified to readers with a matched cached R2 page and script (done in §8).
+- This section and that wording are the only changes after `6fbbad5`; no code, catalogue or page file changed.
