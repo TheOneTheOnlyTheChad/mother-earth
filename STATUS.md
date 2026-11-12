@@ -4,6 +4,35 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 11:18:16 UTC (push time) — **PAGE RELEASED: Timeline "What changed" + evidence last reviewed** (main merge `12ff4ff` of `timeline-changes-rc` @ `281bb55`, code `eed6c28`; Chad: "Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)") — entry written 11:21 UTC
+
+- **Merge (11:18:09 UTC commit time):** no conflicts (main side: STATUS and the backlog view only). The ten page files, worker.js and both catalogue files are byte-identical to the branch. On the merge: generator `--check` OK; timeline-changes-build 45/45; timeline-catalogue-hub 73/73. main's `phase1/worker.js` = live hub 0.6.9 `3e791a5c…c49d`, so **main = live**.
+- **Served hashes: all ten page files exact at 11:19:47 UTC** (pane clock, no-store, first try). **This is the first verified live observation of the release; it is on 12 Nov UTC, the date the page states.**
+
+  | File | sha256 (first 16) | |
+  |---|---|---|
+  | timeline.html | `2f5a246c31ac56f7` | changed |
+  | timeline.js | `713ecd4fad97908a` | changed |
+  | style.css | `e48b3fc067ea7558` | changed |
+  | index.html | `5d2d284c934628fb` | `style.css?v=` only |
+  | sources.html | `5c3e4a7e7dc00087` | `style.css?v=` only |
+  | app.js | `9df9dce8cb082349` | unchanged |
+  | arts.js | `58773cef35e6e947` | unchanged |
+  | sky.js | `2056da8d8bf544e8` | unchanged |
+  | skyscene.js | `5e00ad77cec264bb` | unchanged |
+  | oceanheat.js | `a45097baed582d7f` | unchanged |
+
+- **Live read of the public Timeline page (fresh load, 11:20:24 UTC, pane, 588×834 = phone layout):** assets `?v=202611301000`; embeds revision `tl-2026-11-R2` and catalogue sha256 `2f39aa30…0356`; **one hub request, to `/catalogue/timeline/tl-2026-11-R2`**; axis on, 5 marks; no horizontal overflow.
+  - "Timeline page updated 12 Nov 2026 · revision tl-2026-11-R2 · What changed"; headings "12 Nov 2026 — revision tl-2026-11-R2" and "10 Nov 2026 — revision tl-2026-11-R1 (first release)".
+  - End-Triassic: label "Approximate age of the extinction level in the rock record"; text option A; "Evidence last reviewed: 10 Nov 2026 · Changed in revision tl-2026-11-R2: wording clarified". Pliny: "Evidence last reviewed: 9 Nov 2026". The R2 change record word for word.
+  - The jump: entry open (sheet, page inert) → "wording clarified" → sheet closed, record in view and focused → Back → entry open, focus on the link → Close → closed, fragment cleared.
+- **Observed, as designed:** the pane's first navigation (11:20:10 UTC) got the **old page from its browser cache** (transfer size 0): build `202611221000`, revision R1, axis on from R1. A cached matched R1 page and script keep working until the cache expires or the page is reloaded.
+- **Earth now page (fresh load, 11:20:44 UTC):** `style.css?v=202611301000` loaded (448 rules); earthquakes and fires cards current; header and tabs as before; no overflow; hub 0.6.9.
+- **Timeline inbox:** TL-IN-0001 marked **released** in the private item (11:20:57 UTC, Mac clock), after this live verification.
+- **Limits:** pane only (not a real phone); desktop width not read live (covered by the suites and GPT's Chrome re-check on the preview); Safari and screen reader untested; Worker CPU not measured; GPT has not checked the live release.
+- **Rollback (each its own Approve line):** page = revert `12ff4ff` with both pins kept (axis preserved only for readers with a matched cached R2 page and script; fresh loads get R1). Hub = 0.6.8 `85737a48…c427`, a separate decision: it removes the R2 route, and cached R2 pages fall back to the static list. The R2 object stays.
+- **Open (Chad):** delete branch `timeline-changes-rc` on GitHub; thread close-out (START-HERE §9) not yet done — Mac `_review/` holds four `timeline-changes-rc*` folders.
+
 ## 12 Nov 11:11:37 UTC — **HUB 0.6.9 DEPLOYED** (Chad: "Approve: deploy hub 0.6.9 from 281bb55 (content only)"); **live RC from the Pages origin PASSED** — entry written 11:16 UTC
 
 - **Before (11:11:12 UTC, dashboard tab):** live worker.js = 0.6.8 `85737a48c97a0ee1817b3a70883ba4d334b82da4092135a367d25a676c17c427` (293,193 B; the rollback target); 19 bindings; health 8/8 (200); `/` = 0.6.8.
