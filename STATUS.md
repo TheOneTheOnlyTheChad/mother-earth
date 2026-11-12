@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 16:57 UTC (clock reading at write) — **Dust RGB proposal rev 2** (GPT's review of rev 1 applied; new measurements; 24-hour log started; docs only)
+
+- GPT (relayed by Chad): rev 1 is ready for the 24-hour measurement pass; revise before any branch build; the main issue is showing that the picture on the globe belongs to the time on the card.
+- **Measured (pane, 16:47–16:57 UTC):**
+  - **Lag:** the 16:30 frame became the advertised latest 19–21 min after its time stamp; ages seen 21–29 min.
+  - **Time handling:** the service substitutes a nearby frame silently. For an off-grid time the picture was not the frame its `Warning` header named. For an advertised time asked for exactly, the picture matched the default latest frame pixel for pixel. Out-of-range and malformed times return HTTP 200 with an XML error. The page cannot read the `Warning` header (not exposed to other origins).
+  - **Cache:** `max-age=604800, must-revalidate`, no validators.
+  - **Footprint:** transparent PNG gives a disc, 77.25°N–76.75°S, 79.25°W–78.75°E at the equator; matches the catalogue, not the WMS box.
+  - **Speed:** a 2048 × 2048 JPEG took 37 s once (669,520 B); a 1024 transparent PNG had not returned after 60 s.
+- **24-hour log started 16:54:34 UTC** in the pane tab on `view.eumetsat.int` (one capabilities request and one 160 × 160 PNG every 10 min, rows in the tab's local storage). Started by Claude as a read-only measurement on GPT's recommendation relayed by Chad; it stops if the tab closes or navigates, and pauses when the Mac sleeps.
+- `docs/concepts/DUST-RGB-LAYER-PROPOSAL.md` rev 2: request budget as a maximum (6 + 6 per tab per hour, back-off); only advertised times requested; "Frame … · N min old"; time and picture swap together; "Refresh unavailable"; outline from the verified footprint; D1–D6 with GPT's recommendations.
+- **Not approved:** branch, build, REGISTER, page change. Live unchanged: hub 0.6.10, page `12ff4ff`.
+
 ## 12 Nov 16:50 UTC (clock reading at write) — **Dust RGB layer proposal rev 1** (EUMETSAT MTG at 0°, near-real-time; docs only; for GPT)
 
 - GPT (relayed by Chad): go ahead with a docs-only proposal; catalogue product `EO:EUM:DAT:0869` is CC BY 4.0; the Data Policy classes this RGB as a Core image product; the one-hour threshold applies to the Level 1 inputs. Scope: MTG at 0° only; the multimission ring needs its own check.
