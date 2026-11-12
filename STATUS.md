@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 01:49 UTC (clock reading at write) — **Thread close-out (START-HERE §9): Fires wording + OSMC reliability thread**
+
+- Mac `_review/` emptied 01:44:45 UTC (Mac clock): `osmc-reliability-rc` and `osmc-reliability-rc-r2` moved to `_to_delete/20261112T014445Z/` (313 files each) for Chad to empty.
+- Branch `osmc-reliability-rc` deleted by Chad; `git fetch -p`: remote = `main` + parked `aircraft-rc`.
+- START-HERE: two live-state bullets and §4r (thread facts). HANDOVER: new "NEXT THREAD STARTS HERE" block. Project docs updated. Mac sync of the whole repo at the final commit, preserve-first (result in the next entry if anything differed from an earlier commit).
+- Live unchanged: hub 0.6.8, page `7c3aa22`. Nothing pending approval.
+
 ## 12 Nov 01:41 UTC (clock reading at write) — **Fires wording seen live in the real header-only state; hub 0.6.8 clean overnight** (read-only; Chad asked for the status)
 
 - **Fires card, live page, 01:40:59 UTC (pane):** state UNKNOWN, count "–", "NASA FIRMS · VIIRS NOAA-20 · world · retrieved 10 min ago · Today’s detections aren’t available yet.", tooltip the same sentence, "Records withheld: records are from a different collector run (records 23:45 UTC, counts 01:30 UTC) — counts shown alone". This closes the "not yet seen live" item from the 11 Nov 17:44 entry. D1: 7 firms runs since 00:00 UTC logged down with the header-only note (the expected daily state).

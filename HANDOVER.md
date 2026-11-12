@@ -1,4 +1,4 @@
-# Mother Earth — handover (11 Nov 2026, end of the globe performance thread; main = the commit that carries this file, see `git log -1 -- HANDOVER.md`)
+# Mother Earth — handover (12 Nov 2026, end of the Fires wording + OSMC reliability thread; main = the commit that carries this file, see `git log -1 -- HANDOVER.md`)
 
 Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing), then this file, then `STATUS.md` (newest first; threads 1–13 in `docs/STATUS-ARCHIVE.md`). **Not a fresh sandbox; don't repeat completed reviews.** This thread's full record is STATUS 8 Nov (from 16:15 UTC) and 9 Nov.
 
@@ -41,7 +41,26 @@ Read `START-HERE.md` (§2 constitution · §4 deploy · §4d D1 · §5a testing)
 
 **Timeline maintenance and expansion — captured 10 Nov on Chad's request (backlog §T, `docs/BACKLOG-VIEW-2026-11-08.md`; nothing started):** T1 discovery inbox, T2 evidence review (keep the dates-without-a-year shelf), T3 versioned releases (stable links, new revision IDs, older catalogues retained, page + catalogue as matched pairs with the existing hash checks), T4 public "What changed" (old/new ranges + evidence; page "last updated" separate from entry "last reviewed"), T5 release cadence (batch routine additions; corrections and withdrawals sooner). **First deliverables: T1 discovery inbox and T4 public changelog.** **Real iPhone Safari check: deferred by Chad (site first).**
 
-**NEXT THREAD STARTS HERE (11 Nov 17:08 UTC clock reading, end of the globe performance thread):**
+**NEXT THREAD STARTS HERE (12 Nov 01:49 UTC clock reading, end of the Fires wording + OSMC reliability thread):**
+- **Live, main = live:** hub **0.6.8** (`85737a48…c427`, since 11 Nov 19:38:18 UTC); page = merges `0386058` (Fires wording, 11 Nov 17:43:07 UTC commit time) and `7c3aa22` (buoy fallback, 11 Nov 19:23:40 UTC commit time); assets `?v=202611291000` (timeline.html `202611221000`). Served hashes of all ten page files exact 11 Nov 19:25:50 UTC (index `59500752…3c8a`, app `9df9dce8…0c0b`, sources `44b6e42d…0917`). No R2 layout, D1, cron or variable change.
+- **Rollback, each on its own Approve line, independent:** hub = 0.6.7 `53ede31e…fb9e43`; buoy page = revert `7c3aa22`; Fires wording = revert `0386058`. A `last_attempt` already in R2 stays until the next run successfully replaces the envelope, normally within an hour.
+- **This thread:**
+  - Fires wording: branch fix on Chad's ask → diff and tests to Chad → merged on his line. Seen live in the real header-only state 12 Nov 01:40:59 UTC.
+  - OSMC reliability: proposal rev 1 → GPT → rev 2 → GPT → rev 2.1 → Chad's Go (H1; O1–O7 as recommended) → candidate `987f97e` → GPT found `failed_at` set after awaited storage calls and ruled badge = unknown when records are missing → rev 2 `d28763d` → GPT cleared → page merge → hub 0.6.8 deploy, each on its own line.
+  - First scheduled runs on 0.6.8 all ok (buoys 6/6 by 12 Nov 01:40 UTC).
+- **Watch (read-only, no action needed):** the first real failed buoy run on 0.6.8. `SELECT started_at, finished_at, status, http_status, note FROM collector_runs WHERE layer='drifters' AND status!='ok' AND finished_at > '2026-11-11T19:38'`. When one appears, read `/cells/drifters` (expect the good run's counts + `last_attempt`) and the live card, and record it in STATUS. Until then the fallback is proven by tests only.
+- **Next (Chad's pick; nothing required):** from the open list below, or a new spec.
+- **Open:**
+  - What triggers the slow frame state; B3 merged mesh if it matters.
+  - Tap latency vs the 200 ms target.
+  - Physical phone check (Ocean Heat, new cell drawing, buoy card).
+  - md5 sidecars; NOAA OSPO status.
+  - Hiding run notes from the public `/status` (all layers) — raised in this thread, not asked for.
+  - Older items in the superseded blocks below (Sky refresh by 2027-06-01; timeline backlog §T; provider replies; OpenSky kit; Safari; screen reader).
+- **Close-out done (START-HERE §9):** Mac `_review/` empty (`osmc-reliability-rc` and `osmc-reliability-rc-r2` in `_to_delete/20261112T014445Z/` for Chad to empty); branches `fires-wording-rc` and `osmc-reliability-rc` deleted by Chad (remote: `main` + parked `aircraft-rc`); Mac synced at the final commit, preserve-first (see STATUS); checkouts clean and pushed; research packets untouched.
+- **Chad's standing notes:** exact `Approve: …` lines for production; say when he's needed at the screen; real-clock timestamps; no phone/email/precise address in the public repo (the Gmail in REGISTER's GFW line stays; don't raise it); Mac sync preserve-first; text only; logins and branch deletions are his; GPT reviews, Chad approves; GPT messages point to Mac paths; DevTools docked and traces under a minute in Chrome.
+
+**(superseded) NEXT THREAD STARTS HERE (11 Nov 17:08 UTC clock reading, end of the globe performance thread):**
 - **Live, main = live:** hub **0.6.7** (`53ede31e…`, unchanged); page = merge **`a80bc49`** (17:03:37 UTC commit time) — **globe performance B2b**: coverage cells with no side walls and shared single-sided fills. Served hashes of the ten page files exact 17:04:19 UTC (index `b5ac4ed148beee4c`). No hub, R2 or D1 change.
 - **Effect (Chad's Chrome, M3):** draw calls ~6,300 → ~2,560 on ~1,260 cells; fast state 33.4 → 16.7 ms median (p95 50 → 16.7); slow state ~220 → 50 ms. Taps 711–768 → 482–545 ms (target 200 still open). Picks identical to the old page.
 - **Rollback:** revert `a80bc49` (Approve line).
