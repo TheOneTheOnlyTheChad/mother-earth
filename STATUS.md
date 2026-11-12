@@ -4,6 +4,27 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 13:30 UTC (clock reading at write) — **Follow the Dust: brief filed, Orange River source packet + entry-point proposal rev 1** (docs and research only; for GPT)
+
+- **Chad paused the backlog picks.** Timeline, globe performance, GIBS and the remaining `/status` fields stay queued; sea ice stays on watch. He brought "Follow the Dust" spec v1 (written with GPT), filed verbatim: `docs/concepts/FOLLOW-THE-DUST-BRIEF.md`.
+- **Source packet** `docs/research/FOLLOW-THE-DUST-SOURCE-CHECK.md` rev 1:
+  - NASA EO page and the exact `_lrg` image (3757 × 3131, sha256 `eb7c02e9…d2c7`, pane 13:21:42 UTC);
+  - credit verbatim;
+  - NASA media guidelines quoted;
+  - **flag:** the guidelines' new "SI Applications" section bars "according to NASA" in SI products. Proposed handling: quote NASA's words in marks; Chad decides whether to ask NASA;
+  - mouth −28.631, 16.450 (Wikidata), corroborated by Ramsar 526 (~4 km) and the image;
+  - callouts 1 + 2, with an optional 3 kept as a draft;
+  - the far-left strip of the image looks like a second swath and is cropped out.
+- **Proposal** `docs/concepts/FOLLOW-THE-DUST-PROPOSAL.md` rev 1:
+  - an event list in the Optional layers group;
+  - link `#dust=<id>`;
+  - an image panel with percent-positioned callouts;
+  - static files on Pages, $0;
+  - generator + manifest pinned like the Timeline;
+  - tests, real iPhone check, one page Approve line. Decisions D1–D6 are Chad's.
+- **Mac packet** `research/follow-the-dust/2026-11-12-claude/` (callout draft on a screen render, markup.py, LOG, .hashes; all match). The original image is **not** copied yet: both shells are refused at the proxy for NASA's asset host. Step 0 of the plan.
+- **Not approved:** branch, build, REGISTER filing, page change. Live unchanged: hub 0.6.10, page `12ff4ff`. Lockdown parked.
+
 ## 12 Nov 13:11 UTC (clock reading at write) — **Thread close-out (START-HERE §9): `/status` run-notes thread**
 
 - **Mac `_review/` emptied 13:11:04 UTC (Mac clock):** `status-notes-rc` (325 files) moved to `_to_delete/20261112T131104Z/_review/` for Chad to empty. `_review/` holds 0 entries. The earlier failed clone attempt is in `_to_delete/20261112T121005Z-failed-clone/`.
