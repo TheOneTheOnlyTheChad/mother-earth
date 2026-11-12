@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 13:08:10 UTC (commit time) — **status-notes-rc MERGED to main** (`0d0fa6e`, no-ff of `3140533`; Chad: "Approve: merge status-notes-rc to main (hub 0.6.10 record; no page file change)") — entry written 13:09 UTC
+
+- Merged worker.js = live hub 0.6.10 `784939f8…a0da`, so **main = live again**. On the merge: status-notes-hub 6/6, osmc-reliability-hub 27/27, arts-hub 54/54.
+- **No page file changed:** all ten page files identical to the Timeline release `12ff4ff`; **served hashes all ten exact at 13:08:54 UTC** (pane, no-store, vs raw at `0d0fa6e`).
+- Open (Chad): delete branch `status-notes-rc` on GitHub. Mac `_review/status-notes-rc/` goes to `_to_delete/` at thread close-out (START-HERE §9).
+- Rollback (own Approve line): hub → 0.6.9 `3e791a5c…c49d`.
+
 ## 12 Nov 13:03:54 UTC — **HUB 0.6.10 DEPLOYED** (Chad: "Approve: deploy hub 0.6.10 from 3140533 (content only)") — entry written 13:07 UTC
 
 - **No GPT review of the built candidate was relayed before Chad's line** (GPT passed proposal rev 2; the packet went to `_review/status-notes-rc/`). Recorded, not assumed.
