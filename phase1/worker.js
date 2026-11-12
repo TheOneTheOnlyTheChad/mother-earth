@@ -64,7 +64,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.9';
+const COLLECTOR_VERSION = '0.6.10';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -3194,7 +3194,7 @@ export default {
     if (p[0] === 'place' && p[1] === 'g4') return place(env, url, p[2] || '');
 
     if (p[0] === 'status') {
-      const runs = await env.DB.prepare('SELECT layer, started_at, status, http_status, records, bytes, note FROM collector_runs WHERE id IN (SELECT MAX(id) FROM collector_runs GROUP BY layer)').all();
+      const runs = await env.DB.prepare('SELECT layer, started_at, status, http_status, records, bytes FROM collector_runs WHERE id IN (SELECT MAX(id) FROM collector_runs GROUP BY layer)').all();   // 0.6.10: run notes stay in D1, not public (STATUS-RUN-NOTES-PROPOSAL rev 2)
       const spend = await env.DB.prepare('SELECT * FROM opensky_spend WHERE day = ?').bind(dayKey(Date.now())).first();
       const batch = await env.DB.prepare('SELECT * FROM batch_runs ORDER BY id DESC LIMIT 1').first();
       return json(redactStatus(env, { now: nowIso(), collector_version: COLLECTOR_VERSION, schema_version: SCHEMA_VERSION, cell_deg: CELL_DEG, stale_after_s: STALE_AFTER_S, last_runs: runs.results, opensky_spend_today: spend, last_batch: batch, history: await historyState(env), archive_health: await archiveHealth(env, Date.now()) }), 200, { 'Cache-Control': 'no-store' });   // 0.5.3: notes redacted

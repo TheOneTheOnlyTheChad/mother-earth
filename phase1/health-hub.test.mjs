@@ -252,7 +252,8 @@ await t('H8. a run note carrying the FIRMS key (fetch error with the URL) is red
   const { env } = await healthyHub(); firmsMode = 'throw'; await runUntil(env, '2026-11-06T10:00:00Z'); firmsMode = 'ok';
   const st = await check(env, '/status');
   assert.ok(!st.text.includes(env.FIRMS_MAP_KEY) && !st.text.includes(env.ADMIN_KEY), '/status no longer exposes the key (rev 2)');
-  assert.match(st.text, /fetch failed: TypeError: network connection lost while fetching .*\[redacted\]/, 'the note survives, minus the key');
+  assert.match(st.body.archive_health.collection.firms.latest_run.note, /fetch failed: TypeError: network connection lost while fetching .*\[redacted\]/, 'archive_health keeps its scoped note, minus the key (pinned path)');
+  { const fr = st.body.last_runs.find(x => x.layer === 'firms'); assert.ok(fr && !('note' in fr), '/status last_runs (hub >= 0.6.10): no run note on the firms row'); }
   assert.match(st.text, /"collector_version":"\d+\.\d+\.\d+"/, 'non-note strings are intact');
   for (const p of ALL) { const g = await check(env, p); for (const v of [env.FIRMS_MAP_KEY, env.ADMIN_KEY]) assert.ok(!g.text.includes(v), p + ' leaks a secret'); }
   const p = await check(env, '/health/publication/firms'); assert.match(p.text, /\[redacted\]/);
