@@ -9,7 +9,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Mac `_review/` emptied 13:11:04 UTC (Mac clock):** `status-notes-rc` (325 files) moved to `_to_delete/20261112T131104Z/_review/` for Chad to empty. `_review/` holds 0 entries. The earlier failed clone attempt is in `_to_delete/20261112T121005Z-failed-clone/`.
 - **Branch `status-notes-rc` deleted by Chad;** `git fetch -p`: remote = `main` + parked `aircraft-rc`.
 - START-HERE: live-state bullet for hub 0.6.10 and §4u (thread facts). HANDOVER: new "NEXT THREAD STARTS HERE" block. Project docs updated.
-- **Mac sync of the whole repo at the final commit, preserve-first** (result recorded in the line below once run).
+- **Mac sync at `744ae81`, 13:11:57 UTC (Mac clock), preserve-first:** 324 tracked files; 3 updated (HANDOVER, START-HERE, STATUS), 0 new; every preserved copy matched an earlier commit (HANDOVER and START-HERE = `143f531`, STATUS = `33ba630`; no local edits), kept under `_sync-preserved/20261112T131157Z/`; all 324 byte-identical afterwards (hash-list digest `1222cf94b18046cf` both sides). This entry was then copied the same way.
 - Checkouts clean and pushed. Research packets, the private Timeline inbox and the lockdown records untouched.
 - Live unchanged since the merge: hub 0.6.10, page `12ff4ff`. Nothing pending approval.
 
