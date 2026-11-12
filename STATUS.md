@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 03:44 UTC (clock reading at write) — **Lockdown stage 0 done: read-only fact check and audit; staged proposal rev 2 written** (nothing changed)
+
+- On Chad's line "Go: lockdown fact check and audit of what was already public (read-only)". Run 03:32–03:40 UTC. No purchase, plan, setting, code, deployment or visibility change.
+- GPT's review of rev 1 adopted (protect the repository first; restricting the live site is a separate staged job; no redesign of the hub, collectors, storage or globe). Chad's three corrections applied in rev 2.
+- **Findings and proposal rev 2 are filed outside this repo:** Mac `research/lockdown/2026-11-12-claude/` (`LOCKDOWN-FINDINGS-2026-11-12.md`, `LOCKDOWN-MIGRATION-PROPOSAL.md`; rev 1 kept beside them) and the Claude Project. Detail is deliberately not recorded here.
+- **Next:** GPT's review, then Chad's Stage 1 review. Four read-only access checks are still owed and need Chad at the screen. Stage 1 and Stage 2 each need separate review and approval; every rehearsal is its own approval.
+
 ## 12 Nov 02:48 UTC (clock reading at write) — **Direction change (Chad): Mother Earth becomes a private control centre; migration proposal rev 1 written** (docs only; nothing changed)
 
 - **D1 decided by Chad:** the repository, the working record, the dashboard and general hub access are to be private, limited to Chad and the build and review workflows he authorises. Narrow allowances: the eight UptimeRobot health checks and the authenticated ships ingest. Products built from Mother Earth can have their own public pages and data endpoints where he chooses; kept at design level until a first product has a concrete data requirement.
