@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 16:39 UTC (clock reading at write) — **Historical Follow the Dust STOPPED by Chad; live-dust source check (EUMETSAT Dust RGB) rev 1** (docs only)
+
+- **Chad stopped the historical release** during the desktop Chrome check: "this isnt live feed … we want live feeds"; GPT agreed (relayed). **`dust-rc` stays unmerged** (branch at `4e0ffb5`, a work-in-progress save; last test run interrupted, not verified). Release checks cancelled (iPhone, VoiceOver, final hashes). The Orange River source work is kept for reference. Branch history: built `5eeb387`; GPT held it for a history fix; rev 2 `08019ba`; camera/panel tuning `87d6a9f`. The branch's own STATUS entries and packet (`reviews/2026-11-12-dust-rc.md`) are on the branch only.
+- **Nothing was published.** Live unchanged: hub 0.6.10, page `12ff4ff`.
+- **Source check** `docs/research/DUST-LIVE-SOURCE-CHECK.md` rev 1 (pane, 16:35 UTC):
+  - EUMETView WMS has Dust RGB layers: MTG every 10 min (latest frame 25 min old when read), MSG every 15 min (20 min old), a global multimission ring every 3 h.
+  - Southern Africa is covered; a no-key GetMap returned complete images in 1–3 s with `Access-Control-Allow-Origin: *`, so a browser could read it directly at $0.
+  - **Terms not established (blocker):** EUMETSAT says satellite data follow its Data Policy and are not Creative Commons; fresher-than-set-delay imagery has been licensed; the policy is a PDF, unopened under the text-only rule; the User Portal licensing page would not load.
+- **Next (Chad):** choose how to settle the terms: open the one Data Policy PDF, email EUMETSAT, or neither (Dust stays off). No build is approved.
+- **Mac:** `_review/dust-rc/`, `_review/dust-rc-r2/` and `_review/dust-rc-shots/` are still in place; they move to `_to_delete/` at close-out. Chad's local server on 8899 can be stopped.
+
 ## 12 Nov 13:45 UTC (clock reading at write) — **Follow the Dust rev 2** (GPT's review of rev 1 applied; D1–D6 decided; docs and research only)
 
 - GPT (relayed by Chad):
