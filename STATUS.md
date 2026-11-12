@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 08:50 UTC (clock reading at write) — **Lockdown pass closed and parked (Chad); back to the backlog** (docs only; nothing changed)
+
+- Chad paused the wider migration (12 Nov), asked for the remaining read-only access checks and a rehearsal plan for a narrower website-publishing restriction, then parked it: "Let's park the publishing restriction here and return to the backlog."
+- Done this pass, all read-only or in scratch: access checks (some still need Chad at the screen); rehearsal plan revs 1 and 2 (GPT cleared rev 2 for an isolated rehearsal only); one rehearsal attempt on Chad's Go, **stopped before any site build** because the site builder could not be obtained in the workspace. **The candidate was not tested.**
+- **No change** to the repo's page files, GitHub Pages, any setting, permission, the hub, collectors, storage or production. No purchase, upgrade or visibility change. Nothing was installed on the Mac.
+- **Records are outside this repo:** Mac `research/lockdown/2026-11-12-claude/` (plan, stop report, `rehearsal-evidence/`) and the Claude Project. Detail is deliberately not recorded here.
+- Checked while there (read-only, 08:34–08:40 UTC): GitHub's own build artefact for `d4095c5` holds all ten page files byte-identical to the pinned hashes.
+- **Next:** Chad chooses the next backlog item (HANDOVER lists the candidates). The private-control-centre direction stands but nothing further is scheduled or approved.
+- **Close-out (START-HERE §9), checked 08:50 UTC:** Mac `_review/` empty; no branch was created this pass (remote: `main` + parked `aircraft-rc`); workspace rehearsal scratch removed; research packets untouched; Mac sync of the three changed docs follows this commit, preserve-first (the Mac copies matched `d4095c5` before the sync).
+
 ## 12 Nov 03:44 UTC (clock reading at write) — **Lockdown stage 0 done: read-only fact check and audit; staged proposal rev 2 written** (nothing changed)
 
 - On Chad's line "Go: lockdown fact check and audit of what was already public (read-only)". Run 03:32–03:40 UTC. No purchase, plan, setting, code, deployment or visibility change.

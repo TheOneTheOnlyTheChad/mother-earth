@@ -254,6 +254,14 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Space-Track:** the pane's sign-in does not survive a Mac restart; Chad signs in again. API docs (REST predicates, operators) are only visible signed in.
 - Wait timers: a background `sleep` defaults to a 30-min limit — pass a longer `timeout` for longer waits.
 
+## 4s. Thread facts (12 Nov 2026, lockdown pass)
+- **Lockdown records live outside this repo** (Mac `research/lockdown/2026-11-12-claude/`, Claude Project). Parked by Chad 12 Nov; do not restart it unasked.
+- **The workspace shell cannot reach the Ruby package registry**, in this or a fresh session, even with Chad's network setting on "allow all sites". The Mac shell Claude uses is refused too. The browser pane can reach it.
+- **How the site is built today** (from GitHub's build log, 12 Nov): image `jekyll-build-pages` v1.0.13, `github-pages` v232, Jekyll 3.10.0, no config file, default theme. The image has no dependency lock.
+- **Reading a Pages build:** `gh api repos/<owner>/<repo>/actions/runs` and `/actions/artifacts` work through the proxy; run logs download (`/actions/runs/<id>/logs`). The artefact file's storage host is refused from the workspace and the Mac shell; it can be fetched and inventoried inside a github.com pane tab (zip → tar → per-file sha256 in page JavaScript). The artefact expires after about a day.
+- **Project uploads from a file:** `project_write` with `local_path` only accepts a path inside the working directory. For a file that must stay out of the repo, stage a temporary copy under `.git/` (untracked), upload, delete it.
+- **A push to `main` publishes.** Treat anything committed as public.
+
 ## 5. Browser pane facts
 - **Measuring the backdrop (8 Nov):** GIBS is not reachable from the container. In a pane tab on a plain-text github.io file, fetch the WMS GetMap exactly as the page does (EPSG:4326, 2048×1024 JPEG, no-store), decode with `createImageBitmap` + `OffscreenCanvas`, and count near-black pixels (R, G, B < 12) by latitude band. Evidence and script shape: `reviews/evidence/2026-11-08-gibs-black-share.json`.
 - **Cold load + total transfer (7 Nov):** the pane's cache can't be cleared, and the hub, GIBS and unpkg send no Timing-Allow-Origin, so pane timing can't see their sizes. Method that works: Chad opens a **Chrome Guest window** (fresh profile), opens DevTools → Network (Disable cache off), loads the page, and exports a HAR (↓ in the Network toolbar). Undock DevTools first, or the viewport shrinks. HARs are committed with bodies stripped (`docs/research/p0-recovery/planet/`).
