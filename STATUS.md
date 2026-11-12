@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 11:27 UTC (clock reading at write) — **Thread close-out (START-HERE §9): Timeline inbox + What changed thread**
+
+- **Mac `_review/` emptied 11:26:06 UTC (Mac clock):** `timeline-changes-rc`, `-preview`, `-r2` and `-r2-preview` moved to `_to_delete/20261112T112606Z/_review/` for Chad to empty.
+- **Branch `timeline-changes-rc` deleted by Chad;** `git fetch -p`: remote = `main` + parked `aircraft-rc`.
+- **Downloads tidy-up (Chad's ask):** 16 Mother Earth files moved from `~/Downloads` to `_to_delete/20261112T112606Z/Downloads/` (56 MB; each copied, hash-checked, then removed from Downloads). All 16 had a byte-identical copy in the project (research packets, `bench-private/`, the repo) or are public files that can be fetched again (`co2_daily_mlo.csv`, `horizons_batch.txt`). **Left in Downloads for Chad to decide:** `Performance_Trace` (11 Nov globe trace, the only copy), `index.html` (27 Oct first cut, no identical copy in the project), `credentials.json` (30 Oct, not opened). Nothing else in Downloads was touched.
+- START-HERE: the live-state bullet for hub 0.6.9 / R2 and §4t (thread facts). HANDOVER: new "NEXT THREAD STARTS HERE" block. Project docs updated.
+- **Mac sync at `45f0fac`, 11:27:15 UTC (Mac clock), preserve-first:** 318 tracked files; 17 updated and 5 new; every preserved copy matched an earlier commit (no local edits), kept under `_sync-preserved/20261112T112715Z/`; all 318 byte-identical afterwards (hash-list digest `fecb7d42f2f16faa` both sides). This entry was then copied the same way.
+- Checkouts clean and pushed. Research packets and the private inbox untouched by the close-out.
+- Live unchanged since the release: hub 0.6.9, page `12ff4ff`. Nothing pending approval.
+
 ## 12 Nov 11:18:16 UTC (push time) — **PAGE RELEASED: Timeline "What changed" + evidence last reviewed** (main merge `12ff4ff` of `timeline-changes-rc` @ `281bb55`, code `eed6c28`; Chad: "Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)") — entry written 11:21 UTC
 
 - **Merge (11:18:09 UTC commit time):** no conflicts (main side: STATUS and the backlog view only). The ten page files, worker.js and both catalogue files are byte-identical to the branch. On the merge: generator `--check` OK; timeline-changes-build 45/45; timeline-catalogue-hub 73/73. main's `phase1/worker.js` = live hub 0.6.9 `3e791a5c…c49d`, so **main = live**.
