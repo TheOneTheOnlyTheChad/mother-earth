@@ -76,7 +76,7 @@ Result: **16/16**.
 
 ### 2.5 Full regression
 
-See §5 (filled in when the run completes).
+Sequential, 11:44:07–12:09:19 UTC (log file times, workspace clock), on the committed candidate code `32107f8`: **53 suites run, 4 manual/network tools skipped** (`orbital`, `search.realdata`, `ships-probe`, `spacetrack-probe`). **52 green.** One failure, from this change, fixed: `arts-hub` checked the version with a single-digit pattern (`/^0\.6\.[2-9]$/`), which rejects `0.6.10`; replaced with a numeric ≥ 0.6.2 check (same intent; the old pattern also capped at 0.6.9). Rerun alone: 54/54. Included: status-notes-hub 6, status-notes-ui 16, osmc-reliability-hub 27, health-hub 29, orbital-browser 113, orbital-ui 38, mobile-pass 131, desktop-overflow 112, timeline-ui 585, terminator-ui green this run. Summary file: `reviews/evidence/2026-11-12-status-notes-rc/regression-summary.txt`.
 
 ## 3. What was not done
 
