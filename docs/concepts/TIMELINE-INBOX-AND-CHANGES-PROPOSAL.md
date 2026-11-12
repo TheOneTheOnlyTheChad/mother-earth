@@ -1,4 +1,4 @@
-# Timeline T1 discovery inbox + T4 public "What changed" — proposal rev 2
+# Timeline T1 discovery inbox + T4 public "What changed" — proposal rev 2.1
 
 Rev 1 written 12 Nov 2026 on Chad's go ("draft the Timeline T1 discovery inbox and T4 public 'What changed' proposal for GPT review"). **Rev 2 (12 Nov 2026) applies GPT's review of rev 1** (sha256 `b03f51e6…6ad9`, verified by GPT; "revise before branch build"). **Proposal only.** Nothing here is built, uploaded, deployed or released; each of those needs its own approval (§9).
 
@@ -11,6 +11,13 @@ Base: backlog §T (`docs/BACKLOG-VIEW-2026-11-08.md`), the live deep-time releas
 4. Release day: planned UTC day with a cutoff, a live check of the actual day, and ID rules for a rebuild (§3.5).
 5. GPT's wording recommended for C5 (§3.6).
 6. Compatibility: asset versions bumped; R1 tested with its real page files and against its known pin; links tested both ways on the phone sheet; Pliny fragments in the anchor regression; the rollback trade-off stated (§4–§7, §9).
+
+**Rev 2.1 (12 Nov 2026) applies GPT's re-check of rev 2** (sha256 `28c24f38…a768`, verified by GPT; the private inbox setup is ready for Chad's docs-only Go; C1–C5 remain Chad's):
+- Approvals reference a **frozen review snapshot**, not the live item file (§2.3, §9).
+- The privacy guarantee is stated precisely, and public evidence pointers are limited to records already suitable for publication (§2.1, §3.4).
+- Cutoff: 22:00 UTC is the latest start; the first verified live observation is recorded; `previous` always names the last reader-facing release (§3.5).
+- Phone Back: the visual close is reused without the Close button's handler; Back and Forward tested from both ways of opening an entry (§5, §6).
+- The mixed pair (old HTML, new script) is named and tested (§4, §6).
 
 ## 0. Chad's brief, as given
 - Keep the first delivery small.
@@ -25,7 +32,7 @@ One real item goes through the whole path: GPT's 10 Nov wording note on the end-
 
 ### 2.1 Where it lives (and why not the public repo)
 - **Mac folder `research/timeline-inbox/`**, mirrored to the Claude Project. GPT reads it there.
-- It holds unreviewed leads. The constitution says nothing unverified is shown, and reader tips can carry names or contact details, which stay out of the public repo (standing rule). **Only the reader-facing outcome is published** (§3.4). No inbox ID, item name or other internal reference appears in the repo's changes file, the catalogue or the page *(rev 2, GPT)*.
+- It holds unreviewed leads. The constitution says nothing unverified is shown, and reader tips can carry names or contact details, which stay out of the public repo (standing rule). **Only the reader-facing outcome is shipped** (§3.4). The guarantee, stated precisely *(rev 2.1, GPT)*: **inbox fields and private paths are kept out of shipped data and pages** (the changes file, the catalogue, `timeline.html`, `timeline.js`). This proposal and STATUS are public documents and do name the worked example and its proposed public change ID; that is the project record, not shipped data.
 - $0: plain text files, no hub, D1, R2 or schedule.
 
 ### 2.2 Shape
@@ -53,8 +60,9 @@ logged → triaged → in evidence review → reviewed → accepted → built �
 ```
 - **triaged:** in scope for a lane that exists? Duplicate of another item? Out of scope or duplicate → rejected, with the reason.
 - **in evidence review:** Claude writes the evidence record (§2.4) and the exact proposed wording or values. A source-scan lead or a reader tip **never skips this step**: it is a pointer, not evidence.
-- **reviewed:** GPT found **that specific evidence record and wording ready**. The history entry records GPT's decision, the date, and the sha256 of the item file as reviewed.
-- **accepted:** Chad's **branch-build go** names the item **and the reviewed version** (the same sha256). The history records it. This is the person's review before publication.
+- **Review snapshot** *(rev 2.1, GPT)*: before review, Claude writes a **frozen snapshot file** beside the item (`items/TL-IN-0001.review-1.md`) holding the exact reader-facing wording or values and the sha256 of the evidence record. It is never edited; a later version is a new file (`review-2`). The live item file cannot be the reference, because its hash changes each time its history is appended.
+- **reviewed:** GPT reviewed **that snapshot** and found it ready. The history records GPT's decision, the date and the snapshot's sha256. An earlier opinion (for example GPT's 12 Nov wording review) can be cited in the snapshot, but does not replace the review of the snapshot itself.
+- **accepted:** Chad's **branch-build go** names the item **and the reviewed snapshot's sha256**. The history records it. This is the person's review before publication.
 - **Material change after review:** if the claim, the wording or the evidence changes after "reviewed" (or after "accepted"), the item goes **back to "in evidence review"**, and the earlier decisions are kept in the history as superseded. Typo-level fixes that change no claim, value or wording shown to readers are recorded but do not reset the state.
 - **built:** the item is in a branch candidate. Chad's **page-release approval is a separate, later line** (§9); the build go never implies it.
 - **released:** set only after the **matched page and catalogue are verified live** (served-hash check of the page files, the catalogue read from the hub by revision ID with its exact hash, and a live read of the entry and the change record). The history records the revision ID, the public change ID and the measured time.
@@ -74,8 +82,8 @@ Evidence already on record (research packets, REGISTER) can be cited instead of 
 | logged | the moment the inbox is created (real clock) | Kind *reviewer note*. Source: GPT's live smoke test of the deep-time release, relayed by Chad (STATUS 10 Nov 06:53). Might change: the claim label "Approximate age of the extinction horizon" and the phrase "coincides with the extinction horizon" on `e-big5-end-triassic`. |
 | triaged | same session | In scope (existing entry, existing lane). No duplicate. |
 | in evidence review | same session | **Editorial check against the existing record**; no source is opened. Claude compares the proposed wording (§3.6) with the He et al. 2020 passage already recorded (Results, sulfate sulfur-isotope trends; research packet `research/timeline-big-five/2026-11-10-claude/`). Test: the plainer words must say no more than the source does. Neither the source's checked date nor the entry's "evidence last reviewed" date moves. |
-| reviewed | GPT's decision on this item file (sha256 recorded) | GPT's 12 Nov review already supplies the wording and its reading of what He et al. support; the item records it once the inbox exists. |
-| accepted | Chad's branch-build go | The go line names TL-IN-0001 and the reviewed version. |
+| reviewed | GPT's decision on the frozen snapshot `TL-IN-0001.review-1.md` (sha256 recorded) | The snapshot holds the §3.6 wording and the evidence record's hash, and cites GPT's 12 Nov wording review. GPT still reviews the snapshot itself. |
+| accepted | Chad's branch-build go | The go line names TL-IN-0001 and the snapshot's sha256. |
 | built | branch candidate | In `timeline-changes-rc`. |
 | released | after the page release is verified live | Revision `tl-2026-11-R2`, public change `tl-2026-11-R2-1`. |
 
@@ -128,17 +136,17 @@ The first delivery contains no date change. The rule, which the tests exercise w
 ### 3.4 Where the data comes from (one source of truth)
 - A new repo file **`phase1/timeline/changes.json`**: the public change records, written for readers. Each carries `id` (`tl-2026-11-R2-1`), `revision`, `kind` (`added` · `revised`), `entry`, `what` (`wording` · `date` · `source`), `before`, `after`, `why`, and, for `date` and `source` changes, the per-side evidence snapshots of §3.3. **No inbox field** *(rev 2)*.
 - The generator copies these into the catalogue as `changes` (the full history up to that revision, so every revision is self-contained), fills each affected entry's existing `revisions` list with change IDs, and **pre-renders** the section into `timeline.html`, so it works without JavaScript.
-- New per-entry fields, on axis and shelf entries alike: **`evidence_reviewed`** `{ date, record }` (the entry-wide date and a short public pointer to its record, e.g. the research doc path). Source `checked` dates stay where they are.
+- New per-entry fields, on axis and shelf entries alike: **`evidence_reviewed`** `{ date, record }` (the entry-wide date and a short public pointer to its record). **The pointer may name only a record already suitable for publication** (a document in the public repo, such as the research record or REGISTER); never a Mac research-packet path or an inbox path *(rev 2.1, GPT)*. Source `checked` dates stay where they are.
 - New top-level **`release`**: `{ revision, release_date, previous }` (`previous: "tl-2026-11-R1"`).
 
 ### 3.5 Release day *(C3; rev 2, GPT)*
 - `release_date` is the **reader-facing page release date**: the UTC day the Timeline page carrying this revision goes public. The catalogue object is deliberately exposed on the hub **before** that, by revision ID only, so the live candidate check can read it; that earlier exposure is not the release, and the page says "Timeline page updated".
 - It is set to the **planned UTC day** at build time.
-- **Cutoff:** the page merge is pushed only if the served-hash check can complete on that UTC day; no release is started after **22:00 UTC**. If the day is missed, the release stops and the date is rebuilt.
-- **After release:** the day the page actually went live is verified from the served-hash check's measured time and recorded in STATUS. If it differs from the page's date, that is a correction release (new revision), never a silent edit.
+- **Cutoff** *(rev 2.1, GPT)*: **22:00 UTC is the latest start**, and the release is deferred earlier than that whenever there is not enough time left to verify the served files the same UTC day. If the day is missed, the release stops and the date is rebuilt.
+- **After release:** STATUS records the **first verified live observation** (the measured time of the first served-hash check that shows the new files). That observation proves the page was live by then, not when it cut over: **if the checks straddle midnight UTC, it alone cannot prove the cutover day**, and the record says so instead of asserting a day. A confirmed mismatch with the page's date is a correction release (new revision), never a silent edit.
 - **Rebuild rules:**
   - Before the catalogue object is uploaded or pinned: a date-only rebuild may keep the proposed ID (`tl-2026-11-R2`).
-  - Once the object is **uploaded or pinned**, changed bytes get a **new ID and a new key** (`tl-2026-11-R3`), with the matched page and the hub pin regenerated together. The uploaded R2 object stays, unused.
+  - Once the object is **uploaded or pinned**, changed bytes get a **new ID and a new key** (`tl-2026-11-R3`), with the matched page and the hub pin regenerated together. The uploaded R2 object stays, unused. **`release.previous` still names the last reader-facing release, `tl-2026-11-R1`**, never a staged catalogue that no released page used, and What changed lists no release for the staged ID *(rev 2.1, GPT)*.
   - A **hash-only re-check** by GPT is enough only if the diff shows the date and its generated consequences (the rendered date, hashes, build id) are the sole changes. Anything else is a full review.
 
 ### 3.6 Wording for TL-IN-0001 *(C5; GPT's recommendation adopted as the lean)*
@@ -153,13 +161,13 @@ GPT: He et al. support the approximate age, the shift, and the coincidence in th
 - **R1 is untouched:** same object, same pin (`096ae648…0fbe`, 15,656 B), still served at `/catalogue/timeline` (legacy, permanently) and `/catalogue/timeline/tl-2026-11-R1`. Pages already open keep working.
 - **R2 is a new revision ID and a new R2 object** (`ref/timeline/tl-2026-11-R2.json`). The hub adds one pin to `TIMELINE_REVISIONS` and moves `TIMELINE_CURRENT` (metadata only). The page and catalogue are released as a matched pair with the existing hash checks (T3, unchanged).
 - **Schema (C4):** `schema: 2` for R2 (GPT: fine). The R1-era page asks for R1 by its own revision, so it never meets schema 2.
-- **Asset versions** *(rev 2, GPT)*: `timeline.html` gets a new `?v=` on `timeline.js`, and on `style.css` where its bytes change, so a new page cannot pair with the cached schema-1 validator. The page's build id is that same version, and the existing check (page build id = script build id, else no axis) stays. If `style.css` changes, `index.html` and `sources.html` get the standing `?v=` bump too (version string only).
+- **Asset versions** *(rev 2, GPT)*: `timeline.html` gets a new `?v=` on `timeline.js`, and on `style.css` where its bytes change, so a new page cannot pair with the cached schema-1 validator. The page's build id is that same version, and the existing check (page build id = script build id, else no axis) stays. **What the pins do and do not preserve** *(rev 2.1, GPT)*: keeping the R1 and R2 pins preserves the axis for a reader holding a **matched page and script**. A version query on the same filename does not keep the old script on the server: an old R1 HTML page that has to fetch `timeline.js` again receives the new script. That mixed pair fails the build-id check, so it shows the static list with no axis until the page itself is reloaded. If `style.css` changes, `index.html` and `sources.html` get the standing `?v=` bump too (version string only).
 - **A future withdrawal** would keep its entry ID and anchor so a link never dead-ends. Rule noted; not built in this delivery.
 
 ## 5. Page changes (first delivery)
 - `timeline.html` (generated block): the "Timeline page updated" line, the `#changes` section, an "Evidence last reviewed" line on each entry, and a "Changed in …" link where an entry has revisions.
 - `timeline.js`: `LABELS` takes the new label text; `validate()` checks schema 2, `release`, `evidence_reviewed`, the `changes` IDs, and that every entry ID in `changes` exists. The failure behaviour is unchanged: on any mismatch the axis is not drawn and the pre-rendered list (now including What changed) stays usable.
-- **Links across the phone sheet** *(rev 2, GPT)*: on a phone the open entry is a modal sheet and the rest of the page is inert, so a bare fragment link cannot reach `#changes`. Proposed behaviour: activating "Changed in …" closes the sheet through the existing close path (inert and scroll lock released), scrolls to the change record and moves focus to it; **Back returns to the entry, open, with focus on that link**. "Open the entry" from a change record opens the entry exactly as a card does; Back returns to the change record. On desktop the panel stays open and the page scrolls.
+- **Links across the phone sheet** *(rev 2, GPT)*: on a phone the open entry is a modal sheet and the rest of the page is inert, so a bare fragment link cannot reach `#changes`. Behaviour (GPT agreed in its re-check): activating "Changed in …" closes the sheet, reveals the change record and moves focus to it; **Back reopens the same entry with focus on that link**. It **reuses the visual close and unlock logic only** (hide the sheet, release inert and the scroll lock) and **does not call the Close button's handler**: that handler navigates Back or replaces the history entry, which would consume the very state Back has to restore *(rev 2.1, GPT)*. The jump adds its own history entry instead. "Open the entry" from a change record opens the entry exactly as a card does; Back returns to the change record. On desktop the panel stays open and the page scrolls.
 - `style.css`: a few rules scoped under `body.tl`. No behaviour change on the Earth now or Sources pages.
 
 ## 6. Tests (each with a break that must fail)
@@ -168,8 +176,8 @@ GPT: He et al. support the approximate age, the shift, and the coincidence in th
 - **R1 frozen** *(rev 2, GPT)*: the repo's `tl-2026-11-R1.json` is hashed directly against its known pin (`096ae648…0fbe`, 15,656 B) in a test of its own. The generator's `--check` follows `BUILD.json`, so with BUILD at R2 it says nothing about R1. Break: `r1-mutated`.
 - **Hub:** the candidate hub returns R1's **original bytes on both routes** (legacy and versioned), and R2 only on an exact pin; legacy never follows current. Break: `legacy-follows-current` (exists).
 - **R1 page on the candidate hub** *(rev 2, GPT)*: the **real R1 `timeline.html` and `timeline.js`**, taken from main at the pinned commit `cc91165` (not regenerated), run against the candidate hub; the axis draws from R1. And the reverse: the new page against a hub without the R2 pin shows the list and no axis.
-- **Asset versions:** the new `timeline.html` references a `timeline.js?v=` different from R1's; a new page served with the old script draws no axis (existing build-id check). Break: `stale-js-version`.
-- **Links, both ways, desktop and 390×844:** "Changed in …" from the open entry (on the phone: the sheet closes, the change record is visible in the viewport and focused, Back reopens the entry with focus on the link); "Open the entry" from the change record and Back. Breaks: `fragment-only-link` (the sheet stays open over an inert page), `back-loses-entry`.
+- **Asset versions:** the new `timeline.html` references a `timeline.js?v=` different from R1's; a new page served with the old script draws no axis (existing build-id check). **Mixed pair the other way** *(rev 2.1, GPT)*: the real R1 `timeline.html` served with the **new** `timeline.js` draws no axis, and its static list, entries, sources and anchors stay fully usable with no script error. Breaks: `stale-js-version`, `guard-off` (the build-id check removed: the mixed pair must then fail visibly in the test).
+- **Links, both ways, desktop and 390×844:** "Changed in …" from the open entry (on the phone: the sheet closes, the change record is visible in the viewport and **actually holds focus** (`document.activeElement`), Back reopens the same entry with focus on the link, Forward returns to the change record); "Open the entry" from the change record, then Back and Forward. **Each run twice: from a card-opened entry and from a direct entry link** *(rev 2.1, GPT)*. Breaks: `fragment-only-link` (the sheet stays open over an inert page), `back-loses-entry`, `close-handler-reused` (the jump calls the Close handler, so Back leaves the page or lands elsewhere).
 - **Anchor regression:** every R1 anchor still resolves, including `#e-pliny-ep-6-16-conv` and `#e-pliny-ep-6-16-debate` as direct links (JS on and off). Break: `dropped-anchor`.
 - **Date-change fixture (§3.3):** a synthetic catalogue with one revised date renders old and new side by side, each with its own citation and checked date; editing the entry's current source afterwards leaves the old side unchanged. Breaks: `old-value-hidden`, `snapshot-by-key`. The fixture is never published.
 - Existing timeline suites (timeline-ui, timeline-axis, timeline-catalogue-hub) plus desktop-overflow and mobile-pass.
@@ -193,15 +201,13 @@ GPT: He et al. support the approximate age, the shift, and the coincidence in th
 
 ## 9. Approval lines (none given; each its own line, in order)
 1. `Go: create the Timeline inbox (Mac research/timeline-inbox/ + Project) and log TL-IN-0001 (docs only)`
-2. `Approve: build timeline-changes-rc on a branch only — TL-IN-0001 as reviewed, What changed and evidence-last-reviewed per TIMELINE-INBOX-AND-CHANGES-PROPOSAL rev 2; no merge, R2 write, hub deploy or page change.` (This is the acceptance of the item; it is not the page-release approval.)
-3. GPT reviews the candidate.
-4. `Approve: upload ref/timeline/tl-2026-11-R2.json (complete-file sha256 <hash>, <bytes> B) to R2`
-5. `Approve: deploy hub 0.6.9 from <commit> (content only)` → live RC from the Pages origin (R1 routes return their original bytes, R2 exact, CORS).
-6. `Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)` — the page release, inside the §3.5 cutoff. Then the live verification, and only then is TL-IN-0001 marked released.
+2. GPT reviews the frozen snapshot `TL-IN-0001.review-1.md` (Mac path and sha256 supplied).
+3. `Approve: build timeline-changes-rc on a branch only — TL-IN-0001 review snapshot sha256 <hash>, What changed and evidence-last-reviewed per TIMELINE-INBOX-AND-CHANGES-PROPOSAL rev 2.1; no merge, R2 write, hub deploy or page change.` (This is the acceptance of the item; it is not the page-release approval.)
+4. GPT reviews the candidate.
+5. `Approve: upload ref/timeline/tl-2026-11-R2.json (complete-file sha256 <hash>, <bytes> B) to R2`
+6. `Approve: deploy hub 0.6.9 from <commit> (content only)` → live RC from the Pages origin (R1 routes return their original bytes, R2 exact, CORS).
+7. `Approve: merge timeline-changes-rc to main (page change: Timeline What changed + evidence last reviewed)` — the page release, inside the §3.5 cutoff. Then the live verification, and only then is TL-IN-0001 marked released.
 
-## 10. For GPT (re-check of rev 2)
-1. §2.3: do the version-naming, the back-to-review rule and the "typo-level" exception match what you meant?
-2. §3.2: are the three dates defined the way you intended, and is the reduced validator right?
-3. §3.5: is the 22:00 UTC cutoff a reasonable way to state "a clear cutoff"?
-4. §5: is the proposed Back behaviour across the phone sheet the right one (Back reopens the entry)?
-5. Anything still open before a branch-build go?
+## 10. Review record
+- **Rev 1 → GPT (12 Nov):** revise before branch build; six points (applied in rev 2).
+- **Rev 2 → GPT re-check (12 Nov):** states, dates, cutoff and phone Back agreed, with the five clarifications applied in rev 2.1. The private inbox setup is ready for Chad's docs-only Go. Next for GPT: the frozen item snapshot, once the inbox exists.

@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 09:18 UTC (clock reading at write) — **Timeline T1/T4 proposal rev 2.1** (GPT's re-check of rev 2 applied; docs only)
+
+- GPT (relayed by Chad): rev 2's sha256 verified; states, the three dates, the reduced validator, the 22:00 UTC cutoff and the phone Back behaviour agreed; **the private inbox setup is ready for Chad's docs-only Go**; C1–C5 remain Chad's. A docs re-check.
+- Rev 2.1: approvals reference a frozen review snapshot (the live item file's hash changes as its history grows), and GPT reviews that snapshot before the branch-build line; privacy guarantee = inbox fields and private paths kept out of shipped data and pages, public evidence pointers limited to records already suitable for publication; cutoff = latest start, first verified live observation recorded, a midnight straddle cannot prove the cutover day, `previous` always names the last reader-facing release (R1); the "Changed in …" jump reuses the visual close without the Close handler, tested with Back and Forward from card-opened and direct-link entries; the mixed pair (old HTML re-fetching the new script) shows the static list and is tested.
+- **Not approved:** inbox creation (Chad's Go line pending), branch build, R2 upload, hub deploy, page release. Live unchanged: hub 0.6.8, page `7c3aa22`.
+
 ## 12 Nov 09:15 UTC (clock reading at write) — **Timeline T1/T4 proposal rev 2** (GPT's review of rev 1 applied; docs only)
 
 - GPT (relayed by Chad): rev 1's sha256 verified; **revise before branch build**; C1–C5 remain Chad's. A docs review.
