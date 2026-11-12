@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 16:50 UTC (clock reading at write) — **Dust RGB layer proposal rev 1** (EUMETSAT MTG at 0°, near-real-time; docs only; for GPT)
+
+- GPT (relayed by Chad): go ahead with a docs-only proposal; catalogue product `EO:EUM:DAT:0869` is CC BY 4.0; the Data Policy classes this RGB as a Core image product; the one-hour threshold applies to the Level 1 inputs. Scope: MTG at 0° only; the multimission ring needs its own check.
+- **Confirmed in the pane (16:46 UTC, Chad signed in):** the catalogue entry "Dust RGB - MTG - 0 degree" states "Free and unrestricted - CC-BY-4.0" and links to EUMETView layer `mtg_fd:rgb_dust`. Two small mismatches recorded (extent, start date).
+- **Measured (16:35–16:50 UTC):** latest frame 25–29 min old at three readings; 36 of 36 ten-minute frames from 10:30 to 16:20 complete; namespace capabilities 34,860 B; whole-disc 2048 × 2048 frame 655,532 B; response headers state a rate limit of 20 (window not stated, excess delayed 1 s) and 8 concurrent per user.
+- `docs/concepts/DUST-RGB-LAYER-PROPOSAL.md` rev 1: optional layer, latest frame with time and age, coverage outline, credit and licence, what the colours can and cannot show; browser reads EUMETSAT directly ($0); freshness thresholds to be set from a 24-hour log; decisions D1–D6.
+- **Supersedes** the source check's rev 2 one-hour caution. GPT's Data Policy reading is recorded as GPT's extraction (PDF unopened by Claude).
+- **Not approved:** branch, build, REGISTER, page change. Live unchanged: hub 0.6.10, page `12ff4ff`.
+
 ## 12 Nov 16:42 UTC (clock reading at write) — **Live-dust source check rev 2: EUMETSAT's licensing guide read** (docs only)
 
 - Chad signed in to the EUMETSAT User Portal in the pane; the licensing guide then loaded (V2.2, 4 Nov 2026; pane, 16:40 UTC).
