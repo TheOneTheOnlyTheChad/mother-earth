@@ -1,21 +1,22 @@
-# Dust RGB layer (EUMETSAT MTG, near-real-time) — proposal, rev 2 (12 Nov 2026, docs only)
+# Dust RGB layer (EUMETSAT MTG) — proposal, rev 3 (12 Nov 2026, docs only)
 
-**For:** GPT's review, then Chad's decisions (§9). Proposal only: no branch, build, REGISTER filing or page change is approved.
-**Asked for by:** GPT's review of the live-dust source check, relayed by Chad on 12 Nov: a docs-only proposal for the near-real-time MTG Dust RGB layer, scoped to MTG at 0°.
-**Sources:** `docs/research/DUST-LIVE-SOURCE-CHECK.md` rev 2, plus the checks in §2–§4 below (browser pane, 12 Nov 2026).
-**Rev 2 (12 Nov 2026):** GPT reviewed rev 1 (relayed by Chad): ready for the 24-hour measurement pass, to be revised before any branch build. Changes:
-- §3: the "far below the stated limits" claim is removed; the request budget is stated as a maximum per tab per hour, with back-off.
-- §4: new measurements: publishing lag, what the service does for a time it does not have, cache headers, and the image footprint. The 24-hour log is running (§4c).
-- §5: the timestamp line says "Frame"; time and picture swap together; a failed refresh keeps the last usable frame; the outline follows the verified footprint; transparency is verified on PNG.
-- §9: GPT's recommendations recorded against D1–D6. The decisions stay Chad's.
+**For:** GPT's review, then Chad's decisions (§9). Proposal only: no branch, build, REGISTER filing, hub deploy or page change is approved.
+**Sources:** `docs/research/DUST-LIVE-SOURCE-CHECK.md` rev 2, and the measurements in §6 (browser pane, 12 Nov 2026).
+**Replaces:** the historical Follow the Dust candidate (`dust-rc`, unmerged, stopped by Chad).
 
-**Replaces:** the historical Follow the Dust candidate (`dust-rc`, unmerged, stopped by Chad). Nothing from that branch is reused here except what §8 names.
+**Revision history**
+- **Rev 1:** the reader's browser fetches the latest frame straight from EUMETSAT.
+- **Rev 2:** GPT's review applied; time-handling, footprint, cache and speed measurements; a 24-hour log started.
+- **Rev 3: the design changes, on Chad's direction (12 Nov).** In his words: "if we ping this thing once or twice a day to start off with that should be enough as MVP for this layer … set it up like we did the others to fetch data … a couple of updates per day would be fine for now until we decide we want it like an actual live flowing layer."
+  - **The hub fetches a frame a few times a day and serves its stored copy.** Readers' browsers no longer call EUMETSAT.
+  - This answers GPT's open question from the rev 2 review (can the page reliably fetch a usable image, at a useful size, and pair it with the right time) by moving all three to the hub (§4).
+  - The 24-hour log no longer blocks a build (§6d). GPT has not reviewed this design.
 
 ## 1. What it is, in one paragraph
-- **An optional globe layer, off on load.** When switched on, it paints EUMETSAT's latest Dust RGB frame from Meteosat Third Generation onto the part of the globe that satellite sees (Africa, Europe, the Atlantic, the Middle East).
-- **It shows what the satellite observed at a stated time**, with that time and its age on the card, and the area the satellite does not see left plainly uncovered.
-- **It is imagery, not a dust measurement.** The card says what the colours can and cannot tell you.
-- **$0 in new cost:** the reader's browser fetches the frame straight from EUMETSAT, the same way the page already fetches the NASA backdrop. No hub, storage or scheduled job.
+- **An optional globe layer, off on load.** It paints EUMETSAT's Dust RGB picture from Meteosat Third Generation onto the part of the globe that satellite sees.
+- **A few frames a day, fetched by the hub** on its existing schedule and stored as the one current frame. The card states the frame's observation time, its age, and that it updates a few times a day.
+- **It is imagery, not a dust measurement**, and it is not continuous: it is the latest frame the hub fetched.
+- **Cost:** no new line item. A handful of small requests a day from the Worker, and one image of well under a megabyte kept in R2 and replaced each time.
 
 ## 2. The product and its terms
 **Catalogue entry (browser pane, signed in by Chad, read 16:46 UTC 12 Nov 2026):** https://user.eumetsat.int/catalogue/EO:EUM:DAT:0869
@@ -26,7 +27,7 @@
 **The WMS layer is that product:**
 - The catalogue entry's "Explore in EUMETView" link goes to `https://view.eumetsat.int/productviewer/productDetails/mtg_fd:rgb_dust`, and its Access tab lists EUMETView only.
 - The WMS layer `mtg_fd:rgb_dust` is titled "Dust RGB - MTG-I - 0 degree" and carries the same description.
-- **Use each for what it can prove (GPT):** the catalogue for product identity and licence; the tested WMS response for what the page can actually display (§4b).
+- **Use each for what it can prove (GPT):** the catalogue for product identity and licence; the tested WMS response for what the page can actually display (§6c).
 - **Two small mismatches, recorded, not explained:**
   - the catalogue gives the extent as 77° and 79°, the WMS layer's bounding box is 70° by 70°;
   - the catalogue's record starts 2 Dec 2024, the WMS time range starts 22 Oct 2024.
@@ -35,32 +36,78 @@
 **The Data Policy itself:**
 - **GPT's reading, relayed by Chad (GPT's extraction; neither Chad nor Claude has read the PDF):** Article 4 and Annex II classify this kind of RGB composite as a Core Advanced Image Product; Articles 5 and 6 support public reuse with attribution; the one-hour threshold applies to the Recommended Level 1 inputs, not to this product.
 - **Claude's reading of the licensing guide** (V2.2, 4 Nov 2026, page text): Core data and products are "made available without charge under a CC-BY-4.0 licence"; the one-hour licences are listed for Level 1 image data. That agrees with GPT's reading.
+- **Storing and serving a copy is covered:** CC BY 4.0 permits redistribution with attribution, which is what the hub would do (§3).
 - **This supersedes the source check's rev 2 caution** that a public layer should stay an hour behind. That caution treated the picture like its Level 1 inputs; the catalogue entry answers it.
 
 **Credit (the guide's form, adapted):** "Contains modified EUMETSAT Meteosat data 2026 · Dust RGB - MTG - 0 degree · CC BY 4.0", with links to the catalogue entry and the licence. "Modified" because we reproject the picture onto a globe. No EUMETSAT logo.
 
-## 3. Access, limits and the $0 path (browser pane, 16:47 UTC)
-- **Endpoint:** `https://view.eumetsat.int/geoserver/ows`, WMS 1.3.0. No key, no sign-in. `Access-Control-Allow-Origin: *`, so a browser on any site can read the image and its pixels.
-- **Finding the latest frame:** a GetCapabilities request limited to the `mtg_fd` namespace is **34,860 bytes** and states the layer's latest time. (The full capabilities document is 282,021 characters; the page would never request that.)
-- **The frame:** GetMap in EPSG:4326 with an explicit `TIME`. The whole disc at 2048 × 2048 JPEG was **655,532 bytes**.
-- **Limits, as the service's own response headers state them:**
-  - `x-rate-limit-limit: 20` with `x-rate-limit-action: Delay excess requests 1000ms` (context `wms`);
-  - `x-concurrent-limit-user: 8`.
-  - **The window for the "20" is not stated** in the headers, and no written usage policy was found as page text. EUMETSAT's WMS tutorials are PDFs, unopened.
-  - **What "user" means in those headers is not stated either** (per address, per session or something else).
-- **Our request budget, as a maximum:** per tab that is visible and has the layer on, **at most six capabilities requests and six image requests an hour**.
-  - On switching on: one capabilities request, then one image request.
-  - Every 10 minutes after that: one capabilities request. An image request follows only if the latest time has changed.
-  - Only one request in flight at a time. A frame already shown is never fetched again.
-  - On a throttled or failed response the next check waits longer (20, 40, then 60 minutes), returning to 10 after a success.
-  - Layer off or tab hidden: no requests.
-- **What is not established:** how the service behaves at public traffic levels. Many readers behind one address could share one allowance. The headers show that throttling exists; they do not show our headroom.
-- **Stated purpose:** the EUMETView page says its OGC services "allow you to integrate EUMETView in to other applications".
-- **Dependence:** readers' browsers call EUMETSAT directly, so EUMETSAT sees our readers' requests, and an outage there shows as "not available" here. Proxying through the hub would hide that and cost money; not proposed.
+## 3. How it is fetched (hub)
+A new collector job, `dustrgb`, gated by a plain variable `DUSTRGB_ENABLED` (absent = off), in the pattern of the buoys and plastic jobs.
+1. **Read the list:** GetCapabilities limited to the `mtg_fd` namespace (34,860 bytes when measured). Take the layer's latest advertised time.
+2. **Skip if unchanged:** if that time is the frame already stored, stop. No image request.
+3. **Fetch the picture** for that exact advertised time, box 80°S–80°N, 80°W–80°E.
+4. **Verify before keeping it (§4):** HTTP 200, an image content type, a decodable image signature of the expected size, **and the server's `Warning` header naming the same time that was requested.** Anything else is a failed run.
+5. **Publish:** write the image and a small metadata file (frame time, fetched-at time, bytes, SHA-256, the server's stated time, the request box). Only then does the stored frame change.
+6. **On failure:** the previous good frame stays, with its original times, and the failed attempt is recorded beside it. This is the buoy fallback pattern (hub 0.6.8). The page decides what to show from the frame's age (§5).
 
-## 4. Measurements so far (browser pane on `view.eumetsat.int`, 12 Nov 2026; one afternoon, indicative only)
+**Cadence (Chad: "a couple of updates per day")**
+- **Proposed start: four runs a day**, at 00:07, 06:07, 12:07 and 18:07 UTC (02:07, 08:07, 14:07 and 20:07 SAST), riding the existing hourly job. Two a day is equally easy; it is one setting.
+- Each run costs EUMETSAT two requests (one if nothing is new). **At four runs that is at most eight requests a day**, against response headers that state a limit of 20 per unstated window.
+- Going to hourly later changes that one setting and nothing else.
 
-### 4a. Frame lag
+**Format and size**
+- **Picture:** JPEG, 2048 × 2048 (669,520 bytes when measured; it once took 37 seconds to arrive, which a background job can wait for).
+- **Footprint:** a transparent PNG of the same frame and box at a smaller size, fetched in the same run, stored beside the picture and used as the mask and for the outline. The 160 × 160 version was 64,592 bytes.
+  - **To settle in the build, by measurement:** the mask size that is sharp enough at the disc edge and preserves any gaps inside the picture, compared against a full-size transparent PNG if the hub can fetch one.
+  - The mask is fetched **per frame**, not reused, so a gap in one frame is never hidden by another frame's mask.
+- **Hub routes:** `GET /snapshot/dustrgb/meta` (JSON, short cache) and `GET /snapshot/dustrgb/<frame time>/<file>` (the image and the mask; safe to cache for long because the address names the frame).
+
+**The one unknown that decides this route**
+- **Whether Cloudflare's Workers can reach `view.eumetsat.int` at all.** OpenSky refused cloud servers; EUMETSAT is untested. Both of Claude's shells are refused by their own proxy, which says nothing about Cloudflare.
+- **First build step, before anything else is written:** a single reachability test from the Worker (one capabilities request, result reported, nothing stored), on its own Approve line since it is a production deploy. If it fails, this route is closed and the choice returns to the browser-direct design of rev 2, or to leaving Dust off.
+
+## 4. What moving it to the hub settles
+| GPT's open question (rev 2 review) | Browser-direct (rev 2) | Hub-collected (rev 3) |
+|---|---|---|
+| Is the picture the frame the card names? | The page cannot read the server's stated time; it could only avoid known-bad requests. | **The hub reads the server's stated time and refuses a mismatch.** The page shows the time the hub verified. |
+| Can a usable image be fetched at a useful size? | Large frames were slow and variable for the reader. | The hub waits; readers get a stored file from the hub. |
+| Request limits at public traffic | Unknown headroom, shared per address. | At most eight requests a day in total. |
+| A week-long browser cache on images | A risk for default-time requests. | Each stored frame has its own address. |
+| Dependence | Readers' browsers call EUMETSAT. | Readers call only the hub. |
+
+- **What it gives up:** freshness. A frame is up to about six hours old at four runs a day, plus the 20 to 30 minutes EUMETSAT takes to publish (§6a).
+- **Still not provable:** that the picture's pixels are what EUMETSAT intended for that time. The hub verifies the server's own statement, which is the best evidence available. §6b shows that statement was wrong for an off-grid time, so the hub requests only advertised times.
+
+## 5. What the reader sees
+**Card** (Optional layers, after Ocean heat): heading "Dust RGB imagery", evidence tag **Observed**, described as "a false-colour infrared composite". One switch.
+- **Off:** "Off. Switch on to load the latest Dust RGB frame."
+- **On:** **"Frame 12 Nov, 16:30 UTC · 5 h old"**, "Meteosat (MTG) at 0°", and **"Updated a few times a day — not continuous."**
+  - Chad reads times in South African time in conversation; the globe's convention is UTC. Whether this card also shows local time is D7.
+- **Time and picture change together:** a newer frame is fetched and decoded in the background, and only then are the texture, the mask and the timestamp line swapped in one step.
+- **States** (the page's existing words), from the frame's age against the cadence:
+  - **current:** younger than one run interval plus a margin;
+  - **stale:** older than that, shown with its age;
+  - **unknown:** older than threshold B, or nothing could be loaded. Nothing is painted and the card says why.
+  - **Provisional values at four runs a day: current up to 8 h, unknown beyond 24 h.** B is a product judgement (GPT): how old a dust picture can be and still belong on a globe called "Earth now".
+- **A failed page load of a newer frame:** any frame already shown stays, with its own age and "Refresh unavailable", until B.
+- **A failed first load:** nothing is painted; the card says the frame could not be loaded.
+- **A failed hub run** is visible as a growing age, and in `/status` like every other collector.
+
+**Coverage and gaps**
+- Copy (GPT's): "Shows the part of Earth visible to Meteosat from 0°. Detail decreases toward the edge."
+- The outline follows the frame's own footprint (its mask, §3; measured in §6c), not the rectangular request box.
+- Outside the footprint the globe keeps its normal backdrop. Gaps inside it stay clear.
+
+**What the colours can show**
+- EUMETSAT's own words, quoted: the product "is designed to monitor the evolution of dust storms" and "is equally useful for discriminating cloud types … and detecting low-level moisture and also volcanic plumes".
+- **Colour cue, provisional (GPT's wording, D4):** "Airborne dust can appear pink or magenta. Clouds, moisture and the surface also affect the colours." Provisional until checked against an MTG example or guide.
+- No amount, height or ground-level concentration, and no forecast. Infrared, so it works by night as well as by day.
+
+**Credit:** "Contains modified EUMETSAT Meteosat data 2026 · Dust RGB - MTG - 0 degree · CC BY 4.0", on the card, in the footer and on Sources & Details.
+
+## 6. Measurements so far (browser pane on `view.eumetsat.int`, 12 Nov 2026; one afternoon, indicative only)
+
+### 6a. Frame lag
 | Clock (UTC) | Latest advertised frame | Age |
 |---|---|---|
 | 16:35:28 | 16:10 | 25 min |
@@ -72,9 +119,9 @@
 - **The 16:30 frame became the advertised latest between 16:49:18 and 16:51:22: 19 to 21 minutes after its time stamp.** The 16:20 frame appeared between 16:35:28 and 16:46:42 (15 to 27 minutes).
 - **Reading:** a reader would see a frame roughly 20 to 30 minutes old, the age climbing for 10 minutes and then dropping when the next frame is advertised. Two frames only; the 24-hour log decides.
 - **Recent frames present:** each 10-minute slot from 10:30 to 16:20 UTC (36 frames), requested by explicit time as a small picture over southern Africa, returned a complete picture. Response time 0.9 s fastest, 2.9 s average, 26.5 s slowest.
-  - As GPT noted, differing file sizes do not prove which time the server rendered. §4b tests that directly.
+  - As GPT noted, differing file sizes do not prove which time the server rendered. §6b tests that directly.
 
-### 4b. What the service does with the time we ask for (16:52–16:54 UTC; latest advertised frame 16:30)
+### 6b. What the service does with the time we ask for (16:52–16:54 UTC; latest advertised frame 16:30)
 Same-origin requests, so the response headers were readable. Pictures compared by a hash of their decoded pixels.
 
 | Requested `TIME` | Result | Server's `Warning` header | Pixels |
@@ -98,7 +145,7 @@ Same-origin requests, so the response headers were readable. Pictures compared b
 - **The page cannot read the `Warning` header:** the response exposes no headers to other origins (`Access-Control-Expose-Headers` absent). So the page cannot confirm which frame it was given.
 - **Not established:** the 16:40 result changed between two tests a minute apart and is unexplained; behaviour during a real gap in the record; whether the two matching requests generalise.
 
-**Consequences for the design (§5, §6)**
+**Consequences for a browser-direct design (rev 2; kept for the record)**
 - Request **only a time read from the capabilities document, exactly as advertised**. Never an off-grid time, never the default.
 - **The page cannot prove label and picture agree; it can only avoid the cases shown to break it.** That is the honest claim, and the card's wording must not go beyond it.
 - Check that the response is an image that decodes; treat anything else as a failed refresh.
@@ -108,7 +155,7 @@ Same-origin requests, so the response headers were readable. Pictures compared b
 - A request **without** a time could be cached by the browser for a week under one address. Another reason never to use the default.
 - A request **with** a time may also be cached for a week. That is right if frames never change after publication; whether they do is not measured.
 
-### 4c. Verified image footprint (16:53 UTC, the 16:30 frame)
+### 6c. Verified image footprint (16:53 UTC, the 16:30 frame)
 Whole-world request, transparent PNG, 720 × 360 (0.5° per pixel):
 - **The picture is a disc with transparency outside it.** Every pixel is fully opaque or fully clear (no partial transparency).
 - **Extent:** 77.25°N to 76.75°S; at the equator 79.25°W to 78.75°E. Narrower toward the poles: 55.75°W–54.25°E at 70°N, 59.25°W–59.75°E at 70°S. Nothing at 80° N or S.
@@ -117,90 +164,61 @@ Whole-world request, transparent PNG, 720 × 360 (0.5° per pixel):
 - **The JPEG has no transparency**, so its corners outside the disc are painted. The footprint above is the mask.
 - Measured at 0.5°; the build re-measures it at the request size and asserts it.
 
-### 4d. The 24-hour log (running)
-- **Started 16:54:34 UTC 12 Nov** in the browser pane tab on `view.eumetsat.int`. **Chad's go was GPT's recommendation relayed without objection; Claude started it as a read-only measurement and says so here. It stops if Chad says stop.**
+### 6d. The day log (running; no longer blocks the build)
+- **Rev 3:** with the hub fetching a few frames a day, this log no longer decides anything before a build. It keeps running overnight as background evidence on lag and time handling.
+- **Started 16:54:34 UTC 12 Nov**; changed at 16:59:30 UTC to a 7-minute interval (so it walks through the 10-minute publishing cycle), with the frame-time header recorded per frame as present or absent and by the time it names.
+- **Original set-up:** in the browser pane tab on `view.eumetsat.int`. **Chad's go was GPT's recommendation relayed without objection; Claude started it as a read-only measurement and says so here. It stops if Chad says stop.**
 - Every 10 minutes: one capabilities request (34,860 B) and one 160 × 160 transparent PNG of the advertised latest frame (64,592 B on the first row), by explicit time.
 - Each row records: clock time, whether the tab was hidden, the advertised latest time, response times and statuses, the content type, a hash of the picture, the server's stated time from the `Warning` header, and the rate-limit header.
 - Rows are kept in the tab's local storage, so a reload does not lose them. **The timer stops if the tab is closed or navigated, and pauses while the Mac sleeps.** Missed checks will show as gaps and are reported as gaps.
 - **What it will give:** the distribution of frame age; how often the advertised frame's stated time differs from the requested time; error and non-image responses; gaps.
 - **Thresholds (GPT):** A is set from ordinary delivery lag with a margin. B is a judgement about how old a picture can be and still serve the globe, and a healthy day cannot set it.
 
-## 5. What the reader sees
-**Card** (Optional layers, after Ocean heat): heading "Dust RGB imagery", evidence tag **Observed**, described as "a false-colour infrared composite". One switch.
-- **Off:** "Off. Switch on to load EUMETSAT's latest Dust RGB frame."
-- **On:** **"Frame 12 Nov, 16:20 UTC · 27 min old"** and "Meteosat (MTG) at 0°". The age updates on the page's existing 30-second timer.
-- **Time and picture change together.** A newer frame is fetched and decoded in the background; only then are the texture and the timestamp line swapped, in one step. Until then the previous frame stays with its own time and age.
-- **States** (the page's existing words):
-  - **current**: the frame is younger than threshold A;
-  - **stale**: older than A, shown with its age;
-  - **unknown**: older than threshold B, or no frame could be loaded. Nothing is painted and the card says why.
-  - **A and B are provisional until the log is reviewed. Placeholders: A = 60 min, B = 3 h.**
-- **A failed refresh** (capabilities unreadable, non-image response, decode failure, throttling): any usable frame younger than B stays, with its own age and **"Refresh unavailable"**. Once it passes B it is cleared.
-- **What the label claims:** the time is the one the page asked for, taken from EUMETSAT's list of available frames. The card does not say the page verified it (§4b).
-
-**Coverage and gaps**
-- Copy (GPT's): **"Shows the part of Earth visible to Meteosat from 0°. Detail decreases toward the edge."**
-- **The outline follows the verified image footprint** (§4c), derived from the frame's own transparency, not the rectangular request box.
-- Outside the footprint the globe keeps its normal backdrop. Clear pixels inside it stay clear.
-
-**What the colours can show** (in the card's "What this is and is not")
-- EUMETSAT's own words, quoted: the product "is designed to monitor the evolution of dust storms" and "is equally useful for discriminating cloud types … and detecting low-level moisture and also volcanic plumes".
-- **Colour cue, provisional (GPT's wording, D4):** "Airborne dust can appear pink or magenta. Clouds, moisture and the surface also affect the colours."
-  - GPT's basis: EUMETSAT's older Meteosat case-study material supports the general cue; an FCI-specific key was not verified. Claude has not read that material. The wording stays provisional until checked against an MTG example or guide.
-- It gives no amount, height or ground-level concentration, and no forecast.
-- Infrared, so it works by night as well as by day.
-
-**Credit:** on the card, in the page footer and on Sources & Details (§2).
-
-## 6. How it is painted
-- **Method:** the Ocean Heat method. A texture on a sphere just above the surface, limited to the frame's latitude and longitude box, with partial transparency so coastlines stay readable. It does not touch the observation layers or their records.
-- **Format:** transparent PNG, so the frame carries its own footprint (§4c). Sizes in bytes and load times: 
-  | Request (box 80°S–80°N, 80°W–80°E, the 16:30 frame) | Bytes | Time to arrive |
-  |---|---|---|
-  | JPEG 1024 × 1024 | 198,987 | 4.0 s |
-  | JPEG 2048 × 2048 | 669,520 | **37.4 s** |
-  | PNG 1024 × 1024, transparent | not back after more than 60 s | — |
-  | PNG 2048 × 2048 (8-bit and full) | queued behind it, not measured | — |
-
-  - **Large frames can be slow to arrive, and it varies:** an earlier 2048 × 2048 JPEG on the 70° box came back promptly (655,532 B); this one took 37 s.
-  - **This is a real constraint on the design.** If transparent PNG at build size is too slow, the alternative is the JPEG for the picture plus a small transparent PNG (the 160 × 160 log request is 64,592 B) for the footprint mask. To be measured and decided before a build; the sizes above are from one moment.
-- **Painted size:** one 2048 × 2048 frame for the 160° × 160° request box is about 8.7 km per pixel at the equator, coarser than the product's 2 km.
-  - Phones take 1024 × 1024.
-  - **To check before a build (GPT, D5):** that plumes stay legible over southern Africa at these sizes on desktop and phone. Southern Africa is in the outer part of the disc, where detail is already lower.
-  - **Sharper regional detail (tiles as the reader zooms) is not in this proposal.** It multiplies requests and should follow the limits answer in §9.
-- **Placement and opacity are judged on the real globe** against the true-colour backdrop, in a preview, before any release. A lesson from the buoy colours.
-- **No animation, no time slider** in the first release: the latest frame only.
-
 ## 7. What it is not
-- Not the multimission global ring (`mumi:wideareacoverage_rgb_dust`): other agencies' data, so it needs its own source and terms check.
-- Not the older MSG layers, and not the Indian Ocean view.
-- Not a dust detection, alert or count. No cells, no records, no place-view rows, no history kept.
-- Not a hub feature: nothing is stored or served by Mother Earth.
+- Not continuous and not animated: one current frame, replaced a few times a day.
+- Not the multimission global ring, the older MSG layers or the Indian Ocean view. Each needs its own check.
+- Not a dust detection, alert or count: no cells, no records, no place-view rows.
+- **No history kept:** one current frame, the previous one deleted after a successful publish (the lean-storage rule of 3 Nov). Keeping frames for a later time-lapse would be a separate decision and is flagged here, not proposed.
 
 ## 8. Build shape (for a later Go; not requested now)
-- One new page file `dustrgb.js`, a card in `index.html`, scoped styles, a Sources section, a REGISTER entry on its own line.
-- **Reused from `dust-rc`:** nothing in the page. Two test lessons carry over: a plain backdrop image so the test globe finishes building, and assertions limited to what the page controls.
-- **Tests:**
-  - layer off → no request to EUMETSAT;
-  - on → exactly one capabilities request and one frame request, the frame requested by explicit time;
-  - label time equals requested time;
-  - stale and unknown states from a faked clock;
-  - capabilities unreadable, frame error and undecodable frame → nothing painted, reason shown;
-  - outline drawn; credit present;
-  - switch off → texture removed and no further requests;
-  - a hidden tab makes no refresh requests.
-  - Breaks for each.
-- **Checks on the real globe** in desktop Chrome with Chad, then the phone.
-- **Release:** branch, GPT review of the candidate, then separate Approve lines for REGISTER and merge.
+**Order**
+1. **Reachability test from the Worker** (own Approve line). Stop here if it fails.
+2. **Hub:** the `dustrgb` job, the two routes, a `/status` row, the `DUSTRGB_ENABLED` gate, version bump. Outside history and the health monitors for the first release.
+3. **Page:** new file `dustrgb.js`, the card, scoped styles, Sources section. Painted by the Ocean Heat method: a texture on a sphere just above the surface, limited to the frame's box, masked to its footprint, partly transparent.
+4. **REGISTER** entry on its own line.
 
-## 9. Decisions for Chad, with GPT's recommendations (12 Nov, relayed by Chad)
-| Decision | GPT recommends | Status |
+**Tests**
+- **Hub** (real job code, EUMETSAT stubbed, faked clock):
+  - a good run publishes picture, mask and metadata that agree;
+  - unchanged latest time → no image request;
+  - **stated time differs from requested → run fails, previous frame kept;**
+  - **`Warning` header missing → run fails** (counted separately from a mismatch);
+  - HTTP 200 with an XML error → run fails;
+  - undecodable image → run fails;
+  - a failed run keeps the previous frame with its original times;
+  - gate off → no request at all.
+- **Page:**
+  - layer off → no request;
+  - on → metadata then exactly one picture and one mask;
+  - label time equals the metadata's verified time;
+  - current, stale and unknown from a faked clock;
+  - **failed first load leaves the globe clear;**
+  - **failed refresh keeps the existing frame and its original time until B, then clears it;**
+  - **switching the layer off while an image is in flight: the late response never repaints;**
+  - outline drawn from the mask; credit present.
+- Breaks for each. Full regression.
+
+**Checks on the real globe:** opacity and legibility over southern Africa at 2048 and 1024, in desktop Chrome with Chad, then the phone.
+**Release:** branch → GPT review of the candidate → Approve lines for the hub deploy, REGISTER and the page merge, each separate.
+
+## 9. Decisions for Chad
+| Decision | Recommendation | Status |
 |---|---|---|
-| **D1 Name and tag** | "Dust RGB imagery", Observed; "a false-colour infrared composite"; "Frame" on the timestamp line | in §5; Chad to confirm |
-| **D2 Freshness** | run the 24-hour log with image and cache checks; both thresholds provisional until reviewed | log running (§4d) |
-| **D3 Limits** | proceed with the bounded measurement pass; an optional help-desk enquiry on the rate window, how requests are counted and expected public WMS use | pass under way; enquiry is Chad's choice, not sent |
-| **D4 Colour key** | the provisional sentence in §5, until checked against an MTG example or guide | open |
-| **D5 First release** | latest MTG 0° disc only; check legibility over southern Africa on desktop and phone | open |
-| **D6 Policy record** | keep GPT's labelled review; cite Data Policy Articles 4–6 and Annex II alongside the product listing | recorded in §2 as GPT's reading; the PDF remains unopened by Claude |
-
-**Next review comes back with:** observed frame lag from the log, missing-time behaviour (§4b, to be extended by the log), and the verified coverage mask at build size (§4c).
+| **D1 Name and tag** | "Dust RGB imagery", Observed, "a false-colour infrared composite", "Frame" on the timestamp line | GPT: ready as written |
+| **D2 Freshness** | hub-collected, **four runs a day** to start; current up to 8 h, unknown beyond 24 h, both provisional | **changed in rev 3; needs GPT's review** |
+| **D3 Limits** | at most eight requests a day needs no enquiry; an optional help-desk note stays Chad's choice | changed in rev 3 |
+| **D4 Colour key** | the provisional sentence, until checked against an MTG reference | open |
+| **D5 First release** | latest MTG 0° disc only; settle picture and mask sizes and southern Africa legibility in the build | open |
+| **D6 Policy record** | GPT's labelled reading of Data Policy Articles 4–6 and Annex II, beside the product listing | GPT: ready as written |
+| **D7 Times on the card (new)** | UTC only, as everywhere else on the globe; or UTC with the reader's local time beside it | new |
+| **D8 Reachability test (new)** | one Worker request to EUMETSAT, on its own Approve line, before any other build work | new |

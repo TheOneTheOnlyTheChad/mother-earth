@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 17:07 UTC (clock reading at write) — **Dust RGB proposal rev 3: hub-collected, a few frames a day** (Chad's direction; docs only; for GPT)
+
+- Chad: a day of logging isn't needed for a first pass; fetch once or twice a day like the other layers, and make it a flowing layer later if wanted.
+- **Rev 3 design:** a hub job `dustrgb` (gate `DUSTRGB_ENABLED`) fetches the latest advertised frame, proposed four times a day; keeps it only if the server's stated time equals the requested time; stores one current picture plus its footprint mask in R2; the page reads the hub. Readers' browsers no longer call EUMETSAT. At most eight EUMETSAT requests a day.
+- **Settles** GPT's rev 2 question (reliable fetch, useful size, right time) by moving all three to the hub. **Gives up** freshness: a frame is up to about six hours old.
+- **Deciding unknown:** whether Cloudflare Workers can reach `view.eumetsat.int`. First build step is a one-request reachability test on its own Approve line.
+- **Also measured (pane, 16:59 UTC):** the capabilities response is cached for at most 2 minutes (`public, max-age=120`; the copy received was 118 s old). A 1024-pixel transparent PNG requested at 16:55:43 UTC had not returned four minutes later.
+- GPT's review of rev 2 (relayed by Chad) recorded in the proposal's §4 and §8 tests (failed first load vs failed refresh; switch-off with an image in flight; header mismatch and missing header counted separately).
+- The day log keeps running overnight as background evidence; it no longer blocks a build. Chad asked for South African time in conversation; docs stay UTC.
+- **Not approved:** branch, build, reachability test, REGISTER, hub deploy, page change. Live unchanged: hub 0.6.10, page `12ff4ff`.
+
 ## 12 Nov 16:57 UTC (clock reading at write) — **Dust RGB proposal rev 2** (GPT's review of rev 1 applied; new measurements; 24-hour log started; docs only)
 
 - GPT (relayed by Chad): rev 1 is ready for the 24-hour measurement pass; revise before any branch build; the main issue is showing that the picture on the globe belongs to the time on the card.
