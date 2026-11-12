@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 13:11 UTC (clock reading at write) — **Thread close-out (START-HERE §9): `/status` run-notes thread**
+
+- **Mac `_review/` emptied 13:11:04 UTC (Mac clock):** `status-notes-rc` (325 files) moved to `_to_delete/20261112T131104Z/_review/` for Chad to empty. `_review/` holds 0 entries. The earlier failed clone attempt is in `_to_delete/20261112T121005Z-failed-clone/`.
+- **Branch `status-notes-rc` deleted by Chad;** `git fetch -p`: remote = `main` + parked `aircraft-rc`.
+- START-HERE: live-state bullet for hub 0.6.10 and §4u (thread facts). HANDOVER: new "NEXT THREAD STARTS HERE" block. Project docs updated.
+- **Mac sync of the whole repo at the final commit, preserve-first** (result recorded in the line below once run).
+- Checkouts clean and pushed. Research packets, the private Timeline inbox and the lockdown records untouched.
+- Live unchanged since the merge: hub 0.6.10, page `12ff4ff`. Nothing pending approval.
+
 ## 12 Nov 13:08:10 UTC (commit time) — **status-notes-rc MERGED to main** (`0d0fa6e`, no-ff of `3140533`; Chad: "Approve: merge status-notes-rc to main (hub 0.6.10 record; no page file change)") — entry written 13:09 UTC
 
 - Merged worker.js = live hub 0.6.10 `784939f8…a0da`, so **main = live again**. On the merge: status-notes-hub 6/6, osmc-reliability-hub 27/27, arts-hub 54/54.
