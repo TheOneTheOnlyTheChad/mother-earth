@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 09:29 UTC (clock reading at write) — **GPT approved TL-IN-0001 review snapshot 1 (option A); item now "reviewed"** (docs only)
+
+- GPT (relayed by Chad): both supplied hashes verified. Claim label approved as written; **option A selected**; public change record and entry line approved as written.
+- **Count verification, GPT's (recorded separately in the private item):** He et al. 2020, Results, "Sulfate S isotope trends", identifies three localities immediately before the excerpt's "In all sections"; Figure 2 names Mount Sparagio, Cloghan Point and Black Bear Ridge. This is GPT's reading of the article, not Claude's and not in the research packet's excerpt. It closes the open point on "three".
+- Private item history appended 09:28:44 UTC (Mac clock); index updated. **Both frozen files unchanged** (evidence record `fe176e16…d8c9`, snapshot `d7b895c5…5d8d`, re-hashed on the Mac after the append). Source checked date and entry-wide "evidence last reviewed" both stay 10 Nov 2026.
+- **Next (Chad):** the branch-build line, naming option A and the snapshot sha256 `d7b895c5b0a5361e06ebbd05dacedd0a3727e27050ff5622b9f9938f2a405d8d`. **Not approved:** branch build, R2 upload, hub deploy, page release. Live unchanged: hub 0.6.8, page `7c3aa22`.
+
 ## 12 Nov 09:21 UTC (clock reading at write) — **Timeline inbox CREATED; TL-IN-0001 logged; review snapshot 1 frozen for GPT** (docs only, on Chad's Go line)
 
 - Chad: "Go: create the Timeline inbox (Mac research/timeline-inbox/ + Project) and log TL-IN-0001 (docs only)".
