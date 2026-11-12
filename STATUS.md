@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 11:06 UTC (clock reading at write) — **GPT's re-check PASSED for timeline-changes-rc rev 2; release hold lifted; awaiting Chad's R2 upload line** (docs only)
+
+- GPT (relayed by Chad): passed for packet `6fbbad5` / code `eed6c28`. The repeated-jump focus defect is closed in Chrome on desktop and at 390×844; reload → Forward → Back also restored the correct link focus at 390×844. The browser re-check used the local preview in Chrome.
+- **Release hold lifted.** Ready for Chad's separate R2 upload approval; the deploy and the merge keep their own approvals, with the live Pages-origin check between them.
+- Packet updated on the branch (`281bb55`, docs only: §10 records the re-check; the rollback note now reads "a matched cached R2 page and R2 script"). No code, catalogue or page file changed after `eed6c28`. The Mac `_review/timeline-changes-rc-r2/` copy stays at the reviewed `6fbbad5`.
+- **Final hashes rechecked 11:06:18 UTC (workspace clock):** generator `--check` passes; catalogue `2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356` (18,120 B) = the hub pin in worker.js (`3e791a5c…c49d`); release_date **2026-11-12**, previous R1. timeline.html `2f5a246c…fda5`, timeline.js `713ecd4f…8fad`, style.css `e48b3fc0…bc69`, index.html `5d2d284c…43aa`, sources.html `5c3e4a7e…f937`.
+- The date holds only if the page is released today (latest start 22:00 UTC). **Not approved yet:** R2 upload, hub 0.6.9 deploy, page merge. Live unchanged: hub 0.6.8, page `7c3aa22`.
+
 ## 12 Nov 10:58 UTC (clock reading at write) — **timeline-changes-rc rev 2 @ `6fbbad5`** (code `eed6c28`; focused fix after GPT's review of `fe4cf18`; branch only) — packet §9
 
 - **GPT (relayed by Chad): hold the upload, deploy and merge lines pending a focused branch fix.** Accepted: the `entries` / `records` / `releases` shapes, the focus retry, the desktop Back behaviour, the narrowed privacy check. GPT's independent checks passed (318 manifest entries, generator 45/45, hub 73/73, static fallback, the preview's five marks; Worker diff = version + Timeline pin and current only).
