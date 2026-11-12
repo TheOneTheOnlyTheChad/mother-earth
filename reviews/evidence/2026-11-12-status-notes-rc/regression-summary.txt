@@ -1,0 +1,58 @@
+1 arts-hub.test.mjs 0s arts-hub: 53 passed, 1 failed
+0 buoy-temp.test.mjs 0s 37 passed, 0 failed
+0 drifters-hub.test.mjs 0s 12 passed
+0 duration-contract.test.mjs 10s ALL CHECKS PASSED
+0 firms-guard.test.mjs 4s firms-guard: 19 passed, 0 failed
+0 firms-v2.test.mjs 13s firms-v2: 57 passed, 0 failed, 7 skipped
+0 health-hub.test.mjs 4s 29 passed, 0 failed
+0 history-hub.test.mjs 0s history-hub: 27 passed, 0 failed
+0 kp-degraded.test.mjs 0s kp-degraded: 29 passed, 0 failed
+0 oceanheat-hub.test.mjs 0s 48 passed, 0 failed
+0 orbital-hub.test.mjs 1s 13/13 passed
+0 orbital-ui.test.mjs 0s 38 passed, 0 failed
+SKIP orbital.test.mjs (manual/network)
+0 osmc-reliability-hub.test.mjs 1s osmc-reliability-hub: 27 passed, 0 failed
+0 place-rows.test.mjs 0s place-rows: 7 passed
+0 plastic-hub.test.mjs 0s 11 passed
+0 satellites-hub.test.mjs 0s 12 passed (2000 rows, synthetic)
+SKIP search.realdata.test.mjs (manual/network)
+0 search.test.mjs 0s 111 passed, 0 failed
+0 ships-fallback.test.mjs 180s 7 passed
+0 ships-late.test.mjs 0s 7 passed
+SKIP ships-probe.test.mjs (manual/network)
+0 sky-build.test.mjs 1s sky-build: 35 passed, 0 failed
+0 sky-hub.test.mjs 0s sky-hub: 46 passed, 0 failed
+0 sky-scene-hub.test.mjs 0s sky-scene-hub: 7 passed, 0 failed
+0 sky-scene-ref.test.mjs 1s 7 passed, 0 failed
+0 solar.test.mjs 0s 26 passed, 0 failed
+SKIP spacetrack-probe.test.mjs (manual/network)
+0 status-notes-hub.test.mjs 0s 6 passed, 0 failed
+0 timeline-catalogue-hub.test.mjs 0s timeline-catalogue-hub: 73 passed, 0 failed
+0 timeline-changes-build.test.mjs 1s timeline-changes-build: 45 passed, 0 failed
+0 arts-ui.test.cjs 21s arts-ui: 90 passed, 0 failed
+0 backdrop-layer.test.cjs 15s backdrop-layer: 27 passed, 0 failed
+0 buoy-temp-ui.test.cjs 15s 33 passed, 0 failed
+0 cell-perf-ui.test.cjs 160s 43 passed, 0 failed
+0 desktop-overflow.test.cjs 12s desktop-overflow: 112 pass, 0 fail
+0 drifters-ui.test.cjs 12s 25 passed, 0 failed
+0 fires-wording-ui.test.cjs 11s fires-wording-ui: 35 passed, 0 failed
+0 kept-ui.test.cjs 2s kept-ui: 21 passed, 0 failed
+0 mobile-pass.test.cjs 140s 131 passed, 0 failed
+0 oceanheat-ui.test.cjs 152s 109 passed, 0 failed
+0 orbital-browser.test.cjs 58s 113 passed, 0 failed  · 58 s
+0 osmc-reliability-ui.test.cjs 15s osmc-reliability-ui: 41 passed, 0 failed
+0 place-ui.test.cjs 7s place-ui: 30 passed, 0 failed
+0 plastic-ui.test.cjs 11s 29 passed, 0 failed
+0 search-ui.test.cjs 4s 104 passed, 0 failed
+0 sky-ui.test.cjs 23s sky-ui: 79 passed, 0 failed
+0 sky-zoom-ui.test.cjs 427s sky-zoom-ui: 333 passed, 0 failed
+0 smoke-fixes.test.cjs 2s smoke-fixes: 52 passed, 0 failed
+0 status-notes-ui.test.cjs 9s status-notes-ui: 16 passed, 0 failed
+0 terminator-behaviour.test.cjs 87s   Separately: the geometric boundary is ~0.83° from an observed sunrise (refraction + solar disc).
+0 terminator-ui.test.cjs 11s   Separately: the geometric boundary is ~0.83° from an observed sunrise (refraction + solar disc).
+0 timeline-axis.test.cjs 20s timeline-axis: 96 pass, 0 fail
+0 timeline-changes-ui.test.cjs 34s timeline-changes-ui: 173 pass, 0 fail
+0 timeline-ui.test.cjs 43s timeline-ui: 585 pass, 0 fail
+0 ux-round1.test.cjs 4s 34 passed, 0 failed
+0 sky-scene-build.test.py 1s 14 passed, 0 failed
+DONE

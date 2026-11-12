@@ -115,7 +115,7 @@ const artsSrc = src.slice(src.indexOf('// ===== Arts (the Met)'), src.indexOf('f
 ok('Arts section writes nothing and never reads D1', artsSrc.length > 500 && !/env\.DB|collector_runs|\.put\(|\.delete\(/.test(artsSrc));
 ok('no cron or job references arts', !/arts/i.test((src.match(/function jobForCron[\s\S]*?\n}/) || [''])[0]) && !/arts/i.test((src.match(/const JOBS = \{[\s\S]*?\n};/) || [''])[0]));
 r = await get(env(new Uint8Array(FILE)), '/'); const root = await r.json();
-ok('root: version ≥ 0.6.2, arts listed as a catalogue', /^0\.6\.[2-9]$/.test(root.version) && root.catalogues && root.catalogues.arts && root.catalogues.arts.path === '/snapshot/arts' && !root.layers.includes('arts'), root.version);
+ok('root: version ≥ 0.6.2, arts listed as a catalogue', (v => v.length === 3 && v.every(Number.isInteger) && (v[0] > 0 || v[1] > 6 || (v[1] === 6 && v[2] >= 2)))(String(root.version).split('.').map(Number)) && root.catalogues && root.catalogues.arts && root.catalogues.arts.path === '/snapshot/arts' && !root.layers.includes('arts'), root.version);
 
 console.log(`\narts-hub: ${pass} passed, ${fail} failed${B ? ' [BREAK=' + B + ']' : ''}`);
 process.exit(fail ? 1 : 0);

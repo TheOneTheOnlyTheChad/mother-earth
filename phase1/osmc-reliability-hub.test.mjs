@@ -77,7 +77,7 @@ function makeEnv(extra = {}) {
     async list({ prefix } = {}) { return { objects: [...m.keys()].filter(k => !prefix || k.startsWith(prefix)).map(key => ({ key, uploaded: new Date() })), truncated: false }; },
   };
   const stmt = (sql) => { const x = (a) => ({ async run() { if (/INSERT INTO collector_runs/.test(sql)) NOW += adv.db; if (/INSERT INTO collector_runs/.test(sql)) runs.push({ layer: a[0], started_at: a[1], finished_at: a[2], status: a[3], http: a[4], records: a[5], note: a[7] }); return {}; },
-    async first() { return null; }, async all() { return /FROM collector_runs/.test(sql) ? { results: Object.values(Object.fromEntries(runs.map(r => [r.layer, r]))).map(r => ({ layer: r.layer, started_at: r.started_at, status: r.status, http_status: r.http, records: r.records, bytes: 0, note: r.note })) } : { results: [] }; } }); return { bind: (...a) => x(a), ...x([]) }; };
+    async first() { return null; }, async all() { return /FROM collector_runs/.test(sql) ? { results: Object.values(Object.fromEntries(runs.map(r => [r.layer, r]))).map(r => ({ layer: r.layer, started_at: r.started_at, status: r.status, http_status: r.http, records: r.records, bytes: 0, note: r.note })).map(o => { const cols = (/^\s*SELECT\s+(.+?)\s+FROM\s/i.exec(sql) || [])[1]; if (!cols || cols.trim() === '*') return o; const keep = cols.split(',').map(c => c.trim()); return Object.fromEntries(keep.filter(k => k in o).map(k => [k, o[k]])); }) } : { results: [] }; } }); return { bind: (...a) => x(a), ...x([]) }; };   // projection honoured (0.6.10): only the SELECTed columns come back
   const env = { R2, DB: { prepare: stmt, async batch() { return []; } }, ADMIN_KEY: 'k', DRIFTERS_ENABLED: '1', ...extra };
   const raw = k => { const v = m.get(k); return v ? dec.decode(v.b) : null; };
   return { env, m, puts, runs, hooks, fail, adv, raw, setRaw: (k, text) => m.set(k, { b: enc.encode(text), etag: 'x' + (++seq), up: NOW }), json: k => JSON.parse(raw(k)), etag: k => m.get(k) && m.get(k).etag, bruns: () => runs.filter(r => r.layer === 'drifters') };
@@ -125,7 +125,7 @@ for (const [reason, http] of [['http_error', 522], ['fetch_failed', null], ['ref
     assert.equal(E.bruns().at(-1).status, 'down');
     for (const p of ['/cells/drifters', '/snapshot/drifters', `/place/g4/${firstCell(c0)}?layers=drifters`, '/']) assert.ok(!(await pub(E, p)).text.includes('SECRET-RAW'), 'raw text in ' + p);
     if (reason === 'fetch_failed') { assert.ok(E.bruns().at(-1).note.includes('SECRET-RAW'), 'raw note kept in collector_runs'); assert.ok(E.raw('cells/drifters/2026-11-10T16-08Z.json').includes('SECRET-RAW'), 'raw note kept in the private per-run object');
-      assert.ok((await pub(E, '/status')).text.includes('SECRET-RAW'), '/status shows the latest run note, as it does today (existing behaviour)');
+      { const st = JSON.parse((await pub(E, '/status')).text), d = st.last_runs.find(x => x.layer === 'drifters'); assert.ok(d && !('note' in d) && !JSON.stringify(d).includes('SECRET-RAW'), '/status last_runs (hub >= 0.6.10): no run note'); assert.equal(d.status, 'down'); }
       assert.equal((await pub(E, '/cells/drifters/2026-11-10T16-08Z.json')).status !== 200 || !(await pub(E, '/cells/drifters/2026-11-10T16-08Z.json')).text.includes('SECRET-RAW'), true, 'no public route returns the per-run object'); }
   });
 }
@@ -306,7 +306,7 @@ await t('15. cold failure with a distinctive raw error: the public down envelope
   for (const p of ['/cells/drifters', '/place/g4/10_10?layers=drifters', '/']) assert.ok(!(await pub(E, p)).text.includes('SECRET-RAW'), 'raw text in ' + p);
   assert.equal((await pub(E, '/snapshot/drifters')).status, 404);
   assert.ok(E.bruns().at(-1).note.includes('SECRET-RAW')); assert.ok(E.raw('cells/drifters/2026-11-10T16-07Z.json').includes('SECRET-RAW'), 'kept in the private per-run object');
-  assert.ok((await pub(E, '/status')).text.includes('SECRET-RAW'), '/status: existing exception (latest run note, secret-redacted)');
+  { const st = JSON.parse((await pub(E, '/status')).text), d = st.last_runs.find(x => x.layer === 'drifters'); assert.ok(d && !('note' in d) && !JSON.stringify(d).includes('SECRET-RAW'), '/status last_runs (hub >= 0.6.10): no run note'); }
   // refused response whose body carries the text
   const F = makeEnv(); at('2026-11-10T16:08:42.000Z'); osmc = [KINDS.refused_by_checks]; await hourly(F, '2026-11-10T16:07:00Z');
   const f = await pj(F, '/cells/drifters'); assert.equal(f.note, 'response refused by our checks'); assert.ok(!F.raw(CELLS).includes('SECRET-RAW'));
