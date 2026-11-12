@@ -71,7 +71,14 @@
      "source": "harper2024",
      "locator": "section 'Age and duration'"
     }
-   ]
+   ],
+   "evidence_reviewed": {
+    "date": "2026-11-10",
+    "records": [
+     "docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md",
+     "REGISTER.md"
+    ]
+   }
   },
   {
    "id": "e-big5-frasnian-famennian",
@@ -117,7 +124,14 @@
      "source": "percival2018",
      "locator": "Introduction and Discussion"
     }
-   ]
+   ],
+   "evidence_reviewed": {
+    "date": "2026-11-10",
+    "records": [
+     "docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md",
+     "REGISTER.md"
+    ]
+   }
   },
   {
    "id": "e-big5-end-permian",
@@ -138,7 +152,14 @@
      "source": "burgess2017",
      "locator": "section 'A relative timing framework'"
     }
-   ]
+   ],
+   "evidence_reviewed": {
+    "date": "2026-11-10",
+    "records": [
+     "docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md",
+     "REGISTER.md"
+    ]
+   }
   },
   {
    "id": "e-big5-end-triassic",
@@ -153,11 +174,18 @@
       "type": "approx_point",
       "ma": 201.5
      },
-     "text": "In all three sections studied, a large sulfur-isotope shift at about 201.5 million years ago coincides with the extinction horizon.",
+     "text": "In each of the three sections studied, a large sulfur-isotope shift about 201.5 million years ago coincides with the level in the rock record that marks the extinction.",
      "source": "he2020",
      "locator": "Results, sulfate sulfur-isotope trends"
     }
-   ]
+   ],
+   "evidence_reviewed": {
+    "date": "2026-11-10",
+    "records": [
+     "docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md",
+     "REGISTER.md"
+    ]
+   }
   },
   {
    "id": "e-big5-end-cretaceous",
@@ -194,7 +222,14 @@
      "source": null,
      "locator": null
     }
-   ]
+   ],
+   "evidence_reviewed": {
+    "date": "2026-11-10",
+    "records": [
+     "docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md",
+     "REGISTER.md"
+    ]
+   }
   }
  ]
 }

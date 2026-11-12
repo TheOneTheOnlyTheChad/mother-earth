@@ -309,7 +309,7 @@ const st = p => p.evaluate(id => {
     await p.click(`#card-${ID} .chip`); await p.waitForTimeout(80);
     ok('whole card is not one click target', !(await st(p)).open);
     await p.click(OPENERS.debated); await p.waitForTimeout(80); await p.click('#d-close'); await p.waitForTimeout(80);
-    const bad = reqs.filter(u => !u.startsWith(BASE) && !/fonts\.googleapis/.test(u) && u !== 'https://mother-earth.chadoberholzer.workers.dev/catalogue/timeline/tl-2026-11-R1');   // 0.6.4: the page asks for its own revision
+    const bad = reqs.filter(u => !u.startsWith(BASE) && !/fonts\.googleapis/.test(u) && u !== 'https://mother-earth.chadoberholzer.workers.dev/catalogue/timeline/' + JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'timeline/BUILD.json'), 'utf8')).catalogue_revision);   // 0.6.4: the page asks for its own revision
     ok('requests: only this site, the font stylesheet and the hub catalogue route', bad.length === 0, bad);
     ok('requests: the catalogue is requested exactly once', reqs.filter(u => /\/catalogue\/timeline(\/|$)/.test(u)).length === 1, reqs.filter(u => /workers/.test(u)));
     ok('requests: no fetch of data on the Timeline page', reqs.filter(u => u.startsWith(BASE)).every(u => /timeline\.(html|js)|style\.css|\/$/.test(u)), reqs);
