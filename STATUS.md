@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 12 Nov 13:03:54 UTC — **HUB 0.6.10 DEPLOYED** (Chad: "Approve: deploy hub 0.6.10 from 3140533 (content only)") — entry written 13:07 UTC
+
+- **No GPT review of the built candidate was relayed before Chad's line** (GPT passed proposal rev 2; the packet went to `_review/status-notes-rc/`). Recorded, not assumed.
+- **Before (13:03:35 UTC, dashboard tab):** live worker.js = 0.6.9 `3e791a5c…c49d` (293,542 B; rollback target); 19 bindings. Source raw.githubusercontent at `3140533`: 293,617 B, `784939f814335f47d3d5e0d118c6dbc2d6b0f181157a39b55ce1d0c080b6a0da`. Both re-checked in the tab immediately before the write.
+- **Deploy:** content-only PUT 13:03:51Z → HTTP 200, success, etag `a48dfa64…0a81`, modified 13:03:54.178Z. Bindings, secrets, variables, crons untouched.
+- **Verified 13:04:18 UTC:** read-back `784939f8…a0da` exact; 19 bindings; `/` = **0.6.10**, history collecting; `/status` 200 `no-store`, `collector_version` 0.6.10, **15 `last_runs` rows, none with `note`, every row exactly `layer, started_at, status, http_status, records, bytes`**; `archive_health` keys unchanged and `collection.firms.latest_run.note` still present (out of scope, as proposed); health 8/8 (200).
+- **Live orbital card (fresh load 13:04:52 UTC, pane):** Rocket bodies on → 2,213 drawn; freshness line "Element file retrieved 2026-11-12 11:42 UTC · 32,647 objects …" (latest orbital run ok); no console errors.
+- **First scheduled run on 0.6.10:** usgs 13:05:07 → 13:05:11 ok (D1).
+- **main ≠ live hub** until `status-notes-rc` merges (main's worker.js is 0.6.9). No page file differs.
+- **Rollback (own Approve line):** hub → 0.6.9 `3e791a5c…c49d`.
+- **Next (Chad):** `Approve: merge status-notes-rc to main (hub 0.6.10 record; no page file change)`.
+
 ## 12 Nov 12:10 UTC (clock reading at write) — **status-notes-rc BUILT on branch @ `3140533`** (code `32107f8`; hub 0.6.10, hub only; Chad's Go line; no merge, no hub deploy) — packet `reviews/2026-11-12-status-notes-rc.md` (on the branch)
 
 - GPT passed proposal rev 2 (projection verified in the SQL diff; route harness must honour selected columns; 0.6.9 control must really return the note). Chad: "Go: build status-notes-rc on a branch per STATUS-RUN-NOTES-PROPOSAL rev 2 (hub only; no merge, no hub deploy)".
