@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612021000">
+<link rel="stylesheet" href="style.css?v=202612031000">
 </head>
 <body class="doc">
 <header class="top">
@@ -172,6 +172,15 @@
   <p><b>Layers and clocks.</b> The globe's layers (quakes, fires, vessels, day/night, orbital objects and the rest) show their own times, not 00:00 UTC, so they are hidden while the view is open and come back exactly as they were. The Earth imagery keeps its own date, shown as usual. A day without its own sample shows "No computed position for today"; a neighbouring day is never used, and nothing is interpolated.</p>
   <p><b>Code credit.</b> The precession and sidereal-time code is transcribed from ERFA (a library derived from SOFA, rather than SOFA itself; BSD-3-Clause, © NumFOCUS Foundation), with its notices retained in the generator.</p>
   <p><b>Data path.</b> Your browser reads only the hub's <code>/catalogue/sky/sky-scene-2026-11-R1</code>, served only if the complete file matches its pin. The page checks the file's sha256 and shape, and that it names the distances card's own revision and hash as its pair; otherwise the view does not open.</p>
+
+  <h2 id="skycraft">Moon and Sun spacecraft — published trajectories (calculated; own pages, reached from the Sky zoom-out view)</h2>
+  <p><b>What it is.</b> Two pages, <a href="moon.html">the Moon</a> and <a href="sun.html">the Sun</a>, each drawing one spacecraft from its published trajectory: Lunar Reconnaissance Orbiter and Parker Solar Probe. Every position is calculated by the named provider. Nothing on these pages is observed by Mother Earth.</p>
+  <p><b>Lunar Reconnaissance Orbiter.</b> A dated example only: 10 June 2026 00:00 to 11 June 00:00 UTC, the one-minute states stored in NASA/GSFC Flight Dynamics Facility's definitive trajectory (NASA PDS data set LRO-L-SPICE-6-V1.0, product lrorg_2026074_2026166_v01.bsp), shown as written. <b>No position is shown for a current time:</b> the published prediction has not been compared with a later definitive trajectory. The hub stores Horizons' predicted positions once a day for that comparison and publishes none of them.</p>
+  <p><b>Parker Solar Probe.</b> NASA/JPL Horizons, Sun-centred. A dated example (22 to 27 December 2024, every 10 minutes) and a current read (hourly, from the day before to seven days ahead), fetched once a day by the hub at about 05:07 UTC. The trajectory description shown beside each position is Horizons' own, taken from the same answer as the coordinates. A sample that falls at a change between named trajectory segments is withheld. If a daily read fails, the last good one stays and is used only for the times it holds.</p>
+  <p><b>Closest approach.</b> The figure quoted is NASA's, from <a href="https://science.nasa.gov/science-research/heliophysics/nasas-parker-solar-probe-makes-history-with-closest-pass-to-sun/" target="_blank" rel="noopener">its report</a>. The "closest sample" is the nearest of the page's 10-minute points, with height above the surface as our subtraction of 695,700 km.</p>
+  <p><b>Cross-product check.</b> NASA/GSFC Space Physics Data Facility, PSP_HELIO1HR_POSITION (<a href="https://doi.org/10.48322/ecnj-rx61" target="_blank" rel="noopener">DOI 10.48322/ecnj-rx61</a>; data provided by N. E. Papitashvili and CDAWeb; accessed 13 Nov 2026). Used for comparison at nine hours, not displayed. The two agree on distance within that product's rounding and differ in longitude around the Sun by up to about 0.85° near closest approach; the cause is not established.</p>
+  <p><b>Our changes.</b> Positions rotated to a stated viewing direction and rounded (1 m for the Moon example, 1 km for the Sun). Body and path are drawn to one scale; the spacecraft marker, and the Sun when it would be too small to see, are enlarged and the page says so.</p>
+  <p><b>Credit.</b> NASA/GSFC Flight Dynamics Facility and NASA PDS (NAIF); NASA/JPL Solar System Dynamics. Data retrieved 13 Nov 2026 (examples) and daily (current read). No endorsement by NASA, Caltech or JPL is implied.</p>
 
   <h2 id="search">Search — what it covers and what it cannot</h2>
   <p>The Explore panel on World View searches <b>only the records your browser has already loaded</b> from each layer's latest published snapshot. It issues no request of any kind: no geocoder, no place-name dataset, no country boundaries, no history. It is not a search of the world, and not a search of everything a source holds.</p>
