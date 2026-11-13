@@ -23,6 +23,9 @@
  *                           0.6.4: this legacy URL is pinned to TIMELINE_LEGACY (tl-2026-11-R1) permanently, never to "current".
  *   GET /catalogue/timeline/<revision> (0.6.4; TIMELINE-CATALOGUE-REVISIONS-PROPOSAL rev 1.1) that exact published revision, same rules;
  *                           an id not in TIMELINE_REVISIONS (exact key match) → 404 without any R2 read.
+ *   GET /snapshot/skycraft/meta, /snapshot/skycraft/<id> (0.6.12) Parker Solar Probe hub snapshot from NASA/JPL Horizons (pointer + current/previous)
+ *   GET /catalogue/skycraft/<revision> (0.6.12) the two dated spacecraft examples (LRO June 2026, Parker Dec 2024), pinned
+ *   GET /admin/probe/skycraft?key=ADMIN_KEY (0.6.12) exactly ONE Horizons request with the application User-Agent; stores nothing
  *   GET /catalogue/sky/<revision> (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a) the FIXED Sky catalogue (Moon/Sun daily distances, NASA/JPL
  *                           Horizons): versioned only — an id not in SKY_REVISIONS (exact key match), a malformed path or the bare
  *                           /catalogue/sky → 404 without any R2 read; a known revision whose stored bytes are missing or fail the pin → 503.
@@ -64,7 +67,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.11';
+const COLLECTOR_VERSION = '0.6.12';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2143,6 +2146,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
+export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
 export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
@@ -3026,13 +3030,259 @@ async function dustRoute(env, p) {
   return new Response(buf, { headers: { 'Content-Type': x.type, 'Cache-Control': DUSTRGB.CACHE_FILE, 'ETag': '"' + x.sha256 + '"', ...CORS } });
 }
 
+/* ---------- Sky spacecraft (0.6.12; docs/concepts/MOON-AND-SUN-BUILD-PROPOSAL.md rev 2.1) ----------
+ * Once a day the hub asks NASA/JPL Horizons for (1) Parker Solar Probe, Sun-centred ICRF vectors, hourly, from yesterday 00:00 UTC
+ * to +7 days, and (2) LRO, Moon-centred, at the forward-study epochs. Each response carries the object's data sheet AND the
+ * vectors, so the provider's own description of the trajectory solution is read from the same response as the coordinates.
+ * Parker: validated, stored under a key that names its content, then the pointer moves (conditional write). A failed run never
+ * moves the pointer. LRO: stored for the prediction study only; NOTHING about LRO is published or served.
+ * JPL fair use (read 13 Nov 2026): one request at a time, application User-Agent with contact, cache and reuse, back off on
+ * failure (no retry inside a run), check the API version. The browser never calls Horizons.
+ * Gate: SKYCRAFT_ENABLED=1 (absent = no request at all). Outside LAYERS, cells, history, health and the generic writeDown. */
+const SKYCRAFT = {
+  API: 'https://ssd.jpl.nasa.gov/api/horizons.api', API_VERSION: '1.2',
+  UA: 'mother-earth-collector/' + COLLECTOR_VERSION + ' (+https://github.com/TheOneTheOnlyTheChad/mother-earth; contact: issues at that address)',
+  RUN_HOUR_UTC: 5, TIMEOUT_MS: 30000, MAX_BYTES: 512 * 1024, LOCK_STALE_MS: 10 * 60 * 1000,
+  POINTER: 'skycraft/current.json', SNAP: 'skycraft/snap/', RAW: 'skycraft/raw/', STUDY: 'skycraft/study/lro/', LOCK: 'skycraft/lock.json',
+  CACHE_FILE: 'public, max-age=86400, immutable',
+  PARKER: { command: '-96', center: '500@10', target: 'Parker Solar Probe (spacecraft) (-96)', centre: 'Sun (10)', back_days: 1, ahead_days: 7, step_s: 3600, band_km: [5.5e6, 1.7e8] },
+  LRO: { command: '-85', center: '500@301', target: 'LRO (spacecraft) (-85)', centre: 'Moon (301)', leads_days: [0, 1, 3, 7, 14, 21, 30, 37, 45, 60], instants_utc: ['12:00', '12:30', '13:00', '13:30'] },
+  // ICRF → the Sun page's view axes (screen right, screen up, toward the viewer). The SAME numbers as the dated example's
+  // frame.view.rows, written by phase1/skycraft/build_examples.py; skycraft-hub.test.mjs fails if they ever differ.
+  VIEW_SUN: [[0.2458856779, 0.889314294858, 0.385564934046], [-0.961545555883, 0.17358023217, 0.212838076859], [0.122353493472, -0.423072083648, 0.897797101061]],
+  SUN_R_KM: 695700,
+  SOURCE: { provider: 'NASA/JPL Solar System Dynamics (Horizons)', url: 'https://ssd.jpl.nasa.gov/horizons/', credit: 'Predicted position · NASA/JPL Horizons' },
+};
+const HZ_MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+const hzStamp = ms => { const d = new Date(ms).toISOString(); return d.slice(0, 10) + ' ' + d.slice(11, 16); };   // 2026-11-13 00:00
+const hzQ = v => encodeURIComponent(v).replace(/%2C/g, ',');
+/** The Horizons request for vectors plus the data sheet. times = { start, stop, step_m } (ms, ms, minutes) or { list: [ms…] }. */
+function hzUrl(spec, times) {
+  const q = { format: 'json', COMMAND: `'${spec.command}'`, OBJ_DATA: "'YES'", MAKE_EPHEM: "'YES'", EPHEM_TYPE: "'VECTORS'", CENTER: `'${spec.center}'`, REF_PLANE: "'FRAME'", REF_SYSTEM: "'ICRF'",
+    VEC_CORR: "'NONE'", TIME_TYPE: "'UT'", CSV_FORMAT: "'NO'", VEC_TABLE: "'2'", OUT_UNITS: "'KM-S'" };
+  if (times.list) q.TLIST = times.list.map(ms => `'${hzStamp(ms)}'`).join(',');
+  else { q.START_TIME = `'${hzStamp(times.start)}'`; q.STOP_TIME = `'${hzStamp(times.stop)}'`; q.STEP_SIZE = `'${times.step_m} m'`; }
+  return SKYCRAFT.API + '?' + Object.entries(q).map(([k, v]) => k + '=' + hzQ(v)).join('&');
+}
+/** ONE request to Horizons, body size enforced. { ok, http, text, bytes, sha256 } or { ok:false, reason, http, detail }. Never retried here. */
+async function hzFetch(url) {
+  let r; try { r = await fetch(url, { headers: { 'User-Agent': SKYCRAFT.UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(SKYCRAFT.TIMEOUT_MS) }); } catch (e) { return { ok: false, reason: 'request failed', http: 0, detail: String(e).slice(0, 160) }; }
+  if (r.status !== 200) { try { await r.body.cancel(); } catch (_) {} return { ok: false, reason: 'http error', http: r.status }; }
+  let buf; try { buf = await r.arrayBuffer(); } catch (e) { return { ok: false, reason: 'request failed', http: 200, detail: String(e).slice(0, 160) }; }
+  if (!buf.byteLength || buf.byteLength > SKYCRAFT.MAX_BYTES) return { ok: false, reason: 'size out of range', http: 200, detail: String(buf.byteLength) };
+  let text; try { text = new TextDecoder('utf-8', { fatal: true }).decode(buf); } catch (e) { return { ok: false, reason: 'response unreadable', http: 200 }; }
+  return { ok: true, http: 200, text, buf, bytes: buf.byteLength, sha256: await sha256Bytes(buf) };
+}
+const hzDate = t => { const m = /^(\d{4})[- ]([A-Za-z]{3})[- ](\d\d) (\d\d):(\d\d)$/.exec(t.trim()); return m && m[2].toLowerCase() in HZ_MON ? Date.UTC(+m[1], HZ_MON[m[2].toLowerCase()], +m[3], +m[4], +m[5]) : NaN; };
+/** Parse one Horizons JSON answer: API version, header identity, the data sheet's trajectory statement and table, and the vector rows.
+ * { ok, version, target_source, revised, statement, table:[{name,start,end,start_tdb_ms,end_tdb_ms}], rows:[{ms,p:[x,y,z]}] } or { ok:false, reason, detail }. Reasons are fixed phrases. */
+function hzParse(text, spec) {
+  let j; try { j = JSON.parse(text); } catch (e) { return { ok: false, reason: 'response unreadable' }; }
+  const ver = j && j.signature && j.signature.version;
+  if (ver !== SKYCRAFT.API_VERSION) return { ok: false, reason: 'api version changed', detail: String(ver) };
+  const t = j.result; if (typeof t !== 'string') return { ok: false, reason: 'response unreadable', detail: String(j.error || '').slice(0, 120) };
+  const line = re => { const m = re.exec(t); return m ? m[1].replace(/\s+/g, ' ').trim() : null; };
+  const target = line(/^Target body name: (.*)$/m), centre = line(/^Center body name: (.*)$/m);
+  if (!target || !target.startsWith(spec.target) || !centre || !centre.startsWith(spec.centre)) return { ok: false, reason: 'wrong object in response', detail: `${target} / ${centre}` };
+  for (const need of ['Reference frame : ICRF', 'Output units    : KM-S', 'Output type     : GEOMETRIC cartesian states', 'Center-site name: BODY CENTER']) if (!t.includes(need)) return { ok: false, reason: 'unexpected response settings', detail: need };
+  const a = t.indexOf('$$SOE'), b = t.indexOf('$$EOE');
+  if (a < 0 || b < a) return { ok: false, reason: 'no vector table in response' };
+  const L = t.slice(a + 5, b).split('\n').map(x => x.trim()).filter(Boolean), rows = [];
+  if (!L.length || L.length % 3) return { ok: false, reason: 'vector table unreadable', detail: String(L.length) };
+  for (let i = 0; i < L.length; i += 3) {
+    const e = /= A\.D\. (\d{4}-[A-Za-z]{3}-\d\d \d\d:\d\d):00\.0000 UTC$/.exec(L[i]), p = /^X =\s*(\S+)\s+Y =\s*(\S+)\s+Z =\s*(\S+)$/.exec(L[i + 1]);
+    const ms = e ? hzDate(e[1]) : NaN, v = p ? [+p[1], +p[2], +p[3]] : null;
+    if (!Number.isFinite(ms) || !v || v.some(x => !Number.isFinite(x)) || !/^VX=/.test(L[i + 2])) return { ok: false, reason: 'vector table unreadable', detail: L[i].slice(0, 80) };
+    rows.push({ ms, p: v });
+  }
+  const k = t.indexOf('SPACECRAFT TRAJECTORY'), end = k < 0 ? -1 : t.indexOf('*****', k);
+  if (k < 0 || end < 0) return { ok: false, reason: 'data sheet unreadable', detail: 'no trajectory section' };
+  const block = t.slice(k, end).split('\n'), hdr = block.findIndex(x => /^\s*(Trajectory name|Name)\s+Start/.test(x));
+  if (hdr < 1) return { ok: false, reason: 'data sheet unreadable', detail: 'no trajectory table' };
+  const statement = block.slice(1, hdr).join(' ').replace(/\s+/g, ' ').trim(), table = [];
+  for (const x of block.slice(hdr + 2)) { if (!x.trim()) continue;
+    const m = /^\s*(.+?)\s{2,}(\d{4}[- ][A-Za-z]{3}[- ]\d\d \d\d:\d\d)\s+(\d{4}[- ][A-Za-z]{3}[- ]\d\d \d\d:\d\d)\s*$/.exec(x), s0 = m ? hzDate(m[2]) : NaN, s1 = m ? hzDate(m[3]) : NaN;
+    if (!m || !Number.isFinite(s0) || !Number.isFinite(s1) || s1 <= s0) return { ok: false, reason: 'data sheet unreadable', detail: x.slice(0, 80) };
+    table.push({ name: m[1], start: m[2], end: m[3], start_tdb_ms: s0, end_tdb_ms: s1 }); }
+  if (!statement || !table.length) return { ok: false, reason: 'data sheet unreadable', detail: 'empty statement or table' };
+  return { ok: true, version: ver, target, centre, target_source: line(/^Target body name: .*\{source: ([^}]*)\}/m), revised: line(/^\s*Revised:\s*(\w{3} \d\d, \d{4})/m), statement, table, rows };
+}
+/** Which named trajectory segment holds a UTC instant (the table is in TDB: UTC + 69.184 s). −1 when none, more than one, or within two minutes of a segment edge. */
+function hzSegmentOf(ms, table) {
+  const tdb = ms + 69184, hit = table.map((s, i) => (tdb >= s.start_tdb_ms && tdb < s.end_tdb_ms) ? i : -1).filter(i => i >= 0);
+  if (hit.length !== 1) return -1;
+  const s = table[hit[0]];
+  return (tdb - s.start_tdb_ms < 120000 || s.end_tdb_ms - tdb < 120000) ? -1 : hit[0];
+}
+/** Parker's data sheet states one tracking-fit date for the whole table. Returns its end (ms, end of that UTC day) or null when the sentence is not the one we know. */
+function hzFitThrough(statement) {
+  const m = /Fit to post-launch tracking data through (\d{4})-([A-Za-z]{3})-(\d\d)\. Reference planning trajectory for subsequent times\./.exec(statement || '');
+  return m && m[2].toLowerCase() in HZ_MON ? Date.UTC(+m[1], HZ_MON[m[2].toLowerCase()], +m[3]) + 86400000 : null;
+}
+const craftDay = ms => Date.UTC(new Date(ms).getUTCFullYear(), new Date(ms).getUTCMonth(), new Date(ms).getUTCDate());
+/** The LRO forward-study epochs for a capture on UTC day D: D 00:00 (the Sky sample, usually already past) and four fixed instants on each lead day. */
+function craftStudyEpochs(ms) {
+  const d0 = craftDay(ms), out = [{ ms: d0, lead_days: 0, instant: '00:00' }];
+  for (const lead of SKYCRAFT.LRO.leads_days) for (const hm of SKYCRAFT.LRO.instants_utc) out.push({ ms: d0 + lead * 86400000 + (+hm.slice(0, 2)) * 3600000 + (+hm.slice(3)) * 60000, lead_days: lead, instant: hm });
+  return out;
+}
+const craftEmpty = () => ({ schema: 1, layer: 'skycraft', current: null, previous: null, last_attempt: null, cadence: { run_hour_utc: SKYCRAFT.RUN_HOUR_UTC }, source: SKYCRAFT.SOURCE, collector_version: COLLECTOR_VERSION });
+async function craftPtr(env) { const o = await env.R2.get(SKYCRAFT.POINTER); return o ? { cur: await o.json(), etag: o.etag } : { cur: craftEmpty(), etag: null }; }
+/** Read–change–write of the pointer; EVERY write is conditional (the etag read, or create-only when none existed). As dustUpdate. */
+async function craftUpdate(env, change) {
+  for (let i = 0; i < 5; i++) {
+    const { cur, etag } = await craftPtr(env), body = change(cur);
+    if (body === null) return { cur, body: null, wrote: false };
+    const r = await env.R2.put(SKYCRAFT.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });
+    if (r !== null) return { cur, body, wrote: true };
+  }
+  throw new Error('skycraft pointer kept changing; gave up after 5 tries');
+}
+/** One upstream conversation at a time across scheduled runs, manual runs and the probe: a create-only lock object; a lock older than ten minutes is taken over by etag. */
+async function craftLock(env, who) {
+  const body = JSON.stringify({ who, at: nowIso() }), meta = { httpMetadata: { contentType: 'application/json' } };
+  if (await env.R2.put(SKYCRAFT.LOCK, body, { ...meta, onlyIf: { etagDoesNotMatch: '*' } }) !== null) return true;
+  const o = await env.R2.get(SKYCRAFT.LOCK); if (!o) return false;
+  let held = null; try { held = await o.json(); } catch (_) {}
+  if (held && Date.now() - Date.parse(held.at) < SKYCRAFT.LOCK_STALE_MS) return false;
+  return await env.R2.put(SKYCRAFT.LOCK, body, { ...meta, onlyIf: { etagMatches: o.etag } }) !== null;
+}
+async function craftUnlock(env) { try { await env.R2.delete(SKYCRAFT.LOCK); } catch (_) {} }
+/** A failed run never moves the snapshot: the pointer keeps current/previous and gains last_attempt (fixed public phrase; detail stays in collector_runs). */
+async function craftFail(env, ms, reason, http, detail) {
+  const failed_at = nowIso();
+  try { await craftUpdate(env, cur => ({ ...cur, last_attempt: { run: new Date(ms).toISOString(), failed_at, status: 'down', http: http || 0, reason, consecutive_failures: ((cur.last_attempt && cur.last_attempt.consecutive_failures) || 0) + 1 } })); } catch (_) {}
+  await logRun(env, 'skycraft', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : ''));
+  return 'skycraft:down ' + reason;
+}
+/** Store bytes once under a key that names them, then read back. 'same' | 'stored' | a fixed failure phrase. Never overwrites. */
+async function craftStore(env, key, buf, sha, type) {
+  const same = async () => { let b = null; try { const o = await env.R2.get(key); b = o ? await o.arrayBuffer() : null; } catch (_) { return 'unreadable'; } return !b ? 'absent' : (b.byteLength === buf.byteLength && await sha256Bytes(b) === sha) ? 'same' : 'differs'; };
+  const had = await same();
+  if (had === 'same') return 'same';
+  if (had !== 'absent') return 'stored copy differs';
+  try { await env.R2.put(key, buf, { httpMetadata: { contentType: type }, customMetadata: { sha256: sha } }); } catch (e) { return 'write failed'; }
+  return (await same()) === 'same' ? 'stored' : 'read-back differs';
+}
+async function collectSkycraft(env, ms) {
+  if (!await craftLock(env, 'run ' + new Date(ms).toISOString())) { await logRun(env, 'skycraft', ms, 'ok', 0, 0, 0, 'skipped: another Horizons conversation holds the lock; no request made'); return 'skycraft:busy'; }
+  try { return await craftRun(env, ms); } finally { await craftUnlock(env); }
+}
+async function craftRun(env, ms) {
+  const P = SKYCRAFT.PARKER, day = craftDay(ms), start = day - P.back_days * 86400000, stop = day + P.ahead_days * 86400000, n = (stop - start) / (P.step_s * 1000) + 1;
+  // ---- request 1: Parker (published)
+  const got = await hzFetch(hzUrl(P, { start, stop, step_m: P.step_s / 60 })), retrieved_at = nowIso();
+  if (!got.ok) return craftFail(env, ms, 'parker ' + got.reason, got.http, got.detail);
+  const z = hzParse(got.text, P);
+  if (!z.ok) return craftFail(env, ms, 'parker ' + z.reason, 200, z.detail);
+  if (z.rows.length !== n || z.rows.some((r, i) => r.ms !== start + i * P.step_s * 1000)) return craftFail(env, ms, 'parker returned times differ from the request', 200, `${z.rows.length} rows`);
+  const dist = z.rows.map(r => Math.hypot(...r.p));
+  if (dist.some(d => !(d >= P.band_km[0] && d <= P.band_km[1]))) return craftFail(env, ms, 'parker distance out of range', 200, `${Math.min(...dist)}..${Math.max(...dist)} km`);
+  const fit = hzFitThrough(z.statement);
+  if (fit === null) return craftFail(env, ms, 'parker data sheet statement not recognised', 200, z.statement.slice(0, 160));
+  const seg = z.rows.map(r => hzSegmentOf(r.ms, z.table));
+  if (seg.every(i => i < 0)) return craftFail(env, ms, 'parker no sample inside a named trajectory segment', 200);
+  const stamp = retrieved_at.replace(/[-:]/g, '').slice(0, 15) + 'Z', rawKey = `${SKYCRAFT.RAW}${stamp}-parker.json`;
+  const sr = await craftStore(env, rawKey, got.buf, got.sha256, 'application/json');
+  if (sr !== 'same' && sr !== 'stored') return craftFail(env, ms, 'parker raw ' + sr, 200, rawKey);
+  const used = [...new Set(seg.filter(i => i >= 0))].sort((a, b) => a - b);
+  const snap = { schema: 1, layer: 'skycraft', kind: 'hub snapshot', body: 'sun', mission: { id: 'psp', name: 'Parker Solar Probe', naif_id: -96 },
+    retrieved_at, run: new Date(ms).toISOString(),
+    time: { standard: 'UTC', start: new Date(start).toISOString().slice(0, 19) + 'Z', end: new Date(stop).toISOString().slice(0, 19) + 'Z', step_s: P.step_s, n },
+    frame: { native: 'ICRF, Sun-centred, geometric states (NASA/JPL Horizons)', units: 'km', view: { rows: SKYCRAFT.VIEW_SUN, row_meaning: ['screen right', 'screen up', 'toward the viewer'], description: "Viewed from above the Sun's north pole, looking down on its equator." } },
+    body_radius_km: SKYCRAFT.SUN_R_KM,
+    solution: { same_response_as_vectors: true, api_version: z.version, target: z.target, target_source: z.target_source, data_sheet_revised: z.revised, statement: z.statement, fit_through_utc: new Date(fit - 86400000).toISOString().slice(0, 10),
+      segments: used.map(i => ({ index: i, name: z.table[i].name, start_tdb: z.table[i].start, end_tdb: z.table[i].end })),
+      // per sample: the index of its named segment (−1 = none, or within two minutes of a segment edge: not shown) and whether it lies inside the tracking fit
+      segment_of: seg, within_tracking_fit: z.rows.map(r => r.ms < fit) },
+    source: { ...SKYCRAFT.SOURCE, response_bytes: got.bytes, response_sha256: got.sha256, user_agent: SKYCRAFT.UA },
+    modifications: 'Positions rounded to 1 km. Velocities not carried.',
+    xyz_km: z.rows.flatMap(r => r.p.map(Math.round)) };
+  const body = new TextEncoder().encode(JSON.stringify(snap)).buffer, sha = await sha256Bytes(body), id = stamp + '-' + sha.slice(0, 16), key = SKYCRAFT.SNAP + id + '.json';
+  const ss = await craftStore(env, key, body, sha, 'application/json');
+  if (ss !== 'same' && ss !== 'stored') return craftFail(env, ms, 'snapshot ' + ss, 200, key);
+  const brief = { id, key, path: '/snapshot/skycraft/' + id, bytes: body.byteLength, sha256: sha, retrieved_at, covers: { start: snap.time.start, end: snap.time.end, step_s: P.step_s }, raw: { key: rawKey, sha256: got.sha256, bytes: got.bytes } };
+  const up = await craftUpdate(env, c => (c.current && c.current.retrieved_at >= retrieved_at) ? null : { ...craftEmpty(), current: brief, previous: c.current || null });
+  // ---- request 2: LRO forward study (stored, never published). Runs only after Parker's answer is complete: one request at a time.
+  const study = await craftStudy(env, ms, stamp);
+  const note = `${up.wrote ? 'published' : 'superseded'} ${id}; sheet revised ${z.revised}; segments ${used.map(i => z.table[i].name).join(', ')}; lro study ${study}`;
+  await logRun(env, 'skycraft', ms, study.startsWith('stored') ? 'ok' : 'degraded', 200, n, got.bytes, note);
+  return 'skycraft:' + (up.wrote ? 'published ' : 'superseded ') + id + '; lro study ' + study;
+}
+/** The LRO capture for the forward study: raw answer plus a small index (target epochs, signed lead from the actual retrieval, data sheet). Publishes nothing. */
+async function craftStudy(env, ms, stamp) {
+  const epochs = craftStudyEpochs(ms), got = await hzFetch(hzUrl(SKYCRAFT.LRO, { list: epochs.map(e => e.ms) })), retrieved_at = nowIso();
+  if (!got.ok) return 'failed: ' + got.reason + (got.http ? ' ' + got.http : '');
+  const z = hzParse(got.text, SKYCRAFT.LRO);
+  if (!z.ok) return 'failed: ' + z.reason;
+  if (z.rows.length !== epochs.length || z.rows.some((r, i) => r.ms !== epochs[i].ms)) return 'failed: returned times differ from the request';
+  const rawKey = `${SKYCRAFT.STUDY}${stamp}-raw.json`, sr = await craftStore(env, rawKey, got.buf, got.sha256, 'application/json');
+  if (sr !== 'same' && sr !== 'stored') return 'failed: raw ' + sr;
+  const got_ms = Date.parse(retrieved_at);
+  const idx = { schema: 1, study: 'lro-forward', retrieved_at, capture_day: new Date(craftDay(ms)).toISOString().slice(0, 10), api_version: z.version, target: z.target, target_source: z.target_source,
+    data_sheet_revised: z.revised, statement: z.statement, table: z.table.map(s => ({ name: s.name, start_tdb: s.start, end_tdb: s.end })),
+    // signed_lead_s < 0: the instant was already past at retrieval (not a forward forecast)
+    epochs: epochs.map((e, i) => ({ utc: new Date(e.ms).toISOString().slice(0, 19) + 'Z', lead_days: e.lead_days, instant: e.instant, signed_lead_s: Math.round((e.ms - got_ms) / 1000), forward: e.ms > got_ms, segment: (z.table[hzSegmentOf(e.ms, z.table)] || {}).name || null, xyz_km: z.rows[i].p })),
+    raw: { key: rawKey, sha256: got.sha256, bytes: got.bytes }, frame: 'ICRF, Moon-centred, geometric', published: false };
+  const b = new TextEncoder().encode(JSON.stringify(idx)).buffer, ir = await craftStore(env, `${SKYCRAFT.STUDY}${stamp}-index.json`, b, await sha256Bytes(b), 'application/json');
+  return (ir === 'same' || ir === 'stored') ? `stored ${epochs.length} epochs` : 'failed: index ' + ir;
+}
+/** /admin/probe/skycraft — EXACTLY ONE upstream request (Parker's data sheet only, no vectors), with the application User-Agent. Stores and publishes nothing. */
+async function craftProbe(env) {
+  if (!await craftLock(env, 'probe')) return { probe: 'skycraft', made_request: false, reason: 'another Horizons conversation holds the lock' };
+  try {
+    const url = SKYCRAFT.API + "?format=json&COMMAND='-96'&OBJ_DATA='YES'&MAKE_EPHEM='NO'", t0 = Date.now();
+    let r, text = '', err = null;
+    try { r = await fetch(url, { headers: { 'User-Agent': SKYCRAFT.UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(SKYCRAFT.TIMEOUT_MS) }); text = await r.text(); } catch (e) { err = String(e).slice(0, 200); }
+    let ver = null, revised = null; try { const j = JSON.parse(text); ver = j.signature && j.signature.version; revised = (/Revised:\s*(\w{3} \d\d, \d{4})/.exec(j.result || '') || [])[1] || null; } catch (_) {}
+    return { probe: 'skycraft', made_request: true, upstream_requests: 1, url, user_agent_sent: SKYCRAFT.UA, http: r ? r.status : 0, error: err, ms: Date.now() - t0, bytes: text.length,
+      sha256: text ? await sha256Bytes(new TextEncoder().encode(text).buffer) : null, api_version: ver, expected_api_version: SKYCRAFT.API_VERSION, data_sheet_revised: revised,
+      content_type: r ? r.headers.get('content-type') : null, stored: false, published: false, at: nowIso() };
+  } finally { await craftUnlock(env); }
+}
+/** GET /snapshot/skycraft/meta and /snapshot/skycraft/<id>. A snapshot is served only if it is the current or previous one AND its stored bytes match the pointer. */
+async function craftSnapRoute(env, p) {
+  const none = (status, reason) => json({ layer: 'skycraft', status: 'unavailable', reason }, status, { 'Cache-Control': 'no-store' });
+  let cur; try { cur = await getJson(env, SKYCRAFT.POINTER); } catch (e) { return none(503, 'unreadable'); }
+  if (p.length === 3 && p[2] === 'meta') {
+    const strip = f => f ? { ...f, key: undefined, raw: f.raw && { sha256: f.raw.sha256, bytes: f.raw.bytes } } : f;
+    if (!cur) return json({ schema: 1, layer: 'skycraft', current: null, previous: null, last_attempt: null, now: nowIso() }, 200, { 'Cache-Control': 'no-store' });
+    return json({ ...cur, current: strip(cur.current), previous: strip(cur.previous), now: nowIso() }, 200, { 'Cache-Control': 'no-store' });
+  }
+  if (p.length !== 3 || !cur) return none(404, 'not found');
+  const x = [cur.current, cur.previous].find(f => f && f.id === p[2]);
+  if (!x) return none(404, 'not found');
+  let buf; try { const o = await env.R2.get(x.key); buf = o ? await o.arrayBuffer() : null; } catch (e) { return none(503, 'unreadable'); }
+  if (!buf) return none(503, 'missing');
+  if (buf.byteLength !== x.bytes || await sha256Bytes(buf) !== x.sha256) return none(503, 'integrity');
+  return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': SKYCRAFT.CACHE_FILE, 'ETag': '"' + x.sha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
+}
+/** The two DATED EXAMPLES (fixed files built by phase1/skycraft/build_examples.py), pinned like the Sky catalogue. */
+const CRAFT_REVISIONS = Object.freeze({
+  'craft-moon-2026-06-R1': Object.freeze({ key: 'ref/skycraft/craft-moon-2026-06-R1.json', revision: 'craft-moon-2026-06-R1', fileSha256: 'e747aa7a58a71a5e2a11253b2d063fcfc80809d8d86291ce6dce8220d1d05ebb', bytes: 41681 }),
+  'craft-sun-2024-12-R1': Object.freeze({ key: 'ref/skycraft/craft-sun-2024-12-R1.json', revision: 'craft-sun-2024-12-R1', fileSha256: '5934263214741a21b11019fa55d326a5b0524274c3104a6a768fca4fd3149500', bytes: 26074 }),
+});
+/** GET /catalogue/skycraft/<revision>: exactly one segment, a pinned id, the complete stored file matching its pin; else 404 (no R2 read) or 503. */
+async function craftCatRoute(env, rawPath, table = CRAFT_REVISIONS) {
+  const m = typeof rawPath === 'string' ? rawPath.match(/^\/catalogue\/skycraft\/([^/]+)$/) : null;
+  const pin = m && Object.prototype.hasOwnProperty.call(table, m[1]) ? table[m[1]] : null;   // matched literally: no percent-decoding
+  if (!pin) return json({ kind: 'catalogue', catalogue: 'skycraft', status: 'unknown revision' }, 404, { 'Cache-Control': 'no-store' });
+  const no = reason => json({ kind: 'catalogue', catalogue: 'skycraft', status: 'unavailable', reason }, 503, { 'Cache-Control': 'no-store' });
+  let buf; try { const o = await env.R2.get(pin.key); if (!o) return no('missing'); buf = await o.arrayBuffer(); } catch (e) { return no('unreadable'); }
+  if (buf.byteLength !== pin.bytes || await sha256Bytes(buf) !== pin.fileSha256) return no('integrity');
+  let j; try { j = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(buf)); } catch (e) { return no('invalid'); }
+  if (!j || j.catalogue !== 'skycraft' || j.catalogue_revision !== pin.revision || !j.time || !Array.isArray(j.xyz_km) || j.xyz_km.length !== 3 * j.time.n) return no('invalid');
+  return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': SKYCRAFT.CACHE_FILE, 'ETag': '"' + pin.fileSha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
+}
+
 async function guarded(env, layer, ms, fn) {
   try { await fn(env, ms); return layer + ':ran'; }
   catch (e) {
     const note = 'uncaught: ' + String(e).slice(0, 200);
     if (layer === 'firms' && env.FIRMS_PIPELINE === 'v2') { try { await logRun(env, layer, ms, 'down', 0, 0, 0, note); await fvDownNoInput(env, ms, note); } catch (_) {} }   // v2 never calls the unconditional writeDown
     else if (layer === 'drifters') { try { await driftFail(env, ms, 'internal_error', note, 0); } catch (_) {} }
-    else if (layer === 'dustrgb') { try { await dustFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.11: never the generic writeDown (no cells, no envelope)   // 0.6.8: buoys never call the unconditional writeDown
+    else if (layer === 'dustrgb') { try { await dustFail(env, ms, 'internal error', 0, note); } catch (_) {} }
+    else if (layer === 'skycraft') { try { await craftFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.12: never the generic writeDown   // 0.6.11: never the generic writeDown (no cells, no envelope)   // 0.6.8: buoys never call the unconditional writeDown
     else try { await writeDown(env, layer, ms, note, 0); } catch (_) {}
     return layer + ':threw ' + String(e).slice(0, 80); }
 }
@@ -3054,6 +3304,7 @@ const JOBS = {
   orbital: async (env, ms) => guarded(env, 'orbital', ms, (e, m) => collectOrbital(e, m, true)),   // manual: /admin/run/orbital (same guards)
   satellites: async (env, ms) => guarded(env, 'satellites', ms, collectSatellites),
   plastic: async (env, ms) => guarded(env, 'plastic', ms, collectPlastic),   // manual: /admin/run/plastic (no gate)
+  skycraft: async (env, ms) => guarded(env, 'skycraft', ms, collectSkycraft),   // manual: /admin/run/skycraft (admin key; ignores the gate and the hour; two upstream requests, one at a time)
   dustrgb: async (env, ms) => guarded(env, 'dustrgb', ms, collectDustRgb),   // manual: /admin/run/dustrgb (admin key; ignores the gate and the hour, as plastic does)
   drifters: async (env, ms) => guarded(env, 'drifters', ms, collectDrifters),   // manual: /admin/run/drifters (no gate: one ~100 KB request)   // manual: /admin/run/satellites (same stamp gate)
   hourly: async (env, ms, manual) => {
@@ -3067,7 +3318,9 @@ const JOBS = {
     const b = await hourlyBatch(env, ms);
     // Dust runs LAST: its picture can take over half a minute, and nothing else in the hourly job may wait on it
     const u = env.DUSTRGB_ENABLED !== '1' ? 'dustrgb:not scheduled (DUSTRGB_ENABLED unset)' : (!manual && DUSTRGB.RUN_HOURS_UTC.includes(hr)) ? await guarded(env, 'dustrgb', ms, collectDustRgb) : 'dustrgb:skipped (runs 06 and 18 UTC)';
-    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, dustrgb: u, batch: b };
+    // Sky spacecraft: once a day, after everything else (two small Horizons requests, one at a time)
+    const v = env.SKYCRAFT_ENABLED !== '1' ? 'skycraft:not scheduled (SKYCRAFT_ENABLED unset)' : (!manual && hr === SKYCRAFT.RUN_HOUR_UTC) ? await guarded(env, 'skycraft', ms, collectSkycraft) : 'skycraft:skipped (runs 05 UTC)';
+    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, dustrgb: u, skycraft: v, batch: b };
   },
 };
 
@@ -3410,6 +3663,8 @@ export default {
     if (p[0] === 'snapshot' && p[1] === 'dustrgb') return dustRoute(env, p);   // 0.6.11: pointer + the current and previous frame files; outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
+    if (p[0] === 'snapshot' && p[1] === 'skycraft') return craftSnapRoute(env, p);   // 0.6.12: Parker hub snapshot (pointer + current/previous); outside LAYERS
+    if (p[0] === 'catalogue' && p[1] === 'skycraft') return craftCatRoute(env, url.pathname);   // 0.6.12: the two dated examples, pinned
     if (p[0] === 'catalogue' && p[1] === 'sky') return skyRoute(env, url.pathname);   // 0.6.5 versioned only; outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'oceanheat') return oceanHeatRoute(env, url.pathname);   // 0.6.7 versioned files only; outside LAYERS
 
@@ -3476,6 +3731,11 @@ export default {
         note: 'CPU for this request is in the Worker invocation log; nothing was written' }, 200, { 'Cache-Control': 'no-store' });
     }
 
+    if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'skycraft') {   // 0.6.12: exactly one Horizons request (data sheet only); stores and publishes nothing
+      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+      return json(await craftProbe(env), 200, { 'Cache-Control': 'no-store' });
+    }
+
     if (p[0] === 'admin' && p[1] === 'run') {
       if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
       const job = p[2];
@@ -3485,7 +3745,7 @@ export default {
       catch (e) { return json({ job, error: String(e), wall_ms: Date.now() - t0 }, 500, { 'Cache-Control': 'no-store' }); }
     }
 
-    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>', '/catalogue/sky/<revision>', '/catalogue/oceanheat/<revision>/<file>', '/snapshot/dustrgb/meta', '/snapshot/dustrgb/<frame>/<file>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) }, sky: { kind: 'fixed catalogue', versioned_path: '/catalogue/sky/<revision>', current: SKY_CURRENT, scene: SKY_SCENE_CURRENT, revisions: Object.keys(SKY_REVISIONS) }, oceanheat: { kind: 'fixed snapshot files', versioned_path: '/catalogue/oceanheat/<revision>/<file>', current: OCEANHEAT_CURRENT, revisions: Object.keys(OCEANHEAT_REVISIONS) } },
+    return json({ name: 'Mother Earth collector', version: COLLECTOR_VERSION, history: await historyState(env), endpoints: ['/snapshot/<layer>', '/cells/<layer>', '/place/g4/<row>_<col>', '/elements/satellites', '/elements/orbital', '/status', '/health/<check>/<layer>', '/snapshot/arts', '/catalogue/timeline', '/catalogue/timeline/<revision>', '/catalogue/sky/<revision>', '/catalogue/skycraft/<revision>', '/snapshot/skycraft/meta', '/catalogue/oceanheat/<revision>/<file>', '/snapshot/dustrgb/meta', '/snapshot/dustrgb/<frame>/<file>'], layers: LAYERS, catalogues: { arts: { path: '/snapshot/arts', kind: 'fixed catalogue snapshot', source_date: '2026-11-02' }, timeline: { path: '/catalogue/timeline', kind: 'fixed catalogue', revision: TIMELINE_LEGACY, current: TIMELINE_CURRENT, versioned_path: '/catalogue/timeline/<revision>', revisions: Object.keys(TIMELINE_REVISIONS) }, sky: { kind: 'fixed catalogue', versioned_path: '/catalogue/sky/<revision>', current: SKY_CURRENT, scene: SKY_SCENE_CURRENT, revisions: Object.keys(SKY_REVISIONS) }, oceanheat: { kind: 'fixed snapshot files', versioned_path: '/catalogue/oceanheat/<revision>/<file>', current: OCEANHEAT_CURRENT, revisions: Object.keys(OCEANHEAT_REVISIONS) } },
       promise: 'See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.' });
   },
 };

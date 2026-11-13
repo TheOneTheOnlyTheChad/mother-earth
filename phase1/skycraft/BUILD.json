@@ -1,0 +1,22 @@
+{
+ "generator": "phase1/skycraft/build_examples.py",
+ "raw": {
+  "lrorg_2026074_2026166_v01.seg-894101-904203.bin": "7fb04d7e131e1c8c4b3fbe2d1b8fc36cb535ac262824aa700bdf6a5009b693f9",
+  "horizons-lro-check-20260610.json": "742815ba63bc661d05f313e8be87da244bf9ff73b67ba8373c215944aa7e56aa",
+  "horizons-psp-20241222-20241227-10m.json": "41eb0494899db4720a6d88a94fd14c0c3dbbf40bb444f48f3be3d9bd7a797748",
+  "spdf-psp-helio1hr-20241224T10-14.csv": "2b5fc56ba303ee399bd702144d344ea49bcb23cf1e267ee0a656e14818749404",
+  "spdf-psp-helio1hr-20241222-20241226-edges.csv": "5c10532a2db1af84a42171148b5e150676a0b1f94f528a1ffaef12f7368d449c"
+ },
+ "catalogues": {
+  "craft-moon-2026-06-R1": {
+   "file": "catalogue/craft-moon-2026-06-R1.json",
+   "bytes": 41681,
+   "sha256": "e747aa7a58a71a5e2a11253b2d063fcfc80809d8d86291ce6dce8220d1d05ebb"
+  },
+  "craft-sun-2024-12-R1": {
+   "file": "catalogue/craft-sun-2024-12-R1.json",
+   "bytes": 26074,
+   "sha256": "5934263214741a21b11019fa55d326a5b0524274c3104a6a768fca4fd3149500"
+  }
+ }
+}
