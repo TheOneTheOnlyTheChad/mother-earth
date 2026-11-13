@@ -2,6 +2,15 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 13 Nov 2026
+
+## 13 Nov 04:42 UTC (clock reading at write) — **Hub 0.6.11 live, Dust RGB schedule on; page not released; second thread starting** (handover block written; Dust thread still open)
+
+- Detail lives on branch `dustrgb-rc` (`STATUS.md`, `REGISTER.md`, `reviews/2026-11-13-dustrgb-smoke.md`) until the merge. Summary and rules for a parallel thread: `HANDOVER.md` → NEXT THREAD STARTS HERE. Operating facts: `START-HERE.md` §4v.
+- Hub 0.6.11 `119cc641…801f` since 13 Nov 03:59:00 UTC (Chad's Approve line); `DUSTRGB_ENABLED=1` since 04:35:55 UTC (Chad's line and click). First manual run published `20261113T0350Z-d0cb4223ccfa72f1`; files match the pointer.
+- Page unchanged (`12ff4ff`). main carries docs only since `cf8119c`.
+- **Next, in the Dust thread:** read the 06:07 UTC scheduled run; Chad's look at the globe; Chad's merge line; branch deletion (his).
+
 # 12 Nov 2026
 
 ## 12 Nov 17:31 UTC (clock reading at write) — **Dust RGB proposal rev 5** (GPT's header probe; "Frame requested" is the supported claim; docs only)
