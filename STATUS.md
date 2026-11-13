@@ -2,7 +2,7 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
-# 12 Nov 2026
+# 13 Nov 2026
 
 ## 13 Nov 02:48 UTC (clock reading at write) — **dustrgb-rc round 2** (GPT's three findings fixed; branch only; deploy on hold)
 
@@ -17,6 +17,8 @@ Chad, 13 Nov: "Hold the 0.6.11 deploy" with GPT's review of `7e6f236`. **Nothing
 - Real service 02:03 UTC (browser pane): new validators accept a live pair; picture is progressive JPEG; mask counts match the browser's decoder.
 - `worker.js` 315,632 B `b0ccb053…030b`; `dustrgb.js` 14,886 B `40f6aa2d…e15c`.
 - Not shown: real hub run; conditional write on real R2; real frame on the real globe.
+
+# 12 Nov 2026
 
 ## 12 Nov 19:10 UTC (clock reading at write) — **dustrgb-rc candidate built** (hub 0.6.11 job + page layer; branch only; for GPT)
 
