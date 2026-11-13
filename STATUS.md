@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 10:13 UTC (clock reading at write) — **skycraft: first full manual run ok** (Parker snapshot published on the hub; LRO study capture stored; schedule still off; page not merged)
+
+Chad: "keep it as is that is perfect" (the User-Agent stays the repository address, no email) and "Approve: run /admin/run/skycraft once".
+
+- Run 10:10:38–10:10:49 UTC. D1 row 9430 `ok`, 193 records: "published 20261113T101042Z-c88f5c381b7e6fef; … 0 of 193 samples withheld; lro study stored 41 epochs".
+- Parker snapshot served, 8,862 B, hash matches the pointer; covers 12–20 Nov hourly; Horizons' own description read from the same response (reference planning trajectory; segment `spp_pred_20260930_20270217_od268_v001`). The 13 Nov 00:00 position equals the hand-read value from this morning.
+- LRO study: 41 epochs stored (40 forward; 37-day instants on 20 Dec); nothing published; `/snapshot/skycraft/study` 404.
+- Lock released by its owner. Max CPU in that minute 20.4 ms (upper bound). About 104 KB stored per run.
+- Terms read for REGISTER drafts; one new discrepancy: CDAWeb shows DOI `10.48322/41s1-hx58` for the SPDF product, the proposal and pages cite `10.48322/ecnj-rx61`.
+- Record (branch `skycraft-rc` @ `0b2190c`, Project, Mac `_review/`): `reviews/2026-11-13-skycraft-smoke.md`.
+- **Next, each on Chad's own line:** REGISTER entries (after GPT reads the smoke record) → `SKYCRAFT_ENABLED=1` → live candidate check and Chad's look → page merge.
+
 ## 13 Nov 10:06 UTC (clock reading at write) — **Hub 0.6.12 LIVE; one Horizons probe: reachable.** Skycraft schedule NOT enabled; page not merged
 
 Chad: "Approve: deploy hub 0.6.12 from a5f483f (content only, SKYCRAFT_ENABLED unset) and run /admin/probe/skycraft once".
