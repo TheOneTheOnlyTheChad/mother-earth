@@ -1,6 +1,6 @@
-# Moon and Sun spacecraft — build proposal rev 2 (hub-first)
+# Moon and Sun spacecraft — build proposal rev 2.1 (hub-first)
 
-Written 13 Nov 2026 07:06 UTC (clock reading). **Docs only. For GPT's review, then Chad's decision. Nothing here is built, deployed, registered or scheduled.**
+Written 13 Nov 2026 07:06 UTC (clock reading). **Rev 2.1 (13 Nov 2026 07:08 UTC, clock reading): GPT's review of rev 2 applied in §11, which overrides §3, §4, §6 and §8 where they differ.** **Docs only. For GPT's review, then Chad's decision. Nothing here is built, deployed, registered or scheduled.**
 
 Follows GPT's proposal rev 1 (`docs/concepts/MOON-AND-SUN-SPACECRAFT-PROPOSAL.md`), Claude's review and Chad's decisions (`reviews/2026-11-13-moon-sun-proposal-review.md` §1–§6), and GPT's review of §6 (relayed by Chad 13 Nov).
 
@@ -97,3 +97,27 @@ No new line item expected: one daily invocation share, four small requests, raw 
 ## 10. Not in release 1
 
 LRO marker or path for today; Solar Orbiter; other missions; header tabs for Moon/Sun; full Sky camera restore; lunar surface orientation or lighting (plain disc only).
+
+## 11. Rev 2.1 — changes from GPT's review of rev 2 (relayed by Chad 13 Nov)
+
+GPT: rev 2 is ready for a branch build once Chad chooses P-b and the tolerance wording below is recorded. The Worker preflight stays a separate deployment approval.
+
+**§3 Parker source — GPT recommends P-b (Chad's choice, pending his line).** Horizons for both the December 2024 encounter and the Sky timestamp, each with its own classification visible (encounter: inside the tracking fit; today: reference planning trajectory). NASA's reported closest approach and the closest hourly sample stay separately labelled. The SPDF comparison at the three named hours is kept and is called a **cross-product check** (not "independent") until it is known whether the two products share an upstream solution. Both products are put in the same frame and units for it: a Sun-centred Horizons vector is not automatically in Heliographic Inertial axes. The transform used for the comparison and for the SVG is recorded.
+
+**§6 tolerances (to be fixed before any scoring):**
+
+| Display | Rule |
+|---|---|
+| Marker | 2° along-orbit as an upper limit, **and** total projected position error within one marker radius at the default Moon view on desktop and on phone. Projection, scale and marker size are set before scoring. Applied only to solution ages supported by several distinct prediction vintages. |
+| Path | 1° orbit-plane orientation and 10 km radial deviation as initial limits, compared over a full orbit after aligning orbital phase; the projected curves and near/far treatment are checked too. Four samples per lead inform the marker study only; a path needs a dense full-orbit capture of its own. |
+
+**§6 capture schedule correction.** 00:00 UTC on the collection day is already past when the Worker runs later that day. That sample is kept for the Sky comparison; every sample records its **signed lead from the actual retrieval time**; only future target instants count as forward forecasts. Public LRO marker and path stay off while definitive comparisons are pending.
+
+**§8 preflight, split in two:**
+- **Probe (first approval):** a diagnostic mode that makes **exactly one** upstream call (the Parker data sheet), with the application User-Agent, stores and publishes nothing, and reports status, API version and what it can show of the request it sent. Schedule off.
+- **Full manual run (second step, before the schedule):** the four serialized requests, parsing, validation and storage, read back from R2 and D1.
+- The User-Agent must carry contact details as JPL asks for automated connections. Today's hub string names the project and the GitHub account; whether that is sufficient contact, or a contact address is needed, is settled in the rules re-read (§8 step 2) and is Chad's call (no personal contact details go into the public repo without it).
+
+**§4 solution evidence per vector (new requirement).** Every published vector names the source solution that produced it. Preferred: classification and vectors from the **same response**, if the vector response carries enough metadata (to be established at the probe / full run). Otherwise: read the data sheet **before and after** the vector call and publish only if both readings show the same revision date and trajectory table; a mismatch means no publish and last good stays. This prevents a source update between calls attaching the wrong classification to valid coordinates.
+
+**Still unverified (needs the preflight):** Worker reachability of the Horizons API with the required header; what solution metadata the vector response returns.
