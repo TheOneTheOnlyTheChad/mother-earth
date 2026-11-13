@@ -41,7 +41,7 @@ Fired 10:10:38; the admin route answered 200 at 10:10:50 (`skycraft:ran`, wall 1
 
 **Lock:** `skycraft/lock.json` = `{"released":true,"at":"2026-11-13T10:10:49.851Z"}`.
 
-**Worker cost (Cloudflare analytics, per-minute figures, so upper bounds for the run):** 10:10 — 6 requests, 0 errors, max CPU **20.4 ms**, max wall 5,423 ms as reported by analytics (the admin route itself measured 12,445 ms wall). Storage added by one run: 65.7 KB raw + 8.9 KB snapshot + 29.2 KB study ≈ **104 KB a day** (about 38 MB a year; nothing is deleted).
+**Worker cost** (corrected 13 Nov per GPT): the admin route's own measured elapsed time for this run was **12,445 ms**. Cloudflare analytics for the minute 10:10 (6 requests, 0 errors) show a per-minute maximum CPU of **20.4 ms** — a per-minute analytics maximum, so an upper bound for this run, not its measured CPU. The same view shows a maximum wall time of 5,423 ms; its relationship to this invocation is not verified. Storage added by one run: 65.7 KB raw + 8.9 KB snapshot + 29.2 KB study ≈ **104 KB a day** (about 38 MB a year; nothing is deleted).
 
 ## 4. Terms read for the REGISTER drafts (browser pane, 13 Nov 10:12 UTC; text only)
 
@@ -55,3 +55,15 @@ Fired 10:10:38; the admin route answered 200 at 10:10:50 (`skycraft:ran`, wall 1
 - One Parker snapshot is published on the hub and will not refresh until the schedule is on (or another manual run). No page reads it yet.
 - Rollback, each its own line: hub → 0.6.11 `119cc641…801f`; the R2 objects can stay.
 - Carried: Parker coverage gap 20 Jan – 17 Feb 2027; upstream User-Agent receipt unverified; live page checks pending.
+
+## 6. Schedule enabled (Chad: "Approve: set SKYCRAFT_ENABLED=1", after GPT passed this smoke record)
+
+- Settings page loaded fresh after the code deploy; form filled by Claude (Key `SKYCRAFT_ENABLED`, Value `1`, Production, not a secret); **Chad clicked "Add 1 variable and deploy"**.
+- Cloudflare deployment created **10:31:26 UTC** (source: dash). Read back at 10:32:16: `SKYCRAFT_ENABLED` plain text "1"; 21 bindings; script still 347,290 B `c1addd19…0106`; hub reports 0.6.12.
+- First scheduled run: the 05:07 UTC hourly tick on 14 Nov (07:07 SAST).
+- Rollback (own Approve line): remove `SKYCRAFT_ENABLED` (stops the schedule; stored snapshots stay).
+
+## 7. GPT's rulings on §4 (relayed by Chad 13 Nov; GPT's extraction, not read by Claude)
+
+- **Parker SPDF citation:** keep `10.48322/ecnj-rx61` in `sun.html`, `sources.html` and REGISTER. GPT reports that the SPASE record assigns it to the hourly `PSP_HELIO1HR_POSITION` product, identifies `10.48322/41s1-hx58` as the deprecated daily product, lists CC0 1.0, and requests credit to Natalia E. Papitashvili, the data providers and CDAWeb with the access date. Recorded as a cross-product check.
+- **LRO PDS citation:** GPT reports that NASA's Open Data record for `LRO-L-SPICE-6-V1.0` points to U.S. Government Works in its licence field; cite that dataset-level metadata and the PDS DOI `10.17189/1520116`, alongside the exact kernel and producer; record NAIF's clearance statement separately as evidence of public release.
