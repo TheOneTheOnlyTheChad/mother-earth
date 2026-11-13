@@ -6,7 +6,7 @@
 <title>The Moon · spacecraft · Mother Earth</title>
 <meta name="description" content="Lunar Reconnaissance Orbiter: where its published trajectory places it, with the source and time beside every position.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612041200">
+<link rel="stylesheet" href="style.css?v=202612041300">
 </head>
 <body class="doc craft" data-body="moon">
 <header class="top">
@@ -34,6 +34,22 @@
   <p class="cback"><a id="craft-back" href="index.html">Back to Earth</a></p>
   <h2 id="craft-h">The Moon · spacecraft</h2>
   <p class="lede">One spacecraft at the Moon, drawn from its published trajectory. Positions are calculated from the source named beside them; nothing here is observed by Mother Earth.</p>
+
+  <section id="moon-globe" class="mg" aria-labelledby="mg-h">
+    <h3 id="mg-h">The Moon</h3>
+    <p id="mg-state" class="cstate" role="status">loading…</p>
+    <p id="mg-why" class="cunavail" hidden></p>
+    <div id="mg-globe" class="mgglobe" tabindex="0" role="application" aria-label="Globe of the Moon. Drag, or use the arrow keys, to turn it." aria-describedby="mg-read"></div>
+    <p id="mg-read" class="mgread" aria-live="off"></p>
+    <div id="mg-ctl" class="mgctl">
+      <button type="button" id="mg-near">Near side</button>
+      <button type="button" id="mg-far">Far side</button>
+    </div>
+    <p class="cscale"><span>Evenly lit so the whole surface can be seen: this is not how the Moon is lit today.</span>
+    <span>Appearance map from NASA’s Scientific Visualization Studio, made from Lunar Reconnaissance Orbiter data: tuned for looks, not measurement. Poleward of 70° it is filled from a lower-resolution map.</span>
+    <span>Drawn to fill the view. Sizes are not comparable between the Earth, Moon and Sun pages. The spacecraft drawing below is a separate view; the spacecraft is not shown on this globe.</span></p>
+    <noscript><p class="cunavail">The globe needs JavaScript.</p></noscript>
+  </section>
 
   <section id="craft-view" class="cview" aria-labelledby="craft-vh">
     <h3 id="craft-vh">Lunar Reconnaissance Orbiter</h3>
@@ -68,11 +84,14 @@
       <li><b>Dated example (10–11 June 2026):</b> NASA/GSFC Flight Dynamics Facility definitive trajectory, NASA PDS data set LRO-L-SPICE-6-V1.0, product <code>lrorg_2026074_2026166_v01.bsp</code> (label: “Merged SPICE SPK file containing Regular Definitive LRO Spacecraft trajectory.”). The kernel’s own one-minute states for that day are shown as written, in the J2000 frame centred on the Moon; no interpolation. Positions rounded to 1 m. <a href="https://naif.jpl.nasa.gov/pub/naif/pds/data/lro-l-spice-6-v1.0/lrosp_1000/" rel="noopener">Archive at NAIF</a></li>
       <li><b>Check:</b> at 11:45, 12:00 and 12:15 UTC on 10 June 2026 the kernel states agree with a fresh NASA/JPL Horizons evaluation to about 2 cm.</li>
       <li><b>Today:</b> no position is shown. The published prediction for LRO has not been compared with a later definitive trajectory; a study of that is running and publishes nothing.</li>
+      <li><b>Moon globe:</b> colour map <code>lroc_color_2k.jpg</code> (2025 version) from NASA’s Scientific Visualization Studio, “CGI Moon Kit”. Our copy is served from this site, unchanged. Credit: NASA’s Scientific Visualization Studio.</li>
       <li><b>Moon radius:</b> 1,737.4 km (NASA/JPL Horizons, “Radius (IAU)”).</li>
     </ul>
     <p class="dim">Full register of sources: <a href="sources.html">Sources &amp; Details</a>.</p>
   </section>
 </main>
+<script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
+<script src="moonglobe.js?v=202612041300"></script>
 <script src="craft.js?v=202612031000"></script>
 </body>
 </html>
