@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 10:36 UTC (clock reading at write) — **Skycraft REGISTER entries filed (branch); one page wording change after GPT's review**
+
+Chad: "Approve: file the four skycraft REGISTER entries as described (Horizons extension, LRO PDS data set, SPDF hourly product, NASA closest-approach statement)".
+
+- Filed in `REGISTER.md` on branch `skycraft-rc` (reach main with the page merge). The LRO and SPDF citation and licence lines are labelled as GPT's extraction relayed by Chad; what Claude read directly is labelled as such.
+- **Change after GPT's last code review (`a5f483f`), page only:** reading NASA's closest-approach page showed it gives the distance in miles only. `craft.js` now shows NASA's words in quotation marks ("flying just 3.8 million miles above the surface of the Sun") and "about 6.1 million km" as our conversion. The example file in R2 still carries the earlier wording in a field the page no longer displays (correct at the next catalogue revision). skycraft-ui 77/77, skycraft-hub 164/164 after the change. **GPT has not reviewed this one-line page change.**
+- Branch `skycraft-rc` @ `1920026`. Hub code is unchanged (live 0.6.12 = `a5f483f`'s worker.js).
+- **Next:** GPT's look at the wording change; live check of the two pages against the hub from the Pages origin, with Chad at the screen; then Chad's merge line. First scheduled skycraft run 05:07 UTC 14 Nov.
+
 ## 13 Nov 10:32 UTC (clock reading at write) — **Skycraft schedule ENABLED** (`SKYCRAFT_ENABLED=1`); page still not merged; REGISTER entries not yet filed
 
 GPT (relayed by Chad): the smoke review passes; ready for the REGISTER lines and Chad's separate approval to enable the schedule. Chad: "Approve: set SKYCRAFT_ENABLED=1" (he clicked "Add 1 variable and deploy" himself).
