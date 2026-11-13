@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 10:49 UTC (clock reading at write) — **Moon and Sun spacecraft pages RELEASED** (merge `c4e3162`; hub 0.6.12; main = live)
+
+GPT (relayed by Chad): `1920026` passes review for the page release; two REGISTER corrections applied (`7d3e4f0`). Chad: "Approve: push skycraft-rc to main (page change: Moon and Sun spacecraft pages, Sky Explore links, Sources section)".
+
+- No-ff merge `c4e3162`, pushed 10:46:01 UTC. **Served files exact at 10:47:38 UTC, all fourteen:** new `moon.html` `c25d3aeb…1443`, `sun.html` `e16cc714…179d`, `craft.js` `e5cb7cf7…ce48`; changed `index.html` `32d3095e…6711`, `skyscene.js` `135c2b12…5c69`, `style.css` `7d9edae0…81d2`, `sources.html` `faafb935…c24b`, `timeline.html` `6b3d21fb…6364` (css link only); unchanged `app.js`, `arts.js`, `dustrgb.js`, `oceanheat.js`, `sky.js`, `timeline.js`. Assets `?v=202612031000` (style.css on every page, skyscene.js, craft.js).
+- **Live candidate check before the merge (10:44–10:46 UTC, branch files injected on the Pages origin against the live hub):** Sun page with the Sky time showed the hub's read (84,398,610 km; "Reference planning trajectory"; three requests, all to the hub); Moon page showed the June 2026 example (84 km above the surface).
+- **Live round trip after the merge (10:47–10:48 UTC, public site):** Sky view opened; no Explore link at the Earth stop; "Explore the Moon" at the Moon stop and both links at the Sun stop, each carrying `?t=2026-11-13T00:00:00Z`; Explore the Sun → `sun.html` showed "Predicted position — 13 Nov 2026, 00:00 UTC."; **Back to Earth → the globe page reopened the Sky view at the Sun stop with focus on "Explore the Sun"** (Two Clocks card on). Done with the pane hidden.
+- Hub 0.6.12 `c1addd19…0106` (since 10:01:33 UTC), `SKYCRAFT_ENABLED=1` (since 10:31:26 UTC). main now carries the hub's source again. REGISTER entries (four) are on main.
+- **Rollback, each on its own Approve line, independent:** page = revert `c4e3162` (the Explore links go; the hub keeps collecting); schedule = remove `SKYCRAFT_ENABLED`; hub = 0.6.11 `119cc641…801f`.
+- **Not checked:** a real phone, Safari, a screen reader; Chad's own look at the released pages.
+- **Open:** first scheduled run 05:07 UTC 14 Nov (read D1, pointer with the manual snapshot as `previous`, second LRO capture, CPU); Parker coverage gap 20 Jan – 17 Feb 2027; upstream receipt of the User-Agent unverified; the example file's `reported_closest_approach.text` to correct at the next catalogue revision; the Sun page's true-scale framing for a current date leaves the path near the edge (Chad to judge); LRO prediction study (first definitive reference around Q1 2027); skycraft storage grows about 104 KB a day, no cleanup; branch `skycraft-rc` to be deleted by Chad.
+
 ## 13 Nov 10:36 UTC (clock reading at write) — **Skycraft REGISTER entries filed (branch); one page wording change after GPT's review**
 
 Chad: "Approve: file the four skycraft REGISTER entries as described (Horizons extension, LRO PDS data set, SPDF hourly product, NASA closest-approach statement)".
