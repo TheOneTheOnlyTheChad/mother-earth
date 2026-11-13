@@ -11,6 +11,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - Detail: `reviews/2026-11-13-dustrgb-smoke.md` §7.
 - Next: Chad's look at the globe at 0.82 opacity; then his merge line.
 
+## 13 Nov 04:42 UTC (clock reading at write) — **Hub 0.6.11 live, Dust RGB schedule on; page not released; second thread starting** (handover block written; Dust thread still open)
+
+- Detail lives on branch `dustrgb-rc` (`STATUS.md`, `REGISTER.md`, `reviews/2026-11-13-dustrgb-smoke.md`) until the merge. Summary and rules for a parallel thread: `HANDOVER.md` → NEXT THREAD STARTS HERE. Operating facts: `START-HERE.md` §4v.
+- Hub 0.6.11 `119cc641…801f` since 13 Nov 03:59:00 UTC (Chad's Approve line); `DUSTRGB_ENABLED=1` since 04:35:55 UTC (Chad's line and click). First manual run published `20261113T0350Z-d0cb4223ccfa72f1`; files match the pointer.
+- Page unchanged (`12ff4ff`). main carries docs only since `cf8119c`.
+- **Next, in the Dust thread:** read the 06:07 UTC scheduled run; Chad's look at the globe; Chad's merge line; branch deletion (his).
+
 ## 13 Nov 04:37 UTC (clock reading at write) — **Dust RGB schedule ENABLED; REGISTER entry filed (branch)**
 
 - Chad: "Approve: set DUSTRGB_ENABLED=1". Variable added through the Settings form (page reloaded after the code deploy; Chad's click), Cloudflare deployment **04:35:55 UTC**. Read back: `DUSTRGB_ENABLED` plain text "1"; 20 bindings; script still `119cc641…801f`; hub reports 0.6.11. First scheduled run: 06:07 UTC (08:07 SAST) 13 Nov.
