@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 06:17 UTC (clock reading at write) — **First scheduled Dust RGB run: ok**
+
+- 06:07 UTC run published `20261113T0540Z-f926c6922bfed1a3` (D1 id 9334 `ok`); the manual frame is kept as `previous`; all four files (current and previous) answer 200, match their hashes and decode. Served-time header present on both files again.
+- Hourly invocation with Dust: max CPU 169.6 ms, wall 47.1 s (05:07 without Dust: 52.4 ms / 12.5 s). No failed invocation since the deploy; other collectors `ok`.
+- Detail: `reviews/2026-11-13-dustrgb-smoke.md` §7.
+- Next: Chad's look at the globe at 0.82 opacity; then his merge line.
+
 ## 13 Nov 04:42 UTC (clock reading at write) — **Hub 0.6.11 live, Dust RGB schedule on; page not released; second thread starting** (handover block written; Dust thread still open)
 
 - Detail lives on branch `dustrgb-rc` (`STATUS.md`, `REGISTER.md`, `reviews/2026-11-13-dustrgb-smoke.md`) until the merge. Summary and rules for a parallel thread: `HANDOVER.md` → NEXT THREAD STARTS HERE. Operating facts: `START-HERE.md` §4v.
@@ -11,7 +18,66 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - Page unchanged (`12ff4ff`). main carries docs only since `cf8119c`.
 - **Next, in the Dust thread:** read the 06:07 UTC scheduled run; Chad's look at the globe; Chad's merge line; branch deletion (his).
 
+## 13 Nov 04:37 UTC (clock reading at write) — **Dust RGB schedule ENABLED; REGISTER entry filed (branch)**
+
+- Chad: "Approve: set DUSTRGB_ENABLED=1". Variable added through the Settings form (page reloaded after the code deploy; Chad's click), Cloudflare deployment **04:35:55 UTC**. Read back: `DUSTRGB_ENABLED` plain text "1"; 20 bindings; script still `119cc641…801f`; hub reports 0.6.11. First scheduled run: 06:07 UTC (08:07 SAST) 13 Nov.
+- Chad: "Approve: file the EUMETSAT Dust RGB REGISTER entry as described". Filed in `REGISTER.md` on branch `dustrgb-rc` (reaches main with the page merge).
+- GPT on the smoke report: keep the label rule ("Frame" when both responses name the requested time, else "Frame requested"); page merge still pending.
+- To check after the first scheduled run: D1 `ok`; pointer names a new frame with two readable files; the manual frame kept as `previous`; CPU of the whole hourly invocation.
+- Rollback: remove `DUSTRGB_ENABLED` (schedule stops), or hub → 0.6.10 `784939f8…a0da`.
+
+## 13 Nov 04:23 UTC (clock reading at write) — **Hub 0.6.11 LIVE (smoke test); Dust RGB schedule NOT enabled; page not merged**
+
+Chad: "Approve: deploy hub 0.6.11 from c667c07 (content only, DUSTRGB_ENABLED unset) and run /admin/run/dustrgb once".
+
+- **Hub 0.6.11 live since 13 Nov 03:59:00 UTC**, `119cc641…801f` (316,927 B), content only, read back identical; 19 bindings; no `DUSTRGB_ENABLED`. Rollback = 0.6.10 `784939f8…a0da`.
+- One manual run 04:19:47: published `20261113T0350Z-d0cb4223ccfa72f1`; both file URLs match the pointer's sizes and hashes and decode. D1 run 9289 `ok`.
+- **The served-time header DID reach the production Worker** (GPT's Playground probes had it absent). The page therefore labels this frame "Frame:", not "Frame requested". Decision open.
+- Plan confirmed Workers Paid. CPU upper bound for the run: 41.3 ms (per-minute maximum).
+- Real frame seen on the globe in a clean pane tab (candidate files against the live hub). Chad's eyes still to judge alignment, opacity, legibility.
+- Report: `reviews/2026-11-13-dustrgb-smoke.md`.
+- Pending, each on its own line: `DUSTRGB_ENABLED=1`; REGISTER entry; page merge.
+
+## 13 Nov 03:51 UTC (clock reading at write) — **dustrgb-rc round 3** (GPT's round-2 findings fixed; branch only; deploy on hold)
+
+Chad, 13 Nov: "Keep the 0.6.11 deploy on hold" with GPT's review of `2980ded`. **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.
+
+- Packet: `reviews/2026-11-13-dustrgb-rc-r3.md`.
+- First-run pointer erase (reproduced): `dustPtr` no longer writes; every pointer write is conditional, create-only when none existed (the R2 forms already verified in production for FIRMS).
+- Cleanup deleting a just-published file (reproduced): deletion removed from the candidate; about 1.5 MB a day accumulates until a cleanup is designed.
+- Mask inflation and both downloads are now bounded while reading.
+- Page: a body that breaks off after the response began now falls back to the previous pair and is retried.
+- Tests: `dustrgb-hub` 174/174, 26 breaks fail; `dustrgb-ui` 67/67, 20 breaks fail. Regression 54 passed, 1 failed: `terminator-ui`, which fails about 1 in 3 on **main** too (7 of 22 on main, 8 of 20 on the branch); cause not found; not this candidate.
+- `worker.js` 316,927 B `119cc641…801f`; `dustrgb.js` 15,063 B `6dbed9e5…9ff9`.
+- Not shown: real hub run; **Worker CPU (must be measured before the schedule is enabled)**; real frame on the real globe.
+
+## 13 Nov 02:48 UTC (clock reading at write) — **dustrgb-rc round 2** (GPT's three findings fixed; branch only; deploy on hold)
+
+Chad, 13 Nov: "Hold the 0.6.11 deploy" with GPT's review of `7e6f236`. **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.
+
+- Packet: `reviews/2026-11-13-dustrgb-rc-r2.md`.
+- Finding 1 (frame URLs could change under readers; reproduced): pair id now names the content (time + fingerprint of both files); stored files never overwritten; same-or-older advertised times skipped; pointer writes conditional on its etag; cleanup spares files under 2 h old.
+- Finding 2 (corrupt image could replace the good pair): mask decoded in full on the hub; picture structure check widened but NOT a decode (stated); page falls back to the previous pair. Open: a partly damaged picture still passes both hub and browser.
+- Finding 3: 30 s limit on the frame-list request; parser reads only the dust layer's own element; Dust runs after the hourly batch.
+- Label "(5 h ago)". First packet's "30 minutes" corrected to 10.
+- Tests: `dustrgb-hub` 156/156, 23 breaks fail; `dustrgb-ui` 63/63, 19 breaks fail; regression 55 passed, 0 failed (terminator-ui passed; round-1 failure unexplained).
+- Real service 02:03 UTC (browser pane): new validators accept a live pair; picture is progressive JPEG; mask counts match the browser's decoder.
+- `worker.js` 315,632 B `b0ccb053…030b`; `dustrgb.js` 14,886 B `40f6aa2d…e15c`.
+- Not shown: real hub run; conditional write on real R2; real frame on the real globe.
+
 # 12 Nov 2026
+
+## 12 Nov 19:10 UTC (clock reading at write) — **dustrgb-rc candidate built** (hub 0.6.11 job + page layer; branch only; for GPT)
+
+Chad: "Go: build dustrgb-rc on a branch per DUST-RGB-LAYER-PROPOSAL rev 5 (hub job and page layer; no merge, no hub deploy)". **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.
+
+- Packet: `reviews/2026-11-12-dustrgb-rc.md`.
+- Hub: job `dustrgb` behind `DUSTRGB_ENABLED=1`, 06:07 and 18:07 UTC; picture 2048² JPEG + mask 160² PNG; validate, write, read back, then move the pointer; previous pair kept one run; 90 s request limit. `worker.js` 307,660 B `a8e3b51a…f6eb`.
+- Page: `dustrgb.js` 13,251 B `224e0221…fca4`; card, Sources section, credit. "Frame requested" wording; stale 14 h, cleared 24 h.
+- Tests: `dustrgb-hub` 101/101, 12 breaks fail; `dustrgb-ui` 53/53, 14 breaks fail. Regression: 52 passed, 3 failed first run — two release-pinned assertions loosened (packet §8), one `terminator-ui` check failed once and passed on three reruns, cause not found.
+- Real service check 18:42 UTC (browser pane, not the Worker): the hub's validators accept a live picture (672,352 B) and mask (65,156 B, two-valued alpha).
+- Not shown: a real hub run; a real frame on the real globe; iPhone/Safari.
+- Next, each on Chad's own line: deploy 0.6.11 + set the variable; REGISTER entry; page merge.
 
 ## 12 Nov 17:31 UTC (clock reading at write) — **Dust RGB proposal rev 5** (GPT's header probe; "Frame requested" is the supported claim; docs only)
 
