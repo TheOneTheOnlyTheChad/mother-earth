@@ -67,3 +67,10 @@ Fired 10:10:38; the admin route answered 200 at 10:10:50 (`skycraft:ran`, wall 1
 
 - **Parker SPDF citation:** keep `10.48322/ecnj-rx61` in `sun.html`, `sources.html` and REGISTER. GPT reports that the SPASE record assigns it to the hourly `PSP_HELIO1HR_POSITION` product, identifies `10.48322/41s1-hx58` as the deprecated daily product, lists CC0 1.0, and requests credit to Natalia E. Papitashvili, the data providers and CDAWeb with the access date. Recorded as a cross-product check.
 - **LRO PDS citation:** GPT reports that NASA's Open Data record for `LRO-L-SPICE-6-V1.0` points to U.S. Government Works in its licence field; cite that dataset-level metadata and the PDS DOI `10.17189/1520116`, alongside the exact kernel and producer; record NAIF's clearance statement separately as evidence of public release.
+
+## 8. Live candidate check from the Pages origin (13 Nov, 10:44–10:46 UTC; branch files at `7d3e4f0`, hash-checked, injected into a clean github.io tab)
+
+- **Sun page with the Sky time** (`?t=2026-11-13T00:00:00Z`): three requests, all to the hub (the dated example, `/snapshot/skycraft/meta`, the snapshot it names); no request to Horizons. Shown: "Predicted position — 13 Nov 2026, 00:00 UTC."; 84,398,610 km from the centre; "Reference planning trajectory", Horizons' sentence, segment `spp_pred_20260930_20270217_od268_v001`, "Data sheet revised Nov 03, 2026"; "Read by the hub 13 Nov 2026, 10:10 UTC"; the Sun's 1.7× enlargement disclosed; one unbroken path; no horizontal overflow (588 px pane). Cross-origin read from the Pages origin works.
+- **Moon page, direct visit:** one request (the dated example); "Historical snapshot — 10 Jun 2026, 12:00 UTC."; 1,821 km from the centre, 84 km above the nominal surface; "Definitive trajectory" with the provider's words; no overflow.
+- **Not covered by this check:** the Sky links and the return (the live site has no `moon.html` / `sun.html` to navigate to until the merge; covered by the page suite); a real phone, Safari, a screen reader.
+- GPT (relayed by Chad): `1920026` passes review for the page release; two REGISTER corrections applied at `7d3e4f0`.
