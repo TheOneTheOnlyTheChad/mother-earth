@@ -6,7 +6,8 @@
  * Run: node --no-warnings phase1/dustrgb-hub.test.mjs
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored no-type-check no-readback no-mismatch keep-all move-on-fail any-frame mask-any generic-down refetch-same pointer-early
- *   no-timeout time-keys refetch-older overwrite no-cas clean-young no-decode no-footprint unscoped no-list-timeout dust-first jpeg-sof-only */
+ *   no-timeout time-keys refetch-older overwrite no-cas no-decode no-footprint unscoped no-list-timeout dust-first jpeg-sof-only
+ *   create-unconditional deletes inflate-unbounded download-unbounded pixels-unchecked */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import zlib from 'node:zlib'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
@@ -15,7 +16,6 @@ const BREAKS = {
   'no-type-check': ["  if (type !== spec.type) return { ok: false, reason: what + ' not an image', http: 200, detail: type };", ''],
   'no-readback': ["      if (await same(key) !== 'same') return dustFail(env, ms, k + ' read-back differs', 200, key);", ''],
   'no-mismatch': ["if (f.served && f.served !== T) return dustFail(env, ms, what + ' served time differs'", "if (false) return dustFail(env, ms, what + ' served time differs'"],
-  'keep-all': ['if (!keep.some(d => o.key.startsWith(d)) && o.uploaded && now - new Date(o.uploaded).getTime() > DUSTRGB.CLEAN_AFTER_MS) await env.R2.delete(o.key);', ';'],
   'move-on-fail': ["dustUpdate(env, cur => ({ ...cur, last_attempt: {", "dustUpdate(env, cur => ({ ...cur, frame: null, last_attempt: {"],
   'any-frame': ['const fr = [cur.frame, cur.previous].find(f => f && f.id === p[2]);', 'const fr = cur.frame;'],
   'mask-any': ['if (!i || i.w !== spec.w || i.h !== spec.h || !i.alpha || !i.complete)', 'if (!i)'],
@@ -27,8 +27,13 @@ const BREAKS = {
   'time-keys': ["const id = dustKeyOf(T) + '-' + (await sha256Bytes(new TextEncoder().encode(pic.sha256 + ':' + mask.sha256).buffer)).slice(0, 16);", 'const id = dustKeyOf(T);'],
   'refetch-older': ['if (cur.frame && T <= cur.frame.requested_time) {', 'if (cur.frame && T === cur.frame.requested_time) {'],
   'overwrite': ["    if (had === 'differs' || had === 'unreadable') return dustFail(env, ms, k + ' stored copy differs', 200, key);   // never overwrite a stored file\n    if (had === 'absent') {", '    {'],
-  'no-cas': [", onlyIf: { etagMatches: etag } });\n    if (r !== null) return", ' });\n    if (r !== null) return'],
-  'clean-young': [' && o.uploaded && now - new Date(o.uploaded).getTime() > DUSTRGB.CLEAN_AFTER_MS) await env.R2.delete(o.key);', ') await env.R2.delete(o.key);'],
+  'no-cas': ["onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });", "onlyIf: etag ? undefined : { etagDoesNotMatch: '*' } });"],
+  // GPT review of round 2
+  'create-unconditional': ["onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });", 'onlyIf: etag ? { etagMatches: etag } : undefined });'],
+  'deletes': ['  // Nothing is deleted. A run cannot yet prove', "  { const l = await env.R2.list({ prefix: DUSTRGB.PREFIX }); const keepDirs = [dir, up.cur.frame ? DUSTRGB.PREFIX + up.cur.frame.id + '/' : dir]; for (const o of l.objects) if (!keepDirs.some(d => o.key.startsWith(d)) && Date.now() - new Date(o.uploaded).getTime() > 2 * 3600e3) await env.R2.delete(o.key); }\n  // Nothing is deleted. A run cannot yet prove"],
+  'inflate-unbounded': ['      if (read + value.length > expect) { read += value.length; try { await reader.cancel(); } catch (_) {} return { data: null, read }; }\n      out.set(value, read); read += value.length; }', '      if (read + value.length <= expect) out.set(value, read); read += value.length; }'],
+  'download-unbounded': ["      if (read > max) { try { await reader.cancel(); } catch (_) {} return { over: true, read }; }", ''],
+  'pixels-unchecked': ['  if (info.w * info.h > maxPixels) return null;', ''],
   // finding 2
   'no-decode': ["    if (!d) return { ok: false, reason: what + ' does not decode', http: 200 };", "    if (!d) { alpha = {}; } else"],
   'no-footprint': ['if (!d.opaque || d.centre !== 255 || d.corners.some(a => a !== 0))', 'if (false)'],
@@ -97,17 +102,21 @@ const dustLayer = (t, name = 'rgb_dust') => `<Layer queryable="1"><Name>${name}<
 const caps = t => `<WMS_Capabilities><Capability><Layer><Title>mtg_fd</Title>${dustLayer(t)}</Layer></Capability></WMS_Capabilities>`;
 
 // ---------- fakes
+const STATS = { pointerPuts: 0, unconditionalPointerPuts: 0, deletes: 0 };   // across every world in this file
 function world() {
   const store = new Map(), runs = [], reqs = [];
   const w = { store, runs, reqs, order: [], latest: '2026-11-12T16:50:00Z', capStatus: 200, capBody: null, pic: null, mask: null, warn: undefined, picWarn: undefined, putFail: null, corruptRead: null, throwFetch: false, throwOn: null, signals: [],
-    conflicts: 0, onPointerPut: null, onFetch: null, puts: [], pageSize: 0, brokenResponse: null };
+    conflicts: 0, onPointerPut: null, onFetch: null, puts: [], pageSize: 0, brokenResponse: null, pulled: 0 };
   const etagOf = buf => crypto.createHash('md5').update(buf).digest('hex');
   const R2 = {
     async put(key, body, opts = {}) {
       if (w.putFail && key.endsWith(w.putFail)) throw new Error('R2 put failed (test)');
       const buf = typeof body === 'string' ? Buffer.from(body) : Buffer.from(body.buffer ? body.buffer.slice(body.byteOffset || 0, (body.byteOffset || 0) + body.byteLength) : body);
-      if (opts.onlyIf) { if (key === W.DUSTRGB.POINTER && w.onPointerPut) { const f = w.onPointerPut; w.onPointerPut = null; await f(); }
-        const had = store.get(key); if (!had || had.etag !== opts.onlyIf.etagMatches) { w.conflicts++; return null; } }
+      if (key === W.DUSTRGB.POINTER) { STATS.pointerPuts++; if (!opts.onlyIf) STATS.unconditionalPointerPuts++;
+        if (w.onPointerPut) { const f = w.onPointerPut; w.onPointerPut = null; await f(); } }   // "paused just before its write": another run acts here
+      if (opts.onlyIf) { const had = store.get(key);
+        const refused = opts.onlyIf.etagDoesNotMatch === '*' ? !!had : (!had || had.etag !== opts.onlyIf.etagMatches);   // create-only, or compare-and-swap
+        if (refused) { w.conflicts++; return null; } }
       w.puts.push(key); store.set(key, { buf, opts, etag: etagOf(buf), uploaded: new Date() }); return { key, etag: etagOf(buf) }; },
     async get(key) { const o = store.get(key); if (!o) return null; let buf = o.buf; if (w.corruptRead && key.endsWith(w.corruptRead)) { buf = Buffer.from(buf); buf[buf.length - 3] ^= 0xff; }
       return { body: buf, etag: o.etag, httpEtag: '"' + o.etag + '"', uploaded: o.uploaded, customMetadata: o.opts.customMetadata, async arrayBuffer() { return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength); }, async json() { return JSON.parse(buf.toString('utf8')); }, async text() { return buf.toString('utf8'); } }; },
@@ -115,7 +124,7 @@ function world() {
     async list({ prefix = '', cursor } = {}) { const all = [...store.keys()].filter(k => k.startsWith(prefix)).sort().map(key => ({ key, uploaded: store.get(key).uploaded }));
       if (!w.pageSize) return { objects: all, truncated: false }; const from = cursor ? Number(cursor) : 0, page = all.slice(from, from + w.pageSize), more = from + w.pageSize < all.length;
       return { objects: page, truncated: more, ...(more ? { cursor: String(from + w.pageSize) } : {}) }; },
-    async delete(key) { store.delete(key); },
+    async delete(key) { STATS.deletes++; store.delete(key); },
   };
   const DB = { prepare(sql) { return { bind(...a) { return { async run() { if (/INSERT INTO collector_runs/.test(sql)) { runs.push({ layer: a[0], status: a[3], http: a[4], note: a[7] }); w.order.push('run:' + a[0]); } if (/INSERT INTO batch_runs/.test(sql)) w.order.push('batch'); return {}; }, async first() { return null; }, async all() { return { results: [] }; } }; }, async first() { return null; }, async all() { return { results: [] }; }, async run() { return {}; } }; } };
   w.env = { R2, DB, DUSTRGB_ENABLED: '1' };
@@ -128,8 +137,8 @@ function world() {
     const isPic = /image\/jpeg/.test(u); const t = (u.match(/time=([^&]+)/) || [])[1];
     if (w.brokenResponse && isPic) return { status: 200 };   // not a Response at all: provokes an uncaught error inside the job
     const spec = isPic ? (w.pic || { body: jpeg(Date.parse(t) / 6e5), type: 'image/jpeg', status: 200 }) : (w.mask || { body: mask(Date.parse(t) / 6e5), type: 'image/png', status: 200 });
-    const h = { 'content-type': spec.type }; const wv = isPic && w.picWarn !== undefined ? w.picWarn : w.warn; if (wv !== undefined) h.warning = wv === 'echo' ? `99 Nearest value used: time=${t.replace('Z', '.000Z')} ISO8601 (mtg_fd:rgb_dust)` : wv;
-    return new Response(spec.body, { status: spec.status || 200, headers: h }); };
+    const h = { 'content-type': spec.type, ...(spec.headers || {}) }; const wv = isPic && w.picWarn !== undefined ? w.picWarn : w.warn; if (wv !== undefined) h.warning = wv === 'echo' ? `99 Nearest value used: time=${t.replace('Z', '.000Z')} ISO8601 (mtg_fd:rgb_dust)` : wv;
+    return new Response(typeof spec.body === 'function' ? spec.body(w) : spec.body, { status: spec.status || 200, headers: h }); };
   return w;
 }
 const realFetch = globalThis.fetch;
@@ -221,9 +230,9 @@ ok('version is at least 0.6.11', (() => { const v = src.match(/const COLLECTOR_V
   ok('D a newer frame: pointer moves, the previous pair is named and still stored', fB.requested_time === TB && p2.previous.id === idA && w.store.has(`dustrgb/frames/${idA}/picture.jpg`) && w.store.has(`dustrgb/frames/${idA}/mask.png`), p2);
   ok('D grace: a reader holding the older pointer still gets the previous picture and its matching mask', await readable(w, f));
   w.latest = TC; await W.JOBS.dustrgb(w.env, at(18) + 864e5); p2 = await pointer(w);
-  ok('D one run later the oldest pair is out of the pointer and no longer served, but its files are NOT deleted while young', p2.frame.requested_time === TC && p2.previous.id === fB.id && (await route(w, f.picture.path)).status === 404 && w.store.has(`dustrgb/frames/${idA}/picture.jpg`), frameKeys(w));
-  w.age(3 * 3600e3); w.pageSize = 2; await W.dustClean(w.env);
-  ok('D once older than two hours the unreferenced pair is deleted (the listing is read page by page); current and previous stay', frameKeys(w).join() === [p2.frame.id, fB.id].sort().flatMap(i => [`dustrgb/frames/${i}/mask.png`, `dustrgb/frames/${i}/picture.jpg`]).join() && await readable(w, p2.frame) && await readable(w, fB), frameKeys(w)); }
+  ok('D one run later the oldest pair is out of the pointer and no longer served', p2.frame.requested_time === TC && p2.previous.id === fB.id && (await route(w, f.picture.path)).status === 404, frameKeys(w));
+  w.age(30 * 864e5); w.latest = '2026-11-14T05:50:00Z'; await W.JOBS.dustrgb(w.env, at(6) + 2 * 864e5);
+  ok('D nothing is ever deleted, however old: all four pairs are still stored (eight files)', frameKeys(w).length === 8 && w.store.has(`dustrgb/frames/${idA}/picture.jpg`) && w.store.has(`dustrgb/frames/${idA}/mask.png`), frameKeys(w)); }
 
 // ---------- G. GPT review 1: published addresses never change underneath a reader
 { // the reproduced bug: A, then B, then EUMETSAT advertises A again with different picture bytes and the mask write fails
@@ -273,13 +282,69 @@ ok('version is at least 0.6.11', (() => { const v = src.match(/const COLLECTOR_V
   w.onPointerPut = async () => { const save = w.latest; w.latest = TB; await W.JOBS.dustrgb(w.env, at(18) + 5000); w.latest = save; fB = (await pointer(w)).frame; };
   await W.JOBS.dustrgb(w.env, at(18)); const p = await pointer(w);
   ok('H pointer changed mid-write: the conditional write is refused once, then the run publishes on top of the other run\'s result (C current, B previous)', w.conflicts === 1 && fB && fB.requested_time === TB && p.frame.requested_time === TC && p.previous.id === fB.id, { conflicts: w.conflicts, frame: p.frame.requested_time, prev: p.previous && p.previous.id });
-  ok('H after that race every pair the pointer names is readable (the other run\'s cleanup did not delete this run\'s fresh files)', await readable(w, p.frame) && await readable(w, fB), frameKeys(w));
-  ok('H A, no longer named, is not served; its files wait for the age limit', (await route(w, fA.picture.path)).status === 404 && w.store.has(`dustrgb/frames/${fA.id}/picture.jpg`)); }
+  ok('H after that race every pair the pointer names is readable', await readable(w, p.frame) && await readable(w, fB), frameKeys(w));
+  ok('H A, no longer named, is not served; its files stay stored', (await route(w, fA.picture.path)).status === 404 && w.store.has(`dustrgb/frames/${fA.id}/picture.jpg`)); }
 { // a failure record written while another run publishes must not undo the publication
   const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); w.latest = TB;
   w.onPointerPut = async () => { await W.JOBS.dustrgb(w.env, at(18) + 5000); };   // the other run publishes B while this one is recording a failure
   await W.dustFail(w.env, at(18), 'picture http error', 503); const p = await pointer(w);
   ok('H a failed run recording its attempt cannot overwrite a publication made in between: B stays current, the attempt is added', w.conflicts === 1 && p.frame.requested_time === TB && p.last_attempt && p.last_attempt.reason === 'picture http error', [w.conflicts, p.frame.requested_time, p.last_attempt]); }
+
+// ---------- I. GPT review of round 2, finding 1: first-run initialisation must not erase a published pointer
+{ // the exact interleaving: two runs both read a MISSING pointer; one is paused just before its first pointer write; the other publishes; the first resumes
+  const w = world(); use(w); let other = null;
+  w.onPointerPut = async () => { other = await W.JOBS.dustrgb(w.env, at(6) + 5000); };   // the other run starts from the same missing pointer and publishes A in full
+  await W.dustFail(w.env, at(6), 'frame list http error', 502); const p = await pointer(w);   // the paused run's first write is a failure record on a pointer it read as missing
+  ok('I first run, failure record vs publication: the published frame SURVIVES (it was erased to frame: null); the attempt is added on top', other !== null && p.frame && p.frame.requested_time === TA && p.last_attempt && p.last_attempt.reason === 'frame list http error' && w.conflicts === 1 && await readable(w, p.frame), [p.frame && p.frame.requested_time, p.last_attempt, w.conflicts]); }
+{ const w = world(); use(w); let done = false;   // both first runs publish the same time
+  w.onPointerPut = async () => { done = true; await W.JOBS.dustrgb(w.env, at(6) + 5000); };
+  await W.JOBS.dustrgb(w.env, at(6)); const p = await pointer(w);
+  ok('I first run, two publications overlapping from a missing pointer: one frame published, the other run superseded, nothing lost', done && p.frame.requested_time === TA && p.previous === null && w.conflicts === 1 && w.runs.filter(r => /^superseded/.test(r.note)).length === 1 && await readable(w, p.frame), [w.runs.map(r => r.note), w.conflicts]); }
+{ const w = world(); use(w); w.latest = TA;   // paused first run holds an OLDER time than the one published meanwhile
+  w.onPointerPut = async () => { const s = w.latest; w.latest = TB; await W.JOBS.dustrgb(w.env, at(6) + 5000); w.latest = s; };
+  await W.JOBS.dustrgb(w.env, at(6)); const p = await pointer(w);
+  ok('I first run, the paused run holds an older time: the newer published frame stays current', p.frame.requested_time === TB && w.conflicts === 1 && await readable(w, p.frame), p.frame.requested_time); }
+{ const w = world(); use(w); const before = STATS.pointerPuts; await route(w, '/snapshot/dustrgb/meta'); await W.dustPtr(w.env);
+  ok('I reading a missing pointer writes nothing (no empty pointer is created by a read)', w.store.size === 0 && STATS.pointerPuts === before); }
+
+// ---------- J. GPT review of round 2, finding 2: nothing a run can publish is ever deleted
+{ // an orphan older than two hours is REUSED and published while another run is finishing
+  const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); const fA = (await pointer(w)).frame;
+  w.latest = TB; w.putFail = 'mask.png'; await W.JOBS.dustrgb(w.env, at(18)); w.putFail = null; w.age(3 * 3600e3);   // B's picture is now a 3-hour-old orphan
+  const orphan = frameKeys(w).find(k => !k.includes(fA.id));
+  w.onPointerPut = async () => { const s = w.latest; w.latest = TC; await W.JOBS.dustrgb(w.env, at(18) + 9000); w.latest = s; };   // another run publishes C and finishes while this one is mid-publication
+  w.latest = TB; await W.JOBS.dustrgb(w.env, at(18) + 5000); const p = await pointer(w);
+  ok('J a reused old orphan and an overlapping run: every pair the pointer names is readable, and the reused file is still stored', w.store.has(orphan) && await readable(w, p.frame) && (!p.previous || await readable(w, p.previous)), [p.frame.requested_time, frameKeys(w)]);
+  // and the direct case GPT reproduced: the orphan becomes CURRENT after another run has already looked at the pointer
+  const x = world(); use(x); await W.JOBS.dustrgb(x.env, at(6)); x.latest = TB; x.putFail = 'mask.png'; await W.JOBS.dustrgb(x.env, at(18)); x.putFail = null; x.age(3 * 3600e3);
+  let inner = null; x.onFetch = async u => { if (/image\/png/.test(u) && !inner) { inner = 1; x.onFetch = null; await W.JOBS.dustrgb(x.env, at(18) + 5000); } };   // the inner run reuses the old orphan picture and publishes B
+  await W.JOBS.dustrgb(x.env, at(18) + 2000); const px = await pointer(x);
+  ok('J the old orphan became current during another run: it is still stored and served', px.frame.requested_time === TB && await readable(x, px.frame) && await readable(x, px.previous), [px.frame.id, frameKeys(x)]); }
+
+// ---------- K. GPT review of round 2, finding 3: nothing is read or inflated past its limit
+{ const MiB = 1024 * 1024, zeros16 = zlib.deflateSync(Buffer.alloc(16 * MiB)), expect = 160 * (160 * 4 + 1);
+  const r = await W.dustInflate([new Uint8Array(zeros16)], expect);
+  ok(`K dustInflate: ${zeros16.length} B that expand to 16 MiB are abandoned almost at once (well under 1 MiB read), not inflated in full`, r.data === null && r.read > expect && r.read < MiB, { compressed: zeros16.length, read: r.read, expect });
+  const exact = await W.dustInflate([new Uint8Array(zlib.deflateSync(Buffer.alloc(expect, 7)))], expect), short = await W.dustInflate([new Uint8Array(zlib.deflateSync(Buffer.alloc(expect - 1)))], expect), junk = await W.dustInflate([new Uint8Array(64)], expect);
+  ok('K dustInflate: exactly the expected size is returned; one byte short, or not zlib at all, is refused', exact.data && exact.data.length === expect && exact.data[5] === 7 && short.data === null && junk.data === null);
+  // a 160 x 160 PNG header in front of image data that inflates to 16 MiB (GPT's test file, rebuilt here)
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(160, 0); ihdr.writeUInt32BE(160, 4); ihdr[8] = 8; ihdr[9] = 6;
+  const bomb = new Uint8Array(Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', zeros16), chunk('IEND', Buffer.alloc(0))]));
+  ok(`K pngAlpha: a ${bomb.length} B PNG whose data expands to 16 MiB is refused`, await W.pngAlpha(bomb, 25600) === null, bomb.length);
+  ok('K pngAlpha: an image with more pixels than the caller allows is refused before any inflating', await W.pngAlpha(png({ w: 320, h: 320 }), 25600) === null && await W.pngAlpha(png({ w: 320, h: 320 }), 320 * 320) !== null);
+  { const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); w.latest = TB; w.mask = { body: bomb, type: 'image/png' }; await W.JOBS.dustrgb(w.env, at(18)); const p = await pointer(w);
+    ok('K through the job: the expanding mask fails "mask does not decode"; frame kept', p.last_attempt.reason === 'mask does not decode' && p.frame.requested_time === TA, p.last_attempt); }
+  // download limits enforced while reading
+  const endless = total => w => new ReadableStream({ pull(c) { if (w.pulled >= total) return c.close(); w.pulled += 65536; c.enqueue(new Uint8Array(65536)); } }, { highWaterMark: 0 });
+  { const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); w.latest = TB; w.pic = { body: endless(64 * MiB), type: 'image/jpeg' }; await W.JOBS.dustrgb(w.env, at(18)); const p = await pointer(w);
+    ok('K picture with no declared length that keeps coming (64 MiB): reading stops just past the 4 MiB limit; "picture size out of range"; no mask request', p.last_attempt.reason === 'picture size out of range' && w.pulled > 4 * MiB && w.pulled <= 4 * MiB + 4 * 65536 && imgReqs(w).length === 3 && p.frame.requested_time === TA, { reason: p.last_attempt.reason, pulled: w.pulled }); }
+  { const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); w.latest = TB; w.mask = { body: endless(64 * MiB), type: 'image/png' }; await W.JOBS.dustrgb(w.env, at(18)); const p = await pointer(w);
+    ok('K mask that keeps coming: reading stops just past the 512 KiB limit; "mask size out of range"', p.last_attempt.reason === 'mask size out of range' && w.pulled > 512 * 1024 && w.pulled <= 512 * 1024 + 4 * 65536, { reason: p.last_attempt.reason, pulled: w.pulled }); }
+  { const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); w.latest = TB; w.pic = { body: endless(64 * MiB), type: 'image/jpeg', headers: { 'content-length': String(64 * MiB) } }; await W.JOBS.dustrgb(w.env, at(18)); const p = await pointer(w);
+    ok('K picture DECLARING 64 MiB: refused from the header, body not read', p.last_attempt.reason === 'picture size out of range' && w.pulled <= 2 * 65536, { reason: p.last_attempt.reason, pulled: w.pulled }); }
+  { const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); w.latest = TB; let n = 0; w.pic = { body: () => new ReadableStream({ pull(c) { if (n++ < 3) c.enqueue(new Uint8Array(1000)); else c.error(new TypeError('connection lost (test)')); } }), type: 'image/jpeg' }; await W.JOBS.dustrgb(w.env, at(18)); const p = await pointer(w);
+    ok('K picture whose body breaks off part-way: "picture request failed", frame kept, detail not in the pointer', p.last_attempt.reason === 'picture request failed' && p.frame.requested_time === TA && !JSON.stringify(p).includes('(test)'), p.last_attempt); }
+  { const r = await W.dustBody(new Response(new Uint8Array(1234)), 5000); ok('K dustBody: a body within the limit comes back whole', r.buf && r.buf.byteLength === 1234); } }
 
 // ---------- E. failures: nothing published, pointer and files unchanged, fixed public reason
 const failing = async (name, mut, reason, extra) => {
@@ -316,7 +381,7 @@ await failing('served-time header names another frame (mask)', w => { w.warn = '
   const T2 = '2026-11-12T18:00:00Z', orphanId = pairId(T2, jpeg(Date.parse(T2) / 6e5), mask(Date.parse(T2) / 6e5));
   const w = await failing('partial write (mask put fails)', w => { w.putFail = 'mask.png'; }, 'mask write failed', async w => ok('E partial write: the orphan picture exists but is not served (its pair is not in the pointer)', w.store.has(`dustrgb/frames/${orphanId}/picture.jpg`) && (await route(w, `/snapshot/dustrgb/${orphanId}/picture.jpg`)).status === 404));
   w.putFail = null; w.latest = TB; w.age(3 * 3600e3); await W.JOBS.dustrgb(w.env, at(6) + 864e5); const p = await pointer(w);
-  ok('E after a partial write, the next good run publishes, clears last_attempt and removes the (now old) orphan', p.frame.requested_time === TB && p.last_attempt === null && !w.store.has(`dustrgb/frames/${orphanId}/picture.jpg`), [...w.store.keys()]); }
+  ok('E after a partial write, the next good run publishes and clears last_attempt; the orphan is left in place, unserved', p.frame.requested_time === TB && p.last_attempt === null && w.store.has(`dustrgb/frames/${orphanId}/picture.jpg`) && (await route(w, `/snapshot/dustrgb/${orphanId}/picture.jpg`)).status === 404, [...w.store.keys()]); }
 await failing('picture request times out', w => { w.throwOn = /image\/jpeg/; }, 'picture request failed', async (w, b, kb) => ok('E picture times out: nothing written; no mask request follows', [...w.store.keys()].sort().join() === kb && imgReqs(w).length === 3, imgReqs(w)));
 await failing('mask request times out', w => { w.throwOn = /image\/png/; }, 'mask request failed');
 { const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); ok('E both image requests carry a time limit (an abort signal); the limit is 90 s', imgReqs(w).length === 2 && w.signals.slice(-2).every(Boolean) && W.DUSTRGB.TIMEOUT_MS === 90000, w.signals); }
@@ -344,5 +409,7 @@ await failing('read-back differs (mask)', w => { w.corruptRead = 'mask.png'; }, 
   const w = world(); use(w); await W.JOBS.dustrgb(w.env, at(6)); w.capStatus = 500; await W.JOBS.dustrgb(w.env, at(18)); w.capStatus = 200; await W.JOBS.dustrgb(w.env, at(6) + 864e5);
   ok('an unchanged-frame run after a failure clears last_attempt', (await pointer(w)).last_attempt === null); }
 
+ok('GLOBAL every pointer write in this whole suite was conditional (create-only or compare-and-swap); none unconditional', STATS.pointerPuts > 40 && STATS.unconditionalPointerPuts === 0, STATS);
+ok('GLOBAL the job never deleted anything from storage', STATS.deletes === 0, STATS);
 globalThis.fetch = realFetch;
 console.log(`dustrgb-hub: ${pass} passed, ${fail} failed${BREAK ? ' (BREAK=' + BREAK + ')' : ''}`); process.exit(fail ? 1 : 0);

@@ -1,3 +1,5 @@
+> **Superseded in part by `reviews/2026-11-13-dustrgb-rc-r3.md`** (two more publication defects, bounded reads; cleanup removed; new fingerprints).
+
 # dustrgb-rc round 2 — fixes after GPT's review of `7e6f236`
 
 **Branch only. Nothing merged, uploaded or deployed. No REGISTER entry filed. The 0.6.11 deploy is on hold** (Chad, 13 Nov). Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`. Lockdown parked.

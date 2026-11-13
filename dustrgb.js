@@ -86,7 +86,7 @@
   async function getFile(f) {
     let r; try { r = await hubFetch(ME.HUB + f.path); } catch (e) { throw fileErr('a frame file could not be loaded', false); }
     if (!r.ok || !(r.headers.get('content-type') || '').startsWith('image/')) throw fileErr('a frame file could not be loaded', false);
-    const b = await r.arrayBuffer();
+    let b; try { b = await r.arrayBuffer(); } catch (e) { throw fileErr('a frame file could not be loaded', false); }   // the response began, then the body broke off: retryable, and the previous pair may be shown
     if (b.byteLength !== f.bytes || await hex(b) !== f.sha256) throw fileErr('a frame file did not match its fingerprint', true);
     try { return await createImageBitmap(new Blob([b], { type: f.type })); } catch (e) { throw fileErr('a frame file could not be decoded', true); }
   }

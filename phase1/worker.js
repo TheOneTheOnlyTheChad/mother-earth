@@ -2143,7 +2143,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustClean, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -2800,7 +2800,6 @@ const DUSTRGB = {
   LAYER: 'rgb_dust', BOX: { south: -80, west: -80, north: 80, east: 80 },
   PICTURE: { w: 2048, h: 2048, maxBytes: 4 * 1024 * 1024 }, MASK: { w: 160, h: 160, maxBytes: 512 * 1024 },
   RUN_HOURS_UTC: [6, 18], TIMEOUT_MS: 90000, LIST_TIMEOUT_MS: 30000, POINTER: 'dustrgb/current.json', PREFIX: 'dustrgb/frames/',
-  CLEAN_AFTER_MS: 2 * 3600e3,   // cleanup never deletes a file younger than this, so a run that overlaps another cannot remove files still being published
   CACHE_FILE: 'public, max-age=86400, immutable',
   SOURCE: { product: 'Dust RGB - MTG - 0 degree', collection: 'EO:EUM:DAT:0869', catalogue: 'https://user.eumetsat.int/catalogue/EO:EUM:DAT:0869', licence: 'CC BY 4.0',
     licence_url: 'https://creativecommons.org/licenses/by/4.0/', credit: 'Contains modified EUMETSAT Meteosat data', service: 'EUMETView WMS, layer mtg_fd:rgb_dust' },
@@ -2854,12 +2853,37 @@ function jpegCheck(u8) {
   }
   return out;
 }
+/** Inflates zlib data to EXACTLY `expect` bytes. Reads the output in pieces and stops (cancelling the stream) the moment more than
+ * `expect` bytes have appeared, so a small file that expands enormously costs at most one extra piece. { data|null, read }. */
+async function dustInflate(parts, expect) {
+  const out = new Uint8Array(expect); let read = 0, reader = null;
+  try { reader = new Blob(parts).stream().pipeThrough(new DecompressionStream('deflate')).getReader();
+    for (;;) { const { done, value } = await reader.read(); if (done) break;
+      if (read + value.length > expect) { read += value.length; try { await reader.cancel(); } catch (_) {} return { data: null, read }; }
+      out.set(value, read); read += value.length; }
+  } catch (_) { return { data: null, read }; }
+  return { data: read === expect ? out : null, read };
+}
+/** Reads a response body but never more than `max` bytes: a declared length over the limit is refused before reading, and an
+ * undeclared one is cut off (the stream cancelled) as soon as it passes the limit. { buf } or { over:true, read } or { error }. */
+async function dustBody(r, max) {
+  const declared = Number(r.headers.get('content-length')); if (declared > max) { try { await r.body.cancel(); } catch (_) {} return { over: true, read: 0 }; }
+  const chunks = []; let read = 0;
+  try { const reader = r.body.getReader();
+    for (;;) { const { done, value } = await reader.read(); if (done) break; read += value.length;
+      if (read > max) { try { await reader.cancel(); } catch (_) {} return { over: true, read }; }
+      chunks.push(value); }
+  } catch (e) { return { error: String(e).slice(0, 160), read }; }
+  const u8 = new Uint8Array(read); let o = 0; for (const c of chunks) { u8.set(c, o); o += c.length; }
+  return { buf: u8.buffer };
+}
 const DUST_CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
 /** Fully decodes a PNG's alpha: every chunk checksum verified, the image data inflated (zlib's own checksum included), every row
  * unfiltered. Returns { w, h, colour, opaque, transparent, partial, centre, corners:[4 alphas] } or null if anything is wrong or the
  * form is one this reader does not handle (interlaced; anything but 8/16-bit RGBA or grey+alpha, or an 8-bit palette with tRNS). */
-async function pngAlpha(u8) {
+async function pngAlpha(u8, maxPixels = 1 << 20) {
   const info = pngInfo(u8); if (!info || !info.complete || !info.alpha) return null;
+  if (info.w * info.h > maxPixels) return null;   // never decode an image larger than the caller expects
   const u32 = i => ((u8[i] << 24) | (u8[i + 1] << 16) | (u8[i + 2] << 8) | u8[i + 3]) >>> 0;
   const { w, h, colour } = info, depth = u8[24];
   if (u8[26] !== 0 || u8[27] !== 0 || u8[28] !== 0 || !w || !h) return null;
@@ -2872,8 +2896,8 @@ async function pngAlpha(u8) {
     if (type === 'IDAT') parts.push(u8.subarray(i + 8, i + 8 + len)); else if (type === 'tRNS') trns = u8.subarray(i + 8, i + 8 + len);
     i = end; }
   if (!parts.length) return null;
-  let raw; try { raw = new Uint8Array(await new Response(new Blob(parts).stream().pipeThrough(new DecompressionStream('deflate'))).arrayBuffer()); } catch (_) { return null; }
-  const bpp = ch * depth / 8, stride = w * bpp; if (raw.length !== h * (stride + 1)) return null;
+  const bpp = ch * depth / 8, stride = w * bpp;
+  const raw = (await dustInflate(parts, h * (stride + 1))).data; if (!raw) return null;   // inflation stops as soon as it passes the size the header promises
   for (let y = 0; y < h; y++) { const r = y * (stride + 1), f = raw[r], cur = r + 1, up = cur - (stride + 1);
     if (f > 4) return null;
     for (let x = 0; x < stride; x++) { const a = x >= bpp ? raw[cur + x - bpp] : 0, b = y ? raw[up + x] : 0, c = (y && x >= bpp) ? raw[up + x - bpp] : 0;
@@ -2892,13 +2916,15 @@ async function dustFetch(what, url, spec) {
   if (r.status !== 200) return { ok: false, reason: what + ' http error', http: r.status };
   const type = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
   if (type !== spec.type) return { ok: false, reason: what + ' not an image', http: 200, detail: type };   // EUMETView answers a bad TIME with HTTP 200 + XML
-  let buf; try { buf = await r.arrayBuffer(); } catch (e) { return { ok: false, reason: what + ' request failed', http: 200, detail: String(e).slice(0, 160) }; }   // cut off or timed out mid-body
-  const u8 = new Uint8Array(buf);
-  if (!buf.byteLength || buf.byteLength > spec.maxBytes) return { ok: false, reason: what + ' size out of range', http: 200, detail: String(buf.byteLength) };
+  const got = await dustBody(r, spec.maxBytes);   // the size limit is enforced WHILE reading, not after
+  if (got.error) return { ok: false, reason: what + ' request failed', http: 200, detail: got.error };   // cut off or timed out mid-body
+  if (got.over) return { ok: false, reason: what + ' size out of range', http: 200, detail: 'over ' + spec.maxBytes + ' B (stopped at ' + got.read + ')' };
+  const buf = got.buf, u8 = new Uint8Array(buf);
+  if (!buf.byteLength) return { ok: false, reason: what + ' size out of range', http: 200, detail: '0' };
   let alpha = null;
   if (spec.type === 'image/jpeg') { const d = jpegCheck(u8); if (!d || d.w !== spec.w || d.h !== spec.h || !d.dqt || !d.sos || !d.eoi) return { ok: false, reason: what + ' not a valid image', http: 200, detail: JSON.stringify(d) }; }
   else { const i = pngInfo(u8); if (!i || i.w !== spec.w || i.h !== spec.h || !i.alpha || !i.complete) return { ok: false, reason: what + ' not a valid image', http: 200, detail: JSON.stringify(i) };
-    const d = await pngAlpha(u8);   // the mask is decoded in full before it can be published
+    const d = await pngAlpha(u8, spec.w * spec.h);   // the mask is decoded in full before it can be published
     if (!d) return { ok: false, reason: what + ' does not decode', http: 200 };
     if (!d.opaque || d.centre !== 255 || d.corners.some(a => a !== 0)) return { ok: false, reason: what + ' is not a footprint', http: 200, detail: JSON.stringify(d) };   // Earth's disc in this box: opaque centre, clear corners
     alpha = { opaque: d.opaque, transparent: d.transparent, partial: d.partial }; }
@@ -2906,20 +2932,21 @@ async function dustFetch(what, url, spec) {
   return { ok: true, buf, bytes: buf.byteLength, sha256: await sha256Bytes(buf), warn_present: warn !== null, served: dustServed(warn), alpha };
 }
 const dustEmpty = () => ({ schema: 1, layer: 'dustrgb', frame: null, previous: null, last_attempt: null, cadence: { runs_utc: DUSTRGB.RUN_HOURS_UTC }, source: DUSTRGB.SOURCE, collector_version: COLLECTOR_VERSION });
-/** The pointer and its etag. If there is no pointer yet an empty one is created first, so every later write can be conditional on an etag. */
+/** The pointer and its etag; when there is no pointer yet, an empty body and etag null. Reads only: nothing is ever written here. */
 async function dustPtr(env) {
-  let o = await env.R2.get(DUSTRGB.POINTER);
-  if (!o) { await env.R2.put(DUSTRGB.POINTER, JSON.stringify(dustEmpty()), { httpMetadata: { contentType: 'application/json' } }); o = await env.R2.get(DUSTRGB.POINTER); }
-  return { cur: await o.json(), etag: o.etag };
+  const o = await env.R2.get(DUSTRGB.POINTER);
+  return o ? { cur: await o.json(), etag: o.etag } : { cur: dustEmpty(), etag: null };
 }
-/** Read–change–write of the pointer that cannot overwrite another run's update: the write is conditional on the etag that was read
- * (R2 put onlyIf.etagMatches returns null when the pointer changed in between), and is then retried from a fresh read.
+/** Read–change–write of the pointer that cannot overwrite another run's update. EVERY pointer write is conditional:
+ * on the etag that was read (onlyIf.etagMatches), or, when no pointer existed at the read, on there still being none
+ * (onlyIf.etagDoesNotMatch '*' — create-only, the form already used for FIRMS and checked on the production bucket by fvProbeR2).
+ * A refused write returns null; the run then reads again and decides again.
  * change(cur) returns the new body, or null to leave the pointer alone. Returns { cur, body, wrote }. */
 async function dustUpdate(env, change) {
   for (let i = 0; i < 5; i++) {
     const { cur, etag } = await dustPtr(env), body = change(cur);
     if (body === null) return { cur, body: null, wrote: false };
-    const r = await env.R2.put(DUSTRGB.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagMatches: etag } });
+    const r = await env.R2.put(DUSTRGB.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });
     if (r !== null) return { cur, body, wrote: true };
   }
   throw new Error('dustrgb pointer kept changing; gave up after 5 tries');
@@ -2975,20 +3002,10 @@ async function collectDustRgb(env, ms) {
   // move the pointer only if no other run has published this time or a later one meanwhile
   const up = await dustUpdate(env, c => (c.frame && c.frame.requested_time >= T) ? null : { ...dustEmpty(), frame, previous: c.frame ? dustBrief(c.frame) : null });
   if (!up.wrote) { await logRun(env, 'dustrgb', ms, 'ok', 200, 0, 0, `superseded: another run published ${up.cur.frame.requested_time} first; ${T} not published`); return 'dustrgb:superseded ' + T; }
-  await dustClean(env);
+  // Nothing is deleted. A run cannot yet prove that a file it would delete is not being published by another run (an older orphan
+  // can be reused), so every stored pair stays; about 0.75 MB per publication. Cleanup is a separate, later change.
   await logRun(env, 'dustrgb', ms, 'ok', 200, 1, pic.bytes + mask.bytes, `frame ${T} as ${id}; served-time header ${pic.warn_present ? 'present' : 'absent'} (picture), ${mask.warn_present ? 'present' : 'absent'} (mask)`);
   return 'dustrgb:published ' + T;
-}
-/** Lean storage: keep the pairs the pointer names NOW (re-read, so an overlapping run's publication is respected); delete any other
- * file under the prefix only once it is older than CLEAN_AFTER_MS (orphans of failed runs go on a later run, never mid-flight). */
-async function dustClean(env) {
-  try { const cur = await getJson(env, DUSTRGB.POINTER); if (!cur) return;
-    const keep = [cur.frame, cur.previous].filter(Boolean).map(f => DUSTRGB.PREFIX + f.id + '/'), now = Date.now();
-    let cursor;
-    do { const l = await env.R2.list({ prefix: DUSTRGB.PREFIX, ...(cursor ? { cursor } : {}) });
-      for (const o of l.objects) if (!keep.some(d => o.key.startsWith(d)) && o.uploaded && now - new Date(o.uploaded).getTime() > DUSTRGB.CLEAN_AFTER_MS) await env.R2.delete(o.key);
-      cursor = l.truncated ? l.cursor : null; } while (cursor);
-  } catch (e) { console.log('dustrgb cleanup failed', String(e)); }
 }
 /** GET /snapshot/dustrgb/meta and /snapshot/dustrgb/<frame id>/<picture.jpg|mask.png>. Files are served only for the current or previous frame, and only if the stored bytes match the pointer. */
 async function dustRoute(env, p) {

@@ -3,7 +3,7 @@
  * control (same shapes the real hub produces — see dustrgb-hub.test.mjs). EUMETSAT is never contacted by the page.
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/dustrgb-ui.test.cjs
  * BREAK=<name> weakens the served dustrgb.js; each must fail:
- *   eager refresh-when-off no-verify swap-early late-paint keep-forever refetch-same clear-on-fail hidden-refresh frame-word no-mask no-outline fetch-when-old no-wait no-fallback fallback-silent fallback-old refetch-bad old-wording */
+ *   eager refresh-when-off no-verify swap-early late-paint keep-forever refetch-same clear-on-fail hidden-refresh frame-word no-mask no-outline fetch-when-old no-wait no-fallback fallback-silent fallback-old refetch-bad old-wording body-uncaught */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto'); const http = require('http'); const { PNG } = require('pngjs');
 const ROOT = path.join(__dirname, '..'); const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
@@ -31,6 +31,7 @@ const BREAKS = {
   'fallback-old': [["      if (prev && grade(prev) !== 'unknown') {", '      if (prev) {']],
   'refetch-bad': [['      if (err.bad) st.badId = f.id;\n', '']],
   'old-wording': [['m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ago`;', 'm < 60 ? `${m} min old` : `${Math.floor(m / 60)} h old`;']],
+  'body-uncaught': [["    let b; try { b = await r.arrayBuffer(); } catch (e) { throw fileErr('a frame file could not be loaded', false); }", '    let b = await r.arrayBuffer();']],
   'fetch-when-old': [["      if (grade(f) === 'unknown') {", '      if (false) {']],
 };
 if (BREAK && !BREAKS[BREAK]) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
@@ -70,6 +71,9 @@ async function setup(browser, hub, opts = {}) {
       return route.fulfill({ status: 200, contentType: m[2] === 'picture.jpg' ? 'image/jpeg' : 'image/png', headers: { 'access-control-allow-origin': '*' }, body }); }
     if (p === '/') return j({ name: 'x', history: { collecting: false, retained: { exists: false } } });
     j({ layer: p.split('/').pop(), retrieved_at: NOW, stale_after_s: 10800, source_status: 'ok', cells: {}, record_format: 'rows', record_fields: [], records: [], quantity: 'q', sweep: { answered: 0, cells_total: 559, oldest_queried_at: NOW }, index: null }); });
+  // opts.bodyFail: the page's fetch of any URL containing this text gets a 200 image response whose body breaks off after a few bytes (until window.__bodyFailOff is set)
+  if (opts.bodyFail) await ctx.addInitScript(part => { const real = window.fetch; window.__bodyFails = 0; window.fetch = function (u, init) { if (String(u).includes(part) && !window.__bodyFailOff) { window.__bodyFails++;
+    return Promise.resolve(new Response(new ReadableStream({ start(c) { c.enqueue(new Uint8Array(32)); c.error(new TypeError('network error (test)')); } }), { status: 200, headers: { 'content-type': 'image/jpeg' } })); } return real.call(this, u, init); }; }, opts.bodyFail);
   if (opts.noWebGL) await ctx.addInitScript(() => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, ...a) { return /webgl/i.test(t) ? null : g.call(this, t, ...a); }; });
   const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(String(e).slice(0, 200)));
   await page.goto(BASE + '/index.html', { waitUntil: 'domcontentloaded' });
@@ -230,6 +234,15 @@ let BASE;
     ok('N a previous pair older than 24 h is NOT used as a fallback: nothing drawn, not even fetched', s.meshes === 0 && s.stateWord === 'unknown' && /could not be decoded/.test(s.off || '') && !hub.reqs.some(p => p.includes(hub.previous.id)), [s, hub.reqs]); await ctx.close(); }
   { const hub = newHub(); hub.previous = frame(TA, 'bad'); hub.frame = frame(TB, 'bad'); const { ctx, page, errs } = await setup(browser, hub); await setNow(page, Date.parse(TB) + 1 * H); await on(page); const s = await st(page);
     ok('N both pairs unusable: nothing drawn, state unknown, reason shown, no error', s.meshes === 0 && s.stateWord === 'unknown' && /Nothing is drawn\./.test(s.off || '') && errs.length === 0, [s, errs]); await ctx.close(); }
+  { // GPT review of round 2: the picture response STARTS (200, image/jpeg) and then the body read fails
+    const hub = newHub(); hub.previous = frame(TA, 'a'); hub.frame = frame(TB, 'b'); const { ctx, page, errs } = await setup(browser, hub, { bodyFail: hub.frame.id + '/picture.jpg' }); await setNow(page, Date.parse(TB) + 1 * H); await on(page); let s = await st(page);
+    ok('N first load, newest picture\'s body breaks off after the response began: the previous pair is shown with the note (it used to show nothing)', await page.evaluate(() => window.__bodyFails) === 1 && s.meshes === 1 && s.frameId === hub.previous.id && s.fallback === true && /previous one/.test(s.extra) && /^Frame requested: 12 Nov, 16:50 UTC/.test(s.label) && errs.length === 0, [s, errs]);
+    await refresh(page); s = await st(page);
+    ok('N that failure is retryable: the next refresh tries the newest pair again (and, still failing, keeps the previous pair)', await page.evaluate(() => window.__bodyFails) === 2 && s.frameId === hub.previous.id && s.meshes === 1, [await page.evaluate(() => window.__bodyFails), s.frameId]);
+    await page.evaluate(() => { window.__bodyFailOff = true; }); await refresh(page); s = await st(page);
+    ok('N once the body arrives whole, the newest pair replaces the fallback and the notes go', s.frameId === hub.frame.id && s.fallback === false && s.refreshFailed === false && s.extra === 'Meteosat (MTG) at 0° · Updated twice daily.', s); await ctx.close(); }
+  { const hub = newHub(); const { ctx, page, errs } = await setup(browser, hub, { bodyFail: '/picture.jpg' }); await setNow(page, T0 + 2 * H); await on(page); const s = await st(page);
+    ok('N body breaks off and there is no previous pair: nothing drawn, plain reason, no page error', s.meshes === 0 && s.stateWord === 'unknown' && /could not be loaded/.test(s.off || '') && /Nothing is drawn\./.test(s.off || '') && errs.length === 0, [s, errs]); await ctx.close(); }
   { // the hub suite's success fixtures are real images: a browser decodes both
     const ctx = await browser.newContext(); const page = await ctx.newPage(); await page.goto(BASE + '/sources.html', { waitUntil: 'domcontentloaded' });
     const r = await page.evaluate(async () => { const out = {}; for (const [k, u] of [['pic', '/phase1/dustrgb-fixtures/hub-picture.jpg'], ['mask', '/phase1/dustrgb-fixtures/hub-mask.png']]) { const bm = await createImageBitmap(await (await fetch(u)).blob()); const c = new OffscreenCanvas(bm.width, bm.height), g = c.getContext('2d'); g.drawImage(bm, 0, 0); out[k] = { w: bm.width, h: bm.height, centre: [...g.getImageData(bm.width >> 1, bm.height >> 1, 1, 1).data], corner: [...g.getImageData(0, 0, 1, 1).data] }; } return out; });

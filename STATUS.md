@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 03:51 UTC (clock reading at write) — **dustrgb-rc round 3** (GPT's round-2 findings fixed; branch only; deploy on hold)
+
+Chad, 13 Nov: "Keep the 0.6.11 deploy on hold" with GPT's review of `2980ded`. **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.
+
+- Packet: `reviews/2026-11-13-dustrgb-rc-r3.md`.
+- First-run pointer erase (reproduced): `dustPtr` no longer writes; every pointer write is conditional, create-only when none existed (the R2 forms already verified in production for FIRMS).
+- Cleanup deleting a just-published file (reproduced): deletion removed from the candidate; about 1.5 MB a day accumulates until a cleanup is designed.
+- Mask inflation and both downloads are now bounded while reading.
+- Page: a body that breaks off after the response began now falls back to the previous pair and is retried.
+- Tests: `dustrgb-hub` 174/174, 26 breaks fail; `dustrgb-ui` 67/67, 20 breaks fail. Regression 54 passed, 1 failed: `terminator-ui`, which fails about 1 in 3 on **main** too (7 of 22 on main, 8 of 20 on the branch); cause not found; not this candidate.
+- `worker.js` 316,927 B `119cc641…801f`; `dustrgb.js` 15,063 B `6dbed9e5…9ff9`.
+- Not shown: real hub run; **Worker CPU (must be measured before the schedule is enabled)**; real frame on the real globe.
+
 ## 13 Nov 02:48 UTC (clock reading at write) — **dustrgb-rc round 2** (GPT's three findings fixed; branch only; deploy on hold)
 
 Chad, 13 Nov: "Hold the 0.6.11 deploy" with GPT's review of `7e6f236`. **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.
