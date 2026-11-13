@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 04:23 UTC (clock reading at write) — **Hub 0.6.11 LIVE (smoke test); Dust RGB schedule NOT enabled; page not merged**
+
+Chad: "Approve: deploy hub 0.6.11 from c667c07 (content only, DUSTRGB_ENABLED unset) and run /admin/run/dustrgb once".
+
+- **Hub 0.6.11 live since 13 Nov 03:59:00 UTC**, `119cc641…801f` (316,927 B), content only, read back identical; 19 bindings; no `DUSTRGB_ENABLED`. Rollback = 0.6.10 `784939f8…a0da`.
+- One manual run 04:19:47: published `20261113T0350Z-d0cb4223ccfa72f1`; both file URLs match the pointer's sizes and hashes and decode. D1 run 9289 `ok`.
+- **The served-time header DID reach the production Worker** (GPT's Playground probes had it absent). The page therefore labels this frame "Frame:", not "Frame requested". Decision open.
+- Plan confirmed Workers Paid. CPU upper bound for the run: 41.3 ms (per-minute maximum).
+- Real frame seen on the globe in a clean pane tab (candidate files against the live hub). Chad's eyes still to judge alignment, opacity, legibility.
+- Report: `reviews/2026-11-13-dustrgb-smoke.md`.
+- Pending, each on its own line: `DUSTRGB_ENABLED=1`; REGISTER entry; page merge.
+
 ## 13 Nov 03:51 UTC (clock reading at write) — **dustrgb-rc round 3** (GPT's round-2 findings fixed; branch only; deploy on hold)
 
 Chad, 13 Nov: "Keep the 0.6.11 deploy on hold" with GPT's review of `2980ded`. **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.
