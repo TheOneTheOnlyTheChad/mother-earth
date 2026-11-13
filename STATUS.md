@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 06:25 UTC (clock reading at write) — **Dust RGB imagery RELEASED** (page merge `bdf894f`; hub 0.6.11; main = live)
+
+Chad: "Approve: push dustrgb-rc to main (page change: Dust RGB imagery card, Sources section and credit)".
+
+- No-ff merge `bdf894f`, pushed 06:23:28 UTC. **Served files exact at 06:24:14 UTC**, all eleven: `index.html` `da296ca2…68d9`, `dustrgb.js` `6dbed9e5…9ff9`, `sources.html` `8ab333d9…9fd2`, `style.css` `4b1e2e18…4aa7`, `timeline.html` `0ab9f666…7df6`, and `app.js`, `arts.js`, `oceanheat.js`, `sky.js`, `skyscene.js`, `timeline.js` unchanged. Assets: `dustrgb.js` and `style.css` `?v=202612021000`.
+- **Live read 06:24:33 UTC** (clean pane tab on the public page): layer off on load with no Dust request; on → pointer, one picture, one mask; "Frame: 13 Nov, 05:40 UTC (44 min ago)", state current, one mesh; card and footer credit present.
+- Hub 0.6.11 `119cc641…801f` (since 03:59:00 UTC), `DUSTRGB_ENABLED=1` (since 04:35:55 UTC). main now carries the hub's source again.
+- **Rollback, each on its own Approve line, independent:** page = revert `bdf894f`; schedule = remove `DUSTRGB_ENABLED`; hub = 0.6.10 `784939f8…a0da`.
+- Chad approved the merge without a separate word on the 0.82 opacity / coastline question; it stays open for his eye (a one-line change to `OPACITY` in `dustrgb.js` if he wants it lighter).
+- Open: branch `dustrgb-rc` to be deleted by Chad; `dust-rc` (parked) keep-or-delete is his call; items listed in HANDOVER.
+
 ## 13 Nov 06:17 UTC (clock reading at write) — **First scheduled Dust RGB run: ok**
 
 - 06:07 UTC run published `20261113T0540Z-f926c6922bfed1a3` (D1 id 9334 `ok`); the manual frame is kept as `previous`; all four files (current and previous) answer 200, match their hashes and decode. Served-time header present on both files again.
