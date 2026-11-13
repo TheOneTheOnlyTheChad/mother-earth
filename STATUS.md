@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 10:32 UTC (clock reading at write) — **Skycraft schedule ENABLED** (`SKYCRAFT_ENABLED=1`); page still not merged; REGISTER entries not yet filed
+
+GPT (relayed by Chad): the smoke review passes; ready for the REGISTER lines and Chad's separate approval to enable the schedule. Chad: "Approve: set SKYCRAFT_ENABLED=1" (he clicked "Add 1 variable and deploy" himself).
+
+- Cloudflare deployment 10:31:26 UTC. Read back 10:32:16 UTC: `SKYCRAFT_ENABLED` = "1" (plain text), 21 bindings, script unchanged `c1addd19…0106`, hub 0.6.12.
+- First scheduled run: 05:07 UTC 14 Nov (07:07 SAST). Check then: D1 `ok`; a new pointer with the manual snapshot kept as `previous`; a second LRO study capture; CPU of that hourly invocation.
+- GPT's rulings: keep DOI `10.48322/ecnj-rx61` for the SPDF hourly product; cite PDS DOI `10.17189/1520116` and the dataset-level licence metadata for LRO; smoke record's wall/CPU wording corrected (12,445 ms is the admin route's measured elapsed time; 20.4 ms CPU is a per-minute analytics maximum).
+- **Order note:** the packet listed the REGISTER lines before the schedule; Chad approved the schedule first. The REGISTER entries are drafted for his line next and must be filed before the page merge.
+- Rollback (own lines): remove `SKYCRAFT_ENABLED`; hub → 0.6.11 `119cc641…801f`.
+- Record: `reviews/2026-11-13-skycraft-smoke.md` §6–§7 (branch `skycraft-rc` @ `5680200`).
+
 ## 13 Nov 10:13 UTC (clock reading at write) — **skycraft: first full manual run ok** (Parker snapshot published on the hub; LRO study capture stored; schedule still off; page not merged)
 
 Chad: "keep it as is that is perfect" (the User-Agent stays the repository address, no email) and "Approve: run /admin/run/skycraft once".
