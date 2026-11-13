@@ -365,9 +365,10 @@ details.cd>.cav{margin-top:2px}
 .tabs a+a{border-left:1px solid var(--line-strong)}
 .tabs a:hover,.tabs a:focus-visible{background:rgba(140,170,200,.12)}
 .tabs a[aria-current="page"]{background:rgba(255,179,71,.14);color:var(--accent)}
-@media (min-width:721px) and (max-width:1200px){.top{gap:8px}.top h1{font-size:20px}.top .promise{font-size:10px}.tabs a{padding:0 6px;letter-spacing:.02em;font-size:13px}}   /* four tabs: leave the promise its two full lines */
+@media (min-width:721px) and (max-width:1279px){.top{gap:8px}.top h1{font-size:20px}.tabs a{padding:0 6px;letter-spacing:.02em;font-size:13px}}   /* four tabs on a one-row header */
+@media (min-width:721px) and (max-width:1139px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside four tabs: hide it rather than shrink or cut it */
 @media (max-width:420px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* four tabs on a narrow phone */
-@media (min-width:721px) and (max-width:900px){.top{gap:8px;padding:0 10px}.top h1{font-size:20px}.tabs a{padding:0 6px;font-size:13px;letter-spacing:.02em}.top .clock{font-size:17px}.top .clock span{display:none}.menu>button{padding:0 10px}}   /* four tabs on a narrow one-row header */
+@media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}   /* narrow one-row header: the clock keeps its UTC label */
 /* phone: two fixed rows — title · clock · Menu, then the two tabs. A grid, not a wrapping flex row: with
    fallback fonts at 390 px the wrapping row split into three lines and pushed the title above the header.
    Rows 44 + 44 px (touch targets kept), 2 px gap, 2 px top/bottom padding = 94 px (was 56 px without tabs). */
