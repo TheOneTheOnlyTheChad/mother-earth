@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 06:30 UTC (clock reading at write) — **Dust thread close-out** (START-HERE §9)
+
+- **Chad on the released layer (13 Nov):** "the view looks cool for now i am happy with it we can refine later if need be" — 0.82 opacity accepted for now.
+- **Chad on `dust-rc`:** delete it ("i dont want static images"). The historical "Follow the Dust" gallery (`4e0ffb5`, unmerged) goes with the branch; the Orange River source research stays on the Mac (`research/follow-the-dust/2026-11-12-claude/`) and its three docs stay in `docs/`.
+- **Overnight EUMETSAT log stopped 06:29:41 UTC** on Chad's word; tab closed. Summary: 117 rows over 13.5 h (12 Nov 16:54 → 13 Nov 06:24 UTC); largest gap between rows 7 min; no failed list request (117 of 117 HTTP 200), no failed map request (82 of 82); 82 distinct latest frames, none skipped in the advertised sequence (16:30 → 06:00 UTC); advertised frame 18–30 min old when read; the served-time header present on 81 of 82 map rows in the browser. The raw log (44,695 characters) remains in the pane profile's storage for `view.eumetsat.int` under `me_dust_log_v1`; it was not copied out.
+- **Close-out checklist:**
+  1. Mac `_review/`: empty (all Dust review copies moved to `_to_delete/` in two batches, 04:4x and 06:2x UTC; Chad empties it).
+  2. Branches: `dustrgb-rc` (merged) and `dust-rc` (Chad's decision) are Chad's to delete; the GitHub branches page is open in the pane. `aircraft-rc` stays parked. Not yet confirmed deleted at the time of writing.
+  3. Mac sync at `e574f99`: 22 files, every preserved copy matched an earlier commit; this entry's files synced after this commit (see the handover note).
+  4. Clean checkout; everything pushed.
+  5. Research packets untouched.
+  6. HANDOVER block current (13 Nov, Dust RGB released).
+- **Next concrete action: Chad's new feature** (new thread, branching from main).
+
 ## 13 Nov 06:25 UTC (clock reading at write) — **Dust RGB imagery RELEASED** (page merge `bdf894f`; hub 0.6.11; main = live)
 
 Chad: "Approve: push dustrgb-rc to main (page change: Dust RGB imagery card, Sources section and credit)".
