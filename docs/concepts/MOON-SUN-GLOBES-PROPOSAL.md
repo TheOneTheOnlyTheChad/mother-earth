@@ -1,6 +1,6 @@
 # Moon and Sun as real, spinnable globes — source check and proposal
 
-Rev 2.1 · 2026-11-13 · written by Claude · rev 1 reviewed by GPT (changes listed in section 8) · docs only, nothing built
+Rev 2.2 · 2026-11-13 · written by Claude · rev 1 reviewed by GPT (changes listed in section 8) · docs only, nothing built
 
 ## 1. What Chad asked for
 
@@ -107,6 +107,11 @@ All figures below were read from the pages or from response headers in the brows
   - At three hours or more the image is not shown: "No recent picture" and the plain sphere.
   - When a fetch returns the same bytes (same sha256), the record **keeps the original timestamp**; only a
     separate "last checked" time moves. Identical bytes cannot extend a picture's life.
+  - **The limit also runs in an open tab.** At three hours the page switches to "No recent picture" by its
+    own timer, even if the tab was never reloaded and the hub has stopped answering; it rechecks when the
+    tab is resumed. Tested just before the cutoff and exactly at it.
+  - **A bad replacement does not displace a good image.** If a newly fetched image lacks a trustworthy
+    timestamp, the hub rejects it and keeps the current one, which then expires on its original clock.
   - **No trustworthy timestamp, no image.** If the response has no usable file-updated time (missing,
     unparsable, or later than the hub's own retrieval time) and no verified observation time, the hub does
     not publish the image and the page shows "No recent picture".
@@ -201,3 +206,6 @@ Still to verify during implementation (GPT's list, unchanged): globe alignment, 
 reachability.
 
 Rev 2.1: age limit set to three hours and written as an age limit (3.2); T1 closed.
+
+Rev 2.2 (GPT's review of rev 2.1): the age limit also runs in an open tab and on tab resume; a
+replacement without a trustworthy timestamp is rejected and the last good image expires on its own clock.
