@@ -48,3 +48,26 @@ My read: **B or C for Parker is straightforward** (heliocentric path; the curren
 - **D3:** rendering approach and whether Moon/Sun get header tabs.
 
 No build, REGISTER filing or production step is approved.
+
+## 6. Decisions and the LRO prediction-age measurement, step 1 (added 13 Nov 2026 07:02 UTC, clock reading)
+
+**Chad, 13 Nov:** "Go: LRO prediction-age measurement (read-only research), and D1 C / D2 reopen at stop / D3 2D view via Sky as GPT recommends". Also: **no manual exports as the design — the hub (Cloudflare) connects to the API first; manual is the fallback.** This replaces "manual, pinned exports" for release 1.
+
+**GPT's corrections accepted:** Parker's point for today is on Horizons' "reference planning trajectory" (after the 29 Sep fit), and is labelled so; the named Parker segment ends 17 Feb 2027; the LRO radius check says nothing about along-orbit position.
+
+**Step 1 result: the predictions as issued are not published where I looked, so the retrospective measurement cannot be run.**
+
+| Read (browser pane, naif.jpl.nasa.gov, 13 Nov ~07:1x UTC) | Result |
+|---|---|
+| `/pub/naif/LRO/kernels/aareadme.txt` | "Most operational SPICE data for LRO are produced by and reside at the LRO Mission Operations Center at the Goddard Space Flight Center (GSFC). These data are not made available to NAIF and, therefore, are not present on the NAIF server." The folder holds ck, fk, ik only. |
+| PDS archive `lrosp_1000/data/spk/` | Only merged definitive files (`lrorg_*`) and `de421`. No predicted files in the listing read (first 80 links) and none described in the data-set catalogue (reconstructed and planetary SPKs only; web search result, a lead). |
+| Label `lrorg_2026074_2026166_v01.lbl` (now read directly) | PRODUCER_ID "FDF/GSFC"; PRODUCT_VERSION_TYPE ACTUAL; START 2026-03-15T00:00:00; STOP 2026-06-15T00:00:00; PRODUCT_CREATION_TIME 2026-09-03T13:42:31; "Merged SPICE SPK file containing Regular Definitive LRO Spacecraft trajectory." Matches the proposal. |
+| `/pub/naif/LRO/misc/` | No trajectory predictions (clock, frame and LROC delivery archives; not opened). |
+
+**Published context (web search results, leads, not extractions):** Goddard Flight Dynamics papers (2014–2015) give the LRO requirement as predicted accuracy under 800 m over an **84-hour** span, and say maneuvers were then needed every two to four weeks. A 37-day-old prediction is far outside that span. No published figure for error at that age was found.
+
+**Consequence (GPT's rule):** the "LRO now" marker is unvalidated and is not shown.
+
+**A measurement that can be run, going forward, and that fits hub-first collection:** a daily hub read of Horizons for LRO records (a) the data sheet's revision date and trajectory table, and (b) the predicted positions for the next days. When Horizons later loads a newer solution for those same instants, the difference by prediction age (along-track, radial, cross-track) falls out of the stored record. It also shows how often Horizons refreshes LRO, which decides whether a marker could ever be honest. Not started; needs a proposal, a Worker reachability check for the Horizons API, and a re-read of the JPL API rules for a once-daily scheduled request.
+
+**Proposed shape for the build proposal (rev 2, not written yet):** Parker today from a hub-collected Horizons read, labelled with Horizons' classification, plus the December 2024 encounter example. LRO: the definitive June 2026 example; for today, no marker; a predicted orbit path only if its shape and orientation pass their own check (GPT). 2D view, entry from Sky, reopen at the originating stop.
