@@ -4,8 +4,9 @@
  * - Nothing is requested while the layer is off. On: the hub's pointer, then exactly one picture and one mask.
  * - Both files are checked against the SHA-256 values in the pointer before anything is drawn.
  * - The picture, the mask and the time line change together, only after the replacement has loaded and decoded.
- * - A failed first load paints nothing. A failed refresh keeps the frame already shown, with its own time, until it is
- *   older than UNKNOWN_AFTER_H; then it is cleared.
+ * - A failed first load paints nothing — unless only the NEWEST pair is at fault (missing, not matching its fingerprint, or
+ *   not decodable): the hub keeps the previous pair for one run, and that one is shown instead, under its own time and with a
+ *   note. A failed refresh keeps the frame already shown, with its own time, until it is older than UNKNOWN_AFTER_H; then it is cleared.
  * - The time shown is the time the hub REQUESTED from EUMETSAT's list of frames. EUMETSAT's service can return the nearest
  *   available frame instead and does not say which; if the hub ever learns the served time, the label says "Frame".
  * - Kept out of the observation path like Ocean heat: never touches state, points, pmeta, usable() or a globe.gl layer.
@@ -17,7 +18,7 @@
   const DR = { META: ME.HUB + '/snapshot/dustrgb/meta', STALE_AFTER_H: 14, UNKNOWN_AFTER_H: 24, REFRESH_MS: 10 * 60e3, AGE_MS: 30e3,
     ALT: 0.0006, OPACITY: 0.82, TEX: 2048, TEX_PHONE: 1024, OUTLINE: 'rgba(255,255,255,0.9)', OUTLINE_FRAC: 0.006,
     BUILD_WAIT_MS: 60000 };   // how long to wait for the globe's own picture (the layer borrows the globe's drawing classes from it)
-  const st = { on: false, gen: 0, status: 'off', why: null, frame: null, meta: null, meshes: [], refreshFailed: false, lastAttempt: null,
+  const st = { on: false, gen: 0, status: 'off', why: null, frame: null, meta: null, meshes: [], refreshFailed: false, lastAttempt: null, fallback: false, badId: null,
     timer: null, ageTimer: null, loading: false, requests: [], opts: { now: null } };
   const now = () => (st.opts.now ? st.opts.now() : Date.now());
   const hex = async b => [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map(x => x.toString(16).padStart(2, '0')).join('');
@@ -26,7 +27,7 @@
   const hhmm = iso => { const d = new Date(iso); return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')} UTC`; };
   const frameTime = f => f.served_time || f.requested_time;
   const ageMs = f => now() - Date.parse(frameTime(f));
-  const ageText = ms => { const m = Math.max(0, Math.floor(ms / 60e3)); return m < 60 ? `${m} min old` : `${Math.floor(m / 60)} h old`; };
+  const ageText = ms => { const m = Math.max(0, Math.floor(ms / 60e3)); return m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ago`; };
   const grade = f => { const h = ageMs(f) / 3600e3; return h > DR.UNKNOWN_AFTER_H ? 'unknown' : h > DR.STALE_AFTER_H ? 'stale' : 'current'; };
 
   // ---------- painting (the Ocean heat method: a textured partial sphere just above the surface)
@@ -80,12 +81,14 @@
     if (!r.ok) throw new Error('the hub did not answer (HTTP ' + r.status + ')');
     return r.json();
   }
+  /** file = the pair itself could not be used; bad = it never will be (wrong bytes or undecodable), so it is not fetched again */
+  const fileErr = (msg, bad) => Object.assign(new Error(msg), { file: true, bad });
   async function getFile(f) {
-    const r = await hubFetch(ME.HUB + f.path);
-    if (!r.ok || !(r.headers.get('content-type') || '').startsWith('image/')) throw new Error('a frame file could not be loaded');
+    let r; try { r = await hubFetch(ME.HUB + f.path); } catch (e) { throw fileErr('a frame file could not be loaded', false); }
+    if (!r.ok || !(r.headers.get('content-type') || '').startsWith('image/')) throw fileErr('a frame file could not be loaded', false);
     const b = await r.arrayBuffer();
-    if (b.byteLength !== f.bytes || await hex(b) !== f.sha256) throw new Error('a frame file did not match its fingerprint');
-    try { return await createImageBitmap(new Blob([b], { type: f.type })); } catch (e) { throw new Error('a frame file could not be decoded'); }
+    if (b.byteLength !== f.bytes || await hex(b) !== f.sha256) throw fileErr('a frame file did not match its fingerprint', true);
+    try { return await createImageBitmap(new Blob([b], { type: f.type })); } catch (e) { throw fileErr('a frame file could not be decoded', true); }
   }
   /** Load one frame fully (both files verified and decoded, mesh built) without touching what is shown. */
   async function prepare(frame, gen) {
@@ -99,7 +102,7 @@
   }
   /** Swap in one step: mesh, frame and labels together. */
   function show(frame, built) {
-    destroy(); built.parent.add(built.mesh); st.meshes = [built.mesh]; st.frame = frame; st.refreshFailed = false;
+    destroy(); built.parent.add(built.mesh); st.meshes = [built.mesh]; st.frame = frame; st.refreshFailed = false; st.fallback = false;
   }
   function clearFrame(why) { destroy(); st.frame = null; st.status = 'unknown'; st.why = why; }
 
@@ -114,9 +117,10 @@
     if (!st.on) { fl.hidden = true; ex.hidden = true; o.hidden = false; o.textContent = st.why || 'Off. Switch on to load the latest Dust RGB frame.'; return; }
     if (f) {
       fl.hidden = false; o.hidden = true;
-      fl.innerHTML = `<b>${f.served_time ? 'Frame' : 'Frame requested'}: ${esc(utc(frameTime(f)))}</b> · ${esc(ageText(ageMs(f)))}`;
+      fl.innerHTML = `<b>${f.served_time ? 'Frame' : 'Frame requested'}: ${esc(utc(frameTime(f)))}</b> (${esc(ageText(ageMs(f)))})`;   // the age refers to the requested time
       const bits = ['Meteosat (MTG) at 0° · Updated twice daily.'];
       if (st.lastAttempt) bits.push(`Latest update failed at ${hhmm(st.lastAttempt.failed_at)}.`);
+      if (st.fallback) bits.push('The latest frame could not be shown; this is the previous one.');
       if (st.refreshFailed) bits.push('Refresh unavailable.');
       ex.hidden = false; ex.textContent = bits.join(' ');
     } else {
@@ -143,14 +147,23 @@
       if (grade(f) === 'unknown') {   // too old to belong on "Earth now": nothing is fetched or painted
         clearFrame(`The newest frame is from ${utc(frameTime(f))}, more than ${DR.UNKNOWN_AFTER_H} hours ago.`); return; }
       if (st.frame && st.frame.id === f.id) { st.refreshFailed = false; return; }   // already shown: never fetched again
-      let built;
-      try { built = await prepare(f, gen); } catch (e) {
-        if (gen !== st.gen) return;
-        if (st.frame) st.refreshFailed = true; else { st.status = 'unknown'; st.why = 'The latest frame could not be loaded: ' + (e.message || e) + '.'; }
-        return;
+      if (st.badId === f.id) return;    // known unusable (wrong bytes or undecodable): not fetched again
+      const discard = b => { if (b) { b.mesh.geometry.dispose(); b.mesh.material.map.dispose(); b.mesh.material.dispose(); } };
+      const late = () => gen !== st.gen || !st.on;   // switched off (or off and on again) while loading: a late response never paints
+      let built, err = null;
+      try { built = await prepare(f, gen); } catch (e) { err = e; }
+      if (late()) return discard(built);
+      if (!err) { if (!built) return; show(f, built); st.status = 'ready'; st.why = null; return; }
+      if (err.bad) st.badId = f.id;
+      if (st.frame) { st.refreshFailed = true; return; }   // something is already shown: keep it, with its own time
+      // Nothing is shown and the newest pair itself is at fault. The hub keeps the previous pair for one run: show that one, under its own time.
+      const prev = err.file && meta.previous && meta.previous.id !== f.id ? { box: f.box, served_time: null, ...meta.previous } : null;
+      if (prev && grade(prev) !== 'unknown') {
+        let pb = null; try { pb = await prepare(prev, gen); } catch (_) { pb = null; }
+        if (late()) return discard(pb);
+        if (pb) { show(prev, pb); st.fallback = true; st.status = 'ready'; st.why = null; return; }
       }
-      if (!built || gen !== st.gen || !st.on) { if (built) { built.mesh.geometry.dispose(); built.mesh.material.map.dispose(); built.mesh.material.dispose(); } return; }   // switched off while loading: a late response never paints
-      show(f, built); st.status = 'ready'; st.why = null;
+      st.status = 'unknown'; st.why = 'The latest frame could not be loaded: ' + (err.message || err) + '.';
     } finally { if (gen === st.gen) { st.loading = false; paint(); } }
   }
   function ageTick() {
@@ -161,7 +174,7 @@
   async function setOn(on) {
     if (on === st.on) return;
     st.gen++;
-    if (!on) { st.on = false; st.status = 'off'; st.why = null; st.loading = false; st.refreshFailed = false; st.lastAttempt = null; destroy(); st.frame = null;
+    if (!on) { st.on = false; st.status = 'off'; st.why = null; st.loading = false; st.refreshFailed = false; st.fallback = false; st.badId = null; st.lastAttempt = null; destroy(); st.frame = null;
       clearInterval(st.timer); clearInterval(st.ageTimer); st.timer = st.ageTimer = null; paint(); return; }
     st.on = true; st.why = null; st.status = 'loading'; paint();
     if (!ME.globe || !ME.globe()) { st.on = false; st.status = 'off'; st.why = 'Dust RGB imagery needs the 3-D globe, which is not available in this browser. Nothing is drawn.'; st.gen++; return paint(); }
@@ -173,7 +186,7 @@
 
   // read-only aids for tests and the console
   ME.dustRgb = { state: () => ({ on: st.on, status: st.status, why: st.why, frameId: st.frame ? st.frame.id : null, grade: st.frame ? grade(st.frame) : null, meshes: st.meshes.length,
-      refreshFailed: st.refreshFailed, lastAttempt: st.lastAttempt, requests: st.requests.slice(), label: $('dustrgb-frame').hidden ? null : $('dustrgb-frame').textContent,
+      refreshFailed: st.refreshFailed, fallback: st.fallback, lastAttempt: st.lastAttempt, requests: st.requests.slice(), label: $('dustrgb-frame').hidden ? null : $('dustrgb-frame').textContent,
       extra: $('dustrgb-extra').hidden ? null : $('dustrgb-extra').textContent, off: $('o-dustrgb').hidden ? null : $('o-dustrgb').textContent, stateWord: $('s-dustrgb').textContent,
       inScene: st.meshes.filter(m => m.parent).length, loading: st.loading }),
     refresh: () => refresh(false), ageTick, setOn, opts: st.opts, config: DR,

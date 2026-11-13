@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 12 Nov 2026
 
+## 13 Nov 02:48 UTC (clock reading at write) — **dustrgb-rc round 2** (GPT's three findings fixed; branch only; deploy on hold)
+
+Chad, 13 Nov: "Hold the 0.6.11 deploy" with GPT's review of `7e6f236`. **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.
+
+- Packet: `reviews/2026-11-13-dustrgb-rc-r2.md`.
+- Finding 1 (frame URLs could change under readers; reproduced): pair id now names the content (time + fingerprint of both files); stored files never overwritten; same-or-older advertised times skipped; pointer writes conditional on its etag; cleanup spares files under 2 h old.
+- Finding 2 (corrupt image could replace the good pair): mask decoded in full on the hub; picture structure check widened but NOT a decode (stated); page falls back to the previous pair. Open: a partly damaged picture still passes both hub and browser.
+- Finding 3: 30 s limit on the frame-list request; parser reads only the dust layer's own element; Dust runs after the hourly batch.
+- Label "(5 h ago)". First packet's "30 minutes" corrected to 10.
+- Tests: `dustrgb-hub` 156/156, 23 breaks fail; `dustrgb-ui` 63/63, 19 breaks fail; regression 55 passed, 0 failed (terminator-ui passed; round-1 failure unexplained).
+- Real service 02:03 UTC (browser pane): new validators accept a live pair; picture is progressive JPEG; mask counts match the browser's decoder.
+- `worker.js` 315,632 B `b0ccb053…030b`; `dustrgb.js` 14,886 B `40f6aa2d…e15c`.
+- Not shown: real hub run; conditional write on real R2; real frame on the real globe.
+
 ## 12 Nov 19:10 UTC (clock reading at write) — **dustrgb-rc candidate built** (hub 0.6.11 job + page layer; branch only; for GPT)
 
 Chad: "Go: build dustrgb-rc on a branch per DUST-RGB-LAYER-PROPOSAL rev 5 (hub job and page layer; no merge, no hub deploy)". **Nothing merged, deployed or filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`.

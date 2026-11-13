@@ -2143,7 +2143,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { DUSTRGB, dustLatest, dustKeyOf, jpegSize, pngInfo, dustServed, dustFetch, dustFail, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustClean, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -2799,36 +2799,26 @@ const DUSTRGB = {
   MAP: 'https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&layers=mtg_fd:rgb_dust&styles=&crs=EPSG:4326&bbox=-80,-80,80,80',
   LAYER: 'rgb_dust', BOX: { south: -80, west: -80, north: 80, east: 80 },
   PICTURE: { w: 2048, h: 2048, maxBytes: 4 * 1024 * 1024 }, MASK: { w: 160, h: 160, maxBytes: 512 * 1024 },
-  RUN_HOURS_UTC: [6, 18], TIMEOUT_MS: 90000, POINTER: 'dustrgb/current.json', PREFIX: 'dustrgb/frames/',
+  RUN_HOURS_UTC: [6, 18], TIMEOUT_MS: 90000, LIST_TIMEOUT_MS: 30000, POINTER: 'dustrgb/current.json', PREFIX: 'dustrgb/frames/',
+  CLEAN_AFTER_MS: 2 * 3600e3,   // cleanup never deletes a file younger than this, so a run that overlaps another cannot remove files still being published
   CACHE_FILE: 'public, max-age=86400, immutable',
   SOURCE: { product: 'Dust RGB - MTG - 0 degree', collection: 'EO:EUM:DAT:0869', catalogue: 'https://user.eumetsat.int/catalogue/EO:EUM:DAT:0869', licence: 'CC BY 4.0',
     licence_url: 'https://creativecommons.org/licenses/by/4.0/', credit: 'Contains modified EUMETSAT Meteosat data', service: 'EUMETView WMS, layer mtg_fd:rgb_dust' },
 };
-/** Latest advertised time of the dust layer from a GetCapabilities document, as YYYY-MM-DDTHH:MM:00Z on the 10-minute grid; else null. */
+/** Latest advertised time of the dust layer from a GetCapabilities document, as YYYY-MM-DDTHH:MM:00Z on the 10-minute grid; else null.
+ * Only the dust layer's own element is read: from its <Name> to the next layer boundary. A time on a sibling layer is never used. */
 function dustLatest(xml) {
-  const m = String(xml).match(/<Name>(?:mtg_fd:)?rgb_dust<\/Name>[\s\S]*?<Dimension\b[^>]*\bname="time"[^>]*\bdefault="([^"]+)"/);
-  if (!m) return null;
-  const t = m[1].replace(/\.000Z$/, 'Z');
+  const s = String(xml), n = /<Name>\s*(?:mtg_fd:)?rgb_dust\s*<\/Name>/.exec(s);
+  if (!n) return null;
+  const rest = s.slice(n.index + n[0].length), end = rest.search(/<\/Layer>|<Layer\b/), own = end < 0 ? rest : rest.slice(0, end);
+  let def = null;
+  for (const d of own.matchAll(/<Dimension\b([^>]*)>/g)) { if (!/\bname="time"/.test(d[1])) continue; const m = /\bdefault="([^"]+)"/.exec(d[1]); def = m ? m[1] : null; break; }
+  if (!def) return null;
+  const t = def.replace(/\.000Z$/, 'Z');
   if (!/^\d{4}-\d\d-\d\dT\d\d:\d0:00Z$/.test(t) || Number.isNaN(Date.parse(t))) return null;
   return t;
 }
 const dustKeyOf = t => t.replace(/[-:]/g, '').replace(/00Z$/, 'Z');   // 2026-11-12T16:50:00Z -> 20261112T1650Z
-/** Width and height from a JPEG's first start-of-frame marker, or null (bad signature, truncated, no frame). */
-function jpegSize(u8) {
-  if (u8.length < 4 || u8[0] !== 0xff || u8[1] !== 0xd8) return null;
-  let i = 2;
-  while (i + 9 < u8.length) {
-    if (u8[i] !== 0xff) return null;
-    const k = u8[i + 1];
-    if (k === 0xff) { i++; continue; }
-    if (k >= 0xd0 && k <= 0xd9) { i += 2; continue; }
-    const len = (u8[i + 2] << 8) | u8[i + 3];
-    if (len < 2) return null;
-    if (k >= 0xc0 && k <= 0xcf && k !== 0xc4 && k !== 0xc8 && k !== 0xcc) return { h: (u8[i + 5] << 8) | u8[i + 6], w: (u8[i + 7] << 8) | u8[i + 8] };
-    i += 2 + len;
-  }
-  return null;
-}
 /** Width, height and colour type from a PNG's IHDR, plus whether it can carry transparency (RGBA, grey+alpha, or a palette with tRNS) and ends with IEND; or null. */
 function pngInfo(u8) {
   const sig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
@@ -2843,6 +2833,57 @@ function pngInfo(u8) {
     i += 12 + len; }
   return { w, h, colour, alpha: colour === 6 || colour === 4 || trns, complete: iend };
 }
+/** Walks a JPEG's segments up to the first scan. Returns { w, h, dqt, dht, sos, eoi } or null. A structure check only: the compressed
+ * picture data is NOT decoded (a Worker has no image decoder, and JPEG carries no checksum), so damage inside the scan is not detected here. */
+function jpegCheck(u8) {
+  if (u8.length < 4 || u8[0] !== 0xff || u8[1] !== 0xd8) return null;
+  const out = { w: 0, h: 0, dqt: 0, dht: 0, sos: false, eoi: u8[u8.length - 2] === 0xff && u8[u8.length - 1] === 0xd9 };
+  let i = 2;
+  while (i + 4 <= u8.length) {
+    if (u8[i] !== 0xff) return null;
+    const k = u8[i + 1];
+    if (k === 0xff) { i++; continue; }
+    if (k >= 0xd0 && k <= 0xd9) { i += 2; continue; }
+    const len = (u8[i + 2] << 8) | u8[i + 3];
+    if (len < 2 || i + 2 + len > u8.length) return null;
+    if (k === 0xdb) out.dqt++;
+    else if (k === 0xc4) out.dht++;
+    else if (k >= 0xc0 && k <= 0xcf && k !== 0xc8 && k !== 0xcc) { if (len < 8) return null; out.h = (u8[i + 5] << 8) | u8[i + 6]; out.w = (u8[i + 7] << 8) | u8[i + 8]; }
+    else if (k === 0xda) { out.sos = true; return out; }
+    i += 2 + len;
+  }
+  return out;
+}
+const DUST_CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+/** Fully decodes a PNG's alpha: every chunk checksum verified, the image data inflated (zlib's own checksum included), every row
+ * unfiltered. Returns { w, h, colour, opaque, transparent, partial, centre, corners:[4 alphas] } or null if anything is wrong or the
+ * form is one this reader does not handle (interlaced; anything but 8/16-bit RGBA or grey+alpha, or an 8-bit palette with tRNS). */
+async function pngAlpha(u8) {
+  const info = pngInfo(u8); if (!info || !info.complete || !info.alpha) return null;
+  const u32 = i => ((u8[i] << 24) | (u8[i + 1] << 16) | (u8[i + 2] << 8) | u8[i + 3]) >>> 0;
+  const { w, h, colour } = info, depth = u8[24];
+  if (u8[26] !== 0 || u8[27] !== 0 || u8[28] !== 0 || !w || !h) return null;
+  const ch = { 6: 4, 4: 2, 3: 1 }[colour]; if (!ch || (colour === 3 ? depth !== 8 : depth !== 8 && depth !== 16)) return null;
+  const parts = []; let trns = null;
+  for (let i = 8; i + 12 <= u8.length;) { const len = u32(i), end = i + 12 + len; if (end > u8.length) return null;
+    let c = 0xffffffff; for (let j = i + 4; j < i + 8 + len; j++) c = DUST_CRC[(c ^ u8[j]) & 0xff] ^ (c >>> 8);
+    if (((c ^ 0xffffffff) >>> 0) !== u32(i + 8 + len)) return null;
+    const type = String.fromCharCode(u8[i + 4], u8[i + 5], u8[i + 6], u8[i + 7]);
+    if (type === 'IDAT') parts.push(u8.subarray(i + 8, i + 8 + len)); else if (type === 'tRNS') trns = u8.subarray(i + 8, i + 8 + len);
+    i = end; }
+  if (!parts.length) return null;
+  let raw; try { raw = new Uint8Array(await new Response(new Blob(parts).stream().pipeThrough(new DecompressionStream('deflate'))).arrayBuffer()); } catch (_) { return null; }
+  const bpp = ch * depth / 8, stride = w * bpp; if (raw.length !== h * (stride + 1)) return null;
+  for (let y = 0; y < h; y++) { const r = y * (stride + 1), f = raw[r], cur = r + 1, up = cur - (stride + 1);
+    if (f > 4) return null;
+    for (let x = 0; x < stride; x++) { const a = x >= bpp ? raw[cur + x - bpp] : 0, b = y ? raw[up + x] : 0, c = (y && x >= bpp) ? raw[up + x - bpp] : 0;
+      let add = 0; if (f === 1) add = a; else if (f === 2) add = b; else if (f === 3) add = (a + b) >> 1; else if (f === 4) { const pp = a + b - c, pa = Math.abs(pp - a), pb = Math.abs(pp - b), pc = Math.abs(pp - c); add = pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
+      raw[cur + x] = (raw[cur + x] + add) & 0xff; } }
+  const alphaAt = (x, y) => { const o = y * (stride + 1) + 1 + x * bpp; return colour === 3 ? (trns && raw[o] < trns.length ? trns[raw[o]] : 255) : raw[o + (ch - 1) * depth / 8]; };
+  let opaque = 0, transparent = 0, partial = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const a = alphaAt(x, y); if (a === 255) opaque++; else if (a === 0) transparent++; else partial++; }
+  return { w, h, colour, opaque, transparent, partial, centre: alphaAt(w >> 1, h >> 1), corners: [alphaAt(0, 0), alphaAt(w - 1, 0), alphaAt(0, h - 1), alphaAt(w - 1, h - 1)] };
+}
 const dustServed = w => { const m = /time=(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d)(?:\.\d+)?Z/.exec(w || ''); return m ? m[1] + 'Z' : null; };
 /** One file from EUMETView, validated. Returns { ok, buf, bytes, sha256, served, warn } or { ok:false, reason, http }. Reasons are fixed phrases (public). */
 async function dustFetch(what, url, spec) {
@@ -2854,32 +2895,54 @@ async function dustFetch(what, url, spec) {
   let buf; try { buf = await r.arrayBuffer(); } catch (e) { return { ok: false, reason: what + ' request failed', http: 200, detail: String(e).slice(0, 160) }; }   // cut off or timed out mid-body
   const u8 = new Uint8Array(buf);
   if (!buf.byteLength || buf.byteLength > spec.maxBytes) return { ok: false, reason: what + ' size out of range', http: 200, detail: String(buf.byteLength) };
-  if (spec.type === 'image/jpeg') { const d = jpegSize(u8); if (!d || d.w !== spec.w || d.h !== spec.h || u8[u8.length - 2] !== 0xff || u8[u8.length - 1] !== 0xd9) return { ok: false, reason: what + ' not a valid image', http: 200, detail: JSON.stringify(d) }; }
-  else { const d = pngInfo(u8); if (!d || d.w !== spec.w || d.h !== spec.h || !d.alpha || !d.complete) return { ok: false, reason: what + ' not a valid image', http: 200, detail: JSON.stringify(d) }; }
+  let alpha = null;
+  if (spec.type === 'image/jpeg') { const d = jpegCheck(u8); if (!d || d.w !== spec.w || d.h !== spec.h || !d.dqt || !d.sos || !d.eoi) return { ok: false, reason: what + ' not a valid image', http: 200, detail: JSON.stringify(d) }; }
+  else { const i = pngInfo(u8); if (!i || i.w !== spec.w || i.h !== spec.h || !i.alpha || !i.complete) return { ok: false, reason: what + ' not a valid image', http: 200, detail: JSON.stringify(i) };
+    const d = await pngAlpha(u8);   // the mask is decoded in full before it can be published
+    if (!d) return { ok: false, reason: what + ' does not decode', http: 200 };
+    if (!d.opaque || d.centre !== 255 || d.corners.some(a => a !== 0)) return { ok: false, reason: what + ' is not a footprint', http: 200, detail: JSON.stringify(d) };   // Earth's disc in this box: opaque centre, clear corners
+    alpha = { opaque: d.opaque, transparent: d.transparent, partial: d.partial }; }
   const warn = r.headers.get('warning');
-  return { ok: true, buf, bytes: buf.byteLength, sha256: await sha256Bytes(buf), warn_present: warn !== null, served: dustServed(warn) };
+  return { ok: true, buf, bytes: buf.byteLength, sha256: await sha256Bytes(buf), warn_present: warn !== null, served: dustServed(warn), alpha };
 }
-/** A failed run never moves the frame: the pointer keeps its pair and gains last_attempt. The public reason is a fixed phrase; detail stays in collector_runs. */
+const dustEmpty = () => ({ schema: 1, layer: 'dustrgb', frame: null, previous: null, last_attempt: null, cadence: { runs_utc: DUSTRGB.RUN_HOURS_UTC }, source: DUSTRGB.SOURCE, collector_version: COLLECTOR_VERSION });
+/** The pointer and its etag. If there is no pointer yet an empty one is created first, so every later write can be conditional on an etag. */
+async function dustPtr(env) {
+  let o = await env.R2.get(DUSTRGB.POINTER);
+  if (!o) { await env.R2.put(DUSTRGB.POINTER, JSON.stringify(dustEmpty()), { httpMetadata: { contentType: 'application/json' } }); o = await env.R2.get(DUSTRGB.POINTER); }
+  return { cur: await o.json(), etag: o.etag };
+}
+/** Read–change–write of the pointer that cannot overwrite another run's update: the write is conditional on the etag that was read
+ * (R2 put onlyIf.etagMatches returns null when the pointer changed in between), and is then retried from a fresh read.
+ * change(cur) returns the new body, or null to leave the pointer alone. Returns { cur, body, wrote }. */
+async function dustUpdate(env, change) {
+  for (let i = 0; i < 5; i++) {
+    const { cur, etag } = await dustPtr(env), body = change(cur);
+    if (body === null) return { cur, body: null, wrote: false };
+    const r = await env.R2.put(DUSTRGB.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagMatches: etag } });
+    if (r !== null) return { cur, body, wrote: true };
+  }
+  throw new Error('dustrgb pointer kept changing; gave up after 5 tries');
+}
+const dustBrief = f => ({ id: f.id, requested_time: f.requested_time, served_time: f.served_time || null, box: f.box, crs: f.crs, picture: f.picture, mask: f.mask });   // everything a page needs to draw the previous pair by itself
+/** A failed run never moves the frame: the pointer keeps its pairs and gains last_attempt. The public reason is a fixed phrase; detail stays in collector_runs. */
 async function dustFail(env, ms, reason, http, detail) {
   const failed_at = nowIso();
-  let cur = null; try { cur = await getJson(env, DUSTRGB.POINTER); } catch (_) {}
-  const prevFails = cur && cur.last_attempt ? (cur.last_attempt.consecutive_failures || 0) : 0;
-  const last_attempt = { run: new Date(ms).toISOString(), failed_at, status: 'down', http: http || 0, reason, consecutive_failures: prevFails + 1 };
-  const body = cur && cur.frame ? { ...cur, last_attempt } : { schema: 1, layer: 'dustrgb', frame: null, previous: null, last_attempt, cadence: { runs_utc: DUSTRGB.RUN_HOURS_UTC }, source: DUSTRGB.SOURCE, collector_version: COLLECTOR_VERSION };
-  try { await putJson(env, DUSTRGB.POINTER, body); } catch (_) {}
+  try { await dustUpdate(env, cur => ({ ...cur, last_attempt: { run: new Date(ms).toISOString(), failed_at, status: 'down', http: http || 0, reason, consecutive_failures: ((cur.last_attempt && cur.last_attempt.consecutive_failures) || 0) + 1 } })); } catch (_) {}
   await logRun(env, 'dustrgb', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : ''));
   return 'dustrgb:down ' + reason;
 }
 async function collectDustRgb(env, ms) {
-  const cap = await fetchText(DUSTRGB.CAP, { cf: { cacheTtl: 0 } });
+  let cap; try { cap = await fetchText(DUSTRGB.CAP, { cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(DUSTRGB.LIST_TIMEOUT_MS) }); } catch (e) { return dustFail(env, ms, 'frame list request failed', 0, String(e).slice(0, 160)); }
   if (cap.status !== 200) return dustFail(env, ms, 'frame list http error', cap.status);
   const T = dustLatest(cap.text);
   if (!T) return dustFail(env, ms, 'frame list unreadable', 200, 'no advertised time for ' + DUSTRGB.LAYER);
-  const cur = await getJson(env, DUSTRGB.POINTER);
-  if (cur && cur.frame && cur.frame.requested_time === T) {   // nothing newer: no image request
-    if (cur.last_attempt) await putJson(env, DUSTRGB.POINTER, { ...cur, last_attempt: null });
-    await logRun(env, 'dustrgb', ms, 'ok', 200, 0, 0, 'unchanged: ' + T);
-    return 'dustrgb:unchanged ' + T;
+  const { cur } = await dustPtr(env);
+  if (cur.frame && T <= cur.frame.requested_time) {   // nothing newer (the same time, or an older one advertised again): no image request, nothing rewritten
+    if (cur.last_attempt) await dustUpdate(env, c => c.last_attempt ? { ...c, last_attempt: null } : null);
+    const note = T === cur.frame.requested_time ? 'unchanged: ' + T : `not newer: ${T} advertised, ${cur.frame.requested_time} held and kept`;
+    await logRun(env, 'dustrgb', ms, 'ok', 200, 0, 0, note);
+    return 'dustrgb:' + note;
   }
   const q = `&time=${T}`;
   const pic = await dustFetch('picture', `${DUSTRGB.MAP}&format=image/jpeg&width=${DUSTRGB.PICTURE.w}&height=${DUSTRGB.PICTURE.h}${q}`, { ...DUSTRGB.PICTURE, type: 'image/jpeg' });
@@ -2889,26 +2952,43 @@ async function collectDustRgb(env, ms) {
   // the served-time header does not normally reach a Worker; if it ever does and disagrees, refuse the frame
   for (const [what, f] of [['picture', pic], ['mask', mask]]) if (f.served && f.served !== T) return dustFail(env, ms, what + ' served time differs', 200, `asked ${T}, server named ${f.served}`);
   const served = pic.served && mask.served ? pic.served : null;
-  const dir = DUSTRGB.PREFIX + dustKeyOf(T) + '/';
+  // The pair's id names its CONTENT (the time plus a fingerprint of both files). A different picture or mask for the same time is a
+  // different id, key and URL, so nothing already published can change underneath a reader.
+  const id = dustKeyOf(T) + '-' + (await sha256Bytes(new TextEncoder().encode(pic.sha256 + ':' + mask.sha256).buffer)).slice(0, 16);
+  const dir = DUSTRGB.PREFIX + id + '/';
   const files = { picture: { name: 'picture.jpg', type: 'image/jpeg', f: pic, ...{ w: DUSTRGB.PICTURE.w, h: DUSTRGB.PICTURE.h } }, mask: { name: 'mask.png', type: 'image/png', f: mask, ...{ w: DUSTRGB.MASK.w, h: DUSTRGB.MASK.h } } };
   const out = {};
-  for (const [k, x] of Object.entries(files)) {   // write, then read back: the pointer moves only if both stored files are exactly what was validated
-    const key = dir + x.name;
-    try { await env.R2.put(key, x.f.buf, { httpMetadata: { contentType: x.type }, customMetadata: { sha256: x.f.sha256, requested_time: T } }); } catch (e) { return dustFail(env, ms, k + ' write failed', 200, String(e).slice(0, 160)); }
-    let back = null; try { const o = await env.R2.get(key); back = o ? await o.arrayBuffer() : null; } catch (_) {}
-    if (!back || back.byteLength !== x.f.bytes || await sha256Bytes(back) !== x.f.sha256) return dustFail(env, ms, k + ' read-back differs', 200, key);
-    out[k] = { file: x.name, key, path: `/snapshot/dustrgb/${dustKeyOf(T)}/${x.name}`, type: x.type, bytes: x.f.bytes, sha256: x.f.sha256, w: x.w, h: x.h, warning_header_present: x.f.warn_present };
+  const same = async key => { let b = null; try { const o = await env.R2.get(key); b = o ? await o.arrayBuffer() : null; } catch (_) { return 'unreadable'; } return !b ? 'absent' : (b.byteLength === files[key.endsWith('.jpg') ? 'picture' : 'mask'].f.bytes && await sha256Bytes(b) === files[key.endsWith('.jpg') ? 'picture' : 'mask'].f.sha256) ? 'same' : 'differs'; };
+  for (const [k, x] of Object.entries(files)) {   // write once, then read back: the pointer moves only if both stored files are exactly what was validated
+    const key = dir + x.name, had = await same(key);
+    if (had === 'differs' || had === 'unreadable') return dustFail(env, ms, k + ' stored copy differs', 200, key);   // never overwrite a stored file
+    if (had === 'absent') {
+      try { await env.R2.put(key, x.f.buf, { httpMetadata: { contentType: x.type }, customMetadata: { sha256: x.f.sha256, requested_time: T } }); } catch (e) { return dustFail(env, ms, k + ' write failed', 200, String(e).slice(0, 160)); }
+      if (await same(key) !== 'same') return dustFail(env, ms, k + ' read-back differs', 200, key);
+    }
+    out[k] = { file: x.name, key, path: `/snapshot/dustrgb/${id}/${x.name}`, type: x.type, bytes: x.f.bytes, sha256: x.f.sha256, w: x.w, h: x.h, warning_header_present: x.f.warn_present, ...(x.f.alpha ? { alpha: x.f.alpha } : {}) };
   }
-  const frame = { id: dustKeyOf(T), requested_time: T, served_time: served, served_time_source: served ? 'server Warning header' : null,
+  const frame = { id, requested_time: T, served_time: served, served_time_source: served ? 'server Warning header' : null,
     time_basis: served ? 'served time named by the server' : 'requested time only: the server can substitute the nearest frame and did not say which frame it served',
+    checked: 'mask decoded in full; picture structure only (not decoded)',
     fetched_at: nowIso(), run: new Date(ms).toISOString(), box: DUSTRGB.BOX, crs: 'EPSG:4326', picture: out.picture, mask: out.mask };
-  const previous = cur && cur.frame ? { id: cur.frame.id, requested_time: cur.frame.requested_time, picture: cur.frame.picture, mask: cur.frame.mask } : null;
-  await putJson(env, DUSTRGB.POINTER, { schema: 1, layer: 'dustrgb', frame, previous, last_attempt: null, cadence: { runs_utc: DUSTRGB.RUN_HOURS_UTC }, source: DUSTRGB.SOURCE, collector_version: COLLECTOR_VERSION });
-  // lean storage: keep the current pair and the previous pair (one run of grace); everything else under the prefix goes, orphans of failed runs included
-  try { const keep = [dir, previous ? DUSTRGB.PREFIX + previous.id + '/' : null].filter(Boolean);
-    const l = await env.R2.list({ prefix: DUSTRGB.PREFIX }); for (const o of l.objects) if (!keep.some(d => o.key.startsWith(d))) await env.R2.delete(o.key); } catch (e) { console.log('dustrgb cleanup failed', String(e)); }
-  await logRun(env, 'dustrgb', ms, 'ok', 200, 1, pic.bytes + mask.bytes, `frame ${T}; served-time header ${pic.warn_present ? 'present' : 'absent'} (picture), ${mask.warn_present ? 'present' : 'absent'} (mask)`);
+  // move the pointer only if no other run has published this time or a later one meanwhile
+  const up = await dustUpdate(env, c => (c.frame && c.frame.requested_time >= T) ? null : { ...dustEmpty(), frame, previous: c.frame ? dustBrief(c.frame) : null });
+  if (!up.wrote) { await logRun(env, 'dustrgb', ms, 'ok', 200, 0, 0, `superseded: another run published ${up.cur.frame.requested_time} first; ${T} not published`); return 'dustrgb:superseded ' + T; }
+  await dustClean(env);
+  await logRun(env, 'dustrgb', ms, 'ok', 200, 1, pic.bytes + mask.bytes, `frame ${T} as ${id}; served-time header ${pic.warn_present ? 'present' : 'absent'} (picture), ${mask.warn_present ? 'present' : 'absent'} (mask)`);
   return 'dustrgb:published ' + T;
+}
+/** Lean storage: keep the pairs the pointer names NOW (re-read, so an overlapping run's publication is respected); delete any other
+ * file under the prefix only once it is older than CLEAN_AFTER_MS (orphans of failed runs go on a later run, never mid-flight). */
+async function dustClean(env) {
+  try { const cur = await getJson(env, DUSTRGB.POINTER); if (!cur) return;
+    const keep = [cur.frame, cur.previous].filter(Boolean).map(f => DUSTRGB.PREFIX + f.id + '/'), now = Date.now();
+    let cursor;
+    do { const l = await env.R2.list({ prefix: DUSTRGB.PREFIX, ...(cursor ? { cursor } : {}) });
+      for (const o of l.objects) if (!keep.some(d => o.key.startsWith(d)) && o.uploaded && now - new Date(o.uploaded).getTime() > DUSTRGB.CLEAN_AFTER_MS) await env.R2.delete(o.key);
+      cursor = l.truncated ? l.cursor : null; } while (cursor);
+  } catch (e) { console.log('dustrgb cleanup failed', String(e)); }
 }
 /** GET /snapshot/dustrgb/meta and /snapshot/dustrgb/<frame id>/<picture.jpg|mask.png>. Files are served only for the current or previous frame, and only if the stored bytes match the pointer. */
 async function dustRoute(env, p) {
@@ -2967,8 +3047,9 @@ const JOBS = {
     const s = env.SATELLITES_ENABLED !== '1' ? 'satellites:not scheduled (SATELLITES_ENABLED unset)' : (!manual && hr % 2 === 1) ? await guarded(env, 'satellites', ms, collectSatellites) : 'satellites:skipped (odd UTC hours only)';
     const d = env.DRIFTERS_ENABLED !== '1' ? 'drifters:not scheduled (DRIFTERS_ENABLED unset)' : await guarded(env, 'drifters', ms, collectDrifters);
     const p = env.PLASTIC_ENABLED !== '1' ? 'plastic:not scheduled (PLASTIC_ENABLED unset)' : (await plasticDue(env, ms, false)) ? await guarded(env, 'plastic', ms, collectPlastic) : 'plastic:skipped (refreshed within 20 h)';
-    const u = env.DUSTRGB_ENABLED !== '1' ? 'dustrgb:not scheduled (DUSTRGB_ENABLED unset)' : (!manual && DUSTRGB.RUN_HOURS_UTC.includes(hr)) ? await guarded(env, 'dustrgb', ms, collectDustRgb) : 'dustrgb:skipped (runs 06 and 18 UTC)';
     const b = await hourlyBatch(env, ms);
+    // Dust runs LAST: its picture can take over half a minute, and nothing else in the hourly job may wait on it
+    const u = env.DUSTRGB_ENABLED !== '1' ? 'dustrgb:not scheduled (DUSTRGB_ENABLED unset)' : (!manual && DUSTRGB.RUN_HOURS_UTC.includes(hr)) ? await guarded(env, 'dustrgb', ms, collectDustRgb) : 'dustrgb:skipped (runs 06 and 18 UTC)';
     return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, dustrgb: u, batch: b };
   },
 };

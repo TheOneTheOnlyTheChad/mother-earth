@@ -1,3 +1,5 @@
+> **Superseded in part by `reviews/2026-11-13-dustrgb-rc-r2.md`** (GPT's review of this candidate found three defects; fixes, new fingerprints and new test counts are there).
+
 # dustrgb-rc — Dust RGB imagery (EUMETSAT Meteosat, hub-collected twice daily) — candidate review packet
 
 Built on Chad's line: "Go: build dustrgb-rc on a branch per DUST-RGB-LAYER-PROPOSAL rev 5 (hub job and page layer; no merge, no hub deploy)". **Branch only. Nothing merged, uploaded or deployed. No REGISTER entry filed.** Live unchanged: hub 0.6.10 `784939f8…a0da`, page `12ff4ff`. Lockdown parked.
@@ -55,7 +57,7 @@ No D1 schema change. No change to any other collector, route or the cron express
 - The picture is cut to the mask's footprint on a canvas; a thin white outline follows the footprint edge; outside it the texture is transparent. It is wrapped on a partial sphere just above the surface (the Ocean heat method), opacity 0.82, never a pick target. Desktop texture 2048 px, phone width 1024 px.
 - Label: **"Frame requested: 12 Nov, 18:00 UTC · 5 h old"** ("Frame:" only if the hub recorded a served time). Second line: "Meteosat (MTG) at 0° · Updated twice daily." plus, when they apply, "Latest update failed at HH:MM UTC." (the hub's own failed run) and "Refresh unavailable." (the page could not refresh).
 - Age states: current to 14 h, stale to 24 h, then **cleared**: nothing drawn, state "unknown". A frame already older than 24 h is never fetched.
-- Refresh: the pointer is re-read every 30 minutes while the tab is visible; never while hidden. A frame already shown is not fetched again. A newer frame replaces the old one in one step (mesh, time and label together) only after both files are verified and decoded.
+- Refresh: the pointer is re-read every 10 minutes while the tab is visible (corrected 13 Nov: this line first said 30; the script was always 10); never while hidden. A frame already shown is not fetched again. A newer frame replaces the old one in one step (mesh, time and label together) only after both files are verified and decoded.
 - Failed first load: nothing drawn, the reason shown with "Nothing is drawn." Failed refresh: the frame stays with its original time, marked "Refresh unavailable."
 - Switching off while files are in flight: a late response never paints.
 - **Added during the build (not in rev 5):** the layer waits up to 60 s for the globe's own backdrop picture before drawing, because it borrows the globe's drawing classes from it. Without this, switching on during a slow backdrop load (we saw about 30 s in Chad's Chrome check of the earlier candidate) would have failed after 5 s. If the backdrop never arrives the card says so and nothing is drawn. Ocean heat has the same dependency with no wait; not changed here.

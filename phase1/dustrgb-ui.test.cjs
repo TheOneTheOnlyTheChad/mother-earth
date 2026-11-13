@@ -3,7 +3,7 @@
  * control (same shapes the real hub produces — see dustrgb-hub.test.mjs). EUMETSAT is never contacted by the page.
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/dustrgb-ui.test.cjs
  * BREAK=<name> weakens the served dustrgb.js; each must fail:
- *   eager refresh-when-off no-verify swap-early late-paint keep-forever refetch-same clear-on-fail hidden-refresh frame-word no-mask no-outline fetch-when-old no-wait */
+ *   eager refresh-when-off no-verify swap-early late-paint keep-forever refetch-same clear-on-fail hidden-refresh frame-word no-mask no-outline fetch-when-old no-wait no-fallback fallback-silent fallback-old refetch-bad old-wording */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto'); const http = require('http'); const { PNG } = require('pngjs');
 const ROOT = path.join(__dirname, '..'); const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
@@ -15,9 +15,9 @@ const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const BREAKS = {
   'eager': [['  paint();\n})();', '  paint(); const iv = setInterval(() => { if (ME.globe && ME.globe()) { clearInterval(iv); setOn(true); } }, 50);\n})();']],
   'refresh-when-off': [['    if (!st.on || st.loading) return;', '    if (st.loading) return;']],
-  'no-verify': [["    if (b.byteLength !== f.bytes || await hex(b) !== f.sha256) throw new Error('a frame file did not match its fingerprint');", '']],
-  'swap-early': [['      let built;\n      try { built = await prepare(f, gen); }', '      let built; if (st.frame) { st.frame = f; paint(); }\n      try { built = await prepare(f, gen); }']],
-  'late-paint': [['if (gen !== st.gen) return null;', '', 'all'], ['      if (!built || gen !== st.gen || !st.on) {', '      if (!built) {'], ['    } finally { if (gen === st.gen) { st.loading = false; paint(); } }', '    } finally { st.loading = false; paint(); }']],
+  'no-verify': [["    if (b.byteLength !== f.bytes || await hex(b) !== f.sha256) throw fileErr('a frame file did not match its fingerprint', true);", '']],
+  'swap-early': [['      let built, err = null;\n      try { built = await prepare(f, gen); }', '      let built, err = null; if (st.frame) { st.frame = f; paint(); }\n      try { built = await prepare(f, gen); }']],
+  'late-paint': [['if (gen !== st.gen) return null;', '', 'all'], ['const late = () => gen !== st.gen || !st.on;', 'const late = () => false;'], ['    } finally { if (gen === st.gen) { st.loading = false; paint(); } }', '    } finally { st.loading = false; paint(); }']],
   'keep-forever': [["    if (st.frame && grade(st.frame) === 'unknown') clearFrame(", "    if (false) clearFrame("]],
   'refetch-same': [['      if (st.frame && st.frame.id === f.id) { st.refreshFailed = false; return; }', '']],
   'clear-on-fail': [['if (st.frame) st.refreshFailed = true; else {', 'destroy(); st.frame = null; {', 'all']],
@@ -26,6 +26,11 @@ const BREAKS = {
   'no-mask': [["    c.globalCompositeOperation = 'destination-in'; c.drawImage(mask, 0, 0, N, N);        // keep", '    // keep']],
   'no-outline': [["    c.globalCompositeOperation = 'source-over'; c.drawImage(ring, 0, 0);", "    c.globalCompositeOperation = 'source-over';"]],
   'no-wait': [['if (Date.now() - t0 > DR.BUILD_WAIT_MS) break;', 'break;']],
+  'no-fallback': [["const prev = err.file && meta.previous && meta.previous.id !== f.id ? { box: f.box, served_time: null, ...meta.previous } : null;", 'const prev = null;']],
+  'fallback-silent': [["      if (st.fallback) bits.push('The latest frame could not be shown; this is the previous one.');\n", '']],
+  'fallback-old': [["      if (prev && grade(prev) !== 'unknown') {", '      if (prev) {']],
+  'refetch-bad': [['      if (err.bad) st.badId = f.id;\n', '']],
+  'old-wording': [['m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ago`;', 'm < 60 ? `${m} min old` : `${Math.floor(m / 60)} h old`;']],
   'fetch-when-old': [["      if (grade(f) === 'unknown') {", '      if (false) {']],
 };
 if (BREAK && !BREAKS[BREAK]) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
@@ -33,9 +38,11 @@ const served = file => { let t = fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 // ---------- fixtures: two pictures, one disc-shaped mask
 const PIC = { a: fs.readFileSync(path.join(__dirname, 'dustrgb-fixtures/picture-a.jpg')), b: fs.readFileSync(path.join(__dirname, 'dustrgb-fixtures/picture-b.jpg')) };
+// a picture with every marker in place (tables, frame size, scan header, end marker) whose compressed data is ruined: it passes the hub's structure check and no browser can decode it
+PIC.bad = (() => { const b = Buffer.from(PIC.a); let i = 2; while (b[i + 1] !== 0xda) i += 2 + ((b[i + 2] << 8) | b[i + 3]); b.fill(0x55, i + 40, b.length - 2); return b; })();
 const MASK = (() => { const p = new PNG({ width: 160, height: 160 }); for (let y = 0; y < 160; y++) for (let x = 0; x < 160; x++) { const i = (y * 160 + x) * 4, inside = Math.hypot(x - 79.5, y - 79.5) <= 72; p.data[i] = 90; p.data[i + 1] = 90; p.data[i + 2] = 200; p.data[i + 3] = inside ? 255 : 0; } return PNG.sync.write(p); })();
 const BACKDROP = (() => { const p = new PNG({ width: 64, height: 32 }); for (let i = 0; i < p.data.length; i += 4) { p.data[i] = 10; p.data[i + 1] = 30; p.data[i + 2] = 60; p.data[i + 3] = 255; } return PNG.sync.write(p); })();
-const frame = (t, pic, extra = {}) => { const id = t.replace(/[-:]/g, '').replace(/00Z$/, 'Z'); return { id, requested_time: t, served_time: null, served_time_source: null, time_basis: 'requested time only', fetched_at: t, box: { south: -80, west: -80, north: 80, east: 80 }, crs: 'EPSG:4326',
+const frame = (t, pic, extra = {}) => { const id = t.replace(/[-:]/g, '').replace(/00Z$/, 'Z') + '-' + sha(Buffer.from(sha(PIC[pic]) + ':' + sha(MASK))).slice(0, 16); /* the hub's pair id: time + a fingerprint of both files */ return { id, requested_time: t, served_time: null, served_time_source: null, time_basis: 'requested time only', fetched_at: t, box: { south: -80, west: -80, north: 80, east: 80 }, crs: 'EPSG:4326',
   picture: { file: 'picture.jpg', path: `/snapshot/dustrgb/${id}/picture.jpg`, type: 'image/jpeg', bytes: PIC[pic].length, sha256: sha(PIC[pic]), w: 2048, h: 2048 },
   mask: { file: 'mask.png', path: `/snapshot/dustrgb/${id}/mask.png`, type: 'image/png', bytes: MASK.length, sha256: sha(MASK), w: 160, h: 160 }, _pic: pic, ...extra }; };
 const TA = '2026-11-12T16:50:00Z', TB = '2026-11-13T05:50:00Z';
@@ -59,6 +66,7 @@ async function setup(browser, hub, opts = {}) {
       let body = m[2] === 'picture.jpg' ? Buffer.from(PIC[f._pic]) : Buffer.from(MASK);
       if (fault === 'tamper') body[body.length >> 1] ^= 0xff;
       if (fault === 'junk') body = Buffer.from('not an image at all');
+      const ff = hub.frameFault[f.id]; if (ff === 404) return j({ status: 'unavailable' }, 404); if (ff === 'tamper') body[body.length >> 1] ^= 0xff;
       return route.fulfill({ status: 200, contentType: m[2] === 'picture.jpg' ? 'image/jpeg' : 'image/png', headers: { 'access-control-allow-origin': '*' }, body }); }
     if (p === '/') return j({ name: 'x', history: { collecting: false, retained: { exists: false } } });
     j({ layer: p.split('/').pop(), retrieved_at: NOW, stale_after_s: 10800, source_status: 'ok', cells: {}, record_format: 'rows', record_fields: [], records: [], quantity: 'q', sweep: { answered: 0, cells_total: 559, oldest_queried_at: NOW }, index: null }); });
@@ -69,7 +77,7 @@ async function setup(browser, hub, opts = {}) {
   if (!opts.noWebGL && !opts.backdrop) await page.waitForFunction(() => { const g = ME.globe && ME.globe(); if (!g) return false; let ok = false; g.scene().traverse(o => { if (o.isMesh && o.material === g.globeMaterial() && o.material.map) ok = true; }); return ok; }, null, { timeout: 30000 });   // the globe has finished building
   return { ctx, page, errs };
 }
-const newHub = () => ({ reqs: [], eumetsat: [], frame: frame(TA, 'a'), previous: null, lastAttempt: null, metaStatus: 200, fault: {}, holdPicture: null, afterMeta: null });
+const newHub = () => ({ reqs: [], eumetsat: [], frame: frame(TA, 'a'), previous: null, lastAttempt: null, metaStatus: 200, fault: {}, frameFault: {}, holdPicture: null, afterMeta: null });
 const st = page => page.evaluate(() => ME.dustRgb.state());
 const setNow = (page, ms) => page.evaluate(t => { ME.dustRgb.opts.now = () => t; }, ms);
 const on = async page => { await page.click('#tgl-dustrgb'); await page.waitForFunction(() => !ME.dustRgb.state().loading && ME.dustRgb.state().status !== 'loading', null, { timeout: 20000 }); };
@@ -98,7 +106,7 @@ let BASE;
     await setNow(page, T0 + 5 * H + 20 * 60e3); await on(page); s = await st(page);
     ok('B on: exactly three hub requests — the pointer, one picture, one mask', JSON.stringify(hub.reqs) === JSON.stringify(['/snapshot/dustrgb/meta', hub.frame.picture.path, hub.frame.mask.path]), hub.reqs);
     ok('B on: the page never contacts EUMETSAT', hub.eumetsat.length === 0, hub.eumetsat);
-    ok('B label: "Frame requested: 12 Nov, 16:50 UTC · 5 h old"', s.label === 'Frame requested: 12 Nov, 16:50 UTC · 5 h old', s.label);
+    ok('B label: "Frame requested: 12 Nov, 16:50 UTC (5 h ago)"', s.label === 'Frame requested: 12 Nov, 16:50 UTC (5 h ago)', s.label);
     ok('B second line: satellite and cadence; no failure text', s.extra === 'Meteosat (MTG) at 0° · Updated twice daily.', s.extra);
     ok('B state: current, switch checked, one mesh in the scene', s.stateWord === 'current' && s.grade === 'current' && s.meshes === 1 && s.inScene === 1 && await page.$eval('#tgl-dustrgb', b => b.getAttribute('aria-checked') === 'true'), s);
     const t = await tex(page);
@@ -107,9 +115,9 @@ let BASE;
     ok('B texture: a thin outline runs along the footprint edge (white ring just inside it)', t && t.ringY >= 0 && t.ringY - t.firstOpaqueY <= t.N * 0.02, t);
     ok('B mesh covers the frame box only (160° of longitude and latitude), and is never a pick target', await page.evaluate(() => { const g = ME.globe(); let m = null; g.scene().traverse(o => { if (o.__dustRgb) m = o; }); const p = m.geometry.parameters; return Math.abs(p.phiLength - Math.PI * 2 * 160 / 360) < 1e-6 && Math.abs(p.thetaLength - Math.PI * 160 / 180) < 1e-6 && Math.abs(p.thetaStart - Math.PI * 10 / 180) < 1e-6 && m.material.transparent === true && m.material.opacity < 1; }));
     // ---- C. age states from a faked clock
-    await setNow(page, T0 + 59 * 60e3); await page.evaluate(() => ME.dustRgb.ageTick()); ok('C age under an hour is shown in minutes', (await st(page)).label.endsWith('59 min old'));
-    await setNow(page, T0 + 13.9 * H); await page.evaluate(() => ME.dustRgb.ageTick()); s = await st(page); ok('C 13.9 h: still current', s.stateWord === 'current' && s.label.endsWith('13 h old'), s);
-    await setNow(page, T0 + 14.5 * H); await page.evaluate(() => ME.dustRgb.ageTick()); s = await st(page); ok('C 14.5 h: stale, still shown with its age', s.stateWord === 'stale' && s.meshes === 1 && s.label.endsWith('14 h old'), s);
+    await setNow(page, T0 + 59 * 60e3); await page.evaluate(() => ME.dustRgb.ageTick()); ok('C age under an hour is shown in minutes, in brackets after the requested time', (await st(page)).label.endsWith('(59 min ago)'));
+    await setNow(page, T0 + 13.9 * H); await page.evaluate(() => ME.dustRgb.ageTick()); s = await st(page); ok('C 13.9 h: still current', s.stateWord === 'current' && s.label.endsWith('(13 h ago)'), s);
+    await setNow(page, T0 + 14.5 * H); await page.evaluate(() => ME.dustRgb.ageTick()); s = await st(page); ok('C 14.5 h: stale, still shown with its age', s.stateWord === 'stale' && s.meshes === 1 && s.label.endsWith('(14 h ago)'), s);
     await setNow(page, T0 + 24.2 * H); await page.evaluate(() => ME.dustRgb.ageTick()); s = await st(page);
     ok('C past 24 h: cleared — nothing painted, state unknown, the card says why', s.stateWord === 'unknown' && s.meshes === 0 && s.label === null && /more than 24 hours old and has been cleared\. Nothing is drawn\./.test(s.off || ''), s);
     ok('A–C no page errors', errs.length === 0, errs); await ctx.close(); }
@@ -120,7 +128,7 @@ let BASE;
 
   // ===== B2. if the hub ever records a served time, the label says "Frame"
   { const hub = newHub(); hub.frame = frame(TA, 'a', { served_time: TA, served_time_source: 'server Warning header' }); const { ctx, page } = await setup(browser, hub); await setNow(page, T0 + 2 * H); await on(page);
-    ok('B2 served time known: "Frame: 12 Nov, 16:50 UTC · 2 h old"', (await st(page)).label === 'Frame: 12 Nov, 16:50 UTC · 2 h old', (await st(page)).label); await ctx.close(); }
+    ok('B2 served time known: "Frame: 12 Nov, 16:50 UTC (2 h ago)"', (await st(page)).label === 'Frame: 12 Nov, 16:50 UTC (2 h ago)', (await st(page)).label); await ctx.close(); }
 
   // ===== D. a failed FIRST load leaves the globe clear
   for (const [name, mut, re] of [
@@ -142,18 +150,18 @@ let BASE;
     let release; hub.holdPicture = new Promise(r => { release = r; }); hub.previous = hub.frame; hub.frame = frame(TB, 'b'); await setNow(page, Date.parse(TB) + 1 * H);
     n = hub.reqs.length; const pending = refresh(page); await page.waitForTimeout(700);
     let s = await st(page);
-    ok('E while the newer frame is still loading: the old frame, its own time and its mesh are all still shown', s.frameId === '20261112T1650Z' && /^Frame requested: 12 Nov, 16:50 UTC/.test(s.label) && s.meshes === 1 && (await tex(page)).centre.join() === tA.centre.join(), s);
+    ok('E while the newer frame is still loading: the old frame, its own time and its mesh are all still shown', String(s.frameId).startsWith('20261112T1650Z-') && /^Frame requested: 12 Nov, 16:50 UTC/.test(s.label) && s.meshes === 1 && (await tex(page)).centre.join() === tA.centre.join(), s);
     release(); hub.holdPicture = null; await pending; await page.waitForFunction(() => !ME.dustRgb.state().loading); s = await st(page); const tB = await tex(page);
-    ok('E after it loads: label, frame and texture have all changed together; exactly one mesh', s.frameId === '20261113T0550Z' && s.label === 'Frame requested: 13 Nov, 05:50 UTC · 1 h old' && s.meshes === 1 && s.inScene === 1 && tB.centre[1] > 120 && tB.centre[0] < 100, [s, tB]);
+    ok('E after it loads: label, frame and texture have all changed together; exactly one mesh', String(s.frameId).startsWith('20261113T0550Z-') && s.label === 'Frame requested: 13 Nov, 05:50 UTC (1 h ago)' && s.meshes === 1 && s.inScene === 1 && tB.centre[1] > 120 && tB.centre[0] < 100, [s, tB]);
     ok('E the refresh fetched the new pair once: pointer, picture, mask', JSON.stringify(hub.reqs.slice(n)) === JSON.stringify(['/snapshot/dustrgb/meta', hub.frame.picture.path, hub.frame.mask.path]), hub.reqs.slice(n));
     ok('E only one dust mesh exists in the scene (the old one was removed and disposed)', await page.evaluate(() => { let k = 0; ME.globe().scene().traverse(o => { if (o.__dustRgb) k++; }); return k; }) === 1);
     // F. failed refresh, pointer unreachable
     hub.metaStatus = 503; await refresh(page); s = await st(page);
-    ok('F refresh fails (hub unreachable): the frame stays with its ORIGINAL time; "Refresh unavailable." is shown', s.frameId === '20261113T0550Z' && /^Frame requested: 13 Nov, 05:50 UTC/.test(s.label) && s.meshes === 1 && /Refresh unavailable\./.test(s.extra) && s.refreshFailed === true, s);
+    ok('F refresh fails (hub unreachable): the frame stays with its ORIGINAL time; "Refresh unavailable." is shown', String(s.frameId).startsWith('20261113T0550Z-') && /^Frame requested: 13 Nov, 05:50 UTC/.test(s.label) && s.meshes === 1 && /Refresh unavailable\./.test(s.extra) && s.refreshFailed === true, s);
     hub.metaStatus = 200; await refresh(page); s = await st(page); ok('F a later good refresh removes "Refresh unavailable."', !/Refresh unavailable/.test(s.extra) && s.refreshFailed === false, s);
     // F2. a newer frame whose picture cannot be loaded
     const TC = '2026-11-13T17:50:00Z'; hub.previous = hub.frame; hub.frame = frame(TC, 'a'); hub.fault['picture.jpg'] = 'tamper'; await setNow(page, Date.parse(TC) + 0.5 * H); await refresh(page); s = await st(page);
-    ok('F refresh fails (new picture does not match): the existing frame and its original time are kept, marked "Refresh unavailable."', s.frameId === '20261113T0550Z' && /^Frame requested: 13 Nov, 05:50 UTC · 12 h old/.test(s.label) && s.meshes === 1 && /Refresh unavailable\./.test(s.extra) && (await tex(page)).centre.join() === tB.centre.join(), s);
+    ok('F refresh fails (new picture does not match): the existing frame and its original time are kept, marked "Refresh unavailable."', String(s.frameId).startsWith('20261113T0550Z-') && /^Frame requested: 13 Nov, 05:50 UTC \(12 h ago\)/.test(s.label) && s.meshes === 1 && /Refresh unavailable\./.test(s.extra) && (await tex(page)).centre.join() === tB.centre.join(), s);
     // the hub reports its own failed run
     hub.fault = {}; hub.frame = hub.previous; hub.previous = null; hub.lastAttempt = { run: '2026-11-13T18:07:00.000Z', failed_at: '2026-11-13T18:07:12.000Z', status: 'down', http: 502, reason: 'frame list http error', consecutive_failures: 1 }; await refresh(page); s = await st(page);
     ok('F the hub\'s own failed run is shown at once beside the retained frame: "Latest update failed at 18:07 UTC."', /Latest update failed at 18:07 UTC\./.test(s.extra) && s.meshes === 1 && !/502|frame list/.test(s.extra), s);
@@ -172,7 +180,7 @@ let BASE;
     const n = hub.reqs.length; await refresh(page); await page.waitForTimeout(300);
     ok('G while off, a refresh makes no request', hub.reqs.length === n, hub.reqs.slice(n));
     hub.holdPicture = null; await on(page); s = await st(page);
-    ok('G switching on again afterwards works normally', s.meshes === 1 && s.frameId === '20261112T1650Z', s);
+    ok('G switching on again afterwards works normally', s.meshes === 1 && String(s.frameId).startsWith('20261112T1650Z-'), s);
     await page.click('#tgl-dustrgb'); s = await st(page);
     ok('G switching off removes the mesh and the time line', s.meshes === 0 && s.label === null && await page.evaluate(() => { let k = 0; ME.globe().scene().traverse(o => { if (o.__dustRgb) k++; }); return k; }) === 0, s);
     ok('G no page errors', errs.length === 0, errs); await ctx.close(); }
@@ -182,8 +190,8 @@ let BASE;
     // the page reads the pointer (frame A); before it asks for the files the hub publishes B and keeps A as "previous"
     hub.afterMeta = () => { hub.previous = hub.frame; hub.frame = frame(TB, 'b'); };
     await on(page); const s = await st(page), t = await tex(page);
-    ok('H across a swap: the page asked for frame A\'s files after the hub had moved on, and painted A\'s matching picture and mask', s.frameId === '20261112T1650Z' && s.meshes === 1 && files(hub).every(p => p.includes('20261112T1650Z')) && t.centre[0] > 150 && t.centre[1] < 110 && t.corner[3] === 0, [s, files(hub), t]);
-    await refresh(page); ok('H the next refresh moves to frame B', (await st(page)).frameId === '20261113T0550Z'); await ctx.close(); }
+    ok('H across a swap: the page asked for frame A\'s files after the hub had moved on, and painted A\'s matching picture and mask', String(s.frameId).startsWith('20261112T1650Z-') && s.meshes === 1 && files(hub).every(p => p.includes('20261112T1650Z')) && t.centre[0] > 150 && t.centre[1] < 110 && t.corner[3] === 0, [s, files(hub), t]);
+    await refresh(page); ok('H the next refresh moves to frame B', String((await st(page)).frameId).startsWith('20261113T0550Z-')); await ctx.close(); }
 
   // ===== I. hidden tab: no refresh requests
   { const hub = newHub(); const { ctx, page } = await setup(browser, hub); await setNow(page, T0 + 2 * H); await page.evaluate(() => { ME.dustRgb.config.REFRESH_MS = 250; }); await on(page);
@@ -204,6 +212,28 @@ let BASE;
   { const hub = newHub(); const { ctx, page, errs } = await setup(browser, hub, { backdrop: 'never' }); await setNow(page, T0 + 2 * H); await page.waitForFunction(() => ME.globe && ME.globe(), null, { timeout: 30000 });
     await page.evaluate(() => { ME.dustRgb.config.BUILD_WAIT_MS = 1500; }); await page.click('#tgl-dustrgb'); await page.waitForFunction(() => ME.dustRgb.state().status === 'unknown', null, { timeout: 20000 }).catch(() => {}); const s = await st(page);
     ok('M backdrop never arrives: after the wait the card says so plainly; nothing painted; no error', s.meshes === 0 && s.stateWord === 'unknown' && /globe has not finished loading its own picture/.test(s.off || '') && /Nothing is drawn\./.test(s.off || '') && errs.length === 0, [s, errs]); await ctx.close(); }
+
+  // ===== N. GPT review 2: the newest pair cannot be used, the hub still holds the previous one
+  { const hub = newHub(); hub.previous = frame(TA, 'a'); hub.frame = frame(TB, 'bad'); const { ctx, page, errs } = await setup(browser, hub); await setNow(page, Date.parse(TB) + 2 * H); await on(page); let s = await st(page);
+    ok('N newest picture has the right fingerprint but does not decode: a first-time visitor is shown the PREVIOUS pair, under its own time', s.meshes === 1 && s.frameId === hub.previous.id && s.label === 'Frame requested: 12 Nov, 16:50 UTC (15 h ago)' && s.stateWord === 'stale' && s.fallback === true && errs.length === 0, [s, errs]);
+    ok('N the card says so plainly', /The latest frame could not be shown; this is the previous one\./.test(s.extra) && !/Refresh unavailable/.test(s.extra), s.extra);
+    const t = await tex(page); ok('N what is drawn is the previous pair\'s own picture, cut to its mask', t.centre[0] > 150 && t.centre[1] < 110 && t.corner[3] === 0, t);
+    let n = hub.reqs.length; await refresh(page); await refresh(page);
+    ok('N the unusable pair is not downloaded again on later refreshes (pointer only)', JSON.stringify(hub.reqs.slice(n)) === '["/snapshot/dustrgb/meta","/snapshot/dustrgb/meta"]' && (await st(page)).frameId === hub.previous.id, hub.reqs.slice(n));
+    const TD = '2026-11-13T17:50:00Z'; hub.previous = hub.frame; hub.frame = frame(TD, 'b'); await setNow(page, Date.parse(TD) + 1 * H); await refresh(page); s = await st(page);
+    ok('N when a good newer frame arrives it replaces the fallback and the note goes', s.frameId === hub.frame.id && s.fallback === false && !/previous one/.test(s.extra) && s.label === 'Frame requested: 13 Nov, 17:50 UTC (1 h ago)', s);
+    await ctx.close(); }
+  for (const [name, fault] of [['is missing (404)', 404], ['does not match its fingerprint', 'tamper']]) {
+    const hub = newHub(); hub.previous = frame(TA, 'a'); hub.frame = frame(TB, 'b'); hub.frameFault[hub.frame.id] = fault; const { ctx, page } = await setup(browser, hub); await setNow(page, Date.parse(TB) + 1 * H); await on(page); const s = await st(page);
+    ok(`N newest pair ${name}: the previous pair is shown with the note`, s.meshes === 1 && s.frameId === hub.previous.id && s.fallback === true && /previous one/.test(s.extra), s); await ctx.close(); }
+  { const hub = newHub(); hub.previous = frame(TA, 'a'); hub.frame = frame(TB, 'bad'); const { ctx, page } = await setup(browser, hub); await setNow(page, T0 + 25 * H); await on(page); const s = await st(page);
+    ok('N a previous pair older than 24 h is NOT used as a fallback: nothing drawn, not even fetched', s.meshes === 0 && s.stateWord === 'unknown' && /could not be decoded/.test(s.off || '') && !hub.reqs.some(p => p.includes(hub.previous.id)), [s, hub.reqs]); await ctx.close(); }
+  { const hub = newHub(); hub.previous = frame(TA, 'bad'); hub.frame = frame(TB, 'bad'); const { ctx, page, errs } = await setup(browser, hub); await setNow(page, Date.parse(TB) + 1 * H); await on(page); const s = await st(page);
+    ok('N both pairs unusable: nothing drawn, state unknown, reason shown, no error', s.meshes === 0 && s.stateWord === 'unknown' && /Nothing is drawn\./.test(s.off || '') && errs.length === 0, [s, errs]); await ctx.close(); }
+  { // the hub suite's success fixtures are real images: a browser decodes both
+    const ctx = await browser.newContext(); const page = await ctx.newPage(); await page.goto(BASE + '/sources.html', { waitUntil: 'domcontentloaded' });
+    const r = await page.evaluate(async () => { const out = {}; for (const [k, u] of [['pic', '/phase1/dustrgb-fixtures/hub-picture.jpg'], ['mask', '/phase1/dustrgb-fixtures/hub-mask.png']]) { const bm = await createImageBitmap(await (await fetch(u)).blob()); const c = new OffscreenCanvas(bm.width, bm.height), g = c.getContext('2d'); g.drawImage(bm, 0, 0); out[k] = { w: bm.width, h: bm.height, centre: [...g.getImageData(bm.width >> 1, bm.height >> 1, 1, 1).data], corner: [...g.getImageData(0, 0, 1, 1).data] }; } return out; });
+    ok('N the hub suite\'s success fixtures decode in a browser: picture 2048 x 2048; mask 160 x 160 with an opaque centre and a clear corner', r.pic.w === 2048 && r.pic.h === 2048 && r.pic.centre[3] === 255 && r.mask.w === 160 && r.mask.h === 160 && r.mask.centre[3] === 255 && r.mask.corner[3] === 0, r); await ctx.close(); }
 
   // ===== J. phone width uses the smaller texture; K. no WebGL; L. Sources
   { const hub = newHub(); const { ctx, page } = await setup(browser, hub, { viewport: { width: 390, height: 844 } }); await setNow(page, T0 + 2 * H);
