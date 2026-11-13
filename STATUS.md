@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 09:47 UTC (clock reading at write) — **skycraft-rc rounds 2 and 3** (GPT's findings fixed; branch only; release steps on hold for GPT)
+
+- GPT reviewed `b4f3984` (round 1): hold. Two hub defects and a Sky return bug. Round 2 (`6b7adb5`): lock release is ownership-safe and nothing is deleted; a run that lost its lock makes no further Horizons request; a Parker-only failure no longer cancels the LRO capture (back-off only on no answer, HTTP 429 or 5xx); provenance needs the source tag and the data-sheet revision; the probe says the User-Agent is the header the hub set, receipt not verified; leaving from between the Moon and Sun stops returns to a stop that shows the link used.
+- GPT reviewed round 2: one path left (a Parker pointer failure threw past the LRO request). Round 3 (`a5f483f`): pointer read and write failures are Parker outcomes; anything either part throws is that part's own outcome.
+- Tests at round 3: skycraft-hub 164 (29 breaks fail), skycraft-ui 77 (19 breaks fail); full regression 57 of 57 run passed, 09:16:49–09:45:04 UTC (from the run log).
+- Recorded open item: Parker coverage gap 20 Jan – 17 Feb 2027 (two segments listed in the current data sheet; samples there are withheld).
+- Packets on the branch and in the Project: `reviews/2026-11-13-skycraft-rc.md`, `-r2.md`, `-r3.md`. Review copies on the Mac: `_review/skycraft-rc`, `-r2`, `-r3`.
+- **Live unchanged:** hub 0.6.11, page `bdf894f`. **Next:** GPT's read of round 3; then Chad's lines, starting with the R2 upload of the two example files.
+
 ## 13 Nov 08:06 UTC (clock reading at write) — **Moon and Sun spacecraft: candidate `skycraft-rc` built (branch only)**
 
 New thread. Chad brought GPT's proposal (Moon and Sun pages, LRO and Parker Solar Probe). Record so far, all docs or branch:
