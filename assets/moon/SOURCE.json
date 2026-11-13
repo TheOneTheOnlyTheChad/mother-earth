@@ -1,0 +1,14 @@
+{
+  "file": "lroc_color_2k.jpg",
+  "bytes": 457942,
+  "sha256": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170",
+  "pixels": [2048, 1024],
+  "source_url": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_2k.jpg",
+  "source_page": "https://svs.gsfc.nasa.gov/4720",
+  "source_title": "CGI Moon Kit (NASA Scientific Visualization Studio), colour map, 2025 version",
+  "source_last_modified": "Wed, 03 Dec 2025 19:56:17 GMT",
+  "retrieved_utc": "2026-11-13T17:26:55Z",
+  "credit": "NASA's Scientific Visualization Studio",
+  "modifications": "none; served unchanged",
+  "note": "The source page says its colour maps are tuned for appearance, not science."
+}
