@@ -11,7 +11,7 @@ const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.e
 const ROOT = path.join(__dirname, '..');
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
 const TEX = path.join(ROOT, 'assets/moon/lroc_color_2k.jpg');
-const PIN = { sha256: '@@SHA@@', bytes: 457942, w: 2048, h: 1024 };
+const PIN = { sha256: 'f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170', bytes: 457942, w: 2048, h: 1024 };
 let pass = 0, fail = 0;
 const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log('FAIL', name, info !== undefined ? JSON.stringify(info).slice(0, 300) : ''); } };
 // synthetic map: patches at known selenographic places (lat, east longitude)
