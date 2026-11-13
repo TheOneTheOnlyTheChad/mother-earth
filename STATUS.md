@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 19:20 UTC (clock reading at write) — **Moon and Sun header tabs RELEASED** (merge `3bd4db9`; page only; hub unchanged)
+
+GPT (relayed by Chad): `d48faa6` passes review. Chad: "Approve: push nav-tabs-rc to main (page change: Moon and Sun header tabs and menu entries)".
+
+- No-ff merge `3bd4db9`, pushed 19:16:36 UTC. **Served files exact at 19:18:34 UTC, the six that changed:** `index.html` `5abf2f2c…b1e6`, `moon.html` `89c93f05…3a0d`, `sun.html` `34954607…32e3`, `sources.html` `014c04ad…df2e`, `timeline.html` `9f270265…a4c4`, `style.css` `f8d8bc86…b3d6`. (At 19:17:05 UTC all six still showed the previous files.)
+- **Live read 19:18:49 UTC** (browser pane, 588 px wide, so the phone layout): tabs Earth now · Timeline · Moon · Sun with the right targets and the current page marked; menu World View, Timeline, Moon, Sun, Sources & Details; clock with its UTC label; no sideways overflow; stylesheet `202612041200`.
+- What changed: four header tabs and two menu entries on all five pages; header rules so the UTC label is never hidden and the promise line is 11 px where shown and hidden below 1140 px. Packets: `reviews/2026-11-13-nav-tabs-rc.md`, `-r2.md`. Full regression at `f9445e3`: 57 of 57.
+- Not checked: real phone, Safari, screen reader.
+
+**In review, not merged — Moon globe** (branch `moon-globe-rc` @ `12e42f3`, built on the tabs branch): NASA SVS colour map on a globe, evenly lit, near side first, six buttons. GPT passed round 2. Order from here: REGISTER entry for the NASA SVS map (Chad's Approve line) → push (Chad's Approve line). Packets `reviews/2026-11-13-moon-globe-rc.md`, `-r2.md` are on that branch. Proposal for both globes: `docs/concepts/MOON-SUN-GLOBES-PROPOSAL.md` rev 2.3 (on that branch; Sun not started).
+
 ## 13 Nov 10:49 UTC (clock reading at write) — **Moon and Sun spacecraft pages RELEASED** (merge `c4e3162`; hub 0.6.12; main = live)
 
 GPT (relayed by Chad): `1920026` passes review for the page release; two REGISTER corrections applied (`7d3e4f0`). Chad: "Approve: push skycraft-rc to main (page change: Moon and Sun spacecraft pages, Sky Explore links, Sources section)".
