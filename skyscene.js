@@ -265,6 +265,7 @@
     $('zoom-ui').hidden = true; document.body.classList.remove('sky-zoom'); $('zoom-svg').innerHTML = ''; $('tgl-zoom').textContent = 'Zoom out to the Moon and Sun';
     if (sv.sheetWasOpen && $('sheet').classList.contains('collapsed')) $('sheet-btn').click();
     st.open = false; st.saved = null; st.last = null; st.target = null;
+    links(); forget();   // closed by the visitor: nothing to reopen on a later Back
     say('');
     const back = $('tgl-zoom'); if (back) back.focus();
   }
@@ -307,6 +308,35 @@
     st.placing = true; setS(st.s + dir * STEP, 'keep'); st.placing = false; announce();
   }
   function goStop(n) { if (!st.open || !st.path) return; st.placing = true; setS(n); st.placing = false; }
+
+  // ---------- Explore links (MOON-AND-SUN-BUILD-PROPOSAL rev 2.1 §5): ordinary links, shown while that body is in the view,
+  // carrying the time this scene displays. Leaving records the stop against THIS history entry; coming back (browser Back, or
+  // the destination's "Back to Earth") reopens the view at that stop and returns focus to the link. Camera is not restored.
+  const EXPLORE = { moon: 'zoom-moon', sun: 'zoom-sun' };
+  let linkKey = '';
+  function links() {
+    const on = st.open && !!st.rows, show = { moon: on && (st.free || st.s >= 0.5), sun: on && (st.sunShown || (!st.free && st.s > 1)) };
+    const key = `${show.moon}|${show.sun}|${st.date}`; if (key === linkKey) return; linkKey = key;
+    for (const b of ['moon', 'sun']) { const a = $(EXPLORE[b]); if (!a) continue; a.hidden = !show[b]; a.href = show[b] ? `${b}.html?t=${st.date}T00%3A00%3A00Z` : `${b}.html`; }
+  }
+  function leave(ev, body) {
+    if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;   // new tab or window: the browser's own business, nothing recorded
+    const rec = { stop: st.free ? (body === 'moon' ? 1 : 2) : Math.round(st.s), link: EXPLORE[body], rev: REV };
+    try { history.replaceState({ ...(history.state || {}), skyReturn: rec }, ''); } catch (_) {}
+    try { sessionStorage.setItem('me.sky.out', String(Date.now())); } catch (_) {}
+  }
+  const forget = () => { try { if (history.state && history.state.skyReturn) { const o = { ...history.state }; delete o.skyReturn; history.replaceState(o, ''); } } catch (_) {} };
+  async function comeBack() {
+    const rec = history.state && history.state.skyReturn;
+    if (!rec || rec.rev !== REV || ![0, 1, 2].includes(rec.stop) || !(rec.link in { 'zoom-moon': 1, 'zoom-sun': 1 })) return;
+    if (!st.open) { for (let i = 0; i < 100 && !(ME.globe && ME.globe()); i++) await new Promise(r => setTimeout(r, 100));
+      if (ME.skyState && !ME.skyState().on) $('tgl-sky').click();   // the zoom-out button lives inside the Two Clocks card: show the card it was opened from
+      await enter(); }
+    if (!st.open) return;                // could not reopen (no row for today, file unavailable…): the status line says why
+    rollover(); if (!st.rows) return;    // midnight passed while away: the view shows the new date, or says there is none
+    goStop(rec.stop); links();
+    const a = $(rec.link); if (a && !a.hidden) a.focus();
+  }
 
   // ---------- per-frame: near plane, overlay (lines, rings, tags), state for the text and tests
   function project(p) { const g = ME.globe(); const c = g.getScreenCoords; const R = st.meshes.geo.R;
@@ -367,7 +397,7 @@
       bar: (r => ({ x: r.left - gr.left, y: r.top - gr.top, w: r.width, h: r.height }))($('zoom-bar').getBoundingClientRect()),
       cam: cp, sunShown: st.sunShown, scale: $('zoom-scale').textContent };
   }
-  function loop() { const f = () => { if (!st.open) return; frame(); st.raf = requestAnimationFrame(f); }; st.raf = requestAnimationFrame(f); }
+  function loop() { const f = () => { if (!st.open) return; frame(); links(); st.raf = requestAnimationFrame(f); }; st.raf = requestAnimationFrame(f); }
 
   // ---------- words: scale line, strip, text equivalent, status line
   function scaleLine() { return st.sunShown || (!st.free && st.s > 1) ? TXT.C : TXT.B; }
@@ -377,7 +407,7 @@
     $('zoom-scale').textContent = scaleLine();
     const n = stopName(); for (const k of ['a', 'b', 'c']) $('zoom-' + k).setAttribute('aria-pressed', String(n === k.toUpperCase()));
     $('zoom-reframe').hidden = !st.free;
-    writeStrip();
+    writeStrip(); links();
   }
   const km = v => Math.round(v).toLocaleString('en-GB') + ' km', mkm = v => (v / 1e6).toFixed(1) + ' million km';
   const deg = (v, p, n) => `${Math.abs(v).toFixed(2)}° ${v < 0 ? n : p}`;
@@ -403,7 +433,7 @@
     const rows = rowsFor(d);
     st.date = d; st.rows = rows;
     if (!rows) { st.meshes.moon.visible = st.meshes.sun.visible = false; cancelAnimationFrame(st.raf); st.raf = 0; $('zoom-svg').innerHTML = '';
-      $('zoom-dist').innerHTML = ''; $('zoom-when').textContent = `No computed position for today (${nice(d)}).`; $('zoom-text').innerHTML = `<p>No computed position for today (${esc(nice(d))}).</p>`; return; }
+      $('zoom-dist').innerHTML = ''; $('zoom-when').textContent = `No computed position for today (${nice(d)}).`; $('zoom-text').innerHTML = `<p>No computed position for today (${esc(nice(d))}).</p>`; links(); return; }
     st.meshes.moon.visible = true; st.meshes.geo = bodiesFor(rows); positionMeshes(); $('zoom-scale').textContent = TXT.C; writeStrip(true); buildPath(); st.placing = true; setS(st.s); st.placing = false;
     writeText(); writeStrip(); if (!st.raf) loop();
   }
@@ -415,6 +445,8 @@
   $('zoom-b').addEventListener('click', () => goStop(1));
   $('zoom-c').addEventListener('click', () => goStop(2));
   $('zoom-reframe').addEventListener('click', () => goStop(Math.round(st.s)));
+  for (const b of ['moon', 'sun']) { const el = $(EXPLORE[b]); if (el) el.addEventListener('click', ev => leave(ev, b)); }
+  window.addEventListener('pageshow', () => { comeBack(); });   // first load of a history entry, or a page restored from the back/forward cache
   setInterval(rollover, ME.REFRESH_MS);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') rollover(); });
 

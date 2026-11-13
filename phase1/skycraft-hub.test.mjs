@@ -124,6 +124,8 @@ globalThis.Date = class extends RealDate { constructor(...a) { if (a.length) sup
   ok('R a Parker answer is refused as LRO', W.hzParse(P, S.LRO).reason === 'wrong object in response');
   const B = JSON.parse(fs.readFileSync(path.join(HERE, 'skycraft/BUILD.json'), 'utf8')).catalogues;
   ok('R Worker pins = generator record', Object.entries(W.CRAFT_REVISIONS).every(([k, p]) => B[k] && B[k].sha256 === p.fileSha256 && B[k].bytes === p.bytes && sha(fs.readFileSync(path.join(HERE, 'skycraft', B[k].file))) === p.fileSha256));
+  const page = fs.readFileSync(path.join(HERE, '..', 'craft.js'), 'utf8');
+  ok('R the page pins the same two files', Object.values(W.CRAFT_REVISIONS).every(p => page.includes(`rev: '${p.revision}', sha: '${p.fileSha256}'`)));
   ok('R the synthetic answer has the real layout (same parser, same fields)', W.hzParse(answer('psp', [NOW]), S.PARKER).ok && W.hzParse(answer('lro', [NOW]), S.LRO).ok);
 }
 // ---------- A. gate and schedule, through the real hourly job

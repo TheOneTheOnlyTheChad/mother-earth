@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Sun · spacecraft · Mother Earth</title>
+<meta name="description" content="Parker Solar Probe: where its published trajectory places it, with the source and time beside every position.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=202612031000">
+</head>
+<body class="doc craft" data-body="sun">
+<header class="top">
+  <h1>Mother Earth</h1>
+  <div class="promise">The Sun · spacecraft</div>
+  <nav class="tabs" aria-label="Views">
+    <a href="index.html" data-view="earth">Earth now</a>
+    <a href="timeline.html" data-view="timeline">Timeline</a>
+  </nav>
+  <div class="clock" id="clock">--:--:--<span>UTC</span></div>
+  <nav class="menu" aria-label="Pages">
+    <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
+    <ul id="menu-list" role="menu">
+      <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
+      <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
+      <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="craft-main" class="craftmain">
+  <p class="cback"><a id="craft-back" href="index.html">Back to Earth</a></p>
+  <h2 id="craft-h">The Sun · spacecraft</h2>
+  <p class="lede">One spacecraft at the Sun, drawn from its published trajectory. Positions are calculated or predicted by the source named beside them; nothing here is observed by Mother Earth.</p>
+
+  <section id="craft-view" class="cview" aria-labelledby="craft-vh">
+    <h3 id="craft-vh">Parker Solar Probe</h3>
+    <p id="craft-state" class="cstate" role="status">loading…</p>
+    <div id="craft-unavail" class="cunavail" hidden></div>
+    <div id="craft-stage" class="cstage" hidden>
+      <svg id="craft-svg" class="csvg" role="img" aria-labelledby="craft-state" focusable="false"></svg>
+      <p id="craft-scale" class="cscale"></p>
+    </div>
+    <div id="craft-controls" class="cctl" hidden>
+      <button type="button" id="craft-prev" aria-label="Earlier sample">◀</button>
+      <input type="range" id="craft-range" min="0" max="1" step="1" value="0" aria-label="Time of the position shown">
+      <button type="button" id="craft-next" aria-label="Later sample">▶</button>
+      <output id="craft-time" for="craft-range"></output>
+    </div>
+    <dl id="craft-read" class="cread"></dl>
+    <noscript><p class="cunavail">The drawing needs JavaScript. The mission and its sources are described below.</p></noscript>
+  </section>
+
+  <section id="craft-missions" aria-labelledby="craft-mh">
+    <h3 id="craft-mh">Mission on this page</h3>
+    <ul class="cmissions">
+      <li><button type="button" id="craft-mission-0" aria-pressed="true">Parker Solar Probe</button>
+      <p>NASA’s Parker Solar Probe follows a long, narrow orbit around the Sun, diving through the Sun’s outer atmosphere about every 88 days to sample it directly. Other solar observatories watch from Earth orbit or from near an Earth–Sun balance point; this page shows Parker only.</p>
+      <p class="dim">Mission status: no separate status statement was checked. The trajectory source says its solution is “Fit to post-launch tracking data through 2026-Sep-29”. Source: NASA/JPL Horizons data sheet for Parker Solar Probe, revised 3 Nov 2026; checked 13 Nov 2026.</p></li>
+    </ul>
+  </section>
+
+  <section id="craft-sources" aria-labelledby="craft-sh">
+    <h3 id="craft-sh">Sources and method</h3>
+    <ul>
+      <li><b>Both the dated example (22–27 December 2024) and the position for a current time:</b> NASA/JPL Horizons, Sun-centred positions in the ICRF frame. The example is sampled every 10 minutes; the current read is hourly, fetched once a day by the Mother Earth hub. This page never contacts Horizons. <a href="https://ssd.jpl.nasa.gov/horizons/" rel="noopener">Horizons</a></li>
+      <li><b>Trajectory description:</b> taken from the Horizons data sheet returned in the same answer as the positions. December 2024 lies inside what Horizons calls its fit to tracking data; dates after 29 September 2026 are on what it calls a reference planning trajectory.</li>
+      <li><b>Closest approach:</b> the figure given is NASA’s, from its own report. The “closest sample” is the nearest of this page’s 10-minute points and is not the exact minimum.</li>
+      <li><b>Cross-product check:</b> compared with NASA/GSFC SPDF’s hourly product PSP_HELIO1HR_POSITION (DOI 10.48322/ecnj-rx61; data provided by N. E. Papitashvili and CDAWeb, accessed 13 Nov 2026). Distance from the Sun agrees within that product’s rounding; longitude around the Sun differs by up to about 0.85° near closest approach. The cause is not established, and the two are not assumed to be independent.</li>
+      <li><b>Sun radius:</b> 695,700 km (NASA/JPL Horizons, “Solar radius (IAU2015)”). Heights above the surface are our subtraction.</li>
+      <li><b>Our changes:</b> positions rotated by us to a view from above the Sun’s north pole, and rounded to 1 km.</li>
+    </ul>
+    <p class="dim">Full register of sources: <a href="sources.html">Sources &amp; Details</a>.</p>
+  </section>
+</main>
+<script src="craft.js?v=202612031000"></script>
+</body>
+</html>
