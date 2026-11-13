@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 08:06 UTC (clock reading at write) — **Moon and Sun spacecraft: candidate `skycraft-rc` built (branch only)**
+
+New thread. Chad brought GPT's proposal (Moon and Sun pages, LRO and Parker Solar Probe). Record so far, all docs or branch:
+
+- GPT's proposal rev 1 → Claude's review (`reviews/2026-11-13-moon-sun-proposal-review.md`): both snapshots were historical, so every visitor from Sky would land on "unavailable"; Horizons covers today for both craft with its own classification.
+- Chad: "Go: LRO prediction-age measurement (read-only research), and D1 C / D2 reopen at stop / D3 2D view via Sky as GPT recommends", and **hub first: the hub connects to the API; manual export is the fallback.**
+- Archived LRO predictions are not published (NAIF readme), so the retrospective measurement cannot run; the LRO marker and path for today stay off. A forward study is designed into the hub job and publishes nothing.
+- Build proposal `docs/concepts/MOON-AND-SUN-BUILD-PROPOSAL.md` rev 2 → GPT → rev 2.1. Chad: "Go: build skycraft-rc on a branch per MOON-AND-SUN-BUILD-PROPOSAL rev 2.1 (P-b; tolerances as in §11; no merge, no hub deploy)".
+- **Candidate: branch `skycraft-rc` @ `b4f3984`.** Hub 0.6.12 (job behind `SKYCRAFT_ENABLED`, one-request probe, snapshot and catalogue routes); `moon.html`, `sun.html`, `craft.js`; Explore links and return in the Sky view; two dated examples (LRO 10–11 June 2026 from the PDS definitive kernel; Parker 22–27 Dec 2024 from Horizons). Packet on the branch: `reviews/2026-11-13-skycraft-rc.md` (copy in the Project).
+- Tests: skycraft-hub 127 (22 breaks fail), skycraft-ui 75 (18 breaks fail); full regression 57 of 57 run passed (4 manual skipped), 07:35–08:03 UTC.
+- Numerical checks: LRO kernel vs Horizons 1.7–1.8 cm at three times; Parker vs SPDF hourly agrees on distance, differs up to 0.85° in longitude near closest approach (cause not established).
+- **Live unchanged:** hub 0.6.11 `119cc641…801f`, page `bdf894f`. Nothing uploaded, deployed, registered or scheduled.
+- **Next:** GPT's review of the candidate; then, each on Chad's own line: R2 upload of the two example files → hub 0.6.12 deploy with the gate unset + one probe request → one full manual run → REGISTER lines → `SKYCRAFT_ENABLED=1` → page merge. Open for Chad: whether the hub's User-Agent contact (the repository address) is enough for JPL.
+
 ## 13 Nov 06:32 UTC (clock reading at write) — **Branches deleted; close-out complete**
 
 - Chad deleted `dustrgb-rc` and `dust-rc`. `git fetch -p`: only `main` and the parked `aircraft-rc` remain.
