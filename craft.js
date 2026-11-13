@@ -188,7 +188,8 @@
       out += row('Distance from the centre', esc(km(r)));
       out += row(`Above the nominal surface`, `${esc(km(r - d.R))} <span class="dim">(our subtraction: centre distance − ${esc(km(d.R))})</span>`);
       out += row('Trajectory', `${esc(j.classification.label)}. <span class="dim">Provider’s words: “${esc(j.classification.provider_words)}”${j.classification.segment ? ' Segment: ' + esc(j.classification.segment) + '.' : ''}</span>`);
-      if (j.reported_closest_approach) out += row('Closest approach, as reported', `${esc(j.reported_closest_approach.attributed_to)}: ${esc(j.reported_closest_approach.text)}. <a href="${esc(j.reported_closest_approach.url)}" rel="noopener">NASA’s report</a>`);
+      // NASA's report gives the distance in miles only (page read 13 Nov 2026): the kilometre figure is shown as OUR conversion, not as NASA's words
+      if (j.reported_closest_approach) out += row('Closest approach, as reported', `NASA: “flying just 3.8 million miles above the surface of the Sun” (24 December 2024). <span class="dim">About 6.1 million km by our conversion.</span> <a href="${esc(j.reported_closest_approach.url)}" rel="noopener">NASA’s report</a>`);
       if (j.closest_sample) out += row('Closest sample in this snapshot', `${esc(nice(parseT(j.closest_sample.utc)))}: ${esc(km(j.closest_sample.above_nominal_surface_km))} above the nominal surface. <span class="dim">${esc(j.closest_sample.note)}</span>`);
       out += row('Snapshot', `Dated example ${esc(j.catalogue_revision)}: ${esc(nice(d.start))} to ${esc(nice(d.end))}.`);
     } else {
