@@ -5,7 +5,7 @@
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored any-version any-object any-times no-band no-statement edge-ok move-on-fail no-cas create-unconditional no-readback
  *   overwrite no-lock parallel lro-published any-snapshot no-integrity probe-two generic-down no-ua retry cat-unpinned
- *   release-unowned parker-cancels-study no-backoff no-tag-check study-after-lock-loss */
+ *   release-unowned parker-cancels-study no-backoff no-tag-check study-after-lock-loss pointer-throws parker-throw-escapes */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
@@ -27,8 +27,10 @@ const BREAKS = {
   'parker-cancels-study': ["  const study = pk.backoff ? 'not attempted: backing off after ' + pk.reason", "  const study = !pk.ok ? 'not attempted: backing off after ' + pk.reason"],
   'no-backoff': ["got.http === 0 || got.http === 429 || got.http >= 500);", "false);"],
   'no-tag-check': ["  if (!target_source || !revised) return { ok: false, reason: 'no source tag or data sheet revision in response', detail: `${target_source} / ${revised}` };", ''],
+  'parker-throw-escapes': ["  let pk; try { pk = await craftParker(env, ms); } catch (e) { pk = { ok: false, reason: 'parker internal error', http: 0, detail: String(e).slice(0, 160), backoff: false }; }", "  const pk = await craftParker(env, ms);"],
+  'pointer-throws': ["  let up; try { up = await craftUpdate(env, c => (c.current && c.current.retrieved_at >= retrieved_at) ? null : { ...craftEmpty(), current: brief, previous: c.current || null }); }\n  catch (e) { return bad('parker pointer update failed', 200, String(e).slice(0, 160)); }", "  const up = await craftUpdate(env, c => (c.current && c.current.retrieved_at >= retrieved_at) ? null : { ...craftEmpty(), current: brief, previous: c.current || null });"],
   'study-after-lock-loss': ["    : !await craftHolds(env, lock) ? 'not attempted: this run no longer holds the lock'\n", ''],
-  'parallel': ["    : await craftStudy(env, ms);", "    : await craftStudyEarly;"],   // with the line below: the LRO request starts before Parker's answer
+  'parallel': ["    : await craftStudy(env, ms).catch(", "    : await craftStudyEarly.catch("],   // with the line below: the LRO request starts before Parker's answer
   'lro-published': ["    modifications: 'Positions rounded to 1 km. Velocities not carried.',", "    modifications: 'Positions rounded to 1 km. Velocities not carried.', lro: await env.R2.list({ prefix: SKYCRAFT.STUDY }),"],
   'any-snapshot': ['  const x = [cur.current, cur.previous].find(f => f && f.id === p[2]);\n  if (!x) return none(404, \'not found\');\n  let buf; try { const o = await env.R2.get(x.key);', "  const x = [cur.current, cur.previous].find(f => f && f.id === p[2]) || { key: SKYCRAFT.SNAP + p[2] + '.json' };\n  let buf; try { const o = await env.R2.get(x.key);"],
   'no-integrity': ["  if (buf.byteLength !== x.bytes || await sha256Bytes(buf) !== x.sha256) return none(503, 'integrity');\n  return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': SKYCRAFT.CACHE_FILE,", "  return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': SKYCRAFT.CACHE_FILE,"],
@@ -42,7 +44,7 @@ let src = fs.readFileSync(path.join(HERE, 'worker.js'), 'utf8');
 if (BREAK) {
   if (!(BREAK in BREAKS)) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
   const b = BREAKS[BREAK]; if (!src.includes(b[0])) { console.log('FAIL  break did not apply: ' + BREAK); process.exit(1); } src = src.replace(b[0], b[1]);
-  if (BREAK === 'parallel') { const a = "  const pk = await craftParker(env, ms);"; if (!src.includes(a)) { console.log('FAIL  break did not apply: parallel'); process.exit(1); }
+  if (BREAK === 'parallel') { const a = "  let pk; try { pk = await craftParker(env, ms); }"; if (!src.includes(a)) { console.log('FAIL  break did not apply: parallel'); process.exit(1); }
     src = src.replace(a, "  const craftStudyEarly = craftStudy(env, ms);\n" + a); }
 }
 const tmp = path.join(os.tmpdir(), `worker-craft-${process.pid}.mjs`); fs.writeFileSync(tmp, src);
@@ -222,11 +224,29 @@ await failing('snapshot read-back differs', w => { w.corruptRead = 'skycraft/sna
 { const w = use(world()); w.psp.table = PSP_TABLE.replace('2026-Sep-30 00:00  2027-Feb-17 00:00', '2026-Sep-30 00:00  2026-Nov-14 00:00').replace('2027-Jan-20 00:00  2030-Jan-01 00:00', '2026-Nov-14 00:00  2030-Jan-01 00:00');
   setClock(NOW); await W.collectSkycraft(w.env, NOW); setClock(null); const snap = JSON.parse(w.store.get(w.ptr().current.key).buf.toString()), k = 48;   // 14 Nov 00:00 UTC
   ok('C edge: the sample at a segment change has segment −1; neighbours are named on each side', snap.solution.segment_of[k] === -1 && snap.solution.segment_of[k - 1] === 2 && snap.solution.segment_of[k + 1] === 3, snap.solution.segment_of.slice(k - 2, k + 3)); }
-// uncaught error inside the job: still never the generic writeDown
-{ const w = use(world()); setClock(NOW); await W.collectSkycraft(w.env, NOW); const before = w.ptr().current.id; const realGet = w.env.R2.get; w.runs.length = 0;
-  w.env.R2.get = async k => { if (k === S.POINTER) throw new Error('R2 exploded (test)'); return realGet(k); };
-  setClock(NOW + DAY); const r = await W.JOBS.skycraft(w.env, NOW + DAY, true); setClock(null); w.env.R2.get = realGet;
-  ok('C uncaught: recorded as an internal error; no generic envelope; pointer keeps the snapshot; lock released', w.runs.some(x => x.layer === 'skycraft' && x.status === 'down' && /^internal error/.test(x.note)) && ![...w.store.keys()].some(k => k.startsWith('latest')) && w.ptr().current.id === before && w.lock().released === true, [r, w.runs, [...w.store.keys()].filter(k => k.startsWith('latest'))]); }
+// GPT, 13 Nov (round 2 review): a pointer that cannot be READ or WRITTEN during publication is a Parker outcome — LRO is still captured, the last good snapshot stays current
+for (const [how, arm] of [['read', w => { const g = w.env.R2.get; w.env.R2.get = async k => { if (k === S.POINTER) throw new Error('R2 pointer read failed (test)'); return g(k); }; return () => { w.env.R2.get = g; }; }],
+                          ['write', w => { const p = w.env.R2.put; w.env.R2.put = async (k, b, o) => { if (k === S.POINTER) throw new Error('R2 pointer write failed (test)'); return p(k, b, o); }; return () => { w.env.R2.put = p; }; }]]) {
+  const w = use(world()); setClock(NOW); await W.collectSkycraft(w.env, NOW); const before = w.ptr().current.id; w.reqs.length = 0; w.runs.length = 0;
+  const disarm = arm(w); setClock(NOW + DAY); const r = await W.JOBS.skycraft(w.env, NOW + DAY, true); setClock(null); disarm();
+  ok(`C pointer ${how} fails: recorded as a Parker failure, not an internal error`, w.runs.length === 1 && w.runs[0].status === 'down' && /^parker pointer update failed/.test(w.runs[0].note), [r, w.runs]);
+  ok(`C pointer ${how} fails: the LRO capture still runs (two requests, one at a time) and is stored`, w.reqs.length === 2 && w.reqs[1].lro && w.maxInFlight === 1 && w.keys(S.STUDY).length === 4 && /lro study stored 41 epochs/.test(w.runs[0].note), [w.reqs.length, w.keys(S.STUDY).length, w.runs[0].note]);
+  ok(`C pointer ${how} fails: the last good Parker snapshot stays current and is still served`, w.ptr().current.id === before && (await get(w, '/snapshot/skycraft/' + before)).status === 200 && w.lock().released === true, w.ptr());
+}
+{ // anything else Parker's part throws is still Parker's outcome: LRO captured, snapshot kept
+  const w = use(world()); setClock(NOW); await W.collectSkycraft(w.env, NOW); const before = w.ptr().current.id; w.reqs.length = 0; w.runs.length = 0;
+  const h = Math.hypot; Math.hypot = () => { Math.hypot = h; throw new Error('boom (test)'); };
+  setClock(NOW + DAY); await W.JOBS.skycraft(w.env, NOW + DAY, true); setClock(null); Math.hypot = h;
+  ok('C Parker part throws: its own failure; LRO still captured; snapshot kept', w.runs.length === 1 && /^parker internal error/.test(w.runs[0].note) && /lro study stored 41 epochs/.test(w.runs[0].note) && w.reqs.length === 2 && w.ptr().current.id === before, [w.runs, w.reqs.length]); }
+{ // and the LRO part throwing does not undo a published Parker snapshot
+  const w = use(world()); const p = w.env.R2.put; w.env.R2.put = async (k, b, o) => { if (k.startsWith(S.STUDY)) { const e = new Error('boom (test)'); throw e; } return p(k, b, o); };
+  const g = w.env.R2.get; w.env.R2.get = async k => { if (k.startsWith(S.STUDY)) throw new Error('boom (test)'); return g(k); };
+  setClock(NOW); const r = await W.JOBS.skycraft(w.env, NOW, true); setClock(null);
+  ok('C LRO part fails in storage: Parker is published; run recorded degraded, not an internal error', !!w.ptr().current && w.runs.length === 1 && w.runs[0].status === 'degraded' && !/^internal error/.test(w.runs[0].note), [r, w.runs]); }
+// an error nothing anticipates (here: the lock object cannot be written): still never the generic writeDown
+{ const w = use(world()); setClock(NOW); await W.collectSkycraft(w.env, NOW); const before = w.ptr().current.id; w.runs.length = 0; w.reqs.length = 0;
+  w.putFail = 'skycraft/lock.json'; setClock(NOW + DAY); const r = await W.JOBS.skycraft(w.env, NOW + DAY, true); setClock(null); w.putFail = null;
+  ok('C uncaught: recorded as an internal error; no Horizons request; no generic envelope; pointer keeps the snapshot', w.runs.some(x => x.layer === 'skycraft' && x.status === 'down' && /^internal error/.test(x.note)) && w.reqs.length === 0 && ![...w.store.keys()].some(k => k.startsWith('latest')) && w.ptr().current.id === before, [r, w.runs, [...w.store.keys()].filter(k => k.startsWith('latest'))]); }
 // LRO study failure: Parker still published, run degraded
 { const w = use(world()); w.lroStatus = 500; setClock(NOW); const r = await W.collectSkycraft(w.env, NOW); setClock(null);
   ok('C LRO study fails: Parker is still published; run recorded degraded; no study object', /published/.test(r) && w.ptr().current && w.runs[0].status === 'degraded' && w.keys(S.STUDY).length === 0, [r, w.runs]); }

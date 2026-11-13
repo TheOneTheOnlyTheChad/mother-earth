@@ -3185,10 +3185,11 @@ async function collectSkycraft(env, ms) {
  * A Parker-specific failure (a 4xx answer, an unreadable or invalid answer, a storage or publication failure) does not cancel the
  * LRO capture. A failure that points at an upstream outage or rate limit (no answer, HTTP 429, HTTP 5xx) backs off the whole run. */
 async function craftRun(env, ms, lock) {
-  const pk = await craftParker(env, ms);
+  // neither part can take the other down: anything either one throws becomes that part's own outcome
+  let pk; try { pk = await craftParker(env, ms); } catch (e) { pk = { ok: false, reason: 'parker internal error', http: 0, detail: String(e).slice(0, 160), backoff: false }; }
   const study = pk.backoff ? 'not attempted: backing off after ' + pk.reason
     : !await craftHolds(env, lock) ? 'not attempted: this run no longer holds the lock'
-    : await craftStudy(env, ms);
+    : await craftStudy(env, ms).catch(e => 'failed: internal error — ' + String(e).slice(0, 120));
   if (!pk.ok) return (await craftFail(env, ms, pk.reason, pk.http, (pk.detail ? pk.detail + '; ' : '') + 'lro study ' + study)) + '; lro study ' + study;
   await logRun(env, 'skycraft', ms, study.startsWith('stored') ? 'ok' : 'degraded', 200, pk.n, pk.bytes, pk.note + '; lro study ' + study);
   return 'skycraft:' + (pk.wrote ? 'published ' : 'superseded ') + pk.id + '; lro study ' + study;
@@ -3229,7 +3230,9 @@ async function craftParker(env, ms) {
   const ss = await craftStore(env, key, body, sha, 'application/json');
   if (ss !== 'same' && ss !== 'stored') return bad('snapshot ' + ss, 200, key);
   const brief = { id, key, path: '/snapshot/skycraft/' + id, bytes: body.byteLength, sha256: sha, retrieved_at, covers: { start: snap.time.start, end: snap.time.end, step_s: P.step_s }, withheld_samples: withheld, raw: { key: rawKey, sha256: got.sha256, bytes: got.bytes } };
-  const up = await craftUpdate(env, c => (c.current && c.current.retrieved_at >= retrieved_at) ? null : { ...craftEmpty(), current: brief, previous: c.current || null });
+  // a pointer that cannot be read or written is a Parker outcome like any other: the last good snapshot stays current and the LRO capture still runs (GPT, 13 Nov 2026)
+  let up; try { up = await craftUpdate(env, c => (c.current && c.current.retrieved_at >= retrieved_at) ? null : { ...craftEmpty(), current: brief, previous: c.current || null }); }
+  catch (e) { return bad('parker pointer update failed', 200, String(e).slice(0, 160)); }
   return { ok: true, id, wrote: up.wrote, n, bytes: got.bytes, note: `${up.wrote ? 'published' : 'superseded'} ${id}; sheet revised ${z.revised}; segments ${used.map(i => z.table[i].name).join(', ')}; ${withheld} of ${n} samples withheld` };
 }
 /** The LRO capture for the forward study: raw answer plus a small index (target epochs, signed lead from the actual retrieval, data sheet). Publishes nothing. */
