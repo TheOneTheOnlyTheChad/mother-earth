@@ -19,7 +19,7 @@ Round 1 packet: `reviews/2026-11-13-skycraft-rc.md` (its §1, §2, §4, §6, §7
 
 - `skycraft-hub`: **156 passed** (was 127). New: the takeover regression (run A's lock expires, B takes over, A finishes — B's lock stays, A makes no further request, C is refused while B is in flight, B then completes and releases its own lock); HTTP 422 / unreadable answer / missing source tag / publication failure each still capture LRO; HTTP 503 / 429 / network error each back off with no LRO request; archived answer refused without its source tag and without its revision line; the archived sheet's overlap withholds samples; nothing is ever deleted. **27 breaks, each fails** (new: `release-unowned parker-cancels-study no-backoff no-tag-check study-after-lock-loss`).
 - `skycraft-ui`: **77 passed** (was 75). New: from between the Moon and Sun stops (progress 1.1–1.45, nearer stop still the Moon, Sun link shown) → Sun page → browser Back → reopened at the Sun stop with the Sun link shown and focused. **19 breaks, each fails** (new: `round-stop`).
-- Full regression: 61 test files; 4 manual/network tools skipped; **57 run sequentially, 57 passed** (13 Nov 08:32:27–09:00:19 UTC), including `sky-zoom-ui` 333/333 on the changed `skyscene.js`.
+- Full regression: 61 test files; 4 manual/network tools skipped; **57 run sequentially, 57 passed** (13 Nov 08:31:13–09:00:19 UTC), including `sky-zoom-ui` 333/333 on the changed `skyscene.js`.
 
 ## 3. Coverage gap to carry (Parker, 20 Jan – 17 Feb 2027)
 
