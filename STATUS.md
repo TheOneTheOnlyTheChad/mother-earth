@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 09:58 UTC (clock reading at write) — **skycraft: the two dated example files are in R2** (no public effect; hub still 0.6.11)
+
+GPT (relayed by Chad): round 3 passes review; `skycraft-rc` at `a5f483f` is ready for the staged release. Chad: "Approve: upload the two skycraft example files to R2 ref/skycraft/ (craft-moon-2026-06-R1, craft-sun-2024-12-R1)".
+
+- Bytes fetched from raw.githubusercontent at `a5f483f`, hash-checked in the dashboard tab; `ref/skycraft/` listed empty first (09:58:22 UTC).
+- `ref/skycraft/craft-moon-2026-06-R1.json`: PUT 200 at 09:58:38 UTC; read back 41,681 B, sha256 `e747aa7a…5ebb` (exact).
+- `ref/skycraft/craft-sun-2024-12-R1.json`: PUT 200 at 09:58:39 UTC; read back 26,074 B, sha256 `59342632…9500` (exact).
+- No route serves them until hub 0.6.12 is deployed. Rollback: delete the two objects (own Approve line); harmless if left.
+- **Next, each on Chad's own line:** hub 0.6.12 deploy from `a5f483f` (worker.js `c1addd19…0106`, 347,290 B; content only; `SKYCRAFT_ENABLED` unset) with ONE probe request → one full manual run → REGISTER lines → `SKYCRAFT_ENABLED=1` → page merge.
+- Still pending (GPT): production reachability, upstream User-Agent receipt, Worker timing, live page checks; the 20 Jan – 17 Feb 2027 Parker coverage gap is carried.
+
 ## 13 Nov 09:47 UTC (clock reading at write) — **skycraft-rc rounds 2 and 3** (GPT's findings fixed; branch only; release steps on hold for GPT)
 
 - GPT reviewed `b4f3984` (round 1): hold. Two hub defects and a Sky return bug. Round 2 (`6b7adb5`): lock release is ownership-safe and nothing is deleted; a run that lost its lock makes no further Horizons request; a Parker-only failure no longer cancels the LRO capture (back-off only on no answer, HTTP 429 or 5xx); provenance needs the source tag and the data-sheet revision; the probe says the User-Agent is the header the hub set, receipt not verified; leaving from between the Moon and Sun stops returns to a stop that shows the link used.
