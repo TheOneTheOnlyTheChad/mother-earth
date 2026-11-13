@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 04:37 UTC (clock reading at write) — **Dust RGB schedule ENABLED; REGISTER entry filed (branch)**
+
+- Chad: "Approve: set DUSTRGB_ENABLED=1". Variable added through the Settings form (page reloaded after the code deploy; Chad's click), Cloudflare deployment **04:35:55 UTC**. Read back: `DUSTRGB_ENABLED` plain text "1"; 20 bindings; script still `119cc641…801f`; hub reports 0.6.11. First scheduled run: 06:07 UTC (08:07 SAST) 13 Nov.
+- Chad: "Approve: file the EUMETSAT Dust RGB REGISTER entry as described". Filed in `REGISTER.md` on branch `dustrgb-rc` (reaches main with the page merge).
+- GPT on the smoke report: keep the label rule ("Frame" when both responses name the requested time, else "Frame requested"); page merge still pending.
+- To check after the first scheduled run: D1 `ok`; pointer names a new frame with two readable files; the manual frame kept as `previous`; CPU of the whole hourly invocation.
+- Rollback: remove `DUSTRGB_ENABLED` (schedule stops), or hub → 0.6.10 `784939f8…a0da`.
+
 ## 13 Nov 04:23 UTC (clock reading at write) — **Hub 0.6.11 LIVE (smoke test); Dust RGB schedule NOT enabled; page not merged**
 
 Chad: "Approve: deploy hub 0.6.11 from c667c07 (content only, DUSTRGB_ENABLED unset) and run /admin/run/dustrgb once".
