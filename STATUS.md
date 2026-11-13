@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 20:00 UTC (clock reading at write) — **Moon globe RELEASED** (merge `95aa603`; page only; hub unchanged)
+
+GPT (relayed by Chad): round 2 `12e42f3` passes review. Chad, in one message: "Approve: file the REGISTER entry for the NASA SVS CGI Moon Kit colour map" and "Approve: push moon-globe-rc to main (page change: Moon globe on the Moon page)". **No GPT review of the REGISTER wording, or of the Sources section added after round 2, was relayed before those lines.**
+
+- REGISTER entry filed 19:23 UTC on the branch (`c4ab168`), with a "Moon globe" section in `sources.html` and one more test check. Full regression on `c4ab168`: 19:23:52–19:54:04 UTC, 58 files run (4 manual skipped), 58 pass; `moon-globe` 52 of 52.
+- No-ff merge `95aa603`, pushed 19:55:36 UTC. **Served files exact at 19:57:15 UTC, nine checked:** `moon.html` `57cc757a…3e67`, `moonglobe.js` `723d2b54…81db` (new), `assets/moon/lroc_color_2k.jpg` `f7130a18…2170` (new, NASA's file unchanged), `style.css` `dfc01e5d…fe38`, `sources.html` `6b412bdd…592e`, `index.html` `7915a764…9b94`, `sun.html` `bf2b5b31…8dee`, `timeline.html` `eca486f8…6700` (css link only on those three), `craft.js` `e5cb7cf7…ce48` (unchanged).
+- **Live read 19:57:39 UTC** (public site, browser pane, Apple M3 graphics, 588 px so the phone layout): globe started ("The Moon · drag to turn, or use the buttons"), ambient light only, canvas 960×960 in a 482 px box, no sideways overflow; the spacecraft drawing loaded ("Historical snapshot — 10 Jun 2026, 12:00 UTC."); East and North buttons moved the readout to 15°N 15°E.
+- **Limit of that live read:** the pane tab was hidden (`visibilityState` hidden, 1 animation frame a second), so the 0.6 s glide of Near side / Far side did not run there and its readout stayed at the old value while the view reported the new one. Not seen with the tab visible.
+- **Found after release (headless, motion allowed, main's files, 19:58 UTC):** Near side and Far side glide and read correctly; **a direction button pressed during the 0.6 s glide is ignored** (the glide finishes at its own target). The test suite ran every case with reduced motion, so the glide path had no test. Small follow-up proposed to Chad: make Near/Far immediate, or cancel the glide on the next press, and add a motion-allowed test. Not changed in production.
+- Not checked: real phone (scrolling past the globe, frame rate), Safari, screen reader.
+- What shipped: `reviews/2026-11-13-moon-globe-rc.md`, `-r2.md`, REGISTER draft `…-moon-globe-register-draft.md`; proposal `docs/concepts/MOON-SUN-GLOBES-PROPOSAL.md` rev 2.3 now on main. **Rollback:** revert `95aa603` (own Approve line).
+- Next on this feature: the Sun globe (proposal 3.2, stage 4 onward: hub probe first). Nothing started.
+
 ## 13 Nov 19:20 UTC (clock reading at write) — **Moon and Sun header tabs RELEASED** (merge `3bd4db9`; page only; hub unchanged)
 
 GPT (relayed by Chad): `d48faa6` passes review. Chad: "Approve: push nav-tabs-rc to main (page change: Moon and Sun header tabs and menu entries)".
@@ -12,8 +25,6 @@ GPT (relayed by Chad): `d48faa6` passes review. Chad: "Approve: push nav-tabs-rc
 - **Live read 19:18:49 UTC** (browser pane, 588 px wide, so the phone layout): tabs Earth now · Timeline · Moon · Sun with the right targets and the current page marked; menu World View, Timeline, Moon, Sun, Sources & Details; clock with its UTC label; no sideways overflow; stylesheet `202612041200`.
 - What changed: four header tabs and two menu entries on all five pages; header rules so the UTC label is never hidden and the promise line is 11 px where shown and hidden below 1140 px. Packets: `reviews/2026-11-13-nav-tabs-rc.md`, `-r2.md`. Full regression at `f9445e3`: 57 of 57.
 - Not checked: real phone, Safari, screen reader.
-
-**In review, not merged — Moon globe** (branch `moon-globe-rc` @ `12e42f3`, built on the tabs branch): NASA SVS colour map on a globe, evenly lit, near side first, six buttons. GPT passed round 2. Order from here: REGISTER entry for the NASA SVS map (Chad's Approve line) → push (Chad's Approve line). Packets `reviews/2026-11-13-moon-globe-rc.md`, `-r2.md` are on that branch. Proposal for both globes: `docs/concepts/MOON-SUN-GLOBES-PROPOSAL.md` rev 2.3 (on that branch; Sun not started).
 
 ## 13 Nov 10:49 UTC (clock reading at write) — **Moon and Sun spacecraft pages RELEASED** (merge `c4e3162`; hub 0.6.12; main = live)
 
