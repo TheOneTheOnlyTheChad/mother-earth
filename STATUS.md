@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 06:17 UTC (clock reading at write) — **First scheduled Dust RGB run: ok**
+
+- 06:07 UTC run published `20261113T0540Z-f926c6922bfed1a3` (D1 id 9334 `ok`); the manual frame is kept as `previous`; all four files (current and previous) answer 200, match their hashes and decode. Served-time header present on both files again.
+- Hourly invocation with Dust: max CPU 169.6 ms, wall 47.1 s (05:07 without Dust: 52.4 ms / 12.5 s). No failed invocation since the deploy; other collectors `ok`.
+- Detail: `reviews/2026-11-13-dustrgb-smoke.md` §7.
+- Next: Chad's look at the globe at 0.82 opacity; then his merge line.
+
 ## 13 Nov 04:37 UTC (clock reading at write) — **Dust RGB schedule ENABLED; REGISTER entry filed (branch)**
 
 - Chad: "Approve: set DUSTRGB_ENABLED=1". Variable added through the Settings form (page reloaded after the code deploy; Chad's click), Cloudflare deployment **04:35:55 UTC**. Read back: `DUSTRGB_ENABLED` plain text "1"; 20 bindings; script still `119cc641…801f`; hub reports 0.6.11. First scheduled run: 06:07 UTC (08:07 SAST) 13 Nov.

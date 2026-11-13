@@ -58,3 +58,30 @@ Candidate page files from `c667c07` (eight files, each sha-checked) loaded in a 
 3. Page merge to main.
 
 Open: the label question in §3; the partly-damaged-picture limit; storage grows about 1.5 MB a day (no cleanup); `terminator-ui` intermittent on main.
+
+## 7. First scheduled run (06:07 UTC / 08:07 SAST, 13 Nov) — read 06:17 UTC
+
+`DUSTRGB_ENABLED=1` was set at 04:35:55 UTC (Chad's line and click); script unchanged (`119cc641…801f`), 20 bindings.
+
+| | |
+|---|---|
+| D1 `collector_runs` id 9334 | `dustrgb`, `ok`, 200, records 1, bytes 733,765, 06:07:58.510 → 06:08:46.458, note "frame 2026-11-13T05:40:00Z as 20261113T0540Z-f926c6922bfed1a3; served-time header present (picture), present (mask)" |
+| Order | Dust finished last of the hourly job's collectors (swpc 06:08:03, co2 06:08:09, drifters 06:08:20, plastic 06:08:24, dustrgb 06:08:46) |
+| Pointer | frame `20261113T0540Z-f926c6922bfed1a3`, requested 05:40:00Z, served 05:40:00Z (header on both files), fetched 06:08:45.648Z; **previous = `20261113T0350Z-d0cb4223ccfa72f1`** (the manual frame, with its box); `last_attempt: null` |
+| Current pair | picture 200, 668,223 B, sha matches, decodes 2048 × 2048; mask 200, 65,542 B, sha matches, decodes 160 × 160 (22,269 opaque / 3,331 transparent / 0 partial) |
+| Previous pair | picture 200, 672,431 B, sha matches, decodes; mask 200, 65,879 B, sha matches, decodes |
+| Other collectors 06:00–06:16 | usgs ×4, firms ×2, swpc, co2, drifters, plastic, forest: all `ok` |
+| Invocations since the deploy (04:00–06:16) | none with a non-success status or an error count |
+
+**CPU of the whole hourly invocation** (Cloudflare analytics, per-minute maxima):
+
+| Hourly run | Max CPU | Max wall |
+|---|---|---|
+| 06:07 13 Nov, **with Dust** (and plastic) | **169.6 ms** | 47.1 s |
+| 05:07 13 Nov, no Dust | 52.4 ms | 12.5 s |
+| 18:07 12 Nov, hub 0.6.10 | 75.8 ms | 29.8 s |
+
+Limits on Workers Paid: 30 s CPU per request, 15 minutes for crons at hourly intervals. The 06:07 run also carried the plastic refresh, so the difference is not all Dust.
+
+The advertised frame was 28 minutes old when fetched. The served-time header arrived on both files again (two runs of two).
+
