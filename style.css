@@ -637,6 +637,7 @@ body.craft code{font-size:.92em;overflow-wrap:anywhere}
 body.craft .mgglobe{width:100%;max-width:560px;aspect-ratio:1/1;margin:0 auto;border:1px solid var(--line);background:#05070b;overflow:hidden;touch-action:none;cursor:grab}
 body.craft .mgglobe:active{cursor:grabbing}
 body.craft .mgglobe[hidden],body.craft .mgctl[hidden],body.craft .mgread[hidden]{display:none}
+@media (max-width:720px){body.craft .mgglobe{max-width:min(560px,82vw)}}   /* phones: leave a strip each side to scroll the page past the globe; a swipe that starts on the globe turns it */
 body.craft .mgread{font:500 13px var(--mono);color:var(--fg);max-width:560px;margin:6px auto 0;min-height:1.4em}
-body.craft .mgctl{display:flex;gap:8px;max-width:560px;margin:8px auto}
+body.craft .mgctl{display:flex;flex-wrap:wrap;gap:8px;max-width:560px;margin:8px auto}
 body.craft .mgctl button{min-height:40px;min-width:44px;padding:6px 12px;background:var(--panel);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;cursor:pointer}
