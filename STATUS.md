@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 06:32 UTC (clock reading at write) — **Branches deleted; close-out complete**
+
+- Chad deleted `dustrgb-rc` and `dust-rc`. `git fetch -p`: only `main` and the parked `aircraft-rc` remain.
+- Chad, same message: he and GPT set up the SD card for the Pi; it is ready for when the Pi and antenna arrive.
+
 ## 13 Nov 06:30 UTC (clock reading at write) — **Dust thread close-out** (START-HERE §9)
 
 - **Chad on the released layer (13 Nov):** "the view looks cool for now i am happy with it we can refine later if need be" — 0.82 opacity accepted for now.
