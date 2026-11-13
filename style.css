@@ -366,6 +366,8 @@ details.cd>.cav{margin-top:2px}
 .tabs a:hover,.tabs a:focus-visible{background:rgba(140,170,200,.12)}
 .tabs a[aria-current="page"]{background:rgba(255,179,71,.14);color:var(--accent)}
 @media (min-width:721px) and (max-width:1200px){.top{gap:12px}.tabs a{padding:0 8px;letter-spacing:.04em}}
+@media (max-width:420px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* four tabs on a narrow phone */
+@media (min-width:721px) and (max-width:900px){.top{gap:8px;padding:0 10px}.top h1{font-size:20px}.tabs a{padding:0 6px;font-size:13px;letter-spacing:.02em}.top .clock{font-size:17px}.top .clock span{display:none}.menu>button{padding:0 10px}}   /* four tabs on a narrow one-row header */
 /* phone: two fixed rows — title · clock · Menu, then the two tabs. A grid, not a wrapping flex row: with
    fallback fonts at 390 px the wrapping row split into three lines and pushed the title above the header.
    Rows 44 + 44 px (touch targets kept), 2 px gap, 2 px top/bottom padding = 94 px (was 56 px without tabs). */
