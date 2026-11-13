@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 13 Nov 2026
 
+## 13 Nov 10:06 UTC (clock reading at write) — **Hub 0.6.12 LIVE; one Horizons probe: reachable.** Skycraft schedule NOT enabled; page not merged
+
+Chad: "Approve: deploy hub 0.6.12 from a5f483f (content only, SKYCRAFT_ENABLED unset) and run /admin/probe/skycraft once".
+
+- **Before (10:01:11 UTC):** live script 316,927 B `119cc641…801f` (0.6.11); 20 bindings; no `SKYCRAFT_ENABLED`. Candidate from raw.githubusercontent at `a5f483f`: 347,290 B `c1addd19…0106` (matches).
+- **Deploy:** content-only PUT 200, Cloudflare `modified_on` **10:01:33 UTC**. Read back 347,290 B `c1addd19e7b64d381664e0a05dfc3550c629ff5180946d3b547ccba6054c0106` (exact). 20 bindings, gate still absent. Hub reports 0.6.12.
+- **Routes (10:01:54 UTC):** `/catalogue/skycraft/craft-moon-2026-06-R1` 200, 41,681 B, `e747aa7a…`; `/catalogue/skycraft/craft-sun-2024-12-R1` 200, 26,074 B, `59342632…`; both `immutable`. Unknown revision 404. `/snapshot/skycraft/meta` 200 with `current: null`. Dust meta, Sky catalogue, `/status`, health all answer; probe without the key 403.
+- **Probe (10:02:10 UTC), exactly one upstream request:** HTTP **200** from `ssd.jpl.nasa.gov/api/horizons.api` (Parker data sheet only) in 2,272 ms; 3,887 B; API version 1.2 (as expected); data sheet "Revised: Nov 03, 2026". Nothing stored or published (meta still `current: null`, no `skycraft` run row). **The Worker can reach Horizons.** The probe reports the User-Agent the hub set; receipt by the upstream is not verified.
+- **First scheduled run on 0.6.12:** usgs 10:05:07 UTC `ok`; health 8 of 8 at 10:06:28 UTC.
+- **main ≠ live hub** until `skycraft-rc` merges: 0.6.12 is on the branch. A hub deploy from main would remove the skycraft routes (harmless while the gate is unset and the page is unmerged).
+- **Rollback (own Approve line):** hub → 0.6.11 `119cc641…801f`.
+- **Next, each on Chad's own line:** `/admin/run/skycraft` once (two requests; read back pointer, files, D1 row; measure CPU) → REGISTER lines → `SKYCRAFT_ENABLED=1` → page merge. Open with Chad: the User-Agent contact wording (his "leave the email there" needs confirming: the string currently carries the repository address, no email).
+
 ## 13 Nov 09:58 UTC (clock reading at write) — **skycraft: the two dated example files are in R2** (no public effect; hub still 0.6.11)
 
 GPT (relayed by Chad): round 3 passes review; `skycraft-rc` at `a5f483f` is ready for the staged release. Chad: "Approve: upload the two skycraft example files to R2 ref/skycraft/ (craft-moon-2026-06-R1, craft-sun-2024-12-R1)".
