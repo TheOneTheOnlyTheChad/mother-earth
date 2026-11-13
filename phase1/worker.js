@@ -3105,7 +3105,9 @@ function hzParse(text, spec) {
     if (!m || !Number.isFinite(s0) || !Number.isFinite(s1) || s1 <= s0) return { ok: false, reason: 'data sheet unreadable', detail: x.slice(0, 80) };
     table.push({ name: m[1], start: m[2], end: m[3], start_tdb_ms: s0, end_tdb_ms: s1 }); }
   if (!statement || !table.length) return { ok: false, reason: 'data sheet unreadable', detail: 'empty statement or table' };
-  return { ok: true, version: ver, target, centre, target_source: line(/^Target body name: .*\{source: ([^}]*)\}/m), revised: line(/^\s*Revised:\s*(\w{3} \d\d, \d{4})/m), statement, table, rows };
+  const target_source = line(/^Target body name: .*\{source: ([^}]*)\}/m), revised = line(/^\s*Revised:\s*(\w{3} \d\d, \d{4})/m);
+  if (!target_source || !revised) return { ok: false, reason: 'no source tag or data sheet revision in response', detail: `${target_source} / ${revised}` };   // provenance is accepted only with both (GPT, 13 Nov 2026)
+  return { ok: true, version: ver, target, centre, target_source, revised, statement, table, rows };
 }
 /** Which named trajectory segment holds a UTC instant (the table is in TDB: UTC + 69.184 s). −1 when none, more than one, or within two minutes of a segment edge. */
 function hzSegmentOf(ms, table) {
@@ -3138,16 +3140,26 @@ async function craftUpdate(env, change) {
   }
   throw new Error('skycraft pointer kept changing; gave up after 5 tries');
 }
-/** One upstream conversation at a time across scheduled runs, manual runs and the probe: a create-only lock object; a lock older than ten minutes is taken over by etag. */
+/** One upstream conversation at a time across scheduled runs, manual runs and the probe: a lock object written create-only.
+ * A released lock, or one older than ten minutes, is taken over by compare-and-swap on its etag. Returns { etag } or null. */
 async function craftLock(env, who) {
-  const body = JSON.stringify({ who, at: nowIso() }), meta = { httpMetadata: { contentType: 'application/json' } };
-  if (await env.R2.put(SKYCRAFT.LOCK, body, { ...meta, onlyIf: { etagDoesNotMatch: '*' } }) !== null) return true;
-  const o = await env.R2.get(SKYCRAFT.LOCK); if (!o) return false;
-  let held = null; try { held = await o.json(); } catch (_) {}
-  if (held && Date.now() - Date.parse(held.at) < SKYCRAFT.LOCK_STALE_MS) return false;
-  return await env.R2.put(SKYCRAFT.LOCK, body, { ...meta, onlyIf: { etagMatches: o.etag } }) !== null;
+  const body = JSON.stringify({ who, token: crypto.randomUUID(), at: nowIso() }), meta = { httpMetadata: { contentType: 'application/json' } };
+  let r = await env.R2.put(SKYCRAFT.LOCK, body, { ...meta, onlyIf: { etagDoesNotMatch: '*' } });
+  if (r === null) {
+    const o = await env.R2.get(SKYCRAFT.LOCK); if (!o) return null;
+    let held = null; try { held = await o.json(); } catch (_) {}
+    if (held && !held.released && Date.now() - Date.parse(held.at) < SKYCRAFT.LOCK_STALE_MS) return null;
+    r = await env.R2.put(SKYCRAFT.LOCK, body, { ...meta, onlyIf: { etagMatches: o.etag } });
+    if (r === null) return null;
+  }
+  return { etag: r.etag };
 }
-async function craftUnlock(env) { try { await env.R2.delete(SKYCRAFT.LOCK); } catch (_) {} }
+/** Release ONLY a lock this run still holds: a conditional overwrite on the etag this run wrote. Nothing is deleted, so a run
+ * whose lock expired and was taken over cannot release its successor's lock (GPT, 13 Nov 2026). */
+async function craftUnlock(env, lock) {
+  try { await env.R2.put(SKYCRAFT.LOCK, JSON.stringify({ released: true, at: nowIso() }), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagMatches: lock.etag } }); } catch (_) {}
+}
+async function craftHolds(env, lock) { try { const o = await env.R2.head(SKYCRAFT.LOCK); return !!o && o.etag === lock.etag; } catch (_) { return false; } }
 /** A failed run never moves the snapshot: the pointer keeps current/previous and gains last_attempt (fixed public phrase; detail stays in collector_runs). */
 async function craftFail(env, ms, reason, http, detail) {
   const failed_at = nowIso();
@@ -3165,27 +3177,41 @@ async function craftStore(env, key, buf, sha, type) {
   return (await same()) === 'same' ? 'stored' : 'read-back differs';
 }
 async function collectSkycraft(env, ms) {
-  if (!await craftLock(env, 'run ' + new Date(ms).toISOString())) { await logRun(env, 'skycraft', ms, 'ok', 0, 0, 0, 'skipped: another Horizons conversation holds the lock; no request made'); return 'skycraft:busy'; }
-  try { return await craftRun(env, ms); } finally { await craftUnlock(env); }
+  const lock = await craftLock(env, 'run ' + new Date(ms).toISOString());
+  if (!lock) { await logRun(env, 'skycraft', ms, 'ok', 0, 0, 0, 'skipped: another Horizons conversation holds the lock; no request made'); return 'skycraft:busy'; }
+  try { return await craftRun(env, ms, lock); } finally { await craftUnlock(env, lock); }
 }
-async function craftRun(env, ms) {
+/** Two independent outcomes, one request at a time: Parker (published) then the LRO study capture (stored, never published).
+ * A Parker-specific failure (a 4xx answer, an unreadable or invalid answer, a storage or publication failure) does not cancel the
+ * LRO capture. A failure that points at an upstream outage or rate limit (no answer, HTTP 429, HTTP 5xx) backs off the whole run. */
+async function craftRun(env, ms, lock) {
+  const pk = await craftParker(env, ms);
+  const study = pk.backoff ? 'not attempted: backing off after ' + pk.reason
+    : !await craftHolds(env, lock) ? 'not attempted: this run no longer holds the lock'
+    : await craftStudy(env, ms);
+  if (!pk.ok) return (await craftFail(env, ms, pk.reason, pk.http, (pk.detail ? pk.detail + '; ' : '') + 'lro study ' + study)) + '; lro study ' + study;
+  await logRun(env, 'skycraft', ms, study.startsWith('stored') ? 'ok' : 'degraded', 200, pk.n, pk.bytes, pk.note + '; lro study ' + study);
+  return 'skycraft:' + (pk.wrote ? 'published ' : 'superseded ') + pk.id + '; lro study ' + study;
+}
+/** Request 1. { ok:true, id, wrote, n, bytes, note } or { ok:false, reason, http, detail, backoff }. */
+async function craftParker(env, ms) {
   const P = SKYCRAFT.PARKER, day = craftDay(ms), start = day - P.back_days * 86400000, stop = day + P.ahead_days * 86400000, n = (stop - start) / (P.step_s * 1000) + 1;
-  // ---- request 1: Parker (published)
+  const bad = (reason, http, detail, backoff = false) => ({ ok: false, reason, http, detail, backoff });
   const got = await hzFetch(hzUrl(P, { start, stop, step_m: P.step_s / 60 })), retrieved_at = nowIso();
-  if (!got.ok) return craftFail(env, ms, 'parker ' + got.reason, got.http, got.detail);
+  if (!got.ok) return bad('parker ' + got.reason, got.http, got.detail, got.http === 0 || got.http === 429 || got.http >= 500);
   const z = hzParse(got.text, P);
-  if (!z.ok) return craftFail(env, ms, 'parker ' + z.reason, 200, z.detail);
-  if (z.rows.length !== n || z.rows.some((r, i) => r.ms !== start + i * P.step_s * 1000)) return craftFail(env, ms, 'parker returned times differ from the request', 200, `${z.rows.length} rows`);
+  if (!z.ok) return bad('parker ' + z.reason, 200, z.detail);
+  if (z.rows.length !== n || z.rows.some((r, i) => r.ms !== start + i * P.step_s * 1000)) return bad('parker returned times differ from the request', 200, `${z.rows.length} rows`);
   const dist = z.rows.map(r => Math.hypot(...r.p));
-  if (dist.some(d => !(d >= P.band_km[0] && d <= P.band_km[1]))) return craftFail(env, ms, 'parker distance out of range', 200, `${Math.min(...dist)}..${Math.max(...dist)} km`);
+  if (dist.some(d => !(d >= P.band_km[0] && d <= P.band_km[1]))) return bad('parker distance out of range', 200, `${Math.min(...dist)}..${Math.max(...dist)} km`);
   const fit = hzFitThrough(z.statement);
-  if (fit === null) return craftFail(env, ms, 'parker data sheet statement not recognised', 200, z.statement.slice(0, 160));
+  if (fit === null) return bad('parker data sheet statement not recognised', 200, z.statement.slice(0, 160));
   const seg = z.rows.map(r => hzSegmentOf(r.ms, z.table));
-  if (seg.every(i => i < 0)) return craftFail(env, ms, 'parker no sample inside a named trajectory segment', 200);
+  if (seg.every(i => i < 0)) return bad('parker no sample inside a named trajectory segment', 200);
   const stamp = retrieved_at.replace(/[-:]/g, '').slice(0, 15) + 'Z', rawKey = `${SKYCRAFT.RAW}${stamp}-parker.json`;
   const sr = await craftStore(env, rawKey, got.buf, got.sha256, 'application/json');
-  if (sr !== 'same' && sr !== 'stored') return craftFail(env, ms, 'parker raw ' + sr, 200, rawKey);
-  const used = [...new Set(seg.filter(i => i >= 0))].sort((a, b) => a - b);
+  if (sr !== 'same' && sr !== 'stored') return bad('parker raw ' + sr, 200, rawKey);
+  const used = [...new Set(seg.filter(i => i >= 0))].sort((a, b) => a - b), withheld = seg.filter(i => i < 0).length;
   const snap = { schema: 1, layer: 'skycraft', kind: 'hub snapshot', body: 'sun', mission: { id: 'psp', name: 'Parker Solar Probe', naif_id: -96 },
     retrieved_at, run: new Date(ms).toISOString(),
     time: { standard: 'UTC', start: new Date(start).toISOString().slice(0, 19) + 'Z', end: new Date(stop).toISOString().slice(0, 19) + 'Z', step_s: P.step_s, n },
@@ -3193,25 +3219,22 @@ async function craftRun(env, ms) {
     body_radius_km: SKYCRAFT.SUN_R_KM,
     solution: { same_response_as_vectors: true, api_version: z.version, target: z.target, target_source: z.target_source, data_sheet_revised: z.revised, statement: z.statement, fit_through_utc: new Date(fit - 86400000).toISOString().slice(0, 10),
       segments: used.map(i => ({ index: i, name: z.table[i].name, start_tdb: z.table[i].start, end_tdb: z.table[i].end })),
-      // per sample: the index of its named segment (−1 = none, or within two minutes of a segment edge: not shown) and whether it lies inside the tracking fit
-      segment_of: seg, within_tracking_fit: z.rows.map(r => r.ms < fit) },
+      // per sample: the index of its named segment, or −1 = withheld (no segment, more than one segment listed for that time, or within
+      // two minutes of a segment edge), and whether it lies inside the tracking fit
+      segment_of: seg, within_tracking_fit: z.rows.map(r => r.ms < fit), withheld_samples: withheld },
     source: { ...SKYCRAFT.SOURCE, response_bytes: got.bytes, response_sha256: got.sha256, user_agent: SKYCRAFT.UA },
     modifications: 'Positions rounded to 1 km. Velocities not carried.',
     xyz_km: z.rows.flatMap(r => r.p.map(Math.round)) };
   const body = new TextEncoder().encode(JSON.stringify(snap)).buffer, sha = await sha256Bytes(body), id = stamp + '-' + sha.slice(0, 16), key = SKYCRAFT.SNAP + id + '.json';
   const ss = await craftStore(env, key, body, sha, 'application/json');
-  if (ss !== 'same' && ss !== 'stored') return craftFail(env, ms, 'snapshot ' + ss, 200, key);
-  const brief = { id, key, path: '/snapshot/skycraft/' + id, bytes: body.byteLength, sha256: sha, retrieved_at, covers: { start: snap.time.start, end: snap.time.end, step_s: P.step_s }, raw: { key: rawKey, sha256: got.sha256, bytes: got.bytes } };
+  if (ss !== 'same' && ss !== 'stored') return bad('snapshot ' + ss, 200, key);
+  const brief = { id, key, path: '/snapshot/skycraft/' + id, bytes: body.byteLength, sha256: sha, retrieved_at, covers: { start: snap.time.start, end: snap.time.end, step_s: P.step_s }, withheld_samples: withheld, raw: { key: rawKey, sha256: got.sha256, bytes: got.bytes } };
   const up = await craftUpdate(env, c => (c.current && c.current.retrieved_at >= retrieved_at) ? null : { ...craftEmpty(), current: brief, previous: c.current || null });
-  // ---- request 2: LRO forward study (stored, never published). Runs only after Parker's answer is complete: one request at a time.
-  const study = await craftStudy(env, ms, stamp);
-  const note = `${up.wrote ? 'published' : 'superseded'} ${id}; sheet revised ${z.revised}; segments ${used.map(i => z.table[i].name).join(', ')}; lro study ${study}`;
-  await logRun(env, 'skycraft', ms, study.startsWith('stored') ? 'ok' : 'degraded', 200, n, got.bytes, note);
-  return 'skycraft:' + (up.wrote ? 'published ' : 'superseded ') + id + '; lro study ' + study;
+  return { ok: true, id, wrote: up.wrote, n, bytes: got.bytes, note: `${up.wrote ? 'published' : 'superseded'} ${id}; sheet revised ${z.revised}; segments ${used.map(i => z.table[i].name).join(', ')}; ${withheld} of ${n} samples withheld` };
 }
 /** The LRO capture for the forward study: raw answer plus a small index (target epochs, signed lead from the actual retrieval, data sheet). Publishes nothing. */
-async function craftStudy(env, ms, stamp) {
-  const epochs = craftStudyEpochs(ms), got = await hzFetch(hzUrl(SKYCRAFT.LRO, { list: epochs.map(e => e.ms) })), retrieved_at = nowIso();
+async function craftStudy(env, ms) {
+  const epochs = craftStudyEpochs(ms), got = await hzFetch(hzUrl(SKYCRAFT.LRO, { list: epochs.map(e => e.ms) })), retrieved_at = nowIso(), stamp = retrieved_at.replace(/[-:]/g, '').slice(0, 15) + 'Z';
   if (!got.ok) return 'failed: ' + got.reason + (got.http ? ' ' + got.http : '');
   const z = hzParse(got.text, SKYCRAFT.LRO);
   if (!z.ok) return 'failed: ' + z.reason;
@@ -3229,16 +3252,17 @@ async function craftStudy(env, ms, stamp) {
 }
 /** /admin/probe/skycraft — EXACTLY ONE upstream request (Parker's data sheet only, no vectors), with the application User-Agent. Stores and publishes nothing. */
 async function craftProbe(env) {
-  if (!await craftLock(env, 'probe')) return { probe: 'skycraft', made_request: false, reason: 'another Horizons conversation holds the lock' };
+  const lock = await craftLock(env, 'probe');
+  if (!lock) return { probe: 'skycraft', made_request: false, reason: 'another Horizons conversation holds the lock' };
   try {
     const url = SKYCRAFT.API + "?format=json&COMMAND='-96'&OBJ_DATA='YES'&MAKE_EPHEM='NO'", t0 = Date.now();
     let r, text = '', err = null;
     try { r = await fetch(url, { headers: { 'User-Agent': SKYCRAFT.UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(SKYCRAFT.TIMEOUT_MS) }); text = await r.text(); } catch (e) { err = String(e).slice(0, 200); }
     let ver = null, revised = null; try { const j = JSON.parse(text); ver = j.signature && j.signature.version; revised = (/Revised:\s*(\w{3} \d\d, \d{4})/.exec(j.result || '') || [])[1] || null; } catch (_) {}
-    return { probe: 'skycraft', made_request: true, upstream_requests: 1, url, user_agent_sent: SKYCRAFT.UA, http: r ? r.status : 0, error: err, ms: Date.now() - t0, bytes: text.length,
+    return { probe: 'skycraft', made_request: true, upstream_requests: 1, url, user_agent_set: SKYCRAFT.UA, user_agent_receipt: 'not verified: this is the header the hub set on its request; the upstream does not echo it', http: r ? r.status : 0, error: err, ms: Date.now() - t0, bytes: text.length,
       sha256: text ? await sha256Bytes(new TextEncoder().encode(text).buffer) : null, api_version: ver, expected_api_version: SKYCRAFT.API_VERSION, data_sheet_revised: revised,
       content_type: r ? r.headers.get('content-type') : null, stored: false, published: false, at: nowIso() };
-  } finally { await craftUnlock(env); }
+  } finally { await craftUnlock(env, lock); }
 }
 /** GET /snapshot/skycraft/meta and /snapshot/skycraft/<id>. A snapshot is served only if it is the current or previous one AND its stored bytes match the pointer. */
 async function craftSnapRoute(env, p) {

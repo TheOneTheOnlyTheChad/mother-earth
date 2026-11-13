@@ -6,7 +6,7 @@
  * Run: (python3 -m http.server 8899 --bind 127.0.0.1 &) ; NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/skycraft-ui.test.cjs
  * BREAK=<name> serves a weakened craft.js or skyscene.js; each must fail:
  *   no-pin nearest-sample hub-any-time edge-shown no-snap-hash push-history lro-today wrong-axis no-far no-break controls-shown
- *   example-default-hub link-no-time link-always no-reopen no-focus keep-return back-always */
+ *   example-default-hub link-no-time link-always no-reopen no-focus keep-return back-always round-stop */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), cp = require('child_process'), crypto = require('crypto');
 const REPO = path.join(__dirname, '..'), BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
@@ -31,6 +31,7 @@ const SKY_BREAKS = {
   'link-always': ["show = { moon: on && (st.free || st.s >= 0.5), sun: on && (st.sunShown || (!st.free && st.s > 1)) };", "show = { moon: on, sun: on };"],
   'no-reopen': ["  window.addEventListener('pageshow', () => { comeBack(); });", ''],
   'no-focus': ["    const a = $(rec.link); if (a && !a.hidden) a.focus();", ''],
+  'round-stop': ["const rec = { stop: body === 'sun' ? 2 : (st.free ? 1 : Math.max(1, Math.round(st.s))), link: EXPLORE[body], rev: REV };", "const rec = { stop: st.free ? (body === 'moon' ? 1 : 2) : Math.round(st.s), link: EXPLORE[body], rev: REV };"],
   'keep-return': ["    links(); forget();   // closed by the visitor", "    links();   // closed by the visitor"],
 };
 let CRAFT = fs.readFileSync(path.join(REPO, 'craft.js'), 'utf8'), SKY = fs.readFileSync(path.join(REPO, 'skyscene.js'), 'utf8');
@@ -197,6 +198,18 @@ const kmText = v => Math.round(v).toLocaleString('en-GB') + ' km';
     await page.waitForFunction(() => window.ME && ME.zoomState && ME.zoomState().open && ME.zoomState().path && document.activeElement && document.activeElement.id === 'zoom-sun', null, { timeout: 40000 }).catch(() => {});
     const z = await page.evaluate(() => ({ z: ME.zoomState && ME.zoomState(), focus: document.activeElement && document.activeElement.id, hist: history.length }));
     ok('8 Back to Earth returns to the Sky view, reopened at the Sun stop, focus on the Explore link', z.z && z.z.open && z.z.stop === 'C' && z.focus === 'zoom-sun', [z.z && z.z.stop, z.z && z.z.open, z.focus]);
+    // GPT, 13 Nov: between the Moon and Sun stops the Sun link is already shown while the nearer stop is still the Moon.
+    // Leaving from there must come back to a stop that shows the link that was used.
+    await page.click('#zoom-b'); await page.waitForFunction(() => ME.zoomState().stop === 'B');
+    { const bb = await (await page.$('#globe canvas')).boundingBox(); await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2);
+      for (let i = 0; i < 12; i++) { const p = await page.evaluate(() => ME.zoomState().s); if (p > 1.1 && p < 1.45) break; await page.mouse.wheel(0, 100); await page.waitForTimeout(80); } }
+    const mid = await page.evaluate(() => ({ s: ME.zoomState().s, stop: ME.zoomState().stop, sun: !document.getElementById('zoom-sun').hidden }));
+    ok('8 between stops: past the Moon stop the Sun link is shown while the nearer stop is still the Moon', mid.s > 1.1 && mid.s < 1.45 && mid.stop === 'B' && mid.sun, mid);
+    await page.click('#zoom-sun'); await page.waitForFunction(() => window.ME && ME.craftState && ME.craftState().status === 'ready', null, { timeout: 15000 });
+    await page.goBack(); await page.waitForURL(BASE + '/index.html');
+    await page.waitForFunction(() => window.ME && ME.zoomState && ME.zoomState().open && ME.zoomState().path && document.activeElement && document.activeElement.id === 'zoom-sun', null, { timeout: 40000 }).catch(() => {});
+    const zm = await page.evaluate(() => ({ z: ME.zoomState && ME.zoomState(), focus: document.activeElement && document.activeElement.id, sunShown: !document.getElementById('zoom-sun').hidden }));
+    ok('8 between stops: Back reopens at the Sun stop, where the Sun link is shown and focused', zm.z && zm.z.open && zm.z.stop === 'C' && zm.sunShown && zm.focus === 'zoom-sun', [zm.z && zm.z.stop, zm.sunShown, zm.focus]);
     // again by the browser's Back button, from the Moon stop
     await page.click('#zoom-b'); await page.waitForFunction(() => ME.zoomState().stop === 'B');
     await page.click('#zoom-moon'); await page.waitForFunction(() => window.ME && ME.craftState && ME.craftState().status === 'ready', null, { timeout: 15000 });

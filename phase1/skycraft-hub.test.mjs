@@ -4,7 +4,8 @@
  * Run: node --no-warnings phase1/skycraft-hub.test.mjs
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored any-version any-object any-times no-band no-statement edge-ok move-on-fail no-cas create-unconditional no-readback
- *   overwrite no-lock parallel lro-published any-snapshot no-integrity probe-two generic-down no-ua retry cat-unpinned */
+ *   overwrite no-lock parallel lro-published any-snapshot no-integrity probe-two generic-down no-ua retry cat-unpinned
+ *   release-unowned parker-cancels-study no-backoff no-tag-check study-after-lock-loss */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
@@ -14,15 +15,20 @@ const BREAKS = {
   'any-object': ["if (!target || !target.startsWith(spec.target) || !centre || !centre.startsWith(spec.centre))", 'if (false)'],
   'any-times': ["if (z.rows.length !== n || z.rows.some((r, i) => r.ms !== start + i * P.step_s * 1000))", 'if (false)'],
   'no-band': ["if (dist.some(d => !(d >= P.band_km[0] && d <= P.band_km[1])))", 'if (false)'],
-  'no-statement': ["  if (fit === null) return craftFail(env, ms, 'parker data sheet statement not recognised', 200, z.statement.slice(0, 160));", '  const fit2 = fit === null ? Infinity : fit;'],
+  'no-statement': ["  if (fit === null) return bad('parker data sheet statement not recognised', 200, z.statement.slice(0, 160));", ''],
   'edge-ok': ['return (tdb - s.start_tdb_ms < 120000 || s.end_tdb_ms - tdb < 120000) ? -1 : hit[0];', 'return hit[0];'],
   'move-on-fail': ["craftUpdate(env, cur => ({ ...cur, last_attempt: { run:", "craftUpdate(env, cur => ({ ...cur, current: null, last_attempt: { run:"],
   'no-cas': ["    const r = await env.R2.put(SKYCRAFT.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });", "    const r = await env.R2.put(SKYCRAFT.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? undefined : { etagDoesNotMatch: '*' } });"],
   'create-unconditional': ["    const r = await env.R2.put(SKYCRAFT.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });", "    const r = await env.R2.put(SKYCRAFT.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : undefined });"],
   'no-readback': ["  return (await same()) === 'same' ? 'stored' : 'read-back differs';", "  return 'stored';"],
   'overwrite': ["  if (had !== 'absent') return 'stored copy differs';", ''],
-  'no-lock': ["  if (!await craftLock(env, 'run ' + new Date(ms).toISOString())) {", '  if (false) {'],
-  'parallel': ["  const study = await craftStudy(env, ms, stamp);", "  const study = await craftStudyEarly;"],   // with the line below: the LRO request starts before Parker's answer
+  'no-lock': ["  const lock = await craftLock(env, 'run ' + new Date(ms).toISOString());", "  const lock = { etag: 'none' };"],
+  'release-unowned': ["JSON.stringify({ released: true, at: nowIso() }), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagMatches: lock.etag } });", "JSON.stringify({ released: true, at: nowIso() }), { httpMetadata: { contentType: 'application/json' } });"],
+  'parker-cancels-study': ["  const study = pk.backoff ? 'not attempted: backing off after ' + pk.reason", "  const study = !pk.ok ? 'not attempted: backing off after ' + pk.reason"],
+  'no-backoff': ["got.http === 0 || got.http === 429 || got.http >= 500);", "false);"],
+  'no-tag-check': ["  if (!target_source || !revised) return { ok: false, reason: 'no source tag or data sheet revision in response', detail: `${target_source} / ${revised}` };", ''],
+  'study-after-lock-loss': ["    : !await craftHolds(env, lock) ? 'not attempted: this run no longer holds the lock'\n", ''],
+  'parallel': ["    : await craftStudy(env, ms);", "    : await craftStudyEarly;"],   // with the line below: the LRO request starts before Parker's answer
   'lro-published': ["    modifications: 'Positions rounded to 1 km. Velocities not carried.',", "    modifications: 'Positions rounded to 1 km. Velocities not carried.', lro: await env.R2.list({ prefix: SKYCRAFT.STUDY }),"],
   'any-snapshot': ['  const x = [cur.current, cur.previous].find(f => f && f.id === p[2]);\n  if (!x) return none(404, \'not found\');\n  let buf; try { const o = await env.R2.get(x.key);', "  const x = [cur.current, cur.previous].find(f => f && f.id === p[2]) || { key: SKYCRAFT.SNAP + p[2] + '.json' };\n  let buf; try { const o = await env.R2.get(x.key);"],
   'no-integrity': ["  if (buf.byteLength !== x.bytes || await sha256Bytes(buf) !== x.sha256) return none(503, 'integrity');\n  return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': SKYCRAFT.CACHE_FILE,", "  return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': SKYCRAFT.CACHE_FILE,"],
@@ -36,8 +42,8 @@ let src = fs.readFileSync(path.join(HERE, 'worker.js'), 'utf8');
 if (BREAK) {
   if (!(BREAK in BREAKS)) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
   const b = BREAKS[BREAK]; if (!src.includes(b[0])) { console.log('FAIL  break did not apply: ' + BREAK); process.exit(1); } src = src.replace(b[0], b[1]);
-  if (BREAK === 'parallel') { const a = "  const got = await hzFetch(hzUrl(P, { start, stop, step_m: P.step_s / 60 })), retrieved_at = nowIso();"; if (!src.includes(a)) { console.log('FAIL  break did not apply: parallel'); process.exit(1); }
-    src = src.replace(a, "  const craftStudyEarly = craftStudy(env, ms, 'EARLY');\n" + a); }
+  if (BREAK === 'parallel') { const a = "  const pk = await craftParker(env, ms);"; if (!src.includes(a)) { console.log('FAIL  break did not apply: parallel'); process.exit(1); }
+    src = src.replace(a, "  const craftStudyEarly = craftStudy(env, ms);\n" + a); }
 }
 const tmp = path.join(os.tmpdir(), `worker-craft-${process.pid}.mjs`); fs.writeFileSync(tmp, src);
 const W = await import(pathToFileURL(tmp).href); fs.unlinkSync(tmp);
@@ -66,7 +72,7 @@ const timesOf = url => { const u = decodeURIComponent(url), g = k => (new RegExp
 // ---------- fakes
 function world(o = {}) {
   const store = new Map(), runs = [], reqs = [];
-  const w = { store, runs, reqs, order: [], conflicts: 0, deletes: 0, putFail: null, corruptRead: null, inFlight: 0, maxInFlight: 0, pointerPuts: [], psp: {}, lro: {}, status: 200, lroStatus: 200, throwFetch: false, delay: 0, onPointerPut: null, ...o };
+  const w = { store, runs, reqs, order: [], hold: null, conflicts: 0, deletes: 0, putFail: null, corruptRead: null, inFlight: 0, maxInFlight: 0, pointerPuts: [], psp: {}, lro: {}, status: 200, lroStatus: 200, throwFetch: false, delay: 0, onPointerPut: null, ...o };
   const etagOf = buf => crypto.createHash('md5').update(buf).digest('hex');
   const R2 = {
     async put(key, body, opts = {}) {
@@ -87,13 +93,14 @@ function world(o = {}) {
     if (!u.startsWith('https://ssd.jpl.nasa.gov/api/horizons.api')) throw new Error('unexpected fetch ' + u);
     const lro = u.includes("COMMAND='-85'"); reqs.push({ u, ua: init && init.headers && init.headers['User-Agent'], signal: !!(init && init.signal), lro });
     w.inFlight++; w.maxInFlight = Math.max(w.maxInFlight, w.inFlight); w.order.push(lro ? 'lro:start' : 'psp:start');
-    try { await new Promise(r => setTimeout(r, w.delay || 1));
+    try { await new Promise(r => setTimeout(r, w.delay || 1)); if (w.hold) await w.hold(u, lro);
       if (w.throwFetch) throw new Error('network down (test)');
       const st = lro ? w.lroStatus : w.status; if (st !== 200) return new Response('no', { status: st });
       if (!u.includes("MAKE_EPHEM='YES'")) return new Response(JSON.stringify({ signature: { version: w.psp.version || '1.2', source: 'NASA/JPL Horizons API' }, result: ' Revised: Nov 03, 2026  Parker Solar Probe / Sun  -96\n' }), { status: 200, headers: { 'content-type': 'application/json' } });
       const body = (lro ? w.lro.body : w.psp.body) || answer(lro ? 'lro' : 'psp', (lro ? w.lro.times : w.psp.times) || timesOf(u), lro ? w.lro : w.psp);
       return new Response(body, { status: 200, headers: { 'content-type': 'application/json' } });
     } finally { w.inFlight--; w.order.push(lro ? 'lro:end' : 'psp:end'); } };
+  w.lock = () => store.has(S.LOCK) ? JSON.parse(store.get(S.LOCK).buf.toString()) : null;
   w.ptr = () => store.has(S.POINTER) ? JSON.parse(store.get(S.POINTER).buf.toString()) : null;
   w.keys = p => [...store.keys()].filter(k => k.startsWith(p)).sort();
   return w;
@@ -121,6 +128,9 @@ globalThis.Date = class extends RealDate { constructor(...a) { if (a.length) sup
   const L = fs.readFileSync(path.join(HERE, 'skycraft/raw/horizons-lro-check-20260610.json'), 'utf8'), y = W.hzParse(L, S.LRO);
   ok('R real LRO answer parses; names with spaces', y.ok && y.rows.length === 3 && y.table.map(s => s.name).join('|') === 'Reconstructed trajectory|Concatenated predict updates|558day_20261007_01', y.reason || y.table);
   ok('R LRO: 10 June 2026 is in the reconstructed span; 13 Nov 2026 in the 558-day prediction', y.table[W.hzSegmentOf(Date.UTC(2026, 5, 10, 12), y.table)].name === 'Reconstructed trajectory' && y.table[W.hzSegmentOf(Date.UTC(2026, 10, 13, 12), y.table)].name === '558day_20261007_01');
+  ok('R the archived answer with its source tag removed is refused', W.hzParse(P.replace(' {source: psp_merged}', ''), S.PARKER).reason === 'no source tag or data sheet revision in response');
+  ok('R the archived answer with its revision line removed is refused', W.hzParse(P.replace(/Revised: Nov 03, 2026/, 'Updated  Nov 03  2026'), S.PARKER).reason === 'no source tag or data sheet revision in response');
+  ok('R the archived sheet lists two segments for 20 Jan – 17 Feb 2027: samples there are withheld; before and after are named', W.hzSegmentOf(Date.UTC(2027, 1, 1, 12), z.table) === -1 && W.hzSegmentOf(Date.UTC(2027, 0, 20, 0), z.table) === -1 && z.table[W.hzSegmentOf(Date.UTC(2027, 0, 19, 12), z.table)].name === 'spp_pred_20260930_20270217_od268_v001' && z.table[W.hzSegmentOf(Date.UTC(2027, 1, 18), z.table)].name === 'spp_nom_20180812_20300101_v044_PostV7');
   ok('R a Parker answer is refused as LRO', W.hzParse(P, S.LRO).reason === 'wrong object in response');
   const B = JSON.parse(fs.readFileSync(path.join(HERE, 'skycraft/BUILD.json'), 'utf8')).catalogues;
   ok('R Worker pins = generator record', Object.entries(W.CRAFT_REVISIONS).every(([k, p]) => B[k] && B[k].sha256 === p.fileSha256 && B[k].bytes === p.bytes && sha(fs.readFileSync(path.join(HERE, 'skycraft', B[k].file))) === p.fileSha256));
@@ -153,7 +163,7 @@ let goodId = null;
   ok('B the snapshot id names its content; stored bytes match the pointer', p.current.id.endsWith(sha(w.store.get(p.current.key).buf).slice(0, 16)) && sha(w.store.get(p.current.key).buf) === p.current.sha256 && p.current.bytes === w.store.get(p.current.key).buf.length);
   ok('B raw answer kept, hash recorded', w.keys(S.RAW).length === 1 && sha(w.store.get(p.current.raw.key).buf) === p.current.raw.sha256 && snap.source.response_sha256 === p.current.raw.sha256);
   ok('B every pointer write was conditional', w.pointerPuts.length >= 1 && w.pointerPuts.every(c => c && (c.etagMatches || c.etagDoesNotMatch === '*')), w.pointerPuts);
-  ok('B the lock is released', !w.store.has(S.LOCK));
+  ok('B the lock is released (marked, not deleted)', w.lock() && w.lock().released === true, w.lock());
   ok('B run recorded ok', w.runs.length === 1 && w.runs[0].layer === 'skycraft' && w.runs[0].status === 'ok' && w.runs[0].records === 193, w.runs);
   // LRO study
   const idxKey = w.keys(S.STUDY).find(k => k.endsWith('-index.json')), idx = JSON.parse(w.store.get(idxKey).buf.toString()), lu = decodeURIComponent(w.reqs[1].u);
@@ -175,22 +185,28 @@ let goodId = null;
   // a second, later run keeps the first as previous
   setClock(NOW + DAY); await W.collectSkycraft(w.env, NOW + DAY); setClock(null); const p2 = w.ptr();
   ok('B next day: new current, yesterday kept as previous and still served', p2.current.id !== goodId && p2.previous.id === goodId && (await get(w, '/snapshot/skycraft/' + goodId)).status === 200);
-  ok('B nothing was deleted except the lock', w.deletes === 2 && w.keys(S.RAW).length === 2 && w.keys(S.SNAP).length === 2);
+  ok('B nothing is ever deleted', w.deletes === 0 && w.keys(S.RAW).length === 2 && w.keys(S.SNAP).length === 2, w.deletes);
+  ok('B the snapshot records how many samples it withholds', JSON.parse(w.store.get(w.ptr().current.key).buf.toString()).solution.withheld_samples === 0 && w.ptr().current.withheld_samples === 0);
 }
 // ---------- C. failures never move the snapshot
 async function failing(name, setup, expect, extra) {
   const w = use(world()); setClock(NOW); await W.collectSkycraft(w.env, NOW); const before = w.ptr().current.id; w.reqs.length = 0; w.runs.length = 0;
   setup(w); setClock(NOW + DAY); const r = await W.collectSkycraft(w.env, NOW + DAY); setClock(null); const p = w.ptr();
-  ok(`C ${name}: run is down with a fixed phrase`, r === 'skycraft:down ' + expect && w.runs[0].status === 'down', [r, w.runs]);
+  ok(`C ${name}: run is down with a fixed phrase`, r.startsWith('skycraft:down ' + expect + '; lro study ') && w.runs[0].status === 'down', [r, w.runs]);
   ok(`C ${name}: the snapshot did not move; last_attempt recorded`, p.current.id === before && p.last_attempt && p.last_attempt.reason === expect && p.last_attempt.consecutive_failures === 1, p);
   ok(`C ${name}: no retry inside the run`, w.reqs.filter(q => !q.lro).length === 1, w.reqs.length);
   ok(`C ${name}: the old snapshot is still served`, (await get(w, '/snapshot/skycraft/' + before)).status === 200);
   if (extra) await extra(w, p);
   return w;
 }
-await failing('HTTP 503', w => { w.status = 503; }, 'parker http error', async w => ok('C HTTP 503: no LRO request after a failed Parker request', w.reqs.every(q => !q.lro)));
-await failing('network error', w => { w.throwFetch = true; }, 'parker request failed');
-await failing('API version changed', w => { w.psp.version = '1.3'; }, 'parker api version changed');
+const noStudy = why => async w => ok(`C ${why}: the whole run backs off — no LRO request, nothing stored for the study that day`, w.reqs.every(q => !q.lro) && w.keys(S.STUDY).length === 2 && /not attempted: backing off/.test(w.runs[0].note), [w.reqs.length, w.runs[0].note]);
+const withStudy = why => async w => ok(`C ${why}: a Parker-only failure does not cancel the LRO capture (one LRO request, stored)`, w.reqs.filter(q => q.lro).length === 1 && w.keys(S.STUDY).length === 4 && /lro study stored 41 epochs/.test(w.runs[0].note) && w.maxInFlight === 1, [w.reqs.length, w.keys(S.STUDY).length, w.runs[0].note]);
+await failing('HTTP 503', w => { w.status = 503; }, 'parker http error', noStudy('HTTP 503'));
+await failing('HTTP 429', w => { w.status = 429; }, 'parker http error', noStudy('HTTP 429'));
+await failing('network error', w => { w.throwFetch = true; }, 'parker request failed', noStudy('network error'));
+await failing('HTTP 422', w => { w.status = 422; }, 'parker http error', withStudy('HTTP 422'));
+await failing('no source tag', w => { w.psp.target = 'Parker Solar Probe (spacecraft) (-96)'; }, 'parker no source tag or data sheet revision in response', withStudy('no source tag'));
+await failing('API version changed', w => { w.psp.version = '1.3'; }, 'parker api version changed', withStudy('unreadable Parker answer'));
 await failing('wrong object', w => { w.psp.target = 'Solar Orbiter (spacecraft) (-144) {source: x}'; }, 'parker wrong object in response');
 await failing('wrong frame', w => { w.psp.frame = 'Ecliptic of J2000.0'; }, 'parker unexpected response settings');
 await failing('a row missing', w => { w.psp.times = timesOf("x?START_TIME='2026-11-13 00:00'&STOP_TIME='2026-11-20 23:00'&STEP_SIZE='60 m'"); }, 'parker returned times differ from the request');
@@ -200,7 +216,7 @@ await failing('non-finite coordinate', w => { w.psp.body = answer('psp', timesOf
 await failing('statement not the known sentence', w => { w.psp.statement = 'Trajectory updated.'; }, 'parker data sheet statement not recognised');
 await failing('no table', w => { w.psp.table = '  (none)\n'; }, 'parker data sheet unreadable');
 await failing('not JSON', w => { w.psp.body = '<html>busy</html>'; }, 'parker response unreadable');
-await failing('snapshot write fails', w => { w.putFail = 'skycraft/snap/'; }, 'snapshot write failed');
+await failing('snapshot write fails', w => { w.putFail = 'skycraft/snap/'; }, 'snapshot write failed', withStudy('publication failure'));
 await failing('snapshot read-back differs', w => { w.corruptRead = 'skycraft/snap/20261114'; }, 'snapshot read-back differs', async w => { w.corruptRead = null; });
 // a sample on a segment edge is published as "no segment", never mislabelled
 { const w = use(world()); w.psp.table = PSP_TABLE.replace('2026-Sep-30 00:00  2027-Feb-17 00:00', '2026-Sep-30 00:00  2026-Nov-14 00:00').replace('2027-Jan-20 00:00  2030-Jan-01 00:00', '2026-Nov-14 00:00  2030-Jan-01 00:00');
@@ -210,7 +226,7 @@ await failing('snapshot read-back differs', w => { w.corruptRead = 'skycraft/sna
 { const w = use(world()); setClock(NOW); await W.collectSkycraft(w.env, NOW); const before = w.ptr().current.id; const realGet = w.env.R2.get; w.runs.length = 0;
   w.env.R2.get = async k => { if (k === S.POINTER) throw new Error('R2 exploded (test)'); return realGet(k); };
   setClock(NOW + DAY); const r = await W.JOBS.skycraft(w.env, NOW + DAY, true); setClock(null); w.env.R2.get = realGet;
-  ok('C uncaught: recorded as an internal error; no generic envelope; pointer keeps the snapshot; lock released', w.runs.some(x => x.layer === 'skycraft' && x.status === 'down' && /^internal error/.test(x.note)) && ![...w.store.keys()].some(k => k.startsWith('latest')) && w.ptr().current.id === before && !w.store.has(S.LOCK), [r, w.runs, [...w.store.keys()].filter(k => k.startsWith('latest'))]); }
+  ok('C uncaught: recorded as an internal error; no generic envelope; pointer keeps the snapshot; lock released', w.runs.some(x => x.layer === 'skycraft' && x.status === 'down' && /^internal error/.test(x.note)) && ![...w.store.keys()].some(k => k.startsWith('latest')) && w.ptr().current.id === before && w.lock().released === true, [r, w.runs, [...w.store.keys()].filter(k => k.startsWith('latest'))]); }
 // LRO study failure: Parker still published, run degraded
 { const w = use(world()); w.lroStatus = 500; setClock(NOW); const r = await W.collectSkycraft(w.env, NOW); setClock(null);
   ok('C LRO study fails: Parker is still published; run recorded degraded; no study object', /published/.test(r) && w.ptr().current && w.runs[0].status === 'degraded' && w.keys(S.STUDY).length === 0, [r, w.runs]); }
@@ -236,11 +252,27 @@ await failing('snapshot read-back differs', w => { w.corruptRead = 'skycraft/sna
   // a different body already stored under the key this run would use is never overwritten
   w.store.delete(S.POINTER); w.store.set(key, { buf: Buffer.from('{"tampered":true}'), opts: {}, etag: 't' }); w.runs.length = 0;
   const r = await W.collectSkycraft(w.env, NOW); setClock(null);
-  ok('D a stored snapshot is never overwritten', r === 'skycraft:down snapshot stored copy differs' && w.store.get(key).buf.toString() === '{"tampered":true}' && !w.ptr().current, [r, id]); void orig; }
+  ok('D a stored snapshot is never overwritten', r.startsWith('skycraft:down snapshot stored copy differs') && w.store.get(key).buf.toString() === '{"tampered":true}' && !w.ptr().current, [r, id]); void orig; }
+{ // GPT, 13 Nov: run A's lock expires; run B takes it over; A then finishes. A must not release B's lock, and a third run must not start.
+  const w = use(world()); const gates = {}; const gate = k => new Promise(r => { gates[k] = r; });
+  let n = 0; w.hold = async (u, lro) => { if (!lro) { const k = n++ === 0 ? 'A' : 'B'; await gate(k); } };
+  const T0 = NOW; setClock(T0); const a = W.collectSkycraft(w.env, T0); await new Promise(r => setTimeout(r, 30));
+  ok('D takeover: run A holds the lock and has one request in flight', w.lock() && /run 2026-11-13T05:07/.test(w.lock().who) && w.reqs.length === 1, w.lock());
+  setClock(T0 + 11 * 60000); const b = W.collectSkycraft(w.env, T0 + 11 * 60000); await new Promise(r => setTimeout(r, 30));
+  const bLock = w.lock();
+  ok('D takeover: after ten minutes run B takes the lock over and starts its request', bLock && /run 2026-11-13T05:18/.test(bLock.who) && w.reqs.length === 2, [bLock, w.reqs.length]);
+  gates.A(); const ra = await a;
+  ok('D takeover: A finishing does NOT release B\'s lock', w.lock() && w.lock().token === bLock.token && !w.lock().released, w.lock());
+  ok('D takeover: A makes no further Horizons request once it no longer holds the lock', /this run no longer holds the lock/.test(ra) && w.reqs.length === 2, [ra, w.reqs.length]);
+  setClock(T0 + 11 * 60000 + 1000); const rc = await W.collectSkycraft(w.env, T0 + 11 * 60000 + 1000);
+  ok('D takeover: a third run cannot start while B\'s request is in flight', rc === 'skycraft:busy' && w.reqs.length === 2, [rc, w.reqs.length]);
+  gates.B(); const rb = await b; setClock(null);
+  ok('D takeover: B completes both requests and then releases its own lock', /lro study stored/.test(rb) && w.reqs.length === 3 && w.lock().released === true, [rb, w.reqs.length, w.lock()]);
+  ok('D takeover: the newer run\'s snapshot is current', /20261113T0518/.test(w.ptr().current.id), w.ptr().current.id); }
 // ---------- E. the probe: exactly one request, nothing stored
 { const w = use(world()); const r = await get(w, '/admin/probe/skycraft?key=k');
-  ok('E probe: exactly one upstream request, data sheet only, with the User-Agent', r.status === 200 && w.reqs.length === 1 && !w.reqs[0].u.includes("MAKE_EPHEM='YES'") && w.reqs[0].u.includes("MAKE_EPHEM='NO'") && w.reqs[0].ua === S.UA && r.j.upstream_requests === 1 && r.j.user_agent_sent === S.UA, [w.reqs.length, r.j]);
-  ok('E probe: reports status, API version and sheet revision; stores and publishes nothing', r.j.http === 200 && r.j.api_version === '1.2' && r.j.data_sheet_revised === 'Nov 03, 2026' && r.j.stored === false && w.store.size === 0 && w.runs.length === 0, [r.j, [...w.store.keys()]]);
+  ok('E probe: exactly one upstream request, data sheet only, with the User-Agent', r.status === 200 && w.reqs.length === 1 && !w.reqs[0].u.includes("MAKE_EPHEM='YES'") && w.reqs[0].u.includes("MAKE_EPHEM='NO'") && w.reqs[0].ua === S.UA && r.j.upstream_requests === 1 && r.j.user_agent_set === S.UA && /not verified/.test(r.j.user_agent_receipt) && !('user_agent_sent' in r.j), [w.reqs.length, r.j]);
+  ok('E probe: reports status, API version and sheet revision; stores and publishes nothing', r.j.http === 200 && r.j.api_version === '1.2' && r.j.data_sheet_revised === 'Nov 03, 2026' && r.j.stored === false && w.keys('skycraft/').filter(k => k !== S.LOCK).length === 0 && w.lock().released === true && w.runs.length === 0, [r.j, [...w.store.keys()]]);
   ok('E probe needs the admin key', (await get(w, '/admin/probe/skycraft')).status === 403 && (await get(w, '/admin/probe/skycraft?key=no')).status === 403 && w.reqs.length === 1);
   w.store.set(S.LOCK, { buf: Buffer.from(JSON.stringify({ who: 'run', at: new RealDate().toISOString() })), opts: {}, etag: 'x' }); const busy = await get(w, '/admin/probe/skycraft?key=k');
   ok('E probe while a run holds the lock: no request', busy.j.made_request === false && w.reqs.length === 1, busy.j); }

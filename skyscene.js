@@ -321,7 +321,9 @@
   }
   function leave(ev, body) {
     if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;   // new tab or window: the browser's own business, nothing recorded
-    const rec = { stop: st.free ? (body === 'moon' ? 1 : 2) : Math.round(st.s), link: EXPLORE[body], rev: REV };
+    // the stop to come back to is one where the link that was used is shown: the Sun link → the Sun stop; the Moon link → the Moon stop,
+    // or the Sun stop when the view had already passed it (between two stops the nearer one could hide the link — GPT, 13 Nov 2026)
+    const rec = { stop: body === 'sun' ? 2 : (st.free ? 1 : Math.max(1, Math.round(st.s))), link: EXPLORE[body], rev: REV };
     try { history.replaceState({ ...(history.state || {}), skyReturn: rec }, ''); } catch (_) {}
     try { sessionStorage.setItem('me.sky.out', String(Date.now())); } catch (_) {}
   }
