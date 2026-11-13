@@ -99,3 +99,9 @@ Every failure captured was the same shape: 103 probes agree, 1 disagrees, a sunl
 | `timeline.html` (unchanged) | | `0ab9f666f4cc3a3e0e4daf6f58603b7f63f0c81f0d6ece8f53b9b82d8b8c7df6` |
 | `phase1/dustrgb-hub.test.mjs` | | `43ca55fcce769b3cb2e074864da74f28cc868354f6dd5f5d8eeb3ba6964072bb` |
 | `phase1/dustrgb-ui.test.cjs` | | `5143d3b78e9b01baf065920e659aca3a3bb9d16163ab588a0dc343091494bc5d` |
+
+## 5. Correction (13 Nov, after GPT's review of round 3)
+
+§1 and §3 say "I do not know which plan the Worker is on" / "Plan unknown to me". That was my miss: `START-HERE.md` records **Workers Paid since 3 Nov** (30 s CPU per request; 15 min for crons at intervals of an hour or more). The 10 ms Free-plan figure does not apply. The plan is still to be confirmed in the dashboard, and CPU still measured on the manual run (Dust alone) and then on the first scheduled run (the whole hourly job).
+
+GPT's result on round 3: ready for an owner-approved hub smoke test with `DUSTRGB_ENABLED` unset; schedule and page release pending the live checks. Success evidence for the smoke test is the pointer and the files, not the admin endpoint's reply (it answers 200 `dustrgb:ran` even when the run records a failure): a newly published frame in `/snapshot/dustrgb/meta`, both file URLs returning bytes that match the pointer's hashes, and the real frame seen on the globe.
