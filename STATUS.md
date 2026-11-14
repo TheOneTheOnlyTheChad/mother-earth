@@ -4,12 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 05:47 UTC (clock reading at write) — **hub 0.6.13 DEPLOYED** (content only, 05:44:54 UTC); Sun probe passed; **hub is ahead of main**
+
+Chad: "Approve: deploy hub 0.6.13 from sunface-rc (content only, SUNFACE_ENABLED unset) and run /admin/probe/sunface once". The same message relayed GPT's hold on `4dd44b7` for two fixes; both were made first (`1a4888c`: Last-Modified must be a real calendar date and never later than retrieval; bytes published before are never republished) and that commit was deployed. **GPT has not reviewed `1a4888c`.**
+
+- Live `worker.js` now `5859fb70…f9ae`, 361,884 B (read back exact). Before: 0.6.12 `c1addd19…0106`. Health 8 of 8 at 05:45:38 UTC. `SUNFACE_ENABLED` unset: no schedule, nothing stored.
+- Probe 05:45:18–05:45:22 UTC, one request: **the Worker reaches `sdo.gsfc.nasa.gov`** (HTTP 200, 3,274 ms, 204,789 B, 1024 × 1024, Last-Modified 05:40:07 GMT, 316 s old, timestamp passes the rule; stored no, published no).
+- **0.6.13 is on branch `sunface-rc`, not on main. Do not deploy a hub built from main** until that branch merges. Rollback = 0.6.12 `c1addd19…0106` (own Approve line).
+- Records on the branch: `reviews/2026-11-14-sunface-rc.md`, `reviews/2026-11-14-sunface-smoke.md`. Tests: `sunface-hub` 149 of 149, 24 breaks; 30 node hub suites pass.
+- Next lines: GPT's review of `1a4888c`; `Approve: run /admin/run/sunface once`; `Approve: set SUNFACE_ENABLED=1`.
+
 ## 14 Nov 05:11 UTC (clock reading at write) — first scheduled skycraft run read: **ok**
 
 - D1 row 9896: started 05:07:58.510Z, finished 05:08:11.030Z, `ok`, HTTP 200, 193 records. Note: "published 20261114T050809Z-71d1328e9dc01272; sheet revised Nov 03, 2026; segments spp_pred_20260930_20270217_od268_v001; 0 of 193 samples withheld; lro study stored 41 epochs". Only two skycraft rows exist (this and the manual run 9430 of 13 Nov).
 - `/snapshot/skycraft/meta` at 05:10:39Z: current `20261114T050809Z-71d1328e9dc01272` (8,814 B, retrieved 05:08:09.491Z), previous `20261113T101042Z-c88f5c381b7e6fef` as expected, `last_attempt` null; the current snapshot file answers 200.
 - Read at 05:17 UTC (dashboard API, read-only): `skycraft/study/lro/` holds a second pair, `20261114T050810Z-raw.json` (20,125 B) and `-index.json` (9,086 B), beside the 13 Nov pair. Worker CPU, per-minute maximum: **103 ms in the 05:07 minute** (4 requests, 0 errors), which is the whole hourly invocation, not skycraft alone; neighbouring minutes 2–19 ms.
-- **In progress, not deployed:** hub 0.6.13 source on branch `sunface-rc` @ `2bfa014` (Sun picture job, probe, routes), packet `reviews/2026-11-14-sunface-rc.md` on that branch; awaiting GPT's review and Chad's deploy line.
 
 ## 14 Nov 04:06 UTC (clock reading at write) — **Moon globe follow-up RELEASED** (merge `87c68be`; page only): instant buttons; zoom inside the box
 
