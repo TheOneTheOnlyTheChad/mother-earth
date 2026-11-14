@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 18:55 UTC (clock reading) — **LRO dated-path thread close-out** (START-HERE §9)
+- Branch `moon-lro-path-rc` deleted by Chad; `git fetch -p`: remote has only `main` and `aircraft-rc`.
+- Mac `_review/moon-lro-path-rc/` moved to `_to_delete/`; `_review/` empty. Mac synced preserve-first at the close-out commit (text files; every preserved copy matched an earlier commit).
+- START-HERE §4z added; HANDOVER "NEXT THREAD STARTS HERE" written. **Next (item 1): Chad chooses the next item**; nothing is agreed-next.
+
 ## 14 Nov 18:39:22 UTC (commit time) — **PAGE RELEASED: LRO's dated path on the Moon globe** (main merge `7dbce14` of `moon-lro-path-rc` @ `d1b3555`; Chad: "Approve: merge moon-lro-path-rc to main (page change: LRO's dated path on the Moon globe)")
 - **REGISTER filed first** on Chad's line "Approve: file the four moon-lro-path REGISTER entries as drafted (NAIF kernels, DE440 ASCII, Horizons extension, Moon-fixed LRO catalogue) on branch moon-lro-path-rc" — branch commit `d1b3555`, filed 18:39 UTC.
 - Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch (apart from STATUS).
