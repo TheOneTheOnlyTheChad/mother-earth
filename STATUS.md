@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 11:31 UTC (clock reading at write) — **Globes thread close-out** (START-HERE §9); branches deleted
+
+Chad: "ok branches are deleted, and yes this is def handover time".
+
+- **Branches:** `git fetch -p` at 11:30:45 UTC pruned `sunface-rc` and `sunglobe-rc`; remote now holds `main` and the parked `aircraft-rc` only.
+- **Mac `_review/`:** empty (both review copies moved to `_to_delete/20261114T112500Z/` earlier; Chad empties `_to_delete/`).
+- **Mac sync:** twelve spot-checked files on the Mac equal main `430ca07` by sha256 at 11:30:46 UTC (STATUS, START-HERE, HANDOVER, REGISTER, `sunglobe.js`, `moonglobe.js`, `phase1/worker.js`, `style.css`, `sun.html`, `moon.html`, `sources.html`, `index.html`); this commit's STATUS and HANDOVER follow, preserve-first.
+- **Checkout:** one worktree, clean, pushed.
+- **Live unchanged:** hub 0.6.14 (`bbf8dc61…0480`, `SUNFACE_ENABLED=1`, `SKYCRAFT_ENABLED=1`), page merge `e50a033`; main = live.
+- **Next (item 1 for the new thread):** the **Sky distance-zoom view fix**, Chad's request ("we will do that later… the distance zoom one"). Not started. Begin with a docs-only proposal for GPT; no build without Chad's go.
+- **Open, Chad's to decide or do (none blocks anything):** real phone / Safari / screen-reader look at both globes; north-up of NASA's picture rests on one frame (no automated alignment test); optional note to SDO's instrument team (not sent; his to send); hub cleanup of old Sun pictures (must keep the replay markers); a verified observation time for the Sun picture; "Lit as now" and LRO on the Moon globe; `mother-earth-lroc_color_2k.jpg` in `~/Downloads` and the Mac's `_to_delete/` are his to delete.
+
 ## 14 Nov 11:23 UTC (clock reading at write) — **Sun globe RELEASED** (merge `e50a033`); **main = live hub again** (0.6.14)
 
 GPT (relayed by Chad): round 2 passes at `ea23f75`; expiry hold cleared; REGISTER rev 2 ready for the retention decision. Chad: "Option A"; "Approve: file the REGISTER entry for the NASA SDO HMI continuum latest image"; "Approve: push sunglobe-rc to main (page change: Sun globe on the Sun page; hub 0.6.14 source reaches main)".
