@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 15:28 UTC (clock reading at write) — **Sky zoom fix thread close-out** (START-HERE §9)
+- Branch `sky-zoom-fix-rc` deleted by Chad; `git fetch -p`: remote has only `main` and `aircraft-rc`.
+- Mac `_review/sky-zoom-fix/` and `_review/sky-zoom-fix-rc/` moved to `_to_delete/`; `_review/` empty. Mac sync of the repo at the final commit, preserve-first (result in the next entry if anything differed).
+- HANDOVER "NEXT THREAD STARTS HERE" block written. **Next (item 1): Chad chooses the next item**; nothing is agreed-next.
+
 ## 14 Nov 15:13:29 UTC (push time) — **PAGE RELEASED: Sky zoom-out view zoom fix** (main merge `ad1261c` of `sky-zoom-fix-rc` @ `6e883c5`; Chad: "Approve: merge sky-zoom-fix-rc to main (page change: Sky zoom-out view zoom fix)")
 - Page only; hub 0.6.14 unchanged (worker.js identical), so **main = live**. Merge tree = the branch.
 - **Before the line:** GPT reviewed section 4 at source level only (12 simulated checks; its browser smoke test did not run). Claude checked the Mac review copy in the browser pane on the Mac's graphics (packet §8). **No independent browser test preceded the merge.**
