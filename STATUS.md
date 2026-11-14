@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 17:16 UTC (clock reading) — **Candidate built: LRO's dated path on the Moon globe** (`moon-lro-path-rc` @ `9255518`; Chad: "Go: build moon-lro-path-rc on a branch per MOON-LRO-DATED-PATH-PROPOSAL rev 2 (keep both rotation checks; if Horizons can't supply a usable Moon-fixed comparison, bring it back to Chad before release; page only; no merge)")
+- Proposal rev 2 (GPT) and Claude's review on main at `0d2bb9e` (commit time 16:06:30 UTC). Rev 1 kept on the Mac in `superseded/`.
+- **Branch only. Nothing merged, deployed or filed.** Page only: no hub, R2 or D1 change. Live site unchanged (main = live).
+- Overlay off by default; follows the spacecraft drawing's minute and 120-sample window; readout with UTC, altitude above the 1,737.4 km sphere, window bounds, behind-the-Moon note.
+- Catalogue `craft-moon-me-2026-06-R1` (`assets/moon/`, 39,267 B, `d62fb271…afb9`) from `phase1/skycraft/build_moonfixed.py` (SpiceyPy 8.0.0 / N0067, `MOON_ME_DE440_ME421`).
+- **Checks:** independent DE440 libration evaluation (no SPICE) worst 0.0000071° / 0.00023 km (ceilings 0.001° / 0.05 km); **Horizons MOON_ME (`500@-85`, quantity 14) worst 0.0000016° with light-time applied** (0.004–0.0055° without; ceiling 0.01°) — a usable, identified comparison, so nothing goes back to Chad on that point; lowest chord 64.177 km; rendered-globe fiducials at six Gazetteer features 0.061° (ceiling 1°).
+- **Tests:** `moon-lro-path` 61/0, eight page breaks all fail; build breaks 6/6. Regressions: moon-globe 67/0 (one caption assertion updated), skycraft-ui 77/0, sun-globe 103/0, desktop-overflow 258/0, mobile-pass 131/0, sky-zoom-ui 351/0. Full regression not run.
+- **Deviation for GPT:** the 12.9 MB orientation PCK is kept as three hashed byte ranges (the pane carries ~190 KB a call); the full file was hashed in the pane; any read outside the ranges is NaN and stops the build.
+- **Kernel/data transfer route:** the workspace and Mac shells cannot reach NAIF or SSD; everything came through the browser pane (packet §5).
+- Packet `reviews/2026-11-14-moon-lro-path-rc.md`; REGISTER drafts `reviews/2026-11-14-moon-lro-path-register-draft.md` (not filed; rev 2 wants them before page release; Chad's line). Mac review copy `_review/moon-lro-path-rc/` (hashes match the branch).
+- **Next:** GPT reviews the packet. Then, each on Chad's own line: REGISTER filing on the branch, and the merge. Optional: a real-graphics check in the Mac pane (needs Chad to serve `_review/moon-lro-path-rc/`).
+- **GPT's live zoom check (relayed by Chad, this thread):** with Chrome control back, both zoom buttons returned to the path after a fresh drag at all three stops (also past an endpoint); Earth, Moon and Sun rendered at their stops; resize after a drag restored + Sun; plain wheel left Sky zoom alone. **Ctrl+wheel not independently verified; phone deferred.**
+
 ## 14 Nov 15:36 UTC (clock reading at write) — GPT's live check of the zoom fix (relayed by Chad, after close-out)
 - GPT read the public page: its HTML, zoom script and stylesheet match the reviewed candidate byte for byte; the globe library and both Sky catalogues responded. This independently confirms what the site serves.
 - **GPT's browser interaction test is still pending** (drag, zoom, buttons). The review gap in the release entry below stands for interaction. Docs only.
