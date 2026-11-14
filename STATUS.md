@@ -6,7 +6,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 ## 14 Nov 15:28 UTC (clock reading at write) — **Sky zoom fix thread close-out** (START-HERE §9)
 - Branch `sky-zoom-fix-rc` deleted by Chad; `git fetch -p`: remote has only `main` and `aircraft-rc`.
-- Mac `_review/sky-zoom-fix/` and `_review/sky-zoom-fix-rc/` moved to `_to_delete/`; `_review/` empty. Mac sync of the repo at the final commit, preserve-first (result in the next entry if anything differed).
+- Mac `_review/sky-zoom-fix/` and `_review/sky-zoom-fix-rc/` moved to `_to_delete/`; `_review/` empty. Mac sync at `77db4f6` (15:28 UTC): 12 files replaced, 2 new; the 12 preserved copies (`_sync-preserved/20261114T152812Z/`) each match `49c8c7e` (no local edits); every tracked file then identical to the commit.
 - HANDOVER "NEXT THREAD STARTS HERE" block written. **Next (item 1): Chad chooses the next item**; nothing is agreed-next.
 
 ## 14 Nov 15:13:29 UTC (push time) — **PAGE RELEASED: Sky zoom-out view zoom fix** (main merge `ad1261c` of `sky-zoom-fix-rc` @ `6e883c5`; Chad: "Approve: merge sky-zoom-fix-rc to main (page change: Sky zoom-out view zoom fix)")
