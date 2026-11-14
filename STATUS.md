@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
-## 14 Nov 04:07 UTC (clock reading at write) — **Moon globe follow-up RELEASED** (merge `87c68be`; page only): instant buttons; zoom inside the box
+## 14 Nov 04:06 UTC (clock reading at write) — **Moon globe follow-up RELEASED** (merge `87c68be`; page only): instant buttons; zoom inside the box
 
 GPT (relayed by Chad): `82f7d0c` passes review; keep closest altitude 0.5; keep the plain wheel scrolling the page; word the line "Use Zoom in and Zoom out, or pinch on supported devices". Chad: "Approve: push moon-globe-fix to main (page change: Moon globe instant buttons and zoom inside the box)".
 
