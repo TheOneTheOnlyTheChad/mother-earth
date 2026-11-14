@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 07:13 UTC (clock reading at write) — Sun picture: **first scheduled run ok** (07:07 UTC)
+
+D1 row 9946 `ok`, 1 record, 203,010 B: image `20261114T070005Z-4bc25d7a146de6fd` (file updated 07:00:05Z, retrieved 07:08:11.200Z, `observed_at` null). The manual run's image `20261114T063005Z-66f213bcb914748e` is now `previous`, times unchanged; no failed attempt. Marker → image → pointer order held. Worker CPU per-minute maximum 63.6 ms for the 07:07 minute (the whole hourly job), 0 errors. Details: `reviews/2026-11-14-sunface-smoke.md` §9 on `sunface-rc`. Next on this feature: the Sun globe page.
+
 ## 14 Nov 06:46 UTC (clock reading at write) — **`SUNFACE_ENABLED=1` set** (06:44:21 UTC); hourly Sun fetch is on
 
 Chad: "Approve: set SUNFACE_ENABLED=1"; Claude filled the form, Chad clicked the deploy button. Read back 06:46:00 UTC: 22 bindings, the variable is `1`, other gates unchanged, live `worker.js` still 0.6.14 `bbf8dc61…0480`. First scheduled fetch expected about 07:07 UTC. To stop: remove the variable (own Approve line). Hub remains ahead of main (branch `sunface-rc`).
