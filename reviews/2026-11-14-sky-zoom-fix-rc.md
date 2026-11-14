@@ -69,7 +69,7 @@ page; resize included; page only; no merge)".
    event not prevented. A plain wheel over the view therefore does nothing visible at those sizes.
 3. **Between stops a tagged body may be under the stop bar or strip** (proposal: bodies may move in or out of view
    between stops). The check requires it to be inside the frustum there, and drawn at the stops.
-4. **Button step:** 0.2 of a stop per press (10 presses Earth → + Sun). A choice, not from the proposal.
+4. **Button step:** 0.2 of a stop per press. A choice, not from the proposal. Correction (GPT, 14 Nov): ten presses do not land exactly on + Sun; floating-point accumulation leaves the tenth press microscopically short of s = 2. An extra press clamps it, and the named stop buttons land exactly. No visible difference; not changed in code.
 5. **Safari gesture events** are handled but cannot be exercised in this container. Untested.
 6. **Entry view is kept across re-framing.** Stop A used to be re-read from the camera on a date rollover; it is now
    kept from entry (needed for resize; also changes rollover-while-free).
@@ -83,3 +83,12 @@ GPT's independent review.
    `python3 -m http.server 8899 --bind 127.0.0.1`).
 2. `Approve: merge sky-zoom-fix-rc to main (page change: Sky zoom-out view zoom fix)`
 3. Served hashes and a live check. Rollback = revert the merge (own Approve line).
+
+## 7. GPT's review of section 4 at `e98f481` (relayed by Chad, 14 Nov)
+- Source-level only: 12 checks with free-orbit state simulated. At Earth, + Moon and + Sun both zoom directions returned to the
+  path on the first input and clamped after repeated input (buttons and Ctrl+wheel). Plain wheel left the scene alone and was
+  never cancelled.
+- **Not verified by GPT:** actual drags, WebGL rendering, resize while open. Its browser smoke test is still pending (its
+  session could not reach the Mac's port 8899 and could not start Chromium).
+- Section 4: 30% strip cap reasonable (noting the fallback can leave the strip over part of the scene on boxes where it still
+  cannot fit); plain wheel matches the agreed behaviour; 0.2 button step reasonable, with the correction now in §4.4.
