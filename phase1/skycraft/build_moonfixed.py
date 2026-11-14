@@ -62,7 +62,7 @@ SOURCES = {
     'de440-header.440': {'url': 'https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/header.440'},
     'de440-ascp01950-rec874.txt': {'url': 'https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/ascp01950.440', 'byte_range': [23414733, 23441553], 'file_bytes': 30629582},
 }
-RETRIEVED = {'naif': '2026-11-14T16:08Z', 'horizons_q14': '2026-11-14T16:11:55Z', 'horizons_vectors': '2026-11-14T16:13:19Z',
+RETRIEVED = {'naif_tf_tls_arrived': '2026-11-14T16:09Z', 'naif_bpc_ranges_arrived': '2026-11-14T16:11Z', 'horizons_q14': '2026-11-14T16:11:55Z', 'horizons_vectors': '2026-11-14T16:13:19Z',
              'de440_header': '2026-11-14T16:14:45Z', 'de440_record': '2026-11-14T16:15:08Z'}
 FRAME = 'MOON_ME_DE440_ME421'
 MOON_R_KM, C_KMS = 1737.4, 299792.458

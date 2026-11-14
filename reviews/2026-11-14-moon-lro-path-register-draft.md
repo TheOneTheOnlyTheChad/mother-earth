@@ -8,7 +8,7 @@ Nothing below is in `REGISTER.md` yet.
 
 ## NAIF generic kernels — lunar frame kernel `moon_de440_250416.tf`, lunar orientation PCK `moon_pa_de440_200625.bpc`, leap seconds `naif0012.tls` — **used offline to make the Moon-fixed LRO catalogue; not fetched by the page or the hub**
 - **Filed:** <date and time> on Chad's line "<Approve line>".
-- **Files (fetched by Claude in the browser pane, 14 Nov 2026 ~16:08 UTC, from `naif.jpl.nasa.gov/pub/naif/generic_kernels/`):**
+- **Files (fetched by Claude in the browser pane on 14 Nov 2026 — arrival in the workspace, file times: the frame kernel and leap-seconds file 16:09 UTC, the PCK ranges 16:11 UTC — from `naif.jpl.nasa.gov/pub/naif/generic_kernels/`):**
   - `fk/satellites/moon_de440_250416.tf` — 19,478 B, sha256 `a47c71e9…f768`, Last-Modified Wed, 16 Apr 2025. Defines `MOON_ME_DE440_ME421` (frame 31009) as a fixed offset from `MOON_PA_DE440`. Whole file kept in the repo.
   - `pck/moon_pa_de440_200625.bpc` — 12,863,488 B, sha256 `60cd55aa…783f`, Last-Modified Sat, 26 Jun 2021. DE440 lunar orientation, 1549–2650. **Only three verbatim byte ranges are kept in the repo** (DAF header and summaries, 5,120 B; type-2 records 21751–21753, 768 B, covering 2 – 26 June 2026 TDB; the segment trailer, 32 B), each hashed in the pane from the full file and again on arrival. The build reassembles a same-length file with every other byte 0xFF, so a read outside the ranges gives NaN and stops the build.
   - `lsk/naif0012.tls` — 5,257 B, sha256 `678e32bd…039b`. Used only to read the first and last state epochs back as UTC (a check); the rotation takes TDB from the LRO segment directly.

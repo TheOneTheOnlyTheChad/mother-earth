@@ -67,7 +67,8 @@
   }
  },
  "retrieved": {
-  "naif": "2026-11-14T16:08Z",
+  "naif_tf_tls_arrived": "2026-11-14T16:09Z",
+  "naif_bpc_ranges_arrived": "2026-11-14T16:11Z",
   "horizons_q14": "2026-11-14T16:11:55Z",
   "horizons_vectors": "2026-11-14T16:13:19Z",
   "de440_header": "2026-11-14T16:14:45Z",
