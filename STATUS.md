@@ -2,6 +2,19 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 14 Nov 2026
+
+## 14 Nov 04:07 UTC (clock reading at write) — **Moon globe follow-up RELEASED** (merge `87c68be`; page only): instant buttons; zoom inside the box
+
+GPT (relayed by Chad): `82f7d0c` passes review; keep closest altitude 0.5; keep the plain wheel scrolling the page; word the line "Use Zoom in and Zoom out, or pinch on supported devices". Chad: "Approve: push moon-globe-fix to main (page change: Moon globe instant buttons and zoom inside the box)".
+
+- **Glide defect fixed:** every button moves the view at once; no animation in `moonglobe.js`. **Zoom (Chad's report that a pinch zoomed the whole page and the box with it):** pinch / ctrl+wheel and Zoom in / Zoom out move the camera between altitude 0.5 and the whole Moon; a plain wheel scrolls the page; turning keeps the zoom. Packet `reviews/2026-11-14-moon-globe-fix.md`.
+- Tests: `moon-globe` 67 of 67, ten breaks each fail; full regression at `5cb3832` 03:25:41–03:53:27 UTC, 58 of 58. **After GPT's wording change (`moon.html` text and one test pattern only) just `moon-globe` (67) and `skycraft-ui` (77) were rerun, not the full regression.**
+- No-ff merge `87c68be`, pushed 04:04:33 UTC. **Served files exact at 04:06:06 UTC:** `moon.html` `16e572bf…90c0`, `moonglobe.js` `c69e7c6f…9366`; `style.css` and `craft.js` unchanged and exact.
+- **Live read 04:06:10 UTC** (public site, pane tab visible, 588 px so the phone layout): Far side then North at once → "15°N 180°W · far side", view lat 15 lon −180; two Zoom in presses → altitude 1.46, unchanged by a turn; stops at 0.5; box size unchanged; Zoom out stops at 2.6 (phone whole-Moon); new wording present; no sideways overflow.
+- Not checked: two-finger pinch on a real touch screen; Safari trackpad pinch; real phone, Safari, screen reader.
+- **Rollback:** revert `87c68be` (own Approve line); the Moon globe itself = `95aa603`.
+
 # 13 Nov 2026
 
 ## 13 Nov 19:58 UTC (clock reading at write) — **Moon globe RELEASED** (merge `95aa603`; page only; hub unchanged)
