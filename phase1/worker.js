@@ -25,6 +25,8 @@
  *                           an id not in TIMELINE_REVISIONS (exact key match) → 404 without any R2 read.
  *   GET /snapshot/skycraft/meta, /snapshot/skycraft/<id> (0.6.12) Parker Solar Probe hub snapshot from NASA/JPL Horizons (pointer + current/previous)
  *   GET /catalogue/skycraft/<revision> (0.6.12) the two dated spacecraft examples (LRO June 2026, Parker Dec 2024), pinned
+ *   GET /snapshot/sunface/meta, /snapshot/sunface/<id>/sun.jpg (0.6.13) NASA/SDO HMI continuum picture of the Sun, hourly (pointer + current/previous)
+ *   GET /admin/probe/sunface?key=ADMIN_KEY (0.6.13) exactly ONE request for that picture; stores nothing
  *   GET /admin/probe/skycraft?key=ADMIN_KEY (0.6.12) exactly ONE Horizons request with the application User-Agent; stores nothing
  *   GET /catalogue/sky/<revision> (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a) the FIXED Sky catalogue (Moon/Sun daily distances, NASA/JPL
  *                           Horizons): versioned only — an id not in SKY_REVISIONS (exact key match), a malformed path or the bare
@@ -67,7 +69,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.12';
+const COLLECTOR_VERSION = '0.6.14';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2146,6 +2148,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
+export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
 export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
@@ -3302,6 +3305,164 @@ async function craftCatRoute(env, rawPath, table = CRAFT_REVISIONS) {
   return new Response(buf, { headers: { 'Content-Type': 'application/json', 'Cache-Control': SKYCRAFT.CACHE_FILE, 'ETag': '"' + pin.fileSha256 + '"', 'Access-Control-Expose-Headers': 'ETag', ...CORS } });
 }
 
+/* ---------- Sun face (0.6.13): one NASA/SDO picture of the Sun's Earth-facing side, fetched once an hour (MOON-SUN-GLOBES-PROPOSAL rev 2.3 §3.2)
+ * One file: the HMI continuum "latest" image, 1024 px. Stored unchanged; the page reads the hub, never SDO.
+ * THREE TIMES, never merged:
+ *   observed_at   when the Sun was observed. NOT KNOWN to the hub (no machine-readable source verified) — always null in this version.
+ *   file_updated  the Last-Modified header SDO sent with the file. This is what the page shows ("File updated at …") and what the
+ *                 three-hour age limit is counted from. The page evaluates the age, at display time.
+ *   retrieved_at  when the hub fetched it.
+ * RULES
+ *   - identical bytes (same sha256 as the current image): the image and ITS ORIGINAL timestamps stay; only last_checked moves.
+ *     Refetching the same picture can never make it look newer.
+ *   - no trustworthy timestamp, no publication: Last-Modified missing, not a real calendar date in the HTTP form, later than the
+ *     hub's retrieval time (no tolerance), or not newer than the current image's, and the fetched image is REJECTED.
+ *     The current image stays and expires on its own clock.
+ *   - no replay: bytes this hub has already recorded (the previous image, or any earlier one) are never published again under a
+ *     different time. The record is a marker at sunface/seen/<sha256>.json, written BEFORE publication; if it cannot be written,
+ *     nothing is published. An unfinished publication may be completed later only with the same file-updated time.
+ *   - a failed or rejected run never moves the image; the pointer gains last_attempt.
+ * Outside LAYERS, cells, history, health and the generic writeDown. Gate: SUNFACE_ENABLED=1 (absent = no request at all). */
+const SUNFACE = {
+  URL: 'https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg', W: 1024, H: 1024, MAX_BYTES: 2 * 1024 * 1024, MIN_BYTES: 20000,
+  TIMEOUT_MS: 30000, POINTER: 'sunface/current.json', PREFIX: 'sunface/images/', FILE: 'sun.jpg', CACHE_FILE: 'public, max-age=86400, immutable',
+  SEEN: 'sunface/seen/',
+  AGE_LIMIT_S: 3 * 3600,    // published for the page, which applies it; the hub does not expire anything
+  UA: 'mother-earth-collector/' + COLLECTOR_VERSION + ' (+https://github.com/TheOneTheOnlyTheChad/mother-earth; contact: issues at that address)',
+  SOURCE: { product: 'SDO/HMI continuum, colourised ("latest" browse image, 1024 px)', provider: 'NASA Solar Dynamics Observatory', page: 'https://sdo.gsfc.nasa.gov/data/',
+    credit: 'Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.', file: 'latest_1024_HMIIC.jpg' },
+};
+/** A Last-Modified header as { iso, ms }, or null when it is missing, not in the HTTP date form, not a real calendar date
+ * (31 Feb, a wrong weekday), or later than nowMs (the hub's retrieval time; no tolerance). */
+function sunStamp(header, nowMs) {
+  if (typeof header !== 'string') return null;
+  const h = header.trim();
+  if (!/^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT$/.test(h)) return null;   // the HTTP date form only; nothing looser
+  const ms = Date.parse(h);
+  if (!Number.isFinite(ms) || new Date(ms).toUTCString() !== h) return null;   // must read back identically: Date.parse turns "31 Feb" into 3 Mar and ignores the weekday
+  if (ms > nowMs) return null;
+  return { iso: new Date(ms).toISOString().replace('.000Z', 'Z'), ms };
+}
+/** One GET of the image, validated. { ok, buf, bytes, sha256, last_modified, date, etag } or { ok:false, reason, http, detail }. Reasons are fixed phrases (public). */
+async function sunFetch() {
+  let r;
+  try { r = await fetch(SUNFACE.URL, { headers: { 'User-Agent': SUNFACE.UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(SUNFACE.TIMEOUT_MS) }); } catch (e) { return { ok: false, reason: 'request failed', http: 0, detail: String(e).slice(0, 160) }; }
+  if (r.status !== 200) return { ok: false, reason: 'http error', http: r.status };
+  const type = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+  if (type !== 'image/jpeg') return { ok: false, reason: 'not an image', http: 200, detail: type };
+  const got = await dustBody(r, SUNFACE.MAX_BYTES);
+  if (got.error) return { ok: false, reason: 'request failed', http: 200, detail: got.error };
+  if (got.over) return { ok: false, reason: 'size out of range', http: 200, detail: 'over ' + SUNFACE.MAX_BYTES + ' B (stopped at ' + got.read + ')' };
+  const buf = got.buf;
+  if (buf.byteLength < SUNFACE.MIN_BYTES) return { ok: false, reason: 'size out of range', http: 200, detail: String(buf.byteLength) };
+  const d = jpegCheck(new Uint8Array(buf));
+  if (!d || d.w !== SUNFACE.W || d.h !== SUNFACE.H || !d.dqt || !d.sos || !d.eoi) return { ok: false, reason: 'not a valid image', http: 200, detail: JSON.stringify(d) };
+  return { ok: true, buf, bytes: buf.byteLength, sha256: await sha256Bytes(buf), last_modified: r.headers.get('last-modified'), date: r.headers.get('date'), etag: r.headers.get('etag') };
+}
+const sunEmpty = () => ({ schema: 1, layer: 'sunface', image: null, previous: null, last_checked: null, last_attempt: null, age_limit_s: SUNFACE.AGE_LIMIT_S, cadence: 'hourly', source: SUNFACE.SOURCE, collector_version: COLLECTOR_VERSION });
+async function sunPtr(env) { const o = await env.R2.get(SUNFACE.POINTER); return o ? { cur: await o.json(), etag: o.etag } : { cur: sunEmpty(), etag: null }; }
+/** Read–change–write of the pointer; every write is conditional on what was read (as dustUpdate). change(cur) → new body, or null to leave it. */
+async function sunUpdate(env, change) {
+  for (let i = 0; i < 5; i++) {
+    const { cur, etag } = await sunPtr(env), body = change(cur);
+    if (body === null) return { cur, body: null, wrote: false };
+    const r = await env.R2.put(SUNFACE.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });
+    if (r !== null) return { cur, body, wrote: true };
+  }
+  throw new Error('sunface pointer kept changing; gave up after 5 tries');
+}
+/** A failed or rejected run: the image is untouched; last_attempt records it. status is 'down' (no usable answer) or 'rejected' (an image came, but it may not be published). */
+async function sunFail(env, ms, status, reason, http, detail) {
+  const failed_at = nowIso();
+  try { await sunUpdate(env, cur => ({ ...cur, last_attempt: { run: new Date(ms).toISOString(), failed_at, status, http: http || 0, reason, consecutive_failures: ((cur.last_attempt && cur.last_attempt.consecutive_failures) || 0) + 1 } })); } catch (_) {}
+  await logRun(env, 'sunface', ms, 'down', http || 0, 0, 0, (status === 'rejected' ? 'rejected: ' : '') + reason + (detail ? ' — ' + detail : ''));
+  return 'sunface:' + status + ' ' + reason;
+}
+async function collectSunface(env, ms) {
+  const f = await sunFetch();
+  if (!f.ok) return sunFail(env, ms, 'down', f.reason, f.http, f.detail);
+  const retrievedMs = Date.now(), retrieved_at = nowIso();
+  let before = (await sunPtr(env)).cur;
+  // identical bytes: nothing about the image changes, whatever headers came with it
+  if (before.image && before.image.sha256 === f.sha256) {
+    const up = await sunUpdate(env, cur => (cur.image && cur.image.sha256 === f.sha256) ? { ...cur, last_checked: retrieved_at, last_attempt: null, collector_version: COLLECTOR_VERSION } : null);
+    if (up.wrote) { await logRun(env, 'sunface', ms, 'ok', 200, 0, 0, `unchanged: same bytes as ${before.image.id}; its file-updated time ${before.image.file_updated} kept`); return 'sunface:unchanged'; }
+    // the pointer moved to another image meanwhile: judge this fetch against what is there NOW, not against the stale read
+    before = up.cur;
+  }
+  // replay: bytes already recorded once must not come back as a new picture under a different time
+  if (before.previous && before.previous.sha256 === f.sha256) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + ' is the previous image; Last-Modified now ' + JSON.stringify(f.last_modified));
+  const seenKey = SUNFACE.SEEN + f.sha256 + '.json';
+  let mark = null; { const o = await env.R2.get(seenKey); if (o) { mark = await o.json(); if (!mark || mark.sha256 !== f.sha256) throw new Error('seen marker does not describe these bytes'); } }   // an unreadable or foreign marker throws: the run fails and nothing is published
+  const stamp = sunStamp(f.last_modified, retrievedMs);
+  // a marker with the SAME file-updated time is an earlier attempt at this very publication that did not finish; any other time is a replay
+  if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + ' recorded with file-updated ' + mark.file_updated + '; Last-Modified now ' + JSON.stringify(f.last_modified));
+  if (!stamp) return sunFail(env, ms, 'rejected', 'no trustworthy timestamp', 200, 'Last-Modified: ' + JSON.stringify(f.last_modified));
+  const id = stamp.iso.replace(/[-:]/g, '').replace('Z', 'Z') + '-' + f.sha256.slice(0, 16);
+  const key = SUNFACE.PREFIX + id + '/' + SUNFACE.FILE;
+  const image = { id, file: SUNFACE.FILE, key, path: `/snapshot/sunface/${id}/${SUNFACE.FILE}`, type: 'image/jpeg', bytes: f.bytes, sha256: f.sha256, w: SUNFACE.W, h: SUNFACE.H,
+    observed_at: null, file_updated: stamp.iso, retrieved_at, source_url: SUNFACE.URL, last_modified_header: f.last_modified, run: new Date(ms).toISOString() };
+  // newer-than-current is decided against the pointer as it is at write time, inside the conditional update
+  const older = cur => cur.image && Date.parse(cur.image.file_updated) >= stamp.ms;
+  if (older(before)) return sunFail(env, ms, 'rejected', 'timestamp not newer than the current image', 200, `${stamp.iso} vs ${before.image.file_updated} (different bytes)`);
+  // HISTORY FIRST. The replay record is written before anything can be published, and a failure here stops the run:
+  // an image never reaches the pointer without its marker, so it cannot later age out of the current/previous pair unrecorded.
+  // The outgoing current image is recorded again here as well (create-only, so a marker that exists is left alone).
+  // record() returns the marker that now stands for those bytes: ours if the create-only write won, otherwise the one that was
+  // already there (or that another run wrote between our lookup above and this write), read back and checked to be about the same bytes.
+  const record = async (sha, rec) => {
+    const k = SUNFACE.SEEN + sha + '.json';
+    const r = await env.R2.put(k, JSON.stringify(rec), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagDoesNotMatch: '*' } });
+    if (r !== null) return rec;
+    const o = await env.R2.get(k); if (!o) throw new Error('marker neither written nor present');
+    const m = await o.json(); if (!m || m.sha256 !== sha || typeof m.file_updated !== 'string') throw new Error('existing marker does not describe these bytes');
+    return m;
+  };
+  let standing;
+  try {
+    standing = await record(f.sha256, { sha256: f.sha256, id, file_updated: stamp.iso, recorded_at: retrieved_at });
+    if (before.image) await record(before.image.sha256, { sha256: before.image.sha256, id: before.image.id, file_updated: before.image.file_updated, recorded_at: retrieved_at, backfilled: true });
+  } catch (e) { return sunFail(env, ms, 'down', 'history record could not be written', 200, String(e).slice(0, 160)); }
+  // THE MARKER DECIDES. If the marker that stands for these bytes carries another file-updated time (it lost a race, or was there all along),
+  // this fetch is a replay under a new time and is refused. Only an identical time may go on (resuming an unfinished publication).
+  if (standing.file_updated !== stamp.iso) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + ' is recorded with file-updated ' + standing.file_updated + '; this fetch says ' + stamp.iso);
+  await env.R2.put(key, f.buf, { httpMetadata: { contentType: 'image/jpeg' } });
+  const back = await env.R2.get(key), bb = back ? await back.arrayBuffer() : null;
+  if (!bb || bb.byteLength !== f.bytes || await sha256Bytes(bb) !== f.sha256) return sunFail(env, ms, 'down', 'stored copy does not read back', 200, key);
+  const strip = x => x ? { ...x } : null;
+  const up = await sunUpdate(env, cur => (older(cur) || (cur.image && cur.image.sha256 === f.sha256) || (cur.previous && cur.previous.sha256 === f.sha256)) ? null : { ...sunEmpty(), image, previous: strip(cur.image), last_checked: retrieved_at, last_attempt: null });
+  if (!up.wrote) { await logRun(env, 'sunface', ms, 'ok', 200, 0, 0, `superseded: another run published first; ${id} not published`); return 'sunface:superseded'; }
+  await logRun(env, 'sunface', ms, 'ok', 200, 1, f.bytes, `image ${id}; file updated ${stamp.iso}; observation time not known`);
+  return 'sunface:published ' + id;
+}
+/** /admin/probe/sunface — EXACTLY ONE upstream request (the image). Stores and publishes nothing. Reports what the projection and the time rules need. */
+async function sunProbe() {
+  const t0 = Date.now(), f = await sunFetch(), now = Date.now();
+  const stamp = f.ok ? sunStamp(f.last_modified, now) : null;
+  return { probe: 'sunface', made_request: true, upstream_requests: 1, url: SUNFACE.URL, user_agent_set: SUNFACE.UA, user_agent_receipt: 'not verified: this is the header the hub set on its request; the upstream does not echo it',
+    ok: f.ok, http: f.ok ? 200 : f.http, reason: f.ok ? null : f.reason, detail: f.ok ? null : (f.detail || null), ms: now - t0,
+    bytes: f.ok ? f.bytes : null, sha256: f.ok ? f.sha256 : null, jpeg: f.ok ? { w: SUNFACE.W, h: SUNFACE.H, structure: 'checked' } : null,
+    last_modified_header: f.ok ? f.last_modified : null, date_header: f.ok ? f.date : null, etag_header: f.ok ? f.etag : null,
+    file_updated: stamp ? stamp.iso : null, file_age_s: stamp ? Math.round((now - stamp.ms) / 1000) : null, timestamp_trustworthy: !!stamp,
+    observed_at: null, observed_at_note: 'not known to the hub', stored: false, published: false, at: nowIso() };
+}
+/** GET /snapshot/sunface/meta and /snapshot/sunface/<id>/sun.jpg. A file is served only for the current or previous image, and only if the stored bytes match the pointer. */
+async function sunRoute(env, p) {
+  const none = (status, reason) => json({ layer: 'sunface', status: 'unavailable', reason }, status, { 'Cache-Control': 'no-store' });
+  let cur; try { cur = await getJson(env, SUNFACE.POINTER); } catch (e) { return none(503, 'unreadable'); }
+  if (p.length === 3 && p[2] === 'meta') {
+    const strip = x => x ? { ...x, key: undefined } : x;
+    const body = cur ? { ...cur, image: strip(cur.image), previous: strip(cur.previous) } : { schema: 1, layer: 'sunface', image: null, previous: null, last_checked: null, last_attempt: null, age_limit_s: SUNFACE.AGE_LIMIT_S };
+    return json({ ...body, now: nowIso() }, 200, { 'Cache-Control': 'no-store' });
+  }
+  if (p.length !== 4 || !cur) return none(404, 'not found');
+  const x = [cur.image, cur.previous].find(f => f && f.id === p[2] && f.file === p[3]);
+  if (!x) return none(404, 'not found');
+  let buf; try { const o = await env.R2.get(x.key); buf = o ? await o.arrayBuffer() : null; } catch (e) { return none(503, 'unreadable'); }
+  if (!buf) return none(503, 'missing');
+  if (buf.byteLength !== x.bytes || await sha256Bytes(buf) !== x.sha256) return none(503, 'integrity');
+  return new Response(buf, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': SUNFACE.CACHE_FILE, 'ETag': '"' + x.sha256 + '"', ...CORS } });
+}
 async function guarded(env, layer, ms, fn) {
   try { await fn(env, ms); return layer + ':ran'; }
   catch (e) {
@@ -3309,6 +3470,7 @@ async function guarded(env, layer, ms, fn) {
     if (layer === 'firms' && env.FIRMS_PIPELINE === 'v2') { try { await logRun(env, layer, ms, 'down', 0, 0, 0, note); await fvDownNoInput(env, ms, note); } catch (_) {} }   // v2 never calls the unconditional writeDown
     else if (layer === 'drifters') { try { await driftFail(env, ms, 'internal_error', note, 0); } catch (_) {} }
     else if (layer === 'dustrgb') { try { await dustFail(env, ms, 'internal error', 0, note); } catch (_) {} }
+    else if (layer === 'sunface') { try { await sunFail(env, ms, 'down', 'internal error', 0, note); } catch (_) {} }   // 0.6.13: never the generic writeDown
     else if (layer === 'skycraft') { try { await craftFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.12: never the generic writeDown   // 0.6.11: never the generic writeDown (no cells, no envelope)   // 0.6.8: buoys never call the unconditional writeDown
     else try { await writeDown(env, layer, ms, note, 0); } catch (_) {}
     return layer + ':threw ' + String(e).slice(0, 80); }
@@ -3331,6 +3493,7 @@ const JOBS = {
   orbital: async (env, ms) => guarded(env, 'orbital', ms, (e, m) => collectOrbital(e, m, true)),   // manual: /admin/run/orbital (same guards)
   satellites: async (env, ms) => guarded(env, 'satellites', ms, collectSatellites),
   plastic: async (env, ms) => guarded(env, 'plastic', ms, collectPlastic),   // manual: /admin/run/plastic (no gate)
+  sunface: async (env, ms) => guarded(env, 'sunface', ms, collectSunface),   // manual: /admin/run/sunface (admin key; ignores the gate; one upstream request)
   skycraft: async (env, ms) => guarded(env, 'skycraft', ms, collectSkycraft),   // manual: /admin/run/skycraft (admin key; ignores the gate and the hour; two upstream requests, one at a time)
   dustrgb: async (env, ms) => guarded(env, 'dustrgb', ms, collectDustRgb),   // manual: /admin/run/dustrgb (admin key; ignores the gate and the hour, as plastic does)
   drifters: async (env, ms) => guarded(env, 'drifters', ms, collectDrifters),   // manual: /admin/run/drifters (no gate: one ~100 KB request)   // manual: /admin/run/satellites (same stamp gate)
@@ -3347,7 +3510,9 @@ const JOBS = {
     const u = env.DUSTRGB_ENABLED !== '1' ? 'dustrgb:not scheduled (DUSTRGB_ENABLED unset)' : (!manual && DUSTRGB.RUN_HOURS_UTC.includes(hr)) ? await guarded(env, 'dustrgb', ms, collectDustRgb) : 'dustrgb:skipped (runs 06 and 18 UTC)';
     // Sky spacecraft: once a day, after everything else (two small Horizons requests, one at a time)
     const v = env.SKYCRAFT_ENABLED !== '1' ? 'skycraft:not scheduled (SKYCRAFT_ENABLED unset)' : (!manual && hr === SKYCRAFT.RUN_HOUR_UTC) ? await guarded(env, 'skycraft', ms, collectSkycraft) : 'skycraft:skipped (runs 05 UTC)';
-    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, dustrgb: u, skycraft: v, batch: b };
+    // Sun face: every scheduled hour, last of all (one ~200 KB request); never on a manual hourly run
+    const w = env.SUNFACE_ENABLED !== '1' ? 'sunface:not scheduled (SUNFACE_ENABLED unset)' : !manual ? await guarded(env, 'sunface', ms, collectSunface) : 'sunface:skipped (manual hourly run)';
+    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, dustrgb: u, skycraft: v, sunface: w, batch: b };
   },
 };
 
@@ -3690,6 +3855,7 @@ export default {
     if (p[0] === 'snapshot' && p[1] === 'dustrgb') return dustRoute(env, p);   // 0.6.11: pointer + the current and previous frame files; outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
+    if (p[0] === 'snapshot' && p[1] === 'sunface') return sunRoute(env, p);   // 0.6.13: the Sun's Earth-facing side (pointer + current/previous image); outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'skycraft') return craftSnapRoute(env, p);   // 0.6.12: Parker hub snapshot (pointer + current/previous); outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'skycraft') return craftCatRoute(env, url.pathname);   // 0.6.12: the two dated examples, pinned
     if (p[0] === 'catalogue' && p[1] === 'sky') return skyRoute(env, url.pathname);   // 0.6.5 versioned only; outside LAYERS
@@ -3756,6 +3922,11 @@ export default {
       const r = orbBuild(text, null, null);
       return json({ staged_bytes: text.length, read_ms: tRead, ok: r.ok, rows: r.rows, counts: r.counts, problems: r.problems, out_bytes: r.csv ? r.csv.length : 0, wall_ms: Date.now() - t0,
         note: 'CPU for this request is in the Worker invocation log; nothing was written' }, 200, { 'Cache-Control': 'no-store' });
+    }
+
+    if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'sunface') {   // 0.6.13: exactly one request for the SDO image; stores and publishes nothing
+      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+      return json(await sunProbe(), 200, { 'Cache-Control': 'no-store' });
     }
 
     if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'skycraft') {   // 0.6.12: exactly one Horizons request (data sheet only); stores and publishes nothing
