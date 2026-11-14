@@ -4,7 +4,7 @@
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored manual-hourly same-bytes-renews loose-stamp future-ok not-newer-ok move-on-fail no-cas no-readback any-image
  *   no-integrity probe-stores probe-two generic-down no-ua retry any-size any-dims observed-invented
- *   no-calendar skew-ok replay-ok replay-previous-only no-seen-marker */
+ *   no-calendar skew-ok replay-ok replay-previous-off marker-optional no-backfill marker-any-time marker-blocks-retry */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
@@ -14,9 +14,12 @@ const BREAKS = {
   'same-bytes-renews': ["  if (before.image && before.image.sha256 === f.sha256) {", "  if (false) {"],
   'loose-stamp': ["  if (typeof header !== 'string') return null;\n  const h = header.trim();", "  if (typeof header !== 'string') return { iso: new Date(nowMs).toISOString().replace(/\\.\\d+Z/, 'Z'), ms: nowMs };\n  const h = header.trim();"],
   'no-calendar': ["  if (!Number.isFinite(ms) || new Date(ms).toUTCString() !== h) return null;", "  if (!Number.isFinite(ms)) return null;"],
-  'replay-ok': ["  if (replay) return sunFail(", "  if (false) return sunFail("],
-  'replay-previous-only': [" || (await env.R2.head(seenKey)) !== null;", ";"],
-  'no-seen-marker': ["  try { await env.R2.put(seenKey,", "  try { if (false) await env.R2.put(seenKey,"],
+  'replay-ok': ["  if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(", "  if (false) return sunFail("],
+  'replay-previous-off': ["  if (before.previous && before.previous.sha256 === f.sha256) return sunFail(", "  if (false) return sunFail("],
+  'marker-optional': ["  } catch (e) { return sunFail(env, ms, 'down', 'history record could not be written', 200, String(e).slice(0, 160)); }", "  } catch (e) {}"],
+  'no-backfill': ["    if (before.image) await record(before.image.sha256,", "    if (false) await record(before.image.sha256,"],
+  'marker-any-time': ["  if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(", "  if (mark && !stamp) return sunFail("],
+  'marker-blocks-retry': ["  if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(", "  if (mark) return sunFail("],
   'future-ok': ["  if (ms > nowMs) return null;\n", ''],
   'skew-ok': ["  if (ms > nowMs) return null;", "  if (ms - nowMs > 120000) return null;"],
   'not-newer-ok': ["  const older = cur => cur.image && Date.parse(cur.image.file_updated) >= stamp.ms;", "  const older = cur => false;"],
@@ -107,7 +110,7 @@ const isoOf = hd => new Date(Date.parse(hd)).toISOString().replace('.000Z', 'Z')
 
 // ---------- B. first publication
 { const w = use(world()); const lm = w.lm, t0 = Date.now(); await run(w); const p = w.ptr(), im = p.image;
-  ok('B request carries the application User-Agent and a timeout', w.reqs[0].ua === S.UA && /mother-earth-collector\/0\.6\.13 /.test(S.UA) && w.reqs[0].signal, w.reqs[0]);
+  ok('B request carries the application User-Agent and a timeout', w.reqs[0].ua === S.UA && /mother-earth-collector\/0\.6\.14 /.test(S.UA) && w.reqs[0].signal, w.reqs[0]);
   ok('B pointer names an image', !!im && im.sha256 === sha(w.body) && im.bytes === w.body.length && im.w === 1024 && im.h === 1024, im);
   ok('B three times kept apart: observed_at null, file_updated = Last-Modified, retrieved_at = hub clock', im.observed_at === null && im.file_updated === isoOf(lm) && Date.parse(im.retrieved_at) >= t0 && im.last_modified_header === lm, im);
   ok('B id is file-updated time + hash prefix', im.id === isoOf(lm).replace(/[-:]/g, '') + '-' + sha(w.body).slice(0, 16), im.id);
@@ -172,6 +175,40 @@ for (const [name, mins] of [['equal', 60], ['older', 75]]) {
   ok('E replay two images back (A→B→C→A): still rejected', q.image.sha256 === sha(C) && q.last_attempt.reason === 'picture already published earlier' && w.keys(S.PREFIX).length === 3, { img: q.image.id, la: q.last_attempt });
   w.body = B; w.lm = httpDate(Date.now() - 400); await run(w);
   ok('E replay of the previous image (C current, B previous → B): rejected', w.ptr().image.sha256 === sha(C) && w.ptr().last_attempt.reason === 'picture already published earlier' && w.ptr().last_attempt.consecutive_failures === 2, w.ptr().last_attempt); }
+// GPT's case: the history write fails for A. A must not be published without its record; later A must not come back fresh.
+{ const w = use(world()); const A = jpeg(41), B = jpeg(42), C = jpeg(43);
+  w.body = A; w.lm = ago(180); w.putFail = S.SEEN; await run(w); w.putFail = null;
+  ok('E history write fails: nothing is published and no image is stored', w.ptr().image === null && w.keys(S.PREFIX).length === 0 && w.keys(S.SEEN).length === 0, { p: w.ptr(), keys: [...w.store.keys()] });
+  ok('E …recorded as down "history record could not be written"', w.ptr().last_attempt.status === 'down' && w.ptr().last_attempt.reason === 'history record could not be written' && w.sun().at(-1).status === 'down', w.ptr().last_attempt);
+  await run(w); const a = w.ptr().image;
+  ok('E next run, history writable: A publishes with its marker', !!a && a.sha256 === sha(A) && w.store.has(S.SEEN + sha(A) + '.json'), a);
+  w.body = B; w.lm = ago(120); await run(w); w.body = C; w.lm = ago(60); await run(w);
+  w.body = A; w.lm = ago(1); await run(w);
+  ok('E A → B → C → A with a fresh header: rejected; C stays current', w.ptr().image.sha256 === sha(C) && w.ptr().last_attempt.reason === 'picture already published earlier', { img: w.ptr().image.id, la: w.ptr().last_attempt }); }
+// the marker of the image now going out is lost: publishing its successor records it again before it can age out
+{ const w = use(world()); const A = jpeg(44), B = jpeg(45), C = jpeg(46);
+  w.body = A; w.lm = ago(180); await run(w); const a0 = w.ptr().image; w.store.delete(S.SEEN + sha(A) + '.json');
+  w.body = B; w.lm = ago(120); await run(w);
+  const m = w.store.get(S.SEEN + sha(A) + '.json');
+  ok('E a lost marker for the outgoing image is written again when its successor publishes, with the ORIGINAL time', !!m && JSON.parse(m.buf.toString()).file_updated === a0.file_updated && JSON.parse(m.buf.toString()).id === a0.id && JSON.parse(m.buf.toString()).backfilled === true, m && m.buf.toString());
+  w.body = C; w.lm = ago(60); await run(w); w.body = A; w.lm = ago(1); await run(w);
+  ok('E …so A → B → C → A is still rejected', w.ptr().image.sha256 === sha(C) && w.ptr().last_attempt.reason === 'picture already published earlier', w.ptr().last_attempt); }
+// the backfill write itself fails: the successor is not published (the outgoing image would otherwise leave unrecorded)
+{ const w = use(world()); const A = jpeg(47), B = jpeg(48);
+  w.body = A; w.lm = ago(180); await run(w); w.store.delete(S.SEEN + sha(A) + '.json');
+  w.body = B; w.lm = ago(120); w.putFail = S.SEEN + sha(A); await run(w); w.putFail = null;
+  ok('E cannot record the outgoing image: its successor is not published', w.ptr().image.sha256 === sha(A) && w.ptr().last_attempt.reason === 'history record could not be written' && w.keys(S.PREFIX).length === 1, w.ptr().last_attempt); }
+// an unfinished publication: marker written, pointer never moved. The same bytes with the SAME time may complete; with another time they may not.
+{ const w = use(world()); const A = jpeg(49); const lm = ago(30);
+  w.body = A; w.lm = lm; w.putFail = S.POINTER; await run(w); w.putFail = null;
+  ok('E pointer write fails after the marker: nothing published, marker kept', !w.store.has(S.POINTER) && w.store.has(S.SEEN + sha(A) + '.json'), [...w.store.keys()]);
+  w.lm = ago(1); await run(w);
+  ok('E same bytes, DIFFERENT time after an unfinished publication: rejected', w.ptr().image === null && w.ptr().last_attempt.reason === 'picture already published earlier', w.ptr());
+  w.lm = lm; await run(w);
+  ok('E same bytes, SAME time: the unfinished publication completes with that original time', !!w.ptr().image && w.ptr().image.sha256 === sha(A) && w.ptr().image.file_updated === isoOf(lm) && w.ptr().last_attempt === null, w.ptr().image); }
+{ const w = use(world()); const A = jpeg(50); w.body = A; w.lm = ago(30); await run(w);
+  const k = S.SEEN + sha(jpeg(51)) + '.json'; w.store.set(k, { buf: Buffer.from('not json'), etag: 'x' }); w.body = jpeg(51); w.lm = ago(2); await run(w);
+  ok('E an unreadable marker: nothing published (internal error), current kept', w.ptr().image.sha256 === sha(A) && w.ptr().last_attempt.status === 'down', w.ptr().last_attempt); }
 { const w = use(world()); const A = jpeg(31), B = jpeg(32); w.body = A; w.lm = ago(120); await run(w); w.body = B; w.lm = ago(60); await run(w);
   for (const k of w.keys(S.SEEN)) w.store.delete(k);   // markers lost: the previous-image check must still hold by itself
   w.body = A; w.lm = ago(2); await run(w);

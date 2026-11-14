@@ -69,7 +69,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.13';
+const COLLECTOR_VERSION = '0.6.14';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -3318,8 +3318,9 @@ async function craftCatRoute(env, rawPath, table = CRAFT_REVISIONS) {
  *   - no trustworthy timestamp, no publication: Last-Modified missing, not a real calendar date in the HTTP form, later than the
  *     hub's retrieval time (no tolerance), or not newer than the current image's, and the fetched image is REJECTED.
  *     The current image stays and expires on its own clock.
- *   - no replay: bytes this hub has already published once (the previous image, or any earlier one) are never published again
- *     under a fresh time. Every published image leaves a marker at sunface/seen/<sha256>.json.
+ *   - no replay: bytes this hub has already recorded (the previous image, or any earlier one) are never published again under a
+ *     different time. The record is a marker at sunface/seen/<sha256>.json, written BEFORE publication; if it cannot be written,
+ *     nothing is published. An unfinished publication may be completed later only with the same file-updated time.
  *   - a failed or rejected run never moves the image; the pointer gains last_attempt.
  * Outside LAYERS, cells, history, health and the generic writeDown. Gate: SUNFACE_ENABLED=1 (absent = no request at all). */
 const SUNFACE = {
@@ -3388,11 +3389,13 @@ async function collectSunface(env, ms) {
     if (up.wrote) { await logRun(env, 'sunface', ms, 'ok', 200, 0, 0, `unchanged: same bytes as ${before.image.id}; its file-updated time ${before.image.file_updated} kept`); return 'sunface:unchanged'; }
     // the pointer moved to another image meanwhile: fall through and judge this fetch against what is there now
   }
-  // replay: bytes already published once must not come back as a new picture, whatever time the header now claims
+  // replay: bytes already recorded once must not come back as a new picture under a different time
+  if (before.previous && before.previous.sha256 === f.sha256) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + ' is the previous image; Last-Modified now ' + JSON.stringify(f.last_modified));
   const seenKey = SUNFACE.SEEN + f.sha256 + '.json';
-  const replay = (before.previous && before.previous.sha256 === f.sha256) || (await env.R2.head(seenKey)) !== null;
-  if (replay) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + '; Last-Modified now ' + JSON.stringify(f.last_modified));
+  let mark = null; { const o = await env.R2.get(seenKey); if (o) mark = await o.json(); }   // an unreadable marker throws: the run fails and nothing is published
   const stamp = sunStamp(f.last_modified, retrievedMs);
+  // a marker with the SAME file-updated time is an earlier attempt at this very publication that did not finish; any other time is a replay
+  if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + ' recorded with file-updated ' + mark.file_updated + '; Last-Modified now ' + JSON.stringify(f.last_modified));
   if (!stamp) return sunFail(env, ms, 'rejected', 'no trustworthy timestamp', 200, 'Last-Modified: ' + JSON.stringify(f.last_modified));
   const id = stamp.iso.replace(/[-:]/g, '').replace('Z', 'Z') + '-' + f.sha256.slice(0, 16);
   const key = SUNFACE.PREFIX + id + '/' + SUNFACE.FILE;
@@ -3401,13 +3404,23 @@ async function collectSunface(env, ms) {
   // newer-than-current is decided against the pointer as it is at write time, inside the conditional update
   const older = cur => cur.image && Date.parse(cur.image.file_updated) >= stamp.ms;
   if (older(before)) return sunFail(env, ms, 'rejected', 'timestamp not newer than the current image', 200, `${stamp.iso} vs ${before.image.file_updated} (different bytes)`);
+  // HISTORY FIRST. The replay record is written before anything can be published, and a failure here stops the run:
+  // an image never reaches the pointer without its marker, so it cannot later age out of the current/previous pair unrecorded.
+  // The outgoing current image is recorded again here as well (create-only, so a marker that exists is left alone).
+  const record = async (sha, rec) => {
+    const r = await env.R2.put(SUNFACE.SEEN + sha + '.json', JSON.stringify(rec), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagDoesNotMatch: '*' } });
+    if (r === null && (await env.R2.head(SUNFACE.SEEN + sha + '.json')) === null) throw new Error('marker neither written nor present');
+  };
+  try {
+    await record(f.sha256, { sha256: f.sha256, id, file_updated: stamp.iso, recorded_at: retrieved_at });
+    if (before.image) await record(before.image.sha256, { sha256: before.image.sha256, id: before.image.id, file_updated: before.image.file_updated, recorded_at: retrieved_at, backfilled: true });
+  } catch (e) { return sunFail(env, ms, 'down', 'history record could not be written', 200, String(e).slice(0, 160)); }
   await env.R2.put(key, f.buf, { httpMetadata: { contentType: 'image/jpeg' } });
   const back = await env.R2.get(key), bb = back ? await back.arrayBuffer() : null;
   if (!bb || bb.byteLength !== f.bytes || await sha256Bytes(bb) !== f.sha256) return sunFail(env, ms, 'down', 'stored copy does not read back', 200, key);
   const strip = x => x ? { ...x } : null;
   const up = await sunUpdate(env, cur => (older(cur) || (cur.image && cur.image.sha256 === f.sha256) || (cur.previous && cur.previous.sha256 === f.sha256)) ? null : { ...sunEmpty(), image, previous: strip(cur.image), last_checked: retrieved_at, last_attempt: null });
   if (!up.wrote) { await logRun(env, 'sunface', ms, 'ok', 200, 0, 0, `superseded: another run published first; ${id} not published`); return 'sunface:superseded'; }
-  try { await env.R2.put(seenKey, JSON.stringify({ sha256: f.sha256, id, file_updated: stamp.iso, first_published: retrieved_at }), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (_) {}   // best effort; the previous-image check above does not depend on it
   await logRun(env, 'sunface', ms, 'ok', 200, 1, f.bytes, `image ${id}; file updated ${stamp.iso}; observation time not known`);
   return 'sunface:published ' + id;
 }
