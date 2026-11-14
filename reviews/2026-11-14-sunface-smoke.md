@@ -87,6 +87,7 @@ Production CPU and memory of a full run (the probe does not store); that SDO see
 - **Storage** (dashboard API): exactly three objects under `sunface/`, written in the required order:
   marker `sunface/seen/66f213bc…7b32.json` 06:38:17.825Z (197 B; holds the id and file-updated 06:30:05Z) → image `…/sun.jpg` 06:38:18.861Z → pointer `sunface/current.json` 06:38:20.125Z.
 - **Worker CPU** (per-minute maximum, 06:38 minute, 16 requests, 0 errors): **10.1 ms**; maximum wall 6,316 ms (this run).
-- Not looked at: the picture itself (bytes and structure checked; nobody has viewed it). SDO's receipt of the User-Agent.
+- **Viewed 06:42 UTC (Claude, browser pane, from the hub's file route):** the Sun's full disc in orange with several small sunspot groups, on black; the disc nearly fills the 1024 px frame. Printed in the bottom-left corner of the image: "SDO/HMI Quick-Look Continuum: 20261114_060000" — a time 30 min 5 s before the file-updated time. What that printed time denotes is not verified; `observed_at` stays null. The caption sits outside the disc, where the page's mask will hide it.
+- Not verified: SDO's receipt of the User-Agent.
 
 Next line: `Approve: set SUNFACE_ENABLED=1` (Chad clicks the final deploy button). The scheduled job would then run every hour with the hourly trigger.
