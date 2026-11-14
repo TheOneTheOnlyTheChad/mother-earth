@@ -3382,17 +3382,18 @@ async function collectSunface(env, ms) {
   const f = await sunFetch();
   if (!f.ok) return sunFail(env, ms, 'down', f.reason, f.http, f.detail);
   const retrievedMs = Date.now(), retrieved_at = nowIso();
-  const before = (await sunPtr(env)).cur;
+  let before = (await sunPtr(env)).cur;
   // identical bytes: nothing about the image changes, whatever headers came with it
   if (before.image && before.image.sha256 === f.sha256) {
     const up = await sunUpdate(env, cur => (cur.image && cur.image.sha256 === f.sha256) ? { ...cur, last_checked: retrieved_at, last_attempt: null, collector_version: COLLECTOR_VERSION } : null);
     if (up.wrote) { await logRun(env, 'sunface', ms, 'ok', 200, 0, 0, `unchanged: same bytes as ${before.image.id}; its file-updated time ${before.image.file_updated} kept`); return 'sunface:unchanged'; }
-    // the pointer moved to another image meanwhile: fall through and judge this fetch against what is there now
+    // the pointer moved to another image meanwhile: judge this fetch against what is there NOW, not against the stale read
+    before = up.cur;
   }
   // replay: bytes already recorded once must not come back as a new picture under a different time
   if (before.previous && before.previous.sha256 === f.sha256) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + ' is the previous image; Last-Modified now ' + JSON.stringify(f.last_modified));
   const seenKey = SUNFACE.SEEN + f.sha256 + '.json';
-  let mark = null; { const o = await env.R2.get(seenKey); if (o) mark = await o.json(); }   // an unreadable marker throws: the run fails and nothing is published
+  let mark = null; { const o = await env.R2.get(seenKey); if (o) { mark = await o.json(); if (!mark || mark.sha256 !== f.sha256) throw new Error('seen marker does not describe these bytes'); } }   // an unreadable or foreign marker throws: the run fails and nothing is published
   const stamp = sunStamp(f.last_modified, retrievedMs);
   // a marker with the SAME file-updated time is an earlier attempt at this very publication that did not finish; any other time is a replay
   if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + ' recorded with file-updated ' + mark.file_updated + '; Last-Modified now ' + JSON.stringify(f.last_modified));
@@ -3407,14 +3408,24 @@ async function collectSunface(env, ms) {
   // HISTORY FIRST. The replay record is written before anything can be published, and a failure here stops the run:
   // an image never reaches the pointer without its marker, so it cannot later age out of the current/previous pair unrecorded.
   // The outgoing current image is recorded again here as well (create-only, so a marker that exists is left alone).
+  // record() returns the marker that now stands for those bytes: ours if the create-only write won, otherwise the one that was
+  // already there (or that another run wrote between our lookup above and this write), read back and checked to be about the same bytes.
   const record = async (sha, rec) => {
-    const r = await env.R2.put(SUNFACE.SEEN + sha + '.json', JSON.stringify(rec), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagDoesNotMatch: '*' } });
-    if (r === null && (await env.R2.head(SUNFACE.SEEN + sha + '.json')) === null) throw new Error('marker neither written nor present');
+    const k = SUNFACE.SEEN + sha + '.json';
+    const r = await env.R2.put(k, JSON.stringify(rec), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagDoesNotMatch: '*' } });
+    if (r !== null) return rec;
+    const o = await env.R2.get(k); if (!o) throw new Error('marker neither written nor present');
+    const m = await o.json(); if (!m || m.sha256 !== sha || typeof m.file_updated !== 'string') throw new Error('existing marker does not describe these bytes');
+    return m;
   };
+  let standing;
   try {
-    await record(f.sha256, { sha256: f.sha256, id, file_updated: stamp.iso, recorded_at: retrieved_at });
+    standing = await record(f.sha256, { sha256: f.sha256, id, file_updated: stamp.iso, recorded_at: retrieved_at });
     if (before.image) await record(before.image.sha256, { sha256: before.image.sha256, id: before.image.id, file_updated: before.image.file_updated, recorded_at: retrieved_at, backfilled: true });
   } catch (e) { return sunFail(env, ms, 'down', 'history record could not be written', 200, String(e).slice(0, 160)); }
+  // THE MARKER DECIDES. If the marker that stands for these bytes carries another file-updated time (it lost a race, or was there all along),
+  // this fetch is a replay under a new time and is refused. Only an identical time may go on (resuming an unfinished publication).
+  if (standing.file_updated !== stamp.iso) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + ' is recorded with file-updated ' + standing.file_updated + '; this fetch says ' + stamp.iso);
   await env.R2.put(key, f.buf, { httpMetadata: { contentType: 'image/jpeg' } });
   const back = await env.R2.get(key), bb = back ? await back.arrayBuffer() : null;
   if (!bb || bb.byteLength !== f.bytes || await sha256Bytes(bb) !== f.sha256) return sunFail(env, ms, 'down', 'stored copy does not read back', 200, key);

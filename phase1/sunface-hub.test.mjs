@@ -4,7 +4,8 @@
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored manual-hourly same-bytes-renews loose-stamp future-ok not-newer-ok move-on-fail no-cas no-readback any-image
  *   no-integrity probe-stores probe-two generic-down no-ua retry any-size any-dims observed-invented
- *   no-calendar skew-ok replay-ok replay-previous-off marker-optional no-backfill marker-any-time marker-blocks-retry */
+ *   no-calendar skew-ok replay-previous-off marker-optional no-backfill marker-blocks-retry
+ *   conflict-exists-only conflict-any-bytes stale-before */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
@@ -14,11 +15,12 @@ const BREAKS = {
   'same-bytes-renews': ["  if (before.image && before.image.sha256 === f.sha256) {", "  if (false) {"],
   'loose-stamp': ["  if (typeof header !== 'string') return null;\n  const h = header.trim();", "  if (typeof header !== 'string') return { iso: new Date(nowMs).toISOString().replace(/\\.\\d+Z/, 'Z'), ms: nowMs };\n  const h = header.trim();"],
   'no-calendar': ["  if (!Number.isFinite(ms) || new Date(ms).toUTCString() !== h) return null;", "  if (!Number.isFinite(ms)) return null;"],
-  'replay-ok': ["  if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(", "  if (false) return sunFail("],
   'replay-previous-off': ["  if (before.previous && before.previous.sha256 === f.sha256) return sunFail(", "  if (false) return sunFail("],
   'marker-optional': ["  } catch (e) { return sunFail(env, ms, 'down', 'history record could not be written', 200, String(e).slice(0, 160)); }", "  } catch (e) {}"],
   'no-backfill': ["    if (before.image) await record(before.image.sha256,", "    if (false) await record(before.image.sha256,"],
-  'marker-any-time': ["  if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(", "  if (mark && !stamp) return sunFail("],
+  'stale-before': ["    before = up.cur;\n", ''],
+  'conflict-exists-only': ["  if (standing.file_updated !== stamp.iso) return sunFail(", "  if (false) return sunFail("],
+  'conflict-any-bytes': ["if (!m || m.sha256 !== sha || typeof m.file_updated !== 'string') throw new Error('existing marker does not describe these bytes');", ''],
   'marker-blocks-retry': ["  if (mark && (!stamp || mark.file_updated !== stamp.iso)) return sunFail(", "  if (mark) return sunFail("],
   'future-ok': ["  if (ms > nowMs) return null;\n", ''],
   'skew-ok': ["  if (ms > nowMs) return null;", "  if (ms - nowMs > 120000) return null;"],
@@ -69,7 +71,8 @@ function world() {
       if (key === S.POINTER) { w.pointerPuts.push(opts.onlyIf || null); if (w.onPointerPut) { const f = w.onPointerPut; w.onPointerPut = null; await f(); } }
       if (opts.onlyIf) { const had = store.get(key); const refused = opts.onlyIf.etagDoesNotMatch === '*' ? !!had : (!had || had.etag !== opts.onlyIf.etagMatches); if (refused) { w.conflicts++; return null; } }
       store.set(key, { buf, etag: etagOf(buf) }); return { key, etag: etagOf(buf) }; },
-    async get(key) { const o = store.get(key); if (!o) return null; let buf = o.buf; if (w.corruptRead && key.includes(w.corruptRead)) { buf = Buffer.from(buf); buf[buf.length - 3] ^= 0xff; }
+    async get(key) { const o = store.get(key); if (!o && w.onSeenMiss && key.startsWith(S.SEEN)) { const f = w.onSeenMiss; w.onSeenMiss = null; await f(key); }   // the lookup saw nothing; something may arrive right after it
+      if (!o) return null; let buf = o.buf; if (w.corruptRead && key.includes(w.corruptRead)) { buf = Buffer.from(buf); buf[buf.length - 3] ^= 0xff; }
       return { etag: o.etag, async arrayBuffer() { return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength); }, async json() { return JSON.parse(buf.toString('utf8')); }, async text() { return buf.toString('utf8'); } }; },
     async head(key) { const o = store.get(key); return o ? { size: o.buf.length, etag: o.etag } : null; },
     async list({ prefix = '' } = {}) { return { objects: [...store.keys()].filter(k => k.startsWith(prefix)).sort().map(key => ({ key })), truncated: false }; },
@@ -206,6 +209,37 @@ for (const [name, mins] of [['equal', 60], ['older', 75]]) {
   ok('E same bytes, DIFFERENT time after an unfinished publication: rejected', w.ptr().image === null && w.ptr().last_attempt.reason === 'picture already published earlier', w.ptr());
   w.lm = lm; await run(w);
   ok('E same bytes, SAME time: the unfinished publication completes with that original time', !!w.ptr().image && w.ptr().image.sha256 === sha(A) && w.ptr().image.file_updated === isoOf(lm) && w.ptr().last_attempt === null, w.ptr().image); }
+// GPT's interleaving: no marker at the lookup; a marker for the same bytes with an OLDER time appears before our create-only write.
+{ const w = use(world()); const A = jpeg(61), B = jpeg(62); const orig = isoOf(ago(219));   // 3 h 39 min earlier
+  w.body = B; w.lm = ago(240); await run(w);   // something current, so the outcome is visible
+  const mk = (time, shaOf = sha(A)) => async key => { const buf = Buffer.from(JSON.stringify({ sha256: shaOf, id: 'earlier', file_updated: time, recorded_at: time })); w.store.set(S.SEEN + sha(A) + '.json', { buf, etag: 'race' }); };
+  w.body = A; w.lm = ago(1); w.onSeenMiss = mk(orig); await run(w); const p = w.ptr();
+  ok('E marker appears between lookup and write with another time: A is NOT published under the fresh time', p.image.sha256 === sha(B) && w.keys(S.PREFIX).length === 1, { img: p.image.id, keys: w.keys(S.PREFIX) });
+  ok('E …rejected as "picture already published earlier"', p.last_attempt.status === 'rejected' && p.last_attempt.reason === 'picture already published earlier', p.last_attempt);
+  ok('E …and the winning marker is untouched (original time kept)', JSON.parse(w.store.get(S.SEEN + sha(A) + '.json').buf.toString()).file_updated === orig);
+  ok('E the hook really fired (the lookup saw no marker)', w.onSeenMiss === null);
+  // same interleaving, but the racing marker carries the SAME time: an interrupted publication may resume
+  const w2 = use(world()); const lm2 = ago(5); w2.body = A; w2.lm = lm2; w2.onSeenMiss = async key => { const buf = Buffer.from(JSON.stringify({ sha256: sha(A), id: 'twin', file_updated: isoOf(lm2), recorded_at: 'x' })); w2.store.set(key, { buf, etag: 'race' }); };
+  await run(w2);
+  ok('E racing marker with the SAME time: publication goes on, with that time', !!w2.ptr().image && w2.ptr().image.sha256 === sha(A) && w2.ptr().image.file_updated === isoOf(lm2) && w2.ptr().last_attempt === null, w2.ptr());
+  // racing marker that is about other bytes, or unreadable: stop
+  for (const [name, body] of [['about other bytes', JSON.stringify({ sha256: 'e'.repeat(64), id: 'x', file_updated: isoOf(ago(5)) })], ['not JSON', 'garbage'], ['without a time', JSON.stringify({ sha256: sha(A), id: 'x' })]]) {
+    const w3 = use(world()); w3.body = A; w3.lm = ago(5); w3.onSeenMiss = async key => { w3.store.set(key, { buf: Buffer.from(body), etag: 'race' }); }; await run(w3);
+    ok(`E racing marker ${name}: nothing published`, w3.ptr().image === null && w3.keys(S.PREFIX).length === 0 && w3.ptr().last_attempt.status === 'down', w3.ptr()); } }
+// the pointer moves on while a run holding the (then) current bytes is deciding: it must judge against the pointer as it is now
+{ const w = use(world()); const A = jpeg(71), B = jpeg(72); w.body = A; w.lm = ago(120); await run(w); const a = w.ptr().image;
+  // A is current. A run fetches A again (fresh header). Before its "unchanged" write lands, a rival publishes B (A becomes previous).
+  const rivalB = { ...a, id: 'B', key: S.PREFIX + 'B/sun.jpg', path: '/snapshot/sunface/B/sun.jpg', sha256: sha(B), file_updated: isoOf(ago(60)) };
+  w.onPointerPut = async () => { const cur = w.ptr(); const buf = Buffer.from(JSON.stringify({ ...cur, image: rivalB, previous: cur.image })); w.store.set(S.POINTER, { buf, etag: crypto.createHash('md5').update(buf).digest('hex') }); };
+  w.lm = ago(1); await run(w); const p = w.ptr();
+  ok('E pointer moved A→B during an "unchanged" check of A: A is not republished over B', p.image.id === 'B' && p.previous.id === a.id && p.previous.file_updated === a.file_updated, { img: p.image.id, prev: p.previous && p.previous.id });
+  ok('E …and the run is recorded as a rejected replay of the previous image', p.last_attempt && p.last_attempt.reason === 'picture already published earlier', p.last_attempt); }
+// the same, with A's marker lost: only a fresh look at the pointer (A is now PREVIOUS) can stop it
+{ const w = use(world()); const A = jpeg(73), B = jpeg(74); w.body = A; w.lm = ago(120); await run(w); const a = w.ptr().image; w.store.delete(S.SEEN + sha(A) + '.json');
+  const rivalB = { ...a, id: 'B', key: S.PREFIX + 'B/sun.jpg', path: '/snapshot/sunface/B/sun.jpg', sha256: sha(B), file_updated: isoOf(ago(60)) };
+  w.onPointerPut = async () => { const cur = w.ptr(); const buf = Buffer.from(JSON.stringify({ ...cur, image: rivalB, previous: cur.image })); w.store.set(S.POINTER, { buf, etag: crypto.createHash('md5').update(buf).digest('hex') }); };
+  w.lm = ago(1); await run(w); const p = w.ptr();
+  ok('E pointer moved A→B during an "unchanged" check, A\'s marker lost: A still not republished under the fresh time', p.image.id === 'B' && p.previous.id === a.id && p.previous.file_updated === a.file_updated && p.last_attempt && p.last_attempt.reason === 'picture already published earlier', { img: p.image.id, la: p.last_attempt }); }
 { const w = use(world()); const A = jpeg(50); w.body = A; w.lm = ago(30); await run(w);
   const k = S.SEEN + sha(jpeg(51)) + '.json'; w.store.set(k, { buf: Buffer.from('not json'), etag: 'x' }); w.body = jpeg(51); w.lm = ago(2); await run(w);
   ok('E an unreadable marker: nothing published (internal error), current kept', w.ptr().image.sha256 === sha(A) && w.ptr().last_attempt.status === 'down', w.ptr().last_attempt); }
