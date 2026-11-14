@@ -202,7 +202,7 @@ const kmText = v => Math.round(v).toLocaleString('en-GB') + ' km';
     // Leaving from there must come back to a stop that shows the link that was used.
     await page.click('#zoom-b'); await page.waitForFunction(() => ME.zoomState().stop === 'B');
     { const bb = await (await page.$('#globe canvas')).boundingBox(); await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2);
-      for (let i = 0; i < 12; i++) { const p = await page.evaluate(() => ME.zoomState().s); if (p > 1.1 && p < 1.45) break; await page.mouse.wheel(0, 100); await page.waitForTimeout(80); } }
+      for (let i = 0; i < 12; i++) { const p = await page.evaluate(() => ME.zoomState().s); if (p > 1.1 && p < 1.45) break; await page.keyboard.down('Control'); await page.mouse.wheel(0, 100); await page.keyboard.up('Control'); await page.waitForTimeout(80); } }
     const mid = await page.evaluate(() => ({ s: ME.zoomState().s, stop: ME.zoomState().stop, sun: !document.getElementById('zoom-sun').hidden }));
     ok('8 between stops: past the Moon stop the Sun link is shown while the nearer stop is still the Moon', mid.s > 1.1 && mid.s < 1.45 && mid.stop === 'B' && mid.sun, mid);
     await page.click('#zoom-sun'); await page.waitForFunction(() => window.ME && ME.craftState && ME.craftState().status === 'ready', null, { timeout: 15000 });

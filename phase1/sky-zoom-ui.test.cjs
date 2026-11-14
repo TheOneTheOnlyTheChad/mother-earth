@@ -471,13 +471,13 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
     await cardOn(page); await openZoom(page); await page.evaluate(() => ME.zoomGo(2));
     const sheetBefore = await page.evaluate(() => document.getElementById('sheet').className);
     await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(900);
-    const z1 = await Z(page), g1 = z1.open ? await evidence(page) : null;
+    const z1 = await Z(page), g1 = z1.open ? await evidence(page) : null, sheetPhone = await page.evaluate(() => document.getElementById('sheet').className);
     await page.setViewportSize({ width: 1280, height: 900 }); await page.waitForTimeout(900);
     const z2 = await Z(page);
     await page.click('#zoom-back'); await page.waitForTimeout(400);
     const sheetAfter = await page.evaluate(() => document.getElementById('sheet').className);
-    ok('desktop → phone width while open: view stays open at + Sun, bodies tagged and drawn; back to desktop still open; exit leaves the sheet as before entry',
-      z1.open && z1.s === 2 && g1 && drawnOk(g1) && ['moon', 'sun'].every(k => g1.tags.includes(k)) && z2.open && z2.s === 2 && sheetAfter === sheetBefore, { z1: [z1.open, z1.s, z1.msg], tags: g1 && g1.tags, z2: [z2.open, z2.s], sheetBefore, sheetAfter });
+    ok('desktop → phone width while open: view stays open at + Sun, the readings sheet collapsed as on entry, bodies tagged and drawn; back to desktop still open; exit leaves the sheet as before entry',
+      z1.open && z1.s === 2 && g1 && drawnOk(g1) && ['moon', 'sun'].every(k => g1.tags.includes(k)) && /collapsed/.test(sheetPhone) && z2.open && z2.s === 2 && sheetAfter === sheetBefore, { sheetPhone, z1: [z1.open, z1.s, z1.msg], tags: g1 && g1.tags, z2: [z2.open, z2.s], sheetBefore, sheetAfter });
     await ctx.close();
   }
 
