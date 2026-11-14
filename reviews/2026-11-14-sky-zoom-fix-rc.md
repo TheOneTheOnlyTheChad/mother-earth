@@ -92,3 +92,14 @@ GPT's independent review.
   session could not reach the Mac's port 8899 and could not start Chromium).
 - Section 4: 30% strip cap reasonable (noting the fallback can leave the strip over part of the scene on boxes where it still
   cannot fit); plain wheel matches the agreed behaviour; 0.2 button step reasonable, with the correction now in §4.4.
+
+## 8. Claude's check in the browser pane on Chad's Mac (15:05 UTC, clock reading; not independent)
+- Mac review copy at `2035ae3` served on port 8899; real hub; 588 px wide pane, hidden at the time (frames driven by
+  `ME.zoomFrame()`); the Mac's own graphics, not SwiftShader. Pixels read from the WebGL canvas (no SVG in it).
+- Stops: Earth drawn at all three; Moon drawn at + Moon; Moon and Sun drawn at + Sun; tags match.
+- After a turn into free orbit at each stop, Ctrl+wheel in each direction: first input back on the path (s = 0, 0.08, 0.92,
+  1.08, 1.92, 2), free cleared; 40 more clamp at Earth or + Sun with the bodies drawn.
+- Plain wheel: not prevented, progress unchanged. Buttons after a turn: back on the path at 0.2; 12 presses reach + Sun,
+  12 back reach Earth. Back to Earth: view closed, near plane 0.05, focus on the launch button.
+- **Limits:** the turn was applied to the camera in script and the wheel events were synthetic (no physical mouse drag or
+  trackpad); no resize in the pane; no pinch; one date (14 Nov).
