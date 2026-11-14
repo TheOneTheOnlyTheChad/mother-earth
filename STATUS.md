@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 18:38 UTC (clock reading) — **GPT passes moon-lro-path-rc round 2** (`b9c7e1d`; relayed by Chad)
+- GPT repeated the round-1 drag in Chrome on the Mac: the Moon turned and "change the time" kept focus; Enter moved focus to the slider; Right Arrow moved both the globe and the drawing to 12:01 UTC. Limb test and kernel documentation pass. Phone deferred.
+- **Next, each on Chad's own line:** (1) file the four REGISTER entries on the branch (draft `reviews/2026-11-14-moon-lro-path-register-draft.md`); (2) merge `moon-lro-path-rc` to main (page change). Rollback after merge: revert the merge commit.
+
 ## 14 Nov 18:27 UTC (clock reading) — **moon-lro-path-rc round 2: GPT's three findings addressed** (branch head `a5a2eb1`, commit time 18:27:04 UTC; branch only, nothing merged)
 - **GPT's review of `2836c6f` (relayed by Chad):** trajectory passes — GPT checked all 1,441 shipped vectors against its own DE440 evaluation (worst 0.93 m after rounding), reproduced Horizons (worst 0.0000075°), confirmed the lowest chord 64.177 km and, from LROC's documentation, the map's equirectangular / planetocentric / east-positive Mean Earth convention. Horizons decision closed. REGISTER drafts match the evidence. Page merge held for three findings; GPT's Chrome smoke on the Mac (access sorted by Chad) reproduced finding 1 and confirmed the rest of the desktop behaviour. Phone deferred.
 - **1. Focus:** readout updated in place (rebuilt only when its kind changes); camera moves only toggle the "behind" line; a press on the globe no longer moves focus (browser default — a second cause found in testing). Focus checks fail on `2836c6f` (4) and pass now; breaks `rebuild`, `dragfocus` fail as they must.
