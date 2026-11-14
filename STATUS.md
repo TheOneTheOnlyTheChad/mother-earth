@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 05:11 UTC (clock reading at write) — first scheduled skycraft run read: **ok**
+
+- D1 row 9896: started 05:07:58.510Z, finished 05:08:11.030Z, `ok`, HTTP 200, 193 records. Note: "published 20261114T050809Z-71d1328e9dc01272; sheet revised Nov 03, 2026; segments spp_pred_20260930_20270217_od268_v001; 0 of 193 samples withheld; lro study stored 41 epochs". Only two skycraft rows exist (this and the manual run 9430 of 13 Nov).
+- `/snapshot/skycraft/meta` at 05:10:39Z: current `20261114T050809Z-71d1328e9dc01272` (8,814 B, retrieved 05:08:09.491Z), previous `20261113T101042Z-c88f5c381b7e6fef` as expected, `last_attempt` null; the current snapshot file answers 200.
+- Not read: the stored `skycraft/study/lro/` objects themselves (the run note says 41 epochs stored); CPU of that hourly invocation.
+- **In progress, not deployed:** hub 0.6.13 source on branch `sunface-rc` @ `2bfa014` (Sun picture job, probe, routes), packet `reviews/2026-11-14-sunface-rc.md` on that branch; awaiting GPT's review and Chad's deploy line.
+
 ## 14 Nov 04:06 UTC (clock reading at write) — **Moon globe follow-up RELEASED** (merge `87c68be`; page only): instant buttons; zoom inside the box
 
 GPT (relayed by Chad): `82f7d0c` passes review; keep closest altitude 0.5; keep the plain wheel scrolling the page; word the line "Use Zoom in and Zoom out, or pinch on supported devices". Chad: "Approve: push moon-globe-fix to main (page change: Moon globe instant buttons and zoom inside the box)".
