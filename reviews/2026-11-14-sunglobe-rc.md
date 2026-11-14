@@ -46,9 +46,9 @@ Dark features were located in the picture and turned into heliographic positions
 | 4578 | S12 W21 | 12°S, 25°W | 12.6°S, 20.6°W |
 | 4576 | S18 W25 | 18°S, 29°W | two spots: 17.5°S 27.0°W and 18.0°S 31.7°W |
 
-Six of the nine listed regions were found, each within about 1° of latitude and 4° of longitude of the summary (which gives whole degrees for a region, not a spot).
+Six of the nine listed regions were found, each within about 1° of latitude and 4.5° of longitude of the summary (which gives whole degrees for a region, not a spot; region 4578 is the widest, about 4.4°).
 Not found: 4573 (smallest class), 4568 (S08 W53; below my detection size), 4566 (W80, in the limb band).
-Northern regions come out north and eastern ones east, so the picture is north-up and not mirrored; latitude agreement at ±30° of longitude puts any roll error under about 1°.
+Northern regions come out north and eastern ones east, which supports north up and east to the left for the checked image. (An earlier version of this packet claimed a roll error under 1°; GPT's review: the comparison is too coarse to support that, and the claim is withdrawn.)
 **Limits:** one picture, one day; my detection thresholds were chosen by hand; the picture's observation time is not known (06:30–07:00 UTC assumed for the rotation allowance). This is a manual check, not an automated test.
 
 ## Age limit (as built)

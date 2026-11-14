@@ -167,6 +167,16 @@ const PLAINS = [[38, 43, 51], [58, 64, 74]], isPlain = c => PLAINS.some(p => nea
     await o.p.clock.resume(); await o.p.waitForTimeout(900); await point(o.p, B0_SEP, 0);
     ok('E …and the globe itself is plain', isPlain(await centre(o.p)) && / · no picture$/.test(await T('#sg-read')(o)), await centre(o.p));
     await o.ctx.close(); }
+  // the 15 s poll keeps the words current and re-reads the pointer every ten minutes, with nobody touching the tab
+  { const start = SEP + 3600000 + 30000; const o = await mk({ clock: start }); await o.p.goto(BASE + '/sources.html', { waitUntil: 'domcontentloaded' }).catch(() => {});
+    o.hub.images.A = await paint(o.p, { b0: B0_SEP, spots: SPOTS }); o.hub.images.B = await paint(o.p, { b0: B0_SEP, spots: SPOTS.slice(0, 2) }); o.hub.meta = n => meta(n, img('A', SEP));
+    await open(o); await upWith(o, 'A'); const t0 = await T('#sg-times')(o), hits0 = o.hub.hits.meta;
+    await o.p.clock.fastForward(5 * 60000); await o.p.waitForTimeout(300); const t1 = await T('#sg-times')(o);
+    ok('E the age in the words advances by itself in an open tab', /\(1 h 0 min ago\)|\(1 h 1 min ago\)/.test(t0) && /\(1 h [5-6] min ago\)/.test(t1), { t0, t1 });
+    o.hub.meta = n => meta(n, img('B', SEP + 3600000), img('A', SEP));
+    await o.p.clock.fastForward(6 * 60000); await upWith(o, 'B');
+    ok('E the pointer is re-read after ten minutes and a newer picture is taken up, untouched', o.hub.hits.meta > hits0 && (await o.p.evaluate(() => SunGlobe.shown() && SunGlobe.shown().id)) === 'B', { hits0, hits: o.hub.hits.meta });
+    await o.ctx.close(); }
   // GPT: the cutoff falls BETWEEN polling ticks; nobody calls tick(). The picture must go at its deadline, in words and on the globe.
   { const start = SEP + 3 * 3600000 - 100000; const o = await mk({ clock: start }); await o.p.goto(BASE + '/sources.html', { waitUntil: 'domcontentloaded' }).catch(() => {});
     o.hub.images.A = await paint(o.p, { b0: B0_SEP, spots: SPOTS, centreDot: true }); o.hub.meta = n => meta(n, img('A', SEP));
