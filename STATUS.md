@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 06:42 UTC (clock reading at write) — Sun picture: **first manual run ok** (hub 0.6.14; schedule still off)
+
+Chad: "Approve: run /admin/run/sunface once". Run 06:38:13.9–06:38:20.4 UTC, one upstream request.
+
+- D1 row 9932 `ok`, 1 record, 203,365 B: image `20261114T063005Z-66f213bcb914748e`.
+- Pointer: `observed_at` null; `file_updated` 2026-11-14T06:30:05Z; `retrieved_at` 06:38:16.927Z; no previous; no failed attempt. File route serves the exact bytes (sha256 `66f213bc…7b32`).
+- Storage order as designed: marker 06:38:17.825Z → image 06:38:18.861Z → pointer 06:38:20.125Z. Three objects under `sunface/`.
+- Worker CPU, per-minute maximum for 06:38: 10.1 ms (16 requests, 0 errors); wall 6.3 s.
+- Nobody has looked at the picture yet. Details: `reviews/2026-11-14-sunface-smoke.md` §7 on branch `sunface-rc`.
+- Next line: `Approve: set SUNFACE_ENABLED=1`. The page does not read this route yet.
+
 ## 14 Nov 06:37 UTC (clock reading at write) — **hub 0.6.14 DEPLOYED** (content only, 06:36:10 UTC); Sun schedule still off; **hub is ahead of main**
 
 GPT held 0.6.13 twice more for replay paths (a failed marker write; a marker landing between lookup and write); fixed on `sunface-rc` (`6bb0228`, `90c7cc5`), GPT passed round 4 at `0672d0a`. A first deploy attempt was refused by the session's safety check because the Approve lines were inside GPT's relayed text; nothing changed. Chad then sent: "Approve: deploy hub 0.6.14 from sunface-rc (content only, SUNFACE_ENABLED unset)".
