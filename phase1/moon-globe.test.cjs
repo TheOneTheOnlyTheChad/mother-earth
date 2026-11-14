@@ -5,7 +5,7 @@
  *  D. the REAL map file: pinned bytes, and named landmarks where their published coordinates say
  *     (settles east/west and north/south, which the source page does not state)
  * Run: node phase1/moon-globe.test.cjs [base-url]   (static server on the repo, default 127.0.0.1:8899)
- * BREAK=lit|far|sign|mirror|flip|wait|late must each fail. */
+ * BREAK=lit|far|sign|mirror|flip|wait|late|glide|zoomreset|wheel must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const crypto = require('crypto'); const path = require('path');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
 const ROOT = path.join(__dirname, '..');
@@ -19,13 +19,16 @@ const PATCH = [['red', 0, 0, [255, 0, 0]], ['green', 0, 90, [0, 255, 0]], ['blue
 (async () => {
   const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const mk = async (opt = {}) => {
-    const ctx = await b.newContext({ viewport: { width: opt.w || 1000, height: 900 }, reducedMotion: 'reduce' });
+    const ctx = await b.newContext({ viewport: { width: opt.w || 1000, height: 900 }, reducedMotion: opt.motion ? 'no-preference' : 'reduce' });
     await ctx.route(/fonts\.googleapis|workers\.dev/, r => r.abort());
     await ctx.route('**/unpkg.com/globe.gl**', async r => { if (opt.noLib) return r.abort(); if (opt.stall) { await new Promise(res => setTimeout(res, opt.stall)); } r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }).catch(() => {}); });
     await ctx.route('**/moonglobe.js*', async r => { let s = fs.readFileSync(path.join(ROOT, 'moonglobe.js'), 'utf8');
       if (BREAK === 'lit') s = s.replace('globe.lights(amb);', '');
       if (BREAK === 'wait') s = s.replace('LIB_WAIT_MS = 12000', 'LIB_WAIT_MS = 600000');
       if (BREAK === 'late') s = s.replace('if (dead || globe || !libOk || !texOk) return;', 'if (globe || !libOk || !texOk) return;');
+      if (BREAK === 'glide') s = s.replace('}, 0); show(); };\n  const go =', '}, 600); setTimeout(show, 650); };\n  const go =');
+      if (BREAK === 'zoomreset') s = s.replace('set(v.lat + dlat, v.lng + dlng, alt())', 'set(v.lat + dlat, v.lng + dlng, ALT())');
+      if (BREAK === 'wheel') s = s.replace("if (!e.ctrlKey) e.stopPropagation();", '');
       if (BREAK === 'far') s = s.replace('go(0, 180)', 'go(0, 0)');
       if (BREAK === 'sign') s = s.replace("fmt(lng, 'E', 'W')", "fmt(lng, 'W', 'E')");
       r.fulfill({ status: 200, contentType: 'application/javascript', body: s }); });
@@ -93,6 +96,48 @@ const PATCH = [['red', 0, 0, [255, 0, 0]], ['green', 0, 90, [0, 255, 0]], ['blue
     ok('no sideways overflow', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     ok('globe box is an image with a name; not an application, not a tab stop', await p.getAttribute('#mg-globe', 'role') === 'img' && await p.getAttribute('#mg-globe', 'aria-label') === 'Globe of the Moon' && await p.getAttribute('#mg-globe', 'tabindex') === null);
     ok('no blocking library tag in the page', await p.evaluate(() => ![...document.querySelectorAll('script[src*="unpkg"]')].some(x => !x.async)));
+    await ctx.close(); }
+  // ---- motion allowed (the default for most visitors): buttons are instant, nothing is lost, readout matches the view
+  { const { ctx, p } = await mk({ synthetic: true, motion: true });
+    await p.waitForSelector('#mg-globe[data-ready="1"]', { timeout: 20000 }).catch(() => {}); await p.waitForTimeout(800);
+    ok('motion allowed: page really has motion allowed', await p.evaluate(() => !matchMedia('(prefers-reduced-motion:reduce)').matches));
+    await p.evaluate(() => { document.getElementById('mg-far').click(); document.getElementById('mg-north').click(); });   // same task: as quick as a press can be
+    const now = { read: await p.textContent('#mg-read'), v: await p.evaluate(() => MoonGlobe.view()) };
+    ok('Far side then North at once: readout is 15°N on the far side immediately', /^Centre of view: 15°N 180°[EW] · far side$/.test(now.read), now);
+    ok('…and the globe itself is there (lat 15, lon ±180)', Math.abs(now.v.lat - 15) < .01 && Math.abs(Math.abs(now.v.lng) - 180) < .01, now);
+    await p.waitForTimeout(1200);
+    const later = { read: await p.textContent('#mg-read'), v: await p.evaluate(() => MoonGlobe.view()) };
+    ok('…and both still say so a second later (no glide finishing elsewhere)', /^Centre of view: 15°N 180°[EW] · far side$/.test(later.read) && Math.abs(later.v.lat - 15) < .01 && Math.abs(Math.abs(later.v.lng) - 180) < .01, later);
+    await p.click('#mg-far'); await p.click('#mg-north'); await p.click('#mg-near'); await p.click('#mg-east'); await p.waitForTimeout(900);
+    ok('real clicks in quick succession: Far, North, Near, East ends at 0° 15°E', (await p.textContent('#mg-read')) === 'Centre of view: 0° 15°E · near side' && Math.abs((await p.evaluate(() => MoonGlobe.view())).lng - 15) < .01, await p.textContent('#mg-read'));
+    await ctx.close(); }
+  // ---- zoom stays inside the box
+  { const { ctx, p } = await mk({ synthetic: true });
+    await p.waitForSelector('#mg-globe[data-ready="1"]', { timeout: 20000 }).catch(() => {}); await p.waitForTimeout(800);
+    const A = () => p.evaluate(() => MoonGlobe.view().altitude), box = () => p.locator('#mg-globe').boundingBox();
+    const corner = async () => { const sh = await p.locator('#mg-globe').screenshot(); return p.evaluate(async b64 => { const i = new Image(); i.src = 'data:image/png;base64,' + b64; await i.decode(); const c = document.createElement('canvas'); c.width = i.naturalWidth; c.height = i.naturalHeight; const g = c.getContext('2d'); g.drawImage(i, 0, 0); return [...g.getImageData(Math.round(c.width * .04), Math.round(c.height * .04), 1, 1).data].slice(0, 3); }, sh.toString('base64')); };
+    const b0 = await box(), a0 = await A();
+    ok('opens with the whole Moon in the box (altitude 2.2; corner is background)', Math.abs(a0 - 2.2) < .01 && near(await corner(), [5, 7, 11], 6), { a0 });
+    await p.click('#mg-zin'); const a1 = await A();
+    ok('Zoom in moves the camera closer', Math.abs(a1 - 1.65) < .01, { a1 });
+    await p.click('#mg-east'); await p.click('#mg-far');
+    ok('turning and Near/Far keep the zoom', Math.abs((await A()) - 1.65) < .01, { a: await A() });
+    for (let k = 0; k < 8; k++) await p.click('#mg-zin'); await p.waitForTimeout(500);
+    const b1 = await box();
+    ok('closest look stops at altitude 0.5', Math.abs((await A()) - .5) < .01, { a: await A() });
+    ok('the box did not change size or place; the Moon grew inside it (corner now shows the Moon)', Math.abs(b1.width - b0.width) < .5 && Math.abs(b1.height - b0.height) < .5 && Math.abs(b1.x - b0.x) < .5 && !near(await corner(), [5, 7, 11], 6), { b0, b1, c: await corner() });
+    ok('no sideways overflow when zoomed in', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    for (let k = 0; k < 9; k++) await p.click('#mg-zout');
+    ok('Zoom out stops at the whole Moon (2.2)', Math.abs((await A()) - 2.2) < .01, { a: await A() });
+    // wheel: pinch on a trackpad arrives as ctrl+wheel and zooms the globe; a plain wheel scrolls the page
+    await p.locator('#mg-globe').scrollIntoViewIfNeeded(); const bb = await box(); await p.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2);
+    const y0 = await p.evaluate(() => scrollY); await p.mouse.wheel(0, 240); await p.waitForTimeout(400);
+    ok('plain wheel over the globe scrolls the page and leaves the zoom alone', (await p.evaluate(() => scrollY)) > y0 && Math.abs((await A()) - 2.2) < .01, { y0, y1: await p.evaluate(() => scrollY), a: await A() });
+    await p.evaluate(() => scrollTo(0, 0)); await p.locator('#mg-globe').scrollIntoViewIfNeeded(); const bb2 = await box(); await p.mouse.move(bb2.x + bb2.width / 2, bb2.y + bb2.height / 2);
+    const y2 = await p.evaluate(() => scrollY); await p.keyboard.down('Control'); await p.mouse.wheel(0, -300); await p.keyboard.up('Control'); await p.waitForTimeout(600);
+    const a2 = await A();
+    ok('ctrl+wheel (trackpad pinch) over the globe zooms the Moon inside the box, page does not scroll', a2 < 2.15 && a2 >= .5 - .01 && (await p.evaluate(() => scrollY)) === y2, { a2, y2, y3: await p.evaluate(() => scrollY) });
+    ok('page says how to zoom and why it blurs', /Use Zoom in and Zoom out, or pinch on supported devices/.test(await p.textContent('#moon-globe')) && /about 5 km to a pixel/.test(await p.textContent('#moon-globe')));
     await ctx.close(); }
   // phone width
   { const { ctx, p } = await mk({ synthetic: true, w: 390 }); await p.waitForSelector('#mg-globe[data-ready="1"]', { timeout: 20000 }).catch(() => {});
