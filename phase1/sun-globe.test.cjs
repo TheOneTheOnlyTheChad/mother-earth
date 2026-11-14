@@ -8,7 +8,7 @@
  *  F. replacement rules: a bad or older replacement never displaces a valid picture
  *  G. controls, zoom, failure states, no request to SDO
  * Run: node phase1/sun-globe.test.cjs [base-url]
- * BREAK=mirror|no-b0|flip|no-mask|no-limb|age-late|no-timer|no-resume|no-offset|step-back|bad-displaces|limit-raised|future-ok|observed must each fail. */
+ * BREAK=mirror|no-b0|flip|no-mask|no-limb|age-late|no-timer|no-resume|no-offset|no-deadline|clock-back|sleep-blind|step-back|bad-displaces|limit-raised|future-ok|observed must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899'; const BREAK = process.env.BREAK || '';
 const ROOT = path.join(__dirname, '..');
@@ -22,7 +22,10 @@ const BREAKS = {
   'age-late': ["ageS(im) >= -60 && ageS(im) < limitS;", "ageS(im) >= -60 && ageS(im) <= limitS + 30;"],
   'no-timer': ["  setInterval(tick, TICK_MS);", ""],
   'no-resume': ["  for (const ev of ['visibilitychange', 'pageshow', 'focus']) addEventListener(ev, () => { if (document.visibilityState !== 'hidden') tick(); });\n  document.addEventListener('visibilitychange', () => { if (document.visibilityState !== 'hidden') tick(); });", ""],
-  'no-offset': ["offset = Date.parse(m.now) - Date.now();", "offset = 0;"],
+  'no-offset': ["sync = { hub: Date.parse(m.now), perf: performance.now(), wall: Date.now() };", "sync = { hub: Date.now(), perf: performance.now(), wall: Date.now() };"],
+  'no-deadline': ["    if (shown) deadline = setTimeout(tick, Math.max(0, Math.ceil(limitS * 1000 - (now() - Date.parse(shown.image.file_updated)))));\n", ""],
+  'clock-back': ["sync.hub + Math.max(performance.now() - sync.perf, Date.now() - sync.wall, 0)", "sync.hub + (Date.now() - sync.wall)"],
+  'sleep-blind': ["sync.hub + Math.max(performance.now() - sync.perf, Date.now() - sync.wall, 0)", "sync.hub + (performance.now() - sync.perf)"],
   'step-back': ["        if (shown && Date.parse(im.file_updated) <= Date.parse(shown.image.file_updated)) break;   // never step back to an older picture\n", ""],
   'bad-displaces': ["        catch (e) { if (!shown) note =", "        catch (e) { shown = null; if (!shown) note ="],
   'limit-raised': ["m.age_limit_s > 0 && m.age_limit_s <= 10800) limitS", "m.age_limit_s > 0) limitS"],
@@ -153,7 +156,7 @@ const PLAINS = [[38, 43, 51], [58, 64, 74]], isPlain = c => PLAINS.some(p => nea
     await o.p.waitForTimeout(800); const cE = await centre(o.p);
     ok('E two hours old: shown', (await T('#sg-state')(o)) !== 'No recent picture' && near(cE, [255, 255, 255]), cE);
     o.hub.down = true;                                   // from here the hub never answers again
-    const off = await o.p.evaluate(() => SunGlobe.offset());   // the page's correction to its own clock, from the pointer read (only latency here)
+    const off = await o.p.evaluate(() => SunGlobe.offset());   // page clock minus device clock, from the pointer read (only latency here)
     ok('E the correction from the hub clock is small here (same clock, only latency)', Math.abs(off) < 2000, off);
     const cut = SEP + 3 * 3600000 - off;                 // device time at which the corrected age is exactly three hours
     await o.p.clock.pauseAt(new Date(cut - 1)); await o.p.evaluate(() => SunGlobe.tick());
@@ -163,6 +166,35 @@ const PLAINS = [[38, 43, 51], [58, 64, 74]], isPlain = c => PLAINS.some(p => nea
     ok('E …and the words give the file time and the limit', /^The last picture’s file was updated at 8 Sep 2026, 11:00 UTC, more than 3 hours ago\.$/.test(await T('#sg-times')(o)), await T('#sg-times')(o));
     await o.p.clock.resume(); await o.p.waitForTimeout(900); await point(o.p, B0_SEP, 0);
     ok('E …and the globe itself is plain', isPlain(await centre(o.p)) && / · no picture$/.test(await T('#sg-read')(o)), await centre(o.p));
+    await o.ctx.close(); }
+  // GPT: the cutoff falls BETWEEN polling ticks; nobody calls tick(). The picture must go at its deadline, in words and on the globe.
+  { const start = SEP + 3 * 3600000 - 100000; const o = await mk({ clock: start }); await o.p.goto(BASE + '/sources.html', { waitUntil: 'domcontentloaded' }).catch(() => {});
+    o.hub.images.A = await paint(o.p, { b0: B0_SEP, spots: SPOTS, centreDot: true }); o.hub.meta = n => meta(n, img('A', SEP));
+    await open(o); await upWith(o, 'A'); await o.p.waitForTimeout(600); const cBefore = await centre(o.p); o.hub.down = true;
+    const left = await o.p.evaluate(() => 3 * 3600000 - (SunGlobe.now() - Date.parse('2026-09-08T11:00:00Z')));   // ms until the deadline, on the page's own clock
+    await o.p.clock.pauseAt(new Date((await o.p.evaluate(() => Date.now())) + 1000)); await o.p.evaluate(() => SunGlobe.tick());   // a poll happens here; the next poll is 15 s away
+    const left2 = await o.p.evaluate(() => 3 * 3600000 - (SunGlobe.now() - Date.parse('2026-09-08T11:00:00Z')));
+    ok('E (set-up) the deadline is more than 2 s away and is not a multiple of the 15 s poll', left2 > 2000 && left2 < 100000 && Math.round(left2) % 15000 !== 0, { left, left2 });
+    await o.p.clock.fastForward(Math.floor(left2) - 1);   // jump to just before the deadline; any timer that fell due fires once (the 15 s poll does)
+    ok('E just before the deadline, no manual tick: picture still up, words unchanged', (await o.p.evaluate(() => !!SunGlobe.shown())) && /^File updated at /.test(await T('#sg-times')(o)) && (await T('#sg-state')(o)) !== 'No recent picture' && near(cBefore, [255, 255, 255]), { t: await T('#sg-times')(o), cBefore });
+    await o.p.clock.fastForward(2);                       // across the deadline: the poll is not due again; only the deadline timer is
+    ok('E at the deadline, between polls, no manual tick: removed, with the words', (await o.p.evaluate(() => SunGlobe.shown())) === null && (await T('#sg-state')(o)) === 'No recent picture' && /more than 3 hours ago/.test(await T('#sg-times')(o)), { s: await T('#sg-state')(o), t: await T('#sg-times')(o) });
+    await o.p.clock.resume(); await o.p.waitForTimeout(1200); await point(o.p, B0_SEP, 0); const cAfter = await centre(o.p);
+    ok('E …and the rendered globe is plain', isPlain(cAfter) && / · no picture$/.test(await T('#sg-read')(o)), cAfter);
+    await o.ctx.close(); }
+  // GPT: the device clock is set BACK after the page has synchronised, hub silent: the picture's life must not grow.
+  { const start = SEP + 3 * 3600000 - 60000; const o = await mk({ clock: start }); await o.p.goto(BASE + '/sources.html', { waitUntil: 'domcontentloaded' }).catch(() => {});
+    o.hub.images.A = await paint(o.p, { b0: B0_SEP, spots: SPOTS }); o.hub.meta = n => meta(n, img('A', SEP));
+    await open(o); await upWith(o, 'A'); o.hub.down = true;
+    await o.p.clock.pauseAt(new Date((await o.p.evaluate(() => Date.now())) + 500));
+    const left = await o.p.evaluate(() => 3 * 3600000 - (SunGlobe.now() - Date.parse('2026-09-08T11:00:00Z')));
+    await o.p.clock.setSystemTime(new Date(SEP + 3600000));   // wall clock now says the picture is one hour old
+    await o.p.evaluate(() => SunGlobe.tick());
+    ok('E clock set back two hours: the page still counts the true age', (await o.p.evaluate(() => !!SunGlobe.shown())) && /2 h 59 min ago/.test(await T('#sg-times')(o)), await T('#sg-times')(o));
+    await o.p.clock.fastForward(Math.floor(left) - 5);
+    ok('E …it is still up 5 ms before the real deadline', await o.p.evaluate(() => !!SunGlobe.shown()));
+    await o.p.clock.fastForward(10);
+    ok('E …and the picture still goes at its real deadline, with the hub silent', (await o.p.evaluate(() => SunGlobe.shown())) === null && (await T('#sg-state')(o)) === 'No recent picture', { left, s: await T('#sg-state')(o) });
     await o.ctx.close(); }
   { const start = SEP + 3 * 3600000 - 40000; const o = await mk({ clock: start }); await o.p.goto(BASE + '/sources.html', { waitUntil: 'domcontentloaded' }).catch(() => {});
     o.hub.images.A = await paint(o.p, { b0: B0_SEP, spots: SPOTS }); o.hub.meta = n => meta(n, img('A', SEP));

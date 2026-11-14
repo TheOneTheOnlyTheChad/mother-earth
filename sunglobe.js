@@ -17,9 +17,12 @@
  *
  * TIMES (three, never merged)
  *   observed_at is not known and is never shown. The page shows "File updated at …" (SDO's Last-Modified, via the hub) and when the
- *   hub retrieved it. AGE LIMIT: the picture is shown only while (now − file updated) < age_limit_s (three hours). "now" is this
- *   device's clock corrected by the hub's clock as read with the pointer, so the limit holds in a tab left open, with the hub
- *   silent, and on resume. At the limit the picture is removed: "No recent picture".
+ *   hub retrieved it. AGE LIMIT: the picture is shown only while (now − file updated) < age_limit_s (three hours).
+ *   "now" is the HUB'S clock as read with the pointer, carried forward by ELAPSED time on this device: the larger of the
+ *   monotonic timer's and the wall clock's advance since that read. Setting the device clock back therefore cannot lengthen a
+ *   picture's life; a sleep (where the monotonic timer may stand still) or a clock set forward can only shorten it.
+ *   Expiry is SCHEDULED for the picture's own deadline (a timer set for that instant), and also checked every 15 s and on resume,
+ *   so the picture goes at the limit, not at the next poll. At the limit the picture is removed: "No recent picture".
  *   A newer pointer whose picture cannot be loaded or placed never displaces a picture that is still valid. */
 (() => {
   'use strict';
@@ -101,8 +104,10 @@
   window.SunGlobe = { sunB0, toDisc, seen, fitDisc, buildTexture, MASK_RHO };
 
   // ---------- state
-  let globe = null, dead = false, libOk = false, shown = null /* { image, geom, b0 } */, limitS = 10800, offset = 0, lastMeta = 0, busy = false, plainUrl = null, note = '';
-  const now = () => Date.now() + offset;
+  let globe = null, dead = false, libOk = false, shown = null /* { image, geom, b0 } */, limitS = 10800, lastMeta = 0, busy = false, plainUrl = null, note = '', deadline = 0;
+  // Clock: the hub's time at the last pointer read, plus elapsed time here (see the header). Before any read: the device clock.
+  let sync = null /* { hub, perf, wall } */;
+  const now = () => sync ? sync.hub + Math.max(performance.now() - sync.perf, Date.now() - sync.wall, 0) : Date.now();
   const ALT = () => innerWidth <= 720 ? 2.6 : 2.2, ALT_MIN = 0.5;
   const alt = () => globe ? Math.max(ALT_MIN, Math.min(ALT(), globe.pointOfView().altitude)) : ALT();
   const fail = msg => { if (dead) return; dead = true; el.hidden = true; $('sg-ctl').hidden = true; read.hidden = true; times.hidden = true; state.textContent = 'Sun globe unavailable'; why.hidden = false; why.textContent = msg + ' The spacecraft drawing below does not need it.'; };
@@ -120,6 +125,7 @@
   /** Everything the reader is told about time, and the age rule itself. Runs on a timer, on resume, and after every pointer read. */
   function tick() {
     if (dead) return;
+    clearTimeout(deadline); deadline = 0;
     if (shown && !valid(shown.image)) {   // the picture has reached its limit: remove it, whether or not the hub answers
       const im = shown.image; shown = null; note = `The last picture’s file was updated at ${utc(Date.parse(im.file_updated))}, more than ${Math.round(limitS / 3600)} hours ago.`;
       if (globe) globe.globeImageUrl(plainUrl);
@@ -130,6 +136,8 @@
       el.dataset.image = im.id; }
     else { state.textContent = 'No recent picture'; times.textContent = note || 'The hub has no picture of the Sun younger than three hours.'; el.dataset.image = ''; }
     show();
+    // the picture's own deadline: a timer for the instant its age reaches the limit (timers cap at 2^31 ms; ours is at most three hours)
+    if (shown) deadline = setTimeout(tick, Math.max(0, Math.ceil(limitS * 1000 - (now() - Date.parse(shown.image.file_updated)))));
     if (now() - lastMeta > REFETCH_MS) refresh();
   }
   const loadImage = url => new Promise((res, rej) => { const i = new Image(); i.crossOrigin = 'anonymous'; const t = setTimeout(() => rej(new Error('picture timed out')), IMG_WAIT_MS); i.onload = () => { clearTimeout(t); res(i); }; i.onerror = () => { clearTimeout(t); rej(new Error('picture did not load')); }; i.src = url; });
@@ -148,7 +156,7 @@
     try {
       const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), META_WAIT_MS); let m;
       try { const r = await fetch(HUB + '/snapshot/sunface/meta', { signal: ctl.signal, cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); m = await r.json(); } finally { clearTimeout(t); }
-      if (m && typeof m.now === 'string' && Number.isFinite(Date.parse(m.now))) offset = Date.parse(m.now) - Date.now();
+      if (m && typeof m.now === 'string' && Number.isFinite(Date.parse(m.now))) sync = { hub: Date.parse(m.now), perf: performance.now(), wall: Date.now() };   // every successful read re-anchors to the hub (the reference); between reads only elapsed time moves the clock
       if (m && Number.isFinite(m.age_limit_s) && m.age_limit_s > 0 && m.age_limit_s <= 10800) limitS = m.age_limit_s;   // the hub may shorten the limit, never lengthen it past three hours
       for (const im of [m && m.image, m && m.previous]) {
         if (!valid(im)) continue;
@@ -194,5 +202,5 @@
   $('sg-zout').addEventListener('click', () => { if (globe) { const v = globe.pointOfView(); set(v.lat, v.lng, alt() / 0.75); } });
   el.addEventListener('wheel', e => { if (!e.ctrlKey) e.stopPropagation(); }, { capture: true, passive: true });
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (globe) { globe.width(el.clientWidth).height(el.clientHeight); globe.controls().maxDistance = 100 * (1 + ALT()); } }, 120); });
-  Object.assign(window.SunGlobe, { view: () => globe ? globe.pointOfView() : null, point: (lat, lng) => set(lat, lng, alt()), shown: () => shown && { id: shown.image.id, geom: shown.geom, b0: shown.b0 }, tick, refresh, lights: () => globe ? globe.lights().map(l => l.type) : null, limit: () => limitS, offset: () => offset });
+  Object.assign(window.SunGlobe, { view: () => globe ? globe.pointOfView() : null, point: (lat, lng) => set(lat, lng, alt()), shown: () => shown && { id: shown.image.id, geom: shown.geom, b0: shown.b0 }, tick, refresh, lights: () => globe ? globe.lights().map(l => l.type) : null, limit: () => limitS, offset: () => now() - Date.now(), now });
 })();
