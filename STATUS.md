@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 15:13:29 UTC (push time) — **PAGE RELEASED: Sky zoom-out view zoom fix** (main merge `ad1261c` of `sky-zoom-fix-rc` @ `6e883c5`; Chad: "Approve: merge sky-zoom-fix-rc to main (page change: Sky zoom-out view zoom fix)")
+- Page only; hub 0.6.14 unchanged (worker.js identical), so **main = live**. Merge tree = the branch.
+- **Before the line:** GPT reviewed section 4 at source level only (12 simulated checks; its browser smoke test did not run). Claude checked the Mac review copy in the browser pane on the Mac's graphics (packet §8). **No independent browser test preceded the merge.**
+- **Served hashes: nine page files exact at 15:15:28Z** (index `2244ad88`, moon `04804e53`, sun `7f1c1447`, sources `c563c052`, timeline.html `4fb27d2c`, skyscene `10270ad8`, style `ee45177d`, app `9df9dce8`, sky `2056da8d`). Assets: `skyscene.js` and `style.css` `?v=202612061000`.
+- **Live check on the public page (15:15:48Z, pane, scripted turn and wheel events):** at + Sun after a turn, 30 Ctrl+wheel in → Earth, on the path; 30 out → + Sun with all three tagged; plain wheel not prevented, progress unchanged; Back to Earth restores (near 0.05).
+- **Rollback:** revert `ad1261c` (own Approve line).
+- **Open:** a physical drag / trackpad / pinch, Safari, a real phone, a screen reader, resize in a real browser; the full regression was not run (sky-zoom-ui 351, sky-ui 79, skycraft-ui 77, desktop-overflow 258, mobile-pass 131 were); 17 older breaks not rerun.
+
 ## 14 Nov 14:51 UTC (clock reading at write) — **Sky zoom fix: candidate `sky-zoom-fix-rc` built, branch only** (new thread)
 - GPT reproduced a blank canvas after drag + zoom-in at + Sun (live Chrome); Claude reproduced it on main `49c8c7e` and found a second failure (free zoom-out past the far plane). GPT's proposal rev 2: `docs/concepts/SKY-DISTANCE-ZOOM-FIX-PROPOSAL.md`.
 - Chad: "Go: build sky-zoom-fix-rc on a branch per SKY-DISTANCE-ZOOM-FIX-PROPOSAL rev 2 (plain wheel scrolls the page; resize included; page only; no merge)".
