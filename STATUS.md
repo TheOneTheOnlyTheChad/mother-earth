@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
-## 14 Nov 06:42 UTC (clock reading at write) — Sun picture: **first manual run ok** (hub 0.6.14; schedule still off)
+## 14 Nov 06:41 UTC (clock reading at write) — Sun picture: **first manual run ok** (hub 0.6.14; schedule still off)
 
 Chad: "Approve: run /admin/run/sunface once". Run 06:38:13.9–06:38:20.4 UTC, one upstream request.
 
