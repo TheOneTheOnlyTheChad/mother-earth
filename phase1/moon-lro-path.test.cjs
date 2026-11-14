@@ -9,7 +9,8 @@
  *  F. the conversion: cardinal axes, the seam, high latitude
  *  G. the REAL map on the rendered globe: a fiducial put by the path's own conversion lands on each named feature within 1°
  * Run: (python3 -m http.server 8899 --bind 127.0.0.1 &) ; node --no-warnings phase1/moon-lro-path.test.cjs
- * BREAK=lngsign|lng180|latflip|alt0|nowindow|stale|nosha|keepold must each fail. */
+ *  H. keyboard focus survives a camera move and a time change (GPT review of 2836c6f, finding 1)
+ * BREAK=lngsign|lng180|latflip|alt0|nowindow|stale|nosha|keepold|rebuild|dragfocus must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto');
 const BASE = process.argv[2] || 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev', BREAK = process.env.BREAK || '';
 const ROOT = path.join(__dirname, '..');
@@ -24,6 +25,8 @@ const BREAKS = {
   nowindow: ["for (let i = s.lo; i <= s.hi; i++)", "for (let i = 0; i < LRO.n; i++)"],
   stale: ["document.addEventListener('me:craft-select', ev => { ov.sel = ev.detail; if (ov.on) drawOverlay(); });", "document.addEventListener('me:craft-select', ev => { if (!ov.sel) ov.sel = ev.detail; if (ov.on) drawOverlay(); });"],
   nosha: ["      if (h !== LRO.sha) return 'the file failed its integrity check';\n", ''],
+  dragfocus: ["\n  el.addEventListener('mousedown', e => e.preventDefault());", ''],
+  rebuild: ["if (mode === m && m !== 'msg') return false;", ''],
   keepold: ["      clearOverlay();\n      lread.innerHTML = 'No dated position", "      lread.innerHTML = 'No dated position"],
 };
 let MG = fs.readFileSync(path.join(ROOT, 'moonglobe.js'), 'utf8');
@@ -56,7 +59,7 @@ const MARKS = [['Tycho', -43.30, -11.22], ['Mare Crisium', 16.18, 59.10], ['Mare
     return { ctx, p, errs };
   };
   const lro = p => p.evaluate(() => MoonGlobe.lro());
-  const text = async p => (await p.textContent('#mg-lro-read')) || '';
+  const text = async p => (await p.innerText('#mg-lro-read')) || '';   // rendered text: a hidden line does not count
   const geom = p => p.evaluate(() => {   // what three.js actually holds for the path and the marker
     const g = MoonGlobe.globe(), out = { lines: [], marks: [] };
     g.scene().traverse(o => {
@@ -82,7 +85,7 @@ const MARKS = [['Tycho', -43.30, -11.22], ['Mare Crisium', 16.18, 59.10], ['Mare
     ok('the globe follows the diagram’s own sample and window', L.drawn && cs.i === L.drawn.i && cs.geo.lo === L.drawn.lo && cs.geo.hi === L.drawn.hi, { cs: cs.i, geo: cs.geo });
     const m = meLL(720), t = await text(p);
     ok('readout: label, source, UTC minute', t.includes('Dated LRO example · 10–11 June 2026 UTC') && t.includes('Calculated from NASA/GSFC’s definitive trajectory · 10 Jun 12:00 UTC'), t);
-    ok('readout: altitude above the reference sphere, from the Moon-fixed file', (await p.textContent('#mg-lro-alt')) === `${m.km.toFixed(1)} km above the reference sphere`, await p.textContent('#mg-lro-alt'));
+    ok('readout: altitude above the reference sphere, from the Moon-fixed file', (await p.innerText('#mg-lro-alt')) === `${m.km.toFixed(1)} km above the reference sphere`, await p.textContent('#mg-lro-alt'));
     ok('the Moon-fixed altitude equals the drawing’s own (J2000) altitude for the same minute', Math.abs(m.km - r1km(720)) < 0.002, [m.km, r1km(720)]);
     ok('readout: actual UTC bounds of the path', t.includes('Path shown: 10 Jun 10:00 to 10 Jun 14:00 UTC'), t);
     ok('readout: flight path, not a ground track; marker enlarged', /flight path above a spherical Moon \(radius 1,737\.4 km\), not a track on the ground; the marker is enlarged/.test(t), t);
@@ -114,6 +117,24 @@ const MARKS = [['Tycho', -43.30, -11.22], ['Mare Crisium', 16.18, 59.10], ['Mare
     ok('toggle off: nothing drawn, readout hidden, not pressed', (await geom(p)).lines.length === 0 && (await geom(p)).marks.length === 0 && await p.locator('#mg-lro-read').isHidden() && (await p.getAttribute('#mg-lro', 'aria-pressed')) === 'false');
     await p.focus('#mg-lro'); await p.keyboard.press('Space'); await p.waitForTimeout(300);
     ok('keyboard (Space) turns it on', (await p.getAttribute('#mg-lro', 'aria-pressed')) === 'true' && !!(await lro(p)).drawn);
+    // H. focus survives a camera move and a time change (GPT finding 1)
+    await p.focus('#mg-lro-time'); await p.evaluate(() => { window.__rd = document.getElementById('mg-lro-read').firstElementChild; });
+    await p.evaluate(() => MoonGlobe.point(10, 40)); await p.waitForTimeout(500);
+    ok('a camera move (buttons/API) keeps focus on “change the time”', await p.evaluate(() => document.activeElement && document.activeElement.id) === 'mg-lro-time');
+    { const bb = await p.locator('#mg-globe').boundingBox(); await p.evaluate(() => document.getElementById('mg-lro-time').focus());
+      const v1 = await p.evaluate(() => MoonGlobe.view());
+      // a real mouse drag across the globe, as GPT did in Chrome
+      await p.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await p.mouse.down();
+      for (let k = 1; k <= 10; k++) await p.mouse.move(bb.x + bb.width / 2 + k * 12, bb.y + bb.height / 2 + k * 3);
+      await p.mouse.up(); await p.waitForTimeout(600);
+      const v2 = await p.evaluate(() => MoonGlobe.view());
+      ok('a real drag of the globe moved the view', Math.abs(v2.lng - v1.lng) > 2, { v1, v2 }); }
+    ok('after the drag, focus is still on “change the time”', await p.evaluate(() => document.activeElement && document.activeElement.id) === 'mg-lro-time');
+    ok('the readout was updated in place, not rebuilt', await p.evaluate(() => document.getElementById('mg-lro-read').firstElementChild === window.__rd));
+    await p.focus('#mg-lro-time');
+    await p.evaluate(() => document.getElementById('craft-next').click()); await p.waitForTimeout(400);
+    ok('a time change updates the readout in place and keeps focus on the link', await p.evaluate(() => document.activeElement && document.activeElement.id) === 'mg-lro-time' && (await p.innerText('#mg-lro-t')) === '10 Jun 12:01 UTC' && await p.evaluate(() => document.getElementById('mg-lro-read').firstElementChild === window.__rd));
+    await p.evaluate(() => document.getElementById('craft-prev').click()); await p.waitForTimeout(300);
     await p.setViewportSize({ width: 390, height: 1200 }); await p.waitForTimeout(800);
     ok('resize to a phone width keeps the overlay and its geometry', !!(await lro(p)).drawn && (await geom(p)).lines[0].length === 241);
     ok('no page errors', errs.length === 0, errs);
@@ -149,13 +170,22 @@ const MARKS = [['Tycho', -43.30, -11.22], ['Mare Crisium', 16.18, 59.10], ['Mare
     ok('from the opposite side: behind, and the words say so; UTC and altitude still given', L.drawn && L.drawn.behind && /At this time LRO is behind the Moon from this view/.test(await text(p)) && /10 Jun 12:00 UTC/.test(await text(p)) && /km above the reference sphere/.test(await text(p)), await text(p));
     s = await screenOf(p, m.lat, m.lng, m.alt);
     ok('from the opposite side: the marker is hidden by the sphere (no marker colour where it projects)', !yellow(await px(p, s.x, s.y)), await px(p, s.x, s.y));
-    // limb: view centre 90° from the marker, along its meridian
-    await p.evaluate(([la, ln]) => MoonGlobe.point(0, ln + 90), [m.lat, m.lng]); await p.waitForTimeout(800);
-    s = await screenOf(p, m.lat, m.lng, m.alt); const s0 = await screenOf(p, m.lat, m.lng, 0);
-    const discR = await p.evaluate(() => { const g = MoonGlobe.globe(), v = g.pointOfView(), a = g.getScreenCoords(v.lat, v.lng + 90, 0), c = g.getScreenCoords(v.lat, v.lng, 0); return Math.hypot(a.x - c.x, a.y - c.y); });
-    const dm = Math.hypot(s.x - s.cx, s.y - s.cy);
-    ok('limb view: the marker projects outside the disc (above the surface)', dm > discR + 2 && dm > Math.hypot(s0.x - s.cx, s0.y - s.cy) + 2, { dm, discR });
+    // limb (GPT finding 2): with a perspective camera the disc edge is where a view ray grazes the sphere, not the points 90° from
+    // the view axis. Pose: view centre on the marker's meridian at the central angle where the marker sits furthest outside that
+    // edge (cos φ = r_marker / D). Then test with the true geometry: the ray from the camera to the marker misses the sphere, its
+    // angle from the camera–centre line exceeds asin(R / D), and the marker is drawn there.
+    const D0 = await p.evaluate(() => { const c = MoonGlobe.globe().camera().position; return Math.hypot(c.x, c.y, c.z); });
+    const rm = 100 * (1 + m.alt), phi = Math.acos(rm / D0) * 180 / Math.PI;
+    await p.evaluate(([la, ln]) => MoonGlobe.point(la, ln), [m.lat - phi, m.lng]); await p.waitForTimeout(800);
+    const geo = await p.evaluate(([la, ln, al]) => { const g = MoonGlobe.globe(), c = g.camera().position, q = g.getCoords(la, ln, al), D = Math.hypot(c.x, c.y, c.z);
+      const d = { x: q.x - c.x, y: q.y - c.y, z: q.z - c.z }, dl = Math.hypot(d.x, d.y, d.z), ang = Math.acos(-(c.x * d.x + c.y * d.y + c.z * d.z) / (D * dl));
+      const t = Math.max(0, Math.min(1, -(c.x * d.x + c.y * d.y + c.z * d.z) / (dl * dl))), miss = Math.hypot(c.x + t * d.x, c.y + t * d.y, c.z + t * d.z);
+      return { D, ang_deg: ang * 180 / Math.PI, limb_deg: Math.asin(100 / D) * 180 / Math.PI, miss }; }, [m.lat, m.lng, m.alt]);
+    ok('limb pose: the camera ray to the marker misses the sphere (closest approach > radius 100)', geo.miss > 100.5, geo);
+    ok('limb pose: the marker lies outside the true limb (angle from the axis > asin(R/D))', geo.ang_deg > geo.limb_deg + 0.3, geo);
+    s = await screenOf(p, m.lat, m.lng, m.alt);
     ok('limb view: the marker is drawn there', yellow(await px(p, s.x, s.y)), await px(p, s.x, s.y));
+    ok('limb view: the words do not say behind', !/behind the Moon/.test(await text(p)), await text(p));
     await p.screenshot({ path: '/tmp/lro-limb.png', clip: await p.locator('#mg-globe').boundingBox() });
     await ctx.close(); }
 
@@ -192,6 +222,7 @@ const MARKS = [['Tycho', -43.30, -11.22], ['Mare Crisium', 16.18, 59.10], ['Mare
   { const { ctx, p } = await mk('', { vp: { width: 1100, height: 1100 } });
     const box = await p.locator('#mg-globe').boundingBox();
     const shot = async () => (await p.screenshot({ clip: box })).toString('base64');
+    await p.waitForTimeout(2000);   // let the globe finish its first renders before the paired frames (the first landmark once caught a frame still settling)
     for (const [name, lat, lng] of MARKS) {
       await p.evaluate(([la, ln]) => { MoonGlobe.globe().labelsData([]); MoonGlobe.globe().pointOfView({ lat: la, lng: ln, altitude: 0.9 }, 0); }, [lat, lng]); await p.waitForTimeout(700);
       const plain = await shot();

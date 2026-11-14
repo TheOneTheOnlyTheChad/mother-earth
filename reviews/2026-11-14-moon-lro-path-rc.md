@@ -1,4 +1,4 @@
-# LRO's dated path on the Moon globe — candidate `moon-lro-path-rc` (14 Nov 2026)
+# LRO's dated path on the Moon globe — candidate `moon-lro-path-rc` (14 Nov 2026) — packet rev 2
 
 Written 14 Nov 2026 17:06 UTC (clock reading) by Claude. **Branch only; nothing merged or deployed. Page only: no hub, R2 or D1 change.**
 Proposal: `docs/concepts/MOON-LRO-DATED-PATH-PROPOSAL.md` rev 2 (GPT; on main at `0d2bb9e` with Claude's review).
@@ -94,8 +94,10 @@ and record, two Horizons answers), `phase1/moon-lro-path.test.cjs`, `phase1/moon
 1. **The orientation PCK is kept as three byte ranges, not the whole file.** The 12.9 MB file could only reach the workspace
    through the browser pane at about 190 KB per call. The full file was hashed in the pane (`60cd55aa…783f`, matching its NAIF
    listing size); the three ranges were hashed there and on arrival; the build fills every other byte with 0xFF so any read
-   outside them is NaN and stops the build (tested: a July date gives NaN). Anyone can rebuild with the full file instead by
-   placing it at the reassembled path; the outputs must be identical.
+   outside them is NaN and stops the build (tested: a July date gives NaN). **Correction (rev 2 of this packet, after GPT's
+   review):** the generator has no full-file input. It always reassembles the three pinned ranges in a fresh temporary directory.
+   Anyone holding the full file can confirm the ranges by cutting the same byte offsets from it and comparing hashes; the build
+   itself does not do that. GPT accepted the three-range deviation on that basis.
 2. **The Horizons comparison needed the light-time model spelled out** (§3.2). Rev 2 anticipated "documenting any … apparent-time
    corrections"; this is that.
 3. Seam and polar samples were chosen by the data (first two seam crossings; northernmost and southernmost samples).
@@ -106,3 +108,28 @@ and record, two Horizons answers), `phase1/moon-lro-path.test.cjs`, `phase1/moon
 - No real-graphics check yet (Mac browser pane needs Chad to serve a `_review/` copy). No phone, Safari or screen-reader check.
 - Full regression not run.
 - Merge needs Chad's own Approve line after GPT's review.
+
+## 7. Round 2 — GPT's review of `2836c6f` (relayed by Chad) and what changed
+GPT passed the trajectory (all 1,441 shipped vectors against its own DE440 evaluation: worst 0.93 m after rounding; Horizons
+reproduced: worst 0.0000075°; lowest chord 64.177 km; LROC documentation confirms equirectangular, planetocentric, east-positive
+Mean Earth) and held the page for three findings. GPT's Chrome smoke on the Mac reproduced finding 1.
+1. **Focus lost when the globe moves — fixed in `moonglobe.js`.** The readout is now rebuilt only when its kind changes (loading /
+   unavailable / no time / drawn). While a path is drawn, a time change updates the time, altitude and window text in place, and a
+   camera move only shows or hides the "behind the Moon" line (`updateBehind`); the path is not redrawn on a camera move. A second
+   cause showed up in testing: **a real mouse press on the globe moved focus to the page by browser default**, rebuild or not. The
+   globe now prevents that default on `mousedown`; dragging is unaffected (tested). `style.css`: a hidden readout line stays hidden.
+   - Tests (H): focus on "change the time" survives an API/button camera move, a **real mouse drag** (view moved > 2°), and a time
+     change; the readout element is the same node afterwards. **On the reviewed code (`2836c6f`) all four fail; on the fix all pass.**
+     New breaks `rebuild` and `dragfocus` must fail.
+2. **Limb assertion — fixed in the test.** The limb is now the true perspective edge. Pose: view centre on the marker's meridian at
+   the central angle φ with cos φ = r_marker / D (where the marker stands furthest outside the edge). Checks: the camera ray to the
+   marker misses the sphere (closest approach > 100.5 globe units); its angle from the camera–centre line exceeds asin(R / D) by more
+   than 0.3°; the marker colour is drawn at its projected point; the words do not say "behind". The label is not separately
+   asserted (it sits beside the dot and is visible in the screenshot).
+3. **Full-kernel claim — corrected in §5.** The generator has no full-file input; the three-range deviation is accepted by GPT.
+- Also: the landmark section now waits 2 s for the globe to settle before the paired frames (one run caught the first landmark
+  mid-render; re-run clean).
+- **Results:** `moon-lro-path` **68 passed, 0 failed** (twice, once before and once after the `mousedown` change). New breaks:
+  `rebuild` 1 failed, `dragfocus` 1 failed. Against the reviewed `2836c6f` code: 4 failed (the four focus checks). Regressions:
+  moon-globe 67/0, skycraft-ui 77/0. The eight earlier breaks (conversion, window, staleness, hash, clearing) were not rerun: this
+  round does not touch the code they target, and each failed as required on `2836c6f`.
