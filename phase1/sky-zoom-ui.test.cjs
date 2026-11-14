@@ -4,6 +4,10 @@
  * from astronomy-engine in this test (not from the scene file).
  * Run:   node phase1/sky-zoom-ui.test.cjs     (needs `python3 -m http.server 8899 --bind 127.0.0.1` in the repo and /home/claude/spike)
  * Break: BREAK=<name> loads a weakened skyscene.js; the suite must FAIL on every one (names in BREAKS below).
+ * 14 Nov 2026 (SKY-DISTANCE-ZOOM-FIX-PROPOSAL rev 2): the path is driven by ctrl+wheel, pinch and the Zoom buttons; a plain
+ *   wheel is the page's. New: zoom after a drag (both directions, every stop and between) returns to the path; rendered
+ *   evidence (canvas pixels with the SVG overlay hidden, and an independent frustum test incl. the far plane); resize and
+ *   rotation; a lifted finger after a pinch is not a drag; tags only on drawable bodies.
  */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
@@ -45,12 +49,25 @@ const BREAKS = {
   'target-by-s': ["    const v = { u: slerp(a.u, b.u, w), d, t: lerp(a.t, b.t, w) };\n    if (t <= 0 || t >= 1 || earthSafe(v)) return v;", "    const v = { u: slerp(a.u, b.u, t), d, t: lerp(a.t, b.t, t) };\n    return v;"],
   'no-containment': ["    if (t <= 0 || t >= 1 || earthSafe(v)) return v;", "    return v;"],
   'pinch-off': ["      if (H.pts.size === 2 && H.pinch0) {", "      if (false) {"],
+  // 14 Nov 2026 (zoom fix)
+  'free-zoom-old': ["    const STEP = 0.08 * k;\n    st.placing = true; setS(st.s + dir * STEP, 'keep');",
+    "    const STEP = 0.08 * k;\n    if (st.free) { const g = ME.globe(), cam = g.camera(), t = g.controls().target, f = Math.exp(dir * STEP * 4);\n      const off = V.mul([cam.position.x - t.x, cam.position.y - t.y, cam.position.z - t.z], f);\n      st.placing = true; cam.position.set(t.x + off[0], t.y + off[1], t.z + off[2]); g.controls().update(); st.placing = false; return; }\n    st.placing = true; setS(st.s + dir * STEP, 'keep');"],
+  'plain-wheel-zooms': ["if (!e.ctrlKey) return; e.preventDefault();", "e.preventDefault();"],
+  'no-resize-reframe': ["    H.ro.observe($('globe')); H.ro.observe($('zoom-strip'));", ""],
+  'tags-not-frustum': ["const shown = items.filter(it => it.drawable)", "const shown = items"],
+  'pinch-leaves-drag': ["      if (H.pinched || H.pts.size >= 2) {", "      if (H.pts.size >= 2) {"],
+  'buttons-off': ["  $('zoom-out').addEventListener('click', () => step(1, BTN_STEP));", ""],
+  'resize-keeps-sheet': ["    const sheet = $('sheet'); if (sheet && !sheet.classList.contains('collapsed') && getComputedStyle($('sheet-btn')).display !== 'none') { st.saved.sheetWasOpen = true; $('sheet-btn').click(); return; }", ""],
+  'strip-40': null,   // style.css served with the strip's old 40% cap (the explanation then cannot be framed above)
 };
 // sun-400-full-labels also widens the tag model (rev 2.1 §4.3)
 const B = process.env.BREAK;
-if (B) { const [a, b] = BREAKS[B]; if (!JS.includes(a)) throw new Error('break anchor missing: ' + B); JS = JS.replace(a, b);
+if (B && !(B in BREAKS)) throw new Error('unknown break: ' + B);
+if (B && BREAKS[B]) { const [a, b] = BREAKS[B]; if (!JS.includes(a)) throw new Error('break anchor missing: ' + B); JS = JS.replace(a, b);
   if (B === 'sun-400-full-labels') JS = JS.replace('const TAG = { w: 56, h: 18 }', 'const TAG = { w: 150, h: 34 }'); }
 
+const EARTH_PNG = (() => { const P = require('/home/claude/spike/node_modules/pngjs').PNG, im = new P({ width: 64, height: 32 });
+  for (let i = 0; i < 64 * 32; i++) { im.data[4 * i] = 235; im.data[4 * i + 1] = 245; im.data[4 * i + 2] = 255; im.data[4 * i + 3] = 255; } return P.sync.write(im); })();
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 500)}` : ''}`); } };
 const wd = setTimeout(() => { console.log('FAIL  suite exceeded 25 min — failure, not a hang'); process.exit(1); }, 25 * 60e3);
 
@@ -67,14 +84,17 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
 
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-  const run = async ({ time = '2026-11-10T10:00:00Z', viewport = { width: 1280, height: 900 }, scene = SC, pin = null, r1 = R1, hasTouch = false }) => {
+  const run = async ({ time = '2026-11-10T10:00:00Z', viewport = { width: 1280, height: 900 }, scene = SC, pin = null, r1 = R1, hasTouch = false, earth = false }) => {
     const ctx = await browser.newContext({ viewport, reducedMotion: 'reduce', hasTouch });
     const hits = [];
     let js = JS; if (pin) js = js.replace(`const SHA = '${sha(SC)}';`, `const SHA = '${pin}';`);
     await ctx.route('**/unpkg.com/globe.gl**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }));
     await ctx.route('**/fonts.googleapis.com/**', r => r.fulfill({ status: 200, contentType: 'text/css', body: '' }));
-    await ctx.route('**/gibs.earthdata.nasa.gov/**', r => r.abort());
+    // earth: true → a plain near-white Earth image instead of no imagery (a black, untextured Earth is invisible on the dark page,
+    // so the rendered-evidence checks need one); every other check keeps the original no-imagery set-up
+    await ctx.route('**/gibs.earthdata.nasa.gov/**', r => earth ? r.fulfill({ status: 200, contentType: 'image/png', headers: { 'access-control-allow-origin': '*' }, body: EARTH_PNG }) : r.abort());
     await ctx.route(BASE + '/skyscene.js*', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: js }));
+    if (B === 'strip-40') await ctx.route(BASE + '/style.css*', r => r.fulfill({ status: 200, contentType: 'text/css', body: fs.readFileSync(path.join(REPO, 'style.css'), 'utf8').replace('max-height:30%;overflow:auto', 'max-height:40%;overflow:auto') }));
     await ctx.route(HUB + '/**', r => { const p = new URL(r.request().url()).pathname; hits.push(p);
       if (p === '/catalogue/sky/sky-2026-11-R1') return r.fulfill({ status: 200, contentType: 'application/json', body: r1 });
       if (p === '/catalogue/sky/sky-scene-2026-11-R1') return r.fulfill({ status: 200, contentType: 'application/json', body: scene });
@@ -94,6 +114,7 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
   const cardOn = async page => { await page.click('#tgl-sky'); await page.waitForFunction(() => ME.skyState().status === 'ok', null, { timeout: 20000 }); };
   const openZoom = async page => { await page.click('#tgl-zoom');
     await page.waitForFunction(() => { const z = ME.zoomState(); return z.open && z.path || /unavailable|No computed/.test(z.msg); }, null, { timeout: 20000 });
+    await page.evaluate(() => new Promise(r => setTimeout(r, 450)));   // the readings sheet's transition can resize the globe after entry; the view re-frames for it
     await page.evaluate(() => ME.zoomFrame()); };
   const Z = page => page.evaluate(() => { ME.zoomFrame(); return ME.zoomState(); });
   const snap = page => page.evaluate(() => { const g = ME.globe(), cam = g.camera(), c = g.controls(), vis = [];
@@ -236,12 +257,13 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
   }
 
   // ---------- check 16 + 22: wheel sequence and pinch sequence A→B→C→A; near plane by forward depth, no clipping; free orbit
-  for (const kind of ['wheel', 'pinch']) {
+  for (const kind of ['ctrl+wheel', 'pinch', 'buttons']) {
     const { ctx, page } = await run({ viewport: kind === 'pinch' ? { width: 390, height: 844 } : { width: 1280, height: 900 }, hasTouch: kind === 'pinch' });
     await cardOn(page); await openZoom(page);
     const box = await page.evaluate(() => { const r = ME.globe().renderer().domElement.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
     const doStep = async dir => {
-      if (kind === 'wheel') { await page.mouse.move(box.x, box.y); await page.mouse.wheel(0, dir * 100); }
+      if (kind === 'ctrl+wheel') { await page.mouse.move(box.x, box.y); await page.keyboard.down('Control'); await page.mouse.wheel(0, dir * 100); await page.keyboard.up('Control'); }
+      else if (kind === 'buttons') await page.click(dir > 0 ? '#zoom-out' : '#zoom-in');
       else await page.evaluate(({ x, y, dir }) => { const el = ME.globe().renderer().domElement, ev = (t, id, px) => el.dispatchEvent(new PointerEvent(t, { pointerId: id, pointerType: 'touch', clientX: px, clientY: y, bubbles: true }));
         ev('pointerdown', 1, x - 60); ev('pointerdown', 2, x + 60); const d = dir > 0 ? 0.7 : 1.4; ev('pointermove', 1, x - 60 * d); ev('pointermove', 2, x + 60 * d); ev('pointerup', 1, x - 60 * d); ev('pointerup', 2, x + 60 * d); }, { ...box, dir });
       await page.waitForTimeout(30);
@@ -274,6 +296,188 @@ const unitEcefFromThree = p => { const r = Math.hypot(...p); return [p[2] / r, p
     ok('Re-frame returns to the path at stop C', !(await Z(page)).free && (await Z(page)).stop === 'C');
     await page.click('#zoom-back'); await page.waitForTimeout(300);
     ok('check 16: near plane restored to globe.gl\'s 0.05 on exit', await page.evaluate(() => ME.globe().camera().near) === 0.05);
+    await ctx.close();
+  }
+
+  // ---------- 14 Nov 2026 zoom fix (SKY-DISTANCE-ZOOM-FIX-PROPOSAL rev 2)
+  // Independent evidence, not the page's own report: (1) a frustum test from the camera's matrices and the meshes actually in
+  // the scene (near AND far planes); (2) canvas pixels with the SVG overlay hidden, at each tagged body's projected position.
+  const PNG = require('/home/claude/spike/node_modules/pngjs').PNG;
+  const evidence = async page => {
+    const geo = await page.evaluate(() => { ME.zoomFrame(); const g = ME.globe(), cam = g.camera(); cam.updateMatrixWorld();
+      const V3 = cam.position.constructor, el = g.renderer().domElement, r = el.getBoundingClientRect(), out = [];
+      const bodies = [{ k: 'earth', p: [0, 0, 0], r: g.getGlobeRadius() }]; g.scene().traverse(o => { if (o.__skyScene && o.visible) bodies.push({ k: o.__skyScene, p: o.position.toArray(), r: o.scale.x }); });
+      for (const b of bodies) {
+        const v = new V3(...b.p).applyMatrix4(cam.matrixWorldInverse), z = -v.z;          // camera space, looking down -z
+        const inDepth = z + b.r > cam.near && z - b.r < cam.far;
+        const tv = Math.tan(cam.fov * Math.PI / 360), th = tv * cam.aspect, zz = Math.max(z, cam.near);
+        const inSide = Math.abs(v.x) - b.r <= th * zz && Math.abs(v.y) - b.r <= tv * zz;
+        const sp = new V3(...b.p).project(cam), x = (sp.x + 1) / 2 * r.width, y = (1 - sp.y) / 2 * r.height;
+        const rpx = z > 0 ? b.r / z / tv * (r.height / 2) : 0;
+        out.push({ k: b.k, z, far: cam.far, near: cam.near, frustum: inDepth && inSide, x, y, rpx });
+      }
+      const L = ME.zoomState().last; return { bodies: out, tags: L.tags.map(t => t.k), W: r.width, H: r.height, rect: { x: r.left, y: r.top } }; });
+    // pixels: the page as the visitor sees it (HTML bar and strip included) with the SVG overlay hidden, then again with ONE body's
+    // mesh hidden; the body counts as drawn where the two differ inside its projected disc (so a body under the strip, clipped by
+    // a plane or off the canvas counts 0)
+    const grab = async () => { await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+      return PNG.sync.read(await page.screenshot({ clip: { x: geo.rect.x, y: geo.rect.y, width: geo.W, height: geo.H } })); };
+    // hidden by scale, not by .visible (the view sets the Sun's .visible every frame)
+    const hide = (k, v) => page.evaluate(({ k, v }) => { const g = ME.globe(), gm = g.globeMaterial();
+      g.scene().traverse(o => { if (k === 'earth' ? o.isMesh && (Array.isArray(o.material) ? o.material[0] : o.material) === gm : o.__skyScene === k) {
+        if (!v) { o.__s = o.scale.clone(); o.scale.setScalar(1e-9); } else if (o.__s) { o.scale.copy(o.__s); delete o.__s; } } }); }, { k, v });
+    await page.evaluate(() => { document.getElementById('zoom-svg').style.visibility = 'hidden'; });
+    const base = await grab(), sc = base.width / geo.W;
+    for (const b of geo.bodies) { b.pixels = 0; if (!(b.z > 0)) continue;
+      await hide(b.k, false); const off = await grab(); await hide(b.k, true);
+      const rr = Math.max(2.5, Math.min(b.rpx, 40)) * sc, cx = b.x * sc, cy = b.y * sc;
+      for (let y = Math.floor(cy - rr); y <= Math.ceil(cy + rr); y++) for (let x = Math.floor(cx - rr); x <= Math.ceil(cx + rr); x++) {
+        if (x < 0 || y < 0 || x >= base.width || y >= base.height || Math.hypot(x - cx, y - cy) > rr) continue;
+        const i = (base.width * y + x) << 2; if (Math.abs(base.data[i] - off.data[i]) + Math.abs(base.data[i + 1] - off.data[i + 1]) + Math.abs(base.data[i + 2] - off.data[i + 2]) > 12) b.pixels++; } }
+    await page.evaluate(() => { document.getElementById('zoom-svg').style.visibility = ''; });
+    return geo;
+  };
+  // Earth drawn (frustum + pixels) and every tagged body drawable (frustum) and drawn (pixels)
+  // atStop: every tagged body also has pixels. Between stops a tagged body must be drawable (inside the frustum); it may sit under
+  // the stop bar or the strip while the camera travels (proposal rev 2: bodies may move into or out of view between stops)
+  const drawnOk = (g, atStop = true) => { const e = g.bodies.find(b => b.k === 'earth');
+    return e.frustum && e.pixels > 0 && g.tags.every(k => { const b = g.bodies.find(x => x.k === k); return b && b.frustum && (!atStop || b.pixels > 0); }); };
+  const centre = page => page.evaluate(() => { const r = ME.globe().renderer().domElement.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  const drag = async (page, c) => { await page.mouse.move(c.x, c.y); await page.mouse.down(); for (let i = 1; i <= 10; i++) { await page.mouse.move(c.x + i * 12, c.y + i * 4); await page.waitForTimeout(15); } await page.mouse.up(); };
+  const ctrlWheel = async (page, c, dy) => { await page.mouse.move(c.x, c.y); await page.keyboard.down('Control'); await page.mouse.wheel(0, dy); await page.keyboard.up('Control'); await page.waitForTimeout(20); };
+
+  // the stops themselves: rendered evidence (desktop and both phones; strip open and closed)
+  for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }, { width: 360, height: 640 }, { width: 900, height: 700 }]) {
+    const { ctx, page } = await run({ viewport: vp, earth: true });
+    await cardOn(page); await openZoom(page);
+    const bad = [], overNote = [];
+    for (const n of [0, 1, 2]) for (const how of ['closed', 'open']) {
+      await page.evaluate(how => { document.querySelector('.zoom-how').open = how === 'open'; }, how); await page.waitForTimeout(200);   // the strip grows; the view re-frames for it
+      await page.evaluate(n => ME.zoomGo(n), n);
+      const zz = await Z(page); if (!zz.open) { bad.push({ n, how, err: 'view closed' }); continue; }
+      const over = !!zz.path.stripOver; if (how === 'open') overNote.push(`${n}:${over ? 'kept framing (does not fit above the open strip)' : 're-framed above the open strip'}`);
+      const g = await evidence(page), want = n === 0 ? [] : n === 1 ? ['moon'] : ['moon', 'sun'];
+      if (over) { bad.push({ n, how, err: 'the stops were not re-framed above the open explanation (strip capped at 30% of the box)' }); continue; }
+      if (!drawnOk(g) || !want.every(k => g.tags.includes(k))) bad.push({ n, how, tags: g.tags, b: g.bodies.map(b => [b.k, b.frustum, b.pixels]) });
+    }
+    await page.evaluate(() => { document.querySelector('.zoom-how').open = false; });
+    console.log(`  note rendered stops ${vp.width}x${vp.height}, explanation open: ${overNote.join('; ')}`);
+    ok(`rendered stops ${vp.width}x${vp.height}: with "How this is drawn" closed and open (re-framed above it), Earth drawn at every stop (canvas pixels, SVG hidden; frustum incl. far plane); at + Moon / + Sun the expected bodies are tagged, drawable and drawn`, bad.length === 0, bad);
+    await ctx.close();
+  }
+
+  // zoom after a drag: both directions, from each stop and between stops; desktop by ctrl+wheel, phone by pinch and buttons
+  for (const [vp, how] of [[{ width: 1280, height: 900 }, 'ctrl+wheel'], [{ width: 390, height: 844 }, 'pinch'], [{ width: 360, height: 640 }, 'buttons']]) {
+    const { ctx, page } = await run({ viewport: vp, hasTouch: how === 'pinch', earth: true });
+    await cardOn(page); await openZoom(page);
+    const c = await centre(page), bad = [];
+    const zoom = async dir => {
+      if (how === 'ctrl+wheel') return ctrlWheel(page, c, dir * 100);
+      if (how === 'buttons') { await page.click(dir > 0 ? '#zoom-out' : '#zoom-in'); return page.waitForTimeout(20); }
+      await page.evaluate(({ x, y, dir }) => { const el = ME.globe().renderer().domElement, ev = (t, id, px) => el.dispatchEvent(new PointerEvent(t, { pointerId: id, pointerType: 'touch', clientX: px, clientY: y, bubbles: true }));
+        ev('pointerdown', 11, x - 60); ev('pointerdown', 12, x + 60); const d = dir > 0 ? 0.7 : 1.4; ev('pointermove', 11, x - 60 * d); ev('pointermove', 12, x + 60 * d); ev('pointerup', 11, x - 60 * d); ev('pointerup', 12, x + 60 * d); }, { ...c, dir });
+      await page.waitForTimeout(20);
+    };
+    for (const s0 of [0, 0.5, 1, 1.5, 2]) for (const dir of [-1, 1]) {
+      await page.evaluate(s0 => { ME.zoomGo(Math.round(s0)); if (s0 !== Math.round(s0)) { const d = s0 - Math.round(s0); for (let i = 0; i < 25; i++) ME.zoomStep(Math.sign(d), Math.abs(d) / 0.08 / 25); } }, s0);
+      const sHeld = (await Z(page)).s;
+      if (how === 'pinch') await page.evaluate(() => { const g = ME.globe(), c = g.controls(); const cam = g.camera(), t = c.target, v = cam.position.clone().sub(t);   // a one-finger turn of the view, as OrbitControls would apply it
+          v.applyAxisAngle(cam.up, 0.6); cam.position.copy(t).add(v); c.update(); });
+      else await drag(page, c);
+      const z0 = await Z(page); if (!z0.free) { bad.push({ s0, dir, err: 'drag did not make the view free' }); continue; }
+      await zoom(dir);
+      const z1 = await Z(page), g1 = await evidence(page);
+      if (z1.free || !(dir > 0 ? z1.s >= sHeld - 1e-9 : z1.s <= sHeld + 1e-9) || Math.abs(z1.s - sHeld) > 0.25 || !drawnOk(g1, [0, 1, 2].includes(z1.s))) bad.push({ s0, dir, step: 1, sHeld, s: z1.s, free: z1.free, b: g1.bodies.map(b => [b.k, b.frustum, b.pixels]), tags: g1.tags });
+      for (let i = 0; i < (how === 'pinch' ? 80 : 30); i++) await zoom(dir);
+      const z2 = await Z(page), g2 = await evidence(page);
+      if (z2.free || z2.s !== (dir > 0 ? 2 : 0) || !drawnOk(g2)) bad.push({ s0, dir, step: 31, s: z2.s, free: z2.free, b: g2.bodies.map(b => [b.k, b.frustum, b.pixels]), tags: g2.tags });
+    }
+    ok(`zoom after a drag (${how}, ${vp.width}x${vp.height}): from each stop and between stops, the FIRST zoom in either direction returns to the path at the held position ± one step (also outward at an end), 30 more clamp at Earth / + Sun; Earth drawn throughout, tagged bodies drawn (independent frustum incl. far plane + canvas pixels)`, bad.length === 0, bad.slice(0, 4));
+    await ctx.close();
+  }
+
+  // the reproduced failures, on purpose: the old free zoom (break free-zoom-old) must fail the check above; and a body outside
+  // the far plane must lose its tag even when its centre projects on screen
+  {
+    const { ctx, page } = await run({});
+    await cardOn(page); await openZoom(page); await page.evaluate(() => ME.zoomGo(2));
+    const r = await page.evaluate(() => { const cam = ME.globe().camera(), far0 = cam.far, s = ME.zoomState().geo.sun, cp = cam.position, d = Math.hypot(s[0] - cp.x, s[1] - cp.y, s[2] - cp.z);
+      cam.far = d * 0.5; cam.updateProjectionMatrix(); ME.zoomFrame(); const L = ME.zoomState().last, it = L.items.find(i => i.k === 'sun');
+      const out = { inFrame: it.inFrame, tagged: L.tags.some(t => t.k === 'sun'), ring: !!document.querySelector('#zoom-svg .zr-sun') };
+      cam.far = far0; cam.updateProjectionMatrix(); ME.zoomFrame(); return out; });
+    ok('tags only on drawable bodies: a Sun beyond the far plane, its centre still on screen, gets no tag and no ring', r.inFrame && !r.tagged && !r.ring, r);
+    await ctx.close();
+  }
+
+  // plain wheel: not the view's. The path does not move, the event is not prevented, and the page scrolls where it can
+  for (const vp of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+    const { ctx, page } = await run({ viewport: vp });
+    await cardOn(page); await openZoom(page); await page.evaluate(() => ME.zoomGo(1));
+    await page.evaluate(() => { window.__wheelPrevented = []; addEventListener('wheel', e => window.__wheelPrevented.push(e.defaultPrevented), { passive: true }); });
+    const c = await centre(page), s0 = (await Z(page)).s, y0 = await page.evaluate(() => scrollY);
+    const canScroll = await page.evaluate(() => { const e = document.scrollingElement, o = [document.documentElement, document.body].map(x => getComputedStyle(x).overflowY);
+      return e.scrollHeight > e.clientHeight + 1 && !o.includes('hidden'); });   // the Earth page's body is overflow:hidden at these sizes, so the page cannot scroll
+    await page.mouse.move(c.x, c.y); for (let i = 0; i < 5; i++) { await page.mouse.wheel(0, 100); await page.waitForTimeout(40); }
+    const z = await Z(page), y1 = await page.evaluate(() => scrollY), prev = await page.evaluate(() => window.__wheelPrevented);
+    ok(`plain wheel ${vp.width}x${vp.height}: the view's progress is unchanged and the wheel is not prevented${canScroll ? '; the page scrolled' : ' (this page does not scroll at this size)'}`,
+      z.s === s0 && !z.free && prev.length > 0 && prev.every(p => !p) && (!canScroll || y1 > y0), { s0, s: z.s, free: z.free, prev, y0, y1, canScroll });
+    await ctx.close();
+  }
+
+  // a pinch whose first finger lifts first: the finger left on the screen is not a drag (no free orbit, camera on the path)
+  {
+    const { ctx, page } = await run({ viewport: { width: 390, height: 844 }, hasTouch: true });
+    await cardOn(page); await openZoom(page); await page.evaluate(() => ME.zoomGo(1));
+    const c = await centre(page);
+    const r = await page.evaluate(({ x, y }) => { const el = ME.globe().renderer().domElement, ev = (t, id, px, py) => el.dispatchEvent(new PointerEvent(t, { pointerId: id, pointerType: 'touch', isPrimary: id === 21, clientX: px, clientY: py, bubbles: true }));
+      ev('pointerdown', 21, x - 60, y); ev('pointerdown', 22, x + 60, y); ev('pointermove', 21, x - 45, y); ev('pointermove', 22, x + 45, y);
+      ev('pointerup', 21, x - 45, y);                                          // first finger up, second still down
+      const g = ME.globe(), cam = g.camera(), t = g.controls().target, v = cam.position.clone().sub(t); v.applyAxisAngle(cam.up, 0.5); cam.position.copy(t).add(v); g.controls().update();   // the remaining finger turns the view
+      const mid = ME.zoomState(); ev('pointercancel', 22, x + 80, y);         // then the gesture is cancelled
+      const end = ME.zoomState(); return { midFree: mid.free, endFree: end.free, s: end.s }; }, c);
+    ok('pinch, one finger lifted, the other moves then is cancelled: never free orbit, the view stays on the path', !r.midFree && !r.endFree, r);
+    // a fresh one-finger drag afterwards is a drag again
+    await page.evaluate(({ x, y }) => { const el = ME.globe().renderer().domElement; el.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 31, pointerType: 'touch', clientX: x, clientY: y, bubbles: true }));
+      const g = ME.globe(), cam = g.camera(), t = g.controls().target, v = cam.position.clone().sub(t); v.applyAxisAngle(cam.up, 0.5); cam.position.copy(t).add(v); g.controls().update();
+      el.dispatchEvent(new PointerEvent('pointerup', { pointerId: 31, pointerType: 'touch', clientX: x, clientY: y, bubbles: true })); }, c);
+    ok('after the gesture ends, a new one-finger turn is free orbit again', (await Z(page)).free);
+    await ctx.close();
+  }
+
+  // resize and rotation while open: the stops are re-framed for the new box, progress kept, entry view kept; also from free orbit
+  {
+    const { ctx, page } = await run({ viewport: { width: 390, height: 844 }, hasTouch: true, earth: true });
+    await cardOn(page); await openZoom(page);
+    const k0 = await page.evaluate(() => JSON.stringify(ME.zoomState().path.k[0]));
+    const bad = [];
+    for (const [n, vp, free] of [[1, { width: 844, height: 390 }, false], [2, { width: 390, height: 844 }, false], [2, { width: 1280, height: 900 }, true], [1, { width: 360, height: 640 }, false]]) {
+      await page.evaluate(n => ME.zoomGo(n), n);
+      if (free) await page.evaluate(() => { const g = ME.globe(), c = g.controls(), cam = g.camera(), t = c.target, v = cam.position.clone().sub(t); v.applyAxisAngle(cam.up, 0.6); cam.position.copy(t).add(v); c.update(); });
+      await page.setViewportSize(vp); await page.waitForTimeout(700);
+      const z = await Z(page), L = z.last, g = await evidence(page), want = n === 1 ? ['moon'] : ['moon', 'sun'];
+      const clear = L.tags.every(t => !t.forced) && L.items.filter(i => want.includes(i.k) || i.k === 'earth').every(i => i.inFrame);
+      if (!z.open || z.s !== n || z.free || z.path.W !== L.W || z.path.H !== L.H || JSON.stringify(z.path.k[0]) !== k0 || !clear || !drawnOk(g) || !want.every(k => g.tags.includes(k)))
+        bad.push({ n, vp, free, open: z.open, s: z.s, isFree: z.free, path: z.path && [z.path.W, z.path.H], last: [L.W, L.H], k0same: z.path && JSON.stringify(z.path.k[0]) === k0, clear, tags: g.tags });
+    }
+    ok('resize / rotation while open (390x844 → 844x390 → 390x844 → 1280x900 from free orbit → 360x640): framing rebuilt for the new box, same stop, back on the path, entry view (stop A) unchanged, bodies tagged, drawn and clear', bad.length === 0, bad);
+    await page.click('#zoom-a'); await page.click('#zoom-back'); await page.waitForTimeout(300);
+    ok('after resizes, Back to Earth still restores the near plane', await page.evaluate(() => ME.globe().camera().near) === 0.05);
+    await ctx.close();
+  }
+
+  {   // opened on a desktop-width window, then narrowed into the phone layout: the readings sheet is collapsed as on entry, the
+      // view stays open at the same stop; widened again; closing restores the sheet as it was on entry
+    const { ctx, page } = await run({ viewport: { width: 1280, height: 900 }, earth: true });
+    await cardOn(page); await openZoom(page); await page.evaluate(() => ME.zoomGo(2));
+    const sheetBefore = await page.evaluate(() => document.getElementById('sheet').className);
+    await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(900);
+    const z1 = await Z(page), g1 = z1.open ? await evidence(page) : null;
+    await page.setViewportSize({ width: 1280, height: 900 }); await page.waitForTimeout(900);
+    const z2 = await Z(page);
+    await page.click('#zoom-back'); await page.waitForTimeout(400);
+    const sheetAfter = await page.evaluate(() => document.getElementById('sheet').className);
+    ok('desktop → phone width while open: view stays open at + Sun, bodies tagged and drawn; back to desktop still open; exit leaves the sheet as before entry',
+      z1.open && z1.s === 2 && g1 && drawnOk(g1) && ['moon', 'sun'].every(k => g1.tags.includes(k)) && z2.open && z2.s === 2 && sheetAfter === sheetBefore, { z1: [z1.open, z1.s, z1.msg], tags: g1 && g1.tags, z2: [z2.open, z2.s], sheetBefore, sheetAfter });
     await ctx.close();
   }
 
