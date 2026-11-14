@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 06:47 UTC (clock reading at write) — **`SUNFACE_ENABLED=1` set** (06:44:21 UTC); hourly Sun fetch is on
+
+Chad: "Approve: set SUNFACE_ENABLED=1"; Claude filled the form, Chad clicked the deploy button. Read back 06:46:00 UTC: 22 bindings, the variable is `1`, other gates unchanged, live `worker.js` still 0.6.14 `bbf8dc61…0480`. First scheduled fetch expected about 07:07 UTC. To stop: remove the variable (own Approve line). Hub remains ahead of main (branch `sunface-rc`).
+
 ## 14 Nov 06:41 UTC (clock reading at write) — Sun picture: **first manual run ok** (hub 0.6.14; schedule still off)
 
 Chad: "Approve: run /admin/run/sunface once". Run 06:38:13.9–06:38:20.4 UTC, one upstream request.
