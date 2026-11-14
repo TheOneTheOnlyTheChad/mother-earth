@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 14:51 UTC (clock reading at write) — **Sky zoom fix: candidate `sky-zoom-fix-rc` built, branch only** (new thread)
+- GPT reproduced a blank canvas after drag + zoom-in at + Sun (live Chrome); Claude reproduced it on main `49c8c7e` and found a second failure (free zoom-out past the far plane). GPT's proposal rev 2: `docs/concepts/SKY-DISTANCE-ZOOM-FIX-PROPOSAL.md`.
+- Chad: "Go: build sky-zoom-fix-rc on a branch per SKY-DISTANCE-ZOOM-FIX-PROPOSAL rev 2 (plain wheel scrolls the page; resize included; page only; no merge)".
+- Built: zoom always on the bounded path; Zoom in / Zoom out buttons, pinch, ctrl+wheel; plain wheel left to the page; re-framing on resize; tags only on drawable bodies; strip cap 40% → 30% (deviation, for GPT). `sky-zoom-ui` 351/0; 8 new breaks each fail. Packet: `reviews/2026-11-14-sky-zoom-fix-rc.md`.
+- Mac review copy `_review/sky-zoom-fix-rc/` (hash-checked against the branch). Live site unchanged: hub 0.6.14, page `e50a033`.
+- **Next:** GPT's review and smoke test, then Chad's merge line. Not done: real phone, Safari, screen reader, full regression.
+
 ## 14 Nov 11:31 UTC (clock reading at write) — **Globes thread close-out** (START-HERE §9); branches deleted
 
 Chad: "ok branches are deleted, and yes this is def handover time".
