@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 18:39:22 UTC (commit time) — **PAGE RELEASED: LRO's dated path on the Moon globe** (main merge `7dbce14` of `moon-lro-path-rc` @ `d1b3555`; Chad: "Approve: merge moon-lro-path-rc to main (page change: LRO's dated path on the Moon globe)")
+- **REGISTER filed first** on Chad's line "Approve: file the four moon-lro-path REGISTER entries as drafted (NAIF kernels, DE440 ASCII, Horizons extension, Moon-fixed LRO catalogue) on branch moon-lro-path-rc" — branch commit `d1b3555`, filed 18:39 UTC.
+- Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch (apart from STATUS).
+- **Served hashes: nine files exact at 18:41:08 UTC** (moon.html `2643c777`, moonglobe.js `beeb851d`, craft.js `ae43ec78`, style.css `69aabbc6`, sources.html `6852b3f2`, index.html `e7be06f6`, sun.html `480a6acf`, timeline.html `19cb96c6`, catalogue `d62fb271`).
+- **Live check (pane, 18:41:25 UTC):** overlay off by default; on → sample 720, window 600–840, 241 points, readout as designed ("behind the Moon" from the opening near-side view, as expected for 12:00).
+- **Rollback:** revert `7dbce14` (own Approve line). Earlier rollbacks unchanged.
+- **Open:** real phone, Safari, screen reader (deferred); full regression not run; branch `moon-lro-path-rc` is Chad's to delete.
+
 ## 14 Nov 18:38 UTC (clock reading) — **GPT passes moon-lro-path-rc round 2** (`b9c7e1d`; relayed by Chad)
 - GPT repeated the round-1 drag in Chrome on the Mac: the Moon turned and "change the time" kept focus; Enter moved focus to the slider; Right Arrow moved both the globe and the drawing to 12:01 UTC. Limb test and kernel documentation pass. Phone deferred.
 - **Next, each on Chad's own line:** (1) file the four REGISTER entries on the branch (draft `reviews/2026-11-14-moon-lro-path-register-draft.md`); (2) merge `moon-lro-path-rc` to main (page change). Rollback after merge: revert the merge commit.
