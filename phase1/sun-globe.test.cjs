@@ -139,6 +139,10 @@ const PLAINS = [[38, 43, 51], [58, 64, 74]], isPlain = c => PLAINS.some(p => nea
     ok('D never "observed at", "now" or "live"', !/observed at|\bnow\b|\blive\b/i.test(t) && !/observed at/i.test(all), t);
     ok('D status line', (await T('#sg-state')(o)) === 'The Sun · drag to turn, or use the buttons');
     ok('D the page explains the plain side, the blank edge, the three-hour rule and the scale', /outside this image’s view/.test(all) && /beyond about 76°/.test(all) && /at most three hours/.test(all) && /sizes are not comparable/.test(all) && /east is to the left/.test(all));
+    ok('D credit line on the page as SDO asks', /Courtesy of NASA\/SDO and the AIA, EVE, and HMI science teams/.test(await o.p.textContent('#craft-sources')));
+    { const q = await o.ctx.newPage(); await q.goto(BASE + '/sources.html', { waitUntil: 'domcontentloaded' });
+      const sec = await q.evaluate(() => { const h = document.getElementById('sunglobe'); if (!h) return ''; let s = '', n = h.nextElementSibling; while (n && n.tagName !== 'H2') { s += n.textContent + ' '; n = n.nextElementSibling; } return s; });
+      ok('D Sources: source file, hub-first, three times, not-observed statement, three-hour rule, changes, credit', /latest_1024_HMIIC\.jpg/.test(sec) && /never SDO/.test(sec) && /When the Sun was observed is not stated by the file and is not shown/.test(sec) && /at most three hours/.test(sec) && /are not drawn/.test(sec) && /Courtesy of NASA\/SDO and the AIA, EVE, and HMI science teams/.test(sec) && /never published again under a newer time/.test(sec), sec.slice(0, 200)); await q.close(); }
     ok('D no request went to SDO; the picture came from the hub', !o.reqs.some(u => /sdo\.gsfc\.nasa\.gov/.test(u)) && o.reqs.some(u => /workers\.dev\/snapshot\/sunface\/A\/sun\.jpg/.test(u)), o.reqs.filter(u => /nasa|workers/.test(u)));
     await o.ctx.close(); }
 

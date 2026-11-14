@@ -193,6 +193,14 @@
   <p><b>Scale.</b> The Earth, Moon and Sun are each drawn to fill the view. Sizes are not comparable between pages.</p>
   <p><b>Credit.</b> NASA's Scientific Visualization Studio. No endorsement by NASA is implied.</p>
 
+  <h2 id="sunglobe">Sun globe — one picture of the Earth-facing side (observed by NASA; fetched hourly by our hub)</h2>
+  <p><b>What it is.</b> On <a href="sun.html">the Sun page</a>, a globe you can turn, carrying one picture of the Sun in visible light. The picture shows only the side that faces Earth; the rest of the globe is drawn plain, with stripes, and reads “outside this image’s view”. It is a looking view: the spacecraft drawing on the same page is separate and at its own scale.</p>
+  <p><b>Source.</b> NASA’s Solar Dynamics Observatory (SDO), Helioseismic and Magnetic Imager, continuum intensity, colourised by SDO: the 1024-pixel “latest” browse image, <code>latest_1024_HMIIC.jpg</code>, from <a href="https://sdo.gsfc.nasa.gov/data/" target="_blank" rel="noopener">sdo.gsfc.nasa.gov</a>. SDO says its browse images are updated about every 15 minutes.</p>
+  <p><b>How it reaches you.</b> Our hub fetches that one file once an hour and keeps the bytes unchanged. Your browser reads the hub, never SDO. A picture the hub has published once is never published again under a newer time.</p>
+  <p><b>Times.</b> Three times are kept apart. “File updated” is the time SDO’s server gave for the file; it is what this page shows and what the age limit is counted from. “Retrieved” is when our hub fetched it. <b>When the Sun was observed is not stated by the file and is not shown.</b> A picture is shown for at most three hours after its file was updated; after that the globe says “No recent picture”, also in a tab left open.</p>
+  <p><b>Our changes.</b> The flat picture is wrapped on a sphere from the disc’s centre and radius, measured in the picture itself, and the tilt of the Sun’s axis toward Earth on that date (calculated; Meeus, <i>Astronomical Algorithms</i>). The outermost edge of the disc, the black sky around it and SDO’s printed caption are not drawn. On 14 Nov 2026 we checked the placement once against the sunspot region positions in NOAA SWPC’s Solar Region Summary for that day.</p>
+  <p><b>Credit.</b> Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams. No endorsement by NASA is implied.</p>
+
   <h2 id="search">Search — what it covers and what it cannot</h2>
   <p>The Explore panel on World View searches <b>only the records your browser has already loaded</b> from each layer's latest published snapshot. It issues no request of any kind: no geocoder, no place-name dataset, no country boundaries, no history. It is not a search of the world, and not a search of everything a source holds.</p>
   <table>
