@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 11:23 UTC (clock reading at write) — **Sun globe RELEASED** (merge `e50a033`); **main = live hub again** (0.6.14)
+
+GPT (relayed by Chad): round 2 passes at `ea23f75`; expiry hold cleared; REGISTER rev 2 ready for the retention decision. Chad: "Option A"; "Approve: file the REGISTER entry for the NASA SDO HMI continuum latest image"; "Approve: push sunglobe-rc to main (page change: Sun globe on the Sun page; hub 0.6.14 source reaches main)".
+
+- REGISTER entry filed 10:41 UTC on the branch (`0147670`), retention deviation recorded as accepted (older picture files stay in storage; only two are served).
+- Full regression on `0147670`: 10:41:24–11:16:54 UTC, 60 files run (4 manual skipped), 60 pass; `sun-globe` 103, `sunface-hub` 171.
+- No-ff merge `e50a033`, pushed 11:20:19 UTC. main's `phase1/worker.js` = `bbf8dc61…0480` = the live hub. **Served files exact at 11:22:02 UTC, nine checked:** `sun.html` `3f08af29…b3f3`, `sunglobe.js` `b25b6c7f…79e2` (new), `sources.html` `7e55b143…c2fb`, `style.css` `96e7cdbf…e40b`, `index.html` `f1fd18ba…b998`, `moon.html` `38c32cb1…793d`, `timeline.html` `4d9b7a45…3b3e` (css link only on those three), `moonglobe.js` and `craft.js` unchanged.
+- **Live read 11:22:09 UTC** (public site, pane tab visible, 588 px): globe up with the hub's picture `20261114T110005Z-59360d0fea26f229`; "File updated at 14 Nov 2026, 11:00 UTC (21 min ago). Retrieved by our hub at 14 Nov 2026, 11:08 UTC. The file does not state when the Sun was observed."; disc fit R 481.0 px, residual 0.25 px; B0 +2.95°; West ×2 → "3°N 30°W · in this picture"; Far side → "outside this image's view"; zoom works; ambient light only; two hub requests (pointer, image) and **none to SDO**; Parker drawing loaded; no sideways overflow.
+- Hub runs since the schedule went on (07:07–11:07 UTC): a new picture each hour, no failed or rejected attempt seen at the reads made.
+- Not checked: real phone, Safari, screen reader, phone performance. North-up rests on one frame. SDO's instrument team not notified.
+- Packets: `reviews/2026-11-14-sunface-rc.md`, `-r3.md`, `-r4.md`, `-sunface-smoke.md`, `-sunglobe-rc.md`, `-sunglobe-rc-r2.md`, `-sunglobe-register-draft.md`. Facts: START-HERE §4x.
+- **Rollback, each its own Approve line, independent:** page = revert `e50a033` (keep the hub); schedule = remove `SUNFACE_ENABLED`; hub = 0.6.12 `c1addd19…0106`.
+
 ## 14 Nov 07:13 UTC (clock reading at write) — Sun picture: **first scheduled run ok** (07:07 UTC)
 
 D1 row 9946 `ok`, 1 record, 203,010 B: image `20261114T070005Z-4bc25d7a146de6fd` (file updated 07:00:05Z, retrieved 07:08:11.200Z, `observed_at` null). The manual run's image `20261114T063005Z-66f213bcb914748e` is now `previous`, times unchanged; no failed attempt. Marker → image → pointer order held. Worker CPU per-minute maximum 63.6 ms for the 07:07 minute (the whole hourly job), 0 errors. Details: `reviews/2026-11-14-sunface-smoke.md` §9 on `sunface-rc`. Next on this feature: the Sun globe page.
