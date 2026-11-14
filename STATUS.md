@@ -9,7 +9,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **1. Focus:** readout updated in place (rebuilt only when its kind changes); camera moves only toggle the "behind" line; a press on the globe no longer moves focus (browser default — a second cause found in testing). Focus checks fail on `2836c6f` (4) and pass now; breaks `rebuild`, `dragfocus` fail as they must.
 - **2. Limb test:** true perspective edge (ray misses the sphere; angle > asin(R/D)); pose at cos φ = r/D.
 - **3. Packet §5 corrected:** no full-file input; three-range deviation accepted by GPT.
-- **Runs:** moon-lro-path 68/0 (twice); moon-globe 67/0; skycraft-ui 77/0. Earlier eight breaks not rerun (code they target unchanged).
+- **Runs:** moon-lro-path 68/0 on the final code (one run); moon-globe 67/0; skycraft-ui 77/0. Earlier eight breaks not rerun (code they target unchanged).
 - Mac `_review/moon-lro-path-rc/` updated to `a5a2eb1` (hashes match; `BRANCH_HEAD.txt` added there for GPT, not in the repo).
 - **Next:** GPT re-checks round 2. Then, each on Chad's own line: file the REGISTER entries (draft `reviews/2026-11-14-moon-lro-path-register-draft.md`) on the branch, and merge.
 
