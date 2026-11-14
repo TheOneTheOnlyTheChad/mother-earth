@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
-## 14 Nov 05:47 UTC (clock reading at write) — **hub 0.6.13 DEPLOYED** (content only, 05:44:54 UTC); Sun probe passed; **hub is ahead of main**
+## 14 Nov 05:46 UTC (clock reading at write) — **hub 0.6.13 DEPLOYED** (content only, 05:44:54 UTC); Sun probe passed; **hub is ahead of main**
 
 Chad: "Approve: deploy hub 0.6.13 from sunface-rc (content only, SUNFACE_ENABLED unset) and run /admin/probe/sunface once". The same message relayed GPT's hold on `4dd44b7` for two fixes; both were made first (`1a4888c`: Last-Modified must be a real calendar date and never later than retrieval; bytes published before are never republished) and that commit was deployed. **GPT has not reviewed `1a4888c`.**
 
