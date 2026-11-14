@@ -570,7 +570,7 @@ html.locked,html.locked body{overflow:hidden}
 .zoom-bar button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .zoom-bar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .zoom-back{background:var(--accent)!important;color:#070a0f!important}
-.zoom-strip{position:absolute;left:8px;right:8px;bottom:8px;pointer-events:auto;background:rgba(7,10,15,.94);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;max-height:40%;overflow:auto}
+.zoom-strip{position:absolute;left:8px;right:8px;bottom:8px;pointer-events:auto;background:rgba(7,10,15,.94);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;max-height:30%;overflow:auto}
 .zoom-scale{font-weight:600}
 .zoom-dist{display:flex;flex-wrap:wrap;gap:2px 14px}
 .zoom-when{color:var(--dim)}

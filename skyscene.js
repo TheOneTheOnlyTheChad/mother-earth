@@ -9,8 +9,15 @@
  *   calculated direction, resized so its angular size from Earth's centre equals the real Sun's. Labels show actual distances.
  * Layers (§5, Z4a): every globe layer group (and the day/night mesh) is hidden in the view and restored exactly on exit.
  * Camera (§2, §4.3, §4.4): one continuous pull-back A → B → C along a path that swings between each stop's framing; free
- *   orbit allowed (then wheel/pinch zoom straight); Re-frame / stop buttons return to the path. Near plane by forward
- *   camera-space depth; far plane untouched. Everything saved on entry is restored on exit.
+ *   orbit allowed for looking around; Re-frame / stop buttons return to the path. Near plane by forward camera-space depth;
+ *   far plane untouched. Everything saved on entry is restored on exit.
+ * Zoom (SKY-DISTANCE-ZOOM-FIX-PROPOSAL rev 2, GPT; Chad's go 14 Nov 2026): every zoom input moves along the bounded path,
+ *   clamped at Earth and at + Sun. After a drag (free orbit) the FIRST zoom input returns to the guided position held when
+ *   the drag began, applies its increment and clamps — free zoom toward an empty orbit target went blank, and free zoom-out
+ *   passed the far plane (meshes clipped under their tags). Inputs: Zoom in / Zoom out buttons, touch pinch, ctrl+wheel
+ *   (trackpad pinch in Chrome/Firefox), Safari gesture events. A plain wheel is left to the page (Moon globe convention).
+ *   Resize: when the globe box changes size the stops are re-framed for it, keeping the entry view and the progress. Tags,
+ *   rings and lines are drawn only for bodies whose meshes are inside the camera frustum (near and far planes included).
  * Directions come from build_scene.py (IAU 2006 precession + GMST; no nutation; polar motion 0; UT1 = UTC). Not observed.
  */
 (() => {
@@ -136,14 +143,17 @@
   }
 
   // ---------- path: s = 0 (entry view) → 1 (stop B) → 2 (stop C)
-  function buildPath() {
+  function buildPath(keep0) {
     const g = ME.globe(), cam = g.camera(), el = $('globe'), W = el.clientWidth, H = el.clientHeight;
     const pt = $('zoom-bar').offsetHeight + 8, pb = $('zoom-strip').offsetHeight + 8;
     const b = st.meshes.geo, E = b.earth, M = b.moon, S = b.sun;
     const fB = frameFor([E, M], W, H, pt, pb), fC = frameFor([E, M, S], W, H, pt, pb);
-    const p0 = [cam.position.x, cam.position.y, cam.position.z], t0 = g.controls().target, tg0 = [t0.x, t0.y, t0.z];
-    const d0 = V.len(V.sub(p0, tg0)), u0 = V.norm(V.sub(p0, tg0));
-    st.path = { W, H, pt, pb, R: E.r, k: [{ u: u0, d: d0, t: tg0 }, fB && { u: fB.u, d: fB.d, t: fB.tgt }, fC && { u: fC.u, d: fC.d, t: fC.tgt }] };
+    // stop A is the entry view: taken from the camera on entry only, then kept (a rebuild for a resize or a rollover would
+    // otherwise make wherever the camera happens to be the new stop A)
+    let k0 = keep0;
+    if (!k0) { const p0 = [cam.position.x, cam.position.y, cam.position.z], t0 = g.controls().target, tg0 = [t0.x, t0.y, t0.z];
+      k0 = { u: V.norm(V.sub(p0, tg0)), d: V.len(V.sub(p0, tg0)), t: tg0 }; }
+    st.path = { W, H, pt, pb, R: E.r, k: [k0, fB && { u: fB.u, d: fB.d, t: fB.tgt }, fC && { u: fC.u, d: fC.d, t: fC.tgt }] };
     return !!(fB && fC);
   }
   // Between stops the camera distance grows geometrically with s, but the orbit target and the swing follow the DISTANCE
@@ -270,41 +280,71 @@
     const back = $('tgl-zoom'); if (back) back.focus();
   }
 
-  // ---------- input: wheel / pinch drive the path; rotation makes the view free (then zoom is straight)
+  // ---------- input: buttons, pinch and ctrl+wheel move along the path; a plain wheel is the page's; rotation makes the view
+  // free (the next zoom input returns to the path)
   const H = {};
   function attach() {
     const el = ME.globe().renderer().domElement, c = ME.globe().controls();
-    H.wheel = e => { e.preventDefault(); step(e.deltaY > 0 ? 1 : -1, Math.min(1, Math.abs(e.deltaY) / 100)); };
-    H.pts = new Map(); H.pinch0 = null;
-    H.down = e => { H.pts.set(e.pointerId, [e.clientX, e.clientY]); if (H.pts.size === 2) H.pinch0 = dist2(); };
+    // plain wheel: not handled and not prevented, so the page scrolls where it can (OrbitControls ignores it: zoom is off)
+    H.wheel = e => { if (!e.ctrlKey) return; e.preventDefault(); step(e.deltaY > 0 ? 1 : -1, Math.min(1, Math.abs(e.deltaY) / 100)); };
+    // Safari's trackpad pinch arrives as gesture events (scale relative to the gesture's start), not as ctrl+wheel
+    H.gs = e => { e.preventDefault(); H.gscale = 1; };
+    H.gc = e => { e.preventDefault(); const r = e.scale / (H.gscale || 1); if (Math.abs(Math.log(r)) > 0.02) { step(r < 1 ? 1 : -1, Math.min(1, Math.abs(Math.log(r)) * 2)); H.gscale = e.scale; } };
+    H.pts = new Map(); H.pinch0 = null; H.pinched = false;
+    H.down = e => { H.pts.set(e.pointerId, [e.clientX, e.clientY]); if (H.pts.size === 2) { H.pinch0 = dist2(); H.pinched = true; } };
     H.move = e => { if (!H.pts.has(e.pointerId)) return; H.pts.set(e.pointerId, [e.clientX, e.clientY]);
       if (H.pts.size === 2 && H.pinch0) { const d = dist2(), r = d / H.pinch0; if (Math.abs(Math.log(r)) > 0.02) { step(r < 1 ? 1 : -1, Math.min(1, Math.abs(Math.log(r)) * 2)); H.pinch0 = d; } } };
-    H.up = e => { H.pts.delete(e.pointerId); if (H.pts.size < 2) H.pinch0 = null; };
+    // a finger lifted or cancelled: the pinch ends; until every finger is up, the one left is not a drag (no free orbit)
+    H.up = e => { H.pts.delete(e.pointerId); if (H.pts.size < 2) H.pinch0 = null; if (!H.pts.size) H.pinched = false; };
     H.change = () => { if (st.target) c.target.set(st.target[0], st.target[1], st.target[2]);
-      if (st.placing) return; if (H.pts.size === 2) return; if (!st.free && moved()) { st.free = true; announce(); } };
+      if (st.placing) return;
+      if (H.pinched || H.pts.size >= 2) { if (!st.free && moved()) { st.placing = true; place(at(st.s)); st.placing = false; } return; }
+      if (!st.free && moved()) { st.free = true; announce(); } };
     H.key = e => { if (e.key === 'Escape' && st.open) { e.preventDefault(); exit(); } };
     el.addEventListener('wheel', H.wheel, { passive: false });
+    el.addEventListener('gesturestart', H.gs); el.addEventListener('gesturechange', H.gc);
     el.addEventListener('pointerdown', H.down); el.addEventListener('pointermove', H.move);
     el.addEventListener('pointerup', H.up); el.addEventListener('pointercancel', H.up);
     c.addEventListener('change', H.change); document.addEventListener('keydown', H.key);
+    H.ro = new ResizeObserver(() => { if (H.rq) return; H.rq = requestAnimationFrame(() => { H.rq = 0; resized(); }); });
+    H.ro.observe($('globe')); H.ro.observe($('zoom-strip'));   // the strip grows when "How this is drawn" is opened
   }
   function detach() {
     const el = ME.globe().renderer().domElement, c = ME.globe().controls();
     el.removeEventListener('wheel', H.wheel); el.removeEventListener('pointerdown', H.down); el.removeEventListener('pointermove', H.move);
+    el.removeEventListener('gesturestart', H.gs); el.removeEventListener('gesturechange', H.gc);
     el.removeEventListener('pointerup', H.up); el.removeEventListener('pointercancel', H.up);
     c.removeEventListener('change', H.change); document.removeEventListener('keydown', H.key);
+    if (H.ro) { H.ro.disconnect(); H.ro = null; } if (H.rq) { cancelAnimationFrame(H.rq); H.rq = 0; }
+    H.pts = new Map(); H.pinch0 = null; H.pinched = false;
+  }
+  // the globe box or the strip changed size (window resize, phone rotation, the readings sheet, "How this is drawn"): re-frame the stops for the new box and put
+  // the camera back on the path at the same progress. A box too small to frame → the existing unavailable state.
+  function resized() {
+    if (!st.open || !st.path || !st.rows) return;
+    // narrowed into the phone layout while open: collapse the readings sheet as entry does (it is reopened on exit, as it was
+    // open when the view collapsed it); the globe box grows after the sheet's transition and this runs again
+    const sheet = $('sheet'); if (sheet && !sheet.classList.contains('collapsed') && getComputedStyle($('sheet-btn')).display !== 'none') { st.saved.sheetWasOpen = true; $('sheet-btn').click(); return; }
+    const el = $('globe'), P = st.path, s = st.s, k0 = P.k[0], scale = $('zoom-scale').textContent;
+    $('zoom-scale').textContent = TXT.C; writeStrip(true);   // measure against the strip at its largest, as on entry
+    const same = el.clientWidth === P.W && el.clientHeight === P.H && $('zoom-strip').offsetHeight + 8 === P.pb;
+    const boxSame = el.clientWidth === P.W && el.clientHeight === P.H, ok = same || buildPath(k0);
+    $('zoom-scale').textContent = scale; writeStrip();
+    if (same) return;
+    // the strip alone grew (the explanation opened) and the stops no longer fit above it: keep the framing the visitor has
+    // (the strip scrolls, at most 40% of the box); closing the explanation re-frames again. A box too small → unavailable.
+    if (!ok && boxSame) { st.path = P; st.path.stripOver = true; return; }
+    if (!ok) { exit(); return say('Zoom-out view unavailable — this screen is too small to frame the scene. Nothing is drawn.', true); }
+    st.placing = true; setS(s, 'keep'); st.placing = false; announce();
   }
   const dist2 = () => { const [a, b] = [...H.pts.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); };
   function moved() { const v = at(st.s), cam = ME.globe().camera(), p = V.add(v.t, V.mul(v.u, v.d));
     return Math.hypot(cam.position.x - p[0], cam.position.y - p[1], cam.position.z - p[2]) > 1e-6 * v.d + 1e-3; }
   function step(dir, k) {
     if (!st.open || !st.path) return;
+    // st.s is not changed by free orbit, so it is the guided position held when the drag began: return there, apply the
+    // increment and clamp, in this same input (also when the increment points past the end: then it is a plain return)
     const STEP = 0.08 * k;
-    if (st.free) {                                  // free orbit: zoom straight along the current view
-      const g = ME.globe(), cam = g.camera(), t = g.controls().target, f = Math.exp(dir * STEP * 4);
-      const off = V.mul([cam.position.x - t.x, cam.position.y - t.y, cam.position.z - t.z], f);
-      st.placing = true; cam.position.set(t.x + off[0], t.y + off[1], t.z + off[2]); g.controls().update(); st.placing = false; return;
-    }
     st.placing = true; setS(st.s + dir * STEP, 'keep'); st.placing = false; announce();
   }
   function goStop(n) { if (!st.open || !st.path) return; st.placing = true; setS(n); st.placing = false; }
@@ -353,6 +393,14 @@
     if (Math.abs(near - cam.near) > 1e-9) { cam.near = near; cam.updateProjectionMatrix(); }
     return { near, minForwardDepth: m };
   }
+  // a body's mesh can be drawn: some of its sphere lies inside the camera frustum, near and far planes included
+  function drawable(b, cam) {
+    cam.updateMatrixWorld(); const e = cam.matrixWorldInverse.elements, p = b.pos;
+    const x = e[0] * p[0] + e[4] * p[1] + e[8] * p[2] + e[12], y = e[1] * p[0] + e[5] * p[1] + e[9] * p[2] + e[13], z = -(e[2] * p[0] + e[6] * p[1] + e[10] * p[2] + e[14]);
+    if (z + b.r <= cam.near || z - b.r >= cam.far) return false;
+    const tv = Math.tan(cam.fov * Math.PI / 360), th = tv * cam.aspect, zz = Math.max(z, cam.near);
+    return Math.abs(x) - b.r <= th * zz && Math.abs(y) - b.r <= tv * zz;
+  }
   function overlaps(a, b) { return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h; }
   // tags: right, left, above, below of the ring — first placement overlapping no other tag or ring and inside the canvas
   function placeTags(items, W, Hh) {
@@ -377,20 +425,20 @@
     const items = [['earth', 'Earth'], ['moon', 'Moon']].concat(st.sunShown ? [['sun', 'Sun']] : []).map(([k, name]) => {
       const b = geo[k], s = project(b.pos), dist = V.len(V.sub(b.pos, cp));
       const rpx = b.r / dist / Math.tan(cam.fov * Math.PI / 360) * (Hh / 2);
-      return { k, name, x: s.x, y: s.y, rpx, dist, inFrame: s.x >= 0 && s.x <= W && s.y >= 0 && s.y <= Hh };
+      return { k, name, x: s.x, y: s.y, rpx, dist, inFrame: s.x >= 0 && s.x <= W && s.y >= 0 && s.y <= Hh, drawable: drawable(b, cam) };
     });
     // occlusion: is the line of sight to each body's centre blocked by another (nearer) body?
     for (const it of items) { it.occludedBy = null;
       for (const o of items) { if (o === it) continue; const b = geo[o.k], dir = V.norm(V.sub(geo[it.k].pos, cp)), w = V.sub(b.pos, cp), t = V.dot(w, dir);
         if (t > 0 && t < it.dist && V.len(V.sub(w, V.mul(dir, t))) < b.r) it.occludedBy = o.k; } }
-    const { tags, rings } = placeTags(items, W, Hh);
+    const shown = items.filter(it => it.drawable), { tags, rings } = placeTags(shown, W, Hh);
     const c0 = items[0];
     let svg = '';
-    for (const it of items.slice(1)) {
+    for (const it of c0.drawable ? shown.filter(i => i !== c0) : []) {
       svg += `<line class="zl" x1="${c0.x.toFixed(1)}" y1="${c0.y.toFixed(1)}" x2="${it.x.toFixed(1)}" y2="${it.y.toFixed(1)}"/>`;
       if (it.k === 'sun') { const dx = it.x - c0.x, dy = it.y - c0.y, L = Math.hypot(dx, dy) || 1; svg += `<line class="zl zd" x1="${it.x.toFixed(1)}" y1="${it.y.toFixed(1)}" x2="${(it.x + dx / L * 2000).toFixed(1)}" y2="${(it.y + dy / L * 2000).toFixed(1)}"/>`; }
     }
-    for (const it of items) if (it.k !== 'earth' || st.s >= 0.5 || st.free) svg += `<circle class="zr zr-${it.k}" cx="${it.x.toFixed(1)}" cy="${it.y.toFixed(1)}" r="${Math.max(6, it.rpx + 4).toFixed(1)}"/>`;
+    for (const it of shown) if (it.k !== 'earth' || st.s >= 0.5 || st.free) svg += `<circle class="zr zr-${it.k}" cx="${it.x.toFixed(1)}" cy="${it.y.toFixed(1)}" r="${Math.max(6, it.rpx + 4).toFixed(1)}"/>`;
     for (const t of tags) { const it = items.find(i => i.k === t.k); svg += `<text class="zt" x="${(t.x + 3).toFixed(1)}" y="${(t.y + 13).toFixed(1)}">${it.name}</text>`; }
     $('zoom-svg').innerHTML = svg;
     const strip = $('zoom-strip').getBoundingClientRect(), gr = el.getBoundingClientRect();
@@ -436,7 +484,7 @@
     st.date = d; st.rows = rows;
     if (!rows) { st.meshes.moon.visible = st.meshes.sun.visible = false; cancelAnimationFrame(st.raf); st.raf = 0; $('zoom-svg').innerHTML = '';
       $('zoom-dist').innerHTML = ''; $('zoom-when').textContent = `No computed position for today (${nice(d)}).`; $('zoom-text').innerHTML = `<p>No computed position for today (${esc(nice(d))}).</p>`; links(); return; }
-    st.meshes.moon.visible = true; st.meshes.geo = bodiesFor(rows); positionMeshes(); $('zoom-scale').textContent = TXT.C; writeStrip(true); buildPath(); st.placing = true; setS(st.s); st.placing = false;
+    st.meshes.moon.visible = true; st.meshes.geo = bodiesFor(rows); positionMeshes(); $('zoom-scale').textContent = TXT.C; writeStrip(true); buildPath(st.path && st.path.k[0]); st.placing = true; setS(st.s); st.placing = false;
     writeText(); writeStrip(); if (!st.raf) loop();
   }
 
@@ -447,6 +495,9 @@
   $('zoom-b').addEventListener('click', () => goStop(1));
   $('zoom-c').addEventListener('click', () => goStop(2));
   $('zoom-reframe').addEventListener('click', () => goStop(Math.round(st.s)));
+  const BTN_STEP = 2.5;   // one press = 0.2 of a stop
+  $('zoom-in').addEventListener('click', () => step(-1, BTN_STEP));
+  $('zoom-out').addEventListener('click', () => step(1, BTN_STEP));
   for (const b of ['moon', 'sun']) { const el = $(EXPLORE[b]); if (el) el.addEventListener('click', ev => leave(ev, b)); }
   window.addEventListener('pageshow', () => { comeBack(); });   // first load of a history entry, or a page restored from the back/forward cache
   setInterval(rollover, ME.REFRESH_MS);
