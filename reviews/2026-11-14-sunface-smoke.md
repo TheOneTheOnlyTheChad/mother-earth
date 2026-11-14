@@ -91,3 +91,10 @@ Production CPU and memory of a full run (the probe does not store); that SDO see
 - Not verified: SDO's receipt of the User-Agent.
 
 Next line: `Approve: set SUNFACE_ENABLED=1` (Chad clicks the final deploy button). The scheduled job would then run every hour with the hourly trigger.
+
+## 8. Schedule on (Chad: "Approve: set SUNFACE_ENABLED=1"; he clicked "Add 1 variable and deploy")
+
+- Claude filled the form (Production, key `SUNFACE_ENABLED`, value `1`, not a secret); Chad clicked. Cloudflare's newest deployment: created **2026-11-14T06:44:21.386Z**, source `dash`.
+- Read back 06:46:00 UTC: 22 bindings (was 21); `SUNFACE_ENABLED` = `1`, plain text; other gates unchanged (DRIFTERS 1, DUSTRGB 1, HISTORY 1, ORBITAL 1, PLASTIC 1, SATELLITES 0, SKYCRAFT 1); live `worker.js` still `bbf8dc61…0480`, 364,554 B.
+- First scheduled Sun fetch expected with the next hourly run, about 07:07 UTC.
+- To stop the schedule: remove `SUNFACE_ENABLED` (own Approve line). Stored pictures stay.
