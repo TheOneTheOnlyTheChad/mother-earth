@@ -209,6 +209,8 @@ const PLAINS = [[38, 43, 51], [58, 64, 74]], isPlain = c => PLAINS.some(p => nea
     const refresh = async m => { o.hub.meta = m; await o.p.evaluate(() => SunGlobe.refresh()); await o.p.waitForTimeout(1500); return o.p.evaluate(() => SunGlobe.shown() && SunGlobe.shown().id); };
     ok('F a newer picture whose file is missing (404) does not displace the valid one', (await refresh(n => meta(n, img('GONE', SEP + 30 * 60000), A))) === 'A');
     ok('F a newer picture that cannot be placed (no disc) does not displace the valid one', (await refresh(n => meta(n, img('BAD', SEP + 30 * 60000), A))) === 'A');
+    ok('F …also when the pointer offers no previous picture to fall back on (missing file)', (await refresh(n => meta(n, img('GONE', SEP + 30 * 60000), null))) === 'A');
+    ok('F …also when the pointer offers no previous picture to fall back on (no disc)', (await refresh(n => meta(n, img('BAD', SEP + 30 * 60000), null))) === 'A');
     ok('F …and the words still describe the picture on screen', /^File updated at 8 Sep 2026, 11:00 UTC/.test(await T('#sg-times')(o)), await T('#sg-times')(o));
     o.hub.metaStatus = 503; ok('F the hub failing leaves the valid picture up', (await refresh(n => meta(n, null))) === 'A'); o.hub.metaStatus = 200;
     ok('F a pointer with no picture leaves the valid picture up until its own limit', (await refresh(n => meta(n, null))) === 'A');
