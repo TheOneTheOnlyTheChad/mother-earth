@@ -74,3 +74,19 @@ Production CPU and memory of a full run (the probe does not store); that SDO see
   unchanged; `/snapshot/sunface/meta` 200 with `image: null`, `last_attempt: null`; the probe without a key answers 403. No probe was run on 0.6.14.
 - **Rollback (own Approve line):** 0.6.12 `c1addd19…0106` (= main), or 0.6.13 `5859fb70…f9ae` (`1a4888c`).
 - Next lines: `Approve: run /admin/run/sunface once`, then `Approve: set SUNFACE_ENABLED=1`.
+
+## 7. Manual run on 0.6.14 (Chad: "Approve: run /admin/run/sunface once")
+
+`/admin/run/sunface`, 06:38:13.9–06:38:20.4 UTC: HTTP 200, `sunface:ran`, wall 6,312 ms. One upstream request.
+
+- **D1 row 9932:** started 06:38:14.101Z, finished 06:38:20.238Z, `ok`, HTTP 200, 1 record, 203,365 bytes. Note: "image 20261114T063005Z-66f213bcb914748e; file updated 2026-11-14T06:30:05Z; observation time not known".
+- **Pointer** (`/snapshot/sunface/meta`, 06:38:20.952Z): image `20261114T063005Z-66f213bcb914748e`, 203,365 B, 1024 × 1024, sha256 `66f213bc…7b32`;
+  `observed_at` **null**; `file_updated` 06:30:05Z (header `Sat, 14 Nov 2026 06:30:05 GMT`); `retrieved_at` 06:38:16.927Z; `previous` null; `last_attempt` null;
+  `age_limit_s` 10800; credit present. The file was 8 min 12 s old when retrieved.
+- **File route:** 200, `image/jpeg`, 203,365 B, sha256 equal to the pointer, immutable cache, ETag = sha256, CORS `*`, starts `ffd8`.
+- **Storage** (dashboard API): exactly three objects under `sunface/`, written in the required order:
+  marker `sunface/seen/66f213bc…7b32.json` 06:38:17.825Z (197 B; holds the id and file-updated 06:30:05Z) → image `…/sun.jpg` 06:38:18.861Z → pointer `sunface/current.json` 06:38:20.125Z.
+- **Worker CPU** (per-minute maximum, 06:38 minute, 16 requests, 0 errors): **10.1 ms**; maximum wall 6,316 ms (this run).
+- Not looked at: the picture itself (bytes and structure checked; nobody has viewed it). SDO's receipt of the User-Agent.
+
+Next line: `Approve: set SUNFACE_ENABLED=1` (Chad clicks the final deploy button). The scheduled job would then run every hour with the hourly trigger.
