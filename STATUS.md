@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 18:28 UTC (clock reading) — **moon-lro-path-rc round 2: GPT's three findings addressed** (branch head `a5a2eb1`, commit time 18:27:04 UTC; branch only, nothing merged)
+- **GPT's review of `2836c6f` (relayed by Chad):** trajectory passes — GPT checked all 1,441 shipped vectors against its own DE440 evaluation (worst 0.93 m after rounding), reproduced Horizons (worst 0.0000075°), confirmed the lowest chord 64.177 km and, from LROC's documentation, the map's equirectangular / planetocentric / east-positive Mean Earth convention. Horizons decision closed. REGISTER drafts match the evidence. Page merge held for three findings; GPT's Chrome smoke on the Mac (access sorted by Chad) reproduced finding 1 and confirmed the rest of the desktop behaviour. Phone deferred.
+- **1. Focus:** readout updated in place (rebuilt only when its kind changes); camera moves only toggle the "behind" line; a press on the globe no longer moves focus (browser default — a second cause found in testing). Focus checks fail on `2836c6f` (4) and pass now; breaks `rebuild`, `dragfocus` fail as they must.
+- **2. Limb test:** true perspective edge (ray misses the sphere; angle > asin(R/D)); pose at cos φ = r/D.
+- **3. Packet §5 corrected:** no full-file input; three-range deviation accepted by GPT.
+- **Runs:** moon-lro-path 68/0 (twice); moon-globe 67/0; skycraft-ui 77/0. Earlier eight breaks not rerun (code they target unchanged).
+- Mac `_review/moon-lro-path-rc/` updated to `a5a2eb1` (hashes match; `BRANCH_HEAD.txt` added there for GPT, not in the repo).
+- **Next:** GPT re-checks round 2. Then, each on Chad's own line: file the REGISTER entries (draft `reviews/2026-11-14-moon-lro-path-register-draft.md`) on the branch, and merge.
+
 ## 14 Nov 17:13 UTC (clock reading) — **Candidate built: LRO's dated path on the Moon globe** (`moon-lro-path-rc` @ `9255518`; Chad: "Go: build moon-lro-path-rc on a branch per MOON-LRO-DATED-PATH-PROPOSAL rev 2 (keep both rotation checks; if Horizons can't supply a usable Moon-fixed comparison, bring it back to Chad before release; page only; no merge)")
 - Proposal rev 2 (GPT) and Claude's review on main at `0d2bb9e` (commit time 16:06:30 UTC). Rev 1 kept on the Mac in `superseded/`.
 - **Branch only. Nothing merged, deployed or filed.** Page only: no hub, R2 or D1 change. Live site unchanged (main = live).
