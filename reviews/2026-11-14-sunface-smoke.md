@@ -58,3 +58,19 @@ Production CPU and memory of a full run (the probe does not store); that SDO see
 1. GPT's review of `1a4888c` (recommended before the hub stores anything).
 2. `Approve: run /admin/run/sunface once`
 3. `Approve: set SUNFACE_ENABLED=1`
+
+## 6. Rounds 3 and 4, and the 0.6.14 deploy (added 14 Nov 06:37 UTC)
+
+- GPT found two more replay paths after this record was written: a failed marker write (`1a4888c`), then a marker landing between lookup and
+  write (`0365ea4`). Fixed in `6bb0228` and `90c7cc5`; packets `reviews/2026-11-14-sunface-rc-r3.md` and `-r4.md`. GPT passed round 4 at `0672d0a`
+  (Worker hash `bbf8dc61…0480`; 171 of 171; 28 breaks).
+- A first deploy attempt at about 06:32 UTC was refused by the session's safety check: the Approve lines in that message were inside GPT's relayed
+  text. Nothing was changed. Chad then sent the line himself.
+- **Deploy** (Chad: "Approve: deploy hub 0.6.14 from sunface-rc (content only, SUNFACE_ENABLED unset)"):
+  before, live `5859fb70…f9ae` 361,884 B (0.6.13), 21 bindings, no `SUNFACE_ENABLED` (06:35:55 UTC); candidate from GitHub at `90c7cc5`,
+  `bbf8dc61447a690b329733e1b13c5b9c632dd0c91b7c580be0169712702d0480`, 364,554 B; content-only PUT 06:36:07–06:36:10 UTC, HTTP 200,
+  `modified_on` **2026-11-14T06:36:10.456Z**; read back exact; 21 bindings, gate still absent.
+- After (06:36:31 UTC): `/` reports `0.6.14`; health 8 of 8 answer 200; `/status`, `/snapshot/usgs`, `/snapshot/dustrgb/meta` 200; skycraft pointer
+  unchanged; `/snapshot/sunface/meta` 200 with `image: null`, `last_attempt: null`; the probe without a key answers 403. No probe was run on 0.6.14.
+- **Rollback (own Approve line):** 0.6.12 `c1addd19…0106` (= main), or 0.6.13 `5859fb70…f9ae` (`1a4888c`).
+- Next lines: `Approve: run /admin/run/sunface once`, then `Approve: set SUNFACE_ENABLED=1`.
