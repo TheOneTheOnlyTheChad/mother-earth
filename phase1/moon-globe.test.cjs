@@ -137,7 +137,7 @@ const PATCH = [['red', 0, 0, [255, 0, 0]], ['green', 0, 90, [0, 255, 0]], ['blue
     const y2 = await p.evaluate(() => scrollY); await p.keyboard.down('Control'); await p.mouse.wheel(0, -300); await p.keyboard.up('Control'); await p.waitForTimeout(600);
     const a2 = await A();
     ok('ctrl+wheel (trackpad pinch) over the globe zooms the Moon inside the box, page does not scroll', a2 < 2.15 && a2 >= .5 - .01 && (await p.evaluate(() => scrollY)) === y2, { a2, y2, y3: await p.evaluate(() => scrollY) });
-    ok('page says how to zoom and why it blurs', /Pinch, or use Zoom in and Zoom out/.test(await p.textContent('#moon-globe')) && /about 5 km to a pixel/.test(await p.textContent('#moon-globe')));
+    ok('page says how to zoom and why it blurs', /Use Zoom in and Zoom out, or pinch on supported devices/.test(await p.textContent('#moon-globe')) && /about 5 km to a pixel/.test(await p.textContent('#moon-globe')));
     await ctx.close(); }
   // phone width
   { const { ctx, p } = await mk({ synthetic: true, w: 390 }); await p.waitForSelector('#mg-globe[data-ready="1"]', { timeout: 20000 }).catch(() => {});
