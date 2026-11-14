@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 15:36 UTC (clock reading at write) — GPT's live check of the zoom fix (relayed by Chad, after close-out)
+- GPT read the public page: its HTML, zoom script and stylesheet match the reviewed candidate byte for byte; the globe library and both Sky catalogues responded. This independently confirms what the site serves.
+- **GPT's browser interaction test is still pending** (drag, zoom, buttons). The review gap in the release entry below stands for interaction. Docs only.
+
 ## 14 Nov 15:28 UTC (clock reading at write) — **Sky zoom fix thread close-out** (START-HERE §9)
 - Branch `sky-zoom-fix-rc` deleted by Chad; `git fetch -p`: remote has only `main` and `aircraft-rc`.
 - Mac `_review/sky-zoom-fix/` and `_review/sky-zoom-fix-rc/` moved to `_to_delete/`; `_review/` empty. Mac sync at `77db4f6` (15:28 UTC): 12 files replaced, 2 new; the 12 preserved copies (`_sync-preserved/20261114T152812Z/`) each match `49c8c7e` (no local edits); every tracked file then identical to the commit.
