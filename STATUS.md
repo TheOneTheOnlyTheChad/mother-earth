@@ -8,7 +8,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 - D1 row 9896: started 05:07:58.510Z, finished 05:08:11.030Z, `ok`, HTTP 200, 193 records. Note: "published 20261114T050809Z-71d1328e9dc01272; sheet revised Nov 03, 2026; segments spp_pred_20260930_20270217_od268_v001; 0 of 193 samples withheld; lro study stored 41 epochs". Only two skycraft rows exist (this and the manual run 9430 of 13 Nov).
 - `/snapshot/skycraft/meta` at 05:10:39Z: current `20261114T050809Z-71d1328e9dc01272` (8,814 B, retrieved 05:08:09.491Z), previous `20261113T101042Z-c88f5c381b7e6fef` as expected, `last_attempt` null; the current snapshot file answers 200.
-- Not read: the stored `skycraft/study/lro/` objects themselves (the run note says 41 epochs stored); CPU of that hourly invocation.
+- Read at 05:17 UTC (dashboard API, read-only): `skycraft/study/lro/` holds a second pair, `20261114T050810Z-raw.json` (20,125 B) and `-index.json` (9,086 B), beside the 13 Nov pair. Worker CPU, per-minute maximum: **103 ms in the 05:07 minute** (4 requests, 0 errors), which is the whole hourly invocation, not skycraft alone; neighbouring minutes 2–19 ms.
 - **In progress, not deployed:** hub 0.6.13 source on branch `sunface-rc` @ `2bfa014` (Sun picture job, probe, routes), packet `reviews/2026-11-14-sunface-rc.md` on that branch; awaiting GPT's review and Chad's deploy line.
 
 ## 14 Nov 04:06 UTC (clock reading at write) — **Moon globe follow-up RELEASED** (merge `87c68be`; page only): instant buttons; zoom inside the box
