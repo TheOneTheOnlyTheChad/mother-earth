@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
-## 14 Nov 17:16 UTC (clock reading) — **Candidate built: LRO's dated path on the Moon globe** (`moon-lro-path-rc` @ `9255518`; Chad: "Go: build moon-lro-path-rc on a branch per MOON-LRO-DATED-PATH-PROPOSAL rev 2 (keep both rotation checks; if Horizons can't supply a usable Moon-fixed comparison, bring it back to Chad before release; page only; no merge)")
+## 14 Nov 17:13 UTC (clock reading) — **Candidate built: LRO's dated path on the Moon globe** (`moon-lro-path-rc` @ `9255518`; Chad: "Go: build moon-lro-path-rc on a branch per MOON-LRO-DATED-PATH-PROPOSAL rev 2 (keep both rotation checks; if Horizons can't supply a usable Moon-fixed comparison, bring it back to Chad before release; page only; no merge)")
 - Proposal rev 2 (GPT) and Claude's review on main at `0d2bb9e` (commit time 16:06:30 UTC). Rev 1 kept on the Mac in `superseded/`.
 - **Branch only. Nothing merged, deployed or filed.** Page only: no hub, R2 or D1 change. Live site unchanged (main = live).
 - Overlay off by default; follows the spacecraft drawing's minute and 120-sample window; readout with UTC, altitude above the 1,737.4 km sphere, window bounds, behind-the-Moon note.
