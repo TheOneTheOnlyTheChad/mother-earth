@@ -6,7 +6,7 @@
 <title>The Sun · spacecraft · Mother Earth</title>
 <meta name="description" content="Parker Solar Probe: where its published trajectory places it, with the source and time beside every position.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612041400">
+<link rel="stylesheet" href="style.css?v=202612051100">
 </head>
 <body class="doc craft" data-body="sun">
 <header class="top">
@@ -34,6 +34,30 @@
   <p class="cback"><a id="craft-back" href="index.html">Back to Earth</a></p>
   <h2 id="craft-h">The Sun · spacecraft</h2>
   <p class="lede">One spacecraft at the Sun, drawn from its published trajectory. Positions are calculated or predicted by the source named beside them; nothing here is observed by Mother Earth.</p>
+
+  <section id="sun-globe" class="mg" aria-labelledby="sg-h">
+    <h3 id="sg-h">The Sun</h3>
+    <p id="sg-state" class="cstate" role="status">loading…</p>
+    <p id="sg-why" class="cunavail" hidden></p>
+    <div id="sg-globe" class="mgglobe" role="img" aria-label="Globe of the Sun" aria-describedby="sg-read sg-times"></div>
+    <p id="sg-read" class="mgread" aria-live="off"></p>
+    <p id="sg-times" class="mgread sgtimes"></p>
+    <div id="sg-ctl" class="mgctl">
+      <button type="button" id="sg-near">Earth-facing side</button>
+      <button type="button" id="sg-far">Far side</button>
+      <button type="button" id="sg-east" aria-label="Turn the view 15 degrees east">◀ East</button>
+      <button type="button" id="sg-west" aria-label="Turn the view 15 degrees west">West ▶</button>
+      <button type="button" id="sg-north" aria-label="Turn the view 15 degrees north">▲ North</button>
+      <button type="button" id="sg-south" aria-label="Turn the view 15 degrees south">▼ South</button>
+      <button type="button" id="sg-zin" aria-label="Zoom in on the Sun">Zoom in</button>
+      <button type="button" id="sg-zout" aria-label="Zoom out">Zoom out</button>
+    </div>
+    <p class="cscale"><span>One picture of the Sun in visible light, taken by NASA’s Solar Dynamics Observatory from near Earth and fetched by our hub once an hour. It shows only the side facing Earth. The rest of the globe is drawn plain, with stripes: <b>outside this image’s view</b>.</span>
+    <span>The picture is wrapped on the globe from the disc’s measured centre and size and the Sun’s tilt on that date. Its outermost edge (beyond about 76° from the centre of the disc) is left blank: there one pixel covers too long a strip of surface. On the Sun, as on a sky map, east is to the left.</span>
+    <span>A picture is shown for at most three hours after its file was updated; after that this globe says “No recent picture”.</span>
+    <span>Use Zoom in and Zoom out, or pinch on supported devices, to look closer. Drawn to fill the view: sizes are not comparable between the Earth, Moon and Sun pages, and the spacecraft drawing below is a separate view at its own scale.</span></p>
+    <noscript><p class="cunavail">The globe needs JavaScript.</p></noscript>
+  </section>
 
   <section id="craft-view" class="cview" aria-labelledby="craft-vh">
     <h3 id="craft-vh">Parker Solar Probe</h3>
@@ -76,5 +100,6 @@
   </section>
 </main>
 <script src="craft.js?v=202612031000"></script>
+<script src="sunglobe.js?v=202612051100"></script>
 </body>
 </html>
