@@ -90,7 +90,7 @@ const PATCH = [['red', 0, 0, [255, 0, 0]], ['green', 0, 90, [0, 255, 0]], ['blue
     const txt = await p.textContent('#moon-globe');
     ok('says it is not how the Moon is lit today', /not how the Moon is lit today/.test(txt));
     ok('says the map is tuned for looks, not measurement', /tuned for looks, not measurement/.test(txt));
-    ok('says sizes are not comparable and the spacecraft is not on this globe', /Sizes are not comparable/.test(txt) && /spacecraft is not shown on this globe/.test(txt));
+    ok('says sizes are not comparable, the views are separate, and LRO is on the globe only as the dated example, off by default (rev: MOON-LRO-DATED-PATH-PROPOSAL rev 2)', /Sizes are not comparable/.test(txt) && /separate views/.test(txt) && /“Show LRO’s dated path” puts the 10–11 June 2026 example on the globe/.test(txt) && /no current position is shown/.test(txt));
     ok('credit line present in sources', /NASA’s Scientific Visualization Studio/.test(await p.textContent('#craft-sources')));
     ok('spacecraft drawing still present', await p.locator('#craft-view').count() === 1);
     ok('no sideways overflow', await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));

@@ -170,7 +170,7 @@
       $('craft-unavail').innerHTML = (when ? `<p class="cwhen">Requested time: <b>${esc(when)}</b></p>` : '') + `<p>${esc(why)}</p>`
         + (st.example ? `<p><button type="button" id="craft-example">View a dated example</button> <span class="dim">${esc(nice(st.example.start + st.example.def * st.example.step))} — a historical snapshot.</span></p>` : '');
       const b = $('craft-example'); if (b) b.addEventListener('click', () => go(st.example.start + st.example.def * st.example.step, true));
-      $('craft-read').innerHTML = ''; return;
+      $('craft-read').innerHTML = ''; announce(null); return;
     }
     const t = d.start + st.i * d.step, j = d.j, r = d.dist[st.i], ex = d.kind === 'example';
     state.textContent = ex ? `Historical snapshot — ${nice(t)}.` : `Predicted position — ${nice(t)}.`;
@@ -202,6 +202,14 @@
       out += row('Snapshot', `${esc(nice(d.start))} to ${esc(nice(d.end))}, hourly.`);
     }
     $('craft-read').innerHTML = out;
+    announce({ kind: d.kind, rev: j.catalogue_revision, i: st.i, t: iso(t), lo: geo.lo, hi: geo.hi });
+  }
+  /** The selected sample, for the Moon globe's dated-path overlay (moonglobe.js). This drawing's time controls stay the only
+   * time selection; the globe only follows. null = nothing selected (loading, an unsupported time, or a failed file). */
+  function announce(sel) {
+    if (st.status !== 'ready') return;
+    window.ME = window.ME || {}; window.ME.craftSelection = sel;
+    document.dispatchEvent(new CustomEvent('me:craft-select', { detail: sel }));
   }
 
   // ---------- selection

@@ -1,0 +1,130 @@
+API VERSION: 1.2
+API SOURCE: NASA/JPL Horizons API
+
+
+Calling TDBMUT with LBND,LMJD= 0.834321600000000E+09  0.612010000000000E+05
+Calling TDBMUT with LBND,LMJD= 0.834343200000000E+09  0.612012500000000E+05
+Calling TDBMUT with LBND,LMJD= 0.834364800000000E+09  0.612015000000000E+05
+Calling TDBMUT with LBND,LMJD= 0.834386400000000E+09  0.612017500000000E+05
+Calling TDBMUT with LBND,LMJD= 0.834408000000000E+09  0.612020000000000E+05
+
+*******************************************************************************
+Ephemeris / API_USER Sat Nov 14 08:13:20 2026 Pasadena, USA      / Horizons
+*******************************************************************************
+Target body name: Moon (301)                      {source: DE441}
+Center body name: Solar System Barycenter (0)     {source: DE441}
+Center-site name: BODY CENTER
+*******************************************************************************
+Start time      : A.D. 2026-Jun-10 00:00:00.0000 UT 
+Stop  time      : A.D. 2026-Jun-11 00:00:00.0000 UT 
+Step-size       : DISCRETE TIME-LIST
+*******************************************************************************
+Center geodetic : 0.0, 0.0, 0.0                   {E-lon(deg),Lat(deg),Alt(km)}
+Center cylindric: 0.0, 0.0, 0.0                   {E-lon(deg),Dxy(km),Dz(km)}
+Center radii    : (undefined)
+Output units    : KM-S
+Calendar mode   : Mixed Julian/Gregorian
+Output type     : GEOMETRIC cartesian states
+Output format   : 2 (position and velocity)
+EOP file        : eop.261113.p270209
+EOP coverage    : DATA-BASED 1962-JAN-20 TO 2026-NOV-13. PREDICTS-> 2027-FEB-08
+Reference frame : ICRF
+*******************************************************************************
+JDUT 
+   X     Y     Z
+   VX    VY    VZ
+*******************************************************************************
+$$SOE
+2461201.500000000 = A.D. 2026-Jun-10 00:00:00.0000 UTC
+ X =-2.944878873941939E+07 Y =-1.373806866246998E+08 Z =-5.951314462847205E+07
+ VX= 2.852875476846812E+01 VY=-4.520267587439896E+00 VZ=-1.883947529296992E+00
+2461201.750000000 = A.D. 2026-Jun-10 06:00:00.0000 UTC
+ X =-2.883295954622359E+07 Y =-1.374771985007780E+08 Z =-5.955338806712054E+07
+ VX= 2.849241221309934E+01 VY=-4.416541978236087E+00 VZ=-1.842575534466839E+00
+2461202.000000000 = A.D. 2026-Jun-10 12:00:00.0000 UTC
+ X =-2.821791805795031E+07 Y =-1.375715040737310E+08 Z =-5.959275598176757E+07
+ VX= 2.845585808990568E+01 VY=-4.315987565037862E+00 VZ=-1.802882499230204E+00
+2461202.250000000 = A.D. 2026-Jun-10 18:00:00.0000 UTC
+ X =-2.760366628311993E+07 Y =-1.376636722678039E+08 Z =-5.963128474135102E+07
+ VX= 2.841933122781105E+01 VY=-4.218641608070374E+00 VZ=-1.764876738762936E+00
+2461202.500000000 = A.D. 2026-Jun-11 00:00:00.0000 UTC
+ X =-2.699020096658051E+07 Y =-1.377537726624850E+08 Z =-5.966901080996664E+07
+ VX= 2.838308002335828E+01 VY=-4.124527259255339E+00 VZ=-1.728558618888465E+00
+$$EOE
+*******************************************************************************
+ 
+TIME
+
+ Times PRIOR to 1962 are UT1, a mean-solar time closely related to the
+prior but now-deprecated GMT. Times AFTER 1962 are in UTC, the current
+civil or "wall-clock" atomic time-scale. UTC is kept within 0.9 seconds
+of UT1 using integer leap-seconds for 1972 and later years.
+
+  Conversion from the internal Barycentric Dynamical Time (TDB) of solar
+system dynamics to the discontinuous civil UT time-scale has not been
+determined for UTC times after the next July or January 1st. Therefore,
+the last known leap-second is used as a constant over future intervals,
+a condition noted here as "UT~".
+
+  Future but as yet undetermined leap-seconds can be expected to change
+time-tags in the "UT~" interval and, in general, the UT scale may not be
+suitable for purposes that assume time-tag continuity in the ephemeris.
+Output in continuous TDB and TT timescales may instead be requested,
+though these are not linked to Earth's rotation.
+
+  Time-tags refer to the UT time-scale conversion from TDB on Earth
+regardless of observer location within the solar system, although clock
+rates may differ due to the local gravity field and no analog to "UT"
+may be defined for that location.
+ 
+CALENDAR SYSTEM
+
+  Mixed calendar mode was active such that calendar dates after AD 1582-Oct-15
+(if any) are in the modern Gregorian system. Dates prior to 1582-Oct-5 (if any)
+are in the Julian calendar system, which is automatically extended for dates
+prior to its adoption on 45-Jan-1 BC.  The Julian calendar is useful for
+matching historical dates. The Gregorian calendar more accurately corresponds
+to the Earth's orbital motion and seasons. A "Gregorian-only" calendar mode is
+available if such physical events are the primary interest.
+
+REFERENCE FRAME AND COORDINATES
+
+  International Celestial Reference Frame (ICRF)
+
+    The ICRF is an adopted reference frame whose axes are defined relative to 
+    fixed extragalactic radio sources distributed across the sky.
+
+    The ICRF was aligned with the prior FK5/J2000 dynamical system at the ~0.02 
+    arcsecond level but is not identical and has no associated standard epoch.
+
+  Symbol meaning:
+
+    JDUT     Julian Day Number, Universal Time
+      X      X-component of position vector (km)
+      Y      Y-component of position vector (km)
+      Z      Z-component of position vector (km)
+      VX     X-component of velocity vector (km/sec)                           
+      VY     Y-component of velocity vector (km/sec)                           
+      VZ     Z-component of velocity vector (km/sec)                           
+
+ABERRATIONS AND CORRECTIONS
+
+ Geometric state vectors have NO corrections or aberrations applied.
+
+Computations by ...
+
+    Solar System Dynamics Group, Horizons On-Line Ephemeris System
+    4800 Oak Grove Drive, Jet Propulsion Laboratory
+    Pasadena, CA  91109   USA
+
+    General site: https://ssd.jpl.nasa.gov/
+    Mailing list: https://ssd.jpl.nasa.gov/email_list.html
+    System news : https://ssd.jpl.nasa.gov/horizons/news.html
+    User Guide  : https://ssd.jpl.nasa.gov/horizons/manual.html
+    Connect     : browser        https://ssd.jpl.nasa.gov/horizons/app.html#/x
+                  API            https://ssd-api.jpl.nasa.gov/doc/horizons.html
+                  command-line   telnet ssd.jpl.nasa.gov 6775
+                  e-mail/batch   https://ssd.jpl.nasa.gov/ftp/ssd/horizons_batch.txt
+                  scripts        https://ssd.jpl.nasa.gov/ftp/ssd/SCRIPTS
+    Inquiries   : Jon.D.Giorgini@jpl.nasa.gov
+*******************************************************************************
