@@ -129,7 +129,8 @@ Mean Earth) and held the page for three findings. GPT's Chrome smoke on the Mac 
 3. **Full-kernel claim — corrected in §5.** The generator has no full-file input; the three-range deviation is accepted by GPT.
 - Also: the landmark section now waits 2 s for the globe to settle before the paired frames (one run caught the first landmark
   mid-render; re-run clean).
-- **Results:** `moon-lro-path` **68 passed, 0 failed** (twice, once before and once after the `mousedown` change). New breaks:
+- **Results:** `moon-lro-path` **68 passed, 0 failed** on the final code (one run). Before the `mousedown` change the real-drag check
+  failed (66 passed, 2 failed), which is how the browser-default cause was found. New breaks:
   `rebuild` 1 failed, `dragfocus` 1 failed. Against the reviewed `2836c6f` code: 4 failed (the four focus checks). Regressions:
   moon-globe 67/0, skycraft-ui 77/0. The eight earlier breaks (conversion, window, staleness, hash, clearing) were not rerun: this
   round does not touch the code they target, and each failed as required on `2836c6f`.
