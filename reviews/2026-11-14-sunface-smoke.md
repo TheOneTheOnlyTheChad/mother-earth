@@ -98,3 +98,11 @@ Next line: `Approve: set SUNFACE_ENABLED=1` (Chad clicks the final deploy button
 - Read back 06:46:00 UTC: 22 bindings (was 21); `SUNFACE_ENABLED` = `1`, plain text; other gates unchanged (DRIFTERS 1, DUSTRGB 1, HISTORY 1, ORBITAL 1, PLASTIC 1, SATELLITES 0, SKYCRAFT 1); live `worker.js` still `bbf8dc61…0480`, 364,554 B.
 - First scheduled Sun fetch expected with the next hourly run, about 07:07 UTC.
 - To stop the schedule: remove `SUNFACE_ENABLED` (own Approve line). Stored pictures stay.
+
+## 9. First scheduled run (07:07 UTC 14 Nov) — ok
+
+- **D1 row 9946:** started 07:07:58.510Z, finished 07:08:11.729Z, `ok`, HTTP 200, 1 record, 203,010 bytes. Note: "image 20261114T070005Z-4bc25d7a146de6fd; file updated 2026-11-14T07:00:05Z; observation time not known".
+- **Pointer** (read from storage 07:12:48 UTC): image `20261114T070005Z-4bc25d7a146de6fd` (file updated 07:00:05Z, retrieved 07:08:11.200Z, `observed_at` null); **previous = the manual run's image** `20261114T063005Z-66f213bcb914748e` with its original times; `last_attempt` null.
+- **Storage:** two images and two markers under `sunface/`. The new marker was written 07:08:11.350Z, the image 07:08:11.522Z, the pointer 07:08:11.704Z — history first.
+- **Worker CPU**, per-minute maximum: 63.6 ms in the 07:07 minute (2 requests; the whole hourly job, wall 12.7 s) and 21 ms in 07:08; 0 errors.
+- The new file was 8 min 6 s old when retrieved.
