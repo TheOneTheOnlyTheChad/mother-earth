@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 14 Nov 2026
 
+## 14 Nov 06:37 UTC (clock reading at write) — **hub 0.6.14 DEPLOYED** (content only, 06:36:10 UTC); Sun schedule still off; **hub is ahead of main**
+
+GPT held 0.6.13 twice more for replay paths (a failed marker write; a marker landing between lookup and write); fixed on `sunface-rc` (`6bb0228`, `90c7cc5`), GPT passed round 4 at `0672d0a`. A first deploy attempt was refused by the session's safety check because the Approve lines were inside GPT's relayed text; nothing changed. Chad then sent: "Approve: deploy hub 0.6.14 from sunface-rc (content only, SUNFACE_ENABLED unset)".
+
+- Live `worker.js` now `bbf8dc61…0480`, 364,554 B (read back exact), version `0.6.14`, from `90c7cc5`. Before: 0.6.13 `5859fb70…f9ae`. 21 bindings, `SUNFACE_ENABLED` absent. Health 8 of 8 at 06:36:31 UTC; `/snapshot/sunface/meta` has `image: null`. No probe run on 0.6.14 (the 0.6.13 probe at 05:45 UTC stands: the Worker reaches SDO).
+- **0.6.14 is on branch `sunface-rc`, not on main. Do not deploy a hub built from main.** Rollback = 0.6.12 `c1addd19…0106` (own Approve line).
+- Records on the branch: `reviews/2026-11-14-sunface-rc.md`, `-r3.md`, `-r4.md`, `-sunface-smoke.md` (§6). Tests: `sunface-hub` 171 of 171, 28 breaks; 30 node hub suites pass.
+- Next lines: `Approve: run /admin/run/sunface once`; `Approve: set SUNFACE_ENABLED=1`.
+
 ## 14 Nov 05:46 UTC (clock reading at write) — **hub 0.6.13 DEPLOYED** (content only, 05:44:54 UTC); Sun probe passed; **hub is ahead of main**
 
 Chad: "Approve: deploy hub 0.6.13 from sunface-rc (content only, SUNFACE_ENABLED unset) and run /admin/probe/sunface once". The same message relayed GPT's hold on `4dd44b7` for two fixes; both were made first (`1a4888c`: Last-Modified must be a real calendar date and never later than retrieval; bytes published before are never republished) and that commit was deployed. **GPT has not reviewed `1a4888c`.**
