@@ -1,7 +1,8 @@
 /* Moon globe (moon.html). Self-contained; needs globe.gl (same build as the Earth page).
  * A looking view only: NASA SVS appearance map on a sphere, evenly lit, drag to turn.
- * No spacecraft, no sunlight, no time: those need the Moon-fixed frame work described in
- * docs/concepts/MOON-SUN-GLOBES-PROPOSAL.md (rev 2.1, section 3.1). The spacecraft diagram below is separate.
+ * No sunlight and no live spacecraft. One overlay, off by default: LRO's DATED path (10–11 June 2026) in the Moon-fixed frame
+ * (docs/concepts/MOON-LRO-DATED-PATH-PROPOSAL.md rev 2; catalogue assets/moon/craft-moon-me-2026-06-R1.json, sha256 pinned below).
+ * The spacecraft drawing below (craft.js) owns the time: the overlay follows its selected minute and its 120-sample window.
  * Texture convention relied on (verified by phase1/moon-globe.test.cjs against named landmarks):
  *   longitude-latitude image, 0° longitude at the centre, east to the right, north up. */
 (() => {
@@ -68,5 +69,75 @@
   $('mg-far').addEventListener('click', () => go(0, 180));
   for (const [id, dlat, dlng] of [['mg-west', 0, -15], ['mg-east', 0, 15], ['mg-north', 15, 0], ['mg-south', -15, 0]]) $(id).addEventListener('click', () => turn(dlat, dlng));
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (globe) { globe.width(el.clientWidth).height(el.clientHeight); globe.controls().maxDistance = 100 * (1 + ALT()); } }, 120); });
-  window.MoonGlobe = { view: () => globe ? globe.pointOfView() : null, point: (lat, lng) => set(lat, lng, alt()), lights: () => globe ? globe.lights().map(l => l.type) : null };   // test aid
+
+  // ---------- LRO's dated path (off by default)
+  const LRO = { url: 'assets/moon/craft-moon-me-2026-06-R1.json?v=1', rev: 'craft-moon-me-2026-06-R1', from: 'craft-moon-2026-06-R1',
+    sha: 'd62fb2712406f25711ea43f3380c3e7b8ab75692a26ae6134de60e474e30afb9', R: 1737.4, n: 1441, start: Date.UTC(2026, 5, 10), step: 60000 };
+  const lb = $('mg-lro'), lread = $('mg-lro-read');
+  const ov = { on: false, data: null, err: undefined, sel: null, drawn: null };   // err: undefined while loading, null when loaded
+  const num = v => typeof v === 'number' && isFinite(v);
+  const MONS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const hm = ms => { const d = new Date(ms), p = n => String(n).padStart(2, '0'); return `${d.getUTCDate()} ${MONS[d.getUTCMonth()]} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`; };
+  /** The path's geographic conversion: Moon-fixed x, y, z (km) → planetocentric latitude, east longitude, altitude in globe radii. */
+  const toGlobe = (x, y, z) => { const r = Math.hypot(x, y, z);
+    return { lat: Math.atan2(z, Math.hypot(x, y)) * 180 / Math.PI, lng: Math.atan2(y, x) * 180 / Math.PI, alt: r / LRO.R - 1, km: r - LRO.R }; };
+  async function loadLro() {
+    try {
+      const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 10000);
+      let buf; try { const r = await fetch(LRO.url, { signal: ctl.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); buf = await r.arrayBuffer(); } finally { clearTimeout(tm); }
+      const h = [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join('');
+      if (h !== LRO.sha) return 'the file failed its integrity check';
+      const j = JSON.parse(new TextDecoder().decode(buf)), T = j.time || {};
+      if (j.schema !== 1 || j.catalogue_revision !== LRO.rev || !j.derived_from || j.derived_from.revision !== LRO.from || !j.frame || j.frame.name !== 'MOON_ME_DE440_ME421'
+        || j.body_radius_km !== LRO.R || T.n !== LRO.n || T.step_s !== 60 || T.start !== '2026-06-10T00:00:00Z' || T.end !== '2026-06-11T00:00:00Z'
+        || !Array.isArray(j.xyz_km) || j.xyz_km.length !== 3 * LRO.n || !j.xyz_km.every(num)) return 'the file is not in the expected form';
+      const g = []; for (let i = 0; i < LRO.n; i++) { const q = toGlobe(j.xyz_km[3 * i], j.xyz_km[3 * i + 1], j.xyz_km[3 * i + 2]); if (!(q.km > 0)) return 'the file holds a position below the reference sphere'; g.push(q); }
+      ov.data = g; return null;
+    } catch (e) { return 'the file could not be loaded'; }
+  }
+  const lroReady = loadLro().then(e => { ov.err = e; });
+  const behind = q => { if (!globe) return false; const c = globe.camera().position, p = globe.getCoords(q.lat, q.lng, q.alt), R = 100;
+    const d = { x: p.x - c.x, y: p.y - c.y, z: p.z - c.z }, dd = d.x * d.x + d.y * d.y + d.z * d.z;
+    const t = Math.max(0, Math.min(1, -(c.x * d.x + c.y * d.y + c.z * d.z) / dd)); return Math.hypot(c.x + t * d.x, c.y + t * d.y, c.z + t * d.z) < R; };
+  function clearOverlay() { if (globe) { globe.pathsData([]); globe.labelsData([]); } ov.drawn = null; }
+  function drawOverlay() {
+    if (!lb || !lread) return;
+    lb.setAttribute('aria-pressed', String(ov.on)); lb.textContent = ov.on ? 'Hide LRO’s dated path' : 'Show LRO’s dated path';
+    if (!ov.on) { clearOverlay(); lread.hidden = true; lread.innerHTML = ''; return; }
+    lread.hidden = false;
+    if (ov.err || !ov.data) { clearOverlay(); lread.innerHTML = ov.err ? `<b>Dated path unavailable on the globe</b> — ${ov.err}. The globe and the spacecraft drawing below are unaffected.` : 'loading…'; return; }
+    if (!globe) { clearOverlay(); lread.innerHTML = '<b>Dated path unavailable on the globe</b> — the globe is not running. The spacecraft drawing below is unaffected.'; return; }
+    const s = ov.sel;
+    if (!s || s.kind !== 'example' || s.rev !== LRO.from || !(s.i >= 0 && s.i < LRO.n) || !(s.lo >= 0 && s.hi < LRO.n && s.lo <= s.i && s.i <= s.hi)) {
+      clearOverlay();
+      lread.innerHTML = 'No dated position on the globe for this time. Use <a href="#craft-view" id="mg-lro-go">the spacecraft drawing</a> below to open the dated example.'; return; }
+    const pts = []; for (let i = s.lo; i <= s.hi; i++) { const q = ov.data[i]; pts.push([q.lat, q.lng, q.alt]); }
+    const m = ov.data[s.i];
+    globe.pathsData([{ pts }]).pathPoints('pts').pathPointLat(p => p[0]).pathPointLng(p => p[1]).pathPointAlt(p => p[2])
+      .pathResolution(1e9).pathColor(() => '#ffd27a').pathStroke(null).pathTransitionDuration(0);
+    globe.labelsData([{ lat: m.lat, lng: m.lng, alt: m.alt }]).labelLat('lat').labelLng('lng').labelAltitude('alt').labelText(() => 'LRO')
+      .labelSize(2.2).labelDotRadius(1.1).labelColor(() => '#ffd27a').labelResolution(2).labelsTransitionDuration(0);
+    ov.drawn = { i: s.i, lo: s.lo, hi: s.hi, marker: m, pts: pts.length };
+    const hidden = behind(m), t = LRO.start + s.i * LRO.step;
+    lread.innerHTML = `<span><b>Dated LRO example · 10–11 June 2026 UTC</b></span>`
+      + `<span>Calculated from NASA/GSFC’s definitive trajectory · <span id="mg-lro-t">${hm(t)} UTC</span> · <a href="#craft-controls" id="mg-lro-time">change the time</a></span>`
+      + `<span id="mg-lro-alt">${m.km.toFixed(1)} km above the reference sphere</span>`
+      + `<span>Path shown: ${hm(LRO.start + s.lo * LRO.step)} to ${hm(LRO.start + s.hi * LRO.step)} UTC, joining LRO’s one-minute positions.</span>`
+      + (hidden ? `<span id="mg-lro-behind">At this time LRO is behind the Moon from this view.</span>` : '')
+      + `<span class="dim">The line is the spacecraft’s flight path above a spherical Moon (radius 1,737.4 km), not a track on the ground; the marker is enlarged so it can be seen. Moon orientation: JPL DE440 via NAIF.</span>`;
+  }
+  if (lb) lb.addEventListener('click', async () => { ov.on = !ov.on; drawOverlay(); if (ov.on && !ov.data && ov.err === undefined) { await lroReady; drawOverlay(); } });
+  if (lread) lread.addEventListener('click', ev => { const a = ev.target.closest('a'); if (!a) return;
+    if (a.id === 'mg-lro-time') { const r = $('craft-range'); if (r && !r.closest('[hidden]')) { ev.preventDefault(); r.focus(); r.scrollIntoView({ block: 'center' }); } }
+    if (a.id === 'mg-lro-go') { const b = $('craft-example'); if (b) { ev.preventDefault(); b.focus(); b.scrollIntoView({ block: 'center' }); } } });
+  document.addEventListener('me:craft-select', ev => { ov.sel = ev.detail; if (ov.on) drawOverlay(); });
+  if (window.ME && 'craftSelection' in window.ME) ov.sel = window.ME.craftSelection;
+  let rbt; const reBehind = () => { clearTimeout(rbt); rbt = setTimeout(() => { if (ov.on && ov.drawn) drawOverlay(); }, 150); };
+  const hook = () => { if (globe) globe.controls().addEventListener('change', reBehind); };   // any turn or zoom: re-check whether the marker is behind the Moon
+  const started = setInterval(() => { if (globe) { clearInterval(started); hook(); if (ov.on) drawOverlay(); } else if (dead) clearInterval(started); }, 200);
+  for (const id of ['mg-near', 'mg-far', 'mg-west', 'mg-east', 'mg-north', 'mg-south', 'mg-zin', 'mg-zout']) { const b = $(id); if (b) b.addEventListener('click', reBehind); }
+
+  window.MoonGlobe = { view: () => globe ? globe.pointOfView() : null, point: (lat, lng) => set(lat, lng, alt()), lights: () => globe ? globe.lights().map(l => l.type) : null,   // test aids
+    lro: () => ({ on: ov.on, err: ov.err, loaded: !!ov.data, drawn: ov.drawn ? { ...ov.drawn, behind: behind(ov.drawn.marker) } : null }),
+    toGlobe, globe: () => globe };
 })();

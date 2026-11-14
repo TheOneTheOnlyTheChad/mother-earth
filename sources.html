@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612061000">
+<link rel="stylesheet" href="style.css?v=202612071000">
 </head>
 <body class="doc">
 <header class="top">
@@ -187,9 +187,11 @@
   <p><b>Credit.</b> NASA/GSFC Flight Dynamics Facility and NASA PDS (NAIF); NASA/JPL Solar System Dynamics. Data retrieved 13 Nov 2026 (examples) and daily (current read). No endorsement by NASA, Caltech or JPL is implied.</p>
 
   <h2 id="moonglobe">Moon globe — appearance map (a looking view; not a measurement)</h2>
-  <p><b>What it is.</b> On <a href="moon.html">the Moon page</a>, a globe you can turn, wrapped in a colour map of the whole Moon and lit evenly so every part can be seen. It is not how the Moon is lit today, and it shows no sunlight, phase, spacecraft or time. The spacecraft drawing on the same page is a separate view.</p>
+  <p><b>What it is.</b> On <a href="moon.html">the Moon page</a>, a globe you can turn, wrapped in a colour map of the whole Moon and lit evenly so every part can be seen. It is not how the Moon is lit today, and it shows no sunlight or phase. It shows a spacecraft only when you turn on LRO’s dated path (below). The spacecraft drawing on the same page is a separate view.</p>
   <p><b>Source.</b> NASA's Scientific Visualization Studio, <a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">CGI Moon Kit</a>: the colour map <code>lroc_color_2k.jpg</code> (2025 version, 2048 × 1024), made from Lunar Reconnaissance Orbiter camera data. The source says its colour maps are tuned for appearance rather than science; the camera data cover 70°N to 70°S and higher latitudes are filled from a lower-resolution map.</p>
   <p><b>How we use it.</b> One copy, fetched on 13 Nov 2026 and served unchanged from this site. Your browser never calls NASA for it. East is to the right and north is up; we checked this against seven feature centres from the USGS/IAU Gazetteer of Planetary Nomenclature.</p>
+  <p><b>LRO’s dated path on the globe (off by default).</b> “Show LRO’s dated path” draws the Lunar Reconnaissance Orbiter’s 10–11 June 2026 example on the globe: a line joining its one-minute positions for two hours either side of the time chosen in the spacecraft drawing, and an enlarged marker at that time. It follows that drawing’s time controls and shows nothing for any other time; there is no current position. The positions are the same NASA/GSFC definitive states as the drawing, each turned once into the Moon’s mean Earth frame (<code>MOON_ME_DE440_ME421</code>) at its own time with NAIF’s SPICE toolkit (SpiceyPy 8.0.0, CSPICE N0067), NAIF’s frame kernel <code>moon_de440_250416.tf</code> and the DE440 lunar orientation file <code>moon_pa_de440_200625.bpc</code>. Altitude is measured above a sphere of 1,737.4 km, not above the terrain, and the line is the flight path above the Moon, not a track on the ground.</p>
+  <p><b>Checks on that path.</b> The turn was recomputed without SPICE, from JPL’s published DE440 coefficients, and agreed to 0.00001° at nine times. NASA/JPL Horizons’ point beneath LRO (its <code>MOON_ME</code> frame) agreed to 0.000002° at five times once Horizons’ light-time correction is applied the same way. The map’s own placement was checked on the drawn globe at six named features. Catalogue <code>craft-moon-me-2026-06-R1</code>, served unchanged from this site, with its generator and check results in the project’s repository.</p>
   <p><b>Scale.</b> The Earth, Moon and Sun are each drawn to fill the view. Sizes are not comparable between pages.</p>
   <p><b>Credit.</b> NASA's Scientific Visualization Studio. No endorsement by NASA is implied.</p>
 

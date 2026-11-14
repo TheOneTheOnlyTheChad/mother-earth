@@ -1,0 +1,93 @@
+{
+ "generator": "phase1/skycraft/build_moonfixed.py",
+ "raw": {
+  "lrorg_2026074_2026166_v01.seg-894101-904203.bin": "7fb04d7e131e1c8c4b3fbe2d1b8fc36cb535ac262824aa700bdf6a5009b693f9",
+  "moon_de440_250416.tf": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768",
+  "naif0012.tls": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+  "moon_pa_de440_200625.bpc.head.bin": "e9965ec81153d6fa9cfcc0f2c56ef0f5f2798dc097de2e4ed4ac6c378f9ea33b",
+  "moon_pa_de440_200625.bpc.rec21751-21753.bin": "10f4ed582cfed7c26bb66fb6e893b51ea253d0b0437dfad63429104385f8ff84",
+  "moon_pa_de440_200625.bpc.seg1-trailer.bin": "cbd56ca0e9d46fb392345be7fc27dee2501d04211a612c3e6a3c82f4d126c707",
+  "de440-header.440": "0f4636b663e6f00af9efa2b605ef23635489f56b23dd1a5e3821d3acc6ac3359",
+  "de440-ascp01950-rec874.txt": "fbd042854aef66eb7d676cbeec8162fed207880d293a34f23c15f83979bbc75a",
+  "horizons-moon-from-lro-q14-20260610.txt": "5a4d595977c7db426810a610da1a4c408916f3c59e39601dfbfe9e2810e08434",
+  "horizons-moon-ssb-vectors-20260610.txt": "229f4008ce207342f86a85c3b6b28e1153537e62d30fdf9c9439fd37c933ecf9"
+ },
+ "bpc": {
+  "file": "moon_pa_de440_200625.bpc",
+  "bytes": 12863488,
+  "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f",
+  "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de440_200625.bpc",
+  "last_modified": "Sat, 26 Jun 2021 01:49:57 GMT",
+  "ranges": [
+   [
+    "moon_pa_de440_200625.bpc.head.bin",
+    0
+   ],
+   [
+    "moon_pa_de440_200625.bpc.rec21751-21753.bin",
+    5573376
+   ],
+   [
+    "moon_pa_de440_200625.bpc.seg1-trailer.bin",
+    10245120
+   ]
+  ],
+  "segment1": {
+   "first_word": 641,
+   "last_word": 1280644,
+   "init_tdb_s": -14200747200.0,
+   "intlen_s": 691200.0,
+   "rsize": 32,
+   "n": 40000
+  },
+  "records_held": [
+   21751,
+   21753
+  ]
+ },
+ "sources": {
+  "moon_de440_250416.tf": {
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_de440_250416.tf",
+   "last_modified": "Wed, 16 Apr 2025 12:47:17 GMT"
+  },
+  "naif0012.tls": {
+   "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls",
+   "last_modified": "Fri, 15 Jul 2016 00:00:37 GMT"
+  },
+  "de440-header.440": {
+   "url": "https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/header.440"
+  },
+  "de440-ascp01950-rec874.txt": {
+   "url": "https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/ascp01950.440",
+   "byte_range": [
+    23414733,
+    23441553
+   ],
+   "file_bytes": 30629582
+  }
+ },
+ "retrieved": {
+  "naif": "2026-11-14T16:08Z",
+  "horizons_q14": "2026-11-14T16:11:55Z",
+  "horizons_vectors": "2026-11-14T16:13:19Z",
+  "de440_header": "2026-11-14T16:14:45Z",
+  "de440_record": "2026-11-14T16:15:08Z"
+ },
+ "toolkit": {
+  "spiceypy": "8.0.0",
+  "cspice": "CSPICE_N0067"
+ },
+ "frame": "MOON_ME_DE440_ME421",
+ "outputs": {
+  "catalogue": {
+   "file": "assets/moon/craft-moon-me-2026-06-R1.json",
+   "bytes": 39267,
+   "sha256": "d62fb2712406f25711ea43f3380c3e7b8ab75692a26ae6134de60e474e30afb9"
+  },
+  "checks": {
+   "file": "phase1/skycraft/checks/moonfixed-checks.json",
+   "bytes": 10723,
+   "sha256": "976e26e0fb17d3b8e12e437d3a171be4e506c5264c9fbf6e24e8dcc7d4f64b1f"
+  }
+ }
+}
