@@ -3,7 +3,8 @@
  * Run: node --no-warnings phase1/sunface-hub.test.mjs
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored manual-hourly same-bytes-renews loose-stamp future-ok not-newer-ok move-on-fail no-cas no-readback any-image
- *   no-integrity probe-stores probe-two generic-down no-ua retry any-size any-dims observed-invented */
+ *   no-integrity probe-stores probe-two generic-down no-ua retry any-size any-dims observed-invented
+ *   no-calendar skew-ok replay-ok replay-previous-only no-seen-marker */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
@@ -11,8 +12,13 @@ const BREAKS = {
   'gate-ignored': ["const w = env.SUNFACE_ENABLED !== '1' ?", 'const w = false ?'],
   'manual-hourly': [": !manual ? await guarded(env, 'sunface', ms, collectSunface) : 'sunface:skipped (manual hourly run)';", ": await guarded(env, 'sunface', ms, collectSunface);"],
   'same-bytes-renews': ["  if (before.image && before.image.sha256 === f.sha256) {", "  if (false) {"],
-  'loose-stamp': ["  if (typeof header !== 'string' || !/^[A-Z][a-z]{2}, \\d{2} [A-Z][a-z]{2} \\d{4} \\d{2}:\\d{2}:\\d{2} GMT$/.test(header.trim())) return null;", "  if (typeof header !== 'string') return { iso: new Date(nowMs).toISOString().replace(/\\.\\d+Z/, 'Z'), ms: nowMs };"],
-  'future-ok': ["  if (!Number.isFinite(ms) || ms - nowMs > SUNFACE.FUTURE_SKEW_MS) return null;", "  if (!Number.isFinite(ms)) return null;"],
+  'loose-stamp': ["  if (typeof header !== 'string') return null;\n  const h = header.trim();", "  if (typeof header !== 'string') return { iso: new Date(nowMs).toISOString().replace(/\\.\\d+Z/, 'Z'), ms: nowMs };\n  const h = header.trim();"],
+  'no-calendar': ["  if (!Number.isFinite(ms) || new Date(ms).toUTCString() !== h) return null;", "  if (!Number.isFinite(ms)) return null;"],
+  'replay-ok': ["  if (replay) return sunFail(", "  if (false) return sunFail("],
+  'replay-previous-only': [" || (await env.R2.head(seenKey)) !== null;", ";"],
+  'no-seen-marker': ["  try { await env.R2.put(seenKey,", "  try { if (false) await env.R2.put(seenKey,"],
+  'future-ok': ["  if (ms > nowMs) return null;\n", ''],
+  'skew-ok': ["  if (ms > nowMs) return null;", "  if (ms - nowMs > 120000) return null;"],
   'not-newer-ok': ["  const older = cur => cur.image && Date.parse(cur.image.file_updated) >= stamp.ms;", "  const older = cur => false;"],
   'move-on-fail': ["sunUpdate(env, cur => ({ ...cur, last_attempt: { run:", "sunUpdate(env, cur => ({ ...cur, image: null, last_attempt: { run:"],
   'no-cas': ["    const r = await env.R2.put(SUNFACE.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });", "    const r = await env.R2.put(SUNFACE.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' } });"],
@@ -114,7 +120,9 @@ const isoOf = hd => new Date(Date.parse(hd)).toISOString().replace('.000Z', 'Z')
   ok('B meta: 200, no-store, storage key not exposed, hub clock included', meta.status === 200 && meta.h.get('cache-control') === 'no-store' && meta.j.image.key === undefined && !!meta.j.now && meta.j.image.path === `/snapshot/sunface/${im.id}/sun.jpg`, meta.j);
   const file = await get(w, im.path);
   ok('B file: exact bytes, image/jpeg, immutable, ETag = sha256, CORS', file.status === 200 && sha(file.buf) === im.sha256 && file.h.get('content-type') === 'image/jpeg' && /immutable/.test(file.h.get('cache-control')) && file.h.get('etag') === '"' + im.sha256 + '"' && file.h.get('access-control-allow-origin') === '*', { s: file.status });
-  ok('B nothing written outside sunface/', [...w.store.keys()].every(k => k.startsWith('sunface/')), [...w.store.keys()]); }
+  ok('B nothing written outside sunface/', [...w.store.keys()].every(k => k.startsWith('sunface/')), [...w.store.keys()]);
+  const mark = w.store.get(S.SEEN + im.sha256 + '.json');
+  ok('B a seen-marker records the published bytes and their original file-updated time', !!mark && JSON.parse(mark.buf.toString()).file_updated === im.file_updated && JSON.parse(mark.buf.toString()).id === im.id, mark && mark.buf.toString()); }
 
 // ---------- C. identical bytes never renew a picture
 { const w = use(world()); w.lm = ago(100); await run(w); const a = w.ptr();
@@ -136,7 +144,8 @@ const isoOf = hd => new Date(Date.parse(hd)).toISOString().replace('.000Z', 'Z')
 
 // ---------- E. no trustworthy timestamp, no publication; a valid picture stays
 for (const [name, lm, reason] of [['missing', null, 'no trustworthy timestamp'], ['not an HTTP date', '2026-11-14 03:00:00', 'no trustworthy timestamp'], ['ISO form', new Date(Date.now() - 600000).toISOString(), 'no trustworthy timestamp'],
-  ['ten minutes in the future', httpDate(Date.now() + 600000), 'no trustworthy timestamp'], ['empty', '', 'no trustworthy timestamp']]) {
+  ['ten minutes in the future', httpDate(Date.now() + 600000), 'no trustworthy timestamp'], ['one minute in the future (no tolerance)', httpDate(Date.now() + 60000), 'no trustworthy timestamp'],
+  ['31 Feb (not a calendar date)', 'Tue, 31 Feb 2026 03:30:05 GMT', 'no trustworthy timestamp'], ['wrong weekday', httpDate(Date.now() - 600000).replace(/^[A-Z][a-z]{2}/, d => d === 'Mon' ? 'Tue' : 'Mon'), 'no trustworthy timestamp'], ['empty', '', 'no trustworthy timestamp']]) {
   const w = use(world()); w.lm = ago(60); await run(w); const a = w.ptr();
   w.body = jpeg(7); w.lm = lm; await run(w); const b = w.ptr();
   ok(`E Last-Modified ${name}: replacement rejected, current image untouched`, b.image.id === a.image.id && b.image.file_updated === a.image.file_updated && b.previous === null, b.image);
@@ -145,12 +154,28 @@ for (const [name, lm, reason] of [['missing', null, 'no trustworthy timestamp'],
   ok(`E ${name}: logged down with "rejected:"`, w.sun()[1].status === 'down' && /^rejected: /.test(w.sun()[1].note), w.sun()[1]);
   const fresh = use(world()); fresh.lm = lm; await run(fresh);
   ok(`E ${name}, no image yet: nothing published at all`, fresh.ptr().image === null && fresh.keys(S.PREFIX).length === 0 && fresh.ptr().last_attempt.status === 'rejected', fresh.ptr()); }
-{ const w = use(world()); w.lm = httpDate(Date.now() + 60000); await run(w);
-  ok('E one minute ahead of the hub clock is accepted as skew', !!w.ptr().image && w.ptr().last_attempt === null, w.ptr()); }
 for (const [name, mins] of [['equal', 60], ['older', 75]]) {
   const w = use(world()); const lm0 = ago(60); w.lm = lm0; await run(w); const a = w.ptr();
   w.body = jpeg(8); w.lm = name === 'equal' ? lm0 : ago(mins); await run(w); const b = w.ptr();
   ok(`E different bytes with an ${name} time: rejected, current kept`, b.image.id === a.image.id && b.last_attempt.status === 'rejected' && b.last_attempt.reason === 'timestamp not newer than the current image' && w.keys(S.PREFIX).length === 1, b); }
+// replay: bytes that were published before come back under a fresh header (GPT: A -> B -> A)
+{ const w = use(world()); const A = jpeg(21), B = jpeg(22), C = jpeg(23);
+  w.body = A; w.lm = ago(120); await run(w); const a = w.ptr().image;
+  w.body = B; w.lm = ago(60); await run(w); const pb = w.ptr();
+  w.body = A; w.lm = ago(2); await run(w); const p = w.ptr();
+  ok('E replay A→B→A with a fresh header: A is not published again; B stays current', p.image.id === pb.image.id && p.image.sha256 === sha(B), p.image);
+  ok('E replay: A remains previous with its ORIGINAL time', p.previous.id === a.id && p.previous.file_updated === a.file_updated, p.previous);
+  ok('E replay: recorded as rejected "picture already published earlier"; nothing new stored', p.last_attempt.status === 'rejected' && p.last_attempt.reason === 'picture already published earlier' && w.keys(S.PREFIX).length === 2, { la: p.last_attempt, keys: w.keys(S.PREFIX) });
+  w.body = C; w.lm = ago(1); await run(w);
+  ok('E after the replay a genuinely new picture still publishes', w.ptr().image.sha256 === sha(C) && w.ptr().previous.sha256 === sha(B) && w.ptr().last_attempt === null, w.ptr().image);
+  await new Promise(r => setTimeout(r, 1100)); w.body = A; w.lm = httpDate(Date.now() - 500); await run(w); const q = w.ptr();
+  ok('E replay two images back (A→B→C→A): still rejected', q.image.sha256 === sha(C) && q.last_attempt.reason === 'picture already published earlier' && w.keys(S.PREFIX).length === 3, { img: q.image.id, la: q.last_attempt });
+  w.body = B; w.lm = httpDate(Date.now() - 400); await run(w);
+  ok('E replay of the previous image (C current, B previous → B): rejected', w.ptr().image.sha256 === sha(C) && w.ptr().last_attempt.reason === 'picture already published earlier' && w.ptr().last_attempt.consecutive_failures === 2, w.ptr().last_attempt); }
+{ const w = use(world()); const A = jpeg(31), B = jpeg(32); w.body = A; w.lm = ago(120); await run(w); w.body = B; w.lm = ago(60); await run(w);
+  for (const k of w.keys(S.SEEN)) w.store.delete(k);   // markers lost: the previous-image check must still hold by itself
+  w.body = A; w.lm = ago(2); await run(w);
+  ok('E replay of the previous image is rejected even with the markers gone', w.ptr().image.sha256 === sha(B) && w.ptr().last_attempt.reason === 'picture already published earlier', w.ptr().last_attempt); }
 { const w = use(world()); w.lm = ago(60); await run(w); w.body = jpeg(9); w.lm = null; await run(w); await run(w);
   ok('E failures count up', w.ptr().last_attempt.consecutive_failures === 2, w.ptr().last_attempt);
   w.lm = ago(5); await run(w);
@@ -214,9 +239,12 @@ for (const [name, mut, reason, http] of [
 // ---------- J. the stamp rule by itself
 { const now = Date.UTC(2026, 10, 14, 4, 0, 0);
   ok('J a plain HTTP date parses to an ISO time', W.sunStamp('Sat, 14 Nov 2026 03:30:05 GMT', now).iso === '2026-11-14T03:30:05Z');
-  for (const bad of [null, undefined, '', 'yesterday', '14 Nov 2026 03:30:05 GMT', 'Sat, 14 Nov 2026 03:30:05 +0200', 'Sat, 14 Nov 2026 03:30:05', '2026-11-14T03:30:05Z', 1794000000, 'Sat, 14 Nov 2026 04:02:01 GMT'])
-    ok('J rejected: ' + JSON.stringify(bad), W.sunStamp(bad, now) === null);
-  ok('J exactly two minutes ahead is still accepted', W.sunStamp('Sat, 14 Nov 2026 04:02:00 GMT', now) !== null); }
+  for (const bad of [null, undefined, '', 'yesterday', '14 Nov 2026 03:30:05 GMT', 'Sat, 14 Nov 2026 03:30:05 +0200', 'Sat, 14 Nov 2026 03:30:05', '2026-11-14T03:30:05Z', 1794000000,
+    'Sat, 14 Nov 2026 04:00:01 GMT' /* one second after retrieval */, 'Sat, 14 Nov 2026 04:02:00 GMT', 'Tue, 31 Feb 2026 03:30:05 GMT', 'Mon, 30 Feb 2026 03:30:05 GMT', 'Fri, 14 Nov 2026 03:30:05 GMT' /* wrong weekday */,
+    'Sat, 14 Nov 2026 24:00:00 GMT', 'Sat, 14 Nov 2026 03:60:05 GMT', 'Sat, 14 Nov 2026 03:30:61 GMT', 'Sat, 14 Foo 2026 03:30:05 GMT', 'Sun, 29 Feb 2026 03:30:05 GMT' /* 2026 is not a leap year */])
+    ok('J rejected: ' + JSON.stringify(bad), W.sunStamp(bad, now) === null, W.sunStamp(bad, now));
+  ok('J exactly the retrieval instant is accepted', W.sunStamp('Sat, 14 Nov 2026 04:00:00 GMT', now) !== null);
+  ok('J a real leap day is accepted', (W.sunStamp('Tue, 29 Feb 2028 03:30:05 GMT', Date.UTC(2028, 2, 1)) || {}).iso === '2028-02-29T03:30:05Z'); }
 
 globalThis.fetch = realFetch;
 console.log(`${fail ? 'FAIL' : 'PASS'}  sunface-hub: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

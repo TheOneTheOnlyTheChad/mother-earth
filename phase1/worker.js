@@ -3315,24 +3315,31 @@ async function craftCatRoute(env, rawPath, table = CRAFT_REVISIONS) {
  * RULES
  *   - identical bytes (same sha256 as the current image): the image and ITS ORIGINAL timestamps stay; only last_checked moves.
  *     Refetching the same picture can never make it look newer.
- *   - no trustworthy timestamp, no publication: Last-Modified missing, unparsable, in the future of the hub's own clock, or not
- *     newer than the current image's, and the fetched image is REJECTED. The current image stays and expires on its own clock.
+ *   - no trustworthy timestamp, no publication: Last-Modified missing, not a real calendar date in the HTTP form, later than the
+ *     hub's retrieval time (no tolerance), or not newer than the current image's, and the fetched image is REJECTED.
+ *     The current image stays and expires on its own clock.
+ *   - no replay: bytes this hub has already published once (the previous image, or any earlier one) are never published again
+ *     under a fresh time. Every published image leaves a marker at sunface/seen/<sha256>.json.
  *   - a failed or rejected run never moves the image; the pointer gains last_attempt.
  * Outside LAYERS, cells, history, health and the generic writeDown. Gate: SUNFACE_ENABLED=1 (absent = no request at all). */
 const SUNFACE = {
   URL: 'https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg', W: 1024, H: 1024, MAX_BYTES: 2 * 1024 * 1024, MIN_BYTES: 20000,
   TIMEOUT_MS: 30000, POINTER: 'sunface/current.json', PREFIX: 'sunface/images/', FILE: 'sun.jpg', CACHE_FILE: 'public, max-age=86400, immutable',
-  FUTURE_SKEW_MS: 120000,   // a Last-Modified up to two minutes ahead of the hub's clock is treated as clock skew; beyond that it is not trusted
+  SEEN: 'sunface/seen/',
   AGE_LIMIT_S: 3 * 3600,    // published for the page, which applies it; the hub does not expire anything
   UA: 'mother-earth-collector/' + COLLECTOR_VERSION + ' (+https://github.com/TheOneTheOnlyTheChad/mother-earth; contact: issues at that address)',
   SOURCE: { product: 'SDO/HMI continuum, colourised ("latest" browse image, 1024 px)', provider: 'NASA Solar Dynamics Observatory', page: 'https://sdo.gsfc.nasa.gov/data/',
     credit: 'Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams.', file: 'latest_1024_HMIIC.jpg' },
 };
-/** A Last-Modified header as { iso, ms }, or null when it is missing, unparsable, or more than FUTURE_SKEW_MS ahead of nowMs. */
+/** A Last-Modified header as { iso, ms }, or null when it is missing, not in the HTTP date form, not a real calendar date
+ * (31 Feb, a wrong weekday), or later than nowMs (the hub's retrieval time; no tolerance). */
 function sunStamp(header, nowMs) {
-  if (typeof header !== 'string' || !/^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT$/.test(header.trim())) return null;   // the HTTP date form only; nothing looser
-  const ms = Date.parse(header.trim());
-  if (!Number.isFinite(ms) || ms - nowMs > SUNFACE.FUTURE_SKEW_MS) return null;
+  if (typeof header !== 'string') return null;
+  const h = header.trim();
+  if (!/^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT$/.test(h)) return null;   // the HTTP date form only; nothing looser
+  const ms = Date.parse(h);
+  if (!Number.isFinite(ms) || new Date(ms).toUTCString() !== h) return null;   // must read back identically: Date.parse turns "31 Feb" into 3 Mar and ignores the weekday
+  if (ms > nowMs) return null;
   return { iso: new Date(ms).toISOString().replace('.000Z', 'Z'), ms };
 }
 /** One GET of the image, validated. { ok, buf, bytes, sha256, last_modified, date, etag } or { ok:false, reason, http, detail }. Reasons are fixed phrases (public). */
@@ -3381,6 +3388,10 @@ async function collectSunface(env, ms) {
     if (up.wrote) { await logRun(env, 'sunface', ms, 'ok', 200, 0, 0, `unchanged: same bytes as ${before.image.id}; its file-updated time ${before.image.file_updated} kept`); return 'sunface:unchanged'; }
     // the pointer moved to another image meanwhile: fall through and judge this fetch against what is there now
   }
+  // replay: bytes already published once must not come back as a new picture, whatever time the header now claims
+  const seenKey = SUNFACE.SEEN + f.sha256 + '.json';
+  const replay = (before.previous && before.previous.sha256 === f.sha256) || (await env.R2.head(seenKey)) !== null;
+  if (replay) return sunFail(env, ms, 'rejected', 'picture already published earlier', 200, 'sha256 ' + f.sha256.slice(0, 16) + '; Last-Modified now ' + JSON.stringify(f.last_modified));
   const stamp = sunStamp(f.last_modified, retrievedMs);
   if (!stamp) return sunFail(env, ms, 'rejected', 'no trustworthy timestamp', 200, 'Last-Modified: ' + JSON.stringify(f.last_modified));
   const id = stamp.iso.replace(/[-:]/g, '').replace('Z', 'Z') + '-' + f.sha256.slice(0, 16);
@@ -3394,8 +3405,9 @@ async function collectSunface(env, ms) {
   const back = await env.R2.get(key), bb = back ? await back.arrayBuffer() : null;
   if (!bb || bb.byteLength !== f.bytes || await sha256Bytes(bb) !== f.sha256) return sunFail(env, ms, 'down', 'stored copy does not read back', 200, key);
   const strip = x => x ? { ...x } : null;
-  const up = await sunUpdate(env, cur => (older(cur) || (cur.image && cur.image.sha256 === f.sha256)) ? null : { ...sunEmpty(), image, previous: strip(cur.image), last_checked: retrieved_at, last_attempt: null });
+  const up = await sunUpdate(env, cur => (older(cur) || (cur.image && cur.image.sha256 === f.sha256) || (cur.previous && cur.previous.sha256 === f.sha256)) ? null : { ...sunEmpty(), image, previous: strip(cur.image), last_checked: retrieved_at, last_attempt: null });
   if (!up.wrote) { await logRun(env, 'sunface', ms, 'ok', 200, 0, 0, `superseded: another run published first; ${id} not published`); return 'sunface:superseded'; }
+  try { await env.R2.put(seenKey, JSON.stringify({ sha256: f.sha256, id, file_updated: stamp.iso, first_published: retrieved_at }), { httpMetadata: { contentType: 'application/json' }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (_) {}   // best effort; the previous-image check above does not depend on it
   await logRun(env, 'sunface', ms, 'ok', 200, 1, f.bytes, `image ${id}; file updated ${stamp.iso}; observation time not known`);
   return 'sunface:published ' + id;
 }
