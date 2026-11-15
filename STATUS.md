@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 12:48 UTC (clock reading) — **Three branches built on Chad's Go lines; all await GPT review; nothing merged, nothing deployed**
+- **`optional-layers-status-rc` at `1a659db`** (page only). Withheld line gated on the rendered count for buoys and microplastic (`cardCount` covers five layers); "no buoy data / no microplastic data from the latest run"; `ME.runTimes` gives dated run times on all five record layers. Suite `optional-layers-status-ui` 219 checks, 8 breaks. Packet `reviews/2026-11-15-optional-layers-status-rc.md` (on the branch). For GPT: lower-case wording without a full stop; 31 February reads "unknown". `osmc-reliability-ui` 3a, 3b, 8 moved to the new rule.
+- **`hub-place-down-rc` at `f684d0c`** (hub source only). Collector 0.6.15, `worker.js` sha256 `aa2e6440e7a1f1bf25a009299388d2509438d197a2a23aafdd66d519ab816d8b`. `/place` answers down on the first counts read and on the final read after the pairing re-read, ordinary and `lines/1` paths. `history-hub` 33, `firms-v2` 61 (7 skipped), `place-ui` 35; `place-down-breaks.mjs` bites in the expected cases only; every other hub suite as on main. Packet `reviews/2026-11-15-hub-place-down-rc.md`. Live hub still 0.6.14.
+- **`widths-preview-rc` at `94180e2`** (page only, PREVIEW, not for release). A: header and globe pinned at 721–1100 px on screens at least 660 px tall (found by `mobile-pass`: a phone held sideways is inside the width range). D: credits to the foot of the right-hand column at 1101–1279 px; globe +160 to +219 px, but the credits are then about 2,550–2,650 px down that column. Suite `widths-preview-ui` 163 checks, 6 breaks. Packet `reviews/2026-11-15-widths-preview-rc.md`. Needs Chad's eye on a real screen.
+- Regression on each page branch: the two failures identical on main only (`osmc-reliability-ui` "old page: no page errors", `smoke-fixes` "Sources 360").
+- Mac `_review/` holds the three branch copies. Main unchanged apart from this entry.
+
 ## 15 Nov 11:00 UTC (clock reading) — **GPT review of the three remaining proposals recorded as rev 2** (docs only; nothing built)
 - Relayed by Chad. Order kept: optional-layer cards, hub `/place`, then layout preview.
 - **Optional layers (rev 2 §5):** cross-day dates on all five record layers, year when the runs cross a year, shared timestamp validation; "No buoy data from the latest run." and "No microplastic data from the latest run."; gate on the rendered count, with the buoy `last_attempt` fallback as a named test.
