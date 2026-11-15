@@ -1,6 +1,6 @@
 # moon-lit-rc — "Lit as now" on the Moon globe — review packet
 
-15 November 2026 · branch `moon-lit-rc` (from main `e98fe66`) · page only · **not merged, nothing live** · for GPT's review.
+15 November 2026 · **rev 2** (§8 = round 2, after GPT's review of `680aec3`) · branch `moon-lit-rc` (from main `e98fe66`) · page only · **not merged, nothing live** · for GPT's re-check.
 Built on Chad's line: "Go: build moon-lit-rc on a branch per MOON-LIT-AS-NOW-PROPOSAL rev 2.1 (D1 B fixed catalogue; D2 off by default; D3 faint night floor; D4 Earth view only if it passes the phase test; page only; no merge)".
 
 ## 1. What was built
@@ -112,3 +112,24 @@ The Earth view is within 0.2 points (gate 2). The ordinary camera misses by 8 po
 1. File the REGISTER entries on the branch (after GPT's view of the draft).
 2. Merge `moon-lit-rc` to main (page change). Rollback: revert the merge commit.
 3. On release, record the renewal date: the table ends 1 January 2028.
+
+## 8. Round 2 — GPT's review of `680aec3` (relayed by Chad, 15 Nov)
+
+GPT: desktop Chrome smoke on the Mac passes (opens evenly lit; crescent when enabled; distant Earth view centred; first drag exits and turns; LRO held at 12:01 while the lighting rolled 04:05 → 04:06 UTC; off restores even lighting); arithmetic suite 27/27 rerun; phase results meet D4's gate. **Merge held for one clock fix.** Decisions on §2, §5 and the REGISTER draft given.
+
+| GPT's point | Done |
+| --- | --- |
+| **Clock, two reads.** `computeLit()` read the clock to calculate, `tickLit()` read it again to record the minute drawn. A boundary between the two could leave the previous minute on screen for nearly a minute. | `tickLit()` reads the device clock **once** and passes that reading to `computeLit(now)`; the minute recorded is `ML.minute(now)` of the same reading. Regression F8a/F8b: the next two clock reads are forced to 59.999 s and the following minute; the recorded minute must equal the drawn one, and the new minute must be on screen within two heartbeats. Break `tworeads` (the old second read) fails 2 checks. |
+| **§2 Earth direction.** Keep geometric for R1. | Unchanged. The like-for-like Horizons check (Earth-observer reception time) stays as a separate check. |
+| Earth view wording: "Centred on Earth using the same calculated UTC minute." | Added as the first sentence of the Earth-view note (E1 checks it). |
+| Generator docstring: say the Sun comparison includes stellar aberration. | Corrected (`build_moonlight.py`; outputs unchanged, `--check` ok). |
+| **§5.** Keep `aria-live="off"`, the 12% floor, the one-second heartbeat. | Unchanged. |
+| Close view sentence: "The percentage is for the view from Earth's centre. The close view can show a different lit share." | Added to the readout, shown in the close view and replaced by the Earth-view note in the Earth view (B6a, E1, E13). |
+| Lighting "Details" link → `#moonlight`. | Done (`moon.html`). |
+| **REGISTER entry 4 (SVS):** file it; label test-only, never loaded by the page. | Draft updated. |
+
+**Runs on the round-2 code:** `moon-lit` **138 / 0** (one full run; six new checks); `moon-light` 27 / 0; `build_moonlight.py --check` ok. Breaks rerun: `tworeads` fails (F), `notick` fails (F). The other thirteen page breaks were not rerun (the code they target is unchanged). `moon-globe`, `moon-lro-path`, `skycraft-ui` not rerun (their code paths are unchanged since §4).
+
+**One test-harness correction:** the first round-2 run showed a page error ("Invalid time value") in section G. It came from the header's own clock (`craft.js`, unchanged code) meeting the test's "no clock" shim, which made `new Date()` invalid as well as `Date.now()`. The shim now affects `Date.now()` only, which is what the lighting reads. Section G then passed three times running (29 / 0).
+
+**Still open:** real phone, Safari, screen reader, real GPU; full regression.

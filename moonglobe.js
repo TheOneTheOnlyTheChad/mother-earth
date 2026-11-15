@@ -208,7 +208,7 @@
   let litReady = null, litMode = '';
   /** Work out the lighting for the device clock's current UTC minute. Light is applied only when a valid direction exists; otherwise the
    *  globe is evenly lit and the reason is given. A later valid time (a corrected clock) brings the lighting back by itself. */
-  function computeLit() {
+  function computeLit(now) {
     lit.cur = null; lit.why = '';
     if (!lit.on) { lit.state = 'off'; return; }
     if (lit.err === undefined) { lit.state = 'loading'; return; }
@@ -218,7 +218,6 @@
     if (!lit.patch) {   // the shading goes in when the globe's material is first compiled; if that has happened without it, say so rather than show an unlit "on"
       const pr = globe.renderer().info.programs; if (pr && pr.length) { lit.why = 'this device could not apply the shading.'; return; }
       lit.state = 'loading'; return; }
-    const now = Date.now();
     if (!Number.isFinite(now)) { lit.why = 'this device’s clock gives no valid time.'; return; }
     const ms = ML.minute(now);
     if (!ML.covered(ms)) { lit.why = `our sunlight table covers 1 Jun 2026 to 1 Jan 2028 UTC, and this device’s clock reads ${ymdhm(ms)} UTC.`; return; }
@@ -240,19 +239,24 @@
     if (litMode !== 'on') { litMode = 'on';   // built once; afterwards only the text of each part changes, so keyboard focus is never thrown away
       litRead.innerHTML = '<span><b>Sunlight calculated for <span id="mg-lit-t"></span> UTC · device clock</b> <span class="ev comp">Computed</span></span>'
         + '<span id="mg-lit-pts"></span><span id="mg-lit-frac"></span>'
-        + '<span id="mg-lit-ev" hidden>Earth view: from the Earth’s centre, Moon’s north up — not how it is tilted in your sky. A drag, a zoom or any view button returns to the close view.</span>'
+        + '<span id="mg-lit-close">The percentage is for the view from Earth’s centre. The close view can show a different lit share.</span>'
+        + '<span id="mg-lit-ev" hidden>Earth view: centred on Earth using the same calculated UTC minute. From the Earth’s centre, Moon’s north up — not how it is tilted in your sky. A drag, a zoom or any view button returns to the close view.</span>'
         + '<span class="dim">Calculated, not observed. A smooth sphere: no crater shadows, no earthshine, no eclipses. The position of the day–night line is the calculated thing. Night side shown faintly as a display aid; this is not earthshine. Sun, Earth and Moon positions and Moon orientation: JPL DE440 via NAIF.</span>'; }
     const put = (id, v) => { const e = $(id); if (e.textContent !== v) e.textContent = v; };
     put('mg-lit-t', ymdhm(lit.cur.ms));
     put('mg-lit-pts', `Sun overhead at ${place(lit.cur.sunLL)} · Earth overhead at ${place(lit.cur.earthLL)}`);
     put('mg-lit-frac', `${(100 * lit.cur.lit).toFixed(1)}% of the Earth-facing disc is lit`);
     const ev = $('mg-lit-ev'); if (ev.hidden === lit.earth) ev.hidden = !lit.earth;
+    const cl = $('mg-lit-close'); if (cl.hidden !== lit.earth) cl.hidden = lit.earth;
   }
-  /** One recalculation. While the Earth view is on it stays centred on the current sub-Earth point. */
+  /** One recalculation. The device clock is read ONCE: the same reading gives the minute that is calculated and drawn and the minute
+   *  recorded as drawn, so a minute boundary falling inside this function cannot leave the previous minute on screen unnoticed.
+   *  While the Earth view is on it stays centred on the current sub-Earth point. */
   function tickLit() {
-    computeLit(); drawLit();
+    const now = Date.now();
+    computeLit(now); drawLit();
     if (lit.state === 'on' && lit.earth) { globe.pointOfView({ lat: lit.cur.earthLL.lat, lng: lit.cur.earthLL.lng, altitude: EARTH_RADII - 1 }, 0); show(); }
-    lit.minute = ML ? ML.minute(Date.now()) : NaN;
+    lit.minute = ML ? ML.minute(now) : NaN;
     // A one-second heartbeat that only compares minutes: the lighting is recalculated when the device clock's UTC minute changes, whether
     // by passing a minute boundary or by the clock being corrected, and while a state is still settling (table or shading not ready yet).
     if (lit.on && !lit.timer) lit.timer = setInterval(() => { const m = ML ? ML.minute(Date.now()) : NaN; if (!Object.is(m, lit.minute) || lit.state === 'loading') tickLit(); }, 1000);
@@ -266,7 +270,7 @@
   const startedLit = setInterval(() => { if (globe) { clearInterval(startedLit); hookLit(); } else if (dead) clearInterval(startedLit); }, 200);
 
   window.MoonGlobe = { view: () => globe ? globe.pointOfView() : null, point: (lat, lng) => set(lat, lng, alt()), lights: () => globe ? globe.lights().map(l => l.type) : null,   // test aids
-    light: () => ({ on: lit.on, state: lit.state, why: lit.why, patch: lit.patch, earthView: lit.earth, cur: lit.cur && { ms: lit.cur.ms, sun: lit.cur.sunLL, earth: lit.cur.earthLL, lit: lit.cur.lit },
+    light: () => ({ on: lit.on, state: lit.state, minute: lit.minute, why: lit.why, patch: lit.patch, earthView: lit.earth, cur: lit.cur && { ms: lit.cur.ms, sun: lit.cur.sunLL, earth: lit.cur.earthLL, lit: lit.cur.lit },
       uniform: lit.uni && { on: lit.uni.mgOn.value, xyz: [lit.uni.mgSun.value.r, lit.uni.mgSun.value.g, lit.uni.mgSun.value.b] },
       cam: globe ? { fov: globe.camera().fov, far: globe.camera().far, dist: globe.camera().position.length(), maxDistance: globe.controls().maxDistance } : null }),
     lightTick: () => tickLit(), shade: v => { if (lit.uni) lit.uni.mgOn.value = v ? 1 : 0; }, screen: (lat, lng) => globe ? globe.getScreenCoords(lat, lng, 0) : null,

@@ -12,7 +12,7 @@
  *  G. clock jumps and fallbacks: valid jump followed, out of range → evenly lit → back; missing / altered table; no arithmetic file;
  *     no shader patch; no clock; no WebGL
  * Run: (python3 -m http.server 8899 --bind 127.0.0.1 &) ; node --no-warnings phase1/moon-lit.test.cjs [A-G letters to run]
- * BREAK=sun5|sunflip|nearcam|nocentre|noexit|keepfov|keeplit|nosha|nocover|notick|onbydefault|bothalways|edgewide|nopatchcheck must each fail. */
+ * BREAK=sun5|sunflip|nearcam|nocentre|noexit|keepfov|keeplit|nosha|nocover|notick|onbydefault|bothalways|edgewide|nopatchcheck|tworeads must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path');
 const { PNG } = require('/home/claude/spike/node_modules/pngjs');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev', BREAK = process.env.BREAK || '', ONLY = (process.argv[2] || 'ABCDEFG');
@@ -33,6 +33,7 @@ const BREAKS = {   // [file, from, to]
   notick: ['moonglobe.js', "if (lit.on && !lit.timer) lit.timer = setInterval(", "if (false) lit.timer = setInterval("],
   onbydefault: ['moonglobe.js', "const lit = { on: false,", "const lit = { on: true,"],
   bothalways: ['moonglobe.js', "const h = !(lit.state === 'on' && ov.on && ov.drawn);", "const h = !(lit.state === 'on');"],
+  tworeads: ['moonglobe.js', "lit.minute = ML ? ML.minute(now) : NaN;", "lit.minute = ML ? ML.minute(Date.now()) : NaN;"],
   nopatchcheck: ['moonglobe.js', "if (pr && pr.length) { lit.why = 'this device could not apply the shading.'; return; }", ""],
   edgewide: ['moonlight.js', "var EDGE_DEG = 1,", "var EDGE_DEG = 3,"],
 };
@@ -62,8 +63,8 @@ const probe = (g, az, e) => { const s = vec(g.sun.lat, g.sun.lng), a = unit(cros
 // three.js SphereGeometry with a longitude-latitude image: column u = (lng + 180) / 360 → x = −cos(2πu)·cos(lat), y = sin(lat), z = sin(2πu)·cos(lat)
 const meshXyz = q => [-Math.cos((q.lng + 180) * D) * Math.cos(q.lat * D), Math.sin(q.lat * D), Math.sin((q.lng + 180) * D) * Math.cos(q.lat * D)];
 const AZ = [0, 45, 90, 135, 180, 225, 270, 315], OFFS = [-2, -1, -0.5, 0, 0.5, 1, 2], WANT = { '-2': 0, '-1': 0, '-0.5': 0.25, '0': 0.5, '0.5': 0.75, '1': 1, '2': 1 };
-const CLOCK = t => { const RD = Date; let off = t - RD.now(), nan = false; class DD extends RD { constructor(...a) { if (a.length) super(...a); else super(nan ? NaN : RD.now() + off); } static now() { return nan ? NaN : RD.now() + off; } }
-  window.Date = DD; window.__setClock = ms => { nan = false; off = ms - RD.now(); }; window.__noClock = () => { nan = true; }; };
+const CLOCK = t => { const RD = Date; let off = t - RD.now(), nan = false, queue = []; class DD extends RD { constructor(...a) { if (a.length) super(...a); else super(RD.now() + off); } static now() { return queue.length ? queue.shift() : nan ? NaN : RD.now() + off; } }
+  window.Date = DD; window.__setClock = ms => { nan = false; off = ms - RD.now(); }; window.__noClock = () => { nan = true; };   /* Date.now() only: that is what the lighting reads; the header's own clock is left alone */ window.__nextReads = a => { queue = a.slice(); }; };
 
 (async () => {
   const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
@@ -118,6 +119,7 @@ const CLOCK = t => { const RD = Date; let off = t - RD.now(), nan = false; class
       ok(`B4 ${name}: readout time and label`, t.r.includes(`Sunlight calculated for ${stamp(g.ms)} UTC · device clock`) && /COMPUTED|Computed/.test(t.r), t.r);
       ok(`B5 ${name}: readout places and lit share`, t.r.includes(`Sun overhead at ${place(g.sun)} · Earth overhead at ${place(g.earth)}`) && t.r.includes(`${(100 * g.lit).toFixed(1)}% of the Earth-facing disc is lit`), t.r);
       ok(`B6 ${name}: the limits are said`, t.r.includes('Calculated, not observed') && t.r.includes('no crater shadows, no earthshine, no eclipses') && t.r.includes('Night side shown faintly as a display aid; this is not earthshine') && t.r.includes('JPL DE440 via NAIF'), t.r);
+      ok(`B6a ${name}: close view says whose percentage it is`, t.r.includes('The percentage is for the view from Earth’s centre. The close view can show a different lit share.') && !t.r.includes('Earth view:'), t.r);
       ok(`B7 ${name}: pressed; Earth-view button offered; readout does not interrupt a screen reader each minute`, t.pressed === 'true' && !t.earthHidden && t.ds === 'on' && t.live === 'off', t); }
     const pts = []; for (const az of AZ) for (const e of OFFS) pts.push({ az, e, ...probe(g, az, e) });
     if (ONLY.includes('C')) {
@@ -140,8 +142,8 @@ const CLOCK = t => { const RD = Date; let off = t - RD.now(), nan = false; class
   if (ONLY.includes('E')) { for (const [name, g] of WHEN.slice(0, 3)) { const { ctx, p, errs } = await mk(g.ms + 20000); await litOn(p);
       const o = await pair(p), ord = phaseOf(o.even, o.lit);   // ordinary close camera, looking at the sub-Earth point
       await p.evaluate(q => MoonGlobe.point(q.lat, q.lng), g.earth); const o2 = await pair(p), ord2 = phaseOf(o2.even, o2.lit);
-      await p.click('#mg-earth'); await p.waitForTimeout(500); const s = await p.evaluate(() => ({ l: MoonGlobe.light(), v: MoonGlobe.view(), pressed: document.getElementById('mg-earth').getAttribute('aria-pressed'), note: !document.getElementById('mg-lit-ev').hidden, txt: document.getElementById('mg-lit-ev').textContent }));
-      ok(`E1 ${name}: Earth view on, note shown`, s.l.earthView && s.pressed === 'true' && s.note && s.txt.includes('from the Earth’s centre, Moon’s north up — not how it is tilted in your sky'), s);
+      await p.click('#mg-earth'); await p.waitForTimeout(500); const s = await p.evaluate(() => ({ l: MoonGlobe.light(), v: MoonGlobe.view(), pressed: document.getElementById('mg-earth').getAttribute('aria-pressed'), note: !document.getElementById('mg-lit-ev').hidden, txt: document.getElementById('mg-lit-ev').textContent, closeHidden: document.getElementById('mg-lit-close').hidden }));
+      ok(`E1 ${name}: Earth view on, note shown`, s.l.earthView && s.pressed === 'true' && s.note && s.txt.includes('Earth view: centred on Earth using the same calculated UTC minute.') && s.txt.includes('From the Earth’s centre, Moon’s north up — not how it is tilted in your sky') && s.closeHidden, s);
       ok(`E2 ${name}: camera at 100 Moon radii after the controls settle`, Math.abs(s.l.cam.dist - 10000) < 1, s.l.cam);
       ok(`E3 ${name}: centred on the sub-Earth point`, ang(vec(s.v.lat, s.v.lng), vec(g.earth.lat, g.earth.lng)) < 1e-4, s.v);
       const e = await pair(p), ph = phaseOf(e.even, e.lit);
@@ -165,7 +167,7 @@ const CLOCK = t => { const RD = Date; let off = t - RD.now(), nan = false; class
         await p.mouse.move(cx, cy); await p.mouse.down(); await p.mouse.move(cx + 70, cy, { steps: 6 }); await p.mouse.up(); await p.waitForTimeout(300); const d = await p.evaluate(() => ({ l: MoonGlobe.light(), v: MoonGlobe.view(), pressed: document.getElementById('mg-earth').getAttribute('aria-pressed'), note: !document.getElementById('mg-lit-ev').hidden }));
         ok('E11 a drag leaves the Earth view: ordinary field of view, distance and limits', !d.l.earthView && Math.abs(d.l.cam.fov - 50) < 1e-9 && Math.abs(d.l.cam.dist - 320) < 0.5 && Math.abs(d.l.cam.maxDistance - 320) < 1e-6 && d.pressed === 'false' && !d.note, d.l.cam);
         ok('E12 … and that same first drag turned the globe', Math.abs(d.v.lng - before.lng) > 5 && Math.abs(d.v.altitude - ALT) < 0.01, [before, d.v]);
-        ok('E13 lighting stays on after leaving the Earth view', d.l.state === 'on' && d.l.uniform.on === 1);
+        ok('E13 lighting stays on after leaving the Earth view, and the close-view sentence is back', d.l.state === 'on' && d.l.uniform.on === 1 && (await p.evaluate(() => !document.getElementById('mg-lit-close').hidden)));
         await p.waitForTimeout(2500);   // let the drag's own momentum die away before reading button results
         for (const [btn, chk, what] of [['#mg-near', v => Math.abs(v.lat) < 0.02 && Math.abs(v.lng) < 0.02 && Math.abs(v.altitude - ALT) < 1e-6, 'Near side'], ['#mg-zin', v => Math.abs(v.altitude - ALT * 0.75) < 1e-6, 'Zoom in'], ['#mg-east', v => Math.abs(v.altitude - ALT) < 1e-6, 'East']]) {
           await p.evaluate(() => MoonGlobe.point(0, 0)); await p.click('#mg-zout'); await p.click('#mg-zout'); await p.click('#mg-earth'); await p.waitForTimeout(250); const inE = (await L(p)).earthView; await p.click(btn); await p.waitForTimeout(250); const x = await p.evaluate(() => ({ l: MoonGlobe.light(), v: MoonGlobe.view() }));
@@ -195,6 +197,10 @@ const CLOCK = t => { const RD = Date; let off = t - RD.now(), nan = false; class
     ok('F7 focus is kept through the tick', foc === 'mg-lro-time', foc);
     await p.focus('#mg-lit'); await jump(p, g.ms + 5 * 3600e3 + 7000); const s4 = await state(); const foc2 = await p.evaluate(() => document.activeElement && document.activeElement.id);
     ok('F8 coming back to the tab recalculates at once', s4.l.cur && s4.l.cur.ms === g.ms + 5 * 3600e3 && s4.lit === stamp(g.ms + 5 * 3600e3) && foc2 === 'mg-lit', s4.lit);
+    // GPT round 1: a minute boundary falling INSIDE one recalculation. The next two clock reads are forced to straddle it: 59.999 s, then the new minute.
+    const A = g.ms + 9 * 3600e3, B = A + 60000; await p.evaluate(([a, b]) => { window.__setClock(b + 5); window.__nextReads([a + 59999, b + 1]); document.dispatchEvent(new Event('visibilitychange')); }, [A, B]);
+    const s5 = await L(p); ok('F8a boundary inside one recalculation: the minute recorded is the minute drawn (one clock read)', s5.cur && s5.cur.ms === A && s5.minute === A, [s5.cur && s5.cur.ms, s5.minute, A]);
+    await p.waitForTimeout(1600); const s6 = await state(); ok('F8b … and the new minute is on screen within two heartbeats, not a minute later', s6.l.cur.ms === B && s6.lit === stamp(B) && s6.l.minute === B, [s6.lit, stamp(B)]);
     await p.click('#mg-lro'); await p.waitForTimeout(200); ok('F9 LRO off: line gone, lighting stays', !(await state()).both && (await L(p)).state === 'on');
     await p.click('#mg-lro'); await p.waitForTimeout(300); await p.click('#mg-lit'); await p.waitForTimeout(200); s = await state(); ok('F10 lighting off: line gone, LRO stays', !s.both && s.o.drawn && s.l.state === 'off', s);
     await p.click('#mg-lit'); await settle(p, 'on'); await jump(p, Date.UTC(2029, 0, 1)); s = await state(); ok('F11 lighting unavailable: no both-on line (no lighting is displayed)', !s.both && s.l.state === 'unavailable' && s.o.drawn, s);

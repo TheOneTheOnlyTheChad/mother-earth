@@ -1,7 +1,7 @@
 # DRAFT — REGISTER entries for "Lit as now" on the Moon globe (not filed)
 
 2026-11-15 · for Chad's Approve line · to be added to `REGISTER.md` on branch `moon-lit-rc`, reaching main with the page merge.
-Nothing below is in `REGISTER.md` yet. Entries 1–3 extend entries filed on 14 Nov; entry 4 is new and GPT is asked whether a test-only reference needs one; entry 5 is the new table.
+Nothing below is in `REGISTER.md` yet. Entries 1–3 extend entries filed on 14 Nov; entry 4 is new (GPT, round 1: file it, because the repo keeps the SVS extract and the public method text cites its results; label it test-only, never loaded by the page); entry 5 is the new table.
 
 ---
 
@@ -25,7 +25,7 @@ Nothing below is in `REGISTER.md` yet. Entries 1–3 extend entries filed on 14 
 - **Answer header used:** "Target pole/equ : MOON_ME {East-longitude positive}"; target radii 1737.4 × 3; target and centre source DE441; geocentric.
 - **Reuse terms, request rules:** as the Horizons entries above.
 
-## 4. NASA Scientific Visualization Studio — "Moon Phase and Libration, 2026" hourly table `mooninfo_2026.json` — **test-only corroboration; not displayed, not shipped** *(GPT: is an entry needed for a test-only reference?)*
+## 4. NASA Scientific Visualization Studio — "Moon Phase and Libration, 2026" hourly table `mooninfo_2026.json` — **test-only corroboration; never loaded by the page; not displayed**
 - **Filed:** <date and time> on Chad's line (as above).
 - **Source:** https://svs.gsfc.nasa.gov/5587/ ; file `https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005587/mooninfo_2026.json`, 2,094,339 B, sha256 `098ec6434ba4fecb84e66485385816d465b7969f142864bcfc9ffc68311b4a86`, Last-Modified Thu, 30 Oct 2025. Fetched once by Claude in the browser pane, 15 Nov 2026 03:15:53 UTC.
 - **Kept in the repo:** an extract only — 1,128 hourly rows, 15 Nov 2026 00:00 UT to 31 Dec 2026 23:00 UT, six columns (time, phase, sub-solar longitude and latitude, sub-Earth longitude and latitude), values as published (`phase1/skycraft/raw/svs-mooninfo-2026-nov15-dec31.csv`, 61,074 B).

@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 04:21 UTC (clock reading) — **moon-lit-rc round 2: GPT's clock finding fixed; wording and REGISTER points applied** (branch only; nothing merged)
+- **GPT's review of `680aec3` (relayed by Chad):** desktop Chrome smoke passes; arithmetic 27/27 rerun; phase gate met. Merge held for one fix: the clock was read twice in one recalculation, so a minute boundary between the reads could leave the previous minute on screen.
+- **Fix:** one clock read per recalculation (`tickLit` → `computeLit(now)`); regression F8a/F8b with forced reads either side of a boundary; break `tworeads` fails.
+- **Also applied:** geometric Earth direction kept for R1 (GPT); Earth-view note opens "Centred on Earth using the same calculated UTC minute."; close-view sentence about whose percentage it is; Details link to `#moonlight`; generator docstring (aberration); REGISTER draft entry 4 (SVS) to be filed, labelled test-only.
+- **Runs:** `moon-lit` 138/0; `moon-light` 27/0; build `--check` ok; breaks `tworeads` and `notick` fail as they must. Other breaks and the other Moon suites not rerun (code unchanged).
+- Packet `reviews/2026-11-15-moon-lit-rc.md` rev 2 (§8).
+- **Next (item 1):** GPT re-checks. Then, each on Chad's own line: file the five REGISTER entries on the branch; merge `moon-lit-rc` to main (page change).
+
 ## 15 Nov 04:02 UTC (clock reading) — **moon-lit-rc built: "Lit as now" on the Moon globe** (branch only; page only; nothing merged; for GPT)
 - Chad: "Go: build moon-lit-rc on a branch per MOON-LIT-AS-NOW-PROPOSAL rev 2.1 (D1 B fixed catalogue; D2 off by default; D3 faint night floor; D4 Earth view only if it passes the phase test; page only; no merge)".
 - **Built:** `moonlight.js` (arithmetic), `moonglobe.js` (shading, device-clock heartbeat, Earth-view camera at 100 radii, readouts, fallbacks), `moon.html`, `style.css`, `sources.html#moonlight`, table `assets/moon/moon-light-2026-06-R1.json` (82,330 B, `a78c2f4b…b462`) from `phase1/skycraft/build_moonlight.py`. **Earth view passes the phase test, so the button is in.**

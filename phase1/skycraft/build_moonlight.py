@@ -13,8 +13,8 @@ Checks on every build (checks/moonlight-checks.json):
      Angle between unit vectors at every sample, before and after the catalogue's rounding. Ceiling 0.0001°.
   2. JUNE ROTATION — pxform at the exact SPK epochs archived in checks/moonfixed-checks.json equals the matrices archived there.
   3. HORIZONS — Moon (301) from the Earth's centre, quantities 10, 14, 15, 116 instants. Compared LIKE FOR LIKE first: our values
-     recomputed in Horizons' conventions (observer time; Moon and its orientation at t − light time; the apparent Sun at the
-     Moon then). Ceilings 0.001° and 0.01 percentage points. The residual against the catalogue's own conventions is reported apart.
+     recomputed in Horizons' conventions (observer time; Moon and its orientation at t − light time, no aberration; the Sun as
+     seen from the Moon then, with light time AND stellar aberration, which is what Horizons' "apparent sub-solar point" holds). Ceilings 0.001° and 0.01 percentage points. The residual against the catalogue's own conventions is reported apart.
   4. INTERPOLATION — the page's rule (spherical interpolation of the rounded samples) against SPICE at every sample and the
      midpoint of every interval. Ceiling 0.01°. (phase1/moon-light.test.mjs repeats this with the page's own JavaScript.)
   5. NASA SVS hourly table, 15 Nov – 31 Dec 2026: corroboration only. Offsets reported; no ceiling.
