@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 18:20 UTC (clock reading) — **GPT passes the Night lights release proposal for a page-only round 3; recorded as rev 2** (docs only; round 3 not started)
+- GPT's review (relayed by Chad): rev 1 passes; RL1 direct GIBS for this release, RL2 keep the phone and Safari deferral, RL3 Chad looks at round 3, RL4 ship the layer and the comparison together. Three details for round 3: the imagery label tied to what is drawn (status report and Sky zoom-out view, including entry and return while loading); bounded GIBS waits with retry, and "No data for this date" for a blank comparison frame; NASA's published bulk-download guidance recorded.
+- `docs/concepts/NIGHT-LIGHTS-RELEASE-PROPOSAL.md` rev 2 §8. GIBS guidance read (summarising fetch of the page GPT linked): a bulk download is more than 1,000,000 tiles planned in 24 hours, arranged with Earthdata support 48 hours ahead; no limit stated for interactive map requests.
+- **The "Go" in GPT's text is not Chad's line.** No build started. RL1–RL4 remain Chad's decisions. The email to Leslie Lait that Chad offered to send was not needed and was not drafted (Ozone Watch, not GIBS).
+
 ## 15 Nov 18:12 UTC (clock reading) — **Night lights release proposal rev 1 for GPT; the pasted NASA email is the Ozone Watch reply** (docs only; nothing built, merged or deployed)
 - Chad: "no remember we are good to go with nasa … GO", with part of an email pasted. **The email is the NASA Ozone Watch reply from Leslie R. Lait, already recorded on 10 Nov (ENQUIRIES rev 8) and filed in REGISTER that day.** It answers for Ozone Watch's two daily files; it is a different NASA service from GIBS and is not used as evidence for Night lights. GIBS is already cleared in REGISTER under the LANCE terms (30 Oct), so no NASA permission is outstanding for Night lights. The email's addresses and phone number are not recorded.
 - "GO" taken as the go for the release proposal offered in the previous message (docs only), not as a merge approval: `docs/concepts/NIGHT-LIGHTS-RELEASE-PROPOSAL.md` rev 1. Release work listed (Sources & Details section, status-report wording, REGISTER layer lines, Sky zoom-out check, served-hash count fifteen); route decision RL1 is Chad's (as reviewed, or the hub applying the date rule).

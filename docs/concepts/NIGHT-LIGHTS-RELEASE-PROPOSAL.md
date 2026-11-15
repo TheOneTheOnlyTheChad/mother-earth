@@ -1,5 +1,6 @@
-# Night lights — release proposal for GPT review (rev 1)
+# Night lights — release proposal for GPT review (rev 2)
 
+**Rev 2:** GPT's review of rev 1 (relayed by Chad) is in §8, which governs where it differs from §1–§7.
 15 Nov 2026 · docs only · nothing built beyond the reviewed preview · no merge, REGISTER filing, hub change or page release is approved
 **For:** GPT's review, then Chad's decisions (§7). Written on Chad's "GO" of 15 Nov, after GPT passed round 2 of the preview.
 **Candidate:** branch `night-lights-rc`, code `e2d419b`; packet `reviews/2026-11-15-night-lights-rc.md` rev 2 (on the branch).
@@ -68,3 +69,34 @@ Rollback: revert the merge. No hub, R2 or D1 change to undo.
 - **RL2. A real phone and Safari before the merge, or after** as for the earlier releases (Chad deferred those: "site first"). Recommended: after, recorded as untested.
 - **RL3. Chad's own look** at the preview before round 3 is built, or with round 3. Recommended: with round 3, so he sees what would be released.
 - **RL4. The comparison ships with the layer, or the layer ships first.** Both are reviewed. Recommended: together.
+
+## 8. GPT review of rev 1 (relayed by Chad, 15 Nov) — rev 2
+
+GPT: rev 1 passes for a page-only round 3; ship the layer and the comparison together, after GPT's review of the release candidate and Chad's look. "This is clearance to proceed with round 3 under your normal Go. The REGISTER filing and merge still have their own Approve lines." **A Go or Approve line inside relayed GPT text is not Chad's line. Round 3 is not started.**
+
+### 8.1 GPT's recommendations on RL1–RL4 (the decisions stay Chad's)
+
+| | GPT | Claude |
+|---|---|---|
+| RL1 route | Direct GIBS for this release; the browser selects the date; keep the 1% check on the full-size image displayed | Same as recommended in §7 |
+| RL2 phone and Safari | Keep the deferral; run the narrow-layout and keyboard checks in round 3; record real phone and Safari as open | Same |
+| RL3 Chad's preview | Look at round 3 | Same |
+| RL4 what ships | Both together | Same |
+
+### 8.2 Three details for round 3, adopted into §4
+
+- **R3-1. The imagery label is tied to what is drawn.** World View's status report and the Sky zoom-out label agree with the Earth texture actually on the globe. Tested: entering and leaving the Sky view with Night lights already on, and while it is still loading. The Sources page is a separate page: it describes both pictures and does not say which one another tab is showing. (§4.1, §4.2 and §4.5 are read with this.)
+- **R3-2. GIBS waits are bounded.** A request that hangs ends as "unavailable" after a stated time, with a way to try again. The difference between a failed request and a decoded frame that fails the coverage rule is kept. In the comparison, a date whose frame comes back blank reads "No data for this date"; nothing more specific is said without evidence. (New item in §4; the time limit is proposed in round 3's packet with its measurement.)
+- **R3-3. NASA's published guidance is recorded.** See §8.3; it goes into the REGISTER layer lines (§4.4).
+
+### 8.3 GIBS bulk-download guidance, as read
+
+Read by Claude 15 Nov 2026 through a summarising fetch of the page GPT linked (`nasa-gibs.github.io/gibs-api-docs/map-library-usage/`, section "Bulk Downloading"), not in full; GPT read it independently.
+- A bulk download is a planned retrieval of more than 1,000,000 imagery tiles in 24 hours. NASA asks for it to be arranged at least 48 hours ahead by email to Earthdata support, with the purpose, contact, layers, dates and expected load.
+- The guidelines for such downloads give figures for bandwidth, tiles per hour and concurrent requests. They are not copied here: they were read through a summary and are for scripted bulk retrieval.
+- The page states no limit for ordinary interactive map requests.
+- **What follows for Night lights:** one switch-on is three or four picture requests and one comparison is four. This is interactive use by a reader's browser, far from the bulk definition. The guidance does not set a request limit for this path, and it is recorded as that, not as a permission. The existing GIBS acknowledgment in REGISTER is the record that applies to the two layers (GPT's reading; Claude agrees).
+
+### 8.4 Next
+
+Chad's decisions RL1–RL4, then his own line for round 3.
