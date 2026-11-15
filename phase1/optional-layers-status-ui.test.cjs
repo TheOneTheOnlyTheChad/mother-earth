@@ -10,7 +10,7 @@
  * Real page; the hub's answers are fixtures shaped as the hub publishes them.
  * Run: 8899 static server on the repo root, then
  *      NODE_PATH=/home/claude/spike/node_modules:/home/claude/node_modules node --no-warnings phase1/optional-layers-status-ui.test.cjs
- * BREAK=no-gate | freshness-gate | old-wording | no-dates | no-year | no-validate | lenient-day | stale-key   each must fail. */
+ * BREAK=no-gate | freshness-gate | old-wording | no-dates | no-year | no-validate | no-zone | lenient-day | stale-key   each must fail. */
 const { chromium } = require('playwright');
 const fs = require('fs'); const path = require('path');
 const ROOT = path.join(__dirname, '..');
@@ -30,7 +30,8 @@ const SAME_A = iso(50e3), SAME_B = iso(20e3), sameDayOk = SAME_A.slice(0, 10) ==
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const hm = s => s.slice(11, 16) + ' UTC', dm = s => `${+s.slice(8, 10)} ${MON[+s.slice(5, 7) - 1]}`, yr = s => s.slice(0, 4);
 const realDay = v => { const m = /^(\d{4})-(\d\d)-(\d\d)T/.exec(v); if (!m) return false; const y = +m[1], mo = +m[2], da = +m[3], dim = [31, (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; return mo >= 1 && mo <= 12 && da >= 1 && da <= dim[mo - 1]; };
-const expectTimes = (r, c) => { const good = v => typeof v === 'string' && Number.isFinite(Date.parse(v)) && realDay(v);
+const fullTime = v => /^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d(\.\d+)?)?Z$/.test(v);   // the fixtures here are all UTC "Z" times; offsets are checked by explicit cases
+const expectTimes = (r, c) => { const good = v => typeof v === 'string' && fullTime(v) && Number.isFinite(Date.parse(v)) && realDay(v);
   if (!good(r) || !good(c)) { const f = v => good(v) ? `${dm(v)} ${yr(v)} ${hm(v)}` : 'unknown'; return `records ${f(r)}, counts ${f(c)}`; }
   if (yr(r) !== yr(c)) return `records ${dm(r)} ${yr(r)} ${hm(r)}, counts ${dm(c)} ${yr(c)} ${hm(c)}`;
   if (r.slice(0, 10) !== c.slice(0, 10)) return `records ${dm(r)} ${hm(r)}, counts ${dm(c)} ${hm(c)}`;
@@ -43,8 +44,9 @@ const served = { index: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'), 
   if (BREAK === 'old-wording') { rep('index', "down ? 'no buoy data from the latest run' : ", ''); rep('index', "s && s.source_status === 'down' ? 'no microplastic data from the latest run' : ", ''); }
   if (BREAK === 'no-dates') rep('app', "const day = !both || year || r.getUTCMonth() !== c.getUTCMonth() || r.getUTCDate() !== c.getUTCDate();", "const day = false;");                                    // hours and minutes only, as on main
   if (BREAK === 'no-year') rep('app', "year = !both || r.getUTCFullYear() !== c.getUTCFullYear();", "year = false;");
-  if (BREAK === 'no-validate') rep('app', "const ok = v => typeof v === 'string' && Number.isFinite(Date.parse(v)) && new Date(Date.parse(v)).toISOString().slice(0, 10) === v.slice(0, 10), d =", "const ok = v => true, d =");
-  if (BREAK === 'lenient-day') rep('app', " && new Date(Date.parse(v)).toISOString().slice(0, 10) === v.slice(0, 10), d =", ', d =');
+  if (BREAK === 'no-validate') rep('app', "const ok = v => { const m = typeof v === 'string' ? ME.RUN_TIME.exec(v) : null; return !!m && !!ME.validDate(m[1]) && Number.isFinite(Date.parse(v)); }, d =", "const ok = v => true, d =");
+  if (BREAK === 'no-zone') rep('app', "const ok = v => { const m = typeof v === 'string' ? ME.RUN_TIME.exec(v) : null; return !!m && !!ME.validDate(m[1]) && Number.isFinite(Date.parse(v)); }, d =", "const ok = v => typeof v === 'string' && Number.isFinite(Date.parse(v)) && new Date(Date.parse(v)).toISOString().slice(0, 10) === v.slice(0, 10), d =");   // round 1's rule
+  if (BREAK === 'lenient-day') rep('app', "return !!m && !!ME.validDate(m[1]) && ", 'return !!m && ');
   if (BREAK === 'stale-key') rep('sources', /app\.js\?v=\d+/.exec(served.sources)[0], 'app.js?v=202612021000'); }
 
 const cov = { grade: 'partial', evidence: 'e', observed_fraction: 1 };
@@ -66,7 +68,7 @@ const NONE = 'none';
 (async () => {
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const open = async (L, opt = {}) => {
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, reducedMotion: 'reduce' });
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 }, reducedMotion: 'reduce', timezoneId: 'Africa/Johannesburg' });   // a visitor's clock that is not UTC
     await ctx.route('**/unpkg.com/globe.gl**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }));
     await ctx.route('**/fonts.googleapis.com/**', r => r.fulfill({ status: 200, contentType: 'text/css', body: '' }));
     await ctx.route('**/gibs.earthdata.nasa.gov/**', r => r.abort());
@@ -100,6 +102,13 @@ const NONE = 'none';
     ok('runTimes: the exact example from the proposal', got[1] === 'records 10 Nov 10:50 UTC, counts 14 Nov 10:50 UTC', got[1]);
     ok('runTimes: one minute either side of a year end shows both years', got[3] === 'records 31 Dec 2026 23:50 UTC, counts 1 Jan 2027 00:10 UTC', got[3]);
     ok('runTimes: an impossible calendar day (31 February) reads unknown, not 3 March', got[9] === 'records unknown, counts unknown', got[9]);
+    // round 2 (GPT): a run time must state its own time and zone — nothing is filled in for it. Asked on a Johannesburg clock.
+    const Z = '2026-11-15T10:50:00.000Z', X = [['2026-11-15', Z, 'records unknown, counts 15 Nov 2026 10:50 UTC'], ['2026-11-15T10:50:00', Z, 'records unknown, counts 15 Nov 2026 10:50 UTC'], [Z, '2026-11-15T10:50', 'records 15 Nov 2026 10:50 UTC, counts unknown'],
+      ['2026-11-15 10:50:00Z', Z, 'records unknown, counts 15 Nov 2026 10:50 UTC'], ['2026-11-15T24:00:00Z', Z, 'records unknown, counts 15 Nov 2026 10:50 UTC'], ['2026-11-15T10:50Z', Z, 'records 10:50 UTC, counts 10:50 UTC'],
+      ['2026-11-15T10:50:00+02:00', Z, 'records 08:50 UTC, counts 10:50 UTC'], ['2026-11-16T01:30:00+02:00', Z, 'records 23:30 UTC, counts 10:50 UTC'], ['2026-11-15T23:30:00-02:00', Z, 'records 16 Nov 01:30 UTC, counts 15 Nov 10:50 UTC'], ['2026-02-31T10:50:00+02:00', Z, 'records unknown, counts 15 Nov 2026 10:50 UTC']];
+    const gx = await page.evaluate(X => ({ tz: Intl.DateTimeFormat().resolvedOptions().timeZone, out: X.map(([r, c]) => { try { return ME.runTimes(r, c); } catch (e) { return 'THREW ' + String(e && e.message); } }) }), X);
+    ok('runTimes round 2: the browser clock is Johannesburg (UTC+2), so a time without a zone would be read two hours off', gx.tz === 'Africa/Johannesburg', gx.tz);
+    X.forEach(([r, c, want], i) => ok(`runTimes round 2 ${JSON.stringify(r)} / ${JSON.stringify(c)} → "${want}"`, gx.out[i] === want, gx.out[i]));
     ok('runTimes: same day stays times only', got[0] === 'records 10:50 UTC, counts 10:55 UTC', got[0]);
     ok('runTimes: no page error', !perr.length, perr); await ctx.close(); }
 

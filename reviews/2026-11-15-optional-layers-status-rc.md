@@ -1,4 +1,4 @@
-# optional-layers-status-rc — candidate for GPT review (round 1)
+# optional-layers-status-rc — candidate for GPT review (round 2)
 
 15 Nov 2026 · branch `optional-layers-status-rc` from main `f655613` · **page only** · no merge · hub untouched (0.6.14)
 Built on Chad's Go line. Spec: `docs/concepts/OPTIONAL-LAYERS-WITHHELD-LINE-PROPOSAL.md` rev 2, §5 governing.
@@ -66,3 +66,34 @@ Regression (same kit as the last four releases): `freshness-wording-ui` 156, `qu
 ## 7. Release steps (on Chad's own Approve line)
 
 Merge to main → verify served hashes of `index.html`, `app.js`, `sources.html` → live text smoke with buoys and microplastic switched on. Rollback: revert the merge.
+
+## 8. Round 2 (GPT's review of `1a659db`, relayed by Chad)
+
+GPT: card changes pass; both §3 decisions accepted; the three changed buoy expectations match. **Hold for one fix:** `ME.runTimes` invented a time for two incomplete inputs. `2026-11-15` displayed as 00:00 UTC, and `2026-11-15T10:50:00` displayed as 08:50 UTC on a Johannesburg clock.
+
+**Fix, scoped to `ME.runTimes` (`app.js` only).** A run time is formatted only if it states its own date, time and zone: `ME.RUN_TIME` = `YYYY-MM-DDTHH:MM[:SS[.fff]]` followed by `Z` or `±HH:MM`, hours 00–23, on a real calendar day (`ME.validDate`). Anything else reads "unknown". A time with an offset is shown converted to UTC. The round 1 read-back test is replaced by the calendar check, so 31 February still reads "unknown".
+
+No other file changed. The cache key stays `202612021100`; it has never been released.
+
+**Suite: 230 passed, 0 failed** (was 219). Every page in the suite now runs on a Johannesburg clock (`timezoneId`), and one check asserts that. Added:
+
+| Records time | Result |
+|---|---|
+| `2026-11-15` | unknown |
+| `2026-11-15T10:50:00` (no zone) | unknown |
+| `2026-11-15T10:50` as the counts time | unknown |
+| `2026-11-15 10:50:00Z` (space) | unknown |
+| `2026-11-15T24:00:00Z` | unknown |
+| `2026-02-31T10:50:00+02:00` | unknown |
+| `2026-11-15T10:50Z` | 10:50 UTC |
+| `2026-11-15T10:50:00+02:00` | 08:50 UTC |
+| `2026-11-16T01:30:00+02:00` | 23:30 UTC, same UTC day as the counts, so no date |
+| `2026-11-15T23:30:00-02:00` | 16 Nov 01:30 UTC, with dates on both |
+
+Breaks, each fails: new `no-zone` (round 1's rule) 6 · `no-validate` 23 · `lenient-day` 3 · `no-gate` 14 · `freshness-gate` 2 · `old-wording` 2 · `no-dates` 34 · `no-year` 19 · `stale-key` 1.
+
+Regression after the fix (the suites that load `app.js` on the World View): `freshness-wording-ui` 156, `quakes-ships-status-ui` 124, `fire-status-ui` 279, `legend-active-ui` 548, `drifters-ui` 25, `plastic-ui` 29, `buoy-temp-ui` 33, `mobile-pass` 131, `status-notes-ui` 17, `search-ui` 104, `place-ui` 30 pass; `osmc-reliability-ui` 40 of 41 (the one failure is identical on main). The other suites in §5 were not rerun for this one-function change.
+
+sha256: `index.html` `ec13b4f7…dc4e` (unchanged), `app.js` `12ad3fed…b3d4`, `sources.html` `91f50b06…4b82` (unchanged).
+
+Not claimed: the 230 checks are browser checks in Chrome; nothing was seen on production.
