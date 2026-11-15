@@ -397,11 +397,15 @@ ME.readings = function () {
     coverage: 'pass schedule not yet wired; cloud may hide detections; one detection per pass, not one fire', quantity: f && f.quantity, window: 'today (UTC) so far — FIRMS day_range=1 is the current UTC date, not a rolling 24 h; the count resets at 00:00 UTC and is lowest in the first hours of the day', cadence: 'collected every 15 min', comparison: `none of ours shown yet — ${ME.kept('firms')}`,
     caveat: 'NASA: not for tactical decisions or local-scale conditions' };
   const s = state.ships, fs = ME.freshness('ships');
-  const lastCount = s ? ME.total(s) : null;
-  R.ships = { label: LABEL.ships, source: SOURCE.ships, fresh: fs, value: fs.grade !== 'unknown' ? lastCount : null, lastSample: lastCount, unit: `vessel identities in a ${s ? s.window_s : 60} s AIS sample`,
-    sampleEnd: s && s.window_end, observed: s ? `sample ended ${hhmm(s.window_end)}; ${s.class_a} Class A + ${s.class_b} Class B; socket connected ${num(s.socket_connected_s ?? s.socket_up_s, 0)} s of ${s.window_s} s` : '', retrieved: s && s.retrieved_at,
+  // A down run publishes an empty envelope (cells: {}, no window, no class counts): it carries NO sample, so nothing about a
+  // sample is read from it — not a count, not "sample ended", not a window length (15 Nov 2026, quakes-ships-status-rc, W3).
+  // A stale envelope is different: it IS the last sample, and its count (a genuine zero included) is kept as "Last sample: N".
+  const sDown = !!(s && s.source_status === 'down'), sample = s && !sDown ? s : null;
+  const lastCount = sample ? ME.total(sample) : null;
+  R.ships = { label: LABEL.ships, source: SOURCE.ships, fresh: fs, value: fs.grade !== 'unknown' ? lastCount : null, lastSample: lastCount, unit: `vessel identities in a ${(sample && sample.window_s) || 60} s AIS sample`, down: sDown,
+    sampleEnd: sample && sample.window_end, observed: sample ? `sample ended ${hhmm(sample.window_end)}; ${sample.class_a} Class A + ${sample.class_b} Class B; socket connected ${num(sample.socket_connected_s ?? sample.socket_up_s, 0)} s of ${sample.window_s} s` : '', retrieved: s && s.retrieved_at,
     mode: s && /cloud/.test(s.collected_by || '') ? ME.SHIPS_CLOUD_TEXT : SHIPS_MODE.text, coverage: 'terrestrial AIS only — a cell with no vessels is not an empty sea; positions between samples unknown', quantity: s && s.quantity,
-    window: s ? `${s.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (s.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours shown yet — ${ME.kept('ships')}` };
+    window: sample ? `${sample.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (sample.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours shown yet — ${ME.kept('ships')}` };
   const fo = state.forest, ffo = ME.freshness('forest');
   const fsum = fo ? Object.values(fo.cells || {}).reduce((a, c) => { a.n += c.count || 0; a.hi += (c.confidence && c.confidence.highest) || 0; a.cells++; return a; }, { n: 0, hi: 0, cells: 0 }) : { n: 0, hi: 0, cells: 0 };
   R.forest = { label: LABEL.forest, source: SOURCE.forest, fresh: ffo, value: ffo.grade !== 'unknown' ? fsum.n : null, highest: fsum.hi, cells: fsum.cells, sweep: fo && fo.sweep, unit: 'alert pixels (10 m) · published in the last 7 days',

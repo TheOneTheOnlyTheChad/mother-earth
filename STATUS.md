@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 08:29 UTC (clock reading) — **quakes-ships-status-rc built: Earthquakes and Ships withheld line; no sample read from a down ships run** (branch only; page only; nothing merged; for GPT)
+- Chad: "Go: build quakes-ships-status-rc on a branch per WITHHELD-LINE-QUAKES-SHIPS-PROPOSAL rev 2 (§6 governing; page only; no merge)".
+- **Built:** `app.js` (`ME.readings`: a down ships envelope is not a sample), `index.html` (`cardCount` for usgs and ships; line gated on `value !== null`; "no sample from the latest run"), `sources.html` (cache key). `app.js?v=202612011000`. Packet: `reviews/2026-11-15-quakes-ships-status-rc.md`.
+- **Tests:** new `quakes-ships-status-ui` 124/0, three breaks fail. Regression across 20 suites passes (fire-status 279, legend 548, mobile-pass 131, …); same two failures as main.
+- **Also gone with the fix:** on main a down ships run printed "undefined s" in the unit and "undefined Class A" in the description.
+- **Not tested:** phone, Safari, screen reader, real GPU, the live page. **Not approved:** merge. Live unchanged: hub 0.6.14, page `d13466a`.
+
 ## 15 Nov 08:08 UTC (clock reading) — **GPT reviews both proposals; rev 2 of each** (docs only; nothing built)
 - GPT (relayed by Chad): both sound with clarifications; build Earthquakes and Ships first, freshness wording after as its own page-only change. Proposals rev 2 are in commit `c2acc9c`.
 - **Earthquakes and Ships (§6):** ships down → "–" and the sample description suppressed; "Last sample: N" kept for a stale real sample incl. a genuine zero; line gated on the displayed reading's `value !== null`; buoys and microplastic later; added check for a genuine zero-vessel sample.

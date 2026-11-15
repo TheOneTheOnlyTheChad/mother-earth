@@ -391,7 +391,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611301000"></script>
+<script src="app.js?v=202612011000"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612061000"></script>
@@ -1408,30 +1408,30 @@ const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
 const FIRMS_NOT_YET_COPY = ME.FIRMS_NOT_YET_COPY + '.';
 const firmsNotYet = () => ME.firmsNotYet(state.firms);
 // The count each card last rendered (null = the card shows "–"). The "Records withheld … counts shown alone" line explains a
-// count that is on screen, so for fires it is gated on this same value (fire-status-rc, A1): with no count on the card, the
-// card's one reason stands alone.
-const cardCount = { firms: undefined };
+// count that is on screen, so for fires, earthquakes and ships it is gated on this same value (fire-status-rc A1;
+// quakes-ships-status-rc W1, W2): with no current count on the card, the card's one reason stands alone.
+const cardCount = { usgs: undefined, firms: undefined, ships: undefined };   // usgs and ships since 15 Nov 2026 (quakes-ships-status-rc): the displayed reading's value; for ships "Last sample: N" is not it
 function pairNote(layer) {
   const e = $('p-' + layer); if (!e) return;
   // 'off' is the layer's own switch, already stated on the card: it is not records being withheld (found 4 Nov 2026, live too)
-  const noCount = layer === 'firms' && cardCount.firms === null;   // unknown fires: there is no count to be "shown alone"
+  const noCount = layer in cardCount && cardCount[layer] === null;   // no current count on the card (a dash, or ships' "Last sample"): nothing is "shown alone". A valid zero or a degraded count IS a count, and keeps the line
   const why = unusableWhy(layer), show = !!why && why !== 'not read yet' && why !== 'off' && !noCount;
   e.hidden = !show; if (show) e.innerHTML = `<b>Records withheld:</b> ${esc(why)}`; else e.textContent = '';   // a hidden line keeps no stale sentence
 }
 function cards() {
   const R = ME.readings();
-  setState('usgs', R.usgs.fresh); $('v-usgs').textContent = R.usgs.value === null ? '–' : R.usgs.value.toLocaleString();
+  setState('usgs', R.usgs.fresh); cardCount.usgs = R.usgs.value; $('v-usgs').textContent = cardCount.usgs === null ? '–' : cardCount.usgs.toLocaleString();
   $('o-usgs').textContent = R.usgs.observed || 'no snapshot yet';
   $('m-usgs').innerHTML = `USGS · retrieved ${ago(R.usgs.retrieved)}${warn(R.usgs.fresh)}`;
   setState('firms', R.firms.fresh); cardCount.firms = R.firms.value; $('v-firms').textContent = cardCount.firms === null ? '–' : cardCount.firms.toLocaleString();
   $('o-firms').textContent = R.firms.observed || 'no snapshot yet';
   const notYet = firmsNotYet(); if (notYet) $('s-firms').title = FIRMS_NOT_YET_COPY;
   $('m-firms').innerHTML = `NASA FIRMS · VIIRS NOAA-20 · ${esc(state.firms ? state.firms.scope || 'world' : '')} · retrieved ${ago(R.firms.retrieved)}${notYet ? ` · <b>${esc(FIRMS_NOT_YET_COPY)}</b>` : warn(R.firms.fresh)}`;
-  setState('ships', R.ships.fresh);
+  setState('ships', R.ships.fresh); cardCount.ships = R.ships.value;
   if (R.ships.value !== null) { $('l-ships').textContent = ''; $('v-ships').textContent = R.ships.value.toLocaleString(); }
   else { $('l-ships').textContent = R.ships.lastSample !== null ? 'Last sample:' : ''; $('v-ships').textContent = R.ships.lastSample === null ? '–' : R.ships.lastSample.toLocaleString(); }
   $('u-ships').textContent = R.ships.unit;
-  $('o-ships').textContent = R.ships.observed || 'no sample yet';
+  $('o-ships').textContent = R.ships.observed || (R.ships.down ? 'no sample from the latest run' : 'no sample yet');   // a down run carries no sample: nothing is claimed about one
   $('m-ships').innerHTML = `aisstream.io · ${esc(R.ships.mode)}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.fresh.why)}</b>` : ''}`;
   setState('forest', R.forest.fresh); $('v-forest').textContent = R.forest.value === null ? '–' : R.forest.value.toLocaleString();
   $('o-forest').textContent = R.forest.observed || 'no sweep yet';
