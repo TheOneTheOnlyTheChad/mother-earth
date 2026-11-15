@@ -48,6 +48,10 @@ const SHIPS_MODE = ME.SHIPS_MODE = { text: 'about every 30 min while the home Ma
 
 const $ = ME.$ = id => document.getElementById(id);
 const esc = ME.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// A retrieval time as text, or null when it is not a readable timestamp (round 3). The same test ME.freshness applies: a string that
+// parses to an instant. Every place that prints a raw retrieval value goes through this, so 'n/a' or an object can neither be
+// printed as a time nor throw.
+ME.stamp = v => typeof v === 'string' && Number.isFinite(Date.parse(v)) ? v.replace('T', ' ').slice(0, 19) + ' UTC' : null;
 const ago = ME.ago = iso => { if (!iso) return 'unknown'; const s = (Date.now() - Date.parse(iso)) / 1000; if (!Number.isFinite(s)) return 'at an unreadable time';   // never "NaN h ago" (freshness-wording-rc round 2)
   return s < 90 ? Math.round(s) + ' s ago' : s < 5400 ? Math.round(s / 60) + ' min ago' : (s / 3600).toFixed(1) + ' h ago'; };
 const dur = ME.dur = s => s < 3600 ? Math.round(s / 60) + ' min' : (s % 3600 === 0 ? (s / 3600) + ' h' : (s / 3600).toFixed(1) + ' h');   // plain-language limits: 10800 → "3 h"
@@ -390,17 +394,17 @@ ME.degradedWhy = function (layer, snap) {
 ME.DATED_INDICES = ['swpc', 'co2', 'seaice'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 // One validator for every observation date the page prints (round 2). A date is used only if it is a real calendar day written
-// 'YYYY-MM-DD…'; anything else (missing, 'soon', 2026-02-31) is null and every surface says the date was not supplied.
+// exactly 'YYYY-MM-DD'; anything else (missing, 'soon', 2026-02-31, '2026-11-13-not-a-date') is null and every surface says the date was not supplied.
 // No Date parsing of the text and no time zone: the source's own day is kept.
-ME.validDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(typeof d === 'string' ? d : ''); if (!m) return null; const y = +m[1], mo = +m[2], da = +m[3];
+ME.validDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(typeof d === 'string' ? d : ''); if (!m) return null; const y = +m[1], mo = +m[2], da = +m[3];   // the whole string: nothing may follow the day (round 3)
   if (mo < 1 || mo > 12 || da < 1 || da > new Date(Date.UTC(y, mo, 0)).getUTCDate()) return null; return `${m[1]}-${m[2]}-${m[3]}`; };
 ME.longDate = d => { const v = ME.validDate(d); return v ? `${+v.slice(8, 10)} ${MONTHS[+v.slice(5, 7) - 1]} ${v.slice(0, 4)}` : null; };   // '13 November 2026'
 // Kp's interval in words, from the instant itself (UTC). An interval that crosses midnight names both days.
 ME.kpIntervalLong = t => { const a = typeof t === 'string' ? Date.parse(t) : NaN; if (!Number.isFinite(a)) return null;
   const A = new Date(a).toISOString(), B = new Date(a + 3 * 3600e3).toISOString(), hm = x => x.slice(11, 16);
-  if (A.slice(0, 10) === B.slice(0, 10)) return `the interval ${hm(A)}–${hm(B)} UTC on ${ME.longDate(A)}`;
-  const dayA = A.slice(0, 4) === B.slice(0, 4) ? ME.longDate(A).replace(/ \d{4}$/, '') : ME.longDate(A);
-  return `${hm(A)} UTC on ${dayA} to ${hm(B)} UTC on ${ME.longDate(B)}`; };
+  const dA = ME.longDate(A.slice(0, 10)), dB = ME.longDate(B.slice(0, 10));   // the date part of the normalised UTC instant
+  if (A.slice(0, 10) === B.slice(0, 10)) return `the interval ${hm(A)}–${hm(B)} UTC on ${dA}`;
+  return `${hm(A)} UTC on ${A.slice(0, 4) === B.slice(0, 4) ? dA.replace(/ \d{4}$/, '') : dA} to ${hm(B)} UTC on ${dB}`; };
 // What an index value is FOR, as a sentence. Sea ice: the hub reads the hemispheres independently, so both dates are named when they differ.
 ME.valueFor = function (layer) {
   const s = state[layer], ix = s && s.index; if (!ix) return null;

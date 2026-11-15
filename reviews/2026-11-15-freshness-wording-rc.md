@@ -1,4 +1,4 @@
-# freshness-wording-rc — review packet (rev 2; §7 = round 2)
+# freshness-wording-rc — review packet (rev 3; §7 = round 2, §8 = round 3)
 
 15 Nov 2026 · branch `freshness-wording-rc` from main `df8f2fe` (after merge `2b94823`) · page only · not merged · for GPT
 Proposal: `docs/concepts/FRESHNESS-WORDING-PROPOSAL.md` rev 2 (§6 governs). Chad's go: "Go: build freshness-wording-rc on a branch per FRESHNESS-WORDING-PROPOSAL rev 2 (§6 governing; page only; no merge)".
@@ -88,3 +88,30 @@ GPT (relayed by Chad): the three indices say "Fresh copy" and valid split sea-ic
 Files changed in round 2: `app.js`, `index.html`, `phase1/freshness-wording-ui.test.cjs`, this packet, STATUS. The cache key is unchanged from round 1 (`202612021000`); nothing has been released under it.
 
 **Not covered:** a sea-ice envelope with a whole hemisphere missing (no `south` object at all) is outside this change; the page's handling of that is as on main.
+
+## 8. Round 3 (15 Nov 10:33 UTC): the Sources retrieval cell and the strict date form
+
+GPT (relayed by Chad) on `4d3b4e8`: the original card and report failures are resolved; the Kp year boundary verified; keep the unreadable-retrieval guard shared across layers. Hold for one Sources-page fix: the Sources table formatted the raw retrieval value ("n/a UTC (at an unreadable time)"), and with `retrieved_at: {}` its renderer threw and stopped building the table. Also require the full `YYYY-MM-DD` form for CO₂ and sea ice (`2026-11-13-not-a-date` was accepted); Kp passes the date part of its normalised UTC timestamp. GPT's three Node suites passed again (73 checks); its Sources check ran the page renderer outside the browser.
+
+**Fix 1 — one timestamp test for every printed retrieval value.** New `ME.stamp(v)`: text only when `v` is a string that parses to an instant, otherwise null (the same test `ME.freshness` applies).
+- `sources.html`: the retrieval cell reads "Retrieval time unknown" when the value is present but unreadable; "–" when there is no snapshot; the real time otherwise. The table builds in full.
+- `index.html`: the three inspector rows that formatted a raw `retrieved_at` ("This run" twice, "Retrieved") use `ME.stamp` too, so the same payloads cannot throw there.
+
+**Fix 2 — strict date form.** `ME.validDate` matches the whole string `YYYY-MM-DD`; text after the day, a timestamp, or a leading space is not a date. `ME.kpIntervalLong` passes the date part of the normalised UTC instant.
+
+**A fault of mine, caught by the suite before this commit:** my first edit of the validator put a comment mid-line and commented out three variable declarations; the page stopped loading and the suite timed out on its first case. Fixed; noted because a syntax-only check did not catch it.
+
+| Run | Result |
+|---|---|
+| `freshness-wording-ui` | **156 passed, 0 failed** (was 115) |
+| New cases | Sources with `retrieved_at` "n/a", `{}` and a number, for each of CO₂, Sea ice and Kp: the table keeps all its rows, no page error, the cell reads "Retrieval time unknown", every other row keeps its real time. World View with CO₂ `retrieved_at` "n/a" and `{}`: badge unknown, no page error. `2026-11-13-not-a-date` for CO₂ and for the Antarctic date: "not supplied" on the card, tooltip, report and Sources row. `ME.validDate` and `ME.stamp` checked directly. |
+| New breaks | `raw-sources-cell` (round 2's cell) fails 21 · `loose-date` fails 9 |
+| Earlier breaks, rerun | `word-current` 21 · `no-tip` 16 · `one-ice-date` 1 · `ships-received` 4 · `ships-age-always` 2 · `no-date-check` 11 · `nan-fresh` 19 · `ships-age-twice` 1 failures |
+| Regression rerun, all pass | `quakes-ships-status-ui` 124 · `fire-status-ui` 279 · `legend-active-ui` 548 · `fires-wording-ui` 35 · `mobile-pass` 131 · `drifters-ui` 25 · `plastic-ui` 29 · `place-ui` 30 · `search-ui` 104 · `kept-ui` 21 · `buoy-temp-ui` 33 · `desktop-overflow` 258 · `cell-perf-ui` 43 · `ux-round1` 34 · `status-notes-ui` 17 · `terminator-ui` 19 · `dustrgb-ui` 67 · `backdrop-layer` 27 · `orbital-browser` 113 · `arts-ui` 90 · `sky-ui` 79 · node `kp-degraded` 29, `place-rows` 7, `buoy-temp` 37 |
+| Same as main | `osmc-reliability-ui` "old page" check; `smoke-fixes` "Sources 360" overflow |
+
+Test change: fixture ages are now measured from when each fixture is built, so "52 min ago" holds however long the suite has run (two checks drifted by a minute as the suite grew).
+
+Files changed in round 3: `app.js`, `index.html`, `sources.html` (now more than the cache key: the retrieval cell), `phase1/freshness-wording-ui.test.cjs`, this packet, STATUS. Cache key unchanged (`202612021000`).
+
+**Not changed:** `ME.hhmm` and `ME.when` still slice their argument and would throw on a non-string; they are fed record and place timestamps, not the retrieval values in this change. Named so it is not a surprise later.

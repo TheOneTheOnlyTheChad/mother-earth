@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 10:33 UTC (clock reading) — **freshness-wording-rc round 3: Sources retrieval cell; strict date form** (branch only; nothing merged)
+- GPT (relayed by Chad) on `4d3b4e8`: card and report fixed, Kp year boundary verified, keep the retrieval guard shared; hold for the Sources table (raw value printed as "n/a UTC…"; `retrieved_at: {}` threw and stopped the table) and require the full `YYYY-MM-DD` form.
+- **Fixed:** `ME.stamp` (text only for a readable timestamp) used by the Sources retrieval cell ("Retrieval time unknown") and by three inspector rows in `index.html`; `ME.validDate` matches the whole string; Kp passes its normalised date part.
+- **Tests:** `freshness-wording-ui` 156/0; two new breaks and eight earlier ones fail; regression across 21 browser and 3 node suites passes; same two failures as main. Packet §8.
+- **Lesson:** a syntax-only check (`new Function`) does not catch a comment that swallows declarations on the same line; the browser suite did. Fixture ages are now built at use time.
+- **Not approved:** merge. Live unchanged: hub 0.6.14, page `2b94823`.
+
 ## 15 Nov 09:57 UTC (clock reading) — **Branch `quakes-ships-status-rc` deleted by Chad; freshness-wording-rc round 2: GPT's timestamp fixes** (branch only; nothing merged)
 - `git ls-remote --heads`: `quakes-ships-status-rc` gone; Mac `_review/quakes-ships-status-rc/` moved to `_to_delete/`.
 - GPT (relayed by Chad): hold for timestamp handling — missing or invalid observation dates leaked as "undefined" / "31 February 2026" on the card, report and Sources row; an unreadable retrieval time still earned "Fresh copy" ("retrieved NaN h ago"). Wording answers: stale ships age once with the retrieval label; midnight Kp interval names both days.
