@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 08:42:39 UTC (commit time) — **PAGE RELEASED: Earthquakes and Ships withheld line; no sample read from a down ships run** (main merge `2b94823` of `quakes-ships-status-rc` @ `1d6d8a5`; Chad: "Approve: merge quakes-ships-status-rc at 1d6d8a5 to main (page change: Earthquakes and Ships withheld line; no sample read from a down ships run)")
+- **GPT (relayed by Chad):** passes review. Ran the candidate's card and report code through current zero, degraded, stale zero, down and recovery states outside the browser; confirmed matching `app.js` cache keys and that hub code and stylesheet match main.
+- Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch. Remote branch head confirmed `1d6d8a5` before the merge.
+- **Served hashes: three files exact at 08:43:27 UTC** (pane): index.html `fd1db50b`, app.js `42e0d842`, sources.html `3e32155c`.
+- **Live smoke (pane, 08:43:46 UTC; pane hidden, text reads only):** page loads `app.js?v=202612011000`. Earthquakes current, 43, line hidden and empty. Ships current, 3,269, no label, "sample ended 08:12 UTC; 2639 Class A + 630 Class B; socket connected 59 s of 60 s", line hidden. Records paired for both. "counts shown alone", "undefined" and "NaN" nowhere on the two cards. The live code's rule on a down ships envelope (a copy placed in page memory, then restored): value and last sample null, no description, unit "…60 s AIS sample", report "ships: unknown — collector reported down: ingested down: …" with no sample claim.
+- **Not seen on production:** a real down or stale ships run, a down earthquakes run. Not tested: phone, Safari, screen reader, real GPU.
+- **Rollback:** revert `2b94823` (own Approve line); independent of `d13466a` (legend) and `83d0fc0` (fire status), except that reverting an earlier one after a later one needs the `app.js` cache key checked.
+- **Open:** branch `quakes-ships-status-rc` is Chad's to delete; Mac `_review/quakes-ships-status-rc/` moves to `_to_delete/` at close-out. Chad's go for `freshness-wording-rc` received in the same message.
+
 ## 15 Nov 08:29 UTC (clock reading) — **quakes-ships-status-rc built: Earthquakes and Ships withheld line; no sample read from a down ships run** (branch only; page only; nothing merged; for GPT)
 - Chad: "Go: build quakes-ships-status-rc on a branch per WITHHELD-LINE-QUAKES-SHIPS-PROPOSAL rev 2 (§6 governing; page only; no merge)".
 - **Built:** `app.js` (`ME.readings`: a down ships envelope is not a sample), `index.html` (`cardCount` for usgs and ships; line gated on `value !== null`; "no sample from the latest run"), `sources.html` (cache key). `app.js?v=202612011000`. Packet: `reviews/2026-11-15-quakes-ships-status-rc.md`.
