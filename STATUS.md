@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 06:10 UTC (clock reading) — **Branch `fire-status-rc` deleted by Chad; legend proposal rev 1** (docs only; for GPT; nothing built)
+- `git ls-remote --heads` (06:08 UTC): remote has only `main` and `aircraft-rc`. Mac `_review/fire-status-rc/` moved to `_to_delete/`; `_review/` empty.
+- Chad: pick up another item from the usability list. Next by GPT's D3: the legend. Proposal: `docs/concepts/LEGEND-ACTIVE-PROPOSAL.md` rev 1 (dot entries only while dots are drawn; counts-only wording; forest swatch only with a drawn cell; an empty-key sentence; `index.html` only). Reproduced first: with records withheld a cell outline is drawn with no dots; a valid zero draws nothing yet counts in "Key · N layers"; stale counts draw an unknown outline. Decisions L1–L3 in the proposal.
+- **Next (item 1): GPT reviews the legend proposal; Chad gives or withholds the branch go.** Live unchanged: hub 0.6.14, page `83d0fc0`.
+
 ## 15 Nov 05:53:21 UTC (commit time) — **PAGE RELEASED: fire status agrees on every surface** (main merge `83d0fc0` of `fire-status-rc` @ `e58b856`; Chad: "Approve: merge `fire-status-rc` at `e58b856` to main (page-only fire-status fix). Verify the served hashes of `index.html`, `app.js`, and `sources.html`, then smoke-test the live Fires card.")
 - **GPT:** passed A1–A5 at source review and held for the `status-notes-ui` test fix (round 2, `e58b856`). **No GPT re-check of round 2 was relayed before Chad's line.**
 - Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch. Remote branch head confirmed `e58b856` before the merge.
