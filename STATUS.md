@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 07:52:32 UTC (commit time) — **PAGE RELEASED: the legend and "Key · N layers" show what is drawn** (main merge `d13466a` of `legend-active-rc` @ `1cfacd5`; Chad: "GPT happy" and "Approve: merge legend-active-rc at 1cfacd5 to main (page change: legend and Key count show what is drawn)")
+- **GPT:** held round 1 for two wording fixes, smoke-tested the local candidate in desktop Chrome; Chad relays GPT is happy with round 2 (`1cfacd5`).
+- Page only (`index.html`); hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch. Remote branch head confirmed `1cfacd5` before the merge.
+- **Served hashes: three files exact at 07:53:13 UTC** (pane): index.html `65e5517d`; app.js `09f59f66` and sources.html `f73ff131` unchanged.
+- **Live smoke (pane, 07:53:31 UTC; pane hidden, text reads only):** on load the line reads "earthquake · fire detection (per pass) · vessel (last sample) · forest-disturbance alert pixels…", Key · 4 layers; tally fires 9,259 symbols / 273 cells, ships 3,142 / 161, earthquakes 41 / 29, forest 559 cells; 12,442 points on the globe = the three symbol tallies. Fires off → entry gone, Key · 3; on → back, Key · 4. All four off → "No data symbols or count cells are drawn right now.", Key · 0, 0 points; restored → Key · 4. Key definition carries the round-2 wording.
+- **Not seen on production:** counts-only wording, a valid zero, stale-only outlines, optional layers, the phone Key. Not tested: phone, Safari, screen reader, real GPU; no screenshot.
+- **Rollback:** revert `d13466a` (own Approve line). Fire status rollback `83d0fc0` unchanged and independent.
+- **Open:** branch `legend-active-rc` is Chad's to delete; Mac `_review/legend-active-rc/` moves to `_to_delete/` at close-out. Remaining usability items: hub `placeSection` down test, freshness wording (FRESH COPY for dated indices), intermediate widths; Earthquakes/Ships withheld-line gating (read, not reproduced).
+
 ## 15 Nov 07:46 UTC (clock reading) — **legend-active-rc round 2: GPT's two wording fixes** (branch only; nothing merged)
 - GPT (relayed by Chad): tally design as agreed; desktop Chrome smoke of the local candidate passed on live data (fires off/on 3 → 4; all off → empty message, 0 layers; day/night only → own line, 1 layer); hold for two wording fixes.
 - **Fix 1:** Key definition now says a data layer counts when it draws a symbol or a usable count cell; "a layer that draws nothing" is not counted (the old "count is zero" wording was wrong for a zero-alert Forest cell, which is drawn and counted). **Fix 2:** "(records withheld)" shows only while `usable(layer)` is false; a usable pair that draws cells only reads "<Layer>: cell outlines only".
