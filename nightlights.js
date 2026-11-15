@@ -8,6 +8,9 @@
  *      states decided from BOTH dates: usable on both · no reliable comparison · no data.
  * Light, not power: nothing here says a place lost power, and no radiance total or percentage change is printed.
  * Kept out of the observation path like ocean heat: it never touches state, points, pmeta, usable() or any globe.gl layer.
+ * Round 3 (release work, GPT's three details): every GIBS wait is bounded (WAIT_MS) and ends as "unavailable" with a way to
+ * try again; the Sky zoom-out view's imagery label is refreshed whenever this layer changes the Earth picture; a comparison
+ * frame that comes back blank says "No data for this date" and nothing more specific; 5° and 10° boxes say they are coarser.
  * Values come from the picture's colours through NASA's own published keys (colormaps v1.3), stored as integers so the
  * 0.95 threshold is an exact comparison: light in tenths of nW/(cm² sr), clear-sky confidence in hundredths; −1 = none.
  */
@@ -23,6 +26,7 @@
     THRESH_H: 95,                 // preview threshold: clear-sky confidence 0.95, in hundredths (not a NASA standard)
     BAND: 30, MAX_MISSING: 0.01,  // latest-date rule: no more than 1% no data between 30°S and 30°N
     CANDIDATES: 4,                // today (UTC) and the three days before it
+    WAIT_MS: 20000,               // the longest any one GIBS request may take, body included, before it counts as not answered
     TOP_T: 382, UNITS: 'nW/(cm² sr)',
     WORLD: { s: -90, w: -180, n: 90, e: 180 }, PROBE: [512, 256], GLOBAL: [2048, 1024],
     PX_PER_DEG: 240, MAX_PX: 480, SPANS: [0.5, 1, 2, 5, 10],
@@ -117,20 +121,43 @@
 
   // ---------- state
   const st = { on: false, gen: 0, status: 'off', why: null, date: null, arriving: [], prevUrl: null, blobUrl: null, saved: null,
-    missing: null, bytes: {}, timings: {}, requests: [], keys: {}, cmp: null, cmpGen: 0, cur: null, opts: { now: null } };
+    missing: null, bytes: {}, timings: {}, requests: [], keys: {}, cmp: null, cmpGen: 0, cur: null, opts: { now: null, waitMs: null } };
   const now = () => st.opts.now != null ? st.opts.now : Date.now();
+  const waitMs = () => st.opts.waitMs != null ? st.opts.waitMs : NL.WAIT_MS;
+  const waitText = () => { const s = waitMs() / 1000; return `NASA GIBS did not answer within ${Number.isInteger(s) ? s : s.toFixed(1)} seconds`; };
+  // A bounded fetch: one deadline covers the headers AND the body, so a response that starts and then stalls is caught too.
+  // `read` turns the Response into the value wanted (blob or text). The deadline is raced against both steps as well as
+  // aborting the request, so it holds even where an abort does not reach the body. A timeout throws an error marked
+  // `timeout`; a body that breaks off for another reason leaves `body` null and the caller says so.
+  async function bounded(url, init, read) {
+    const ac = new AbortController(); let timer;
+    const late = new Promise((_, rej) => { timer = setTimeout(() => { const t = new Error('timeout'); t.timeout = true; try { ac.abort(); } catch (_) { } rej(t); }, waitMs()); });
+    late.catch(() => { });   // raced below; never an unhandled rejection
+    try {
+      const r = await Promise.race([fetch(url, { ...(init || {}), signal: ac.signal }), late]);
+      let body = null;
+      if (r.ok) { try { body = await Promise.race([read(r), late]); } catch (e) { if (e && e.timeout) throw e; } }
+      return { r, body };
+    } catch (e) {
+      if (e && e.timeout) throw e;
+      if (ac.signal.aborted) { const t = new Error('timeout'); t.timeout = true; throw t; }
+      throw e;
+    } finally { clearTimeout(timer); }
+  }
 
   // ---------- fetching (the only network calls this file makes; none before a switch-on or a Compare press)
   async function getImage(url, w, h) {
     st.requests.push(url);
-    let r;
-    try { r = await fetch(url); }
-    catch (e) {   // either no answer, or an answer the browser will not let the page read
-      try { await fetch(url, { mode: 'no-cors' }); return { status: 'blocked', why: 'this browser blocked reading the picture' }; }
+    let r, bl;
+    try { const x = await bounded(url, null, q => q.blob()); r = x.r; bl = x.body; }
+    catch (e) {
+      if (e && e.timeout) return { status: 'failed', why: waitText() };   // a hung request: not answered, never "blocked" and never "arriving"
+      // either no answer, or an answer the browser will not let the page read
+      try { await bounded(url, { mode: 'no-cors' }, async () => null); return { status: 'blocked', why: 'this browser blocked reading the picture' }; }
       catch (_) { return { status: 'failed', why: 'NASA GIBS did not answer' }; }
     }
     if (!r.ok) return { status: 'failed', why: `NASA GIBS answered HTTP ${r.status}` };
-    let bl; try { bl = await r.blob(); } catch (e) { return { status: 'failed', why: 'the answer from NASA GIBS broke off' }; }
+    if (!bl) return { status: 'failed', why: 'the answer from NASA GIBS broke off' };
     if (!/^image\/png/i.test(bl.type)) return { status: 'failed', why: 'NASA GIBS answered without a picture' };
     let bm; try { bm = await createImageBitmap(bl); } catch (e) { return { status: 'failed', why: 'the picture from NASA GIBS could not be read' }; }
     if (bm.width !== w || bm.height !== h) return { status: 'failed', why: `the picture from NASA GIBS is ${bm.width} × ${bm.height}, not ${w} × ${h}` };
@@ -143,8 +170,8 @@
   function getKey(name, scale) {
     if (!st.keys[name]) st.keys[name] = (async () => {
       st.requests.push(NL.KEYS + name);
-      const r = await fetch(NL.KEYS + name); if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return parseKey(await r.text(), scale);
+      const x = await bounded(NL.KEYS + name, null, q => q.text()); if (!x.r.ok) throw new Error(`HTTP ${x.r.status}`);
+      return parseKey(x.body, scale);
     })().catch(e => { delete st.keys[name]; throw e; });
     return st.keys[name];
   }
@@ -157,13 +184,13 @@
     for (const x of [li, ci]) if (x && x.status !== 'ok') return { date, status: x.status, why: x.why };
     const L = decode(li.img.data, w * h, lk), C = ci ? decode(ci.img.data, w * h, ck) : null;
     if (L.unknown || (C && C.unknown)) return { date, status: 'failed', why: "the picture did not match NASA's published key" };
-    return { date, status: 'ok', light: L.v, clear: C ? C.v : null, rgba: li.img.data, bytes: li.bytes + (ci ? ci.bytes : 0) };
+    return { date, status: 'ok', light: L.v, clear: C ? C.v : null, rgba: li.img.data, bytes: li.bytes + (ci ? ci.bytes : 0), blank: L.none === w * h };
   }
 
   // ---------- 1. the globe layer
   const failText = (f, what) => f.status === 'blocked'
     ? `${what} cannot be shown: this browser blocked reading the picture's values, so missing areas could not be told from dark ones. Nothing is drawn.`
-    : `${what} could not be loaded: ${f.why}${f.date ? ' for ' + dayText(f.date) : ''}. Nothing is drawn.`;
+    : `${what} could not be loaded: ${f.why}${f.date ? ' for ' + dayText(f.date) : ''}. Nothing is drawn. Switch it on again to retry.`;
   function paintGlobal(img, w, h, v) {   // the frame as NASA drew it, with every no-data pixel given the no-data checker (never black)
     const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
     const d = img.data, a = NL.NODATA[0], b = NL.NODATA[1];
@@ -175,6 +202,7 @@
     if (st.saved) { const a = $('imgdate'), b = $('img-full'); if (a) a.innerHTML = st.saved.imgdate; if (b) b.textContent = st.saved.full; }
     if (st.blobUrl) { try { URL.revokeObjectURL(st.blobUrl); } catch (_) { } }
     st.prevUrl = null; st.blobUrl = null; st.saved = null;
+    if (typeof ME.zoomImgLabel === 'function') ME.zoomImgLabel();   // the Sky zoom-out view names the picture that is drawn
   }
   async function setOn(on) {
     if (on === st.on) return;
@@ -217,6 +245,7 @@
     const dt = dayText(st.date), full = `Imagery: night lights ${dt} (NASA GIBS, VIIRS ${NL.SAT}) — light measured at night on that UTC date, not live · patterned areas: no data`;
     if (a) a.innerHTML = `<span class="img-long">${esc(full)}</span><span class="img-short">Night lights ${esc(dt.slice(0, dt.length - 5))}<br>${esc(NL.SAT)} · not live</span>`;
     if (b) b.textContent = full;
+    if (typeof ME.zoomImgLabel === 'function') ME.zoomImgLabel();   // the Sky zoom-out view names the picture that is drawn
     paint();
   }
 
@@ -303,16 +332,18 @@
     const cav = `<div class="cav">${esc(NL.THRESH_TEXT)}</div><div class="cav">${esc(NL.R2)} ${esc(NL.LOCAL)}</div>`;
     if (res.blocked) { out.innerHTML = `<div class="hint nl-bad"><b>This browser blocked reading the pictures' values, so nothing can be compared. No shares are shown.</b></div>`; out.hidden = false; return; }
     const okA = res.a.status === 'ok', okB = res.b.status === 'ok';
-    if (!okA && !okB) { out.innerHTML = `<div class="hint nl-bad"><b>Neither night could be loaded: ${esc(res.a.why)}. Nothing is drawn.</b></div>`; out.hidden = false; return; }
+    if (!okA && !okB) { out.innerHTML = `<div class="hint nl-bad"><b>Neither night could be loaded: ${esc(res.a.why)}. Nothing is drawn.</b> Press Compare to try again.</div>`; out.hidden = false; return; }
     const fig = (id, f, ok) => `<figure class="nl-fig"><figcaption>${esc(dayText(f.date))} (UTC)</figcaption>` + (ok
       ? `<div class="nl-cvw"><canvas id="nl-cv-${id}" class="nl-cv" tabindex="0" role="img" aria-label="Night lights, ${esc(dayText(f.date))}, ${esc(boxText(res.box))}"></canvas><span class="nl-mk" id="nl-mk-${id}" hidden></span></div>`
-      : `<div class="hint nl-bad"><b>The ${esc(dayText(f.date))} frame could not be loaded: ${esc(f.why)}.</b> Nothing is drawn for it.</div>`) + `</figure>`;
+      : `<div class="hint nl-bad"><b>The ${esc(dayText(f.date))} frame could not be loaded: ${esc(f.why)}.</b> Nothing is drawn for it. Press Compare to try again.</div>`) +
+      (ok && f.blank ? `<div class="hint nl-blank">No data for this date.</div>` : '') + `</figure>`;
     let shares;
     if (okA && okB) { const t = res.tally;
       shares = `<div class="nl-shares" id="nl-shares">Readable on ${esc(dayText(res.a.date))}: <b>${pct(t.readA, t.n)}</b> · Readable on ${esc(dayText(res.b.date))}: <b>${pct(t.readB, t.n)}</b> · Usable on both: <b>${pct(t.both, t.n)}</b> — of the area in view</div>`;
     } else { const f = okA ? res.a : res.b, g = okA ? res.b : res.a; res.one = classifyOne(f.light, f.clear, NL.THRESH_H);
       shares = `<div class="nl-shares" id="nl-shares">Readable on ${esc(dayText(f.date))}: <b>${pct(readable(f.light, f.clear, NL.THRESH_H), res.w * res.h)}</b> of the area in view · The ${esc(dayText(g.date))} frame could not be loaded, so no comparison is made.</div>`; }
-    out.innerHTML = `<div class="nl-where">${esc(boxText(res.box))} · ${res.w} × ${res.h} pixels</div><div class="nl-pair">${fig('a', res.a, okA)}${fig('b', res.b, okB)}</div>${shares}` +
+    const kmPx = (res.box.n - res.box.s) / res.h * 111.2, coarse = (res.box.n - res.box.s) * NL.PX_PER_DEG > res.h;
+    out.innerHTML = `<div class="nl-where">${esc(boxText(res.box))} · ${res.w} × ${res.h} pixels` + (coarse ? ` · drawn coarser than the layer's own detail: about ${kmPx.toFixed(1)} km a pixel` : '') + `</div><div class="nl-pair">${fig('a', res.a, okA)}${fig('b', res.b, okB)}</div>${shares}` +
       `<div class="hint" id="nl-read" aria-live="polite"></div>${key}${cav}`;
     out.hidden = false;
     if (okA) drawPanel(cmpEl('cv-a'), res.a, res.states || res.one, res.w, res.h);

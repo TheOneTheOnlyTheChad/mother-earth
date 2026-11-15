@@ -6,6 +6,8 @@
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/night-lights-ui.test.cjs
  * BREAK=<name> weakens the served nightlights.js; each must make this suite fail:
  *   eager date-mismatch no-restore nodata-dark panel-own-state value-when-withheld fail-as-arriving stale-kept power-word total-shown full-unchecked
+ * Round 3 (release work): bounded waits with retry (T), Sky zoom-out label (S), blank date and coarse box (U), Sources page (W).
+ *   more breaks: no-sky-hook no-timeout hang-as-arriving blank-silent coarse-silent
  * Round 2 (GPT round 1, 15 Nov): the 1% rule is applied to the 2048 × 1024 frame that is displayed, not only to the probe (section R).
  */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const http = require('http'); const { PNG } = require('pngjs');
@@ -13,7 +15,7 @@ const ROOT = path.join(__dirname, '..'); const HUB = 'https://mother-earth.chado
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
 const BREAK = process.env.BREAK || '';
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 700)}` : ''}`); } };
-const wd = setTimeout(() => { console.log('FAIL  suite exceeded 12 min'); process.exit(1); }, 12 * 60e3);
+const wd = setTimeout(() => { console.log('FAIL  suite exceeded 20 min'); process.exit(1); }, 20 * 60e3);
 
 const BREAKS = {
   'eager': [['  paint();\n})();', '  paint(); const iv = setInterval(() => { if (ME.globe && ME.globe()) { clearInterval(iv); setOn(true); } }, 50);\n})();']],
@@ -26,10 +28,15 @@ const BREAKS = {
   'stale-kept': [["if (out) { out.hidden = true; out.innerHTML = ''; } st.cmp = null;", "st.cmp = null;"]],
   'power-word': [["R2: 'Light as measured at the satellite.", "R2: 'Light as measured at the satellite, a sign of power."]],
   'full-unchecked': [["      if (r.full <= NL.MAX_MISSING) { f = g; break; }", "      f = g; r.missing = r.probe; break;"]],
+  'no-sky-hook': [["    if (typeof ME.zoomImgLabel === 'function') ME.zoomImgLabel();   // the Sky zoom-out view names the picture that is drawn\n", '', 'all']],
+  'no-timeout': [["    const late = new Promise((_, rej) => { timer = setTimeout(", "    const late = new Promise((_, rej) => { if (0) timer = setTimeout("]],
+  'hang-as-arriving': [["      if (e && e.timeout) return { status: 'failed', why: waitText() };", "      if (e && e.timeout) return { status: 'ok', img: new ImageData(w, h), bytes: 0 };"]],
+  'blank-silent': [["      (ok && f.blank ? `<div class=\"hint nl-blank\">No data for this date.</div>` : '') + `</figure>`;", "      `</figure>`;"]],
+  'coarse-silent': [["coarse = (res.box.n - res.box.s) * NL.PX_PER_DEG > res.h;", "coarse = false;"]],
   'total-shown': [["Usable on both: <b>${pct(t.both, t.n)}</b> — of the area in view</div>`;", "Usable on both: <b>${pct(t.both, t.n)}</b> — of the area in view · total light ${res.a.light.reduce((s, v) => s + Math.max(0, v), 0) / 10}</div>`;"]],
 };
 if (BREAK && !BREAKS[BREAK]) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
-const served = file => { let t = fs.readFileSync(path.join(ROOT, file), 'utf8'); if (BREAK && file === 'nightlights.js') for (const [a, b] of BREAKS[BREAK]) { if (t.split(a).length !== 2) { console.log('FAIL  break did not apply exactly once: ' + BREAK + ' / ' + a.slice(0, 50)); process.exit(1); } t = t.replace(a, b); } return t; };
+const served = file => { let t = fs.readFileSync(path.join(ROOT, file), 'utf8'); if (BREAK && file === 'nightlights.js') for (const [a, b, all] of BREAKS[BREAK]) { const k = t.split(a).length - 1; if (all ? k < 2 : k !== 1) { console.log('FAIL  break did not apply (' + k + ' matches): ' + BREAK + ' / ' + a.slice(0, 50)); process.exit(1); } t = t.split(a).join(b); } return t; };
 
 // ---------- fixtures
 const REC = JSON.parse(fs.readFileSync(path.join(__dirname, 'night-lights/recorded-gibs-2026-11-15.json'), 'utf8'));
@@ -48,12 +55,14 @@ const globalPng = (kind, w, h) => memo(kind + w, () => make(w, h, (x, y) => { co
   return lat > 10 && lat < 12 && lng > 20 && lng < 22 ? LIGHT.get(382) : LIGHT.get(0); }));
 // the three-state box (0.5° about 0, 0), 120 × 120: rows 0–39 usable on both; rows 40–79 a valid DARK pixel on the first date
 // and transparent on the second (GPT's fixture); rows 80–119 light on both, confidence 0.94 on the second date
-const TRI = { box: '-0.25,-0.25,0.25,0.25', a: '2026-05-01', b: '2026-05-02' };
+const TRI = { box: '-0.25,-0.25,0.25,0.25', a: '2026-05-01', b: '2026-05-02', blank: '2026-05-03' };   // blank: a date inside the layer's range whose light picture comes back empty
 const triPng = (layer, date) => memo('tri' + layer + date, () => make(120, 120, (x, y) => {
+  if (layer === 'light' && date === TRI.blank) return null;
   if (layer === 'light') return date === TRI.a ? (y < 40 ? LIGHT.get(100) : y < 80 ? LIGHT.get(0) : LIGHT.get(50)) : (y < 40 ? LIGHT.get(10) : y < 80 ? null : LIGHT.get(50));
   return date === TRI.b && y >= 80 ? CLEAR.get(94) : CLEAR.get(100); }));
 const RECBOX = '14.85,145.45,15.35,145.95', recPng = k => Buffer.from(REC.frames[k].b64, 'base64');
 const T_NOW = Date.parse('2026-11-15T16:00:00Z');
+const SKY_R1 = fs.readFileSync(path.join(ROOT, 'phase1/sky/catalogue/sky-2026-11-R1.json'), 'utf8'), SKY_SC = fs.readFileSync(path.join(ROOT, 'phase1/sky/catalogue/sky-scene-2026-11-R1.json'), 'utf8');   // the committed Sky files, as sky-zoom-ui serves them
 
 const newGibs = () => ({ reqs: [], globalFull: {}, global: { '2026-11-15': 'filling', '2026-11-14': 'complete', '2026-11-13': 'complete', '2026-11-12': 'complete' }, fault: {}, hold: null, keyFault: null });
 async function setup(browser, gibs, opts = {}) {
@@ -79,13 +88,16 @@ async function setup(browser, gibs, opts = {}) {
     const png = (() => {
       if (box === '-90,-180,90,180') { const k = (w === 2048 && gibs.globalFull[date]) || gibs.global[date]; return kind === 'light' && k ? globalPng(k, w, h) : null; }   // globalFull: what the 2048 × 1024 frame holds when it differs from the probe
       if (box === RECBOX && REC.frames[`${date}/${kind === 'light' ? 'rad' : 'csc'}`]) return recPng(`${date}/${kind === 'light' ? 'rad' : 'csc'}`);
-      if (box === TRI.box && (date === TRI.a || date === TRI.b)) return triPng(kind, date);
+      if (box === TRI.box && (date === TRI.a || date === TRI.b || date === TRI.blank)) return triPng(kind, date);
+      if (box === '-2.5,-2.5,2.5,2.5') return memo('flat' + kind + w, () => make(w, h, () => kind === 'light' ? LIGHT.get(0) : CLEAR.get(100)));   // a 5° box: uniform dark, clear
       return null; })();
     if (!png) return route.fulfill({ status: 404, headers: cors, body: 'no fixture' });
     return route.fulfill({ status: 200, contentType: 'image/png', headers: cors, body: png }); });
   const NOW = new Date().toISOString();
   await ctx.route(HUB + '/**', async route => { const p = new URL(route.request().url()).pathname; const j = (b, s = 200) => route.fulfill({ status: s, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(b) });
     if (p === '/') return j({ name: 'x', history: { collecting: false, retained: { exists: false } } });
+    if (p === '/catalogue/sky/sky-2026-11-R1') return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: SKY_R1 });
+    if (p === '/catalogue/sky/sky-scene-2026-11-R1') return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: SKY_SC });
     if (/^\/(snapshot\/dustrgb|catalogue)\//.test(p)) return j({ status: 'unavailable' }, 404);
     j({ layer: p.split('/').pop(), retrieved_at: NOW, stale_after_s: 10800, source_status: 'ok', cells: {}, record_format: 'rows', record_fields: [], records: [], quantity: 'q', sweep: { answered: 0, cells_total: 559, oldest_queried_at: NOW }, index: null }); });
   // a read the browser blocks: the page's normal fetch is refused (as CORS refuses it) while a no-cors fetch still reaches the server.
@@ -93,7 +105,9 @@ async function setup(browser, gibs, opts = {}) {
   await ctx.addInitScript(() => { const real = window.fetch; window.fetch = function (u, init) { const b = window.__blockRead; if (b && String(u).includes(b)) return init && init.mode === 'no-cors' ? Promise.resolve(new Response(null)) : Promise.reject(new TypeError('Failed to fetch')); return real.call(this, u, init); }; });
   if (opts.noWebGL) await ctx.addInitScript(() => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, ...a) { return /webgl/i.test(t) ? null : g.call(this, t, ...a); }; });
   const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(String(e).slice(0, 200)));
-  await page.goto(BASE + '/index.html', { waitUntil: 'domcontentloaded' });
+  if (opts.clock) await page.clock.install({ time: new Date(opts.clock) });   // the Sky view's scene file is dated; Night lights takes its own "now" from options()
+  await page.goto(BASE + '/' + (opts.path || 'index.html'), { waitUntil: 'domcontentloaded' });
+  if (opts.path) { await page.waitForFunction(() => window.ME && ME.loadedAt, null, { timeout: 30000 }).catch(() => { }); return { ctx, page, errs }; }
   await page.waitForFunction(() => window.ME && ME.loadedAt && ME.nightLights, null, { timeout: 30000 });
   if (!opts.noWebGL) await page.waitForFunction(() => { const g = ME.globe && ME.globe(); if (!g) return false; let ok = false; g.scene().traverse(o => { if (o.isMesh && o.material === g.globeMaterial() && o.material.map) ok = true; }); return ok; }, null, { timeout: 30000 });
   await page.evaluate(t => ME.nightLights.options({ now: t }), T_NOW);
@@ -173,7 +187,7 @@ let BASE;
     await ctx.close(); }
 
   // ===== F. a failed request is a failure, never "still arriving"; G. blocked pixel access; H. off while loading
-  for (const [f, want] of [[503, /^Night lights could not be loaded: NASA GIBS answered HTTP 503 for 15 Nov 2026\. Nothing is drawn\.$/], ['abort', /^Night lights could not be loaded: NASA GIBS did not answer for 15 Nov 2026\. Nothing is drawn\.$/], ['xml', /^Night lights could not be loaded: NASA GIBS answered without a picture for 15 Nov 2026\. Nothing is drawn\.$/]]) {
+  for (const [f, want] of [[503, /^Night lights could not be loaded: NASA GIBS answered HTTP 503 for 15 Nov 2026\. Nothing is drawn\. Switch it on again to retry\.$/], ['abort', /^Night lights could not be loaded: NASA GIBS did not answer for 15 Nov 2026\. Nothing is drawn\. Switch it on again to retry\.$/], ['xml', /^Night lights could not be loaded: NASA GIBS answered without a picture for 15 Nov 2026\. Nothing is drawn\. Switch it on again to retry\.$/]]) {
     const gibs = newGibs(); gibs.fault['2026-11-15'] = f; const { ctx, page } = await setup(browser, gibs);
     const url0 = await backdrop(page); await toggle(page); const s = await st(page), status = await txt(page, '#nl-status');
     ok(`F failed request (${f}): its own failure message, not "arriving"; no fallback to an older date; nothing drawn`, want.test(status) && !/arriving/.test(status) && s.status === 'unavailable' && s.on === false && await backdrop(page) === url0 && nl(gibs).filter(r => /2026-11-14/.test(r)).length === 0, [status, nl(gibs)]);
@@ -215,11 +229,109 @@ let BASE;
     await ctx.close(); }
   { const gibs = newGibs(); gibs.global['2026-11-15'] = 'complete'; gibs.fault['light:2026-11-15:2048'] = 503; const { ctx, page } = await setup(browser, gibs);
     const url0 = await backdrop(page); await toggle(page); const s = await st(page), status = await txt(page, '#nl-status');
-    ok('R probe passes, the full-frame request fails: the failure message for that date, not "arriving", and no older date is tried', /^Night lights could not be loaded: NASA GIBS answered HTTP 503 for 15 Nov 2026\. Nothing is drawn\.$/.test(status) && !/arriving/.test(status) && s.status === 'unavailable' && await backdrop(page) === url0 && !nl(gibs).some(r => /2026-11-14/.test(r)), [status, nl(gibs)]);
+    ok('R probe passes, the full-frame request fails: the failure message for that date, not "arriving", and no older date is tried', /^Night lights could not be loaded: NASA GIBS answered HTTP 503 for 15 Nov 2026\. Nothing is drawn\. Switch it on again to retry\.$/.test(status) && !/arriving/.test(status) && s.status === 'unavailable' && await backdrop(page) === url0 && !nl(gibs).some(r => /2026-11-14/.test(r)), [status, nl(gibs)]);
     await ctx.close(); }
   { const gibs = newGibs(); gibs.global['2026-11-15'] = 'complete'; const { ctx, page } = await setup(browser, gibs);
     await page.evaluate(() => { window.__blockRead = 'WIDTH=2048&HEIGHT=1024&FORMAT=image/png&TRANSPARENT=TRUE&TIME=2026-11-15'; }); await toggle(page); const status = await txt(page, '#nl-status');
     ok('R probe passes, the browser blocks reading the full frame: the blocked message, nothing drawn', /^Night lights cannot be shown: this browser blocked reading the picture's values/.test(status) && (await st(page)).status === 'unavailable', status);
+    await ctx.close(); }
+
+  // ===== T. every GIBS wait is bounded, and a retry works (round 3, GPT detail 2)
+  { const gibs = newGibs(); let release; gibs.hold = new Promise(r => release = r); const { ctx, page, errs } = await setup(browser, gibs);
+    const url0 = await backdrop(page); await page.evaluate(() => ME.nightLights.options({ waitMs: 700 }));
+    const t0 = Date.now(); await toggle(page); const took = Date.now() - t0; let s = await st(page), status = await txt(page, '#nl-status');
+    ok('T a request that hangs ends as unavailable after the wait limit, with its own message and a way to retry', /^Night lights could not be loaded: NASA GIBS did not answer within 0\.7 seconds for 15 Nov 2026\. Nothing is drawn\. Switch it on again to retry\.$/.test(status) && s.status === 'unavailable' && s.on === false && took < 6000, [status, took]);
+    ok('T a hung request is not "still arriving", is not "blocked", and no older date is tried', !/arriving|blocked/.test(status) && !nl(gibs).some(r => /2026-11-14/.test(r)) && await backdrop(page) === url0 && await page.$eval('#tgl-nl', b => b.getAttribute('aria-checked') === 'false' && b.getAttribute('aria-busy') === 'false'), [status, nl(gibs)]);
+    release(); gibs.hold = null; await page.waitForTimeout(300); await toggle(page); s = await st(page);
+    ok('T retry: switching on again after the hang loads the layer', s.status === 'ready' && s.date === '2026-11-14' && /^blob:/.test(await backdrop(page)), s);
+    await toggle(page);
+    // the comparison: one night's picture hangs
+    let rel2; gibs.hold = new Promise(r => rel2 = r);
+    await fillCmp(page, { lat: '0', lng: '0', span: '0.5', a: TRI.a, b: TRI.b }); await runCmp(page);
+    const out = await txt(page, '#nl-out');
+    ok('T comparison: hung pictures end with the wait message and "Press Compare to try again"; nothing is drawn', /^Neither night could be loaded: NASA GIBS did not answer within 0\.7 seconds\. Nothing is drawn\. Press Compare to try again\.$/.test(out) && await page.$('#nl-out canvas') === null && await page.$eval('#nl-go', b => b.getAttribute('aria-busy') === 'false'), out);
+    rel2(); gibs.hold = null; await page.waitForTimeout(300); await runCmp(page);
+    ok('T comparison retry: pressing Compare again loads both nights', (await txt(page, '#nl-shares')).startsWith('Readable on 1 May 2026: 100% · Readable on 2 May 2026: 33% · Usable on both: 33%'));
+    ok('T no page errors (no unhandled rejection from the wait limit)', errs.length === 0, errs);
+    await ctx.close(); }
+  { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs);   // a response that starts and then stalls in its body
+    await page.evaluate(() => { ME.nightLights.options({ waitMs: 700 }); const real = window.fetch; window.fetch = function (u, init) { if (/WIDTH=512&HEIGHT=256/.test(String(u)) && !window.__stallOff) return Promise.resolve(new Response(new ReadableStream({ start(c) { c.enqueue(new Uint8Array(16)); } }), { status: 200, headers: { 'content-type': 'image/png' } })); return real.call(this, u, init); }; });
+    await toggle(page); const status = await txt(page, '#nl-status');
+    ok('T a response whose body stalls is caught by the same limit', /NASA GIBS did not answer within 0\.7 seconds for 15 Nov 2026/.test(status) && (await st(page)).status === 'unavailable', status);
+    await page.evaluate(() => { window.__stallOff = true; }); await toggle(page);
+    ok('T and loads on retry once the body arrives', (await st(page)).status === 'ready');
+    ok('T no page errors', errs.length === 0, errs);
+    await ctx.close(); }
+  { const gibs = newGibs(); const { ctx, page } = await setup(browser, gibs);   // NASA's key hangs
+    await page.evaluate(() => { ME.nightLights.options({ waitMs: 700 }); const real = window.fetch; window.fetch = function (u, init) { if (/colormaps/.test(String(u))) return new Promise(() => { }); return real.call(this, u, init); }; });
+    await toggle(page); const status = await txt(page, '#nl-status');
+    ok('T NASA\'s key hanging is bounded too: the key message, no picture asked for', /NASA's key for the picture could not be loaded/.test(status) && nl(gibs).filter(r => r.startsWith('light:')).length === 0, status);
+    await ctx.close(); }
+  { const { ctx, page } = await setup(browser, newGibs());
+    ok('T the default wait limit is 20 seconds', await page.evaluate(() => ME.nlLogic.NL.WAIT_MS) === 20000);
+    await ctx.close(); }
+
+  // ===== S. the Sky zoom-out view names the picture that is drawn (round 3, GPT detail 1)
+  { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs, { clock: '2026-11-10T10:00:00Z' });
+    const derived = () => page.evaluate(() => ({ zoom: document.getElementById('zoom-img').textContent, line: (document.getElementById('imgdate').textContent || '').split(' — ')[0].split(' (')[0], night: /^blob:/.test(ME.globe().globeImageUrl()), open: ME.zoomState().open }));
+    const agree = d => d.zoom === d.line && /night lights/.test(d.zoom) === d.night;
+    const skyOn = async () => { await page.evaluate(() => document.getElementById('tgl-sky').click()); await page.waitForFunction(() => ME.skyState().status === 'ok', null, { timeout: 20000 }); };
+    const zoom = async open => { await page.evaluate(() => document.getElementById('tgl-zoom').click()); await page.waitForFunction(o => ME.zoomState().open === o && (!o || ME.zoomState().path), open, { timeout: 20000 }); await page.waitForTimeout(500); };
+    await skyOn(); const trueColour = (await derived()).line;
+    // (1) layer already on, then enter and leave
+    await toggle(page); await zoom(true); let d = await derived();
+    ok('S enter the Sky view with Night lights on: its imagery label names night lights and its date, and the globe carries that picture', d.open && d.zoom === 'Imagery: night lights 14 Nov 2026' && agree(d), d);
+    await zoom(false); d = await derived();
+    ok('S leave the Sky view: World View still shows and names night lights; the layer is still on', !d.open && agree(d) && d.night && (await st(page)).status === 'ready' && /night lights 14 Nov 2026/.test(await txt(page, '#imgdate')), d);
+    // (2) switch it off while inside the Sky view
+    await zoom(true); await toggle(page); d = await derived();
+    ok('S switch Night lights off inside the Sky view: the label returns to the true-colour picture at once', d.open && d.zoom === trueColour && !d.night && agree(d), [d, trueColour]);
+    // (3) switch it on inside the Sky view, while it is still loading
+    let release; gibs.hold = new Promise(r => release = r);
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'loading'); d = await derived();
+    ok('S while Night lights is still loading in the Sky view, the label still names the true-colour picture that is drawn', d.open && d.zoom === trueColour && !d.night && agree(d), d);
+    release(); gibs.hold = null; await page.waitForFunction(() => ME.nightLights.state().status === 'ready', null, { timeout: 30000 }); d = await derived();
+    ok('S when it finishes loading inside the Sky view, the label changes to night lights without leaving the view', d.open && d.zoom === 'Imagery: night lights 14 Nov 2026' && agree(d), d);
+    await zoom(false); await toggle(page);
+    // (4) start loading in World View, enter the Sky view before it finishes
+    gibs.hold = new Promise(r => release = r);
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'loading');
+    await zoom(true); d = await derived();
+    ok('S enter the Sky view while Night lights is loading: true-colour label, true-colour picture', d.open && d.zoom === trueColour && agree(d), d);
+    release(); gibs.hold = null; await page.waitForFunction(() => ME.nightLights.state().status === 'ready', null, { timeout: 30000 }); d = await derived();
+    ok('S it finishes while the view is open: label and picture are night lights together', d.zoom === 'Imagery: night lights 14 Nov 2026' && agree(d), d);
+    await zoom(false); d = await derived();
+    ok('S back in World View: night lights shown and named; switching off restores the true-colour line', agree(d) && d.night && await (async () => { await toggle(page); const e = await derived(); return e.line === trueColour && !e.night && agree(e); })(), d);
+    ok('S no page errors', errs.length === 0, errs);
+    await ctx.close(); }
+
+  // ===== U. a blank date and a coarse box in the comparison (round 3)
+  { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs);
+    await fillCmp(page, { lat: '0', lng: '0', span: '0.5', a: TRI.a, b: TRI.blank }); await runCmp(page);
+    const figs = await page.$$eval('#nl-out figure', f => f.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
+    ok('U a date whose picture comes back empty says "No data for this date", under that date only', figs.length === 2 && !/No data for this date/.test(figs[0]) && /^3 May 2026 \(UTC\) ?No data for this date\.$/.test(figs[1]), figs);
+    ok('U and nothing more specific: no "arriving", no "no night pass", no cause', !/arriving|night pass|cloud|outage/i.test(figs[1]), figs[1]);
+    ok('U its shares: nothing readable on that date, nothing usable on both; every pixel is the no-data pattern on both panels', (await txt(page, '#nl-shares')) === 'Readable on 1 May 2026: 100% · Readable on 3 May 2026: 0% · Usable on both: 0% — of the area in view' && (await panelPx(page, 'a', [[20, 20], [200, 300]])).px.every(c => isIn(c, NODATA)) && (await panelPx(page, 'b', [[20, 20], [200, 300]])).px.every(c => isIn(c, NODATA)));
+    ok('U a 0.5° box carries no coarseness note', !/coarser/.test(await txt(page, '#nl-out .nl-where')), await txt(page, '#nl-out .nl-where'));
+    await fillCmp(page, { lat: '0', lng: '0', span: '5', a: TRI.a, b: TRI.b }); await runCmp(page);
+    const where = await txt(page, '#nl-out .nl-where');
+    ok('U a 5° box says it is drawn coarser than the layer\'s own detail, with the size of a pixel', where === "2.50° S to 2.50° N, 2.50° W to 2.50° E · 480 × 480 pixels · drawn coarser than the layer's own detail: about 1.2 km a pixel" && nl(gibs).filter(r => /-2\.5,-2\.5,2\.5,2\.5:480x480/.test(r)).length === 4, [where, nl(gibs).slice(-4)]);
+    ok('U no page errors', errs.length === 0, errs);
+    await ctx.close(); }
+
+  // ===== W. Sources & Details (round 3)
+  { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs, { path: 'sources.html' });
+    const sec = await page.evaluate(() => { const h = document.getElementById('nightlights'); if (!h) return null; let t = '', e = h.nextElementSibling; while (e && e.tagName !== 'H2') { t += ' ' + e.textContent; e = e.nextElementSibling; } return { h: h.textContent, t: t.replace(/\s+/g, ' ') }; });
+    ok('W Sources & Details has a Night lights section', sec && /Night lights — light measured at night \(observed, optional layer\)/.test(sec.h), sec && sec.h);
+    ok('W it names both NASA layers, the scale and its top, the date rule on the displayed picture, the three states and the threshold label', sec && /VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance/.test(sec.t) && /VIIRS_NOAA20_Clear_Sky_Confidence_Night/.test(sec.t) && /38\.2 or more/.test(sec.t) && /no more than 1% missing between 30°S and 30°N, judged on the picture that is put on the globe/.test(sec.t) && /usable on both/.test(sec.t) && /no reliable comparison/.test(sec.t) && /Preview threshold: clear-sky confidence 0\.95 or more on both nights\. Chosen for this preview; not a NASA standard\./.test(sec.t), sec && sec.t.slice(0, 300));
+    ok('W it carries the as-measured line, the wait limit, the no-fallback rule and NASA\'s local-scale caveat; light, never power', sec && /Light as measured at the satellite\. Moonlight, cloud, fires, lightning, boats and the viewing angle all change it\./.test(sec.t) && /within 20 seconds/.test(sec.t) && /does not fall back to an older night/.test(sec.t) && /NASA: not for tactical decisions or local-scale conditions\./.test(sec.t) && !/outage|blackout|power/i.test(sec.t));
+    const img = await page.$eval('#imagery', h => { let t = '', e = h.nextElementSibling; while (e && e.tagName !== 'H2') { t += ' ' + e.textContent; e = e.nextElementSibling; } return t.replace(/\s+/g, ' '); });
+    ok('W the imagery section describes both pictures and does not claim to know which one World View is showing', /true-colour/.test(img) && /While Night lights is switched on there, the globe shows NASA's night-light picture in its place/.test(img) && /This page cannot see which picture another tab is showing\./.test(img), img.slice(-300));
+    ok('W the Sources page makes no night-light request', nl(gibs).length === 0, nl(gibs));
+    ok('W no page errors on Sources', errs.length === 0, errs);
+    await ctx.close(); }
+  { const { ctx, page } = await setup(browser, newGibs());
+    ok('W the card links to that section', await page.$eval('#nl-scope a', a => a.getAttribute('href')) === 'sources.html#nightlights');
     await ctx.close(); }
 
   // ===== J. the recorded Saipan and Tinian pair through the page
@@ -290,7 +402,7 @@ let BASE;
     // M. one date fails
     gibs.fault['light:' + TRI.b] = 503; await runCmp(page);
     const outM = await txt(page, '#nl-out'), shM = await txt(page, '#nl-shares');
-    ok('M one night fails: its own message in its own place; the other night is drawn', /The 2 May 2026 frame could not be loaded: NASA GIBS answered HTTP 503\. Nothing is drawn for it\./.test(outM) && await page.$('#nl-cv-a') !== null && await page.$('#nl-cv-b') === null, outM.slice(0, 300));
+    ok('M one night fails: its own message in its own place; the other night is drawn', /The 2 May 2026 frame could not be loaded: NASA GIBS answered HTTP 503\. Nothing is drawn for it\. Press Compare to try again\./.test(outM) && await page.$('#nl-cv-a') !== null && await page.$('#nl-cv-b') === null, outM.slice(0, 300));
     ok('M one night fails: only that night\'s readable share; no "usable on both"; no comparison made', shM === 'Readable on 1 May 2026: 100% of the area in view · The 2 May 2026 frame could not be loaded, so no comparison is made.' && !/Usable on both/.test(outM), shM);
     const pm = await panelPx(page, 'a', [[100, 50], [100, 180]]);
     ok('M the loaded night stands on its own: its measured dark pixels are drawn as measured (nothing borrowed from the earlier answer)', same(pm.px[0], LIGHT.get(100)) && same(pm.px[1], LIGHT.get(0)), pm.px);
@@ -306,7 +418,7 @@ let BASE;
     await page.evaluate(d => { window.__blockRead = 'Clear_Sky_Confidence_Night&STYLES=&CRS=EPSG:4326&BBOX=-0.25,-0.25,0.25,0.25&WIDTH=120&HEIGHT=120&FORMAT=image/png&TRANSPARENT=TRUE&TIME=' + d; }, TRI.a); await runCmp(page); const outN = await txt(page, '#nl-out');
     ok('N the browser blocks reading a picture: says so, shows no shares and no picture', outN === "This browser blocked reading the pictures' values, so nothing can be compared. No shares are shown." && await page.$('#nl-shares') === null && await page.$('#nl-out canvas') === null, outN);
     await page.evaluate(() => { window.__blockRead = null; }); gibs.fault = { ['light:' + TRI.a]: 'abort', ['light:' + TRI.b]: 'abort' }; await runCmp(page);
-    ok('N both nights fail: one failure message, nothing drawn', /^Neither night could be loaded: NASA GIBS did not answer\. Nothing is drawn\.$/.test(await txt(page, '#nl-out')));
+    ok('N both nights fail: one failure message, nothing drawn', /^Neither night could be loaded: NASA GIBS did not answer\. Nothing is drawn\. Press Compare to try again\.$/.test(await txt(page, '#nl-out')));
     ok('L/M/N no page errors', errs.length === 0, errs);
     await ctx.close(); }
 

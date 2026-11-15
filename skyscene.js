@@ -465,8 +465,13 @@
     const r = st.rows; if (!r) return;
     $('zoom-dist').innerHTML = `<span>Moon · ${esc(km(r.moon[3]))}</span>` + (st.sunShown || forceSun ? `<span>Sun · ${esc(mkm(r.sun[3]))}</span>` : '') + `<span class="zc">from Earth's centre</span>`;
     $('zoom-when').textContent = `00:00 UTC, ${nice(st.date)} · NASA/JPL Horizons · Layers are hidden in this view.`;
-    $('zoom-img').textContent = ($('imgdate').textContent || '').split(' — ')[0].split(' (')[0];   // the Earth imagery keeps its own date, shown here while the view covers the usual line
+    imgLabel();
   }
+  // The Earth imagery keeps its own date, shown here while the view covers the usual line. One function, so the label is taken
+  // from the page's imagery line whenever either changes: Night lights calls it when it puts its picture on the globe or takes
+  // it off (night-lights-rc round 3), so this label always names the picture that is drawn.
+  function imgLabel() { const e = $('zoom-img'), i = $('imgdate'); if (e && i) e.textContent = (i.textContent || '').split(' — ')[0].split(' (')[0]; }
+  ME.zoomImgLabel = imgLabel;
   function writeText() {
     const r = st.rows; if (!r) { $('zoom-text').innerHTML = ''; return; }
     $('zoom-text').innerHTML = `<p>Computed positions at 00:00 UTC, ${esc(nice(st.date))} (not observed).</p><ul>`
