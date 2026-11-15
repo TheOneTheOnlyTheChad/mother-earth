@@ -6,7 +6,7 @@
 <title>The Moon · spacecraft · Mother Earth</title>
 <meta name="description" content="Lunar Reconnaissance Orbiter: where its published trajectory places it, with the source and time beside every position.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612071000">
+<link rel="stylesheet" href="style.css?v=202612071100">
 </head>
 <body class="doc craft" data-body="moon">
 <header class="top">
@@ -51,10 +51,14 @@
       <button type="button" id="mg-zin" aria-label="Zoom in on the Moon">Zoom in</button>
       <button type="button" id="mg-zout" aria-label="Zoom out">Zoom out</button>
       <button type="button" id="mg-lro" aria-pressed="false">Show LRO’s dated path</button>
+      <button type="button" id="mg-lit" aria-pressed="false">Lit as now</button>
+      <button type="button" id="mg-earth" aria-pressed="false" hidden>As seen from Earth now</button>
     </div>
+    <p id="mg-lit-read" class="mglro" aria-live="off" hidden></p>
+    <p id="mg-both" class="mgboth" role="note" hidden>Lighting uses the current UTC minute. The LRO path is a dated example from 10–11 June 2026.</p>
     <p id="mg-lro-read" class="mglro" aria-live="polite" hidden></p>
     <p class="cscale"><span>Use Zoom in and Zoom out, or pinch on supported devices, to look closer: the Moon grows inside its box. The map holds about 5 km to a pixel at the equator, so it blurs up close.</span>
-    <span>Evenly lit so the whole surface can be seen: this is not how the Moon is lit today.</span>
+    <span>Opens evenly lit so the whole surface can be seen: that is not how the Moon is lit today. “Lit as now” shades it from the calculated direction of the Sun at this device’s current UTC minute.</span>
     <span>Appearance map from NASA’s Scientific Visualization Studio, made from Lunar Reconnaissance Orbiter data: tuned for looks, not measurement. Poleward of 70° it is filled from a lower-resolution map.</span>
     <span>Drawn to fill the view. Sizes are not comparable between the Earth, Moon and Sun pages. The globe and the spacecraft drawing below are separate views. “Show LRO’s dated path” puts the 10–11 June 2026 example on the globe, at the time chosen in the drawing; no current position is shown.</span></p>
     <noscript><p class="cunavail">The globe needs JavaScript.</p></noscript>
@@ -95,12 +99,14 @@
       <li><b>Today:</b> no position is shown. The published prediction for LRO has not been compared with a later definitive trajectory; a study of that is running and publishes nothing.</li>
       <li><b>Moon globe:</b> colour map <code>lroc_color_2k.jpg</code> (2025 version) from NASA’s Scientific Visualization Studio, “CGI Moon Kit”. Our copy is served from this site, unchanged. Credit: NASA’s Scientific Visualization Studio.</li>
       <li><b>On the globe:</b> the same one-minute states, each turned once into the Moon’s mean Earth frame (<code>MOON_ME_DE440_ME421</code>) at its own time, with NAIF’s SPICE toolkit and JPL’s DE440 Moon orientation. Checked against our own evaluation of DE440 and against NASA/JPL Horizons. Altitude is above a sphere of 1,737.4 km, not above the terrain. <a href="sources.html#skycraft">Details</a></li>
+      <li><b>Lit as now:</b> calculated, not observed. The directions of the Sun and the Earth over the Moon come from a table we built with NAIF’s SPICE toolkit from JPL’s DE440 positions and Moon orientation, every six hours from 1 June 2026 to 1 January 2028 UTC, in the same frame as the map; the page interpolates between entries (within 0.005° of the direct calculation at every midpoint). Checked against our own evaluation of DE440 and against NASA/JPL Horizons. The time is this device’s clock. A smooth sphere and a point Sun: no relief shadows, no earthshine, no eclipses. The night side is shown faintly as a display aid. <a href="sources.html#moonlight">Details</a></li>
       <li><b>Moon radius:</b> 1,737.4 km (NASA/JPL Horizons, “Radius (IAU)”).</li>
     </ul>
     <p class="dim">Full register of sources: <a href="sources.html">Sources &amp; Details</a>.</p>
   </section>
 </main>
 <script src="craft.js?v=202612071000"></script>
-<script src="moonglobe.js?v=202612071000"></script>
+<script src="moonlight.js?v=202612071100"></script>
+<script src="moonglobe.js?v=202612071200"></script>
 </body>
 </html>

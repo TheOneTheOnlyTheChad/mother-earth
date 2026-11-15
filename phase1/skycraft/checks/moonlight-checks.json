@@ -1,0 +1,3285 @@
+{
+ "what": "Checks run by build_moonlight.py for moon-light-2026-06-R1 (MOON-LIT-AS-NOW-PROPOSAL rev 2.1 \u00a73 and \u00a710).",
+ "ceilings": {
+  "independent_deg": 0.0001,
+  "june_matrix_abs": 1e-14,
+  "horizons_subpoint_deg": 0.001,
+  "horizons_illum_pp": 0.01,
+  "interpolation_deg": 0.01
+ },
+ "worst": {
+  "independent_before_rounding_deg": 7.190983441259322e-06,
+  "independent_after_rounding_deg": 1.2757817299195528e-05,
+  "june_matrix_abs": 9.992007221626409e-16,
+  "horizons_sun_deg": 1.421282064083972e-06,
+  "horizons_earth_deg": 1.3067716699735748e-06,
+  "horizons_illum_pp": 5.122245951838522e-06,
+  "interpolation_sun_deg": 0.0005521493523960628,
+  "interpolation_earth_deg": 0.004950449894320429
+ },
+ "toolkit": "CSPICE_N0067",
+ "spiceypy": "8.0.0",
+ "first_last_sample_utc": [
+  "2026-06-01T00:00:00.000",
+  "2028-01-01T00:00:00.000"
+ ],
+ "samples": 2317,
+ "midpoints": 2316,
+ "independent": {
+  "method": "DE440 ASCII records 873\u2013891 (EMB, geocentric Moon, Sun, librations) with this script's own Chebyshev evaluator and derivative; EMRAT from header.440; own UTC\u2192TDB from the leap-second kernel's constants; own light-time iteration and Newtonian stellar aberration for the Sun; own 3-1-3 libration rotation and NAIF's fixed PA\u2192ME offset. No SPICE call.",
+  "compared": "angle between unit vectors, larger of Sun and Earth, at every sample",
+  "before_rounding_deg": {
+   "max": 7.190983441259322e-06,
+   "mean": 4.59531931578325e-06,
+   "p99": 7.190194476850209e-06
+  },
+  "after_rounding_deg": {
+   "max": 1.2757817299195528e-05,
+   "mean": 6.390946432669243e-06,
+   "p99": 1.1955468600588588e-05
+  },
+  "leap_seconds_used": [
+   37
+  ],
+  "own_vs_spice_tdb_worst_s": 1.1920928955078125e-07,
+  "note": "No leap second is scheduled after 2017-01-01 in naif0012.tls; a future one inside the table would shift its later samples by 1 s (about 0.00014\u00b0 of sub-solar longitude)."
+ },
+ "june_rotation": {
+  "epochs": [
+   834321669.1846904,
+   834327489.1846886,
+   834334509.1846865,
+   834343269.1846839,
+   834358689.1846794,
+   834362169.1846783,
+   834364869.1846775,
+   834386469.1846712,
+   834408069.1846647
+  ],
+  "source": "phase1/skycraft/checks/moonfixed-checks.json (independent_rotation.samples[].tdb_s and .spice)",
+  "worst_abs_element_difference": 9.992007221626409e-16,
+  "note": "pxform from the wider PCK byte range (records 21750\u201321823), rounded as archived (15 decimals)."
+ },
+ "horizons": {
+  "request": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='301'&OBJ_DATA=NO&MAKE_EPHEM=YES&EPHEM_TYPE=OBSERVER&CENTER='500@399'&START_TIME='2026-06-01 00:00'&STOP_TIME='2028-01-01 00:00'&STEP_SIZE='5 d'&QUANTITIES='10,14,15,20,21'&ANG_FORMAT=DEG&CSV_FORMAT=YES&EXTRA_PREC=YES&TIME_DIGITS=SECONDS",
+  "target_source": "DE441",
+  "frame_line": "Target pole/equ : MOON_ME {East-longitude positive}; radii 1737.4 \u00d7 3",
+  "horizons_conventions": "Apparent quantities at the observer time t: the Moon and its orientation at t \u2212 lt (down-leg light time, no aberration); the Sun as seen from the Moon at t \u2212 lt, apparent (light time and stellar aberration); illuminated fraction from those two directions. Reading the sub-solar point with light time only leaves the residual in sun_without_aberration_deg (about the 20\" aberration constant), so that reading is rejected.",
+  "sun_without_aberration_deg": {
+   "max": 0.0059877435765972285,
+   "mean": 0.005686616755549659,
+   "p99": 0.00598598421466794
+  },
+  "like_for_like": {
+   "sun_deg": {
+    "max": 1.421282064083972e-06,
+    "mean": 9.490138516745721e-07,
+    "p99": 1.4206320874527684e-06
+   },
+   "earth_deg": {
+    "max": 1.3067716699735748e-06,
+    "mean": 6.037586523117679e-07,
+    "p99": 1.261202860635298e-06
+   },
+   "illum_pp": {
+    "max": 5.122245951838522e-06,
+    "mean": 2.5488445553655028e-06,
+    "p99": 4.912968762482706e-06
+   }
+  },
+  "catalogue_convention_residual": {
+   "sun_deg": {
+    "max": 0.00019088130476520966,
+    "mean": 0.000180325119605815,
+    "p99": 0.0001901323269628863
+   },
+   "earth_deg": {
+    "max": 0.0057996888308154216,
+    "mean": 0.0036359241712846505,
+    "p99": 0.005772896756762256
+   },
+   "illum_pp": {
+    "max": 0.002641300031896776,
+    "mean": 0.001571956748443947,
+    "p99": 0.0026239219984631745
+   },
+   "explanation": "The catalogue takes sunlight arriving at the Moon at t (with aberration) and the geometric Earth at t; Horizons ties both to an Earth observer at t, about 1.3 s of light time later than the Moon event. Not judged against the ceilings."
+  },
+  "rows": [
+   {
+    "utc": "2026-06-01T00:00:00Z",
+    "horizons": {
+     "illum_pct": 99.45946,
+     "obs_sub_lon_lat": [
+      359.87856,
+      6.387672
+     ],
+     "sun_sub_lon_lat": [
+      352.929106,
+      1.584027
+     ],
+     "light_time_s": 1.355433
+    },
+    "like_for_like": {
+     "sun_deg": 1.421282064083972e-06,
+     "earth_deg": 3.3308140451653025e-07,
+     "illum_pp": 6.509822156886003e-07,
+     "light_time_s": 1.3554329305325226,
+     "sun_deg_without_aberration": 0.005798855398332213
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.000189778631843089,
+     "earth_deg": 0.005546952412634686,
+     "illum_pp": 0.0005976593073739878
+    }
+   },
+   {
+    "utc": "2026-06-06T00:00:00Z",
+    "horizons": {
+     "illum_pct": 73.60952,
+     "obs_sub_lon_lat": [
+      353.799753,
+      1.843694
+     ],
+     "sun_sub_lon_lat": [
+      291.947239,
+      1.532764
+     ],
+     "light_time_s": 1.325451
+    },
+    "like_for_like": {
+     "sun_deg": 1.3889903584365971e-06,
+     "earth_deg": 1.5850471516141642e-07,
+     "illum_pp": 4.7333985406794454e-06,
+     "light_time_s": 1.3254510653183065,
+     "sun_deg_without_aberration": 0.005693074468384995
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018587181039929026,
+     "earth_deg": 0.0025886435070581262,
+     "illum_pp": 0.0021260468924992892
+    }
+   },
+   {
+    "utc": "2026-06-11T00:00:00Z",
+    "horizons": {
+     "illum_pct": 23.2962,
+     "obs_sub_lon_lat": [
+      353.118253,
+      -4.985156
+     ],
+     "sun_sub_lon_lat": [
+      230.838085,
+      1.456146
+     ],
+     "light_time_s": 1.2355044
+    },
+    "like_for_like": {
+     "sun_deg": 1.2986319195998075e-06,
+     "earth_deg": 2.8058354476965234e-07,
+     "illum_pp": 3.734984399983432e-06,
+     "light_time_s": 1.2355043874214402,
+     "sun_deg_without_aberration": 0.0054915238160870095
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017369152462823657,
+     "earth_deg": 0.003044998878240157,
+     "illum_pp": 0.0020993041646768518
+    }
+   },
+   {
+    "utc": "2026-06-16T00:00:00Z",
+    "horizons": {
+     "illum_pct": 1.33362,
+     "obs_sub_lon_lat": [
+      2.27725,
+      -5.369383
+     ],
+     "sun_sub_lon_lat": [
+      169.598286,
+      1.397554
+     ],
+     "light_time_s": 1.1949383999999998
+    },
+    "like_for_like": {
+     "sun_deg": 6.015003644412738e-07,
+     "earth_deg": 3.970243293716186e-07,
+     "illum_pp": 2.1235358007576366e-06,
+     "light_time_s": 1.1949384511386565,
+     "sun_deg_without_aberration": 0.005402597992160847
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00016897740370574663,
+     "earth_deg": 0.005439171375272696,
+     "illum_pp": 0.0010014677389682536
+    }
+   },
+   {
+    "utc": "2026-06-21T00:00:00Z",
+    "horizons": {
+     "illum_pct": 40.61191,
+     "obs_sub_lon_lat": [
+      7.508593,
+      1.915163
+     ],
+     "sun_sub_lon_lat": [
+      108.386607,
+      1.36769
+     ],
+     "light_time_s": 1.2780281999999998
+    },
+    "like_for_like": {
+     "sun_deg": 1.2304961912613634e-06,
+     "earth_deg": 5.729748898431967e-07,
+     "illum_pp": 4.164494171732258e-07,
+     "light_time_s": 1.2780280490611347,
+     "sun_deg_without_aberration": 0.005555913863100029
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001796564125438585,
+     "earth_deg": 0.0010598388553814404,
+     "illum_pp": 0.0007429489859518412
+    }
+   },
+   {
+    "utc": "2026-06-26T00:00:00Z",
+    "horizons": {
+     "illum_pct": 86.06349,
+     "obs_sub_lon_lat": [
+      3.6552,
+      6.526766
+     ],
+     "sun_sub_lon_lat": [
+      47.312482,
+      1.348972
+     ],
+     "light_time_s": 1.348122
+    },
+    "like_for_like": {
+     "sun_deg": 5.731819593665313e-07,
+     "earth_deg": 7.919672448438814e-07,
+     "illum_pp": 5.561427798284058e-07,
+     "light_time_s": 1.3481221991816719,
+     "sun_deg_without_aberration": 0.005732369621285177
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018985186623507336,
+     "earth_deg": 0.004052319977481805,
+     "illum_pp": 0.002525015941444053
+    }
+   },
+   {
+    "utc": "2026-07-01T00:00:00Z",
+    "horizons": {
+     "illum_pct": 99.00224,
+     "obs_sub_lon_lat": [
+      357.374849,
+      4.405273
+     ],
+     "sun_sub_lon_lat": [
+      346.327537,
+      1.283639
+     ],
+     "light_time_s": 1.3468482
+    },
+    "like_for_like": {
+     "sun_deg": 1.030404542992409e-06,
+     "earth_deg": 4.2280110173621163e-07,
+     "illum_pp": 2.657393039839917e-06,
+     "light_time_s": 1.3468481420237604,
+     "sun_deg_without_aberration": 0.0057820175238696
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018906351686808975,
+     "earth_deg": 0.0054767094444776974,
+     "illum_pp": 0.0009355826129109346
+    }
+   },
+   {
+    "utc": "2026-07-06T00:00:00Z",
+    "horizons": {
+     "illum_pct": 68.94072,
+     "obs_sub_lon_lat": [
+      352.980403,
+      -2.341402
+     ],
+     "sun_sub_lon_lat": [
+      285.316468,
+      1.162137
+     ],
+     "light_time_s": 1.2927203999999999
+    },
+    "like_for_like": {
+     "sun_deg": 6.388630597310114e-07,
+     "earth_deg": 2.9700404828063667e-07,
+     "illum_pp": 4.693887106554939e-06,
+     "light_time_s": 1.2927203237809117,
+     "sun_deg_without_aberration": 0.005663479018895389
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001820605269804767,
+     "earth_deg": 0.0021107182648325735,
+     "illum_pp": 0.0018412469663928732
+    }
+   },
+   {
+    "utc": "2026-07-11T00:00:00Z",
+    "horizons": {
+     "illum_pct": 16.70083,
+     "obs_sub_lon_lat": [
+      356.126636,
+      -6.669362
+     ],
+     "sun_sub_lon_lat": [
+      224.173605,
+      1.033177
+     ],
+     "light_time_s": 1.2126972
+    },
+    "like_for_like": {
+     "sun_deg": 1.3645079267580381e-06,
+     "earth_deg": 3.9626610245437005e-07,
+     "illum_pp": 8.485660885071411e-07,
+     "light_time_s": 1.2126969814734683,
+     "sun_deg_without_aberration": 0.005460414095619481
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001704718397690332,
+     "earth_deg": 0.0037440935577855903,
+     "illum_pp": 0.0022862376754133606
+    }
+   },
+   {
+    "utc": "2026-07-16T00:00:00Z",
+    "horizons": {
+     "illum_pct": 3.69924,
+     "obs_sub_lon_lat": [
+      5.08716,
+      -1.715929
+     ],
+     "sun_sub_lon_lat": [
+      162.917104,
+      0.924254
+     ],
+     "light_time_s": 1.2185658
+    },
+    "like_for_like": {
+     "sun_deg": 1.183870829169562e-06,
+     "earth_deg": 6.085952990975504e-07,
+     "illum_pp": 2.036149134632126e-06,
+     "light_time_s": 1.2185659770735255,
+     "sun_deg_without_aberration": 0.005411895141597488
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001715910273996059,
+     "earth_deg": 0.005180035923520488,
+     "illum_pp": 0.0016483332562176045
+    }
+   },
+   {
+    "utc": "2026-07-21T00:00:00Z",
+    "horizons": {
+     "illum_pct": 45.51816,
+     "obs_sub_lon_lat": [
+      6.469394,
+      5.384322
+     ],
+     "sun_sub_lon_lat": [
+      101.715474,
+      0.844765
+     ],
+     "light_time_s": 1.3130064000000001
+    },
+    "like_for_like": {
+     "sun_deg": 8.626986179339062e-07,
+     "earth_deg": 5.430298014288706e-07,
+     "illum_pp": 4.628166301756664e-06,
+     "light_time_s": 1.313006674213569,
+     "sun_deg_without_aberration": 0.005577534656076293
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001849385120413101,
+     "earth_deg": 0.0006934022685800909,
+     "illum_pp": 0.00031417391481625145
+    }
+   },
+   {
+    "utc": "2026-07-26T00:00:00Z",
+    "horizons": {
+     "illum_pct": 88.30211,
+     "obs_sub_lon_lat": [
+      0.940387,
+      6.260027
+     ],
+     "sun_sub_lon_lat": [
+      40.654888,
+      0.766961
+     ],
+     "light_time_s": 1.3527018
+    },
+    "like_for_like": {
+     "sun_deg": 9.784642015273982e-07,
+     "earth_deg": 1.1583113623272551e-06,
+     "illum_pp": 9.944004091266834e-07,
+     "light_time_s": 1.3527017580959972,
+     "sun_deg_without_aberration": 0.005747558306443863
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00019010232132705396,
+     "earth_deg": 0.004272021999924626,
+     "illum_pp": 0.0024664844232518135
+    }
+   },
+   {
+    "utc": "2026-07-31T00:00:00Z",
+    "horizons": {
+     "illum_pct": 98.11738,
+     "obs_sub_lon_lat": [
+      355.457387,
+      0.798089
+     ],
+     "sun_sub_lon_lat": [
+      339.684216,
+      0.641593
+     ],
+     "light_time_s": 1.3194978000000002
+    },
+    "like_for_like": {
+     "sun_deg": 1.3076912675216499e-06,
+     "earth_deg": 4.245360886364319e-07,
+     "illum_pp": 3.596181983311908e-06,
+     "light_time_s": 1.3194976260712965,
+     "sun_deg_without_aberration": 0.0057890209204132775
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018489168562248247,
+     "earth_deg": 0.005394576512995958,
+     "illum_pp": 0.0013192225820688464
+    }
+   },
+   {
+    "utc": "2026-08-05T00:00:00Z",
+    "horizons": {
+     "illum_pct": 62.25194,
+     "obs_sub_lon_lat": [
+      354.373883,
+      -5.772751
+     ],
+     "sun_sub_lon_lat": [
+      278.682501,
+      0.480777
+     ],
+     "light_time_s": 1.2592128
+    },
+    "like_for_like": {
+     "sun_deg": 5.190366638546938e-07,
+     "earth_deg": 4.530294976130628e-07,
+     "illum_pp": 2.3273224130093695e-06,
+     "light_time_s": 1.259212920622586,
+     "sun_deg_without_aberration": 0.005652314385023187
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017745940873945307,
+     "earth_deg": 0.0014753700633691428,
+     "illum_pp": 0.001342620641189285
+    }
+   },
+   {
+    "utc": "2026-08-10T00:00:00Z",
+    "horizons": {
+     "illum_pct": 10.44604,
+     "obs_sub_lon_lat": [
+      0.08867,
+      -5.196117
+     ],
+     "sun_sub_lon_lat": [
+      217.542895,
+      0.325642
+     ],
+     "light_time_s": 1.2122183999999998
+    },
+    "like_for_like": {
+     "sun_deg": 6.673965947986878e-07,
+     "earth_deg": 8.727354607769652e-07,
+     "illum_pp": 2.6622135944620595e-06,
+     "light_time_s": 1.212218155110627,
+     "sun_deg_without_aberration": 0.005455304039726119
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001711613183371196,
+     "earth_deg": 0.004414249487975771,
+     "illum_pp": 0.002242350299336948
+    }
+   },
+   {
+    "utc": "2026-08-15T00:00:00Z",
+    "horizons": {
+     "illum_pct": 6.62974,
+     "obs_sub_lon_lat": [
+      6.033438,
+      2.589079
+     ],
+     "sun_sub_lon_lat": [
+      156.312066,
+      0.190543
+     ],
+     "light_time_s": 1.257609
+    },
+    "like_for_like": {
+     "sun_deg": 6.230571174148428e-07,
+     "earth_deg": 6.230519220362979e-07,
+     "illum_pp": 4.672904408309364e-06,
+     "light_time_s": 1.257608924942963,
+     "sun_deg_without_aberration": 0.005445807253164296
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017769219140548913,
+     "earth_deg": 0.0049074167183476595,
+     "illum_pp": 0.0020417907197805008
+    }
+   },
+   {
+    "utc": "2026-08-20T00:00:00Z",
+    "horizons": {
+     "illum_pct": 49.01938,
+     "obs_sub_lon_lat": [
+      4.015149,
+      6.837869
+     ],
+     "sun_sub_lon_lat": [
+      95.157215,
+      0.085285
+     ],
+     "light_time_s": 1.338534
+    },
+    "like_for_like": {
+     "sun_deg": 1.1270289627263693e-06,
+     "earth_deg": 2.846072229796677e-07,
+     "illum_pp": 4.6344180901769505e-06,
+     "light_time_s": 1.338534274455522,
+     "sun_deg_without_aberration": 0.005617441287982221
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018814092600693029,
+     "earth_deg": 0.000558354010677578,
+     "illum_pp": 2.2209539501716336e-05
+    }
+   },
+   {
+    "utc": "2026-08-25T00:00:00Z",
+    "horizons": {
+     "illum_pct": 90.23588,
+     "obs_sub_lon_lat": [
+      357.913808,
+      3.889577
+     ],
+     "sun_sub_lon_lat": [
+      34.148302,
+      -0.024442
+     ],
+     "light_time_s": 1.3373784
+    },
+    "like_for_like": {
+     "sun_deg": 5.415220712393951e-07,
+     "earth_deg": 7.099196587539774e-07,
+     "illum_pp": 4.3567018082057984e-06,
+     "light_time_s": 1.3373786325299848,
+     "sun_deg_without_aberration": 0.005784125163239869
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018818643378792853,
+     "earth_deg": 0.0044762722551062745,
+     "illum_pp": 0.0024069285734071855
+    }
+   },
+   {
+    "utc": "2026-08-30T00:00:00Z",
+    "horizons": {
+     "illum_pct": 96.3685,
+     "obs_sub_lon_lat": [
+      354.998381,
+      -3.260711
+     ],
+     "sun_sub_lon_lat": [
+      333.23256,
+      -0.171824
+     ],
+     "light_time_s": 1.2807042
+    },
+    "like_for_like": {
+     "sun_deg": 1.2546445612644509e-06,
+     "earth_deg": 6.342230758315533e-07,
+     "illum_pp": 3.997239844011347e-06,
+     "light_time_s": 1.2807039134552098,
+     "sun_deg_without_aberration": 0.005815764853820485
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001793275317247624,
+     "earth_deg": 0.005259036304364444,
+     "illum_pp": 0.001758405515403183
+    }
+   },
+   {
+    "utc": "2026-09-04T00:00:00Z",
+    "horizons": {
+     "illum_pct": 53.87085,
+     "obs_sub_lon_lat": [
+      357.843179,
+      -6.729566
+     ],
+     "sun_sub_lon_lat": [
+      272.275008,
+      -0.331352
+     ],
+     "light_time_s": 1.237323
+    },
+    "like_for_like": {
+     "sun_deg": 1.232536222832834e-06,
+     "earth_deg": 4.3667021843803054e-07,
+     "illum_pp": 3.023113983147141e-06,
+     "light_time_s": 1.2373229223944155,
+     "sun_deg_without_aberration": 0.005657824547120944
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001736454274739539,
+     "earth_deg": 0.0007296556441767429,
+     "illum_pp": 0.000599944289007226
+    }
+   },
+   {
+    "utc": "2026-09-09T00:00:00Z",
+    "horizons": {
+     "illum_pct": 5.82502,
+     "obs_sub_lon_lat": [
+      3.295596,
+      -1.289365
+     ],
+     "sun_sub_lon_lat": [
+      211.17379,
+      -0.48139
+     ],
+     "light_time_s": 1.2350742
+    },
+    "like_for_like": {
+     "sun_deg": 1.0840564860573975e-06,
+     "earth_deg": 6.220593915427241e-07,
+     "illum_pp": 4.2494572038975775e-07,
+     "light_time_s": 1.2350743358211658,
+     "sun_deg_without_aberration": 0.0054779697967523465
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017380289709801233,
+     "earth_deg": 0.004946270573950757,
+     "illum_pp": 0.0019489734199105158
+    }
+   },
+   {
+    "utc": "2026-09-14T00:00:00Z",
+    "horizons": {
+     "illum_pct": 9.30651,
+     "obs_sub_lon_lat": [
+      5.228157,
+      5.713937
+     ],
+     "sun_sub_lon_lat": [
+      150.005177,
+      -0.610707
+     ],
+     "light_time_s": 1.299654
+    },
+    "like_for_like": {
+     "sun_deg": 1.1394452970970998e-06,
+     "earth_deg": 3.691617234013813e-07,
+     "illum_pp": 3.0920567297698653e-06,
+     "light_time_s": 1.299654111637897,
+     "sun_deg_without_aberration": 0.005498552024637519
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018282584942932618,
+     "earth_deg": 0.004687408973615419,
+     "illum_pp": 0.0022501147145508327
+    }
+   },
+   {
+    "utc": "2026-09-19T00:00:00Z",
+    "horizons": {
+     "illum_pct": 51.4249,
+     "obs_sub_lon_lat": [
+      0.64408,
+      5.997294
+     ],
+     "sun_sub_lon_lat": [
+      88.92731,
+      -0.709916
+     ],
+     "light_time_s": 1.3484346
+    },
+    "like_for_like": {
+     "sun_deg": 1.3971605073581051e-06,
+     "earth_deg": 3.556275275157105e-07,
+     "illum_pp": 5.378451817250607e-08,
+     "light_time_s": 1.3484343113622117,
+     "sun_deg_without_aberration": 0.005671214873981211
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018904873627963926,
+     "earth_deg": 0.0004473051961723496,
+     "illum_pp": 0.00019546577951246036
+    }
+   },
+   {
+    "utc": "2026-09-24T00:00:00Z",
+    "horizons": {
+     "illum_pct": 92.0781,
+     "obs_sub_lon_lat": [
+      355.320736,
+      0.155386
+     ],
+     "sun_sub_lon_lat": [
+      28.001877,
+      -0.813622
+     ],
+     "light_time_s": 1.305051
+    },
+    "like_for_like": {
+     "sun_deg": 6.323822114149673e-07,
+     "earth_deg": 9.548797619565042e-07,
+     "illum_pp": 4.6273776774796715e-06,
+     "light_time_s": 1.3050511249141146,
+     "sun_deg_without_aberration": 0.005838466607819894
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018322275897793711,
+     "earth_deg": 0.004712153111637973,
+     "illum_pp": 0.0023118908722068454
+    }
+   },
+   {
+    "utc": "2026-09-29T00:00:00Z",
+    "horizons": {
+     "illum_pct": 93.36101,
+     "obs_sub_lon_lat": [
+      356.645925,
+      -6.132101
+     ],
+     "sun_sub_lon_lat": [
+      327.171044,
+      -0.9362
+     ],
+     "light_time_s": 1.2418266
+    },
+    "like_for_like": {
+     "sun_deg": 6.696750492237064e-07,
+     "earth_deg": 3.1776652497689703e-07,
+     "illum_pp": 4.2059883469391934e-06,
+     "light_time_s": 1.2418267063857826,
+     "sun_deg_without_aberration": 0.005853105278485461
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017427075382590211,
+     "earth_deg": 0.005002041719473052,
+     "illum_pp": 0.0022144457105355286
+    }
+   },
+   {
+    "utc": "2026-10-04T00:00:00Z",
+    "horizons": {
+     "illum_pct": 45.08093,
+     "obs_sub_lon_lat": [
+      2.026819,
+      -4.484473
+     ],
+     "sun_sub_lon_lat": [
+      266.279391,
+      -1.05422
+     ],
+     "light_time_s": 1.236039
+    },
+    "like_for_like": {
+     "sun_deg": 1.3086804990360827e-06,
+     "earth_deg": 1.0661674603104517e-06,
+     "illum_pp": 2.7088353036219814e-06,
+     "light_time_s": 1.2360390184530317,
+     "sun_deg_without_aberration": 0.005674446875919312
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001731279327122953,
+     "earth_deg": 0.0005937520379694575,
+     "illum_pp": 0.0002585898101017392
+    }
+   },
+   {
+    "utc": "2026-10-09T00:00:00Z",
+    "horizons": {
+     "illum_pct": 3.14589,
+     "obs_sub_lon_lat": [
+      4.87939,
+      3.040737
+     ],
+     "sun_sub_lon_lat": [
+      205.240987,
+      -1.167833
+     ],
+     "light_time_s": 1.2731058
+    },
+    "like_for_like": {
+     "sun_deg": 9.173521785414884e-07,
+     "earth_deg": 7.698477804348257e-07,
+     "illum_pp": 3.5492862990871288e-06,
+     "light_time_s": 1.2731057509300119,
+     "sun_deg_without_aberration": 0.005518226464382061
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017908790732683614,
+     "earth_deg": 0.00531164742127796,
+     "illum_pp": 0.001556054931085793
+    }
+   },
+   {
+    "utc": "2026-10-14T00:00:00Z",
+    "horizons": {
+     "illum_pct": 11.2591,
+     "obs_sub_lon_lat": [
+      3.104185,
+      6.666409
+     ],
+     "sun_sub_lon_lat": [
+      144.155843,
+      -1.258352
+     ],
+     "light_time_s": 1.3336553999999998
+    },
+    "like_for_like": {
+     "sun_deg": 1.0350416682067485e-06,
+     "earth_deg": 3.318600574400296e-07,
+     "illum_pp": 3.5326819247671892e-06,
+     "light_time_s": 1.3336553390200567,
+     "sun_deg_without_aberration": 0.005557493083592769
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018744468520084955,
+     "earth_deg": 0.004529227844123935,
+     "illum_pp": 0.0023526182637017
+    }
+   },
+   {
+    "utc": "2026-10-19T00:00:00Z",
+    "horizons": {
+     "illum_pct": 53.22383,
+     "obs_sub_lon_lat": [
+      356.948342,
+      3.215074
+     ],
+     "sun_sub_lon_lat": [
+      83.170513,
+      -1.318159
+     ],
+     "light_time_s": 1.3409622
+    },
+    "like_for_like": {
+     "sun_deg": 5.037803835764312e-07,
+     "earth_deg": 8.05289671258152e-07,
+     "illum_pp": 4.424225160448714e-06,
+     "light_time_s": 1.3409622050607084,
+     "sun_deg_without_aberration": 0.005730163865836204
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001886152347858476,
+     "earth_deg": 0.00033195546758872933,
+     "illum_pp": 0.0003695391061100395
+    }
+   },
+   {
+    "utc": "2026-10-24T00:00:00Z",
+    "horizons": {
+     "illum_pct": 94.00391,
+     "obs_sub_lon_lat": [
+      354.063697,
+      -3.740035
+     ],
+     "sun_sub_lon_lat": [
+      22.343899,
+      -1.37543
+     ],
+     "light_time_s": 1.2631098
+    },
+    "like_for_like": {
+     "sun_deg": 7.311728883436128e-07,
+     "earth_deg": 7.437841644532998e-07,
+     "illum_pp": 2.834637186310829e-06,
+     "light_time_s": 1.263109992485809,
+     "sun_deg_without_aberration": 0.00589981938364817
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017686483588949688,
+     "earth_deg": 0.005002370443816358,
+     "illum_pp": 0.002126850723300322
+    }
+   },
+   {
+    "utc": "2026-10-29T00:00:00Z",
+    "horizons": {
+     "illum_pct": 89.04141,
+     "obs_sub_lon_lat": [
+      0.067391,
+      -6.270891
+     ],
+     "sun_sub_lon_lat": [
+      321.606299,
+      -1.429478
+     ],
+     "light_time_s": 1.215585
+    },
+    "like_for_like": {
+     "sun_deg": 1.3786452335701869e-06,
+     "earth_deg": 7.301475456633992e-07,
+     "illum_pp": 1.3716205558012007e-06,
+     "light_time_s": 1.2155852691676128,
+     "sun_deg_without_aberration": 0.005890236364132588
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00016955583104657577,
+     "earth_deg": 0.0045671225545570685,
+     "illum_pp": 0.002546884728175769
+    }
+   },
+   {
+    "utc": "2026-11-03T00:00:00Z",
+    "horizons": {
+     "illum_pct": 37.4848,
+     "obs_sub_lon_lat": [
+      5.286471,
+      -0.150236
+     ],
+     "sun_sub_lon_lat": [
+      260.781996,
+      -1.477192
+     ],
+     "light_time_s": 1.2558192
+    },
+    "like_for_like": {
+     "sun_deg": 9.82521851597132e-07,
+     "earth_deg": 5.048413032237765e-07,
+     "illum_pp": 4.139276207126841e-06,
+     "light_time_s": 1.2558188970259263,
+     "sun_deg_without_aberration": 0.005695478628979861
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017613886573248676,
+     "earth_deg": 0.0013651086074261518,
+     "illum_pp": 0.0010077068713201243
+    }
+   },
+   {
+    "utc": "2026-11-08T00:00:00Z",
+    "horizons": {
+     "illum_pct": 1.83645,
+     "obs_sub_lon_lat": [
+      4.834566,
+      5.932731
+     ],
+     "sun_sub_lon_lat": [
+      199.811821,
+      -1.529595
+     ],
+     "light_time_s": 1.3134156000000001
+    },
+    "like_for_like": {
+     "sun_deg": 1.0686408888112309e-06,
+     "earth_deg": 9.48656349350835e-07,
+     "illum_pp": 2.0052317077912107e-06,
+     "light_time_s": 1.3134158647399126,
+     "sun_deg_without_aberration": 0.005562989188518885
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001843867877265051,
+     "earth_deg": 0.005540310508196722,
+     "illum_pp": 0.0011941010112321848
+    }
+   },
+   {
+    "utc": "2026-11-13T00:00:00Z",
+    "horizons": {
+     "illum_pct": 12.49813,
+     "obs_sub_lon_lat": [
+      0.129851,
+      5.312565
+     ],
+     "sun_sub_lon_lat": [
+      138.80906,
+      -1.556378
+     ],
+     "light_time_s": 1.3521558
+    },
+    "like_for_like": {
+     "sun_deg": 8.300816751158316e-07,
+     "earth_deg": 4.636604940576776e-07,
+     "illum_pp": 4.2499502583837057e-08,
+     "light_time_s": 1.3521560371715071,
+     "sun_deg_without_aberration": 0.00561125534411175
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001900281738996686,
+     "earth_deg": 0.004408169072493918,
+     "illum_pp": 0.0024110449776433285
+    }
+   },
+   {
+    "utc": "2026-11-18T00:00:00Z",
+    "horizons": {
+     "illum_pct": 55.11445,
+     "obs_sub_lon_lat": [
+      353.765266,
+      -0.685758
+     ],
+     "sun_sub_lon_lat": [
+      77.910362,
+      -1.551553
+     ],
+     "light_time_s": 1.3183014
+    },
+    "like_for_like": {
+     "sun_deg": 8.810463652772688e-07,
+     "earth_deg": 2.2126022115069602e-07,
+     "illum_pp": 2.6208966730223437e-06,
+     "light_time_s": 1.3183011331582184,
+     "sun_deg_without_aberration": 0.005786315008041139
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018466101178260137,
+     "earth_deg": 0.000496049640621904,
+     "illum_pp": 0.0005836662120586311
+    }
+   },
+   {
+    "utc": "2026-11-23T00:00:00Z",
+    "horizons": {
+     "illum_pct": 96.08761,
+     "obs_sub_lon_lat": [
+      354.793965,
+      -6.260284
+     ],
+     "sun_sub_lon_lat": [
+      17.173808,
+      -1.531617
+     ],
+     "light_time_s": 1.2226152
+    },
+    "like_for_like": {
+     "sun_deg": 7.060897928777966e-07,
+     "earth_deg": 6.023568259670249e-07,
+     "illum_pp": 1.3782269547846226e-07,
+     "light_time_s": 1.2226154324301735,
+     "sun_deg_without_aberration": 0.005953704759942173
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017106235169493696,
+     "earth_deg": 0.005324823500639145,
+     "illum_pp": 0.0018078578303573067
+    }
+   },
+   {
+    "utc": "2026-11-28T00:00:00Z",
+    "horizons": {
+     "illum_pct": 83.92236,
+     "obs_sub_lon_lat": [
+      3.797546,
+      -3.372368
+     ],
+     "sun_sub_lon_lat": [
+      316.510005,
+      -1.492563
+     ],
+     "light_time_s": 1.2109746
+    },
+    "like_for_like": {
+     "sun_deg": 5.564227299324412e-07,
+     "earth_deg": 6.816213738079556e-07,
+     "illum_pp": 5.122245951838522e-06,
+     "light_time_s": 1.2109746833386228,
+     "sun_deg_without_aberration": 0.005911612980815237
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.000169540464658342,
+     "earth_deg": 0.0039762250280424224,
+     "illum_pp": 0.002641300031896776
+    }
+   },
+   {
+    "utc": "2026-12-03T00:00:00Z",
+    "horizons": {
+     "illum_pct": 31.96679,
+     "obs_sub_lon_lat": [
+      6.825482,
+      4.100207
+     ],
+     "sun_sub_lon_lat": [
+      255.732754,
+      -1.461554
+     ],
+     "light_time_s": 1.2882372
+    },
+    "like_for_like": {
+     "sun_deg": 7.568186074089644e-07,
+     "earth_deg": 5.621836320403552e-07,
+     "illum_pp": 1.312585840906877e-06,
+     "light_time_s": 1.2882374229180036,
+     "sun_deg_without_aberration": 0.0057122577439205945
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018072794500125693,
+     "earth_deg": 0.0020742555419962106,
+     "illum_pp": 0.0015196170276503551
+    }
+   },
+   {
+    "utc": "2026-12-08T00:00:00Z",
+    "horizons": {
+     "illum_pct": 1.17449,
+     "obs_sub_lon_lat": [
+      3.401265,
+      6.473699
+     ],
+     "sun_sub_lon_lat": [
+      194.813274,
+      -1.443246
+     ],
+     "light_time_s": 1.343814
+    },
+    "like_for_like": {
+     "sun_deg": 4.626803037001709e-07,
+     "earth_deg": 6.451269791295753e-07,
+     "illum_pp": 2.533091863821113e-06,
+     "light_time_s": 1.3438140271825423,
+     "sun_deg_without_aberration": 0.005595896648127599
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018909354772433807,
+     "earth_deg": 0.0056724175721824515,
+     "illum_pp": 0.0009385741974845541
+    }
+   },
+   {
+    "utc": "2026-12-13T00:00:00Z",
+    "horizons": {
+     "illum_pct": 13.46064,
+     "obs_sub_lon_lat": [
+      356.930959,
+      2.161312
+     ],
+     "sun_sub_lon_lat": [
+      133.867991,
+      -1.399044
+     ],
+     "light_time_s": 1.3516866
+    },
+    "like_for_like": {
+     "sun_deg": 8.70772925247761e-07,
+     "earth_deg": 3.0996471064962026e-07,
+     "illum_pp": 2.4096069939361087e-06,
+     "light_time_s": 1.3516868911684798,
+     "sun_deg_without_aberration": 0.0056485428875742
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018973279238456483,
+     "earth_deg": 0.004281007272827198,
+     "illum_pp": 0.0024309346080375605
+    }
+   },
+   {
+    "utc": "2026-12-18T00:00:00Z",
+    "horizons": {
+     "illum_pct": 57.94469,
+     "obs_sub_lon_lat": [
+      352.096275,
+      -4.480044
+     ],
+     "sun_sub_lon_lat": [
+      73.027829,
+      -1.322691
+     ],
+     "light_time_s": 1.2861018
+    },
+    "like_for_like": {
+     "sun_deg": 1.2433216820937317e-06,
+     "earth_deg": 1.132673314907849e-06,
+     "illum_pp": 4.271259996357912e-06,
+     "light_time_s": 1.2861016227804172,
+     "sun_deg_without_aberration": 0.005827381077112503
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017959879280763275,
+     "earth_deg": 0.0009474890779173512,
+     "illum_pp": 0.0009093009730705148
+    }
+   },
+   {
+    "utc": "2026-12-23T00:00:00Z",
+    "horizons": {
+     "illum_pct": 98.11442,
+     "obs_sub_lon_lat": [
+      357.291696,
+      -6.067419
+     ],
+     "sun_sub_lon_lat": [
+      12.348448,
+      -1.217427
+     ],
+     "light_time_s": 1.195836
+    },
+    "like_for_like": {
+     "sun_deg": 6.237782473824143e-07,
+     "earth_deg": 3.6608538201679507e-07,
+     "illum_pp": 3.9173291241922925e-06,
+     "light_time_s": 1.195836286628582,
+     "sun_deg_without_aberration": 0.00598598421466794
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001672104815052489,
+     "earth_deg": 0.005605529573264245,
+     "illum_pp": 0.0013076841949413165
+    }
+   },
+   {
+    "utc": "2026-12-28T00:00:00Z",
+    "horizons": {
+     "illum_pct": 78.89248,
+     "obs_sub_lon_lat": [
+      6.375802,
+      1.097869
+     ],
+     "sun_sub_lon_lat": [
+      311.71574,
+      -1.092905
+     ],
+     "light_time_s": 1.2286188
+    },
+    "like_for_like": {
+     "sun_deg": 1.3751556235663093e-06,
+     "earth_deg": 2.771164357168656e-07,
+     "illum_pp": 2.8333794119816957e-06,
+     "light_time_s": 1.2286187370780028,
+     "sun_deg_without_aberration": 0.005912191583070485
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001712239115644549,
+     "earth_deg": 0.00335665921055863,
+     "illum_pp": 0.0025155802296694674
+    }
+   },
+   {
+    "utc": "2027-01-02T00:00:00Z",
+    "horizons": {
+     "illum_pct": 28.43514,
+     "obs_sub_lon_lat": [
+      6.554855,
+      6.517598
+     ],
+     "sun_sub_lon_lat": [
+      250.949047,
+      -0.998685
+     ],
+     "light_time_s": 1.3211069999999998
+    },
+    "like_for_like": {
+     "sun_deg": 9.738934088654743e-07,
+     "earth_deg": 7.079607500278348e-07,
+     "illum_pp": 9.882621760937127e-07,
+     "light_time_s": 1.321106862444895,
+     "sun_deg_without_aberration": 0.005714241590992667
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018512583764845907,
+     "earth_deg": 0.002567250796452804,
+     "illum_pp": 0.0018294826490645733
+    }
+   },
+   {
+    "utc": "2027-01-07T00:00:00Z",
+    "horizons": {
+     "illum_pct": 0.74041,
+     "obs_sub_lon_lat": [
+      0.911614,
+      4.703199
+     ],
+     "sun_sub_lon_lat": [
+      190.043919,
+      -0.92181
+     ],
+     "light_time_s": 1.35615
+    },
+    "like_for_like": {
+     "sun_deg": 4.019542180099121e-07,
+     "earth_deg": 4.506942747051139e-07,
+     "illum_pp": 3.264569583771859e-06,
+     "light_time_s": 1.3561497747958309,
+     "sun_deg_without_aberration": 0.005606018008535783
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00019088130476520966,
+     "earth_deg": 0.00573590834434017,
+     "illum_pp": 0.0007736038944907708
+    }
+   },
+   {
+    "utc": "2027-01-12T00:00:00Z",
+    "horizons": {
+     "illum_pct": 14.86143,
+     "obs_sub_lon_lat": [
+      354.394009,
+      -1.811979
+     ],
+     "sun_sub_lon_lat": [
+      129.114541,
+      -0.822162
+     ],
+     "light_time_s": 1.3328765999999999
+    },
+    "like_for_like": {
+     "sun_deg": 8.461582103440021e-07,
+     "earth_deg": 3.4371950865208135e-07,
+     "illum_pp": 1.0073394971499283e-06,
+     "light_time_s": 1.33287663671128,
+     "sun_deg_without_aberration": 0.005661268628221808
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018702090355723027,
+     "earth_deg": 0.00408540934646557,
+     "illum_pp": 0.002417053248240819
+    }
+   },
+   {
+    "utc": "2027-01-17T00:00:00Z",
+    "horizons": {
+     "illum_pct": 62.40716,
+     "obs_sub_lon_lat": [
+      352.67663,
+      -6.665949
+     ],
+     "sun_sub_lon_lat": [
+      68.291312,
+      -0.690475
+     ],
+     "light_time_s": 1.2529968
+    },
+    "like_for_like": {
+     "sun_deg": 7.523807452688272e-07,
+     "earth_deg": 7.201824689791466e-07,
+     "illum_pp": 4.748785315200621e-06,
+     "light_time_s": 1.2529969684904763,
+     "sun_deg_without_aberration": 0.005845748387903906
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017549222103185826,
+     "earth_deg": 0.00154165633764359,
+     "illum_pp": 0.0013625635840810446
+    }
+   },
+   {
+    "utc": "2027-01-22T00:00:00Z",
+    "horizons": {
+     "illum_pct": 99.55912,
+     "obs_sub_lon_lat": [
+      0.422899,
+      -3.012502
+     ],
+     "sun_sub_lon_lat": [
+      7.622246,
+      -0.521357
+     ],
+     "light_time_s": 1.1918106000000002
+    },
+    "like_for_like": {
+     "sun_deg": 9.538516549310945e-07,
+     "earth_deg": 8.399010101902833e-07,
+     "illum_pp": 4.912968762482706e-06,
+     "light_time_s": 1.191810757695221,
+     "sun_deg_without_aberration": 0.0059877435765972285
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00016639219178104646,
+     "earth_deg": 0.005765258325871017,
+     "illum_pp": 0.0006481471354220503
+    }
+   },
+   {
+    "utc": "2027-01-27T00:00:00Z",
+    "horizons": {
+     "illum_pct": 74.67228,
+     "obs_sub_lon_lat": [
+      7.24354,
+      4.972559
+     ],
+     "sun_sub_lon_lat": [
+      306.969446,
+      -0.350564
+     ],
+     "light_time_s": 1.2611556000000002
+    },
+    "like_for_like": {
+     "sun_deg": 5.051175616975834e-07,
+     "earth_deg": 1.827162994065786e-07,
+     "illum_pp": 1.9968318270002783e-06,
+     "light_time_s": 1.26115587545763,
+     "sun_deg_without_aberration": 0.005886568236751972
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017682265820611663,
+     "earth_deg": 0.0028365197216072033,
+     "illum_pp": 0.0022638336692040184
+    }
+   },
+   {
+    "utc": "2027-02-01T00:00:00Z",
+    "horizons": {
+     "illum_pct": 26.30326,
+     "obs_sub_lon_lat": [
+      4.628941,
+      6.450648
+     ],
+     "sun_sub_lon_lat": [
+      246.171381,
+      -0.228261
+     ],
+     "light_time_s": 1.3441632000000001
+    },
+    "like_for_like": {
+     "sun_deg": 1.0454355515294192e-06,
+     "earth_deg": 7.980776465717327e-07,
+     "illum_pp": 3.9975748755693985e-06,
+     "light_time_s": 1.344163360560712,
+     "sun_deg_without_aberration": 0.0056937664831575325
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018850193722091187,
+     "earth_deg": 0.0028529472447847396,
+     "illum_pp": 0.0020071270327690627
+    }
+   },
+   {
+    "utc": "2027-02-06T00:00:00Z",
+    "horizons": {
+     "illum_pct": 0.41165,
+     "obs_sub_lon_lat": [
+      357.977412,
+      1.321867
+     ],
+     "sun_sub_lon_lat": [
+      185.237319,
+      -0.124491
+     ],
+     "light_time_s": 1.3474367999999999
+    },
+    "like_for_like": {
+     "sun_deg": 5.077361311414782e-07,
+     "earth_deg": 5.563022815466868e-07,
+     "illum_pp": 4.605616895692055e-06,
+     "light_time_s": 1.3474370973266023,
+     "sun_deg_without_aberration": 0.005588111533400447
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018971214230152235,
+     "earth_deg": 0.00575167228545826,
+     "illum_pp": 0.0006202466756500269
+    }
+   },
+   {
+    "utc": "2027-02-11T00:00:00Z",
+    "horizons": {
+     "illum_pct": 17.48114,
+     "obs_sub_lon_lat": [
+      353.500643,
+      -5.270077
+     ],
+     "sun_sub_lon_lat": [
+      124.27967,
+      -0.00334
+     ],
+     "light_time_s": 1.3007592
+    },
+    "like_for_like": {
+     "sun_deg": 8.153313326708859e-07,
+     "earth_deg": 5.133621911299568e-07,
+     "illum_pp": 2.722392746790092e-06,
+     "light_time_s": 1.3007591606121502,
+     "sun_deg_without_aberration": 0.005649462685698641
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018269389650885657,
+     "earth_deg": 0.003745834970885549,
+     "illum_pp": 0.0023321808080964956
+    }
+   },
+   {
+    "utc": "2027-02-16T00:00:00Z",
+    "horizons": {
+     "illum_pct": 68.55592,
+     "obs_sub_lon_lat": [
+      355.360884,
+      -6.005295
+     ],
+     "sun_sub_lon_lat": [
+      63.432821,
+      0.149588
+     ],
+     "light_time_s": 1.2294576
+    },
+    "like_for_like": {
+     "sun_deg": 1.351228066528441e-06,
+     "earth_deg": 6.91156680432559e-07,
+     "illum_pp": 1.7655581530107156e-07,
+     "light_time_s": 1.229457372516125,
+     "sun_deg_without_aberration": 0.00584346464592352
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017163583789885455,
+     "earth_deg": 0.002246615524506801,
+     "illum_pp": 0.0019146783583607885
+    }
+   },
+   {
+    "utc": "2027-02-21T00:00:00Z",
+    "horizons": {
+     "illum_pct": 99.99007,
+     "obs_sub_lon_lat": [
+      3.039719,
+      1.435686
+     ],
+     "sun_sub_lon_lat": [
+      2.728385,
+      0.33707
+     ],
+     "light_time_s": 1.2120882
+    },
+    "like_for_like": {
+     "sun_deg": 7.077513913130052e-07,
+     "earth_deg": 2.4575696186514774e-07,
+     "illum_pp": 8.688716519600348e-07,
+     "light_time_s": 1.2120882424044268,
+     "sun_deg_without_aberration": 0.005958667432045293
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00016962320558695554,
+     "earth_deg": 0.005772896756762256,
+     "illum_pp": 3.0420481863302484e-05
+    }
+   },
+   {
+    "utc": "2027-02-26T00:00:00Z",
+    "horizons": {
+     "illum_pct": 71.49368,
+     "obs_sub_lon_lat": [
+      6.426238,
+      6.753978
+     ],
+     "sun_sub_lon_lat": [
+      302.01193,
+      0.500012
+     ],
+     "light_time_s": 1.2978882
+    },
+    "like_for_like": {
+     "sun_deg": 6.636259215176161e-07,
+     "earth_deg": 4.96733598045291e-07,
+     "illum_pp": 3.0339530781020585e-06,
+     "light_time_s": 1.2978884832567763,
+     "sun_deg_without_aberration": 0.005840975258457864
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018194313860653202,
+     "earth_deg": 0.0024403145766717905,
+     "illum_pp": 0.0020144954582264063
+    }
+   },
+   {
+    "utc": "2027-03-03T00:00:00Z",
+    "horizons": {
+     "illum_pct": 24.88486,
+     "obs_sub_lon_lat": [
+      1.441917,
+      4.191254
+     ],
+     "sun_sub_lon_lat": [
+      241.146709,
+      0.607783
+     ],
+     "light_time_s": 1.3514346000000002
+    },
+    "like_for_like": {
+     "sun_deg": 1.0244421625690394e-06,
+     "earth_deg": 1.0050602726001667e-06,
+     "illum_pp": 2.789124117441588e-06,
+     "light_time_s": 1.3514343141366116,
+     "sun_deg_without_aberration": 0.005651291883134965
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018963440414273875,
+     "earth_deg": 0.003005603812440993,
+     "illum_pp": 0.002108708564939832
+    }
+   },
+   {
+    "utc": "2027-03-08T00:00:00Z",
+    "horizons": {
+     "illum_pct": 0.18767,
+     "obs_sub_lon_lat": [
+      355.545354,
+      -2.569988
+     ],
+     "sun_sub_lon_lat": [
+      180.147206,
+      0.698756
+     ],
+     "light_time_s": 1.3197084
+    },
+    "like_for_like": {
+     "sun_deg": 7.435735865427661e-07,
+     "earth_deg": 1.0456640215746443e-06,
+     "illum_pp": 4.73213119334126e-06,
+     "light_time_s": 1.3197083016649616,
+     "sun_deg_without_aberration": 0.005546563668168894
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018574870293600295,
+     "earth_deg": 0.005734494857179294,
+     "illum_pp": 0.0003895020681774497
+    }
+   },
+   {
+    "utc": "2027-03-13T00:00:00Z",
+    "horizons": {
+     "illum_pct": 21.94212,
+     "obs_sub_lon_lat": [
+      354.83392,
+      -6.728077
+     ],
+     "sun_sub_lon_lat": [
+      119.128843,
+      0.80199
+     ],
+     "light_time_s": 1.2648666
+    },
+    "like_for_like": {
+     "sun_deg": 9.845073844754548e-07,
+     "earth_deg": 5.404616406408693e-07,
+     "illum_pp": 8.661444113045036e-07,
+     "light_time_s": 1.2648665265062908,
+     "sun_deg_without_aberration": 0.005622792895840694
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017753709614477854,
+     "earth_deg": 0.003190340667739604,
+     "illum_pp": 0.0021308595112010664
+    }
+   },
+   {
+    "utc": "2027-03-18T00:00:00Z",
+    "horizons": {
+     "illum_pct": 75.55006,
+     "obs_sub_lon_lat": [
+      359.046826,
+      -2.514744
+     ],
+     "sun_sub_lon_lat": [
+      58.231006,
+      0.936549
+     ],
+     "light_time_s": 1.2247326
+    },
+    "like_for_like": {
+     "sun_deg": 1.3393679805127138e-06,
+     "earth_deg": 1.261202860635298e-06,
+     "illum_pp": 3.4754290965111068e-06,
+     "light_time_s": 1.2247323563981787,
+     "sun_deg_without_aberration": 0.005824331693729809
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017109936697022314,
+     "earth_deg": 0.0030094968592759047,
+     "illum_pp": 0.002376799122060902
+    }
+   },
+   {
+    "utc": "2027-03-23T00:00:00Z",
+    "horizons": {
+     "illum_pct": 99.49427,
+     "obs_sub_lon_lat": [
+      4.556614,
+      5.128923
+     ],
+     "sun_sub_lon_lat": [
+      357.458808,
+      1.090152
+     ],
+     "light_time_s": 1.2498864
+    },
+    "like_for_like": {
+     "sun_deg": 5.260406473074051e-07,
+     "earth_deg": 4.987256392301342e-07,
+     "illum_pp": 2.2322381738604236e-06,
+     "light_time_s": 1.2498866372396942,
+     "sun_deg_without_aberration": 0.005908933236368553
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017523725624761543,
+     "earth_deg": 0.005663324935999863,
+     "illum_pp": 0.0006351779016284809
+    }
+   },
+   {
+    "utc": "2027-03-28T00:00:00Z",
+    "horizons": {
+     "illum_pct": 69.16487,
+     "obs_sub_lon_lat": [
+      4.113751,
+      6.055124
+     ],
+     "sun_sub_lon_lat": [
+      296.652822,
+      1.198229
+     ],
+     "light_time_s": 1.3288019999999998
+    },
+    "like_for_like": {
+     "sun_deg": 1.0714090177893703e-06,
+     "earth_deg": 2.823976154910127e-07,
+     "illum_pp": 3.995553427671439e-06,
+     "light_time_s": 1.3288018565839972,
+     "sun_deg_without_aberration": 0.005782598847011482
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001861903597665774,
+     "earth_deg": 0.0021246358338166374,
+     "illum_pp": 0.0018166171661277986
+    }
+   },
+   {
+    "utc": "2027-04-02T00:00:00Z",
+    "horizons": {
+     "illum_pct": 23.47896,
+     "obs_sub_lon_lat": [
+      357.758801,
+      0.580407
+     ],
+     "sun_sub_lon_lat": [
+      235.699427,
+      1.256263
+     ],
+     "light_time_s": 1.3409406
+    },
+    "like_for_like": {
+     "sun_deg": 8.539969483175503e-07,
+     "earth_deg": 5.868755172968089e-07,
+     "illum_pp": 4.135487909451285e-06,
+     "light_time_s": 1.3409405287672347,
+     "sun_deg_without_aberration": 0.005593867329068721
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018855850283121874,
+     "earth_deg": 0.0031311894063650756,
+     "illum_pp": 0.002171941708930092
+    }
+   },
+   {
+    "utc": "2027-04-07T00:00:00Z",
+    "horizons": {
+     "illum_pct": 0.14233,
+     "obs_sub_lon_lat": [
+      354.634739,
+      -5.625318
+     ],
+     "sun_sub_lon_lat": [
+      174.614614,
+      1.301185
+     ],
+     "light_time_s": 1.279608
+    },
+    "like_for_like": {
+     "sun_deg": 5.922954059555786e-07,
+     "earth_deg": 4.843361883309963e-07,
+     "illum_pp": 8.214774810388903e-08,
+     "light_time_s": 1.279608094513026,
+     "sun_deg_without_aberration": 0.005492984443285616
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018045969385313286,
+     "earth_deg": 0.005686448270285023,
+     "illum_pp": 5.574395388119324e-06
+    }
+   },
+   {
+    "utc": "2027-04-12T00:00:00Z",
+    "horizons": {
+     "illum_pct": 28.46071,
+     "obs_sub_lon_lat": [
+      358.022052,
+      -5.204038
+     ],
+     "sun_sub_lon_lat": [
+      113.523547,
+      1.355579
+     ],
+     "light_time_s": 1.2377022
+    },
+    "like_for_like": {
+     "sun_deg": 6.283123891123729e-07,
+     "earth_deg": 1.7263675189824544e-07,
+     "illum_pp": 1.5587529489380358e-06,
+     "light_time_s": 1.2377022112341414,
+     "sun_deg_without_aberration": 0.005594621166032338
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017420210157132875,
+     "earth_deg": 0.0023950464433952073,
+     "illum_pp": 0.0017173016609639546
+    }
+   },
+   {
+    "utc": "2027-04-17T00:00:00Z",
+    "horizons": {
+     "illum_pct": 82.09573,
+     "obs_sub_lon_lat": [
+      2.478289,
+      2.126472
+     ],
+     "sun_sub_lon_lat": [
+      52.565045,
+      1.438726
+     ],
+     "light_time_s": 1.2419244
+    },
+    "like_for_like": {
+     "sun_deg": 1.3698494279247565e-06,
+     "earth_deg": 8.577599905075206e-07,
+     "illum_pp": 4.920356104776147e-07,
+     "light_time_s": 1.2419241574981905,
+     "sun_deg_without_aberration": 0.005797370415867784
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001736330088086353,
+     "earth_deg": 0.0037153403379435604,
+     "illum_pp": 0.002597283950294127
+    }
+   },
+   {
+    "utc": "2027-04-22T00:00:00Z",
+    "horizons": {
+     "illum_pct": 98.54017,
+     "obs_sub_lon_lat": [
+      4.675551,
+      6.572115
+     ],
+     "sun_sub_lon_lat": [
+      351.712059,
+      1.519207
+     ],
+     "light_time_s": 1.2933042
+    },
+    "like_for_like": {
+     "sun_deg": 1.0001126722185063e-06,
+     "earth_deg": 9.081082912963659e-07,
+     "illum_pp": 1.0479881353830933e-06,
+     "light_time_s": 1.2933039134878674,
+     "sun_deg_without_aberration": 0.005853080137136386
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018124207047404164,
+     "earth_deg": 0.0054965611089122625,
+     "illum_pp": 0.0011035086377830794
+    }
+   },
+   {
+    "utc": "2027-04-27T00:00:00Z",
+    "horizons": {
+     "illum_pct": 67.22208,
+     "obs_sub_lon_lat": [
+      0.716861,
+      3.344003
+     ],
+     "sun_sub_lon_lat": [
+      290.811793,
+      1.547281
+     ],
+     "light_time_s": 1.3463796000000001
+    },
+    "like_for_like": {
+     "sun_deg": 9.488286918625252e-07,
+     "earth_deg": 4.4320567788531825e-07,
+     "illum_pp": 6.034706956370428e-07,
+     "light_time_s": 1.3463795581228992,
+     "sun_deg_without_aberration": 0.005722094377810906
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018901919689971635,
+     "earth_deg": 0.0018525842067594733,
+     "illum_pp": 0.0016541200938036127
+    }
+   },
+   {
+    "utc": "2027-05-02T00:00:00Z",
+    "horizons": {
+     "illum_pct": 21.39899,
+     "obs_sub_lon_lat": [
+      354.631552,
+      -3.260241
+     ],
+     "sun_sub_lon_lat": [
+      229.767973,
+      1.538106
+     ],
+     "light_time_s": 1.3141914
+    },
+    "like_for_like": {
+     "sun_deg": 5.846237196169481e-07,
+     "earth_deg": 5.914575880753895e-07,
+     "illum_pp": 2.3649092746325096e-06,
+     "light_time_s": 1.314191346863331,
+     "sun_deg_without_aberration": 0.005533116031703864
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018530325631372033,
+     "earth_deg": 0.003327715733300198,
+     "illum_pp": 0.0022433110688773183
+    }
+   },
+   {
+    "utc": "2027-05-07T00:00:00Z",
+    "horizons": {
+     "illum_pct": 0.5791,
+     "obs_sub_lon_lat": [
+      355.796361,
+      -6.486593
+     ],
+     "sun_sub_lon_lat": [
+      168.598648,
+      1.51977
+     ],
+     "light_time_s": 1.2379008
+    },
+    "like_for_like": {
+     "sun_deg": 9.074764760180846e-07,
+     "earth_deg": 4.753495363093664e-07,
+     "illum_pp": 4.767344124134709e-06,
+     "light_time_s": 1.2379010164320141,
+     "sun_deg_without_aberration": 0.005444401604557263
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017445521275214225,
+     "earth_deg": 0.005575339374831389,
+     "illum_pp": 0.0005792154646031555
+    }
+   },
+   {
+    "utc": "2027-05-12T00:00:00Z",
+    "horizons": {
+     "illum_pct": 36.55473,
+     "obs_sub_lon_lat": [
+      1.868253,
+      -1.159339
+     ],
+     "sun_sub_lon_lat": [
+      107.444487,
+      1.510771
+     ],
+     "light_time_s": 1.230051
+    },
+    "like_for_like": {
+     "sun_deg": 1.1987375581800057e-06,
+     "earth_deg": 8.426426069426471e-07,
+     "illum_pp": 1.8270437251999283e-06,
+     "light_time_s": 1.2300512028701482,
+     "sun_deg_without_aberration": 0.005578920373120895
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017270082957907,
+     "earth_deg": 0.00144628755530669,
+     "illum_pp": 0.0010706690878734548
+    }
+   },
+   {
+    "utc": "2027-05-17T00:00:00Z",
+    "horizons": {
+     "illum_pct": 87.31117,
+     "obs_sub_lon_lat": [
+      4.805596,
+      5.638932
+     ],
+     "sun_sub_lon_lat": [
+      46.432103,
+      1.52376
+     ],
+     "light_time_s": 1.2751488
+    },
+    "like_for_like": {
+     "sun_deg": 1.195596249785825e-06,
+     "earth_deg": 1.3067716699735748e-06,
+     "illum_pp": 2.8898764412588207e-06,
+     "light_time_s": 1.2751487345344,
+     "sun_deg_without_aberration": 0.005771614248229376
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017865018138805064,
+     "earth_deg": 0.004262970127975142,
+     "illum_pp": 0.002553651902175602
+    }
+   },
+   {
+    "utc": "2027-05-22T00:00:00Z",
+    "horizons": {
+     "illum_pct": 97.50969,
+     "obs_sub_lon_lat": [
+      3.266848,
+      5.469413
+     ],
+     "sun_sub_lon_lat": [
+      345.506131,
+      1.516748
+     ],
+     "light_time_s": 1.3300866
+    },
+    "like_for_like": {
+     "sun_deg": 1.3065920205362396e-06,
+     "earth_deg": 4.3859783688120645e-07,
+     "illum_pp": 4.1694285641824536e-06,
+     "light_time_s": 1.3300865211702333,
+     "sun_deg_without_aberration": 0.005804936312890523
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001862389804271773,
+     "earth_deg": 0.005324480062274744,
+     "illum_pp": 0.0014572212268006979
+    }
+   },
+   {
+    "utc": "2027-05-27T00:00:00Z",
+    "horizons": {
+     "illum_pct": 65.04126,
+     "obs_sub_lon_lat": [
+      357.001423,
+      -0.44666
+     ],
+     "sun_sub_lon_lat": [
+      284.527038,
+      1.464974
+     ],
+     "light_time_s": 1.3465326
+    },
+    "like_for_like": {
+     "sun_deg": 1.0255122019590552e-06,
+     "earth_deg": 5.047083651671493e-07,
+     "illum_pp": 4.02146963551786e-06,
+     "light_time_s": 1.346532833375216,
+     "sun_deg_without_aberration": 0.00567097197557436
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018930368209524074,
+     "earth_deg": 0.0016005584847540778,
+     "illum_pp": 0.0014861145171352064
+    }
+   },
+   {
+    "utc": "2027-06-01T00:00:00Z",
+    "horizons": {
+     "illum_pct": 18.13942,
+     "obs_sub_lon_lat": [
+      353.081039,
+      -6.04702
+     ],
+     "sun_sub_lon_lat": [
+      223.40891,
+      1.391107
+     ],
+     "light_time_s": 1.276467
+    },
+    "like_for_like": {
+     "sun_deg": 1.13536738518278e-06,
+     "earth_deg": 4.5543472821799504e-07,
+     "illum_pp": 2.3407087219595724e-06,
+     "light_time_s": 1.2764668704347955,
+     "sun_deg_without_aberration": 0.005481620430647258
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017962416703468025,
+     "earth_deg": 0.003651375233830155,
+     "illum_pp": 0.00230141404093942
+    }
+   },
+   {
+    "utc": "2027-06-06T00:00:00Z",
+    "horizons": {
+     "illum_pct": 2.11766,
+     "obs_sub_lon_lat": [
+      358.639643,
+      -4.43271
+     ],
+     "sun_sub_lon_lat": [
+      162.175605,
+      1.310514
+     ],
+     "light_time_s": 1.2075528
+    },
+    "like_for_like": {
+     "sun_deg": 1.2714225512780796e-06,
+     "earth_deg": 2.034960094559536e-07,
+     "illum_pp": 8.56680193450643e-09,
+     "light_time_s": 1.2075530001294414,
+     "sun_deg_without_aberration": 0.005415552654881189
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001698776931523349,
+     "earth_deg": 0.005350275933594589,
+     "illum_pp": 0.001271656161806245
+    }
+   },
+   {
+    "utc": "2027-06-11T00:00:00Z",
+    "horizons": {
+     "illum_pct": 45.02257,
+     "obs_sub_lon_lat": [
+      5.185412,
+      3.423825
+     ],
+     "sun_sub_lon_lat": [
+      100.984792,
+      1.240515
+     ],
+     "light_time_s": 1.244853
+    },
+    "like_for_like": {
+     "sun_deg": 5.887627642203976e-07,
+     "earth_deg": 2.694303690499152e-07,
+     "illum_pp": 2.670083460998285e-07,
+     "light_time_s": 1.2448528404976196,
+     "sun_deg_without_aberration": 0.005579552207100271
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017555416168388944,
+     "earth_deg": 0.000597323005077255,
+     "illum_pp": 0.0003057002438779932
+    }
+   },
+   {
+    "utc": "2027-06-16T00:00:00Z",
+    "horizons": {
+     "illum_pct": 91.06009,
+     "obs_sub_lon_lat": [
+      5.477023,
+      6.622661
+     ],
+     "sun_sub_lon_lat": [
+      39.939436,
+      1.182679
+     ],
+     "light_time_s": 1.3124466
+    },
+    "like_for_like": {
+     "sun_deg": 8.556367317115275e-07,
+     "earth_deg": 5.351810095570965e-07,
+     "illum_pp": 2.9095368745402084e-06,
+     "light_time_s": 1.312446392556226,
+     "sun_deg_without_aberration": 0.005756550601824399
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018449955300118824,
+     "earth_deg": 0.004630670988810052,
+     "illum_pp": 0.0023588623544128495
+    }
+   },
+   {
+    "utc": "2027-06-21T00:00:00Z",
+    "horizons": {
+     "illum_pct": 96.45645,
+     "obs_sub_lon_lat": [
+      0.636303,
+      2.4536
+     ],
+     "sun_sub_lon_lat": [
+      338.967008,
+      1.099428
+     ],
+     "light_time_s": 1.3511922
+    },
+    "like_for_like": {
+     "sun_deg": 7.409649840371082e-07,
+     "earth_deg": 2.9170903839219755e-07,
+     "illum_pp": 4.421390784159485e-06,
+     "light_time_s": 1.3511921082593146,
+     "sun_deg_without_aberration": 0.00577399815429733
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00019013012301259723,
+     "earth_deg": 0.005176298794486457,
+     "illum_pp": 0.0017194099852986255
+    }
+   },
+   {
+    "utc": "2027-06-26T00:00:00Z",
+    "horizons": {
+     "illum_pct": 61.95876,
+     "obs_sub_lon_lat": [
+      353.98936,
+      -4.158546
+     ],
+     "sun_sub_lon_lat": [
+      277.94067,
+      0.988812
+     ],
+     "light_time_s": 1.3293138
+    },
+    "like_for_like": {
+     "sun_deg": 8.283691448397659e-07,
+     "earth_deg": 7.014601370324988e-07,
+     "illum_pp": 2.5249082540312884e-06,
+     "light_time_s": 1.3293140665447991,
+     "sun_deg_without_aberration": 0.005636734917285902
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018727793117035379,
+     "earth_deg": 0.0013304860657631335,
+     "illum_pp": 0.001252304503736923
+    }
+   },
+   {
+    "utc": "2027-07-01T00:00:00Z",
+    "horizons": {
+     "illum_pct": 13.68065,
+     "obs_sub_lon_lat": [
+      353.623808,
+      -6.553765
+     ],
+     "sun_sub_lon_lat": [
+      216.778728,
+      0.868794
+     ],
+     "light_time_s": 1.2370428
+    },
+    "like_for_like": {
+     "sun_deg": 1.4206320874527684e-06,
+     "earth_deg": 7.170825720453396e-07,
+     "illum_pp": 4.575343815815813e-06,
+     "light_time_s": 1.2370429908487333,
+     "sun_deg_without_aberration": 0.005447439018241528
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017399136578375178,
+     "earth_deg": 0.0040951017793821815,
+     "illum_pp": 0.002309504631153203
+    }
+   },
+   {
+    "utc": "2027-07-06T00:00:00Z",
+    "horizons": {
+     "illum_pct": 5.27869,
+     "obs_sub_lon_lat": [
+      2.077662,
+      -0.201791
+     ],
+     "sun_sub_lon_lat": [
+      155.516959,
+      0.742376
+     ],
+     "light_time_s": 1.1990358
+    },
+    "like_for_like": {
+     "sun_deg": 7.874026617746424e-07,
+     "earth_deg": 7.254832379325914e-07,
+     "illum_pp": 3.39365692969551e-06,
+     "light_time_s": 1.1990357626094845,
+     "sun_deg_without_aberration": 0.0054146143825800404
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00016923423320776016,
+     "earth_deg": 0.004988638500821062,
+     "illum_pp": 0.001877304893697307
+    }
+   },
+   {
+    "utc": "2027-07-11T00:00:00Z",
+    "horizons": {
+     "illum_pct": 52.52158,
+     "obs_sub_lon_lat": [
+      7.164375,
+      6.360444
+     ],
+     "sun_sub_lon_lat": [
+      94.325575,
+      0.627458
+     ],
+     "light_time_s": 1.275354
+    },
+    "like_for_like": {
+     "sun_deg": 1.0768589895258747e-06,
+     "earth_deg": 6.502001302269561e-07,
+     "illum_pp": 4.5279962748168145e-06,
+     "light_time_s": 1.2753541088910372,
+     "sun_deg_without_aberration": 0.005599827486847897
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017938182773951319,
+     "earth_deg": 0.0005529230309151502,
+     "illum_pp": 0.000375875014000826
+    }
+   },
+   {
+    "utc": "2027-07-16T00:00:00Z",
+    "horizons": {
+     "illum_pct": 93.61122,
+     "obs_sub_lon_lat": [
+      4.305739,
+      5.031783
+     ],
+     "sun_sub_lon_lat": [
+      33.279609,
+      0.516424
+     ],
+     "light_time_s": 1.3416222
+    },
+    "like_for_like": {
+     "sun_deg": 1.0747382884524594e-06,
+     "earth_deg": 1.05452212792012e-06,
+     "illum_pp": 7.233116861016242e-07,
+     "light_time_s": 1.3416219805724685,
+     "sun_deg_without_aberration": 0.005760747726209462
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.000188458327655587,
+     "earth_deg": 0.004869343033405607,
+     "illum_pp": 0.002131666578307545
+    }
+   },
+   {
+    "utc": "2027-07-21T00:00:00Z",
+    "horizons": {
+     "illum_pct": 95.17653,
+     "obs_sub_lon_lat": [
+      357.613395,
+      -1.395921
+     ],
+     "sun_sub_lon_lat": [
+      332.300245,
+      0.387667
+     ],
+     "light_time_s": 1.3522584
+    },
+    "like_for_like": {
+     "sun_deg": 1.3488839285490299e-06,
+     "earth_deg": 6.238618262622036e-07,
+     "illum_pp": 2.8601356518720422e-06,
+     "light_time_s": 1.3522585144012549,
+     "sun_deg_without_aberration": 0.005768448067862115
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018957374025622113,
+     "earth_deg": 0.005048902113997222,
+     "illum_pp": 0.0019544683362084925
+    }
+   },
+   {
+    "utc": "2027-07-26T00:00:00Z",
+    "horizons": {
+     "illum_pct": 57.43194,
+     "obs_sub_lon_lat": [
+      352.633859,
+      -6.5246
+     ],
+     "sun_sub_lon_lat": [
+      271.267353,
+      0.252505
+     ],
+     "light_time_s": 1.299288
+    },
+    "like_for_like": {
+     "sun_deg": 5.477537466631604e-07,
+     "earth_deg": 8.029498007509964e-07,
+     "illum_pp": 2.1128934193370696e-06,
+     "light_time_s": 1.299288164887407,
+     "sun_deg_without_aberration": 0.005622560636456304
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018331006182023183,
+     "earth_deg": 0.0009755728330052566,
+     "illum_pp": 0.0008811512014403888
+    }
+   },
+   {
+    "utc": "2027-07-31T00:00:00Z",
+    "horizons": {
+     "illum_pct": 8.73085,
+     "obs_sub_lon_lat": [
+      355.940822,
+      -4.222699
+     ],
+     "sun_sub_lon_lat": [
+      210.099708,
+      0.114543
+     ],
+     "light_time_s": 1.2078347999999999
+    },
+    "like_for_like": {
+     "sun_deg": 5.877861890820615e-07,
+     "earth_deg": 8.120262282217444e-07,
+     "illum_pp": 2.2561092727357845e-06,
+     "light_time_s": 1.207834719286052,
+     "sun_deg_without_aberration": 0.005435802691623883
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017066778236633515,
+     "earth_deg": 0.004601427458419714,
+     "illum_pp": 0.0021677922351646117
+    }
+   },
+   {
+    "utc": "2027-08-05T00:00:00Z",
+    "horizons": {
+     "illum_pct": 9.75754,
+     "obs_sub_lon_lat": [
+      5.05739,
+      4.130691
+     ],
+     "sun_sub_lon_lat": [
+      148.85223,
+      -0.030442
+     ],
+     "light_time_s": 1.214871
+    },
+    "like_for_like": {
+     "sun_deg": 6.523412954744714e-07,
+     "earth_deg": 3.240759110000524e-07,
+     "illum_pp": 5.326420726703418e-07,
+     "light_time_s": 1.2148712587046595,
+     "sun_deg_without_aberration": 0.00544326166030405
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001716891245689386,
+     "earth_deg": 0.004542295558763006,
+     "illum_pp": 0.002247419834287001
+    }
+   },
+   {
+    "utc": "2027-08-10T00:00:00Z",
+    "horizons": {
+     "illum_pct": 58.23372,
+     "obs_sub_lon_lat": [
+      7.260397,
+      6.602195
+     ],
+     "sun_sub_lon_lat": [
+      87.698899,
+      -0.164228
+     ],
+     "light_time_s": 1.3096164
+    },
+    "like_for_like": {
+     "sun_deg": 9.157398137110587e-07,
+     "earth_deg": 2.5142205724268104e-07,
+     "illum_pp": 3.425201064999328e-06,
+     "light_time_s": 1.309616504238528,
+     "sun_deg_without_aberration": 0.005636904782590437
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018427599102018133,
+     "earth_deg": 0.0009817618760706228,
+     "illum_pp": 0.0008811927320877544
+    }
+   },
+   {
+    "utc": "2027-08-15T00:00:00Z",
+    "horizons": {
+     "illum_pct": 95.29368,
+     "obs_sub_lon_lat": [
+      1.709537,
+      1.716223
+     ],
+     "sun_sub_lon_lat": [
+      26.690641,
+      -0.296093
+     ],
+     "light_time_s": 1.3541658
+    },
+    "like_for_like": {
+     "sun_deg": 9.745685433202978e-07,
+     "earth_deg": 1.1080243608081917e-06,
+     "illum_pp": 1.675573599868585e-06,
+     "light_time_s": 1.354165514223325,
+     "sun_deg_without_aberration": 0.005786604384078916
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001901323269628863,
+     "earth_deg": 0.005042520822598949,
+     "illum_pp": 0.0019322432384001331
+    }
+   },
+   {
+    "utc": "2027-08-20T00:00:00Z",
+    "horizons": {
+     "illum_pct": 93.37316,
+     "obs_sub_lon_lat": [
+      355.294656,
+      -4.834587
+     ],
+     "sun_sub_lon_lat": [
+      325.747785,
+      -0.428318
+     ],
+     "light_time_s": 1.3337496
+    },
+    "like_for_like": {
+     "sun_deg": 1.0156232274406108e-06,
+     "earth_deg": 5.765636432465929e-07,
+     "illum_pp": 2.0624582219852527e-06,
+     "light_time_s": 1.3337495185697226,
+     "sun_deg_without_aberration": 0.005785172634305311
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018715986512737358,
+     "earth_deg": 0.004905608761225559,
+     "illum_pp": 0.0021855620968125322
+    }
+   },
+   {
+    "utc": "2027-08-25T00:00:00Z",
+    "horizons": {
+     "illum_pct": 51.24173,
+     "obs_sub_lon_lat": [
+      353.378183,
+      -6.427349
+     ],
+     "sun_sub_lon_lat": [
+      264.748484,
+      -0.548669
+     ],
+     "light_time_s": 1.2653364
+    },
+    "like_for_like": {
+     "sun_deg": 1.21541027815817e-06,
+     "earth_deg": 1.0079272139983804e-06,
+     "illum_pp": 2.403449528287638e-06,
+     "light_time_s": 1.265336307816759,
+     "sun_deg_without_aberration": 0.005627334059749748
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017766926867837668,
+     "earth_deg": 0.0005348167563236891,
+     "illum_pp": 0.0003312513952451468
+    }
+   },
+   {
+    "utc": "2027-08-30T00:00:00Z",
+    "horizons": {
+     "illum_pct": 4.49133,
+     "obs_sub_lon_lat": [
+      359.147596,
+      0.105429
+     ],
+     "sun_sub_lon_lat": [
+      203.612359,
+      -0.672855
+     ],
+     "light_time_s": 1.199394
+    },
+    "like_for_like": {
+     "sun_deg": 1.3649909452686745e-06,
+     "earth_deg": 7.706121678138197e-07,
+     "illum_pp": 1.7694725471528727e-06,
+     "light_time_s": 1.199393794919461,
+     "sun_deg_without_aberration": 0.005451181912173304
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00016854013135960994,
+     "earth_deg": 0.005078881297088083,
+     "illum_pp": 0.0017731746364315626
+    }
+   },
+   {
+    "utc": "2027-09-04T00:00:00Z",
+    "horizons": {
+     "illum_pct": 14.40138,
+     "obs_sub_lon_lat": [
+      6.770227,
+      6.519835
+     ],
+     "sun_sub_lon_lat": [
+      142.419472,
+      -0.803934
+     ],
+     "light_time_s": 1.248459
+    },
+    "like_for_like": {
+     "sun_deg": 8.745511738927711e-07,
+     "earth_deg": 4.0653723982922755e-07,
+     "illum_pp": 3.1413328525076167e-06,
+     "light_time_s": 1.248459256628198,
+     "sun_deg_without_aberration": 0.005495048228201772
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017589992901680736,
+     "earth_deg": 0.004102739696530068,
+     "illum_pp": 0.0023660444973074846
+    }
+   },
+   {
+    "utc": "2027-09-09T00:00:00Z",
+    "horizons": {
+     "illum_pct": 62.01948,
+     "obs_sub_lon_lat": [
+      5.365315,
+      4.419517
+     ],
+     "sun_sub_lon_lat": [
+      81.337963,
+      -0.924468
+     ],
+     "light_time_s": 1.3364562
+    },
+    "like_for_like": {
+     "sun_deg": 1.297127321399845e-06,
+     "earth_deg": 1.0951219373211576e-06,
+     "illum_pp": 2.2002950572641566e-07,
+     "light_time_s": 1.3364563227744106,
+     "sun_deg_without_aberration": 0.005689011580344194
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018748305997840197,
+     "earth_deg": 0.0012854430438551854,
+     "illum_pp": 0.0012106901647328527
+    }
+   },
+   {
+    "utc": "2027-09-14T00:00:00Z",
+    "horizons": {
+     "illum_pct": 96.42464,
+     "obs_sub_lon_lat": [
+      358.622616,
+      -2.138657
+     ],
+     "sun_sub_lon_lat": [
+      20.402476,
+      -1.036859
+     ],
+     "light_time_s": 1.346397
+    },
+    "like_for_like": {
+     "sun_deg": 9.054317991147117e-07,
+     "earth_deg": 9.818194710341059e-07,
+     "illum_pp": 1.0809335861949876e-06,
+     "light_time_s": 1.346396940101692,
+     "sun_deg_without_aberration": 0.0058316919831606605
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001888357599434747,
+     "earth_deg": 0.005201818176959775,
+     "illum_pp": 0.0017414241363837846
+    }
+   },
+   {
+    "utc": "2027-09-19T00:00:00Z",
+    "horizons": {
+     "illum_pct": 90.75463,
+     "obs_sub_lon_lat": [
+      354.606584,
+      -6.596387
+     ],
+     "sun_sub_lon_lat": [
+      319.53216,
+      -1.128115
+     ],
+     "light_time_s": 1.3008378
+    },
+    "like_for_like": {
+     "sun_deg": 1.369386844480689e-06,
+     "earth_deg": 4.0553597242079746e-07,
+     "illum_pp": 2.2934993779699653e-06,
+     "light_time_s": 1.3008378410312273,
+     "sun_deg_without_aberration": 0.005819127525092053
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018196192654151852,
+     "earth_deg": 0.004685667869115441,
+     "illum_pp": 0.0024224434430522024
+    }
+   },
+   {
+    "utc": "2027-09-24T00:00:00Z",
+    "horizons": {
+     "illum_pct": 43.70903,
+     "obs_sub_lon_lat": [
+      355.91316,
+      -3.529758
+     ],
+     "sun_sub_lon_lat": [
+      258.595176,
+      -1.197992
+     ],
+     "light_time_s": 1.2391728
+    },
+    "like_for_like": {
+     "sun_deg": 7.204170986602185e-07,
+     "earth_deg": 6.908728214526602e-07,
+     "illum_pp": 4.5667347521316515e-06,
+     "light_time_s": 1.2391724906035277,
+     "sun_deg_without_aberration": 0.005642918828223159
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.000174335071623968,
+     "earth_deg": 0.0006901330691498348,
+     "illum_pp": 0.00039493016685554494
+    }
+   },
+   {
+    "utc": "2027-09-29T00:00:00Z",
+    "horizons": {
+     "illum_pct": 1.81314,
+     "obs_sub_lon_lat": [
+      2.326465,
+      4.339617
+     ],
+     "sun_sub_lon_lat": [
+      197.518107,
+      -1.278925
+     ],
+     "light_time_s": 1.2155184
+    },
+    "like_for_like": {
+     "sun_deg": 1.1651654323877135e-06,
+     "earth_deg": 5.672362954813598e-07,
+     "illum_pp": 3.444156056797709e-06,
+     "light_time_s": 1.2155183888359893,
+     "sun_deg_without_aberration": 0.005487178794477101
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017083284523516319,
+     "earth_deg": 0.005442710046872971,
+     "illum_pp": 0.0012002226435956498
+    }
+   },
+   {
+    "utc": "2027-10-04T00:00:00Z",
+    "horizons": {
+     "illum_pct": 18.06858,
+     "obs_sub_lon_lat": [
+      6.619237,
+      6.165062
+     ],
+     "sun_sub_lon_lat": [
+      136.407408,
+      -1.365409
+     ],
+     "light_time_s": 1.2883722000000002
+    },
+    "like_for_like": {
+     "sun_deg": 5.411690095607518e-07,
+     "earth_deg": 4.948319217858382e-07,
+     "illum_pp": 1.3513519974139854e-06,
+     "light_time_s": 1.2883721715299996,
+     "sun_deg_without_aberration": 0.0055576604778524415
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018154801423082536,
+     "earth_deg": 0.003746327648324156,
+     "illum_pp": 0.0023602991552031938
+    }
+   },
+   {
+    "utc": "2027-10-09T00:00:00Z",
+    "horizons": {
+     "illum_pct": 64.24387,
+     "obs_sub_lon_lat": [
+      1.998103,
+      0.813411
+     ],
+     "sun_sub_lon_lat": [
+      75.418132,
+      -1.440673
+     ],
+     "light_time_s": 1.348617
+    },
+    "like_for_like": {
+     "sun_deg": 4.846944023526606e-07,
+     "earth_deg": 9.236195063397449e-07,
+     "illum_pp": 4.353710323812265e-06,
+     "light_time_s": 1.3486169745932235,
+     "sun_deg_without_aberration": 0.005748051657956756
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018961867111502514,
+     "earth_deg": 0.001496858232103064,
+     "illum_pp": 0.0014140915593685577
+    }
+   },
+   {
+    "utc": "2027-10-14T00:00:00Z",
+    "horizons": {
+     "illum_pct": 97.33101,
+     "obs_sub_lon_lat": [
+      356.121297,
+      -5.286226
+     ],
+     "sun_sub_lon_lat": [
+      14.576329,
+      -1.494987
+     ],
+     "light_time_s": 1.31949
+    },
+    "like_for_like": {
+     "sun_deg": 1.2454518039938728e-06,
+     "earth_deg": 7.00607357724326e-07,
+     "illum_pp": 2.8109331537962134e-06,
+     "light_time_s": 1.319489919384642,
+     "sun_deg_without_aberration": 0.005888027677446322
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001844527176702594,
+     "earth_deg": 0.005373936732434044,
+     "illum_pp": 0.0015180313584721716
+    }
+   },
+   {
+    "utc": "2027-10-19T00:00:00Z",
+    "horizons": {
+     "illum_pct": 87.05435,
+     "obs_sub_lon_lat": [
+      355.858256,
+      -5.720477
+     ],
+     "sun_sub_lon_lat": [
+      313.795823,
+      -1.509197
+     ],
+     "light_time_s": 1.2631602
+    },
+    "like_for_like": {
+     "sun_deg": 5.171407601714862e-07,
+     "earth_deg": 7.711871484163596e-08,
+     "illum_pp": 9.097923623357929e-07,
+     "light_time_s": 1.263159933556888,
+     "sun_deg_without_aberration": 0.0058565076596152465
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017722841371898434,
+     "earth_deg": 0.004316477905257323,
+     "illum_pp": 0.0026037968227399233
+    }
+   },
+   {
+    "utc": "2027-10-24T00:00:00Z",
+    "horizons": {
+     "illum_pct": 35.76065,
+     "obs_sub_lon_lat": [
+      359.455067,
+      1.072398
+     ],
+     "sun_sub_lon_lat": [
+      252.929497,
+      -1.505904
+     ],
+     "light_time_s": 1.2313596
+    },
+    "like_for_like": {
+     "sun_deg": 1.245343297768123e-06,
+     "earth_deg": 8.928970094883484e-07,
+     "illum_pp": 8.839170888563785e-07,
+     "light_time_s": 1.2313594757218629,
+     "sun_deg_without_aberration": 0.005664384440106377
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001724297523736496,
+     "earth_deg": 0.0015448383246307142,
+     "illum_pp": 0.0011458162959598894
+    }
+   },
+   {
+    "utc": "2027-10-29T00:00:00Z",
+    "horizons": {
+     "illum_pct": 0.59172,
+     "obs_sub_lon_lat": [
+      4.588987,
+      6.460321
+     ],
+     "sun_sub_lon_lat": [
+      191.921905,
+      -1.523031
+     ],
+     "light_time_s": 1.2507402
+    },
+    "like_for_like": {
+     "sun_deg": 9.513342864382007e-07,
+     "earth_deg": 1.0125042318630252e-06,
+     "illum_pp": 1.2114853076283794e-06,
+     "light_time_s": 1.250740040695304,
+     "sun_deg_without_aberration": 0.005534237297611948
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017576412245151043,
+     "earth_deg": 0.005662324493853164,
+     "illum_pp": 0.0006058110107409753
+    }
+   },
+   {
+    "utc": "2027-11-03T00:00:00Z",
+    "horizons": {
+     "illum_pct": 20.33347,
+     "obs_sub_lon_lat": [
+      4.528529,
+      3.547579
+     ],
+     "sun_sub_lon_lat": [
+      130.899731,
+      -1.544361
+     ],
+     "light_time_s": 1.3235934
+    },
+    "like_for_like": {
+     "sun_deg": 6.502384407109091e-07,
+     "earth_deg": 2.37094893839528e-07,
+     "illum_pp": 1.929004756817676e-06,
+     "light_time_s": 1.3235935027957002,
+     "sun_deg_without_aberration": 0.005619297627107325
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001860978598096502,
+     "earth_deg": 0.0035051572766137146,
+     "illum_pp": 0.0023191362055143827
+    }
+   },
+   {
+    "utc": "2027-11-08T00:00:00Z",
+    "horizons": {
+     "illum_pct": 65.59617,
+     "obs_sub_lon_lat": [
+      358.124365,
+      -3.015667
+     ],
+     "sun_sub_lon_lat": [
+      70.002252,
+      -1.551946
+     ],
+     "light_time_s": 1.3433922
+    },
+    "like_for_like": {
+     "sun_deg": 1.3279436018634884e-06,
+     "earth_deg": 5.869151831723966e-07,
+     "illum_pp": 7.075416874613438e-07,
+     "light_time_s": 1.343392069957346,
+     "sun_deg_without_aberration": 0.005806540325162207
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018775197846359663,
+     "earth_deg": 0.0016995128486984256,
+     "illum_pp": 0.0015476772208415923
+    }
+   },
+   {
+    "utc": "2027-11-13T00:00:00Z",
+    "horizons": {
+     "illum_pct": 98.27706,
+     "obs_sub_lon_lat": [
+      354.997018,
+      -6.571447
+     ],
+     "sun_sub_lon_lat": [
+      9.252551,
+      -1.523204
+     ],
+     "light_time_s": 1.2794226
+    },
+    "like_for_like": {
+     "sun_deg": 8.718782617739874e-07,
+     "earth_deg": 1.0893161832394196e-06,
+     "illum_pp": 8.732091885121918e-07,
+     "light_time_s": 1.279422730726514,
+     "sun_deg_without_aberration": 0.005941866423800536
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001789138087833262,
+     "earth_deg": 0.0055572372677779305,
+     "illum_pp": 0.0012224033331733608
+    }
+   },
+   {
+    "utc": "2027-11-18T00:00:00Z",
+    "horizons": {
+     "illum_pct": 82.10707,
+     "obs_sub_lon_lat": [
+      358.623176,
+      -2.220068
+     ],
+     "sun_sub_lon_lat": [
+      308.5531,
+      -1.445164
+     ],
+     "light_time_s": 1.2331379999999998
+    },
+    "like_for_like": {
+     "sun_deg": 5.48095673245866e-07,
+     "earth_deg": 1.7326229919578047e-07,
+     "illum_pp": 9.509746377034389e-07,
+     "light_time_s": 1.2331378221935283,
+     "sun_deg_without_aberration": 0.005884967645228825
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017291136961933542,
+     "earth_deg": 0.0037582401627168356,
+     "illum_pp": 0.0026239219984631745
+    }
+   },
+   {
+    "utc": "2027-11-23T00:00:00Z",
+    "horizons": {
+     "illum_pct": 28.57864,
+     "obs_sub_lon_lat": [
+      3.091776,
+      5.142637
+     ],
+     "sun_sub_lon_lat": [
+      247.742577,
+      -1.366621
+     ],
+     "light_time_s": 1.2456018
+    },
+    "like_for_like": {
+     "sun_deg": 7.403307968046223e-07,
+     "earth_deg": 8.722046490470057e-07,
+     "illum_pp": 3.516781106327471e-06,
+     "light_time_s": 1.2456015632765907,
+     "sun_deg_without_aberration": 0.005681438716721863
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017492066775472953,
+     "earth_deg": 0.0024445360433695065,
+     "illum_pp": 0.0017642974917393417
+    }
+   },
+   {
+    "utc": "2027-11-28T00:00:00Z",
+    "horizons": {
+     "illum_pct": 0.17047,
+     "obs_sub_lon_lat": [
+      5.149075,
+      5.754712
+     ],
+     "sun_sub_lon_lat": [
+      186.793657,
+      -1.315793
+     ],
+     "light_time_s": 1.2932622
+    },
+    "like_for_like": {
+     "sun_deg": 1.228945830938279e-06,
+     "earth_deg": 2.6491176275258104e-07,
+     "illum_pp": 3.998041536390495e-06,
+     "light_time_s": 1.2932622343526632,
+     "sun_deg_without_aberration": 0.005577334235974512
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001813466975866785,
+     "earth_deg": 0.005767776280811804,
+     "illum_pp": 0.00013932886979184378
+    }
+   },
+   {
+    "utc": "2027-12-03T00:00:00Z",
+    "horizons": {
+     "illum_pct": 21.52862,
+     "obs_sub_lon_lat": [
+      1.115577,
+      -0.218619
+     ],
+     "sun_sub_lon_lat": [
+      125.841835,
+      -1.269754
+     ],
+     "light_time_s": 1.3462188
+    },
+    "like_for_like": {
+     "sun_deg": 1.3436737075268515e-06,
+     "earth_deg": 3.5144705672425203e-07,
+     "illum_pp": 3.886731743563132e-06,
+     "light_time_s": 1.3462189444558268,
+     "sun_deg_without_aberration": 0.005667025917734727
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018845340702114885,
+     "earth_deg": 0.003361371549666307,
+     "illum_pp": 0.0022790917136639166
+    }
+   },
+   {
+    "utc": "2027-12-08T00:00:00Z",
+    "horizons": {
+     "illum_pct": 66.93577,
+     "obs_sub_lon_lat": [
+      354.793396,
+      -5.892149
+     ],
+     "sun_sub_lon_lat": [
+      65.013004,
+      -1.206796
+     ],
+     "light_time_s": 1.3221858
+    },
+    "like_for_like": {
+     "sun_deg": 1.2406758281920154e-06,
+     "earth_deg": 1.2588108687516864e-06,
+     "illum_pp": 1.1865121507526055e-07,
+     "light_time_s": 1.322185998593543,
+     "sun_deg_without_aberration": 0.005850556435513936
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018473772668492697,
+     "earth_deg": 0.0019464023509718127,
+     "illum_pp": 0.0016960577542590727
+    }
+   },
+   {
+    "utc": "2027-12-13T00:00:00Z",
+    "horizons": {
+     "illum_pct": 99.27324,
+     "obs_sub_lon_lat": [
+      355.467505,
+      -5.265406
+     ],
+     "sun_sub_lon_lat": [
+      4.330216,
+      -1.094713
+     ],
+     "light_time_s": 1.236444
+    },
+    "like_for_like": {
+     "sun_deg": 1.240457562679605e-06,
+     "earth_deg": 1.0434214975952837e-06,
+     "illum_pp": 4.818794124616943e-06,
+     "light_time_s": 1.2364441731789642,
+     "sun_deg_without_aberration": 0.005980734278214802
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00017227831458760075,
+     "earth_deg": 0.005718220179102076,
+     "illum_pp": 0.0007891280872058815
+    }
+   },
+   {
+    "utc": "2027-12-18T00:00:00Z",
+    "horizons": {
+     "illum_pct": 76.11307,
+     "obs_sub_lon_lat": [
+      2.110917,
+      2.436695
+     ],
+     "sun_sub_lon_lat": [
+      303.678379,
+      -0.939553
+     ],
+     "light_time_s": 1.2214692
+    },
+    "like_for_like": {
+     "sun_deg": 1.1966321629036782e-06,
+     "earth_deg": 2.3285808061835182e-07,
+     "illum_pp": 3.7039283284912017e-06,
+     "light_time_s": 1.2214692041980735,
+     "sun_deg_without_aberration": 0.005893011599216483
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001704198758961126,
+     "earth_deg": 0.003054026967279113,
+     "illum_pp": 0.0023987394072548796
+    }
+   },
+   {
+    "utc": "2027-12-23T00:00:00Z",
+    "horizons": {
+     "illum_pct": 22.98022,
+     "obs_sub_lon_lat": [
+      5.747787,
+      6.739556
+     ],
+     "sun_sub_lon_lat": [
+      242.890622,
+      -0.806301
+     ],
+     "light_time_s": 1.2761064
+    },
+    "like_for_like": {
+     "sun_deg": 1.3569120405416472e-06,
+     "earth_deg": 3.3895656367982307e-07,
+     "illum_pp": 4.844915331148059e-07,
+     "light_time_s": 1.2761061934803017,
+     "sun_deg_without_aberration": 0.00568784467112412
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.0001785049407187948,
+     "earth_deg": 0.0031636953059751625,
+     "illum_pp": 0.0021461248922740594
+    }
+   },
+   {
+    "utc": "2027-12-28T00:00:00Z",
+    "horizons": {
+     "illum_pct": 0.061,
+     "obs_sub_lon_lat": [
+      3.813479,
+      2.853143
+     ],
+     "sun_sub_lon_lat": [
+      181.97003,
+      -0.704358
+     ],
+     "light_time_s": 1.330404
+    },
+    "like_for_like": {
+     "sun_deg": 7.930887738118187e-07,
+     "earth_deg": 4.830582186327115e-07,
+     "illum_pp": 1.730464121940667e-06,
+     "light_time_s": 1.3304040888465507,
+     "sun_deg_without_aberration": 0.005600503065181922
+    },
+    "catalogue_convention": {
+     "sun_deg": 0.00018704722363853876,
+     "earth_deg": 0.0057996888308154216,
+     "illum_pp": 0.00015133916919657375
+    }
+   }
+  ]
+ },
+ "interpolation": {
+  "rule": "spherical interpolation of the rounded samples (as moonlight.js)",
+  "sun_deg": {
+   "max": 0.0005521493523960628,
+   "mean": 0.0001793734197760955,
+   "p99": 0.0005456912990056367
+  },
+  "earth_deg": {
+   "max": 0.004950449894320429,
+   "mean": 0.0012929870379282983,
+   "p99": 0.004527181579269177
+  },
+  "lit_fraction_worst_pp_at_midpoints": 0.0032382405893982558
+ },
+ "svs": {
+  "source": {
+   "page": "https://svs.gsfc.nasa.gov/5587/",
+   "file": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005587/mooninfo_2026.json",
+   "bytes": 2094339,
+   "sha256": "098ec6434ba4fecb84e66485385816d465b7969f142864bcfc9ffc68311b4a86",
+   "last_modified": "Thu, 30 Oct 2025 14:24:53 GMT",
+   "extract": "rows 15 Nov 2026 00:00 UT to 31 Dec 2026 23:00 UT; columns time, phase, subsolar lon/lat, subearth lon/lat, values as published",
+   "ephemeris_listed_on_page": "DE421 (JPL DE421)"
+  },
+  "rows": 1128,
+  "status": "corroboration only; no ceiling; offsets as found",
+  "sun_deg": {
+   "max": 0.0008280114987544729,
+   "mean": 0.00041713369074902783,
+   "p99": 0.0007891633067510225
+  },
+  "earth_deg": {
+   "max": 0.0006903688521369828,
+   "mean": 0.0003947131880306748,
+   "p99": 0.0006630748394228053
+  },
+  "phase_pp": {
+   "max_abs": 0.00515289727950119,
+   "mean": 1.721807350995934e-05
+  },
+  "note": "SVS publishes 3 decimals of a degree and 2 of a percent and lists DE421. Its page does not state light-time or aberration conventions; the offsets here are against the catalogue conventions."
+ }
+}

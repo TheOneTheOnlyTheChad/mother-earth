@@ -1,0 +1,232 @@
+{
+ "generator": "phase1/skycraft/build_moonlight.py",
+ "raw": {
+  "de440s.bsp.head.bin": "ff5c641287d93e8b44f1095e274f76881803cc1b63cb5c724280141495c7cfa2",
+  "de440s.bsp.seg3.rec4027-4063.bin": "b10bcfbf25ddc0b75cad355ec158d4b680a7ba76864403eb7d26b0dcac1c1125",
+  "de440s.bsp.seg3-trailer.bin": "5c2c40218128aa6a3a8d66a78ba4b7a5b68d31d2bc0acea1a718afb9ee5daa48",
+  "de440s.bsp.seg10.rec4027-4063.bin": "1d255d2fa210dbdf610ec8f9a30c0f7828f6947641f0ecdfc7e2b4d8e1e0923c",
+  "de440s.bsp.seg10-trailer.bin": "301337d4f1d701702672e5ce85dae675a09c47b34652e30cad4f74040bcd87e6",
+  "de440s.bsp.seg301.rec16109-16255.bin": "110b51d75808696d4eeaecfab31bf1a675f3d9aec5c0521121d135c3d0c7dadd",
+  "de440s.bsp.seg301-trailer.bin": "43eea3a9958caf71f431f91ec6878a876da6e18ecd507a8c2d64e80afea186a1",
+  "de440s.bsp.seg399.rec16109-16255.bin": "c64cde8bf68c5e3384b45804839036cb94168746324b0d033929e2094cd86aec",
+  "de440s.bsp.seg399-trailer.bin": "43eea3a9958caf71f431f91ec6878a876da6e18ecd507a8c2d64e80afea186a1",
+  "moon_pa_de440_200625.bpc.head.bin": "e9965ec81153d6fa9cfcc0f2c56ef0f5f2798dc097de2e4ed4ac6c378f9ea33b",
+  "moon_pa_de440_200625.bpc.rec21750-21823.bin": "7430467e69a773860f7c2fa45d7ac9f4499cdbfd30468ae425dfa7f3ea0e9797",
+  "moon_pa_de440_200625.bpc.seg1-trailer.bin": "cbd56ca0e9d46fb392345be7fc27dee2501d04211a612c3e6a3c82f4d126c707",
+  "moon_de440_250416.tf": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768",
+  "naif0012.tls": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+  "de440-header.440": "0f4636b663e6f00af9efa2b605ef23635489f56b23dd1a5e3821d3acc6ac3359",
+  "de440-ascp01950-rec873-891.txt": "922de55b9b92223c23d2a93277f309593d4693fb6f19d7d6fa67d810c2e408e1",
+  "horizons-moon-geocentre-q10-14-15-20260601-20280101.txt": "fb1d0d8f1c99150f6f67bbd2653871f36b04e7c45cdb31b85dc7285eef1086e9",
+  "svs-mooninfo-2026-nov15-dec31.csv": "2150f7e55a7d65d3e27647a4d57d2f9e21eae16f0716495a71060e20cabbcb9e"
+ },
+ "spk": {
+  "file": "de440s.bsp",
+  "bytes": 32726016,
+  "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+  "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp",
+  "last_modified": "Mon, 21 Dec 2020 19:39:26 GMT",
+  "ranges": [
+   [
+    "de440s.bsp.head.bin",
+    0
+   ],
+   [
+    "de440s.bsp.seg3.rec4027-4063.bin",
+    7961432
+   ],
+   [
+    "de440s.bsp.seg3-trailer.bin",
+    8887376
+   ],
+   [
+    "de440s.bsp.seg10.rec4027-4063.bin",
+    13960760
+   ],
+   [
+    "de440s.bsp.seg10-trailer.bin",
+    14751200
+   ],
+   [
+    "de440s.bsp.seg301.rec16109-16255.bin",
+    20034984
+   ],
+   [
+    "de440s.bsp.seg301-trailer.bin",
+    23738432
+   ],
+   [
+    "de440s.bsp.seg399.rec16109-16255.bin",
+    29022216
+   ],
+   [
+    "de440s.bsp.seg399-trailer.bin",
+    32725664
+   ]
+  ],
+  "segments": {
+   "3": [
+    0,
+    830073,
+    1110926,
+    41,
+    1382400.0,
+    4027,
+    4063
+   ],
+   "10": [
+    0,
+    1604151,
+    1843904,
+    35,
+    1382400.0,
+    4027,
+    4063
+   ],
+   "301": [
+    3,
+    1843905,
+    2967308,
+    41,
+    345600.0,
+    16109,
+    16255
+   ],
+   "399": [
+    3,
+    2967309,
+    4090712,
+    41,
+    345600.0,
+    16109,
+    16255
+   ]
+  },
+  "init_tdb_s": -4734072000.0
+ },
+ "bpc": {
+  "file": "moon_pa_de440_200625.bpc",
+  "bytes": 12863488,
+  "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f",
+  "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de440_200625.bpc",
+  "last_modified": "Sat, 26 Jun 2021 01:49:57 GMT",
+  "ranges": [
+   [
+    "moon_pa_de440_200625.bpc.head.bin",
+    0
+   ],
+   [
+    "moon_pa_de440_200625.bpc.rec21750-21823.bin",
+    5573120
+   ],
+   [
+    "moon_pa_de440_200625.bpc.seg1-trailer.bin",
+    10245120
+   ]
+  ],
+  "segment1": {
+   "first_word": 641,
+   "last_word": 1280644,
+   "init_tdb_s": -14200747200.0,
+   "intlen_s": 691200.0,
+   "rsize": 32,
+   "n": 40000
+  },
+  "records_held": [
+   21750,
+   21823
+  ]
+ },
+ "de440_ascii": {
+  "file": "ascp01950.440",
+  "bytes": 30629582,
+  "sha256": "e24f6356225f7d912e35af2ebc5f9bcf6fb0425c53aa92b5d7243cb063477286",
+  "url": "https://ssd.jpl.nasa.gov/ftp/eph/planets/ascii/de440/ascp01950.440",
+  "last_modified": "Tue, 22 Dec 2020 00:51:10 GMT",
+  "byte_range": [
+   23387912,
+   23897511
+  ],
+  "records": [
+   873,
+   891
+  ],
+  "record_bytes": 26821
+ },
+ "horizons": {
+  "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND='301'&OBJ_DATA=NO&MAKE_EPHEM=YES&EPHEM_TYPE=OBSERVER&CENTER='500@399'&START_TIME='2026-06-01 00:00'&STOP_TIME='2028-01-01 00:00'&STEP_SIZE='5 d'&QUANTITIES='10,14,15,20,21'&ANG_FORMAT=DEG&CSV_FORMAT=YES&EXTRA_PREC=YES&TIME_DIGITS=SECONDS"
+ },
+ "svs": {
+  "page": "https://svs.gsfc.nasa.gov/5587/",
+  "file": "https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005587/mooninfo_2026.json",
+  "bytes": 2094339,
+  "sha256": "098ec6434ba4fecb84e66485385816d465b7969f142864bcfc9ffc68311b4a86",
+  "last_modified": "Thu, 30 Oct 2025 14:24:53 GMT",
+  "extract": "rows 15 Nov 2026 00:00 UT to 31 Dec 2026 23:00 UT; columns time, phase, subsolar lon/lat, subearth lon/lat, values as published",
+  "ephemeris_listed_on_page": "DE421 (JPL DE421)"
+ },
+ "retrieved": {
+  "de440s_ranges": "2026-11-15T03:14Z",
+  "bpc_range": "2026-11-15T03:14:45Z",
+  "de440_ascii_records": "2026-11-15T03:15:09Z",
+  "horizons": "2026-11-15T03:15:23Z",
+  "svs": "2026-11-15T03:15:53Z",
+  "via": "browser pane on the Mac (JPL and SVS hosts are not reachable from the workspace shell)"
+ },
+ "toolkit": {
+  "spiceypy": "8.0.0",
+  "cspice": "CSPICE_N0067"
+ },
+ "frame": "MOON_ME_DE440_ME421",
+ "coverage": {
+  "table_utc": [
+   "2026-06-01T00:00:00Z",
+   "2028-01-01T00:00:00Z"
+  ],
+  "spk_records_tdb_s": {
+   "3": [
+    832852800.0,
+    884001600.0
+   ],
+   "10": [
+    832852800.0,
+    884001600.0
+   ],
+   "301": [
+    833198400.0,
+    884001600.0
+   ],
+   "399": [
+    833198400.0,
+    884001600.0
+   ]
+  },
+  "pck_records_tdb_s": [
+   832852800.0,
+   884001600.0
+  ],
+  "table_tdb_s": [
+   833544069.1849113,
+   883569669.183905
+  ],
+  "confirmed": "every sample, midpoint and comparison epoch was checked against the held record numbers before SPICE was called, and every returned value is finite"
+ },
+ "renewal": "The table ends 2028-01-01 00:00 UTC. Rebuild with wider ranges, or move to another route, before then.",
+ "outputs": {
+  "catalogue": {
+   "file": "assets/moon/moon-light-2026-06-R1.json",
+   "bytes": 82330,
+   "sha256": "a78c2f4b10e3d9fa27153401531852f4eb53117562703d10243d7cf1f253b462"
+  },
+  "checks": {
+   "file": "phase1/skycraft/checks/moonlight-checks.json",
+   "bytes": 83459,
+   "sha256": "eafc95a500b14ec28faa3a73c8de9b0bcda0ccc650f4dde4fb7d4c871d858647"
+  },
+  "truth": {
+   "file": "phase1/skycraft/checks/moonlight-truth.json",
+   "bytes": 199562,
+   "sha256": "9df36b5f0487ae9111c6f9253a6f32525493494a4d14ee90c256378cf3b89dd6"
+  }
+ }
+}

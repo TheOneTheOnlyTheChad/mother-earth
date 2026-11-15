@@ -4,6 +4,24 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 04:21 UTC (clock reading) — **moon-lit-rc round 2: GPT's clock finding fixed; wording and REGISTER points applied** (branch only; nothing merged)
+- **GPT's review of `680aec3` (relayed by Chad):** desktop Chrome smoke passes; arithmetic 27/27 rerun; phase gate met. Merge held for one fix: the clock was read twice in one recalculation, so a minute boundary between the reads could leave the previous minute on screen.
+- **Fix:** one clock read per recalculation (`tickLit` → `computeLit(now)`); regression F8a/F8b with forced reads either side of a boundary; break `tworeads` fails.
+- **Also applied:** geometric Earth direction kept for R1 (GPT); Earth-view note opens "Centred on Earth using the same calculated UTC minute."; close-view sentence about whose percentage it is; Details link to `#moonlight`; generator docstring (aberration); REGISTER draft entry 4 (SVS) to be filed, labelled test-only.
+- **Runs:** `moon-lit` 138/0; `moon-light` 27/0; build `--check` ok; breaks `tworeads` and `notick` fail as they must. Other breaks and the other Moon suites not rerun (code unchanged).
+- Packet `reviews/2026-11-15-moon-lit-rc.md` rev 2 (§8).
+- **Next (item 1):** GPT re-checks. Then, each on Chad's own line: file the five REGISTER entries on the branch; merge `moon-lit-rc` to main (page change).
+
+## 15 Nov 04:02 UTC (clock reading) — **moon-lit-rc built: "Lit as now" on the Moon globe** (branch only; page only; nothing merged; for GPT)
+- Chad: "Go: build moon-lit-rc on a branch per MOON-LIT-AS-NOW-PROPOSAL rev 2.1 (D1 B fixed catalogue; D2 off by default; D3 faint night floor; D4 Earth view only if it passes the phase test; page only; no merge)".
+- **Built:** `moonlight.js` (arithmetic), `moonglobe.js` (shading, device-clock heartbeat, Earth-view camera at 100 radii, readouts, fallbacks), `moon.html`, `style.css`, `sources.html#moonlight`, table `assets/moon/moon-light-2026-06-R1.json` (82,330 B, `a78c2f4b…b462`) from `phase1/skycraft/build_moonlight.py`. **Earth view passes the phase test, so the button is in.**
+- **Numbers:** own DE440 vs SPICE 0.0000128° (all 2,317 samples, after rounding); June matrices 1e-15; Horizons like for like 0.0000014° / 0.0000013° / 0.0000051 pp; interpolation Sun 0.00055°, Earth 0.00495°; SVS (corroboration) ≤ 0.00083°. Phase on screen in the Earth view 27.07 / 47.78 / 72.25% against 27.23 / 47.79 / 72.08% calculated; ordinary camera 18.64 / 46.77 / 80.51%.
+- **Tests:** `moon-light` 27/0 (6 breaks); `moon-lit` 132/0 (14 breaks); build breaks 13/13; `moon-globe` 67/0, `moon-lro-path` 68/0, `skycraft-ui` 77/0. Full regression, phone, Safari, screen reader, real GPU: not run.
+- **Correction recorded in the packet (§2):** the proposal's "0.0002°" for the Earth-direction convention was wrong; the geometric Earth direction differs from Horizons' apparent one by up to 0.0058°. No effect on the lighting; below the readout's precision. Option for GPT: build the table with the apparent Earth direction (R2).
+- **Inputs fetched through the pane (15 Nov 03:14–03:16 UTC):** `de440s.bsp` ranges, PCK records 21750–21823, DE440 ASCII records 873–891, one Horizons request, SVS `mooninfo_2026.json` (extract kept).
+- Packet `reviews/2026-11-15-moon-lit-rc.md`; REGISTER draft `reviews/2026-11-15-moon-lit-register-draft.md` (not filed).
+- **Next (item 1):** GPT reviews the branch. Then, each on Chad's own line: file the REGISTER entries; merge `moon-lit-rc` to main. Rollback after merge: revert the merge commit.
+
 ## 15 Nov 03:11 UTC (clock reading) — **GPT passes "Lit as now" proposal rev 2 at docs review; rev 2.1 records its acceptance clarifications** (docs only; nothing built)
 - GPT (relayed by Chad): rev 2 passes; recommendations stand (D1 B · D2 off · D3 faint floor · D4 conditional). Clarifications carried into the branch checks as proposal §10: camera distance read after settle and resize, Earth view stays centred as the clock ticks, ordinary camera restored on exit; mask probes at ±0.5° and ±1°, rendered points against an evenly lit capture at the same pose, phase count on the mask's 50% contour; June matrices at the exact archived SPK epochs.
 - **Next (item 1):** Chad's own D1–D4 and his go for the branch build (relayed GPT text is not a go).
