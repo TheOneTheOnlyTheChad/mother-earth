@@ -651,7 +651,7 @@ body.craft .mgctl button{min-height:40px;min-width:44px;padding:6px 12px;backgro
 /* ---------- Sun globe (sun.html; sunglobe.js). Shares the Moon globe's box, readout and button styles. */
 body.craft .sgtimes{color:var(--dim);min-height:2.8em}
 
-/* ---------- widths-preview-rc (15 Nov 2026, INTERMEDIATE-WIDTHS-PROPOSAL rev 2 §6) — PREVIEW
+/* ---------- widths-preview-rc (15 Nov 2026, INTERMEDIATE-WIDTHS-PROPOSAL rev 2 §6) — PREVIEW, A only (D dropped in review)
    A. 721–1100 px: the header and the globe stay in view while the legend, credits and cards scroll beneath, so every layer
       switch can be used with its result visible. The globe's height follows the viewport height (--gh), so a short landscape
       screen keeps room for the cards. The centre column's box is dissolved (display:contents) so the globe can stay stuck for
@@ -669,10 +669,4 @@ body.craft .sgtimes{color:var(--dim);min-height:2.8em}
   body.world .col.left{order:5} body.world .col.right{order:6}
   body.world .inspector{position:fixed;top:calc(var(--header) + 8px);right:24px;left:auto;max-height:calc(var(--gh) - 16px)}
   body.world .zoom-ui{position:fixed;inset:auto;top:var(--header);left:12px;right:12px;height:var(--gh)}
-}
-/* D. 1101–1279 px: the credits move from under the globe to the foot of the right-hand column (the copy the phone layout
-      already uses), so the globe gets that height back. Exactly one credits block is visible at every width. */
-@media (min-width:1101px) and (max-width:1279px){
-  body.world .centre>.credits{display:none}
-  body.world .col.right>.credits.m{display:block;border:1px solid var(--line);margin-top:auto}
 }

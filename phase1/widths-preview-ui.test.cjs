@@ -2,13 +2,12 @@
  * rev 2, §6 governing).
  *   A  721–1100 px: header and globe stay in view; every layer switch can be reached, used, and its result seen on the globe
  *      without scrolling back; a control focused by keyboard is never under the pinned globe; a swipe on the cards scrolls the page.
- *   D  1101–1279 px: the credits move to the foot of the right-hand column; the globe gets that height back; exactly one
- *      credits block is visible at every width, text unchanged.
+ *   D (credits to the right-hand column at 1101–1279 px) was dropped in review: that range must be exactly as on main.
  * Real page with the real fonts; hub answers are fixtures. "Main" = index.html and style.css from `git show main:`, served to a
  * second context, so every before/after number is measured in the same run.
  * Run: 8899 static server on the repo root, then
  *      NODE_PATH=/home/claude/spike/node_modules:/home/claude/node_modules node --no-warnings phase1/widths-preview-ui.test.cjs
- * OUT=<dir> also writes before/after screenshots there.  BREAK=no-sticky | no-scroll-padding | both-credits | no-move | header-scrolls | short-screens   each must fail. */
+ * OUT=<dir> also writes before/after screenshots there.  BREAK=no-sticky | no-scroll-padding | header-scrolls | short-screens   each must fail. */
 const { chromium } = require('playwright');
 const fs = require('fs'); const path = require('path'); const cp = require('child_process');
 const ROOT = path.join(__dirname, '..');
@@ -26,8 +25,6 @@ const FILES = { branch: { index: fs.readFileSync(path.join(ROOT, 'index.html'), 
 { const rep = (k, a, b) => { const before = FILES.branch[k]; FILES.branch[k] = FILES.branch[k].split(a).join(b); if (FILES.branch[k] === before) { console.log('FAIL  break did not apply'); process.exit(1); } };
   if (BREAK === 'no-sticky') rep('css', 'body.world #globe{position:sticky;top:var(--header);', 'body.world #globe{position:relative;');
   if (BREAK === 'no-scroll-padding') rep('css', 'scroll-padding-top:calc(var(--header) + var(--gh) + 12px)', 'scroll-padding-top:0');
-  if (BREAK === 'both-credits') rep('css', 'body.world .centre>.credits{display:none}', '');
-  if (BREAK === 'no-move') rep('index', "document.querySelector('#sheet-scroll .col.right').append(c);", "$('sheet-scroll').append(c);");
   if (BREAK === 'short-screens') rep('css', '@media (min-width:721px) and (max-width:1100px) and (min-height:660px){', '@media (min-width:721px) and (max-width:1100px){');
   if (BREAK === 'header-scrolls') rep('css', 'body.world .top{position:sticky;top:0;z-index:40;', 'body.world .top{'); }
 const cellOf = (lat, lng) => `${Math.floor((lat + 90) / 4)}_${Math.floor((lng + 180) / 4)}`;
@@ -137,26 +134,8 @@ const SWITCHES = ['usgs', 'firms', 'ships', 'forest', 'drifters', 'plastic'];
       await ctx.close(); }
   }
 
-  // =========================================================== D. 1101–1279 px
-  for (const [w, h] of [[1101, 800], [1180, 820], [1279, 720]]) {
-    const tag = `D ${w}×${h}`;
-    const M = await open('main', w, h), mg = await geo(M.page); await shot(M.page, `before-${w}x${h}`); await M.ctx.close();
-    const { ctx, page, perr } = await open('branch', w, h); const g = await geo(page); await shot(page, `after-${w}x${h}`);
-    const mc = mg.credits.find(c => c.shown), bc = g.credits.filter(c => c.shown);
-    note(`${tag}: globe ${mg.globe.h} → ${g.globe.h} px (+${g.globe.h - mg.globe.h}); credits were ${mc.rect.h} px under the globe`);
-    ok(`${tag}: the globe gains at least 150 px of height`, g.globe.h - mg.globe.h >= 150, [mg.globe.h, g.globe.h]);
-    ok(`${tag}: exactly one credits block is shown, in the right-hand column, with main's text`, bc.length === 1 && bc[0].inRight && bc[0].text === mc.text, g.credits.map(c => [c.id, c.shown, c.inRight]));
-    const pos = await page.evaluate(() => { const col = document.querySelector('.col.right'), c = col.querySelector('.credits.m'); if (!c) return { missing: true }; const b = c.getBoundingClientRect(), cb = col.getBoundingClientRect(); const inView0 = b.top < cb.bottom; col.scrollTop = col.scrollHeight; const b2 = c.getBoundingClientRect();
-      return { inView0, scrollNeeded: Math.max(0, Math.round(b.bottom - cb.bottom)), colH: Math.round(cb.height), contentH: col.scrollHeight, afterTop: Math.round(b2.top), afterBottom: Math.round(b2.bottom), colBottom: Math.round(cb.bottom), last: col.lastElementChild === c }; });
-    note(`${tag}: credits are the last thing in the right-hand column; ${pos.inView0 ? 'partly on screen when the page opens' : 'NOT on screen when the page opens'}; ${pos.scrollNeeded} px of scrolling in that column brings them fully into view (column ${pos.colH} px tall, content ${pos.contentH} px)`);
-    ok(`${tag}: credits are the last item of the right-hand column and fully visible once that column is scrolled to its end`, pos.last && pos.afterBottom <= pos.colBottom + 1 && pos.afterTop >= g.colR.top - 1, pos);
-    ok(`${tag}: no sideways scroll; columns and header where main has them`, g.docW <= g.vw && JSON.stringify([g.header, g.colL, g.colR]) === JSON.stringify([mg.header, mg.colL, mg.colR]), [g.colL, mg.colL]);
-    await shot(page, `after-${w}x${h}-right-column-end`);
-    ok(`${tag}: no page error`, !perr.length, perr); await ctx.close();
-  }
-
-  // =========================================================== outside the two ranges: nothing moves
-  for (const [w, h] of [[390, 844], [720, 900], [1280, 800], [1440, 900], [780, 360], [844, 390], [932, 430], [1024, 600], [1100, 659]]) {   // the last five: in the 721–1100 width range but under 660 px tall (phones held sideways, small laptops) — not pinned
+  // =========================================================== outside the range: nothing moves (D was dropped in review, so 1101–1279 px is as on main)
+  for (const [w, h] of [[390, 844], [720, 900], [1101, 800], [1180, 820], [1279, 720], [1280, 800], [1440, 900], [780, 360], [844, 390], [932, 430], [1024, 600], [1100, 659]]) {   // the last five: in the 721–1100 width range but under 660 px tall (phones held sideways, small laptops) — not pinned
     const M = await open('main', w, h), mg = await geo(M.page); await M.ctx.close();
     const { ctx, page, perr } = await open('branch', w, h); const g = await geo(page);
     const pick = x => JSON.stringify([x.header, x.globe, x.legend, x.colL, x.colR, x.docW, x.credits.filter(c => c.shown).map(c => [c.rect, c.text])]);

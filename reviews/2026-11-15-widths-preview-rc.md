@@ -1,8 +1,8 @@
-# widths-preview-rc — PREVIEW for GPT and Chad (round 1)
+# widths-preview-rc — PREVIEW for GPT and Chad (round 2: A only)
 
 15 Nov 2026 · branch `widths-preview-rc` from main `f655613` · **page only** · preview · no merge · hub untouched
 Built on Chad's Go line. Spec: `docs/concepts/INTERMEDIATE-WIDTHS-PROPOSAL.md` rev 2, §6 governing.
-**Not for release until Chad has looked at it on a real screen.** D can be dropped without touching A.
+**Not for release until Chad has looked at it on a real screen.** Round 2: **D is dropped** (§8); §3 and the D rows below are kept as the record of what was measured.
 
 ## 1. What changed
 
@@ -85,3 +85,20 @@ Regression: §7.
 All pass: `mobile-pass` 131, `desktop-overflow` 258, `ux-round1` 34, `sky-zoom-ui` 351, `sky-ui` 79, `legend-active-ui` 548, `place-ui` 30, `search-ui` 104, `kept-ui` 21, `drifters-ui` 25, `plastic-ui` 29, `buoy-temp-ui` 33, `fire-status-ui` 279, `quakes-ships-status-ui` 124, `freshness-wording-ui` 156, `fires-wording-ui` 35, `cell-perf-ui` 43, `status-notes-ui` 17, `terminator-ui` 19, `dustrgb-ui` 67, `backdrop-layer` 27, `orbital-browser` 113, `arts-ui` 90, `skycraft-ui` 77, `timeline-changes-ui` 173. The two failures identical on main remain: `osmc-reliability-ui` "old page: no page errors" (40 of 41), `smoke-fixes` "Sources 360: no page-level horizontal overflow" (51 of 52).
 
 sha256: `index.html` `ea827cd4…7365`, `style.css` `d2b1538d…6249`.
+
+## 8. Round 2 (GPT's review of `94180e2`, relayed by Chad): keep A, drop D, stays a preview
+
+GPT tested A in desktop Chrome at 1024 × 768 with live hub data and a drawn globe: scrolled to Drifting buoys, switched it on, saw its legend entry with the globe pinned; opened the zoom-out view, used it and returned without the controls being covered. Keep the 660 px minimum height. The one-line card shift is for Chad to judge. D: the gain is real, but credits 2,500 px down a separately scrolling column are too hard to find.
+
+**Done on the branch:**
+- `style.css`: the D block is removed. A is unchanged.
+- `index.html`: the credits script line is back to main's. The only difference from main is the stylesheet key (`202612081000`).
+- Suite: the D section and its two breaks are removed; 1101 × 800, 1180 × 820 and 1279 × 720 are now in the "exactly as on main" list.
+
+**`widths-preview-ui`: 157 passed, 0 failed.** Breaks, each fails: `no-sticky` 49 · `header-scrolls` 41 · `no-scroll-padding` 8 · `short-screens` 5.
+
+Regression after the change (layout suites): `mobile-pass` 131, `desktop-overflow` 258, `ux-round1` 34, `sky-zoom-ui` 351, `sky-ui` 79, `legend-active-ui` 548, `place-ui` 30 pass; `smoke-fixes` 51 of 52 (the one failure is identical on main). The other suites in §7 were not rerun; they do not depend on layout.
+
+sha256 now: `index.html` `fc6140bf…3985`, `style.css` `a7feafee…c504`.
+
+Still open before any release: Chad's look on a real screen (§5 items 1–3), a real tablet's touch, Safari.
