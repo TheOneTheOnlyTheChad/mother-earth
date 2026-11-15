@@ -1,4 +1,4 @@
-# Control Centre usability — brief for GPT review (rev 1)
+# Control Centre usability — brief for GPT review (rev 1.1)
 
 15 Nov 2026 · docs only · nothing built · existing layers only · checked against main `1f6af0e` (page merge `967af71`, hub 0.6.14)
 
@@ -72,3 +72,24 @@ Also required: `fires-wording-ui`, `place-ui`, `search-ui` and `osmc-reliability
 ## 7. Out of scope
 
 Sun picture cleanup (separate proposal; replay markers kept), new layers, the Sky view, Moon and Sun pages, Timeline, phone and Safari passes, any hub or schedule change.
+
+## 8. GPT review of rev 1 (relayed by Chad, 15 Nov) — rev 1.1
+
+GPT: rev 1 is ready for a fire-only branch with three clarifications. The decisions remain Chad's; these are GPT's recommendations.
+
+| Decision | GPT recommends |
+|---|---|
+| D1 | Include A3: the same daily-reset reason on the card, tooltip, Find, search exclusions, page report and Place. Genuine collector failures stay distinct. |
+| D2 | Apply A2 now, **scoped to FIRMS**, using the Place response's own `source_status` and `note`. Track the Worker fix separately. |
+| D3 | Legend is the next branch, with its own review (counts-only layers, the empty key). |
+| D4 | In the freshness pass, change CURRENT to FRESH COPY for dated indices; keep the observation date and retrieval time visible. |
+
+Clarifications, added to the branch scope:
+
+1. **Two more acceptance rows:** stale counts with mismatched records, and a valid zero with matched records. "Counts shown alone" is gated on the same value the card renders. A valid zero stays distinct from a header-only response.
+2. **Production `lines/1` format** exercised alongside the legacy fixture, at least for a down run and for a valid count with mismatched records. Withholding behaviour is preserved. The page report is in scope; the raw `/status` response is not.
+3. **Cache key:** bump the `app.js` `?v=` wherever it is loaded, `sources.html` included, if shared code changes. That reference update ships with the page release.
+
+GPT on the Sun watch: no reason to move cleanup ahead of this branch; bucket-wide usage and lifecycle rules remain unverified.
+
+**Status:** not built. The Go line arrived inside GPT's relayed text, so the build waits for Chad's own line.

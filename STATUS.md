@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 05:15 UTC (clock reading) — **GPT reviews usability brief rev 1: ready for a fire-only branch, three clarifications; rev 1.1** (docs only; nothing built)
+- GPT (relayed by Chad): D1 include A3; D2 A2 now, FIRMS only, from the Place response's own `source_status` and `note`, Worker fix tracked separately; D3 legend next branch; D4 FRESH COPY for dated indices in the freshness pass. Clarifications: two more acceptance rows (stale counts + mismatched records; valid zero + matched records) with the withheld line gated on the value the card renders; `lines/1` cases alongside the legacy fixture; bump the `app.js` cache key everywhere, `sources.html` included.
+- Brief §8 records this. **Not built:** the Go line was inside GPT's relayed text; the branch waits for Chad's own line. Live unchanged.
+
 ## 15 Nov 05:07 UTC (clock reading) — **Control Centre usability brief rev 1 + Sun picture watch** (docs only; for GPT; nothing built)
 - New thread started from main `1f6af0e`; Chad chose the Control Centre usability backlog. Brief: `docs/concepts/CONTROL-CENTRE-USABILITY-BRIEF.md` (rev 1). Evidence: `reviews/evidence/2026-11-15-usability-repro/`. **Build waits for Chad's go.**
 - **Reproduced on main (harness: real page + real `worker.js` for `/place`; live card text read 05:00 UTC):**
