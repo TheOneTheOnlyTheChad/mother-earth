@@ -51,7 +51,7 @@ Still failing, same as on main: `osmc-reliability-ui` "old page: no page errors"
 
 ## 4. Fixed on the way (same fault, same line of code)
 
-On main a down ships run also printed "vessel identities in a undefined s AIS sample" as the card's unit and "sample ended –; undefined Class A + undefined Class B; socket connected 0 s of undefined s" as its description. Both came from reading sample fields off the down envelope and are gone with W3.
+On main a down ships run also printed "sample ended –; undefined Class A + undefined Class B; socket connected – s of undefined s" as the card's description and "last sample 0 vessels ending –" in the report (both reproduced with break `down-as-sample`). The unit line read `${s.window_s}` off the same envelope, which gives "undefined s" (from the code; not separately reproduced). All three came from reading sample fields off the down envelope and are gone with W3.
 
 ## 5. Not tested
 

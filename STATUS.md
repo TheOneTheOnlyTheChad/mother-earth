@@ -8,7 +8,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - Chad: "Go: build quakes-ships-status-rc on a branch per WITHHELD-LINE-QUAKES-SHIPS-PROPOSAL rev 2 (§6 governing; page only; no merge)".
 - **Built:** `app.js` (`ME.readings`: a down ships envelope is not a sample), `index.html` (`cardCount` for usgs and ships; line gated on `value !== null`; "no sample from the latest run"), `sources.html` (cache key). `app.js?v=202612011000`. Packet: `reviews/2026-11-15-quakes-ships-status-rc.md`.
 - **Tests:** new `quakes-ships-status-ui` 124/0, three breaks fail. Regression across 20 suites passes (fire-status 279, legend 548, mobile-pass 131, …); same two failures as main.
-- **Also gone with the fix:** on main a down ships run printed "undefined s" in the unit and "undefined Class A" in the description.
+- **Also gone with the fix:** on main a down ships run printed "sample ended –; undefined Class A + undefined Class B…" as the description and "last sample 0 vessels ending –" in the report (reproduced).
 - **Not tested:** phone, Safari, screen reader, real GPU, the live page. **Not approved:** merge. Live unchanged: hub 0.6.14, page `d13466a`.
 
 ## 15 Nov 08:08 UTC (clock reading) — **GPT reviews both proposals; rev 2 of each** (docs only; nothing built)
