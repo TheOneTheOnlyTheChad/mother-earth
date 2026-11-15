@@ -64,7 +64,7 @@ Measured (real fonts):
 
 Breaks, each fails: `no-sticky` 49 · `header-scrolls` 41 · `no-scroll-padding` 8 · `both-credits` 8 · `no-move` 8 · `short-screens` 5.
 
-Regression: see §7.
+Regression: §7.
 
 ## 5. Things to look at on a real screen (Chad)
 
@@ -82,4 +82,6 @@ Regression: see §7.
 
 ## 7. Regression
 
-Filled in below after the run.
+All pass: `mobile-pass` 131, `desktop-overflow` 258, `ux-round1` 34, `sky-zoom-ui` 351, `sky-ui` 79, `legend-active-ui` 548, `place-ui` 30, `search-ui` 104, `kept-ui` 21, `drifters-ui` 25, `plastic-ui` 29, `buoy-temp-ui` 33, `fire-status-ui` 279, `quakes-ships-status-ui` 124, `freshness-wording-ui` 156, `fires-wording-ui` 35, `cell-perf-ui` 43, `status-notes-ui` 17, `terminator-ui` 19, `dustrgb-ui` 67, `backdrop-layer` 27, `orbital-browser` 113, `arts-ui` 90, `skycraft-ui` 77, `timeline-changes-ui` 173. The two failures identical on main remain: `osmc-reliability-ui` "old page: no page errors" (40 of 41), `smoke-fixes` "Sources 360: no page-level horizontal overflow" (51 of 52).
+
+sha256: `index.html` `ea827cd4…7365`, `style.css` `d2b1538d…6249`.
