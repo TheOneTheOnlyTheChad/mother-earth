@@ -43,7 +43,7 @@ Not in this release: any hub change (unless §7 RL1 chooses it), the gap-filled 
 
 | | Per use |
 |---|---|
-| Layer switched on | NASA's key 34 KB; one or two 512 × 256 frames (58–244 KB each across the frames read so far); one 2048 × 1024 frame, 0.89–0.92 MB. About 5 to 6 s in the pane. |
+| Layer switched on | NASA's key 34 KB; one or two 512 × 256 frames (58 KB for the one whose size was recorded, 21 June 2026; the live probes' sizes were not recorded); one 2048 × 1024 frame, 0.89–0.92 MB. About 5 to 6 s in the pane. |
 | When a probe passes and its full frame fails | One more full frame, about 0.9 MB, discarded. Seen only in tests. |
 | One comparison at 0.5° | Both keys (51 KB, once) and four pictures, 12 KB in all; 0.8 s. |
 | Fresh load with the layer off | Nothing. |
@@ -63,7 +63,7 @@ Rollback: revert the merge. No hub, R2 or D1 change to undo.
 
 - **RL1. Route.**
   - **(a) As reviewed: the reader's browser asks GIBS and applies the date rule itself.** Nothing is manual: the rule runs every time the layer is switched on. No hub change, no deploy.
-  - **(b) The hub applies the date rule on its schedule and publishes the pinned date;** the page reads the date from the hub and asks GIBS only for the full frame. This needs a PNG reader in the Worker, a schedule entry, a new envelope, tests, and a hub deploy by Chad's paste. It saves each reader the probe requests (58–244 KB each) and lets the health checks watch it.
+  - **(b) The hub applies the date rule on its schedule and publishes the pinned date;** the page reads the date from the hub and asks GIBS only for the full frame. This needs a PNG reader in the Worker, a schedule entry, a new envelope, tests, and a hub deploy by Chad's paste. It saves each reader the probe requests (one or two small frames; one recorded at 58 KB) and lets the health checks watch it.
   - **Recommended: (a) for this release.** It is the route that was reviewed and seen working from the site's own address. It departs from hub-first, on the backdrop's precedent, and Chad's "we have cloudflare, no manual jobs" is met in the sense that nothing is done by hand. If Chad meant the hub should own the date, (b) is a follow-on with its own proposal, or this release waits for it. Chad decides.
 - **RL2. A real phone and Safari before the merge, or after** as for the earlier releases (Chad deferred those: "site first"). Recommended: after, recorded as untested.
 - **RL3. Chad's own look** at the preview before round 3 is built, or with round 3. Recommended: with round 3, so he sees what would be released.
