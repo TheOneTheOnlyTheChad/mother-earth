@@ -57,6 +57,21 @@ const ago = ME.ago = iso => { if (!iso) return 'unknown'; const s = (Date.now() 
 const dur = ME.dur = s => s < 3600 ? Math.round(s / 60) + ' min' : (s % 3600 === 0 ? (s / 3600) + ' h' : (s / 3600).toFixed(1) + ' h');   // plain-language limits: 10800 → "3 h"
 const hhmm = ME.hhmm = iso => iso ? iso.slice(11, 16) + ' UTC' : '–';
 ME.dayMonth = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.getUTCDate() + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getUTCMonth()]; };   // UTC "11 Nov"
+// The two run times in a "records withheld" line (optional-layers-status-rc, 15 Nov 2026). Same UTC day: times only, as before.
+// Different UTC days: each time carries its date; different years: the year too. A run time that is not a readable timestamp
+// (ME.RUN_TIME below) reads "unknown", and the other then carries its full date, since there is nothing to compare it with.
+// A run time must state its own date, time and zone (round 2): "2026-11-15" would be shown as 00:00 UTC and
+// "2026-11-15T10:50:00" would be read on the visitor's own clock (08:50 UTC in Johannesburg) — both are times nobody published.
+// The day must also be a real calendar day (ME.validDate), so 31 February is not quietly turned into 3 March.
+ME.RUN_TIME = /^(\d{4}-\d\d-\d\d)T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
+ME.runTimes = (recIso, cntIso) => {
+  const ok = v => { const m = typeof v === 'string' ? ME.RUN_TIME.exec(v) : null; return !!m && !!ME.validDate(m[1]) && Number.isFinite(Date.parse(v)); }, d = v => new Date(Date.parse(v)), p2 = n => String(n).padStart(2, '0');
+  const rOk = ok(recIso), cOk = ok(cntIso), r = rOk ? d(recIso) : null, c = cOk ? d(cntIso) : null;
+  const both = rOk && cOk, year = !both || r.getUTCFullYear() !== c.getUTCFullYear();
+  const day = !both || year || r.getUTCMonth() !== c.getUTCMonth() || r.getUTCDate() !== c.getUTCDate();
+  const t = x => x ? (day ? ME.dayMonth(x.toISOString()) + (year ? ' ' + x.getUTCFullYear() : '') + ' ' : '') + p2(x.getUTCHours()) + ':' + p2(x.getUTCMinutes()) + ' UTC' : 'unknown';
+  return `records ${t(r)}, counts ${t(c)}`;
+};
 const when = ME.when = iso => iso ? iso.replace('T', ' ').slice(0, 16) + ' UTC' : 'source time not supplied';
 const num = (x, d = 2) => Number.isFinite(+x) ? (+x).toFixed(d) : '–';
 

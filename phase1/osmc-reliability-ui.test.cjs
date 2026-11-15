@@ -121,7 +121,8 @@ const ctl = async (port, q) => { const r = await fetch(`http://127.0.0.1:${port}
   ok('3a records unreadable: no buoy cells drawn either', r.cells === 0, r.cells);
   ok('3a records unreadable: no count shown, and no copy implying positions are shown', r.value === '–' && r.obs === 'buoy positions not shown' && !/each buoy shown/.test(r.obs), [r.value, r.obs]);
   ok('3a records unreadable: the card says only that the update failed — no "Showing buoys"', r.bold === 'Latest update failed at 16:08 UTC.' && !/Showing buoys/.test(r.meta + r.title), r.meta);
-  ok('3a records unreadable: the existing withheld reason is shown', /^Records withheld:/.test(r.withheld), r.withheld);
+  // since optional-layers-status-rc (15 Nov 2026): the card shows a dash here, so the "Records withheld … counts shown alone" line is hidden — no count is shown alone. Records stay withheld.
+  ok('3a records unreadable: a dash on the card, so no "counts shown alone" line; records still withheld', r.withheld === '' && r.value === '–' && r.pair.usable === false && r.points === 0, r);
   pr = await placeRow(w.page, cellsWith(c)[0]); ok('3a place: withheld, no clause', /^withheld — /.test(pr || '') && !/latest update failed at/.test(pr), pr);
   await w.ctx.close();
 
@@ -133,7 +134,7 @@ const ctl = async (port, q) => { const r = await fetch(`http://127.0.0.1:${port}
   ok('3b mismatched records: badge UNKNOWN (bad), not degraded', r.badge === 'unknown' && /\bbad\b/.test(r.cls) && !/\bwarn\b/.test(r.cls), [r.badge, r.cls]);
   ok('3b mismatched records: no buoy points and no buoy cells drawn', r.points === 0 && r.cells === 0, [r.points, r.cells]);
   ok('3b mismatched records: no count, no positions copy', r.value === '–' && r.obs === 'buoy positions not shown', [r.value, r.obs]);
-  ok('3b mismatched records: failed-at line kept, no "Showing buoys", withheld reason shown', r.bold === 'Latest update failed at 16:08 UTC.' && r.title === 'Latest update failed at 16:08 UTC.' && !/Showing buoys/.test(r.meta + r.title) && /^Records withheld:.*different collector run/.test(r.withheld), r);
+  ok('3b mismatched records: failed-at line kept, no "Showing buoys", a dash and no "counts shown alone" line', r.bold === 'Latest update failed at 16:08 UTC.' && r.title === 'Latest update failed at 16:08 UTC.' && !/Showing buoys/.test(r.meta + r.title) && r.withheld === '' && r.value === '–' && r.pair.usable === false, r);   // since optional-layers-status-rc: dash on the card → the line is hidden
   await w.ctx.close();
 
   // ---- 4. ageing through 4 h in an already-open page, without a data poll
@@ -164,7 +165,7 @@ const ctl = async (port, q) => { const r = await fetch(`http://127.0.0.1:${port}
   // ---- 8. NEW page on the OLD hub (0.6.7): exactly today's behaviour
   c = await seed(PORT_OLD); ok('8 seed: the old hub wrote the empty down envelope, no last_attempt', c.source_status === 'down' && !c.last_attempt && c.note === 'http 522', c);
   w = await open({ port: PORT_OLD, nowIso: '2026-11-10T16:20:00.000Z' }); r = await read(w.page);
-  ok('8 new page, old hub after a failure: unknown, "collector reported down: http 522", records withheld, nothing drawn, no fallback line', r.badge === 'unknown' && r.bold === 'collector reported down: http 522' && r.points === 0 && /^Records withheld:/.test(r.withheld) && !/Latest update failed/.test(r.meta), r);
+  ok('8 new page, old hub after a failure: unknown, "collector reported down: http 522", no count and no "counts shown alone" line, "no buoy data from the latest run", nothing drawn, no fallback line', r.badge === 'unknown' && r.bold === 'collector reported down: http 522' && r.points === 0 && r.withheld === '' && r.value === '–' && r.obs === 'no buoy data from the latest run' && r.pair.usable === false && !/Latest update failed/.test(r.meta), r);   // since optional-layers-status-rc
   await ctl(PORT_OLD, '__reset'); await ctl(PORT_OLD, '__now?at=2026-11-10T15:08:15.000Z'); await ctl(PORT_OLD, '__run?kind=good&sched=2026-11-10T15:07:00Z');
   await setNow(w.page, '2026-11-10T15:10:00.000Z'); await fire(w.page, 'tick'); await w.page.waitForTimeout(300); r = await read(w.page);
   ok('8 new page, old hub, good run (no field): current, no line — a missing field is not a failure', r.badge === 'current' && r.points === 1300 && !/Latest update failed/.test(r.meta + r.title), r);
