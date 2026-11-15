@@ -54,11 +54,11 @@ No fallback past a failure: if the newest date's request fails, the layer report
 
 | Result | Suites |
 |---|---|
-| Pass | arts-ui 90 · backdrop-layer 27 · buoy-temp-ui 33 · cell-perf-ui 43 · desktop-overflow 258 · drifters-ui 25 · dustrgb-ui 67 · fire-status-ui 279 · fires-wording-ui 35 · freshness-wording-ui 156 · kept-ui 21 · legend-active-ui 548 · mobile-pass 131 · moon-globe 67 · moon-lit 138 · moon-lro-path 68 · optional-layers-status-ui 230 · orbital-browser 113 · place-ui 35 · plastic-ui 29 · quakes-ships-status-ui 124 · search-ui 104 · sky-ui 79 · skycraft-ui 77 · status-notes-ui 17 · sun-globe 103 · terminator-behaviour 47 · terminator-ui 19 · timeline-axis 96 · timeline-changes-ui 173 · timeline-ui 591 · ux-round1 34 |
+| Pass | arts-ui 90 · backdrop-layer 27 · buoy-temp-ui 33 · cell-perf-ui 43 · desktop-overflow 258 · drifters-ui 25 · dustrgb-ui 67 · fire-status-ui 279 · fires-wording-ui 35 · freshness-wording-ui 156 · kept-ui 21 · legend-active-ui 548 · mobile-pass 131 · moon-globe 67 · moon-lit 138 · moon-lro-path 68 · optional-layers-status-ui 230 · orbital-browser 113 · place-ui 35 · plastic-ui 29 · quakes-ships-status-ui 124 · search-ui 104 · sky-ui 79 · sky-zoom-ui 351 · skycraft-ui 77 · status-notes-ui 17 · sun-globe 103 · terminator-behaviour 47 · terminator-ui 19 · timeline-axis 96 · timeline-changes-ui 173 · timeline-ui 591 · ux-round1 34 |
 | Fails the same way on main | `osmc-reliability-ui` 40 of 41 ("old page: no page errors"; the known one). `smoke-fixes` 51 of 52: "Sources 360: no page-level horizontal overflow" (page 367 px wide at 360) — run against untouched main `3f87d36` in the same container: the same 51 of 52. Not caused by this branch; not on record before. |
-| Not run | `oceanheat-ui` (needs the ocean heat snapshot folder, which is not in this container). `sky-zoom-ui`: see §7. |
+| Not run | `oceanheat-ui` (needs the ocean heat snapshot folder, which is not in this container). |
 
-Five suites failed on a first pass for reasons in the container, not the page: missing font files (`backdrop-layer`), a missing scratch folder (`buoy-temp-ui`), a missing orbital fixture (`mobile-pass`), and a shallow clone without the old commits that `status-notes-ui` and `osmc-reliability-ui` compare against. The table shows the reruns after those were supplied.
+Five suites failed on a first pass for reasons in the container, not the page: missing font files (`backdrop-layer`), a missing scratch folder (`buoy-temp-ui`), a missing orbital fixture (`mobile-pass`), and a shallow clone without the old commits that `status-notes-ui` and `osmc-reliability-ui` compare against. The table shows the reruns after those were supplied. Both new suites were run once more at the end, on the code head: 49 and 85, no failures.
 
 ## 5. Live check: the real GIBS path, from the site's own address
 
@@ -94,7 +94,7 @@ The test record gave the Saipan box as 1,950 pixels and its totals as 2,854 and 
 
 ## 7. Not done, not seen, or open
 
-- **`sky-zoom-ui`:** did not finish inside the first run's 7-minute limit. A rerun with a longer limit was still going when this packet was written; its result is in STATUS.
+- **`sky-zoom-ui`** did not finish inside the first run's 7-minute limit; rerun with a longer limit it passes, 351 of 351 (about 12 minutes). It does not switch Night lights on.
 - **Sky zoom-out view with Night lights on:** not tested. That view prints the Earth imagery date from the same line this layer rewrites, so it should name night lights; unverified.
 - **The status report and Sources & Details still describe the true-colour picture** while Night lights is on (`app.js` is unchanged). There is no Night lights section on Sources & Details; the card links to NASA GIBS. Both are release work, with the REGISTER lines.
 - **Mask alignment** is checked at the request (one box, one grid for all four pictures) and by the lit pixels falling inside the island boxes. A coast falling on the same pixels in both layers could not be checked: neither layer draws a coast.
