@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 17:48 UTC (clock reading) — **night-lights-rc round 2: the 1% rule is applied to the frame that is displayed** (branch only; nothing merged, nothing deployed; for GPT)
+- GPT's round 1 (relayed by Chad): hold `8b833ed` for one fix. The Saipan and Tinian comparison passes (57%, 92%, 50% reproduced; four file hashes matched; logic 49 of 49, eight breaks failing). GPT did not rerun the browser suite or the live globe. **Finding:** the 1% limit was applied to the 512 × 256 probe only, so a 2048 × 1024 frame failing it could be drawn (GPT: probe 0% missing, full frame 50% missing, marked ready).
+- **Fix, `nightlights.js` only:** code head `e2d419b` (commit time 17:28:57 UTC), branch head `8f87ff8` (packet rev 2, §10). Each candidate's full frame is held to the same rule; one that fails is "still arriving" and the next date is tried, within the four-date limit; failed and blocked requests keep their own messages and stop the search.
+- **Checks:** page suite 94 of 94 (section R, 9 new checks; the same checks fail 6 of 9 against `69a2489`); 11 breaks each fail, including the new `full-unchecked`; logic suite 49 of 49; `mobile-pass` 131, `legend-active-ui` 548, `desktop-overflow` 258, `dustrgb-ui` 67. Other existing suites not rerun.
+- **Live re-check 17:29 UTC (pane, github.io address, files hash-checked):** 14 Nov chosen; its full frame 0.302% missing in 30°S–30°N, measured again on the picture taken off the globe; 15 Nov's probe 56.6% missing. Ready in 5.6 s.
+- Not merged. Next: GPT's re-check of round 2, then Chad's look at the preview.
+
 ## 15 Nov 17:10 UTC (clock reading) — **night-lights-rc built: Night lights layer and two-night comparison** (branch only; page only; nothing merged, nothing deployed; for GPT)
 - GPT's review of rev 2 (relayed by Chad): passes for a local, page-only preview; two build details (one missing date is "No data" on both panels; partial data is never worded as a failed request). Chad: "Go: build night-lights-rc on a branch per NIGHT-LIGHTS-PROPOSAL rev 2 (§9 governing; page only; no merge)". Recorded as proposal §10 (main `853b429`, whose commit message names STATUS although this entry was not in it: the STATUS step of that commit failed and the entry is here).
 - **Branch `night-lights-rc`:** code head `69a2489` (commit time 16:15:54 UTC), packet `reviews/2026-11-15-night-lights-rc.md` at branch head `8b833ed`. New `nightlights.js` (351 lines); card, legend line, Key count and script tag in `index.html`; 35 lines in `style.css` (key `202612091000` in `index.html` and `sources.html`). `app.js`, the hub and every other page unchanged.
