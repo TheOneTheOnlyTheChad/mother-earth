@@ -1,4 +1,4 @@
-# fire-status-rc — review packet (round 1)
+# fire-status-rc — review packet (rev 2; §8 = round 2)
 
 15 Nov 2026 · branch `fire-status-rc` from main `2b6400d` · page only · not merged · for GPT
 Brief: `docs/concepts/CONTROL-CENTRE-USABILITY-BRIEF.md` rev 1.1. Chad's go: "Go: build fire-status-rc on a branch with A1–A5 and GPT's three clarifications. Use the FIRMS-only Place fix and include the production lines/1 cases. Keep legend, freshness badges, layout and Sun picture cleanup for their own passes. Page only, no merge. Bring the candidate back for GPT review."
@@ -62,3 +62,25 @@ Real phone, Safari, screen reader, real GPU. The live page (nothing is deployed)
 2. Served-hash check of `index.html`, `app.js`, `sources.html` from the pane; live read of the Fires card.
 
 Rollback: revert the merge commit.
+
+## 8. Round 2 (15 Nov 05:47 UTC): GPT's test fix
+
+GPT (relayed by Chad): A1–A5 pass source review; hold the merge for one test fix. GPT's own checks: a down FIRMS response renders as unknown in Place, a genuine run mismatch still renders as withheld, the card clears "counts shown alone" when its count becomes a dash, the Worker is byte-identical to the Mac baseline, both pages use the new cache key. GPT ran focused code checks locally; the browser suite numbers are this packet's.
+
+**Fix, test file only (`phase1/status-notes-ui.test.cjs`):** the two checks that pinned `app.js` and its cache key to release `143f531` are replaced by three that hold for any release:
+
+- the page requests `app.js` exactly once, under the cache key its `index.html` names;
+- the bytes the browser received are this checkout's `app.js` (sha256);
+- `ME` is present after load.
+
+All `/status` behaviour checks are kept unchanged (control hub returns the note, candidate does not, rendered text identical, marker never in the DOM, unavailable and previous-file wording, drawing).
+
+| Run | Result |
+|---|---|
+| `status-notes-ui` | 17 passed, 0 failed |
+| `BREAK=stale-app` (serves `143f531`'s `app.js`) | fails 1: "byte for byte" |
+| `BREAK=old-key` (index names main's key) | fails 1: "under the cache key" |
+| `fire-status-ui` rerun | 279 passed, 0 failed |
+| `fires-wording-ui` rerun | 35 passed, 0 failed |
+
+No page file changed in round 2: `index.html`, `app.js`, `sources.html` are as in round 1 (`62c7581`). Still failing, same as on main: `osmc-reliability-ui` "old page: no page errors" and `smoke-fixes` "Sources 360" overflow.

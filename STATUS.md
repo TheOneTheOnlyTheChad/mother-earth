@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 05:47 UTC (clock reading) — **fire-status-rc round 2: GPT's test fix** (branch only; test file only; nothing merged)
+- GPT (relayed by Chad): A1–A5 pass source review; merge held for one test fix. `status-notes-ui`'s two checks pinned to release `143f531` are replaced by a served-file check (cache key named by `index.html`; received bytes = this checkout's `app.js`); the `/status` behaviour checks are unchanged. **17/0**; breaks `stale-app` and `old-key` each fail 1. `fire-status-ui` 279/0 and `fires-wording-ui` 35/0 rerun. Page files unchanged since `62c7581`. Packet §8.
+- **Not approved:** merge. Live unchanged.
+
 ## 15 Nov 05:39 UTC (clock reading) — **fire-status-rc built: fire status agrees on every surface** (branch only; page only; nothing merged; for GPT)
 - Chad: "Go: build fire-status-rc on a branch with A1–A5 and GPT's three clarifications. Use the FIRMS-only Place fix and include the production lines/1 cases. Keep legend, freshness badges, layout and Sun picture cleanup for their own passes. Page only, no merge. Bring the candidate back for GPT review."
 - **Built:** `app.js` (`ME.downWhy`; `ME.freshness` and `ME.placeRows` use it), `index.html` (withheld line gated on the count the card rendered; zero-record Find note), `sources.html` (cache key). `app.js?v=202611301000` on both pages. Packet: `reviews/2026-11-15-fire-status-rc.md`.
