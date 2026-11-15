@@ -2,10 +2,11 @@
 // No network: sources stubbed; R2 in memory; D1 = a REAL SQLite database (node:sqlite) loaded with phase1/schema.sql,
 // so every history statement is executed by an SQL engine, not mocked. Clock controlled.
 // Usage: node --no-warnings phase1/history-hub.test.mjs        (BREAK=<name> runs a deliberately broken variant)
+// PD cases (0.6.15, /place down test): their breaks are in phase1/place-down-breaks.mjs.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
-import worker, * as W from './worker.js';
+const W = await import(process.env.WORKER || './worker.js'), worker = W.default;   // WORKER = a deliberately broken copy (place-down-breaks.mjs)
 
 const BREAK = process.env.BREAK || '';
 let passed = 0, failed = 0;
@@ -247,6 +248,61 @@ await t('G6. the place endpoint is read-only: no R2 write, no D1 change', async 
   const keys = [...store.keys()].sort().join(','), w0 = writes();
   await get(env, '/place/g4/14_52?layers=plastic,drifters');
   assert.equal([...store.keys()].sort().join(','), keys); assert.equal(writes(), w0);
+});
+
+// ================= PD. /place answers a down layer as down (0.6.15; docs/concepts/HUB-PLACE-DOWN-FIX-PROPOSAL.md rev 2 §7)
+// The down envelope is the hub's own: usgs is made to fail and writeDown publishes it; the other layers get the same envelope.
+const pdDown = async (env, store) => {
+  await seedPlace(env, store); const keep = usgsFeatures, f = globalThis.fetch;
+  globalThis.fetch = async () => { throw new TypeError('fetch failed'); }; try { await runFive(env); } finally { globalThis.fetch = f; usgsFeatures = keep; }
+  const d = JSON.parse(String((await env.R2.get('latest-cells/usgs.json')).body));
+  assert.equal(d.source_status, 'down'); assert.deepEqual(d.cells, {}, 'writeDown publishes cells: {} (an empty object is truthy — the 0.6.14 test never fired)'); assert.ok(d.note);
+  return d;
+};
+const pdClear = () => { for (const l of ['usgs', 'firms', 'ships', 'drifters', 'plastic']) W.placeCache[l] = undefined; };
+const pdNoData = s => { for (const k of ['cell', 'count', 'records', 'records_total', 'record_fields', 'records_run_ref', 'why']) assert.ok(!(k in s), `a down answer carries no "${k}"`); };
+await t('PD1. first counts read is down → state "down" with that envelope\'s note and metadata, no count, no records (usgs via the real writeDown; firms legacy, ships, buoys, microplastic)', async () => {
+  const { env, store } = makeEnv(); const d = await pdDown(env, store); pdClear();
+  await env.R2.put('latest/drifters.json', JSON.stringify({ layer: 'drifters', retrieved_at: '2026-11-05T09:55:00.000Z', source_status: 'ok', record_fields: ['id', 'lat', 'lng', 'observed_at'], records: [['b1', -33.9, 28.4, '2026-11-05T09:00:00Z']], cells: {} }));
+  for (const l of ['firms', 'ships', 'drifters', 'plastic']) await env.R2.put(`latest-cells/${l}.json`, JSON.stringify({ ...d, layer: l, note: 'http 522 (' + l + ')' }));
+  const r = await (await get(env, '/place/g4/14_52?layers=drifters,plastic')).json();
+  for (const l of ['usgs', 'firms', 'ships', 'drifters', 'plastic']) { const s = r.layers[l];
+    assert.equal(s.state, 'down', l + ' is answered as down, not as a pairing mismatch'); assert.equal(s.source_status, 'down'); assert.equal(s.retrieved_at, d.retrieved_at);
+    assert.equal(s.note, l === 'usgs' ? d.note : 'http 522 (' + l + ')'); assert.equal(s.run_ref, l + '@' + d.retrieved_at); pdNoData(s); }
+  assert.match(r.layers.usgs.note, /fetch failed/); assert.equal(r.layers.forest.state, 'not_covered', 'forest unchanged');
+});
+for (const l of ['usgs', 'drifters']) await t(`PD2. ${l}: first read ok but not paired, the pairing re-read finds DOWN counts → "down" from the re-read envelope (never "withheld"), records not read again`, async () => {
+  const { env, store, gets, resetGets } = makeEnv(); const d = await pdDown(env, store); pdClear();
+  const T = '2026-11-05T09:55:00.000Z';
+  await env.R2.put(`latest/${l}.json`, JSON.stringify({ layer: l, retrieved_at: T, source_status: 'ok', record_fields: ['id', 'lat', 'lng', 'observed_at'], records: [['x1', -33.9, 28.4, '2026-11-05T09:00:00Z']], cells: {} }));
+  const first = { layer: l, collector_version: '0.6.14', retrieved_at: '2026-11-05T09:50:00.000Z', source_status: 'ok', stale_after_s: 900, cells: { '14_52': { count: 1 } } };   // an older ok run: not the records' run
+  const second = { ...d, layer: l, note: 'http 522 between the two reads' };
+  const real = env.R2.get.bind(env.R2); let n = 0;
+  env.R2.get = async k => { if (k === `latest-cells/${l}.json`) { const b = JSON.stringify(n++ === 0 ? first : second); return { body: b, httpEtag: '"c' + n + '"', async json() { return JSON.parse(b); }, async text() { return b; } }; } return real(k); };
+  resetGets(); const s = (await (await get(env, `/place/g4/14_52?layers=${l}`)).json()).layers[l];
+  assert.equal(n, 2, 'counts read twice'); assert.equal(s.state, 'down'); assert.equal(s.note, 'http 522 between the two reads'); assert.equal(s.retrieved_at, d.retrieved_at, 'metadata from the FINAL envelope'); pdNoData(s);
+  assert.equal(gets().filter(k => k === `latest/${l}.json`).length, 1, 'the records file is not read again once the final counts are down');
+});
+await t('PD3. a genuine mismatch on both reads is still "withheld" (records and counts from different runs, neither down); a consistent re-read is still served', async () => {
+  const { env, store } = makeEnv(); await seedPlace(env, store); pdClear();
+  const real = env.R2.get.bind(env.R2); let n = 0; env.R2.get = async k => { if (k === 'latest-cells/ships.json') n++; return real(k); };
+  const r = await (await get(env, '/place/g4/14_52')).json();
+  assert.equal(r.layers.ships.state, 'withheld'); assert.match(r.layers.ships.why, /not from the same collector run \(records 2026-11-05T09:30:00.000Z, counts 2026-11-05T09:31:00.000Z\)/); assert.equal(n, 2, 're-read once');
+  assert.equal(r.layers.usgs.state, 'ok'); assert.equal(r.layers.firms.state, 'ok');
+});
+await t('PD4. counts kept from a good run after a failed update (buoys last_attempt, source_status ok) are not "down"; the collector version is 0.6.15', async () => {
+  const { env, store } = makeEnv(); await seedPlace(env, store); pdClear(); const T = new Date(NOW - 600e3).toISOString();
+  await env.R2.put('latest/drifters.json', JSON.stringify({ layer: 'drifters', retrieved_at: T, source_status: 'ok', record_fields: ['id', 'lat', 'lng', 'observed_at'], records: [['b1', -33.9, 28.4, T]], cells: {} }));
+  await env.R2.put('latest-cells/drifters.json', JSON.stringify({ layer: 'drifters', retrieved_at: T, source_status: 'ok', stale_after_s: 14400, cells: { '14_52': { count: 1 } }, last_attempt: { failed_at: new Date(NOW - 60e3).toISOString(), reason: 'http 522' } }));
+  const s = (await (await get(env, '/place/g4/14_52?layers=drifters')).json()).layers.drifters;
+  assert.equal(s.state, 'ok'); assert.equal(s.count, 1); assert.equal(s.last_attempt.reason, 'http 522');
+  assert.equal((await (await get(env, '/')).json()).version, '0.6.15');
+});
+await t('PD5. down counts and NO records file at all → "down" (not "withheld … records unreadable"); the records file is not read', async () => {
+  const { env, store, gets, resetGets } = makeEnv(); const d = await pdDown(env, store); pdClear();
+  await env.R2.put('latest-cells/drifters.json', JSON.stringify({ ...d, layer: 'drifters', note: 'http 522' })); resetGets();   // seedPlace publishes no latest/drifters.json
+  const s = (await (await get(env, '/place/g4/14_52?layers=drifters')).json()).layers.drifters;
+  assert.equal(s.state, 'down'); assert.equal(s.note, 'http 522'); pdNoData(s); assert.ok(!gets().includes('latest/drifters.json'), 'no records read for a down layer');
 });
 
 // ================= R. regressions from GPT's independent review (5 Nov)

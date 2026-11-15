@@ -656,6 +656,45 @@ await t('L5. /place during the switch: legacy latest/ + new counts (run_id on on
 });
 
 // =====================================================================================================================
+// 5b. /place answers down FIRMS counts as down over a lines/1 latest/ (0.6.15; HUB-PLACE-DOWN-FIX-PROPOSAL rev 2 §7, H1a and H1c)
+const pdSeed = async () => {   // a good v2 run (lines/1 records + counts), then the hub's own down envelope from a failed fetch
+  const E = makeEnv(); FIRMS = { status: 200, body: csv([row(-20, 30)]) }; await runFirmsAt(E.env, '2026-11-07T09:45:00Z', '2026-11-07T09:45:40Z');
+  assert.equal(E.m.get(LATEST).customMetadata.format, 'lines/1'); const good = jsonOf(E, CELLS); assert.equal(good.source_status, 'ok');
+  FIRMS = { status: 500, body: 'upstream error' }; await runFirmsAt(E.env, '2026-11-07T10:00:00Z', '2026-11-07T10:00:40Z');
+  const down = jsonOf(E, CELLS); assert.equal(down.source_status, 'down'); assert.deepEqual(down.cells, {}, 'the v2 down writer publishes cells: {}'); assert.ok(down.note);
+  FIRMS = { status: 200, body: csv([row(-20, 30)]) }; W.fvPlace.cache.clear(); W.fvPlace.bytes = 0;   // the per-isolate scan cache is keyed by etag, and every stub bucket restarts its etags
+  return { E, good, down, id: W.cellId(-20, 30) };
+};
+const pdPlace = async (E, id) => { W.fvPlace.cache.clear(); W.fvPlace.bytes = 0; return pdPlace0(E, id); };
+const pdPlace0 = async (E, id) => (await (await worker.fetch(new Request('http://x/place/g4/' + id), E.env)).json()).layers.firms;
+const pdCellsReads = (E, seq) => { const real = E.env.R2.get.bind(E.env.R2); const c = { n: 0 };
+  E.env.R2.get = async (k, o) => { if (k !== CELLS) return real(k, o); const b = JSON.stringify(seq[Math.min(c.n++, seq.length - 1)]); return { body: b, httpEtag: '"pd' + c.n + '"', async json() { return JSON.parse(b); }, async text() { return b; } }; }; return c; };
+const pdBare = s => { for (const k of ['cell', 'count', 'records', 'records_total', 'record_fields', 'records_run_ref', 'why']) assert.ok(!(k in s), `a down answer carries no "${k}"`); };
+await t('PDL1. lines/1: the first counts read is down (the v2 writer\'s own envelope) → "down" with its note and run metadata, no count, no records', async () => {
+  const { E, down, id } = await pdSeed(); const s = await pdPlace(E, id);
+  assert.equal(s.state, 'down'); assert.equal(s.note, down.note); assert.equal(s.retrieved_at, down.retrieved_at); assert.equal(s.source_status, 'down'); pdBare(s);
+});
+await t('PDL2. lines/1: first read ok but not the records\' run, the pairing re-read finds DOWN counts → "down" from the re-read envelope (never "withheld")', async () => {
+  const { E, good, down, id } = await pdSeed();
+  const c = pdCellsReads(E, [{ ...good, run_id: 'another-run', retrieved_at: '2026-11-07T09:30:40.000Z' }, down]); E.stats.gets.length = 0;
+  const s = await pdPlace(E, id);
+  assert.equal(c.n, 2, 'counts read twice'); assert.equal(s.state, 'down'); assert.equal(s.note, down.note); assert.equal(s.retrieved_at, down.retrieved_at, 'metadata from the FINAL envelope'); pdBare(s);
+  // "No second record scan" is in the code order (the down return sits before the re-scan) but is not observable here: a
+  // second scan of an unchanged file is answered from the per-isolate cache without an R2 read.
+});
+await t('PDL3. lines/1: a genuine mismatch on both reads is still "withheld"; a matching pair is still served', async () => {
+  const { E, good, id } = await pdSeed(); const c = pdCellsReads(E, [{ ...good, run_id: 'another-run' }]);
+  let s = await pdPlace(E, id); assert.equal(s.state, 'withheld'); assert.match(s.why, /not from the same collector run/); assert.equal(c.n, 2); assert.equal(s.cell.count, 1);
+  const F = await pdSeed(); pdCellsReads(F.E, [F.good]); s = await pdPlace(F.E, F.id); assert.equal(s.state, 'ok'); assert.equal(s.records_total, 1);
+});
+await t('PDL4. lines/1: down counts while every scan slot is taken → "down" at once (not "busy" beside a down envelope; no wait, no scan)', async () => {
+  const { E, down, id } = await pdSeed(); W.fvPlace.scans = 2;
+  const realNow = Date.now; let fake = NOW, ticks = 0; globalThis.Date.now = () => { ticks++; return (fake += 500); };
+  let s; try { s = await pdPlace0(E, id); } finally { globalThis.Date.now = realNow; W.fvPlace.scans = 0; }
+  assert.equal(s.state, 'down'); assert.equal(s.note, down.note); pdBare(s);
+});
+
+// =====================================================================================================================
 // 6. /place bounds
 await t('B1. /place scan cap: 2 concurrent scans per isolate; a 3rd waits ≤ 2 s then answers "busy" (counts still given)', async () => {
   const E = makeEnv(); FIRMS = { status: 200, body: csv(Array.from({ length: 200 }, (_, i) => row(-20 + i * 0.01, 30))) }; await runFirmsAt(E.env, '2026-11-07T09:45:00Z', '2026-11-07T09:45:40Z');

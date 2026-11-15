@@ -19,6 +19,8 @@ const BREAKS = {
   'line limit not enforced': ["if (ln.length > FV.maxLine) throw new Error(`line longer than ${FV.maxLine} chars`); yield ln;", 'yield ln;'],
   'Content-Length not checked': ['if (contentLength !== null && contentLength !== res.bytes)', 'if (false)'],
   'writer drops completed parts (single put of the last part)': ['if (!mpu) { await env.R2.put(key, buf.slice(0, n), putOpts);', 'if (true) { if (mpu) await mpu.abort(); await env.R2.put(key, buf.slice(0, n), putOpts);'],
+  '/place lines/1: final counts not tested for down (0.6.15 H1c)': ["    if (cells.source_status === 'down') return placeDown('firms', cells);   // the FINAL counts are down: no pairing answer, no second record scan\n", ''],
+  '/place: first counts read tested the 0.6.14 way (0.6.15 H1a)': ["if (cells.source_status === 'down') return placeDown(layer, cells);", "if (cells.source_status === 'down' && !cells.cells) return placeDown(layer, cells);"],
   '/place ties out of legacy order': ["while (pos > 0 && String(top[pos - 1][iT]) < k) pos--;", "while (pos > 0 && String(top[pos - 1][iT]) <= k) pos--;"],
   '/place cache unbounded': ['while (fvPlace.bytes > FV.placeCacheBytes && fvPlace.cache.size)', 'while (false)'],
   '/place scan cap removed': ['while (fvPlace.scans >= FV.placeScans) {', 'while (false) {'],
