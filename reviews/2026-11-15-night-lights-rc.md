@@ -1,6 +1,7 @@
-# Night lights — release candidate for GPT review (rev 1)
+# Night lights — release candidate for GPT review (rev 2)
 
-15 Nov 2026 · branch `night-lights-rc` · code head `69a24894a2dd91fc020297bb82de4b28742e5ef1` (commit time 16:15:54 UTC), from main `3f87d36`
+15 Nov 2026 · branch `night-lights-rc` · code head `e2d419b1b5618a3af967f85a807cf9bfe048af00` (commit time 17:28:57 UTC), from main `3f87d36`
+**Rev 2:** GPT's round 1 held `8b833ed` for one fix. It is in §10, which governs where it differs from §1–§9. Rev 1's code head was `69a2489`; §1–§9 describe it and are left as written.
 **Preview. Page only. Not merged, nothing deployed, no hub change, no REGISTER filing.**
 Built on Chad's line: "Go: build night-lights-rc on a branch per NIGHT-LIGHTS-PROPOSAL rev 2 (§9 governing; page only; no merge)".
 Governing text: `docs/concepts/NIGHT-LIGHTS-PROPOSAL.md` rev 2 §9, plus GPT's two build details relayed by Chad with the Go (§2 below).
@@ -115,3 +116,48 @@ Mac: `~/Documents/Mother Earth/_review/night-lights-rc/` (the branch at the code
 ## 9. Decisions still Chad's
 
 Merge and release are not asked for. Before any release: the route (N1: direct GIBS, or the hub applying the date rule on its schedule, per Chad's "no manual jobs"), the REGISTER lines for the two GIBS layers, the Sources & Details section, and the status report wording.
+
+## 10. Round 2 — GPT's round 1 (relayed by Chad, 15 Nov)
+
+**GPT:** hold `8b833ed` for one fix. The Saipan and Tinian comparison passes: rendered from the recorded frames with the candidate's renderer, Saipan's lights are visibly dimmer on the second date in the pixels usable on both nights, and the hatched areas are easy to tell from dark measured pixels; 57%, 92% and 50% reproduced; all four file hashes matched; logic suite 49 of 49 and all eight breaks failing as expected. GPT did not rerun the browser suite or the live globe.
+
+**The finding.** The globe could show a frame that fails the agreed rule. The 1% limit was applied to the 512 × 256 probe; the 2048 × 1024 frame was measured again but not held to the limit. GPT reproduced a probe with 0% missing followed by a full frame with 50% missing in 30°S–30°N, which the layer marked ready and drew (`nightlights.js` lines 195–207 at `69a2489`).
+
+**Confirmed here before the fix:** the new checks below, run against `nightlights.js` from `69a2489`, fail 6 of 9.
+
+**The fix (`nightlights.js` only; code head `e2d419b`, sha256 `a77edadc…8ae7`; `index.html`, `style.css` and `sources.html` unchanged from §1):**
+- For each candidate date, newest first: the probe; if the probe passes, the full frame; **the same 1% rule on the full frame.** A full frame that fails it makes that date "still arriving", exactly as a failing probe does, and the next date is tried, inside the existing limit of four dates.
+- The picture that goes on the globe is always one that passed the rule itself. `state().missing` is that picture's share; each date's record keeps both shares (`probe`, `full`).
+- A request that fails or is blocked, probe or full frame, still stops the search with its own message. No older date is tried after a failure.
+- If no date's full frame passes: "No complete night frame yet: … are still arriving. Nothing is drawn."
+
+**Checks added (page suite section R, 9 checks):**
+
+| Check | Pass |
+|---|---|
+| Probe passes, full frame fails (15 Nov) | 15 Nov is not shown; 14 Nov is; 15 Nov named as still arriving |
+| The record | 15 Nov probe 0, full frame 0.5; 14 Nov full frame 0; the shown picture's share 0 |
+| Requests, in order | key; 15 Nov probe; 15 Nov full; 14 Nov probe; 14 Nov full |
+| The picture on the globe | the half that had not arrived on 15 Nov is measured light, not the pattern |
+| Every probe passes, every full frame fails | nothing drawn; all four named; eight frames asked for |
+| Probe passes, full-frame request answers 503 | the failure message for that date, not "arriving"; no older date tried |
+| Probe passes, full-frame read is blocked | the blocked message; nothing drawn |
+
+New break `full-unchecked` (the old behaviour): fails 6 checks.
+
+**Results at `e2d419b`:**
+
+| Suite | Result |
+|---|---|
+| `phase1/night-lights-ui.test.cjs` | 94 passed, 0 failed |
+| its 11 breaks | each fails the suite (1 to 9 checks; `eager` also stops it) |
+| `phase1/night-lights.test.mjs` | 49 passed, 0 failed (file unchanged; its 8 breaks not rerun) |
+| `mobile-pass` 131 · `legend-active-ui` 548 · `desktop-overflow` 258 · `dustrgb-ui` 67 | pass |
+
+The other existing suites were not rerun: the only page file that changed since §4 is `nightlights.js`, inside the switch-on path.
+
+**Live re-check, 17:29 UTC (same method as §5, files hash-checked against `e2d419b`):** the layer chose 14 Nov; 15 Nov's probe 56.6% missing, so its full frame was not asked for; 14 Nov probe 0.295%, full frame 0.302%. Measured separately on the picture taken back off the globe: 0.302% of the 30°S–30°N band is the no-data pattern. Ready in 5.6 s; 918,414 bytes; off restored the backdrop and the imagery line. The comparison was not rerun live (its code is unchanged).
+
+**Cost of the fix:** when a probe passes and its full frame fails, about 0.9 MB is fetched and discarded before the next date is tried. Not seen live.
+
+**Still as §7**, with one addition: a probe and a full frame disagreeing has been seen only in the suite's fixture and in GPT's reproduction.
