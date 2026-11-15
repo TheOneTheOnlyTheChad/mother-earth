@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 07:10 UTC (clock reading) — **legend-active-rc built: the legend and "Key · N layers" show what is drawn** (branch only; page only; nothing merged; for GPT)
+- Chad: "Go: build legend-active-rc on a branch per LEGEND-ACTIVE-PROPOSAL rev 2, with §6 governing L1–L3. index.html is the only production file in scope. Add the legend regression checks and update mobile-pass expectations where needed. No merge."
+- **Built (`index.html` only):** `render()` tallies symbols and usable count cells per data layer (`drawnGeom`); `paintLegend()` and `drawnLayers()` read that tally. Counts-only wording; empty sentence; key definition updated. Packet: `reviews/2026-11-15-legend-active-rc.md`.
+- **Tests:** new `legend-active-ui` 496/0 (twice), six breaks all fail. Regression across 21 World View suites passes, incl. `mobile-pass` 131 with no expectation change and `sky-zoom-ui` 351; `fire-status-ui` 279 after one expectation moved to L1. Same two failures as main (`osmc-reliability-ui` old page; `smoke-fixes` Sources 360). `oceanheat-ui` not runnable here (no snapshot folder).
+- **For GPT to look at:** buoys with records withheld now count as one (main did not count them); microplastic with records withheld gets no entry and no count (its cells carry no value).
+- **Test lesson:** aborting the GIBS image made the page settle fast enough to hide a wait that was too weak; wait on committed counts per record layer (`ME.pairState(k)[k].cells`), and give day/night a plain Earth image or it cannot switch on.
+- **Not tested:** phone, Safari, screen reader, real GPU, the live page. **Not approved:** merge. Live unchanged: hub 0.6.14, page `83d0fc0`.
+
 ## 15 Nov 06:16 UTC (clock reading) — **GPT reviews the legend proposal; rev 2** (docs only; nothing built)
 - GPT (relayed by Chad): L1 a valid zero that draws nothing leaves both the legend and "Key · N layers"; a usable counts-only cell still counts as one; legend and count for the six data layers derive from the geometry rendered (hollow microplastic rings included); day/night, ocean heat and orbital keep their rules. L2 stale unknown outlines stay with the coverage key, no entry, no count; empty line reads "No data symbols or count cells are drawn right now." L3 "Fire detections: cell outlines only (records withheld)" and equivalents. Extra checks listed in proposal §6.
 - **Not built:** awaits Chad's own go line. Live unchanged: hub 0.6.14, page `83d0fc0`.
