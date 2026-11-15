@@ -5,7 +5,8 @@
  * here from NASA's own key colours. The real GIBS path is a separate live check (reviews/2026-11-15-night-lights-rc.md).
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/night-lights-ui.test.cjs
  * BREAK=<name> weakens the served nightlights.js; each must make this suite fail:
- *   eager date-mismatch no-restore nodata-dark panel-own-state value-when-withheld fail-as-arriving stale-kept power-word total-shown
+ *   eager date-mismatch no-restore nodata-dark panel-own-state value-when-withheld fail-as-arriving stale-kept power-word total-shown full-unchecked
+ * Round 2 (GPT round 1, 15 Nov): the 1% rule is applied to the 2048 × 1024 frame that is displayed, not only to the probe (section R).
  */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const http = require('http'); const { PNG } = require('pngjs');
 const ROOT = path.join(__dirname, '..'); const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
@@ -24,6 +25,7 @@ const BREAKS = {
   'fail-as-arriving': [["    if (pick.fail) return stop(failText(pick.fail, 'Night lights'));", "    if (pick.fail) return stop(`No complete night frame yet: ${dayText(pick.fail.date)} is still arriving. Nothing is drawn.`);"]],
   'stale-kept': [["if (out) { out.hidden = true; out.innerHTML = ''; } st.cmp = null;", "st.cmp = null;"]],
   'power-word': [["R2: 'Light as measured at the satellite.", "R2: 'Light as measured at the satellite, a sign of power."]],
+  'full-unchecked': [["      if (r.full <= NL.MAX_MISSING) { f = g; break; }", "      f = g; r.missing = r.probe; break;"]],
   'total-shown': [["Usable on both: <b>${pct(t.both, t.n)}</b> — of the area in view</div>`;", "Usable on both: <b>${pct(t.both, t.n)}</b> — of the area in view · total light ${res.a.light.reduce((s, v) => s + Math.max(0, v), 0) / 10}</div>`;"]],
 };
 if (BREAK && !BREAKS[BREAK]) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
@@ -53,7 +55,7 @@ const triPng = (layer, date) => memo('tri' + layer + date, () => make(120, 120, 
 const RECBOX = '14.85,145.45,15.35,145.95', recPng = k => Buffer.from(REC.frames[k].b64, 'base64');
 const T_NOW = Date.parse('2026-11-15T16:00:00Z');
 
-const newGibs = () => ({ reqs: [], global: { '2026-11-15': 'filling', '2026-11-14': 'complete', '2026-11-13': 'complete', '2026-11-12': 'complete' }, fault: {}, hold: null, keyFault: null });
+const newGibs = () => ({ reqs: [], globalFull: {}, global: { '2026-11-15': 'filling', '2026-11-14': 'complete', '2026-11-13': 'complete', '2026-11-12': 'complete' }, fault: {}, hold: null, keyFault: null });
 async function setup(browser, gibs, opts = {}) {
   const ctx = await browser.newContext({ viewport: opts.viewport || { width: 1280, height: 900 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   await ctx.route('**/unpkg.com/globe.gl**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }));
@@ -70,12 +72,12 @@ async function setup(browser, gibs, opts = {}) {
     const kind = /Radiance/.test(layer) ? 'light' : 'clear', date = q.get('TIME'), box = q.get('BBOX'), w = +q.get('WIDTH'), h = +q.get('HEIGHT');
     const tag = `${kind}:${date}:${box}:${w}x${h}`; if (route.request().method() === 'GET') gibs.reqs.push(tag);
     if (gibs.hold) await gibs.hold;
-    const f = gibs.fault[`${kind}:${date}`] || gibs.fault[date];
+    const f = gibs.fault[`${kind}:${date}:${w}`] || gibs.fault[`${kind}:${date}`] || gibs.fault[date];
     if (f === 'abort') return route.abort();
     if (f === 'xml') return route.fulfill({ status: 200, contentType: 'text/xml', headers: cors, body: '<ServiceExceptionReport/>' });
     if (typeof f === 'number') return route.fulfill({ status: f, headers: cors, body: 'no' });
     const png = (() => {
-      if (box === '-90,-180,90,180') return kind === 'light' && gibs.global[date] ? globalPng(gibs.global[date], w, h) : null;
+      if (box === '-90,-180,90,180') { const k = (w === 2048 && gibs.globalFull[date]) || gibs.global[date]; return kind === 'light' && k ? globalPng(k, w, h) : null; }   // globalFull: what the 2048 × 1024 frame holds when it differs from the probe
       if (box === RECBOX && REC.frames[`${date}/${kind === 'light' ? 'rad' : 'csc'}`]) return recPng(`${date}/${kind === 'light' ? 'rad' : 'csc'}`);
       if (box === TRI.box && (date === TRI.a || date === TRI.b)) return triPng(kind, date);
       return null; })();
@@ -194,6 +196,30 @@ let BASE;
     ok('H while loading: "Finding the newest complete night frame…", switch busy', /Finding the newest complete night frame/.test(await txt(page, '#nl-status')) && await page.$eval('#tgl-nl', b => b.getAttribute('aria-busy') === 'true'));
     await page.evaluate(() => document.getElementById('tgl-nl').click()); release(); gibs.hold = null; await page.waitForTimeout(1500); const s = await st(page);
     ok('H switched off while loading: never draws, backdrop untouched, state off', s.status === 'off' && s.on === false && await backdrop(page) === url0 && s.backdrop === 'unchanged', s);
+    await ctx.close(); }
+
+  // ===== R. the rule is applied to the picture that is displayed (GPT round 1, 15 Nov 2026)
+  { const gibs = newGibs(); gibs.global['2026-11-15'] = 'complete'; gibs.globalFull['2026-11-15'] = 'filling'; const { ctx, page, errs } = await setup(browser, gibs);
+    await toggle(page); const s = await st(page), status = await txt(page, '#nl-status');
+    ok('R probe passes, full frame fails the rule: that date is not shown; the next date is tried and shown', s.status === 'ready' && s.date === '2026-11-14' && same(s.arriving, ['2026-11-15']), s);
+    ok('R the record shows why: 15 Nov probe 0 missing, full frame half missing; 14 Nov full frame 0 missing', s.probes[0].probe === 0 && s.probes[0].full === 0.5 && s.probes[0].missing === 0.5 && s.probes[1].full === 0 && s.missing === 0, s.probes);
+    ok('R requests, in order: key, 15 Nov probe, 15 Nov full frame, 14 Nov probe, 14 Nov full frame', same(nl(gibs), ['key:VIIRS_DayNightBand_At_Sensor_Radiance.xml', 'light:2026-11-15:-90,-180,90,180:512x256', 'light:2026-11-15:-90,-180,90,180:2048x1024', 'light:2026-11-14:-90,-180,90,180:512x256', 'light:2026-11-14:-90,-180,90,180:2048x1024']), nl(gibs));
+    ok('R the card says 15 Nov is still arriving and names the date shown', /^Showing 14 Nov 2026 \(UTC\)/.test(status) && /15 Nov 2026 is still arriving\. Showing 14 Nov 2026\./.test(status), status);
+    const t = await texPx(page, [[0, 100], [0, -100]]);
+    ok('R the picture on the globe is the complete one: the half that had not arrived on 15 Nov is measured light, not the pattern', same(t.px[0], [7, 7, 7, 255]) && same(t.px[1], [7, 7, 7, 255]), t.px);
+    ok('R no page errors', errs.length === 0, errs);
+    await ctx.close(); }
+  { const gibs = newGibs(); for (const d of Object.keys(gibs.global)) { gibs.global[d] = 'complete'; gibs.globalFull[d] = 'filling'; } const { ctx, page } = await setup(browser, gibs);
+    const url0 = await backdrop(page); await toggle(page); const s = await st(page), status = await txt(page, '#nl-status');
+    ok('R every probe passes and every full frame fails: nothing is drawn; all four named as still arriving; eight frames asked for, none shown', s.status === 'unavailable' && s.on === false && /^No complete night frame yet: 15 Nov 2026, 14 Nov 2026, 13 Nov 2026, 12 Nov 2026 are still arriving\. Nothing is drawn\.$/.test(status) && await backdrop(page) === url0 && nl(gibs).filter(r => r.startsWith('light:')).length === 8 && s.probes.every(p => p.probe === 0 && p.full === 0.5), [status, s.probes]);
+    await ctx.close(); }
+  { const gibs = newGibs(); gibs.global['2026-11-15'] = 'complete'; gibs.fault['light:2026-11-15:2048'] = 503; const { ctx, page } = await setup(browser, gibs);
+    const url0 = await backdrop(page); await toggle(page); const s = await st(page), status = await txt(page, '#nl-status');
+    ok('R probe passes, the full-frame request fails: the failure message for that date, not "arriving", and no older date is tried', /^Night lights could not be loaded: NASA GIBS answered HTTP 503 for 15 Nov 2026\. Nothing is drawn\.$/.test(status) && !/arriving/.test(status) && s.status === 'unavailable' && await backdrop(page) === url0 && !nl(gibs).some(r => /2026-11-14/.test(r)), [status, nl(gibs)]);
+    await ctx.close(); }
+  { const gibs = newGibs(); gibs.global['2026-11-15'] = 'complete'; const { ctx, page } = await setup(browser, gibs);
+    await page.evaluate(() => { window.__blockRead = 'WIDTH=2048&HEIGHT=1024&FORMAT=image/png&TRANSPARENT=TRUE&TIME=2026-11-15'; }); await toggle(page); const status = await txt(page, '#nl-status');
+    ok('R probe passes, the browser blocks reading the full frame: the blocked message, nothing drawn', /^Night lights cannot be shown: this browser blocked reading the picture's values/.test(status) && (await st(page)).status === 'unavailable', status);
     await ctx.close(); }
 
   // ===== J. the recorded Saipan and Tinian pair through the page

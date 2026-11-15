@@ -2,7 +2,8 @@
  * Two things, both read straight from NASA GIBS (no hub, nothing stored):
  *   1. A globe layer, off on load: NOAA-20 Day/Night Band light as measured at night, for ONE pinned UTC date, drawn in
  *      place of the true-colour picture while it is on. The date is chosen by a rule, never by hand: the newest UTC date
- *      whose 30°S–30°N band has no more than 1% no data. A date that fails the rule is "still arriving".
+ *      whose 30°S–30°N band has no more than 1% no data, judged on the picture that is displayed (the 2048 × 1024 frame),
+ *      not only on the small probe. A date that fails the rule is "still arriving".
  *   2. A comparison of two nights for one box, on the same extent, grid and fixed scale, with every pixel in one of three
  *      states decided from BOTH dates: usable on both · no reliable comparison · no data.
  * Light, not power: nothing here says a place lost power, and no radiance total or percentage change is printed.
@@ -182,20 +183,28 @@
     st.on = true; st.why = null; st.status = 'loading'; st.date = null; st.arriving = []; paint();
     const stop = why => { st.status = 'unavailable'; st.why = why; st.on = false; restore(); paint(); };
     if (!ME.globe || !ME.globe()) return stop('Night lights on the globe needs the 3-D globe, which is not available in this browser. Nothing is drawn. The comparison below still works.');
-    const t0 = performance.now(), results = [];
-    for (let i = 0; i < NL.CANDIDATES; i++) {   // newest first; stop at the first usable date, or at the first request that fails
-      const date = utcDay(now() - i * 864e5), f = await frame(date, NL.WORLD, NL.PROBE[0], NL.PROBE[1], false);
+    // Newest first. For each date: a small probe, and only if the probe passes the rule, the full frame. The rule is then
+    // applied AGAIN to the full frame, because that is the picture that goes on the globe (GPT round 1, 15 Nov): a date whose
+    // displayed frame fails the rule is "still arriving" whatever its probe said, and the next date is tried. A request that
+    // fails or is blocked, probe or full frame, stops the search and is reported as that. Each result's `missing` is the
+    // share for the last picture read for that date; `probe` keeps the probe's own share.
+    const t0 = performance.now(), results = [], [W, H] = NL.GLOBAL; let f = null;
+    for (let i = 0; i < NL.CANDIDATES; i++) {
+      const date = utcDay(now() - i * 864e5), p = await frame(date, NL.WORLD, NL.PROBE[0], NL.PROBE[1], false);
       if (gen !== st.gen) return;
-      results.push(f.status === 'ok' ? { date, status: 'ok', missing: bandMissing(f.light, NL.PROBE[0], NL.PROBE[1], NL.BAND) } : { date, status: f.status, why: f.why });
-      const last = results[results.length - 1]; if (last.status !== 'ok' || last.missing <= NL.MAX_MISSING) break;
+      if (p.status !== 'ok') { results.push({ date, status: p.status, why: p.why }); break; }
+      const r = { date, status: 'ok', probe: bandMissing(p.light, NL.PROBE[0], NL.PROBE[1], NL.BAND), full: null }; r.missing = r.probe; results.push(r);
+      if (r.probe > NL.MAX_MISSING) continue;                       // the probe already shows it is still arriving
+      const g = await frame(date, NL.WORLD, W, H, false);
+      if (gen !== st.gen) return;
+      if (g.status !== 'ok') { results[results.length - 1] = { date, status: g.status, why: g.why, probe: r.probe }; break; }
+      r.full = bandMissing(g.light, W, H, NL.BAND); r.missing = r.full;   // the rule is judged on the displayed picture
+      if (r.full <= NL.MAX_MISSING) { f = g; break; }
     }
     const pick = pickDate(results); st.arriving = pick.arriving; st.probes = results;
     if (pick.fail) return stop(failText(pick.fail, 'Night lights'));
-    if (!pick.date) return stop(`No complete night frame yet: ${joinDays(pick.arriving)} ${pick.arriving.length === 1 ? 'is' : 'are'} still arriving. Nothing is drawn.`);
-    const [W, H] = NL.GLOBAL, f = await frame(pick.date, NL.WORLD, W, H, false);
-    if (gen !== st.gen) return;
-    if (f.status !== 'ok') return stop(failText(f, 'Night lights'));
-    st.missing = bandMissing(f.light, W, H, NL.BAND); st.bytes.global = f.bytes;
+    if (!pick.date || !f) return stop(`No complete night frame yet: ${joinDays(pick.arriving)} ${pick.arriving.length === 1 ? 'is' : 'are'} still arriving. Nothing is drawn.`);
+    st.missing = results[results.length - 1].full; st.bytes.global = f.bytes;
     try { st.keyLight = await getKey(NL.LIGHT_KEY, 10); } catch (_) { st.keyLight = null; }   // already loaded for the frame; kept for the legend's swatches
     const cv = paintGlobal(new ImageData(f.rgba, W, H), W, H, f.light);
     const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
