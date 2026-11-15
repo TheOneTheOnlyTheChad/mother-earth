@@ -62,3 +62,27 @@ Whole globe, `VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance`, WMS 1.3.0, 1024 × 
 - Sizes and times, one request each: 1024 × 512 light 230–244 KB for complete dates (132 KB for the filling date), 1.0–1.4 s; 2048 × 1024 light 891 KB, 2.3 s; 1024 × 512 clear-sky confidence (14 Nov) 297 KB, 2.2 s, 8.4% no data (50% of 90–60°S).
 - No pixel carried the colour map's own no-data colour; no data arrives as transparency.
 - One read at one time of day. When a UTC date finishes filling was not measured.
+
+## Erratum (15 Nov 2026, found while building the fixture for `night-lights-rc`)
+
+Two slips in the figures above. The data has not changed; the conclusions stand (the data path works; 20 April is the clearest post-storm night read).
+
+**1. The box totals and the box pixel counts came from two different rules.** "Saipan … (1,950 px)" and "Tinian … (1,080 px)" count the pixels whose centres lie inside each box. The totals in the Result table (2,854 → 770; 183 → 138) were taken over each box with its edges rounded outward to whole pixels: 2,028 and 1,175 pixels.
+
+| Box rule | Saipan, 19 March → 20 April | Tinian |
+|---|---|---|
+| Edges rounded outward (the totals in the table above) | 2,854.1 → 769.9 (2,028 pixels) | 183.0 → 137.8 (1,175 pixels) |
+| Pixel centres inside the box | 2,853.2 → 760.9 (1,950 pixels) | 181.8 → 130.2 (1,080 pixels) |
+
+Pixels at or above 5 are the same by both rules (Saipan 154 and 16; Tinian 7 and 0).
+
+**2. Two clear-sky shares counted "above 0.95", not "0.95 or more".** The first in-browser count held the values as 32-bit numbers, in which 0.95 is stored slightly low. This affects "18 April … (0% at or above 0.95); 19 April 0.93 (47%)". Re-read 15 Nov 16:58 UTC through the pane with whole hundredths, pixel centres:
+
+| Clear-sky confidence 0.95 or more | 19 March | 18 April | 19 April | 20 April |
+|---|---|---|---|---|
+| Saipan (1,950 px) | 86.3% | 5.3% | 66.8% | 95.1% |
+| Tinian (1,080 px) | 85.6% | 9.4% | 18.9% | 95.0% |
+
+The Result table's 85% / 83% (19 March) and 95% / 95% (20 April) are the outward-rounded boxes with the correct "0.95 or more" test, and stand as that. The means are unchanged.
+
+The fixture in `phase1/night-lights/` (branch `night-lights-rc`) holds the recorded responses and checks both box rules, each against its own figures.

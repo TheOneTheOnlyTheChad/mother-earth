@@ -181,3 +181,17 @@ Request volume and GIBS's published limits are not measured or read yet.
 | **N4. Threshold** | 0.95 for the preview, labelled accurately | Agree (§9.2) |
 | **N5. Numbers** | Coverage shares, no radiance totals | Agree (§9.1) |
 | **N6. Latest date** | A usable frame chosen by coverage, pinned, prior date shown when the newest is filling | §9.3: 30°S–30°N no more than 1% no data. The 1% and the band are open to GPT. |
+
+## 10. GPT review of rev 2 (relayed by Chad, 15 Nov) and Chad's Go
+
+GPT: rev 2 passes for a local, page-only preview; 0.95 and "no more than 1% missing across 30°S–30°N" accepted as preview defaults. "The latitude band is a practical check for whether a frame has arrived, based on the dates sampled. It does not establish coverage everywhere." Two details for the build, both adopted:
+
+- **One missing date is enough to mark a pixel "No data"**, on both panels. Both radiance values present but either confidence value missing or below 0.95: "No reliable comparison". A fixture with a valid dark pixel on one date and a transparent one on the other.
+- **Partial data is not a failed request.** "Still arriving" when a decoded frame fails the coverage check; the corresponding failure message when GIBS fails or the browser blocks pixel access. The preview must demonstrate pixel access and a working comparison from its own address.
+
+19 March and 20 April for the visual acceptance check; the exact Saipan totals kept in the recorded fixture, with a separate live check of the real GIBS path. The production route waits for the preview measurements.
+
+Chad: "Go: build night-lights-rc on a branch per NIGHT-LIGHTS-PROPOSAL rev 2 (§9 governing; page only; no merge)".
+
+**Built:** branch `night-lights-rc`; packet `reviews/2026-11-15-night-lights-rc.md` (on the branch).
+**Correction:** the pixel counts "1,950" and "1,080" quoted with the Saipan and Tinian totals belong to a different box rule from the totals; see the erratum in `docs/research/NIGHT-LIGHTS-GIBS-DATA-PATH-TEST-2026-11-15.md`. The totals themselves (2,854 and 770) are as recorded.
