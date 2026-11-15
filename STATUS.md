@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 06:16 UTC (clock reading) — **GPT reviews the legend proposal; rev 2** (docs only; nothing built)
+- GPT (relayed by Chad): L1 a valid zero that draws nothing leaves both the legend and "Key · N layers"; a usable counts-only cell still counts as one; legend and count for the six data layers derive from the geometry rendered (hollow microplastic rings included); day/night, ocean heat and orbital keep their rules. L2 stale unknown outlines stay with the coverage key, no entry, no count; empty line reads "No data symbols or count cells are drawn right now." L3 "Fire detections: cell outlines only (records withheld)" and equivalents. Extra checks listed in proposal §6.
+- **Not built:** awaits Chad's own go line. Live unchanged: hub 0.6.14, page `83d0fc0`.
+
 ## 15 Nov 06:10 UTC (clock reading) — **Branch `fire-status-rc` deleted by Chad; legend proposal rev 1** (docs only; for GPT; nothing built)
 - `git ls-remote --heads` (06:08 UTC): remote has only `main` and `aircraft-rc`. Mac `_review/fire-status-rc/` moved to `_to_delete/`; `_review/` empty.
 - Chad: pick up another item from the usability list. Next by GPT's D3: the legend. Proposal: `docs/concepts/LEGEND-ACTIVE-PROPOSAL.md` rev 1 (dot entries only while dots are drawn; counts-only wording; forest swatch only with a drawn cell; an empty-key sentence; `index.html` only). Reproduced first: with records withheld a cell outline is drawn with no dots; a valid zero draws nothing yet counts in "Key · N layers"; stale counts draw an unknown outline. Decisions L1–L3 in the proposal.

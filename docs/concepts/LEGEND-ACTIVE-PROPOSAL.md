@@ -1,4 +1,4 @@
-# Legend shows what is drawn — proposal for GPT review (rev 1)
+# Legend shows what is drawn — proposal for GPT review (rev 2)
 
 15 Nov 2026 · docs only · nothing built · page only · main `5befc51` (page merge `83d0fc0`, hub 0.6.14)
 Second item from `docs/concepts/CONTROL-CENTRE-USABILITY-BRIEF.md` (L1). GPT asked for its own review, "especially for counts-only layers and the empty key".
@@ -49,3 +49,33 @@ Files: `index.html` only (legend markup gets ids; one function called from `rend
 ## 5. Out of scope
 
 Freshness badges, layout at intermediate widths, the hub place fix, Earthquakes and Ships withheld-line gating, Sun picture cleanup, the Moon and Sun pages.
+
+## 6. GPT review of rev 1 (relayed by Chad, 15 Nov 06:16 UTC) — rev 2
+
+GPT: review complete; the page-only build awaits Chad's go. Rev 2 adopts all three answers. Where this section differs from §2–§4, this section governs.
+
+**One source for the legend and the count.** For the six data layers (earthquakes, fires, ships, forest, drifting buoys, microplastic) the legend entry and the "Key · N layers" count both come from the geometry handed to the globe on that render: points, rings (including hollow microplastic rings) and usable count cells. Day/night, ocean heat and the orbital categories keep today's counting and their own legend lines.
+
+| Layer state | Legend entry | Counts toward N |
+|---|---|---|
+| Symbols drawn (dots or rings), with or without cells | the layer's normal entry | yes, one |
+| Usable count cell drawn, records withheld | "Fire detections: cell outlines only (records withheld)" and the equivalent for the other record layers; no dot; the reason stays on the card | yes, one |
+| Valid zero: nothing drawn (**L1**) | none | **no** (changes today's count) |
+| Stale or otherwise unknown: only unknown outlines (**L2**) | none; the coverage key covers them | no |
+| Off, down, loading, unavailable | none | no |
+| Forest: at least one usable cell drawn | swatch entry | yes, one |
+
+**Empty line (L2):** "No data symbols or count cells are drawn right now." It shows only when none of the six data layers has such geometry. An overlay on its own (day/night, ocean heat, orbital) keeps its own line and does not suppress or replace this sentence's rule.
+
+**Added acceptance checks** (with §3's desktop, 390 px and refresh checks):
+
+- Valid zero removes both the entry and the count.
+- Stale-only leaves the unknown outline on the globe, adds no entry and does not increment the count.
+- An overlay on its own keeps its own legend line; the empty sentence still describes the six data layers.
+- Optional layers (buoys, microplastic) while loading and while unavailable: no entry, no count.
+- A microplastic fixture with hollow rings only (every sample zero) still gets its entry and counts as one.
+- Counts-only wording appears only with a usable count cell drawn and records withheld, in both records formats.
+
+**Scope note:** the count rule lives in `drawnLayers()` in `index.html`, so the build still touches `index.html` only. `mobile-pass` asserts today's counts and will need its expectations updated where L1 changes them; that is named here so it is not a surprise at review.
+
+**Status:** not built. Awaits Chad's own go line.
