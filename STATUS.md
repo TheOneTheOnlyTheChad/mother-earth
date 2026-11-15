@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 04:22:53 UTC (commit time) — **PAGE RELEASED: "Lit as now" on the Moon globe** (main merge `967af71` of `moon-lit-rc` @ `fb9caa7`; Chad: "Approve: merge moon-lit-rc to main (page change: "Lit as now" on the Moon globe)")
+- **REGISTER filed first** on Chad's line "Approve: file the five moon-lit REGISTER entries as drafted (NAIF kernels extension, DE440 ASCII extension, Horizons extension, NASA SVS hourly Moon table, sunlight table) on branch moon-lit-rc" — branch commit `fb9caa7`, filed 04:22 UTC.
+- **GPT:** passed round 1's Chrome smoke and held the merge for the clock fix; the round-2 code (`4853308`) carries that fix. **No GPT re-check of round 2 was relayed before Chad's two lines.**
+- Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch.
+- **Served hashes: ten files exact at 04:24:31 UTC** (pane): moon.html `1503e0ed`, moonglobe.js `4205093a`, moonlight.js `f01b8e21`, style.css `ae472be2`, sources.html `83542137`, table `a78c2f4b`; unchanged index.html `e7be06f6`, sun.html `480a6acf`, timeline.html `19cb96c6`, craft.js `ae43ec78`.
+- **Live check (pane, 04:24:44 UTC):** opens off and evenly lit; on → "Sunlight calculated for 15 Nov 2026 04:24 UTC · device clock", Sun overhead 1.6°S 112.2°E, Earth overhead 3.1°N 2.9°W, 28.8% lit; Earth view at 100 radii centred on the sub-Earth point; off → evenly lit, ordinary camera.
+- **Rollback:** revert `967af71` (own Approve line). Earlier rollbacks unchanged.
+- **Renewal on record:** the sunlight table ends **1 January 2028 00:00 UTC**; after that the globe stays evenly lit. Rebuild with wider ranges, or choose another route, before then.
+- **Open:** GPT's re-check of round 2; real phone, Safari, screen reader, real GPU; full regression not run; branch `moon-lit-rc` is Chad's to delete.
+
 ## 15 Nov 04:21 UTC (clock reading) — **moon-lit-rc round 2: GPT's clock finding fixed; wording and REGISTER points applied** (branch only; nothing merged)
 - **GPT's review of `680aec3` (relayed by Chad):** desktop Chrome smoke passes; arithmetic 27/27 rerun; phase gate met. Merge held for one fix: the clock was read twice in one recalculation, so a minute boundary between the reads could leave the previous minute on screen.
 - **Fix:** one clock read per recalculation (`tickLit` → `computeLit(now)`); regression F8a/F8b with forced reads either side of a boundary; break `tworeads` fails.
