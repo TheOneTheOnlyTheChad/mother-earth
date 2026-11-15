@@ -1,4 +1,4 @@
-# DRAFT — REGISTER entries for "Lit as now" on the Moon globe (not filed)
+# REGISTER entries for "Lit as now" on the Moon globe — **FILED 15 Nov 2026 04:22 UTC** (this draft is kept as the record of what was proposed)
 
 2026-11-15 · for Chad's Approve line · to be added to `REGISTER.md` on branch `moon-lit-rc`, reaching main with the page merge.
 Nothing below is in `REGISTER.md` yet. Entries 1–3 extend entries filed on 14 Nov; entry 4 is new (GPT, round 1: file it, because the repo keeps the SVS extract and the public method text cites its results; label it test-only, never loaded by the page); entry 5 is the new table.
