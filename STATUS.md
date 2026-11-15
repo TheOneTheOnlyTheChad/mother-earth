@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 04:41 UTC (clock reading) — **"Lit as now" thread close-out** (START-HERE §9)
+- **GPT passes the live page** (relayed by Chad): desktop Chrome smoke of `967af71` passes, no issue needing a rollback. Clock fix confirmed in the code and in a controlled replay (new minute on the next heartbeat; restoring the old second read reproduced the stale display). Opening state, lighting readout, Earth view and its exits, both clocks (LRO 12:00 → 12:01 while lighting held 04:32, then lighting → 04:33 while LRO held), Details link and the five REGISTER entries all confirmed. Arithmetic suite 27/27 on rerun. This closes the "no round-2 re-check relayed" note in the release entry.
+- **Branch `moon-lit-rc` NOT yet deleted:** Chad is on his phone and could not find branch deletion in the app; it stays until he deletes it (merged; nothing depends on it). Remote branches at close: `main`, `aircraft-rc` (parked), `moon-lit-rc` (merged, awaiting deletion).
+- Mac `_review/moon-lit-rc/` moved to `_to_delete/`; `_review/` empty. Mac synced preserve-first at the close-out commit.
+- START-HERE §4aa added; HANDOVER "NEXT THREAD STARTS HERE" written. **Next (item 1): Chad chooses the next item**; nothing is agreed-next.
+
 ## 15 Nov 04:22:53 UTC (commit time) — **PAGE RELEASED: "Lit as now" on the Moon globe** (main merge `967af71` of `moon-lit-rc` @ `fb9caa7`; Chad: "Approve: merge moon-lit-rc to main (page change: "Lit as now" on the Moon globe)")
 - **REGISTER filed first** on Chad's line "Approve: file the five moon-lit REGISTER entries as drafted (NAIF kernels extension, DE440 ASCII extension, Horizons extension, NASA SVS hourly Moon table, sunlight table) on branch moon-lit-rc" — branch commit `fb9caa7`, filed 04:22 UTC.
 - **GPT:** passed round 1's Chrome smoke and held the merge for the clock fix; the round-2 code (`4853308`) carries that fix. **No GPT re-check of round 2 was relayed before Chad's two lines.**
