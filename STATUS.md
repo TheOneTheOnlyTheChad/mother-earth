@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 04:43 UTC (clock reading) — **Branch `moon-lit-rc` deleted by Chad** (docs only)
+- `git ls-remote --heads`: remote has only `main` and `aircraft-rc`. Close-out complete; Chad is handing over to a new thread.
+
 ## 15 Nov 04:41 UTC (clock reading) — **"Lit as now" thread close-out** (START-HERE §9)
 - **GPT passes the live page** (relayed by Chad): desktop Chrome smoke of `967af71` passes, no issue needing a rollback. Clock fix confirmed in the code and in a controlled replay (new minute on the next heartbeat; restoring the old second read reproduced the stale display). Opening state, lighting readout, Earth view and its exits, both clocks (LRO 12:00 → 12:01 while lighting held 04:32, then lighting → 04:33 while LRO held), Details link and the five REGISTER entries all confirmed. Arithmetic suite 27/27 on rerun. This closes the "no round-2 re-check relayed" note in the release entry.
 - **Branch `moon-lit-rc` NOT yet deleted:** Chad is on his phone and could not find branch deletion in the app; it stays until he deletes it (merged; nothing depends on it). Remote branches at close: `main`, `aircraft-rc` (parked), `moon-lit-rc` (merged, awaiting deletion).
