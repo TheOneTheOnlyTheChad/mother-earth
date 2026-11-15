@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 03:09 UTC (clock reading) — **"Lit as now" proposal rev 2** (GPT's review of rev 1 applied; docs only; nothing built)
+- GPT (relayed by Chad): rev 1 a good basis; rev 2 wanted before a branch go. Main finding: the present camera distorts the phase (75% phase covers about 84% of the rendered disc), so the rendered-disc gate would fail with correct sunlight.
+- **Reproduced:** 84.1% at 3.2 radii (desktop), 83.0% at 3.6; 75.3% at 100 radii.
+- **Rev 2:** device clock only, labelled (hub comparison dropped; minute-boundary cadence; valid jumps recoverable); near-flat day side, labelled night floor, narrow transition on the calculated line, mask tested apart from texture; Earth view from at least 100 radii with a narrowed field of view, 2-point gate kept, button deferred if it fails; unit-vector comparisons after rounding, every interval midpoint; Horizons like for like with the catalogue-convention residual reported separately; SVS as cited test-only corroboration; GPT's both-on wording.
+- GPT's recommendations: D1 B · D2 off · D3 faint floor · D4 conditional. Decisions remain Chad's; no go given.
+- **Next (item 1):** GPT re-checks rev 2 (§8); then Chad's D1–D4 and his go for a branch build.
+
 ## 15 Nov 03:04 UTC (clock reading) — **"Lit as now" proposal rev 1** (docs only; for GPT; nothing built)
 - New thread started from main `69566f0`. Chad (with GPT) chose "Lit as now" on the Moon globe and asked for a docs-only proposal; build waits for his own go.
 - **`docs/concepts/MOON-LIT-AS-NOW-PROPOSAL.md` rev 1:** off-by-default control; sunlight from the Sun's direction in `MOON_ME_DE440_ME421` at the current UTC minute; sub-solar and sub-Earth points and lit fraction in the readout; "As seen from Earth now"; the dated LRO path keeps its own time. Recommended route B: fixed 6-hourly catalogue 1 Jun 2026 – 1 Jan 2028 from the existing SPICE generator (page only). Checks proposed: own DE440 evaluator, Horizons quantities 10/14/15, NASA SVS hourly table (corroboration), interpolation, rendered day–night line. Fallback: evenly lit. Decisions D1–D4 are Chad's; four questions for GPT.

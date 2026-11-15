@@ -1,24 +1,29 @@
 # Mother Earth · "Lit as now" on the Moon globe
 
-**Rev 1 · 14 November 2026 · proposal for GPT review · docs only**
+**Rev 2 · 15 November 2026 · proposal for GPT re-check · docs only**
+
+Rev 2 applies GPT's review of rev 1 (relayed by Chad, 15 Nov): device clock only; near-flat shading with a narrow edge; a distant camera for the Earth view; like-for-like Horizons comparison; new both-on wording. Changes are listed in §9.
 
 Add an off-by-default **Lit as now** control to the Moon globe on `moon.html`. When on, the globe is lit from the direction of the Sun at the current UTC minute, and the readout says where the Sun and the Earth stand over the Moon and how much of the Earth-facing disc is lit. This is the addendum that `MOON-SUN-GLOBES-PROPOSAL.md` §3.1 requires before lighting is added. Nothing is built until Chad's own go. Live LRO positions are not part of this.
 
 ## 1. What a visitor sees
 
 - The globe still opens **evenly lit on the near side**, exactly as today. A new button, **Lit as now**, sits with the globe controls (off by default; `aria-pressed`).
-- On: one directional light is placed at the calculated sub-solar direction, fixed to the Moon's surface, so turning the globe shows day, night and the line between them where they are at this minute. The night side keeps a faint floor of light so the map stays readable (decision D3).
-- A second button, **As seen from Earth now**, turns the view to the calculated sub-Earth point, so the globe shows the phase and libration as seen from the Earth's centre. Words beside it: "from the Earth's centre, Moon's north up — not how it is tilted in your sky."
+- On: the globe is shaded from the calculated sub-solar direction, fixed to the Moon's surface, so turning the globe shows day, night and the line between them where they are at this minute.
+  - **Day side near-flat** (the map at even brightness, as today), **night side at a faint floor**, and a **narrow transition centred on the calculated day–night line** (proposed half-width 1°; the real Sun's disc already blurs the line by about ±0.27°).
+  - The night floor is labelled: "Night side shown faintly as a display aid; this is not earthshine."
+  - The day/night decision is a mask computed from the sub-solar direction alone, so it can be tested without reference to how bright the map is at any spot.
+- A second button, **As seen from Earth now**, turns the view to the calculated sub-Earth point and switches to a **distant view** (see "Earth view camera" below), so the disc on screen shows the phase and libration as from the Earth's centre. Words beside it: "from the Earth's centre, Moon's north up — not how it is tilted in your sky." Any other view button, drag or zoom returns to the ordinary close camera.
 - Readout, updated in place (same focus rules as the LRO readout):
-  - **Sunlight calculated for 14 Nov 2026 19:02 UTC (now)**
+  - **Sunlight calculated for 15 Nov 2026 03:20 UTC · device clock**
   - Sun overhead at [lat] [lon] · Earth overhead at [lat] [lon]
   - [nn.n]% of the Earth-facing disc is lit
-  - "Calculated, not observed. A smooth sphere: no crater shadows, no earthshine, no eclipses. The shading is illustrative; the position of the day–night line is the calculated thing. Moon orientation and Sun and Earth positions: JPL DE440 via NAIF."
+  - "Calculated, not observed. A smooth sphere: no crater shadows, no earthshine, no eclipses. The position of the day–night line is the calculated thing. Moon orientation and Sun and Earth positions: JPL DE440 via NAIF."
 - Evidence label: `Computed` (`.ev.comp`), never `Observed`.
 
 ### Two clocks, kept apart
 
-The dated LRO path keeps its own heading and time ("Dated LRO example · 10–11 June 2026 UTC … [selected minute]"). The lighting has its own line and time ("Sunlight calculated for … UTC (now)"). When both are on, one extra line appears: **"The sunlight is for now. The LRO path is from June 2026. They are different times."** Neither control changes the other. Lighting the globe for the LRO example's own minute is a possible later change and is out of scope here.
+The dated LRO path keeps its own heading and time ("Dated LRO example · 10–11 June 2026 UTC … [selected minute]"). The lighting has its own line and time ("Sunlight calculated for … UTC · device clock"). Each time sits next to its own control: the selected LRO minute with the LRO readout, the lighting minute with the lighting readout. While both are displayed, one extra line shows: **"Lighting uses the current UTC minute. The LRO path is a dated example from 10–11 June 2026."** Neither control changes the other. Lighting the globe for the LRO example's own minute is a possible later change and is out of scope here.
 
 ## 2. Sources and calculation
 
@@ -44,10 +49,20 @@ The convention difference between "light arriving" and purely geometric is about
 
 B is the smallest step that reuses the verified rotation directly. A or C is then the renewal path, chosen well before 2028 and recorded as an open item on release. The start date of 1 June 2026 is deliberate: the build must reproduce the already-reviewed June rotation inside the new range.
 
+### Earth view camera
+
+In the ordinary view the camera sits 3.2 Moon radii from the centre on desktop (3.6 on a phone). From that close it sees less than half the sphere, and the lit share of the disc on screen is not the phase. Calculated for this proposal (GPT's figure reproduced): a 75% phase covers **84.1%** of the rendered disc at 3.2 radii and 83.0% at 3.6; a 25% phase covers 15.9%. At 100 radii the same phases render as 75.3% and 24.7%.
+
+So the Earth view uses the same camera moved to **at least 100 Moon radii with the field of view narrowed** so the Moon keeps its size in the box (an "equivalent distant view"; expected error about 0.3 percentage points). The branch must show this works with the globe library's controls and clipping planes. **If it does not pass the phase test in §3, the button is deferred and the lighting toggle ships alone** (D4).
+
+The "% lit" figure in the readout is always the geocentric calculated value, in either camera.
+
 ### Time and cadence
 
-- **Clock:** the device's clock, shown to the minute in UTC. If the page already holds a hub time from another read, the two are compared; if they differ by more than 10 minutes the globe stays evenly lit and says so (Q2 for GPT).
-- **Cadence:** recalculated every 60 seconds and on return to the tab. The sub-solar point moves about 0.0085° a minute. No network request after the catalogue is loaded.
+- **Clock:** the device's clock, shown to the minute in UTC and labelled "device clock". No comparison with hub times (a hub timestamp says when a file was produced, not what the time is).
+- **Cadence:** recalculated on each UTC minute boundary and at once when the tab becomes visible. The sub-solar point moves about 0.0085° a minute. No network request after the catalogue is loaded.
+- **Clock jumps:** recompute from the new minute. If the new time is inside coverage the lighting simply follows it (a correction to a valid time is recoverable); if it is outside, the evenly lit fallback applies until a valid time returns.
+- **Pinned inputs:** the exact DE440 position inputs and orientation byte ranges are hashed and listed in `BUILD-moonlight.json`, and the build confirms they cover every catalogue sample from the first to the last.
 - **Kernel inputs** come through the browser pane as hashed byte ranges of the full JPL files, as in the last thread (START-HERE §4z).
 
 ## 3. Evidence before release
@@ -55,14 +70,15 @@ B is the smallest step that reuses the verified rotation directly. A or C is the
 | Check | Proposed acceptance |
 | --- | --- |
 | Rebuild | Regenerated bytes equal the shipped file; inputs and hashes in `BUILD-moonlight.json`. June 2026 rotation matrices equal those in `checks/moonfixed-checks.json`. |
-| Independent calculation | Our own DE440 evaluator (ASCII coefficients, own Chebyshev and rotation code, extended from librations to the Sun, Earth and Moon) against SPICE at every catalogue sample: both sub-points within **0.0001°**. |
-| Horizons, sub-points | Moon (301) from the Earth's centre (`500@399`), observer quantities 14 and 15, at no fewer than 40 instants spread over the range including new, full and both quarters. Horizons' own light-time and aberration conventions are modelled in the comparison, as last thread. Within **0.001°**. Raw responses archived. |
-| Horizons, lit fraction | Quantity 10 at the same instants, within **0.01 percentage points**. |
-| NASA SVS hourly table | `mooninfo_2026.json` (SVS 5587: hourly phase, sub-solar and sub-Earth longitude and latitude for 2026), Nov–Dec 2026 hours. Corroboration only: the table's frame and conventions must be established from SVS's documentation first; the tolerance is set then and any offset reported, not tuned away. |
-| Interpolation | Page arithmetic (the same JavaScript, run in the test) against hourly SPICE truth across the whole range: worst error reported, limit **0.01°**. |
-| Rendered day–night line | On the rendered globe, for at least three dated instants: sample points 5° on the sunward side of the calculated line are lit and points 5° beyond it are at the night floor, at eight positions around the line, including across the texture seam and near a pole. Break: light moved by 10° must fail. |
-| "As seen from Earth now" | View centre equals the sub-Earth point; lit fraction of rendered disc pixels within 2 percentage points of the calculated value at a crescent, a quarter and a gibbous date. |
-| Clocks and labels | With both overlays on, the two times are present, different and correctly attributed; changing the LRO minute never changes the sunlight time, and a minute tick never changes the LRO time. Focus is kept through ticks. |
+| Independent calculation | Our own DE440 evaluator (ASCII coefficients, own Chebyshev and rotation code, extended from librations to the Sun, Earth and Moon), using the **same conventions** as the catalogue, against SPICE at every catalogue sample. Compared as the **angle between unit vectors**, before and after the catalogue's rounding: within **0.0001°**. |
+| Horizons, sub-points | Moon (301) from the Earth's centre (`500@399`), observer quantities 14 and 15, at no fewer than 40 instants spread over the range including new, full and both quarters. These are apparent quantities tied to the Earth observer's time; the catalogue uses sunlight arriving at the Moon and a geometric Earth direction. So the check first recomputes our values **in Horizons' conventions** (its light time and aberration, modelled as last thread) and compares like with like: proposed gate **0.001°**. The residual against the catalogue's own conventions is reported **separately** and explained by the timing difference, not judged against the gate. Request, returned frame line and raw responses archived. |
+| Horizons, lit fraction | Quantity 10 at the same instants, like for like first: proposed gate **0.01 percentage points**; catalogue-convention residual reported separately. |
+| NASA SVS hourly table | `mooninfo_2026.json` (SVS 5587: hourly phase, sub-solar and sub-Earth longitude and latitude for 2026), Nov–Dec 2026 hours. **Cited, test-only corroboration, never shipped.** SVS's stated ephemeris (GPT reports DE421) and conventions are recorded from its documentation; offsets are reported as found, with no gate and no tuning. |
+| Interpolation | The page's own JavaScript, run in the test, against SPICE truth at **every sample and the midpoint of every six-hour interval** across the whole range, as unit-vector angles after rounding: worst error reported, limit **0.01°**. |
+| Day/night mask | Tested independently of texture brightness: the mask value is read for points 2° on the sunward side of the calculated line (must be day) and 2° beyond it (must be night), at eight positions around the line, including across the texture seam and near a pole, for at least three dated instants. The transition is centred on the line (mask at half value within 0.1° of it). Break: sub-solar direction moved by 5° must fail. |
+| Rendered globe | The same points sampled from the rendered picture agree with the mask (day pixels at map brightness, night pixels at the floor). |
+| Earth view | View centre equals the sub-Earth point. Share of rendered disc pixels that the mask marks as day is within **2 percentage points** of the calculated lit fraction at a crescent, a quarter and a gibbous date. The same measurement in the ordinary close camera is recorded to show why the distant view is needed. If the gate fails, the button is deferred. |
+| Clocks and labels | With both displayed, the two times are present, each beside its own control, and the both-on line is shown; changing the LRO minute never changes the lighting time, and a minute tick never changes the LRO time. Focus is kept through ticks. Minute-boundary recalculation, tab return, and a clock jump to a valid time, to an out-of-range time and back are each exercised. |
 | Fallbacks (below) | Each one forced in a test, each with a break. |
 
 Figures are agreement with named references over the stated range, not a claim of absolute accuracy.
@@ -73,7 +89,7 @@ The globe returns to (or stays) **evenly lit**, the button reads "Lit as now una
 
 - Catalogue fails to load, fails its hash or is not in the expected form.
 - The current time is outside the catalogue's range ("our sunlight table ends on 1 Jan 2028").
-- The clock check fails, or the clock jumps backwards.
+- The device clock gives no valid time. (A jump to another valid, covered time is not a failure; the lighting follows it.)
 - A computed value is not finite or not a unit direction.
 - On leaving the tab for longer than a tick, the first act on return is a recalculation before anything is shown as "now".
 
@@ -92,15 +108,25 @@ Crater shadows and relief; earthshine; lunar eclipses (the Earth's shadow is not
 
 - **D1** Route: B (fixed catalogue to 1 Jan 2028) as recommended, or A, or C.
 - **D2** Off by default (recommended), keeping the opening view as it is.
-- **D3** Night side: faint floor so the map stays readable (recommended, labelled as not earthshine), or fully dark.
-- **D4** Include **As seen from Earth now** in this release (recommended), or leave it out.
+- **D3** Night side: faint floor, labelled as a display aid (recommended), or fully dark.
+- **D4** Include **As seen from Earth now** if the distant view passes the phase test; otherwise defer the button and ship the lighting toggle alone (recommended), or leave the button out from the start.
 
-## 8. Questions for GPT
+GPT's recommendation on rev 1 (relayed): D1 B · D2 off · D3 faint floor · D4 conditional, as above. The decisions remain Chad's.
 
-1. Are the tolerances in §3 right for what the page claims, and is the SVS table worth including as corroboration?
-2. Clock: is "device clock, refused if it disagrees with a hub time by more than 10 minutes" the right rule, or should the device clock simply be shown?
-3. Shading: stock diffuse shading darkens toward the line more than the real Moon does. Is the "illustrative shading" sentence enough, or should the lit side be near-flat with a narrow edge?
-4. Is the both-on sentence in §1 clear enough to keep the two times apart?
+## 8. For GPT's re-check
+
+1. Is 100 radii with a narrowed field of view an acceptable "equivalent distant view", or should the gate demand a true orthographic camera?
+2. Transition half-width of 1°, and mask sampling at ±2°: acceptable?
+3. Anything in §9 not applied as you meant it.
+
+## 9. Changes from rev 1
+
+- Clock: device clock only, labelled; the 10-minute hub comparison is removed; minute-boundary cadence; jumps to a valid time are recoverable.
+- Shading: near-flat day side, labelled night floor, narrow transition centred on the calculated line; the mask is tested apart from texture brightness.
+- Earth view: distant camera, with the measured reason (75% phase renders as 84.1% of the disc at the present desktop camera); 2-point gate kept; button deferred if it fails.
+- Checks: unit-vector angles, after rounding; every interval midpoint; Horizons compared like for like with the catalogue-convention residual reported separately; SVS as cited test-only corroboration.
+- Both-on wording replaced with GPT's; each time stays beside its own control.
+- Pinned inputs and whole-range coverage stated; renewal before 1 Jan 2028 recorded on release.
 
 ## Source references
 
