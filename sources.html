@@ -241,7 +241,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202612011000"></script>
+<script src="app.js?v=202612021000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -262,7 +262,7 @@ function renderAll() {
     row(['<a id="aircraft"></a>Aircraft', '<a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a>', 'hobbyist use within credits; a public-facing website must additionally feed the network; cloud servers not whitelisted (reply 30 Oct 2026)', 'not shown'])]);
   fill('t-measures', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].quantity || 'no snapshot yet')])));
   fill('t-windows', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].window), esc(R[l].cadence)])));
-  fill('t-dates', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].observed || '–'), R[l].retrieved ? esc(R[l].retrieved.replace('T', ' ').slice(0, 19) + ' UTC (' + ago(R[l].retrieved) + ')') : '–', esc(rep.states[l])])));
+  fill('t-dates', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].observed || '–'), R[l].retrieved ? (st => st ? esc(st + ' (' + ago(R[l].retrieved) + ')') : 'Retrieval time unknown')(ME.stamp(R[l].retrieved)) : '–', esc(rep.states[l])])));
   // smoke review 6 Nov: evidence codes join many terms with ';' and '_' and no spaces; brk() adds a break opportunity (<wbr>)
   // after each, so a phone wraps them between terms. The text itself is unchanged.
   const brk = t => String(t).split(/(?<=[;_])/).map(esc).join('<wbr>');

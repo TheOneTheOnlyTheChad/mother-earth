@@ -4,6 +4,27 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 10:33 UTC (clock reading) — **freshness-wording-rc round 3: Sources retrieval cell; strict date form** (branch only; nothing merged)
+- GPT (relayed by Chad) on `4d3b4e8`: card and report fixed, Kp year boundary verified, keep the retrieval guard shared; hold for the Sources table (raw value printed as "n/a UTC…"; `retrieved_at: {}` threw and stopped the table) and require the full `YYYY-MM-DD` form.
+- **Fixed:** `ME.stamp` (text only for a readable timestamp) used by the Sources retrieval cell ("Retrieval time unknown") and by three inspector rows in `index.html`; `ME.validDate` matches the whole string; Kp passes its normalised date part.
+- **Tests:** `freshness-wording-ui` 156/0; two new breaks and eight earlier ones fail; regression across 21 browser and 3 node suites passes; same two failures as main. Packet §8.
+- **Lesson:** a syntax-only check (`new Function`) does not catch a comment that swallows declarations on the same line; the browser suite did. Fixture ages are now built at use time.
+- **Not approved:** merge. Live unchanged: hub 0.6.14, page `2b94823`.
+
+## 15 Nov 09:57 UTC (clock reading) — **Branch `quakes-ships-status-rc` deleted by Chad; freshness-wording-rc round 2: GPT's timestamp fixes** (branch only; nothing merged)
+- `git ls-remote --heads`: `quakes-ships-status-rc` gone; Mac `_review/quakes-ships-status-rc/` moved to `_to_delete/`.
+- GPT (relayed by Chad): hold for timestamp handling — missing or invalid observation dates leaked as "undefined" / "31 February 2026" on the card, report and Sources row; an unreadable retrieval time still earned "Fresh copy" ("retrieved NaN h ago"). Wording answers: stale ships age once with the retrieval label; midnight Kp interval names both days.
+- **Fixed:** `ME.validDate` validates CO₂ and sea-ice dates once in `ME.readings`; all four surfaces read it ("date not supplied"). `ME.freshness` returns unknown ("the time our copy was retrieved could not be read") for an unparseable `retrieved_at` — **in the shared rule, so for every layer**; `ME.ago` never prints "NaN". Ships age shown once. `ME.kpIntervalLong` for the tooltip.
+- **Tests:** `freshness-wording-ui` 115/0; three new breaks and five earlier ones fail; regression across 21 browser and 3 node suites passes; same two failures as main. Packet §7.
+- **Not approved:** merge. Live unchanged: hub 0.6.14, page `2b94823`.
+
+## 15 Nov 09:03 UTC (clock reading) — **freshness-wording-rc built: "fresh copy" for dated indices, two-time tooltip, Ships retrieval time** (branch only; page only; nothing merged; for GPT)
+- Chad: "Go: build freshness-wording-rc on a branch per FRESHNESS-WORDING-PROPOSAL rev 2 (§6 governing; page only; no merge)" (sent with the Earthquakes and Ships merge approval). Branch from main `df8f2fe`.
+- **Built:** `app.js` (`ME.stateWord`, `ME.longDate`, `ME.valueFor`, `ME.freshTip`; sea ice carries both hemisphere dates; ships `retrievedAge`), `index.html` (tooltip; Ships "retrieved N ago"), `sources.html` (cache key). `app.js?v=202612021000`. Packet: `reviews/2026-11-15-freshness-wording-rc.md`.
+- **Tests:** new `freshness-wording-ui` 63/0, five breaks fail. Regression across 21 browser suites and 3 node suites passes with no expectation changes; same two failures as main.
+- **For GPT:** stale ships repeats the age (retrieval age plus the reason's own); a Kp interval crossing midnight is dated by its start.
+- **Not tested:** phone, Safari, screen reader, real GPU, the live page. **Not approved:** merge. Live unchanged: hub 0.6.14, page `2b94823`.
+
 ## 15 Nov 08:42:39 UTC (commit time) — **PAGE RELEASED: Earthquakes and Ships withheld line; no sample read from a down ships run** (main merge `2b94823` of `quakes-ships-status-rc` @ `1d6d8a5`; Chad: "Approve: merge quakes-ships-status-rc at 1d6d8a5 to main (page change: Earthquakes and Ships withheld line; no sample read from a down ships run)")
 - **GPT (relayed by Chad):** passes review. Ran the candidate's card and report code through current zero, degraded, stale zero, down and recovery states outside the browser; confirmed matching `app.js` cache keys and that hub code and stylesheet match main.
 - Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch. Remote branch head confirmed `1d6d8a5` before the merge.

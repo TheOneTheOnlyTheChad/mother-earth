@@ -391,7 +391,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202612011000"></script>
+<script src="app.js?v=202612021000"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612061000"></script>
@@ -735,7 +735,7 @@ function inspectRecord(layer, r) {
     ['Source', esc(SOURCE[layer].name)],
     ['Quantity', esc(snap.quantity || MISSING), 'more'],
     ['Window', windowText(layer, snap)],
-    ['This run', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING]);
+    ['This run', ME.stamp(snap.retrieved_at) || MISSING]);
   if (layer === 'firms') rows.push(['NASA', 'not for tactical decisions or local-scale conditions']);
   if (layer === 'firms') rows.push(['What FRP is', 'Pixel-integrated fire radiative power estimated at the satellite observation time; not fire size, spread or severity. It is a power (MW), not an amount of energy, and it is not a comparison between fires. Cloud decides what could be detected at all. NASA: not for tactical decisions or local-scale conditions.', 'more']);
   if (ME.kept(layer)) rows.push(['Comparison', 'none of ours shown yet — ' + ME.kept(layer)]);
@@ -783,7 +783,7 @@ function inspectSample(r) {
     if (o.method_note) rows.push(['Note', esc(o.method_note), 'more']);
   }
   rows.push(['Source', `Oceaneye Association via NOAA NCEI Marine Microplastics, Accession 0276422 · ${esc(r.id)}`]);
-  rows.push(['This run', snap && snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : MISSING]);
+  rows.push(['This run', (snap && ME.stamp(snap.retrieved_at)) || MISSING]);
   rows.push(['Not current', 'a sample on its own date at the tow-start location — not where plastic is now', 'more']);
   rows.push(['Comparability', 'NOAA NCEI: concentrations may not be comparable across studies (methods differ); this layer shows one programme only', 'more']);
   rows.push(['Quality flags', 'Oceaneye\'s original file encodes SeaDataNet flag 0 (no quality control recorded in that flag) on its values; Oceaneye states its staff analysed all samples', 'more']);
@@ -816,7 +816,7 @@ function inspectCell(p) {
     ['Quantity', esc(snap.quantity || '')],
     ['Coverage', `${p.grade} — ${esc(p.cell.coverage ? p.cell.coverage.evidence : MISSING)}`],
     ['Collector', `${fresh.grade} — ${esc(fresh.why)}`],
-    ['Retrieved', snap.retrieved_at ? snap.retrieved_at.replace('T', ' ').slice(0, 19) + ' UTC' : '–'],
+    ['Retrieved', ME.stamp(snap.retrieved_at) || '–'],
     ['Comparison', 'none of ours shown yet' + (ME.kept(p.layer) ? ' — ' + ME.kept(p.layer) : '')],
   ];
   if (p.layer === 'drifters') rows.push(['Caveat', 'buoys are sparse: a cell with no buoy is not evidence of anything about that water']);
@@ -1398,7 +1398,7 @@ ME.cellPolys = layer => globeOk ? globe.polygonsData().filter(p => p.layer === l
 ME.renderState = () => globeOk ? { points: globe.pointsData().length, driftPoints: globe.pointsData().filter(p => p.buoy !== undefined).length, driftCells: globe.polygonsData().filter(p => p.layer === 'drifters').length, plasticPoints: globe.pointsData().filter(p => p.sampled_on !== undefined).length, plasticRings: globe.pathsData().length, plasticCells: globe.polygonsData().filter(p => p.layer === 'plastic').length, polygons: globe.polygonsData().length, on: { ...on } } : null;
 
 // ---------- cards
-const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = k === 'plastic' ? 'the hub\'s copy is fresh — says nothing about when the samples were taken; ' + f.why : f.why; };
+const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = k === 'plastic' ? 'the hub\'s copy is fresh — says nothing about when the samples were taken; ' + f.why : (ME.freshTip(k, f) || f.why); };   // dated indices, adequate: both times (when our copy was retrieved; what the value is for)
 const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
 // Fires wording (11 Nov 2026 card copy; 15 Nov 2026 fire-status-rc: one reason on every surface). Early in the UTC day FIRMS
 // serves a header-only file and the hub records the run as down with a note starting "no detections processed yet for today (UTC)".
@@ -1432,7 +1432,7 @@ function cards() {
   else { $('l-ships').textContent = R.ships.lastSample !== null ? 'Last sample:' : ''; $('v-ships').textContent = R.ships.lastSample === null ? '–' : R.ships.lastSample.toLocaleString(); }
   $('u-ships').textContent = R.ships.unit;
   $('o-ships').textContent = R.ships.observed || (R.ships.down ? 'no sample from the latest run' : 'no sample yet');   // a down run carries no sample: nothing is claimed about one
-  $('m-ships').innerHTML = `aisstream.io · ${esc(R.ships.mode)}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.fresh.why)}</b>` : ''}`;
+  $('m-ships').innerHTML = `aisstream.io${R.ships.retrievedAge ? ` · retrieved ${esc(R.ships.retrievedAge)}` : ''} · ${esc(R.ships.mode)}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.retrievedAge ? R.ships.fresh.why.replace(` (${R.ships.retrievedAge})`, '') : R.ships.fresh.why)}</b>` : ''}`;   // the age is shown once, with the retrieval label
   setState('forest', R.forest.fresh); $('v-forest').textContent = R.forest.value === null ? '–' : R.forest.value.toLocaleString();
   $('o-forest').textContent = R.forest.observed || 'no sweep yet';
   $('m-forest').innerHTML = `Global Nature Watch · integrated alerts · across ${R.forest.cells} cells, ${R.forest.highest.toLocaleString()} highest-confidence · last run ${ago(R.forest.retrieved)}${R.forest.fresh.grade === 'unknown' ? ` · <b>${esc(R.forest.fresh.why)}</b>` : ''}`;
