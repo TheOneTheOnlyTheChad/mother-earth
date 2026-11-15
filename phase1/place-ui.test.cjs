@@ -141,6 +141,18 @@ const cellOf = (lat, lng) => `${Math.floor((lat + 90) / 4)}_${Math.floor((lng + 
   ok('7 keyboard reaches a Load button', reached);
   if (reached) { const which = await page.evaluate(() => document.activeElement.dataset.placeLayer); await page.keyboard.press('Enter'); await page.waitForTimeout(800);
     ok('7 Enter on Load requests that layer for this place', hits.filter(h => h.startsWith('/place/')).at(-1).includes(which), hits.slice(-2)); }
+  // 8. hub 0.6.15: a layer whose collector reported down is answered by /place as down, so the row says unknown with the collector's own
+  //    note — never "withheld — records and counts are not from the same collector run". Envelope = writeDown's (cells: {}, note).
+  { const keep = {}, downEnv = (l, note) => ({ schema_version: 1, collector_version: '0.6.15', layer: l, window_start: null, window_end: null, retrieved_at: new Date(Date.now() - 30e3).toISOString(), source_status: 'down', interruptions: [], stale_after_s: 900, cells: {}, record_format: 'rows', record_fields: [], note });
+    const NOTES = { usgs: 'fetch failed: TypeError: fetch failed', ships: 'ingested down: Error: websocket error: ', drifters: 'http 522' };
+    for (const [l, n] of Object.entries(NOTES)) { keep[l] = store.get(`latest-cells/${l}.json`); store.set(`latest-cells/${l}.json`, JSON.stringify(downEnv(l, n))); } etag++;
+    await page.keyboard.press('Escape'); await page.evaluate(() => ME.openPlace('14_49')); await waitPlace(page); P = await panel(page);
+    const sent = hits.filter(h => h.startsWith('/place/')).at(-1), raw = await (await W.default.fetch(new Request('https://hub' + sent), HENV)).json();
+    ok('8 hub: down counts are answered state "down" with the note, no count and no records (earthquakes, ships, buoys)', ['usgs', 'ships', 'drifters'].every(l => raw.layers[l].state === 'down' && raw.layers[l].note === NOTES[l] && !('records' in raw.layers[l]) && !('cell' in raw.layers[l]) && !('why' in raw.layers[l])), Object.fromEntries(['usgs', 'ships', 'drifters'].map(l => [l, raw.layers[l]])));
+    for (const [name, l] of [['Earthquakes', 'usgs'], ['Ships', 'ships'], ['Drifting buoys', 'drifters']])
+      ok(`8 place row "${name}": unknown — ${NOTES[l].slice(0, 24)}…, not "withheld"`, (row(P, name) || '').startsWith('unknown — ' + NOTES[l].trim().slice(0, 20)) && !/withheld|same collector run/.test(row(P, name) || ''), row(P, name));
+    ok('8 a layer that is not down is unaffected (fires still listed)', /detection/.test(row(P, 'Fire detections') || '') && !/unknown —/.test(row(P, 'Fire detections') || ''), row(P, 'Fire detections'));
+    for (const l of Object.keys(NOTES)) store.set(`latest-cells/${l}.json`, keep[l]); etag++; await page.keyboard.press('Escape'); }
   ok('desktop: no page errors', perr.length === 0, perr);
   await ctx.close();
 

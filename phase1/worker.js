@@ -69,7 +69,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.14';
+const COLLECTOR_VERSION = '0.6.15';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2702,6 +2702,11 @@ function placeMeta(layer, cells) {   // section metadata, always built from the 
   return { layer, retrieved_at: cells.retrieved_at, run_ref: runRef(layer, cells.retrieved_at), collector_version: cells.collector_version, source_status: cells.source_status, stale_after_s: cells.stale_after_s,
     window_start: cells.window_start, window_end: cells.window_end, quantity: cells.quantity || null, coverage_default: cells.coverage_default || null, coverage_note: cells.coverage_note || null, note: cells.note || null };
 }
+// 0.6.15: a counts envelope the collector published as down is answered as down — never as a pairing mismatch. Both down writers
+// (writeDown, fvDownForInput) publish `cells: {}`, so the old test (`&& !cells.cells`) never fired. The answer carries the envelope's
+// own metadata and note, no cell count and no records. It is applied to the FIRST counts read and again to the FINAL counts
+// envelope after a pairing re-read, in the ordinary path and in the FIRMS lines/1 path (a collector can write down between reads).
+const placeDown = (layer, cells) => ({ ...placeMeta(layer, cells), state: 'down' });
 async function placeSection(env, layer, id) {
   let cells = await getJson(env, `latest-cells/${layer}.json`);
   if (!cells) return { layer, state: 'unavailable', note: 'no snapshot published yet' };
@@ -2712,7 +2717,7 @@ async function placeSection(env, layer, id) {
     if (!c) return { ...base, state: 'pending', why: 'in the sweep, not answered yet' };
     return { ...base, state: 'ok', cell: c };
   }
-  if (cells.source_status === 'down' && !cells.cells) return { ...placeMeta(layer, cells), state: 'down' };
+  if (cells.source_status === 'down') return placeDown(layer, cells);
   if (layer === 'firms') {
     const h = await env.R2.head('latest/firms.json');
     if (h && h.customMetadata && h.customMetadata.format === 'lines/1') return fvPlaceSection(env, id, cells);
@@ -2721,7 +2726,9 @@ async function placeSection(env, layer, id) {
   }
   let rec = await placeRecords(env, layer);
   if (rec && rec.retrieved_at !== cells.retrieved_at) {   // a collector wrote between the two reads: re-read both once
-    const again = await getJson(env, `latest-cells/${layer}.json`); if (again) cells = again; rec = await placeRecords(env, layer);
+    const again = await getJson(env, `latest-cells/${layer}.json`); if (again) cells = again;
+    if (cells.source_status === 'down') return placeDown(layer, cells);   // the FINAL counts are down: say so, before any pairing answer
+    rec = await placeRecords(env, layer);
   }
   const base = placeMeta(layer, cells);   // from the FINAL cells file — never from a superseded first read
   const cell = cells.cells ? cells.cells[id] : undefined;
@@ -2745,7 +2752,9 @@ async function fvPlaceSection(env, id, cells) {
   const scan = async () => { try { return await fvPlaceFirms(env, id); } catch (e) { return { error: String(e).slice(0, 120) }; } };
   let rec = await scan();
   const same = (r, c) => r && r.retrieved_at === c.retrieved_at && r.run_id && r.run_id === c.run_id;
-  if (rec && !rec.busy && !same(rec, cells)) { const again = await getJson(env, 'latest-cells/firms.json'); if (again) cells = again; rec = await scan(); }
+  if (rec && !rec.busy && !same(rec, cells)) { const again = await getJson(env, 'latest-cells/firms.json'); if (again) cells = again;
+    if (cells.source_status === 'down') return placeDown('firms', cells);   // the FINAL counts are down: no pairing answer, no second record scan
+    rec = await scan(); }
   const base = placeMeta('firms', cells), cell = cells.cells ? cells.cells[id] : undefined;
   if (rec && rec.busy) return { ...base, state: 'busy', why: 'too many concurrent record scans; counts are shown, records are not', cell: cell || null };
   if (!rec || rec.changed || !same(rec, cells)) return { ...base, state: 'withheld', why: `records and counts are not from the same collector run (records ${rec && rec.retrieved_at ? rec.retrieved_at + ' ' + (rec.run_id || 'no run id') : 'unreadable'}, counts ${cells.retrieved_at} ${cells.run_id || 'no run id'})`, cell: cell || null, records_run_ref: rec && rec.retrieved_at ? runRef('firms', rec.retrieved_at) : null };
