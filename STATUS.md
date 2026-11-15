@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 05:53:21 UTC (commit time) — **PAGE RELEASED: fire status agrees on every surface** (main merge `83d0fc0` of `fire-status-rc` @ `e58b856`; Chad: "Approve: merge `fire-status-rc` at `e58b856` to main (page-only fire-status fix). Verify the served hashes of `index.html`, `app.js`, and `sources.html`, then smoke-test the live Fires card.")
+- **GPT:** passed A1–A5 at source review and held for the `status-notes-ui` test fix (round 2, `e58b856`). **No GPT re-check of round 2 was relayed before Chad's line.**
+- Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch. Remote branch head confirmed `e58b856` before the merge.
+- **Served hashes: three files exact at 05:54:07 UTC** (pane): index.html `9fe6e920`, app.js `09f59f66`, sources.html `f73ff131`.
+- **Live smoke (pane, 05:54:35 UTC; pane hidden, text reads only):** page loads `app.js?v=202611301000`; Fires card current, 4,589, "retrieved 9 min ago", withheld line hidden and empty; records paired with counts (run 05:45:42 UTC, 4,589 points); Key counts fires; Find gives the highest FRP (45.37 MW); report "4,589 fire detections so far today"; place row for cell 40_63 "3 detections so far today (UTC)"; "counts shown alone" nowhere on the page. The live code's rule, called directly: daily note → "Today’s detections aren’t available yet"; fetch failure → "collector reported down: TypeError: fetch failed"; a down fires place section → "unknown — Today’s detections aren’t available yet"; a mismatch section → "withheld — …".
+- **Not seen on production:** the daily reset itself (next 00:00 to about 03:45 UTC, 16 Nov) and a failed refresh. Not tested: phone, Safari, screen reader, real GPU; no screenshot (pane hidden).
+- **Rollback:** revert `83d0fc0` (own Approve line). Earlier rollbacks unchanged.
+- **Open:** branch `fire-status-rc` is Chad's to delete; Mac `_review/fire-status-rc/` moves to `_to_delete/` at close-out. Later branches on record in the brief: legend (L1), hub `placeSection` down test, freshness wording (FRESH COPY for dated indices), intermediate widths; Earthquakes/Ships share the withheld-line pattern (read, not reproduced).
+
 ## 15 Nov 05:47 UTC (clock reading) — **fire-status-rc round 2: GPT's test fix** (branch only; test file only; nothing merged)
 - GPT (relayed by Chad): A1–A5 pass source review; merge held for one test fix. `status-notes-ui`'s two checks pinned to release `143f531` are replaced by a served-file check (cache key named by `index.html`; received bytes = this checkout's `app.js`); the `/status` behaviour checks are unchanged. **17/0**; breaks `stale-app` and `old-key` each fail 1. `fire-status-ui` 279/0 and `fires-wording-ui` 35/0 rerun. Page files unchanged since `62c7581`. Packet §8.
 - **Not approved:** merge. Live unchanged.
