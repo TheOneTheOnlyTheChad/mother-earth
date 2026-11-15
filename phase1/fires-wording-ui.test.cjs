@@ -2,7 +2,9 @@
  * When the hub reports the fires run as down with the note "no detections processed yet for today (UTC)…" (header-only file early
  * in the UTC day), the Fires card says "Today’s detections aren’t available yet." — state stays UNKNOWN, the count stays "–",
  * records stay withheld and nothing is drawn. Every other down note keeps "collector reported down: <note>".
- * Scope: the Fires card only. ME.freshness, the summary report and Sources are unchanged.
+ * Scope on 11 Nov: the Fires card only. Since 15 Nov (fire-status-rc, brief CONTROL-CENTRE-USABILITY rev 1.1, A1 and A3) the same
+ * sentence is the reason on every surface (ME.downWhy in app.js, used by ME.freshness), and the "Records withheld … counts shown
+ * alone" line is hidden while the card shows no count. The full table is phase1/fire-status-ui.test.cjs.
  * The down notes are taken from phase1/worker.js itself (the template literals in collectFirms), not hand-written, so the page's
  * pattern is tied to what the hub actually publishes.
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/fires-wording-ui.test.cjs
@@ -52,12 +54,12 @@ let cells = downCells(NOTE_BOUNDARY), snap = goodSnap(GOOD);
     if (p === '/snapshot/firms') return j(snap);
     if (p === '/') return j({ name: 'x', history: { collecting: false, retained: { exists: false } } });
     j({ layer: p.split('/').pop(), retrieved_at: NOW, stale_after_s: 10800, source_status: 'ok', cells: {}, record_format: 'rows', record_fields: [], records: [], quantity: 'q', sweep: { answered: 0, cells_total: 559, oldest_queried_at: NOW }, index: null }); });
-  if (BREAK) await ctx.route(BASE + '/index.html', async route => { let h = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8'); const before = h;
-    if (BREAK === 'match-all') h = h.replace('FIRMS_NOT_YET.test(s.note || \'\')', 'true');                       // every down run gets the calm sentence
-    if (BREAK === 'never-match') h = h.replace('FIRMS_NOT_YET.test(s.note || \'\')', 'false');                    // the change is not there (= main's behaviour)
+  if (BREAK) await ctx.route(BASE + '/app.js*', async route => { let h = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8'); const before = h;   // the pattern and the rule live in app.js since 15 Nov
+    if (BREAK === 'match-all') h = h.replace('ME.FIRMS_NOT_YET.test(s.note || \'\')', 'true');                       // every down run gets the calm sentence
+    if (BREAK === 'never-match') h = h.replace('ME.FIRMS_NOT_YET.test(s.note || \'\')', 'false');                    // the change is not there (= main's behaviour)
     if (BREAK === 'loose-prefix') h = h.replace('/^no detections processed yet for today \\(UTC\\)/', '/header only/');   // also swallows the later-in-the-day empty file
     if (h === before) { console.log('FAIL  break did not apply'); process.exit(1); }
-    route.fulfill({ status: 200, contentType: 'text/html', body: h }); });
+    route.fulfill({ status: 200, contentType: 'application/javascript', body: h }); });
   // the page's own scheduled refresh (tick) — sky.js and skyscene.js also run 5-minute intervals, so filter by name
   await ctx.addInitScript(() => { const si = window.setInterval; window.__refresh = []; window.setInterval = function (fn, ms, ...a) { if (fn && fn.name === 'tick') window.__refresh.push(fn); return si.call(this, fn, ms, ...a); }; });
   const page = await ctx.newPage(); const perr = []; page.on('pageerror', e => perr.push(String(e).slice(0, 200)));
@@ -77,11 +79,11 @@ let cells = downCells(NOTE_BOUNDARY), snap = goodSnap(GOOD);
   ok('A header-only: state word stays UNKNOWN (class bad)', r.state === 'unknown' && /\bbad\b/.test(r.cls), [r.state, r.cls]);
   ok('A header-only: the state tooltip carries the same sentence', r.title === COPY, r.title);
   ok('A header-only: the count stays "–" (never 0)', r.value === '–', r.value);
-  ok('A header-only: records still withheld (the pair rule), and said so on the card', r.pair.usable === false && /^Records withheld:/.test(r.withheld), [r.pair, r.withheld]);
+  ok('A header-only: records still withheld (the pair rule); no "counts shown alone" line, because the card shows no count', r.pair.usable === false && r.withheld === '', [r.pair, r.withheld]);
   ok('A header-only: no fire record is drawn', r.drawn === 0, r.drawn);
   ok('A header-only: the card still names the source and the retrieval', /^NASA FIRMS · VIIRS NOAA-20 · .* · retrieved /.test(r.meta), r.meta);
-  ok('A scope: ME.freshness is unchanged (grade unknown, full hub note kept)', r.fresh.grade === 'unknown' && r.fresh.why === 'collector reported down: ' + NOTE_BOUNDARY, r.fresh);
-  ok('A scope: the summary report keeps its existing wording', r.report.includes('collector reported down: no detections processed yet for today (UTC)') && !r.report.includes(COPY), r.report.slice(0, 400));
+  ok('A: ME.freshness gives the same sentence (grade unknown; no full stop, it sits inside longer sentences)', r.fresh.grade === 'unknown' && r.fresh.why === COPY.slice(0, -1), r.fresh);
+  ok('A: the summary report gives the same sentence, not "collector reported down"', r.report.includes('fires: unknown — ' + COPY.slice(0, -1) + ';') && !r.report.includes('collector reported down'), r.report.slice(0, 400));
   ok('A scope: another card is untouched', !r.quakeMeta.includes(COPY), r.quakeMeta);
 
   // ---- B. genuine failures keep the existing wording

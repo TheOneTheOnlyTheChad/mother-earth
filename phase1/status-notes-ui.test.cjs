@@ -1,6 +1,7 @@
 /* Mother Earth — hub 0.6.10 /status without run notes: the UNCHANGED globe page against both hubs (STATUS-RUN-NOTES-PROPOSAL rev 2 §5.2).
  *
- * The page files (index.html, app.js) are served from the clone as they are. /status is answered by the REAL hub code, run
+ * The page files (index.html, app.js) are served from the clone as they are (checked at the end: the browser receives this
+ * checkout's app.js under the cache key its index.html names). /status is answered by the REAL hub code, run
  * in-process over a real SQLite D1 (schema.sql) seeded with an orbital run row that carries a marker note:
  *   - candidate: phase1/worker.js (0.6.10; last_runs carry no note)
  *   - control:   worker.js at 143f531 (0.6.9, live today; its orbital row DOES return the note — asserted, so the control is real)
@@ -86,9 +87,6 @@ async function run(browser, worker, metaStatus) {
 (async () => {
   const cand = await loadWorker(fs.readFileSync(path.join(__dirname, 'worker.js'), 'utf8'), 'cand');
   const ctrl = await loadWorker(execFileSync('git', ['-C', path.join(__dirname, '..'), 'show', '143f531:phase1/worker.js'], { encoding: 'utf8' }), 'ctrl');
-  // loosened for dustrgb-rc: index.html gains the Dust RGB card, so only app.js (which reads /status) stays pinned to the 0.6.10 release
-  ok('page file index.html still loads the same app.js build as main 143f531', (m => m && execFileSync('git', ['-C', path.join(__dirname, '..'), 'show', '143f531:index.html'], { encoding: 'utf8' }).includes(m[0]))(fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8').match(/app\.js\?v=\d+/)));
-  for (const f of ['app.js']) ok(`page file ${f} unchanged from main 143f531`, fs.readFileSync(path.join(__dirname, '..', f), 'utf8') === execFileSync('git', ['-C', path.join(__dirname, '..'), 'show', '143f531:' + f], { encoding: 'utf8' }));
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const rowOf = b => (JSON.parse(b).last_runs || []).find(x => x.layer === 'orbital');
   for (const [name, metaStatus] of [['A missing snapshot', 404], ['B usable snapshot + newer failed run', 200]]) {
@@ -107,6 +105,21 @@ async function run(browser, worker, metaStatus) {
       ok('B: layer still draws', c.drawn);
     }
   }
+  // The page under test is the candidate's own (15 Nov 2026, fire-status-rc). Until then two checks pinned app.js and its cache
+  // key to release 143f531, so they failed on any later release that changes app.js. What matters to this suite is that the
+  // browser really ran THIS checkout's app.js, under the cache key THIS checkout's index.html names.
+  { const disk = fs.readFileSync(path.join(__dirname, '..', 'app.js')), want = (fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8').match(/app\.js\?v=\d+/) || [])[0];
+    const sha = b => require('crypto').createHash('sha256').update(b).digest('hex');
+    const ctx = await browser.newContext(); await ctx.route(/workers\.dev|unpkg|gibs|fonts\.googleapis/, r => r.abort());
+    // BREAK=stale-app serves release 143f531's app.js in place of the checkout's; BREAK=old-key serves an index.html that still names main's key. Each must fail.
+    if (process.env.BREAK === 'stale-app') await ctx.route(BASE + '/app.js*', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: execFileSync('git', ['-C', path.join(__dirname, '..'), 'show', '143f531:app.js'], { encoding: 'utf8' }) }));
+    if (process.env.BREAK === 'old-key') await ctx.route(BASE + '/index.html', r => r.fulfill({ status: 200, contentType: 'text/html', body: fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8').replace(want, 'app.js?v=202611291000') }));
+    const pg = await ctx.newPage(); const got = []; pg.on('response', async r => { if (/\/app\.js(\?|$)/.test(r.url())) { try { got.push({ url: r.url(), status: r.status(), sha: sha(await r.body()) }); } catch (_) { got.push({ url: r.url(), status: r.status(), sha: null }); } } });
+    await pg.goto(BASE + '/index.html', { waitUntil: 'load' }).catch(() => { }); await pg.waitForTimeout(300);
+    ok('the page requests app.js exactly once, under the cache key its index.html names', !!want && got.length === 1 && got[0].status === 200 && got[0].url.endsWith('/' + want), { want, got });
+    ok('the app.js the browser received is this checkout\'s app.js, byte for byte', got.length === 1 && got[0].sha === sha(disk), { got, disk: sha(disk).slice(0, 16) });
+    ok('that app.js defines the page\'s /status reader (ME is present after load)', await pg.evaluate(() => !!(window.ME && typeof ME.getJson === 'function')));
+    await ctx.close(); }
   await browser.close();
   console.log(`\nstatus-notes-ui: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })().catch(e => { console.log('FAIL  ' + (e && e.stack || e)); process.exit(1); });

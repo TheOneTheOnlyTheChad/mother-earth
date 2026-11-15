@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 05:47 UTC (clock reading) — **fire-status-rc round 2: GPT's test fix** (branch only; test file only; nothing merged)
+- GPT (relayed by Chad): A1–A5 pass source review; merge held for one test fix. `status-notes-ui`'s two checks pinned to release `143f531` are replaced by a served-file check (cache key named by `index.html`; received bytes = this checkout's `app.js`); the `/status` behaviour checks are unchanged. **17/0**; breaks `stale-app` and `old-key` each fail 1. `fire-status-ui` 279/0 and `fires-wording-ui` 35/0 rerun. Page files unchanged since `62c7581`. Packet §8.
+- **Not approved:** merge. Live unchanged.
+
+## 15 Nov 05:39 UTC (clock reading) — **fire-status-rc built: fire status agrees on every surface** (branch only; page only; nothing merged; for GPT)
+- Chad: "Go: build fire-status-rc on a branch with A1–A5 and GPT's three clarifications. Use the FIRMS-only Place fix and include the production lines/1 cases. Keep legend, freshness badges, layout and Sun picture cleanup for their own passes. Page only, no merge. Bring the candidate back for GPT review."
+- **Built:** `app.js` (`ME.downWhy`; `ME.freshness` and `ME.placeRows` use it), `index.html` (withheld line gated on the count the card rendered; zero-record Find note), `sources.html` (cache key). `app.js?v=202611301000` on both pages. Packet: `reviews/2026-11-15-fire-status-rc.md`.
+- **Tests:** new `fire-status-ui` 279/0, five breaks all fail; `fires-wording-ui` 35/0 (three assertions moved to the new scope), three breaks fail. Regression: place-ui, place-rows, search-ui, kept-ui, drifters-ui, plastic-ui, buoy-temp-ui, desktop-overflow, mobile-pass, cell-perf-ui, ux-round1 pass. Two failures also on main (`osmc-reliability-ui` "old page: no page errors"; `smoke-fixes` "Sources 360" overflow). `status-notes-ui` 2 checks pin `app.js` to `143f531` and fail by design.
+- **Confirmed in the production `lines/1` format:** the hub answers a down fires run as "withheld" in the place view; the page rule corrects it.
+- **Not tested:** phone, Safari, screen reader, real GPU, the live page. **Not approved:** merge. Live unchanged: hub 0.6.14, page `967af71`.
+- **Test kit additions this thread:** `npm i satellite.js@6.0.2 astronomy-engine` and `mkdir /home/claude/fixtures` before `orbital-fixture.build.mjs`; `osmc-reliability-ui` needs history back to `0386058` (`git fetch --depth=400 origin main`).
+
 ## 15 Nov 05:15 UTC (clock reading) — **GPT reviews usability brief rev 1: ready for a fire-only branch, three clarifications; rev 1.1** (docs only; nothing built)
 - GPT (relayed by Chad): D1 include A3; D2 A2 now, FIRMS only, from the Place response's own `source_status` and `note`, Worker fix tracked separately; D3 legend next branch; D4 FRESH COPY for dated indices in the freshness pass. Clarifications: two more acceptance rows (stale counts + mismatched records; valid zero + matched records) with the withheld line gated on the value the card renders; `lines/1` cases alongside the legacy fixture; bump the `app.js` cache key everywhere, `sources.html` included.
 - Brief §8 records this. **Not built:** the Go line was inside GPT's relayed text; the branch waits for Chad's own line. Live unchanged.

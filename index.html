@@ -391,7 +391,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202611291000"></script>
+<script src="app.js?v=202611301000"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612061000"></script>
@@ -831,6 +831,8 @@ function findExtreme(layer, key, label) {
   if (!snap) return say(`No ${LABEL[layer].toLowerCase()} snapshot has been read yet.`);
   if (fresh.grade === 'unknown') return say(`${LABEL[layer]} is unknown right now — ${esc(fresh.why)}. Nothing to move to.`);
   if (!usable(layer)) return say(`Records for ${LABEL[layer].toLowerCase()} are not usable — ${esc(unusableWhy(layer))}.`);
+  // fires with no records at all (fire-status-rc, A4): say that, not that records lack a value
+  if (layer === 'firms' && !points.firms.length) return say('No fire detections in this snapshot, so there is no highest FRP. Not “no fires”: satellite passes, cloud and processing decide what can be detected.');
   const ex = ME.extremeOf(points[layer], key);
   if (!ex) return say(`No ${LABEL[layer].toLowerCase()} record in this snapshot carries a ${esc(label.toLowerCase())} value. Records without one are excluded, not counted as zero.`);
   const i = findTie[layer] % ex.tied.length; findTie[layer] = i + 1;
@@ -1375,24 +1377,30 @@ ME.renderState = () => globeOk ? { points: globe.pointsData().length, driftPoint
 // ---------- cards
 const setState = (k, f) => { const [word, cls] = ME.stateWord(f, k); const e = $('s-' + k); e.textContent = word; e.className = 'state ' + cls; e.title = k === 'plastic' ? 'the hub\'s copy is fresh — says nothing about when the samples were taken; ' + f.why : f.why; };
 const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
-// Fires card copy only (11 Nov 2026). Early in the UTC day FIRMS serves a header-only file and the hub records the run as down with a
-// note starting "no detections processed yet for today (UTC)" (worker.js collectFirms). That is an expected daily state, so the card
-// says so plainly instead of "collector reported down: …". Coverage stays UNKNOWN and records stay withheld; every other down note
-// (fetch or processing failures, an empty file later in the day) keeps the existing wording. ME.freshness is unchanged.
-const FIRMS_NOT_YET = /^no detections processed yet for today \(UTC\)/, FIRMS_NOT_YET_COPY = 'Today’s detections aren’t available yet.';
-const firmsNotYet = () => { const s = state.firms; return !!(s && s.source_status === 'down' && FIRMS_NOT_YET.test(s.note || '')); };
+// Fires wording (11 Nov 2026 card copy; 15 Nov 2026 fire-status-rc: one reason on every surface). Early in the UTC day FIRMS
+// serves a header-only file and the hub records the run as down with a note starting "no detections processed yet for today (UTC)".
+// That is an expected daily state, so every surface says so plainly instead of "collector reported down: …". The pattern, the
+// sentence and the rule live in app.js (ME.downWhy), which ME.freshness uses; the card adds the full stop. Coverage stays UNKNOWN
+// and records stay withheld; every other down note keeps its wording.
+const FIRMS_NOT_YET_COPY = ME.FIRMS_NOT_YET_COPY + '.';
+const firmsNotYet = () => ME.firmsNotYet(state.firms);
+// The count each card last rendered (null = the card shows "–"). The "Records withheld … counts shown alone" line explains a
+// count that is on screen, so for fires it is gated on this same value (fire-status-rc, A1): with no count on the card, the
+// card's one reason stands alone.
+const cardCount = { firms: undefined };
 function pairNote(layer) {
   const e = $('p-' + layer); if (!e) return;
   // 'off' is the layer's own switch, already stated on the card: it is not records being withheld (found 4 Nov 2026, live too)
-  const why = unusableWhy(layer), show = !!why && why !== 'not read yet' && why !== 'off';
-  e.hidden = !show; if (show) e.innerHTML = `<b>Records withheld:</b> ${esc(why)}`;
+  const noCount = layer === 'firms' && cardCount.firms === null;   // unknown fires: there is no count to be "shown alone"
+  const why = unusableWhy(layer), show = !!why && why !== 'not read yet' && why !== 'off' && !noCount;
+  e.hidden = !show; if (show) e.innerHTML = `<b>Records withheld:</b> ${esc(why)}`; else e.textContent = '';   // a hidden line keeps no stale sentence
 }
 function cards() {
   const R = ME.readings();
   setState('usgs', R.usgs.fresh); $('v-usgs').textContent = R.usgs.value === null ? '–' : R.usgs.value.toLocaleString();
   $('o-usgs').textContent = R.usgs.observed || 'no snapshot yet';
   $('m-usgs').innerHTML = `USGS · retrieved ${ago(R.usgs.retrieved)}${warn(R.usgs.fresh)}`;
-  setState('firms', R.firms.fresh); $('v-firms').textContent = R.firms.value === null ? '–' : R.firms.value.toLocaleString();
+  setState('firms', R.firms.fresh); cardCount.firms = R.firms.value; $('v-firms').textContent = cardCount.firms === null ? '–' : cardCount.firms.toLocaleString();
   $('o-firms').textContent = R.firms.observed || 'no snapshot yet';
   const notYet = firmsNotYet(); if (notYet) $('s-firms').title = FIRMS_NOT_YET_COPY;
   $('m-firms').innerHTML = `NASA FIRMS · VIIRS NOAA-20 · ${esc(state.firms ? state.firms.scope || 'world' : '')} · retrieved ${ago(R.firms.retrieved)}${notYet ? ` · <b>${esc(FIRMS_NOT_YET_COPY)}</b>` : warn(R.firms.fresh)}`;

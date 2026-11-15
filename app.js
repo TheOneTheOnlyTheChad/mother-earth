@@ -321,11 +321,21 @@ ME.loadCells = async function (layers) {
 
 // ---------- freshness check 2 (§3.3): collector freshness; plus the reading corrections from the layout brief §5
 // grade: adequate | partial | unknown.   why: the measured reason, shown next to every state word.
+// Why a layer is down, in one place for every surface (15 Nov 2026, fire-status-rc; brief CONTROL-CENTRE-USABILITY rev 1.1, A3).
+// Fires only: early in the UTC day FIRMS serves a header-only file and the hub records the run as down with a note starting
+// "no detections processed yet for today (UTC)" (worker.js collectFirms and fvRun). That is the expected daily state, so the card,
+// its tooltip, Find, the search notes, the summary report and the place row all give the same plain sentence. Every other down
+// note (a failed fetch, a processing failure, an empty file later in the day) keeps "collector reported down: <note>".
+// `s` is anything that carries source_status and note: a counts envelope, or a /place section.
+ME.FIRMS_NOT_YET = /^no detections processed yet for today \(UTC\)/;
+ME.FIRMS_NOT_YET_COPY = 'Today’s detections aren’t available yet';   // no full stop: it is used inside longer sentences
+ME.firmsNotYet = s => !!(s && s.source_status === 'down' && ME.FIRMS_NOT_YET.test(s.note || ''));
+ME.downWhy = (layer, s) => layer === 'firms' && ME.firmsNotYet(s) ? ME.FIRMS_NOT_YET_COPY : 'collector reported down: ' + ((s && s.note) || '');
 ME.freshness = function (layer) {
   const snap = state[layer];
   if (!snap) return { grade: 'unknown', why: 'no snapshot from the hub' };
   const ageS = (Date.now() - Date.parse(snap.retrieved_at)) / 1000;
-  if (snap.source_status === 'down') return { grade: 'unknown', why: 'collector reported down: ' + (snap.note || '') };
+  if (snap.source_status === 'down') return { grade: 'unknown', why: ME.downWhy(layer, snap) };
   if (ageS > (snap.stale_after_s || 900)) return { grade: 'unknown', why: layer === 'ships' ? `last sample is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)}); current positions unknown` : `last snapshot is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)})` };
   // FIRMS (brief §5): an empty response is not a validated zero. day_range=1 = today (UTC): the file empties at 00:00 UTC and refills ~2–3 h behind.
   if (layer === 'firms' && ME.total(snap) === 0 && (snap.raw_bytes || 0) < 1000) return { grade: 'unknown', why: new Date().getUTCHours() < 4 ? `no detections processed yet for today (UTC) — FIRMS resets at 00:00 UTC, NRT runs ~2–3 h behind` : `source returned an empty file (${snap.raw_bytes || 0} bytes) — not a validated zero` };
@@ -763,6 +773,10 @@ ME.placeRows = function (P, nowMs = Date.now()) {
     if (s.state === 'off_not_requested') { rows.push([name, `layer off · <button type="button" class="placeload" data-place-layer="${l}">Load this layer's data for this place</button> <span class="q">fetches data for this panel only; the layer stays off on the globe</span>`]); continue; }
     const stale = s.retrieved_at && s.stale_after_s && (nowMs - Date.parse(s.retrieved_at)) / 1000 > s.stale_after_s;
     const meta = s.retrieved_at ? ` <span class="q">· retrieved ${esc(when(s.retrieved_at))}${stale ? ' · <b>stale</b>: older than its refresh limit' : ''}</span>` : '';
+    // Fires (fire-status-rc, A2): a down run is unknown here as it is on the card, whatever `state` the hub sent. Hub 0.6.14 tests
+    // `!cells.cells` and a down run publishes `cells: {}`, so its own down branch is skipped and the section arrives as
+    // "withheld — records and counts are not from the same collector run". The section's own source_status and note decide.
+    if (l === 'firms' && s.source_status === 'down') { rows.push([name, `unknown — ${esc(ME.downWhy('firms', s))}${meta}`]); continue; }
     if (s.state === 'withheld') { rows.push([name, `withheld — ${esc(s.why)}${meta}`]); continue; }
     if (s.state === 'unavailable' || s.state === 'down') { rows.push([name, `unknown — ${esc(s.note || 'the collector reported down')}${meta}`]); continue; }
     if (s.state === 'not_covered') { rows.push([name, `not covered — ${esc(s.why)}${meta}`]); continue; }
