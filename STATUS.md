@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 13:42 UTC (clock reading) — **Hub 0.6.15 deploy attempted on Chad's Approve line; refused by the session's safety check; nothing changed**
+- GPT passed `optional-layers-status-rc` round 2 at `0229772` (relayed). No merge yet: Chad's own Approve line for that merge has not been sent.
+- Chad: "Approve: deploy hub 0.6.15 from hub-place-down-rc at f684d0c (worker sha256 aa2e6440…6d8b)".
+- Before (dashboard tab, 13:40:48 UTC): live `worker.js` 0.6.14 `bbf8dc61…0480`, 364,554 bytes, 22 bindings, `SUNFACE_ENABLED=1`, `SKYCRAFT_ENABLED=1`. Branch head `f684d0cb…551f`, `worker.js` `aa2e6440…6d8b`, loads as a module.
+- The content-only upload (the 0.6.14 method) was refused by the session's safety check before it ran. Read back 13:41:26 UTC: live still 0.6.14 `bbf8dc61…0480`. No request that changes anything was sent.
+- Next: Chad's choice of how the deploy is done (he pastes and clicks Deploy in the Cloudflare editor, then Claude reads back the hash).
+
 ## 15 Nov 13:34 UTC (clock reading) — **GPT review of the three branches (relayed by Chad); two branches updated; nothing merged, nothing deployed**
 - **`optional-layers-status-rc`**: card changes pass; both wording decisions accepted. Held for `ME.runTimes` inventing a time for `2026-11-15` (00:00 UTC) and `2026-11-15T10:50:00` (read on the visitor's clock). Fixed at **`0229772`**: a run time is formatted only if it states its own time and zone (`ME.RUN_TIME`) on a real calendar day. Suite 230 checks on a Johannesburg clock; 9 breaks. Awaits GPT's round 2.
 - **`hub-place-down-rc` at `f684d0c`**: passes GPT's hub review; worker hash verified by GPT. Ready for Chad's own Approve line to deploy 0.6.15. Open, test runner only: `place-down-breaks.mjs` (and `firms-v2-breaks.mjs`, same pattern on main) take their folder from `URL.pathname`, which fails from a path with a space such as the Mac folder; needs `fileURLToPath()`. Not changed on the branch, so the reviewed head stands.
