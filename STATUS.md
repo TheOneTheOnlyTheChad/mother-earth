@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 18:00 UTC (clock reading) — **GPT passes night-lights-rc round 2; the hold is cleared** (docs only; nothing merged, nothing deployed)
+- GPT's round 2 (relayed by Chad): passes for the Night lights preview. Reviewed code `e2d419b` from branch head `8f87ff8`; the 1% coverage limit now applies to the full-size image before it reaches the globe. GPT reran the original failure case (probe 0% missing, full frame 50% missing: rejected, the prior valid date drawn), verified that four incomplete candidates leave the backdrop in place and that HTTP 503 and blocked pixel access keep distinct messages, and that removing the new guard reproduces the bug. All four file hashes matched; logic suite 49 of 49. GPT used controlled inputs; the live globe re-check and the browser suite are Claude's, as the packet records.
+- **State:** a reviewed preview on branch `night-lights-rc` (code `e2d419b`). No merge is approved or asked for. Chad has not yet looked at the preview himself.
+- **Before any release, still open (packet §7, §9; proposal N1):** the release route (direct GIBS, or the hub applying the date rule on its schedule); REGISTER lines for the two GIBS layers; a Sources & Details section and the status-report wording while the layer is on; the Sky zoom-out view with the layer on; a real phone and Safari.
+
 ## 15 Nov 17:48 UTC (clock reading) — **night-lights-rc round 2: the 1% rule is applied to the frame that is displayed** (branch only; nothing merged, nothing deployed; for GPT)
 - GPT's round 1 (relayed by Chad): hold `8b833ed` for one fix. The Saipan and Tinian comparison passes (57%, 92%, 50% reproduced; four file hashes matched; logic 49 of 49, eight breaks failing). GPT did not rerun the browser suite or the live globe. **Finding:** the 1% limit was applied to the 512 × 256 probe only, so a 2048 × 1024 frame failing it could be drawn (GPT: probe 0% missing, full frame 50% missing, marked ready).
 - **Fix, `nightlights.js` only:** code head `e2d419b` (commit time 17:28:57 UTC), branch head `8f87ff8` (packet rev 2, §10). Each candidate's full frame is held to the same rule; one that fails is "still arriving" and the next date is tried, within the four-date limit; failed and blocked requests keep their own messages and stop the search.
