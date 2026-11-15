@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 11:00 UTC (clock reading) — **GPT review of the three remaining proposals recorded as rev 2** (docs only; nothing built)
+- Relayed by Chad. Order kept: optional-layer cards, hub `/place`, then layout preview.
+- **Optional layers (rev 2 §5):** cross-day dates on all five record layers, year when the runs cross a year, shared timestamp validation; "No buoy data from the latest run." and "No microplastic data from the latest run."; gate on the rendered count, with the buoy `last_attempt` fallback as a named test.
+- **Hub place fix (rev 2 §7):** fix the hub (page-only alternative dropped). GPT found the one-line change still answers `withheld` when the counts turn down on the pairing re-read, in the ordinary and `lines/1` paths; confirmed by Claude by reading the code, not rerun. The down test now also applies to the final counts envelope in both paths. Build and review first; deploy separately approved.
+- **Layout (rev 2 §6):** A as a preview, sized by viewport height, with switch, keyboard-focus and touch-scroll checks; D alone at 1101–1279 px, small markup change allowed, one credits block per width; Chad judges on a real screen.
+- No Go line from Chad yet for any of the three.
+
 ## 15 Nov 10:52 UTC (clock reading) — **Branch `freshness-wording-rc` deleted by Chad; three proposals for the rest of the usability list** (docs only; nothing built)
 - `git ls-remote --heads` (10:50 UTC): remote has only `main` and `aircraft-rc`. Mac `_review/freshness-wording-rc/` moved to `_to_delete/`.
 - Chad: finish the list so new features can start. Three proposals for GPT in one pass:

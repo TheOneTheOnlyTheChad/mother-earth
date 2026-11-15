@@ -1,4 +1,4 @@
-# Hub: the place view's down test — proposal for GPT review (rev 1)
+# Hub: the place view's down test — proposal (rev 2: GPT review recorded; §7 governs)
 
 15 Nov 2026 · docs only · nothing built · **hub change** (needs a hub deploy) · main `9bc05bb`, hub 0.6.14 (`bbf8dc61…0480`)
 Root cause of finding F2 in `CONTROL-CENTRE-USABILITY-BRIEF.md`. The page has corrected the wording for fires since `83d0fc0`; the hub still answers wrongly.
@@ -50,3 +50,34 @@ Rollback: redeploy 0.6.14 (`bbf8dc61…0480`).
 ## 6. Out of scope
 
 Any other hub behaviour, Sun picture cleanup, schedules, storage.
+
+## 7. GPT review of rev 1 (relayed by Chad, 15 Nov) — governs where it differs from §2–§5
+
+**H-D1 / H-D2 decided: fix the hub.** The page-only alternative is dropped.
+
+**Gap in H1 (GPT's test against the worker code; confirmed by Claude by reading `placeSection` and `fvPlaceSection`, not rerun).** The one-line change answers `down` only when the *first* counts read is down. Both paths re-read the counts once when records and counts do not pair, and replace `cells` with the re-read:
+
+- ordinary path: `const again = await getJson(...); if (again) cells = again;` then straight to the pairing check;
+- FIRMS `lines/1` path (`fvPlaceSection`): the same re-read, then the pairing check.
+
+If a collector writes a down envelope between the two reads, the final counts are down and the section is still answered `withheld`, "not from the same collector run".
+
+**H1 as revised.**
+- H1a. First read: `cells.source_status === 'down'` → `state: 'down'` (as rev 1).
+- H1b. Ordinary path: after the pairing re-read, test the **final** counts envelope; down → `state: 'down'` with that envelope's metadata, before any pairing result is returned.
+- H1c. `fvPlaceSection`: the same test on the final counts envelope after its re-read, before a pairing result is returned and before records are scanned again.
+- A down answer carries no cell count and no records, and its metadata comes from the final envelope (as `placeMeta` already requires).
+
+Added hub tests (beside §3):
+
+| Case | Expected |
+|---|---|
+| Ordinary path, first read ok and mismatched, re-read down (one record layer at least, plus buoys) | `down`, note from the re-read envelope, no records |
+| `lines/1` path, first read ok and mismatched, re-read down | `down`, same |
+| Genuine mismatch on both reads, ordinary and `lines/1` | `withheld`, unchanged |
+| `lines/1` busy scan | `busy`, unchanged |
+| Breaks | remove H1b: the ordinary transition case must fail; remove H1c: the `lines/1` transition case must fail; restore `&& !cells.cells`: the first-read cases must fail |
+
+**Order.** The branch is built and reviewed first; nothing is deployed by the build. The Cloudflare deploy (0.6.15) and the merge each need Chad's own Approve line, with Chad at the screen for the deploy click.
+
+Status: ready to build on Chad's own Go line.

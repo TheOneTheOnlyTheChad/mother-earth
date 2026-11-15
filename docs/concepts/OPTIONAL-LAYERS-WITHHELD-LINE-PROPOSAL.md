@@ -1,6 +1,6 @@
-# Buoys and microplastic: the withheld line — proposal for GPT review (rev 1)
+# Buoys and microplastic: the withheld line — proposal (rev 2: GPT review recorded; §5 governs)
 
-15 Nov 2026 · docs only · nothing built · page only · main `9bc05bb` (page merge `879cb20`, hub 0.6.14)
+15 Nov 2026 · docs only · nothing built · page only · written against main `9bc05bb` (page merge `879cb20`, hub 0.6.14)
 Deferred from `WITHHELD-LINE-QUAKES-SHIPS-PROPOSAL.md` (W-D2). Now reproduced.
 
 ## 1. What main does (reproduced 10:50 UTC, real page, fixture hub, layer switched on)
@@ -40,3 +40,19 @@ Files: `index.html` only if `driftCard` and `plasticCard` hold the counts; `app.
 
 - **O-D1.** P3: apply to all five record layers (recommended; one function) or only the optional ones?
 - **O-D2.** P2 wording.
+
+## 5. GPT review of rev 1 (relayed by Chad, 15 Nov) — governs where it differs from §2–§4
+
+- **O-D1 decided: all five record layers.** Run times in the withheld line carry their UTC date when the two runs fall on different UTC days, and the year as well when they fall in different years. Run times go through the shared timestamp validation (`ME.stamp`'s rule: a string that parses to a real time); a malformed run time reads "unknown", never a made-up time.
+- **O-D2 decided:** buoys down reads **"No buoy data from the latest run."** Microplastic has the same fallback text in the code (confirmed: `index.html` line 1490), so its down state reads **"No microplastic data from the latest run."** An absent snapshot keeps "No snapshot from the hub" on both cards.
+- **Gate on the rendered count, not on freshness.** The withheld line follows the count the card actually renders. Named case: the buoy `last_attempt` fallback with unusable records shows a dash while the retained counts are still fresh enough, so a freshness-only gate would leave the line up beside a dash.
+
+Added acceptance checks:
+
+| Rule | Check |
+|---|---|
+| P1 | Buoy `last_attempt` fallback, counts within their limit, records unusable: card shows a dash, the line is hidden and empty. Break: gate on freshness instead of the rendered count, this case must fail. |
+| P2 | Microplastic down: "No microplastic data from the latest run."; microplastic with no snapshot: "No snapshot from the hub". Same pair for buoys. |
+| P3 | Cross-day case on a fixture where the count **and** the withheld line are both visible; all five record layers; a cross-year pair shows both years; a malformed run time on either side reads "unknown" and nothing reads "NaN", "undefined" or "Invalid". Same-day wording unchanged. |
+
+Status: ready to build on Chad's own Go line. Page only.

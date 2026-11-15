@@ -1,4 +1,4 @@
-# Layout at intermediate widths — proposal for GPT review (rev 1)
+# Layout at intermediate widths — proposal (rev 2: GPT review recorded; §6 governs)
 
 15 Nov 2026 · docs only · nothing built · page only · main `9bc05bb`
 Last item from `CONTROL-CENTRE-USABILITY-BRIEF.md` (W1, W2). This one needs a layout decision before any build, so it sets out options with the measurements.
@@ -57,3 +57,28 @@ A for W1 and D for W2: both are CSS only, keep every control and credit visible,
 - **L-D1.** W1: A, B or C.
 - **L-D2.** W2: D, E, both, or leave.
 - **L-D3.** Whether W2 is worth doing at all: it is a comfort issue, not a fault.
+
+## 6. GPT review of rev 1 (relayed by Chad, 15 Nov) — governs where it differs from §3–§5
+
+**L-D1 decided: A** (globe stays in view at 721–1100 px), with these conditions:
+- The sticky globe is sized by viewport height, so a short landscape screen (1024 × 768, 1100 × 800) still leaves usable room for the cards. The share is set in the preview and reported with the measurements.
+- Preview check, per size: scroll to each of the six switches, activate it, and confirm the result is visible on the globe without scrolling back.
+- Keyboard: tabbing through the cards never leaves the focused control hidden under the sticky globe.
+- Touch: a swipe that starts on the cards scrolls the page; the sticky globe cannot trap it. (A swipe on the globe turns the globe, as now; reported, not changed.)
+
+**L-D2 / L-D3 decided: preview D alone** at 1101–1279 px; E is not built. D is kept only if it gives back the proposed globe height without making the credits hard to find; Chad judges the before-and-after on his own screen.
+- The footer sits inside the centre column today, so a small markup change is allowed if CSS alone cannot put it in the right-hand column's scroll flow.
+- Exactly one visible credits block at every width; text unchanged.
+
+**This is a preview build.** A and D go on a branch with before-and-after screenshots and measurements; nothing is released until Chad has looked at it on a real screen. D can be dropped from the branch without touching A.
+
+Added acceptance checks:
+
+| | Check |
+|---|---|
+| A | At the four W1 sizes: each switch activated at its own scroll position changes what is drawn while at least 300 px of globe is on screen; cards area height reported per size. |
+| A | Focus walk through every focusable control in the cards: focused element's box never overlaps the sticky globe's box. |
+| A | Touch-emulated swipe on the cards changes page scroll at each W1 size. |
+| D | One credits block visible at 721, 1100, 1101, 1279, 1280 px; its text equals main's; globe height gain reported at the three W2 sizes. |
+
+Status: ready to build as a preview on Chad's own Go line. Page only.
