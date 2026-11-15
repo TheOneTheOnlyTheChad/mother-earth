@@ -391,7 +391,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202612021000"></script>
+<script src="app.js?v=202612021100"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612061000"></script>
@@ -1408,9 +1408,10 @@ const warn = f => f.grade !== 'adequate' ? ` · <b>${esc(f.why)}</b>` : '';
 const FIRMS_NOT_YET_COPY = ME.FIRMS_NOT_YET_COPY + '.';
 const firmsNotYet = () => ME.firmsNotYet(state.firms);
 // The count each card last rendered (null = the card shows "–"). The "Records withheld … counts shown alone" line explains a
-// count that is on screen, so for fires, earthquakes and ships it is gated on this same value (fire-status-rc A1;
+// count that is on screen, so for all five record layers it is gated on this same value (fire-status-rc A1;
 // quakes-ships-status-rc W1, W2): with no current count on the card, the card's one reason stands alone.
-const cardCount = { usgs: undefined, firms: undefined, ships: undefined };   // usgs and ships since 15 Nov 2026 (quakes-ships-status-rc): the displayed reading's value; for ships "Last sample: N" is not it
+const cardCount = { usgs: undefined, firms: undefined, ships: undefined, drifters: undefined, plastic: undefined };   // buoys and microplastic since optional-layers-status-rc: the count the card renders, whatever the reason for a dash (freshness, a down run, or a kept run whose records are unusable)
+const showCount = (k, v) => { cardCount[k] = v; $('v-' + k).textContent = v === null ? '–' : v.toLocaleString(); };   // usgs and ships since 15 Nov 2026 (quakes-ships-status-rc): the displayed reading's value; for ships "Last sample: N" is not it
 function pairNote(layer) {
   const e = $('p-' + layer); if (!e) return;
   // 'off' is the layer's own switch, already stated on the card: it is not records being withheld (found 4 Nov 2026, live too)
@@ -1457,8 +1458,8 @@ function cards() {
 function driftCard() {
   $('sstkey-drifters').hidden = !on.drifters;   // card legend only while the layer is on
   const st = $('s-drifters');
-  if (!on.drifters) { st.textContent = 'off'; st.className = 'state'; st.title = ''; $('v-drifters').textContent = '–'; $('o-drifters').textContent = 'off — switch on to load the latest fixes'; $('m-drifters').textContent = 'NOAA OSMC · GTS'; return; }
-  if (optLoading.drifters && !state.drifters) { st.textContent = 'loading'; st.className = 'state'; $('o-drifters').textContent = 'loading the latest fixes from the hub…'; return; }
+  if (!on.drifters) { st.textContent = 'off'; st.className = 'state'; st.title = ''; showCount('drifters', null); $('o-drifters').textContent = 'off — switch on to load the latest fixes'; $('m-drifters').textContent = 'NOAA OSMC · GTS'; return; }
+  if (optLoading.drifters && !state.drifters) { st.textContent = 'loading'; st.className = 'state'; showCount('drifters', null); $('o-drifters').textContent = 'loading the latest fixes from the hub…'; return; }
   const f = ME.freshness('drifters'), s = state.drifters; setState('drifters', f);
   // A failed update after a good run (hub ≥ 0.6.8 keeps the good run's counts and adds last_attempt). While the good run is inside its
   // limit: badge "degraded" = update status only (the good run's coverage and freshness are untouched) and a line saying why.
@@ -1467,9 +1468,10 @@ function driftCard() {
   const fb = driftFallback(s, f), shown = usable('drifters'), noRecords = !!fb && !shown;
   if (fb && shown) { st.textContent = 'degraded'; st.className = 'state warn'; st.title = fb; }
   if (noRecords) { st.textContent = 'unknown'; st.className = 'state bad'; st.title = fb; }
-  $('v-drifters').textContent = f.grade !== 'unknown' && s && !noRecords ? ME.total(s).toLocaleString() : '–';
+  showCount('drifters', f.grade !== 'unknown' && s && !noRecords ? ME.total(s) : null);
+  const down = !!(s && s.source_status === 'down');   // a snapshot exists and it is a down one: say so, not "no snapshot"
   const ref = s && s.refused ? Object.values(s.refused).reduce((a, x) => a + x, 0) : 0;
-  $('o-drifters').textContent = noRecords ? 'buoy positions not shown' : s && s.window_end ? `newest fix ${hhmm(s.window_end)} (${ago(s.window_end)}); each buoy shown at its own last fix` + (ref ? ` · ${ref.toLocaleString()} reports refused (e.g. time in the future), not drawn` : '') : 'no snapshot from the hub';
+  $('o-drifters').textContent = noRecords ? 'buoy positions not shown' : down ? 'no buoy data from the latest run' : s && s.window_end ? `newest fix ${hhmm(s.window_end)} (${ago(s.window_end)}); each buoy shown at its own last fix` + (ref ? ` · ${ref.toLocaleString()} reports refused (e.g. time in the future), not drawn` : '') : 'no snapshot from the hub';
   $('m-drifters').innerHTML = `NOAA OSMC · GTS · retrieved ${ago(s && s.retrieved_at)}${fb ? ` · <b>${esc(fb)}</b>` : warn(f)}`;
 }
 // The buoy card's fallback line, or '' when there is none to show. Times are UTC; both carry their date when the dates differ.
@@ -1482,12 +1484,12 @@ function driftFallback(s, f) {
 
 function plasticCard() {
   const st = $('s-plastic');
-  if (!on.plastic) { st.textContent = 'off'; st.className = 'state'; st.title = ''; $('v-plastic').textContent = '–'; $('o-plastic').textContent = 'off — switch on to load the samples'; $('m-plastic').textContent = 'Oceaneye · published by NOAA NCEI'; return; }
-  if (optLoading.plastic && !state.plastic) { st.textContent = 'loading'; st.className = 'state'; $('o-plastic').textContent = 'loading the samples from the hub…'; return; }
+  if (!on.plastic) { st.textContent = 'off'; st.className = 'state'; st.title = ''; showCount('plastic', null); $('o-plastic').textContent = 'off — switch on to load the samples'; $('m-plastic').textContent = 'Oceaneye · published by NOAA NCEI'; return; }
+  if (optLoading.plastic && !state.plastic) { st.textContent = 'loading'; st.className = 'state'; showCount('plastic', null); $('o-plastic').textContent = 'loading the samples from the hub…'; return; }
   const f = ME.freshness('plastic'), s = state.plastic; setState('plastic', f);
-  $('v-plastic').textContent = f.grade !== 'unknown' && s ? ME.total(s).toLocaleString() : '–';
+  showCount('plastic', f.grade !== 'unknown' && s ? ME.total(s) : null);
   const v = s && s.verification;
-  $('o-plastic').textContent = s && s.window_end ? `sampled ${s.window_start} to ${s.window_end}, each on its own date` + (v && v.counts ? ` · ${v.counts.reproduced.toLocaleString()} reproduced from Oceaneye's original record` : v && v.status === 'unavailable' ? ' · original-record checks unavailable this run' : '') : 'no snapshot from the hub';
+  $('o-plastic').textContent = s && s.source_status === 'down' ? 'no microplastic data from the latest run' : s && s.window_end ? `sampled ${s.window_start} to ${s.window_end}, each on its own date` + (v && v.counts ? ` · ${v.counts.reproduced.toLocaleString()} reproduced from Oceaneye's original record` : v && v.status === 'unavailable' ? ' · original-record checks unavailable this run' : '') : 'no snapshot from the hub';
   $('m-plastic').innerHTML = `Oceaneye · published by NOAA NCEI · retrieved ${ago(s && s.retrieved_at)}${warn(f)}`;
 }
 
@@ -1522,7 +1524,7 @@ async function refreshPair(layer) {
   if (samePair(cells, snap)) { state[layer] = cells; points[layer] = toPoints[layer](snap); pmeta[layer] = { id: snapId(snap), ok: true, fields: snap.record_fields || [], why: '' }; }
   else {
     state[layer] = cells; points[layer] = [];
-    pmeta[layer] = { id: snapId(snap), ok: false, fields: [], why: `records are from a different collector run (records ${hhmm(snapId(snap))}, counts ${hhmm(snapId(cells))}) — counts shown alone` };
+    pmeta[layer] = { id: snapId(snap), ok: false, fields: [], why: `records are from a different collector run (${ME.runTimes(snapId(snap), snapId(cells))}) — counts shown alone` };
   }
 }
 

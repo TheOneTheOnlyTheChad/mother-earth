@@ -57,6 +57,18 @@ const ago = ME.ago = iso => { if (!iso) return 'unknown'; const s = (Date.now() 
 const dur = ME.dur = s => s < 3600 ? Math.round(s / 60) + ' min' : (s % 3600 === 0 ? (s / 3600) + ' h' : (s / 3600).toFixed(1) + ' h');   // plain-language limits: 10800 → "3 h"
 const hhmm = ME.hhmm = iso => iso ? iso.slice(11, 16) + ' UTC' : '–';
 ME.dayMonth = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.getUTCDate() + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getUTCMonth()]; };   // UTC "11 Nov"
+// The two run times in a "records withheld" line (optional-layers-status-rc, 15 Nov 2026). Same UTC day: times only, as before.
+// Different UTC days: each time carries its date; different years: the year too. A run time that is not a readable timestamp
+// (ME.stamp's rule, plus: it must read back as the same UTC day, so 31 February is not quietly turned into 3 March) reads
+// "unknown", and the other then carries its full date, since there is nothing to compare it with.
+ME.runTimes = (recIso, cntIso) => {
+  const ok = v => typeof v === 'string' && Number.isFinite(Date.parse(v)) && new Date(Date.parse(v)).toISOString().slice(0, 10) === v.slice(0, 10), d = v => new Date(Date.parse(v)), p2 = n => String(n).padStart(2, '0');
+  const rOk = ok(recIso), cOk = ok(cntIso), r = rOk ? d(recIso) : null, c = cOk ? d(cntIso) : null;
+  const both = rOk && cOk, year = !both || r.getUTCFullYear() !== c.getUTCFullYear();
+  const day = !both || year || r.getUTCMonth() !== c.getUTCMonth() || r.getUTCDate() !== c.getUTCDate();
+  const t = x => x ? (day ? ME.dayMonth(x.toISOString()) + (year ? ' ' + x.getUTCFullYear() : '') + ' ' : '') + p2(x.getUTCHours()) + ':' + p2(x.getUTCMinutes()) + ' UTC' : 'unknown';
+  return `records ${t(r)}, counts ${t(c)}`;
+};
 const when = ME.when = iso => iso ? iso.replace('T', ' ').slice(0, 16) + ' UTC' : 'source time not supplied';
 const num = (x, d = 2) => Number.isFinite(+x) ? (+x).toFixed(d) : '–';
 
