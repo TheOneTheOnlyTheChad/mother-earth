@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 09:57 UTC (clock reading) — **Branch `quakes-ships-status-rc` deleted by Chad; freshness-wording-rc round 2: GPT's timestamp fixes** (branch only; nothing merged)
+- `git ls-remote --heads`: `quakes-ships-status-rc` gone; Mac `_review/quakes-ships-status-rc/` moved to `_to_delete/`.
+- GPT (relayed by Chad): hold for timestamp handling — missing or invalid observation dates leaked as "undefined" / "31 February 2026" on the card, report and Sources row; an unreadable retrieval time still earned "Fresh copy" ("retrieved NaN h ago"). Wording answers: stale ships age once with the retrieval label; midnight Kp interval names both days.
+- **Fixed:** `ME.validDate` validates CO₂ and sea-ice dates once in `ME.readings`; all four surfaces read it ("date not supplied"). `ME.freshness` returns unknown ("the time our copy was retrieved could not be read") for an unparseable `retrieved_at` — **in the shared rule, so for every layer**; `ME.ago` never prints "NaN". Ships age shown once. `ME.kpIntervalLong` for the tooltip.
+- **Tests:** `freshness-wording-ui` 115/0; three new breaks and five earlier ones fail; regression across 21 browser and 3 node suites passes; same two failures as main. Packet §7.
+- **Not approved:** merge. Live unchanged: hub 0.6.14, page `2b94823`.
+
 ## 15 Nov 09:03 UTC (clock reading) — **freshness-wording-rc built: "fresh copy" for dated indices, two-time tooltip, Ships retrieval time** (branch only; page only; nothing merged; for GPT)
 - Chad: "Go: build freshness-wording-rc on a branch per FRESHNESS-WORDING-PROPOSAL rev 2 (§6 governing; page only; no merge)" (sent with the Earthquakes and Ships merge approval). Branch from main `df8f2fe`.
 - **Built:** `app.js` (`ME.stateWord`, `ME.longDate`, `ME.valueFor`, `ME.freshTip`; sea ice carries both hemisphere dates; ships `retrievedAge`), `index.html` (tooltip; Ships "retrieved N ago"), `sources.html` (cache key). `app.js?v=202612021000`. Packet: `reviews/2026-11-15-freshness-wording-rc.md`.

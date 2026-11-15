@@ -1,4 +1,4 @@
-# freshness-wording-rc — review packet (round 1)
+# freshness-wording-rc — review packet (rev 2; §7 = round 2)
 
 15 Nov 2026 · branch `freshness-wording-rc` from main `df8f2fe` (after merge `2b94823`) · page only · not merged · for GPT
 Proposal: `docs/concepts/FRESHNESS-WORDING-PROPOSAL.md` rev 2 (§6 governs). Chad's go: "Go: build freshness-wording-rc on a branch per FRESHNESS-WORDING-PROPOSAL rev 2 (§6 governing; page only; no merge)".
@@ -59,3 +59,32 @@ Real phone, Safari, screen reader (tooltips are `title` text), real GPU, the liv
 2. Served-hash check of `index.html`, `app.js`, `sources.html`; live read of the three index cards and the Ships line.
 
 Rollback: revert the merge commit.
+
+## 7. Round 2 (15 Nov 09:57 UTC): GPT's hold for timestamp handling
+
+GPT (relayed by Chad): the three indices say "Fresh copy" and valid split sea-ice dates appear correctly in the shared report; hold for two edge cases. GPT reproduced "Antarctic … on undefined" on the card and report with no Antarctic date (the Sources row inheriting it), the same for a missing CO₂ date, 2026-02-31 becoming "31 February 2026", and "Our copy was retrieved NaN h ago" still earning "Fresh copy". On the packet's two questions: show the stale Ships age once, with the retrieval label; write the midnight Kp interval as "21:00 UTC on 14 November to 00:00 UTC on 15 November 2026". GPT's three Node suites passed independently (73 checks); GPT did not rerun the browser suite.
+
+**Fix 1 — observation dates validated once, used everywhere.** New `ME.validDate`: a date is used only if it is a real calendar day written `YYYY-MM-DD` (day checked against the month's length). `ME.readings` validates CO₂ and both sea-ice dates once; the card, tooltip, report and Sources row all read that result.
+
+| Input | Card and Sources row | Report |
+|---|---|---|
+| CO₂ date missing, a word, 2026-02-31 or month 13 | "daily mean; the date was not supplied (preliminary), Mauna Loa, Hawaii" | "CO₂ 428.88 ppm at Mauna Loa (date not supplied) (NOAA GML, …" |
+| Sea ice, no or impossible Antarctic date | "daily extent: Arctic for 2026-11-13, Antarctic date not supplied (~1 day latency)" | "sea ice: Arctic 8.95 M km² on 2026-11-13, Antarctic 15.02 M km² (date not supplied) (NSIDC; …" |
+| Sea ice, no Arctic date | "daily extent: Arctic date not supplied, Antarctic for 2026-11-12 (~1 day latency)" | mirrored |
+| Sea ice, neither date | "daily extent: Arctic date not supplied, Antarctic date not supplied (~1 day latency)" | "sea ice (dates not supplied): Arctic …, Antarctic …" |
+
+**Fix 2 — a readable retrieval time is required.** `ME.freshness` returns unknown with "the time our copy was retrieved could not be read" when `retrieved_at` cannot be parsed, so the badge is "unknown", never "fresh copy". `ME.ago` returns "at an unreadable time" in place of "NaN h ago", so the card line reads "… · retrieved at an unreadable time · the time our copy was retrieved could not be read". **This guard sits in the shared freshness rule, so it applies to every layer, not only the three indices** (an unreadable retrieval time could not honestly be "current" for earthquakes either). Say if it should be limited to the indices.
+
+**GPT's two wording answers, applied.** Stale ships: "aisstream.io · retrieved 4.0 h ago · … · current positions unknown — last sample is over 3 h old; current positions unknown" (the age once, with the retrieval label; the report and tooltip keep their own single mention). Kp across midnight: "This value is for 21:00 UTC on 14 November to 00:00 UTC on 15 November 2026."; across a year end both years are named.
+
+| Run | Result |
+|---|---|
+| `freshness-wording-ui` | **115 passed, 0 failed** (was 63): assertions now cover the card, report and Sources row for every bad-date case, the unreadable retrieval time for all three indices and ships, the single ships age, the midnight and year-end Kp intervals, and `ME.validDate` directly |
+| New breaks | `no-date-check` (31 February passes) fails 11 · `nan-fresh` fails 8 · `ships-age-twice` fails 1 |
+| Earlier breaks, rerun | `word-current` 21 · `no-tip` 14 · `one-ice-date` 1 · `ships-received` 4 · `ships-age-always` 2 failures |
+| Regression rerun, all pass | `quakes-ships-status-ui` 124 · `fire-status-ui` 279 · `legend-active-ui` 548 · `fires-wording-ui` 35 · `mobile-pass` 131 · `drifters-ui` 25 · `plastic-ui` 29 · `place-ui` 30 · `search-ui` 104 · `kept-ui` 21 · `buoy-temp-ui` 33 · `desktop-overflow` 258 · `cell-perf-ui` 43 · `ux-round1` 34 · `status-notes-ui` 17 · `terminator-ui` 19 · `dustrgb-ui` 67 · `backdrop-layer` 27 · `orbital-browser` 113 · `arts-ui` 90 · `sky-ui` 79 · node `kp-degraded` 29, `place-rows` 7, `buoy-temp` 37 |
+| Same as main | `osmc-reliability-ui` "old page" check; `smoke-fixes` "Sources 360" overflow |
+
+Files changed in round 2: `app.js`, `index.html`, `phase1/freshness-wording-ui.test.cjs`, this packet, STATUS. The cache key is unchanged from round 1 (`202612021000`); nothing has been released under it.
+
+**Not covered:** a sea-ice envelope with a whole hemisphere missing (no `south` object at all) is outside this change; the page's handling of that is as on main.

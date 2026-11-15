@@ -10,7 +10,10 @@
  * Envelope shapes are the live hub's (read 15 Nov 2026 08:44 UTC). Real fonts for the layout checks.
  * Run: 8899 static server on the repo root, then
  *      NODE_PATH=/home/claude/spike/node_modules node --no-warnings phase1/freshness-wording-ui.test.cjs
- * BREAK=word-current | no-tip | one-ice-date | ships-received | ships-age-always   each must fail. */
+ * Round 2 (GPT's hold): observation dates are validated once (ME.validDate) and every surface reads the result — a missing or
+ * impossible date (2026-02-31) is "not supplied" on the card, tooltip, report and Sources row; an unreadable retrieval time is
+ * never "fresh copy" or "NaN h ago"; a stale ships sample shows its age once; a Kp interval that crosses midnight names both days.
+ * BREAK=word-current | no-tip | one-ice-date | ships-received | ships-age-always | no-date-check | nan-fresh | ships-age-twice   each must fail. */
 const { chromium } = require('playwright');
 const fs = require('fs'); const path = require('path');
 const ROOT = path.join(__dirname, '..');
@@ -31,6 +34,9 @@ const served = { index: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'), 
   if (BREAK === 'no-tip') rep('index', "(ME.freshTip(k, f) || f.why)", "f.why");                                                       // main's tooltip
   if (BREAK === 'one-ice-date') rep('app', "return n === so ? `This value is for ${n}.` : `The Arctic value is for ${n}; the Antarctic value is for ${so}.`;", "return `This value is for ${n}.`;");
   if (BREAK === 'ships-received') rep('index', " · retrieved ${esc(R.ships.retrievedAge)}", " · received ${esc(R.ships.retrievedAge)}");
+  if (BREAK === 'no-date-check') rep('app', "if (mo < 1 || mo > 12 || da < 1 || da > new Date(Date.UTC(y, mo, 0)).getUTCDate()) return null;", "if (mo < 1 || mo > 12 || da < 1 || da > 31) return null;");   // round 1's check: 31 February passes
+  if (BREAK === 'nan-fresh') rep('app', "if (!Number.isFinite(ageS)) return { grade: 'unknown', why: 'the time our copy was retrieved could not be read' };", '');                    // round 1: an unreadable retrieval time still earned the badge
+  if (BREAK === 'ships-age-twice') rep('index', "R.ships.retrievedAge ? R.ships.fresh.why.replace(` (${R.ships.retrievedAge})`, '') : R.ships.fresh.why", "R.ships.fresh.why");
   if (BREAK === 'ships-age-always') rep('app', "retrievedAge: sample && Number.isFinite(Date.parse(sample.retrieved_at)) ? ago(sample.retrieved_at) : null,", "retrievedAge: s ? ago(s.retrieved_at) : null,"); }
 
 // ---- fixtures in the live hub's shapes
@@ -47,7 +53,7 @@ const kp = (tag, extra = {}) => env0('swpc', { retrieved_at: RET, stale_after_s:
 const co2 = (date, extra = {}) => env0('co2', { retrieved_at: RET, stale_after_s: 7200, index: { name: 'CO2, Mauna Loa Observatory', value: 428.88, unit: 'ppm', date, preliminary: true }, status_reason: null, comparison: { basis: 'source-provided: NOAA GML weekly file, same week 1 year ago (365 days) and 10 years ago (3,653 days), week starting 2026-11-08', week_average: 428.64, days_in_week: 6, one_year_ago: 426.3, ten_years_ago: 402.95, increase_since_1800: 150.83 }, map_layer: false, ...extra });
 const hemi = (value, date, avg) => ({ value, unit: '10^6 km^2', date, missing_area: 0, day_of_year: 317, climatology_1981_2010: { average: avg, std: .5, p10: avg - .8, p25: avg - .4, p50: avg, p75: avg + .4, p90: avg + .8 }, difference_from_average: +(value - avg).toFixed(3) });
 const ice = (dN, dS, extra = {}) => env0('seaice', { retrieved_at: iso(1.9 * 3600e3), stale_after_s: 28800, index: { name: 'sea-ice extent, NSIDC Sea Ice Index v4', north: hemi(8.951, dN, 10.53), south: hemi(15.024, dS, 16.378) }, status_reason: null, comparison: { basis: 'source-provided baseline' }, map_layer: false, ...extra });
-const KP_TAG = new Date(Math.floor((n0 - 5 * 3600e3) / (3 * 3600e3)) * 3 * 3600e3).toISOString().replace('.000Z', 'Z');   // an interval that began 3–8 h ago, on a 3-hour boundary
+const KP_TAG = '2026-11-15T03:00:00Z';   // a same-day interval; the badge depends on our retrieval time, not on this
 const longDate = d => { const M = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']; const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d); return `${+m[3]} ${M[+m[2] - 1]} ${m[1]}`; };
 const kpIv = t => { const a = Date.parse(t); return `${new Date(a).toISOString().slice(11, 16)}–${new Date(a + 3 * 3600e3).toISOString().slice(11, 16)} UTC`; };
 const base = () => ({ usgs: usgs(), firms: firms(), ships: ships(), swpc: { cells: kp(KP_TAG) }, co2: { cells: co2('2026-11-13') }, seaice: { cells: ice('2026-11-13', '2026-11-13') } });
@@ -81,7 +87,7 @@ const base = () => ({ usgs: usgs(), firms: firms(), ships: ships(), swpc: { cell
     for (const k of ['usgs', 'firms', 'ships']) ok(`F1 ${k}: still "current"`, r[k].word === 'current' && r.states[k].startsWith('current — '), [r[k].word, r.states[k]]);
     ok('F2 CO₂ tooltip: both times, the date in words', r.co2.tip === 'Our copy was retrieved 52 min ago. This value is for 13 November 2026.', r.co2.tip);
     ok('F2 CO₂ card still shows the observation date', /daily mean for 2026-11-13/.test(r.co2.obs), r.co2.obs);
-    ok('F2 Kp tooltip: names the UTC interval and its date', r.swpc.tip === `Our copy was retrieved 52 min ago. This value is for the interval ${kpIv(KP_TAG)} on ${longDate(KP_TAG)}.`, r.swpc.tip);
+    ok('F2 Kp tooltip: names the UTC interval and its date', r.swpc.tip === 'Our copy was retrieved 52 min ago. This value is for the interval 03:00–06:00 UTC on 15 November 2026.', r.swpc.tip);
     ok('F2 Kp card still shows the interval and its age', new RegExp(`^interval ${kpIv(KP_TAG).replace(/[–]/g, '–')}, began \\d`).test(r.swpc.obs), r.swpc.obs);
     ok('F2 Sea ice tooltip, same date in both hemispheres: one date', r.seaice.tip === 'Our copy was retrieved 1.9 h ago. This value is for 13 November 2026.', r.seaice.tip);
     ok('F2 Sea ice card and report, same date: unchanged wording', r.seaice.obs === 'daily extent for 2026-11-13 (~1 day latency)' && /sea ice on 2026-11-13: Arctic 8\.95 M km², Antarctic 15\.02 M km²/.test(r.report), [r.seaice.obs, r.report.slice(r.report.indexOf('sea ice'), r.report.indexOf('sea ice') + 90)]);
@@ -106,25 +112,57 @@ const base = () => ({ usgs: usgs(), firms: firms(), ships: ships(), swpc: { cell
     ok('degraded Kp: "degraded", tooltip is the collector\'s own reason, not the two-time sentence', r.swpc.word === 'degraded' && !TIP.test(r.swpc.tip) && r.swpc.tip.length > 10 && r.states.swpc.startsWith('degraded — '), r.swpc);
     ok('down CO₂: "unknown — collector reported down: http 503", as before', r.co2.word === 'unknown' && r.co2.tip === 'collector reported down: http 503' && r.states.co2 === 'unknown — collector reported down: http 503', [r.co2, r.states.co2]);
     ok('stale Sea ice: "unknown", the stale reason, as before', r.seaice.word === 'unknown' && /^last snapshot is over 8 h old/.test(r.seaice.tip), r.seaice); await ctx.close(); }
-  { const L = base(); L.co2 = { cells: co2('soon') }; L.swpc = { cells: kp('not a time') }; L.seaice = { cells: ice('2026-11-13', undefined) };
-    const { ctx, page, perr } = await open(L); const r = await read(page);
-    ok('CO₂ with an unreadable date: the tooltip says the date was not supplied, never a guessed one', r.co2.tip === 'Our copy was retrieved 52 min ago. The date of this value was not supplied.', r.co2.tip);
-    ok('Kp with an unreadable time: the tooltip says the interval could not be read', r.swpc.tip === 'Our copy was retrieved 52 min ago. The interval of this value could not be read.', r.swpc.tip);
-    ok('Sea ice with no Antarctic date: the tooltip names the Arctic date and says the other was not supplied', r.seaice.tip === 'Our copy was retrieved 1.9 h ago. The Arctic value is for 13 November 2026; the Antarctic date was not supplied.', r.seaice.tip);
-    ok('unreadable dates: no "undefined", "NaN" or "Invalid" in any tooltip; no page error', !/undefined|NaN|Invalid/.test(r.co2.tip + r.swpc.tip + r.seaice.tip) && !perr.length, [r.co2.tip, r.swpc.tip, r.seaice.tip, perr]); await ctx.close(); }
+  // ---- round 2: missing or impossible observation dates are "not supplied" on EVERY surface, never "undefined" or a made-up day
+  const srcRows = async L => { const s = await open(L, { page: 'sources.html' }); await s.page.waitForFunction(() => document.querySelectorAll('#t-dates tr').length > 3, null, { timeout: 20000 }).catch(() => { });
+    const t = await s.page.evaluate(() => { const rows = [...document.querySelectorAll('#t-dates tr')].map(tr => tr.innerText.replace(/\s+/g, ' ')); return { ice: rows.find(x => /^Sea ice/.test(x)) || '', co2: rows.find(x => /^CO/.test(x)) || '', kp: rows.find(x => /^Kp/.test(x)) || '', all: document.body.innerText }; }); const perr = s.perr; await s.ctx.close(); return { ...t, perr }; };
+  const BAD = /undefined|NaN|Invalid|null/;
+  for (const [tag, d] of [['a word', 'soon'], ['missing', undefined], ['31 February', '2026-02-31'], ['month 13', '2026-13-01']]) { const L = base(); L.co2 = { cells: co2(d) };
+    const { ctx, page, perr } = await open(L); const r = await read(page); const rep = r.report.split('; ').find(x => /^CO₂/.test(x)) || '';
+    ok(`CO₂ date ${tag}: tooltip says the date was not supplied`, r.co2.tip === 'Our copy was retrieved 52 min ago. The date of this value was not supplied.', r.co2.tip);
+    ok(`CO₂ date ${tag}: the card says so too`, r.co2.obs === 'daily mean; the date was not supplied (preliminary), Mauna Loa, Hawaii', r.co2.obs);
+    ok(`CO₂ date ${tag}: the report says so too`, /^CO₂ 428\.88 ppm at Mauna Loa \(date not supplied\) \(NOAA GML/.test(rep), rep.slice(0, 90));
+    ok(`CO₂ date ${tag}: nothing prints "undefined", "NaN", "Invalid", "null" or "February"`, !BAD.test(r.co2.tip + r.co2.obs + rep) && !/February/.test(r.co2.tip + r.co2.obs + rep) && !perr.length, [r.co2.tip, r.co2.obs, rep.slice(0, 80), perr]); await ctx.close();
+    const t = await srcRows(L); ok(`CO₂ date ${tag}: the Sources row says so too`, /daily mean; the date was not supplied/.test(t.co2) && !BAD.test(t.co2) && !t.perr.length, t.co2); }
+  for (const [tag, dN, dS, exp] of [
+    ['no Antarctic date', '2026-11-13', undefined, { tip: 'The Arctic value is for 13 November 2026; the Antarctic date was not supplied.', obs: 'daily extent: Arctic for 2026-11-13, Antarctic date not supplied (~1 day latency)', rep: /sea ice: Arctic 8\.95 M km² on 2026-11-13, Antarctic 15\.02 M km² \(date not supplied\) \(NSIDC;/ }],
+    ['impossible Antarctic date', '2026-11-13', '2026-02-31', { tip: 'The Arctic value is for 13 November 2026; the Antarctic date was not supplied.', obs: 'daily extent: Arctic for 2026-11-13, Antarctic date not supplied (~1 day latency)', rep: /sea ice: Arctic 8\.95 M km² on 2026-11-13, Antarctic 15\.02 M km² \(date not supplied\) \(NSIDC;/ }],
+    ['no Arctic date', 'n/a', '2026-11-12', { tip: 'The Antarctic value is for 12 November 2026; the Arctic date was not supplied.', obs: 'daily extent: Arctic date not supplied, Antarctic for 2026-11-12 (~1 day latency)', rep: /sea ice: Arctic 8\.95 M km² \(date not supplied\), Antarctic 15\.02 M km² on 2026-11-12 \(NSIDC;/ }],
+    ['neither date', undefined, undefined, { tip: 'The date of this value was not supplied.', obs: 'daily extent: Arctic date not supplied, Antarctic date not supplied (~1 day latency)', rep: /sea ice \(dates not supplied\): Arctic 8\.95 M km², Antarctic 15\.02 M km² \(NSIDC;/ }],
+  ]) { const L = base(); L.seaice = { cells: ice(dN, dS) }; const { ctx, page, perr } = await open(L); const r = await read(page); const rep = r.report.slice(r.report.indexOf('sea ice'), r.report.indexOf('sea ice') + 120);
+    ok(`Sea ice, ${tag}: tooltip`, r.seaice.tip === 'Our copy was retrieved 1.9 h ago. ' + exp.tip, r.seaice.tip);
+    ok(`Sea ice, ${tag}: card`, r.seaice.obs === exp.obs, r.seaice.obs);
+    ok(`Sea ice, ${tag}: report`, exp.rep.test(r.report), rep);
+    ok(`Sea ice, ${tag}: nothing prints "undefined", "NaN", "Invalid" or "February"; no page error`, !BAD.test(r.seaice.tip + r.seaice.obs + rep) && !/February/.test(r.seaice.tip + r.seaice.obs + rep) && !perr.length, [r.seaice.tip, r.seaice.obs, rep, perr]); await ctx.close();
+    const t = await srcRows(L); ok(`Sea ice, ${tag}: the Sources row carries the card's wording`, t.ice.includes(exp.obs) && !BAD.test(t.ice) && !t.perr.length, t.ice); }
+  { const L = base(); L.swpc = { cells: kp('not a time') }; const { ctx, page, perr } = await open(L); const r = await read(page);
+    ok('Kp with an unreadable time: tooltip says the interval could not be read; the card keeps its own plain sentence', r.swpc.tip === 'Our copy was retrieved 52 min ago. The interval of this value could not be read.' && /interval time unknown/.test(r.swpc.obs) && !BAD.test(r.swpc.tip + r.swpc.obs) && !perr.length, [r.swpc.tip, r.swpc.obs, perr]); await ctx.close(); }
+  { const L = base(); L.swpc = { cells: kp('2026-11-14T21:00:00Z') }; const { ctx, page } = await open(L); const r = await read(page);
+    ok('Kp interval that crosses midnight: both days named', r.swpc.tip === 'Our copy was retrieved 52 min ago. This value is for 21:00 UTC on 14 November to 00:00 UTC on 15 November 2026.', r.swpc.tip);
+    const pure = await page.evaluate(() => ({ ny: ME.kpIntervalLong('2026-12-31T21:00:00Z'), same: ME.kpIntervalLong('2026-11-15T18:00:00Z'), bad: ME.kpIntervalLong('x'),
+      dates: ['2026-11-13', '2024-02-29', '2026-02-29', '2026-02-31', '2026-04-31', '2026-13-01', '2026-00-10', '2026-11-00', 'soon', '', null, undefined, 20261113].map(d => ME.validDate(d)), long: ME.longDate('2026-11-03') }));
+    ok('Kp interval across a year end names both years', pure.ny === '21:00 UTC on 31 December 2026 to 00:00 UTC on 1 January 2027' && pure.same === 'the interval 18:00–21:00 UTC on 15 November 2026' && pure.bad === null, pure);
+    ok('ME.validDate accepts only real calendar days', JSON.stringify(pure.dates) === JSON.stringify(['2026-11-13', '2024-02-29', null, null, null, null, null, null, null, null, null, null, null]) && pure.long === '3 November 2026', pure); await ctx.close(); }
+
+  // ---- round 2: an unreadable retrieval time is never "fresh copy" and never "NaN"
+  for (const k of ['co2', 'swpc', 'seaice']) { const L = base(); L[k] = { cells: { ...L[k].cells, retrieved_at: 'n/a' } }; const { ctx, page, perr } = await open(L); const r = await read(page);
+    ok(`${k} with an unreadable retrieval time: badge "unknown", plain reason, no value claimed as fresh`, r[k].word === 'unknown' && r[k].cls === 'state bad' && r[k].tip === 'the time our copy was retrieved could not be read' && r.states[k] === 'unknown — the time our copy was retrieved could not be read', [r[k], r.states[k]]);
+    ok(`${k} with an unreadable retrieval time: the card line reads "retrieved at an unreadable time" and gives the reason`, / · retrieved at an unreadable time · the time our copy was retrieved could not be read$/.test(r[k].src), r[k].src);
+    ok(`${k} with an unreadable retrieval time: no "NaN" or "undefined" on the card, in the report or its states; no page error`, !/NaN|undefined/.test(r[k].tip + r[k].src + r[k].obs + r.report + JSON.stringify(r.states)) && !perr.length, [r[k].src, perr]); await ctx.close(); }
 
   // ---- F3: ships retrieval time
   for (const [tag, sh, exp] of [
     ['adequate sample', ships(iso(32 * 60e3)), { age: /^aisstream\.io · retrieved 32 min ago · /, end: true }],
-    ['stale real sample', ships(iso(4 * 3600e3)), { age: /^aisstream\.io · retrieved 4\.0 h ago · /, end: true, unknown: true }],
+    ['stale real sample', ships(iso(4 * 3600e3)), { age: /^aisstream\.io · retrieved 4\.0 h ago · /, end: true, unknown: true, once: '4.0 h ago' }],
     ['down run', { cells: shipsDown(), snap: ships(GOOD).snap }, { age: null, end: false, unknown: true }],
-    ['sample with an unreadable retrieval time', (s => ({ cells: { ...s.cells, retrieved_at: 'n/a' }, snap: { ...s.snap, retrieved_at: 'n/a' } }))(ships(NOW)), { age: null }],
+    ['sample with an unreadable retrieval time', (s => ({ cells: { ...s.cells, retrieved_at: 'n/a' }, snap: { ...s.snap, retrieved_at: 'n/a' } }))(ships(NOW)), { age: null, unknown: true, reason: 'the time our copy was retrieved could not be read' }],
   ]) { const L = base(); L.ships = sh; const { ctx, page, perr } = await open(L).catch(e => ({ err: e })); if (!page) { ok(`F3 ${tag}: page opened`, false, String(perr)); continue; }
     const r = await read(page);
-    ok(`F3 ${tag}: source line ${exp.age ? 'gives "retrieved N ago"' : 'gives no retrieval age'}`, exp.age ? exp.age.test(r.ships.src) : !/retrieved/.test(r.ships.src), r.ships.src);
+    ok(`F3 ${tag}: source line ${exp.age ? 'gives "retrieved N ago"' : 'gives no retrieval age'}`, exp.age ? exp.age.test(r.ships.src) : !/· retrieved /.test(r.ships.src), r.ships.src);   // "· retrieved <age>" is the label; the plain reason may contain the word
     ok(`F3 ${tag}: never says "received"`, !/received \d/.test(r.ships.src), r.ships.src);
     if (exp.end !== undefined) ok(`F3 ${tag}: sample end ${exp.end ? 'still visible' : 'not claimed'}`, /^sample ended \d\d:\d\d UTC/.test(r.ships.obs) === exp.end, r.ships.obs);
     if (exp.unknown) ok(`F3 ${tag}: the existing "current positions unknown —" reason is kept`, /current positions unknown — /.test(r.ships.src), r.ships.src);
+    if (exp.once) ok(`F3 ${tag}: the age appears once on the line, with the retrieval label; the reason keeps "last sample is over 3 h old"`, r.ships.src.split(exp.once).length === 2 && /last sample is over 3 h old; current positions unknown/.test(r.ships.src), r.ships.src);
+    if (exp.reason) ok(`F3 ${tag}: badge unknown with the plain reason; no "NaN"`, r.ships.word === 'unknown' && r.ships.src.includes(exp.reason) && !/NaN/.test(r.ships.src + r.ships.tip + r.report), [r.ships.word, r.ships.src]);
     ok(`F3 ${tag}: no page error`, !perr.length, perr); await ctx.close(); }
 
   // ---- layout: the longer badge neither wraps nor meets the card title
