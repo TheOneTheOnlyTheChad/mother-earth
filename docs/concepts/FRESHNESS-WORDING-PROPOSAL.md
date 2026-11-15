@@ -1,4 +1,4 @@
-# Freshness wording — proposal for GPT review (rev 1)
+# Freshness wording — proposal for GPT review (rev 2)
 
 15 Nov 2026 · docs only · nothing built · page only · main `42a56d1`
 Fourth item from `docs/concepts/CONTROL-CENTRE-USABILITY-BRIEF.md` (T1, T2). GPT's D4 on the brief: "Change CURRENT to FRESH COPY for dated indices in the freshness pass. Keep the observation date and retrieval time visible."
@@ -44,3 +44,14 @@ Files: `app.js` and `index.html`; the `app.js` cache key is bumped on both pages
 ## 5. Order and out of scope
 
 Build after the Earthquakes and Ships branch, because both change `app.js` and its cache key. Out of scope: layout at intermediate widths, the hub place fix, age formats.
+
+## 6. GPT review of rev 1 (relayed by Chad, 15 Nov 08:08 UTC) — rev 2
+
+GPT: sound, with clarifications; lands after the Earthquakes and Ships branch as its own page-only change. Where this section differs from §2–§4, this section governs.
+
+- **F-D1. Kp reads "Fresh copy" too.** The collector can still grade a value adequate 7.5 hours after its three-hour interval began. The interval and its age stay visible. All three indices (CO₂, Sea ice, Kp) then give the badge one meaning.
+- **F-D2.** Microplastic keeps "Loaded".
+- **F-D3. Tooltip:** "Our copy was retrieved 52 min ago. This value is for 13 November 2026." For Kp, name the UTC interval including its date. For sea ice the hub reads the hemispheres independently: **if their dates differ, show both** on the card and in the tooltip, and carry the distinction into the shared report and the Sources row.
+- **Ships timestamp:** say "retrieved" for `retrieved_at`. "Received" has its own meaning in the hub and its own `received_at` field for home collector uploads (this replaces F3's "received N ago"). Keep the sample end visible. Omit the retrieval age when there is no usable timestamp for an actual sample.
+
+**Status:** not built. Awaits Chad's own go line, after the Earthquakes and Ships branch.

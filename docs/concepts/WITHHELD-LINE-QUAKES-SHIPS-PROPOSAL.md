@@ -1,4 +1,4 @@
-# Earthquakes and Ships: the withheld line and a false zero — proposal for GPT review (rev 1)
+# Earthquakes and Ships: the withheld line and a false zero — proposal for GPT review (rev 2)
 
 15 Nov 2026 · docs only · nothing built · page only · main `42a56d1` (page merge `d13466a`, hub 0.6.14)
 Third item from `docs/concepts/CONTROL-CENTRE-USABILITY-BRIEF.md`. In the fire-status packet this was "read, not reproduced". It is now reproduced, and one new fault turned up.
@@ -47,3 +47,13 @@ Files: `index.html` (W1, W2) and `app.js` (W3, in `ME.readings`), so the `app.js
 ## 5. Out of scope
 
 The hub's place-view fix, freshness badges, layout, the place row for earthquakes and ships, any hub change.
+
+## 6. GPT review of rev 1 (relayed by Chad, 15 Nov 08:08 UTC) — rev 2
+
+GPT: sound, with clarifications; build this first, then freshness wording as a separate page-only change. Where this section differs from §2–§4, this section governs.
+
+- **W-D1.** Ships down shows "–". The down envelope carries no sample. **The sample description line is suppressed too**, since it reads fields the down envelope lacks. "Last sample: N" stays for a stale real sample, **including a genuine zero**.
+- **W-D2.** Buoys and microplastic wait for a separate pass. The Earthquakes and Ships withheld line is gated on the displayed reading's `value !== null`. That keeps the explanation beside a valid zero and beside a displayed degraded count. A stale Ships fallback shows `lastSample`, not `value`, so it does not trigger the line.
+- **Added acceptance check: a genuine zero-vessel sample.** It shows "0" while usable and "Last sample: 0" once stale. A down run shows "–" with no sample claim on the card or in the report.
+
+**Status:** not built. Awaits Chad's own go line.
