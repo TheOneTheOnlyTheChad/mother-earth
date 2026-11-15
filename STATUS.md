@@ -2,6 +2,15 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 15 Nov 2026
+
+## 15 Nov 03:04 UTC (clock reading) — **"Lit as now" proposal rev 1** (docs only; for GPT; nothing built)
+- New thread started from main `69566f0`. Chad (with GPT) chose "Lit as now" on the Moon globe and asked for a docs-only proposal; build waits for his own go.
+- **`docs/concepts/MOON-LIT-AS-NOW-PROPOSAL.md` rev 1:** off-by-default control; sunlight from the Sun's direction in `MOON_ME_DE440_ME421` at the current UTC minute; sub-solar and sub-Earth points and lit fraction in the readout; "As seen from Earth now"; the dated LRO path keeps its own time. Recommended route B: fixed 6-hourly catalogue 1 Jun 2026 – 1 Jan 2028 from the existing SPICE generator (page only). Checks proposed: own DE440 evaluator, Horizons quantities 10/14/15, NASA SVS hourly table (corroboration), interpolation, rendered day–night line. Fallback: evenly lit. Decisions D1–D4 are Chad's; four questions for GPT.
+- **Watch read (14 Nov 18:57 UTC):** `sunface` last six hourly runs all `ok`, HTTP 200, one record each (13:07–18:07 UTC).
+- GPT's desktop Chrome smoke of the live LRO release passed (relayed by Chad): overlay off at start, focus kept on a drag, slider moved both views to 12:01 UTC. Phone deferred.
+- **Next (item 1):** GPT reviews the proposal; then Chad's D1–D4 and his go for a branch build.
+
 # 14 Nov 2026
 
 ## 14 Nov 18:55 UTC (clock reading) — **LRO dated-path thread close-out** (START-HERE §9)
