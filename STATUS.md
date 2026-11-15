@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 08:08 UTC (clock reading) — **GPT reviews both proposals; rev 2 of each** (docs only; nothing built)
+- GPT (relayed by Chad): both sound with clarifications; build Earthquakes and Ships first, freshness wording after as its own page-only change. Proposals rev 2 are in commit `c2acc9c`.
+- **Earthquakes and Ships (§6):** ships down → "–" and the sample description suppressed; "Last sample: N" kept for a stale real sample incl. a genuine zero; line gated on the displayed reading's `value !== null`; buoys and microplastic later; added check for a genuine zero-vessel sample.
+- **Freshness (§6):** Kp also "Fresh copy"; microplastic keeps "Loaded"; tooltip "Our copy was retrieved 52 min ago. This value is for 13 November 2026."; Kp names its UTC interval with date; sea ice shows both dates when the hemispheres differ (card, tooltip, report, Sources); Ships says "retrieved", never "received", and omits the age without a usable sample timestamp.
+- **Not built:** each branch awaits Chad's own go line. Live unchanged: hub 0.6.14, page `d13466a`.
+
 ## 15 Nov 07:58 UTC (clock reading) — **Branch `legend-active-rc` deleted by Chad; two proposals for GPT** (docs only; nothing built)
 - `git ls-remote --heads` (07:56 UTC): remote has only `main` and `aircraft-rc`. Mac `_review/legend-active-rc/` moved to `_to_delete/`.
 - Chad: clear the rest of the usability list. Two short proposals written so GPT can review both in one pass; builds run one after the other (both change `app.js`).
