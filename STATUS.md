@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 03:11 UTC (clock reading) — **GPT passes "Lit as now" proposal rev 2 at docs review; rev 2.1 records its acceptance clarifications** (docs only; nothing built)
+- GPT (relayed by Chad): rev 2 passes; recommendations stand (D1 B · D2 off · D3 faint floor · D4 conditional). Clarifications carried into the branch checks as proposal §10: camera distance read after settle and resize, Earth view stays centred as the clock ticks, ordinary camera restored on exit; mask probes at ±0.5° and ±1°, rendered points against an evenly lit capture at the same pose, phase count on the mask's 50% contour; June matrices at the exact archived SPK epochs.
+- **Next (item 1):** Chad's own D1–D4 and his go for the branch build (relayed GPT text is not a go).
+
 ## 15 Nov 03:09 UTC (clock reading) — **"Lit as now" proposal rev 2** (GPT's review of rev 1 applied; docs only; nothing built)
 - GPT (relayed by Chad): rev 1 a good basis; rev 2 wanted before a branch go. Main finding: the present camera distorts the phase (75% phase covers about 84% of the rendered disc), so the rendered-disc gate would fail with correct sunlight.
 - **Reproduced:** 84.1% at 3.2 radii (desktop), 83.0% at 3.6; 75.3% at 100 radii.

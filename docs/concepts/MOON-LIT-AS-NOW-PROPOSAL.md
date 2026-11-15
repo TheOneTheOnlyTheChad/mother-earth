@@ -1,6 +1,8 @@
 # Mother Earth · "Lit as now" on the Moon globe
 
-**Rev 2 · 15 November 2026 · proposal for GPT re-check · docs only**
+**Rev 2.1 · 15 November 2026 · passed GPT's docs review · docs only**
+
+Rev 2.1 adds §10: GPT's acceptance clarifications for the branch (no design change).
 
 Rev 2 applies GPT's review of rev 1 (relayed by Chad, 15 Nov): device clock only; near-flat shading with a narrow edge; a distant camera for the Earth view; like-for-like Horizons comparison; new both-on wording. Changes are listed in §9.
 
@@ -127,6 +129,23 @@ GPT's recommendation on rev 1 (relayed): D1 B · D2 off · D3 faint floor · D4 
 - Checks: unit-vector angles, after rounding; every interval midpoint; Horizons compared like for like with the catalogue-convention residual reported separately; SVS as cited test-only corroboration.
 - Both-on wording replaced with GPT's; each time stays beside its own control.
 - Pinned inputs and whole-range coverage stated; renewal before 1 Jan 2028 recorded on release.
+
+## 10. Acceptance clarifications for the branch (GPT, relayed by Chad, 15 Nov)
+
+GPT passed rev 2 at docs review and accepted the 100-radii narrowed-field camera, the ±1° transition and the ±2° probes. These are added to the §3 checks:
+
+**Earth view camera**
+- Read the actual camera distance after the controls settle and again after a resize; confirm the disc keeps its intended size.
+- While Earth view is active, it stays centred on the current sub-Earth point as the clock ticks.
+- On exit or fallback, the ordinary camera settings are restored so drag and zoom work on the first input.
+
+**Mask and rendered checks**
+- Add mask probes at ±0.5° and ±1° to verify the transition's width and its edges (the ±2° and midpoint probes alone could pass with a wrong width).
+- Rendered check: compare the same visible surface points against an evenly lit capture at the same camera pose.
+- Phase percentage: count disc pixels on the day side of the mask's 50% contour, so the night floor and map brightness have no effect on the count.
+
+**June rotation**
+- Compare the June rotation matrices at the exact archived SPK epochs recorded in `checks/moonfixed-checks.json`. The six-hour lighting grid and those archived epochs are separate inputs.
 
 ## Source references
 
