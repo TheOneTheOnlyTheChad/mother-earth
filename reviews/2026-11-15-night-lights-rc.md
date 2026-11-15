@@ -1,6 +1,7 @@
-# Night lights — release candidate for GPT review (rev 2)
+# Night lights — release candidate for GPT review (rev 3)
 
-15 Nov 2026 · branch `night-lights-rc` · code head `e2d419b1b5618a3af967f85a807cf9bfe048af00` (commit time 17:28:57 UTC), from main `3f87d36`
+15 Nov 2026 · branch `night-lights-rc` · code head `7457568ae662aa42a32545f8388c2f6e20a7ee66` (commit time 19:46:23 UTC), from main `3f87d36`
+**Rev 3:** round 3, the release work, is in §11, which governs where it differs from §1–§10. Earlier code heads: `69a2489` (rev 1), `e2d419b` (rev 2).
 **Rev 2:** GPT's round 1 held `8b833ed` for one fix. It is in §10, which governs where it differs from §1–§9. Rev 1's code head was `69a2489`; §1–§9 describe it and are left as written.
 **Preview. Page only. Not merged, nothing deployed, no hub change, no REGISTER filing.**
 Built on Chad's line: "Go: build night-lights-rc on a branch per NIGHT-LIGHTS-PROPOSAL rev 2 (§9 governing; page only; no merge)".
@@ -161,3 +162,88 @@ The other existing suites were not rerun: the only page file that changed since 
 **Cost of the fix:** when a probe passes and its full frame fails, about 0.9 MB is fetched and discarded before the next date is tried. Not seen live.
 
 **Still as §7**, with one addition: a probe and a full frame disagreeing has been seen only in the suite's fixture and in GPT's reproduction.
+
+## 11. Round 3 — release work (Chad's Go, 15 Nov)
+
+Chad: "Go: build night-lights-rc round 3 per NIGHT-LIGHTS-RELEASE-PROPOSAL rev 2 (§8 governing; RL1 direct GIBS, RL2 deferred, RL3 with round 3, RL4 together; branch only; no merge)". **Not merged. REGISTER not filed. Nothing deployed.**
+
+### 11.1 Files at the code head `7457568`
+
+| File | Change this round | sha256 |
+|---|---|---|
+| `nightlights.js` | bounded waits, retry wording, the Sky label call, "No data for this date", the coarse-box note (391 lines) | `fefe6dea…01ff` |
+| `skyscene.js` | the Earth-imagery label is one function, also callable as `ME.zoomImgLabel` (7 lines) | `18e41b2d…89e5` |
+| `index.html` | the card's link goes to `sources.html#nightlights`; keys `nightlights.js?v=202612101000`, `skyscene.js?v=202612101000` | `cc89f5b7…8ba6` |
+| `sources.html` | a Night lights section; one paragraph under "Imagery source and date" | `88cdd78f…3df8` |
+| `style.css` | unchanged since round 1 | `0a03038d…16f4` |
+| `phase1/night-lights-ui.test.cjs` | sections T, S, U, W; five more breaks | |
+| `reviews/2026-11-15-night-lights-register-draft.md` | the REGISTER text, **not filed** | |
+
+`app.js`, the hub and `phase1/night-lights.test.mjs` are unchanged. A release would make **fifteen** page files for the served-hash check (`nightlights.js` is the new one).
+
+### 11.2 The release proposal's items, and what was done
+
+| Item (proposal §4, §8.2) | Done as |
+|---|---|
+| §4.1 Sources & Details section; card link | Done. Section `#nightlights`: what is measured, both layers, how it reaches the page, the date rule on the displayed picture, no fallback after a failure, no data and the seasonal gap, the three states, the threshold label, our changes, credit and NASA's local-scale line. |
+| §4.2 the status report says which picture is on the globe | **Done differently, and `app.js` is not changed.** The report and the imagery rule are shown only on the Sources page, which cannot know what another tab shows (GPT's detail 1). So the Sources page now describes both pictures and says so in one paragraph. On World View, every statement about the imagery already follows the picture: the line on the globe, the full line in the Key, the legend, and now the Sky view's label. |
+| §4.3 5° and 10° boxes say they are coarser | Done: "drawn coarser than the layer's own detail: about 1.2 km a pixel" (5°), computed from the box and grid. |
+| §4.4 REGISTER lines | Drafted, not filed: `reviews/2026-11-15-night-lights-register-draft.md`. |
+| §4.5 / R3-1 Sky zoom-out view | The layer stays on in the view; the view's imagery label is rewritten whenever this layer puts its picture on the globe or takes it off, and whenever the view writes its own strip. Checked for: entering with the layer on; leaving; switching it off inside the view; switching it on inside the view (label unchanged while loading, changed when ready, without leaving); entering while it is loading. |
+| R3-2 bounded waits | Every GIBS request (both keys, every picture) has one 20-second limit covering headers and body. Past it: "NASA GIBS did not answer within 20 seconds", the layer is unavailable and "Switch it on again to retry"; in the comparison "Press Compare to try again". A hang is never worded as "arriving" or "blocked", and no older date is tried after it. |
+| R3-2 blank comparison frame | A date whose light picture comes back with nothing in it reads "No data for this date." under that date, and nothing more specific. |
+| R3-3 NASA's guidance | In the REGISTER draft and proposal §8.3. |
+| §4.6 served-hash count | Fifteen (above). |
+| §4.7 suites; §4.8 keys | Below; keys in §11.1. |
+
+**The 20-second limit is a choice, not a NASA figure.** Basis: the slowest single request seen was the 2048 × 1024 frame at 2.3 s; a whole switch-on took 4.1 to 5.6 s in the pane. GPT and Chad may prefer another number; it is one constant (`WAIT_MS`).
+
+### 11.3 A fault found and fixed inside this round
+
+The first version of the Sources section **widened the Sources page at 360 px from 367 px to 463 px**: the two NASA layer names did not wrap. The full regression run showed it (`smoke-fixes`, "Sources 360", a check that already fails on main at 367 px, so the pass count did not move; the number did). Fixed with break points after the underscores (`7457568`); the page is back to 367 px. A width check for the new section is in the page suite and fails against the unwrapped version. The 367 px on main is older than this branch; its cause is not established.
+
+### 11.4 Results
+
+| Suite | Result |
+|---|---|
+| `phase1/night-lights-ui.test.cjs` | **128 passed, 0 failed** at `7457568` |
+| its 16 breaks (run at `74c7d64`, before the wrap fix; that fix changed `sources.html` and added one check) | each fails the suite: the five new ones are `no-sky-hook` 4 checks, `no-timeout` (stops the suite on a 30 s wait), `hang-as-arriving` 4, `blank-silent` 1, `coarse-silent` 1 |
+| `phase1/night-lights.test.mjs` | 49 passed, 0 failed; its 8 breaks each fail |
+| Full existing set at `74c7d64` | 33 suites pass, including `sky-zoom-ui` 351, `sky-ui` 79, `mobile-pass` 131, `desktop-overflow` 258, `legend-active-ui` 548, `backdrop-layer` 27 |
+| Fail as on main | `osmc-reliability-ui` 40 of 41 (the known one); `smoke-fixes` 51 of 52 ("Sources 360", 367 px, as on main after the fix in §11.3) |
+| Rerun at `7457568` after the wrap fix | `desktop-overflow` 258, `mobile-pass` 131, `backdrop-layer` 27, `smoke-fixes` 51 of 52 at 367 px |
+| Not run | `oceanheat-ui` (its snapshot folder is not in this container) |
+
+Narrow layout and keyboard (RL2): section Q at 390 px, the arrow-key readout in J, and the 360 px width check in W. No real phone, no Safari, no screen reader.
+
+### 11.5 Live check at the site's own address (pane, 18:31 UTC, files hash-checked against `74c7d64`; `sources.html` hashed but not run)
+
+| Check | Result |
+|---|---|
+| Layer on | 14 Nov chosen (15 Nov probe 49.5% missing; 14 Nov full frame 0.302%); ready in 4.1 s |
+| Enter the Sky view with the layer on | The view's label read "Imagery: night lights 14 Nov 2026"; the globe carried the night picture |
+| Switch off inside the view | Label "Imagery: 14 Nov 2026" (the true-colour picture, whose date that day was also 14 Nov); true-colour picture |
+| Switch on inside the view | While loading: true-colour label and picture. When ready: night-lights label and picture, without leaving |
+| Leave the view; switch off | World View showed and named night lights; off restored the true-colour line |
+| Saipan and Tinian, 19 March and 20 April | 57%, 92%, 50%; Saipan 2,854.1 and 769.9, as recorded; 0.9 s |
+| A 5° box about the same point | "480 × 480 pixels · drawn coarser than the layer's own detail: about 1.2 km a pixel"; 1.1 s; 432,729 bytes for the four pictures |
+| A date after today | Refused with the range, no request |
+| Today's date (15 Nov) for that box | "15 Nov 2026 (UTC) No data for this date."; 0% readable on it; 0% usable on both |
+
+Not seen live: a request that hangs or fails, a blocked read, a probe and a full frame disagreeing. Those are from the suites only.
+
+### 11.6 Open, for GPT and Chad
+
+- The threshold label still reads "Chosen for this preview; not a NASA standard" on a page that would be released. The wording is the one agreed for the preview; whether "preview" stays is a wording decision.
+- "No complete night frame yet …" carries no retry sentence (it is not a failure); nor does the blocked-read message (a retry would not help).
+- The Sources page's menu line of section links does not list Night lights; the card links to the section.
+- Everything in §7 that this round did not close: a real phone, Safari, a screen reader; moonlit frames; when a UTC date finishes filling.
+
+### 11.7 For GPT's local preview and Chad's look
+
+Mac: `~/Documents/Mother Earth/_review/night-lights-rc/` (branch head with this packet). Acceptance case as §8. For Chad's look, Claude can open this candidate in the app's browser pane at the site's own address, as in §11.5.
+
+### 11.8 Lines still needed from Chad (none given)
+
+- `Approve: file the two GIBS Night lights layer lines in REGISTER (draft reviews/2026-11-15-night-lights-register-draft.md rev 1)`
+- `Approve: merge night-lights-rc at <reviewed head> to main (page change: Night lights layer and two-night comparison)`
