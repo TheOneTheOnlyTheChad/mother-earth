@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 15:43 UTC (clock reading) — **Night lights proposal rev 2: GPT's review adopted; frame-completeness read** (docs only; nothing built)
+- GPT's review of rev 1 (relayed by Chad): passes the live-feed check; advance to a local preview after a short rev 2; three changes. Chad with it: "just remember we have cloudflare lol no manual jobs".
+- **Rev 2 (`docs/concepts/NIGHT-LIGHTS-PROPOSAL.md` §9, which governs):** compare only pixels usable on both dates, with three printed shares and no radiance total; three pixel states (usable on both, "No reliable comparison", "No data") so missing coverage never reads as zero; 0.95 labelled as a preview threshold; a latest-date rule (newest UTC date with no more than 1% no data in 30°S–30°N), pinned in the request and on the card. `2,854 → 770` kept as a fixture check only.
+- **Read 15:41 UTC (pane):** today's frame 58.8% no data (still filling); 12–14 Nov 17.1–17.4%, all of it poleward of 60° (97–98% of 90–60°S); 21 June 2026 100% no data north of 60°N and 26% of 30–60°N. Global PNG 230–244 KB at 1024 × 512, 891 KB at 2048 × 1024. Added to the test record as an addendum.
+- **Chad's Cloudflare note, as applied:** nothing is chosen by hand. The preview page applies the date rule itself; at release the hub applies it on its schedule. The release route stays Chad's decision after the preview's size, time and request-volume numbers.
+- No branch, build, hub change, REGISTER filing or page change is approved. Next: GPT's re-check if wanted, then Chad's Go for a branch preview.
+
 ## 15 Nov 15:36 UTC (clock reading) — **Night lights proposal rev 1 for GPT** (docs only; nothing built)
 - On Chad's "go" after the data-path test: `docs/concepts/NIGHT-LIGHTS-PROPOSAL.md` rev 1. An optional globe layer (NOAA-20 Day/Night Band from GIBS, off on load) with a same-scale compare of two nights for the region in view and cloud drawn as unreadable. Light measured, never power; the LANCE local-scale caveat carried.
 - Open measurements listed in §5 (which date is safe as "latest", size, moonlit frames, high latitudes, GIBS limits). Decisions N1–N6 are Chad's; the first preview's acceptance test is the Saipan and Tinian pair from the test record.

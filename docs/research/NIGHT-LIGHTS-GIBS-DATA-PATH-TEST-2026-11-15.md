@@ -45,3 +45,20 @@ Is NASA's nighttime-light data a live feed, and can one same-scale before-and-af
 
 ## Not opened by Claude
 NASA's Sinlaku map service and the Weather Service impact narrative (links relayed from GPT); the LANCE archive.
+
+## Addendum — frame completeness, size and time (read 15 Nov 2026 15:41 UTC, pane)
+
+Whole globe, `VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance`, WMS 1.3.0, 1024 × 512 PNG, transparent pixels counted as no data. Bands: 90–60°S, 60–30°S, 30°S–0, 0–30°N, 30–60°N, 60–90°N.
+
+| UTC date | Whole globe | By band |
+|---|---|---|
+| 15 Nov 2026 (at 15:41 UTC) | 58.8% | 100, 54, 57, 57, 53, 34% |
+| 14 Nov 2026 | 17.4% | 98, 0, 0, 0, 0, 6% |
+| 13 Nov 2026 | 17.3% | 98, 0, 0, 0, 0, 6% |
+| 12 Nov 2026 | 17.1% | 97, 0, 0, 0, 0, 6% |
+| 8 Nov 2026 | 16.5% | 93, 0, 0, 0, 0, 6% |
+| 21 Jun 2026 | 21.8% | 5, 0, 0, 0, 26, 100% |
+
+- Sizes and times, one request each: 1024 × 512 light 230–244 KB for complete dates (132 KB for the filling date), 1.0–1.4 s; 2048 × 1024 light 891 KB, 2.3 s; 1024 × 512 clear-sky confidence (14 Nov) 297 KB, 2.2 s, 8.4% no data (50% of 90–60°S).
+- No pixel carried the colour map's own no-data colour; no data arrives as transparency.
+- One read at one time of day. When a UTC date finishes filling was not measured.
