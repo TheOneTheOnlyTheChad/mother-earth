@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 09:03 UTC (clock reading) — **freshness-wording-rc built: "fresh copy" for dated indices, two-time tooltip, Ships retrieval time** (branch only; page only; nothing merged; for GPT)
+- Chad: "Go: build freshness-wording-rc on a branch per FRESHNESS-WORDING-PROPOSAL rev 2 (§6 governing; page only; no merge)" (sent with the Earthquakes and Ships merge approval). Branch from main `df8f2fe`.
+- **Built:** `app.js` (`ME.stateWord`, `ME.longDate`, `ME.valueFor`, `ME.freshTip`; sea ice carries both hemisphere dates; ships `retrievedAge`), `index.html` (tooltip; Ships "retrieved N ago"), `sources.html` (cache key). `app.js?v=202612021000`. Packet: `reviews/2026-11-15-freshness-wording-rc.md`.
+- **Tests:** new `freshness-wording-ui` 63/0, five breaks fail. Regression across 21 browser suites and 3 node suites passes with no expectation changes; same two failures as main.
+- **For GPT:** stale ships repeats the age (retrieval age plus the reason's own); a Kp interval crossing midnight is dated by its start.
+- **Not tested:** phone, Safari, screen reader, real GPU, the live page. **Not approved:** merge. Live unchanged: hub 0.6.14, page `2b94823`.
+
 ## 15 Nov 08:42:39 UTC (commit time) — **PAGE RELEASED: Earthquakes and Ships withheld line; no sample read from a down ships run** (main merge `2b94823` of `quakes-ships-status-rc` @ `1d6d8a5`; Chad: "Approve: merge quakes-ships-status-rc at 1d6d8a5 to main (page change: Earthquakes and Ships withheld line; no sample read from a down ships run)")
 - **GPT (relayed by Chad):** passes review. Ran the candidate's card and report code through current zero, degraded, stale zero, down and recovery states outside the browser; confirmed matching `app.js` cache keys and that hub code and stylesheet match main.
 - Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch. Remote branch head confirmed `1d6d8a5` before the merge.

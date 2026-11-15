@@ -381,7 +381,29 @@ ME.degradedWhy = function (layer, snap) {
   }
   return 'below our collection-quality standard for this layer — marked by our collector, not by the source';
 };
-ME.stateWord = (f, layer) => f.grade === 'adequate' ? [layer === 'plastic' ? 'loaded' : 'current', 'ok']   // plastic: the badge is about our retrieval, and beside 2011–2024 samples 'current' would read as current observations (GPT review, 4 Nov)
+// Dated indices (15 Nov 2026, freshness-wording-rc; proposal FRESHNESS-WORDING rev 2 §6): for Kp, CO₂ and sea ice an adequate
+// grade means OUR COPY was refreshed within its limit. The value itself is for an earlier day or interval (the collector can
+// still grade Kp adequate 7.5 h after its interval began), so the badge says "fresh copy", never "current".
+ME.DATED_INDICES = ['swpc', 'co2', 'seaice'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+// 'YYYY-MM-DD' → '13 November 2026'; anything else → null (never a guessed or shifted date: no Date parsing, no time zone)
+ME.longDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(typeof d === 'string' ? d : ''); if (!m || +m[2] < 1 || +m[2] > 12 || +m[3] < 1 || +m[3] > 31) return null; return `${+m[3]} ${MONTHS[+m[2] - 1]} ${m[1]}`; };
+// What an index value is FOR, as a sentence. Sea ice: the hub reads the hemispheres independently, so both dates are named when they differ.
+ME.valueFor = function (layer) {
+  const s = state[layer], ix = s && s.index; if (!ix) return null;
+  if (layer === 'co2') { const d = ME.longDate(ix.date); return d ? `This value is for ${d}.` : 'The date of this value was not supplied.'; }
+  if (layer === 'swpc') { const iv = ME.kpInterval(ix.time_tag), d = ME.longDate(ix.time_tag); return iv && d ? `This value is for the interval ${iv} on ${d}.` : 'The interval of this value could not be read.'; }
+  if (layer === 'seaice') { const n = ix.north && ME.longDate(ix.north.date), so = ix.south && ME.longDate(ix.south.date);
+    if (n && so) return n === so ? `This value is for ${n}.` : `The Arctic value is for ${n}; the Antarctic value is for ${so}.`;
+    return n ? `The Arctic value is for ${n}; the Antarctic date was not supplied.` : so ? `The Antarctic value is for ${so}; the Arctic date was not supplied.` : 'The date of this value was not supplied.'; }
+  return null;
+};
+// The badge tooltip for an adequate dated index: both times, in two sentences. Null for every other layer and grade.
+ME.freshTip = function (layer, f) {
+  const s = state[layer]; if (!ME.DATED_INDICES.includes(layer) || !f || f.grade !== 'adequate' || !s) return null;
+  const v = ME.valueFor(layer); return `Our copy was retrieved ${ago(s.retrieved_at)}.` + (v ? ' ' + v : '');
+};
+ME.stateWord = (f, layer) => f.grade === 'adequate' ? [layer === 'plastic' ? 'loaded' : ME.DATED_INDICES.includes(layer) ? 'fresh copy' : 'current', 'ok']   // plastic: the badge is about our retrieval, and beside 2011–2024 samples 'current' would read as current observations (GPT review, 4 Nov)
    : f.grade === 'partial' ? (layer === 'forest' ? [f.sweeping ? 'sweeping' : 'partial', 'warn'] : ['degraded', 'warn']) : ['unknown', 'bad'];   // forest is partial by design (REGISTER): say what it is, not 'degraded'
 
 // ---------- readings: one object per layer that both pages render from (value, unit, observed, source, freshness, coverage, comparison)
@@ -402,7 +424,7 @@ ME.readings = function () {
   // A stale envelope is different: it IS the last sample, and its count (a genuine zero included) is kept as "Last sample: N".
   const sDown = !!(s && s.source_status === 'down'), sample = s && !sDown ? s : null;
   const lastCount = sample ? ME.total(sample) : null;
-  R.ships = { label: LABEL.ships, source: SOURCE.ships, fresh: fs, value: fs.grade !== 'unknown' ? lastCount : null, lastSample: lastCount, unit: `vessel identities in a ${(sample && sample.window_s) || 60} s AIS sample`, down: sDown,
+  R.ships = { label: LABEL.ships, source: SOURCE.ships, fresh: fs, value: fs.grade !== 'unknown' ? lastCount : null, lastSample: lastCount, unit: `vessel identities in a ${(sample && sample.window_s) || 60} s AIS sample`, down: sDown, retrievedAge: sample && Number.isFinite(Date.parse(sample.retrieved_at)) ? ago(sample.retrieved_at) : null,
     sampleEnd: sample && sample.window_end, observed: sample ? `sample ended ${hhmm(sample.window_end)}; ${sample.class_a} Class A + ${sample.class_b} Class B; socket connected ${num(sample.socket_connected_s ?? sample.socket_up_s, 0)} s of ${sample.window_s} s` : '', retrieved: s && s.retrieved_at,
     mode: s && /cloud/.test(s.collected_by || '') ? ME.SHIPS_CLOUD_TEXT : SHIPS_MODE.text, coverage: 'terrestrial AIS only — a cell with no vessels is not an empty sea; positions between samples unknown', quantity: s && s.quantity,
     window: sample ? `${sample.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (sample.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours shown yet — ${ME.kept('ships')}` };
@@ -428,8 +450,8 @@ ME.readings = function () {
   const i = state.seaice, fi = ME.freshness('seaice');
   const pct = h => { const cl = h && h.climatology_1981_2010; if (!cl) return 'no baseline for this day'; const pos = h.value < cl.p10 ? 'below the 10th percentile' : h.value < cl.p25 ? 'between the 10th and 25th percentile' : h.value <= cl.p75 ? 'within the middle half' : h.value <= cl.p90 ? 'between the 75th and 90th percentile' : 'above the 90th percentile'; return `${h.difference_from_average > 0 ? '+' : ''}${num(h.difference_from_average)} vs the 1981–2010 average of ${num(cl.average)} for this day of year (${pos})`; };
   const n = i && i.index && i.index.north, so = i && i.index && i.index.south;
-  R.seaice = { label: LABEL.seaice, source: SOURCE.seaice, fresh: fi, north: n && fi.grade !== 'unknown' ? n.value : null, south: so && fi.grade !== 'unknown' ? so.value : null, unit: 'million km²', date: n && n.date,
-    observed: n ? `daily extent for ${n.date} (~1 day latency)` : '', retrieved: i && i.retrieved_at,
+  R.seaice = { label: LABEL.seaice, source: SOURCE.seaice, fresh: fi, north: n && fi.grade !== 'unknown' ? n.value : null, south: so && fi.grade !== 'unknown' ? so.value : null, unit: 'million km²', date: n && n.date, dateS: so && so.date, datesDiffer: !!(n && so && n.date !== so.date),
+    observed: n ? (so && so.date !== n.date ? `daily extent: Arctic for ${n.date}, Antarctic for ${so.date} (~1 day latency)` : `daily extent for ${n.date} (~1 day latency)`) : '', retrieved: i && i.retrieved_at,
     coverage: 'two numbers per day (area with ≥15% ice concentration); not a map layer; polar-cap imagery not shown (polar night blinds daylight sensors)', quantity: i && i.quantity, window: 'daily extent', cadence: 'collected at 03/09/15/21 UTC',
     comparison: n ? `Arctic ${pct(n)}; Antarctic ${pct(so)}` : 'unknown', comparisonWho: 'baseline is NSIDC\'s 1981–2010 climatology (source-provided); the subtraction is Mother Earth\'s', pctN: n && pct(n), pctS: so && pct(so) };
   return R;
@@ -445,7 +467,7 @@ ME.report = function (R) {
   parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels published in the last 7 days across ${R.forest.cells} queried cells (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; sweep ${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells; 10 m pixels, not hectares; detection date ≠ clearing date; not for area or trend)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
   parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value}, ${ME.kpWhen(R.swpc.observedAt)} (NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; marked degraded by our collector' : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa on ${R.co2.date} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
-  parts.push(R.seaice.north !== null ? `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km² (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
+  parts.push(R.seaice.north !== null ? `${R.seaice.datesDiffer ? `sea ice: Arctic ${num(R.seaice.north)} M km² on ${R.seaice.date}, Antarctic ${num(R.seaice.south)} M km² on ${R.seaice.dateS}` : `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km²`} (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
   parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; none installed');
   return { at: new Date().toISOString(), text: `As of ${new Date().toISOString().slice(11, 16)} UTC: ` + parts.join('; ') + '.', states: Object.fromEntries(Object.entries(R).map(([k, r]) => [k, st(r, k)])) };
 };
