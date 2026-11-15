@@ -3,8 +3,8 @@
 // must FAIL and nothing else may. (With H1a alone undone, a down envelope whose records exist is still caught by H1b / H1c on
 // the re-read, so H1a's own cases are the ones with no records file and with every scan slot taken.) Nothing in the repo is changed.
 // Usage: node phase1/place-down-breaks.mjs
-import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawnSync } from 'node:child_process';
-const here = path.dirname(new URL(import.meta.url).pathname);
+import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawnSync } from 'node:child_process'; import { fileURLToPath } from 'node:url';
+const here = path.dirname(fileURLToPath(import.meta.url));   // not URL.pathname: that keeps %20 for a folder path with a space
 const src = fs.readFileSync(path.join(here, 'worker.js'), 'utf8');
 const BREAKS = [
   ['H1a first read tested the 0.6.14 way (&& !cells.cells)', "if (cells.source_status === 'down') return placeDown(layer, cells);\n", "if (cells.source_status === 'down' && !cells.cells) return placeDown(layer, cells);\n", { 'history-hub': ['PD5'], 'firms-v2': ['PDL4'] }],

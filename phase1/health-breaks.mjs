@@ -1,8 +1,8 @@
 // Breaks must bite (HANDOVER §3): each deliberate break of the health code must make health-hub.test.mjs FAIL.
 // Writes modified copies of worker.js to a temp dir and runs the suite against each. Nothing in the repo is changed.
 // Usage: node phase1/health-breaks.mjs
-import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawnSync } from 'node:child_process';
-const here = path.dirname(new URL(import.meta.url).pathname);
+import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawnSync } from 'node:child_process'; import { fileURLToPath } from 'node:url';
+const here = path.dirname(fileURLToPath(import.meta.url));   // not URL.pathname: that keeps %20 for a folder path with a space
 const src = fs.readFileSync(path.join(here, 'worker.js'), 'utf8');
 const BREAKS = {
   'fail-open on unreadable data': ["r = { healthy: false, reasons: ['health data unreadable: '", "r = { healthy: true, reasons: ['health data unreadable: '"],
