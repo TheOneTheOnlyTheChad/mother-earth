@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 07:46 UTC (clock reading) — **legend-active-rc round 2: GPT's two wording fixes** (branch only; nothing merged)
+- GPT (relayed by Chad): tally design as agreed; desktop Chrome smoke of the local candidate passed on live data (fires off/on 3 → 4; all off → empty message, 0 layers; day/night only → own line, 1 layer); hold for two wording fixes.
+- **Fix 1:** Key definition now says a data layer counts when it draws a symbol or a usable count cell; "a layer that draws nothing" is not counted (the old "count is zero" wording was wrong for a zero-alert Forest cell, which is drawn and counted). **Fix 2:** "(records withheld)" shows only while `usable(layer)` is false; a usable pair that draws cells only reads "<Layer>: cell outlines only".
+- **Tests:** `legend-active-ui` 548/0 with new cases 3c (zero-alert Forest beside zero fires) and 4c (same-run empty records); breaks `always-withheld` and `never-withheld` fail; six earlier breaks still fail. Regression rerun passes (fire-status 279, mobile-pass 131, drifters, plastic, buoy-temp, place, search, status-notes); `osmc-reliability-ui` same failure as main. Packet §7.
+- **Not approved:** merge. Live unchanged.
+
 ## 15 Nov 07:10 UTC (clock reading) — **legend-active-rc built: the legend and "Key · N layers" show what is drawn** (branch only; page only; nothing merged; for GPT)
 - Chad: "Go: build legend-active-rc on a branch per LEGEND-ACTIVE-PROPOSAL rev 2, with §6 governing L1–L3. index.html is the only production file in scope. Add the legend regression checks and update mobile-pass expectations where needed. No merge."
 - **Built (`index.html` only):** `render()` tallies symbols and usable count cells per data layer (`drawnGeom`); `paintLegend()` and `drawnLayers()` read that tally. Counts-only wording; empty sentence; key definition updated. Packet: `reviews/2026-11-15-legend-active-rc.md`.

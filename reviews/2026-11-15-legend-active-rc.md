@@ -1,4 +1,4 @@
-# legend-active-rc — review packet (round 1)
+# legend-active-rc — review packet (rev 2; §7 = round 2)
 
 15 Nov 2026 · branch `legend-active-rc` from main `0373839` · page only · not merged · for GPT
 Proposal: `docs/concepts/LEGEND-ACTIVE-PROPOSAL.md` rev 2 (§6 governs). Chad's go: "Go: build legend-active-rc on a branch per LEGEND-ACTIVE-PROPOSAL rev 2, with §6 governing L1–L3. index.html is the only production file in scope. Add the legend regression checks and update mobile-pass expectations where needed. No merge."
@@ -71,3 +71,22 @@ Real phone, Safari, screen reader, real GPU, the live page. Legend appearance wa
 2. Served-hash check of `index.html` from the pane; live read of the legend line and Key count.
 
 Rollback: revert the merge commit.
+
+## 7. Round 2 (15 Nov 07:46 UTC): GPT's two wording fixes
+
+GPT (relayed by Chad): the same render tally drives the legend and the Key count, as agreed; hold for two wording fixes. GPT reviewed the Mac copy, ran five checks against the candidate's render code with a stub globe (valid zero, counts-only, stale outlines, hollow microplastic rings, zero-alert Forest), then smoke-tested the local candidate in desktop Chrome on live hub data: fires off → on (entry leaves and returns, Key 3 → 4); all data layers off (empty message, 0 layers); day/night only (its own line, 1 layer, empty message stays). Desktop smoke passed; the hold stood for the two fixes, which live data did not exercise.
+
+**Fix 1 — the Key definition.** It said a layer "whose count is zero" never counts, but a Forest cell reporting zero alerts is drawn, shows its swatch and counts (correct under rev 2). The definition now reads: "…each data layer that draws a symbol or a usable count cell (…) … switched-off layers, layers still loading or unavailable, a layer that draws nothing, and cells outlined as unknown are not counted." New case **3c**: one answered Forest cell with zero alerts (drawn, swatch, counted) beside zero fires (nothing drawn, no entry, not counted).
+
+**Fix 2 — "(records withheld)" only when they are.** The suffix is now a separate span shown only while `usable(layer)` is false. A usable pair that draws cells and no symbols reads "Fire detections: cell outlines only". New case **4c**: same run, counts present, records file empty; the page accepts the pair; no suffix, no dot, counted as one. Every counts-only case now also asserts that the suffix appears exactly when the records are not usable.
+
+Also changed: the test aid `ME.legendState()` reads visible text at any depth, so a hidden suffix is not reported as shown.
+
+| Run | Result |
+|---|---|
+| `legend-active-ui` | **548 passed, 0 failed** |
+| New breaks | `always-withheld` (round 1's behaviour) fails 2 · `never-withheld` fails 10 |
+| Earlier breaks, rerun | `always-show` 87 · `mismatch-as-symbols` 19 · `count-old-rule` 6 · `count-unknown-cells` 4 · `no-hollow-rings` 3 · `no-empty-line` 4 failures |
+| Regression rerun | `fire-status-ui` 279 · `mobile-pass` 131 · `drifters-ui` 25 · `plastic-ui` 29 · `buoy-temp-ui` 33 · `place-ui` 30 · `search-ui` 104 · `status-notes-ui` 17, all pass · `osmc-reliability-ui` 40 passed, 1 failed (same "old page" check as main) |
+
+Files changed in round 2: `index.html`, `phase1/legend-active-ui.test.cjs`, this packet, STATUS. The other suites listed in §3 were not rerun (round 2 touches the legend markup, one line of `paintLegend()`, the definition text and the test aid).

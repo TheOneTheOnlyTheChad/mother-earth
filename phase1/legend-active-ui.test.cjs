@@ -3,7 +3,9 @@
  * For the six data layers (earthquakes, fires, ships, forest, drifting buoys, microplastic) the legend line and the count are read
  * from the tally of what the last render handed to the globe:
  *   symbols drawn                         → the layer's entry, counts one
- *   usable count cells, records withheld  → "<Layer>: cell outlines only (records withheld)", no dot, counts one
+ *   usable count cells, no symbols        → "<Layer>: cell outlines only", no dot, counts one; " (records withheld)" is added
+ *                                           only while the records are not usable (round 2: a same-run empty records file is not withheld)
+ *   forest cell reporting zero alerts     → the cell is drawn, so the swatch entry shows and the layer counts (round 2)
  *   valid zero (nothing drawn)            → no entry, no count
  *   stale / unknown outlines only         → no entry, no count (the coverage key covers them)
  *   off, down, loading, unavailable       → no entry, no count
@@ -13,7 +15,7 @@
  * One case runs on the production `lines/1` records file written by the hub's own pipeline.
  * Run: 8899 static server on the repo root, then
  *      NODE_PATH=/home/claude/spike/node_modules node --no-warnings phase1/legend-active-ui.test.cjs
- * BREAK=always-show | mismatch-as-symbols | count-old-rule | count-unknown-cells | no-hollow-rings | no-empty-line   each must fail. */
+ * BREAK=always-show | mismatch-as-symbols | count-old-rule | count-unknown-cells | no-hollow-rings | no-empty-line | always-withheld | never-withheld   each must fail. */
 const { chromium } = require('playwright');
 const fs = require('fs'); const path = require('path'); const { pathToFileURL } = require('url'); const { DatabaseSync } = require('node:sqlite');
 const ROOT = path.join(__dirname, '..');
@@ -28,6 +30,7 @@ const RealDate = Date; const iso = ms => new RealDate(ms).toISOString(); const n
 const EMPTY = 'No data symbols or count cells are drawn right now.';
 const E = { usgs: 'earthquake', firms: 'fire detection (per pass)', ships: 'vessel (last sample)', drifters: 'drifting buoy · coloured by water temperature (see card)', plastic: 'microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero)', forest: 'forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)' };
 const CNT = { usgs: 'Earthquakes: cell outlines only (records withheld)', firms: 'Fire detections: cell outlines only (records withheld)', ships: 'Ships: cell outlines only (records withheld)', drifters: 'Drifting buoys: cell outlines only (records withheld)' };
+const ONLY = Object.fromEntries(Object.entries(CNT).map(([k, v]) => [k, v.replace(' (records withheld)', '')]));   // a usable pair that draws cells and no symbols
 const line = (...parts) => parts.join(' · ');
 
 // ---- page under test (optionally weakened)
@@ -38,6 +41,8 @@ let INDEX = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   if (BREAK === 'count-old-rule') rep("for (const k of DATA_LAYERS) if (drawnGeom[k].symbols > 0 || drawnGeom[k].cells > 0) out.push(k);", "for (const k of DATA_LAYERS) { if (!on[k] || !state[k] || ME.freshness(k).grade === 'unknown') continue; out.push(k); }");   // main's count: a zero layer counts
   if (BREAK === 'count-unknown-cells') rep("if (layer !== 'plastic' && grade !== 'unknown' && tally[layer]) tally[layer].cells++;", "if (layer !== 'plastic' && tally[layer]) tally[layer].cells++;");
   if (BREAK === 'no-hollow-rings') rep(" tally.plastic.symbols += hollow.length;", '');
+  if (BREAK === 'always-withheld') rep("c.querySelector('.lwh').hidden = usable(k);", "c.querySelector('.lwh').hidden = false;");   // round 1's behaviour
+  if (BREAK === 'never-withheld') rep("c.querySelector('.lwh').hidden = usable(k);", "c.querySelector('.lwh').hidden = true;");
   if (BREAK === 'no-empty-line') rep("$('leg-none').hidden = any;", "$('leg-none').hidden = true;"); }
 const FAST_APP = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8').replace('5 * 60e3', '4e3');   // transition case only: poll every 4 s
 
@@ -90,7 +95,7 @@ const BASEL = () => ({
   const read = page => page.evaluate(() => { const st = ME.legendState(), k = ME.keyState(), rs = ME.renderState();
     const polys = l => (ME.cellPolys(l) || []).map(p => p.stroke);
     const dotsVisible = id => [...document.querySelectorAll('#' + id + ' .dot, #' + id + ' .sw')].filter(e => { let a = e; while (a && a.id !== 'leg-line') { if (a.hidden) return false; a = a.parentElement; } return true; }).length;
-    return { line: st.line, empty: st.empty, geom: st.geom, n: k.label.replace(/\s+/g, ' '), drawn: k.drawn, points: rs.points, plasticRings: rs.plasticRings, plasticPoints: rs.plasticPoints, driftPoints: rs.driftPoints,
+    return { line: st.line, empty: st.empty, geom: st.geom, usable: Object.fromEntries(Object.entries(ME.pairState()).map(([k, v]) => [k, v.usable])), n: k.label.replace(/\s+/g, ' '), drawn: k.drawn, points: rs.points, plasticRings: rs.plasticRings, plasticPoints: rs.plasticPoints, driftPoints: rs.driftPoints,
       polys: { usgs: polys('usgs'), firms: polys('firms'), ships: polys('ships'), forest: polys('forest'), drifters: polys('drifters'), plastic: polys('plastic') },
       fireDot: dotsVisible('leg-firms'), nightLegend: (e => e.hidden ? null : e.textContent)(document.getElementById('night-legend')), keydef: document.getElementById('key-def').textContent,
       legendVisibleText: (e => getComputedStyle(e).display === 'none' ? null : e.innerText)(document.getElementById('legend')) }; });
@@ -102,7 +107,8 @@ const BASEL = () => ({
       ok(`${tag}: ${k} tally of count cells = usable cells on the globe`, g.cells === usablePolys, { g, polys: r.polys[k] });
       ok(`${tag}: ${k} counted in the Key exactly when it has symbols or count cells`, counted === (g.symbols > 0 || g.cells > 0), { g, counted });
       const entry = k === 'forest' ? g.cells > 0 : g.symbols > 0, cnt = !entry && CNT[k] && g.cells > 0;
-      ok(`${tag}: ${k} legend entry ${entry ? 'present' : cnt ? 'counts-only' : 'absent'}`, r.line.includes(E[k]) === !!entry && (!CNT[k] || r.line.includes(CNT[k]) === !!cnt), r.line); }
+      ok(`${tag}: ${k} legend entry ${entry ? 'present' : cnt ? 'counts-only' : 'absent'}`, r.line.includes(E[k]) === !!entry && (!CNT[k] || r.line.includes(ONLY[k]) === !!cnt), r.line);
+      if (cnt) ok(`${tag}: ${k} says "(records withheld)" exactly when its records are not usable`, r.line.includes(CNT[k]) === !r.usable[k], { line: r.line, usable: r.usable[k] }); }
     ok(`${tag}: dots handed to the globe = sum of the symbol tallies less hollow rings`, r.points === r.geom.usgs.symbols + r.geom.firms.symbols + r.geom.ships.symbols + r.geom.drifters.symbols + r.geom.plastic.symbols - r.plasticRings, { points: r.points, geom: r.geom, rings: r.plasticRings });
     ok(`${tag}: the line has no leading, trailing or doubled separator`, !/^ ?·|· ?$|· ?·/.test(r.line.replace(/· \d{4}–\d{4} ·|· coloured|· tow-start|· dated/g, 'x')), r.line);
     ok(`${tag}: the empty sentence shows exactly when no data layer is drawn`, r.empty === ['usgs', 'firms', 'ships', 'drifters', 'plastic', 'forest'].every(k => !r.drawn.includes(k)) && (r.line === EMPTY) === r.empty, { line: r.line, empty: r.empty, drawn: r.drawn });
@@ -113,7 +119,7 @@ const BASEL = () => ({
   { const L = BASEL(); const { ctx, page, perr } = await open(L); let r = await read(page); agree('1 matched', r);
     ok('1 matched: line is the four core entries in order', r.line === line(E.usgs, E.firms, E.ships, E.forest), r.line);
     ok('1 matched: Key · 4 layers', r.n === N(4), r.n);
-    ok('1 the key definition names the new rule', /each data layer with symbols or count cells on the globe/.test(r.keydef) && /a layer whose count is zero, and cells outlined as unknown are not counted/.test(r.keydef), r.keydef);
+    ok('1 the key definition says what counts: a symbol or a usable count cell; a layer that draws nothing does not', /each data layer that draws a symbol or a usable count cell/.test(r.keydef) && /a layer that draws nothing, and cells outlined as unknown are not counted/.test(r.keydef) && !/count is zero/.test(r.keydef), r.keydef);
     await tgl(page, 'firms'); await page.waitForTimeout(300); r = await read(page); agree('1 fires off', r);
     ok('1 fires off: the fire entry is gone, the others stay, count 3', r.line === line(E.usgs, E.ships, E.forest) && r.n === N(3), [r.line, r.n]);
     await tgl(page, 'firms'); await page.waitForTimeout(300); r = await read(page);
@@ -146,6 +152,16 @@ const BASEL = () => ({
   // ---- 3b. forest: sweep not started (unknown) → no swatch entry
   { const L = BASEL(); L.forest = { cells: env0('forest', { cells: {}, sweep: { answered: 0, cells_total: 559, oldest_queried_at: NOW } }) }; const { ctx, page } = await open(L); const r = await read(page); agree('3b forest not started', r);
     ok('3b forest with no answered cell: no swatch entry, not counted', r.line === line(E.usgs, E.firms, E.ships) && r.n === N(3), [r.line, r.n]); await ctx.close(); }
+
+  // ---- 3c (round 2). forest: one answered cell reporting ZERO alerts → the cell is drawn, the swatch shows, the layer counts
+  { const L = BASEL(); L.forest = { cells: env0('forest', { cells: { '22_46': { count: 0, confidence: { nominal: 0, high: 0, highest: 0 }, since: '2026-11-08', queried_at: NOW, version: 'v1', coverage: cov } }, sweep: { answered: 559, cells_total: 559, oldest_queried_at: GOOD } }) };
+    L.firms = firesZero(); const { ctx, page } = await open(L); const r = await read(page); agree('3c forest zero alerts', r);
+    ok('3c forest cell with zero alerts: a usable cell is drawn, so the swatch entry shows and forest counts', r.polys.forest.length === 1 && r.polys.forest[0] !== UNKNOWN && r.geom.forest.cells === 1 && r.line.includes(E.forest) && r.drawn.includes('forest'), [r.polys.forest, r.geom.forest, r.line, r.drawn]);
+    ok('3c beside it, zero fires draw nothing: no fire entry, not counted; Key · 3 layers', !r.line.includes('ire') && !r.drawn.includes('firms') && r.polys.firms.length === 0 && r.n === N(3), [r.line, r.drawn, r.n]); await ctx.close(); }
+  // ---- 4c (round 2). same run, counts present, records file empty: the pair is usable, so nothing is "withheld"
+  { const L = BASEL(); const f = fires(); L.firms = { cells: f.cells, snap: { ...f.snap, records: [] } }; const { ctx, page } = await open(L); const r = await read(page); agree('4c usable pair, cells only', r);
+    ok('4c same-run empty records with count cells: the page accepted the pair', r.usable.firms === true && r.geom.firms.symbols === 0 && r.geom.firms.cells === 2, [r.usable.firms, r.geom.firms]);
+    ok('4c the entry reads "Fire detections: cell outlines only" with no "(records withheld)", no dot, counted as one', r.line === line(E.usgs, ONLY.firms, E.ships, E.forest) && !r.line.includes('withheld') && r.fireDot === 0 && r.n === N(4), [r.line, r.fireDot, r.n]); await ctx.close(); }
 
   // ---- 9–11. optional layers
   { const L = BASEL(); const { ctx, page, perr } = await open(L, { delay: { drifters: 2500 } }); let r = await read(page);
