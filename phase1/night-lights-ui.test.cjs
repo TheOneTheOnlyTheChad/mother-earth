@@ -330,6 +330,11 @@ let BASE;
     ok('W the Sources page makes no night-light request', nl(gibs).length === 0, nl(gibs));
     ok('W no page errors on Sources', errs.length === 0, errs);
     await ctx.close(); }
+  { const { ctx, page } = await setup(browser, newGibs(), { path: 'sources.html', viewport: { width: 360, height: 800 } });
+    const m = await page.evaluate(() => { const h = document.getElementById('nightlights'); let right = 0, e = h; while (e && (e === h || e.tagName !== 'H2')) { right = Math.max(right, e.getBoundingClientRect().right, ...[...e.querySelectorAll('*')].map(x => x.getBoundingClientRect().right)); e = e.nextElementSibling; }
+      const img = document.getElementById('imagery').nextElementSibling.nextElementSibling.getBoundingClientRect().right; return { W: innerWidth, right: Math.round(right), img: Math.round(img) }; });
+    ok('W at 360 px the Night lights section and the new imagery sentence stay inside the page (the long layer names wrap)', m.right <= m.W && m.img <= m.W, m);
+    await ctx.close(); }
   { const { ctx, page } = await setup(browser, newGibs());
     ok('W the card links to that section', await page.$eval('#nl-scope a', a => a.getAttribute('href')) === 'sources.html#nightlights');
     await ctx.close(); }
