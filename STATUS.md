@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 13:57 UTC (clock reading) — **RELEASED: buoys and microplastic withheld line (merge `131862c`); hub branch merged (`d7f784b`); main = live again**
+- Chad's lines: "Approve: merge hub-place-down-rc at f684d0c to main (hub source and tests; no page change)" and "Approve: merge optional-layers-status-rc at 0229772 to main (page change: buoys and microplastic withheld line, dated run times)". GPT had passed both (hub round 1; page round 2).
+- Merged no-ff in that order; no file overlap. Before the push, on the merged tree: `optional-layers-status-ui` 230, `place-ui` 35, `history-hub` 33, `osmc-reliability-ui` 40 of 41 (the one failure identical on main). Pushed 13:53:23 UTC (commit time).
+- **Served hashes 13:56:07 UTC, all exact:** `index.html` `ec13b4f7…dc4e`, `app.js` `12ad3fed…b3d4`, `sources.html` `91f50b06…4b82`, `style.css` `ae472be2…b465` (unchanged). main's `phase1/worker.js` = the deployed 0.6.15 `aa2e6440…6d8b`.
+- **Live smoke 13:56:31 UTC (pane, text read):** `app.js?v=202612021100`; buoys switched on: current, 1,295, records paired, line hidden; microplastic: loaded, 1,145, paired, line hidden; earthquakes 41, fires 14,905, ships 2,881, all paired; "counts shown alone" nowhere; no "undefined", "NaN" or "Invalid"; `ME.runTimes` live gives "records 10 Nov 10:50 UTC, counts 14 Nov 10:50 UTC" and "unknown" for a bare date and a time without a zone; Key · 6 layers; place 14_49 lists all five record layers through hub 0.6.15.
+- **Not seen on production:** a down or stale buoy or microplastic run, a run mismatch, or a down layer in the place view. No phone, Safari, screen reader or real GPU.
+- **Rollback (own Approve lines):** page = revert `131862c`; hub = paste 0.6.14 `bbf8dc61…0480` (file at `ba44912:phase1/worker.js`) and Deploy.
+- **Still open from the usability list:** `widths-preview-rc` at `2b20b0a` (A only, preview; needs Chad's look on a real screen). Test runner only: `place-down-breaks.mjs` and `firms-v2-breaks.mjs` need `fileURLToPath()` to run from a folder path with a space.
+
 ## 15 Nov 13:51 UTC (clock reading) — **hub 0.6.15 DEPLOYED by Chad** (13:49:55 UTC, Cloudflare's deployment time); verified; **hub is ahead of main** until `hub-place-down-rc` is merged
 - The session's safety check refused Claude's content-only upload a second time ("undermining oversight"), on Chad's repeat request. Chad pasted `worker.js` from `raw.githubusercontent.com/…/f684d0cb…551f/phase1/worker.js` (hash checked in that tab first: `aa2e6440…6d8b`) into the Cloudflare editor and clicked Deploy. Source recorded by Cloudflare: `quick_editor`, version `3ef8ad20-42cd-493f-95fd-bf9e3772e7df` at 100%.
 - Read back 13:50:27 UTC (dashboard tab): live `worker.js` sha256 `aa2e6440e7a1f1bf25a009299388d2509438d197a2a23aafdd66d519ab816d8b`, 365,418 bytes, exact match with the reviewed branch file; 22 bindings; `SUNFACE_ENABLED=1`, `SKYCRAFT_ENABLED=1`, all other variables as before.
