@@ -650,3 +650,29 @@ body.craft .mgctl{display:flex;flex-wrap:wrap;gap:8px;max-width:560px;margin:8px
 body.craft .mgctl button{min-height:40px;min-width:44px;padding:6px 12px;background:var(--panel);color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;cursor:pointer}
 /* ---------- Sun globe (sun.html; sunglobe.js). Shares the Moon globe's box, readout and button styles. */
 body.craft .sgtimes{color:var(--dim);min-height:2.8em}
+
+/* ---------- widths-preview-rc (15 Nov 2026, INTERMEDIATE-WIDTHS-PROPOSAL rev 2 §6) — PREVIEW
+   A. 721–1100 px: the header and the globe stay in view while the legend, credits and cards scroll beneath, so every layer
+      switch can be used with its result visible. The globe's height follows the viewport height (--gh), so a short landscape
+      screen keeps room for the cards. The centre column's box is dissolved (display:contents) so the globe can stay stuck for
+      the whole length of the page; what overlaid the globe through that box (the inspector, the zoom-out view) is pinned to
+      the same rectangle instead. scroll-padding keeps a control focused by keyboard clear of the pinned header and globe.
+      Only on screens at least 660 px tall: below that (a phone held sideways is 360–430 px tall) a pinned header and globe
+      would leave no room for the page, so the layout stays as it was and the globe scrolls away. */
+@media (min-width:721px) and (max-width:1100px) and (min-height:660px){
+  html:has(body.world){--gh:clamp(300px,46vh,560px);scroll-padding-top:calc(var(--header) + var(--gh) + 12px)}
+  body.world .top{position:sticky;top:0;z-index:40;background:linear-gradient(var(--panel),var(--panel)),var(--bg)}   /* opaque: the page now scrolls beneath it */
+  body.world .stage{display:flex;flex-direction:column}
+  body.world .centre{display:contents}
+  body.world #globe{position:sticky;top:var(--header);height:var(--gh);min-height:0;flex:none;order:1;margin:0;border:solid var(--bg);border-width:0 12px;z-index:6;background:var(--bg);box-shadow:0 1px 0 var(--line)}   /* the side gutters are part of the pinned box, so no card shows beside the globe */
+  body.world .imgdate,body.world .legend,body.world .centre>.credits{margin-left:12px;margin-right:12px}
+  body.world .col.left{order:5} body.world .col.right{order:6}
+  body.world .inspector{position:fixed;top:calc(var(--header) + 8px);right:24px;left:auto;max-height:calc(var(--gh) - 16px)}
+  body.world .zoom-ui{position:fixed;inset:auto;top:var(--header);left:12px;right:12px;height:var(--gh)}
+}
+/* D. 1101–1279 px: the credits move from under the globe to the foot of the right-hand column (the copy the phone layout
+      already uses), so the globe gets that height back. Exactly one credits block is visible at every width. */
+@media (min-width:1101px) and (max-width:1279px){
+  body.world .centre>.credits{display:none}
+  body.world .col.right>.credits.m{display:block;border:1px solid var(--line);margin-top:auto}
+}
