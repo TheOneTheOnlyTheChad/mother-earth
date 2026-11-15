@@ -1,0 +1,568 @@
+{
+ "legend": {
+  "allOn": {
+   "line": "earthquake \u00b7 fire detection (per pass) \u00b7 vessel (last sample) \u00b7 forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)",
+   "drawn": [
+    "usgs",
+    "firms",
+    "ships",
+    "forest"
+   ],
+   "legendDisplay": "block"
+  },
+  "firesOff": {
+   "line": "earthquake \u00b7 fire detection (per pass) \u00b7 vessel (last sample) \u00b7 forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)",
+   "drawn": [
+    "usgs",
+    "ships",
+    "forest"
+   ],
+   "legendDisplay": "block"
+  },
+  "allCoreOff": {
+   "line": "earthquake \u00b7 fire detection (per pass) \u00b7 vessel (last sample) \u00b7 forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)",
+   "drawn": [],
+   "legendDisplay": "block"
+  },
+  "firesDown": {
+   "line": "earthquake \u00b7 fire detection (per pass) \u00b7 vessel (last sample) \u00b7 forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)",
+   "drawn": [
+    "usgs",
+    "ships",
+    "forest"
+   ],
+   "legendDisplay": "block"
+  }
+ },
+ "widths": {
+  "721": {
+   "header": {
+    "h": 56,
+    "scrollW": 721,
+    "clientW": 721
+   },
+   "layout": {
+    "globe": [
+     12,
+     56,
+     697,
+     448
+    ],
+    "legend": [
+     12,
+     562,
+     320,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     12,
+     698,
+     697,
+     176
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 3629,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "768": {
+   "header": {
+    "h": 56,
+    "scrollW": 768,
+    "clientW": 768
+   },
+   "layout": {
+    "globe": [
+     12,
+     56,
+     744,
+     448
+    ],
+    "legend": [
+     12,
+     562,
+     320,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     12,
+     698,
+     744,
+     161
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 3522,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "820": {
+   "header": {
+    "h": 56,
+    "scrollW": 820,
+    "clientW": 820
+   },
+   "layout": {
+    "globe": [
+     12,
+     56,
+     796,
+     448
+    ],
+    "legend": [
+     12,
+     562,
+     320,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     12,
+     698,
+     796,
+     146
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 3426,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "900": {
+   "header": {
+    "h": 56,
+    "scrollW": 900,
+    "clientW": 900
+   },
+   "layout": {
+    "globe": [
+     12,
+     56,
+     876,
+     448
+    ],
+    "legend": [
+     12,
+     562,
+     320,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     12,
+     698,
+     876,
+     132
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 3332,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "901": {
+   "header": {
+    "h": 56,
+    "scrollW": 901,
+    "clientW": 901
+   },
+   "layout": {
+    "globe": [
+     12,
+     56,
+     877,
+     448
+    ],
+    "legend": [
+     12,
+     562,
+     320,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     12,
+     698,
+     877,
+     132
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 3332,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "1000": {
+   "header": {
+    "h": 56,
+    "scrollW": 1000,
+    "clientW": 1000
+   },
+   "layout": {
+    "globe": [
+     12,
+     56,
+     976,
+     448
+    ],
+    "legend": [
+     12,
+     546,
+     320,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     12,
+     682,
+     976,
+     132
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 3257,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "1100": {
+   "header": {
+    "h": 56,
+    "scrollW": 1100,
+    "clientW": 1100
+   },
+   "layout": {
+    "globe": [
+     12,
+     56,
+     1076,
+     448
+    ],
+    "legend": [
+     12,
+     546,
+     320,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     12,
+     682,
+     1076,
+     117
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 3229,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "1101": {
+   "header": {
+    "h": 56,
+    "scrollW": 1101,
+    "clientW": 1101
+   },
+   "layout": {
+    "globe": [
+     284,
+     56,
+     533,
+     525
+    ],
+    "legend": [
+     546,
+     445,
+     259,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     284,
+     581,
+     533,
+     219
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 800,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "1139": {
+   "header": {
+    "h": 56,
+    "scrollW": 1139,
+    "clientW": 1139
+   },
+   "layout": {
+    "globe": [
+     284,
+     56,
+     571,
+     540
+    ],
+    "legend": [
+     564,
+     460,
+     279,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     284,
+     596,
+     571,
+     204
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 800,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "1140": {
+   "header": {
+    "h": 56,
+    "scrollW": 1140,
+    "clientW": 1140
+   },
+   "layout": {
+    "globe": [
+     284,
+     56,
+     572,
+     540
+    ],
+    "legend": [
+     565,
+     460,
+     279,
+     125
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     284,
+     596,
+     572,
+     204
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 800,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "1279": {
+   "header": {
+    "h": 56,
+    "scrollW": 1279,
+    "clientW": 1279
+   },
+   "layout": {
+    "globe": [
+     284,
+     56,
+     711,
+     584
+    ],
+    "legend": [
+     653,
+     520,
+     330,
+     108
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     284,
+     640,
+     711,
+     160
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 800,
+    "vh": 800
+   },
+   "issues": []
+  },
+  "1280": {
+   "header": {
+    "h": 56,
+    "scrollW": 1280,
+    "clientW": 1280
+   },
+   "layout": {
+    "globe": [
+     284,
+     56,
+     712,
+     584
+    ],
+    "legend": [
+     654,
+     520,
+     330,
+     108
+    ],
+    "side": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "credits": [
+     284,
+     640,
+     712,
+     160
+    ],
+    "tglH": [
+     36,
+     36,
+     36,
+     36,
+     36,
+     36
+    ],
+    "docH": 800,
+    "vh": 800
+   },
+   "issues": []
+  }
+ },
+ "note": "inline text links (14-17 px tall) and scroll-container \"covered\" hits removed as probe noise; full probe in widths.cjs"
+}

@@ -1,0 +1,236 @@
+{
+ "A missing daily feed": {
+  "card": {
+   "state": "unknown",
+   "tooltip": "Today’s detections aren’t available yet.",
+   "count": "–",
+   "src": "NASA FIRMS · VIIRS NOAA-20 · world · retrieved 31 s ago · Today’s detections aren’t available yet.",
+   "pairHidden": false,
+   "pair": "Records withheld: records are from a different collector run (records 01:58 UTC, counts 04:57 UTC) — counts shown alone"
+  },
+  "pairState": {
+   "cells": "2026-11-15T04:57:34.547Z",
+   "records": "2026-11-15T01:58:04.547Z",
+   "ok": false,
+   "usable": false,
+   "points": 0
+  },
+  "key": {
+   "open": false,
+   "label": "Key · 2 layers",
+   "drawn": [
+    "usgs",
+    "ships"
+   ],
+   "persist": []
+  },
+  "find": "Fire detections is unknown right now — collector reported down: no detections processed yet for today (UTC): FIRMS day_range=1 resets at 00:00 UTC and NRT runs ~2–3 h behind (header only, 122 bytes). Nothing to move to.",
+  "search": {
+   "status": "33.800° S, 18.600° E · 1 loaded record within 250 km, nearest first · searched: earthquakes, ships",
+   "notes": [
+    "Fire detections: not searched — collector reported down: no detections processed yet for today (UTC): FIRMS day_range=1 resets at 00:00 UTC and NRT runs ~2–3 h behind (header only, 122 bytes)"
+   ]
+  },
+  "report": {
+   "text": "fires: unknown — collector reported down: no detections processed yet for today (UTC): FIRMS day_range=1 resets at 00:00 UTC and NRT runs ~2–3 h behind (header only, 122 bytes)",
+   "state": "unknown — collector reported down: no detections processed yet for today (UTC): FIRMS day_range=1 resets at 00:00 UTC and NRT runs ~2–3 h behind (header only, 122 bytes)"
+  },
+  "place": "Fire detections | withheld — records and counts are not from the same collector run (records 2026-11-15T01:58:04.547Z, counts 2026-11-15T04:57:34.547Z) · retrieved 2026-11-15 04:57 UTC | Ships",
+  "perr": []
+ },
+ "B failed refresh": {
+  "card": {
+   "state": "unknown",
+   "tooltip": "collector reported down: TypeError: fetch failed",
+   "count": "–",
+   "src": "NASA FIRMS · VIIRS NOAA-20 · world · retrieved 34 s ago · collector reported down: TypeError: fetch failed",
+   "pairHidden": false,
+   "pair": "Records withheld: records are from a different collector run (records 01:58 UTC, counts 04:57 UTC) — counts shown alone"
+  },
+  "pairState": {
+   "cells": "2026-11-15T04:57:34.547Z",
+   "records": "2026-11-15T01:58:04.547Z",
+   "ok": false,
+   "usable": false,
+   "points": 0
+  },
+  "key": {
+   "open": false,
+   "label": "Key · 2 layers",
+   "drawn": [
+    "usgs",
+    "ships"
+   ],
+   "persist": []
+  },
+  "find": "Fire detections is unknown right now — collector reported down: TypeError: fetch failed. Nothing to move to.",
+  "search": {
+   "status": "33.800° S, 18.600° E · 1 loaded record within 250 km, nearest first · searched: earthquakes, ships",
+   "notes": [
+    "Fire detections: not searched — collector reported down: TypeError: fetch failed"
+   ]
+  },
+  "report": {
+   "text": "fires: unknown — collector reported down: TypeError: fetch failed",
+   "state": "unknown — collector reported down: TypeError: fetch failed"
+  },
+  "place": "Fire detections | withheld — records and counts are not from the same collector run (records 2026-11-15T01:58:04.547Z, counts 2026-11-15T04:57:34.547Z) · retrieved 2026-11-15 04:57 UTC | Ships",
+  "perr": []
+ },
+ "C valid zero": {
+  "card": {
+   "state": "current",
+   "tooltip": "retrieved 68 s ago",
+   "count": "0",
+   "src": "NASA FIRMS · VIIRS NOAA-20 · world · retrieved 68 s ago",
+   "pairHidden": true,
+   "pair": ""
+  },
+  "pairState": {
+   "cells": "2026-11-15T04:57:04.547Z",
+   "records": "2026-11-15T04:57:04.547Z",
+   "ok": true,
+   "usable": true,
+   "points": 0
+  },
+  "key": {
+   "open": false,
+   "label": "Key · 3 layers",
+   "drawn": [
+    "usgs",
+    "firms",
+    "ships"
+   ],
+   "persist": []
+  },
+  "find": "No fire detections record in this snapshot carries a highest frp value. Records without one are excluded, not counted as zero.",
+  "search": {
+   "status": "33.800° S, 18.600° E · 1 loaded record within 250 km, nearest first · searched: earthquakes, fire detections, ships",
+   "notes": []
+  },
+  "report": {
+   "text": "0 fire detections so far today, UTC (NASA FIRMS, world",
+   "state": "current — retrieved 69 s ago"
+  },
+  "place": "Fire detections | no detection reached us for this cell so far today (UTC) — not “no fires”: satellite passes, cloud and processing decide what can be detected · retrieved 2026-11-15 04:57 UTC | Ships",
+  "perr": []
+ },
+ "D run mismatch (valid count)": {
+  "card": {
+   "state": "current",
+   "tooltip": "retrieved 31 s ago",
+   "count": "2",
+   "src": "NASA FIRMS · VIIRS NOAA-20 · world · retrieved 31 s ago",
+   "pairHidden": false,
+   "pair": "Records withheld: records are from a different collector run (records 01:58 UTC, counts 04:57 UTC) — counts shown alone"
+  },
+  "pairState": {
+   "cells": "2026-11-15T04:57:44.547Z",
+   "records": "2026-11-15T01:58:04.547Z",
+   "ok": false,
+   "usable": false,
+   "points": 0
+  },
+  "key": {
+   "open": false,
+   "label": "Key · 3 layers",
+   "drawn": [
+    "usgs",
+    "firms",
+    "ships"
+   ],
+   "persist": []
+  },
+  "find": "Records for fire detections are not usable — records are from a different collector run (records 01:58 UTC, counts 04:57 UTC) — counts shown alone.",
+  "search": {
+   "status": "33.800° S, 18.600° E · 1 loaded record within 250 km, nearest first · searched: earthquakes, ships",
+   "notes": [
+    "Fire detections: not searched — records are from a different collector run (records 01:58 UTC, counts 04:57 UTC) — counts shown alone"
+   ]
+  },
+  "report": {
+   "text": "2 fire detections so far today, UTC (NASA FIRMS, world",
+   "state": "current — retrieved 33 s ago"
+  },
+  "place": "Fire detections | withheld — records and counts are not from the same collector run (records 2026-11-15T01:58:04.547Z, counts 2026-11-15T04:57:44.547Z) · retrieved 2026-11-15 04:57 UTC | Ships",
+  "perr": []
+ },
+ "E records file unreadable (valid count)": {
+  "card": {
+   "state": "current",
+   "tooltip": "retrieved 75 s ago",
+   "count": "2",
+   "src": "NASA FIRMS · VIIRS NOAA-20 · world · retrieved 75 s ago",
+   "pairHidden": false,
+   "pair": "Records withheld: the record file could not be read (/snapshot/firms 500) — counts shown alone"
+  },
+  "pairState": {
+   "cells": "2026-11-15T04:57:04.547Z",
+   "records": null,
+   "ok": false,
+   "usable": false,
+   "points": 0
+  },
+  "key": {
+   "open": false,
+   "label": "Key · 3 layers",
+   "drawn": [
+    "usgs",
+    "firms",
+    "ships"
+   ],
+   "persist": []
+  },
+  "find": "Records for fire detections are not usable — the record file could not be read (/snapshot/firms 500) — counts shown alone.",
+  "search": {
+   "status": "33.800° S, 18.600° E · 1 loaded record within 250 km, nearest first · searched: earthquakes, ships",
+   "notes": [
+    "Fire detections: not searched — the record file could not be read (/snapshot/firms 500) — counts shown alone"
+   ]
+  },
+  "report": {
+   "text": "2 fire detections so far today, UTC (NASA FIRMS, world",
+   "state": "current — retrieved 76 s ago"
+  },
+  "place": "Fire detections | withheld — records and counts are not from the same collector run (records unreadable, counts 2026-11-15T04:57:04.547Z) · retrieved 2026-11-15 04:57 UTC | Ships",
+  "perr": []
+ },
+ "F all good": {
+  "card": {
+   "state": "current",
+   "tooltip": "retrieved 79 s ago",
+   "count": "2",
+   "src": "NASA FIRMS · VIIRS NOAA-20 · world · retrieved 79 s ago",
+   "pairHidden": true,
+   "pair": ""
+  },
+  "pairState": {
+   "cells": "2026-11-15T04:57:04.547Z",
+   "records": "2026-11-15T04:57:04.547Z",
+   "ok": true,
+   "usable": true,
+   "points": 2
+  },
+  "key": {
+   "open": false,
+   "label": "Key · 3 layers",
+   "drawn": [
+    "usgs",
+    "firms",
+    "ships"
+   ],
+   "persist": []
+  },
+  "find": "Highest FRP in the loaded snapshot: 5.8 MW, observed 2026-11-15 01:58 UTC · NASA FIRMS · so far today (UTC; resets 00:00 UTC). FRP is pixel-integrated fire radiative power estimated at the satellite observation time — a power (MW), not fire size, spread or severity; cloud decides what could be detected at all. This is the largest value among the records loaded here, not a ranking of the world.",
+  "search": {
+   "status": "33.800° S, 18.600° E · 3 loaded records within 250 km, nearest first · searched: earthquakes, fire detections, ships",
+   "notes": []
+  },
+  "report": {
+   "text": "2 fire detections so far today, UTC (NASA FIRMS, world",
+   "state": "current — retrieved 80 s ago"
+  },
+  "place": "Fire detections | 2 detections so far today (UTC) · coverage partial · retrieved 2026-11-15 04:57 UTC | 2026-11-15 01:58 UTC · FRP 5.8 MW · day pass",
+  "perr": []
+ }
+}

@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 05:07 UTC (clock reading) — **Control Centre usability brief rev 1 + Sun picture watch** (docs only; for GPT; nothing built)
+- New thread started from main `1f6af0e`; Chad chose the Control Centre usability backlog. Brief: `docs/concepts/CONTROL-CENTRE-USABILITY-BRIEF.md` (rev 1). Evidence: `reviews/evidence/2026-11-15-usability-repro/`. **Build waits for Chad's go.**
+- **Reproduced on main (harness: real page + real `worker.js` for `/place`; live card text read 05:00 UTC):**
+  - **F1** "counts shown alone" is printed while the Fires count is "–" (missing daily feed and failed refresh). Also on record live, 12 Nov 01:40 UTC.
+  - **F2** the place view calls both of those states "withheld — records and counts are not from the same collector run"; card, search and report say unknown. Cause: hub `placeSection` tests `!cells.cells` and a down run publishes `cells: {}`.
+  - **F3** the daily fires state is worded two ways (card vs find, search, report). **F4** "Highest FRP" with zero records talks about records without a value.
+  - **L1** the legend's first line lists earthquake, fire, vessel and forest whether or not they are drawn. **W1** at 721–1100 px no layer switch is on screen with the globe (first switch at y 811–1087). **W2** at 1101–1279 px credits take 160–219 px under the globe and the legend covers 10–12% of the globe box. **T1** "current" beside dated CO₂, sea ice and Kp values. **T2** retrieval wording varies.
+  - Clean: no sideways scroll or header clipping at 721–1280 px; run mismatch and unreadable-records states are correct.
+  - D1 (read-only): fires down with the boundary note 13–16 runs a day, 00:00 to 03:00–03:45 UTC, on 12–15 Nov. The hub does not publish an ok zero for fires.
+- **Proposed first branch `fire-status-rc` (page only):** A1 withheld line only with a visible count; A2 place row reads a down section as unknown; A3 one fires reason on every surface; A4 zero-record find note; A5 one state table test. Decisions D1–D4 in the brief. Legend, hub place fix, freshness wording and widths are later branches.
+- **Sun picture watch (D1, read-only, 05:00 UTC):** 23 runs since 14 Nov 06:38 UTC, all ok, one new image each, none rejected or unchanged; latest 15 Nov 04:07 UTC. Images 201–208 KB each, 4,689,371 bytes in total. **Retention: none** — every image and every `sunface/seen/` marker stays (Option A, 14 Nov). **Growth:** about 4.9 MB a day, about 147 MB in 30 days, about 1.8 GB a year at this size. **Pressure:** none verified from this layer against R2's 10 GB-month free allowance ($0.015 per GB-month above it; Cloudflare's pricing page, read 15 Nov). **Not verified:** the bucket's total size and the lifecycle rules (the connector returns neither); marker sizes (not measured). `/snapshot/sunface/meta` not read. Cleanup stays a separate proposal and must keep `sunface/seen/`.
+- Live unchanged: hub 0.6.14, page `967af71`. **Next (item 1): GPT reviews the brief; Chad decides D1–D4 and gives or withholds the branch go.**
+
 ## 15 Nov 04:43 UTC (clock reading) — **Branch `moon-lit-rc` deleted by Chad** (docs only)
 - `git ls-remote --heads`: remote has only `main` and `aircraft-rc`. Close-out complete; Chad is handing over to a new thread.
 
