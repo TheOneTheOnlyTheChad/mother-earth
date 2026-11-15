@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 13:51 UTC (clock reading) — **hub 0.6.15 DEPLOYED by Chad** (13:49:55 UTC, Cloudflare's deployment time); verified; **hub is ahead of main** until `hub-place-down-rc` is merged
+- The session's safety check refused Claude's content-only upload a second time ("undermining oversight"), on Chad's repeat request. Chad pasted `worker.js` from `raw.githubusercontent.com/…/f684d0cb…551f/phase1/worker.js` (hash checked in that tab first: `aa2e6440…6d8b`) into the Cloudflare editor and clicked Deploy. Source recorded by Cloudflare: `quick_editor`, version `3ef8ad20-42cd-493f-95fd-bf9e3772e7df` at 100%.
+- Read back 13:50:27 UTC (dashboard tab): live `worker.js` sha256 `aa2e6440e7a1f1bf25a009299388d2509438d197a2a23aafdd66d519ab816d8b`, 365,418 bytes, exact match with the reviewed branch file; 22 bindings; `SUNFACE_ENABLED=1`, `SKYCRAFT_ENABLED=1`, all other variables as before.
+- Public hub 13:50:41 UTC: `/` reports 0.6.15, history collecting; all eight health URLs 200 ok; `/place/g4/14_49?layers=drifters,plastic` 200 with every section answered; `/status` 200. First scheduled run on the new code: usgs retrieved 13:50:08 UTC, `collector_version` 0.6.15.
+- Not seen on production: a layer actually down, so the new `down` answer itself is unverified live.
+- **0.6.15 is on branch `hub-place-down-rc` (`f684d0c`), not on main. Do not deploy a hub built from main.** Rollback = 0.6.14 `bbf8dc61…0480` (main's `phase1/worker.js`), same paste-and-Deploy route, Chad's own Approve line.
+
 ## 15 Nov 13:42 UTC (clock reading) — **Hub 0.6.15 deploy attempted on Chad's Approve line; refused by the session's safety check; nothing changed**
 - GPT passed `optional-layers-status-rc` round 2 at `0229772` (relayed). No merge yet: Chad's own Approve line for that merge has not been sent.
 - Chad: "Approve: deploy hub 0.6.15 from hub-place-down-rc at f684d0c (worker sha256 aa2e6440…6d8b)".
