@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 10:52 UTC (clock reading) — **Branch `freshness-wording-rc` deleted by Chad; three proposals for the rest of the usability list** (docs only; nothing built)
+- `git ls-remote --heads` (10:50 UTC): remote has only `main` and `aircraft-rc`. Mac `_review/freshness-wording-rc/` moved to `_to_delete/`.
+- Chad: finish the list so new features can start. Three proposals for GPT in one pass:
+  - **`OPTIONAL-LAYERS-WITHHELD-LINE-PROPOSAL.md`** (page only). Reproduced: buoys and microplastic show "counts shown alone" beside a dash when down or stale; buoys down says "no snapshot from the hub"; run times a day apart print as the same time. Rules P1–P3.
+  - **`HUB-PLACE-DOWN-FIX-PROPOSAL.md`** (hub 0.6.15; needs Chad at the screen for the deploy). One-line fix to `placeSection`'s down test; alternative with no deploy offered (H-D2).
+  - **`INTERMEDIATE-WIDTHS-PROPOSAL.md`** (page only). Options A–C for 721–1100 px and D–E for 1101–1279 px with the measurements; recommendation A + D; needs Chad's eye on a real screen before release.
+- **Next (item 1): GPT reviews; Chad decides and gives each go.** Live unchanged: hub 0.6.14, page `879cb20`.
+
 ## 15 Nov 10:46:40 UTC (commit time) — **PAGE RELEASED: "fresh copy" for dated indices, two-time tooltip, Ships retrieval time** (main merge `879cb20` of `freshness-wording-rc` @ `ced03fd`; Chad: "Approve: merge freshness-wording-rc at ced03fd to main (page change: fresh copy for dated indices, two-time tooltip, Ships retrieval time)")
 - **GPT (relayed by Chad):** `ced03fd` passes round 3 review and the desktop Chrome smoke; hold cleared. Reran the Sources renderer with "n/a", {} and numeric retrieval values for each of the three indices (all nine kept the full table and showed "Retrieval time unknown"); malformed observation dates rejected; year-end Kp interval names both years. In Chrome on live hub data: Kp, CO₂ and sea ice showed Fresh copy on the cards and in Sources; Ships showed the sample end and the retrieval age.
 - Page only; hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch. Remote branch head confirmed `ced03fd` before the merge.
