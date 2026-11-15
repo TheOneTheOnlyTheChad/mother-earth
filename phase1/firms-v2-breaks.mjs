@@ -2,8 +2,8 @@
 // (S0, the SQL-text comparison, does not count — a break must be caught by what the worker does).
 // Writes modified copies of worker.js to a temp dir and runs the suite against each. Nothing in the repo is changed.
 // Usage: node phase1/firms-v2-breaks.mjs
-import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawnSync } from 'node:child_process';
-const here = path.dirname(new URL(import.meta.url).pathname);
+import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawnSync } from 'node:child_process'; import { fileURLToPath } from 'node:url';
+const here = path.dirname(fileURLToPath(import.meta.url));   // not URL.pathname: that keeps %20 for a folder path with a space
 const src = fs.readFileSync(path.join(here, 'worker.js'), 'utf8');
 const BREAKS = {
   'claim ignores a live owner': ['     AND NOT EXISTS (SELECT 1 FROM firms_attempts b WHERE b.run_id = ?1 AND b.finished_at IS NULL AND b.lease_until > ?4)\n', '\n'],
@@ -20,7 +20,7 @@ const BREAKS = {
   'Content-Length not checked': ['if (contentLength !== null && contentLength !== res.bytes)', 'if (false)'],
   'writer drops completed parts (single put of the last part)': ['if (!mpu) { await env.R2.put(key, buf.slice(0, n), putOpts);', 'if (true) { if (mpu) await mpu.abort(); await env.R2.put(key, buf.slice(0, n), putOpts);'],
   '/place lines/1: final counts not tested for down (0.6.15 H1c)': ["    if (cells.source_status === 'down') return placeDown('firms', cells);   // the FINAL counts are down: no pairing answer, no second record scan\n", ''],
-  '/place: first counts read tested the 0.6.14 way (0.6.15 H1a)': ["if (cells.source_status === 'down') return placeDown(layer, cells);", "if (cells.source_status === 'down' && !cells.cells) return placeDown(layer, cells);"],
+  '/place: first counts read tested the 0.6.14 way (0.6.15 H1a)': ["if (cells.source_status === 'down') return placeDown(layer, cells);\n", "if (cells.source_status === 'down' && !cells.cells) return placeDown(layer, cells);\n"],   // with the newline: without it the pattern also matches the final-read line
   '/place ties out of legacy order': ["while (pos > 0 && String(top[pos - 1][iT]) < k) pos--;", "while (pos > 0 && String(top[pos - 1][iT]) <= k) pos--;"],
   '/place cache unbounded': ['while (fvPlace.bytes > FV.placeCacheBytes && fvPlace.cache.size)', 'while (false)'],
   '/place scan cap removed': ['while (fvPlace.scans >= FV.placeScans) {', 'while (false) {'],
