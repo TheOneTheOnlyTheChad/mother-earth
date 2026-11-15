@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 15 Nov 2026
 
+## 15 Nov 07:58 UTC (clock reading) — **Branch `legend-active-rc` deleted by Chad; two proposals for GPT** (docs only; nothing built)
+- `git ls-remote --heads` (07:56 UTC): remote has only `main` and `aircraft-rc`. Mac `_review/legend-active-rc/` moved to `_to_delete/`.
+- Chad: clear the rest of the usability list. Two short proposals written so GPT can review both in one pass; builds run one after the other (both change `app.js`).
+- **`docs/concepts/WITHHELD-LINE-QUAKES-SHIPS-PROPOSAL.md` rev 1.** Reproduced on main: earthquakes down or stale show "counts shown alone" beside a dash; **new: ships down shows "Last sample: 0"** (a down run's empty envelope totalled as a sample; D1: 8 down ships runs since 8 Nov, last 13 Nov 17:15 UTC); ships stale with mismatched records shows the line beside "Last sample: 2". Rules W1–W3, decisions W-D1, W-D2.
+- **`docs/concepts/FRESHNESS-WORDING-PROPOSAL.md` rev 1.** "fresh copy" for adequate CO₂ and Sea ice (GPT's D4), tooltip with both times, retrieval time on the Ships card. Decisions F-D1 (Kp), F-D2 (microplastic), F-D3.
+- Left after these: hub `placeSection` down test (hub deploy), intermediate widths (layout decision).
+- **Next (item 1): GPT reviews both; Chad gives the branch go for each.** Live unchanged: hub 0.6.14, page `d13466a`.
+
 ## 15 Nov 07:52:32 UTC (commit time) — **PAGE RELEASED: the legend and "Key · N layers" show what is drawn** (main merge `d13466a` of `legend-active-rc` @ `1cfacd5`; Chad: "GPT happy" and "Approve: merge legend-active-rc at 1cfacd5 to main (page change: legend and Key count show what is drawn)")
 - **GPT:** held round 1 for two wording fixes, smoke-tested the local candidate in desktop Chrome; Chad relays GPT is happy with round 2 (`1cfacd5`).
 - Page only (`index.html`); hub 0.6.14 unchanged, so **main = live**. Merge tree = the branch. Remote branch head confirmed `1cfacd5` before the merge.
