@@ -5,7 +5,7 @@
  * BREAK=<name> weakens the served wind.js; each must fail:
  *   eager no-verify swap-early late-paint keep-forever wrong-from no-recover new-rev-on-switch refetch-cached refresh-when-off
  *   no-hatch calm-bearing pole-bearing smooth fetched-age no-modified-words tap-when-off silent-level-fail refresh-back bad-input-wiped draw-after-cutoff
- *   coast-stays coast-eager coast-under coast-silent-fail any-opacity coast-refetch coast-drawn-first */
+ *   coast-stays coast-eager coast-under coast-silent-fail opacity-05 switch-back coast-refetch coast-drawn-first */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto'); const http = require('http'); const { PNG } = require('pngjs');
 const ROOT = path.join(__dirname, '..'); const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
@@ -34,12 +34,13 @@ const BREAKS = {
   'silent-level-fail': [['else st.note = `${LV(levelId).label} could not be loaded: ${err.message || err}. Still showing ${LV(st.level).label}.`;', 'else st.note = null;']],
   'bad-input-wiped': [["      if (st.badInput) { rd.textContent = 'Enter a latitude from −90 to 90 and a longitude from −180 to 180.'; rd.dataset.kind = ''; }   // kept by every repaint until a valid point is chosen\n      else if (st.sel) {", '      if (st.sel) {']],
   'draw-after-cutoff': [["      if (!err && built && tooOld(target)) {", '      if (false) {']],
-  'coast-stays': [["    const want = st.on && st.meshes.length > 0 && coast.status === 'ready' && COAST.MODE !== '0';", "    const want = coast.status === 'ready' && COAST.MODE !== '0';"]],
+  'coast-stays': [["    const want = st.on && st.meshes.length > 0 && coast.status === 'ready';", "    const want = coast.status === 'ready';"]],
   'coast-eager': [['  /** the outline is drawn exactly while a wind sheet is drawn; it never appears on its own */', '  loadCoast();']],
   'coast-under': [["MAGIC: 'MECOAST1', ALT: 0.002,", "MAGIC: 'MECOAST1', ALT: 0.0002,"]],
   'coast-silent-fail': [["      if (coast.status === 'failed') bits.push('The coastline outline could not be loaded.');\n", '']],
-  'any-opacity': [['  if (qo === 0.5 || qo === 0.8) WD.OPACITY = qo;', '  if (qo > 0) WD.OPACITY = qo;']],
-  'coast-refetch': [["    if (coast.status !== 'idle' || COAST.MODE === '0') return;", "    if (COAST.MODE === '0') return;"]],
+  'opacity-05': [['ALT: 0.0009, OPACITY: 0.8,', 'ALT: 0.0009, OPACITY: 0.5,']],
+  'switch-back': [["  const COAST = { FILE:", "  { const q = Number(new URLSearchParams(location.search).get('wind_opacity')); if (q > 0) WD.OPACITY = q; }\n  const COAST = { FILE:"]],
+  'coast-refetch': [["    if (coast.status !== 'idle') return;", "    if (coast.status === 'loading') return;"]],
   'coast-drawn-first': [["mesh.renderOrder = 1;   // after the wind sheet", "mesh.renderOrder = -5;   // after the wind sheet"]],
   'refresh-back': [['    if (st.rev && c.run < st.rev.run) return paint();        // never go back to an older run\n', '']],
 };
@@ -93,7 +94,7 @@ async function setup(browser, hub, opts = {}) {
   if (opts.noWebGL) await ctx.addInitScript(() => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, ...a) { return /webgl/i.test(t) ? null : g.call(this, t, ...a); }; });
   const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(String(e).slice(0, 200)));
   const coastReqs = []; page.on('request', q => { if (/assets\/coast-50m\.bin/.test(q.url()) && !/suite=1/.test(q.url())) coastReqs.push(q.url()); });   // the suite's own reads of the file are marked and not counted
-  if (opts.coast404) await ctx.route('**/assets/coast-50m.bin**', r => r.fulfill({ status: 404, body: 'nf' }));
+  if (opts.coast404) await ctx.route('**/assets/coast-50m.bin**', r => /suite=1/.test(r.request().url()) ? r.continue() : r.fulfill({ status: 404, body: 'nf' }));   // the page is refused; the suite's own read is not
   await page.goto(BASE + '/index.html' + (opts.qs || ''), { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.ME && ME.loadedAt && ME.wind, null, { timeout: 30000 });
   if (!opts.noWebGL) await page.waitForFunction(() => { const g = ME.globe && ME.globe(); if (!g) return false; let ok = false; g.scene().traverse(o => { if (o.isMesh && o.material === g.globeMaterial() && o.material.map) ok = true; }); return ok; }, null, { timeout: 30000 });
@@ -281,7 +282,7 @@ const read = async (page, lat, lon) => { await page.evaluate(([a, b]) => ME.wind
   { const hub = newHub(); const { ctx, page } = await setup(browser, hub, { noWebGL: true }); await page.click('#tgl-wind'); await page.waitForTimeout(300); const s = await st(page);
     ok('H no 3-D globe in this browser: the layer stays off, says why, asks the hub for nothing', s.on === false && /needs the 3-D globe/.test(s.off) && hub.reqs.length === 0, s.off); await ctx.close(); }
 
-  // ---------- I. coastline outline above the sheet, and the preview-only address switches (rev 6; own mesh since rev 7)
+  // ---------- I. coastline outline above the sheet, (rev 6; own mesh since rev 7; 0.8 and no address switches since rev 8)
   const coastReady = page => page.waitForFunction(() => ['ready', 'failed'].includes(ME.wind.state().coast.status), null, { timeout: 20000 });
   const outlined = async page => (await st(page)).coast.inScene;
   /** share of sampled coast points near southern Africa where the screen shows a bright, near-white pixel (the line really is on top) */
@@ -324,15 +325,12 @@ const read = async (page, lat, lon) => { await page.evaluate(([a, b]) => ME.wind
     await page.click('#tgl-wind'); ok('I Wind off: the outline is removed', !(await outlined(page)) && (await st(page)).coast.shown === false);
     ok('I no page error', errs.length === 0, errs); await ctx.close(); }
   { const hub = newHub(); const { ctx, page, errs } = await setup(browser, hub, { coast404: true }); await setNow(page, T0 + 5 * H); await on(page); await coastReady(page); await page.evaluate(() => ME.wind.ageTick()); const s = await st(page);
-    ok('I the coastline file fails: the wind is still drawn, the card says the outline could not be loaded, nothing is outlined', s.meshes === 1 && s.coast.status === 'failed' && /The coastline outline could not be loaded\./.test(s.extra || '') && !s.coast.inScene && errs.length === 0, [s.coast, s.extra]); await ctx.close(); }
-  { const hub = newHub(); const { ctx, page, coastReqs } = await setup(browser, hub, { qs: '?wind_coast=0&wind_opacity=0.8' }); await setNow(page, T0 + 5 * H); await on(page); await page.waitForTimeout(400); const s = await st(page);
+    ok('I the coastline file fails: the wind is still drawn, the card says the outline could not be loaded, nothing is outlined', s.meshes === 1 && s.coast.status === 'failed' && /The coastline outline could not be loaded\./.test(s.extra || '') && !s.coast.inScene && errs.length === 0, [s.coast, s.extra]);
+    const ws = await whiteShare(page); ok('I with no outline drawn, the same screen points are not bright (the screen check can tell the difference)', ws.n >= 20 && ws.share <= 0.2, ws); await ctx.close(); }
+  { const hub = newHub(); const { ctx, page, coastReqs } = await setup(browser, hub, { qs: '?wind_coast=0&wind_opacity=0.5' }); await setNow(page, T0 + 5 * H); await on(page); await coastReady(page); await page.waitForFunction(() => ME.wind.state().coast.shown); const s = await st(page);
     const op = await page.evaluate(() => { let o = null; ME.globe().scene().traverse(m => { if (m.__wind) o = m.material.opacity; }); return o; });
-    ok('I preview switch wind_coast=0: no request, no outline', coastReqs.length === 0 && !s.coast.inScene && s.coast.mode === '0', [coastReqs.length, s.coast]);
-    ok('I preview switch wind_opacity=0.8: the sheet is drawn at 0.8', s.opacity === 0.8 && op === 0.8, [s.opacity, op]);
-    const ws = await whiteShare(page); ok('I with the outline off, the same screen points are not white (the pixel check can tell the difference)', ws.n >= 20 && ws.share <= 0.2, ws); await ctx.close(); }
-  { const hub = newHub(); const { ctx, page } = await setup(browser, hub, { qs: '?wind_opacity=0.05&wind_coast=bold' }); await setNow(page, T0 + 5 * H); await on(page); await coastReady(page); await page.waitForFunction(() => ME.wind.state().coast.shown); const s = await st(page);
-    const op = await page.evaluate(() => { let o = null; ME.globe().scene().traverse(m => { if (m.__wind) o = m.material.opacity; }); return o; });
-    ok('I any other value in the address is ignored: 0.5 and the outline on', s.opacity === 0.5 && op === 0.5 && s.coast.mode === 'thin' && s.coast.shown, [s.opacity, s.coast]); await ctx.close(); }
+    ok('I the release setting: the sheet is drawn at 0.8 with the outline on', s.opacity === 0.8 && op === 0.8 && s.coast.inScene, [s.opacity, op, s.coast]);
+    ok('I the preview address switches are gone: ?wind_coast=0&wind_opacity=0.5 changes nothing', s.opacity === 0.8 && op === 0.8 && s.coast.inScene && coastReqs.length === 1, [s.opacity, op, coastReqs.length]); await ctx.close(); }
 
   await browser.close(); srv.close(); clearTimeout(wd);
   console.log(`${fail ? 'FAILED' : 'ok'}  wind-ui${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${pass} passed, ${fail} failed`);
