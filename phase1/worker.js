@@ -3314,12 +3314,17 @@ async function collectWind(env, ms) {
   if (!run) {
     // a clean scan clears an EARLIER failure note only; a note from an attempt that started later stays, and `seen` is never touched
     const started = new Date(ms).toISOString();
-    if (cur.last_attempt) await windUpdate(env, c => c.last_attempt && c.last_attempt.started <= started ? { ...c, last_attempt: null } : null);
+    // decided against the manifest AS IT IS NOW, inside the conditional update: a note written while this scan was waiting is seen too
+    await windUpdate(env, c => c.last_attempt && c.last_attempt.started <= started ? { ...c, last_attempt: null } : null);
     const note = held ? `no newer run on the mirror: ${held} held and kept` : 'no run found on the mirror';
     await logRun(env, 'wind', ms, 'ok', 200, 0, 0, `${note}; ${requests} request(s)`);
     return 'wind:' + note;
   }
-  const seen = windSeenMerge(cur.seen && cur.seen.run === run ? cur.seen : null, { run, index_first_seen: nowIso() });
+  // The sighting goes on the manifest NOW, as soon as the index is accepted and before any field is asked for, so an invocation that
+  // is cut short cannot lose it. What this run carries from here on is the value the manifest holds (the earliest sighting of this run).
+  let seen = { run, index_first_seen: nowIso() };
+  { const up = await windUpdate(env, c => { const k = !c.current || run > c.current.run ? windSeenMerge(c.seen, seen) : (c.seen || null); return JSON.stringify(k) === JSON.stringify(c.seen || null) ? null : { ...c, seen: k }; });
+    const held2 = up.wrote ? up.body.seen : up.cur.seen; if (held2 && held2.run === run) seen = held2; }
   const fail = (reason, http, detail) => windFail(env, ms, reason, http, `${run} ${detail || ''}`.trim(), seen);
   const url = WIND.HOST + windObject(run), cycle = { year: +run.slice(0, 4), month: +run.slice(4, 6), day: +run.slice(6, 8), hour: +run.slice(8) };
   let hd; try { hd = await fetch(url, { method: 'HEAD', headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(WIND.TIMEOUT_MS) }); requests++; } catch (e) { return fail('object request failed', 0, String(e).slice(0, 120)); }
@@ -3358,7 +3363,6 @@ async function collectWind(env, ms) {
     grid: { source: 'regular lat/lon 0.25 degree, 1440 x 721', display: { w: WIND.W, h: WIND.H, lat0: 90, lon0: 0, step_deg: 1, order: 'rows north to south, columns west to east from 0 degrees east' },
       reduction: 'model value at each whole degree (every fourth point each way); no averaging', encoding: { type: 'int16 little-endian', per_cell: ['u eastward', 'v northward'], scale_m_s: 0.1, missing: WIND.MISSING } },
     times: { index_first_seen: seen.index_first_seen, fields_fetched, published: null }, started: new Date(ms).toISOString() };
-  await windUpdate(env, c => { const k = !c.current || run > c.current.run ? windSeenMerge(c.seen, seen) : (c.seen || null); return JSON.stringify(k) === JSON.stringify(c.seen || null) ? null : { ...c, seen: k }; });   // the sighting is on record before anything else can fail
   // the manifest is the single commit point: it advances only if no other run has published this run or a newer one meanwhile
   const brief = c => c && ({ run: c.run, run_time: c.run_time, valid_time: c.valid_time, levels: c.levels, source: c.source, grid: c.grid, times: c.times });
   const up = await windUpdate(env, c => { if (c.current && c.current.run >= run) return null;
@@ -3366,7 +3370,7 @@ async function collectWind(env, ms) {
     const current = { ...rev, times: { index_first_seen: first, fields_fetched, published: nowIso() } };
     return { ...windEmpty(), current, previous: brief(c.current), seen: c.seen && c.seen.run > run ? c.seen : null, last_attempt: windNoteRelevant(c.last_attempt, current) ? c.last_attempt : null }; });
   if (!up.wrote) { await logRun(env, 'wind', ms, 'ok', 200, 0, bytes, `superseded: ${up.cur.current.run} is published; ${run} not published; ${requests} requests`); return 'wind:superseded ' + run; }
-  await logRun(env, 'wind', ms, 'ok', 200, 3, bytes, `run ${run} published; index first seen ${seen.index_first_seen}; fields fetched ${fields_fetched}; published ${up.body.current.times.published}; ${requests} requests`);
+  await logRun(env, 'wind', ms, 'ok', 200, 3, bytes, `run ${run} published; index first seen ${up.body.current.times.index_first_seen}; fields fetched ${fields_fetched}; published ${up.body.current.times.published}; ${requests} requests`);
   return 'wind:published ' + run;
 }
 /** GET /snapshot/wind/meta and /snapshot/wind/grid/<sha256>.i16. A grid is served only if the manifest's current or previous revision

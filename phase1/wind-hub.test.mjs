@@ -9,7 +9,7 @@
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored manual-gated no-range-check no-etag-check no-length-check no-readback grid-overwrite run-keys no-cas
  *   create-unconditional late-run-wins move-on-fail any-grid no-integrity wind-first skip-run-check poll-when-held no-timeout
- *   generic-down decoder-drift accept-nonfinite note-unordered clear-newer-note seen-in-note late-note-kept plain-ran */
+ *   generic-down decoder-drift accept-nonfinite note-unordered clear-newer-note seen-in-note late-note-kept plain-ran clear-on-first-read seen-late row-own-seen */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
@@ -38,6 +38,9 @@ const BREAKS = {
   'seen-in-note': ["return { ...windEmpty(), current, previous: brief(c.current), seen: c.seen && c.seen.run > run ? c.seen : null,", "return { ...windEmpty(), current: { ...current, times: { ...current.times, index_first_seen: seen.index_first_seen } }, previous: brief(c.current), seen: c.seen && c.seen.run > run ? c.seen : null,"],
   'late-note-kept': ["last_attempt: windNoteRelevant(c.last_attempt, current) ? c.last_attempt : null }; });", "last_attempt: c.last_attempt }; });"],
   'plain-ran': ["async function runWind(env, ms) { let r = null; const g = await guarded(env, 'wind', ms, async (e, m) => { r = await collectWind(e, m); }); return r || g; }", "async function runWind(env, ms) { return guarded(env, 'wind', ms, collectWind); }"],
+  'clear-on-first-read': ["    await windUpdate(env, c => c.last_attempt && c.last_attempt.started <= started ? { ...c, last_attempt: null } : null);", "    if (cur.last_attempt) await windUpdate(env, c => c.last_attempt && c.last_attempt.started <= started ? { ...c, last_attempt: null } : null);"],
+  'seen-late': ["    const held2 = up.wrote ? up.body.seen : up.cur.seen; if (held2 && held2.run === run) seen = held2; }", "    const held2 = up.wrote ? up.body.seen : up.cur.seen; if (held2 && held2.run === run) seen = held2; if (up.wrote) await windUpdate(env, c => ({ ...c, seen: up.cur.seen || null })); }"],
+  'row-own-seen': ["`run ${run} published; index first seen ${up.body.current.times.index_first_seen};", "`run ${run} published; index first seen ${seen.index_first_seen};"],
   'decoder-drift': ["  if (!Number.isFinite(R)) no('packing reference value is not a finite number');\n  if (Math.abs(E) > 30)", "  if (Math.abs(E) > 30)"],
   'accept-nonfinite': ["    if (!(Math.abs(v) <= maxAbs)) no(Number.isFinite(v) ? `decoded value ${v} at point ${n} is beyond ${maxAbs}` : `decoded value at point ${n} is not a finite number`);\n", ''],
 };
@@ -362,6 +365,24 @@ for (const [fault, why] of [['full-200', 'a full 200 in place of a range'], ['wr
   w.onFetch = async kind => { if (kind !== 'idx' || done) return; done = true; await W.windUpdate(w.env, c => ({ ...c, seen: { run: '2026111606', index_first_seen: early } })); };
   await W.collectWind(w.env, at(16, 10)); const m = await manifest(w);
   ok('H the published revision carries the EARLIEST sighting on the manifest at commit time, not only this run\'s own', m.current.run === '2026111606' && m.current.times.index_first_seen === early && m.seen === null, m.current.times); }
+// ----- GPT's re-review of rev 2
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4));
+  // a LATER-started scan reads the manifest (no note), and while it waits on the index an EARLIER-started attempt notes a failure
+  let done = false; w.onFetch = async kind => { if (kind !== 'idx' || done) return; done = true; await W.windFail(w.env, at(16, 10), 'index request failed', 0, 'earlier attempt'); };
+  const mid = []; const r = await W.collectWind(w.env, at(16, 11)); const m = await manifest(w);
+  ok('H a later clean scan clears an earlier failure even if the note was written while the scan was waiting', /^wind:no newer run/.test(r) && m.last_attempt === null && windRuns(w).some(x => x.status === 'down' && /earlier attempt/.test(x.note) && !/not noted/.test(x.note)), [r, m.last_attempt]); }
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4)); w.publish('2026111606', 2);
+  // the sighting must be on the manifest before the object check and before any field request
+  const at_ = {}; w.onFetch = async kind => { if (!at_[kind]) at_[kind] = (await manifest(w)).seen; };
+  w.throwOn = 'range'; await W.collectWind(w.env, at(16, 10)); w.throwOn = null; w.onFetch = null; const m = await manifest(w);
+  ok('H the sighting is written as soon as the index is accepted: it is already there at the object check', at_.head && at_.head.run === '2026111606' && !!at_.head.index_first_seen && at_.idx === null, at_);
+  ok('H so a run cut short at its first field request has not lost it', m.seen && m.seen.run === '2026111606' && m.seen.index_first_seen === at_.head.index_first_seen && m.current.run === '2026111600', m.seen); }
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4)); w.publish('2026111606', 2);
+  // another attempt records an EARLIER sighting after this run wrote its own: the published revision and the run row must agree on the committed value
+  const early = '2026-11-16T09:40:00.000Z'; let done = false;
+  w.onFetch = async kind => { if (kind !== 'range' || done) return; done = true; await W.windUpdate(w.env, c => ({ ...c, seen: { run: '2026111606', index_first_seen: early } })); };
+  await W.collectWind(w.env, at(16, 10)); const m = await manifest(w), row = windRuns(w).pop();
+  ok('H the run row logs the sighting from the COMMITTED revision, so the two records agree', m.current.times.index_first_seen === early && row.note.includes('index first seen ' + early + ';'), [m.current.times.index_first_seen, row.note]); }
 { ok('H ordering rule: a note naming a run is ordered by run; one naming none by when its attempt started', W.windNoteRelevant({ run: '2026111606', started: 'a' }, { run: '2026111600', started: 'z' }) && !W.windNoteRelevant({ run: '2026111600', started: 'z' }, { run: '2026111600', started: 'a' }) && W.windNoteRelevant({ run: null, started: '2026-11-16T11' }, { run: '2026111600', started: '2026-11-16T10' }) && !W.windNoteRelevant({ run: null, started: '2026-11-16T09' }, { run: '2026111600', started: '2026-11-16T10' }) && W.windNoteRelevant({ run: null, started: 'x' }, null));
   const S = W.windSeenMerge; ok('H sighting rule: a newer run replaces; the same run keeps the earlier time; an older run never replaces', S(null, { run: 'b', index_first_seen: '2' }).run === 'b' && S({ run: 'b', index_first_seen: '2' }, { run: 'b', index_first_seen: '1' }).index_first_seen === '1' && S({ run: 'b', index_first_seen: '1' }, { run: 'b', index_first_seen: '2' }).index_first_seen === '1' && S({ run: 'b', index_first_seen: '5' }, { run: 'a', index_first_seen: '1' }).run === 'b' && S({ run: 'a', index_first_seen: '1' }, { run: 'b', index_first_seen: '9' }).run === 'b'); }
 ok('F across this whole file: no unconditional manifest write, no unconditional grid write by the hub, no delete', STATS.unconditionalPointerPuts === 0 && STATS.deletes === 0 && STATS.pointerPuts > 10, STATS);
