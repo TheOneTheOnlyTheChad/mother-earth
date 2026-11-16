@@ -468,3 +468,22 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **Computed, not observed.** Shown with the Computed label, the device-clock time used, and its limits (sphere, point Sun, no relief shadows, no earthshine, no eclipses).
 - **Attribution (our display):** "Sun, Earth and Moon positions and Moon orientation: JPL DE440 via NAIF".
 - **Ends 1 January 2028.** Outside its span the globe stays evenly lit. Renewal (a rebuild with wider ranges, or another route) is to be decided before then.
+
+## NOAA/NCEP Global Forecast System (GFS) — wind at three heights (modelled; optional layer) — **hourly hub collection enabled 16 Nov 2026; shown as "Wind by height" on the page once released**
+- **Filed:** 16 Nov 2026 18:54 UTC on Chad's line "Approve: file the REGISTER entries for NOAA/NCEP GFS wind and Natural Earth coastline as drafted in the wind-rc packet §14.3 (rev 9 wording)", after GPT passed the Natural Earth draft and asked for two wording fixes to this one, both made in rev 9. Filed on main because the hub already collects this source; the page is on branch `wind-rc` and reaches main with the page merge.
+- **Source:** NOAA Open Data Dissemination (NODD) on AWS, bucket `noaa-gfs-bdp-pds`, 0.25° pressure GRIB2, analysis hour f000; six fields a run (eastward and northward wind at 10 m above ground, 250 hPa and 10 hPa), fetched by byte range, about 4 MB a run.
+- **Request method:** **scheduled** — the hub (Cloudflare Worker) checks once an hour when `WIND_ENABLED=1` (set 16 Nov 2026 18:09:40 UTC; first manual publication 15:05 UTC that day). A successful fetch of one run is eight requests (one index, one object check, six ranges), after one index lookup for each newer candidate run not yet on the mirror; no retries inside a run. On an hourly check with nothing new: one index lookup for each candidate run newer than the one held (up to four are tried, newest first; several are possible when the held run is more than one cycle behind), or none while the newest possible run is already held. NOAA produces a run every six hours.
+- **Reuse terms — registry.opendata.aws/noaa-gfs-bdp-pds, read 16 Nov 2026 (Claude, browser pane):** "open to the public and can be used as desired"; NOAA requests attribution "for the use or dissemination of unaltered NOAA data"; no stated or implied endorsement by or affiliation with NOAA; modified data must not be stated or implied to be original, unaltered NOAA data.
+- **Credit, and why it is kept:** what Mother Earth shows is modified, so the attribution request does not strictly reach it; the credit "NOAA/NCEP GFS" is kept all the same, always together with the disclosure that Mother Earth resamples the grids (the value at each whole degree, to 1°) and quantises them (to 0.1 m/s), and that they are not original, unaltered NOAA data.
+- **Modelled, not observed.** One model analysis, frozen at its valid time; shown with the Modelled label, the valid time and its age.
+- **No endorsement implied.** No NOAA logo is shown.
+- **Commercial use:** the terms place no restriction.
+- **Not read:** a NOAA-hosted page of terms for GFS output specifically. The registry entry is the mirror's own statement and governs the bytes the hub fetches.
+
+## Natural Earth — 1:50m coastline, version 5.1.2 — **static reference outline drawn with Wind; not live data; on the page once released**
+- **Filed:** 16 Nov 2026 18:54 UTC on the same line of Chad's. On branch `wind-rc` (the file `assets/coast-50m.bin`); reaches main with the page merge.
+- **Source:** `ne_50m_coastline.geojson` from github.com/nvkelso/natural-earth-vector at tag `v5.1.2` (sha256 `271f1c4c1908312bac6b29d158ea1356544beafc129f260005300913aa5ea283`, fetched 16 Nov 2026).
+- **Request method:** **none at run time.** Fetched once by hand on 16 Nov 2026 to build the shipped file; no refresh schedule.
+- **Reuse terms — that repository's `LICENSE.md`, read 16 Nov 2026 (Claude):** "Everything here is public domain … No permission is needed to use Natural Earth. Crediting the authors is unnecessary." Credited in Sources all the same.
+- **Our modifications (`phase1/build-coast.py`, which rebuilds the file byte for byte from the pinned source):** lines under about 0.4° across dropped, the rest thinned to within 0.02° and rounded to 0.01°; shipped as `assets/coast-50m.bin`.
+- **Why a static source is here:** kept as a fixed map reference by Chad's decision of 16 Nov 2026. The rule for new features is live feeds; this is a reference line for reading a live layer, not a layer.

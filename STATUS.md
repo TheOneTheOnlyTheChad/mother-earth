@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 18:54 UTC (clock reading) — **REGISTER: NOAA/NCEP GFS wind and Natural Earth coastline filed**
+- Chad, his own line: "Approve: file the REGISTER entries for NOAA/NCEP GFS wind and Natural Earth coastline as drafted in the wind-rc packet §14.3 (rev 9 wording)".
+- Two entries appended to `REGISTER.md` on main, in the register's bullet layout, wording from §14.3 rev 9 (the two fixes GPT asked for included). Filed on main, not the branch, because the hub already collects the NOAA source.
+- Nothing else changed. Page still on `wind-rc`, not merged.
+
 ## 16 Nov 18:52 UTC (clock reading) — **GPT passes `wind-rc` rev 8 and the live hub bytes (§10). `wind-rc` rev 9: release preparation.** Poll watch started.
 - GPT (relayed by Chad): rev 8 passes desktop Chrome; all 491 files matched `91cf65d`. **Hub §10 reviewed on the exact Worker bytes: they match the live 0.6.17 sha256; the cache change is confined to the six byte-range downloads; 103 hub checks passed on GPT's rerun (fixtures).** Natural Earth REGISTER draft ready for filing on Chad's approval; NOAA draft needed two wording fixes; the page still needed asset-version bumps, the Sources preview copy, and a check that the browser picks up a newly published run without a reload.
 - **Branch head `f6025953eb84b683932f24b56caf07c2672a7c81` (rev 9; page and words only):** NOAA REGISTER draft fixed as asked (several index lookups possible on one hourly check; attribution is requested for unaltered data, credit kept with the resampling and quantising disclosure); `style.css?v=202612121500` on all five pages; Sources Wind heading no longer says "preview"; scale sentence says it is provisional. `wind-ui` 92 passed; `timeline-changes-build` 45 passed (its long-failing style.css check now passes). Hub file unchanged. Mac `_review/wind-rc/` at this head, 491 hashes check.
