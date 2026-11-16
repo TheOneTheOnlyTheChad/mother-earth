@@ -1,4 +1,4 @@
-/* Mother Earth — Wind by height (GLOBAL-WIND-BUILD-PROPOSAL rev 2; preview branch wind-rc).
+/* Mother Earth — Wind by height (GLOBAL-WIND-BUILD-PROPOSAL rev 2; built on branch wind-rc).
  * An optional layer, off on load. The hub fetches one NOAA/NCEP GFS run (analysis hour), samples it to a 1 degree grid at three
  * heights and serves each as a small file; this file paints one height at a time on a transparent sheet over the globe.
  * - MODELLED, not measured. The card says so whenever the layer is drawn, with the model's valid time.
@@ -21,7 +21,7 @@
   const WD = { META: ME.HUB + '/snapshot/wind/meta', HIDE_AFTER_H: 24, REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, ALT: 0.0009, OPACITY: 0.8,
     W: 360, H: 181, BYTES: 360 * 181 * 4, MISSING: -32768, PX: 8, PX_PHONE: 4, CALM_KMH: 1, ARROW_STEP: 5, ARROW_MAX_LAT: 80, ARROW_LEN: 2.1, BUILD_WAIT_MS: 60000,
     LEVELS: [{ id: 'near-ground', label: 'Near ground', where: '10 m above the model’s surface' }, { id: '250hPa', label: 'Jet-stream height', where: '250 hPa, roughly 10–11 km' }, { id: '10hPa', label: 'Stratosphere', where: '10 hPa, roughly 30 km' }],
-    // One fixed scale for all three heights, in km/h. PROVISIONAL: to be frozen from real revisions in the preview. Each band is [from, colour].
+    // One fixed scale for all three heights, in km/h. PROVISIONAL: to be frozen once several days of real revisions have been seen. Each band is [from, colour].
     SCALE: [[0, '#1b2a4a'], [5, '#27477a'], [10, '#2f6c9c'], [20, '#2f9aa6'], [30, '#3fbf8f'], [45, '#8fd65c'], [60, '#dfe04a'], [80, '#f5b33c'], [100, '#f08433'], [130, '#e4532f'], [160, '#cf2f4f'], [200, '#b0308f'], [250, '#8a4fd0'], [300, '#c9a6ff'], [400, '#ffffff']] };
   const st = { on: false, gen: 0, seq: 0, status: 'off', why: null, note: null, level: 'near-ground', want: null, rev: null, grid: null, meta: null, meshes: [], cache: new Map(),
     sel: null, badInput: false, lastAttempt: null, refreshFailed: false, timer: null, ageTimer: null, loading: false, requests: [], opts: { now: null } };
