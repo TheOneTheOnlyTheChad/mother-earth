@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 17:59 UTC (clock reading) — **GPT: `wind-rc` rev 7 passes the desktop Chrome retest; ship 0.8 with the outline, subject to Chad's decision on Natural Earth**
+- GPT (relayed by Chad): all four preview addresses hard-reloaded; three heights, zoomed out, back to jet-stream height over the Cape; the outline stayed visible throughout at both opacities. At 0.8 the Cape and Madagascar were traceable and the colours easier to match to the legend. Weakest contrast: the wide stratosphere view. The 0.8 preview was watched through the page's five-minute refresh: the line was the same before and after, no toggle needed. **Outside the watch: Wind's own ten-minute poll.** All 491 hashes matched `f661a3a`.
+- **Open, Chad's:** keep Natural Earth as a fixed map reference or not. **Not done:** locking 0.8 and removing the preview-only address switches (a branch change, after that decision); REGISTER entries; stage 5; any merge.
+- Hub unchanged: live 0.6.17, `WIND_ENABLED` unset; the one published revision (valid 06:00 UTC) is hidden by the page from 06:00 UTC on 17 Nov.
+
 ## 16 Nov 17:46 UTC (clock reading) — **`wind-rc` rev 7: the fading outline was Claude's fault in rev 6; fixed** (page only, branch only)
 - GPT's third look (relayed by Chad): 0.8 with the outline is the better setting when the coastline is visible; but the outline was clear on first load and very faint after the wider checks; Wind off and on restored it. All 491 hashes of `2bbe2bc` matched.
 - **Cause:** rev 6 drew the outline with the globe library's path layer, which `index.html` already uses for zero-count microplastic rings and refills on every page redraw. The redraw replaced the coastline; wind.js did not notice. The packet had said the Earth globe did not use that layer: wrong, Claude searched the `.js` files and not `index.html`. **Reproduced on the rev 6 file:** 30 of 39 sampled coast points bright on screen, 1 of 39 after one page-style redraw. Rev 6 also changed that layer's settings when Wind was switched on, which would have misplaced microplastic rings (not tested; removed with the cause). Draw order was not the cause.
