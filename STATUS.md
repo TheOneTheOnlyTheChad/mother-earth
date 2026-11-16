@@ -12,7 +12,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Page on the branch:** `wind.js`, a card, a tap hook, styles, a Sources section. `wind-ui` 72 passed; 20 breaks all caught. Rendered in headless Chromium with the gate's real grids: jet stream and calm over land visible, no page error.
 - Existing suites rerun: the hub suites sharing the hourly job and eight page suites pass; `smoke-fixes` "Sources 360" fails at 367 px as on main.
 - **Open:** coastlines are hard to see under the sheet (Chad's look); colour scale provisional; Sky view and other sheets together not tested; nothing ran in a Worker.
-- **Mac:** the `_review/wind-rc/` copy and the docs sync are not done; Chad's Mac was closed. To do when it is back.
+- **Mac (12:32 UTC, clock):** `_review/wind-rc/` holds the branch at `0cecbe1` (cloned in the Mac shell, copied without `.git`; seven files hash-checked against the workspace). STATUS and HANDOVER synced, the earlier copies preserved in `_sync-preserved/20261116T123252Z/` (both equal main `fcb3e7a`'s). The packet is also at `reviews/2026-11-16-wind-rc.md` in the Mac folder.
 - Next: GPT's review of the branch. Hub deploy, first manual run and schedule each need Chad's own Approve line.
 
 ## 16 Nov 11:19 UTC (clock reading) — **Global Wind: GPT's review of the build proposal; rev 2** (docs only; nothing built)
