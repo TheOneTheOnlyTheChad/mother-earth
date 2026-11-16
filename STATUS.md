@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 15:28 UTC (clock reading) — **GPT's look at the wind page: works at all three heights; hold release for readability. `wind-rc` rev 5: opacity 0.5 preview** (page only, branch only)
+- GPT (relayed by Chad), desktop Chrome, branch page against the live hub: all three heights worked, valid time 06:00 UTC throughout, legend readable, no load errors; **at 0.8 opacity the coastline of southern Africa was lost**, worst at jet-stream height. Asked for a 0.5 preview, then a thin coastline outline above the sheet if still lost.
+- **Branch head `e7bfacc586763a5a305dc018aa254b5e191f8b57`:** `wind.js` opacity 0.8 → 0.5; `index.html` asset version for `wind.js` moved; packet rev 5 (§11; §10's sentence about the two test null reads corrected). `wind-ui` 76 passed. **Hub file unchanged** (`59129514…e93e`, the live 0.6.17).
+- **Cost flagged in §11:** at 0.5 the sheet's colours mix half and half with the Earth picture, so bands no longer match the legend swatches closely; the outline route would keep 0.8 and true colours. Claude cannot judge coastlines here (no NASA picture in the workspace).
+- Mac `_review/wind-rc/` updated to this head; old copies preserved.
+
 ## 16 Nov 15:06 UTC (clock reading) — **Hub 0.6.17 deployed; first wind publication (run 2026111606) made and verified** — stages 3 and 4 of the wind preview
 - Chad, his own two lines in one message: "Approve: deploy hub 0.6.17 from wind-rc c6fe97a (phase1/worker.js sha256 59129514…e93e; WIND_ENABLED unset, so no NOAA request and nothing written; no schedule change, no merge)" and "Approve: run /admin/run/wind once on hub 0.6.17 (first wind publication: about 8 requests and 4 MB from NOAA's mirror, three grids and a manifest written under wind/ in R2; WIND_ENABLED stays unset; no schedule, no merge)". **No GPT review of rev 4 (`c6fe97a`) was relayed before these lines;** GPT had specified the change, not seen the commit.
 - **Deployed 15:04:31 UTC** (Cloudflare's modified time) from the pane: file fetched from GitHub at `c6fe97a`, 397,649 bytes, hash checked, uploaded as code only. Cloudflare version 73 (`fa2239c9`); previous 72 (`8a48b281`, 0.6.16). **Read back 15:04–15:05:** deployed module hashes to `59129514…e93e`; hub and `/status` answer 0.6.17; 22 bindings unchanged, none named WIND; four schedules unchanged; `/admin/run/wind` without key 403; usgs, dustrgb and sunface snapshots 200; manifest as left by the second failed attempt.
