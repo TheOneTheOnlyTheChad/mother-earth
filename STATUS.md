@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 10:41 UTC (clock reading) — **Aircraft: OpenSky's reply on the feeder username error** (docs only; aircraft stays parked)
+- OpenSky (Martin, relayed by Chad, received 12:33 SAST): the feeder image added a check that causes the "Invalid OpenSky username" error and it is not fixed yet; he assumed Chad is on the beta; suggested the latest stable version, or he can issue a serial by hand in the evening. He linked the feeder image's GitHub issue 369.
+- Read by search snippet only (the page could not be opened from Claude's workspace): on that issue OpenSky wrote on 9 Nov 2026 that a user's username was rejected because it contains an "@", and the quoted code prints "Invalid OpenSky username format". Chad's 16 Nov note says his image is v3.0.15 **stable**, so "use the latest stable" may not clear it; which versions carry the check was not established.
+- Next (Chad's): reply to OpenSky. No serial yet; no outside feed verified.
+
 ## 16 Nov 08:52 UTC (clock reading) — **Global Wind: GPT's review of the gate; decoder hardened; Worker probe prepared, not deployed** (research files only)
 - GPT (relayed by Chad): carry the decoder forward as a private-preview candidate; run a read-only Worker probe next. GPT reran the decoder on the Mac and found two accepted corruptions (a not-a-number packing reference; a first latitude of 123°).
 - **Decoder rev 2** closes both and bounds sizes before allocating; a batch must be exactly the six expected fields of one run. Rerun: still 0 difference from ecCodes on every value; 25 refusals, none accepted. Record: `docs/research/GLOBAL-WIND-GATE-2026-11-16.md` §8.
