@@ -61,7 +61,7 @@ Every step: status 206, Content-Range, Content-Length and ETag exactly as pinned
 - The hub's failure is reproduced outside the hub, twice, in both orders, and removed by changing only the cache setting. User-Agent and the 30 s limit are ruled out (identical in every step).
 - With the setting, the response goes through Cloudflare's cache path ("REVALIDATED") and not one byte of body reaches the Worker in 30 s. Without it the response is "DYNAMIC" (not cached) and streams at once.
 - The chunked read here and the hub's `arrayBuffer()` fail the same way with the setting, so the reading method is not the cause.
-- D and E were not run: the plan called for them only if the cf step had completed. **Three keyed requests used of five; six upstream requests; about 2.9 MB delivered.**
+- D and E were not run: the plan called for them only if the cf step had completed. **Three keyed requests used of five; five upstream requests (two in A, two in B, one in C); about 2.9 MB delivered.** (Corrected 16 Nov: this first said six upstream requests; GPT caught it.)
 
 **Not shown**
 - What Cloudflare was doing during the 30 s (for example fetching the whole 497 MB object to serve the slice). The probe sees only what reached the Worker.

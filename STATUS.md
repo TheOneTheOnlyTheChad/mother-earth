@@ -4,11 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 14:58 UTC (clock reading) — **`wind-rc` rev 4 (hub 0.6.17): range downloads send `cache: 'no-store'`** — branch only, not deployed
+- GPT (relayed by Chad): go ahead with the branch fix; `cache: 'no-store'` only in `windFetchRange`; leave the index GET and object HEAD alone; keep the 30 s limit and the response checks; add a regression assertion for the range fetch options; the probe made five upstream requests, not six. Line: "Go: use cache: 'no-store' for wind byte-range downloads on wind-rc (branch only; no deploy, no merge)".
+- **Branch head `c6fe97a78bc30ae834e94a9908d2e881c9f56f22`.** One line changed in `windFetchRange`; `COLLECTOR_VERSION` 0.6.17. `phase1/worker.js` sha256 `59129514a3e6923a3a8664ebf38502e293725cf29e28d5df79110f9422e2e93e`, 397,649 bytes.
+- **Tests:** three new checks (range requests send `no-store` and no cf setting; index and object check unchanged; User-Agent), breaks `range-cf0` and `range-no-setting`, `no-timeout` rewritten for the new line; two null reads under breaks guarded (GPT's rev 3 note). `wind-hub` 103 passed (109 with real NOAA bytes); 31 breaks, each applied and failing a real check; history-hub, sunface-hub, skycraft-hub, dustrgb-hub, status-notes-hub, health-hub, sky-hub, arts-hub pass. `wind-ui` not rerun (no page file changed).
+- **The suites cannot prove the fix** (fake mirror). Proof is the next manual run on the deployed file.
+- Packet `reviews/2026-11-16-wind-rc.md` rev 4 (§10). Mac `_review/wind-rc/` updated to `c6fe97a`: five changed files written in place (old copies preserved), `REVIEW-COPY.txt` rewritten, all 489 listed hashes check on the Mac.
+- **Live hub unchanged: 0.6.16, `WIND_ENABLED` unset.** Deploying 0.6.17 and running it each need Chad's own line.
+
 ## 16 Nov 14:35 UTC (clock reading) — **Wind range probe run: the `cf: { cacheTtl: 0 }` setting is the cause**
 - Chad, his own line: "Approve: create temporary Worker mother-earth-wind-range-probe from commit b94c191 (…sha256 51ccabd7…b7d1; no bindings, no schedule, no storage), run up to five keyed read-only sequences per its README rev 2, then delete the Worker".
 - **Created 14:32:42 UTC, deleted 14:34:36 UTC** from the pane's signed-in Cloudflare tab; source hash checked first; account holds only `mother-earth` again; the probe address returns Cloudflare's own 404.
 - **Three keyed requests (A, B, C), all from Johannesburg.** With `cf: { cacheTtl: 0 }`: 206 and the right headers after about 1.1 s, cf-cache-status REVALIDATED, then **0 bytes of body and a timeout at 30 s**, in both orders. With no cache setting, and with `cache: 'no-store'`: DYNAMIC, all 959,100 bytes in about 2.4 s, sha256 equal to the browser read. User-Agent and time limit were identical throughout.
-- D and E not run (the plan called for them only if the cf step completed). Six upstream requests, about 2.9 MB.
+- D and E not run (the plan called for them only if the cf step completed). Five upstream requests (corrected from "six"; GPT's catch), about 2.9 MB.
 - Full table and what is not shown: `docs/research/global-wind-range/README.md`, "Result".
 - **Hub unchanged:** 0.6.16, `WIND_ENABLED` unset, manifest as after the second attempt (no grid, two failures noted). No fix made; candidates go to GPT first.
 
