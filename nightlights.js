@@ -197,12 +197,31 @@
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; if (v[i] >= 0) continue; const p = ((x >> 3) + (y >> 3)) & 1 ? b : a; d[i * 4] = p[0]; d[i * 4 + 1] = p[1]; d[i * 4 + 2] = p[2]; d[i * 4 + 3] = 255; }
     g.putImageData(img, 0, 0); return c;
   }
+  // The picture the globe is drawing now, by its address. The globe takes a new address at once but swaps the picture only
+  // when that picture has loaded, so "what is drawn" is read from the globe's own material, never from the address given.
+  const drawnUrl = g => { try { const i = g.globeMaterial().map.image; return (i && i.src) || null; } catch (_) { return null; } };
+  const sameUrl = (a, b) => { if (!a || !b) return false; try { return new URL(a, location.href).href === new URL(b, location.href).href; } catch (_) { return a === b; } };
+  // Switching off: the globe is given the earlier picture's address at once, but it draws that picture only when it has
+  // loaded. The imagery line and the Sky label go back with the picture, not before it (GPT's live smoke, 16 Nov): until
+  // the globe's own picture changes they still name night lights, which is what is still drawn.
   function restore() {
-    try { const g = ME.globe && ME.globe(); if (g && st.prevUrl != null) g.globeImageUrl(st.prevUrl); } catch (_) { }
-    if (st.saved) { const a = $('imgdate'), b = $('img-full'); if (a) a.innerHTML = st.saved.imgdate; if (b) b.textContent = st.saved.full; }
+    let g = null, want = null;
+    try { g = ME.globe && ME.globe(); if (g && st.prevUrl != null) { g.globeImageUrl(st.prevUrl); want = g.globeImageUrl(); } } catch (_) { }
+    const saved = st.saved;
     if (st.blobUrl) { try { URL.revokeObjectURL(st.blobUrl); } catch (_) { } }
     st.prevUrl = null; st.blobUrl = null; st.saved = null;
+    if (!saved) {
     if (typeof ME.zoomImgLabel === 'function') ME.zoomImgLabel();   // the Sky zoom-out view names the picture that is drawn
+      return;
+    }
+    const job = st.restoring = { saved };
+    const done = () => {
+      if (st.restoring !== job) return; st.restoring = null;
+      const a = $('imgdate'), b = $('img-full'); if (a) a.innerHTML = saved.imgdate; if (b) b.textContent = saved.full;
+    if (typeof ME.zoomImgLabel === 'function') ME.zoomImgLabel();   // the Sky zoom-out view names the picture that is drawn
+    };
+    if (!g || !want) return done();
+    const iv = setInterval(() => { if (st.restoring !== job) return clearInterval(iv); if (sameUrl(drawnUrl(g), want)) { clearInterval(iv); done(); } }, 30);
   }
   async function setOn(on) {
     if (on === st.on) return;
@@ -239,8 +258,14 @@
     if (gen !== st.gen) return;
     if (!blob) return stop('Night lights could not be drawn in this browser. Nothing is drawn.');
     const g = ME.globe(); st.prevUrl = g.globeImageUrl(); st.blobUrl = URL.createObjectURL(blob);
-    const a = $('imgdate'), b = $('img-full'); st.saved = { imgdate: a ? a.innerHTML : '', full: b ? b.textContent : '' };
+    const a = $('imgdate'), b = $('img-full');
+    st.saved = st.restoring ? st.restoring.saved : { imgdate: a ? a.innerHTML : '', full: b ? b.textContent : '' }; st.restoring = null;   // switched on again before the earlier picture came back: the line on the page still names night lights, so keep the one saved before
     g.globeImageUrl(st.blobUrl);
+    // "ready", and the imagery line, only once the night picture is the one on the globe (the same rule as switching off)
+    const t1 = performance.now(), wait = waitMs();
+    while (gen === st.gen && !sameUrl(drawnUrl(g), st.blobUrl) && performance.now() - t1 < wait) await new Promise(r => setTimeout(r, 30));
+    if (gen !== st.gen) return;
+    if (!sameUrl(drawnUrl(g), st.blobUrl)) return stop('Night lights could not be drawn in this browser. Nothing is drawn.');
     st.date = pick.date; st.status = 'ready'; st.timings.readyMs = Math.round(performance.now() - t0);
     const dt = dayText(st.date), full = `Imagery: night lights ${dt} (NASA GIBS, VIIRS ${NL.SAT}) — light measured at night on that UTC date, not live · patterned areas: no data`;
     if (a) a.innerHTML = `<span class="img-long">${esc(full)}</span><span class="img-short">Night lights ${esc(dt.slice(0, dt.length - 5))}<br>${esc(NL.SAT)} · not live</span>`;
@@ -385,7 +410,7 @@
   ME.nightLights = {
     on: () => st.on && st.status === 'ready', setOn, compare, runCompare, logic,
     state: () => ({ on: st.on, status: st.status, why: st.why, date: st.date, arriving: st.arriving.slice(), probes: st.probes ? st.probes.map(p => ({ ...p })) : null, missing: st.missing,
-      backdrop: st.blobUrl ? 'night lights' : 'unchanged', requests: st.requests.slice(), bytes: { ...st.bytes }, timings: { ...st.timings },
+      backdrop: st.blobUrl || st.restoring ? 'night lights' : 'unchanged', restoring: !!st.restoring, requests: st.requests.slice(), bytes: { ...st.bytes }, timings: { ...st.timings },
       compare: st.cmp ? { box: st.cmp.box, w: st.cmp.w, h: st.cmp.h, a: st.cmp.a.status, b: st.cmp.b.status, blocked: st.cmp.blocked, tally: st.cmp.tally ? { ...st.cmp.tally } : null } : null }),
     options: o => Object.assign(st.opts, o || {}),   // test aid: now (ms) pins "today" before a switch-on or a Compare
     result: () => st.cmp,                            // test aid: the decoded comparison last drawn
