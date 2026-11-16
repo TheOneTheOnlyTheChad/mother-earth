@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 03:41 UTC (clock reading) — **night-lights-label-rc built: the imagery label follows the picture drawn** (branch only; nothing merged; for GPT)
+- Chad: "go". Branch `night-lights-label-rc`, code head `bcc4432` (commit time 03:32:29 UTC), branch head `2dac540`; packet `reviews/2026-11-16-night-lights-label-rc.md`.
+- **Fix (`nightlights.js`; cache key in `index.html`):** on switch-off the imagery line, its full form and the Sky label keep the night-lights wording until the globe itself carries the earlier picture; on switch-on "ready" and the wording appear only once the night picture is drawn. "Drawn" is read from the globe's material. The switch-on gap was found while writing the test; GPT had not seen it.
+- **Suites:** page suite 138 of 138 (section S2, six checks); its 19 breaks each fail (new: `label-early`, `ready-early`); logic 49 of 49; `sky-zoom-ui` 351, `sky-ui` 79, `backdrop-layer` 27, `legend-active-ui` 548, `mobile-pass` 131, `desktop-overflow` 258; `smoke-fixes` 51 of 52 as on main. Others not rerun.
+- **Live check 03:41 UTC (pane, github.io address, hash-checked):** after switch-off the true-colour picture took 1.9 s and 3.5 s to come back in two tries; the line and the Sky label stayed on night lights until it did. Sampled every 10 ms: 7 of 1,772 samples disagreed, all at a swap; the wording can trail the picture by up to 30 ms (the page's polling step).
+- Next: GPT's review; then Chad's own `Approve: merge night-lights-label-rc at <reviewed head> to main (page change: Night lights imagery label follows the picture drawn)`. Not given.
+
 ## 16 Nov 02:39 UTC (clock reading) — **REGISTER: observed request count corrected** (docs only)
 - Chad: "fix the register". The Night lights line's observed figure now reads one to three 512 × 256 frames per switch-on (three seen 16 Nov 02:18 UTC), in place of "one or two". The code's maximum of four is unchanged. Chad gave this in his own words, not as an "Approve:" line; it is a one-line correction to a record, with no page or hub change.
 - Chad, same message: "go" for the switch-off label fix on a branch (in progress, `night-lights-label-rc`), and: phone testing waits until features are done; desktop first.
