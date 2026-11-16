@@ -32,8 +32,8 @@
   //   ?wind_opacity=0.5|0.8   ?wind_coast=0 (outline off)
   const QS = new URLSearchParams(location.search), qo = Number(QS.get('wind_opacity')), qc = QS.get('wind_coast');
   if (qo === 0.5 || qo === 0.8) WD.OPACITY = qo;
-  const COAST = { FILE: 'assets/coast-50m.bin?v=202612121200', MAGIC: 'MECOAST1', ALT: 0.002, COLOR: 'rgba(255,255,255,0.92)', MODE: qc === '0' ? '0' : 'thin' };
-  const coast = { status: 'idle', lines: null, shown: false, set: false };
+  const COAST = { FILE: 'assets/coast-50m.bin?v=202612121200', MAGIC: 'MECOAST1', ALT: 0.002, OPACITY: 0.92, MAX_SEG_DEG: 1, MODE: qc === '0' ? '0' : 'thin' };
+  const coast = { status: 'idle', lines: null, shown: false, mesh: null, parent: null };
   async function loadCoast() {
     if (coast.status !== 'idle' || COAST.MODE === '0') return;
     coast.status = 'loading';
@@ -50,14 +50,33 @@
     } catch (e) { coast.status = 'failed'; coast.err = String(e.message || e); }
     paint();
   }
+  /** The outline is its own mesh, like the wind sheet: it uses NO globe.gl data layer. (Rev 6 used the library's path layer, which the
+   *  page already uses for microplastic rings: the page's next redraw wiped the outline, and Wind changed that layer's settings. Rev 7.)
+   *  The library gives this file no line class, so each segment is a flat triangle (a, b, b) drawn as a wireframe: one object, one-pixel lines. */
+  function buildCoast() {
+    const h = harvest(); if (!h || !coast.lines) return null;
+    const g = h.g, Geo = Object.getPrototypeOf(h.Sphere), pos = h.gmesh.geometry.getAttribute && h.gmesh.geometry.getAttribute('position'), Attr = pos && pos.constructor, C = g.globeMaterial().constructor;
+    if (typeof Geo !== 'function' || !Attr || typeof g.getCoords !== 'function') return null;
+    const xyz = []; let segs = 0;
+    const put = (lng, lat) => { const c = g.getCoords(lat, lng, COAST.ALT); xyz.push(c.x, c.y, c.z); };
+    for (const l of coast.lines) for (let i = 1; i < l.length; i++) {
+      const a = l[i - 1], b = l[i], n = Math.max(1, Math.ceil(Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1])) / COAST.MAX_SEG_DEG));   // long straight runs are cut so they follow the curve
+      for (let k = 0; k < n; k++) { const t0 = k / n, t1 = (k + 1) / n, x0 = a[0] + (b[0] - a[0]) * t0, y0 = a[1] + (b[1] - a[1]) * t0, x1 = a[0] + (b[0] - a[0]) * t1, y1 = a[1] + (b[1] - a[1]) * t1;
+        put(x0, y0); put(x1, y1); put(x1, y1); segs++; }
+    }
+    const geo = new Geo(); geo.setAttribute('position', new Attr(new Float32Array(xyz), 3));
+    const mat = new C({ wireframe: true, transparent: true, opacity: COAST.OPACITY, depthWrite: false }); if (mat.color) mat.color.set(0xffffff); if (mat.emissive) mat.emissive.set(0xffffff);
+    const mesh = new h.Mesh(geo, mat); mesh.raycast = () => { }; mesh.renderOrder = 1;   // after the wind sheet (−4) and the other sheets
+    mesh.__windCoast = true; mesh.__segments = segs;
+    return { mesh, parent: h.gmesh.parent };
+  }
   /** the outline is drawn exactly while a wind sheet is drawn; it never appears on its own */
   function coastSync() {
-    const g = ME.globe && ME.globe(); if (!g || typeof g.pathsData !== 'function') return;
     const want = st.on && st.meshes.length > 0 && coast.status === 'ready' && COAST.MODE !== '0';
+    if (want && !coast.mesh) { const b = buildCoast(); if (!b) { coast.status = 'failed'; coast.err = 'the outline could not be built'; return; } coast.mesh = b.mesh; coast.parent = b.parent; }
     if (want === coast.shown) return;
-    if (want && !coast.set) { coast.set = true;
-      g.pathPoints(d => d).pathPointLat(p => p[1]).pathPointLng(p => p[0]).pathPointAlt(COAST.ALT).pathColor(() => COAST.COLOR).pathStroke(null).pathTransitionDuration(0); }
-    g.pathsData(want ? coast.lines : []); coast.shown = want;
+    if (want) coast.parent.add(coast.mesh); else if (coast.mesh && coast.mesh.parent) coast.mesh.parent.remove(coast.mesh);
+    coast.shown = want;
   }
   const hex = async b => [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map(x => x.toString(16).padStart(2, '0')).join('');
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -314,8 +333,8 @@
       read: $('wind-read').textContent, readKind: $('wind-read').dataset.kind || '', stateWord: $('s-wind').textContent,
       checked: [...document.querySelectorAll('#wind-levels button')].filter(b => b.getAttribute('aria-checked') === 'true').map(b => b.dataset.level),
       drawn: st.meshes[0] && st.meshes[0].material.map.image.__wind || null, cached: st.cache.size,
-      coast: { status: coast.status, shown: coast.shown, lines: coast.lines ? coast.lines.length : 0, mode: COAST.MODE, err: coast.err || null }, opacity: WD.OPACITY }),
+      coast: { status: coast.status, shown: coast.shown, lines: coast.lines ? coast.lines.length : 0, mode: COAST.MODE, err: coast.err || null, inScene: !!(coast.mesh && coast.mesh.parent), segments: coast.mesh ? coast.mesh.__segments : 0 }, opacity: WD.OPACITY }),
     setOn, setLevel, refresh, ageTick, select, opts: st.opts, config: WD, reading: (lat, lng) => st.grid ? reading(st.grid, lat, lng) : null, cell, band,
-    coastConfig: COAST, texture: () => (st.meshes[0] && st.meshes[0].material.map && st.meshes[0].material.map.image) || null };
+    coastConfig: COAST, coastLines: () => coast.lines, texture: () => (st.meshes[0] && st.meshes[0].material.map && st.meshes[0].material.map.image) || null };
   paint();
 })();
