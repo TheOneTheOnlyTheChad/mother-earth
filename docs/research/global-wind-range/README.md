@@ -21,9 +21,13 @@
 
 Each range step records: time to headers, the headers, time to first and last chunk, bytes received, and either the hash of the complete body or the error. The probe reads in chunks to count bytes; the hub reads with `arrayBuffer()`. The request is the same.
 
-## Order of running
-1. **A.** 2. **B** if A's two steps differ (GPT's order check). 3. **C** if the cf step fails in either. 4. **D, then E,** only if the cf range step completes in A and B, so the cause lies elsewhere.
-At most five keyed requests, at most two upstream requests each, under 1 MB delivered each. A failing cf step takes the full 30 s.
+## Order of running (rev 2, 14:31 UTC: GPT's clarification, relayed by Chad)
+1. **A** always.
+2. **If A's two steps differ:** run **B** (reverse order). If the cf step fails in either A or B, run **C**.
+3. **If both steps of A complete and match the browser hash:** skip B; run **D**, then **E**, to test whether the object check before the range matters.
+4. If every probe request succeeds, the hub failure stays unexplained (the probe reads in chunks, the hub with `arrayBuffer()`); say so and stop.
+
+**Cap: at most five keyed requests in all**, whatever the results. The Worker itself would accept more with the key until it expires, so the cap is kept by the person running it, and the Worker is deleted when the run ends. At most two upstream requests per keyed request, under 1 MB delivered each. A failing cf step takes the full 30 s. `WIND_ENABLED` stays unset; results go back to GPT before any hub change.
 
 ## What it cannot show
 How many bytes Cloudflare pulled from NOAA upstream; only what reached the Worker. One location, one object, one afternoon.

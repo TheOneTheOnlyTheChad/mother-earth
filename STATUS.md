@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 14:31 UTC (clock reading) — Wind range probe: GPT approves the file; run order clarified; **not run (awaiting Chad's own line)**
+- GPT (relayed by Chad): Mac copy matches sha256 `51ccabd7…b7d1`; reran the 19 local checks and confirmed an expired request gives 410 with no upstream call; order to use: A; if A differs, B, and C if the cf request fails in either; if both of A complete and match, skip B and run D then E; cap of five keyed sequences kept in the run instructions; delete the Worker after; bring results back before changing the hub.
+- README's order section rewritten to that (rev 2). The Worker file is unchanged (same hash, still as at `b94c191`).
+- Relayed approval is not Chad's Approve line. Nothing created on Cloudflare.
+
 ## 16 Nov 14:29 UTC (clock reading) — **Wind range-request probe file written (docs only; nothing deployed)**
 - GPT (relayed by Chad): take the probe-first route; pin the 06z object and the failing range, one Worker, same User-Agent and 30 s limit, change only the cache setting; record time to headers, bytes received and the hash; reverse the order if outcomes differ; `cache: 'no-store'` as a separate test. Chad forwarded GPT's text with the line "Go: write the wind range-request probe file (docs only on main; no deploy)"; taken as go for docs work only.
 - **Control read from the pane, 14:27:34 UTC (read-only):** the failing range (bytes 410321002–411280101 of the 06z object, 959,100 bytes) straight from the mirror: 206, headers in 309 ms, complete in 1,528 ms, sha256 `83eb6f5e51ce1a3f4eb562dbc6938fbf3bfe34667d932a42e2393f911d2b1386`. The mirror serves it normally to a browser.
