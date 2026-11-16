@@ -1,11 +1,11 @@
 == decode vs ecCodes, tolerance 0.000001 m/s
-0 10u 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 45.5 wall ms 38.0 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":103,"surfaceScale":0,"surfaceValue":10,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-2374.7392578125,"E":0,"D":2,"nbits":12,"NG":31412}
-1 10v 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 40.1 wall ms 36.1 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":103,"surfaceScale":0,"surfaceValue":10,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-2408.120361328125,"E":0,"D":2,"nbits":12,"NG":31558}
-2 u 250 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 86.4 wall ms 53.6 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":25000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-387.67144775390625,"E":0,"D":1,"nbits":9,"NG":28239}
-3 v 250 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 20.9 wall ms 21.0 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":25000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-551.2896118164062,"E":0,"D":1,"nbits":9,"NG":28986}
-4 u 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 21.2 wall ms 21.2 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":1000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-496.000244140625,"E":0,"D":1,"nbits":7,"NG":25622}
-5 v 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 31.5 wall ms 31.7 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":1000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-519.000732421875,"E":0,"D":1,"nbits":7,"NG":26373}
-rss start MB 38.0 peak MB 151.6 heapUsed MB 4.3
+0 10u 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 62.4 wall ms 55.4 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":103,"surfaceScale":0,"surfaceValue":10,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-2374.7392578125,"E":0,"D":2,"nbits":12,"NG":31412}
+1 10v 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 55.3 wall ms 48.5 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":103,"surfaceScale":0,"surfaceValue":10,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-2408.120361328125,"E":0,"D":2,"nbits":12,"NG":31558}
+2 u 250 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 76.8 wall ms 49.5 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":25000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-387.67144775390625,"E":0,"D":1,"nbits":9,"NG":28239}
+3 v 250 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 16.2 wall ms 16.6 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":25000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-551.2896118164062,"E":0,"D":1,"nbits":9,"NG":28986}
+4 u 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 15.2 wall ms 15.1 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":1000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-496.000244140625,"E":0,"D":1,"nbits":7,"NG":25622}
+5 v 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 20.4 wall ms 20.5 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":1000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-519.000732421875,"E":0,"D":1,"nbits":7,"NG":26373}
+rss start MB 37.9 peak MB 154.9 heapUsed MB 4.3
 same grid all six true same ref time true all f000 analysis true
 == refusals
 truncated to half -> GribRefused : declared length 959584 but 479792 bytes given
@@ -18,6 +18,15 @@ scanning mode set to 64 (south to north) -> GribRefused : scanning mode 64 not s
 components flagged grid-relative -> GribRefused : wind components are grid-relative, not Earth-relative
 bitmap flagged present -> GribRefused : bitmap indicator 0 not supported (only 255: none)
 edition set to 1 -> GribRefused : edition 1 not supported
+GPT 1: packing reference value set to NaN -> GribRefused : packing reference value is not a finite number
+GPT 2: first latitude set to 123 degrees -> GribRefused : grid la1 is 123, expected 90
+packing reference value set to +Infinity -> GribRefused : packing reference value is not a finite number
+packing reference value set to 1,000,000 (finite, implausible wind) -> GribRefused : decoded value 10019.7 at point 0 is beyond 500
+binary scale factor set to 40 -> GribRefused : binary scale factor 40 out of range
+decimal scale factor set to 9 -> GribRefused : decimal scale factor 9 out of range
+Ni set to 720 -> GribRefused : grid ni is 720, expected 1440
+longitude step set to 0.25004 degrees -> GribRefused : grid di is 0.25004, expected 0.25
+group count set to 1,038,240 -> GribRefused : group count does not fit in the data section
 == 1 degree export (method: point sample at whole degrees; components first, speed after)
 near-ground bytes 260640
 250hPa bytes 260640
@@ -51,3 +60,10 @@ southward → From north (0°), 36 km/h; arrow heads 180°
 to north-east → From south-west (225°), 36 km/h; arrow heads 45°
 0.2 m/s → calm
 eastward at exact pole → 36 km/h (pole: no bearing)
+batch: the six real messages, right run -> accepted, 6 fields
+batch: five messages -> GribRefused : batch has 5 messages, expected 6
+batch: u10m given twice (v10m missing) -> GribRefused : v10m: parameter is 0.2.2
+batch: 250 hPa and 10 hPa swapped -> GribRefused : u250: level is type 100 value 1000
+batch: right messages, run expected 06 UTC -> GribRefused : u10m: run is 2026-11-16 0:0, expected 2026-11-16 6:00
+batch: one message relabelled as the 18 UTC run -> GribRefused : v250: run is 2026-11-16 18:0, expected 2026-11-16 0:00
+batch: one message relabelled as a 3-hour forecast -> GribRefused : v10: forecast time 3, expected 0

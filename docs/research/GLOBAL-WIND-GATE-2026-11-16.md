@@ -69,3 +69,28 @@ At 08:42:16 UTC the 16 Nov 06 run's index returned 404. Four runs are a first sa
 ## 7. Question the gate was to answer
 
 Whether the decoder goes forward to a private preview. The evidence supports yes. The decision is Chad's, after GPT's review.
+
+## 8. GPT's review of the result (relayed by Chad, 16 Nov) and the hardening fix — written 08:52 UTC (clock reading)
+
+GPT: carry the decoder forward as a private-preview candidate; run a read-only Worker reach-and-cost probe before any collector or layer is built. GPT reran the decoder on the Mac's copy of the run: six hashes matched, all values finite, each field's minimum, maximum and mean matched the saved ecCodes figures, and the 0.0488 m/s export rounding was reproduced. The point-by-point comparison in §3 is Claude's alone.
+
+**Two gaps GPT found by changing a real message, both confirmed and closed:**
+- A corrupt packing reference value was accepted and gave not-a-number values. Now refused: "packing reference value is not a finite number".
+- A grid whose first latitude was 123° was accepted. Now refused: "grid la1 is 123, expected 90".
+
+**Decoder rev 2** (`gribwind.mjs`, 156 lines, sha256 `f1bd75e6…9e75`):
+- The grid must be exactly the global 0.25° grid (1440 × 721, 90 to −90, 0 to 359.75, 0.25 steps).
+- Sizes and the group count are bounded before any array is made (the group fields must fit in the data section).
+- Refused: a non-finite reference value; a binary scale beyond ±30; a decimal scale outside 0–6; any decoded value that is not finite or is beyond 500 m/s (Claude's bound, added beyond GPT's list: a finite but absurd value would otherwise pass).
+- `decodeWindBatch()` requires exactly six messages, in the fixed order, each the expected parameter and level, forecast time 0, all from the stated run.
+
+**Rerun on the same bytes:** all six still match ecCodes with a largest difference of 0; export unchanged (same three grid hashes). **25 refusals, none accepted:** the first ten; GPT's two; +Infinity reference; an absurd finite reference; scale factors; Ni changed; longitude step changed; group count set to the number of points; a batch of five; a field given twice; levels swapped; the wrong run expected; one message relabelled as another run; one relabelled as a 3-hour forecast. One of Claude's own new tests first changed nothing (it wrote the value already there) and was corrected. Full text: `gate-output.txt`.
+
+## 9. The read-only Worker probe, as prepared (not deployed; needs Chad's own Approve line)
+
+- **File:** `global-wind-gate/probe-worker.mjs` (the decoder plus `probe-handler.part.mjs`; built by `build-probe.sh`). It is a separate, temporary Worker. No bindings, no schedule, no storage, no change to the hub `mother-earth`, R2, D1 or the page.
+- **What one request does:** for one run, reads the index, then six range requests to one host; each response is checked (status `206`, exact `Content-Range`, exact length, same ETag) **before** its body is read, and refused otherwise; one field decoded at a time with no forced garbage collection; three 1° grids made; hashes and wall times returned as JSON.
+- **Pass:** for run 2026111600 the three grid hashes equal the workspace's (`515452c6…`, `5e37bfa3…`, `cf721ec0…`) and the six message hashes equal §1's.
+- **CPU and memory:** a Worker cannot read its own CPU time; it comes from the invocation log (`$workers.cpuTimeMs`, `wallTimeMs`, `outcome`; START-HERE §4a). The runtime gives no memory figure; the evidence is the outcome (an over-limit run is reported as such).
+- **Guard:** the probe refuses to run after a fixed time written into the file, and the Worker is deleted after the result is read.
+- **Checked in the workspace with the network replaced by the saved bytes** (`probe-local.mjs`): same three grid hashes; a full `200`, a wrong range and a changed ETag are each refused before the body is used.

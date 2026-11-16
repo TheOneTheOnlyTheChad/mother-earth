@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 08:52 UTC (clock reading) — **Global Wind: GPT's review of the gate; decoder hardened; Worker probe prepared, not deployed** (research files only)
+- GPT (relayed by Chad): carry the decoder forward as a private-preview candidate; run a read-only Worker probe next. GPT reran the decoder on the Mac and found two accepted corruptions (a not-a-number packing reference; a first latitude of 123°).
+- **Decoder rev 2** closes both and bounds sizes before allocating; a batch must be exactly the six expected fields of one run. Rerun: still 0 difference from ecCodes on every value; 25 refusals, none accepted. Record: `docs/research/GLOBAL-WIND-GATE-2026-11-16.md` §8.
+- **Probe Worker file prepared** (`docs/research/global-wind-gate/probe-worker.mjs`, §9): separate temporary Worker, no bindings, schedule or storage. Not deployed. Needs Chad's own Approve line.
+
 ## 16 Nov 08:47 UTC (clock reading) — **Global Wind first gate: all three parts pass on one real run** (research only; no hub or page change)
 - Chad, his own line: "Go: Global Wind first gate per GLOBAL-WIND-PROPOSAL rev 2 §11.5 (research only, read-only; no hub change)". He also allowed his Chrome and said yes to saving the one file to Downloads.
 - **Record: `docs/research/GLOBAL-WIND-GATE-2026-11-16.md`**, files in `docs/research/global-wind-gate/`.

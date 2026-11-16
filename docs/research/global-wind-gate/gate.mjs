@@ -42,6 +42,28 @@ const findN = (num) => { let o = 16; while (true) { const len = (base[o] * 16777
 { const b = base.slice(); b[findN(3) + 54] |= 8; tryIt('components flagged grid-relative', b); }
 { const b = base.slice(); b[findN(6) + 5] = 0; tryIt('bitmap flagged present', b); }
 { const b = base.slice(); b[7] = 1; tryIt('edition set to 1', b); }
+// == rev 2 refusals (GPT's two mutations first)
+{ const b = base.slice(); b.set([0x7f, 0xc0, 0, 0], o5 + 11); tryIt('GPT 1: packing reference value set to NaN', b); }
+{ const b = base.slice(); const v = 123000000; b.set([v >>> 24, (v >> 16) & 255, (v >> 8) & 255, v & 255], findN(3) + 46); tryIt('GPT 2: first latitude set to 123 degrees', b); }
+{ const b = base.slice(); b.set([0x7f, 0x80, 0, 0], o5 + 11); tryIt('packing reference value set to +Infinity', b); }
+{ const b = base.slice(); b.set([0x49, 0x74, 0x24, 0], o5 + 11); tryIt('packing reference value set to 1,000,000 (finite, implausible wind)', b); }
+{ const b = base.slice(); b[o5 + 16] = 40; tryIt('binary scale factor set to 40', b); }
+{ const b = base.slice(); b[o5 + 18] = 9; tryIt('decimal scale factor set to 9', b); }
+{ const b = base.slice(); const o3 = findN(3); b.set([0, 0, 2, 0xd0], o3 + 30); tryIt('Ni set to 720', b); }
+{ const b = base.slice(); const o3 = findN(3); b.set([0, 0x03, 0xd0, 0xb8], o3 + 63); tryIt('longitude step set to 0.25004 degrees', b); }
+{ const b = base.slice(); b.set([0, 0x0f, 0xd7, 0xa0], o5 + 31); tryIt('group count set to 1,038,240', b); }
+import('./gribwind.mjs').then(({ decodeWindBatch }) => {
+  const six = [0, 1, 2, 3, 4, 5].map(i => new Uint8Array(readFileSync(`${dir}/msg${i}.grib2`)));
+  const cyc = { year: 2026, month: 11, day: 16, hour: 0 };
+  const tryB = (name, msgs, c = cyc) => { try { let n = 0; decodeWindBatch(msgs, c, () => n++); console.log('batch:', name, '-> accepted,', n, 'fields'); } catch (e) { console.log('batch:', name, '->', e.name, ':', e.message); } };
+  tryB('the six real messages, right run', six);
+  tryB('five messages', six.slice(0, 5));
+  tryB('u10m given twice (v10m missing)', [six[0], six[0], six[2], six[3], six[4], six[5]]);
+  tryB('250 hPa and 10 hPa swapped', [six[0], six[1], six[4], six[5], six[2], six[3]]);
+  tryB('right messages, run expected 06 UTC', six, { year: 2026, month: 11, day: 16, hour: 6 });
+  { const b = six[3].slice(); let o = 16; while (b[o + 4] !== 1) o += (b[o] * 16777216) + (b[o + 1] << 16) + (b[o + 2] << 8) + b[o + 3]; b[o + 16] = 18; tryB('one message relabelled as the 18 UTC run', [six[0], six[1], six[2], b, six[4], six[5]]); }
+  { const b = six[5].slice(); let o = 16; while (b[o + 4] !== 4) o += (b[o] * 16777216) + (b[o + 1] << 16) + (b[o + 2] << 8) + b[o + 3]; b[o + 21] = 3; tryB('one message relabelled as a 3-hour forecast', [six[0], six[1], six[2], six[3], six[4], b]); }
+});
 // == export 1 degree grids: sample the model value at each whole degree (every 4th point of the 0.25 degree grid)
 console.log('== 1 degree export (method: point sample at whole degrees; components first, speed after)');
 const NI = 1440, STEP = 4, W = 360, H = 181, MISS = -32768;
