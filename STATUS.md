@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 18:29 UTC (clock reading) — **Wind stage 5: `WIND_ENABLED=1` set on hub 0.6.17. `wind-rc` rev 8: 0.8 with the outline locked.**
+- Chad, his own two lines: "Go: keep the Natural Earth outline; lock opacity 0.8 and remove the preview switches on wind-rc (branch only; no deploy, no merge)" and "Approve: set WIND_ENABLED=1 on hub 0.6.17 (wind collector runs in the hourly job; at most one run fetched every six hours; no merge)". **Natural Earth kept as a fixed map reference: Chad's decision.**
+- **Rule change, Chad, 16 Nov:** "Change the rule from now on you can click it" (the hub Deploy click, which was his). His Approve line still authorises each change.
+- **`WIND_ENABLED=1` deployed 18:09:40 UTC** (Cloudflare's version time) by Claude in the pane's Cloudflare settings: text variable, Production only, not a secret; button "Add 1 variable and deploy". Cloudflare version 74 (`045733da`), 100%. **Read back 18:10:00:** 23 bindings (the 22 before plus `WIND_ENABLED` = "1", plain text); four schedules unchanged; deployed code hashes to `59129514…e93e` (the 0.6.17 file, unchanged). The 18:07 hourly run had already passed; **first scheduled wind run is 19:07 UTC, not yet verified at the time of writing.**
+- **Branch head `91cf65db51beb8563fe8c80c1312447132a50c18` (rev 8, page only):** opacity 0.8; address switches removed; `wind-ui` 92 passed; the four new or rewritten breaks each fail a real check. Packet §14, with REGISTER wording drafted for NOAA GFS and Natural Earth (**not filed**). Hub file unchanged.
+- **Not done:** REGISTER filing; any merge; GPT's review of hub rev 4 as a commit (`c6fe97a`, live); colour scale and stale threshold.
+- **Rollback of the schedule:** delete `WIND_ENABLED` (own Approve line); the collector then makes no request in the hourly job.
+
 ## 16 Nov 17:59 UTC (clock reading) — **GPT: `wind-rc` rev 7 passes the desktop Chrome retest; ship 0.8 with the outline, subject to Chad's decision on Natural Earth**
 - GPT (relayed by Chad): all four preview addresses hard-reloaded; three heights, zoomed out, back to jet-stream height over the Cape; the outline stayed visible throughout at both opacities. At 0.8 the Cape and Madagascar were traceable and the colours easier to match to the legend. Weakest contrast: the wide stratosphere view. The 0.8 preview was watched through the page's five-minute refresh: the line was the same before and after, no toggle needed. **Outside the watch: Wind's own ten-minute poll.** All 491 hashes matched `f661a3a`.
 - **Open, Chad's:** keep Natural Earth as a fixed map reference or not. **Not done:** locking 0.8 and removing the preview-only address switches (a branch change, after that decision); REGISTER entries; stage 5; any merge.
