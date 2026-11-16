@@ -1,6 +1,7 @@
-# Night lights — the imagery label follows the picture drawn (candidate for GPT review, rev 2)
+# Night lights — the imagery label follows the picture drawn (candidate for GPT review, rev 3)
 
-16 Nov 2026 · branch `night-lights-label-rc` · code head `9cd3ec35f31397a1000c263e82af8ff64a8196f2` (commit time 04:38:04 UTC), from main `f60fca0`
+16 Nov 2026 · branch `night-lights-label-rc` · code head `41c1186377d435410ce49171ebe1dc11537d6905` (commit time 05:16:26 UTC), from main `f60fca0`
+**Rev 3:** GPT held `4759af1` for two more cases. The fix is in §9, which governs where it differs from §1–§8. **§8.2's mechanism (waiting, polling and re-giving the picture) is replaced, not extended.** Rev 2's code head was `9cd3ec3`.
 **Rev 2:** GPT held `2dac540` for one race condition. The fix is in §8, which governs where it differs from §1–§7. Rev 1's code head was `bcc4432`.
 **Page only. Not merged, nothing deployed, no hub change.** Built on Chad's "go" (16 Nov), after GPT's live desktop smoke.
 
@@ -152,5 +153,80 @@ A first live attempt set the wait limit to 0.7 s, which also cut off the real NA
 | `phase1/night-lights-ui.test.cjs` | `e0fd31f9069137c2981ea1b3d91246d4fc587af0170a43fadd284f064a44fa5e` |
 
 ### 8.8 Line needed from Chad (not given)
+
+`Approve: merge night-lights-label-rc at <reviewed head> to main (page change: Night lights imagery label follows the picture drawn)`
+
+## 9. Round 3 — GPT's second hold (relayed by Chad, 16 Nov)
+
+### 9.1 The two cases (GPT, controlled harness)
+
+1. **New night, old date.** Daylight restoration held past the timeout; switched on again with a newer night available: the new picture is shown and marked Ready while Earth and Sky keep the previous night's date.
+2. **Late night load after switch-off.** A pending night picture finishes after the daylight restore has settled: it replaces the daylight picture and stays, while the layer says Off and the labels name daylight imagery.
+
+GPT asked: tie the date to the specific texture on screen, and prevent superseded loads from replacing it in either direction. Claude did not reproduce either before the fix; breaks `date-stale` and `no-gate` show them in the suite.
+
+**Why round 2 let these through.** Round 2 watched the globe every 30 ms and reacted. Its wording had two states, "night" or "not night", so a second night picture changed nothing. And it stopped watching once the layer was off and settled, so a late night picture landed unseen.
+
+### 9.2 The fix (`nightlights.js` only)
+
+- **A gate on the globe's own picture.** The first time the layer is switched on, the globe material's picture slot is given a gate. Every picture the globe library tries to put there passes through it. While this layer has asked for a picture, no other picture is let on. A night picture of ours that is no longer the one asked for is never let on, however late its load finishes, including after the layer is off and settled. The gate stays for the life of the page; with the layer off and settled it lets every other picture through.
+- **After a refusal the picture in place is drawn again.** The library releases the current picture just before it hands over a new one; the gate marks the current one to be drawn again. Checked on rendered pixels (§9.3, section V).
+- **The wording is written at the moment a picture is let through, from that picture.** Each night picture is recorded with its own UTC date; when it goes on the globe, the imagery line, its full form and the Sky label take that date. When the earlier picture goes back on, they take the wording saved before.
+- **No waiting on other loads, no polling of the globe, no re-giving.** Round 2's 30 ms step, its wait for a pending restore and its "give the night picture again" are removed. Switch-on still reads ready only once its own night picture is on the globe.
+- `state()` gains `pending` ("night", "earlier" or null) and `gate` (what was let through and what was refused, last 40 of each), for tests and review.
+
+### 9.3 Tests
+
+Section S3, ten checks (replaces round 2's S3):
+
+| Case | Checks |
+|---|---|
+| (a) Round 2's finding: off, daylight held, on again, Ready, then the daylight load finishes | ready with the night picture drawn and named while the daylight load is out; the daylight load **finishes after Ready and is refused**; picture, Sky label and both lines still agree; off restores the true-colour picture and line |
+| (b) **Case 1, new night, old date:** 14 Nov shown; off with daylight held; 15 Nov becomes available; on again | set-up: the 14 Nov picture is still drawn and named 14 Nov; then the 15 Nov picture is on the globe and the Sky label, both imagery lines and the card all say **15 Nov**; the held daylight load, finishing after that, is refused and everything still says 15 Nov |
+| (c) **Case 2, late night load after switch-off:** the night picture's load is held at its last step; switched off while it is loading | set-up: the daylight picture has settled, layer off, nothing of ours left, nothing yet refused; then the night load **finishes after the daylight picture settled and is refused**: the globe still carries daylight, the layer says off, the labels name daylight; the layer still switches on normally afterwards |
+
+In (c) the night picture is fetched and decoded on time and its "loaded" notice to the globe library is delivered 2.5 s late. Delaying its address instead lets the page's own clean-up cancel the load, which proves nothing (the first version of the test did that and never saw a refusal).
+
+Section V, four checks, pixels read from the globe's canvas: the rendered globe differs between the two pictures; after a late daylight load is refused the globe still renders the night picture; off renders the true-colour picture again; no page errors.
+
+Breaks: `no-gate` (nothing is refused) stops the suite at the first refusal it waits for; `date-stale` (a second night picture does not rewrite the wording) fails the two 15 Nov checks. `no-reissue` and `no-serialize` are gone with the code they broke.
+
+### 9.4 Results at `41c1186`
+
+| Suite | Result |
+|---|---|
+| `night-lights-ui.test.cjs` | **152 passed, 0 failed** |
+| its 21 breaks | each fails the suite |
+| `night-lights.test.mjs` | 49 passed, 0 failed |
+| `sky-zoom-ui` · `sky-ui` · `backdrop-layer` · `legend-active-ui` · `mobile-pass` · `desktop-overflow` | 351 · 79 · 27 · 548 · 131 · 258, all pass |
+| `smoke-fixes` | 51 of 52, as on main |
+| others | not rerun |
+
+### 9.5 Live check at the site's own address (pane, 05:18 UTC, files fetched at `41c1186` and hash-checked). GPT asked for no live retest; this is Claude's own.
+
+| Step | Result |
+|---|---|
+| On, off | ready in 5.0 s, 14 Nov; off restored the daylight picture and line |
+| Round 2's case, daylight load held 8 s by the harness | on again: ready at 5.0 s with the night picture drawn and named; the daylight load finished at 8.5 s and was refused; night picture and wording unchanged |
+| Case 2, night load held at its last step, switched off while loading | **not exercised live:** the daylight picture settled in about 25 ms and the page's clean-up cancelled the night load before it finished, so nothing arrived to refuse. End state correct (daylight, off). The suite's (c) is the evidence for this case |
+| Case 1 (a newer night arriving between two switch-ons) | not possible to stage live |
+| Sampling every 10 ms across the run | **0 of 2,360 samples** had the wording and the picture disagreeing |
+
+### 9.6 Open
+
+- The gate replaces a property of the globe library's material object. It depends on that library (three-globe, bundled in globe.gl 2.45.0, which the page pins) assigning the picture to `material.map` when a load finishes. A different library version could change that; the suites would show it.
+- While the layer is on, any other code that changes the globe's picture is refused until the layer is off. Nothing else in the page does so after opening, as far as the suites show.
+- If the earlier picture never loads after switch-off, the night picture stays on the globe, named as night lights, with the layer off (as §3).
+- The card's "Showing …" line and the state change at ready up to 30 ms after the picture and its wording.
+
+### 9.7 Files at `41c1186`
+
+| File | sha256 |
+|---|---|
+| `nightlights.js` | `a664f28d62845ae9f44800a438789651a4991b2a0a905a4661b9bc152afa677f` |
+| `index.html` | `01dd287743fe70e3d2af7ee9f472346f8f2d68d2d7f5f2bb78f358957119f2d4` (unchanged since rev 1) |
+| `phase1/night-lights-ui.test.cjs` | `1bd20eb7c05bd13cc63d5dcea052258eb4c8f2b9c2bb07c38819910466121091` |
+
+### 9.8 Line needed from Chad (not given)
 
 `Approve: merge night-lights-label-rc at <reviewed head> to main (page change: Night lights imagery label follows the picture drawn)`
