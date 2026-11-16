@@ -52,6 +52,19 @@ Breaks: `label-early` (the label changes without waiting) fails 1 check; `ready-
 
 A first run of the six existing suites failed because the container's local server had stopped; rerun after restarting it.
 
+## 4b. Live check at the site's own address (pane, 03:41 UTC; `index.html` and `nightlights.js` fetched at `bcc4432` and hash-checked; everything else is main's)
+
+The page was sampled every 10 ms for whether the imagery line names night lights and whether the globe carries the night picture.
+
+| Step | Result |
+|---|---|
+| Switch on | ready in 5.6 s, 14 Nov 2026; at ready the globe carried the night picture |
+| Switch off | at that instant: layer off, line still night lights, night picture still drawn. The true-colour picture took **1.9 s** to come back; the line went back with it |
+| Off, then straight into the Sky view (GPT's case) | 176 samples of the Sky label over 3.5 s: it named night lights for as long as the night picture was drawn and changed when the true-colour picture arrived at 3.5 s. No sample disagreed |
+| Whole run | 1,772 samples, **7 disagreed**, all at the moment of a swap: the page looks for the swap every 30 ms, so the wording can trail the picture by up to that long |
+
+The 30 ms trail is in the candidate as built. One night, one browser.
+
 ## 5. Files
 
 | File | sha256 |
