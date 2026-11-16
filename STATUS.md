@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 11:19 UTC (clock reading) — **Global Wind: GPT's review of the build proposal; rev 2** (docs only; nothing built)
+- GPT (relayed by Chad): proceed with the `wind-rc` branch build once the R2 section spells out immutable grid writes and safe cleanup. GPT's finding: with one fixed key per run, an overlapping attempt could overwrite a grid another attempt had verified.
+- **`docs/concepts/GLOBAL-WIND-BUILD-PROPOSAL.md` rev 2** (§11 governs): renamed a branch preview backed by public data; content-addressed create-only grid objects; the manifest as the single commit point holding current and previous, with a re-read on a lost conditional write; no deletion during the preview; a browser recovery case for an aged-out revision; scheduled path makes zero requests with the flag unset, manual run publishes once with the admin key; three arrival times logged; NOAA/NCEP credit and "sampled and quantised by Mother Earth" from the first revision.
+- Next: Chad's B1 and his go for stage 1. No branch exists.
+
 ## 16 Nov 11:06 UTC (clock reading) — **Global Wind: GPT's review of the probe; build proposal rev 1 for a private preview** (docs only; nothing built)
 - GPT (relayed by Chad): the probe is enough to propose a private preview with the collector in the hub code and the layer on a branch; five areas to carry forward (another run, scheduled hub execution, R2 publication, freshness, globe and reuse); an end-to-end private run at the centre.
 - **`docs/concepts/GLOBAL-WIND-BUILD-PROPOSAL.md` rev 1.** Dust RGB pattern: collector in the hub gated by `WIND_ENABLED`, page on a branch only. It states plainly that there is no private hub environment and that published revisions would be fetchable by address, so the reuse terms are read before the first hub run. Seven stages; hub deploy, first manual run and schedule each on their own Approve line.
