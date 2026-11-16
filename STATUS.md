@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 11:06 UTC (clock reading) — **Global Wind: GPT's review of the probe; build proposal rev 1 for a private preview** (docs only; nothing built)
+- GPT (relayed by Chad): the probe is enough to propose a private preview with the collector in the hub code and the layer on a branch; five areas to carry forward (another run, scheduled hub execution, R2 publication, freshness, globe and reuse); an end-to-end private run at the centre.
+- **`docs/concepts/GLOBAL-WIND-BUILD-PROPOSAL.md` rev 1.** Dust RGB pattern: collector in the hub gated by `WIND_ENABLED`, page on a branch only. It states plainly that there is no private hub environment and that published revisions would be fetchable by address, so the reuse terms are read before the first hub run. Seven stages; hub deploy, first manual run and schedule each on their own Approve line.
+- Next: GPT's review; then Chad's B1–B6. No branch exists.
+
 ## 16 Nov 10:58 UTC (clock reading) — **Global Wind: Worker probe run and passed; temporary Worker deleted** (hub, schedules, R2, D1 and page untouched)
 - Chad, his own line: "Approve: create temporary Worker mother-earth-wind-probe from commit a6bf84f (…; no bindings, no schedule, no storage), run the read-only wind probe once with the probe key, then delete the Worker".
 - Created 10:56:36 UTC from the pane (file hash checked first), one keyed run 10:57:06–10:57:19 UTC, deleted 10:57:56 UTC. The account again holds only `mother-earth`; hub answered 0.6.15.
