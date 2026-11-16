@@ -16,7 +16,8 @@
   const ME = window.ME; if (!ME) return;
   const $ = ME.$, esc = ME.esc;
   const tgl = $('tgl-wind'); if (!tgl) return;
-  // OPACITY 0.5 is a preview value (16 Nov): at 0.8 the coastline was lost under the sheet (GPT's look in Chrome). Not settled.
+  // OPACITY 0.5 is a preview value (16 Nov): at 0.8 the coastline was lost under the sheet (GPT's look in Chrome). Not settled;
+  // ?wind_opacity=0.8 puts the first value back for comparison (preview only, see the coastline block below).
   const WD = { META: ME.HUB + '/snapshot/wind/meta', HIDE_AFTER_H: 24, REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, ALT: 0.0009, OPACITY: 0.5,
     W: 360, H: 181, BYTES: 360 * 181 * 4, MISSING: -32768, PX: 8, PX_PHONE: 4, CALM_KMH: 1, ARROW_STEP: 5, ARROW_MAX_LAT: 80, ARROW_LEN: 2.1, BUILD_WAIT_MS: 60000,
     LEVELS: [{ id: 'near-ground', label: 'Near ground', where: '10 m above the model’s surface' }, { id: '250hPa', label: 'Jet-stream height', where: '250 hPa, roughly 10–11 km' }, { id: '10hPa', label: 'Stratosphere', where: '10 hPa, roughly 30 km' }],
@@ -25,6 +26,39 @@
   const st = { on: false, gen: 0, seq: 0, status: 'off', why: null, note: null, level: 'near-ground', want: null, rev: null, grid: null, meta: null, meshes: [], cache: new Map(),
     sel: null, badInput: false, lastAttempt: null, refreshFailed: false, timer: null, ageTimer: null, loading: false, requests: [], opts: { now: null } };
   const now = () => (st.opts.now ? st.opts.now() : Date.now());
+  // ---------- coastline outline above the sheet (preview, 16 Nov: under the sheet the coast was hard to find; GPT's look)
+  // Natural Earth 1:50m coastline (public domain), simplified by Mother Earth: assets/coast-50m.bin. A reference line, not live data.
+  // PREVIEW-ONLY address switches, to compare settings in one sitting; to be removed when the release setting is chosen:
+  //   ?wind_opacity=0.5|0.8   ?wind_coast=0 (outline off)
+  const QS = new URLSearchParams(location.search), qo = Number(QS.get('wind_opacity')), qc = QS.get('wind_coast');
+  if (qo === 0.5 || qo === 0.8) WD.OPACITY = qo;
+  const COAST = { FILE: 'assets/coast-50m.bin?v=202612121200', MAGIC: 'MECOAST1', ALT: 0.002, COLOR: 'rgba(255,255,255,0.92)', MODE: qc === '0' ? '0' : 'thin' };
+  const coast = { status: 'idle', lines: null, shown: false, set: false };
+  async function loadCoast() {
+    if (coast.status !== 'idle' || COAST.MODE === '0') return;
+    coast.status = 'loading';
+    try {
+      const r = await fetch(COAST.FILE); if (!r.ok) throw new Error('HTTP ' + r.status);
+      const b = await r.arrayBuffer(), dv = new DataView(b); let o = 8;
+      if (b.byteLength < 12 || new TextDecoder().decode(new Uint8Array(b, 0, 8)) !== COAST.MAGIC) throw new Error('not a coastline file');
+      const n = dv.getUint32(o, true); o += 4; const lens = []; let total = 0;
+      for (let i = 0; i < n; i++) { const k = dv.getUint32(o, true); o += 4; lens.push(k); total += k; }
+      if (!(n > 0 && n < 5000) || b.byteLength !== o + total * 4) throw new Error('coastline file has the wrong length');
+      const lines = [];
+      for (const k of lens) { const pts = []; for (let i = 0; i < k; i++) { const lng = dv.getInt16(o, true) / 100, lat = dv.getInt16(o + 2, true) / 100; o += 4; if (Math.abs(lng) > 180 || Math.abs(lat) > 90) throw new Error('coastline point out of range'); pts.push([lng, lat]); } lines.push(pts); }
+      coast.lines = lines; coast.status = 'ready';
+    } catch (e) { coast.status = 'failed'; coast.err = String(e.message || e); }
+    paint();
+  }
+  /** the outline is drawn exactly while a wind sheet is drawn; it never appears on its own */
+  function coastSync() {
+    const g = ME.globe && ME.globe(); if (!g || typeof g.pathsData !== 'function') return;
+    const want = st.on && st.meshes.length > 0 && coast.status === 'ready' && COAST.MODE !== '0';
+    if (want === coast.shown) return;
+    if (want && !coast.set) { coast.set = true;
+      g.pathPoints(d => d).pathPointLat(p => p[1]).pathPointLng(p => p[0]).pathPointAlt(COAST.ALT).pathColor(() => COAST.COLOR).pathStroke(null).pathTransitionDuration(0); }
+    g.pathsData(want ? coast.lines : []); coast.shown = want;
+  }
   const hex = async b => [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map(x => x.toString(16).padStart(2, '0')).join('');
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const utc = iso => { const d = new Date(iso); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}, ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')} UTC`; };
@@ -213,6 +247,7 @@
 
   // ---------- labels
   function paint() {
+    coastSync();
     const s = $('s-wind'), o = $('o-wind'), fl = $('wind-frame'), ex = $('wind-extra'), rd = $('wind-read');
     tgl.setAttribute('aria-checked', String(st.on));
     s.textContent = !st.on ? 'off' : st.rev ? 'loaded' : st.status === 'loading' || st.loading ? 'loading' : 'unknown';
@@ -228,6 +263,7 @@
       if (st.note) bits.push(st.note);
       if (st.lastAttempt && st.lastAttempt.status === 'down') bits.push('The hub’s latest update did not complete.');
       if (st.refreshFailed) bits.push('Refresh unavailable.');
+      if (coast.status === 'failed') bits.push('The coastline outline could not be loaded.');
       ex.hidden = false; ex.textContent = bits.join(' ');
       if (st.badInput) { rd.textContent = 'Enter a latitude from −90 to 90 and a longitude from −180 to 180.'; rd.dataset.kind = ''; }   // kept by every repaint until a valid point is chosen
       else if (st.sel) { const r = reading(st.grid, st.sel.lat, st.sel.lng); rd.textContent = `${r.text} · ${l.label} · model cell ${r.where} · valid ${utc(st.rev.valid_time)}`; rd.dataset.kind = r.kind; }
@@ -251,6 +287,7 @@
       clearInterval(st.timer); clearInterval(st.ageTimer); st.timer = st.ageTimer = null; paint(); return; }
     st.on = true; st.why = null; st.status = 'loading'; st.level = 'near-ground'; paint();
     if (!ME.globe || !ME.globe()) { st.on = false; st.status = 'off'; st.why = 'Wind needs the 3-D globe, which is not available in this browser. Nothing is drawn.'; st.gen++; return paint(); }
+    loadCoast();
     st.timer = setInterval(() => { if (!document.hidden) refresh(); }, WD.REFRESH_MS);
     st.ageTimer = setInterval(ageTick, WD.AGE_MS);
     await load('near-ground', null, false);
@@ -276,8 +313,9 @@
       label: $('wind-frame').hidden ? null : $('wind-frame').textContent, extra: $('wind-extra').hidden ? null : $('wind-extra').textContent, off: $('o-wind').hidden ? null : $('o-wind').textContent,
       read: $('wind-read').textContent, readKind: $('wind-read').dataset.kind || '', stateWord: $('s-wind').textContent,
       checked: [...document.querySelectorAll('#wind-levels button')].filter(b => b.getAttribute('aria-checked') === 'true').map(b => b.dataset.level),
-      drawn: st.meshes[0] && st.meshes[0].material.map.image.__wind || null, cached: st.cache.size }),
+      drawn: st.meshes[0] && st.meshes[0].material.map.image.__wind || null, cached: st.cache.size,
+      coast: { status: coast.status, shown: coast.shown, lines: coast.lines ? coast.lines.length : 0, mode: COAST.MODE, err: coast.err || null }, opacity: WD.OPACITY }),
     setOn, setLevel, refresh, ageTick, select, opts: st.opts, config: WD, reading: (lat, lng) => st.grid ? reading(st.grid, lat, lng) : null, cell, band,
-    texture: () => (st.meshes[0] && st.meshes[0].material.map && st.meshes[0].material.map.image) || null };
+    coastConfig: COAST, texture: () => (st.meshes[0] && st.meshes[0].material.map && st.meshes[0].material.map.image) || null };
   paint();
 })();
