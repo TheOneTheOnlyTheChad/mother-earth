@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 02:39 UTC (clock reading) — **REGISTER: observed request count corrected** (docs only)
+- Chad: "fix the register". The Night lights line's observed figure now reads one to three 512 × 256 frames per switch-on (three seen 16 Nov 02:18 UTC), in place of "one or two". The code's maximum of four is unchanged. Chad gave this in his own words, not as an "Approve:" line; it is a one-line correction to a record, with no page or hub change.
+- Chad, same message: "go" for the switch-off label fix on a branch (in progress, `night-lights-label-rc`), and: phone testing waits until features are done; desktop first.
+
 ## 16 Nov 02:25 UTC (clock reading) — **Night lights: GPT's live desktop Chrome smoke passed, with one brief Sky transition issue** (GPT's report, relayed by Chad; no change made)
 - **Earth globe (GPT saw):** the night texture rendered, with visible lights and patterned no-data areas; the NOAA-20 frame for 14 Nov 2026 UTC; 15 and 16 Nov marked as still arriving.
 - **Sky (GPT saw):** the night texture and its date carried into the zoom-out view; Back to Earth worked. **Issue:** after switching Night lights off and immediately re-entering Sky, the label switched to the daytime imagery before the daytime texture appeared; the picture caught up on its own.
