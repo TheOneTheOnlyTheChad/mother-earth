@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 10:53 UTC (clock reading) — **Global Wind: probe Worker rev 2 (key required, run pinned); still not deployed** (research files only)
+- GPT (relayed by Chad): decoder hardening passes. The probe file at `6d83d1f` accepted unauthenticated requests for any valid run before expiry (GPT: two calls, 16 upstream requests).
+- **Probe rev 2** (`docs/research/global-wind-gate/probe-worker.mjs`, sha256 `2d4dceca…fbcd`): the run is fixed to 2026111600; a request needs the probe key (only its SHA-256 is in the file); anything else gets 404 with no upstream request. Access test in the gate record §10: nine callers, only the keyed one fetches. Not deployed; needs Chad's own Approve line naming the new commit.
+
 ## 16 Nov 10:41 UTC (clock reading) — **Aircraft: OpenSky's reply on the feeder username error** (docs only; aircraft stays parked)
 - OpenSky (Martin, relayed by Chad, received 12:33 SAST): the feeder image added a check that causes the "Invalid OpenSky username" error and it is not fixed yet; he assumed Chad is on the beta; suggested the latest stable version, or he can issue a serial by hand in the evening. He linked the feeder image's GitHub issue 369.
 - Read by search snippet only (the page could not be opened from Claude's workspace): on that issue OpenSky wrote on 9 Nov 2026 that a user's username was rejected because it contains an "@", and the quoted code prints "Invalid OpenSky username format". Chad's 16 Nov note says his image is v3.0.15 **stable**, so "use the latest stable" may not clear it; which versions carry the check was not established.

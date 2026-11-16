@@ -94,3 +94,30 @@ GPT: carry the decoder forward as a private-preview candidate; run a read-only W
 - **CPU and memory:** a Worker cannot read its own CPU time; it comes from the invocation log (`$workers.cpuTimeMs`, `wallTimeMs`, `outcome`; START-HERE §4a). The runtime gives no memory figure; the evidence is the outcome (an over-limit run is reported as such).
 - **Guard:** the probe refuses to run after a fixed time written into the file, and the Worker is deleted after the result is read.
 - **Checked in the workspace with the network replaced by the saved bytes** (`probe-local.mjs`): same three grid hashes; a full `200`, a wrong range and a changed ETag are each refused before the body is used.
+
+## 10. GPT's review of the probe file (relayed by Chad, 16 Nov) and probe rev 2 — written 10:53 UTC (clock reading)
+
+GPT tested the Worker file from `6d83d1f` on the Mac with the fetches simulated from the saved bytes: both original mutations refused, six message hashes matched, the three grid hash prefixes reproduced. **GPT's finding: that file accepted unauthenticated requests for any valid run before expiry** (two calls without credentials caused 16 upstream requests; a different run also started a fetch). Confirmed: §9's only guard was the expiry time. **§9's file is superseded.**
+
+**Probe rev 2** (`probe-worker.mjs`, sha256 `2d4dceca…fbcd`, built by `build-probe.sh`):
+- **The run is fixed in the file** (`2026111600`). A query string is refused.
+- **A request must carry the probe key** in an `x-probe-key` header. Only the key's SHA-256 is in the file. The key was generated in Claude's workspace, is in no repo file and is not written to Cloudflare; Claude sends it in the one probe request. If the workspace is lost the file is rebuilt with a new key and gets a new hash.
+- **Without the right key the answer is 404 and no upstream request is made.**
+- Expiry unchanged (16 Nov 23:59 UTC). The Worker is still deleted after the result is read.
+- A Cloudflare preview with public access off was not used as the control: Claude has not established that such a preview runs under the same limits as a deployed Worker, and the measurement is the point.
+
+**Access test** (`access-test.mjs`, upstream requests counted, network replaced by the saved bytes):
+
+| Caller | Status | Upstream requests |
+|---|---|---|
+| no key | 404 | 0 |
+| no key, another run in the query | 404 | 0 |
+| wrong key | 404 | 0 |
+| empty key | 404 | 0 |
+| the published hash sent as the key | 404 | 0 |
+| right key, another run in the query | 404 | 0 |
+| right key, POST | 404 | 0 |
+| right key, another path | 404 | 0 |
+| right key | 200 | 8; the three grid hashes match §4 |
+
+Claude's first build of rev 2 had an empty key (the key-making command was missing from the workspace). The access test showed it at once (the right-key call returned 404); the key was remade and the file rebuilt. That build was never committed.

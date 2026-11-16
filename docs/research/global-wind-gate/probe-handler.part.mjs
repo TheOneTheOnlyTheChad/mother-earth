@@ -1,9 +1,13 @@
 
 // ---- Read-only probe Worker (private, temporary). No bindings, no schedule, no storage. One run per request. ----
-// GET /?cycle=YYYYMMDDHH  → fetches the six wind messages of that run from ONE host by byte range, checks each response
+// Rev 2 (16 Nov, GPT's review): the run is fixed in this file and a request must carry the probe key. A request without
+// the right key gets 404 and causes no upstream request. Only the key's SHA-256 is in this file; the key is not in the repo.
+// GET / with header x-probe-key → fetches the six wind messages of the pinned run from ONE host by byte range, checks each response
 // before reading its body, decodes one field at a time, makes the three 1 degree grids, returns hashes and timings as JSON.
 const HOST = 'https://noaa-gfs-bdp-pds.s3.amazonaws.com/';
 const NOT_AFTER = Date.parse('__NOT_AFTER__');            // the probe refuses to run after this time
+const PINNED_CYCLE = '2026111600';                        // the only run this probe will fetch
+const KEY_SHA256 = '__KEY_SHA256__';                      // SHA-256 (hex) of the probe key
 const IDX_WANT = [['UGRD', '10 m above ground'], ['VGRD', '10 m above ground'], ['UGRD', '250 mb'], ['VGRD', '250 mb'], ['UGRD', '10 mb'], ['VGRD', '10 mb']];
 const MAX_MSG = 3 * 1024 * 1024, MAX_IDX = 200 * 1024, W = 360, H = 181, STEP = 4, MISS = -32768;
 const hex = (buf) => [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, '0')).join('');
@@ -65,9 +69,13 @@ export default {
   async fetch(request) {
     const url = new URL(request.url);
     const json = (o, s = 200) => new Response(JSON.stringify(o, null, 1), { status: s, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
-    if (request.method !== 'GET' || url.pathname !== '/') return json({ error: 'not found' }, 404);
+    if (request.method !== 'GET' || url.pathname !== '/' || url.search !== '') return json({ error: 'not found' }, 404);
+    const key = request.headers.get('x-probe-key') || '';
+    const got = key.length >= 32 && key.length <= 128 ? await sha(new TextEncoder().encode(key)) : '';
+    let diff = got.length ^ KEY_SHA256.length; for (let i = 0; i < KEY_SHA256.length; i++) diff |= (got.charCodeAt(i) || 0) ^ KEY_SHA256.charCodeAt(i);
+    if (diff !== 0) return json({ error: 'not found' }, 404);            // no key, no upstream request
     if (!(Date.now() <= NOT_AFTER)) return json({ error: 'probe expired' }, 410);
-    try { return json(await probe(url.searchParams.get('cycle'))); }
+    try { return json(await probe(PINNED_CYCLE)); }
     catch (e) { return json({ error: e.name + ': ' + e.message, refused: e instanceof GribRefused }, e instanceof GribRefused ? 422 : 500); }
   },
 };

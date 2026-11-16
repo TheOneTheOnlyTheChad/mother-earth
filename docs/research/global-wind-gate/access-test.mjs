@@ -1,0 +1,25 @@
+// Access test for the built probe Worker: counts upstream requests for each kind of caller. Usage: node access-test.mjs <key or ''> <data dir>
+import { readFileSync } from 'node:fs';
+const key = process.argv[2], dir = process.argv[3];
+const idx = readFileSync(dir + '/f000.idx'); const TOTAL = 500418863, ETAG = '"e85c7642b26561940fb3e795dd04348e"';
+const ranges = { '413095365': 0, '414054949': 1, '206166258': 2, '206753934': 3, '114656286': 4, '115147644': 5 };
+let upstream = 0; const real = globalThis.fetch;
+globalThis.fetch = async (url, opt = {}) => { upstream++;
+  if (!String(url).includes('gfs.20261116/00/')) return new Response('other run asked: ' + url, { status: 599 });
+  if (String(url).endsWith('.idx')) return new Response(idx, { status: 200, headers: { 'content-length': String(idx.length) } });
+  if (opt.method === 'HEAD') return new Response(null, { status: 200, headers: { 'content-length': String(TOTAL), etag: ETAG } });
+  const [s, e] = opt.headers.Range.slice(6).split('-'); const b = readFileSync(`${dir}/msg${ranges[s]}.grib2`);
+  return new Response(b, { status: 206, headers: { 'content-range': `bytes ${s}-${e}/${TOTAL}`, 'content-length': String(b.length), etag: ETAG } }); };
+const w = (await import('./probe-worker.mjs')).default;
+const call = async (name, url, headers = {}, method = 'GET') => { upstream = 0; const r = await w.fetch(new Request(url, { method, headers })); const j = await r.json();
+  console.log(name.padEnd(46), 'status', r.status, 'upstream requests', upstream, j.grids ? 'grids ' + j.grids.map(g => g.sha256.slice(0, 12)).join(' ') + ' cycle ' + j.cycle : JSON.stringify(j)); };
+const U = 'https://probe.example/';
+await call('no key', U);
+await call('no key, other cycle in query', U + '?cycle=2026111518');
+await call('wrong key (64 hex)', U, { 'x-probe-key': 'a'.repeat(64) });
+await call('empty key', U, { 'x-probe-key': '' });
+await call('the key hash itself sent as the key', U, { 'x-probe-key': readFileSync('./probe-worker.mjs', 'utf8').match(/KEY_SHA256 = '([0-9a-f]{64})'/)[1] });
+await call('right key, other cycle in query', U + '?cycle=2026111518', { 'x-probe-key': key });
+await call('right key, POST', U, { 'x-probe-key': key }, 'POST');
+await call('right key, other path', U + 'run', { 'x-probe-key': key });
+await call('right key', U, { 'x-probe-key': key });
