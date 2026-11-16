@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 14:23 UTC (clock reading) — **Wind stage 4, second manual run: same failure; nothing published; cause not yet proven**
+- Chad, his own line: "Approve: run /admin/run/wind once more on hub 0.6.16 (second attempt at the first wind publication: …; WIND_ENABLED stays unset; no schedule, no merge)".
+- **Run once, 14:22:28.960–14:23:03.576 UTC**, from the pane, served from Johannesburg (ray `a5b725e6fd31a147-JNB`). Answer: `wind:down field body unreadable`, 34.8 s. Run row: "field body unreadable — 2026111606 u10m TimeoutError: The operation was aborted due to timeout". **Identical to the first attempt: the first field answers 206 with the right headers, then its body does not finish in 30 s.**
+- **State after:** manifest `current` and `previous` null; `last_attempt` down, started 14:22:28.960, failed 14:23:02.604, consecutive_failures 2; `seen` unchanged (run 2026111606, 14:19:56.355, the earliest sighting kept). Row and manifest agree. No grid published. `WIND_ENABLED` unset.
+- **Twice in the same place is not a one-off.** The morning probe read the same mirror from the same Cloudflare location without trouble. Its range request differs from the hub's in three ways: the hub adds `cf: { cacheTtl: 0 }`, a User-Agent header and a 30 s abort signal. **Leading suspicion, not proven:** the `cf` cache option on a range request against a 500 MB object (Cloudflare's cache path may be pulling far more than the range). The suites could not catch this: they run against a fake mirror, not Cloudflare's fetch.
+- **Not done:** grid hash check, ecCodes comparison. Both approvals are spent. Next step proposed to Chad: a temporary read-only probe Worker that reads one field with and without the `cf` option, then a branch fix for GPT.
+
 ## 16 Nov 14:21 UTC (clock reading) — **Wind stage 4: the one manual run failed safely; nothing published**
 - Chad, his own line: "Approve: run /admin/run/wind once on hub 0.6.16 (first wind publication: about 8 requests and 4 MB from NOAA's mirror, three grids and a manifest written under wind/ in R2; WIND_ENABLED stays unset; no schedule, no merge)".
 - **Run once, 14:19:53.754–14:20:29.691 UTC**, from the pane (the Mac shell's proxy refuses the hub address, 403 on CONNECT). Hub answered as 0.6.16 and the manifest was empty immediately before. Answer: `{"job":"wind","result":"wind:down field body unreadable","wall_ms":36138}`.
