@@ -27,6 +27,8 @@
  *   GET /catalogue/skycraft/<revision> (0.6.12) the two dated spacecraft examples (LRO June 2026, Parker Dec 2024), pinned
  *   GET /snapshot/sunface/meta, /snapshot/sunface/<id>/sun.jpg (0.6.13) NASA/SDO HMI continuum picture of the Sun, hourly (pointer + current/previous)
  *   GET /admin/probe/sunface?key=ADMIN_KEY (0.6.13) exactly ONE request for that picture; stores nothing
+ *   GET /snapshot/wind/meta, /snapshot/wind/grid/<sha256>.i16 (0.6.16) modelled wind at three heights from NOAA/NCEP GFS (manifest + the
+ *                           current and previous revision's grids). Scheduled job gated by WIND_ENABLED=1; /admin/run/wind runs it once.
  *   GET /admin/probe/skycraft?key=ADMIN_KEY (0.6.12) exactly ONE Horizons request with the application User-Agent; stores nothing
  *   GET /catalogue/sky/<revision> (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a) the FIXED Sky catalogue (Moon/Sun daily distances, NASA/JPL
  *                           Horizons): versioned only — an id not in SKY_REVISIONS (exact key match), a malformed path or the bare
@@ -69,7 +71,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.15';
+const COLLECTOR_VERSION = '0.6.17';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2148,6 +2150,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
+export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
 export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
@@ -3042,6 +3045,356 @@ async function dustRoute(env, p) {
   return new Response(buf, { headers: { 'Content-Type': x.type, 'Cache-Control': DUSTRGB.CACHE_FILE, 'ETag': '"' + x.sha256 + '"', ...CORS } });
 }
 
+/* ---------- Wind by height (NOAA/NCEP GFS, 0.25 degree, analysis hour f000) — 0.6.16, GLOBAL-WIND-BUILD-PROPOSAL rev 2 (§11 governs)
+ * Each scheduled hour the hub looks for the newest GFS run whose f000 index exists on NOAA's open-data mirror. If that run is newer
+ * than the published one it fetches six messages by byte range (u and v at 10 m above ground, 250 hPa and 10 hPa), from ONE host,
+ * refusing every response before its body is read unless it is 206 with the exact range, length and the object's ETag. Each message
+ * is decoded by the narrow decoder below, one field at a time, and sampled at whole degrees into three 360 x 181 grids
+ * (two little-endian int16 per cell: u east, v north, 0.1 m/s). Any refusal is a named failure; nothing is repaired or guessed.
+ * Publication: each grid is stored once under a key that IS its SHA-256 (create-only), read back and hashed; only then does the
+ * manifest (wind/current.json, holding current AND previous) move, by a conditional write. A lost conditional write is re-read and
+ * the run advances only if it is still newer. An older run that finishes late never replaces a newer one. Nothing is deleted.
+ * Status on the manifest is ordered too (GPT's stage 2 review): last_attempt is a failure note, kept only while it is about something
+ * newer than what is published and never replaced by a run that started earlier; `seen` records when a run's index was first found
+ * and is kept apart from it, so clearing a failure never loses that time.
+ * Gate: WIND_ENABLED=1 for the SCHEDULED path (absent = zero NOAA requests, nothing written). /admin/run/wind (admin key) runs the
+ * collector once whatever the flag says. Outside LAYERS, cells, history, health and the generic writeDown.
+ * Terms (read 16 Nov 2026, Registry of Open Data on AWS, noaa-gfs-bdp-pds): open to the public; attribution requested; no implied
+ * endorsement; modified data must not be presented as original, unaltered NOAA data. These grids are modified and say so. */
+// >>> gribwind.mjs — copied from phase1/gribwind.mjs with the word "export" removed; the wind-hub suite checks the two match
+const GRIBWIND = (() => {
+// Candidate narrow GRIB2 decoder for the six GFS wind messages (gate test, 16 Nov 2026).
+// Supports ONLY: edition 2, one field per message, grid template 3.0 (regular lat/lon), scanning mode 0,
+// Earth-relative components, product template 4.0, data template 5.3 (complex packing, spatial differencing order 2),
+// no bitmap, no missing-value management, floating-point original values. Anything else throws GribRefused.
+// Rev 2 (16 Nov, GPT's review): the grid must be exactly the expected global grid; sizes and group counts are bounded
+// before anything is allocated; non-finite packing numbers and non-finite or implausible output are refused;
+// decodeWindBatch() requires exactly the six expected fields from one run.
+class GribRefused extends Error { constructor(m) { super(m); this.name = 'GribRefused'; } }
+const no = (m) => { throw new GribRefused(m); };
+const u8 = (b, o) => b[o];
+const u16 = (b, o) => (b[o] << 8) | b[o + 1];
+const u32 = (b, o) => ((b[o] * 16777216) + (b[o + 1] << 16) + (b[o + 2] << 8) + b[o + 3]);
+const sm = (v, bits) => { const s = 2 ** (bits - 1); return v >= s ? -(v - s) : v; };   // sign-and-magnitude
+const s16 = (b, o) => sm(u16(b, o), 16);
+const s32 = (b, o) => sm(u32(b, o), 32);
+const f32 = (b, o) => new DataView(b.buffer, b.byteOffset + o, 4).getFloat32(0, false);
+
+const GFS_0P25 = { ni: 1440, nj: 721, la1: 90, lo1: 0, la2: -90, lo2: 359.75, di: 0.25, dj: 0.25 };
+const MAX_ABS_MS = 500;   // no wind component on Earth approaches this; a larger value means corrupt input
+
+function decode(msg, grid = GFS_0P25, maxAbs = MAX_ABS_MS) {
+  if (!(msg instanceof Uint8Array)) no('input is not bytes');
+  if (msg.length < 16 + 21 + 4) no('too short for a GRIB2 message');
+  if (!(msg[0] === 71 && msg[1] === 82 && msg[2] === 73 && msg[3] === 66)) no('does not start with GRIB');
+  if (msg[7] !== 2) no('edition ' + msg[7] + ' not supported');
+  const hi = u32(msg, 8), total = u32(msg, 12);
+  if (hi !== 0) no('message length over 4 GB');
+  if (total !== msg.length) no(`declared length ${total} but ${msg.length} bytes given`);
+  if (!(msg[total - 4] === 55 && msg[total - 3] === 55 && msg[total - 2] === 55 && msg[total - 1] === 55)) no('does not end with 7777');
+  const discipline = msg[6];
+  const sec = {}; let o = 16;
+  while (o < total - 4) {
+    if (o + 5 > total - 4) no('section header runs past the end');
+    const len = u32(msg, o), num = msg[o + 4];
+    if (len < 5 || o + len > total - 4) no(`section ${num} length ${len} runs past the end`);
+    if (num < 1 || num > 7) no('unknown section ' + num);
+    if (num === 2) { o += len; continue; }               // local use: ignored
+    if (sec[num]) no(`section ${num} appears twice (more than one field in the message)`);
+    sec[num] = msg.subarray(o, o + len); o += len;
+  }
+  if (o !== total - 4) no('sections do not fill the message');
+  for (const n of [1, 3, 4, 5, 6, 7]) if (!sec[n]) no('section ' + n + ' missing');
+  const s1 = sec[1], s3 = sec[3], s4 = sec[4], s5 = sec[5], s6 = sec[6], s7 = sec[7];
+  // Section 1: reference time
+  if (s1.length < 21) no('section 1 too short');
+  const ref = { significance: s1[11], year: u16(s1, 12), month: s1[14], day: s1[15], hour: s1[16], minute: s1[17], second: s1[18] };
+  // Section 3: grid
+  if (s3.length < 72) no('section 3 too short');
+  if (s3[5] !== 0) no('grid definition source ' + s3[5]);
+  if (s3[10] !== 0) no('quasi-regular grid not supported');
+  if (u16(s3, 12) !== 0) no('grid template 3.' + u16(s3, 12) + ' not supported');
+  const npts = u32(s3, 6), ni = u32(s3, 30), nj = u32(s3, 34);
+  const basic = u32(s3, 38), sub = u32(s3, 42);
+  if (!((basic === 0) && (sub === 0 || sub === 0xFFFFFFFF))) no('non-standard basic angle');
+  const la1 = s32(s3, 46) / 1e6, lo1 = u32(s3, 50) / 1e6, flags = s3[54], la2 = s32(s3, 55) / 1e6, lo2 = u32(s3, 59) / 1e6;
+  const di = u32(s3, 63) / 1e6, dj = u32(s3, 67) / 1e6, scan = s3[71];
+  if (scan !== 0) no('scanning mode ' + scan + ' not supported (only 0: west to east, north to south, rows)');
+  if (flags & 0x08) no('wind components are grid-relative, not Earth-relative');
+  if ((flags & 0x30) !== 0x30) no('direction increments not given');
+  for (const [k, v] of Object.entries({ ni, nj, la1, lo1, la2, lo2, di, dj })) if (v !== grid[k]) no(`grid ${k} is ${v}, expected ${grid[k]}`);
+  if (npts !== grid.ni * grid.nj) no('number of grid points is ' + npts + ', expected ' + grid.ni * grid.nj);
+  // Section 4: product
+  if (s4.length < 34) no('section 4 too short');
+  if (u16(s4, 5) !== 0) no('hybrid coordinate list present');
+  if (u16(s4, 7) !== 0) no('product template 4.' + u16(s4, 7) + ' not supported');
+  const prod = { discipline, category: s4[9], number: s4[10], process: s4[11], timeUnit: s4[17], forecastTime: u32(s4, 18),
+    surfaceType: s4[22], surfaceScale: s4[23], surfaceValue: u32(s4, 24), surface2Type: s4[28] };
+  // Section 5: packing
+  if (s5.length < 49) no('section 5 too short for template 5.3');
+  const nvals = u32(s5, 5), drt = u16(s5, 9);
+  if (drt !== 3) no('data template 5.' + drt + ' not supported (only 5.3)');
+  if (nvals !== npts) no('number of packed values differs from grid points');
+  const R = f32(s5, 11), E = s16(s5, 15), D = s16(s5, 17), nbits = s5[19], origType = s5[20], split = s5[21], miss = s5[22];
+  if (!Number.isFinite(R)) no('packing reference value is not a finite number');
+  if (Math.abs(E) > 30) no('binary scale factor ' + E + ' out of range');
+  if (D < 0 || D > 6) no('decimal scale factor ' + D + ' out of range');
+  if (origType !== 0) no('original field type ' + origType + ' not supported');
+  if (split !== 1) no('group splitting method ' + split + ' not supported');
+  if (miss !== 0) no('missing-value management ' + miss + ' not supported');
+  const NG = u32(s5, 31), refW = s5[35], bitsW = s5[36], refL = u32(s5, 37), incL = s5[41], lastL = u32(s5, 42), bitsL = s5[46], order = s5[47], nOct = s5[48];
+  if (order !== 2) no('spatial differencing order ' + order + ' not supported (only 2)');
+  if (nOct < 1 || nOct > 4) no('extra descriptor size ' + nOct);
+  if (nbits > 32 || bitsW > 32 || bitsL > 32) no('field width over 32 bits');
+  if (NG < 1 || NG > npts) no('group count out of range');
+  if (lastL < 1 || lastL > npts || incL < 1) no('group length fields out of range');
+  // every group needs its reference, width and length fields inside section 7: checked before any array is made
+  if (5 + 3 * nOct + Math.ceil(NG * nbits / 8) + Math.ceil(NG * bitsW / 8) + Math.ceil(NG * bitsL / 8) > s7.length) no('group count does not fit in the data section');
+  // Section 6: bitmap
+  if (s6.length < 6) no('section 6 too short');
+  if (s6[5] !== 255) no('bitmap indicator ' + s6[5] + ' not supported (only 255: none)');
+  // Section 7: data
+  const d = s7, dl = d.length; let p = 5;
+  const need = (n) => { if (p + n > dl) no('data section ends early'); };
+  const rdS = () => { need(nOct); let v = 0; for (let i = 0; i < nOct; i++) v = v * 256 + d[p + i]; p += nOct; return sm(v, 8 * nOct); };
+  const ival1 = rdS(), ival2 = rdS(), minsd = rdS();
+  let bit = p * 8; const endBit = dl * 8;
+  const rd = (n) => {                                   // read n bits (0..32), big-endian
+    if (n === 0) return 0;
+    if (bit + n > endBit) no('data section ends early');
+    let v = 0, left = n;
+    while (left > 0) {
+      const byte = d[bit >> 3], off = bit & 7, take = Math.min(8 - off, left);
+      v = v * (1 << take) + ((byte >> (8 - off - take)) & ((1 << take) - 1));
+      bit += take; left -= take;
+    }
+    return v;
+  };
+  const align = () => { bit = (bit + 7) & ~7; };
+  const gref = new Int32Array(NG), gwid = new Uint8Array(NG), glen = new Int32Array(NG);
+  for (let g = 0; g < NG; g++) gref[g] = rd(nbits); align();
+  for (let g = 0; g < NG; g++) { const w = refW + rd(bitsW); if (w > 32) no('group width over 32'); gwid[g] = w; } align();
+  let sum = 0;
+  for (let g = 0; g < NG; g++) { const L = refL + rd(bitsL) * incL; glen[g] = L; sum += L; } align();
+  sum += lastL - glen[NG - 1]; glen[NG - 1] = lastL;
+  if (sum !== nvals) no(`group lengths add to ${sum}, expected ${nvals}`);
+  const x = new Float64Array(nvals); let k = 0;
+  for (let g = 0; g < NG; g++) {
+    const w = gwid[g], L = glen[g], r = gref[g];
+    if (w === 0) { for (let i = 0; i < L; i++) x[k++] = r; }
+    else { if (bit + w * L > endBit) no('data section ends early'); for (let i = 0; i < L; i++) x[k++] = r + rd(w); }
+  }
+  if (k !== nvals) no('value count mismatch');
+  if (endBit - bit >= 8 * 2) no('unread bytes at the end of the data section');
+  // undo second-order differencing
+  x[0] = ival1; x[1] = ival2;
+  for (let n = 2; n < nvals; n++) x[n] = x[n] + minsd + 2 * x[n - 1] - x[n - 2];
+  const be = 2 ** E, dd = 10 ** (-D), out = new Float64Array(nvals);
+  for (let n = 0; n < nvals; n++) {
+    const v = (R + x[n] * be) * dd;
+    if (!(Math.abs(v) <= maxAbs)) no(Number.isFinite(v) ? `decoded value ${v} at point ${n} is beyond ${maxAbs}` : `decoded value at point ${n} is not a finite number`);
+    out[n] = v;
+  }
+  return { ref, prod, grid: { ni, nj, la1, lo1, la2, lo2, di, dj, scan, flags }, packing: { template: 3, order, R, E, D, nbits, NG }, values: out };
+}
+
+// The six fields the wind layer needs, in order. surfaceType 103 = height above ground (m), 100 = isobaric (Pa).
+const WIND_FIELDS = [
+  { key: 'u10m', number: 2, surfaceType: 103, surfaceValue: 10 }, { key: 'v10m', number: 3, surfaceType: 103, surfaceValue: 10 },
+  { key: 'u250', number: 2, surfaceType: 100, surfaceValue: 25000 }, { key: 'v250', number: 3, surfaceType: 100, surfaceValue: 25000 },
+  { key: 'u10', number: 2, surfaceType: 100, surfaceValue: 1000 }, { key: 'v10', number: 3, surfaceType: 100, surfaceValue: 1000 },
+];
+// Checks one decoded message is the wanted field of the wanted run. cycle = { year, month, day, hour } (UTC).
+function checkField(r, want, cycle) {
+  const p = r.prod, t = r.ref;
+  if (p.discipline !== 0 || p.category !== 2 || p.number !== want.number) no(`${want.key}: parameter is ${p.discipline}.${p.category}.${p.number}`);
+  if (p.surfaceType !== want.surfaceType || p.surfaceScale !== 0 || p.surfaceValue !== want.surfaceValue || p.surface2Type !== 255) no(`${want.key}: level is type ${p.surfaceType} value ${p.surfaceValue}`);
+  if (p.forecastTime !== 0) no(`${want.key}: forecast time ${p.forecastTime}, expected 0`);
+  if (t.significance !== 1) no(`${want.key}: reference time significance ${t.significance}`);
+  if (t.year !== cycle.year || t.month !== cycle.month || t.day !== cycle.day || t.hour !== cycle.hour || t.minute !== 0 || t.second !== 0) no(`${want.key}: run is ${t.year}-${t.month}-${t.day} ${t.hour}:${t.minute}, expected ${cycle.year}-${cycle.month}-${cycle.day} ${cycle.hour}:00`);
+}
+// Exactly six messages, in WIND_FIELDS order, all from one run. Calls use(i, decoded) for each, one at a time, so the
+// caller can keep only what it needs. Refuses the whole batch on any failure.
+function decodeWindBatch(msgs, cycle, use) {
+  if (!Array.isArray(msgs) || msgs.length !== WIND_FIELDS.length) no(`batch has ${Array.isArray(msgs) ? msgs.length : 'no'} messages, expected ${WIND_FIELDS.length}`);
+  for (let i = 0; i < WIND_FIELDS.length; i++) { const r = decode(msgs[i]); checkField(r, WIND_FIELDS[i], cycle); use(i, r); }
+}
+return { decode, checkField, decodeWindBatch, GribRefused, WIND_FIELDS, GFS_0P25, MAX_ABS_MS };
+})();
+// <<< gribwind.mjs
+const WIND = {
+  HOST: 'https://noaa-gfs-bdp-pds.s3.amazonaws.com/', LOOKBACK_RUNS: 4, TIMEOUT_MS: 30000, MAX_IDX: 200 * 1024, MAX_MSG: 3 * 1024 * 1024,
+  POINTER: 'wind/current.json', GRIDS: 'wind/grids/', W: 360, H: 181, STEP: 4, MISSING: -32768, GRID_BYTES: 360 * 181 * 4,
+  CACHE_FILE: 'public, max-age=86400, immutable',
+  IDX: [['UGRD', '10 m above ground'], ['VGRD', '10 m above ground'], ['UGRD', '250 mb'], ['VGRD', '250 mb'], ['UGRD', '10 mb'], ['VGRD', '10 mb']],
+  LEVELS: [{ id: 'near-ground', gfs_level: '10 m above ground' }, { id: '250hPa', gfs_level: '250 hPa' }, { id: '10hPa', gfs_level: '10 hPa' }],
+  SOURCE: { model: 'NOAA/NCEP Global Forecast System (GFS)', product: '0.25 degree pressure GRIB2, analysis hour f000', credit: 'NOAA/NCEP GFS',
+    mirror: 'NOAA Open Data Dissemination (NODD) on AWS, bucket noaa-gfs-bdp-pds', terms: 'https://registry.opendata.aws/noaa-gfs-bdp-pds/',
+    modified: 'Modified by Mother Earth: sampled from the 0.25 degree grid at whole degrees to 1 degree and quantised to 0.1 m/s. Not original, unaltered NOAA data.' },
+};
+const windEmpty = () => ({ schema: 1, layer: 'wind', current: null, previous: null, last_attempt: null, seen: null, source: WIND.SOURCE, collector_version: COLLECTOR_VERSION });
+/** Is a failure note (a = { started, run }) still about something newer than the published revision? A note that names a run is
+ * ordered by that run; one that names none (the index could not even be asked for) is ordered by when its attempt started. */
+const windNoteRelevant = (a, current) => !!a && (!current || (a.run ? a.run > current.run : !current.started || a.started > current.started));
+/** The first sighting of a run's index: a newer run replaces an older one; for the same run the EARLIER time is kept. */
+const windSeenMerge = (have, s) => !s ? (have || null) : (!have || s.run > have.run) ? s : (s.run === have.run && s.index_first_seen < have.index_first_seen) ? s : have;
+/** 'YYYYMMDDHH' of the GFS runs whose named time is not after ms, newest first. */
+function windCandidates(ms, n = WIND.LOOKBACK_RUNS) {
+  const out = []; let t = Math.floor(ms / 21600000) * 21600000;
+  for (let i = 0; i < n; i++, t -= 21600000) { const d = new Date(t); out.push(d.toISOString().slice(0, 13).replace(/[-T]/g, '')); }
+  return out;
+}
+const windObject = run => `gfs.${run.slice(0, 8)}/${run.slice(8)}/atmos/gfs.t${run.slice(8)}z.pgrb2.0p25.f000`;
+const windRunIso = run => `${run.slice(0, 4)}-${run.slice(4, 6)}-${run.slice(6, 8)}T${run.slice(8)}:00:00Z`;
+/** The six byte ranges from an index file, in WIND.IDX order; throws GribRefused if any field is absent, repeated or out of bounds. */
+function windRanges(idxText, total) {
+  const lines = String(idxText).trim().split('\n').map(l => l.split(':'));
+  return WIND.IDX.map(([v, lev]) => {
+    const hits = []; lines.forEach((l, i) => { if (l[3] === v && l[4] === lev && l[5] === 'anl') hits.push(i); });
+    if (hits.length !== 1) throw new GRIBWIND.GribRefused(`${v} ${lev}: ${hits.length} index lines`);
+    const i = hits[0], start = Number(lines[i][1]), end = (i + 1 < lines.length ? Number(lines[i + 1][1]) : total) - 1, len = end - start + 1;
+    if (!(Number.isInteger(start) && Number.isInteger(end) && start >= 0 && len > 0 && len <= WIND.MAX_MSG && end < total)) throw new GRIBWIND.GribRefused(`${v} ${lev}: range ${start}-${end} not acceptable`);
+    return { start, end, len };
+  });
+}
+async function windPtr(env) {
+  const o = await env.R2.get(WIND.POINTER);
+  return o ? { cur: await o.json(), etag: o.etag } : { cur: windEmpty(), etag: null };
+}
+/** Read-change-write of the manifest. EVERY write is conditional: on the etag read, or create-only when none existed. A refused
+ * write (null) is read again and decided again. change(cur) returns the new body, or null to leave the manifest alone. */
+async function windUpdate(env, change) {
+  for (let i = 0; i < 5; i++) {
+    const { cur, etag } = await windPtr(env), body = change(cur);
+    if (body === null) return { cur, body: null, wrote: false };
+    const r = await env.R2.put(WIND.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });
+    if (r !== null) return { cur, body, wrote: true };
+  }
+  throw new Error('wind manifest kept changing; gave up after 5 tries');
+}
+/** A failed run never moves the revisions. It leaves a note (last_attempt) ONLY if the note is still about something newer than
+ * what is published and no later-started attempt has already written one; either way the run row records the failure. The public
+ * reason is a fixed phrase; detail stays in collector_runs. seen = { run, index_first_seen } when the run's index had been found. */
+async function windFail(env, ms, reason, http, detail, seen) {
+  const failed_at = nowIso(), started = new Date(ms).toISOString(), note = { started, run: seen ? seen.run : null };
+  let recorded = false;
+  try { const up = await windUpdate(env, cur => {
+    const la = cur.last_attempt, keepSeen = seen && (!cur.current || seen.run > cur.current.run) ? windSeenMerge(cur.seen, seen) : (cur.seen || null);
+    const record = windNoteRelevant(note, cur.current) && (!la || la.started <= started);
+    if (!record) return JSON.stringify(keepSeen) === JSON.stringify(cur.seen || null) ? null : { ...cur, seen: keepSeen };
+    return { ...cur, seen: keepSeen, last_attempt: { started, failed_at, status: 'down', http: http || 0, reason, run: note.run, consecutive_failures: ((la && la.consecutive_failures) || 0) + 1 } }; });
+    recorded = !!(up.wrote && up.body.last_attempt && up.body.last_attempt.started === started); } catch (_) {}
+  await logRun(env, 'wind', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : '') + (recorded ? '' : ' (not noted on the manifest: a newer result is already there)'));
+  return 'wind:down ' + reason;
+}
+/** One range request. The response is refused BEFORE its body is read unless it is 206 with the exact Content-Range, length and ETag. */
+async function windFetchRange(url, r, total, etag) {
+  // 0.6.17: cache: 'no-store', NOT cf: { cacheTtl: 0 }. With the cf setting a byte-range request to this mirror got its 206 headers and
+  // then no body at all (two live runs and the range probe, 16 Nov: docs/research/global-wind-range/README.md). Range downloads only.
+  let res; try { res = await fetch(url, { headers: { 'User-Agent': UA, Range: `bytes=${r.start}-${r.end}` }, cache: 'no-store', signal: AbortSignal.timeout(WIND.TIMEOUT_MS) }); } catch (e) { return { ok: false, reason: 'field request failed', http: 0, detail: String(e).slice(0, 120) }; }
+  const cr = res.headers.get('content-range'), cl = Number(res.headers.get('content-length')), et = res.headers.get('etag');
+  if (res.status !== 206 || cr !== `bytes ${r.start}-${r.end}/${total}` || cl !== r.len || et !== etag) {
+    try { if (res.body) await res.body.cancel(); } catch (_) {}
+    return { ok: false, reason: 'field response refused', http: res.status, detail: `content-range ${cr}, length ${cl}, etag ${et}` };
+  }
+  let buf; try { buf = new Uint8Array(await res.arrayBuffer()); } catch (e) { return { ok: false, reason: 'field body unreadable', http: 206, detail: String(e).slice(0, 120) }; }
+  if (buf.length !== r.len) return { ok: false, reason: 'field body length differs', http: 206, detail: `${buf.length} of ${r.len}` };
+  return { ok: true, buf };
+}
+async function collectWind(env, ms) {
+  if (new Uint8Array(new Uint16Array([1]).buffer)[0] !== 1) return windFail(env, ms, 'internal error', 0, 'platform is not little-endian');
+  const { cur } = await windPtr(env), held = cur.current ? cur.current.run : null;
+  let run = null, idx = null, requests = 0;
+  for (const c of windCandidates(ms)) {
+    if (held && c <= held) break;                          // nothing newer can be found from here on: no request
+    let r; try { r = await fetch(WIND.HOST + windObject(c) + '.idx', { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(WIND.TIMEOUT_MS) }); requests++; } catch (e) { return windFail(env, ms, 'index request failed', 0, c + ' ' + String(e).slice(0, 120)); }
+    if (r.status === 404) { try { if (r.body) await r.body.cancel(); } catch (_) {} continue; }   // that run is not on the mirror yet
+    const il = Number(r.headers.get('content-length'));
+    if (r.status !== 200 || !(il > 0 && il <= WIND.MAX_IDX)) { try { if (r.body) await r.body.cancel(); } catch (_) {} return windFail(env, ms, 'index http error', r.status, `${c} length ${il}`); }
+    idx = await r.text(); run = c; break;
+  }
+  if (!run) {
+    // a clean scan clears an EARLIER failure note only; a note from an attempt that started later stays, and `seen` is never touched
+    const started = new Date(ms).toISOString();
+    // decided against the manifest AS IT IS NOW, inside the conditional update: a note written while this scan was waiting is seen too
+    await windUpdate(env, c => c.last_attempt && c.last_attempt.started <= started ? { ...c, last_attempt: null } : null);
+    const note = held ? `no newer run on the mirror: ${held} held and kept` : 'no run found on the mirror';
+    await logRun(env, 'wind', ms, 'ok', 200, 0, 0, `${note}; ${requests} request(s)`);
+    return 'wind:' + note;
+  }
+  // The sighting goes on the manifest NOW, as soon as the index is accepted and before any field is asked for, so an invocation that
+  // is cut short cannot lose it. What this run carries from here on is the value the manifest holds (the earliest sighting of this run).
+  let seen = { run, index_first_seen: nowIso() };
+  { const up = await windUpdate(env, c => { const k = !c.current || run > c.current.run ? windSeenMerge(c.seen, seen) : (c.seen || null); return JSON.stringify(k) === JSON.stringify(c.seen || null) ? null : { ...c, seen: k }; });
+    const held2 = up.wrote ? up.body.seen : up.cur.seen; if (held2 && held2.run === run) seen = held2; }
+  const fail = (reason, http, detail) => windFail(env, ms, reason, http, `${run} ${detail || ''}`.trim(), seen);
+  const url = WIND.HOST + windObject(run), cycle = { year: +run.slice(0, 4), month: +run.slice(4, 6), day: +run.slice(6, 8), hour: +run.slice(8) };
+  let hd; try { hd = await fetch(url, { method: 'HEAD', headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(WIND.TIMEOUT_MS) }); requests++; } catch (e) { return fail('object request failed', 0, String(e).slice(0, 120)); }
+  const total = Number(hd.headers.get('content-length')), etag = hd.headers.get('etag');
+  if (hd.status !== 200 || !(total > 0) || !etag) return fail('object http error', hd.status, `length ${total}`);
+  let ranges; try { ranges = windRanges(idx, total); } catch (e) { return fail('index unreadable', 200, String(e.message).slice(0, 160)); }
+  const grids = WIND.LEVELS.map(() => new Int16Array(WIND.W * WIND.H * 2)), messages = []; let bytes = 0;
+  for (let f = 0; f < 6; f++) {
+    const got = await windFetchRange(url, ranges[f], total, etag); requests++;
+    if (!got.ok) return fail(got.reason, got.http, `${GRIBWIND.WIND_FIELDS[f].key} ${got.detail || ''}`);
+    let dec;
+    try { dec = GRIBWIND.decode(got.buf); GRIBWIND.checkField(dec, GRIBWIND.WIND_FIELDS[f], cycle); }
+    catch (e) { if (e instanceof GRIBWIND.GribRefused) return fail('field refused by the decoder', 200, `${GRIBWIND.WIND_FIELDS[f].key}: ${String(e.message).slice(0, 140)}`); throw e; }
+    const g = grids[f >> 1], c = f & 1, v = dec.values, NI = GRIBWIND.GFS_0P25.ni;
+    for (let j = 0; j < WIND.H; j++) for (let k = 0; k < WIND.W; k++) g[(j * WIND.W + k) * 2 + c] = Math.round(v[j * WIND.STEP * NI + k * WIND.STEP] * 10);
+    messages.push({ key: GRIBWIND.WIND_FIELDS[f].key, range: `${ranges[f].start}-${ranges[f].end}`, bytes: ranges[f].len, sha256: await sha256Bytes(got.buf.buffer) });
+    bytes += ranges[f].len;
+  }
+  const fields_fetched = nowIso();
+  // grids: content-addressed and create-only; an existing object is used only if its bytes hash to its name
+  const levels = [];
+  for (let i = 0; i < WIND.LEVELS.length; i++) {
+    const buf = grids[i].buffer, sha = await sha256Bytes(buf), key = WIND.GRIDS + sha + '.i16';
+    if (buf.byteLength !== WIND.GRID_BYTES) return fail('internal error', 200, 'grid size ' + buf.byteLength);
+    const stored = async () => { let b = null; try { const o = await env.R2.get(key); b = o ? await o.arrayBuffer() : null; } catch (_) { return 'unreadable'; } return !b ? 'absent' : (b.byteLength === WIND.GRID_BYTES && await sha256Bytes(b) === sha) ? 'same' : 'differs'; };
+    let had = await stored();
+    if (had === 'absent') {
+      try { await env.R2.put(key, buf, { httpMetadata: { contentType: 'application/octet-stream' }, customMetadata: { sha256: sha, run, level: WIND.LEVELS[i].id }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return fail('grid write failed', 200, String(e).slice(0, 120)); }
+      had = await stored();                                 // read back whether this run or another one created it
+    }
+    if (had !== 'same') return fail(had === 'absent' ? 'grid read-back missing' : 'grid stored copy differs', 200, key);
+    levels.push({ ...WIND.LEVELS[i], file: sha + '.i16', key, path: `/snapshot/wind/grid/${sha}.i16`, bytes: WIND.GRID_BYTES, sha256: sha });
+  }
+  const rev = { run, run_time: windRunIso(run), valid_time: windRunIso(run), forecast_hour: 0, levels, messages,
+    source: { ...WIND.SOURCE, host: WIND.HOST, object: windObject(run), object_bytes: total, object_etag: etag, object_last_modified: hd.headers.get('last-modified') || null, index_sha256: await sha256Bytes(new TextEncoder().encode(idx).buffer) },
+    grid: { source: 'regular lat/lon 0.25 degree, 1440 x 721', display: { w: WIND.W, h: WIND.H, lat0: 90, lon0: 0, step_deg: 1, order: 'rows north to south, columns west to east from 0 degrees east' },
+      reduction: 'model value at each whole degree (every fourth point each way); no averaging', encoding: { type: 'int16 little-endian', per_cell: ['u eastward', 'v northward'], scale_m_s: 0.1, missing: WIND.MISSING } },
+    times: { index_first_seen: seen.index_first_seen, fields_fetched, published: null }, started: new Date(ms).toISOString() };
+  // the manifest is the single commit point: it advances only if no other run has published this run or a newer one meanwhile
+  const brief = c => c && ({ run: c.run, run_time: c.run_time, valid_time: c.valid_time, levels: c.levels, source: c.source, grid: c.grid, times: c.times });
+  const up = await windUpdate(env, c => { if (c.current && c.current.run >= run) return null;
+    const first = windSeenMerge(c.seen && c.seen.run === run ? c.seen : null, seen).index_first_seen;      // the earliest sighting of this run, whoever made it
+    const current = { ...rev, times: { index_first_seen: first, fields_fetched, published: nowIso() } };
+    return { ...windEmpty(), current, previous: brief(c.current), seen: c.seen && c.seen.run > run ? c.seen : null, last_attempt: windNoteRelevant(c.last_attempt, current) ? c.last_attempt : null }; });
+  if (!up.wrote) { await logRun(env, 'wind', ms, 'ok', 200, 0, bytes, `superseded: ${up.cur.current.run} is published; ${run} not published; ${requests} requests`); return 'wind:superseded ' + run; }
+  await logRun(env, 'wind', ms, 'ok', 200, 3, bytes, `run ${run} published; index first seen ${up.body.current.times.index_first_seen}; fields fetched ${fields_fetched}; published ${up.body.current.times.published}; ${requests} requests`);
+  return 'wind:published ' + run;
+}
+/** GET /snapshot/wind/meta and /snapshot/wind/grid/<sha256>.i16. A grid is served only if the manifest's current or previous revision
+ * names it, and only if the stored bytes hash to that name. */
+async function windRoute(env, p) {
+  const none = (status, reason) => json({ layer: 'wind', status: 'unavailable', reason }, status, { 'Cache-Control': 'no-store' });
+  let cur; try { cur = await getJson(env, WIND.POINTER); } catch (e) { return none(503, 'unreadable'); }
+  if (p.length === 3 && p[2] === 'meta') {
+    const strip = r => r ? { ...r, levels: r.levels.map(l => ({ ...l, key: undefined })) } : r;
+    const c = cur || windEmpty();
+    return json({ ...c, current: strip(c.current), previous: strip(c.previous), now: nowIso() }, 200, { 'Cache-Control': 'no-store' });
+  }
+  const m = p.length === 4 && p[2] === 'grid' ? /^([0-9a-f]{64})\.i16$/.exec(p[3]) : null;
+  if (!m || !cur) return none(404, 'not found');
+  const x = [cur.current, cur.previous].filter(Boolean).flatMap(r => r.levels).find(l => l.sha256 === m[1]);
+  if (!x) return none(404, 'not found');
+  let buf; try { const o = await env.R2.get(x.key); buf = o ? await o.arrayBuffer() : null; } catch (e) { return none(503, 'unreadable'); }
+  if (!buf) return none(503, 'missing');
+  if (buf.byteLength !== x.bytes || await sha256Bytes(buf) !== x.sha256) return none(503, 'integrity');
+  return new Response(buf, { headers: { 'Content-Type': 'application/octet-stream', 'Cache-Control': WIND.CACHE_FILE, 'ETag': '"' + x.sha256 + '"', ...CORS } });
+}
+
 /* ---------- Sky spacecraft (0.6.12; docs/concepts/MOON-AND-SUN-BUILD-PROPOSAL.md rev 2.1) ----------
  * Once a day the hub asks NASA/JPL Horizons for (1) Parker Solar Probe, Sun-centred ICRF vectors, hourly, from yesterday 00:00 UTC
  * to +7 days, and (2) LRO, Moon-centred, at the forward-study epochs. Each response carries the object's data sheet AND the
@@ -3479,12 +3832,16 @@ async function guarded(env, layer, ms, fn) {
     if (layer === 'firms' && env.FIRMS_PIPELINE === 'v2') { try { await logRun(env, layer, ms, 'down', 0, 0, 0, note); await fvDownNoInput(env, ms, note); } catch (_) {} }   // v2 never calls the unconditional writeDown
     else if (layer === 'drifters') { try { await driftFail(env, ms, 'internal_error', note, 0); } catch (_) {} }
     else if (layer === 'dustrgb') { try { await dustFail(env, ms, 'internal error', 0, note); } catch (_) {} }
+    else if (layer === 'wind') { try { await windFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.16: never the generic writeDown
     else if (layer === 'sunface') { try { await sunFail(env, ms, 'down', 'internal error', 0, note); } catch (_) {} }   // 0.6.13: never the generic writeDown
     else if (layer === 'skycraft') { try { await craftFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.12: never the generic writeDown   // 0.6.11: never the generic writeDown (no cells, no envelope)   // 0.6.8: buoys never call the unconditional writeDown
     else try { await writeDown(env, layer, ms, note, 0); } catch (_) {}
     return layer + ':threw ' + String(e).slice(0, 80); }
 }
 
+/** The wind collector under the guard, answering with the collector's own result ("wind:published <run>", "wind:down <reason>", …)
+ * so that a handled failure is never reported as a plain "ran". */
+async function runWind(env, ms) { let r = null; const g = await guarded(env, 'wind', ms, async (e, m) => { r = await collectWind(e, m); }); return r || g; }
 const JOBS = {
   five: async (env, ms) => (await Promise.all([
     guarded(env, 'usgs', ms, collectUsgs),
@@ -3504,6 +3861,7 @@ const JOBS = {
   plastic: async (env, ms) => guarded(env, 'plastic', ms, collectPlastic),   // manual: /admin/run/plastic (no gate)
   sunface: async (env, ms) => guarded(env, 'sunface', ms, collectSunface),   // manual: /admin/run/sunface (admin key; ignores the gate; one upstream request)
   skycraft: async (env, ms) => guarded(env, 'skycraft', ms, collectSkycraft),   // manual: /admin/run/skycraft (admin key; ignores the gate and the hour; two upstream requests, one at a time)
+  wind: async (env, ms) => runWind(env, ms),   // manual: /admin/run/wind (admin key; ignores the gate; runs the collector once). The result is the collector's own word: published, down, superseded or nothing newer.
   dustrgb: async (env, ms) => guarded(env, 'dustrgb', ms, collectDustRgb),   // manual: /admin/run/dustrgb (admin key; ignores the gate and the hour, as plastic does)
   drifters: async (env, ms) => guarded(env, 'drifters', ms, collectDrifters),   // manual: /admin/run/drifters (no gate: one ~100 KB request)   // manual: /admin/run/satellites (same stamp gate)
   hourly: async (env, ms, manual) => {
@@ -3521,7 +3879,9 @@ const JOBS = {
     const v = env.SKYCRAFT_ENABLED !== '1' ? 'skycraft:not scheduled (SKYCRAFT_ENABLED unset)' : (!manual && hr === SKYCRAFT.RUN_HOUR_UTC) ? await guarded(env, 'skycraft', ms, collectSkycraft) : 'skycraft:skipped (runs 05 UTC)';
     // Sun face: every scheduled hour, last of all (one ~200 KB request); never on a manual hourly run
     const w = env.SUNFACE_ENABLED !== '1' ? 'sunface:not scheduled (SUNFACE_ENABLED unset)' : !manual ? await guarded(env, 'sunface', ms, collectSunface) : 'sunface:skipped (manual hourly run)';
-    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, dustrgb: u, skycraft: v, sunface: w, batch: b };
+    // Wind: every scheduled hour, after everything else; never on a manual hourly run. With the flag unset: no request, nothing written.
+    const x = env.WIND_ENABLED !== '1' ? 'wind:not scheduled (WIND_ENABLED unset)' : !manual ? await runWind(env, ms) : 'wind:skipped (manual hourly run)';
+    return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, dustrgb: u, skycraft: v, sunface: w, wind: x, batch: b };
   },
 };
 
@@ -3861,6 +4221,7 @@ export default {
     }
     if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
+    if (p[0] === 'snapshot' && p[1] === 'wind') return windRoute(env, p);   // 0.6.16: manifest + the current and previous revision's grids; outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'dustrgb') return dustRoute(env, p);   // 0.6.11: pointer + the current and previous frame files; outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS

@@ -290,13 +290,13 @@ await t('PD3. a genuine mismatch on both reads is still "withheld" (records and 
   assert.equal(r.layers.ships.state, 'withheld'); assert.match(r.layers.ships.why, /not from the same collector run \(records 2026-11-05T09:30:00.000Z, counts 2026-11-05T09:31:00.000Z\)/); assert.equal(n, 2, 're-read once');
   assert.equal(r.layers.usgs.state, 'ok'); assert.equal(r.layers.firms.state, 'ok');
 });
-await t('PD4. counts kept from a good run after a failed update (buoys last_attempt, source_status ok) are not "down"; the collector version is 0.6.15', async () => {
+await t('PD4. counts kept from a good run after a failed update (buoys last_attempt, source_status ok) are not "down"; the collector version is 0.6.16', async () => {
   const { env, store } = makeEnv(); await seedPlace(env, store); pdClear(); const T = new Date(NOW - 600e3).toISOString();
   await env.R2.put('latest/drifters.json', JSON.stringify({ layer: 'drifters', retrieved_at: T, source_status: 'ok', record_fields: ['id', 'lat', 'lng', 'observed_at'], records: [['b1', -33.9, 28.4, T]], cells: {} }));
   await env.R2.put('latest-cells/drifters.json', JSON.stringify({ layer: 'drifters', retrieved_at: T, source_status: 'ok', stale_after_s: 14400, cells: { '14_52': { count: 1 } }, last_attempt: { failed_at: new Date(NOW - 60e3).toISOString(), reason: 'http 522' } }));
   const s = (await (await get(env, '/place/g4/14_52?layers=drifters')).json()).layers.drifters;
   assert.equal(s.state, 'ok'); assert.equal(s.count, 1); assert.equal(s.last_attempt.reason, 'http 522');
-  assert.equal((await (await get(env, '/')).json()).version, '0.6.15');
+  assert.equal((await (await get(env, '/')).json()).version, '0.6.17');
 });
 await t('PD5. down counts and NO records file at all → "down" (not "withheld … records unreadable"); the records file is not read', async () => {
   const { env, store, gets, resetGets } = makeEnv(); const d = await pdDown(env, store); pdClear();

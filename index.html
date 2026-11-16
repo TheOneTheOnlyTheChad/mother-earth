@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612091000">
+<link rel="stylesheet" href="style.css?v=202612121500">
 </head>
 <body class="world">
 <header class="top">
@@ -283,6 +283,38 @@
               </div>
             </details>
           </div>
+          <div class="ovl opt-wind" id="card-wind">
+            <div class="ovl-h">Wind by height <span class="ev comp">Modelled</span><span class="state" id="s-wind">off</span></div>
+            <button class="ovl-tgl" type="button" id="tgl-wind" role="switch" aria-checked="false" aria-describedby="wind-note"><span class="box" aria-hidden="true"></span><span class="t">Wind — newest model field</span></button>
+            <div class="cav" id="wind-note">Modelled wind from NOAA's global forecast model, at three heights. A model's picture of the air at one moment, not a measurement at each place.</div>
+            <div class="wind-levels" id="wind-levels" role="radiogroup" aria-label="Height">
+              <button type="button" role="radio" aria-checked="false" data-level="near-ground" disabled>Near ground</button>
+              <button type="button" role="radio" aria-checked="false" data-level="250hPa" disabled>Jet-stream height</button>
+              <button type="button" role="radio" aria-checked="false" data-level="10hPa" disabled>Stratosphere</button>
+            </div>
+            <div class="wind-frame" id="wind-frame" aria-live="polite" hidden></div>
+            <div class="hint" id="wind-extra" aria-live="polite" hidden></div>
+            <div class="obs" id="o-wind" aria-live="polite">Off. Switch on to load the newest modelled wind field.</div>
+            <div class="wind-key" id="wind-key" aria-label="Wind speed key"></div>
+            <div class="wind-pt" id="wind-pt" hidden>
+              <label>Lat <input id="wind-lat" type="number" min="-90" max="90" step="1" inputmode="decimal" aria-label="Latitude, degrees north"></label>
+              <label>Lon <input id="wind-lng" type="number" min="-180" max="180" step="1" inputmode="decimal" aria-label="Longitude, degrees east"></label>
+              <button type="button" id="wind-go">Read</button>
+            </div>
+            <div class="wind-read" id="wind-read" aria-live="polite"></div>
+            <details class="scope" id="wind-scope">
+              <summary>What this is and is not</summary>
+              <div>
+                <p><b>Modelled, not measured.</b> NOAA's Global Forecast System (GFS) combines observations from around the world into one picture of the atmosphere four times a day. This layer shows the wind in that picture at the model's starting moment (its analysis hour). Observations inform the model; global coverage does not mean wind was measured at every place.</p>
+                <p><b>Three heights.</b> Near ground is 10 m above the model's own land or water surface. Jet-stream height is the 250 hPa pressure level, roughly 10–11 km up. Stratosphere is the 10 hPa level, roughly 30 km up. The two upper levels are surfaces of equal pressure: their true height varies from place to place.</p>
+                <p><b>One frozen moment.</b> Colour is speed and arrows are direction at the valid time shown. Nothing here moves the model forward, forecasts, or shows where a parcel of air will travel.</p>
+                <p><b>Coarse.</b> One value per whole degree, about 110 km. It cannot show the wind in a street, a valley or around a building. A reading names the model cell it came from.</p>
+                <p><b>The white coastline.</b> While Wind is on, a thin outline of the world's coasts is drawn over it so you can tell where you are. It is a fixed reference line from Natural Earth (1:50 million, public domain), simplified by Mother Earth. It is not live data and not part of NOAA's model.</p>
+                <p><b>Changed by Mother Earth.</b> NOAA publishes this field on a 0.25° grid. Mother Earth takes the value at each whole degree and rounds it to 0.1 m/s. It is not original, unaltered NOAA data.</p>
+                <p><a href="sources.html#wind">Sources &amp; Details →</a></p>
+              </div>
+            </details>
+          </div>
           <div class="ovl opt-nl" id="card-nl">
             <div class="ovl-h">Night lights <span class="ev obs">Observed</span><span class="state" id="s-nl">off</span></div>
             <button class="ovl-tgl" type="button" id="tgl-nl" role="switch" aria-checked="false" aria-describedby="nl-note"><span class="box" aria-hidden="true"></span><span class="t">Night lights — newest complete night</span></button>
@@ -432,6 +464,7 @@
 <script src="oceanheat.js?v=202611291000"></script>
 <script src="dustrgb.js?v=202612021000"></script>
 <script src="nightlights.js?v=202612111000"></script>
+<script src="wind.js?v=202612121500"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
@@ -524,12 +557,13 @@ if (noWebGL) {
       .polygonsData([]).polygonGeoJsonGeometry('geom').polygonCapColor(p => p.fill).polygonCapMaterial(p => p.mat).polygonSideColor(() => CELL_PERF.mode === 'main' ? 'rgba(0,0,0,0)' : null).polygonStrokeColor(p => p.stroke).polygonAltitude(.006)
       .polygonLabel(p => p.label)
       .pathsData([]).pathPoints('pts').pathPointLat(q => q[0]).pathPointLng(q => q[1]).pathPointAlt(() => .003).pathColor(() => 'rgba(206,222,236,.95)').pathTransitionDuration(0)
-      .onPolygonClick((p, ev, c) => { ohTap = c && Number.isFinite(c.lat) && Number.isFinite(c.lng) ? { lat: c.lat, lng: c.lng } : null; inspectCell(p); })
-      .onGlobeClick(({ lat, lng }) => { ohTap = { lat, lng }; openPlace(ME.cellId(lat, lng)); });   // any place, including one with no visible records
+      .onPolygonClick((p, ev, c) => { ohTap = c && Number.isFinite(c.lat) && Number.isFinite(c.lng) ? { lat: c.lat, lng: c.lng } : null; if (ohTap) tapped(ohTap.lat, ohTap.lng); inspectCell(p); })
+      .onGlobeClick(({ lat, lng }) => { ohTap = { lat, lng }; tapped(lat, lng); openPlace(ME.cellId(lat, lng)); });   // any place, including one with no visible records
     globe.pointOfView({ lat: -10, lng: 25, altitude: innerWidth <= 720 ? 2.8 : 2.2 });   // phones: the whole sphere fits above the readings sheet
     globe.controls().autoRotate = !reduced; globe.controls().autoRotateSpeed = .25;
     globe.controls().addEventListener('start', () => globe.controls().autoRotate = false);
     globeOk = true;
+    function tapped(lat, lng) { for (const f of (ME.taps || [])) { try { f(lat, lng); } catch (_) {} } }   // optional layers that read a tapped point (wind.js) register in ME.taps; a fault in one never stops the tap
     ME.globe = () => globe;   // read handle for the Sky zoom-out view (skyscene.js); the view saves and restores everything it touches
   } catch (e) {
     globeUnavailable('The 3-D globe could not start in this browser.', (e && e.message) || e);
