@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 08:15 UTC (clock reading) — **Aircraft: home ADS-B receiver receiving; OpenSky registration not done** (docs only; aircraft stays parked)
+- Relayed by Chad (his and GPT's setup; nothing here was seen by Claude). The Raspberry Pi 4 runs ADS-B Feeder Image v3.0.15 stable on the home network; station name TheOneTheOnlyTheChad; ADS-B only; antenna at the airport-facing window. Position and altitude are in Chad's private setup note, never in this repo.
+- **Local reception reported working:** map 21 aircraft, 15 with positions, about 115 messages a second; homepage 116 messages a second, 22 position updates a second, 25 aircraft seen today. A first "1090 container is down" warning cleared on refresh.
+- **OpenSky: not enabled.** With the account's feeder username entered (as confirmed on the OpenSky profile), the serial left blank and Request Key clicked, the feeder answered "Invalid OpenSky username" and "did not successfully enable opensky". No receiver serial exists; no outside feed is verified. Chad emailed OpenSky on the existing ticket thread asking how to get a serial; reply pending, nothing inferred from sending.
+- Chad's scope: no other aggregator switched on until the list is reviewed together; passwords and feeder keys stay in the feeder's setup pages; the aircraft layer stays parked until OpenSky contribution is verified and Chad gives his own production approval.
+- Next: OpenSky's reply; then verify OpenSky receives data from this station.
+
 ## 16 Nov 06:58 UTC (clock reading) — **GPT's live desktop Chrome smoke of the released site: passed** (docs only; no page or hub change)
 - New thread. Read START-HERE, HANDOVER and STATUS from main at `8c74abc`. Remote branches at the read: `main`, `aircraft-rc`, `widths-preview-rc` (the two merged Night lights branches are gone). Claude's container could not reach the public site (proxy 403), so the served hashes were not re-read; the last read is 06:30:01 UTC above.
 - **GPT (relayed by Chad): the live desktop Chrome smoke passed; Night lights done for now.** GPT replayed the sequence that exposed the label defect: Night lights switched off, Sky entered at once. The night picture showed briefly with its night label, then the daylight picture and the daylight label appeared together; back to Earth worked; no mismatch seen again.
