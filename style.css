@@ -587,6 +587,29 @@ body.sky-zoom #legend,body.sky-zoom #key-btn,body.sky-zoom #persist,body.sky-zoo
 .optgroup .opt-dustrgb .ovl-h .state{margin-left:auto}
 .dustrgb-frame{font-size:12.5px;color:var(--fg);margin-top:2px}
 .dustrgb-frame[hidden]{display:none}
+/* Wind by height (wind-rc) */
+.optgroup .opt-wind .ovl-h{font:600 15px/1.2 var(--display);letter-spacing:.06em;color:var(--fg);flex-wrap:wrap}
+.optgroup .opt-wind .ovl-h .state{margin-left:auto}
+.wind-levels{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 4px}
+.wind-levels button{font:inherit;font-size:12px;padding:4px 8px;background:transparent;color:var(--fg);border:1px solid rgba(255,255,255,.28);border-radius:3px;cursor:pointer}
+.wind-levels button[aria-checked="true"]{background:rgba(159,216,255,.16);border-color:#9fd8ff;font-weight:600}
+.wind-levels button[aria-checked="true"]::before{content:"● "}
+.wind-levels button.pending{border-style:dashed}
+.wind-levels button.pending::after{content:" …"}
+.wind-levels button:disabled{opacity:.45;cursor:default}
+.wind-levels button:focus-visible,.wind-pt button:focus-visible,.wind-pt input:focus-visible{outline:2px solid #9fd8ff;outline-offset:1px}
+.wind-frame{font-size:12.5px;color:var(--fg);margin-top:2px}
+.wind-frame[hidden],.wind-pt[hidden]{display:none}
+.wind-frame .wind-lv{color:var(--dim,#b9c2cc)}
+.wind-key{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;font:11px/1.5 var(--mono);margin:6px 0 2px}
+.wind-key .b{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.wind-key i{display:inline-block;width:12px;height:10px;border:1px solid rgba(255,255,255,.35)}
+.wind-key i.hatch{background:repeating-linear-gradient(135deg,#282828 0 3px,#bbb 3px 4px)}
+.wind-key .u{flex-basis:100%;opacity:.85}
+.wind-pt{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;margin-top:6px}
+.wind-pt input{width:4.6em;font:inherit;padding:2px 4px;background:rgba(0,0,0,.35);color:var(--fg);border:1px solid rgba(255,255,255,.28);border-radius:3px}
+.wind-pt button{font:inherit;padding:3px 9px;background:transparent;color:var(--fg);border:1px solid rgba(255,255,255,.28);border-radius:3px;cursor:pointer}
+.wind-read{font-size:12.5px;margin-top:4px;min-height:1.2em}
 
 /* ---------- Moon and Sun spacecraft pages (moon.html, sun.html; craft.js). Scoped to body.craft. */
 body.craft .top{position:sticky;top:0;z-index:40}
