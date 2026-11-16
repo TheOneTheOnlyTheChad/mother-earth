@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 14:29 UTC (clock reading) — **Wind range-request probe file written (docs only; nothing deployed)**
+- GPT (relayed by Chad): take the probe-first route; pin the 06z object and the failing range, one Worker, same User-Agent and 30 s limit, change only the cache setting; record time to headers, bytes received and the hash; reverse the order if outcomes differ; `cache: 'no-store'` as a separate test. Chad forwarded GPT's text with the line "Go: write the wind range-request probe file (docs only on main; no deploy)"; taken as go for docs work only.
+- **Control read from the pane, 14:27:34 UTC (read-only):** the failing range (bytes 410321002–411280101 of the 06z object, 959,100 bytes) straight from the mirror: 206, headers in 309 ms, complete in 1,528 ms, sha256 `83eb6f5e51ce1a3f4eb562dbc6938fbf3bfe34667d932a42e2393f911d2b1386`. The mirror serves it normally to a browser.
+- **Written:** `docs/research/global-wind-range/` (README with the plan, source, build script, built Worker, local test: 19 checks pass). Built Worker `range-probe-worker.mjs` sha256 `51ccabd7840d7a2b76570d3282f084b7bafc6749b7aaabc6bb38fb67db8eb7d1`, 7,103 bytes. Keyed; expires 17 Nov 12:00 UTC; five fixed sequences (A–E); no bindings, schedule or storage.
+- Added beyond GPT's list, as separate sequences: the hub's own order (object check with the cf setting, then the range), in case the range request alone does not reproduce the fault.
+- **Not done:** nothing created on Cloudflare. Creating and running the probe needs Chad's own Approve line.
+
 ## 16 Nov 14:23 UTC (clock reading) — **Wind stage 4, second manual run: same failure; nothing published; cause not yet proven**
 - Chad, his own line: "Approve: run /admin/run/wind once more on hub 0.6.16 (second attempt at the first wind publication: …; WIND_ENABLED stays unset; no schedule, no merge)".
 - **Run once, 14:22:28.960–14:23:03.576 UTC**, from the pane, served from Johannesburg (ray `a5b725e6fd31a147-JNB`). Answer: `wind:down field body unreadable`, 34.8 s. Run row: "field body unreadable — 2026111606 u10m TimeoutError: The operation was aborted due to timeout". **Identical to the first attempt: the first field answers 206 with the right headers, then its body does not finish in 30 s.**
