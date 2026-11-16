@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 02:25 UTC (clock reading) — **Night lights: GPT's live desktop Chrome smoke passed, with one brief Sky transition issue** (GPT's report, relayed by Chad; no change made)
+- **Earth globe (GPT saw):** the night texture rendered, with visible lights and patterned no-data areas; the NOAA-20 frame for 14 Nov 2026 UTC; 15 and 16 Nov marked as still arriving.
+- **Sky (GPT saw):** the night texture and its date carried into the zoom-out view; Back to Earth worked. **Issue:** after switching Night lights off and immediately re-entering Sky, the label switched to the daytime imagery before the daytime texture appeared; the picture caught up on its own.
+- **Saipan and Tinian (GPT saw):** both comparison pictures rendered; 57%, 92% and 50%; the arrow-key readout worked and withheld the light value at a pixel with no reliable comparison.
+- **Claude's reading of the issue, from the code, not reproduced:** on switch-off `restore()` hands the true-colour address back to the globe and rewrites the imagery line and the Sky label in the same step, while the globe loads that picture over the network afterwards. For that moment the label names a picture that is not yet drawn. It is not specific to the Sky view. Switch-on does not have it: the label changes only after the night picture is ready. No fix proposed or built yet.
+- **Still open:** real phone, Safari, screen reader. Chad's own look. The REGISTER "observed" request count (one or two; three seen on 16 Nov).
+
 ## 16 Nov 02:18 UTC (clock reading) — **Night lights LIVE** (page merge `20bff7c`; REGISTER lines filed `a27e39d`; no hub change)
 - GPT (relayed by Chad): round 4 passes independent review at branch `8f6342a`; hashes matched; logic 49 of 49; the key-timeout path rerun; REGISTER draft rev 2 ready to file. GPT ran no fresh live smoke and no real-device Safari test.
 - Chad, his own lines: "Approve: file the two GIBS Night lights layer lines in REGISTER (draft reviews/2026-11-15-night-lights-register-draft.md rev 2)" and "Approve: merge night-lights-rc at <reviewed head> to main (page change: Night lights layer and two-night comparison)". **The merge line carried the placeholder `<reviewed head>` unfilled.** Claude read it as `8f6342a`, the only head GPT reviewed and the one GPT named in the same message, and told Chad so before acting.
