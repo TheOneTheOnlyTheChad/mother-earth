@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 19:31 UTC (clock reading) — **Wind by height is live: `wind-rc` merged to main**
+- Chad, his own line: "Approve: merge wind-rc f602595 to main (Wind by height goes live on the page with the Natural Earth outline; main's hub file becomes the live 0.6.17; no hub deploy)". **GPT had passed rev 8 and the hub bytes; no GPT look at rev 9 (release asset versions, Sources copy) was relayed before the merge.**
+- **Merged `f6025953eb84b683932f24b56caf07c2672a7c81` into main as `6bdfd97`** (merge commit, no conflicts), **pushed 19:29:14 UTC**. On main after the merge: `phase1/worker.js` sha256 `59129514…e93e` (the live 0.6.17: **main is the live hub again**); `assets/coast-50m.bin` `f3cda6be…fdfe`; both REGISTER entries present; `wind-hub` 103, `history-hub` 33, `timeline-changes-build` 45 passed.
+- **Live site read from the pane, 19:31:17 UTC** (`theonetheonlythechad.github.io/mother-earth/`): the Wind card is there; `wind.js?v=202612121500` served and hashes to main's file (`6648fb51…426d`); `style.css?v=202612121500`; the coastline file served with the right hash; Sources has the Wind section without "preview". **Nothing asked of the hub for wind before the switch. Wind on:** run 2026111612, valid 12:00 UTC, opacity 0.8, outline in the scene (701 lines); all three heights loaded with the outline kept; Cape Town reading "From south-east (152°), 47 km/h · Near ground · model cell 34°S 18°E". Wind then left off.
+- **No hub deploy.** Hub unchanged: 0.6.17, `WIND_ENABLED=1`.
+- **Not done:** GPT's live desktop smoke; phone, Safari, screen reader (deferred); colour scale still marked provisional; stale threshold not set; branch `wind-rc` not deleted (Chad's). Mac main copy: changed text files synced; the binary coastline file is not copied to the Mac's main copy (text-only rule), it is in `_review/wind-rc/assets/`.
+- **Rollback (own Approve line):** revert merge `6bdfd97` on main (the page loses the Wind card; the hub keeps collecting until `WIND_ENABLED` is deleted).
+
 ## 16 Nov 19:27 UTC (clock reading) — **First scheduled wind run published 12z; the open page moved to it without a reload** — stage 5 verified
 - **Hub, hourly job of 19:07 UTC** (scheduled, version `045733da`): wind row ok, "run 2026111612 published; index first seen 19:08:25.373Z; fields fetched 19:08:28.433Z; published 19:08:32.645Z; 9 requests", 3 records, 4,783,522 bytes. swpc, co2, drifters and sunface rows ok in the same job. **Cloudflare's invocation log: outcome ok, 745 ms CPU, 34,303 ms wall for the whole hourly job** (146 ms CPU without wind at 14:07). The wind part took about 7 s from index to publication.
 - **Manifest, read 19:12:43 UTC:** `current` run 2026111612, valid 2026-11-16T12:00:00Z, object 502,892,274 bytes, ETag `"53487450…2aac"`; `previous` run 2026111606; `last_attempt` null; `seen` null.
