@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 10:58 UTC (clock reading) — **Global Wind: Worker probe run and passed; temporary Worker deleted** (hub, schedules, R2, D1 and page untouched)
+- Chad, his own line: "Approve: create temporary Worker mother-earth-wind-probe from commit a6bf84f (…; no bindings, no schedule, no storage), run the read-only wind probe once with the probe key, then delete the Worker".
+- Created 10:56:36 UTC from the pane (file hash checked first), one keyed run 10:57:06–10:57:19 UTC, deleted 10:57:56 UTC. The account again holds only `mother-earth`; hub answered 0.6.15.
+- **Result:** the Worker reached NOAA's mirror from Johannesburg; six message hashes and all three grid hashes equal the workspace's; **1,085 ms CPU, 13,008 ms wall, outcome ok** (Cloudflare's invocation log). Requests without the key: 404, 0 ms CPU.
+- Record: `docs/research/GLOBAL-WIND-GATE-2026-11-16.md` §11. Next: GPT's review; then Chad's decision on a private preview (collector and layer on a branch). Nothing is built.
+
 ## 16 Nov 10:53 UTC (clock reading) — **Global Wind: probe Worker rev 2 (key required, run pinned); still not deployed** (research files only)
 - GPT (relayed by Chad): decoder hardening passes. The probe file at `6d83d1f` accepted unauthenticated requests for any valid run before expiry (GPT: two calls, 16 upstream requests).
 - **Probe rev 2** (`docs/research/global-wind-gate/probe-worker.mjs`, sha256 `2d4dceca…fbcd`): the run is fixed to 2026111600; a request needs the probe key (only its SHA-256 is in the file); anything else gets 404 with no upstream request. Access test in the gate record §10: nine callers, only the keyed one fetches. Not deployed; needs Chad's own Approve line naming the new commit.

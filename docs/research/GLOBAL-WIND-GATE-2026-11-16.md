@@ -121,3 +121,31 @@ GPT tested the Worker file from `6d83d1f` on the Mac with the fetches simulated 
 | right key | 200 | 8; the three grid hashes match §4 |
 
 Claude's first build of rev 2 had an empty key (the key-making command was missing from the workspace). The access test showed it at once (the right-key call returned 404); the key was remade and the file rebuilt. That build was never committed.
+
+## 11. The Worker probe, run — written 10:58 UTC (clock reading)
+
+Run on Chad's own line: "Approve: create temporary Worker mother-earth-wind-probe from commit a6bf84f (docs/research/global-wind-gate/probe-worker.mjs, sha256 2d4dceca…fbcd; no bindings, no schedule, no storage), run the read-only wind probe once with the probe key, then delete the Worker". Done from the browser pane's signed-in Cloudflare tab; the session's check let all three steps through.
+
+**Result: pass. A Cloudflare Worker reached the mirror, decoded the run and produced the same three grids as the workspace, in about 1.1 s of CPU.**
+
+| Step | Time (UTC, clock) | Evidence |
+|---|---|---|
+| Source checked | 10:56:23 | file fetched from GitHub at `a6bf84f`, sha256 `2d4dceca…fbcd` matched; account held one Worker, `mother-earth` |
+| Worker created | 10:56:36 | `mother-earth-wind-probe`; handlers `fetch` only; bindings none; schedules none; logs on; workers.dev address on, previews off |
+| No key | 10:56:58, 10:57:06 | three requests without the key: 404, 0 ms CPU, no upstream request |
+| **Keyed run (one)** | 10:57:06–10:57:19 | status 200, served from Johannesburg (ray `a5b5f90f6abe73d6-JNB`) |
+| Worker deleted | 10:57:56 | delete answered success; account again holds only `mother-earth`; the address now returns Cloudflare's own 404; hub answered as 0.6.15 |
+
+**The keyed run:**
+- Run `gfs.20261116/00`, same object (ETag `e85c7642…`, 500,418,863 bytes) and same index (sha256 `ffc4e74b…b146`) as §1. Eight upstream requests to one host.
+- **Six message hashes equal §1's** (`10b5602745b7`, `e7ec0160867f`, `7d1db1dea9e3`, `b84f60e543c9`, `83ff8d385f24`, `0d1261163e81`). Every range response passed the before-body check.
+- **Three grid hashes equal the workspace's in full:** near ground `515452c6…ba62`, 250 hPa `5e37bfa3…4110`, 10 hPa `cf721ec0…923e`. 260,640 bytes each.
+- **CPU and wall, from Cloudflare's invocation log (not from the Worker): 1,085 ms CPU, 13,008 ms wall, outcome "ok".** GPT's cited limits: 30 s CPU, 128 MB.
+- Wall time as the Worker saw it: 12,817 ms in all; index and object check 2,269 ms; the six range fetches 1,162, 2,480, 335, 2,260, 2,190 and 2,121 ms. Nearly all the wall time is waiting on the mirror.
+- **Memory:** the runtime reports no figure. The evidence is the outcome "ok" (not an over-limit outcome) on a run that held one decoded field at a time.
+
+**CPU was about 3.5 times the workspace figure** (1,085 ms against about 300 ms in Node). It includes SHA-256 of the six messages and three grids and the 4 MB of response handling, which the Node figure did not; the split was not measured.
+
+**Still not tested:** a second run, and any run with different packing; several days of complete-run availability; the same work inside a scheduled run of the hub alongside its other jobs; R2 writes; reuse terms; anything on the page. One invocation is one sample of CPU and wall time.
+
+The probe key was used for the one request and has been deleted from Claude's workspace. Nothing was written to Cloudflare beyond the temporary Worker, which is gone. Hub, schedules, R2, D1 and the page were not touched.
