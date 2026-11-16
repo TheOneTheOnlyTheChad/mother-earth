@@ -16,7 +16,8 @@
   const ME = window.ME; if (!ME) return;
   const $ = ME.$, esc = ME.esc;
   const tgl = $('tgl-wind'); if (!tgl) return;
-  const WD = { META: ME.HUB + '/snapshot/wind/meta', HIDE_AFTER_H: 24, REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, ALT: 0.0009, OPACITY: 0.8,
+  // OPACITY 0.5 is a preview value (16 Nov): at 0.8 the coastline was lost under the sheet (GPT's look in Chrome). Not settled.
+  const WD = { META: ME.HUB + '/snapshot/wind/meta', HIDE_AFTER_H: 24, REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, ALT: 0.0009, OPACITY: 0.5,
     W: 360, H: 181, BYTES: 360 * 181 * 4, MISSING: -32768, PX: 8, PX_PHONE: 4, CALM_KMH: 1, ARROW_STEP: 5, ARROW_MAX_LAT: 80, ARROW_LEN: 2.1, BUILD_WAIT_MS: 60000,
     LEVELS: [{ id: 'near-ground', label: 'Near ground', where: '10 m above the model’s surface' }, { id: '250hPa', label: 'Jet-stream height', where: '250 hPa, roughly 10–11 km' }, { id: '10hPa', label: 'Stratosphere', where: '10 hPa, roughly 30 km' }],
     // One fixed scale for all three heights, in km/h. PROVISIONAL: to be frozen from real revisions in the preview. Each band is [from, colour].
