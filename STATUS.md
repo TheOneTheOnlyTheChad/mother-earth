@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 08:25 UTC (clock reading) — **Global Wind by Height: brief filed, proposal rev 1 written for GPT** (docs only; nothing built)
+- Chad brought the spec (`docs/concepts/GLOBAL-WIND-BRIEF.md`, filed as received): an optional Wind layer at three heights from NOAA GFS, global. Chad on a plainly modelled layer on the globe: "i am happy with 2". Then "go" for a docs-only proposal.
+- **`docs/concepts/GLOBAL-WIND-PROPOSAL.md` rev 1.** Six changes to the brief's route: decode in the hub, not with desktop tools; start from the 0.25° product because NOAA's notice of 16 Apr 2026 (PNS 26-30, read through a fetch summary) proposes removing the 1° files with GFS v17; set the stale line from measured arrival times; colour and static arrows first; desktop only; the page's existing state words. Its §3 marks which source facts were read today and which were not.
+- Nothing downloaded, decoded or built. Next: GPT's review; then Chad's W1–W7. The first gate (one real run, research only) needs Chad's go.
+
 ## 16 Nov 08:15 UTC (clock reading) — **Aircraft: home ADS-B receiver receiving; OpenSky registration not done** (docs only; aircraft stays parked)
 - Relayed by Chad (his and GPT's setup; nothing here was seen by Claude). The Raspberry Pi 4 runs ADS-B Feeder Image v3.0.15 stable on the home network; station name TheOneTheOnlyTheChad; ADS-B only; antenna at the airport-facing window. Position and altitude are in Chad's private setup note, never in this repo.
 - **Local reception reported working:** map 21 aircraft, 15 with positions, about 115 messages a second; homepage 116 messages a second, 22 position updates a second, 25 aircraft seen today. A first "1090 container is down" warning cleared on refresh.
