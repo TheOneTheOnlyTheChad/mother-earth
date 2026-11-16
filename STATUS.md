@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 14:30 UTC (clock reading) — **Wind stage 4: the one manual run failed safely; nothing published**
+- Chad, his own line: "Approve: run /admin/run/wind once on hub 0.6.16 (first wind publication: about 8 requests and 4 MB from NOAA's mirror, three grids and a manifest written under wind/ in R2; WIND_ENABLED stays unset; no schedule, no merge)".
+- **Run once, 14:19:53.754–14:20:29.691 UTC**, from the pane (the Mac shell's proxy refuses the hub address, 403 on CONNECT). Hub answered as 0.6.16 and the manifest was empty immediately before. Answer: `{"job":"wind","result":"wind:down field body unreadable","wall_ms":36138}`.
+- **What happened:** the collector chose run `2026111606` (index first seen 14:19:56.355), the object check passed, the first field (u at 10 m) answered 206 and passed the before-body check, and then **its body did not finish inside the 30-second request limit** (run row: "field body unreadable — 2026111606 u10m TimeoutError: The operation was aborted due to timeout"). The collector stopped there, as written. Three upstream requests made (index, object check, one field).
+- **State after (read back 14:20–14:22):** manifest `current` null, `previous` null; `last_attempt` down, reason "field body unreadable", http 206, run 2026111606, started 14:19:53.754, failed 14:20:28.462, consecutive_failures 1; `seen` run 2026111606 at 14:19:56.355. Run row and manifest agree. **No grid published; the page layer has nothing to draw.** `WIND_ENABLED` still unset; no schedule or merge.
+- **Not known:** why the body stalled. The probe this morning read the same kind of field from the same mirror in 0.3–2.5 s each (six fields, 13 s in all, served from Johannesburg). One stalled transfer is one sample; whether it repeats is untested. Which Cloudflare location served this run was not read.
+- **Not done:** the hash check of served grids and the ecCodes comparison (nothing was served). **The approval covered one run and is spent**; a second attempt needs Chad's own line.
+- Seen in passing, not wind: a ships row at 14:20:03 is "down: websocket error", the same note as rows at 12:14 and 12:45 today, before the deploy; the 13:48 row was ok.
+
 ## 16 Nov 14:10 UTC (clock reading) — **Hub 0.6.16 deployed (wind collector present, `WIND_ENABLED` unset)** — stage 3 of the wind preview
 - GPT (relayed by Chad): `wind-rc` rev 3 passes re-review; reviewed Worker sha256 `74c0af40d7c81f123ff36d0304b6eeb575351b93c3baef6e7ccf3498ba1c8158`; all 489 files of the Mac export matched the hash list for `ad83cae`.
 - Chad, his own line: "Approve: deploy hub 0.6.16 from wind-rc ad83cae (phase1/worker.js sha256 74c0af40…8158; WIND_ENABLED unset, so no NOAA request and nothing written; no schedule change, no merge)".
