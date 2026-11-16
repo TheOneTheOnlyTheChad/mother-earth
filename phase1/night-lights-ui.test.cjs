@@ -10,6 +10,10 @@
  *   more breaks: no-sky-hook no-timeout hang-as-arriving blank-silent coarse-silent
  * Round 4 (GPT round 3, 16 Nov): a comparison whose key request hangs fails once, at once, and never writes over a newer Compare (section K2).
  *   more breaks: cmp-key-refetch
+ * Round 5 (GPT's live smoke, 16 Nov): on switch-off the imagery line and the Sky label change when the earlier picture is on the globe, not before (section S2).
+ *   more breaks: label-early ready-early
+ * Rounds 6 and 7 (GPT's holds, 16 Nov): a superseded picture load cannot go on the globe in either direction, and a night picture's wording carries that picture's own date (section S3).
+ *   more breaks: no-gate date-stale
  * Round 2 (GPT round 1, 15 Nov): the 1% rule is applied to the 2048 × 1024 frame that is displayed, not only to the probe (section R).
  */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const http = require('http'); const { PNG } = require('pngjs');
@@ -22,7 +26,11 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 20 min'); proces
 const BREAKS = {
   'eager': [['  paint();\n})();', '  paint(); const iv = setInterval(() => { if (ME.globe && ME.globe()) { clearInterval(iv); setOn(true); } }, 50);\n})();']],
   'date-mismatch': [["    st.date = pick.date; st.status = 'ready';", "    st.date = results[0].date; st.status = 'ready';"]],
-  'no-restore': [["    try { const g = ME.globe && ME.globe(); if (g && st.prevUrl != null) g.globeImageUrl(st.prevUrl); } catch (_) { }", '']],
+  'no-restore': [["    g.globeImageUrl(st.prevUrl); st.want = href(g.globeImageUrl()); st.prevUrl = null;", "    st.want = href(g.globeImageUrl()); st.prevUrl = null; landed(st.want);"]],
+  'label-early': [["    st.blobUrl = null; st.restoring = true;\n", "    st.blobUrl = null; st.restoring = true; label(null);\n"]],
+  'ready-early': [["    while (gen === st.gen && st.nightOn !== mine && performance.now() - t1 < wait) await sleep(30);\n    if (gen !== st.gen) return;\n    if (st.nightOn !== mine) return stop('Night lights could not be drawn in this browser. Nothing is drawn.');\n", "    label(pick.date);\n"]],
+  'no-gate': [["      if (src && ((ours && src !== st.want) || (st.want && src !== st.want))) {", "      if (false) {"]],
+  'date-stale': [["    if (!st.saved || st.labelFor === (date || '')) return;", "    if (!st.saved || !!st.labelFor === !!date) return;"]],
   'nodata-dark': [["if (v[i] >= 0) continue; const p = ((x >> 3) + (y >> 3)) & 1 ? b : a; d[i * 4] = p[0]; d[i * 4 + 1] = p[1]; d[i * 4 + 2] = p[2]; d[i * 4 + 3] = 255; }", "if (v[i] >= 0) continue; d[i * 4] = 0; d[i * 4 + 1] = 0; d[i * 4 + 2] = 0; d[i * 4 + 3] = 255; }"]],
   'panel-own-state': [["    if (okA) drawPanel(cmpEl('cv-a'), res.a, res.states || res.one, res.w, res.h);", "    if (okA) drawPanel(cmpEl('cv-a'), res.a, classifyOne(res.a.light, res.a.clear, NL.THRESH_H), res.w, res.h);"]],
   'value-when-withheld': [["        : s === NOREL ? `${where} · No reliable comparison: clear-sky confidence is below 0.95, or absent, on at least one night. No light value is shown.`", "        : s === NOREL ? `${where} · No reliable comparison · ${dayText(c.a.date)}: ${lightText(c.a.light[i])} ${NL.UNITS}`"]],
@@ -67,7 +75,7 @@ const RECBOX = '14.85,145.45,15.35,145.95', recPng = k => Buffer.from(REC.frames
 const T_NOW = Date.parse('2026-11-15T16:00:00Z');
 const SKY_R1 = fs.readFileSync(path.join(ROOT, 'phase1/sky/catalogue/sky-2026-11-R1.json'), 'utf8'), SKY_SC = fs.readFileSync(path.join(ROOT, 'phase1/sky/catalogue/sky-scene-2026-11-R1.json'), 'utf8');   // the committed Sky files, as sky-zoom-ui serves them
 
-const newGibs = () => ({ reqs: [], globalFull: {}, global: { '2026-11-15': 'filling', '2026-11-14': 'complete', '2026-11-13': 'complete', '2026-11-12': 'complete' }, fault: {}, hold: null, keyFault: null });
+const newGibs = () => ({ holdBackdrop: null, reqs: [], globalFull: {}, global: { '2026-11-15': 'filling', '2026-11-14': 'complete', '2026-11-13': 'complete', '2026-11-12': 'complete' }, fault: {}, hold: null, keyFault: null });
 async function setup(browser, gibs, opts = {}) {
   const ctx = await browser.newContext({ viewport: opts.viewport || { width: 1280, height: 900 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
   await ctx.route('**/unpkg.com/globe.gl**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: GLOBE_JS }));
@@ -80,7 +88,7 @@ async function setup(browser, gibs, opts = {}) {
       if (gibs.keyFault) return route.fulfill({ status: gibs.keyFault, headers: cors, body: 'no' });
       return KEYS[n] ? route.fulfill({ status: 200, contentType: 'text/xml', headers: cors, body: KEYS[n] }) : route.fulfill({ status: 404, headers: cors, body: '' }); }
     const layer = q.get('LAYERS') || '';
-    if (!/DayNightBand_At_Sensor_Radiance|Clear_Sky_Confidence_Night/.test(layer)) return route.fulfill({ status: 200, contentType: 'image/png', headers: cors, body: BACKDROP });   // the true-colour backdrop
+    if (!/DayNightBand_At_Sensor_Radiance|Clear_Sky_Confidence_Night/.test(layer)) { if (gibs.holdBackdrop) await gibs.holdBackdrop; return route.fulfill({ status: 200, contentType: 'image/png', headers: cors, body: BACKDROP }); }   // the true-colour backdrop
     const kind = /Radiance/.test(layer) ? 'light' : 'clear', date = q.get('TIME'), box = q.get('BBOX'), w = +q.get('WIDTH'), h = +q.get('HEIGHT');
     const tag = `${kind}:${date}:${box}:${w}x${h}`; if (route.request().method() === 'GET') gibs.reqs.push(tag);
     if (gibs.hold) await gibs.hold;
@@ -119,7 +127,7 @@ async function setup(browser, gibs, opts = {}) {
 }
 const st = page => page.evaluate(() => ME.nightLights.state());
 const nl = gibs => gibs.reqs.slice();
-const toggle = async page => { await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status !== 'loading', null, { timeout: 30000 }); };
+const toggle = async page => { await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => { const s = ME.nightLights.state(); return s.status !== 'loading' && !s.restoring; }, null, { timeout: 30000 }); };
 const txt = (page, sel) => page.$eval(sel, e => e.textContent.replace(/\s+/g, ' ').trim());
 const backdrop = page => page.evaluate(() => ME.globe().globeImageUrl());
 const texPx = (page, pts) => page.evaluate(async pts => { const u = ME.globe().globeImageUrl(), bm = await createImageBitmap(await (await fetch(u)).blob()); const c = new OffscreenCanvas(bm.width, bm.height), g = c.getContext('2d'); g.drawImage(bm, 0, 0);
@@ -292,6 +300,25 @@ let BASE;
     ok('T the default wait limit is 20 seconds', await page.evaluate(() => ME.nlLogic.NL.WAIT_MS) === 20000);
     await ctx.close(); }
 
+  // ===== V. a refused load does not blank the globe: the picture in place is still what is rendered (pixels read from the globe's canvas)
+  { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs);
+    await page.evaluate(() => { ME.globe().renderer().domElement.id = 'nl-test-gl'; const g = ME.globe(), real = g.globeImageUrl; let n = 0; g.globeImageUrl = function (u) { return arguments.length ? real.call(g, /^blob:/.test(u) ? u : u + '&nlhold=' + (++n)) : real.call(g); }; });
+    const centre = async () => { await page.waitForTimeout(700); const p = PNG.sync.read(await (await page.$('#nl-test-gl')).screenshot()); const c = [0, 0, 0]; let k = 0;
+      for (let y = (p.height >> 1) - 12; y < (p.height >> 1) + 12; y++) for (let x = (p.width >> 1) - 12; x < (p.width >> 1) + 12; x++) { const i = (y * p.width + x) * 4; c[0] += p.data[i]; c[1] += p.data[i + 1]; c[2] += p.data[i + 2]; k++; } return c.map(s => Math.round(s / k)); };
+    const far = (a, b) => Math.max(...a.map((s, i) => Math.abs(s - b[i])));
+    const pxDay = await centre(); await toggle(page); const pxNight = await centre();
+    ok('V the rendered globe differs between the true-colour picture and night lights (so the next two checks mean something)', far(pxDay, pxNight) > 25, [pxDay, pxNight]);
+    let rel; gibs.holdBackdrop = new Promise(r => rel = r);
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'off');
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'ready', null, { timeout: 30000 });
+    const n0 = (await st(page)).gate.rejected.length; rel(); gibs.holdBackdrop = null; await page.waitForFunction(n => ME.nightLights.state().gate.rejected.length > n, n0, { timeout: 20000 });
+    const pxAfter = await centre();
+    ok('V after a late daylight load is refused, the globe still renders the night picture', far(pxAfter, pxNight) <= 12 && far(pxAfter, pxDay) > 25, [pxAfter, pxNight, pxDay]);
+    await toggle(page); const pxBack = await centre();
+    ok('V switching off then renders the true-colour picture again', far(pxBack, pxDay) <= 12, [pxBack, pxDay]);
+    ok('V no page errors', errs.length === 0, errs);
+    await ctx.close(); }
+
   // ===== S. the Sky zoom-out view names the picture that is drawn (round 3, GPT detail 1)
   { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs, { clock: '2026-11-10T10:00:00Z' });
     const derived = () => page.evaluate(() => ({ zoom: document.getElementById('zoom-img').textContent, line: (document.getElementById('imgdate').textContent || '').split(' — ')[0].split(' (')[0], night: /^blob:/.test(ME.globe().globeImageUrl()), open: ME.zoomState().open }));
@@ -300,13 +327,75 @@ let BASE;
     const zoom = async open => { await page.evaluate(() => document.getElementById('tgl-zoom').click()); await page.waitForFunction(o => ME.zoomState().open === o && (!o || ME.zoomState().path), open, { timeout: 20000 }); await page.waitForTimeout(500); };
     await skyOn(); const trueColour = (await derived()).line;
     // (1) layer already on, then enter and leave
+    await page.evaluate(() => { const iv = setInterval(() => { if (ME.nightLights.state().status === 'ready') { clearInterval(iv); window.__atReady = /^blob:/.test(ME.globe().globeMaterial().map.image.src); } }, 5); });
     await toggle(page); await zoom(true); let d = await derived();
+    ok('S2 at the moment the layer reads ready, the picture on the globe is already the night picture', await page.evaluate(() => window.__atReady) === true);
     ok('S enter the Sky view with Night lights on: its imagery label names night lights and its date, and the globe carries that picture', d.open && d.zoom === 'Imagery: night lights 14 Nov 2026' && agree(d), d);
     await zoom(false); d = await derived();
     ok('S leave the Sky view: World View still shows and names night lights; the layer is still on', !d.open && agree(d) && d.night && (await st(page)).status === 'ready' && /night lights 14 Nov 2026/.test(await txt(page, '#imgdate')), d);
     // (2) switch it off while inside the Sky view
     await zoom(true); await toggle(page); d = await derived();
-    ok('S switch Night lights off inside the Sky view: the label returns to the true-colour picture at once', d.open && d.zoom === trueColour && !d.night && agree(d), [d, trueColour]);
+    ok('S switch Night lights off inside the Sky view: the label returns to the true-colour picture', d.open && d.zoom === trueColour && !d.night && agree(d), [d, trueColour]);
+    // (2b) S2: the label goes back WITH the picture, not before it (GPT's live smoke, 16 Nov). The true-colour picture is held.
+    // The browser keeps the true-colour picture it loaded earlier and would hand it back without asking the fixture, so each
+    // address given back to the globe is made new here; the request then reaches the fixture, which can hold it.
+    await page.evaluate(() => { const g = ME.globe(), real = g.globeImageUrl; let n = 0; g.globeImageUrl = function (u) { return arguments.length ? real.call(g, /^blob:/.test(u) ? u : u + '&nlhold=' + (++n)) : real.call(g); }; });
+    await toggle(page); await page.evaluate(() => { window.__m0 = ME.globe().globeMaterial().map; });
+    let relB; gibs.holdBackdrop = new Promise(r => relB = r);
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'off'); await page.waitForTimeout(600);
+    let h = await page.evaluate(() => ({ zoom: document.getElementById('zoom-img').textContent, line: document.getElementById('imgdate').textContent, full: document.getElementById('img-full').textContent, same: ME.globe().globeMaterial().map === window.__m0, drawnNight: /^blob:/.test(ME.globe().globeMaterial().map.image.src), s: ME.nightLights.state(), card: document.getElementById('nl-status').textContent, legendHidden: document.getElementById('nl-legend').hidden }));
+    ok('S2 switched off, the true-colour picture not yet loaded: the night picture is still on the globe, and the Sky label and both imagery lines still name night lights', h.same && h.drawnNight && h.zoom === 'Imagery: night lights 14 Nov 2026' && /night lights 14 Nov 2026/.test(h.line) && /night lights 14 Nov 2026/.test(h.full) && h.s.restoring === true && h.s.backdrop === 'night lights', h);
+    ok('S2 the layer itself reads off straight away: state off, card "Off…", legend hidden', h.s.on === false && h.s.status === 'off' && /^Off\./.test(h.card) && h.legendHidden, h);
+    relB(); gibs.holdBackdrop = null; await page.waitForFunction(() => !ME.nightLights.state().restoring, null, { timeout: 20000 });
+    h = await page.evaluate(() => ({ zoom: document.getElementById('zoom-img').textContent, same: ME.globe().globeMaterial().map === window.__m0, s: ME.nightLights.state() })); d = await derived();
+    ok('S2 when the true-colour picture is on the globe, the label and the lines go back to it', !h.same && h.zoom === trueColour && h.s.backdrop === 'unchanged' && agree(d) && !d.night, [h, d]);
+    // switched on again before the true-colour picture came back: off afterwards still restores the ORIGINAL line, not a night-lights one
+    await toggle(page); gibs.holdBackdrop = new Promise(r => relB = r);
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'off');
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'ready', null, { timeout: 30000 });
+    relB(); gibs.holdBackdrop = null; await page.waitForTimeout(400); d = await derived();
+    ok('S2 off then on again before the earlier picture arrived: night lights is drawn and named', d.zoom === 'Imagery: night lights 14 Nov 2026' && d.night && agree(d), d);
+    await toggle(page); d = await derived();
+    ok('S2 and switching off after that restores the true-colour line it started with', d.zoom === trueColour && !d.night && agree(d), [d, trueColour]);
+    // ===== S3. superseded loads, both directions (GPT's holds, 16 Nov). The globe library applies pictures in the order their loads finish.
+    const view = () => page.evaluate(() => { const s = ME.nightLights.state(), tx = id => document.getElementById(id).textContent, dt = x => (x.match(/night lights (\d+ \w+ \d+)/) || [])[1] || null;
+      return { drawn: /^blob:/.test(ME.globe().globeMaterial().map.image.src) ? 'night' : 'day', zoom: dt(tx('zoom-img')), line: dt(tx('imgdate')), full: dt(tx('img-full')), card: (tx('nl-status').match(/Showing (\d+ \w+ \d+)/) || [])[1] || null, status: s.status, date: s.date, restoring: s.restoring, pending: s.pending, backdrop: s.backdrop, acc: s.gate.accepted, rej: s.gate.rejected }; });
+    const nightOf = (v, d) => v.drawn === 'night' && v.zoom === d && v.line === d && v.full === d, allDay = v => v.drawn === 'day' && !v.zoom && !v.line && !v.full;
+    // (a) GPT round 1 of this branch: off, the daylight load held, on again, ready; then the old daylight load finishes.
+    await toggle(page); let relC; gibs.holdBackdrop = new Promise(r => relC = r);
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'off');
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'ready', null, { timeout: 30000 }); let v = await view(); const rej0 = v.rej.length;
+    ok('S3 off, daylight held, on again: ready with the night picture drawn and named while the daylight load is still out', v.status === 'ready' && nightOf(v, '14 Nov 2026') && v.card === '14 Nov 2026', v);
+    relC(); gibs.holdBackdrop = null; await page.waitForFunction(n => ME.nightLights.state().gate.rejected.length > n, rej0, { timeout: 20000 }); await page.waitForTimeout(300); v = await view();
+    ok('S3 the held daylight load then finishes, after ready, and is refused: it does not go on the globe', v.rej.length === rej0 + 1 && v.rej[v.rej.length - 1] === 'other' && v.status === 'ready', v);
+    ok('S3 the night picture, the Sky label and both imagery lines still agree', nightOf(v, '14 Nov 2026') && v.card === '14 Nov 2026', v);
+    await toggle(page); v = await view(); d = await derived();
+    ok('S3 switching off after that goes back to the true-colour picture and the line it started with', allDay(v) && d.zoom === trueColour && v.backdrop === 'unchanged', [v, d]);
+    // (b) GPT round 2, case 1: new night, old date. Daylight restoration held; a NEWER night is available at the second switch-on.
+    await toggle(page); gibs.holdBackdrop = new Promise(r => relC = r);
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'off'); v = await view();
+    ok('S3 (set-up) off with the daylight load held: the 14 Nov night picture is still drawn and still named 14 Nov', nightOf(v, '14 Nov 2026') && v.restoring === true, v);
+    gibs.global['2026-11-15'] = 'complete';
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'ready', null, { timeout: 30000 }); v = await view();
+    ok('S3 new night, old date: the newer picture (15 Nov) is on the globe and the Sky label, both imagery lines and the card all say 15 Nov', v.date === '2026-11-15' && nightOf(v, '15 Nov 2026') && v.card === '15 Nov 2026', v);
+    const rej1 = v.rej.length; relC(); gibs.holdBackdrop = null; await page.waitForFunction(n => ME.nightLights.state().gate.rejected.length > n, rej1, { timeout: 20000 }); await page.waitForTimeout(300); v = await view();
+    ok('S3 and the held daylight load, finishing now, is refused; everything still says 15 Nov', nightOf(v, '15 Nov 2026') && v.rej[v.rej.length - 1] === 'other', v);
+    gibs.global['2026-11-15'] = 'filling'; await toggle(page);
+    // (c) GPT round 2, case 2: a night picture still loading when the layer is switched off, finishing after the daylight picture has settled.
+    // Hold the night picture's own load at its last step: the picture is fetched and decoded on time, and the "loaded" notice
+    // to the globe library is delivered late. (Delaying the address instead would let the page's clean-up cancel the load.)
+    await page.evaluate(() => { const add = HTMLImageElement.prototype.addEventListener;
+      HTMLImageElement.prototype.addEventListener = function (type, fn, o) { if (type !== 'load') return add.call(this, type, fn, o); const el = this;
+        return add.call(this, type, function (e) { if (window.__holdBlob && /^blob:/.test(el.src)) setTimeout(() => fn.call(el, e), window.__holdBlob); else fn.call(el, e); }, o); }; window.__holdBlob = 2500; });
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().pending === 'night', null, { timeout: 30000 });
+    const rej2 = (await view()).rej.length;
+    await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => { const s = ME.nightLights.state(); return s.status === 'off' && !s.restoring; }, null, { timeout: 20000 }); v = await view();
+    ok('S3 (set-up) switched off while the night picture is still loading: the daylight picture has settled, layer off, nothing of ours left', allDay(v) && v.status === 'off' && v.backdrop === 'unchanged' && v.pending === null && v.rej.length === rej2, v);
+    await page.waitForFunction(n => ME.nightLights.state().gate.rejected.length > n, rej2, { timeout: 20000 }); await page.waitForTimeout(300); v = await view();
+    ok('S3 late night load after switch-off: it finishes after the daylight picture settled and is refused; the globe still carries daylight, the layer says off, the labels name daylight', v.rej[v.rej.length - 1] === 'night' && allDay(v) && v.status === 'off' && d.zoom === trueColour, v);
+    await page.evaluate(() => { window.__holdBlob = 0; }); await toggle(page); v = await view();
+    ok('S3 and the layer still switches on normally afterwards', v.status === 'ready' && nightOf(v, '14 Nov 2026'), v);
+    await toggle(page);
     // (3) switch it on inside the Sky view, while it is still loading
     let release; gibs.hold = new Promise(r => release = r);
     await page.evaluate(() => document.getElementById('tgl-nl').click()); await page.waitForFunction(() => ME.nightLights.state().status === 'loading'); d = await derived();

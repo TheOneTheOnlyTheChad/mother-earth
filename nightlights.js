@@ -120,7 +120,7 @@
   ME.nlLogic = logic;
 
   // ---------- state
-  const st = { on: false, gen: 0, status: 'off', why: null, date: null, arriving: [], prevUrl: null, blobUrl: null, saved: null,
+  const st = { on: false, gen: 0, status: 'off', why: null, date: null, arriving: [], prevUrl: null, blobUrl: null, saved: null, restoring: false, nights: new Map(), want: null, nightOn: null, blob: null, labelFor: null, gated: false, gate: { accepted: [], rejected: [] },
     missing: null, bytes: {}, timings: {}, requests: [], keys: {}, cmp: null, cmpGen: 0, cur: null, opts: { now: null, waitMs: null } };
   const now = () => st.opts.now != null ? st.opts.now : Date.now();
   const waitMs = () => st.opts.waitMs != null ? st.opts.waitMs : NL.WAIT_MS;
@@ -197,12 +197,53 @@
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; if (v[i] >= 0) continue; const p = ((x >> 3) + (y >> 3)) & 1 ? b : a; d[i * 4] = p[0]; d[i * 4 + 1] = p[1]; d[i * 4 + 2] = p[2]; d[i * 4 + 3] = 255; }
     g.putImageData(img, 0, 0); return c;
   }
-  function restore() {
-    try { const g = ME.globe && ME.globe(); if (g && st.prevUrl != null) g.globeImageUrl(st.prevUrl); } catch (_) { }
-    if (st.saved) { const a = $('imgdate'), b = $('img-full'); if (a) a.innerHTML = st.saved.imgdate; if (b) b.textContent = st.saved.full; }
-    if (st.blobUrl) { try { URL.revokeObjectURL(st.blobUrl); } catch (_) { } }
-    st.prevUrl = null; st.blobUrl = null; st.saved = null;
+  // ---- the picture on the globe and its wording (GPT, 16 Nov: three rounds of findings)
+  // The globe library puts a picture on the globe when its load FINISHES, whatever has been asked for since, so an old
+  // load can land over a newer picture. Two rules close that, in both directions:
+  // 1. A gate on the globe's own material. While this layer has asked for a picture (st.want), no other picture is let
+  //    onto the globe; and a night picture of ours that has been retired is never let on, however late it lands.
+  // 2. The wording is written at the moment a picture is let through, from that picture: a night picture carries its
+  //    own date; anything else gets the wording saved before the layer first touched the line.
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const href = u => { try { return new URL(u, location.href).href; } catch (_) { return String(u); } };
+  const note = (list, kind) => { list.push(kind); if (list.length > 40) list.shift(); };
+  const nightWording = date => { const dt = dayText(date), full = `Imagery: night lights ${dt} (NASA GIBS, VIIRS ${NL.SAT}) — light measured at night on that UTC date, not live · patterned areas: no data`;
+    return { imgdate: `<span class="img-long">${esc(full)}</span><span class="img-short">Night lights ${esc(dt.slice(0, dt.length - 5))}<br>${esc(NL.SAT)} · not live</span>`, full }; };
+  function label(date) {   // date: the UTC date of the night picture now on the globe, or null for the earlier picture
+    if (!st.saved || st.labelFor === (date || '')) return;
+    const a = $('imgdate'), b = $('img-full'), w = date ? nightWording(date) : st.saved;
+    if (a) a.innerHTML = w.imgdate; if (b) b.textContent = w.full; st.labelFor = date || '';
     if (typeof ME.zoomImgLabel === 'function') ME.zoomImgLabel();   // the Sky zoom-out view names the picture that is drawn
+  }
+  function gate(g) {
+    if (st.gated) return; const m = g.globeMaterial(); let cur = m.map;
+    Object.defineProperty(m, 'map', { configurable: true, enumerable: true, get: () => cur, set: v => {
+      const src = v && v.image && v.image.src ? href(v.image.src) : null, ours = !!src && st.nights.has(src);
+      if (src && ((ours && src !== st.want) || (st.want && src !== st.want))) {   // a superseded load: it does not go on the globe
+        note(st.gate.rejected, ours ? 'night' : 'other'); try { v.dispose(); } catch (_) { }
+        if (cur) cur.needsUpdate = true;   // the library has just released the picture in place; have it drawn again
+        return;
+      }
+      cur = v; note(st.gate.accepted, ours ? 'night' : 'other'); landed(src);
+    } });
+    st.gated = true;
+  }
+  function landed(src) {   // a picture has just gone on the globe
+    if (!src || src !== st.want) return;
+    if (st.nights.has(src)) { st.nightOn = src; label(st.nights.get(src)); return; }
+    // the earlier picture is back: the wording goes back with it, and the layer lets go of the globe
+    label(null); st.want = null; st.nightOn = null; st.restoring = false; st.saved = null; st.labelFor = null; st.blob = null;
+    for (const u of st.nights.keys()) { try { URL.revokeObjectURL(u); } catch (_) { } }   // the addresses stay in st.nights, so a late load of one is still refused
+  }
+  // Switching off. The layer reads off at once; the earlier picture is asked for; the wording changes when it lands.
+  function restore() {
+    let g = null; try { g = ME.globe && ME.globe(); } catch (_) { }
+    if (!st.saved || st.restoring || !g) {
+    if (typeof ME.zoomImgLabel === 'function') ME.zoomImgLabel();   // the Sky zoom-out view names the picture that is drawn
+      return;
+    }
+    st.blobUrl = null; st.restoring = true;
+    g.globeImageUrl(st.prevUrl); st.want = href(g.globeImageUrl()); st.prevUrl = null;   // from here a night picture still loading is refused when it lands
   }
   async function setOn(on) {
     if (on === st.on) return;
@@ -238,14 +279,18 @@
     const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
     if (gen !== st.gen) return;
     if (!blob) return stop('Night lights could not be drawn in this browser. Nothing is drawn.');
-    const g = ME.globe(); st.prevUrl = g.globeImageUrl(); st.blobUrl = URL.createObjectURL(blob);
-    const a = $('imgdate'), b = $('img-full'); st.saved = { imgdate: a ? a.innerHTML : '', full: b ? b.textContent : '' };
+    const g = ME.globe(), a = $('imgdate'), b = $('img-full'); gate(g);
+    if (st.restoring) { st.prevUrl = st.want; st.restoring = false; }   // switched on again before the earlier picture came back: keep its address and the wording saved before; its load is refused if it lands now
+    else { st.prevUrl = g.globeImageUrl(); st.saved = { imgdate: a ? a.innerHTML : '', full: b ? b.textContent : '' }; st.labelFor = ''; }
+    st.blob = blob; st.blobUrl = URL.createObjectURL(blob);
+    const mine = href(st.blobUrl); st.nights.set(mine, pick.date); st.want = mine;
     g.globeImageUrl(st.blobUrl);
+    // "ready" only once THIS night picture is the one on the globe; its wording was written as it went on
+    const t1 = performance.now(), wait = waitMs();
+    while (gen === st.gen && st.nightOn !== mine && performance.now() - t1 < wait) await sleep(30);
+    if (gen !== st.gen) return;
+    if (st.nightOn !== mine) return stop('Night lights could not be drawn in this browser. Nothing is drawn.');
     st.date = pick.date; st.status = 'ready'; st.timings.readyMs = Math.round(performance.now() - t0);
-    const dt = dayText(st.date), full = `Imagery: night lights ${dt} (NASA GIBS, VIIRS ${NL.SAT}) — light measured at night on that UTC date, not live · patterned areas: no data`;
-    if (a) a.innerHTML = `<span class="img-long">${esc(full)}</span><span class="img-short">Night lights ${esc(dt.slice(0, dt.length - 5))}<br>${esc(NL.SAT)} · not live</span>`;
-    if (b) b.textContent = full;
-    if (typeof ME.zoomImgLabel === 'function') ME.zoomImgLabel();   // the Sky zoom-out view names the picture that is drawn
     paint();
   }
 
@@ -385,7 +430,7 @@
   ME.nightLights = {
     on: () => st.on && st.status === 'ready', setOn, compare, runCompare, logic,
     state: () => ({ on: st.on, status: st.status, why: st.why, date: st.date, arriving: st.arriving.slice(), probes: st.probes ? st.probes.map(p => ({ ...p })) : null, missing: st.missing,
-      backdrop: st.blobUrl ? 'night lights' : 'unchanged', requests: st.requests.slice(), bytes: { ...st.bytes }, timings: { ...st.timings },
+      backdrop: st.saved ? 'night lights' : 'unchanged', restoring: !!st.restoring, pending: st.want ? (st.nights.has(st.want) ? (st.nightOn === st.want ? null : 'night') : 'earlier') : null, gate: { accepted: st.gate.accepted.slice(), rejected: st.gate.rejected.slice() }, requests: st.requests.slice(), bytes: { ...st.bytes }, timings: { ...st.timings },
       compare: st.cmp ? { box: st.cmp.box, w: st.cmp.w, h: st.cmp.h, a: st.cmp.a.status, b: st.cmp.b.status, blocked: st.cmp.blocked, tally: st.cmp.tally ? { ...st.cmp.tally } : null } : null }),
     options: o => Object.assign(st.opts, o || {}),   // test aid: now (ms) pins "today" before a switch-on or a Compare
     result: () => st.cmp,                            // test aid: the decoded comparison last drawn
