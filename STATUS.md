@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 05:05 UTC (clock reading) — **night-lights-label-rc round 2: GPT's race-condition hold fixed** (branch only; nothing merged; for GPT)
+- GPT (relayed by Chad): hold `2dac540`. Off, daylight load held, on again, Ready, then the old daylight load lands over the night picture while both labels still say night lights; the globe library applies pictures in completion order. Reproduced by GPT in a harness.
+- **Branch `night-lights-label-rc`:** code head `9cd3ec3` (commit time 04:38:04 UTC), branch head `4759af1`; packet rev 2 §8. `nightlights.js` only: the wording is written from what the globe carries; a new address is not given while an earlier one of ours is loading (bounded by the 20-second limit); if an earlier load lands over the night picture anyway, the night picture is given again.
+- **Suites:** page suite 144 of 144 (section S3, six checks, including proof that the held daylight load landed while the layer read ready); its 21 breaks each fail (new: `no-reissue`, `no-serialize`); logic 49 of 49; `sky-zoom-ui` 351, `sky-ui` 79, `backdrop-layer` 27, `legend-active-ui` 548, `mobile-pass` 131, `desktop-overflow` 258; `smoke-fixes` 51 of 52 as on main.
+- **Live check 04:49–04:52 UTC (pane, github.io address, hash-checked):** GPT's case with the daylight load held 30 s: ready at 29.8 s, daylight landed at 32.8 s while ready, night picture back at 33.8 s; wording followed the picture. The pane was hidden (timers about once a second), so the daylight picture showed for about a second; in view the step is 30 ms. A first attempt with a 0.7 s limit cut off the real NASA requests and was redone.
+- Next: GPT's review; then Chad's own Approve line for the merge. Not given.
+
 ## 16 Nov 03:41 UTC (clock reading) — **night-lights-label-rc built: the imagery label follows the picture drawn** (branch only; nothing merged; for GPT)
 - Chad: "go". Branch `night-lights-label-rc`, code head `bcc4432` (commit time 03:32:29 UTC), branch head `2dac540`; packet `reviews/2026-11-16-night-lights-label-rc.md`.
 - **Fix (`nightlights.js`; cache key in `index.html`):** on switch-off the imagery line, its full form and the Sky label keep the night-lights wording until the globe itself carries the earlier picture; on switch-on "ready" and the wording appear only once the night picture is drawn. "Drawn" is read from the globe's material. The switch-on gap was found while writing the test; GPT had not seen it.
