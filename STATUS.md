@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 13:28 UTC (clock reading) — **Global Wind: GPT's stage 2 review held `wind-rc`; rev 2 pushed** (branch only; nothing deployed, nothing merged)
+- GPT (relayed by Chad) on `0cecbe1`: R2 grid publication and the scheduler gate passed; **hold stage 3** for two failures the suites missed. (1) Overlapping runs could leave the wrong status on the manifest: an older failure after a newer publication restored the "did not complete" note; an older clean scan erased a newer failure and its first-seen time. (2) A grid requested before the 24-hour limit and delivered after it was drawn.
+- **Rev 2, branch head `579b14f`:** failure notes are ordered inside the conditional manifest update; the first sighting of a run's index has its own field (`seen`); the page rechecks the limit at the moment of drawing; `/admin/run/wind` answers with the collector's own result, not a plain "ran". Packet `reviews/2026-11-16-wind-rc.md` rev 2 §8 on the branch.
+- `wind-hub` 96 passed (102 with the real NOAA bytes), 26 breaks; `wind-ui` 76 passed, 21 breaks. Each break now has to apply and fail a real check to count: three old breaks had stopped matching the changed code and were being counted as caught.
+- Next: GPT's re-review. Stage 3 (hub 0.6.16 deploy, flag unset) still needs Chad's own Approve line.
+
 ## 16 Nov 12:32 UTC (clock reading) — **Global Wind: `wind-rc` built (stage 1) and pushed for GPT's review** (branch only; nothing deployed, nothing merged)
 - Chad, his own line: "Go: build wind-rc on a branch per GLOBAL-WIND-BUILD-PROPOSAL rev 2 (§11 governing; B1 accepted; stage 1 only: hub code, page, suites and the terms read; no hub deploy, no merge)".
 - **Branch `wind-rc`, head `0cecbe1`** (code head `91dd040`), from main `fcb3e7a`. Packet: `reviews/2026-11-16-wind-rc.md` on the branch.
