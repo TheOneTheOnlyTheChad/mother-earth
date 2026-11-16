@@ -1,6 +1,7 @@
-# Night lights — the imagery label follows the picture drawn (candidate for GPT review)
+# Night lights — the imagery label follows the picture drawn (candidate for GPT review, rev 2)
 
-16 Nov 2026 · branch `night-lights-label-rc` · code head `bcc44322b83b5b924ff38df02546a947d9eaed69` (commit time 03:32:29 UTC), from main `f60fca0`
+16 Nov 2026 · branch `night-lights-label-rc` · code head `9cd3ec35f31397a1000c263e82af8ff64a8196f2` (commit time 04:38:04 UTC), from main `f60fca0`
+**Rev 2:** GPT held `2dac540` for one race condition. The fix is in §8, which governs where it differs from §1–§7. Rev 1's code head was `bcc4432`.
 **Page only. Not merged, nothing deployed, no hub change.** Built on Chad's "go" (16 Nov), after GPT's live desktop smoke.
 
 ## 1. The issue (GPT's live smoke, relayed by Chad)
@@ -80,5 +81,76 @@ The 30 ms trail is in the candidate as built. One night, one browser.
 - The label-follows-picture rule now holds for Night lights. The true-colour picture's own first load on opening the page is `app.js` and is not touched.
 
 ## 7. Line needed from Chad (not given)
+
+`Approve: merge night-lights-label-rc at <reviewed head> to main (page change: Night lights imagery label follows the picture drawn)`
+
+## 8. Round 2 — GPT's hold (relayed by Chad, 16 Nov)
+
+### 8.1 The finding
+
+GPT, with controlled texture loads: Night lights off; the daylight load held; Night lights on again; once the night picture is visible and the layer says Ready, the old daylight load finishes. It replaces the night picture while Earth and Sky keep their Night lights labels. The globe library applies each picture when its load finishes, whatever was asked for since. GPT reproduced it in a harness; Claude did not reproduce it separately before the fix. The new break `no-reissue` shows it in the suite.
+
+### 8.2 The fix (`nightlights.js` only; `index.html` unchanged from rev 1)
+
+- **One rule for the wording.** The imagery line, its full form and the Sky label say night lights exactly while the globe carries one of this layer's night pictures, and the earlier wording while it carries anything else. One function reads what is drawn and writes that, every 30 ms while the layer has anything on the globe or on its way.
+- **One load at a time.** A new address is not given to the globe while an earlier one of ours is still loading. Switched on again while the daylight picture is on its way back, the layer stays "loading" until that picture has landed, then gives the night picture. Switched off while the night picture is still landing, the daylight address is given once it has. Each wait is bounded by the 20-second limit.
+- **If an earlier load lands over the night picture all the same** (the wait ran out first): the wording follows it to the daylight wording, and the night picture is given to the globe again under a new address. When it lands the wording is night lights again.
+- While the layer is off and settled, nothing is watched or re-given.
+
+### 8.3 The test GPT asked for: section S3, six checks
+
+Every picture the globe takes is logged as it lands, with the layer's state at that moment.
+
+| Check | Pass |
+|---|---|
+| (a) Off, daylight held, on again; 1.5 s later | the layer is still loading; nothing new has landed; picture and all three wordings are still night lights |
+| (a) Daylight released | the daylight picture lands first (while loading), then the night picture; at ready everything says night lights |
+| (b) GPT's case: wait limit 0.7 s, daylight held past it | the layer reaches ready with the night picture drawn and named; the daylight load has not landed |
+| (b) Daylight released | **the held daylight load lands on the globe while the layer reads ready** (this is the proof it completed after Ready) |
+| (b) After that | the night picture is put back; the picture, the Sky label and both imagery lines say night lights |
+| Off | the true-colour picture and the line it started with |
+
+Breaks: `no-reissue` (the night picture is not given again) fails 2 and stops the suite; `no-serialize` (no wait for the pending load) fails 3.
+
+### 8.4 Results at `9cd3ec3`
+
+| Suite | Result |
+|---|---|
+| `night-lights-ui.test.cjs` | **144 passed, 0 failed** (138 + 6) |
+| its 21 breaks | each fails the suite |
+| `night-lights.test.mjs` | 49 passed, 0 failed |
+| `sky-zoom-ui` 351 · `sky-ui` 79 · `backdrop-layer` 27 · `legend-active-ui` 548 · `mobile-pass` 131 · `desktop-overflow` 258 | pass |
+| `smoke-fixes` | 51 of 52, as on main |
+| others | not rerun |
+
+### 8.5 Live check at the site's own address (pane, 04:49–04:52 UTC, files fetched at `9cd3ec3` and hash-checked)
+
+| Step | Result |
+|---|---|
+| On, off | ready in 6.7 s; off restored the daylight picture and line (22 ms this time: the browser had the picture) |
+| Off and on again at once | the daylight picture landed first, then the night picture, both before ready |
+| **GPT's case**, daylight load held 30 s by the harness, default 20-second limit | ready at 29.8 s with the night picture drawn and named. The daylight load landed at 32.8 s, **while ready**. The night picture was back at 33.8 s. Wording followed the picture both ways |
+| Sampling every 10 ms, both runs | 13 of 4,179 and 4 of 2,267 samples disagreed, all within a swap |
+
+**In GPT's case the daylight picture was on the globe for about one second before the night picture came back.** The pane was hidden, and a hidden page's timers run about once a second; the 30 ms step applies to a page in view. For that second the imagery wording said daylight (true), while the card still said "Showing 14 Nov 2026".
+
+A first live attempt set the wait limit to 0.7 s, which also cut off the real NASA requests; that run proved nothing and was redone as above.
+
+### 8.6 Open
+
+- The wording can trail the picture by up to 30 ms at a swap (page in view).
+- In the pathological case (a daylight load outlasting the 20-second wait and then landing), the daylight picture shows for a moment under daylight wording while the card says the layer is on. Not reported as a failure state.
+- While the layer is on, any other picture put on the globe is replaced by the night picture. Nothing else in the page changes the globe's picture after it opens, as far as the suites show; not separately tested.
+- A night picture still landing when the layer is switched off, and taking longer than the wait limit, could still land late. It is a local picture; not seen.
+
+### 8.7 Files at `9cd3ec3`
+
+| File | sha256 |
+|---|---|
+| `nightlights.js` | `e2eca6275f29daccbfa93192e9e184a509e92ebd212e5646e984ab5dd038994a` |
+| `index.html` | `01dd287743fe70e3d2af7ee9f472346f8f2d68d2d7f5f2bb78f358957119f2d4` |
+| `phase1/night-lights-ui.test.cjs` | `e0fd31f9069137c2981ea1b3d91246d4fc587af0170a43fadd284f064a44fa5e` |
+
+### 8.8 Line needed from Chad (not given)
 
 `Approve: merge night-lights-label-rc at <reviewed head> to main (page change: Night lights imagery label follows the picture drawn)`
