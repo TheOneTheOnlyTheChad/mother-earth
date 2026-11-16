@@ -120,7 +120,7 @@ ok('F shares: whole percent, never "0%" for some and never "100%" for less than 
 ok('F box: 0.5° about 15.10, 145.70 is the recorded box; 120 pixels', JSON.stringify(L.boxFor(15.10, 145.70, 0.5)) === JSON.stringify(BOX) && L.spanPx(0.5) === 120 && L.spanPx(1) === 240 && L.spanPx(2) === 480 && L.spanPx(10) === 480, L.boxFor(15.10, 145.70, 0.5));
 ok('F box: kept inside the map at the poles and the date line (shifted, never wrapped)', (() => { const a = L.boxFor(89.9, 179.9, 2), b = L.boxFor(-89.9, -179.9, 2); return a.n === 90 && a.e === 180 && a.s === 88 && a.w === 178 && b.s === -90 && b.w === -180; })());
 ok('F threshold is 0.95 as an exact integer comparison (94 fails, 95 passes)', NL.THRESH_H === 95 && L.classify(Int16Array.of(1, 1), Int16Array.of(94, 95), Int16Array.of(1, 1), Int16Array.of(100, 100), NL.THRESH_H).join() === '1,0');
-ok('F the fixed wording: light, never power', !/outage|blackout|power/i.test([NL.R2, NL.THRESH_TEXT, NL.LOCAL].join(' ')) && /Preview threshold: clear-sky confidence 0\.95 or more on both nights\. Chosen for this preview; not a NASA standard\./.test(NL.THRESH_TEXT));
+ok('F the fixed wording: light, never power', !/outage|blackout|power/i.test([NL.R2, NL.THRESH_TEXT, NL.LOCAL].join(' ')) && /Mother Earth uses a clear-sky confidence threshold of 0\.95 for this comparison, on both nights; not a NASA standard\./.test(NL.THRESH_TEXT));
 
 console.log(`\nnight-lights logic${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

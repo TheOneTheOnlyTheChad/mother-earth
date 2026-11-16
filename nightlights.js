@@ -23,7 +23,7 @@
     LIGHT: 'VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance', LIGHT_KEY: 'VIIRS_DayNightBand_At_Sensor_Radiance.xml',
     CLEAR: 'VIIRS_NOAA20_Clear_Sky_Confidence_Night', CLEAR_KEY: 'VIIRS_Clear_Sky_Confidence.xml',
     SAT: 'NOAA-20', FIRST: '2024-03-25',
-    THRESH_H: 95,                 // preview threshold: clear-sky confidence 0.95, in hundredths (not a NASA standard)
+    THRESH_H: 95,                 // our threshold: clear-sky confidence 0.95, in hundredths (not a NASA standard)
     BAND: 30, MAX_MISSING: 0.01,  // latest-date rule: no more than 1% no data between 30°S and 30°N
     CANDIDATES: 4,                // today (UTC) and the three days before it
     WAIT_MS: 20000,               // the longest any one GIBS request may take, body included, before it counts as not answered
@@ -33,7 +33,7 @@
     NODATA: [[128, 140, 160], [100, 112, 130]],   // checker: no data (the ocean heat no-data colours)
     NOREL: [[150, 112, 30], [44, 34, 12]],        // diagonal stripes: no reliable comparison
     R2: 'Light as measured at the satellite. Moonlight, cloud, fires, lightning, boats and the viewing angle all change it.',
-    THRESH_TEXT: 'Preview threshold: clear-sky confidence 0.95 or more on both nights. Chosen for this preview; not a NASA standard.',
+    THRESH_TEXT: 'Mother Earth uses a clear-sky confidence threshold of 0.95 for this comparison, on both nights; not a NASA standard.',
     LOCAL: 'NASA: not for tactical decisions or local-scale conditions.',
   };
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -184,7 +184,7 @@
     for (const x of [li, ci]) if (x && x.status !== 'ok') return { date, status: x.status, why: x.why };
     const L = decode(li.img.data, w * h, lk), C = ci ? decode(ci.img.data, w * h, ck) : null;
     if (L.unknown || (C && C.unknown)) return { date, status: 'failed', why: "the picture did not match NASA's published key" };
-    return { date, status: 'ok', light: L.v, clear: C ? C.v : null, rgba: li.img.data, bytes: li.bytes + (ci ? ci.bytes : 0), blank: L.none === w * h };
+    return { date, status: 'ok', key: lk, light: L.v, clear: C ? C.v : null, rgba: li.img.data, bytes: li.bytes + (ci ? ci.bytes : 0), blank: L.none === w * h };
   }
 
   // ---------- 1. the globe layer
@@ -233,7 +233,7 @@
     if (pick.fail) return stop(failText(pick.fail, 'Night lights'));
     if (!pick.date || !f) return stop(`No complete night frame yet: ${joinDays(pick.arriving)} ${pick.arriving.length === 1 ? 'is' : 'are'} still arriving. Nothing is drawn.`);
     st.missing = results[results.length - 1].full; st.bytes.global = f.bytes;
-    try { st.keyLight = await getKey(NL.LIGHT_KEY, 10); } catch (_) { st.keyLight = null; }   // already loaded for the frame; kept for the legend's swatches
+    st.keyLight = f.key;   // the key this frame was decoded with; kept for the legend's swatches (never asked for again here)
     const cv = paintGlobal(new ImageData(f.rgba, W, H), W, H, f.light);
     const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
     if (gen !== st.gen) return;
@@ -362,11 +362,14 @@
     const gen = ++st.cmpGen; if (out) { out.hidden = true; out.innerHTML = ''; } st.cmp = null;   // nothing stays on screen from an earlier answer
     cmpMsg('Loading the two nights from NASA GIBS…'); const go = cmpEl('go'); if (go) go.setAttribute('aria-busy', 'true');
     const t0 = performance.now(), res = await compare(p);
-    if (gen !== st.cmpGen) return null;
-    if (go) go.setAttribute('aria-busy', 'false');
-    try { st.keyLight = await getKey(NL.LIGHT_KEY, 10); } catch (_) { }
+    if (gen !== st.cmpGen) return null;   // a newer Compare owns the form: this one writes nothing
+    // No request and no wait from here to the end (GPT round 3, 16 Nov): the key comes from a frame that loaded, and a
+    // failure is shown as it came back. The busy mark stays set until this result is on the page.
+    const k = (res.a.status === 'ok' && res.a.key) || (res.b.status === 'ok' && res.b.key); if (k) st.keyLight = k;
     st.timings.compareMs = Math.round(performance.now() - t0); st.bytes.compare = (res.a.bytes || 0) + (res.b.bytes || 0);
-    cmpMsg(''); showCompare(res); return res;
+    cmpMsg(''); showCompare(res);
+    if (go) go.setAttribute('aria-busy', 'false');
+    return res;
   }
 
   // ---------- wiring

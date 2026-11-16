@@ -8,6 +8,8 @@
  *   eager date-mismatch no-restore nodata-dark panel-own-state value-when-withheld fail-as-arriving stale-kept power-word total-shown full-unchecked
  * Round 3 (release work): bounded waits with retry (T), Sky zoom-out label (S), blank date and coarse box (U), Sources page (W).
  *   more breaks: no-sky-hook no-timeout hang-as-arriving blank-silent coarse-silent
+ * Round 4 (GPT round 3, 16 Nov): a comparison whose key request hangs fails once, at once, and never writes over a newer Compare (section K2).
+ *   more breaks: cmp-key-refetch
  * Round 2 (GPT round 1, 15 Nov): the 1% rule is applied to the 2048 × 1024 frame that is displayed, not only to the probe (section R).
  */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const http = require('http'); const { PNG } = require('pngjs');
@@ -33,6 +35,7 @@ const BREAKS = {
   'hang-as-arriving': [["      if (e && e.timeout) return { status: 'failed', why: waitText() };", "      if (e && e.timeout) return { status: 'ok', img: new ImageData(w, h), bytes: 0 };"]],
   'blank-silent': [["      (ok && f.blank ? `<div class=\"hint nl-blank\">No data for this date.</div>` : '') + `</figure>`;", "      `</figure>`;"]],
   'coarse-silent': [["coarse = (res.box.n - res.box.s) * NL.PX_PER_DEG > res.h;", "coarse = false;"]],
+  'cmp-key-refetch': [["    const k = (res.a.status === 'ok' && res.a.key) || (res.b.status === 'ok' && res.b.key); if (k) st.keyLight = k;\n", "    if (go) go.setAttribute('aria-busy', 'false');\n    try { st.keyLight = await getKey(NL.LIGHT_KEY, 10); } catch (_) { }\n"]],
   'total-shown': [["Usable on both: <b>${pct(t.both, t.n)}</b> — of the area in view</div>`;", "Usable on both: <b>${pct(t.both, t.n)}</b> — of the area in view · total light ${res.a.light.reduce((s, v) => s + Math.max(0, v), 0) / 10}</div>`;"]],
 };
 if (BREAK && !BREAKS[BREAK]) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
@@ -267,6 +270,24 @@ let BASE;
     await toggle(page); const status = await txt(page, '#nl-status');
     ok('T NASA\'s key hanging is bounded too: the key message, no picture asked for', /NASA's key for the picture could not be loaded/.test(status) && nl(gibs).filter(r => r.startsWith('light:')).length === 0, status);
     await ctx.close(); }
+  // ===== K2. a comparison whose key request hangs (GPT round 3, 16 Nov): one key request, the failure at once, and a newer Compare is never written over
+  { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs);
+    await page.evaluate(() => { ME.nightLights.options({ waitMs: 700 }); window.__keyHang = true; const real = window.fetch; window.fetch = function (u, init) { if (/colormaps/.test(String(u))) { window.__keyAsked = (window.__keyAsked || 0) + 1; if (window.__keyHang) return new Promise(() => { }); } return real.call(this, u, init); }; });
+    await fillCmp(page, { lat: '0', lng: '0', span: '0.5', a: TRI.a, b: TRI.b });
+    await page.evaluate(() => document.getElementById('nl-go').click()); await page.waitForTimeout(1000);   // past the 0.7 s limit, before a second 0.7 s could end
+    const first = await page.evaluate(() => ({ asked: window.__keyAsked, busy: document.getElementById('nl-go').getAttribute('aria-busy'), hidden: document.getElementById('nl-out').hidden, out: document.getElementById('nl-out').textContent.replace(/\s+/g, ' ').trim(), msg: document.getElementById('nl-msg').hidden }));
+    ok('K2 the key hangs: the failure is on the page as soon as the wait limit passes, the busy mark clears with it, and the key was asked for once', first.asked === 1 && first.busy === 'false' && first.hidden === false && first.msg === true && /^Neither night could be loaded: NASA's key for the picture could not be loaded\. Nothing is drawn\. Press Compare to try again\.$/.test(first.out) && nl(gibs).filter(r => /^(light|clear):/.test(r)).length === 0, first);
+    // a second Compare straight after, with the key answering and the pictures held: nothing from the first may touch it
+    let rel; gibs.hold = new Promise(r => rel = r);
+    await page.evaluate(() => { window.__keyHang = false; ME.nightLights.options({ waitMs: 8000 }); document.getElementById('nl-go').click(); });
+    await page.waitForTimeout(1200);   // long enough for any second key request by the first Compare to reach its own limit
+    const mid = await page.evaluate(() => ({ busy: document.getElementById('nl-go').getAttribute('aria-busy'), hidden: document.getElementById('nl-out').hidden, msg: document.getElementById('nl-msg').textContent, msgHidden: document.getElementById('nl-msg').hidden }));
+    ok('K2 a second Compare started after that failure keeps its own loading message and busy mark while it runs; the first writes nothing over it', mid.busy === 'true' && mid.hidden === true && mid.msgHidden === false && /^Loading the two nights from NASA GIBS/.test(mid.msg), mid);
+    rel(); gibs.hold = null;
+    await page.waitForFunction(() => document.getElementById('nl-go').getAttribute('aria-busy') === 'false', null, { timeout: 30000 });
+    ok('K2 and it ends with its own answer', (await txt(page, '#nl-shares')).startsWith('Readable on 1 May 2026: 100% · Readable on 2 May 2026: 33% · Usable on both: 33%') && await page.$eval('#nl-msg', m => m.hidden));
+    ok('K2 no page errors', errs.length === 0, errs);
+    await ctx.close(); }
   { const { ctx, page } = await setup(browser, newGibs());
     ok('T the default wait limit is 20 seconds', await page.evaluate(() => ME.nlLogic.NL.WAIT_MS) === 20000);
     await ctx.close(); }
@@ -323,7 +344,7 @@ let BASE;
   { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs, { path: 'sources.html' });
     const sec = await page.evaluate(() => { const h = document.getElementById('nightlights'); if (!h) return null; let t = '', e = h.nextElementSibling; while (e && e.tagName !== 'H2') { t += ' ' + e.textContent; e = e.nextElementSibling; } return { h: h.textContent, t: t.replace(/\s+/g, ' ') }; });
     ok('W Sources & Details has a Night lights section', sec && /Night lights — light measured at night \(observed, optional layer\)/.test(sec.h), sec && sec.h);
-    ok('W it names both NASA layers, the scale and its top, the date rule on the displayed picture, the three states and the threshold label', sec && /VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance/.test(sec.t) && /VIIRS_NOAA20_Clear_Sky_Confidence_Night/.test(sec.t) && /38\.2 or more/.test(sec.t) && /no more than 1% missing between 30°S and 30°N, judged on the picture that is put on the globe/.test(sec.t) && /usable on both/.test(sec.t) && /no reliable comparison/.test(sec.t) && /Preview threshold: clear-sky confidence 0\.95 or more on both nights\. Chosen for this preview; not a NASA standard\./.test(sec.t), sec && sec.t.slice(0, 300));
+    ok('W it names both NASA layers, the scale and its top, the date rule on the displayed picture, the three states and the threshold label', sec && /VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance/.test(sec.t) && /VIIRS_NOAA20_Clear_Sky_Confidence_Night/.test(sec.t) && /38\.2 or more/.test(sec.t) && /no more than 1% missing between 30°S and 30°N, judged on the picture that is put on the globe/.test(sec.t) && /usable on both/.test(sec.t) && /no reliable comparison/.test(sec.t) && /Mother Earth uses a clear-sky confidence threshold of 0\.95 for this comparison, on both nights; not a NASA standard\./.test(sec.t), sec && sec.t.slice(0, 300));
     ok('W it carries the as-measured line, the wait limit, the no-fallback rule and NASA\'s local-scale caveat; light, never power', sec && /Light as measured at the satellite\. Moonlight, cloud, fires, lightning, boats and the viewing angle all change it\./.test(sec.t) && /within 20 seconds/.test(sec.t) && /does not fall back to an older night/.test(sec.t) && /NASA: not for tactical decisions or local-scale conditions\./.test(sec.t) && !/outage|blackout|power/i.test(sec.t));
     const img = await page.$eval('#imagery', h => { let t = '', e = h.nextElementSibling; while (e && e.tagName !== 'H2') { t += ' ' + e.textContent; e = e.nextElementSibling; } return t.replace(/\s+/g, ' '); });
     ok('W the imagery section describes both pictures and does not claim to know which one World View is showing', /true-colour/.test(img) && /While Night lights is switched on there, the globe shows NASA's night-light picture in its place/.test(img) && /This page cannot see which picture another tab is showing\./.test(img), img.slice(-300));
@@ -357,7 +378,7 @@ let BASE;
     const SAIPAN = { s: 15.09, n: 15.30, w: 145.68, e: 145.84 };
     ok('J fixture (harness only): what the page decoded gives the recorded Saipan totals, 2,854.1 and 769.9', slice(res.la, SAIPAN) === 28541 && slice(res.lb, SAIPAN) === 7699, [slice(res.la, SAIPAN), slice(res.lb, SAIPAN)]);
     ok('J no radiance total, percentage change or difference is printed; light, not power', !/2,?85\d|76\d\.\d|770|total|less light|more light|difference|change/i.test(sh + ' ' + (await txt(page, '#nl-out .nl-where'))) && !/outage|blackout|power/i.test(out), out.slice(0, 200));
-    ok('J the threshold is labelled as a preview choice; the as-measured line and NASA\'s local-scale caveat travel with the result', /Preview threshold: clear-sky confidence 0\.95 or more on both nights\. Chosen for this preview; not a NASA standard\./.test(out) && /Light as measured at the satellite/.test(out) && /NASA: not for tactical decisions or local-scale conditions\./.test(out));
+    ok('J the threshold is labelled as Mother Earth\'s choice, not NASA\'s; the as-measured line and NASA\'s local-scale caveat travel with the result', /Mother Earth uses a clear-sky confidence threshold of 0\.95 for this comparison, on both nights; not a NASA standard\./.test(out) && /Light as measured at the satellite/.test(out) && /NASA: not for tactical decisions or local-scale conditions\./.test(out));
     ok('J key: the same fixed scale on both, white is 38.2 or more, both patterns named', /the same fixed scale on both pictures · white is 38\.2 or more/.test(out) && /No reliable comparison/.test(out) && /No data/.test(out) && await page.$$eval('#nl-out .nl-p-norel, #nl-out .nl-p-nodata', e => e.length) === 2);
     // pixels: pick a usable bright one, a usable pair at the top of the scale, and a withheld one, from the decoded result
     const iTop = res.la.findIndex((v, i) => v === 382 && res.st[i] === 0), iUse = res.la.findIndex((v, i) => v >= 50 && v < 382 && res.st[i] === 0), iNo = res.st.findIndex(x => x === 1);
@@ -447,7 +468,7 @@ let BASE;
     await page.evaluate(() => document.getElementById('nl-here').click());
     ok('P "Use the centre of the globe view" without a globe says there is no view to read', /The globe is unavailable in this browser, so there is no view to read\. Type a latitude and longitude instead\./.test(await txt(page, '#nl-msg')));
     await fillCmp(page, { ...RECFORM, a: '2026-03-19', b: '2026-04-20' }); await runCmp(page);
-    ok('P the comparison works without WebGL: dates, shares, caveats and source are all there', (await txt(page, '#nl-shares')).startsWith('Readable on 19 Mar 2026: 57%') && /Preview threshold/.test(await txt(page, '#nl-out')) && /NASA GIBS/.test(await txt(page, '#card-nl')));
+    ok('P the comparison works without WebGL: dates, shares, caveats and source are all there', (await txt(page, '#nl-shares')).startsWith('Readable on 19 Mar 2026: 57%') && /Mother Earth uses a clear-sky confidence threshold of 0\.95/.test(await txt(page, '#nl-out')) && /NASA GIBS/.test(await txt(page, '#card-nl')));
     ok('P no page errors without WebGL', errs.length === 0, errs);
     await ctx.close(); }
   { const gibs = newGibs(); const { ctx, page, errs } = await setup(browser, gibs, { viewport: { width: 390, height: 844 } });
