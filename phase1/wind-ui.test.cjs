@@ -4,7 +4,7 @@
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/wind-ui.test.cjs
  * BREAK=<name> weakens the served wind.js; each must fail:
  *   eager no-verify swap-early late-paint keep-forever wrong-from no-recover new-rev-on-switch refetch-cached refresh-when-off
- *   no-hatch calm-bearing pole-bearing smooth fetched-age no-modified-words tap-when-off silent-level-fail refresh-back bad-input-wiped */
+ *   no-hatch calm-bearing pole-bearing smooth fetched-age no-modified-words tap-when-off silent-level-fail refresh-back bad-input-wiped draw-after-cutoff */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const crypto = require('crypto'); const http = require('http'); const { PNG } = require('pngjs');
 const ROOT = path.join(__dirname, '..'); const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
@@ -32,6 +32,7 @@ const BREAKS = {
   'tap-when-off': [['(lat, lng) => { if (st.on && st.rev) select(lat, lng); }', '(lat, lng) => { select(lat, lng); }']],
   'silent-level-fail': [['else st.note = `${LV(levelId).label} could not be loaded: ${err.message || err}. Still showing ${LV(st.level).label}.`;', 'else st.note = null;']],
   'bad-input-wiped': [["      if (st.badInput) { rd.textContent = 'Enter a latitude from −90 to 90 and a longitude from −180 to 180.'; rd.dataset.kind = ''; }   // kept by every repaint until a valid point is chosen\n      else if (st.sel) {", '      if (st.sel) {']],
+  'draw-after-cutoff': [["      if (!err && built && tooOld(target)) {", '      if (false) {']],
   'refresh-back': [['    if (st.rev && c.run < st.rev.run) return paint();        // never go back to an older run\n', '']],
 };
 if (BREAK && !BREAKS[BREAK]) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
@@ -233,6 +234,20 @@ const read = async (page, lat, lon) => { await page.evaluate(([a, b]) => ME.wind
   { const hub = newHub(); const { ctx, page } = await setup(browser, hub); await setNow(page, T0 + 10 * H); await on(page);
     await setNow(page, T0 + 25 * H); await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange'))); await page.waitForTimeout(300); const s = await st(page);
     ok('G when the tab comes back after the limit has passed, the age is rechecked and the sheet cleared', s.meshes === 0 && s.stateWord === 'unknown', s); await ctx.close(); }
+  { // GPT's stage 2 review: a load that starts before the limit and finishes after it must not draw
+    const hub = newHub(); const { ctx, page, errs } = await setup(browser, hub); await setNow(page, T0 + 23 * H + 59 * 60e3);
+    let release; hub.hold[RA.levels[0].sha256] = new Promise(r => { release = r; });
+    await page.click('#tgl-wind'); await page.waitForFunction(() => ME.wind.state().requests.length >= 2);
+    await setNow(page, T0 + 24 * H + 60e3); release(); await idle(page); await page.waitForTimeout(300); const s = await st(page);
+    ok('G a grid requested at 23 h 59 min that arrives after the 24-hour limit is NOT drawn', s.meshes === 0 && s.inScene === 0 && s.stateWord === 'unknown' && s.label === null && s.checked.length === 0, s);
+    ok('G and the card says why', /The newest model field is valid at 16 Nov 2026, 00:00 UTC, more than 24 hours ago\. Nothing is drawn\./.test(s.off), s.off);
+    ok('G no page error', errs.length === 0, errs); await ctx.close(); }
+  { // the same during a height switch: the limit passes while the new height is loading
+    const hub = newHub(); const { ctx, page } = await setup(browser, hub); await setNow(page, T0 + 23 * H + 59 * 60e3); await on(page);
+    let release; hub.hold[RA.levels[1].sha256] = new Promise(r => { release = r; });
+    await page.click('#wind-levels button[data-level="250hPa"]'); await page.waitForFunction(() => ME.wind.state().want === '250hPa');
+    await setNow(page, T0 + 24 * H + 60e3); release(); await idle(page); await page.waitForTimeout(300); const s = await st(page);
+    ok('G the limit passes while another height is loading: nothing of that run stays drawn', s.meshes === 0 && s.stateWord === 'unknown' && s.read === '', s); await ctx.close(); }
   { // published late: the age still runs from the valid time, not from publication
     const hub = newHub(); const { ctx, page } = await setup(browser, hub); await setNow(page, T0 + 9 * H); await on(page); const s = await st(page);
     ok('G the age shown is from the valid time (9 h), not from when the hub published it (5 h)', /\(9 h ago\)/.test(s.label), s.label); await ctx.close(); }

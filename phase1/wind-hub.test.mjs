@@ -9,13 +9,13 @@
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored manual-gated no-range-check no-etag-check no-length-check no-readback grid-overwrite run-keys no-cas
  *   create-unconditional late-run-wins move-on-fail any-grid no-integrity wind-first skip-run-check poll-when-held no-timeout
- *   generic-down decoder-drift accept-nonfinite */
+ *   generic-down decoder-drift accept-nonfinite note-unordered clear-newer-note seen-in-note late-note-kept plain-ran */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BREAK = process.env.BREAK || '';
 const BREAKS = {
   'gate-ignored': ["const x = env.WIND_ENABLED !== '1' ?", 'const x = false ?'],
-  'manual-gated': ["  wind: async (env, ms) => guarded(env, 'wind', ms, collectWind),", "  wind: async (env, ms) => env.WIND_ENABLED !== '1' ? 'wind:not scheduled' : guarded(env, 'wind', ms, collectWind),"],
+  'manual-gated': ["  wind: async (env, ms) => runWind(env, ms),", "  wind: async (env, ms) => env.WIND_ENABLED !== '1' ? 'wind:not scheduled' : runWind(env, ms),"],
   'no-range-check': ["if (res.status !== 206 || cr !== `bytes ${r.start}-${r.end}/${total}` || cl !== r.len || et !== etag) {", 'if (res.status !== 206 && res.status !== 200) {'],
   'no-etag-check': ['|| cl !== r.len || et !== etag) {', '|| cl !== r.len) {'],
   'no-length-check': ["  if (buf.length !== r.len) return { ok: false, reason: 'field body length differs', http: 206, detail: `${buf.length} of ${r.len}` };\n", ''],
@@ -24,8 +24,8 @@ const BREAKS = {
   'run-keys': ["const buf = grids[i].buffer, sha = await sha256Bytes(buf), key = WIND.GRIDS + sha + '.i16';", "const buf = grids[i].buffer, sha = await sha256Bytes(buf), key = WIND.GRIDS + run + '-' + WIND.LEVELS[i].id + '.i16';"],
   'no-cas': ["    const r = await env.R2.put(WIND.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });", "    const r = await env.R2.put(WIND.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? undefined : { etagDoesNotMatch: '*' } });"],
   'create-unconditional': ["    const r = await env.R2.put(WIND.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });", "    const r = await env.R2.put(WIND.POINTER, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : undefined });"],
-  'late-run-wins': ['const up = await windUpdate(env, c => (c.current && c.current.run >= run) ? null :', 'const up = await windUpdate(env, c => false ? null :'],
-  'move-on-fail': ["    return { ...cur, last_attempt: { started: new Date(ms).toISOString(), failed_at, status: 'down',", "    return { ...cur, current: null, last_attempt: { started: new Date(ms).toISOString(), failed_at, status: 'down',"],
+  'late-run-wins': ['  const up = await windUpdate(env, c => { if (c.current && c.current.run >= run) return null;', '  const up = await windUpdate(env, c => { if (false) return null;'],
+  'move-on-fail': ["    return { ...cur, seen: keepSeen, last_attempt: { started, failed_at, status: 'down',", "    return { ...cur, current: null, seen: keepSeen, last_attempt: { started, failed_at, status: 'down',"],
   'any-grid': ['  const x = [cur.current, cur.previous].filter(Boolean).flatMap(r => r.levels).find(l => l.sha256 === m[1]);\n  if (!x) return none(404, \'not found\');', "  const x = { key: WIND.GRIDS + m[1] + '.i16', bytes: WIND.GRID_BYTES, sha256: m[1] };"],
   'no-integrity': ["  if (buf.byteLength !== x.bytes || await sha256Bytes(buf) !== x.sha256) return none(503, 'integrity');\n  return new Response(buf, { headers: { 'Content-Type': 'application/octet-stream', 'Cache-Control': WIND.CACHE_FILE,", "  return new Response(buf, { headers: { 'Content-Type': 'application/octet-stream', 'Cache-Control': WIND.CACHE_FILE,"],
   'wind-first': null,
@@ -33,6 +33,11 @@ const BREAKS = {
   'poll-when-held': ['    if (held && c <= held) break;                          // nothing newer can be found from here on: no request\n', ''],
   'no-timeout': ["Range: `bytes=${r.start}-${r.end}` }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(WIND.TIMEOUT_MS) });", "Range: `bytes=${r.start}-${r.end}` }, cf: { cacheTtl: 0 } });"],
   'generic-down': ["    else if (layer === 'wind') { try { await windFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.16: never the generic writeDown\n", ''],
+  'note-unordered': ["    const record = windNoteRelevant(note, cur.current) && (!la || la.started <= started);", '    const record = true;'],
+  'clear-newer-note': ["c => c.last_attempt && c.last_attempt.started <= started ? { ...c, last_attempt: null } : null);", "c => c.last_attempt ? { ...c, last_attempt: null, seen: null } : null);"],
+  'seen-in-note': ["return { ...windEmpty(), current, previous: brief(c.current), seen: c.seen && c.seen.run > run ? c.seen : null,", "return { ...windEmpty(), current: { ...current, times: { ...current.times, index_first_seen: seen.index_first_seen } }, previous: brief(c.current), seen: c.seen && c.seen.run > run ? c.seen : null,"],
+  'late-note-kept': ["last_attempt: windNoteRelevant(c.last_attempt, current) ? c.last_attempt : null }; });", "last_attempt: c.last_attempt }; });"],
+  'plain-ran': ["async function runWind(env, ms) { let r = null; const g = await guarded(env, 'wind', ms, async (e, m) => { r = await collectWind(e, m); }); return r || g; }", "async function runWind(env, ms) { return guarded(env, 'wind', ms, collectWind); }"],
   'decoder-drift': ["  if (!Number.isFinite(R)) no('packing reference value is not a finite number');\n  if (Math.abs(E) > 30)", "  if (Math.abs(E) > 30)"],
   'accept-nonfinite': ["    if (!(Math.abs(v) <= maxAbs)) no(Number.isFinite(v) ? `decoded value ${v} at point ${n} is beyond ${maxAbs}` : `decoded value at point ${n} is not a finite number`);\n", ''],
 };
@@ -179,7 +184,7 @@ const call = async (w, pathname) => W.default.fetch(new Request('https://hub.tes
   const res = await call(w, '/admin/run/wind'); ok('A manual path without the admin key: 403, zero requests', res.status === 403 && w.reqs.length === 0, res.status);
   const res2 = await call(w, '/admin/run/wind?key=wrong'); ok('A manual path with a wrong key: 403, zero requests', res2.status === 403 && w.reqs.length === 0);
   const res3 = await call(w, '/admin/run/wind?key=k-test'), j3 = await res3.json(), m = await manifest(w);
-  ok('A manual path with the admin key and the flag unset: runs once and publishes', res3.status === 200 && j3.result === 'wind:ran' && m && m.current.run === RNOW && gridKeys(w).length === 3, j3);
+  ok('A manual path with the admin key and the flag unset: runs once and publishes', res3.status === 200 && j3.result === 'wind:published ' + RNOW && m && m.current.run === RNOW && gridKeys(w).length === 3, j3);
   // the admin route runs at the real clock, so newer runs that are not on the test mirror are each looked for once (404) first
   ok('A that manual run went to one host: index lookups, then 1 object check and 6 ranges', w.reqs.filter(q => q.kind === 'range').length === 6 && w.reqs.filter(q => q.kind === 'head').length === 1 && w.reqs.filter(q => q.kind === 'idx').length >= 1 && w.reqs.every(q => q.u.startsWith(W.WIND.HOST)), w.reqs.map(q => q.kind));
   const before = w.reqs.length; const r2 = await W.JOBS.hourly(w.env, at(16, 7), false);
@@ -188,7 +193,7 @@ const call = async (w, pathname) => W.default.fetch(new Request('https://hub.tes
   const rm = await W.JOBS.hourly(w.env, at(16, 6), true);
   ok('A flag on, MANUAL hourly run: wind skipped, no request', w.reqs.length === 0 && /skipped \(manual hourly run\)/.test(rm.wind), rm.wind);
   w.order.length = 0; const r = await W.JOBS.hourly(w.env, at(16, 6), false);
-  ok('A flag on, scheduled hour: runs and publishes', r.wind === 'wind:ran' && (await manifest(w)).current.run === '2026111600', r.wind);
+  ok('A flag on, scheduled hour: runs and publishes, and the result says which run', r.wind === 'wind:published 2026111600' && (await manifest(w)).current.run === '2026111600', r.wind);
   const first = w.order.indexOf('wind'), others = w.order.map((x, i) => [x, i]).filter(([x]) => x === 'other' || (x.startsWith('run:') && x !== 'run:wind'));
   ok('A order: the hourly batch and every other request and run record are done BEFORE the first NOAA request', first > 0 && w.order.includes('batch') && w.order.indexOf('batch') < first && others.every(([, i]) => i < first), { first, batch: w.order.indexOf('batch') }); }
 
@@ -243,11 +248,12 @@ for (const [fault, why] of [['full-200', 'a full 200 in place of a range'], ['wr
 { const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4)); const good = (await manifest(w)).current;
   w.publish('2026111606', 2); w.throwOn = 'range'; await W.collectWind(w.env, at(16, 10)); let m = await manifest(w);
   ok('D a hung field request: down, the last good revision is still current', windRuns(w).pop().status === 'down' && /field request failed/.test(windRuns(w).pop().note) && m.current.run === '2026111600' && m.current.levels[0].sha256 === good.levels[0].sha256, windRuns(w).pop());
-  ok('D the failure is on the manifest as last_attempt with the run and when its index was first seen', m.last_attempt && m.last_attempt.status === 'down' && m.last_attempt.reason === 'field request failed' && m.last_attempt.run === '2026111606' && m.last_attempt.index_first_seen && m.last_attempt.consecutive_failures === 1, m.last_attempt);
-  const seen = m.last_attempt.index_first_seen; await new Promise(r => setTimeout(r, 15)); await W.collectWind(w.env, at(16, 11)); m = await manifest(w);
-  ok('D a second failure counts up and keeps the FIRST index-seen time', m.last_attempt.consecutive_failures === 2 && m.last_attempt.index_first_seen === seen, m.last_attempt);
+  ok('D the failure is on the manifest as last_attempt with its run, and the sighting of that run\'s index is recorded apart from it', m.last_attempt && m.last_attempt.status === 'down' && m.last_attempt.reason === 'field request failed' && m.last_attempt.run === '2026111606' && m.last_attempt.consecutive_failures === 1 && m.seen && m.seen.run === '2026111606' && !!m.seen.index_first_seen, [m.last_attempt, m.seen]);
+  const seen = m.seen.index_first_seen; await new Promise(r => setTimeout(r, 15)); await W.collectWind(w.env, at(16, 11)); m = await manifest(w);
+  ok('D a second failure counts up and keeps the FIRST index-seen time', m.last_attempt.consecutive_failures === 2 && m.seen.index_first_seen === seen, [m.last_attempt, m.seen]);
+  const rj = await W.JOBS.wind(w.env, at(16, 11, 30)); ok('D a handled failure is reported by the job as down with its reason, never as a plain "ran"', rj === 'wind:down field request failed', rj);
   w.throwOn = null; await W.collectWind(w.env, at(16, 12)); m = await manifest(w);
-  ok('D the next complete run recovers: published, last_attempt cleared, index-first-seen is the earliest sighting', m.current.run === '2026111606' && m.last_attempt === null && m.current.times.index_first_seen === seen && m.previous.run === '2026111600', [m.current.run, m.current.times.index_first_seen, seen]); }
+  ok('D the next complete run recovers: published, last_attempt cleared, index-first-seen is the earliest sighting', m.current.run === '2026111606' && m.last_attempt === null && m.seen === null && m.current.times.index_first_seen === seen && m.previous.run === '2026111600', [m.current.run, m.current.times.index_first_seen, seen]); }
 { const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4));
   // 06 and 12 never arrive; 18 does
   w.publish('2026111618', 4); await W.collectWind(w.env, at(16, 22)); const m = await manifest(w);
@@ -293,7 +299,7 @@ for (const [fault, why] of [['full-200', 'a full 200 in place of a range'], ['wr
 { const w = world(); use(w); w.publish('2026111600', 1); const exp = expectGrids('2026111600', 1);
   for (const g of exp) await w.env.R2.put(W.WIND.GRIDS + sha(g) + '.i16', Buffer.from(g.buffer));   // an earlier, interrupted run left all three grids and no manifest
   const puts0 = w.puts.length; await W.collectWind(w.env, at(16, 4)); const m = await manifest(w);
-  ok('F grids left by an interrupted run are reused after their hashes are checked; only the manifest is written', m.current.run === '2026111600' && w.puts.slice(puts0).join() === W.WIND.POINTER, w.puts.slice(puts0)); }
+  ok('F grids left by an interrupted run are reused after their hashes are checked; only the manifest is written (the sighting, then the commit)', m.current.run === '2026111600' && w.puts.slice(puts0).join() === [W.WIND.POINTER, W.WIND.POINTER].join(), w.puts.slice(puts0)); }
 { const w = world(); use(w); w.publish('2026111600', 1);
   // two attempts on the same run overlap: the second creates a grid while the first is about to
   w.onGridPut = async key => { const exp = expectGrids('2026111600', 1); const g = exp.find(x => key.endsWith(sha(x) + '.i16')); w.store.set(key, { buf: Buffer.from(g.buffer), opts: {}, etag: 'other' }); };
@@ -316,6 +322,48 @@ for (const [fault, why] of [['full-200', 'a full 200 in place of a range'], ['wr
   w.onPointerPut = async () => { await w.env.R2.put(W.WIND.POINTER, JSON.stringify({ schema: 1, layer: 'wind', current: { run: '2026111606', levels: [], times: {} }, previous: null, last_attempt: null }), { onlyIf: { etagDoesNotMatch: '*' } }); };
   await W.collectWind(w.env, at(16, 4)); const m = await manifest(w);
   ok('F the first manifest is create-only: a manifest created meanwhile is not overwritten', m.current.run === '2026111606', m.current.run); }
+// ---------- H. status ordering when runs overlap (GPT's stage 2 review): both completion orders
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4)); w.publish('2026111606', 2);
+  // an EARLIER-started run is part-way through 06 when a LATER-started run publishes 06; then the earlier one fails
+  let done = false; w.onFetch = async kind => { if (kind !== 'range' || done) return; done = true; await W.collectWind(w.env, at(16, 11)); w.throwOn = 'range'; };
+  const r = await W.collectWind(w.env, at(16, 10)); w.onFetch = null; w.throwOn = null; const m = await manifest(w);
+  ok('H older run fails AFTER a newer-started run published the same run: the page gets no "did not complete" note', r === 'wind:down field request failed' && m.current.run === '2026111606' && m.last_attempt === null, [r, m.last_attempt]);
+  ok('H that failure is still in the run rows, marked as not noted on the manifest', windRuns(w).some(x => x.status === 'down' && /field request failed .*\(not noted on the manifest: a newer result is already there\)/.test(x.note)), windRuns(w).map(x => x.note));
+  ok('H and the published revision is untouched (grids hash to their names)', m.current.levels.every(l => sha(w.store.get(l.key).buf) === l.sha256) && m.previous.run === '2026111600'); }
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4)); w.publish('2026111606', 2);
+  // the other order: the earlier run fails first (noted), then the later one publishes
+  w.throwOn = 'range'; await W.collectWind(w.env, at(16, 10)); w.throwOn = null; const m1 = await manifest(w);
+  await W.collectWind(w.env, at(16, 11)); const m2 = await manifest(w);
+  ok('H the other order: a failure is noted, then the newer result clears it', m1.last_attempt && m1.last_attempt.status === 'down' && m2.last_attempt === null && m2.current.run === '2026111606', [m1.last_attempt, m2.last_attempt]); }
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4));
+  // an anonymous failure (the index could not be asked for) from an attempt that started BEFORE the published revision's own run started
+  await W.windFail(w.env, at(16, 3), 'index request failed', 0, 'late report'); const m = await manifest(w);
+  ok('H a failure note from an attempt that started before the published revision is not put on the manifest', m.last_attempt === null && windRuns(w).pop().status === 'down', m.last_attempt); }
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4));
+  // an OLDER scan is asking whether 06 exists (it does not yet); meanwhile a LATER-started run finds 06 and fails on it; then the older scan ends cleanly
+  let done = false; w.onFetch = async kind => { if (kind !== 'idx' || done) return; done = true; const hold = w.onFetch; w.onFetch = null;
+    w.publish('2026111606', 2); w.throwOn = 'range'; await W.collectWind(w.env, at(16, 11)); w.throwOn = null; w.mirror.delete('2026111606'); };
+  const r = await W.collectWind(w.env, at(16, 10)); const m = await manifest(w);
+  ok('H an older scan that finds nothing new does NOT erase a newer failure', /^wind:no newer run on the mirror/.test(r) && m.last_attempt && m.last_attempt.status === 'down' && m.last_attempt.run === '2026111606' && m.last_attempt.started === new Date(at(16, 11)).toISOString(), [r, m.last_attempt]);
+  ok('H nor the time that run\'s index was first seen', m.seen && m.seen.run === '2026111606' && !!m.seen.index_first_seen, m.seen);
+  const first = m.seen.index_first_seen; w.publish('2026111606', 2); await new Promise(x => setTimeout(x, 15)); await W.collectWind(w.env, at(16, 12)); const m2 = await manifest(w);
+  ok('H when that run is finally published it carries the FIRST sighting, and the note and the sighting are cleared', m2.current.run === '2026111606' && m2.current.times.index_first_seen === first && m2.last_attempt === null && m2.seen === null, [m2.current.times, first]); }
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4));
+  // the other order: a clean scan first, then a later failure
+  await W.collectWind(w.env, at(16, 5)); w.idxStatus = 503; await W.collectWind(w.env, at(16, 10)); w.idxStatus = null; let m = await manifest(w);
+  ok('H the other order: after a clean scan, a later failure is noted', m.last_attempt && m.last_attempt.reason === 'index http error', m.last_attempt);
+  await W.collectWind(w.env, at(16, 11)); m = await manifest(w);
+  ok('H and a LATER clean scan clears an earlier failure note', m.last_attempt === null && m.current.run === '2026111600', m.last_attempt);
+  w.idxStatus = 503; await W.collectWind(w.env, at(16, 14)); w.idxStatus = null; await W.collectWind(w.env, at(16, 13)); m = await manifest(w);
+  ok('H but an EARLIER-started clean scan does not', m.last_attempt && m.last_attempt.started === new Date(at(16, 14)).toISOString(), m.last_attempt); }
+{ const w = world(); use(w); w.publish('2026111600', 1); await W.collectWind(w.env, at(16, 4)); w.publish('2026111606', 2);
+  // this run has already read the manifest when another attempt records an EARLIER sighting of the same run
+  const early = '2026-11-16T09:40:00.000Z'; let done = false;
+  w.onFetch = async kind => { if (kind !== 'idx' || done) return; done = true; await W.windUpdate(w.env, c => ({ ...c, seen: { run: '2026111606', index_first_seen: early } })); };
+  await W.collectWind(w.env, at(16, 10)); const m = await manifest(w);
+  ok('H the published revision carries the EARLIEST sighting on the manifest at commit time, not only this run\'s own', m.current.run === '2026111606' && m.current.times.index_first_seen === early && m.seen === null, m.current.times); }
+{ ok('H ordering rule: a note naming a run is ordered by run; one naming none by when its attempt started', W.windNoteRelevant({ run: '2026111606', started: 'a' }, { run: '2026111600', started: 'z' }) && !W.windNoteRelevant({ run: '2026111600', started: 'z' }, { run: '2026111600', started: 'a' }) && W.windNoteRelevant({ run: null, started: '2026-11-16T11' }, { run: '2026111600', started: '2026-11-16T10' }) && !W.windNoteRelevant({ run: null, started: '2026-11-16T09' }, { run: '2026111600', started: '2026-11-16T10' }) && W.windNoteRelevant({ run: null, started: 'x' }, null));
+  const S = W.windSeenMerge; ok('H sighting rule: a newer run replaces; the same run keeps the earlier time; an older run never replaces', S(null, { run: 'b', index_first_seen: '2' }).run === 'b' && S({ run: 'b', index_first_seen: '2' }, { run: 'b', index_first_seen: '1' }).index_first_seen === '1' && S({ run: 'b', index_first_seen: '1' }, { run: 'b', index_first_seen: '2' }).index_first_seen === '1' && S({ run: 'b', index_first_seen: '5' }, { run: 'a', index_first_seen: '1' }).run === 'b' && S({ run: 'a', index_first_seen: '1' }, { run: 'b', index_first_seen: '9' }).run === 'b'); }
 ok('F across this whole file: no unconditional manifest write, no unconditional grid write by the hub, no delete', STATS.unconditionalPointerPuts === 0 && STATS.deletes === 0 && STATS.pointerPuts > 10, STATS);
 
 // ---------- G. real NOAA bytes, when a folder is given

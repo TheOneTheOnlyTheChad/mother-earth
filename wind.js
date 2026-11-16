@@ -183,6 +183,8 @@
       let built = null;
       if (!err && grid) { try { built = await build(grid, gen); } catch (e) { err = e; } }
       if (late()) return discard(built);
+      // the 24-hour limit is checked again at the moment of drawing: a load that began in time can finish too late
+      if (!err && built && tooOld(target)) { discard(built); clearAll(`The newest model field is valid at ${utc(target.valid_time)}, more than ${WD.HIDE_AFTER_H} hours ago.`); return; }
       if (!err && built) { show(target, levelId, grid, built); return; }
       if (!err) return;
       // failure: what is shown stays, under its own label, and the level that failed is named

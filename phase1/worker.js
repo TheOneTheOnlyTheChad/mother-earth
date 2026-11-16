@@ -2150,7 +2150,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
-export { WIND, GRIBWIND, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
+export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
 export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
@@ -3054,6 +3054,9 @@ async function dustRoute(env, p) {
  * Publication: each grid is stored once under a key that IS its SHA-256 (create-only), read back and hashed; only then does the
  * manifest (wind/current.json, holding current AND previous) move, by a conditional write. A lost conditional write is re-read and
  * the run advances only if it is still newer. An older run that finishes late never replaces a newer one. Nothing is deleted.
+ * Status on the manifest is ordered too (GPT's stage 2 review): last_attempt is a failure note, kept only while it is about something
+ * newer than what is published and never replaced by a run that started earlier; `seen` records when a run's index was first found
+ * and is kept apart from it, so clearing a failure never loses that time.
  * Gate: WIND_ENABLED=1 for the SCHEDULED path (absent = zero NOAA requests, nothing written). /admin/run/wind (admin key) runs the
  * collector once whatever the flag says. Outside LAYERS, cells, history, health and the generic writeDown.
  * Terms (read 16 Nov 2026, Registry of Open Data on AWS, noaa-gfs-bdp-pds): open to the public; attribution requested; no implied
@@ -3229,7 +3232,12 @@ const WIND = {
     mirror: 'NOAA Open Data Dissemination (NODD) on AWS, bucket noaa-gfs-bdp-pds', terms: 'https://registry.opendata.aws/noaa-gfs-bdp-pds/',
     modified: 'Modified by Mother Earth: sampled from the 0.25 degree grid at whole degrees to 1 degree and quantised to 0.1 m/s. Not original, unaltered NOAA data.' },
 };
-const windEmpty = () => ({ schema: 1, layer: 'wind', current: null, previous: null, last_attempt: null, source: WIND.SOURCE, collector_version: COLLECTOR_VERSION });
+const windEmpty = () => ({ schema: 1, layer: 'wind', current: null, previous: null, last_attempt: null, seen: null, source: WIND.SOURCE, collector_version: COLLECTOR_VERSION });
+/** Is a failure note (a = { started, run }) still about something newer than the published revision? A note that names a run is
+ * ordered by that run; one that names none (the index could not even be asked for) is ordered by when its attempt started. */
+const windNoteRelevant = (a, current) => !!a && (!current || (a.run ? a.run > current.run : !current.started || a.started > current.started));
+/** The first sighting of a run's index: a newer run replaces an older one; for the same run the EARLIER time is kept. */
+const windSeenMerge = (have, s) => !s ? (have || null) : (!have || s.run > have.run) ? s : (s.run === have.run && s.index_first_seen < have.index_first_seen) ? s : have;
 /** 'YYYYMMDDHH' of the GFS runs whose named time is not after ms, newest first. */
 function windCandidates(ms, n = WIND.LOOKBACK_RUNS) {
   const out = []; let t = Math.floor(ms / 21600000) * 21600000;
@@ -3264,14 +3272,19 @@ async function windUpdate(env, change) {
   }
   throw new Error('wind manifest kept changing; gave up after 5 tries');
 }
-/** A failed run never moves the revisions: the manifest keeps current and previous and gains last_attempt. The public reason is a
- * fixed phrase; detail stays in collector_runs. seen = { run, index_first_seen } when the run's index had been found. */
+/** A failed run never moves the revisions. It leaves a note (last_attempt) ONLY if the note is still about something newer than
+ * what is published and no later-started attempt has already written one; either way the run row records the failure. The public
+ * reason is a fixed phrase; detail stays in collector_runs. seen = { run, index_first_seen } when the run's index had been found. */
 async function windFail(env, ms, reason, http, detail, seen) {
-  const failed_at = nowIso();
-  try { await windUpdate(env, cur => { const la = cur.last_attempt || {}; const same = seen && la.run === seen.run && la.index_first_seen;
-    return { ...cur, last_attempt: { started: new Date(ms).toISOString(), failed_at, status: 'down', http: http || 0, reason, run: seen ? seen.run : (la.run || null),
-      index_first_seen: seen ? (same ? la.index_first_seen : seen.index_first_seen) : (la.index_first_seen || null), consecutive_failures: (la.consecutive_failures || 0) + 1 } }; }); } catch (_) {}
-  await logRun(env, 'wind', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : ''));
+  const failed_at = nowIso(), started = new Date(ms).toISOString(), note = { started, run: seen ? seen.run : null };
+  let recorded = false;
+  try { const up = await windUpdate(env, cur => {
+    const la = cur.last_attempt, keepSeen = seen && (!cur.current || seen.run > cur.current.run) ? windSeenMerge(cur.seen, seen) : (cur.seen || null);
+    const record = windNoteRelevant(note, cur.current) && (!la || la.started <= started);
+    if (!record) return JSON.stringify(keepSeen) === JSON.stringify(cur.seen || null) ? null : { ...cur, seen: keepSeen };
+    return { ...cur, seen: keepSeen, last_attempt: { started, failed_at, status: 'down', http: http || 0, reason, run: note.run, consecutive_failures: ((la && la.consecutive_failures) || 0) + 1 } }; });
+    recorded = !!(up.wrote && up.body.last_attempt && up.body.last_attempt.started === started); } catch (_) {}
+  await logRun(env, 'wind', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : '') + (recorded ? '' : ' (not noted on the manifest: a newer result is already there)'));
   return 'wind:down ' + reason;
 }
 /** One range request. The response is refused BEFORE its body is read unless it is 206 with the exact Content-Range, length and ETag. */
@@ -3299,12 +3312,14 @@ async function collectWind(env, ms) {
     idx = await r.text(); run = c; break;
   }
   if (!run) {
-    if (cur.last_attempt && cur.last_attempt.status === 'down') await windUpdate(env, c => c.last_attempt ? { ...c, last_attempt: null } : null);
+    // a clean scan clears an EARLIER failure note only; a note from an attempt that started later stays, and `seen` is never touched
+    const started = new Date(ms).toISOString();
+    if (cur.last_attempt) await windUpdate(env, c => c.last_attempt && c.last_attempt.started <= started ? { ...c, last_attempt: null } : null);
     const note = held ? `no newer run on the mirror: ${held} held and kept` : 'no run found on the mirror';
     await logRun(env, 'wind', ms, 'ok', 200, 0, 0, `${note}; ${requests} request(s)`);
     return 'wind:' + note;
   }
-  const la = cur.last_attempt, seen = { run, index_first_seen: la && la.run === run && la.index_first_seen ? la.index_first_seen : nowIso() };
+  const seen = windSeenMerge(cur.seen && cur.seen.run === run ? cur.seen : null, { run, index_first_seen: nowIso() });
   const fail = (reason, http, detail) => windFail(env, ms, reason, http, `${run} ${detail || ''}`.trim(), seen);
   const url = WIND.HOST + windObject(run), cycle = { year: +run.slice(0, 4), month: +run.slice(4, 6), day: +run.slice(6, 8), hour: +run.slice(8) };
   let hd; try { hd = await fetch(url, { method: 'HEAD', headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(WIND.TIMEOUT_MS) }); requests++; } catch (e) { return fail('object request failed', 0, String(e).slice(0, 120)); }
@@ -3343,9 +3358,13 @@ async function collectWind(env, ms) {
     grid: { source: 'regular lat/lon 0.25 degree, 1440 x 721', display: { w: WIND.W, h: WIND.H, lat0: 90, lon0: 0, step_deg: 1, order: 'rows north to south, columns west to east from 0 degrees east' },
       reduction: 'model value at each whole degree (every fourth point each way); no averaging', encoding: { type: 'int16 little-endian', per_cell: ['u eastward', 'v northward'], scale_m_s: 0.1, missing: WIND.MISSING } },
     times: { index_first_seen: seen.index_first_seen, fields_fetched, published: null }, started: new Date(ms).toISOString() };
+  await windUpdate(env, c => { const k = !c.current || run > c.current.run ? windSeenMerge(c.seen, seen) : (c.seen || null); return JSON.stringify(k) === JSON.stringify(c.seen || null) ? null : { ...c, seen: k }; });   // the sighting is on record before anything else can fail
   // the manifest is the single commit point: it advances only if no other run has published this run or a newer one meanwhile
   const brief = c => c && ({ run: c.run, run_time: c.run_time, valid_time: c.valid_time, levels: c.levels, source: c.source, grid: c.grid, times: c.times });
-  const up = await windUpdate(env, c => (c.current && c.current.run >= run) ? null : { ...windEmpty(), current: { ...rev, times: { ...rev.times, published: nowIso() } }, previous: brief(c.current) });
+  const up = await windUpdate(env, c => { if (c.current && c.current.run >= run) return null;
+    const first = windSeenMerge(c.seen && c.seen.run === run ? c.seen : null, seen).index_first_seen;      // the earliest sighting of this run, whoever made it
+    const current = { ...rev, times: { index_first_seen: first, fields_fetched, published: nowIso() } };
+    return { ...windEmpty(), current, previous: brief(c.current), seen: c.seen && c.seen.run > run ? c.seen : null, last_attempt: windNoteRelevant(c.last_attempt, current) ? c.last_attempt : null }; });
   if (!up.wrote) { await logRun(env, 'wind', ms, 'ok', 200, 0, bytes, `superseded: ${up.cur.current.run} is published; ${run} not published; ${requests} requests`); return 'wind:superseded ' + run; }
   await logRun(env, 'wind', ms, 'ok', 200, 3, bytes, `run ${run} published; index first seen ${seen.index_first_seen}; fields fetched ${fields_fetched}; published ${up.body.current.times.published}; ${requests} requests`);
   return 'wind:published ' + run;
@@ -3814,6 +3833,9 @@ async function guarded(env, layer, ms, fn) {
     return layer + ':threw ' + String(e).slice(0, 80); }
 }
 
+/** The wind collector under the guard, answering with the collector's own result ("wind:published <run>", "wind:down <reason>", …)
+ * so that a handled failure is never reported as a plain "ran". */
+async function runWind(env, ms) { let r = null; const g = await guarded(env, 'wind', ms, async (e, m) => { r = await collectWind(e, m); }); return r || g; }
 const JOBS = {
   five: async (env, ms) => (await Promise.all([
     guarded(env, 'usgs', ms, collectUsgs),
@@ -3833,7 +3855,7 @@ const JOBS = {
   plastic: async (env, ms) => guarded(env, 'plastic', ms, collectPlastic),   // manual: /admin/run/plastic (no gate)
   sunface: async (env, ms) => guarded(env, 'sunface', ms, collectSunface),   // manual: /admin/run/sunface (admin key; ignores the gate; one upstream request)
   skycraft: async (env, ms) => guarded(env, 'skycraft', ms, collectSkycraft),   // manual: /admin/run/skycraft (admin key; ignores the gate and the hour; two upstream requests, one at a time)
-  wind: async (env, ms) => guarded(env, 'wind', ms, collectWind),   // manual: /admin/run/wind (admin key; ignores the gate; runs the collector once)
+  wind: async (env, ms) => runWind(env, ms),   // manual: /admin/run/wind (admin key; ignores the gate; runs the collector once). The result is the collector's own word: published, down, superseded or nothing newer.
   dustrgb: async (env, ms) => guarded(env, 'dustrgb', ms, collectDustRgb),   // manual: /admin/run/dustrgb (admin key; ignores the gate and the hour, as plastic does)
   drifters: async (env, ms) => guarded(env, 'drifters', ms, collectDrifters),   // manual: /admin/run/drifters (no gate: one ~100 KB request)   // manual: /admin/run/satellites (same stamp gate)
   hourly: async (env, ms, manual) => {
@@ -3852,7 +3874,7 @@ const JOBS = {
     // Sun face: every scheduled hour, last of all (one ~200 KB request); never on a manual hourly run
     const w = env.SUNFACE_ENABLED !== '1' ? 'sunface:not scheduled (SUNFACE_ENABLED unset)' : !manual ? await guarded(env, 'sunface', ms, collectSunface) : 'sunface:skipped (manual hourly run)';
     // Wind: every scheduled hour, after everything else; never on a manual hourly run. With the flag unset: no request, nothing written.
-    const x = env.WIND_ENABLED !== '1' ? 'wind:not scheduled (WIND_ENABLED unset)' : !manual ? await guarded(env, 'wind', ms, collectWind) : 'wind:skipped (manual hourly run)';
+    const x = env.WIND_ENABLED !== '1' ? 'wind:not scheduled (WIND_ENABLED unset)' : !manual ? await runWind(env, ms) : 'wind:skipped (manual hourly run)';
     return { swpc: k, co2: c, seaice: i, satellites: s, drifters: d, plastic: p, dustrgb: u, skycraft: v, sunface: w, wind: x, batch: b };
   },
 };
