@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612071000">
+<link rel="stylesheet" href="style.css?v=202612091000">
 </head>
 <body class="world">
 <header class="top">
@@ -79,6 +79,7 @@
       <div id="leg-line"><span class="lg" id="leg-usgs" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--quake)"></span>earthquake</span><span class="lcnt" hidden>Earthquakes: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-firms" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--fire)"></span>fire detection (per pass)</span><span class="lcnt" hidden>Fire detections: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-ships" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--ship)"></span>vessel (last sample)</span><span class="lcnt" hidden>Ships: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-drifters" hidden><span class="lsep" hidden> · </span><span class="lsym"><span id="leg-drifters-sw"></span>drifting buoy · coloured by water temperature (see card)</span><span class="lcnt" hidden>Drifting buoys: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-plastic" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero)</span></span><span class="lg" id="leg-forest" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</span></span><span id="leg-none">No data symbols or count cells are drawn right now.</span></div>
       <div class="cov nightleg" id="night-legend" hidden></div>
       <div class="cov nightleg" id="oh-legend" hidden></div>
+      <div class="cov nightleg" id="nl-legend" hidden></div>
       <div class="cov nightleg" id="orb-legend" hidden></div>
       <details class="covkey">
         <summary>Cell outlines — coverage key</summary>
@@ -88,7 +89,7 @@
         <div class="cov">No outline = no records in that cell; not evidence of absence.</div>
         <div><a href="sources.html#coverage">How coverage is graded →</a></div>
       </details>
-      <div class="keydef" id="key-def">“Key · N layers” counts layers drawn on the globe right now: each data layer that draws a symbol or a usable count cell (earthquakes, fires, vessels, forest, drifting buoys, microplastic samples), day/night as one, ocean heat as one, and each orbital category (payloads, rocket bodies, debris) as one. Indices (Kp, CO₂, sea ice), switched-off layers, layers still loading or unavailable, a layer that draws nothing, and cells outlined as unknown are not counted.</div>
+      <div class="keydef" id="key-def">“Key · N layers” counts layers drawn on the globe right now: each data layer that draws a symbol or a usable count cell (earthquakes, fires, vessels, forest, drifting buoys, microplastic samples), day/night as one, ocean heat as one, night lights as one, and each orbital category (payloads, rocket bodies, debris) as one. Indices (Kp, CO₂, sea ice), switched-off layers, layers still loading or unavailable, a layer that draws nothing, and cells outlined as unknown are not counted.</div>
       </div>
     </div>
     <footer class="credits" id="credits" aria-label="Data sources and acknowledgments">Data: <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a> · <a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">NASA FIRMS</a> · <a href="https://www.swpc.noaa.gov/" target="_blank" rel="noopener">NOAA SWPC</a> · <a href="https://gml.noaa.gov/ccgg/trends/" target="_blank" rel="noopener">NOAA GML</a> · <a href="https://nsidc.org/data/g02135" target="_blank" rel="noopener">NSIDC</a> · <a href="https://aisstream.io/" target="_blank" rel="noopener">aisstream.io</a> · orbital element sets <a href="https://www.space-track.org/" target="_blank" rel="noopener">Space-Track.org</a> (US Space Force 18th/19th Space Defense Squadrons) · drifting buoys <a href="https://osmc.noaa.gov/erddap/tabledap/OSMC_flattened.html" target="_blank" rel="noopener">NOAA OSMC</a> (WMO GTS reports; CC0) · <a href="https://www.globalforestwatch.org/" target="_blank" rel="noopener">Global Nature Watch</a> (powered by <a href="https://resourcewatch.org/" target="_blank" rel="noopener">Resource Watch</a>, WRI; integrated deforestation alerts, UMD/GLAD and WUR, CC BY 4.0) · imagery <a href="https://earthdata.nasa.gov/gibs" target="_blank" rel="noopener">NASA GIBS</a> · Collection data: <a href="https://github.com/metmuseum/openaccess" target="_blank" rel="noopener">The Metropolitan Museum of Art Open Access</a> (CC0), source CSV of 2 Nov 2026 (commit e394878) · Moon and Sun distances: <a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener">NASA/JPL Horizons</a> (calculated). Dust RGB imagery: contains modified <a href="https://user.eumetsat.int/catalogue/EO:EUM:DAT:0869" target="_blank" rel="noopener">EUMETSAT</a> Meteosat data 2026 (Dust RGB - MTG - 0 degree, CC BY 4.0). Ocean heat: <a href="https://coralreefwatch.noaa.gov/product/5km/index_5km_ssta_clim19912020.php" target="_blank" rel="noopener">NOAA Coral Reef Watch</a> (CoralTemp v3.1 and SST anomaly, 1991–2020 baseline; methods article DOI 10.3390/rs12233856), files from the <a href="https://www.star.nesdis.noaa.gov/" target="_blank" rel="noopener">NOAA / NESDIS Center for Satellite Applications and Research</a>. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (<a href="https://earthdata.nasa.gov/lance" target="_blank" rel="noopener">LANCE</a>), part of NASA's Earth Science Data and Information System (ESDIS). <a href="sources.html">Sources &amp; Details →</a></footer>
@@ -282,6 +283,39 @@
               </div>
             </details>
           </div>
+          <div class="ovl opt-nl" id="card-nl">
+            <div class="ovl-h">Night lights <span class="ev obs">Observed</span><span class="state" id="s-nl">off</span></div>
+            <button class="ovl-tgl" type="button" id="tgl-nl" role="switch" aria-checked="false" aria-describedby="nl-note"><span class="box" aria-hidden="true"></span><span class="t">Night lights — newest complete night</span></button>
+            <div class="cav" id="nl-note">Light measured at night by the NOAA-20 satellite, for one UTC date. Drawn in place of the true-colour picture while it is on. Light as measured at the satellite. Moonlight, cloud, fires, lightning, boats and the viewing angle all change it.</div>
+            <div class="obs" id="nl-status" aria-live="polite">Off. Switch on to load the newest complete night frame.</div>
+            <details class="scope" id="nl-scope">
+              <summary>What this is and is not</summary>
+              <div>
+                <p>NASA's <b>Day/Night Band</b> picture from the VIIRS instrument on NOAA-20, read from NASA GIBS: the light the satellite measured at night, on one fixed scale. It is a measurement of <b>light</b>. It does not say why a place is bright or dark.</p>
+                <p><b>Which night.</b> The newest UTC date whose band from 30°S to 30°N has no more than 1% missing. A newer date that is still filling in is named as still arriving. That band is a check that a frame has arrived; it does not establish coverage everywhere.</p>
+                <p><b>No data</b> is drawn as a pattern, never as dark. Around midsummer the high latitudes have no night pass, so there is no picture there.</p>
+                <p><b>Not corrected.</b> Moonlight, cloud, fires, lightning, boats and the viewing angle all change what is measured. The scale stops at 38.2: anything brighter is drawn white.</p>
+                <p>NASA: not for tactical decisions or local-scale conditions.</p>
+                <p><a href="sources.html#nightlights">Sources &amp; Details →</a></p>
+              </div>
+            </details>
+            <details class="scope nl-cmp" id="nl-cmp">
+              <summary>Compare two nights for one place</summary>
+              <div>
+                <p>The same box, grid and scale for both nights. A pixel is compared only where light was measured on both nights <b>and</b> clear-sky confidence is 0.95 or more on both. Everything else is drawn as a pattern.</p>
+                <form id="nl-form" class="nl-form" novalidate>
+                  <label for="nl-lat">Latitude<input id="nl-lat" type="number" inputmode="decimal" min="-90" max="90" step="0.01"></label>
+                  <label for="nl-lng">Longitude<input id="nl-lng" type="number" inputmode="decimal" min="-180" max="180" step="0.01"></label>
+                  <label for="nl-span">Box size<select id="nl-span"><option value="0.5">0.5° (about 55 km)</option><option value="1">1°</option><option value="2">2°</option><option value="5">5°</option><option value="10">10°</option></select></label>
+                  <label for="nl-a">First night (UTC date)<input id="nl-a" type="date"></label>
+                  <label for="nl-b">Second night (UTC date)<input id="nl-b" type="date"></label>
+                  <div class="nl-btns"><button type="button" id="nl-here">Use the centre of the globe view</button><button type="submit" id="nl-go">Compare the two nights</button></div>
+                </form>
+                <div class="hint" id="nl-msg" role="status" hidden></div>
+                <div id="nl-out" hidden></div>
+              </div>
+            </details>
+          </div>
           <div class="sky-group" id="sky-group" role="group" aria-labelledby="sky-h">
             <div class="sky-head" id="sky-h">Sky</div>
           <div class="card sat-card orb-card" id="card-orb" style="--c:var(--space)">
@@ -394,9 +428,10 @@
 <script src="app.js?v=202612021100"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
-<script src="skyscene.js?v=202612061000"></script>
+<script src="skyscene.js?v=202612101000"></script>
 <script src="oceanheat.js?v=202611291000"></script>
 <script src="dustrgb.js?v=202612021000"></script>
+<script src="nightlights.js?v=202612101000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
@@ -581,6 +616,7 @@ function drawnLayers() {
   for (const k of DATA_LAYERS) if (drawnGeom[k].symbols > 0 || drawnGeom[k].cells > 0) out.push(k);
   try { if (night.on && night.at) out.push('daynight'); } catch (_) { /* declared later in this script */ }
   if (ME.oceanHeat && ME.oceanHeat.on()) out.push('oceanheat');
+  if (ME.nightLights && ME.nightLights.on()) out.push('nightlights');
   try { if (orb.at && !orb.why) for (const g of orbGroupsNow()) if (orb.on.has(g.id) && orb.last[g.id]) out.push('orbital:' + g.id); } catch (_) { }
   return out;
 }
