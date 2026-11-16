@@ -31,3 +31,44 @@ Each range step records: time to headers, the headers, time to first and last ch
 
 ## What it cannot show
 How many bytes Cloudflare pulled from NOAA upstream; only what reached the Worker. One location, one object, one afternoon.
+
+## Result — run 16 Nov 2026, 14:32–14:35 UTC (written 14:35 UTC, clock reading)
+
+Run on Chad's own line: "Approve: create temporary Worker mother-earth-wind-range-probe from commit b94c191 (docs/research/global-wind-range/range-probe-worker.mjs, sha256 51ccabd7…b7d1; no bindings, no schedule, no storage), run up to five keyed read-only sequences per its README rev 2, then delete the Worker".
+
+**The cache setting is the cause. With `cf: { cacheTtl: 0 }` the range request gets its headers and then no body at all; without it, or with `cache: 'no-store'`, the same request completes in about 2.4 s with the right bytes. Order makes no difference.**
+
+| Step | Time (UTC, clock) | Evidence |
+|---|---|---|
+| Source checked, Worker created | 14:32:39–14:32:42 | file fetched from GitHub at `b94c191`, 7,103 bytes, sha256 `51ccabd7…b7d1` matched; account held only `mother-earth` before; handlers `fetch` only; bindings none; schedules none; workers.dev address on, previews off |
+| No key | 14:33:11 | 404 "not found" |
+| Keyed 1: **A** | 14:33:11–14:33:43 | ray `a5b73596ddfcf732-JNB` |
+| Keyed 2: **B** | 14:33:52–14:34:24 | ray `a5b7369658bff732-JNB` |
+| Keyed 3: **C** | 14:34:24–14:34:27 | ray `a5b737618d06f732-JNB` |
+| Worker deleted | 14:34:36 | delete answered success; account again holds only `mother-earth`; the address returns Cloudflare's own 404 (14:34:53) |
+
+Every step: status 206, Content-Range, Content-Length and ETag exactly as pinned; hub's User-Agent; 30 s abort signal; all served from Johannesburg.
+
+| Sequence | Step | Cache setting | cf-cache-status | Headers after | Bytes handed to the Worker | Outcome |
+|---|---|---|---|---|---|---|
+| A | 1 | `cf: { cacheTtl: 0 }` | REVALIDATED | 1,090 ms | **0** (no chunk) | **not finished: TimeoutError at 30,000 ms** |
+| A | 2 | none | DYNAMIC | 1,142 ms | 959,100 in 247 chunks | complete at 2,480 ms; sha256 equals the browser read |
+| B | 1 | none | DYNAMIC | 1,106 ms | 959,100 in 241 chunks | complete at 2,465 ms; sha256 equals the browser read |
+| B | 2 | `cf: { cacheTtl: 0 }` | REVALIDATED | 1,114 ms | **0** (no chunk) | **not finished: TimeoutError at 30,000 ms** |
+| C | 1 | `cache: 'no-store'` | DYNAMIC | 1,075 ms | 959,100 in 241 chunks | complete at 2,370 ms; sha256 equals the browser read |
+
+**What this shows**
+- The hub's failure is reproduced outside the hub, twice, in both orders, and removed by changing only the cache setting. User-Agent and the 30 s limit are ruled out (identical in every step).
+- With the setting, the response goes through Cloudflare's cache path ("REVALIDATED") and not one byte of body reaches the Worker in 30 s. Without it the response is "DYNAMIC" (not cached) and streams at once.
+- The chunked read here and the hub's `arrayBuffer()` fail the same way with the setting, so the reading method is not the cause.
+- D and E were not run: the plan called for them only if the cf step had completed. **Three keyed requests used of five; six upstream requests; about 2.9 MB delivered.**
+
+**Not shown**
+- What Cloudflare was doing during the 30 s (for example fetching the whole 497 MB object to serve the slice). The probe sees only what reached the Worker.
+- Whether the setting also harms the hub's index request and object check: on the hub both passed with it, twice. Those are a 32 kB file and a HEAD.
+- Other runs, other locations, other days. One object, one afternoon, Johannesburg.
+- The morning probe (§11 of the gate) sent no cache setting, which is why it passed.
+
+**Candidate fixes for the hub (not made; for GPT):** on the wind requests, send `cache: 'no-store'` (Cloudflare's documented bypass; passed here) or no cache setting (passed here, and passed all six fields this morning). The suites' fake mirror cannot tell these apart, so the proof stays a live run.
+
+The probe key was used for the three requests and has been deleted from Claude's workspace.

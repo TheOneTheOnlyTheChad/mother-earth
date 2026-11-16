@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 14:35 UTC (clock reading) — **Wind range probe run: the `cf: { cacheTtl: 0 }` setting is the cause**
+- Chad, his own line: "Approve: create temporary Worker mother-earth-wind-range-probe from commit b94c191 (…sha256 51ccabd7…b7d1; no bindings, no schedule, no storage), run up to five keyed read-only sequences per its README rev 2, then delete the Worker".
+- **Created 14:32:42 UTC, deleted 14:34:36 UTC** from the pane's signed-in Cloudflare tab; source hash checked first; account holds only `mother-earth` again; the probe address returns Cloudflare's own 404.
+- **Three keyed requests (A, B, C), all from Johannesburg.** With `cf: { cacheTtl: 0 }`: 206 and the right headers after about 1.1 s, cf-cache-status REVALIDATED, then **0 bytes of body and a timeout at 30 s**, in both orders. With no cache setting, and with `cache: 'no-store'`: DYNAMIC, all 959,100 bytes in about 2.4 s, sha256 equal to the browser read. User-Agent and time limit were identical throughout.
+- D and E not run (the plan called for them only if the cf step completed). Six upstream requests, about 2.9 MB.
+- Full table and what is not shown: `docs/research/global-wind-range/README.md`, "Result".
+- **Hub unchanged:** 0.6.16, `WIND_ENABLED` unset, manifest as after the second attempt (no grid, two failures noted). No fix made; candidates go to GPT first.
+
 ## 16 Nov 14:31 UTC (clock reading) — Wind range probe: GPT approves the file; run order clarified; **not run (awaiting Chad's own line)**
 - GPT (relayed by Chad): Mac copy matches sha256 `51ccabd7…b7d1`; reran the 19 local checks and confirmed an expired request gives 410 with no upstream call; order to use: A; if A differs, B, and C if the cf request fails in either; if both of A complete and match, skip B and run D then E; cap of five keyed sequences kept in the run instructions; delete the Worker after; bring results back before changing the hub.
 - README's order section rewritten to that (rev 2). The Worker file is unchanged (same hash, still as at `b94c191`).
