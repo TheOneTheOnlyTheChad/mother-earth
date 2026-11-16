@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 16:37 UTC (clock reading) — **`wind-rc` rev 6: thin coastline outline above the wind sheet** (page only, branch only) — **new static source, Chad's decision needed**
+- GPT's second look (relayed by Chad): rev 5 at 0.5 is better but the Cape's southern edge is still hard to pick out under the jet stream, and speed colours are harder to match to the legend at 0.5; keep the visual hold; preview a thin coastline outline above the sheet and compare at 0.5 and 0.8. GPT matched all 489 hashes of `e7bfacc`; its own rerun of the page suite was blocked (no Playwright there).
+- **Branch head `2bbe2bca798223177d42118bc52e4bc3646a778b`.** `wind.js` draws a one-pixel white coastline above the sheet, only while a wind sheet is drawn, using the globe library's path layer; `assets/coast-50m.bin` (126,880 bytes, sha256 `f3cda6be…fdfe`) fetched once on first switch-on; card and Sources paragraphs added; `phase1/build-coast.py` rebuilds the asset byte for byte from the pinned source.
+- **Source: Natural Earth 1:50m coastline v5.1.2, public domain** (terms read 16 Nov in the repository's LICENSE.md), simplified by Mother Earth (701 lines, 31,016 points). **It is static, not a live feed; Chad's rule for new features is live feeds only. Kept or not is Chad's call. No REGISTER entry filed; a draft is in the packet §12.2.**
+- **Preview-only address switches:** `?wind_opacity=0.8` and `?wind_coast=0`, so all four combinations can be compared in one sitting; to be removed at release.
+- **Tests:** `wind-ui` 89 passed; 27 breaks (6 new), each run alone, each applied and failed a real check. Hub suite not rerun (no hub file changed). **Hub file unchanged** (`59129514…e93e`, the live 0.6.17).
+- **Seen by Claude** only over a flat stand-in Earth picture: outline crisp at both opacities; weakest over the pale yellow-green bands. A thicker line was tried and did not draw; dropped. Not seen: real Earth picture, high-density screen, Sky view. Frame-rate cost of 701 line objects not measured.
+- Mac `_review/wind-rc/` updated to this head (491 files, all hashes check); the new asset is a binary file, fetched straight from GitHub into the review copy because the preview needs it.
+
 ## 16 Nov 15:28 UTC (clock reading) — **GPT's look at the wind page: works at all three heights; hold release for readability. `wind-rc` rev 5: opacity 0.5 preview** (page only, branch only)
 - GPT (relayed by Chad), desktop Chrome, branch page against the live hub: all three heights worked, valid time 06:00 UTC throughout, legend readable, no load errors; **at 0.8 opacity the coastline of southern Africa was lost**, worst at jet-stream height. Asked for a 0.5 preview, then a thin coastline outline above the sheet if still lost.
 - **Branch head `e7bfacc586763a5a305dc018aa254b5e191f8b57`:** `wind.js` opacity 0.8 → 0.5; `index.html` asset version for `wind.js` moved; packet rev 5 (§11; §10's sentence about the two test null reads corrected). `wind-ui` 76 passed. **Hub file unchanged** (`59129514…e93e`, the live 0.6.17).
