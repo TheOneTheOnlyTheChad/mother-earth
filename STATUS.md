@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 14:10 UTC (clock reading) — **Hub 0.6.16 deployed (wind collector present, `WIND_ENABLED` unset)** — stage 3 of the wind preview
+- GPT (relayed by Chad): `wind-rc` rev 3 passes re-review; reviewed Worker sha256 `74c0af40d7c81f123ff36d0304b6eeb575351b93c3baef6e7ccf3498ba1c8158`; all 489 files of the Mac export matched the hash list for `ad83cae`.
+- Chad, his own line: "Approve: deploy hub 0.6.16 from wind-rc ad83cae (phase1/worker.js sha256 74c0af40…8158; WIND_ENABLED unset, so no NOAA request and nothing written; no schedule change, no merge)".
+- **Deployed 13:59:44 UTC** (Cloudflare's modified time) from the pane: file fetched from GitHub at `ad83cae`, hash checked, uploaded as code only. Cloudflare version 72 (`8a48b281`); the previous is version 71 (`3ef8ad20`, 0.6.15).
+- **Read back 14:00:07 UTC:** hub answers 0.6.16; the deployed module is 397,379 bytes and hashes to `74c0af40…8158`; 22 bindings as before, none named WIND; the four schedules unchanged; `/snapshot/wind/meta` is the empty manifest (credit NOAA/NCEP GFS); an unpublished grid address 404; `/admin/run/wind` without the key 403; no object under `wind/` in R2; `/status`, usgs, dustrgb, sunface and skycraft answer 200.
+- **First scheduled hour on 0.6.16 (14:07 UTC):** the hourly invocation ended "ok" on version `8a48b281`, 146 ms CPU, 16.9 s wall; swpc, co2, drifters and sunface rows written; **no wind run row, no wind log line, no object under `wind/`, manifest still empty.** The 14:00 fifteen-minute and 14:00/14:05 five-minute invocations also ended ok on the new version.
+- **Main is not the live hub for now:** `phase1/worker.js` on main is still 0.6.15; the live hub is the branch file at `ad83cae`. Nothing merged. The page is unchanged.
+- **Rollback (own Approve line):** redeploy 0.6.15 (main's `phase1/worker.js`; Cloudflare version 71).
+- Next: stage 4, one manual run (`/admin/run/wind`), needs Chad's own Approve line. Then verify the manifest's run and all three served grid hashes, and compare with ecCodes for that run through Chad's Chrome.
+
 ## 16 Nov 13:46 UTC (clock reading) — **Global Wind: GPT's re-review held `wind-rc` for two more hub gaps; rev 3 pushed** (branch only; nothing deployed, nothing merged)
 - GPT (relayed by Chad) on `579b14f`: the page cutoff fix passes and the two original races pass. Two gaps left in the hub's status code: a later clean scan could leave an earlier failure visible (it decided from its first read of the manifest); the first sighting of a run's index was written only after the grids were verified, and the run row could log a later time than the manifest.
 - **Rev 3, branch head `ad83cae`:** clearing is decided inside the conditional update; the sighting is written as soon as the index is accepted; the run row logs the committed revision's sighting. Hub only; no page file changed. Packet rev 3 §9.
