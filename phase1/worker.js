@@ -71,7 +71,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.16';
+const COLLECTOR_VERSION = '0.6.17';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -3289,7 +3289,9 @@ async function windFail(env, ms, reason, http, detail, seen) {
 }
 /** One range request. The response is refused BEFORE its body is read unless it is 206 with the exact Content-Range, length and ETag. */
 async function windFetchRange(url, r, total, etag) {
-  let res; try { res = await fetch(url, { headers: { 'User-Agent': UA, Range: `bytes=${r.start}-${r.end}` }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(WIND.TIMEOUT_MS) }); } catch (e) { return { ok: false, reason: 'field request failed', http: 0, detail: String(e).slice(0, 120) }; }
+  // 0.6.17: cache: 'no-store', NOT cf: { cacheTtl: 0 }. With the cf setting a byte-range request to this mirror got its 206 headers and
+  // then no body at all (two live runs and the range probe, 16 Nov: docs/research/global-wind-range/README.md). Range downloads only.
+  let res; try { res = await fetch(url, { headers: { 'User-Agent': UA, Range: `bytes=${r.start}-${r.end}` }, cache: 'no-store', signal: AbortSignal.timeout(WIND.TIMEOUT_MS) }); } catch (e) { return { ok: false, reason: 'field request failed', http: 0, detail: String(e).slice(0, 120) }; }
   const cr = res.headers.get('content-range'), cl = Number(res.headers.get('content-length')), et = res.headers.get('etag');
   if (res.status !== 206 || cr !== `bytes ${r.start}-${r.end}/${total}` || cl !== r.len || et !== etag) {
     try { if (res.body) await res.body.cancel(); } catch (_) {}
