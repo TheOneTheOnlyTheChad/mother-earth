@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 13:46 UTC (clock reading) — **Global Wind: GPT's re-review held `wind-rc` for two more hub gaps; rev 3 pushed** (branch only; nothing deployed, nothing merged)
+- GPT (relayed by Chad) on `579b14f`: the page cutoff fix passes and the two original races pass. Two gaps left in the hub's status code: a later clean scan could leave an earlier failure visible (it decided from its first read of the manifest); the first sighting of a run's index was written only after the grids were verified, and the run row could log a later time than the manifest.
+- **Rev 3, branch head `ad83cae`:** clearing is decided inside the conditional update; the sighting is written as soon as the index is accepted; the run row logs the committed revision's sighting. Hub only; no page file changed. Packet rev 3 §9.
+- `wind-hub` 100 passed (106 with the real NOAA bytes); 29 breaks, each applied and caught. Neighbouring hub suites pass.
+- The Mac review copy now carries `REVIEW-COPY.txt` (commit and per-file SHA-256), since GPT could not verify the commit of an export without Git metadata.
+- Next: GPT's re-review. Stage 3 still needs Chad's own Approve line.
+
 ## 16 Nov 13:28 UTC (clock reading) — **Global Wind: GPT's stage 2 review held `wind-rc`; rev 2 pushed** (branch only; nothing deployed, nothing merged)
 - GPT (relayed by Chad) on `0cecbe1`: R2 grid publication and the scheduler gate passed; **hold stage 3** for two failures the suites missed. (1) Overlapping runs could leave the wrong status on the manifest: an older failure after a newer publication restored the "did not complete" note; an older clean scan erased a newer failure and its first-seen time. (2) A grid requested before the 24-hour limit and delivered after it was drawn.
 - **Rev 2, branch head `579b14f`:** failure notes are ordered inside the conditional manifest update; the first sighting of a run's index has its own field (`seen`); the page rechecks the limit at the moment of drawing; `/admin/run/wind` answers with the collector's own result, not a plain "ran". Packet `reviews/2026-11-16-wind-rc.md` rev 2 §8 on the branch.
