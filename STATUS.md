@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 08:34 UTC (clock reading) — **Global Wind: GPT's review of rev 1; proposal rev 2** (docs only; nothing built)
+- GPT (relayed by Chad): rev 1 is ready for the bounded research gate, with three clarifications: start from 0.25°; treat the in-Worker decoder as a candidate; leave the stale line unset (24-hour hide limit provisional). GPT sharpened the gate's pass criteria and recommends go for it, research only.
+- **`docs/concepts/GLOBAL-WIND-PROPOSAL.md` rev 2:** §11 carries the review and governs. The "about 15 h" expectation is withdrawn. GPT's "v17 in late 2027" is recorded as GPT's; Claude could not open the October notice.
+- Next: Chad's own go for the gate (§11.5). Nothing downloaded or decoded yet.
+
 ## 16 Nov 08:25 UTC (clock reading) — **Global Wind by Height: brief filed, proposal rev 1 written for GPT** (docs only; nothing built)
 - Chad brought the spec (`docs/concepts/GLOBAL-WIND-BRIEF.md`, filed as received): an optional Wind layer at three heights from NOAA GFS, global. Chad on a plainly modelled layer on the globe: "i am happy with 2". Then "go" for a docs-only proposal.
 - **`docs/concepts/GLOBAL-WIND-PROPOSAL.md` rev 1.** Six changes to the brief's route: decode in the hub, not with desktop tools; start from the 0.25° product because NOAA's notice of 16 Apr 2026 (PNS 26-30, read through a fetch summary) proposes removing the 1° files with GFS v17; set the stale line from measured arrival times; colour and static arrows first; desktop only; the page's existing state words. Its §3 marks which source facts were read today and which were not.
