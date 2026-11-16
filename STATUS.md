@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 12:32 UTC (clock reading) — **Global Wind: `wind-rc` built (stage 1) and pushed for GPT's review** (branch only; nothing deployed, nothing merged)
+- Chad, his own line: "Go: build wind-rc on a branch per GLOBAL-WIND-BUILD-PROPOSAL rev 2 (§11 governing; B1 accepted; stage 1 only: hub code, page, suites and the terms read; no hub deploy, no merge)".
+- **Branch `wind-rc`, head `0cecbe1`** (code head `91dd040`), from main `fcb3e7a`. Packet: `reviews/2026-11-16-wind-rc.md` on the branch.
+- **Terms read first** (Registry of Open Data on AWS, `noaa-gfs-bdp-pds`, in the pane): open to the public; attribution requested; no implied endorsement; modified data must not be presented as original. REGISTER entry drafted in the packet, not filed.
+- **Hub 0.6.16 on the branch:** wind collector gated by `WIND_ENABLED` (unset = no request), `/admin/run/wind` runs once with the admin key, content-addressed create-only grids, the manifest as the single conditional commit point, no deletes. `wind-hub` 81 passed (87 with the real NOAA bytes); 21 breaks all caught.
+- **Page on the branch:** `wind.js`, a card, a tap hook, styles, a Sources section. `wind-ui` 72 passed; 20 breaks all caught. Rendered in headless Chromium with the gate's real grids: jet stream and calm over land visible, no page error.
+- Existing suites rerun: the hub suites sharing the hourly job and eight page suites pass; `smoke-fixes` "Sources 360" fails at 367 px as on main.
+- **Open:** coastlines are hard to see under the sheet (Chad's look); colour scale provisional; Sky view and other sheets together not tested; nothing ran in a Worker.
+- **Mac:** the `_review/wind-rc/` copy and the docs sync are not done; Chad's Mac was closed. To do when it is back.
+- Next: GPT's review of the branch. Hub deploy, first manual run and schedule each need Chad's own Approve line.
+
 ## 16 Nov 11:19 UTC (clock reading) — **Global Wind: GPT's review of the build proposal; rev 2** (docs only; nothing built)
 - GPT (relayed by Chad): proceed with the `wind-rc` branch build once the R2 section spells out immutable grid writes and safe cleanup. GPT's finding: with one fixed key per run, an overlapping attempt could overwrite a grid another attempt had verified.
 - **`docs/concepts/GLOBAL-WIND-BUILD-PROPOSAL.md` rev 2** (§11 governs): renamed a branch preview backed by public data; content-addressed create-only grid objects; the manifest as the single commit point holding current and previous, with a re-read on a lost conditional write; no deletion during the preview; a browser recovery case for an aged-out revision; scheduled path makes zero requests with the flag unset, manual run publishes once with the admin key; three arrival times logged; NOAA/NCEP credit and "sampled and quantised by Mother Earth" from the first revision.
