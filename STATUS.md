@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 19:27 UTC (clock reading) — **First scheduled wind run published 12z; the open page moved to it without a reload** — stage 5 verified
+- **Hub, hourly job of 19:07 UTC** (scheduled, version `045733da`): wind row ok, "run 2026111612 published; index first seen 19:08:25.373Z; fields fetched 19:08:28.433Z; published 19:08:32.645Z; 9 requests", 3 records, 4,783,522 bytes. swpc, co2, drifters and sunface rows ok in the same job. **Cloudflare's invocation log: outcome ok, 745 ms CPU, 34,303 ms wall for the whole hourly job** (146 ms CPU without wind at 14:07). The wind part took about 7 s from index to publication.
+- **Manifest, read 19:12:43 UTC:** `current` run 2026111612, valid 2026-11-16T12:00:00Z, object 502,892,274 bytes, ETag `"53487450…2aac"`; `previous` run 2026111606; `last_attempt` null; `seen` null.
+- **Served grids hashed against the manifest: all three of the current run match** (near ground `2e23eee4…c449`, 250 hPa `2601adf0…d5e8`, 10 hPa `7f2fdf73…51db`; 260,640 bytes each), **and all three of the previous run are still served and match.**
+- **Page, the watch started 18:47:42 UTC** (pane on Chad's Mac, `http://localhost:8080/`, rev 8 page, Wind on, no reload): the watch log has two entries only: run 2026111606 at 18:47:47, and **run 2026111612, valid 12:00 UTC, at 19:12:37, one sheet, outline still in the scene, state "loaded"**. A screenshot at 19:13:00 shows the wind sheet, arrows and coastline on the globe. The pane tab was in the background, where browsers slow timers; the change was logged as Claude's read began, so the poll may have run late. It was the page's own poll: nothing was reloaded and no refresh was called.
+- **Not shown:** the swap watched by a person on screen; a run with nothing new on the hourly check (next hour); several days of arrival times; memory (not reported).
+- The second check-in (19:31 UTC) was cancelled as no longer needed.
+
 ## 16 Nov 18:54 UTC (clock reading) — **REGISTER: NOAA/NCEP GFS wind and Natural Earth coastline filed**
 - Chad, his own line: "Approve: file the REGISTER entries for NOAA/NCEP GFS wind and Natural Earth coastline as drafted in the wind-rc packet §14.3 (rev 9 wording)".
 - Two entries appended to `REGISTER.md` on main, in the register's bullet layout, wording from §14.3 rev 9 (the two fixes GPT asked for included). Filed on main, not the branch, because the hub already collects the NOAA source.
