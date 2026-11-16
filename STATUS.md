@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 08:47 UTC (clock reading) — **Global Wind first gate: all three parts pass on one real run** (research only; no hub or page change)
+- Chad, his own line: "Go: Global Wind first gate per GLOBAL-WIND-PROPOSAL rev 2 §11.5 (research only, read-only; no hub change)". He also allowed his Chrome and said yes to saving the one file to Downloads.
+- **Record: `docs/research/GLOBAL-WIND-GATE-2026-11-16.md`**, files in `docs/research/global-wind-gate/`.
+- **Fetch:** six bounded range requests to NOAA's open-data mirror from Chad's Chrome (08:42 UTC), run 16 Nov 00 UTC, 0.25°, 4,030,812 bytes, each `206` with the expected range. Claude's workspace and the Mac shell were refused by their allowlists.
+- **Decode:** all six are data template 5.3 (complex packing, second-order differencing), scanning mode 0, Earth-relative, no bitmap. The 117-line candidate decoder matched ecCodes 2.50.0 on all 6 × 1,038,240 values with a largest difference of 0, and refused ten damaged or unsupported inputs. About 290 ms CPU and a 72–75 MB process peak for all six in Node (not a Worker).
+- **Export:** three 1° grids of 260,640 bytes by point sampling; worst difference from the reference 0.0488 m/s; direction, date line, seam and pole checks pass.
+- **Arrival sample:** the mirror's copies of four runs were written 3 h 32 min to 3 h 49 min after the run's named time.
+- Not tested: the hub (reach, CPU, memory), other runs, several days of availability, reuse terms, anything on the page. Next: GPT's review of the result; then Chad's decision on a private preview.
+
 ## 16 Nov 08:34 UTC (clock reading) — **Global Wind: GPT's review of rev 1; proposal rev 2** (docs only; nothing built)
 - GPT (relayed by Chad): rev 1 is ready for the bounded research gate, with three clarifications: start from 0.25°; treat the in-Worker decoder as a candidate; leave the stale line unset (24-hour hide limit provisional). GPT sharpened the gate's pass criteria and recommends go for it, research only.
 - **`docs/concepts/GLOBAL-WIND-PROPOSAL.md` rev 2:** §11 carries the review and governs. The "about 15 h" expectation is withdrawn. GPT's "v17 in late 2027" is recorded as GPT's; Claude could not open the October notice.

@@ -1,0 +1,20 @@
+Step 1 fetch — Chad's Chrome, page origin noaa-gfs-bdp-pds.s3.amazonaws.com, clock 2026-11-16T08:42:07.913Z to 08:42:16.791Z
+Run: gfs.20261116/00/atmos/gfs.t00z.pgrb2.0p25.f000
+Object: 200, length 500418863, Last-Modified Mon, 16 Nov 2026 03:48:31 GMT, ETag "e85c7642b26561940fb3e795dd04348e", Accept-Ranges bytes
+Index: 200, 31816 bytes, 696 lines, Last-Modified Mon, 16 Nov 2026 03:48:52 GMT, ETag "fd2ddf81d620766eecb416c064b69f2f", sha256 ffc4e74b45c95b9081aff118b9091d83e60faa7577fb114e42c66696f201b146
+field|level|index matches|status|length ok|bytes|ms|head+tail|range|etag = object|sha256[:12]
+UGRD|10 m above ground|1|206|true|959584|1456|GRIB7777|413095365-414054948|true|10b5602745b7
+VGRD|10 m above ground|1|206|true|942176|1210|GRIB7777|414054949-414997124|true|e7ec0160867f
+UGRD|250 mb|1|206|true|587676|439|GRIB7777|206166258-206753933|true|7d1db1dea9e3
+VGRD|250 mb|1|206|true|595021|509|GRIB7777|206753934-207348954|true|b84f60e543c9
+UGRD|10 mb|1|206|true|491358|441|GRIB7777|114656286-115147643|true|83ff8d385f24
+VGRD|10 mb|1|206|true|454997|487|GRIB7777|115147644-115602640|true|0d1261163e81
+TOTAL 4030812 bytes, 6 range requests
+Index line (first): 585:413095365:d=2026111600:UGRD:10 m above ground:anl:
+Arrival sample (S3 Last-Modified of the mirror object = when the mirror copy was written; not NOAA's own publication time, not retrievability of the fields):
+20261116 00|file 03:48:31|idx 03:48:52|500418863
+20261115 18|file 21:33:42|idx 21:34:07|504270473
+20261115 12|file 15:33:31|idx 15:33:53|502827025
+20261115 06|file 09:32:15|idx 09:32:26|499157671
+06 UTC run of 16 Nov: index 404 at 08:42:16 UTC
+Blocked routes: Claude workspace curl -> proxy 403 "no rule allows host" (08:41:00 UTC); Mac shell curl -> proxy 403 blocked-by-allowlist (08:41:06 UTC)

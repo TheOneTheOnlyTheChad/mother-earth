@@ -1,0 +1,53 @@
+== decode vs ecCodes, tolerance 0.000001 m/s
+0 10u 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 45.5 wall ms 38.0 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":103,"surfaceScale":0,"surfaceValue":10,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-2374.7392578125,"E":0,"D":2,"nbits":12,"NG":31412}
+1 10v 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 40.1 wall ms 36.1 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":103,"surfaceScale":0,"surfaceValue":10,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-2408.120361328125,"E":0,"D":2,"nbits":12,"NG":31558}
+2 u 250 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 86.4 wall ms 53.6 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":25000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-387.67144775390625,"E":0,"D":1,"nbits":9,"NG":28239}
+3 v 250 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 20.9 wall ms 21.0 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":25000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-551.2896118164062,"E":0,"D":1,"nbits":9,"NG":28986}
+4 u 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 21.2 wall ms 21.2 prod {"discipline":0,"category":2,"number":2,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":1000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-496.000244140625,"E":0,"D":1,"nbits":7,"NG":25622}
+5 v 10 n 1038240 refn 1038240 maxdiff 0.00e+0 over tol 0 NaN 0 cpu ms 31.5 wall ms 31.7 prod {"discipline":0,"category":2,"number":3,"process":2,"timeUnit":1,"forecastTime":0,"surfaceType":100,"surfaceScale":0,"surfaceValue":1000,"surface2Type":255} ref {"significance":1,"year":2026,"month":11,"day":16,"hour":0,"minute":0,"second":0} grid {"ni":1440,"nj":721,"la1":90,"lo1":0,"la2":-90,"lo2":359.75,"di":0.25,"dj":0.25,"scan":0,"flags":48} pack {"template":3,"order":2,"R":-519.000732421875,"E":0,"D":1,"nbits":7,"NG":26373}
+rss start MB 38.0 peak MB 151.6 heapUsed MB 4.3
+same grid all six true same ref time true all f000 analysis true
+== refusals
+truncated to half -> GribRefused : declared length 959584 but 479792 bytes given
+cut 1000 bytes, length and end marker repaired -> GribRefused : section 7 length 959382 runs past the end
+data template set to 5.0 (simple packing) -> GribRefused : data template 5.0 not supported (only 5.3)
+data template set to 5.40 (JPEG 2000) -> GribRefused : data template 5.40 not supported (only 5.3)
+missing-value management set to 1 -> GribRefused : missing-value management 1 not supported
+differencing order set to 1 -> GribRefused : spatial differencing order 1 not supported (only 2)
+scanning mode set to 64 (south to north) -> GribRefused : scanning mode 64 not supported (only 0: west to east, north to south, rows)
+components flagged grid-relative -> GribRefused : wind components are grid-relative, not Earth-relative
+bitmap flagged present -> GribRefused : bitmap indicator 0 not supported (only 255: none)
+edition set to 1 -> GribRefused : edition 1 not supported
+== 1 degree export (method: point sample at whole degrees; components first, speed after)
+near-ground bytes 260640
+250hPa bytes 260640
+10hPa bytes 260640
+Cape Town | -34 | 18 | near-ground: u -4.5 (ref -4.52) v 11.0 (ref 11.00) → From south (158°), 43 km/h; arrow heads 338° | 250hPa: u 35.5 (ref 35.53) v 16.3 (ref 16.27) → From south-west (245°), 141 km/h; arrow heads 65° | 10hPa: u -7.0 (ref -7.00) v -2.4 (ref -2.40) → From east (71°), 27 km/h; arrow heads 251°
+North Atlantic | 50 | -30 | near-ground: u 9.1 (ref 9.05) v 5.4 (ref 5.37) → From south-west (239°), 38 km/h; arrow heads 59° | 250hPa: u 55.8 (ref 55.83) v 18.6 (ref 18.57) → From west (252°), 212 km/h; arrow heads 72° | 10hPa: u 23.2 (ref 23.20) v -10.8 (ref -10.80) → From north-west (295°), 92 km/h; arrow heads 115°
+Tokyo | 36 | 140 | near-ground: u -0.9 (ref -0.86) v -2.5 (ref -2.54) → From north (20°), 10 km/h; arrow heads 200° | 250hPa: u 29.8 (ref 29.83) v -2.3 (ref -2.33) → From west (274°), 108 km/h; arrow heads 94° | 10hPa: u 13.6 (ref 13.60) v 3.1 (ref 3.10) → From west (257°), 50 km/h; arrow heads 77°
+Southern Ocean | -55 | 100 | near-ground: u 0.1 (ref 0.06) v -9.5 (ref -9.50) → From north (359°), 34 km/h; arrow heads 179° | 250hPa: u 25.1 (ref 25.13) v -5.9 (ref -5.93) → From west (283°), 93 km/h; arrow heads 103° | 10hPa: u 17.7 (ref 17.70) v -3.5 (ref -3.50) → From west (281°), 65 km/h; arrow heads 101°
+Date line west side | 0 | 179 | near-ground: u -0.2 (ref -0.21) v 3.7 (ref 3.75) → From south (177°), 13 km/h; arrow heads 357° | 250hPa: u -6.4 (ref -6.37) v -2.1 (ref -2.13) → From east (72°), 24 km/h; arrow heads 252° | 10hPa: u -19.8 (ref -19.80) v -0.8 (ref -0.80) → From east (88°), 71 km/h; arrow heads 268°
+Date line | 0 | 180 | near-ground: u -1.4 (ref -1.43) v 3.2 (ref 3.22) → From south-east (156°), 13 km/h; arrow heads 336° | 250hPa: u -6.3 (ref -6.27) v 0.4 (ref 0.37) → From east (94°), 23 km/h; arrow heads 274° | 10hPa: u -18.9 (ref -18.90) v 1.5 (ref 1.50) → From east (95°), 68 km/h; arrow heads 275°
+Date line east side | 0 | -179 | near-ground: u -1.2 (ref -1.16) v 3.0 (ref 3.00) → From south (158°), 12 km/h; arrow heads 338° | 250hPa: u -2.9 (ref -2.87) v -0.3 (ref -0.33) → From east (84°), 10 km/h; arrow heads 264° | 10hPa: u -22.8 (ref -22.80) v -0.1 (ref -0.10) → From east (90°), 82 km/h; arrow heads 270°
+Greenwich seam | 40 | 0 | near-ground: u 2.3 (ref 2.33) v 1.0 (ref 0.97) → From south-west (247°), 9 km/h; arrow heads 67° | 250hPa: u 27.7 (ref 27.73) v -30.6 (ref -30.63) → From north-west (318°), 149 km/h; arrow heads 138° | 10hPa: u 52.2 (ref 52.20) v 10.2 (ref 10.20) → From west (259°), 191 km/h; arrow heads 79°
+Last column | 40 | 359 | near-ground: u 3.9 (ref 3.85) v -0.1 (ref -0.07) → From west (271°), 14 km/h; arrow heads 91° | 250hPa: u 24.8 (ref 24.83) v -26.6 (ref -26.63) → From north-west (317°), 131 km/h; arrow heads 137° | 10hPa: u 53.7 (ref 53.70) v 9.8 (ref 9.80) → From west (260°), 197 km/h; arrow heads 80°
+Near N pole | 89 | 45 | near-ground: u -5.6 (ref -5.56) v -0.2 (ref -0.18) → From east (88°), 20 km/h; arrow heads 268° | 250hPa: u -8.5 (ref -8.47) v 6.1 (ref 6.07) → From south-east (126°), 38 km/h; arrow heads 306° | 10hPa: u -46.9 (ref -46.90) v -2.8 (ref -2.80) → From east (87°), 169 km/h; arrow heads 267°
+Near S pole | -89 | 200 | near-ground: u -9.0 (ref -8.96) v -0.6 (ref -0.55) → From east (86°), 32 km/h; arrow heads 266° | 250hPa: u -21.1 (ref -21.07) v -8.2 (ref -8.23) → From east (69°), 81 km/h; arrow heads 249° | 10hPa: u 14.9 (ref 14.90) v -16.0 (ref -16.00) → From north-west (317°), 79 km/h; arrow heads 137°
+N pole | 90 | 0 | near-ground: u -4.0 (ref -4.05) v -3.5 (ref -3.53) → 19 km/h (pole: no bearing) | 250hPa: u -10.4 (ref -10.37) v -2.9 (ref -2.93) → 39 km/h (pole: no bearing) | 10hPa: u -31.2 (ref -31.20) v -34.3 (ref -34.30) → 167 km/h (pole: no bearing)
+S pole | -90 | 90 | near-ground: u 4.7 (ref 4.69) v 5.0 (ref 5.02) → 25 km/h (pole: no bearing) | 250hPa: u -1.6 (ref -1.57) v 22.6 (ref 22.57) → 82 km/h (pole: no bearing) | 10hPa: u -18.5 (ref -18.50) v -7.5 (ref -7.50) → 72 km/h (pole: no bearing)
+worst export-vs-reference difference at these points m/s 0.049 (quantisation limit 0.05)
+worst export-vs-reference over all 3 x 65,160 cells m/s 0.0488
+pole row N near-ground speed min 5.367 max 5.380 m/s across 1440 longitudes
+pole row S near-ground speed min 6.866 max 6.879 m/s across 1440 longitudes
+pole row N 250hPa speed min 10.745 max 10.878 m/s across 1440 longitudes
+pole row S 250hPa speed min 22.543 max 22.675 m/s across 1440 longitudes
+pole row N 10hPa speed min 46.337 max 46.469 m/s across 1440 longitudes
+pole row S 10hPa speed min 19.920 max 20.048 m/s across 1440 longitudes
+== synthetic
+eastward 10 m/s → From west (270°), 36 km/h; arrow heads 90°
+northward 10 m/s → From south (180°), 36 km/h; arrow heads 0°
+westward → From east (90°), 36 km/h; arrow heads 270°
+southward → From north (0°), 36 km/h; arrow heads 180°
+to north-east → From south-west (225°), 36 km/h; arrow heads 45°
+0.2 m/s → calm
+eastward at exact pole → 36 km/h (pole: no bearing)
