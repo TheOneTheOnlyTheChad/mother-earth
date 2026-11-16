@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 16 Nov 2026
 
+## 16 Nov 06:58 UTC (clock reading) — **GPT's live desktop Chrome smoke of the released site: passed** (docs only; no page or hub change)
+- New thread. Read START-HERE, HANDOVER and STATUS from main at `8c74abc`. Remote branches at the read: `main`, `aircraft-rc`, `widths-preview-rc` (the two merged Night lights branches are gone). Claude's container could not reach the public site (proxy 403), so the served hashes were not re-read; the last read is 06:30:01 UTC above.
+- **GPT (relayed by Chad): the live desktop Chrome smoke passed; Night lights done for now.** GPT replayed the sequence that exposed the label defect: Night lights switched off, Sky entered at once. The night picture showed briefly with its night label, then the daylight picture and the daylight label appeared together; back to Earth worked; no mismatch seen again.
+- Night lights (GPT): NOAA-20 imagery for 14 Nov UTC drew with lights and patterned gaps; 15 and 16 Nov marked as still arriving; Saipan and Tinian comparison 57% / 92% readable, 50% usable on both nights; the keyboard readout withheld the light value where the comparison was unreliable.
+- Rest of the site (GPT): core layers and the status report filled; Buoys, Microplastic, Day/night, Ocean Heat, Dust RGB, orbital payloads and the Met list loaded; Explore found the Cape Town coordinates and took Go to; Timeline opened the Pliny entry; Moon lighting and the dated LRO path worked together; the Sun picture and Parker's dated view loaded; the public hub answered as 0.6.15.
+- **Outside this smoke (GPT):** GPT's own shell fetch could not reach the host, so its check was through Chrome and the eighteen served hashes are Claude's 06:30:01 UTC read; real phone, Safari, screen reader; forced picture-load failures.
+- Next: nothing agreed. Chad chooses the next feature (live or regularly updated feeds only).
+
 ## 16 Nov 06:32 UTC (clock reading) — **Night lights label fix LIVE (page merge `9e9769c`); thread closed out** (no hub change)
 - GPT (relayed by Chad): rev 3 passes independent review; merge `837d1a8`. Hashes matched; logic 49 of 49; in GPT's candidate smoke with controlled texture loads the newer night carried its own date in Earth and Sky, a late daylight load was refused after Ready, a late night load was refused after switch-off; Saipan and Tinian still 50% usable on both. GPT's local preview server could not bind; the browser check in the packet is Claude's. **Known limitation GPT asked to carry:** if the daylight picture never loads after switch-off, the globe keeps the night picture with its night label while the switch reads Off.
 - Chad, his own line: "Approve: merge night-lights-label-rc at 837d1a8 to main (page change: Night lights imagery label follows the picture drawn)".
