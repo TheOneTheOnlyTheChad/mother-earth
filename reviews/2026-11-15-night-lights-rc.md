@@ -1,6 +1,7 @@
-# Night lights — release candidate for GPT review (rev 3)
+# Night lights — release candidate for GPT review (rev 4)
 
-15 Nov 2026 · branch `night-lights-rc` · code head `7457568ae662aa42a32545f8388c2f6e20a7ee66` (commit time 19:46:23 UTC), from main `3f87d36`
+15 Nov 2026, rev 4 on 16 Nov 2026 · branch `night-lights-rc` · code head `88979a223a5fe73ae8e12e94ba20314b40e87ac9` (commit time 16 Nov 01:47:42 UTC), from main `3f87d36`
+**Rev 4:** GPT's round 3 held `7457568` for one comparison retry bug. The fix is in §12, which governs where it differs from §1–§11.
 **Rev 3:** round 3, the release work, is in §11, which governs where it differs from §1–§10. Earlier code heads: `69a2489` (rev 1), `e2d419b` (rev 2).
 **Rev 2:** GPT's round 1 held `8b833ed` for one fix. It is in §10, which governs where it differs from §1–§9. Rev 1's code head was `69a2489`; §1–§9 describe it and are left as written.
 **Preview. Page only. Not merged, nothing deployed, no hub change, no REGISTER filing.**
@@ -246,4 +247,71 @@ Mac: `~/Documents/Mother Earth/_review/night-lights-rc/` (branch head with this 
 ### 11.8 Lines still needed from Chad (none given)
 
 - `Approve: file the two GIBS Night lights layer lines in REGISTER (draft reviews/2026-11-15-night-lights-register-draft.md rev 1)`
+- `Approve: merge night-lights-rc at <reviewed head> to main (page change: Night lights layer and two-night comparison)`
+
+## 12. Round 4 — GPT's round 3 (relayed by Chad, 16 Nov)
+
+GPT held round 3 at `7457568` for one bug, asked for two changes to the REGISTER draft, and answered the wording question. **Not merged. REGISTER not filed. Nothing deployed.**
+
+### 12.1 The bug, as GPT reported it
+
+When NASA's light key timed out, `runCompare` cleared the busy mark, then asked for the same key again before showing the failure. A second Compare started during that wait was written over: the first one erased its loading message and showed its own failure while the second was still running. GPT reproduced it; Claude did not reproduce it separately before fixing, and the new break below shows the same behaviour in the suite.
+
+### 12.2 The fix (`nightlights.js`)
+
+- `frame()` returns the key it decoded with (`key`) in every result that loaded.
+- `runCompare` takes the legend key from a frame that loaded. It makes no request and waits for nothing after `compare()` returns. A failure is shown as it came back. The busy mark is cleared after the result is on the page.
+- A Compare that has been overtaken still returns before writing anything, as before. With no wait after that test, it cannot write later.
+- `setOn` takes the legend key from the frame it drew, the same way. (That path asked for a key that was already loaded, so it did not wait; changed so that no code asks for the key twice.)
+
+### 12.3 The test GPT asked for: section K2, four checks, and break `cmp-key-refetch`
+
+The key request hangs; the wait limit is 0.7 s. Compare is pressed; the page is read at 1.0 s.
+
+1. The failure is on the page, the busy mark is clear, the loading message is gone, the key was asked for **once**, and no picture was asked for.
+2. Compare is pressed again with the key answering and the pictures held. 1.2 s later (past the time a second key request by the first Compare would have ended) the second Compare still shows its own loading message and busy mark, and no result is drawn.
+3. The pictures are released: the second Compare ends with its own shares.
+4. No page errors.
+
+Break `cmp-key-refetch` puts the old lines back: checks 1 and 2 fail, and the suite then stops at check 3 because the second Compare never shows its shares. Break `stale-kept` also fails check 2.
+**Not separately tested:** the order "result on the page, then busy mark cleared" has no wait between the two steps, so no check can tell it from the reverse order. It is in the code as GPT asked.
+
+### 12.4 Wording (GPT's answer to §11.6)
+
+The threshold line on the card's result and in Sources & Details now reads: **"Mother Earth uses a clear-sky confidence threshold of 0.95 for this comparison, on both nights; not a NASA standard."** The words "on both nights" and "not a NASA standard" are kept from the old line; GPT's sentence did not include them. The word "preview" is gone from the page. The 20-second limit is unchanged and is still Claude's number.
+
+### 12.5 REGISTER draft, rev 2 (not filed)
+
+- Request counts are split: the code's maximum for one switch-on (four dates, so at most four 512 × 256 frames and four 2048 × 1024 frames) and what was observed on 15 Nov (one or two 512 × 256 frames and one 2048 × 1024 frame).
+- "far below that definition" is removed. The line now says the use is interactive and that the site's total traffic to GIBS was not measured.
+- "our preview threshold" is now "our threshold".
+
+### 12.6 Files at the code head `88979a2`
+
+| File | Change this round | sha256 |
+|---|---|---|
+| `nightlights.js` | §12.2; the threshold line | `c69703f58bba430bf4bcda6c35d307e1ee36f106f0c41c0cf666be93dfa7f3fc` |
+| `sources.html` | the threshold line | `2bff4383613d911d3a68577f56cfb6ae3bae6d6a91404e389c32d52a0977933a` |
+| `phase1/night-lights-ui.test.cjs` | section K2, break `cmp-key-refetch`, the new wording | `b3e8a6962455b84e58aeba501ec5d7210715fa573c193eb9d37367c389306eca` |
+| `phase1/night-lights.test.mjs` | the new wording | `4b7aad7d90eb2c267b94b7b426ad59de0cf79b066d628ea7449093d1bee0f2f6` |
+| `index.html`, `skyscene.js`, `style.css` | unchanged since round 3 | `cc89f5b7…8ba6`, `18e41b2d…89e5`, `0a03038d…16f4` |
+
+`index.html` still loads `nightlights.js?v=202612101000`. That key has never been served from main, so it was not changed.
+
+### 12.7 Results (container, 16 Nov)
+
+| Suite | Result |
+|---|---|
+| `night-lights-ui.test.cjs` | **132 passed, 0 failed** (128 + 4) |
+| its 17 breaks | each fails the suite |
+| `night-lights.test.mjs` | **49 passed, 0 failed** (its 8 breaks were not rerun; the only change to that suite is the wording pattern) |
+| `smoke-fixes.test.cjs` | 51 passed, 1 failed: "Sources 360", as on main and in round 3 |
+| `sky-zoom-ui.test.cjs` | 351 passed, 0 failed |
+| the other existing suites | **not rerun** this round; `skyscene.js`, `index.html`, `style.css` and `app.js` are unchanged since round 3 |
+
+**No live check this round.** The live check in §11.5 was made on `74c7d64`. The fix is in a failure path that was only ever seen in the suites.
+
+### 12.8 Lines still needed from Chad (none given)
+
+- `Approve: file the two GIBS Night lights layer lines in REGISTER (draft reviews/2026-11-15-night-lights-register-draft.md rev 2)`
 - `Approve: merge night-lights-rc at <reviewed head> to main (page change: Night lights layer and two-night comparison)`
