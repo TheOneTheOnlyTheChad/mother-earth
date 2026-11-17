@@ -4,6 +4,20 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 12:00 UTC (clock reading) — **Aircraft schedule ON in `~/mother-earth` (rev 5 runner, `4267bbf`); first scheduled upload made at 11:57 UTC; both read-backs clean (counts only)** (production: Mac switch file; one OpenSky request, one ingest; `OPENSKY_ENABLED` unset; REGISTER unchanged; page not merged)
+- **Chad's own line (17 Nov):** "Approve: switch the aircraft schedule on in ~/mother-earth with the rev 5 runner from aircraft-counts-rc 4267bbf (10 requests per rolling 24 hours, one about every 144 minutes, only from the home network; OPENSKY_ENABLED stays unset; no REGISTER change, no page merge)". It followed Claude's confirmation of the installed checksum (entry below).
+- **Switched on 11:56:48 UTC:** `state/aircraft.on` created (empty file). `run.sh` checked first: sha256 `f6f587ae…65ce`. Ships next due about 12:15 UTC, outside the 180 s guard.
+- **First scheduled run, the next tick:** `11:57:05Z [tick] aircraft due (last 9595 s ago)`; hub answer `200 {"ok":true,"layer":"opensky","snapshot":"2026-11-17T11-57Z","records":0,"cells":457,"bytes":42127}`; `11:57:13Z [tick] aircraft exit=0`. The home probe passed (the request was made; no probe marker or scratch file left). Ledger `state/aircraft_requests`: two entries (1794907029, 1794916625); `aircraft_last` 1794916624; `launchd.log` 0 bytes; no lock.
+- **Read-back from Chad's Chrome, 11:59:34 UTC (hub 0.6.17):**
+  - `/cells/opensky`: HTTP 200, 42,072 bytes; **no `records`, `record_fields` or `record_format` keys**; 457 cells, total 6,694, largest 188; every cell is exactly `count` + `coverage` (partial, volunteer_receivers_only); no bad cell ids.
+  - `/snapshot/opensky`: HTTP 200, 42,127 bytes; **`records` is an empty list, `record_fields` is `[]`**, `record_format` "rows"; the same 457 cells and total.
+  - Both: `window_start` = `window_end` = 11:57:06.000 UTC; `retrieved_at` 11:57:09.019; `received_at` 11:57:09.482; `stale_after_s` 10800; `position_age_cutoff_s` 300; counts: 6,856 state vectors, 6,694 counted, 54 without a position, 108 with a position older than the 300 s limit, 0 without a position time, 0 duplicates, 846 on the ground; `credits_remaining` 3988; `collector_version` mac-0.3.3; citation "The OpenSky Network, https://opensky-network.org".
+  - **Searches of both full bodies:** no 6-digit hex strings in quotes; no callsign-shaped strings; the only arrays are the empty `interruptions` (and the empty `records` / `record_fields` in the snapshot); the only identifier word is "callsigns" inside the policy sentence.
+- **Not checked:** the D1 `collector_runs` row for this ingest.
+- **Next scheduled request:** about 14:21 UTC (8640 s after 11:57:05), if the Mac is awake and at home and no ships sample is due. Cap 10 per rolling 24 h; two used.
+- **To switch off:** remove `~/mother-earth/state/aircraft.on`.
+- **Next (each on Chad's own line, after GPT's check of the read-backs):** REGISTER; page merge.
+
 ## 17 Nov 11:47 UTC (clock reading) — **Rev 5 runner INSTALLED in `~/mother-earth` from `aircraft-counts-rc` `4267bbf`; schedule off** (production: one Mac runtime file; no OpenSky request, no upload; `OPENSKY_ENABLED` unset)
 - **GPT (relayed by Chad): rev 5 passes review; hold on `4267bbf` cleared.** GPT reports the review copy matched the checksums, and independently reproduced 88/88 runner checks on macOS Bash 3.2, 19/19 collector checks, a passing ships duration suite, and a hanging probe killed with no lock, scratch file or ledger entry left. GPT notes real off-network and VPN behaviour remain untested. Sequence GPT set: install with the schedule off; confirm the checksum; schedule on as a separate approval at 10 per rolling 24 h; verify the first scheduled upload and both read-backs; then REGISTER and the page merge.
 - **Chad's own line (17 Nov):** "Approve: install the rev 5 runner from aircraft-counts-rc 4267bbf in ~/mother-earth (run.sh sha256 f6f587ae…65ce; collector stays mac-0.3.3; schedule stays off; no OpenSky request; OPENSKY_ENABLED stays unset)".
