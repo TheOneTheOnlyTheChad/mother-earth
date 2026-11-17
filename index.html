@@ -136,8 +136,8 @@
           <details class="cd"><summary>Details</summary><div class="cav">Counts of 10 m pixels, not hectares; detection date ≠ clearing date; tropics only (30°N–30°S); not for area or trend. <a class="more" href="sources.html#forest">details</a></div></details>
         </div>
         <div class="card locked" style="--c:var(--plane)">
-          <div class="head"><span class="pip"></span><span class="name">Aircraft</span><span class="state">not shown</span></div>
-          <div class="cav">OpenSky permits public sites only if they feed the network; no receiver installed yet. <a class="more" href="sources.html#aircraft">details</a></div>
+          <div class="head"><span class="pip"></span><span class="name">Aircraft</span><span class="state">optional</span></div>
+          <div class="cav">Counts per area from the OpenSky Network, about ten times a day. Off on load: switch on “Aircraft counts” under Optional layers. <a class="more" href="sources.html#aircraft">details</a></div>
         </div>
 
         <div class="card explore" id="card-explore">
@@ -315,6 +315,26 @@
               </div>
             </details>
           </div>
+          <div class="ovl opt-wind opt-air" id="card-air">
+            <div class="ovl-h">Aircraft counts <span class="ev obs">Observed</span><span class="state" id="s-air">off</span></div>
+            <button class="ovl-tgl" type="button" id="tgl-air" role="switch" aria-checked="false" aria-describedby="air-note"><span class="box" aria-hidden="true"></span><span class="t">Aircraft — newest count per area</span></button>
+            <div class="cav" id="air-note">How many aircraft the OpenSky Network's volunteer receivers had recently heard in each 4° cell, as of one OpenSky snapshot. Counts only: no individual aircraft is shown.</div>
+            <div class="wind-frame" id="air-frame" aria-live="polite" hidden></div>
+            <div class="hint" id="air-extra" aria-live="polite" hidden></div>
+            <div class="obs" id="o-air" aria-live="polite">Off. Switch on to load the newest aircraft counts.</div>
+            <div class="wind-key" id="air-key" aria-label="Aircraft count key"></div>
+            <div class="wind-read" id="air-read" aria-live="polite"></div>
+            <details class="scope" id="air-scope">
+              <summary>What this shows and does not show</summary>
+              <div>
+                <p><b>Heard, not everything flying.</b> Each count is the number of aircraft that reported a position to the OpenSky Network in one snapshot. Aircraft are heard only where a volunteer receiver is in range, so oceans, deserts and many regions show little or nothing. No colour means no count, never an empty sky.</p>
+                <p><b>One snapshot, at most ten times a day.</b> Mother Earth asks OpenSky for one snapshot roughly every two and a half hours while its collecting computer is awake. The card shows the time OpenSky gave the snapshot, and its age. That time is not the moment every aircraft was heard: each aircraft is counted where it last reported a position, and only if that report was no more than 5 minutes before the snapshot time. Aircraft whose last position is older are left out. A snapshot older than six hours is cleared.</p>
+                <p><b>Counts only.</b> Mother Earth keeps and publishes the number per 4° cell and nothing else: no aircraft identifiers, callsigns, positions or tracks.</p>
+                <p><b>Credit.</b> Data: <a href="https://opensky-network.org" target="_blank" rel="noopener">The OpenSky Network, https://opensky-network.org</a>. Mother Earth contributes a receiver to the network.</p>
+                <p><a href="sources.html#aircraft">Sources &amp; Details →</a></p>
+              </div>
+            </details>
+          </div>
           <div class="ovl opt-nl" id="card-nl">
             <div class="ovl-h">Night lights <span class="ev obs">Observed</span><span class="state" id="s-nl">off</span></div>
             <button class="ovl-tgl" type="button" id="tgl-nl" role="switch" aria-checked="false" aria-describedby="nl-note"><span class="box" aria-hidden="true"></span><span class="t">Night lights — newest complete night</span></button>
@@ -457,7 +477,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202612021100"></script>
+<script src="app.js?v=202612131000"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612101000"></script>
@@ -465,6 +485,7 @@
 <script src="dustrgb.js?v=202612021000"></script>
 <script src="nightlights.js?v=202612111000"></script>
 <script src="wind.js?v=202612121500"></script>
+<script src="aircraft.js?v=202612131100"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;

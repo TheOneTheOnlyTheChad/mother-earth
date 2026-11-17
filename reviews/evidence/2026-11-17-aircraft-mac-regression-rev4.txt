@@ -1,0 +1,115 @@
+aircraft regression on Darwin 25.5.0, /bin/bash 3.2.57(1)-release, node v24.14.1, started 2026-11-17T09:47:10Z
+sha256 of the files under test:
+  1ee9c041aeb1b6fc1a1b1f924bf0fe13f7ffe52957440045364fc5d408f295e4  run.sh
+  e88ada68c3f334a0e98b35c12bf00c4d0c330c26d35f5e8644226ca364db3d47  collector-mac.mjs
+  07d928175073112b5acd90b5361507abf03615691e3561ddaa58f5997e3f7880  aircraft-schedule.test.sh
+  5e0bde54f82ce3ea8d52883ea85dcf68710c927d408bda66bdfd86ddde6dc6f2  aircraft-counts.test.mjs
+  0a1a499b0e85f22172482dbce6d19902fe13926886a93147b86e5c99a84c3a33  duration-contract.test.mjs
+  59129514a3e6923a3a8664ebf38502e293725cf29e28d5df79110f9422e2e93e  worker.js
+--- runner suite, no break
+
+aircraft-schedule: 54 passed, 0 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=aircraft-first (must fail)
+FAIL  A2 both due: aircraft does not run in that tick
+FAIL  A3 ships is the first collector call
+FAIL  B1 ships due in 120 s: aircraft does not start
+FAIL  B2 and says why
+FAIL  B3 no request was entered in the ledger
+FAIL  G2 and aircraft does not run in that tick
+FAIL  G3 order: retry, then ships
+FAIL  K15 ships due: ships runs and the receiver is not probed in that tick
+FAIL  K16 ships due within the guard: no probe and no request
+aircraft-schedule (BREAK=aircraft-first): 45 passed, 9 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-guard (must fail)
+FAIL  B1 ships due in 120 s: aircraft does not start
+FAIL  B2 and says why
+FAIL  B3 no request was entered in the ledger
+FAIL  K16 ships due within the guard: no probe and no request
+aircraft-schedule (BREAK=no-guard): 50 passed, 4 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-kill (must fail)
+FAIL  C1 the slow aircraft run is ended at its limit
+FAIL  C2 it was started and killed, and the log says so
+FAIL  C5 ships starts on the first tick after it is due (not delayed by the failed aircraft run)
+aircraft-schedule (BREAK=no-kill): 51 passed, 3 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-budget (must fail)
+FAIL  D1 scheduled: the 11th request in 24 h is not made
+FAIL  D2 manual: refused with exit 7
+FAIL  D3 manual --dry: also refused (a dry run still asks OpenSky)
+FAIL  D4 an entry older than 24 h no longer counts: the request is made and entered
+FAIL  D5 back-to-back manual runs stop at the cap
+FAIL  J1 nine ledger entries + the one-off pull one hour ago: the next request is refused
+FAIL  J2 the one-off pull older than 24 h no longer counts
+aircraft-schedule (BREAK=no-budget): 47 passed, 7 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=dry-free (must fail)
+FAIL  D2 manual: refused with exit 7
+FAIL  D3 manual --dry: also refused (a dry run still asks OpenSky)
+FAIL  D4 an entry older than 24 h no longer counts: the request is made and entered
+FAIL  D5 back-to-back manual runs stop at the cap
+FAIL  I3 manual, ledger not a file: refused with exit 9, no request
+FAIL  I5 manual, ledger entry cannot be written: refused with exit 9
+FAIL  J1 nine ledger entries + the one-off pull one hour ago: the next request is refused
+FAIL  J2 the one-off pull older than 24 h no longer counts
+aircraft-schedule (BREAK=dry-free): 46 passed, 8 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-switch (must fail)
+FAIL  E1 no switch file: no request
+aircraft-schedule (BREAK=no-switch): 53 passed, 1 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=stale-clock (must fail)
+FAIL  G1 retry crossed the due time: ships runs in that same tick
+FAIL  G2 and aircraft does not run in that tick
+FAIL  G3 order: retry, then ships
+aircraft-schedule (BREAK=stale-clock): 51 passed, 3 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=manual-no-guard (must fail)
+FAIL  H1 manual, ships due in 5 s: refused with exit 8, no request
+FAIL  H2 manual --dry, ships due in 5 s: refused with exit 8, no request
+FAIL  H3 a refused manual run enters nothing in the ledger
+FAIL  H4 manual with ships overdue: refused with exit 8
+FAIL  H5 manual with ships 400 s away: allowed
+aircraft-schedule (BREAK=manual-no-guard): 49 passed, 5 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=ledger-unchecked (must fail)
+FAIL  I1 scheduled, ledger not a file: no request
+FAIL  I2 and the log says the ledger could not be saved
+FAIL  I3 manual, ledger not a file: refused with exit 9, no request
+FAIL  I4 scheduled, ledger entry cannot be written: no request
+FAIL  I5 manual, ledger entry cannot be written: refused with exit 9
+aircraft-schedule (BREAK=ledger-unchecked): 49 passed, 5 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=once-ignored (must fail)
+FAIL  J1 nine ledger entries + the one-off pull one hour ago: the next request is refused
+FAIL  J2 the one-off pull older than 24 h no longer counts
+aircraft-schedule (BREAK=once-ignored): 52 passed, 2 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-probe (must fail)
+FAIL  K1 at home: the receiver is probed, then the one request is made
+FAIL  K2 away: no OpenSky request
+FAIL  K3 away: the ledger is untouched and the run is not marked as taken
+FAIL  K4 away: the reason is logged
+FAIL  K5 away: nothing was uploaded (no collector call at all), lock free
+FAIL  K6 away, next tick: the probe is not repeated straight away
+FAIL  K7 back home: the next tick after the wait probes again and makes the request
+FAIL  K11 a sign-in page that answers for any address is not home (scheduled and manual)
+FAIL  K13 after a hanging probe: no request, ledger untouched, lock free, no probe left running
+aircraft-schedule (BREAK=no-probe): 45 passed, 9 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=manual-no-probe (must fail)
+FAIL  K8 away, manual: refused with exit 10, no request, no ledger entry
+FAIL  K9 away, manual --dry: refused with exit 10, no request
+FAIL  K10 home, manual --dry: allowed
+FAIL  K11 a sign-in page that answers for any address is not home (scheduled and manual)
+aircraft-schedule (BREAK=manual-no-probe): 50 passed, 4 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=portal-ok (must fail)
+FAIL  K11 a sign-in page that answers for any address is not home (scheduled and manual)
+aircraft-schedule (BREAK=portal-ok): 53 passed, 1 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=probe-no-kill (must fail)
+FAIL  K12 a hanging probe is cut off at its limit (2 s + 2 s)
+FAIL  K14 ships starts on the first tick after it is due
+aircraft-schedule (BREAK=probe-no-kill): 52 passed, 2 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=probe-no-backoff (must fail)
+FAIL  K6 away, next tick: the probe is not repeated straight away
+FAIL  K7 back home: the next tick after the wait probes again and makes the request
+aircraft-schedule (BREAK=probe-no-backoff): 52 passed, 2 failed  [bash 3.2.57(1)-release, Darwin]
+--- live home-network probe (the REAL curl against our receiver; read-only; shows where this Mac is right now)
+  receiver answered with aircraft JSON in 0 s: HOME (first bytes: { "now" : 1794909959.000,  "messages" : )
+  curl: /usr/bin/curl  perl: /usr/bin/perl
+--- collector suite
+
+aircraft-counts: 19 passed, 0 failed
+--- ships duration contract
+ALL CHECKS PASSED
+finished 2026-11-17T10:06:09Z
