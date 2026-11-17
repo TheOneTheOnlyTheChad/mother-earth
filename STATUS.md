@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 13:22 UTC (clock reading) — **Close-out of the Aircraft counts + Cape Town station thread** (docs only)
+- **Branches:** `aircraft-counts-rc` deleted by Claude on the GitHub branches page (fully merged at `51814fd`); `git fetch -p` shows `main`, `cape-town-station-rc` (`d540c5d`, private preview awaiting GPT), `widths-preview-rc` (`2b20b0a`, awaiting Chad's look) and `aircraft-rc` (`67c98e3`, superseded; Chad has not said to delete it).
+- **Mac:** `_review/aircraft-counts-rc` moved to `_to_delete/`; `_review/` keeps `cape-town-station` and `widths-preview-rc` (both still awaiting a look). `~/mother-earth/aircraft-test` moved to `~/mother-earth/_to_delete/`. Main synced at this commit, preserve-first.
+- **Docs:** HANDOVER next-thread block; START-HERE live line, layers line and §4ad.
+- **Not yet known at close-out:** the away case. Chad took the Mac out on his hotspot from about 12:45 UTC; the aircraft request due about 14:21 UTC should be skipped. Reading the log for it is item 1 for the next thread.
+
+## Next
+1. Read `~/mother-earth/logs/collector.log` for the away skip around 14:21 UTC on 17 Nov and the resume at home; record it; tell Chad and GPT.
+2. 18 Nov 07:00 UTC: ships log re-read (read-only); also wind arrival times.
+3. Chad chooses the next feature.
+
 ## 17 Nov 12:22 UTC (clock reading) — **`aircraft-counts-rc` MERGED into main: optional layer "Aircraft counts" is on the page** (production: Pages; no hub change; `OPENSKY_ENABLED` unset)
 - **Chad's own line (17 Nov):** "Approve: merge aircraft-counts-rc 4267bbf into main (publishes the optional "Aircraft counts" layer on the page with OpenSky attribution; no hub change; OPENSKY_ENABLED stays unset)".
 - **Merge commit `51814fd430044b45160a03fe4f53c25eaec9568c`, pushed 12:18:37 UTC** (no-fast-forward merge of `4267bbff9a7d077a8107d2be86fdd20840c6fd23`; no conflicts; main had no page or collector changes since the branch point, so the merged files are byte-identical to the reviewed ones: `aircraft.js` `f03617c4…6f39`, `app.js` `b0141cfe…33e3`, `index.html` `8b411778…4af1`, `sources.html` `a53039d4…cf22`, `phase1/run.sh` `f6f587ae…65ce`, `phase1/collector-mac.mjs` `e88ada68…3d47`). Before the push, on the merged tree (Linux): collector suite 19 passed; runner suite 88 passed.
