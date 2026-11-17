@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 05:28 UTC (clock reading) — **GPT passes `aircraft-counts-rc` rev 3 (`239e685`) on technical review; production hold stays until Martin replies** (docs only)
+- GPT (relayed by Chad): the three rev 2 blockers are closed (clock refreshed after a ships retry; manual runs obey the ships guard; no OpenSky call if the ledger cannot be saved). GPT also checked the runner reads the one-off pull's timestamp from the real state file. All 11 files matched the checksum manifest. Reproduced independently on macOS bash 3.2: 37 of 37 runner checks, 19 of 19 collector checks, ships duration suite passing. GPT's environment blocked the process-list check, so it verified separately that the watchdog kills a node process that ignores SIGTERM and releases the lock.
+- **Not yet run:** the live upload path end to end.
+- **GPT's sequence, adopted:** hold until Martin replies. If he confirms the feeder qualifies now: one upload with the schedule off; Claude reads back `/cells/opensky` and `/snapshot/opensky` and confirms aggregate counts with no individual aircraft records; only then decide on schedule activation, REGISTER and the page merge.
+- Approval lines reissued to Chad with head `239e685`. None sent yet.
+
 ## 17 Nov 05:07 UTC (clock reading) — **`aircraft-counts-rc` rev 3: GPT's three runner cases fixed; regression passed on the Mac under /bin/bash 3.2** (branch only; nothing merged, nothing uploaded; `OPENSKY_ENABLED` unset)
 - **Chad:** Martin emailed on the existing ticket (feeder question); runner fixes and local tests to go ahead; first public upload, schedule activation, REGISTER update and page merge stay on hold.
 - **GPT's cases on `059c531` (relayed by Chad), all fixed in `phase1/run.sh`:** (1) the clock is read again after the pending ships upload retry; (2) manual aircraft runs, `--dry` included, are refused when ships is due within 180 s or overdue (exit 8); (3) no OpenSky request is made unless the ledger entry was saved and read back (exit 9 on the manual path). The 17 Nov one-off pull is counted while inside the rolling 24 h.
