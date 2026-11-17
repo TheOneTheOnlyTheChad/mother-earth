@@ -8,7 +8,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Branches:** `aircraft-counts-rc` deleted by Claude on the GitHub branches page (fully merged at `51814fd`); `git fetch -p` shows `main`, `cape-town-station-rc` (`d540c5d`, private preview awaiting GPT), `widths-preview-rc` (`2b20b0a`, awaiting Chad's look) and `aircraft-rc` (`67c98e3`, superseded; Chad has not said to delete it).
 - **Mac:** `_review/aircraft-counts-rc` moved to `_to_delete/`; `_review/` keeps `cape-town-station` and `widths-preview-rc` (both still awaiting a look). `~/mother-earth/aircraft-test` moved to `~/mother-earth/_to_delete/`. Main synced at this commit, preserve-first.
 - **Docs:** HANDOVER next-thread block; START-HERE live line, layers line and §4ad.
-- **Not yet known at close-out:** the away case. Chad took the Mac out on his hotspot from about 12:45 UTC; the aircraft request due about 14:21 UTC should be skipped. Reading the log for it is item 1 for the next thread.
+- **Not yet known at close-out:** the away case. Chad said at about 12:25 UTC that he was taking the Mac out on his hotspot (the time he left is not recorded); the aircraft request due about 14:21 UTC should be skipped. Reading the log for it is item 1 for the next thread.
 
 ## Next
 1. Read `~/mother-earth/logs/collector.log` for the away skip around 14:21 UTC on 17 Nov and the resume at home; record it; tell Chad and GPT.
