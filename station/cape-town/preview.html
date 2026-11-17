@@ -49,7 +49,7 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
   const sim = new URLSearchParams(location.search).get('sim') || '';
   const SIMTXT = { zero: 'the real feed with every position removed', stale: 'the first reading, frozen', down: 'the receiver not answering' };
   if (sim) { $('sim').hidden = false; $('sim').textContent = 'SIMULATED TEST STATE — ' + (SIMTXT[sim] || 'unknown test: showing the real feed') + '. Not what the receiver is reporting now.'; }
-  const st = { state: 'connecting', why: '', lastNow: null, sameNow: 0, snap: null, fetchedAt: 0, polls: 0, inFlight: false, skipped: 0, base: null, offset: null, advanced: false, range: CFG.RANGE_DEFAULT };
+  const st = { state: 'connecting', why: '', lastNow: null, sameNow: 0, snap: null, fetchedAt: 0, polls: 0, inFlight: false, skipped: 0, base: null, offset: null, advanced: false, movedAt: 0, back: null, clockReset: null, range: CFG.RANGE_DEFAULT };
   { const q = Number(new URLSearchParams(location.search).get('range')); if (CFG.RANGES[q]) st.range = q; }
   const num = v => typeof v === 'number' && Number.isFinite(v);
   const band = m => { let k = 0; for (let i = 0; i < CFG.BANDS.length; i++) if (m >= CFG.BANDS[i][0]) k = i; return k; };
@@ -89,16 +89,18 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
   }
   const ageTxt = s => s < 1 ? 'under 1 s' : s < 90 ? Math.round(s) + ' s' : Math.round(s / 60) + ' min';
   function paint() {
-    const S = $('state'), W = $('why'), N = $('nums'), ext = st.snap ? (Date.now() - st.fetchedAt) / 1000 : 0;
+    const S = $('state'), W = $('why'), N = $('nums'), ext = st.snap ? (Date.now() - st.movedAt) / 1000 : 0;   // seconds since the reading on screen first arrived (a repeat of the same reading does not make it newer)
     // A reading is only "now" for STALE_S seconds. If no fresh reading has arrived since (tab in the background, polls failing to
     // start, a slow helper), the page stops saying live on its own, whatever the last poll concluded.
     const expired = st.state === 'live' && ext > CFG.STALE_S;
     const shown = expired ? 'expired' : st.state;
     const v = st.snap && shown === 'live' ? view(st.snap, ext, st.range) : null;
-    const clock = st.offset !== null && Math.abs(st.offset) > CFG.CLOCK_WARN_S ? `The receiver's clock is about ${ageTxt(Math.abs(st.offset))} ${st.offset > 0 ? 'behind' : 'ahead of'} this Mac's clock. Position ages come from the receiver itself and are not affected.` : '';
+    const resetNote = st.clockReset && Date.now() - st.clockReset.at < 60000 ? `The receiver's clock moved back by about ${ageTxt(st.clockReset.by)} (${st.clockReset.from} to ${st.clockReset.to} UTC); readings are being followed on the new clock.` : '';
+    const clock0 = st.offset !== null && Math.abs(st.offset) > CFG.CLOCK_WARN_S ? `The receiver's clock is about ${ageTxt(Math.abs(st.offset))} ${st.offset > 0 ? 'behind' : 'ahead of'} this Mac's clock. Position ages come from the receiver itself and are not affected.` : '';
+    const clock = [resetNote, clock0].filter(Boolean).join(' ');
     if (shown === 'unreachable') { S.className = 'bad'; S.textContent = 'Receiver unreachable'; W.textContent = st.why + ' Nothing is drawn: the last reading is not shown as if it were current.'; }
     else if (shown === 'stale') { S.className = 'warn'; S.textContent = 'Receiver data is stale'; W.textContent = st.why + ' Nothing is drawn: old positions are not shown as if they were current.'; }
-    else if (shown === 'expired') { S.className = 'warn'; S.textContent = 'No fresh reading'; W.textContent = `The last reading from the receiver arrived ${ageTxt(ext)} ago and nothing newer has arrived since. Nothing is drawn until a fresh reading arrives.`; }
+    else if (shown === 'expired') { S.className = 'warn'; S.textContent = 'No fresh reading'; W.textContent = `The receiver's data last moved forward ${ageTxt(ext)} ago and nothing newer has arrived since. Nothing is drawn until a fresh reading arrives.`; }
     else if (shown === 'checking') { S.className = 'warn'; S.textContent = 'Checking the receiver…'; W.textContent = st.why + ' Nothing is drawn until a second reading shows whether the data is changing.'; }
     else if (shown === 'connecting') { S.className = ''; S.textContent = 'Connecting…'; W.textContent = ''; }
     else if (v.plot.length === 0) { S.className = 'ok'; S.textContent = 'Receiver live — no aircraft with a usable position ' + (v.beyond ? 'inside this range' : 'right now'); W.textContent = `The feed is fresh. ${v.heard} aircraft heard; ` + (v.beyond ? `${v.beyond} with a position beyond ${st.range} km (listed below).` : 'none has a current position to plot.') + (clock ? ' ' + clock : ''); }
@@ -112,7 +114,7 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
     for (const b of document.querySelectorAll('#ranges button')) b.setAttribute('aria-pressed', String(Number(b.dataset.km) === st.range));
     document.title = (shown === 'live' ? '' : '[' + shown + '] ') + 'Aircraft seen by our Cape Town receiver';
   }
-  const reset = () => { st.snap = null; st.lastNow = null; st.sameNow = 0; st.base = null; st.offset = null; st.advanced = false; };
+  const reset = () => { st.snap = null; st.lastNow = null; st.sameNow = 0; st.base = null; st.offset = null; st.advanced = false; st.back = null; };
   /** One poll at a time. A poll that is still waiting blocks the next one (counted in st.skipped), and each has its own time limit,
    *  so two answers can never arrive out of order. A reading older than the one already held is ignored as a second guard. */
   async function poll() {
@@ -124,14 +126,30 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
       const b = await r.json().catch(() => null);
       if (!r.ok || !b || !b.data) { st.state = 'unreachable'; st.why = 'The receiver did not answer' + (b && b.error ? ' (' + b.error + ').' : '.'); reset(); return; }
       const j = b.data, off = b.fetched_at_ms / 1000 - j.now;       // this Mac's clock minus the receiver's clock, plus the data's real age
-      if (st.lastNow !== null && j.now < st.lastNow) return;         // older than what is held: ignored
+      const hms = t => new Date(t * 1000).toISOString().slice(11, 19);
+      if (st.lastNow !== null && j.now < st.lastNow) {
+        // Older than the reading held. With one poll in flight this is not a late answer: the receiver's clock has gone back.
+        // The first such reading is not trusted on its own. A SECOND one that has moved forward from the first confirms the
+        // receiver is running on an earlier clock (a reset), and the page follows it from there. Until then the held reading
+        // stays and expires by its own age; older readings that do not move are stale.
+        if (st.back && j.now > st.back.now) {
+          st.clockReset = { at: Date.now(), by: st.lastNow - j.now, from: hms(st.lastNow), to: hms(j.now) };
+          st.lastNow = j.now; st.sameNow = 0; st.base = off; st.offset = off; st.advanced = true; st.back = null;
+          st.snap = j; st.fetchedAt = st.movedAt = Date.now(); st.state = 'live'; return;
+        }
+        const n = st.back && j.now === st.back.now ? st.back.n + 1 : 1; st.back = { now: j.now, n };
+        if (n > CFG.FROZEN_POLLS) { st.state = 'stale'; st.why = `The receiver's clock went back to ${hms(j.now)} UTC and has not moved for ${n} readings in a row.`; }
+        return;
+      }
+      st.back = null;
+      const moved = st.lastNow === null || j.now > st.lastNow;
       if (st.lastNow !== null && j.now > st.lastNow) st.advanced = true;
       st.sameNow = st.lastNow !== null && j.now === st.lastNow ? st.sameNow + 1 : 0; st.lastNow = j.now;
       // Clock difference and staleness are told apart by watching whether the receiver's own clock moves. The smallest gap seen
       // (st.base) is the clock difference; how far the current gap has grown past it is the data's age.
       st.base = st.base === null ? off : Math.min(st.base, off); st.offset = st.advanced ? st.base : null;
       const grown = off - st.base;
-      st.snap = j; st.fetchedAt = Date.now();
+      st.snap = j; st.fetchedAt = Date.now(); if (moved) st.movedAt = st.fetchedAt;   // only a reading that moved forward restarts the 30 s clock
       const clockUtc = new Date(j.now * 1000).toISOString().slice(11, 19);
       if (st.sameNow >= CFG.FROZEN_POLLS) { st.state = 'stale'; st.why = `The receiver answers, but its data has not changed for ${st.sameNow + 1} readings in a row (receiver clock ${clockUtc} UTC).`; }
       else if (grown > CFG.STALE_S) { st.state = 'stale'; st.why = `The receiver answers, but its data has fallen ${ageTxt(grown)} behind.`; }
@@ -144,7 +162,7 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
   }
   $('key').innerHTML = CFG.BANDS.map(([, c, t]) => `<span><i style="background:${c}"></i>${t}</span>`).join('') + `<span><i style="background:${CFG.GROUND}"></i>on the ground</span><span><i style="background:${CFG.NOALT}"></i>no altitude sent</span><span>faded = position older than ${CFG.FADE_S} s · not drawn after ${CFG.DROP_S} s</span>`;
   for (const b of document.querySelectorAll('#ranges button')) b.addEventListener('click', () => { st.range = Number(b.dataset.km); paint(); });
-  window.CT = { state: () => ({ state: st.shown || st.state, polled: st.state, skipped: st.skipped, lastNow: st.lastNow, offset: st.offset, range: st.range, rings: [...$('plot').querySelectorAll('.rl')].map(t => t.textContent), why: st.why, polls: st.polls, title: $('state').textContent, whyText: $('why').textContent, plotted: $('plot').querySelectorAll('path,circle[cx]').length, rows: $('rows').querySelectorAll('tr').length, nopos: $('nopos').textContent, sim: $('sim').hidden ? null : $('sim').textContent }), view, cfg: CFG };
+  window.CT = { state: () => ({ state: st.shown || st.state, polled: st.state, skipped: st.skipped, lastNow: st.lastNow, movedAgo: st.movedAt ? (Date.now() - st.movedAt) / 1000 : null, clockReset: st.clockReset, offset: st.offset, range: st.range, rings: [...$('plot').querySelectorAll('.rl')].map(t => t.textContent), why: st.why, polls: st.polls, title: $('state').textContent, whyText: $('why').textContent, plotted: $('plot').querySelectorAll('path,circle[cx]').length, rows: $('rows').querySelectorAll('tr').length, nopos: $('nopos').textContent, sim: $('sim').hidden ? null : $('sim').textContent }), view, cfg: CFG };
   paint(); poll(); setInterval(() => { if (!document.hidden) poll(); }, CFG.POLL_MS); setInterval(paint, 1000);
 })();
 </script></body></html>

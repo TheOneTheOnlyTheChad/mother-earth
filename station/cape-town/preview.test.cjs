@@ -13,7 +13,7 @@ const ac = () => [
   { hex: 'aaa006', alt_baro: 12000, lat: -33.1, lon: 18.9, seen_pos: 0.2, seen: 0.2, rssi: -9 },                                                                     // position but no range/bearing, no heading
   { hex: 'aaa007', flight: 'NOHDG   ', lat: -33.3, lon: 18.2, seen_pos: 2, seen: 1, r_dst: 30, r_dir: 270, rssi: -15 },                                              // no heading, no altitude: dot
 ];
-let frozenNow = null, inPi = 0, maxInPi = 0, flip = 0;
+let frozenNow = null, inPi = 0, maxInPi = 0, flip = 0, shift = 0;
 const pi = http.createServer(async (req, res) => {
   inPi++; maxInPi = Math.max(maxInPi, inPi); res.on('close', () => { inPi--; });
   if (mode === 'hang') return;
@@ -22,7 +22,7 @@ const pi = http.createServer(async (req, res) => {
   if (mode === 'garbage') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end('{"hello":1}'); }
   const real = Date.now() / 1000;
   const now = mode === 'frozen' ? (frozenNow = frozenNow || real) : mode === 'frozen-old' ? (frozenNow = frozenNow || real - 120) : mode === 'old' ? real - 120
-    : mode === 'behind45' ? real - 45 : mode === 'ahead45' ? real + 45 : mode === 'backwards' ? (flip++ % 2 ? Math.floor(real) - 20 : Math.floor(real)) : real;
+    : mode === 'behind45' ? real - 45 : mode === 'ahead45' ? real + 45 : mode === 'backwards' ? (flip++ % 2 ? Math.floor(real) - 20 : Math.floor(real)) : real - shift;
   res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ now, messages: 4311880, aircraft: mode === 'empty' ? [] : ac() }));
 });
 (async () => {
@@ -85,6 +85,30 @@ const pi = http.createServer(async (req, res) => {
   ok('never more than one request to the receiver at a time', maxInPi === 1, maxInPi);
   mode = 'backwards'; flip = 0; await open(''); const seen = []; for (let i = 0; i < 6; i++) { await sleep(3000); seen.push((await S()).lastNow); }
   ok('a reading older than the one held is ignored (receiver time never goes backwards on the page)', seen.every((v, i) => i === 0 || v >= seen[i - 1]), seen);
+  // --- GPT's review of rev 2: the 30 s limit runs from the last reading that MOVED FORWARD, not from the last answer
+  // The same answer is replayed byte for byte (same receiver time, same fetch time), so neither the frozen-clock rule (switched
+  // off here) nor the falling-behind rule can act: only the expiry rule is left.
+  mode = 'live'; await open(''); await page.evaluate(() => { window.CT.cfg.FROZEN_POLLS = 9999; });
+  let replay = null; await page.route('**/aircraft.json*', async route => { if (!replay) { const r = await route.fetch(); replay = await r.text(); } await route.fulfill({ status: 200, contentType: 'application/json', body: replay }); });
+  await sleep(24000); s = await S();
+  ok('receiver repeating one reading for under 30 s: still live', s.state === 'live' && s.movedAgo > 15, s);
+  await sleep(11000); s = await S();
+  ok('receiver repeating one reading for over 30 s: no longer live although answers keep arriving', s.state === 'expired' && s.polled === 'live' && s.plotted === 0 && s.polls > 8 && s.movedAgo > 30 && /last moved forward/.test(s.whyText), s);
+  await page.unroute('**/aircraft.json*'); await sleep(4000); s = await S();
+  ok('receiver moves forward again: live', s.state === 'live' && s.plotted === 4 && s.movedAgo < 5, s);
+  // --- a receiver clock that steps backwards is followed once a second reading confirms it
+  shift = 0; mode = 'live'; await open(''); await sleep(3500); const before = (await S()).lastNow;
+  shift = 300; await sleep(3200); s = await S();
+  ok('receiver clock steps back 5 min, first older reading: not yet followed', s.lastNow === before || s.lastNow > before - 100, s);
+  await sleep(3500); s = await S();
+  ok('second older reading that has moved forward: the page follows the new clock and is live', s.state === 'live' && s.plotted === 4 && s.lastNow < before - 250 && s.clockReset && Math.abs(s.clockReset.by - 300) < 15 && /clock moved back by about 5 min/.test(s.whyText), s);
+  await sleep(7000); s = await S();
+  ok('and stays live on the new clock', s.state === 'live' && s.movedAgo < 5, s);
+  shift = 0; await sleep(4000); s = await S();
+  ok('clock jumps forward again: simply newer, still live', s.state === 'live' && s.plotted === 4, s);
+  frozenNow = null; mode = 'frozen-old'; await sleep(16000); s = await S();
+  ok('clock goes back and does NOT move: stale, not followed', s.state === 'stale' && /went back/.test(s.whyText) && s.plotted === 0, s);
+  mode = 'live'; shift = 0;
   // --- range controls
   mode = 'live'; await open(''); s = await S();
   ok('range: 320 km by default, four rings', s.range === 320 && s.rings.join() === '50 km,100 km,200 km,300 km' && s.plotted === 4, s);
