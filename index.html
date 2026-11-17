@@ -326,7 +326,7 @@
             <div class="wind-read" id="air-read" aria-live="polite"></div>
             <div class="ovl-h air-sub">Positions <span class="state" id="s-airdots">off</span></div>
             <button class="ovl-tgl" type="button" id="tgl-airdots" role="switch" aria-checked="false" aria-describedby="airdots-note"><span class="box" aria-hidden="true"></span><span class="t">Aircraft — positions in the newest snapshot</span></button>
-            <div class="cav" id="airdots-note">One plain dot for each aircraft in the same OpenSky snapshot, where it last reported a position. A dot carries nothing else: no identity, no height, no direction, no path.</div>
+            <div class="cav" id="airdots-note">One plain dot for each aircraft in the same OpenSky snapshot, where it last reported a position. A dot carries nothing else: no identity, no height, no direction, no path. Counts and positions are shown one at a time: switching one on switches the other off.</div>
             <div class="wind-frame" id="airdots-frame" aria-live="polite" hidden></div>
             <div class="hint" id="airdots-extra" aria-live="polite" hidden></div>
             <div class="obs" id="o-airdots" aria-live="polite">Off. Switch on to load the positions in the newest snapshot.</div>
@@ -491,7 +491,7 @@
 <script src="dustrgb.js?v=202612021000"></script>
 <script src="nightlights.js?v=202612111000"></script>
 <script src="wind.js?v=202612121500"></script>
-<script src="aircraft.js?v=202612141100"></script>
+<script src="aircraft.js?v=202612141200"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;

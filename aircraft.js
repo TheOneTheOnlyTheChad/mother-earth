@@ -8,6 +8,7 @@
  * - Counts: /cells/opensky, which never carries records. Positions: /snapshot/opensky, drawn ONLY if its record fields are exactly
  *   lat,lng. No aircraft identifier, callsign, altitude, speed, heading or track exists in what the hub serves, and none is drawn.
  * - A dot cannot be tapped, has no label and is never matched to a dot in an earlier snapshot: each snapshot replaces the last.
+ * - Counts and positions are never drawn together: switching one on switches the other off.
  * - Dots are cleared once the snapshot is older than its own stale limit (stale_after_s): a position is where an aircraft was.
  * - A cell with no count is drawn as nothing: aircraft are heard only where a volunteer receiver is in range, so no count is not
  *   an empty sky.
@@ -173,6 +174,7 @@
     st.gen++;
     if (!on) { st.on = false; st.status = 'off'; st.why = null; st.loading = false; st.refreshFailed = false; st.sel = null; destroy(); st.env = null;
       clearInterval(st.timer); clearInterval(st.ageTimer); st.timer = st.ageTimer = null; paint(); return; }
+    if (dt.on) await dotsSetOn(false);   // counts and positions are never drawn together (Chad, 17 Nov): one on switches the other off
     st.on = true; st.why = null; st.status = 'loading'; paint();
     if (!ME.globe || !ME.globe()) { st.on = false; st.status = 'off'; st.why = 'Aircraft counts need the 3-D globe, which is not available in this browser. Nothing is drawn.'; st.gen++; return paint(); }
     st.timer = setInterval(() => { if (!document.hidden) load(true); }, AC.REFRESH_MS);
@@ -186,7 +188,7 @@
 
 
   // ====================================================================== positions as plain dots (aircraft-dots-rc)
-  const DT = { URL: ME.HUB + '/snapshot/opensky', FIELDS: ['lat', 'lng'], W: 4096, H: 2048, R_PX: 2.4, ALT: 0.0016, OPACITY: 1, ORDER: -0.5,
+  const DT = { URL: ME.HUB + '/snapshot/opensky', FIELDS: ['lat', 'lng'], W: 4096, H: 2048, R_PX: 1.6, ALT: 0.0016, OPACITY: 1, ORDER: -0.5,
     FILL: '#ffe9a8', EDGE: 'rgba(8,12,20,0.75)', REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, MAX: 60000 };
   const dt = { on: false, gen: 0, seq: 0, why: null, env: null, meshes: [], loading: false, refreshFailed: false, timer: null, ageTimer: null, requests: [], opts: { source: null } };
   const dtgl = $('tgl-airdots');
@@ -280,6 +282,7 @@
     if (!dtgl || on === dt.on) return;
     dt.gen++;
     if (!on) { dt.on = false; dt.why = null; dt.loading = false; dt.refreshFailed = false; dotsDestroy(); dt.env = null; clearInterval(dt.timer); clearInterval(dt.ageTimer); dt.timer = dt.ageTimer = null; dotsPaint(); return; }
+    if (st.on) await setOn(false);       // the other half of the same rule
     dt.on = true; dt.why = null; dotsPaint();
     if (!ME.globe || !ME.globe()) { dt.on = false; dt.why = 'Aircraft positions need the 3-D globe, which is not available in this browser. Nothing is drawn.'; dt.gen++; return dotsPaint(); }
     dt.timer = setInterval(() => { if (!document.hidden) dotsLoad(true); }, DT.REFRESH_MS);

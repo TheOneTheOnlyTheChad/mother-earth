@@ -1,7 +1,7 @@
 /* Aircraft positions as plain dots — page suite for aircraft.js (aircraft-dots-rc). Runs the REAL aircraft.js in node with a small
  * stand-in for the document, the canvas and the globe: no browser, no network, no real picture. It checks what the page accepts,
  * refuses, says and removes. It does NOT check how the dots look on the globe (see the review packet).
- * Run: node phase1/aircraft-dots-page.test.cjs      Breaks (each must fail the suite): BREAK=any-fields|keep-old|no-clear|tap */
+ * Run: node phase1/aircraft-dots-page.test.cjs      Breaks (each must fail the suite): BREAK=any-fields|keep-old|no-clear|tap|both-on */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 let src = fs.readFileSync(path.join(__dirname, '..', 'aircraft.js'), 'utf8');
 const BREAK = process.env.BREAK || '';
@@ -9,6 +9,7 @@ const brk = (a, b) => { if (!src.includes(a)) { console.log('FAIL  break target 
 if (BREAK === 'any-fields') brk("if (f.length !== DT.FIELDS.length || f.some((x, i) => x !== DT.FIELDS[i])) return", "if (false) return");
 if (BREAK === 'keep-old') brk("dotsDestroy(); built.parent.add(built.mesh); dt.meshes = [built.mesh];", "built.parent.add(built.mesh); dt.meshes = [built.mesh];");
 if (BREAK === 'no-clear') brk("const dotsOld = env => ageMs(env) >= env.staleS * 1e3;", "const dotsOld = env => false;");
+if (BREAK === 'both-on') brk("    if (st.on) await setOn(false);       // the other half of the same rule", "");
 if (BREAK === 'tap') brk("built.mesh.__air = false; built.mesh.__airdots = true;", "built.mesh.__air = false; built.mesh.__airdots = true; built.mesh.raycast = function () { return 1; };");
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log('FAIL  ' + n + (got !== undefined ? '\n      got: ' + JSON.stringify(got).slice(0, 500) : '')); } };
 
@@ -96,5 +97,16 @@ ok('a position lands where its latitude and longitude put it', dotAt && Math.abs
   ok('the counts layer was never switched on or requested by any of this', A.state().on === false && A.state().requests.length === 0 && fetched.length === 0, A.state().requests);
   D.opts.source = null; await D.setOn(true); s = D.state();
   ok('without a supplied file the page asks the hub for /snapshot/opensky and nothing else', fetched.length === 1 && fetched[0] === 'https://hub.test/snapshot/opensky' && s.requests.join() === '/snapshot/opensky' && s.meshes === 0 && /could not be loaded/.test(s.off), [fetched, s.off]);
+  // ---------- counts and positions are exclusive (rev 3)
+  await D.setOn(false); D.opts.source = async () => file({ window_end: T2, window_start: T2 }); A.opts.now = Date.parse(T2) + 60e3;
+  await A.setOn(true);
+  ok('rev3. counts switched on (the hub is not reachable here, so it reads unknown): on, positions off', A.state().on === true && D.state().on === false);
+  await D.setOn(true);
+  ok('rev3. positions switched on: the counts switch goes off, its sheet is gone, only the dots sheet is in the scene', D.state().on === true && D.state().meshes === 1 && A.state().on === false && A.state().meshes === 0 && els['tgl-air'].attrs['aria-checked'] === 'false' && els['tgl-airdots'].attrs['aria-checked'] === 'true' && els['s-air'].textContent === 'off' && group.children.filter(m => m.__air || m.__airdots).length === 1, [A.state().on, D.state().on]);
+  await A.setOn(true);
+  ok('rev3. counts switched on again: the positions switch goes off and its dots are removed', A.state().on === true && D.state().on === false && D.state().meshes === 0 && group.children.filter(m => m.__airdots).length === 0 && els['tgl-airdots'].attrs['aria-checked'] === 'false' && els['s-airdots'].textContent === 'off', [A.state().on, D.state().on]);
+  await A.setOn(false);
+  ok('rev3. both can be off', A.state().on === false && D.state().on === false && group.children.filter(m => m.__air || m.__airdots).length === 0);
+  ok('rev3. dot radius is the small size Chad chose', D.config.R_PX === 1.6);
   console.log(`\naircraft-dots-page${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();
