@@ -157,3 +157,29 @@ Chad: Martin has been emailed on the existing ticket; go ahead with the runner f
 - **Not tested:** the away case on the real Mac with the real curl (the Mac was home during the run; the away, timeout and sign-in-page cases use a stand-in for curl). Real-world evidence that the Pi does not answer off the home network: Chrome at 07:36 UTC from the cafe (name did not resolve). A VPN case: not tested.
 
 **Release state.** The Mac runs `239e685` with the schedule off. Installing the rev 4 runner, switching the schedule on, the REGISTER line and the page merge each need Chad's own line.
+
+## 15. Rev 5 — GPT's hold on `f9791f7`: the home probe accepted answers that were not our receiver (relayed by Chad, 17 Nov)
+**What GPT found.** The rev 4 probe called it "home" when the first 512 bytes of the answer contained both `"now"` and `"aircraft"`. Three false positives: a timeout after a partial body, an HTML page containing both key names, and JSON with the wrong types.
+
+**What changed (`phase1/run.sh` only, `home_probe()`; collector unchanged, still mac-0.3.3).** Home now needs all three:
+1. **curl succeeded** (exit 0). A timeout or any other curl failure is not home, whatever arrived.
+2. **HTTP status 2xx.** Redirects are not followed.
+3. **The whole body parses as JSON** and is an object whose `now` is a finite number and whose `aircraft` is an array. **An empty array is valid** (GPT's instruction).
+
+The body goes to a scratch file (`state/aircraft_probe.tmp`, removed afterwards; curl `--max-filesize` 8 MB); the JSON check runs under the same `perl alarm` kill (5 s). **Unchanged:** the 4 s curl limit and 6 s kill; the placement (ships guard → probe backoff → home probe → request ledger → OpenSky request) on the scheduled, manual and `--dry` paths; the 300 s retry wait; exit 10 for a manual run away from home.
+
+**Runner suite: 88 checks (was 54).** Section L, each case on the scheduled path and on manual plus `--dry`, each asserting **the collector is never started and the ledger is byte-for-byte untouched**, with the reason logged (scheduled) or exit 10 (manual):
+- **GPT's three:** L1 timeout after a partial body (curl exit 28) · L2 HTML page containing both key names · L3 JSON with `now` as a string and `aircraft` null.
+- **Neighbouring cases:** L4 full valid body but curl failed · L5 cut-off body with curl exit 0 · L6 `now` null · L7 `aircraft` an object · L8 top-level array · L9 HTTP 500 · L10 HTTP 302 · L11 HTTP 404.
+- An empty `aircraft` array at home is accepted and the request is made.
+
+**Results:**
+- **On the Mac** (Chad ran `/bin/bash ~/mother-earth/aircraft-test/aircraft-mac-regression.sh`; Darwin 25.5.0, /bin/bash 3.2.57, node v24.14.1; 10:49:21–11:17:43 UTC; output `reviews/evidence/2026-11-17-aircraft-mac-regression-rev5.txt`, sha256 `48270add7fd6b715612cfeab0bcdf78ec941f9fec868401b566ad899bc975caa`): **runner suite 88 passed, 0 failed**; collector suite 19 passed; ships duration contract passed.
+- **Nineteen breaks on the Mac, each applied, each failing:** `aircraft-first` 9 · `no-guard` 4 · `no-kill` 3 · `no-budget` 7 · `dry-free` 8 · `no-switch` 1 · `stale-clock` 3 · `manual-no-guard` 5 · `ledger-unchecked` 5 · `once-ignored` 2 · `no-probe` 31 · `manual-no-probe` 26 · `portal-ok` 13 · `probe-no-kill` 2 · `probe-no-backoff` 2 · **new:** `probe-ignore-exit` 2 (L4) · `probe-ignore-http` 6 (L9–L11) · `probe-two-words` 12 (restores the rev 4 two-word search; L2, L3, L5–L8) · `probe-any-json` 6 (L3, L6, L7).
+- **Live probe on the Mac at home** (the real `/usr/bin/curl` and `/usr/bin/perl`, the same three conditions as the runner): curl exit 0, HTTP 200, 9,022 bytes, `now` a finite number, `aircraft` an array of 22, 1 s: HOME.
+- Linux bash 5.2: 88 passed; the same breaks fail. The `f9791f7` `run.sh` under this suite fails L1–L11 and passes everything else. **L9–L11 on the old runner are partly an artefact:** the stand-in for curl ignores `-f`, which the old runner relied on for HTTP errors. GPT's three (L1–L3) and the body-shape cases (L5–L8) are real false positives in `f9791f7`.
+- **Not tested:** the false-positive answers against the real curl (they use a stand-in; the real curl was exercised only by the live probe at home). The away case on the real Mac. A VPN case (limit unchanged from §14: the probe shows the Mac can reach the Pi, not which route the OpenSky request takes).
+
+**Files at this head:** `phase1/run.sh` sha256 `f6f587aec646ca8bfdeeebad4d162077f683ecc6eb51514aab58f999216f65ce` · `phase1/aircraft-schedule.test.sh` `aa5cd2a6c2e3a04eabf5f72aebd5f0161a3decf7bee08cb007b1219db8a3b613` · `phase1/aircraft-mac-regression.sh` `f66cc8185481a858873a817eeaab046da30277feb43f93e70a6e4cd92fe2356c` · `phase1/collector-mac.mjs` `e88ada68c3f334a0e98b35c12bf00c4d0c330c26d35f5e8644226ca364db3d47` (unchanged). The code under test is commit `375d3f6`; the commit after it adds only this section and the evidence file.
+
+**Release state.** The Mac runs the `239e685` runner with the schedule off; one upload made (§13). Installing the rev 5 runner, switching the schedule on, the REGISTER line and the page merge each need Chad's own line, after GPT's review of this head.
