@@ -4,6 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 18:17 UTC (clock reading) — **`AIRCRAFT_POSITIONS=1` SET on the hub: aircraft positions will be published from the next upload** (production: one hub variable; code unchanged)
+- **Chad's own line (17 Nov):** "Approve: set AIRCRAFT_POSITIONS=1 on the hub (publishes rounded aircraft positions without identifiers at /snapshot/opensky, newest snapshot only, served for three hours from the snapshot time)".
+- **Before (18:15:05 UTC, dashboard tab in the Mac's pane, Settings page loaded fresh after the 15:53 code deploy):** script sha256 `ad5bce33b334…`; 23 bindings (9 secrets, 12 plain text, D1, R2); no `AIRCRAFT_*` binding.
+- **Set by Claude through the Settings → Variables and Secrets form** (Key `AIRCRAFT_POSITIONS`, Value `1`, Production ticked, Previews not, Secret not ticked; "Add 1 variable and deploy"). The bindings API was not used.
+- **After (18:16:45 UTC):** 24 bindings (9 secrets, 13 plain text, D1, R2); `AIRCRAFT_POSITIONS` plain text `1`; script sha256 still `ad5bce33b33461f944004d238488d80acdeea27a4730156d3cfd9e7825664132`, version 0.6.18; no `OPENSKY_ENABLED`.
+- **Hub, 18:17:04 UTC:** `/` 0.6.18; `/snapshot/opensky` 200, `no-store`, `positions: "none"`, 0 records, no coordinate pairs (the stored file is the 17:24 UTC upload, made while the variable was off); 442 cells. Other layers answering: usgs ok 18:15:07, firms ok 18:15:40, swpc ok 18:07:58, ships degraded 18:07:03; `/snapshot/wind/meta` 200.
+- **Positions become public at the next aircraft upload,** due about 19:48 UTC (17:24:02 + 8640 s) if the Mac is awake and at home. Read-back set for 19:55 UTC.
+- **Rollback (Chad's own line), immediate:** remove `AIRCRAFT_POSITIONS` (the next request serves no coordinates), then `POST /admin/aircraft/clear-positions?key=…`.
+
+## Next
+1. About 19:55 UTC: read back the first published positions (fields exactly lat,lng; identifier search; dated R2 copy without records). Then Chad's own lines: REGISTER → merge `aircraft-dots-rc` (`e227d4b`).
+2. GPT's review of `layer-switches-rc` `4564740`; then stage A (bare at load, "Choose layers to explore", Layers button) on Chad's go.
+3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run and the hub-fallback / Mac-failure pattern; also wind arrival times.
+4. Look at the two suite checks that fail on main in the container (`smoke-fixes` Sources at 360 px; `osmc-reliability-ui` old page).
+
 ## 17 Nov 18:08 UTC (clock reading) — **First aircraft run on mac-0.3.4: positions sent, hub dropped them, counts clean. Bare Earth stage B on `layer-switches-rc` (`4564740`), packet for GPT** (read-only checks; branch and docs only)
 - **Ships on the new collector file, 17:03:06 UTC:** ok (socket 58.5 s, 3,031 vessels), `200 {"ok":true,"layer":"ships","snapshot":"2026-11-17T17-03Z","records":3031,"cells":166,"bytes":436280}`, exit 0. The first Mac ships sample with records on hub 0.6.18.
 - **First aircraft run on mac-0.3.4:** `17:24:02Z [tick] aircraft due (last 8696 s ago)`; hub answer `200 {"ok":true,"layer":"opensky","snapshot":"2026-11-17T17-24Z","records":0,"cells":442,"bytes":40806,"positions":"not stored (AIRCRAFT_POSITIONS is not 1)"}`; `17:24:10Z [tick] aircraft exit=0`. Ledger: four entries (09:17:09, 11:57:05, 14:59:05, 17:24:01 UTC). `launchd.log` 0 bytes; no pending file; no coordinate pair anywhere in `collector.log`.
@@ -13,12 +28,6 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Browser suites, run for the first time in this thread (Playwright's own Chromium works in this container):** all 39 page suites on the branch. 37 pass; new `layer-switches-ui.test.cjs` 54 passed, four breaks each fail. **`smoke-fixes` ("Sources 360: no page-level horizontal overflow") and `osmc-reliability-ui` ("old page: no page errors") each fail one check, and fail the same check on main `d212584` in this container:** not from either branch; not investigated.
 - **Found by that run, fixed on `aircraft-dots-rc` (`e227d4b`, test only):** `quakes-ships-status-ui` matched the old text of the hub's ingest-down line; it now accepts hub 0.6.18's wording. No code file changed (`phase1/worker.js` still `ad5bce33…4132`). `aircraft-dots-rc` head is now `e227d4bb409fc06776533554f09c3b23c2f682b9`.
 - **Seen on live data** (branch page at `4564740` in a clean github.io tab in the Mac's pane, 18:0x UTC): six switches as labelled; Ships switched off removed 2,604 points from the globe (33,407 → 30,803) while the card kept its number; switched on again, 33,407.
-
-## Next
-1. Chad's own lines for aircraft positions, in order (packet `reviews/2026-11-17-aircraft-dots-rc.md` §7): set `AIRCRAFT_POSITIONS=1` (publishes coordinates) → REGISTER → merge `aircraft-dots-rc` (`e227d4b`).
-2. GPT's review of `layer-switches-rc` `4564740`; then stage A (bare at load, "Choose layers to explore", Layers button) on Chad's go.
-3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run and the hub-fallback / Mac-failure pattern; also wind arrival times.
-4. Look at the two suite checks that fail on main in the container (`smoke-fixes` Sources at 360 px; `osmc-reliability-ui` old page).
 
 ## 17 Nov 16:47 UTC (clock reading) — **GPT: `aircraft-dots-rc` rev 3 passes the page review; Bare Earth proposal rev 2 with Chad's and GPT's decisions** (docs only)
 - **GPT (relayed by Chad, 17 Nov), on `ab7f37e`:** rev 3 passes the page code review; hashes match; page suite rerun, 37 passed; both switches turn the other layer off and remove its sheet; dot radius 1.6 px. Real-position appearance, phone rendering and the broader browser suites remain unverified.
