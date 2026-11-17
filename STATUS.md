@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 07:47 UTC (clock reading) — **OpenSky: Martin replies "you can go ahead without waiting"** (docs only; nothing uploaded, nothing switched on)
+- Chad pasted Martin's reply (Gmail shows 9:40 AM, Chad's local time): "Perfect! Thanks a lot for feeding - you can go ahead without waiting - if you need anything just let us know." Recorded verbatim in `docs/research/ENQUIRIES-2026-11.md` rev 9, with a bounded reading: it settles the wait-or-not question (packet §9 of `aircraft-counts-rc`) and changes none of the standing conditions. Chad's exact sent question is not on record.
+- **Production state unchanged.** The four steps still need Chad's own lines in order: one upload with the schedule off; read-back; schedule on; REGISTER; page merge. Head `239e685` (GPT-passed).
+- **Raised with Chad before the first upload:** the collector runs on the MacBook, which was on a cafe network today. The arrangement on record is about ten requests a day from Chad's own home connection. As built, the collector would ask OpenSky from whatever network the Mac is on. Options put to Chad: run the first upload at home; and before the schedule is switched on, either add a home-network check to the runner or move collection to the Pi.
+
 ## 17 Nov 07:40 UTC (clock reading) — **Cape Town station: why the Pi was unreachable at 07:36 UTC** (docs only)
 - Chad: the Mac was not on the home network (he was out, on a cafe's network). The Pi is reachable only from the home network, so the helper's requests timed out and `adsb-feeder.local` did not resolve. Not a Pi fault; the preview's "Receiver unreachable" was the correct state.
 - The live aircraft smoke at 40 km waits until the Mac is back on the home network. The balloon replay is unaffected (it reads the saved flight from disk).

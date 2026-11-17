@@ -202,3 +202,21 @@ This is a summary relayed by Chad (via GPT's review packet); the verbatim text i
 | Lightcurve index and report retrieval guidance (cadence, caching, load) | not addressed | **Open.** The API cadence preference is not extended to the lightcurve files. |
 
 **Open after this reply, pending the follow-up:** explicit commercial-use confirmation; lightcurve reuse scope; automated lightcurve retrieval guidance. Whether and when to follow up is Chad's decision; nothing is sent automatically. No REGISTER filing or status change: the updated draft (`R2-terms-access.md` §4) awaits GPT's review and then Chad's separate approval. R2's identity and validation gates stay open.
+
+## OpenSky ticket #837506 — reply on publishing now that the receiver feeds (17 Nov 2026) — rev 9
+*Rev 9, 17 Nov 2026 (17 Nov 07:47 UTC clock reading), docs only.*
+
+**Source and reader:** Chad pasted the message text into the Claude thread. The pasted header shows "9:40 AM (5 minutes ago)", as Gmail displays it in Chad's local time (not converted; not a measured UTC reading). Signed "Martin — The OpenSky Network". Email addresses are not reproduced.
+
+**Body, verbatim:**
+> Hi Chad
+>
+> Perfect! Thanks a lot for feeding - you can go ahead without waiting - if you need anything just let us know.
+>
+> Best,
+> Martin
+
+**What it answers.** The open question (packet `reviews/2026-11-17-aircraft-counts-rc.md` §9 on branch `aircraft-counts-rc`) was whether the public-use condition "the site must be a feeder" is met by a receiver that is feeding now, or only once the account has fed for 30%+ of the preceding month. Chad emailed Martin about this on the existing ticket on 17 Nov. **The exact text Chad sent is not on record here** (Claude drafted a question for him: start hosting the aggregated counts now that the receiver is feeding, or wait for the 30% rule; whether that draft was sent as written is not recorded).
+
+**Reading (bounded):** "you can go ahead without waiting" answers the wait-or-not question in favour of going ahead now. It is read with the standing conditions, which it does not change: hobbyist use, no commercial entity or payments; applicable credits; no cloud-server whitelisting; aggregated counts per area only, no aircraft identifiers or individual tracks ("3. Yes", 9 Nov); about ten requests a day from Chad's own connection; OpenSky attribution. Not a wider permission. If Chad supplies his sent text, the link to the question can be recorded exactly, as for rev 4 and rev 7.
+
