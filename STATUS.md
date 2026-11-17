@@ -2,6 +2,15 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 17 Nov 2026
+
+## 17 Nov 02:49 UTC (clock reading) — **GPT's live desktop Chrome smoke of Wind by height: passed**
+- GPT (relayed by Chad): after a hard reload Wind started off. All three heights loaded the 16 Nov 18:00 UTC run. The Cape coastline was traceable at all three heights and stayed visible zoomed out; weakest contrast in the wide stratosphere view. Globe click off the Cape at jet-stream height: 111 km/h from the south-west. Typed Cape Town (-33.92, 18.42) at jet-stream height: 101 km/h from the south-west. Wind off removed the sheet, arrows and outline; earthquake markers and forest cells stayed. Microplastics loaded 1,145 dated samples, hollow zero-count rings seen in the North Atlantic and cleared when switched off. Both optional layers left off.
+- **GPT also saw Fire and Ships showing UNKNOWN before and after the Wind test.** Checked in the hub's run log at 02:49 UTC: fire rows since 00:00 UTC say "no detections processed yet for today (UTC): FIRMS day_range=1 resets at 00:00 UTC and NRT runs ~2–3 h behind", the usual state in the first hours of a UTC day; ship rows alternate between ok and "down: websocket error", the same pattern as on 16 Nov before the 0.6.16 deploy (rows at 12:14 and 12:45 UTC). **Neither began with the wind work.** Not investigated further.
+- **GPT prepared a patch** (`wind-live-smoke-2026-11-17.patch`, a STATUS entry and a packet §16) but had no write access to the Mac folder; **the patch file did not reach Claude.** This entry and packet §16 were written by Claude from GPT's relayed text.
+- **Hub overnight, read 02:49 UTC:** seven hourly wind rows since 20:07 UTC on 16 Nov, all ok, no failure. **Run 2026111618 published 22:08:16 UTC** (index first seen 22:08:11; 8 requests). Runs published by the schedule so far: 12z at 19:08 UTC, 18z at 22:08 UTC.
+- **Still open:** colour scale marked provisional; stale threshold not set; phone, Safari, screen reader (deferred); branch `wind-rc` to delete (Chad's).
+
 # 16 Nov 2026
 
 ## 16 Nov 19:31 UTC (clock reading) — **Wind by height is live: `wind-rc` merged to main**
