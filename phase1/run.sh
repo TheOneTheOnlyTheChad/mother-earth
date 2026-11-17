@@ -3,7 +3,7 @@
 #
 #   ./run.sh ships [--dry] [--window=60]   collect one sample now (manual)
 #   ./run.sh mock                          synthetic sample (proves the path)
-#   ./run.sh aircraft [--dry]              one OpenSky counts request now (refused: 7 budget used · 8 ships due soon · 9 ledger not saved)
+#   ./run.sh aircraft [--dry]              one OpenSky counts request now (refused: 7 budget used · 8 ships due soon · 9 ledger not saved · 10 not on the home network)
 #   ./run.sh tick                          scheduler entry point (launchd, every minute): samples when ~30 min are due; retries a pending upload
 #   ./run.sh status                        what the scheduler has been doing
 #
@@ -56,6 +56,14 @@ AIRCRAFT_INTERVAL_S=${AIRCRAFT_INTERVAL_S:-8640}   # 144 min between scheduled a
 AIRCRAFT_MAX_PER_DAY=10                            # hard cap on OpenSky requests in any 24 h, all paths (not overridable from the environment)
 AIRCRAFT_MAX_S=${AIRCRAFT_MAX_S:-90}               # a run is killed at this many seconds
 AIRCRAFT_GUARD_S=${AIRCRAFT_GUARD_S:-180}          # no aircraft run starts when a ships sample is due within this many seconds
+# Home-network check (GPT review, 17 Nov 2026). The arrangement with OpenSky is requests from Chad's own home connection, and this
+# Mac roams. Before ANY OpenSky request (scheduled, manual, dry) the runner reads our own receiver's local aircraft JSON, which
+# answers only on the home network. No answer, or an answer that is not that JSON (a captive portal), means no request.
+# Limit, stated plainly: this shows the Mac can reach the Pi. With a VPN that sends internet traffic elsewhere, the Pi can still
+# answer while the OpenSky request leaves by another route; the check cannot see that.
+AIRCRAFT_HOME_PROBE_URL=${AIRCRAFT_HOME_PROBE_URL:-http://adsb-feeder.local:8080/data/aircraft.json}
+AIRCRAFT_PROBE_TIMEOUT_S=${AIRCRAFT_PROBE_TIMEOUT_S:-4}     # curl's own limit; the probe is killed outright 2 s after it
+AIRCRAFT_PROBE_RETRY_S=${AIRCRAFT_PROBE_RETRY_S:-300}       # after a failed scheduled probe, do not probe again for this long
 
 # ---- one shared lock (mkdir is atomic). Age alone does NOT make a lock stale (1 Nov 2026): a sample that was running
 # when the host suspended is older than the timeout but still alive, and reclaiming it would start a second sample
@@ -95,6 +103,17 @@ aircraft_budget() {
   [ -f state/aircraft_requests ] && [ "$(tail -n 1 state/aircraft_requests 2>/dev/null)" = "$t" ] || return 2
   return 0
 }
+# Is this Mac on the home network? Read-only: one GET of the receiver's local JSON; only its first 512 bytes are looked at and the scratch copy is removed.
+# Returns 0 when the answer is the receiver's aircraft JSON; 1 otherwise (no answer, timeout, error, or some other page).
+home_probe() {
+  local out
+  # The answer goes to a small scratch file, not a pipe, so nothing here can be left waiting on a probe that hangs; perl's alarm
+  # ends the probe outright if curl's own limit does not.
+  perl -e 'alarm shift; exec @ARGV' "$((AIRCRAFT_PROBE_TIMEOUT_S + 2))" curl -fsS -m "$AIRCRAFT_PROBE_TIMEOUT_S" "$AIRCRAFT_HOME_PROBE_URL" > state/aircraft_probe.tmp 2>/dev/null
+  out=$(head -c 512 state/aircraft_probe.tmp 2>/dev/null); rm -f state/aircraft_probe.tmp 2>/dev/null
+  case "$out" in *'"now"'*'"aircraft"'*|*'"aircraft"'*'"now"'*) return 0 ;; esac
+  return 1
+}
 # Run the collector with a hard time limit: $1 seconds, then the rest as collector arguments. Killed at the limit (exit 124).
 run_bounded() {
   local limit="$1"; shift
@@ -131,7 +150,13 @@ case "$MODE" in
       alast=$(cat state/aircraft_last 2>/dev/null); alast=${alast:-0}
       if [ $((now - alast)) -ge $AIRCRAFT_INTERVAL_S ]; then
         if [ $((INTERVAL_S - (now - last))) -le $AIRCRAFT_GUARD_S ]; then log "aircraft due but ships is due within ${AIRCRAFT_GUARD_S} s; waiting"
+        elif [ $((now - $(cat state/aircraft_probe_failed 2>/dev/null || echo 0))) -lt $AIRCRAFT_PROBE_RETRY_S ]; then :   # a probe failed recently: not probing again yet
+        elif ! home_probe; then
+          # Not on the home network: no OpenSky request, no ledger entry, nothing uploaded (the hub keeps its last good count), and
+          # aircraft_last is left alone so the count is taken soon after the Mac is home again.
+          date +%s > state/aircraft_probe_failed; log "aircraft due but our receiver did not answer on the local network (not at home?); no OpenSky request made"
         else
+          rm -f state/aircraft_probe_failed 2>/dev/null
           aircraft_budget; ab=$?
           if [ "$ab" = 1 ]; then log "aircraft due but the daily request budget ($AIRCRAFT_MAX_PER_DAY in 24 h) is used; skipped"; echo "$now" > state/aircraft_last
           elif [ "$ab" != 0 ]; then log "aircraft due but the request ledger could not be saved; no request made"
@@ -149,9 +174,10 @@ case "$MODE" in
     case "$*" in *--dry*) ;; *) record manual "$rc" "$stamp" "$(date +%s)" ;; esac
     tail -n 3 logs/collector.log; exit $rc ;;
   aircraft)   # manual: one OpenSky request now. '--dry' prints the envelope and uploads nothing, but it STILL asks OpenSky, so it
-    # obeys the same rules as a scheduled run: the ships guard, the daily budget, and a saved ledger entry before the request.
+    # obeys the same rules as a scheduled run: the ships guard, the home-network check, the daily budget, and a saved ledger entry.
     now=$(date +%s); last=$(ships_last)
     if [ $((INTERVAL_S - (now - last))) -le $AIRCRAFT_GUARD_S ]; then echo "refused: a ships sample is due within ${AIRCRAFT_GUARD_S} s (or overdue); try again after it has run" >&2; log "manual aircraft refused: ships due within ${AIRCRAFT_GUARD_S} s"; exit 8; fi
+    if ! home_probe; then echo "refused: our receiver did not answer on the local network, so this Mac does not appear to be on the home network; no OpenSky request made" >&2; log "manual aircraft refused: receiver not reachable on the local network"; exit 10; fi
     aircraft_budget; ab=$?
     if [ "$ab" = 1 ]; then echo "refused: $AIRCRAFT_MAX_PER_DAY OpenSky requests already made in the last 24 h (state/aircraft_requests, plus the one-off pull if recent)" >&2; log "manual aircraft refused: budget used"; exit 7; fi
     if [ "$ab" != 0 ]; then echo "refused: the request ledger (state/aircraft_requests) could not be saved, so no request was made" >&2; log "manual aircraft refused: ledger not saved"; exit 9; fi

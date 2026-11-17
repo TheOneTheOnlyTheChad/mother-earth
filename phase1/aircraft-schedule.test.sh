@@ -4,6 +4,7 @@
 # Run: bash phase1/aircraft-schedule.test.sh        BREAK=<name> weakens the copied run.sh; each must fail:
 #   aircraft-first (the ddf109b ordering: aircraft before ships, no guard)  no-guard  no-kill  no-budget  dry-free  no-switch
 #   stale-clock  manual-no-guard  ledger-unchecked  once-ignored   (the three cases GPT reproduced on 059c531, and the one-off pull)
+#   no-probe  manual-no-probe  portal-ok  probe-no-kill  probe-no-backoff   (the home-network check)
 # Written for macOS /bin/bash 3.2 as well as Linux bash: no python, no GNU-only flags.
 set -u
 SRC="$(cd "$(dirname "$0")" && pwd)"; T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
@@ -20,6 +21,11 @@ setup() {   # fresh folder each case
     stale-clock) perl -0777 -i.bak -pe 's/(seen in this tick \(GPT review of 059c531\)\.\n)    now=\$\(date \+%s\); last=\$\(ships_last\)\n/$1    :\n/' "$T/w/run.sh" ;;   # 059c531: the clock is not read again after the retry
     manual-no-guard) sed -i.bak 's/if \[ \$((INTERVAL_S - (now - last))) -le \$AIRCRAFT_GUARD_S \]; then echo/if false; then echo/' "$T/w/run.sh" ;;   # 059c531: manual runs ignore ships
     ledger-unchecked) sed -i.bak 's/|| return 2$/|| true/; s/then return 2; fi   # present/then true; fi   # present/' "$T/w/run.sh" ;;        # 059c531: a ledger that cannot be saved does not stop the request
+    no-probe) sed -i.bak 's/        elif ! home_probe; then/        elif false; then/' "$T/w/run.sh" ;;                                         # 239e685: the scheduled path asks OpenSky from any network
+    manual-no-probe) sed -i.bak 's/    if ! home_probe; then echo/    if false; then echo/' "$T/w/run.sh" ;;                                    # manual and dry runs ask from any network
+    portal-ok) perl -0777 -i.bak -pe 's/  case "\$out" in .*?esac\n  return 1/  [ -n "\$out" ] \&\& return 0\n  return 1/s' "$T/w/run.sh" ;;                # any answer at all counts as home
+    probe-no-kill) sed -i.bak "s/  perl -e 'alarm shift; exec @ARGV' \"\$((AIRCRAFT_PROBE_TIMEOUT_S + 2))\" curl/  curl/" "$T/w/run.sh" ;;   # a probe that hangs is not cut off
+    probe-no-backoff) sed -i.bak 's/-lt \$AIRCRAFT_PROBE_RETRY_S \]; then :/-lt 0 ]; then :/' "$T/w/run.sh" ;;                               # a failed probe is repeated every tick
     once-ignored) sed -i.bak 's/if \[ -n "\$once" \] \&\& /if false \&\& /' "$T/w/run.sh" ;;                                          # the one-off pull is not counted
     no-kill) sed -i.bak 's/if \[ "\$waited" -ge "\$limit" \]; then/if false; then/' "$T/w/run.sh" ;;
     no-budget) sed -i.bak 's/\[ "\$n" -ge "\$AIRCRAFT_MAX_PER_DAY" \] \&\& return 1/false \&\& return 1/' "$T/w/run.sh" ;;
@@ -39,6 +45,18 @@ if [ "$layer" = "opensky" ]; then sleep "${STUB_OPENSKY_SLEEP:-0}"; echo "$(date
 sleep "${STUB_SHIPS_SLEEP:-0}"; echo "$(date +%s) end $layer" >> "$STUB_LOG"; exit 0
 N
   chmod +x "$T/w/bin/node"; export STUB_LOG="$T/w/stub.log"; : > "$STUB_LOG"
+  # the stub "curl" stands in for the probe of our receiver. $T/w/probe says what the network looks like: home | away | hang | portal
+  cat > "$T/w/bin/curl" <<'N'
+#!/bin/bash
+echo "$(date +%s) probe $(cat "$PROBE_FILE")" >> "$STUB_LOG"
+case "$(cat "$PROBE_FILE")" in
+  home) printf '{ "now" : 1794907029.5,\n  "messages" : 5742535,\n  "aircraft" : [\n    {"hex":"000000"}\n  ]\n}\n'; exit 0 ;;
+  portal) printf '<html><body>Welcome to Cafe WiFi. Please sign in.</body></html>\n'; exit 0 ;;
+  hang) sleep 30; exit 28 ;;
+  *) exit 6 ;;
+esac
+N
+  chmod +x "$T/w/bin/curl"; export PROBE_FILE="$T/w/probe"; echo home > "$PROBE_FILE"
 }
 tick() { (cd "$T/w" && PATH="$T/w/bin:$PATH" "$@" ./run.sh tick >/dev/null 2>&1); }
 run() { (cd "$T/w" && PATH="$T/w/bin:$PATH" env "$@" >/dev/null 2>&1); }
@@ -146,5 +164,55 @@ ok 'J1 nine ledger entries + the one-off pull one hour ago: the next request is 
 printf '{\n "pull": {\n  "source_time": %s\n }\n}\n' $((t - 90000)) > "$T/w/state/opensky-once.json"
 (cd "$T/w" && PATH="$T/w/bin:$PATH" ./run.sh aircraft --dry >/dev/null 2>&1); rc=$?
 ok 'J2 the one-off pull older than 24 h no longer counts' "$([ "$rc" = 0 ] && [ "$(n opensky)" = 1 ] && echo 1)" "rc=$rc"
+
+# K. the home-network check: our receiver must answer on the local network before any OpenSky request
+np() { grep -c ' probe ' "$STUB_LOG"; }
+setup; touch "$T/w/state/aircraft.on"; sched $(now)
+run env ./run.sh tick
+ok 'K1 at home: the receiver is probed, then the one request is made' "$([ "$(np)" = 1 ] && [ "$(n opensky)" = 1 ] && grep -n . "$STUB_LOG" | head -1 | grep -q probe && echo 1)" "$(cat "$STUB_LOG")"
+setup; touch "$T/w/state/aircraft.on"; sched $(now); echo away > "$PROBE_FILE"
+run env AIRCRAFT_PROBE_RETRY_S=3 ./run.sh tick
+ok 'K2 away: no OpenSky request' "$([ "$(n opensky)" = 0 ] && [ "$(np)" = 1 ] && echo 1)" "$(cat "$STUB_LOG")"
+ok 'K3 away: the ledger is untouched and the run is not marked as taken' "$([ ! -e "$T/w/state/aircraft_requests" ] && [ ! -e "$T/w/state/aircraft_last" ] && echo 1)" "$(ls "$T/w/state")"
+ok 'K4 away: the reason is logged' "$(grep -q 'our receiver did not answer on the local network' "$T/w/logs/collector.log" && echo 1)" "$(cat "$T/w/logs/collector.log")"
+ok 'K5 away: nothing was uploaded (no collector call at all), lock free' "$([ "$(grep -c ' start ' "$STUB_LOG")" = 0 ] && [ ! -d "$T/w/state/lock" ] && echo 1)" "$(cat "$STUB_LOG")"
+run env AIRCRAFT_PROBE_RETRY_S=3 ./run.sh tick
+ok 'K6 away, next tick: the probe is not repeated straight away' "$([ "$(np)" = 1 ] && [ "$(n opensky)" = 0 ] && echo 1)" "$(cat "$STUB_LOG")"
+echo home > "$PROBE_FILE"; sleep 4
+run env AIRCRAFT_PROBE_RETRY_S=3 ./run.sh tick
+ok 'K7 back home: the next tick after the wait probes again and makes the request' "$([ "$(np)" = 2 ] && [ "$(n opensky)" = 1 ] && [ "$(grep -c . "$T/w/state/aircraft_requests")" = 1 ] && [ ! -e "$T/w/state/aircraft_probe_failed" ] && echo 1)" "$(cat "$STUB_LOG"; ls "$T/w/state")"
+setup; sched $(now); echo away > "$PROBE_FILE"
+(cd "$T/w" && PATH="$T/w/bin:$PATH" ./run.sh aircraft >/dev/null 2>&1); rc=$?
+ok 'K8 away, manual: refused with exit 10, no request, no ledger entry' "$([ "$rc" = 10 ] && [ "$(n opensky)" = 0 ] && [ ! -e "$T/w/state/aircraft_requests" ] && echo 1)" "rc=$rc"
+(cd "$T/w" && PATH="$T/w/bin:$PATH" ./run.sh aircraft --dry >/dev/null 2>&1); rc=$?
+ok 'K9 away, manual --dry: refused with exit 10, no request' "$([ "$rc" = 10 ] && [ "$(n opensky)" = 0 ] && echo 1)" "rc=$rc"
+echo home > "$PROBE_FILE"
+(cd "$T/w" && PATH="$T/w/bin:$PATH" ./run.sh aircraft --dry >/dev/null 2>&1); rc=$?
+ok 'K10 home, manual --dry: allowed' "$([ "$rc" = 0 ] && [ "$(n opensky)" = 1 ] && echo 1)" "rc=$rc"
+setup; touch "$T/w/state/aircraft.on"; sched $(now); echo portal > "$PROBE_FILE"
+run env ./run.sh tick
+(cd "$T/w" && PATH="$T/w/bin:$PATH" ./run.sh aircraft >/dev/null 2>&1); rc=$?
+ok 'K11 a sign-in page that answers for any address is not home (scheduled and manual)' "$([ "$(n opensky)" = 0 ] && [ "$rc" = 10 ] && [ ! -e "$T/w/state/aircraft_requests" ] && echo 1)" "rc=$rc $(cat "$STUB_LOG")"
+# a probe that hangs, with ships coming due: cut off at its limit, no request, ships on time
+setup; touch "$T/w/state/aircraft.on"; echo hang > "$PROBE_FILE"; t0=$(now); sched $(( t0 - 1800 + 12 ))    # ships due 12 s from now
+run env AIRCRAFT_GUARD_S=2 AIRCRAFT_PROBE_TIMEOUT_S=2 ./run.sh tick
+t1=$(now)
+ok 'K12 a hanging probe is cut off at its limit (2 s + 2 s)' "$([ $((t1 - t0)) -le 6 ] && echo 1)" "$((t1 - t0)) s"
+ok 'K13 after a hanging probe: no request, ledger untouched, lock free, no probe left running' "$([ "$(n opensky)" = 0 ] && [ ! -e "$T/w/state/aircraft_requests" ] && [ ! -d "$T/w/state/lock" ] && ! pgrep -f "$T/w/bin/curl" >/dev/null && echo 1)" "$(cat "$STUB_LOG")"
+sleep $(( 13 - ($(now) - t0) > 0 ? 13 - ($(now) - t0) : 0 ))
+run env AIRCRAFT_GUARD_S=2 AIRCRAFT_PROBE_TIMEOUT_S=2 ./run.sh tick
+due=$(( t0 + 12 )); started=$(grep 'start ships' "$STUB_LOG" | head -1 | cut -d' ' -f1)
+ok 'K14 ships starts on the first tick after it is due' "$([ -n "$started" ] && [ $((started - due)) -le 3 ] && echo 1)" "started ${started:-never}, due $due"
+# ships priority: when ships is due the receiver is not even probed in that tick
+setup; touch "$T/w/state/aircraft.on"; sched 0
+run env ./run.sh tick
+ok 'K15 ships due: ships runs and the receiver is not probed in that tick' "$([ "$(n ships)" = 1 ] && [ "$(np)" = 0 ] && [ "$(n opensky)" = 0 ] && echo 1)" "$(cat "$STUB_LOG")"
+setup; touch "$T/w/state/aircraft.on"; sched $(( $(now) - 1800 + 120 )); echo home > "$PROBE_FILE"
+run env ./run.sh tick
+ok 'K16 ships due within the guard: no probe and no request' "$([ "$(np)" = 0 ] && [ "$(n opensky)" = 0 ] && echo 1)" "$(cat "$STUB_LOG")"
+# a full ledger while away: still nothing asked, ledger unchanged
+setup; touch "$T/w/state/aircraft.on"; sched $(now); echo away > "$PROBE_FILE"; t=$(now); for i in 1 2 3 4 5 6 7 8 9 10; do echo $((t - i * 60)); done > "$T/w/state/aircraft_requests"; cp "$T/w/state/aircraft_requests" "$T/w/before"
+run env ./run.sh tick
+ok 'K17 away with a full ledger: no request and the ledger is byte-for-byte unchanged' "$([ "$(n opensky)" = 0 ] && cmp -s "$T/w/before" "$T/w/state/aircraft_requests" && echo 1)"
 
 echo; echo "aircraft-schedule${BREAK:+ (BREAK=$BREAK)}: $pass passed, $fail failed  [bash $BASH_VERSION, $(uname -s)]"; [ "$fail" = 0 ]
