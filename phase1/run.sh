@@ -3,6 +3,7 @@
 #
 #   ./run.sh ships [--dry] [--window=60]   collect one sample now (manual)
 #   ./run.sh mock                          synthetic sample (proves the path)
+#   ./run.sh aircraft [--dry]              one OpenSky counts request now (refused: 7 budget used · 8 ships due soon · 9 ledger not saved)
 #   ./run.sh tick                          scheduler entry point (launchd, every minute): samples when ~30 min are due; retries a pending upload
 #   ./run.sh status                        what the scheduler has been doing
 #
@@ -76,14 +77,23 @@ trap 'rm -f state/lock/pid 2>/dev/null; rmdir state/lock 2>/dev/null' EXIT
 run_collector() {   # $1 = layer/mode, rest = flags
   "$NODE" collector-mac.mjs "$@" --quiet --state=state >> logs/collector.log 2>&1; return $?
 }
-# Aircraft: every OpenSky request (scheduled, manual, dry) is entered in state/aircraft_requests BEFORE it is made, and refused when
-# AIRCRAFT_MAX_PER_DAY entries already fall inside the last 24 h. Returns 0 and records the request, or 1.
+ships_last() { local l; l=$(grep -o '"last_sample_epoch":[0-9]*' state/scheduler.json 2>/dev/null | grep -o '[0-9]*$'); echo "${l:-0}"; }
+# Aircraft: every OpenSky request (scheduled, manual, dry) is entered in state/aircraft_requests BEFORE it is made.
+# Returns 0 = entry saved, the request may be made · 1 = AIRCRAFT_MAX_PER_DAY requests already fall inside the last 24 h
+# · 2 = the entry could not be saved and read back, so NO request may be made (an unrecorded request would break the cap).
+# The one-off private pull of 17 Nov 2026 (state/opensky-once.json, made outside this ledger) is counted while it is inside the window.
 aircraft_budget() {
-  local t cut n=0 keep=""; t=$(date +%s); cut=$((t - 86400))
+  local t cut n=0 keep="" e once; t=$(date +%s); cut=$((t - 86400))
+  if [ -e state/aircraft_requests ] && { [ ! -f state/aircraft_requests ] || [ ! -r state/aircraft_requests ]; }; then return 2; fi   # present but not a readable file: its entries cannot be counted
   if [ -f state/aircraft_requests ]; then while read -r e; do case "$e" in ''|*[!0-9]*) continue ;; esac; [ "$e" -gt "$cut" ] && { keep="$keep$e
 "; n=$((n + 1)); }; done < state/aircraft_requests; fi
-  [ "$n" -ge "$AIRCRAFT_MAX_PER_DAY" ] && { printf '%s' "$keep" > state/aircraft_requests; return 1; }
-  printf '%s%s\n' "$keep" "$t" > state/aircraft_requests; return 0
+  once=$(grep -o '"source_time": *[0-9]*' state/opensky-once.json 2>/dev/null | grep -o '[0-9]*$' | head -n 1)
+  if [ -n "$once" ] && [ "$once" -gt "$cut" ]; then n=$((n + 1)); fi
+  [ "$n" -ge "$AIRCRAFT_MAX_PER_DAY" ] && return 1
+  printf '%s%s\n' "$keep" "$t" > state/aircraft_requests.tmp 2>/dev/null || return 2
+  mv -f state/aircraft_requests.tmp state/aircraft_requests 2>/dev/null || return 2
+  [ -f state/aircraft_requests ] && [ "$(tail -n 1 state/aircraft_requests 2>/dev/null)" = "$t" ] || return 2
+  return 0
 }
 # Run the collector with a hard time limit: $1 seconds, then the rest as collector arguments. Killed at the limit (exit 124).
 run_bounded() {
@@ -101,8 +111,11 @@ case "$MODE" in
   tick)
     touch state/last_tick            # heartbeat: mtime only, nothing grows
     now=$(date +%s)
-    last=$(grep -o '"last_sample_epoch":[0-9]*' state/scheduler.json 2>/dev/null | grep -o '[0-9]*$'); last=${last:-0}
+    last=$(ships_last)
     if [ -f state/pending.json ]; then log "pending upload found; retrying"; run_collector retry; rc=$?; log "retry exit=$rc"; fi
+    # The retry above can take minutes (timeouts and backoff). Read the clock and the last ships sample AGAIN before deciding which
+    # collector runs, so a ships sample that came due during the retry is seen in this tick (GPT review of 059c531).
+    now=$(date +%s); last=$(ships_last)
     if [ $((now - last)) -ge $INTERVAL_S ]; then
       stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ); log "sample due (last $((now - last)) s ago)"
       run_collector ships; rc=$?; log "ships exit=$rc"
@@ -118,10 +131,14 @@ case "$MODE" in
       alast=$(cat state/aircraft_last 2>/dev/null); alast=${alast:-0}
       if [ $((now - alast)) -ge $AIRCRAFT_INTERVAL_S ]; then
         if [ $((INTERVAL_S - (now - last))) -le $AIRCRAFT_GUARD_S ]; then log "aircraft due but ships is due within ${AIRCRAFT_GUARD_S} s; waiting"
-        elif ! aircraft_budget; then log "aircraft due but the daily request budget ($AIRCRAFT_MAX_PER_DAY in 24 h) is used; skipped"; echo "$now" > state/aircraft_last
         else
-          echo "$now" > state/aircraft_last; log "aircraft due (last $((now - alast)) s ago)"
-          run_bounded "$AIRCRAFT_MAX_S" opensky --quiet --state=state; arc=$?; log "aircraft exit=$arc"
+          aircraft_budget; ab=$?
+          if [ "$ab" = 1 ]; then log "aircraft due but the daily request budget ($AIRCRAFT_MAX_PER_DAY in 24 h) is used; skipped"; echo "$now" > state/aircraft_last
+          elif [ "$ab" != 0 ]; then log "aircraft due but the request ledger could not be saved; no request made"
+          else
+            echo "$now" > state/aircraft_last; log "aircraft due (last $((now - alast)) s ago)"
+            run_bounded "$AIRCRAFT_MAX_S" opensky --quiet --state=state; arc=$?; log "aircraft exit=$arc"
+          fi
         fi
       fi
     fi
@@ -132,8 +149,12 @@ case "$MODE" in
     case "$*" in *--dry*) ;; *) record manual "$rc" "$stamp" "$(date +%s)" ;; esac
     tail -n 3 logs/collector.log; exit $rc ;;
   aircraft)   # manual: one OpenSky request now. '--dry' prints the envelope and uploads nothing, but it STILL asks OpenSky, so it
-    # is counted against the same daily budget as every other request.
-    if ! aircraft_budget; then echo "refused: $AIRCRAFT_MAX_PER_DAY OpenSky requests already made in the last 24 h (state/aircraft_requests)" >&2; log "manual aircraft refused: budget used"; exit 7; fi
+    # obeys the same rules as a scheduled run: the ships guard, the daily budget, and a saved ledger entry before the request.
+    now=$(date +%s); last=$(ships_last)
+    if [ $((INTERVAL_S - (now - last))) -le $AIRCRAFT_GUARD_S ]; then echo "refused: a ships sample is due within ${AIRCRAFT_GUARD_S} s (or overdue); try again after it has run" >&2; log "manual aircraft refused: ships due within ${AIRCRAFT_GUARD_S} s"; exit 8; fi
+    aircraft_budget; ab=$?
+    if [ "$ab" = 1 ]; then echo "refused: $AIRCRAFT_MAX_PER_DAY OpenSky requests already made in the last 24 h (state/aircraft_requests, plus the one-off pull if recent)" >&2; log "manual aircraft refused: budget used"; exit 7; fi
+    if [ "$ab" != 0 ]; then echo "refused: the request ledger (state/aircraft_requests) could not be saved, so no request was made" >&2; log "manual aircraft refused: ledger not saved"; exit 9; fi
     log "manual aircraft $*"; case "$*" in *--dry*) ;; *) date +%s > state/aircraft_last ;; esac
     run_bounded "$AIRCRAFT_MAX_S" opensky "$@" --state=state; rc=$?; log "aircraft exit=$rc"; tail -n 6 logs/collector.log; exit $rc ;;
   retry) run_collector retry; exit $? ;;
