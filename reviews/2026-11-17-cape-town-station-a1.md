@@ -1,5 +1,7 @@
 # Cape Town observation station — A1 private preview: "Aircraft seen by our Cape Town receiver"
 
+**Rev 3, 17 Nov 2026 (17 Nov 07:38 UTC clock reading): GPT's review of rev 2; §7 records the two remaining freshness fixes, the balloon replay and the live results, and governs where it differs from earlier sections.**
+
 **Rev 2, 17 Nov 2026 (17 Nov 06:32 UTC clock reading): GPT's review of rev 1; §6 records the three freshness fixes and the range controls and governs where it differs from §3–§5.**
 
 Rev 1, 17 Nov 2026 (17 Nov 06:10 UTC clock reading). Branch `cape-town-station-rc`. For GPT's review. **Private, local-network preview only.** No page on the public site, no hub change, no upload, nothing on the Pi changed. The public OpenSky release, additional feeds and hardware purchases are outside this pass (Chad).
@@ -60,3 +62,23 @@ Spec: `docs/concepts/CAPE-TOWN-STATION-SPEC.md` (A1 only). Verify the local read
 **Not done:** the live smoke was not repeated on the real Pi at rev 2. The helper had been stopped when Claude tried (06:31 UTC). It needs `node ~/mother-earth/cape-town/preview.mjs` running again; the Mac copy of the page is already rev 2.
 
 **Radiosonde first look** (GPT's second ask): `docs/research/CAPE-TOWN-RADIOSONDE-FIRST-LOOK-2026-11-17.md`.
+
+## 7. Rev 3 — GPT's review of rev 2 (relayed by Chad, 17 Nov), balloon replay, live results
+**Two remaining A1 cases GPT reproduced, both fixed in `preview.html`:**
+1. **A repeated reading reset the 30 s timer.** The limit now runs from the last reading whose receiver time moved forward (`movedAt`); a repeat of the same reading leaves it alone. Position ages are counted from the same moment. Check: one answer replayed byte for byte with the frozen-clock rule switched off: live at 24 s, "No fresh reading" at 35 s while answers keep arriving, live again when the receiver moves.
+2. **A Pi clock stepping backwards was ignored until it caught up.** The first older reading is still not trusted on its own. A second older reading that has moved forward from the first confirms the receiver is on an earlier clock: the page follows it, goes live, and says the clock moved back (for 60 s). Older readings that do not move are stale. Checks: 5-minute step back (not followed on the first, followed on the second, stays live, forward jump is simply newer); back and frozen is stale.
+- Aircraft suite **50 passed**; against the rev 2 page the new cases fail. `preview.mjs` gained two read-only routes for the replay; its aircraft behaviour is unchanged.
+
+**Balloon replay (private; GPT's licence finding: SondeHub's open telemetry is CC BY-SA 2.0; sensor readings to be treated as uncalibrated; single archived flight only, no polling):**
+- `fetch-flight.mjs`: downloads one serial once and saves it unchanged in `balloon/` with a record (source, time, frame count, sha256). Does nothing if the copy exists. Tries the open archive, then the API.
+- `preview.mjs`: `/balloon` (the page) and `/balloon/flight.json` (the saved copy and its record), read from disk only.
+- `balloon.html`: received path from above (north up, scale bar; way up and way down in different colours; a gap over 30 s breaks the line); first and last points labelled "first point received (not the launch)" and "last point received (not the landing)", plus a sentence saying so; highest point; altitude slider with an up/down switch; readout (time, altitude, position, distance from the first point, temperature, humidity, wind estimate); temperature and humidity by altitude, each marked uncalibrated on the chart, in the readout and in a note; wind labelled as an estimate from GPS drift with its window stated (first to last reading within 30 s either side; none under 20 s or across a gap); credit block: SondeHub, CC BY-SA 2.0 with link, the single copy's source/time/sha256, the changes made (time order, repeats and unusable readings left out and counted, flat local map, wind estimate added), and the ShareAlike condition.
+- **The raw flight is on the Mac only** (`~/mother-earth/cape-town/balloon/`), not in this repository: it carries the volunteer stations' callsigns and positions. The page shows only how many receivers heard the flight.
+- Balloon suite (`balloon.test.cjs`, synthetic flight in SondeHub's frame format, real helper and page): **24 passed**.
+
+**Live results (Chad ran `fetch-flight.mjs` then `preview.mjs`; Claude drove tabs in Chad's Chrome, 07:35–07:37 UTC):**
+- **Flight download:** open archive answered HTTP 403 for this serial; the API copy was saved at 07:33:44 UTC: 2,829 frames, 1,726,665 bytes, sha256 `c29a63b9…dd97`.
+- **Balloon replay on the real flight:** loaded; 2,829 readings, 16 Nov 23:42:17 UTC to 17 Nov 01:06:27 UTC; first received 211 m, highest 27,429 m, last 9,631 m; one reading every 2 s; no gap over 30 s; 2 receivers; 0 repeats and 0 unusable readings left out. Slider: 3,000 m → 8.3 °C, 13.7 %, about 12 km/h from 233°; 10,007 m → −39.7 °C, 18.4 %, about 90 km/h from 231°, 17.6 km from the first point; top → −51.3 °C, 0.0 %; way down at 14,967 m → −60.8 °C, 2.7 %, about 119 km/h from 246°. These agree with the first-look note. Screenshot looked at: path, three labels, slider marker, both profiles drawn.
+- **Aircraft at 40 km: NOT smoke-tested live.** The helper ran, but the Pi did not answer: six requests in a row timed out at 4 s, and Chrome could not resolve `adsb-feeder.local` (DNS_PROBE_FINISHED_NXDOMAIN) at 07:36 UTC. The page showed "Receiver unreachable", nothing drawn, with the 40/100/320 km rings switching correctly. Cause not known (Pi off the network or restarting, the Mac on a different network, or name resolution); not investigated; nothing on the Pi touched.
+
+**Open:** live aircraft smoke at 40 km once the Pi answers; why the Pi stopped answering by name; map labels can overlap the path near the end points; the wind estimate around the highest point spans the burst and is not meaningful there; GFS comparison, recurring polling and hardware left for a later decision (GPT, Chad).
