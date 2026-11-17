@@ -47,14 +47,14 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 5 min — failur
     return { ctx, page, hits, count, perr };
   };
   const R = page => page.evaluate(() => ({ r: ME.renderState(), d: ME.pairState('drifters').drifters, usgs: ME.pairState('usgs').usgs, leg: !document.getElementById('leg-drifters').hidden,
-    st: document.getElementById('s-drifters').textContent, pressed: document.querySelector('[data-layer="drifters"]').getAttribute('aria-pressed'), v: document.getElementById('v-drifters').textContent, o: document.getElementById('o-drifters').textContent, pair: document.getElementById('p-drifters').hidden ? '' : document.getElementById('p-drifters').textContent }));
+    st: document.getElementById('s-drifters').textContent, pressed: document.querySelector('[data-layer="drifters"]').getAttribute('aria-checked'), v: document.getElementById('v-drifters').textContent, o: document.getElementById('o-drifters').textContent, pair: document.getElementById('p-drifters').hidden ? '' : document.getElementById('p-drifters').textContent }));
   const on = async page => { await page.click('[data-layer="drifters"]'); await page.waitForFunction(() => !document.getElementById('s-drifters').textContent.match(/off|loading/), null, { timeout: 15000 }); await page.waitForTimeout(300); };
   const off = async page => { await page.click('[data-layer="drifters"]'); await page.waitForTimeout(300); };
 
   // --- desktop
   let { ctx, page, hits, count, perr } = await run({ width: 1280, height: 860 });
   let x = await R(page); const basePts = x.r.points;
-  ok('1 fresh load: drifters off (aria-pressed false, card says off)', x.pressed === 'false' && x.st === 'off' && !x.r.on.drifters, x);
+  ok('1 fresh load: drifters off (switch aria-checked false, card says off)', x.pressed === 'false' && x.st === 'off' && !x.r.on.drifters, x);
   ok('1 fresh load: no drifter points, cells or legend entry', x.r.driftPoints === 0 && x.r.driftCells === 0 && !x.leg, x);
   ok('1 fresh load: ZERO drifter requests, never OSMC directly', count(/drifters|OSMC/) === 0, hits.filter(h => /drifters|OSMC/.test(h)));
   ok('1 always-on layers rendered', basePts > 0, basePts);

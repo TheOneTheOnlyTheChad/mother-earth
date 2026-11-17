@@ -35,8 +35,8 @@ const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log(
       const g = page.locator('#card-optional');
       ok('optional group holds drifters, day/night and orbital', await g.locator('#card-drifters').count() === 1 && await g.locator('#tgl-night').count() === 1 && await g.locator('#card-orb').count() === 1);
       ok('no group toggle', await g.locator(':scope > button, .opt-head button').count() === 0);
-      ok('every optional control off on load', await A(page.locator('#card-drifters button.tgl'), 'aria-pressed') === 'false' && await A(page.locator('#tgl-night'), 'aria-checked') === 'false' && (await page.locator('#orb-tgls [aria-checked="true"]').count()) === 0);
-      ok('core layers still on by default', (await page.locator('#card-usgs button.tgl, #card-firms button.tgl, #card-ships button.tgl, #card-forest button.tgl').evaluateAll(bs => bs.every(b => b.getAttribute('aria-pressed') === 'true'))));
+      ok('every optional control off on load', await A(page.locator('#card-drifters button.tgl'), 'aria-checked') === 'false' && await A(page.locator('#tgl-night'), 'aria-checked') === 'false' && (await page.locator('#orb-tgls [aria-checked="true"]').count()) === 0);
+      ok('core layers still on by default', (await page.locator('#card-usgs button.tgl, #card-firms button.tgl, #card-ships button.tgl, #card-forest button.tgl').evaluateAll(bs => bs.every(b => b.getAttribute('aria-checked') === 'true'))));
       // §4 Explore: search, scope, two jump buttons; no overlays; sits after the core cards, before the optional group in reading order
       ok('Explore keeps search, scope and both jump buttons, no overlays', await page.locator('#card-explore #search-form').count() === 1 && await page.locator('#card-explore #find-usgs, #card-explore #find-firms').count() === 2 && await page.locator('#card-explore .ovl').count() === 0);
       const order = await page.evaluate(() => { const a = ['card-forest', 'card-explore', 'card-optional'].map(id => document.getElementById(id)); return a.every(Boolean) ? a.map((e, i) => i === 0 || (a[i - 1].compareDocumentPosition(e) & Node.DOCUMENT_POSITION_FOLLOWING) > 0) : [false]; });

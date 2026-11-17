@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612141000">
+<link rel="stylesheet" href="style.css?v=202612151100">
 </head>
 <body class="world">
 <header class="top">
@@ -101,8 +101,9 @@
     <div class="scroll" id="sheet-scroll">
       <section class="col left" aria-label="Map layers and navigation">
         <div class="card toggle" id="card-usgs" style="--c:var(--quake)">
-          <button class="tgl" type="button" data-layer="usgs" aria-pressed="true"><span class="pip"></span><span class="name">Earthquakes</span><span class="state" id="s-usgs">loading</span></button>
-          <div class="evl"><span class="ev obs">Observed</span> events in the USGS catalogue</div>
+          <div class="head"><span class="pip"></span><span class="name">Earthquakes</span><span class="state" id="s-usgs">loading</span></div>
+          <button class="ovl-tgl tgl" type="button" id="tgl-usgs" data-layer="usgs" role="switch" aria-checked="true" aria-describedby="ev-usgs"><span class="box" aria-hidden="true"></span><span class="t">Earthquakes — show on the globe</span></button>
+          <div class="evl" id="ev-usgs"><span class="ev obs">Observed</span> events in the USGS catalogue</div>
           <div class="value"><span id="v-usgs">–</span><small>M2.5+ · last 24 h</small></div>
           <div class="obs" id="o-usgs">loading…</div>
           <div class="src" id="m-usgs">USGS</div>
@@ -110,8 +111,9 @@
           <details class="cd"><summary>Details</summary><div class="cav">M2.5 completeness is regional; USGS documents global completeness at M4.5+. <a class="more" href="sources.html#usgs">details</a></div></details>
         </div>
         <div class="card toggle" id="card-firms" style="--c:var(--fire)">
-          <button class="tgl" type="button" data-layer="firms" aria-pressed="true"><span class="pip"></span><span class="name">Fire detections</span><span class="state" id="s-firms">loading</span></button>
-          <div class="evl"><span class="ev obs">Observed</span> per satellite pass — one detection per pass, not one fire</div>
+          <div class="head"><span class="pip"></span><span class="name">Fire detections</span><span class="state" id="s-firms">loading</span></div>
+          <button class="ovl-tgl tgl" type="button" id="tgl-firms" data-layer="firms" role="switch" aria-checked="true" aria-describedby="ev-firms"><span class="box" aria-hidden="true"></span><span class="t">Fire detections — show on the globe</span></button>
+          <div class="evl" id="ev-firms"><span class="ev obs">Observed</span> per satellite pass — one detection per pass, not one fire</div>
           <div class="value"><span id="v-firms">–</span><small>detections · today so far (UTC)</small></div>
           <div class="obs" id="o-firms">loading…</div>
           <div class="src" id="m-firms">NASA FIRMS · VIIRS NOAA-20</div>
@@ -119,8 +121,9 @@
           <div class="cav">One detection per pass, not one fire; cloud may hide detections. NASA: not for tactical or local-scale decisions. <a class="more" href="sources.html#firms">details</a></div>
         </div>
         <div class="card toggle" id="card-ships" style="--c:var(--ship)">
-          <button class="tgl" type="button" data-layer="ships" aria-pressed="true"><span class="pip"></span><span class="name">Ships</span><span class="state" id="s-ships">loading</span></button>
-          <div class="evl"><span class="ev obs">Observed</span> sampled 60 s, terrestrial AIS only</div>
+          <div class="head"><span class="pip"></span><span class="name">Ships</span><span class="state" id="s-ships">loading</span></div>
+          <button class="ovl-tgl tgl" type="button" id="tgl-ships" data-layer="ships" role="switch" aria-checked="true" aria-describedby="ev-ships"><span class="box" aria-hidden="true"></span><span class="t">Ships — show on the globe</span></button>
+          <div class="evl" id="ev-ships"><span class="ev obs">Observed</span> sampled 60 s, terrestrial AIS only</div>
           <div class="value"><span class="lbl" id="l-ships"></span><span id="v-ships">–</span><small id="u-ships">vessel identities · 60 s sample</small></div>
           <div class="obs" id="o-ships">loading…</div>
           <div class="src" id="m-ships">aisstream.io</div>
@@ -128,8 +131,9 @@
           <details class="cd"><summary>Details</summary><div class="cav" id="mode-ships">Terrestrial AIS only: a cell with no vessels is not an empty sea. <a class="more" href="sources.html#ships">details</a></div></details>
         </div>
         <div class="card toggle" id="card-forest" style="--c:var(--forest)">
-          <button class="tgl" type="button" data-layer="forest" aria-pressed="true"><span class="pip"></span><span class="name">Forest disturbance</span><span class="state" id="s-forest">loading</span></button>
-          <div class="evl"><span class="ev obs">Observed</span> satellite-derived alerts — interpreted by the source, not ground-verified</div>
+          <div class="head"><span class="pip"></span><span class="name">Forest disturbance</span><span class="state" id="s-forest">loading</span></div>
+          <button class="ovl-tgl tgl" type="button" id="tgl-forest" data-layer="forest" role="switch" aria-checked="true" aria-describedby="ev-forest"><span class="box" aria-hidden="true"></span><span class="t">Forest disturbance — show on the globe</span></button>
+          <div class="evl" id="ev-forest"><span class="ev obs">Observed</span> satellite-derived alerts — interpreted by the source, not ground-verified</div>
           <div class="value"><span id="v-forest">–</span><small>alert pixels (10 m) · published in the last 7 days</small></div>
           <div class="obs" id="o-forest">loading…</div>
           <div class="src" id="m-forest">Global Nature Watch · integrated alerts (GLAD-L, GLAD-S2, RADD)</div>
@@ -211,8 +215,9 @@
           <div class="opt-head"><span class="name" id="opt-h">Optional layers</span></div>
           <div class="cav">Off when the page opens. Each switch loads and shows only its own layer.</div>
           <div class="card toggle off" id="card-drifters" style="--c:var(--drift)">
-            <button class="tgl" type="button" data-layer="drifters" aria-pressed="false"><span class="pip"></span><span class="name">Drifting buoys</span><span class="state" id="s-drifters">off</span></button>
-            <div class="evl"><span class="ev obs">Observed</span> each buoy's own latest fix — different times</div>
+            <div class="head"><span class="pip"></span><span class="name">Drifting buoys</span><span class="state" id="s-drifters">off</span></div>
+            <button class="ovl-tgl tgl" type="button" id="tgl-drifters" data-layer="drifters" role="switch" aria-checked="false" aria-describedby="ev-drifters"><span class="box" aria-hidden="true"></span><span class="t">Drifting buoys — show on the globe</span></button>
+            <div class="evl" id="ev-drifters"><span class="ev obs">Observed</span> each buoy's own latest fix — different times</div>
             <div class="value"><span id="v-drifters">–</span><small>buoys · latest fix each, last 24 h</small></div>
             <div class="obs" id="o-drifters">off — switch on to load the latest fixes</div>
             <div class="src" id="m-drifters">NOAA OSMC · GTS</div>
@@ -221,8 +226,9 @@
             <details class="cd"><summary>Details</summary><div class="cav">Each dot is one buoy at its own last reported time, not one moment; buoys are few and far apart, so empty ocean is not evidence of anything. <a class="more" href="sources.html#drifters">details</a></div></details>
           </div>
           <div class="card toggle off" id="card-plastic" style="--c:var(--plastic)">
-            <button class="tgl" type="button" data-layer="plastic" aria-pressed="false"><span class="pip"></span><span class="name">Microplastic samples — dated</span><span class="state" id="s-plastic">off</span></button>
-            <div class="evl"><span class="ev obs">Observed</span> dated samples — not current positions</div>
+            <div class="head"><span class="pip"></span><span class="name">Microplastic samples — dated</span><span class="state" id="s-plastic">off</span></div>
+            <button class="ovl-tgl tgl" type="button" id="tgl-plastic" data-layer="plastic" role="switch" aria-checked="false" aria-describedby="ev-plastic"><span class="box" aria-hidden="true"></span><span class="t">Microplastic samples — show on the globe</span></button>
+            <div class="evl" id="ev-plastic"><span class="ev obs">Observed</span> dated samples — not current positions</div>
             <div class="value"><span id="v-plastic">–</span><small>surface samples · 2011–2024</small></div>
             <div class="obs" id="o-plastic">off — switch on to load the samples</div>
             <div class="src" id="m-plastic">Oceaneye · published by NOAA NCEI</div>
@@ -719,7 +725,7 @@ ME.keyState = () => ({ open: keyOpen(), label: $('key-btn').textContent, drawn: 
 
 document.querySelectorAll('button.tgl').forEach(b => b.addEventListener('click', () => {
   const k = b.dataset.layer; on[k] = !on[k];
-  b.setAttribute('aria-pressed', String(on[k])); b.closest('.card').classList.toggle('off', !on[k]);
+  b.setAttribute('aria-checked', String(on[k])); b.closest('.card').classList.toggle('off', !on[k]);   // a labelled switch like every other layer (layer-switches-rc)
   if (OPTIONAL_LAYERS.includes(k)) {
     if (on[k]) { optLoading[k] = true; cards(); refreshPair(k).then(() => { optLoading[k] = false; if (!on[k]) clearOptional(k); cards(); render(); }); }
     else { clearOptional(k); cards(); }   // off: nothing kept, nothing fetched
