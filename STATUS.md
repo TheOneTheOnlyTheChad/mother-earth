@@ -4,15 +4,30 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 15:54 UTC (clock reading) — **Hub 0.6.18 DEPLOYED from `aircraft-dots-rc` `c3ef264`, `AIRCRAFT_POSITIONS` unset; counts read back unchanged; no positions stored or served** (production: hub code only; the hub is now ahead of main)
+- **GPT (relayed by Chad): rev 2.1 passes review** (Worker hash matches, future timestamps withheld, 75 and 32 checks rerun). Real-upload verification, phone appearance and the broader browser suites remain outstanding; coordinate publication needs Chad's separate approval.
+- **Chad's own line (17 Nov):** "Approve: deploy hub 0.6.18 from aircraft-dots-rc c3ef264 (phase1/worker.js sha256 ad5bce33…4132) with AIRCRAFT_POSITIONS unset; no positions stored or served; then read back /cells/opensky and /snapshot/opensky with the mac-0.3.3 collector".
+- **Before (15:53:03 UTC, dashboard tab in the Mac's pane):** live script 0.6.17, sha256 `59129514a3e6923a3a8664ebf38502e293725cf29e28d5df79110f9422e2e93e`; 23 bindings; no `AIRCRAFT_*` binding; no `OPENSKY_ENABLED`. File from `raw.githubusercontent.com` at `c3ef264eaebedb1069ebbf16b73e03d9ced2b994`: 410,654 bytes, sha256 `ad5bce33b33461f944004d238488d80acdeea27a4730156d3cfd9e7825664132`, version 0.6.18.
+- **Deployed by Claude:** content-only upload, HTTP 200, `modified_on` **15:53:18 UTC**. Read back from Cloudflare: sha256 `ad5bce33…4132` (exact). Bindings still 23, no `AIRCRAFT_*` binding. Code only: no variable, secret or cron touched.
+- **Read back from the hub's own origin, 15:53:43 UTC:** `/` and `/status` report 0.6.18.
+  - `/cells/opensky`: HTTP 200, `Cache-Control: no-store`, 40,402 bytes; no `records`, `record_fields` or `record_format` key; 438 cells, total 10,779, largest 369; every cell exactly `count` + `coverage{grade, evidence}` (partial / volunteer_receivers_only); snapshot time 14:59:03 UTC, retrieved 14:59:17.556, received 14:59:18.290; `position_age_cutoff_s` 300; `stale_after_s` 10800; counts: 10,974 state vectors, 10,779 counted, 58 without a position, 137 older than the limit, 0 without a position time, 0 duplicates, 1,115 on the ground; `credits_remaining` 3984; `collector_version` mac-0.3.3; `ingested_from` mother-earth-mac-0.3.3.
+  - `/snapshot/opensky`: HTTP 200, `no-store`, 40,504 bytes; `records` empty, `record_fields` `[]`, **`positions: "none"`**; the same 438 cells; top-level keys exactly the packet's list.
+  - Both bodies: no 6-digit hex strings in quotes, no callsign-shaped strings.
+  - Other layers unchanged: `/cells/ships` and `/snapshot/usgs` HTTP 200 with `public, max-age=60` as before.
+- **Live page (main, unchanged) against the new hub, 15:54:08 UTC:** Aircraft counts switched on: "loaded", "OpenSky snapshot of 14:59 UTC, 17 Nov 2026 (55 min ago) · 10,779 aircraft counted, in 438 cells", one sheet, only `/cells/opensky` requested; switched off again.
+- **Not checked:** D1 `collector_runs`; a scheduled ingest on 0.6.18 (the next aircraft run is due about 17:23 UTC, ships sooner); Worker CPU.
+- **State:** hub 0.6.18 is live and **ahead of main** (main's `phase1/worker.js` is 0.6.17). Anything deployed from main before `aircraft-dots-rc` is merged would roll the hub back. Mac collector still mac-0.3.3; page unchanged.
+- **Rollback (Chad's own line):** redeploy 0.6.17 (`59129514…e93e`, main's `phase1/worker.js`).
+
+## Next
+1. Read the first scheduled ingests on hub 0.6.18 (ships, then aircraft about 17:23 UTC): accepted, counts served as before.
+2. Chad's own lines, in order (packet `reviews/2026-11-17-aircraft-dots-rc.md` §7): install collector mac-0.3.4 → set `AIRCRAFT_POSITIONS=1` (publishes coordinates) → REGISTER → merge the page. Chad to look at the dot colour before the merge.
+3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run; also wind arrival times.
+
 ## 17 Nov 15:46 UTC (clock reading) — **`aircraft-dots-rc` rev 2.1 (`c3ef264`): future snapshot times withheld with no allowance; GPT: both production holds resolved** (branch only; nothing installed, deployed or merged)
 - **GPT (relayed by Chad, 17 Nov), on `b23cd1e`:** both production holds are resolved in rev 2; reran both suites on the Mac copy (74 and 32 passed); own probes confirmed unexpected metadata is stripped, expired coordinates are withheld, both routes use `no-store`, and removing the variable stops serving coordinates. **One mismatch:** the packet said future timestamps are withheld but the code allowed ten minutes ahead (a snapshot five minutes ahead was published in GPT's probe). Keeping one expired snapshot in private R2 until replacement or clearing is acceptable; no scheduled erasure. Release order sound. Outstanding: real-upload verification, phone appearance, the broader browser suites.
 - **Fixed:** `aircraftRoute()` withholds any snapshot time later than the hub's clock (`t > Date.now()`). Head `c3ef264eaebedb1069ebbf16b73e03d9ced2b994` (commit time 15:46:39 UTC). `aircraft-counts.test.mjs` 75 passed: an hour, five minutes and one millisecond ahead are withheld; equal to the clock and one millisecond behind are served. Breaks against a copy: ten-minute allowance restored fails 1, equal-withheld fails 1, expiry removed fails 1. `aircraft-dots-page.test.cjs` 32 passed. The Worker loads as a module. Packet rev 2.1.
 - **Changed since `b23cd1e`:** `phase1/worker.js` (one line), the suite, the packet. Nothing else.
-
-## Next
-1. GPT to confirm the final head of `aircraft-dots-rc`, `c3ef264` (rev 2.1; packet `reviews/2026-11-17-aircraft-dots-rc.md`; Mac copy `_review/aircraft-dots-rc/`).
-2. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 14:52 UTC run below (why it was published as a sample after a 348 s interruption; compare message-flow time with the status in the published payload); also wind arrival times.
-3. Production for the dots, if Chad wants it: his own Approve lines, in the packet's §7 order (hub, then collector, then REGISTER, then page).
 
 ## 17 Nov 15:41 UTC (clock reading) — **`aircraft-dots-rc` rev 2 (`b23cd1e`): GPT's two findings fixed on the branch** (branch only; nothing installed, deployed or merged)
 - **GPT (relayed by Chad, 17 Nov), on `c8bd941`: preview review passed, with two fixes before production.** GPT reran both suites (49 and 29 passed) and reproduced both against the Worker with in-memory storage: (1) an upload with an extra `unexpected.icao24` field was accepted and exposed in `/snapshot/opensky`, `/cells/opensky` and the dated copy; (2) the three-hour limit only cleared the map: a four-hour-old snapshot still returned coordinates from `/snapshot/opensky` with `Cache-Control: public, max-age=60`, and the rollback left the last dots public until a counts-only upload. GPT's answers: `[lat, lng]` is the right shape; keep 0.01°, described as "rounded positions without identifiers"; hub first; three hours from the source snapshot time, independent of cadence. Asked for rev 2 with tests for the leak, server-side expiry and immediate rollback.
