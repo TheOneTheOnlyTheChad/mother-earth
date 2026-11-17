@@ -1,7 +1,26 @@
 # aircraft-dots-rc — aircraft positions as plain dots (preview branch) — review packet
 
-**Rev 1.1 (globe check added to §6.2), 17 Nov 2026 15:22 UTC (clock reading). Preview only. Nothing here is installed, deployed or merged.**
-Branch `aircraft-dots-rc`, from main `b9c0d2b`. The head is in the message that accompanies this packet (a file cannot hold its own commit).
+**Rev 2, 17 Nov 2026 15:41 UTC (clock reading). Preview only. Nothing here is installed, deployed or merged.**
+Branch `aircraft-dots-rc`, from main `b9c0d2b`. The head is in the message that accompanies this packet (a file cannot hold its own commit). Rev 1.1 was reviewed by GPT at `c8bd941`: passed, with two fixes asked for before production. Rev 2 makes them. **Where rev 2 differs, §0 governs;** §2 and §7 are rewritten; the rest stands as written.
+
+## 0. Rev 2: GPT's two findings and what changed
+**Finding 1: the hub validated the coordinate rows but passed unexpected metadata through** (an upload with `unexpected.icao24` was accepted and served from `/snapshot/opensky`, `/cells/opensky` and the dated copy). Reproduced, then fixed:
+- `aircraftProject()` in `phase1/worker.js` builds every stored and served aircraft object from nothing, key by key, nested objects included (`cells.<id>` = `count` + `coverage{grade, evidence}`; `counts` = seven named whole numbers; `coverage_default`; `interruptions` always empty). Nothing the uploader sent is copied through.
+- **Every sentence in the file is now the hub's own text** (`quantity`, `records_policy`, `cadence`, `citation`): an uploader's wording never reaches a reader. `collector_version` and `ingested_from` must match a version pattern or read "unknown". `coverage.evidence` is `volunteer_receivers_only` or "unspecified". A failed run's free-text note is matched to one of seven fixed phrases, never copied.
+- Applied at `/ingest/opensky` before any write (normal and archive-only path), in `writeSnapshot`, and **again when serving**, so a file left by an earlier hub is held to the same schema.
+- **The counts-only collector installed today (mac-0.3.3) is still accepted and served** (suite check rev2 E).
+
+**Finding 2: the three-hour limit only cleared the map; the hub kept serving coordinates, cacheable, and a rollback left them public.** Reproduced, then fixed:
+- **Expiry at the hub:** `/snapshot/opensky` serves positions only while now − the snapshot's own time (`window_end`) is under 3 hours (`AIRCRAFT_MAX_AGE_S`), independent of cadence. After that the same file is served with no coordinates and `positions: "withheld_expired"`; the snapshot time and the counts are still given. A snapshot time that is unreadable or in the future is not served either.
+- **`Cache-Control: no-store`** on `/snapshot/opensky` and `/cells/opensky` (was `public, max-age=60`).
+- **Positions are OFF unless the plain variable `AIRCRAFT_POSITIONS` is exactly `1`.** Off: an upload's positions are not stored at all (the reply says "not stored"), and none are served. So deploying the hub publishes nothing new, and installing the collector publishes nothing new. **Setting the variable is the step that makes coordinates public, and gets its own approval.**
+- **Immediate stop:** remove `AIRCRAFT_POSITIONS`: the route reads it on every request, so the next request gets `positions: "withheld_off"` and no coordinates. Then `POST /admin/aircraft/clear-positions?key=…` removes them from the one stored copy (`latest/opensky.json`); it is safe to repeat. Neither step waits for a collector run.
+- **Page:** `aircraft.js` reads `positions` and says "…more than 3 hours ago… its positions are no longer served" (with the snapshot time) or "not being published at the moment"; a file marked withheld is never drawn. Wording now says **"rounded positions without identifiers"** and states that a position and snapshot time could still be matched against other flight data.
+
+**Tests added (each proven to fail on broken code):** `phase1/aircraft-counts.test.mjs` is now **74 checks** (rev2 A to G): unexpected fields at every level absent from all four stored objects and both routes; exact top-level and nested key lists; hub-owned sentences; no-store; 1 s under 3 h served, at 3 h and 4 h withheld, future time withheld; variable removed → withheld on the next request; clear route (403 without key, 405 on GET, clears, repeatable); variable off → nothing stored; only "1" switches on; mac-0.3.3 counts-only upload unchanged; a stored legacy file projected when served; unreadable stored file → 503; fixed phrases for a failed run. **Hub breaks run against a copy:** ingest projection removed → 3 fail; expiry removed → 1; switch ignored → 5; cacheable header → 1; clear does nothing → 2; cells copied through → 3. `phase1/aircraft-dots-page.test.cjs` is now **32 checks** (three for the withheld states); its 4 breaks still fail.
+**Also run after rev 2:** aircraft-schedule 88; history-hub 33, sunface-hub 171, wind-hub 103, health-hub 29, osmc-reliability-hub 27, status-notes-hub 6, drifters-hub 12, ships-fallback 7, ships-late 7, place-rows 7; the Worker loads as a module.
+**Still not done:** a real upload; phone rendering; the Mac bash 3.2 regression (`run.sh` unchanged); the Playwright page suites; dot colour over cloud.
+**One thing rev 2 does not do:** after three hours the hub stops *serving* positions, but the stored copy in `latest/opensky.json` (private R2, not publicly readable) stays until the next upload overwrites it or the clear route is called. Say if you want the hub to erase it on a schedule.
 
 ## 1. What was asked
 Chad, 17 Nov 2026 (his own message): "reuse the existing scheduled pull and keep one replaceable snapshot of plain dots, with no identifiers, tracks or history. Include the 2014 paper citation alongside the OpenSky website credit. Send GPT the branch head and the exact fields the browser receives for review. This go is for the preview only. Production approval comes separately."
@@ -12,8 +31,8 @@ The page makes two requests for aircraft, each only while its own switch is on. 
 
 **`GET /cells/opensky`** (counts switch): unchanged. No `records`, `record_fields` or `record_format` key.
 
-**`GET /snapshot/opensky`** (positions switch). Top-level keys, complete list:
-`schema_version, collector_version, layer, window_start, window_end, retrieved_at, scheduled_for, source_status, interruptions, cells, record_format, record_fields, records, coverage_default, quantity, stale_after_s, position_age_cutoff_s, counts, position_precision_deg, records_policy, credits_remaining, cadence, citation`, plus two the hub adds on receipt: `received_at, ingested_from`.
+**`GET /snapshot/opensky`** (positions switch). Top-level keys, complete list and order, enforced by the hub (rev 2):
+`schema_version, collector_version, layer, window_start, window_end, retrieved_at, scheduled_for, source_status, interruptions, stale_after_s, cells, record_format, record_fields, records, coverage_default, quantity, position_age_cutoff_s, counts, position_precision_deg, records_policy, credits_remaining, cadence, citation, received_at, ingested_from, positions, positions_max_age_s` (`note` only on a failed run; `position_precision_deg` only when positions are present). `positions` is one of `published`, `none`, `withheld_off`, `withheld_expired`.
 
 | Key | Content | Per aircraft? |
 |---|---|---|
@@ -70,12 +89,13 @@ The page makes two requests for aircraft, each only while its own switch is on. 
 9. **Cadence unchanged** (about every 144 minutes), so dots are up to 2 h 24 min old before the next snapshot, and are cleared at 3 h: one missed pull leaves the layer empty until the next. A faster cadence is Chad's separate decision.
 10. **VPN case of the home check: still untested.**
 
-## 7. If this goes to production later (each step on Chad's own Approve line, in this order)
-1. Deploy hub 0.6.18 (so no dated copy of positions is ever written). Read back `/snapshot/opensky` and `/cells/opensky`: unchanged, counts only.
-2. Install `collector-mac.mjs` mac-0.3.4 in `~/mother-earth` (preserve the old file first; `run.sh` stays). After the next scheduled run: read back `/snapshot/opensky` (fields exactly lat,lng; no hex strings, no callsign-shaped strings) and list R2 `snapshots/opensky/` to confirm the dated copy has no records.
-3. REGISTER: positions in use.
-4. Merge the page.
-Rollback: copy the preserved mac-0.3.3 collector back (the next upload overwrites `latest/opensky.json` with a counts-only file); revert the page merge; hub 0.6.17 is the previous version.
+## 7. If this goes to production later (rev 2; each step on Chad's own Approve line, in this order)
+1. **Deploy hub 0.6.18** with `AIRCRAFT_POSITIONS` unset. Nothing new is published. Read back `/cells/opensky` and `/snapshot/opensky` with the collector installed today (mac-0.3.3): counts as before, `positions: "none"`, `no-store`.
+2. **Install `collector-mac.mjs` mac-0.3.4** in `~/mother-earth` (preserve the old file; `run.sh` stays). Positions are uploaded and dropped by the hub: after the next scheduled run the ingest reply reads "not stored", and the read-backs are unchanged.
+3. **Set `AIRCRAFT_POSITIONS=1`. This is the step that makes coordinates public through the API,** before any page change. After the next scheduled run: `/snapshot/opensky` has `record_fields` exactly lat,lng and `positions: "published"`; search the body for hex strings and callsign shapes; list R2 `snapshots/opensky/` to confirm the dated copy has no records.
+4. REGISTER: positions in use.
+5. Merge the page.
+**Rollback, immediate:** remove `AIRCRAFT_POSITIONS` (the next request serves no coordinates), then `POST /admin/aircraft/clear-positions` (none left in storage). Later, if wanted: copy the preserved mac-0.3.3 collector back; revert the page merge; hub 0.6.17 is the previous version.
 
 ## 8. Questions for GPT
 1. Is the field list in §2 what you expect the browser to receive, and is anything in the metadata keys a concern (`counts.on_ground` is a total, not per aircraft)?

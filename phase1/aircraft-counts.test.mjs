@@ -1,7 +1,7 @@
 /* Aircraft counts and positions (OpenSky) — collector and hub suite. No network: storage is in memory, nothing is uploaded.
  * Run: node phase1/aircraft-counts.test.mjs */
 import { openskyPositions, openskyDots, buildEnvelope } from './collector-mac.mjs';
-import worker, { validateEnvelope, aircraftPublic, aircraftFieldsOk } from './worker.js';
+import worker, { validateEnvelope, aircraftProject, aircraftDownNote, aircraftFieldsOk, AIRCRAFT_MAX_AGE_S } from './worker.js';
 import fs from 'node:fs';
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log('FAIL  ' + n + (got !== undefined ? '\n      got: ' + JSON.stringify(got).slice(0, 400) : '')); } };
 const sv = (icao, lng, lat, ground = false, call = 'TEST123 ', tpos = 1794886850) => [icao, call, 'Testland', tpos, 1794886852, lng, lat, 11000, ground, 230, 90, 0, null, 11200, '1000', false, 0];
@@ -73,18 +73,18 @@ ok('hub refuses unrounded positions', /rounded to 0\.01/.test(bad(['lat', 'lng']
 ok('hub refuses records with no record_fields', /exactly 0 fields|without record_fields/.test(bad([], [[1, 2]])), bad([], [[1, 2]]));
 ok('ships are not held to the aircraft rule', validateEnvelope({ ...e2, layer: 'ships', record_fields: ['mmsi', 'lat', 'lng'], records: [['1', 1.23456, 2]] }, 'ships') === null);
 ok('aircraftFieldsOk: only [] or exactly lat,lng', aircraftFieldsOk([]) && aircraftFieldsOk(['lat', 'lng']) && !aircraftFieldsOk(['lng', 'lat']) && !aircraftFieldsOk(['lat', 'lng', 'x']) && !aircraftFieldsOk(null));
-const own = aircraftPublic({ layer: 'opensky', record_fields: ['icao24', 'lat', 'lng', 'callsign'], records: [['aaaaaa', 1, 2, 'TEST123']], cells: {} });
-ok('the hub\'s own parked OpenSky rows (addresses, callsigns) would be published without records', own.records.length === 0 && own.record_fields.length === 0 && /latitude and longitude only/.test(own.records_withheld) && !/aaaaaa|TEST123/.test(JSON.stringify(own)), own);
+const own = aircraftProject({ layer: 'opensky', source_status: 'ok', record_fields: ['icao24', 'lat', 'lng', 'callsign'], records: [['aaaaaa', 1, 2, 'TEST123']], cells: {} }, true);
+ok('the hub\'s own parked OpenSky rows (addresses, callsigns) would be published without records', own.records.length === 0 && own.record_fields.length === 0 && !/aaaaaa|TEST123/.test(JSON.stringify(own)), own);
 ok('hub lists opensky as ingestable', /const INGEST_LAYERS = \[[^\]]*'opensky'/.test(fs.readFileSync(new URL('./worker.js', import.meta.url), 'utf8')));
 
-function makeEnv() {
+function makeEnv(extra = {}) {
   const store = new Map(), runs = [];
   const R2 = { async put(k, v) { store.set(k, String(v)); }, async get(k) { if (!store.has(k)) return null; const v = store.get(k); return { body: v, httpEtag: '"t"', async text() { return v; }, async json() { return JSON.parse(v); } }; }, async list() { return { objects: [] }; } };
   const stmt = () => ({ bind() { return this; }, async run() { runs.push(1); return {}; }, async first() { return null; }, async all() { return { results: [] }; } });
-  return { env: { R2, DB: { prepare: stmt, async batch() { return []; } }, INGEST_KEY: 'k' }, store, runs };
+  return { env: { R2, DB: { prepare: stmt, async batch() { return []; } }, INGEST_KEY: 'k', ADMIN_KEY: 'a', AIRCRAFT_POSITIONS: '1', ...extra }, store, runs };
 }
 const post = (env, body, key = 'k') => worker.fetch(new Request('https://hub.test/ingest/opensky', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key }, body: JSON.stringify(body) }), env, { waitUntil() { } });
-const get = (env, path) => worker.fetch(new Request('https://hub.test' + path), env, { waitUntil() { } });
+const get = (env, path, method = 'GET') => worker.fetch(new Request('https://hub.test' + path, { method }), env, { waitUntil() { } });
 {
   const { env, store } = makeEnv();
   const r = await post(env, e2); const rj = await r.json();
@@ -109,6 +109,78 @@ const get = (env, path) => worker.fetch(new Request('https://hub.test' + path), 
   ok('an upload with an address is refused with 422 and nothing of it is stored', rBad.status === 422 && /lat,lng only/.test(rBadJ.why) && ![...store.values()].some(v => /aaaaaa/.test(v)), rBadJ);
   ok('a wrong ingest key is refused', (await post(env, e2, 'x')).status === 403);
 }
+
+// ---------- rev 2 (GPT's review of c8bd941): explicit schema, expiry at the hub, immediate stop
+const LEAK = /abc123|TEST123|4b1815|leak-me|Testland/;
+const dirty = () => { const d = JSON.parse(JSON.stringify(e2));
+  d.unexpected = { icao24: 'abc123', callsign: 'TEST123' }; d.icao24 = '4b1815'; d.tracks = [['abc123', 1, 2]];
+  d.cells['14_49'].icao24 = 'abc123'; d.cells['14_49'].coverage.callsign = 'TEST123'; d.cells['14_49'].coverage.evidence = 'leak-me abc123';
+  d.counts = { state_vectors: 10, counted: 5, on_ground: 1, icao24: 'abc123', list: ['4b1815'] }; d.coverage_default.extra = 'TEST123';
+  d.quantity = 'leak-me abc123'; d.records_policy = 'TEST123'; d.cadence = 'abc123'; d.citation = '4b1815'; d.collector_version = 'mac-0.3.4 abc123'; d.interruptions = [{ icao24: 'abc123' }];
+  d.note = 'abc123'; d.received_at = 'abc123'; d.ingested_from = 'TEST123'; d.positions = 'published'; return d; };
+{
+  const { env, store } = makeEnv();
+  const r = await post(env, dirty()), rj = await r.json();
+  ok('rev2 A. an upload with unexpected fields at every level is accepted (its documented fields are valid)…', r.status === 200 && rj.records === 5 && rj.positions === 'stored', rj);
+  const stored = [...store.entries()];
+  ok('rev2 A. …and NONE of the unexpected content is in any stored object', stored.length === 4 && !stored.some(([, v]) => LEAK.test(v)), stored.filter(([, v]) => LEAK.test(v)).map(([k]) => k));
+  const sr = await get(env, '/snapshot/opensky'), st = await sr.text(), cr = await get(env, '/cells/opensky'), ct = await cr.text();
+  ok('rev2 A. …nor in /snapshot/opensky or /cells/opensky', sr.status === 200 && cr.status === 200 && !LEAK.test(st) && !LEAK.test(ct), (st + ct).match(LEAK));
+  const sj = JSON.parse(st), KEYS = 'schema_version,collector_version,layer,window_start,window_end,retrieved_at,scheduled_for,source_status,interruptions,stale_after_s,cells,record_format,record_fields,records,coverage_default,quantity,position_age_cutoff_s,counts,position_precision_deg,records_policy,credits_remaining,cadence,citation,received_at,ingested_from,positions,positions_max_age_s';
+  ok('rev2 A. /snapshot/opensky has exactly the documented top-level keys', Object.keys(sj).join() === KEYS, Object.keys(sj).join());
+  ok('rev2 A. nested objects have exactly their documented keys', Object.keys(sj.cells['14_49']).join() === 'count,coverage' && Object.keys(sj.cells['14_49'].coverage).join() === 'grade,evidence' && sj.cells['14_49'].coverage.evidence === 'unspecified' && Object.keys(sj.counts).join() === 'state_vectors,counted,without_position,position_older_than_cutoff,position_time_missing,duplicate_addresses,on_ground' && sj.counts.without_position === null && Object.keys(sj.coverage_default).join() === 'grade,evidence' && sj.interruptions.length === 0, sj.counts);
+  ok('rev2 A. every sentence in the file is the hub\'s own; the version is a version or "unknown"', /^aircraft in one OpenSky Network state snapshot/.test(sj.quantity) && /rounded positions without identifiers/.test(sj.records_policy) && sj.citation === 'The OpenSky Network, https://opensky-network.org' && sj.collector_version === 'unknown' && sj.ingested_from === 'unknown' && sj.positions === 'published', [sj.collector_version, sj.ingested_from]);
+  const cj = JSON.parse(ct);
+  ok('rev2 A. /cells/opensky: no records keys, counts policy, the same cells', !('records' in cj) && !('record_fields' in cj) && !('record_format' in cj) && !('position_precision_deg' in cj) && /counts per cell only/.test(cj.records_policy) && JSON.stringify(cj.cells) === JSON.stringify(sj.cells));
+  ok('rev2 B. both aircraft routes answer no-store', sr.headers.get('Cache-Control') === 'no-store' && cr.headers.get('Cache-Control') === 'no-store', [sr.headers.get('Cache-Control'), cr.headers.get('Cache-Control')]);
+  const T0 = Date.parse(e2.window_end), at = async ms => { Date.now = () => ms; return (await get(env, '/snapshot/opensky')).json(); };
+  const j1 = await at(T0 + AIRCRAFT_MAX_AGE_S * 1e3 - 1000), j2 = await at(T0 + AIRCRAFT_MAX_AGE_S * 1e3), j3 = await at(T0 + 4 * 3600e3);
+  ok('rev2 B. one second under three hours: positions served', j1.positions === 'published' && j1.records.length === 5, j1.positions);
+  ok('rev2 B. at three hours, and at four: the hub serves NO coordinates, says so, and still gives the snapshot time and the counts', j2.positions === 'withheld_expired' && j2.records.length === 0 && j2.record_fields.length === 0 && j3.positions === 'withheld_expired' && j3.records.length === 0 && !/-33\.9|48\.9/.test(JSON.stringify(j3)) && j3.window_end === e2.window_end && Object.keys(j3.cells).length === 4 && j3.positions_max_age_s === 10800 && /counts per cell only/.test(j3.records_policy) && !('position_precision_deg' in j3), [j2.positions, j3.positions]);
+  const jf = await at(T0 - 3600e3);
+  ok('rev2 B. a snapshot time in the future is not served either', jf.positions === 'withheld_expired' && jf.records.length === 0, jf.positions);
+  Date.now = () => Date.parse('2026-11-17T03:41:00Z');
+  delete env.AIRCRAFT_POSITIONS;
+  const off = await (await get(env, '/snapshot/opensky')).json();
+  ok('rev2 C. variable removed: the very next request serves no coordinates ("withheld_off"), counts intact', off.positions === 'withheld_off' && off.records.length === 0 && off.record_fields.length === 0 && !/-33\.9|48\.9/.test(JSON.stringify(off)) && Object.keys(off.cells).length === 4, off.positions);
+  ok('rev2 C. the stored copy still holds them until cleared (so the clear step matters)', JSON.parse(store.get('latest/opensky.json')).records.length === 5);
+  ok('rev2 C. clear-positions needs the admin key and POST', (await get(env, '/admin/aircraft/clear-positions', 'POST')).status === 403 && (await get(env, '/admin/aircraft/clear-positions?key=x', 'POST')).status === 403 && (await get(env, '/admin/aircraft/clear-positions?key=a')).status === 405 && JSON.parse(store.get('latest/opensky.json')).records.length === 5);
+  const cl = await (await get(env, '/admin/aircraft/clear-positions?key=a', 'POST')).json();
+  ok('rev2 C. clear-positions removes them from storage; nothing with a coordinate is left anywhere', cl.ok && cl.cleared === 5 && cl.positions_variable_on === false && JSON.parse(store.get('latest/opensky.json')).records.length === 0 && ![...store.values()].some(v => /"records":\[\[/.test(v)), cl);
+  const cl2 = await (await get(env, '/admin/aircraft/clear-positions?key=a', 'POST')).json();
+  ok('rev2 C. clearing again is harmless; /snapshot now reads "none"', cl2.ok && cl2.cleared === 0 && (await (await get(env, '/snapshot/opensky')).json()).positions === 'none');
+  const r5 = await post(env, e2), r5j = await r5.json();
+  ok('rev2 C. while the variable is off, a positions upload is stored WITHOUT positions and the reply says so', r5.status === 200 && r5j.records === 0 && /not stored/.test(r5j.positions) && ![...store.values()].some(v => /"records":\[\[/.test(v)), r5j);
+}
+{ // positions are off by default: deploying the hub alone publishes nothing new
+  const { env, store } = makeEnv({ AIRCRAFT_POSITIONS: undefined });
+  const r = await post(env, e2), rj = await r.json(), sj = await (await get(env, '/snapshot/opensky')).json();
+  ok('rev2 D. no variable: positions are neither stored nor served', r.status === 200 && rj.records === 0 && sj.positions === 'none' && sj.records.length === 0 && ![...store.values()].some(v => /"records":\[\[/.test(v)), [rj, sj.positions]);
+  for (const v of ['0', 'true', 'on', '']) { env.AIRCRAFT_POSITIONS = v; await post(env, e2); }
+  ok('rev2 D. only the exact value "1" switches positions on', ![...store.values()].some(v => /"records":\[\[/.test(v)));
+}
+{ // the collector that is installed today (mac-0.3.3, counts only) keeps working on the new hub
+  const { env, store } = makeEnv({ AIRCRAFT_POSITIONS: undefined });
+  const old = { ...e, collector_version: 'mac-0.3.3', position_age_cutoff_s: 300, counts: { state_vectors: 10, counted: 5, without_position: 2, position_older_than_cutoff: 1, position_time_missing: 1, duplicate_addresses: 1, on_ground: 1 }, credits_remaining: 3988 };
+  const r = await worker.fetch(new Request('https://hub.test/ingest/opensky', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer k', 'User-Agent': 'mother-earth-mac-0.3.3' }, body: JSON.stringify(old) }), env, { waitUntil() { } });
+  const cj = await (await get(env, '/cells/opensky')).json(), sj = await (await get(env, '/snapshot/opensky')).json();
+  ok('rev2 E. the counts-only collector installed today is accepted and served as before', r.status === 200 && Object.keys(cj.cells).length === 4 && cj.cells['14_49'].count === 2 && cj.cells['14_49'].coverage.grade === 'partial' && cj.cells['14_49'].coverage.evidence === 'volunteer_receivers_only' && cj.window_end === e.window_end && cj.position_age_cutoff_s === 300 && cj.stale_after_s === 10800 && cj.source_status === 'ok' && cj.counts.counted === 5 && cj.credits_remaining === 3988 && cj.collector_version === 'mac-0.3.3' && cj.ingested_from === 'mother-earth-mac-0.3.3' && !('records' in cj) && sj.records.length === 0 && sj.positions === 'none', cj);
+  store.set('latest/opensky.json', JSON.stringify({ ...old, records: [], record_fields: [], unexpected: { icao24: 'abc123' }, quantity: 'leak-me' }));
+  store.set('latest-cells/opensky.json', JSON.stringify({ ...old, unexpected: { icao24: 'abc123' }, quantity: 'leak-me' }));
+  const t1 = await (await get(env, '/snapshot/opensky')).text(), t2 = await (await get(env, '/cells/opensky')).text();
+  ok('rev2 E. a stored file from an earlier hub is projected when served', !LEAK.test(t1) && !LEAK.test(t2) && JSON.parse(t2).cells['14_49'].count === 2, (t1 + t2).match(LEAK));
+  store.set('latest/opensky.json', 'not json');
+  ok('rev2 E. an unreadable stored file is a 503, never passed through', (await get(env, '/snapshot/opensky')).status === 503);
+}
+{ // a failed collection: the collector's free-text note is matched to a fixed phrase, never copied
+  const { env, store } = makeEnv();
+  const down = { schema_version: 1, collector_version: 'mac-0.3.4', layer: 'opensky', retrieved_at: '2026-11-17T03:40:57.000Z', scheduled_for: '2026-11-17T03:40:54.000Z', source_status: 'down', cells: {}, note: 'Error: OpenSky states refused (HTTP 429) abc123 TEST123' };
+  const r = await post(env, down), all = [...store.values()].join('\n');
+  ok('rev2 F. a down upload stores a fixed phrase and nothing of the free text', r.status === 200 && /OpenSky states request refused \(HTTP 429\)/.test(all) && !LEAK.test(all), all.slice(0, 300));
+  ok('rev2 F. unknown failure text becomes "collection failed"', aircraftDownNote('abc123 anything') === 'collection failed' && aircraftDownNote('TypeError: fetch failed') === 'request failed' && aircraftDownNote('TimeoutError: The operation was aborted due to timeout') === 'request timed out');
+}
+ok('rev2 G. projection drops every row if one row is not a rounded lat,lng; and never keeps records for a down file', aircraftProject({ ...e2, records: [[1, 2], [1.234567, 2]] }, true).records.length === 0 && aircraftProject({ ...e2, source_status: 'down' }, true).records.length === 0 && aircraftProject(e2, false).records.length === 0 && aircraftProject(null, true).layer === 'opensky');
+Date.now = realNow;
 // the real feed's envelope states its own age limit and the tallies (source text check: the feed needs the network to run)
 const src = fs.readFileSync(new URL('./collector-mac.mjs', import.meta.url), 'utf8');
 ok('the feed publishes its position-age limit and the excluded tallies', /position_age_cutoff_s: OPENSKY_MAX_POSITION_AGE_S/.test(src) && /position_older_than_cutoff: o\.tooOld/.test(src) && /const OPENSKY_MAX_POSITION_AGE_S = 300;/.test(src));

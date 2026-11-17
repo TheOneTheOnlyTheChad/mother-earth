@@ -196,6 +196,9 @@
     if (j.source_status === 'down') return { ok: false, down: true, why: 'The latest collection did not complete' + (j.retrieved_at && Number.isFinite(Date.parse(j.retrieved_at)) ? ` (${utc(j.retrieved_at)})` : '') + '.' };
     const t = j.window_end; if (!t || !Number.isFinite(Date.parse(t))) return { ok: false, why: 'the snapshot carries no readable time' };
     const cut = j.position_age_cutoff_s; if (!Number.isFinite(cut) || cut <= 0) return { ok: false, why: 'the snapshot does not state how old a position may be' };
+    // The hub says when it is holding positions back (hub 0.6.18): after three hours from the snapshot time, or while switched off.
+    if (j.positions === 'withheld_expired') return { ok: false, none: true, why: `The newest snapshot is from ${utc(t)}, more than ${Math.round((Number.isFinite(j.positions_max_age_s) ? j.positions_max_age_s : AC.STALE_FALLBACK_S) / 3600)} hours ago. Aircraft have long since moved, so its positions are no longer served.` };
+    if (j.positions === 'withheld_off') return { ok: false, none: true, why: `Aircraft positions are not being published at the moment (newest snapshot: ${utc(t)}).` };
     const f = j.record_fields, rows = j.records;
     if (!Array.isArray(f) || !Array.isArray(rows)) return { ok: false, why: 'the snapshot carries no list of positions' };
     if (f.length === 0 && rows.length === 0) return { ok: false, none: true, why: `The newest snapshot (${utc(t)}) carries counts only: no positions have been collected yet.` };
