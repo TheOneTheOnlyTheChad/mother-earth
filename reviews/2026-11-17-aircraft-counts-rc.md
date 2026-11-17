@@ -1,5 +1,7 @@
 # aircraft-counts-rc — Aircraft counts per area (OpenSky), release candidate packet
 
+**Rev 3, 17 Nov 2026 (17 Nov 05:07 UTC clock reading): GPT reproduced three more runner cases on `059c531`; §12 records them, the fixes, the Mac `/bin/bash` results and a correction to §8. §12 governs where it differs from earlier sections.**
+
 **Rev 2, 17 Nov 2026 (17 Nov 04:13 UTC clock reading): GPT held `ddf109b`; §8 onward records the hold and the changes. §3, §5 and §7 below are rev 1 text and are superseded where §8–§11 differ.**
 
 Rev 1, 17 Nov 2026 (17 Nov 03:53 UTC clock reading). For GPT's review and Chad's approval. **Nothing here is released**: no merge, no upload to the hub, no schedule. The old Worker flag `OPENSKY_ENABLED` stays unset.
@@ -59,7 +61,7 @@ GPT reproduced the 15 collector checks and the ships duration suite on the Mac c
 - `phase1/run.sh` now: the aircraft block is reached only in a tick where **no ships sample was due**; it does **not start when ships is due within 180 s** (`AIRCRAFT_GUARD_S`); the run is **killed at 90 s** (`AIRCRAFT_MAX_S`, `run_bounded`), so the lock is free before the next ships sample. The interval still runs from the attempt.
 - `phase1/collector-mac.mjs`: token timeout 15 s, states timeout 30 s, **one** upload attempt for a counts-only layer (no backoff), and its own 80 s deadline.
 - New suite `phase1/aircraft-schedule.test.sh` drives the real `run.sh` with a stub in place of node (no network): **22 passed**. Case C is GPT's case: a slow, failing OpenSky run while ships comes due is killed at its limit, the lock is released, no process is left, ships starts on the first tick after it is due, and the failed aircraft run is not retried early.
-- Six breaks, each applied and each failing: `aircraft-first` (the `ddf109b` ordering) 5 fail; `no-guard` 3; `no-kill` 3; `no-budget` 5; `dry-free` 4; `no-switch` 1. The `ddf109b` `run.sh` itself fails 14 of the 22.
+- Six breaks, each applied and each failing: `aircraft-first` (the `ddf109b` ordering) 5 fail; `no-guard` 3; `no-kill` 3; `no-budget` 5; `dry-free` 4; `no-switch` 1. ~~The `ddf109b` `run.sh` itself fails 14 of the 22.~~ **Withdrawn (rev 3): that comparison was invalid. The old `run.sh` was copied without its executable bit, so every call failed for that reason. The valid comparison is in §12.**
 
 **2. First upload split from schedule activation; the ten-a-day claim now holds on every path.**
 - Every OpenSky request (scheduled, manual, and `--dry`, which still asks OpenSky) is entered in `state/aircraft_requests` before it is made and **refused when 10 entries fall inside the last 24 h** (`AIRCRAFT_MAX_PER_DAY`, not overridable from the environment; manual refusal exits 7). Suite cases D1–D5.
@@ -99,3 +101,27 @@ Rollback: delete `state/aircraft.on`; restore the preserved `collector-mac.mjs` 
 - Private preview repeated in a clean pane session at `0bdee8d` (page files identical at the packet commit): ready, label "OpenSky snapshot of 03:40 UTC, 17 Nov 2026", the 5-minute line shown, Cape Town cell 5; counts without a stated limit refused. **The preview's numbers are the first pull's, counted before the 300 s limit existed** (the one-off file kept no per-aircraft ages), so the first real run will count fewer.
 - **Matching the Mac copy to the remote head:** `_review/aircraft-counts-rc/SHA256SUMS.txt` lists the sha256 of every file in the review copy, produced from a fresh clone of the head named in that file.
 - **Still open:** no page suite for `aircraft.js` (hand checks only); the `opensky` feed has not run end to end (step 1 is its first run); the runner suite ran under Linux bash, not macOS's bash 3.2; bands, 3 h stale, 6 h clear, 300 s position limit all provisional; the layer empties when the Mac sleeps over 6 h; other page suites not rerun; phone, Safari, screen reader deferred; Martin's location update unverified.
+
+## 12. Rev 3 — three cases GPT reproduced on `059c531` (relayed by Chad, 17 Nov), fixes, and the Mac results
+Chad: Martin has been emailed on the existing ticket; go ahead with the runner fixes and local tests; the first public upload, schedule activation, REGISTER update and page merge stay on hold.
+
+**1. Clock after the pending ships retry.** `run.sh tick` read the clock once, before the pending-upload retry, which can take minutes. It now reads the clock and the last ships sample again after the retry, before choosing a collector. Suite G1–G3: a retry that crosses the ships due time → ships runs in that same tick, aircraft does not, order retry then ships.
+
+**2. Manual aircraft runs obey the ships guard.** `run.sh aircraft`, with or without `--dry`, is refused with exit 8 when a ships sample is due within `AIRCRAFT_GUARD_S` (180 s) or overdue, before the budget is touched. Suite H1–H5: five seconds before ships is due (plain and `--dry`), nothing entered in the ledger, ships overdue, and allowed at 400 s.
+
+**3. No request without a saved ledger entry.** `aircraft_budget` now returns 0 (entry saved and read back), 1 (cap reached) or 2 (entry could not be saved, or the ledger exists but is not a readable file). On 2 no request is made: the scheduled path logs it, the manual path exits 9. The entry is written to a temporary file, moved into place and read back. Suite I1–I5: the ledger path is a directory; the temporary file cannot be written; scheduled and manual.
+
+**The one-off pull is counted.** `aircraft_budget` reads `source_time` from `state/opensky-once.json` (the 17 Nov 03:40:53 UTC pull, made outside the ledger) and counts it while it is inside the rolling 24 h. Suite J1–J2. So if the first upload happens before 03:40:53 UTC on 18 Nov, it is request 2 of 10.
+
+**Exit codes for a refused manual run:** 7 cap reached · 8 ships due soon · 9 ledger not saved.
+
+**Results, head as named in `SHA256SUMS.txt`:**
+- **On the Mac itself** (Chad ran `/bin/bash ~/mother-earth/aircraft-test/aircraft-mac-regression.sh` in Terminal; Darwin 25.5.0, **/bin/bash 3.2.57(1)-release**, node v24.14.1; 04:56:29–05:06:13 UTC; full output `reviews/evidence/2026-11-17-aircraft-mac-regression.txt`, with the sha256 of each file under test): **runner suite 37 passed, 0 failed**; collector suite 19 passed; ships duration contract ALL CHECKS PASSED.
+- **Ten breaks, each applied, each failing, same counts on the Mac and on Linux bash 5.2:** `aircraft-first` 7 · `no-guard` 3 · `no-kill` 3 · `no-budget` 7 · `dry-free` 8 · `no-switch` 1 · `stale-clock` 3 (G1–G3) · `manual-no-guard` 5 (H1–H5) · `ledger-unchecked` 5 (I1–I5) · `once-ignored` 2 (J1–J2).
+- **Earlier heads against this suite (Linux, executable copies):** `059c531` `run.sh` fails exactly the 15 new checks (G1–G3, H1–H5, I1–I5, J1–J2) and passes the other 22; `ddf109b` `run.sh` fails 27 of 37.
+- `wind-ui.test.cjs`: not rerun at this head (no page file changed since `0bdee8d`, where it passed 92).
+- No page file and no collector source changed in rev 3: `run.sh`, the runner suite, the Mac regression script and this packet only.
+
+**Release sequence:** unchanged from §10, all on hold. Step 1's manual run now also needs ships not due within 3 minutes, so it is run just after a ships sample.
+
+**Still open:** §9 (Martin's answer pending); no page suite for `aircraft.js`; the `opensky` feed has not run end to end; provisional limits (bands, 3 h stale, 6 h clear, 300 s position age); the layer empties when the Mac sleeps over 6 h. **Closed:** the runner suite has now run under macOS bash 3.2.

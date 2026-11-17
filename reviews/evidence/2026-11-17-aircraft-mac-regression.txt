@@ -1,0 +1,81 @@
+aircraft regression on Darwin 25.5.0, /bin/bash 3.2.57(1)-release, node v24.14.1, started 2026-11-17T04:56:29Z
+sha256 of the files under test:
+  8b63f7486ccfe4816e58b11d321e80f3bd31fd120b4fa86121fea39f2d6683fd  run.sh
+  e88ada68c3f334a0e98b35c12bf00c4d0c330c26d35f5e8644226ca364db3d47  collector-mac.mjs
+  7cf066dd2e4975f28856225050fff81b955ed78fe889305cf0a6379db160c3a3  aircraft-schedule.test.sh
+  5e0bde54f82ce3ea8d52883ea85dcf68710c927d408bda66bdfd86ddde6dc6f2  aircraft-counts.test.mjs
+  0a1a499b0e85f22172482dbce6d19902fe13926886a93147b86e5c99a84c3a33  duration-contract.test.mjs
+  59129514a3e6923a3a8664ebf38502e293725cf29e28d5df79110f9422e2e93e  worker.js
+--- runner suite, no break
+
+aircraft-schedule: 37 passed, 0 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=aircraft-first (must fail)
+FAIL  A2 both due: aircraft does not run in that tick
+FAIL  A3 ships is the first collector call
+FAIL  B1 ships due in 120 s: aircraft does not start
+FAIL  B2 and says why
+FAIL  B3 no request was entered in the ledger
+FAIL  G2 and aircraft does not run in that tick
+FAIL  G3 order: retry, then ships
+aircraft-schedule (BREAK=aircraft-first): 30 passed, 7 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-guard (must fail)
+FAIL  B1 ships due in 120 s: aircraft does not start
+FAIL  B2 and says why
+FAIL  B3 no request was entered in the ledger
+aircraft-schedule (BREAK=no-guard): 34 passed, 3 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-kill (must fail)
+FAIL  C1 the slow aircraft run is ended at its limit
+FAIL  C2 it was started and killed, and the log says so
+FAIL  C5 ships starts on the first tick after it is due (not delayed by the failed aircraft run)
+aircraft-schedule (BREAK=no-kill): 34 passed, 3 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-budget (must fail)
+FAIL  D1 scheduled: the 11th request in 24 h is not made
+FAIL  D2 manual: refused with exit 7
+FAIL  D3 manual --dry: also refused (a dry run still asks OpenSky)
+FAIL  D4 an entry older than 24 h no longer counts: the request is made and entered
+FAIL  D5 back-to-back manual runs stop at the cap
+FAIL  J1 nine ledger entries + the one-off pull one hour ago: the next request is refused
+FAIL  J2 the one-off pull older than 24 h no longer counts
+aircraft-schedule (BREAK=no-budget): 30 passed, 7 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=dry-free (must fail)
+FAIL  D2 manual: refused with exit 7
+FAIL  D3 manual --dry: also refused (a dry run still asks OpenSky)
+FAIL  D4 an entry older than 24 h no longer counts: the request is made and entered
+FAIL  D5 back-to-back manual runs stop at the cap
+FAIL  I3 manual, ledger not a file: refused with exit 9, no request
+FAIL  I5 manual, ledger entry cannot be written: refused with exit 9
+FAIL  J1 nine ledger entries + the one-off pull one hour ago: the next request is refused
+FAIL  J2 the one-off pull older than 24 h no longer counts
+aircraft-schedule (BREAK=dry-free): 29 passed, 8 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=no-switch (must fail)
+FAIL  E1 no switch file: no request
+aircraft-schedule (BREAK=no-switch): 36 passed, 1 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=stale-clock (must fail)
+FAIL  G1 retry crossed the due time: ships runs in that same tick
+FAIL  G2 and aircraft does not run in that tick
+FAIL  G3 order: retry, then ships
+aircraft-schedule (BREAK=stale-clock): 34 passed, 3 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=manual-no-guard (must fail)
+FAIL  H1 manual, ships due in 5 s: refused with exit 8, no request
+FAIL  H2 manual --dry, ships due in 5 s: refused with exit 8, no request
+FAIL  H3 a refused manual run enters nothing in the ledger
+FAIL  H4 manual with ships overdue: refused with exit 8
+FAIL  H5 manual with ships 400 s away: allowed
+aircraft-schedule (BREAK=manual-no-guard): 32 passed, 5 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=ledger-unchecked (must fail)
+FAIL  I1 scheduled, ledger not a file: no request
+FAIL  I2 and the log says the ledger could not be saved
+FAIL  I3 manual, ledger not a file: refused with exit 9, no request
+FAIL  I4 scheduled, ledger entry cannot be written: no request
+FAIL  I5 manual, ledger entry cannot be written: refused with exit 9
+aircraft-schedule (BREAK=ledger-unchecked): 32 passed, 5 failed  [bash 3.2.57(1)-release, Darwin]
+--- BREAK=once-ignored (must fail)
+FAIL  J1 nine ledger entries + the one-off pull one hour ago: the next request is refused
+FAIL  J2 the one-off pull older than 24 h no longer counts
+aircraft-schedule (BREAK=once-ignored): 35 passed, 2 failed  [bash 3.2.57(1)-release, Darwin]
+--- collector suite
+
+aircraft-counts: 19 passed, 0 failed
+--- ships duration contract
+ALL CHECKS PASSED
+finished 2026-11-17T05:06:13Z
