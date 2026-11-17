@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 06:10 UTC (clock reading) — **Cape Town observation station, A1: private preview "Aircraft seen by our Cape Town receiver" built and smoke-tested on the real Pi** (branch `cape-town-station-rc` `042a760`; local network only; no public page, no hub change, nothing uploaded)
+- **Chad's Go (own message):** A1 only from the Cape Town observation station spec (`docs/concepts/CAPE-TOWN-STATION-SPEC.md` on the branch): verify the Pi's readsb aircraft JSON, build a private page-only preview, check the three feed states, confirm OpenSky still receives; public OpenSky release, more feeds and hardware are outside this pass. Chad asked for the files on a branch.
+- **Endpoint verified:** `http://adsb-feeder.local:8080/data/aircraft.json` on the home network (05:47:04 UTC receiver clock: 17 aircraft, 12 with a position, distance and bearing from the receiver present).
+- **Built (`station/cape-town/`):** a helper for the Mac listening on 127.0.0.1:8787 only, and one self-contained page: aircraft placed by the receiver's own distance and bearing (the page never holds the antenna's coordinates), altitude, speed, heading, position age, signal; live / live-with-zero / stale / unreachable states. Start: `node ~/mother-earth/cape-town/preview.mjs`, open `http://localhost:8787`.
+- **Checks:** local suite 24 passed (stand-in receiver). Live smoke in Chad's Chrome via the extension, 06:07–06:09 UTC: 12 aircraft plotted of 20 heard, furthest 228 km; `?sim=zero`, `?sim=stale`, `?sim=down` each showed its own state.
+- **OpenSky during the test:** the Pi's status page (06:09:35 UTC) shows OpenSky Data "connected", MLAT "sync warning", Enabled "intermittent / degraded". OpenSky's own dashboard was not checked in this pass.
+- **Open:** dashboard check; the degraded/MLAT warning not investigated; plot crowds near the centre (no range switch); no coastline; GPT's review. Packet: `reviews/2026-11-17-cape-town-station-a1.md` on the branch; Mac copy `_review/cape-town-station/`.
+- **Aircraft counts (OpenSky API) release:** unchanged, on hold for Martin's reply.
+
 ## 17 Nov 05:28 UTC (clock reading) — **GPT passes `aircraft-counts-rc` rev 3 (`239e685`) on technical review; production hold stays until Martin replies** (docs only)
 - GPT (relayed by Chad): the three rev 2 blockers are closed (clock refreshed after a ships retry; manual runs obey the ships guard; no OpenSky call if the ledger cannot be saved). GPT also checked the runner reads the one-off pull's timestamp from the real state file. All 11 files matched the checksum manifest. Reproduced independently on macOS bash 3.2: 37 of 37 runner checks, 19 of 19 collector checks, ships duration suite passing. GPT's environment blocked the process-list check, so it verified separately that the watchdog kills a node process that ignores SIGTERM and releases the lock.
 - **Not yet run:** the live upload path end to end.
