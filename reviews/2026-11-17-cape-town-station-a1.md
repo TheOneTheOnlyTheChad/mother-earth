@@ -82,3 +82,10 @@ Spec: `docs/concepts/CAPE-TOWN-STATION-SPEC.md` (A1 only). Verify the local read
 - **Aircraft at 40 km: NOT smoke-tested live.** The helper ran, but the Pi did not answer: six requests in a row timed out at 4 s, and Chrome could not resolve `adsb-feeder.local` (DNS_PROBE_FINISHED_NXDOMAIN) at 07:36 UTC. The page showed "Receiver unreachable", nothing drawn, with the 40/100/320 km rings switching correctly. Cause not known (Pi off the network or restarting, the Mac on a different network, or name resolution); not investigated; nothing on the Pi touched.
 
 **Open:** live aircraft smoke at 40 km once the Pi answers; why the Pi stopped answering by name; map labels can overlap the path near the end points; the wind estimate around the highest point spans the burst and is not meaningful there; GFS comparison, recurring polling and hardware left for a later decision (GPT, Chad).
+
+## 8. Live aircraft smoke at 40 km, rev 3 page (17 Nov 09:19 UTC clock reading)
+The Mac was back on the home network (the Pi's `aircraft.json` answered in Chrome at 09:08:04 UTC receiver time: 35 heard, 27 with a position). Chad restarted the helper; Claude drove a tab in Chad's Chrome at 09:18:58 UTC.
+- `?range=40`: "Receiver live — 6 aircraft plotted"; rings 10/20/30/40 km; 16 listed; "11 aircraft heard without a usable position (counted, not drawn). 10 beyond the 40 km range (listed, not drawn)."; reading under 3 s old; receiver and Mac clocks 0.14 s apart, so no clock note; no skipped polls.
+- 100 km: 9 plotted, 7 beyond. 320 km: 16 plotted, none beyond. Back to 40 km.
+- Screenshot looked at: the airport-side aircraft are now separate and readable at 40 km; rows beyond the range are marked "(beyond this range)".
+This closes the open live smoke from §7. Still open: label overlap on the balloon map; GPT's review of rev 3.
