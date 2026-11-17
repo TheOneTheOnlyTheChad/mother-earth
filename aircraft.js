@@ -7,7 +7,10 @@
  * - Counts per area only. No aircraft identifier, callsign, position or track exists in what the hub serves, and none is drawn.
  * - A cell with no count is drawn as nothing: aircraft are heard only where a volunteer receiver is in range, so no count is not
  *   an empty sky.
- * - The time shown is the time of OpenSky's snapshot, with its age. Past the stale limit the sheet says so; past HIDE_AFTER_H it is cleared.
+ * - The time shown is the time OpenSky gave its snapshot, with its age. It is not the moment every aircraft was heard: each aircraft is
+ *   counted at its last reported position, which the collector accepts only up to a stated limit before the snapshot time. The
+ *   limit travels with the counts (position_age_cutoff_s) and is printed; counts that do not state it are not drawn.
+ * - Snapshot age: Past the stale limit the sheet says so; past HIDE_AFTER_H it is cleared.
  * - Kept out of the observation path like Wind, Ocean heat and Dust RGB: never touches state, points, pmeta, usable() or a globe.gl
  *   data layer (index.html uses those; see START-HERE). The sheet is its own mesh.
  * - Fetched only while the layer is on.
@@ -29,6 +32,7 @@
   const band = n => { let k = -1; for (let i = 0; i < AC.SCALE.length; i++) if (n >= AC.SCALE[i][0]) k = i; return k; };
   const cellOf = (lat, lng) => { const l = ((lng + 540) % 360) - 180; return Math.max(0, Math.min(AC.ROWS - 1, Math.floor((lat + 90) / AC.CELL_DEG))) + '_' + Math.max(0, Math.min(AC.COLS - 1, Math.floor((l + 180) / AC.CELL_DEG))); };
   const cellBox = id => { const [r, c] = id.split('_').map(Number); return { s: -90 + r * AC.CELL_DEG, n: -90 + (r + 1) * AC.CELL_DEG, w: -180 + c * AC.CELL_DEG, e: -180 + (c + 1) * AC.CELL_DEG }; };
+  const cutText = s => s % 60 === 0 ? `${s / 60} minute${s === 60 ? '' : 's'}` : `${s} seconds`;
   const deg = (v, pos, neg) => `${Math.abs(v)}°${v === 0 ? '' : v > 0 ? pos : neg}`;
   const boxText = b => `${deg(b.s, 'N', 'S')} to ${deg(b.n, 'N', 'S')}, ${deg(b.w, 'E', 'W')} to ${deg(b.e, 'E', 'W')}`;
 
@@ -38,12 +42,13 @@
     if (Array.isArray(j.records) && j.records.length) return { ok: false, why: 'the file carries individual records, which this layer never shows' };
     if (j.source_status === 'down') return { ok: false, down: true, why: 'The latest collection did not complete' + (j.retrieved_at && Number.isFinite(Date.parse(j.retrieved_at)) ? ` (${utc(j.retrieved_at)})` : '') + '.' };
     const t = j.window_end; if (!t || !Number.isFinite(Date.parse(t))) return { ok: false, why: 'the counts carry no readable time' };
+    const cut = j.position_age_cutoff_s; if (!Number.isFinite(cut) || cut <= 0) return { ok: false, why: 'the counts do not state how old a counted position may be' };
     if (!j.cells || typeof j.cells !== 'object' || Array.isArray(j.cells)) return { ok: false, why: 'the counts are missing' };
     const cells = {}; let total = 0, max = 0;
     for (const id in j.cells) { const m = /^(\d{1,2})_(\d{1,2})$/.exec(id), n = j.cells[id] && j.cells[id].count;
       if (!m || +m[1] >= AC.ROWS || +m[2] >= AC.COLS || !Number.isInteger(n) || n < 0) return { ok: false, why: 'a count in the file is not readable' };
       if (n > 0) { cells[id] = n; total += n; if (n > max) max = n; } }
-    return { ok: true, env: { time: t, retrieved: j.retrieved_at || null, cells, total, max, n: Object.keys(cells).length, degraded: j.source_status === 'degraded',
+    return { ok: true, env: { time: t, cutS: cut, retrieved: j.retrieved_at || null, cells, total, max, n: Object.keys(cells).length, degraded: j.source_status === 'degraded',
       staleS: Number.isFinite(j.stale_after_s) && j.stale_after_s > 0 ? j.stale_after_s : AC.STALE_FALLBACK_S, citation: typeof j.citation === 'string' ? j.citation : AC.CREDIT } };
   }
   const ageMs = env => now() - Date.parse(env.time);
@@ -103,7 +108,7 @@
     if (!built) throw new Error('the globe has not finished loading its own picture, so the layer cannot be drawn on it');
     return built;
   }
-  const oldWhy = env => `The newest count is from ${utc(env.time)}, more than ${AC.HIDE_AFTER_H} hours ago.`;
+  const oldWhy = env => `The newest snapshot is from ${utc(env.time)}, more than ${AC.HIDE_AFTER_H} hours ago.`;
   /** Fetch, check, build, then swap sheet and labels in one step. A failed refresh leaves what is shown, and says so. */
   async function load(isRefresh) {
     if (st.loading) return;
@@ -129,7 +134,7 @@
       destroy(); built.parent.add(built.mesh); st.meshes = [built.mesh]; st.env = env; st.status = 'ready'; st.why = null; st.refreshFailed = false;
     } finally { if (gen === st.gen && seq === st.seq) { st.loading = false; paint(); } }
   }
-  function ageTick() { if (!st.on) return; if (st.env && tooOld(st.env)) clearAll(`The count shown was from ${utc(st.env.time)}, more than ${AC.HIDE_AFTER_H} hours ago, and has been cleared.`); paint(); }
+  function ageTick() { if (!st.on) return; if (st.env && tooOld(st.env)) clearAll(`The snapshot shown was from ${utc(st.env.time)}, more than ${AC.HIDE_AFTER_H} hours ago, and has been cleared.`); paint(); }
 
   // ---------- labels
   function reading(env, lat, lng) {
@@ -145,13 +150,13 @@
     if (!st.on) { fl.hidden = true; ex.hidden = true; rd.textContent = ''; o.hidden = false; o.textContent = st.why || 'Off. Switch on to load the newest aircraft counts.'; return; }
     if (st.env) {
       const e = st.env; fl.hidden = false; o.hidden = true;
-      fl.innerHTML = `<b>Aircraft counted at ${esc(utc(e.time))}</b> (${esc(ageText(ageMs(e)))})<br><span class="wind-lv">${e.total.toLocaleString()} aircraft with a reported position, in ${e.n.toLocaleString()} cells</span>`;
-      const bits = ['One snapshot, not a live view: counts per 4° cell, about ten times a day. No individual aircraft is shown or stored.'];
+      fl.innerHTML = `<b>OpenSky snapshot of ${esc(utc(e.time))}</b> (${esc(ageText(ageMs(e)))})<br><span class="wind-lv">${e.total.toLocaleString()} aircraft counted, in ${e.n.toLocaleString()} cells</span>`;
+      const bits = [`Each aircraft is counted where it last reported a position, no more than ${cutText(e.cutS)} before the snapshot time. One snapshot, not a live view. No individual aircraft is shown or stored.`];
       if (isStale) bits.push(`This count is more than ${Math.round(e.staleS / 3600)} hours old; it is cleared at ${AC.HIDE_AFTER_H} hours.`);
       if (e.degraded) bits.push('The collector marked this count as incomplete.');
       if (st.refreshFailed) bits.push('Refresh unavailable.');
       ex.hidden = false; ex.textContent = bits.join(' ');
-      rd.textContent = st.sel ? reading(e, st.sel.lat, st.sel.lng).text + ` · ${utc(e.time)}` : 'Tap the globe to read the count for that cell.';
+      rd.textContent = st.sel ? reading(e, st.sel.lat, st.sel.lng).text + ` · snapshot of ${utc(e.time)}` : 'Tap the globe to read the count for that cell.';
     } else {
       fl.hidden = true; ex.hidden = true; rd.textContent = ''; o.hidden = false;
       o.textContent = st.loading ? 'Loading the newest aircraft counts…' : (st.why || 'No aircraft count is available.') + ' Nothing is drawn.';
@@ -176,7 +181,7 @@
   { const el = $('air-key'); if (el) el.innerHTML = AC.SCALE.map(([v, c], k) => `<span class="b"><i style="background:${c}"></i>${k === AC.SCALE.length - 1 ? v + '+' : v + '–' + (AC.SCALE[k + 1][0] - 1)}</span>`).join('') + '<span class="u">aircraft per 4° cell (bands provisional) · no colour = no count, not an empty sky</span>'; }
 
   // read-only aids for tests and the console
-  ME.aircraft = { state: () => ({ on: st.on, status: st.status, why: st.why, time: st.env ? st.env.time : null, total: st.env ? st.env.total : null, cells: st.env ? st.env.n : null,
+  ME.aircraft = { state: () => ({ on: st.on, status: st.status, why: st.why, time: st.env ? st.env.time : null, cutS: st.env ? st.env.cutS : null, total: st.env ? st.env.total : null, cells: st.env ? st.env.n : null,
       meshes: st.meshes.length, inScene: st.meshes.filter(m => m.parent).length, loading: st.loading, refreshFailed: st.refreshFailed, requests: st.requests.slice(), sel: st.sel,
       label: $('air-frame').hidden ? null : $('air-frame').textContent, extra: $('air-extra').hidden ? null : $('air-extra').textContent, off: $('o-air').hidden ? null : $('o-air').textContent,
       read: $('air-read').textContent, stateWord: $('s-air').textContent, drawn: st.meshes[0] && st.meshes[0].material.map.image.__air || null }),

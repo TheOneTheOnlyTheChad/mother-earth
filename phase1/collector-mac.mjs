@@ -188,39 +188,45 @@ export const FEEDS = {
     const id = process.env.OPENSKY_CLIENT_ID, secret = process.env.OPENSKY_CLIENT_SECRET;
     if (!id || !secret) throw new Error('OPENSKY_CLIENT_ID / OPENSKY_CLIENT_SECRET not set');
     const tr = await fetch(OPENSKY.token, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ grant_type: 'client_credentials', client_id: id, client_secret: secret }), signal: AbortSignal.timeout(30e3) });
+      body: new URLSearchParams({ grant_type: 'client_credentials', client_id: id, client_secret: secret }), signal: AbortSignal.timeout(15e3) });
     const tj = await tr.json().catch(() => ({}));
     if (!tr.ok || !tj.access_token) throw new Error('OpenSky token refused (HTTP ' + tr.status + ')');
-    const r = await fetch(OPENSKY.states, { headers: { Authorization: 'Bearer ' + tj.access_token, 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION }, signal: AbortSignal.timeout(60e3) });
+    const r = await fetch(OPENSKY.states, { headers: { Authorization: 'Bearer ' + tj.access_token, 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION }, signal: AbortSignal.timeout(30e3) });
     if (!r.ok) throw new Error('OpenSky states refused (HTTP ' + r.status + ')');
     const o = openskyPositions(await r.json());
     const credits = Number(r.headers.get('x-rate-limit-remaining'));
     return { fields: ['lat', 'lng'], rows: o.rows, countsOnly: true, coverageDefault: { grade: 'partial', evidence: 'volunteer_receivers_only' },
-      quantity: 'aircraft (unique ICAO 24-bit addresses) with a reported position in one OpenSky Network state snapshot, counted per 4-degree cell. Heard only where a volunteer receiver is in range: a cell with no count is not an empty sky.',
+      quantity: `aircraft (unique ICAO 24-bit addresses) in one OpenSky Network state snapshot whose position was reported no more than ${OPENSKY_MAX_POSITION_AGE_S} s before the snapshot time, counted per 4-degree cell at that last reported position. Heard only where a volunteer receiver is in range: a cell with no count is not an empty sky.`,
       extra: { stale_after_s: OPENSKY.staleAfterS, window_start_override: o.sourceTime, window_end_override: o.sourceTime,
-        counts: { state_vectors: o.stateVectors, with_position: o.rows.length, without_position: o.withoutPosition, duplicate_addresses: o.duplicates, on_ground: o.onGround },
+        position_age_cutoff_s: OPENSKY_MAX_POSITION_AGE_S,
+        counts: { state_vectors: o.stateVectors, counted: o.rows.length, without_position: o.withoutPosition, position_older_than_cutoff: o.tooOld, position_time_missing: o.noPositionTime, duplicate_addresses: o.duplicates, on_ground: o.onGround },
         records_policy: 'counts per cell only: no aircraft identifiers, callsigns, positions or tracks are stored or published',
         credits_remaining: Number.isFinite(credits) ? credits : null, cadence: 'about 10 requests a day while the collecting computer is awake',
         citation: 'The OpenSky Network, https://opensky-network.org' } };
   },
 };
 
+const OPENSKY_MAX_POSITION_AGE_S = 300;   // an aircraft is counted only if its position was reported no more than this long before OpenSky's snapshot time
 const OPENSKY = { token: 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token', states: 'https://opensky-network.org/api/states/all', staleAfterS: 3 * 3600 };
 /* OpenSky state vectors -> positions for the cell counter. Pure (tested in phase1/aircraft-counts.test.mjs). One position per ICAO
  * address; vectors with no position are counted and dropped. Returns [lat, lng] pairs ONLY: the address is used for de-duplication
  * inside this function and never leaves it. */
-export function openskyPositions(j) {
+export function openskyPositions(j, maxAgeS = OPENSKY_MAX_POSITION_AGE_S) {
   if (!j || !Array.isArray(j.states) || !Number.isFinite(j.time)) throw new Error('OpenSky response has no states array or time');
-  const seen = new Set(), rows = []; let withoutPosition = 0, duplicates = 0, onGround = 0;
+  const seen = new Set(), rows = []; let withoutPosition = 0, duplicates = 0, onGround = 0, tooOld = 0, noPositionTime = 0;
   for (const s of j.states) {
     if (!Array.isArray(s)) continue;
     if (seen.has(s[0])) { duplicates++; continue; } seen.add(s[0]);
     const lng = s[5], lat = s[6];
     if (typeof lat !== 'number' || typeof lng !== 'number' || !Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) { withoutPosition++; continue; }
+    // s[3] = time_position: when this position was last reported. A snapshot keeps aircraft whose last position is much older
+    // (17 Nov 2026 pull: median 1 s, 90th percentile 88 s, maximum 6,487 s), so the count has its own stated age limit.
+    if (typeof s[3] !== 'number' || !Number.isFinite(s[3])) { noPositionTime++; continue; }
+    if (j.time - s[3] > maxAgeS) { tooOld++; continue; }
     if (s[8] === true) onGround++;
     rows.push([lat, lng]);
   }
-  return { rows, stateVectors: j.states.length, withoutPosition, duplicates, onGround, sourceTime: new Date(j.time * 1000).toISOString() };
+  return { rows, stateVectors: j.states.length, withoutPosition, duplicates, onGround, tooOld, noPositionTime, sourceTime: new Date(j.time * 1000).toISOString() };
 }
 /* Envelope from a feed result. Pure. A countsOnly feed publishes its cells and NO records. */
 export function buildEnvelope(layer, f, scheduledMs, nowIsoStr) {
@@ -239,6 +245,7 @@ export function buildEnvelope(layer, f, scheduledMs, nowIsoStr) {
 }
 
 async function main() {
+  if (layer === 'opensky') setTimeout(() => { console.error('aircraft run exceeded 80 s; stopped'); process.exit(1); }, 80e3).unref();   // own deadline, inside the runner's 90 s kill
   if (!FEEDS[layer]) { console.error('unknown layer', layer, '— known:', Object.keys(FEEDS).join(', ') + ', retry'); process.exit(2); }
   const scheduledMs = Date.now();
   let e;
@@ -262,7 +269,8 @@ async function main() {
 /* Upload with bounded timeouts and backoff. On final failure keep the envelope as the single pending file (identity and timestamps intact). */
 async function upload(e, noPending) {
   const body = JSON.stringify(e);
-  for (let i = 0; i <= UPLOAD_BACKOFF_MS.length; i++) {
+  const tries = noPending ? 1 : UPLOAD_BACKOFF_MS.length + 1;   // a counts-only layer gets ONE attempt: its whole run is time-limited so it can never hold the lock into a ships sample
+  for (let i = 0; i < tries; i++) {
     const ac = new AbortController(); const to = setTimeout(() => ac.abort(), UPLOAD_TIMEOUT_MS);
     try {
       const r = await fetch(`${HUB}/ingest/${e.layer}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + KEY, 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION }, body, signal: ac.signal });
@@ -272,7 +280,7 @@ async function upload(e, noPending) {
       if (r.status >= 400 && r.status < 500) { console.error('rejected by hub; not retrying'); if (!noPending) dropPending(); return 1; }   // 4xx: our envelope is wrong — retrying will not help
     } catch (err) { console.error(`upload attempt ${i + 1} failed: ${String(err && err.name === 'AbortError' ? 'timeout' : err).slice(0, 120)}`); }
     finally { clearTimeout(to); }
-    if (i < UPLOAD_BACKOFF_MS.length) await new Promise(r => setTimeout(r, UPLOAD_BACKOFF_MS[i]));
+    if (i < tries - 1) await new Promise(r => setTimeout(r, UPLOAD_BACKOFF_MS[i]));
   }
   if (noPending) { console.error('upload failed; not kept as pending (this layer is simply collected again at its next time)'); return 1; }
   savePending(e, body); return 1;

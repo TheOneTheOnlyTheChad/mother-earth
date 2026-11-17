@@ -51,7 +51,10 @@ if [ -z "$INGEST_KEY" ] || [ -z "$AISSTREAM_KEY" ]; then log "keys unreadable fr
 export INGEST_KEY AISSTREAM_KEY
 # Aircraft counts (OpenSky): optional. Keys are read the same way; the schedule runs only while state/aircraft.on exists.
 OPENSKY_CLIENT_ID="$(keyval OPENSKY_CLIENT_ID)"; OPENSKY_CLIENT_SECRET="$(keyval OPENSKY_CLIENT_SECRET)"; export OPENSKY_CLIENT_ID OPENSKY_CLIENT_SECRET
-AIRCRAFT_INTERVAL_S=${AIRCRAFT_INTERVAL_S:-8640}   # 144 min: at most 10 requests in 24 h
+AIRCRAFT_INTERVAL_S=${AIRCRAFT_INTERVAL_S:-8640}   # 144 min between scheduled attempts
+AIRCRAFT_MAX_PER_DAY=10                            # hard cap on OpenSky requests in any 24 h, all paths (not overridable from the environment)
+AIRCRAFT_MAX_S=${AIRCRAFT_MAX_S:-90}               # a run is killed at this many seconds
+AIRCRAFT_GUARD_S=${AIRCRAFT_GUARD_S:-180}          # no aircraft run starts when a ships sample is due within this many seconds
 
 # ---- one shared lock (mkdir is atomic). Age alone does NOT make a lock stale (1 Nov 2026): a sample that was running
 # when the host suspended is older than the timeout but still alive, and reclaiming it would start a second sample
@@ -73,6 +76,25 @@ trap 'rm -f state/lock/pid 2>/dev/null; rmdir state/lock 2>/dev/null' EXIT
 run_collector() {   # $1 = layer/mode, rest = flags
   "$NODE" collector-mac.mjs "$@" --quiet --state=state >> logs/collector.log 2>&1; return $?
 }
+# Aircraft: every OpenSky request (scheduled, manual, dry) is entered in state/aircraft_requests BEFORE it is made, and refused when
+# AIRCRAFT_MAX_PER_DAY entries already fall inside the last 24 h. Returns 0 and records the request, or 1.
+aircraft_budget() {
+  local t cut n=0 keep=""; t=$(date +%s); cut=$((t - 86400))
+  if [ -f state/aircraft_requests ]; then while read -r e; do case "$e" in ''|*[!0-9]*) continue ;; esac; [ "$e" -gt "$cut" ] && { keep="$keep$e
+"; n=$((n + 1)); }; done < state/aircraft_requests; fi
+  [ "$n" -ge "$AIRCRAFT_MAX_PER_DAY" ] && { printf '%s' "$keep" > state/aircraft_requests; return 1; }
+  printf '%s%s\n' "$keep" "$t" > state/aircraft_requests; return 0
+}
+# Run the collector with a hard time limit: $1 seconds, then the rest as collector arguments. Killed at the limit (exit 124).
+run_bounded() {
+  local limit="$1"; shift
+  "$NODE" collector-mac.mjs "$@" >> logs/collector.log 2>&1 & local pid=$! waited=0
+  while kill -0 "$pid" 2>/dev/null; do
+    if [ "$waited" -ge "$limit" ]; then kill "$pid" 2>/dev/null; sleep 1; kill -9 "$pid" 2>/dev/null; wait "$pid" 2>/dev/null; log "collector killed at the ${limit} s limit ($1)"; return 124; fi
+    sleep 1; waited=$((waited + 1))
+  done
+  wait "$pid"; return $?
+}
 record() { printf '{"last_run":"%s","mode":"%s","result":%s,"last_sample":"%s","last_sample_epoch":%s}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$1" "$2" "$3" "$4" > state/scheduler.json; }
 
 case "$MODE" in
@@ -81,15 +103,6 @@ case "$MODE" in
     now=$(date +%s)
     last=$(grep -o '"last_sample_epoch":[0-9]*' state/scheduler.json 2>/dev/null | grep -o '[0-9]*$'); last=${last:-0}
     if [ -f state/pending.json ]; then log "pending upload found; retrying"; run_collector retry; rc=$?; log "retry exit=$rc"; fi
-    # Aircraft counts: one OpenSky request when due, only while the switch file exists. Runs before the ships sample and never
-    # changes its timing or exit code. The interval runs from the attempt, so a failure is not retried early (request budget).
-    if [ -f state/aircraft.on ]; then
-      alast=$(cat state/aircraft_last 2>/dev/null); alast=${alast:-0}
-      if [ $((now - alast)) -ge $AIRCRAFT_INTERVAL_S ]; then
-        echo "$now" > state/aircraft_last; log "aircraft due (last $((now - alast)) s ago)"
-        run_collector opensky; arc=$?; log "aircraft exit=$arc"
-      fi
-    fi
     if [ $((now - last)) -ge $INTERVAL_S ]; then
       stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ); log "sample due (last $((now - last)) s ago)"
       run_collector ships; rc=$?; log "ships exit=$rc"
@@ -98,15 +111,31 @@ case "$MODE" in
       record tick "$rc" "$stamp" "$(date +%s)"
       exit $rc
     fi
+    # Aircraft counts (OpenSky). SHIPS HAS PRIORITY (GPT review, 17 Nov 2026): this block is reached only in a tick where no ships
+    # sample was due, it does not start when ships will be due within AIRCRAFT_GUARD_S, and the run is killed at AIRCRAFT_MAX_S,
+    # so the shared lock is free again before the next ships sample. The interval runs from the attempt: a failure is not retried early.
+    if [ -f state/aircraft.on ]; then
+      alast=$(cat state/aircraft_last 2>/dev/null); alast=${alast:-0}
+      if [ $((now - alast)) -ge $AIRCRAFT_INTERVAL_S ]; then
+        if [ $((INTERVAL_S - (now - last))) -le $AIRCRAFT_GUARD_S ]; then log "aircraft due but ships is due within ${AIRCRAFT_GUARD_S} s; waiting"
+        elif ! aircraft_budget; then log "aircraft due but the daily request budget ($AIRCRAFT_MAX_PER_DAY in 24 h) is used; skipped"; echo "$now" > state/aircraft_last
+        else
+          echo "$now" > state/aircraft_last; log "aircraft due (last $((now - alast)) s ago)"
+          run_bounded "$AIRCRAFT_MAX_S" opensky --quiet --state=state; arc=$?; log "aircraft exit=$arc"
+        fi
+      fi
+    fi
     exit 0 ;;
   ships|mock)
     stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ); log "manual $MODE $*"
     run_collector "$MODE" "$@"; rc=$?; log "$MODE exit=$rc"
     case "$*" in *--dry*) ;; *) record manual "$rc" "$stamp" "$(date +%s)" ;; esac
     tail -n 3 logs/collector.log; exit $rc ;;
-  aircraft)   # manual: './run.sh aircraft --dry' prints the envelope and uploads nothing; without --dry it uploads one count
+  aircraft)   # manual: one OpenSky request now. '--dry' prints the envelope and uploads nothing, but it STILL asks OpenSky, so it
+    # is counted against the same daily budget as every other request.
+    if ! aircraft_budget; then echo "refused: $AIRCRAFT_MAX_PER_DAY OpenSky requests already made in the last 24 h (state/aircraft_requests)" >&2; log "manual aircraft refused: budget used"; exit 7; fi
     log "manual aircraft $*"; case "$*" in *--dry*) ;; *) date +%s > state/aircraft_last ;; esac
-    "$NODE" collector-mac.mjs opensky "$@" --state=state 2>&1 | tee -a logs/collector.log | tail -n 40; exit ${PIPESTATUS[0]} ;;
+    run_bounded "$AIRCRAFT_MAX_S" opensky "$@" --state=state; rc=$?; log "aircraft exit=$rc"; tail -n 6 logs/collector.log; exit $rc ;;
   retry) run_collector retry; exit $? ;;
-  *) echo "usage: run.sh ships|mock|aircraft|tick|retry|status" >&2; exit 2 ;;
+  *) echo "usage: run.sh ships|mock|aircraft [--dry]|tick|retry|status" >&2; exit 2 ;;
 esac
