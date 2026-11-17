@@ -23,7 +23,7 @@ const n0 = Date.now(), iso = ms => new Date(n0 - ms).toISOString(), GOOD = iso(3
 // ---- the hub's down envelope, tied to worker.js
 const WSRC = fs.readFileSync(path.join(__dirname, 'worker.js'), 'utf8');
 ok('worker.js: writeDown publishes an envelope with no cells, no window and no records', /const e = envelope\(layer, scheduledMs, null, null, 'down', \{\}, \[\], \[\], \{ note \}\);/.test(WSRC));
-ok('worker.js: a ships sample ingested as down goes through writeDown', /await writeDown\(env, layer, scheduledMs, 'ingested down: ' \+ \(e\.note \|\| ''\), 0\);/.test(WSRC));
+ok('worker.js: a ships sample ingested as down goes through writeDown', /await writeDown\(env, layer, scheduledMs, 'ingested down: ' \+ \((?:layer === AIRCRAFT_LAYER \? e\.note : \()?e\.note \|\| ''\)\)?, 0\);/.test(WSRC));   // hub 0.6.18 words the aircraft note itself; ships is unchanged
 
 const served = { index: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8') };
 { const rep = (k, a, b) => { const before = served[k]; served[k] = served[k].replace(a, b); if (served[k] === before) { console.log('FAIL  break did not apply'); process.exit(1); } };

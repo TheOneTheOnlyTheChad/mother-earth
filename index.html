@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612121500">
+<link rel="stylesheet" href="style.css?v=202612141000">
 </head>
 <body class="world">
 <header class="top">
@@ -137,7 +137,7 @@
         </div>
         <div class="card locked" style="--c:var(--plane)">
           <div class="head"><span class="pip"></span><span class="name">Aircraft</span><span class="state">optional</span></div>
-          <div class="cav">Counts per area from the OpenSky Network, about ten times a day. Off on load: switch on “Aircraft counts” under Optional layers. <a class="more" href="sources.html#aircraft">details</a></div>
+          <div class="cav">Counts per area, and positions as plain dots, from the OpenSky Network, about ten times a day. Off on load: switch on “Aircraft” under Optional layers. <a class="more" href="sources.html#aircraft">details</a></div>
         </div>
 
         <div class="card explore" id="card-explore">
@@ -316,21 +316,27 @@
             </details>
           </div>
           <div class="ovl opt-wind opt-air" id="card-air">
-            <div class="ovl-h">Aircraft counts <span class="ev obs">Observed</span><span class="state" id="s-air">off</span></div>
+            <div class="ovl-h">Aircraft <span class="ev obs">Observed</span><span class="state" id="s-air">off</span></div>
             <button class="ovl-tgl" type="button" id="tgl-air" role="switch" aria-checked="false" aria-describedby="air-note"><span class="box" aria-hidden="true"></span><span class="t">Aircraft — newest count per area</span></button>
-            <div class="cav" id="air-note">How many aircraft the OpenSky Network's volunteer receivers had recently heard in each 4° cell, as of one OpenSky snapshot. Counts only: no individual aircraft is shown.</div>
+            <div class="cav" id="air-note">How many aircraft the OpenSky Network's volunteer receivers had recently heard in each 4° cell, as of one OpenSky snapshot.</div>
             <div class="wind-frame" id="air-frame" aria-live="polite" hidden></div>
             <div class="hint" id="air-extra" aria-live="polite" hidden></div>
             <div class="obs" id="o-air" aria-live="polite">Off. Switch on to load the newest aircraft counts.</div>
             <div class="wind-key" id="air-key" aria-label="Aircraft count key"></div>
             <div class="wind-read" id="air-read" aria-live="polite"></div>
+            <div class="ovl-h air-sub">Positions <span class="state" id="s-airdots">off</span></div>
+            <button class="ovl-tgl" type="button" id="tgl-airdots" role="switch" aria-checked="false" aria-describedby="airdots-note"><span class="box" aria-hidden="true"></span><span class="t">Aircraft — positions in the newest snapshot</span></button>
+            <div class="cav" id="airdots-note">One plain dot for each aircraft in the same OpenSky snapshot, where it last reported a position. A dot carries nothing else: no identity, no height, no direction, no path. Counts and positions are shown one at a time: switching one on switches the other off.</div>
+            <div class="wind-frame" id="airdots-frame" aria-live="polite" hidden></div>
+            <div class="hint" id="airdots-extra" aria-live="polite" hidden></div>
+            <div class="obs" id="o-airdots" aria-live="polite">Off. Switch on to load the positions in the newest snapshot.</div>
             <details class="scope" id="air-scope">
               <summary>What this shows and does not show</summary>
               <div>
                 <p><b>Heard, not everything flying.</b> Each count is the number of aircraft that reported a position to the OpenSky Network in one snapshot. Aircraft are heard only where a volunteer receiver is in range, so oceans, deserts and many regions show little or nothing. No colour means no count, never an empty sky.</p>
                 <p><b>One snapshot, at most ten times a day.</b> Mother Earth asks OpenSky for one snapshot roughly every two and a half hours while its collecting computer is awake. The card shows the time OpenSky gave the snapshot, and its age. That time is not the moment every aircraft was heard: each aircraft is counted where it last reported a position, and only if that report was no more than 5 minutes before the snapshot time. Aircraft whose last position is older are left out. A snapshot older than six hours is cleared.</p>
-                <p><b>Counts only.</b> Mother Earth keeps and publishes the number per 4° cell and nothing else: no aircraft identifiers, callsigns, positions or tracks.</p>
-                <p><b>Credit.</b> Data: <a href="https://opensky-network.org" target="_blank" rel="noopener">The OpenSky Network, https://opensky-network.org</a>. Mother Earth contributes a receiver to the network.</p>
+                <p><b>Counts, and rounded positions without identifiers.</b> Mother Earth publishes the number per 4° cell and, for the newest snapshot only, one latitude and longitude per counted aircraft, rounded to 0.01° and listed in order of position. A rounded position and the snapshot time could still be matched to a flight by someone holding other flight data. Nothing else about an aircraft is kept or published: no identifier, callsign, country, height, speed or heading. No track: each snapshot replaces the one before it, no earlier positions are kept, and a dot in one snapshot cannot be matched to a dot in the next. Positions are served for three hours from the snapshot time; after that the hub stops serving them and the dots are cleared, and the card gives the time of the last snapshot.</p>
+                <p><b>Credit.</b> Data: <a href="https://opensky-network.org" target="_blank" rel="noopener">The OpenSky Network, https://opensky-network.org</a>. Matthias Schäfer, Martin Strohmeier, Vincent Lenders, Ivan Martinovic and Matthias Wilhelm, “Bringing up OpenSky: A large-scale ADS-B sensor network for research”, ACM/IEEE International Conference on Information Processing in Sensor Networks, April 2014. Mother Earth contributes a receiver to the network.</p>
                 <p><a href="sources.html#aircraft">Sources &amp; Details →</a></p>
               </div>
             </details>
@@ -477,7 +483,7 @@
 </div>
 
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
-<script src="app.js?v=202612131000"></script>
+<script src="app.js?v=202612141100"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612101000"></script>
@@ -485,7 +491,7 @@
 <script src="dustrgb.js?v=202612021000"></script>
 <script src="nightlights.js?v=202612111000"></script>
 <script src="wind.js?v=202612121500"></script>
-<script src="aircraft.js?v=202612131100"></script>
+<script src="aircraft.js?v=202612141200"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;

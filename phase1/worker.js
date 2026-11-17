@@ -10,7 +10,9 @@
  *   "7 * * * *"     (hourly, :07)  → aggregate previous hour from R2 cell files into D1
  *
  * HTTP (viewers only read; §4.2):
- *   GET /snapshot/<layer>   latest full snapshot (records + cells)
+ *   GET /snapshot/<layer>   latest full snapshot (records + cells). opensky (0.6.18): built on an explicit schema; records are [lat, lng] only,
+ *                           rounded to 0.01°, served only while AIRCRAFT_POSITIONS=1 and the snapshot is under 3 h old; no-store; no dated copy
+ *   POST /admin/aircraft/clear-positions?key=…  (0.6.18) remove positions from the one stored copy (rollback)
  *   GET /cells/<layer>      latest cells-only file (small)
  *   GET /status             last runs per layer + OpenSky spend today
  *   GET /admin/run/<job>?key=ADMIN_KEY   run a job now (jobs: five, minute, firms, forest, hourly)
@@ -71,7 +73,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.17';
+const COLLECTOR_VERSION = '0.6.18';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -139,12 +141,113 @@ async function logRun(env, layer, startedMs, status, http, records, bytes, note)
 }
 
 /** Write the §5 envelope: full snapshot + small cells file + latest pointers. */
+/* Aircraft (0.6.18, aircraft-dots-rc rev 2). The only per-aircraft values this hub ever stores or serves for the opensky layer are a
+ * latitude and a longitude (basis: OpenSky ticket #837506, 17 Nov 2026; terms §3(i): no aircraft identifiers in anything published).
+ *   - EXPLICIT SCHEMA. Nothing an uploader sends is copied through. aircraftProject() builds every stored and served object from
+ *     nothing, key by key, nested objects included, with typed values; every sentence in the file is the hub's own text. A key
+ *     this function does not name cannot reach storage or a reader, wherever in the upload it sits.
+ *   - Positions are OFF unless the plain variable AIRCRAFT_POSITIONS is "1". Off: uploads are stored without records and
+ *     /snapshot/opensky serves none. Removing the variable stops positions being served at once (the route reads it on every request).
+ *   - EXPIRY AT THE HUB. /snapshot/opensky serves positions only while the snapshot's own time is less than three hours old; after
+ *     that the same file is served without them. Both aircraft routes answer no-store, so no cache outlives that decision.
+ *   - No history: the dated copy under snapshots/ never holds records for this layer; the one stored copy of positions is
+ *     latest/opensky.json, overwritten by the next upload, and POST /admin/aircraft/clear-positions removes them from it. */
+const AIRCRAFT_LAYER = 'opensky', AIRCRAFT_FIELDS = ['lat', 'lng'], AIRCRAFT_STEP_DEG = 0.01, AIRCRAFT_MAX_AGE_S = 3 * 3600, AIRCRAFT_MAX_RECORDS = 60000;
+const AIRCRAFT_COUNT_KEYS = ['state_vectors', 'counted', 'without_position', 'position_older_than_cutoff', 'position_time_missing', 'duplicate_addresses', 'on_ground'];
+const AIRCRAFT_TEXT = {
+  quantity: s => `aircraft in one OpenSky Network state snapshot whose position was reported no more than ${s} s before the snapshot time, counted per 4-degree cell at that last reported position. Heard only where a volunteer receiver is in range: a cell with no count is not an empty sky.`,
+  policyCounts: 'counts per cell only: no aircraft identifiers, callsigns, positions or tracks are stored or published',
+  policyPositions: `rounded positions without identifiers: one latitude and longitude per counted aircraft, rounded to ${AIRCRAFT_STEP_DEG} degree and ordered by position; no aircraft identifier, callsign, country, altitude, speed, heading, on-ground flag, per-aircraft time or track is stored or published; each snapshot replaces the last; positions are served for three hours from the snapshot time`,
+  cadence: 'about 10 requests a day while the collecting computer is awake', citation: 'The OpenSky Network, https://opensky-network.org' };
+const aircraftOn = env => !!env && env.AIRCRAFT_POSITIONS === '1';
+function aircraftFieldsOk(f) { return Array.isArray(f) && (f.length === 0 || (f.length === AIRCRAFT_FIELDS.length && f.every((x, i) => x === AIRCRAFT_FIELDS[i]))); }
+function aircraftRowOk(r) {
+  if (!Array.isArray(r) || r.length !== 2) return false; const la = r[0], lo = r[1], k = Math.round(1 / AIRCRAFT_STEP_DEG);
+  return typeof la === 'number' && typeof lo === 'number' && Number.isFinite(la) && Number.isFinite(lo) && la >= -90 && la <= 90 && lo >= -180 && lo <= 180
+    && Math.abs(la * k - Math.round(la * k)) <= 1e-6 && Math.abs(lo * k - Math.round(lo * k)) <= 1e-6;
+}
+/* A fixed phrase for a failed collection. The collector's own note is free text, so it is matched, never copied. */
+function aircraftDownNote(note) {
+  const n = String(note || ''); let m;
+  if ((m = /states refused \(HTTP (\d{3})\)/.exec(n))) return 'OpenSky states request refused (HTTP ' + m[1] + ')';
+  if ((m = /token refused \(HTTP (\d{3})\)/.exec(n))) return 'OpenSky token request refused (HTTP ' + m[1] + ')';
+  if (/not set/.test(n)) return 'collector credentials not set';
+  if (/no states array or time/.test(n)) return 'OpenSky response not readable';
+  if (/Timeout|timed out|AbortError|aborted/i.test(n)) return 'request timed out';
+  if (/fetch failed/.test(n)) return 'request failed';
+  return 'collection failed';
+}
+/* The whole aircraft file, rebuilt from nothing. `withRecords` false, a field list that is not exactly lat,lng, or a single row
+ * that is not a rounded latitude and longitude: no records at all. Returns a new object; the input is never stored. */
+function aircraftProject(e, withRecords) {
+  e = e && typeof e === 'object' ? e : {};
+  const iso = v => (typeof v === 'string' && Number.isFinite(Date.parse(v))) ? new Date(Date.parse(v)).toISOString() : null;
+  const nat = v => (typeof v === 'number' && Number.isInteger(v) && v >= 0 && v < 1e9) ? v : null;
+  const ver = v => (typeof v === 'string' && /^(?:(?:mac|pi)-)?\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(v)) ? v : 'unknown';                       // a version number, or nothing
+  const agent = v => (typeof v === 'string' && /^(?:mother-earth-(?:mac|pi)-|hub )\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(v)) ? v : 'unknown';   // our own collectors' names, or nothing
+  const status = ['ok', 'degraded', 'down'].includes(e.source_status) ? e.source_status : 'down';
+  const cut = (typeof e.position_age_cutoff_s === 'number' && e.position_age_cutoff_s > 0 && e.position_age_cutoff_s <= 3600) ? e.position_age_cutoff_s : null;
+  const stale = (typeof e.stale_after_s === 'number' && e.stale_after_s > 0) ? Math.min(e.stale_after_s, AIRCRAFT_MAX_AGE_S) : AIRCRAFT_MAX_AGE_S;
+  const cells = {};
+  if (e.cells && typeof e.cells === 'object' && !Array.isArray(e.cells)) for (const id of Object.keys(e.cells)) {
+    const m = /^(\d{1,2})_(\d{1,2})$/.exec(id), c = e.cells[id];
+    if (!m || +m[1] >= 180 / CELL_DEG || +m[2] >= 360 / CELL_DEG || !c || nat(c.count) === null) continue;
+    const g = c.coverage && ['adequate', 'partial', 'unknown'].includes(c.coverage.grade) ? c.coverage.grade : 'unknown';
+    cells[m[1] + '_' + m[2]] = { count: c.count, coverage: { grade: g, evidence: c.coverage && c.coverage.evidence === 'volunteer_receivers_only' ? 'volunteer_receivers_only' : 'unspecified' } };
+  }
+  let records = [];
+  if (withRecords && status !== 'down' && aircraftFieldsOk(e.record_fields) && e.record_fields.length === 2 && Array.isArray(e.records) && e.records.length <= AIRCRAFT_MAX_RECORDS && e.records.every(aircraftRowOk)) records = e.records.map(r => [r[0], r[1]]);
+  const out = { schema_version: SCHEMA_VERSION, collector_version: ver(e.collector_version), layer: AIRCRAFT_LAYER,
+    window_start: iso(e.window_start), window_end: iso(e.window_end), retrieved_at: iso(e.retrieved_at), scheduled_for: iso(e.scheduled_for),
+    source_status: status, interruptions: [], stale_after_s: stale, cells,
+    record_format: 'rows', record_fields: records.length ? AIRCRAFT_FIELDS.slice() : [], records,
+    coverage_default: { grade: 'partial', evidence: 'volunteer_receivers_only' },
+    quantity: AIRCRAFT_TEXT.quantity(cut === null ? 'a stated number of' : cut), position_age_cutoff_s: cut };
+  if (e.counts && typeof e.counts === 'object' && !Array.isArray(e.counts)) { out.counts = {}; for (const k of AIRCRAFT_COUNT_KEYS) out.counts[k] = nat(e.counts[k]); }
+  if (records.length) out.position_precision_deg = AIRCRAFT_STEP_DEG;
+  out.records_policy = records.length ? AIRCRAFT_TEXT.policyPositions : AIRCRAFT_TEXT.policyCounts;
+  out.credits_remaining = nat(e.credits_remaining); out.cadence = AIRCRAFT_TEXT.cadence; out.citation = AIRCRAFT_TEXT.citation;
+  if (status === 'down') out.note = aircraftDownNote(e.note);
+  if (iso(e.received_at)) out.received_at = iso(e.received_at);
+  if (typeof e.ingested_from === 'string') out.ingested_from = agent(e.ingested_from);
+  return out;
+}
+const aircraftNoRecords = e => { const c = { ...e }; delete c.records; delete c.record_fields; delete c.record_format; delete c.position_precision_deg; c.records_policy = AIRCRAFT_TEXT.policyCounts; return c; };
+/* GET /snapshot/opensky and /cells/opensky. The stored file is projected again on the way out, so a file written by an earlier
+ * hub version is held to the same schema. `positions` says what was done: published | none | withheld_off | withheld_expired. */
+async function aircraftRoute(env, kind) {
+  const NS = { 'Cache-Control': 'no-store' };
+  const o = await env.R2.get((kind === 'snapshot' ? 'latest/' : 'latest-cells/') + AIRCRAFT_LAYER + '.json');
+  if (!o) return json({ error: 'no snapshot yet', layer: AIRCRAFT_LAYER }, 404, NS);
+  let stored; try { stored = JSON.parse(await o.text()); } catch (_) { return json({ error: 'stored aircraft file is not readable', layer: AIRCRAFT_LAYER }, 503, NS); }
+  if (kind === 'cells') return json(aircraftNoRecords(aircraftProject(stored, false)), 200, NS);
+  const full = aircraftProject(stored, true), had = full.records.length > 0;
+  const t = Date.parse(full.window_end), expired = !Number.isFinite(t) || Date.now() - t >= AIRCRAFT_MAX_AGE_S * 1e3 || t > Date.now();   // no readable time, or ANY time later than the hub's clock, is not served either (no allowance; it clears itself once the clock passes it)
+  const state = !had ? 'none' : !aircraftOn(env) ? 'withheld_off' : expired ? 'withheld_expired' : 'published';
+  const out = state === 'published' ? full : aircraftProject(stored, false);
+  out.positions = state; out.positions_max_age_s = AIRCRAFT_MAX_AGE_S;
+  return json(out, 200, NS);
+}
+/* POST /admin/aircraft/clear-positions?key=…  Removes positions from the one stored copy. For a rollback: remove AIRCRAFT_POSITIONS
+ * (serving stops at once), then call this so nothing is left in storage. Safe to repeat. */
+async function aircraftClear(req, env, url) {
+  const NS = { 'Cache-Control': 'no-store' };
+  if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403, NS);
+  if (req.method !== 'POST') return json({ error: 'POST only' }, 405, NS);
+  const cur = await getJson(env, `latest/${AIRCRAFT_LAYER}.json`);
+  if (!cur) return json({ ok: true, cleared: 0, note: 'no stored aircraft file' }, 200, NS);
+  const had = Array.isArray(cur.records) ? cur.records.length : 0;
+  await putJson(env, `latest/${AIRCRAFT_LAYER}.json`, aircraftProject(cur, false));
+  return json({ ok: true, cleared: had, positions_variable_on: aircraftOn(env) }, 200, NS);
+}
 async function writeSnapshot(env, layer, scheduledMs, envelope) {
   const stamp = isoMinute(scheduledMs);
-  const cellsOnly = { ...envelope, records: undefined, record_fields: undefined, record_format: undefined };
-  const full = await putJson(env, `snapshots/${layer}/${stamp}.json`, envelope, { retrieved_at: String(envelope.retrieved_at) });   // retrieved_at lets a listing order snapshots by full timestamp
+  if (layer === AIRCRAFT_LAYER) envelope = aircraftProject(envelope, aircraftOn(env));   // explicit schema; no records unless positions are switched on
+  const cellsOnly = layer === AIRCRAFT_LAYER ? aircraftNoRecords(envelope) : { ...envelope, records: undefined, record_fields: undefined, record_format: undefined };
+  const dated = await putJson(env, `snapshots/${layer}/${stamp}.json`, layer === AIRCRAFT_LAYER ? cellsOnly : envelope, { retrieved_at: String(envelope.retrieved_at) });   // retrieved_at lets a listing order snapshots by full timestamp
   await putJson(env, `cells/${layer}/${stamp}.json`, cellsOnly);
-  await putJson(env, `latest/${layer}.json`, envelope);
+  const latest = await putJson(env, `latest/${layer}.json`, envelope);
+  const full = layer === AIRCRAFT_LAYER ? latest : dated;   // bytes reported for the run: the file that holds the records
   await putJson(env, `latest-cells/${layer}.json`, cellsOnly);
   if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpointsDue(env, layer, Date.now()));   // after publishing; no mutable state (see histCheckpointsDue)
   return full;
@@ -2150,6 +2253,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
+export { AIRCRAFT_LAYER, AIRCRAFT_FIELDS, AIRCRAFT_MAX_AGE_S, AIRCRAFT_TEXT, aircraftFieldsOk, aircraftRowOk, aircraftProject, aircraftDownNote, aircraftRoute, validateEnvelope, writeSnapshot };
 export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
@@ -3923,6 +4027,15 @@ function validateEnvelope(e, layer) {
     if (e.record_format !== 'rows' || !Array.isArray(e.record_fields) || !Array.isArray(e.records)) return "record_format must be 'rows' with record_fields[] and records[]";
     for (const r of e.records) if (!Array.isArray(r) || r.length !== e.record_fields.length) return 'every record must have exactly ' + e.record_fields.length + ' fields';
     if (typeof e.quantity !== 'string') return 'quantity (what one count means) is required';
+    if (layer === AIRCRAFT_LAYER) {   // 0.6.18: latitude and longitude only, rounded; nothing else about an aircraft is accepted
+      if (!aircraftFieldsOk(e.record_fields)) return 'aircraft records may carry lat,lng only (record_fields must be [] or ["lat","lng"])';
+      if (e.record_fields.length === 0 && e.records.length) return 'aircraft records present without record_fields';
+      if (e.records.length > AIRCRAFT_MAX_RECORDS) return 'too many aircraft records';
+      for (const r of e.records) {
+        if (!Array.isArray(r) || r.length !== 2 || typeof r[0] !== 'number' || typeof r[1] !== 'number' || !Number.isFinite(r[0]) || !Number.isFinite(r[1]) || r[0] < -90 || r[0] > 90 || r[1] < -180 || r[1] > 180) return 'aircraft record is not a latitude and longitude';
+        if (!aircraftRowOk(r)) return 'aircraft positions must be rounded to ' + AIRCRAFT_STEP_DEG + ' degree';
+      }
+    }
   }
   return null;
 }
@@ -3939,25 +4052,29 @@ async function ingest(req, env, layer) {
   const why = validateEnvelope(e, layer);
   if (why) return json({ error: 'invalid envelope', why }, 422, { 'Cache-Control': 'no-store' });
   const scheduledMs = Date.parse(e.scheduled_for);
+  const sentRecords = Array.isArray(e.records) ? e.records.length : 0;
+  if (layer === AIRCRAFT_LAYER) e = aircraftProject(e, aircraftOn(env));   // 0.6.18: from here on only the hub's own schema exists; nothing else the uploader sent is kept
   e.received_at = nowIso();                                          // third timestamp: observed (window_end) / retrieved_at / received_at
-  e.ingested_from = (req.headers.get('User-Agent') || '').slice(0, 120);
+  e.ingested_from = layer === AIRCRAFT_LAYER ? aircraftProject({ ingested_from: req.headers.get('User-Agent') || '' }, false).ingested_from : (req.headers.get('User-Agent') || '').slice(0, 120);
   e.stale_after_s = e.stale_after_s || STALE_AFTER_S[layer] || 900;
   if (e.source_status === 'down') {
-    await writeDown(env, layer, scheduledMs, 'ingested down: ' + (e.note || ''), 0);
+    await writeDown(env, layer, scheduledMs, 'ingested down: ' + (layer === AIRCRAFT_LAYER ? e.note : (e.note || '')), 0);
     return json({ ok: true, layer, published: 'cells only (down)', snapshot: isoMinute(scheduledMs) }, 200, { 'Cache-Control': 'no-store' });
   }
   // Ordering guard (review round 4): an upload older than what latest/ already holds is archived but must not become "latest".
   const cur = await getJson(env, `latest-cells/${layer}.json`);
   if (cur && cur.retrieved_at && Date.parse(cur.retrieved_at) > Date.parse(e.retrieved_at)) {
     const stamp = isoMinute(scheduledMs);
-    const bytes = await putJson(env, `snapshots/${layer}/${stamp}.json`, e);
-    await putJson(env, `cells/${layer}/${stamp}.json`, { ...e, records: undefined, record_fields: undefined, record_format: undefined });
+    const noRecords = layer === AIRCRAFT_LAYER ? aircraftNoRecords(e) : { ...e, records: undefined, record_fields: undefined, record_format: undefined };
+    const bytes = await putJson(env, `snapshots/${layer}/${stamp}.json`, layer === AIRCRAFT_LAYER ? noRecords : e);   // aircraft: no dated copy of positions
+    await putJson(env, `cells/${layer}/${stamp}.json`, noRecords);
     await logRun(env, layer, scheduledMs, e.source_status, 200, e.records.length, bytes, 'ingested (archive only: older than latest ' + cur.retrieved_at + ') from ' + e.ingested_from);
     return json({ ok: true, layer, snapshot: stamp, published: 'archive only (older than latest)', latest_retrieved_at: cur.retrieved_at }, 200, { 'Cache-Control': 'no-store' });
   }
   const bytes = await writeSnapshot(env, layer, scheduledMs, e);    // same path as internal collectors: snapshot, cells, latest, latest-cells
   await logRun(env, layer, scheduledMs, e.source_status, 200, e.records.length, bytes, 'ingested from ' + e.ingested_from + ' v' + e.collector_version);
-  return json({ ok: true, layer, snapshot: isoMinute(scheduledMs), records: e.records.length, cells: Object.keys(e.cells).length, bytes }, 200, { 'Cache-Control': 'no-store' });
+  return json({ ok: true, layer, snapshot: isoMinute(scheduledMs), records: e.records.length, cells: Object.keys(e.cells).length, bytes,
+    ...(layer === AIRCRAFT_LAYER ? { positions: e.records.length ? 'stored' : sentRecords ? 'not stored (AIRCRAFT_POSITIONS is not 1)' : 'none sent' } : {}) }, 200, { 'Cache-Control': 'no-store' });
 }
 
 /* Repair ONE hour of ships aggregation from the objects still in R2 (added 1 Nov 2026 after hours 12/13 UTC were
@@ -4211,6 +4328,7 @@ export default {
       if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
       return ingest(req, env, p[1] || '');
     }
+    if (p[0] === 'admin' && p[1] === 'aircraft' && p[2] === 'clear-positions') return aircraftClear(req, env, url);   // 0.6.18
     if (p[0] === 'admin' && p[1] === 'reaggregate') {
       if (req.method !== 'POST') return json({ error: 'POST only (this can write history)' }, 405);
       return reaggregate(req, env, url, p[2] || '');
@@ -4234,6 +4352,7 @@ export default {
     if (p[0] === 'snapshot' || p[0] === 'cells') {
       const layer = p[1];
       if (!LAYERS.includes(layer)) return json({ error: 'unknown layer', layers: LAYERS }, 404);
+      if (layer === AIRCRAFT_LAYER) return aircraftRoute(env, p[0]);   // 0.6.18: explicit schema, expiry at the hub, no-store
       const key = (p[0] === 'snapshot' ? 'latest/' : 'latest-cells/') + layer + '.json';
       const o = await env.R2.get(key);
       if (!o) return json({ error: 'no snapshot yet', layer }, 404);
