@@ -1,10 +1,14 @@
-/* Mother Earth — Aircraft counts (OpenSky Network), aircraft-counts-rc.
- * An optional layer, off on load. A collector on Chad's own connection asks the OpenSky Network for one state snapshot about ten
- * times a day, counts the aircraft that reported a position in each 4 degree cell, and sends ONLY those counts to the hub. This file
- * paints the counts on a transparent sheet over the globe.
+/* Mother Earth — Aircraft counts and positions (OpenSky Network), aircraft-counts-rc + aircraft-dots-rc.
+ * Two optional layers, both off on load, from the same OpenSky snapshot. A collector on Chad's own connection asks the OpenSky
+ * Network for one state snapshot about ten times a day. It sends the hub (1) the number of aircraft that reported a position in
+ * each 4 degree cell and (2) one latitude and longitude per counted aircraft, rounded to 0.01 degree and ordered by position.
+ * This file paints the counts on one transparent sheet over the globe and the positions, as plain dots, on another.
  *
  * Rules this file keeps:
- * - Counts per area only. No aircraft identifier, callsign, position or track exists in what the hub serves, and none is drawn.
+ * - Counts: /cells/opensky, which never carries records. Positions: /snapshot/opensky, drawn ONLY if its record fields are exactly
+ *   lat,lng. No aircraft identifier, callsign, altitude, speed, heading or track exists in what the hub serves, and none is drawn.
+ * - A dot cannot be tapped, has no label and is never matched to a dot in an earlier snapshot: each snapshot replaces the last.
+ * - Dots are cleared once the snapshot is older than its own stale limit (stale_after_s): a position is where an aircraft was.
  * - A cell with no count is drawn as nothing: aircraft are heard only where a volunteer receiver is in range, so no count is not
  *   an empty sky.
  * - The time shown is the time OpenSky gave its snapshot, with its age. It is not the moment every aircraft was heard: each aircraft is
@@ -75,15 +79,15 @@
     if (!gmesh || !gmesh.geometry || !/Sphere/i.test(gmesh.geometry.type || '') || !Mat || !Tex || !gmesh.parent) return null;
     return { g, gmesh, Sphere: gmesh.geometry.constructor, Mesh: gmesh.constructor, Mat, Tex };
   }
-  function buildMesh(cv) {
+  function buildMesh(cv, alt = AC.ALT, opacity = AC.OPACITY, order = -1) {
     const h = harvest(); if (!h) return null;
-    const p = h.gmesh.geometry.parameters || {}, R = h.g.getGlobeRadius() * (1 + AC.ALT);
+    const p = h.gmesh.geometry.parameters || {}, R = h.g.getGlobeRadius() * (1 + alt);
     const tex = new h.Tex(cv); if ('colorSpace' in tex) tex.colorSpace = 'srgb'; tex.needsUpdate = true;
     const geo = new h.Sphere(R, 96, 96, p.phiStart != null ? p.phiStart : 0, p.phiLength != null ? p.phiLength : Math.PI * 2, p.thetaStart != null ? p.thetaStart : 0, p.thetaLength != null ? p.thetaLength : Math.PI);
-    const mesh = new h.Mesh(geo, new h.Mat({ map: tex, transparent: true, depthWrite: false, opacity: AC.OPACITY }));
+    const mesh = new h.Mesh(geo, new h.Mat({ map: tex, transparent: true, depthWrite: false, opacity }));
     mesh.rotation.set(h.gmesh.rotation.x, h.gmesh.rotation.y, h.gmesh.rotation.z);
     mesh.raycast = () => { };          // never a pick target: taps go through to the globe
-    mesh.renderOrder = -1;             // above the wind sheet (−4), Dust RGB (−3) and Ocean heat (−2)
+    mesh.renderOrder = order;          // counts −1: above the wind sheet (−4), Dust RGB (−3) and Ocean heat (−2); dots −0.5: above the counts
     mesh.__air = true;
     return { mesh, parent: h.gmesh.parent };
   }
@@ -180,12 +184,120 @@
   (ME.taps = ME.taps || []).push((lat, lng) => { if (st.on && st.env && Number.isFinite(lat) && Number.isFinite(lng)) { st.sel = { lat, lng }; paint(); } });
   { const el = $('air-key'); if (el) el.innerHTML = AC.SCALE.map(([v, c], k) => `<span class="b"><i style="background:${c}"></i>${k === AC.SCALE.length - 1 ? v + '+' : v + '–' + (AC.SCALE[k + 1][0] - 1)}</span>`).join('') + '<span class="u">aircraft per 4° cell (bands provisional) · no colour = no count, not an empty sky</span>'; }
 
+
+  // ====================================================================== positions as plain dots (aircraft-dots-rc)
+  const DT = { URL: ME.HUB + '/snapshot/opensky', FIELDS: ['lat', 'lng'], W: 4096, H: 2048, R_PX: 2.4, ALT: 0.0016, OPACITY: 1, ORDER: -0.5,
+    FILL: '#ffe9a8', EDGE: 'rgba(8,12,20,0.75)', REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, MAX: 60000 };
+  const dt = { on: false, gen: 0, seq: 0, why: null, env: null, meshes: [], loading: false, refreshFailed: false, timer: null, ageTimer: null, requests: [], opts: { source: null } };
+  const dtgl = $('tgl-airdots');
+  /** What the hub served, checked. Positions are drawn only from a file whose record fields are exactly lat,lng. */
+  function checkDots(j) {
+    if (!j || typeof j !== 'object' || j.layer !== AC.LAYER) return { ok: false, why: 'the hub returned something that is not the aircraft snapshot' };
+    if (j.source_status === 'down') return { ok: false, down: true, why: 'The latest collection did not complete' + (j.retrieved_at && Number.isFinite(Date.parse(j.retrieved_at)) ? ` (${utc(j.retrieved_at)})` : '') + '.' };
+    const t = j.window_end; if (!t || !Number.isFinite(Date.parse(t))) return { ok: false, why: 'the snapshot carries no readable time' };
+    const cut = j.position_age_cutoff_s; if (!Number.isFinite(cut) || cut <= 0) return { ok: false, why: 'the snapshot does not state how old a position may be' };
+    const f = j.record_fields, rows = j.records;
+    if (!Array.isArray(f) || !Array.isArray(rows)) return { ok: false, why: 'the snapshot carries no list of positions' };
+    if (f.length === 0 && rows.length === 0) return { ok: false, none: true, why: `The newest snapshot (${utc(t)}) carries counts only: no positions have been collected yet.` };
+    if (f.length !== DT.FIELDS.length || f.some((x, i) => x !== DT.FIELDS[i])) return { ok: false, why: 'the file carries more than a latitude and a longitude for each aircraft, which this layer never shows' };
+    if (rows.length > DT.MAX) return { ok: false, why: 'the snapshot carries more positions than this layer draws' };
+    const pts = new Float32Array(rows.length * 2);
+    for (let i = 0; i < rows.length; i++) { const r = rows[i];
+      if (!Array.isArray(r) || r.length !== 2 || typeof r[0] !== 'number' || typeof r[1] !== 'number' || !Number.isFinite(r[0]) || !Number.isFinite(r[1]) || r[0] < -90 || r[0] > 90 || r[1] < -180 || r[1] > 180) return { ok: false, why: 'a position in the file is not readable' };
+      pts[2 * i] = r[0]; pts[2 * i + 1] = r[1]; }
+    return { ok: true, env: { time: t, cutS: cut, pts, n: rows.length, degraded: j.source_status === 'degraded', step: Number.isFinite(j.position_precision_deg) && j.position_precision_deg > 0 ? j.position_precision_deg : null,
+      staleS: Number.isFinite(j.stale_after_s) && j.stale_after_s > 0 ? j.stale_after_s : AC.STALE_FALLBACK_S } };
+  }
+  const dotsOld = env => ageMs(env) >= env.staleS * 1e3;
+  const dotsOldWhy = env => `The newest snapshot is from ${utc(env.time)}, more than ${Math.round(env.staleS / 3600)} hours ago. Aircraft have long since moved, so no positions are drawn.`;
+  function composeDots(env) {
+    const cv = document.createElement('canvas'); cv.width = DT.W; cv.height = DT.H; const c = cv.getContext('2d'), r = DT.R_PX, TAU = Math.PI * 2; let drawn = 0;
+    const put = (x, y, rad) => { c.moveTo(x + rad, y); c.arc(x, y, rad, 0, TAU); };
+    for (const [rad, col] of [[r + 1.2, DT.EDGE], [r, DT.FILL]]) {   // every dark edge first, then every dot, so a dot is never hidden under a neighbour's edge
+      c.fillStyle = col; c.beginPath();
+      for (let i = 0; i < env.n; i++) { const x = (env.pts[2 * i + 1] + 180) / 360 * DT.W, y = (90 - env.pts[2 * i]) / 180 * DT.H;
+        put(x, y, rad); if (x < rad + 2) put(x + DT.W, y, rad); else if (x > DT.W - rad - 2) put(x - DT.W, y, rad);   // the 180° seam
+        if (col === DT.FILL) drawn++; }
+      c.fill(); }
+    cv.__airdots = { drawn, w: DT.W, h: DT.H, r };
+    return cv;
+  }
+  function dotsDestroy() { for (const m of dt.meshes) { if (m.parent) m.parent.remove(m); if (m.geometry) m.geometry.dispose(); if (m.material) { if (m.material.map) m.material.map.dispose(); m.material.dispose(); } } dt.meshes = []; }
+  function dotsClear(why) { dotsDestroy(); dt.env = null; dt.why = why; }
+  async function getDots() {
+    if (typeof dt.opts.source === 'function') return checkDots(await dt.opts.source());   // tests and previews: a supplied file in place of the hub's
+    dt.requests.push(DT.URL.replace(ME.HUB, ''));
+    const r = await fetch(DT.URL, { cache: 'no-store' });
+    if (r.status === 404) return { ok: false, none: true, why: 'No aircraft snapshot has been collected yet.' };
+    if (!r.ok) throw new Error('the hub did not answer (HTTP ' + r.status + ')');
+    return checkDots(await r.json());
+  }
+  async function dotsLoad(isRefresh) {
+    if (dt.loading) return;
+    const gen = dt.gen, seq = ++dt.seq; dt.loading = true; dotsPaint();
+    const late = () => gen !== dt.gen || seq !== dt.seq || !dt.on;
+    try {
+      let res, err = null; try { res = await getDots(); } catch (e) { err = e; }
+      if (late()) return;
+      if (err) { if (dt.env && isRefresh) dt.refreshFailed = true; else dotsClear('The aircraft positions could not be loaded: ' + (err.message || err) + '.'); return; }
+      if (!res.ok) { dotsClear(res.down || res.none ? res.why : 'The aircraft positions could not be shown: ' + res.why + '.'); return; }   // never an older snapshot's dots under a newer failure
+      const env = res.env;
+      if (dt.env && Date.parse(env.time) <= Date.parse(dt.env.time)) { dt.refreshFailed = false; return; }
+      if (dotsOld(env)) { dotsClear(dotsOldWhy(env)); return; }
+      const cv = composeDots(env); let built = null;
+      for (const t0 = Date.now(); !built;) { built = buildMesh(cv, DT.ALT, DT.OPACITY, DT.ORDER); if (built) break; if (Date.now() - t0 > AC.BUILD_WAIT_MS) break; await new Promise(r => setTimeout(r, 200)); if (late()) return; }
+      if (late()) return discard(built);
+      if (!built) { if (!dt.env) dotsClear('The aircraft positions could not be drawn: the globe has not finished loading its own picture.'); else dt.refreshFailed = true; return; }
+      built.mesh.__air = false; built.mesh.__airdots = true;
+      dotsDestroy(); built.parent.add(built.mesh); dt.meshes = [built.mesh]; dt.env = env; dt.why = null; dt.refreshFailed = false;   // the earlier snapshot's dots are destroyed in the same step
+    } finally { if (gen === dt.gen && seq === dt.seq) { dt.loading = false; dotsPaint(); } }
+  }
+  function dotsAgeTick() { if (!dt.on) return; if (dt.env && dotsOld(dt.env)) dotsClear(`The positions shown were from ${utc(dt.env.time)}, more than ${Math.round(dt.env.staleS / 3600)} hours ago, and have been cleared.`); dotsPaint(); }
+  function dotsPaint() {
+    if (!dtgl) return;
+    const s = $('s-airdots'), o = $('o-airdots'), fl = $('airdots-frame'), ex = $('airdots-extra');
+    dtgl.setAttribute('aria-checked', String(dt.on));
+    s.textContent = !dt.on ? 'off' : dt.env ? 'loaded' : dt.loading ? 'loading' : 'unknown';
+    s.className = 'state' + (dt.on && dt.env ? ' ok' : dt.on && !dt.loading ? ' bad' : '');
+    if (!dt.on) { fl.hidden = true; ex.hidden = true; o.hidden = false; o.textContent = dt.why || 'Off. Switch on to load the positions in the newest snapshot.'; return; }
+    if (dt.env) {
+      const e = dt.env; fl.hidden = false; o.hidden = true;
+      fl.innerHTML = `<b>OpenSky snapshot of ${esc(utc(e.time))}</b> (${esc(ageText(ageMs(e)))})<br><span class="wind-lv">${e.n.toLocaleString()} aircraft positions</span>`;
+      const bits = [`Each dot is where an aircraft last reported a position, no more than ${cutText(e.cutS)} before the snapshot time${e.step ? `, rounded to ${e.step}°` : ''}. One snapshot, not a live view: every aircraft has moved since. A dot says nothing else about an aircraft, cannot be tapped, and is not followed from one snapshot to the next.`,
+        `Cleared when the snapshot is ${Math.round(e.staleS / 3600)} hours old.`];
+      if (e.degraded) bits.push('The collector marked this snapshot as incomplete.');
+      if (dt.refreshFailed) bits.push('Refresh unavailable.');
+      ex.hidden = false; ex.textContent = bits.join(' ');
+    } else {
+      fl.hidden = true; ex.hidden = true; o.hidden = false;
+      o.textContent = dt.loading ? 'Loading the positions in the newest snapshot…' : (dt.why || 'No aircraft positions are available.') + ' Nothing is drawn.';
+    }
+  }
+  async function dotsSetOn(on) {
+    if (!dtgl || on === dt.on) return;
+    dt.gen++;
+    if (!on) { dt.on = false; dt.why = null; dt.loading = false; dt.refreshFailed = false; dotsDestroy(); dt.env = null; clearInterval(dt.timer); clearInterval(dt.ageTimer); dt.timer = dt.ageTimer = null; dotsPaint(); return; }
+    dt.on = true; dt.why = null; dotsPaint();
+    if (!ME.globe || !ME.globe()) { dt.on = false; dt.why = 'Aircraft positions need the 3-D globe, which is not available in this browser. Nothing is drawn.'; dt.gen++; return dotsPaint(); }
+    dt.timer = setInterval(() => { if (!document.hidden) dotsLoad(true); }, DT.REFRESH_MS);
+    dt.ageTimer = setInterval(dotsAgeTick, DT.AGE_MS);
+    await dotsLoad(false);
+  }
+  if (dtgl) {
+    dtgl.addEventListener('click', () => dotsSetOn(!dt.on));
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && dt.on) { dotsAgeTick(); dotsLoad(true); } });
+  }
+
   // read-only aids for tests and the console
   ME.aircraft = { state: () => ({ on: st.on, status: st.status, why: st.why, time: st.env ? st.env.time : null, cutS: st.env ? st.env.cutS : null, total: st.env ? st.env.total : null, cells: st.env ? st.env.n : null,
       meshes: st.meshes.length, inScene: st.meshes.filter(m => m.parent).length, loading: st.loading, refreshFailed: st.refreshFailed, requests: st.requests.slice(), sel: st.sel,
       label: $('air-frame').hidden ? null : $('air-frame').textContent, extra: $('air-extra').hidden ? null : $('air-extra').textContent, off: $('o-air').hidden ? null : $('o-air').textContent,
       read: $('air-read').textContent, stateWord: $('s-air').textContent, drawn: st.meshes[0] && st.meshes[0].material.map.image.__air || null }),
     setOn, refresh: () => load(true), ageTick, select: (lat, lng) => { if (st.on && st.env) { st.sel = { lat, lng }; paint(); } }, opts: st.opts, config: AC, check, band, cellOf,
-    reading: (lat, lng) => st.env ? reading(st.env, lat, lng) : null, texture: () => (st.meshes[0] && st.meshes[0].material.map && st.meshes[0].material.map.image) || null };
-  paint();
+    reading: (lat, lng) => st.env ? reading(st.env, lat, lng) : null, texture: () => (st.meshes[0] && st.meshes[0].material.map && st.meshes[0].material.map.image) || null,
+    dots: { state: () => ({ on: dt.on, why: dt.why, time: dt.env ? dt.env.time : null, n: dt.env ? dt.env.n : null, meshes: dt.meshes.length, inScene: dt.meshes.filter(m => m.parent).length, loading: dt.loading, refreshFailed: dt.refreshFailed,
+        requests: dt.requests.slice(), stateWord: dtgl ? $('s-airdots').textContent : null, label: dtgl && !$('airdots-frame').hidden ? $('airdots-frame').textContent : null, extra: dtgl && !$('airdots-extra').hidden ? $('airdots-extra').textContent : null,
+        off: dtgl && !$('o-airdots').hidden ? $('o-airdots').textContent : null, drawn: dt.meshes[0] && dt.meshes[0].material.map.image.__airdots || null }),
+      setOn: dotsSetOn, refresh: () => dotsLoad(true), ageTick: dotsAgeTick, opts: dt.opts, config: DT, check: checkDots, compose: composeDots } };
+  paint(); dotsPaint();
 })();

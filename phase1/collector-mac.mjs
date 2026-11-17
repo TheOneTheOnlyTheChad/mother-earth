@@ -6,7 +6,7 @@
  * Usage:   INGEST_KEY=… node collector-mac.mjs mock          # synthetic feed, proves the path end to end
  *          INGEST_KEY=… node collector-mac.mjs mock --dry    # print the envelope, send nothing
  *          INGEST_KEY=… AISSTREAM_KEY=… node collector-mac.mjs ships [--window=60] [--dry] [--quiet] [--state=DIR]
- *          INGEST_KEY=… OPENSKY_CLIENT_ID=… OPENSKY_CLIENT_SECRET=… node collector-mac.mjs opensky [--dry]   # aircraft COUNTS per cell; one request; no identifiers leave this machine
+ *          INGEST_KEY=… OPENSKY_CLIENT_ID=… OPENSKY_CLIENT_SECRET=… node collector-mac.mjs opensky [--dry]   # aircraft counts per cell + plain positions (lat, lng only); one request; no identifiers leave this machine
  *          node collector-mac.mjs retry --state=DIR          # upload the one pending envelope, if any (expired/oversize ones are dropped)
  * Hub:     HUB=https://mother-earth.chadoberholzer.workers.dev (default)
  * Needs Node 22+ (global fetch + global WebSocket). No dependencies.
@@ -25,7 +25,7 @@
  * not covered, so a silent cell is not an empty cell (coverage stays 'partial' until receipt history exists — same rule as OpenSky, D9).
  */
 
-const COLLECTOR_VERSION = 'mac-0.3.3';
+const COLLECTOR_VERSION = 'mac-0.3.4';
 const SCHEMA_VERSION = 1;
 const CELL_DEG = 4;
 const HUB = process.env.HUB || 'https://mother-earth.chadoberholzer.workers.dev';
@@ -180,10 +180,12 @@ export const FEEDS = {
         compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,
         citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' } };
   },
-  // OpenSky Network states API (aircraft), COUNTS ONLY (17 Nov 2026). One request per run from this machine's own connection.
-  // OpenSky's conditions (ticket #837506, REGISTER): hobbyist use within credits, the site feeds the network, and what we host is
-  // aggregated — counts per area, no aircraft identifiers and no individual tracks. So this feed returns positions to the cell
-  // counter only: no address, callsign or position is put in the envelope, written to disk or uploaded (countsOnly below).
+  // OpenSky Network states API (aircraft): counts per cell AND plain positions (aircraft-dots-rc, 17 Nov 2026). One request per run
+  // from this machine's own connection. Basis (ticket #837506, REGISTER, ENQUIRIES rev 11): hobbyist use within credits, the site
+  // feeds the network; counts per area ("3. Yes", 9 Nov) and aircraft positions on the map (Martin, 17 Nov), with no aircraft
+  // identifiers and no tracks (terms §3(i); what Chad asked for). So the ONLY per-aircraft values that leave this function are a
+  // latitude and a longitude, rounded and re-ordered (openskyDots). Nothing per aircraft is written to disk: an aircraft upload
+  // is never kept as pending, and a dry run prints the number of positions, never the positions.
   opensky: async () => {
     const id = process.env.OPENSKY_CLIENT_ID, secret = process.env.OPENSKY_CLIENT_SECRET;
     if (!id || !secret) throw new Error('OPENSKY_CLIENT_ID / OPENSKY_CLIENT_SECRET not set');
@@ -195,12 +197,13 @@ export const FEEDS = {
     if (!r.ok) throw new Error('OpenSky states refused (HTTP ' + r.status + ')');
     const o = openskyPositions(await r.json());
     const credits = Number(r.headers.get('x-rate-limit-remaining'));
-    return { fields: ['lat', 'lng'], rows: o.rows, countsOnly: true, coverageDefault: { grade: 'partial', evidence: 'volunteer_receivers_only' },
+    return { fields: ['lat', 'lng'], rows: o.rows, records: openskyDots(o.rows), coverageDefault: { grade: 'partial', evidence: 'volunteer_receivers_only' },
       quantity: `aircraft (unique ICAO 24-bit addresses) in one OpenSky Network state snapshot whose position was reported no more than ${OPENSKY_MAX_POSITION_AGE_S} s before the snapshot time, counted per 4-degree cell at that last reported position. Heard only where a volunteer receiver is in range: a cell with no count is not an empty sky.`,
       extra: { stale_after_s: OPENSKY.staleAfterS, window_start_override: o.sourceTime, window_end_override: o.sourceTime,
         position_age_cutoff_s: OPENSKY_MAX_POSITION_AGE_S,
         counts: { state_vectors: o.stateVectors, counted: o.rows.length, without_position: o.withoutPosition, position_older_than_cutoff: o.tooOld, position_time_missing: o.noPositionTime, duplicate_addresses: o.duplicates, on_ground: o.onGround },
-        records_policy: 'counts per cell only: no aircraft identifiers, callsigns, positions or tracks are stored or published',
+        position_precision_deg: OPENSKY_DOT_PRECISION_DEG,
+        records_policy: `positions only: one latitude and longitude per counted aircraft, rounded to ${OPENSKY_DOT_PRECISION_DEG} degree and ordered by position; no aircraft identifier, callsign, country, altitude, speed, heading, on-ground flag, per-aircraft time or track is stored or published; each snapshot replaces the last`,
         credits_remaining: Number.isFinite(credits) ? credits : null, cadence: 'about 10 requests a day while the collecting computer is awake',
         citation: 'The OpenSky Network, https://opensky-network.org' } };
   },
@@ -208,6 +211,15 @@ export const FEEDS = {
 
 const OPENSKY_MAX_POSITION_AGE_S = 300;   // an aircraft is counted only if its position was reported no more than this long before OpenSky's snapshot time
 const OPENSKY = { token: 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token', states: 'https://opensky-network.org/api/states/all', staleAfterS: 3 * 3600 };
+const OPENSKY_DOT_PRECISION_DEG = 0.01;   // published positions are rounded to this (about 1.1 km of latitude)
+/* Positions as published: [lat, lng] rounded to OPENSKY_DOT_PRECISION_DEG, then sorted by latitude and longitude. Pure.
+ * The sort matters: OpenSky's response has its own order, and an order is information. Sorted by position, the list says nothing
+ * about which entry was which aircraft, and two snapshots cannot be lined up entry by entry. Cells are still counted from the
+ * unrounded positions (buildEnvelope), so the counts are exactly what the counts-only collector published. */
+export function openskyDots(rows, step = OPENSKY_DOT_PRECISION_DEG) {
+  const k = Math.round(1 / step), r = v => { const x = Math.round(v * k) / k; return x === 0 ? 0 : x; };   // no -0
+  return rows.map(([lat, lng]) => [r(lat), r(lng)]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+}
 /* OpenSky state vectors -> positions for the cell counter. Pure (tested in phase1/aircraft-counts.test.mjs). One position per ICAO
  * address; vectors with no position are counted and dropped. Returns [lat, lng] pairs ONLY: the address is used for de-duplication
  * inside this function and never leaves it. */
@@ -228,7 +240,8 @@ export function openskyPositions(j, maxAgeS = OPENSKY_MAX_POSITION_AGE_S) {
   }
   return { rows, stateVectors: j.states.length, withoutPosition, duplicates, onGround, tooOld, noPositionTime, sourceTime: new Date(j.time * 1000).toISOString() };
 }
-/* Envelope from a feed result. Pure. A countsOnly feed publishes its cells and NO records. */
+/* Envelope from a feed result. Pure. A countsOnly feed publishes its cells and NO records. A feed with `records` publishes those
+ * in place of its rows (same fields): the cells are always counted from the rows. */
 export function buildEnvelope(layer, f, scheduledMs, nowIsoStr) {
   const cells = {};
   const iLat = f.fields.indexOf('lat'), iLng = f.fields.indexOf('lng');
@@ -240,7 +253,7 @@ export function buildEnvelope(layer, f, scheduledMs, nowIsoStr) {
   return { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer,
     window_start: ws, window_end: we, retrieved_at: nowIsoStr,
     scheduled_for: new Date(scheduledMs).toISOString(), source_status: status, interruptions,
-    cells, record_format: 'rows', record_fields: f.countsOnly ? [] : f.fields, records: f.countsOnly ? [] : f.rows,
+    cells, record_format: 'rows', record_fields: f.countsOnly ? [] : f.fields, records: f.countsOnly ? [] : (f.records || f.rows),
     coverage_default: f.coverageDefault, quantity: f.quantity, ...extra };
 }
 
@@ -259,7 +272,10 @@ async function main() {
   if (dry) {
     const body = JSON.stringify(e);
     console.error(`dry: layer=${layer} status=${e.source_status} cells=${Object.keys(e.cells).length} records=${(e.records || []).length} bytes=${body.length}`);
-    console.log(quiet ? body.slice(0, 2000) + (body.length > 2000 ? '…' : '') : JSON.stringify(e, null, 1)); return;
+    // An aircraft dry run goes to logs/collector.log through run.sh, so it never prints a position: the count stands in for the list.
+    const shown = layer === 'opensky' ? { ...e, records: `[${(e.records || []).length} positions not printed]` } : e;
+    const sb = JSON.stringify(shown);
+    console.log(quiet ? sb.slice(0, 2000) + (sb.length > 2000 ? '…' : '') : JSON.stringify(shown, null, 1)); return;
   }
   if (!KEY) { console.error('INGEST_KEY not set'); process.exit(2); }
   const code = await upload(e, layer === 'opensky');
@@ -269,7 +285,7 @@ async function main() {
 /* Upload with bounded timeouts and backoff. On final failure keep the envelope as the single pending file (identity and timestamps intact). */
 async function upload(e, noPending) {
   const body = JSON.stringify(e);
-  const tries = noPending ? 1 : UPLOAD_BACKOFF_MS.length + 1;   // a counts-only layer gets ONE attempt: its whole run is time-limited so it can never hold the lock into a ships sample
+  const tries = noPending ? 1 : UPLOAD_BACKOFF_MS.length + 1;   // the aircraft layer gets ONE attempt and is never written to disk: its whole run is time-limited so it can never hold the lock into a ships sample
   for (let i = 0; i < tries; i++) {
     const ac = new AbortController(); const to = setTimeout(() => ac.abort(), UPLOAD_TIMEOUT_MS);
     try {

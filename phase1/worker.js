@@ -10,7 +10,8 @@
  *   "7 * * * *"     (hourly, :07)  → aggregate previous hour from R2 cell files into D1
  *
  * HTTP (viewers only read; §4.2):
- *   GET /snapshot/<layer>   latest full snapshot (records + cells)
+ *   GET /snapshot/<layer>   latest full snapshot (records + cells). opensky (0.6.18): records are [lat, lng] only, rounded to 0.01°, from the
+ *                           newest upload; no dated copy of them is kept (snapshots/opensky/* holds cells only)
  *   GET /cells/<layer>      latest cells-only file (small)
  *   GET /status             last runs per layer + OpenSky spend today
  *   GET /admin/run/<job>?key=ADMIN_KEY   run a job now (jobs: five, minute, firms, forest, hourly)
@@ -71,7 +72,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.17';
+const COLLECTOR_VERSION = '0.6.18';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -139,12 +140,27 @@ async function logRun(env, layer, startedMs, status, http, records, bytes, note)
 }
 
 /** Write the §5 envelope: full snapshot + small cells file + latest pointers. */
+/* Aircraft (0.6.18, aircraft-dots-rc). The only per-aircraft values this hub ever stores or serves for the opensky layer are a
+ * latitude and a longitude (basis: OpenSky ticket #837506, 17 Nov 2026; terms §3(i): no aircraft identifiers in anything published).
+ *   - aircraftPublic(): an envelope whose record fields are anything other than exactly lat,lng (or none) is published WITHOUT its
+ *     records. /ingest already refuses such an upload (validateEnvelope); this also covers the hub's own parked OpenSky job, whose
+ *     rows carry addresses and callsigns, should it ever be switched on.
+ *   - No history of positions: the dated copy under snapshots/ is written without records for this layer, so the one place a
+ *     position exists is latest/opensky.json, and the next upload overwrites it. */
+const AIRCRAFT_LAYER = 'opensky', AIRCRAFT_FIELDS = ['lat', 'lng'], AIRCRAFT_STEP_DEG = 0.01;
+function aircraftFieldsOk(f) { return Array.isArray(f) && (f.length === 0 || (f.length === AIRCRAFT_FIELDS.length && f.every((x, i) => x === AIRCRAFT_FIELDS[i]))); }
+function aircraftPublic(e) {
+  if (aircraftFieldsOk(e.record_fields) && Array.isArray(e.records)) return e;
+  return { ...e, record_fields: [], records: [], records_withheld: 'this layer publishes latitude and longitude only; records with any other field are not stored or served' };
+}
 async function writeSnapshot(env, layer, scheduledMs, envelope) {
   const stamp = isoMinute(scheduledMs);
+  if (layer === AIRCRAFT_LAYER) envelope = aircraftPublic(envelope);
   const cellsOnly = { ...envelope, records: undefined, record_fields: undefined, record_format: undefined };
-  const full = await putJson(env, `snapshots/${layer}/${stamp}.json`, envelope, { retrieved_at: String(envelope.retrieved_at) });   // retrieved_at lets a listing order snapshots by full timestamp
+  const dated = await putJson(env, `snapshots/${layer}/${stamp}.json`, layer === AIRCRAFT_LAYER ? cellsOnly : envelope, { retrieved_at: String(envelope.retrieved_at) });   // retrieved_at lets a listing order snapshots by full timestamp
   await putJson(env, `cells/${layer}/${stamp}.json`, cellsOnly);
-  await putJson(env, `latest/${layer}.json`, envelope);
+  const latest = await putJson(env, `latest/${layer}.json`, envelope);
+  const full = layer === AIRCRAFT_LAYER ? latest : dated;   // bytes reported for the run: the file that holds the records
   await putJson(env, `latest-cells/${layer}.json`, cellsOnly);
   if (HIST.checkpointLayers.includes(layer)) await hist(env, layer + '-checkpoint', () => histCheckpointsDue(env, layer, Date.now()));   // after publishing; no mutable state (see histCheckpointsDue)
   return full;
@@ -2150,6 +2166,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
+export { AIRCRAFT_LAYER, AIRCRAFT_FIELDS, aircraftFieldsOk, aircraftPublic, validateEnvelope, writeSnapshot };
 export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
@@ -3923,6 +3940,16 @@ function validateEnvelope(e, layer) {
     if (e.record_format !== 'rows' || !Array.isArray(e.record_fields) || !Array.isArray(e.records)) return "record_format must be 'rows' with record_fields[] and records[]";
     for (const r of e.records) if (!Array.isArray(r) || r.length !== e.record_fields.length) return 'every record must have exactly ' + e.record_fields.length + ' fields';
     if (typeof e.quantity !== 'string') return 'quantity (what one count means) is required';
+    if (layer === AIRCRAFT_LAYER) {   // 0.6.18: latitude and longitude only, rounded; nothing else about an aircraft is accepted
+      if (!aircraftFieldsOk(e.record_fields)) return 'aircraft records may carry lat,lng only (record_fields must be [] or ["lat","lng"])';
+      if (e.record_fields.length === 0 && e.records.length) return 'aircraft records present without record_fields';
+      const k = Math.round(1 / AIRCRAFT_STEP_DEG);
+      for (const r of e.records) {
+        const la = r[0], lo = r[1];
+        if (typeof la !== 'number' || typeof lo !== 'number' || !Number.isFinite(la) || !Number.isFinite(lo) || la < -90 || la > 90 || lo < -180 || lo > 180) return 'aircraft record is not a latitude and longitude';
+        if (Math.abs(la * k - Math.round(la * k)) > 1e-6 || Math.abs(lo * k - Math.round(lo * k)) > 1e-6) return 'aircraft positions must be rounded to ' + AIRCRAFT_STEP_DEG + ' degree';
+      }
+    }
   }
   return null;
 }
@@ -3950,8 +3977,9 @@ async function ingest(req, env, layer) {
   const cur = await getJson(env, `latest-cells/${layer}.json`);
   if (cur && cur.retrieved_at && Date.parse(cur.retrieved_at) > Date.parse(e.retrieved_at)) {
     const stamp = isoMinute(scheduledMs);
-    const bytes = await putJson(env, `snapshots/${layer}/${stamp}.json`, e);
-    await putJson(env, `cells/${layer}/${stamp}.json`, { ...e, records: undefined, record_fields: undefined, record_format: undefined });
+    const noRecords = { ...e, records: undefined, record_fields: undefined, record_format: undefined };
+    const bytes = await putJson(env, `snapshots/${layer}/${stamp}.json`, layer === AIRCRAFT_LAYER ? noRecords : e);   // aircraft: no dated copy of positions
+    await putJson(env, `cells/${layer}/${stamp}.json`, noRecords);
     await logRun(env, layer, scheduledMs, e.source_status, 200, e.records.length, bytes, 'ingested (archive only: older than latest ' + cur.retrieved_at + ') from ' + e.ingested_from);
     return json({ ok: true, layer, snapshot: stamp, published: 'archive only (older than latest)', latest_retrieved_at: cur.retrieved_at }, 200, { 'Cache-Control': 'no-store' });
   }
