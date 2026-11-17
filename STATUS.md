@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 08:15 UTC (clock reading) — **Aircraft counts step 1, first half: collector mac-0.3.3 INSTALLED in `~/mother-earth`; the one upload is held until the Mac is on the home network** (production: Mac runtime files only; no OpenSky request, no upload, schedule off, `OPENSKY_ENABLED` unset)
+- **Chad's own line (17 Nov):** "Approve: install collector mac-0.3.3 from aircraft-counts-rc 239e685 in ~/mother-earth and make one aircraft counts upload (one OpenSky request; schedule stays off; OPENSKY_ENABLED stays unset)". GPT's matching text was relayed with it (does not count on its own).
+- **Installed 07:53:17 UTC** from a clone at `239e685e75c9245e7ca0ba94150523a5f3e2153c`: `run.sh` sha256 `8b63f748…83fd`, `collector-mac.mjs` `e88ada68…3d47` (both match the head and the files the Mac regression tested). Previous files preserved in `~/mother-earth/_preserved/20261117T075317Z/` (`run.sh` `61e4ce48…`, `collector-mac.mjs` `3c0752cb…`). `state/aircraft.on` not created.
+- **Scheduler on the new runner:** minute ticks at 07:54 and 07:55 UTC clean (`last_tick` updated, `launchd.log` 0 bytes, lock free). **First ships sample on the new runner, 08:11:03 UTC: status ok, socket 58.9 s, upload 200, 3,151 vessels, exit 0.** No `aircraft_requests`, `aircraft_last`, lock or pending file at 08:14:50 UTC.
+- **The upload was NOT made.** The Mac was on a cafe network. The arrangement on record with OpenSky is requests from Chad's own home connection, so Claude held the one request until the Mac is home; Chad was told and can direct otherwise.
+- **Rollback of the install:** copy the two preserved files back over `~/mother-earth/run.sh` and `collector-mac.mjs`.
+
 ## 17 Nov 07:47 UTC (clock reading) — **OpenSky: Martin replies "you can go ahead without waiting"** (docs only; nothing uploaded, nothing switched on)
 - Chad pasted Martin's reply (Gmail shows 9:40 AM, Chad's local time): "Perfect! Thanks a lot for feeding - you can go ahead without waiting - if you need anything just let us know." Recorded verbatim in `docs/research/ENQUIRIES-2026-11.md` rev 9, with a bounded reading: it settles the wait-or-not question (packet §9 of `aircraft-counts-rc`) and changes none of the standing conditions. Chad's exact sent question is not on record.
 - **Production state unchanged.** The four steps still need Chad's own lines in order: one upload with the schedule off; read-back; schedule on; REGISTER; page merge. Head `239e685` (GPT-passed).
