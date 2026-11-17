@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aircraft seen by our Cape Town receiver — private preview</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1016;--panel:#111a24;--line:#243244;--fg:#e6edf3;--dim:#9fb0c3;--ok:#8fe3a2;--warn:#ffd166;--bad:#ff8a8a;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:14px 18px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:19px;letter-spacing:.02em}
+.sub{color:var(--dim);font-size:13px;margin-top:3px}
+.sim{background:#5a1f1f;color:#fff;padding:8px 18px;font-weight:600}.sim[hidden]{display:none}
+main{display:grid;grid-template-columns:minmax(320px,640px) minmax(320px,1fr);gap:16px;padding:16px 18px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px}
+#state{font-weight:700;font-size:16px}#state.ok{color:var(--ok)}#state.warn{color:var(--warn)}#state.bad{color:var(--bad)}
+#why{margin-top:4px}#nums{margin-top:8px;color:var(--dim);font:13px var(--mono)}
+svg{width:100%;height:auto;display:block}
+.ring{fill:none;stroke:#2b3d52}.axis{stroke:#1d2a39}.rl{fill:#6f8499;font:11px var(--mono)}.nl{fill:#9fb0c3;font:600 12px var(--mono)}
+.lab{fill:#e6edf3;font:11px var(--mono);paint-order:stroke;stroke:#0b1016;stroke-width:3px}
+table{width:100%;border-collapse:collapse;font:12.5px var(--mono)}th,td{text-align:right;padding:3px 6px;border-bottom:1px solid #1b2733;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:600}tr.old td{color:#8493a3}
+.key{display:flex;flex-wrap:wrap;gap:4px 12px;font:11.5px var(--mono);color:var(--dim);margin-top:8px}.key i{display:inline-block;width:12px;height:10px;margin-right:4px;vertical-align:-1px}
+.note{color:var(--dim);font-size:12.5px;margin-top:10px}
+</style></head><body>
+<div class="sim" id="sim" hidden></div>
+<header><h1>Aircraft seen by our Cape Town receiver</h1>
+<div class="sub">Private preview · this Mac and the home network only · nothing is published or stored · read from the receiver every 3 seconds</div></header>
+<main>
+<section class="panel">
+  <div id="state" aria-live="polite">Connecting…</div><div id="why" aria-live="polite"></div><div id="nums"></div>
+  <svg id="plot" viewBox="-330 -330 660 660" role="img" aria-label="Aircraft positions around the receiver, north up"></svg>
+  <div class="key" id="key"></div>
+  <div class="note">The centre is our receiver; north is up; rings are distance from the receiver. Each arrow is one aircraft at its last reported position, pointing along its heading (a dot when no heading was sent). These are aircraft <b>heard by this one receiver</b>: terrain, the antenna's position, an aircraft's height and whether it transmits a position all decide what appears. An empty sky here is not an empty sky.</div>
+</section>
+<section class="panel">
+  <table><thead><tr><th>Aircraft</th><th>Altitude</th><th>Speed</th><th>Heading</th><th>From receiver</th><th>Position age</th><th>Signal</th></tr></thead><tbody id="rows"></tbody></table>
+  <div class="note" id="nopos"></div>
+</section>
+</main>
+<script>
+(() => {
+  const CFG = { POLL_MS: 3000, STALE_S: 30, FROZEN_POLLS: 3, FADE_S: 15, DROP_S: 60, RING_KM: [50, 100, 200, 300], MAX_KM: 320, R: 300, NM_KM: 1.852, FT_M: 0.3048,
+    BANDS: [[0, '#ff8a5c', 'below 1,000 m'], [1000, '#ffd166', '1,000–3,000 m'], [3000, '#8fe3a2', '3,000–8,000 m'], [8000, '#7cc4ff', 'above 8,000 m']], GROUND: '#b7b7b7', NOALT: '#d7b6ff' };
+  const $ = id => document.getElementById(id), esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const sim = new URLSearchParams(location.search).get('sim') || '';
+  const SIMTXT = { zero: 'the real feed with every position removed', stale: 'the first reading, frozen', down: 'the receiver not answering' };
+  if (sim) { $('sim').hidden = false; $('sim').textContent = 'SIMULATED TEST STATE — ' + (SIMTXT[sim] || 'unknown test: showing the real feed') + '. Not what the receiver is reporting now.'; }
+  const st = { state: 'connecting', why: '', lastNow: null, sameNow: 0, snap: null, fetchedAt: 0, polls: 0 };
+  const num = v => typeof v === 'number' && Number.isFinite(v);
+  const band = m => { let k = 0; for (let i = 0; i < CFG.BANDS.length; i++) if (m >= CFG.BANDS[i][0]) k = i; return k; };
+  const colour = a => a.alt_baro === 'ground' ? CFG.GROUND : num(a.alt_baro) ? CFG.BANDS[band(a.alt_baro * CFG.FT_M)][1] : num(a.alt_geom) ? CFG.BANDS[band(a.alt_geom * CFG.FT_M)][1] : CFG.NOALT;
+  const altText = a => a.alt_baro === 'ground' ? 'on ground' : num(a.alt_baro) ? Math.round(a.alt_baro * CFG.FT_M / 10) * 10 + ' m' : num(a.alt_geom) ? Math.round(a.alt_geom * CFG.FT_M / 10) * 10 + ' m (GPS)' : '—';
+  const heading = a => num(a.track) ? a.track : num(a.true_heading) ? a.true_heading : num(a.mag_heading) ? a.mag_heading : null;
+  const name = a => (typeof a.flight === 'string' && a.flight.trim()) || (typeof a.r === 'string' && a.r.trim()) || String(a.hex || '?');
+  /** One reading -> what to show. Pure: everything the page prints comes from here. ageExtra = seconds since the reading was fetched. */
+  function view(j, ageExtra) {
+    const all = j.aircraft || [], plot = [], rows = []; let noPos = 0, oldPos = 0, noRange = 0;
+    for (const a of all) {
+      const hasPos = num(a.lat) && num(a.lon) && num(a.seen_pos);
+      if (!hasPos) { noPos++; continue; }
+      const age = a.seen_pos + ageExtra, km = num(a.r_dst) ? a.r_dst * CFG.NM_KM : null, dir = num(a.r_dir) ? a.r_dir : null;
+      const row = { name: name(a), alt: altText(a), gs: num(a.gs) ? Math.round(a.gs * CFG.NM_KM) + ' km/h' : '—', hd: heading(a), km, dir, age, rssi: num(a.rssi) ? a.rssi.toFixed(1) + ' dB' : '—', col: colour(a), old: age > CFG.FADE_S };
+      rows.push(row);
+      if (age > CFG.DROP_S) { oldPos++; continue; }
+      if (km === null || dir === null) { noRange++; continue; }
+      plot.push(row);
+    }
+    rows.sort((p, q) => (p.km === null ? 1e9 : p.km) - (q.km === null ? 1e9 : q.km));
+    return { heard: all.length, noPos, oldPos, noRange, plot, rows };
+  }
+  function draw(v) {
+    const R = CFG.R, k = R / CFG.MAX_KM; let s = '';
+    for (const km of CFG.RING_KM) s += `<circle class="ring" r="${(km * k).toFixed(1)}"/><text class="rl" x="4" y="${(-km * k + 12).toFixed(1)}">${km} km</text>`;
+    s += `<line class="axis" x1="-${R}" x2="${R}"/><line class="axis" y1="-${R}" y2="${R}"/><text class="nl" x="-4" y="-${R + 8}" text-anchor="end">N</text><text class="nl" x="${R + 6}" y="4">E</text><text class="nl" x="-4" y="${R + 18}" text-anchor="end">S</text><text class="nl" x="-${R + 16}" y="4">W</text>`;
+    s += `<circle r="4" fill="#fff"/><text class="lab" x="8" y="-6">our receiver</text>`;
+    for (const p of (v ? v.plot : [])) {
+      const d = Math.min(p.km, CFG.MAX_KM) * k, t = p.dir * Math.PI / 180, x = d * Math.sin(t), y = -d * Math.cos(t), op = p.old ? 0.4 : 1;
+      s += p.hd === null ? `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${p.col}" opacity="${op}"/>`
+        : `<path d="M0,-9 L6,7 L0,3 L-6,7 Z" fill="${p.col}" opacity="${op}" transform="translate(${x.toFixed(1)},${y.toFixed(1)}) rotate(${p.hd.toFixed(0)})"/>`;
+      s += `<text class="lab" x="${(x + 9).toFixed(1)}" y="${(y + 4).toFixed(1)}" opacity="${op}">${esc(p.name)}${p.km > CFG.MAX_KM ? ' (beyond the outer ring)' : ''}</text>`;
+    }
+    $('plot').innerHTML = s;
+  }
+  const ageTxt = s => s < 1 ? 'under 1 s' : s < 90 ? Math.round(s) + ' s' : Math.round(s / 60) + ' min';
+  function paint() {
+    const S = $('state'), W = $('why'), N = $('nums'), ext = st.snap ? (Date.now() - st.fetchedAt) / 1000 : 0;
+    const v = st.snap && st.state !== 'unreachable' && st.state !== 'stale' ? view(st.snap, ext) : null;
+    if (st.state === 'unreachable') { S.className = 'bad'; S.textContent = 'Receiver unreachable'; W.textContent = st.why + ' Nothing is drawn: the last reading is not shown as if it were current.'; }
+    else if (st.state === 'stale') { S.className = 'warn'; S.textContent = 'Receiver data is stale'; W.textContent = st.why + ' Nothing is drawn: old positions are not shown as if they were current.'; }
+    else if (st.state === 'connecting') { S.className = ''; S.textContent = 'Connecting…'; W.textContent = ''; }
+    else if (v.plot.length === 0) { S.className = 'ok'; S.textContent = 'Receiver live — no aircraft with a usable position right now'; W.textContent = `The feed is fresh. ${v.heard} aircraft heard; none has a current position to plot.`; }
+    else { S.className = 'ok'; S.textContent = `Receiver live — ${v.plot.length} aircraft plotted`; W.textContent = ''; }
+    draw(v);
+    const rows = v ? v.rows : [];
+    $('rows').innerHTML = rows.map(r => `<tr class="${r.old ? 'old' : ''}"><td><span style="color:${r.col}">●</span> ${esc(r.name)}</td><td>${esc(r.alt)}</td><td>${esc(r.gs)}</td><td>${r.hd === null ? '—' : Math.round(r.hd) + '°'}</td><td>${r.km === null ? '—' : r.km.toFixed(0) + ' km' + (r.dir === null ? '' : ' at ' + Math.round(r.dir) + '°')}</td><td>${esc(ageTxt(r.age))}${r.age > CFG.DROP_S ? ' (too old to plot)' : ''}</td><td>${esc(r.rssi)}</td></tr>`).join('') || '<tr><td colspan="7" style="text-align:left;color:#9fb0c3">No aircraft with a position to list.</td></tr>';
+    $('nopos').textContent = v ? `${v.noPos} aircraft heard without a usable position (counted, not drawn).` + (v.oldPos ? ` ${v.oldPos} with a position older than ${CFG.DROP_S} s (listed, not drawn).` : '') + (v.noRange ? ` ${v.noRange} with a position but no distance from the receiver (listed, not drawn).` : '') : '';
+    N.textContent = st.snap ? `reading taken ${ageTxt(ext)} ago · receiver clock ${new Date(st.snap.now * 1000).toISOString().slice(11, 19)} UTC · ${st.snap.messages != null ? Number(st.snap.messages).toLocaleString() + ' messages since the receiver started' : ''}` : '';
+    document.title = (st.state === 'live' ? '' : '[' + st.state + '] ') + 'Aircraft seen by our Cape Town receiver';
+  }
+  async function poll() {
+    st.polls++;
+    try {
+      const r = await fetch('/aircraft.json' + (sim ? '?sim=' + encodeURIComponent(sim) : ''), { cache: 'no-store' });
+      const b = await r.json().catch(() => null);
+      if (!r.ok || !b || !b.data) { st.state = 'unreachable'; st.why = 'The receiver did not answer' + (b && b.error ? ' (' + b.error + ').' : '.'); st.snap = null; st.lastNow = null; st.sameNow = 0; return paint(); }
+      const j = b.data, lag = b.fetched_at_ms / 1000 - j.now;
+      st.sameNow = st.lastNow !== null && j.now === st.lastNow ? st.sameNow + 1 : 0; st.lastNow = j.now;
+      st.snap = j; st.fetchedAt = Date.now();
+      if (st.sameNow >= CFG.FROZEN_POLLS) { st.state = 'stale'; st.why = `The receiver answers, but its data has not changed for ${st.sameNow + 1} readings in a row (receiver clock ${new Date(j.now * 1000).toISOString().slice(11, 19)} UTC).`; }
+      else if (lag > CFG.STALE_S) { st.state = 'stale'; st.why = `The receiver answers, but its newest data is ${ageTxt(lag)} old.`; }
+      else st.state = 'live';
+    } catch (e) { st.state = 'unreachable'; st.why = 'This page could not reach its own local helper (is preview.mjs still running in Terminal?).'; st.snap = null; st.lastNow = null; st.sameNow = 0; }
+    paint();
+  }
+  $('key').innerHTML = CFG.BANDS.map(([, c, t]) => `<span><i style="background:${c}"></i>${t}</span>`).join('') + `<span><i style="background:${CFG.GROUND}"></i>on the ground</span><span><i style="background:${CFG.NOALT}"></i>no altitude sent</span><span>faded = position older than ${CFG.FADE_S} s · not drawn after ${CFG.DROP_S} s</span>`;
+  window.CT = { state: () => ({ state: st.state, why: st.why, polls: st.polls, title: $('state').textContent, whyText: $('why').textContent, plotted: $('plot').querySelectorAll('path,circle[cx]').length, rows: $('rows').querySelectorAll('tr').length, nopos: $('nopos').textContent, sim: $('sim').hidden ? null : $('sim').textContent }), view, cfg: CFG };
+  paint(); poll(); setInterval(() => { if (!document.hidden) poll(); }, CFG.POLL_MS); setInterval(paint, 1000);
+})();
+</script></body></html>
