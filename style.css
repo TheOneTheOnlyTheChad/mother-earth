@@ -710,7 +710,7 @@ body.craft .sgtimes{color:var(--dim);min-height:2.8em}
 .layers-btn{position:absolute;top:12px;left:12px;z-index:16;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;font:500 12px/1 inherit;font-family:inherit;color:var(--fg);background:rgba(7,10,15,.82);border:1px solid var(--line-strong);cursor:pointer}
 .layers-btn:focus-visible,.bh-b:focus-visible,.lp-x:focus-visible,.lp-off:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .layers-btn[aria-expanded="true"]{border-color:var(--accent)}
-.bare-hint{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);z-index:14;display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(7,10,15,.86);border:1px solid var(--line-strong);font-size:13px;color:var(--fg);white-space:nowrap}
+.bare-hint{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:14;display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(7,10,15,.86);border:1px solid var(--line-strong);font-size:13px;color:var(--fg);white-space:nowrap}
 .bare-hint[hidden],.layers-panel[hidden]{display:none}
 /* In the Sky zoom-out view the globe's layers are hidden (as the key and legend are), so the Layers controls are too: they would otherwise sit over the Earth / + Moon / + Sun buttons. */
 body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{visibility:hidden}
@@ -722,8 +722,11 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
 .lp-g{margin:8px 0 0;font:500 11px/1.2 var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
 .layers-panel .ovl-tgl[aria-disabled="true"]{opacity:.55;cursor:default}
 .lp-off{align-self:flex-start;margin-top:8px}
+@media (max-width:1100px){
+  .layers-btn{top:64px;left:auto;right:12px}   /* below 1100 px the imagery label sits top-left; the button goes under the Key button's place on the right */
+  .bare-hint{top:auto;bottom:64px}
+}
 @media (max-width:720px){
-  .layers-btn{top:64px;left:auto;right:12px}
   .bare-hint{bottom:auto;top:118px;white-space:normal;max-width:calc(100% - 24px)}
   .layers-panel{top:auto;bottom:0;left:0;width:100%;max-height:70vh;border-left:0;border-right:0;border-bottom:0}
 }

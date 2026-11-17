@@ -23,7 +23,7 @@ const SW = ['#tgl-usgs', '#tgl-firms', '#tgl-ships', '#tgl-forest', '#tgl-drifte
 (async () => {
   ok('index.html on disk: START_ON is empty (bare at load)', (fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').match(/const START_ON = \[\];/g) || []).length === 1);
   const browser = await chromium.launch();
-  for (const vp of [{ w: 1440, h: 900, tag: 'desktop' }, { w: 390, h: 844, tag: 'phone 390' }, { w: 360, h: 640, tag: 'phone 360' }]) {
+  for (const vp of [{ w: 1440, h: 900, tag: 'desktop' }, { w: 1000, h: 800, tag: 'tablet 1000' }, { w: 800, h: 1100, tag: 'tablet 800' }, { w: 390, h: 844, tag: 'phone 390' }, { w: 360, h: 640, tag: 'phone 360' }]) {
     const ctx = await browser.newContext({ viewport: { width: vp.w, height: vp.h } });
     const page = await ctx.newPage(); page.setDefaultTimeout(3000);
     const errors = []; page.on('pageerror', e => errors.push(String(e)));
@@ -43,6 +43,10 @@ const SW = ['#tgl-usgs', '#tgl-firms', '#tgl-ships', '#tgl-forest', '#tgl-drifte
       return { hint: r('bare-hint'), btn: r('layers-btn'), hb: r('layers-open-hint'), hintTop: top('layers-open-hint'), btnTop: top('layers-btn'), vw: innerWidth, vh: innerHeight }; });
     ok(`${t}: "Choose layers to explore." is shown, inside the viewport`, !vis.hint.hidden && vis.hint.shown && /^Choose layers to explore\. Layers$/.test(vis.hint.text) && vis.hint.x >= 0 && vis.hint.r <= vis.vw && vis.hint.y >= 0 && vis.hint.btm <= vis.vh, vis.hint);
     ok(`${t}: the Layers button is shown, inside the viewport, at least 44 px tall, and not covered`, vis.btn.shown && vis.btn.x >= 0 && vis.btn.r <= vis.vw && vis.btn.y >= 0 && vis.btn.btm <= vis.vh && vis.btn.h >= 44 && vis.btnTop, vis.btn);
+    const clash = await page.evaluate(() => { const hit = (a, b) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+      const R = id => { const e = document.getElementById(id); if (!e) return null; const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || e.hidden) return null; return e.getBoundingClientRect(); };
+      const L = R('layers-btn'), H = R('bare-hint'); return ['imgdate', 'key-btn', 'persist', 'zoom-in', 'zoom-out'].filter(id => { const r = R(id); return r && r.width > 0 && ((L && hit(L, r)) || (H && hit(H, r))); }); });
+    ok(`${t}: the Layers button and the first-view line do not sit over the imagery label, the Key button or the zoom buttons`, clash.length === 0, clash);
     ok(`${t}: the button in the first-view line is at least 44 px tall and not covered`, vis.hb.h >= 44 && vis.hintTop, vis.hb);
     ok(`${t}: the panel is closed at load`, s.open === false && await page.locator('#layers-panel').isHidden());
     await page.locator('#layers-open-hint').click(); await page.waitForTimeout(150); s = await S();
