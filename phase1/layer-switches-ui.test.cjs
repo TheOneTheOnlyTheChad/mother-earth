@@ -2,7 +2,7 @@
  * What it proves: every control that puts a layer on the globe is the same labelled switch (a button with role="switch",
  * aria-checked, a visible box and a text label); the six layers that used a pressed-button card header (earthquakes, fires,
  * ships, forest, buoys, microplastic) are switches now; a switch works by click and by keyboard; an off card is not dimmed at all (readings, times, warnings and links keep full contrast);
- * each switch is described by its card's short evidence line; the defaults are unchanged in this stage (the four core layers are still on at load).
+ * each switch is described by its card's short evidence line; every layer is off at load (Bare Earth, bare-earth-rc).
  * What it does NOT prove: anything drawn on the globe (the hub is routed to 404, so every layer fails safely).
  * Needs: python3 -m http.server 8899 --bind 127.0.0.1 running in the clone.
  * Run: node phase1/layer-switches-ui.test.cjs     Breaks: BREAK=pressed|no-role|dim-card|no-label|describe-reading */
@@ -14,11 +14,12 @@ const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log(
 const CARD = ['usgs', 'firms', 'ships', 'forest', 'drifters', 'plastic'];
 const CORE = ['usgs', 'firms', 'ships', 'forest'];
 // every control that draws a layer on the globe: [selector, on at load in this stage]
-const ALL = [...CARD.map(k => [`#tgl-${k}`, CORE.includes(k)]), ['#tgl-night', false], ['#tgl-oh', false], ['#tgl-dustrgb', false], ['#tgl-wind', false],
+const ALL = [...CARD.map(k => [`#tgl-${k}`, false]),   // Bare Earth (bare-earth-rc): nothing is on at load
+  ['#tgl-night', false], ['#tgl-oh', false], ['#tgl-dustrgb', false], ['#tgl-wind', false],
   ['#tgl-air', false], ['#tgl-airdots', false], ['#tgl-nl', false], ['#orb-tgls [data-g="payload"]', false], ['#orb-tgls [data-g="rocket_body"]', false], ['#orb-tgls [data-g="debris"]', false]];
 const brk = (file, body) => {
   if (file === 'index.html') {
-    if (BREAK === 'pressed') body = body.replace('id="tgl-ships" data-layer="ships" role="switch" aria-checked="true"', 'id="tgl-ships" data-layer="ships" aria-pressed="true"');
+    if (BREAK === 'pressed') body = body.replace('id="tgl-ships" data-layer="ships" role="switch" aria-checked="false"', 'id="tgl-ships" data-layer="ships" aria-pressed="false"');
     if (BREAK === 'no-role') body = body.replace('id="tgl-forest" data-layer="forest" role="switch"', 'id="tgl-forest" data-layer="forest"');
     if (BREAK === 'no-label') body = body.replace('<span class="t">Fire detections — show on the globe</span>', '<span class="t"></span>');
   }
@@ -45,7 +46,7 @@ const brk = (file, body) => {
     ok(`${t}: every one is a <button type="button"> with role="switch" and aria-checked true or false`, info.every(x => x.tag === 'BUTTON' && x.type === 'button' && x.role === 'switch' && (x.checked === 'true' || x.checked === 'false')), info.filter(x => x.role !== 'switch' || !/^(true|false)$/.test(x.checked || '')).map(x => [x.sel, x.role, x.checked]));
     ok(`${t}: none carries aria-pressed (a switch is not a pressed button)`, info.every(x => x.pressed === null), info.filter(x => x.pressed !== null).map(x => x.sel));
     ok(`${t}: every one has the same look: class ovl-tgl, a box hidden from assistive technology, a text label`, info.every(x => /\bovl-tgl\b/.test(x.cls) && x.box && x.boxHidden === 'true' && x.label.length > 3), info.filter(x => !(/\bovl-tgl\b/.test(x.cls) && x.box && x.label.length > 3)).map(x => [x.sel, x.cls, x.label]));
-    ok(`${t}: defaults unchanged in this stage: the four core layers on, everything else off`, info.every((x, i) => x.checked === String(ALL[i][1])), info.map(x => [x.sel, x.checked]));
+    ok(`${t}: defaults: every map layer off at load (Bare Earth)`, info.every((x, i) => x.checked === String(ALL[i][1])), info.map(x => [x.sel, x.checked]));
     ok(`${t}: no layer control anywhere on the page still uses aria-pressed with data-layer`, await page.locator('[data-layer][aria-pressed]').count() === 0);
     for (const k of CARD) {
       const lab = await page.locator(`#tgl-${k} .t`).textContent(), name = await page.locator(`#card-${k} .head .name`).textContent();
@@ -69,7 +70,7 @@ const brk = (file, body) => {
       if ((await b.getAttribute('aria-checked')) !== was) { await b.click(); await page.waitForTimeout(100); }
     }
     // an off card is dimmed; its switch is not
-    await page.locator('#tgl-forest').scrollIntoViewIfNeeded(); await page.locator('#tgl-forest').click(); await page.waitForTimeout(150);
+    await page.locator('#tgl-forest').scrollIntoViewIfNeeded();   // forest is off at load
     const dim = await page.evaluate(() => { const card = document.getElementById('card-forest'), o = el => { let v = 1; for (let e = el; e; e = e.parentElement) v *= parseFloat(getComputedStyle(e).opacity); return v; };
       return { off: card.classList.contains('off'), sw: o(document.getElementById('tgl-forest')), value: o(card.querySelector('.value')), head: o(card.querySelector('.head')), min: document.getElementById('tgl-forest').getBoundingClientRect().height }; });
     const parts = await page.evaluate(() => { const card = document.getElementById('card-forest'), o = el => { let v = 1; for (let e = el; e; e = e.parentElement) v *= parseFloat(getComputedStyle(e).opacity); return v; };
@@ -77,7 +78,6 @@ const brk = (file, body) => {
     ok(`${t}: an off layer's card is not dimmed: heading, switch, evidence line, value, reading, source, caveat and links all at full opacity`, dim.off && dim.sw === 1 && dim.value === 1 && dim.head === 1 && parts.length >= 8 && parts.every(x => x[1] === 1), parts.filter(x => x[1] !== 1));
     ok(`${t}: off is still shown without dimming: the switch is unchecked and the card's dot is hollow`, await page.evaluate(() => { const c = document.getElementById('card-forest'), p = getComputedStyle(c.querySelector('.pip')); return document.getElementById('tgl-forest').getAttribute('aria-checked') === 'false' && (p.backgroundColor === 'rgba(0, 0, 0, 0)' || p.backgroundColor === 'transparent'); }));
     ok(`${t}: the switch is at least 44 px tall (touch target)`, dim.min >= 44, dim.min);
-    await page.locator('#tgl-forest').click();
     ok(`${t}: no page errors`, errors.length === 0, errors.slice(0, 3));
     await ctx.close();
   }

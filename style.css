@@ -706,3 +706,22 @@ body.craft .sgtimes{color:var(--dim);min-height:2.8em}
   .nl-shares{font-size:13px}
 }
 .ovl-h.air-sub{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12)}
+/* ---------- Bare Earth: Layers button, first-view line, layers panel (bare-earth-rc) */
+.layers-btn{position:absolute;top:12px;left:12px;z-index:16;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;font:500 12px/1 inherit;font-family:inherit;color:var(--fg);background:rgba(7,10,15,.82);border:1px solid var(--line-strong);cursor:pointer}
+.layers-btn:focus-visible,.bh-b:focus-visible,.lp-x:focus-visible,.lp-off:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.layers-btn[aria-expanded="true"]{border-color:var(--accent)}
+.bare-hint{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);z-index:14;display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(7,10,15,.86);border:1px solid var(--line-strong);font-size:13px;color:var(--fg);white-space:nowrap}
+.bare-hint[hidden],.layers-panel[hidden]{display:none}
+.bh-b,.lp-x,.lp-off{min-height:44px;padding:0 14px;font:500 12px/1 inherit;font-family:inherit;color:var(--fg);background:transparent;border:1px solid var(--accent);cursor:pointer}
+.layers-panel{position:fixed;z-index:60;top:64px;left:12px;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 88px);overflow:auto;background:rgba(9,13,19,.97);border:1px solid var(--line-strong);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.lp-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lp-head h2{margin:0;font:600 15px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.lp-note{margin:0;font-size:12px;color:var(--dim)}
+.lp-g{margin:8px 0 0;font:500 11px/1.2 var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
+.layers-panel .ovl-tgl[aria-disabled="true"]{opacity:.55;cursor:default}
+.lp-off{align-self:flex-start;margin-top:8px}
+@media (max-width:720px){
+  .layers-btn{top:64px;left:auto;right:12px}
+  .bare-hint{bottom:auto;top:118px;white-space:normal;max-width:calc(100% - 24px)}
+  .layers-panel{top:auto;bottom:0;left:0;width:100%;max-height:70vh;border-left:0;border-right:0;border-bottom:0}
+}
