@@ -263,7 +263,7 @@
 
   <p class="back"><a href="index.html">← Back to World View</a></p>
 </main>
-<script src="app.js?v=202612021100"></script>
+<script src="app.js?v=202612131000"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
@@ -281,7 +281,7 @@ function renderAll() {
     row(['<a id="gibs"></a>Imagery', `<a href="${SOURCE.gibs.url}" target="_blank" rel="noopener">${esc(SOURCE.gibs.name)}</a>`, esc(SOURCE.gibs.terms), esc(SOURCE.gibs.credit)]),
     row(['<a id="horizons"></a>Moon and Sun distances (Sky card)', '<a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener">NASA/JPL Horizons</a> (Solar System Dynamics)', 'SSD: data considered public domain; no endorsement implied; modifications identified; fixed export retrieved 10 Nov 2026 (revision sky-2026-11-R1)', 'Calculated orbital distances · NASA/JPL Horizons; citation and modifications in <a href="#sky">The Sky on Two Clocks</a>']),
     row(['<a id="met"></a>Met catalogue sample', '<a href="https://github.com/metmuseum/openaccess" target="_blank" rel="noopener">The Metropolitan Museum of Art Open Access</a>', 'CC0 1.0 (collection data; commercial use yes; attribution not required); fixed snapshot, source CSV of 2 Nov 2026 (commit e394878); media excluded', 'Collection data: The Metropolitan Museum of Art Open Access (CC0), source CSV of 2 Nov 2026 (commit e394878)']),
-    row(['<a id="aircraft"></a>Aircraft', '<a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a>', 'hobbyist use within credits; a public-facing website must additionally feed the network; cloud servers not whitelisted (reply 30 Oct 2026)', 'not shown'])]);
+    row(['<a id="aircraft"></a>Aircraft', '<a href="https://opensky-network.org/" target="_blank" rel="noopener">OpenSky Network</a>', 'hobbyist use within credits; a public-facing website must additionally feed the network; aggregated counts per area may be hosted, without aircraft identifiers or tracks (replies 30 Oct and 9 Nov 2026); cloud servers not whitelisted. Credit: The OpenSky Network, https://opensky-network.org', 'optional layer: counts per 4° cell'])]);
   fill('t-measures', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].quantity || 'no snapshot yet')])));
   fill('t-windows', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].window), esc(R[l].cadence)])));
   fill('t-dates', LAYERS.map(l => row([esc(LABEL[l]), esc(R[l].observed || '–'), R[l].retrieved ? (st => st ? esc(st + ' (' + ago(R[l].retrieved) + ')') : 'Retrieval time unknown')(ME.stamp(R[l].retrieved)) : '–', esc(rep.states[l])])));
@@ -293,7 +293,7 @@ function renderAll() {
   fill('t-tiers', [...LAYERS.map(l => row([esc(LABEL[l]), esc(TIER[l])])), row(['Imagery', esc(TIER.gibs)]), row(['Orbital objects', 'computed — positions calculated (SGP4) from published orbital elements; not observed (model-based method)']), row(['Day/night', 'computed — astronomical context, from the clock']), row(['Microplastic samples', esc(TIER.plastic)]), row(['Sky: Moon and Sun distances', 'computed — calculated by NASA/JPL Horizons (DE441); not observed']), row(['Met catalogue sample', 'catalogued — a record of what an institution states, dated; not observed, not computed']), row(['Aircraft', 'observation — not shown'])]);
   $('p-imagery').textContent = (rules.find(x => x.section === 'imagery') || {}).v || '';
   $('limits-body').innerHTML = [
-    `<p><b>Aircraft — not shown.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,
+    `<p><b>Aircraft — counts per area only.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,
     `<p><b>Fires.</b> ${esc((rules.find(x => x.section === 'firms' && x.k === 'Source caveat') || {}).v || '')} One detection per satellite pass, not one fire; cloud may hide detections. The count is <b>today (UTC) so far</b>: the FIRMS area API with day_range=1 returns the current UTC date only, so it resets at 00:00 UTC and refills as near-real-time processing lands, about 2–3 h after each pass (confirmed 1 Nov 2026 after a run of empty files between 02:15 and 03:45 UTC). An empty response is shown as unknown, never as zero.</p>`,
     `<p><b>Forest disturbance.</b> ${esc((rules.find(x => x.section === 'forest' && x.k === 'Source caveat') || {}).v || '')} Counts are 10 m alert pixels published in the 7 days before each cell's query — never hectares, never a trend. Only cells between 30°N and 30°S with land are queried (559 at 4°, six every 30 minutes, so a full sweep takes about two days and each cell shows its own query time); the rest of the globe is outside the alert systems and is shown as nothing, not as zero. Coverage inside the tropics is graded partial: the three systems (GLAD-L Landsat, GLAD-S2 and RADD Sentinel) have different forest masks and coverage periods, cloud varies, and GLAD-L 30 m pixels are resampled to 10 m so integrated counts exceed native GLAD-L counts. ${esc((rules.find(x => x.section === 'forest' && x.k === 'Attribution') || {}).v || '')}</p>`,
     `<p><b>Ships.</b> ${esc((rules.find(x => x.section === 'ships' && x.k === 'Source terms') || {}).v || '')} Terrestrial receivers only: a cell with no vessels is not an empty sea. Samples, not a continuous feed; current positions are unknown between samples; mode: ${esc(ME.SHIPS_MODE.text)}.</p>`,

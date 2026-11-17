@@ -501,7 +501,7 @@ ME.report = function (R) {
   parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value}, ${ME.kpWhen(R.swpc.observedAt)} (NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; marked degraded by our collector' : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa${R.co2.date ? ` on ${R.co2.date}` : ' (date not supplied)'} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
   parts.push(R.seaice.north !== null ? `${R.seaice.datesDiffer ? `sea ice: Arctic ${num(R.seaice.north)} M km² ${R.seaice.date ? 'on ' + R.seaice.date : '(date not supplied)'}, Antarctic ${num(R.seaice.south)} M km² ${R.seaice.dateS ? 'on ' + R.seaice.dateS : '(date not supplied)'}` : R.seaice.date ? `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km²` : `sea ice (dates not supplied): Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km²`} (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
-  parts.push('aircraft: not shown — OpenSky requires public sites to run a receiver that feeds the network; none installed');
+  parts.push('aircraft: optional layer, off on load — counts per 4° cell from the OpenSky Network about ten times a day; not part of this report');
   return { at: new Date().toISOString(), text: `As of ${new Date().toISOString().slice(11, 16)} UTC: ` + parts.join('; ') + '.', states: Object.fromEntries(Object.entries(R).map(([k, r]) => [k, st(r, k)])) };
 };
 
@@ -535,7 +535,7 @@ ME.rules = function (R) {
     if (layer === 'ships') add(layer, 'Source terms', 'aisstream.io (read 31 Oct 2026): free; "Direct browser connections are not permitted. Connect from your own server"; 3 subscribed connections per account. No terms-of-use page exists on the site — redistribution/archival scope not established.', true);
     if (layer === 'seaice') add(layer, 'Map layer', 'not shown. Measured 30 Oct 2026: GIBS VIIRS sea ice paints 0.76% of the globe (polar night, cloud); AMSR2 concentration ended 1 Sep 2025; GHRSST MUR is an L4 analysis (model tier). Decision pending.', true);
   }
-  add('aircraft', 'Status', 'not shown. OpenSky permits public sites only if they feed the network (reply 30 Oct 2026); cloud collectors are not whitelisted; a home ADS-B receiver in Cape Town is under consideration (site promising, reception unmeasured).', true);
+  add('aircraft', 'Status', 'optional layer, off on load. Counts of aircraft per 4° cell from one OpenSky Network state snapshot, requested about ten times a day from the project’s own connection while its collecting computer is awake. Only the counts are kept and published: no aircraft identifiers, callsigns, positions or tracks. Aircraft are heard only where a volunteer receiver is in range, so a cell with no count is not an empty sky. OpenSky permits this for a hobbyist site that feeds the network (replies of 30 Oct and 9 Nov 2026); Mother Earth contributes a receiver. Credit: The OpenSky Network, https://opensky-network.org.', true);
   add('imagery', 'Imagery', `Dated true-colour imagery from NASA GIBS, VIIRS ${IMG_LAYER.sat}, image date ${IMG_DAY} — not live (the only direct source call). Fire detections use NOAA-20 separately. Dark areas may reflect insufficient sunlight or unavailable imagery; the cause of individual gaps has not been established.`);
   return rows;
 };

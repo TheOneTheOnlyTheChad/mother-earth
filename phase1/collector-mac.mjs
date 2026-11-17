@@ -6,6 +6,7 @@
  * Usage:   INGEST_KEY=… node collector-mac.mjs mock          # synthetic feed, proves the path end to end
  *          INGEST_KEY=… node collector-mac.mjs mock --dry    # print the envelope, send nothing
  *          INGEST_KEY=… AISSTREAM_KEY=… node collector-mac.mjs ships [--window=60] [--dry] [--quiet] [--state=DIR]
+ *          INGEST_KEY=… OPENSKY_CLIENT_ID=… OPENSKY_CLIENT_SECRET=… node collector-mac.mjs opensky [--dry]   # aircraft COUNTS per cell; one request; no identifiers leave this machine
  *          node collector-mac.mjs retry --state=DIR          # upload the one pending envelope, if any (expired/oversize ones are dropped)
  * Hub:     HUB=https://mother-earth.chadoberholzer.workers.dev (default)
  * Needs Node 22+ (global fetch + global WebSocket). No dependencies.
@@ -24,7 +25,7 @@
  * not covered, so a silent cell is not an empty cell (coverage stays 'partial' until receipt history exists — same rule as OpenSky, D9).
  */
 
-const COLLECTOR_VERSION = 'mac-0.3.2';
+const COLLECTOR_VERSION = 'mac-0.3.3';
 const SCHEMA_VERSION = 1;
 const CELL_DEG = 4;
 const HUB = process.env.HUB || 'https://mother-earth.chadoberholzer.workers.dev';
@@ -179,7 +180,63 @@ export const FEEDS = {
         compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,
         citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' } };
   },
+  // OpenSky Network states API (aircraft), COUNTS ONLY (17 Nov 2026). One request per run from this machine's own connection.
+  // OpenSky's conditions (ticket #837506, REGISTER): hobbyist use within credits, the site feeds the network, and what we host is
+  // aggregated — counts per area, no aircraft identifiers and no individual tracks. So this feed returns positions to the cell
+  // counter only: no address, callsign or position is put in the envelope, written to disk or uploaded (countsOnly below).
+  opensky: async () => {
+    const id = process.env.OPENSKY_CLIENT_ID, secret = process.env.OPENSKY_CLIENT_SECRET;
+    if (!id || !secret) throw new Error('OPENSKY_CLIENT_ID / OPENSKY_CLIENT_SECRET not set');
+    const tr = await fetch(OPENSKY.token, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'client_credentials', client_id: id, client_secret: secret }), signal: AbortSignal.timeout(30e3) });
+    const tj = await tr.json().catch(() => ({}));
+    if (!tr.ok || !tj.access_token) throw new Error('OpenSky token refused (HTTP ' + tr.status + ')');
+    const r = await fetch(OPENSKY.states, { headers: { Authorization: 'Bearer ' + tj.access_token, 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION }, signal: AbortSignal.timeout(60e3) });
+    if (!r.ok) throw new Error('OpenSky states refused (HTTP ' + r.status + ')');
+    const o = openskyPositions(await r.json());
+    const credits = Number(r.headers.get('x-rate-limit-remaining'));
+    return { fields: ['lat', 'lng'], rows: o.rows, countsOnly: true, coverageDefault: { grade: 'partial', evidence: 'volunteer_receivers_only' },
+      quantity: 'aircraft (unique ICAO 24-bit addresses) with a reported position in one OpenSky Network state snapshot, counted per 4-degree cell. Heard only where a volunteer receiver is in range: a cell with no count is not an empty sky.',
+      extra: { stale_after_s: OPENSKY.staleAfterS, window_start_override: o.sourceTime, window_end_override: o.sourceTime,
+        counts: { state_vectors: o.stateVectors, with_position: o.rows.length, without_position: o.withoutPosition, duplicate_addresses: o.duplicates, on_ground: o.onGround },
+        records_policy: 'counts per cell only: no aircraft identifiers, callsigns, positions or tracks are stored or published',
+        credits_remaining: Number.isFinite(credits) ? credits : null, cadence: 'about 10 requests a day while the collecting computer is awake',
+        citation: 'The OpenSky Network, https://opensky-network.org' } };
+  },
 };
+
+const OPENSKY = { token: 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token', states: 'https://opensky-network.org/api/states/all', staleAfterS: 3 * 3600 };
+/* OpenSky state vectors -> positions for the cell counter. Pure (tested in phase1/aircraft-counts.test.mjs). One position per ICAO
+ * address; vectors with no position are counted and dropped. Returns [lat, lng] pairs ONLY: the address is used for de-duplication
+ * inside this function and never leaves it. */
+export function openskyPositions(j) {
+  if (!j || !Array.isArray(j.states) || !Number.isFinite(j.time)) throw new Error('OpenSky response has no states array or time');
+  const seen = new Set(), rows = []; let withoutPosition = 0, duplicates = 0, onGround = 0;
+  for (const s of j.states) {
+    if (!Array.isArray(s)) continue;
+    if (seen.has(s[0])) { duplicates++; continue; } seen.add(s[0]);
+    const lng = s[5], lat = s[6];
+    if (typeof lat !== 'number' || typeof lng !== 'number' || !Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) { withoutPosition++; continue; }
+    if (s[8] === true) onGround++;
+    rows.push([lat, lng]);
+  }
+  return { rows, stateVectors: j.states.length, withoutPosition, duplicates, onGround, sourceTime: new Date(j.time * 1000).toISOString() };
+}
+/* Envelope from a feed result. Pure. A countsOnly feed publishes its cells and NO records. */
+export function buildEnvelope(layer, f, scheduledMs, nowIsoStr) {
+  const cells = {};
+  const iLat = f.fields.indexOf('lat'), iLng = f.fields.indexOf('lng');
+  for (const r of f.rows) { const id = cellId(r[iLat], r[iLng]); (cells[id] || (cells[id] = { count: 0 })).count++; }
+  for (const id in cells) cells[id].coverage = { ...f.coverageDefault };
+  const extra = { ...(f.extra || {}) }; const status = extra.source_status_override || 'ok'; delete extra.source_status_override;
+  const interruptions = extra.interruptions_override || []; delete extra.interruptions_override;
+  const ws = extra.window_start_override || new Date(scheduledMs).toISOString(), we = extra.window_end_override || nowIsoStr; delete extra.window_start_override; delete extra.window_end_override;
+  return { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer,
+    window_start: ws, window_end: we, retrieved_at: nowIsoStr,
+    scheduled_for: new Date(scheduledMs).toISOString(), source_status: status, interruptions,
+    cells, record_format: 'rows', record_fields: f.countsOnly ? [] : f.fields, records: f.countsOnly ? [] : f.rows,
+    coverage_default: f.coverageDefault, quantity: f.quantity, ...extra };
+}
 
 async function main() {
   if (!FEEDS[layer]) { console.error('unknown layer', layer, '— known:', Object.keys(FEEDS).join(', ') + ', retry'); process.exit(2); }
@@ -187,17 +244,7 @@ async function main() {
   let e;
   try {
     const f = await FEEDS[layer]();
-    const cells = {};
-    const iLat = f.fields.indexOf('lat'), iLng = f.fields.indexOf('lng');
-    for (const r of f.rows) { const id = cellId(r[iLat], r[iLng]); (cells[id] || (cells[id] = { count: 0 })).count++; }
-    for (const id in cells) cells[id].coverage = { ...f.coverageDefault };
-    const extra = { ...(f.extra || {}) }; const status = extra.source_status_override || 'ok'; delete extra.source_status_override;
-    const interruptions = extra.interruptions_override || []; delete extra.interruptions_override;
-    e = { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer,
-      window_start: new Date(scheduledMs).toISOString(), window_end: nowIso(), retrieved_at: nowIso(),
-      scheduled_for: new Date(scheduledMs).toISOString(), source_status: status, interruptions,
-      cells, record_format: 'rows', record_fields: f.fields, records: f.rows,
-      coverage_default: f.coverageDefault, quantity: f.quantity, ...extra };
+    e = buildEnvelope(layer, f, scheduledMs, nowIso());
   } catch (err) {
     e = { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer, retrieved_at: nowIso(),
       scheduled_for: new Date(scheduledMs).toISOString(), source_status: 'down', cells: {}, note: String(err).slice(0, 200) };
@@ -208,12 +255,12 @@ async function main() {
     console.log(quiet ? body.slice(0, 2000) + (body.length > 2000 ? '…' : '') : JSON.stringify(e, null, 1)); return;
   }
   if (!KEY) { console.error('INGEST_KEY not set'); process.exit(2); }
-  const code = await upload(e);
+  const code = await upload(e, layer === 'opensky');
   process.exit(code === 0 && e.source_status === 'down' ? 3 : code);
 }
 
 /* Upload with bounded timeouts and backoff. On final failure keep the envelope as the single pending file (identity and timestamps intact). */
-async function upload(e) {
+async function upload(e, noPending) {
   const body = JSON.stringify(e);
   for (let i = 0; i <= UPLOAD_BACKOFF_MS.length; i++) {
     const ac = new AbortController(); const to = setTimeout(() => ac.abort(), UPLOAD_TIMEOUT_MS);
@@ -221,12 +268,13 @@ async function upload(e) {
       const r = await fetch(`${HUB}/ingest/${e.layer}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + KEY, 'User-Agent': 'mother-earth-' + COLLECTOR_VERSION }, body, signal: ac.signal });
       const t = await r.text();
       console.log(r.status, t.slice(0, 300));
-      if (r.ok) { dropPending(); return 0; }
-      if (r.status >= 400 && r.status < 500) { console.error('rejected by hub; not retrying'); dropPending(); return 1; }   // 4xx: our envelope is wrong — retrying will not help
+      if (r.ok) { if (!noPending) dropPending(); return 0; }
+      if (r.status >= 400 && r.status < 500) { console.error('rejected by hub; not retrying'); if (!noPending) dropPending(); return 1; }   // 4xx: our envelope is wrong — retrying will not help
     } catch (err) { console.error(`upload attempt ${i + 1} failed: ${String(err && err.name === 'AbortError' ? 'timeout' : err).slice(0, 120)}`); }
     finally { clearTimeout(to); }
     if (i < UPLOAD_BACKOFF_MS.length) await new Promise(r => setTimeout(r, UPLOAD_BACKOFF_MS[i]));
   }
+  if (noPending) { console.error('upload failed; not kept as pending (this layer is simply collected again at its next time)'); return 1; }
   savePending(e, body); return 1;
 }
 function savePending(e, body) {

@@ -49,6 +49,9 @@ keyval() { grep -m1 "^| $1" "$KEYS_FILE" 2>/dev/null | awk -F'|' '{gsub(/ /,"",$
 INGEST_KEY="$(keyval INGEST_KEY)"; AISSTREAM_KEY="$(keyval AISSTREAM_KEY)"
 if [ -z "$INGEST_KEY" ] || [ -z "$AISSTREAM_KEY" ]; then log "keys unreadable from $KEYS_FILE (background access to ~/Documents denied? ingest=${#INGEST_KEY} ais=${#AISSTREAM_KEY} chars)"; echo "keys unreadable" >&2; exit 6; fi
 export INGEST_KEY AISSTREAM_KEY
+# Aircraft counts (OpenSky): optional. Keys are read the same way; the schedule runs only while state/aircraft.on exists.
+OPENSKY_CLIENT_ID="$(keyval OPENSKY_CLIENT_ID)"; OPENSKY_CLIENT_SECRET="$(keyval OPENSKY_CLIENT_SECRET)"; export OPENSKY_CLIENT_ID OPENSKY_CLIENT_SECRET
+AIRCRAFT_INTERVAL_S=${AIRCRAFT_INTERVAL_S:-8640}   # 144 min: at most 10 requests in 24 h
 
 # ---- one shared lock (mkdir is atomic). Age alone does NOT make a lock stale (1 Nov 2026): a sample that was running
 # when the host suspended is older than the timeout but still alive, and reclaiming it would start a second sample
@@ -78,6 +81,15 @@ case "$MODE" in
     now=$(date +%s)
     last=$(grep -o '"last_sample_epoch":[0-9]*' state/scheduler.json 2>/dev/null | grep -o '[0-9]*$'); last=${last:-0}
     if [ -f state/pending.json ]; then log "pending upload found; retrying"; run_collector retry; rc=$?; log "retry exit=$rc"; fi
+    # Aircraft counts: one OpenSky request when due, only while the switch file exists. Runs before the ships sample and never
+    # changes its timing or exit code. The interval runs from the attempt, so a failure is not retried early (request budget).
+    if [ -f state/aircraft.on ]; then
+      alast=$(cat state/aircraft_last 2>/dev/null); alast=${alast:-0}
+      if [ $((now - alast)) -ge $AIRCRAFT_INTERVAL_S ]; then
+        echo "$now" > state/aircraft_last; log "aircraft due (last $((now - alast)) s ago)"
+        run_collector opensky; arc=$?; log "aircraft exit=$arc"
+      fi
+    fi
     if [ $((now - last)) -ge $INTERVAL_S ]; then
       stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ); log "sample due (last $((now - last)) s ago)"
       run_collector ships; rc=$?; log "ships exit=$rc"
@@ -92,6 +104,9 @@ case "$MODE" in
     run_collector "$MODE" "$@"; rc=$?; log "$MODE exit=$rc"
     case "$*" in *--dry*) ;; *) record manual "$rc" "$stamp" "$(date +%s)" ;; esac
     tail -n 3 logs/collector.log; exit $rc ;;
+  aircraft)   # manual: './run.sh aircraft --dry' prints the envelope and uploads nothing; without --dry it uploads one count
+    log "manual aircraft $*"; case "$*" in *--dry*) ;; *) date +%s > state/aircraft_last ;; esac
+    "$NODE" collector-mac.mjs opensky "$@" --state=state 2>&1 | tee -a logs/collector.log | tail -n 40; exit ${PIPESTATUS[0]} ;;
   retry) run_collector retry; exit $? ;;
-  *) echo "usage: run.sh ships|mock|tick|retry|status" >&2; exit 2 ;;
+  *) echo "usage: run.sh ships|mock|aircraft|tick|retry|status" >&2; exit 2 ;;
 esac
