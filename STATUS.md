@@ -5,7 +5,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 # 17 Nov 2026
 
 ## 17 Nov 15:23 UTC (clock reading) — **Preview branch `aircraft-dots-rc` (`a3510fe`) pushed: aircraft positions as plain dots; packet for GPT** (branch only; nothing installed, deployed or merged)
-- **Chad's go (17 Nov): preview only.** Branch from main `b9c0d2b`; head `a3510fe6d0c7aa2e9c6bd86a8f5dd7ee8e3d1f69` (commit time 15:22:38 UTC). Packet: `reviews/2026-11-17-aircraft-dots-rc.md` on the branch (rev 1).
+- **Chad's go (17 Nov): preview only.** Branch from main `b9c0d2b`; head `a3510fe6d0c7aa2e9c6bd86a8f5dd7ee8e3d1f69` (commit time 15:22:38 UTC). Packet: `reviews/2026-11-17-aircraft-dots-rc.md` on the branch (rev 1). **Branch head is now `c8bd941d7308fb6d3dcc1b450d5091b8a686dbf5` (commit time 15:25:33 UTC): packet rev 1.1 only, code identical to `a3510fe`.** Rev 1.1 adds a globe check: the branch page at `a3510fe` in a clean github.io tab in the Mac's pane with 6,500 synthetic positions drew one sheet of 6,500 dots in the right places; the pale yellow reads weakly over white cloud (colour and size provisional).
 - **What the browser would receive at `/snapshot/opensky`:** `record_fields` exactly `["lat","lng"]`; `records` one `[lat, lng]` per counted aircraft, rounded to 0.01°, sorted by position; everything else is totals and run metadata (full key list in the packet §2). No address, callsign, country, altitude, speed, heading or per-aircraft time reaches the hub.
 - **Collector mac-0.3.4** (`phase1/collector-mac.mjs`): same one OpenSky request; cells counted from the unrounded positions (counts unchanged); nothing per aircraft on the Mac's disk; a dry run prints "[N positions not printed]". **`phase1/run.sh` unchanged** (`f6f587ae…65ce`): schedule, home check and the cap of 10 per rolling 24 h as installed.
 - **Hub 0.6.18** (`phase1/worker.js`, not deployed): `/ingest/opensky` refuses any record field but `lat,lng`, out-of-range values and unrounded values (422); the dated copy `snapshots/opensky/<time>.json` is written without records, so positions exist only in `latest/opensky.json` until the next upload. **Found while building: on hub 0.6.17 the dated copy would keep positions for 2 days, so the hub must be deployed before the collector is installed.**
@@ -15,7 +15,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Corrected from the entry below:** `#o-air` reading "Loading…" was not a fault. Once a count is loaded `paint()` hides `#o-air` and shows `#air-frame`; the text read was the hidden element's old text. Item 3 of that entry's Next is closed.
 
 ## Next
-1. GPT's review of `aircraft-dots-rc` `a3510fe` (packet `reviews/2026-11-17-aircraft-dots-rc.md`; Mac copy `_review/aircraft-dots-rc/`).
+1. GPT's review of `aircraft-dots-rc` `c8bd941` (code `a3510fe`; packet `reviews/2026-11-17-aircraft-dots-rc.md`; Mac copy `_review/aircraft-dots-rc/`).
 2. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 14:52 UTC run below (why it was published as a sample after a 348 s interruption; compare message-flow time with the status in the published payload); also wind arrival times.
 3. Production for the dots, if Chad wants it: his own Approve lines, in the packet's §7 order (hub, then collector, then REGISTER, then page).
 
