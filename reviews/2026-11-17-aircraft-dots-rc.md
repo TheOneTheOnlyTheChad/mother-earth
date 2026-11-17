@@ -1,6 +1,6 @@
 # aircraft-dots-rc — aircraft positions as plain dots (preview branch) — review packet
 
-**Rev 1, 17 Nov 2026 15:22 UTC (clock reading). Preview only. Nothing here is installed, deployed or merged.**
+**Rev 1.1 (globe check added to §6.2), 17 Nov 2026 15:22 UTC (clock reading). Preview only. Nothing here is installed, deployed or merged.**
 Branch `aircraft-dots-rc`, from main `b9c0d2b`. The head is in the message that accompanies this packet (a file cannot hold its own commit).
 
 ## 1. What was asked
@@ -60,7 +60,7 @@ The page makes two requests for aircraft, each only while its own switch is on. 
 
 ## 6. Not done, not checked (say so plainly)
 1. **No real upload exists.** No Mac runtime file was changed and no hub was deployed, so `/snapshot/opensky` on the live hub still has `records: []`. On the live hub today the positions switch would read "…carries counts only: no positions have been collected yet."
-2. **Not seen on a real globe with real positions.** The page suite uses stand-ins. How 6,700 dots look, at world zoom and zoomed in, is unjudged; dot size (2.4 px on a 4096 × 2048 sheet, about 0.2°) and colour are provisional.
+2. **Seen on the real globe with SYNTHETIC positions only** (17 Nov 2026 15:25 UTC, the Mac's browser pane, 1024 × 768): the branch's page files at `a3510fe`, fetched by commit, sha-checked (`index.html` af6497b6, `app.js` 0ecb24e4, `style.css` 2d5f51f6, `aircraft.js` 2a404fbd) and written into a clean github.io tab; 6,500 seeded made-up positions supplied through `ME.aircraft.dots.opts.source`. Result: state "loaded", one sheet in the scene, 6,500 dots drawn, in the right places, the counts layer off and unrequested. **The pale yellow dots read weakly over white cloud** and are small at world zoom: colour and size (2.4 px on a 4096 × 2048 sheet, about 0.2°) are provisional and want Chad's eye. Not seen with real positions (none exist); not checked zoomed in, at phone width, or with the counts sheet on underneath.
 3. **Phones:** a 4096 × 2048 sheet is about 33 MB of picture memory; not measured on a phone; no smaller sheet for narrow screens yet.
 4. **The 38 browser page suites (Playwright) were not run** (not installed in this container). They do not cover aircraft, but `index.html`, `app.js` and `style.css` changed.
 5. **Mac `/bin/bash` 3.2 regression not run** (`run.sh` is unchanged, so its result should stand; say if you want it run anyway).
