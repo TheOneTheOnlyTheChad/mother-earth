@@ -4,6 +4,22 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 19:53 UTC (clock reading) — **First published aircraft positions read back clean: 11,326 rounded positions, lat and lng only; dots drawn on the live page** (read-only checks)
+- **Collector, 19:48:05 UTC:** `[tick] aircraft due (last 8643 s ago)`; hub answer `200 {"ok":true,"layer":"opensky","snapshot":"2026-11-17T19-48Z","records":11326,"cells":459,"bytes":209554,"positions":"stored"}`; `19:48:14Z [tick] aircraft exit=0`. Ledger: five entries (09:17:09, 11:57:05, 14:59:05, 17:24:01, 19:48:05 UTC). No coordinate pair in `collector.log`; `launchd.log` 0 bytes; no pending file. (Ships at 19:43:04 was another fast "down".)
+- **`/snapshot/opensky`, 19:51:46 UTC (hub origin):** 200, `no-store`, 209,606 bytes; top-level keys exactly the documented list; `record_fields` `["lat","lng"]`; `positions: "published"`; `positions_max_age_s` 10800; `position_precision_deg` 0.01; **11,326 records, every one two numbers in range, all rounded to 0.01°, sorted by latitude then longitude** (first `[-46.41,168.32]`, last `[70.52,-162.12]`); records = `counts.counted` = cell total = 11,326; 459 cells; snapshot time 19:48:05 UTC, retrieved 19:48:09.612, received 19:48:10.317; mac-0.3.4; counts 11,562 state vectors, 95 without a position, 141 older than the limit, 0 without a position time, 0 duplicates, 1,050 on the ground; credits 3976. **No 6-digit hex string in quotes and no callsign-shaped string anywhere in the body; no string inside any record.**
+- **`/cells/opensky`:** 200, `no-store`, 42,267 bytes; no `records` or `record_fields` key; no coordinate pair; the same 459 cells.
+- **R2 (dashboard API, 19:52:16 UTC):** `snapshots/opensky/2026-11-17T19-48Z.json` 42,267 bytes, no `records` key, no coordinate pair (the dated copy holds counts only); likewise `cells/opensky/2026-11-17T19-48Z.json` and `latest-cells/opensky.json`. **`latest/opensky.json` (209,554 bytes) is the one object holding the 11,326 positions.**
+- **Live page (main `2241032` served), 19:52–19:53 UTC:** positions switched on: "loaded", "OpenSky snapshot of 19:48 UTC, 17 Nov 2026 (4 min ago) · 11,326 aircraft positions", one sheet, 11,326 dots drawn, only `/snapshot/opensky` requested. Counts on → positions off and its sheet gone; positions on → counts off; positions off → no dots sheet left in the scene; on again → drawn. Screenshot taken in the pane: dots present over Europe and the Gulf.
+- **Seen in that screenshot:** at 1.6 px and pale yellow the dots are **faint**, especially over cloud, at the pane's phone-like width. Colour and size still need Chad's eye.
+- **Not checked:** a real phone; dots zoomed in on live data; the three-hour withdrawal on the live hub (tested in the suite only).
+
+## Next
+1. Bare Earth stage A on branch `bare-earth-rc` (Chad's go, 17 Nov): finish the suites, packet and preview for GPT.
+2. Aircraft dots are faint on the live page: colour and size for Chad to choose. Stage C (remembered choices) is parked: Chad, "start bare every time for now".
+3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run and the hub-fallback / Mac-failure pattern; also wind arrival times.
+4. The two suite checks that fail on main in the container (`smoke-fixes` Sources at 360 px; `osmc-reliability-ui` old page).
+5. Close-out: delete merged branches `aircraft-dots-rc` and `layer-switches-rc`; `_review/` copies to `_to_delete/`; dot colour (still pale yellow); a real phone and a screen reader have not been tried.
+
 ## 17 Nov 19:20 UTC (clock reading) — **REGISTER filed; `aircraft-dots-rc` and `layer-switches-rc` MERGED into main: aircraft positions switch, citation, and one kind of switch for every map layer are on the page** (production: Pages; hub and Mac unchanged by these merges)
 - **Chad's own lines (17 Nov, one message, in this order):** "Approve: file the REGISTER update for The OpenSky Network (aircraft positions in use: rounded to 0.01°, no identifiers, newest snapshot only)" · "Approve: merge aircraft-dots-rc e227d4b into main (publishes the "Aircraft — positions in the newest snapshot" switch and the 2014 paper citation on the page)" · "Approve: merge layer-switches-rc f9a5d8e into main (publishes the same labelled switch for earthquakes, fires, ships, forest, buoys and microplastic; off cards no longer dimmed)". Claude had recommended waiting for the first positions read-back; Chad chose to go ahead.
 - **REGISTER (`9c227ab`, commit time 19:15:13 UTC):** OpenSky row status now "aircraft counts per area, and aircraft positions", with the limits (lat, lng only, 0.01°, newest snapshot, three hours, no dated copy, no identifiers), the basis (ticket #837506, Martin 17 Nov; terms §3(i)), the stop procedure and the paper citation. **It says plainly that the first published positions had not yet been read back when it was filed.**
@@ -14,13 +30,6 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Not checked in this smoke:** a screenshot of the page (the pane was hidden, and one long test call timed out at 45 s; the checks were redone in short calls); switching a core layer off and on by hand on the live page (done on the branch preview earlier: ships off removed 2,604 points); phone widths; Sources page read through.
 - **Still to come:** the first published positions (aircraft run due about 19:48 UTC), then dots with real positions on the live page.
 - **Rollback (each on Chad's own line):** page: revert `2241032` (switches), then `1210e0f` (aircraft positions switch and citation). Positions: remove `AIRCRAFT_POSITIONS`, then `POST /admin/aircraft/clear-positions`. Hub code: redeploy 0.6.17 (`59129514…e93e`, `29284bc:phase1/worker.js`). Collector: `~/mother-earth/_preserved/20261117T160222Z/collector-mac.mjs`.
-
-## Next
-1. About 19:55 UTC: read back the first published positions (fields exactly lat,lng; identifier search; count equals the cell total; dated R2 copy without records), then look at the dots on the live page and tell Chad and GPT.
-2. Bare Earth stage A (bare at load, "Choose layers to explore", Layers button) on Chad's go. Stage C (remembered choices) is parked: Chad, "start bare every time for now".
-3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run and the hub-fallback / Mac-failure pattern; also wind arrival times.
-4. The two suite checks that fail on main in the container (`smoke-fixes` Sources at 360 px; `osmc-reliability-ui` old page).
-5. Close-out: delete merged branches `aircraft-dots-rc` and `layer-switches-rc`; `_review/` copies to `_to_delete/`; dot colour (still pale yellow); a real phone and a screen reader have not been tried.
 
 ## 17 Nov 19:12 UTC (clock reading) — **GPT: `layer-switches-rc` rev 2 (`f9a5d8e`) passes code review** (docs only)
 - **GPT (relayed by Chad, 17 Nov):** rev 2 passes the code review. The six switches keep the agreed labels and each points to its own concise evidence line; off cards keep full contrast, with the unchecked switch and hollow dot showing state; all five pages use the bumped CSS version. GPT matched both file hashes and checked the descriptions, unique ids, defaults and the removal of the off-card opacity rules.
