@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 10:17 UTC (clock reading) — **`aircraft-counts-rc` rev 4: home-network check before any OpenSky request; regression passed on the Mac** (branch only; the Mac still runs `239e685`; schedule off; nothing merged)
+- **GPT (relayed by Chad):** independently confirmed the public read-back (452 cells, 5,411 aircraft at 09:17:11 UTC, counts and coverage only, five-minute cutoff and attribution present). Asked for a home-network check before the schedule is enabled, noted that Pi reachability does not prove the route under a VPN, and to keep 10 requests per rolling 24 h for the first rollout.
+- **Built in `phase1/run.sh`** (code commit `39e4a9c`, branch head `f9791f7` with the packet and evidence): a read-only probe of our receiver's local aircraft JSON before any OpenSky request (scheduled, manual, dry). Away: no request, no ledger entry, nothing uploaded, reason logged, manual exit 10; re-probe after 300 s; a sign-in page is not home; a hanging probe is cut off at 6 s; ships priority unchanged. Collector source unchanged.
+- **On the Mac** (Chad ran the regression in Terminal, /bin/bash 3.2.57, 09:47:10–10:06:09 UTC): runner suite 54 passed; all fifteen breaks fail; collector suite 19; ships duration passed; live probe with the real curl at home: receiver answered, HOME. Output on the branch: `reviews/evidence/2026-11-17-aircraft-mac-regression-rev4.txt`.
+- **Not tested:** the away case with the real curl on the Mac; a VPN.
+- **Next:** GPT's review of the new head; then Chad's own lines: install the rev 4 runner and switch the schedule on; REGISTER; page merge.
+
 ## 17 Nov 09:19 UTC (clock reading) — **Aircraft counts step 1 complete: ONE upload made from the home connection; read-back clean (counts only, no individual aircraft records)** (production: one OpenSky request, one ingest to the hub; schedule off; `OPENSKY_ENABLED` unset; page not merged)
 - **Authority:** Chad's own Approve line of 17 Nov (install mac-0.3.3 from `aircraft-counts-rc` `239e685` and one upload). Martin's "go ahead without waiting" on record (ENQUIRIES rev 9).
 - **Home network confirmed first:** the Pi's local `aircraft.json` answered in Chad's Chrome at 09:08 UTC (it is reachable only from the home network).
