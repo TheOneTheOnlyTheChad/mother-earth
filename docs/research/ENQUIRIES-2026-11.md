@@ -3,6 +3,7 @@
 **Rule:** sending an enquiry grants no permission, and silence grants none. A reply is filed with its date and who read it, next to the provider's published terms. No duplicate enquiry and no follow-up is sent automatically; any follow-up is Chad's decision. Chad's drafts sign off "Ta". An enquiry is marked sent only when Chad confirms it was sent.
 Personal contact details (phone, precise home address) that Chad included are **not recorded in this public repository**. The aircraft enquiries describe the receiver site as "Chad's home, Cape Town, facing the airport, roof access"; antenna height is **unmeasured**, and installation approval is **not assumed**.
 
+*Rev 11, 17 Nov 2026: OpenSky's reply on showing individual aircraft positions on the public map recorded verbatim (section at the end): "yes you can use the aircraft positions / contents from the API on the map". Bounded reading there; the citation question was not answered. No production change.*
 *Rev 2, 9 Nov 2026 (GPT's corrections relayed by Chad): CNEOS added; adsb.fi recorded as prepared, not sent; OpenSky's acknowledgement recorded as supplied.*
 *Rev 3, 9 Nov 2026: OpenSky's substantive reply on ticket #837506 recorded (section below). The earlier acknowledgement and its conditions are unchanged.*
 *Rev 4, 9 Nov 2026: Chad supplied his exact sent enquiry; the reply is now linked to it, with a bounded reading (section below). Personal details in that email are not reproduced.*
@@ -234,4 +235,43 @@ This is a summary relayed by Chad (via GPT's review packet); the verbatim text i
 **Context.** It follows Martin's "go ahead without waiting" (rev 9). **The message of Chad's that it replies to is not on record here.** Claude drafted a thank-you for Chad that restated "about ten requests a day from my own connection, counts per area only with no aircraft identifiers or tracks, and OpenSky credited on the page"; whether that was sent, and as written, is not recorded.
 
 **Reading (bounded):** OpenSky is content for the account's API credits to be used in full; the credits are the limit OpenSky applies, and "about ten requests a day" is not a ceiling OpenSky asks for. Measured 17 Nov: one world `states/all` request cost 4 of 4,000 daily credits. **Not stated and not inferred:** anything about which connection the requests come from, cloud servers (the "no whitelisting of cloud servers" condition stands), identifiers or tracks (counts per area only stands), or commercial use. The project's own cap of 10 requests in 24 h (`AIRCRAFT_MAX_PER_DAY` in `phase1/run.sh`, branch `aircraft-counts-rc`) is unchanged; a different cadence is Chad's decision and a reviewed code change.
+
+## OpenSky ticket #837506 — reply on showing individual aircraft positions (17 Nov 2026) — rev 11
+*Rev 11, 17 Nov 2026 (17 Nov 15:07 UTC clock reading), docs only.*
+
+**Why the question was asked.** Chad re-read the ticket on 17 Nov and pointed out that Martin had never said individual aircraft could not be shown: "counts per area, no aircraft identifiers or individual tracks" was the arrangement Chad described in follow-up Q3 (9 Nov), to which Martin answered "3. Yes". Earlier wording in this repository that lists "aggregated counts only" among OpenSky's conditions describes the scope that was asked for and approved, not a limit Martin set. Claude then read OpenSky's published terms on 17 Nov (`https://opensky-network.org/about/terms-of-use`, in the browser pane): §3(i) (for any publication, anonymise or de-identify aircraft identifiers and sensor locations), §3(iii) (no making the data sets available outside one's own institute), the opening of §3 (exemptions need written authorisation), §1 and §3(vi) (operational REST API use needs a written licence), §4(i) (a publication, web pages included, is sent to OpenSky as a copy or link and cites the 2014 paper; the website credit is an additional form). GPT (relayed by Chad) agreed with that reading.
+
+**What Chad sent.** Chad confirmed in the Claude thread on 17 Nov that he had sent the email on the existing ticket. **The exact sent text is not on record here.** Claude's draft for him, which he was asked to send as a reply on the ticket, read:
+
+> Hi Martin,
+>
+> The aircraft layer is live, thanks to you. As the terms ask (4(i)), here is the link:
+> https://theonetheonlythechad.github.io/mother-earth/
+> (Optional layers > Aircraft counts. It shows the number of aircraft per 4° cell from one snapshot, credited to The OpenSky Network.)
+>
+> Two questions:
+>
+> 1. Would you allow us to show individual aircraft positions from each snapshot on the public page, as plain dots? No icao24, no callsign, no registration, no tracks or history, nothing clickable that identifies an aircraft. Each snapshot would replace the last, labelled with its snapshot time. I read sections 3(i) and 3(iii) of the terms as needing your written OK for this, so I'm asking before building anything. If the answer is no, counts per area stay as they are.
+>
+> 2. For the credit, we currently show "The OpenSky Network, https://opensky-network.org". Is that enough for a web page, or do you want the 2014 paper cited as well?
+>
+> Still non-commercial, still feeding, requests still only from my home connection.
+>
+> Ta,
+> Chad
+
+**Source and reader of the reply:** a screenshot of the message in Gmail on Chad's phone, sent by Chad to the Claude thread and read by Claude. Sender shown as "Martin Strohmeier…"; time shown "16:03", as Gmail displays it in Chad's local time (not converted; not a measured UTC reading); the phone clock in the screenshot reads 16:09. The screenshot and email addresses are not in this repository. Gmail's "AI Overview" panel is visible above the message in the screenshot; it is not used as a source.
+
+**Body, verbatim:**
+> Hi Chad
+>
+> All good with us, yes you can use the aircraft positions / contents from the API on the map.
+>
+> Best,
+> Martin
+
+**Reading (bounded).** A written yes, on the ticket, to showing aircraft positions from the API on the public map. Read against the request it answers (if sent as drafted): plain dots from each snapshot, no icao24, callsign or registration, no tracks or history, each snapshot replacing the last. GPT's reading (relayed by Chad, 17 Nov): "a clear yes to showing the aircraft positions as plain dots on the public map you described".
+**Not stated and not inferred:** coordinate precision; cadence; whether on-ground aircraft are to be left out; anything about identifiers ("contents from the API" is not read as permission to publish identifiers: the request excluded them and terms §3(i) requires de-identification for any publication); tracks or history; commercial use; cloud servers. **Question 2 (the 2014 paper citation) was not answered;** the terms (§4(i)) ask for the paper to be cited, so it is added without waiting.
+**Standing conditions unchanged:** hobbyist, non-commercial; the site is a feeder; credits apply; no cloud-server whitelisting; requests from Chad's home connection; OpenSky attribution.
+**No production change follows from this record.** Chad's go of 17 Nov is for a preview branch only; production approval is separate.
 

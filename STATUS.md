@@ -4,6 +4,29 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 15:08 UTC (clock reading) — **Away case tested: aircraft skipped on the hotspot, resumed at home. Martin: positions may be shown on the map (record only; preview go)** (docs only; no code, page, hub or Mac runtime change)
+- **Away test, read from `~/mother-earth/logs/collector.log` at 14:59:21 UTC (read-only).** Chad was out on his phone hotspot (he confirmed it in the thread; the times he left and returned are not recorded).
+  - `14:21:08Z [tick] aircraft due but our receiver did not answer on the local network (not at home?); no OpenSky request made`
+  - `14:35:43Z [tick] aircraft due but our receiver did not answer on the local network (not at home?); no OpenSky request made`
+  - At home: `14:59:06Z [tick] aircraft due (last 10921 s ago)`, hub answer `200 {"ok":true,"layer":"opensky","snapshot":"2026-11-17T14-59Z","records":0,"cells":438,"bytes":40488}`.
+  - Ledger `state/aircraft_requests` after it: three entries, 09:17:09, 11:57:05 and 14:59:05 UTC. **No entry for the two skips.** `state/aircraft.on` present; schedule left on. `run.sh` sha256 began `f6f587aec646ca8b` at 13:27 UTC.
+  - **Not checked:** the `aircraft exit=` line for the 14:59 run (the log was read as the run finished); the public read-back of the 14:59 upload. **A VPN is still untested.** The gap between the two skips is 875 s, not the 300 s re-probe: the minute ticks in between are not in the log, so whether the Mac was asleep is not known.
+- **Ships across the network moves (same log).**
+  - 13:02:28 UTC: two `upload attempt … failed: TypeError: fetch failed`, then `cells only (down)`, exit 3 at 13:08:57.
+  - 13:39:01 UTC: ok (degraded, socket 46.9 s, 2,437 vessels, upload 200).
+  - 14:14:25 UTC: four failed uploads; kept as `state/pending.json`; retried at 14:16:00, three more failures, then `cells only (down)` for the 14-14Z snapshot, retry exit 0.
+  - **14:52:31 UTC: `window=60s wall=381.5s … overlong=true status=degraded socket=368.2s flowing=20.2s(inferred) interruptions=1 (348s) quiet_at_end=347.7s messages=701 vessels=700`, uploaded as a normal sample (`records":700,"cells":123`), exit 0 at 14:59:01.** About 20 s of messages was published without a "down". **For the 18 Nov read-only check (Chad): trace why this run was marked normal after the 348 s interruption; compare the message-flow time with the status in the published payload.**
+- **Live page, from the Mac's browser pane, about 13:30 UTC:** the aircraft toggle `#tgl-air` is served, visible and enabled (fifth item under Optional layers); switched on, the count cells drew, the card state read "loaded" and the key appeared. **`#o-air` stayed on "Loading the newest aircraft counts…" for at least ten seconds** while the state read "loaded"; the tab was hidden (`document.visibilityState` "hidden"), so this may be background throttling. Not reproduced in a visible tab. Open.
+- **OpenSky, ticket #837506.** Chad re-read the ticket: "counts only" was the scope he asked for on 9 Nov, not a limit Martin set. Terms read again by Claude (§3(i), §3(iii), §1, §3(vi), §4(i)); GPT agreed with the reading (relayed by Chad). Chad sent a question on the ticket (the exact sent text is not on record; Claude's draft is in the enquiries record). **Martin's reply, verbatim (Chad's screenshot, Gmail shows 16:03 local): "All good with us, yes you can use the aircraft positions / contents from the API on the map."** Filed: `docs/research/ENQUIRIES-2026-11.md` rev 11 and the OpenSky row of `REGISTER.md` (positions not in use; the row's status line is unchanged). START-HERE §4ad carries the correction.
+- **Citation gap found:** terms §4(i) ask for the 2014 paper ("Bringing up OpenSky") to be cited; the page and `sources.html` carry the website credit only. Martin did not answer the citation question. GPT: add it without waiting.
+- **Chad's go (17 Nov, his own message): preview only.** "reuse the existing scheduled pull and keep one replaceable snapshot of plain dots, with no identifiers, tracks or history. Include the 2014 paper citation alongside the OpenSky website credit. Send GPT the branch head and the exact fields the browser receives for review. This go is for the preview only. Production approval comes separately." GPT (relayed) asked the same.
+
+## Next
+1. Dots preview branch (Chad's go, preview only): build, test, review copy on the Mac, packet for GPT with the branch head and the exact fields the browser receives.
+2. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 14:52 UTC run above; also wind arrival times.
+3. `#o-air` "Loading…" line: reproduce in a visible tab before deciding anything.
+4. Production for any of it: Chad's own Approve lines, after GPT's review.
+
 ## 17 Nov 13:26 UTC (clock reading) — **`aircraft-rc` deleted; Chad's rule on deletes and keys recorded** (docs only)
 - **Chad (17 Nov, after the handover note):** Claude can delete things and add keys and so on itself, as already agreed for Cloudflare, for when he is working from his phone.
 - **Done:** the old parked branch `aircraft-rc` (`67c98e3`, 3 Nov; superseded by the merged aircraft counts; it held one commit not on main) deleted by Claude on the GitHub branches page. `git fetch -p`: `main`, `cape-town-station-rc`, `widths-preview-rc`.
@@ -14,11 +37,6 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Mac:** `_review/aircraft-counts-rc` moved to `_to_delete/`; `_review/` keeps `cape-town-station` and `widths-preview-rc` (both still awaiting a look). `~/mother-earth/aircraft-test` moved to `~/mother-earth/_to_delete/`. Main synced at this commit, preserve-first.
 - **Docs:** HANDOVER next-thread block; START-HERE live line, layers line and §4ad.
 - **Not yet known at close-out:** the away case. Chad said at about 12:25 UTC that he was taking the Mac out on his hotspot (the time he left is not recorded); the aircraft request due about 14:21 UTC should be skipped. Reading the log for it is item 1 for the next thread.
-
-## Next
-1. Read `~/mother-earth/logs/collector.log` for the away skip around 14:21 UTC on 17 Nov and the resume at home; record it; tell Chad and GPT.
-2. 18 Nov 07:00 UTC: ships log re-read (read-only); also wind arrival times.
-3. Chad chooses the next feature.
 
 ## 17 Nov 12:22 UTC (clock reading) — **`aircraft-counts-rc` MERGED into main: optional layer "Aircraft counts" is on the page** (production: Pages; no hub change; `OPENSKY_ENABLED` unset)
 - **Chad's own line (17 Nov):** "Approve: merge aircraft-counts-rc 4267bbf into main (publishes the optional "Aircraft counts" layer on the page with OpenSky attribution; no hub change; OPENSKY_ENABLED stays unset)".
