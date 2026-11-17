@@ -4,6 +4,21 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 15:23 UTC (clock reading) — **Preview branch `aircraft-dots-rc` (`a3510fe`) pushed: aircraft positions as plain dots; packet for GPT** (branch only; nothing installed, deployed or merged)
+- **Chad's go (17 Nov): preview only.** Branch from main `b9c0d2b`; head `a3510fe6d0c7aa2e9c6bd86a8f5dd7ee8e3d1f69` (commit time 15:22:38 UTC). Packet: `reviews/2026-11-17-aircraft-dots-rc.md` on the branch (rev 1).
+- **What the browser would receive at `/snapshot/opensky`:** `record_fields` exactly `["lat","lng"]`; `records` one `[lat, lng]` per counted aircraft, rounded to 0.01°, sorted by position; everything else is totals and run metadata (full key list in the packet §2). No address, callsign, country, altitude, speed, heading or per-aircraft time reaches the hub.
+- **Collector mac-0.3.4** (`phase1/collector-mac.mjs`): same one OpenSky request; cells counted from the unrounded positions (counts unchanged); nothing per aircraft on the Mac's disk; a dry run prints "[N positions not printed]". **`phase1/run.sh` unchanged** (`f6f587ae…65ce`): schedule, home check and the cap of 10 per rolling 24 h as installed.
+- **Hub 0.6.18** (`phase1/worker.js`, not deployed): `/ingest/opensky` refuses any record field but `lat,lng`, out-of-range values and unrounded values (422); the dated copy `snapshots/opensky/<time>.json` is written without records, so positions exist only in `latest/opensky.json` until the next upload. **Found while building: on hub 0.6.17 the dated copy would keep positions for 2 days, so the hub must be deployed before the collector is installed.**
+- **Page:** second switch "Aircraft — positions in the newest snapshot" in `aircraft.js` (draws only a `lat,lng` file; one non-pickable sheet; cleared at 3 h); wording in `index.html`, `sources.html`, `app.js`; **2014 "Bringing up OpenSky" paper cited beside the website credit.**
+- **Checks (Linux, this container):** `aircraft-counts.test.mjs` 49 passed; new `aircraft-dots-page.test.cjs` 29 passed, its 4 breaks each fail; `aircraft-schedule.test.sh` 88 passed; hub suites pass (three version pins moved to 0.6.18).
+- **Not done:** no real upload; not seen on a globe with real positions; phone memory for the 4096 × 2048 sheet not measured; the Playwright page suites and the Mac bash 3.2 regression not run. Packet §6 lists all ten.
+- **Corrected from the entry below:** `#o-air` reading "Loading…" was not a fault. Once a count is loaded `paint()` hides `#o-air` and shows `#air-frame`; the text read was the hidden element's old text. Item 3 of that entry's Next is closed.
+
+## Next
+1. GPT's review of `aircraft-dots-rc` `a3510fe` (packet `reviews/2026-11-17-aircraft-dots-rc.md`; Mac copy `_review/aircraft-dots-rc/`).
+2. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 14:52 UTC run below (why it was published as a sample after a 348 s interruption; compare message-flow time with the status in the published payload); also wind arrival times.
+3. Production for the dots, if Chad wants it: his own Approve lines, in the packet's §7 order (hub, then collector, then REGISTER, then page).
+
 ## 17 Nov 15:08 UTC (clock reading) — **Away case tested: aircraft skipped on the hotspot, resumed at home. Martin: positions may be shown on the map (record only; preview go)** (docs only; no code, page, hub or Mac runtime change)
 - **Away test, read from `~/mother-earth/logs/collector.log` at 14:59:21 UTC (read-only).** Chad was out on his phone hotspot (he confirmed it in the thread; the times he left and returned are not recorded).
   - `14:21:08Z [tick] aircraft due but our receiver did not answer on the local network (not at home?); no OpenSky request made`
@@ -20,12 +35,6 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **OpenSky, ticket #837506.** Chad re-read the ticket: "counts only" was the scope he asked for on 9 Nov, not a limit Martin set. Terms read again by Claude (§3(i), §3(iii), §1, §3(vi), §4(i)); GPT agreed with the reading (relayed by Chad). Chad sent a question on the ticket (the exact sent text is not on record; Claude's draft is in the enquiries record). **Martin's reply, verbatim (Chad's screenshot, Gmail shows 16:03 local): "All good with us, yes you can use the aircraft positions / contents from the API on the map."** Filed: `docs/research/ENQUIRIES-2026-11.md` rev 11 and the OpenSky row of `REGISTER.md` (positions not in use; the row's status line is unchanged). START-HERE §4ad carries the correction.
 - **Citation gap found:** terms §4(i) ask for the 2014 paper ("Bringing up OpenSky") to be cited; the page and `sources.html` carry the website credit only. Martin did not answer the citation question. GPT: add it without waiting.
 - **Chad's go (17 Nov, his own message): preview only.** "reuse the existing scheduled pull and keep one replaceable snapshot of plain dots, with no identifiers, tracks or history. Include the 2014 paper citation alongside the OpenSky website credit. Send GPT the branch head and the exact fields the browser receives for review. This go is for the preview only. Production approval comes separately." GPT (relayed) asked the same.
-
-## Next
-1. Dots preview branch (Chad's go, preview only): build, test, review copy on the Mac, packet for GPT with the branch head and the exact fields the browser receives.
-2. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 14:52 UTC run above; also wind arrival times.
-3. `#o-air` "Loading…" line: reproduce in a visible tab before deciding anything.
-4. Production for any of it: Chad's own Approve lines, after GPT's review.
 
 ## 17 Nov 13:26 UTC (clock reading) — **`aircraft-rc` deleted; Chad's rule on deletes and keys recorded** (docs only)
 - **Chad (17 Nov, after the handover note):** Claude can delete things and add keys and so on itself, as already agreed for Cloudflare, for when he is working from his phone.
