@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 03:02 UTC (clock reading) — **Thread close-out (Global Wind thread)**
+- Chad: thread at its limit; list concerns, handover note, save everything, tidy Downloads, delete branches no longer needed; the next thread has Chrome access and may deploy on Cloudflare and click; ask for access by raising the prompt; Martin replied, Chad is handling it with GPT.
+- **Branches:** `wind-rc` confirmed fully in main, then deleted 17 Nov ~03:00 UTC by Claude on the GitHub branches page in the pane (`git push --delete` refused, 403). Remote now: `main`, `aircraft-rc` (parked), `widths-preview-rc` (open preview; kept).
+- **Mac:** `_review/wind-rc` moved to `_to_delete/wind-rc`; `_review/` holds `widths-preview-rc` only (open preview, kept on purpose). Main synced at the close-out commit.
+- **Downloads:** moved into `~/Downloads/_to_delete/`: `gfs-20261116-00z-wind6.grib2`, `gfs.t00z.pgrb2.0p25.f000.idx` (this thread's test files) and `mother-earth-lroc_color_2k.jpg` (identical to `assets/moon/lroc_color_2k.jpg` in the repo, same sha256). Nothing else moved; other candidates listed to Chad for his say. Personal files untouched.
+- **Docs:** HANDOVER "NEXT THREAD STARTS HERE" rewritten; START-HERE live lines and the 16–17 Nov rule changes added; Project `claude/HANDOVER-LATEST.md` updated.
+- **Scheduled check-ins:** none left (one fired, one cancelled).
+- **Next (item 1): Chad chooses the next feature. For Wind, after a few days of runs: propose the stale threshold and freeze the colour scale.**
+
 ## 17 Nov 02:49 UTC (clock reading) — **GPT's live desktop Chrome smoke of Wind by height: passed**
 - GPT (relayed by Chad): after a hard reload Wind started off. All three heights loaded the 16 Nov 18:00 UTC run. The Cape coastline was traceable at all three heights and stayed visible zoomed out; weakest contrast in the wide stratosphere view. Globe click off the Cape at jet-stream height: 111 km/h from the south-west. Typed Cape Town (-33.92, 18.42) at jet-stream height: 101 km/h from the south-west. Wind off removed the sheet, arrows and outline; earthquake markers and forest cells stayed. Microplastics loaded 1,145 dated samples, hollow zero-count rings seen in the North Atlantic and cleared when switched off. Both optional layers left off.
 - **GPT also saw Fire and Ships showing UNKNOWN before and after the Wind test.** Checked in the hub's run log at 02:49 UTC: fire rows since 00:00 UTC say "no detections processed yet for today (UTC): FIRMS day_range=1 resets at 00:00 UTC and NRT runs ~2–3 h behind", the usual state in the first hours of a UTC day; ship rows alternate between ok and "down: websocket error", the same pattern as on 16 Nov before the 0.6.16 deploy (rows at 12:14 and 12:45 UTC). **Neither began with the wind work.** Not investigated further.
