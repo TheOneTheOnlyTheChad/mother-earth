@@ -58,7 +58,7 @@ AIRCRAFT_MAX_S=${AIRCRAFT_MAX_S:-90}               # a run is killed at this man
 AIRCRAFT_GUARD_S=${AIRCRAFT_GUARD_S:-180}          # no aircraft run starts when a ships sample is due within this many seconds
 # Home-network check (GPT review, 17 Nov 2026). The arrangement with OpenSky is requests from Chad's own home connection, and this
 # Mac roams. Before ANY OpenSky request (scheduled, manual, dry) the runner reads our own receiver's local aircraft JSON, which
-# answers only on the home network. No answer, or an answer that is not that JSON (a captive portal), means no request.
+# answers only on the home network. No answer, a failed transfer, a non-2xx status, or a body that is not that JSON means no request.
 # Limit, stated plainly: this shows the Mac can reach the Pi. With a VPN that sends internet traffic elsewhere, the Pi can still
 # answer while the OpenSky request leaves by another route; the check cannot see that.
 AIRCRAFT_HOME_PROBE_URL=${AIRCRAFT_HOME_PROBE_URL:-http://adsb-feeder.local:8080/data/aircraft.json}
@@ -103,16 +103,25 @@ aircraft_budget() {
   [ -f state/aircraft_requests ] && [ "$(tail -n 1 state/aircraft_requests 2>/dev/null)" = "$t" ] || return 2
   return 0
 }
-# Is this Mac on the home network? Read-only: one GET of the receiver's local JSON; only its first 512 bytes are looked at and the scratch copy is removed.
-# Returns 0 when the answer is the receiver's aircraft JSON; 1 otherwise (no answer, timeout, error, or some other page).
+# Is this Mac on the home network? Read-only: one GET of our receiver's local aircraft JSON. Returns 0 ONLY when all of these hold
+# (GPT review of f9791f7, 17 Nov 2026: a partial body, an HTML page naming both keys, and JSON of the wrong types each passed the
+# earlier two-word search):
+#   1. curl itself succeeded (exit 0: a timeout after a partial body is exit 28, and is not home);
+#   2. the HTTP status is 2xx (redirects are not followed);
+#   3. the whole body is valid JSON: an object whose "now" is a finite number and whose "aircraft" is an array (empty is fine).
+# Anything else returns 1. The body is held in a scratch file only for the check and removed. Both steps have hard time limits.
 home_probe() {
-  local out
-  # The answer goes to a small scratch file, not a pipe, so nothing here can be left waiting on a probe that hangs; perl's alarm
-  # ends the probe outright if curl's own limit does not.
-  perl -e 'alarm shift; exec @ARGV' "$((AIRCRAFT_PROBE_TIMEOUT_S + 2))" curl -fsS -m "$AIRCRAFT_PROBE_TIMEOUT_S" "$AIRCRAFT_HOME_PROBE_URL" > state/aircraft_probe.tmp 2>/dev/null
-  out=$(head -c 512 state/aircraft_probe.tmp 2>/dev/null); rm -f state/aircraft_probe.tmp 2>/dev/null
-  case "$out" in *'"now"'*'"aircraft"'*|*'"aircraft"'*'"now"'*) return 0 ;; esac
-  return 1
+  local code rc ok=1
+  rm -f state/aircraft_probe.tmp 2>/dev/null
+  code=$(perl -e 'alarm shift; exec @ARGV' "$((AIRCRAFT_PROBE_TIMEOUT_S + 2))" curl -sS -m "$AIRCRAFT_PROBE_TIMEOUT_S" --max-filesize 8000000 -o state/aircraft_probe.tmp -w '%{http_code}' "$AIRCRAFT_HOME_PROBE_URL" 2>/dev/null); rc=$?
+  if [ "$rc" = 0 ]; then
+    case "$code" in
+      2[0-9][0-9])
+        perl -e 'alarm shift; exec @ARGV' 5 "$NODE" -e 'let j; try { j = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); } catch (e) { process.exit(1); } process.exit(j !== null && typeof j === "object" && !Array.isArray(j) && typeof j.now === "number" && Number.isFinite(j.now) && Array.isArray(j.aircraft) ? 0 : 1);' state/aircraft_probe.tmp >/dev/null 2>&1 && ok=0 ;;
+    esac
+  fi
+  rm -f state/aircraft_probe.tmp 2>/dev/null
+  return $ok
 }
 # Run the collector with a hard time limit: $1 seconds, then the rest as collector arguments. Killed at the limit (exit 124).
 run_bounded() {
