@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 12:22 UTC (clock reading) — **`aircraft-counts-rc` MERGED into main: optional layer "Aircraft counts" is on the page** (production: Pages; no hub change; `OPENSKY_ENABLED` unset)
+- **Chad's own line (17 Nov):** "Approve: merge aircraft-counts-rc 4267bbf into main (publishes the optional "Aircraft counts" layer on the page with OpenSky attribution; no hub change; OPENSKY_ENABLED stays unset)".
+- **Merge commit `51814fd430044b45160a03fe4f53c25eaec9568c`, pushed 12:18:37 UTC** (no-fast-forward merge of `4267bbff9a7d077a8107d2be86fdd20840c6fd23`; no conflicts; main had no page or collector changes since the branch point, so the merged files are byte-identical to the reviewed ones: `aircraft.js` `f03617c4…6f39`, `app.js` `b0141cfe…33e3`, `index.html` `8b411778…4af1`, `sources.html` `a53039d4…cf22`, `phase1/run.sh` `f6f587ae…65ce`, `phase1/collector-mac.mjs` `e88ada68…3d47`). Before the push, on the merged tree (Linux): collector suite 19 passed; runner suite 88 passed.
+- **Smoke on the live page from Chad's Chrome, 12:21–12:22 UTC:** the live `aircraft.js` has the reviewed sha256. On load the layer is off ("Off. Switch on to load the newest aircraft counts."). Switched on: state "loaded"; label "OpenSky snapshot of 11:57 UTC, 17 Nov 2026 (24 min ago) · 6,694 aircraft counted, in 457 cells"; note "Each aircraft is counted where it last reported a position, no more than 5 minutes before the snapshot time. One snapshot, not a live view. No individual aircraft is shown or stored."; one sheet in the scene; key shown; only `/cells/opensky` requested; the attribution link "The OpenSky Network, https://opensky-network.org" is on the page. Switched off: state "off", sheet removed. No page errors caught.
+- **Not checked in this smoke:** how the sheet looks on the globe (no screenshot taken); tapping a cell for its count; narrow widths; `sources.html#aircraft` read through (the anchor was not confirmed). `aircraft.js` still has no automated page suite.
+- **Ships on the rev 5 runner:** the 12:16:01 UTC sample was ok (degraded, socket 45.2 s, 2,408 vessels, upload 200, exit 0), after the fast "down" at 11:45. `launchd.log` 0 bytes.
+- **Mac:** project copy synced with the merged files (the copies there matched the previous main versions, nothing to preserve). Runtime `~/mother-earth` already runs the merged `run.sh` and `collector-mac.mjs`.
+- **Rollback:** remove `~/mother-earth/state/aircraft.on` (stops requests); revert the merge commit (removes the layer from the page); the previous runner is in `~/mother-earth/_preserved/20261117T113927Z/`. The hub's last count would remain at `/cells/opensky` until overwritten; the page clears a count at 6 h.
+- **Next:** delete the merged branch `aircraft-counts-rc` (and decide on the superseded `aircraft-rc` of 3 Nov); watch the next scheduled request, about 14:21 UTC; HANDOVER at close-out.
+
 ## 17 Nov 12:16 UTC (clock reading) — **REGISTER: OpenSky row updated: aircraft counts per area in use** (docs only on main; no code, no page change)
 - **GPT (relayed by Chad): approves** after the schedule-on report and read-backs (entry below).
 - **Chad's own line (17 Nov):** "Approve: file the REGISTER update for The OpenSky Network (aircraft counts per area in use)."
