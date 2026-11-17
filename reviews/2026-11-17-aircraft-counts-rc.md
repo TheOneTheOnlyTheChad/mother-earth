@@ -1,5 +1,7 @@
 # aircraft-counts-rc — Aircraft counts per area (OpenSky), release candidate packet
 
+**Rev 4, 17 Nov 2026 (17 Nov 10:17 UTC clock reading): first upload made and read back (§13); home-network check added before any OpenSky request (§14). §13–§14 govern where they differ from earlier sections. Code head for review: `39e4a9c`.**
+
 **Rev 3, 17 Nov 2026 (17 Nov 05:07 UTC clock reading): GPT reproduced three more runner cases on `059c531`; §12 records them, the fixes, the Mac `/bin/bash` results and a correction to §8. §12 governs where it differs from earlier sections.**
 
 **Rev 2, 17 Nov 2026 (17 Nov 04:13 UTC clock reading): GPT held `ddf109b`; §8 onward records the hold and the changes. §3, §5 and §7 below are rev 1 text and are superseded where §8–§11 differ.**
@@ -125,3 +127,33 @@ Chad: Martin has been emailed on the existing ticket; go ahead with the runner f
 **Release sequence:** unchanged from §10, all on hold. Step 1's manual run now also needs ships not due within 3 minutes, so it is run just after a ships sample.
 
 **Still open:** §9 (Martin's answer pending); no page suite for `aircraft.js`; the `opensky` feed has not run end to end; provisional limits (bands, 3 h stale, 6 h clear, 300 s position age); the layer empties when the Mac sleeps over 6 h. **Closed:** the runner suite has now run under macOS bash 3.2.
+
+## 13. Step 1 done at `239e685`: one upload from the home connection, read-back clean
+- GPT passed rev 3 on technical review (17 Nov). Martin (OpenSky), 17 Nov: "you can go ahead without waiting" and "You can easily use all the credits you have - that's what they are for." (both verbatim in `docs/research/ENQUIRIES-2026-11.md` on main, rev 9 and rev 10). §9 is closed.
+- Chad's own Approve line (17 Nov). Collector mac-0.3.3 installed in `~/mother-earth` at 07:53:17 UTC from `239e685`; previous files preserved. First ships sample on the new runner 08:11:03 UTC: ok.
+- **The upload was held while the Mac was on a cafe network** and made once the Mac was home (the Pi's local JSON answered at 09:08 UTC). Chad ran `run.sh aircraft` at 09:17:09 UTC: hub answer `200 … "layer":"opensky" … "records":0,"cells":452,"bytes":41682`, exit 0; one ledger entry; D1 `collector_runs` id 11848.
+- **Read-back (Claude from Chad's Chrome 09:17–09:18 UTC; GPT confirmed independently):** `/cells/opensky` has no records keys; `/snapshot/opensky` has `records: []` and `record_fields: []`; both carry the same 452 cells totalling 5,411, each cell a count and a coverage grade; snapshot time 09:17:11 UTC; `position_age_cutoff_s` 300; 157 aircraft left out as older than the limit (2.8% of those with a position); `credits_remaining` 3992; citation and policy present; no hex addresses, callsign-shaped strings or coordinates in either body.
+- Schedule off. Page not merged. `OPENSKY_ENABLED` unset.
+
+## 14. Rev 4 — home-network check before any OpenSky request (GPT via Chad, 17 Nov)
+**Why.** The collector runs on a MacBook that roams. The arrangement on record is requests from Chad's own home connection. As built at `239e685`, a request would leave from whatever network the Mac was on.
+
+**What changed (`phase1/run.sh` only; the collector source is unchanged, still mac-0.3.3):**
+- `home_probe()`: one read-only GET of our own receiver's local aircraft JSON (`AIRCRAFT_HOME_PROBE_URL`, default `http://adsb-feeder.local:8080/data/aircraft.json`), curl limit 4 s, killed outright at 6 s by `perl alarm`; the answer goes to a scratch file (not a pipe) and only its first 512 bytes are looked at. **Home = the answer contains both `"now"` and `"aircraft"`.** Anything else (no answer, timeout, error, a sign-in page) is not home.
+- **Order on every path:** ships guard → home probe → request ledger → OpenSky request. Scheduled, manual and `--dry` alike.
+- **Away, scheduled:** no OpenSky request, no ledger entry, `aircraft_last` not set, the collector is not started (so nothing is uploaded and the hub keeps its last good count), one log line with the reason. The probe is not repeated for 300 s (`AIRCRAFT_PROBE_RETRY_S`, marker `state/aircraft_probe_failed`); the count is taken on the first successful probe after that.
+- **Away, manual:** refused with exit 10 before the ledger is touched.
+- **Ships priority unchanged:** when a ships sample is due, or due within 180 s, the receiver is not probed at all in that tick.
+- **Limit (GPT's point, written into the runner's comments):** the probe shows the Mac can reach the Pi. With a VPN that routes internet traffic elsewhere, the Pi can still answer while the OpenSky request leaves by another route. The check cannot see that.
+- Unchanged: 10 requests per rolling 24 h; 144 min interval; 90 s run limit.
+
+**Runner suite: 54 checks (17 new, K1–K17):** home (probe first, then one request); away (no request, ledger and `aircraft_last` untouched, reason logged, no collector call, lock free); no immediate re-probe; return home (probe again after the wait, request made, marker cleared); manual and `--dry` refused with exit 10 when away and allowed at home; a sign-in page is not home; a hanging probe is cut off at its limit with no request, no probe left running, and ships still on time; ships due → no probe; ships within the guard → no probe; away with a full ledger → ledger byte-for-byte unchanged.
+
+**Results:**
+- **On the Mac** (Chad ran `/bin/bash ~/mother-earth/aircraft-test/aircraft-mac-regression.sh`; Darwin 25.5.0, /bin/bash 3.2.57, node v24.14.1; 09:47:10–10:06:09 UTC; output `reviews/evidence/2026-11-17-aircraft-mac-regression-rev4.txt`): **runner suite 54 passed, 0 failed**; collector suite 19 passed; ships duration contract passed.
+- **Fifteen breaks on the Mac, each applied, each failing:** `aircraft-first` 9 · `no-guard` 4 · `no-kill` 3 · `no-budget` 7 · `dry-free` 8 · `no-switch` 1 · `stale-clock` 3 · `manual-no-guard` 5 · `ledger-unchecked` 5 · `once-ignored` 2 · `no-probe` 9 · `manual-no-probe` 4 · `portal-ok` 1 · `probe-no-kill` 2 · `probe-no-backoff` 2.
+- **Live probe on the Mac at home** (the real `/usr/bin/curl` and `/usr/bin/perl`, same command as the runner): the receiver answered with aircraft JSON in under a second: HOME.
+- Linux bash 5.2: 54 passed; the five new breaks fail (9, 4, 1, 2, 2). The installed `239e685` `run.sh` fails 12 of the 17 new checks (K1–K11, K13) and passes the other 42.
+- **Not tested:** the away case on the real Mac with the real curl (the Mac was home during the run; the away, timeout and sign-in-page cases use a stand-in for curl). Real-world evidence that the Pi does not answer off the home network: Chrome at 07:36 UTC from the cafe (name did not resolve). A VPN case: not tested.
+
+**Release state.** The Mac runs `239e685` with the schedule off. Installing the rev 4 runner, switching the schedule on, the REGISTER line and the page merge each need Chad's own line.
