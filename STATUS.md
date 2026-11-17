@@ -4,6 +4,19 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 16:03 UTC (clock reading) — **Collector mac-0.3.4 INSTALLED in `~/mother-earth` from `aircraft-dots-rc` `c3ef264`; `run.sh` unchanged; `AIRCRAFT_POSITIONS` unset** (production: one Mac runtime file; no OpenSky request made by the install; nothing new published)
+- **Chad's own line (17 Nov):** "Approve: install collector-mac.mjs mac-0.3.4 from aircraft-dots-rc c3ef264 (sha256 2c36a9cd…6d0a) in ~/mother-earth; run.sh stays (f6f587ae…65ce); schedule unchanged at 10 requests per rolling 24 hours; AIRCRAFT_POSITIONS stays unset".
+- **First ingest on hub 0.6.18, before the install:** `16:01:05Z [tick] sample due (last 1856 s ago)`, hub answer `200 {"ok":true,"layer":"ships","published":"cells only (down)","snapshot":"2026-11-17T16-01Z"}`, `16:01:23Z [tick] ships exit=3`. A fast "down" ships sample (18 s), the same signature as the earlier ones on 16 and 17 Nov under hub 0.6.17; the hub accepted the down report. **A ships sample with records has not yet been seen on 0.6.18.**
+- **Installed 16:02:22 UTC** from a clone at `c3ef264eaebedb1069ebbf16b73e03d9ced2b994`, written beside the old file and moved into place between minute ticks: `collector-mac.mjs` sha256 `2c36a9cd89ecfc73e686fb509262e3d094801785ef4600f62273de303d4b6d0a` (29,983 bytes, `COLLECTOR_VERSION` mac-0.3.4). Previous file (`e88ada68c3f334a0e98b35c12bf00c4d0c330c26d35f5e8644226ca364db3d47`, mac-0.3.3) preserved in `~/mother-earth/_preserved/20261117T160222Z/`. `run.sh` untouched: `f6f587aec646ca8bfdeeebad4d162077f683ecc6eb51514aab58f999216f65ce`.
+- **After the install:** the file loads as a module under node 22 in the Mac folder's Linux shell (exports `FEEDS, buildEnvelope, openskyDots, openskyPositions`; nothing run, no request); minute tick at 16:03:02 UTC (`last_tick`); `launchd.log` 0 bytes; `state/aircraft.on` present; `aircraft_requests` three entries; no leftover `.new` file. The old file carried a macOS access-list mark (`+` in the listing) that the new one does not; owner permissions are the same. **Not yet seen:** the Mac's own node running the new file (first use: the ships sample due about 16:32 UTC; first aircraft run due about 17:23 UTC).
+- **Expected at the first aircraft run:** the hub drops the positions (variable unset): reply `records: 0`, `positions: "not stored (AIRCRAFT_POSITIONS is not 1)"`.
+- **Rollback:** copy `_preserved/20261117T160222Z/collector-mac.mjs` back over `~/mother-earth/collector-mac.mjs`.
+
+## Next
+1. Read the log about 16:36 UTC (first ships sample on the new collector file) and about 17:32 UTC (first aircraft run on mac-0.3.4; then both hub read-backs).
+2. Chad's own lines, in order (packet §7): set `AIRCRAFT_POSITIONS=1` (publishes coordinates) → REGISTER → merge the page. Chad to look at the dot colour before the merge.
+3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run; also wind arrival times.
+
 ## 17 Nov 15:54 UTC (clock reading) — **Hub 0.6.18 DEPLOYED from `aircraft-dots-rc` `c3ef264`, `AIRCRAFT_POSITIONS` unset; counts read back unchanged; no positions stored or served** (production: hub code only; the hub is now ahead of main)
 - **GPT (relayed by Chad): rev 2.1 passes review** (Worker hash matches, future timestamps withheld, 75 and 32 checks rerun). Real-upload verification, phone appearance and the broader browser suites remain outstanding; coordinate publication needs Chad's separate approval.
 - **Chad's own line (17 Nov):** "Approve: deploy hub 0.6.18 from aircraft-dots-rc c3ef264 (phase1/worker.js sha256 ad5bce33…4132) with AIRCRAFT_POSITIONS unset; no positions stored or served; then read back /cells/opensky and /snapshot/opensky with the mac-0.3.3 collector".
@@ -18,11 +31,6 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Not checked:** D1 `collector_runs`; a scheduled ingest on 0.6.18 (the next aircraft run is due about 17:23 UTC, ships sooner); Worker CPU.
 - **State:** hub 0.6.18 is live and **ahead of main** (main's `phase1/worker.js` is 0.6.17). Anything deployed from main before `aircraft-dots-rc` is merged would roll the hub back. Mac collector still mac-0.3.3; page unchanged.
 - **Rollback (Chad's own line):** redeploy 0.6.17 (`59129514…e93e`, main's `phase1/worker.js`).
-
-## Next
-1. Read the first scheduled ingests on hub 0.6.18 (ships, then aircraft about 17:23 UTC): accepted, counts served as before.
-2. Chad's own lines, in order (packet `reviews/2026-11-17-aircraft-dots-rc.md` §7): install collector mac-0.3.4 → set `AIRCRAFT_POSITIONS=1` (publishes coordinates) → REGISTER → merge the page. Chad to look at the dot colour before the merge.
-3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run; also wind arrival times.
 
 ## 17 Nov 15:46 UTC (clock reading) — **`aircraft-dots-rc` rev 2.1 (`c3ef264`): future snapshot times withheld with no allowance; GPT: both production holds resolved** (branch only; nothing installed, deployed or merged)
 - **GPT (relayed by Chad, 17 Nov), on `b23cd1e`:** both production holds are resolved in rev 2; reran both suites on the Mac copy (74 and 32 passed); own probes confirmed unexpected metadata is stripped, expired coordinates are withheld, both routes use `no-store`, and removing the variable stops serving coordinates. **One mismatch:** the packet said future timestamps are withheld but the code allowed ten minutes ahead (a snapshot five minutes ahead was published in GPT's probe). Keeping one expired snapshot in private R2 until replacement or clearing is acceptable; no scheduled erasure. Release order sound. Outstanding: real-upload verification, phone appearance, the broader browser suites.
