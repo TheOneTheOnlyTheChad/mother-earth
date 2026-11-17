@@ -222,7 +222,7 @@ async function aircraftRoute(env, kind) {
   let stored; try { stored = JSON.parse(await o.text()); } catch (_) { return json({ error: 'stored aircraft file is not readable', layer: AIRCRAFT_LAYER }, 503, NS); }
   if (kind === 'cells') return json(aircraftNoRecords(aircraftProject(stored, false)), 200, NS);
   const full = aircraftProject(stored, true), had = full.records.length > 0;
-  const t = Date.parse(full.window_end), expired = !Number.isFinite(t) || Date.now() - t >= AIRCRAFT_MAX_AGE_S * 1e3 || t - Date.now() > 600e3;   // no readable time, or a time in the future, is not served either
+  const t = Date.parse(full.window_end), expired = !Number.isFinite(t) || Date.now() - t >= AIRCRAFT_MAX_AGE_S * 1e3 || t > Date.now();   // no readable time, or ANY time later than the hub's clock, is not served either (no allowance; it clears itself once the clock passes it)
   const state = !had ? 'none' : !aircraftOn(env) ? 'withheld_off' : expired ? 'withheld_expired' : 'published';
   const out = state === 'published' ? full : aircraftProject(stored, false);
   out.positions = state; out.positions_max_age_s = AIRCRAFT_MAX_AGE_S;

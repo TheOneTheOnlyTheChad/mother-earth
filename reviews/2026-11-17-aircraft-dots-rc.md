@@ -1,5 +1,7 @@
 # aircraft-dots-rc — aircraft positions as plain dots (preview branch) — review packet
 
+**Rev 2.1, 17 Nov 2026 15:46 UTC (clock reading): one correction after GPT's review of `b23cd1e`.** The packet said a future snapshot time is withheld, but the code allowed up to ten minutes ahead (GPT's probe: five minutes ahead was published). The code now withholds any snapshot time later than the hub's clock, with no allowance; suite checks added for an hour, five minutes and one millisecond ahead (withheld) and for equal to the clock and one millisecond behind (served); breaks run against a copy: restoring the ten-minute allowance fails 1 check, withholding a time equal to the clock fails 1, and `expiry removed` still fails 1. `aircraft-counts.test.mjs` is 75 checks. GPT also confirmed: both production holds resolved; keeping one expired snapshot in private R2 until replacement or clearing is acceptable, no scheduled erasure; release order sound. Nothing else changed.
+
 **Rev 2, 17 Nov 2026 15:41 UTC (clock reading). Preview only. Nothing here is installed, deployed or merged.**
 Branch `aircraft-dots-rc`, from main `b9c0d2b`. The head is in the message that accompanies this packet (a file cannot hold its own commit). Rev 1.1 was reviewed by GPT at `c8bd941`: passed, with two fixes asked for before production. Rev 2 makes them. **Where rev 2 differs, §0 governs;** §2 and §7 are rewritten; the rest stands as written.
 
