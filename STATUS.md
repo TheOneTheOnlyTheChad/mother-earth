@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 07:40 UTC (clock reading) — **Cape Town station: why the Pi was unreachable at 07:36 UTC** (docs only)
+- Chad: the Mac was not on the home network (he was out, on a cafe's network). The Pi is reachable only from the home network, so the helper's requests timed out and `adsb-feeder.local` did not resolve. Not a Pi fault; the preview's "Receiver unreachable" was the correct state.
+- The live aircraft smoke at 40 km waits until the Mac is back on the home network. The balloon replay is unaffected (it reads the saved flight from disk).
+
 ## 17 Nov 07:38 UTC (clock reading) — **Cape Town station rev 3: two more freshness fixes; private balloon replay of SondeHub flight 55126368 working on the real flight; Pi unreachable for the 40 km smoke** (branch `cape-town-station-rc` `b55a434`; private)
 - **GPT (relayed by Chad):** SondeHub's open telemetry is CC BY-SA 2.0 (credit, licence link, state changes, ShareAlike for any published adaptation); sensor readings to be treated as uncalibrated; single archived flight only. Two remaining A1 cases: a repeated reading reset the 30 s timer; a Pi clock stepping backwards was ignored until it caught up.
 - **A1 fixed:** the 30 s limit runs from the last reading that moved forward; a receiver clock reset is followed once a second, advancing reading confirms it. Aircraft suite 50 passed; the new cases fail on the rev 2 page.
