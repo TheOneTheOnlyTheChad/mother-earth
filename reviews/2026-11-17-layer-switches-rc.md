@@ -1,0 +1,38 @@
+# layer-switches-rc — one kind of labelled switch for every map layer (Bare Earth stage B) — review packet
+
+**Rev 1, 17 Nov 2026 18:06 UTC (clock reading). Branch only: nothing merged or deployed by this branch.**
+Branch `layer-switches-rc`, made from `aircraft-dots-rc` (it changes the same page files and that branch merges first). The head is in the message that accompanies this packet. Proposal: `docs/concepts/BARE-EARTH-LAYERS-PROPOSAL.md` rev 2 on main (§0: order B → A → C).
+
+## 1. What was asked
+Chad, 17 Nov 2026: "Start bare every time for now. Go ahead with the first Bare Earth stage on a branch — consistent labelled switches for every map layer, following the agreed build order. Send GPT the preview and review packet when ready." (So: no remembered choices for now; stage C is parked.)
+
+## 2. What this stage changes
+Before, two controls did the same job. The newer layers (day/night, ocean heat, Dust RGB, wind, aircraft, night lights, orbital) each had a labelled switch (`button.ovl-tgl`, `role="switch"`, `aria-checked`, a box and a text label). Six layers (earthquakes, fire detections, ships, forest disturbance, drifting buoys, microplastic) used the card's heading as a pressed button (`button.tgl`, `aria-pressed`): no box, no label saying what pressing it did.
+
+Now all of them use the same switch:
+- **Markup (`index.html`, six cards):** the heading is a plain row (`div.head`: dot, name, state word). Under it: `<button class="ovl-tgl tgl" type="button" id="tgl-<layer>" data-layer="<layer>" role="switch" aria-checked="…" aria-describedby="o-<layer>">` with the box and the label "<Name> — show on the globe". `class="tgl"` and `data-layer` are kept, so the page's one click handler and the existing suites still find the control.
+- **Script (`index.html`, one line):** the handler sets `aria-checked` in place of `aria-pressed`. Nothing else in the script changed: the same `on[…]` map, the same fetching, rendering and `reviewResults()`.
+- **Style (`style.css`):** the old `.card button.tgl` rules are gone; `.card.off` no longer dims the whole card: `.card.off>:not(.ovl-tgl){opacity:.5}` dims everything in an off card except its switch, so the control keeps full contrast. `.card.toggle{cursor:pointer}` removed (the card is no longer the control). `style.css?v=` bumped on all five pages.
+- **Defaults are unchanged in this stage:** the four core layers are still on at load. Bare-at-load is stage A, next.
+
+## 3. What it does not change
+The hub, any data, any wording of readings, status or freshness; the order or grouping of cards (the single "Layers" list and its button arrive with stage A); the orbital switches (already this control); the Timeline, Moon and Sun pages (only the `style.css?v=` value).
+
+## 4. Checks run (Linux container, Playwright's own Chromium, globe.gl 2.45.0)
+- **New: `phase1/layer-switches-ui.test.cjs`: 54 passed** at 1440 × 900 and 390 × 844. It checks all 16 map-layer controls: each a `<button type="button" role="switch">` with `aria-checked`, class `ovl-tgl`, a box hidden from assistive technology and a text label; none with `aria-pressed`; defaults as before; the six converted cards keep name and state outside the switch; click, Space and Enter each flip a switch and the card's off state; an off card is dimmed while its switch has opacity 1; switch height at least 44 px; no page errors. **Breaks, each fails the suite:** `pressed` 8, `no-role` 2, `dim-switch` 2, `no-label` 4.
+- **Every browser page suite in `phase1/` was run on this branch (39 files).** 37 pass, including the ones that drive these controls: ux-round1 34, drifters-ui 25, plastic-ui 29, place-ui 35, legend-active-ui 548, fire-status-ui 279, quakes-ships-status-ui 124, freshness-wording-ui 156, optional-layers-status-ui 230, mobile-pass 131, desktop-overflow 258, cell-perf-ui 43, search-ui 104, orbital-browser 113, night-lights-ui 152, oceanheat-ui 109, dustrgb-ui 67, wind-ui 92, sky-ui 79, sky-zoom-ui 351, sun-globe 103, moon-globe 67, moon-lit 138, moon-lro-path 68, timeline-ui 591, timeline-changes-ui 173, timeline-axis 96, arts-ui 90, backdrop-layer 27, buoy-temp-ui 33, kept-ui 21, fires-wording-ui 35, skycraft-ui 77, status-notes-ui 17, terminator-ui and terminator-behaviour (exit 0), aircraft-dots-page 37.
+- **Two suites fail one check each, and fail the same check on main (`d212584`) in this container, so neither comes from this branch:** `smoke-fixes` ("Sources 360: no page-level horizontal overflow", 51 passed, 1 failed) and `osmc-reliability-ui` ("old page: no page errors", 40 passed, 1 failed). **Not investigated:** whether they are real faults on the live page or effects of this container (fonts, the old commit it loads). Worth its own look.
+- **Four test lines changed** to read `aria-checked` where they read `aria-pressed` (drifters-ui, plastic-ui, place-ui, ux-round1). No other expectation changed.
+- **Found on the way, fixed on `aircraft-dots-rc` (test only, `e227d4b`):** `quakes-ships-status-ui` has a source-text check of the hub's ingest-down line, which hub 0.6.18 reworded for aircraft; the check now accepts it. Ships behaviour is unchanged and no code file changed (`phase1/worker.js` is still `ad5bce33…4132`, the deployed file). That suite had not been run before rev 2 of that branch went to review.
+
+## 5. Not done, not checked
+1. **Not seen by a person on a phone.** The suites run at 390 × 844 in desktop Chromium.
+2. **Screen reader behaviour** (how the switch and its `aria-describedby` line are announced) is not tested with a real screen reader.
+3. The label wording "— show on the globe" is a first proposal.
+4. The six cards still sit where they were (core cards on the left, buoys and microplastic in the optional group): one list is stage A's work.
+5. This branch carries `aircraft-dots-rc`: it can only be merged after that branch, or together with it.
+
+## 6. Questions for GPT
+1. Is `role="switch"` with `aria-describedby` pointing at the card's reading line right, or should the description be the evidence line?
+2. Label wording: "<Name> — show on the globe", or shorter?
+3. Dimming everything in an off card except the switch: acceptable, given stage A will make "off" the normal state for every card and the numbers should stay readable (proposal P2)? If not, should off cards not be dimmed at all?
