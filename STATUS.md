@@ -4,10 +4,25 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 09:19 UTC (clock reading) — **Aircraft counts step 1 complete: ONE upload made from the home connection; read-back clean (counts only, no individual aircraft records)** (production: one OpenSky request, one ingest to the hub; schedule off; `OPENSKY_ENABLED` unset; page not merged)
+- **Authority:** Chad's own Approve line of 17 Nov (install mac-0.3.3 from `aircraft-counts-rc` `239e685` and one upload). Martin's "go ahead without waiting" on record (ENQUIRIES rev 9).
+- **Home network confirmed first:** the Pi's local `aircraft.json` answered in Chad's Chrome at 09:08 UTC (it is reachable only from the home network).
+- **The run:** Chad ran `~/mother-earth/run.sh aircraft` in Terminal (Claude's shell on the Mac is a sandbox that cannot reach OpenSky or run the Mac's collector). Log: `09:17:09Z manual aircraft`, hub answer `200 {"ok":true,"layer":"opensky","snapshot":"2026-11-17T09-17Z","records":0,"cells":452,"bytes":41682}`, `09:17:16Z aircraft exit=0`. Ledger `state/aircraft_requests`: one entry (1794907029). Ships was due 1,717 s later, outside the guard.
+- **D1 `collector_runs` id 11848:** layer `opensky`, 09:17:10.046 to 09:17:16.581 UTC, ok, HTTP 200, records 0, 41,682 bytes, "ingested from mother-earth-mac-0.3.3 vmac-0.3.3".
+- **Read-back from Chad's Chrome, 09:17–09:18 UTC (hub 0.6.17):**
+  - `/cells/opensky`: HTTP 200, 41,627 bytes; **no `records`, `record_fields` or `record_format` keys**; 452 cells, total 5,411, largest 158, Cape Town cell 21; every cell is exactly `count` + `coverage` (partial, volunteer_receivers_only); no bad cell ids.
+  - `/snapshot/opensky`: HTTP 200, 41,682 bytes; **`records` is an empty list, `record_fields` is `[]`**, `record_format` "rows"; the same 452 cells and total.
+  - Both: `window_start` = `window_end` = 09:17:11.000 UTC (OpenSky's snapshot time); `retrieved_at` 09:17:12.749; `received_at` 09:17:13.363; `stale_after_s` 10800; `position_age_cutoff_s` 300; counts: 5,615 state vectors, 5,411 counted, 47 without a position, **157 with a position older than the 300 s limit**, 0 without a position time, 0 duplicates, 616 on the ground; `credits_remaining` 3992 (two world requests today at 4 credits each); citation "The OpenSky Network, https://opensky-network.org"; the records policy sentence.
+  - **Searches of both full bodies:** no 6-digit hex strings in quotes, no callsign-shaped strings, no array other than the empty `interruptions`. The only decimals are the five timestamps; the only match for identifier words is "callsigns" inside the policy sentence.
+- **First measurement of the 300 s limit:** it left out 157 of 5,568 aircraft with a position (2.8%).
+- **Not done / next (each on Chad's own line):** schedule on; REGISTER; page merge. Open before the schedule: the collector asks OpenSky from whatever network the Mac is on (home-network check or Pi collection; Chad's decision). Martin's credits reply (rev 10) allows a faster cadence if Chad wants one.
+- **Cape Town station:** live aircraft smoke at 40 km done on the home network at 09:18:58 UTC (6 plotted at 40 km, 9 at 100 km, 16 at 320 km; packet §8 on `cape-town-station-rc` `d540c5d`).
+- **Ships:** the sample that started 08:59:17 UTC ended down at 09:06:32 with failed upload attempts, while the Mac was moving between networks. Not investigated; the next sample will show whether it is back to normal.
+
 ## 17 Nov 08:25 UTC (clock reading) — **OpenSky: Martin on credits: "You can easily use all the credits you have - that's what they are for."** (docs only)
 - Pasted by Chad (Gmail shows 10:21 AM, his local time). Recorded verbatim in `docs/research/ENQUIRIES-2026-11.md` rev 10 with a bounded reading: the credits are OpenSky's limit; "about ten a day" is not a ceiling OpenSky asks for. Nothing in it about which connection requests come from, cloud servers, identifiers or commercial use. Chad's message that it answers is not on record.
 - **No change made.** The runner's cap stays 10 requests in 24 h. A faster cadence is Chad's decision and would be a reviewed code change. The one upload is still held for the home network.
-- **Mac copy not synced for this entry:** the Mac was unreachable (Chad out). To sync at the next contact.
+- Mac copy synced at the next contact (09:2x UTC).
 
 ## 17 Nov 08:15 UTC (clock reading) — **Aircraft counts step 1, first half: collector mac-0.3.3 INSTALLED in `~/mother-earth`; the one upload is held until the Mac is on the home network** (production: Mac runtime files only; no OpenSky request, no upload, schedule off, `OPENSKY_ENABLED` unset)
 - **Chad's own line (17 Nov):** "Approve: install collector mac-0.3.3 from aircraft-counts-rc 239e685 in ~/mother-earth and make one aircraft counts upload (one OpenSky request; schedule stays off; OPENSKY_ENABLED stays unset)". GPT's matching text was relayed with it (does not count on its own).
