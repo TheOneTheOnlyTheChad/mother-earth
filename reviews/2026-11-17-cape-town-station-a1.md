@@ -1,5 +1,7 @@
 # Cape Town observation station — A1 private preview: "Aircraft seen by our Cape Town receiver"
 
+**Rev 2, 17 Nov 2026 (17 Nov 06:32 UTC clock reading): GPT's review of rev 1; §6 records the three freshness fixes and the range controls and governs where it differs from §3–§5.**
+
 Rev 1, 17 Nov 2026 (17 Nov 06:10 UTC clock reading). Branch `cape-town-station-rc`. For GPT's review. **Private, local-network preview only.** No page on the public site, no hub change, no upload, nothing on the Pi changed. The public OpenSky release, additional feeds and hardware purchases are outside this pass (Chad).
 
 ## 1. Scope (Chad's Go, 17 Nov, own message)
@@ -42,3 +44,19 @@ Spec: `docs/concepts/CAPE-TOWN-STATION-SPEC.md` (A1 only). Verify the local read
 - The helper runs only while its Terminal window is open, on the Mac, on the home network.
 - Not tested: Safari, phone, screen reader; a receiver-clock offset against the Mac's clock (the stale rule assumes both keep time).
 - A2 (other networks) and section 4 instruments: not started, by scope.
+
+## 6. Rev 2 — GPT's review of rev 1 (relayed by Chad, 17 Nov)
+**OpenSky:** GPT refreshed the dashboard: Online, 74 messages per second at 06:20 UTC (08:20 SAST), i.e. received after the smoke test. GPT: leave the Pi settings alone; watch the Pi's "intermittent" warning only if OpenSky's samples stop advancing; the MLAT warning is about synchronisation between receivers. This closes the dashboard item in §5.
+
+**Three freshness cases GPT reproduced on `preview.html`, all fixed:**
+1. **Clock difference was read as staleness (and a fast clock passed unnoticed).** Staleness no longer compares the Pi's clock with the Mac's. The page watches whether the receiver's own clock moves between readings. The smallest gap seen between the two clocks is taken as the clock difference; how far the gap grows past it is the data's age (stale past 30 s), and an unchanged receiver clock for 4 readings is stale as before. A first reading more than 30 s off is shown as "Checking the receiver…" with nothing drawn until a second reading settles it. A difference over 10 s is stated on the page ("about 45 s behind/ahead of this Mac's clock"). Limit: data that arrives late by a constant amount but keeps moving cannot be told from a clock difference, and shows as one.
+2. **Live after 35 s without a poll.** A reading now expires on its own: 30 s after the last fresh reading the page shows "No fresh reading" and draws nothing, whatever the last poll concluded.
+3. **Overlapping polls; an older answer replacing a newer one.** One poll at a time: a poll still waiting blocks the next (counted), each has a 6 s limit, and a reading older than the one held is ignored.
+
+**Range controls:** 40 km, 100 km, 320 km buttons (rings 10/20/30/40, 25/50/75/100, 50/100/200/300). Aircraft beyond the chosen range stay in the table, marked, and are counted under the plot. `?range=40` opens at that range. Default 320 km.
+
+**Checks:** local suite now **42 passed, 0 failed**. New cases: Pi clock 45 s behind (checking, then live with the note); 45 s ahead; 2 min behind but moving; old and not moving (checking, then stale); clocks agreeing (no note); no poll for 27 s (still live) and for 36 s (expired, nothing drawn), then recovery; a receiver taking 3.5 s per answer (polls skipped, never two requests at once); answers alternating newer/older (receiver time never goes backwards on the page); the three ranges, the pressed state, `?range=40`, and the empty state at 40 km. **Run against the rev 1 page, the new freshness, overlap and range cases fail.** `preview.mjs` is unchanged.
+
+**Not done:** the live smoke was not repeated on the real Pi at rev 2. The helper had been stopped when Claude tried (06:31 UTC). It needs `node ~/mother-earth/cape-town/preview.mjs` running again; the Mac copy of the page is already rev 2.
+
+**Radiosonde first look** (GPT's second ask): `docs/research/CAPE-TOWN-RADIOSONDE-FIRST-LOOK-2026-11-17.md`.

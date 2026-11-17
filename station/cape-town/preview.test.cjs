@@ -13,12 +13,16 @@ const ac = () => [
   { hex: 'aaa006', alt_baro: 12000, lat: -33.1, lon: 18.9, seen_pos: 0.2, seen: 0.2, rssi: -9 },                                                                     // position but no range/bearing, no heading
   { hex: 'aaa007', flight: 'NOHDG   ', lat: -33.3, lon: 18.2, seen_pos: 2, seen: 1, r_dst: 30, r_dir: 270, rssi: -15 },                                              // no heading, no altitude: dot
 ];
-let frozenNow = null;
-const pi = http.createServer((req, res) => {
-  if (mode === 'hang') return;                                           // never answers
+let frozenNow = null, inPi = 0, maxInPi = 0, flip = 0;
+const pi = http.createServer(async (req, res) => {
+  inPi++; maxInPi = Math.max(maxInPi, inPi); res.on('close', () => { inPi--; });
+  if (mode === 'hang') return;
+  if (mode === 'slow') await sleep(3500);                                           // never answers
   if (mode === 'http500') { res.writeHead(500); return res.end('no'); }
   if (mode === 'garbage') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end('{"hello":1}'); }
-  const now = mode === 'frozen' ? (frozenNow = frozenNow || Date.now() / 1000) : mode === 'old' ? Date.now() / 1000 - 120 : Date.now() / 1000;
+  const real = Date.now() / 1000;
+  const now = mode === 'frozen' ? (frozenNow = frozenNow || real) : mode === 'frozen-old' ? (frozenNow = frozenNow || real - 120) : mode === 'old' ? real - 120
+    : mode === 'behind45' ? real - 45 : mode === 'ahead45' ? real + 45 : mode === 'backwards' ? (flip++ % 2 ? Math.floor(real) - 20 : Math.floor(real)) : real;
   res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ now, messages: 4311880, aircraft: mode === 'empty' ? [] : ac() }));
 });
 (async () => {
@@ -52,9 +56,48 @@ const pi = http.createServer((req, res) => {
   ok('sim=stale: live at first (one reading cannot show staleness)', s.state === 'live', s);
   await sleep(13000); s = await S();
   ok('sim=stale: becomes stale when the data stops changing; nothing drawn', s.state === 'stale' && /Receiver data is stale/.test(s.title) && s.plotted === 0 && /has not changed/.test(s.whyText), s);
-  mode = 'old'; await open(''); s = await S();
-  ok('old receiver clock: stale by age; nothing drawn', s.state === 'stale' && /old/.test(s.whyText) && s.plotted === 0, s);
-  mode = 'frozen'; await open(''); await sleep(13000); s = await S();
+  // --- clock difference versus stale data (GPT's review of rev 1)
+  mode = 'behind45'; await open(''); s = await S();
+  ok('receiver clock 45 s behind, first reading: not called live or stale yet; nothing drawn', s.state === 'checking' && s.plotted === 0 && /either old data or a clock difference/.test(s.whyText), s);
+  await sleep(4000); s = await S();
+  ok('receiver clock 45 s behind, data changing: live, with the clock difference stated', s.state === 'live' && s.plotted === 4 && /about 45 s behind this Mac/.test(s.whyText), s);
+  mode = 'ahead45'; await open(''); await sleep(4000); s = await S();
+  ok('receiver clock 45 s ahead, data changing: live, with the clock difference stated', s.state === 'live' && s.plotted === 4 && /about 45 s ahead of this Mac/.test(s.whyText), s);
+  mode = 'old'; await open(''); await sleep(4000); s = await S();
+  ok('receiver clock 2 min behind but moving: live with the clock note, not stale', s.state === 'live' && /2 min behind/.test(s.whyText), s);
+  frozenNow = null; mode = 'frozen-old'; await open(''); s = await S();
+  ok('old and not moving, first reading: checking', s.state === 'checking' && s.plotted === 0, s);
+  await sleep(13000); s = await S();
+  ok('old and not moving: stale; nothing drawn', s.state === 'stale' && /has not changed/.test(s.whyText) && s.plotted === 0, s);
+  mode = 'live'; await open(''); s = await S();
+  ok('clocks agree: live with no clock note', s.state === 'live' && s.whyText === '', s);
+  // --- a reading expires on its own after 30 s without a fresh one
+  await open(''); await page.evaluate(() => Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }));   // polls stop, the page keeps running
+  await sleep(3500); const p0 = (await S()).polls; await sleep(24000); s = await S();
+  ok('no poll for under 30 s: still live', s.state === 'live' && s.polls === p0, s);
+  await sleep(9000); s = await S();
+  ok('no poll for over 30 s: no longer live; nothing drawn', s.state === 'expired' && /No fresh reading/.test(s.title) && s.plotted === 0 && s.polls === p0 && /Nothing is drawn until a fresh reading arrives/.test(s.whyText), s);
+  await page.evaluate(() => { delete document.hidden; }); await sleep(4000); s = await S();
+  ok('polls resume: live again', s.state === 'live' && s.plotted === 4, s);
+  // --- one poll in flight; answers cannot arrive out of order
+  mode = 'slow'; maxInPi = 0; await open(''); await sleep(15000); s = await S();
+  ok('slow receiver (3.5 s per answer, polls every 3 s): polls are skipped while one is waiting', s.skipped >= 2 && s.state === 'live', s);
+  ok('never more than one request to the receiver at a time', maxInPi === 1, maxInPi);
+  mode = 'backwards'; flip = 0; await open(''); const seen = []; for (let i = 0; i < 6; i++) { await sleep(3000); seen.push((await S()).lastNow); }
+  ok('a reading older than the one held is ignored (receiver time never goes backwards on the page)', seen.every((v, i) => i === 0 || v >= seen[i - 1]), seen);
+  // --- range controls
+  mode = 'live'; await open(''); s = await S();
+  ok('range: 320 km by default, four rings', s.range === 320 && s.rings.join() === '50 km,100 km,200 km,300 km' && s.plotted === 4, s);
+  await page.click('#ranges button[data-km="40"]'); s = await S();
+  ok('range 40 km: rings 10 to 40; aircraft beyond it are listed and counted, not drawn', s.range === 40 && s.rings.join() === '10 km,20 km,30 km,40 km' && s.plotted === 2 && /2 beyond the 40 km range/.test(s.nopos) && s.rows === 6, s);
+  ok('range 40 km: the pressed button is marked', await page.getAttribute('#ranges button[data-km="40"]', 'aria-pressed') === 'true' && await page.getAttribute('#ranges button[data-km="320"]', 'aria-pressed') === 'false');
+  await page.click('#ranges button[data-km="100"]'); s = await S();
+  ok('range 100 km: rings 25 to 100; all four in range', s.range === 100 && s.rings.join() === '25 km,50 km,75 km,100 km' && s.plotted === 4, s);
+  await open('?range=40'); s = await S();
+  ok('?range=40 opens at 40 km', s.range === 40 && s.plotted === 2, s);
+  mode = 'empty'; await open('?range=40'); s = await S();
+  ok('range 40 km, nothing heard: still the fresh-and-empty state', s.state === 'live' && /no aircraft with a usable position right now/.test(s.title), s);
+  frozenNow = null; mode = 'frozen'; await open(''); await sleep(13000); s = await S();
   ok('receiver frozen for real: stale; nothing drawn', s.state === 'stale' && s.plotted === 0, s);
 
   mode = 'live'; await open('?sim=down'); s = await S();
