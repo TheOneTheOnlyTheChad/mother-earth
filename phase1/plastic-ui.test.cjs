@@ -61,7 +61,7 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 5 min — failur
   const R = page => page.evaluate(() => {
     const c = ME.renderState(); const polys = window.__polys ? window.__polys() : null;
     return { r: c, p: ME.pairState('plastic').plastic, usgs: ME.pairState('usgs').usgs, leg: !document.getElementById('leg-plastic').hidden,
-      st: document.getElementById('s-plastic').textContent, pressed: document.querySelector('[data-layer="plastic"]').getAttribute('aria-pressed'),
+      st: document.getElementById('s-plastic').textContent, pressed: document.querySelector('[data-layer="plastic"]').getAttribute('aria-checked'),
       v: document.getElementById('v-plastic').textContent, o: document.getElementById('o-plastic').textContent, note: document.getElementById('n-plastic').textContent, polys };
   });
   const toggle = async page => { await page.click('[data-layer="plastic"]'); await page.waitForTimeout(400); };
@@ -78,7 +78,7 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 5 min — failur
   let { ctx, page, hits, count, perr } = await run({ width: 1280, height: 860 });
   await page.evaluate(() => { const g = window.ME && ME; });
   let x = await R(page); const basePts = x.r.points;
-  ok('1 fresh load: plastic off (aria-pressed false, card says off)', x.pressed === 'false' && x.st === 'off' && !x.r.on.plastic, x);
+  ok('1 fresh load: plastic off (switch aria-checked false, card says off)', x.pressed === 'false' && x.st === 'off' && !x.r.on.plastic, x);
   ok('1 fresh load: no plastic markers, rings, cells or legend entry', x.r.plasticPoints === 0 && x.r.plasticRings === 0 && x.r.plasticCells === 0 && !x.leg, x.r);
   ok('1 fresh load: ZERO plastic requests; NOAA/SEANOE never contacted from the browser', count(/plastic|DIRECT/) === 0, hits.filter(h => /plastic|DIRECT/.test(h)));
   ok('1 card wording (GPT, 4 Nov): published by NOAA NCEI, tow-start, not current position, missing marker ≠ plastic-free', /published by NOAA NCEI/.test(x.note) && /tow-start locations/.test(x.note) && /not plastic's current position/.test(x.note) && /A missing marker does not establish plastic-free water/.test(x.note), x.note);

@@ -76,7 +76,7 @@ const cellOf = (lat, lng) => `${Math.floor((lat + 90) / 4)}_${Math.floor((lng + 
   const panel = page => page.evaluate(() => ({ open: document.getElementById('insp').classList.contains('show'), h: document.getElementById('insp-h').textContent,
     rows: [...document.querySelectorAll('#insp-dl dt')].map(dt => [dt.textContent, dt.nextElementSibling.textContent]), more: document.getElementById('insp-more').textContent,
     html: document.getElementById('insp-dl').innerHTML, place: ME.placeState(), render: ME.renderState(), plasticCard: document.getElementById('s-plastic') && document.getElementById('s-plastic').textContent,
-    pressed: document.querySelector('[data-layer="plastic"]') && document.querySelector('[data-layer="plastic"]').getAttribute('aria-pressed') }));
+    pressed: document.querySelector('[data-layer="plastic"]') && document.querySelector('[data-layer="plastic"]').getAttribute('aria-checked') }));
   const row = (P, k) => (P.rows.find(r => r[0] === k) || [null, null])[1];
   const waitPlace = page => page.waitForFunction(() => !/Loading/.test(document.querySelector('#insp-dl dt') ? document.querySelector('#insp-dl dt').textContent : 'Loading'), null, { timeout: 15000 });
 
