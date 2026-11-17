@@ -4,17 +4,23 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 16:39 UTC (clock reading) — **`aircraft-dots-rc` rev 3 (`ab7f37e`, page only) after Chad's look at the preview; proposal "Bare Earth first" rev 1 written** (branch and docs only)
+- **Chad looked at the dots preview** in the Mac's pane (branch page at `c3ef264`, 6,500 synthetic positions, colour and size buttons). His screenshot showed counts and dots on together, and dots swelling into blobs when zoomed in. **Chad (17 Nov):** keep both aircraft layers and make them exclusive; the "small" size looks good.
+- **Rev 3, head `ab7f37e398f05b6fcc9b20f21cc8fb98e68e6b0b`** (commit time 16:38:26 UTC): switching counts or positions on switches the other off; dot radius 2.4 → 1.6 px. Changed: `aircraft.js` (`296a0be8…be9d`), `index.html` (`45c783b4…a280`), `phase1/aircraft-dots-page.test.cjs`, the packet. **Hub and collector files unchanged** (`ad5bce33…4132`, `2c36a9cd…6d0a`: what is deployed and installed). Suites: aircraft-dots-page 37 passed, five breaks each fail (new `both-on` fails 3); aircraft-counts 75 passed. **Needs GPT's look at the page change before the merge.** Dot colour still pale yellow; Chad has not chosen another.
+- **Chad asked** for every feature to be a switch, starting from a bare Earth. **Proposal: `docs/concepts/BARE-EARTH-LAYERS-PROPOSAL.md` rev 1** (this commit; no code). Three questions for Chad, four for GPT.
+
+## Next
+1. Read the log about 17:32 UTC (first aircraft run on mac-0.3.4; then both hub read-backs).
+2. GPT: page-only review of `aircraft-dots-rc` rev 3 `ab7f37e`; and the Bare Earth proposal rev 1.
+3. Chad's own lines, in order (packet §7): set `AIRCRAFT_POSITIONS=1` (publishes coordinates) → REGISTER → merge the page. Chad to look at the dot colour before the merge.
+4. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run; also wind arrival times.
+
 ## 17 Nov 16:37 UTC (clock reading) — **First ships run on the mac-0.3.4 collector file: it started and uploaded; the sample was a fast "down" (websocket error). Hub 0.6.18 published its own ships fallback with records** (read-only)
 - **Log, read 16:36:23 UTC:** `16:32:05Z [tick] sample due (last 1842 s ago)`, hub answer `200 {"ok":true,"layer":"ships","published":"cells only (down)","snapshot":"2026-11-17T16-32Z"}`, `16:32:24Z [tick] ships exit=3`. `launchd.log` 0 bytes; minute tick 16:36:02; installed file still `2c36a9cd…`. **So the Mac's own node runs the new collector file** (it built and uploaded a report). The sample itself failed in 19 s.
 - **Hub, 16:36:44 UTC:** `/cells/ships` down, note "ingested down: Error: websocket error: ", retrieved 16:32:21.866. That is the aisstream socket failing on the Mac, the fast "down" seen on 16 and 17 Nov under the earlier hub and collector (two in a row now: 16:01 and 16:32 UTC).
 - **`/snapshot/ships`: ok, 3,232 records, retrieved 16:17:01.495 UTC, `ingested_from` "hub 0.6.18":** the hub's own cloud fallback ran after the 16:01 down and published records normally on 0.6.18. A Mac ships sample with records has still not been seen on 0.6.18.
 - **For the 18 Nov ships check:** whether the hub's fallback sample (16:17) and the Mac's next attempt (16:32) are related (aisstream allows three connections per account); the two consecutive Mac failures.
 - No change made.
-
-## Next
-1. Read the log about 17:32 UTC (first aircraft run on mac-0.3.4; then both hub read-backs).
-2. Chad's own lines, in order (packet §7): set `AIRCRAFT_POSITIONS=1` (publishes coordinates) → REGISTER → merge the page. Chad to look at the dot colour before the merge.
-3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run; also wind arrival times.
 
 ## 17 Nov 16:03 UTC (clock reading) — **Collector mac-0.3.4 INSTALLED in `~/mother-earth` from `aircraft-dots-rc` `c3ef264`; `run.sh` unchanged; `AIRCRAFT_POSITIONS` unset** (production: one Mac runtime file; no OpenSky request made by the install; nothing new published)
 - **Chad's own line (17 Nov):** "Approve: install collector-mac.mjs mac-0.3.4 from aircraft-dots-rc c3ef264 (sha256 2c36a9cd…6d0a) in ~/mother-earth; run.sh stays (f6f587ae…65ce); schedule unchanged at 10 requests per rolling 24 hours; AIRCRAFT_POSITIONS stays unset".
