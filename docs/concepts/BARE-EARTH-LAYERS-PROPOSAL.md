@@ -1,6 +1,15 @@
 # Bare Earth first: every map layer a switch — proposal
 
-**Rev 1, 17 Nov 2026 16:39 UTC (clock reading). Proposal only: no code, no branch. For GPT's review; Chad decides.**
+**Rev 2, 17 Nov 2026 16:47 UTC (clock reading). Proposal only: no code, no branch. Rev 1 was reviewed by GPT (relayed by Chad, 17 Nov); Chad answered question 1. §0 records the decisions and governs where it differs from the text below.**
+
+## 0. Decisions after rev 1
+- **Truly bare at load (Chad, 17 Nov, his own words):** "you land at mother earth naked as she stands and then you start turning on all the different layers, she is striking as she is and then layer by layer you switch things on and off start discovering all these things". The first look is the Earth; the layers come after. No layer is on by default, not even earthquakes. (Answers question 1.)
+- **First view (GPT):** keep the dated Earth imagery and the reading cards; show "Choose layers to explore" with a visible **Layers** button, on phones too. Bare must read as an intended starting point, not as a page that failed to load. This replaces the wording in P4.
+- **Remembered choices (GPT: yes, if Chad wants returning visitors to resume their view; Chad has not yet said):** the rule would be **first visit starts bare, later visits restore the choices**. Only recognised layer ids are saved; unavailable storage is handled (the page starts bare); "Switch everything off" saves the empty selection; a short note beside the controls: "Layer choices are saved in this browser". This sharpens P5. **Open: Chad's yes or no.**
+- **Place view and search (GPT):** opening a place shows the available observations and respects the current map switches (it does not switch layers on). Selecting a specific search result switches its layer on and focuses the result, with visible feedback such as "Ships switched on." This settles §6.3.
+- **Stage order (GPT): B → A → C,** then consider D. One kind of switch first, then the bare default, then remembering. This replaces §5's order.
+- **Full-globe sheets (GPT): no blanket rule.** Wind over ocean heat may be a useful pair; opaque imagery can hide another layer. Which pairs conflict is decided from previews, pair by pair. Aircraft counts and positions stay exclusive (Chad). P6 and stage D are deferred.
+- **Still open:** Chad on remembered choices; the phone design for the Layers button (§6.5); the count of browser suites that assume the core layers are drawn (§6.2); `localStorage` wording on Sources (GPT's "note beside the controls" may be enough).
 
 ## 1. What Chad asked (17 Nov 2026, looking at the aircraft preview)
 "should we not turn every single tab/feature into a toggle because its starting to look messy, so basically you see earth as it stands bare and then you start toggling things"
