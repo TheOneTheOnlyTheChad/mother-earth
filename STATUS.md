@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 12:16 UTC (clock reading) — **REGISTER: OpenSky row updated: aircraft counts per area in use** (docs only on main; no code, no page change)
+- **GPT (relayed by Chad): approves** after the schedule-on report and read-backs (entry below).
+- **Chad's own line (17 Nov):** "Approve: file the REGISTER update for The OpenSky Network (aircraft counts per area in use)."
+- **Filed in `REGISTER.md`, row "OpenSky Network — states API":** the "parked" status line is replaced with "in use from 17 Nov 2026, aircraft counts per area only" (4° cells, 300 s position limit, no identifiers, callsigns, positions or tracks; at most 10 requests per rolling 24 h from the home network; receiver Online and Approved; hub's own OpenSky collector off). Added: Martin's two replies of 17 Nov verbatim with the ENQUIRIES references, the attribution string, and the coverage statement. **Unchanged:** Read, Terms, the 9 Nov ticket summary, and "Commercial use: needs agreement". The text follows packet §6 (reviewed), updated with today's facts.
+- **Says plainly:** the page still shows "not shown" until the page change is merged.
+- **Next (Chad's own line):** page merge of `aircraft-counts-rc`.
+
 ## 17 Nov 12:00 UTC (clock reading) — **Aircraft schedule ON in `~/mother-earth` (rev 5 runner, `4267bbf`); first scheduled upload made at 11:57 UTC; both read-backs clean (counts only)** (production: Mac switch file; one OpenSky request, one ingest; `OPENSKY_ENABLED` unset; REGISTER unchanged; page not merged)
 - **Chad's own line (17 Nov):** "Approve: switch the aircraft schedule on in ~/mother-earth with the rev 5 runner from aircraft-counts-rc 4267bbf (10 requests per rolling 24 hours, one about every 144 minutes, only from the home network; OPENSKY_ENABLED stays unset; no REGISTER change, no page merge)". It followed Claude's confirmation of the installed checksum (entry below).
 - **Switched on 11:56:48 UTC:** `state/aircraft.on` created (empty file). `run.sh` checked first: sha256 `f6f587ae…65ce`. Ships next due about 12:15 UTC, outside the 180 s guard.
