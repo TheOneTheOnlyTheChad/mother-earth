@@ -17,6 +17,7 @@
  *      NODE_PATH=/home/claude/spike/node_modules node --no-warnings phase1/legend-active-ui.test.cjs
  * BREAK=always-show | mismatch-as-symbols | count-old-rule | count-unknown-cells | no-hollow-rings | no-empty-line | always-withheld | never-withheld   each must fail. */
 const { chromium } = require('playwright');
+const coreOn = h => { if (!h.includes("const START_ON = [];")) throw new Error('index.html: START_ON = [] not found'); return h.replace("const START_ON = [];", "const START_ON = ['usgs', 'firms', 'ships', 'forest'];"); };   // this suite was written for the page with the four core layers on at load; the bare default is tested in bare-earth-ui.test.cjs
 const fs = require('fs'); const path = require('path'); const { pathToFileURL } = require('url'); const { DatabaseSync } = require('node:sqlite');
 const ROOT = path.join(__dirname, '..');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
@@ -34,7 +35,7 @@ const ONLY = Object.fromEntries(Object.entries(CNT).map(([k, v]) => [k, v.replac
 const line = (...parts) => parts.join(' · ');
 
 // ---- page under test (optionally weakened)
-let INDEX = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+let INDEX = coreOn(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'));
 { const rep = (a, b) => { const before = INDEX; INDEX = INDEX.replace(a, b); if (INDEX === before) { console.log('FAIL  break did not apply'); process.exit(1); } };
   if (BREAK === 'always-show') rep("e.hidden = !(sym || cnt); if (e.hidden) continue;", "e.hidden = false; if (!(sym || cnt)) { e.querySelector('.lsym').hidden = false; e.querySelector('.lsep').hidden = first; first = false; any = true; continue; }");   // main's behaviour: every entry, always
   if (BREAK === 'mismatch-as-symbols') rep("sym = k === 'forest' ? g.cells > 0 : g.symbols > 0", "sym = g.cells > 0 || g.symbols > 0");                      // counts-only shown with the dot entry

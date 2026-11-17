@@ -712,6 +712,8 @@ body.craft .sgtimes{color:var(--dim);min-height:2.8em}
 .layers-btn[aria-expanded="true"]{border-color:var(--accent)}
 .bare-hint{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);z-index:14;display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(7,10,15,.86);border:1px solid var(--line-strong);font-size:13px;color:var(--fg);white-space:nowrap}
 .bare-hint[hidden],.layers-panel[hidden]{display:none}
+/* In the Sky zoom-out view the globe's layers are hidden (as the key and legend are), so the Layers controls are too: they would otherwise sit over the Earth / + Moon / + Sun buttons. */
+body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{visibility:hidden}
 .bh-b,.lp-x,.lp-off{min-height:44px;padding:0 14px;font:500 12px/1 inherit;font-family:inherit;color:var(--fg);background:transparent;border:1px solid var(--accent);cursor:pointer}
 .layers-panel{position:fixed;z-index:60;top:64px;left:12px;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 88px);overflow:auto;background:rgba(9,13,19,.97);border:1px solid var(--line-strong);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .lp-head{display:flex;align-items:center;justify-content:space-between;gap:8px}

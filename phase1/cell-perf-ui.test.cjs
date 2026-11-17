@@ -8,6 +8,7 @@
  * Run: node --no-warnings phase1/cell-perf-ui.test.cjs   (8899 server + /home/claude/spike, as the other suites)
  * BREAK=keep-sides|per-cell|wrong-opacity|frontside-a|cache-across-passes|url-switch  — each puts an old or wrong behaviour back and must fail. */
 const { chromium } = require('playwright'); const fs = require('fs');
+const coreOn = h => { if (!h.includes("const START_ON = [];")) throw new Error('index.html: START_ON = [] not found'); return h.replace("const START_ON = [];", "const START_ON = ['usgs', 'firms', 'ships', 'forest'];"); };   // this suite was written for the page with the four core layers on at load; the bare default is tested in bare-earth-ui.test.cjs
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
 const BREAK = process.env.BREAK || '';
@@ -39,7 +40,7 @@ const serveIndex = html => {
   if (BREAK === 'cache-across-passes') html = html.replace('const mats = new Map();', 'const mats = (CELL_PERF.keep = CELL_PERF.keep || new Map());');   // the R3 risk: a material kept across passes can be disposed while still attached
   return html;
 };
-const RAW = fs.readFileSync('index.html', 'utf8'), MODE_LINE = "const CELL_PERF = { mode: 'b2b', Ctor: null, pass: 0, mats: null };";
+const RAW = coreOn(fs.readFileSync('index.html', 'utf8')), MODE_LINE = "const CELL_PERF = { mode: 'b2b', Ctor: null, pass: 0, mats: null };";
 if (!RAW.includes(MODE_LINE)) { console.log('FAIL  release constant not found in index.html'); process.exit(1); }
 const INDEX = serveIndex(RAW);
 if (BREAK && INDEX === RAW) { console.log('FAIL  BREAK did not apply: ' + BREAK); process.exit(1); }
