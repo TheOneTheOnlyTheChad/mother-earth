@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 08:25 UTC (clock reading) — **OpenSky: Martin on credits: "You can easily use all the credits you have - that's what they are for."** (docs only)
+- Pasted by Chad (Gmail shows 10:21 AM, his local time). Recorded verbatim in `docs/research/ENQUIRIES-2026-11.md` rev 10 with a bounded reading: the credits are OpenSky's limit; "about ten a day" is not a ceiling OpenSky asks for. Nothing in it about which connection requests come from, cloud servers, identifiers or commercial use. Chad's message that it answers is not on record.
+- **No change made.** The runner's cap stays 10 requests in 24 h. A faster cadence is Chad's decision and would be a reviewed code change. The one upload is still held for the home network.
+- **Mac copy not synced for this entry:** the Mac was unreachable (Chad out). To sync at the next contact.
+
 ## 17 Nov 08:15 UTC (clock reading) — **Aircraft counts step 1, first half: collector mac-0.3.3 INSTALLED in `~/mother-earth`; the one upload is held until the Mac is on the home network** (production: Mac runtime files only; no OpenSky request, no upload, schedule off, `OPENSKY_ENABLED` unset)
 - **Chad's own line (17 Nov):** "Approve: install collector mac-0.3.3 from aircraft-counts-rc 239e685 in ~/mother-earth and make one aircraft counts upload (one OpenSky request; schedule stays off; OPENSKY_ENABLED stays unset)". GPT's matching text was relayed with it (does not count on its own).
 - **Installed 07:53:17 UTC** from a clone at `239e685e75c9245e7ca0ba94150523a5f3e2153c`: `run.sh` sha256 `8b63f748…83fd`, `collector-mac.mjs` `e88ada68…3d47` (both match the head and the files the Mac regression tested). Previous files preserved in `~/mother-earth/_preserved/20261117T075317Z/` (`run.sh` `61e4ce48…`, `collector-mac.mjs` `3c0752cb…`). `state/aircraft.on` not created.

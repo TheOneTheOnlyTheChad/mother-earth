@@ -220,3 +220,18 @@ This is a summary relayed by Chad (via GPT's review packet); the verbatim text i
 
 **Reading (bounded):** "you can go ahead without waiting" answers the wait-or-not question in favour of going ahead now. It is read with the standing conditions, which it does not change: hobbyist use, no commercial entity or payments; applicable credits; no cloud-server whitelisting; aggregated counts per area only, no aircraft identifiers or individual tracks ("3. Yes", 9 Nov); about ten requests a day from Chad's own connection; OpenSky attribution. Not a wider permission. If Chad supplies his sent text, the link to the question can be recorded exactly, as for rev 4 and rev 7.
 
+## OpenSky ticket #837506 — reply on credits (17 Nov 2026) — rev 10
+*Rev 10, 17 Nov 2026 (17 Nov 08:25 UTC clock reading), docs only.*
+
+**Source and reader:** Chad pasted the message text into the Claude thread. Header as pasted: "Martin Strohmeier via Opensky", "10:21 AM (3 minutes ago)", as Gmail displays it in Chad's local time (not converted). Email addresses are not reproduced.
+
+**Body, verbatim:**
+> You can easily use all the credits you have - that's what they are for.
+>
+> Best,
+> Martin
+
+**Context.** It follows Martin's "go ahead without waiting" (rev 9). **The message of Chad's that it replies to is not on record here.** Claude drafted a thank-you for Chad that restated "about ten requests a day from my own connection, counts per area only with no aircraft identifiers or tracks, and OpenSky credited on the page"; whether that was sent, and as written, is not recorded.
+
+**Reading (bounded):** OpenSky is content for the account's API credits to be used in full; the credits are the limit OpenSky applies, and "about ten requests a day" is not a ceiling OpenSky asks for. Measured 17 Nov: one world `states/all` request cost 4 of 4,000 daily credits. **Not stated and not inferred:** anything about which connection the requests come from, cloud servers (the "no whitelisting of cloud servers" condition stands), identifiers or tracks (counts per area only stands), or commercial use. The project's own cap of 10 requests in 24 h (`AIRCRAFT_MAX_PER_DAY` in `phase1/run.sh`, branch `aircraft-counts-rc`) is unchanged; a different cadence is Chad's decision and a reviewed code change.
+
