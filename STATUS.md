@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 13:26 UTC (clock reading) — **`aircraft-rc` deleted; Chad's rule on deletes and keys recorded** (docs only)
+- **Chad (17 Nov, after the handover note):** Claude can delete things and add keys and so on itself, as already agreed for Cloudflare, for when he is working from his phone.
+- **Done:** the old parked branch `aircraft-rc` (`67c98e3`, 3 Nov; superseded by the merged aircraft counts; it held one commit not on main) deleted by Claude on the GitHub branches page. `git fetch -p`: `main`, `cape-town-station-rc`, `widths-preview-rc`.
+- **Recorded in HANDOVER and START-HERE §4ad:** the rule, and the one limit that stays on Claude's side: it does not type, paste or print secret values; a script reads `KEYS.md`, or Chad pastes the value.
+
 ## 17 Nov 13:22 UTC (clock reading) — **Close-out of the Aircraft counts + Cape Town station thread** (docs only)
 - **Branches:** `aircraft-counts-rc` deleted by Claude on the GitHub branches page (fully merged at `51814fd`); `git fetch -p` shows `main`, `cape-town-station-rc` (`d540c5d`, private preview awaiting GPT), `widths-preview-rc` (`2b20b0a`, awaiting Chad's look) and `aircraft-rc` (`67c98e3`, superseded; Chad has not said to delete it).
 - **Mac:** `_review/aircraft-counts-rc` moved to `_to_delete/`; `_review/` keeps `cape-town-station` and `widths-preview-rc` (both still awaiting a look). `~/mother-earth/aircraft-test` moved to `~/mother-earth/_to_delete/`. Main synced at this commit, preserve-first.
