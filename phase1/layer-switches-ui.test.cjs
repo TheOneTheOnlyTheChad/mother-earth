@@ -1,11 +1,11 @@
 /* Mother Earth — one kind of switch for every map layer (layer-switches-rc; Bare Earth proposal rev 2, stage B).
  * What it proves: every control that puts a layer on the globe is the same labelled switch (a button with role="switch",
  * aria-checked, a visible box and a text label); the six layers that used a pressed-button card header (earthquakes, fires,
- * ships, forest, buoys, microplastic) are switches now; a switch works by click and by keyboard; an off card is dimmed but
- * its switch is not; the defaults are unchanged in this stage (the four core layers are still on at load).
+ * ships, forest, buoys, microplastic) are switches now; a switch works by click and by keyboard; an off card is not dimmed at all (readings, times, warnings and links keep full contrast);
+ * each switch is described by its card's short evidence line; the defaults are unchanged in this stage (the four core layers are still on at load).
  * What it does NOT prove: anything drawn on the globe (the hub is routed to 404, so every layer fails safely).
  * Needs: python3 -m http.server 8899 --bind 127.0.0.1 running in the clone.
- * Run: node phase1/layer-switches-ui.test.cjs     Breaks: BREAK=pressed|no-role|dim-switch|no-label */
+ * Run: node phase1/layer-switches-ui.test.cjs     Breaks: BREAK=pressed|no-role|dim-card|no-label|describe-reading */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const BASE = 'http://127.0.0.1:8899', BREAK = process.env.BREAK || '';
@@ -22,7 +22,8 @@ const brk = (file, body) => {
     if (BREAK === 'no-role') body = body.replace('id="tgl-forest" data-layer="forest" role="switch"', 'id="tgl-forest" data-layer="forest"');
     if (BREAK === 'no-label') body = body.replace('<span class="t">Fire detections — show on the globe</span>', '<span class="t"></span>');
   }
-  if (file === 'style.css' && BREAK === 'dim-switch') body = body.replace('.card.off>:not(.ovl-tgl){opacity:.5}', '.card.off{opacity:.5}');
+  if (file === 'style.css' && BREAK === 'dim-card') body += '\n.card.off{opacity:.5}\n';
+  if (file === 'index.html' && BREAK === 'describe-reading') body = body.replace('aria-describedby="ev-usgs"', 'aria-describedby="o-usgs"');
   return body;
 };
 (async () => {
@@ -49,6 +50,8 @@ const brk = (file, body) => {
     for (const k of CARD) {
       const lab = await page.locator(`#tgl-${k} .t`).textContent(), name = await page.locator(`#card-${k} .head .name`).textContent();
       ok(`${t} ${k}: the label names the layer and says what the switch does`, / — show on the globe$/.test(lab) && lab.toLowerCase().startsWith(name.replace(/ — dated$/, '').toLowerCase().slice(0, 8)), [lab, name]);
+      const d = await page.evaluate(k => { const b = document.getElementById('tgl-' + k), id = b.getAttribute('aria-describedby'), el = id && document.getElementById(id); return { id, cls: el && el.className, text: el ? el.textContent.replace(/\s+/g, ' ').trim() : null, inCard: !!el && el.closest('.card') === b.closest('.card') }; }, k);
+      ok(`${t} ${k}: the switch is described by its own card's evidence line (short, starts with the evidence label), not by the changing reading`, d.id === 'ev-' + k && d.cls === 'evl' && d.inCard && /^Observed\s+\S/.test(d.text) && d.text.length <= 110, d);
       ok(`${t} ${k}: the card keeps its name and state word in a plain heading row, not inside the switch`, await page.locator(`#card-${k} .head #s-${k}`).count() === 1 && await page.locator(`#tgl-${k} #s-${k}`).count() === 0);
     }
     if (vp.tag === 'phone 390') { const open = page.locator('#sheet-toggle, #readings-toggle, .sheet-h'); if (await open.count()) await open.first().click().catch(() => { }); await page.waitForTimeout(300); }
@@ -69,7 +72,10 @@ const brk = (file, body) => {
     await page.locator('#tgl-forest').scrollIntoViewIfNeeded(); await page.locator('#tgl-forest').click(); await page.waitForTimeout(150);
     const dim = await page.evaluate(() => { const card = document.getElementById('card-forest'), o = el => { let v = 1; for (let e = el; e; e = e.parentElement) v *= parseFloat(getComputedStyle(e).opacity); return v; };
       return { off: card.classList.contains('off'), sw: o(document.getElementById('tgl-forest')), value: o(card.querySelector('.value')), head: o(card.querySelector('.head')), min: document.getElementById('tgl-forest').getBoundingClientRect().height }; });
-    ok(`${t}: an off layer's card is dimmed, its switch keeps full opacity`, dim.off && dim.sw === 1 && dim.value < 1 && dim.head < 1, dim);
+    const parts = await page.evaluate(() => { const card = document.getElementById('card-forest'), o = el => { let v = 1; for (let e = el; e; e = e.parentElement) v *= parseFloat(getComputedStyle(e).opacity); return v; };
+      return [...card.querySelectorAll('.head, .name, .state, .ovl-tgl, .evl, .value, .obs, .src, .cav, a, summary')].map(el => [el.className || el.tagName, o(el)]); });
+    ok(`${t}: an off layer's card is not dimmed: heading, switch, evidence line, value, reading, source, caveat and links all at full opacity`, dim.off && dim.sw === 1 && dim.value === 1 && dim.head === 1 && parts.length >= 8 && parts.every(x => x[1] === 1), parts.filter(x => x[1] !== 1));
+    ok(`${t}: off is still shown without dimming: the switch is unchecked and the card's dot is hollow`, await page.evaluate(() => { const c = document.getElementById('card-forest'), p = getComputedStyle(c.querySelector('.pip')); return document.getElementById('tgl-forest').getAttribute('aria-checked') === 'false' && (p.backgroundColor === 'rgba(0, 0, 0, 0)' || p.backgroundColor === 'transparent'); }));
     ok(`${t}: the switch is at least 44 px tall (touch target)`, dim.min >= 44, dim.min);
     await page.locator('#tgl-forest').click();
     ok(`${t}: no page errors`, errors.length === 0, errors.slice(0, 3));

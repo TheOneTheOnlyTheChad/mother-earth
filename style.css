@@ -56,7 +56,7 @@ body.world{height:100vh;height:100dvh;overflow:hidden;display:grid;grid-template
 
 /* ---------- cards */
 .card{border:1px solid var(--line);background:var(--card);padding:8px 10px;display:flex;flex-direction:column;gap:4px}
-.card.off>:not(.ovl-tgl){opacity:.5}   /* an off layer's card is dimmed, but never its switch: the control keeps full contrast (layer-switches-rc) */
+/* An off layer's card is NOT dimmed (Chad, 17 Nov): readings, times, warnings and source links keep full contrast whatever the map switch says. Off is shown by the switch, the state word and the hollow dot. */
 .card .head{display:flex;align-items:center;gap:8px}
 .card .pip{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
 .card.off .pip{box-shadow:none;background:transparent;border:1px solid var(--c)}
