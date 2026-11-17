@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 17 Nov 2026
 
+## 17 Nov 18:28 UTC (clock reading) — **`layer-switches-rc` rev 2 (`f9a5d8e`): switches described by the evidence line; off cards no longer dimmed** (branch only)
+- **Chad (17 Nov, his own message):** "Keep the “<Name> — show on the globe” labels. Point aria-describedby at a concise evidence/scope line. Remove off-card dimming so readings, timestamps, warnings and source links retain full contrast regardless of the map switch. Update the targeted suite accordingly and send GPT the revised head. Keep the two failures reproduced on main recorded separately."
+- **Head `f9a5d8e88d0d306bb1213cc7fec8a2df531cd07b`.** Each of the six cards' evidence lines has an id (`ev-<layer>`), and its switch's `aria-describedby` points there. The dimming rule is removed from `style.css`: off is shown by the unchecked switch, the state word and the hollow dot. `layer-switches-ui.test.cjs` 68 passed; breaks `pressed` 8, `no-role` 2, `dim-card` 2, `no-label` 4, `describe-reading` 2. Re-run and passing: ux-round1, drifters-ui, plastic-ui, place-ui, desktop-overflow, optional-layers-status-ui, fire-status-ui, quakes-ships-status-ui, mobile-pass, legend-active-ui. Packet rev 2.
+- **Kept separate (not this branch):** on main `d212584` in the container, `smoke-fixes` fails "Sources 360: no page-level horizontal overflow" and `osmc-reliability-ui` fails "old page: no page errors". Not investigated. Item 4 of Next.
+
+## Next
+1. About 19:55 UTC: read back the first published positions (fields exactly lat,lng; identifier search; dated R2 copy without records). Then Chad's own lines: REGISTER → merge `aircraft-dots-rc` (`e227d4b`).
+2. GPT's review of `layer-switches-rc` rev 2 `f9a5d8e`; then stage A (bare at load, "Choose layers to explore", Layers button) on Chad's go.
+3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run and the hub-fallback / Mac-failure pattern; also wind arrival times.
+4. Look at the two suite checks that fail on main in the container (`smoke-fixes` Sources at 360 px; `osmc-reliability-ui` old page).
+
 ## 17 Nov 18:17 UTC (clock reading) — **`AIRCRAFT_POSITIONS=1` SET on the hub: aircraft positions will be published from the next upload** (production: one hub variable; code unchanged)
 - **Chad's own line (17 Nov):** "Approve: set AIRCRAFT_POSITIONS=1 on the hub (publishes rounded aircraft positions without identifiers at /snapshot/opensky, newest snapshot only, served for three hours from the snapshot time)".
 - **Before (18:15:05 UTC, dashboard tab in the Mac's pane, Settings page loaded fresh after the 15:53 code deploy):** script sha256 `ad5bce33b334…`; 23 bindings (9 secrets, 12 plain text, D1, R2); no `AIRCRAFT_*` binding.
@@ -12,12 +23,6 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Hub, 18:17:04 UTC:** `/` 0.6.18; `/snapshot/opensky` 200, `no-store`, `positions: "none"`, 0 records, no coordinate pairs (the stored file is the 17:24 UTC upload, made while the variable was off); 442 cells. Other layers answering: usgs ok 18:15:07, firms ok 18:15:40, swpc ok 18:07:58, ships degraded 18:07:03; `/snapshot/wind/meta` 200.
 - **Positions become public at the next aircraft upload,** due about 19:48 UTC (17:24:02 + 8640 s) if the Mac is awake and at home. Read-back set for 19:55 UTC.
 - **Rollback (Chad's own line), immediate:** remove `AIRCRAFT_POSITIONS` (the next request serves no coordinates), then `POST /admin/aircraft/clear-positions?key=…`.
-
-## Next
-1. About 19:55 UTC: read back the first published positions (fields exactly lat,lng; identifier search; dated R2 copy without records). Then Chad's own lines: REGISTER → merge `aircraft-dots-rc` (`e227d4b`).
-2. GPT's review of `layer-switches-rc` `4564740`; then stage A (bare at load, "Choose layers to explore", Layers button) on Chad's go.
-3. 18 Nov 07:00 UTC: ships log re-read (read-only), including the 17 Nov 14:52 UTC run and the hub-fallback / Mac-failure pattern; also wind arrival times.
-4. Look at the two suite checks that fail on main in the container (`smoke-fixes` Sources at 360 px; `osmc-reliability-ui` old page).
 
 ## 17 Nov 18:08 UTC (clock reading) — **First aircraft run on mac-0.3.4: positions sent, hub dropped them, counts clean. Bare Earth stage B on `layer-switches-rc` (`4564740`), packet for GPT** (read-only checks; branch and docs only)
 - **Ships on the new collector file, 17:03:06 UTC:** ok (socket 58.5 s, 3,031 vessels), `200 {"ok":true,"layer":"ships","snapshot":"2026-11-17T17-03Z","records":3031,"cells":166,"bytes":436280}`, exit 0. The first Mac ships sample with records on hub 0.6.18.
