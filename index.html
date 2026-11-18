@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612161000">
+<link rel="stylesheet" href="style.css?v=202612181000">
 </head>
 <body class="world">
 <header class="top">
@@ -78,7 +78,7 @@
       </div>
       <div class="legend" id="legend" role="region" aria-label="Map key">
       <div class="imgfull" id="img-full"></div>
-      <div id="leg-line"><span class="lg" id="leg-usgs" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--quake)"></span>earthquake</span><span class="lcnt" hidden>Earthquakes: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-firms" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--fire)"></span>fire detection (per pass)</span><span class="lcnt" hidden>Fire detections: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-ships" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--ship)"></span>vessel (last sample)</span><span class="lcnt" hidden>Ships: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-drifters" hidden><span class="lsep" hidden> · </span><span class="lsym"><span id="leg-drifters-sw"></span>drifting buoy · coloured by water temperature (see card)</span><span class="lcnt" hidden>Drifting buoys: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-plastic" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero)</span></span><span class="lg" id="leg-forest" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</span></span><span id="leg-none">No data symbols or count cells are drawn right now.</span></div>
+      <div id="leg-line"><span class="lg" id="leg-usgs" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--quake)"></span>earthquake</span><span class="lcnt" hidden>Earthquakes: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-firms" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--fire)"></span>fire detection (per pass)</span><span class="lcnt" hidden>Fire detections: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-ships" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--ship)"></span>vessel (last sample)</span><span class="lcnt" hidden>Ships: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-drifters" hidden><span class="lsep" hidden> · </span><span class="lsym"><span id="leg-drifters-sw"></span>drifting buoy · coloured by water temperature (see card)</span><span class="lcnt" hidden>Drifting buoys: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-plastic" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero)</span></span><span class="lg" id="leg-forest" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</span></span><span class="lg" id="leg-aircraft" hidden><span class="lsep" hidden> · </span><span class="lsym">Aircraft counts per area — scale on its card</span></span><span class="lg" id="leg-airdots" hidden><span class="lsep" hidden> · </span><span class="lsym">Aircraft positions — plain dots — snapshot details on its card</span></span><span class="lg" id="leg-wind" hidden><span class="lsep" hidden> · </span><span class="lsym">Wind by height — scale on its card</span></span><span class="lg" id="leg-dustrgb" hidden><span class="lsep" hidden> · </span><span class="lsym">Dust RGB — false-colour imagery — explanation on its card</span></span><span id="leg-none">No layer data is drawn on the globe right now.</span></div>
       <div class="cov nightleg" id="night-legend" hidden></div>
       <div class="cov nightleg" id="oh-legend" hidden></div>
       <div class="cov nightleg" id="nl-legend" hidden></div>
@@ -502,10 +502,10 @@
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612101000"></script>
 <script src="oceanheat.js?v=202611291000"></script>
-<script src="dustrgb.js?v=202612021000"></script>
+<script src="dustrgb.js?v=202612181000"></script>
 <script src="nightlights.js?v=202612111000"></script>
-<script src="wind.js?v=202612121500"></script>
-<script src="aircraft.js?v=202612171000"></script>
+<script src="wind.js?v=202612181000"></script>
+<script src="aircraft.js?v=202612181000"></script>
 <script src="layers.js?v=202612151200"></script>
 <script>
 (() => {
@@ -691,12 +691,16 @@ function render() {
 // "N layers" (15 Nov 2026, legend-active-rc): a data layer counts as one while the last render put its symbols or its usable
 // count cells on the globe (drawnGeom) — so a valid zero, a layer outlined only as unknown, and a layer that is off, down,
 // loading or unavailable do not count; day/night = 1; ocean heat = 1; each orbital category = 1. Indices never count.
+const SHEET_DRAWN = [['aircraft', () => ME.aircraft && ME.aircraft.drawn()], ['airdots', () => ME.aircraft && ME.aircraft.dots.drawn()], ['wind', () => ME.wind && ME.wind.drawn()], ['dustrgb', () => ME.dustRgb && ME.dustRgb.drawn()]];
 function drawnLayers() {
   const out = [];
   for (const k of DATA_LAYERS) if (drawnGeom[k].symbols > 0 || drawnGeom[k].cells > 0) out.push(k);
   try { if (night.on && night.at) out.push('daynight'); } catch (_) { /* declared later in this script */ }
   if (ME.oceanHeat && ME.oceanHeat.on()) out.push('oceanheat');
   if (ME.nightLights && ME.nightLights.on()) out.push('nightlights');
+  // smoke-key-hint-rc (18 Nov 2026): the four sheet layers count while their own picture is on the globe — a failed refresh that
+  // leaves the earlier picture drawn still counts; on-but-loading, failed with nothing drawn, expired or a snapshot with nothing in it do not.
+  for (const [k, f] of SHEET_DRAWN) { try { if (f()) out.push(k); } catch (_) { } }
   try { if (orb.at && !orb.why) for (const g of orbGroupsNow()) if (orb.on.has(g.id) && orb.last[g.id]) out.push('orbital:' + g.id); } catch (_) { }
   return out;
 }
@@ -706,14 +710,17 @@ function drawnLayers() {
 // Forest is counts by design: its swatch entry needs a drawn cell. Nothing from the six data layers → one plain sentence.
 // Day/night, ocean heat and the orbital categories have their own legend lines and are not part of this one.
 function paintLegend() {
-  let first = true, any = false;
+  let first = true;
   for (const k of ['usgs', 'firms', 'ships', 'drifters', 'plastic', 'forest']) {
     const e = $('leg-' + k), g = drawnGeom[k], sym = k === 'forest' ? g.cells > 0 : g.symbols > 0, cnt = !sym && k !== 'forest' && k !== 'plastic' && g.cells > 0;
     e.hidden = !(sym || cnt); if (e.hidden) continue;
     e.querySelector('.lsym').hidden = !sym; const c = e.querySelector('.lcnt'); if (c) { c.hidden = !cnt; c.querySelector('.lwh').hidden = usable(k); }   // "(records withheld)" only when they are: a usable pair that draws cells and no symbols is just "cell outlines only"
-    e.querySelector('.lsep').hidden = first; first = false; any = true;
+    e.querySelector('.lsep').hidden = first; first = false;
   }
-  $('leg-none').hidden = any;
+  // the four sheet layers: one line each, naming the layer and where its explanation is (their scales live on the cards)
+  const d = drawnLayers();
+  for (const [k] of SHEET_DRAWN) { const e = $('leg-' + k); e.hidden = !d.includes(k); if (e.hidden) continue; e.querySelector('.lsep').hidden = first; first = false; }
+  $('leg-none').hidden = d.length > 0;   // the sentence is true only when no layer at all is drawn: day/night, ocean heat, night lights and orbital count too
 }
 ME.legendState = () => { const vis = n => [...n.childNodes].map(c => c.nodeType === 3 ? c.textContent : c.nodeType === 1 && !c.hidden ? vis(c) : '').join('');   // the text a reader sees: hidden parts left out at any depth
   return { line: vis($('leg-line')).replace(/\s+/g, ' ').trim(), geom: JSON.parse(JSON.stringify(drawnGeom)), empty: !$('leg-none').hidden }; };   // read-only test aid
@@ -727,7 +734,7 @@ function paintKey() {
   const og = d.filter(x => x.startsWith('orbital:')).map(x => x.slice(8)), po = $('ps-orb'); po.hidden = !og.length;
   try { if (og.length) po.innerHTML = `<b>Orbital</b> ${og.map(g => `<span class="orb-sw" style="--oc:${ME.orbColour(g)}"></span>`).join('')} · computed · enlarged, not to scale`; } catch (_) { }   // the pass time stays in the Key and on the card: one line on a 360 px phone
 }
-ME.paintKeyExternal = () => { try { paintKey(); } catch (_) { } };   // Ocean heat repaints the Key count when it switches
+ME.paintKeyExternal = () => { try { paintLegend(); paintKey(); } catch (_) { } };   // layers in their own files (ocean heat, night lights, aircraft, wind, Dust RGB) call this when they draw, clear or fail: count, entries and the empty sentence together
 const keyOpen = () => $('legend').classList.contains('open');
 function openKey() { closeInspector(); $('legend').classList.add('open'); $('key-btn').setAttribute('aria-expanded', 'true'); }
 function closeKey(focusBtn) { if (!keyOpen()) return; $('legend').classList.remove('open'); $('key-btn').setAttribute('aria-expanded', 'false'); if (focusBtn) $('key-btn').focus(); }
@@ -1224,7 +1231,7 @@ function paintNightLabels() {
   lg.hidden = !show;
   if (show) lg.innerHTML = `<b>Day/night now</b> · computed · ${esc(night.at.slice(11, 19))} UTC`;
   if (!show && night.why) { t.hidden = false; t.innerHTML = `<b>${esc(night.why)}</b>`; }
-  paintKey();
+  paintLegend(); paintKey();
 }
 
 function destroyNight() {
@@ -1297,7 +1304,7 @@ function orbPaint() {
   const drawnOn = onG.filter(g => orb.last[g.id]);
   lg.hidden = !(drawnOn.length && orb.at && !orb.why);
   if (!lg.hidden) lg.innerHTML = ME.orbLegend(drawnOn, orb.at);
-  paintKey();
+  paintLegend(); paintKey();
 }
 
 async function orbFetchMeta() {

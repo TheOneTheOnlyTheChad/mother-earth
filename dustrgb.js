@@ -107,7 +107,9 @@
   function clearFrame(why) { destroy(); st.frame = null; st.status = 'unknown'; st.why = why; }
 
   // ---------- labels
+  const keyRepaint = () => { if (typeof ME.paintKeyExternal === 'function') ME.paintKeyExternal(); };   // the Key's count, entries and empty sentence follow what is drawn
   function paint() {
+    keyRepaint();
     const s = $('s-dustrgb'), o = $('o-dustrgb'), fl = $('dustrgb-frame'), ex = $('dustrgb-extra');
     tgl.setAttribute('aria-checked', String(st.on));
     const f = st.frame;
@@ -185,7 +187,8 @@
   tgl.addEventListener('click', () => setOn(!st.on));
 
   // read-only aids for tests and the console
-  ME.dustRgb = { state: () => ({ on: st.on, status: st.status, why: st.why, frameId: st.frame ? st.frame.id : null, grade: st.frame ? grade(st.frame) : null, meshes: st.meshes.length,
+  ME.dustRgb = { drawn: () => st.meshes.some(m => m.parent),   // a frame is on the globe (also after a failed refresh that kept it)
+    state: () => ({ on: st.on, status: st.status, why: st.why, frameId: st.frame ? st.frame.id : null, grade: st.frame ? grade(st.frame) : null, meshes: st.meshes.length,
       refreshFailed: st.refreshFailed, fallback: st.fallback, lastAttempt: st.lastAttempt, requests: st.requests.slice(), label: $('dustrgb-frame').hidden ? null : $('dustrgb-frame').textContent,
       extra: $('dustrgb-extra').hidden ? null : $('dustrgb-extra').textContent, off: $('o-dustrgb').hidden ? null : $('o-dustrgb').textContent, stateWord: $('s-dustrgb').textContent,
       inScene: st.meshes.filter(m => m.parent).length, loading: st.loading }),

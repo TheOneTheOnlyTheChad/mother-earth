@@ -727,6 +727,16 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
   .layers-btn{top:64px;left:auto;right:12px}   /* below 1100 px the imagery label sits top-left; the button goes under the Key button's place on the right */
   .bare-hint{top:auto;bottom:64px}
 }
+@media (min-width:1101px) and (max-width:1279px){
+  /* 1101–1279 px: the centre column is narrow enough (533 px at 1101) for the centred line to reach the Layers button at the
+     top left of the globe (found by this branch's own test; on main too). The line sits one row lower, below the button. */
+  .bare-hint{top:64px}
+}
+@media (min-width:721px) and (max-width:1100px){
+  /* 721–1100 px: the globe's wrapper makes no box here (.gwrap is display:contents), so an absolute line was measured from the
+     bottom of the whole column and sat over the credits (GPT's smoke, 18 Nov 2026). It is a plain row directly under the globe. */
+  .bare-hint{position:static;order:1;align-self:center;transform:none;margin:8px 0 0}
+}
 @media (max-width:720px){
   /* phone: the line sits below the globe, in the strip the persistent notes use once layers are on (the two are never
      shown together), and carries no button of its own — the Layers button above is the single way in */

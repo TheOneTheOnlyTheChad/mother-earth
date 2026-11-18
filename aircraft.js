@@ -148,7 +148,9 @@
     const id = cellOf(lat, lng), n = env.cells[id] || 0, b = boxText(cellBox(id));
     return n > 0 ? { n, id, text: `${n.toLocaleString()} aircraft counted in this cell (${b})` } : { n: 0, id, text: `No aircraft counted in this cell (${b}). That is not an empty sky: aircraft are heard only where a volunteer receiver is in range.` };
   }
+  const keyRepaint = () => { if (typeof ME.paintKeyExternal === 'function') ME.paintKeyExternal(); };   // the Key's count, entries and empty sentence follow what is drawn
   function paint() {
+    keyRepaint();
     const s = $('s-air'), o = $('o-air'), fl = $('air-frame'), ex = $('air-extra'), rd = $('air-read');
     tgl.setAttribute('aria-checked', String(st.on));
     const isStale = st.on && st.env && stale(st.env);
@@ -265,6 +267,7 @@
   }
   function dotsAgeTick() { if (!dt.on) return; if (dt.env && dotsOld(dt.env)) dotsClear(`The positions shown were from ${utc(dt.env.time)}, more than ${Math.round(dt.env.staleS / 3600)} hours ago, and have been cleared.`); dotsPaint(); }
   function dotsPaint() {
+    keyRepaint();
     if (!dtgl) return;
     const s = $('s-airdots'), o = $('o-airdots'), fl = $('airdots-frame'), ex = $('airdots-extra');
     dtgl.setAttribute('aria-checked', String(dt.on));
@@ -306,11 +309,13 @@
       meshes: st.meshes.length, inScene: st.meshes.filter(m => m.parent).length, loading: st.loading, refreshFailed: st.refreshFailed, requests: st.requests.slice(), visSkips: st.visSkips, sel: st.sel,
       label: $('air-frame').hidden ? null : $('air-frame').textContent, extra: $('air-extra').hidden ? null : $('air-extra').textContent, off: $('o-air').hidden ? null : $('o-air').textContent,
       read: $('air-read').textContent, stateWord: $('s-air').textContent, drawn: st.meshes[0] && st.meshes[0].material.map.image.__air || null }),
+    drawn: () => !!(st.meshes[0] && st.meshes[0].parent && (st.meshes[0].material.map.image.__air || {}).drawn > 0),   // the counts picture is on the globe with at least one cell coloured
     setOn, refresh: () => load(true), ageTick, onVisible, select: (lat, lng) => { if (st.on && st.env) { st.sel = { lat, lng }; paint(); } }, opts: st.opts, config: AC, check, band, cellOf,
     reading: (lat, lng) => st.env ? reading(st.env, lat, lng) : null, texture: () => (st.meshes[0] && st.meshes[0].material.map && st.meshes[0].material.map.image) || null,
     dots: { state: () => ({ on: dt.on, why: dt.why, time: dt.env ? dt.env.time : null, n: dt.env ? dt.env.n : null, meshes: dt.meshes.length, inScene: dt.meshes.filter(m => m.parent).length, loading: dt.loading, refreshFailed: dt.refreshFailed,
         requests: dt.requests.slice(), visSkips: dt.visSkips, stateWord: dtgl ? $('s-airdots').textContent : null, label: dtgl && !$('airdots-frame').hidden ? $('airdots-frame').textContent : null, extra: dtgl && !$('airdots-extra').hidden ? $('airdots-extra').textContent : null,
         off: dtgl && !$('o-airdots').hidden ? $('o-airdots').textContent : null, drawn: dt.meshes[0] && dt.meshes[0].material.map.image.__airdots || null }),
+      drawn: () => !!(dt.meshes[0] && dt.meshes[0].parent && (dt.meshes[0].material.map.image.__airdots || {}).drawn > 0),   // the positions picture is on the globe with at least one dot
       setOn: dotsSetOn, refresh: () => dotsLoad(true), ageTick: dotsAgeTick, onVisible: dotsOnVisible, opts: dt.opts, config: DT, check: checkDots, compose: composeDots } };
   paint(); dotsPaint();
 })();
