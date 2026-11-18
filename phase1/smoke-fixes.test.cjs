@@ -115,7 +115,9 @@ const GLOBE = () => { const store = {}; const g = new Proxy(function () { return
   }
 
   // ---- 2 + 4. Sources & Details at 360 px (and 1280 unchanged in kind)
-  for (const vp of [{ width: 360, height: 780 }, { width: 1280, height: 900 }]) {
+  // 18 Nov (sources-360-overflow-rc): 390, 430, tablet and wider desktop added; a long file name in running text must
+  // stay whole in the page's text and inside the page width (it may wrap, it is never clipped).
+  for (const vp of [{ width: 360, height: 780 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 768, height: 1024 }, { width: 1024, height: 768 }, { width: 1280, height: 900 }, { width: 1440, height: 900 }]) {
     const { ctx, page, perr } = await open('/sources.html', vp);
     await page.waitForFunction(() => /terrestrial_ais_only/.test(document.getElementById('t-coverage').textContent), null, { timeout: 20000 });
     await page.waitForTimeout(300);
@@ -131,13 +133,22 @@ const GLOBE = () => { const store = {}; const g = new Proxy(function () { return
         for (const w of text.split(/(\s+)/)) { if (w.trim()) { const r = document.createRange(); r.setStart(tn, i); r.setEnd(tn, i + w.length); if (r.getClientRects().length > 1) split.push(w); } i += w.length; }
       }
       const cov = document.getElementById('t-coverage').textContent;
+      const codes = [...document.querySelectorAll('main p code, main li code')].map(c => { const rs = [...c.getClientRects()].filter(r => r.width);
+        return { t: c.textContent, right: Math.max(0, ...rs.map(r => r.right)), left: Math.min(W, ...rs.map(r => r.left)), clip: getComputedStyle(c).overflow !== 'visible' || getComputedStyle(c).textOverflow !== 'clip' }; });
+      const texts = []; const tw = document.createTreeWalker(document.querySelector('main'), NodeFilter.SHOW_TEXT);
+      for (let n; (n = tw.nextNode());) { if (!n.textContent.trim()) continue; const r = document.createRange(); r.selectNodeContents(n);
+        for (const b of r.getClientRects()) if (b.width && (b.right > W + 0.5 || b.left < -0.5)) { texts.push(n.textContent.trim().slice(0, 50)); break; } }
       const para = [...document.querySelectorAll('p')].find(p => /makes one request each hour/.test(p.textContent));
       return { W, sw, maxRight: Math.max(...tables), split: [...new Set(split)], codeIntact: cov.includes('messages_flowing_inferred_from_arrival_gaps;not_a_measure_of_reception;not_geographic_coverage;receipt_history_pending;terrestrial_ais_only'),
-        para: para ? para.innerHTML : null, wbr: document.querySelectorAll('#t-coverage wbr').length };
+        para: para ? para.innerHTML : null, wbr: document.querySelectorAll('#t-coverage wbr').length, texts,
+        codesOut: codes.filter(c => c.right > W + 0.5 || c.left < -0.5 || c.clip), longCode: codes.some(c => c.t === 'phase1/skycraft/build_moonlight.py'), nCodes: codes.length };
     });
     const tag = `Sources ${vp.width}`;
     ok(`${tag}: no page-level horizontal overflow`, m.sw <= m.W, m);
     ok(`${tag}: every table inside the page width`, m.maxRight <= m.W, m);
+    ok(`${tag}: no text in the page body is laid out past the page edge`, m.texts.length === 0, m.texts);
+    ok(`${tag}: every file name in running text is inside the page width and not clipped`, m.nCodes > 10 && m.codesOut.length === 0, m.codesOut);
+    ok(`${tag}: the long file name is still one unchanged string in the page text`, m.longCode);
     ok(`${tag}: no label split inside a word`, m.split.length === 0, m.split);
     ok(`${tag}: the long evidence code is shown in full (text unchanged)`, m.codeIntact);
     ok(`${tag}: break hints placed in the evidence codes`, m.wbr > 5, m.wbr);
