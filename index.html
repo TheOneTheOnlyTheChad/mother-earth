@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612151200">
+<link rel="stylesheet" href="style.css?v=202612161000">
 </head>
 <body class="world">
 <header class="top">
@@ -169,7 +169,7 @@
                 <p>Earthquake descriptions are searched exactly as USGS writes them. Vessel names and MMSIs are searched as received. <b>Fire detections and forest disturbance publish no text</b>, so they are never text-searched; fire detections do take part in a coordinate search.</p>
                 <p>There is no geocoder and no country boundaries. A place or country word matches the source's own description text: it finds records described that way and misses records in the same country described some other way.</p>
                 <p>A coordinate search always offers to move the view to that position, and separately lists loaded records within <span id="scope-km">250</span> km. That radius is a choice made for this box — it is not a coverage boundary.</p>
-                <p>A hidden, unknown, or withheld layer is not searched, and the panel names it. A result is tied to the collector run, layer visibility and freshness it was found under; if any of those change the result is marked and refused rather than opened.</p>
+                <p>Loaded records are searched whether or not their layer is drawn on the globe. A result from a layer that is off says so, and choosing it switches that layer on. An unknown or withheld layer is not searched, and the panel names it. A result is tied to the collector run and freshness it was found under; if either changes the result is marked and refused rather than opened.</p>
                 <p><a href="sources.html#search">Full rules on Sources &amp; Details →</a></p>
               </div>
             </details>
@@ -497,7 +497,7 @@
   <div id="layers-list"></div>
   <button type="button" class="lp-off" id="layers-off">Switch everything off</button>
 </div>
-<script src="app.js?v=202612141100"></script>
+<script src="app.js?v=202612161000"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612101000"></script>
@@ -994,14 +994,15 @@ function expOpen(o) { expBody.hidden = !o; expBtn.setAttribute('aria-expanded', 
 expBtn.addEventListener('click', () => { const o = expBody.hidden; expOpen(o); if (o) { $('search-q').focus({ preventScroll: true }); if (innerWidth <= 720) $('card-explore').scrollIntoView({ block: 'nearest' }); } });
 
 // ---------- search: results appear only after submission; a result is only ever opened while everything it was
-// found under still holds — the same collector run, the layer still visible, the layer still not unknown, and the
-// records still paired with their counts. Each result is judged on its own layer, so one layer refreshing does not
+// found under still holds — the same collector run, the layer still not unknown, and the records still paired
+// with their counts. Whether the layer is drawn on the globe is NOT part of that (bare-search-rc): the page starts
+// with nothing drawn, so loaded records of a switched-off layer are searched too, the row says the layer is off,
+// and choosing the row switches the layer on through its own switch and says so. Each result is judged on its own layer, so one layer refreshing does not
 // disable the others' results.
 let sres = null;         // the submitted result set; each hit carries its own layer, run id and liveness
 let sstatus = '';        // the one-line status, written to an aria-live region only when it changes
 
 function liveness(layer, runId) {
-  if (!on[layer]) return `${LABEL[layer]} are hidden now — turn the layer back on to open this`;
   const f = ME.freshness(layer);
   if (f.grade === 'unknown') return `${LABEL[layer]} is unknown now — ${f.why}`;
   if (!usable(layer)) return `records withheld — ${unusableWhy(layer) || 'records and counts are not from the same collector run'}`;
@@ -1009,7 +1010,7 @@ function liveness(layer, runId) {
   return null;
 }
 const searchPools = () => RECORD_LAYERS
-  .filter(l => on[l] && usable(l) && ME.freshness(l).grade !== 'unknown')
+  .filter(l => usable(l) && ME.freshness(l).grade !== 'unknown')
   .map(l => ({ layer: l, records: points[l], runId: pmeta[l].id, fields: pmeta[l].fields || [] }));
 
 // observation time, receipt time and the sample window are three different things and are never substituted for
@@ -1036,7 +1037,7 @@ function rowHtml(h, i) {
     + matched
     + `<span class="rw">${rowTimes(h.layer, h)}</span>`
     + `<span class="rf">${esc(ME.stateWord(f, h.layer)[0])} · run ${esc(hhmm(h.runId))}</span>`
-    + (h.dead ? `<span class="rx">${esc(h.dead)}</span>` : '')
+    + (h.dead ? `<span class="rx">${esc(h.dead)}</span>` : !on[h.layer] ? `<span class="ro">layer off — choosing this switches ${esc(LABEL[h.layer])} on</span>` : '')
     + `</button></li>`;
 }
 function notesHtml() {
@@ -1047,7 +1048,7 @@ function notesHtml() {
     for (const l of sres.searched) { const f = ME.freshness(l); if (f.grade !== 'adequate') notes.push(`<b>${esc(LABEL[l])}: ${esc(ME.stateWord(f, l)[0])}</b> — ${esc(f.why)}`); }
     if (sres.searched.includes('ships') && state.ships) notes.push(`Ship records come from the ${esc(String(state.ships.window_s || 60))} s sample ending ${esc(hhmm(state.ships.window_end))}; each record shows its own observation and receipt times.`);
     for (const l of RECORD_LAYERS.filter(l => !sres.searched.includes(l))) {
-      const why = !on[l] ? 'layer hidden' : ME.freshness(l).grade === 'unknown' ? ME.freshness(l).why : !usable(l) ? (unusableWhy(l) || 'records withheld') : ME.TEXT_FIELDS[l] && !ME.TEXT_FIELDS[l].length ? 'publishes no text to search' : 'not searched';
+      const why = ME.freshness(l).grade === 'unknown' ? ME.freshness(l).why : !usable(l) ? (unusableWhy(l) || 'records withheld') : ME.TEXT_FIELDS[l] && !ME.TEXT_FIELDS[l].length ? 'publishes no text to search' : 'not searched';
       notes.push(`${esc(LABEL[l])}: not searched — ${esc(why)}`);
     }
   }
@@ -1095,10 +1096,10 @@ function runSearch() {
 function reviewResults() {
   if (!sres || !sres.hits) return;
   let changed = false;
-  for (const h of sres.hits) { const w = liveness(h.layer, h.runId); if (w !== h.dead) { h.dead = w; changed = true; } }
+  for (const h of sres.hits) { const w = liveness(h.layer, h.runId), off = !on[h.layer]; if (w !== h.dead || off !== h.off) { h.dead = w; h.off = off; changed = true; } }
   if (changed) paintResults();
 }
-ME.searchState = () => sres && { kind: sres.kind, total: sres.total, shown: sres.hits.length, searched: sres.searched, dead: sres.hits.map(h => h.dead) };
+ME.searchState = () => sres && { kind: sres.kind, total: sres.total, shown: sres.hits.length, searched: sres.searched, dead: sres.hits.map(h => h.dead), off: sres.hits.map(h => !on[h.layer]) };
 
 $('search-form').addEventListener('submit', e => { e.preventDefault(); runSearch(); });
 $('search-list').addEventListener('click', e => {
@@ -1114,8 +1115,12 @@ $('search-list').addEventListener('click', e => {
   const h = sres.hits[Number(b.dataset.i)]; if (!h) return;
   const why = liveness(h.layer, h.runId);
   if (why) { reviewResults(); setStatus(`<span class="bad">Not opened — ${esc(why)}.</span>`); return; }
-  if (globeOk) globe.pointOfView({ lat: +h.rec.lat, lng: +h.rec.lng, altitude: 1.1 }, reduced ? 0 : 1200);
-  else setStatus('The globe is unavailable in this browser, so the view did not move. The record is open below.');
+  // a result from a switched-off layer: switch it on through the layer's OWN switch (one path for state, card,
+  // Layers panel and Key), and say so. Nothing is switched on by searching — only by choosing a result.
+  let switched = '';
+  if (!on[h.layer]) { const sw = $('tgl-' + h.layer); if (sw) sw.click(); if (on[h.layer]) switched = `Switched <b>${esc(LABEL[h.layer])}</b> on to show this result. `; }
+  if (globeOk) { globe.pointOfView({ lat: +h.rec.lat, lng: +h.rec.lng, altitude: 1.1 }, reduced ? 0 : 1200); if (switched) setStatus(switched + 'The record is open.'); }
+  else setStatus(switched + 'The globe is unavailable in this browser, so the view did not move. The record is open below.');
   inspectRecord(h.layer, h.rec);
 });
 $('search-list').addEventListener('keydown', e => {

@@ -114,6 +114,7 @@ button.res .rw{font-size:10.5px;color:var(--dim);line-height:1.35;font-variant-n
 button.res .rw b{color:var(--warn);font-weight:500}
 button.res .rf{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
 button.res .rx{font-size:10.5px;color:var(--warn);line-height:1.35}
+button.res .ro{font-size:10.5px;color:var(--accent);line-height:1.35}   /* result from a switched-off layer: choosing it switches the layer on (bare-search-rc) */
 button.res.dead{opacity:.6;border-left-color:var(--warn);background:rgba(255,209,102,.06)}
 button.res.go .rt{color:var(--fg)}
 .rnotes{font-size:10.5px;color:rgba(127,141,163,.85);line-height:1.4;display:flex;flex-direction:column;gap:3px;margin-top:6px}
@@ -252,7 +253,7 @@ body.doc{overflow:auto}
   .card .cav{font-size:11.5px;color:rgba(127,141,163,.9)}
   .card button.tgl{min-height:44px}   /* touch target: 36 px is desktop-only (UX round 1) */   /* 10.5px measured too small on a 390 px phone (1 Nov 2026) */
   /* the sheet is the only scrolling surface: results extend it rather than scrolling inside it */
-  .exp-body .hint,.rnotes,.exp-body details.scope>div,button.res .rw,button.res .rx{font-size:11.5px}
+  .exp-body .hint,.rnotes,.exp-body details.scope>div,button.res .rw,button.res .rx,button.res .ro{font-size:11.5px}
   .exp-body details.scope summary{font-size:12px;min-height:44px}
   button.res{padding:9px 10px}
   button.res .rm{font-size:12.5px}

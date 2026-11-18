@@ -4,7 +4,8 @@
  * Playwright's clock so the stale-result path is exercised through production code, not a hook.
  *
  * Asserts: no camera movement before a selection · results only after submission · a result
- * refused when its own basis moves (run replaced, layer hidden, freshness lapsed) · one layer
+ * refused when its own basis moves (run replaced, freshness lapsed) · a switched-off layer still searched,
+ * its rows saying so, and choosing one switching the layer on through its own switch (bare-search-rc) · one layer
  * refreshing invalidating only that layer's results · observation vs receipt vs sample end kept
  * apart · the agreed wordings · keyboard · reduced motion · no-WebGL · one scrolling surface.
  *
@@ -16,6 +17,8 @@ const ME_REFRESH_MS = 5 * 60e3 + 1000;   // the page's own polling interval, dri
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 
 let pass = 0, fail = 0;
+const BREAK = process.env.BREAK || '';   // BREAK=pools-on|no-switch|search-switches|no-off-note (bare sections only)
+const brk = (body, a, b) => { if (!body.includes(a)) { console.log('FAIL  break target not found: ' + a.slice(0, 60)); process.exit(1); } return body.replace(a, b); };
 const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got)}` : ''}`); } };
 
 const PAGE_NOW = Date.UTC(2026, 10, 2, 6, 0, 0);          // the page's clock for every test
@@ -84,7 +87,7 @@ const GLOBE_DOUBLE = ({ noWebGL }) => {
 };
 
 async function harness(browser, opts = {}) {
-  const { noWebGL = false, reducedMotion, viewport = { width: 1400, height: 900 }, isMobile = false, quakeTitles, clock = true } = opts;
+  const { noWebGL = false, reducedMotion, viewport = { width: 1400, height: 900 }, isMobile = false, quakeTitles, clock = true, bare = false } = opts;
   const ctx = await browser.newContext({ viewport, reducedMotion, isMobile, hasTouch: isMobile });
   const st = { runs: { usgs: RUN_A, ships: RUN_A, firms: RUN_A },
                titles: quakeTitles || ['14 km SSW of Volcano, Hawaii', '8 km N of Santiago, Chile'] };
@@ -103,6 +106,13 @@ async function harness(browser, opts = {}) {
       : idle(p.split('/').pop());
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
   });
+  // bare: serve index.html as it is on disk (nothing drawn at load), whatever the test server does to START_ON
+  if (bare) await ctx.route(/127\.0\.0\.1:8899\/index\.html(\?.*)?$/, r => { let body = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8');
+    if (BREAK === 'pools-on') body = brk(body, ".filter(l => usable(l) && ME.freshness(l).grade !== 'unknown')", ".filter(l => on[l] && usable(l) && ME.freshness(l).grade !== 'unknown')");
+    if (BREAK === 'no-switch') body = brk(body, "if (sw) sw.click();", "");
+    if (BREAK === 'search-switches') body = brk(body, "  sres = r;\n", "  sres = r; for (const l of r.searched) if (!on[l]) $('tgl-' + l).click();\n");
+    if (BREAK === 'no-off-note') body = brk(body, "!on[h.layer] ? `<span class=\"ro\">", "false ? `<span class=\"ro\">");
+    r.fulfill({ status: 200, contentType: 'text/html', body }); });
   await ctx.addInitScript(GLOBE_DOUBLE, { noWebGL });
 
   const page = await ctx.newPage();
@@ -320,24 +330,55 @@ async function harness(browser, opts = {}) {
     await ctx.close();
   }
 
-  // ------------------------------------------------- 5. hiding a layer invalidates only that layer
+  // ------------------------------------------------- 5. a switched-off layer: rows stay usable and say so; choosing one switches it on
   {
     const { ctx, page, search, rows, povs } = await harness(browser);
     await page.click('#exp-btn'); await search('-33.92, 18.42');
     await page.waitForSelector('#search-list button.res');
     await page.evaluate(() => document.querySelector('[data-layer="ships"]').click());
-    await page.waitForFunction(() => ME.searchState().dead.some(Boolean));
-    const r = await rows();
-    ok('hidden layer\'s results die', r.filter(x => /ship/i.test(x.layer)).every(x => x.dead) && r.some(x => /ship/i.test(x.layer)), r);
-    ok('other layers\' results survive', r.filter(x => !x.go && !/ship/i.test(x.layer)).every(x => !x.dead), r);
-    ok('a hidden-layer row says the layer is hidden',
-      /hidden now/.test((r.find(x => x.dead) || {}).text || ''), (r.find(x => x.dead) || {}).text);
+    await page.waitForFunction(() => ME.searchState().off.some(Boolean));
+    let r = await rows();
+    const ship = x => /ship/i.test(x.layer);
+    ok('switching a layer off does not kill its results', r.some(ship) && r.every(x => !x.dead), r);
+    ok('a switched-off layer\'s rows say the layer is off and what choosing does', r.filter(ship).every(x => /layer off — choosing this switches Ships on/.test(x.text)), r.filter(ship).map(x => x.text));
+    ok('other layers\' rows carry no such line', r.filter(x => !x.go && !ship(x)).every(x => !/layer off/.test(x.text)), r);
     const n = (await povs()).length;
-    await page.locator('#search-list button.res.dead').first().click({ force: true });   // aria-disabled blocks a normal click; force it to prove the handler also refuses
-    ok('a hidden-layer result cannot be opened', (await povs()).length === n && await page.locator('#insp.show').count() === 0);
-    await page.evaluate(() => document.querySelector('[data-layer="ships"]').click());
-    await page.waitForFunction(() => !ME.searchState().dead.some(Boolean));
-    ok('showing the layer again revives its results', (await rows()).every(x => !x.dead));
+    await page.locator('#search-list button.res', { hasText: 'Ships' }).first().click();
+    await page.waitForSelector('#insp.show');
+    ok('choosing it switches the layer on through its own switch', await page.getAttribute('#tgl-ships', 'aria-checked') === 'true' && await page.evaluate(() => !document.getElementById('card-ships').classList.contains('off')));
+    ok('…moves the view once and opens the record', (await povs()).length === n + 1 && await page.locator('#insp.show').count() === 1);
+    ok('…and says that it switched the layer on', /Switched Ships on to show this result\./.test(await page.innerText('#search-status')), await page.innerText('#search-status'));
+    r = await rows();
+    ok('once on, the rows drop the "layer off" line', r.every(x => !/layer off/.test(x.text)), r);
+    await ctx.close();
+  }
+
+  // ------------------------------------------------- 5b. bare start (index.html as on disk): hidden layers are searched; searching switches nothing on
+  {
+    const { ctx, page, search, rows, povs } = await harness(browser, { bare: true });
+    const sw = () => page.evaluate(() => ['usgs', 'firms', 'ships', 'forest'].map(k => document.getElementById('tgl-' + k).getAttribute('aria-checked')).join());
+    ok('bare: no core layer is on at load', await sw() === 'false,false,false,false', await sw());
+    await page.click('#exp-btn'); await search('Volcano');
+    await page.waitForFunction(() => ME.searchState());
+    let r = await rows(), st = await page.evaluate(() => ME.searchState());
+    ok('bare: a text query finds the earthquake although its layer is off', st.total === 1 && st.searched.includes('usgs') && r.length === 1 && /Volcano/.test(r[0].text) && !r[0].dead, [st, r]);
+    ok('bare: the row says the layer is off and what choosing does', /layer off — choosing this switches Earthquakes on/.test(r[0].text), r[0] && r[0].text);
+    ok('bare: the notes do not say a layer was left out for being hidden', !/layer hidden/.test(await page.innerText('#search-notes')), await page.innerText('#search-notes'));
+    ok('bare: searching alone switches nothing on and moves nothing', await sw() === 'false,false,false,false' && (await povs()).length <= 1 && await page.evaluate(() => ME.keyState().drawn.length === 0), [await sw(), (await povs()).length]);
+    const n = (await povs()).length;
+    await page.locator('#search-list button.res').first().click();
+    await page.waitForSelector('#insp.show');
+    ok('bare: choosing the result switches Earthquakes on and nothing else', await sw() === 'true,false,false,false', await sw());
+    ok('bare: …the Layers button counts one on and the first-view line is gone', await page.evaluate(() => ME.layers.state().n === 1 && document.getElementById('bare-hint').hidden));
+    ok('bare: …the view moves once and the record opens', (await povs()).length === n + 1);
+    ok('bare: …and the status says the layer was switched on', /Switched Earthquakes on to show this result\./.test(await page.innerText('#search-status')), await page.innerText('#search-status'));
+    // coordinate search on a second bare page: ships and fires near the point are listed from hidden layers
+    await page.evaluate(() => document.getElementById('tgl-usgs').click());
+    await search('-33.92, 18.42'); await page.waitForFunction(() => ME.searchState() && ME.searchState().kind === 'coord');
+    r = await rows(); st = await page.evaluate(() => ME.searchState());
+    ok('bare: a coordinate query lists nearby records from every hidden record layer', ['usgs', 'ships', 'firms'].every(l => st.searched.includes(l)) && r.filter(x => !x.go).length >= 2 && r.filter(x => !x.go).every(x => /layer off/.test(x.text) && !x.dead), [st.searched, r.map(x => x.text)]);
+    await page.locator('#search-list button.res[data-go]').click();
+    ok('bare: "Go to" moves the view and switches nothing on', await sw() === 'false,false,false,false' && /No record was opened/.test(await page.innerText('#search-status')), await sw());
     await ctx.close();
   }
 
