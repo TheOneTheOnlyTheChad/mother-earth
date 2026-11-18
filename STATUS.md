@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 18 Nov 2026
 
+## 18 Nov 02:58 UTC (clock reading) — **LIVE: aircraft counts and positions ask the hub on return to view at most once a minute (merge `32d1bfc`)**
+- **GPT (relayed by Chad):** `visibility-gap-rc` `cab156e` passes; keep one minute; Orbital correction confirmed. GPT matched both hashes, ran the 75 aircraft data checks and exercised both handlers at the 60-second boundary itself.
+- **Chad's own line:** "Approve: merge visibility-gap-rc cab156e into main (aircraft counts and positions ask the hub on return to view at most once a minute)".
+- **Merge `32d1bfc`**, pushed 02:54 UTC, no conflict; page files identical to `cab156e`. On the merged tree: `aircraft-dots-page` 45, `aircraft-counts` 75. **Served-hash check 02:57:21 UTC: 21 of 21 match.** `aircraft.js` `ccac7390…a8e8`, `index.html` `f2411885…6979`.
+- **Live page, 02:57–02:58 UTC:** positions on, 1 request, 8,676 dots (00:37 UTC snapshot). The pane did not flip visibility this time (0 returns to view in 32 s, although the pane tool reported it hidden), so the burst was imitated: 12 `visibilitychange` events sent to the live page at 2 s spacing gave 1 further request (the one that fell 60 s after switch-on) and 11 skips; network entries 2. **The real hidden-pane flipping has still not been seen against the fix.**
+- **Clock correction:** the entry below is headed 03:00 UTC and its live reading says 02:55 UTC. Both were written without reading a clock and are wrong. The Mac sync that followed that entry is stamped 02:50:02 UTC, so the entry was written shortly before that and the live reading was a few minutes earlier still.
+
 ## 18 Nov 03:00 UTC (clock reading) — **`visibility-gap-rc` for GPT: a one-minute minimum gap between aircraft requests made on return to view; correction about Orbital** (branch only)
 - **GPT (relayed by Chad):** own small branch; minimum gap on visibility-triggered fetches; age check stays immediate.
 - **Head: see the branch** (code commit `b42cf8f`, packet `reviews/2026-11-18-visibility-gap-rc.md` rev 1), from main `ccd26e2`. `aircraft.js` `ccac7390…a8e8`, `index.html` `f2411885…6979` (`aircraft.js?v=` bumped). Counts and positions each ask the hub on return to view only if their last ask began at least 60 s ago; the age check runs every time.
