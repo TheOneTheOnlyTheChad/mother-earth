@@ -1,6 +1,6 @@
 # Animals — source audit of the two first study candidates
 
-18 Nov 2026 · rev 1 · for GPT review · read-only research. Nothing built, nothing deployed, no provider contacted, nothing spent.
+18 Nov 2026 · rev 1.1 (sensitivity wording corrected after GPT's review; figures unchanged) · for GPT · read-only research. Nothing built, nothing deployed, no provider contacted, nothing spent.
 
 **Chad's scope (18 Nov):** inspect the Botswana zebra and archived blue-whale candidates; return dataset identity and DOI, licence and display rights, available files, observation dates, usable animal and point counts, tracking method, quality and uncertainty fields, sensitivity considerations and any costs; recommend one study for the first private journey preview.
 
@@ -73,9 +73,10 @@
 
 ### Sensitivity considerations
 - Completed historical tracks, 17 to 19 years old, already public under CC0 at full precision since 2013.
-- The fixes lie between the south-eastern Okavango Delta and the Makgadikgadi grasslands. No den, nest, breeding site or individual home range of a currently living animal is exposed by data this old.
+- The fixes lie between the south-eastern Okavango Delta and the Makgadikgadi grasslands.
+- **Rev 1.1 (GPT's review):** the earlier sentence here said data this old expose no sensitive site. That was a categorical claim the audit cannot support and it is withdrawn. What can be said: for a private, local preview the display adds nothing that the public file does not already give. Age and public CC0 availability alone do not establish absence of risk. Public release needs a recorded, dataset-specific sensitivity decision (proposal §6a).
 - Animal identifiers are collar-derived codes (`Z3866`), not names.
-- The species' assessed extinction risk was **not looked up in this audit** (the conservation source has not been reviewed; proposal §7). No sensitivity treatment beyond "completed historical track" is proposed. GPT to say if it reads this differently.
+- The species' assessed extinction risk was **not looked up in this audit** (the conservation source has not been reviewed; proposal §7). "Completed historical track, no generalisation" is accepted by GPT for the private preview only.
 
 ### Costs
 - No fee, account or agreement was needed to read the record or the files.
@@ -154,7 +155,7 @@
 - Completed historical tracks, 17 to 33 years old, public under CC0 at full precision since 2019.
 - Open-ocean and coastal positions at Argos precision. No haul-out, nest or den applies.
 - Identifiers are tag-derived codes.
-- The species' assessed extinction risk and any stock-level guidance were **not looked up in this audit.** GPT to say if a generalisation is still expected for a whale dataset this old.
+- The species' assessed extinction risk and any stock-level guidance were **not looked up in this audit.** Public treatment is deferred with the whale quality-rule proposal (GPT).
 
 ### Costs
 - No fee, account or agreement was needed. All visible rows encode to about 189 KB (114 KB gzipped) with the same simple encoding.
@@ -181,7 +182,7 @@
 ## 5. What stays open
 
 - **Both studies are closed archives.** Neither is live or regularly updated. Chad's feature rule (15 Nov) is live or regularly updated feeds only. The private preview does not settle that; the revised proposal makes it a decision before any public release.
-- Movebank's General Terms of Use were read only as a search-result extract (owner permission not required for publicly downloadable CC0 studies; citation encouraged). The full page should be read, and the operative sentence pasted by Chad, before a REGISTER entry.
+- Movebank's General Terms of Use were read only as a search-result extract (owner permission not required for publicly downloadable CC0 studies; citation encouraged). The full page should be read, and the operative sentence pasted by Chad, before a REGISTER entry. GPT's review (18 Nov) reports reading the full terms: owner permission is waived for publicly downloadable CC0 studies and contact is strongly encouraged; citation is an academic expectation, and a Mother Earth requirement, not a CC0 condition.
 - The repository files were read without the MD5 comparison.
 - The papers were not read beyond their abstracts. A statement about what the animals were doing (migration timing, causes) needs the paper, not this audit.
 - Conservation assessment and population series: no source audited. Nothing about status or trend is claimed here.

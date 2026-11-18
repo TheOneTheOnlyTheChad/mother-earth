@@ -1,0 +1,2231 @@
+{
+ "captured_utc": "2026-11-18T17:24:56.916Z",
+ "note": "Movebank Data Repository discovery search, record metadata only; no data file read. Keyword matches, not a complete catalogue.",
+ "query_totals": {
+  "shark": 0,
+  "dolphin": 0,
+  "whale": 14,
+  "turtle": 9,
+  "seal": 5,
+  "sea lion": 3,
+  "penguin": 4,
+  "albatross": 6,
+  "ray": 10,
+  "tuna": 1,
+  "elephant": 7,
+  "wildebeest": 3,
+  "giraffe": 1,
+  "lion": 6,
+  "cheetah": 2,
+  "stork": 25,
+  "crane": 23,
+  "eagle": 14,
+  "bat": 41,
+  "caribou": 6,
+  "Carcharodon": 0,
+  "Rhincodon": 0,
+  "Galeocerdo": 0,
+  "Prionace": 0,
+  "elasmobranch": 0,
+  "Tursiops": 0,
+  "Delphinus": 0,
+  "Orcinus": 0,
+  "Physeter": 5,
+  "cetacean": 6,
+  "Mobula": 7,
+  "fish": 20,
+  "marine": 71
+ },
+ "request_log": [
+  "2026-11-18T17:23:57.001Z GET /server/api/discover/search/objects?query=shark&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:23:59.055Z GET /server/api/discover/search/objects?query=dolphin&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:00.157Z GET /server/api/discover/search/objects?query=whale&dsoType=item&size=40 200 total=14",
+  "2026-11-18T17:24:01.645Z GET /server/api/discover/search/objects?query=turtle&dsoType=item&size=40 200 total=9",
+  "2026-11-18T17:24:03.131Z GET /server/api/discover/search/objects?query=seal&dsoType=item&size=40 200 total=5",
+  "2026-11-18T17:24:04.157Z GET /server/api/discover/search/objects?query=sea%20lion&dsoType=item&size=40 200 total=3",
+  "2026-11-18T17:24:05.179Z GET /server/api/discover/search/objects?query=penguin&dsoType=item&size=40 200 total=4",
+  "2026-11-18T17:24:06.265Z GET /server/api/discover/search/objects?query=albatross&dsoType=item&size=40 200 total=6",
+  "2026-11-18T17:24:07.394Z GET /server/api/discover/search/objects?query=ray&dsoType=item&size=40 200 total=10",
+  "2026-11-18T17:24:08.625Z GET /server/api/discover/search/objects?query=tuna&dsoType=item&size=40 200 total=1",
+  "2026-11-18T17:24:09.780Z GET /server/api/discover/search/objects?query=elephant&dsoType=item&size=40 200 total=7",
+  "2026-11-18T17:24:11.204Z GET /server/api/discover/search/objects?query=wildebeest&dsoType=item&size=40 200 total=3",
+  "2026-11-18T17:24:12.251Z GET /server/api/discover/search/objects?query=giraffe&dsoType=item&size=40 200 total=1",
+  "2026-11-18T17:24:13.287Z GET /server/api/discover/search/objects?query=lion&dsoType=item&size=40 200 total=6",
+  "2026-11-18T17:24:14.658Z GET /server/api/discover/search/objects?query=cheetah&dsoType=item&size=40 200 total=2",
+  "2026-11-18T17:24:15.610Z GET /server/api/discover/search/objects?query=stork&dsoType=item&size=40 200 total=25",
+  "2026-11-18T17:24:18.490Z GET /server/api/discover/search/objects?query=crane&dsoType=item&size=40 200 total=23",
+  "2026-11-18T17:24:21.078Z GET /server/api/discover/search/objects?query=eagle&dsoType=item&size=40 200 total=14",
+  "2026-11-18T17:24:23.015Z GET /server/api/discover/search/objects?query=bat&dsoType=item&size=40 200 total=41",
+  "2026-11-18T17:24:27.276Z GET /server/api/discover/search/objects?query=caribou&dsoType=item&size=40 200 total=6",
+  "2026-11-18T17:24:40.648Z GET /server/api/discover/search/objects?query=Carcharodon&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:41.848Z GET /server/api/discover/search/objects?query=Rhincodon&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:42.669Z GET /server/api/discover/search/objects?query=Galeocerdo&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:43.483Z GET /server/api/discover/search/objects?query=Prionace&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:44.416Z GET /server/api/discover/search/objects?query=elasmobranch&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:45.232Z GET /server/api/discover/search/objects?query=Tursiops&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:46.159Z GET /server/api/discover/search/objects?query=Delphinus&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:46.993Z GET /server/api/discover/search/objects?query=Orcinus&dsoType=item&size=40 200 total=0",
+  "2026-11-18T17:24:47.872Z GET /server/api/discover/search/objects?query=Physeter&dsoType=item&size=40 200 total=5",
+  "2026-11-18T17:24:48.867Z GET /server/api/discover/search/objects?query=cetacean&dsoType=item&size=40 200 total=6",
+  "2026-11-18T17:24:49.856Z GET /server/api/discover/search/objects?query=Mobula&dsoType=item&size=40 200 total=7",
+  "2026-11-18T17:24:50.793Z GET /server/api/discover/search/objects?query=fish&dsoType=item&size=40 200 total=20",
+  "2026-11-18T17:24:53.012Z GET /server/api/discover/search/objects?query=marine&dsoType=item&size=40 200 total=71"
+ ],
+ "records": [
+  {
+   "uuid": "7fb8ee56-cb2d-4c4c-9456-166fc8e3ee6d",
+   "title": "Data from: Australia’s east coast humpback whales: satellite tag derived movements on breeding grounds, feeding grounds and along the northern and southern migration.",
+   "doi": "doi:10.5441/001/1.294",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-12-12",
+   "animals": 50,
+   "locations": 30029,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Megaptera novaeangliae",
+   "study": "3030068329",
+   "paper": "https://doi.org/10.3897/BDJ.11.e114729",
+   "subjects": "Megaptera novaeangliae, animal migration, animal movement, animal tracking, Argos, baleen whale, cetaceans, humpback whale, satellite telemetry, Southern Ocean",
+   "terms": [
+    "whale",
+    "cetacean"
+   ]
+  },
+  {
+   "uuid": "4bd42b30-98f4-473d-b931-4c13b4ed3481",
+   "title": "Data from: Study \"Blue and fin whales Southern California 2014-2015 - Argos data\"",
+   "doi": "doi:10.5441/001/1.98f5r6d0",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2020-06-17",
+   "animals": 13,
+   "locations": 4277,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Balaenoptera physalus; Balaenoptera musculus",
+   "study": "1027467132",
+   "paper": "https://doi.org/10.1186/s40317-020-00207-x",
+   "subjects": "Balaenoptera physalus, Balaenoptera musculus, animal tracking, Argos, Balaenoptera physalus, Balaenoptera musculus, blue whales, cetaceans, diving behavior, fin whales",
+   "terms": [
+    "whale",
+    "Physeter",
+    "cetacean"
+   ]
+  },
+  {
+   "uuid": "a6f0c2e4-4ed5-446b-9238-48ea138e4b27",
+   "title": "Data from: Study \"Sperm whales Gulf of Mexico 2011-2013 - FastLoc GPS data\"",
+   "doi": "doi:10.5441/001/1.44cb3946",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2020-06-18",
+   "animals": 17,
+   "locations": 7151,
+   "sensor": "GPS",
+   "taxa": "Physeter macrocephalus",
+   "study": "15661938",
+   "paper": "https://doi.org/10.1186/s40317-020-00207-x",
+   "subjects": "Physeter macrocephalus, animal tracking, cetaceans, diving behavior, Physeter macrocephalus, satellite telemetry, sperm whale",
+   "terms": [
+    "whale",
+    "Physeter",
+    "cetacean"
+   ]
+  },
+  {
+   "uuid": "0cb4838c-4869-44c6-92e5-68a60e8c293e",
+   "title": "Data from: Study \"Sperm whales Gulf of Mexico 2011-2013 - Argos data\"",
+   "doi": "doi:10.5441/001/1.tj291471",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2020-06-16",
+   "animals": 17,
+   "locations": 3956,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Physeter macrocephalus",
+   "study": "1093338949",
+   "paper": "https://doi.org/10.1186/s40317-020-00207-x",
+   "subjects": "Physeter macrocephalus, animal tracking, Argos, cetaceans, diving behavior, Physeter macrocephalus, satellite telemetry, sperm whale",
+   "terms": [
+    "whale",
+    "Physeter",
+    "cetacean"
+   ]
+  },
+  {
+   "uuid": "4c7988df-b55e-48f9-b227-46fbc0004fc8",
+   "title": "Data from: Sperm whale dive behavior characteristics derived from intermediate-duration archival tag data",
+   "doi": "doi:10.5441/001/1.rj857167",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-08-09",
+   "animals": 27,
+   "locations": 4506,
+   "sensor": "GPS",
+   "taxa": "Physeter macrocephalus",
+   "study": "227843945",
+   "paper": "https://doi.org/10.1002/ece3.3322",
+   "subjects": "Physeter macrocephalus, animal tracking, diving behavior, Physeter macrocephalus, sperm whale",
+   "terms": [
+    "whale",
+    "Physeter"
+   ]
+  },
+  {
+   "uuid": "b7853a1e-43fc-483d-906a-6991ec676413",
+   "title": "Data from: Behavioural estimation of blue whale movements in the Northeast Pacific from state-space model analysis of satellite tracks",
+   "doi": "doi:10.5441/001/1.5ph88fk2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-02-08",
+   "animals": 143,
+   "locations": 15778,
+   "sensor": "GPS",
+   "taxa": "Balaenoptera musculus",
+   "study": "650188969",
+   "paper": "https://doi.org/10.3354/esr00239",
+   "subjects": "Balaenoptera musculus, animal migration, animal movement, animal tracking, area-restricted search, Argos, Baja California, Balaenoptera musculus, blue whale, Pacific Ocean",
+   "terms": [
+    "whale",
+    "turtle"
+   ]
+  },
+  {
+   "uuid": "c21cdd71-8a0c-4123-86bd-8fae2055b2ed",
+   "title": "Data from: Fin whale movements in the Gulf of California, Mexico, from satellite telemetry",
+   "doi": "doi:10.5441/001/1.65h5s5p2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-01-10",
+   "animals": 8,
+   "locations": 572,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Balaenoptera physalus",
+   "study": "452187673",
+   "paper": "https://doi.org/10.1371/journal.pone.0209324",
+   "subjects": "Balaenoptera physalus, animal movement, animal tracking, Balaenoptera physalus, Bayesian state-space models, fin whale, Gulf of California, satellite telemetry",
+   "terms": [
+    "whale"
+   ]
+  },
+  {
+   "uuid": "ba6e95bb-60df-4015-8e21-422c1374f0cb",
+   "title": "Data from: Scales of blue and fin whale feeding behavior off California, USA, with implications for prey patchiness",
+   "doi": "doi:10.5441/001/1.47h576f2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-12-03",
+   "animals": 13,
+   "locations": 17150,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Balaenoptera musculus; Balaenoptera physalus",
+   "study": "943824007",
+   "paper": "https://doi.org/10.3389/fevo.2019.00338",
+   "subjects": "Balaenoptera musculus, Balaenoptera physalus, animal tracking, Argos, Balaenoptera musculus, Balaenoptera physalus, blue whales, cetaceans, diving behavior, fin whales",
+   "terms": [
+    "whale",
+    "cetacean"
+   ]
+  },
+  {
+   "uuid": "df53968d-4bcc-4dd7-9bb6-8358378836ec",
+   "title": "Data from: Study \"Green turtles (Chelonia Mydas); Hays; Chagos Archipelago, Western Indian Ocean\"",
+   "doi": "doi:10.5441/001/1.313",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-01-23",
+   "animals": 33,
+   "locations": 55411,
+   "sensor": "GPS/Argos Doppler Shift",
+   "taxa": "Chelonia mydas",
+   "study": "3267664208",
+   "paper": "https://doi.org/10.1098/rspb.2016.2581",
+   "subjects": "Chelonia mydas, animal movement, animal tracking, Argos, GPS, green sea turtle, reptiles, satellite telemetry",
+   "terms": [
+    "turtle"
+   ]
+  },
+  {
+   "uuid": "bd9f2614-11b3-48c3-8251-1aee62c8e650",
+   "title": "Data from: High accuracy tracking reveals how small conservation areas can protect marine megafauna",
+   "doi": "doi:10.5441/001/1.r72ph75f",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2021-07-21",
+   "animals": 23,
+   "locations": 88727,
+   "sensor": "GPS",
+   "taxa": "Chelonia mydas; Eretmochelys imbricata",
+   "study": "1606812667",
+   "paper": "https://doi.org/10.1002/eap.2418",
+   "subjects": "Chelonia mydas, Eretmochelys imbricata, animal tracking, Argos, Chelonia mydas, conservation biology, Eretmochelys imbricata, green sea turtle, hawksbill sea turtle, Indian ocean",
+   "terms": [
+    "turtle",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "c2bfb336-99ff-402f-b630-9cca68d1e595",
+   "title": "Data from: Study \"Chelonia mydas_Banc_Arguin_2020_2021\"",
+   "doi": "doi:10.5441/001/1.636",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2024-12-20",
+   "animals": 16,
+   "locations": 14680,
+   "sensor": "GPS/Argos Doppler Shift",
+   "taxa": "Chelonia mydas",
+   "study": "5020584004",
+   "paper": "https://doi.org/10.1007/s00227-024-04558-4",
+   "subjects": "Chelonia mydas, animal tracking, Argos, GPS, green turtle, satellite telemetry",
+   "terms": [
+    "turtle",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "9500806c-2712-4906-99d3-64a46c1f877b",
+   "title": "Data from: Study \"Satellite Tracking of Oceanic Loggerhead Turtles in the Mediterranean\"",
+   "doi": "doi:10.5441/001/1.1f1h87r8",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2020-11-23",
+   "animals": 11,
+   "locations": 10271,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Caretta caretta",
+   "study": "1134407259",
+   "paper": "https://doi.org/10.1002/ece3.6370",
+   "subjects": "Caretta caretta, animal movement, animal tracking, Argos, Caretta caretta, Hidden Markov Models, life history, loggerhead turtles, marine megafauna, ocean management",
+   "terms": [
+    "turtle",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "0a818ffd-e318-4c56-9cba-3ee578bb7a88",
+   "title": "Data from: Latitudinal cline in the ratio of foraging dichotomy in the North Pacific population of loggerhead turtles revealed a priority conservation area",
+   "doi": "doi:10.5441/001/1.m3c90703",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2022-12-22",
+   "animals": 12,
+   "locations": 17248,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Caretta caretta",
+   "study": "1417866900",
+   "paper": "https://doi.org/10.1111/ddi.13531",
+   "subjects": "Caretta caretta, animal tracking, Argos, Caretta caretta, conservation biology, loggerhead sea turtle, satellite telemetry",
+   "terms": [
+    "turtle"
+   ]
+  },
+  {
+   "uuid": "1a65b7b8-0773-4165-9d3a-93f35f98230e",
+   "title": "Data from: A novel approach to quantifying the spatiotemporal behavior of instrumented grey seals used to sample the environment",
+   "doi": "doi:10.5441/001/1.910p0c20",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2015-09-15",
+   "animals": 16,
+   "locations": 124360,
+   "sensor": "GPS",
+   "taxa": "Halichoerus grypus",
+   "study": "66507017",
+   "paper": "https://doi.org/10.1186/s40462-015-0047-4",
+   "subjects": "Halichoerus grypus, animal tracking, bio-logging, bioprobe, grey seals, Halichoerus grypus, marine acoustics, ships of opportunity",
+   "terms": [
+    "seal",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "48f3a4ac-7aef-46aa-bda1-3e5900b5559b",
+   "title": "Data from: State-switching continuous-time correlated random walks",
+   "doi": "doi:10.5441/001/1.m7j2263r",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-02-28",
+   "animals": 1,
+   "locations": 2535,
+   "sensor": "GPS",
+   "taxa": "Halichoerus grypus",
+   "study": "654043458",
+   "paper": "https://doi.org/10.1111/2041-210X.13154",
+   "subjects": "Halichoerus grypus, animal movement, animal tracking, grey seal, Halichoerus grypus, North Sea, state-space model",
+   "terms": [
+    "seal"
+   ]
+  },
+  {
+   "uuid": "3909516a-0178-4eec-869b-fd52522826e4",
+   "title": "Data from: Suite of simple metrics reveals common movement syndromes across vertebrate taxa",
+   "doi": "doi:10.5441/001/1.hm5nk220",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2017-06-01",
+   "animals": 103,
+   "locations": 365408,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Antidorcas marsupialis; Canis mesomelas; Chelonoidis hoodensis; Chelonoidis porteri; Gyps africanus; Loxodonta africana; Mirounga angustirostris; Phoebastria irrorata; Syncerus caffer; Zalophus californianus",
+   "study": "259966228",
+   "paper": "https://doi.org/10.1186/s40462-017-0104-2",
+   "subjects": "Antidorcas marsupialis, Canis mesomelas, Chelonoidis hoodensis, Chelonoidis porteri, Gyps africanus, Loxodonta africana, Mirounga angustirostris, Phoebastria irrorata, Syncerus caffer, Zalophus californianus",
+   "terms": [
+    "seal",
+    "sea lion",
+    "albatross",
+    "elephant",
+    "lion"
+   ]
+  },
+  {
+   "uuid": "2f7d3d21-040f-42c0-ab89-2d7c74c24136",
+   "title": "Data from: Productivity changes in the Mediterranean Sea drive foraging movements of yelkouan shearwater Puffinus yelkouan from the core of its global breeding range",
+   "doi": "doi:10.5441/001/1.k49p9t60",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2021-12-10",
+   "animals": 21,
+   "locations": 10649,
+   "sensor": "GPS",
+   "taxa": "Puffinus yelkouan",
+   "study": "1566542752",
+   "paper": "https://doi.org/10.1111/maec.12668",
+   "subjects": "Puffinus yelkouan, animal tracking, foraging ecology, GPS logger, Mediterranean Sea, Puffinus yelkouan, yelkouan shearwater",
+   "terms": [
+    "sea lion",
+    "lion"
+   ]
+  },
+  {
+   "uuid": "60a9c039-becf-464c-9e86-d54f8e5b87e8",
+   "title": "Data from: Spatio-temporal overlap between purse seine fisheries and Humboldt penguin feeding areas in northern Chile",
+   "doi": "doi:10.5441/001/1.725",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2026-01-25",
+   "animals": 21,
+   "locations": 421,
+   "sensor": "GPS",
+   "taxa": "Spheniscus humboldti",
+   "study": "5371230531",
+   "paper": "https://doi.org/10.7717/peerj.20714",
+   "subjects": "Spheniscus humboldti, animal foraging, animal movement, animal tracking, GPS, Humboldt penguin, seabirds",
+   "terms": [
+    "penguin",
+    "fish"
+   ]
+  },
+  {
+   "uuid": "52bcbc64-38b6-4491-aca7-56df66f04a12",
+   "title": "Data from: Juvenile emperor penguin range calls for extended conservation measures in the Southern Ocean",
+   "doi": "doi:10.5441/001/1.sg2s0f7q",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2022-08-30",
+   "animals": 8,
+   "locations": 17856,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Aptenodytes forsteri",
+   "study": "1322558986",
+   "paper": "https://doi.org/10.1098/rsos.211708",
+   "subjects": "Aptenodytes forsteri, animal tracking, Aptenodytes forsteri, Argos, conservation biology, emperor penguin, home range, satellite telemetry, seabirds",
+   "terms": [
+    "penguin"
+   ]
+  },
+  {
+   "uuid": "5ac2654d-9843-4c99-a80d-6ff8e28cc94f",
+   "title": "Data from: Classification of animal movement behavior through residence in space and time",
+   "doi": "doi:10.5441/001/1.694p666h",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2017-01-27",
+   "animals": 24,
+   "locations": 93474,
+   "sensor": "GPS",
+   "taxa": "Thalassarche chrysostoma",
+   "study": "220078181",
+   "paper": "https://doi.org/10.1371/journal.pone.0168513",
+   "subjects": "Thalassarche chrysostoma, animal movement, animal tracking, area restricted search, behavior classification, GPS logger, grey-headed albatross, Movebank, movement ecology, residence time",
+   "terms": [
+    "albatross"
+   ]
+  },
+  {
+   "uuid": "b118f49f-6450-430d-b5f8-c455ff0292ae",
+   "title": "Data from: The Environmental-Data Automated Track Annotation (Env-DATA) System: Linking animal tracks with environmental data",
+   "doi": "doi:10.5441/001/1.3hp3s250",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2013-07-03",
+   "animals": 28,
+   "locations": 16414,
+   "sensor": "GPS",
+   "taxa": "Phoebastria irrorata",
+   "study": "2911040",
+   "paper": "xxx",
+   "subjects": "Phoebastria irrorata, migration, Movebank, movement ecology, remote sensing, track annotation, weather",
+   "terms": [
+    "albatross"
+   ]
+  },
+  {
+   "uuid": "0425c92c-f157-4f92-88f1-f40de2e0405f",
+   "title": "Data from: Staying close to home: horizontal movements of satellite-tracked reef manta rays Mobula alfredi (Krefft, 1868) in the world’s largest manta sanctuary",
+   "doi": "doi:10.5441/001/1.626",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2025-02-10",
+   "animals": 25,
+   "locations": 3224,
+   "sensor": "Argos Doppler Shift/GPS",
+   "taxa": "Mobula",
+   "study": "4834784047",
+   "paper": "https://doi.org/10.3390/fishes10020066",
+   "subjects": "Mobula, animal movement, animal tracking, Argos, devil rays, fishes, GPS, Mobulidae, reef manta ray, satellite telemetry",
+   "terms": [
+    "ray",
+    "Mobula",
+    "fish"
+   ]
+  },
+  {
+   "uuid": "fc898722-d930-4f48-8c4b-8505cbb2b627",
+   "title": "Data from: Residency and use of an important nursery habitat, Raja Ampat’s Wayag lagoon, by juvenile reef manta rays (Mobula alfredi)",
+   "doi": "doi:10.5441/001/1.n95c7182",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2022-05-27",
+   "animals": 14,
+   "locations": 98682,
+   "sensor": "GPS",
+   "taxa": "Mobula hypostoma; Mobula hypostoma; Mobula hypostoma; Mobula hypostoma",
+   "study": "1546153444",
+   "paper": "https://doi.org/10.3389/fmars.2022.815094",
+   "subjects": "Mobula hypostoma, Mobula hypostoma, Mobula hypostoma, Mobula hypostoma, animal movement, animal tracking, Argos, manta ray, Mobula alfredi, Mobula",
+   "terms": [
+    "ray",
+    "Mobula"
+   ]
+  },
+  {
+   "uuid": "1859a24c-d65a-4e45-a321-4fb108650777",
+   "title": "Data from: Determining fine-scale migratory connectivity and habitat selection for a migratory songbird by using new GPS technology",
+   "doi": "doi:10.5441/001/1.5q5gn84d",
+   "rights": "Attribution 4.0 International",
+   "issued": "2016-08-30",
+   "animals": 14,
+   "locations": 128,
+   "sensor": "GPS",
+   "taxa": "Progne subis",
+   "study": "186171846",
+   "paper": "https://doi.org/10.1111/jav.01091",
+   "subjects": "Progne subis, animal movement, animal tracking, avian migration, bio-logging, migratory connectivity, Neotropical birds, Progne subis, purple martin",
+   "terms": [
+    "ray"
+   ]
+  },
+  {
+   "uuid": "f8c74489-c4ff-46fb-8771-5eebc5b4e8b6",
+   "title": "Data from: Correcting for missing and irregular data in home-range estimation",
+   "doi": "doi:10.5441/001/1.3gj67c2k",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2018-03-02",
+   "animals": 1,
+   "locations": 75,
+   "sensor": "GPS",
+   "taxa": "Manta birostris",
+   "study": "396866882",
+   "paper": "https://doi.org/10.1002/eap.1704",
+   "subjects": "Manta birostris, animal tracking, autocorrelation, home range, Indonesia, irregular sampling, kernel density estimation, Komodo National Park, Manta, Manta alfredi",
+   "terms": [
+    "ray",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "ddc6ed49-ebe4-4770-953f-e0a4bd560460",
+   "title": "Data from: Dispersive migration of breeding Juan Fernández Petrels Pterodroma externa across the eastern Pacific Ocean and overlap with tropical tuna fisheries",
+   "doi": "doi:10.5441/001/1.733",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2026-03-23",
+   "animals": 7,
+   "locations": 7064,
+   "sensor": "Solar Geolocator/Solar Geolocator Twilight/Solar Geolocator Raw/Accessory Measurements",
+   "taxa": "Pterodroma externa",
+   "study": "5022396890",
+   "paper": "https://doi.org/10.1080/01584197.2026.2630916",
+   "subjects": "Pterodroma externa, animal movement, animal tracking, avian migration, conductivity, Juan Fernandez Petrel, light-level logger, seabirds, solar geolocation",
+   "terms": [
+    "tuna"
+   ]
+  },
+  {
+   "uuid": "b777279a-581d-43ce-b790-8e60304fb8b4",
+   "title": "Data from: Fine-scale tracking of ambient temperature and movement reveals shuttling behavior of elephants to water",
+   "doi": "doi:10.5441/001/1.403h24q5",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-09-24",
+   "animals": 14,
+   "locations": 283688,
+   "sensor": "GPS",
+   "taxa": "Loxodonta africana",
+   "study": "736029750",
+   "paper": "https://doi.org/10.3389/fevo.2019.00004",
+   "subjects": "Loxodonta africana, African savanna elephant, animal movement, animal tracking, bio-logging, GPS logger, Loxodonta africana, temperature",
+   "terms": [
+    "elephant"
+   ]
+  },
+  {
+   "uuid": "f30fb6d4-803f-4b45-8313-716c3b21e087",
+   "title": "Data from: Study \"African elephants in Etosha National Park (data from Tsalyuk et al. 2018)\"",
+   "doi": "doi:10.5441/001/1.3nj3qj45_2",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2025-02-19",
+   "animals": 15,
+   "locations": 2930263,
+   "sensor": "GPS",
+   "taxa": "Loxodonta africana",
+   "study": "605129389",
+   "paper": "https://doi.org/10.1002/ecm.1348",
+   "subjects": "Loxodonta africana, animal movement, animal tracking, diurnal cycle, elephant, Etosha National Park, long-term memory, Namibia, seasonal resource variability, spatial cognition",
+   "terms": [
+    "elephant"
+   ]
+  },
+  {
+   "uuid": "38e05433-0a6f-49c4-ab77-0511e716786c",
+   "title": "Data from: Elliptical Time-Density model to estimate wildlife utilization distributions",
+   "doi": "doi:10.5441/001/1.f321pf80",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2014-08-01",
+   "animals": 2,
+   "locations": 23494,
+   "sensor": "GPS",
+   "taxa": "Loxodonta africana",
+   "study": "22646468",
+   "paper": "https://doi.org/10.1111/2041-210X.12218",
+   "subjects": "Loxodonta africana, animal movement, GIS, GPS tracking, home-range, Loxodonta africana, utilization distribution",
+   "terms": [
+    "elephant"
+   ]
+  },
+  {
+   "uuid": "48c93576-7b84-48f8-bdf5-4e5d4ee139b3",
+   "title": "Data from: Resource-driven encounters among consumers and implications for the spread of infectious disease",
+   "doi": "doi:10.5441/001/1.n1r7ds5r",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2017-10-11",
+   "animals": 22,
+   "locations": 130688,
+   "sensor": "GPS",
+   "taxa": "Canis mesomelas",
+   "study": "304875150",
+   "paper": "https://doi.org/10.1098/rsif.2017.0555",
+   "subjects": "Canis mesomelas, animal movement, animal tracking, black-backed jackal, Canis mesomelas, disease ecology, Etosha National Park, jackal",
+   "terms": [
+    "elephant",
+    "wildebeest",
+    "giraffe",
+    "lion"
+   ]
+  },
+  {
+   "uuid": "5b6706c8-e7e5-46e4-82ba-da5a82324298",
+   "title": "Data from: Comparison of movement strategies of three populations of white-bearded wildebeest",
+   "doi": "doi:10.5441/001/1.h0t27719",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2020-12-01",
+   "animals": 36,
+   "locations": 279082,
+   "sensor": "Accessory Measurements",
+   "taxa": "Connochaetes taurinus",
+   "study": "208413731",
+   "paper": "https://doi.org/10.3389/fevo.2022.846171",
+   "subjects": "Connochaetes taurinus, Amboseli National Park, animal movement, animal tracking, Connochaetes taurinus, GPS logger, Kenya, Maasai Mara National Reserve, Nairobi National Park, white-bearded wildebeest",
+   "terms": [
+    "wildebeest"
+   ]
+  },
+  {
+   "uuid": "fafe7da6-ad56-4c43-b4d6-792486b46b82",
+   "title": "Data from: Uncovering behavioural states from animal activity and site fidelity patterns",
+   "doi": "doi:10.5441/001/1.7d8301h2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2017-10-23",
+   "animals": 18,
+   "locations": 198705,
+   "sensor": "Acceleration",
+   "taxa": "Canis latrans; Puma concolor",
+   "study": "193545363",
+   "paper": "https://doi.org/10.1111/2041-210X.12658",
+   "subjects": "Canis latrans, Puma concolor, animal movement, animal tracking, Canis latrans, clustering, cougar, coyote, denning, GPS logger",
+   "terms": [
+    "lion"
+   ]
+  },
+  {
+   "uuid": "b06f7d4d-2e0d-4d8f-8c48-99488c4eaf78",
+   "title": "Data from: A note on the reestablishment of the cheetah population in the Pilanesberg National Park, South Africa",
+   "doi": "doi:10.5441/001/1.k6b630mv",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2020-11-25",
+   "animals": 1,
+   "locations": 1182,
+   "sensor": "GPS",
+   "taxa": "Acinonyx jubatus",
+   "study": "1260886163",
+   "paper": "https://doi.org/10.3957/056.049.0012",
+   "subjects": "Acinonyx jubatus, Africa, animal movement, animal tracking, cheetah, conservation biology",
+   "terms": [
+    "cheetah"
+   ]
+  },
+  {
+   "uuid": "967b7813-220e-4f60-8415-166d118ac8fa",
+   "title": "Data from: Timing is critical: consequences of asynchronous migration for the performance and destination of a long-distance migrant",
+   "doi": "doi:10.5441/001/1.137cn005",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-07-25",
+   "animals": 69,
+   "locations": 1667881,
+   "sensor": "Acceleration/GPS/Barometer",
+   "taxa": "Ciconia ciconia",
+   "study": "multiple",
+   "paper": "https://doi.org/10.1186/s40462-022-00328-3",
+   "subjects": "Ciconia ciconia, accelerometer, bio-logging, animal movement, animal tracking, avian migration, GSM telemetry, GPS, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "3949d945-4730-4c24-96e8-4e6bb0234e1c",
+   "title": "Data from: The price of being late: short- and long-term consequences of a delayed migration timing [naturally-timed birds]",
+   "doi": "doi:10.5441/001/1.277",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-07-28",
+   "animals": 40,
+   "locations": 42002427,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "1176017658",
+   "paper": "https://doi.org/10.1098/rspb.2023.1268",
+   "subjects": "Ciconia ciconia, accelerometer, animal movement, animal tracking, avian migration, bio-logging, GPRS telemetry, GPS, GPS logger, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "e0181e26-4f70-45cf-a3f7-6c61ce368af0",
+   "title": "Data from: The price of being late: short- and long-term consequences of a delayed migration timing [delayed birds]",
+   "doi": "doi:10.5441/001/1.276",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-07-28",
+   "animals": 40,
+   "locations": 31144518,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "908232414",
+   "paper": "https://doi.org/10.1098/rspb.2023.1268",
+   "subjects": "Ciconia ciconia, accelerometer, animal movement, animal tracking, avian migration, bio-logging, GPRS telemetry, GPS, GPS logger, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "5075cbbc-08d7-4d6f-b74f-8f0c2fa07044",
+   "title": "Data from: Study \"NC Wood Stork Tracking\"",
+   "doi": "doi:10.5441/001/1.303",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-12-23",
+   "animals": 2,
+   "locations": 112346,
+   "sensor": "Accessory Measurements/Acceleration/GPS",
+   "taxa": "Mycteria americana",
+   "study": "67281010",
+   "paper": "http://migratoryconnectivityproject.org/atlas-of-migratory-connectivity",
+   "subjects": "Mycteria americana, animal movement, animal tracking, avian migration, bio-logging, GPS logger, GSM telemetry, wood stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "79710d0e-d1d6-45fd-90f9-1c6d9be0c46e",
+   "title": "Data from: The price of being late: short- and long-term consequences of a delayed migration timing [control birds]",
+   "doi": "doi:10.5441/001/1.271",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-07-28",
+   "animals": 19,
+   "locations": 8618285,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "927364554",
+   "paper": "https://doi.org/10.1098/rspb.2023.126",
+   "subjects": "Ciconia ciconia, animal movement, animal tracking, avian migration, bio-logging, Ciconia ciconia, GPRS telemetry, GPS, GPS logger, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "3695ca1b-4a59-473a-a0f7-3aa5773ec022",
+   "title": "Data from: Fitness, behavioral, and energetic trade-offs of different migratory strategies in a partially migratory species",
+   "doi": "doi:10.5441/001/1.283",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-08-03",
+   "animals": 131,
+   "locations": 37239692,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Ciconia ciconia",
+   "paper": "https://doi.org/10.1002/ecy.4151",
+   "subjects": "Ciconia ciconia, accelerometer, bio-logging, animal movement, animal tracking, avian migration, GSM telemetry, GPS, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "3754d5ea-3bc5-46af-afdb-6fad413dfba3",
+   "title": "Data from: The challenges of the first migration: movement and behavior of juvenile versus adult white storks with insights regarding juvenile mortality",
+   "doi": "doi:10.5441/001/1.hn1bd23k",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2016-04-12",
+   "animals": 122,
+   "locations": 1440936,
+   "sensor": "Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "150450794",
+   "paper": "https://doi.org/10.1111/1365-2656.12525",
+   "subjects": "Ciconia ciconia, animal movement, animal tracking, avian migration, Ciconia ciconia, Env-DATA, flight, flight efficiency, GSM telemetry, juvenile mortality",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "6d60b346-369c-46be-b976-d793b61fa076",
+   "title": "Data from: Study \"LifeTrack White Stork Vorarlberg\" (2016-2023)",
+   "doi": "doi:10.5441/001/1.71r7pp6q_2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-01-17",
+   "animals": 26,
+   "locations": 8487718,
+   "sensor": "Acceleration/GPS/Orientation/Magnetometer",
+   "taxa": "Ciconia ciconia",
+   "study": "173641633",
+   "paper": "https://doi.org/10.1073/pnas.2306389121",
+   "subjects": "Ciconia ciconia, accelerometer, animal migration, animal movement, animal tracking, avian migration, bio-logging, Ciconia ciconia, GPS logger, GSM telemetry",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "0a3ec70a-967c-432a-99b6-794c4f6b63f0",
+   "title": "Data from: Study \"LifeTrack White Stork Bavaria\" (2014-2023)",
+   "doi": "doi:10.5441/001/1.v1cs4nn0_2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-01-17",
+   "animals": 67,
+   "locations": 5089656,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "24442409",
+   "paper": "https://doi.org/10.1073/pnas.2306389121",
+   "subjects": "Ciconia ciconia, accelerometer, animal migration, animal movement, animal tracking, avian migration, bio-logging, Ciconia ciconia, GPS logger, GSM telemetry",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "72aef22c-54fa-4938-a433-5cf4a5cef3e8",
+   "title": "Data from: Costs of migratory decisions: a comparison across eight white stork populations",
+   "doi": "doi:10.5441/001/1.78152p3q",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2015-06-13",
+   "animals": 72,
+   "locations": 1584192,
+   "sensor": "Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "74496970",
+   "paper": "https://doi.org/10.1126/sciadv.1500931",
+   "subjects": "Ciconia ciconia, avian migration, Ciconia ciconia, Env-DATA, Movebank, movement ecology, white storks",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "5f8c5199-c2b0-4e48-9521-8c5d5f6b115c",
+   "title": "Data from: Study \"LifeTrack White Stork SW Germany\" (2013-2023)",
+   "doi": "doi:10.5441/001/1.ck04mn78_2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-01-17",
+   "animals": 92,
+   "locations": 13184272,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "21231406",
+   "paper": "https://doi.org/10.1073/pnas.2306389121",
+   "subjects": "Ciconia ciconia, accelerometer, animal migration, animal movement, animal tracking, avian migration, bio-logging, Ciconia ciconia, GPS logger, GSM telemetry",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "520a64ae-2047-445d-af5f-7b961caeef79",
+   "title": "Data from: Study \"LifeTrack White Stork Rheinland-Pfalz\" (2015-2023)",
+   "doi": "doi:10.5441/001/1.4192t2j4_2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-01-17",
+   "animals": 108,
+   "locations": 12789862,
+   "sensor": "Orientation/Magnetometer/Acceleration/GPS",
+   "taxa": "Ciconia ciconia",
+   "study": "76367850",
+   "paper": "https://doi.org/10.1073/pnas.2306389121",
+   "subjects": "Ciconia ciconia, accelerometer, animal migration, animal movement, animal tracking, avian migration, bio-logging, Ciconia ciconia, GPS logger, GSM telemetry",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "86008da5-779d-4d96-ac83-66652b552402",
+   "title": "Data from: Study \"LifeTrack White Stork Oberschwaben\" (2014-2023)",
+   "doi": "doi:10.5441/001/1.c42j3js7_2",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-01-16",
+   "animals": 18,
+   "locations": 2494711,
+   "sensor": "Acceleration/GPS",
+   "taxa": "Ciconia ciconia",
+   "study": "212096177",
+   "paper": "https://doi.org/10.1073/pnas.2306389121",
+   "subjects": "Ciconia ciconia, accelerometer, animal migration, animal movement, animal tracking, avian migration, bio-logging, Ciconia ciconia, GPS logger, GSM telemetry",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "18974cb5-6ad2-410c-9982-e6d8687457ff",
+   "title": "Data from: Satellite telemetry tracks flyways of Asian Openbill storks in relation to H5N1 avian influenza spread and ecological change",
+   "doi": "doi:10.5441/001/1.1j802v05",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2018-11-19",
+   "animals": 5,
+   "locations": 8372,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Anastomus oscitans",
+   "study": "463520202",
+   "paper": "https://doi.org/10.1186/s12917-018-1683-x",
+   "subjects": "Anastomus oscitans, animal movement, animal tracking, Argos, Asian openbill stork, avian influenza, flyway, H5N1, satellite telemetry, Thailand",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "47e2c1b0-bb67-4810-b8d6-12750eb4a467",
+   "title": "Data from: Individual environmental niches in mobile organisms",
+   "doi": "doi:10.5441/001/1.rj21g1p1",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2021-02-19",
+   "animals": 48,
+   "locations": 3174282,
+   "sensor": "Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "1410035327",
+   "paper": "https://www.movebank.org/cms/webapp?gwt_fragment=page=studies,path=study1410035327",
+   "subjects": "Ciconia ciconia, animal movement, animal tracking, bio-logging, Ciconia ciconia, individual variation, resource selection, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "6cc937ff-be4a-4ba9-99c1-7364d928b2d9",
+   "title": "Data from: Wind estimation based on thermal soaring of birds",
+   "doi": "doi:10.5441/001/1.bj96m274",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2017-11-30",
+   "animals": 60,
+   "locations": 7153159,
+   "sensor": "GPS",
+   "taxa": "Ciconia ciconia",
+   "study": "332044860",
+   "paper": "https://doi.org/10.1002/ece3.2585",
+   "subjects": "Ciconia ciconia, animal tracking, avian migration, Ciconia ciconia, ECMWF, Env-DATA, GSM telemetry, GPS logger, Movebank, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "6c481a15-2f87-4418-9476-8bbd84974adf",
+   "title": "Data from: Early arrival at breeding grounds: causes, costs and a trade-off with overwintering latitude",
+   "doi": "doi:10.5441/001/1.v8d24552",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2018-09-14",
+   "animals": 36,
+   "locations": 1207130,
+   "sensor": "Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "560041066",
+   "paper": "https://doi.org/10.1111/1365-2656.12898",
+   "subjects": "Ciconia ciconia, animal tracking, animal migration, avian migration, body acceleration, breeding success, Ciconia ciconia, climate change, Env-DATA, Movebank",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "09b3694c-5ea1-485f-a1d8-f4e11699ef74",
+   "title": "Data from: Study \"LifeTrack White Stork Kosova\"",
+   "doi": "doi:10.5441/001/1.s367rd3k",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2021-12-10",
+   "animals": 8,
+   "locations": 265522,
+   "sensor": "Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "175720577",
+   "paper": "https://doi.org/10.1111/2041-210X.13767",
+   "subjects": "Ciconia ciconia, animal migration, animal movement, animal tracking, avian migration, bio-logging, Ciconia ciconia, GPS logger, GSM telemetry, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "48289b21-92d7-4d54-85b2-bce60b331953",
+   "title": "Data from: Study \"LifeTrack White Stork Sicily\"",
+   "doi": "doi:10.5441/001/1.4v8q16qf",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2021-12-10",
+   "animals": 7,
+   "locations": 90424,
+   "sensor": "Acceleration",
+   "taxa": "Ciconia ciconia",
+   "study": "79206236",
+   "paper": "https://doi.org/10.1111/2041-210X.13767",
+   "subjects": "Ciconia ciconia, animal migration, animal movement, animal tracking, avian migration, bio-logging, Ciconia ciconia, GPS logger, GSM telemetry, white stork",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "9daa9707-6b70-4419-8693-108af8e0a1eb",
+   "title": "Data from: A periodic Markov model to formalise animal migration on a network [white-fronted goose data]",
+   "doi": "doi:10.5441/001/1.kk38017f",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2018-06-13",
+   "animals": 7,
+   "locations": 11806,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Anser albifrons",
+   "study": "467107447",
+   "paper": "https://doi.org/10.1098/rsos.180438",
+   "subjects": "Anser albifrons, animal movement, animal tracking, Anser albifrons, Argos, avian migration, satellite telemetry, spatial migration network, white-gronted goose",
+   "terms": [
+    "stork"
+   ]
+  },
+  {
+   "uuid": "34240718-cd75-4a61-9260-a0ed741e943a",
+   "title": "Data from: Study \"Sandhill Cranes; Minnesota, USA\"",
+   "doi": "doi:10.5441/001/1.650",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2026-05-21",
+   "animals": 52,
+   "locations": 1318702,
+   "sensor": "GPS",
+   "taxa": "Antigone canadensis",
+   "study": "133810762",
+   "paper": "https://doi.org/10.1002/wsb.799",
+   "subjects": "Antigone canadensis, animal movement, animal tracking, avian migration, conservation biology, GPS, sandhill crane, wildlife management",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "e82ecc51-ad30-4e52-b956-47b51a3ee19a",
+   "title": "Data from: Study \"1000 Cranes. Russia. Common Crane.\"",
+   "doi": "doi:10.5441/001/1.593",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 17,
+   "locations": 13921,
+   "sensor": "GPS",
+   "taxa": "Grus grus",
+   "study": "542653863",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Grus grus, animal tracking, avian migration, Common Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "5672a811-db2a-472f-bc42-35dd41ee5ea9",
+   "title": "Data from: Study \"Black-necked crane Bhutan (UWICE-MPIAB)\"",
+   "doi": "doi:10.5441/001/1.601",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 13,
+   "locations": 537238,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Grus nigricollis",
+   "study": "4124813",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Grus nigricollis, animal tracking, avian migration, bio-logging, Black-necked Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "fd78ade4-cedd-459c-b151-fac2ca2f65a1",
+   "title": "Data from: Study \"1000 Cranes. Russia. Transbaikalia.\"",
+   "doi": "doi:10.5441/001/1.592",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 16,
+   "locations": 33188,
+   "sensor": "GPS",
+   "taxa": "Anthropoides virgo; Grus vipio",
+   "study": "497091077",
+   "paper": "10.1073/pnas.2316827121",
+   "subjects": "Anthropoides virgo, Grus vipio, animal tracking, avian migration, Demoiselle Crane, GPS, White-naped Crane",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "1e31df42-edfa-4225-b923-d8b0de83ab20",
+   "title": "Data from: Study \"White-naped crane Mongolia WSCC\"",
+   "doi": "doi:10.5441/001/1.600",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2024-09-19",
+   "animals": 7,
+   "locations": 233541,
+   "sensor": "GPS",
+   "taxa": "Grus vipio",
+   "study": "233141114",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Grus vipio, animal tracking, avian migration, GPS, White-naped Crane",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "26c82518-d17c-470c-8c9a-557d1b7fbe61",
+   "title": "Data from: Study \"LifeTrack Mongolia Demoiselle cranes\"",
+   "doi": "doi:10.5441/001/1.599",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2024-09-19",
+   "animals": 19,
+   "locations": 74380,
+   "sensor": "GPS",
+   "taxa": "Anthropoides virgo",
+   "study": "172972156",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Anthropoides virgo, animal tracking, avian migration, Demoiselle Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "346009bb-5f5f-4363-890b-2e5119f78ed0",
+   "title": "Data from: Study \"GPS telemetry of Common Cranes, Sweden\"",
+   "doi": "doi:10.5441/001/1.597",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 19,
+   "locations": 603756,
+   "sensor": "GPS",
+   "taxa": "Grus grus",
+   "study": "10722328",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Grus grus, animal tracking, avian migration, Common Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "a19440b7-58a0-488a-a345-97f8d7afef87",
+   "title": "Data from: Study \"1000 Cranes. Mongolia.\"",
+   "doi": "doi:10.5441/001/1.598",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2024-09-19",
+   "animals": 13,
+   "locations": 22519,
+   "sensor": "GPS",
+   "taxa": "Anthropoides virgo",
+   "study": "631036041",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Anthropoides virgo, animal tracking, avian migration, Demoiselle Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "e68f2847-c651-47f3-84e5-c429ec8e27d9",
+   "title": "Data from: Study \"1000 Cranes. Ukraine.\"",
+   "doi": "doi:10.5441/001/1.590",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 4,
+   "locations": 1793,
+   "sensor": "GPS",
+   "taxa": "Anthropoides virgo",
+   "study": "2984378217",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Anthropoides virgo, animal tracking, Anthropoides virgo, avian migration, Demoiselle Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "76af61c7-aa26-4917-adc8-66f017f79d47",
+   "title": "Data from: Study \"Common Crane Lithuania GPS, 2015-2016\"",
+   "doi": "doi:10.5441/001/1.604",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 3,
+   "locations": 528388,
+   "sensor": "GPS/Acceleration/Magnetometer/Barometer/Solar Geolocator Raw",
+   "taxa": "Grus grus",
+   "study": "146932094",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Grus grus, accelerometer, animal movement, animal tracking, avian migration, barometer, bio-logging, Common Crane, GPS, light-level logger",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "d52006ff-9c80-4c9e-8170-6569f8018f39",
+   "title": "Data from: Study \"1000 Cranes. Southern Kazakhstan.\"",
+   "doi": "doi:10.5441/001/1.591",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 7,
+   "locations": 6752,
+   "sensor": "GPS",
+   "taxa": "Anthropoides virgo",
+   "study": "497138661",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Anthropoides virgo, animal tracking, avian migration, Demoiselle Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "88c61e4c-e277-46ae-9762-2e2d9efbf451",
+   "title": "Data from: Study \"1000 Cranes. Russia. Altai.\"",
+   "doi": "doi:10.5441/001/1.596",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 2,
+   "locations": 7901,
+   "sensor": "GPS",
+   "taxa": "Anthropoides virgo",
+   "study": "497087673",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Anthropoides virgo, animal tracking, avian migration, Demoiselle Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "319926e6-3b42-4864-a761-192ed681dbe1",
+   "title": "Data from: Study \"1000 Cranes. Russia. Volga-Ural Interfluve.\"",
+   "doi": "doi:10.5441/001/1.595",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 29,
+   "locations": 26681,
+   "sensor": "GPS",
+   "taxa": "Anthropoides virgo",
+   "study": "496136836",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Anthropoides virgo, animal tracking, avian migration, Demoiselle Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "386d7ca8-7a05-49ca-a081-740688506e98",
+   "title": "Data from: Study \"1000 Cranes. Russia. Taman. Azov.\"",
+   "doi": "doi:10.5441/001/1.594",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-09-11",
+   "animals": 29,
+   "locations": 26681,
+   "sensor": "GPS",
+   "taxa": "Anthropoides virgo",
+   "study": "496130871",
+   "paper": "https://doi.org/10.1073/pnas.2316827121",
+   "subjects": "Anthropoides virgo, animal tracking, avian migration, Demoiselle Crane, GPS",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "d5ddd305-89ce-40d5-a4d0-8f63b188e5bb",
+   "title": "Data from: Ontogenetic shifts from social to experiential learning drive avian migration timing",
+   "doi": "doi:10.5441/001/1.t23vm852",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2022-12-16",
+   "animals": 95,
+   "locations": 3627,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Grus americana",
+   "study": "1744814602",
+   "paper": "https://doi.org/10.1038/s41467-021-27626-5",
+   "subjects": "Grus americana, animal tracking, Argos, avian migration, conservation biology, Grus americana, ontogeny, satellite telemetry, whooping crane",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "de1cccab-7744-4014-9f15-504740aa31a2",
+   "title": "Data from: Ámbito de hogar y actividad circadiana del ocelote (Leopardus pardalis) en la Isla de Barro Colorado, Panamá",
+   "doi": "doi:10.5441/001/1.pb653nk3",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2020-07-03",
+   "animals": 11,
+   "locations": 2288,
+   "sensor": "Radio Transmitter",
+   "taxa": "Leopardus pardalis",
+   "study": "123413",
+   "paper": "https://doi.org/10.5441/001/1.pb653nk3/3",
+   "subjects": "Leopardus pardalis, animal tracking, Barro Colorado Island, home range, Leopardus pardalis, ocelot, Panama, radio telemetry",
+   "terms": [
+    "crane"
+   ]
+  },
+  {
+   "uuid": "6b24c770-8ab5-4f63-bef2-2fc4dec13b7f",
+   "title": "Data from: Study \"Golden Eagle Nevada\"",
+   "doi": "doi:10.5441/001/1.693",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2026-05-21",
+   "animals": 27,
+   "locations": 297613,
+   "sensor": "GPS",
+   "taxa": "Aquila chrysaetos",
+   "study": "259354593",
+   "paper": "https://doi.org/10.1126/science.adq3396",
+   "subjects": "Aquila chrysaetos, animal movement, animal tracking, Golden Eagle, GPS, movement ecology, raptors",
+   "terms": [
+    "eagle"
+   ]
+  },
+  {
+   "uuid": "307799b8-c92f-4556-8c70-8220266cf76d",
+   "title": "Data from: Study \"Bald Eagle - Haliaeetus leucocephalus - Biodiversity Research Institute\" [part]",
+   "doi": "doi:10.5441/001/1.704",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2026-05-21",
+   "animals": 6,
+   "locations": 89721,
+   "sensor": "GPS",
+   "taxa": "Haliaeetus leucocephalus",
+   "study": "88283014",
+   "paper": "https://doi.org/10.1126/science.adq3396",
+   "subjects": "Haliaeetus leucocephalus, animal movement, animal tracking, avian migration, bald eagle, GPS",
+   "terms": [
+    "eagle"
+   ]
+  },
+  {
+   "uuid": "389a1279-0dda-488a-9bca-f78e5039e54c",
+   "title": "Data from: Study \"LifeTrack Bald Eagle\"",
+   "doi": "doi:10.5441/001/1.642",
+   "rights": "Attribution 4.0 International",
+   "issued": "2026-05-21",
+   "animals": 5,
+   "locations": 158878,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Haliaeetus leucocephalus",
+   "study": "20873986",
+   "paper": "https://doi.org/10.1126/science.adq3396",
+   "subjects": "Haliaeetus leucocephalus, animal movement, animal tracking, bald eagle, Argos, satellite telemetry, GSM telemetry, GPS logger, bio-logging, accelerometer",
+   "terms": [
+    "eagle"
+   ]
+  },
+  {
+   "uuid": "7ee85303-d762-4922-bdc2-1f89e0fa004b",
+   "title": "Data from: Study \"Bald Eagle (Haliaeetus leucocephalus) in the Pacific Northwest\"",
+   "doi": "doi:10.5441/001/1.702",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2026-05-21",
+   "animals": 35,
+   "locations": 120933,
+   "sensor": "GPS",
+   "taxa": "Haliaeetus leucocephalus",
+   "study": "430263960",
+   "paper": "https://doi.org/10.1126/science.adq3396",
+   "subjects": "Haliaeetus leucocephalus, animal movement, animal tracking, avian migration, GPS, bald eagle, raptors",
+   "terms": [
+    "eagle"
+   ]
+  },
+  {
+   "uuid": "9d8e2a5a-3c17-4898-8231-511beb8c044c",
+   "title": "Data from: Age-dependent response to anthropogenic habitat during migration of an endangered raptor",
+   "doi": "doi:10.5441/001/1.695",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2025-07-26",
+   "animals": 21,
+   "locations": 517997,
+   "sensor": "GPS",
+   "taxa": "Aquila nipalensis",
+   "study": "6793037828",
+   "paper": "https://doi.org/10.1016/j.cub.2025.07.061",
+   "subjects": "Aquila nipalensis, animal tracking, avian migration, GPS, GSM telemetry, Steppe Eagle",
+   "terms": [
+    "eagle"
+   ]
+  },
+  {
+   "uuid": "aca486d6-3d99-4aeb-9d23-2bb61d28a7eb",
+   "title": "Data from: Study \"HawkWatch International Golden Eagles\"",
+   "doi": "doi:10.5441/001/1.95r77m9k",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-08-28",
+   "animals": 33,
+   "locations": 23650,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Aquila chrysaetos",
+   "study": "171287018",
+   "paper": "https://unmpress.com/books/raptors-new-mexico/9780826341457",
+   "subjects": "Aquila chrysaetos, animal tracking, Argos, avian migration, Aquila chrysaetos, golden eagle, raptor, satellite telemetry",
+   "terms": [
+    "eagle"
+   ]
+  },
+  {
+   "uuid": "94676483-537e-4bc0-bf64-f1a0825cad6e",
+   "title": "Data from: New York State bald eagle report 2010",
+   "doi": "doi:10.5441/001/1.s65q50j0",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2018-12-21",
+   "animals": 78,
+   "locations": 199556,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Aquila chrysaetos; Asio flammeus; Haliaeetus leucocephalus; Pandion haliaetus; Falco peregrinus",
+   "study": "2943485",
+   "paper": "https://www.dec.ny.gov/docs/wildlife_pdf/baea2010.pdf",
+   "subjects": "Aquila chrysaetos, Asio flammeus, Haliaeetus leucocephalus, Pandion haliaetus, Falco peregrinus, animal movement, Aquila chrysaetos, Argos, Asio flammeus, avian migration",
+   "terms": [
+    "eagle"
+   ]
+  },
+  {
+   "uuid": "c92d9814-0950-4b78-885c-ae76b6383c75",
+   "title": "Data from: Multidimensional differentiation in foraging resource use during breeding of two sympatric raptors: space, habitat type, time and food",
+   "doi": "doi:10.5441/001/1.c6q8353q",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2016-10-18",
+   "animals": 24,
+   "locations": 371685,
+   "sensor": "GPS",
+   "taxa": "Buteo rufinus; Circaetus gallicus",
+   "study": "34551859",
+   "paper": "https://doi.org/10.1038/srep35031",
+   "subjects": "Buteo rufinus, Circaetus gallicus, Circaetus gallicus, diel, ecological release, flight corridors, food niche differentiation, foraging area, GPS tags, habitat differentiation",
+   "terms": [
+    "eagle"
+   ]
+  },
+  {
+   "uuid": "789a0aa7-d8aa-4721-8080-649b4bbd3e36",
+   "title": "Data from: Science update for the South Peace Northern Caribou (Rangifer tarandus caribou pop. 15) in British Columbia",
+   "doi": "doi:10.5441/001/1.p5bn656k",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-08-27",
+   "animals": 260,
+   "locations": 249450,
+   "sensor": "Radio Transmitter",
+   "taxa": "Rangifer tarandus; Rangifer tarandus; Rangifer tarandus",
+   "study": "216040785",
+   "subjects": "Rangifer tarandus, Rangifer tarandus, Rangifer tarandus, animal behavior, animal movement, animal tracking, caribou, GPS logger, habitat selection, radio telemetry",
+   "terms": [
+    "eagle",
+    "caribou"
+   ]
+  },
+  {
+   "uuid": "166c0893-a7bc-4b40-93b3-9337a7e01c6d",
+   "title": "Data from: Study \"Foraging movement patterns of lactating Mexican long-nosed bats in central Mexico\"",
+   "doi": "doi:10.5441/001/1.696",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2025-09-09",
+   "animals": 21,
+   "locations": 709,
+   "sensor": "GPS",
+   "taxa": "Leptonycteris nivalis",
+   "study": "6884793928",
+   "paper": "http://dx.doi.org/10.1002/ece3.72055",
+   "subjects": "Leptonycteris nivalis, animal foraging, animal movement, animal tracking, GPS logger, Greater long-nosed bat, Mexican long-nosed bat, movement ecology",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "71a6385f-06d8-4ad4-b109-acacce8c2a74",
+   "title": "Data from: Heart rate supports accelerometry as a reliable predictor of energy expenditure in bats",
+   "doi": "https://doi.org/10.5441/001/1.754",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2026-10-23",
+   "animals": 12,
+   "locations": 2879,
+   "sensor": "GPS/Acceleration/Heart Rate",
+   "taxa": "Phyllostomus hastatus",
+   "study": "9403481254",
+   "paper": "https://doi.org/10.1242/jeb.251521",
+   "subjects": "Phyllostomus hastatus, accelerometer, animal foraging, animal movement, animal tracking, bio-logging, energy expenditure, GPS logger, heart rate, greater spear-nosed bat",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "6749e3ab-1625-445c-bd42-9feac301dedf",
+   "title": "Data from: Consistent long-distance foraging flights across years and seasons at colony level in a neotropical bat [2023]",
+   "doi": "doi:10.5441/001/1.322",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-11-27",
+   "animals": 25,
+   "locations": 16024,
+   "sensor": "GPS",
+   "taxa": "Phyllostomus hastatus",
+   "study": "2956085063",
+   "paper": "https://doi.org/10.1098/rsbl.2024.0424",
+   "subjects": "Phyllostomus hastatus, animal movement, animal tracking, bats, GPS logger, greater spear-nosed bat",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "9ce236cf-c0a7-41c4-bbf6-eaf802b2ae92",
+   "title": "Data from: Consistent long-distance foraging flights across years and seasons at colony level in a neotropical bat [2021-2022]",
+   "doi": "doi:10.5441/001/1.321",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-11-27",
+   "animals": 23,
+   "locations": 26575,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Phyllostomus hastatus",
+   "study": "1990236627",
+   "paper": "https://doi.org/10.1098/rsbl.2024.0424",
+   "subjects": "Phyllostomus hastatus, animal movement, animal tracking, bats, bio-logging, GPS logger, greater spear-nosed bat",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "5259147d-04a1-471d-a65c-240cd3d7071d",
+   "title": "Data from: Greater spear nosed bats commute long distances alone, rest together, but forage apart",
+   "doi": "doi:10.5441/001/1.282",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-08-22",
+   "animals": 22,
+   "locations": 253968,
+   "sensor": "GPS",
+   "taxa": "Phyllostomus hastatus",
+   "study": "145038719",
+   "paper": "https://doi.org/10.1016/j.anbehav.2023.08.001",
+   "subjects": "Phyllostomus hastatus, animal movement, animal tracking, GPS logger, greater spear-nosed bat",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "38bee44f-ca80-4b02-a55c-7aa136872606",
+   "title": "Data from: Defensive fruit metabolites obstruct seed dispersal by altering bat behavior and physiology at multiple temporal scales",
+   "doi": "doi:10.5441/001/1.bc72jg61",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-11-25",
+   "animals": 17,
+   "locations": 3343,
+   "sensor": "Radio Transmitter",
+   "taxa": "Carollia castanea; Carollia perspicillata",
+   "study": "69142590",
+   "paper": "https://doi.org/10.1002/ecy.2937",
+   "subjects": "Carollia castanea, Carollia perspicillata, animal foraging, animal tracking, bats, Carollia castanea, Carollia perspicillata, chemical ecology, Chestnut short-tailed bat, dispersal distance",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "9f0aeac2-dbd1-43f3-8146-599a1dd9baab",
+   "title": "Data from: Foraging and roosting behaviour of the fringe-lipped bat, Trachops cirrhosus, on Barro Colorado Island, Panamá",
+   "doi": "doi:10.5441/001/1.15pq1m81",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2017-12-18",
+   "animals": 6,
+   "locations": 1552,
+   "sensor": "Radio Transmitter",
+   "taxa": "Trachops cirrhosus",
+   "study": "196932952",
+   "paper": "https://doi.org/10.3161/15081109ACC2017.19.2.010",
+   "subjects": "Trachops cirrhosus, animal movement, animal tracking, Barro Colorado Island, bat, Brownian bridge movement model, fringe-lipped bat, movement ecology, home range, social learning",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "7758fed2-dde3-47ae-a817-4d28032df60a",
+   "title": "Data from: Seasonal shifts in tropical insect ephemerality drive bat foraging effort",
+   "doi": "doi:10.5441/001/1.297",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-06-26",
+   "animals": 23,
+   "locations": 8973,
+   "sensor": "GPS",
+   "taxa": "Noctilio albiventris",
+   "study": "836714638",
+   "paper": "https://doi.org/10.5441/001/1.297",
+   "subjects": "Noctilio albiventris, animal movement, animal tracking, behavioral plasticity, GPS logger, lesser bulldog bat, tropical ecology",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "f565e4ce-a459-4bc7-8d3c-11a386901c97",
+   "title": "Data from: Bats surf storm fronts during spring migration",
+   "doi": "doi:10.5441/001/1.319",
+   "rights": "Attribution 4.0 International",
+   "issued": "2024-12-20",
+   "animals": 131,
+   "locations": 4834,
+   "sensor": "GPS/Sigfox Geolocation",
+   "taxa": "Nyctalus noctula",
+   "study": "2057805903",
+   "paper": "https://doi.org/10.1126/science.ade7441",
+   "subjects": "Nyctalus noctula, animal migration, animal movement, animal tracking, bats, common noctule, energy expenditure, SigFox, telemetry",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "a51b51e0-fbf2-43e2-86ae-bc41c9f53a98",
+   "title": "Data from: Foraging and mating behaviors of Hypsignathus monstrosus at the bat-human interface in central African rainforest",
+   "doi": "doi:10.5441/001/1.278",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-12-12",
+   "animals": 32,
+   "locations": 32318,
+   "sensor": "Acceleration/GPS",
+   "taxa": "Hypsignathus monstrosus",
+   "study": "2379775078",
+   "paper": "https://doi.org/10.1002/ece3.10240",
+   "subjects": "Hypsignathus monstrosus, animal foraging, animal movement, animal tracking, bio-logging, GPS logger, hammer-headed fruit bat, Hypsignathus monstrosus, Pteropodidae",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "dbf2f016-6a3c-4951-a738-0096df24493c",
+   "title": "Data from: Commuting fruit bats beneficially modulate their flight in relation to wind",
+   "doi": "doi:10.5441/001/1.62s17b4v",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2014-03-18",
+   "animals": 9,
+   "locations": 614,
+   "sensor": "GPS",
+   "taxa": "Eidolon helvum",
+   "study": "16748598",
+   "paper": "https://doi.org/10.1098/rspb.2014.0018",
+   "subjects": "Eidolon helvum, Eidolon helvum, flight behaviour, fruit bats",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "e81f2977-7caa-4f81-868b-5f067fd830b7",
+   "title": "Data from: Modelling landscape connectivity for greater horseshoe bat using an empirical quantification of resistance",
+   "doi": "doi:10.5441/001/1.3pk82706",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2018-07-09",
+   "animals": 8,
+   "locations": 57,
+   "sensor": "Radio Transmitter",
+   "taxa": "Rhinolophus ferrumequinum",
+   "study": "494680989",
+   "paper": "https://doi.org/10.1111/1365-2664.13228",
+   "subjects": "Rhinolophus ferrumequinum, animal movement, animal tracking, bats, France, greater horseshoe bat, habitat fragmentation, landscape connectivity, radio telemetry, Rhinolophus ferrumequinum",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "04fffcf6-b556-40c1-90c4-947376de3fab",
+   "title": "Data from: Airplane tracking documents the fastest flight speeds recorded for bats",
+   "doi": "doi:10.5441/001/1.td71sn54",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2016-10-31",
+   "animals": 7,
+   "locations": 561,
+   "sensor": "Radio Transmitter",
+   "taxa": "Tadarida brasiliensis",
+   "study": "433126",
+   "paper": "https://doi.org/10.1098/rsos.160398",
+   "subjects": "Tadarida brasiliensis, animal movement, animal tracking, Brazilian free-tailed bats, Env-DATA, flight performance, ground speed, Movebank, North American Regional Reanalysis, radio telemetry",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "bc728b1d-e903-43fc-925e-25b97577b41d",
+   "title": "Data from: Delayed response and biosonar perception explain movement coordination in trawling bats",
+   "doi": "doi:10.5441/001/1.62h1f7k9",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2015-03-26",
+   "animals": 545,
+   "locations": 69336,
+   "sensor": "",
+   "taxa": "Myotis daubentonii; Myotis daubentonii; Myotis daubentonii",
+   "study": "47899041",
+   "paper": "https://doi.org/10.1371/journal.pcbi.1004089.t001",
+   "subjects": "Myotis daubentonii, Myotis daubentonii, Myotis daubentonii, coordinated movement, Daubenton’s bat, echolocation, Myotis daubentoni, videogrammetry",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "a83f10a7-1068-480c-a317-b40cb5268a54",
+   "title": "Data from: Movement seasonality in a desert-dwelling bat revealed by miniature GPS loggers",
+   "doi": "doi:10.5441/001/1.n157b4n8",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-08-16",
+   "animals": 22,
+   "locations": 1801,
+   "sensor": "GPS",
+   "taxa": "Lavia frons",
+   "study": "908357795",
+   "paper": "https://doi.org/10.1186/s40462-019-0170-8",
+   "subjects": "Lavia frons, animal tracking, GPS logger, Kenya, Lavia frons, yellow-winged bat",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "f3024833-eae6-44e7-8e27-f496fc2ffbb3",
+   "title": "Data from: European free-tailed bats use topography and nocturnal updrafts to fly high and fast",
+   "doi": "doi:10.5441/001/1.52nn82r9",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2021-02-04",
+   "animals": 8,
+   "locations": 9873,
+   "sensor": "GPS",
+   "taxa": "Tadarida teniotis",
+   "study": "312057662",
+   "paper": "https://doi.org/10.1016/j.cub.2020.12.042",
+   "subjects": "Tadarida teniotis, animal tracking, European free-tailed bat, GPS logger, Tadarida teniotis",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "ce6d6d3f-427f-4c15-901c-61bf0b2b8392",
+   "title": "Data from: Overall dynamic body acceleration in straw-colored fruit bats increases in headwinds but not with airspeed",
+   "doi": "doi:10.5441/001/1.k8n02jn8",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-05-21",
+   "animals": 63,
+   "locations": 18154,
+   "sensor": "Acceleration",
+   "taxa": "Eidolon helvum",
+   "study": "404939825",
+   "paper": "https://doi.org/10.3389/fevo.2019.00200",
+   "subjects": "Eidolon helvum, animal tracking, avian migration, biotelemetry, body acceleration, Burkina Faso, Eidolon helvum, flight behavior, Ghana, GPS logger",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "595664bf-661d-49d9-af92-ec8a41a50f50",
+   "title": "Data from: Acoustic evaluation of behavioral states predicted from GPS tracking: a case study of a marine fishing bat",
+   "doi": "doi:10.5441/001/1.kk3bg2f4",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2019-06-26",
+   "animals": 11,
+   "locations": 14328,
+   "sensor": "GPS",
+   "taxa": "Myotis vivesi",
+   "study": "797650867",
+   "paper": "https://doi.org/10.1186/s40462-019-0163-7",
+   "subjects": "Myotis vivesi, animal foraging, animal movement, animal tracking, bio-logging, GPS logger, Mexican fish-eating bat, Myotis vivesi, path segmentation, ultrasonic audio",
+   "terms": [
+    "bat",
+    "fish",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "10ea2b4f-84e0-46c2-b731-28ec0598d98f",
+   "title": "Data from: First three-dimensional tracks of bat migration reveal large amounts of individual behavioral flexibility",
+   "doi": "doi:10.5441/001/1.5d736bf0",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-05-28",
+   "animals": 5,
+   "locations": 1274,
+   "sensor": "GPS",
+   "taxa": "Nyctalus noctula",
+   "study": "625284084",
+   "paper": "https://doi.org/10.1002/ecy.2762",
+   "subjects": "Nyctalus noctula, animal movement, animal tracking, bat, common noctule, flight altitude, Germany, Nyctalus noctula, radio telemetry",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "0523946d-2039-45e3-96ac-b5ffe8fc08b2",
+   "title": "Data from: Long-distance seed dispersal by straw-coloured fruit bats varies by season and landscape",
+   "doi": "doi:10.5441/001/1.44183438",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2016-08-05",
+   "animals": 29,
+   "locations": 5063,
+   "sensor": "Acceleration",
+   "taxa": "Eidolon helvum",
+   "study": "183770262",
+   "paper": "https://doi.org/10.1016/j.gecco.2016.03.005",
+   "subjects": "Eidolon helvum, animal tracking, Eidolon, Eidolon helvum, fragmentation, foraging, gut passage, seasonality, straw-coloured fruit bat",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "5cdca828-9f1e-421f-bcac-cb56a691cb3e",
+   "title": "Data from: Tracking post-hibernation behavior and early migration does not reveal the expected sex-differences in a \"female-migrating“ bat",
+   "doi": "doi:10.5441/001/1.f01815nq",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2015-03-23",
+   "animals": 33,
+   "locations": 622,
+   "sensor": "Radio Transmitter",
+   "taxa": "Nyctalus noctula",
+   "study": "19148474",
+   "paper": "https://doi.org/10.1371/journal.pone.0114810",
+   "subjects": "Nyctalus noctula, animal tracking, common noctule, Germany, movement ecology, Nyctalus noctula, radio telemetry",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "78c0f978-c57a-4349-b1a8-412f6f687e0b",
+   "title": "Data from: Common noctules exploit low levels of the aerosphere",
+   "doi": "doi:10.5441/001/1.7t4b97qf",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-02-21",
+   "animals": 8,
+   "locations": 0,
+   "sensor": "Accessory Measurements",
+   "taxa": "Nyctalus noctula",
+   "study": "509393372",
+   "paper": "https://doi.org/10.1098/rsos.181942",
+   "subjects": "Nyctalus noctula, animal tracking, bat, bio-logging, common noctule, flight, movement ecology, Nyctalus noctula, wingbeat frequency",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "e3343be6-d586-4c65-8b0a-cd2a063f24c9",
+   "title": "Data from: Pteropus lylei primarily forages in residential areas in Kandal, Cambodia",
+   "doi": "doi:10.5441/001/1.j25661td",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2020-03-13",
+   "animals": 14,
+   "locations": 13522,
+   "sensor": "GPS",
+   "taxa": "Pteropus lylei",
+   "study": "681056756",
+   "paper": "https://doi.org/10.1002/ece3.5046",
+   "subjects": "Pteropus lylei, animal movement, animal tracking, bats, Cambodia, Lyle's flying fox, Pteropus lylei",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "f7b38cdd-b028-4889-8163-694c86df7dec",
+   "title": "Data from: Spring foraging movements of an urban population of grey-headed flying foxes (Pteropus poliocephalus)",
+   "doi": "doi:10.5441/001/1.5bd6pq55",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2021-03-09",
+   "animals": 4,
+   "locations": 145262,
+   "sensor": "GPS",
+   "taxa": "Pteropus poliocephalus",
+   "study": "1077432441",
+   "paper": "https://doi.org/10.1093/jue/juaa034",
+   "subjects": "Pteropus poliocephalus, animal tracking, Australia, bats, grey-headed flying fox, GPS loggers, Pteropus poliocephalus, urban ecology, urban foraging",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "3cef8e9d-c82a-43d2-8bea-fd9d3527c66b",
+   "title": "Data from: Study \"Movements of the Christmas Island flying fox, Australia\"",
+   "doi": "doi:10.5441/001/1.mn019k4d",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2022-12-13",
+   "animals": 27,
+   "locations": 6139,
+   "sensor": "GPS",
+   "taxa": "Pteropus melanotus",
+   "study": "1852945982",
+   "paper": "https://doi.org/10.1186/s40462-022-00315-8",
+   "subjects": "Pteropus melanotus, animal foraging, animal tracking, ecosystem services, fruit bats, GPS logger, pollination, Pteropodidae, Pteropus melanotus",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "99928459-120b-4e4a-a3a0-abea6a1b4f35",
+   "title": "Data from: Flight behaviour of Red Kites within their breeding area in relation to local weather variables: conclusions with regard to wind turbine collision mitigation",
+   "doi": "doi:10.5441/001/1.338",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-08-05",
+   "animals": 4,
+   "locations": 436194,
+   "sensor": "Magnetometer/Barometer/Acceleration/GPS",
+   "taxa": "Milvus milvus",
+   "study": "878431870",
+   "paper": "https://doi.org/10.1111/1365-2664.14739",
+   "subjects": "Milvus milvus, animal tracking, barometer, biotelemetry, GSM telemetry, GPS, light-level logger, magnetometer, Red Kite, wind energy",
+   "terms": [
+    "bat"
+   ]
+  },
+  {
+   "uuid": "c0de801a-53ce-461b-8fd3-e9e3f9731a93",
+   "title": "Data from: Wolf ecology and caribou-primary prey-wolf spatial relationships in low productivity peatland complexes in northeastern Alberta",
+   "doi": "doi:10.5441/001/1.7vr1k987",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2019-08-14",
+   "animals": 12,
+   "locations": 15159,
+   "sensor": "GPS",
+   "taxa": "Canis lupus",
+   "study": "178979729",
+   "subjects": "Canis lupus, animal tracking, Canada, Canis lupus, GPS logger, movement ecology, predation, wolf",
+   "terms": [
+    "caribou"
+   ]
+  },
+  {
+   "uuid": "bc7febf2-d956-409b-944a-0764ae558a51",
+   "title": "Data from: Study \"Fishing cat (Prionairulus viverrinus) study in Khao Sam Roi Yot, Thailand\"",
+   "doi": "doi:10.5441/001/1.644",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2025-07-27",
+   "animals": 13,
+   "locations": 56939,
+   "sensor": "GPS/Acceleration",
+   "taxa": "Prionailurus viverrinus",
+   "study": "2728151646",
+   "paper": "https://doi.org/10.5281/zenodo.13835300",
+   "subjects": "Prionailurus viverrinus, animal movement, animal tracking, conservation biology, fishing cats, GPS, resource selection, urban ecology",
+   "terms": [
+    "fish"
+   ]
+  },
+  {
+   "uuid": "91804022-7b95-4192-a1bb-5288e1141225",
+   "title": "Data from: Study \"American Herring Gulls - GPS - Lobster Bay, Southwest Nova Scotia, Canada\"",
+   "doi": "doi:10.5441/001/1.292",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-08-29",
+   "animals": 15,
+   "locations": 327690,
+   "sensor": "GPS",
+   "taxa": "Larus smithsonianus",
+   "study": "2944153255",
+   "paper": "https://doi.org/10.1002/2688-8319.12274",
+   "subjects": "Larus smithsonianus, animal movement, animal tracking, GPS telemetry, anthropogenic influence, seabirds",
+   "terms": [
+    "fish"
+   ]
+  },
+  {
+   "uuid": "335a3479-eb48-4708-9af0-b31a48311533",
+   "title": "Data from: Terrestrial and marine foraging strategies of an opportunistic seabird species breeding in the Wadden Sea",
+   "doi": "doi:10.5441/001/1.nk286sc0",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2016-08-19",
+   "animals": 8,
+   "locations": 49617,
+   "sensor": "GPS",
+   "taxa": "Larus fuscus",
+   "study": "183209639",
+   "paper": "https://doi.org/10.1371/journal.pone.0159630",
+   "subjects": "Larus fuscus, animal foraging, animal movement, animal tracking, Larus fuscus, lesser black-backed gull, seabird",
+   "terms": [
+    "fish",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "831030a3-c255-46a8-8de8-e8a786d32dc6",
+   "title": "Data from: Study \"Northern Gannet Breeding Season GPS Data from Cape St. Mary's, NL, Canada: 2019 to 2022\"",
+   "doi": "doi:10.5441/001/1.5km7v2s3",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2023-05-01",
+   "animals": 25,
+   "locations": 50597,
+   "sensor": "GPS",
+   "taxa": "Morus bassanus",
+   "study": "2630711281",
+   "paper": "https://doi.org/10.3354/meps14164",
+   "subjects": "Morus bassanus, animal movement, animal tracking, GPS logger, GPS telemetry, Morus bassanus, northern gannet, seabirds, time-depth recorder",
+   "terms": [
+    "fish",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "569465d9-a8e9-4b1f-a9bc-00438f80d50b",
+   "title": "Data from: Study \"GPS tracking of guanay cormorants\"",
+   "doi": "doi:10.5441/001/1.646",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2025-12-10",
+   "animals": 12,
+   "locations": 30242,
+   "sensor": "GPS",
+   "taxa": "Leucocarbo bougainvillii",
+   "study": "5627630439",
+   "paper": "https://doi.org/10.1007/s00227-025-04734-0",
+   "subjects": "Leucocarbo bougainvillii, animal foraging, animal movement, animal tracking, GPS, Phalacrocorax bougainvillii, seabirds",
+   "terms": [
+    "fish"
+   ]
+  },
+  {
+   "uuid": "f8d590ca-0f7a-47ef-bacd-dd9efada41b9",
+   "title": "Data from: Study \"GPS tracking of Peruvian boobies\"",
+   "doi": "doi:10.5441/001/1.645",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2025-12-10",
+   "animals": 47,
+   "locations": 84783,
+   "sensor": "GPS",
+   "taxa": "Sula variegata",
+   "study": "5549752586",
+   "paper": "https://doi.org/10.1007/s00227-025-04734-0",
+   "subjects": "Sula variegata, animal foraging, animal movement, animal tracking, GPS, Peruvian boobies, seabirds",
+   "terms": [
+    "fish"
+   ]
+  },
+  {
+   "uuid": "b77c0250-c850-4e73-8f06-1c53ed195080",
+   "title": "Data from: Annual-cycle movement patterns of Eastern Brown Pelicans from the northern end of their breeding range",
+   "doi": "https://doi.org/10.5441/001/1.715",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2026-08-19",
+   "animals": 7,
+   "locations": 24061,
+   "sensor": "GPS",
+   "taxa": "Pelecanus occidentalis",
+   "study": "2782529952",
+   "paper": "https://doi.org/10.1675/063.049.0103",
+   "subjects": "Pelecanus occidentalis, animal tracking, brown pelican, GPS, satellite telemetry",
+   "terms": [
+    "fish",
+    "marine"
+   ]
+  },
+  {
+   "uuid": "0bd4ff73-23b8-4cd9-8676-e70e215d6a2b",
+   "title": "Data from: Evaluation of micro-GPS receivers for tracking small-bodied mammals",
+   "doi": "doi:10.5441/001/1.b0g6rq1t",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2017-03-16",
+   "animals": 17,
+   "locations": 4724,
+   "sensor": "GPS",
+   "taxa": "Brachylagus idahoensis",
+   "study": "243688044",
+   "paper": "https://doi.org/10.1371/journal.pone.0173185",
+   "subjects": "Brachylagus idahoensis, Brachylagus idahoensis, GPS telemetry, micro-GPS, microtopography, pygmy rabbit, small mammals",
+   "terms": [
+    "fish"
+   ]
+  },
+  {
+   "uuid": "cd578716-fe99-4c5d-9974-d6d764d0165b",
+   "title": "Data from: At-sea distribution and prey selection of Antarctic petrels and commercial krill fisheries",
+   "doi": "doi:10.5441/001/1.q4gn4q56",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2016-10-10",
+   "animals": 156,
+   "locations": 65334,
+   "sensor": "Solar Geolocator Raw",
+   "taxa": "Thalassoica antarctica",
+   "study": "180290122",
+   "paper": "https://doi.org/10.1371/journal.pone.0156968",
+   "subjects": "Thalassoica antarctica, animal foraging, animal tracking, Antarctica, Antarctic petrel, fisheries, light-level loggers, predators, Procellariformes, seabirds",
+   "terms": [
+    "fish"
+   ]
+  },
+  {
+   "uuid": "0f7d9e2f-6269-4c7c-ad28-8af219e85ca9",
+   "title": "Data from: Foraging habitat choice of white-tailed tropicbirds revealed by fine-scale GPS tracking and remote sensing",
+   "doi": "doi:10.5441/001/1.649s6f21",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2018-12-27",
+   "animals": 15,
+   "locations": 6671,
+   "sensor": "GPS",
+   "taxa": "Phaethon lepturus",
+   "study": "630478736",
+   "paper": "https://doi.org/10.7717/peerj.6261",
+   "subjects": "Phaethon lepturus, animal movement, animal tracking, Atlantic Ocean, Brazil, foraging ecology, GPS logger, Phaethon lepturus, seabirds, tropical seabirds",
+   "terms": [
+    "fish"
+   ]
+  },
+  {
+   "uuid": "9685bc77-0d7c-48dd-87f3-8cd95b844f9b",
+   "title": "Data from: Movement of long-tailed ducks marked on the Yukon-Kuskokwim Delta, Alaska 1998-2000 (data from Petersen et al. 2003)",
+   "doi": "doi:10.5441/001/1.1rc3hj8d",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2016-04-01",
+   "animals": 14,
+   "locations": 1275,
+   "sensor": "Argos Doppler Shift",
+   "taxa": "Clangula hyemalis",
+   "study": "140391801",
+   "paper": "https://pubs.er.usgs.gov/publication/70025260",
+   "subjects": "Clangula hyemalis, animal tracking, Argos, Clangula hyemalis, long-tailed duck, moult distribution, post-breeding, satellite telemetry, winter distribution, Yukon-Kuskokwim Delta",
+   "terms": [
+    "fish"
+   ]
+  },
+  {
+   "uuid": "68886fec-9dcd-42f1-bea9-b3bfc6609b51",
+   "title": "Data from: Trans-equatorial migration links oceanic frontal habitats across the Pacific Ocean: year-round movements and foraging activity of a small gadfly petrel",
+   "doi": "doi:10.5441/001/1.301",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-01-22",
+   "animals": 10,
+   "locations": 10426,
+   "sensor": "Solar Geolocator Raw/Solar Geolocator Twilight/Solar Geolocator",
+   "taxa": "Pterodroma longirostris",
+   "study": "3062819236",
+   "paper": "https://doi.org/10.1007/s00227-023-04373-3",
+   "subjects": "Pterodroma longirostris, animal tracking, bio-logging, light-level logger, marine protected areas, seabirds, solar geolocation, Stejneger's Petrel",
+   "terms": [
+    "marine"
+   ]
+  },
+  {
+   "uuid": "f8dc5b88-a229-424b-b792-98bee73c6a2d",
+   "title": "Data from: Northwest range shifts and shorter wintering period of an Arctic seabird in response to four decades of changing ocean climate",
+   "doi": "doi:10.5441/001/1.p1m75qn1",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2021-11-29",
+   "animals": 71,
+   "locations": 44761,
+   "sensor": "Solar Geolocator",
+   "taxa": "Uria lomvia",
+   "study": "1810804830",
+   "paper": "https://doi.org/10.3354/meps13890",
+   "subjects": "Uria lomvia, animal tracking, Arctic, geolocator, Hudson Bay, light-level logger, seabirds, thick-billed murre, Uria lomvia",
+   "terms": [
+    "marine"
+   ]
+  },
+  {
+   "uuid": "7fb0373b-1063-4e4f-a422-712a7b5e3333",
+   "title": "Data from: Diverse foraging strategies of breeding Swinhoe's Storm-Petrel in the productive marginal sea of Northwest Pacific",
+   "doi": "doi:10.5441/001/1.306",
+   "rights": "CC0 1.0 Universal",
+   "issued": "2024-01-04",
+   "animals": 9,
+   "locations": 184,
+   "sensor": "GPS",
+   "taxa": "Oceanodroma monorhis",
+   "study": "1719986633",
+   "paper": "https://doi.org/10.1016/j.avrs.2023.100157",
+   "subjects": "Oceanodroma monorhis, animal movement, animal tracking, GPS, seabirds, Swinhoe's storm petrel",
+   "terms": [
+    "marine"
+   ]
+  },
+  {
+   "uuid": "8e78d67d-24d9-49cd-9f0a-9b2bccaa70fa",
+   "title": "Data from: Changes in behaviour drive inter‐annual variability in the at‐sea distribution of northern gannets",
+   "doi": "doi:10.5441/001/1.30r98tb3",
+   "rights": "Attribution 4.0 International",
+   "issued": "2017-08-01",
+   "animals": 61,
+   "locations": 363394,
+   "sensor": "GPS",
+   "taxa": "Morus bassanus",
+   "study": "305974507",
+   "paper": "https://doi.org/10.1007/s00227-016-2922-y",
+   "subjects": "Morus bassanus, animal movement, animal tracking, avian migration, collision risk, English Channel, environmental impact assessment, evidence-based decision making, GPS logger, home range",
+   "terms": [
+    "marine"
+   ]
+  },
+  {
+   "uuid": "b575f1e3-3146-4537-8072-df97e1dc3b8b",
+   "title": "Data from: Partial migration in the Mediterranean storm petrel Hydrobates pelagicus melitensis",
+   "doi": "doi:10.5441/001/1.4h490c02",
+   "rights": "Attribution-NonCommercial 4.0 International",
+   "issued": "2019-04-23",
+   "animals": 7,
+   "locations": 2590,
+   "sensor": "Solar Geolocator",
+   "taxa": "Hydrobates pelagicus",
+   "study": "360546360",
+   "paper": "http://www.marineornithology.org/content/get.cgi?rn=1299",
+   "subjects": "Hydrobates pelagicus, animal tracking, avian migration, geolocator, Hydrobates pelagicus, melitensis, Mediterranean Sea, Mediterranean storm petrel, Procellariformes, seabirds",
+   "terms": [
+    "marine"
+   ]
+  },
+  {
+   "uuid": "3b01d6f3-fb98-4027-b7c6-9b6fecdd871a",
+   "title": "Data from: Study \"Leach's storm-petrel GPS - Middle Lawn Is. - Atlantic Canada - 2022-2023\"",
+   "doi": "https://doi.org/10.5441/001/1.763",
+   "rights": "Attribution 4.0 International",
+   "issued": "2026-11-03",
+   "animals": 64,
+   "locations": 11563,
+   "sensor": "GPS",
+   "taxa": "Hydrobates leucorhous",
+   "study": "3853638231",
+   "paper": "https://doi.org/10.3389/fmars.2026.1950203",
+   "subjects": "Hydrobates leucorhous, animal foraging, animal movement, animal tracking, GPS logger, Leach's Storm-petrel",
+   "terms": [
+    "marine"
+   ]
+  },
+  {
+   "uuid": "6653a98c-b259-49c0-83fc-09329e869e84",
+   "title": "Data from: Study \"Leach's storm-petrel GPS - Bon Portage Is. - Atlantic Canada - 2017-2022\"",
+   "doi": "https://doi.org/10.5441/001/1.759",
+   "rights": "Attribution 4.0 International",
+   "issued": "2026-11-03",
+   "animals": 52,
+   "locations": 7448,
+   "sensor": "GPS",
+   "taxa": "Hydrobates leucorhous",
+   "study": "3853678437",
+   "paper": "https://doi.org/10.3389/fmars.2026.1950203",
+   "subjects": "Hydrobates leucorhous, animal movement, animal foraging, animal tracking, GPS logger, Leach's Storm-petrel",
+   "terms": [
+    "marine"
+   ]
+  },
+  {
+   "uuid": "3c6edee1-230a-438f-8bcd-903a915a24ec",
+   "title": "Data from: Study \"Leach's storm-petrel GPS - Baccalieu Is. - Atlantic Canada - 2016-2023\"",
+   "doi": "https://doi.org/10.5441/001/1.757",
+   "rights": "Attribution 4.0 International",
+   "issued": "2026-11-02",
+   "animals": 115,
+   "locations": 21729,
+   "sensor": "GPS",
+   "taxa": "Hydrobates leucorhous",
+   "study": "3853604988",
+   "paper": "https://doi.org/10.3389/fmars.2026.1950203",
+   "subjects": "Hydrobates leucorhous, animal tracking, animal foraging, animal movement, GPS logger, Leach's Storm-petrel",
+   "terms": [
+    "marine"
+   ]
+  },
+  {
+   "uuid": "2ace1d03-c3c8-47f7-8963-234db604de9d",
+   "title": "Data from: Study \"Leach's storm-petrel GPS - Gull Is. (Witless Bay) - Atlantic Canada - 2016-2023\"",
+   "doi": "https://doi.org/10.5441/001/1.761",
+   "rights": "Attribution 4.0 International",
+   "issued": "2026-11-03",
+   "animals": 100,
+   "locations": 16512,
+   "sensor": "GPS",
+   "taxa": "Hydrobates leucorhous",
+   "study": "3853620966",
+   "paper": "https://doi.org/10.3389/fmars.2026.1950203",
+   "subjects": "Hydrobates leucorhous, animal foraging, animal movement, animal tracking, GPS logger, Leach's Storm-petrel",
+   "terms": [
+    "marine"
+   ]
+  }
+ ]
+}
