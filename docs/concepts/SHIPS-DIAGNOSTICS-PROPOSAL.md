@@ -34,7 +34,7 @@ One extra line in `collector.log` for every ships run that fails or is degraded,
 ## Part B. An overlong sample — a decision
 
 Today an overlong sample replaces the latest sample and is drawn. Options:
-- **B1. Leave it.** The card says degraded and why. Cost: 700 vessels from 20 s of listening stood as "the ships" for 37 minutes on 17 Nov.
+- **B1. Leave it.** The card says degraded and why. Cost: 700 vessels from 20 s of listening stood as the latest ships sample for about half an hour on 17 Nov (accepted by the hub at about 14:59 UTC, replaced by the 15:29 UTC sample).
 - **B2. The hub keeps the last good sample and records the attempt** (recommended). In `ingest()`, for ships only, an upload with `overlong_sample: true` is archived and logged as today but does not become latest. `latest-cells/ships.json` keeps the good sample's cells and gains `last_attempt` (time, status, reason code `sample_overlong`, elapsed, window), as buoys do since hub 0.6.8. The card reads "degraded" with "Latest sample ran N s against a 60 s window and is not shown. Showing ships from the HH:MM UTC sample." The existing three-hour stale limit still ends it.
 - **B3. The collector does not upload an overlong sample's records.** Simpler, but the hub then sees `down` and Part C's problem applies.
 
