@@ -107,6 +107,6 @@ ok('a position lands where its latitude and longitude put it', dotAt && Math.abs
   ok('rev3. counts switched on again: the positions switch goes off and its dots are removed', A.state().on === true && D.state().on === false && D.state().meshes === 0 && group.children.filter(m => m.__airdots).length === 0 && els['tgl-airdots'].attrs['aria-checked'] === 'false' && els['s-airdots'].textContent === 'off', [A.state().on, D.state().on]);
   await A.setOn(false);
   ok('rev3. both can be off', A.state().on === false && D.state().on === false && group.children.filter(m => m.__air || m.__airdots).length === 0);
-  ok('rev3. dot radius is the small size Chad chose', D.config.R_PX === 1.6);
+  ok('rev4. dot radius and colour are the ones Chad chose on 18 Nov (2.2 px, magenta)', D.config.R_PX === 2.2 && D.config.FILL === '#e84ab5');
   console.log(`\naircraft-dots-page${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();
