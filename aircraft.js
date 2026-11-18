@@ -26,10 +26,12 @@
   const tgl = $('tgl-air'); if (!tgl) return;
   const AC = { URL: ME.HUB + '/cells/opensky', LAYER: 'opensky', CELL_DEG: 4, ROWS: 45, COLS: 90, PX: 4, ALT: 0.0011, OPACITY: 0.78,
     STALE_FALLBACK_S: 3 * 3600, HIDE_AFTER_H: 6, REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, BUILD_WAIT_MS: 60000,
+    VIS_GAP_MS: 60e3,   // returning to view asks the hub again only if the last ask (counts and positions each on their own) began at least this long ago
+   
     // PROVISIONAL bands, chosen from the first private pull (17 Nov 2026: 446 cells, largest cell 172). Each band is [from, colour].
     SCALE: [[1, '#3b2f6b'], [5, '#6a3d9a'], [20, '#b5478c'], [50, '#ef7f4f'], [100, '#ffd166']],
     CREDIT: 'The OpenSky Network, https://opensky-network.org' };
-  const st = { on: false, gen: 0, seq: 0, status: 'off', why: null, env: null, meshes: [], loading: false, refreshFailed: false, sel: null, timer: null, ageTimer: null, requests: [], opts: { now: null } };
+  const st = { on: false, gen: 0, seq: 0, status: 'off', why: null, env: null, meshes: [], loading: false, refreshFailed: false, sel: null, timer: null, ageTimer: null, requests: [], lastAsk: -Infinity, visSkips: 0, opts: { now: null } };
   const now = () => (st.opts.now != null ? st.opts.now : Date.now());
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const utc = iso => { const d = new Date(iso); return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')} UTC, ${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
@@ -117,7 +119,7 @@
   /** Fetch, check, build, then swap sheet and labels in one step. A failed refresh leaves what is shown, and says so. */
   async function load(isRefresh) {
     if (st.loading) return;
-    const gen = st.gen, seq = ++st.seq; st.loading = true; paint();
+    const gen = st.gen, seq = ++st.seq; st.loading = true; st.lastAsk = now(); paint();
     const late = () => gen !== st.gen || seq !== st.seq || !st.on;
     try {
       let res, err = null; try { res = await getCounts(); } catch (e) { err = e; }
@@ -182,7 +184,11 @@
     await load(false);
   }
   tgl.addEventListener('click', () => setOn(!st.on));
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && st.on) { ageTick(); load(true); } });
+  // Back in view: the age check runs at once, every time, so an expired sheet is cleared even when no request is made.
+  // The hub is asked again only if the last ask began at least VIS_GAP_MS ago: an embedding pane can report the page
+  // visible for a few milliseconds every 2 s (seen 18 Nov 2026: 47 requests in about 95 s), and that must not become a request each time.
+  function onVisible() { if (document.hidden || !st.on) return; ageTick(); if (now() - st.lastAsk >= AC.VIS_GAP_MS) load(true); else st.visSkips++; }
+  document.addEventListener('visibilitychange', onVisible);
   (ME.taps = ME.taps || []).push((lat, lng) => { if (st.on && st.env && Number.isFinite(lat) && Number.isFinite(lng)) { st.sel = { lat, lng }; paint(); } });
   { const el = $('air-key'); if (el) el.innerHTML = AC.SCALE.map(([v, c], k) => `<span class="b"><i style="background:${c}"></i>${k === AC.SCALE.length - 1 ? v + '+' : v + '–' + (AC.SCALE[k + 1][0] - 1)}</span>`).join('') + '<span class="u">aircraft per 4° cell (bands provisional) · no colour = no count, not an empty sky</span>'; }
 
@@ -190,7 +196,7 @@
   // ====================================================================== positions as plain dots (aircraft-dots-rc)
   const DT = { URL: ME.HUB + '/snapshot/opensky', FIELDS: ['lat', 'lng'], W: 4096, H: 2048, R_PX: 2.2, ALT: 0.0016, OPACITY: 1, ORDER: -0.5,
     FILL: '#e84ab5', EDGE: 'rgba(8,12,20,0.75)', REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, MAX: 60000 };
-  const dt = { on: false, gen: 0, seq: 0, why: null, env: null, meshes: [], loading: false, refreshFailed: false, timer: null, ageTimer: null, requests: [], opts: { source: null } };
+  const dt = { on: false, gen: 0, seq: 0, why: null, env: null, meshes: [], loading: false, refreshFailed: false, timer: null, ageTimer: null, requests: [], lastAsk: -Infinity, visSkips: 0, opts: { source: null } };
   const dtgl = $('tgl-airdots');
   /** What the hub served, checked. Positions are drawn only from a file whose record fields are exactly lat,lng. */
   function checkDots(j) {
@@ -239,7 +245,7 @@
   }
   async function dotsLoad(isRefresh) {
     if (dt.loading) return;
-    const gen = dt.gen, seq = ++dt.seq; dt.loading = true; dotsPaint();
+    const gen = dt.gen, seq = ++dt.seq; dt.loading = true; dt.lastAsk = now(); dotsPaint();
     const late = () => gen !== dt.gen || seq !== dt.seq || !dt.on;
     try {
       let res, err = null; try { res = await getDots(); } catch (e) { err = e; }
@@ -289,21 +295,22 @@
     dt.ageTimer = setInterval(dotsAgeTick, DT.AGE_MS);
     await dotsLoad(false);
   }
+  function dotsOnVisible() { if (document.hidden || !dt.on) return; dotsAgeTick(); if (now() - dt.lastAsk >= AC.VIS_GAP_MS) dotsLoad(true); else dt.visSkips++; }   // same rule as the counts
   if (dtgl) {
     dtgl.addEventListener('click', () => dotsSetOn(!dt.on));
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && dt.on) { dotsAgeTick(); dotsLoad(true); } });
+    document.addEventListener('visibilitychange', dotsOnVisible);
   }
 
   // read-only aids for tests and the console
   ME.aircraft = { state: () => ({ on: st.on, status: st.status, why: st.why, time: st.env ? st.env.time : null, cutS: st.env ? st.env.cutS : null, total: st.env ? st.env.total : null, cells: st.env ? st.env.n : null,
-      meshes: st.meshes.length, inScene: st.meshes.filter(m => m.parent).length, loading: st.loading, refreshFailed: st.refreshFailed, requests: st.requests.slice(), sel: st.sel,
+      meshes: st.meshes.length, inScene: st.meshes.filter(m => m.parent).length, loading: st.loading, refreshFailed: st.refreshFailed, requests: st.requests.slice(), visSkips: st.visSkips, sel: st.sel,
       label: $('air-frame').hidden ? null : $('air-frame').textContent, extra: $('air-extra').hidden ? null : $('air-extra').textContent, off: $('o-air').hidden ? null : $('o-air').textContent,
       read: $('air-read').textContent, stateWord: $('s-air').textContent, drawn: st.meshes[0] && st.meshes[0].material.map.image.__air || null }),
-    setOn, refresh: () => load(true), ageTick, select: (lat, lng) => { if (st.on && st.env) { st.sel = { lat, lng }; paint(); } }, opts: st.opts, config: AC, check, band, cellOf,
+    setOn, refresh: () => load(true), ageTick, onVisible, select: (lat, lng) => { if (st.on && st.env) { st.sel = { lat, lng }; paint(); } }, opts: st.opts, config: AC, check, band, cellOf,
     reading: (lat, lng) => st.env ? reading(st.env, lat, lng) : null, texture: () => (st.meshes[0] && st.meshes[0].material.map && st.meshes[0].material.map.image) || null,
     dots: { state: () => ({ on: dt.on, why: dt.why, time: dt.env ? dt.env.time : null, n: dt.env ? dt.env.n : null, meshes: dt.meshes.length, inScene: dt.meshes.filter(m => m.parent).length, loading: dt.loading, refreshFailed: dt.refreshFailed,
-        requests: dt.requests.slice(), stateWord: dtgl ? $('s-airdots').textContent : null, label: dtgl && !$('airdots-frame').hidden ? $('airdots-frame').textContent : null, extra: dtgl && !$('airdots-extra').hidden ? $('airdots-extra').textContent : null,
+        requests: dt.requests.slice(), visSkips: dt.visSkips, stateWord: dtgl ? $('s-airdots').textContent : null, label: dtgl && !$('airdots-frame').hidden ? $('airdots-frame').textContent : null, extra: dtgl && !$('airdots-extra').hidden ? $('airdots-extra').textContent : null,
         off: dtgl && !$('o-airdots').hidden ? $('o-airdots').textContent : null, drawn: dt.meshes[0] && dt.meshes[0].material.map.image.__airdots || null }),
-      setOn: dotsSetOn, refresh: () => dotsLoad(true), ageTick: dotsAgeTick, opts: dt.opts, config: DT, check: checkDots, compose: composeDots } };
+      setOn: dotsSetOn, refresh: () => dotsLoad(true), ageTick: dotsAgeTick, onVisible: dotsOnVisible, opts: dt.opts, config: DT, check: checkDots, compose: composeDots } };
   paint(); dotsPaint();
 })();
