@@ -3,6 +3,17 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 16:40 UTC (clock reading) — **RELEASED: `sources-360-overflow-rc` merged (merge `8bb3139`); the Sources page no longer overflows at 360 px.** (production: page)
+- **Chad's own line (18 Nov):** "Approve: merge sources-360-overflow-rc fbb9144 into main (page change: a long file name on the Sources page wraps at 360 px; stylesheet key bump; no hub change)". **No GPT review of the branch was relayed before his line** (the review request had been given to him for GPT).
+- **Merge `8bb31395601b6cc05805633eda125fb1ec4b6e2b`**, no-fast-forward merge of `fbb9144`, no conflicts; eight files (five pages' stylesheet key, `style.css`, `phase1/smoke-fixes.test.cjs`, the packet); `phase1/worker.js` unchanged. On the merged tree before the push: `smoke-fixes` 113 pass, `desktop-overflow` 258 pass, `mobile-pass` 131 pass. Pushed 16:38:01 UTC.
+- **Served-hash check, 21 of 21 page files, 16:38:56 UTC** (`style.css` `51013008…08b8`, `index.html` `0800e745…444c`, `sources.html` `158039cb…063a`, `timeline.html` `94c410e8…8d84`, `moon.html` `fc90b973…efe6`, `sun.html` `99ab66e8…900d`; the other 15 unchanged).
+- **Live Sources page, real fonts, 16:39 UTC (frames of each width, fresh address):** `style.css?v=202612181300`; 360 px: page 360 wide, no text past the edge, the file name on two lines, widest table 340; 390, 430, 768, 1024, 1280, 1440 px: page width equals the window, no text past the edge, the file name on one line.
+- **`smoke-fixes` now passes on main** (its known failure is closed). Still open on main: `osmc-reliability-ui` ("old page: no page errors"), `terminator-ui` intermittent.
+- **Branch `sources-360-overflow-rc` is still on GitHub** (0 ahead, 2 behind): the session's safety check refused Claude's delete click on the branches page (16:40 UTC). Chad's to delete, or to say so again. Mac `_review/sources-360-overflow-rc/` moved to `_to_delete/` (16:39:10 UTC); `_review/` keeps `cape-town-station` and `widths-preview-rc`.
+- **Not tested:** a real phone (frames are emulated widths on the Mac); screen reader.
+- **Rollback (own Approve line):** revert `8bb3139`.
+- **Next:** ships read at 16:48 UTC; next feature (Chad chooses).
+
 ## 18 Nov 16:31 UTC (clock reading) — **`sources-360-overflow-rc` for GPT: head `fbb9144` (Sources page 360 px overflow). New thread: ships read at 16:17 UTC.** (branch only; nothing deployed, nothing merged)
 - **New thread read in** (START-HERE, HANDOVER, STATUS, memory, the last threads). Live state matched the handover: page files `style.css` `3922796c…`, `sources.html` `829a10d8…` served at 16:24 UTC; hub answers 0.6.19.
 - **Ships, read-only, 16:17:40 UTC (hub `/cells/ships`):** unchanged since close-out: down-shaped, "connect timeout (15 s)", `last_attempt {run 16:12:03.064Z, status down, collected_by mother-earth-mac-0.3.5, consecutive 1}`. **A failure after an eligible sample is still not seen.** Next read scheduled for 16:48 UTC (fallback due about 16:30, Mac about 16:43).
