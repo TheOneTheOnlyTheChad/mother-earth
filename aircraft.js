@@ -188,8 +188,8 @@
 
 
   // ====================================================================== positions as plain dots (aircraft-dots-rc)
-  const DT = { URL: ME.HUB + '/snapshot/opensky', FIELDS: ['lat', 'lng'], W: 4096, H: 2048, R_PX: 1.6, ALT: 0.0016, OPACITY: 1, ORDER: -0.5,
-    FILL: '#ffe9a8', EDGE: 'rgba(8,12,20,0.75)', REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, MAX: 60000 };
+  const DT = { URL: ME.HUB + '/snapshot/opensky', FIELDS: ['lat', 'lng'], W: 4096, H: 2048, R_PX: 2.2, ALT: 0.0016, OPACITY: 1, ORDER: -0.5,
+    FILL: '#e84ab5', EDGE: 'rgba(8,12,20,0.75)', REFRESH_MS: 10 * 60e3, AGE_MS: 30e3, MAX: 60000 };
   const dt = { on: false, gen: 0, seq: 0, why: null, env: null, meshes: [], loading: false, refreshFailed: false, timer: null, ageTimer: null, requests: [], opts: { source: null } };
   const dtgl = $('tgl-airdots');
   /** What the hub served, checked. Positions are drawn only from a file whose record fields are exactly lat,lng. */
