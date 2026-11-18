@@ -1,6 +1,7 @@
 # Proposal: two fixes from GPT's 18 Nov smoke (Bare Earth line over the credits; Key says nothing is drawn while layers are)
 
-Rev 1, 18 Nov 2026 03:28 UTC (clock reading). Branch `smoke-key-hint-rc` from main `8bdb329`. Proposal only: no page file is changed on this branch yet.
+Rev 2, 18 Nov 2026 07:55 UTC (clock reading); rev 1 was 18 Nov 2026 03:27 UTC. Branch `smoke-key-hint-rc` from main `8bdb329`. Proposal only: no page file is changed on this branch yet.
+Rev 2 takes in GPT's review of rev 1 (relayed by Chad, 18 Nov): both causes confirmed by GPT, fixes supported, K1 and K2 answered, three implementation and test details tightened (marked **rev 2**).
 Source: GPT's read-only smoke of the live page, 18 Nov 03:11–03:21 UTC (relayed by Chad). Causes below are read from the code on main; Claude has not yet reproduced either in a browser.
 
 ## 1. "Choose layers to explore." sits over the credits at 721–1100 px
@@ -13,7 +14,7 @@ Source: GPT's read-only smoke of the live page, 18 Nov 03:11–03:21 UTC (relaye
 
 **Check the same cause on the Layers button** (`top:64px; right:12px` in the same range): GPT did not report it and it measures from the top, but the suite will assert it stays inside the globe's rectangle.
 
-**Tests:** `bare-earth-ui`: at 900×800 and 1024×768, the line's rectangle does not intersect `#credits`, `#legend`, `#imgdate` or `#layers-btn`; break = remove the new rule.
+**Tests (rev 2):** `bare-earth-ui`: at 900×800 and 1024×768, and at both sides of each boundary (720 / 721 and 1100 / 1101 px wide), with the line shown and with it hidden: shown, its rectangle does not intersect `#credits`, `#legend`, `#imgdate` or `#layers-btn`; hidden, it takes no room and the column is as on main. Break = remove the new rule.
 
 **Note:** `widths-preview-rc` (unreleased) changes this same width range. Whichever merges second must rerun this check.
 
@@ -28,15 +29,30 @@ Source: GPT's read-only smoke of the live page, 18 Nov 03:11–03:21 UTC (relaye
 
 **Proposed:**
 1. `drawnLayers()` adds `aircraft` (counts picture in the scene with at least one cell drawn), `airdots` (positions picture in the scene with at least one dot), `wind` (a field on the globe) and `dustrgb` (a frame on the globe), each read from that layer's own state, counted only while actually drawn (same rule as today: on but loading, withheld or failed does not count).
-2. The empty sentence shows only when `drawnLayers()` is empty, and reads "Nothing is drawn on the globe right now."
-3. Each of the four gets a one-line Key entry naming it and where its scale is ("Aircraft counts per area — scale on its card"), since their scales live on the cards today. No scale is duplicated.
-4. Those four call `ME.paintKeyExternal` when they draw, clear or fail.
+2. The empty sentence shows only when `drawnLayers()` is empty, and reads **"No layer data is drawn on the globe right now."** (rev 2, GPT: "Nothing is drawn" would contradict the Earth imagery in view).
+3. Each of the four gets a one-line Key entry (rev 2, K1 decided; wording per GPT). No scale is duplicated:
+   - Aircraft counts: "Aircraft counts per area — scale on its card".
+   - Wind: "Wind by height — scale on its card".
+   - Aircraft positions: "Aircraft positions — plain dots — snapshot details on its card" (it has no numerical scale).
+   - Dust RGB: "Dust RGB — false-colour imagery — explanation on its card" (it has no numerical scale).
+4. Those four call `ME.paintKeyExternal` when they draw, clear or fail. **Rev 2:** today `ME.paintKeyExternal` repaints only the count (`paintKey`). It will repaint the count, the entries and the empty sentence together, so the existing Ocean Heat and Night lights callers get the same full repaint.
+5. **Rev 2, counted means drawn:** a layer whose refresh failed but whose earlier valid picture is still on the globe stays counted and keeps its entry. A layer that failed or is still loading with nothing drawn is not counted.
 
-**Decisions for Chad (GPT to advise):**
-- K1. Item 3: one-line Key entries (recommended), or count them in "N layers" and stay silent in the Key.
-- K2. Should "Key · N layers" and "Layers · N on" always agree? They measure different things (drawn vs switched on); a switched-on layer that is withheld is 1 on, 0 drawn. Recommended: leave both, no wording change.
+**Decisions (rev 2, GPT's advice; Chad's to confirm with his go):**
+- K1: one-line entries, worded as in item 3.
+- K2: keep both measures unchanged. "Layers · N on" counts switches that are on; "Key · N layers" counts layers actually drawn. They can rightly differ.
 
-**Tests:** `legend-active-ui` new section: each of the four alone → Key count 1, no empty sentence, its entry shown; off → 0 and the sentence returns; on but failed → not counted. Breaks: drop each layer from `drawnLayers()`; restore the old `leg-none` rule; drop the repaint call.
+**Tests (rev 2):** `legend-active-ui` new section:
+- each of the four alone → Key count 1, no empty sentence, its entry shown; off → 0 and the sentence returns;
+- first load still loading, and first load failed → not counted, no entry;
+- refresh failed with the earlier picture still drawn → still counted, entry kept;
+- zero aircraft in a valid snapshot (nothing drawn) → not counted;
+- aircraft expiry (three hours for positions, six for counts) and clearing → count and entry go;
+- counts ↔ positions → one entry replaces the other, count stays 1;
+- "Switch everything off" → 0 and the sentence;
+- an existing overlay alone (Ocean Heat; Night lights) and one orbital group alone → counted, no empty sentence.
+
+Breaks: drop each layer from `drawnLayers()`; restore the old `leg-none` rule; drop the repaint call; restore the count-only `paintKeyExternal`. Each break must fail its own assertion. For the repaint breaks the test switches the layer with no other render in between (no data poll, no other switch), so an unrelated `render()` cannot hide the missing call.
 
 ## Not in this proposal
 - Sources page: 6 px of page-level overflow at 360 px (366 wide). Known (`smoke-fixes` fails on it on main); the overflowing element is not yet isolated. Its own small branch if Chad wants it.
