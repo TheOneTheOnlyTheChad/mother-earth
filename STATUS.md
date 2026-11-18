@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 18 Nov 2026
 
+## 18 Nov 02:46 UTC (clock reading) — **LIVE: Bare Earth stage A with search (merge `e5be103`) and magenta aircraft dots (merge `00844ba`)**
+- **GPT (relayed by Chad):** both branches pass review at `d5975da` and `5ff364d`; wording kept; results of a layer switched off again stay selectable. GPT ran 111 search checks and 75 aircraft checks itself; the browser suite results are Claude's.
+- **Chad's own lines:** "Approve: merge bare-search-rc d5975da into main (Bare Earth at load, Layers button and panel, search reaches switched-off layers)" and "Approve: merge aircraft-dots-magenta-rc 5ff364d into main (aircraft dots magenta #e84ab5 at 2.2 px)".
+- **Merges:** `e5be103` (bare-search-rc `d5975da`), then `00844ba` (aircraft-dots-magenta-rc `5ff364d`). The second merge had one conflict in `index.html`, in the script list, where both branches changed neighbouring lines; resolved by keeping the new `aircraft.js?v=202612161000` and the `layers.js` line. The merged `index.html` differs from `d5975da`'s by that one line. On the merged tree before the push: aircraft-dots-page 37, bare-earth-ui 128, search-ui 117, layer-switches-ui 68, legend-active-ui 548.
+- **Pushed 02:42 UTC. Served-hash check 02:45:47 UTC: 21 of 21 page files match main** (`no-store`, from the Mac's pane; at 02:44:26 nine were still the old files and `layers.js` was 404). `index.html` `bb1248e7…a374`, `style.css` `c7e147ef…4829`, `app.js` `87a302db…e411`, `layers.js` `1e65fe5d…afe6`, `aircraft.js` `75f7241b…3ad3`.
+- **Live page read, 02:46 UTC:** "Layers · none on", four core switches off, first-view line shown, nothing drawn; "km" gave 48 matches in 2,793 loaded records with switches still off; choosing the first row switched Earthquakes on only, "Switched Earthquakes on to show this result. The record is open."; dots config `#e84ab5`, 2.2.
+- **Not checked:** real phone, screen reader.
+- **Next (GPT):** own small branch for a minimum gap on visibility-triggered fetches (aircraft counts, positions, orbital), age check still immediate.
+
 ## 18 Nov 02:30 UTC (clock reading) — **GPT's review of `bare-earth-rc fcd61ee` acted on: `bare-search-rc` (`d5975da`) carries Bare Earth stage A plus search of switched-off layers; `aircraft-dots-magenta-rc` (`5ff364d`) for the dot colour** (branches only)
 - **GPT (relayed by Chad, 18 Nov):** keep the mirrored non-modal panel and the card switches; at phone widths put the first-view line below the globe with the Layers button as the single way in; build the search change on the next small branch and ship it with Bare Earth; `serve-core-on.py` and `coreOn()` accepted. Aircraft dots: magenta `#e84ab5` at 2.2 px texture radius, same dark edge.
 - **`bare-earth-rc` now `f412d88`:** up to 720 px the line sits at the bottom of the globe box, below the sphere, with no button of its own. `bare-earth-ui` 128 passed; new break `phone-hint` 2 failed.
