@@ -354,12 +354,14 @@ ME.downWhy = (layer, s) => layer === 'firms' && ME.firmsNotYet(s) ? ME.FIRMS_NOT
 // Ships (hub >= 0.6.19): the hub keeps the last eligible sample when the latest attempt failed or ran past its window, and records
 // that attempt beside it (last_attempt). One sentence says so, for every surface. The sample's own time is never the attempt's:
 // elapsed and window come from the attempt, the "sample that ended" time from the retained sample. '' when there is none to report.
+// Three different times exist and only two are printed: last_attempt.run (the attempt's scheduled start: printed, and named as such),
+// the retained sample's own end time (printed), and last_attempt.at (when the hub recorded the attempt: never printed).
 ME.shipsAttempt = function (s) {
   const la = s && s.last_attempt;
   if (!la || typeof la.run !== 'string' || !Number.isFinite(Date.parse(la.run)) || s.source_status === 'down' || !Number.isFinite(Date.parse(s.retrieved_at))) return '';
   if (la.reason === 'sample_overlong') return Number.isFinite(la.elapsed_s) && Number.isFinite(la.window_s) ? `Latest sample ran ${secs(la.elapsed_s)} against a ${secs(la.window_s)} window and is not shown.` : 'Latest sample ran past its window and is not shown.';
   const cross = la.run.slice(0, 10) !== String(s.retrieved_at).slice(0, 10);
-  return `Latest sample failed at ${hhmm(la.run)}${cross ? ', ' + ME.dayMonth(la.run) : ''}.`;
+  return `Latest attempt, scheduled for ${hhmm(la.run)}${cross ? ', ' + ME.dayMonth(la.run) : ''}, failed.`;   // la.run is when that run was SCHEDULED to start, not when it failed (GPT hold 3, 18 Nov)
 };
 ME.shipsSampleTime = s => { const t = (s && (s.window_end || s.retrieved_at)) || '', la = s && s.last_attempt, cross = la && typeof la.run === 'string' && la.run.slice(0, 10) !== String(t).slice(0, 10); return hhmm(t) + (cross ? ', ' + ME.dayMonth(t) : ''); };
 ME.freshness = function (layer) {

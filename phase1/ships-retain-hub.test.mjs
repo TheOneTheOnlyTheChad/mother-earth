@@ -12,7 +12,7 @@
 // bucket by fvProbeR2 for the same two forms).
 // Run: node --no-warnings phase1/ships-retain-hub.test.mjs      (about 2.5 min: two cases listen for the real 60 s)
 // Breaks (each must fail): BREAK=overlong-publishes|attempt-renews|unconditional-cells|unconditional-records|fallback-reads-attempt|
-//   older-failure-replaces|delayed-erases-later|no-repair|raw-note-public|expired-kept|down-replaces-sample|records-on-attempt|overlong-guard-only
+//   older-failure-replaces|delayed-erases-later|no-repair|no-repair-on-archive|repair-drops-attempt|repair-unconditional|repair-no-retry|log-before-outcome|repair-not-logged|raw-note-public|expired-kept|down-replaces-sample|records-on-attempt|overlong-guard-only
 //   FAST=1 skips the two 60 s fallback-sample cases (used for the breaks, which all fail in the fast cases).
 import assert from 'node:assert/strict';
 import fs from 'node:fs'; import path from 'node:path'; import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -28,14 +28,21 @@ const BREAKS = {
   'fallback-reads-attempt': ["const now = Date.now(); const latest = await getJson(env, 'latest/ships.json');", "const now = Date.now(); let latest = await getJson(env, 'latest/ships.json'); { const cc = await getJson(env, 'latest-cells/ships.json'); if (latest && cc && cc.last_attempt) latest = { ...latest, retrieved_at: cc.last_attempt.at }; }"],
   'older-failure-replaces': ["const stored = [cur && cur.scheduled_for, L && L.run].filter(Boolean).sort().pop();", "const stored = [cur && cur.scheduled_for].filter(Boolean).sort().pop();"],
   'delayed-erases-later': ["...(L && L.run && L.run > E.scheduled_for ? { last_attempt: { ...L, consecutive: 1 } } : {}) });", "});"],
-  'no-repair': ["if (!repaired) {   // an interrupted writer", "if (false) {   // an interrupted writer"],
+  'no-repair': ["async function shipsRepair(env) {\n  try {", "async function shipsRepair(env) {\n  return 'none';\n  try {"],
+  'no-repair-on-archive': ["{ const repair = await shipsRepair(env); return { published: 'archive only (older than latest)'", "{ const repair = 'none'; return { published: 'archive only (older than latest)'"],   // GPT hold 1 as it was at 5789f08
+  'repair-drops-attempt': ["if (await shipsCondPut(env, SHIPS_PUB.cells, shipsCellsFor(E, cur && cur.last_attempt), c.etag)) return 'repaired';", "if (await shipsCondPut(env, SHIPS_PUB.cells, shipsCellsFor(E, null), c.etag)) return 'repaired';"],
+  'repair-unconditional': ["if (await shipsCondPut(env, SHIPS_PUB.cells, shipsCellsFor(E, cur && cur.last_attempt), c.etag)) return 'repaired';", "await putJson(env, SHIPS_PUB.cells, shipsCellsFor(E, cur && cur.last_attempt)); return 'repaired';"],
+  'repair-no-retry': ["    for (let t = 0; t < 2; t++) {\n      const c = await shipsReadCells(env), cur = c.cur, rec = await shipsRecHead(env);", "    for (let t = 0; t < 1; t++) {\n      const c = await shipsReadCells(env), cur = c.cur, rec = await shipsRecHead(env);"],
+  'log-before-outcome': ["(/^left: /.test(outcome) ? ' [publication ' + outcome + ']' : '')", "''"],   // GPT hold 2 as it was at 5789f08: the conflict never reaches collector_runs
+  'repair-not-logged': ["(info && info.repair && info.repair !== 'none' ? ' [counts repair: ' + info.repair + ']' : '')", "''", "const shipsRepairNote = r => (r && r !== 'none' ? '; counts repair: ' + r : '');", "const shipsRepairNote = r => '';"],
   'raw-note-public': ["const raw = String(e.note || ''), phrase = SHIPS_COLLECTOR_PHRASES.includes(raw) ? raw : SHIPS_PHRASE.collector;", "const raw = String(e.note || ''), phrase = raw;"],
   'expired-kept': ["const keep = !!(S && !shipsExpired(S, Date.now()));", "const keep = !!S;"],
   'down-replaces-sample': ["const keep = !!(S && !shipsExpired(S, Date.now()));", "const keep = false;"],   // 0.6.18's behaviour for a failure
-  'records-on-attempt': ["      if (await shipsCondPut(env, SHIPS_PUB.cells, body, c.etag)) return keep", "      if (a.reason === 'sample_overlong' && a.e) await putJson(env, SHIPS_PUB.rec, a.e);\n      if (await shipsCondPut(env, SHIPS_PUB.cells, body, c.etag)) return keep"],
+  'records-on-attempt': ["      if (await shipsCondPut(env, SHIPS_PUB.cells, body, c.etag)) return keep", "      if (a.reason === 'sample_overlong' && a.e) await putJson(env, SHIPS_PUB.rec, a.e);\n      if (await shipsCondPut(env, SHIPS_PUB.cells, body, c.etag)) return keep",
+    "collected_by: e.collected_by || e.ingested_from || null }, info);", "collected_by: e.collected_by || e.ingested_from || null, e }, info);"],   // both parts are checked to apply (the second was once applied unchecked and silently stopped applying)
 };
 let workerPath = path.join(HERE, 'worker.js');
-if (BREAK) { if (!BREAKS[BREAK]) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); } const B_ = BREAKS[BREAK]; for (let i = 0; i < B_.length; i += 2) { if (src.split(B_[i]).length !== 2) { console.log('FAIL  break did not apply: ' + BREAK + ' #' + i / 2); process.exit(1); } src = src.replace(B_[i], B_[i + 1]); } if (BREAK === 'records-on-attempt') src = src.replace("collected_by: e.collected_by || e.ingested_from || null });\n  return { outcome, bytes };", "collected_by: e.collected_by || e.ingested_from || null, e });\n  return { outcome, bytes };");
+if (BREAK) { if (!BREAKS[BREAK]) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); } const B_ = BREAKS[BREAK]; for (let i = 0; i < B_.length; i += 2) { if (src.split(B_[i]).length !== 2) { console.log('FAIL  break did not apply: ' + BREAK + ' #' + i / 2); process.exit(1); } src = src.replace(B_[i], B_[i + 1]); }
   workerPath = path.join(HERE, `.ships-retain-break-${process.pid}.tmp.mjs`); fs.writeFileSync(workerPath, src); process.on('exit', () => { try { fs.unlinkSync(workerPath); } catch (_) { } }); }
 const worker = (await import(pathToFileURL(workerPath).href)).default;
 
@@ -189,7 +196,7 @@ await t('9. order against last_attempt: an older failure arriving late does not 
   await post(E, down(f2, 'websocket error after connection')); const before = E.raw(CELLS);
   const r = await post(E, down(f1, 'connect timeout (15 s)')); assert.equal(r.j.published, 'left: not later than what is published');
   assert.equal(E.raw(CELLS), before, 'the counts file is untouched'); assert.equal(E.json(CELLS).last_attempt.run, iso(f2)); assert.equal(E.json(CELLS).last_attempt.reason, 'websocket error after connection');
-  assert.equal(E.sruns().pop().note, 'ingested down: connect timeout (15 s)', 'the late failure is still logged');
+  { const row = E.sruns().pop(); assert.equal(row.status, 'down'); assert.equal(row.note, 'ingested down: connect timeout (15 s) [publication left: not later than what is published]', 'the late failure is still logged, with its own note first and what publication did after it'); }
   const o = await post(E, sample(f1 - 60e3, 500, { status: 'degraded', overlong: true, elapsedS: 200 })); assert.match(o.j.published, /not published: overlong sample; left: not later/); assert.equal(E.raw(CELLS), before);
 });
 await t('10. a delayed eligible sample newer than the retained one but older than a recorded failure: it becomes the retained sample and the later failure is kept', async () => {
@@ -275,7 +282,8 @@ await t('22. retry exhausted (counts change twice under a failure): it stops, ch
   E.hooks.beforePut = async (k, o) => { if (k !== CELLS || !o.onlyIf || n >= 2) return; n++; const keep = E.hooks.beforePut; E.hooks.beforePut = null; await post(E, sample(now() - (50 - n * 10) * 60e3, 3000 + n)); E.hooks.beforePut = keep; };
   const fRun = now() - 5e3; const r = await post(E, down(fRun, 'websocket error before connection')); E.hooks.beforePut = null;
   assert.equal(r.j.published, 'left: publish_conflict'); const c = E.json(CELLS); assert.equal(c.last_attempt, undefined); assert.equal(E.json(REC).retrieved_at, c.retrieved_at, 'the files left behind are a pair'); assert.equal(E.json(REC).records.length, 3002);
-  assert.ok(E.sruns().some(x => x.status === 'down' && x.started_at === iso(fRun)), 'the failure is in collector_runs'); await paired(E, '22');
+  { const rows = E.sruns().filter(x => x.started_at === iso(fRun)); assert.equal(rows.length, 1, 'one collector_runs row for the failure'); assert.equal(rows[0].status, 'down', 'its true status');
+    assert.equal(rows[0].note, 'ingested down: websocket error before connection [publication left: publish_conflict]', 'the diagnostic note is kept and the conflict is on the row (GPT hold 2)'); } await paired(E, '22');
 });
 await t('23. retry exhausted for an eligible sample (counts change twice after its records write): readers withhold; the next write repairs', async () => {
   const { E, S } = await seeded({ agoMin: 61 }); const N = sample(now() - 61e3, 3050); let n = 0;
@@ -295,8 +303,63 @@ await t('24. two writers at once, both orders: fallback failure and Mac failure;
     const later = runs.map(x => x.started_at).sort().pop(); assert.equal(c.last_attempt.run, later, order + ': the later run\'s note stands'); assert.equal(c.retrieved_at, E.json(REC).retrieved_at); await paired(E, '24 ' + order); }
 });
 
+// ---------- GPT's hold on 5789f08 (18 Nov): repair before archiving an older eligible upload; conflicts on the collector_runs row
+const touchTwice = (E, max = 2) => { let n = 0; E.hooks.beforePut = async (k, o) => { if (k !== CELLS || !o.onlyIf || n >= max) return; n++; const keep = E.hooks.beforePut; E.hooks.beforePut = null; const c = E.json(CELLS); c.touched = n; E.m.set(CELLS, { b: enc.encode(JSON.stringify(c)), etag: 'x' + n + real(), up: now(), meta: {} }); E.hooks.beforePut = keep; }; return () => n; };
+const interrupt = async (E, N) => { E.fail.put = (k, o) => k === CELLS && !!o.onlyIf; const r = await post(E, N); E.fail.put = null; assert.equal(r.j.published, 'publish_error'); };
+await t('27. an older eligible upload (S < E < N) arriving after N was interrupted: N\'s counts are completed BEFORE E is archived', async () => {
+  const { E, S } = await seeded({ agoMin: 91 }); const N = sample(now() - 61e3, 3050), Em = sample(now() - 45 * 60e3, 2000);
+  await interrupt(E, N); assert.equal(E.json(REC).retrieved_at, N.retrieved_at); assert.equal(E.json(CELLS).retrieved_at, S.retrieved_at); assert.equal((await placeShips(E)).state, 'withheld');
+  const r = await post(E, Em); assert.equal(r.status, 200); assert.match(r.j.published, /^archive only/); assert.equal(r.j.counts_repair, 'repaired');
+  const c = E.json(CELLS); assert.equal(c.retrieved_at, N.retrieved_at, 'counts now name N'); assert.equal(c.scheduled_for, N.scheduled_for); assert.equal(c.records, undefined); assert.equal(c.last_attempt, undefined);
+  assert.deepEqual(c.cells, N.cells); assert.equal(E.json(REC).retrieved_at, N.retrieved_at, 'records are still N'); assert.equal(E.json(REC).records.length, 3050);
+  const p = await placeShips(E); assert.equal(p.state, 'ok', '/place lists records again'); await paired(E, '27');
+  const row = E.sruns().pop(); assert.equal(row.status, 'ok'); assert.equal(row.records, 2000); assert.match(row.note, /^ingested \(archive only: older than latest .*; counts repair: repaired\) from /);
+  assert.ok(E.keys('snapshots/ships/').some(k => E.json(k).retrieved_at === Em.retrieved_at), 'E is in the archive');
+});
+await t('28. …and a LATER last_attempt already on the counts is preserved by that repair (consecutive 1)', async () => {
+  const { E, S } = await seeded({ agoMin: 91 }); const fRun = now() - 5e3; await post(E, down(fRun, 'connect timeout (15 s)'));   // S + L(F)
+  const N = sample(now() - 31 * 60e3, 3050), Em = sample(now() - 61 * 60e3, 2000);                                             // N is a delayed sample: S < E < N < F
+  await interrupt(E, N); assert.equal(E.json(CELLS).retrieved_at, S.retrieved_at); assert.equal(E.json(CELLS).last_attempt.run, iso(fRun));
+  const r = await post(E, Em); assert.match(r.j.published, /^archive only/); assert.equal(r.j.counts_repair, 'repaired');
+  const c = E.json(CELLS); assert.equal(c.retrieved_at, N.retrieved_at); assert.ok(c.last_attempt, 'the later failure is still stated'); assert.equal(c.last_attempt.run, iso(fRun)); assert.equal(c.last_attempt.reason, 'connect timeout (15 s)'); assert.equal(c.last_attempt.consecutive, 1);
+  assert.equal((await placeShips(E)).state, 'ok'); await paired(E, '28');
+});
+await t('29. …an attempt note OLDER than the repaired sample is not carried onto it', async () => {
+  const { E } = await seeded({ agoMin: 91 }); const f0 = now() - 70 * 60e3; await post(E, down(f0, 'connect timeout (15 s)'));
+  const N = sample(now() - 61e3, 3050), Em = sample(now() - 80 * 60e3, 2000); await interrupt(E, N);
+  const r = await post(E, Em); assert.equal(r.j.counts_repair, 'repaired'); const c = E.json(CELLS); assert.equal(c.retrieved_at, N.retrieved_at); assert.equal(c.last_attempt, undefined); await paired(E, '29');
+});
+await t('30. a conflict during that repair: the counts change once under it, it reads again and completes', async () => {
+  const { E } = await seeded({ agoMin: 91 }); const N = sample(now() - 61e3, 3050), Em = sample(now() - 45 * 60e3, 2000); await interrupt(E, N);
+  const n = touchTwice(E, 1); const r = await post(E, Em); E.hooks.beforePut = null; assert.equal(n(), 1); assert.match(r.j.published, /^archive only/); assert.equal(r.j.counts_repair, 'repaired');
+  assert.equal(E.json(CELLS).retrieved_at, N.retrieved_at); assert.equal((await placeShips(E)).state, 'ok'); await paired(E, '30');
+});
+await t('31. …the counts change twice under the repair: it stops, nothing is overwritten, the conflict is answered and logged, readers still withhold; the next write repairs', async () => {
+  const { E, S } = await seeded({ agoMin: 91 }); const N = sample(now() - 61e3, 3050), Em = sample(now() - 45 * 60e3, 2000); await interrupt(E, N);
+  const n = touchTwice(E, 2); const r = await post(E, Em); E.hooks.beforePut = null; assert.equal(n(), 2); assert.equal(r.status, 200); assert.match(r.j.published, /^archive only/); assert.equal(r.j.counts_repair, 'publish_conflict');
+  const c = E.json(CELLS); assert.equal(c.retrieved_at, S.retrieved_at); assert.equal(c.touched, 2, 'the other writer\'s change stands'); assert.equal(E.json(REC).retrieved_at, N.retrieved_at); assert.equal((await placeShips(E)).state, 'withheld'); await paired(E, '31a');
+  const row = E.sruns().pop(); assert.equal(row.status, 'ok'); assert.match(row.note, /^ingested \(archive only: older than latest .*; counts repair: publish_conflict\) from /);
+  const E2 = sample(now() - 40 * 60e3, 2100); const r2 = await post(E, E2); assert.equal(r2.j.counts_repair, 'repaired'); assert.equal(E.json(CELLS).retrieved_at, N.retrieved_at); assert.equal((await placeShips(E)).state, 'ok'); await paired(E, '31b');
+});
+await t('32. a repair made by a failure is on that failure\'s collector_runs row; a failure whose repair conflicts says so', async () => {
+  { const { E } = await seeded({ agoMin: 61 }); const N = sample(now() - 61e3, 3050); await interrupt(E, N); const fRun = now() - 5e3; const f = await post(E, down(fRun, 'websocket error before connection'));
+    assert.equal(f.j.published, 'failure recorded; last sample kept'); const row = E.sruns().pop(); assert.equal(row.status, 'down'); assert.equal(row.note, 'ingested down: websocket error before connection [counts repair: repaired]'); await paired(E, '32a'); }
+  { const { E } = await seeded({ agoMin: 61 }); const N = sample(now() - 61e3, 3050); await interrupt(E, N); const n = touchTwice(E, 4); const fRun = now() - 5e3; const f = await post(E, down(fRun, 'websocket error before connection')); E.hooks.beforePut = null;
+    assert.equal(n(), 4); assert.equal(f.j.published, 'left: publish_conflict'); const row = E.sruns().pop(); assert.equal(row.status, 'down');
+    assert.equal(row.note, 'ingested down: websocket error before connection [publication left: publish_conflict] [counts repair: publish_conflict]'); assert.equal((await placeShips(E)).state, 'withheld'); await paired(E, '32b'); }
+});
+await t('33. exhausted conflicts are on the collector_runs row with the true status and note: Mac overlong sample; fallback failure', async () => {
+  { const { E, S } = await seeded({ agoMin: 61 }); const n = touchTwice(E, 2); const oRun = now() - 400e3; const r = await post(E, sample(oRun, 700, { status: 'degraded', overlong: true, elapsedS: 381.5 })); E.hooks.beforePut = null;
+    assert.equal(n(), 2); assert.equal(r.j.published, 'not published: overlong sample; left: publish_conflict'); const c = E.json(CELLS); assert.equal(c.retrieved_at, S.retrieved_at); assert.equal(c.last_attempt, undefined);
+    const rows = E.sruns().filter(x => x.started_at === iso(oRun)); assert.equal(rows.length, 1); assert.equal(rows[0].status, 'degraded'); assert.equal(rows[0].records, 700);
+    assert.match(rows[0].note, /^ingested \(not published: overlong sample\) from mother-earth-mac-0\.3\.5 vmac-0\.3\.5 \[publication left: publish_conflict\]$/); await paired(E, '33 mac overlong'); }
+  { const { E, S } = await seeded({ agoMin: 51 }); wsMode = '522'; const n = touchTwice(E, 2); const r = await fallback(E); E.hooks.beforePut = null; wsMode = 'ok';
+    assert.equal(n(), 2); assert.equal(r.result, 'ships-fallback:down'); const c = E.json(CELLS); assert.equal(c.retrieved_at, S.retrieved_at); assert.equal(c.last_attempt, undefined);
+    const row = E.sruns().pop(); assert.equal(row.status, 'down'); assert.match(row.note, /^cloud fallback: .*522.* \[publication left: publish_conflict\]$/); await paired(E, '33 fallback failure'); }
+});
+
 // ---------- the fallback's own samples (each listens for the real 60 s)
-if (process.env.FAST === '1') { console.log(`\nships-retain-hub${BREAK ? ' [BREAK=' + BREAK + ']' : ''} (FAST: the two 60 s fallback-sample cases not run): ${passed} passed, ${failed} failed`); process.exit(failed ? 1 : 0); }
+if (process.env.FAST === '1') { console.log(`\nships-retain-hub${BREAK ? ' [BREAK=' + BREAK + ']' : ''} (FAST: the three 60 s fallback-sample cases not run): ${passed} passed, ${failed} failed`); process.exit(failed ? 1 : 0); }
 await t('25. the fallback publishes an eligible sample by the same rule: after a Mac failure it replaces the old sample and the note goes', async () => {
   const { E } = await seeded({ agoMin: 51 }); await post(E, down(now() - 5e3, 'websocket error before connection')); conns = 0; wsMode = 'ok';
   const r = await fallback(E); assert.match(r.result, /^ships-fallback:(ok|degraded) \(25 vessels\)$/); assert.equal(conns, 1);
@@ -308,6 +371,13 @@ await t('26. an overlong fallback sample is not published either: the retained s
   const r = await fallback(E); onDuring = null; assert.match(r.result, /^ships-fallback:degraded \(\d+ vessels, not published: overlong\)$/);
   const c = E.json(CELLS); assert.ok(sameSample(c, S)); assert.equal(E.json(REC).retrieved_at, S.retrieved_at); assert.equal(c.last_attempt.reason, 'sample_overlong'); assert.ok(c.last_attempt.elapsed_s > 75); assert.equal(c.last_attempt.window_s, 60); assert.match(c.last_attempt.collected_by, /cloud hub/);
   assert.match(E.sruns().pop().note, /cloud fallback \(not published: overlong sample\)/); await paired(E, '26');
+});
+
+await t('34. an overlong fallback sample whose counts write is contended twice: the conflict is on its collector_runs row with its own status', async () => {
+  const { E, S } = await seeded({ agoMin: 51 }); conns = 0; wsMode = 'ok'; onDuring = async () => { advance(40e3); }; const n = touchTwice(E, 2);
+  const r = await fallback(E); onDuring = null; E.hooks.beforePut = null; assert.equal(n(), 2); assert.match(r.result, /not published: overlong/);
+  const c = E.json(CELLS); assert.equal(c.retrieved_at, S.retrieved_at); assert.equal(c.last_attempt, undefined);
+  const row = E.sruns().pop(); assert.equal(row.status, 'degraded'); assert.ok(row.records > 0); assert.match(row.note, /^cloud fallback \(not published: overlong sample\) .* \[publication left: publish_conflict\]$/); await paired(E, '34');
 });
 
 console.log(`\nships-retain-hub${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${passed} passed, ${failed} failed`);
