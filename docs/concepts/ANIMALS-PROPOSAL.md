@@ -1,10 +1,12 @@
 # Animals — animal journeys, populations and conservation
 
-18 Nov 2026 · proposal rev 2.1 · for GPT re-check and Chad · no build, no production change
+18 Nov 2026 · proposal rev 2.2 · passed by GPT at rev 2.1 for the private zebra preview; rev 2.2 records GPT's corrections for the build brief · no build, no production change
 
 Revises concept spec rev 1 (17 Nov 2026) on Chad's six points of 18 Nov, using the source audit in `docs/research/animals-source-audit/README.md`. Where rev 1 is not mentioned here it stands (questions the feature answers, movement and population interpretation rules, sensitive-location rules, cost and approval rules).
 
 **Rev 2.1 (18 Nov, later):** GPT reviewed rev 2 at `435c897` (relayed by Chad): source choice and design direction accepted, with five clarifications and rulings on N1–N6 and C5. All are folded in below and listed in §1a. Chad also asked for more animals ("dolphins, sharks etc"): §13 is new. GPT's review implies no build or production authorisation, and none is assumed.
+
+**Rev 2.2 (18 Nov, later still):** GPT (relayed by Chad) passed rev 2.1 at `c1ba7d1` for the private zebra preview, with corrections to carry into the build brief. They are in §12a and applied where the text was wrong. Chad made sharks and dolphins the next source audit; its first pass is `docs/research/animals-source-audit/SHARKS-DOLPHINS.md`. No build, spending, merge or deploy is authorised by GPT's review, and Chad has not yet given a go for the preview build.
 
 **Authorised so far (Chad, 18 Nov):** a bounded source audit and this revised proposal. Not authorised: any build, provider message, spending, merge or deploy.
 
@@ -83,7 +85,7 @@ One switch in the first preview, built like every other map-layer switch (Bare E
   - removes its Key entry and repaints the count.
 - **Sky zoom-out view:** entering it pauses playback and hides the journey, the replay bar and the replay-time line; the switch stays on and the Key entry goes (nothing is drawn). Leaving it restores the journey at the same replay time, still paused. It never resumes playing by itself.
 - **Leaving the page and coming back** (another tab, Back, the Animals page): the page starts bare as always. The switch is off, no replay position is remembered, and nothing is requested until it is switched on again.
-- **A hidden browser tab:** playback pauses when the tab is hidden and stays paused when it is shown again.
+- **A hidden browser tab:** playback pauses when the tab is hidden. The replay is preserved: when the tab is shown again the journey is still drawn at the same replay time, paused. Only real page navigation (another page, Back) starts bare.
 - **Other layers:** switching the journey on or off changes no other switch, no other layer's drawing and no selection or open panel elsewhere.
 - **Keyboard:** play and pause is a button; the scrubber is a native range control (arrow keys step, Home and End go to the first and last fix); every control has a visible focus and an accessible name; the fix time and age are announced politely, not on every frame.
 - **A display file that cannot be trusted:** if the file fails its pinned sha256, does not parse, or does not match its manifest (counts, first and last time), nothing is drawn, the card says "Journey file could not be verified. Nothing is drawn.", and the Key is unchanged. **A failed load** says so and offers Retry; a retry that succeeds draws normally.
@@ -165,11 +167,11 @@ Each becomes content only after its own source audit (identity, terms, display a
 - J8c. **Failed load and retry:** a failed request shows a failure line and a Retry control; a successful retry draws normally; a second failure leaves nothing drawn.
 - J8d. **Other layers preserved:** with other layers on, switching the journey on and off leaves their switches, drawings, Key entries, open inspector and search state as they were.
 - J8e. **Keyboard:** the whole replay can be run without a pointer (switch, play, pause, step by arrow keys, Home, End); focus is visible; the controls have accessible names.
-- J8f. **Sky view and navigation:** entering the Sky view pauses and hides the journey and removes its Key entry; leaving restores it paused at the same replay time. Leaving the page and returning starts bare with the switch off. A hidden tab pauses playback.
+- J8f. **Sky view and navigation:** entering the Sky view pauses and hides the journey and removes its Key entry; leaving restores it paused at the same replay time. Leaving the page and returning (navigation, Back) starts bare with the switch off. Hiding the browser tab pauses playback and preserves the replay at the same time, paused, when the tab is shown again.
 - J9. **Independence from replay time.** With a replay playing and being scrubbed: the header UTC clock keeps advancing; a scheduled refresh of the core layers still happens and updates their data; the day and night line keeps its own current position; the imagery date is whatever the page would show without the replay. No replay control changes another layer's clock, date, data or selection. Tested by running the same scripted period with and without the replay and comparing the other layers' requests and state, and by scrubbing the replay across a year while checking that nothing else moves with it. The replay-time line is present whenever the journey is drawn.
 - J10. The Animals tab is on every page; the header passes the overflow suites at 360, 390, 430, tablet and desktop widths.
 - J11. Animals sampled (7) and animals shown are both stated. Source, DOI, licence and citation are one action away.
-- J12. **Performance, with a protocol and a tolerance.** Protocol: the Ocean Heat release gate (`reviews/2026-11-10-ocean-heat-rc.md` §10; `docs/concepts/OCEAN-HEAT-RELEASE-PROPOSAL.md` D1) with the Stage 0 harness (`reviews/evidence/2026-11-11-globe-perf-stage0/harness.js`): foreground desktop Chrome on the final candidate, the same rotation sweep, three matched runs each of (a) journey off, (b) journey drawn and paused at the last fix, (c) journey playing; the frame state (fast or slow) recorded for every run and only like states compared; then the same three at 390 px emulated width. **Proposed tolerance, for GPT to agree:** against its own journey-off baseline, the median frame interval of (b) and of (c) is no more than 10% or 2 ms higher, whichever is larger, and p95 no more than 20% higher, in at least two of the three matched runs. A miss is reported, not averaged away. N4 (no thinning) holds only if this passes; if it fails, thinning to recorded fixes is the first remedy and is re-measured. A real phone stays unverified until one is tested.
+- J12. **Performance, with a protocol and a tolerance.** Protocol: the Ocean Heat release gate (`reviews/2026-11-10-ocean-heat-rc.md` §10; `docs/concepts/OCEAN-HEAT-RELEASE-PROPOSAL.md` D1) with the Stage 0 harness (`reviews/evidence/2026-11-11-globe-perf-stage0/harness.js`): foreground desktop Chrome on the final candidate, the same rotation sweep, three matched runs each of (a) journey off, (b) journey drawn and paused at the last fix, (c) journey playing; the frame state (fast or slow) recorded for every run and only like states compared; then the same three at 390 px emulated width. **Tolerance (accepted by GPT as a provisional preview gate; thresholds, not measured results):** against its own journey-off baseline, the median frame interval is no more than 10% or 2 ms higher, whichever is larger, **and** p95 no more than 20% higher. Both must pass in the **same** two of the three matched runs, judged separately for each scenario ((b) drawn and paused, (c) playing) and for each width. All runs are reported, passes and misses. The playing run must play through a substantial part of the track (at least 2,000 fixes of `Z3866` at a stated speed), not a few seconds at one end. N4 (no thinning) holds only if this passes; if it fails, thinning to recorded fixes is the first remedy and is re-measured. A real phone stays unverified until one is tested.
 - J13. Existing suites pass; the new suite has breaks that fail for the right reason.
 
 ### C. Conservation assessment
@@ -212,7 +214,7 @@ No option is assumed. The proposal's later steps (public release, hub files, REG
 ## 10. Decisions N1–N6 after GPT's review
 
 - **N1. Accepted.** The link reads "Choose this journey on Earth now". It selects the study and reveals its switch; it switches nothing on.
-- **N2. Several studies.** GPT: defer. Chad has since asked for more animals, so §13 proposes the selector for review now; it is built only after the first replay passes J.
+- **N2. Accepted by GPT (rev 2.1 review): one journey switch with a study chooser, built after the first replay passes J.** Changing the study pauses playback, clears the previous study's drawing, replay bar and Key wording, and rejects any load still in flight for the old study, so a late response can never draw the old study under the new study's name (§13).
 - **N3. Accepted as provisional:** fixes more than 3 hours apart are not joined. Our display rule, stated as ours (§5).
 - **N4. Accepted:** no thinning at first, subject to J12's measurement.
 - **N5.** A courtesy note to the data authors is optional and is Chad's decision. It is not a permission gate. None is sent without his approval.
@@ -235,6 +237,17 @@ No option is assumed. The proposal's later steps (public release, hub files, REG
 6. Whale quality-rule proposal, then the marine preview.
 7. Public release proposal: branch, REGISTER entries, credits, costs, release steps, each on Chad's own line.
 
+## 12a. Corrections for the build brief (GPT's pass of rev 2.1)
+
+These go into the build brief word for word when Chad gives a go for the preview build.
+
+1. **GPS does not mean clean.** Every study, GPS included, has its quality fields read and its positions checked for implausible steps before anything is drawn. The zebra audit did this (one flagged row, 17 rows without a position, one unexplained first step in `Z6405`); it is a required step for every later study, not a property of the method.
+2. **Argos rules are per study.** Filtering and gap rules are justified for each study, species and tag. A rule agreed for the blue whales does not carry over to another Argos study; the machinery is reused, the rule is argued again.
+3. **J12** as reworded in §8: both metrics in the same two of three matched runs, per scenario and per width; all runs reported; substantial track playback.
+4. **Study chooser** (after the first replay passes): changing study pauses, clears the old drawing and rejects obsolete loads (N2).
+5. **Hidden tab versus navigation:** hiding the tab pauses and preserves the replay; real navigation or Back starts bare (§4, J8f).
+6. **What the Movebank search showed:** "no shark or dolphin matches in these searches", not proof the repository holds none. A published package also does not show whether its parent project is still active (§13).
+
 ## 13. More animals (Chad, 18 Nov: "more animals like dolphins, sharks etc")
 
 Not part of GPT's review of rev 2. For GPT and Chad to look at now; nothing here is audited or authorised.
@@ -242,8 +255,8 @@ Not part of GPT's review of rev 2. For GPT and Chad to look at now; nothing here
 ### What the same repository holds
 A keyword search of the Movebank Data Repository's own index, 18 Nov 2026 17:23–17:24 UTC: 33 searches, record metadata only, no data file opened (`docs/research/animals-source-audit/repository-discovery-2026-11-18.json`). It returned 125 distinct data packages: 90 marked CC0 1.0, 18 CC BY 4.0, 17 CC BY-NC 4.0. A keyword search is not a complete catalogue.
 
-- **Sharks: no record.** "shark", "elasmobranch" and four shark genus names each returned 0.
-- **Dolphins: no record.** "dolphin", *Tursiops*, *Delphinus* and *Orcinus* each returned 0.
+- **Sharks: no matches in these searches.** "shark", "elasmobranch" and four shark genus names each returned 0. That is not proof the repository holds none.
+- **Dolphins: no matches in these searches.** "dolphin", *Tursiops*, *Delphinus* and *Orcinus* each returned 0.
 - **What is there** (a selection; figures are the repository's own, not counted by us):
 
 | Animals | Dataset DOI | Licence on the record | Published | Animals | Locations | Method as recorded |
@@ -266,7 +279,7 @@ A keyword search of the Movebank Data Repository's own index, 18 Nov 2026 17:23�
 | African elephants, Etosha | `10.5441/001/1.3nj3qj45_2` | CC BY-NC 4.0 | 2025 | 15 | 2,930,263 | GPS |
 | Cheetah, Pilanesberg | `10.5441/001/1.k6b630mv` | CC0 1.0 | 2020 | 1 | 1,182 | GPS |
 
-Every one of these is a closed archive, like the zebra and blue-whale studies. None is audited: the licence shown is the record's label, the counts are the record's, and files, dates, quality fields and sensitivity are unread. CC BY-NC packages add a non-commercial condition that needs Chad's decision against the project's plans.
+Every one of these is a published, fixed package, like the zebra and blue-whale studies. A published package does not show whether its parent project is still active, and that was not checked. None is audited: the licence shown is the record's label, the counts are the record's, and files, dates, quality fields and sensitivity are unread. CC BY-NC packages add a non-commercial condition that needs Chad's decision against the project's plans.
 
 ### Sharks and dolphins need other sources
 Rev 1 §5 already names them. None has been audited, and most need the provider's terms read or the provider asked:
@@ -281,13 +294,13 @@ Some of these sources may update regularly (not checked). If one does, a shark o
 ### Proposed way to add animals without lowering the bar
 1. **The first build stays one zebra replay.** It proves the switch, the replay bar, the gap rule and the wording. Every later study reuses them.
 2. **Each added study gets the same short audit as the zebra** (identity, licence, files, dates, counts, method, quality fields, sensitivity, cost) and its own manifest: its own gap rule, its own quality rule, its own sensitivity decision. No study is added from its record label alone.
-3. **Studies whose method is GPS and whose record is CC0 come first**, because they need no quality rule of ours: for example grey seals, the turtle and albatross packages, sperm whales (FastLoc GPS), wildebeest. Argos studies (humpback, emperor penguin, loggerhead) wait for the whale quality-rule proposal, which then covers all of them.
+3. **Order (revised after Chad's and GPT's messages):** sharks and dolphins are audited next (`SHARKS-DOLPHINS.md`); the packages in the table follow in the order Chad chooses. No method is exempt from checks: GPS studies still have their quality fields and implausible positions checked, and each Argos study gets its own justified filtering and gap rule.
 4. **Several studies on the page (N2):** the Animals page lists studies under Land, Sea and Air (rev 1 §4). The globe keeps **one** journey switch; the study chosen on the Animals page, or from a selector beside the switch, is the one it draws. One journey at a time at first, so the replay clock and the dates on screen stay unambiguous. Built after the first replay passes J.
 5. **Sensitivity is decided per study** (§6a). Elephants, cheetah, nesting turtles and penguin colonies are the obvious cases for a recorded decision before anything public.
 
 ### What Chad would be choosing
-- **Which animals next.** A bounded audit batch of three to five packages from the table is about the size of the zebra and whale audit. Suggested first batch: humpback whales, grey seals, one turtle package, one albatross package, wildebeest.
-- **Whether to open the shark and dolphin source audit** (reading terms only at first; any provider message comes back for approval).
+- **Sharks and dolphins: opened** (Chad, 18 Nov). First pass done: the best accessible shark candidate is the South African white shark package (Zenodo `10.5281/zenodo.5575189`, CC BY 4.0, Argos); no tagged-dolphin track is openly downloadable among the sources read, and the nearest is false killer whales in the U.S. Animal Telemetry Network archive. Two enquiries are drafted for Chad and not sent.
+- **Which other animals next**, from the table, after sharks and dolphins.
 
 ## 14. Not done, not claimed
 
@@ -296,4 +309,4 @@ Some of these sources may update regularly (not checked). If one does, a shark o
 - The papers were read only as the abstracts carried on the repository records.
 - No conservation category, population figure or trend for zebra or blue whale is stated anywhere in this proposal or the audit.
 - Phone performance, hosting cost and the fifth header tab are unmeasured.
-- No package in §13 has been audited; no shark or dolphin source has been opened.
+- No package in §13 has been audited. The shark and dolphin pass read terms and metadata only; no shark or dolphin data file has been opened.
