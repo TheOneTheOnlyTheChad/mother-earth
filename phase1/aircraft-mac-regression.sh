@@ -5,10 +5,13 @@
 cd "$(dirname "$0")" || exit 2
 OUT=results.txt
 NODE="$(command -v node 2>/dev/null)"; for c in /opt/homebrew/bin/node /usr/local/bin/node "$HOME/.nvm/versions/node/"*/bin/node; do [ -z "$NODE" ] && [ -x "$c" ] && NODE="$c"; done
+FAILED=""
+# a normal (no-break) suite: show the end of its output, record its exit status, and remember a failure (a pipe into tail would hide it)
+suite() { name="$1"; n="$2"; shift 2; t="$(mktemp)"; "$@" > "$t" 2>&1; rc=$?; tail -n "$n" "$t"; rm -f "$t"; echo "  exit status of $name: $rc"; [ "$rc" -ne 0 ] && FAILED="$FAILED $name"; }
 {
   echo "aircraft regression on $(uname -s) $(uname -r), /bin/bash $(/bin/bash -c 'echo $BASH_VERSION'), node $("$NODE" -v 2>/dev/null || echo none), started $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "sha256 of the files under test:"; for f in run.sh collector-mac.mjs aircraft-schedule.test.sh aircraft-counts.test.mjs duration-contract.test.mjs worker.js; do printf '  %s  %s\n' "$(shasum -a 256 "$f" 2>/dev/null | cut -d' ' -f1)" "$f"; done
-  echo "--- runner suite, no break"; /bin/bash aircraft-schedule.test.sh 2>&1 | tail -n 40
+  echo "sha256 of the files under test:"; for f in run.sh collector-mac.mjs aircraft-schedule.test.sh aircraft-counts.test.mjs duration-contract.test.mjs ships-diagnostics.test.mjs ships-diagnostics.stub.mjs worker.js; do printf '  %s  %s\n' "$(shasum -a 256 "$f" 2>/dev/null | cut -d' ' -f1)" "$f"; done
+  echo "--- runner suite, no break"; suite runner-suite 40 /bin/bash aircraft-schedule.test.sh
   for b in aircraft-first no-guard no-kill no-budget dry-free no-switch stale-clock manual-no-guard ledger-unchecked once-ignored no-probe manual-no-probe portal-ok probe-no-kill probe-no-backoff probe-ignore-exit probe-ignore-http probe-two-words probe-any-json; do
     echo "--- BREAK=$b (must fail)"; BREAK=$b /bin/bash aircraft-schedule.test.sh 2>&1 | grep -E '^FAIL|passed|did not apply|unknown break' | cut -c1-120
   done
@@ -20,8 +23,11 @@ NODE="$(command -v node 2>/dev/null)"; for c in /opt/homebrew/bin/node /usr/loca
   case "$rc/$code/$verdict" in 0/2[0-9][0-9]/valid*) echo "  => HOME (the same three conditions the runner applies)" ;; *) echo "  => NOT HOME" ;; esac
   rm -f "$tmp"
   echo "  curl: $(command -v curl)  perl: $(command -v perl)"
-  echo "--- collector suite"; "$NODE" aircraft-counts.test.mjs 2>&1 | tail -n 12
-  echo "--- ships duration contract"; "$NODE" duration-contract.test.mjs 2>&1 | tail -n 1
+  echo "--- collector suite"; suite collector-suite 12 "$NODE" aircraft-counts.test.mjs
+  echo "--- ships duration contract"; suite duration-contract 1 "$NODE" duration-contract.test.mjs
+  echo "--- ships diagnostics (mac-0.3.5; about 45 s; stubbed socket, lookup and upload: nothing leaves this Mac)"; suite ships-diagnostics 12 "$NODE" ships-diagnostics.test.mjs
+  if [ -z "$FAILED" ]; then echo "RESULT: the four normal suites all exited 0"; else echo "RESULT: FAILED:$FAILED"; fi
   echo "finished $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 } > "$OUT" 2>&1
 tail -n 3 "$OUT"; echo "results written to $(pwd)/$OUT"
+[ -z "$FAILED" ] || exit 1
