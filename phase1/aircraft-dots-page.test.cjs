@@ -1,7 +1,7 @@
 /* Aircraft positions as plain dots — page suite for aircraft.js (aircraft-dots-rc). Runs the REAL aircraft.js in node with a small
  * stand-in for the document, the canvas and the globe: no browser, no network, no real picture. It checks what the page accepts,
  * refuses, says and removes. It does NOT check how the dots look on the globe (see the review packet).
- * Run: node phase1/aircraft-dots-page.test.cjs      Breaks (each must fail the suite): BREAK=any-fields|keep-old|no-clear|tap|both-on */
+ * Run: node phase1/aircraft-dots-page.test.cjs      Breaks (each must fail the suite): BREAK=any-fields|keep-old|no-clear|tap|both-on|no-gap|no-gap-counts|gap-blocks-age */
 const fs = require('fs'), path = require('path'), vm = require('vm');
 let src = fs.readFileSync(path.join(__dirname, '..', 'aircraft.js'), 'utf8');
 const BREAK = process.env.BREAK || '';
@@ -11,6 +11,9 @@ if (BREAK === 'keep-old') brk("dotsDestroy(); built.parent.add(built.mesh); dt.m
 if (BREAK === 'no-clear') brk("const dotsOld = env => ageMs(env) >= env.staleS * 1e3;", "const dotsOld = env => false;");
 if (BREAK === 'both-on') brk("    if (st.on) await setOn(false);       // the other half of the same rule", "");
 if (BREAK === 'tap') brk("built.mesh.__air = false; built.mesh.__airdots = true;", "built.mesh.__air = false; built.mesh.__airdots = true; built.mesh.raycast = function () { return 1; };");
+if (BREAK === 'no-gap') brk("if (now() - dt.lastAsk >= AC.VIS_GAP_MS) dotsLoad(true); else dt.visSkips++;", "dotsLoad(true);");
+if (BREAK === 'no-gap-counts') brk("if (now() - st.lastAsk >= AC.VIS_GAP_MS) load(true); else st.visSkips++;", "load(true);");
+if (BREAK === 'gap-blocks-age') brk("dotsAgeTick(); if (now() - dt.lastAsk >= AC.VIS_GAP_MS)", "if (now() - dt.lastAsk < AC.VIS_GAP_MS) return; dotsAgeTick(); if (true)");
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log('FAIL  ' + n + (got !== undefined ? '\n      got: ' + JSON.stringify(got).slice(0, 500) : '')); } };
 
 // ---------- stand-ins
@@ -108,5 +111,31 @@ ok('a position lands where its latitude and longitude put it', dotAt && Math.abs
   await A.setOn(false);
   ok('rev3. both can be off', A.state().on === false && D.state().on === false && group.children.filter(m => m.__air || m.__airdots).length === 0);
   ok('rev4. dot radius and colour are the ones Chad chose on 18 Nov (2.2 px, magenta)', D.config.R_PX === 2.2 && D.config.FILL === '#e84ab5');
+  // ---------- returning to view: a minimum gap between asks, the age check always at once (visibility-gap-rc)
+  {
+    const GAP = A.config.VIS_GAP_MS, T3 = '2026-11-17T16:48:00.000Z', t3 = Date.parse(T3); let asks = 0;
+    D.opts.source = async () => { asks++; return file({ window_end: T3, window_start: T3 }); };
+    A.opts.now = t3 + 60e3; await D.setOn(true);
+    ok('gap. the gap is one minute; switching on asks once', GAP === 60e3 && asks === 1 && D.state().meshes === 1, [GAP, asks]);
+    for (let i = 0; i < 30; i++) { A.opts.now = t3 + 60e3 + i * 2000; D.onVisible(); await new Promise(r => setTimeout(r, 0)); }   // back in view every 2 s for 58 s
+    ok('gap. 30 returns to view inside a minute make no further ask', asks === 1 && D.state().visSkips === 30, [asks, D.state().visSkips]);
+    A.opts.now = t3 + 60e3 + GAP; D.onVisible(); await new Promise(r => setTimeout(r, 5));
+    ok('gap. a return to view a minute after the last ask does ask', asks === 2, asks);
+    doc.hidden = true; A.opts.now += 10 * GAP; D.onVisible(); await new Promise(r => setTimeout(r, 0)); doc.hidden = false;
+    ok('gap. nothing is asked while the page is hidden', asks === 2, asks);
+    // the age check is not held back by the gap: ask just before the 3-hour limit, return to view 40 s later
+    A.opts.now = t3 + 10800e3 - 30e3; await D.refresh(); const before = asks;
+    A.opts.now += 40e3; D.onVisible(); await new Promise(r => setTimeout(r, 0));
+    ok('gap. expired dots are cleared on return to view even when no ask is made', asks === before && D.state().meshes === 0 && group.children.filter(m => m.__airdots).length === 0 && /have been cleared/.test(D.state().off || ''), [asks, before, D.state().meshes, D.state().off]);
+    await D.setOn(false);
+    // counts: the same rule (the hub is not reachable in this suite, so each ask fails; the asks are still counted)
+    A.opts.now = t3 + 60e3; await A.setOn(true); const c0 = A.state().requests.length;
+    for (let i = 0; i < 30; i++) { A.opts.now = t3 + 60e3 + i * 2000; A.onVisible(); await new Promise(r => setTimeout(r, 0)); }
+    ok('gap. counts: 30 returns to view inside a minute make no further ask', A.state().requests.length === c0 && A.state().visSkips === 30, [c0, A.state().requests.length, A.state().visSkips]);
+    A.opts.now = t3 + 60e3 + GAP; A.onVisible(); await new Promise(r => setTimeout(r, 5));
+    ok('gap. counts: a return to view a minute after the last ask does ask', A.state().requests.length === c0 + 1, A.state().requests.length);
+    await A.setOn(false);
+    ok('gap. the page listens for returns to view with these handlers', doc.listeners.visibilitychange === D.onVisible);
+  }
   console.log(`\naircraft-dots-page${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();
