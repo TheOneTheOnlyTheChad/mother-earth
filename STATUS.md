@@ -3,6 +3,12 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 12:09 UTC (clock reading) — **main = installed collector: `ships-diagnostics-rc` merged (merge `d5cc4eb`)**
+- **Chad's own line:** "Approve: merge ships-diagnostics-rc ca97634 into main (collector mac-0.3.5 and its tests; no page or hub change)".
+- **Merge `d5cc4eb`** (no-ff, no conflict). Changed on main: `phase1/collector-mac.mjs` (`342dfd41…de8f`, the file installed at 12:03:30 UTC), `phase1/ships-diagnostics.test.mjs`, `phase1/ships-diagnostics.stub.mjs`, `phase1/aircraft-mac-regression.sh`, the proposal and the packet. **No root page file, `worker.js` or `run.sh` changed.**
+- **On the merged tree before the push:** `ships-diagnostics` 102, duration contract passed, `aircraft-counts` 75, `aircraft-schedule.test.sh` 88, `ships-fallback` 7.
+- **Parts B and C** (what an overlong sample and a failure may replace; proposal rev 2.1, passed by GPT as a proposal) are not built. A branch build needs Chad's go.
+
 ## 18 Nov 12:03 UTC (clock reading) — **INSTALLED: Mac collector mac-0.3.5 (ships diagnostic logging, fixed public failure phrases)**
 - **Chad's own line:** "Approve: install collector-mac.mjs mac-0.3.5 from ships-diagnostics-rc ca97634 (sha256 342dfd410aa4885c14ed44016bf03f5f51f74c627c5ec3b6bc7e61c24062de8f) in ~/mother-earth, preserving the previous file; run.sh and schedules unchanged."
 - **Install, 12:03:30 UTC** (device shell, between ticks; the 12:03:05 tick had ended at 12:03:23): file fetched from `raw.githubusercontent.com` at `ca97634`, sha256 matched the approved one before the move; previous file copied to `~/mother-earth/_preserved/20261118T120330Z/collector-mac.mjs` (`2c36a9cd…6d0a`, mac-0.3.4); new file moved into place. Read back: `collector-mac.mjs` `342dfd41…de8f`, `run.sh` `f6f587ae…65ce` (unchanged). Schedules, switch file and ledger untouched. No hub or page change; nothing merged (the branch is not on main yet).
