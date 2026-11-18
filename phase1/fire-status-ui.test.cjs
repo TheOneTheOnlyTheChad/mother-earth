@@ -14,6 +14,7 @@
  *      NODE_PATH=/home/claude/spike/node_modules node --no-warnings phase1/fire-status-ui.test.cjs
  * BREAK=no-gate | no-place-rule | no-shared-reason | no-zero-note | no-clear weakens the served page; each must fail. */
 const { chromium } = require('playwright');
+const coreOn = h => { if (!h.includes("const START_ON = [];")) throw new Error('index.html: START_ON = [] not found'); return h.replace("const START_ON = [];", "const START_ON = ['usgs', 'firms', 'ships', 'forest'];"); };   // this suite was written for the page with the four core layers on at load; the bare default is tested in bare-earth-ui.test.cjs
 const fs = require('fs'); const path = require('path'); const { pathToFileURL } = require('url'); const { DatabaseSync } = require('node:sqlite');
 const ROOT = path.join(__dirname, '..');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
@@ -36,7 +37,7 @@ const NOTE_FETCH = 'TypeError: fetch failed';
 ok('worker.js: both down writers publish cells: {} (the reason the hub\'s own place down branch is skipped)', /envelope\(layer, scheduledMs, null, null, 'down', \{\}, \[\], \[\], \{ note \}\)/.test(WSRC) && /source_status: 'down', interruptions: \[\], stale_after_s: STALE_AFTER_S\.firms, cells: \{\}, note, run_id: runId/.test(WSRC));
 
 // ---- page under test (optionally weakened)
-const served = { index: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8') };
+const served = { index: coreOn(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8') };
 { const rep = (k, a, b) => { const before = served[k]; served[k] = served[k].replace(a, b); if (served[k] === before) { console.log('FAIL  break did not apply'); process.exit(1); } };
   if (BREAK === 'no-gate') rep('index', " && !noCount;", ";");                                                       // main's behaviour: the line shows with no count
   if (BREAK === 'no-place-rule') rep('app', "if (l === 'firms' && s.source_status === 'down')", "if (false)");          // main's behaviour: place says withheld

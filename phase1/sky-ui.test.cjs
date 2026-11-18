@@ -9,6 +9,7 @@
  *              tilde-required | flag-sentence-always | caveat-always | no-flag-agreement      → each must FAIL
  */
 const { chromium } = require('playwright');
+const coreOn = h => { if (!h.includes("const START_ON = [];")) throw new Error('index.html: START_ON = [] not found'); return h.replace("const START_ON = [];", "const START_ON = ['usgs', 'firms', 'ships', 'forest'];"); };   // this suite was written for the page with the four core layers on at load; the bare default is tested in bare-earth-ui.test.cjs
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
@@ -16,7 +17,7 @@ const FILE = fs.readFileSync(path.join(__dirname, 'sky/catalogue/sky-2026-11-R1.
 const J = JSON.parse(FILE);
 const sha = s => crypto.createHash('sha256').update(s).digest('hex');
 let SKY_JS = fs.readFileSync(path.join(__dirname, '..', 'sky.js'), 'utf8');
-let INDEX = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+let INDEX = coreOn(fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8'));
 const BREAKS = {
   'local-date': ["const utcToday = () => new Date(Date.now()).toISOString().slice(0, 10);", "const utcToday = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };"],
   'extrema-full-bundle': ["    const pts = s.days.filter(p => p.v != null);\n    if (!pts.length) return null;", "    const all = st.cat.bodies[s.body].rows.map(r => ({ d: r[0], v: r[1] })); const pts = all;\n    if (!pts.length) return null;"],

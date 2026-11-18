@@ -9,6 +9,7 @@
  *      NODE_PATH=/home/claude/spike/node_modules node --no-warnings phase1/quakes-ships-status-ui.test.cjs
  * BREAK=no-gate | down-as-sample | keep-description   each must fail. */
 const { chromium } = require('playwright');
+const coreOn = h => { if (!h.includes("const START_ON = [];")) throw new Error('index.html: START_ON = [] not found'); return h.replace("const START_ON = [];", "const START_ON = ['usgs', 'firms', 'ships', 'forest'];"); };   // this suite was written for the page with the four core layers on at load; the bare default is tested in bare-earth-ui.test.cjs
 const fs = require('fs'); const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
@@ -25,7 +26,7 @@ const WSRC = fs.readFileSync(path.join(__dirname, 'worker.js'), 'utf8');
 ok('worker.js: writeDown publishes an envelope with no cells, no window and no records', /const e = envelope\(layer, scheduledMs, null, null, 'down', \{\}, \[\], \[\], \{ note \}\);/.test(WSRC));
 ok('worker.js: a ships sample ingested as down goes through writeDown', /await writeDown\(env, layer, scheduledMs, 'ingested down: ' \+ \((?:layer === AIRCRAFT_LAYER \? e\.note : \()?e\.note \|\| ''\)\)?, 0\);/.test(WSRC));   // hub 0.6.18 words the aircraft note itself; ships is unchanged
 
-const served = { index: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8') };
+const served = { index: coreOn(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8') };
 { const rep = (k, a, b) => { const before = served[k]; served[k] = served[k].replace(a, b); if (served[k] === before) { console.log('FAIL  break did not apply'); process.exit(1); } };
   if (BREAK === 'no-gate') rep('index', "const noCount = layer in cardCount && cardCount[layer] === null;", "const noCount = layer === 'firms' && cardCount.firms === null;");   // main's behaviour for earthquakes and ships
   if (BREAK === 'down-as-sample') rep('app', "sample = s && !sDown ? s : null;", "sample = s;");                                                                        // main's behaviour: the empty down envelope totalled as a sample

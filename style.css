@@ -114,6 +114,7 @@ button.res .rw{font-size:10.5px;color:var(--dim);line-height:1.35;font-variant-n
 button.res .rw b{color:var(--warn);font-weight:500}
 button.res .rf{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim)}
 button.res .rx{font-size:10.5px;color:var(--warn);line-height:1.35}
+button.res .ro{font-size:10.5px;color:var(--accent);line-height:1.35}   /* result from a switched-off layer: choosing it switches the layer on (bare-search-rc) */
 button.res.dead{opacity:.6;border-left-color:var(--warn);background:rgba(255,209,102,.06)}
 button.res.go .rt{color:var(--fg)}
 .rnotes{font-size:10.5px;color:rgba(127,141,163,.85);line-height:1.4;display:flex;flex-direction:column;gap:3px;margin-top:6px}
@@ -252,7 +253,7 @@ body.doc{overflow:auto}
   .card .cav{font-size:11.5px;color:rgba(127,141,163,.9)}
   .card button.tgl{min-height:44px}   /* touch target: 36 px is desktop-only (UX round 1) */   /* 10.5px measured too small on a 390 px phone (1 Nov 2026) */
   /* the sheet is the only scrolling surface: results extend it rather than scrolling inside it */
-  .exp-body .hint,.rnotes,.exp-body details.scope>div,button.res .rw,button.res .rx{font-size:11.5px}
+  .exp-body .hint,.rnotes,.exp-body details.scope>div,button.res .rw,button.res .rx,button.res .ro{font-size:11.5px}
   .exp-body details.scope summary{font-size:12px;min-height:44px}
   button.res{padding:9px 10px}
   button.res .rm{font-size:12.5px}
@@ -706,3 +707,31 @@ body.craft .sgtimes{color:var(--dim);min-height:2.8em}
   .nl-shares{font-size:13px}
 }
 .ovl-h.air-sub{margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12)}
+/* ---------- Bare Earth: Layers button, first-view line, layers panel (bare-earth-rc) */
+.layers-btn{position:absolute;top:12px;left:12px;z-index:16;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 12px;font:500 12px/1 inherit;font-family:inherit;color:var(--fg);background:rgba(7,10,15,.82);border:1px solid var(--line-strong);cursor:pointer}
+.layers-btn:focus-visible,.bh-b:focus-visible,.lp-x:focus-visible,.lp-off:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.layers-btn[aria-expanded="true"]{border-color:var(--accent)}
+.bare-hint{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:14;display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(7,10,15,.86);border:1px solid var(--line-strong);font-size:13px;color:var(--fg);white-space:nowrap}
+.bare-hint[hidden],.layers-panel[hidden]{display:none}
+/* In the Sky zoom-out view the globe's layers are hidden (as the key and legend are), so the Layers controls are too: they would otherwise sit over the Earth / + Moon / + Sun buttons. */
+body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{visibility:hidden}
+.bh-b,.lp-x,.lp-off{min-height:44px;padding:0 14px;font:500 12px/1 inherit;font-family:inherit;color:var(--fg);background:transparent;border:1px solid var(--accent);cursor:pointer}
+.layers-panel{position:fixed;z-index:60;top:64px;left:12px;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 88px);overflow:auto;background:rgba(9,13,19,.97);border:1px solid var(--line-strong);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.lp-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lp-head h2{margin:0;font:600 15px/1.2 var(--display);letter-spacing:.06em;text-transform:uppercase}
+.lp-note{margin:0;font-size:12px;color:var(--dim)}
+.lp-g{margin:8px 0 0;font:500 11px/1.2 var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
+.layers-panel .ovl-tgl[aria-disabled="true"]{opacity:.55;cursor:default}
+.lp-off{align-self:flex-start;margin-top:8px}
+@media (max-width:1100px){
+  .layers-btn{top:64px;left:auto;right:12px}   /* below 1100 px the imagery label sits top-left; the button goes under the Key button's place on the right */
+  .bare-hint{top:auto;bottom:64px}
+}
+@media (max-width:720px){
+  /* phone: the line sits below the globe, in the strip the persistent notes use once layers are on (the two are never
+     shown together), and carries no button of its own — the Layers button above is the single way in */
+  .bare-hint{top:auto;bottom:calc(52% + 8px);padding:6px 10px;font-size:12px;max-width:calc(100% - 24px)}
+  .stage:has(.sheet.collapsed) .bare-hint{bottom:56px}
+  .bare-hint .bh-b{display:none}
+  .layers-panel{top:auto;bottom:0;left:0;width:100%;max-height:70vh;border-left:0;border-right:0;border-bottom:0}
+}

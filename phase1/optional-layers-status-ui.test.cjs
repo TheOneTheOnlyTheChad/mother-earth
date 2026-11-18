@@ -12,6 +12,7 @@
  *      NODE_PATH=/home/claude/spike/node_modules:/home/claude/node_modules node --no-warnings phase1/optional-layers-status-ui.test.cjs
  * BREAK=no-gate | freshness-gate | old-wording | no-dates | no-year | no-validate | no-zone | lenient-day | stale-key   each must fail. */
 const { chromium } = require('playwright');
+const coreOn = h => { if (!h.includes("const START_ON = [];")) throw new Error('index.html: START_ON = [] not found'); return h.replace("const START_ON = [];", "const START_ON = ['usgs', 'firms', 'ships', 'forest'];"); };   // this suite was written for the page with the four core layers on at load; the bare default is tested in bare-earth-ui.test.cjs
 const fs = require('fs'); const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
@@ -37,7 +38,7 @@ const expectTimes = (r, c) => { const good = v => typeof v === 'string' && fullT
   if (r.slice(0, 10) !== c.slice(0, 10)) return `records ${dm(r)} ${hm(r)}, counts ${dm(c)} ${hm(c)}`;
   return `records ${hm(r)}, counts ${hm(c)}`; };
 
-const served = { index: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8'), sources: fs.readFileSync(path.join(ROOT, 'sources.html'), 'utf8') };
+const served = { index: coreOn(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8'), sources: fs.readFileSync(path.join(ROOT, 'sources.html'), 'utf8') };
 { const rep = (k, a, b) => { const before = served[k]; served[k] = served[k].split(a).join(b); if (served[k] === before) { console.log('FAIL  break did not apply'); process.exit(1); } };
   if (BREAK === 'no-gate') rep('index', "const noCount = layer in cardCount && cardCount[layer] === null;", "const noCount = ['usgs', 'firms', 'ships'].includes(layer) && cardCount[layer] === null;");   // main's behaviour for the optional cards
   if (BREAK === 'freshness-gate') rep('index', "showCount('drifters', f.grade !== 'unknown' && s && !noRecords ? ME.total(s) : null);", "showCount('drifters', f.grade !== 'unknown' && s && !noRecords ? ME.total(s) : null); cardCount.drifters = f.grade !== 'unknown' && s ? ME.total(s) : null;");   // gate on freshness, not on what the card renders

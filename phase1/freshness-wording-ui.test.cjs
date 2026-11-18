@@ -17,6 +17,7 @@
  * time unknown" and the table still builds); CO₂ and sea-ice dates must be exactly YYYY-MM-DD.
  * BREAK=word-current | no-tip | one-ice-date | ships-received | ships-age-always | no-date-check | nan-fresh | ships-age-twice | raw-sources-cell | loose-date   each must fail. */
 const { chromium } = require('playwright');
+const coreOn = h => { if (!h.includes("const START_ON = [];")) throw new Error('index.html: START_ON = [] not found'); return h.replace("const START_ON = [];", "const START_ON = ['usgs', 'firms', 'ships', 'forest'];"); };   // this suite was written for the page with the four core layers on at load; the bare default is tested in bare-earth-ui.test.cjs
 const fs = require('fs'); const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const BASE = 'http://127.0.0.1:8899', HUB = 'https://mother-earth.chadoberholzer.workers.dev';
@@ -30,7 +31,7 @@ const wd = setTimeout(() => { console.log('FAIL  suite exceeded 12 min'); proces
 const cellOf = (lat, lng) => `${Math.floor((lat + 90) / 4)}_${Math.floor((lng + 180) / 4)}`;
 const iso = ms => new Date(Date.now() - ms).toISOString(), GOOD = iso(3 * 3600e3), NOW = iso(60e3);   // iso() reads the clock when a fixture is built, so stated ages hold however long the suite has run
 
-const served = { index: fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8'), sources: fs.readFileSync(path.join(ROOT, 'sources.html'), 'utf8') };
+const served = { index: coreOn(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')), app: fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8'), sources: fs.readFileSync(path.join(ROOT, 'sources.html'), 'utf8') };
 { const rep = (k, a, b) => { const before = served[k]; served[k] = served[k].replace(a, b); if (served[k] === before) { console.log('FAIL  break did not apply'); process.exit(1); } };
   if (BREAK === 'word-current') rep('app', "ME.DATED_INDICES.includes(layer) ? 'fresh copy' : 'current'", "'current'");               // main's badge
   if (BREAK === 'no-tip') rep('index', "(ME.freshTip(k, f) || f.why)", "f.why");                                                       // main's tooltip
