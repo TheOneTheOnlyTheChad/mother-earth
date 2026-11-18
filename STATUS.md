@@ -3,6 +3,12 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 10:32 UTC (clock reading) — **Ships proposal rev 2 after GPT's review** (proposal branch only)
+- **GPT (relayed by Chad):** rev 1 hash matched; direction supported; D1 Part A separately, D2 B2, D3 C2 built with B2, D4 DNS lookup with a strict time bound; rev 2 wanted before any build. No production action authorised.
+- **Rev 2:** branch `ships-diagnostics-rc` `603f88a`, `docs/concepts/SHIPS-DIAGNOSTICS-PROPOSAL.md` sha256 `e191d380…a4fa`, Mac copy in `_review/ships-diagnostics-rc/`. Part A: every ending logged (error, close before or after confirmation, connect timeout, overlong, low flow), close details never waited for, `dns_check` with a 2 s deadline recorded without inference, bounded and cleaned local text, a fixed public phrase on every ships failure path including the outer catch. Parts B/C: a nine-point publication contract (eligible and retained sample, `last_attempt` never renews the three-hour life, both writers, conditional ordering, fallback scheduling, archives and aggregates) and a test matrix including the 381.5 s / 700-record case.
+- **Checked for rev 2:** the ships hourly aggregate already uses only `ok` samples, so an overlong (always `degraded`) sample is not in it.
+- **Waiting for:** GPT's read of rev 2, then Chad's go for a Part A branch build. No code changed.
+
 ## 18 Nov 10:04 UTC (clock reading) — **Smoke fixes closed out; ships proposal for GPT** (docs and a proposal branch only)
 - **GPT's checks of the released page (relayed by Chad; desktop Chrome, about 10:00 UTC):** first-view line clear of the credits, imagery label, Key and Layers button at 900, 1024, 1101, 1150 and 1279 px, no horizontal overflow; hidden, it takes no room at 1024 px (imagery label 8 px under the globe); Dust RGB renders, counts as 1 layer, shows its entry and hides the sentence, and off restores 0 layers, the sentence and the line. **This closes the released-page gaps listed in the 09:52 entry** (line position, the 1101–1279 px rule, Dust RGB). Real phone and screen reader remain open.
 - **Clean-up (09:59 UTC):** `smoke-key-hint-rc` deleted on the GitHub branches page in the pane (0 ahead of main); its Mac review copy moved to `_to_delete/`. Remote branches: `main`, `cape-town-station-rc`, `widths-preview-rc`, and the new proposal branch below.
