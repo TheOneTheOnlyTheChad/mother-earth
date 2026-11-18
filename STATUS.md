@@ -3,6 +3,14 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 12:03 UTC (clock reading) — **INSTALLED: Mac collector mac-0.3.5 (ships diagnostic logging, fixed public failure phrases)**
+- **Chad's own line:** "Approve: install collector-mac.mjs mac-0.3.5 from ships-diagnostics-rc ca97634 (sha256 342dfd410aa4885c14ed44016bf03f5f51f74c627c5ec3b6bc7e61c24062de8f) in ~/mother-earth, preserving the previous file; run.sh and schedules unchanged."
+- **Install, 12:03:30 UTC** (device shell, between ticks; the 12:03:05 tick had ended at 12:03:23): file fetched from `raw.githubusercontent.com` at `ca97634`, sha256 matched the approved one before the move; previous file copied to `~/mother-earth/_preserved/20261118T120330Z/collector-mac.mjs` (`2c36a9cd…6d0a`, mac-0.3.4); new file moved into place. Read back: `collector-mac.mjs` `342dfd41…de8f`, `run.sh` `f6f587ae…65ce` (unchanged). Schedules, switch file and ledger untouched. No hub or page change; nothing merged (the branch is not on main yet).
+- **Before the install, on mac-0.3.4, three ships failures in a row at home today:** 11:01, 11:32 and 12:03 UTC, each "cells only (down)", exit 3, about 18 s after its tick.
+- **Not yet seen:** a run on mac-0.3.5. Next aircraft run due about 12:10 UTC, next ships sample about 12:33 UTC; a read is set for 12:37 UTC.
+- **Rollback (own Approve line):** copy `_preserved/20261118T120330Z/collector-mac.mjs` back.
+- **Still to do:** merge `ships-diagnostics-rc` into main (collector and tests; own Approve line) so main matches what is installed; START-HERE's collector line.
+
 ## 18 Nov 11:55 UTC (clock reading) — **Mac regression for `ships-diagnostics-rc` `ca97634`: all four normal suites exit 0; all 19 runner breaks fail** (read-only; nothing installed)
 - **Chad ran `phase1/aircraft-mac-regression.sh` in Terminal** from `_review/ships-diagnostics-rc/phase1` (a path with a space). `results.txt` read by Claude at 11:54:55 UTC: Darwin 25.5.0, `/bin/bash` 3.2.57, Node v24.14.1; started 11:21:59 UTC, finished 11:50:37 UTC.
 - **Files under test, as hashed on the Mac:** `collector-mac.mjs` `342dfd41…de8f`, `run.sh` `f6f587ae…65ce`, `ships-diagnostics.test.mjs` `1d7389ac…c849`, `ships-diagnostics.stub.mjs` `5fddd002…2763`, `worker.js` `ad5bce33…4132`. All equal the branch head's.
