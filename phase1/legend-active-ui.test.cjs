@@ -9,7 +9,9 @@
  *   valid zero (nothing drawn)            → no entry, no count
  *   stale / unknown outlines only         → no entry, no count (the coverage key covers them)
  *   off, down, loading, unavailable       → no entry, no count
- *   nothing from the six                  → "No data symbols or count cells are drawn right now."
+ *   no layer of any kind drawn            → "No layer data is drawn on the globe right now." (smoke-key-hint-rc, 18 Nov 2026: the
+ *                                           sentence no longer shows beside day/night, ocean heat, night lights, orbital, aircraft,
+ *                                           wind or Dust RGB; those cases are in phase1/key-drawn-ui.test.cjs)
  * Day/night, ocean heat and orbital keep their own lines and counting.
  * Every check compares the legend and the count with what the globe was given (ME.renderState, ME.cellPolys), not with a second rule.
  * One case runs on the production `lines/1` records file written by the hub's own pipeline.
@@ -28,7 +30,7 @@ let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++
 const wd = setTimeout(() => { console.log('FAIL  suite exceeded 14 min'); process.exit(1); }, 14 * 60e3);
 const cellOf = (lat, lng) => `${Math.floor((lat + 90) / 4)}_${Math.floor((lng + 180) / 4)}`;
 const RealDate = Date; const iso = ms => new RealDate(ms).toISOString(); const n0 = RealDate.now();
-const EMPTY = 'No data symbols or count cells are drawn right now.';
+const EMPTY = 'No layer data is drawn on the globe right now.';
 const E = { usgs: 'earthquake', firms: 'fire detection (per pass)', ships: 'vessel (last sample)', drifters: 'drifting buoy · coloured by water temperature (see card)', plastic: 'microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero)', forest: 'forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)' };
 const CNT = { usgs: 'Earthquakes: cell outlines only (records withheld)', firms: 'Fire detections: cell outlines only (records withheld)', ships: 'Ships: cell outlines only (records withheld)', drifters: 'Drifting buoys: cell outlines only (records withheld)' };
 const ONLY = Object.fromEntries(Object.entries(CNT).map(([k, v]) => [k, v.replace(' (records withheld)', '')]));   // a usable pair that draws cells and no symbols
@@ -44,7 +46,7 @@ let INDEX = coreOn(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'));
   if (BREAK === 'no-hollow-rings') rep(" tally.plastic.symbols += hollow.length;", '');
   if (BREAK === 'always-withheld') rep("c.querySelector('.lwh').hidden = usable(k);", "c.querySelector('.lwh').hidden = false;");   // round 1's behaviour
   if (BREAK === 'never-withheld') rep("c.querySelector('.lwh').hidden = usable(k);", "c.querySelector('.lwh').hidden = true;");
-  if (BREAK === 'no-empty-line') rep("$('leg-none').hidden = any;", "$('leg-none').hidden = true;"); }
+  if (BREAK === 'no-empty-line') rep("$('leg-none').hidden = d.length > 0;", "$('leg-none').hidden = true;"); }
 const FAST_APP = fs.readFileSync(path.join(ROOT, 'app.js'), 'utf8').replace('5 * 60e3', '4e3');   // transition case only: poll every 4 s
 
 // ---- fixtures (legacy `rows`)
@@ -112,7 +114,7 @@ const BASEL = () => ({
       if (cnt) ok(`${tag}: ${k} says "(records withheld)" exactly when its records are not usable`, r.line.includes(CNT[k]) === !r.usable[k], { line: r.line, usable: r.usable[k] }); }
     ok(`${tag}: dots handed to the globe = sum of the symbol tallies less hollow rings`, r.points === r.geom.usgs.symbols + r.geom.firms.symbols + r.geom.ships.symbols + r.geom.drifters.symbols + r.geom.plastic.symbols - r.plasticRings, { points: r.points, geom: r.geom, rings: r.plasticRings });
     ok(`${tag}: the line has no leading, trailing or doubled separator`, !/^ ?·|· ?$|· ?·/.test(r.line.replace(/· \d{4}–\d{4} ·|· coloured|· tow-start|· dated/g, 'x')), r.line);
-    ok(`${tag}: the empty sentence shows exactly when no data layer is drawn`, r.empty === ['usgs', 'firms', 'ships', 'drifters', 'plastic', 'forest'].every(k => !r.drawn.includes(k)) && (r.line === EMPTY) === r.empty, { line: r.line, empty: r.empty, drawn: r.drawn });
+    ok(`${tag}: the empty sentence shows exactly when no layer of any kind is drawn`, r.empty === (r.drawn.length === 0) && (r.line === EMPTY) === r.empty, { line: r.line, empty: r.empty, drawn: r.drawn });
   };
   const N = n => `Key · ${n} layer${n === 1 ? '' : 's'}`;
 
@@ -131,7 +133,7 @@ const BASEL = () => ({
     // ---- 8. an overlay on its own keeps its own line; the sentence still describes the six data layers
     await page.evaluate(() => document.getElementById('tgl-night').click()); await page.waitForFunction(() => !document.getElementById('night-legend').hidden, null, { timeout: 15000 }).catch(() => { }); r = await read(page); agree('8 overlay alone', r);
     ok('8 day/night alone: its own legend line shows', /Day\/night now/.test(r.nightLegend || ''), r.nightLegend);
-    ok('8 day/night alone: the data line is still the empty sentence, and the count is 1 (day/night)', r.line === EMPTY && r.n === N(1) && r.drawn.join() === 'daynight', [r.line, r.n, r.drawn]);
+    ok('8 day/night alone: the data line has no entry and no empty sentence (a layer is drawn), and the count is 1 (day/night)', r.line === '' && r.empty === false && r.n === N(1) && r.drawn.join() === 'daynight', [r.line, r.empty, r.n, r.drawn]);
     await page.evaluate(() => document.getElementById('tgl-night').click()); await tgl(page, 'usgs'); await page.waitForTimeout(400); r = await read(page);
     ok('7 earthquakes back on: the sentence is replaced by the entry', r.line === E.usgs && !r.empty && r.n === N(1), [r.line, r.n]);
     ok('1/7/8: no page error', !perr.length, perr); await ctx.close(); }

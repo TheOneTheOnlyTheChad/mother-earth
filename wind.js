@@ -261,7 +261,9 @@
   }
 
   // ---------- labels
+  const keyRepaint = () => { if (typeof ME.paintKeyExternal === 'function') ME.paintKeyExternal(); };   // the Key's count, entries and empty sentence follow what is drawn
   function paint() {
+    keyRepaint();
     coastSync();
     const s = $('s-wind'), o = $('o-wind'), fl = $('wind-frame'), ex = $('wind-extra'), rd = $('wind-read');
     tgl.setAttribute('aria-checked', String(st.on));
@@ -323,7 +325,8 @@
   { const el = $('wind-key'); if (el) el.innerHTML = WD.SCALE.map(([v, c], k) => `<span class="b"><i style="background:${c}"></i>${k === WD.SCALE.length - 1 ? v + '+' : v}</span>`).join('') + '<span class="u">km/h · one scale for all three heights (provisional)</span><span class="b m"><i class="hatch"></i>no model value</span>'; }
 
   // read-only aids for tests and the console
-  ME.wind = { state: () => ({ on: st.on, status: st.status, why: st.why, note: st.note, level: st.rev ? st.level : null, want: st.want, run: st.rev ? st.rev.run : null, valid: st.rev ? st.rev.valid_time : null,
+  ME.wind = { drawn: () => st.meshes.some(m => m.parent),   // a wind field is on the globe (also after a failed refresh that kept it)
+    state: () => ({ on: st.on, status: st.status, why: st.why, note: st.note, level: st.rev ? st.level : null, want: st.want, run: st.rev ? st.rev.run : null, valid: st.rev ? st.rev.valid_time : null,
       meshes: st.meshes.length, inScene: st.meshes.filter(m => m.parent).length, loading: st.loading, refreshFailed: st.refreshFailed, requests: st.requests.slice(), sel: st.sel,
       label: $('wind-frame').hidden ? null : $('wind-frame').textContent, extra: $('wind-extra').hidden ? null : $('wind-extra').textContent, off: $('o-wind').hidden ? null : $('o-wind').textContent,
       read: $('wind-read').textContent, readKind: $('wind-read').dataset.kind || '', stateWord: $('s-wind').textContent,

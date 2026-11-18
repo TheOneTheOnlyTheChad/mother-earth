@@ -5,7 +5,9 @@
  * comes back when everything is off; "Switch everything off" does that; Escape closes the panel and returns focus.
  * What it does NOT prove: that reading cards keep their numbers while a layer is off, or that nothing is drawn with real data
  * (the hub is routed to 404 here: see the review packet for the live-data check).
- * Run: node phase1/bare-earth-ui.test.cjs (any server on 8899 serving the repo)   Breaks: BREAK=start-on|hint-stays|no-mirror|row-direct|phone-hint */
+ * Section G (smoke-key-hint-rc, 18 Nov 2026): at 721–1100 px the first-view line is a plain row directly under the globe and covers
+ * nothing (it sat over the credits: GPT's smoke of the live page); both sides of the 720/721 and 1100/1101 boundaries, line shown and hidden.
+ * Run: node phase1/bare-earth-ui.test.cjs (any server on 8899 serving the repo)   Breaks: BREAK=start-on|hint-stays|no-mirror|row-direct|phone-hint|tablet-hint|narrow-desktop-hint */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path');
 const BASE = 'http://127.0.0.1:8899', BREAK = process.env.BREAK || '', ROOT = path.join(__dirname, '..');
@@ -18,6 +20,8 @@ const serve = f => { let body = fs.readFileSync(path.join(ROOT, f), 'utf8');
   if (f === 'layers.js' && BREAK === 'no-mirror') body = must(body, "if (r.getAttribute('aria-checked') !== String(c)) r.setAttribute('aria-checked', String(c));").replace("if (r.getAttribute('aria-checked') !== String(c)) r.setAttribute('aria-checked', String(c));", '');
   if (f === 'layers.js' && BREAK === 'row-direct') body = must(body, 't.click(); sync(); });').replace('t.click(); sync(); });', "r.setAttribute('aria-checked', 'true'); });");
   if (f === 'style.css' && BREAK === 'phone-hint') body = must(body, '.bare-hint{top:auto;bottom:calc(52% + 8px);').replace('.bare-hint{top:auto;bottom:calc(52% + 8px);', '.bare-hint{bottom:auto;top:118px;');
+  if (f === 'style.css' && BREAK === 'narrow-desktop-hint') body = must(body, '  .bare-hint{top:64px}\n').replace('  .bare-hint{top:64px}\n', '');   // main: the centred line reaches the Layers button at 1101–1160 px
+  if (f === 'style.css' && BREAK === 'tablet-hint') body = must(body, '.bare-hint{position:static;order:1;align-self:center;transform:none;margin:8px 0 0}').replace('.bare-hint{position:static;order:1;align-self:center;transform:none;margin:8px 0 0}', '');   // main's rule: absolute, 64 px from the bottom of the whole column
   return body; };
 const SW = ['#tgl-usgs', '#tgl-firms', '#tgl-ships', '#tgl-forest', '#tgl-drifters', '#tgl-plastic', '#tgl-air', '#tgl-airdots', '#tgl-nl', '#tgl-dustrgb', '#tgl-oh', '#tgl-wind', '#tgl-night',
   '#orb-tgls [data-g="payload"]', '#orb-tgls [data-g="rocket_body"]', '#orb-tgls [data-g="debris"]'];
@@ -79,6 +83,33 @@ const SW = ['#tgl-usgs', '#tgl-firms', '#tgl-ships', '#tgl-forest', '#tgl-drifte
     ok(`${t}: Close closes it`, (await S()).open === false);
     ok(`${t}: nothing was stored in the browser`, await page.evaluate(() => { try { return localStorage.length === 0 && sessionStorage.length === 0; } catch (e) { return true; } }));
     ok(`${t}: no page errors`, errors.length === 0, errors.slice(0, 3));
+    await ctx.close();
+  }
+  // ===== G. the first-view line covers nothing at tablet widths, and takes no room when hidden
+  for (const [w, h] of [[720, 800], [721, 800], [900, 800], [1024, 768], [1100, 800], [1101, 800], [1150, 800], [1279, 800], [1280, 800], [1440, 900]]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } }); const page = await ctx.newPage(); page.setDefaultTimeout(3000);
+    await page.route(/workers\.dev|unpkg\.com|gibs\.earthdata|fonts\.g/, r => r.fulfill({ status: 404, body: '' }));
+    await page.route(/127\.0\.0\.1:8899\/(index\.html|layers\.js|style\.css)(\?.*)?$/, r => { const u = r.request().url(), f = /layers\.js/.test(u) ? 'layers.js' : /style\.css/.test(u) ? 'style.css' : 'index.html';
+      r.fulfill({ status: 200, contentType: f === 'index.html' ? 'text/html' : f === 'style.css' ? 'text/css' : 'text/javascript', body: serve(f) }); });
+    await page.goto(BASE + '/index.html'); await page.waitForTimeout(900);
+    const t = `G ${w}×${h}`, tablet = w >= 721 && w <= 1100;
+    const geo = () => page.evaluate(() => { const hit = (a, b) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+      const R = e => { if (!e) return null; const cs = getComputedStyle(e); if (cs.display === 'none' || cs.visibility === 'hidden' || e.hidden) return null; const b = e.getBoundingClientRect(); return b.width > 0 && b.height > 0 ? { left: b.left, right: b.right, top: b.top, bottom: b.bottom } : null; };
+      const H = R(document.getElementById('bare-hint')), els = { credits: document.querySelector('#credits'), legend: document.getElementById('legend'), imgdate: document.getElementById('imgdate'), 'layers-btn': document.getElementById('layers-btn') };
+      const rects = Object.fromEntries(Object.entries(els).map(([k, e]) => [k, R(e)]));
+      return { hint: H, rects, over: H ? Object.keys(rects).filter(k => rects[k] && hit(H, rects[k])) : [], globe: R(document.getElementById('globe')), sw: document.documentElement.scrollWidth, vw: innerWidth }; });
+    let g = await geo();
+    ok(`${t}: the first-view line is shown`, !!g.hint, g);
+    ok(`${t}: shown, it does not sit over the credits, the legend, the imagery label or the Layers button`, g.hint && g.over.length === 0, { over: g.over, hint: g.hint, credits: g.rects.credits });
+    if (tablet) { ok(`${t}: the credits are on the page at this width (so the check above means something)`, !!g.rects.credits, g.rects);
+      ok(`${t}: the line is a row directly under the globe and above the imagery label`, g.hint && g.globe && g.rects.imgdate && g.hint.top >= g.globe.bottom && g.hint.top - g.globe.bottom <= 12 && g.hint.bottom <= g.rects.imgdate.top, [g.globe, g.hint, g.rects.imgdate]); }
+    ok(`${t}: no page-level horizontal overflow`, g.sw <= g.vw, [g.sw, g.vw]);
+    const gap0 = g.globe && g.rects.imgdate ? g.rects.imgdate.top - g.globe.bottom : null;
+    await page.evaluate(() => document.getElementById('tgl-usgs').click()); await page.waitForTimeout(250); g = await geo();
+    ok(`${t}: with a layer on the line is hidden`, g.hint === null && await page.locator('#bare-hint').isHidden(), g.hint);
+    if (tablet) ok(`${t}: hidden, it takes no room: the imagery label sits 8 px under the globe, closer than with the line shown`, g.globe && g.rects.imgdate && Math.abs(g.rects.imgdate.top - g.globe.bottom - 8) < 1 && gap0 > g.rects.imgdate.top - g.globe.bottom, [gap0, g.globe, g.rects.imgdate]);
+    await page.evaluate(() => document.getElementById('tgl-usgs').click()); await page.waitForTimeout(250); g = await geo();
+    ok(`${t}: everything off again: the line is back and still covers nothing`, g.hint && g.over.length === 0, { over: g.over });
     await ctx.close();
   }
   await browser.close();
