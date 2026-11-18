@@ -17,9 +17,11 @@
  * from the Mac's log after installation.
  * Run: node phase1/ships-diagnostics.test.mjs        (about 45 s: two cases wait out the real 15 s and 10 s limits)
  * Breaks (each must fail): BREAK=precedence|upload-detail|outer-raw|no-dns-deadline|no-cleanup|serialise-event|no-exit-outstanding|log-raw-close */
-import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawn } from 'node:child_process'; import { pathToFileURL } from 'node:url';
-const HERE = path.dirname(new URL(import.meta.url).pathname), BREAK = process.env.BREAK || '';
-const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'ships-diag-'));
+import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawn } from 'node:child_process'; import { pathToFileURL, fileURLToPath } from 'node:url';
+const SELF = fileURLToPath(import.meta.url), HERE = path.dirname(SELF), BREAK = process.env.BREAK || '';   // fileURLToPath, not URL.pathname: a folder name with a space ("Mother Earth") must not arrive as %20
+// The canonical path: on macOS os.tmpdir() is under /var, a link to /private/var. Node resolves the collector's own address to the real path, and the
+// collector runs main() only when that equals the command's path, so a child started from the /var spelling would import the file and do nothing.
+const TMP = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'ships-diag-')));
 const KEYV = 'AIS-TEST-KEY-0123456789';
 const allNetwork = [];
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 900)}` : ''}`); } };
@@ -63,6 +65,7 @@ const noLeak = (r, label) => { const up = JSON.stringify(r.uploads);
   allNetwork.push(...r.network); };
 /** A failed run: exit 3, one down report with exactly this phrase, exactly one diagnostic line. */
 const failed = (r, label, phrase, outcome) => {
+  ok(`${label}: the child really ran the collector (it printed the upload's answer)`, /^200 /m.test(r.stdout), [r.stdout.slice(0, 80), r.stderr.slice(0, 160)]);
   ok(`${label}: the run ends by itself with exit 3 (down report uploaded)`, r.code === 3 && !r.killed, [r.code, r.killed, r.stderr.slice(-300)]);
   ok(`${label}: one down report, note exactly "${phrase}"`, r.uploads.length === 1 && r.uploads[0].source_status === 'down' && r.uploads[0].note === phrase && r.uploads[0].layer === 'ships' && r.uploads[0].collector_version === 'mac-0.3.5', r.uploads.map(u => [u.source_status, u.note, u.collector_version]));
   ok(`${label}: exactly one diagnostic line, outcome=${outcome}`, r.diag.length === 1 && r.diag[0].startsWith(`ships: outcome=${outcome} `), r.diag);
@@ -71,7 +74,7 @@ const failed = (r, label, phrase, outcome) => {
 // ---------- A. unit: the two pure helpers
 // argv[1] is THIS file, never the collector's path: the collector runs main() only when it is the command itself. A socket that throws stands in until case F installs its own, so an in-process slip can never reach the network.
 globalThis.WebSocket = class { constructor() { allNetwork.push('NETWORK in-process WebSocket'); throw new Error('no network in this suite'); } };
-const mod = await (async () => { process.argv = [process.argv[0], new URL(import.meta.url).pathname, 'ships', '--window=60', '--dry']; process.env.AISSTREAM_KEY = KEYV; process.env.INGEST_KEY = 'unused';
+const mod = await (async () => { process.argv = [process.argv[0], SELF, 'ships', '--window=60', '--dry']; process.env.AISSTREAM_KEY = KEYV; process.env.INGEST_KEY = 'unused';
   globalThis.fetch = async u => { allNetwork.push('NETWORK in-process ' + u); throw new Error('no network in this suite'); };
   return import(pathToFileURL(COLLECTOR).href); })();
 { const { errorDetail, dnsCheck, DIAG, SHIPS_PUBLIC } = mod;

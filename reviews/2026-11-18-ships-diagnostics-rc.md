@@ -1,7 +1,17 @@
 # Review packet: `ships-diagnostics-rc`, Part A (collector mac-0.3.5: how a ships run ended, and a fixed public note)
 
-Rev 1, 18 Nov 2026. Branch `ships-diagnostics-rc` (from main `4303664`). **Collector only. Not installed on the Mac. Nothing merged. No hub or page change.**
+Rev 2, 18 Nov 2026 (rev 1 was head `4d0d7c8`). Branch `ships-diagnostics-rc` (from main `4303664`). **Collector only. Not installed on the Mac. Nothing merged. No hub or page change.**
 Proposal: `docs/concepts/SHIPS-DIAGNOSTICS-PROPOSAL.md` rev 2.1, Part A (passed by GPT with one wording correction and the exit proof). Chad's go, 18 Nov: "Go: build Part A of SHIPS-DIAGNOSTICS-PROPOSAL rev 2.1 on branch ships-diagnostics-rc (collector only; no install, no merge)". Parts B and C are not built.
+
+## 0. Rev 2: GPT's hold on `4d0d7c8` for the Mac regression harness (test files only; the collector file is byte-identical, `342dfd41…de8f`)
+GPT found no blocking collector defect, accepted all four §3 differences, and held the head for three harness faults. Fixed:
+1. **Folder name with a space.** `ships-diagnostics.test.mjs` took its own folder from `new URL(import.meta.url).pathname`, which arrives percent-encoded (`Mother%20Earth`). It now uses `fileURLToPath(import.meta.url)`, for its folder and for the in-process `argv[1]`.
+2. **Temporary folder behind a link.** On macOS the temp folder is under `/var`, a link to `/private/var`; Node resolves the collector's own address to the real path, the collector's "am I the command" test then fails, and each child imported the file and did nothing. The suite now uses `fs.realpathSync` on its temp folder. **New check on every failed-run case:** the child really ran the collector (it printed the upload's answer), so a child that does nothing can never pass by silence. 102 checks (was 94).
+3. **Hidden exit status.** `aircraft-mac-regression.sh` piped each suite into `tail`. The four normal (no-break) suites now run through a helper that prints the end of the output, prints the exit status, and remembers a failure; the script ends with a `RESULT:` line and exits 1 if any failed. Break runs are unchanged (they are expected to fail).
+
+Reproduced in the workspace: the suite copied to `/tmp/Mother Earth/phase1` with `TMPDIR` pointing through a symbolic link: **rev 1 crashes (file not found), rev 2 passes 102**. The helper: a passing suite records 0; a deliberately broken one records 1 and is named in `FAILED`.
+
+**Known and left alone (existing behaviour, outside Part A):** the collector's own default `--state` folder is also taken from `URL.pathname`, and its "am I the command" test would also fail if it were started through a linked path. Neither applies to the installed runner (`~/mother-earth`, no space, no link; `run.sh` passes `--state`). Say if either should be fixed here.
 
 ## 1. Files
 
@@ -47,7 +57,7 @@ A failed line: `ships: outcome=… after=<s>s opened=<bool> confirmed=<bool> mes
 
 ## 4. Tests
 
-**New `phase1/ships-diagnostics.test.mjs`: 94 passed** (about 35 s). Child processes run the real collector file as a command under a preload that replaces the WebSocket, `dns.lookup` and `fetch`; two parts import it in-process. Any real lookup, any fetch other than the test hub's ships ingest, and any in-process socket are recorded and fail the suite.
+**New `phase1/ships-diagnostics.test.mjs`: 102 passed** (about 35 s; 94 in rev 1). Child processes run the real collector file as a command under a preload that replaces the WebSocket, `dns.lookup` and `fetch`; two parts import it in-process. Any real lookup, any fetch other than the test hub's ships ingest, and any in-process socket are recorded and fail the suite.
 - A. helpers: empty event → the fallback words; named fields only (an unnamed field and nested objects never appear); cut, cleaned, key struck out; DNS success, error, lookup that throws, no answer (2.0–2.5 s), late answer ignored.
 - B. as real processes: error before open; error with no fields; error after open; error after messages; close before confirmation with no error event; opened and never confirmed (ends at the 10 s test window); never opens (ends at 15 s). Each: exit 3, one down report with exactly its phrase, exactly one line, nothing of the detail uploaded, no key anywhere, no control character in the line.
 - C. the outer catch: a throw from the socket constructor, no key configured, no WebSocket in Node → "collector error" uploaded, cleaned reason in the local line.
