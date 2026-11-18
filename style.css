@@ -202,6 +202,11 @@ body.doc{overflow:auto}
    page 1,371 → 360 px wide, widest table 320 px). */
 .doc td,.doc th{overflow-wrap:anywhere}
 @media (max-width:720px){.doc td:first-child{white-space:normal;overflow-wrap:normal}.doc table{font-size:13px}.doc td,.doc th{padding:6px 6px}}
+/* Sources 360 px overflow (18 Nov): a file name or path in running text is one unbroken string, and with the bracket and
+   comma around it can be wider than the text column on a narrow phone (measured live at 360 px: the run
+   "(phase1/skycraft/build_moonlight.py," was 347 px in a 320 px column; page 366 px wide). Such a string may now break,
+   only where it would otherwise overflow. Nothing is clipped, hidden or resized; table cells keep their own rule above. */
+.doc p code,.doc li code{overflow-wrap:anywhere}
 .doc .fixed{color:var(--dim);font-style:italic}
 .doc .toc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;margin:8px 0 0}
 .doc .back{display:inline-block;margin-top:24px}
