@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 18 Nov 2026
 
+## 18 Nov 03:00 UTC (clock reading) — **`visibility-gap-rc` for GPT: a one-minute minimum gap between aircraft requests made on return to view; correction about Orbital** (branch only)
+- **GPT (relayed by Chad):** own small branch; minimum gap on visibility-triggered fetches; age check stays immediate.
+- **Head: see the branch** (code commit `b42cf8f`, packet `reviews/2026-11-18-visibility-gap-rc.md` rev 1), from main `ccd26e2`. `aircraft.js` `ccac7390…a8e8`, `index.html` `f2411885…6979` (`aircraft.js?v=` bumped). Counts and positions each ask the hub on return to view only if their last ask began at least 60 s ago; the age check runs every time.
+- **Correction to the 02:30 entry:** Orbital does not ask the hub on return to view. `orbRequest(true)` recomputes positions in the page's own worker from elements already loaded; the hub is asked only at switch-on and by the 30-minute timer. Orbital is not changed.
+- **Suites:** `aircraft-dots-page` 45 passed (8 new); breaks `no-gap` 4, `no-gap-counts` 2, `gap-blocks-age` 2. `aircraft-counts` 75, `bare-earth-ui` 128, `layer-switches-ui` 68, `search-ui` 117. Full browser suites not rerun.
+- **Live:** branch file on the live page in the pane, 02:55 UTC: positions on for 30 s, 1 request. The pane was displayed, so the 2 s flipping was not reproduced live.
+- **Branch deletes:** `git push --delete` is refused from the container as before; `bare-earth-rc`, `bare-search-rc`, `aircraft-dots-magenta-rc`, `aircraft-dots-rc`, `layer-switches-rc` are merged and still on GitHub, for the close-out.
+
 ## 18 Nov 02:46 UTC (clock reading) — **LIVE: Bare Earth stage A with search (merge `e5be103`) and magenta aircraft dots (merge `00844ba`)**
 - **GPT (relayed by Chad):** both branches pass review at `d5975da` and `5ff364d`; wording kept; results of a layer switched off again stay selectable. GPT ran 111 search checks and 75 aircraft checks itself; the browser suite results are Claude's.
 - **Chad's own lines:** "Approve: merge bare-search-rc d5975da into main (Bare Earth at load, Layers button and panel, search reaches switched-off layers)" and "Approve: merge aircraft-dots-magenta-rc 5ff364d into main (aircraft dots magenta #e84ab5 at 2.2 px)".
