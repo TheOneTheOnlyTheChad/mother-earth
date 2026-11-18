@@ -3,6 +3,15 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 11:55 UTC (clock reading) — **Mac regression for `ships-diagnostics-rc` `ca97634`: all four normal suites exit 0; all 19 runner breaks fail** (read-only; nothing installed)
+- **Chad ran `phase1/aircraft-mac-regression.sh` in Terminal** from `_review/ships-diagnostics-rc/phase1` (a path with a space). `results.txt` read by Claude at 11:54:55 UTC: Darwin 25.5.0, `/bin/bash` 3.2.57, Node v24.14.1; started 11:21:59 UTC, finished 11:50:37 UTC.
+- **Files under test, as hashed on the Mac:** `collector-mac.mjs` `342dfd41…de8f`, `run.sh` `f6f587ae…65ce`, `ships-diagnostics.test.mjs` `1d7389ac…c849`, `ships-diagnostics.stub.mjs` `5fddd002…2763`, `worker.js` `ad5bce33…4132`. All equal the branch head's.
+- **Normal suites:** runner suite `aircraft-schedule` 88 passed, exit 0; `aircraft-counts` 75 passed, exit 0; duration contract all passed, exit 0; **`ships-diagnostics` 102 passed, exit 0** (macOS temp folder behind `/var`, folder name with a space). `RESULT: the four normal suites all exited 0`.
+- **Runner breaks:** all 19 fail (between 1 and 31 failed checks each).
+- **Live home probe during the run:** curl exit 0, HTTP 200, valid, 15 aircraft heard: HOME.
+- **Still Claude's evidence only:** the eight `ships-diagnostics` breaks (not part of the Mac script).
+- **Next:** GPT's clearance of `ca97634`, then Chad's install Approve line. Nothing installed.
+
 ## 18 Nov 11:19 UTC (clock reading) — **`ships-diagnostics-rc` head `ca97634`: Mac harness fixes after GPT's hold** (branch only; collector file unchanged)
 - **GPT (relayed by Chad):** hashes at `4d0d7c8` matched; no blocking collector-behaviour defect; all four packet §3 differences accepted; **B/C rev 2.1 passes proposal review** (not built, not reviewed as code). Hold for three harness faults: the suite read its folder from the encoded URL path (fails in `Mother Earth`); its temp folder under `/var` made each child skip `main()` on macOS; the regression script's pipe into `tail` hid the suite's exit status. GPT ran 94 of 94 on Mac Node 24 from a canonical path without spaces, plus aircraft 75, duration contract and fallback 7.
 - **Fixed at `ca97634`** (packet rev 2, sha256 `6c517545…a7dd`): `fileURLToPath`; `fs.realpathSync` on the temp folder; a new check that every failed-run child really ran the collector (102 checks, was 94); `aircraft-mac-regression.sh` records and prints each normal suite's exit status, ends with a `RESULT:` line and exits 1 on a failure. `collector-mac.mjs` byte-identical (`342dfd41…de8f`).
