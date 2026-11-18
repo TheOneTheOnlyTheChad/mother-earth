@@ -3,6 +3,16 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 09:52 UTC (clock reading) — **LIVE: the Key counts and names aircraft, wind and Dust RGB when drawn; the first-view line is clear of the credits and the Layers button (merge `74d437b`)**
+- **GPT (relayed by Chad):** `smoke-key-hint-rc` passes code review at `7cdbbcc` (code `e71be8a`); packet and five page hashes matched; keep the 1101–1279 px addition on this branch; all four entries accepted as built. GPT ran 75 aircraft checks, 111 search checks and 28 extracted-code checks itself; the browser-suite results are Claude's.
+- **Chad's own line:** "Approve: merge smoke-key-hint-rc 7cdbbcc into main (Key counts and names aircraft, wind and Dust RGB when drawn; first-view line clear of the credits and the Layers button)".
+- **Merge `74d437b`** (no-ff, no conflict; the 21 root page files identical to `7cdbbcc`). On the merged tree before the push: `key-drawn-ui` 70, `bare-earth-ui` 190, `legend-active-ui` 548, `layer-switches-ui` 68, `search-ui` 117, `aircraft-dots-page` 45, `aircraft-counts` 75.
+- **Pushed 09:49:31 UTC. Served-hash check 09:51:33 UTC: 21 of 21 page files match main** (`no-store`, from the Mac's pane). `index.html` `3a82c7d6…79a9`, `style.css` `3922796c…2f0f`, `aircraft.js` `83c61716…aa55`, `wind.js` `749fd522…a653`, `dustrgb.js` `bd4ca6f3…9505`; `app.js` `87a302db…e411` and `layers.js` `1e65fe5d…afe6` unchanged.
+- **Live page read, 09:51–09:52 UTC** (fresh query string; stylesheet key `202612181000`): bare → "Key · 0 layers", "No layer data is drawn on the globe right now.", "Layers · none on". Aircraft counts (snapshot of 09:46 UTC, 5,744 aircraft in 443 cells) → "Key · 1 layer", "Aircraft counts per area — scale on its card". **Aircraft positions (5,744, same snapshot) → "Key · 1 layer", "Aircraft positions — plain dots — snapshot details on its card"** (this closes the packet's "positions on live data" gap). Positions → counts: the counts entry replaces it, positions off. Wind → 1 layer, its entry. All off → the sentence.
+- **Not checked live:** the first-view line's position on the released page (the pane was hidden and reported a 0 × 0 viewport; the 1024 × 768 reading at 08:29 UTC on the branch files stands); the 1101–1279 px rule; Dust RGB on the released page (read on the branch files at 08:29 UTC); real phone; screen reader.
+- **Rollback:** revert `74d437b` (own Approve line).
+- **Still open from GPT's smoke:** Sources page, 6 px of page-level overflow at 360 px (known; no branch yet).
+
 ## 18 Nov 09:30 UTC (clock reading) — **`smoke-key-hint-rc` built for GPT: the Key counts and names aircraft, wind and Dust RGB when drawn; the first-view line is clear of the credits** (branch only)
 - **Chad's go (18 Nov):** "Go: build smoke-key-hint-rc on a branch per SMOKE-KEY-HINT-PROPOSAL rev 2 (page only; no merge)."
 - **Head `7cdbbcc`** (code commit `e71be8a`; packet `reviews/2026-11-18-smoke-key-hint-rc.md` rev 1, sha256 `5b13f8f7…8146`). Page files: `index.html` `3a82c7d6…79a9`, `style.css` `3922796c…2f0f`, `aircraft.js` `83c61716…aa55`, `wind.js` `749fd522…a653`, `dustrgb.js` `bd4ca6f3…9505`; `style.css?v=202612181000` on five pages. No hub change. Nothing merged.
