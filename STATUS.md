@@ -3,6 +3,12 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 03:08 UTC (clock reading) — **Close-out of the aircraft positions + Bare Earth thread**
+- **Branches:** six merged branches deleted on the GitHub branches page in the pane (each 0 ahead of main): `aircraft-dots-rc`, `layer-switches-rc`, `bare-earth-rc`, `bare-search-rc`, `aircraft-dots-magenta-rc`, `visibility-gap-rc`. Remaining: `main`, `cape-town-station-rc`, `widths-preview-rc`.
+- **Mac:** the six `_review/` copies moved to `_to_delete/`; `_review/` keeps `cape-town-station` and `widths-preview-rc`. Whole-repo sync at the close-out commit, preserve-first.
+- **Workspace:** one checkout on `main`, clean; other worktrees removed.
+- **HANDOVER:** new "NEXT THREAD STARTS HERE" block. First job for the next thread: GPT's full smoke of the live site; the ships log read set for 07:00 UTC.
+
 
 ## 18 Nov 02:58 UTC (clock reading) — **LIVE: aircraft counts and positions ask the hub on return to view at most once a minute (merge `32d1bfc`)**
 - **GPT (relayed by Chad):** `visibility-gap-rc` `cab156e` passes; keep one minute; Orbital correction confirmed. GPT matched both hashes, ran the 75 aircraft data checks and exercised both handlers at the 60-second boundary itself.
