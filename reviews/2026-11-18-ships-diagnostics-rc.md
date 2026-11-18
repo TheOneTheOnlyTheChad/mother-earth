@@ -42,7 +42,7 @@ A failed line: `ships: outcome=… after=<s>s opened=<bool> confirmed=<bool> mes
 
 1. **A seventh ending and a sixth uploaded phrase: "no subscription confirmation within the window".** The proposal listed "connection closed before confirmation" only. Today the collector also fails when the socket opens, is never confirmed, and our own window timer closes it; calling that "closed before confirmation" would be untrue, so it has its own phrase.
 2. **"connection closed after confirmation" is logged but is not an uploaded phrase.** Today a run the far end closes after confirming is still a sample (degraded by flow). Making it a failure would change what is published, which Part A must not do. It gets the log line and keeps its sample.
-3. **Low-flow samples get the line too.** On 18 Nov about a third of Mac samples were low-flow (for example 52.6 of 60 s), so expect this line often. It adds the first interruption's times when there is one.
+3. **Low-flow samples get the line too.** Between 17 Nov 12:00 and 18 Nov 03:41 UTC, 10 of 26 Mac uploads were degraded (D1; for example 52.6 of 60 s on 18 Nov 03:09), so expect this line often. It adds the first interruption's times when there is one.
 4. **Close details that arrive during the DNS check are included** (the proposal said "what is known at that moment"). Nothing waits for them either way.
 
 ## 4. Tests
