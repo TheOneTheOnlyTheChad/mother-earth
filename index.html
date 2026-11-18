@@ -497,7 +497,7 @@
   <div id="layers-list"></div>
   <button type="button" class="lp-off" id="layers-off">Switch everything off</button>
 </div>
-<script src="app.js?v=202612161000"></script>
+<script src="app.js?v=202612181200"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612101000"></script>
@@ -659,6 +659,8 @@ function render() {
     const fresh = ME.freshness(layer);
     // buoys kept from the last good run after a failed update: not drawn at all once expired, or while that run's records are not readable and paired
     if (layer === 'drifters' && snap.last_attempt && (fresh.grade === 'unknown' || !usable('drifters'))) continue;
+    // ships kept from the last eligible sample (hub ≥ 0.6.19): its cells are drawn only while that sample's records are read and paired
+    if (layer === 'ships' && fresh.attempt && !usable('ships')) continue;
     for (const [id, cell] of Object.entries(snap.cells || {})) {
       let grade = (cell.coverage && cell.coverage.grade) || 'unknown';
       if (fresh.grade === 'unknown') grade = 'unknown';
@@ -1556,12 +1558,18 @@ function cards() {
   $('o-firms').textContent = R.firms.observed || 'no snapshot yet';
   const notYet = firmsNotYet(); if (notYet) $('s-firms').title = FIRMS_NOT_YET_COPY;
   $('m-firms').innerHTML = `NASA FIRMS · VIIRS NOAA-20 · ${esc(state.firms ? state.firms.scope || 'world' : '')} · retrieved ${ago(R.firms.retrieved)}${notYet ? ` · <b>${esc(FIRMS_NOT_YET_COPY)}</b>` : warn(R.firms.fresh)}`;
+  // Ships after a failed or overlong attempt (hub ≥ 0.6.19 keeps the last eligible sample and adds last_attempt): badge "degraded"
+  // and "Showing ships from…" only when that sample's vessels really are shown (records read and paired). If they are not, nothing
+  // of the ships is shown: badge unknown, no count, no cells — the same rule as the buoy card.
+  const shipsNote = R.ships.fresh.attempt || '', shipsShown = usable('ships'), shipsHidden = !!shipsNote && !shipsShown;
+  if (shipsHidden) { R.ships.value = null; R.ships.lastSample = null; R.ships.observed = ''; }
   setState('ships', R.ships.fresh); cardCount.ships = R.ships.value;
+  if (shipsHidden) { const e = $('s-ships'); e.textContent = 'unknown'; e.className = 'state bad'; e.title = shipsNote; }
   if (R.ships.value !== null) { $('l-ships').textContent = ''; $('v-ships').textContent = R.ships.value.toLocaleString(); }
   else { $('l-ships').textContent = R.ships.lastSample !== null ? 'Last sample:' : ''; $('v-ships').textContent = R.ships.lastSample === null ? '–' : R.ships.lastSample.toLocaleString(); }
   $('u-ships').textContent = R.ships.unit;
-  $('o-ships').textContent = R.ships.observed || (R.ships.down ? 'no sample from the latest run' : 'no sample yet');   // a down run carries no sample: nothing is claimed about one
-  $('m-ships').innerHTML = `aisstream.io${R.ships.retrievedAge ? ` · retrieved ${esc(R.ships.retrievedAge)}` : ''} · ${esc(R.ships.mode)}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.retrievedAge ? R.ships.fresh.why.replace(` (${R.ships.retrievedAge})`, '') : R.ships.fresh.why)}</b>` : ''}`;   // the age is shown once, with the retrieval label
+  $('o-ships').textContent = shipsHidden ? 'ship positions not shown' : R.ships.observed || (R.ships.down ? 'no sample from the latest run' : 'no sample yet');   // a down run carries no sample: nothing is claimed about one
+  $('m-ships').innerHTML = `aisstream.io${R.ships.retrievedAge ? ` · retrieved ${esc(R.ships.retrievedAge)}` : ''} · ${esc(R.ships.mode)}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.retrievedAge ? R.ships.fresh.why.replace(` (${R.ships.retrievedAge})`, '') : R.ships.fresh.why)}</b>` : shipsNote ? ` · <b>${esc(shipsNote)}${shipsShown ? ` Showing ships from the ${esc(ME.shipsSampleTime(state.ships))} sample.` : ''}</b>` : ''}`;   // the age is shown once, with the retrieval label
   setState('forest', R.forest.fresh); $('v-forest').textContent = R.forest.value === null ? '–' : R.forest.value.toLocaleString();
   $('o-forest').textContent = R.forest.observed || 'no sweep yet';
   $('m-forest').innerHTML = `Global Nature Watch · integrated alerts · across ${R.forest.cells} cells, ${R.forest.highest.toLocaleString()} highest-confidence · last run ${ago(R.forest.retrieved)}${R.forest.fresh.grade === 'unknown' ? ` · <b>${esc(R.forest.fresh.why)}</b>` : ''}`;

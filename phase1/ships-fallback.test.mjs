@@ -5,8 +5,13 @@ import worker from './worker.js';
 
 function makeEnv(extra = {}) {
   const store = new Map(); const runs = [];
-  const R2 = { async put(k, b) { store.set(k, String(b)); }, async delete(k) { store.delete(k); },
-    async get(k) { const b = store.get(k); return b === undefined ? null : { body: b, async json() { return JSON.parse(b); }, async text() { return b; } }; },
+  // hub 0.6.19 writes the two ships files conditionally (etag or create-only) and reads the records file's head and metadata
+  const tags = new Map(), metas = new Map(); let seq = 0; const tag = k => tags.get(k) || null;
+  const R2 = { async put(k, b, o = {}) { const c = o.onlyIf; if (c && c.etagDoesNotMatch === '*' && store.has(k)) return null; if (c && c.etagMatches && tag(k) !== c.etagMatches) return null;
+      store.set(k, String(b)); tags.set(k, 't' + (++seq) + '-' + Math.random().toString(36).slice(2)); metas.set(k, o.customMetadata || {}); return { key: k, etag: tag(k) }; },
+    async delete(k) { store.delete(k); tags.delete(k); },
+    async head(k) { if (!store.has(k)) return null; if (!tag(k)) tags.set(k, 'seed' + (++seq) + '-' + Math.random().toString(36).slice(2)); return { key: k, etag: tag(k), customMetadata: metas.get(k) || {} }; },
+    async get(k) { const b = store.get(k); if (b === undefined) return null; if (!tag(k)) tags.set(k, 'seed' + (++seq) + '-' + Math.random().toString(36).slice(2)); return { body: b, etag: tag(k), httpEtag: '"' + tag(k) + '"', async json() { return JSON.parse(b); }, async text() { return b; } }; },
     async list({ prefix } = {}) { return { objects: [...store.keys()].filter(k => !prefix || k.startsWith(prefix)).map(key => ({ key, uploaded: new Date() })), truncated: false }; } };
   const st = sql => { const x = a => ({ async run() { if (/INSERT INTO collector_runs/.test(sql)) runs.push(a); return {}; }, async first() { return null; }, async all() { return { results: [] }; } }); return { bind: (...a) => x(a), ...x([]) }; };
   return { env: { R2, DB: { prepare: st, async batch() { return []; } }, ADMIN_KEY: 'k', AISSTREAM_KEY: 'AIS-SECRET', SHIPS_FALLBACK: '1', ...extra }, store, runs };
