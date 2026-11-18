@@ -351,6 +351,17 @@ ME.FIRMS_NOT_YET = /^no detections processed yet for today \(UTC\)/;
 ME.FIRMS_NOT_YET_COPY = 'Today’s detections aren’t available yet';   // no full stop: it is used inside longer sentences
 ME.firmsNotYet = s => !!(s && s.source_status === 'down' && ME.FIRMS_NOT_YET.test(s.note || ''));
 ME.downWhy = (layer, s) => layer === 'firms' && ME.firmsNotYet(s) ? ME.FIRMS_NOT_YET_COPY : 'collector reported down: ' + ((s && s.note) || '');
+// Ships (hub >= 0.6.19): the hub keeps the last eligible sample when the latest attempt failed or ran past its window, and records
+// that attempt beside it (last_attempt). One sentence says so, for every surface. The sample's own time is never the attempt's:
+// elapsed and window come from the attempt, the "sample that ended" time from the retained sample. '' when there is none to report.
+ME.shipsAttempt = function (s) {
+  const la = s && s.last_attempt;
+  if (!la || typeof la.run !== 'string' || !Number.isFinite(Date.parse(la.run)) || s.source_status === 'down' || !Number.isFinite(Date.parse(s.retrieved_at))) return '';
+  if (la.reason === 'sample_overlong') return Number.isFinite(la.elapsed_s) && Number.isFinite(la.window_s) ? `Latest sample ran ${secs(la.elapsed_s)} against a ${secs(la.window_s)} window and is not shown.` : 'Latest sample ran past its window and is not shown.';
+  const cross = la.run.slice(0, 10) !== String(s.retrieved_at).slice(0, 10);
+  return `Latest sample failed at ${hhmm(la.run)}${cross ? ', ' + ME.dayMonth(la.run) : ''}.`;
+};
+ME.shipsSampleTime = s => { const t = (s && (s.window_end || s.retrieved_at)) || '', la = s && s.last_attempt, cross = la && typeof la.run === 'string' && la.run.slice(0, 10) !== String(t).slice(0, 10); return hhmm(t) + (cross ? ', ' + ME.dayMonth(t) : ''); };
 ME.freshness = function (layer) {
   const snap = state[layer];
   if (!snap) return { grade: 'unknown', why: 'no snapshot from the hub' };
@@ -361,6 +372,8 @@ ME.freshness = function (layer) {
   if (ageS > (snap.stale_after_s || 900)) return { grade: 'unknown', why: layer === 'ships' ? `last sample is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)}); current positions unknown` : `last snapshot is over ${dur(snap.stale_after_s || 900)} old (${ago(snap.retrieved_at)})` };
   // FIRMS (brief §5): an empty response is not a validated zero. day_range=1 = today (UTC): the file empties at 00:00 UTC and refills ~2–3 h behind.
   if (layer === 'firms' && ME.total(snap) === 0 && (snap.raw_bytes || 0) < 1000) return { grade: 'unknown', why: new Date().getUTCHours() < 4 ? `no detections processed yet for today (UTC) — FIRMS resets at 00:00 UTC, NRT runs ~2–3 h behind` : `source returned an empty file (${snap.raw_bytes || 0} bytes) — not a validated zero` };
+  // a retained ships sample with a later failed or overlong attempt beside it: degraded, and the reason names both times
+  if (layer === 'ships') { const a = ME.shipsAttempt(snap); if (a) return { grade: 'partial', attempt: a, why: `${a} The sample in use ended ${ME.shipsSampleTime(snap)}` + (snap.source_status === 'degraded' ? '; ' + ME.degradedWhy(layer, snap) : '') }; }
   if (layer === 'forest' && !(snap.sweep && snap.sweep.answered)) return { grade: 'unknown', why: 'no cell has answered yet — the sweep has not started' };
   if (layer === 'forest') return { grade: 'partial', sweeping: snap.sweep.answered < snap.sweep.cells_total, why: `${snap.sweep.answered < snap.sweep.cells_total ? 'first sweep in progress: ' : 'coverage partial by design: '}${snap.sweep.answered} of ${snap.sweep.cells_total} cells answered; oldest query ${ago(snap.sweep.oldest_queried_at)}; last run ${ago(snap.retrieved_at)}` };   // partial by design in phase 1 (REGISTER: no per-cell observation-opportunity record)
   // the card and the report already print the observation and retrieval times; this reason must not repeat them (review round 5)
@@ -496,7 +509,7 @@ ME.report = function (R) {
   const st = (r, k) => `${ME.stateWord(r.fresh, k)[0]} — ${r.fresh.why}`;
   parts.push(R.usgs.value !== null ? `${R.usgs.value.toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS; ${R.usgs.observed}; retrieved ${ago(R.usgs.retrieved)})` : `earthquakes: unknown — ${R.usgs.fresh.why}`);
   parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections so far today, UTC (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'marked degraded by our collector; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
-  parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
+  parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)${R.ships.fresh.attempt ? ' — ' + R.ships.fresh.attempt.replace(/\.$/, '').replace(/^Latest/, 'latest') : ''}` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
   parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels published in the last 7 days across ${R.forest.cells} queried cells (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; sweep ${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells; 10 m pixels, not hectares; detection date ≠ clearing date; not for area or trend)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
   parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value}, ${ME.kpWhen(R.swpc.observedAt)} (NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; marked degraded by our collector' : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa${R.co2.date ? ` on ${R.co2.date}` : ' (date not supplied)'} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
@@ -849,10 +862,12 @@ ME.placeRows = function (P, nowMs = Date.now()) {
     const list = objs.map(o => `<li>${esc(ME.placeRecordLine(l, o))}</li>`).join('');
     const more = s.records_total > objs.length ? `<li class="q">${s.records_total - objs.length} more in this cell, not listed</li>` : '';
     // buoys kept from the last good run after a failed update (hub ≥ 0.6.8): said only here, where the section really lists that run's records
+    const sa = l === 'ships' ? ME.shipsAttempt(s) : '';   // ships kept from the last eligible sample (hub ≥ 0.6.19): said here, where that sample's records are listed
     const la = l === 'drifters' && s.last_attempt && s.last_attempt.failed_at && s.retrieved_at ? s.last_attempt : null;
     const lcross = la && la.failed_at.slice(0, 10) !== s.retrieved_at.slice(0, 10);
+    const sbk = sa ? ` <span class="q">· <b>${esc(sa.replace(/\.$/, '').replace(/^Latest/, 'latest'))}</b>; from the sample retrieved at ${esc(hhmm(s.retrieved_at))}${s.last_attempt.run.slice(0, 10) !== s.retrieved_at.slice(0, 10) ? ', ' + esc(ME.dayMonth(s.retrieved_at)) : ''}</span>` : '';
     const fbk = la ? ` <span class="q">· <b>latest update failed at ${esc(hhmm(la.failed_at))}${lcross ? ', ' + esc(ME.dayMonth(la.failed_at)) : ''}</b>; from the ${esc(hhmm(s.retrieved_at))} run${lcross ? ', ' + esc(ME.dayMonth(s.retrieved_at)) : ''}</span>` : '';
-    rows.push([name, `${head}${cov ? ` <span class="q">· coverage ${esc(cov.grade || MISSING)}</span>` : ''}${meta}${fbk}<ul class="plist">${list}${more}</ul>`]);
+    rows.push([name, `${head}${cov ? ` <span class="q">· coverage ${esc(cov.grade || MISSING)}</span>` : ''}${meta}${fbk}${sbk}<ul class="plist">${list}${more}</ul>`]);
   }
   const C = P.collection;
   if (C) for (const l of ['usgs', 'firms', 'ships']) { const x = C[l]; if (!x) continue; const a = x.collection_ran, b = x.records_reached_us_here;

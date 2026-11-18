@@ -73,7 +73,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.18';
+const COLLECTOR_VERSION = '0.6.19';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -1966,6 +1966,122 @@ async function aisListen(env, windowS) {
   const socketS = (end - connectedAt) / 1000;
   return { rows: [...vessels.values()], messages, parseErrors, handlerErrors, confirmed, socketS, gapS, wallS: (end - t0) / 1000, closeInfo, sourceError, noSourceTime, olderIgnored, upgradeStatus: r.status };
 }
+/* ---- SHIPS PUBLICATION RULE (0.6.19, 18 Nov 2026; docs/concepts/SHIPS-DIAGNOSTICS-PROPOSAL.md rev 2.1, Parts B and C) ----------
+ * One rule for both writers (the Mac's upload through /ingest/ships and the hub's own fallback sample):
+ *  - ELIGIBLE sample: status ok or degraded, and NOT overlong. An ordinary low-flow sample is eligible. An overlong sample never is.
+ *    A down attempt is not a sample.
+ *  - RETAINED sample: the last eligible sample published. latest/ships.json (records) and latest-cells/ships.json (counts) keep it
+ *    exactly as published: its cells, records, retrieved_at, window and run time. An attempt never renews its three-hour life:
+ *    everything that judges freshness (the page, /place, the fallback's "is the Mac stale" test) reads the sample's own retrieved_at.
+ *  - An INELIGIBLE attempt (a failure, or an overlong sample) never becomes latest. It is archived and logged with its true
+ *    status, and the counts file gains last_attempt { run, at, status, reason, [elapsed_s, window_s], collected_by, consecutive }.
+ *    It never writes the records file.
+ *  - Nothing eligible to retain, or the retained sample is three hours old or more: the counts file becomes a down-shaped
+ *    envelope with a fixed phrase (and the same last_attempt). An expired sample is not brought back by a later attempt.
+ *  - ORDER is by RUN time (scheduled_for), never by arrival. With S retained and L the recorded last_attempt:
+ *      an ineligible attempt is applied only if it is later than S and later than L (else archived and logged only);
+ *      an eligible sample later than S and later than L replaces S and the attempt note goes;
+ *      an eligible sample later than S but older than L becomes the retained sample and L is KEPT (consecutive set to 1);
+ *      an eligible sample older than the published one is archived only.
+ *  - RECORDS AND COUNTS: both writes are conditional on what was read (etag, or create-only). Records first, then counts.
+ *    A writer that loses re-reads once and applies the same rule; if it loses again it stops, logs publish_conflict and changes
+ *    nothing more. A writer interrupted between its two writes leaves records newer than counts: every reader checks that both
+ *    name the same run and withholds records until they do; the next ships write of any kind completes that sample's counts.
+ *  - PUBLIC TEXT is a fixed phrase. The raw note stays in collector_runs and the dated per-run object (no public route). */
+const SHIPS_PUB = { rec: 'latest/ships.json', cells: 'latest-cells/ships.json' };
+const SHIPS_COLLECTOR_PHRASES = ['websocket error before connection', 'websocket error after connection', 'connection closed before confirmation', 'no subscription confirmation within the window', 'connect timeout (15 s)', 'collector error'];   // collector mac-0.3.5's own fixed phrases
+const SHIPS_PHRASE = { collector: 'collector reported a failure', fallback: 'cloud fallback failed', overlong: 'latest sample ran past its window and is not shown' };
+const shipsEligible = e => !!(e && typeof e === 'object' && (e.source_status === 'ok' || e.source_status === 'degraded') && e.overlong_sample !== true && e.cells && e.retrieved_at && e.scheduled_for);
+const shipsCellsOnly = e => { const c = { ...e, records: undefined, record_fields: undefined, record_format: undefined }; delete c.last_attempt; return c; };
+const shipsExpired = (e, nowMs) => !((nowMs - Date.parse(e.retrieved_at)) / 1000 < (e.stale_after_s || STALE_AFTER_S.ships));
+/** The counts file for eligible sample E, given the attempt note L already recorded: L stays only if it is LATER than E. */
+const shipsCellsFor = (E, L) => ({ ...shipsCellsOnly(E), ...(L && L.run && L.run > E.scheduled_for ? { last_attempt: { ...L, consecutive: 1 } } : {}) });
+const shipsCondPut = async (env, key, body, etag, meta) => !!(await env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, ...(meta ? { customMetadata: meta } : {}), onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } }));
+async function shipsReadCells(env) {
+  const o = await env.R2.get(SHIPS_PUB.cells); if (!o) return { etag: null, cur: null };
+  let cur = null; try { cur = JSON.parse(await o.text()); } catch (_) { cur = null; }
+  return { etag: o.etag, cur: cur && typeof cur === 'object' ? cur : null };
+}
+/** What the records file is, without reading its body when it carries our metadata (a file written before 0.6.19 is read once). */
+async function shipsRecHead(env) {
+  const h = await env.R2.head(SHIPS_PUB.rec); if (!h) return { etag: null, absent: true };
+  const m = h.customMetadata || {};
+  if (m.run && m.retrieved_at) return { etag: h.etag, run: m.run, retrieved_at: m.retrieved_at, eligible: m.eligible === '1' };
+  let j = null; try { j = await getJson(env, SHIPS_PUB.rec); } catch (_) { j = null; }
+  return { etag: h.etag, run: (j && (j.scheduled_for || j.retrieved_at)) || '', retrieved_at: (j && j.retrieved_at) || '', eligible: shipsEligible(j) };
+}
+const shipsStamp = async (env, scheduledMs, e, full) => {   // the dated per-run objects: the archive and the hourly aggregation read these; no public route serves them
+  const stamp = isoMinute(scheduledMs); let bytes = 0;
+  if (full) bytes = await putJson(env, `snapshots/ships/${stamp}.json`, e, { retrieved_at: String(e.retrieved_at) });
+  await putJson(env, `cells/ships/${stamp}.json`, { ...e, records: undefined, record_fields: undefined, record_format: undefined });
+  return bytes;
+};
+/** An eligible sample: records first, then counts, both conditional. Returns { published, bytes }. */
+async function shipsPublishEligible(env, scheduledMs, e) {
+  if (!shipsEligible(e)) return { published: 'refused: not an eligible sample', bytes: 0, conflict: true };   // callers route failures and overlong samples elsewhere; this is the second lock
+  const bytes = await shipsStamp(env, scheduledMs, e, true), run = e.scheduled_for;
+  const meta = { run, retrieved_at: String(e.retrieved_at), eligible: '1' };
+  try {
+    for (let round = 0; round < 2; round++) {
+      const rec = await shipsRecHead(env);
+      const mine = !rec.absent && rec.retrieved_at === e.retrieved_at && rec.run === run;
+      if (!rec.absent && !mine && rec.run && rec.run >= run) return { published: 'archive only (older than latest)', bytes, latest_run: rec.run };
+      if (!mine && !(await shipsCondPut(env, SHIPS_PUB.rec, e, rec.absent ? null : rec.etag, meta))) continue;   // lost the records write: read again
+      for (let t = 0; t < 2; t++) {
+        const c = await shipsReadCells(env), S = shipsEligible(c.cur) ? c.cur : null;
+        if (S && S.scheduled_for > run) return { published: 'archive only (older than latest)', bytes, latest_run: S.scheduled_for };   // a newer sample was published meanwhile (it also replaced our records)
+        if (S && S.scheduled_for === run && S.retrieved_at === e.retrieved_at) return { published: 'latest', bytes };
+        if (await shipsCondPut(env, SHIPS_PUB.cells, shipsCellsFor(e, c.cur && c.cur.last_attempt), c.etag)) return { published: 'latest', bytes };
+      }
+      return { published: 'publish_conflict (records written, counts contended; records are withheld by readers until the next ships write)', bytes, conflict: true };
+    }
+    return { published: 'publish_conflict (records contended; nothing changed)', bytes, conflict: true };
+  } catch (err) { console.log('shipsPublishEligible failed', String(err).slice(0, 160)); return { published: 'publish_error', bytes, conflict: true }; }
+}
+/** An ineligible attempt (a failure, or an overlong sample): one conditional write of the counts file, after completing an
+ *  interrupted sample's counts if the records file is ahead of them. a = { status, reason, note, elapsed_s?, window_s?, collected_by }. */
+async function shipsRecordAttempt(env, scheduledMs, a) {
+  const run = new Date(scheduledMs).toISOString(), at = nowIso();   // "at" is captured once, on entry
+  try {
+    let repaired = false;
+    for (let round = 0; round < 2; round++) {
+      const c = await shipsReadCells(env), cur = c.cur;
+      if (!repaired) {   // an interrupted writer left records newer than counts: finish its sample first, then apply this attempt to the result
+        repaired = true;
+        const rec = await shipsRecHead(env);
+        if (!rec.absent && rec.eligible && rec.retrieved_at && (!cur || rec.retrieved_at !== cur.retrieved_at) && rec.run > ((cur && cur.scheduled_for) || '')) {
+          const E = await getJson(env, SHIPS_PUB.rec);
+          if (shipsEligible(E) && E.retrieved_at === rec.retrieved_at) { await shipsCondPut(env, SHIPS_PUB.cells, shipsCellsFor(E, cur && cur.last_attempt), c.etag); round--; continue; }
+        }
+      }
+      const S = shipsEligible(cur) ? cur : null, L = cur && cur.last_attempt;
+      const stored = [cur && cur.scheduled_for, L && L.run].filter(Boolean).sort().pop();
+      if (stored && stored >= run) return 'left: not later than what is published';
+      const la = { run, at, status: a.status, reason: a.reason, ...(Number.isFinite(a.elapsed_s) ? { elapsed_s: a.elapsed_s } : {}), ...(Number.isFinite(a.window_s) ? { window_s: a.window_s } : {}),
+        collected_by: a.collected_by || null, consecutive: ((L && L.consecutive) || 0) + 1 };
+      const keep = !!(S && !shipsExpired(S, Date.now()));
+      const body = keep ? { ...S, last_attempt: la }
+        : { ...envelope('ships', scheduledMs, null, null, 'down', {}, [], [], { note: a.note, reason: a.reason }), records: undefined, last_attempt: la };
+      if (await shipsCondPut(env, SHIPS_PUB.cells, body, c.etag)) return keep ? 'kept last sample' : 'down envelope';
+    }
+    console.log('shipsRecordAttempt: counts changed twice while writing; left alone');
+    return 'left: publish_conflict';
+  } catch (err) { console.log('shipsRecordAttempt failed', String(err).slice(0, 160)); return 'left: write failed'; }
+}
+/** A failed ships attempt from either writer: logged and archived with the raw note, published as a fixed phrase. */
+async function shipsFailed(env, scheduledMs, rawNote, phrase, collectedBy, http) {
+  await logRun(env, 'ships', scheduledMs, 'down', http || 0, 0, 0, rawNote);
+  try { await shipsStamp(env, scheduledMs, { ...envelope('ships', scheduledMs, null, null, 'down', {}, [], [], { note: rawNote }) }, false); } catch (err) { console.log('shipsFailed per-run record failed', String(err).slice(0, 120)); }
+  return shipsRecordAttempt(env, scheduledMs, { status: 'down', reason: phrase, note: phrase, collected_by: collectedBy });
+}
+/** An overlong sample from either writer: archived whole and logged with its own status; never published as current. */
+async function shipsOverlong(env, scheduledMs, e, logNote) {
+  const bytes = await shipsStamp(env, scheduledMs, e, true);
+  await logRun(env, 'ships', scheduledMs, e.source_status, 200, e.records.length, bytes, logNote);
+  const outcome = await shipsRecordAttempt(env, scheduledMs, { status: e.source_status, reason: 'sample_overlong', note: SHIPS_PHRASE.overlong, elapsed_s: e.elapsed_wall_s, window_s: e.window_s, collected_by: e.collected_by || e.ingested_from || null });
+  return { outcome, bytes };
+}
+
 async function collectShipsFallback(env, scheduledMs) {
   if (env.SHIPS_FALLBACK !== '1') return 'ships-fallback:off (SHIPS_FALLBACK unset)';
   if (!env.AISSTREAM_KEY) return 'ships-fallback:off (AISSTREAM_KEY unset)';
@@ -1978,9 +2094,9 @@ async function collectShipsFallback(env, scheduledMs) {
   const layer = 'ships';
   let L;
   try { L = await aisListen(env, SF.windowS); }
-  catch (e) { await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'down', reason: String(e).slice(0, 160) }); await writeDown(env, layer, scheduledMs, 'cloud fallback: ' + String(e).slice(0, 160), 0); return 'ships-fallback:down'; }
+  catch (e) { await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'down', reason: String(e).slice(0, 160) }); await shipsFailed(env, scheduledMs, 'cloud fallback: ' + String(e).slice(0, 160), SHIPS_PHRASE.fallback, 'cloud hub (fallback)', 0); return 'ships-fallback:down'; }
   const flowingS = Math.max(0, L.socketS - L.gapS), upFrac = Math.max(0, Math.min(1, flowingS / SF.windowS));
-  if (!L.confirmed || !L.messages) { await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'down', reason: L.sourceError || 'no messages', close: L.closeInfo }); await writeDown(env, layer, scheduledMs, 'cloud fallback: ' + (L.sourceError || 'no subscription confirmation or no messages'), L.upgradeStatus); return 'ships-fallback:down'; }
+  if (!L.confirmed || !L.messages) { await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status: 'down', reason: L.sourceError || 'no messages', close: L.closeInfo }); await shipsFailed(env, scheduledMs, 'cloud fallback: ' + (L.sourceError || 'no subscription confirmation or no messages'), SHIPS_PHRASE.fallback, 'cloud hub (fallback)', L.upgradeStatus); return 'ships-fallback:down'; }
   const overlong = L.wallS > 1.25 * SF.windowS;
   const status = upFrac >= 0.9 && !overlong ? 'ok' : 'degraded';
   const statusReason = shipsReason(L.wallS, upFrac, SF.windowS, overlong);
@@ -1999,16 +2115,17 @@ async function collectShipsFallback(env, scheduledMs) {
     sampling: 'cloud fallback: one 60 s sample when no home sample has arrived for 40 min; at most one attempt per 25 min',
     stale_after_s: 3 * 3600, citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' });
   e.received_at = nowIso(); e.ingested_from = 'hub ' + COLLECTOR_VERSION;
-  const cur = await getJson(env, 'latest/ships.json');
-  let bytes, published = true;
-  if (cur && cur.retrieved_at && Date.parse(cur.retrieved_at) > Date.parse(e.retrieved_at)) {   // a Mac sample landed meanwhile: it wins
-    const stamp = isoMinute(scheduledMs); published = false;
-    bytes = await putJson(env, `snapshots/${layer}/${stamp}.json`, e);
-    await putJson(env, `cells/${layer}/${stamp}.json`, { ...e, records: undefined, record_fields: undefined, record_format: undefined });
-  } else bytes = await writeSnapshot(env, layer, scheduledMs, e);
-  await logRun(env, layer, scheduledMs, status, 200, L.rows.length, bytes, `cloud fallback${published ? '' : ' (archive only: newer home sample)'} messages=${L.messages} vessels=${L.rows.length} flowing=${flowingS.toFixed(1)}s`);
+  // 0.6.19: the one ships publication rule (above). An overlong fallback sample is archived and recorded as an attempt; an
+  // eligible one is published unless a newer sample (the Mac's) is already there.
+  let bytes, published = true, how = '';
+  if (overlong) { const o = await shipsOverlong(env, scheduledMs, e, `cloud fallback (not published: overlong sample) messages=${L.messages} vessels=${L.rows.length} flowing=${flowingS.toFixed(1)}s`); bytes = o.bytes; published = false; how = ', not published: overlong'; }
+  else {
+    const r = await shipsPublishEligible(env, scheduledMs, e); bytes = r.bytes; published = r.published === 'latest';
+    how = published ? '' : r.conflict ? ', ' + r.published.split(' (')[0] : ', archive only';
+    await logRun(env, layer, scheduledMs, status, 200, L.rows.length, bytes, `cloud fallback${published ? '' : r.conflict ? ' (' + r.published.split(' (')[0] + ')' : ' (archive only: newer home sample)'} messages=${L.messages} vessels=${L.rows.length} flowing=${flowingS.toFixed(1)}s`);
+  }
   await putJson(env, SF.stateKey, { started_at: new Date(now).toISOString(), status, published, vessels: L.rows.length, messages: L.messages });
-  return `ships-fallback:${status} (${L.rows.length} vessels${published ? '' : ', archive only'})`;
+  return `ships-fallback:${status} (${L.rows.length} vessels${how})`;
 }
 
 // ---------------------------------------------------------------- CelesTrak GP — satellites (MODEL tier: element sets for propagation, not observations)
@@ -2253,6 +2370,7 @@ function orbBuild(text, statusMap, previousRows) {
   if (previousRows && rows < previousRows * ORB.minFractionOfPrevious) problems.push(`only ${rows} rows vs previous valid ${previousRows} (floor ${Math.round(ORB.minFractionOfPrevious * 100)} %)`);
   return { ok: problems.length === 0, rows, counts, problems, csv: problems.length ? null : out.join('\n') + '\n' };
 }
+export { SHIPS_PUB, SHIPS_PHRASE, SHIPS_COLLECTOR_PHRASES, shipsEligible, shipsCellsFor, shipsPublishEligible, shipsRecordAttempt };
 export { AIRCRAFT_LAYER, AIRCRAFT_FIELDS, AIRCRAFT_MAX_AGE_S, AIRCRAFT_TEXT, aircraftFieldsOk, aircraftRowOk, aircraftProject, aircraftDownNote, aircraftRoute, validateEnvelope, writeSnapshot };
 export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
@@ -2844,9 +2962,9 @@ async function placeSection(env, layer, id) {
   }
   // 0.6.8 buoys: counts kept from the last good run after a failed update (last_attempt). Judged on the FINAL counts envelope,
   // after the pairing re-read above. Past the layer's own limit the fallback is withheld here, so no page can keep listing it.
-  const la = layer === 'drifters' && cells.last_attempt ? cells.last_attempt : null;
-  if (la && (Date.now() - Date.parse(cells.retrieved_at)) / 1000 > (cells.stale_after_s || STALE_AFTER_S.drifters)) {
-    return { ...base, state: 'withheld', why: `the latest update failed and the last successful update is over ${Math.round((cells.stale_after_s || STALE_AFTER_S.drifters) / 3600)} h old`, last_attempt: la, cell: null, records_run_ref: runRef(layer, rec.retrieved_at) };
+  const la = (layer === 'drifters' || layer === 'ships') && cells.last_attempt ? cells.last_attempt : null;   // 0.6.19: ships keeps its last eligible sample the same way
+  if (la && (Date.now() - Date.parse(cells.retrieved_at)) / 1000 > (cells.stale_after_s || STALE_AFTER_S[layer])) {
+    return { ...base, state: 'withheld', why: `the latest ${layer === 'ships' ? 'sample was not usable and the last usable sample' : 'update failed and the last successful update'} is over ${Math.round((cells.stale_after_s || STALE_AFTER_S[layer]) / 3600)} h old`, last_attempt: la, cell: null, records_run_ref: runRef(layer, rec.retrieved_at) };
   }
   const recs = rec.byCell[id] || [];
   const iT = rec.fields.indexOf('observed_at') >= 0 ? rec.fields.indexOf('observed_at') : rec.fields.indexOf('sampled_on');
@@ -4057,6 +4175,21 @@ async function ingest(req, env, layer) {
   e.received_at = nowIso();                                          // third timestamp: observed (window_end) / retrieved_at / received_at
   e.ingested_from = layer === AIRCRAFT_LAYER ? aircraftProject({ ingested_from: req.headers.get('User-Agent') || '' }, false).ingested_from : (req.headers.get('User-Agent') || '').slice(0, 120);
   e.stale_after_s = e.stale_after_s || STALE_AFTER_S[layer] || 900;
+  if (layer === 'ships') {   // 0.6.19: ships has its own publication rule (SHIPS PUBLICATION RULE): a failure or an overlong sample never replaces the last eligible sample
+    const stamp = isoMinute(scheduledMs), H = { 'Cache-Control': 'no-store' };
+    if (e.source_status === 'down') {
+      const raw = String(e.note || ''), phrase = SHIPS_COLLECTOR_PHRASES.includes(raw) ? raw : SHIPS_PHRASE.collector;
+      const outcome = await shipsFailed(env, scheduledMs, 'ingested down: ' + raw, phrase, e.ingested_from, 0);
+      return json({ ok: true, layer, published: outcome === 'kept last sample' ? 'failure recorded; last sample kept' : outcome === 'down envelope' ? 'cells only (down)' : outcome, snapshot: stamp }, 200, H);
+    }
+    if (e.overlong_sample === true) {
+      const o = await shipsOverlong(env, scheduledMs, e, 'ingested (not published: overlong sample) from ' + e.ingested_from + ' v' + e.collector_version);
+      return json({ ok: true, layer, snapshot: stamp, records: e.records.length, cells: Object.keys(e.cells).length, bytes: o.bytes, published: 'not published: overlong sample' + (o.outcome === 'kept last sample' ? '; last sample kept' : o.outcome === 'down envelope' ? '; nothing to keep' : '; ' + o.outcome) }, 200, H);
+    }
+    const r = await shipsPublishEligible(env, scheduledMs, e);
+    await logRun(env, layer, scheduledMs, e.source_status, 200, e.records.length, r.bytes, (r.published === 'latest' ? 'ingested from ' : 'ingested (' + r.published.split(' (')[0] + (r.latest_run ? ': older than latest ' + r.latest_run : '') + ') from ') + e.ingested_from + ' v' + e.collector_version);
+    return json({ ok: true, layer, snapshot: stamp, records: e.records.length, cells: Object.keys(e.cells).length, bytes: r.bytes, ...(r.published === 'latest' ? {} : { published: r.published }) }, 200, H);
+  }
   if (e.source_status === 'down') {
     await writeDown(env, layer, scheduledMs, 'ingested down: ' + (layer === AIRCRAFT_LAYER ? e.note : (e.note || '')), 0);
     return json({ ok: true, layer, published: 'cells only (down)', snapshot: isoMinute(scheduledMs) }, 200, { 'Cache-Control': 'no-store' });
