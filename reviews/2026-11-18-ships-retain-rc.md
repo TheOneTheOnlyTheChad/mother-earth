@@ -1,6 +1,6 @@
 # Review packet: `ships-retain-rc` — one publication rule for ships (hub 0.6.19 and the page)
 
-Rev 1, 18 Nov 2026. Branch `ships-retain-rc` (from main `bc462f7`), code commit `1989b17`. **Nothing deployed, nothing merged.**
+Rev 1, 18 Nov 2026. Branch `ships-retain-rc` (from main `91f0cbb`; main has since moved to `bc462f7` with `STATUS.md` entries only), code commit `1989b17`. **Nothing deployed, nothing merged.**
 Proposal: `docs/concepts/SHIPS-DIAGNOSTICS-PROPOSAL.md` rev 2.1, Parts B and C (on main; passed by GPT as a proposal). Chad's go, 18 Nov: "Go: build Parts B and C of SHIPS-DIAGNOSTICS-PROPOSAL rev 2.1 together on a new branch (hub and page; no deploy, no merge). Send GPT the candidate and review packet."
 
 ## 1. Files
@@ -100,7 +100,7 @@ The first version of `overlong-publishes` passed (it weakened only `shipsEligibl
 **Page breaks (8), each fails:** `no-attempt` 15, `n-from-sample` 2, `time-from-attempt` 6, `no-pair-check` 1, `draw-unpaired-cells` 1, `attempt-when-down` 1, `attempt-renews-life` 1, `report-silent` 3. `attempt-when-down` first passed (nothing checked the helper for a down file); a check was added and it now fails.
 
 ## 4a. Regression
-Every suite in `phase1/` on the branch tree, 12:5x–13:54 UTC, in the workspace (hub suites in Node, page suites in Chromium): **79 suites run (36 hub and collector, 43 page).**
+Every suite in `phase1/` on the branch tree, 12:54–13:54 UTC, in the workspace (hub suites in Node, page suites in Chromium): **79 suites run (36 hub and collector, 43 page).**
 - **76 passed outright.**
 - `sunface-hub`: 170 passed, 1 failed on the first run: it pins the hub's User-Agent version. Pin moved to 0.6.19; rerun **171 passed**. That change is in the commit.
 - `smoke-fixes`: 51 passed, 1 failed, "Sources 360: no page-level horizontal overflow". Fails the same way on main (the Sources fix that is queued next).
