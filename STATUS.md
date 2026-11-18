@@ -3,6 +3,13 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 07:02 UTC (clock reading) — **New thread: two additions to the 07:01 ships read; smoke-fix proposal on a branch**
+- **Both threads' scheduled reads fired** (the old thread's at 07:00:13 UTC, this thread's at 07:00:40 UTC). The entry below is the record; this thread's read of the same D1 rows agrees with it and its Mac attempt at 07:00 UTC also failed ("not connected").
+- **Addition 1, hub side of the 14:52 run:** `ingest()` in `phase1/worker.js` withholds only `source_status: 'down'`. A degraded upload takes the same `writeSnapshot` path as an ok one, so the hub made the 700-record sample the latest. Nothing at the hub reads `overlong_sample`.
+- **Addition 2, a Mac failure after a good fallback:** a Mac `down` upload calls `writeDown` whatever is already published. The 16:32:06 Mac failure was written 16 minutes after the hub's good 16:15:40 fallback sample (3,232 vessels); the next good sample was the 17:00:40 fallback. What the page showed from 16:32 to 17:00 UTC was not checked. This is separate from the question of the fallback causing Mac failures, which the rows do not support.
+- **GPT's smoke of the live site (03:11–03:21 UTC, relayed by Chad):** no blocking failure; two presentation faults (first-view line over the credits at 721–1100 px; the Key says nothing is drawn and counts 0 layers while aircraft, wind or Dust RGB are drawn). Proposal: branch `smoke-key-hint-rc` `4a61152`, `docs/concepts/SMOKE-KEY-HINT-PROPOSAL.md` (sha256 `5e70309b…3a0b`), Mac copy in `_review/smoke-key-hint-rc/` (hash matched 03:28:20 UTC). Awaiting GPT. No page file changed.
+- **Mac copy of this STATUS not synced** (Mac not connected).
+
 ## 18 Nov 07:01 UTC (clock reading) — **Scheduled ships and wind read (read-only): done from D1 only; the Mac was not reachable, so the collector log and the published payload were not read**
 - **Reach:** the scheduled read fired 07:00:13 UTC. Two attempts to reach the Mac failed ("device not connected"), and the browser pane tools were not available to this session. Read: D1 `collector_runs` through the Cloudflare connector, and the code on main. **Not read:** `~/mother-earth/logs/collector.log`; the stored ships payload for the 17 Nov 14:52 UTC run (R2 `snapshots/ships/`, kept two days, so until about 19 Nov 14:52 UTC).
 - **The 17 Nov 14:52 UTC ships run was not recorded as normal.** D1: `started_at 2026-11-17T14:52:33.872Z, status degraded, http 200, records 700, "ingested from mother-earth-mac-0.3.3"`. The collector's own log line (read 17 Nov) also said `status=degraded`.
