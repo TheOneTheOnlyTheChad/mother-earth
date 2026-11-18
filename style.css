@@ -727,6 +727,10 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
   .bare-hint{top:auto;bottom:64px}
 }
 @media (max-width:720px){
-  .bare-hint{bottom:auto;top:118px;white-space:normal;max-width:calc(100% - 24px)}
+  /* phone: the line sits below the globe, in the strip the persistent notes use once layers are on (the two are never
+     shown together), and carries no button of its own — the Layers button above is the single way in */
+  .bare-hint{top:auto;bottom:calc(52% + 8px);padding:6px 10px;font-size:12px;max-width:calc(100% - 24px)}
+  .stage:has(.sheet.collapsed) .bare-hint{bottom:56px}
+  .bare-hint .bh-b{display:none}
   .layers-panel{top:auto;bottom:0;left:0;width:100%;max-height:70vh;border-left:0;border-right:0;border-bottom:0}
 }
