@@ -15,6 +15,8 @@
  *   · 1 upload failed (envelope kept as the single pending file, 2 h expiry, 5 MB cap) · 2 usage/config error · 4 nothing pending (retry mode)
  * Bounded storage: nothing is archived locally — messages are processed in memory and only the finished envelope leaves the machine.
  *   The only files: <state>/pending.json (≤ 1 envelope) and whatever the runner logs. No credentials or vessel payloads are ever logged.
+ * Ships diagnostics (mac-0.3.5): a ships run that does not end as an ok sample writes one extra log line saying how it ended; a failed
+ *   run uploads a fixed phrase, never the error text. See SHIPS DIAGNOSTICS below. Sampling, timing and cadence are unchanged.
  * Interruptions: message gaps > 10 s inside a sample are recorded and subtracted from connected time. A sample whose ELAPSED time ran past
  *   the overlong threshold is marked degraded and never counted as observed — on elapsed time alone, with no cause inferred. The
  *   wall-minus-monotonic sleep detector was retired 2 Nov 2026 (it cannot see host suspend on this hardware). See the duration contract below.
@@ -25,7 +27,7 @@
  * not covered, so a silent cell is not an empty cell (coverage stays 'partial' until receipt history exists — same rule as OpenSky, D9).
  */
 
-const COLLECTOR_VERSION = 'mac-0.3.4';
+const COLLECTOR_VERSION = 'mac-0.3.5';
 const SCHEMA_VERSION = 1;
 const CELL_DEG = 4;
 const HUB = process.env.HUB || 'https://mother-earth.chadoberholzer.workers.dev';
@@ -37,6 +39,7 @@ const flag = (name, dflt) => { const f = flags.find(x => x.startsWith('--' + nam
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import dns from 'node:dns';
 const STATE_DIR = flag('state', path.join(path.dirname(new URL(import.meta.url).pathname), 'state'));
 const PENDING = path.join(STATE_DIR, 'pending.json');
 const PENDING_MAX_BYTES = 5 * 1024 * 1024, PENDING_MAX_AGE_MS = 2 * 3600e3;
@@ -55,6 +58,54 @@ const UPLOAD_TIMEOUT_MS = 20e3, UPLOAD_BACKOFF_MS = [5e3, 20e3, 60e3];   // 3 tr
 const GAP_S = 10;                                                         // a silence longer than this inside a sample is an interruption
 const MAX_WALL_MULTIPLE = 2;
 const OVERLONG_MULTIPLE = 1.25;
+
+/* ---- SHIPS DIAGNOSTICS (mac-0.3.5, 18 Nov 2026; docs/concepts/SHIPS-DIAGNOSTICS-PROPOSAL.md rev 2.1, Part A) --------------
+ * What is sampled, when and how often is unchanged. This only records how a ships run ended.
+ *   - One line in the log for every ships run that does not end as an ok sample: which ending, how long in, whether the
+ *     socket opened and the subscription was confirmed, how many messages, whatever the error event carried, the close
+ *     code if one has arrived (never waited for), and after a FAILED run one DNS lookup of the stream's host name.
+ *   - The DNS lookup has a 2 s deadline and records a fact only. A success shows that the name resolved at that later
+ *     moment; it does not show the network was working when the sample failed, and it does not tell a network fault from
+ *     a refusal by the provider. A lookup still outstanding at the deadline is abandoned; the process then ends by an
+ *     explicit exit, so it cannot be kept alive by it (see main()).
+ *   - Local text is built from named fields only, cut and cleaned; no event object is serialised; nothing from the
+ *     subscription message (which carries the key) is logged, and the key's value is struck from any text.
+ *   - What is UPLOADED for a failed ships run is one of the fixed phrases below and nothing else: the note goes into the
+ *     hub's public cells file. */
+export const SHIPS_PUBLIC = { errorBeforeOpen: 'websocket error before connection', errorAfterOpen: 'websocket error after connection',
+  closedBeforeConfirmation: 'connection closed before confirmation', noConfirmation: 'no subscription confirmation within the window',
+  connectTimeout: 'connect timeout (15 s)', collector: 'collector error' };
+const SHIPS_HOST = 'stream.aisstream.io', DNS_DEADLINE_MS = 2000;
+export const DIAG = { lookup: (host, cb) => dns.lookup(host, cb), deadlineMs: DNS_DEADLINE_MS, outstanding: false };   // the lookup is replaceable so a test never touches the network
+const cleanText = (v, n) => { let t = v == null ? '' : String(v); const k = process.env.AISSTREAM_KEY; if (k && k.length >= 6) t = t.split(k).join('[key]');
+  return t.replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n); };
+/** The error event's own fields, by name, each cut to 80 characters; the words "no detail…" when all are empty. */
+export function errorDetail(ev) {
+  let parts = [];
+  try { const er = ev && ev.error; parts = [ev && ev.type, ev && ev.message, er && er.name, er && er.message, er && er.code, er && er.cause && er.cause.code].map(x => typeof x === 'string' || typeof x === 'number' ? cleanText(x, 80) : '').filter(Boolean); } catch (_) { parts = []; }
+  const meaningful = parts.filter(x => x !== 'error');                       // the bare event type "error" says nothing on its own
+  return meaningful.length ? cleanText(parts.join(' | '), 300) : 'no detail from the WebSocket client';
+}
+const closeText = c => c ? `${Number.isFinite(Number(c.code)) ? Number(c.code) : '?'}/${cleanText(c.reason, 80) || '-'}` : 'unavailable';
+/** One bounded DNS lookup. Resolves to a short phrase; never throws; a late answer is ignored. */
+export function dnsCheck() {
+  return new Promise(resolve => {
+    const t0 = Date.now(); let done = false; DIAG.outstanding = true;
+    const finish = text => { if (done) return; done = true; clearTimeout(to); resolve(text); };
+    const to = setTimeout(() => finish(`no answer in ${DIAG.deadlineMs / 1000} s`), DIAG.deadlineMs);
+    try { DIAG.lookup(SHIPS_HOST, err => { DIAG.outstanding = false; finish(err ? 'error ' + (cleanText(err.code, 40) || 'unknown') : `resolved in ${Date.now() - t0} ms`); }); }
+    catch (e) { DIAG.outstanding = false; finish('error ' + (cleanText(e && e.code, 40) || 'lookup threw')); }
+  });
+}
+const diagLine = d => `ships: outcome=${d.outcome} after=${d.afterS.toFixed(1)}s opened=${d.opened} confirmed=${d.confirmed} messages=${d.messages}` +
+  (d.error !== undefined ? ` error=${d.error}` : '') + (d.first ? ` first_interruption=${d.first.from}..${d.first.to} (${d.first.seconds}s)` : '') + ` close=${closeText(d.close)}` + (d.dns !== undefined ? ` dns_check=${d.dns}` : '');
+/** A failed ships run: logs its line (with the bounded DNS check) and returns the error main() turns into a down report with a fixed phrase. */
+async function shipsFailure(publicNote, d) {
+  d.dns = await dnsCheck();
+  if (d.closeNow) d.close = d.closeNow();   // a close that arrived during the bounded lookup is used; nothing waits for one
+  console.error(diagLine(d));
+  const e = new Error(publicNote); e.shipsPublic = publicNote; return e;
+}
 
 function cellId(lat, lng) {
   const r = Math.max(0, Math.min(Math.floor(180 / CELL_DEG) - 1, Math.floor((lat + 90) / CELL_DEG)));
@@ -88,27 +139,34 @@ export const FEEDS = {
     const interruptions = [];                                                      // [{from, to, seconds}] gaps > GAP_S between messages (sleep, Wi-Fi loss, upstream silence)
     const t0 = Date.now(); const h0 = process.hrtime.bigint();
     let hardStop = null;
-    await new Promise((resolve, reject) => {
+    let ending = null;              // { kind: 'error' | 'connect-timeout', ev, atMs }: how a FAILED run ended; null while the run is a sample
+    let selfClosed = false;         // true once WE asked for the close (window done, hard stop, overlong): a close without it is the far end's
+    let timers = [];
+    await new Promise((resolve) => {
       const ws = new WebSocket('wss://stream.aisstream.io/v0/stream');
+      // every ending goes through here: all three timers cleared, the handlers dropped, the socket asked to close
+      const finishRun = () => { timers.forEach(clearTimeout); ws.onopen = ws.onmessage = ws.onerror = null; resolve(); };
       ws.binaryType = 'arraybuffer';
-      const timer = setTimeout(() => { try { ws.close(1000, 'window done'); } catch (_) {} resolve(); }, windowS * 1000);
+      const timer = setTimeout(() => { selfClosed = true; try { ws.close(1000, 'window done'); } catch (_) {} finishRun(); }, windowS * 1000);
       // Duration contract (1 Nov 2026). This timer bounds the sample ONLY while the process is actually running: a
       // suspended host runs no timers, so nothing here prevents a suspension overrun and no such claim is made. It
       // ends the run once the host is scheduling again, instead of holding a dead socket open. The real guard against
       // folding post-resumption data into an expired window is the elapsed check in onmessage below.
-      hardStop = setTimeout(() => { try { ws.close(4000, 'overlong'); } catch (_) {} resolve(); }, MAX_WALL_MULTIPLE * windowS * 1000);
-      const connectTimer = setTimeout(() => { if (!connectedAt) { try { ws.close(); } catch (_) {} reject(new Error('connect timeout (15 s)')); } }, 15e3);
+      hardStop = setTimeout(() => { selfClosed = true; try { ws.close(4000, 'overlong'); } catch (_) {} finishRun(); }, MAX_WALL_MULTIPLE * windowS * 1000);
+      const connectTimer = setTimeout(() => { if (!connectedAt && !ending) { ending = { kind: 'connect-timeout', ev: null, atMs: Date.now() }; selfClosed = true; try { ws.close(); } catch (_) {} finishRun(); } }, 15e3);
+      timers = [timer, hardStop, connectTimer];
       ws.onopen = () => {
         connectedAt = Date.now(); clearTimeout(connectTimer);
         ws.send(JSON.stringify({ APIKey: key, BoundingBoxes: [[[bbox[0], bbox[1]], [bbox[2], bbox[3]]]], FilterMessageTypes: Object.keys(CLASS) }));
       };
-      ws.onerror = (ev) => { clearTimeout(timer); clearTimeout(hardStop); const er = ev && ev.error; reject(new Error('websocket error: ' + [ev && ev.message, er && er.message, er && er.cause && er.cause.message, er && er.cause && er.cause.code].filter(Boolean).join(' | ') || 'unknown (no detail from the socket)')); };
-      ws.onclose = (ev) => { closeInfo = { code: ev.code, reason: ev.reason }; closedAt = Date.now(); clearTimeout(timer); clearTimeout(hardStop); resolve(); };
+      // An error ends the run as a failure, as before. Its detail is read later, by field name; the close that usually follows is not waited for.
+      ws.onerror = (ev) => { if (ending) return; ending = { kind: 'error', ev, atMs: Date.now() }; try { ws.close(); } catch (_) {} finishRun(); };
+      ws.onclose = (ev) => { closeInfo = { code: ev && ev.code, reason: ev && ev.reason, remote: !selfClosed && !ending }; closedAt = Date.now(); finishRun(); };
       ws.onmessage = (ev) => {
         // On resumption the timers above may not have fired while the host was away. Check elapsed time BEFORE accepting
         // anything: a message arriving past the hard bound belongs to a window that expired, so the sample is closed and
         // left unusable rather than topped up with data from long after the period it claims to describe.
-        if (Date.now() - t0 > MAX_WALL_MULTIPLE * windowS * 1000) { try { ws.close(4000, 'overlong on resumption'); } catch (_) {} resolve(); return; }
+        if (Date.now() - t0 > MAX_WALL_MULTIPLE * windowS * 1000) { selfClosed = true; try { ws.close(4000, 'overlong on resumption'); } catch (_) {} finishRun(); return; }
         let m;
         try { m = JSON.parse(typeof ev.data === 'string' ? ev.data : Buffer.from(ev.data).toString('utf8')); } catch (_) { parseErrors++; return; }
         if (m.MessageType === 'SubscriptionConfirmation') { confirmed = true; compression = m.Message && m.Message.CompressionEnabled; return; }
@@ -133,6 +191,9 @@ export const FEEDS = {
     });
     const wallS = (Date.now() - t0) / 1000;
     const monoS = Number(process.hrtime.bigint() - h0) / 1e9;
+    const base = () => ({ afterS: ((ending ? ending.atMs : (closedAt || Date.now())) - t0) / 1000, opened: !!connectedAt, confirmed, messages, close: closeInfo, closeNow: () => closeInfo });
+    if (ending && ending.kind === 'connect-timeout') throw await shipsFailure(SHIPS_PUBLIC.connectTimeout, { outcome: 'connect-timeout', ...base() });
+    if (ending) throw await shipsFailure(connectedAt ? SHIPS_PUBLIC.errorAfterOpen : SHIPS_PUBLIC.errorBeforeOpen, { outcome: 'error', ...base(), error: errorDetail(ending.ev) });
     /* The wall-minus-monotonic sleep detector is RETIRED on this hardware (2 Nov 2026). Measured against pmset -g log,
      * which macOS writes and this collector has no part in: three overnight samples sat inside Maintenance Sleep of
      * 946/921/682 s against gaps of 948/923/686 s, and it reported slept=false on every one. process.hrtime advances
@@ -154,14 +215,17 @@ export const FEEDS = {
     const gapS = lostS;
     const flowingS = Math.max(0, socketS - gapS);
     const upFrac = Math.max(0, Math.min(1, flowingS / windowS));
-    if (!confirmed) throw new Error('no SubscriptionConfirmation within the window' + (closeInfo ? ' (close ' + closeInfo.code + ' ' + closeInfo.reason + ')' : ''));
+    const remoteClose = !!(closeInfo && closeInfo.remote);          // the far end closed the socket before our window ended
+    if (!confirmed) throw await shipsFailure(remoteClose ? SHIPS_PUBLIC.closedBeforeConfirmation : SHIPS_PUBLIC.noConfirmation, { outcome: remoteClose ? 'close-before-confirmation' : 'no-confirmation', ...base() });
     const rows = [...vessels.values()];
     const rowsA = rows.filter(r => r[9] === 'A').length;
     // A sample whose elapsed time ran past the overlong threshold is not a clean window of listening, whatever the
     // cause, and is degraded on that fact alone. No cause is inferred or needed.
     const overlong = wallS > OVERLONG_MULTIPLE * windowS;
     const status = upFrac >= 0.9 && !overlong ? 'ok' : 'degraded';
-    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s overlong=${overlong} status=${status} socket=${socketS.toFixed(1)}s flowing=${flowingS.toFixed(1)}s(inferred) interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo)}`);
+    console.error(`ships: window=${windowS}s wall=${wallS.toFixed(1)}s mono=${monoS.toFixed(1)}s overlong=${overlong} status=${status} socket=${socketS.toFixed(1)}s flowing=${flowingS.toFixed(1)}s(inferred) interruptions=${interruptions.length} (${lostS}s) quiet_at_end=${quietS === null ? '?' : quietS.toFixed(1)}s messages=${messages} vessels=${rows.length} (A=${rowsA} B=${rows.length - rowsA}) no_source_time=${noSourceTime} older_ignored=${olderIgnored} compression=${compression} parseErrors=${parseErrors} close=${JSON.stringify(closeInfo ? { code: closeInfo.code, reason: cleanText(closeInfo.reason, 80) } : null)}`);
+    // a sample that is not ok, or whose socket the far end closed early, gets one more line; the sample itself is built and uploaded exactly as before
+    if (status !== 'ok' || remoteClose) console.error(diagLine({ outcome: remoteClose ? 'close-after-confirmation' : overlong ? 'overlong' : 'low-flow', ...base(), first: interruptions[0] || null }));
     return { fields: ['mmsi', 'lat', 'lng', 'observed_at', 'received_at', 'sog_kn', 'cog_deg', 'heading_deg', 'nav_status', 'class', 'name'], rows,
       quantity: `vessel identities (MMSI) with a Class A or B position report received during a ${windowS} s AIS sample, per cell; latest received position per vessel — terrestrial AIS, so open ocean is not covered; a silent cell is not an empty cell; positions between samples unknown`,
       coverageDefault: { grade: 'partial', evidence: 'messages_flowing_inferred_from_arrival_gaps;not_a_measure_of_reception;not_geographic_coverage;receipt_history_pending;terrestrial_ais_only', observed_fraction: upFrac },
@@ -177,7 +241,7 @@ export const FEEDS = {
         overlong_sample: overlong, elapsed_not_counted_s: overlong ? Math.round((elapsedWallS - flowingS) * 10) / 10 : 0,
         duration_rule: `elapsed time (${Math.round(elapsedWallS)} s) is never counted as listening; a sample over ${OVERLONG_MULTIPLE}× its ${windowS} s window is degraded whatever the cause, is closed at ${MAX_WALL_MULTIPLE}× once the process runs again, and rejects messages arriving past that bound`,
         records_without_source_time: noSourceTime, older_reports_ignored: olderIgnored, sampling: 'one sample per run; runs are scheduled roughly every 30 min while the collector is available; no observation between samples',
-        compression_enabled: compression, parse_errors: parseErrors, close: closeInfo, stale_after_s: 3 * 3600, source_status_override: status,
+        compression_enabled: compression, parse_errors: parseErrors, close: closeInfo ? { code: closeInfo.code, reason: closeInfo.reason } : null, stale_after_s: 3 * 3600, source_status_override: status,
         citation: 'AIS data via aisstream.io (aisstream.io; free API, server-side use only)' } };
   },
   // OpenSky Network states API (aircraft): counts per cell AND plain positions (aircraft-dots-rc, 17 Nov 2026). One request per run
@@ -266,8 +330,13 @@ async function main() {
     const f = await FEEDS[layer]();
     e = buildEnvelope(layer, f, scheduledMs, nowIso());
   } catch (err) {
+    let note = String(err).slice(0, 200);
+    if (layer === 'ships') {   // a failed ships run uploads a fixed phrase on EVERY path; anything else thrown is logged here, cleaned, and uploaded only as "collector error"
+      note = (err && err.shipsPublic) || SHIPS_PUBLIC.collector;
+      if (!(err && err.shipsPublic)) console.error('ships: outcome=collector-error error=' + (cleanText([err && err.name, err && err.message].filter(Boolean).join(' | '), 300) || 'no detail'));
+    }
     e = { schema_version: SCHEMA_VERSION, collector_version: COLLECTOR_VERSION, layer, retrieved_at: nowIso(),
-      scheduled_for: new Date(scheduledMs).toISOString(), source_status: 'down', cells: {}, note: String(err).slice(0, 200) };
+      scheduled_for: new Date(scheduledMs).toISOString(), source_status: 'down', cells: {}, note };
   }
   if (dry) {
     const body = JSON.stringify(e);
@@ -275,7 +344,10 @@ async function main() {
     // An aircraft dry run goes to logs/collector.log through run.sh, so it never prints a position: the count stands in for the list.
     const shown = layer === 'opensky' ? { ...e, records: `[${(e.records || []).length} positions not printed]` } : e;
     const sb = JSON.stringify(shown);
-    console.log(quiet ? sb.slice(0, 2000) + (sb.length > 2000 ? '…' : '') : JSON.stringify(shown, null, 1)); return;
+    const text = quiet ? sb.slice(0, 2000) + (sb.length > 2000 ? '…' : '') : JSON.stringify(shown, null, 1);
+    // A DNS lookup abandoned at its deadline may still be pending in the system resolver, which would hold the process open: end it once the output is written.
+    if (DIAG.outstanding) { process.stdout.write(text + '\n', () => process.exit(0)); return; }
+    console.log(text); return;
   }
   if (!KEY) { console.error('INGEST_KEY not set'); process.exit(2); }
   const code = await upload(e, layer === 'opensky');
