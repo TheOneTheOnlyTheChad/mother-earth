@@ -3,6 +3,13 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 10:04 UTC (clock reading) — **Smoke fixes closed out; ships proposal for GPT** (docs and a proposal branch only)
+- **GPT's checks of the released page (relayed by Chad; desktop Chrome, about 10:00 UTC):** first-view line clear of the credits, imagery label, Key and Layers button at 900, 1024, 1101, 1150 and 1279 px, no horizontal overflow; hidden, it takes no room at 1024 px (imagery label 8 px under the globe); Dust RGB renders, counts as 1 layer, shows its entry and hides the sentence, and off restores 0 layers, the sentence and the line. **This closes the released-page gaps listed in the 09:52 entry** (line position, the 1101–1279 px rule, Dust RGB). Real phone and screen reader remain open.
+- **Clean-up (09:59 UTC):** `smoke-key-hint-rc` deleted on the GitHub branches page in the pane (0 ahead of main); its Mac review copy moved to `_to_delete/`. Remote branches: `main`, `cape-town-station-rc`, `widths-preview-rc`, and the new proposal branch below.
+- **Ships proposal, rev 1:** branch `ships-diagnostics-rc` `8252e86`, `docs/concepts/SHIPS-DIAGNOSTICS-PROPOSAL.md` (sha256 `4cd8b52f…a165`), Mac copy in `_review/ships-diagnostics-rc/`. Part A: one diagnostic log line per failed or degraded ships run and a corrected note (collector only, mac-0.3.5). Part B: whether an overlong sample may replace the latest sample. Part C: whether a Mac failure may replace a good sample. Decisions D1–D4 are Chad's. **No code changed.**
+- **Found while writing it:** the empty "websocket error:" note is an operator-precedence fault in `collector-mac.mjs` (`'…' + details || 'unknown'`: the fallback text can never apply), on top of Node's WebSocket client giving no detail in the fields read.
+- **Next after ships (GPT):** the Sources page overflow at 360 px, as its own small fix.
+
 ## 18 Nov 09:52 UTC (clock reading) — **LIVE: the Key counts and names aircraft, wind and Dust RGB when drawn; the first-view line is clear of the credits and the Layers button (merge `74d437b`)**
 - **GPT (relayed by Chad):** `smoke-key-hint-rc` passes code review at `7cdbbcc` (code `e71be8a`); packet and five page hashes matched; keep the 1101–1279 px addition on this branch; all four entries accepted as built. GPT ran 75 aircraft checks, 111 search checks and 28 extracted-code checks itself; the browser-suite results are Claude's.
 - **Chad's own line:** "Approve: merge smoke-key-hint-rc 7cdbbcc into main (Key counts and names aircraft, wind and Dust RGB when drawn; first-view line clear of the credits and the Layers button)".
