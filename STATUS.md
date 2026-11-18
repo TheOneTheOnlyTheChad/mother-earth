@@ -3,6 +3,24 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 18 Nov 2026
+## 18 Nov 07:02 UTC (clock reading) — **Ships follow-up, PARTIAL: D1 only; the Mac was not reachable, so the log was not read** (read-only; docs only)
+- **This entry does not complete the scheduled read in HANDOVER.** Not done, because `~/mother-earth/logs/collector.log` could not be reached (the Mac was off the bridge at 07:00 UTC; two attempts): the per-sample connection open delay (wall minus socket), the trace of the 17 Nov 14:52 UTC run, and the WebSocket error and close details. The next thread still does those first.
+- **Source for everything below:** D1 `collector_runs`, read through the Cloudflare connector at 07:00–07:02 UTC, rows from 17 Nov 03:03 UTC to 18 Nov 06:46 UTC.
+- **Mac ships runs by day (status as ingested; "fast" = a down run that ended within 30 s):**
+  - 14 Nov: 46 ok, 0 degraded, 0 down. 15 Nov: 45 ok, 0, 0.
+  - 16 Nov: 20 ok, 15 degraded, 9 down (8 fast).
+  - 17 Nov: 17 ok, 16 degraded, 10 down (6 fast).
+  - 18 Nov to 03:41 UTC: 2 ok, 5 degraded, 0 down.
+- **So the slow opens recurred.** The collector marks a run degraded when messages flowed for less than 90% of the 60 s window; before 16 Nov there were none in two days, since then about half of the Mac's completed samples. Open delay per sample is not in D1, so the size of the delay is still only in the log.
+- **Down runs since 17 Nov 03:03 UTC: 9.** Four overlap known network moves and ran long (06:45–07:09, 08:59–09:06, 13:02–13:08, 14:14–14:17 UTC). **Five were fast (17–18 s) on the home network: 11:45, 16:01, 16:32, 19:43, 22:22 UTC.** All five carry the same note, "websocket error" with no detail. None between 22:53 UTC and the Mac's last sample at 03:41 UTC (10 samples).
+- **Clash with the hub fallback: not supported by these rows.** No fast down overlaps a fallback run in time. Fallback runs since 17 Nov 03:03 UTC started at 07:00, 09:00, 12:00, 13:00, 14:30, 16:15, 17:00, 20:00, 22:45 UTC and, with the Mac silent, 04:30, 05:15, 06:00, 06:45 UTC on 18 Nov. Each follows a failed or missing Mac sample, as designed. The closest case: fallback ended 16:17:03, Mac failed at 16:32:06 (15 minutes later).
+- **Aircraft schedule as a cause: not supported.** 16 Nov had eight fast downs with no aircraft schedule. On 17 Nov two fast downs fell within 12 minutes before an aircraft request (11:45, 19:43) and one 9 minutes after (22:22); two had none near (16:01, 16:32).
+- **The cloud path saw slow samples too:** hub fallback degraded 3 of 8 on 16 Nov and 1 of 10 on 17 Nov (20:00 UTC, messages flowing 42.6 s). So the source side is at least part of it; the fast failures have so far been seen only from the Mac.
+- **The 14:52 UTC run (question in HANDOVER), from the collector source only:** a run that receives any messages is published as `degraded` with its records; only a run with an error or no messages is `down` (`collector-mac.mjs`, status rule at line 163, down path at line 270). D1 shows it ingested as degraded with 700 records, 14:52:33–14:59:00. Whether the payload and the page then treat it as a usable sample was not read.
+- **Wind arrival times (D1 notes), eight runs 16–18 Nov:** each run is published at 8 minutes past the hour, about 4 h 08 min after its nominal time: 00z at 04:08, 06z at 10:08, 12z at 16:08, 18z at 22:08 UTC (17 Nov; 18 Nov 00z at 04:08). The hourly check an hour earlier did not find it each time. The first day differs (06z manual at 15:05; 12z at 19:08). Seven scheduled runs in a row on that pattern, all ok, 8 requests each. A stale threshold is still a proposal to make, not made here.
+- **Aircraft, seen in passing:** eight ingests since 17 Nov 09:17 UTC, all ok, the last at 03:02 UTC on 18 Nov. None since, with the Mac silent.
+- **Proposal not written.** The trigger for one is met (slow opens recurred), but the log numbers are missing and the current thread owns the next step. What it should cover, unchanged from 17 Nov: connection timing in the log, WebSocket error and close details, a bounded retry that keeps the listening window. No collector change without Chad's go.
+
 ## 18 Nov 07:02 UTC (clock reading) — **New thread: two additions to the 07:01 ships read; smoke-fix proposal on a branch**
 - **Both threads' scheduled reads fired** (the old thread's at 07:00:13 UTC, this thread's at 07:00:40 UTC). The entry below is the record; this thread's read of the same D1 rows agrees with it and its Mac attempt at 07:00 UTC also failed ("not connected").
 - **Addition 1, hub side of the 14:52 run:** `ingest()` in `phase1/worker.js` withholds only `source_status: 'down'`. A degraded upload takes the same `writeSnapshot` path as an ok one, so the hub made the 700-record sample the latest. Nothing at the hub reads `overlong_sample`.
