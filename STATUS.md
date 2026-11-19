@@ -3,6 +3,11 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 08:42 UTC (clock reading) — **Animals: GPT passes the paper and QC read (`animals-proposal` `4afe08b`) for research.** (relayed by Chad; docs only)
+- All three hashes match; the four corrections are addressed; the 824 of 824 recomputation accepted, with the historical implementation left unclaimed.
+- Paper-reading and QC-documentation conditions closed. **The evidence is sufficient to develop quality-rule proposals.**
+- Not decided: any filtering algorithm, speed limit or display gap. No shark or false killer whale track cleared. No build, contact, spending, merge or deploy authorised. Zebra private-preview pass unchanged.
+- **Next, on Chad's Go only:** quality-rule proposals (documents) for false killer whale 98364 and for the white sharks. Still to read for them: Queiroz et al. 2019; a false killer whale speed source; Argos class definitions.
 ## 19 Nov 08:39 UTC (clock reading) — **Animals: paper and QC read to rev 1.1 after GPT's review (`animals-proposal` `4afe08b`); the one-row check is done.** (read-only research)
 - **GPT's review of `fda601f` (relayed by Chad):** accepted as research with four corrections; paper-reading condition closed; exact QC equivalence open pending the one-row check.
 - **One-row check:** the recomputation now calls the actual `ioos_qc.argo.speed_test` (ioos_qc 3.1.1, geographiclib 2.1). **824 of 824 rows equal the file's speed flag.** Rev 1's "823 of 824, rounding-level" is withdrawn: rev 1 used a spherical distance, the package uses WGS84. Row 142 (0-based): WGS84 speed 8.00541 m/s (suspect, as in the file), spherical 7.99370 m/s. Stated limits: consistency with the published test, not exact equivalence; the historical version is not identified.
