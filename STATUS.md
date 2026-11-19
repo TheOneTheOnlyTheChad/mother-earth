@@ -3,6 +3,11 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 14:12 UTC (clock reading) — **Animals: GPT PASS for the three-journey private preview (`animals-journeys-preview-rc`, code `f00a330`, packet `ea5414d`, evidence head `56636dc`).** (nothing merged, deployed, sent or spent)
+- **GPT (relayed by Chad):** the wording and `--check` holds are cleared; the enlarged-mark note is accepted; J12 passes for all three journeys, paused and playing, at desktop and 390 px. Evidence at `56636dc`: all three hashes verified, all 36 journey windows meet the thresholds.
+- **GPT's qualification:** in Claude's packet the zebra playback advances only 288 to 289 fixes per window, so that packet alone does not meet J12's substantial-playback requirement. GPT's own saved measurements on the current code close it. (Claude has not seen GPT's files.)
+- No further preview repair requested.
+- **Still outstanding:** public release and sensitivity decisions for the three animals; Sources page and REGISTER; real phone; screen reader; the two unsent enquiries (Chad's to send). **No merge or deploy authorised.**
 ## 19 Nov 14:09 UTC (clock reading) — **Animals: J12 performance measured on the three-journey preview; within tolerance at both widths. Branch head `56636dc` (evidence only; code still `f00a330`).** (nothing merged, deployed, sent or spent)
 - Chad served the Mac tree `ea5414d` and put Chrome in front; Claude ran the Stage 0 harness through Claude in Chrome, 13:53 to 14:08 UTC. Chrome 157, Apple M3, 1470 x 745.
 - Three rounds per width of: off; zebra, shark, whale each paused at the last fix and playing. **Every journey window passes in all three rounds, desktop and narrow**: every median 16.7 ms; journey p95 16.8 to 17.7 ms against off 17.2 to 17.7 ms (one narrow off window 33.3 ms). Render time 0.3 to 0.4 ms off, 0.6 to 1.0 ms on.
