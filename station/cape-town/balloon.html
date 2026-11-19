@@ -150,7 +150,7 @@ svg{width:100%;height:auto;display:block}
     const lines = []; for (const g of [...segs(F, 0, F.top), ...segs(F, F.top, tr.length - 1)]) for (let i = 1; i < g.length; i++) lines.push([[X(g[i - 1]), Y(g[i - 1])], [X(g[i]), Y(g[i])]]);
     const items = [{ id: 'first', x: X(a), y: Y(a), lines: [`first point received · ${Math.round(a.alt).toLocaleString()} m `, '(not the launch)'] },
       { id: 'last', x: X(z), y: Y(z), lines: [`last point received · ${Math.round(z.alt).toLocaleString()} m `, '(not the landing)'] },
-      { id: 'top', x: X(t), y: Y(t), lines: [`highest point received · ${Math.round(t.alt).toLocaleString()} m`] }];
+      { id: 'top', x: X(t), y: Y(t), lines: ['highest point received ', `· ${Math.round(t.alt).toLocaleString()} m`] }];
     const fixed = [{ x0: M - 4, x1: M + nice * k + 62, y0: W - 32, y1: W - 6 }, { x0: W - 42, x1: W - 12, y0: 10, y1: 60 }];   // scale bar, north arrow
     st.labels = place(items, lines, W, fixed);
     for (const L of st.labels) {
