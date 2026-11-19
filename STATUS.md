@@ -3,6 +3,12 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 14:09 UTC (clock reading) — **Animals: J12 performance measured on the three-journey preview; within tolerance at both widths. Branch head `56636dc` (evidence only; code still `f00a330`).** (nothing merged, deployed, sent or spent)
+- Chad served the Mac tree `ea5414d` and put Chrome in front; Claude ran the Stage 0 harness through Claude in Chrome, 13:53 to 14:08 UTC. Chrome 157, Apple M3, 1470 x 745.
+- Three rounds per width of: off; zebra, shark, whale each paused at the last fix and playing. **Every journey window passes in all three rounds, desktop and narrow**: every median 16.7 ms; journey p95 16.8 to 17.7 ms against off 17.2 to 17.7 ms (one narrow off window 33.3 ms). Render time 0.3 to 0.4 ms off, 0.6 to 1.0 ms on.
+- **Limits:** the narrow run is a 390 x 740 same-origin iframe, not DevTools emulation (the window would not resize). Every window is capped at 60 Hz. A first desktop pass was lost before it was saved (the tab was navigated away); the saved desktop file is the full rerun. Rows were transcribed from page output. No other layer was on.
+- Evidence: `reviews/evidence/2026-11-19-animals-journeys-j12/` on the branch; Mac `_review/animals-journeys-j12-56636dc/`.
+- Still open: GPT's review of r2 and of these measurements; real phone; screen reader; Sources page, REGISTER; sensitivity and public release; the two enquiries. The server on the Mac is Chad's to stop.
 ## 19 Nov 13:40 UTC (clock reading) — **Animals: GPT held the three-journey preview `817a13f` (two repairs); r2 answers them: `animals-journeys-preview-rc` head `ea5414d`.** (branch only; nothing merged, deployed, sent or spent)
 - **GPT's review (relayed by Chad):** hashes match; its own real-input rebuild and land checks pass; counts confirmed (shark 755 / 616, whale 661 / 554); chooser, cards, narrow layout and Back worked in desktop Chrome. On hold for: (1) the bar said "No fix was recorded" across gaps that hold left-out source fixes (53 shark gaps, 22 whale gaps) and called the whale's 12 Feb endpoint the end of the tracking record; (2) `build_argos_journey.py --check` printed DIFFERENT but exited 0. Also: say enlarged marks are not uncertainty; performance on this branch unverified.
 - **r2, code commit `f00a330`, head `ea5414d`** (packet `reviews/2026-11-19-animals-journeys-preview-rc-r2.md`, sha256 `3e4d2f0b…7d08`). **No data file changed.**
