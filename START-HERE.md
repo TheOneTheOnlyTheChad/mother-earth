@@ -355,6 +355,20 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Chad's rule (17 Nov, at close-out):** Claude may delete things itself (branches, files) and handle keys and settings on Cloudflare and elsewhere, so he can work from his phone without the MacBook; his own Approve line still authorises each production change. Claude's own limit is unchanged: it does not type, paste or print secret values; use a script that reads `KEYS.md` itself, or Chad pastes the value.
 - **Secrets:** `KEYS.md` on the Mac must never be printed; use scripts that read it themselves. Its contents reached tool output once this thread through a failed redaction; nothing was repeated or committed.
 
+## 4ag. Thread facts (19 Nov 2026, Animals thread)
+- **Recorded animal journeys are the one archive feature** (Chad, 19 Nov): allowed on the Animals tab only; every other layer keeps the live-feed rule.
+- **Five header tabs.** Tabs go compact at 480 px and below and between 1280 and 1365 px; header padding is 4 px between 721 and 760 px; the promise line is hidden below 1200 px. Older suites' expectations were updated on the Animals branches (five tabs, 17 switches, 1200 px).
+- **Journey files are verified, not trusted:** pinned list → manifest → display file, each by sha256, in the page. A changed data file needs the pin in `animals-journey.js` changed with it, and the script's `?v=`.
+- **Switching off must abort the request**, not only ignore its answer (`AbortController`, plus a generation guard). `pagehide` and `pageshow` (persisted) reset the journey so Back never restores a drawn one.
+- **Filtered journeys speak of "displayed" fixes**, never "recorded" or "tracking record ends": the source may hold fixes that were left out.
+- **A check command must exit non-zero on a difference.** Printing DIFFERENT and returning 0 was a hold.
+- **Argos:** the line drawn is a straight 3-D chord; test that chord against land, not the great circle. ATN's speed flag is reproduced only with WGS84 distances (`ioos_qc`), not spherical.
+- **Large files through the pane:** gzip in the page (`CompressionStream`), base64, return slices padded past about 300,000 characters so the result is saved to a file; about 234,000 characters of payload a call.
+- **Claude in Chrome on a served local tree:** results are cut at about 1,000 characters and a call times out at 45 s, so run long work without awaiting it, poll, and read results out in small batches. **Do not navigate the tab away before the results are saved** (a desktop pass was lost that way). The extension could not resize the window; a 390 px run was done in a same-origin iframe and labelled as that.
+- **Computer use limits:** Terminal is click-only, Chrome is read-only. A local server is Chad's one command.
+- **Enquiries:** record each one separately with recipient and status; mark sent when Chad says so; never carry "unsent" forward from an older note without checking. Past-chat search did not find the earlier messages this time, so blanks were left, not guesses.
+- **Timestamps:** read the clock in the same step that writes the time.
+
 ## 4af. Thread facts (18 Nov 2026, smoke fixes + ships thread)
 - **Released:** smoke fixes (merge `74d437b`: Key counts aircraft, wind and Dust RGB; first-view line clear of the credits and the Layers button); collector mac-0.3.5 (merge `d5cc4eb`: one diagnostic line per ships run that is not an ok sample, six fixed public phrases); hub 0.6.19 and the ships page wording (merge `ed1b652`).
 - **A hub invocation that began before a deploy finishes on the OLD code.** The 15:45:40 UTC fallback run published an overlong sample 21 s after 0.6.19 went up. Read the first run that STARTS after a deploy before judging the new code.

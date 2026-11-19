@@ -3,6 +3,11 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 14:43 UTC (clock reading) — **Animals thread closed out. Live unchanged (hub 0.6.19, page `ed1b652`). Next: Chad wants the journeys live.** (docs only)
+- **State at close:** `animals-journeys-preview-rc` `aa507f5` (code `f00a330`) is a GPT-passed private preview of three recorded journeys. Awaiting GPT: the release assessment, the Sources and REGISTER draft, the enquiries record (all at `aa507f5`). Nothing merged, deployed or filed.
+- **Next, item 1:** GPT's review of those three documents. Then Chad's sensitivity decision per animal, the whale's population question, a release branch (Sources section, "Private preview" wording), and Chad's Approve lines for REGISTER and the merge. Full order: HANDOVER, "NEXT THREAD STARTS HERE (19 Nov)".
+- **Claude's view, given to Chad:** release the zebra and the shark first if he does not want to wait; the whale follows once its population is stated from a source.
+- **Close-out (START-HERE §9):** HANDOVER block and START-HERE §4ag written; Mac review copies that are finished moved to `_to_delete/`; four kept in `_review/` and named in HANDOVER; no branch merged, so none deleted; Mac synced preserve-first; Project copies written.
 ## 19 Nov 14:39 UTC (clock reading) — **Animals: enquiry status corrected (both SENT by Chad); release assessment and Sources/REGISTER draft on the branch for GPT (`animals-journeys-preview-rc` head `aa507f5`, docs only).** (nothing merged, deployed, filed or spent; Claude sent nothing)
 - **Correction (Chad, 19 Nov):** the entries below that say "the two unsent enquiries" are wrong. **Chad sent both from his own email.** The NOAA address first used bounced; he sent it again and confirmed it sent. Recorded separately in `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` on the branch:
   - **A. NOAA Southeast Fisheries Science Center, bottlenose-dolphin telemetry (InPort 26479): sent; first address bounced; resent and confirmed. No reply on record.**
