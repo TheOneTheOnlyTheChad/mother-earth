@@ -1,151 +1,202 @@
 # Earth from Space: source check, recommendation, layout, costs and plan
 
-19 Nov 2026 17:03 UTC (clock reading) · rev 1 · for GPT review · **read-only investigation and documents only.** Nothing is built, scheduled, deployed or spent. No provider was contacted: every request below was an ordinary read of EUMETSAT's public catalogue page and public map service from the browser pane.
+19 Nov 2026 17:20 UTC (clock reading) · **rev 2** (rev 1: 19 Nov 2026, `41a8f2c`; changes after GPT's review are listed in section 12) · for GPT · **read-only investigation and documents only.** Nothing is built, scheduled, deployed or spent. No provider was contacted: every request was an ordinary read of EUMETSAT's public catalogue page, public viewer files and public map service from the browser pane. Evidence: `reviews/evidence/2026-11-19-earth-from-space/source-check.json`.
 
-**Chad's brief (19 Nov, filed verbatim as `docs/concepts/EARTH-FROM-SPACE-BRIEF.md`):** a dedicated top-level tab, "Earth from Space", opening its own page; first release one Africa-centred Meteosat full-disk still image; EUMETSAT GeoColour investigated first; hub-first collection and caching; still image first, a short loop assessed as the next step. **His line:** proceed with the read-only source investigation and return the source recommendation, layout, estimated costs and implementation plan for GPT review. No spending, provider contact, device changes or production actions authorised.
+**Chad's brief** is filed verbatim as `docs/concepts/EARTH-FROM-SPACE-BRIEF.md`. **GPT's review of rev 1 (relayed by Chad, 19 Nov):** direction supported; six required revisions before a private build. Accepted and unchanged here: GeoColour collection 0913; a dedicated page and top-level tab; a 2048 px still first, animation later; EUMETSAT and NASA credit and an explicit static-night-background explanation; five-tab and six-tab tests with real and fallback fonts; no computed day and night line at first. No build, spending, provider contact or production change is authorised.
 
 ## 1. Recommendation in short
-- **Source: EUMETSAT "GeoColour RGB - MTG - 0 degree"** (`EO:EUM:DAT:0913`), taken as rendered pictures from the EUMETView map service, layer `mtg_fd:rgb_geocolour`. It is the same service, host and collection pattern the Dust RGB layer already uses in production, so the access route, the licence family and the failure behaviour are known.
-- **Picture: one 2048 × 2048 JPEG per 10-minute frame, drawn by the service as a disk** (orthographic view centred on 0°N 0°E), about 0.56 to 0.67 MB.
-- **Collection: the hub**, every new frame once, validated, kept under an address that names the frame; visitors only ever load our copy. Newest frame about 20 to 30 minutes old when it becomes available.
-- **Expected new cost: $0.** No paid service is recommended.
-- **Three things to settle before a build** (section 9): what the frame time means; whether the disk view the service drew for us today can be relied on; and tab naming and order with Animals.
+- **Source:** EUMETSAT "GeoColour RGB - MTG - 0 degree" (`EO:EUM:DAT:0913`), as rendered pictures from the EUMETView map service, layer `mtg_fd:rgb_geocolour`.
+- **Picture:** one 2048 × 2048 JPEG per frame, **in the geostationary projection EUMETView's own viewer uses for this satellite** (`EPSG:900003`, section 3), with the surround drawn by the service in the page's background colour.
+- **Collection:** the hub, every new frame once. A frame is published only when its served time is confirmed and the delivered picture itself has been decoded and checked (sections 4 and 5).
+- **Expected incremental cost:** $0 if the account stays inside its shared allowances; the realistic exposure is processor time, at cents a month (section 8). Not certain until the account's present usage is read.
 
-## 2. What was verified (browser pane, 19 Nov 2026, 16:42 to 17:02 UTC)
+## 2. What was verified
+Browser pane, 19 Nov 2026, 16:42 to 17:02 and 17:13 to 17:18 UTC. Full request lines, sizes, hashes and the response headers that matter are in the evidence file.
 
-| Question | Finding | How |
+| Question | Finding |
+|---|---|
+| Layer and catalogue match | the catalogue entry's "Explore in EUMETView" link goes to `…/productDetails/mtg_fd:rgb_geocolour`; its Access tab lists EUMETView only. The layer's own metadata carries no licence or catalogue link, so the match rests on the catalogue's link (as recorded for Dust RGB) |
+| Licence | "Free and unrestricted - CC-BY-4.0" (catalogue, "Data policy") |
+| Credit | "When GeoColour imagery and animation are used outside of EUMETView, both EUMETSAT and NASA should be given credit." |
+| What the picture is | by day, True Colour RGB from the visible channels; by night, infrared cloud information, partly transparent, over the NASA Black Marble, which "is a static layer, and it doesn't reflect the actual conditions of the city lights" |
+| Instrument, level | MTG, FCI (Imager); "Visualisation"; operational; 1 km |
+| Coverage | the layer's box is 81.3°W to 81.3°E, 77.4°S to 77.4°N. All of Africa is inside it |
+| Cadence | every 10 minutes (time dimension `…/PT10M`) |
+| When a frame is listed | 16:30 first seen at 16:50:07; 16:40 not listed at 17:01:24; 16:50 newest at 17:13:32. **The capabilities document comes through a cache** (`max-age=120`; one read carried `age: 177`), so a sighting can lag the service by minutes. These are observations, not a delay bound |
+| Served time | every picture response carried `Warning: 99 Nearest value used: time=<served time>`, also when the requested time existed |
+| Off-grid time | silently substituted (11:03 returned 11:00, HTTP 200, header said 11:00) |
+| Future time | HTTP 200 with an XML error document |
+| The delivered JPEG | **progressive** (frame marker FFC2), 8-bit, 3 components, 4:2:0, no restart markers, starts and ends with the correct markers |
+| Rate control | headers on every response: limit 20 per context, 8 concurrent, "Delay excess requests 1000ms". Our own requests were delayed by up to 5.4 s when sent one after another |
+| Authentication | none |
+| Usage policy | none found |
+
+**Sizes and service times** (19 Nov frames):
+
+| Request | Bytes | Time |
 |---|---|---|
-| Layer exists | `mtg_fd:rgb_geocolour`, title "Geo Colour RGB - MTG-I - 0 degree" | WMS GetCapabilities, namespace `mtg_fd` (34,860 bytes, 13 layers) |
-| Layer and catalogue match | the catalogue entry's "Explore in EUMETView" link goes to `…/productDetails/mtg_fd:rgb_geocolour`; its Access tab lists EUMETView only | catalogue page, read without signing in |
-| Licence | **"Free and unrestricted - CC-BY-4.0"** (catalogue, "Data policy") | same page |
-| Credit required | "When GeoColour imagery and animation are used outside of EUMETView, both EUMETSAT and NASA should be given credit." | same page, Description |
-| What the picture is | **Daytime:** True Colour RGB from the red, green and blue visible channels, Rayleigh scattering removed, the green band adjusted for vegetation. **Night-time:** infrared (10.5 µm) and the 10.5 − 3.8 µm difference pick out ice and liquid-water clouds, shown whitish and bluish, partly transparent, over the NASA Black Marble. "the Black Marble is a static layer, and it doesn't reflect the actual conditions of the city lights." | same page |
-| Satellite, instrument | MTG; FCI (Imager); processing level "Visualisation"; operational; 24 Sep 2024 to now | same page |
-| Coverage | −77° to 77° latitude and longitude (catalogue); the layer's box is 81.3°W to 81.3°E, 77.4°S to 77.4°N. **All of Africa is inside it**, with the Atlantic, Europe, the Middle East and part of South America | catalogue; capabilities |
-| Native resolution | 1 km (catalogue, "Spatial resolution"). The full disk is 10 minutes of scanning, in 40 chunks from south to north (EUMETSAT training material) | catalogue; search |
-| Cadence | every 10 minutes: time dimension `2024-09-23T00:00:00Z/…/PT10M` | capabilities |
-| Publication delay | the 16:20 frame was the newest at 16:42:15; the 16:30 frame appeared between 16:49:37 and 16:50:07 (**about 20 minutes** after its time); the 16:40 frame had not appeared by 17:01:24 (**more than 21 minutes**). The Dust RGB record (12 to 13 Nov, overnight) has 18 to 30 minutes for the same service. **Two frames is not a measurement**; section 8 puts a 24-hour log first | capabilities polled every 30 s |
-| Explicit frame time | honoured. Every picture response carried `Warning: 99 Nearest value used: time=<served time>`, **also when the requested time existed**, so the header names the frame actually served | 9 GetMap requests |
-| A time off the 10-minute grid | **silently substituted**: 11:03 returned the 11:00 frame, HTTP 200, and the header said 11:00 | one request |
-| A time in the future | **HTTP 200 with an XML error document**, not a picture | one request |
-| Projections on offer | advertised: EPSG:4326, EPSG:3857, EPSG:3995, EPSG:3976, CRS:84 and seven service-specific codes (EPSG:70201 to 70213). **A disk view was returned for `AUTO:42003` (orthographic, centred 0°N 0°E), which is not in the advertised list.** Three of the service-specific codes were probed and are not a centred disk; their definitions were not read | capabilities; 4 requests |
-| Outside the disk | white in JPEG; transparent in PNG with `transparent=true` | measured |
-| Authentication | none for the catalogue page or the map service | observed |
-| Usage limits | none published that we have found. The Dust record notes service headers "a rate limit of 20 (window not stated) and 8 concurrent" | REGISTER, 13 Nov |
+| 2048 px JPEG, geostationary, page-coloured surround, 16:50 | 664,557 | 16.1 s |
+| 256 px PNG, transparent surround, geostationary, 16:50 (the check image) | 131,868 | 5.6 s |
+| 2048 px JPEG, orthographic: 11:00 day / 16:20 dusk / 00:00 night | 660,271 / 662,368 / 563,095 | 9.1 / 9.8 / 17.0 s |
+| 1024 px JPEG, orthographic, 11:00 | 188,572 | 8.7 s |
+| 4096 px JPEG, orthographic, 11:00 | 2,278,433 | 65.3 s |
+| 1024 px PNG, transparent, orthographic | 1,830,785 to 1,840,439 | 38.9 to 53.1 s |
 
-**Measured frame sizes and service times (orthographic disk unless stated; 19 Nov frames):**
+## 3. Projection (GPT 3)
+**What was investigated:**
+- The service's capabilities list, for the root layer: EPSG:4326, 3857, 3995, 3976, CRS:84 and seven service-specific codes, EPSG:70201 to 70213. Three of those seven were probed at 256 px; none returned a centred disk. **Their definitions were not found and are not used.**
+- **EUMETView's own product viewer** loads its projections from `https://view.eumetsat.int/assets/data/config.json` (8,754 bytes, sha256 `e4f8369e…3a8a`, read 17:16:59 UTC). It defines **`EPSG:900003`, named "GEOS: MSG FES, MTG FD"**, as `+proj=geos +h=35785831.0 +lon_0=0`, extent ±5,440,000 m. This is the geostationary projection EUMETSAT's viewer offers for this satellite's full disk.
+- A GetMap request in `EPSG:900003` over that extent returned a picture with the disk filling the frame (non-transparent share 0.78; a full circle would be 0.785).
+- `AUTO:42003` (orthographic), which rev 1 proposed, also works but is listed nowhere. **It is dropped.**
 
-| Request | Bytes | Service time |
+**Proposed, pinned request for the delivered picture** (every parameter is a constant in the code and is written into each frame's record):
+```
+service=WMS  request=GetMap  version=1.3.0  layers=mtg_fd:rgb_geocolour  styles=
+crs=EPSG:900003  bbox=<to be fixed in stage 1, see below>  width=2048  height=2048
+format=image/jpeg  bgcolor=0x0B1016  time=<the advertised frame time>
+```
+- **No clipping.** The service paints the surround in the page's background colour (`bgcolor`; measured corner colour 11,15,24 against 11,16,22 asked, through JPEG compression). Rev 1's circular clip is withdrawn: on the orthographic picture the data's edge lay between 0.976 and 0.989 of the half-width depending on direction, so any circle would have cut valid imagery or shown surround.
+- **The box is not final.** At ±5,440,000 m the data's edge reached 0.99 to 1.002 of the half-width, so the disk touches the frame and may lose a pixel at the west edge. Stage 1 fixes a slightly wider box and records, from the transparent check image, that the data's edge is inside the frame on every side.
+- **No silent switch.** If this request fails, the hub keeps the last good picture or the page says none is available. A different projection is never substituted; changing the request is a code change and a review.
+- **What the page may say:** "shown in the geostationary projection EUMETSAT's viewer uses for Meteosat at 0°". **Not** "exactly as the satellite sees it": the definition's height and longitude are nominal, and its match to the instrument's real viewing geometry was not verified.
+- **Not verified:** that a projection defined in the viewer's file, and absent from the capabilities list, will stay available; where EUMETSAT documents it.
+
+## 4. Frame time (GPT 1)
+- **One rule, no exception:** a frame is published only if the response's `Warning` header names a served time **equal to** the time requested, on the delivered JPEG and on the check image.
+- **A different served time: rejected.** Nothing is published; the run is recorded as "served a different frame".
+- **No header: not published either.** The pointer to the current verified frame does not move, and no requested time is ever shown as an observation time. The run is recorded as "served time not confirmed", and the page keeps showing the last verified frame with its own time.
+- **No alternative verification is proposed.** Nothing else in the response states which frame was drawn, and comparing pictures cannot prove it (two renderings of one frame differ; two frames ten minutes apart can look alike). If stage 1 or production shows that a Worker does not reliably receive the header for this layer (the Dust record has it absent in one outside probe and present in production), **the feature returns to review before any build**; the rule is not weakened. Rev 1's "Frame requested" label is withdrawn for this feature.
+- **Wording:** the page says **"Source frame time"**, with the explanation that the instrument scans the disk in about ten minutes, south to north, so different parts were observed at different moments. It states no scan start or end. What EUMETSAT's time marks (start, end or a nominal slot) is not established; if stage 1 finds EUMETSAT's own statement, the wording is revised and reviewed.
+
+## 5. Validating the picture that is displayed (GPT 2)
+Rev 1 checked a small PNG and the JPEG's header. That does not show the JPEG decodes or is not blank. Proposed instead:
+
+1. **Decode the delivered JPEG itself, in full, in the hub**, before it is stored. A Worker has no built-in image decoder, so this needs a JavaScript JPEG decoder carried inside `worker.js`. It must handle **progressive** JPEG (what the service sends) and must fail on a truncated or damaged file instead of filling the gap. Candidate: `jpeg-js` (to confirm: licence, progressive support, behaviour on damaged input). The exact library and version are named in the build packet.
+2. **Checks on the decoded pixels:** 2048 × 2048; the four corners match the background colour asked for, within a tolerance for compression; inside the disk the picture is not blank or flat (spread of brightness and number of distinct colours above floors).
+3. **The small transparent PNG stays as a second, separate check:** it is decoded in full (PNG carries checksums); its transparent area gives the disk's shape for **this** run. The JPEG's surround must fall where the PNG is transparent, and coarse block averages of the two must agree. Thresholds are relative to the same run's check image; **no fixed disk fraction is hard-coded.**
+4. **Thresholds come from fixtures,** not from one measurement: day, night, dusk and a deliberately damaged set (truncated, blank, wrong size, an XML answer, a different frame). Each threshold is stated with the sample it came from.
+
+**Limits, stated:**
+- It shows the file decodes with that decoder, has the expected shape and is not blank. It does not show the picture is meteorologically right, or that a browser will decode it identically.
+- Agreement with the PNG is coarse by nature: in the pane, the JPEG drawn down to 256 px differed from the 256 px PNG by 17.9 levels a channel on average.
+- **Processor time and memory for a 2048 px progressive decode in a Worker are not measured.** If they do not fit, the options are a smaller delivered picture or a different delivered format the hub can verify, and the choice returns to review. The page also decodes before showing and says so if it cannot; that is display handling, not validation.
+
+## 6. Keeping the last good picture (GPT 4)
+- **No age-based lifecycle rule on this feature's pictures.** Rev 1's rule could have deleted the current picture during a long outage.
+- The hub keeps a small list of the pictures it holds, with the time each stopped being current or previous.
+- **A picture is deleted only when all three hold:** it is neither current nor previous; it left that role at least 24 hours ago (the grace period, Chad's to set, D3); and the deletion happens in a run that has just published a newer verified frame. So during an outage nothing is deleted, however long it lasts.
+- **A reader who declined a newer frame** already holds the picture's bytes in the page, and its address never changes and is cached as immutable; the grace period covers a reload or a slow connection.
+- Steady state at 10 minutes and 24 hours: about 146 pictures, about 95 MB. Deleting objects is free of charge.
+
+## 7. What the page says, and on what evidence (GPT 5)
+Three facts are kept apart in the hub's record and on the page:
+
+| Fact | Values |
+|---|---|
+| **Source check** (the last attempt to read which frames exist) | succeeded at HH:MM, newest listed frame HH:MM · **failed** at HH:MM |
+| **Collection** of the newest listed frame | collected and verified · failed (served a different frame / served time not confirmed / not a picture / failed validation / no answer) · not attempted |
+| **Displayed frame** | its source frame time and its age, counting up |
+
+**Wording, each line tied to the evidence it needs:**
+
+| Shown | Only when |
+|---|---|
+| "Current: the newest frame the source lists" | the last source check succeeded and the displayed frame is that newest frame |
+| "Waiting for the next frame" | the last source check succeeded, lists nothing newer, and the newest frame is younger than the provisional limit |
+| "The source has listed nothing newer since HH:MM" | the last source check **succeeded** and the newest listed frame is older than that limit |
+| "We could not check the source at HH:MM. Whether a newer frame exists is unknown." | the last source check failed. **Never worded as a source delay** |
+| "A newer frame (HH:MM) is listed, but our collection failed. Showing HH:MM." | source check succeeded, collection of the newer frame failed |
+| "No verified picture is available" | nothing verified is held |
+
+- **Everything on the page describes the displayed picture:** its source frame time, its age, its credits. When a newer verified frame exists and the reader has not chosen it, one separate line says so ("A newer frame, HH:MM UTC, is available. Show it."), and nothing else changes until they do.
+- A successful source check still reads a cached document; the record keeps the check time and the cache age.
+- **Limits are provisional.** The stage 1 log is preliminary evidence about typical delay, not a guaranteed bound; the page's wording says what was listed and when, and never promises when the next frame will come.
+
+## 8. Costs (GPT 6)
+**Official prices, read 19 Nov 2026 from Cloudflare's pricing pages:** Workers Paid has a minimum charge of $5 a month; 10 million requests a month included, then $0.30 a million; 30 million CPU milliseconds a month included, then $0.02 a million; no charge for duration. R2 Standard: $0.015 a GB-month, Class A $4.50 a million, Class B $0.36 a million; free each month: 10 GB-month, 1 million Class A, 10 million Class B; DeleteObject is free; ListObjects and PutObject are Class A, GetObject and HeadObject are Class B; no egress charge. **These allowances are shared by everything on the account; the account's present usage was not read.**
+
+**Per new frame (still, 2048 px, every 10 minutes: up to 144 a day, about 4,320 a month):**
+
+| Item | Per frame | Per month | Against |
+|---|---|---|---|
+| Hub invocations | none added: the existing five-minute trigger is reused | 0 | 10 M requests |
+| Reads from EUMETSAT | 1 capabilities (5.9 KB compressed), 1 JPEG (about 0.66 MB), 1 check PNG (about 0.13 MB, measured) | about 3.4 GB downloaded | EUMETSAT's service; whether outbound reads are billed by Cloudflare was not read |
+| Stored objects written (Class A) | picture 1, pointer 1, held-list 1 | about 13,000 | 1 M |
+| Stored objects read by the hub (Class B) | pointer 1, held-list 1 per run | about 8,600 | 10 M |
+| Deletes | 1 | about 4,300 | free |
+| Storage | | about 95 MB steady (24 h grace) | 10 GB |
+| **Processor time** | **not measured**: hashing 0.8 MB, decoding one PNG and one 2048 px progressive JPEG | at 2 s a frame: 8.6 M CPU-ms (29% of the allowance); at 5 s: 21.6 M (72%) | 30 M CPU-ms, shared |
+
+**Per reader, while the page is open and visible:**
+
+| Item | Rate | Note |
 |---|---|---|
-| 2048 px JPEG, 11:00 UTC (day over Africa) | 660,271 | 9.1 s |
-| 2048 px JPEG, 16:20 UTC (dusk) | 662,368 | 9.8 s |
-| 2048 px JPEG, 00:00 UTC (night) | 563,095 | 17.0 s |
-| 2048 px JPEG, 16:20, latitude-longitude grid | 667,379 | 5.4 s |
-| 1024 px JPEG, 11:00 | 188,572 | 8.7 s |
-| **4096 px JPEG, 11:00** | 2,278,433 | **65.3 s** |
-| 1024 px PNG, 11:00, transparent outside the disk | 1,840,439 | 38.9 s |
+| Status read (pointer and state) | one a minute | one request each; the hub can answer from a short in-memory copy so most do not read storage |
+| Picture | one per frame shown, about 0.66 MB | one request and one Class B read, unless served from Cloudflare's cache |
+| Example: 1,000 reader-hours a month | about 66,000 requests | 0.7% of the request allowance |
 
-The disk fills the frame: the non-white share of the orthographic picture was 0.766, against 0.76 for a circle touching the content's own edges.
+- **Expected incremental cost: $0, on the condition that the account's combined use stays within the shared allowances.** The one item that could plausibly leave them is processor time: 10 million CPU-ms over the allowance costs $0.20. Nothing here needs a new service or plan.
+- **To read before a build (stage 1, read-only):** the account's present requests, CPU milliseconds, Class A and B operations and stored GB for the month.
+- **Later loop:** a 1024 px copy per frame adds one EUMETSAT read, one Class A write and about 0.19 MB per frame (about 27 MB for 24 hours), and its own decode cost.
+- **Paid alternative, not recommended:** drawing our own pictures from Level 1c data on a rented server (native 1 km, our own tiles for deep zoom); a monthly server charge not priced here, a far larger build, and EUMETSAT's one-hour licensing of Level 1 image data to resolve.
 
-## 3. Delivered picture against the native data
-- Native: 1 km at the point under the satellite, so the disk is roughly 11,000 pixels across. Delivered at 2048 px the disk is about 6 km a pixel at its centre: about one fifth of the native detail.
-- 4096 px (about 3 km a pixel) took 65 seconds to draw and is 2.3 MB. **Not recommended** for routine collection: it is slow enough to fail under load and four times the bytes for every visitor.
-- **Zoom in the first release is therefore zoom into the 2048 picture** (to one picture pixel per screen pixel, and no further without saying the picture is being enlarged). Deeper zoom would need tiles fetched on demand, which breaks "fetch each frame once" and is left out.
-- **The disk view is the service's orthographic redraw, not the satellite's exact perspective.** From geostationary height the visible edge is about 81° from the centre; an orthographic view puts 90° at the rim, so the picture has a thin empty ring and slightly different proportions near the edge. The page would say "drawn as a disk centred on 0°N 0°E", never "as the satellite sees it", unless D2 chooses the exact view.
+## 9. Page layout
+`space.html` and `space.js` (two new page files).
+1. Title: Earth from Space.
+2. Viewpoint: "Africa, the Atlantic and Europe, as Meteosat at 0° longitude views them."
+3. The picture: the disk on the page's own background, never stretched; alternative text gives product, source frame time and state.
+4. Information strip, always visible: satellite and instrument; product and a plain colour description ("By day, close to natural colour. By night, cloud seen in infrared over a fixed NASA map. **The city lights are not tonight's.**"); **source frame time** in UTC and its age; the state lines of section 7.
+5. Controls: zoom in, zoom out, reset; drag when zoomed; keyboard operable; zoom stops at one picture pixel per screen pixel; link to the original at EUMETSAT.
+6. "How this image is made" (closed by default): scanning, band combination by day and by night, **not an instantaneous photograph**, what is and is not known about the frame time, the static night background, and what Mother Earth changed (asked the service for this projection, size and surround colour; nothing else).
+7. Credits: "Contains modified EUMETSAT Meteosat data 2026 · GeoColour RGB - MTG - 0 degree · CC BY 4.0" with links; "Night-time background: NASA Black Marble"; a Sources link. EUMETSAT and NASA do not endorse Mother Earth.
 
-## 4. What the hub would do (reusing the Dust RGB pattern)
-1. Every 10 minutes (the existing five-minute trigger; no new trigger), read the capabilities document and take this layer's newest advertised time. If it is the frame already held, stop: **source not updated yet**, which is normal.
-2. Request that exact time: the 2048 px JPEG, and a small transparent PNG of the same view (about 256 px; size to be measured) used only for checking.
-3. **Validate before publishing:** content type is an image (an XML answer is a failure); the JPEG's own header gives 2048 × 2048 and the file is complete; size within bounds; the `Warning` header's time equals the time asked for; the small PNG decodes in the Worker (a Worker can decode PNG, not JPEG), its opaque share matches the expected disk (about 0.77), and the disk is not blank or one flat colour.
-4. Write the picture under a key that names product, size and frame time and never changes; then move the pointer with a conditional write. A newer pointer is never replaced by an older frame.
-5. On any failure: keep the last valid frame and its true time; record whether **the source had nothing newer** or **our collection failed**.
-6. **Times kept apart:** frame time (EUMETSAT's), advertised-by time (when we first saw it listed), retrieved time (ours).
-7. **Frame-time label rule** (as accepted for Dust): "Frame" only when the header named the requested time; otherwise "Frame requested". In the browser the header was present on every response today; in a Worker it was absent in one probe and present in production (Dust record), so both cases must be handled.
-8. Retention: the current and previous frames for a still; the last 24 hours once a loop exists; older frames removed by a storage lifecycle rule (the bucket already has such rules for other prefixes).
-9. Gate: a plain variable (absent = no request at all). Outside layers, cells, history and health, as Dust is.
+Narrow screens: picture first at full width, strip beneath, controls in reach, disclosure and credits below.
 
-**The page never contacts EUMETSAT.** Nothing on Earth now loads or processes this imagery; the globe's layer choices are untouched because this is a separate page.
+## 10. Navigation
+- Four tabs on main today; the parked Animals branch adds one; this adds one. The header must work with **five and with six**.
+- Full label "Earth from Space" where it fits; a shorter label at compact widths; at phone width the tab row scrolls sideways with the current tab in view. Breakpoints come from measurement on the branch.
+- The tab and Menu entry go on every page.
+- The header suites take the tab list as a parameter and run with five and with six tabs, **with the real fonts and with the fallback fonts** (GPT).
+- Animals and this branch both edit the tab row and the header suites: whichever merges second merges main first and reruns them.
 
-## 5. Page layout
-`space.html` with `space.js` (two new page files; the served-hash check grows by two).
+## 11. Plan
+Stages 1 to 3 need Chad's go. **Every action on production needs his own Approve line: a hub deploy, a production probe route or its use, any write to production storage, a variable, a schedule, a merge. A private page does not make any of those non-production.**
 
-1. **Title:** Earth from Space.
-2. **Viewpoint line:** "Africa, the Atlantic and Europe, from Meteosat's position 36,000 km above the equator at 0° longitude."
-3. **The picture:** the disk on the page's dark background, clipped to a circle just inside the data's edge so the white surround is not shown; never stretched; alternative text gives product, frame time and state.
-4. **Information strip, always visible beside or under the picture:**
-   - Satellite and instrument: Meteosat Third Generation, Flexible Combined Imager (FCI).
-   - Product: GeoColour RGB. "By day, close to natural colour. By night, cloud seen in infrared over a fixed NASA map of city lights. **The city lights are not tonight's.**"
-   - Frame time in UTC and its age, counting up.
-   - State: one of **Current** · **Waiting for the next frame** (the source has published nothing newer; normal up to a stated limit) · **Delayed at the source** (past that limit) · **Our last collection failed: showing the frame from HH:MM UTC** · **No picture available**.
-   - A new frame is offered, not swapped in under the reader: "A newer frame (HH:MM UTC) is available. Show it."
-5. **Controls:** zoom in, zoom out, reset; drag to move when zoomed; keyboard operable; "Open the original at EUMETSAT" (the catalogue entry and EUMETView's viewer).
-6. **"How this image is made"** (closed by default): the instrument scans the disk from south to north in about ten minutes and measures 16 bands; EUMETSAT combines visible bands by day and infrared by night into one processed picture; it is **not an instantaneous photograph**; what the frame time marks; the night side's static background; what Mother Earth changed (asked the service for a disk view, clipped the surround, resized for the screen).
-7. **Credits:** "Contains modified EUMETSAT Meteosat data 2026 · GeoColour RGB - MTG - 0 degree · CC BY 4.0", links to the catalogue entry and the licence; "Night-time background: NASA Black Marble"; the method's origin (CIRA and NOAA's RAMMB, per the catalogue); a link to our Sources page. EUMETSAT and NASA do not endorse Mother Earth.
-
-**Narrow screens:** picture first at full width, strip under it, controls reachable by thumb, disclosure and credits below. A 1024 px copy for phones is a later saving, not in the first release (section 6).
-
-## 6. Navigation
-- Today main has four tabs (Earth now · Timeline · Moon · Sun). The parked Animals branch adds a fifth. This adds one more, so the header must work with **five now and six later**.
-- "Earth from Space" is the longest label. Proposed: full label where it fits; "From space" at the compact widths; at phone width the tab row scrolls sideways with the current tab brought into view, instead of shrinking six labels. The exact breakpoints come from measurement on the branch, both font sets, as `desktop-overflow` does now.
-- The tab and the Menu entry go on every page (World View, Timeline, Moon, Sun, Sources).
-- **Branch dependency, stated now:** Animals and this branch both edit the tab row and both change the header suites' expectations. Whichever merges second must merge main first and rerun the header suites. The new suite takes the tab list as a parameter and is run with and without the Animals tab, so the six-tab header is tested before Animals is released.
-- Tab order is Chad's (D5).
-
-## 7. Costs
-Prices as read on 19 Nov from Cloudflare's billing page and secondary summaries; to confirm on Cloudflare's pricing pages before a build. The account's present usage was not read.
-
-| | Still only (every frame, 2048 px) | With a loop (adds a 1024 px copy per frame, 24 h kept) |
+| Stage | What | Touches production? |
 |---|---|---|
-| Requests to EUMETSAT a day | 144 capability reads (35 KB each), up to 144 pictures, up to 144 small check images | up to 144 more pictures |
-| Downloaded from EUMETSAT a day | about 95 MB | about 125 MB |
-| Hub storage, steady | about 1.3 MB (two frames) | about 120 MB (24 h of both sizes) |
-| Storage writes a month | about 13,000 | about 17,000 |
-| Each page view | one pointer read and one picture, about 0.6 MB | a three-hour loop is 18 frames: about 3.4 MB and roughly 75 MB of decoded pictures in the browser at 1024 px |
-| Allowances | Workers Paid includes 10 million requests a month; storage has 10 GB, 1 million writes and 10 million reads a month free; no charge for data sent out | same |
-| **Expected new monthly cost** | **$0** | **$0** |
+| 0 | This document, GPT's review, Chad's decisions | no |
+| 1 | Read-only, from the browser pane only: a log of when frames are listed (D2 sets how long and when), kept as observations in `reviews/evidence/`; the final request box and its edge measurement; sample pictures across day, night and dusk captured as fixtures; EUMETSAT's documentation of the frame time, if any; the account's usage figures read from the dashboard | no |
+| 2 | Branch from current main. Hub collector with its suite and breaks (different served time, no header, XML answer, truncated file, damaged scan, wrong size, blank disk, mismatched surround, older over newer, failure after a good frame, deletion during an outage). Decoder choice with measured processor time and memory on the fixtures. `space.html`, `space.js`, the tab on every page, page suite (every state in section 7, a declined newer frame, zoom, keyboard, narrow widths, five and six tabs, both font sets, reduced motion). Sources section and REGISTER draft | no |
+| 3 | **Private preview on local fixtures only:** the real `worker.js` behind a local port with EUMETSAT stubbed by the stage 1 fixtures (the fixture-hub pattern already in the repo), and the branch page pointed at it. No production storage, route or probe | **no** |
+| 4 | Release, each step on its own Approve line: hub deploy with the gate unset → gate on → first verified frames read back (this is also the first real test of which headers a Worker receives) → REGISTER → page merge → served-hash check → GPT smoke | yes, each step |
+| 5 | The loop, as its own proposal after the still has run for some days | later |
 
-- **If old frames were never removed** the store would grow about 2.8 GB a month and pass the free 10 GB in about three months, at $0.015 a GB-month after that. Hence the lifecycle rule in section 4.
-- A loop at 2048 px is not proposed: 18 frames are about 12 MB to download and roughly 300 MB decoded, too much for a phone.
-- **Load on EUMETSAT's free service:** about 290 to 430 small requests a day from one address. No usage policy was found; if GPT or Chad prefers a lighter footprint, collecting every 30 minutes cuts it by two thirds and still shows a picture 20 to 50 minutes old.
-- **One paid alternative, not recommended:** collect the instrument's Level 1c data from EUMETSAT's Data Store and draw our own pictures on a small rented server. Advantage: native 1 km detail, the satellite's exact perspective, our own tiles for deep zoom. Cost: a server every month (not priced), a much larger build, and a licence question, because EUMETSAT's licensing guide lists one-hour licences for Meteosat Level 1 image data (REGISTER, Dust entry). It buys zoom, which the first release does not need.
+**Rollback:** remove the gate variable (collection stops; held pictures stay); revert the page merge.
 
-## 8. Implementation plan
-Each stage ends with a packet for GPT. Stages 1 to 3 need Chad's go; every production step needs his own Approve line.
+**Decisions for Chad**
 
-| Stage | What | Production? |
-|---|---|---|
-| 0 | This document, GPT review, Chad's decisions D1 to D7 | no |
-| 1 | **Read-only measurement:** a 24-hour log of when each frame is advertised (delay and gaps), sizes across a day, one Worker-side read through the existing admin probe pattern to see which headers reach a Worker, the size of the small check image, EUMETSAT's documentation on what the frame time marks. Thresholds for "waiting" and "delayed" come from this log | the Worker probe needs a hub that has the probe route, so it follows stage 2's hub review or is done from the pane only (D7) |
-| 2 | Branch from current main: hub collector and routes with a suite and breaks (substituted time, XML answer, truncated file, wrong size, blank disk, missing header, older-over-newer, failure after a good frame); `space.html`, `space.js`, the tab on every page; page suite (states, times, zoom, keyboard, narrow widths, five and six tabs, reduced motion); Sources section; REGISTER draft | no |
-| 3 | Private preview: the branch page against a hub copy of real frames, as earlier live candidate checks were done | no |
-| 4 | Release, each on its own Approve line: hub deploy (gate unset) → lifecycle rule → gate on → first frames read back → REGISTER → page merge → served-hash check → GPT smoke | yes, each step |
-| 5 | The loop, as its own proposal after the still has run for some days: play, pause, scrubber, the shown frame's time, gaps disclosed, no invented frames, no autoplay, reduced motion respected, bounded frames and memory | later |
-
-**Rollback:** remove the gate variable (collection stops; the page says no picture is available); revert the page merge. Stored frames expire by the lifecycle rule.
-
-## 9. Decisions for Chad
 | | Decision | Claude's recommendation |
 |---|---|---|
-| D1 | Source and product | GeoColour from EUMETView, as above |
-| D2 | The disk view: the service's orthographic redraw (works today, not in its advertised list); or the latitude-longitude picture redrawn by our own page into the satellite's exact perspective (advertised projection, more code, a reprojection of ours to disclose) | start with the service's disk; build the fallback only if stage 1 shows the disk request is unreliable |
-| D3 | Cadence | every frame (10 minutes) |
-| D4 | Size | 2048 px only for the first release |
-| D5 | Tab label and order | "Earth from Space", placed second, after Earth now |
-| D6 | A computed day and night line on the picture, to mark where the static night background begins | not in the first release; the text explains it. A computed line would be labelled as computed |
-| D7 | Whether stage 1's Worker-side header check waits for the hub branch | yes; the pane log does not need it |
+| D1 | Tab label and order | "Earth from Space", second, after Earth now |
+| D2 | How the stage 1 log is collected: it needs the browser pane, so the Mac must be on. One 24-hour run, or several shorter runs at different times of day | three runs of about three hours (morning, afternoon, night), since the Mac is not left on |
+| D3 | Grace period before an old picture may be deleted | 24 hours |
+| D4 | Cadence | every frame (10 minutes); 30 minutes if a lighter footprint on EUMETSAT's free service is preferred |
 
-## 10. Not verified
-- **What the frame time marks** (start of the 10-minute scan, its end, or a nominal slot) and whether scan start and end are available anywhere for this product. The map service supplies one time only.
-- That the orthographic disk request will keep working: it is not in the advertised projection list.
-- Publication delay and gaps over a full day; frame sizes over a full day; behaviour during an EUMETSAT outage.
-- Which headers reach a Worker for this layer.
-- Any usage policy for automated reads of the map service.
-- EUMETSAT's Data Policy document itself (not read by Claude; the catalogue's licence statement is what this rests on). Whether NASA's Black Marble inside the composite carries any condition beyond credit.
-- The meaning of the seven service-specific projection codes.
-- Cloudflare's prices on its own pages; the account's present usage.
+## 12. Changes in rev 2 (GPT's six points)
+1. **Timestamp:** one rule. A different served time is rejected; without the header nothing is published and the pointer does not move; no alternative verification; "Source frame time"; no scan start or end stated (section 4).
+2. **Validation:** the delivered JPEG is decoded in full and checked; the PNG is an additional check; thresholds are relative to the same run and set from fixtures; limits stated; decode cost unmeasured (section 5).
+3. **Projection:** the viewer's own geostationary definition `EPSG:900003` replaces the unlisted orthographic request; full request recorded; evidence file added; no clipping; no silent switch; no "exact perspective" claim (section 3).
+4. **Last good picture:** no age-based lifecycle rule; deletion only after a newer verified frame, with a grace period (section 6).
+5. **Status:** source check, collection outcome and displayed frame kept apart; "delayed at the source" wording needs a successful check; everything describes the displayed picture (section 7).
+6. **Costs and stages:** official prices; processor time, reader polling, shared allowances and the measured check-image size included; $0 qualified; stage 3 is local fixtures only; production probes and storage writes moved to stage 4 behind Approve lines (sections 8 and 11). The log is described as preliminary evidence.
+
+## 13. Not verified
+- What the source frame time marks; whether scan start and end exist for this product.
+- That `EPSG:900003` stays available; its match to the instrument's real geometry; the meaning of codes 70201 to 70213.
+- Whether a Worker reliably receives the `Warning` header for this layer.
+- Processor time and memory to decode the picture in a Worker; the decoder's behaviour on damaged files.
+- Listing delay and gaps over a day; sizes over a day; behaviour in an EUMETSAT outage.
+- Any usage policy for automated reads; whether Cloudflare bills outbound reads.
+- EUMETSAT's Data Policy document itself; any condition on the Black Marble background beyond credit.
+- The account's present usage against the shared allowances.
 - A real phone and a screen reader.
-
-## 11. Later viewpoints
-GOES, Himawari and DSCOVR/EPIC are not investigated here. Each has its own position, products, schedule and terms, and would be labelled as a different viewpoint on the same page.
-
-**Evidence:** values in section 2 are from the browser pane on 19 Nov 2026 between 16:42 and 17:02 UTC (pane clock), 14 GetMap requests, 3 projection probes at 256 px and about 35 capability reads in all. No picture was saved; sizes and statistics were computed in the pane.

@@ -1,0 +1,404 @@
+{
+ "note": "Read-only requests from the browser pane on 19 Nov 2026 (pane clock, UTC). No picture was saved; sizes, hashes and statistics were computed in the pane. Session 1 hashes are the first 16 hex digits only (the full value was not kept). Statistics are from pictures drawn down to the stated size in the pane.",
+ "catalogue": {
+  "url": "https://user.eumetsat.int/catalogue/EO:EUM:DAT:0913",
+  "read_at": "2026-11-19T16:44:57Z",
+  "signed_in": false,
+  "title": "GeoColour RGB - MTG - 0 degree",
+  "data_policy": "Free and unrestricted - CC-BY-4.0",
+  "spatial_resolution": "1 km",
+  "temporal_extent": "24 Sep 2024–Now",
+  "processing_level": "Visualisation",
+  "satellites": "MTG",
+  "sensors": "FCI (Imager)",
+  "lat_lon": "-77° to 77°, -77° to 77°",
+  "credit_sentence": "When GeoColour imagery and animation are used outside of EUMETView, both EUMETSAT and NASA should be given credit.",
+  "night_sentence": "Note that the Black Marble is a static layer, and it doesn't reflect the actual conditions of the city lights.",
+  "explore_link": "https://view.eumetsat.int/productviewer/productDetails/mtg_fd:rgb_geocolour",
+  "access_tab": "EUMETView only"
+ },
+ "capabilities": {
+  "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetCapabilities&version=1.3.0&namespace=mtg_fd",
+  "bytes": 34860,
+  "layer": {
+   "name": "mtg_fd:rgb_geocolour",
+   "title": "Geo Colour RGB - MTG-I - 0 degree",
+   "crs_on_layer": [
+    "EPSG:4326",
+    "CRS:84"
+   ],
+   "bbox_crs84": [
+    -81.2777938842773,
+    -77.3506393432617,
+    81.2807235717773,
+    77.3563919067383
+   ],
+   "time_dimension": "2024-09-23T00:00:00.000Z/<newest>/PT10M",
+   "nearestValue": "1",
+   "style": "raster"
+  },
+  "crs_on_root_layer": [
+   "EPSG:4326",
+   "EPSG:3857",
+   "EPSG:3995",
+   "EPSG:70201",
+   "EPSG:70203",
+   "EPSG:70205",
+   "EPSG:70207",
+   "EPSG:70209",
+   "EPSG:70211",
+   "EPSG:70213",
+   "EPSG:3976",
+   "CRS:84"
+  ],
+  "read_at_17:13:32": {
+   "default_time": "2026-11-19T16:50:00Z",
+   "cache-control": "public, max-age=120",
+   "age": "177",
+   "x-cache": "HIT Varnish",
+   "x-rate-limit-limit": "20, 20, 20",
+   "x-rate-limit-context": "wms.getcapabilities, wms, wms",
+   "x-rate-limit-action": "Delay excess requests 10000ms, Delay excess requests 1000ms, Delay excess requests 1000ms",
+   "x-concurrent-limit-user": "8"
+  }
+ },
+ "newest_advertised_time_log": {
+  "method": "capabilities read every 30 s from the pane; the document is served through a cache (max-age 120 s; one read had age 177 s), so each sighting can lag the service by a few minutes",
+  "observations": [
+   [
+    "2026-11-19T16:42:15Z",
+    "16:20 newest"
+   ],
+   [
+    "2026-11-19T16:49:37Z",
+    "16:20 still newest (last read before the change)"
+   ],
+   [
+    "2026-11-19T16:50:07Z",
+    "16:30 first seen"
+   ],
+   [
+    "2026-11-19T17:01:24Z",
+    "16:30 still newest; 16:40 not yet listed"
+   ],
+   [
+    "2026-11-19T17:13:32Z",
+    "16:50 newest"
+   ]
+  ]
+ },
+ "viewer_config": {
+  "url": "https://view.eumetsat.int/assets/data/config.json",
+  "read_at": "2026-11-19T17:16:59Z",
+  "bytes": 8754,
+  "sha256": "e4f8369eb04ae420f6a1dd9067ac94c7937929fcd86ea6ef5a456fc001f83a8a",
+  "found_via": "EUMETView's product viewer loads map.projections from this file (app bundle app.e4e1fc2d6cbe5f6dfbd7.bundle.js)",
+  "projections": [
+   {
+    "id": "EPSG:4326",
+    "name": "Geographic"
+   },
+   {
+    "id": "EPSG:900003",
+    "name": "GEOS: MSG FES, MTG FD",
+    "extent": [
+     -5440000,
+     -5440000,
+     5440000,
+     5440000
+    ],
+    "definition": "+proj=geos +h=35785831.0 +lon_0=0"
+   },
+   {
+    "id": "EPSG:900004",
+    "name": "GEOS: MSG RSS",
+    "definition": "+proj=geos +h=35785831.0 +lon_0=9.5"
+   },
+   {
+    "id": "EPSG:900005",
+    "name": "GEOS: MSG IODC",
+    "definition": "+proj=geos +h=35785831.0 +lon_0=41.5"
+   },
+   {
+    "id": "EPSG:3857",
+    "name": "Spherical Mercator"
+   },
+   {
+    "id": "EPSG:3995",
+    "name": "North Polar"
+   },
+   {
+    "id": "EPSG:3976",
+    "name": "South Polar"
+   }
+  ]
+ },
+ "requests_session_2": [
+  {
+   "key": "geos_jpg2048bg",
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=EPSG:900003&bbox=-5440000,-5440000,5440000,5440000&width=2048&height=2048&format=image/jpeg&bgcolor=0x0B1016&time=2026-11-19T16:50:00Z",
+   "status": 200,
+   "content-type": "image/jpeg",
+   "bytes": 664557,
+   "ms": 16055,
+   "at": "2026-11-19T17:17:30Z",
+   "sha256": "4e760553f874fcf38f3a59308f0a1e7ea66a7f70210c87c22d15b44282c6c276",
+   "warning": "99 Nearest value used: time=2026-11-19T16:50:00.000Z ISO8601 (mtg_fd:rgb_geocolour)",
+   "cache-control": "max-age=604800, must-revalidate",
+   "x-control-flow-delay-ms": "0",
+   "at_512px": {
+    "corner_rgb": [
+     11,
+     15,
+     24
+    ],
+    "centre_rgb": [
+     105,
+     104,
+     76
+    ]
+   }
+  },
+  {
+   "key": "geos_png256t",
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=EPSG:900003&bbox=-5440000,-5440000,5440000,5440000&width=256&height=256&format=image/png&transparent=true&time=2026-11-19T16:50:00Z",
+   "status": 200,
+   "content-type": "image/png",
+   "bytes": 131868,
+   "ms": 5607,
+   "at": "2026-11-19T17:17:14Z",
+   "sha256": "f46b203b487fdb47f5c1eae4640c6f0ada986e59a167752b5982bd004b810c5b",
+   "warning": "99 Nearest value used: time=2026-11-19T16:50:00.000Z ISO8601 (mtg_fd:rgb_geocolour)",
+   "x-control-flow-delay-ms": "2258",
+   "alpha": {
+    "non_transparent_share": 0.7817,
+    "edge_radius_as_fraction_of_half_width": {
+     "min": 0.99,
+     "max": 1.002,
+     "by_angle_deg": [
+      [
+       0,
+       0.998
+      ],
+      [
+       45,
+       0.994
+      ],
+      [
+       90,
+       0.99
+      ],
+      [
+       135,
+       0.994
+      ],
+      [
+       180,
+       1.0
+      ],
+      [
+       225,
+       0.994
+      ],
+      [
+       270,
+       0.992
+      ],
+      [
+       315,
+       0.994
+      ]
+     ]
+    }
+   }
+  },
+  {
+   "key": "jpg2048 (orthographic)",
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=2048&height=2048&format=image/jpeg&time=2026-11-19T16:50:00Z",
+   "status": 200,
+   "content-type": "image/jpeg",
+   "bytes": 651506,
+   "ms": 6259,
+   "at": "2026-11-19T17:13:38Z",
+   "sha256": "4540781eb89e4ed82eb69003f3c626d01c9748f411e26b9624b04fb28a1aeac2",
+   "warning": "99 Nearest value used: time=2026-11-19T16:50:00.000Z ISO8601 (mtg_fd:rgb_geocolour)",
+   "x-control-flow-delay-ms": "44",
+   "jpeg_structure": {
+    "starts_with_SOI": true,
+    "ends_with_EOI": true,
+    "markers_before_first_scan": [
+     "FFE0:16",
+     "FFDB:67",
+     "FFDB:67",
+     "FFC2:17",
+     "FFC4:27",
+     "FFC4:24",
+     "FFDA:12"
+    ],
+    "frame_type": "FFC2 (progressive)",
+    "precision_bits": 8,
+    "width": 2048,
+    "height": 2048,
+    "components": 3,
+    "sampling": [
+     "22",
+     "11",
+     "11"
+    ],
+    "restart_markers": 0
+   }
+  },
+  {
+   "key": "png256t (orthographic)",
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=256&height=256&format=image/png&transparent=true&time=2026-11-19T16:50:00Z",
+   "status": 200,
+   "bytes": 109073,
+   "ms": 6926,
+   "at": "2026-11-19T17:14:06Z",
+   "sha256": "49a65c39b9f2935d4557102cfaadb5072994a31db3f2517fe986b552b4622620",
+   "warning": "99 Nearest value used: time=2026-11-19T16:50:00.000Z ISO8601 (mtg_fd:rgb_geocolour)",
+   "x-control-flow-delay-ms": "3584",
+   "alpha": {
+    "opaque_share": 0.7651,
+    "partly_transparent_share": 0.0
+   }
+  },
+  {
+   "key": "png1024t (orthographic)",
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=1024&height=1024&format=image/png&transparent=true&time=2026-11-19T16:50:00Z",
+   "status": 200,
+   "bytes": 1830785,
+   "ms": 53073,
+   "at": "2026-11-19T17:14:59Z",
+   "sha256": "b7bb8ff1284d3ae82563318ae4d4df3f39c75c665e7a344da273e6ac6f999b76",
+   "warning": "99 Nearest value used: time=2026-11-19T16:50:00.000Z ISO8601 (mtg_fd:rgb_geocolour)",
+   "x-control-flow-delay-ms": "5378",
+   "alpha": {
+    "edge_radius_as_fraction_of_half_width": {
+     "min": 0.9756,
+     "max": 0.9893,
+     "by_angle_deg": [
+      [
+       0,
+       0.9873
+      ],
+      [
+       45,
+       0.9883
+      ],
+      [
+       90,
+       0.9756
+      ],
+      [
+       135,
+       0.9854
+      ],
+      [
+       180,
+       0.9844
+      ],
+      [
+       225,
+       0.9824
+      ],
+      [
+       270,
+       0.9766
+      ],
+      [
+       315,
+       0.9883
+      ]
+     ]
+    }
+   }
+  },
+  {
+   "key": "jpg512bg (orthographic)",
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=512&height=512&format=image/jpeg&bgcolor=0x0B1016&time=2026-11-19T16:50:00Z",
+   "status": 200,
+   "bytes": 53929,
+   "ms": 1983,
+   "at": "2026-11-19T17:15:01Z",
+   "sha256": "8a59ea53da8cf48a38288cf0cf92b5ce837bc4e39ec3c797707d442bc38f303e",
+   "warning": "99 Nearest value used: time=2026-11-19T16:50:00.000Z ISO8601 (mtg_fd:rgb_geocolour)",
+   "corner_rgb": [
+    11,
+    15,
+    24
+   ]
+  },
+  {
+   "key": "agreement of the 2048 JPEG (drawn down to 256 px in the pane) with the 256 px PNG, orthographic, opaque pixels only",
+   "pixels": 50142,
+   "mean_abs_difference_per_channel": 17.9,
+   "max": 244.3,
+   "reading": "a pixel-by-pixel comparison of two separate renderings is loose; only a coarse comparison is usable"
+  }
+ ],
+ "requests_session_1": [
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=EPSG:4326&bbox=-81,-81,81,81&width=2048&height=2048&format=image/jpeg&time=2026-11-19T16:20:00Z",
+   "bytes": 667379,
+   "ms": 5424,
+   "sha256_first16": "12f944e5a4a20ac5",
+   "warning": "99 Nearest value used: time=2026-11-19T16:20:00.000Z ISO8601 (mtg_fd:rgb_geocolour)"
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=EPSG:4326&bbox=-81,-81,81,81&width=1024&height=1024&format=image/png&time=2026-11-19T16:20:00Z",
+   "bytes": 1714641,
+   "ms": 12770,
+   "sha256_first16": "91b9ed4f630f19ac"
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=2048&height=2048&format=image/jpeg&time=2026-11-19T16:20:00Z",
+   "bytes": 662368,
+   "ms": 9780,
+   "sha256_first16": "1e4ba988d678f794",
+   "non_white_share_at_512px": 0.766
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=2048&height=2048&format=image/jpeg&time=2026-11-19T11:00:00Z",
+   "bytes": 660271,
+   "ms": 9071
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=2048&height=2048&format=image/jpeg&time=2026-11-19T00:00:00Z",
+   "bytes": 563095,
+   "ms": 16997
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=1024&height=1024&format=image/jpeg&time=2026-11-19T11:00:00Z",
+   "bytes": 188572,
+   "ms": 8651
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=4096&height=4096&format=image/jpeg&time=2026-11-19T11:00:00Z",
+   "bytes": 2278433,
+   "ms": 65321
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=512&height=512&format=image/jpeg&time=2026-11-19T11:03:00Z",
+   "bytes": 55235,
+   "warning": "99 Nearest value used: time=2026-11-19T11:00:00.000Z ISO8601 (mtg_fd:rgb_geocolour)",
+   "reading": "off-grid time substituted; HTTP 200"
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=512&height=512&format=image/jpeg&time=2026-11-20T11:00:00Z",
+   "status": 200,
+   "content-type": "text/xml;charset=UTF-8",
+   "bytes": 472,
+   "reading": "ServiceExceptionReport with HTTP 200"
+  },
+  {
+   "url": "https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&styles=&layers=mtg_fd:rgb_geocolour&crs=AUTO:42003,9001,0,0&bbox=-6378137,-6378137,6378137,6378137&width=1024&height=1024&format=image/png&transparent=true&time=2026-11-19T11:00:00Z",
+   "bytes": 1840439,
+   "ms": 38909
+  },
+  {
+   "probe": "EPSG:70201, 70203, 70213 at 256 px, bbox ±12,000,000",
+   "reading": "content not a centred disk (boxes 64..255 × 0..174; 0..255 × 0..79; 176..255 × 0..175 of 256); definitions not read"
+  }
+ ]
+}
