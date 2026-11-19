@@ -6,7 +6,7 @@
 <title>Mother Earth — Sources &amp; Details</title>
 <meta name="description" content="Sources, attribution, what each layer measures, observation windows, coverage grades, comparison methods and limitations for Mother Earth.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612181300">
+<link rel="stylesheet" href="style.css?v=202612191000">
 </head>
 <body class="doc">
 <header class="top">
@@ -14,6 +14,7 @@
   <div class="promise">Sources &amp; Details</div>
   <nav class="tabs" aria-label="Views">
     <a href="index.html" data-view="earth">Earth now</a>
+    <a href="space.html" data-view="space" aria-label="Earth from Space"><span class="tfull">Earth from Space</span><span class="tshort">From Space</span></a>
     <a href="timeline.html" data-view="timeline">Timeline</a>
     <a href="moon.html" data-view="moon">Moon</a>
     <a href="sun.html" data-view="sun">Sun</a>
@@ -23,6 +24,7 @@
     <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
     <ul id="menu-list" role="menu">
       <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
+      <li role="none"><a role="menuitem" href="space.html" data-page="space">Earth from Space</a></li>
       <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
       <li role="none"><a role="menuitem" href="moon.html" data-page="moon">Moon</a></li>
       <li role="none"><a role="menuitem" href="sun.html" data-page="sun">Sun</a></li>
@@ -226,6 +228,17 @@
   <p><b>Times.</b> Three times are kept apart. “File updated” is the time SDO’s server gave for the file; it is what this page shows and what the age limit is counted from. “Retrieved” is when our hub fetched it. <b>When the Sun was observed is not stated by the file and is not shown.</b> A picture is shown for at most three hours after its file was updated; after that the globe says “No recent picture”, also in a tab left open.</p>
   <p><b>Our changes.</b> The flat picture is wrapped on a sphere from the disc’s centre and radius, measured in the picture itself, and the tilt of the Sun’s axis toward Earth on that date (calculated; Meeus, <i>Astronomical Algorithms</i>). The outermost edge of the disc, the black sky around it and SDO’s printed caption are not drawn. On 14 Nov 2026 we checked the placement once against the sunspot region positions in NOAA SWPC’s Solar Region Summary for that day.</p>
   <p><b>Credit.</b> Courtesy of NASA/SDO and the AIA, EVE, and HMI science teams. No endorsement by NASA is implied.</p>
+
+  <h2 id="earthview">Earth from Space — EUMETSAT Meteosat GeoColour (observed by EUMETSAT; its own page)</h2>
+  <p><b>What it is.</b> On <a href="space.html">the Earth from Space page</a>, one picture of the side of the Earth that faces a weather satellite at 0° longitude: Africa, the Atlantic, Europe and the Middle East. It is a looking view. It measures nothing and is not part of the globe’s layers, the place panel, search or history.</p>
+  <p><b>Source.</b> EUMETSAT’s “GeoColour RGB - MTG - 0 degree” (<a href="https://user.eumetsat.int/catalogue/EO:EUM:DAT:0913" target="_blank" rel="noopener">EO:EUM:DAT:0913</a>), from the Flexible Combined Imager on Meteosat Third Generation, read from the public EUMETView map service (layer <code>mtg_fd:rgb_geocolour</code>). By day the product is close to natural colour. By night it draws cloud from infrared measurements over NASA’s Black Marble, a fixed map of city lights made on other dates: <b>the lights are not tonight’s</b>.</p>
+  <p><b>The view.</b> Our hub asks the service for its own geostationary projection for this satellite position (<code>EPSG:900003</code>, which the service defines as <code>+proj=geos +h=35785831.0 +lon_0=0</code>), the square from −5,500,000 to 5,500,000 metres each way, 2,048 pixels square, as a JPEG, with the surround painted in one dark colour by the service. The exact request is kept with every frame. We do not describe it as the satellite’s exact perspective: the service drew it.</p>
+  <p><b>“Source frame time.”</b> The service lists frames every ten minutes. Our hub asks for one listed time and publishes the picture <b>only if the service’s own answer names that same time</b> for both the picture and a small check image of the same view. If the answer names another time, or names none, nothing is published and the last verified picture stays. The time is the one the service gives the frame. The satellite builds a frame by scanning; when that scan began or ended is not something we hold, and the page does not state it.</p>
+  <p><b>Checks before a picture is kept.</b> The hub reads the delivered JPEG to its last byte, requires every part of it to be present, decodes it in full, and compares it with the check image from the same request: the surround must be the colour that was asked for, the Earth must not touch the frame’s edge, the disk must not be blank, and the two must agree. A picture that fails is refused. These checks catch a cut, incomplete, blank or mismatched file. They cannot prove that a picture which decodes cleanly and agrees with its check image is free of every local fault.</p>
+  <p><b>How it reaches you.</b> The hub looks every ten minutes and serves the picture unchanged. Your browser reads the hub, never EUMETSAT. Three things are kept apart and worded separately on the page: the hub’s last check of the source, whether its last collection worked, and the frame you are looking at. A failed check is said as a failed check; it is never described as a delay at the source. A newer frame is offered and is shown only when you ask.</p>
+  <p><b>What is kept.</b> The current and the previous picture, and any other for 24 hours after it stops being one of those. A picture is deleted only in a run that has just published a newer verified one, so a long outage deletes nothing.</p>
+  <p><b>Our changes.</b> The choice of projection, size, format and surround colour in the request. Nothing is recoloured, sharpened or retouched. Zooming on the page enlarges the same picture and stops at one picture pixel per screen pixel.</p>
+  <p><b>Credit and terms.</b> Contains modified EUMETSAT Meteosat data. Licence: <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>, as stated in EUMETSAT’s catalogue entry for the product, which also asks that NASA be credited for the night-time background. Neither EUMETSAT nor NASA endorses Mother Earth. The hub carries the JPEG decoder from the open-source jpeg-js project (Apache License 2.0), unmodified.</p>
 
   <h2 id="search">Search — what it covers and what it cannot</h2>
   <p>The Explore panel on World View searches <b>only the records your browser has already loaded</b> from each layer's latest published snapshot. It issues no request of any kind: no geocoder, no place-name dataset, no country boundaries, no history. It is not a search of the world, and not a search of everything a source holds.</p>

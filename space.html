@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Earth from Space · Mother Earth</title>
+<meta name="description" content="Africa, the Atlantic and Europe as Meteosat at 0° longitude views them: one recent picture, with its source frame time beside it.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=202612191000">
+</head>
+<body class="doc craft space" data-body="space">
+<header class="top">
+  <h1>Mother Earth</h1>
+  <div class="promise">Earth from Space</div>
+  <nav class="tabs" aria-label="Views">
+    <a href="index.html" data-view="earth">Earth now</a>
+    <a href="space.html" data-view="space" aria-label="Earth from Space" aria-current="page"><span class="tfull">Earth from Space</span><span class="tshort">From Space</span></a>
+    <a href="timeline.html" data-view="timeline">Timeline</a>
+    <a href="moon.html" data-view="moon">Moon</a>
+    <a href="sun.html" data-view="sun">Sun</a>
+  </nav>
+  <div class="clock" id="clock">--:--:--<span>UTC</span></div>
+  <nav class="menu" aria-label="Pages">
+    <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
+    <ul id="menu-list" role="menu">
+      <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
+      <li role="none"><a role="menuitem" href="space.html" data-page="space" aria-current="page">Earth from Space</a></li>
+      <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
+      <li role="none"><a role="menuitem" href="moon.html" data-page="moon">Moon</a></li>
+      <li role="none"><a role="menuitem" href="sun.html" data-page="sun">Sun</a></li>
+      <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="ev-main" class="craftmain evmain">
+  <h2 id="ev-h">Earth from Space</h2>
+  <p class="lede">Africa, the Atlantic and Europe, as Meteosat at 0° longitude views them.</p>
+
+  <section id="ev-picture" aria-labelledby="ev-h">
+    <p id="ev-state" class="cstate" role="status">Loading…</p>
+    <div id="ev-lines" class="evlines" hidden></div>
+    <p id="ev-offer" class="evoffer" hidden><span id="ev-offer-say"></span> <button type="button" id="ev-offer-btn">Show it</button></p>
+    <p id="ev-busy" class="evbusy" role="status" hidden></p>
+    <p><button type="button" id="ev-retry" hidden>Try again</button></p>
+    <div id="ev-view" class="evview" tabindex="0" role="group" aria-label="The picture. When zoomed in, drag or use the arrow keys to move; plus and minus zoom." hidden><img id="ev-img" alt="" draggable="false"></div>
+    <div id="ev-ctl" class="mgctl evctl" hidden>
+      <button type="button" id="ev-zin" aria-label="Zoom in on the picture">Zoom in</button>
+      <button type="button" id="ev-zout" aria-label="Zoom out">Zoom out</button>
+      <button type="button" id="ev-reset">Whole picture</button>
+      <span id="ev-zoomsay" class="evzoomsay" aria-live="polite"></span>
+    </div>
+    <dl id="ev-frame" class="evinfo" hidden>
+      <div><dt>Source frame time</dt><dd><time id="ev-time"></time> · <span id="ev-age"></span></dd></div>
+      <div><dt>Satellite and instrument</dt><dd>Meteosat Third Generation, at 0° longitude · Flexible Combined Imager (FCI)</dd></div>
+      <div><dt>Product</dt><dd>GeoColour RGB (EUMETSAT). By day, close to natural colour. By night, cloud seen in infrared over a fixed NASA map. <b>The city lights are not tonight’s.</b></dd></div>
+      <div><dt>Not a single instant</dt><dd>The satellite builds each frame by scanning. The source frame time is the time the service gives the frame; we do not hold when its scan began or ended.</dd></div>
+    </dl>
+    <noscript><p class="cunavail">The picture needs JavaScript. The source and its credits are below.</p></noscript>
+  </section>
+
+  <details id="ev-how" class="evhow">
+    <summary>How this image is made</summary>
+    <p>A weather satellite about 36,000 km above the equator at 0° longitude scans the side of the Earth it faces, strip by strip, about every ten minutes. It is not a photograph taken in one instant.</p>
+    <p>EUMETSAT combines several of the instrument’s measurements into this “GeoColour” picture. Where it is day, visible-light measurements give colours close to what an eye would see. Where it is night, cloud is drawn from infrared measurements and laid over NASA’s Black Marble, a fixed map of city lights made on other dates. The lights do not show tonight’s lights, power cuts or fires.</p>
+    <p><b>What the time means.</b> “Source frame time” is the time EUMETSAT’s map service names for the frame it served. Our hub publishes a picture only when the service itself confirms that time for it. We do not state when the scan started or finished.</p>
+    <p><b>What Mother Earth changed.</b> We asked the service for this view (its own geostationary projection for this satellite position), this size (2,048 pixels square) and this surround colour, and received a JPEG. Nothing was recoloured, sharpened or retouched. Zooming on this page enlarges that same picture.</p>
+    <p><b>How it gets here.</b> Our hub looks for a newer frame every ten minutes, checks the picture it receives before keeping it, and serves it to this page. This page never contacts EUMETSAT. If a check or a collection fails, the last verified picture stays and the lines above the picture say what happened.</p>
+  </details>
+
+  <section id="ev-credits" aria-labelledby="ev-ch">
+    <h3 id="ev-ch">Credits</h3>
+    <p>Contains modified EUMETSAT Meteosat data <span id="ev-year">2026</span> · <a href="https://user.eumetsat.int/catalogue/EO:EUM:DAT:0913" rel="noopener">GeoColour RGB - MTG - 0 degree</a> · <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener license">CC BY 4.0</a>. Read from the public <a href="https://view.eumetsat.int/" rel="noopener">EUMETView</a> map service.</p>
+    <p>Night-time background within the product: NASA Black Marble.</p>
+    <p class="dim">EUMETSAT and NASA do not endorse Mother Earth. Full register of sources: <a href="sources.html#earthview">Sources &amp; Details</a>.</p>
+  </section>
+</main>
+<script src="space.js?v=202612191000"></script>
+</body>
+</html>

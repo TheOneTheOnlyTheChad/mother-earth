@@ -27,6 +27,10 @@
   const TIMEOUT_MS = 10000, MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const st = { status: 'loading', example: null, today: null, hubNote: null, active: null, i: -1, t: null, tRaw: null, problem: null };
 
+
+  // ---------- view tabs: when the row is too narrow for every tab (fallback fonts, narrow phones) it scrolls sideways; keep the current tab in view
+  { const show = () => { const c = document.querySelector('.tabs [aria-current="page"]'), t = c && c.parentElement; if (t && t.scrollWidth > t.clientWidth) t.scrollLeft += c.getBoundingClientRect().left - t.getBoundingClientRect().left - (t.clientWidth - c.offsetWidth) / 2; };
+    show(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(show); addEventListener('resize', show); }
   // ---------- clock + menu (same behaviour as the other pages)
   const clock = $('clock');
   if (clock) { const tick = () => { clock.firstChild.textContent = new Date().toISOString().slice(11, 19); }; tick(); setInterval(tick, 1000); }

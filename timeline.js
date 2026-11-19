@@ -21,6 +21,9 @@ const BUILD = '202611301000';   // = the ?v= of this file in timeline.html (buil
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
+// ---------- view tabs: when the row is too narrow for every tab (fallback fonts, narrow phones) it scrolls sideways; keep the current tab in view
+{ const show = () => { const c = document.querySelector('.tabs [aria-current="page"]'), t = c && c.parentElement; if (t && t.scrollWidth > t.clientWidth) t.scrollLeft += c.getBoundingClientRect().left - t.getBoundingClientRect().left - (t.clientWidth - c.offsetWidth) / 2; };
+  show(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(show); addEventListener('resize', show); }
 // ---------- clock + menu (same behaviour as app.js ME.clock / ME.menu)
 const clock = $('clock');
 if (clock) { const tick = () => { clock.firstChild.textContent = new Date().toISOString().slice(11, 19); }; tick(); setInterval(tick, 1000); }

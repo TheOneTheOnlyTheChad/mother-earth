@@ -363,14 +363,22 @@ details.cd>.cav{margin-top:2px}
 .arts-o .arts-link{color:rgba(255,179,71,.85);display:inline-block;min-height:24px;padding:2px 0}
 
 /* ---------- view tabs (all pages) + Timeline page (timeline-rc, 9 Nov 2026) */
-.tabs{display:flex;flex:0 0 auto;border:1px solid var(--line-strong)}
+.tabs{display:flex;flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none;border:1px solid var(--line-strong)}   /* never wider than its place: with fallback fonts and five or six tabs the row scrolls sideways instead of pushing the Menu off the page */
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{flex:0 0 auto}
 .tabs a{display:flex;align-items:center;min-height:36px;padding:0 12px;color:var(--fg);text-decoration:none;font:600 14px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .tabs a+a{border-left:1px solid var(--line-strong)}
+.tabs a .tshort{display:none}
 .tabs a:hover,.tabs a:focus-visible{background:rgba(140,170,200,.12)}
 .tabs a[aria-current="page"]{background:rgba(255,179,71,.14);color:var(--accent)}
 @media (min-width:721px) and (max-width:1279px){.top{gap:8px}.top h1{font-size:20px}.tabs a{padding:0 6px;letter-spacing:.02em;font-size:13px}}   /* four tabs on a one-row header */
+/* World View's long promise: two full lines need 62 characters of width. Narrower than 63ch (five or six tabs, or fallback fonts), it is not shown at all, never cut. */
+@media (min-width:1140px){.top .promise.fit{display:block;container-type:inline-size}}
+.top .promise.fit>span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+@container (max-width:63ch){.top .promise.fit>span{display:none}}
 @media (min-width:721px) and (max-width:1139px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside four tabs: hide it rather than shrink or cut it */
-@media (max-width:420px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* four tabs on a narrow phone */
+@media (max-width:420px){.tabs a{padding:0 3px;letter-spacing:.02em;font-size:13px}}   /* five or six tabs on a narrow phone */
+@media (max-width:899px){.tabs a .tfull{display:none}.tabs a .tshort{display:inline}}   /* Earth from Space: shorter label where the row is tight; the link's name stays "Earth from Space" */
 @media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}   /* narrow one-row header: the clock keeps its UTC label */
 /* phone: two fixed rows — title · clock · Menu, then the two tabs. A grid, not a wrapping flex row: with
    fallback fonts at 390 px the wrapping row split into three lines and pushed the title above the header.
@@ -380,7 +388,7 @@ details.cd>.cav{margin-top:2px}
   .top{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"t c m" "v v v";grid-template-rows:44px 44px;column-gap:10px;row-gap:2px;padding-top:2px;padding-bottom:2px;align-items:center}
   .top h1{grid-area:t;min-width:0;overflow:hidden}
   .top .clock{grid-area:c} .top .menu{grid-area:m} .top .tabs{grid-area:v}
-  .tabs a{flex:1;justify-content:center;min-height:44px}
+  .tabs a{flex:1 0 auto;justify-content:center;min-height:44px}
 }
 body.tl .top{position:sticky;top:0;z-index:40}
 body.tl .tlmain{max-width:1100px;margin:0 auto;padding:16px}
@@ -750,3 +758,25 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
   .bare-hint .bh-b{display:none}
   .layers-panel{top:auto;bottom:0;left:0;width:100%;max-height:70vh;border-left:0;border-right:0;border-bottom:0}
 }
+/* ---------- Earth from Space (space.html; earth-from-space-rc, 19 Nov 2026) */
+body.space .evmain{max-width:980px}
+body.space .evview{position:relative;width:100%;max-width:min(980px,calc(100vh - var(--header) - 250px));max-width:min(980px,calc(100dvh - var(--header) - 250px));min-width:min(100%,280px);aspect-ratio:1;margin:10px auto 0;overflow:hidden;background:#0b1016;border:1px solid var(--line);touch-action:pan-y}
+body.space .evview[hidden],body.space .evctl[hidden],body.space .evinfo[hidden],body.space .evoffer[hidden],body.space .evlines[hidden]{display:none}
+body.space .evview.zoomed{cursor:grab;touch-action:none}
+body.space .evview:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+body.space .evview img{display:block;width:100%;height:100%;transform-origin:50% 50%;user-select:none;-webkit-user-drag:none}
+body.space .evlines p{margin:2px 0;color:var(--fg)}
+body.space .evoffer{border:1px solid var(--accent);background:rgba(255,179,71,.08);padding:8px 12px;margin:8px 0;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+body.space .evoffer button,body.space #ev-retry{min-height:40px;min-width:44px;padding:6px 14px;background:var(--accent);color:#070a0f;border:0;border-radius:6px;font:600 14px/1 var(--display);letter-spacing:.04em;cursor:pointer}
+body.space #ev-retry[hidden]{display:none}
+body.space .evbusy{color:var(--dim);margin:4px 0}
+body.space .evctl{max-width:none;justify-content:center;align-items:center}
+body.space .evctl button:disabled{opacity:.45;cursor:default}
+body.space .evzoomsay{color:var(--dim);font-size:13px;flex:1 0 100%;text-align:center}
+body.space .evinfo{margin:14px 0 0;display:grid;gap:8px}
+body.space .evinfo div{border-top:1px solid var(--line);padding-top:8px}
+body.space .evinfo dt{font:600 13px/1.2 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+body.space .evinfo dd{margin:2px 0 0}
+body.space .evhow{margin:22px 0 0;border:1px solid var(--line);padding:0 14px}
+body.space .evhow summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font:600 16px/1.2 var(--display);letter-spacing:.04em}
+body.space .evhow p{max-width:72ch}
