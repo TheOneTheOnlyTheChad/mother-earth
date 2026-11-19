@@ -370,8 +370,9 @@ details.cd>.cav{margin-top:2px}
 .tabs a[aria-current="page"]{background:rgba(255,179,71,.14);color:var(--accent)}
 @media (min-width:721px) and (max-width:1279px){.top{gap:8px}.top h1{font-size:20px}.tabs a{padding:0 6px;letter-spacing:.02em;font-size:13px}}   /* four tabs on a one-row header */
 @media (min-width:721px) and (max-width:1139px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside four tabs: hide it rather than shrink or cut it */
-@media (max-width:420px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* four tabs on a narrow phone */
-@media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}   /* narrow one-row header: the clock keeps its UTC label */
+@media (max-width:480px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* five tabs on a phone: at full size they need 468 px, so the compact size now runs to 480 px (was 420 px with four tabs) */
+@media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}
+@media (min-width:721px) and (max-width:760px){.tabs a{padding:0 4px}}   /* five tabs: the one-row header was 2 px too wide at 721 px */   /* narrow one-row header: the clock keeps its UTC label */
 /* phone: two fixed rows — title · clock · Menu, then the two tabs. A grid, not a wrapping flex row: with
    fallback fonts at 390 px the wrapping row split into three lines and pushed the title above the header.
    Rows 44 + 44 px (touch targets kept), 2 px gap, 2 px top/bottom padding = 94 px (was 56 px without tabs). */
@@ -750,3 +751,45 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
   .bare-hint .bh-b{display:none}
   .layers-panel{top:auto;bottom:0;left:0;width:100%;max-height:70vh;border-left:0;border-right:0;border-bottom:0}
 }
+
+/* Animal journey replay bar (animals-zebra-preview-rc, 19 Nov 2026). It takes the place the first-view line uses: that line is
+   hidden whenever a layer is on, and the bar shows only while the journey is drawn. It covers no other control. */
+.replay{position:absolute;left:173px;right:12px;top:12px;z-index:14;display:flex;flex-direction:column;gap:4px;padding:8px 10px;background:rgba(7,10,15,.9);border:1px solid var(--line-strong);font-size:12px;color:var(--fg)}
+.replay[hidden]{display:none}
+body.sky-zoom #replay{visibility:hidden}
+.rp-ctl{display:flex;align-items:center;gap:8px}
+.rp-ctl button,.rp-ctl select,.journey-retry{min-height:44px;padding:0 12px;font:500 12px/1 var(--mono);color:var(--fg);background:transparent;border:1px solid var(--accent);cursor:pointer}
+.rp-ctl select{border-color:var(--line-strong);background:var(--card)}
+#replay-play{min-width:72px}
+.rp-ctl input[type=range]{flex:1 1 60px;min-width:60px;min-height:44px;margin:0;accent-color:var(--accent)}
+.rp-ctl button,.rp-ctl select{flex:none;white-space:nowrap}
+.rp-ctl button:focus-visible,.rp-ctl select:focus-visible,.rp-ctl input:focus-visible,.journey-retry:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rp-now{font-variant-numeric:tabular-nums;line-height:1.35}
+.rp-note{color:var(--dim);font-size:11px;line-height:1.35}
+.journey-retry{margin:6px 0}
+.journey-retry[hidden]{display:none}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (min-width:1101px) and (max-width:1279px){.replay{left:12px;top:64px}}
+@media (min-width:721px) and (max-width:1100px){.replay{position:static;order:1;margin:8px 0 0}}
+@media (max-width:720px){
+  .replay{left:8px;right:8px;top:auto;bottom:calc(52% + 8px);padding:6px 8px;gap:3px;font-size:11.5px}
+  .rp-ctl{gap:6px}
+  .rp-ctl button,.rp-ctl select{padding:0 8px}
+  #replay-play{min-width:56px}
+  .rp-w{display:none}
+  #replay-goto{text-transform:capitalize}
+  .rp-note{font-size:10.5px}
+  .stage:has(.sheet.collapsed) .replay{bottom:56px}
+  #replay-rule{display:none}   /* the rule is on the card and in the Key; the phone bar keeps the time line and the not-matched line */
+}
+/* Animals page (private preview) */
+.an-preview{padding:8px 10px;border:1px solid var(--accent);display:inline-block}
+.an-study{border:1px solid var(--line-strong);padding:4px 14px 10px;margin:8px 0 18px}
+.an-facts{width:100%;border-collapse:collapse;margin:8px 0}
+.an-facts th{width:30%;text-align:left;vertical-align:top;font-weight:500;color:var(--dim);padding:6px 10px 6px 0}
+.an-facts td{padding:6px 0;overflow-wrap:anywhere}
+.an-facts tr+tr th,.an-facts tr+tr td{border-top:1px solid var(--line)}
+.an-go{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--accent);color:var(--fg);text-decoration:none}
+.an-go:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.an-na{color:var(--dim)}
+@media (max-width:720px){.an-facts th,.an-facts td{display:block;width:auto;padding:4px 0}.an-facts tr+tr td{border-top:0}}

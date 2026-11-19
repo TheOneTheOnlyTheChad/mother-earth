@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612181300">
+<link rel="stylesheet" href="style.css?v=202612190100">
 </head>
 <body class="world">
 <header class="top">
@@ -17,6 +17,7 @@
     <a href="timeline.html" data-view="timeline">Timeline</a>
     <a href="moon.html" data-view="moon">Moon</a>
     <a href="sun.html" data-view="sun">Sun</a>
+    <a href="animals.html" data-view="animals">Animals</a>
   </nav>
   <div class="clock" id="clock">--:--:--<span>UTC</span></div>
   <nav class="menu" aria-label="Pages">
@@ -26,6 +27,7 @@
       <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
       <li role="none"><a role="menuitem" href="moon.html" data-page="moon">Moon</a></li>
       <li role="none"><a role="menuitem" href="sun.html" data-page="sun">Sun</a></li>
+      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>
       <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
     </ul>
   </nav>
@@ -38,6 +40,20 @@
       <div class="imgdate" id="imgdate">Imagery: loading…</div>
       <button type="button" class="layers-btn" id="layers-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="layers-panel">Layers · <span id="layers-n">none on</span></button>
       <div class="bare-hint" id="bare-hint" hidden><span class="bh-t">Choose layers to explore.</span> <button type="button" class="bh-b" id="layers-open-hint">Layers</button></div>
+      <div class="replay" id="replay" role="group" aria-label="Animal journey replay" hidden>
+        <div class="rp-ctl">
+          <button type="button" id="replay-play" aria-pressed="false">Play</button>
+          <label class="vh" for="replay-range">Recorded fix (arrow keys step from fix to fix)</label>
+          <input type="range" id="replay-range" min="0" max="0" step="1" value="0">
+          <label class="vh" for="replay-speed">Speed: replay time per second</label>
+          <select id="replay-speed"></select>
+          <button type="button" id="replay-goto" aria-label="Go to the journey area on the globe"><span class="rp-w">Journey </span>area</button>
+        </div>
+        <div class="rp-now" id="replay-now"></div>
+        <div class="rp-note" id="replay-note"></div>
+        <div class="rp-note" id="replay-rule"></div>
+        <div class="vh" id="replay-say" aria-live="polite"></div>
+      </div>
       <div class="zoom-ui" id="zoom-ui" hidden>
         <svg class="zoom-svg" id="zoom-svg" aria-hidden="true"></svg>
         <div class="zoom-bar" id="zoom-bar">
@@ -78,7 +94,7 @@
       </div>
       <div class="legend" id="legend" role="region" aria-label="Map key">
       <div class="imgfull" id="img-full"></div>
-      <div id="leg-line"><span class="lg" id="leg-usgs" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--quake)"></span>earthquake</span><span class="lcnt" hidden>Earthquakes: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-firms" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--fire)"></span>fire detection (per pass)</span><span class="lcnt" hidden>Fire detections: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-ships" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--ship)"></span>vessel (last sample)</span><span class="lcnt" hidden>Ships: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-drifters" hidden><span class="lsep" hidden> · </span><span class="lsym"><span id="leg-drifters-sw"></span>drifting buoy · coloured by water temperature (see card)</span><span class="lcnt" hidden>Drifting buoys: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-plastic" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero)</span></span><span class="lg" id="leg-forest" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</span></span><span class="lg" id="leg-aircraft" hidden><span class="lsep" hidden> · </span><span class="lsym">Aircraft counts per area — scale on its card</span></span><span class="lg" id="leg-airdots" hidden><span class="lsep" hidden> · </span><span class="lsym">Aircraft positions — plain dots — snapshot details on its card</span></span><span class="lg" id="leg-wind" hidden><span class="lsep" hidden> · </span><span class="lsym">Wind by height — scale on its card</span></span><span class="lg" id="leg-dustrgb" hidden><span class="lsep" hidden> · </span><span class="lsym">Dust RGB — false-colour imagery — explanation on its card</span></span><span id="leg-none">No layer data is drawn on the globe right now.</span></div>
+      <div id="leg-line"><span class="lg" id="leg-usgs" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--quake)"></span>earthquake</span><span class="lcnt" hidden>Earthquakes: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-firms" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--fire)"></span>fire detection (per pass)</span><span class="lcnt" hidden>Fire detections: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-ships" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--ship)"></span>vessel (last sample)</span><span class="lcnt" hidden>Ships: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-drifters" hidden><span class="lsep" hidden> · </span><span class="lsym"><span id="leg-drifters-sw"></span>drifting buoy · coloured by water temperature (see card)</span><span class="lcnt" hidden>Drifting buoys: cell outlines only<span class="lwh"> (records withheld)</span></span></span><span class="lg" id="leg-plastic" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="dot" style="--c:var(--plastic)"></span>microplastic samples · 2011–2024 · tow-start locations · dated observations (hollow ring = source reports zero)</span></span><span class="lg" id="leg-forest" hidden><span class="lsep" hidden> · </span><span class="lsym"><span class="sw forest"></span>forest-disturbance alert pixels, last 7 days (tropics only; deeper green = more, log scale)</span></span><span class="lg" id="leg-aircraft" hidden><span class="lsep" hidden> · </span><span class="lsym">Aircraft counts per area — scale on its card</span></span><span class="lg" id="leg-airdots" hidden><span class="lsep" hidden> · </span><span class="lsym">Aircraft positions — plain dots — snapshot details on its card</span></span><span class="lg" id="leg-wind" hidden><span class="lsep" hidden> · </span><span class="lsym">Wind by height — scale on its card</span></span><span class="lg" id="leg-dustrgb" hidden><span class="lsep" hidden> · </span><span class="lsym">Dust RGB — false-colour imagery — explanation on its card</span></span><span class="lg" id="leg-journey" hidden><span class="lsep" hidden> · </span><span class="lsym">Animal journey: recorded fixes and the line joining them — a dated replay, not current</span></span><span id="leg-none">No layer data is drawn on the globe right now.</span></div>
       <div class="cov nightleg" id="night-legend" hidden></div>
       <div class="cov nightleg" id="oh-legend" hidden></div>
       <div class="cov nightleg" id="nl-legend" hidden></div>
@@ -288,6 +304,24 @@
                 <p><b>Shows the part of Earth visible to Meteosat from 0°. Detail decreases toward the edge.</b> The thin outline marks where the picture ends; beyond it nothing was observed by this satellite.</p>
                 <p><b>Frame requested.</b> Mother Earth asks EUMETSAT for this frame by its time, twice a day. EUMETSAT's service can return the nearest available frame instead, and does not tell us when it has. A frame older than 24 hours is not shown.</p>
                 <p><a href="sources.html#dustrgb">Sources &amp; Details →</a></p>
+              </div>
+            </details>
+          </div>
+          <div class="ovl opt-journey" id="card-journey">
+            <div class="ovl-h">Animal journey <span class="ev obs">Observed</span><span class="state" id="s-journey">off</span></div>
+            <button class="ovl-tgl" type="button" id="tgl-journey" role="switch" aria-checked="false" aria-describedby="journey-note"><span class="box" aria-hidden="true"></span><span class="t">Animal journey — show on the globe</span></button>
+            <div class="cav" id="journey-note">Recorded GPS fixes of one plains zebra in northern Botswana, 25 Oct 2007 to 22 Oct 2008. A dated replay, not current. Private preview.</div>
+            <div class="hint" id="journey-chosen" hidden>Chosen on the Animals page: Botswana zebra, animal Z3866. Nothing is switched on until you press the switch.</div>
+            <div class="obs" id="o-journey" aria-live="polite">Off. Switch on to load the recorded journey.</div>
+            <button type="button" class="journey-retry" id="journey-retry" hidden>Retry</button>
+            <details class="scope" id="journey-scope">
+              <summary>What this is and is not</summary>
+              <div>
+                <p><b>Recorded fixes of one animal.</b> A GPS collar on one adult female zebra (study animal Z3866) recorded a position every hour or every 15 minutes. Seven animals were tracked in the study; one is shown. Seven is a sample size, not a population estimate.</p>
+                <p><b>The marker is always on a recorded fix</b>: the last one at or before the replay time. The line joins recorded fixes; the path between fixes was not recorded. Mother Earth does not join fixes more than 3 hours apart. This is a display rule, not part of the study.</p>
+                <p><b>Times are as recorded by the study</b>: UTC, or GPS time, which differs from UTC by a few leap seconds (source README). Location uncertainty: not supplied by the dataset.</p>
+                <p><b>A replay of 2007–2008.</b> Other layers on the globe retain their own dates and times; they are not matched to this journey.</p>
+                <p>Source: Movebank Data Repository, doi:10.5441/001/1.f3550b4f, CC0 1.0. <a href="animals.html#zebra-botswana">Study, citation and licence on the Animals page →</a></p>
               </div>
             </details>
           </div>
@@ -503,10 +537,11 @@
 <script src="skyscene.js?v=202612101000"></script>
 <script src="oceanheat.js?v=202611291000"></script>
 <script src="dustrgb.js?v=202612181000"></script>
+<script src="animals-journey.js?v=202612190100"></script>
 <script src="nightlights.js?v=202612111000"></script>
 <script src="wind.js?v=202612181000"></script>
 <script src="aircraft.js?v=202612181000"></script>
-<script src="layers.js?v=202612151200"></script>
+<script src="layers.js?v=202612190100"></script>
 <script>
 (() => {
 const { $, esc, ago, hhmm, when, state, LABEL, SOURCE, MAP_LAYERS, IMG_DAY, IMG_LABEL, IMG_LAYER, fmt, has, snapId, samePair, MISSING } = ME;
@@ -693,7 +728,7 @@ function render() {
 // "N layers" (15 Nov 2026, legend-active-rc): a data layer counts as one while the last render put its symbols or its usable
 // count cells on the globe (drawnGeom) — so a valid zero, a layer outlined only as unknown, and a layer that is off, down,
 // loading or unavailable do not count; day/night = 1; ocean heat = 1; each orbital category = 1. Indices never count.
-const SHEET_DRAWN = [['aircraft', () => ME.aircraft && ME.aircraft.drawn()], ['airdots', () => ME.aircraft && ME.aircraft.dots.drawn()], ['wind', () => ME.wind && ME.wind.drawn()], ['dustrgb', () => ME.dustRgb && ME.dustRgb.drawn()]];
+const SHEET_DRAWN = [['aircraft', () => ME.aircraft && ME.aircraft.drawn()], ['airdots', () => ME.aircraft && ME.aircraft.dots.drawn()], ['wind', () => ME.wind && ME.wind.drawn()], ['dustrgb', () => ME.dustRgb && ME.dustRgb.drawn()], ['journey', () => ME.journey && ME.journey.drawn()]];
 function drawnLayers() {
   const out = [];
   for (const k of DATA_LAYERS) if (drawnGeom[k].symbols > 0 || drawnGeom[k].cells > 0) out.push(k);

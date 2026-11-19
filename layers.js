@@ -15,7 +15,7 @@
   if (!panel || !list || !btn) return;
   const GROUPS = [
     ['Observed', [['Earthquakes', '#tgl-usgs'], ['Fire detections', '#tgl-firms'], ['Ships', '#tgl-ships'], ['Forest disturbance', '#tgl-forest'], ['Drifting buoys', '#tgl-drifters'],
-      ['Microplastic samples — dated', '#tgl-plastic'], ['Aircraft — count per area', '#tgl-air'], ['Aircraft — positions', '#tgl-airdots'], ['Night lights', '#tgl-nl'], ['Dust RGB imagery', '#tgl-dustrgb']]],
+      ['Microplastic samples — dated', '#tgl-plastic'], ['Aircraft — count per area', '#tgl-air'], ['Aircraft — positions', '#tgl-airdots'], ['Night lights', '#tgl-nl'], ['Dust RGB imagery', '#tgl-dustrgb'], ['Animal journey — dated replay', '#tgl-journey']]],
     ['Analysed and modelled', [['Ocean heat', '#tgl-oh'], ['Wind by height', '#tgl-wind']]],
     ['Computed', [['Day/night', '#tgl-night'], ['Orbital objects — payloads', '#orb-tgls [data-g="payload"]'], ['Orbital objects — rocket bodies', '#orb-tgls [data-g="rocket_body"]'], ['Orbital objects — debris', '#orb-tgls [data-g="debris"]']]],
   ];
