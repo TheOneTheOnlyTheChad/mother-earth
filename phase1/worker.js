@@ -73,7 +73,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.19';
+const COLLECTOR_VERSION = '0.6.20';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2391,7 +2391,7 @@ export { AIRCRAFT_LAYER, AIRCRAFT_FIELDS, AIRCRAFT_MAX_AGE_S, AIRCRAFT_TEXT, air
 export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
-export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { EARTHVIEW, evLatest, evKeyOf, evJpegScans, evDecode, evPng, evCompare, evFetch, collectEarthView, evRoute, EV_JPEG, DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -3283,6 +3283,1390 @@ async function dustRoute(env, p) {
   return new Response(buf, { headers: { 'Content-Type': x.type, 'Cache-Control': DUSTRGB.CACHE_FILE, 'ETag': '"' + x.sha256 + '"', ...CORS } });
 }
 
+/* ---------- Earth from Space (EUMETSAT "GeoColour RGB - MTG - 0 degree", EO:EUM:DAT:0913) — EARTH-FROM-SPACE-PROPOSAL rev 2
+ * Every ten minutes the hub reads which frames EUMETView lists and, when a newer one is listed, asks for that exact frame time:
+ * one 2048 x 2048 JPEG in the geostationary projection EUMETView's own viewer defines (EPSG:900003, "+proj=geos +h=35785831.0
+ * +lon_0=0"), surround painted in the page's background colour by the service, and one 256 x 256 transparent PNG of the same view.
+ * A frame is PUBLISHED ONLY IF, for both responses, the server's Warning header names a served time equal to the time asked for.
+ * A different time, or no header, publishes nothing: the pointer does not move and no requested time is ever shown as a frame time.
+ * The delivered JPEG itself is decoded in full here (EV_JPEG, below) and checked, and compared coarsely with the decoded PNG.
+ * Storage: earthview/current.json (frame and previous; every write conditional), earthview/state.json (the last source check and
+ * the last collection outcome, kept apart from the frame), earthview/held.json (every stored picture and when it stopped being
+ * current or previous). A picture is deleted ONLY in a run that has just published a newer verified frame, and only when it is
+ * neither current nor previous and left that role at least GRACE_S ago. A failed or idle run deletes nothing.
+ * Gate: EARTHVIEW_ENABLED=1 for the scheduled path (absent = no request at all, nothing written). /admin/run/earthview runs once.
+ * Outside LAYERS, cells, history, health and the generic writeDown. Licence: CC BY 4.0; credit EUMETSAT and NASA (catalogue). */
+const EARTHVIEW = {
+  CAP: 'https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetCapabilities&version=1.3.0&namespace=mtg_fd',
+  MAP: 'https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&layers=mtg_fd:rgb_geocolour&styles=&crs=EPSG:900003&bbox=-5500000,-5500000,5500000,5500000',
+  LAYER: 'rgb_geocolour', CRS: 'EPSG:900003', CRS_DEFINITION: '+proj=geos +h=35785831.0 +lon_0=0', BBOX: [-5500000, -5500000, 5500000, 5500000],
+  BGCOLOR: '0x0B1016', BG: [11, 16, 22],
+  PICTURE: { w: 2048, h: 2048, maxBytes: 3 * 1024 * 1024, type: 'image/jpeg' }, CHECK: { w: 256, h: 256, maxBytes: 1024 * 1024, type: 'image/png' },
+  // Validation limits. Each is relative to the SAME run's check image or to the colour that was asked for; none is a fixed disk size.
+  // Set from the fixtures named in the review packet (three real frames and the damaged set); provisional until more frames are seen.
+  LIMITS: { BG_TOLERANCE: 16, SURROUND_SHARE_MIN: 0.98, DISK_LUMA_SD_MIN: 12, AGREEMENT_MIN: 0.85, DISK_SAMPLES_MIN: 2000, SURROUND_SAMPLES_MIN: 500 },
+  DECODE: { maxResolutionInMP: 5, maxMemoryUsageInMB: 96 },
+  EVERY_MIN: 10, TIMEOUT_MS: 90000, LIST_TIMEOUT_MS: 30000, GRACE_S: 86400,
+  POINTER: 'earthview/current.json', STATE: 'earthview/state.json', HELD: 'earthview/held.json', PREFIX: 'earthview/frames/',
+  CACHE_FILE: 'public, max-age=86400, immutable',
+  WAITING_LIMIT_S: 2700,   // provisional: after this long with nothing newer listed, the page says so plainly. Not a delay bound.
+  SOURCE: { product: 'GeoColour RGB - MTG - 0 degree', collection: 'EO:EUM:DAT:0913', catalogue: 'https://user.eumetsat.int/catalogue/EO:EUM:DAT:0913', licence: 'CC BY 4.0',
+    licence_url: 'https://creativecommons.org/licenses/by/4.0/', credit: 'Contains modified EUMETSAT Meteosat data', night_background: 'NASA Black Marble (a static layer; not current city lights)',
+    service: 'EUMETView WMS, layer mtg_fd:rgb_geocolour', satellite: 'Meteosat Third Generation', instrument: 'Flexible Combined Imager (FCI)' },
+};
+/** Newest advertised time of the GeoColour layer from a GetCapabilities document, on the 10-minute grid; else null. Only that layer's own element is read. */
+function evLatest(xml) {
+  const s = String(xml), n = /<Name>\s*(?:mtg_fd:)?rgb_geocolour\s*<\/Name>/.exec(s);
+  if (!n) return null;
+  const rest = s.slice(n.index + n[0].length), end = rest.search(/<\/Layer>|<Layer\b/), own = end < 0 ? rest : rest.slice(0, end);
+  let def = null;
+  for (const d of own.matchAll(/<Dimension\b([^>]*)>/g)) { if (!/\bname="time"/.test(d[1])) continue; const m = /\bdefault="([^"]+)"/.exec(d[1]); def = m ? m[1] : null; break; }
+  if (!def) return null;
+  const t = def.replace(/\.000Z$/, 'Z');
+  if (!/^\d{4}-\d\d-\d\dT\d\d:\d0:00Z$/.test(t) || Number.isNaN(Date.parse(t))) return null;
+  return t;
+}
+const evKeyOf = t => t.replace(/[-:]/g, '').replace(/00Z$/, 'Z');
+/** Walks EVERY segment of a JPEG, scans included, to its end. Reports the frame type and size, each scan's coefficient range and
+ * precision, whether the file ends exactly at its end marker, and whether the scans between them deliver every coefficient of every
+ * component at full precision (a progressive file cut short after an early scan still has valid syntax; this is what catches it).
+ * Returns { ok:false, reason } or { ok:true, progressive, w, h, components, scans, complete, missing }. Not a decode. */
+function evJpegScans(u8) {
+  const bad = reason => ({ ok: false, reason });
+  if (u8.length < 4 || u8[0] !== 0xff || u8[1] !== 0xd8) return bad('no start marker');
+  let i = 2, frame = null, scans = 0, ended = false; const cov = new Map();
+  while (i + 1 < u8.length) {
+    if (u8[i] !== 0xff) return bad('segment out of step at ' + i);
+    const k = u8[i + 1];
+    if (k === 0xff) { i++; continue; }
+    if (k === 0xd9) { ended = true; i += 2; break; }
+    if (k === 0xd8 || (k >= 0xd0 && k <= 0xd7) || k === 0x01) { i += 2; continue; }
+    if (i + 4 > u8.length) return bad('cut inside a segment header');
+    const len = (u8[i + 2] << 8) | u8[i + 3];
+    if (len < 2 || i + 2 + len > u8.length) return bad('segment runs past the end');
+    if (k >= 0xc0 && k <= 0xcf && k !== 0xc4 && k !== 0xc8 && k !== 0xcc) {
+      if (frame) return bad('more than one frame');
+      const n = u8[i + 9]; if (len < 8 + 3 * n || !n) return bad('frame header too short');
+      frame = { type: k, progressive: k === 0xc2, h: (u8[i + 5] << 8) | u8[i + 6], w: (u8[i + 7] << 8) | u8[i + 8], ids: [] };
+      for (let c = 0; c < n; c++) { const id = u8[i + 10 + 3 * c]; frame.ids.push(id); cov.set(id, { dc: -1, ac: new Int8Array(64).fill(-1) }); }
+      if (k !== 0xc0 && k !== 0xc1 && k !== 0xc2) return bad('frame type not handled');
+      i += 2 + len; continue;
+    }
+    if (k === 0xda) {
+      if (!frame) return bad('scan before frame');
+      const ns = u8[i + 4]; if (len !== 6 + 2 * ns || !ns) return bad('scan header size');
+      const ss = u8[i + 5 + 2 * ns], se = u8[i + 6 + 2 * ns], al = u8[i + 7 + 2 * ns] & 15;
+      if (se > 63 || ss > se) return bad('scan range');
+      for (let c = 0; c < ns; c++) { const cv = cov.get(u8[i + 5 + 2 * c]); if (!cv) return bad('scan names an unknown component');
+        const low = frame.progressive ? al : 0;
+        for (let z = ss; z <= se; z++) { if (z === 0) { if (cv.dc < 0 || low < cv.dc) cv.dc = low; } else if (cv.ac[z] < 0 || low < cv.ac[z]) cv.ac[z] = low; } }
+      scans++; i += 2 + len;
+      for (;;) {   // entropy-coded data runs to the next real marker (FF followed by anything but 00 or a restart marker)
+        const j = u8.indexOf(0xff, i); if (j < 0 || j + 1 >= u8.length) return bad('scan data runs past the end');
+        const m = u8[j + 1]; if (m === 0x00 || (m >= 0xd0 && m <= 0xd7)) { i = j + 2; continue; }
+        if (m === 0xff) { i = j + 1; continue; }
+        i = j; break;
+      }
+      continue;
+    }
+    i += 2 + len;
+  }
+  if (!frame) return bad('no frame header');
+  if (!ended) return bad('no end marker');
+  if (i !== u8.length) return bad('bytes after the end marker');
+  if (!scans) return bad('no scan');
+  let missing = 0; for (const cv of cov.values()) { if (cv.dc !== 0) missing++; for (let z = 1; z < 64; z++) if (cv.ac[z] !== 0) missing++; }
+  return { ok: true, progressive: frame.progressive, w: frame.w, h: frame.h, components: frame.ids.length, scans, complete: missing === 0, missing };
+}
+/** Decodes the whole JPEG with the decoder carried below (strict: a damaged scan throws). Returns the three component planes as the
+ * file stores them (luma at full size, colour at half), or { error }. The colour conversion to RGB is not run: the checks read the
+ * planes directly, which roughly halves the memory a decode needs. */
+function evDecode(u8) {
+  try {
+    const d = new EV_JPEG(); d.opts = { tolerantDecoding: false, formatAsRGBA: false, useTArray: true, colorTransform: undefined, ...EARTHVIEW.DECODE };
+    EV_JPEG.resetMaxMemoryUsage(EARTHVIEW.DECODE.maxMemoryUsageInMB * 1024 * 1024);
+    d.parse(u8);
+    if (!d.components || d.components.length !== 3) return { error: 'not a three-component picture' };
+    return { w: d.width, h: d.height, planes: d.components.map(c => ({ lines: c.lines, sx: c.scaleX, sy: c.scaleY })) };
+  } catch (e) { return { error: String((e && e.message) || e).slice(0, 120) }; }
+}
+/** Fully decodes an 8-bit RGBA PNG: every chunk checksum verified, the data inflated to exactly the size the header promises, every
+ * row unfiltered. Returns { w, h, rgba } or null for anything wrong or any other form (interlaced, palette, 16-bit). */
+async function evPng(u8, maxPixels) {
+  const info = pngInfo(u8); if (!info || !info.complete || info.colour !== 6 || u8[24] !== 8 || u8[26] !== 0 || u8[27] !== 0 || u8[28] !== 0) return null;
+  const { w, h } = info; if (!w || !h || w * h > maxPixels) return null;
+  const u32 = i => ((u8[i] << 24) | (u8[i + 1] << 16) | (u8[i + 2] << 8) | u8[i + 3]) >>> 0, parts = [];
+  for (let i = 8; i + 12 <= u8.length;) { const len = u32(i), end = i + 12 + len; if (end > u8.length) return null;
+    let c = 0xffffffff; for (let j = i + 4; j < i + 8 + len; j++) c = DUST_CRC[(c ^ u8[j]) & 0xff] ^ (c >>> 8);
+    if (((c ^ 0xffffffff) >>> 0) !== u32(i + 8 + len)) return null;
+    if (String.fromCharCode(u8[i + 4], u8[i + 5], u8[i + 6], u8[i + 7]) === 'IDAT') parts.push(u8.subarray(i + 8, i + 8 + len));
+    i = end; }
+  if (!parts.length) return null;
+  const stride = w * 4, raw = (await dustInflate(parts, h * (stride + 1))).data; if (!raw) return null;
+  const rgba = new Uint8Array(w * h * 4);
+  for (let y = 0; y < h; y++) { const r = y * (stride + 1), f = raw[r], cur = r + 1, up = cur - (stride + 1); if (f > 4) return null;
+    for (let x = 0; x < stride; x++) { const a = x >= 4 ? raw[cur + x - 4] : 0, b = y ? raw[up + x] : 0, c = (y && x >= 4) ? raw[up + x - 4] : 0;
+      let add = 0; if (f === 1) add = a; else if (f === 2) add = b; else if (f === 3) add = (a + b) >> 1; else if (f === 4) { const pp = a + b - c, pa = Math.abs(pp - a), pb = Math.abs(pp - b), pc = Math.abs(pp - c); add = pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
+      raw[cur + x] = (raw[cur + x] + add) & 0xff; }
+    rgba.set(raw.subarray(cur, cur + stride), y * stride); }
+  return { w, h, rgba };
+}
+/** Compares the decoded picture with the decoded check image of the same request. The check image's transparency says where the
+ * disk is IN THIS RUN; nothing here assumes a disk size. Measures: (1) where the check image is clear, the picture must be the
+ * background colour that was asked for; (2) inside the disk the picture must not be flat; (3) block by block, the picture's
+ * brightness must follow the check image's. Returns the measurements and { ok, reason }. */
+function evCompare(dec, png, L = EARTHVIEW.LIMITS, bg = EARTHVIEW.BG) {
+  const n = png.w, step = dec.w / n; if (png.w !== png.h || dec.w !== dec.h || step !== Math.floor(step)) return { ok: false, reason: 'sizes do not correspond' };
+  const [Y, Cb, Cr] = dec.planes, A = (x, y) => png.rgba[(y * n + x) * 4 + 3];
+  const inner = (x, y, v) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= n || yy >= n) { if (v !== 0) return false; continue; } if (A(xx, yy) !== v) return false; } return true; };
+  let edgeOpaque = 0; for (let k = 0; k < n; k++) { if (A(k, 0)) edgeOpaque++; if (A(k, n - 1)) edgeOpaque++; if (A(0, k)) edgeOpaque++; if (A(n - 1, k)) edgeOpaque++; }
+  let sN = 0, sIn = 0, sWorst = 0, dN = 0, sp = 0, sj = 0, spp = 0, sjj = 0, spj = 0, opaque = 0;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const a = A(x, y); if (a === 255) opaque++;
+    const px = Math.floor((x + 0.5) * step), py = Math.floor((y + 0.5) * step);
+    if (a === 0 && inner(x, y, 0)) {   // well inside the surround: the picture must show the colour that was asked for
+      const yy = Y.lines[py][px], cb = Cb.lines[Math.floor(py * Cb.sy)][Math.floor(px * Cb.sx)] - 128, cr = Cr.lines[Math.floor(py * Cr.sy)][Math.floor(px * Cr.sx)] - 128;
+      const d = Math.max(Math.abs(yy + 1.402 * cr - bg[0]), Math.abs(yy - 0.3441363 * cb - 0.71413636 * cr - bg[1]), Math.abs(yy + 1.772 * cb - bg[2]));
+      sN++; if (d <= L.BG_TOLERANCE) sIn++; if (d > sWorst) sWorst = d;
+    } else if (a === 255 && inner(x, y, 255)) {   // well inside the disk: block mean brightness of the picture against the check image's pixel
+      let m = 0; const x0 = x * step, y0 = y * step; for (let v = 0; v < step; v++) { const row = Y.lines[y0 + v]; for (let u = 0; u < step; u++) m += row[x0 + u]; } m /= step * step;
+      const o = (y * n + x) * 4, p = 0.299 * png.rgba[o] + 0.587 * png.rgba[o + 1] + 0.114 * png.rgba[o + 2];
+      dN++; sp += p; sj += m; spp += p * p; sjj += m * m; spj += p * m;
+    }
+  }
+  const sd = dN ? Math.sqrt(Math.max(0, sjj / dN - (sj / dN) ** 2)) : 0, sdP = dN ? Math.sqrt(Math.max(0, spp / dN - (sp / dN) ** 2)) : 0;
+  const agreement = dN && sd > 0 && sdP > 0 ? (spj / dN - (sp / dN) * (sj / dN)) / (sd * sdP) : 0;
+  const m = { check_opaque_share: +(opaque / (n * n)).toFixed(4), check_opaque_on_frame_edge: edgeOpaque, surround_samples: sN, surround_share_background: sN ? +(sIn / sN).toFixed(4) : 0, surround_worst_difference: +sWorst.toFixed(1),
+    disk_samples: dN, disk_brightness_spread: +sd.toFixed(1), agreement: +agreement.toFixed(4) };
+  const fail = edgeOpaque ? 'disk touches the frame edge' : dN < L.DISK_SAMPLES_MIN ? 'check image shows no disk' : sN < L.SURROUND_SAMPLES_MIN ? 'check image shows no surround'
+    : m.surround_share_background < L.SURROUND_SHARE_MIN ? 'surround is not the background colour' : sd < L.DISK_LUMA_SD_MIN ? 'picture is blank inside the disk' : agreement < L.AGREEMENT_MIN ? 'picture does not match the check image' : null;
+  return { ok: !fail, reason: fail, ...m };
+}
+/** One response from EUMETView, read with a size limit. { ok, buf, bytes, sha256, warn_present, served } or { ok:false, reason, http, detail }. Reasons are fixed phrases (public). */
+async function evFetch(what, url, spec) {
+  let r;
+  try { r = await fetch(url, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(EARTHVIEW.TIMEOUT_MS) }); } catch (e) { return { ok: false, reason: what + ' request failed', http: 0, detail: String(e).slice(0, 160) }; }
+  if (r.status !== 200) return { ok: false, reason: what + ' http error', http: r.status };
+  const type = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+  if (type !== spec.type) return { ok: false, reason: what + ' not a picture', http: 200, detail: type };   // EUMETView answers a bad time with HTTP 200 and XML
+  const got = await dustBody(r, spec.maxBytes);
+  if (got.error) return { ok: false, reason: what + ' request failed', http: 200, detail: got.error };
+  if (got.over || !got.buf.byteLength) return { ok: false, reason: what + ' size out of range', http: 200, detail: got.over ? 'over ' + spec.maxBytes : '0' };
+  const warn = r.headers.get('warning');
+  return { ok: true, buf: got.buf, bytes: got.buf.byteLength, sha256: await sha256Bytes(got.buf), warn_present: warn !== null, served: dustServed(warn) };
+}
+const evEmpty = () => ({ schema: 1, layer: 'earthview', frame: null, previous: null, collector_version: COLLECTOR_VERSION });
+async function evRead(env, key, empty) { const o = await env.R2.get(key); return o ? { cur: await o.json(), etag: o.etag } : { cur: empty(), etag: null }; }
+/** Read, change, write of one small record; every write is conditional on what was read (or on there being nothing). change(cur) returns the new body or null to leave it. */
+async function evUpdate(env, key, empty, change) {
+  for (let i = 0; i < 5; i++) {
+    const { cur, etag } = await evRead(env, key, empty), body = change(cur);
+    if (body === null) return { cur, body: null, wrote: false };
+    const r = await env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });
+    if (r !== null) return { cur, body, wrote: true };
+  }
+  throw new Error('earthview record kept changing; gave up after 5 tries: ' + key);
+}
+const evStateEmpty = () => ({ schema: 1, layer: 'earthview', run: null, source_check: null, collection: null });
+/** Records the last source check and the last collection outcome. Ordered by run time: a run that started earlier never replaces a later run's record. The frame pointer is never touched here. */
+async function evState(env, ms, patch) {
+  const run = new Date(ms).toISOString();
+  try { await evUpdate(env, EARTHVIEW.STATE, evStateEmpty, cur => (cur.run && cur.run > run) ? null : { ...cur, ...patch(cur), run, collector_version: COLLECTOR_VERSION }); } catch (_) {}
+}
+/** A failed collection: nothing published, the pointer untouched, the outcome recorded with a fixed public phrase; detail goes to collector_runs only. */
+async function evFail(env, ms, reason, http, detail, T, check) {
+  const at = nowIso();
+  await evState(env, ms, cur => ({ ...(check ? { source_check: check } : {}), collection: { outcome: 'failed', frame_time: T || null, reason, http: http || 0, at,
+    consecutive_failures: ((cur.collection && cur.collection.outcome === 'failed' && cur.collection.consecutive_failures) || 0) + 1 } }));
+  await logRun(env, 'earthview', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : ''));
+  return 'earthview:down ' + reason;
+}
+async function collectEarthView(env, ms) {
+  // 1. Source check: which frames does the service list? A failure here is recorded as a failed CHECK, never as a delay at the source.
+  let r; const checkAt = nowIso();
+  try { r = await fetch(EARTHVIEW.CAP, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(EARTHVIEW.LIST_TIMEOUT_MS) }); } catch (e) { return evFail(env, ms, 'source check failed', 0, String(e).slice(0, 160), null, { ok: false, at: checkAt, reason: 'no answer' }); }
+  if (r.status !== 200) { try { await r.body.cancel(); } catch (_) {} return evFail(env, ms, 'source check failed', r.status, null, null, { ok: false, at: checkAt, reason: 'http error', http: r.status }); }
+  let xml; try { xml = await r.text(); } catch (e) { return evFail(env, ms, 'source check failed', 200, String(e).slice(0, 160), null, { ok: false, at: checkAt, reason: 'unreadable' }); }
+  const T = evLatest(xml);
+  if (!T) return evFail(env, ms, 'source check failed', 200, 'no advertised time for ' + EARTHVIEW.LAYER, null, { ok: false, at: checkAt, reason: 'frame list unreadable' });
+  const age = Number(r.headers.get('age')), check = { ok: true, at: checkAt, newest: T, cache_age_s: Number.isFinite(age) && r.headers.get('age') !== null ? age : null };
+  const { cur } = await evRead(env, EARTHVIEW.POINTER, evEmpty);
+  if (cur.frame && T <= cur.frame.source_frame_time) {   // nothing newer listed: no picture request, the pointer untouched
+    await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'nothing newer', frame_time: T, at: nowIso() } }));
+    await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, 'nothing newer: ' + T + ' listed, ' + cur.frame.source_frame_time + ' held');
+    return 'earthview:nothing newer ' + T;
+  }
+  // 2. The delivered picture and the check image, for exactly that time
+  const q = `&time=${T}`, P = EARTHVIEW.PICTURE, C = EARTHVIEW.CHECK;
+  const picUrl = `${EARTHVIEW.MAP}&width=${P.w}&height=${P.h}&format=image/jpeg&bgcolor=${EARTHVIEW.BGCOLOR}${q}`, chkUrl = `${EARTHVIEW.MAP}&width=${C.w}&height=${C.h}&format=image/png&transparent=true${q}`;
+  const pic = await evFetch('picture', picUrl, P); if (!pic.ok) return evFail(env, ms, pic.reason, pic.http, pic.detail, T, check);
+  const chk = await evFetch('check image', chkUrl, C); if (!chk.ok) return evFail(env, ms, chk.reason, chk.http, chk.detail, T, check);
+  // 3. Served time: strict. A different frame is refused; no statement of the served time is refused too.
+  for (const [what, f] of [['picture', pic], ['check image', chk]]) {
+    if (!f.served) return evFail(env, ms, 'served time not confirmed', 200, what + ': ' + (f.warn_present ? 'header present but names no time' : 'no Warning header'), T, check);
+    if (f.served !== T) return evFail(env, ms, 'served a different frame', 200, `${what}: asked ${T}, server named ${f.served}`, T, check);
+  }
+  // 4. The delivered picture itself: structure to the last byte, every scan present, then a full decode
+  const u8 = new Uint8Array(pic.buf), sc = evJpegScans(u8);
+  if (!sc.ok) return evFail(env, ms, 'picture failed validation', 200, 'structure: ' + sc.reason, T, check);
+  if (sc.w !== P.w || sc.h !== P.h || sc.components !== 3) return evFail(env, ms, 'picture failed validation', 200, `size ${sc.w}x${sc.h}, ${sc.components} components`, T, check);
+  if (!sc.complete) return evFail(env, ms, 'picture failed validation', 200, `scans incomplete: ${sc.missing} coefficient positions not delivered at full precision in ${sc.scans} scans`, T, check);
+  const png = await evPng(new Uint8Array(chk.buf), C.w * C.h);
+  if (!png || png.w !== C.w || png.h !== C.h) return evFail(env, ms, 'check image failed validation', 200, 'does not decode as ' + C.w + 'x' + C.h + ' RGBA', T, check);
+  const dec = evDecode(u8);
+  if (dec.error) return evFail(env, ms, 'picture failed validation', 200, 'decode: ' + dec.error, T, check);
+  if (dec.w !== P.w || dec.h !== P.h) return evFail(env, ms, 'picture failed validation', 200, `decoded size ${dec.w}x${dec.h}`, T, check);
+  const cmp = evCompare(dec, png);
+  if (!cmp.ok) return evFail(env, ms, 'picture failed validation', 200, cmp.reason + ' ' + JSON.stringify(cmp), T, check);
+  // 5. Store the picture once, under a key that names its time and content; read it back
+  const id = evKeyOf(T) + '-' + pic.sha256.slice(0, 16), key = EARTHVIEW.PREFIX + id + '/picture.jpg';
+  const stored = async () => { let b = null; try { const o = await env.R2.get(key); b = o ? await o.arrayBuffer() : null; } catch (_) { return 'unreadable'; } return !b ? 'absent' : (b.byteLength === pic.bytes && await sha256Bytes(b) === pic.sha256) ? 'same' : 'differs'; };
+  const had = await stored();
+  if (had === 'differs' || had === 'unreadable') return evFail(env, ms, 'stored copy differs', 200, key, T, check);
+  if (had === 'absent') {
+    try { await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return evFail(env, ms, 'picture write failed', 200, String(e).slice(0, 160), T, check); }
+    if (await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, key, T, check);
+  }
+  const published_at = nowIso();
+  const frame = { id, source_frame_time: T, served_time: T, time_basis: 'the server named this frame time on both responses (Warning header)', first_listed_seen_at: checkAt, fetched_at: published_at, run: new Date(ms).toISOString(),
+    request: { service: 'WMS 1.3.0 GetMap', layer: 'mtg_fd:' + EARTHVIEW.LAYER, crs: EARTHVIEW.CRS, crs_definition: EARTHVIEW.CRS_DEFINITION, bbox: EARTHVIEW.BBOX, width: P.w, height: P.h, format: 'image/jpeg', bgcolor: EARTHVIEW.BGCOLOR, time: T },
+    picture: { file: 'picture.jpg', key, path: `/snapshot/earthview/${id}/picture.jpg`, type: 'image/jpeg', bytes: pic.bytes, sha256: pic.sha256, w: P.w, h: P.h },
+    checks: { decoded: true, progressive: sc.progressive, scans: sc.scans, check_image_sha256: chk.sha256, ...cmp, ok: undefined, reason: undefined } };
+  // 6. The held list learns of the picture BEFORE the pointer can name it, so no stored picture is ever unknown to cleanup
+  await evUpdate(env, EARTHVIEW.HELD, () => ({ schema: 1, items: [] }), h => h.items.some(x => x.id === id) ? null : { ...h, items: [...h.items, { id, key, bytes: pic.bytes, source_frame_time: T, published_at, left_at: null }] });
+  // 7. Move the pointer only if no other run has published this time or a later one meanwhile
+  const up = await evUpdate(env, EARTHVIEW.POINTER, evEmpty, c => (c.frame && c.frame.source_frame_time >= T) ? null : { ...evEmpty(), frame, previous: c.frame || null });
+  if (!up.wrote) { await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'superseded', frame_time: T, at: nowIso() } })); await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, `superseded: ${up.cur.frame.source_frame_time} was published first; ${T} not published`); return 'earthview:superseded ' + T; }
+  await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'published', frame_time: T, at: published_at } }));
+  // 8. Cleanup, only here: a newer verified frame has just been published. Deleted: pictures that are neither current nor previous
+  //    and left that role at least GRACE_S ago. A picture seen out of role for the first time starts its grace period now.
+  let deleted = 0;
+  try {
+    const live = new Set([frame.id, up.body.previous && up.body.previous.id].filter(Boolean)), nowMs = Date.parse(published_at), gone = [];
+    const h = await evUpdate(env, EARTHVIEW.HELD, () => ({ schema: 1, items: [] }), hh => ({ ...hh, items: hh.items.map(x => live.has(x.id) ? { ...x, left_at: null } : x.left_at ? x : { ...x, left_at: published_at }) }));
+    for (const x of h.body.items) if (!live.has(x.id) && x.left_at && nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 && x.key.startsWith(EARTHVIEW.PREFIX)) { try { await env.R2.delete(x.key); gone.push(x.id); } catch (_) {} }
+    if (gone.length) { deleted = gone.length; await evUpdate(env, EARTHVIEW.HELD, () => ({ schema: 1, items: [] }), hh => ({ ...hh, items: hh.items.filter(x => !gone.includes(x.id) || live.has(x.id)) })); }
+  } catch (_) {}
+  await logRun(env, 'earthview', ms, 'ok', 200, 1, pic.bytes, `frame ${T} as ${id}; agreement ${cmp.agreement}; ${deleted} old picture(s) deleted`);
+  return 'earthview:published ' + T;
+}
+async function runEarthView(env, ms) { let r = null; const g = await guarded(env, 'earthview', ms, async (e, m) => { r = await collectEarthView(e, m); }); return r || g; }
+/** GET /snapshot/earthview/meta and /snapshot/earthview/<frame id>/picture.jpg. A picture is served for any frame still on the held
+ * list (current, previous, or inside its grace period), and only if the stored bytes match what was recorded at publication. */
+async function evRoute(env, p) {
+  const none = (status, reason) => json({ layer: 'earthview', status: 'unavailable', reason }, status, { 'Cache-Control': 'no-store' });
+  if (p.length === 3 && p[2] === 'meta') {
+    let cur, st; try { cur = await getJson(env, EARTHVIEW.POINTER); st = await getJson(env, EARTHVIEW.STATE); } catch (e) { return none(503, 'unreadable'); }
+    const strip = f => f ? { ...f, picture: f.picture && { ...f.picture, key: undefined } } : null;
+    return json({ schema: 1, layer: 'earthview', frame: strip(cur && cur.frame), previous: strip(cur && cur.previous), source_check: (st && st.source_check) || null, collection: (st && st.collection) || null,
+      limits: { waiting_s: EARTHVIEW.WAITING_LIMIT_S, provisional: true }, cadence_min: EARTHVIEW.EVERY_MIN, source: EARTHVIEW.SOURCE, collecting: env.EARTHVIEW_ENABLED === '1', now: nowIso() }, 200, { 'Cache-Control': 'no-store' });
+  }
+  if (p.length !== 4 || p[3] !== 'picture.jpg' || !/^\d{8}T\d{4}Z-[0-9a-f]{16}$/.test(p[2])) return none(404, 'not found');
+  let cur, held; try { cur = await getJson(env, EARTHVIEW.POINTER); held = await getJson(env, EARTHVIEW.HELD); } catch (e) { return none(503, 'unreadable'); }
+  const fr = cur && [cur.frame, cur.previous].find(f => f && f.id === p[2]);
+  const x = fr ? fr.picture : held && (held.items || []).filter(i => i.id === p[2]).map(i => ({ key: i.key, bytes: i.bytes, sha256: null }))[0];
+  if (!x) return none(404, 'not found');
+  let buf; try { const o = await env.R2.get(x.key); buf = o ? await o.arrayBuffer() : null; } catch (e) { return none(503, 'unreadable'); }
+  if (!buf) return none(503, 'missing');
+  const sha = await sha256Bytes(buf);
+  if (buf.byteLength !== x.bytes || (x.sha256 ? sha !== x.sha256 : sha.slice(0, 16) !== p[2].slice(-16))) return none(503, 'integrity');
+  return new Response(buf, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': EARTHVIEW.CACHE_FILE, 'ETag': '"' + sha + '"', ...CORS } });
+}
+/* The JPEG decoder carried for Earth from Space: jpeg-js 0.4.4, lib/decoder.js (https://github.com/jpeg-js/jpeg-js), the JpegImage
+ * class only, unmodified; the package's own decode() wrapper and its colour conversion are not used. Its licence notice follows. */
+const EV_JPEG = (() => {
+/* -*- tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- /
+/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
+/*
+   Copyright 2011 notmasteryet
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
+// - The JPEG specification can be found in the ITU CCITT Recommendation T.81
+//   (www.w3.org/Graphics/JPEG/itu-t81.pdf)
+// - The JFIF specification can be found in the JPEG File Interchange Format
+//   (www.w3.org/Graphics/JPEG/jfif3.pdf)
+// - The Adobe Application-Specific JPEG markers in the Supporting the DCT Filters
+//   in PostScript Level 2, Technical Note #5116
+//   (partners.adobe.com/public/developer/en/ps/sdk/5116.DCT_Filter.pdf)
+
+var JpegImage = (function jpegImage() {
+  "use strict";
+  var dctZigZag = new Int32Array([
+     0,
+     1,  8,
+    16,  9,  2,
+     3, 10, 17, 24,
+    32, 25, 18, 11, 4,
+     5, 12, 19, 26, 33, 40,
+    48, 41, 34, 27, 20, 13,  6,
+     7, 14, 21, 28, 35, 42, 49, 56,
+    57, 50, 43, 36, 29, 22, 15,
+    23, 30, 37, 44, 51, 58,
+    59, 52, 45, 38, 31,
+    39, 46, 53, 60,
+    61, 54, 47,
+    55, 62,
+    63
+  ]);
+
+  var dctCos1  =  4017   // cos(pi/16)
+  var dctSin1  =   799   // sin(pi/16)
+  var dctCos3  =  3406   // cos(3*pi/16)
+  var dctSin3  =  2276   // sin(3*pi/16)
+  var dctCos6  =  1567   // cos(6*pi/16)
+  var dctSin6  =  3784   // sin(6*pi/16)
+  var dctSqrt2 =  5793   // sqrt(2)
+  var dctSqrt1d2 = 2896  // sqrt(2) / 2
+
+  function constructor() {
+  }
+
+  function buildHuffmanTable(codeLengths, values) {
+    var k = 0, code = [], i, j, length = 16;
+    while (length > 0 && !codeLengths[length - 1])
+      length--;
+    code.push({children: [], index: 0});
+    var p = code[0], q;
+    for (i = 0; i < length; i++) {
+      for (j = 0; j < codeLengths[i]; j++) {
+        p = code.pop();
+        p.children[p.index] = values[k];
+        while (p.index > 0) {
+          if (code.length === 0)
+            throw new Error('Could not recreate Huffman Table');
+          p = code.pop();
+        }
+        p.index++;
+        code.push(p);
+        while (code.length <= i) {
+          code.push(q = {children: [], index: 0});
+          p.children[p.index] = q.children;
+          p = q;
+        }
+        k++;
+      }
+      if (i + 1 < length) {
+        // p here points to last code
+        code.push(q = {children: [], index: 0});
+        p.children[p.index] = q.children;
+        p = q;
+      }
+    }
+    return code[0].children;
+  }
+
+  function decodeScan(data, offset,
+                      frame, components, resetInterval,
+                      spectralStart, spectralEnd,
+                      successivePrev, successive, opts) {
+    var precision = frame.precision;
+    var samplesPerLine = frame.samplesPerLine;
+    var scanLines = frame.scanLines;
+    var mcusPerLine = frame.mcusPerLine;
+    var progressive = frame.progressive;
+    var maxH = frame.maxH, maxV = frame.maxV;
+
+    var startOffset = offset, bitsData = 0, bitsCount = 0;
+    function readBit() {
+      if (bitsCount > 0) {
+        bitsCount--;
+        return (bitsData >> bitsCount) & 1;
+      }
+      bitsData = data[offset++];
+      if (bitsData == 0xFF) {
+        var nextByte = data[offset++];
+        if (nextByte) {
+          throw new Error("unexpected marker: " + ((bitsData << 8) | nextByte).toString(16));
+        }
+        // unstuff 0
+      }
+      bitsCount = 7;
+      return bitsData >>> 7;
+    }
+    function decodeHuffman(tree) {
+      var node = tree, bit;
+      while ((bit = readBit()) !== null) {
+        node = node[bit];
+        if (typeof node === 'number')
+          return node;
+        if (typeof node !== 'object')
+          throw new Error("invalid huffman sequence");
+      }
+      return null;
+    }
+    function receive(length) {
+      var n = 0;
+      while (length > 0) {
+        var bit = readBit();
+        if (bit === null) return;
+        n = (n << 1) | bit;
+        length--;
+      }
+      return n;
+    }
+    function receiveAndExtend(length) {
+      var n = receive(length);
+      if (n >= 1 << (length - 1))
+        return n;
+      return n + (-1 << length) + 1;
+    }
+    function decodeBaseline(component, zz) {
+      var t = decodeHuffman(component.huffmanTableDC);
+      var diff = t === 0 ? 0 : receiveAndExtend(t);
+      zz[0]= (component.pred += diff);
+      var k = 1;
+      while (k < 64) {
+        var rs = decodeHuffman(component.huffmanTableAC);
+        var s = rs & 15, r = rs >> 4;
+        if (s === 0) {
+          if (r < 15)
+            break;
+          k += 16;
+          continue;
+        }
+        k += r;
+        var z = dctZigZag[k];
+        zz[z] = receiveAndExtend(s);
+        k++;
+      }
+    }
+    function decodeDCFirst(component, zz) {
+      var t = decodeHuffman(component.huffmanTableDC);
+      var diff = t === 0 ? 0 : (receiveAndExtend(t) << successive);
+      zz[0] = (component.pred += diff);
+    }
+    function decodeDCSuccessive(component, zz) {
+      zz[0] |= readBit() << successive;
+    }
+    var eobrun = 0;
+    function decodeACFirst(component, zz) {
+      if (eobrun > 0) {
+        eobrun--;
+        return;
+      }
+      var k = spectralStart, e = spectralEnd;
+      while (k <= e) {
+        var rs = decodeHuffman(component.huffmanTableAC);
+        var s = rs & 15, r = rs >> 4;
+        if (s === 0) {
+          if (r < 15) {
+            eobrun = receive(r) + (1 << r) - 1;
+            break;
+          }
+          k += 16;
+          continue;
+        }
+        k += r;
+        var z = dctZigZag[k];
+        zz[z] = receiveAndExtend(s) * (1 << successive);
+        k++;
+      }
+    }
+    var successiveACState = 0, successiveACNextValue;
+    function decodeACSuccessive(component, zz) {
+      var k = spectralStart, e = spectralEnd, r = 0;
+      while (k <= e) {
+        var z = dctZigZag[k];
+        var direction = zz[z] < 0 ? -1 : 1;
+        switch (successiveACState) {
+        case 0: // initial state
+          var rs = decodeHuffman(component.huffmanTableAC);
+          var s = rs & 15, r = rs >> 4;
+          if (s === 0) {
+            if (r < 15) {
+              eobrun = receive(r) + (1 << r);
+              successiveACState = 4;
+            } else {
+              r = 16;
+              successiveACState = 1;
+            }
+          } else {
+            if (s !== 1)
+              throw new Error("invalid ACn encoding");
+            successiveACNextValue = receiveAndExtend(s);
+            successiveACState = r ? 2 : 3;
+          }
+          continue;
+        case 1: // skipping r zero items
+        case 2:
+          if (zz[z])
+            zz[z] += (readBit() << successive) * direction;
+          else {
+            r--;
+            if (r === 0)
+              successiveACState = successiveACState == 2 ? 3 : 0;
+          }
+          break;
+        case 3: // set value for a zero item
+          if (zz[z])
+            zz[z] += (readBit() << successive) * direction;
+          else {
+            zz[z] = successiveACNextValue << successive;
+            successiveACState = 0;
+          }
+          break;
+        case 4: // eob
+          if (zz[z])
+            zz[z] += (readBit() << successive) * direction;
+          break;
+        }
+        k++;
+      }
+      if (successiveACState === 4) {
+        eobrun--;
+        if (eobrun === 0)
+          successiveACState = 0;
+      }
+    }
+    function decodeMcu(component, decode, mcu, row, col) {
+      var mcuRow = (mcu / mcusPerLine) | 0;
+      var mcuCol = mcu % mcusPerLine;
+      var blockRow = mcuRow * component.v + row;
+      var blockCol = mcuCol * component.h + col;
+      // If the block is missing and we're in tolerant mode, just skip it.
+      if (component.blocks[blockRow] === undefined && opts.tolerantDecoding)
+        return;
+      decode(component, component.blocks[blockRow][blockCol]);
+    }
+    function decodeBlock(component, decode, mcu) {
+      var blockRow = (mcu / component.blocksPerLine) | 0;
+      var blockCol = mcu % component.blocksPerLine;
+      // If the block is missing and we're in tolerant mode, just skip it.
+      if (component.blocks[blockRow] === undefined && opts.tolerantDecoding)
+        return;
+      decode(component, component.blocks[blockRow][blockCol]);
+    }
+
+    var componentsLength = components.length;
+    var component, i, j, k, n;
+    var decodeFn;
+    if (progressive) {
+      if (spectralStart === 0)
+        decodeFn = successivePrev === 0 ? decodeDCFirst : decodeDCSuccessive;
+      else
+        decodeFn = successivePrev === 0 ? decodeACFirst : decodeACSuccessive;
+    } else {
+      decodeFn = decodeBaseline;
+    }
+
+    var mcu = 0, marker;
+    var mcuExpected;
+    if (componentsLength == 1) {
+      mcuExpected = components[0].blocksPerLine * components[0].blocksPerColumn;
+    } else {
+      mcuExpected = mcusPerLine * frame.mcusPerColumn;
+    }
+    if (!resetInterval) resetInterval = mcuExpected;
+
+    var h, v;
+    while (mcu < mcuExpected) {
+      // reset interval stuff
+      for (i = 0; i < componentsLength; i++)
+        components[i].pred = 0;
+      eobrun = 0;
+
+      if (componentsLength == 1) {
+        component = components[0];
+        for (n = 0; n < resetInterval; n++) {
+          decodeBlock(component, decodeFn, mcu);
+          mcu++;
+        }
+      } else {
+        for (n = 0; n < resetInterval; n++) {
+          for (i = 0; i < componentsLength; i++) {
+            component = components[i];
+            h = component.h;
+            v = component.v;
+            for (j = 0; j < v; j++) {
+              for (k = 0; k < h; k++) {
+                decodeMcu(component, decodeFn, mcu, j, k);
+              }
+            }
+          }
+          mcu++;
+
+          // If we've reached our expected MCU's, stop decoding
+          if (mcu === mcuExpected) break;
+        }
+      }
+
+      if (mcu === mcuExpected) {
+        // Skip trailing bytes at the end of the scan - until we reach the next marker
+        do {
+          if (data[offset] === 0xFF) {
+            if (data[offset + 1] !== 0x00) {
+              break;
+            }
+          }
+          offset += 1;
+        } while (offset < data.length - 2);
+      }
+
+      // find marker
+      bitsCount = 0;
+      marker = (data[offset] << 8) | data[offset + 1];
+      if (marker < 0xFF00) {
+        throw new Error("marker was not found");
+      }
+
+      if (marker >= 0xFFD0 && marker <= 0xFFD7) { // RSTx
+        offset += 2;
+      }
+      else
+        break;
+    }
+
+    return offset - startOffset;
+  }
+
+  function buildComponentData(frame, component) {
+    var lines = [];
+    var blocksPerLine = component.blocksPerLine;
+    var blocksPerColumn = component.blocksPerColumn;
+    var samplesPerLine = blocksPerLine << 3;
+    // Only 1 used per invocation of this function and garbage collected after invocation, so no need to account for its memory footprint.
+    var R = new Int32Array(64), r = new Uint8Array(64);
+
+    // A port of poppler's IDCT method which in turn is taken from:
+    //   Christoph Loeffler, Adriaan Ligtenberg, George S. Moschytz,
+    //   "Practical Fast 1-D DCT Algorithms with 11 Multiplications",
+    //   IEEE Intl. Conf. on Acoustics, Speech & Signal Processing, 1989,
+    //   988-991.
+    function quantizeAndInverse(zz, dataOut, dataIn) {
+      var qt = component.quantizationTable;
+      var v0, v1, v2, v3, v4, v5, v6, v7, t;
+      var p = dataIn;
+      var i;
+
+      // dequant
+      for (i = 0; i < 64; i++)
+        p[i] = zz[i] * qt[i];
+
+      // inverse DCT on rows
+      for (i = 0; i < 8; ++i) {
+        var row = 8 * i;
+
+        // check for all-zero AC coefficients
+        if (p[1 + row] == 0 && p[2 + row] == 0 && p[3 + row] == 0 &&
+            p[4 + row] == 0 && p[5 + row] == 0 && p[6 + row] == 0 &&
+            p[7 + row] == 0) {
+          t = (dctSqrt2 * p[0 + row] + 512) >> 10;
+          p[0 + row] = t;
+          p[1 + row] = t;
+          p[2 + row] = t;
+          p[3 + row] = t;
+          p[4 + row] = t;
+          p[5 + row] = t;
+          p[6 + row] = t;
+          p[7 + row] = t;
+          continue;
+        }
+
+        // stage 4
+        v0 = (dctSqrt2 * p[0 + row] + 128) >> 8;
+        v1 = (dctSqrt2 * p[4 + row] + 128) >> 8;
+        v2 = p[2 + row];
+        v3 = p[6 + row];
+        v4 = (dctSqrt1d2 * (p[1 + row] - p[7 + row]) + 128) >> 8;
+        v7 = (dctSqrt1d2 * (p[1 + row] + p[7 + row]) + 128) >> 8;
+        v5 = p[3 + row] << 4;
+        v6 = p[5 + row] << 4;
+
+        // stage 3
+        t = (v0 - v1+ 1) >> 1;
+        v0 = (v0 + v1 + 1) >> 1;
+        v1 = t;
+        t = (v2 * dctSin6 + v3 * dctCos6 + 128) >> 8;
+        v2 = (v2 * dctCos6 - v3 * dctSin6 + 128) >> 8;
+        v3 = t;
+        t = (v4 - v6 + 1) >> 1;
+        v4 = (v4 + v6 + 1) >> 1;
+        v6 = t;
+        t = (v7 + v5 + 1) >> 1;
+        v5 = (v7 - v5 + 1) >> 1;
+        v7 = t;
+
+        // stage 2
+        t = (v0 - v3 + 1) >> 1;
+        v0 = (v0 + v3 + 1) >> 1;
+        v3 = t;
+        t = (v1 - v2 + 1) >> 1;
+        v1 = (v1 + v2 + 1) >> 1;
+        v2 = t;
+        t = (v4 * dctSin3 + v7 * dctCos3 + 2048) >> 12;
+        v4 = (v4 * dctCos3 - v7 * dctSin3 + 2048) >> 12;
+        v7 = t;
+        t = (v5 * dctSin1 + v6 * dctCos1 + 2048) >> 12;
+        v5 = (v5 * dctCos1 - v6 * dctSin1 + 2048) >> 12;
+        v6 = t;
+
+        // stage 1
+        p[0 + row] = v0 + v7;
+        p[7 + row] = v0 - v7;
+        p[1 + row] = v1 + v6;
+        p[6 + row] = v1 - v6;
+        p[2 + row] = v2 + v5;
+        p[5 + row] = v2 - v5;
+        p[3 + row] = v3 + v4;
+        p[4 + row] = v3 - v4;
+      }
+
+      // inverse DCT on columns
+      for (i = 0; i < 8; ++i) {
+        var col = i;
+
+        // check for all-zero AC coefficients
+        if (p[1*8 + col] == 0 && p[2*8 + col] == 0 && p[3*8 + col] == 0 &&
+            p[4*8 + col] == 0 && p[5*8 + col] == 0 && p[6*8 + col] == 0 &&
+            p[7*8 + col] == 0) {
+          t = (dctSqrt2 * dataIn[i+0] + 8192) >> 14;
+          p[0*8 + col] = t;
+          p[1*8 + col] = t;
+          p[2*8 + col] = t;
+          p[3*8 + col] = t;
+          p[4*8 + col] = t;
+          p[5*8 + col] = t;
+          p[6*8 + col] = t;
+          p[7*8 + col] = t;
+          continue;
+        }
+
+        // stage 4
+        v0 = (dctSqrt2 * p[0*8 + col] + 2048) >> 12;
+        v1 = (dctSqrt2 * p[4*8 + col] + 2048) >> 12;
+        v2 = p[2*8 + col];
+        v3 = p[6*8 + col];
+        v4 = (dctSqrt1d2 * (p[1*8 + col] - p[7*8 + col]) + 2048) >> 12;
+        v7 = (dctSqrt1d2 * (p[1*8 + col] + p[7*8 + col]) + 2048) >> 12;
+        v5 = p[3*8 + col];
+        v6 = p[5*8 + col];
+
+        // stage 3
+        t = (v0 - v1 + 1) >> 1;
+        v0 = (v0 + v1 + 1) >> 1;
+        v1 = t;
+        t = (v2 * dctSin6 + v3 * dctCos6 + 2048) >> 12;
+        v2 = (v2 * dctCos6 - v3 * dctSin6 + 2048) >> 12;
+        v3 = t;
+        t = (v4 - v6 + 1) >> 1;
+        v4 = (v4 + v6 + 1) >> 1;
+        v6 = t;
+        t = (v7 + v5 + 1) >> 1;
+        v5 = (v7 - v5 + 1) >> 1;
+        v7 = t;
+
+        // stage 2
+        t = (v0 - v3 + 1) >> 1;
+        v0 = (v0 + v3 + 1) >> 1;
+        v3 = t;
+        t = (v1 - v2 + 1) >> 1;
+        v1 = (v1 + v2 + 1) >> 1;
+        v2 = t;
+        t = (v4 * dctSin3 + v7 * dctCos3 + 2048) >> 12;
+        v4 = (v4 * dctCos3 - v7 * dctSin3 + 2048) >> 12;
+        v7 = t;
+        t = (v5 * dctSin1 + v6 * dctCos1 + 2048) >> 12;
+        v5 = (v5 * dctCos1 - v6 * dctSin1 + 2048) >> 12;
+        v6 = t;
+
+        // stage 1
+        p[0*8 + col] = v0 + v7;
+        p[7*8 + col] = v0 - v7;
+        p[1*8 + col] = v1 + v6;
+        p[6*8 + col] = v1 - v6;
+        p[2*8 + col] = v2 + v5;
+        p[5*8 + col] = v2 - v5;
+        p[3*8 + col] = v3 + v4;
+        p[4*8 + col] = v3 - v4;
+      }
+
+      // convert to 8-bit integers
+      for (i = 0; i < 64; ++i) {
+        var sample = 128 + ((p[i] + 8) >> 4);
+        dataOut[i] = sample < 0 ? 0 : sample > 0xFF ? 0xFF : sample;
+      }
+    }
+
+    requestMemoryAllocation(samplesPerLine * blocksPerColumn * 8);
+
+    var i, j;
+    for (var blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
+      var scanLine = blockRow << 3;
+      for (i = 0; i < 8; i++)
+        lines.push(new Uint8Array(samplesPerLine));
+      for (var blockCol = 0; blockCol < blocksPerLine; blockCol++) {
+        quantizeAndInverse(component.blocks[blockRow][blockCol], r, R);
+
+        var offset = 0, sample = blockCol << 3;
+        for (j = 0; j < 8; j++) {
+          var line = lines[scanLine + j];
+          for (i = 0; i < 8; i++)
+            line[sample + i] = r[offset++];
+        }
+      }
+    }
+    return lines;
+  }
+
+  function clampTo8bit(a) {
+    return a < 0 ? 0 : a > 255 ? 255 : a;
+  }
+
+  constructor.prototype = {
+    load: function load(path) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", path, true);
+      xhr.responseType = "arraybuffer";
+      xhr.onload = (function() {
+        // TODO catch parse error
+        var data = new Uint8Array(xhr.response || xhr.mozResponseArrayBuffer);
+        this.parse(data);
+        if (this.onload)
+          this.onload();
+      }).bind(this);
+      xhr.send(null);
+    },
+    parse: function parse(data) {
+      var maxResolutionInPixels = this.opts.maxResolutionInMP * 1000 * 1000;
+      var offset = 0, length = data.length;
+      function readUint16() {
+        var value = (data[offset] << 8) | data[offset + 1];
+        offset += 2;
+        return value;
+      }
+      function readDataBlock() {
+        var length = readUint16();
+        var array = data.subarray(offset, offset + length - 2);
+        offset += array.length;
+        return array;
+      }
+      function prepareComponents(frame) {
+        // According to the JPEG standard, the sampling factor must be between 1 and 4
+        // See https://github.com/libjpeg-turbo/libjpeg-turbo/blob/9abeff46d87bd201a952e276f3e4339556a403a3/libjpeg.txt#L1138-L1146
+        var maxH = 1, maxV = 1;
+        var component, componentId;
+        for (componentId in frame.components) {
+          if (frame.components.hasOwnProperty(componentId)) {
+            component = frame.components[componentId];
+            if (maxH < component.h) maxH = component.h;
+            if (maxV < component.v) maxV = component.v;
+          }
+        }
+        var mcusPerLine = Math.ceil(frame.samplesPerLine / 8 / maxH);
+        var mcusPerColumn = Math.ceil(frame.scanLines / 8 / maxV);
+        for (componentId in frame.components) {
+          if (frame.components.hasOwnProperty(componentId)) {
+            component = frame.components[componentId];
+            var blocksPerLine = Math.ceil(Math.ceil(frame.samplesPerLine / 8) * component.h / maxH);
+            var blocksPerColumn = Math.ceil(Math.ceil(frame.scanLines  / 8) * component.v / maxV);
+            var blocksPerLineForMcu = mcusPerLine * component.h;
+            var blocksPerColumnForMcu = mcusPerColumn * component.v;
+            var blocksToAllocate = blocksPerColumnForMcu * blocksPerLineForMcu;
+            var blocks = [];
+
+            // Each block is a Int32Array of length 64 (4 x 64 = 256 bytes)
+            requestMemoryAllocation(blocksToAllocate * 256);
+
+            for (var i = 0; i < blocksPerColumnForMcu; i++) {
+              var row = [];
+              for (var j = 0; j < blocksPerLineForMcu; j++)
+                row.push(new Int32Array(64));
+              blocks.push(row);
+            }
+            component.blocksPerLine = blocksPerLine;
+            component.blocksPerColumn = blocksPerColumn;
+            component.blocks = blocks;
+          }
+        }
+        frame.maxH = maxH;
+        frame.maxV = maxV;
+        frame.mcusPerLine = mcusPerLine;
+        frame.mcusPerColumn = mcusPerColumn;
+      }
+      var jfif = null;
+      var adobe = null;
+      var pixels = null;
+      var frame, resetInterval;
+      var quantizationTables = [], frames = [];
+      var huffmanTablesAC = [], huffmanTablesDC = [];
+      var fileMarker = readUint16();
+      var malformedDataOffset = -1;
+      this.comments = [];
+      if (fileMarker != 0xFFD8) { // SOI (Start of Image)
+        throw new Error("SOI not found");
+      }
+
+      fileMarker = readUint16();
+      while (fileMarker != 0xFFD9) { // EOI (End of image)
+        var i, j, l;
+        switch(fileMarker) {
+          case 0xFF00: break;
+          case 0xFFE0: // APP0 (Application Specific)
+          case 0xFFE1: // APP1
+          case 0xFFE2: // APP2
+          case 0xFFE3: // APP3
+          case 0xFFE4: // APP4
+          case 0xFFE5: // APP5
+          case 0xFFE6: // APP6
+          case 0xFFE7: // APP7
+          case 0xFFE8: // APP8
+          case 0xFFE9: // APP9
+          case 0xFFEA: // APP10
+          case 0xFFEB: // APP11
+          case 0xFFEC: // APP12
+          case 0xFFED: // APP13
+          case 0xFFEE: // APP14
+          case 0xFFEF: // APP15
+          case 0xFFFE: // COM (Comment)
+            var appData = readDataBlock();
+
+            if (fileMarker === 0xFFFE) {
+              var comment = String.fromCharCode.apply(null, appData);
+              this.comments.push(comment);
+            }
+
+            if (fileMarker === 0xFFE0) {
+              if (appData[0] === 0x4A && appData[1] === 0x46 && appData[2] === 0x49 &&
+                appData[3] === 0x46 && appData[4] === 0) { // 'JFIF\x00'
+                jfif = {
+                  version: { major: appData[5], minor: appData[6] },
+                  densityUnits: appData[7],
+                  xDensity: (appData[8] << 8) | appData[9],
+                  yDensity: (appData[10] << 8) | appData[11],
+                  thumbWidth: appData[12],
+                  thumbHeight: appData[13],
+                  thumbData: appData.subarray(14, 14 + 3 * appData[12] * appData[13])
+                };
+              }
+            }
+            // TODO APP1 - Exif
+            if (fileMarker === 0xFFE1) {
+              if (appData[0] === 0x45 &&
+                appData[1] === 0x78 &&
+                appData[2] === 0x69 &&
+                appData[3] === 0x66 &&
+                appData[4] === 0) { // 'EXIF\x00'
+                this.exifBuffer = appData.subarray(5, appData.length);
+              }
+            }
+
+            if (fileMarker === 0xFFEE) {
+              if (appData[0] === 0x41 && appData[1] === 0x64 && appData[2] === 0x6F &&
+                appData[3] === 0x62 && appData[4] === 0x65 && appData[5] === 0) { // 'Adobe\x00'
+                adobe = {
+                  version: appData[6],
+                  flags0: (appData[7] << 8) | appData[8],
+                  flags1: (appData[9] << 8) | appData[10],
+                  transformCode: appData[11]
+                };
+              }
+            }
+            break;
+
+          case 0xFFDB: // DQT (Define Quantization Tables)
+            var quantizationTablesLength = readUint16();
+            var quantizationTablesEnd = quantizationTablesLength + offset - 2;
+            while (offset < quantizationTablesEnd) {
+              var quantizationTableSpec = data[offset++];
+              requestMemoryAllocation(64 * 4);
+              var tableData = new Int32Array(64);
+              if ((quantizationTableSpec >> 4) === 0) { // 8 bit values
+                for (j = 0; j < 64; j++) {
+                  var z = dctZigZag[j];
+                  tableData[z] = data[offset++];
+                }
+              } else if ((quantizationTableSpec >> 4) === 1) { //16 bit
+                for (j = 0; j < 64; j++) {
+                  var z = dctZigZag[j];
+                  tableData[z] = readUint16();
+                }
+              } else
+                throw new Error("DQT: invalid table spec");
+              quantizationTables[quantizationTableSpec & 15] = tableData;
+            }
+            break;
+
+          case 0xFFC0: // SOF0 (Start of Frame, Baseline DCT)
+          case 0xFFC1: // SOF1 (Start of Frame, Extended DCT)
+          case 0xFFC2: // SOF2 (Start of Frame, Progressive DCT)
+            readUint16(); // skip data length
+            frame = {};
+            frame.extended = (fileMarker === 0xFFC1);
+            frame.progressive = (fileMarker === 0xFFC2);
+            frame.precision = data[offset++];
+            frame.scanLines = readUint16();
+            frame.samplesPerLine = readUint16();
+            frame.components = {};
+            frame.componentsOrder = [];
+
+            var pixelsInFrame = frame.scanLines * frame.samplesPerLine;
+            if (pixelsInFrame > maxResolutionInPixels) {
+              var exceededAmount = Math.ceil((pixelsInFrame - maxResolutionInPixels) / 1e6);
+              throw new Error(`maxResolutionInMP limit exceeded by ${exceededAmount}MP`);
+            }
+
+            var componentsCount = data[offset++], componentId;
+            var maxH = 0, maxV = 0;
+            for (i = 0; i < componentsCount; i++) {
+              componentId = data[offset];
+              var h = data[offset + 1] >> 4;
+              var v = data[offset + 1] & 15;
+              var qId = data[offset + 2];
+
+              if ( h <= 0 || v <= 0 ) {
+                throw new Error('Invalid sampling factor, expected values above 0');
+              }
+
+              frame.componentsOrder.push(componentId);
+              frame.components[componentId] = {
+                h: h,
+                v: v,
+                quantizationIdx: qId
+              };
+              offset += 3;
+            }
+            prepareComponents(frame);
+            frames.push(frame);
+            break;
+
+          case 0xFFC4: // DHT (Define Huffman Tables)
+            var huffmanLength = readUint16();
+            for (i = 2; i < huffmanLength;) {
+              var huffmanTableSpec = data[offset++];
+              var codeLengths = new Uint8Array(16);
+              var codeLengthSum = 0;
+              for (j = 0; j < 16; j++, offset++) {
+                codeLengthSum += (codeLengths[j] = data[offset]);
+              }
+              requestMemoryAllocation(16 + codeLengthSum);
+              var huffmanValues = new Uint8Array(codeLengthSum);
+              for (j = 0; j < codeLengthSum; j++, offset++)
+                huffmanValues[j] = data[offset];
+              i += 17 + codeLengthSum;
+
+              ((huffmanTableSpec >> 4) === 0 ?
+                huffmanTablesDC : huffmanTablesAC)[huffmanTableSpec & 15] =
+                buildHuffmanTable(codeLengths, huffmanValues);
+            }
+            break;
+
+          case 0xFFDD: // DRI (Define Restart Interval)
+            readUint16(); // skip data length
+            resetInterval = readUint16();
+            break;
+
+          case 0xFFDC: // Number of Lines marker
+            readUint16() // skip data length
+            readUint16() // Ignore this data since it represents the image height
+            break;
+            
+          case 0xFFDA: // SOS (Start of Scan)
+            var scanLength = readUint16();
+            var selectorsCount = data[offset++];
+            var components = [], component;
+            for (i = 0; i < selectorsCount; i++) {
+              component = frame.components[data[offset++]];
+              var tableSpec = data[offset++];
+              component.huffmanTableDC = huffmanTablesDC[tableSpec >> 4];
+              component.huffmanTableAC = huffmanTablesAC[tableSpec & 15];
+              components.push(component);
+            }
+            var spectralStart = data[offset++];
+            var spectralEnd = data[offset++];
+            var successiveApproximation = data[offset++];
+            var processed = decodeScan(data, offset,
+              frame, components, resetInterval,
+              spectralStart, spectralEnd,
+              successiveApproximation >> 4, successiveApproximation & 15, this.opts);
+            offset += processed;
+            break;
+
+          case 0xFFFF: // Fill bytes
+            if (data[offset] !== 0xFF) { // Avoid skipping a valid marker.
+              offset--;
+            }
+            break;
+          default:
+            if (data[offset - 3] == 0xFF &&
+                data[offset - 2] >= 0xC0 && data[offset - 2] <= 0xFE) {
+              // could be incorrect encoding -- last 0xFF byte of the previous
+              // block was eaten by the encoder
+              offset -= 3;
+              break;
+            }
+            else if (fileMarker === 0xE0 || fileMarker == 0xE1) {
+              // Recover from malformed APP1 markers popular in some phone models.
+              // See https://github.com/eugeneware/jpeg-js/issues/82
+              if (malformedDataOffset !== -1) {
+                throw new Error(`first unknown JPEG marker at offset ${malformedDataOffset.toString(16)}, second unknown JPEG marker ${fileMarker.toString(16)} at offset ${(offset - 1).toString(16)}`);
+              }
+              malformedDataOffset = offset - 1;
+              const nextOffset = readUint16();
+              if (data[offset + nextOffset - 2] === 0xFF) {
+                offset += nextOffset - 2;
+                break;
+              }
+            }
+            throw new Error("unknown JPEG marker " + fileMarker.toString(16));
+        }
+        fileMarker = readUint16();
+      }
+      if (frames.length != 1)
+        throw new Error("only single frame JPEGs supported");
+
+      // set each frame's components quantization table
+      for (var i = 0; i < frames.length; i++) {
+        var cp = frames[i].components;
+        for (var j in cp) {
+          cp[j].quantizationTable = quantizationTables[cp[j].quantizationIdx];
+          delete cp[j].quantizationIdx;
+        }
+      }
+
+      this.width = frame.samplesPerLine;
+      this.height = frame.scanLines;
+      this.jfif = jfif;
+      this.adobe = adobe;
+      this.components = [];
+      for (var i = 0; i < frame.componentsOrder.length; i++) {
+        var component = frame.components[frame.componentsOrder[i]];
+        this.components.push({
+          lines: buildComponentData(frame, component),
+          scaleX: component.h / frame.maxH,
+          scaleY: component.v / frame.maxV
+        });
+      }
+    },
+    getData: function getData(width, height) {
+      var scaleX = this.width / width, scaleY = this.height / height;
+
+      var component1, component2, component3, component4;
+      var component1Line, component2Line, component3Line, component4Line;
+      var x, y;
+      var offset = 0;
+      var Y, Cb, Cr, K, C, M, Ye, R, G, B;
+      var colorTransform;
+      var dataLength = width * height * this.components.length;
+      requestMemoryAllocation(dataLength);
+      var data = new Uint8Array(dataLength);
+      switch (this.components.length) {
+        case 1:
+          component1 = this.components[0];
+          for (y = 0; y < height; y++) {
+            component1Line = component1.lines[0 | (y * component1.scaleY * scaleY)];
+            for (x = 0; x < width; x++) {
+              Y = component1Line[0 | (x * component1.scaleX * scaleX)];
+
+              data[offset++] = Y;
+            }
+          }
+          break;
+        case 2:
+          // PDF might compress two component data in custom colorspace
+          component1 = this.components[0];
+          component2 = this.components[1];
+          for (y = 0; y < height; y++) {
+            component1Line = component1.lines[0 | (y * component1.scaleY * scaleY)];
+            component2Line = component2.lines[0 | (y * component2.scaleY * scaleY)];
+            for (x = 0; x < width; x++) {
+              Y = component1Line[0 | (x * component1.scaleX * scaleX)];
+              data[offset++] = Y;
+              Y = component2Line[0 | (x * component2.scaleX * scaleX)];
+              data[offset++] = Y;
+            }
+          }
+          break;
+        case 3:
+          // The default transform for three components is true
+          colorTransform = true;
+          // The adobe transform marker overrides any previous setting
+          if (this.adobe && this.adobe.transformCode)
+            colorTransform = true;
+          else if (typeof this.opts.colorTransform !== 'undefined')
+            colorTransform = !!this.opts.colorTransform;
+
+          component1 = this.components[0];
+          component2 = this.components[1];
+          component3 = this.components[2];
+          for (y = 0; y < height; y++) {
+            component1Line = component1.lines[0 | (y * component1.scaleY * scaleY)];
+            component2Line = component2.lines[0 | (y * component2.scaleY * scaleY)];
+            component3Line = component3.lines[0 | (y * component3.scaleY * scaleY)];
+            for (x = 0; x < width; x++) {
+              if (!colorTransform) {
+                R = component1Line[0 | (x * component1.scaleX * scaleX)];
+                G = component2Line[0 | (x * component2.scaleX * scaleX)];
+                B = component3Line[0 | (x * component3.scaleX * scaleX)];
+              } else {
+                Y = component1Line[0 | (x * component1.scaleX * scaleX)];
+                Cb = component2Line[0 | (x * component2.scaleX * scaleX)];
+                Cr = component3Line[0 | (x * component3.scaleX * scaleX)];
+
+                R = clampTo8bit(Y + 1.402 * (Cr - 128));
+                G = clampTo8bit(Y - 0.3441363 * (Cb - 128) - 0.71413636 * (Cr - 128));
+                B = clampTo8bit(Y + 1.772 * (Cb - 128));
+              }
+
+              data[offset++] = R;
+              data[offset++] = G;
+              data[offset++] = B;
+            }
+          }
+          break;
+        case 4:
+          if (!this.adobe)
+            throw new Error('Unsupported color mode (4 components)');
+          // The default transform for four components is false
+          colorTransform = false;
+          // The adobe transform marker overrides any previous setting
+          if (this.adobe && this.adobe.transformCode)
+            colorTransform = true;
+          else if (typeof this.opts.colorTransform !== 'undefined')
+            colorTransform = !!this.opts.colorTransform;
+
+          component1 = this.components[0];
+          component2 = this.components[1];
+          component3 = this.components[2];
+          component4 = this.components[3];
+          for (y = 0; y < height; y++) {
+            component1Line = component1.lines[0 | (y * component1.scaleY * scaleY)];
+            component2Line = component2.lines[0 | (y * component2.scaleY * scaleY)];
+            component3Line = component3.lines[0 | (y * component3.scaleY * scaleY)];
+            component4Line = component4.lines[0 | (y * component4.scaleY * scaleY)];
+            for (x = 0; x < width; x++) {
+              if (!colorTransform) {
+                C = component1Line[0 | (x * component1.scaleX * scaleX)];
+                M = component2Line[0 | (x * component2.scaleX * scaleX)];
+                Ye = component3Line[0 | (x * component3.scaleX * scaleX)];
+                K = component4Line[0 | (x * component4.scaleX * scaleX)];
+              } else {
+                Y = component1Line[0 | (x * component1.scaleX * scaleX)];
+                Cb = component2Line[0 | (x * component2.scaleX * scaleX)];
+                Cr = component3Line[0 | (x * component3.scaleX * scaleX)];
+                K = component4Line[0 | (x * component4.scaleX * scaleX)];
+
+                C = 255 - clampTo8bit(Y + 1.402 * (Cr - 128));
+                M = 255 - clampTo8bit(Y - 0.3441363 * (Cb - 128) - 0.71413636 * (Cr - 128));
+                Ye = 255 - clampTo8bit(Y + 1.772 * (Cb - 128));
+              }
+              data[offset++] = 255-C;
+              data[offset++] = 255-M;
+              data[offset++] = 255-Ye;
+              data[offset++] = 255-K;
+            }
+          }
+          break;
+        default:
+          throw new Error('Unsupported color mode');
+      }
+      return data;
+    },
+    copyToImageData: function copyToImageData(imageData, formatAsRGBA) {
+      var width = imageData.width, height = imageData.height;
+      var imageDataArray = imageData.data;
+      var data = this.getData(width, height);
+      var i = 0, j = 0, x, y;
+      var Y, K, C, M, R, G, B;
+      switch (this.components.length) {
+        case 1:
+          for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+              Y = data[i++];
+
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = Y;
+              if (formatAsRGBA) {
+                imageDataArray[j++] = 255;
+              }
+            }
+          }
+          break;
+        case 3:
+          for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+              R = data[i++];
+              G = data[i++];
+              B = data[i++];
+
+              imageDataArray[j++] = R;
+              imageDataArray[j++] = G;
+              imageDataArray[j++] = B;
+              if (formatAsRGBA) {
+                imageDataArray[j++] = 255;
+              }
+            }
+          }
+          break;
+        case 4:
+          for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+              C = data[i++];
+              M = data[i++];
+              Y = data[i++];
+              K = data[i++];
+
+              R = 255 - clampTo8bit(C * (1 - K / 255) + K);
+              G = 255 - clampTo8bit(M * (1 - K / 255) + K);
+              B = 255 - clampTo8bit(Y * (1 - K / 255) + K);
+
+              imageDataArray[j++] = R;
+              imageDataArray[j++] = G;
+              imageDataArray[j++] = B;
+              if (formatAsRGBA) {
+                imageDataArray[j++] = 255;
+              }
+            }
+          }
+          break;
+        default:
+          throw new Error('Unsupported color mode');
+      }
+    }
+  };
+
+
+  // We cap the amount of memory used by jpeg-js to avoid unexpected OOMs from untrusted content.
+  var totalBytesAllocated = 0;
+  var maxMemoryUsageBytes = 0;
+  function requestMemoryAllocation(increaseAmount = 0) {
+    var totalMemoryImpactBytes = totalBytesAllocated + increaseAmount;
+    if (totalMemoryImpactBytes > maxMemoryUsageBytes) {
+      var exceededAmount = Math.ceil((totalMemoryImpactBytes - maxMemoryUsageBytes) / 1024 / 1024);
+      throw new Error(`maxMemoryUsageInMB limit exceeded by at least ${exceededAmount}MB`);
+    }
+
+    totalBytesAllocated = totalMemoryImpactBytes;
+  }
+
+  constructor.resetMaxMemoryUsage = function (maxMemoryUsageBytes_) {
+    totalBytesAllocated = 0;
+    maxMemoryUsageBytes = maxMemoryUsageBytes_;
+  };
+
+  constructor.getBytesAllocated = function () {
+    return totalBytesAllocated;
+  };
+
+  constructor.requestMemoryAllocation = requestMemoryAllocation;
+
+  return constructor;
+})();
+return JpegImage;
+})();
+
 /* ---------- Wind by height (NOAA/NCEP GFS, 0.25 degree, analysis hour f000) — 0.6.16, GLOBAL-WIND-BUILD-PROPOSAL rev 2 (§11 governs)
  * Each scheduled hour the hub looks for the newest GFS run whose f000 index exists on NOAA's open-data mirror. If that run is newer
  * than the published one it fetches six messages by byte range (u and v at 10 m above ground, 250 hPa and 10 hPa), from ONE host,
@@ -4070,6 +5454,7 @@ async function guarded(env, layer, ms, fn) {
     if (layer === 'firms' && env.FIRMS_PIPELINE === 'v2') { try { await logRun(env, layer, ms, 'down', 0, 0, 0, note); await fvDownNoInput(env, ms, note); } catch (_) {} }   // v2 never calls the unconditional writeDown
     else if (layer === 'drifters') { try { await driftFail(env, ms, 'internal_error', note, 0); } catch (_) {} }
     else if (layer === 'dustrgb') { try { await dustFail(env, ms, 'internal error', 0, note); } catch (_) {} }
+    else if (layer === 'earthview') { try { await evFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // never the generic writeDown
     else if (layer === 'wind') { try { await windFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.16: never the generic writeDown
     else if (layer === 'sunface') { try { await sunFail(env, ms, 'down', 'internal error', 0, note); } catch (_) {} }   // 0.6.13: never the generic writeDown
     else if (layer === 'skycraft') { try { await craftFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.12: never the generic writeDown   // 0.6.11: never the generic writeDown (no cells, no envelope)   // 0.6.8: buoys never call the unconditional writeDown
@@ -4081,10 +5466,17 @@ async function guarded(env, layer, ms, fn) {
  * so that a handled failure is never reported as a plain "ran". */
 async function runWind(env, ms) { let r = null; const g = await guarded(env, 'wind', ms, async (e, m) => { r = await collectWind(e, m); }); return r || g; }
 const JOBS = {
-  five: async (env, ms) => (await Promise.all([
-    guarded(env, 'usgs', ms, collectUsgs),
-    env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky', ms, collectOpenskyWorld) : 'opensky:parked',
-  ])).join('; '),
+  five: async (env, ms) => {
+    const a = (await Promise.all([
+      guarded(env, 'usgs', ms, collectUsgs),
+      env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky', ms, collectOpenskyWorld) : 'opensky:parked',
+    ])).join('; ');
+    // Earth from Space rides this trigger every other tick (ten minutes), AFTER earthquakes, so a slow picture never delays them.
+    // With the flag unset: no request, nothing written.
+    const e = env.EARTHVIEW_ENABLED !== '1' ? 'earthview:not scheduled (EARTHVIEW_ENABLED unset)' : (new Date(ms).getUTCMinutes() % EARTHVIEW.EVERY_MIN) < 5 ? await runEarthView(env, ms) : 'earthview:skipped (every ten minutes)';
+    return a + '; ' + e;
+  },
+  earthview: async (env, ms) => runEarthView(env, ms),   // manual: /admin/run/earthview (admin key; ignores the gate; runs the collector once)
   minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
   firms: async (env, ms) => { const f = await guarded(env, 'firms', ms, env.FIRMS_PIPELINE === 'v2' ? collectFirmsV2 : collectFirms); let s; try { s = await collectShipsFallback(env, ms); } catch (e) { s = 'ships-fallback:threw ' + String(e).slice(0, 80); } return f + '; ' + s; },
   'ships-fallback': async (env, ms) => collectShipsFallback(env, ms),   // manual: /admin/run/ships-fallback (same gates)
@@ -4489,6 +5881,7 @@ export default {
     if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
     if (p[0] === 'snapshot' && p[1] === 'wind') return windRoute(env, p);   // 0.6.16: manifest + the current and previous revision's grids; outside LAYERS
+    if (p[0] === 'snapshot' && p[1] === 'earthview') return evRoute(env, p);   // Earth from Space: record plus held pictures; outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'dustrgb') return dustRoute(env, p);   // 0.6.11: pointer + the current and previous frame files; outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
