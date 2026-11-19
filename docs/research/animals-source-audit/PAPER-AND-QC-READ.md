@@ -69,8 +69,8 @@ None of this is decided here.
 | Long journeys | 9 of 33 sharks reached Mozambique, 6 the Madagascar area; some used the high seas | extent 39.8°W to 80.2°E |
 
 - **The archive is neither the paper's raw set nor its filtered set.** It has fewer rows than the paper's raw count yet runs 14 months longer, and it already lacks Z-class rows and duplicate times. It reads as the raw set with the first cleaning step applied and later transmissions included, but **that is our inference, not something the paper or the record states.** The enquiry to the authors (unsent, Chad's decision) is the way to settle it.
-- **Long journeys are real, and so are errors.** The paper confirms movements to Mozambique, Madagascar and the high seas, so distance alone cannot mark a row as wrong. It says nothing that supports a white shark at 39.8°W; rows like that are what the speed filter is for.
-- **The paper names no individual shark.** The file's `DeployID` values are given names. Tag numbers stay the neutral default.
+- **Long journeys are real, and so are errors.** The paper confirms movements to Mozambique, Madagascar and the high seas, so distance alone cannot mark a row as wrong. Nothing in the extract supports a white shark at 39.8°W; rows like that are what the speed filter is for.
+- **The parts of the paper read name no individual shark.** The file's `DeployID` values are given names. Tag numbers stay the neutral default.
 - The data availability statement points to the Zenodo DOI we audited. The permit named is an Oceans and Coasts research permit (now Department of Forestry, Fisheries and the Environment).
 
 **What a rule proposal for the sharks can now rest on**
