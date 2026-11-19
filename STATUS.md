@@ -3,6 +3,17 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 07:50 UTC (clock reading) — **Animals: GPT held the zebra preview (2 issues, 3 unfinished checks); r2 answers them: `animals-zebra-preview-rc` head `9ad932c`. Audits to rev 1.1 (`animals-proposal` `ed8ad49`).** (branch and docs only; nothing merged, deployed, sent or spent)
+- **GPT's review of `9e64d19` (relayed by Chad):** on hold. Confirmed: age lost its seconds at an hour or more; off did not abort the request. Unfinished: navigation/Back; a complete tree; source reproduction (J2) and performance (J12). Audits accepted as candidate assessments, with wording changes.
+- **r2, code commit `67db011`, head `9ad932c`** (packet `reviews/2026-11-19-animals-zebra-preview-rc-r2.md`, sha256 `96958a8d…860f`):
+  - Ages exact to the second at every length ("1 h 1 min 1 s"); the whole bar string is checked against separately built text.
+  - Off, leaving the page and a newer load abort the request (`net::ERR_ABORTED` observed); a late answer is still refused (tested with a fetch that ignores the stop signal).
+  - `pagehide` / `pageshow persisted` switch the journey off. Real tab-click navigation and Back tested, ready and loading: bare. **The headless Chromium did not keep the page for Back** (reasons it gave: `BrowsingInstanceNotSwapped`, `BackForwardCacheDisabledForDelegate`), so a real back/forward-cache restoration is **unverified**; the events themselves are tested.
+  - **J2 done:** source fetched again 07:18 UTC, sha256 equal to the pin; the generator's display file is byte-identical (13,045 fixes, `8d00aa32…1bb6`); the manifest differs only in `built_from`. The committed manifest is now the full-source build (`f337cdd0…73d0`, was `780f2ec4…398a`), re-pinned in both scripts. Working copy deleted.
+  - Added J8d (other layers left alone). Suite 274 of 274; 30 breaks, 30 caught. Generator tests 22 of 22.
+  - **Still open: J12 performance and a real Back restoration, both needing Chad's Chrome on a served copy of the tree.**
+- **Audits rev 1.1:** false killer whale: "usable with the source's own flags" replaced by conditional wording (read and pin ATN's QC documentation, show it applies to this file, recompute after filtering; PASS is not a guarantee). White sharks: read the paper before any rule; tag numbers the neutral default. sha256 `ca0b1880…3047` and `75a1ef2c…f64e`.
+- **Mac:** complete tree `_review/animals-zebra-preview-9ad932c-full/` (537 files, digest over all files equal to the repo's, 07:46:55 UTC); the 20-file snapshot moved to `_to_delete/`; `_review/animals-proposal-ed8ad49/`. **Project:** the two audit docs replaced with rev 1.1.
 ## 19 Nov 05:41 UTC (clock reading) — **Animals: private zebra preview built for GPT (`animals-zebra-preview-rc` head `9e64d19`); white shark file audit and false killer whale deployment audit done (`animals-proposal` `0015af2`).** (branch and docs only; nothing merged, deployed, sent or spent)
 - **Chad's three lines (19 Nov):** "Go: private zebra preview build (Z3866) on a branch per ANIMALS-PROPOSAL rev 2.2; no merge, no deploy" · "Go: full audit of the South African white shark file (Zenodo 10.5281/zenodo.5575189), read-only" · "Go: deep audit of one false killer whale deployment (ptt 98364), read-only".
 - **Zebra preview, branch `animals-zebra-preview-rc`:** code commit `01a4690`, head `9e64d19` (packet only). Packet `reviews/2026-11-19-animals-zebra-preview-rc.md` (sha256 `61a439e6…7039`).
