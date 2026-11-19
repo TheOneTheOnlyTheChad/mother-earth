@@ -3,6 +3,17 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 12:40 UTC (clock reading) — **DECISION: recorded animal journeys are allowed as a dated archive feature. Three-journey private preview built for GPT (`animals-journeys-preview-rc` head `817a13f`).** (branch only; nothing merged, deployed, sent or spent)
+- **Chad's decision (19 Nov), his words:** "Decision: recorded animal journeys are allowed on the Animals tab as a dated archive feature; all other layers keep the live-feed rule". This settles proposal §9 for the Animals tab only. **The live-or-regularly-updated rule stands for every other layer.**
+- **Chad's Go:** "Go: private preview build with one journey switch and a chooser for zebra Z3866, shark 118845 and false killer whale 98364, settings as GPT recommended; no merge, no deploy".
+- **Built:** branch from `animals-zebra-preview-rc` `9ad932c`; code commit `185dcff`, head `817a13f` (packet `reviews/2026-11-19-animals-journeys-preview-rc.md`, sha256 `b3280249…018e`).
+  - One switch and a "Journey" chooser; a pinned journey list (`journeys-R1.catalog.json`, `a25cdce3…3470`) pins each manifest, which pins its display file.
+  - White shark tag 118845: 1,004 → 796 → 795 → 755 fixes shown; 616 of 754 steps joined at 12 h, 2 refused for land. False killer whale tag 98364: 693 → 663 → 661 fixes shown; 554 of 660 steps joined at 6 h; replay ends 12 Feb 2014. Same counts as the rev 2 proposals.
+  - **Land test now on the line the page draws** (a straight chord, sampled at 1 km or less) against Natural Earth 1:10m; join flags are in the display file; the browser suite checks the drawn segments against them.
+  - Argos class shown per fix with the nominal-estimate caveat; statements of what was left out composed from the build's own counts; shark by tag number, never the file's name; Animals page has three study cards, the archive decision and the experimental note; conservation and population "Not available yet".
+- **Tests:** browser suite 308 of 308; 37 breaks, 37 caught. Argos build tests 30 of 30 with the real inputs (22 without; inputs not in the repo). Rule tests 17, zebra generator 22. 43 older suites: 40 pass; the same three fail for reasons outside the branch.
+- **Not measured:** performance on this branch; real phone; screen reader; real imagery. **Not done:** Sources page, REGISTER; sensitivity and public-release decisions; the two enquiries (unsent).
+- **Mac:** complete tree `_review/animals-journeys-preview-817a13f-full/` (549 files, digest over all files equal to the repo's, 12:40:29 UTC); the earlier zebra tree moved to `_to_delete/`. Working copies of the source files and the land map deleted.
 ## 19 Nov 10:49 UTC (clock reading) — **Animals: GPT passes the quality-rule proposals rev 2 (`animals-proposal` `8b10fdb`) as provisional private-preview proposals.** (relayed by Chad; docs only)
 - **GPT's recommendation for a private experiment (a recommendation, not a decision):**
   - False killer whale 98364: PASS/non-Z candidates; C with anchors 3 and 2 at 20 km/h; exclude fixes isolated under the 72-hour policy; join limit 6 h.
