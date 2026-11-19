@@ -3,6 +3,14 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 10:49 UTC (clock reading) — **Animals: GPT passes the quality-rule proposals rev 2 (`animals-proposal` `8b10fdb`) as provisional private-preview proposals.** (relayed by Chad; docs only)
+- **GPT's recommendation for a private experiment (a recommendation, not a decision):**
+  - False killer whale 98364: PASS/non-Z candidates; C with anchors 3 and 2 at 20 km/h; exclude fixes isolated under the 72-hour policy; join limit 6 h.
+  - White shark 118845: C with anchors 3, 2, 1 at 3 m/s; the same isolation policy; join limit 12 h; exclude masked land fixes and crossings.
+  - Argos class shown per fix with the nominal-error caveat.
+- These are experimental display choices, not validated reconstructions of the animals' routes.
+- **Build requirement carried forward:** test the geometry actually drawn against the pinned land mask. The geodesic assessment does not clear the page's existing 3-D chord.
+- **Waiting on Chad:** his choice of settings, and a separate Go for any build. No build, contact, spending, merge or deploy authorised. Public-release and sensitivity decisions separate. Zebra private-preview pass unchanged.
 ## 19 Nov 09:18 UTC (clock reading) — **Animals: quality-rule proposals to rev 2 after GPT's review (`animals-proposal` `8b10fdb`).** (documents only; nothing decided, built, sent or spent)
 - **GPT's review of `f6551d6` (relayed by Chad):** returned for revision, seven points: complete staged pipelines; C as an experimental heuristic with its weaknesses and adversarial fixtures; B renamed; speed and join wording; "temporally isolated" naming; shark reference corrected; nominal-accuracy wording and a pinned land assessment.
 - **Rev 2:** FKW `5335e9df…5b35`; white sharks `4e2a6742…5bf7`; script rev 2 `91126c35…7930`; new tests `quality_rule_effects.test.py` `8073fbe6…3ae0` (19 made-up-track checks pass, including each stated weakness); output `86f6bcc6…1d81`.
