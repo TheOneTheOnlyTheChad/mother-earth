@@ -1,124 +1,130 @@
 # Animals — quality-rule proposal: false killer whale, tag ptt 98364
 
-19 Nov 2026 08:58 UTC (clock reading) · rev 1 · for GPT review · documents only. Nothing built, no provider contacted, nothing spent. **Nothing in this document is decided; it proposes, and marks each choice as Chad's or GPT's to accept or change.**
+19 Nov 2026 · rev 2, 09:16 UTC (clock reading), after GPT's review of rev 1 (changes in §11) · documents only. Nothing built, no provider contacted, nothing spent. **Nothing in this document is decided. It proposes provisional policies for a private preview and marks each as Chad's or GPT's to accept or change.**
 
 **Chad's line (19 Nov):** "Go: quality-rule proposals for false killer whale 98364 and the white sharks, documents only, for GPT review".
 
-Rests on: `docs/research/animals-source-audit/FALSE-KILLER-WHALE-98364.md` rev 1.1 and `PAPER-AND-QC-READ.md` rev 1.1 (GPT: pass for research). Every count below is from `quality_rule_effects.py` run on the pinned file (sha256 `9896550e…d3f6`); the full output is `quality-rule-effects-2026-11-19.json` beside the audits. The script defines each candidate algorithm in full and refuses any other input.
+Rests on: `docs/research/animals-source-audit/FALSE-KILLER-WHALE-98364.md` rev 1.1 and `PAPER-AND-QC-READ.md` rev 1.1. Every count is from `quality_rule_effects.py` rev 2 run on the pinned file (sha256 `9896550e…d3f6`); full output `quality-rule-effects-2026-11-19.json`; behaviour of each algorithm pinned by `quality_rule_effects.test.py` (19 made-up-track checks, all pass).
 
 ## 1. What a rule has to settle
-Five separate questions. A choice on one does not settle another.
-1. Which rows are candidates at all.
-2. Whether any further row is rejected, by what exact algorithm, at what speed limit.
-3. When two consecutive kept fixes are joined by a line.
-4. What is said about accuracy.
-5. What happens to the tagging row.
+1. Which rows are candidates.
+2. Whether further rows are rejected, by what exact algorithm, at what limit.
+3. Whether temporally isolated fixes are drawn.
+4. When consecutive fixes are joined.
+5. What is said about accuracy.
+6. Land.
 
 Sensitivity and public release are outside this document and still need their recorded decision.
 
-## 2. New reading for this proposal
+## 2. Sources read for this proposal
 | Source | What it gives | How read |
 |---|---|---|
-| Baird et al. 2011, "Movements and spatial use of false killer whales in Hawai‘i: satellite tagging studies in 2009" (Cascadia Research report to NOAA PIFSC) | The tagging group's own filter settings for this species: Douglas Argos-Filter 7.08, classes 3 and 2 always kept, **maximum rate of movement 20 km/h, stated as based on the fastest travel speeds they observed in fast-travelling false killer whales in Hawai‘i**, maximum redundant distance 3 km, rate coefficient 25. Tags of this family transmitted about 9 to 10 hours a day in blocks, then every second day, later every fifth. | Report PDF through the web-fetch tool (an extract). **To be checked line by line before adoption.** It describes 2009 deployments, not this 2013 one; whether 98364 used the same schedule is not established. |
-| Movebank's description of the Douglas Argos Filter | What the filter's parameters mean. It does not state which point of a triplet is rejected. | Web page, same tool |
-| Argos class meanings | In the file's own attributes and on ATN's modelling page: class 3 under 250 m, 2 250 to 500 m, 1 500 to 1,500 m, 0 over 1,500 m; A and B carry no estimate; Z is an invalid fix. Independent tests report larger real errors than these nominal figures. | File attributes (audit); web pages |
+| Baird et al. 2011, "Movements and spatial use of false killer whales in Hawai‘i: satellite tagging studies in 2009" (Cascadia Research report), `cascadiaresearch.org/files/CRCHawaiiPseudorcaSpatialUse2011.pdf` | The tagging group's filter settings for this species: Douglas Argos-Filter 7.08, classes 3 and 2 always kept, maximum rate of movement 20 km/h (stated as based on the fastest travel speeds they observed in fast-travelling false killer whales in Hawai‘i), maximum redundant distance 3 km, rate coefficient 25 | PDF through the web-fetch tool (an extract). To be checked line by line before adoption. It describes 2009 deployments. **The transmission schedule of tag 98364 is not established.** |
+| Movebank's description of the Douglas Argos Filter | Meaning of that filter's parameters | Web page, same tool |
+| Argos class meanings | In the file's attributes and on ATN's modelling page: nominal estimates of under 250 m (class 3), 250 to 500 m (2), 500 to 1,500 m (1), over 1,500 m (0); none for A and B; Z an invalid fix | File attributes; web pages |
 
-- 20 km/h is 5.56 m/s. In the tagging group's filter it works together with other tests and with classes 3 and 2 always kept. Used alone as a speed cut it is not the same filter. It is a species-specific, citable limit from the people who deployed this tag; that is all that is claimed for it.
+**Status of the 20 km/h figure:** a sourced candidate parameter. It is not the Douglas filter (which combines it with other tests), and it is not a proven biological ceiling on the species' speed.
 
-## 3. Question 1: which rows are candidates
-| Set | Rows |
-|---|---|
-| All rows | 824 |
-| Tagging row (type "User") | 1 |
-| Argos rows | 823 |
-| Argos rows passing the source's time, location and speed checks (roll-up PASS) | 694 |
-| …of which class Z | **1** |
+## 3. The three candidate algorithms
+All three are Mother Earth's own. Full definitions (order, which row goes, iteration, endpoints, stopping) are in the script header; their behaviour, including the weaknesses below, is pinned by the test file.
+- **A "forward":** one pass in time order; a row is rejected if the speed from the last kept row exceeds the limit. **Weakness:** a wrong kept row, including a wrong first row, causes correct rows after it to be rejected (cascade).
+- **B "two fast legs":** a row is rejected when the step into it and the step out of it both exceed the limit; one row at a time until none qualifies; endpoints never rejected. **It is not only an out-and-back test:** it also removes the middle rows of steady fast movement in one direction. Fast steps with one fast leg are left in.
+- **C "anchored": an experimental Mother Earth heuristic.** It gives the better Argos classes precedence. **It does not guarantee that the better-rated fix of a conflicting pair is the one kept.**
+  - Step 1 applies A to the anchor-class rows alone. So within the anchor classes the choice is chronological: an earlier class-2 anchor can reject a later class-3 fix. Step 1 has A's first-anchor and cascade weaknesses.
+  - **Anchor-class rows rejected in step 1 are never reconsidered.**
+  - Step 2 walks the other rows in time order; each is kept if within the limit of the nearest earlier kept row and of the nearest later anchor. Among non-anchors the choice is again chronological: an earlier class B fix, once kept, can reject a later class 0 fix.
+  - After C no step between kept neighbours exceeds the limit. **That is consistency between kept fixes. It does not establish that any position is accurate.**
 
-**Proposed:** Argos rows with roll-up PASS, **minus class Z**: 693 rows.
-- PASS is described on screen as "passed the data centre's time, location and speed checks". It is not a statement of accuracy.
-- The one class Z row passes the source's checks, but Argos itself labels Z an invalid fix and ATN's own modelling page lists it as invalid. Dropping it is a rule of ours and would be stated.
-- Not proposed: starting from all 823 Argos rows and replacing the source's test with ours. The source's flags are documented and reproduced (824 of 824); using them keeps the rule traceable. The counts for that route are in the JSON.
+## 4. The complete proposed pipeline, stage by stage
+| Stage | Rows in | Removed | Rows out |
+|---|---|---|---|
+| 0. File | | | 824 |
+| 1. Tagging row (type "User") left out | 824 | 1 | 823 |
+| 2. Rows not passing the source's time, location and speed checks | 823 | 129 | 694 |
+| 3. Argos class Z (the satellite system's "invalid fix") | 694 | 1 | **693** |
+| 4. C, anchors on classes 3 and 2, limit 20 km/h | 693 | 30 | 663 |
+| 5. Temporally isolated under Mother Earth's 72-hour policy | 663 | 2 | **661** |
 
-## 4. Question 2: further rejection
-Among the 694 PASS rows, steps between neighbouring rows exceed the source's own limits because the source tested before any row was removed: 2 steps over 10 m/s, 3 over 8 m/s, **32 over 20 km/h**.
+- Stage 3 and stage 4 are counted separately: one row leaves as class Z, then C removes 30 others. (Rev 1 ran C on 694 rows and reported 31, which included the Z row.)
+- Stage 4: longest run of consecutive removed rows 2. Before stage 4, 31 of 692 steps exceed 20 km/h; after it, none (fastest kept step 5.31 m/s).
+- Stage 5 removes two fixes, and the last fix in the file is one of them: the final ten days hold fixes that are each more than 72 hours from any other kept fix. **The drawn record would then end 12 Feb 2014, not 22 Feb.** No row becomes newly isolated by the removal.
 
-Three candidate algorithms, each fully specified in the script header (order, which row is rejected, iteration, endpoints, stopping):
-- **A "forward":** one pass in time order; a row is rejected if the speed from the last kept row exceeds the limit. First row never tested.
-- **B "spike":** a row is rejected only if the steps both into and out of it exceed the limit; repeated one row at a time until no such row remains. Endpoints never rejected. Lone fast pairs are left in and reported.
-- **C "anchored":** rows of the better classes are filtered first (A among themselves) and become anchors; any other row is kept only if it is within the limit of the nearest earlier kept row and of the nearest later anchor. One pass.
-
-Effects on the 694 PASS rows:
-| Limit | Algorithm | Rows kept | Rejected | Longest run of rejected rows | Steps still over the limit | Fastest kept step |
-|---|---|---|---|---|---|---|
-| 10 m/s (source's fail limit) | none | 694 | 0 | 0 | 2 | 13.86 m/s |
-| | A | 692 | 2 | 1 | 0 | 8.78 |
-| | B | 694 | 0 | 0 | 2 | 13.86 |
-| | C, anchors 3 and 2 | 692 | 2 | 1 | 0 | 8.78 |
-| 20 km/h (tagging group's limit) | none | 694 | 0 | 0 | 32 | 13.86 |
-| | A | 663 | 31 | 2 | 0 | 5.41 |
-| | B | 692 | 2 | 1 | 28 | 11.46 |
-| | C, anchors 3 and 2 | 663 | 31 | 2 | 0 | 5.31 |
-| | C, anchors 3, 2 and 1 | 664 | 30 | 1 | 0 | 5.31 |
-
-What the table shows:
-- **B barely acts.** The fast steps here are almost all lone pairs, not out-and-back spikes. B is honest about not knowing which row is wrong, and leaves 28 steps over 20 km/h on the map.
-- **A and C agree closely** on this file (31 rejected either way at 20 km/h), with short runs. No cascade: the longest run of rejected rows is 2.
-- With anchors on classes 3 and 2, C at 20 km/h happens to remove the class Z row as well (classes kept: 14 / 101 / 189 / 119 / 121 / 119 for 3 / 2 / 1 / 0 / A / B).
-
-**Proposed for review: C, anchors on classes 3 and 2, limit 20 km/h.** Reasons: it prefers the positions Argos rates best when a fast pair must lose one row, which is the same preference the tagging group's filter expresses; it is one pass with defined endpoints; and the limit has a species source. It rejects 31 of 694 rows (4.5%).
-- **Alternative if the 20 km/h source is not accepted after a line-by-line read:** C at the source's 10 m/s (2 rows rejected). That adds no species claim: it only re-applies the source's own limit to kept neighbours.
-- **What no option here does:** identify which row of a fast pair is truly wrong. C makes a stated, class-based choice. That would be said on the card.
-- Rows no speed test can check (kept neighbours more than 24 hours away on both existing sides): 2.
-
-## 5. Question 3: joining fixes
-Gaps between kept neighbours (proposed set, 663 rows, 662 steps): median 1.7 h, longest 125.5 h.
-
-| Join limit | Steps not joined | Share of the four months that lies inside joined steps |
+**Result after all stages**
+| | With stage 5 (proposed) | Without stage 5 |
 |---|---|---|
-| 3 h | 245 | 16% |
-| 6 h | 108 | 36% |
-| 10 h | 30 | 55% |
-| 12 h | 25 | 57% |
-| 24 h | 22 | 59% |
-| 72 h | 7 | 74% |
+| Fixes | 661 | 663 |
+| Classes 3 / 2 / 1 / 0 / A / B | 14 / 101 / 189 / 119 / 121 / 117 | 14 / 101 / 189 / 119 / 121 / 119 |
+| First fix | 23 Oct 2013 03:02:00 UTC | same |
+| Last fix | 12 Feb 2014 14:51:34 UTC | 22 Feb 2014 15:28:47 UTC |
+| Extent | 17.3°N to 24.6°N, 157.4°W to 137.9°W | same |
+| Consecutive steps | 660 | 662 |
+| Median / longest gap | 1.7 h / 109.0 h | 1.7 h / 125.5 h |
+| Steps over 20 km/h | 0 | 0 |
 
-- These are counts, not a recommendation by themselves. The zebra rule (3 hours) was three times a one-hour schedule. This tag has no fixed fix interval: positions arrive when the whale surfaces during a satellite pass inside the tag's transmission blocks.
-- A straight line across a gap claims nothing about the route, but it reads as one. At 20 km/h a whale can be 200 km from the chord's midpoint after a 20-hour gap.
-- ATN's 10 hours is its limit for modelling, recorded as a reference point only.
+**Joining, on the 661-fix set**
+| Join limit | Steps joined | Not joined | Share of first-to-last time inside joined steps |
+|---|---|---|---|
+| 3 h | 417 | 243 | 17% |
+| **6 h (proposed, provisional)** | **554** | **106** | **39%** |
+| 10 h | 632 | 28 | 60% |
 
-**Proposed for review: join at 6 hours or less,** on the reasoning that it is about three and a half times the median gap, the same proportion as the zebra rule, and that it never draws across the tag's daily silent period. Then 108 of 662 steps are unjoined and the fixes on either side stand as separate marks. **This is the choice in this document with the least outside support**; 3 hours and 10 hours are the alternatives to weigh, with the counts above.
-- Whatever the limit, the replay bar's gap sentence ("No fix was recorded for … after it") applies as built for the zebra.
+**Land (provisional: Natural Earth 1:10m land, pinned in the script):** 0 of 661 fixes on land; 0 of the joined steps cross land at any of the three join limits. Islands and coast detail absent from that dataset are not detected.
 
-## 6. Question 4: accuracy
-- Each fix carries its Argos class. Proposed: the class is shown for the fix under the marker, and the card states the class meanings as the file gives them, with the sentence that A and B carry no estimate.
-- Proposed card wording: "Positions are Argos satellite fixes. Their accuracy varies from under 250 m to unknown; many are the two weakest classes. The line joins recorded fixes; it is not the whale's route."
-- Error radius exists on 49 of 824 rows (audit). Not proposed for display in a first preview; stated on the card as "supplied for 6% of rows".
-- Not proposed: thinning to classes 3, 2 and 1 only (319 PASS rows). It removes more than half the fixes and leaves the same 22 gaps over 24 hours.
+## 5. Alternatives counted
+| Limit | Algorithm on the 693 rows | Kept | Removed | Longest run | Steps still over the limit |
+|---|---|---|---|---|---|
+| 20 km/h | none | 693 | 0 | 0 | 31 |
+| | A | 663 | 30 | 2 | 0 |
+| | B | 691 | 2 | 1 | 27 |
+| | C, anchors 3, 2 | 663 | 30 | 2 | 0 |
+| | C, anchors 3, 2, 1 | 664 | 29 | 1 | 0 |
+| 10 m/s (source's fail limit) | none | 693 | 0 | 0 | 2 |
+| | A | 691 | 2 | 1 | 0 |
+| | B | 693 | 0 | 0 | 2 |
+| | C, anchors 3, 2 | 691 | 2 | 1 | 0 |
 
-## 7. Question 5: the tagging row
-- One row of type "User", timed 22 Oct 2013 23:16 UTC, eight hours before the file's stated deployment start; it fails the source's time check.
-- **Proposed:** not part of the track and not drawn as a fix. The card states the deployment start as the file's attribute gives it and notes the inconsistency.
+- A and C remove the same number at 20 km/h but not the same rows (the class counts differ). C at 10 m/s followed by stage 5 gives 689 fixes.
+- B leaves 27 steps over 20 km/h on the map.
 
-## 8. What the proposal would produce
-| | |
-|---|---|
-| Fixes drawn | 663 (classes 3 / 2 / 1 / 0 / A / B: 14 / 101 / 189 / 119 / 121 / 119) |
-| First and last | 23 Oct 2013 03:02:00 UTC to 22 Feb 2014 15:28:47 UTC |
-| Extent | 17.3°N to 24.6°N, 157.4°W to 137.9°W |
-| Line | joins 554 of 662 steps at a 6-hour limit |
-| Statement of what was done | "Shown: Argos fixes that passed the data centre's time, location and speed checks, except one the satellite system marks invalid. Mother Earth then removed 31 fixes that would need more than 20 km/h from a neighbouring fix, keeping the better-rated fix of a pair. Fixes more than 6 hours apart are not joined." |
+## 6. The proposals, and their standing
+1. **Candidate rows: PASS minus class Z (693).** PASS is described as "passed the data centre's time, location and speed checks", never as accuracy.
+2. **Rejection: C, anchors 3 and 2, at 20 km/h**, labelled as Mother Earth's experimental heuristic with the limitations in §3. Alternative: C at the source's own 10 m/s (2 rows), which adds no species parameter.
+3. **Temporal isolation: fixes isolated under the 72-hour policy are not drawn** (2 fixes; the record ends 10 days earlier). This is a conservative choice of ours. A speed test still limits how far such a fix can be from its neighbours; over days that limit is too wide to do much for the position's credibility. Alternative: keep them (663 fixes).
+4. **Join limit: 6 hours, as a provisional private-preview display policy.** It is about three and a half times the median gap, the proportion used for the zebra. Nothing more is claimed for it. Alternatives 3 h and 10 h, counted above.
+5. **Tagging row left out** of the track; the card gives the deployment start as the file states it and notes that the tagging row's time disagrees by eight hours.
+
+**What no speed limit or join limit does:** bound where the animal went between fixes. A limit used for filtering says which pairs of fixes are mutually plausible; the unseen route is not constrained by it.
+
+## 7. Accuracy wording (proposed)
+- The Argos class is shown for the fix under the marker.
+- Card: "Positions are Argos satellite fixes. Each carries a quality class. The satellite system's nominal error estimates are under 250 m (class 3), 250–500 m (2), 500–1,500 m (1) and over 1,500 m (0); classes A and B have no estimate. These are nominal estimates, not guaranteed limits: real errors can be larger. 54% of the fixes shown are classes 0, A or B."
+  (357 of 661.)
+- "The line joins recorded fixes that are no more than 6 hours apart. It is not the whale's route."
+- Error radius is supplied for 6% of the file's rows; not proposed for display in a first preview, and said so.
+
+## 8. Statement of what was done (proposed card text)
+"Shown: Argos fixes that passed the data centre's time, location and speed checks. Mother Earth then left out 1 fix the satellite system marks invalid, 30 fixes under its own speed-consistency rule (20 km/h, favouring better-rated fixes; an experimental rule that can remove a correct fix), and 2 fixes more than 72 hours from any other. Fixes more than 6 hours apart are not joined."
 
 ## 9. Decisions asked for
-1. Candidate rows: PASS minus class Z (§3).
-2. Rejection: C, anchors 3 and 2, at 20 km/h; or C at 10 m/s; or none (§4).
-3. Join limit: 6 h, 3 h or 10 h (§5).
-4. Accuracy wording and whether the class is shown per fix (§6).
-5. Tagging row left out (§7).
+1. Candidate rows (§6.1).
+2. Rejection rule and limit (§6.2).
+3. Temporal isolation at 72 hours, or not (§6.3).
+4. Join limit (§6.4).
+5. Accuracy wording and class per fix (§7).
 
 ## 10. Not done, not claimed
-- No rule is selected. No track is cleared for drawing. This covers one deployment; the other 26 are untouched.
-- The 20 km/h source was read as a fetch-tool extract and concerns 2009 deployments.
-- The Douglas Argos Filter itself was not run; C is not that filter.
-- No land test was run (the extent is open ocean and island waters; a kept fix on an island is possible and uncounted).
-- The table in §4 was run on the 694 PASS rows including the class Z row; C at 20 km/h removes that row itself. If §3 is accepted, the run is repeated on the 693-row set before anything is built, and any difference reported.
-- Sensitivity: small, island-associated populations are the subject of the tagging project; their conservation and legal status were not looked up; the recorded decision is still to make, and the authors' request for contact stands as Chad's choice.
+- No rule is selected. No track is cleared for drawing. One deployment only; the other 26 are untouched.
+- The 20 km/h source was read as an extract and concerns 2009 deployments.
+- The Douglas Argos Filter was not run; no published filter was run.
+- The tag's transmission schedule is unknown; no claim is made about transmission bouts or daily silent periods.
+- Land results depend on one dataset at one scale.
+- Sensitivity: small, island-associated populations are the subject of the tagging project; their conservation and legal status were not looked up; the authors' request for contact stands as Chad's choice.
+
+## 11. Changes in rev 2 (GPT's review of rev 1, relayed by Chad 19 Nov)
+1. **Complete pipeline calculated from the 693-row set, by stage** (§4). The Z row is no longer double-counted: 1 as class Z, then 30 by C.
+2. **C described as an experimental heuristic** with its chronological choices, its inherited first-anchor and cascade weaknesses, and the rule that rejected anchor-class rows are never reconsidered (§3). Made-up tracks covering each are kept in `quality_rule_effects.test.py`; the invariant test is stated as consistency, not accuracy.
+3. **B renamed "two fast legs"**; the algorithm is unchanged and its removal of the middle of steady fast movement is stated and tested.
+4. **20 km/h** described as a sourced candidate parameter only. **6 hours** described as a provisional display policy; the claim that it stays inside transmission bouts or never crosses the daily silence is withdrawn (schedule unverified). The sentence bounding the whale's distance from a chord is withdrawn.
+5. **"Cannot be checked" renamed** "temporally isolated under Mother Earth's 72-hour policy", applied here as a stage, with the effect on the end date shown.
+6. **Accuracy wording** now says nominal estimates, not guaranteed limits.
+7. **Land** assessed against a pinned dataset: none found; stated as provisional.
