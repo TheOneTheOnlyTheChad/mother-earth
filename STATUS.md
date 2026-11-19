@@ -3,6 +3,13 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 08:39 UTC (clock reading) — **Animals: paper and QC read to rev 1.1 after GPT's review (`animals-proposal` `4afe08b`); the one-row check is done.** (read-only research)
+- **GPT's review of `fda601f` (relayed by Chad):** accepted as research with four corrections; paper-reading condition closed; exact QC equivalence open pending the one-row check.
+- **One-row check:** the recomputation now calls the actual `ioos_qc.argo.speed_test` (ioos_qc 3.1.1, geographiclib 2.1). **824 of 824 rows equal the file's speed flag.** Rev 1's "823 of 824, rounding-level" is withdrawn: rev 1 used a spherical distance, the package uses WGS84. Row 142 (0-based): WGS84 speed 8.00541 m/s (suspect, as in the file), spherical 7.99370 m/s. Stated limits: consistency with the published test, not exact equivalence; the historical version is not identified.
+- Script `docs/research/animals-source-audit/fkw_98364_speed_recompute.py` (sha256 `0241bd38…4615`) and summary `fkw-98364-speed-recompute-2026-11-19.json` (`70508e46…a9df`) kept in the repo; the script refuses any input but the pinned file. Working copy of the file deleted.
+- **Wording corrected:** PASS = passed the source's time, location and speed checks, no implication about accuracy; no default for further row rejection (an algorithm must specify which row, order, iteration, endpoints, stopping); the shark paper's three days is a pre-modelling segmentation limit and its land decision concerns modelled estimates; "no qualifying segment of at least 25"; the archive/paper explanation is an inference. Document sha256 `c22d0d5e…cc38`.
+- **Mac:** `_review/animals-proposal-4afe08b/` (3 files). **Project:** `claude/research/ANIMALS-PAPER-AND-QC-READ.md` replaced.
+- No rule selected, no track cleared. Zebra preview pass unchanged.
 ## 19 Nov 08:33 UTC (clock reading) — **Animals: white shark paper and ATN QC documentation read against the two audits (`animals-proposal` `fda601f`).** (read-only research; nothing built, sent or spent)
 - **Chad's line:** "Go: read the white shark paper (10.3389/fmars.2022.811985) and ATN's QC documentation, read-only, and report against the two audits".
 - Document: `docs/research/animals-source-audit/PAPER-AND-QC-READ.md` rev 1, sha256 `7692a746…0f0a`.
