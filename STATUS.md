@@ -3,6 +3,14 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 09:01 UTC (clock reading) — **Animals: two quality-rule proposals written for GPT (`animals-proposal` `f6551d6`).** (documents only; nothing built, sent or spent; nothing decided)
+- **Chad's line:** "Go: quality-rule proposals for false killer whale 98364 and the white sharks, documents only, for GPT review".
+- `docs/concepts/ANIMALS-QUALITY-RULE-FKW-98364.md` rev 1 (sha256 `a6824be4…f6af`); `docs/concepts/ANIMALS-QUALITY-RULE-WHITE-SHARKS.md` rev 1 (`2762b407…82b4`). Effects counted by `docs/research/animals-source-audit/quality_rule_effects.py` (`f8c13123…5944`), output `quality-rule-effects-2026-11-19.json` (`140110da…3ca4`). Both source files fetched again (same sha256 as the audits), working copies deleted.
+- **Three candidate rejection algorithms, each fully specified:** A forward, B spike, C anchored on the better Argos classes.
+- **False killer whale, proposed for review:** PASS rows minus the one class Z row; C with anchors 3 and 2 at 20 km/h (the tagging group's stated maximum rate for the species, Baird et al. 2011 report, read as an extract): 663 of 694 rows kept, longest rejected run 2, no step over the limit; join at 6 h (108 of 662 steps unjoined); class shown per fix; tagging row left out.
+- **White sharks, proposed for review:** a speed limit alone is not enough. At 3 m/s: A rejects 4,537 rows with runs up to 87; B leaves 2,797 fast steps; C keeps 15,316 with runs up to 20. After C, 363 kept rows still lie outside 10°E to 60°E and 172 rows cannot be checked at 72 h; median 30% of a track lies inside steps of 72 h or less. Proposal: one animal first (tag 118845), C at 3 m/s with anchors 3, 2, 1, uncheckable rows not drawn, join at 12 h, **land not yet counted and must be before any build**. Queiroz et al. 2019 SI read as an extract: it does not state which row of a fast pair is removed.
+- Not read: McConnell et al. 1992 / argosfilter. No published filter run. No rule selected, no track cleared.
+- **Mac:** `_review/animals-proposal-f6551d6/` (4 files). **Project:** the two proposals under `claude/concepts/`.
 ## 19 Nov 08:42 UTC (clock reading) — **Animals: GPT passes the paper and QC read (`animals-proposal` `4afe08b`) for research.** (relayed by Chad; docs only)
 - All three hashes match; the four corrections are addressed; the 824 of 824 recomputation accepted, with the historical implementation left unclaimed.
 - Paper-reading and QC-documentation conditions closed. **The evidence is sufficient to develop quality-rule proposals.**
