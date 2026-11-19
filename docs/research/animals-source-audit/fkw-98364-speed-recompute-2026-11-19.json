@@ -1,0 +1,130 @@
+{
+ "input": {
+  "bytes": 319596,
+  "sha256": "9896550eeeff21ff6fed461d0d13d0f6f2b759e5cca726e58d7308b254c4d3f6",
+  "rows": 824,
+  "time_units": "seconds since 1990-01-01 00:00:00Z",
+  "time_dtype": "float64",
+  "lat_dtype": "float64",
+  "lon_dtype": "float64"
+ },
+ "versions": {
+  "ioos_qc": "3.1.1",
+  "geographiclib": "2.1",
+  "numpy": "2.5.3",
+  "netCDF4": "1.7.5.1.post1"
+ },
+ "python": "3.13.18",
+ "thresholds_m_per_s": {
+  "suspect_over": 8.0,
+  "fail_over": 10.0
+ },
+ "file_speed_flag_counts": {
+  "1": 694,
+  "2": 1,
+  "3": 16,
+  "4": 113,
+  "9": 0
+ },
+ "recomputed_flag_counts": {
+  "1": 694,
+  "2": 1,
+  "3": 16,
+  "4": 113,
+  "9": 0
+ },
+ "rows_equal": 824,
+ "rows_different": 0,
+ "mismatches": [],
+ "rows_where_a_spherical_distance_changes_the_flag": [
+  {
+   "row_index_0_based": 142,
+   "file_flag": 3,
+   "prev": {
+    "time": "2013-11-04T03:02:57.000000000",
+    "lat": "18.975",
+    "lon": "-153.054"
+   },
+   "this": {
+    "time": "2013-11-04T03:40:28.000000000",
+    "lat": "18.969",
+    "lon": "-153.225"
+   },
+   "whole_seconds": 2251.0,
+   "wgs84_geodesic_distance_m": "18020.18531230552",
+   "wgs84_speed_m_per_s": "8.00541328845203",
+   "wgs84_flag": 3,
+   "spherical_distance_m": "17993.82458672636",
+   "spherical_speed_m_per_s": "7.993702615160534",
+   "spherical_flag": 1
+  }
+ ],
+ "rows_nearest_suspect_threshold": [
+  {
+   "row": 142,
+   "speed_m_per_s": "8.00541328845203",
+   "file_flag": 3,
+   "recomputed_flag": 3
+  },
+  {
+   "row": 177,
+   "speed_m_per_s": "8.033333420770056",
+   "file_flag": 3,
+   "recomputed_flag": 3
+  },
+  {
+   "row": 489,
+   "speed_m_per_s": "8.083249663095424",
+   "file_flag": 3,
+   "recomputed_flag": 3
+  },
+  {
+   "row": 784,
+   "speed_m_per_s": "8.109045316597367",
+   "file_flag": 3,
+   "recomputed_flag": 3
+  }
+ ],
+ "rows_nearest_fail_threshold": [
+  {
+   "row": 151,
+   "speed_m_per_s": "9.817734977068916",
+   "file_flag": 3,
+   "recomputed_flag": 3
+  },
+  {
+   "row": 677,
+   "speed_m_per_s": "10.203791367343007",
+   "file_flag": 4,
+   "recomputed_flag": 4
+  },
+  {
+   "row": 676,
+   "speed_m_per_s": "10.259753201380205",
+   "file_flag": 4,
+   "recomputed_flag": 4
+  },
+  {
+   "row": 458,
+   "speed_m_per_s": "9.677177151641406",
+   "file_flag": 3,
+   "recomputed_flag": 3
+  }
+ ],
+ "same_time_as_previous_row": {
+  "rows": 57,
+  "of_which_file_flag_fail": 57
+ },
+ "rollup_pass_rows": {
+  "rows": 694,
+  "steps": 693,
+  "steps_over_8": 3,
+  "steps_over_10": 2,
+  "fastest_m_per_s": "13.859774317620102",
+  "gap_median_h": 1.68,
+  "gaps_over_10h": 30,
+  "gaps_over_24h": 22,
+  "gaps_over_72h": 7,
+  "longest_gap_h": 125.5
+ }
+}
