@@ -299,7 +299,7 @@ Some of these sources may update regularly (not checked). If one does, a shark o
 5. **Sensitivity is decided per study** (§6a). Elephants, cheetah, nesting turtles and penguin colonies are the obvious cases for a recorded decision before anything public.
 
 ### What Chad would be choosing
-- **Sharks and dolphins: opened** (Chad, 18 Nov). First pass done: the best accessible shark candidate is the South African white shark package (Zenodo `10.5281/zenodo.5575189`, CC BY 4.0, Argos); no tagged-dolphin track is openly downloadable among the sources read, and the nearest is false killer whales in the U.S. Animal Telemetry Network archive. Two enquiries are drafted for Chad and not sent.
+- **Sharks and dolphins: opened** (Chad, 18 Nov). First pass done: the best accessible shark candidate is the South African white shark package (Zenodo `10.5281/zenodo.5575189`, CC BY 4.0, Argos); no tagged bottlenose or common dolphin track is openly downloadable among the sources read; false killer whales (biologically dolphins) are accessible in the U.S. Animal Telemetry Network archive. Both are candidate discovery, not clearances (GPT, 19 Nov): positions are not yet classified and no update schedule is established. Two enquiries are drafted for Chad and not sent.
 - **Which other animals next**, from the table, after sharks and dolphins.
 
 ## 14. Not done, not claimed

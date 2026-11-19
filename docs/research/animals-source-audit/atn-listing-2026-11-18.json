@@ -1,5 +1,5 @@
 {
- "note": "ATN staging folder listing (file names only) and one netCDF file header read in browser memory; no file saved.",
+ "note": "ATN staging folder listing (file names, dates, sizes only), and one complete netCDF file (319,596 bytes) fetched in browser memory for metadata inspection. 'netcdf_header.hits' are printable text strings extracted from the file's bytes and filtered by keyword: not a decoded header, no structure, no values. Trajectory arrays were not analysed. No file was saved. (Note corrected 19 Nov 2026 after GPT's review; data unchanged.)",
  "atn_listing": {
   "captured_utc": "2026-11-18T17:39:30.362Z",
   "url": "https://ncei.axiomdatascience.com/atn/prod/",
