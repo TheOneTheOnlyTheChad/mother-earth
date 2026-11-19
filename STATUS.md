@@ -3,6 +3,12 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 08:09 UTC (clock reading) — **Animals: GPT passes the private zebra preview `9ad932c` (code `67db011`); the hold is cleared.** (relayed by Chad; branch only; nothing merged or deployed)
+- **GPT's r2 verdict, as relayed:** PASS for the private preview. All supplied hashes match; generator 22 pass; GPT's own focused checks 18 pass, four deliberate breaks caught.
+- **GPT reports two checks done in desktop Chrome that Claude could not run:** a real back/forward-cache restoration starts bare; **J12 passes at desktop and 390 px**, "complete measurements saved". **Claude has not seen the measurement files**: none are in `~/Documents/Mother Earth` at 08:09 UTC. Until they are in the repo's evidence folder, J12 and the Back restoration stand on GPT's report.
+- **Audits `ed8ad49`:** accepted as bounded candidate research; not clearance to draw shark or false killer whale tracks.
+- **Still open before any public step:** public-release and sensitivity decisions, proposal §9, Sources page and REGISTER, Chad's Approve line. Real phone and screen reader unverified.
+- Claude's own attempt to serve the tree for J12 (Chad's Go, 19 Nov) did not run: Terminal is click-only for Claude and the Mac-side shell has no address Chrome can reach. Nothing was changed on the Mac.
 ## 19 Nov 07:48 UTC (clock reading) — **Animals: GPT held the zebra preview (2 issues, 3 unfinished checks); r2 answers them: `animals-zebra-preview-rc` head `9ad932c`. Audits to rev 1.1 (`animals-proposal` `ed8ad49`).** (branch and docs only; nothing merged, deployed, sent or spent)
 - **GPT's review of `9e64d19` (relayed by Chad):** on hold. Confirmed: age lost its seconds at an hour or more; off did not abort the request. Unfinished: navigation/Back; a complete tree; source reproduction (J2) and performance (J12). Audits accepted as candidate assessments, with wording changes.
 - **r2, code commit `67db011`, head `9ad932c`** (packet `reviews/2026-11-19-animals-zebra-preview-rc-r2.md`, sha256 `96958a8d…860f`):
