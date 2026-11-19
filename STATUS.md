@@ -3,6 +3,15 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 09:18 UTC (clock reading) — **Animals: quality-rule proposals to rev 2 after GPT's review (`animals-proposal` `8b10fdb`).** (documents only; nothing decided, built, sent or spent)
+- **GPT's review of `f6551d6` (relayed by Chad):** returned for revision, seven points: complete staged pipelines; C as an experimental heuristic with its weaknesses and adversarial fixtures; B renamed; speed and join wording; "temporally isolated" naming; shark reference corrected; nominal-accuracy wording and a pinned land assessment.
+- **Rev 2:** FKW `5335e9df…5b35`; white sharks `4e2a6742…5bf7`; script rev 2 `91126c35…7930`; new tests `quality_rule_effects.test.py` `8073fbe6…3ae0` (19 made-up-track checks pass, including each stated weakness); output `86f6bcc6…1d81`.
+- **False killer whale, complete pipeline:** 824 → 823 (tagging row) → 694 (source PASS) → 693 (class Z) → 663 (C, anchors 3 and 2, 20 km/h: 30 removed) → 661 (temporally isolated at 72 h: 2; the drawn record then ends 12 Feb 2014). 660 steps; at 6 h, 554 joined and 106 not. Land: none on land, no crossing (provisional).
+- **White shark tag 118845, complete pipeline:** 1,004 → 796 (C, anchors 3, 2, 1, 3 m/s) → 795 (isolated at 72 h: 1) → **provisional** 755 (40 fixes on land: 39 class B, 1 class A; median 4.9 km inland, furthest 68.7 km). 794 steps before the land stage (rev 1's 795 was wrong); at 12 h, 654 joined; after the land stage 616 joined, 2 crossings refused. All 34 sharks after C and isolation: 15,144 fixes, extent 8.1°E to 74.4°E.
+- **Land data pinned:** Natural Earth 1:10m land, `ne_10m_land.geojson` sha256 `1ac90796…7416`, natural-earth-vector commit `ca96624a`; line tested as a WGS84 geodesic sampled at 1 km or less.
+- **Reference corrected:** the NOAA-hosted supplement read for rev 1 is Queiroz et al. 2016 (PNAS), per GPT; the 2019 Nature article's Track Processing was read separately and carries the same 3 m/s wording; neither states the rejection method.
+- Withdrawn: the 65 km excursion bound; claims about transmission bouts and daily silence (schedules unverified).
+- **Mac:** `_review/animals-proposal-8b10fdb/` (5 files). **Project:** both proposals replaced. Working copies of the source files and the land file deleted.
 ## 19 Nov 09:01 UTC (clock reading) — **Animals: two quality-rule proposals written for GPT (`animals-proposal` `f6551d6`).** (documents only; nothing built, sent or spent; nothing decided)
 - **Chad's line:** "Go: quality-rule proposals for false killer whale 98364 and the white sharks, documents only, for GPT review".
 - `docs/concepts/ANIMALS-QUALITY-RULE-FKW-98364.md` rev 1 (sha256 `a6824be4…f6af`); `docs/concepts/ANIMALS-QUALITY-RULE-WHITE-SHARKS.md` rev 1 (`2762b407…82b4`). Effects counted by `docs/research/animals-source-audit/quality_rule_effects.py` (`f8c13123…5944`), output `quality-rule-effects-2026-11-19.json` (`140110da…3ca4`). Both source files fetched again (same sha256 as the audits), working copies deleted.
