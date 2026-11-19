@@ -24,7 +24,7 @@ const serve = f => { let body = fs.readFileSync(path.join(ROOT, f), 'utf8');
   if (f === 'style.css' && BREAK === 'tablet-hint') body = must(body, '.bare-hint{position:static;order:1;align-self:center;transform:none;margin:8px 0 0}').replace('.bare-hint{position:static;order:1;align-self:center;transform:none;margin:8px 0 0}', '');   // main's rule: absolute, 64 px from the bottom of the whole column
   return body; };
 const SW = ['#tgl-usgs', '#tgl-firms', '#tgl-ships', '#tgl-forest', '#tgl-drifters', '#tgl-plastic', '#tgl-air', '#tgl-airdots', '#tgl-nl', '#tgl-dustrgb', '#tgl-oh', '#tgl-wind', '#tgl-night',
-  '#orb-tgls [data-g="payload"]', '#orb-tgls [data-g="rocket_body"]', '#orb-tgls [data-g="debris"]'];
+  '#orb-tgls [data-g="payload"]', '#orb-tgls [data-g="rocket_body"]', '#orb-tgls [data-g="debris"]', '#tgl-journey'];
 (async () => {
   ok('index.html on disk: START_ON is empty (bare at load)', (fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').match(/const START_ON = \[\];/g) || []).length === 1);
   const browser = await chromium.launch();
@@ -38,7 +38,7 @@ const SW = ['#tgl-usgs', '#tgl-firms', '#tgl-ships', '#tgl-forest', '#tgl-drifte
     await page.goto(BASE + '/index.html'); await page.waitForTimeout(900);
     const t = vp.tag, S = () => page.evaluate(() => window.ME.layers.state());
     const sw = () => page.evaluate(sels => sels.map(s => { const b = document.querySelector(s); return b ? b.getAttribute('aria-checked') : 'missing'; }), SW);
-    ok(`${t}: no map layer is on at load (all 16 switches unchecked)`, (await sw()).every(c => c === 'false'), await sw());
+    ok(`${t}: no map layer is on at load (all 17 switches unchecked)`, (await sw()).every(c => c === 'false'), await sw());
     ok(`${t}: the four core cards are in their off state at load`, await page.evaluate(() => ['usgs', 'firms', 'ships', 'forest'].every(k => document.getElementById('card-' + k).classList.contains('off'))));
     ok(`${t}: the key counts nothing drawn`, await page.evaluate(() => window.ME.keyState().drawn.length === 0));
     let s = await S();
@@ -60,7 +60,7 @@ const SW = ['#tgl-usgs', '#tgl-firms', '#tgl-ships', '#tgl-forest', '#tgl-drifte
     ok(`${t}: the panel is closed at load`, s.open === false && await page.locator('#layers-panel').isHidden());
     await page.locator(phone ? '#layers-btn' : '#layers-open-hint').click(); await page.waitForTimeout(150); s = await S();
     ok(`${t}: the ${phone ? 'Layers button' : 'button in the line'} opens the panel`, s.open && await page.locator('#layers-panel').isVisible() && (await page.locator('#layers-btn').getAttribute('aria-expanded')) === 'true');
-    ok(`${t}: the panel lists every map-layer switch once (16), each a role="switch" button, all unchecked`, s.rows.length === 16 && s.rows.every(r => r[1] === 'false') && await page.locator('#layers-list [role="switch"]').count() === 16 && new Set(await page.evaluate(() => window.ME.layers.rows.map(r => r[1]))).size === 16, s.rows.length);
+    ok(`${t}: the panel lists every map-layer switch once (17: the animal journey added 19 Nov 2026), each a role="switch" button, all unchecked`, s.rows.length === 17 && s.rows.every(r => r[1] === 'false') && await page.locator('#layers-list [role="switch"]').count() === 17 && new Set(await page.evaluate(() => window.ME.layers.rows.map(r => r[1]))).size === 17, s.rows.length);
     ok(`${t}: every row points at a switch that exists on the page`, await page.evaluate(() => window.ME.layers.rows.every(r => document.querySelector(r[1]) && document.querySelector(r[1]).getAttribute('role') === 'switch')));
     ok(`${t}: rows are grouped under Observed, Analysed and modelled, Computed`, (await page.locator('#layers-list .lp-g').allTextContents()).join('|') === 'Observed|Analysed and modelled|Computed');
     ok(`${t}: the panel says choices are not saved`, /starts bare each time/.test(await page.locator('#layers-note').textContent()) && /not saved/.test(await page.locator('#layers-note').textContent()));

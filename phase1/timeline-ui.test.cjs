@@ -110,13 +110,13 @@ const st = p => p.evaluate(id => {
   // ---------- header tabs on every page
   {
     const c = await ctx(b); const p = await c.newPage();
-    for (const [pg, want] of [['timeline.html', 'timeline'], ['index.html', 'earth'], ['sources.html', null], ['moon.html', 'moon'], ['sun.html', 'sun']]) {
+    for (const [pg, want] of [['timeline.html', 'timeline'], ['index.html', 'earth'], ['sources.html', null], ['moon.html', 'moon'], ['sun.html', 'sun'], ['animals.html', 'animals']]) {
       await p.goto(BASE + '/' + pg).catch(() => {});
       const t = await p.evaluate(() => [...document.querySelectorAll('nav.tabs a')].map(a => [a.dataset.view, a.getAttribute('aria-current'), a.getAttribute('href')]));
-      ok(`tabs: ${pg} has Earth now · Timeline · Moon · Sun`, t.length === 4 && t.map(x => x[2]).join() === 'index.html,timeline.html,moon.html,sun.html', t);
+      ok(`tabs: ${pg} has Earth now · Timeline · Moon · Sun · Animals`, t.length === 5 && t.map(x => x[2]).join() === 'index.html,timeline.html,moon.html,sun.html,animals.html', t);
       ok(`tabs: ${pg} aria-current`, want ? t.filter(x => x[1] === 'page').map(x => x[0]).join() === want : t.every(x => !x[1]), t);
       const menu = await p.evaluate(() => [...document.querySelectorAll('#menu-list a')].map(a => a.dataset.page).join());
-      ok(`menu: ${pg} lists World View · Timeline · Moon · Sun · Sources`, menu === 'world,timeline,moon,sun,sources', menu);
+      ok(`menu: ${pg} lists World View · Timeline · Moon · Sun · Animals · Sources`, menu === 'world,timeline,moon,sun,animals,sources', menu);
     }
     await c.close();
   }

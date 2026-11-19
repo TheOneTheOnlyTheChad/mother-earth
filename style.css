@@ -369,7 +369,8 @@ details.cd>.cav{margin-top:2px}
 .tabs a:hover,.tabs a:focus-visible{background:rgba(140,170,200,.12)}
 .tabs a[aria-current="page"]{background:rgba(255,179,71,.14);color:var(--accent)}
 @media (min-width:721px) and (max-width:1279px){.top{gap:8px}.top h1{font-size:20px}.tabs a{padding:0 6px;letter-spacing:.02em;font-size:13px}}   /* four tabs on a one-row header */
-@media (min-width:721px) and (max-width:1139px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside four tabs: hide it rather than shrink or cut it */
+@media (min-width:721px) and (max-width:1199px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside five tabs: hide it rather than shrink or cut it (was 1139 px with four tabs) */
+@media (min-width:1280px) and (max-width:1365px){.tabs a{padding:0 6px;letter-spacing:.02em;font-size:13px}}   /* five tabs: with stand-in fonts the full-size tabs cut the promise at 1280 px; compact tabs run to 1365 px */
 @media (max-width:480px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* five tabs on a phone: at full size they need 468 px, so the compact size now runs to 480 px (was 420 px with four tabs) */
 @media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}
 @media (min-width:721px) and (max-width:760px){.tabs a{padding:0 4px}}   /* five tabs: the one-row header was 2 px too wide at 721 px */   /* narrow one-row header: the clock keeps its UTC label */
