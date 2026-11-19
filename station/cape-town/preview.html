@@ -42,7 +42,7 @@ h2{margin:16px 0 6px;font-size:13.5px;color:var(--dim);font-weight:600;letter-sp
   <h2>Other emitters heard (not counted or drawn as aircraft)</h2>
   <table id="others"><thead><tr><th>Emitter</th><th>What it is</th><th>Evidence in the feed</th><th>From receiver</th><th>Position age</th></tr></thead><tbody id="orows"></tbody></table>
   <div class="note" id="classnote"></div>
-  <div class="note">How entries are sorted. The receiver's software (readsb) gives each entry a message <b>type</b> and, when the sender transmits one, an ADS-B <b>emitter category</b>. Categories C1 and C2 are surface vehicles and C3 to C5 are fixed obstacles: those are not aircraft. Categories A1 to A7 and B1 to B7 are things that fly (aeroplanes, helicopters, gliders, balloons, drones and the like) and are counted with the aircraft, whether in the air or on the ground. Type <code>adsb_icao_nt</code> is an ADS-B sender that is not a transponder, which readsb documents with the example of a ground vehicle; with no usable category it could be a vehicle or an aircraft, so it is listed above as <b>kind not stated</b> and kept out of the aircraft count and the plot. Every other entry without a usable category is counted as an aircraft on its message type alone, and the line above says how many.</div>
+  <div class="note">How entries are sorted. The receiver's software (readsb) gives each entry a message <b>type</b> and, when the sender transmits one, an ADS-B <b>emitter category</b>. The category decides first. A1 to A7, B1, B2, B4, B6 and B7 are aircraft (aeroplanes, helicopters, gliders, balloons, ultralights, drones, space vehicles) and are counted as aircraft, in the air or on the ground. B3 is a parachutist or skydiver, C1 and C2 are surface vehicles and C3 to C5 are fixed obstacles: those are listed above, not with the aircraft. A0, B0, C0 and D0 mean "no information", and B5, C6, C7 and D1 to D7 are reserved: none of those says what the sender is. With no usable category, an entry is counted as an aircraft only when its message type is one of <code>adsb_icao</code>, <code>adsb_other</code>, <code>mode_s</code> (documented as coming from a transponder), <code>mlat</code> or <code>adsc</code>; the count line says how many were counted that way. Every other entry without a usable category is listed above as <b>kind not stated</b> and kept out of the aircraft count and the plot: type <code>adsb_icao_nt</code> (an ADS-B sender that is not a transponder, which readsb documents with the example of a ground vehicle, so it could be a vehicle or an aircraft), the rebroadcast and traffic-service types, type <code>other</code>, an undocumented type, and an entry with no type at all.</div>
 </section>
 </main>
 <script>
@@ -64,18 +64,28 @@ h2{margin:16px 0 6px;font-size:13.5px;color:var(--dim);font-weight:600;letter-sp
   // What each entry is, from what the feed itself says (readsb README-json.md: "type" and "category"; category values are the
   // ADS-B emitter categories of DO-260B 2.2.3.2.5.2). Nothing is inferred from altitude, speed or the "ground" flag.
   const CAT = { AIR: { A1: 'light aircraft', A2: 'small aircraft', A3: 'large aircraft', A4: 'high-vortex large aircraft', A5: 'heavy aircraft', A6: 'high-performance aircraft', A7: 'rotorcraft',
-      B1: 'glider or sailplane', B2: 'lighter-than-air', B3: 'parachutist or skydiver', B4: 'ultralight, hang-glider or paraglider', B6: 'unmanned aerial vehicle', B7: 'space or trans-atmospheric vehicle' },
+      B1: 'glider or sailplane', B2: 'lighter-than-air', B4: 'ultralight, hang-glider or paraglider', B6: 'unmanned aerial vehicle', B7: 'space or trans-atmospheric vehicle' },
     SURFACE: { C1: 'Surface vehicle: emergency vehicle', C2: 'Surface vehicle: service vehicle' },
+    PERSON: { B3: 'Parachutist or skydiver' },
     OBSTACLE: { C3: 'Point obstacle (includes tethered balloons)', C4: 'Cluster obstacle', C5: 'Line obstacle' } };
   const NT_TYPE = 'adsb_icao_nt';
+  // Message types that count as an aircraft when no usable category was sent. An explicit list; anything not on it is "kind not
+  // stated". adsb_icao, adsb_other and mode_s are documented by readsb as coming from a transponder (mode_s: "from the planes
+  // transponder"). mlat and adsc are on the list for what the method is (a position worked out from transponder signals; a
+  // report from aircraft avionics by satellite), not for a word in readsb's text. Left off on purpose: adsr_* and tisb_*
+  // (rebroadcast and traffic services, whose targets the text does not limit to aircraft), "other" (documented as source unknown).
+  const AIR_TYPES = ['adsb_icao', 'adsb_other', 'mode_s', 'mlat', 'adsc'], KNOWN_TYPES = [...AIR_TYPES, NT_TYPE, 'adsr_icao', 'adsr_other', 'tisb_icao', 'tisb_other', 'tisb_trackfile', 'other'];
   function classify(a) {
     const cat = typeof a.category === 'string' ? a.category.trim().toUpperCase() : '', type = typeof a.type === 'string' ? a.type.trim() : '';
     if (CAT.SURFACE[cat]) return { cls: 'other', kind: CAT.SURFACE[cat], basis: 'category ' + cat };
     if (CAT.OBSTACLE[cat]) return { cls: 'other', kind: CAT.OBSTACLE[cat], basis: 'category ' + cat };
+    if (CAT.PERSON[cat]) return { cls: 'other', kind: CAT.PERSON[cat], basis: 'category ' + cat };
     if (CAT.AIR[cat]) return { cls: 'aircraft', by: 'category', basis: 'category ' + cat };
     const catTxt = cat ? 'category ' + cat + (/^[ABCD]0$/.test(cat) ? ' (no information)' : /^[A-D][0-7]$/.test(cat) ? ' (reserved)' : ' (not a known value)') : 'no category sent';
     if (type === NT_TYPE) return { cls: 'unknown', kind: 'Kind not stated: a non-transponder ADS-B sender (vehicle or aircraft)', basis: 'type ' + NT_TYPE + '; ' + catTxt };
-    return { cls: 'aircraft', by: 'type', basis: (type ? 'type ' + type : 'no type sent') + '; ' + catTxt };
+    if (AIR_TYPES.includes(type)) return { cls: 'aircraft', by: 'type', basis: 'type ' + type + '; ' + catTxt };
+    const typeTxt = !type ? 'no message type sent' : KNOWN_TYPES.includes(type) ? 'type ' + type : 'type ' + type.slice(0, 24) + ' (not a documented value)';
+    return { cls: 'unknown', kind: !type ? 'Kind not stated: the entry carries no message type' : KNOWN_TYPES.includes(type) ? 'Kind not stated: this message type does not say what sent it' : 'Kind not stated: the message type is not one readsb documents', basis: typeTxt + '; ' + catTxt };
   }
   const name = a => (typeof a.flight === 'string' && a.flight.trim()) || (typeof a.r === 'string' && a.r.trim()) || String(a.hex || '?');
   /** One reading -> what to show. Pure: everything the page prints comes from here. ageExtra = seconds since the reading was fetched. */
