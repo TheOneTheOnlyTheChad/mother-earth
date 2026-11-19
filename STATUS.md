@@ -2,6 +2,20 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 19 Nov 2026
+## 19 Nov 02:16 UTC (clock reading) — **Animals: GPT accepts the sharks and dolphins audit as candidate discovery with six corrections; audit rev 1.1 (branch `animals-proposal` `f888050`, docs only).** (research and docs only; nothing built, deployed, merged, sent or spent)
+- **GPT (relayed by Chad) on `970312e`:** four hashes matched; proposal rev 2.2 keeps its pass for the private zebra preview; the sharks and dolphins audit is accepted as candidate discovery, **not a source clearance**. No build, provider contact, spending or production action authorised. **Chad has not yet given a go for the preview build or for either full audit.**
+- **Corrections applied in `docs/research/animals-source-audit/SHARKS-DOLPHINS.md` rev 1.1 (sha256 `30f1a6a9…a63d`):**
+  1. File access stated exactly: one complete false-killer-whale netCDF (319,596 bytes) was fetched in the pane's memory for metadata inspection; trajectory arrays not analysed; nothing saved; the evidence holds extracted text strings, not a decoded header (the evidence file's note is corrected too).
+  2. Fields present is not values present: position types, flag meanings, fill values and populated error estimates are for the full audits; "argos / modeled" appears in the file, so nothing there is classified as a raw fix; basking-shark positioning stays unverified.
+  3. Deployment-specific rights evidence, read in the pane 02:14 UTC: the data.gov record for ptt 98364 gives CC0 1.0; the OBIS record `560c7bbd…e9f7` gives CC0 1.0, 373 occurrences, a subset, published 30 Sep 2025, and names the source at NCEI accession `0303525`. Source netCDF, ERDDAP table and OBIS subset are kept as three identities.
+  4. Listing dates are file dates, not observation dates or a demonstrated update schedule; no live-feed qualification is established.
+  5. OTN: the publication page and the policies page read (public data under CC BY; attribution to all data providers; detection extracts not public; optional two-year embargo). The 2024 policy document and any one endpoint's terms are still to be read in full when an endpoint is selected.
+  6. Both enquiries reworded: no "non-commercial"; they ask about download, processing, hosting or caching, public display and redistribution of prepared files, with future paid features asked separately. **Both unsent.**
+  - Also: CC BY 4.0 for the white sharks needs credit, a licence link and a statement of changes; the white shark "type" codes are resolved before any position is classified; false killer whales are named as dolphins biologically.
+- **Mac:** `_review/animals-proposal-f888050/` (three changed files, hashes equal, 02:16:19 UTC). **Project:** audit and proposal replaced.
+- **Next, each on Chad's own go:** private zebra preview build; full South African white shark file audit; deep audit of one false killer whale deployment; the two enquiries (his to send or not).
+
 # 18 Nov 2026
 ## 18 Nov 17:42 UTC (clock reading) — **Animals: GPT passes rev 2.1 for the private zebra preview; Chad makes sharks and dolphins the next source audit; first pass done (branch `animals-proposal` `970312e`, docs only).** (research and docs only; nothing built, deployed, merged, sent or spent)
 - **GPT (relayed by Chad) on `c1ba7d1`:** rev 2.1 passes proposal review for the private zebra preview; five hashes matched. Corrections for the build brief: GPS studies still need quality checks; Argos filtering and gap rules are justified per study; J12 tolerances accepted provisionally, both metrics in the same two of three matched runs, per scenario and width, all runs reported, substantial track playback; one journey switch with a study chooser after the first replay passes (study change pauses, clears, rejects obsolete loads); hidden tab pauses and preserves, navigation starts bare; say "no shark or dolphin matches in these searches". **No build, spending, merge or deploy authorised by the review. Chad has not yet given a go for the preview build.**
