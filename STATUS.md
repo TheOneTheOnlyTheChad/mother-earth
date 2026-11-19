@@ -3,7 +3,7 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
-## 19 Nov 14:43 UTC (clock reading) — **Animals thread closed out. Live unchanged (hub 0.6.19, page `ed1b652`). Next: Chad wants the journeys live.** (docs only)
+## 19 Nov 14:43 UTC (clock reading) — **Animals thread closed out. Live unchanged (hub 0.6.19, page merge `8bb3139`). Next: Chad wants the journeys live.** (docs only)
 - **State at close:** `animals-journeys-preview-rc` `aa507f5` (code `f00a330`) is a GPT-passed private preview of three recorded journeys. Awaiting GPT: the release assessment, the Sources and REGISTER draft, the enquiries record (all at `aa507f5`). Nothing merged, deployed or filed.
 - **Next, item 1:** GPT's review of those three documents. Then Chad's sensitivity decision per animal, the whale's population question, a release branch (Sources section, "Private preview" wording), and Chad's Approve lines for REGISTER and the merge. Full order: HANDOVER, "NEXT THREAD STARTS HERE (19 Nov)".
 - **Claude's view, given to Chad:** release the zebra and the shark first if he does not want to wait; the whale follows once its population is stated from a source.
