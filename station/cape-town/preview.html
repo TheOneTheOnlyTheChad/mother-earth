@@ -17,6 +17,7 @@ svg{width:100%;height:auto;display:block}
 .lab{fill:#e6edf3;font:11px var(--mono);paint-order:stroke;stroke:#0b1016;stroke-width:3px}
 table{width:100%;border-collapse:collapse;font:12.5px var(--mono)}th,td{text-align:right;padding:3px 6px;border-bottom:1px solid #1b2733;white-space:nowrap}
 th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:600}tr.old td{color:#8493a3}
+h2{margin:16px 0 6px;font-size:13.5px;color:var(--dim);font-weight:600;letter-spacing:.02em}td.wrap{white-space:normal;text-align:left}#others th:nth-child(-n+3),#others td:nth-child(-n+3){text-align:left}
 .key{display:flex;flex-wrap:wrap;gap:4px 12px;font:11.5px var(--mono);color:var(--dim);margin-top:8px}.key i{display:inline-block;width:12px;height:10px;margin-right:4px;vertical-align:-1px}
 .note{color:var(--dim);font-size:12.5px;margin-top:10px}
 .ranges{display:flex;align-items:center;gap:6px;margin:10px 0 2px;font:12.5px var(--mono);color:var(--dim)}
@@ -38,6 +39,10 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
 <section class="panel">
   <table><thead><tr><th>Aircraft</th><th>Altitude</th><th>Speed</th><th>Heading</th><th>From receiver</th><th>Position age</th><th>Signal</th></tr></thead><tbody id="rows"></tbody></table>
   <div class="note" id="nopos"></div>
+  <h2>Other emitters heard (not counted or drawn as aircraft)</h2>
+  <table id="others"><thead><tr><th>Emitter</th><th>What it is</th><th>Evidence in the feed</th><th>From receiver</th><th>Position age</th></tr></thead><tbody id="orows"></tbody></table>
+  <div class="note" id="classnote"></div>
+  <div class="note">How entries are sorted. The receiver's software (readsb) gives each entry a message <b>type</b> and, when the sender transmits one, an ADS-B <b>emitter category</b>. Categories C1 and C2 are surface vehicles and C3 to C5 are fixed obstacles: those are not aircraft. Categories A1 to A7 and B1 to B7 are things that fly (aeroplanes, helicopters, gliders, balloons, drones and the like) and are counted with the aircraft, whether in the air or on the ground. Type <code>adsb_icao_nt</code> is an ADS-B sender that is not a transponder, which readsb documents with the example of a ground vehicle; with no usable category it could be a vehicle or an aircraft, so it is listed above as <b>kind not stated</b> and kept out of the aircraft count and the plot. Every other entry without a usable category is counted as an aircraft on its message type alone, and the line above says how many.</div>
 </section>
 </main>
 <script>
@@ -56,11 +61,35 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
   const colour = a => a.alt_baro === 'ground' ? CFG.GROUND : num(a.alt_baro) ? CFG.BANDS[band(a.alt_baro * CFG.FT_M)][1] : num(a.alt_geom) ? CFG.BANDS[band(a.alt_geom * CFG.FT_M)][1] : CFG.NOALT;
   const altText = a => a.alt_baro === 'ground' ? 'on ground' : num(a.alt_baro) ? Math.round(a.alt_baro * CFG.FT_M / 10) * 10 + ' m' : num(a.alt_geom) ? Math.round(a.alt_geom * CFG.FT_M / 10) * 10 + ' m (GPS)' : '—';
   const heading = a => num(a.track) ? a.track : num(a.true_heading) ? a.true_heading : num(a.mag_heading) ? a.mag_heading : null;
+  // What each entry is, from what the feed itself says (readsb README-json.md: "type" and "category"; category values are the
+  // ADS-B emitter categories of DO-260B 2.2.3.2.5.2). Nothing is inferred from altitude, speed or the "ground" flag.
+  const CAT = { AIR: { A1: 'light aircraft', A2: 'small aircraft', A3: 'large aircraft', A4: 'high-vortex large aircraft', A5: 'heavy aircraft', A6: 'high-performance aircraft', A7: 'rotorcraft',
+      B1: 'glider or sailplane', B2: 'lighter-than-air', B3: 'parachutist or skydiver', B4: 'ultralight, hang-glider or paraglider', B6: 'unmanned aerial vehicle', B7: 'space or trans-atmospheric vehicle' },
+    SURFACE: { C1: 'Surface vehicle: emergency vehicle', C2: 'Surface vehicle: service vehicle' },
+    OBSTACLE: { C3: 'Point obstacle (includes tethered balloons)', C4: 'Cluster obstacle', C5: 'Line obstacle' } };
+  const NT_TYPE = 'adsb_icao_nt';
+  function classify(a) {
+    const cat = typeof a.category === 'string' ? a.category.trim().toUpperCase() : '', type = typeof a.type === 'string' ? a.type.trim() : '';
+    if (CAT.SURFACE[cat]) return { cls: 'other', kind: CAT.SURFACE[cat], basis: 'category ' + cat };
+    if (CAT.OBSTACLE[cat]) return { cls: 'other', kind: CAT.OBSTACLE[cat], basis: 'category ' + cat };
+    if (CAT.AIR[cat]) return { cls: 'aircraft', by: 'category', basis: 'category ' + cat };
+    const catTxt = cat ? 'category ' + cat + (/^[ABCD]0$/.test(cat) ? ' (no information)' : /^[A-D][0-7]$/.test(cat) ? ' (reserved)' : ' (not a known value)') : 'no category sent';
+    if (type === NT_TYPE) return { cls: 'unknown', kind: 'Kind not stated: a non-transponder ADS-B sender (vehicle or aircraft)', basis: 'type ' + NT_TYPE + '; ' + catTxt };
+    return { cls: 'aircraft', by: 'type', basis: (type ? 'type ' + type : 'no type sent') + '; ' + catTxt };
+  }
   const name = a => (typeof a.flight === 'string' && a.flight.trim()) || (typeof a.r === 'string' && a.r.trim()) || String(a.hex || '?');
   /** One reading -> what to show. Pure: everything the page prints comes from here. ageExtra = seconds since the reading was fetched. */
   function view(j, ageExtra, maxKm = CFG.RANGE_DEFAULT) {
-    const all = j.aircraft || [], plot = [], rows = []; let noPos = 0, oldPos = 0, noRange = 0, beyond = 0;
+    const all = j.aircraft || [], plot = [], rows = [], others = []; let noPos = 0, oldPos = 0, noRange = 0, beyond = 0, heard = 0, byType = 0, notAircraft = 0, unknown = 0;
     for (const a of all) {
+      const c = classify(a);
+      if (c.cls !== 'aircraft') {       // listed on its own; never counted, plotted or listed as an aircraft
+        c.cls === 'other' ? notAircraft++ : unknown++;
+        const pos = num(a.lat) && num(a.lon) && num(a.seen_pos);
+        others.push({ name: name(a), kind: c.kind, basis: c.basis, cls: c.cls, km: pos && num(a.r_dst) ? a.r_dst * CFG.NM_KM : null, dir: pos && num(a.r_dir) ? a.r_dir : null, age: pos ? a.seen_pos + ageExtra : null });
+        continue;
+      }
+      heard++; if (c.by === 'type') byType++;
       const hasPos = num(a.lat) && num(a.lon) && num(a.seen_pos);
       if (!hasPos) { noPos++; continue; }
       const age = a.seen_pos + ageExtra, km = num(a.r_dst) ? a.r_dst * CFG.NM_KM : null, dir = num(a.r_dir) ? a.r_dir : null;
@@ -72,7 +101,8 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
       plot.push(row);
     }
     rows.sort((p, q) => (p.km === null ? 1e9 : p.km) - (q.km === null ? 1e9 : q.km));
-    return { heard: all.length, noPos, oldPos, noRange, beyond, plot, rows };
+    others.sort((p, q) => (p.km === null ? 1e9 : p.km) - (q.km === null ? 1e9 : q.km));
+    return { entries: all.length, heard, byType, notAircraft, unknown, others, noPos, oldPos, noRange, beyond, plot, rows };
   }
   function draw(v) {
     const R = CFG.R, maxKm = st.range, k = R / maxKm; let s = '';
@@ -109,6 +139,8 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
     draw(v);
     const rows = v ? v.rows : [];
     $('rows').innerHTML = rows.map(r => `<tr class="${r.old ? 'old' : ''}"><td><span style="color:${r.col}">●</span> ${esc(r.name)}</td><td>${esc(r.alt)}</td><td>${esc(r.gs)}</td><td>${r.hd === null ? '—' : Math.round(r.hd) + '°'}</td><td>${r.km === null ? '—' : r.km.toFixed(0) + ' km' + (r.dir === null ? '' : ' at ' + Math.round(r.dir) + '°')}</td><td>${esc(ageTxt(r.age))}${r.age > CFG.DROP_S ? ' (too old to plot)' : r.beyond ? ' (beyond this range)' : ''}</td><td>${esc(r.rssi)}</td></tr>`).join('') || '<tr><td colspan="7" style="text-align:left;color:#9fb0c3">No aircraft with a position to list.</td></tr>';
+    $('orows').innerHTML = (v ? v.others : []).map(r => `<tr><td>${esc(r.name)}</td><td class="wrap">${esc(r.kind)}</td><td class="wrap">${esc(r.basis)}</td><td>${r.km === null ? '—' : r.km.toFixed(0) + ' km' + (r.dir === null ? '' : ' at ' + Math.round(r.dir) + '°')}</td><td>${r.age === null ? 'no position' : esc(ageTxt(r.age))}</td></tr>`).join('') || `<tr><td colspan="5" style="text-align:left;color:#9fb0c3">${v ? 'None in this reading.' : 'Nothing is listed while there is no current reading.'}</td></tr>`;
+    $('classnote').textContent = v ? `${v.entries} ${v.entries === 1 ? 'entry' : 'entries'} in this reading: ${v.heard} counted as aircraft` + (v.byType ? ` (${v.byType} of them on message type alone, with no usable emitter category)` : '') + `; ${v.notAircraft} not aircraft by emitter category; ${v.unknown} of a kind not stated.` : '';
     $('nopos').textContent = v ? `${v.noPos} aircraft heard without a usable position (counted, not drawn).` + (v.oldPos ? ` ${v.oldPos} with a position older than ${CFG.DROP_S} s (listed, not drawn).` : '') + (v.noRange ? ` ${v.noRange} with a position but no distance from the receiver (listed, not drawn).` : '') + (v.beyond ? ` ${v.beyond} beyond the ${st.range} km range (listed, not drawn).` : '') : '';
     N.textContent = st.snap ? `reading taken ${ageTxt(ext)} ago · receiver clock ${new Date(st.snap.now * 1000).toISOString().slice(11, 19)} UTC · ${st.snap.messages != null ? Number(st.snap.messages).toLocaleString() + ' messages since the receiver started' : ''}` : '';
     for (const b of document.querySelectorAll('#ranges button')) b.setAttribute('aria-pressed', String(Number(b.dataset.km) === st.range));
@@ -162,7 +194,7 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
   }
   $('key').innerHTML = CFG.BANDS.map(([, c, t]) => `<span><i style="background:${c}"></i>${t}</span>`).join('') + `<span><i style="background:${CFG.GROUND}"></i>on the ground</span><span><i style="background:${CFG.NOALT}"></i>no altitude sent</span><span>faded = position older than ${CFG.FADE_S} s · not drawn after ${CFG.DROP_S} s</span>`;
   for (const b of document.querySelectorAll('#ranges button')) b.addEventListener('click', () => { st.range = Number(b.dataset.km); paint(); });
-  window.CT = { state: () => ({ state: st.shown || st.state, polled: st.state, skipped: st.skipped, lastNow: st.lastNow, movedAgo: st.movedAt ? (Date.now() - st.movedAt) / 1000 : null, clockReset: st.clockReset, offset: st.offset, range: st.range, rings: [...$('plot').querySelectorAll('.rl')].map(t => t.textContent), why: st.why, polls: st.polls, title: $('state').textContent, whyText: $('why').textContent, plotted: $('plot').querySelectorAll('path,circle[cx]').length, rows: $('rows').querySelectorAll('tr').length, nopos: $('nopos').textContent, sim: $('sim').hidden ? null : $('sim').textContent }), view, cfg: CFG };
+  window.CT = { state: () => ({ state: st.shown || st.state, polled: st.state, skipped: st.skipped, lastNow: st.lastNow, movedAgo: st.movedAt ? (Date.now() - st.movedAt) / 1000 : null, clockReset: st.clockReset, offset: st.offset, range: st.range, rings: [...$('plot').querySelectorAll('.rl')].map(t => t.textContent), why: st.why, polls: st.polls, title: $('state').textContent, whyText: $('why').textContent, plotted: $('plot').querySelectorAll('path,circle[cx]').length, rows: $('rows').querySelectorAll('tr').length, others: [...$('orows').querySelectorAll('tr')].filter(r => r.children.length === 5).map(r => [...r.children].map(c => c.textContent)), classnote: $('classnote').textContent, nopos: $('nopos').textContent, sim: $('sim').hidden ? null : $('sim').textContent }), view, classify, cfg: CFG };
   paint(); poll(); setInterval(() => { if (!document.hidden) poll(); }, CFG.POLL_MS); setInterval(paint, 1000);
 })();
 </script></body></html>

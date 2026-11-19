@@ -13,6 +13,16 @@ const ac = () => [
   { hex: 'aaa006', alt_baro: 12000, lat: -33.1, lon: 18.9, seen_pos: 0.2, seen: 0.2, rssi: -9 },                                                                     // position but no range/bearing, no heading
   { hex: 'aaa007', flight: 'NOHDG   ', lat: -33.3, lon: 18.2, seen_pos: 2, seen: 1, r_dst: 30, r_dir: 270, rssi: -15 },                                              // no heading, no altitude: dot
 ];
+// Extra entries for the "what is an aircraft" cases (mixed = true). Types and categories as readsb documents them.
+let mixed = false;
+const extra = () => [
+  { hex: 'bbb001', type: 'adsb_icao_nt', category: 'C2', flight: 'OPS12   ', alt_baro: 'ground', gs: 12, track: 80, lat: -33.97, lon: 18.61, seen_pos: 0.5, seen: 0.2, r_dst: 6.5, r_dir: 96, rssi: -18 },   // service vehicle
+  { hex: 'bbb002', type: 'adsb_icao_nt', alt_baro: 'ground', gs: 5, lat: -33.97, lon: 18.62, seen_pos: 1.0, seen: 0.4, r_dst: 6.6, r_dir: 97, rssi: -19 },                                              // non-transponder, no category
+  { hex: 'bbb003', type: 'adsb_icao', category: 'C3', lat: -33.9, lon: 18.5, seen_pos: 2, seen: 1, r_dst: 20, r_dir: 10, rssi: -22 },                                                                  // point obstacle sent by an ordinary type
+  { hex: 'bbb004', type: 'adsb_icao_nt', category: 'C0', seen: 3, rssi: -30 },                                                                                                                         // non-transponder, "no information", no position
+  { hex: 'bbb005', type: 'adsb_icao_nt', category: 'B1', flight: 'GLIDER1 ', alt_baro: 3000, gs: 60, track: 10, lat: -33.8, lon: 18.8, seen_pos: 1, seen: 0.5, r_dst: 20, r_dir: 120, rssi: -21 },     // glider: flies, counted as aircraft
+  { hex: 'bbb006', type: 'adsb_icao', category: 'A3', flight: 'TAXI303 ', alt_baro: 'ground', gs: 8, track: 190, lat: -33.97, lon: 18.6, seen_pos: 0.6, seen: 0.3, r_dst: 7.0, r_dir: 94, rssi: -14 }, // airliner on the ground: an aircraft
+];
 let frozenNow = null, inPi = 0, maxInPi = 0, flip = 0, shift = 0;
 const pi = http.createServer(async (req, res) => {
   inPi++; maxInPi = Math.max(maxInPi, inPi); res.on('close', () => { inPi--; });
@@ -23,7 +33,7 @@ const pi = http.createServer(async (req, res) => {
   const real = Date.now() / 1000;
   const now = mode === 'frozen' ? (frozenNow = frozenNow || real) : mode === 'frozen-old' ? (frozenNow = frozenNow || real - 120) : mode === 'old' ? real - 120
     : mode === 'behind45' ? real - 45 : mode === 'ahead45' ? real + 45 : mode === 'backwards' ? (flip++ % 2 ? Math.floor(real) - 20 : Math.floor(real)) : real - shift;
-  res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ now, messages: 4311880, aircraft: mode === 'empty' ? [] : ac() }));
+  res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ now, messages: 4311880, aircraft: mode === 'empty' ? [] : mixed ? [...ac(), ...extra()] : ac() }));
 });
 (async () => {
   await new Promise(r => pi.listen(18080, '127.0.0.1', r));
@@ -45,6 +55,43 @@ const pi = http.createServer(async (req, res) => {
   ok('live: no simulated banner', s.sim === null, s.sim);
   await sleep(17000); s = await S();
   ok('live: still live after more readings (data keeps changing)', s.state === 'live' && s.polls >= 5, s);
+
+  // ---- what counts as an aircraft (19 Nov: the real feed carries adsb_icao_nt entries) ----
+  mixed = true; mode = 'live'; await open(''); s = await S();
+  ok('mixed feed: the title counts aircraft only (base 4 + glider + grounded airliner = 6 plotted)', s.state === 'live' && /Receiver live — 6 aircraft plotted/.test(s.title) && s.plotted === 6, s);
+  ok('mixed feed: the aircraft table lists aircraft only (base 6 + 2)', s.rows === 8, s.rows);
+  ok('mixed feed: four other emitters are listed apart, each with what it is and the evidence', s.others.length === 4 && s.others.some(r => r[0] === 'OPS12' && /Surface vehicle: service vehicle/.test(r[1]) && r[2] === 'category C2')
+    && s.others.some(r => r[0] === 'bbb003' && /Point obstacle/.test(r[1]) && r[2] === 'category C3') && s.others.some(r => r[0] === 'bbb002' && /Kind not stated/.test(r[1]) && r[2] === 'type adsb_icao_nt; no category sent')
+    && s.others.some(r => r[0] === 'bbb004' && /Kind not stated/.test(r[1]) && r[2] === 'type adsb_icao_nt; category C0 (no information)' && r[4] === 'no position'), s.others);
+  ok('mixed feed: the count line gives entries, aircraft, type-only, not aircraft and kind not stated', s.classnote === '13 entries in this reading: 9 counted as aircraft (7 of them on message type alone, with no usable emitter category); 2 not aircraft by emitter category; 2 of a kind not stated.', s.classnote);
+  ok('mixed feed: "without a usable position" counts aircraft only (the position-less non-transponder entry is not in it)', /^1 aircraft heard without a usable position/.test(s.nopos), s.nopos);
+  { const h = await page.content(), plotTxt = await page.evaluate(() => [...document.querySelectorAll('#plot text.lab')].map(t => t.textContent)), rowTxt = await page.evaluate(() => document.getElementById('rows').textContent);
+    ok('mixed feed: no vehicle, obstacle or unstated emitter is drawn on the plot or listed with the aircraft', !plotTxt.some(t => /OPS12|bbb00[234]/.test(t)) && !/OPS12|bbb00[234]/.test(rowTxt), [plotTxt, rowTxt.slice(0, 200)]);
+    ok('mixed feed: the grounded airliner and the glider are drawn and listed as aircraft', plotTxt.includes('TAXI303') && plotTxt.includes('GLIDER1') && /TAXI303/.test(rowTxt) && /on ground/.test(rowTxt), plotTxt);
+    ok('mixed feed: the page explains the sorting and does not guess about the unstated kind', /could be a vehicle or an aircraft/.test(h) && /kept out of the aircraft count and the plot/.test(h)); }
+  await open('?range=40'); s = await S();
+  ok('mixed feed at 40 km: still aircraft only on the plot', /aircraft plotted/.test(s.title) && s.others.length === 4 && !(await page.evaluate(() => [...document.querySelectorAll('#plot text.lab')].map(t => t.textContent))).some(t => /OPS12|bbb00[234]/.test(t)), s.title);
+  await open('?sim=zero'); s = await S();
+  ok('mixed feed, sim=zero: 9 aircraft heard, none plotted; the others stay listed without positions', /9 aircraft heard/.test(s.whyText) && s.plotted === 0 && s.others.length === 4 && s.others.every(r => r[4] === 'no position'), [s.whyText, s.others]);
+  { const c = await page.evaluate(() => { const k = a => { const r = window.CT.classify(a); return r.cls + (r.by ? ':' + r.by : ''); }; return {
+      nt_none: k({ type: 'adsb_icao_nt' }), nt_a0: k({ type: 'adsb_icao_nt', category: 'A0' }), nt_c1: k({ type: 'adsb_icao_nt', category: 'C1' }), nt_a1: k({ type: 'adsb_icao_nt', category: 'A1' }), nt_b6: k({ type: 'adsb_icao_nt', category: 'b6 ' }),
+      nt_c6: k({ type: 'adsb_icao_nt', category: 'C6' }), nt_junk: k({ type: 'adsb_icao_nt', category: 'ZZ' }), nt_num: k({ type: 'adsb_icao_nt', category: 7 }),
+      icao_none: k({ type: 'adsb_icao' }), icao_c2: k({ type: 'adsb_icao', category: 'C2' }), icao_c5: k({ type: 'mlat', category: 'C5' }), modes: k({ type: 'mode_s' }), notype: k({}), notype_ground: k({ alt_baro: 'ground' }),
+      nt_air_high: k({ type: 'adsb_icao_nt', alt_baro: 3000, gs: 120 }), tisb: k({ type: 'tisb_trackfile' }), a7_ground: k({ type: 'adsb_icao', category: 'A7', alt_baro: 'ground' }) }; });
+    ok('classify: non-transponder type with no, empty-of-information, reserved, unknown or non-text category is "kind not stated"', ['nt_none', 'nt_a0', 'nt_c6', 'nt_junk', 'nt_num'].every(x => c[x] === 'unknown'), c);
+    ok('classify: categories C1, C2, C5 are not aircraft whatever the type', c.nt_c1 === 'other' && c.icao_c2 === 'other' && c.icao_c5 === 'other', c);
+    ok('classify: an A or B category makes it an aircraft even on the non-transponder type (case and spaces ignored)', c.nt_a1 === 'aircraft:category' && c.nt_b6 === 'aircraft:category', c);
+    ok('classify: other types with no category are aircraft on type alone, and that is recorded', c.icao_none === 'aircraft:type' && c.modes === 'aircraft:type' && c.tisb === 'aircraft:type' && c.notype === 'aircraft:type', c);
+    ok('classify: "on the ground" never changes the class (grounded aircraft stay aircraft)', c.notype_ground === 'aircraft:type' && c.a7_ground === 'aircraft:category', c);
+    ok('classify: nothing is inferred from altitude or speed (a moving, high non-transponder entry with no category stays unstated)', c.nt_air_high === 'unknown', c); }
+  { // control: the reviewed page before this change (d540c5d) counts and draws the same vehicles as aircraft
+    const { execFileSync } = require('child_process'), fs = require('fs'), os = require('os'); const old = fs.mkdtempSync(path.join(os.tmpdir(), 'ct-old-'));
+    for (const f of ['preview.mjs', 'preview.html']) fs.writeFileSync(path.join(old, f), execFileSync('git', ['show', 'd540c5d:station/cape-town/' + f], { cwd: __dirname, maxBuffer: 1 << 24 }));
+    const so = spawn(process.execPath, [path.join(old, 'preview.mjs')], { env: { ...process.env, PI_URL: 'http://127.0.0.1:18080/data/aircraft.json', PORT: '18789' } }); await sleep(700);
+    const p2 = await browser.newPage(); await p2.goto('http://127.0.0.1:18789/'); await sleep(1200); const o = await p2.evaluate(() => window.CT.state());
+    ok('control (old page, same feed): 9 "aircraft" plotted, the vehicles and the obstacle among them', /Receiver live — 9 aircraft plotted/.test(o.title) && o.plotted === 9, o.title);
+    await p2.close(); so.kill(); fs.rmSync(old, { recursive: true, force: true }); }
+  mixed = false;
 
   mode = 'empty'; await open(''); s = await S();
   ok('fresh feed, nothing heard: live, zero plotted, says so', s.state === 'live' && /no aircraft with a usable position right now/.test(s.title) && s.plotted === 0 && /0 aircraft heard/.test(s.whyText), s);

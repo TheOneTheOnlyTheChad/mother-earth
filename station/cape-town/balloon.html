@@ -12,7 +12,7 @@ main{display:grid;grid-template-columns:minmax(320px,600px) minmax(340px,1fr);ga
 #state{font-weight:700}#state.bad{color:var(--bad)}
 svg{width:100%;height:auto;display:block}
 .grid{stroke:#1d2a39}.axis{stroke:#3a4d63}.tick{fill:#8194a8;font:10.5px var(--mono)}.cap{fill:#9fb0c3;font:11px var(--mono)}
-.lab{fill:#e6edf3;font:11px var(--mono);paint-order:stroke;stroke:#0b1016;stroke-width:3px}
+.lab{fill:#e6edf3;font:11px var(--mono);paint-order:stroke;stroke:#0b1016;stroke-width:3px}.lead{stroke:#9fb0c3;stroke-width:1;stroke-dasharray:2 2}
 .ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:10px 0 4px;font:13px var(--mono)}
 .ctl input[type=range]{flex:1 1 260px;min-width:200px}
 .ctl label{color:var(--dim)}
@@ -79,12 +79,16 @@ svg{width:100%;height:auto;display:block}
       nTemp: tr.filter(x => x.temp !== null).length, nHum: tr.filter(x => x.hum !== null).length };
   }
   /** Wind ESTIMATE at frame i from GPS drift: the straight-line movement between the first and the last frame received within
-   *  WIND_HALF_S seconds either side, divided by the time between them. Null when that span is under WIND_MIN_SPAN_S or crosses a gap. */
+   *  WIND_HALF_S seconds either side, divided by the time between them. The window never crosses a gap. No estimate
+   *  ({ none: 'transition' }) when the window holds readings from both sides of the highest point received: the estimate
+   *  assumes steady drift with the air, and across the change from rising to falling that does not hold. No estimate
+   *  ({ none: 'short' }) when the span is under WIND_MIN_SPAN_S. */
   function wind(F, i) {
     const tr = F.tr, x = tr[i]; let a = i, b = i;
     while (a > 0 && x.t - tr[a - 1].t <= CFG.WIND_HALF_S * 1000 && (tr[a].t - tr[a - 1].t) / 1000 <= CFG.GAP_S) a--;
     while (b < tr.length - 1 && tr[b + 1].t - x.t <= CFG.WIND_HALF_S * 1000 && (tr[b + 1].t - tr[b].t) / 1000 <= CFG.GAP_S) b++;
-    const span = (tr[b].t - tr[a].t) / 1000; if (span < CFG.WIND_MIN_SPAN_S) return null;
+    if (a < F.top && b > F.top) return { none: 'transition' };
+    const span = (tr[b].t - tr[a].t) / 1000; if (span < CFG.WIND_MIN_SPAN_S) return { none: 'short' };
     const d = distKm(tr[a], tr[b]), from = (bearing(tr[a], tr[b]) + 180) % 360;
     return { kmh: d / span * 3600, from, span, frames: b - a + 1 };
   }
@@ -93,8 +97,41 @@ svg{width:100%;height:auto;display:block}
     if (phase === 'down') { for (let i = F.top + 1; i < F.tr.length; i++) if (F.tr[i].alt <= alt) return i; return F.tr.length - 1; }
     for (let i = 0; i <= F.top; i++) if (F.tr[i].alt >= alt) return i; return F.top;
   }
-  const st = { F: null, meta: null, serial: '', phase: 'up', i: 0 };
+  const st = { F: null, meta: null, serial: '', phase: 'up', i: 0, labels: [] };
   function segs(F, a, b) { const out = []; let cur = []; for (let i = a; i <= b; i++) { if (i > a && F.gaps.some(g => g.i === i)) { if (cur.length > 1) out.push(cur); cur = []; } cur.push(F.tr[i]); } if (cur.length > 1) out.push(cur); return out; }
+  /** Where to put each map label. For every label, boxes are tried on eight sides of its marker at growing distances; each box
+   *  is scored by how many drawn path pieces cross it, whether it leaves the map, and whether it covers another label, another
+   *  marker, the scale bar or the north arrow. The lowest score wins, the nearest first on a tie. A label moved well away from
+   *  its marker gets a thin leader line. Pure: the same flight always gives the same placement. Sizes are estimates from the
+   *  11 px fixed-width font (LAB.CH per character); the suite checks the result against the boxes the browser really drew. */
+  const LAB = { CH: 6.7, LH: 13, PAD: 3, DIST: [14, 26, 42, 62, 86, 114], DIRS: [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, -1], [1, 1], [-1, 1]], LEAD_FROM: 20 };
+  function crosses(r, p, q) {      // does the segment p-q touch rectangle r? (Liang-Barsky)
+    let t0 = 0, t1 = 1; const dx = q[0] - p[0], dy = q[1] - p[1];
+    for (const [pp, qq] of [[-dx, p[0] - r.x0], [dx, r.x1 - p[0]], [-dy, p[1] - r.y0], [dy, r.y1 - p[1]]]) {
+      if (pp === 0) { if (qq < 0) return false; } else { const u = qq / pp; if (pp < 0) { if (u > t1) return false; if (u > t0) t0 = u; } else { if (u < t0) return false; if (u < t1) t1 = u; } }
+    }
+    return true;
+  }
+  function place(items, lines, W, fixed) {
+    const over = (r, q) => r.x0 < q.x1 && q.x0 < r.x1 && r.y0 < q.y1 && q.y0 < r.y1, out = [];
+    const marks = items.map(it => ({ id: it.id, x0: it.x - 9, x1: it.x + 9, y0: it.y - 9, y1: it.y + 9 }));
+    for (const it of items) {
+      const w = Math.max(...it.lines.map(l => l.length)) * LAB.CH + 2 * LAB.PAD, h = it.lines.length * LAB.LH + 2 * LAB.PAD; let best = null;
+      for (const d of LAB.DIST) for (const [ux, uy] of LAB.DIRS) {
+        const g = ux && uy ? d * 0.7 : d, cx = it.x + ux * (g + w / 2), cy = it.y + uy * (g + h / 2), r = { x0: cx - w / 2, x1: cx + w / 2, y0: cy - h / 2, y1: cy + h / 2 };
+        let hits = 0; for (const [p, q] of lines) if (crosses(r, p, q)) hits++;
+        let score = Math.min(hits, 50) * 4 + d / 1000;
+        if (r.x0 < 2 || r.x1 > W - 2 || r.y0 < 2 || r.y1 > W - 2) score += 5000;
+        for (const q of out) if (over(r, q.r)) score += 800;
+        for (const q of marks) if (q.id !== it.id && over(r, q)) score += 400;
+        for (const q of fixed) if (over(r, q)) score += 400;
+        if (!best || score < best.score) best = { score, r, d, hits };
+      }
+      const r = best.r, lead = best.d >= LAB.LEAD_FROM ? [Math.max(r.x0, Math.min(r.x1, it.x)), Math.max(r.y0, Math.min(r.y1, it.y))] : null;
+      out.push({ id: it.id, x: it.x, y: it.y, lines: it.lines, r, d: best.d, hits: best.hits, lead });
+    }
+    return out;
+  }
   function drawMap() {
     const F = st.F, tr = F.tr, W = 560, M = 46; let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
     for (const q of tr) { x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); }
@@ -109,9 +146,18 @@ svg{width:100%;height:auto;display:block}
     for (const g of segs(F, F.top, tr.length - 1)) s += path(g, 'var(--down)');
     const dia = (q, col) => `<path d="M0,-7 L7,0 L0,7 L-7,0 Z" fill="${col}" stroke="#0b1016" transform="translate(${X(q).toFixed(1)},${Y(q).toFixed(1)})"/>`;
     const a = tr[0], z = tr[tr.length - 1], t = tr[F.top], c = tr[st.i];
-    s += dia(a, '#fff') + `<text class="lab" x="${(X(a) + 11).toFixed(1)}" y="${(Y(a) + 4).toFixed(1)}">first point received · ${Math.round(a.alt).toLocaleString()} m (not the launch)</text>`;
-    s += dia(z, '#fff') + `<text class="lab" x="${(X(z) + 11).toFixed(1)}" y="${(Y(z) - 8).toFixed(1)}" ${X(z) > W * 0.55 ? 'text-anchor="end" dx="-22"' : ''}>last point received · ${Math.round(z.alt).toLocaleString()} m (not the landing)</text>`;
-    s += `<path d="M0,-8 L7,6 L-7,6 Z" fill="#ffd166" stroke="#0b1016" transform="translate(${X(t).toFixed(1)},${Y(t).toFixed(1)})"/><text class="lab" x="${(X(t) + 11).toFixed(1)}" y="${(Y(t) + 16).toFixed(1)}" ${X(t) > W * 0.55 ? 'text-anchor="end" dx="-22"' : ''}>highest point received · ${Math.round(t.alt).toLocaleString()} m</text>`;
+    // Labels are placed where they cover the least of the drawn path: see place(). The path pieces are the ones drawn above.
+    const lines = []; for (const g of [...segs(F, 0, F.top), ...segs(F, F.top, tr.length - 1)]) for (let i = 1; i < g.length; i++) lines.push([[X(g[i - 1]), Y(g[i - 1])], [X(g[i]), Y(g[i])]]);
+    const items = [{ id: 'first', x: X(a), y: Y(a), lines: [`first point received · ${Math.round(a.alt).toLocaleString()} m `, '(not the launch)'] },
+      { id: 'last', x: X(z), y: Y(z), lines: [`last point received · ${Math.round(z.alt).toLocaleString()} m `, '(not the landing)'] },
+      { id: 'top', x: X(t), y: Y(t), lines: [`highest point received · ${Math.round(t.alt).toLocaleString()} m`] }];
+    const fixed = [{ x0: M - 4, x1: M + nice * k + 62, y0: W - 32, y1: W - 6 }, { x0: W - 42, x1: W - 12, y0: 10, y1: 60 }];   // scale bar, north arrow
+    st.labels = place(items, lines, W, fixed);
+    for (const L of st.labels) {
+      if (L.lead) s += `<line class="lead" x1="${L.x.toFixed(1)}" y1="${L.y.toFixed(1)}" x2="${L.lead[0].toFixed(1)}" y2="${L.lead[1].toFixed(1)}"/>`;
+    }
+    s += dia(a, '#fff') + dia(z, '#fff') + `<path d="M0,-8 L7,6 L-7,6 Z" fill="#ffd166" stroke="#0b1016" transform="translate(${X(t).toFixed(1)},${Y(t).toFixed(1)})"/>`;
+    for (const L of st.labels) s += `<text class="lab" data-for="${L.id}" x="${(L.r.x0 + 3).toFixed(1)}" y="${(L.r.y0 + 12).toFixed(1)}">${L.lines.map((ln, n) => `<tspan x="${(L.r.x0 + 3).toFixed(1)}" dy="${n ? LAB.LH : 0}">${esc(ln)}</tspan>`).join('')}</text>`;
     s += `<circle id="mk" cx="${X(c).toFixed(1)}" cy="${Y(c).toFixed(1)}" r="6.5" fill="${st.phase === 'up' ? 'var(--up)' : 'var(--down)'}" stroke="#fff" stroke-width="2"/>`;
     $('map').innerHTML = s;
   }
@@ -137,7 +183,9 @@ svg{width:100%;height:auto;display:block}
       ['From first point', distKm(a, c).toFixed(1) + ' km'],
       ['Temperature', c.temp === null ? 'not transmitted' : c.temp.toFixed(1) + ' °C (uncalibrated)'],
       ['Humidity', c.hum === null ? 'not transmitted' : c.hum.toFixed(1) + ' % (uncalibrated)'],
-      ['Wind (estimate)', w ? `about ${Math.round(w.kmh)} km/h from the ${COMPASS[Math.round(w.from / 45) % 8]} (${Math.round(w.from)}°) — from GPS drift over ${Math.round(w.span)} s` : 'no estimate here (too few frames around this reading)']];
+      ['Wind (estimate)', !w.none ? `about ${Math.round(w.kmh)} km/h from the ${COMPASS[Math.round(w.from / 45) % 8]} (${Math.round(w.from)}°) — from GPS drift over ${Math.round(w.span)} s`
+        : w.none === 'transition' ? 'no estimate here: the window around this reading runs across the highest point received, where the balloon stopped rising and began to fall'
+        : 'no estimate here (too few frames around this reading)']];
     $('read').innerHTML = rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
     drawMap();
     const temps = tr.map(q => q.temp).filter(v => v !== null), tlo = temps.length ? Math.floor(Math.min(...temps) / 10) * 10 : -80, thi = temps.length ? Math.ceil(Math.max(...temps) / 10) * 10 : 40, tt = []; for (let v = tlo; v <= thi; v += 20) tt.push(v);
@@ -160,7 +208,7 @@ svg{width:100%;height:auto;display:block}
     $('state').textContent = `Flight ${b.serial}: ${tr.length.toLocaleString()} readings received, ${utc(a.t)} to ${utc(z.t)}`;
     $('facts').innerHTML = `First received at ${Math.round(a.alt).toLocaleString()} m, highest received ${Math.round(t.alt).toLocaleString()} m, last received at ${Math.round(z.alt).toLocaleString()} m on the way down. One reading about every ${F.cadence} s; ${F.gaps.length ? F.gaps.length + ' gap' + (F.gaps.length === 1 ? '' : 's') + ' of more than 30 s' : 'no gap of more than 30 s'}. Heard by ${F.receivers} volunteer receiver${F.receivers === 1 ? '' : 's'}.`;
     if (F.top >= tr.length - 1) { $('lab-down').hidden = true; }
-    $('windnote').innerHTML = `<b>Wind is an estimate, not a measurement.</b> The sonde did not transmit wind. Mother Earth works it out from how far the balloon's GPS position moved between the first and the last reading received within ${CFG.WIND_HALF_S} seconds either side of the chosen reading (a window of up to ${2 * CFG.WIND_HALF_S} seconds), divided by the time between them. No estimate is given when that window is shorter than ${CFG.WIND_MIN_SPAN_S} seconds or crosses a gap. On the way down the balloon is falling under a parachute, so the estimate is rougher.`;
+    $('windnote').innerHTML = `<b>Wind is an estimate, not a measurement.</b> The sonde did not transmit wind. Mother Earth works it out from how far the balloon's GPS position moved between the first and the last reading received within ${CFG.WIND_HALF_S} seconds either side of the chosen reading (a window of up to ${2 * CFG.WIND_HALF_S} seconds), divided by the time between them. No estimate is given when that window is shorter than ${CFG.WIND_MIN_SPAN_S} seconds or crosses a gap. <b>No estimate is given around the highest point received either</b>, wherever the window would hold readings from both the way up and the way down: the estimate assumes the balloon is drifting steadily with the air around it, and at the top it is not (the balloon bursts and the sonde changes from rising to falling fast), so a straight line across that change would not be a wind. On the way down the balloon is falling under a parachute, so the estimate is rougher.`;
     const m = b.meta || {};
     $('credit').innerHTML = `<b>Data:</b> <a href="https://sondehub.org" target="_blank" rel="noopener">SondeHub Radiosonde Telemetry</a>, received by volunteer radiosonde_auto_rx stations. Licence: <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC BY-SA 2.0</a>.` +
       ` One archived copy${m.retrieved_at ? ', retrieved ' + esc(utc(Date.parse(m.retrieved_at))) : ''}${m.source ? ' from the ' + esc(m.source) : ''}${m.sha256 ? ' (sha256 ' + esc(String(m.sha256).slice(0, 12)) + '…)' : ''}.` +
@@ -169,7 +217,7 @@ svg{width:100%;height:auto;display:block}
     $('alt').addEventListener('input', () => { st.i = pick(st.F, st.phase, Number($('alt').value)); paint(); });
     setPhase('up'); window.BR.ready = 'ok';
   }
-  window.BR = { ready: 'loading', prepare, wind, pick, cfg: CFG, state: () => ({ ready: window.BR.ready, title: $('state').textContent, facts: $('facts').textContent, phase: st.phase, i: st.i, n: st.F ? st.F.tr.length : 0, top: st.F ? st.F.top : null,
+  window.BR = { ready: 'loading', prepare, wind, pick, place, crosses, cfg: CFG, lab: LAB, labels: () => st.labels, state: () => ({ ready: window.BR.ready, title: $('state').textContent, facts: $('facts').textContent, phase: st.phase, i: st.i, n: st.F ? st.F.tr.length : 0, top: st.F ? st.F.top : null,
       read: Object.fromEntries([...document.querySelectorAll('#read dt')].map(d => [d.textContent, d.nextElementSibling.textContent])), slider: { min: $('alt').min, max: $('alt').max, value: $('alt').value, text: $('alt-out').textContent },
       mapLabels: [...$('map').querySelectorAll('text.lab')].map(t => t.textContent), polylines: $('map').querySelectorAll('polyline').length, marker: $('map').querySelector('#mk') ? [$('map').querySelector('#mk').getAttribute('cx'), $('map').querySelector('#mk').getAttribute('cy')] : null,
       tempLines: $('ptemp').querySelectorAll('polyline').length, humLines: $('phum').querySelectorAll('polyline').length, credit: $('credit').textContent, windnote: $('windnote').textContent, downHidden: $('lab-down').hidden }) };
