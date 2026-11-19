@@ -3,6 +3,19 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 14:39 UTC (clock reading) — **Animals: enquiry status corrected (both SENT by Chad); release assessment and Sources/REGISTER draft on the branch for GPT (`animals-journeys-preview-rc` head `aa507f5`, docs only).** (nothing merged, deployed, filed or spent; Claude sent nothing)
+- **Correction (Chad, 19 Nov):** the entries below that say "the two unsent enquiries" are wrong. **Chad sent both from his own email.** The NOAA address first used bounced; he sent it again and confirmed it sent. Recorded separately in `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` on the branch:
+  - **A. NOAA Southeast Fisheries Science Center, bottlenose-dolphin telemetry (InPort 26479): sent; first address bounced; resent and confirmed. No reply on record.**
+  - **B. ATAP (SAIAB), South African acoustic data: sent. No reply on record.**
+  - Addresses, dates and the sent text are not on record in this thread (Claude could not find the earlier messages by search) and are left blank, not guessed. No duplicate is to be sent.
+- **These two enquiries are separate from the three preview animals.** They concern other data; the release assessment does not wait on them.
+- **`docs/concepts/ANIMALS-RELEASE-ASSESSMENT.md` rev 1 (a recommendation; the decisions are Chad's):**
+  - Zebra Z3866: release as recorded. No author reply needed.
+  - White shark 118845: release as recorded, tag number only. No author reply needed.
+  - False killer whale 98364: release as recorded **once its population is established** (main Hawaiian Islands insular, which is listed as endangered in the US; Northwestern Hawaiian Islands; or pelagic). The file does not say. A published source first (read-only search, Chad's go); the authors only if none states it.
+  - Precision: unchanged for all three (already open at this precision or finer; rounding would break "nothing moved").
+- **`reviews/2026-11-19-animals-journeys-sources-register-draft.md` rev 1:** proposed Sources section and four REGISTER entries (three sources and Natural Earth 1:10m land). **Not filed.**
+- **Unverified still:** real phone, screen reader. **No merge or deploy authorised.**
 ## 19 Nov 14:12 UTC (clock reading) — **Animals: GPT PASS for the three-journey private preview (`animals-journeys-preview-rc`, code `f00a330`, packet `ea5414d`, evidence head `56636dc`).** (nothing merged, deployed, sent or spent)
 - **GPT (relayed by Chad):** the wording and `--check` holds are cleared; the enlarged-mark note is accepted; J12 passes for all three journeys, paused and playing, at desktop and 390 px. Evidence at `56636dc`: all three hashes verified, all 36 journey windows meet the thresholds.
 - **GPT's qualification:** in Claude's packet the zebra playback advances only 288 to 289 fixes per window, so that packet alone does not meet J12's substantial-playback requirement. GPT's own saved measurements on the current code close it. (Claude has not seen GPT's files.)
