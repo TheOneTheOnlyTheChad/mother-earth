@@ -11,7 +11,11 @@
  *   clock, the imagery label or request anything; off clears every object, the bar and the Key; off while loading draws
  *   nothing late; rapid on/off/on leaves one set of objects; a changed display file or manifest, or a file whose contents
  *   break the checks, draws nothing and says so; a failed load offers Retry and Retry works; the Sky zoom-out view pauses and
- *   hides and restores at the same replay time; a hidden tab pauses and keeps the replay; a reload starts bare; keyboard:
+ *   hides and restores at the same replay time; a hidden tab pauses and keeps the replay; a reload starts bare; leaving the
+ *   page by a real link and coming Back starts bare (ready, and while loading), and so do the page-keeping events sent to
+ *   the page (the suite prints whether this browser really restored a kept page); off aborts the request itself, and an
+ *   answer that still arrives is refused; with other layers on, journey on/off leaves their switches, Key entries and drawings
+ *   as they were (open inspector and search state are NOT covered); ages are exact to the second across minute, hour, midnight and day; keyboard:
  *   arrows step fix to fix, Home/End, Space/Enter on Play and on the switch; the Key and "Key · N layers" follow what is drawn;
  *   the Layers panel row; the deep link shows the switch and switches nothing on; the bar covers no other control and nothing
  *   overflows at five widths; the Animals page: details from the verified manifest, fixed "Not available yet" states, the
@@ -24,7 +28,7 @@
  *   that check failed, otherwise BREAK MISSED. SECTIONS=n,n runs parts of the suite.
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/animals-journey-ui.test.cjs
  * Breaks (each must fail): BREAK=marker-next-fix|marker-interpolated|future-fixes-drawn|future-line-drawn|join-over-rule|
- *   exact-rule-not-joined|no-manifest-check|no-display-check|no-content-check|off-no-cancel|off-keeps-objects|on-means-drawn|
+ *   exact-rule-not-joined|no-manifest-check|no-display-check|no-content-check|off-no-cancel|off-no-abort|age-drops-seconds|no-pagehide-reset|no-pageshow-reset|off-keeps-objects|on-means-drawn|
  *   drop-key|drop-layers-row|sky-keeps-drawn|sky-keeps-playing|hidden-keeps-playing|local-time|no-stop-at-end|deep-link-switches-on|
  *   retry-hidden|load-on-open|population-substituted|page-unverified-figures|tab-missing|replay-moves-clock */
 const { chromium } = require('playwright');
@@ -35,7 +39,7 @@ const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const BREAK = process.env.BREAK || '';
 const ONLY = (process.env.SECTIONS || '').split(',').filter(Boolean).map(Number), want = n => !ONLY.length || ONLY.includes(n);   // SECTIONS=1,4 runs those parts only (used for the breaks)
-let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; failed.push(n); console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 700)}` : ''}`); } };
+let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; failed.push(n); console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 2400)}` : ''}`); } };
 const wd = setTimeout(() => { console.log('FAIL  suite exceeded 14 min'); process.exit(1); }, 14 * 60e3);
 
 const JS = 'animals-journey.js';
@@ -50,8 +54,12 @@ const BREAKS = {
   'no-manifest-check': [JS, "if (await hex(mb) !== J.MANIFEST_SHA256) throw new Unverified('the manifest does not match its pinned checksum');", ''],
   'no-display-check': [JS, "if (db.byteLength !== ent.bytes || await hex(db) !== ent.sha256) throw new Unverified('the display file does not match the manifest checksum');", ''],
   'no-content-check': [JS, "if (!Number.isInteger(t) || (i && t <= d.t[i - 1])) throw new Unverified('fix times are not whole seconds in increasing order');", ''],
-  'off-no-cancel': [JS, "if (!on) { st.on = false; st.gen++; pause(false); clearObjs();", "if (!on) { st.on = false; pause(false); clearObjs();"],
-  'off-keeps-objects': [JS, "st.gen++; pause(false); clearObjs(); st.d = null;", "st.gen++; pause(false); st.d = null;"],
+  'off-no-cancel': [JS, "if (!on) { st.on = false; st.gen++; abortLoad(); pause(false); clearObjs();", "if (!on) { st.on = false; abortLoad(); pause(false); clearObjs();"],
+  'off-no-abort': [JS, "if (!on) { st.on = false; st.gen++; abortLoad(); pause(false); clearObjs();", "if (!on) { st.on = false; st.gen++; pause(false); clearObjs();"],
+  'age-drops-seconds': [JS, "return d ? `${d} d ${h} h ${m} min ${x} s` : h ? `${h} h ${m} min ${x} s` :", "return d ? `${d} d ${h} h` : h ? `${h} h ${m} min` :"],
+  'no-pagehide-reset': [JS, "window.addEventListener('pagehide', () => { if (st.on) setOn(false); });", ''],
+  'no-pageshow-reset': [JS, "window.addEventListener('pageshow', e => { if (e.persisted && st.on) setOn(false); });", ''],
+  'off-keeps-objects': [JS, "st.gen++; abortLoad(); pause(false); clearObjs(); st.d = null;", "st.gen++; abortLoad(); pause(false); st.d = null;"],
   'on-means-drawn': [JS, 'const drawn = () => !!(st.objs && st.objs.line.parent && st.objs.line.visible);', 'const drawn = () => st.on;'],
   'drop-key': ['index.html', "['journey', () => ME.journey && ME.journey.drawn()]", "['journey', () => false]"],
   'drop-layers-row': ['layers.js', ", ['Animal journey — dated replay', '#tgl-journey']", ''],
@@ -69,7 +77,7 @@ const BREAKS = {
   'replay-moves-clock': [JS, 'st.rt = s; st.rtExact = s; st.i = fixAt(s); show(); paintBar(quiet); }', "st.rt = s; st.rtExact = s; st.i = fixAt(s); show(); paintBar(quiet); const c = $('clock'); if (c) c.firstChild.textContent = '00:00:00'; }"],
 };
 const EXPECT = { 'marker-next-fix': '2a between', 'marker-interpolated': '2a between', 'future-fixes-drawn': '2b between', 'future-line-drawn': '2b between', 'join-over-rule': '12a', 'exact-rule-not-joined': '12a',
-  'no-manifest-check': '10 a manifest that differs', 'no-display-check': '10 a display file with one digit', 'no-content-check': '10 a file with matching checksums whose fix times', 'off-no-cancel': '9b', 'off-keeps-objects': '8a',
+  'no-manifest-check': '10 a manifest that differs', 'no-display-check': '10 a display file with one digit', 'no-content-check': '10 a file with matching checksums whose fix times', 'off-no-cancel': '9e', 'off-no-abort': '9b off', 'age-drops-seconds': '2c 1 h 1 min 1 s', 'no-pagehide-reset': '18c', 'no-pageshow-reset': '18d', 'off-keeps-objects': '8a',
   'on-means-drawn': '6a', 'drop-key': '1h', 'drop-layers-row': '1c', 'sky-keeps-drawn': '6a', 'sky-keeps-playing': '6a', 'hidden-keeps-playing': '7a', 'local-time': '13 visitor in Pacific/Auckland', 'no-stop-at-end': '5c',
   'deep-link-switches-on': '14b', 'retry-hidden': '11a', 'load-on-open': '1b', 'population-substituted': '16c', 'page-unverified-figures': '16h', 'tab-missing': '17a moon.html at 390', 'replay-moves-clock': '3a' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
@@ -83,6 +91,8 @@ const lastAt = s => { let k = -1; for (let i = 0; i < N && D.t[i] <= s; i++) k =
 const joinsTo = (t, i) => { let k = 0; for (let j = 1; j <= i; j++) if (t[j] - t[j - 1] <= RULE) k++; return k; };
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const utc = s => { const x = new Date(s * 1000).toISOString(); return `${+x.slice(8, 10)} ${MON[+x.slice(5, 7) - 1]} ${x.slice(0, 4)} ${x.slice(11, 19)} UTC`; };
+/** a length of time in words, exact to the second — written apart from the page's code (peel the units off one at a time) */
+const ageWords = sec => { const out = []; let rest = sec; for (const [unit, size] of [['d', 86400], ['h', 3600], ['min', 60]]) { let k = 0; while (rest >= size) { rest -= size; k++; } if (k || out.length) out.push(`${k} ${unit}`); } out.push(`${rest} s`); return out.join(' '); };
 /** a small made-up file for the line rule: gaps of 1 h, exactly 3 h, 3 h 1 s, 1 h, 5 h */
 function fixture(times) {
   const t0 = 1193299200, t = times || [0, 3600, 3600 + 10800, 3600 + 10800 + 10801, 3600 + 10800 + 10801 + 3600, 3600 + 10800 + 10801 + 3600 + 18000].map(x => t0 + x);
@@ -94,7 +104,7 @@ function fixture(times) {
 const BACKDROP = (() => { const p = new PNG({ width: 64, height: 32 }); for (let i = 0; i < p.data.length; i += 4) { p.data[i] = 10; p.data[i + 1] = 30; p.data[i + 2] = 60; p.data[i + 3] = 255; } return PNG.sync.write(p); })();
 
 // ---------- server: the real files; S lets one step swap or fail the two animal files
-const S = { fx: null, manifest: null, display: null, manifestStatus: 200, displayStatus: 200, hold: null, log: [] };
+const S = { fx: null, manifest: null, display: null, manifestStatus: 200, displayStatus: 200, hold: null, holdManifest: null, keepable: false, log: [] };
 const TYPES = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json' };
 function served(f) { let t = fs.readFileSync(path.join(ROOT, f), 'utf8');
   if (BREAK && BREAKS[BREAK][0] === f) { const [, a, b] = BREAKS[BREAK]; if (t.split(a).length !== 2) { console.log('FAIL  break did not apply: ' + BREAK); process.exit(1); } t = t.replace(a, b); }
@@ -102,16 +112,16 @@ function served(f) { let t = fs.readFileSync(path.join(ROOT, f), 'utf8');
   return t; }
 const srv = http.createServer(async (q, s) => {
   const p = decodeURIComponent(q.url.split('?')[0]), f = p.replace(/^\//, '') || 'index.html';
-  const send = (code, type, body) => { s.writeHead(code, { 'content-type': type, 'cache-control': 'no-store' }); s.end(body); };
+  const send = (code, type, body) => { s.writeHead(code, { 'content-type': type, 'cache-control': S.keepable ? 'no-cache' : 'no-store' }); s.end(body); };   // keepable: lets the browser keep a page for Back (section 10)
   if (p.startsWith('/assets/animals/')) { S.log.push(p);
-    if (p.endsWith('.manifest.json')) { if (S.manifestStatus !== 200) return send(S.manifestStatus, 'text/plain', 'no'); return send(200, 'application/json', S.fx ? S.fx.manifest : S.manifest || MAN); }
+    if (p.endsWith('.manifest.json')) { if (S.holdManifest) await S.holdManifest; if (S.manifestStatus !== 200) return send(S.manifestStatus, 'text/plain', 'no'); return send(200, 'application/json', S.fx ? S.fx.manifest : S.manifest || MAN); }
     if (S.hold) await S.hold; if (S.displayStatus !== 200) return send(S.displayStatus, 'text/plain', 'no');
     return send(200, 'application/json', S.fx ? S.fx.display : S.display || DISP); }
   if (!fs.existsSync(path.join(ROOT, f))) return send(404, 'text/plain', '');
   const ext = path.extname(f); if (TYPES[ext] && ext !== '.json') return send(200, TYPES[ext], served(f));
   send(200, TYPES[ext] || 'application/octet-stream', fs.readFileSync(path.join(ROOT, f)));
 });
-const reset = () => Object.assign(S, { fx: null, manifest: null, display: null, manifestStatus: 200, displayStatus: 200, hold: null, log: [] });
+const reset = () => Object.assign(S, { fx: null, manifest: null, display: null, manifestStatus: 200, displayStatus: 200, hold: null, holdManifest: null, keepable: false, log: [] });
 
 let BASE;
 async function ctxFor(browser, vp, extra = {}) {
@@ -125,8 +135,8 @@ async function ctxFor(browser, vp, extra = {}) {
     body: JSON.stringify({ layer: 'x', retrieved_at: NOW, stale_after_s: 10800, source_status: 'ok', cells: {}, record_format: 'rows', record_fields: [], records: [], history: { collecting: false, retained: { exists: false } } }) }));
   return ctx;
 }
-async function open(browser, vp = { width: 1280, height: 860 }, hash = '', extra = {}) {
-  const ctx = await ctxFor(browser, vp, extra), page = await ctx.newPage(), errs = []; page.on('pageerror', e => errs.push(String(e).slice(0, 200)));
+async function open(browser, vp = { width: 1280, height: 860 }, hash = '', extra = {}, pre = null) {
+  const ctx = await ctxFor(browser, vp, extra); if (pre) await pre(ctx); const page = await ctx.newPage(), errs = []; page.on('pageerror', e => errs.push(String(e).slice(0, 200)));
   const reqs = []; page.on('request', r => reqs.push(r.url()));
   await page.goto(BASE + '/index.html' + hash, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.ME && ME.journey && ME.globe && ME.globe(), null, { timeout: 30000 });
@@ -164,11 +174,15 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
     ok('1i the card states the counts, the sample of seven and that uncertainty is not supplied', /13,045 recorded fixes of one animal \(Z3866\), 25 Oct 2007 to 22 Oct 2008\. 7 animals were tracked in this study; 1 is shown\. Not drawn for this animal: 3 fix attempts without a position, 0 flagged by the source\. Location uncertainty: not supplied by the dataset\./.test(s.card), s.card);
 
     // ----- the marker is on the last recorded fix; only the past is drawn
-    for (const [name, tt] of [['between two fixes', D.t[2940] + 1153], ['one second before a fix', D.t[5000] - 1], ['exactly on a fix', D.t[5000]], ['late in the record', D.t[N - 2] + 5]]) {
+    const G = D.t.findIndex((v, k) => k && v - D.t[k - 1] === Math.max(...D.t.slice(1).map((x, q) => x - D.t[q])));               // the fix after the longest gap in the record
+    for (const [name, tt] of [['between two fixes', D.t[2940] + 1153], ['one second before a fix', D.t[5000] - 1], ['exactly on a fix', D.t[5000]], ['late in the record', D.t[N - 2] + 5],
+      ['1 h 1 min 1 s after fix 63, across midnight (GPT\'s case)', D.t[63] + 3661], ['59 s after a fix', D.t[700] + 59], ['exactly 1 min after a fix', D.t[700] + 60], ['one second before the next fix, in the longest gap', D.t[G] - 1], ['exactly 1 h after the fix before the longest gap', D.t[G - 1] + 3600], ['1 h 0 min 1 s into the longest gap', D.t[G - 1] + 3601]]) {
       await page.evaluate(x => ME.journey.seek(x), tt); s = await state(page); const i = lastAt(tt), age = tt - D.t[i];
       ok(`2a ${name}: the marker is on fix ${i}, the last at or before the replay time`, s.i === i && s.fixTime === D.t[i] && near(s.objects.marker, await coordsOf(page, D.lat[i], D.lon[i])) && near(s.objects.marker, s.objects.fixXYZ), [s.i, i, s.objects.marker]);
       ok(`2b ${name}: exactly ${i + 1} fixes and ${joinsTo(D.t, i)} joins are drawn — nothing later`, s.objects.fixesShown === i + 1 && s.objects.lineShown === joinsTo(D.t, i), s.objects);
-      ok(`2c ${name}: the bar prints the fix time and its age`, s.bar.includes(`Replay time (recorded) ${utc(tt)}`) && s.bar.includes(`Last recorded fix ${utc(D.t[i])}`) && (age ? /, \d+ (s|min \d+ s|h \d+ min) earlier$/.test(s.bar) : s.bar.endsWith(', at this time')), s.bar); }
+      const want = `Replay time (recorded) ${utc(tt)} · Last recorded fix ${utc(D.t[i])}` + (age ? `, ${ageWords(age)} earlier` : ', at this time');
+      ok(`2c ${name}: the bar is exactly the replay time, the fix time and the age to the second (${age ? ageWords(age) : 'at this time'})`, s.bar === want, [s.bar, want]); }
+    ok('2c2 the cases really cross an hour and midnight: fix 63 is 27 Oct 2007 23:00:18 UTC and its case reads 1 h 1 min 1 s; the longest gap is over 2 h', utc(D.t[63]) === '27 Oct 2007 23:00:18 UTC' && utc(D.t[63] + 3661) === '28 Oct 2007 00:01:19 UTC' && ageWords(3661) === '1 h 1 min 1 s' && ageWords(60) === '1 min 0 s' && ageWords(3600) === '1 h 0 min 0 s' && ageWords(176703) === '2 d 1 h 5 min 3 s' && D.t[G] - D.t[G - 1] === 7225, [utc(D.t[63]), D.t[G] - D.t[G - 1]]);
     await page.evaluate(x => ME.journey.seek(x), D.t[100] + 10); s = await state(page);
     ok('2d scrubbing back removes what is now in the future', s.i === 100 && s.objects.fixesShown === 101 && s.objects.lineShown === joinsTo(D.t, 100), s.objects);
     ok('2e the visitor moving the replay is announced once (polite), with the same words as the bar', s.say === s.bar && s.say.length > 20, [s.say, s.bar]);
@@ -233,11 +247,29 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
 
   // ===== 2. off while loading; rapid switching =====
   if (want(2)) { reset(); const { ctx, page } = await open(browser);
+    const aborted = []; page.on('requestfailed', r => { if (r.url().includes('/assets/animals/')) aborted.push([r.url().split('/').pop(), r.failure() && r.failure().errorText]); });
     let release; S.hold = new Promise(r => { release = r; });
-    await page.click('#tgl-journey'); await page.waitForFunction(() => ME.journey.state().status === 'loading'); let s = await state(page);
+    await page.click('#tgl-journey'); await page.waitForFunction(() => ME.journey.state().status === 'loading'); await page.waitForFunction(() => true); while (S.log.length < 2) await page.waitForTimeout(50); let s = await state(page);
     ok('9a while loading: busy, nothing drawn, not in the Key', s.status === 'loading' && s.scene === 0 && !s.leg && s.card === 'Loading the journey file…' && await page.getAttribute('#tgl-journey', 'aria-busy') === 'true', s);
-    await page.click('#tgl-journey'); release(); S.hold = null; await page.waitForTimeout(1500); s = await state(page);
-    ok('9b switched off before the file arrived: the late answer draws nothing', !s.on && s.scene === 0 && s.barHidden && !s.leg && s.status === 'off', s);
+    await page.click('#tgl-journey'); await page.waitForTimeout(600);
+    ok('9b off while the display file is on its way: the request itself is aborted (before the server answers)', aborted.length === 1 && aborted[0][0] === MANJ.journeys[0].file && /ERR_ABORTED/.test(aborted[0][1]), aborted);
+    release(); S.hold = null; await page.waitForTimeout(1200); s = await state(page);
+    ok('9b2 and nothing is drawn afterwards', !s.on && s.scene === 0 && s.barHidden && !s.leg && s.status === 'off', s);
+    // the same while the manifest is on its way
+    aborted.length = 0; S.log = []; let rel2; S.holdManifest = new Promise(r => { rel2 = r; }); await page.click('#tgl-journey'); while (S.log.length < 1) await page.waitForTimeout(50); await page.click('#tgl-journey'); await page.waitForTimeout(600);
+    ok('9b3 off while the manifest is on its way: that request is aborted, and the display file is never asked for', aborted.length === 1 && /manifest\.json$/.test(aborted[0][0]) && /ERR_ABORTED/.test(aborted[0][1]) && S.log.length === 1, [aborted, S.log]);
+    rel2(); S.holdManifest = null; await page.waitForTimeout(800); s = await state(page); ok('9b4 and nothing is drawn afterwards', !s.on && s.scene === 0 && S.log.length === 1, [s, S.log]);
+    // a newer load aborts the older one's request: on (held), off, on again
+    aborted.length = 0; S.log = []; let rel3; S.hold = new Promise(r => { rel3 = r; }); await page.click('#tgl-journey'); while (S.log.length < 2) await page.waitForTimeout(50); await page.click('#tgl-journey'); S.hold = null; await page.click('#tgl-journey');
+    await page.waitForFunction(() => ME.journey.state().status === 'ready', null, { timeout: 30000 }); rel3(); await page.waitForTimeout(800); s = await state(page);
+    ok('9b5 on again straight away: the first request was aborted, the second load drew one set of objects', aborted.length === 1 && s.scene === 3 && s.on && s.i === 0, [aborted, s.scene]);
+    await page.click('#tgl-journey'); await page.waitForTimeout(300);
+    // an answer that arrives although the request was told to stop (here: a fetch that ignores the stop signal) is refused
+    await page.evaluate(() => { const f = window.fetch; window.__late = 0; window.fetch = (u, o) => f(u, { ...o, signal: undefined }).then(r => { if (String(u).includes('assets/animals/') && !String(u).includes('manifest')) window.__late++; return r; }); });
+    S.log = []; let rel4; S.hold = new Promise(r => { rel4 = r; }); await page.click('#tgl-journey'); while (S.log.length < 2) await page.waitForTimeout(50); await page.click('#tgl-journey'); rel4(); S.hold = null;
+    await page.waitForFunction(() => window.__late === 1, null, { timeout: 15000 }).catch(() => { }); await page.waitForTimeout(1200); s = await state(page);
+    ok('9e the display file arrives after off (the answer really came back) and is refused: nothing drawn, still off', await page.evaluate(() => window.__late) === 1 && !s.on && s.scene === 0 && s.barHidden && !s.leg && s.status === 'off', [await page.evaluate(() => window.__late), s]);
+    await page.evaluate(() => location.reload()); await page.waitForFunction(() => window.ME && ME.journey && ME.globe && ME.globe() && window.__late === undefined, null, { timeout: 30000 }); await page.waitForTimeout(1500); reset();
     await page.click('#tgl-journey'); await page.click('#tgl-journey'); await page.click('#tgl-journey'); await page.waitForFunction(() => ME.journey.state().status === 'ready', null, { timeout: 30000 }); await page.waitForTimeout(800); s = await state(page);
     ok('9c on, off, on in quick succession: on, one set of three objects', s.on && s.scene === 3 && s.status === 'ready' && s.i === 0, s);
     await page.click('#tgl-journey'); await page.click('#tgl-journey'); await page.click('#tgl-journey'); await page.waitForTimeout(1500); s = await state(page);
@@ -270,12 +302,19 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
   if (want(4)) { reset(); S.fx = fixture(); const T = S.fx.d.t; const { ctx, page } = await open(browser); await switchOn(page); await page.evaluate(x => ME.journey.seek(x), T[T.length - 1]); let s = await state(page);
     ok('12a gaps of 1 h, exactly 3 h, 3 h 1 s, 1 h, 5 h: three joins — exactly 3 h is joined, 3 h 1 s and 5 h are not', s.objects.segments === 3 && s.objects.lineShown === 3 && s.objects.fixesShown === 6, s.objects);
     await page.evaluate(x => ME.journey.seek(x), T[2] + 60); s = await state(page);
-    ok('12b before the 3 h 1 s gap closes: two joins drawn, and the bar says no fix was recorded for that long', s.objects.lineShown === 2 && s.i === 2 && / · No fix was recorded for 3 h 0 min after it$/.test(s.bar), [s.objects, s.bar]);
+    ok('12b before the 3 h 1 s gap closes: two joins drawn, and the bar says no fix was recorded for that long', s.objects.lineShown === 2 && s.i === 2 && s.bar.endsWith(', 1 min 0 s earlier · No fix was recorded for 3 h 0 min 1 s after it'), [s.objects, s.bar]);
     await page.evaluate(x => ME.journey.seek(x), T[3]); s = await state(page);
     ok('12c on the fix after the gap: the fix is drawn, still two joins (no line across the gap)', s.i === 3 && s.objects.fixesShown === 4 && s.objects.lineShown === 2 && !/No fix was recorded/.test(s.bar), [s.objects, s.bar]);
     await page.evaluate(x => ME.journey.seek(x), T[4] + 9000); s = await state(page);
-    ok('12d inside the 5 h gap: marker stays on the last recorded fix, its age grows, the gap is stated', s.i === 4 && s.objects.lineShown === 3 && /Last recorded fix .*, 2 h 30 min earlier · No fix was recorded for 5 h 0 min after it$/.test(s.bar) && near(s.objects.marker, s.objects.fixXYZ), s.bar);
-    await ctx.close(); }
+    ok('12d inside the 5 h gap: marker stays on the last recorded fix, its age grows, the gap is stated', s.i === 4 && s.objects.lineShown === 3 && s.bar.endsWith(', 2 h 30 min 0 s earlier · No fix was recorded for 5 h 0 min 0 s after it') && near(s.objects.marker, s.objects.fixXYZ), s.bar);
+    await ctx.close();
+    // ages and gaps longer than a day (made-up file: 1 h, then 2 d 1 h 5 min 3 s)
+    reset(); const t0 = 1193299200; S.fx = fixture([t0, t0 + 3600, t0 + 3600 + 176703]); const c2 = await open(browser); await switchOn(c2.page);
+    for (const [age, name] of [[86399, 'one second short of a day'], [86400, 'exactly a day'], [90061, 'a day, an hour, a minute and a second'], [176702, 'one second before the next fix']]) { await c2.page.evaluate(x => ME.journey.seek(x), t0 + 3600 + age); const b = (await state(c2.page)).bar;
+      const want = `Replay time (recorded) ${utc(t0 + 3600 + age)} · Last recorded fix ${utc(t0 + 3600)}, ${ageWords(age)} earlier · No fix was recorded for 2 d 1 h 5 min 3 s after it`;
+      ok(`12e ${name}: the age is exact to the second (${ageWords(age)}) and the gap is stated to the second`, b === want, [b, want]); }
+    ok('12f the day cases read as intended', ageWords(86399) === '23 h 59 min 59 s' && ageWords(86400) === '1 d 0 h 0 min 0 s' && ageWords(90061) === '1 d 1 h 1 min 1 s');
+    await c2.ctx.close(); }
 
   // ===== 5. UTC whatever the visitor's zone =====
   if (want(5)) for (const tz of ['Pacific/Auckland', 'America/Los_Angeles']) { reset(); const { ctx, page } = await open(browser, undefined, '', { timezoneId: tz, locale: 'en-US' }); await switchOn(page); await page.evaluate(x => ME.journey.seek(x), D.t[2940] + 1153); const s = await state(page);
@@ -338,6 +377,66 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
       ok(`17b ${pg} at ${w} px: Animals is in the Menu and the page has no horizontal overflow`, /\|Sun\|Animals\|Sources & Details$/.test(r.menu) && r.ov <= 0, [r.menu, r.ov]);
       await page.close(); }
     await ctx.close(); }
+
+  // ===== 11. other layers are left as they were (J8d) =====
+  if (want(11)) { reset(); const AT = new Date(Date.now() - 20 * 60e3).toISOString(), H = { 'access-control-allow-origin': '*' };
+    const OCSV = fs.readFileSync('/home/claude/fixtures/orbital.csv', 'utf8'), OMETA = JSON.parse(fs.readFileSync('/home/claude/fixtures/orbital-meta.json', 'utf8'));
+    const { ctx, page } = await open(browser, undefined, '', {}, async c => {   // two layers that really draw: aircraft counts (in the Key) and satellites
+      await c.route(HUB + '/cells/opensky', r => r.fulfill({ status: 200, contentType: 'application/json', headers: H, body: JSON.stringify({ layer: 'opensky', schema_version: 1, source_status: 'ok', retrieved_at: AT, window_end: AT, position_age_cutoff_s: 300, stale_after_s: 10800, position_precision_deg: 0.01, cells: { '30_50': { count: 12 }, '31_50': { count: 3 }, '14_49': { count: 1 } }, record_fields: [], records: [] }) }));
+      await c.route(HUB + '/snapshot/orbital', r => r.fulfill({ status: 200, contentType: 'application/json', headers: H, body: JSON.stringify(OMETA) }));
+      await c.route(HUB + '/elements/orbital', r => r.fulfill({ status: 200, contentType: 'text/csv', body: OCSV, headers: { ...H, 'X-Elements-SHA256': OMETA.elements.sha256, 'Access-Control-Expose-Headers': 'X-Elements-SHA256' } })); });
+    for (const id of ['#tgl-air', '#orb-tgls [data-g="payload"]', '#tgl-night']) { await page.evaluate(q => { const e = document.querySelector(q); if (e) e.click(); }, id); await page.waitForTimeout(2500); }
+    await page.evaluate(() => { const b = document.getElementById('key-btn'); if (b && b.getAttribute('aria-expanded') !== 'true') b.click(); }); await page.waitForTimeout(300);
+    const snap = () => page.evaluate(() => { let n = 0; ME.globe().scene().traverse(o => { if (!o.__journey) n++; });
+      return { sw: [...document.querySelectorAll('[role="switch"]')].filter(e => e.id !== 'tgl-journey' && e.dataset.for !== '#tgl-journey').map(e => (e.id || e.dataset.g || e.dataset.for || '') + '=' + e.getAttribute('aria-checked')).join(' '),
+        key: [...document.querySelectorAll('#leg-line .lg')].filter(e => e.id !== 'leg-journey').map(e => e.id + (e.hidden ? ':hidden' : ':shown')).join(' '), keyOpen: document.getElementById('key-btn').getAttribute('aria-expanded'),
+        drawn: 'aircraft=' + !!(ME.aircraft && ME.aircraft.drawn && ME.aircraft.drawn()), scene: n, layersOpen: !document.getElementById('layers-panel').hidden, clock: document.getElementById('clock').firstChild.textContent.length, img: (document.querySelector('.stage').innerText.match(/Imagery[^\n]*/) || [''])[0] }; });
+    const a0 = await snap(), n0 = (a0.sw.match(/=true/g) || []).length, k0 = await page.evaluate(() => document.getElementById('key-n').textContent);
+    ok('19a set-up: other layers are switched on, one is drawn and shown in the Key, before the journey is touched', n0 >= 2 && /leg-aircraft:shown/.test(a0.key) && /aircraft=true/.test(a0.drawn) && parseInt(k0, 10) >= 1, [a0.sw, a0.key, a0.drawn, k0]);
+    await switchOn(page); await page.evaluate(x => { ME.journey.seek(x); ME.journey.play(); }, D.t[3000]); await page.waitForTimeout(800); const a1 = await snap(), k1 = await page.evaluate(() => document.getElementById('key-n').textContent);
+    ok('19b journey on and playing: every other switch, Key entry, drawing, the open Key and the imagery label are as they were; the Key count is one higher', JSON.stringify(a1) === JSON.stringify(a0) && parseInt(k1, 10) === parseInt(k0, 10) + 1, [a0, a1, k0, k1]);
+    await page.click('#tgl-journey'); await page.waitForTimeout(500); const a2 = await snap(), k2 = await page.evaluate(() => document.getElementById('key-n').textContent);
+    ok('19c journey off: the same again, and the Key count is back', JSON.stringify(a2) === JSON.stringify(a0) && k2 === k0, [a0, a2, k0, k2]);
+    await ctx.close(); }
+
+  // ===== 10. leaving the page and coming Back (real navigation; a browser allowed to keep pages for Back) =====
+  if (want(10)) { const b2 = await chromium.launch({ ignoreDefaultArgs: ['--disable-back-forward-cache'], args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-features=BackForwardCache'] });
+    const why = []; const fresh = async () => { reset(); S.keepable = true; const o = await open(b2); const cdp = await o.ctx.newCDPSession(o.page); await cdp.send('Page.enable'); cdp.on('Page.backForwardCacheNotUsed', e => why.push(...(e.notRestoredExplanations || []).map(x => x.reason))); await o.page.evaluate(() => { window.__shows = []; window.__mark = Math.random(); window.addEventListener('pageshow', e => window.__shows.push(e.persisted)); }); return o; };
+    const back = async page => { await page.goBack({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => window.ME && ME.journey && ME.globe && ME.globe(), null, { timeout: 30000 }); await page.waitForTimeout(1500);
+      return page.evaluate(() => ({ kept: window.__mark !== undefined && Array.isArray(window.__shows) && window.__shows.includes(true), sameDoc: window.__mark !== undefined })); };
+    const bare = s => !s.on && s.status === 'off' && s.scene === 0 && s.sw === 'false' && s.barHidden && !s.leg && s.keyN === '0 layers' && !s.playing;
+    // a) journey ready and playing; follow the Animals tab; Back
+    { const { ctx, page } = await fresh(); await switchOn(page); await page.evaluate(x => { ME.journey.seek(x); ME.journey.play(); }, D.t[3000]); await page.waitForTimeout(300);
+      await page.click('nav.tabs a[data-view="animals"]'); await page.waitForURL(/animals\.html/); await page.waitForTimeout(800);
+      const how = await back(page), s = await state(page); console.log(`      note 18a: Back ${how.kept ? 'RESTORED THE KEPT PAGE (back/forward cache; pageshow persisted = true)' : how.sameDoc ? 'kept the document without a persisted pageshow' : 'loaded the page afresh (the browser did not keep it)'}${why.length ? '; the browser\'s stated reasons: ' + [...new Set(why)].join(', ') : ''}`);
+      ok(`18a journey playing → Animals tab → Back: the page is bare (${how.kept ? 'restored from the back/forward cache' : 'fresh load'})`, bare(s), s);
+      // forward to Animals and Back again
+      await page.goForward({ waitUntil: 'domcontentloaded' }); await page.waitForTimeout(600); const how2 = await back(page); ok(`18a2 forward and Back again: still bare (${how2.kept ? 'restored' : 'fresh load'})`, bare(await state(page)));
+      // switching on after coming back works
+      await switchOn(page); ok('18a3 after coming back the switch still works: one set of objects', (await state(page)).scene === 3);
+      await ctx.close(); }
+    // b) while loading
+    { const { ctx, page } = await fresh(); const aborted = []; page.on('requestfailed', r => { if (r.url().includes('/assets/animals/')) aborted.push(r.url().split('/').pop()); });
+      let release; S.hold = new Promise(r => { release = r; }); await page.click('#tgl-journey'); while (S.log.length < 2) await page.waitForTimeout(50);
+      await page.click('nav.tabs a[data-view="animals"]'); await page.waitForURL(/animals\.html/); await page.waitForTimeout(600); release(); S.hold = null;
+      const how = await back(page), s = await state(page); console.log(`      note 18b: Back ${how.kept ? 'RESTORED THE KEPT PAGE' : 'loaded the page afresh'}`);
+      ok(`18b journey loading → Animals tab → Back: bare (${how.kept ? 'restored' : 'fresh load'})`, bare(s), [s, aborted]);
+      await ctx.close(); }
+    // c, d) the page-keeping events themselves, sent to the page (this is the code path a kept page takes, whether or not this browser kept it above)
+    { const { ctx, page } = await fresh(); await switchOn(page); await page.evaluate(x => { ME.journey.seek(x); ME.journey.play(); }, D.t[3000]); await page.waitForTimeout(200);
+      await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }))); let s = await state(page);
+      ok('18c the page is put away for Back (pagehide, persisted): the journey is switched off there and then', bare(s), s);
+      await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }))); ok('18c2 and it is bare when shown again', bare(await state(page)));
+      await switchOn(page); await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }))); s = await state(page);
+      ok('18d a kept page shown again without having seen pagehide (pageshow, persisted): switched off', bare(s), s);
+      if (!(await state(page)).on) await switchOn(page); await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: false }))); s = await state(page);
+      ok('18e an ordinary pageshow (not a kept page) changes nothing', s.on && s.scene === 3, s);
+      const ab = []; page.on('requestfailed', r => { if (r.url().includes('/assets/animals/')) ab.push(r.failure() && r.failure().errorText); });
+      let release; await page.click('#tgl-journey'); S.log = []; S.hold = new Promise(r => { release = r; }); await page.click('#tgl-journey'); while (S.log.length < 2) await page.waitForTimeout(50);
+      await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }))); await page.waitForTimeout(500); const abN = ab.length; release(); S.hold = null; await page.waitForTimeout(1200); s = await state(page);
+      ok('18f put away while loading: the request is aborted, the journey is off, and nothing is drawn later', bare(s) && abN === 1 && /ERR_ABORTED/.test(ab[0]), [s, ab]);
+      await ctx.close(); }
+    await b2.close(); }
 
   await browser.close(); srv.close(); clearTimeout(wd);
   if (BREAK) { const hit = failed.some(n => n.startsWith(EXPECT[BREAK])); console.log(`\n${hit ? 'BREAK CAUGHT' : 'BREAK MISSED'}  ${BREAK}: expected check "${EXPECT[BREAK]}" ${hit ? 'failed' : 'did NOT fail'}; ${fail} checks failed in all: ${failed.map(n => n.split(' ')[0]).join(' ')}`); process.exit(1); }

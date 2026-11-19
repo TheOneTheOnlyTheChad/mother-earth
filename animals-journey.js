@@ -12,10 +12,11 @@
  *    clock, the imagery or the day/night shading. This file writes only to its own card, its own replay bar and its own objects.
  *  - Files are verified before anything is drawn: the manifest against the sha256 pinned here, the display file against the
  *    manifest's sha256, then counts, end times, order and coordinate ranges. A file that fails draws nothing.
- *  - Switching off stops playback, cancels a load in flight (a late answer draws nothing), removes and disposes every object
+ *  - Switching off stops playback, aborts a request in flight and refuses any answer that still arrives (a late answer draws nothing), removes and disposes every object
  *    this file added, hides the replay bar and takes the entry out of the Key.
  *  - The Sky zoom-out view pauses and hides the journey and restores it, paused, at the same replay time. A hidden browser tab
- *    pauses playback and keeps the replay. A new page load starts bare: nothing is remembered.
+ *    pauses playback and keeps the replay. A new page load starts bare: nothing is remembered. Leaving the page switches the
+ *    journey off, so a page restored by Back also starts bare.
  *  - Its own scene objects, never a globe.gl data layer (the page uses those for other layers and redraws them).
  * The Key and "Key · N layers" follow drawn(): the journey counts only while its objects are on the globe and visible. */
 (() => {
@@ -24,7 +25,7 @@
   const tgl = $('tgl-journey'); if (!tgl) return;
   const J = {
     MANIFEST: 'assets/animals/zebra-botswana-R1.manifest.json',
-    MANIFEST_SHA256: '780f2ec42fc990b27d71b354779b6cf1b4737f35fd0d61561ba72694a684398a',
+    MANIFEST_SHA256: 'f337cdd078f7210db25aa55788d5b7a6f6007840f3f62ceb17320bc4125373d0',
     BASE: 'assets/animals/',
     ANIMAL: 'Z3866',
     DEEP_LINK: 'journey=zebra-botswana-Z3866',
@@ -51,22 +52,26 @@
     },
   };
   const st = { on: false, status: 'off', why: '', gen: 0, man: null, jr: null, d: null, seg: null, i: 0, rt: 0, playing: false, speed: J.SPEED_DEFAULT,
-    raf: 0, lastTick: 0, objs: null, sky: false, said: '', ctl: null };
+    raf: 0, lastTick: 0, objs: null, sky: false, said: '', ctl: null, abort: null };
 
   // ---------- time, in UTC, from whole seconds (the visitor's zone is never used)
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const p2 = n => String(n).padStart(2, '0');
   const utc = s => { const d = new Date(s * 1000); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()} ${p2(d.getUTCHours())}:${p2(d.getUTCMinutes())}:${p2(d.getUTCSeconds())} UTC`; };
   const utcDay = s => { const d = new Date(s * 1000); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
+  /** a length of time, exact to the second: every unit below the largest is printed (1 h 1 min 1 s; 3 h 0 min 1 s; 2 d 0 h 5 min 3 s) */
   const span = s => { s = Math.max(0, Math.floor(s)); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
-    return d ? `${d} d ${h} h` : h ? `${h} h ${m} min` : m ? `${m} min ${x} s` : `${x} s`; };
+    return d ? `${d} d ${h} h ${m} min ${x} s` : h ? `${h} h ${m} min ${x} s` : m ? `${m} min ${x} s` : `${x} s`; };
   /** index of the last fix at or before time s (−1 before the first fix) */
   function fixAt(s) { const t = st.d.t; if (s < t[0]) return -1; let lo = 0, hi = t.length - 1; while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (t[mid] <= s) lo = mid; else hi = mid - 1; } return lo; }
 
   // ---------- loading and verification
   const hex = async buf => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join('');
-  async function get(url) { const c = new AbortController(), timer = setTimeout(() => c.abort(), J.WAIT_MS);
-    try { const r = await fetch(url, { cache: 'no-store', signal: c.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.arrayBuffer(); } finally { clearTimeout(timer); } }
+  /** one request of the current load. Its AbortController is kept in st.abort so that switching off (or leaving the page, or a
+   *  newer load) aborts the request itself; the generation check in load() separately refuses any answer that still arrives. */
+  async function get(url) { const c = new AbortController(), timer = setTimeout(() => c.abort(), J.WAIT_MS); st.abort = c;
+    try { const r = await fetch(url, { cache: 'no-store', signal: c.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.arrayBuffer(); } finally { clearTimeout(timer); if (st.abort === c) st.abort = null; } }
+  const abortLoad = () => { const c = st.abort; st.abort = null; if (c) try { c.abort(); } catch (_) { } };
   class Unverified extends Error { }
   /** every check the display file must pass before anything is drawn; throws Unverified with the reason */
   function verify(man, d) {
@@ -82,7 +87,7 @@
     return jr;
   }
   async function load() {
-    const gen = ++st.gen; st.status = 'loading'; st.why = ''; paint();
+    abortLoad(); const gen = ++st.gen; st.status = 'loading'; st.why = ''; paint();
     try {
       const mb = await get(J.MANIFEST); if (gen !== st.gen) return;
       if (await hex(mb) !== J.MANIFEST_SHA256) throw new Unverified('the manifest does not match its pinned checksum'); if (gen !== st.gen) return;
@@ -219,7 +224,7 @@
   // ---------- the switch
   async function setOn(on) {
     if (on === st.on) return;
-    if (!on) { st.on = false; st.gen++; pause(false); clearObjs(); st.d = null; st.man = null; st.jr = null; st.seg = null; st.status = 'off'; st.why = ''; st.said = ''; $('replay-say').textContent = ''; return paint(); }
+    if (!on) { st.on = false; st.gen++; abortLoad(); pause(false); clearObjs(); st.d = null; st.man = null; st.jr = null; st.seg = null; st.status = 'off'; st.why = ''; st.said = ''; $('replay-say').textContent = ''; return paint(); }
     if (!ME.globe || !ME.globe()) { st.why = J.T.noGlobe; st.status = 'off'; return paint(); }
     st.on = true; await load();
   }
@@ -231,6 +236,10 @@
     .observe(document.body, { attributes: true, attributeFilter: ['class'] });
   // a hidden browser tab pauses playback; the replay itself is kept
   document.addEventListener('visibilitychange', () => { if (document.hidden && st.playing) pause(false); });
+  // leaving the page switches the journey off, so a page the browser keeps and restores on Back (its back/forward cache) comes
+  // back bare, the same as a fresh load; pageshow repeats it in case the page was frozen before pagehide ran
+  window.addEventListener('pagehide', () => { if (st.on) setOn(false); });
+  window.addEventListener('pageshow', e => { if (e.persisted && st.on) setOn(false); });
   // keep the marker a steady size while the visitor zooms with the replay paused
   setInterval(() => { if (st.objs && !st.playing && !st.sky) sizeMarker(); }, 500);
 

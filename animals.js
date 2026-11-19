@@ -6,7 +6,7 @@
  * This file fetches one file (the manifest). It does not load the journey, the globe library or app.js. */
 (() => {
   const $ = id => document.getElementById(id);
-  const A = { MANIFEST: 'assets/animals/zebra-botswana-R1.manifest.json', MANIFEST_SHA256: '780f2ec42fc990b27d71b354779b6cf1b4737f35fd0d61561ba72694a684398a', ANIMAL: 'Z3866',
+  const A = { MANIFEST: 'assets/animals/zebra-botswana-R1.manifest.json', MANIFEST_SHA256: 'f337cdd078f7210db25aa55788d5b7a6f6007840f3f62ceb17320bc4125373d0', ANIMAL: 'Z3866',
     UNVERIFIED: 'Study details could not be verified. No figure is shown.', FAILED: 'Study details could not be loaded. No figure is shown.' };
   // header clock (UTC) and menu, as on the other pages
   const p2 = n => String(n).padStart(2, '0'), clock = $('clock');

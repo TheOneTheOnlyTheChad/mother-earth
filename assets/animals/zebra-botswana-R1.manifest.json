@@ -34,7 +34,7 @@
   "retrieved_utc": "2026-11-19T02:29:17Z",
   "retrieved_from": "https://datarepository.movebank.org (bitstream 9672ab98-93db-4943-bbb0-ef1a9435545d)"
  },
- "built_from": "pinned single-animal extract",
+ "built_from": "full source file",
  "gap_rule": {
   "max_join_seconds": 10800,
   "statement": "Mother Earth does not join fixes more than 3 hours apart. This is a display rule, not part of the study.",
