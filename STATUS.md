@@ -3,6 +3,15 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 13:40 UTC (clock reading) — **Animals: GPT held the three-journey preview `817a13f` (two repairs); r2 answers them: `animals-journeys-preview-rc` head `ea5414d`.** (branch only; nothing merged, deployed, sent or spent)
+- **GPT's review (relayed by Chad):** hashes match; its own real-input rebuild and land checks pass; counts confirmed (shark 755 / 616, whale 661 / 554); chooser, cards, narrow layout and Back worked in desktop Chrome. On hold for: (1) the bar said "No fix was recorded" across gaps that hold left-out source fixes (53 shark gaps, 22 whale gaps) and called the whale's 12 Feb endpoint the end of the tracking record; (2) `build_argos_journey.py --check` printed DIFFERENT but exited 0. Also: say enlarged marks are not uncertainty; performance on this branch unverified.
+- **r2, code commit `f00a330`, head `ea5414d`** (packet `reviews/2026-11-19-animals-journeys-preview-rc-r2.md`, sha256 `3e4d2f0b…7d08`). **No data file changed.**
+  - Filtered journeys now speak of displayed fixes: "Last displayed fix", "No fix is displayed for …", "displayed record ends here". The zebra keeps its wording. Regression checks for GPT's two cases and a sweep of every gap.
+  - `--check` exits 3 on a difference or a missing file, 0 only when both match, 2 when the build stops; six checks.
+  - Card, details and Animals page say the large fix marks do not show uncertainty, and that a gap may hide left-out fixes.
+- **Tests:** browser suite 314 of 314; new break caught (the other 37 were caught on `185dcff`, not rerun). Argos build tests 28 without the real inputs (part 3 not rerun; inputs deleted). Five older suites rerun and pass.
+- **Still open: performance on this branch** (needs Chad's Chrome on a served copy, or GPT's run); real phone; screen reader; Sources page, REGISTER; sensitivity and public release; the two enquiries.
+- **Mac:** complete tree `_review/animals-journeys-preview-ea5414d-full/` (550 files, digest equal to the repo's, 13:40:06 UTC); the `817a13f` tree moved to `_to_delete/`.
 ## 19 Nov 12:40 UTC (clock reading) — **DECISION: recorded animal journeys are allowed as a dated archive feature. Three-journey private preview built for GPT (`animals-journeys-preview-rc` head `817a13f`).** (branch only; nothing merged, deployed, sent or spent)
 - **Chad's decision (19 Nov), his words:** "Decision: recorded animal journeys are allowed on the Animals tab as a dated archive feature; all other layers keep the live-feed rule". This settles proposal §9 for the Animals tab only. **The live-or-regularly-updated rule stands for every other layer.**
 - **Chad's Go:** "Go: private preview build with one journey switch and a chooser for zebra Z3866, shark 118845 and false killer whale 98364, settings as GPT recommended; no merge, no deploy".
