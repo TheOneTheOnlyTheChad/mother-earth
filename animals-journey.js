@@ -1,5 +1,10 @@
 /* Mother Earth — Animal journey: a dated replay of one tracked animal's recorded fixes (animals-zebra-preview-rc;
- * docs/concepts/ANIMALS-PROPOSAL.md rev 2.2). PRIVATE PREVIEW: one study, one animal (Botswana zebra, Z3866).
+ * docs/concepts/ANIMALS-PROPOSAL.md rev 2.2). PRIVATE PREVIEW. From animals-journeys-preview-rc (19 Nov 2026): one switch and a
+ * chooser over three recorded journeys (zebra Z3866 by GPS; white shark tag 118845 and false killer whale tag 98364 by Argos, each
+ * filtered at build time by phase1/animals/build_argos_journey.py). A dated archive feature: Chad's decision of 19 Nov 2026 allows
+ * recorded journeys on the Animals tab; every other layer keeps the live-feed rule.
+ * Argos journeys carry a quality class per fix (shown with the fix) and a per-step join flag made at build time: a step is joined
+ * only if it is within the journey's time limit AND the build found the drawn line clear of land in its land map.
  * One optional layer, off on load. Nothing is requested while it is off.
  * Rules this file keeps:
  *  - Observation-based. The marker is only ever on a recorded fix: the last one at or before the replay time. Nothing is
@@ -24,11 +29,9 @@
   const $ = id => document.getElementById(id);
   const tgl = $('tgl-journey'); if (!tgl) return;
   const J = {
-    MANIFEST: 'assets/animals/zebra-botswana-R1.manifest.json',
-    MANIFEST_SHA256: 'f337cdd078f7210db25aa55788d5b7a6f6007840f3f62ceb17320bc4125373d0',
+    CATALOG: 'assets/animals/journeys-R1.catalog.json',          // the list of journeys; it pins each study's manifest, which pins its display file
+    CATALOG_SHA256: 'a25cdce33091e0b1a62f4cce35c93f26b192d92409e53dc573ea513056bf3470',
     BASE: 'assets/animals/',
-    ANIMAL: 'Z3866',
-    DEEP_LINK: 'journey=zebra-botswana-Z3866',
     WAIT_MS: 20000,                     // a request that has not answered in 20 s is treated as failed (our number)
     ALT: 0.004,                         // line and fix marks sit just above the surface (fraction of the globe radius)
     VIEW_ALT: 0.14,                     // "Go to the journey area": camera altitude in globe radii
@@ -74,8 +77,10 @@
   const abortLoad = () => { const c = st.abort; st.abort = null; if (c) try { c.abort(); } catch (_) { } };
   class Unverified extends Error { }
   /** every check the display file must pass before anything is drawn; throws Unverified with the reason */
-  function verify(man, d) {
-    const jr = (man.journeys || []).find(j => j.animal === J.ANIMAL); if (!jr) throw new Unverified('the manifest lists no journey for ' + J.ANIMAL);
+  /** a step (fix i−1 → fix i) is joined when it is within the journey's time rule and, for files that carry join flags, the build allowed it */
+  const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule && (!d.j || d.j[i] === 1);
+  function verify(man, d, animal) {
+    const jr = (man.journeys || []).find(j => j.animal === animal); if (!jr) throw new Unverified('the manifest lists no journey for ' + animal);
     const rule = man.gap_rule && man.gap_rule.max_join_seconds; if (!Number.isInteger(rule) || rule <= 0) throw new Unverified('the manifest has no gap rule');
     if (!d || !Array.isArray(d.t) || !Array.isArray(d.lat) || !Array.isArray(d.lon)) throw new Unverified('the display file has no fix arrays');
     const n = d.t.length; if (n !== jr.fixes || d.lat.length !== n || d.lon.length !== n || d.n !== n) throw new Unverified('the fix count does not match the manifest');
@@ -84,22 +89,32 @@
     for (let i = 0; i < n; i++) { const t = d.t[i], la = d.lat[i], lo = d.lon[i];
       if (!Number.isInteger(t) || (i && t <= d.t[i - 1])) throw new Unverified('fix times are not whole seconds in increasing order');
       if (!Number.isFinite(la) || !Number.isFinite(lo) || la < b.south || la > b.north || lo < b.west || lo > b.east) throw new Unverified('a coordinate is missing or outside the study area'); }
+    if (d.schema === 2 || d.lc !== undefined || d.j !== undefined) {                       // Argos files: a class per fix and a join flag per step
+      const cm = man.class_meanings || {};
+      if (typeof d.lc !== 'string' || d.lc.length !== n || [...d.lc].some(c => !(c in cm))) throw new Unverified('the quality classes are missing or not ones the manifest explains');
+      if (!Array.isArray(d.j) || d.j.length !== n || d.j[0] !== 0 || d.j.some(x => x !== 0 && x !== 1)) throw new Unverified('the join flags are missing or malformed');
+      let k = 0; for (let i = 1; i < n; i++) { if (d.j[i] === 1) { k++; if (d.t[i] - d.t[i - 1] > rule) throw new Unverified('a join flag joins fixes further apart than the rule allows'); } }
+      if (k !== jr.steps_joined) throw new Unverified('the number of joined steps does not match the manifest'); }
     return jr;
   }
   async function load() {
     abortLoad(); const gen = ++st.gen; st.status = 'loading'; st.why = ''; paint();
     try {
-      const mb = await get(J.MANIFEST); if (gen !== st.gen) return;
-      if (await hex(mb) !== J.MANIFEST_SHA256) throw new Unverified('the manifest does not match its pinned checksum'); if (gen !== st.gen) return;
+      const cb = await get(J.CATALOG); if (gen !== st.gen) return;
+      if (await hex(cb) !== J.CATALOG_SHA256) throw new Unverified('the journey list does not match its pinned checksum'); if (gen !== st.gen) return;
+      let cat; try { cat = JSON.parse(new TextDecoder().decode(cb)); } catch (_) { throw new Unverified('the journey list is not readable'); }
+      const ce = (cat.journeys || []).find(j => j.id === st.choice); if (!ce) throw new Unverified('the journey list has no journey ' + st.choice);
+      const mb = await get(J.BASE + ce.manifest); if (gen !== st.gen) return;
+      if (await hex(mb) !== ce.manifest_sha256) throw new Unverified('the manifest does not match the checksum in the journey list'); if (gen !== st.gen) return;
       let man; try { man = JSON.parse(new TextDecoder().decode(mb)); } catch (_) { throw new Unverified('the manifest is not readable'); }
-      const ent = (man.journeys || []).find(j => j.animal === J.ANIMAL); if (!ent) throw new Unverified('the manifest lists no journey for ' + J.ANIMAL);
+      const ent = (man.journeys || []).find(j => j.animal === ce.animal); if (!ent) throw new Unverified('the manifest lists no journey for ' + ce.animal);
       const db = await get(J.BASE + ent.file); if (gen !== st.gen) return;
       if (db.byteLength !== ent.bytes || await hex(db) !== ent.sha256) throw new Unverified('the display file does not match the manifest checksum'); if (gen !== st.gen) return;
       let d; try { d = JSON.parse(new TextDecoder().decode(db)); } catch (_) { throw new Unverified('the display file is not readable'); }
-      const jr = verify(man, d); if (gen !== st.gen) return;
-      st.man = man; st.jr = jr; st.d = d;
+      const jr = verify(man, d, ce.animal); if (gen !== st.gen) return;
+      st.man = man; st.jr = jr; st.d = d; st.ce = ce;
       // seg[i] = number of line segments whose later fix has index ≤ i (a segment joins fix i−1 to fix i when they are within the rule)
-      const rule = man.gap_rule.max_join_seconds, seg = new Uint32Array(d.t.length); let k = 0; for (let i = 1; i < d.t.length; i++) { if (d.t[i] - d.t[i - 1] <= rule) k++; seg[i] = k; } st.seg = seg;
+      const rule = man.gap_rule.max_join_seconds, seg = new Uint32Array(d.t.length); let k = 0; for (let i = 1; i < d.t.length; i++) { if (joins(d, rule, i)) k++; seg[i] = k; } st.seg = seg;
       if (!build()) { st.status = 'failed'; st.why = J.T.notBuilt; st.d = null; return paint(); }
       st.status = 'ready'; st.playing = false; ensureBar(); setBarFrame(); paint(); seek(d.t[0], true);
     } catch (e) { if (gen !== st.gen) return; clearObjs(); st.d = null;
@@ -121,11 +136,12 @@
     const P = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const c = g.getCoords(d.lat[i], d.lon[i], J.ALT); P[i * 3] = c.x; P[i * 3 + 1] = c.y; P[i * 3 + 2] = c.z; }
     const mat = (colour, wire, op) => { const m = new h.Mat({ wireframe: wire, transparent: true, opacity: op, depthWrite: false }); if (m.color) m.color.set(colour); if (m.emissive) m.emissive.set(colour); if ('side' in m) m.side = 2; return m; };
     // the line: one flat triangle (a, b, b) per joined pair, drawn as a wireframe; segments are in time order so a draw range shows only the past
-    const L = []; for (let i = 1; i < n; i++) if (d.t[i] - d.t[i - 1] <= rule) { const a = (i - 1) * 3, b = i * 3; L.push(P[a], P[a + 1], P[a + 2], P[b], P[b + 1], P[b + 2], P[b], P[b + 1], P[b + 2]); }
+    const L = []; for (let i = 1; i < n; i++) if (joins(d, rule, i)) { const a = (i - 1) * 3, b = i * 3; L.push(P[a], P[a + 1], P[a + 2], P[b], P[b + 1], P[b + 2], P[b], P[b + 1], P[b + 2]); }
     const lg = new h.Geo(); lg.setAttribute('position', new h.Attr(new Float32Array(L), 3)); lg.setDrawRange(0, 0);
     const line = new h.Mesh(lg, mat(J.LINE, true, 0.9)); line.raycast = () => { }; line.renderOrder = 3; line.frustumCulled = false; line.__journey = 'line';
     // the fix marks: one small filled triangle per recorded fix, lying on the surface, in time order
-    const F = new Float32Array(n * 9), s = J.FIX_SIZE;
+    // Argos journeys cover hundreds to thousands of km: their fix marks are sized to stay visible when the whole journey is in view
+    const bb = st.jr.bbox, F = new Float32Array(n * 9), s = d.lc ? Math.max(J.FIX_SIZE, 0.2 * Math.max(J.VIEW_ALT, Math.max(bb.north - bb.south, bb.east - bb.west) / 26)) : J.FIX_SIZE;
     for (let i = 0; i < n; i++) { const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2], r = Math.hypot(x, y, z), ux = x / r, uy = y / r, uz = z / r;
       let ex = -uz, ey = 0, ez = ux; const el = Math.hypot(ex, ey, ez) || 1; ex /= el; ez /= el;                 // east-ish, on the surface
       const nx = uy * ez - uz * ey, ny = uz * ex - ux * ez, nz = ux * ey - uy * ex;                               // north-ish, on the surface
@@ -176,6 +192,8 @@
     retry.hidden = !(st.on && st.status === 'failed');
     if (!st.on) o.textContent = st.why || J.T.off;
     else if (st.status === 'loading') o.textContent = J.T.loading;
+    else if (st.status === 'ready' && st.man.card) { const m = st.man, c = m.card;      // Argos journeys: the manifest carries the sentences
+      o.textContent = `${c.shown} ${c.not_route} ${c.line} ${c.done} ${m.accuracy_note} ${m.sample_sentence}` + (st.sky ? ' ' + J.T.sky : ''); }
     else if (st.status === 'ready') { const j = st.jr, m = st.man;
       o.textContent = `${j.fixes.toLocaleString('en-GB')} recorded fixes of one animal (${j.animal}), ${utcDay(j.first_fix_s)} to ${utcDay(j.last_fix_s)}. ` +
         `${m.animals_sampled} animals were tracked in this study; ${m.animals_shown} is shown. ` +
@@ -193,6 +211,7 @@
     if (i < 0) return s + ' · No fix recorded yet';
     const age = st.rt - t[i];
     s += i === 0 && age === 0 ? ` · ${J.T.first} ${utc(t[i])}` : i === n - 1 ? ` · ${J.T.last}, ${utc(t[i])}` : ` · Last recorded fix ${utc(t[i])}` + (age > 0 ? `, ${span(age)} earlier` : ', at this time');
+    if (d.lc) { const c = d.lc[i], m = st.man.class_meanings[c]; s += ` · Argos class ${c} (${m === 'no estimate' ? 'no error estimate' : 'nominal error ' + m})`; }
     if (i < n - 1 && t[i + 1] - t[i] > rule) s += ` · No fix was recorded for ${span(t[i + 1] - t[i])} after it`;
     return s;
   }
@@ -209,13 +228,13 @@
     $('replay-play').addEventListener('click', () => st.playing ? pause(true) : play());
     r.addEventListener('input', () => { if (!st.d) return; pause(false); seek(st.d.t[Math.min(st.d.t.length - 1, Math.max(0, +r.value))], false); });
     sp.addEventListener('change', () => { st.speed = +sp.value || J.SPEED_DEFAULT; });
-    $('replay-goto').addEventListener('click', () => { const o = st.objs; if (!o || !st.jr) return; const b = st.jr.bbox;
+    $('replay-goto').addEventListener('click', () => { const o = st.objs; if (!o || !st.jr) return; const b = st.jr.bbox, ALT = Math.max(J.VIEW_ALT, Math.max(b.north - b.south, b.east - b.west) / 26);   // far enough out to hold the whole journey
       try { o.g.controls().autoRotate = false;
         // centre the journey in the part of the globe's box the replay bar does not cover (the bar sits over the top or the bottom of it)
         let shift = 0; const cv = o.g.renderer().domElement.getBoundingClientRect(), br = $('replay').getBoundingClientRect();
         if (cv.height > 0 && br.height > 0 && br.bottom > cv.top && br.top < cv.bottom) { const above = br.top - cv.top, below = cv.bottom - br.bottom, top = above >= below ? cv.top : br.bottom, bot = above >= below ? br.top : cv.bottom;   // the larger free part
-          const dy = (top + bot) / 2 - (cv.top + cv.height / 2), fov = (o.g.camera().fov || 50) * Math.PI / 180; shift = dy * (2 * J.VIEW_ALT * Math.tan(fov / 2) / cv.height) * 180 / Math.PI; }
-        o.g.pointOfView({ lat: (b.south + b.north) / 2 + shift, lng: (b.west + b.east) / 2, altitude: J.VIEW_ALT }, 0); sizeMarker(); } catch (_) { } });
+          const dy = (top + bot) / 2 - (cv.top + cv.height / 2), fov = (o.g.camera().fov || 50) * Math.PI / 180; shift = dy * (2 * ALT * Math.tan(fov / 2) / cv.height) * 180 / Math.PI; }
+        o.g.pointOfView({ lat: (b.south + b.north) / 2 + shift, lng: (b.west + b.east) / 2, altitude: ALT }, 0); sizeMarker(); } catch (_) { } });
   }
   function setBarFrame() { const d = st.d, r = $('replay-range'); r.min = '0'; r.max = String(d.t.length - 1); r.step = '1';
     $('replay-note').textContent = `Replay: recorded ${utcDay(d.t[0])} to ${utcDay(d.t[d.t.length - 1])}. ${J.T.others}`;
@@ -229,6 +248,9 @@
     st.on = true; await load();
   }
   tgl.addEventListener('click', () => setOn(!st.on));
+  // the chooser: which recorded journey the switch shows. Choosing while the switch is on clears the old journey and loads the new one.
+  const chooser = $('journey-choose'); st.choice = chooser.value;
+  chooser.addEventListener('change', () => { st.choice = chooser.value; const c = $('journey-chosen'); if (c) c.hidden = true; if (st.on) { setOn(false); setOn(true); } else paint(); });
   $('journey-retry').addEventListener('click', () => { if (st.on && st.status === 'failed') load(); });
 
   // the Sky zoom-out view: pause and hide; restore, paused, at the same replay time
@@ -244,14 +266,14 @@
   setInterval(() => { if (st.objs && !st.playing && !st.sky) sizeMarker(); }, 500);
 
   // "Choose this journey on Earth now" (from the Animals page): reveal the switch in the Layers panel; switch nothing on
-  function reveal() { if (!location.hash.includes(J.DEEP_LINK)) return; const go = () => { const btn = $('layers-btn'), panel = $('layers-panel'); if (!btn || !panel) return false; if (panel.hidden) btn.click(); if (panel.hidden) return false;
+  function reveal() { const m = /journey=([A-Za-z0-9-]+)/.exec(location.hash); if (!m || ![...chooser.options].some(o => o.value === m[1])) return; chooser.value = m[1]; st.choice = m[1]; const go = () => { const btn = $('layers-btn'), panel = $('layers-panel'); if (!btn || !panel) return false; if (panel.hidden) btn.click(); if (panel.hidden) return false;
       const row = [...document.querySelectorAll('#layers-list [data-for]')].find(r => r.dataset.for === '#tgl-journey'); if (row) row.focus(); const c = $('journey-chosen'); if (c) c.hidden = false; return true; };
     if (!go()) { let n = 0; const iv = setInterval(() => { if (go() || ++n > 40) clearInterval(iv); }, 100); } }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', reveal); else reveal();
 
   ME.journey = { drawn, on: () => st.on, J,
     /** read-only aids for tests and the console */
-    state: () => ({ on: st.on, status: st.status, why: st.why, detail: st.detail || null, gen: st.gen, playing: st.playing, speed: st.speed, sky: st.sky, rt: st.rt, i: st.i, n: st.d ? st.d.t.length : 0,
+    state: () => ({ choice: st.choice, cls: st.d && st.d.lc && st.i >= 0 ? st.d.lc[st.i] : null, on: st.on, status: st.status, why: st.why, detail: st.detail || null, gen: st.gen, playing: st.playing, speed: st.speed, sky: st.sky, rt: st.rt, i: st.i, n: st.d ? st.d.t.length : 0,
       fixTime: st.d && st.i >= 0 ? st.d.t[st.i] : null, bar: $('replay').hidden ? null : $('replay-now').textContent, drawn: drawn(),
       objects: st.objs ? { segments: st.objs.segs, lineShown: st.objs.line.geometry.drawRange.count / 3, fixesShown: st.objs.fixes.geometry.drawRange.count / 3, markerVisible: st.objs.marker.visible,
         marker: st.objs.marker.visible ? [st.objs.marker.position.x, st.objs.marker.position.y, st.objs.marker.position.z] : null, fixXYZ: st.i >= 0 ? [st.objs.P[st.i * 3], st.objs.P[st.i * 3 + 1], st.objs.P[st.i * 3 + 2]] : null } : null }),

@@ -1,0 +1,30 @@
+{
+ "schema": 1,
+ "note": "Journeys offered by the Animal journey switch. Private preview.",
+ "journeys": [
+  {
+   "id": "zebra-botswana-Z3866",
+   "label": "Plains zebra, animal Z3866",
+   "group": "Land",
+   "animal": "Z3866",
+   "manifest": "zebra-botswana-R1.manifest.json",
+   "manifest_sha256": "f337cdd078f7210db25aa55788d5b7a6f6007840f3f62ceb17320bc4125373d0"
+  },
+  {
+   "id": "white-shark-sa-118845",
+   "label": "White shark, tag 118845",
+   "group": "Sea",
+   "animal": "118845",
+   "manifest": "white-shark-sa-R1.manifest.json",
+   "manifest_sha256": "bf8cc595c4d471a6afe29f0998eb42f0aba7068b224b18f6fdd1c647afb0e160"
+  },
+  {
+   "id": "false-killer-whale-hawaii-98364",
+   "label": "False killer whale, tag 98364",
+   "group": "Sea",
+   "animal": "98364",
+   "manifest": "false-killer-whale-hawaii-R1.manifest.json",
+   "manifest_sha256": "9d7fd4fcf33cfd283af151a23e866b82dadd4cbc0f8e5fdce9f14bdc70c9c4e5"
+  }
+ ]
+}

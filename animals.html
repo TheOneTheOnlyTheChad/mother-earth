@@ -6,7 +6,7 @@
 <title>Mother Earth — Animals</title>
 <meta name="description" content="Recorded animal journeys, shown as dated replays with their sources. Private preview: one study.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612190100">
+<link rel="stylesheet" href="style.css?v=202612190200">
 </head>
 <body class="doc animals">
 <header class="top">
@@ -34,53 +34,116 @@
 </header>
 <main>
   <p class="small"><a href="index.html">← World View</a></p>
-  <p class="an-preview"><b>Private preview.</b> One study, one animal. Not released.</p>
+  <p class="an-preview"><b>Private preview.</b> Three recorded journeys. Not released.</p>
 
   <h2 id="journeys">Recorded animal journeys</h2>
   <p>A journey here is a set of positions recorded by a tag on one animal, replayed against the dates they were recorded. It is a dated record, not a live position. The marker is always on a recorded fix. The line joins recorded fixes; the path between fixes was not recorded.</p>
+  <p id="an-archive"><b>An archive feature.</b> Every other layer on Mother Earth shows live or regularly updated data. These journeys are finished studies from past years, shown as dated records. If regularly updated tracking is added later it will carry its own dates and freshness labels.</p>
+  <p id="an-experimental"><b>The two sea journeys are experimental.</b> Their positions are Argos satellite fixes, far less exact than GPS. Mother Earth has left out fixes under rules of its own, listed on each card. They are display choices, not a reconstruction of where the animal went.</p>
 
   <h3>Land</h3>
-  <section class="an-study" id="zebra-botswana" aria-labelledby="zb-h">
-    <h4 id="zb-h">Plains zebra, northern Botswana</h4>
-    <p class="an-state" id="an-state" aria-live="polite">Checking the study file…</p>
-    <table class="an-facts" id="an-facts" hidden>
+  <section class="an-study" id="zebra-botswana-Z3866" data-journey="zebra-botswana-Z3866" aria-labelledby="zebra-botswana-Z3866-h">
+    <h4 id="zebra-botswana-Z3866-h">Plains zebra, northern Botswana — animal Z3866</h4>
+    <p class="an-state" data-f="state" aria-live="polite">Checking the study file…</p>
+    <table class="an-facts" data-f="facts" hidden>
       <tbody>
-        <tr><th scope="row">Study</th><td id="an-title"></td></tr>
-        <tr><th scope="row">Place</th><td id="an-place"></td></tr>
-        <tr><th scope="row">Species as recorded</th><td id="an-species"></td></tr>
-        <tr><th scope="row">Tracking method</th><td id="an-method"></td></tr>
-        <tr><th scope="row">Animals</th><td id="an-animals"></td></tr>
-        <tr><th scope="row">Shown</th><td id="an-shown"></td></tr>
-        <tr><th scope="row">Recorded</th><td id="an-period"></td></tr>
-        <tr><th scope="row">Not drawn</th><td id="an-notdrawn"></td></tr>
-        <tr><th scope="row">Times</th><td id="an-times"></td></tr>
-        <tr><th scope="row">Location uncertainty</th><td id="an-unc"></td></tr>
-        <tr><th scope="row">Line rule</th><td id="an-rule"></td></tr>
-        <tr><th scope="row">Changes made</th><td id="an-simp"></td></tr>
-        <tr><th scope="row">Dataset</th><td id="an-doi"></td></tr>
-        <tr><th scope="row">Licence</th><td id="an-lic"></td></tr>
-        <tr><th scope="row">Citation, as the repository gives it</th><td id="an-cite"></td></tr>
-        <tr><th scope="row">Paper</th><td id="an-paper"></td></tr>
+        <tr><th scope="row">Study</th><td data-f="title"></td></tr>
+        <tr><th scope="row">Place</th><td data-f="place"></td></tr>
+        <tr><th scope="row">Species as recorded</th><td data-f="species"></td></tr>
+        <tr><th scope="row">Tracking method</th><td data-f="method"></td></tr>
+        <tr><th scope="row">Animals</th><td data-f="animals"></td></tr>
+        <tr><th scope="row">Shown</th><td data-f="shown"></td></tr>
+        <tr><th scope="row">Recorded</th><td data-f="period"></td></tr>
+        <tr><th scope="row">Left out</th><td data-f="notdrawn"></td></tr>
+        <tr><th scope="row">Times</th><td data-f="times"></td></tr>
+        <tr><th scope="row">Accuracy</th><td data-f="unc"></td></tr>
+        <tr><th scope="row">Line rule</th><td data-f="rule"></td></tr>
+        <tr><th scope="row">Changes made</th><td data-f="simp"></td></tr>
+        <tr><th scope="row">Dataset</th><td data-f="doi"></td></tr>
+        <tr><th scope="row">Licence</th><td data-f="lic"></td></tr>
+        <tr><th scope="row">Citation</th><td data-f="cite"></td></tr>
+        <tr><th scope="row">Paper or project</th><td data-f="paper"></td></tr>
+        <tr><th scope="row">Land map used</th><td data-f="land"></td></tr>
       </tbody>
     </table>
-    <p><a class="an-go" id="an-go" href="index.html#journey=zebra-botswana-Z3866">Choose this journey on Earth now</a><span class="small"> — opens the globe with this journey's switch shown. Nothing is switched on for you.</span></p>
-
-    <h4 id="zb-cons">Conservation assessment</h4>
-    <p class="an-na" id="an-cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
-
-    <h4 id="zb-pop">Population</h4>
-    <p class="an-na" id="an-pop">Not available yet. No population series has been reviewed.</p>
-    <p class="small" id="an-sample">7 animals were tracked in this study. This is a sample size, not a population estimate.</p>
+    <p><a class="an-go" data-f="go" href="index.html#journey=zebra-botswana-Z3866">Choose this journey on Earth now</a><span class="small"> — opens the globe with the journey switch shown and this journey chosen. Nothing is switched on for you.</span></p>
+    <h5>Conservation assessment</h5>
+    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <h5>Population</h5>
+    <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
+    <p class="small" data-f="sample">7 animals were tracked in this study. This is a sample size, not a population estimate.</p>
   </section>
 
   <h3>Sea</h3>
-  <p class="an-na">No study yet.</p>
+  <section class="an-study" id="white-shark-sa-118845" data-journey="white-shark-sa-118845" aria-labelledby="white-shark-sa-118845-h">
+    <h4 id="white-shark-sa-118845-h">White shark, South African coast — tag 118845</h4>
+    <p class="an-state" data-f="state" aria-live="polite">Checking the study file…</p>
+    <table class="an-facts" data-f="facts" hidden>
+      <tbody>
+        <tr><th scope="row">Study</th><td data-f="title"></td></tr>
+        <tr><th scope="row">Place</th><td data-f="place"></td></tr>
+        <tr><th scope="row">Species as recorded</th><td data-f="species"></td></tr>
+        <tr><th scope="row">Tracking method</th><td data-f="method"></td></tr>
+        <tr><th scope="row">Animals</th><td data-f="animals"></td></tr>
+        <tr><th scope="row">Shown</th><td data-f="shown"></td></tr>
+        <tr><th scope="row">Recorded</th><td data-f="period"></td></tr>
+        <tr><th scope="row">Left out</th><td data-f="notdrawn"></td></tr>
+        <tr><th scope="row">Times</th><td data-f="times"></td></tr>
+        <tr><th scope="row">Accuracy</th><td data-f="unc"></td></tr>
+        <tr><th scope="row">Line rule</th><td data-f="rule"></td></tr>
+        <tr><th scope="row">Changes made</th><td data-f="simp"></td></tr>
+        <tr><th scope="row">Dataset</th><td data-f="doi"></td></tr>
+        <tr><th scope="row">Licence</th><td data-f="lic"></td></tr>
+        <tr><th scope="row">Citation</th><td data-f="cite"></td></tr>
+        <tr><th scope="row">Paper or project</th><td data-f="paper"></td></tr>
+        <tr><th scope="row">Land map used</th><td data-f="land"></td></tr>
+      </tbody>
+    </table>
+    <p><a class="an-go" data-f="go" href="index.html#journey=white-shark-sa-118845">Choose this journey on Earth now</a><span class="small"> — opens the globe with the journey switch shown and this journey chosen. Nothing is switched on for you.</span></p>
+    <h5>Conservation assessment</h5>
+    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <h5>Population</h5>
+    <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
+    <p class="small" data-f="sample">34 sharks were tagged in this study. This is a sample size, not a population estimate.</p>
+  </section>
+  <section class="an-study" id="false-killer-whale-hawaii-98364" data-journey="false-killer-whale-hawaii-98364" aria-labelledby="false-killer-whale-hawaii-98364-h">
+    <h4 id="false-killer-whale-hawaii-98364-h">False killer whale, Hawaiian waters — tag 98364</h4>
+    <p class="an-state" data-f="state" aria-live="polite">Checking the study file…</p>
+    <table class="an-facts" data-f="facts" hidden>
+      <tbody>
+        <tr><th scope="row">Study</th><td data-f="title"></td></tr>
+        <tr><th scope="row">Place</th><td data-f="place"></td></tr>
+        <tr><th scope="row">Species as recorded</th><td data-f="species"></td></tr>
+        <tr><th scope="row">Tracking method</th><td data-f="method"></td></tr>
+        <tr><th scope="row">Animals</th><td data-f="animals"></td></tr>
+        <tr><th scope="row">Shown</th><td data-f="shown"></td></tr>
+        <tr><th scope="row">Recorded</th><td data-f="period"></td></tr>
+        <tr><th scope="row">Left out</th><td data-f="notdrawn"></td></tr>
+        <tr><th scope="row">Times</th><td data-f="times"></td></tr>
+        <tr><th scope="row">Accuracy</th><td data-f="unc"></td></tr>
+        <tr><th scope="row">Line rule</th><td data-f="rule"></td></tr>
+        <tr><th scope="row">Changes made</th><td data-f="simp"></td></tr>
+        <tr><th scope="row">Dataset</th><td data-f="doi"></td></tr>
+        <tr><th scope="row">Licence</th><td data-f="lic"></td></tr>
+        <tr><th scope="row">Citation</th><td data-f="cite"></td></tr>
+        <tr><th scope="row">Paper or project</th><td data-f="paper"></td></tr>
+        <tr><th scope="row">Land map used</th><td data-f="land"></td></tr>
+      </tbody>
+    </table>
+    <p><a class="an-go" data-f="go" href="index.html#journey=false-killer-whale-hawaii-98364">Choose this journey on Earth now</a><span class="small"> — opens the globe with the journey switch shown and this journey chosen. Nothing is switched on for you.</span></p>
+    <h5>Conservation assessment</h5>
+    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <h5>Population</h5>
+    <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
+    <p class="small" data-f="sample">This file is the record of one tagged whale. One animal is not a population estimate.</p>
+  </section>
+
   <h3>Air</h3>
   <p class="an-na">No study yet.</p>
 
   <h2 id="replay-time">Replay time is not the globe's time</h2>
-  <p>This journey was recorded in 2007 and 2008. On the globe, other layers retain their own dates and times; they are not matched to this journey. Nothing on this page says why the animal moved.</p>
+  <p>These journeys were recorded between 2007 and 2014. On the globe, other layers retain their own dates and times; they are not matched to a journey. Nothing on this page says why an animal moved.</p>
 </main>
-<script src="animals.js?v=202612190100"></script>
+<script src="animals.js?v=202612190200"></script>
 </body>
 </html>

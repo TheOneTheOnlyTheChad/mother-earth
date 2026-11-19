@@ -29,7 +29,7 @@
  * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/animals-journey-ui.test.cjs
  * Breaks (each must fail): BREAK=marker-next-fix|marker-interpolated|future-fixes-drawn|future-line-drawn|join-over-rule|
  *   exact-rule-not-joined|no-manifest-check|no-display-check|no-content-check|off-no-cancel|off-no-abort|age-drops-seconds|no-pagehide-reset|no-pageshow-reset|off-keeps-objects|on-means-drawn|
- *   drop-key|drop-layers-row|sky-keeps-drawn|sky-keeps-playing|hidden-keeps-playing|local-time|no-stop-at-end|deep-link-switches-on|
+ *   drop-key|drop-layers-row|sky-keeps-drawn|sky-keeps-playing|hidden-keeps-playing|local-time|no-stop-at-end|deep-link-switches-on|no-catalogue-check|ignore-join-flags|no-class-in-bar|chooser-keeps-old|no-flag-verify|no-class-verify|link-ignores-id|
  *   retry-hidden|load-on-open|population-substituted|page-unverified-figures|tab-missing|replay-moves-clock */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), http = require('http'), crypto = require('crypto');
@@ -49,9 +49,10 @@ const BREAKS = {
     "if (i >= 0) { const j = Math.min(st.d.t.length - 1, i + 1), f = j > i ? Math.min(1, (st.rt - st.d.t[i]) / (st.d.t[j] - st.d.t[i])) : 0; o.marker.position.set(o.P[i * 3] + (o.P[j * 3] - o.P[i * 3]) * f, o.P[i * 3 + 1] + (o.P[j * 3 + 1] - o.P[i * 3 + 1]) * f, o.P[i * 3 + 2] + (o.P[j * 3 + 2] - o.P[i * 3 + 2]) * f); sizeMarker(); }"],
   'future-fixes-drawn': [JS, 'o.fixes.geometry.setDrawRange(0, i >= 0 ? (i + 1) * 3 : 0);', 'o.fixes.geometry.setDrawRange(0, st.d.t.length * 3);'],
   'future-line-drawn': [JS, 'o.line.geometry.setDrawRange(0, i > 0 ? st.seg[i] * 3 : 0);', 'o.line.geometry.setDrawRange(0, o.segs * 3);'],
-  'join-over-rule': [JS, 'for (let i = 1; i < n; i++) if (d.t[i] - d.t[i - 1] <= rule) {', 'for (let i = 1; i < n; i++) if (d.t[i] - d.t[i - 1] <= rule + 1) {'],
-  'exact-rule-not-joined': [JS, 'for (let i = 1; i < n; i++) if (d.t[i] - d.t[i - 1] <= rule) {', 'for (let i = 1; i < n; i++) if (d.t[i] - d.t[i - 1] < rule) {'],
-  'no-manifest-check': [JS, "if (await hex(mb) !== J.MANIFEST_SHA256) throw new Unverified('the manifest does not match its pinned checksum');", ''],
+  'join-over-rule': [JS, "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule && (!d.j || d.j[i] === 1);", "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule + 1 && (!d.j || d.j[i] === 1);"],
+  'exact-rule-not-joined': [JS, "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule && (!d.j || d.j[i] === 1);", "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] < rule && (!d.j || d.j[i] === 1);"],
+  'no-manifest-check': [JS, "if (await hex(mb) !== ce.manifest_sha256) throw new Unverified('the manifest does not match the checksum in the journey list');", ''],
+  'no-catalogue-check': [JS, "if (await hex(cb) !== J.CATALOG_SHA256) throw new Unverified('the journey list does not match its pinned checksum');", ''],
   'no-display-check': [JS, "if (db.byteLength !== ent.bytes || await hex(db) !== ent.sha256) throw new Unverified('the display file does not match the manifest checksum');", ''],
   'no-content-check': [JS, "if (!Number.isInteger(t) || (i && t <= d.t[i - 1])) throw new Unverified('fix times are not whole seconds in increasing order');", ''],
   'off-no-cancel': [JS, "if (!on) { st.on = false; st.gen++; abortLoad(); pause(false); clearObjs();", "if (!on) { st.on = false; abortLoad(); pause(false); clearObjs();"],
@@ -61,6 +62,12 @@ const BREAKS = {
   'no-pageshow-reset': [JS, "window.addEventListener('pageshow', e => { if (e.persisted && st.on) setOn(false); });", ''],
   'off-keeps-objects': [JS, "st.gen++; abortLoad(); pause(false); clearObjs(); st.d = null;", "st.gen++; abortLoad(); pause(false); st.d = null;"],
   'on-means-drawn': [JS, 'const drawn = () => !!(st.objs && st.objs.line.parent && st.objs.line.visible);', 'const drawn = () => st.on;'],
+  'ignore-join-flags': [JS, "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule && (!d.j || d.j[i] === 1);", "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule;"],
+  'no-class-in-bar': [JS, "    if (d.lc) { const c = d.lc[i], m = st.man.class_meanings[c];", "    if (false) { const c = d.lc[i], m = st.man.class_meanings[c];"],
+  'chooser-keeps-old': [JS, "if (st.on) { setOn(false); setOn(true); } else paint(); });", "paint(); });"],
+  'no-flag-verify': [JS, "if (d.j[i] === 1) { k++; if (d.t[i] - d.t[i - 1] > rule) throw new Unverified('a join flag joins fixes further apart than the rule allows'); } }\n      if (k !== jr.steps_joined) throw new Unverified('the number of joined steps does not match the manifest'); }", "if (d.j[i] === 1) k++; } }"],
+  'no-class-verify': [JS, " || [...d.lc].some(c => !(c in cm))", ''],
+  'link-ignores-id': [JS, "chooser.value = m[1]; st.choice = m[1]; const go", "const go"],
   'drop-key': ['index.html', "['journey', () => ME.journey && ME.journey.drawn()]", "['journey', () => false]"],
   'drop-layers-row': ['layers.js', ", ['Animal journey — dated replay', '#tgl-journey']", ''],
   'sky-keeps-drawn': [JS, 'const i = st.i, vis = !st.sky;', 'const i = st.i, vis = true;'],
@@ -70,14 +77,14 @@ const BREAKS = {
   'no-stop-at-end': [JS, 'if (next >= end) { st.playing = false; seek(end, false); paintCtl(); return; }', 'if (next >= end) { seek(st.d.t[0], true); st.raf = requestAnimationFrame(tick); return; }'],
   'deep-link-switches-on': [JS, "if (row) row.focus(); const c = $('journey-chosen');", "if (row) row.focus(); setOn(true); const c = $('journey-chosen');"],
   'retry-hidden': [JS, "retry.hidden = !(st.on && st.status === 'failed');", 'retry.hidden = true;'],
-  'load-on-open': [JS, "  tgl.addEventListener('click', () => setOn(!st.on));", "  tgl.addEventListener('click', () => setOn(!st.on)); fetch(J.MANIFEST).catch(() => { });"],
-  'population-substituted': ['animals.html', '<p class="an-na" id="an-pop">Not available yet. No population series has been reviewed.</p>', '<p class="an-na" id="an-pop">Population: 7 tracked animals.</p>'],
-  'page-unverified-figures': ['animals.js', 'if (sha !== A.MANIFEST_SHA256) throw 0; ', ''],
+  'load-on-open': [JS, "  tgl.addEventListener('click', () => setOn(!st.on));", "  tgl.addEventListener('click', () => setOn(!st.on)); fetch(J.CATALOG).catch(() => { });"],
+  'population-substituted': ['animals.html', '<p class="small" data-f="sample">34 sharks were tagged in this study. This is a sample size, not a population estimate.</p>', '<p class="small" data-f="sample">Population: 34 sharks.</p>'],
+  'page-unverified-figures': ['animals.js', 'if (await hex(buf) !== e.manifest_sha256) throw 0; ', ''],
   'tab-missing': ['moon.html', '    <a href="animals.html" data-view="animals">Animals</a>\n', ''],
   'replay-moves-clock': [JS, 'st.rt = s; st.rtExact = s; st.i = fixAt(s); show(); paintBar(quiet); }', "st.rt = s; st.rtExact = s; st.i = fixAt(s); show(); paintBar(quiet); const c = $('clock'); if (c) c.firstChild.textContent = '00:00:00'; }"],
 };
 const EXPECT = { 'marker-next-fix': '2a between', 'marker-interpolated': '2a between', 'future-fixes-drawn': '2b between', 'future-line-drawn': '2b between', 'join-over-rule': '12a', 'exact-rule-not-joined': '12a',
-  'no-manifest-check': '10 a manifest that differs', 'no-display-check': '10 a display file with one digit', 'no-content-check': '10 a file with matching checksums whose fix times', 'off-no-cancel': '9e', 'off-no-abort': '9b off', 'age-drops-seconds': '2c 1 h 1 min 1 s', 'no-pagehide-reset': '18c', 'no-pageshow-reset': '18d', 'off-keeps-objects': '8a',
+  'no-manifest-check': '10 a manifest that differs', 'no-catalogue-check': '21a', 'ignore-join-flags': '20b shark', 'no-class-in-bar': '20c shark', 'chooser-keeps-old': '20h', 'no-flag-verify': '21b a join flag changed', 'no-class-verify': '21b a quality class', 'link-ignores-id': '20l', 'no-display-check': '10 a display file with one digit', 'no-content-check': '10 a file with matching checksums whose fix times', 'off-no-cancel': '9e', 'off-no-abort': '9b off', 'age-drops-seconds': '2c 1 h 1 min 1 s', 'no-pagehide-reset': '18c', 'no-pageshow-reset': '18d', 'off-keeps-objects': '8a',
   'on-means-drawn': '6a', 'drop-key': '1h', 'drop-layers-row': '1c', 'sky-keeps-drawn': '6a', 'sky-keeps-playing': '6a', 'hidden-keeps-playing': '7a', 'local-time': '13 visitor in Pacific/Auckland', 'no-stop-at-end': '5c',
   'deep-link-switches-on': '14b', 'retry-hidden': '11a', 'load-on-open': '1b', 'population-substituted': '16c', 'page-unverified-figures': '16h', 'tab-missing': '17a moon.html at 390', 'replay-moves-clock': '3a' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
@@ -86,6 +93,11 @@ const failed = [];
 // ---------- files and fixtures
 const MAN = fs.readFileSync(path.join(ROOT, 'assets/animals/zebra-botswana-R1.manifest.json')), MANJ = JSON.parse(MAN);
 const DISP = fs.readFileSync(path.join(ROOT, 'assets/animals/' + MANJ.journeys[0].file)), D = JSON.parse(DISP);
+const CAT = fs.readFileSync(path.join(ROOT, 'assets/animals/journeys-R1.catalog.json')), CATJ = JSON.parse(CAT), CAT_PIN = sha(CAT), ZID = 'zebra-botswana-Z3866';
+const real = name => fs.readFileSync(path.join(ROOT, 'assets/animals', name));
+const JOUR = Object.fromEntries(CATJ.journeys.map(e => { const m = JSON.parse(real(e.manifest)); return [e.id, { e, m, j: m.journeys[0], d: JSON.parse(real(m.journeys[0].file)) }]; }));
+/** the journey list as the page must see it when a made-up file stands in for one journey: that journey's manifest checksum swapped */
+const fxCatalog = () => Buffer.from(JSON.stringify({ ...CATJ, journeys: CATJ.journeys.map(e => e.id === (S.fx.id || ZID) ? { ...e, manifest_sha256: sha(S.fx.manifest) } : e) }));
 const PIN = sha(MAN), RULE = MANJ.gap_rule.max_join_seconds, N = D.t.length;
 const lastAt = s => { let k = -1; for (let i = 0; i < N && D.t[i] <= s; i++) k = i; return k; };                      // plain scan, not the page's search
 const joinsTo = (t, i) => { let k = 0; for (let j = 1; j <= i; j++) if (t[j] - t[j - 1] <= RULE) k++; return k; };
@@ -104,24 +116,28 @@ function fixture(times) {
 const BACKDROP = (() => { const p = new PNG({ width: 64, height: 32 }); for (let i = 0; i < p.data.length; i += 4) { p.data[i] = 10; p.data[i + 1] = 30; p.data[i + 2] = 60; p.data[i + 3] = 255; } return PNG.sync.write(p); })();
 
 // ---------- server: the real files; S lets one step swap or fail the two animal files
-const S = { fx: null, manifest: null, display: null, manifestStatus: 200, displayStatus: 200, hold: null, holdManifest: null, keepable: false, log: [] };
+const S = { fx: null, manifest: null, display: null, manifestStatus: 200, displayStatus: 200, hold: null, holdManifest: null, keepable: false, log: [], cat: 0, target: null };
 const TYPES = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json' };
 function served(f) { let t = fs.readFileSync(path.join(ROOT, f), 'utf8');
   if (BREAK && BREAKS[BREAK][0] === f) { const [, a, b] = BREAKS[BREAK]; if (t.split(a).length !== 2) { console.log('FAIL  break did not apply: ' + BREAK); process.exit(1); } t = t.replace(a, b); }
-  if (S.fx && (f === JS || f === 'animals.js')) { if (t.split(PIN).length !== 2) { console.log('FAIL  pinned checksum not found in ' + f); process.exit(1); } t = t.replace(PIN, sha(S.fx.manifest)); }
+  if (S.fx && (f === JS || f === 'animals.js')) { if (t.split(CAT_PIN).length !== 2) { console.log('FAIL  pinned checksum not found in ' + f); process.exit(1); } t = t.replace(CAT_PIN, sha(fxCatalog())); }
   return t; }
 const srv = http.createServer(async (q, s) => {
   const p = decodeURIComponent(q.url.split('?')[0]), f = p.replace(/^\//, '') || 'index.html';
   const send = (code, type, body) => { s.writeHead(code, { 'content-type': type, 'cache-control': S.keepable ? 'no-cache' : 'no-store' }); s.end(body); };   // keepable: lets the browser keep a page for Back (section 10)
-  if (p.startsWith('/assets/animals/')) { S.log.push(p);
-    if (p.endsWith('.manifest.json')) { if (S.holdManifest) await S.holdManifest; if (S.manifestStatus !== 200) return send(S.manifestStatus, 'text/plain', 'no'); return send(200, 'application/json', S.fx ? S.fx.manifest : S.manifest || MAN); }
+  if (p.startsWith('/assets/animals/')) { const name = p.split('/').pop(), id = (S.fx && S.fx.id) || S.target || ZID, T = JOUR[id];     // overrides apply to ONE journey (the zebra unless S.target or S.fx.id says otherwise)
+    if (name.endsWith('.catalog.json')) { S.cat++; return send(200, 'application/json', S.fx ? fxCatalog() : CAT); }
+    S.log.push(p);
+    if (name.endsWith('.manifest.json')) { if (name !== T.e.manifest) return send(200, 'application/json', real(name));
+      if (S.holdManifest) await S.holdManifest; if (S.manifestStatus !== 200) return send(S.manifestStatus, 'text/plain', 'no'); return send(200, 'application/json', S.fx ? S.fx.manifest : S.manifest || real(name)); }
+    if (name !== T.j.file && !(S.fx && name === 'fx.json')) return fs.existsSync(path.join(ROOT, 'assets/animals', name)) ? send(200, 'application/json', real(name)) : send(404, 'text/plain', '');
     if (S.hold) await S.hold; if (S.displayStatus !== 200) return send(S.displayStatus, 'text/plain', 'no');
-    return send(200, 'application/json', S.fx ? S.fx.display : S.display || DISP); }
+    return send(200, 'application/json', S.fx ? S.fx.display : S.display || real(name)); }
   if (!fs.existsSync(path.join(ROOT, f))) return send(404, 'text/plain', '');
   const ext = path.extname(f); if (TYPES[ext] && ext !== '.json') return send(200, TYPES[ext], served(f));
   send(200, TYPES[ext] || 'application/octet-stream', fs.readFileSync(path.join(ROOT, f)));
 });
-const reset = () => Object.assign(S, { fx: null, manifest: null, display: null, manifestStatus: 200, displayStatus: 200, hold: null, holdManifest: null, keepable: false, log: [] });
+const reset = () => Object.assign(S, { fx: null, manifest: null, display: null, manifestStatus: 200, displayStatus: 200, hold: null, holdManifest: null, keepable: false, log: [], cat: 0, target: null });
 
 let BASE;
 async function ctxFor(browser, vp, extra = {}) {
@@ -162,11 +178,11 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
   if (want(1)) { reset(); const { ctx, page, errs, reqs } = await open(browser);
     let s = await state(page);
     ok('1a off on load: switch off, nothing in the scene, no bar, not in the Key', s.sw === 'false' && !s.on && s.scene === 0 && s.barHidden && !s.leg && s.keyN === '0 layers' && s.chip === 'off' && !s.hint, s);
-    ok('1b nothing from assets/animals is requested before the switch', S.log.length === 0 && !reqs.some(u => u.includes('/assets/animals/')), S.log);
+    ok('1b nothing from assets/animals is requested before the switch', S.log.length === 0 && S.cat === 0 && !reqs.some(u => u.includes('/assets/animals/')), S.log);
     ok('1c the Layers panel lists the journey as a dated replay', await page.evaluate(() => [...document.querySelectorAll('#layers-list [data-for]')].some(r => r.dataset.for === '#tgl-journey' && r.textContent.trim() === 'Animal journey — dated replay')));
     const before = reqs.length;
     await switchOn(page); s = await state(page);
-    ok('1d the switch fetches the manifest and the display file, once each, and nothing else', S.log.length === 2 && S.log[0].endsWith('zebra-botswana-R1.manifest.json') && S.log[1].endsWith(MANJ.journeys[0].file) && reqs.slice(before).filter(u => !u.startsWith(HUB) && !/nasa\.gov/.test(u)).every(u => u.includes('/assets/animals/')), [S.log, reqs.slice(before)]);
+    ok('1d the switch fetches the journey list, the manifest and the display file, once each, and nothing else', S.cat === 1 && S.log.length === 2 && S.log[0].endsWith('zebra-botswana-R1.manifest.json') && S.log[1].endsWith(MANJ.journeys[0].file) && reqs.slice(before).filter(u => !u.startsWith(HUB) && !/nasa\.gov/.test(u)).every(u => u.includes('/assets/animals/')), [S.log, reqs.slice(before)]);
     ok('1e ready: three objects, every fix loaded, marker on the first recorded fix, no line yet', s.status === 'ready' && s.scene === 3 && s.n === N && s.i === 0 && s.objects.fixesShown === 1 && s.objects.lineShown === 0 && s.objects.markerVisible && near(s.objects.marker, await coordsOf(page, D.lat[0], D.lon[0])), s);
     ok('1f the bar gives the replay time and the first recorded fix, to the second, in UTC', s.bar === `Replay time (recorded) ${utc(D.t[0])} · First recorded fix ${utc(D.t[0])}` && /25 Oct 2007 08:01:53 UTC/.test(s.bar), s.bar);
     ok('1g the replay line says other layers are not matched; the rule line states the join rule and whose rule it is', s.note === NOTE && s.rule === 'The line joins recorded fixes. The path between fixes was not recorded. Mother Earth does not join fixes more than 3 hours apart. This is a display rule, not part of the study.', [s.note, s.rule]);
@@ -265,7 +281,7 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
     ok('9b5 on again straight away: the first request was aborted, the second load drew one set of objects', aborted.length === 1 && s.scene === 3 && s.on && s.i === 0, [aborted, s.scene]);
     await page.click('#tgl-journey'); await page.waitForTimeout(300);
     // an answer that arrives although the request was told to stop (here: a fetch that ignores the stop signal) is refused
-    await page.evaluate(() => { const f = window.fetch; window.__late = 0; window.fetch = (u, o) => f(u, { ...o, signal: undefined }).then(r => { if (String(u).includes('assets/animals/') && !String(u).includes('manifest')) window.__late++; return r; }); });
+    await page.evaluate(() => { const f = window.fetch; window.__late = 0; window.fetch = (u, o) => f(u, { ...o, signal: undefined }).then(r => { if (String(u).includes('assets/animals/') && !String(u).includes('manifest') && !String(u).includes('catalog')) window.__late++; return r; }); });
     S.log = []; let rel4; S.hold = new Promise(r => { rel4 = r; }); await page.click('#tgl-journey'); while (S.log.length < 2) await page.waitForTimeout(50); await page.click('#tgl-journey'); rel4(); S.hold = null;
     await page.waitForFunction(() => window.__late === 1, null, { timeout: 15000 }).catch(() => { }); await page.waitForTimeout(1200); s = await state(page);
     ok('9e the display file arrives after off (the answer really came back) and is refused: nothing drawn, still off', await page.evaluate(() => window.__late) === 1 && !s.on && s.scene === 0 && s.barHidden && !s.leg && s.status === 'off', [await page.evaluate(() => window.__late), s]);
@@ -324,7 +340,7 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
   if (want(6)) { reset(); const { ctx, page } = await open(browser, undefined, '#journey=zebra-botswana-Z3866'); await page.waitForTimeout(800);
     const r = await page.evaluate(() => ({ panel: !document.getElementById('layers-panel').hidden, focus: document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.for : null, chosen: !document.getElementById('journey-chosen').hidden, s: ME.journey.state(), scene: ME.journey.sceneCount(), sw: document.getElementById('tgl-journey').getAttribute('aria-checked') }));
     ok('14a the link opens Layers with the journey row focused and a note on its card', r.panel && r.focus === '#tgl-journey' && r.chosen, r);
-    ok('14b the link switches nothing on and requests no journey file', !r.s.on && r.scene === 0 && r.sw === 'false' && S.log.length === 0, [r, S.log]);
+    ok('14b the link switches nothing on and requests no journey file', !r.s.on && r.scene === 0 && r.sw === 'false' && S.log.length === 0 && S.cat === 0, [r, S.log]);
     await page.keyboard.press('Enter'); await page.waitForFunction(() => ME.journey.state().status === 'ready', null, { timeout: 10000 }).catch(() => { }); ok('14c pressing Enter on the focused row switches it on', (await state(page)).scene === 3);
     await ctx.close();
     reset(); const o = await open(browser); const r2 = await o.page.evaluate(() => ({ panel: !document.getElementById('layers-panel').hidden, chosen: !document.getElementById('journey-chosen').hidden })); ok('14d without the link: Layers stays closed, no note', !r2.panel && !r2.chosen, r2); await o.ctx.close(); }
@@ -345,27 +361,34 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
     ok(`15d ${w} px: after "Journey area" the marker is on screen in the part of the globe the bar leaves free`, r.sc.y > r.free[0] && r.sc.y < r.free[1] && r.sc.x > 0 && r.sc.x < w, [r.sc, r.free]);
     await ctx.close(); }
 
-  // ===== 8. the Animals page and the tab on every page =====
+  // ===== 8. the Animals page: three study cards =====
   if (want(8)) { reset(); const ctx = await ctxFor(browser, { width: 1280, height: 860 }), page = await ctx.newPage(), errs = []; page.on('pageerror', e => errs.push(String(e).slice(0, 200)));
-    await page.goto(BASE + '/animals.html', { waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => !document.getElementById('an-facts').hidden, null, { timeout: 15000 });
-    const r = await page.evaluate(() => { const t = id => document.getElementById(id).textContent; return { state: t('an-state'), animals: t('an-animals'), shown: t('an-shown'), period: t('an-period'), notdrawn: t('an-notdrawn'), unc: t('an-unc'), rule: t('an-rule'), doi: document.querySelector('#an-doi a').href, lic: t('an-lic'), cite: t('an-cite'), cons: t('an-cons'), pop: t('an-pop'), sample: t('an-sample'), go: document.getElementById('an-go').getAttribute('href'), goText: t('an-go'),
-      tab: document.querySelector('nav.tabs a[aria-current="page"]').textContent, head: document.querySelector('.top .promise').textContent, title: document.title, menu: document.querySelector('#menu-list a[aria-current="page"]').textContent, all: document.querySelector('main').innerText, scripts: [...document.scripts].map(s => s.src.split('/').pop().split('?')[0]) }; });
-    ok('16a the study card is filled from the verified manifest: animals, shown, period, not drawn', r.state === 'Study file verified against its checksum.' && r.animals === '7 animals were tracked in this study. This is a sample size, not a population estimate.' && r.shown === '1 animal: Z3866, 13,045 recorded fixes.' && r.period === 'First recorded fix 25 Oct 2007 08:01:53 UTC. Last recorded fix 22 Oct 2008 23:00:45 UTC: the tracking record ends there.' && r.notdrawn === 'For this animal: 3 fix attempts without a position and 0 fixes flagged by the source. In the whole study: 17 and 1.', r);
-    ok('16b uncertainty, line rule, dataset link, licence and the citation as the repository gives it', r.unc === 'Location uncertainty: not supplied by the dataset.' && /Mother Earth does not join fixes more than 3 hours apart\. This is a display rule, not part of the study\. Gaps longer than the rule for this animal: 0\./.test(r.rule) && r.doi === 'https://doi.org/10.5441/001/1.f3550b4f' && /^CC0 1\.0 Universal/.test(r.lic) && r.cite === MANJ.citation_as_given, r);
-    ok('16c conservation and population are "Not available yet"; the tag count is called a sample size', r.cons === 'Not available yet. No assessment source has been reviewed for display on Mother Earth.' && r.pop === 'Not available yet. No population series has been reviewed.' && r.sample === '7 animals were tracked in this study. This is a sample size, not a population estimate.', [r.cons, r.pop, r.sample]);
-    ok('16d nothing on the page offers a population figure, a trend or a status', !/population (of|is|trend|size:)|\bincreasing\b|\bdecreasing\b|\bendangered\b|\bvulnerable\b|\bleast concern\b|Population: \d/i.test(r.all), r.all.match(/.{0,40}(population (of|is|trend)|Population: \d).{0,40}/i));
-    ok('16e the link is "Choose this journey on Earth now" and points at the switch, not at a drawn journey', r.goText === 'Choose this journey on Earth now' && r.go === 'index.html#journey=zebra-botswana-Z3866', [r.goText, r.go]);
-    ok('16f the Animals tab and Menu entry are marked current; the page loads neither the globe nor the journey file', r.tab === 'Animals' && r.menu === 'Animals' && r.head === 'Animals — recorded journeys' && r.title === 'Mother Earth — Animals' && r.scripts.join() === 'animals.js' && S.log.length === 1 && S.log[0].endsWith('.manifest.json') && errs.length === 0, [r.tab, r.menu, r.scripts, S.log, errs]);
-    await page.click('#an-go'); await page.waitForFunction(() => window.ME && ME.journey && !document.getElementById('layers-panel').hidden, null, { timeout: 30000 }).catch(() => { });
-    ok('16g following the link lands on Earth now with the switch shown and off', await page.evaluate(() => location.pathname.endsWith('index.html') && !document.getElementById('layers-panel').hidden && document.getElementById('tgl-journey').getAttribute('aria-checked') === 'false' && ME.journey.sceneCount() === 0));
+    const cards = pg => pg.evaluate(() => Object.fromEntries([...document.querySelectorAll('.an-study[data-journey]')].map(c => [c.dataset.journey, Object.fromEntries([...c.querySelectorAll('[data-f]')].map(e => [e.dataset.f, e.dataset.f === 'facts' ? !e.hidden : e.dataset.f === 'go' ? e.getAttribute('href') + '|' + e.textContent : e.dataset.f === 'doi' ? (e.querySelector('a') || {}).href : e.textContent]))])));
+    const settled = pg => pg.waitForFunction(() => [...document.querySelectorAll('.an-study [data-f="state"]')].every(e => e.textContent !== 'Checking the study file…'), null, { timeout: 15000 });
+    await page.goto(BASE + '/animals.html', { waitUntil: 'domcontentloaded' }); await settled(page);
+    const c = await cards(page), z = c[ZID], sh = c['white-shark-sa-118845'], wh = c['false-killer-whale-hawaii-98364'];
+    const r = await page.evaluate(() => ({ tab: document.querySelector('nav.tabs a[aria-current="page"]').textContent, head: document.querySelector('.top .promise').textContent, title: document.title, menu: document.querySelector('#menu-list a[aria-current="page"]').textContent,
+      all: document.querySelector('main').innerText, scripts: [...document.scripts].map(s => s.src.split('/').pop().split('?')[0]), archive: document.getElementById('an-archive').textContent, exp: document.getElementById('an-experimental').textContent }));
+    ok('16a three cards, each verified and filled: zebra figures as before', Object.keys(c).length === 3 && [z, sh, wh].every(x => x.state === 'Study file verified against its checksum.' && x.facts) && z.animals === '7 animals were tracked in this study. This is a sample size, not a population estimate.' && z.shown === '1 animal: Z3866, 13,045 recorded fixes.' && z.period === 'First recorded fix shown 25 Oct 2007 08:01:53 UTC. Last recorded fix shown 22 Oct 2008 23:00:45 UTC: the replay ends there.' && z.notdrawn === 'For this animal: 3 fix attempts without a position and 0 fixes flagged by the source. In the whole study: 17 and 1.', [z, sh.state, wh.state]);
+    ok('16b zebra: uncertainty, line rule, dataset link, licence, citation as the repository gives it', z.unc === 'Location uncertainty: not supplied by the dataset.' && /Mother Earth does not join fixes more than 3 hours apart\. This is a display rule, not part of the study\. Gaps longer than the rule for this animal: 0\./.test(z.rule) && z.doi === 'https://doi.org/10.5441/001/1.f3550b4f' && /^CC0 1\.0 Universal/.test(z.lic) && z.cite === MANJ.citation_as_given, z);
+    const S1 = JOUR['white-shark-sa-118845'], W1 = JOUR['false-killer-whale-hawaii-98364'];
+    ok('16b2 shark: the stage-by-stage statement, the counts, the experimental and not-a-route wording, nominal-error wording, CC BY credit with the changes made, tag number not a name', sh.shown === '755 recorded fixes of one shark (tag 118845). 69% of them are the two weakest Argos classes, A and B.' && sh.notdrawn === S1.m.card.done && /^1,004 recorded fixes for this tag\. Mother Earth left out 208 under its own speed-consistency rule \(3 m\/s, the study authors' limit; the rule favours better-rated fixes, is experimental and can remove a correct fix\), 1 more than 72 hours from any other, and 40 that fall on land in Natural Earth's 1:10m map\. 755 are shown\. Fixes more than 12 hours apart, and 2 pairs whose joining line would cross land in that map, are not joined\.$/.test(sh.notdrawn) && /These are nominal estimates, not guaranteed limits: real errors can be larger\..*This is not the study's modelled track, and not a reconstruction of where the shark went\./.test(sh.unc) && /616 of 754 steps\. It is not the shark's route\./.test(sh.rule) && sh.doi === 'https://doi.org/10.5281/zenodo.5575189' && sh.lic === 'CC BY 4.0' && /^Kock, Alison; .*Photopoulou, Theoni \(2021\)\. Satellite tracking data of white sharks/.test(sh.cite) && /Changes made to the dataset \(CC BY 4\.0\)/.test(sh.simp) && /Natural Earth 1:10m land polygons.*at that scale only/.test(sh.land) && S1.d.lc.length === 755, sh);
+    ok('16b3 the shark card and page never show the given name from the file', !/\bAlbert\b|DeployID/.test(r.all) && !/[A-Z][a-z]+\b.*\(shark\)/.test(sh.shown));
+    ok('16b4 whale: its statement and counts, the earlier end date explained, citation as the file gives it', wh.shown === '661 recorded fixes of one whale (tag 98364). 54% of them are Argos classes 0, A or B.' && /left out 1 fix the satellite system marks invalid, 30 fixes under its own speed-consistency rule \(20 km\/h, favouring better-rated fixes; an experimental rule that can remove a correct fix\), 2 fixes more than 72 hours from any other, and 0 on land in Natural Earth's 1:10m map\. 661 are shown\. Fixes more than 6 hours apart are not joined/.test(wh.notdrawn) && /so the replay ends 12 Feb 2014\./.test(wh.unc) && /554 of 660 steps/.test(wh.rule) && /^Baird, Robin; .*\[Dataset\]\. US Integrated Ocean Observing System \(IOOS\) Animal Telemetry Network \(ATN\)\.$/.test(wh.cite) && wh.period === 'First recorded fix shown 23 Oct 2013 03:02:00 UTC. Last recorded fix shown 12 Feb 2014 14:51:34 UTC: the replay ends there.', wh);
+    ok('16c on every card conservation and population are "Not available yet", and the tag count is a sample size', [z, sh, wh].every(x => x.cons === 'Not available yet. No assessment source has been reviewed for display on Mother Earth.' && x.pop === 'Not available yet. No population series has been reviewed.') && z.sample === '7 animals were tracked in this study. This is a sample size, not a population estimate.' && sh.sample === '34 sharks were tagged in this study. This is a sample size, not a population estimate.' && wh.sample === 'This file is the record of one tagged whale. One animal is not a population estimate.', [z.sample, sh.sample, wh.sample, sh.pop]);
+    ok('16d nothing on the page offers a population figure, a trend or a status', !/population (of|is|trend|size:)|\bincreasing\b|\bdecreasing\b|\bendangered\b|\bvulnerable\b|\bleast concern\b|Population: \d/i.test(r.all), r.all.match(/.{0,40}(population (of|is|trend)|Population: \d|endangered).{0,40}/i));
+    ok('16e each link is "Choose this journey on Earth now" and points at the switch with that journey chosen', z.go === 'index.html#journey=zebra-botswana-Z3866|Choose this journey on Earth now' && sh.go === 'index.html#journey=white-shark-sa-118845|Choose this journey on Earth now' && wh.go === 'index.html#journey=false-killer-whale-hawaii-98364|Choose this journey on Earth now', [z.go, sh.go, wh.go]);
+    ok('16f Animals tab and Menu entry current; the page says this is an archive feature and that the sea journeys are experimental; it loads the journey list and three manifests, no display file, no globe', r.tab === 'Animals' && r.menu === 'Animals' && r.head === 'Animals — recorded journeys' && r.title === 'Mother Earth — Animals' && r.scripts.join() === 'animals.js' && /An archive feature\. Every other layer on Mother Earth shows live or regularly updated data\./.test(r.archive) && /experimental\..*not a reconstruction of where the animal went/.test(r.exp) && S.cat === 1 && S.log.length === 3 && S.log.every(u => u.endsWith('.manifest.json')) && errs.length === 0, [r.tab, r.scripts, S.cat, S.log, errs]);
+    await page.click('.an-study[data-journey="white-shark-sa-118845"] [data-f="go"]'); await page.waitForFunction(() => window.ME && ME.journey && !document.getElementById('layers-panel').hidden, null, { timeout: 30000 }).catch(() => { });
+    ok('16g following the shark link lands on Earth now with the switch shown and off, the shark chosen, nothing drawn', await page.evaluate(() => location.pathname.endsWith('index.html') && !document.getElementById('layers-panel').hidden && document.getElementById('tgl-journey').getAttribute('aria-checked') === 'false' && ME.journey.sceneCount() === 0 && document.getElementById('journey-choose').value === 'white-shark-sa-118845' && ME.journey.state().choice === 'white-shark-sa-118845'));
     await ctx.close();
-    // a manifest that fails its checksum: no figure
+    // one manifest that fails its checksum: that card shows no figure, the others are unaffected
     reset(); S.manifest = Buffer.from(MAN.toString().replace(/"animals_sampled": ?7/, m => m.replace('7', '70')));
-    const c2 = await ctxFor(browser, { width: 1280, height: 860 }), p2 = await c2.newPage(); await p2.goto(BASE + '/animals.html', { waitUntil: 'domcontentloaded' }); await p2.waitForFunction(() => document.getElementById('an-state').textContent !== 'Checking the study file…', null, { timeout: 15000 });
-    const b = await p2.evaluate(() => ({ state: document.getElementById('an-state').textContent, hidden: document.getElementById('an-facts').hidden, text: document.querySelector('main').innerText }));
-    ok('16h a manifest that fails its checksum: "could not be verified", the table stays hidden, no changed figure appears', sha(S.manifest) !== PIN && b.state === 'Study details could not be verified. No figure is shown.' && b.hidden && !/\b70\b/.test(b.text), b.state);
-    S.manifest = null; S.manifestStatus = 500; await p2.reload({ waitUntil: 'domcontentloaded' }); await p2.waitForFunction(() => document.getElementById('an-state').textContent !== 'Checking the study file…', null, { timeout: 15000 });
-    ok('16i a manifest that cannot be loaded: says so, the table stays hidden', await p2.evaluate(() => document.getElementById('an-state').textContent === 'Study details could not be loaded. No figure is shown.' && document.getElementById('an-facts').hidden));
+    const c2 = await ctxFor(browser, { width: 1280, height: 860 }), p2 = await c2.newPage(); await p2.goto(BASE + '/animals.html', { waitUntil: 'domcontentloaded' }); await settled(p2);
+    let b = await cards(p2);
+    ok('16h a manifest that fails its checksum: that card says "could not be verified", its table stays hidden, the changed figure does not appear; the other two cards are filled', sha(S.manifest) !== PIN && b[ZID].state === 'Study details could not be verified. No figure is shown.' && !b[ZID].facts && !/\b70\b/.test(await p2.evaluate(() => document.querySelector('.an-study[data-journey="zebra-botswana-Z3866"]').innerText)) && b['white-shark-sa-118845'].facts && b['false-killer-whale-hawaii-98364'].facts, b[ZID]);
+    S.manifest = null; S.manifestStatus = 500; await p2.reload({ waitUntil: 'domcontentloaded' }); await settled(p2); b = await cards(p2);
+    ok('16i a manifest that cannot be loaded: says so, the table stays hidden', b[ZID].state === 'Study details could not be loaded. No figure is shown.' && !b[ZID].facts && b['white-shark-sa-118845'].facts, b[ZID]);
     await c2.close(); }
   // tabs and overflow on every page at phone and desktop widths
   if (want(9)) for (const w of [360, 390, 430, 480, 481, 721, 760, 761, 768, 1140, 1280]) { reset(); const ctx = await ctxFor(browser, { width: w, height: 800 });
@@ -398,6 +421,76 @@ const near = (a, b) => a && b && a.every((v, i) => Math.abs(v - b[i]) < 1e-3);
     await page.click('#tgl-journey'); await page.waitForTimeout(500); const a2 = await snap(), k2 = await page.evaluate(() => document.getElementById('key-n').textContent);
     ok('19c journey off: the same again, and the Key count is back', JSON.stringify(a2) === JSON.stringify(a0) && k2 === k0, [a0, a2, k0, k2]);
     await ctx.close(); }
+
+  // ===== 12. the chooser and the two Argos journeys =====
+  if (want(12)) { const SID = 'white-shark-sa-118845', WID = 'false-killer-whale-hawaii-98364';
+    const choose = (page, id) => page.selectOption('#journey-choose', id);
+    const expectJoins = (X, i) => { let k = 0; for (let q = 1; q <= i; q++) if (X.d.t[q] - X.d.t[q - 1] <= X.m.gap_rule.max_join_seconds && X.d.j[q] === 1) k++; return k; };
+    const clsWords = (X, c) => X.m.class_meanings[c] === 'no estimate' ? 'no error estimate' : 'nominal error ' + X.m.class_meanings[c];
+    reset(); const { ctx, page, errs } = await open(browser);
+    await choose(page, SID); await page.waitForTimeout(300); let s = await state(page);
+    ok('20a choosing a journey while the switch is off requests nothing and draws nothing', s.choice === SID && !s.on && s.scene === 0 && S.cat === 0 && S.log.length === 0, [s.choice, S.log]);
+    for (const [id, name] of [[SID, 'shark'], [WID, 'whale']]) { const X = JOUR[id], d = X.d, n = d.t.length; S.log = []; S.cat = 0;
+      if ((await state(page)).on) await page.click('#tgl-journey'); await choose(page, id); await switchOn(page); s = await state(page);
+      ok(`20b ${name}: the switch loads the chosen journey's own files; every fix of the file, three objects, in the Key`, s.choice === id && s.n === n && s.scene === 3 && s.leg && s.keyN === '1 layer' && S.cat === 1 && S.log.length === 2 && S.log[0].endsWith(X.e.manifest) && S.log[1].endsWith(X.j.file) && s.objects.segments === X.j.steps_joined && s.objects.segments === expectJoins(X, n - 1), [s.n, n, s.objects, S.log]);
+      ok(`20c ${name}: the bar gives the fix's Argos class with its nominal-error wording; the card carries the statement of what was left out`, s.bar === `Replay time (recorded) ${utc(d.t[0])} · First recorded fix ${utc(d.t[0])} · Argos class ${d.lc[0]} (${clsWords(X, d.lc[0])})` && s.cls === d.lc[0] && s.card.includes(X.m.card.done) && s.card.includes('These are nominal estimates, not guaranteed limits') && s.card.includes(X.m.card.not_route) && s.note === `Replay: recorded ${utc(d.t[0]).replace(/ \d\d:\d\d:\d\d UTC/, '')} to ${utc(d.t[n - 1]).replace(/ \d\d:\d\d:\d\d UTC/, '')}. Other layers on the globe retain their own dates and times; they are not matched to this journey.` && s.rule.includes(X.m.gap_rule.statement), [s.bar, s.note, s.rule]);
+      // steps: joined only when within the limit AND flagged by the build; at several replay times
+      const lim = X.m.gap_rule.max_join_seconds, refused = []; for (let q = 1; q < n; q++) if (d.t[q] - d.t[q - 1] <= lim && d.j[q] === 0) refused.push(q);
+      const picks = [1, 2, Math.floor(n / 3), Math.floor(n / 2), n - 2, n - 1].concat(refused.slice(0, 2)); let bad = [];
+      for (const i of picks) { await page.evaluate(x => ME.journey.seek(x), d.t[i]); const q = await state(page);
+        if (q.i !== i || q.objects.fixesShown !== i + 1 || q.objects.lineShown !== expectJoins(X, i) || q.cls !== d.lc[i] || !q.bar.includes(`Argos class ${d.lc[i]} (${clsWords(X, d.lc[i])})`) || !near(q.objects.marker, q.objects.fixXYZ)) bad.push([i, q.i, q.objects.lineShown, expectJoins(X, i), q.cls]); }
+      ok(`20d ${name}: at ${picks.length} replay times the marker is on the right fix, the class shown is that fix's, and exactly the build's joined steps up to then are drawn`, bad.length === 0, bad);
+      ok(`20e ${name}: steps within the time limit that the build refused for land: ${refused.length}, as the manifest says, and they are not drawn`, refused.length === X.j.steps_refused_for_land && (name !== 'shark' || refused.length === 2), [refused.length, X.j.steps_refused_for_land]);
+      // the line that is drawn: straight segments between the page's positions for exactly the joined pairs, in order
+      await page.evaluate(x => ME.journey.seek(x), d.t[n - 1]);
+      const g = await page.evaluate(([la, lo, J, lim2, T]) => { let line = null; ME.globe().scene().traverse(o => { if (o.__journey === 'line') line = o; }); const a = line.geometry.attributes.position.array, G = ME.globe(); let k = 0, wrong = 0, worst = 0;
+        const unit = (lat, lng) => { const p = lat * Math.PI / 180, l = lng * Math.PI / 180; return [Math.cos(p) * Math.cos(l), Math.cos(p) * Math.sin(l), Math.sin(p)]; };
+        for (let i = 1; i < la.length; i++) { if (!(T[i] - T[i - 1] <= lim2 && J[i] === 1)) continue; const A = G.getCoords(la[i - 1], lo[i - 1], 0.004), B = G.getCoords(la[i], lo[i], 0.004), o = k * 9; k++;
+          const v = [A.x, A.y, A.z, B.x, B.y, B.z, B.x, B.y, B.z]; for (let q = 0; q < 9; q++) if (Math.abs(a[o + q] - v[q]) > 1e-3) { wrong++; break; }
+          // the middle of the drawn chord, seen from above, against the middle of the path the build tested (average of the two unit vectors)
+          const mid = G.toGeoCoords({ x: (A.x + B.x) / 2, y: (A.y + B.y) / 2, z: (A.z + B.z) / 2 }), u1 = unit(la[i - 1], lo[i - 1]), u2 = unit(la[i], lo[i]), m = u1.map((x, q) => x + u2[q]), len = Math.hypot(...m);
+          const lat = Math.asin(m[2] / len) * 180 / Math.PI, lng = Math.atan2(m[1], m[0]) * 180 / Math.PI; worst = Math.max(worst, Math.abs(mid.lat - lat), Math.abs(((mid.lng - lng + 540) % 360) - 180)); }
+        return { segments: k, vertices: a.length / 9, wrong, worst, drawn: line.geometry.drawRange.count / 3 }; }, [d.lat, d.lon, d.j, lim, d.t]);
+      ok(`20f ${name}: the drawn line is exactly one straight segment per joined step, between the page's positions of the two fixes, and nothing else`, g.segments === X.j.steps_joined && g.vertices === g.segments && g.wrong === 0 && g.drawn === g.segments, g);
+      ok(`20g ${name}: seen from above, the middle of every drawn segment lies on the path the build tested for land (within 0.00001°)`, g.worst < 1e-5, g.worst); }
+    // switching the chooser while on: the old journey is cleared and the new one loaded
+    S.log = []; await choose(page, ZID); await page.waitForFunction(() => ME.journey.state().status === 'ready' && ME.journey.state().n === 13045, null, { timeout: 12000 }).catch(() => { }); s = await state(page);
+    ok('20h choosing another journey while on: the switch stays on, the old drawing is gone, one set of objects for the new journey, its own bar text (no Argos class for the GPS zebra)', s.on && s.sw === 'true' && s.scene === 3 && s.n === N && s.choice === ZID && s.cls === null && !/Argos class/.test(s.bar) && s.keyN === '1 layer' && S.log.length === 2 && S.log[1].endsWith(MANJ.journeys[0].file), [s.n, s.scene, s.bar, S.log]);
+    await page.evaluate(() => ME.journey.play()); await page.waitForTimeout(200); await choose(page, WID); await page.waitForFunction(() => ME.journey.state().status === 'ready' && ME.journey.state().n === 661, null, { timeout: 12000 }).catch(() => { }); s = await state(page);
+    ok('20i choosing during playback: playback stops, the new journey starts at its first fix, paused', !s.playing && s.i === 0 && s.n === 661 && s.scene === 3 && s.play === 'Play', s);
+    // choosing while a load is in flight: the held request is aborted, the newly chosen journey is what ends up drawn
+    await page.click('#tgl-journey'); await choose(page, SID); S.target = SID; S.log = []; let rel; S.hold = new Promise(r => { rel = r; }); const ab = []; page.on('requestfailed', r => { if (r.url().includes('/assets/animals/')) ab.push(r.url().split('/').pop()); });
+    await page.click('#tgl-journey'); while (S.log.length < 2) await page.waitForTimeout(50); await choose(page, WID); await page.waitForFunction(() => ME.journey.state().status === 'ready', null, { timeout: 12000 }).catch(() => { }); rel(); S.hold = null; await page.waitForTimeout(1000); s = await state(page);
+    ok('20j choosing while the first journey is still loading: its request is aborted and only the newly chosen journey is drawn', ab.includes(JOUR[SID].j.file) && s.choice === WID && s.n === 661 && s.scene === 3 && s.on, [ab, s.n, s.scene]);
+    ok('20k no page error', errs.length === 0, errs);
+    await ctx.close();
+    // the deep link chooses the journey named in it, and nothing else
+    for (const id of [SID, WID]) { reset(); const o = await open(browser, undefined, '#journey=' + id); await o.page.waitForTimeout(800); const r = await o.page.evaluate(() => ({ v: document.getElementById('journey-choose').value, c: ME.journey.state().choice, on: ME.journey.state().on, scene: ME.journey.sceneCount(), panel: !document.getElementById('layers-panel').hidden, chosen: !document.getElementById('journey-chosen').hidden }));
+      ok(`20l the link for ${id} chooses it, shows the switch, switches nothing on and requests nothing`, r.v === id && r.c === id && !r.on && r.scene === 0 && r.panel && r.chosen && S.cat === 0 && S.log.length === 0, r); await o.ctx.close(); }
+    { reset(); const o = await open(browser, undefined, '#journey=not-a-journey'); await o.page.waitForTimeout(600); const r = await o.page.evaluate(() => ({ v: document.getElementById('journey-choose').value, panel: !document.getElementById('layers-panel').hidden })); ok('20m a link naming no known journey changes nothing', r.v === ZID && !r.panel, r); await o.ctx.close(); }
+    // layout with an Argos journey on (longer bar text): no overflow, bar inside the page, controls 44 px
+    for (const [w, h] of [[1280, 860], [390, 844], [360, 740]]) { reset(); const o = await open(browser, { width: w, height: h }); await o.page.selectOption('#journey-choose', SID).catch(async () => { await o.page.evaluate(() => { const b = document.getElementById('layers-btn'); }); }); await o.page.evaluate(id => { const c = document.getElementById('journey-choose'); c.value = id; c.dispatchEvent(new Event('change')); document.getElementById('tgl-journey').click(); }, SID);
+      await o.page.waitForFunction(() => ME.journey.state().status === 'ready', null, { timeout: 30000 }); await o.page.click('#replay-goto'); await o.page.waitForTimeout(400);
+      const r = await o.page.evaluate(() => { const b = document.getElementById('replay').getBoundingClientRect(), now = document.getElementById('replay-now'), cs = [...document.querySelectorAll('#replay button, #replay select, #replay input')].map(e => e.getBoundingClientRect().height); const ch = document.getElementById('journey-choose').getBoundingClientRect();
+        return { ov: document.documentElement.scrollWidth - innerWidth, in: b.left >= 0 && b.right <= innerWidth + 0.5, clip: now.scrollWidth > now.clientWidth + 1, minH: Math.min(...cs), chooserH: ch.height }; });
+      ok(`20n shark on at ${w} px: no horizontal overflow, the bar inside the page with its longer text unclipped, bar controls and the chooser at least 44 px high`, r.ov <= 0 && r.in && !r.clip && r.minH >= 44 && (r.chooserH === 0 || r.chooserH >= 44), r); await o.ctx.close(); } }
+
+  // ===== 13. Argos files that must be refused; the pinned journey list =====
+  if (want(13)) { const WID = 'false-killer-whale-hawaii-98364', W = JOUR[WID], UNV = 'Journey file could not be verified. Nothing is drawn.';
+    const mk = (change, manChange) => { const d = JSON.parse(JSON.stringify(W.d)); change(d); const db = Buffer.from(JSON.stringify(d)); const m = JSON.parse(JSON.stringify(W.m)); m.journeys[0].file = 'fx.json'; m.journeys[0].bytes = db.length; m.journeys[0].sha256 = sha(db); if (manChange) manChange(m); return { id: WID, manifest: Buffer.from(JSON.stringify(m)), display: db }; };
+    const firstJoined = W.d.j.findIndex(x => x === 1), firstGap = W.d.t.findIndex((v, i) => i && v - W.d.t[i - 1] > W.m.gap_rule.max_join_seconds);
+    const cases = [['unchanged content under new checksums (control: must load)', () => mk(() => { }), 'ready'],
+      ['a join flag that joins two fixes further apart than the rule allows', () => mk(d => { d.j[firstGap] = 1; }, m => { m.journeys[0].steps_joined++; }), 'unverified'],
+      ['a join flag changed without the manifest count changing', () => mk(d => { d.j[firstJoined] = 0; }), 'unverified'],
+      ['a quality class the manifest does not explain', () => mk(d => { d.lc = 'Q' + d.lc.slice(1); }), 'unverified'],
+      ['quality classes missing', () => mk(d => { delete d.lc; }), 'unverified'], ['join flags missing', () => mk(d => { delete d.j; }), 'unverified'],
+      ['a join flag on the first fix', () => mk(d => { d.j[0] = 1; }), 'unverified']];
+    for (const [name, make, want_] of cases) { reset(); S.fx = make(); const o = await open(browser); await o.page.selectOption('#journey-choose', WID); await o.page.click('#tgl-journey'); await o.page.waitForFunction(() => ['unverified', 'failed', 'ready'].includes(ME.journey.state().status), null, { timeout: 30000 }); await o.page.waitForTimeout(300); const s = await state(o.page);
+      ok(`21b ${name}: ${want_ === 'ready' ? 'loads' : 'nothing is drawn and the card says it could not be verified'}`, want_ === 'ready' ? s.status === 'ready' && s.scene === 3 && s.n === 661 : s.status === 'unverified' && s.card === UNV && s.scene === 0 && s.barHidden && !s.leg, [s.status, s.detail, s.scene]); await o.ctx.close(); }
+    // a journey list that differs from the pinned one
+    reset(); const badCat = Buffer.from(CAT.toString().replace(JOUR[ZID].e.manifest_sha256, sha(Buffer.from('x')))); const o = await open(browser);
+    await o.ctx.route('**/assets/animals/journeys-R1.catalog.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: badCat })); await o.page.click('#tgl-journey'); await o.page.waitForFunction(() => ME.journey.state().status !== 'loading', null, { timeout: 30000 }); const s = await state(o.page);
+    ok('21a a journey list that differs from the pinned one: nothing is drawn, could not be verified, no manifest is even asked for', s.status === 'unverified' && s.card === UNV && s.scene === 0 && S.log.length === 0, [s.status, s.detail, S.log]); await o.ctx.close(); }
 
   // ===== 10. leaving the page and coming Back (real navigation; a browser allowed to keep pages for Back) =====
   if (want(10)) { const b2 = await chromium.launch({ ignoreDefaultArgs: ['--disable-back-forward-cache'], args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-features=BackForwardCache'] });

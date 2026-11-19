@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612190100">
+<link rel="stylesheet" href="style.css?v=202612190200">
 </head>
 <body class="world">
 <header class="top">
@@ -310,18 +310,24 @@
           <div class="ovl opt-journey" id="card-journey">
             <div class="ovl-h">Animal journey <span class="ev obs">Observed</span><span class="state" id="s-journey">off</span></div>
             <button class="ovl-tgl" type="button" id="tgl-journey" role="switch" aria-checked="false" aria-describedby="journey-note"><span class="box" aria-hidden="true"></span><span class="t">Animal journey — show on the globe</span></button>
-            <div class="cav" id="journey-note">Recorded GPS fixes of one plains zebra in northern Botswana, 25 Oct 2007 to 22 Oct 2008. A dated replay, not current. Private preview.</div>
-            <div class="hint" id="journey-chosen" hidden>Chosen on the Animals page: Botswana zebra, animal Z3866. Nothing is switched on until you press the switch.</div>
+            <label class="jr-l" for="journey-choose">Journey</label>
+            <select id="journey-choose" aria-describedby="journey-note">
+              <option value="zebra-botswana-Z3866">Plains zebra, animal Z3866 (2007–2008)</option>
+              <option value="white-shark-sa-118845">White shark, tag 118845 (2012–2013)</option>
+              <option value="false-killer-whale-hawaii-98364">False killer whale, tag 98364 (2013–2014)</option>
+            </select>
+            <div class="cav" id="journey-note">A recorded journey of one tracked animal, replayed against the dates it was recorded. A dated record, not current. Private preview.</div>
+            <div class="hint" id="journey-chosen" hidden>Chosen on the Animals page. Nothing is switched on until you press the switch.</div>
             <div class="obs" id="o-journey" aria-live="polite">Off. Switch on to load the recorded journey.</div>
             <button type="button" class="journey-retry" id="journey-retry" hidden>Retry</button>
             <details class="scope" id="journey-scope">
               <summary>What this is and is not</summary>
               <div>
-                <p><b>Recorded fixes of one animal.</b> A GPS collar on one adult female zebra (study animal Z3866) recorded a position every hour or every 15 minutes. Seven animals were tracked in the study; one is shown. Seven is a sample size, not a population estimate.</p>
-                <p><b>The marker is always on a recorded fix</b>: the last one at or before the replay time. The line joins recorded fixes; the path between fixes was not recorded. Mother Earth does not join fixes more than 3 hours apart. This is a display rule, not part of the study.</p>
-                <p><b>Times are as recorded by the study</b>: UTC, or GPS time, which differs from UTC by a few leap seconds (source README). Location uncertainty: not supplied by the dataset.</p>
-                <p><b>A replay of 2007–2008.</b> Other layers on the globe retain their own dates and times; they are not matched to this journey.</p>
-                <p>Source: Movebank Data Repository, doi:10.5441/001/1.f3550b4f, CC0 1.0. <a href="animals.html#zebra-botswana">Study, citation and licence on the Animals page →</a></p>
+                <p><b>Recorded positions of one animal</b>, from a tag it carried. One animal is shown from each study. A count of tagged animals is a sample size, not a population estimate.</p>
+                <p><b>The marker is always on a recorded fix</b>: the last one at or before the replay time. The line joins recorded fixes; the path between fixes was not recorded. Each journey has its own limit beyond which fixes are not joined. These limits are Mother Earth's display rules, not part of the studies.</p>
+                <p><b>The zebra's positions are GPS fixes.</b> The shark's and the whale's are Argos satellite fixes, which are much less exact: each carries a quality class, and Mother Earth has left out fixes under experimental rules of its own. Those two replays are not reconstructions of where the animals went.</p>
+                <p><b>A replay of past years.</b> Other layers on the globe retain their own dates and times; they are not matched to this journey.</p>
+                <p><a href="animals.html">Studies, credit, licences and what was left out, on the Animals page →</a></p>
               </div>
             </details>
           </div>
@@ -537,7 +543,7 @@
 <script src="skyscene.js?v=202612101000"></script>
 <script src="oceanheat.js?v=202611291000"></script>
 <script src="dustrgb.js?v=202612181000"></script>
-<script src="animals-journey.js?v=202612190100"></script>
+<script src="animals-journey.js?v=202612190200"></script>
 <script src="nightlights.js?v=202612111000"></script>
 <script src="wind.js?v=202612181000"></script>
 <script src="aircraft.js?v=202612181000"></script>

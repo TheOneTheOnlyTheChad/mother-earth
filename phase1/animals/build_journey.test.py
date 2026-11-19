@@ -68,6 +68,7 @@ ok('20 committed display file: count, first and last fix, strictly increasing wh
    and all(isinstance(x, int) for x in cd['t']) and all(b > a for a, b in zip(cd['t'], cd['t'][1:])) and min(cd['lat']) == cj['bbox']['south'] and max(cd['lat']) == cj['bbox']['north'] and min(cd['lon']) == cj['bbox']['west'] and max(cd['lon']) == cj['bbox']['east'])
 gaps = [b - a for a, b in zip(cd['t'], cd['t'][1:])]
 ok('21 committed manifest: gaps over the rule and the longest gap are what the file holds', cj['gaps_over_rule'] == sum(g > m['gap_rule']['max_join_seconds'] for g in gaps) and cj['longest_gap_s'] == max(gaps), [max(gaps)])
-pins = [f for f in ('animals-journey.js', 'animals.js') if hashlib.sha256(mb).hexdigest() in open(os.path.join(ROOT, f), encoding='utf-8').read()]
-ok('22 both page scripts pin this manifest', pins == ['animals-journey.js', 'animals.js'], pins)
+cat = open(os.path.join(ROOT, 'assets/animals/journeys-R1.catalog.json'), 'rb').read(); ce = [e for e in json.loads(cat)['journeys'] if e['id'] == 'zebra-botswana-Z3866']
+pins = [f for f in ('animals-journey.js', 'animals.js') if hashlib.sha256(cat).hexdigest() in open(os.path.join(ROOT, f), encoding='utf-8').read()]
+ok('22 the journey list pins this manifest and both page scripts pin the journey list', len(ce) == 1 and ce[0]['manifest_sha256'] == hashlib.sha256(mb).hexdigest() and pins == ['animals-journey.js', 'animals.js'], (ce, pins))
 print(('FAILED' if nfail else 'PASSED') + f'  {npass} passed, {nfail} failed' + (f'  (BREAK={BREAK})' if BREAK else '')); sys.exit(1 if nfail else 0)

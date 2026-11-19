@@ -1,0 +1,135 @@
+{
+ "study": "white-shark-sa",
+ "revision": "R1",
+ "animal": "118845",
+ "label": "White shark, tag 118845",
+ "title": "Satellite tracking data of white sharks in the southwest Indian Ocean (2012-2014)",
+ "place": "South African coast to southern Mozambique",
+ "species_as_recorded": "Carcharodon carcharias",
+ "common_name": "white shark",
+ "method": "Wildlife Computers SPOT5 satellite transmitter on the dorsal fin; positions by Argos (Doppler) when the fin is at the surface",
+ "animals_sampled": 34,
+ "sample_sentence": "34 sharks were tagged in this study. This is a sample size, not a population estimate.",
+ "time_convention": "Times are as recorded in the dataset, which the record states are UTC.",
+ "location_uncertainty": "an Argos quality class per fix; no error figure per fix in the dataset",
+ "dataset_doi": "10.5281/zenodo.5575189",
+ "dataset_url": "https://doi.org/10.5281/zenodo.5575189",
+ "repository": "Zenodo",
+ "licence": "CC BY 4.0",
+ "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+ "citation_as_given": "Kock, Alison; Lombard, Amanda T; Daly, Ryan; Goodall, Victoria; Meÿer, Michael; Johnson, Ryan; Fischer, Chris; Koen, Pieter; Irion, Dylan; Gennari, Enrico; Towner, Alison; Jewell, Oliver; da Silva, Charlene; Dicken, Matt; Smale, Malcolm; Photopoulou, Theoni (2021). Satellite tracking data of white sharks in the southwest Indian Ocean (2012-2014), version 1.0.0. Zenodo. https://doi.org/10.5281/zenodo.5575189",
+ "citation_note": "Credit line composed by Mother Earth from the creators, date, title and version on the Zenodo record.",
+ "paper_citation_as_given": "Kock AA, Lombard AT, Daly R, Goodall V, Meÿer M, Johnson R, Fischer C, Koen P, Irion D, Gennari E, Towner A, Jewell OJD, da Silva C, Dicken ML, Smale MJ, Photopoulou T (2022) Sex and Size Influence the Spatiotemporal Distribution of White Sharks, With Implications for Interactions With Fisheries and Spatial Management in the Southwest Indian Ocean. Frontiers in Marine Science 9. doi:10.3389/fmars.2022.811985",
+ "source_file": {
+  "name": "south_african_white_shark_ARGOS_tracks.csv",
+  "bytes": 1830322,
+  "sha256": "156b1ee2d72b20244ad378020abd7da30e8c006fc58c7e72e6864f1f23a0029d",
+  "retrieved_utc": "2026-11-19T08:53:07Z",
+  "retrieved_from": "https://zenodo.org/api/records/5575189 (file link on the record)"
+ },
+ "land_data": {
+  "file": "ne_10m_land.geojson",
+  "sha256": "1ac90796408bc6ad6911d69448485d3c4dbf2190370080368a09976e1c9f7416",
+  "source": "Natural Earth 1:10m land polygons, github.com/nvkelso/natural-earth-vector at commit ca96624a56bd078437bca8184e78163e5039ad19 (VERSION 5.2.0-pre)",
+  "scale": "1:10m",
+  "licence": "public domain"
+ },
+ "class_meanings": {
+  "3": "under 250 m",
+  "2": "250 to 500 m",
+  "1": "500 to 1,500 m",
+  "0": "over 1,500 m",
+  "A": "no estimate",
+  "B": "no estimate"
+ },
+ "accuracy_note": "Positions are Argos satellite fixes. Each carries a quality class. The satellite system's nominal error estimates are under 250 m (class 3), 250–500 m (2), 500–1,500 m (1) and over 1,500 m (0); classes A and B have no estimate. These are nominal estimates, not guaranteed limits: real errors can be larger.",
+ "simplification": "filtered, not thinned or smoothed: see the stages. This is not the study's modelled track",
+ "kind": "argos",
+ "schema": 2,
+ "animals_shown": 1,
+ "built_from": "full source file",
+ "rule": {
+  "speed_limit_m_per_s": 3.0,
+  "speed_limit_label": "3 m/s",
+  "speed_limit_source": "the study authors' filter parameter (Kock et al. 2022, following Queiroz et al. 2019)",
+  "anchor_classes": "321",
+  "isolation_hours": 72,
+  "join_hours": 12,
+  "weak_classes": "AB"
+ },
+ "stages": [
+  {
+   "stage": "rows for tag 118845 in the source file",
+   "rows_out": 1004
+  },
+  {
+   "stage": "speed consistency (experimental rule; limit 3 m/s; classes 3 2 1 first)",
+   "rows_in": 1004,
+   "removed": 208,
+   "rows_out": 796
+  },
+  {
+   "stage": "more than 72 hours from any other kept fix",
+   "rows_in": 796,
+   "removed": 1,
+   "rows_out": 795
+  },
+  {
+   "stage": "on land in the pinned Natural Earth 1:10m land file",
+   "rows_in": 795,
+   "removed": 40,
+   "rows_out": 755,
+   "removed_by_class": {
+    "B": 39,
+    "A": 1
+   }
+  }
+ ],
+ "gap_rule": {
+  "max_join_seconds": 43200,
+  "statement": "Mother Earth does not join fixes more than 12 hours apart, or where the line would cross land in its land map. These are display rules of Mother Earth's, not part of the study."
+ },
+ "journeys": [
+  {
+   "animal": "118845",
+   "file": "white-shark-sa-118845-R1.json",
+   "bytes": 21884,
+   "sha256": "fb6d4079f5015270f453f984e316a3e22e04a1cce2d867581cc4ec717e986f71",
+   "fixes": 755,
+   "first_fix": "2012-05-09T23:24:04Z",
+   "last_fix": "2013-09-29T05:02:41Z",
+   "first_fix_s": 1336605844,
+   "last_fix_s": 1380430961,
+   "bbox": {
+    "south": -35.494,
+    "north": -23.165,
+    "west": 18.815,
+    "east": 36.118
+   },
+   "steps": 754,
+   "steps_within_join_limit": 618,
+   "steps_refused_for_land": 2,
+   "steps_joined": 616,
+   "classes": {
+    "3": 28,
+    "2": 81,
+    "1": 92,
+    "0": 30,
+    "A": 111,
+    "B": 413
+   },
+   "weak_class_share_percent": 69,
+   "gaps_over_rule": 136,
+   "longest_gap_s": 16270060,
+   "newly_isolated_after_all_stages_not_removed": 0
+  }
+ ],
+ "card": {
+  "note": "Recorded Argos satellite fixes of one white shark, 9 May 2012 to 29 Sep 2013, after filtering. A dated replay, not current. Experimental. Private preview.",
+  "shown": "755 recorded fixes of one shark (tag 118845). 69% of them are the two weakest Argos classes, A and B.",
+  "done": "1,004 recorded fixes for this tag. Mother Earth left out 208 under its own speed-consistency rule (3 m/s, the study authors' limit; the rule favours better-rated fixes, is experimental and can remove a correct fix), 1 more than 72 hours from any other, and 40 that fall on land in Natural Earth's 1:10m map. 755 are shown. Fixes more than 12 hours apart, and 2 pairs whose joining line would cross land in that map, are not joined.",
+  "line": "The line joins recorded fixes no more than 12 hours apart: 616 of 754 steps. It is not the shark's route. For most of the period there is no line.",
+  "not_route": "Recorded Argos fixes after filtering. This is not the study's modelled track, and not a reconstruction of where the shark went.",
+  "changes": "Changes made to the dataset (CC BY 4.0): one tag selected; fixes left out by the stages listed; nothing moved, smoothed or interpolated; the tag number is shown in place of the name in the file."
+ }
+}
