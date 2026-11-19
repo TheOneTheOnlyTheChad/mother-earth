@@ -55,6 +55,26 @@ stops('P8 rows out of time order', 'out of time order', [GOOD[1], GOOD[0]])
 stops('P9 an unknown class', 'unknown Argos class', GOOD[:2] + [row(1, 5, 0.0, 0.6, 'Q')])
 stops('P10 a coordinate out of range', 'out of range', GOOD[:2] + [row(1, 5, 95.0, 0.6, '3')])
 
+# --check: writes nothing; exit 0 only when both outputs are present and identical, 3 when one differs or is missing, 2 when the build stops
+import contextlib, io
+with tempfile.TemporaryDirectory() as tmp:
+    raw_src = ('\n'.join([HEAD] + GOOD) + '\n').encode(); cfg = copy.deepcopy(CFG); cfg['source_file']['sha256'] = sha(raw_src); cfg['land_data']['sha256'] = sha(ISLAND)
+    cp, sp, lp, od = [os.path.join(tmp, x) for x in ('c.json', 's.csv', 'l.geojson', 'out')]; os.mkdir(od)
+    json.dump(cfg, open(cp, 'w', encoding='utf-8')); open(sp, 'wb').write(raw_src); open(lp, 'wb').write(ISLAND)
+    def cli(*extra):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf): rc = b.main(['--config', cp, '--source', sp, '--land', lp, '--out-dir', od, *extra])
+        return rc, buf.getvalue()
+    rc, out = cli('--check'); ok('K1 --check with both outputs missing: exit 3, says MISSING, writes nothing', rc == 3 and out.count('MISSING') == 2 and 'CHECK FAILED' in out and os.listdir(od) == [], (rc, out[:200], os.listdir(od)))
+    rc, out = cli(); files = sorted(os.listdir(od)); ok('K2 a build writes the two files and exits 0', rc == 0 and len(files) == 2, (rc, files))
+    rc, out = cli('--check'); ok('K3 --check against a fresh build: exit 0, both "same"', rc == 0 and out.count('same  ') == 2 and 'CHECK FAILED' not in out, (rc, out[:200]))
+    before = {f: open(os.path.join(od, f), 'rb').read() for f in files}
+    disp = [f for f in files if 'manifest' not in f][0]; open(os.path.join(od, disp), 'ab').write(b' ')
+    rc, out = cli('--check'); ok('K4 --check with one output changed by one byte: exit 3, says DIFFERENT, and leaves the changed file as it found it', rc == 3 and out.count('DIFFERENT') == 1 and out.count('same  ') == 1 and open(os.path.join(od, disp), 'rb').read() == before[disp] + b' ', (rc, out[:200]))
+    os.remove(os.path.join(od, [f for f in files if 'manifest' in f][0]))
+    rc, out = cli('--check'); ok('K5 --check with the manifest missing and the display file changed: exit 3', rc == 3 and 'MISSING' in out and 'DIFFERENT' in out, (rc, out[:200]))
+    open(sp, 'ab').write(b'x'); rc, out = cli('--check'); ok('K6 --check when the build itself stops (wrong source): exit 2', rc == 2 and 'BUILD STOPPED' in out, (rc, out[:120]))
+
 # ---------- Part 2: the committed files
 cat_raw = open(os.path.join(A, 'journeys-R1.catalog.json'), 'rb').read(); cat = json.loads(cat_raw)
 ok('C1 the journey list names three journeys and pins each manifest', [e['id'] for e in cat['journeys']] == ['zebra-botswana-Z3866', 'white-shark-sa-118845', 'false-killer-whale-hawaii-98364'] and all(sha(open(os.path.join(A, e['manifest']), 'rb').read()) == e['manifest_sha256'] for e in cat['journeys']))

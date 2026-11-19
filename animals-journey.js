@@ -50,6 +50,10 @@
       sky: 'Hidden while the zoom-out view is open. Paused at the same replay time.',
       first: 'First recorded fix',
       last: 'Last recorded fix: tracking record ends here',
+      // filtered journeys (Argos): the source holds fixes that are not displayed, so the bar speaks of displayed fixes only.
+      // "No fix was recorded" or "the tracking record ends" would be false where a left-out fix lies in the gap or after the end.
+      firstShown: 'First displayed fix', lastShown: 'Last displayed fix: displayed record ends here', midShown: 'Last displayed fix',
+      marks: 'The fix marks are drawn large so they can be seen with the whole journey in view. Their size does not show uncertainty.',
       line: 'The line joins recorded fixes. The path between fixes was not recorded.',
       others: 'Other layers on the globe retain their own dates and times; they are not matched to this journey.',
     },
@@ -193,7 +197,7 @@
     if (!st.on) o.textContent = st.why || J.T.off;
     else if (st.status === 'loading') o.textContent = J.T.loading;
     else if (st.status === 'ready' && st.man.card) { const m = st.man, c = m.card;      // Argos journeys: the manifest carries the sentences
-      o.textContent = `${c.shown} ${c.not_route} ${c.line} ${c.done} ${m.accuracy_note} ${m.sample_sentence}` + (st.sky ? ' ' + J.T.sky : ''); }
+      o.textContent = `${c.shown} ${c.not_route} ${c.line} ${c.done} ${m.accuracy_note} ${J.T.marks} ${m.sample_sentence}` + (st.sky ? ' ' + J.T.sky : ''); }
     else if (st.status === 'ready') { const j = st.jr, m = st.man;
       o.textContent = `${j.fixes.toLocaleString('en-GB')} recorded fixes of one animal (${j.animal}), ${utcDay(j.first_fix_s)} to ${utcDay(j.last_fix_s)}. ` +
         `${m.animals_sampled} animals were tracked in this study; ${m.animals_shown} is shown. ` +
@@ -208,11 +212,12 @@
   function barText() {
     const d = st.d, i = st.i, t = d.t, rule = st.man.gap_rule.max_join_seconds, n = t.length;
     let s = `Replay time (recorded) ${utc(st.rt)}`;
-    if (i < 0) return s + ' · No fix recorded yet';
+    const F = !!st.man.card;                                   // a filtered journey: speak of displayed fixes
+    if (i < 0) return s + (F ? ' · No fix displayed yet' : ' · No fix recorded yet');
     const age = st.rt - t[i];
-    s += i === 0 && age === 0 ? ` · ${J.T.first} ${utc(t[i])}` : i === n - 1 ? ` · ${J.T.last}, ${utc(t[i])}` : ` · Last recorded fix ${utc(t[i])}` + (age > 0 ? `, ${span(age)} earlier` : ', at this time');
+    s += i === 0 && age === 0 ? ` · ${F ? J.T.firstShown : J.T.first} ${utc(t[i])}` : i === n - 1 ? ` · ${F ? J.T.lastShown : J.T.last}, ${utc(t[i])}` : ` · ${F ? J.T.midShown : 'Last recorded fix'} ${utc(t[i])}` + (age > 0 ? `, ${span(age)} earlier` : ', at this time');
     if (d.lc) { const c = d.lc[i], m = st.man.class_meanings[c]; s += ` · Argos class ${c} (${m === 'no estimate' ? 'no error estimate' : 'nominal error ' + m})`; }
-    if (i < n - 1 && t[i + 1] - t[i] > rule) s += ` · No fix was recorded for ${span(t[i + 1] - t[i])} after it`;
+    if (i < n - 1 && t[i + 1] - t[i] > rule) s += F ? ` · No fix is displayed for ${span(t[i + 1] - t[i])} after it` : ` · No fix was recorded for ${span(t[i + 1] - t[i])} after it`;
     return s;
   }
   function paintBar(quiet) {

@@ -5,6 +5,8 @@ reconstruction of the animal's route.
 
   python3 -I phase1/animals/build_argos_journey.py --config phase1/animals/<study>.json --source <file> --land <ne_10m_land.geojson>
           [--out-dir assets/animals] [--check]
+  --check writes nothing: it builds in memory and compares with the files in --out-dir. Exit 0 only if both are present and
+  byte-identical; exit 3 if either differs or is missing; exit 2 if the build itself stops.
 
 The build refuses: a source or land file whose sha256 is not the one pinned in the config; rows out of time order; a class it does
 not know; a coordinate out of range. Nothing is thinned, smoothed, interpolated or modelled. Coordinates are written as read.
@@ -114,9 +116,13 @@ def main(argv=None):
     a = ap.parse_args(argv); cfg = json.load(open(a.config, encoding='utf-8'))
     try: dn, db, mn, mb = build(cfg, a.source, a.land)
     except BuildError as e: print(f'BUILD STOPPED: {e}'); return 2
+    differ = 0
     for name, data in ((dn, db), (mn, mb)):
         p = os.path.join(a.out_dir, name)
-        if a.check: print(('same  ' if os.path.exists(p) and open(p, 'rb').read() == data else 'DIFFERENT  ') + p)
+        if a.check:
+            state = 'MISSING  ' if not os.path.exists(p) else 'same  ' if open(p, 'rb').read() == data else 'DIFFERENT  '; differ += state != 'same  '; print(state + p)
         else: open(p, 'wb').write(data); print(f'{name}  {len(data)} bytes  sha256 {sha(data)}')
-    m = json.loads(mb); print(json.dumps(m['stages'], ensure_ascii=False)); print(json.dumps(m['journeys'][0])); return 0
+    m = json.loads(mb); print(json.dumps(m['stages'], ensure_ascii=False)); print(json.dumps(m['journeys'][0]))
+    if a.check and differ: print(f'CHECK FAILED: {differ} of 2 output files differ from a fresh build or are missing'); return 3
+    return 0
 if __name__ == '__main__': sys.exit(main())
