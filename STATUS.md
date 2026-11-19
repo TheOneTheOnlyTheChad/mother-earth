@@ -3,6 +3,12 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
+## 19 Nov 17:03 UTC (clock reading) — **Earth from Space: read-only source check done; proposal rev 1 for GPT (branch `earth-from-space-proposal` `41a8f2c`, docs only).** (nothing built, scheduled, deployed or spent; no provider contacted)
+- **Source recommended:** EUMETSAT "GeoColour RGB - MTG - 0 degree" (`EO:EUM:DAT:0913`), pictures from EUMETView layer `mtg_fd:rgb_geocolour` (the catalogue links to that layer; licence "Free and unrestricted - CC-BY-4.0"; credit EUMETSAT and NASA). Same service and pattern as the live Dust RGB collection.
+- **Measured in the pane, 16:42 to 17:02 UTC:** 10-minute cadence; the 16:30 frame was advertised about 20 minutes after its time and the 16:40 frame not within 21 minutes (two frames only); a 2048 px JPEG is 0.56 to 0.67 MB in 5 to 17 s; 4096 px took 65 s (2.3 MB); the response header names the frame served; an off-grid time is silently substituted; a future time returns HTTP 200 with XML. A disk view came back for `AUTO:42003`, which the service does not advertise.
+- **Proposal:** `docs/concepts/EARTH-FROM-SPACE-PROPOSAL.md`: hub collects every frame once and validates it; own page `space.html` and a sixth-tab-ready header; expected new cost $0; five stages; decisions D1 to D7. **Not verified:** what the frame time marks, the reliability of the disk request, a full day's delay and sizes, usage policy (its section 10).
+- **Branch dependency:** this and the parked Animals branch both edit the tab row and header suites.
+- **Mac:** `_review/earth-from-space-proposal/`. **Next:** GPT's review; then Chad's decisions and go for stage 1.
 ## 19 Nov 16:41 UTC (clock reading) — **Public Cape Town aircraft proposal PARKED at `3608a5c` (Chad). Private station preview kept at `8012a0f`. Next: Earth from Space, read-only source investigation.** (docs only)
 - **Chad (19 Nov, his own message):** "park the public Cape Town aircraft proposal at 3608a5c. Keep the passed private station preview at 8012a0f. No further station build, multi-day capture, location study or Pi work now." Pi-direct is the preferred option **to investigate later, not an installation approval**. **No release decision D1 to D8 is finalised.**
 - **GPT's review points, recorded for resume (relayed by Chad); rev 1 is not edited, so these are the first changes for a rev 2:**
