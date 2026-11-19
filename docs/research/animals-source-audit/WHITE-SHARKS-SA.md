@@ -1,6 +1,6 @@
 # Animals — full file audit: white sharks tagged on the South African coast
 
-19 Nov 2026 · rev 1 · for GPT review · read-only. Nothing built, nothing saved, no provider contacted, nothing spent.
+19 Nov 2026 · rev 1.1 (after GPT's review of rev 1; changes in §10) · read-only. Nothing built, nothing saved, no provider contacted, nothing spent.
 
 **Chad's line (19 Nov):** "Go: full audit of the South African white shark file (Zenodo 10.5281/zenodo.5575189), read-only".
 
@@ -72,4 +72,10 @@
 ## 9. What this audit supports
 - **Supports:** opening a quality-rule proposal for this study, and a study card with correct credit.
 - **Does not support yet:** drawing any line; any statement about where the sharks travelled; public display.
+- **Before a rule is proposed: read the paper** (doi `10.3389/fmars.2022.811985`). This audit counted the archive file and did not read how the authors filtered or modelled it; a rule of ours has to be set against theirs, and the paper's analysed counts and period may differ from the archive's.
 - **Suggested first animals for the quality-rule work**, by amount of better-class data: tag `118852` (1,641 rows, 471 in classes 1–3, 15 Apr 2012 to 24 Apr 2015) and tag `118845` (1,004 rows, 209 in classes 1–3, 9 May 2012 to 29 Sep 2013).
+
+## 10. Changes in rev 1.1 (GPT's review, relayed by Chad 19 Nov)
+- The hold on drawing stands.
+- §9 now puts reading the paper ahead of any rule proposal. GPT reports that the paper describes a 3 m/s speed filter, treatment of gaps over three days, and modelled trajectories, and that its analysed counts and period differ from this archive audit. **Not read or verified here.** The rule proposal must explain that difference, not assume the archive and the paper's analysed set are the same.
+- Animal names: tag numbers are the neutral default (GPT agrees); showing given names stays Chad's decision.

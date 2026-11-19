@@ -1,10 +1,10 @@
 # Animals — deep audit of one deployment: false killer whale, tag ptt 98364
 
-19 Nov 2026 · rev 1 · for GPT review · read-only. Nothing built, no provider contacted, nothing spent.
+19 Nov 2026 · rev 1.1 (after GPT's review of rev 1; changes listed in §9) · read-only. Nothing built, no provider contacted, nothing spent.
 
 **Chad's line (19 Nov):** "Go: deep audit of one false killer whale deployment (ptt 98364), read-only".
 
-**Result: the best-documented candidate so far, and usable with the source's own quality flags.** Every row but one is an Argos location; no row is a modelled position. The source's roll-up quality flag removes the worst rows. Error estimates exist for only 6% of rows. Its public treatment still needs a recorded sensitivity decision and a study-specific gap rule.
+**Result: the best-documented candidate so far. Whether the source's own quality flags can carry a display rule is not yet established:** that depends on reading ATN's quality-control documentation, showing it applies to how this file was processed, and recomputing gaps and speeds after the proposed filtering. Every row but one is an Argos location; no row is a modelled position. In this file the roll-up flag removes the worst rows; a PASS is not a guarantee of an accurate, continuous path. Error estimates exist for only 6% of rows. Its public treatment still needs a recorded sensitivity decision and a study-specific gap rule.
 
 ## 1. Which identity was read
 - **The source netCDF**, `atn_98364_false-killer-whale_trajectory_20131023-20140223.nc`, from the ATN production staging folder named on IOOS's archiving page. 319,596 bytes; sha256 `9896550e…d3f6`; MD5 `8a029ef46a09b62ab30422e200717813`, **equal to the staging folder's own `md5.txt` entry** for this file.
@@ -71,6 +71,7 @@
 | Argos classes 3, 2, 1 only | 365 | 25 | 50 | 15 | 6 | 225 km/h |
 
 - **The source's roll-up flag does more than the Argos class does:** it removes every step over 50 km/h and every duplicate time, and keeps 694 rows. Filtering by class alone keeps fewer rows and leaves worse steps.
+- **These speeds are between neighbouring rows that are kept, which is not what the source's test measured.** The source's speed test was run on the rows as they stood before any were removed; once failed rows are dropped, each kept row has a new neighbour, so the steps above are a different quantity from the one the flag was set on. A rule proposal must state which it uses and recompute after filtering.
 - Steps over 10 km/h remain after the flag. Whether those are real travel or position error at short intervals is not decided here.
 - Time between consecutive rows (all rows): median 1.3 h, one in ten over 6.5 h, longest 125.5 h. 22 gaps over 24 hours, 7 over 72 hours.
 
@@ -83,6 +84,13 @@
 - A completed deployment, 12 years old. The project name runs to 2025, which suggests later deployments exist; a published file does not show whether the project continues, and no update schedule is established.
 
 ## 8. What this audit supports
-- **Supports:** a quality-rule proposal for this deployment built on the source's own flags (draw roll-up PASS rows; state that the rule is the source's test plus our choice to use it), with the speed-test limits confirmed from ATN's documentation first; a study card with the file's citation.
+- **Supports:** opening a quality-rule proposal for this one deployment, and a study card with the file's citation.
+- **Before that proposal can rest on the source's flags:** read ATN's quality-control documentation and pin the version read; establish that it applies to this file's processing history (file created 21 May 2022, dated 5 Mar 2025); confirm the speed-test limits from it; recompute gaps and speeds after the proposed filtering.
 - **Does not support yet:** auditing or drawing the other 26 deployments by assumption (each file's values need the same read); any public display; any "regularly updated" claim.
-- **Next, if Chad wants it:** read ATN's quality-control documentation; run the same read over the other 26 files (small, scripted); then one quality-rule proposal for the false killer whales.
+- **Next, if Chad wants it:** read and pin ATN's quality-control documentation; then a quality-rule proposal for this deployment. The other 26 deployments are not covered by this audit: each needs the same read of its own file.
+
+## 9. Changes in rev 1.1 (GPT's review, relayed by Chad 19 Nov)
+- The result line no longer says the track is "usable with the source's own quality flags"; it is conditional on the documentation, its applicability and a recomputation.
+- §5 explains kept-neighbour speeds against the source's original test, and says PASS is not a guarantee of an accurate continuous path.
+- §8 separates what the audit supports from what must be done first, and drops the suggestion of running the other 26 files as a next step by default.
+- GPT reports that ATN publishes generic speed thresholds (8 m/s suspect, 10 m/s fail). **Not read or verified here**; it is the first thing to check against this file.
