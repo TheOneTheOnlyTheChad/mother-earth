@@ -3,7 +3,7 @@
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
 # 19 Nov 2026
-## 19 Nov 07:50 UTC (clock reading) — **Animals: GPT held the zebra preview (2 issues, 3 unfinished checks); r2 answers them: `animals-zebra-preview-rc` head `9ad932c`. Audits to rev 1.1 (`animals-proposal` `ed8ad49`).** (branch and docs only; nothing merged, deployed, sent or spent)
+## 19 Nov 07:48 UTC (clock reading) — **Animals: GPT held the zebra preview (2 issues, 3 unfinished checks); r2 answers them: `animals-zebra-preview-rc` head `9ad932c`. Audits to rev 1.1 (`animals-proposal` `ed8ad49`).** (branch and docs only; nothing merged, deployed, sent or spent)
 - **GPT's review of `9e64d19` (relayed by Chad):** on hold. Confirmed: age lost its seconds at an hour or more; off did not abort the request. Unfinished: navigation/Back; a complete tree; source reproduction (J2) and performance (J12). Audits accepted as candidate assessments, with wording changes.
 - **r2, code commit `67db011`, head `9ad932c`** (packet `reviews/2026-11-19-animals-zebra-preview-rc-r2.md`, sha256 `96958a8d…860f`):
   - Ages exact to the second at every length ("1 h 1 min 1 s"); the whole bar string is checked against separately built text.
