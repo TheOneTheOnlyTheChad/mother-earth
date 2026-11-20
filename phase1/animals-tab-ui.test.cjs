@@ -10,6 +10,7 @@
  * harness substitution, stated here.
  * Sections 16 and 17 and checks 12h to 12m were added after GPT's Stage 1 review (phone reveal; the list Retry's lifecycle; the
  * sampled bar-text sweep carried over from the old suite).
+ * Sections 18 and 19 are stage 2: the waved albatross (withheld fixes, the recording-period replay, the tag's accuracy estimate).
  * Breaks: BREAK=<name> edits one served file; the suite must then FAIL at the check named in EXPECT ("BREAK CAUGHT"), or it
  * prints BREAK MISSED. SECTIONS=1,4 runs parts.
  * Needs the npm packages playwright (with its Chromium), pngjs and globe.gl@2.45.0, found through NODE_PATH (or ME_GLOBE_JS for
@@ -74,6 +75,20 @@ const BREAKS = {
   'list-retry-late-success': [JS, "const h = await hex(b); if (tok !== st.listTok) return;", "const h = await hex(b);", "const b = await r.arrayBuffer(); if (tok !== st.listTok) return;", "const b = await r.arrayBuffer();", "const r = await fetch(J.CATALOG, { cache: 'no-store', signal: c.signal }); if (tok !== st.listTok) return;", "const r = await fetch(J.CATALOG, { cache: 'no-store' });"],
   'list-retry-no-time-limit': [JS, "L = { c, timer: setTimeout(() => c.abort(), J.WAIT_MS) }; st.list = L; paint();", "L = { c, timer: 0 }; st.list = L; paint();"],
   'pagehide-keeps-list-retry': [JS, "window.addEventListener('pagehide', () => { cancelList(); if", "window.addEventListener('pagehide', () => { if"],
+  // stage 2: the bird
+  'marker-in-withheld': [JS, "o.marker.visible = vis && i >= 0 && !st.hid;", "o.marker.visible = vis && i >= 0;"],
+  'hidden-ends-at-last-withheld': [JS, "for (const h of H) if (s >= h.from && s < h.to) return h; return null; };", "for (const h of H) if (s >= h.from && s <= h.p[1]) return h; return null; };"],
+  'tried-before-reached': [JS, "if (x > t[i] && x < next && x <= st.rt) f = x;", "if (x > t[i] && x < next) f = x;"],
+  'accuracy-in-withheld': [JS, "are not shown. No marker is shown` +", "are not shown. No marker is shown · Tag's accuracy estimate ${i >= 0 ? d.acc[i] : 0} m` +"],
+  'replay-starts-at-first-fix': [JS, "setBarFrame(); paint(); seek(st.R0, true); goArea();", "setBarFrame(); paint(); seek(d.t[0], true); goArea();"],
+  'replay-ends-at-last-fix': [JS, "    const end = st.R1, next = st.rtExact + dt * st.speed;", "    const end = st.d.t[st.d.t.length - 1], next = st.rtExact + dt * st.speed;"],
+  'bird-says-not-displayed': [JS, "      if (st.man.kind === 'gps-filtered') {", "      if (false) {"],
+  'new-fields-optional': [JS, "if (!Array.isArray(d[f])) throw new Unverified(`the display file lacks \"${f}\", which this journey requires`);", ""],
+  'no-acc-check': [JS, "if (!Array.isArray(d.acc) || d.acc.length !== n || d.acc.some(x => typeof x !== 'number' || !Number.isFinite(x) || x < 0)) throw new Unverified('the accuracy estimates are missing or malformed'); }", "}"],
+  'no-inside-period-check': [JS, "if (lo < n && d.t[lo] <= l) throw new Unverified('a displayed fix lies inside a withheld period');", ""],
+  'join-across-withheld-accepted': [JS, "if (lo > 0 && lo < n && (!d.j || d.j[lo] !== 0)) throw new Unverified('a step is joined across a withheld period');", ""],
+  'no-failed-check': [JS, "|| ts.has(x) || W.some(p => x >= p[0] && x <= p[1])) throw", ") throw"],
+  'stops-skip-withheld-starts': [JS, "[...new Set([st.R0, ...d.t, ...W.map(p => p[0]), st.R1])]", "[...new Set([st.R0, ...d.t, st.R1])]"],
   'chooser-back': ['animals.html', '<div class="vh" id="an-say" aria-live="polite"></div>', '<select id="journey-choose"><option>x</option></select><div class="vh" id="an-say" aria-live="polite"></div>'],
   'switch-unlabelled': ['animals.html', '<span class="t">White shark, tag 118845 (2012–2013)</span>', '<span class="t"></span>'],
 };
@@ -84,15 +99,19 @@ const EXPECT = { 'not-exclusive': '3b', 'late-answer-draws': '5a', 'off-no-cance
   'no-catalogue-check': '6h', 'no-manifest-check': '6f', 'no-display-check': '6e', 'no-content-check': '6g', 'marker-next-fix': '2d', 'future-fixes-drawn': '2e', 'join-over-rule': '12a', 'ignore-join-flags': '12c',
   'autoplay': '2b', 'announce-per-frame': '7e', 'disabled-still-loads': '11b', 'no-pagehide-reset': '9a', 'hidden-keeps-playing': '9c', 'date-kept-on-fallback': '10b', 'auto-rotate': '1g', 'coast-always-fetched': '1f',
   'chooser-back': '1d', 'switch-unlabelled': '1c', 'filtered-says-recorded': '12h', 'no-phone-scroll': '16b', 'scroll-on-answer': '16c', 'scroll-on-off': '16e', 'scroll-ignores-reduced-motion': '16b',
-  'deep-link-scrolls-to-globe': '16j', 'no-status-by-globe': '16b', 'selection-keeps-list-retry': '17a', 'list-retry-no-token': '17a', 'list-retry-late-success': '17c', 'list-retry-no-time-limit': '17h', 'pagehide-keeps-list-retry': '17f' };
+  'deep-link-scrolls-to-globe': '16j', 'no-status-by-globe': '16b', 'selection-keeps-list-retry': '17a', 'list-retry-no-token': '17a', 'list-retry-late-success': '17c', 'list-retry-no-time-limit': '17h', 'pagehide-keeps-list-retry': '17f',
+  'marker-in-withheld': '18c', 'hidden-ends-at-last-withheld': '18c', 'tried-before-reached': '18e', 'accuracy-in-withheld': '18a', 'replay-starts-at-first-fix': '18a', 'replay-ends-at-last-fix': '18m',
+  'bird-says-not-displayed': '18f', 'new-fields-optional': '19a', 'no-acc-check': '19b', 'no-inside-period-check': '19d', 'join-across-withheld-accepted': '19c', 'no-failed-check': '19e', 'stops-skip-withheld-starts': '18i' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
 
 // ---------- files
 const real = name => fs.readFileSync(path.join(ROOT, 'assets/animals', name));
 const CAT = real('journeys-R1.catalog.json'), CATJ = JSON.parse(CAT), CAT_PIN = sha(CAT);
 const JOUR = Object.fromEntries(CATJ.journeys.map(e => { const m = JSON.parse(real(e.manifest)), j = m.journeys.find(x => x.animal === e.animal); return [e.id, { e, m, j, d: JSON.parse(real(j.file)) }]; }));
-const Z = 'zebra-botswana-Z3866', SH = 'white-shark-sa-118845', W = 'false-killer-whale-hawaii-98364', IDS = [Z, SH, W];
-const NAME = { [Z]: 'Plains zebra', [SH]: 'White shark', [W]: 'False killer whale' };
+const Z = 'zebra-botswana-Z3866', SH = 'white-shark-sa-118845', W = 'false-killer-whale-hawaii-98364', BIRD = 'waved-albatross-galapagos-3275-30662', IDS = [Z, SH, W, BIRD];
+const NAME = { [Z]: 'Plains zebra', [SH]: 'White shark', [W]: 'False killer whale', [BIRD]: 'Waved albatross' };
+/** where a journey's replay starts: the start of the recording (the bird's is before its first displayed fix) */
+const startOf = id => Number.isInteger(JOUR[id].j.record_first_s) ? JOUR[id].j.record_first_s : JOUR[id].d.t[0];
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const utc = s => { const x = new Date(s * 1000).toISOString(); return `${+x.slice(8, 10)} ${MON[+x.slice(5, 7) - 1]} ${x.slice(0, 4)} ${x.slice(11, 19)} UTC`; };
 const lastAt = (t, s) => { let k = -1; for (let i = 0; i < t.length && t[i] <= s; i++) k = i; return k; };                 // plain scan, not the page's search
@@ -182,12 +201,12 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       groups: [...document.querySelectorAll('#an-panel h3.an-grp')].map(h => h.textContent.trim()), selects: [...document.querySelectorAll('select')].map(x => x.id), radios: document.querySelectorAll('[role="radio"],[role="radiogroup"],input[type="radio"]').length,
       tabs: [...document.querySelectorAll('nav.tabs a')].map(a => [a.textContent.trim(), a.getAttribute('aria-current')]) }));
     ok('1c each animal has one labelled switch: role="switch", unchecked, a visible label that begins with the journey list\'s label and carries the years, described by its evidence line, at least 44 px high',
-      dom.sw.length === 3 && dom.sw.every(b => b.role === 'switch' && b.checked === 'false' && !b.acc && b.label.startsWith(JOUR[b.id].e.label) && /\(\d{4}–\d{4}\)$/.test(b.label) && /dated record, not current/.test(b.desc) && b.h >= 44), dom.sw);
+      dom.sw.length === IDS.length && dom.sw.every(b => b.role === 'switch' && b.checked === 'false' && !b.acc && b.label.startsWith(JOUR[b.id].e.label) && /\(\d{4}(–\d{4})?\)$/.test(b.label) && /dated record, not current/.test(b.desc) && b.h >= 44), dom.sw);
     ok('1d no chooser: the only select on the page is the replay speed; no radio semantics', dom.selects.join() === 'replay-speed' && dom.radios === 0, [dom.selects, dom.radios]);
-    ok('1e the switches are one labelled group that says "one at a time"; groups are Land and Sea (no empty Air group among the switches)', dom.group.role === 'group' && /one at a time/i.test(dom.group.name) && /Switching another on switches the first off/.test(dom.group.desc) && /Nothing is on when the page opens/.test(dom.group.desc) && dom.groups.join() === 'Land,Sea', dom);
+    ok('1e the switches are one labelled group that says "one at a time"; groups are Land, Sea and Air', dom.group.role === 'group' && /one at a time/i.test(dom.group.name) && /Switching another on switches the first off/.test(dom.group.desc) && /Nothing is on when the page opens/.test(dom.group.desc) && dom.groups.join() === 'Land,Sea,Air', dom);
     const assets = S.log.slice(), allowed = u => u.startsWith(BASE) || /^https:\/\/unpkg\.com\/globe\.gl@2\.45\.0\//.test(u) || /^https:\/\/fonts\.googleapis\.com\//.test(u) || /^https:\/\/gibs\.earthdata\.nasa\.gov\//.test(u) || u.startsWith('blob:') || u.startsWith('data:');
-    ok('1f network at load: the journey list and the three manifests for the cards; NO journey display file; no coastline file while imagery is shown; one imagery request; no hub request; only the allowed origins',
-      assets.filter(n => /catalog/.test(n)).length >= 1 && assets.filter(n => /manifest/.test(n)).length === 3 && !assets.some(n => IDS.some(id => n === JOUR[id].j.file)) && !assets.includes('coast-50m.bin') && ctx._img.length === 1 && !reqs.some(u => u.includes(HUB)) && reqs.every(allowed), { assets, img: ctx._img.length, other: reqs.filter(u => !allowed(u)) });
+    ok('1f network at load: the journey list and one manifest per card; NO journey display file; no coastline file while imagery is shown; one imagery request; no hub request; only the allowed origins',
+      assets.filter(n => /catalog/.test(n)).length >= 1 && assets.filter(n => /manifest/.test(n)).length === IDS.length && !assets.some(n => IDS.some(id => n === JOUR[id].j.file)) && !assets.includes('coast-50m.bin') && ctx._img.length === 1 && !reqs.some(u => u.includes(HUB)) && reqs.every(allowed), { assets, img: ctx._img.length, other: reqs.filter(u => !allowed(u)) });
     ok('1g the globe is ready, still (no auto-rotation), showing the whole Earth; the backdrop line gives the picture\'s own date and says it is not the journey dates',
       s.g.globe === 'ok' && s.g.autoRotate === false && Math.abs(s.g.view.altitude - 2.2) < 0.01 && s.g.backdrop === 'imagery' && /^Backdrop: NASA satellite imagery for \d{2} [A-Z][a-z]{2} \d{4} \(NASA GIBS, VIIRS NOAA-21\), not the journey dates\./.test(s.g.note) && /Dark areas/.test(s.g.note), s.g);
     ok('1h the header has the five tabs with Animals current', dom.tabs.map(t => t[0]).join() === 'Earth now,Timeline,Moon,Sun,Animals' && dom.tabs[4][1] === 'page' && dom.tabs.slice(0, 4).every(t => !t[1]), dom.tabs);
@@ -244,7 +263,7 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       await settle(page, B); await page.waitForTimeout(150); const s = await state(page), tag = `${NAME[A]} → ${NAME[B]}`;
       ok(`3a ${tag}: exactly one switch is on (the new one); the old journey's objects are gone and the new one's are there`, checked(s).join() === B && s.scene === 3 && s.n === JOUR[B].d.t.length && s.switches[A].state === 'off' && s.switches[A].checked === 'false', { ck: checked(s), scene: s.scene, n: s.n });
       ok(`3b ${tag}: straight after the press the old switch already reads off and the new one on, the old journey's objects are already gone and its replay has stopped`, mid.switches[A].checked === 'false' && mid.switches[B].checked === 'true' && checked(mid).length === 1 && (mid.status === 'ready' ? mid.n === JOUR[B].d.t.length : mid.scene === 0) && mid.playing === false, { sw: mid.switches, scene: mid.scene, status: mid.status, playing: mid.playing });
-      ok(`3c ${tag}: the old replay stopped; the new one is paused at its own first fix; focus stayed on the pressed switch`, s.playing === false && s.rt === JOUR[B].d.t[0] && s.focus === 'tgl-' + B, [s.playing, s.rt, s.focus]);
+      ok(`3c ${tag}: the old replay stopped; the new one is paused at its own start; focus stayed on the pressed switch`, s.playing === false && s.rt === startOf(B) && s.focus === 'tgl-' + B, [s.playing, s.rt, s.focus]);
       ok(`3d ${tag}: announced once as a change and once as shown`, new RegExp(`^${NAME[B]} shown\\.`).test(s.say) && (mid.say === `${NAME[A]} switched off. ${NAME[B]} loading.` || new RegExp(`^${NAME[B]} shown\\.`).test(mid.say)), [mid.say, s.say]); }
     ok('3e no page error', errs.length === 0, errs); await ctx.close(); }
 
@@ -266,10 +285,10 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     ok('5d A, B, A in quick succession: the last pressed (A) is the one shown, once', checked(s).join() === Z && s.scene === 3 && s.n === JOUR[Z].d.t.length, { ck: checked(s), scene: s.scene, n: s.n });
     await page.click(tgl(Z)); await settle(page, null, 'off');
     // three in a row on a slowed network, checking the switches after each press
-    const gs = IDS.map(() => gate()); IDS.forEach((id, i) => { S.over[JOUR[id].j.file] = { hold: gs[i].p }; }); const after = [];
-    for (const id of IDS) { await page.click(tgl(id)); after.push(checked(await state(page))); }
-    gs[0].go(); await page.waitForTimeout(300); gs[1].go(); await page.waitForTimeout(300); const midScene = (await state(page)).scene; gs[2].go(); IDS.forEach(id => delete S.over[JOUR[id].j.file]); await settle(page, W); await page.waitForTimeout(300); s = await state(page);
-    ok('5e three pressed in a row on a slow connection: exactly one switch on after each press; only the last is ever drawn', after.every((c, i) => c.join() === IDS[i]) && midScene === 0 && checked(s).join() === W && s.scene === 3 && s.n === JOUR[W].d.t.length, { after, midScene, scene: s.scene });
+    const TRIO = [Z, SH, BIRD], gs = TRIO.map(() => gate()); TRIO.forEach((id, i) => { S.over[JOUR[id].j.file] = { hold: gs[i].p }; }); const after = [];
+    for (const id of TRIO) { await page.click(tgl(id)); after.push(checked(await state(page))); }
+    gs[0].go(); await page.waitForTimeout(300); gs[1].go(); await page.waitForTimeout(300); const midScene = (await state(page)).scene; gs[2].go(); TRIO.forEach(id => delete S.over[JOUR[id].j.file]); await settle(page, BIRD); await page.waitForTimeout(300); s = await state(page);
+    ok('5e three pressed in a row on a slow connection: exactly one switch on after each press; only the last is ever drawn', after.every((c, i) => c.join() === TRIO[i]) && midScene === 0 && checked(s).join() === BIRD && s.scene === 3 && s.n === JOUR[BIRD].d.t.length, { after, midScene, scene: s.scene });
     ok('5f after the races: no replay is running and no page error', s.playing === false && errs.length === 0, errs);
     await ctx.close(); }
 
@@ -298,7 +317,7 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     reset(); { const o = await open(browser); await on(o.page, Z); const badCat = Buffer.from(CAT.toString().replace('"schema": 1', '"schema": 1 ')); S.cat = badCat; S.log = []; await o.page.click(tgl(W)); await done(o.page); await o.page.waitForTimeout(200); let s3 = await state(o.page);
       ok('6h a journey list that does not verify is ONE error for the whole group: no row carries it, every switch is off, nothing is drawn, no manifest or display file is requested after it', s3.integrity === 'The list of journeys could not be verified. No journey can be shown until it verifies.' && IDS.every(id => s3.switches[id].state === 'off' && s3.switches[id].retry === false) && checked(s3).length === 0 && s3.scene === 0 && Object.keys(s3.err).length === 0 && S.log.every(n => /catalog/.test(n)), [s3.integrity, s3.switches, S.log]);
       const cards = await o.page.evaluate(() => [...document.querySelectorAll('.an-study')].map(c => !c.querySelector('[data-f="facts"]').hidden && c.querySelector('[data-f="title"]').textContent.length > 5));
-      ok('6i the study cards stay readable under the list error', cards.length === 3 && cards.every(Boolean), cards);
+      ok('6i the study cards stay readable under the list error', cards.length === IDS.length && cards.every(Boolean), cards);
       await o.page.click(tgl(SH)); await done(o.page); s3 = await state(o.page);
       ok('6j while the list does not verify, no journey can be switched on (the check is not bypassed)', s3.scene === 0 && checked(s3).length === 0 && s3.integrity !== null, s3.integrity);
       await o.page.click('#an-integrity-retry'); await o.page.waitForTimeout(500); s3 = await state(o.page); const still = s3.integrity !== null;
@@ -310,7 +329,7 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
   // ===== 7. Keyboard, focus and announcements (T9, T10)
   if (want(7)) { reset(); const { ctx, page } = await open(browser);
     await page.focus('#an-panel'); await page.evaluate(() => document.querySelector('.an-preview').closest('p').querySelector('a').focus()); const order = [];
-    for (let i = 0; i < 40 && order.filter(x => /^tgl-/.test(x)).length < 3; i++) { await page.keyboard.press('Tab'); order.push(await page.evaluate(() => document.activeElement.id || document.activeElement.tagName)); }
+    for (let i = 0; i < 60 && order.filter(x => /^tgl-/.test(x)).length < IDS.length; i++) { await page.keyboard.press('Tab'); order.push(await page.evaluate(() => document.activeElement.id || document.activeElement.tagName)); }
     ok('7a Tab reaches each switch, in the order shown', order.filter(x => /^tgl-/.test(x)).join() === IDS.map(id => 'tgl-' + id).join(), order);
     await page.focus(tgl(Z)); await page.keyboard.press('Space'); await settle(page, Z); let s = await state(page); const a = s.focus === 'tgl-' + Z && checked(s).join() === Z;
     await page.focus(tgl(SH)); await page.keyboard.press('Enter'); await settle(page, SH); s = await state(page); const b = s.focus === 'tgl-' + SH && checked(s).join() === SH;
@@ -323,7 +342,7 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     await on(page, Z); const said = (await state(page)).say; await page.evaluate(() => { ME.journey.setSpeed(3600); ME.journey.play(); }); await page.waitForTimeout(700); s = await state(page);
     ok('7e playback does not announce on every frame: the announcement is unchanged while the replay runs', s.playing === true && s.say === said && s.rt > JOUR[Z].d.t[0], [s.say, s.rt]);
     const names = await page.evaluate(() => [...document.querySelectorAll('button.an-tgl')].map(b => b.textContent.trim())); await page.click(tgl(Z)); await settle(page, null, 'off'); const names2 = await page.evaluate(() => [...document.querySelectorAll('button.an-tgl')].map(b => b.textContent.trim()));
-    ok('7f a switch\'s label never changes with its state', names.join('|') === names2.join('|') && names.length === 3, [names, names2]);
+    ok('7f a switch\'s label never changes with its state', names.join('|') === names2.join('|') && names.length === IDS.length, [names, names2]);
     await ctx.close(); }
 
   // ===== 8. Links to one journey (T11)
@@ -372,7 +391,7 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     S.log = []; await o.page.click(tgl(Z), { force: true }); await o.page.waitForTimeout(400); s = await state(o.page);
     ok('11b pressing an unavailable switch switches nothing on, requests nothing and says why', checked(s).length === 0 && s.choice === null && S.log.length === 0 && /Plains zebra cannot be shown\. The journey needs the 3-D globe/.test(s.say) && s.focus === 'tgl-' + Z, [s.say, S.log]);
     const cards = await o.page.evaluate(() => [...document.querySelectorAll('.an-study')].map(c => [c.querySelector('[data-f="state"]').textContent, !c.querySelector('[data-f="facts"]').hidden, c.querySelector('[data-f="lic"]').textContent.length > 3]));
-    ok('11c the study cards, sources and licences are still shown', cards.length === 3 && cards.every(c => /verified/.test(c[0]) && c[1] && c[2]), cards); ok('11d no page error without WebGL', o.errs.length === 0, o.errs); await o.ctx.close();
+    ok('11c the study cards, sources and licences are still shown', cards.length === IDS.length && cards.every(c => /verified/.test(c[0]) && c[1] && c[2]), cards); ok('11d no page error without WebGL', o.errs.length === 0, o.errs); await o.ctx.close();
     reset(); const l = await open(browser, undefined, '', { lib: false }); s = await state(l.page); const box2 = await l.page.evaluate(() => document.getElementById('an-globe').textContent);
     ok('11e the globe library failed to load: the same plain message with a Diagnostics note; switches unavailable; cards readable', s.g.globe === 'failed' && /could not start in this browser/.test(box2) && /Diagnostics/.test(box2) && IDS.every(id => s.switches[id].disabled === 'true') && checked(s).length === 0, [box2, s.g]); await l.ctx.close();
     reset(); const k = await open(browser); await on(k.page, Z); await k.page.evaluate(() => { ME.journey.setSpeed(3600); ME.journey.play(); });
@@ -453,7 +472,7 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
   // ===== 15. The study cards
   if (want(15)) { reset(); const { ctx, page } = await open(browser);
     const c = await page.evaluate(() => [...document.querySelectorAll('.an-study')].map(s => ({ id: s.dataset.journey, state: s.querySelector('[data-f="state"]').textContent, title: s.querySelector('[data-f="title"]').textContent, lic: s.querySelector('[data-f="lic"]').textContent, cons: s.querySelector('[data-f="cons"]').textContent, pop: s.querySelector('[data-f="pop"]').textContent, sample: s.querySelector('[data-f="sample"]').textContent, go: s.querySelector('a.an-go').getAttribute('href') })));
-    ok('15a each card is filled from its verified manifest, links to its own switch, and keeps the fixed "Not available yet" states and the sample-size sentence', c.length === 3 && c.every(x => x.title === JOUR[x.id].m.title && /verified/.test(x.state) && x.lic.includes(JOUR[x.id].m.licence) && /^Not available yet\./.test(x.cons) && /^Not available yet\./.test(x.pop) && /not a population estimate/.test(x.sample) && x.go === '#journey=' + x.id), c);
+    ok('15a each card is filled from its verified manifest, links to its own switch, and keeps the fixed "Not available yet" states and the sample-size sentence', c.length === IDS.length && c.every(x => x.title === JOUR[x.id].m.title && /verified/.test(x.state) && x.lic.includes(JOUR[x.id].m.licence) && /^Not available yet\./.test(x.cons) && /^Not available yet\./.test(x.pop) && /not a population estimate/.test(x.sample) && x.go === '#journey=' + x.id), c);
     const txt = await page.evaluate(() => document.querySelector('main').textContent);
     ok('15b the page says the globe shows no current observations and that the backdrop is not from a journey\'s dates; it does not send the reader to Earth now for the replay', /shows no current observations/.test(txt) && /not from a journey's dates/.test(txt) && !/Choose this journey on Earth now/.test(txt) && /Private preview/.test(txt), null);
     const air = await page.evaluate(() => [...document.querySelectorAll('.an-doc h3')].map(h => h.textContent)); ok('15c the cards are grouped Land, Sea, Air', air.join() === 'Land,Sea,Air', air);
@@ -542,6 +561,116 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     {
       const o = await listError(browser, { width: 390, height: 740 }); await o.page.evaluate(() => document.getElementById('an-integrity-retry').scrollIntoView({ block: 'center' })); const s0 = await state(o.page); await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => document.getElementById('an-integrity').hidden, null, { timeout: 10000 }); const s = await state(o.page);
       ok('17j phone: the list\'s Retry does not scroll the page to the globe', s.scroll.n === s0.scroll.n && s.box.bottom < 0 && s.integrity === null, [s.y, s0.y, s.scroll]); await o.ctx.close(); } }
+
+  // ===== 18. The bird (stage 2; Part B: B8, B9, B12, B13, B16 and §11a). Expected states are worked out here from the display file.
+  if (want(18)) { reset(); const T = JOUR[BIRD], D = T.d, J = T.j, n = D.t.length, RULE = T.m.gap_rule.max_join_seconds, P = D.withheld, R0 = J.record_first_s, R1 = J.record_last_s;
+    const nextFix = s => { for (let i = 0; i < n; i++) if (D.t[i] > s) return D.t[i]; return Infinity; };
+    const H = P.map(p => ({ from: p[0], to: nextFix(p[1]), p })), hidAt = s => H.find(h => s >= h.from && s < h.to) || null;
+    const at = (page, times) => page.evaluate(ts => ts.map(x => { ME.journey.seek(x); const s = ME.journey.state(); return { t: x, rt: s.rt, i: s.i, hidden: s.hidden, bar: s.bar, mv: s.objects.markerVisible, fx: s.objects.fixesShown, ln: s.objects.lineShown, range: +document.getElementById('replay-range').value, text: document.getElementById('replay').textContent }; }), times);
+    const { ctx, page, errs } = await open(browser); S.log = []; await page.focus(tgl(BIRD)); await page.keyboard.press('Space'); await settle(page, BIRD); await page.waitForTimeout(300); let s = await state(page);
+    ok('18a the bird opens at the start of the recording, inside the first withheld period: no marker, no accuracy, nothing drawn yet; the bar and the announcement say fixes are withheld; three objects on the globe; its own files requested once',
+      s.rt === R0 && s.hidden === true && s.objects.markerVisible === false && s.objects.fixesShown === 0 && s.objects.lineShown === 0 && s.scene === 3 && s.playing === false && !/accuracy/i.test(s.bar) && !/displayed fix 2/.test(s.bar.split(' · ')[1]) &&
+      s.bar === `Replay time (recorded) ${utc(R0)} · Fixes near the tagging site are withheld: 86 fixes between 23 Jun 2008 17:58:44 UTC and 29 Jun 2008 00:01:14 UTC, within 5 km of the tagging-site reference point, are not shown. No marker is shown · Next displayed fix 29 Jun 2008 01:30:54 UTC` &&
+      s.say === 'Waved albatross shown. Replay is at the start of the recording. The first fixes are withheld, so no marker is shown yet.' && s.note.startsWith('Replay: recorded 23 Jun 2008 to 15 Sep 2008.') && S.log.filter(x => x === T.j.file).length === 1, { bar: s.bar, say: s.say, obj: s.objects, rt: s.rt });
+    ok('18b the row carries the manifest\'s sentences and the tag\'s accuracy statement; the switch\'s line is the accepted label, as the manifest has it', s.switches[BIRD].obs.includes(T.m.card.shown) && s.switches[BIRD].obs.includes(T.m.card.accuracy) && s.switches[BIRD].obs.includes(T.m.card.done) &&
+      (await page.evaluate(id => document.querySelector(`.an-sw[data-journey="${id}"] [data-f="sw-label"]`).textContent, BIRD)) === T.m.label_line && T.m.label_line === 'Recorded movements of one breeding adult, 23 June to 15 September 2008.', s.switches[BIRD].obs.slice(0, 160));
+    // every withheld period: at its start, just before the next displayed fix, exactly at it, and just before the period
+    const times = []; for (const h of H) { times.push(h.from, h.p[1], h.to - 1); if (h.to !== Infinity) times.push(h.to); if (h.from - 1 >= R0) times.push(h.from - 1); }
+    let r = await at(page, times), bad = [];
+    for (const x of r) { const h = hidAt(x.t), i = lastAt(D.t, x.t);
+      const want = h ? { hidden: true, mv: false, acc: false } : { hidden: false, mv: i >= 0, acc: i >= 0 };
+      const acc = / · Tag's accuracy estimate ([\d.]+) m/.exec(x.bar);
+      if (x.hidden !== want.hidden || x.mv !== want.mv || !!acc !== want.acc || (acc && +acc[1] !== D.acc[i]) || x.i !== i || x.fx !== i + 1 || x.ln !== joinsTo(D, RULE, i) || (h && (!x.bar.includes(`${h.p[2]} fixes between ${utc(h.p[0])} and ${utc(h.p[1])}`) || /Last displayed fix|tried/.test(x.bar))) || (!h && /withheld/.test(x.bar))) bad.push([x.t, x.hidden, x.mv, x.bar.slice(0, 200)]); }
+    ok(`18c all ${H.length} withheld periods, at ${r.length} times: hidden from the first withheld time (inclusive) to the next displayed fix (exclusive); the marker and its accuracy are absent throughout and return exactly at that fix; track drawn before the period stays; no line into or out of it`, bad.length === 0 && r.length >= 4 * H.length, bad.slice(0, 3));
+    // the failed attempt that lies inside a hidden span (after a period's last withheld fix, before the next displayed fix)
+    const fin = D.failed_t.filter(f => hidAt(f)); r = await at(page, fin.concat(fin.map(f => f + 1)));
+    ok('18d the one failed attempt inside a hidden span: withholding takes precedence; no "tried" wording, no marker, no accuracy', fin.length === 1 && r.every(x => x.hidden && !x.mv && !/tried|accuracy/i.test(x.bar) && /are withheld/.test(x.bar)), r.map(x => x.bar.slice(0, 160)));
+    // a failed attempt in a visible joined step: said only once replay time reaches it
+    const fv = D.failed_t.filter(f => !hidAt(f)), f0 = fv[0], i0 = lastAt(D.t, f0); r = await at(page, [f0 - 1, f0, f0 + 60, D.t[i0 + 1]]);
+    ok('18e a failed attempt in a displayed, joined step: nothing before it; from the attempt on, "The tag tried for a position at … and got none", with the marker still on the earlier fix, named as the last displayed fix with its accuracy; gone at the next fix',
+      fv.length === 10 && D.j[i0 + 1] === 1 && !/tried/.test(r[0].bar) && r[1].bar.includes(`The tag tried for a position at ${utc(f0)} and got none`) && r[2].bar.includes(`The tag tried for a position at ${utc(f0)} and got none`) && r[1].i === i0 && r[1].mv && r[1].bar.includes(`Last displayed fix ${utc(D.t[i0])}`) && r[1].bar.includes(`Tag's accuracy estimate ${D.acc[i0]} m`) && !/tried/.test(r[3].bar) && r[3].i === i0 + 1, r.map(x => x.bar));
+    // the long step with no row of any kind in the source
+    const longs = []; for (let i = 0; i < n - 1; i++) if (D.t[i + 1] - D.t[i] > RULE && !H.some(h => h.from > D.t[i] && h.from < D.t[i + 1])) longs.push(i);
+    r = await at(page, longs.map(i => D.t[i] + 60));
+    ok('18f the 9-hour step: "No position and no attempt is in the source for 9 h 0 min 14 s after it"; the marker stays on the earlier fix; the step is not drawn', longs.length === 1 && D.t[longs[0] + 1] - D.t[longs[0]] === 32414 && r[0].bar.includes('No position and no attempt is in the source for 9 h 0 min 14 s after it') && r[0].mv && r[0].i === longs[0] && D.j[longs[0] + 1] === 0, r.map(x => x.bar));
+    // every stop of the slider, and one second after each: the three wordings each in their own state only; never the older journeys' wording
+    const stops = [...new Set([R0, ...D.t, ...P.map(p => p[0]), R1])].sort((a, b) => a - b), sweep = stops.concat(stops.filter(x => x < R1).map(x => x + 1), D.failed_t, D.failed_t.map(x => x + 1)); r = await at(page, sweep); bad = []; let nHid = 0, nTried = 0, nLong = 0;
+    for (const x of r) { const h = hidAt(x.t), i = lastAt(D.t, x.t), next = i < n - 1 ? D.t[i + 1] : Infinity, tried = !h && D.failed_t.some(f => f > D.t[i] && f < next && f <= x.t), long = !h && i >= 0 && i < n - 1 && next - D.t[i] > RULE && !H.some(q => q.from > D.t[i] && q.from < next);
+      nHid += h ? 1 : 0; nTried += tried ? 1 : 0; nLong += long ? 1 : 0;
+      if (/was recorded|No fix is displayed|tracking record|recorded fix\b/i.test(x.bar.replace('Replay time (recorded)', '')) || /are withheld/.test(x.bar) !== !!h || /tried for a position/.test(x.bar) !== tried || /is in the source for/.test(x.bar) !== long || x.mv !== (!h && i >= 0) || x.hidden !== !!h || x.fx !== i + 1 || x.ln !== joinsTo(D, RULE, i) ||
+        /migrat|foraging trip|incubat|at the colony|at the nest/i.test(x.text)) bad.push([x.t, x.bar.slice(0, 220)]); }
+    ok(`18g B12 at all ${stops.length} slider stops, every listed failed attempt, and one second after each (${r.length} times): withheld, failed-attempt and long-gap wording each appear only in their own state (${nHid}, ${nTried}, ${nLong} times); "No fix was recorded" and the older wordings never appear; marker, fix marks and line are as the file says; none of the not-said words is on the bar`, bad.length === 0 && nHid >= 2 * P.length && nTried === 20 && nLong === 2, bad.slice(0, 3));
+    // B9: hidden after a seek, a speed change and a pause
+    const mid = P[0][0] + 86400; await page.evaluate(x => { ME.journey.seek(x); ME.journey.setSpeed(3600); ME.journey.play(); }, mid); await page.waitForTimeout(500); const playing = await state(page);
+    await page.evaluate(() => ME.journey.pause()); const paused = await state(page), barText = await page.evaluate(() => document.getElementById('replay').textContent + document.getElementById('an-status').textContent);
+    ok('18h B9 inside a withheld period after a seek, a speed change, while playing and after a pause: no marker and no accuracy text anywhere on the bar', playing.playing === true && playing.hidden && !playing.objects.markerVisible && paused.playing === false && paused.hidden && !paused.objects.markerVisible && paused.rt > mid && !/accuracy estimate/i.test(barText), [playing.bar, paused.bar]);
+    // the slider
+    await page.evaluate(x => ME.journey.seek(x), D.t[0]); await page.focus('#replay-range'); await page.keyboard.press('Home'); const k0 = await state(page); await page.keyboard.press('ArrowRight'); const k1 = await state(page);
+    const iB = lastAt(D.t, P[1][0]); await page.evaluate(x => ME.journey.seek(x), D.t[iB]); await page.keyboard.press('ArrowRight'); const k2 = await state(page); await page.keyboard.press('ArrowRight'); const k3 = await state(page); await page.keyboard.press('End'); const k4 = await state(page);
+    const rng = await page.evaluate(() => { const r = document.getElementById('replay-range'); return [r.max, document.querySelector('label[for="replay-range"]').textContent, r.getAttribute('aria-valuetext')]; });
+    ok('18i the slider\'s stops are the displayed fixes and the start of each withheld period: Home is the start of the recording (withheld); the next stop is the first displayed fix; from the fix before a period the next stop is the period\'s start (withheld), then the next displayed fix; End is the end of the recording',
+      k0.rt === R0 && k0.hidden && k1.rt === D.t[0] && !k1.hidden && k1.i === 0 && k2.rt === P[1][0] && k2.hidden && k3.rt === H[1].to && !k3.hidden && k4.rt === R1 && +rng[0] === stops.length - 1 && stops.length === n + P.length && /start of each withheld period/.test(rng[1]) && rng[2] === k4.bar, [k0.rt, k1.rt, k2.rt, k3.rt, k4.rt, rng[0], stops.length]);
+    ok('18j at the last displayed fix, which is also the last source row, the bar says the displayed record ends here, with that fix\'s accuracy', k4.i === n - 1 && k4.bar === `Replay time (recorded) ${utc(R1)} · Last displayed fix: displayed record ends here, ${utc(D.t[n - 1])} · Tag's accuracy estimate ${D.acc[n - 1]} m`, k4.bar);
+    // play to the end, and again
+    await page.evaluate(x => { ME.journey.setSpeed(604800 * 8); ME.journey.seek(x); }, R1 - 86400 * 2); await page.click('#replay-play'); await page.waitForFunction(() => !ME.journey.state().playing, null, { timeout: 30000 }); const e1 = await state(page);
+    await page.click('#replay-play'); await page.waitForTimeout(60); await page.evaluate(() => ME.journey.pause()); const e2 = await state(page);
+    ok('18k Play runs to the end of the recording and stops; Play again starts from the start of the recording', e1.rt === R1 && e1.i === n - 1 && e1.play === 'Play' && e2.rt >= R0 && e2.rt < D.t[0] + 86400 * 30, [e1.rt, e2.rt]);
+    // B16: the view holds the displayed journey
+    const inView = async pg => pg.evaluate(([la, lo]) => { ME.journey.goArea(); const g = ME.animalsGlobe.raw(), cv = document.querySelector('#an-globe canvas').getBoundingClientRect(); let out = 0;
+      for (let i = 0; i < la.length; i += 5) { const c = g.getScreenCoords(la[i], lo[i], 0.004); if (!(c.x >= 0 && c.x <= cv.width && c.y >= 0 && c.y <= cv.height)) out++; } return [out, Math.round(cv.width), Math.round(cv.height)]; }, [D.lat, D.lon]);
+    const v1 = await inView(page);
+    ok('18l B16 desktop: "Journey area" puts every sampled displayed fix inside the globe\'s box', v1[0] === 0, v1);
+    ok('18l2 the card under the globe: the label, the counts and the withholding statement come from the manifest; the recording period and the displayed fixes are stated apart; no land-map row',
+      await page.evaluate(([id, m]) => { const c = document.getElementById(id), f = k => c.querySelector(`[data-f="${k}"]`).textContent; return c.querySelector('h4').textContent === m.label && f('shown') === m.label_line + ' ' + m.card.shown && f('notdrawn') === m.card.done + ' ' + m.withholding.statement && /^Recording: 23 Jun 2008 17:58:44 UTC to 15 Sep 2008 13:30:18 UTC; the replay covers all of it\. First displayed fix 29 Jun 2008 01:30:54 UTC\. Last displayed fix 15 Sep 2008 13:30:18 UTC\.$/.test(f('period')) && f('unc').startsWith(m.accuracy_note) && f('place').includes('Punta Cevallos') && f('place').includes('Nest stage: egg') && c.querySelector('[data-f="land"]').closest('tr').hidden && !/migrat|foraging trip|incubat|at the colony|at the nest/i.test(c.textContent) && /nine were used in the paper's analysis/.test(c.textContent); }, [BIRD, T.m]));
+    // back to an older journey: nothing of the bird's wording or frame is left
+    await page.click(tgl(Z)); await settle(page, Z); const z = await state(page), zr = await page.evaluate(() => [document.getElementById('replay-range').max, document.querySelector('label[for="replay-range"]').textContent]);
+    ok('18n after the bird, the zebra is as before: its own stops (one per fix), its own label on the slider, no accuracy or withheld wording, no hidden state', +zr[0] === JOUR[Z].d.t.length - 1 && zr[1] === 'Recorded fix (arrow keys step from fix to fix)' && z.hidden === false && !/accuracy|withheld/.test(z.bar) && z.bar.includes('First recorded fix') && z.scene === 3 && z.n === JOUR[Z].d.t.length, [zr, z.bar]);
+    ok('18o no page error', errs.length === 0, errs); await ctx.close();
+    { reset(); const o = await open(browser, { width: 390, height: 740 }); await o.page.evaluate(i => document.getElementById('tgl-' + i).scrollIntoView({ block: 'center' }), BIRD); await o.page.click(tgl(BIRD)); await settle(o.page, BIRD); await o.page.waitForTimeout(300); const v = await inView(o.page), s2 = await state(o.page);
+      ok('18p B16 at 390 px: every sampled displayed fix is inside the globe\'s box; the press brought the globe into view although no marker is shown', v[0] === 0 && s2.box.top >= 0 && s2.box.top <= 12 && s2.box.bottom <= s2.vh && s2.hidden === true && s2.scroll && s2.scroll.n === 1, [v, s2.box]); await o.ctx.close(); }
+    // B8: a trailing withheld period (fixture: the last three displayed fixes become a withheld period)
+    { reset(); S.fx = fixture(BIRD, (d, m, jr) => { const k = d.n - 3, a = d.t[k], b = d.t[d.n - 1]; for (const f of ['t', 'lat', 'lon', 'acc', 'j']) d[f] = d[f].slice(0, k); d.n = k; d.withheld.push([a, b, 3]);
+        const keep = d.failed_t.filter(x => x < a || x > b); d.failed_t = keep; jr.failed_listed = keep.length; jr.fixes = k; jr.last_fix_s = d.t[k - 1]; jr.fixes_withheld += 3; jr.withheld_periods += 1; jr.steps_joined = d.j.reduce((x, y) => x + y, 0); });
+      const o = await open(browser), fd = S.fx.d, last = fd.withheld[fd.withheld.length - 1]; await on(o.page, BIRD);
+      const rr = await at(o.page, [last[0] - 1, last[0], last[1], R1 - 1, R1]); await o.page.focus('#replay-range'); await o.page.keyboard.press('End'); const kEnd = await state(o.page);
+      await o.page.evaluate(x => { ME.journey.setSpeed(604800 * 8); ME.journey.seek(x); }, fd.t[fd.n - 1] - 86400); await o.page.click('#replay-play'); await o.page.waitForFunction(() => !ME.journey.state().playing, null, { timeout: 30000 }); const pEnd = await state(o.page);
+      ok('18m B8 a trailing withheld period (fixture): the hidden state runs through the end of the recording, inclusive; the slider\'s End and Play both reach that end; no marker and no accuracy there; the bar says the recording ends in the period',
+        !rr[0].hidden && rr[0].mv && rr.slice(1).every(x => x.hidden && !x.mv && !/accuracy/.test(x.bar) && /The recording ends in this withheld period/.test(x.bar)) && kEnd.rt === R1 && kEnd.hidden && pEnd.rt === R1 && pEnd.hidden && !pEnd.objects.markerVisible && pEnd.objects.fixesShown === fd.n, [rr.map(x => [x.hidden, x.mv]), kEnd.rt, pEnd.rt, R1]); await o.ctx.close(); } }
+
+  // ===== 19. The bird's file is verified before anything is drawn (B11, B14, §11a structure checks). Fixtures are re-pinned (harness).
+  if (want(19)) { const UNV = 'Journey file could not be verified. Nothing is drawn.';
+    const refused = async (id, mutate, re) => { reset(); S.fx = fixture(id, mutate); const o = await open(browser); await o.page.click(tgl(id)); await done(o.page); const s = await state(o.page); await o.ctx.close();
+      return { ok: s.scene === 0 && checked(s).length === 0 && s.switches[id].obs === UNV && s.err[id] && re.test(s.err[id].detail), detail: s.err[id] && s.err[id].detail, scene: s.scene }; };
+    const loads = async (id, mutate) => { reset(); S.fx = fixture(id, mutate); const o = await open(browser); await o.page.click(tgl(id)); await done(o.page); const s = await state(o.page); await o.ctx.close(); return s.scene === 3 && s.status === 'ready'; };
+    let res = []; for (const f of ['acc', 'j', 'withheld', 'failed_t']) res.push([f, await refused(BIRD, d => { delete d[f]; }, new RegExp(`lacks "${f}"`))]);
+    ok('19a §11a the bird requires its new fields: a display file without acc, j, withheld or failed_t is refused, never read as an older journey', res.every(x => x[1].ok), res.filter(x => !x[1].ok));
+    res = [['short', d => { d.acc = d.acc.slice(1); }], ['negative', d => { d.acc[7] = -1; }], ['text', d => { d.acc[7] = '4.2'; }], ['null', d => { d.acc[7] = null; }]]; const rb = []; for (const [nm, mu] of res) rb.push([nm, await refused(BIRD, mu, /accuracy estimates/)]);
+    ok('19b B11 accuracy: a wrong length, a negative, a non-number and a missing entry are each refused', rb.every(x => x[1].ok), rb.filter(x => !x[1].ok));
+    const D = JOUR[BIRD].d, kP = (() => { for (let i = 1; i < D.n; i++) if (D.withheld.some(p => p[0] > D.t[i - 1] && p[0] < D.t[i])) return i; })();
+    // a step that IS within the time rule and is flagged joined, with a withheld period placed between its two fixes
+    const kJ = (() => { for (let i = 5; i < D.n; i++) if (D.j[i] === 1 && D.t[i] - D.t[i - 1] > 100 && !D.failed_t.some(f => f > D.t[i - 1] && f < D.t[i])) return i; })();
+    const c1 = await refused(BIRD, (d, m, jr) => { d.withheld.push([d.t[kJ - 1] + 10, d.t[kJ - 1] + 20, 2]); d.withheld.sort((x, y) => x[0] - y[0]); jr.fixes_withheld += 2; jr.withheld_periods += 1; }, /joined across a withheld period/);
+    const c1b = await refused(BIRD, (d, m, jr) => { d.j[kP] = 1; jr.steps_joined += 1; }, /further apart than the rule/);
+    const c2 = await refused(BIRD, (d, m, jr) => { const i = d.j.indexOf(1); d.j[i] = 0; }, /number of joined steps/);
+    const c3 = await refused(BIRD, d => { d.j[0] = 1; }, /join flags are missing or malformed/);
+    ok('19c join flags: a join across a withheld period although the two fixes are within the time rule; a join over the time rule; a count that differs from the manifest; and a malformed array are each refused', c1.ok && c1b.ok && c2.ok && c3.ok, [c1, c1b, c2, c3]);
+    const w = [['a displayed fix inside a period', (d) => { d.withheld[1][1] = d.t[kP]; }, /inside a withheld period/], ['periods out of order', d => { const x = d.withheld[2]; d.withheld[2] = d.withheld[3]; d.withheld[3] = x; }, /out of order, overlap/],
+      ['a count that differs', d => { d.withheld[1][2] += 1; }, /withheld counts do not match/], ['a period before the recording', d => { d.withheld[0][0] -= 10; }, /out of order, overlap or lie outside/], ['a coordinate smuggled into a period', d => { d.withheld[1].push(-1.39); }, /withheld period is malformed/],
+      ['a non-integer time', d => { d.withheld[1][0] += 0.5; }, /withheld period is malformed/]]; const rw = []; for (const [nm, mu, re] of w) rw.push([nm, await refused(BIRD, mu, re)]);
+    ok('19d withheld periods: a displayed fix inside one, periods out of order, a wrong count, a period outside the recording, an extra value in a period and a non-integer time are each refused', rw.every(x => x[1].ok), rw.filter(x => !x[1].ok));
+    const fl = [['at a fix', d => { d.failed_t[0] = d.t[lastAt(d.t, d.failed_t[0])]; }], ['inside a period', d => { d.failed_t[0] = d.withheld[0][0] + 5; }], ['not increasing', d => { d.failed_t[1] = d.failed_t[0]; }], ['one missing', d => { d.failed_t.pop(); }], ['outside the recording', d => { d.failed_t[d.failed_t.length - 1] = 2e9; }]]; const rf = [];
+    for (const [nm, mu] of fl) rf.push([nm, await refused(BIRD, mu, /failed-attempt time/)]);
+    ok('19e failed attempts: a time at a fix, inside a stored period, out of order, missing, or outside the recording is each refused', rf.every(x => x[1].ok), rf.filter(x => !x[1].ok));
+    const m1 = await refused(BIRD, (d, m, jr) => { delete jr.record_first_s; }, /recording period in the manifest/), m2 = await refused(BIRD, (d, m, jr) => { jr.record_last_s = d.t[d.n - 1] - 1; }, /recording period in the manifest/);
+    ok('19f a manifest without a usable recording period is refused', m1.ok && m2.ok, [m1, m2]);
+    // the older journeys verify exactly as before
+    const a1 = await refused(SH, d => { delete d.lc; }, /quality classes/), a2 = await refused(SH, d => { delete d.j; }, /join flags are missing/), a3 = await refused(Z, d => { d.j = d.t.map(() => 0); }, /quality classes/), a4 = await refused(W, d => { d.lc = d.lc.slice(1); }, /quality classes/);
+    ok('19g the older journeys verify as before: an Argos file without its classes or its join flags is refused; an older-schema file that gains join flags without classes is refused', a1.ok && a2.ok && a3.ok && a4.ok, [a1, a2, a3, a4]);
+    ok('19h an unchanged copy of each file, re-pinned the same way, still loads (the harness is not what refuses)', (await loads(BIRD, () => { })) && (await loads(SH, () => { })) && (await loads(Z, () => { })));
+    // B14 for the bird: a changed display file and a changed manifest (real pins)
+    reset(); { const o = await open(browser); const bad = Buffer.from(real(JOUR[BIRD].j.file)); bad[bad.length - 40] = bad[bad.length - 40] === 0x31 ? 0x32 : 0x31; S.over[JOUR[BIRD].j.file] = { body: bad }; await o.page.click(tgl(BIRD)); await done(o.page); let s = await state(o.page); const e1 = s.scene === 0 && s.switches[BIRD].obs === UNV && /display file does not match/.test(s.err[BIRD].detail);
+      delete S.over[JOUR[BIRD].j.file]; S.over[JOUR[BIRD].e.manifest] = { body: Buffer.from(JSON.stringify({ ...JOUR[BIRD].m, label: 'x' })) }; S.log = []; await o.page.click(`.an-sw[data-journey="${BIRD}"] [data-f="sw-retry"]`); await done(o.page); s = await state(o.page);
+      ok('19i B14 the bird\'s display file with one digit changed, and its manifest changed, are each refused with nothing drawn; with a bad manifest the display file is never requested', e1 && s.scene === 0 && /manifest does not match/.test(s.err[BIRD].detail) && !S.log.includes(JOUR[BIRD].j.file), [e1, s.err]); await o.ctx.close(); } }
   } catch (e) { fail++; console.log('FAIL  suite error: ' + (e && e.stack || e).toString().slice(0, 900)); }
   await browser.close(); srv.close(); clearTimeout(wd);
   if (BREAK) { const hit = failed.some(n => n.startsWith(EXPECT[BREAK])); console.log(hit ? `BREAK CAUGHT  ${BREAK} (at "${EXPECT[BREAK]}"; ${fail} checks failed)` : `BREAK MISSED  ${BREAK}: expected a failure at "${EXPECT[BREAK]}"; failed: ${failed.slice(0, 6).join(' | ') || 'none'}`); process.exit(hit ? 0 : 1); }

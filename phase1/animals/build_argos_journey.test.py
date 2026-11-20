@@ -77,10 +77,10 @@ with tempfile.TemporaryDirectory() as tmp:
 
 # ---------- Part 2: the committed files
 cat_raw = open(os.path.join(A, 'journeys-R1.catalog.json'), 'rb').read(); cat = json.loads(cat_raw)
-ok('C1 the journey list names three journeys and pins each manifest', [e['id'] for e in cat['journeys']] == ['zebra-botswana-Z3866', 'white-shark-sa-118845', 'false-killer-whale-hawaii-98364'] and all(sha(open(os.path.join(A, e['manifest']), 'rb').read()) == e['manifest_sha256'] for e in cat['journeys']))
+ok('C1 the journey list names the three first journeys, then the bird (stage 2), and pins each manifest', [e['id'] for e in cat['journeys']] == ['zebra-botswana-Z3866', 'white-shark-sa-118845', 'false-killer-whale-hawaii-98364', 'waved-albatross-galapagos-3275-30662'] and all(sha(open(os.path.join(A, e['manifest']), 'rb').read()) == e['manifest_sha256'] for e in cat['journeys']))
 ok('C2 both page scripts pin this journey list', all(sha(cat_raw) in open(os.path.join(ROOT, f), encoding='utf-8').read() for f in ('animals-journey.js', 'animals.js')))
 EXPECT = {'white-shark-sa-118845': (755, 754, 616, 2, [1004, 796, 795, 755]), 'false-killer-whale-hawaii-98364': (661, 660, 554, 0, [824, 823, 694, 693, 663, 661, 661])}
-for e in cat['journeys'][1:]:
+for e in [x for x in cat['journeys'] if x['id'] in EXPECT]:        # the two Argos journeys
     m = json.load(open(os.path.join(A, e['manifest']), encoding='utf-8')); j = m['journeys'][0]; raw = open(os.path.join(A, j['file']), 'rb').read(); d = json.loads(raw); n = d['n']; R = m['rule']; lim = m['gap_rule']['max_join_seconds']
     rows = [(d['t'][i], d['lat'][i], d['lon'][i], d['lc'][i]) for i in range(n)]; x = EXPECT[e['id']]
     ok(f"C3 {e['id']}: display file is the one the manifest pins; counts are the ones GPT reviewed", sha(raw) == j['sha256'] and len(raw) == j['bytes'] and (n, j['steps'], j['steps_joined'], j['steps_refused_for_land']) == x[:4] and [s['rows_out'] for s in m['stages']] == x[4], ((n, j['steps'], j['steps_joined'], j['steps_refused_for_land']), [s['rows_out'] for s in m['stages']]))
