@@ -4,8 +4,8 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 20 Nov 2026
 
-## 20 Nov 12:44 UTC (clock reading) — **Animals expansion proposal rev 1.1 (`animals-expansion-proposal` `ffa790f`): IWC and *Ostrich* pages read in Chad's Chrome.** (docs only; new-spec thread; nothing built, sent or spent; the shared pane not used)
-- **Chad (20 Nov):** the sites that failed in rev 1 should have been read through his Chrome extension or the pane with his sign-in; ask for access. Done for three pages, 12:42 to 12:48 UTC, in a tab Claude opened and closed.
+## 20 Nov 12:44 UTC (clock reading) — **Animals expansion proposal rev 1.1 (`animals-expansion-proposal` `baac664`): IWC and *Ostrich* pages read in Chad's Chrome.** (docs only; new-spec thread; nothing built, sent or spent; the shared pane not used)
+- **Chad (20 Nov):** the sites that failed in rev 1 should have been read through his Chrome extension or the pane with his sign-in; ask for access. Done for three pages, between 12:41 and 12:44 UTC (clock reading before, commit time after; the times first written here were estimates and are corrected), in a tab Claude opened and closed.
 - **IWC status graphics (read in full):** humpback Western Indian Ocean (BSC) "Abundant and recovered after strong growth", 18,111 (15,580 to 20,700), growth 1995 to 2015 strongly increased, last update 2026: **GPT's reading confirmed.** West South Africa (BSB2) 484 (138 to 860), very low. Western South Atlantic (BSA) 11,672 (7,255 to 16,149), "not yet recovered".
 - **Change:** stock A withdrawn as the fallback recovery example (the 2019 paper's 93% and the IWC's current "not yet recovered" disagree). Recovery card = IWC stock C, with the Cape Vidal C1 shore counts as its observed series if they can be shown.
 - **2024 *Ostrich* penguin paper (publisher's page):** open access; no data-availability statement or repository in the page text; supplement is a PDF, not opened. The enquiry's first question stands.
