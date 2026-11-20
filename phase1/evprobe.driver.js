@@ -8,6 +8,13 @@
  * "fetched" with both responses' facts, BEFORE any decode; "validate-begin" and "validated" around each validation; "done" last.
  * A run killed for memory therefore shows how far it got: no "ballast" = it died taking the memory; "validate-begin" without
  * "validated" = it died decoding. CPU time, wall time and the outcome of each invocation come from Cloudflare's invocation log.
+ * TIME. The slot comes from the cron event's scheduled time; WHETHER ANYTHING HAPPENS comes from the actual clock. A run does
+ * nothing unless the actual time is inside its own ten-minute slot, and it starts a request only if that request's whole timeout
+ * ends before the slot does. Slots end at or before the window's end, and an excluded slot is never run, so: no request starts
+ * before the approved start or can be in flight after the approved end; no request can be in flight during an excluded (Dust RGB)
+ * slot; a tick delivered late does not run in a later slot. A slot is run at most once per isolate. (Across isolates there is no
+ * shared memory and no storage: if Cloudflare delivered one scheduled time to two isolates, both would run. Every attempt carries
+ * its own id and is reported.)
  * DIFFERENCES FROM THE COLLECTOR, all deliberate: the size is a parameter (2048 or 1536); validation runs even when a header is
  * missing or names another time (the collector would stop there), so that memory is measured on every run; nothing is stored. */
 const PROBE = {
@@ -46,7 +53,9 @@ async function evprobeValidate(picBuf, chkBuf, size) {
   if (!cmp.ok) return { ...cmp, ok: false, reason: 'picture failed validation', detail: cmp.reason, progressive: sc.progressive, scans: sc.scans };
   return { ...cmp, ok: true, reason: null, progressive: sc.progressive, scans: sc.scans };
 }
-const EVPROBE_ISOLATE = { id: null, runs: 0, active: 0 };   // shows, in the log, when two runs shared an isolate or overlapped
+const EVPROBE_ISOLATE = { id: null, runs: 0, active: 0, slots: new Set() };   // shows, in the log, when two runs shared an isolate or overlapped; slots already run here
+const evprobeHex = n => { const b = new Uint8Array(n); crypto.getRandomValues(b); return [...b].map(x => x.toString(16).padStart(2, '0')).join(''); };
+const EVPROBE_BUILD = PROBE_SOURCE.validation_sha256.slice(0, 12) + '-' + PROBE_SOURCE.driver_sha256.slice(0, 12);
 const evprobeSay = o => console.log(JSON.stringify(o));
 async function evprobeRun(scheduledMs) {
   const tick = Math.floor(scheduledMs / PROBE.SLOT_MS) * PROBE.SLOT_MS, k = Math.round((tick - PROBE.START_MS) / PROBE.SLOT_MS);
@@ -56,10 +65,17 @@ async function evprobeRun(scheduledMs) {
   }
   const slot = evprobePlan()[k];
   if (slot.excluded) { evprobeSay({ probe: 'evprobe', ev: 'excluded', k, scheduled: evprobeIso(scheduledMs), why: slot.excluded }); return 'excluded'; }
-  if (!EVPROBE_ISOLATE.id) { const b = new Uint8Array(4); crypto.getRandomValues(b); EVPROBE_ISOLATE.id = [...b].map(x => x.toString(16).padStart(2, '0')).join(''); }
-  const base = { probe: 'evprobe', k, run: slot.n + 1, phase: slot.phase, size: slot.size, ballast_mib: slot.ballast_mib, isolate: EVPROBE_ISOLATE.id, isolate_run: ++EVPROBE_ISOLATE.runs };
-  const began = Date.now(), deadline = began + PROBE.WALL_BUDGET_MS, left = () => deadline - Date.now(), overlapping = EVPROBE_ISOLATE.active++;
-  evprobeSay({ ...base, ev: 'start', scheduled: evprobeIso(scheduledMs), late_ms: began - scheduledMs, overlapping, source: PROBE_SOURCE.validation_sha256.slice(0, 16) });
+  // ACTUAL TIME: only inside this slot's own ten minutes. Early, late, after the approved end, or in an excluded slot's time: nothing is asked.
+  const slotStart = PROBE.START_MS + k * PROBE.SLOT_MS, slotEnd = slotStart + PROBE.SLOT_MS, began = Date.now();
+  if (began < slotStart || began >= slotEnd) { evprobeSay({ probe: 'evprobe', ev: 'not run', k, why: began < slotStart ? 'delivered before its slot' : 'delivered after its slot', scheduled: evprobeIso(scheduledMs), actual: evprobeIso(began), start: PROBE_START }); return 'not run: outside its slot'; }
+  if (EVPROBE_ISOLATE.slots.has(k)) { evprobeSay({ probe: 'evprobe', ev: 'not run', k, why: 'this slot already ran in this isolate', scheduled: evprobeIso(scheduledMs), actual: evprobeIso(began) }); return 'not run: duplicate'; }
+  EVPROBE_ISOLATE.slots.add(k);
+  if (!EVPROBE_ISOLATE.id) EVPROBE_ISOLATE.id = evprobeHex(4);
+  const base = { probe: 'evprobe', attempt: evprobeHex(6), k, run: slot.n + 1, phase: slot.phase, size: slot.size, ballast_mib: slot.ballast_mib, isolate: EVPROBE_ISOLATE.id, isolate_run: ++EVPROBE_ISOLATE.runs };
+  const deadline = began + PROBE.WALL_BUDGET_MS, left = () => deadline - Date.now(), overlapping = EVPROBE_ISOLATE.active++;
+  /** may a request with this timeout start now? Only if it would be over before this slot ends (so before the window ends and before any excluded slot) */
+  const fits = timeoutMs => { const now = Date.now(); return now >= slotStart && now + timeoutMs <= slotEnd; };
+  evprobeSay({ ...base, ev: 'start', scheduled: evprobeIso(scheduledMs), actual: evprobeIso(began), late_ms: began - scheduledMs, overlapping, start: PROBE_START, build: EVPROBE_BUILD });
   const done = (outcome, extra) => { evprobeSay({ ...base, ev: 'done', outcome, wall_ms: Date.now() - began, ...extra }); return outcome; };
   try {
     // PHASE 3: take the memory first, write every byte, and keep it until it has been checked after the validation
@@ -67,18 +83,20 @@ async function evprobeRun(scheduledMs) {
     if (slot.ballast_mib) { ballast = []; for (let i = 0; i < slot.ballast_mib; i++) { const b = new Uint8Array(1048576); b.fill((i * 31 + 7) & 255); ballast.push(b); }
       evprobeSay({ ...base, ev: 'ballast', held_mib: ballast.length }); }
     // the frame list, as the collector reads it
+    if (!fits(EARTHVIEW.LIST_TIMEOUT_MS)) return done('slot ending: frame list not asked for');
     let r; try { r = await fetch(EARTHVIEW.CAP, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(EARTHVIEW.LIST_TIMEOUT_MS) }); } catch (e) { return done('frame list: no answer', { detail: String(e).slice(0, 160) }); }
     if (r.status !== 200) { try { await r.body.cancel(); } catch (_) {} return done('frame list: http error', { http: r.status }); }
     let xml; try { xml = await r.text(); } catch (e) { return done('frame list: unreadable', { detail: String(e).slice(0, 160) }); }
     const T = evLatest(xml); if (!T) return done('frame list: no time for this layer');
     if (left() < 2 * EARTHVIEW.TIMEOUT_MS) return done('wall budget: not enough left for the pictures');
+    if (!fits(EARTHVIEW.TIMEOUT_MS)) return done('slot ending: picture not asked for', { frame_time: T });
     // the picture at this slot's size, and the check image: the collector's requests, with only the size changed
     const C = EARTHVIEW.CHECK, P = { w: slot.size, h: slot.size, maxBytes: PROBE.PICTURE_MAX_BYTES, type: 'image/jpeg' }, q = `&time=${T}`;
     const picUrl = `${EARTHVIEW.MAP}&width=${P.w}&height=${P.h}&format=image/jpeg&bgcolor=${EARTHVIEW.BGCOLOR}${q}`, chkUrl = `${EARTHVIEW.MAP}&width=${C.w}&height=${C.h}&format=image/png&transparent=true${q}`;
-    const pic = await evFetch('picture', picUrl, P), chk = pic.ok && left() > EARTHVIEW.TIMEOUT_MS ? await evFetch('check image', chkUrl, C) : { ok: false, reason: 'not requested', http: 0 };
+    const pic = await evFetch('picture', picUrl, P), chk = !pic.ok ? { ok: false, reason: 'not requested', http: 0 } : !(left() > EARTHVIEW.TIMEOUT_MS && fits(EARTHVIEW.TIMEOUT_MS)) ? { ok: false, reason: 'not requested: slot or budget ending', http: 0 } : await evFetch('check image', chkUrl, C);
     const fact = f => f.ok ? { ok: true, bytes: f.bytes, sha256: f.sha256, header_present: f.warn_present, header_names: f.served } : { ok: false, reason: f.reason, http: f.http, detail: f.detail };
     const header_ok = !!(pic.ok && chk.ok && pic.served === T && chk.served === T);
-    evprobeSay({ ...base, ev: 'fetched', frame_time: T, cache_age_s: r.headers.get('age'), picture: fact(pic), check: fact(chk), header_ok });
+    evprobeSay({ ...base, ev: 'fetched', frame_time: T, actual: evprobeIso(Date.now()), cache_age_s: r.headers.get('age'), picture: fact(pic), check: fact(chk), header_ok });
     if (!pic.ok || !chk.ok) return done('fetch failed', { frame_time: T, header_ok });
     // validation: once, or (phase 2) six times on the same bytes in this one invocation
     let last = null, refused = 0;
@@ -92,4 +110,4 @@ async function evprobeRun(scheduledMs) {
   finally { EVPROBE_ISOLATE.active--; }
 }
 /* No fetch handler: the Worker cannot be called. __probe is for the test suite only; the runtime ignores it. */
-export default { async scheduled(event, env, ctx) { await evprobeRun(event.scheduledTime); }, __probe: { PROBE, PROBE_START, PROBE_SOURCE, EARTHVIEW, evprobePlan, evprobeRun, evprobeValidate, EVPROBE_ISOLATE } };
+export default { async scheduled(event, env, ctx) { await evprobeRun(event.scheduledTime); }, __probe: { PROBE, PROBE_START, PROBE_SOURCE, EVPROBE_BUILD, EARTHVIEW, evprobePlan, evprobeRun, evprobeValidate, EVPROBE_ISOLATE } };
