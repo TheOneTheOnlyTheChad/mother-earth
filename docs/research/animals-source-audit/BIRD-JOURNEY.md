@@ -2,6 +2,9 @@
 
 20 Nov 2026 · **rev 1.2** (GPT closed the corrections on rev 1.1, `reviews/2026-11-20-animals-audits-c-d-closure-gpt-review.md`; rev 1.2 makes its record updates only) · rev 1.1 (rev 1 accepted by GPT as source-feasibility work with corrections, `reviews/2026-11-20-animals-audits-c-d-gpt-review.md`; rev 1.1 carries them and adds the two reference-data files, read at 14:18 UTC) · read-only research under brief D (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1), on Chad's go of 20 Nov. Nothing built, nothing sent, no account. Claude retained no raw working copies; the files Chad downloaded remain in his Downloads.
 
+
+**Where the source files are now (20 Nov 14:36 UTC):** on Chad's instruction they were moved from his Downloads to `~/Documents/Mother Earth/_source-data/animals-expansion/` on his Mac, each hash-checked there against this audit before the Downloads original was removed. That folder is local only: not in Git, not in any served folder. Statements below that the files are in his Downloads describe where they were when read.
+
 **Results**
 - **Waved albatross, Galápagos: usable as a source, at feasibility level.** Structural checks passed and the rows without a position were identified; each positioned fix carries the tag's own accuracy estimate (not an independently measured error and not a quality pass); no date-line crossing anywhere in the file. **Recommended package; Chad agreed on 20 Nov.**
 - **Grey-headed albatross, New Zealand: six candidates without date-line crossings; the other 18 birds cross the date line.** One bird has a timestamp anomaly and is set aside.

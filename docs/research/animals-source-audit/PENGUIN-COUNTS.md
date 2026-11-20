@@ -2,6 +2,9 @@
 
 20 Nov 2026 · **rev 2.1** (rev 2 passed by GPT within its scope, `reviews/2026-11-20-animals-audit-a-gpt-review.md`; rev 2.1 carries GPT's wording refinements, figures unchanged) · read-only research under brief A (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1). Chad's go: 20 Nov, his own message ("go"), taken as audit A first. Nothing built, nothing sent, no account. Claude retained no new raw working copies; Chad's downloaded ZIP remains in his Downloads.
 
+
+**Where the source files are now (20 Nov 14:36 UTC):** on Chad's instruction they were moved from his Downloads to `~/Documents/Mother Earth/_source-data/animals-expansion/` on his Mac, each hash-checked there against this audit before the Downloads original was removed. That folder is local only: not in Git, not in any served folder. Statements below that the files are in his Downloads describe where they were when read.
+
 **Results**
 - **Version A (Dryad file, to 2019): usable**, for individual colony series, as a dated 2021 deposit. Public domain on its record; contents consistent with the record's notes. One caution: the author's later file revises some of its values (§6).
 - **Version B (repository file, to 2023): requires clarification** (no licence; the rule for its 0.1 markers and its unit are not written down). Its contents are internally consistent.
