@@ -1,11 +1,11 @@
 # Animals: audit B, whale recovery (IWC stock C and Cape Vidal)
 
-20 Nov 2026 · rev 1 · for GPT · read-only research under brief B (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1), on Chad's go of 20 Nov. Nothing built, nothing sent, no account, nothing downloaded or saved.
+20 Nov 2026 · **rev 1.1** (rev 1 accepted by GPT with three corrections, `reviews/2026-11-20-animals-audit-b-gpt-review.md`; rev 1.1 carries them) · read-only research under brief B (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1), on Chad's go of 20 Nov. Nothing built, nothing sent, no account, nothing downloaded or saved.
 
 **Results**
-- **IWC assessment for Western Indian Ocean humpbacks (BSC): requires clarification.** Two reasons. The IWC's own terms say its material must not be republished without written permission (§3). And the pages do not say which year the abundance figure refers to or what its interval is (§2).
-- **Cape Vidal passage estimates: requires clarification.** The values are GPT's extraction from a PDF Claude has not opened; the repository copy is "all rights reserved"; the table gives no uncertainty (§4).
-- **Neither part is unsuitable.** The stock, the wording and the survey window are all identified. What is missing is permission and two definitions.
+- **IWC assessment for Western Indian Ocean humpbacks (BSC): requires clarification.** Two reasons. The IWC's own terms say its website material must not be republished without written permission (§3). And the pages do not say how the abundance figure was derived, which year it refers to or what its range is (§2).
+- **Cape Vidal passage estimates: the extraction is verified by GPT; public reuse is unresolved.** GPT rechecked all five cells directly against Table 3 (Claude has not opened the PDF). The repository copy is "all rights reserved"; the table gives no uncertainty, which is disclosed, and does not by itself make a clearly labelled historical chart unusable (§4). As a publication status this is still "requires clarification".
+- **Neither part is unsuitable.** The stock, the wording and the survey window are all identified. What is missing is permission and the figure's metadata.
 - **This changes the proposal's enquiry list:** rev 2 said no IWC message was needed unless reuse turned out to be unclear. It is not unclear; the terms require permission. An IWC enquiry is now recommended, for Chad's decision (§5).
 
 ## 1. How this was done
@@ -40,13 +40,14 @@
 **What the status summary says:** summary pages for all Southern Hemisphere humpback populations "are currently in development". "The assessment date for these populations is 2015", when the Committee finalised a comprehensive evaluation that took over ten years. New information continues to be reviewed and the assessments will be updated.
 
 **Established**
-- The figure is a model-based assessment output, not a survey count: the page's explanation says so in general terms for the table.
+- The figure appears in the IWC assessment table. The explanation describes model-based status measures (Relative Abundance and 20-Year Change); **the derivation and reference year of this particular abundance figure, and the meaning of its range, have not been established** (GPT's correction 1; rev 1 called it a model output, which the page does not say of that cell).
 - The assessment date is 2015. "last update: 2026" is the page's label.
 - The growth class refers to 1995 to 2015.
 
 **Not stated on the pages read**
-- The year the 18,111 refers to. (2015 is the likely reading, since the growth period ends there; that is an inference and is not shown.)
-- What the bracketed range is (a confidence interval, a credible interval or something else).
+- How the 18,111 was derived, and the source, model or paper behind it.
+- The year it refers to. Nothing is inferred from the 2015 assessment date, the 1995 to 2015 growth period or the 2026 label.
+- What the bracketed range is, and its coverage level. It is not assumed to be a 95% confidence interval.
 - The numeric Relative Abundance behind "VERY GOOD".
 - Where it would be stated: the population's own Status Summary and Status Details, which the IWC says are in development, or the Scientific Committee's published assessment. Neither was read.
 
@@ -63,7 +64,9 @@ From the IWC's "Copyright disclaimer" page (`iwc.int/disclaimer`), read in full:
 - If permission is given, the IWC sets guidelines for how the information is displayed, and an acknowledgement of the source is required.
 - Requests go to the IWC Secretariat. (Its address is on that page and is not written here.)
 
-**What follows.** A card that shows the IWC's status sentence, its figure and its growth class on Mother Earth is republishing part of that material on another website. Under the IWC's own terms that needs written permission. Whether a short cited statement of fact would be allowed without it is not Claude's call and is not assumed. **No IWC wording or figure is shown without the IWC's written permission.**
+**What follows.** A card that shows the IWC's status sentence, its figure and its growth class on Mother Earth is republishing part of that website material on another website. Under the IWC's own terms that needs prior written permission; acknowledgement alone is not the permission described. **Project rule: no IWC website wording or figure is shown without the IWC's written permission.**
+
+**Scope of that rule (GPT).** It covers the proposed reuse of IWC website material. It is not a finding that every independently established fact about whales needs IWC permission, and it does not restrict research or links. A journal article published under its own licence neither inherits the website's terms nor escapes them by assumption: its own licence is read.
 
 ## 4. Cape Vidal
 
@@ -84,10 +87,12 @@ From the IWC's "Copyright disclaimer" page (`iwc.int/disclaimer`), read in full:
 **Claude's check of the extract against what Claude has read**
 - Unit: consistent. The abstract calls the headline values "annual relative abundance estimates", adjusted for effort and missed groups. GPT reports the same kind of value for the window.
 - Window: consistent. 6 to 30 July lies inside the 27 June to 7 August survey period, so a window total below the season total is expected: 6,801 against 10,499 for 2018, and 7,378 against 11,009 for 2019. That is a consistency check, not a verification of the cells.
-- Years: 2018 and 2019 match the abstract. 1990, 1991 and 2002 are earlier surveys the abstract refers to only as "previous estimates"; **Claude cannot confirm those three values**.
-- Not checkable by Claude: the cell values themselves, the column's exact heading, whether the older values were recomputed by these authors for this window or taken from earlier papers, and the absence of intervals.
+- Years: 2018 and 2019 match the abstract. 1990, 1991 and 2002 are earlier surveys the abstract refers to only as "previous estimates".
+- This was a consistency check by Claude, not verification.
 
-**Reuse.** The repository record (CPUT Digital Knowledge, handle `11189/10004`) lists the article with publisher NISC and one PDF of 1.01 MB, and states that items are "protected by copyright, with all rights reserved, unless otherwise indicated". No open licence is indicated on the record. The publisher's page showed the abstract view. So redrawing five cited values as facts is a reuse question that is not settled here; it goes to the build proposal's release review, and to the authors if Chad wants certainty.
+**GPT's direct recheck (round of 20 Nov, after rev 1; GPT's reading, independent of this audit):** all five cells of the 6–30 July column reread against Table 3, printed page 46, and confirmed as above. No uncertainty intervals accompany the cells. The table's caption identifies the earlier data as from Findlay et al. (2011). The paper's copyright notice names NISC. **The extraction is verified by GPT; no further reader is required** (correction 2). Claude has not opened the PDF and does not claim to have verified the cells.
+
+**Reuse.** The repository record (CPUT Digital Knowledge, handle `11189/10004`) lists the article with publisher NISC and one PDF of 1.01 MB, and states that items are "protected by copyright, with all rights reserved, unless otherwise indicated". No open licence is indicated on the record. The publisher's page showed the abstract view. So reuse is unresolved. Two different things would settle different questions (GPT's correction 3): an author can confirm the science; permission, if needed, comes from the relevant rights holder. If clarification is sought, the request describes **a newly drawn chart of five attributed numerical values**, not a reproduction of the published table or figure, and asks who can authorise it where that is necessary. An all-rights-reserved notice alone is not taken as proof that permission is required for every factual value. It goes to the build proposal's release review.
 
 **If shown, how** (from the proposal and GPT's refinements; unchanged)
 - Its own panel, titled "Cape Vidal northward passage: relative abundance estimate, 6–30 July".
@@ -101,14 +106,14 @@ From the IWC's "Copyright disclaimer" page (`iwc.int/disclaimer`), read in full:
 - The whale recovery card can be designed now: stock, wording, fields and the second panel are fixed.
 - It cannot be shown until two things are settled:
   1. **IWC permission** to display the status sentence, the figure with its range, the growth class and period, with the IWC's display guidelines and acknowledgement; and, in the same message, what year the figure refers to and what the range is.
-  2. **The Cape Vidal values**: either an independent read of Table 3 (GPT's extraction stands until then, labelled as GPT's), and a view on reuse of five cited values.
+  2. **Cape Vidal:** the values are verified by GPT. What is open is reuse of five attributed values in a newly drawn chart (§4). IWC permission would not clear this separate material.
 - If the IWC's answer on the figure is slow or negative, GPT's point applies: the dated status statement could still be used with permission, and the number left unavailable.
-- **Recommended, for Chad's decision:** one short enquiry to the IWC Secretariat. Not drafted; Claude drafts it only if Chad asks. It would be a new enquiry and would change nothing about NOAA (sent) or ATAP (contact established, response pending).
+- **For Chad's decision:** one enquiry to the IWC Secretariat. GPT judged it warranted and a draft justified; the draft is `docs/research/animals-source-audit/ENQUIRY-DRAFT-IWC.md`, **unsent**. Sending is a separate instruction from Chad. It is a new enquiry and changes nothing about NOAA (sent) or ATAP (contact established, response pending).
 - An unread lead: the Scientific Committee's assessment is published in the IWC's journal. Its licence and whether it states the reference year were not checked.
 
 ## 6. Not done, not claimed
 
-- No PDF opened by Claude: the Cape Vidal paper's methods and Table 3 are GPT's reading.
+- No PDF opened by Claude: the Cape Vidal paper's methods and Table 3 are GPT's reading, now directly rechecked by GPT.
 - The IWC's Status Details for this stock, the Committee's reports and the journal: not read.
 - No permission sought or assumed. No statement that citing a published figure is or is not allowed.
 - The NOAA stock assessment for false killer whales: out of scope here.
