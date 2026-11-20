@@ -1,0 +1,164 @@
+# Animals: expansion proposal (the unstarted and deferred parts of concept rev 1)
+
+20 Nov 2026 12:32 UTC (clock reading) · rev 1 · for GPT review (round 3) · **docs only.** Nothing built, no Animals branch touched, no file downloaded, no account created, no agreement accepted, no provider contacted, nothing spent. Animals implementation stays parked; this does not reopen the release work.
+
+Answers GPT's research round 1 (`reviews/2026-11-20-animals-expansion-round1-gpt-brief.md`) against concept rev 1 (`ANIMALS-CONCEPT-REV1.md`, branch `animals-proposal`), proposal rev 2.2 and the coverage record (`ANIMALS-SPEC-COVERAGE-2026-11-20.md`, main). Chad's brief (20 Nov): challenge GPT's recommendations; cover every unstarted or deferred area; prioritise penguin population evidence, one whale recovery example, one migration corridor and one bird journey; draft the penguin enquiry, unsent; say which other enquiries are worthwhile; keep the NOAA and ATAP status as recorded.
+
+## 0. How the sources were read today, and the limits
+
+- Read-only, 20 Nov 2026 about 11:50 to 12:30 UTC, through the workspace's web search and page fetch. **The fetch returns a summary of a page written by a tool, not the page's bytes.** Every figure below marked "page" is from such a read and must be re-read on the source before it is shown anywhere. The browser pane was not used (the other thread's reading window).
+- No PDF was opened (text-only rule). Where a fact rests on a PDF it is marked "not read".
+- **Not reached today:** the IWC estimate and status-graphics pages (only the IWC's general population-status page surfaced, as a search extract), the CMS atlas, the IUCN terms, the Living Planet policy, eBird, Motus, OTN, SAEON. For those, what GPT reported stands as GPT's reading, not checked by Claude.
+- **One disagreement with GPT's read, unresolved:** GPT reports usage notes on the Dryad penguin record (0.1 values are model anchors; NA has several meanings). My read of the same record returned empty Methods and Usage sections and no licence code. One of the two reads is incomplete. The file and its notes have to be opened before either statement is relied on.
+
+## 1. Where I agree with GPT, and where I do not
+
+Agreed: three visitor questions; an evidence-type label on every result; modules with independent availability and release boundaries; a species match is not a stock match; no trend of our own; new kinds of evidence before more tags.
+
+Challenges and additions:
+
+| # | GPT's position | Challenge | Effect |
+|---|---|---|---|
+| 1 | Ask whether a citable extension of the 1979–2019 penguin counts exists | **It exists and is published.** Sherley and co-authors, 2024, *Ostrich* 95(3): 181–187, doi `10.2989/00306525.2024.2355618`: breeding-pair counts at 26 colonies in South Africa and Namibia, 1979 to 2023 (abstract, publisher's page). The open question is narrower: are those counts deposited or may they be supplied, and on what terms | The enquiry asks for the 2023 series by name (§7) |
+| 2 | Penguin movement = dataset 2213 (interpolated, duplicates) | The same database lists **three raw GPS datasets it supersedes** (ids 1444, 1445, 1446: Robben Island, chick-rearing, 2011 to 2013, "Data are interpolated: No") and a **satellite-tag dispersal dataset** (id 1269: 14 juveniles, 2011 to 2013, 1,974 points, not interpolated). 1269 is a journey away from the colony; the GPS sets are short foraging trips from it | Ask about the raw sets and 1269, not only 2213 (§3.2, §7) |
+| 3 | Recovery case = IWC Western Indian Ocean humpbacks (stock C), "recovered" | I could not open the IWC pages, so "recovered" is GPT's reading. An assessment label alone is a classification, not evidence a visitor can see. Two sources carry numbers: a **South African shore-count series for sub-stock C1** and an **open, deposited assessment for stock A** (§4) | Audit C1 first, with the IWC assessment as its classification; stock A is the fallback |
+| 4 | Corridor = CMS/GIUM or USGS volume 6 | USGS is the only one with a stated open licence, and its series is **regularly updated** (six volumes, 2020 to 2026), which fits the live-feed rule better than any archive. But it is North American. An African corridor needs a rights answer first | USGS first as the method and the rights-clean example; CMS enquiry only if Chad wants Africa before USGS (§5) |
+| 5 | Bird = grey-headed albatross package | Licence on the record confirmed today (CC0). The colony is in New Zealand waters near 169°E, so **tracks may cross the date line** (not counted; the file was not opened). GPT lists date-line tests as a separate area; for this package they are a precondition | Audit it beside a no-date-line alternative and choose from the files (§6) |
+| 6 | Assessment card may need the IUCN API | A dated, cited category for a handful of taxa can be a hand-kept record with its source link; that avoids an API key, caching and a feed. It still needs the terms read for quoting a category. BirdLife South Africa's page gives both the regional and the global category with years | No IUCN enquiry until the terms are read and the card design is agreed (§8) |
+| 7 | "Recorded journeys" exception covers the Animals tab | Chad's exception (19 Nov) names **recorded animal journeys**. Population series, corridors and assessments are not journeys. Two of them are regularly updated sources (annual penguin census; USGS volumes), which the standing rule already allows; a dated assessment card is neither | A decision for Chad, listed in §11. Not assumed |
+| 8 | Illustrative transfer arithmetic | Fine as arithmetic. The first three modules below are small: one 3.89 KB table, one simplified polygon set, one bird's fixes. Cost inputs are in §9 | No recurring charge above US$1 a month is expected; to be measured, not claimed |
+
+## 2. The page, as proposed
+
+- Keep Land, Sea and Air. Add an **evidence-type label** on every item, from a fixed list: recorded fixes · filtered recorded fixes (ours, experimental) · source-interpolated track · receiver detections · published corridor or range · population counts · model estimate · dated assessment. The existing manifests already carry `kind`; this extends it.
+- Three kinds of card, not one: **journey** (replay on the globe, as built), **population** (a chart on the Animals page; nothing on the globe), **corridor** (polygons on the globe under their own labelled switch, off on load, in Layers and the drawn Key).
+- Each card states its own period, source revision and when we last checked it. A card with no reviewed source keeps the existing "Not available yet" wording.
+- Records are linked by taxon **and** population or stock where the source names one. Where only the species matches, the card says so in words (criterion C4, proposal rev 2.2).
+
+## 3. African penguins (concept §6D): population first
+
+### 3.1 Population series
+| | |
+|---|---|
+| Deposited data | Dryad doi `10.5061/dryad.vx0k6djp7`, "Data from: The conservation status and population decline of the African penguin deconstructed in space and time"; one file, `Afr_penguin.csv`, 3.89 KB; published 3 Mar 2021; 14 authors, R. Sherley corresponding (page) |
+| What it is | counts, 1979 to 2019, used with a state-space model to assess the species; the abstract reports about 17,700 pairs in 2019 and a decline of almost 65% since 1989 (page). Paper: *Ecology and Evolution* 10(15): 8506–8516, doi `10.1002/ece3.6554` |
+| Newer, published | Sherley and co-authors 2024 (*Ostrich*, doi above): 26 colonies, 1979 to 2023; about 44,300 pairs in 1993 and about 9,900 in 2023; a 30-year decline of 77.8% with a stated credible interval (abstract). Whether its counts are deposited: **not established** |
+| Assessments | BirdLife South Africa's page: regional Endangered (2025) and global Critically Endangered (2024), and 8,750 breeding pairs for the region (page). BirdLife's species factsheet gives the global history: Endangered 2018 and 2020, Critically Endangered 2024 (search extract) |
+| Rights | Dryad's general terms dedicate deposits to the public domain (GPT's read; not confirmed on this record by me). The 2024 paper and the BirdLife pages: terms not read |
+| Not known | the file's columns, unit per row (occupied nests, pairs), which colonies, the meaning of each blank; whether 0.1 anchors exist (§0) |
+
+- **Interpretation.** Counts are counts and model estimates are model estimates; the chart shows one or the other and names it. Missing years are gaps. A press figure of 8,324 pairs for 2023 also circulates; it differs from 8,750 and from 9,900 (global). That is three figures with three scopes, which is the reason the card needs one cited series and its scope on screen.
+- **Visitor experience.** A population card under Sea or Air (Chad's choice): pairs counted by year, South Africa and Namibia apart if the file supports it, the period and the unit in the title, gaps left open; beneath it the two assessments as separate dated fields with their scope. No extinction date or countdown (concept §8), even though press reports quote one.
+- **Next audit (needs Chad's go):** open the 3.89 KB file and its notes; record columns, units, colonies, gaps and licence text; state exactly what a chart may show. Read the 2024 paper's data statement (HTML, not PDF).
+- **Dependency:** none on the parked journey code. Does not wait for any reply if the 2019 series is acceptable as a first chart, dated as such.
+
+### 3.2 Movement (separate, permission needed)
+- Seabird Tracking Database (BirdLife International). Dataset 2213: Robben Island, chick-rearing, 2008 and 2010 to 2019, GPS, 207 tracks, 185 birds, 180,360 points, **interpolated**, contains duplicate tracks; providers E. Weideman, R. Sherley, A. Makhado (page). Raw predecessors 1444 to 1446; dispersal dataset 1269 (challenge 2).
+- **Rights:** the database's terms say data may not be used in any publication, product or commercial application without permission through a data request; owners approve, amend or refuse (search extract of the terms; full terms not read). A request needs an account, which is Chad's.
+- **Sensitivity:** the colony is public knowledge; foraging areas are tied to a live fishing-closure dispute. A decision per dataset, with the owners' guidance (concept §9).
+- **Interpretation:** 2213 could only be shown as a source-interpolated track, never as recorded fixes. A raw set could use the existing replay.
+- Not before the enquiry in §7 is answered. No download, no account, no request now.
+
+## 4. Whale recovery example (concept §6E)
+
+| | A. Humpbacks, sub-stock C1 (east coast of South Africa) | B. Humpbacks, stock A (western South Atlantic) |
+|---|---|---|
+| Evidence | shore-based counts from Cape Vidal: relative abundance 10,499 (2018) and 11,009 (2019); average annual increase 7.4% to 8.8% over 31 years from 1988; the authors say the rate is slowing (abstract). Wilkinson and co-authors 2023, *African Journal of Marine Science* 45(1): 39–50, doi `10.2989/1814232X.2023.2193591` | a population model: about 25,000 whales, 93% of pre-exploitation size with a 73% to 100% interval (search extracts; the paper itself not read). Zerbini and co-authors 2019, *Royal Society Open Science* |
+| Kind | counts adjusted for effort, at one site, in a few survey years | model estimate |
+| Data | series points and their years: in the paper, not read. No deposit known | the paper states data are deposited (a figshare collection; extract) |
+| Rights | publisher's article; an institutional repository copy exists. Reuse of a handful of published numbers with citation: to be confirmed | journal is open access; licence to confirm on the record |
+| Why | South African, observed, and honest about slowing | cleanest rights and a deposited series |
+
+- **Recommendation:** audit A first and use the IWC assessment for stock C only as the dated classification beside it, once someone has read the IWC page. If A's series cannot be shown, B.
+- **Interpretation.** "Recovered" appears only as the source's word, with the stock and the assessment year. A relative-abundance count past one headland is not the stock's size. Stock C has sub-stocks (C1 to C4); numbers for one are not borrowed for another, nor for the west-coast stock (B2), nor for the false killer whale.
+- **Second whale item, small:** the NOAA stock assessment for the Hawaiʻi pelagic false killer whale stock would give the existing journey its stock-level context (GPT's lead). Audit the pelagic section only.
+- **Next audit (needs Chad's go):** read the Cape Vidal paper's HTML or repository record for the survey years and estimates; read the IWC status and estimate pages in the pane; record every year, unit and interval.
+
+## 5. Migration corridor (concept §3B)
+
+- **Candidate:** USGS, "Ungulate Migrations of the Western United States, Volume 6", data release doi `10.5066/P1ETBSYE`, released 27 Mar 2026, marked CC0 1.0; GIS files per herd or as one archive; the report covers 23 herds; **not all underlying files are released**, by the agencies' sharing constraints (page). An independent description of the series lists corridors, stopovers, winter ranges and annual ranges as polygons, and per-animal-year routes as lines (search extract; not the USGS's own wording).
+- **Use only the published polygons** (corridor, stopover, seasonal range). Per-animal route lines are not needed and raise sensitivity questions; withheld files are never sought.
+- **Interpretation.** A corridor is a modelled summary of many animals over stated years (the series uses utilisation distributions), not a path any animal took. The card states species, herd, contributing years and animals, the method as the source names it, and "published corridor", never "recorded".
+- **Visitor experience.** Land: one herd; its corridor, stopovers and winter range as three labelled shapes on the globe under one switch; the card explains what each is. No replay clock.
+- **Africa.** The concept wanted wildebeest, zebra or elephant. CMS/GIUM has the maps; no geometry licence is established (GPT). A corridor is never drawn from our zebra's replay.
+- **Marine lead, unaudited:** the IUCN task force's "South East African Coastal Migration Corridor" area for humpbacks (47,060 km², factsheet extract) would sit beside §4A. Layer access and terms not read.
+- **Next audit (needs Chad's go):** list the volume 6 herds from the release; choose one with corridor, stopover and winter range all released; record file sizes, vertex counts, metadata, years and animals; test polygons with holes and several parts.
+- **Dependency:** a polygon layer is new drawing work (the journey code draws points and lines). Its switch adds to the header-and-switch expectations that Animals and Earth from Space already change.
+
+## 6. Bird journey (concept Air)
+
+| | Grey-headed albatross, New Zealand | Waved albatross, Galápagos |
+|---|---|---|
+| Package | Movebank Data Repository doi `10.5441/001/1.694p666h` ("data from Torres et al. 2017") | doi `10.5441/001/1.3hp3s250` |
+| Licence on the record | CC0 1.0, read today on the reference-data part (page) | CC0 1.0 (the 18 Nov discovery label; not re-read) |
+| Method | GPS loggers | GPS |
+| Size (18 Nov label) | 24 animals, 93,474 locations | 28 animals, 16,414 locations |
+| Date line | likely for some tracks; not counted | no |
+| Known caveat | the paper is a method paper on classifying behaviour; the tracks are probably trips from the colony, not a migration (inference; to be checked) | published 2013; unread |
+
+- **Recommendation:** audit both files the way the zebra was audited (identity, licence text, files, dates, counts, quality fields, implausible steps, sensitivity) and count date-line crossings per bird. Choose from the files. If the grey-headed albatross is chosen, the date-line tests of §8 come first.
+- **Interpretation.** A foraging trip is a loop from a colony; the card says so and does not call it a migration. The colony is named only as the source names it.
+- **Visitor experience.** The existing replay, one bird, under Air.
+- eBird and Motus stay later: both need permission and neither is a journey (GPT; agreed).
+
+## 7. Enquiries
+
+**Existing, unchanged:** NOAA Southeast Fisheries Science Center (bottlenose dolphins): sent by Chad, no reply on record. ATAP (SAIAB): contact established, substantive response pending. No inbox was checked today. No follow-up, no duplicate.
+
+**Worth sending (Chad's decision), in this order:**
+1. **Penguins, one message, to the corresponding author of the Dryad record.** Draft: `docs/research/animals-source-audit/ENQUIRY-DRAFT-PENGUINS.md`. Unsent.
+2. **CMS/GIUM, only if Chad wants an African corridor before or instead of the USGS one.** Not drafted: it needs one named migration first, and choosing it needs the atlas read in the pane.
+
+**Not worth sending now:**
+- IUCN: read the terms and settle the card design first (challenge 6).
+- IWC: only if, after the pages are read, reuse of a published estimate is unclear.
+- eBird, Motus, Living Planet, an active Movebank study owner: no module is waiting on them.
+- USGS, the albatross packages, the stock A paper: open licences on the record; an audit, not a message.
+- The Seabird Tracking Database's formal data request: only after the penguin reply, and through Chad's own account.
+
+## 8. Every other unstarted or deferred area
+
+| Area | Proposal | Depends on |
+|---|---|---|
+| Date line (§7, §13) | A test specification before any global track: a step from 179°E to 179°W and back is joined the short way; longitudes outside ±180 are refused at build; a polygon across the line is split, with holes and several parts kept; fitting the view to a track that spans the line; the land test for sea journeys run on the chord actually drawn; the build fails on an unsupported case | written with the bird audit; built only with a module that needs it |
+| Several animals from one study (§4) | A second zebra (`Z3743`) through the existing chooser, one at a time; a study-and-animal key; its own manifest; "7 sampled, 2 available, 1 shown" | the parked journeys branch; not before it resumes |
+| Conservation card (§3D) | A hand-kept, dated record per taxon and scope with its source link; regional and global as separate fields; trend separate from category | terms read; Chad's decision in §11 |
+| Population chart (§3C, §8) | Penguins first (§3.1), then the whale series (§4) | the two audits |
+| Blue whales (§6B) | Unchanged: their own quality-rule proposal first. Lower priority than a new kind of evidence | none |
+| Environmental context (§11) | Not before a paper supplies the link. The zebra paper's subject is rainfall and vegetation; a dated product matched to 2007 and 2008 would be its own audit | later |
+| Ongoing feeds (§12) | Nothing chosen. The states are specified in concept §12 and criterion C5; no provider is approached until Chad wants one | later |
+| Sharks, rays, dolphins | Wait for the two replies on record | replies |
+| Wider backlog (turtles, seals, elephants, basking sharks, CC BY-NC sources) | Unchanged, after the four priorities. The non-commercial question is still Chad's | §11 |
+| Living Planet, eBird, Motus, OTN, SAEON, DFFE | No work proposed now; GPT's findings stand as recorded | none |
+
+## 9. Cost inputs (nothing measured yet)
+
+- Measured today by GPT: the seven existing Animals JSON files total 501,170 bytes.
+- Penguin table: 3.89 KB at source.
+- One bird: at 12 bytes a fix (the zebra encoding), 4,000 fixes is about 48 KB; all 93,474 fixes about 1.1 MB. One bird is proposed.
+- Corridor polygons: unknown until a herd is chosen; a budget is proposed (for example 150 KB after simplification, with the method stated).
+- The page is served by GitHub Pages today: no storage or request charge. Nothing here needs the hub, a schedule, R2 or a key. **No new recurring charge is expected.** Provider fees: none for the four priority sources as read. To be replaced by measured bytes per opened module once products are chosen.
+
+## 10. Order proposed
+
+1. Penguin file audit (small, no dependency) and, if Chad agrees, the penguin enquiry.
+2. Cape Vidal and IWC read for the whale recovery series.
+3. USGS herd choice and geometry audit.
+4. Bird file audits with the date-line count; then the date-line test specification.
+5. One build proposal per module, each to GPT, each on Chad's go. The parked three-journey candidate is the foundation and is not changed by any of this.
+
+## 11. Decisions for Chad
+
+- D1. Do population charts, published corridors and dated assessment cards belong on the Animals tab, given that the 19 Nov exception names recorded journeys? (Two are regularly updated sources; the assessment card is not.)
+- D2. Corridor: the USGS example first, or hold for an African one (which needs the CMS enquiry)?
+- D3. Send the penguin enquiry as drafted, amended, or not yet?
+- D4. Which audits to start, from §10 items 1 to 4.
+- D5. Still open from before: whether non-commercial-only sources are acceptable at all, given the project's plans.
+
+## 12. Not done, not claimed
+
+- No data file opened. No count, unit, column or licence text verified beyond the page reads described in §0.
+- The IWC, CMS, IUCN, Living Planet, eBird, Motus, OTN and SAEON pages were not read by Claude today.
+- No PDF read. No inbox checked. Nothing sent.
+- No estimate of visitors, transfer or price.
+- No implementation, and no change to any Animals branch, the hub, the site or the other thread's probe.
