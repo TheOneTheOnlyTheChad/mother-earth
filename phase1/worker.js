@@ -32,6 +32,8 @@
  *   GET /snapshot/wind/meta, /snapshot/wind/grid/<sha256>.i16 (0.6.16) modelled wind at three heights from NOAA/NCEP GFS (manifest + the
  *                           current and previous revision's grids). Scheduled job gated by WIND_ENABLED=1; /admin/run/wind runs it once.
  *   GET /admin/probe/skycraft?key=ADMIN_KEY (0.6.12) exactly ONE Horizons request with the application User-Agent; stores nothing
+ *   GET|POST /admin/earthview/<status|hold|recover|sweep|release>?key=ADMIN_KEY (0.6.20) Earth from Space storage. GET is a dry run that
+ *                           writes nothing; POST with apply=1 acts (recover and sweep also need plan=<id> from the dry run).
  *   GET /catalogue/sky/<revision> (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a) the FIXED Sky catalogue (Moon/Sun daily distances, NASA/JPL
  *                           Horizons): versioned only — an id not in SKY_REVISIONS (exact key match), a malformed path or the bare
  *                           /catalogue/sky → 404 without any R2 read; a known revision whose stored bytes are missing or fail the pin → 503.
@@ -2391,7 +2393,7 @@ export { AIRCRAFT_LAYER, AIRCRAFT_FIELDS, AIRCRAFT_MAX_AGE_S, AIRCRAFT_TEXT, air
 export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
-export { EARTHVIEW, evLatest, evKeyOf, evJpegScans, evDecode, evPng, evCompare, evFetch, collectEarthView, evRoute, EV_JPEG, DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { EARTHVIEW, evLatest, evKeyOf, evJpegScans, evDecode, evPng, evCompare, evFetch, collectEarthView, evRoute, evGuard, evAdmin, evCleanup, EvStop, EV_STOP, EV_JPEG, DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -3290,11 +3292,14 @@ async function dustRoute(env, p) {
  * A frame is PUBLISHED ONLY IF, for both responses, the server's Warning header names a served time equal to the time asked for.
  * A different time, or no header, publishes nothing: the pointer does not move and no requested time is ever shown as a frame time.
  * The delivered JPEG itself is decoded in full here (EV_JPEG, below) and checked, and compared coarsely with the decoded PNG.
- * Storage: earthview/current.json (frame and previous; every write conditional), earthview/state.json (the last source check and
- * the last collection outcome, kept apart from the frame), earthview/held.json (every stored picture and when it stopped being
- * current or previous). A picture is deleted ONLY in a run that has just published a newer verified frame, and only when it is
- * neither current nor previous and left that role at least GRACE_S ago. A failed or idle run deletes nothing. Every stored picture
- * has a key no other run ever had or will have (a counter on the held list), so a late or repeated delete cannot reach a newer one.
+ * Storage: earthview/current.json (frame and previous; every write conditional and fenced by an epoch), earthview/state.json (the
+ * last source check and the last collection outcome, kept apart from the frame; for the page only), earthview/held.json (every
+ * stored picture and when it stopped being current or previous). A picture is deleted ONLY in a run that has just published a newer
+ * verified frame, and only when it is neither current nor previous and left that role at least GRACE_S ago. A failed or idle run
+ * deletes nothing. Every stored picture has a key holding 96 random bits drawn by its own run, so no restore of any record can make
+ * a later run write an old key, and a late or repeated delete cannot reach a newer picture. The collector never creates or repairs
+ * the pointer or the list: /admin/earthview/{status,hold,recover,sweep,release} does, under a hold (see "Storage records, guards
+ * and recovery" below).
  * Gate: EARTHVIEW_ENABLED=1 for the scheduled path (absent = no request at all, nothing written). /admin/run/earthview runs once.
  * Outside LAYERS, cells, history, health and the generic writeDown. Licence: CC BY 4.0; credit EUMETSAT and NASA (catalogue). */
 const EARTHVIEW = {
@@ -3309,6 +3314,7 @@ const EARTHVIEW = {
   DECODE: { maxResolutionInMP: 5, maxMemoryUsageInMB: 96 },
   EVERY_MIN: 10, TIMEOUT_MS: 90000, LIST_TIMEOUT_MS: 30000, GRACE_S: 86400,
   POINTER: 'earthview/current.json', STATE: 'earthview/state.json', HELD: 'earthview/held.json', PREFIX: 'earthview/frames/',
+  HOLD: 'earthview/hold.json', EPOCHS: 'earthview/epochs/', LIST_PAGE: 1000, LIST_PAGES_MAX: 20, INVENTORY_TRIES: 4,
   CACHE_FILE: 'public, max-age=86400, immutable',
   WAITING_LIMIT_S: 2700,   // provisional: after this long with nothing newer listed, the page says so plainly. Not a delay bound.
   SOURCE: { product: 'GeoColour RGB - MTG - 0 degree', collection: 'EO:EUM:DAT:0913', catalogue: 'https://user.eumetsat.int/catalogue/EO:EUM:DAT:0913', licence: 'CC BY 4.0',
@@ -3456,25 +3462,100 @@ async function evFetch(what, url, spec) {
   const warn = r.headers.get('warning');
   return { ok: true, buf: got.buf, bytes: got.buf.byteLength, sha256: await sha256Bytes(got.buf), warn_present: warn !== null, served: dustServed(warn) };
 }
-const evEmpty = () => ({ schema: 1, layer: 'earthview', frame: null, previous: null, collector_version: COLLECTOR_VERSION });
-async function evRead(env, key, empty) { const o = await env.R2.get(key); return o ? { cur: await o.json(), etag: o.etag } : { cur: empty(), etag: null }; }
-/** Read, change, write of one small record; every write is conditional on what was read (or on there being nothing). change(cur) returns the new body or null to leave it. */
-async function evUpdate(env, key, empty, change) {
+/* ---- Storage records, guards and recovery (review of readiness rev 2, 20 Nov 2026) ----
+ * RECORDS. earthview/current.json (the pointer: frame, previous), earthview/held.json (the list: every stored picture), both stamped
+ * with an EPOCH; earthview/epochs/<epoch>.json (a create-only marker per epoch); earthview/hold.json (present = no run may start).
+ * earthview/state.json (last source check, last outcome) is for the page only: NO guard reads it, so a failure report cannot
+ * destroy evidence a guard uses, and a failed write to it is not a safety failure.
+ * THE COLLECTOR NEVER CREATES THE POINTER OR THE LIST. They are created only by evRecover (admin, under a hold), for a first start
+ * and for a repair alike. A run that finds either missing stops. There is no counter that could silently restart.
+ * KEYS. earthview/frames/<epoch>/<time>-<sha16>-g<n>-<24 hex>/picture.jpg. The 24 hex digits are 96 random bits drawn by the run;
+ * the write is create-only. No restore of any record can make a later run issue an old key again, short of drawing the same value.
+ * A STOP is an EvStop: the run stores nothing more, deletes nothing, publishes nothing and reports one fixed phrase. */
+class EvStop extends Error { constructor(reason, detail) { super(reason); this.reason = reason; this.detail = detail || null; } }
+const EV_STOP = { HELD: 'collection is held', UNSET: 'storage is not set up', REPAIR: 'storage record needs repair', BUSY: 'storage busy', CHANGED: 'storage changed during the run' };
+const evHex = n => { const b = new Uint8Array(n); crypto.getRandomValues(b); let s = ''; for (const x of b) s += x.toString(16).padStart(2, '0'); return s; };
+const evEpochOk = e => typeof e === 'string' && /^e\d{8}T\d{6}Z-[0-9a-f]{16}$/.test(e);
+const evNewEpoch = () => 'e' + nowIso().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z') + '-' + evHex(8);
+const evIdOk = id => typeof id === 'string' && /^\d{8}T\d{4}Z-[0-9a-f]{16}-g\d{1,12}-[0-9a-f]{24}$/.test(id);
+const evPutJson = (env, key, body, onlyIf) => env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf });
+/** One record as stored: { cur, etag }. cur is null when there is no object and undefined when the object does not parse. */
+async function evGet(env, key) { const o = await env.R2.get(key); if (!o) return { cur: null, etag: null }; let cur; try { cur = await o.json(); } catch (_) { cur = undefined; } return { cur: cur === null ? undefined : cur, etag: o.etag }; }
+/** Read, change, write of one small record; every write is conditional on what was read (or on there being nothing). change(cur)
+ * returns the new body, or null to leave it, or throws EvStop. It runs again on EVERY retry, against what was just read, so a
+ * fence inside it is checked again each time. */
+async function evUpdate(env, key, change) {
   for (let i = 0; i < 5; i++) {
-    const { cur, etag } = await evRead(env, key, empty), body = change(cur);
+    const { cur, etag } = await evGet(env, key), body = change(cur);
     if (body === null) return { cur, body: null, wrote: false };
-    const r = await env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });
+    const r = await evPutJson(env, key, body, etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' });
     if (r !== null) return { cur, body, wrote: true };
   }
-  throw new Error('earthview record kept changing; gave up after 5 tries: ' + key);
+  throw new EvStop(EV_STOP.BUSY, 'record kept changing; gave up after 5 tries: ' + key);
+}
+/** THE FENCE. Wraps a change so that it applies only to a record still stamped with the epoch this run started under. Recovery
+ * changes the epoch; from then on every write by an earlier run, scheduled or manual, however long it has been going, stops here. */
+const evFence = (epoch, change) => cur => { if (!cur || cur.epoch !== epoch) throw new EvStop(EV_STOP.CHANGED, 'the record is no longer stamped ' + epoch); return change(cur); };
+/** Every object under a prefix, all pages. */
+async function evListAll(env, prefix) {
+  const out = []; let cursor;
+  for (let i = 0; i < EARTHVIEW.LIST_PAGES_MAX; i++) { const r = await env.R2.list({ prefix, cursor, limit: EARTHVIEW.LIST_PAGE });
+    for (const o of r.objects) out.push({ key: o.key, size: o.size });
+    if (!r.truncated) return out; cursor = r.cursor; }
+  throw new EvStop(EV_STOP.REPAIR, 'more than ' + EARTHVIEW.LIST_PAGES_MAX + ' pages of objects under ' + prefix);
+}
+/** GUARDS, at the start of every run (scheduled or manual) before any request or write. Returns { epoch } or throws EvStop.
+ *  G0 a hold record exists                                   -> "collection is held"
+ *  G1 neither pointer nor list exists                        -> "storage is not set up" (first start, or everything lost: a person decides)
+ *     one of them is missing or unreadable                   -> "storage record needs repair"
+ *  G2 the epochs differ, or the epoch has no marker          -> repair
+ *  G4 the pointer names a picture that is outside this epoch, not on the list, marked or pending -> repair (confirmed on a second read)
+ *  G5 INVENTORY against a STABLE view: the list is read, every page of this epoch's prefix is listed, the list's version is read
+ *     again. If it changed, the pass is discarded and repeated. A mismatch (a stored picture not on the list; or a claimed, unmarked
+ *     entry of this epoch with no picture) must be found by TWO stable passes before it is called repair. Passes that keep being
+ *     overtaken end as "storage busy": this run collects nothing, and nothing is said to be broken.
+ * G5 is a consistency check. It does not detect every restore: one after which the records and the stored pictures agree passes.
+ * Pending entries without a picture and marked entries without a picture are legitimate and never reported. Entries whose key is
+ * outside this epoch's prefix (pictures adopted by a recovery) are not checked: an old delete may still remove them, harmlessly. */
+async function evGuard(env, opt = {}) {
+  const repair = d => new EvStop(EV_STOP.REPAIR, d);
+  if (!opt.ignoreHold && await env.R2.head(EARTHVIEW.HOLD)) throw new EvStop(EV_STOP.HELD, null);
+  // Pointer first, then list: a frame the pointer names was claimed on the list before the pointer was written.
+  const read = async () => { const P = await evGet(env, EARTHVIEW.POINTER), H = await evGet(env, EARTHVIEW.HELD);
+    if (P.cur === null && H.cur === null) throw new EvStop(EV_STOP.UNSET, 'no pointer and no list');
+    if (!P.cur || !H.cur || !Array.isArray(H.cur.items)) throw repair(`pointer ${P.cur === null ? 'missing' : P.cur ? 'present' : 'unreadable'}, list ${H.cur === null ? 'missing' : H.cur && Array.isArray(H.cur.items) ? 'present' : 'unreadable'}`);
+    if (!evEpochOk(P.cur.epoch) || H.cur.epoch !== P.cur.epoch) throw repair(`epochs differ: pointer ${String(P.cur.epoch).slice(0, 40)}, list ${String(H.cur.epoch).slice(0, 40)}`);
+    return { P: P.cur, H: H.cur }; };
+  const role = (P, H, prefix) => { for (const [name, f] of [['current', P.frame], ['previous', P.previous]]) { if (!f) continue;
+    if (!f.picture || !String(f.picture.key).startsWith(prefix)) return name + ' picture is outside this epoch';
+    const x = H.items.find(i => i.id === f.id);
+    if (!x || x.key !== f.picture.key) return name + ' picture is not on the list';
+    if (x.deleting) return name + ' picture is marked for deletion'; if (x.pending) return name + ' picture is still pending on the list'; } return null; };
+  let v = await read(); const epoch = v.P.epoch, prefix = EARTHVIEW.PREFIX + epoch + '/';
+  if (!await env.R2.head(EARTHVIEW.EPOCHS + epoch + '.json')) throw repair('no marker for epoch ' + epoch);
+  if (role(v.P, v.H, prefix)) { v = await read(); if (v.P.epoch !== epoch) throw new EvStop(EV_STOP.CHANGED, 'epoch changed during the guards'); const again = role(v.P, v.H, prefix); if (again) throw repair(again); }
+  const pass = async () => { const a = await evGet(env, EARTHVIEW.HELD);
+    if (!a.cur || a.cur.epoch !== epoch || !Array.isArray(a.cur.items)) throw new EvStop(EV_STOP.CHANGED, 'the list changed epoch or became unreadable during the inventory');
+    const objs = await evListAll(env, prefix), b = await env.R2.head(EARTHVIEW.HELD);
+    if (!b || b.etag !== a.etag) return null;   // overtaken: not a finding
+    const stored = new Set(objs.map(o => o.key)), listed = new Set(a.cur.items.map(i => i.key));
+    const unlisted = objs.filter(o => !listed.has(o.key)).map(o => o.key), missing = a.cur.items.filter(i => String(i.key).startsWith(prefix) && !i.deleting && !i.pending && !stored.has(i.key)).map(i => i.key);
+    return { unlisted, missing, sig: JSON.stringify([unlisted, missing]) }; };
+  let first = null, verdict = null;
+  for (let t = 0; t < EARTHVIEW.INVENTORY_TRIES && !verdict; t++) { const r = await pass(); if (!r) continue;
+    if (!r.unlisted.length && !r.missing.length) verdict = 'clean'; else if (first && first.sig === r.sig) verdict = 'mismatch'; else first = r; }
+  if (!verdict) throw new EvStop(EV_STOP.BUSY, first ? 'a mismatch was seen once and could not be confirmed against a stable view' : 'the list kept changing during the inventory');
+  if (verdict === 'mismatch') throw repair(`inventory: ${first.unlisted.length} stored picture(s) not on the list, ${first.missing.length} listed picture(s) not stored; ` + [...first.unlisted, ...first.missing].slice(0, 3).join(' '));
+  return { epoch };
 }
 const evStateEmpty = () => ({ schema: 1, layer: 'earthview', run: null, source_check: null, collection: null });
-/** Records the last source check and the last collection outcome. Ordered by run time: a run that started earlier never replaces a later run's record. The frame pointer is never touched here. */
+/** Records the last source check and the last collection outcome, for the page. Ordered by run time: a run that started earlier
+ * never replaces a later run's record. Not a safety record (no guard reads it); a failure to write it is deliberately not fatal. */
 async function evState(env, ms, patch) {
   const run = new Date(ms).toISOString();
-  try { await evUpdate(env, EARTHVIEW.STATE, evStateEmpty, cur => (cur.run && cur.run > run) ? null : { ...cur, ...patch(cur), run, collector_version: COLLECTOR_VERSION }); } catch (_) {}
+  try { await evUpdate(env, EARTHVIEW.STATE, c => { const cur = c || evStateEmpty(); return (cur.run && cur.run > run) ? null : { ...cur, ...patch(cur), run, collector_version: COLLECTOR_VERSION }; }); } catch (_) {}
 }
-/** A failed collection: nothing published, the pointer untouched, the outcome recorded with a fixed public phrase; detail goes to collector_runs only. */
+/** A failed collection: nothing published, the pointer and the list untouched, the outcome recorded with a fixed public phrase; detail goes to collector_runs only. */
 async function evFail(env, ms, reason, http, detail, T, check) {
   const at = nowIso();
   await evState(env, ms, cur => ({ ...(check ? { source_check: check } : {}), collection: { outcome: 'failed', frame_time: T || null, reason, http: http || 0, at,
@@ -3483,6 +3564,13 @@ async function evFail(env, ms, reason, http, detail, T, check) {
   return 'earthview:down ' + reason;
 }
 async function collectEarthView(env, ms) {
+  let T = null, check = null;
+  try { return await evCollect(env, ms, v => { T = v.T; check = v.check; }); }
+  catch (e) { if (e instanceof EvStop) return evFail(env, ms, e.reason, 0, e.detail, T, check); throw e; }
+}
+async function evCollect(env, ms, note) {
+  // 0. Guards: hold, records present, epochs agree, pointer pictures in role, inventory. A stop here makes no request to the source.
+  const { epoch } = await evGuard(env);
   // 1. Source check: which frames does the service list? A failure here is recorded as a failed CHECK, never as a delay at the source.
   let r; const checkAt = nowIso();
   try { r = await fetch(EARTHVIEW.CAP, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(EARTHVIEW.LIST_TIMEOUT_MS) }); } catch (e) { return evFail(env, ms, 'source check failed', 0, String(e).slice(0, 160), null, { ok: false, at: checkAt, reason: 'no answer' }); }
@@ -3491,7 +3579,8 @@ async function collectEarthView(env, ms) {
   const T = evLatest(xml);
   if (!T) return evFail(env, ms, 'source check failed', 200, 'no advertised time for ' + EARTHVIEW.LAYER, null, { ok: false, at: checkAt, reason: 'frame list unreadable' });
   const age = Number(r.headers.get('age')), check = { ok: true, at: checkAt, newest: T, cache_age_s: Number.isFinite(age) && r.headers.get('age') !== null ? age : null };
-  const { cur } = await evRead(env, EARTHVIEW.POINTER, evEmpty);
+  note({ T, check });
+  const cur = evFence(epoch, c => c)((await evGet(env, EARTHVIEW.POINTER)).cur);
   if (cur.frame && T <= cur.frame.source_frame_time) {   // nothing newer listed: no picture request, the pointer untouched
     await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'nothing newer', frame_time: T, at: nowIso() } }));
     await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, 'nothing newer: ' + T + ' listed, ' + cur.frame.source_frame_time + ' held');
@@ -3519,15 +3608,16 @@ async function collectEarthView(env, ms) {
   if (dec.w !== P.w || dec.h !== P.h) return evFail(env, ms, 'picture failed validation', 200, `decoded size ${dec.w}x${dec.h}`, T, check);
   const cmp = evCompare(dec, png);
   if (!cmp.ok) return evFail(env, ms, 'picture failed validation', 200, cmp.reason + ' ' + JSON.stringify(cmp), T, check);
-  // 5. A KEY NO OTHER RUN HAS EVER HAD OR WILL HAVE. The held list carries a counter (next_gen) that only a conditional write can
-  //    advance; this run takes the next number and, in the same write, lists its picture as "pending" under a key that contains that
-  //    number. A key is therefore written by exactly one run, and once its object is deleted nothing ever writes that key again:
-  //    a retry of the same frame with the same bytes is a NEW number and a NEW key. So a cleanup that deletes a key late, twice, or
-  //    from an out-of-date view of the list can only delete what was already condemned; it cannot touch a picture stored since.
-  const heldEmpty = () => ({ schema: 2, next_gen: 1, items: [] }), published_at = nowIso(), runStamp = new Date(ms).toISOString(); let gen = 0;
-  await evUpdate(env, EARTHVIEW.HELD, heldEmpty, h => { gen = Math.max(1, Number(h.next_gen) || 1, ...h.items.map(x => (Number(x.gen) || 0) + 1));
-    return { ...h, schema: 2, next_gen: gen + 1, items: [...h.items, { id: evKeyOf(T) + '-' + pic.sha256.slice(0, 16) + '-g' + gen, gen, key: `${EARTHVIEW.PREFIX}${evKeyOf(T)}-${pic.sha256.slice(0, 16)}-g${gen}/picture.jpg`, bytes: pic.bytes, source_frame_time: T, published_at, left_at: null, pending: runStamp }] }; });
-  const id = evKeyOf(T) + '-' + pic.sha256.slice(0, 16) + '-g' + gen, key = `${EARTHVIEW.PREFIX}${id}/picture.jpg`;
+  // 5. A KEY NO OTHER RUN HAS HAD OR WILL HAVE. The run draws 96 random bits; the key holds them, beside the epoch and a number
+  //    from the list. In one fenced conditional write the run takes the number and lists its picture as "pending" under that key,
+  //    so an entry always exists before its object does. Only this run writes the key, once, create-only; once its object is
+  //    deleted nothing writes that key again: a retry of the same frame with the same bytes draws a new value. So a cleanup that
+  //    deletes a key late, twice, or from an out-of-date view of the list can only delete what was already condemned.
+  const published_at = nowIso(), runStamp = new Date(ms).toISOString(), rand = evHex(12); let gen = 0;
+  const idOf = g => evKeyOf(T) + '-' + pic.sha256.slice(0, 16) + '-g' + g + '-' + rand, keyOf = g => `${EARTHVIEW.PREFIX}${epoch}/${idOf(g)}/picture.jpg`;
+  await evUpdate(env, EARTHVIEW.HELD, evFence(epoch, h => { gen = Math.max(1, Number(h.next_gen) || 1, ...h.items.map(x => (Number(x.gen) || 0) + 1));
+    return { ...h, next_gen: gen + 1, items: [...h.items, { id: idOf(gen), gen, key: keyOf(gen), bytes: pic.bytes, source_frame_time: T, published_at, left_at: null, pending: runStamp }] }; }));
+  const id = idOf(gen), key = keyOf(gen);
   const stored = async () => { let b = null; try { const o = await env.R2.get(key); b = o ? await o.arrayBuffer() : null; } catch (_) { return 'unreadable'; } return !b ? 'absent' : (b.byteLength === pic.bytes && await sha256Bytes(b) === pic.sha256) ? 'same' : 'differs'; };
   // 5b. Store it, create-only (an object already at this key is never replaced), and read it back
   let put; try { put = await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return evFail(env, ms, 'picture write failed', 200, String(e).slice(0, 160), T, check); }
@@ -3537,53 +3627,169 @@ async function collectEarthView(env, ms) {
     request: { service: 'WMS 1.3.0 GetMap', layer: 'mtg_fd:' + EARTHVIEW.LAYER, crs: EARTHVIEW.CRS, crs_definition: EARTHVIEW.CRS_DEFINITION, bbox: EARTHVIEW.BBOX, width: P.w, height: P.h, format: 'image/jpeg', bgcolor: EARTHVIEW.BGCOLOR, time: T },
     picture: { file: 'picture.jpg', key, path: `/snapshot/earthview/${id}/picture.jpg`, type: 'image/jpeg', bytes: pic.bytes, sha256: pic.sha256, w: P.w, h: P.h },
     checks: { decoded: true, progressive: sc.progressive, scans: sc.scans, check_image_sha256: chk.sha256, ...cmp, ok: undefined, reason: undefined } };
-  // 6. CLAIM: the entry stops being pending. The write refuses if the entry is missing or marked for deletion (which would need this
-  //    run to have been stopped for the whole grace period); the pointer is written only after it succeeds.
+  // 6. CLAIM (fenced): the entry stops being pending. The write refuses if the entry is missing or marked for deletion (which would
+  //    need this run to have been stopped for the whole grace period); the pointer is written only after it succeeds.
   let claimed = false;
-  await evUpdate(env, EARTHVIEW.HELD, heldEmpty, h => { const x = h.items.find(i => i.gen === gen); claimed = !!x && !x.deleting; if (!claimed) return null;
-    return { ...h, items: h.items.map(i => i.gen === gen ? { ...i, pending: undefined, left_at: null, claimed_at: nowIso() } : i) }; });
+  await evUpdate(env, EARTHVIEW.HELD, evFence(epoch, h => { const x = h.items.find(i => i.key === key); claimed = !!x && !x.deleting; if (!claimed) return null;
+    return { ...h, items: h.items.map(i => i.key === key ? { ...i, pending: undefined, left_at: null, claimed_at: nowIso() } : i) }; }));
   if (!claimed) return evFail(env, ms, 'stored copy is being removed', 200, key + ' is no longer listed, or is marked for deletion; not published', T, check);
-  // 7. Move the pointer only if no other run has published this time or a later one meanwhile
-  const up = await evUpdate(env, EARTHVIEW.POINTER, evEmpty, c => (c.frame && c.frame.source_frame_time >= T) ? null : { ...evEmpty(), frame, previous: c.frame || null });
+  // 7. PUBLISH (fenced): move the pointer only if it is still this epoch's and no run has published this time or a later one meanwhile
+  const up = await evUpdate(env, EARTHVIEW.POINTER, evFence(epoch, c => (c.frame && c.frame.source_frame_time >= T) ? null : { ...evPointer(epoch), frame, previous: c.frame || null }));
   if (!up.wrote) { await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'superseded', frame_time: T, at: nowIso() } })); await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, `superseded: ${up.cur.frame.source_frame_time} was published first; ${T} not published`); return 'earthview:superseded ' + T; }
   await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'published', frame_time: T, at: published_at } }));
-  // 8. Cleanup, only here: a newer verified frame has just been published.
-  let deleted = 0; try { deleted = await evCleanup(env); } catch (_) {}
-  await logRun(env, 'earthview', ms, 'ok', 200, 1, pic.bytes, `frame ${T} as ${id}; agreement ${cmp.agreement}; ${deleted} old picture(s) deleted`);
+  // 8. Cleanup, only here: a newer verified frame has just been published. Its failure never undoes the publication.
+  let deleted = 0, cleanupNote = ''; try { deleted = await evCleanup(env, epoch); } catch (e) { cleanupNote = '; cleanup stopped: ' + String((e && e.reason) || e).slice(0, 80); }
+  await logRun(env, 'earthview', ms, 'ok', 200, 1, pic.bytes, `frame ${T} as ${id}; agreement ${cmp.agreement}; ${deleted} old picture(s) deleted${cleanupNote}`);
   return 'earthview:published ' + T;
 }
+const evPointer = epoch => ({ schema: 2, layer: 'earthview', epoch, frame: null, previous: null, collector_version: COLLECTOR_VERSION });
 /** Removes pictures that are neither current nor previous and left that role at least GRACE_S ago. Called only by a run that has
  * just published a newer verified frame. Any number of cleanups may overlap, stop half way, or act on an out-of-date view.
- * WHY NO CLEANUP CAN DELETE A PICTURE THE POINTER NAMES OR MAY COME TO NAME:
- *  1. One key, one writer, one life. A key holds a number taken from the list's counter by a conditional write (collector step 5).
- *     Only the run that took the number writes that key, once, create-only. After its object is deleted the key is never written
- *     again, by anyone: there is no path in this file that stores to a key it did not just allocate.
- *  2. An entry can enter the pointer only through its own run, straight after that run's claim (step 6). It never re-enters: a
- *     later run for the same frame is a different entry with a different key.
- *  3. An entry is marked "deleting" only by a conditional write whose own view shows it absent from the pointer just read and at
- *     least GRACE_S past the moment a cleanup first saw it out of role. Its own run's claim refuses a marked entry. So a marked
- *     entry is not in the pointer and can never be put there.
- *  4. Therefore deleting a marked entry's key is safe WHENEVER it happens and HOWEVER OFTEN: by this cleanup, by another cleanup
- *     that found the same mark, or by a cleanup that was paused and resumes after the entry is gone. The key it deletes cannot
- *     hold a current, previous or future picture (1 and 2). Deleting an absent key does nothing.
- *  5. A delete that fails leaves the mark; a list update that fails after the delete leaves a marked entry with no object. Either
- *     way the next cleanup finds the mark, deletes again (harmless) and removes the entry. Marked entries are not served.
- *  6. Current and previous are read from the pointer here, twice; the second read guards a state rules 1 to 3 do not produce.
- * What this rests on: R2 conditional puts behaving as probed on the production bucket; the held list not being lost (its counter
- * would restart: step 5 also takes the counter past every number still listed, and the create-only put refuses a key that still
- * has an object); and no run pausing for the whole grace period between its claim and its pointer write. */
-async function evCleanup(env) {
-  const heldEmpty = () => ({ schema: 2, next_gen: 1, items: [] }), liveOf = p => new Set([p && p.frame && p.frame.id, p && p.previous && p.previous.id].filter(Boolean));
-  const live = liveOf((await evRead(env, EARTHVIEW.POINTER, evEmpty)).cur), at = nowIso(), nowMs = Date.parse(at);
-  const h = await evUpdate(env, EARTHVIEW.HELD, heldEmpty, hh => ({ ...hh, items: hh.items.map(x => x.deleting ? x : live.has(x.id) ? { ...x, left_at: null }
-    : !x.left_at ? { ...x, left_at: at } : (nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 && String(x.key).startsWith(EARTHVIEW.PREFIX)) ? { ...x, deleting: at } : x) }));
+ * WHY NO CLEANUP DELETES A PICTURE THE POINTER NAMES OR MAY COME TO NAME (within what the collector itself can do):
+ *  1. One key, one writer, one life. A key holds 96 random bits drawn by its run (collector step 5). Only that run writes the key,
+ *     once, create-only. After its object is deleted nothing writes that key again: no path in this file stores to a key it did
+ *     not just make, and recovery copies to keys it has just made too.
+ *  2. An entry enters the pointer only through its own run, straight after that run's claim (step 6), or through a recovery, which
+ *     makes a new entry under a new key. An entry never re-enters.
+ *  3. An entry is marked "deleting" only by a fenced conditional write whose own view shows it absent from the pointer just read
+ *     and at least GRACE_S past the moment a cleanup first saw it out of role. Its own run's claim refuses a marked entry.
+ *  4. Therefore deleting a marked entry's key is safe whenever it happens and however often, as far as any run can arrange.
+ *  5. A delete that fails leaves the mark; a list update that fails after the delete leaves a marked entry with no object. The next
+ *     cleanup finds the mark, deletes again (harmless) and removes the entry. Marked entries are not served.
+ *  6. Current and previous are read from the pointer here, twice, each time with the epoch checked; the second read guards a state
+ *     rules 1 to 3 do not produce.
+ * WHAT RULES 1 TO 4 DO NOT COVER: someone outside the collector putting back an OLDER POINTER that names a key whose delete is
+ * already pending. No check here can stop that delete. evRecover is the answer: it never keeps a restored key; it copies the
+ * verified pictures to new keys before it installs a pointer, so a pending delete can only reach the old copies.
+ * Rests on: R2 conditional puts behaving as probed on the production bucket; crypto.getRandomValues being unpredictable; and no
+ * run pausing for the whole grace period between its claim and its pointer write. */
+async function evCleanup(env, epoch) {
+  const liveOf = p => new Set([p && p.frame && p.frame.id, p && p.previous && p.previous.id].filter(Boolean));
+  const pointer = async () => evFence(epoch, c => c)((await evGet(env, EARTHVIEW.POINTER)).cur);
+  const live = liveOf(await pointer()), at = nowIso(), nowMs = Date.parse(at);
+  const h = await evUpdate(env, EARTHVIEW.HELD, evFence(epoch, hh => ({ ...hh, items: hh.items.map(x => x.deleting ? x : live.has(x.id) ? { ...x, left_at: null }
+    : !x.left_at ? { ...x, left_at: at } : (nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 && String(x.key).startsWith(EARTHVIEW.PREFIX)) ? { ...x, deleting: at } : x) })));
   const marked = h.body.items.filter(x => x.deleting); if (!marked.length) return 0;
-  const live2 = liveOf((await evRead(env, EARTHVIEW.POINTER, evEmpty)).cur), gone = [], spared = [];
+  const live2 = liveOf(await pointer()), gone = [], spared = [];
   for (const x of marked) { if (live2.has(x.id)) { spared.push(x.key); continue; } try { await env.R2.delete(x.key); gone.push(x.key); } catch (_) {} }
-  if (gone.length || spared.length) await evUpdate(env, EARTHVIEW.HELD, heldEmpty, hh => ({ ...hh, items: hh.items.filter(x => !(x.deleting && gone.includes(x.key))).map(x => x.deleting && spared.includes(x.key) ? { ...x, deleting: undefined, left_at: null } : x) }));
+  if (gone.length || spared.length) await evUpdate(env, EARTHVIEW.HELD, evFence(epoch, hh => ({ ...hh, items: hh.items.filter(x => !(x.deleting && gone.includes(x.key))).map(x => x.deleting && spared.includes(x.key) ? { ...x, deleting: undefined, left_at: null } : x) })));
   return gone.length;
 }
 async function runEarthView(env, ms) { let r = null; const g = await guarded(env, 'earthview', ms, async (e, m) => { r = await collectEarthView(e, m); }); return r || g; }
+/* ---- Hold, recover, sweep, release: /admin/earthview/<action> (admin key). Every action is a DRY RUN that writes nothing unless it
+ * is a POST with apply=1; recover and sweep also need plan=<id> from a dry run, and refuse if what they find no longer gives that
+ * id. ORDER OF A RECOVERY (also the first start), and what holds in every gap:
+ *   hold    writes earthview/hold.json, create-only. From then on no NEW run starts (guard G0), scheduled or manual. Runs already
+ *           going are not stopped by it; nothing below assumes they have ended, however long they last.
+ *   recover R1 reads the pointer, the list and every object; reads the current and previous pictures WHOLE and checks each against
+ *              the size and hash the pointer records. One that is missing or differs is not kept (the plan says so, by role).
+ *           R2 makes a new epoch and writes its marker, create-only (the plan is in it).
+ *           R3 writes each kept picture's bytes, from memory, to a NEW key under the new epoch; reads each back.
+ *              [until here nothing live has changed; an earlier run can still publish, and if one does, R4 refuses]
+ *           R4 THE FENCE ON PUBLICATION: one conditional write of the pointer, on the exact version R1 read: new epoch, the kept
+ *              frames under their new keys. If the pointer changed since R1, nothing is installed and recovery ends ("pointer
+ *              changed"); it is NOT retried against a pointer the plan never saw. After R4 the page is served from the new keys,
+ *              and no earlier run can publish: its pointer write meets the new epoch and stops.
+ *              [gap R4..R5: the list still carries the old epoch. Earlier runs can still take a number, store and claim on it; they
+ *               stop at the pointer. An earlier cleanup stops at its pointer read; one already past it deletes only keys it had
+ *               marked, none of which the new pointer names. New runs: held, and G2 stops them too.]
+ *           R5 lists every object under earthview/frames/ and writes the list: new epoch, the kept pictures in role, EVERY other
+ *              object out of role with its grace period starting now. The new body does not depend on the old one, so a conflict
+ *              is simply retried (5 times). After R5 no earlier run can write the list either.
+ *              [if R5 cannot be written the records disagree: G2 keeps every run stopped; recover is run again, whole]
+ *           R6 reads back: epochs agree, both kept pictures present, in role and matching.
+ *           Recovery DELETES NOTHING. A failed recovery is never resumed: it is run again from R1 with a new epoch; what the failed
+ *           one left (its marker, its copies) is unlisted until the next R5 adopts the copies as out-of-role pictures.
+ *   sweep   adds any object under earthview/frames/ that the list does not know, out of role (a picture an earlier run finished
+ *           storing after R5). May be repeated.
+ *   release refuses unless: a hold exists; every guard passes (stable inventory included); a sweep would add nothing; the current
+ *           and previous pictures read back whole and match. Then it removes the hold.
+ * WHAT AN EARLIER RUN CAN STILL DO AFTER A RECOVERY, for as long as it lives: finish storing a picture under the OLD epoch's prefix
+ * (unlisted; a leak until a sweep adopts it; the guards do not look there), and carry out a delete it had already decided (an old
+ * key). Neither can reach a picture the recovered pointer names. */
+async function evSurvey(env) {
+  const hold = await evGet(env, EARTHVIEW.HOLD), P = await evGet(env, EARTHVIEW.POINTER), H = await evGet(env, EARTHVIEW.HELD);
+  const objects = await evListAll(env, EARTHVIEW.PREFIX), markers = await evListAll(env, EARTHVIEW.EPOCHS);
+  const keep = [], drop = [];
+  for (const [role, f] of [['current', P.cur && P.cur.frame], ['previous', P.cur && P.cur.previous]]) { if (!f) continue;
+    let buf = null, why = null; try { const o = f.picture && f.picture.key ? await env.R2.get(f.picture.key) : null; buf = o ? await o.arrayBuffer() : null; } catch (_) { why = 'unreadable'; }
+    if (!why && !buf) why = 'missing'; if (!why && (buf.byteLength !== f.picture.bytes || await sha256Bytes(buf) !== f.picture.sha256)) why = 'differs from the record';
+    if (why) drop.push({ role, id: f.id, source_frame_time: f.source_frame_time, why }); else keep.push({ role, frame: f, buf }); }
+  const listed = new Set(((H.cur && Array.isArray(H.cur.items)) ? H.cur.items : []).map(i => i.key));
+  return { hold, P, H, objects, markers, keep, drop, unlisted: objects.filter(o => !listed.has(o.key)) };
+}
+const evPlanId = async plan => (await sha256Bytes(new TextEncoder().encode(JSON.stringify(plan)))).slice(0, 16);
+async function evAdmin(env, action, apply, planGiven) {
+  const s = await evSurvey(env), at = nowIso(), rec = x => x.cur === null ? 'missing' : x.cur ? 'present' : 'unreadable';
+  let guards = 'pass'; try { await evGuard(env, { ignoreHold: true }); } catch (e) { if (!(e instanceof EvStop)) throw e; guards = e.reason + (e.detail ? ': ' + e.detail : ''); }
+  const seen = { hold: s.hold.cur ? s.hold.cur : s.hold.cur === null ? null : 'unreadable', pointer: rec(s.P), pointer_epoch: (s.P.cur && s.P.cur.epoch) || null, list: rec(s.H), list_epoch: (s.H.cur && s.H.cur.epoch) || null,
+    list_entries: s.H.cur && Array.isArray(s.H.cur.items) ? s.H.cur.items.length : null, objects: s.objects.length, epoch_markers: s.markers.length, unlisted_objects: s.unlisted.length, guards,
+    current: (s.P.cur && s.P.cur.frame && s.P.cur.frame.source_frame_time) || null, previous: (s.P.cur && s.P.cur.previous && s.P.cur.previous.source_frame_time) || null };
+  const out = (extra, status = 200) => ({ status, body: { layer: 'earthview', action, applied: false, at, seen, ...extra } });
+  if (action === 'status') return out({});
+  if (action === 'hold') {
+    if (s.hold.etag) return out({ result: 'already held' });
+    if (!apply) return out({ would: 'write the hold record' });
+    const r = await evPutJson(env, EARTHVIEW.HOLD, { schema: 1, layer: 'earthview', held_at: at, collector_version: COLLECTOR_VERSION }, { etagDoesNotMatch: '*' });
+    return out({ applied: r !== null, result: r !== null ? 'held' : 'already held' });
+  }
+  if (action === 'recover') {
+    const first = !s.P.etag && !s.H.etag && !s.objects.length && !s.markers.length;
+    const kept = s.keep.map(k => ({ role: k.role, from_id: k.frame.id, source_frame_time: k.frame.source_frame_time, sha256: k.frame.picture.sha256, bytes: k.frame.picture.bytes }));
+    const plan = { action, mode: first ? 'first start' : 'recovery', pointer_version: s.P.etag, list_version: s.H.etag, keep: kept, not_kept: s.drop, objects: s.objects.length };
+    const plan_id = await evPlanId(plan);
+    if (!apply) return out({ plan, plan_id, would: first ? 'create an empty pointer and list under a new epoch' : 'copy the kept pictures to new keys, install a pointer and a list under a new epoch; delete nothing' });
+    if (!s.hold.etag) return out({ plan, plan_id, refused: 'no hold: hold first' }, 409);
+    if (planGiven !== plan_id) return out({ plan, plan_id, refused: 'what was found does not give the plan id that was passed; read the dry run again' }, 409);
+    const steps = [], epoch = evNewEpoch();
+    // R2 marker
+    if (await evPutJson(env, EARTHVIEW.EPOCHS + epoch + '.json', { schema: 1, layer: 'earthview', epoch, started_at: at, plan_id, plan, collector_version: COLLECTOR_VERSION }, { etagDoesNotMatch: '*' }) === null) return out({ plan_id, steps, refused: 'epoch marker already exists; run again' }, 500);
+    steps.push('R2 marker ' + epoch);
+    // R3 copies under new keys, from the bytes already verified in memory
+    const made = {};
+    for (const [n, k] of s.keep.entries()) { const f = k.frame, id = `${evKeyOf(f.source_frame_time)}-${f.picture.sha256.slice(0, 16)}-g${n + 1}-${evHex(12)}`, key = `${EARTHVIEW.PREFIX}${epoch}/${id}/picture.jpg`;
+      const put = await env.R2.put(key, k.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: f.picture.sha256, source_frame_time: f.source_frame_time }, onlyIf: { etagDoesNotMatch: '*' } });
+      if (put === null) return out({ plan_id, epoch, steps, refused: 'a copy key was already in use; nothing installed; run again' }, 500);
+      const o = await env.R2.get(key), back = o ? await o.arrayBuffer() : null;
+      if (!back || back.byteLength !== f.picture.bytes || await sha256Bytes(back) !== f.picture.sha256) return out({ plan_id, epoch, steps, refused: 'a copy did not read back; nothing installed; run again' }, 500);
+      made[k.role] = { ...f, id, recovered_from: f.id, picture: { ...f.picture, key, path: `/snapshot/earthview/${id}/picture.jpg` } }; steps.push(`R3 ${k.role} copied to ${id}`); }
+    // R4 the fence on publication: the pointer, on exactly the version R1 read. Never retried.
+    const frame = made.current || made.previous || null, previous = made.current ? (made.previous || null) : null;
+    const pr = await evPutJson(env, EARTHVIEW.POINTER, { ...evPointer(epoch), frame, previous, recovered_at: at }, s.P.etag ? { etagMatches: s.P.etag } : { etagDoesNotMatch: '*' });
+    if (pr === null) return out({ plan_id, epoch, steps, refused: 'pointer changed during recovery; nothing was installed; read the dry run again' }, 409);
+    steps.push('R4 pointer installed');
+    // R5 the list, from an inventory taken AFTER the fence
+    const objs = await evListAll(env, EARTHVIEW.PREFIX), inRole = new Map([frame, previous].filter(Boolean).map((f, i) => [f.picture.key, { f, gen: i + 1 }]));
+    const items = objs.map(o => { const r = inRole.get(o.key), id = (o.key.slice(0, -'/picture.jpg'.length).split('/').pop());
+      return r ? { id: r.f.id, gen: r.gen, key: o.key, bytes: r.f.picture.bytes, source_frame_time: r.f.source_frame_time, published_at: at, left_at: null, claimed_at: at, recovered: true }
+        : { id: o.key.endsWith('/picture.jpg') && evIdOk(id) ? id : null, gen: 0, key: o.key, bytes: o.size, source_frame_time: null, published_at: null, left_at: at, recovered: true }; });
+    const body = { schema: 3, layer: 'earthview', epoch, next_gen: inRole.size + 1, recovered_at: at, items }; let wrote = false;
+    for (let i = 0; i < 5 && !wrote; i++) { const h = await evGet(env, EARTHVIEW.HELD); wrote = await evPutJson(env, EARTHVIEW.HELD, body, h.etag ? { etagMatches: h.etag } : { etagDoesNotMatch: '*' }) !== null; }
+    if (!wrote) return out({ plan_id, epoch, steps, applied: true, refused: 'the list could not be written; the records disagree and every run stays stopped; run recover again' }, 500);
+    steps.push(`R5 list written with ${items.length} picture(s), ${inRole.size} in role`);
+    // R6 read back
+    let verified = 'pass'; try { await evGuard(env, { ignoreHold: true }); } catch (e) { if (!(e instanceof EvStop)) throw e; verified = e.reason + (e.detail ? ': ' + e.detail : ''); }
+    return out({ plan_id, epoch, steps, applied: true, result: 'recovered', guards_after: verified, kept: [frame, previous].filter(Boolean).map(f => ({ id: f.id, source_frame_time: f.source_frame_time })), not_kept: s.drop, still: 'held; sweep, then release' });
+  }
+  if (action === 'sweep') {
+    if (!s.H.cur || !evEpochOk(s.H.cur.epoch)) return out({ refused: 'no readable list: recover first' }, 409);
+    const plan = { action, epoch: s.H.cur.epoch, list_version: s.H.etag, add: s.unlisted.map(o => o.key) }, plan_id = await evPlanId(plan);
+    if (!apply) return out({ plan, plan_id, would: `add ${plan.add.length} picture(s) to the list, out of role` });
+    if (!s.hold.etag) return out({ plan, plan_id, refused: 'no hold: hold first' }, 409);
+    if (planGiven !== plan_id) return out({ plan, plan_id, refused: 'what was found does not give the plan id that was passed; read the dry run again' }, 409);
+    let added = 0; await evUpdate(env, EARTHVIEW.HELD, evFence(plan.epoch, h => { const have = new Set(h.items.map(i => i.key)), add = s.unlisted.filter(o => !have.has(o.key)); added = add.length; if (!added) return null;
+      return { ...h, items: [...h.items, ...add.map(o => { const id = o.key.slice(0, -'/picture.jpg'.length).split('/').pop(); return { id: o.key.endsWith('/picture.jpg') && evIdOk(id) ? id : null, gen: 0, key: o.key, bytes: o.size, source_frame_time: null, published_at: null, left_at: at, swept: true }; })] }; }));
+    return out({ plan_id, applied: added > 0, result: `added ${added}` });
+  }
+  if (action === 'release') {
+    const why = !s.hold.etag ? 'not held' : guards !== 'pass' ? 'guards: ' + guards : s.unlisted.length ? `${s.unlisted.length} stored picture(s) are not on the list: sweep first` : s.drop.length ? `${s.drop[0].role} picture is ${s.drop[0].why}` : null;
+    if (why) return out({ refused: why }, 409);
+    if (!apply) return out({ would: 'remove the hold' });
+    await env.R2.delete(EARTHVIEW.HOLD);
+    return out({ applied: true, result: 'released' });
+  }
+  return out({ refused: 'unknown action', actions: ['status', 'hold', 'recover', 'sweep', 'release'] }, 404);
+}
 /** GET /snapshot/earthview/meta and /snapshot/earthview/<frame id>/picture.jpg. A picture is served for any frame still on the held
  * list (current, previous, or inside its grace period), and only if the stored bytes match what was recorded at publication. */
 async function evRoute(env, p) {
@@ -3594,7 +3800,7 @@ async function evRoute(env, p) {
     return json({ schema: 1, layer: 'earthview', frame: strip(cur && cur.frame), previous: strip(cur && cur.previous), source_check: (st && st.source_check) || null, collection: (st && st.collection) || null,
       limits: { waiting_s: EARTHVIEW.WAITING_LIMIT_S, provisional: true }, cadence_min: EARTHVIEW.EVERY_MIN, source: EARTHVIEW.SOURCE, collecting: env.EARTHVIEW_ENABLED === '1', now: nowIso() }, 200, { 'Cache-Control': 'no-store' });
   }
-  if (p.length !== 4 || p[3] !== 'picture.jpg' || !/^\d{8}T\d{4}Z-[0-9a-f]{16}-g\d{1,12}$/.test(p[2])) return none(404, 'not found');
+  if (p.length !== 4 || p[3] !== 'picture.jpg' || !evIdOk(p[2])) return none(404, 'not found');
   let cur, held; try { cur = await getJson(env, EARTHVIEW.POINTER); held = await getJson(env, EARTHVIEW.HELD); } catch (e) { return none(503, 'unreadable'); }
   const fr = cur && [cur.frame, cur.previous].find(f => f && f.id === p[2]);
   const x = fr ? fr.picture : held && (held.items || []).filter(i => i.id === p[2] && !i.deleting && !i.pending).map(i => ({ key: i.key, bytes: i.bytes, sha256: null }))[0];
@@ -5906,6 +6112,11 @@ export default {
     if (p[0] === 'admin' && p[1] === 'reaggregate') {
       if (req.method !== 'POST') return json({ error: 'POST only (this can write history)' }, 405);
       return reaggregate(req, env, url, p[2] || '');
+    }
+    if (p[0] === 'admin' && p[1] === 'earthview') {   // Earth from Space storage: status, hold, recover, sweep, release. A dry run unless POST with apply=1.
+      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403, { 'Cache-Control': 'no-store' });
+      try { const r = await evAdmin(env, p[2] || 'status', req.method === 'POST' && url.searchParams.get('apply') === '1', url.searchParams.get('plan')); return json(r.body, r.status, { 'Cache-Control': 'no-store' }); }
+      catch (e) { return json({ layer: 'earthview', action: p[2] || 'status', applied: false, refused: e instanceof EvStop ? e.reason : 'internal error', detail: String((e && e.detail) || e).slice(0, 300) }, e instanceof EvStop ? 409 : 500, { 'Cache-Control': 'no-store' }); }
     }
     if (p[0] === 'health') {   // 0.5.3: external monitor checks; HEAD is the UptimeRobot HTTP monitor's default request
       if (req.method !== 'GET' && req.method !== 'HEAD') return json({ error: 'GET or HEAD only' }, 405, { 'Cache-Control': 'no-store' });
