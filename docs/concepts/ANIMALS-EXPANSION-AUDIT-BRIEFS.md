@@ -106,3 +106,56 @@ Companion to `ANIMALS-EXPANSION-PROPOSAL.md` rev 2. Each brief is a bounded, rea
 **PDF point:** none expected; READMEs are text. The two papers are read only as far as their HTML pages allow.
 
 **Out of scope:** eBird, Motus, any other bird package; any date-line build work.
+
+---
+
+## Addendum (rev 1.1, 20 Nov 13:16 UTC): carried from GPT's pass of the planning package
+
+GPT passed proposal rev 2, these briefs and the enquiry draft as a planning package (`reviews/2026-11-20-animals-expansion-rev2-gpt-review.md`). No further proposal round is needed before the audits. The points below bind the audits. The briefs above are otherwise unchanged. **Still none started; each needs Chad's own go.**
+
+**Every audit**
+- Ends with one of three results, on the evidence: **usable · requires clarification · unsuitable.** A shortlisted dataset is not owed a pass.
+- Returns: source version and checksum; what public payload is permitted; sensitivity treatment; availability and revision policy; measured sizes with their assumptions.
+- A size shown on a page (for example "16 MB") is an approximate label, not a byte pin. Byte counts and hashes come from the bytes received. Expected differences are recorded and looked into.
+- A newly found licence or a changed schema is a finding to record, not a reason to stop. **Stop only** on uncertainty about a source's identity or provenance, or on access that is not permitted. Never substitute another source silently.
+
+**Wording in proposal rev 2 to read as provisional (GPT)**
+- Version B of the penguin counts is newer and broader, not "better", until audited.
+- A raw penguin tracking set is a candidate for the replay, not suitable because it is labelled raw.
+- eBird and Motus are "not drop-in individual GPS-fix datasets"; Motus detections could support a differently labelled movement story later.
+
+**Brief A (penguins)**
+- Audit and design against A now; investigate B in parallel, separately (provenance, contents, anchors). The public version is chosen at the build proposal. No promise to migrate.
+- State how much missingness is acceptable for a visitor-facing series, without dropping inconvenient years.
+- Explicit zero, NA and model anchors are three different states and stay distinguishable.
+- No sum over changing colony coverage. National totals are out of scope for this audit. (They need evidence; they need not be modelled if a source ever supplies complete comparable coverage.)
+
+**Brief B (whale)**
+- If the IWC figure's reference year or interval cannot be established, the number stays unavailable and the dated status statement can still be used. The module does not wait on one field.
+- Short quotation only; a faithful cited paraphrase is fine.
+- **GPT's extraction, recorded as GPT's (Claude has not opened the PDF).** Wilkinson and co-authors 2023, doi `10.2989/1814232X.2023.2193591`, Table 3, printed page 46, column "6–30 July", relative abundance estimate for that window:
+
+  | Survey year | Estimate |
+  |---|---|
+  | 1990 | 695 |
+  | 1991 | 1,093 |
+  | 2002 | 1,673 |
+  | 2018 | 6,801 |
+  | 2019 | 7,378 |
+
+  These are adjusted estimates of whales passing Cape Vidal in that window: not raw sightings, not stock C totals. The table gives no interval for these cells. Other years are absent, not zero. The longer-window 2018 and 2019 headline totals (10,499 and 11,009) do not belong in this column. The paper's 7.4% to 8.8% a year comes from its own analysis of several comparable windows; no rate is calculated by us from these five values.
+- Claude's part in brief B for this table: check its provenance, unit and window against the abstract and record which parts are GPT's reading. It is an audit input, not an approved chart, and not a statement that the paper's figures may be reused.
+
+**Brief C (corridor)**
+- The herd is not chosen by alphabetical order. It needs suitable metadata and nothing in its record that argues against public display.
+- Record the coordinate reference system, axis order, units and every transformation.
+- A trial simplification is an audit measurement, not page work: keep topology, holes, multipart structure and use classes; record the tolerance and the full and simplified byte sizes. If it cannot be done without saving files, report it as not performed.
+
+**Brief D (bird)**
+- Before choosing an animal: duplicate times, out-of-order records, invalid or missing coordinates, study-specific ids, quality flags.
+- State the date-line counting rule, applied after longitude normalisation. Identical positions at +180 and −180 are not crossings.
+- An implausible speed is a diagnostic. It is not an exclusion rule without a justified, per-study threshold.
+- A measured trial display size is not an approved encoding.
+- If the paper and metadata do not establish the kind of trip, the label is the neutral "recorded journey".
+
+**Not for the audits (later, at build proposals):** data-failure behaviour, keyboard and touch, accessibility, a table fallback for charts, performance, integration and regression tests.
