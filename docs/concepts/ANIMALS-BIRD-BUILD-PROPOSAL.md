@@ -1,6 +1,6 @@
 # Animals: bird journey build proposal (waved albatross, Galápagos)
 
-20 Nov 2026 · **rev 2** · for GPT's focused review · **docs only.** On Chad's go of 20 Nov for the docs-only proposal ("This authorises the bird proposal only. No implementation or deployment yet."). Nothing built, no code branch cut, nothing sent. The Earth from Space probe and its files are untouched.
+20 Nov 2026 · **rev 2.1** (rev 2 PASSED by GPT at proposal level, `reviews/2026-11-20-animals-bird-build-proposal-rev2-gpt-review.md`; rev 2.1 adds §11a, GPT's implementation clarifications, and changes nothing else) · **docs only.** On Chad's go of 20 Nov for the docs-only proposal ("This authorises the bird proposal only. No implementation or deployment yet."). Nothing built, no code branch cut, nothing sent. The Earth from Space probe and its files are untouched.
 
 Rev 2 replaces rev 1 in full. GPT held rev 1 (`reviews/2026-11-20-animals-bird-build-proposal-gpt-review.md`) on two design points, both right: **the 5 ms timestamp rule fails on the pinned file**, and **omitting colony-area fixes by deletion alone would make the replay say false things**. §12 lists what rev 1 got wrong.
 
@@ -200,6 +200,40 @@ GPT's choices are recommendations, not Chad's approval. A build starts only on C
 - B16. The view fits the retained journey at desktop and 390 px.
 - B17. Source guard: `_source-data/` is added to `.gitignore`, and the test run checks that no tracked file sits under it and that no source file name appears in the served tree. This reduces accidental additions; it does not make committing impossible.
 - Real phone and screen reader: unverified, as for the rest.
+
+## 11a. Implementation clarifications from GPT's pass (rev 2.1; binding on the build, checked at candidate review)
+
+**Timestamps**
+- `ms` is the complete timestamp in integer epoch milliseconds.
+- A `.500` timestamp is outside the 25 ms allowance and must stop the integrated builder. Half-up rounding is shown by a unit test of the rounding helper alone. (This corrects B4's ".500 rounds as specified".)
+- Tests include: 25 ms passes; 26 ms stops; a `.999` value carries into the next second.
+
+**Hidden span**
+- Half-open: from the first withheld time **inclusive** to the next retained time **exclusive**. At that retained event the marker and its accuracy may reappear.
+- A trailing period stays hidden through the end of the recording, inclusive, and the controls still reach that end.
+- The replay opens with no marker and no accuracy.
+- "No line into or out of a period" means no connector bridges it. Track already drawn before the period may stay visible.
+- "Longest 144 hours" is rounded; GPT measures about 144.016 hours.
+
+**Failed attempts**
+- All 11 `failed_t` entries are kept. "Outside withheld periods" means outside the stored first-to-last tuples only: one of the 11 lies after a period's last withheld fix and before the next retained fix, so it is inside the hidden span.
+- **Withholding takes precedence over failed-attempt wording throughout the hidden span.** That entry never restores a marker or accuracy and never turns the screen into an ordinary failed-fix state.
+- In a visible joined step, "tried … and got none" appears only once replay time reaches the failed event, never before it.
+- The absence of an attempt row is not proof the tag made no attempt; the wording stays limited to what is in the source.
+
+**The centre**
+- The manifest may state the reference file's two-decimal point, its provenance, the radius, the distance formula and the boundary rule. Exact withheld fixes and the first-fix-derived centre stay out of every served file. The 5 km rule is a project omission rule, not a guarantee of safety.
+
+**Structure checks**
+- `j`: `n` entries, first is 0, only integers 0 or 1, total equals the manifest's joined count, never 1 over the time rule or across a withheld event.
+- Periods: integer endpoints inside the recording bounds; first ≤ last; ordered and disjoint; counts and totals agree.
+- `failed_t`: integers, inside the recording bounds, unique, count agrees with the manifest.
+- **The new bird's manifest requires the new fields.** A missing `acc`, `j`, `withheld` or `failed_t` is a verification failure, never a silent fall back to legacy behaviour. The three existing journeys still load without them.
+
+**Tests**
+- The hidden state is tested at its start, just before the next retained event, exactly at that event, at a trailing recording end, and at the failed event that lies inside a hidden span.
+- B6's string scan is a supplementary leak check, not proof. Also verified: the structured output holds only retained source rows, and no raw input or extract can be served. (Reformatted numbers could defeat a string match.)
+- B17 means no raw source **file** is in the served tree. A provenance manifest may name the source CSV. (This corrects B17's "no source file name appears in the served tree".)
 
 ## 12. What rev 1 got wrong
 
