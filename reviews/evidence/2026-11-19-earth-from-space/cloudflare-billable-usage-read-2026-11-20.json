@@ -1,0 +1,18 @@
+{
+  "what": "Read-only read of the Cloudflare dashboard page Manage Account > Billing > Billable usage (page text only; nothing clicked or changed), and of the Workers plans page.",
+  "read_at": "2026-11-20T07:11:02Z",
+  "period": "as the page shows by default; the period's dates were not in the text read (the Observability page gives the current cycle as 30 Oct to 29 Nov 2026)",
+  "billable_usage": [
+    { "product": "Workers Standard Requests", "included": "first 10M", "total_usage": "80.5k", "billable": 0, "cost_usd": 0 },
+    { "product": "Workers CPU ms", "included": "first 30M", "total_usage": "635.35k", "billable": 0, "cost_usd": 0 },
+    { "product": "R2 Storage Class A Operations", "included": "first 1M", "total_usage": "53.09k", "billable": 0, "cost_usd": 0 },
+    { "product": "R2 Storage Class B Operations", "included": "first 10M", "total_usage": "87.22k", "billable": 0, "cost_usd": 0 },
+    { "product": "R2 Data Storage", "included": "first 10 GB-month", "total_usage": "0.49 GB-months", "billable": 0, "cost_usd": 0 },
+    { "product": "D1 - Rows Read", "included": "first 25 billion", "total_usage": "5.08M", "billable": 0, "cost_usd": 0 },
+    { "product": "D1 - Rows Written", "included": "first 50 million", "total_usage": "1.13M", "billable": 0, "cost_usd": 0 },
+    { "product": "D1 - Storage GB-mo", "included": "first 5 GB", "total_usage": "0.02 GB-months", "billable": 0, "cost_usd": 0 }
+  ],
+  "total_usage_cost_usd": 0,
+  "workers_plans_page_2026_11_20T07_10Z": { "current_plan": "Paid, $5 / month + usage", "requests": "10 million included monthly, then $0.30 per million", "cpu": "$0.02 / million CPU ms", "cpu_max_per_invocation": "5 min", "number_of_workers": 500, "cron_triggers_per_account": 250 },
+  "note": "Analytics figures on a dashboard page, not an invoice."
+}

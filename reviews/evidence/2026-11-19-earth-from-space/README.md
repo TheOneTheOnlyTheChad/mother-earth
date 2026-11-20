@@ -14,3 +14,5 @@ All read-only. Nothing here was produced by a production deployment, storage wri
 | `timing-night.json` | The night listing-delay sample, 17:33 to 20:33 UTC: 176 reads, 18 new frames, listed 19.9 to 24.7 minutes after their frame time. Morning and afternoon samples not yet run. |
 
 Fixtures: `phase1/earthview-fixtures/` (three real frames, with their request and hashes in `SOURCE.md`).
+
+Added 20 Nov for the release-readiness proposal (`docs/concepts/EARTH-FROM-SPACE-RELEASE-READINESS-PROPOSAL.md`): `workerd-local-spike-2026-11-20.md` (the validation run inside the Workers runtime locally; what that can and cannot show), `eight-page-suites-2026-11-20.md` (cause of the eight failures: the wrong local server), `cloudflare-billable-usage-read-2026-11-20.json` (account-wide usage, read-only).
