@@ -3293,7 +3293,8 @@ async function dustRoute(env, p) {
  * Storage: earthview/current.json (frame and previous; every write conditional), earthview/state.json (the last source check and
  * the last collection outcome, kept apart from the frame), earthview/held.json (every stored picture and when it stopped being
  * current or previous). A picture is deleted ONLY in a run that has just published a newer verified frame, and only when it is
- * neither current nor previous and left that role at least GRACE_S ago. A failed or idle run deletes nothing.
+ * neither current nor previous and left that role at least GRACE_S ago. A failed or idle run deletes nothing. A run claims its
+ * picture on the held list before the pointer can name it, and cleanup marks before it deletes (evCleanup), so the two are ordered.
  * Gate: EARTHVIEW_ENABLED=1 for the scheduled path (absent = no request at all, nothing written). /admin/run/earthview runs once.
  * Outside LAYERS, cells, history, health and the generic writeDown. Licence: CC BY 4.0; credit EUMETSAT and NASA (catalogue). */
 const EARTHVIEW = {
@@ -3521,10 +3522,11 @@ async function collectEarthView(env, ms) {
   // 5. Store the picture once, under a key that names its time and content; read it back
   const id = evKeyOf(T) + '-' + pic.sha256.slice(0, 16), key = EARTHVIEW.PREFIX + id + '/picture.jpg';
   const stored = async () => { let b = null; try { const o = await env.R2.get(key); b = o ? await o.arrayBuffer() : null; } catch (_) { return 'unreadable'; } return !b ? 'absent' : (b.byteLength === pic.bytes && await sha256Bytes(b) === pic.sha256) ? 'same' : 'differs'; };
+  const store = async () => { try { await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return String(e).slice(0, 160); } return null; };
   const had = await stored();
   if (had === 'differs' || had === 'unreadable') return evFail(env, ms, 'stored copy differs', 200, key, T, check);
   if (had === 'absent') {
-    try { await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return evFail(env, ms, 'picture write failed', 200, String(e).slice(0, 160), T, check); }
+    const err = await store(); if (err) return evFail(env, ms, 'picture write failed', 200, err, T, check);
     if (await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, key, T, check);
   }
   const published_at = nowIso();
@@ -3532,23 +3534,49 @@ async function collectEarthView(env, ms) {
     request: { service: 'WMS 1.3.0 GetMap', layer: 'mtg_fd:' + EARTHVIEW.LAYER, crs: EARTHVIEW.CRS, crs_definition: EARTHVIEW.CRS_DEFINITION, bbox: EARTHVIEW.BBOX, width: P.w, height: P.h, format: 'image/jpeg', bgcolor: EARTHVIEW.BGCOLOR, time: T },
     picture: { file: 'picture.jpg', key, path: `/snapshot/earthview/${id}/picture.jpg`, type: 'image/jpeg', bytes: pic.bytes, sha256: pic.sha256, w: P.w, h: P.h },
     checks: { decoded: true, progressive: sc.progressive, scans: sc.scans, check_image_sha256: chk.sha256, ...cmp, ok: undefined, reason: undefined } };
-  // 6. The held list learns of the picture BEFORE the pointer can name it, so no stored picture is ever unknown to cleanup
-  await evUpdate(env, EARTHVIEW.HELD, () => ({ schema: 1, items: [] }), h => h.items.some(x => x.id === id) ? null : { ...h, items: [...h.items, { id, key, bytes: pic.bytes, source_frame_time: T, published_at, left_at: null }] });
+  // 6. CLAIM the picture on the held list BEFORE the pointer can name it. The claim is a conditional write that (a) refuses if a
+  //    cleanup has marked this picture for deletion, and (b) clears any grace period it had begun, so that from this write on no
+  //    cleanup can select it (cleanup selects only pictures whose grace period has run out; see step 8). The stored bytes are then
+  //    checked AGAIN, after the claim: a cleanup that finished before the claim has removed the picture and its entry, the claim made
+  //    a new entry, and the picture is stored afresh here. Nothing can remove it between this check and the pointer write.
+  const heldEmpty = () => ({ schema: 1, items: [] }); let beingRemoved = false;
+  await evUpdate(env, EARTHVIEW.HELD, heldEmpty, h => { const x = h.items.find(i => i.id === id); beingRemoved = !!(x && x.deleting); if (beingRemoved) return null;
+    const entry = { id, key, bytes: pic.bytes, source_frame_time: T, published_at: (x && x.published_at) || published_at, left_at: null, claimed_at: published_at, claimed_by: new Date(ms).toISOString() };
+    return { ...h, items: x ? h.items.map(i => i.id === id ? entry : i) : [...h.items, entry] }; });
+  if (beingRemoved) return evFail(env, ms, 'stored copy is being removed', 200, key + ' is marked for deletion by a cleanup; not published in this run', T, check);
+  const after = await stored();
+  if (after === 'absent') { const err = await store(); if (err) return evFail(env, ms, 'picture write failed', 200, 'after claim: ' + err, T, check); }
+  if (after !== 'same' && await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, 'after claim: ' + key, T, check);
   // 7. Move the pointer only if no other run has published this time or a later one meanwhile
   const up = await evUpdate(env, EARTHVIEW.POINTER, evEmpty, c => (c.frame && c.frame.source_frame_time >= T) ? null : { ...evEmpty(), frame, previous: c.frame || null });
   if (!up.wrote) { await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'superseded', frame_time: T, at: nowIso() } })); await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, `superseded: ${up.cur.frame.source_frame_time} was published first; ${T} not published`); return 'earthview:superseded ' + T; }
   await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'published', frame_time: T, at: published_at } }));
-  // 8. Cleanup, only here: a newer verified frame has just been published. Deleted: pictures that are neither current nor previous
-  //    and left that role at least GRACE_S ago. A picture seen out of role for the first time starts its grace period now.
-  let deleted = 0;
-  try {
-    const live = new Set([frame.id, up.body.previous && up.body.previous.id].filter(Boolean)), nowMs = Date.parse(published_at), gone = [];
-    const h = await evUpdate(env, EARTHVIEW.HELD, () => ({ schema: 1, items: [] }), hh => ({ ...hh, items: hh.items.map(x => live.has(x.id) ? { ...x, left_at: null } : x.left_at ? x : { ...x, left_at: published_at }) }));
-    for (const x of h.body.items) if (!live.has(x.id) && x.left_at && nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 && x.key.startsWith(EARTHVIEW.PREFIX)) { try { await env.R2.delete(x.key); gone.push(x.id); } catch (_) {} }
-    if (gone.length) { deleted = gone.length; await evUpdate(env, EARTHVIEW.HELD, () => ({ schema: 1, items: [] }), hh => ({ ...hh, items: hh.items.filter(x => !gone.includes(x.id) || live.has(x.id)) })); }
-  } catch (_) {}
+  // 8. Cleanup, only here: a newer verified frame has just been published.
+  let deleted = 0; try { deleted = await evCleanup(env); } catch (_) {}
   await logRun(env, 'earthview', ms, 'ok', 200, 1, pic.bytes, `frame ${T} as ${id}; agreement ${cmp.agreement}; ${deleted} old picture(s) deleted`);
   return 'earthview:published ' + T;
+}
+/** Removes pictures that are neither current nor previous and left that role at least GRACE_S ago. Called only by a run that has
+ * just published a newer verified frame. Why it cannot remove a picture that can still become current or previous:
+ *  1. A picture becomes current only through a run that first CLAIMED it (collector step 6): a conditional write to the held list
+ *     that sets left_at to null and refuses if the entry is marked "deleting".
+ *  2. Here a picture is marked "deleting" by a conditional write to the same list, and only if, IN THAT WRITE'S OWN VIEW of the
+ *     list, it is not in the pointer just read and its left_at is at least GRACE_S old. Both writes are conditional on the list
+ *     being unchanged since it was read, so they are ordered: a claim first makes the picture ineligible (left_at null, and a later
+ *     cleanup can only restart its grace period from that moment); a mark first makes the claim refuse.
+ *  3. The object is deleted only after the mark is in place, and only if a second read of the pointer still does not name it.
+ *     The entry is removed after the object. A mark left behind by an interrupted cleanup is finished by the next one.
+ *  4. Current and previous are taken from the pointer as read here, never from what this run believes it published. */
+async function evCleanup(env) {
+  const heldEmpty = () => ({ schema: 1, items: [] }), liveOf = p => new Set([p && p.frame && p.frame.id, p && p.previous && p.previous.id].filter(Boolean));
+  const live = liveOf((await evRead(env, EARTHVIEW.POINTER, evEmpty)).cur), at = nowIso(), nowMs = Date.parse(at);
+  const h = await evUpdate(env, EARTHVIEW.HELD, heldEmpty, hh => ({ ...hh, items: hh.items.map(x => x.deleting ? x : live.has(x.id) ? { ...x, left_at: null }
+    : !x.left_at ? { ...x, left_at: at } : (nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 && String(x.key).startsWith(EARTHVIEW.PREFIX)) ? { ...x, deleting: at } : x) }));
+  const marked = h.body.items.filter(x => x.deleting); if (!marked.length) return 0;
+  const live2 = liveOf((await evRead(env, EARTHVIEW.POINTER, evEmpty)).cur), gone = [], spared = [];
+  for (const x of marked) { if (live2.has(x.id)) { spared.push(x.id); continue; } try { await env.R2.delete(x.key); gone.push(x.id); } catch (_) {} }
+  if (gone.length || spared.length) await evUpdate(env, EARTHVIEW.HELD, heldEmpty, hh => ({ ...hh, items: hh.items.filter(x => !(x.deleting && gone.includes(x.id))).map(x => x.deleting && spared.includes(x.id) ? { ...x, deleting: undefined, left_at: null } : x) }));
+  return gone.length;
 }
 async function runEarthView(env, ms) { let r = null; const g = await guarded(env, 'earthview', ms, async (e, m) => { r = await collectEarthView(e, m); }); return r || g; }
 /** GET /snapshot/earthview/meta and /snapshot/earthview/<frame id>/picture.jpg. A picture is served for any frame still on the held
@@ -3564,7 +3592,7 @@ async function evRoute(env, p) {
   if (p.length !== 4 || p[3] !== 'picture.jpg' || !/^\d{8}T\d{4}Z-[0-9a-f]{16}$/.test(p[2])) return none(404, 'not found');
   let cur, held; try { cur = await getJson(env, EARTHVIEW.POINTER); held = await getJson(env, EARTHVIEW.HELD); } catch (e) { return none(503, 'unreadable'); }
   const fr = cur && [cur.frame, cur.previous].find(f => f && f.id === p[2]);
-  const x = fr ? fr.picture : held && (held.items || []).filter(i => i.id === p[2]).map(i => ({ key: i.key, bytes: i.bytes, sha256: null }))[0];
+  const x = fr ? fr.picture : held && (held.items || []).filter(i => i.id === p[2] && !i.deleting).map(i => ({ key: i.key, bytes: i.bytes, sha256: null }))[0];
   if (!x) return none(404, 'not found');
   let buf; try { const o = await env.R2.get(x.key); buf = o ? await o.arrayBuffer() : null; } catch (e) { return none(503, 'unreadable'); }
   if (!buf) return none(503, 'missing');

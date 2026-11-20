@@ -1,0 +1,21 @@
+{
+  "what": "Read-only reads of two Cloudflare dashboard pages in the browser pane (Chad signed in). Page text only. Nothing was clicked or changed.",
+  "read_at": "2026-11-20T04:51:15Z",
+  "worker_metrics": {
+    "page": "Workers & Pages > mother-earth > Production > Metrics, last 24 hours, all deployed versions (hub 0.6.19, version 674cdc95)",
+    "invocations": "3.09k", "subrequests": "1.19k", "errors": 0,
+    "errors_by_invocation_status": { "Exceeded Memory": 0, "Exceeded CPU Time Limits": 0, "Internal": 0, "Load Shed": 0, "Uncaught Exception": 0 },
+    "cpu_time_ms": { "p50": 3.55, "p90": 12.77, "p99": 244, "p999": 244 },
+    "wall_time_ms": { "p50": 60.73, "p90": "3k", "p99": "39k", "p999": "39k" },
+    "memory_usage_mb": { "p50": 2.69, "p90": 3.24, "p99": 16.86, "p999": 16.86 },
+    "memory_usage_meaning": "Cloudflare changelog, 30 Jun 2026: the V8 isolate memory at the time of each invocation, subject to the 128 MB per-isolate limit; a single isolate can handle many concurrent requests and shares memory across them."
+  },
+  "observability_usage": {
+    "page": "Observability > Usage, billing cycle 30 Oct to 29 Nov 2026, day 22 of 31",
+    "ingestion": { "used_gb": 0.57, "included_gb": 50.0, "billable_gb": 0, "rate": "US$0.25 per GB" },
+    "storage": { "used_gb_month": 0.12, "included_gb_month": 10.0, "billable": 0, "rate": "US$0.10 per GB-month" },
+    "estimated_bill": "US$0.00 so far, US$0.00 projected", "datasets": [ { "name": "Workers Logs", "ingested_gb": 0.57, "events": "115.9k", "avg_event_kb": 4.9, "share": "100%" } ],
+    "context": "Cloudflare's notice to Chad of 20 Nov 2026: volume-based Observability pricing from 1 Dec 2026; Workers Paid accounts get 50 GB ingestion and 10 GB-month storage included per billing cycle."
+  },
+  "not_read": "Account-wide Workers request and CPU-ms totals against the Workers Paid allowances; R2 Class A and Class B operation counts; R2 storage."
+}

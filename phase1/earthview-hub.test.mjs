@@ -4,7 +4,8 @@
  * Run: node --no-warnings phase1/earthview-hub.test.mjs
  * BREAK=<name> weakens a copy of worker.js; each must fail:
  *   gate-ignored no-header-ok mismatch-ok check-header-skipped scans-any trailing-ok decode-error-ignored no-compare pointer-on-fail
- *   no-grace delete-idle no-cas overwrite no-readback serve-any generic-down delay-on-failed-check older-over-newer type-any */
+ *   no-grace delete-idle no-cas overwrite no-readback serve-any generic-down delay-on-failed-check older-over-newer type-any
+ *   claim-keeps-grace claim-ignores-mark no-check-after-claim cleanup-own-view no-second-pointer-read serve-marked */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import zlib from 'node:zlib'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url)), FX = path.join(HERE, 'earthview-fixtures');
 const BREAK = process.env.BREAK || '';
@@ -21,16 +22,23 @@ const BREAKS = {
   'no-grace': ['nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 &&', 'nowMs - Date.parse(x.left_at) >= 0 &&'],
   'delete-idle': ["    await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, 'nothing newer: '", "    try { const h = await getJson(env, EARTHVIEW.HELD); for (const x of (h && h.items) || []) if (Date.now() - Date.parse(x.published_at) > EARTHVIEW.GRACE_S * 1000) await env.R2.delete(x.key); } catch (_) {}\n    await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, 'nothing newer: '"],
   'no-cas': ["    const r = await env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf: etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' } });\n    if (r !== null) return { cur, body, wrote: true };\n  }\n  throw new Error('earthview record kept changing", "    const r = await env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' } });\n    if (r !== null) return { cur, body, wrote: true };\n  }\n  throw new Error('earthview record kept changing"],
-  'overwrite': ["  if (had === 'differs' || had === 'unreadable') return evFail(env, ms, 'stored copy differs', 200, key, T, check);\n  if (had === 'absent') {\n    try { await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T }, onlyIf: { etagDoesNotMatch: '*' } });", "  {\n    try { await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T } });"],
-  'no-readback': ["    if (await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, key, T, check);", ''],
+  'overwrite': [["onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return String(e).slice(0, 160); } return null; };", "}); } catch (e) { return String(e).slice(0, 160); } return null; };"], ["  const had = await stored();\n", "  const had = 'absent';\n"]],
+  'no-readback': [["    if (await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, key, T, check);\n", ''], ["  if (after !== 'same' && await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, 'after claim: ' + key, T, check);\n", '']],
   'serve-any': ["  if (buf.byteLength !== x.bytes || (x.sha256 ? sha !== x.sha256 : sha.slice(0, 16) !== p[2].slice(-16))) return none(503, 'integrity');", ''],
   'generic-down': ["    else if (layer === 'earthview') { try { await evFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // never the generic writeDown", ''],
   'delay-on-failed-check': ["{ ok: false, at: checkAt, reason: 'http error', http: r.status }", "{ ok: true, at: checkAt, newest: null }"],
   'older-over-newer': ['c => (c.frame && c.frame.source_frame_time >= T) ? null : { ...evEmpty(), frame, previous: c.frame || null }', 'c => ({ ...evEmpty(), frame, previous: c.frame || null })'],
+  'claim-keeps-grace': ["left_at: null, claimed_at: published_at, claimed_by", "left_at: (x && x.left_at) || null, claimed_at: published_at, claimed_by"],
+  'claim-ignores-mark': ["beingRemoved = !!(x && x.deleting); if (beingRemoved) return null;", "beingRemoved = false;"],
+  'no-check-after-claim': ["  const after = await stored();", "  const after = 'same';"],
+  'cleanup-own-view': ["  const live = liveOf((await evRead(env, EARTHVIEW.POINTER, evEmpty)).cur), at = nowIso(), nowMs = Date.parse(at);", "  const live = new Set(), at = nowIso(), nowMs = Date.parse(at);"],
+  'no-second-pointer-read': ["  const live2 = liveOf((await evRead(env, EARTHVIEW.POINTER, evEmpty)).cur), gone = [], spared = [];", "  const live2 = new Set(), gone = [], spared = [];"],
+  'serve-marked': ["filter(i => i.id === p[2] && !i.deleting)", "filter(i => i.id === p[2])"],
   'type-any': ["  if (type !== spec.type) return { ok: false, reason: what + ' not a picture', http: 200, detail: type };   // EUMETView answers a bad time with HTTP 200 and XML", ''],
 };
 let src = fs.readFileSync(process.env.WORKER || path.join(HERE, 'worker.js'), 'utf8');
-if (BREAK) { if (!(BREAK in BREAKS)) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); } const b = BREAKS[BREAK]; if (!src.includes(b[0])) { console.log('FAIL  break did not apply: ' + BREAK); process.exit(1); } src = src.replace(b[0], b[1]); }
+if (BREAK) { if (!(BREAK in BREAKS)) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); } const parts = Array.isArray(BREAKS[BREAK][0]) ? BREAKS[BREAK] : [BREAKS[BREAK]];   // a break may have several parts; EVERY part must apply
+  for (const b of parts) { if (src.split(b[0]).length !== 2) { console.log('FAIL  break did not apply (each part must match exactly once): ' + BREAK); process.exit(1); } src = src.replace(b[0], b[1]); } }
 const tmp = path.join(os.tmpdir(), `worker-ev-${process.pid}.mjs`); fs.writeFileSync(tmp, src);
 const W = await import(pathToFileURL(tmp).href); fs.unlinkSync(tmp);
 for (const ev of ['uncaughtException', 'unhandledRejection']) process.on(ev, e => { console.log('FAIL  suite stopped on an error: ' + String(e && e.stack || e).split('\n').slice(0, 3).join(' | ')); process.exit(1); });
@@ -71,21 +79,24 @@ const caps = t => `<WMS_Capabilities><Capability><Layer><Title>mtg_fd</Title><La
 function world() {
   const store = new Map(), runs = [], reqs = [];
   const w = { store, runs, reqs, order: [], latest: '2026-11-19T11:00:00Z', capStatus: 200, capBody: null, capThrow: false, capAge: '77', pic: null, chk: null, warn: 'echo', picWarn: undefined, chkWarn: undefined, base: 'day',
-    putFail: null, corruptRead: null, onPointerPut: null, brokenResponse: false, deletes: [], puts: [], unconditional: [], conflicts: 0 };
+    once: [], deleteFail: false, putFail: null, corruptRead: null, onPointerPut: null, brokenResponse: false, deletes: [], puts: [], unconditional: [], conflicts: 0 };
   const etagOf = buf => crypto.createHash('md5').update(buf).digest('hex');
+  /** one-shot hooks: w.once.push({ op, key (suffix), fn }) runs fn before the first matching storage call, then is spent */
+  w.fire = async (op, key) => { const i = w.once.findIndex(h => h.op === op && key.endsWith(h.key)); if (i < 0) return; const [h] = w.once.splice(i, 1); await h.fn(); };
   const R2 = {
     async put(key, body, opts = {}) {
       if (w.putFail && key.endsWith(w.putFail)) throw new Error('R2 put failed (test)');
       const buf = typeof body === 'string' ? Buffer.from(body) : Buffer.from(body.buffer ? body.buffer.slice(body.byteOffset || 0, (body.byteOffset || 0) + body.byteLength) : body);
       if (key === W.EARTHVIEW.POINTER && w.onPointerPut) { const f = w.onPointerPut; w.onPointerPut = null; await f(); }
+      await w.fire('put', key);
       if (!opts.onlyIf) w.unconditional.push(key);
       if (opts.onlyIf) { const had = store.get(key); const refused = opts.onlyIf.etagDoesNotMatch === '*' ? !!had : (!had || had.etag !== opts.onlyIf.etagMatches); if (refused) { w.conflicts++; return null; } }
       w.puts.push(key); store.set(key, { buf, opts, etag: etagOf(buf) }); return { key, etag: etagOf(buf) }; },
-    async get(key) { const o = store.get(key); if (!o) return null; let buf = o.buf; if (w.corruptRead && key.endsWith(w.corruptRead)) { buf = Buffer.from(buf); buf[buf.length - 30] ^= 0xff; }
+    async get(key) { await w.fire('get', key); const o = store.get(key); if (!o) return null; let buf = o.buf; if (w.corruptRead && key.endsWith(w.corruptRead)) { buf = Buffer.from(buf); buf[buf.length - 30] ^= 0xff; }
       return { body: buf, etag: o.etag, customMetadata: o.opts.customMetadata, async arrayBuffer() { return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength); }, async json() { return JSON.parse(buf.toString('utf8')); }, async text() { return buf.toString('utf8'); } }; },
     async head(key) { const o = store.get(key); return o ? { size: o.buf.length, etag: o.etag } : null; },
     async list({ prefix = '' } = {}) { return { objects: [...store.keys()].filter(k => k.startsWith(prefix)).sort().map(key => ({ key })), truncated: false }; },
-    async delete(key) { w.deletes.push(key); store.delete(key); },
+    async delete(key) { await w.fire('delete', key); if (w.deleteFail) throw new Error('R2 delete failed (test)'); w.deletes.push(key); store.delete(key); },
   };
   const DB = { prepare(sql) { return { bind(...a) { return { async run() { if (/INSERT INTO collector_runs/.test(sql)) { runs.push({ layer: a[0], status: a[3], http: a[4], note: a[7] }); w.order.push('run:' + a[0]); } return {}; }, async first() { return null; }, async all() { return { results: [] }; } }; }, async first() { return null; }, async all() { return { results: [] }; }, async run() { return {}; } }; } };
   w.env = { R2, DB, EARTHVIEW_ENABLED: '1' };
@@ -214,7 +225,7 @@ ok('H pure: the newest time is read from this layer only', W.evLatest(caps('2026
 { const w = world(); const pub = async (t, at) => { w.latest = t; w.capStatus = 200; w.warn = 'echo'; return run(w, at); };
   await pub('2026-11-19T11:00:00Z', T0); await pub('2026-11-19T11:10:00Z', T0 + 10 * MIN); await pub('2026-11-19T11:20:00Z', T0 + 20 * MIN);
   let h = await held(w); const id1 = h[0].id, id2 = h[1].id, id3 = h[2].id, key1 = h[0].key;
-  ok('J1 three frames: the first has left its role and its grace period started at that publication; nothing deleted', h.length === 3 && h[0].left_at === h[2].published_at && h[0].left_at.startsWith('2026-11-19T11:41:00') && h[1].left_at === null && h[2].left_at === null && !w.deletes.length && frames(w).length === 3, h);
+  ok('J1 three frames: the first has left its role and its grace period started at that publication; nothing deleted', h.length === 3 && h[0].left_at.startsWith('2026-11-19T11:41:00') && h[1].left_at === null && h[2].left_at === null && !w.deletes.length && frames(w).length === 3, h);
   const r1 = await route(w, `/snapshot/earthview/${id1}/picture.jpg`); ok('J2 a reader still showing the first frame can reload it during the grace period', r1.status === 200 && sha(Buffer.from(await r1.arrayBuffer())).startsWith(id1.slice(-16)), r1.status);
   // a long outage: 48 hours of failed checks, failed pictures and idle runs
   w.capStatus = 503; for (let k = 1; k <= 12; k++) await run(w, T0 + 20 * MIN + k * 4 * 60 * MIN);
@@ -226,7 +237,7 @@ ok('H pure: the newest time is read from this layer only', W.evLatest(caps('2026
   // a newer verified frame arrives: only now may the long-departed first picture go
   await pub('2026-11-21T13:00:00Z', T0 + 50 * 60 * MIN + 10 * MIN); h = await held(w);
   ok('J5 the next verified publication deletes exactly the picture that left its role over 24 hours ago', w.deletes.length === 1 && w.deletes[0] === key1 && !h.some(x => x.id === id1), [w.deletes, h.map(x => x.id)]);
-  ok('J6 the frame that has only just left its role is kept and its grace period starts now', h.some(x => x.id === id2 && x.left_at === h[h.length - 1].published_at && x.left_at.startsWith('2026-11-21T13:31:00')) && w.store.has(h.find(x => x.id === id2).key), h);
+  ok('J6 the frame that has only just left its role is kept and its grace period starts now', h.some(x => x.id === id2 && x.left_at.startsWith('2026-11-21T13:31:00')) && w.store.has(h.find(x => x.id === id2).key), h);
   ok('J7 current and previous are never on the delete list', !w.deletes.includes((await ptr(w)).frame.picture.key) && !w.deletes.includes((await ptr(w)).previous.picture.key));
   const gone = await route(w, `/snapshot/earthview/${id1}/picture.jpg`); ok('J8 a deleted picture answers 404, not another picture', gone.status === 404, gone.status);
   await pub('2026-11-21T13:10:00Z', T0 + 50 * 60 * MIN + 20 * MIN); ok('J9 ten minutes later: nothing more deleted (inside the grace period)', w.deletes.length === 1, w.deletes);
@@ -244,4 +255,64 @@ ok('H pure: the newest time is read from this layer only', W.evLatest(caps('2026
   const r = await run(w, T0); ok('K6 a different object already at the picture\'s address is never overwritten', /stored copy differs/.test(r) && w.store.get(key).buf.toString() === 'something else', r); }
 { const mj = await (await route(world(), '/snapshot/earthview/meta')).json(); ok('K7 meta before anything exists: empty, not an error, and says collection is off or on', mj.frame === null && mj.previous === null && mj.source_check === null && mj.collecting === true, mj); }
 { const w = world(); const r = await run(w, T0); ok('K8 the Dust collector\'s storage is untouched by this job', ![...w.store.keys()].some(k => /^dustrgb/.test(k)) && /published/.test(r)); }
+// ===== L. publication against overlapping cleanup (GPT's review of ef33a18, finding 1)
+// Set-up for each case: 11:00 is current. A run for 11:30 stores its picture and is interrupted before the pointer moves, leaving an
+// UNPUBLISHED CANDIDATE. The source list then steps back to 11:10, which is published; its cleanup starts the candidate's grace
+// period. More than 24 hours pass with nothing new. Then two runs overlap: A for 11:30 again (same bytes, so the same stored object)
+// and B for 11:20, whose cleanup finds the candidate out of role and past its grace period.
+const raceWorld = async () => { const w = world(); await run(w, T0);
+  w.latest = '2026-11-19T11:30:00Z'; w.putFail = 'current.json'; await run(w, T0 + 10 * MIN); w.putFail = null;
+  const cand = frames(w).find(k => /T1130Z/.test(k)); w.latest = '2026-11-19T11:10:00Z'; await run(w, T0 + 20 * MIN);
+  return { w, cand, later: T0 + 30 * 60 * MIN }; };
+const bRun = async (w, at, latest) => { const keep = w.latest; w.latest = latest; setNow(at); const r = await W.collectEarthView(w.env, at); w.latest = keep; return r; };
+const sound = async (w, name) => { const p = await ptr(w), h = await held(w), has = k => w.store.has(k);
+  ok(`${name}: the current frame's picture exists and is served`, p.frame && has(p.frame.picture.key) && (await route(w, p.frame.picture.path)).status === 200, [p.frame && p.frame.id, p.frame && has(p.frame.picture.key)]);
+  ok(`${name}: the previous frame's picture exists and is served`, !p.previous || (has(p.previous.picture.key) && (await route(w, p.previous.picture.path)).status === 200), p.previous && p.previous.id);
+  ok(`${name}: every stored picture is on the held list and every unmarked entry has its picture`, frames(w).every(k => h.some(x => x.key === k)) && h.filter(x => !x.deleting).every(x => has(x.key)), [frames(w), h.map(x => [x.id, !!x.deleting])]); return p; };
+{ const { w, cand } = await raceWorld(); const h = await held(w), c = h.find(x => x.key === cand);
+  ok('L0 set-up: an unpublished 11:30 candidate is stored, on the held list, out of role, its grace period begun; 11:10 is current', !!cand && w.store.has(cand) && c && !!c.left_at && (await ptr(w)).frame.source_frame_time === '2026-11-19T11:10:00Z' && (await state(w)).collection.outcome === 'published', [cand, c]); }
+{ // L1: GPT's reproduction. B runs whole (publishes 11:20, cleanup deletes the aged candidate) after A has found its picture already stored and before A claims it.
+  const { w, cand, later } = await raceWorld(); w.latest = '2026-11-19T11:30:00Z'; let b = null;
+  w.once.push({ op: 'get', key: 'held.json', fn: async () => { b = await bRun(w, later + 1000, '2026-11-19T11:20:00Z'); } });
+  const a = await run(w, later), p = await sound(w, 'L1');
+  ok('L1 B published 11:20 and its cleanup removed the aged candidate while A was between its stored-copy check and its claim', /published 2026-11-19T11:20/.test(b) && w.deletes.includes(cand), [b, w.deletes]);
+  ok('L1 A then claimed, found the picture gone, stored it afresh and published 11:30: the pointer never names a missing picture', a === 'earthview:published 2026-11-19T11:30:00Z' && p.frame.source_frame_time === '2026-11-19T11:30:00Z' && p.previous.source_frame_time === '2026-11-19T11:20:00Z' && w.store.has(cand), [a, p.frame.source_frame_time]); }
+{ // L2: B runs whole at the moment A WRITES its claim: A's write is refused (the list changed), A reads again and claims afresh.
+  const { w, cand, later } = await raceWorld(); w.latest = '2026-11-19T11:30:00Z'; let b = null;
+  w.once.push({ op: 'put', key: 'held.json', fn: async () => { b = await bRun(w, later + 1000, '2026-11-19T11:20:00Z'); } });
+  const a = await run(w, later), p = await sound(w, 'L2');
+  ok('L2 the same outcome when B lands exactly on A\'s claim write', /published 2026-11-19T11:20/.test(b) && w.deletes.includes(cand) && /published 2026-11-19T11:30/.test(a) && p.frame.source_frame_time === '2026-11-19T11:30:00Z' && w.conflicts > 0, [a, b, w.conflicts]); }
+{ // L3: A claims FIRST; B's cleanup then runs: the candidate is no longer eligible and is not deleted.
+  const { w, cand, later } = await raceWorld(); w.latest = '2026-11-19T11:30:00Z'; let b = null;
+  w.once.push({ op: 'get', key: 'current.json', fn: async () => {} });   // A's own first pointer read (step 2) passes untouched
+  w.once.push({ op: 'put', key: 'current.json', fn: async () => { b = await bRun(w, later + 1000, '2026-11-19T11:20:00Z'); } });   // B runs whole after A's claim, before A's pointer write
+  const a = await run(w, later), p = await sound(w, 'L3');
+  ok('L3 a claimed candidate survives an overlapping cleanup although its grace period had run out', /published 2026-11-19T11:20/.test(b) && !w.deletes.includes(cand) && /published 2026-11-19T11:30/.test(a) && p.frame.source_frame_time === '2026-11-19T11:30:00Z', [a, b, w.deletes]); }
+{ // L4: B has MARKED the candidate and is about to delete it when A runs whole: A is refused and publishes nothing.
+  const { w, cand, later } = await raceWorld(); let a = null;
+  w.once.push({ op: 'delete', key: 'picture.jpg', fn: async () => { a = await bRun(w, later + 1000, '2026-11-19T11:30:00Z'); } });
+  const b = await bRun(w, later, '2026-11-19T11:20:00Z'), p = await sound(w, 'L4'), s = await state(w);
+  ok('L4 a run that finds its picture marked for deletion publishes nothing and says why', a === 'earthview:down stored copy is being removed' && p.frame.source_frame_time === '2026-11-19T11:20:00Z' && /published/.test(b) && w.deletes.includes(cand), [a, b, p.frame.source_frame_time]);
+  w.latest = '2026-11-19T11:30:00Z'; const a2 = await run(w, later + 10 * MIN), p2 = await sound(w, 'L4 next run');
+  ok('L4 the next run stores the picture afresh and publishes it', /published 2026-11-19T11:30/.test(a2) && p2.frame.source_frame_time === '2026-11-19T11:30:00Z', a2); }
+{ // L5: a cleanup interrupted between its mark and its delete leaves a mark; nothing can publish that picture; the next cleanup finishes.
+  const { w, cand, later } = await raceWorld(); w.deleteFail = true; const b = await bRun(w, later, '2026-11-19T11:20:00Z'); w.deleteFail = false;
+  const h = await held(w); ok('L5 the interrupted cleanup leaves the candidate marked and still stored; the publication stands', /published/.test(b) && h.some(x => x.key === cand && x.deleting) && w.store.has(cand), h.map(x => [x.id, x.deleting]));
+  const gone = await route(w, '/snapshot/earthview/' + h.find(x => x.key === cand).id + '/picture.jpg'); ok('L5 a marked picture is not served', gone.status === 404, gone.status);
+  w.latest = '2026-11-19T11:30:00Z'; const a = await run(w, later + 10 * MIN); ok('L5 a run for that picture is refused while the mark stands', a === 'earthview:down stored copy is being removed', a);
+  w.latest = '2026-11-19T11:40:00Z'; const c = await run(w, later + 20 * MIN), p = await sound(w, 'L5 after the next publication');
+  ok('L5 the next publishing run finishes the deletion and removes the entry', /published 2026-11-19T11:40/.test(c) && w.deletes.includes(cand) && !(await held(w)).some(x => x.key === cand) && p.previous.source_frame_time === '2026-11-19T11:20:00Z', [c, w.deletes]); }
+{ // L6: cleanup reads the pointer itself. A run whose own view of "previous" is out of date must not start a grace period on a live picture, nor delete one.
+  const w = world(); await run(w, T0); w.latest = '2026-11-19T11:10:00Z'; await run(w, T0 + 10 * MIN); const first = (await ptr(w)).previous;
+  // age the first frame's entry by hand as an interrupted earlier cleanup could have, then publish: it is PREVIOUS, so it must be kept and its grace period cleared
+  const o = await w.env.R2.get(W.EARTHVIEW.HELD), hh = await o.json(); hh.items = hh.items.map(x => x.id === first.id ? { ...x, left_at: '2026-11-01T00:00:00.000Z' } : x); await w.env.R2.put(W.EARTHVIEW.HELD, JSON.stringify(hh), { onlyIf: { etagMatches: o.etag } });
+  w.latest = '2026-11-19T11:00:00Z'; await run(w, T0 + 20 * MIN);   // an idle run: nothing may change
+  ok('L6 an idle run never cleans, whatever the list says', !w.deletes.length && w.store.has(first.picture.key));
+  const w2 = world(); await run(w2, T0); const f0 = (await ptr(w2)).frame; const o2 = await w2.env.R2.get(W.EARTHVIEW.HELD), h2 = await o2.json(); h2.items[0].left_at = '2026-11-01T00:00:00.000Z'; await w2.env.R2.put(W.EARTHVIEW.HELD, JSON.stringify(h2), { onlyIf: { etagMatches: o2.etag } });
+  w2.latest = '2026-11-19T11:10:00Z'; await run(w2, T0 + 10 * MIN); const h3 = await held(w2);
+  ok('L6 a picture that is previous is never deleted, even with a grace period long run out on the list; the stale mark is cleared', !w2.deletes.length && w2.store.has(f0.picture.key) && h3.find(x => x.id === f0.id).left_at === null, [w2.deletes, h3.map(x => [x.id, x.left_at])]); }
+{ // L7: defence in depth. The protocol cannot put a mark on a live picture; if one is there anyway (written here by hand), cleanup clears it and deletes nothing.
+  const w = world(); await run(w, T0); const f0 = (await ptr(w)).frame; const o = await w.env.R2.get(W.EARTHVIEW.HELD), h = await o.json(); h.items[0].deleting = '2026-11-19T11:21:30.000Z'; h.items[0].left_at = '2026-11-01T00:00:00.000Z'; await w.env.R2.put(W.EARTHVIEW.HELD, JSON.stringify(h), { onlyIf: { etagMatches: o.etag } });
+  w.latest = '2026-11-19T11:10:00Z'; const r = await run(w, T0 + 10 * MIN), h2 = await held(w); await sound(w, 'L7');
+  ok('L7 a mark found on the previous picture is cleared and the picture kept', /published/.test(r) && !w.deletes.length && w.store.has(f0.picture.key) && !h2.find(x => x.id === f0.id).deleting && h2.find(x => x.id === f0.id).left_at === null, [w.deletes, h2.map(x => [x.id, x.deleting, x.left_at])]); }
 console.log(`\nearthview-hub${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

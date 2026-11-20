@@ -53,7 +53,8 @@ const SCENES = {
   'different-frame': { say: '16:50 is listed, but the service says it served 16:40: not published', do: async () => { setClock('2026-11-19T17:15:00Z'); await runOnce('2026-11-19T16:50:00Z', 'mismatch'); } },
   'damaged-picture': { say: '16:50 is listed, but the picture received is damaged: not published', do: async () => { setClock('2026-11-19T17:15:00Z'); await runOnce('2026-11-19T16:50:00Z', 'damaged'); } },
   'dusk-published': { say: '16:50 collected and verified (the day–night line crossing Africa)', do: async () => { setClock('2026-11-19T17:25:00Z'); await runOnce('2026-11-19T16:50:00Z'); } },
-  'nothing-newer': { say: 'An hour later the source still lists the same frame', do: async () => { setClock(new RealDate(hubNow() + 3600000).toISOString()); await runOnce(); } },
+  'source-stepped-back': { say: 'The source’s list steps back: it ends at 11:00 although 16:50 is already verified (an out-of-date list)', do: async () => { setClock('2026-11-19T17:35:00Z'); await runOnce('2026-11-19T11:00:00Z'); } },
+  'nothing-newer': { say: 'An hour after 16:50 was collected the source still lists 16:50 as its newest', do: async () => { setClock('2026-11-19T18:25:00Z'); await runOnce('2026-11-19T16:50:00Z'); } },
   'checks-stopped': { say: '40 minutes pass with no source check at all', do: async () => { setClock(new RealDate(hubNow() + 2400000).toISOString()); } },
   'picture-unreachable': { say: 'The next request for a picture fails once (then use Try again on the page)', do: async () => { picDown = true; } },
 };
@@ -62,7 +63,7 @@ const page = () => `<!doctype html><meta charset="utf-8"><title>Earth from Space
 <h1>Earth from Space · local preview</h1><p><b>Fixture preview. Not live.</b> The pictures are three real EUMETSAT GeoColour frames from 19 Nov 2026 (00:00, 11:00, 16:50 UTC), served by a stand-in on this computer. The hub code is the real <code>worker.js</code> with storage in memory. Nothing here contacts EUMETSAT or Cloudflare. The hub’s clock is set by the buttons below, so ages on the page are counted from that clock, not from today.</p>
 <p><a href="/space.html" target="ev">Open the page</a> (keep it open in its own tab, then press buttons here; the page re-reads within a minute, or reload it).</p>
 <ol>${Object.entries(SCENES).map(([k, v]) => `<li><button onclick="fetch('/__scene?name=${k}').then(r=>r.json()).then(j=>{document.getElementById('o').textContent=JSON.stringify(j,null,1)})">${k}</button> ${v.say}</li>`).join('')}</ol>
-<p>Suggested order: empty → first-night → (open the page) → newer-day → check-failed → no-header → different-frame → damaged-picture → dusk-published → nothing-newer → checks-stopped.</p><pre id="o"></pre>`;
+<p>Suggested order: empty → first-night → (open the page) → newer-day → check-failed → no-header → different-frame → damaged-picture → dusk-published → source-stepped-back → nothing-newer → checks-stopped.</p><pre id="o"></pre>`;
 http.createServer(async (req, res) => {
   const u = new URL(req.url, 'http://x'), send = (code, body, type = 'application/json', extra = {}) => { res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store', ...extra }); res.end(body); };
   try {

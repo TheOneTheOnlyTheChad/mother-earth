@@ -3,6 +3,8 @@
  * Rules kept here:
  *  - Everything on the page describes the DISPLAYED picture: its source frame time, its age, its credits.
  *  - A newer verified frame never replaces the picture being looked at. One line offers it; nothing changes until the reader asks.
+ *  - "Current" is said only when a recent, successful source check listed exactly the newest verified frame AND that frame is the
+ *    one displayed. A list that ends earlier than a frame already verified is an out-of-date list, said as such.
  *  - Three facts stay apart: the hub's last source check, its last collection outcome, and the displayed frame. A failed check is
  *    said as a failed check ("whether a newer frame exists is unknown"), never as a delay at the source.
  *  - "Source frame time" is the time the service named for the frame. No scan start or end is stated: we do not hold one.
@@ -76,18 +78,20 @@
     if (metaError) lines.push(`Mother Earth’s hub could not be reached${metaAt ? ' since ' + hm(metaAt) : ''}. ${shown ? 'The picture shown is the last one loaded.' : ''}`.trim());
     if (!shown) return { head: st.loading ? 'Loading the picture…' : (m && !f) ? 'No verified picture is available' : metaError ? 'No picture could be loaded' : st.loadError ? 'The picture could not be loaded' : 'Loading…', lines: m && !f && sc && sc.ok === false ? [...lines, `We could not check the source at ${hm(sc.at)}. Whether a frame exists is unknown.`] : m && !f && col && col.outcome === 'failed' && col.frame_time ? [...lines, `A frame (${hm(col.frame_time)}) is listed, but our collection failed.`] : lines, offer };
     if (f && f.id !== shown.id && f.source_frame_time > shown.source_frame_time) offer = f;
-    if (metaError || !m) return { head: 'Showing the last picture loaded', lines, offer };
+    // The heading speaks of the DISPLAYED frame against the newest frame we have verified. What is known of the source is said
+    // in the lines beneath, separately. While a newer verified frame is on offer the heading always says so.
+    if (metaError || !m) return { head: offer ? 'Showing an earlier frame' : 'Showing the last picture loaded', lines, offer };
     const newest = sc && sc.ok ? sc.newest : null, checkAge = sc && sc.at ? (t - Date.parse(sc.at)) / 1000 : Infinity;
-    let head;
-    if (!sc) { head = 'Showing the last verified frame'; lines.push('No source check is on record.'); }
-    else if (sc.ok === false) { head = 'Showing the last verified frame'; lines.push(`We could not check the source at ${hm(sc.at)}. Whether a newer frame exists is unknown.`); }
-    else if (checkAge > CHECK_STALE_S) { head = 'Showing the last verified frame'; lines.push(`Our last check of the source was at ${hm(sc.at)}, ${ago(checkAge)}. Whether a newer frame exists is unknown.`); }
-    else if (newest > f.source_frame_time) { head = 'Showing the last verified frame';
-      lines.push(col && col.outcome === 'failed' && col.frame_time === newest ? `A newer frame (${hm(newest)}) is listed, but our collection failed. Showing ${hm(shown.source_frame_time)}.` : `A newer frame (${hm(newest)}) is listed. It has not been collected yet.`); }
-    else { head = offer ? 'Showing an earlier frame' : 'Current: the newest frame the source lists';
-      const limit = (m.limits && m.limits.waiting_s) || 2700;
-      lines.push((t - Date.parse(newest)) / 1000 < limit ? 'Waiting for the next frame.' : `The source has listed nothing newer than the ${hm(newest)} frame.`);
+    let current = false;   // true only when a recent, successful check listed exactly the newest frame we hold
+    if (!sc) lines.push('No source check is on record.');
+    else if (sc.ok === false) lines.push(`We could not check the source at ${hm(sc.at)}. Whether a newer frame exists is unknown.`);
+    else if (checkAge > CHECK_STALE_S) lines.push(`Our last check of the source was at ${hm(sc.at)}, ${ago(checkAge)}. Whether a newer frame exists is unknown.`);
+    else if (newest > f.source_frame_time) lines.push(col && col.outcome === 'failed' && col.frame_time === newest ? `A newer frame (${hm(newest)}) is listed, but our collection failed. Showing ${hm(shown.source_frame_time)}.` : `A newer frame (${hm(newest)}) is listed. It has not been collected yet.`);
+    else if (newest < f.source_frame_time) lines.push(`At ${hm(sc.at)} the source’s list ended at ${hm(newest)}, earlier than the ${hm(f.source_frame_time)} frame already verified. The list we were given was out of date. Whether a newer frame exists is unknown.`);
+    else { current = true; const limit = (m.limits && m.limits.waiting_s) || 2700;
+      lines.push((t - Date.parse(newest)) / 1000 >= limit ? `The source has listed nothing newer than the ${hm(newest)} frame.` : offer ? `The newest frame the source lists is ${hm(newest)}.` : 'Waiting for the next frame.');
       lines.push(`Source last checked at ${hm(sc.at)}.`); }
+    const head = offer ? 'Showing an earlier frame' : current ? 'Current: the newest frame the source lists' : 'Showing the last verified frame';
     return { head, lines, offer };
   }
   function render() {

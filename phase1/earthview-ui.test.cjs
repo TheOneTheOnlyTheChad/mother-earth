@@ -5,20 +5,23 @@
  *  G. nothing newer / checks stopped  H. hub unreachable; picture unreachable                       I. zoom, drag, keyboard
  *  J. narrow screens                  K. wording that must never appear; requests made               L. the pure wording table
  * Run: node phase1/earthview-ui.test.cjs
- * BREAK=auto-swap|requested-time|delay-wording|current-on-failed-check|stale-ignored|step-back|zoom-unbounded|pan-unbounded|offer-hidden|keep-on-error|contacts-source  must each fail. */
+ * BREAK=rollback-current|waiting-with-offer|offer-heading-lost|auto-swap|requested-time|delay-wording|current-on-failed-check|stale-ignored|step-back|zoom-unbounded|pan-unbounded|offer-hidden|keep-on-error|contacts-source  must each fail. */
 const { chromium } = require('playwright'); const fs = require('fs'); const path = require('path'); const { spawn } = require('child_process');
 const PORT = 8896, B = 'http://127.0.0.1:' + PORT, BREAK = process.env.BREAK || '';
 const BREAKS = {
   'auto-swap': ["if (m.frame && !st.shown && !st.loading && !(st.failed && st.failed.id === m.frame.id)) load(m.frame);", "if (m.frame && !st.loading && (!st.shown || st.shown.id !== m.frame.id)) load(m.frame);"],
   'requested-time': ["set('ev-time', full(s.source_frame_time));", "set('ev-time', full((st.meta && st.meta.collection && st.meta.collection.frame_time) || s.source_frame_time));"],
   'delay-wording': ["`We could not check the source at ${hm(sc.at)}. Whether a newer frame exists is unknown.`", "`The source is delayed.`"],
-  'current-on-failed-check': ["    else if (sc.ok === false) { head = 'Showing the last verified frame';", "    else if (sc.ok === false) { head = 'Current: the newest frame the source lists';"],
-  'stale-ignored': ["    else if (checkAge > CHECK_STALE_S) {", "    else if (false) {"],
+  'current-on-failed-check': ["    else if (sc.ok === false) lines.push(", "    else if (sc.ok === false) current = true; else if (false) lines.push("],
+  'stale-ignored': ["    else if (checkAge > CHECK_STALE_S) lines.push(", "    else if (false) lines.push("],
   'step-back': ["      if (st.meta && st.meta.frame && (!m.frame || m.frame.source_frame_time < st.meta.frame.source_frame_time)) m = { ...m, frame: st.meta.frame };   // never step back\n", ""],
   'zoom-unbounded': ["const s = Math.max(1, Math.min(maxScale(), z.s * f));", "const s = Math.max(1, z.s * f);"],
   'pan-unbounded': ["z.x = Math.max(-lim, Math.min(lim, z.x)); z.y = Math.max(-lim, Math.min(lim, z.y));", ""],
   'offer-hidden': ["off.hidden = !w.offer || !!st.loading;", "off.hidden = true;"],
   'keep-on-error': ["st.loading = null; st.loadError = `The ${hm(frame.source_frame_time)} picture could not be loaded.", "st.loading = null; st.shown = frame; st.loadError = `The ${hm(frame.source_frame_time)} picture could not be loaded."],
+  'rollback-current': ["    else if (newest < f.source_frame_time) lines.push(", "    else if (false) lines.push("],
+  'waiting-with-offer': [": offer ? `The newest frame the source lists is ${hm(newest)}.` : 'Waiting for the next frame.');", ": 'Waiting for the next frame.');"],
+  'offer-heading-lost': ["    const head = offer ? 'Showing an earlier frame' : current ?", "    const head = current ? (offer ? 'Showing an earlier frame' : 'Current: the newest frame the source lists') : false ?"],
   'contacts-source': ["  apply(); render(); read();", "  apply(); render(); read(); fetch('https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetCapabilities').catch(() => {});"],
 };
 if (BREAK && !(BREAK in BREAKS)) { console.log('FAIL unknown break ' + BREAK); process.exit(1); }
@@ -64,6 +67,7 @@ const get = p => fetch(B + p).then(r => r.json()); const scene = n => get('/__sc
     ok('C1 the picture, its time and its age are unchanged', /20261119T0000Z/.test(s.src) && s.time === '00:00 UTC, 19 Nov 2026' && /^11 hours 25 minutes ago$/.test(s.age), [s.src, s.time, s.age]);
     ok('C2 one separate line offers the newer frame', s.offer === 'A newer frame, 11:00 UTC, is available.' && s.head === 'Showing an earlier frame', s);
     ok('C3 the page does not call an earlier frame current', !/^Current/.test(s.head), s.head);
+    ok('C3b while a newer verified frame is on offer the page does not say it is waiting for one; it says what the source lists (GPT 3b)', !/Waiting/.test(s.lines.join(' ')) && s.lines[0] === 'The newest frame the source lists is 11:00 UTC.' && s.lines[1] === 'Source last checked at 11:25 UTC.', s.lines);
     await p.waitForTimeout(1500); ok('C4 and it stays that way without being asked', /20261119T0000Z/.test((await S(p)).src));
     await p.click('#ev-offer-btn'); await p.waitForFunction(() => /1100Z/.test(document.getElementById('ev-img').getAttribute('src')), null, { timeout: 15000 }).catch(() => {}); s = await S(p);
     ok('C5 on request: the newer picture, its own time and age, and the offer gone', /20261119T1100Z/.test(s.src) && s.time === '11:00 UTC, 19 Nov 2026' && s.age === '25 minutes ago' && !s.offer && s.head === 'Current: the newest frame the source lists' && /source frame time 11:00 UTC/.test(s.alt), s);
@@ -79,13 +83,21 @@ const get = p => fetch(B + p).then(r => r.json()); const scene = n => get('/__sc
     // ===== F. later frame; a fresh visit shows the newest verified frame
     await scene('dusk-published'); await reread(p); s = await S(p);
     ok('F1 once verified, 16:50 is offered', s.offer === 'A newer frame, 16:50 UTC, is available.' && s.time === '11:00 UTC, 19 Nov 2026', s);
+    { await get('/__run?latest=2026-11-19T16:50:00Z&fault=check503'); await reread(p); const x = await S(p);
+      ok('F1b an earlier frame displayed, a newer one on offer, and the source check fails: the heading still says an earlier frame is shown; the failed check is its own line (GPT 3c)', x.head === 'Showing an earlier frame' && x.offer === 'A newer frame, 16:50 UTC, is available.' && /^We could not check the source at \d\d:\d\d UTC\. Whether a newer frame exists is unknown\.$/.test(x.lines[0]), x);
+      await get('/__clock?at=2026-11-19T17:25:08Z'); await get('/__run?latest=2026-11-19T16:50:00Z'); await reread(p); }
     const p2 = await open(); const s2 = await S(p2);
     ok('F2 a new visit opens on the newest verified frame', s2.time === '16:50 UTC, 19 Nov 2026' && /1650Z/.test(s2.src) && s2.head === 'Current: the newest frame the source lists' && s2.age === '35 minutes ago', s2);
+    await scene('source-stepped-back'); await reread(p2); s = await S(p2);
+    ok('F3 the source’s list steps back to 11:00 with 16:50 verified and displayed: NOT "Current"; said as an out-of-date list (GPT 3a)', s.head === 'Showing the last verified frame' && s.lines[0] === 'At 17:35 UTC the source’s list ended at 11:00 UTC, earlier than the 16:50 UTC frame already verified. The list we were given was out of date. Whether a newer frame exists is unknown.' && !/Current|Waiting|nothing newer/.test(s.head + s.lines.join(' ')) && /1650Z/.test(s.src) && s.time === '16:50 UTC, 19 Nov 2026', s);
+    await reread(p); { const x = await S(p); ok('F3b the same list seen from the page still on 11:00: an earlier frame, 16:50 on offer, the out-of-date list said beneath', x.head === 'Showing an earlier frame' && !!x.offer && /out of date/.test(x.lines[0]) && x.time === '11:00 UTC, 19 Nov 2026', x); }
     // ===== G. nothing newer for a long time; checks stop
     await scene('nothing-newer'); await reread(p2); s = await S(p2);
     ok('G1 after the provisional limit: says what is listed, promises nothing', s.lines[0] === 'The source has listed nothing newer than the 16:50 UTC frame.' && s.lines[1] === 'Source last checked at 18:25 UTC.' && s.age === '95 minutes ago' && !/Waiting|soon|expected/i.test(s.lines.join(' ')), s);
     await scene('checks-stopped'); await reread(p2); s = await S(p2);
     ok('G2 no source check for 40 minutes: not called current; the last check time and the unknown are said', s.head === 'Showing the last verified frame' && /^Our last check of the source was at 18:25 UTC, 40 minutes ago\. Whether a newer frame exists is unknown\.$/.test(s.lines[0]), s);
+    await reread(p); { const x = await S(p);
+      ok('G3 11:00 displayed, 16:50 offered and not accepted, checks stopped: heading "Showing an earlier frame"; the stopped checks reported separately (GPT 3c)', x.head === 'Showing an earlier frame' && x.offer === 'A newer frame, 16:50 UTC, is available.' && /^Our last check of the source was at 18:25 UTC, 40 minutes ago\. Whether a newer frame exists is unknown\.$/.test(x.lines[0]) && x.time === '11:00 UTC, 19 Nov 2026', x); }
     // ===== H. hub unreachable; picture unreachable
     await p2.route('**/snapshot/earthview/meta', r => r.abort()); await reread(p2); s = await S(p2);
     ok('H1 hub unreachable: said, with the time of the last good read; the picture stays', /^Mother Earth’s hub could not be reached since \d\d:\d\d UTC\. The picture shown is the last one loaded\.$/.test(s.lines[0]) && s.head === 'Showing the last picture loaded' && /1650Z/.test(s.src) && s.time === '16:50 UTC, 19 Nov 2026', s);
@@ -140,14 +152,17 @@ const get = p => fetch(B + p).then(r => r.json()); const scene = n => get('/__sc
         return { cur: w({ frame: A, source_check: sc(true, A.source_frame_time), limits: lim }, A, T), old: w({ frame: A, source_check: sc(true, A.source_frame_time), limits: lim }, A, T + 3600e3 - 1e3),
           later: w({ frame: A, source_check: sc(true, A.source_frame_time, '2026-11-19T12:55:00Z'), limits: lim }, A, T + 3600e3), failed: w({ frame: A, source_check: sc(false) }, A, T),
           listed: w({ frame: A, source_check: sc(true, '2026-11-19T11:40:00Z'), collection: { outcome: 'failed', frame_time: '2026-11-19T11:40:00Z' } }, A, T), pending: w({ frame: A, source_check: sc(true, '2026-11-19T11:40:00Z'), collection: { outcome: 'published', frame_time: A.source_frame_time } }, A, T),
-          earlier: w({ frame: A, source_check: sc(true, A.source_frame_time), limits: lim }, O, T), none: w({ frame: null, source_check: sc(true, null) }, null, T), nocheck: w({ frame: A, source_check: null }, A, T) }; });
+          earlier: w({ frame: A, source_check: sc(true, A.source_frame_time), limits: lim }, O, T), back: w({ frame: A, source_check: sc(true, O.source_frame_time), limits: lim }, A, T), backOld: w({ frame: A, source_check: sc(true, O.source_frame_time), limits: lim }, A, T + 20 * 60e3),
+          earlierFailed: w({ frame: A, source_check: sc(false) }, O, T), earlierStale: w({ frame: A, source_check: sc(true, A.source_frame_time), limits: lim }, O, T + 3600e3), earlierListed: w({ frame: A, source_check: sc(true, '2026-11-19T11:40:00Z'), collection: { outcome: 'failed', frame_time: '2026-11-19T11:40:00Z' } }, O, T), earlierQuiet: w({ frame: A, source_check: sc(true, A.source_frame_time, '2026-11-19T12:55:00Z'), limits: lim }, O, T + 3600e3), none: w({ frame: null, source_check: sc(true, null) }, null, T), nocheck: w({ frame: A, source_check: null }, A, T) }; });
       ok('L1 current + waiting', r.cur.head === 'Current: the newest frame the source lists' && r.cur.lines[0] === 'Waiting for the next frame.' && !r.cur.offer, r.cur);
       ok('L2 a check older than 25 minutes is not "current"', r.old.head === 'Showing the last verified frame' && /Whether a newer frame exists is unknown/.test(r.old.lines[0]), r.old);
       ok('L3 a recent check, the newest frame older than the limit: "nothing newer than"', r.later.head === 'Current: the newest frame the source lists' && r.later.lines[0] === 'The source has listed nothing newer than the 11:30 UTC frame.', r.later);
       ok('L4 failed check', r.failed.lines[0] === 'We could not check the source at 11:55 UTC. Whether a newer frame exists is unknown.', r.failed);
       ok('L5 newer listed and its collection failed', r.listed.lines[0] === 'A newer frame (11:40 UTC) is listed, but our collection failed. Showing 11:30 UTC.', r.listed);
       ok('L6 newer listed, not yet collected, no failure on record for it: no failure is claimed', r.pending.lines[0] === 'A newer frame (11:40 UTC) is listed. It has not been collected yet.', r.pending);
-      ok('L7 looking at an earlier frame: offered the newer one, not called current', r.earlier.head === 'Showing an earlier frame' && r.earlier.offer && r.earlier.offer.id === 'a', r.earlier);
+      ok('L7 looking at an earlier frame: offered the newer one, not called current, and not told to wait for one', r.earlier.head === 'Showing an earlier frame' && r.earlier.offer && r.earlier.offer.id === 'a' && r.earlier.lines[0] === 'The newest frame the source lists is 11:30 UTC.' && !/Waiting/.test(r.earlier.lines.join(' ')), r.earlier);
+      ok('L7a a list that ends earlier than a verified frame is never "current"', r.back.head === 'Showing the last verified frame' && /^At 11:55 UTC the source’s list ended at 11:00 UTC, earlier than the 11:30 UTC frame already verified\./.test(r.back.lines[0]) && r.back.lines.length === 1 && r.backOld.head === 'Showing the last verified frame', r.back);
+      ok('L7b an earlier frame with a failed check, a stale check, a failed collection: the heading stays "Showing an earlier frame" and each fact has its own line', [r.earlierFailed, r.earlierStale, r.earlierListed, r.earlierQuiet].every(x => x.head === 'Showing an earlier frame' && x.offer) && /could not check/.test(r.earlierFailed.lines[0]) && /Our last check/.test(r.earlierStale.lines[0]) && r.earlierListed.lines[0] === 'A newer frame (11:40 UTC) is listed, but our collection failed. Showing 11:00 UTC.' && r.earlierQuiet.lines[0] === 'The source has listed nothing newer than the 11:30 UTC frame.', [r.earlierFailed, r.earlierStale, r.earlierListed, r.earlierQuiet]);
       ok('L8 nothing verified', r.none.head === 'No verified picture is available', r.none); ok('L9 no check on record: no claim either way', r.nocheck.head === 'Showing the last verified frame' && r.nocheck.lines[0] === 'No source check is on record.', r.nocheck); await q.context().close(); }
   } catch (e) { fail++; console.log('FAIL suite stopped on an error: ' + String(e && e.stack || e).split('\n').slice(0, 4).join(' | ')); }
   await b.close(); srv.kill();
