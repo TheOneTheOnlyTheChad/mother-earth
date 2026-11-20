@@ -1,11 +1,11 @@
 # Animals: audit A, African penguin counts
 
-20 Nov 2026 · **rev 2, complete (parts 1 and 2)** · for GPT · read-only research under brief A (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1). Chad's go: 20 Nov, his own message ("go"), taken as audit A first. Nothing built, nothing sent, no account, nothing saved to the Mac or the repository.
+20 Nov 2026 · **rev 2.1** (rev 2 passed by GPT within its scope, `reviews/2026-11-20-animals-audit-a-gpt-review.md`; rev 2.1 carries GPT's wording refinements, figures unchanged) · read-only research under brief A (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1). Chad's go: 20 Nov, his own message ("go"), taken as audit A first. Nothing built, nothing sent, no account. Claude retained no new raw working copies; Chad's downloaded ZIP remains in his Downloads.
 
 **Results**
 - **Version A (Dryad file, to 2019): usable**, for individual colony series, as a dated 2021 deposit. Public domain on its record; contents consistent with the record's notes. One caution: the author's later file revises some of its values (§6).
 - **Version B (repository file, to 2023): requires clarification** (no licence; the rule for its 0.1 markers and its unit are not written down). Its contents are internally consistent.
-- **The two files are not one series.** B is not A with four more years: 24 of the 902 colony-years they share differ (§6).
+- **The two files are not one series.** B is not a simple four-year extension of A: across the 902 colony-years they share there are **24 literal cell differences**, one of which is only a difference in how an empty cell is written (§6).
 
 ## 1. How this was done
 
@@ -77,7 +77,7 @@ The earlier two versions of the CSV were not opened. What changed at Dyer Island
 ## 4. What this means for a chart (version B)
 
 - **Individual colony series are possible, and the candidates are clear.** Fewest gaps inside the series: Robben Island and Simonstown (1 each), Mercury and Possession (3), Stony Point (6), Ichaboe and Halifax (7), Malgas (8), Dyer (9). The large colonies Dassen (11), St Croix (18) and Bird Island (14) have many gaps and would be drawn as broken series. How many gaps are acceptable for a visitor is a design choice for the build proposal; nothing is dropped here.
-- **No fixed-coverage aggregate is available that covers the population.** No colony has a count in every year from 1979. From 1989 only Malgas and Simonstown are complete; from 2004 only Malgas, Simonstown, Stony Point, Dyer and Ichaboe. Those sets are a small and unrepresentative share. **A total made by adding the cells would be wrong**, as GPT warned: this file confirms it.
+- **An available-cell sum is not a supported national or global population total.** No colony has a count in every year from 1979. From 1989 only Malgas and Simonstown are complete; from 2004 only Malgas, Simonstown, Stony Point, Dyer and Ichaboe. A consistently counted subset could be summed as that named subset; it could never stand for the population.
 - National, regional and global figures therefore exist only as the paper's model output. The repository holds those outputs (folders `AP Output/Global`, `S.Africa`, `Namibia`, `W_Coast`, `S_Coast`, `E_Cape`, each with estimate, fit and trajectory files). They are out of scope for this audit and were not opened.
 - Three cell states must stay distinct on any chart: a count, no count (NA), and the 0.1 marker. The marker is never drawn as a value.
 
@@ -124,7 +124,7 @@ The earlier two versions of the CSV were not opened. What changed at Dyer Island
 
 **For a chart from version A**
 - Individual colony series: Robben Island has no gap from 1983 to 2019; Simonstown has one; Mercury and Possession two; Ichaboe three. The three largest colonies have many gaps (Dassen 10, St Croix 18, Bird Island 13).
-- **No fixed-coverage total.** No colony is counted in every year from 1979. From 1989: Malgas, Robben Island and Simonstown only. From 2004: nine colonies (Malgas, Jutten, Vondeling, Robben Island, Simonstown, Stony Point, Dyer, Mercury, Possession), without Dassen, St Croix or Bird Island. Adding cells would be wrong for this file too.
+- **An available-cell sum is not a supported national or global total here either.** No colony is counted in every year from 1979. From 1989: Malgas, Robben Island and Simonstown only. From 2004: nine colonies (Malgas, Jutten, Vondeling, Robben Island, Simonstown, Stony Point, Dyer, Mercury, Possession), without Dassen, St Croix or Bird Island. Those could be summed as that named subset and nothing more.
 - What a chart may say: "Annual colony census: occupied nest sites (used as a breeding-pair proxy)", per colony, 1979 to 2019, gaps left open, the four markers left out, with the two countries' definitions and the 2021 deposit date.
 
 **Result for version A: usable**, with the caution in §6.
@@ -132,7 +132,7 @@ The earlier two versions of the CSV were not opened. What changed at Dyer Island
 ## 6. The two files compared
 
 - Colonies: all 22 of A's are in B under the same names. B adds four: De Hoop, Pomona, Plumpudding, Sinclair.
-- Shared colony-years (22 colonies, 1979 to 2019): **902. Identical: 878. Different: 24.**
+- Shared colony-years (22 colonies, 1979 to 2019): **902. Identical cells: 878. Literal cell differences: 24** (23 differences of value or state, and one of spelling only).
 
 | Kind of difference | Number | Where |
 |---|---|---|
@@ -140,10 +140,22 @@ The earlier two versions of the CSV were not opened. What changed at Dyer Island
 | A count in A, no count in B | 3 | Vondeling 2019 (112); Mercury 2018 (2,500); Possession 2016 (990) |
 | No count in A, a count in B | 7 | Stony Point 1987 (41); Seal Island Algoa Bay 1979 (26); Stag Island 1981 (23); Bird Island 1979 (314) and 2002 (4,459); Ichaboe 1979 (4,200) and 2016 (444) |
 | A's 0.1 marker, no entry in B | 1 | Lamberts Bay 2019 (B's marker is at 2023) |
-| Empty cell in A, NA in B | 1 | Seal Island Algoa Bay 2003 (the same state, written differently) |
+| Empty cell in A, NA in B | 1 | Seal Island Algoa Bay 2003. The same state written differently; not a new value |
 
 - Values are given as "A → B". Why they differ is not stated in either source and is not guessed here. Most are Namibian colonies and recent years.
-- **Consequences.** (1) The files cannot be joined; that rule now rests on evidence. (2) A chart from A shows the 2021 deposit as it stood, and should say that a later version by the same authors revises some values. (3) Which version the authors regard as current for the shared years is a fair question for them; the enquiry draft's request for "any corrected version" covers it.
+- The differences are not called corrections: neither source says which value is right. The Lamberts Bay marker is described by where it sits in each file, with no reason inferred.
+- **Consequences.** (1) The files cannot be joined; that rule now rests on evidence. (2) B's numbers are never shown under A's licence. (3) A chart from A says which version it uses (below). (4) Which version the authors recommend for the shared years is a fair question for them; the enquiry draft's request for "any corrected version" covers it, and GPT's optional extra sentence is noted in that draft.
+
+**Chart note for a chart built from A (GPT's wording, adopted for the later build proposal)**
+
+> Historical census data from the 2021 deposit, ending in 2019. The authors' later analysis file extends to 2023 and differs in some overlapping entries. This chart uses the earlier deposit throughout.
+
+- Both sources are linked in the card's details, with a line that the later file's public-display terms are being clarified, if that is still true at release. The chart is never labelled "latest".
+- A colony whose own values differ between the files says so in its details. A colony with no differences (Robben Island, for one) carries no such warning.
+- The note does not replace reading a published correction or withdrawal if one is found later.
+- "Usable" means a faithful, dated view of that deposit. It is not the latest population evidence and does not validate every historical census. An increase at one colony does not show recovery of the species. A slope is never computed by the page and shown as the source's trend.
+
+**Before a build relies on this audit:** the parser and checks used here (the three cell states; empty cell treated as no count; markers left out; gaps counted between first and last count) are to be kept as a reproducible script with its own tests, in the build proposal. Raw inputs still stay out of the public repository.
 
 ## 7. Not done, not claimed
 

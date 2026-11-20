@@ -1,6 +1,6 @@
 # Animals: penguin enquiry, draft
 
-20 Nov 2026 · rev 2 (GPT's round 3 replacement, adopted with small changes) · **DRAFT. NOT SENT.** For GPT, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. This is a new enquiry about penguins; it is separate from the NOAA enquiry (sent) and the ATAP enquiry (contact established, response pending), and changes neither.
+20 Nov 2026 · rev 2 (GPT's round 3 replacement, adopted with small changes; passed by GPT as ready for Chad's decision) · rev 2.1 adds one optional sentence below, the draft itself unchanged · **DRAFT. NOT SENT.** For GPT, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. This is a new enquiry about penguins; it is separate from the NOAA enquiry (sent) and the ATAP enquiry (contact established, response pending), and changes neither.
 
 ## Who
 - **Proposed recipient:** Dr Richard Sherley, through a professional contact route Chad verifies as current. He is the corresponding author on the Dryad record, the owner of the repository and a named provider of the Robben Island tracking datasets. One message to one person.
@@ -32,6 +32,14 @@
 >
 > Ta,
 > Chad
+
+## Optional addition (GPT, after audit A, 20 Nov; Chad's choice; not in the draft above)
+
+After the paragraph about the repository file, one more sentence could be added:
+
+> We also found differences in overlapping colony-years between the 2021 Dryad deposit and the later repository input. Is the repository version the one you recommend for historical counts as well?
+
+The full list of differences is in `PENGUIN-COUNTS.md` §6 and is not attached unless he asks. A properly labelled chart from the 2021 deposit does not wait for his answer.
 
 ## Notes for the reviewer
 - Changes from GPT's wording: the site address added in the first paragraph, as GPT asked; "to guidance" and "or generalisation" for grammar. Nothing else.
