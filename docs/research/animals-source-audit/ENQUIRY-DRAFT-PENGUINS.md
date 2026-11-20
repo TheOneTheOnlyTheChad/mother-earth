@@ -1,51 +1,40 @@
 # Animals: penguin enquiry, draft
 
-20 Nov 2026 · rev 1.1 (after the Dryad record and the tracking database's terms were read in full) · **DRAFT. NOT SENT.** For GPT review, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. This is a new enquiry about penguins; it is separate from the NOAA enquiry (sent) and the ATAP enquiry (contact established, response pending), and changes neither.
+20 Nov 2026 · rev 2 (GPT's round 3 replacement, adopted with small changes) · **DRAFT. NOT SENT.** For GPT, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. This is a new enquiry about penguins; it is separate from the NOAA enquiry (sent) and the ATAP enquiry (contact established, response pending), and changes neither.
 
 ## Who
-- **Proposed recipient:** Dr Richard Sherley (University of Exeter), corresponding author on the Dryad record `10.5061/dryad.vx0k6djp7` and a named provider of the Robben Island tracking datasets. One message to one person; he is asked to name the right contact for anything that is not his to answer.
-- **Address:** Chad takes it from the Dryad record or the university's page. No address is written in this repository.
-- **Before sending, Chad confirms:** the two sentences marked [CHAD] about how the site is funded and what may change.
+- **Proposed recipient:** Dr Richard Sherley, through a professional contact route Chad verifies as current. He is the corresponding author on the Dryad record, the owner of the repository and a named provider of the Robben Island tracking datasets. One message to one person.
+- **No address is written in this repository.**
+- **This first message is about routing and permission.** It does not replace the tracking database's formal request or any co-owner's conditions.
 
-## Why one message with two separate questions
-The counts and the tracks have different owners and different rules. Keeping them as questions 1 and 2 lets him answer one without the other.
+## What changed from rev 1.1
+- The 2023 counts are already public in the paper's linked repository (`rbsherley/AP_IUCN_CR`, `Afr_penguin_2023_JARAinput.csv`). The message no longer asks where the data are. It asks about reuse terms, corrected versions and interpretation.
+- Removed: the statement that a paid tier is possible. That was Claude's assumption, not a fact Chad had stated for this message. Funding and intended use are Chad's to state, from verified facts, at the formal request.
+- Removed: "give the data to no one else", which contradicted public delivery.
+- Public delivery to browsers, and that visitors can retrieve the values, is stated outright.
+- No promise of the author's review or control over the page, and none about copies visitors may have saved.
 
 ## Draft
 
-> Subject: African penguin counts (1979–2023) and a Robben Island track for a public educational page
+> Subject: African penguin count data and one historical journey for Mother Earth
 >
-> Dear Dr Sherley
+> Dear Dr Sherley,
 >
-> I run Mother Earth, a public website that shows observations of the planet with their sources, dates and limits on screen (https://theonetheonlythechad.github.io/mother-earth/). I am preparing a page on animal movement and populations, and I would like the African penguin on it to be shown from the evidence, in your terms, not from press figures.
+> I run Mother Earth, a public website presenting planetary observations with their sources, dates and limitations (https://theonetheonlythechad.github.io/mother-earth/). I am developing an Animals page and would like to include an African penguin population chart and, separately, one historical journey.
 >
-> I have two separate questions.
+> We found the dataset and analysis outputs linked from your 2024 Ostrich paper in rbsherley/AP_IUCN_CR, including Afr_penguin_2023_JARAinput.csv. Could you confirm the terms for charting those counts and serving the selected values publicly to visitors' browsers? Please also point us to any corrected version, and to guidance on the model-anchor values, missing counts and the appropriate unit. We would keep recorded counts separate from model estimates and cite the paper and the data version.
 >
-> 1. The count series. Your Dryad record (doi 10.5061/dryad.vx0k6djp7) holds the 1979–2019 counts, and your 2024 paper in Ostrich extends the series to 2023 across 26 colonies.
->    I have read the record's methods and usage notes: occupied nests at 18 South African and 4 Namibian colonies, NA for years without a count, and the 0.1 anchors at four colonies, which I will leave out. I plan to chart that file as it stands, to 2019, under its public-domain dedication.
->    - Are the counts to 2023 deposited anywhere, or could they be shared, with the citation you would want used? I would not join them to the 2019 file unless you tell me the colonies and methods allow it (26 colonies against 22).
->    - May a public page chart them by year (South Africa and Namibia separately if the data support it), with the values present in the page so the chart can be drawn?
->    - Is the series updated each year, and by whom?
->    - Is there anything in how I describe the unit that you would correct: "occupied nests, taken as breeding pairs, counted differently in South Africa and Namibia"?
+> For movement, would one of the original Robben Island GPS datasets, or juvenile dispersal dataset 1269, be suitable? We would prefer recorded fixes, apply any agreed omissions or generalisation, and use the formal Seabird Tracking Database request process as required.
 >
-> 2. One track, only if you think it appropriate. The Seabird Tracking Database lists your Robben Island datasets: 2213 (2008–2019, interpolated, with duplicate tracks), the raw 2011–2013 sets it supersedes (1444, 1445, 1446), and the juvenile dispersal dataset (1269).
->    - Would you consider a request to show one bird's track on the page, and which dataset would you point me to? My preference is recorded fixes, shown as recorded fixes; if only the interpolated set is suitable I would label it as interpolated.
->    - Is there anything that should be left out or generalised, given the colony and the current fishing-closure work?
->    - I understand a request must go through the database and its owners, and that its terms do not allow data to be passed on. A web page cannot draw a track without the visitor's browser receiving the positions, so I would say that plainly in the request. If that rules it out, I would rather know now.
->    - I have not made a request and will not until I hear from you.
+> The prepared coordinates would be publicly retrievable, because the visitor's browser receives them to draw the journey. Could any permission explicitly cover that delivery, and what credit and conditions would apply? If that is unsuitable, a generalised product may be a better option.
 >
-> What I would do with anything you agree to: prepare a small display file from it, serve that file from the website, and show your citation, the licence or conditions, the dates and what was changed. I would give the data to no one else in any other form. I am glad to show you the page before it is public and to take it down if you ask.
+> Could you also state any non-commercial condition? I would confirm our funding and intended use before making the formal request. If someone else should answer either question, I would appreciate the appropriate contact.
 >
-> About the project: [CHAD] it is free to view, carries no advertising and earns nothing; I pay for it myself. [CHAD] I cannot promise it will always be non-commercial, because a small paid tier is possible later. If your conditions require non-commercial use, please tell me and I will treat that as a condition, not work around it.
->
-> If any of this belongs with someone else (DFFE, BirdLife South Africa, a co-author), I would be grateful for the name.
->
-> Ta
+> Ta,
 > Chad
 
 ## Notes for the reviewer
-- Rev 1.1: the record's methods, usage notes and "Public domain" label were read on 20 Nov (proposal §0b), so the draft no longer asks what the 2019 values mean; it states the plan and invites correction. A first chart does not wait on this message.
-- Rev 1.1: the tracking database's terms forbid passing data to third parties and define a commercial request to include revenue use by a non-profit. The draft now states that a display file reaches visitors' browsers, so the owner can refuse on that ground at the start.
-- It does not commit the project to non-commercial use (GPT's correction of 19 Nov, carried over).
-- It names dataset ids from the database's public listing as read on 20 Nov 2026; nothing was downloaded and no account exists.
-- The fishing-closure sentence is there because foraging areas around the colony are the subject of a current dispute; the recipient is best placed to say what is sensitive.
-- Not included on purpose: any conservation category, population figure or decline percentage. Those are his to state.
+- Changes from GPT's wording: the site address added in the first paragraph, as GPT asked; "to guidance" and "or generalisation" for grammar. Nothing else.
+- A chart from the 2019 Dryad file (public domain on its record) does not wait on this message.
+- If project funding or use later changes, any conditions then in force would need reassessing. That is a note for us, not a promise in the message.
+- Not included on purpose: any conservation category, population figure or decline percentage.
