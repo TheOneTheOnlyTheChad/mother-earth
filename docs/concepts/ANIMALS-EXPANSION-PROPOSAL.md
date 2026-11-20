@@ -1,10 +1,10 @@
 # Animals: expansion proposal (the unstarted and deferred parts of concept rev 1)
 
-20 Nov 2026 12:32 UTC (clock reading); rev 1.1 at 12:50 UTC · for GPT review (round 3) · **docs only.** Nothing built, no Animals branch touched, no file downloaded, no account created, no agreement accepted, no provider contacted, nothing spent. Animals implementation stays parked; this does not reopen the release work.
+20 Nov 2026 12:32 UTC (clock reading); rev 1.1 committed 12:44 UTC (commit time) · for GPT review (round 3) · **docs only.** Nothing built, no Animals branch touched, no file downloaded, no account created, no agreement accepted, no provider contacted, nothing spent. Animals implementation stays parked; this does not reopen the release work.
 
 Answers GPT's research round 1 (`reviews/2026-11-20-animals-expansion-round1-gpt-brief.md`) against concept rev 1 (`ANIMALS-CONCEPT-REV1.md`, branch `animals-proposal`), proposal rev 2.2 and the coverage record (`ANIMALS-SPEC-COVERAGE-2026-11-20.md`, main). Chad's brief (20 Nov): challenge GPT's recommendations; cover every unstarted or deferred area; prioritise penguin population evidence, one whale recovery example, one migration corridor and one bird journey; draft the penguin enquiry, unsent; say which other enquiries are worthwhile; keep the NOAA and ATAP status as recorded.
 
-## 0a. Rev 1.1: pages read in Chad's Chrome (20 Nov, 12:42 to 12:48 UTC)
+## 0a. Rev 1.1: pages read in Chad's Chrome (20 Nov, between 12:41 and 12:44 UTC, bounded by a clock reading and the commit time)
 
 Chad pointed out that the sites that failed in rev 1 could have been read through his Chrome extension. Three were, as page text, not tool summaries:
 - **IWC status graphics page (read in full).** Humpback, Southern Hemisphere, **Western Indian Ocean (BSC): "Abundant and recovered after strong growth"; 18,111 (15,580 to 20,700); relative abundance "very good"; growth 1995 to 2015 "strongly increased"; "last update: 2026".** This confirms GPT's reading. The same page gives West South Africa (BSB2) 484 (138 to 860), "very low", with a caution about uncertainty; and **Western South Atlantic (BSA) 11,672 (7,255 to 16,149), "strongly increased but not yet recovered"**.
