@@ -1,6 +1,6 @@
 # Animals: the Animals tab with its own globe and journey toggles, and the bird journey (waved albatross, Galápagos)
 
-20 Nov 2026 · **rev 3** · for GPT · **docs only.** Rev 3 adds Part A on Chad's design instruction of 20 Nov (his own messages): the journey globe, the journey toggles and the replay move to the Animals tab, and the journey controls leave Earth now. He stated: "This is a docs-only design instruction, not a build or deployment go." Part B is rev 2.1 of the bird proposal (rev 2 PASSED by GPT at proposal level, `reviews/2026-11-20-animals-bird-build-proposal-rev2-gpt-review.md`), changed only where the page design touches it; those places are marked "rev 3". Nothing built, no code branch cut, nothing sent. The Earth from Space probe and its files are untouched.
+20 Nov 2026 · **rev 3.1** (rev 3 PASSED by GPT at design and proposal level, `reviews/2026-11-20-animals-tab-proposal-rev3-gpt-review.md`; rev 3.1 adds §A7, GPT's clarifications, which correct T2, T4, T6, T8, T13, T15 and T16, and changes nothing else) · **docs only.** Rev 3 adds Part A on Chad's design instruction of 20 Nov (his own messages): the journey globe, the journey toggles and the replay move to the Animals tab, and the journey controls leave Earth now. He stated: "This is a docs-only design instruction, not a build or deployment go." Part B is rev 2.1 of the bird proposal (rev 2 PASSED by GPT at proposal level, `reviews/2026-11-20-animals-bird-build-proposal-rev2-gpt-review.md`), changed only where the page design touches it; those places are marked "rev 3". Nothing built, no code branch cut, nothing sent. The Earth from Space probe and its files are untouched.
 
 Rev 2 replaces rev 1 in full. GPT held rev 1 (`reviews/2026-11-20-animals-bird-build-proposal-gpt-review.md`) on two design points, both right: **the 5 ms timestamp rule fails on the pinned file**, and **omitting colony-area fixes by deletion alone would make the replay say false things**. §12 lists what rev 1 got wrong.
 
@@ -90,6 +90,40 @@ Alternative: both in one candidate. Faster, larger review.
 - T16. Widths 360, 390, 720, 1100, 1280 and 1470 px: no overflow; the switches, the bar and the cards do not cover the globe beyond the agreed share; every switch stays operable.
 - T17. No WebGL: the page says the journey needs the 3-D globe; switches do not pretend to work; the cards and study content remain readable.
 - T18. The replay line, gap wording and marker behaviour of the three existing journeys are unchanged from the passed preview (the earlier J-criteria, rerun on the new page).
+
+## A7. Clarifications from GPT's pass of rev 3 (rev 3.1; binding on the build, checked at candidate review; where they differ from A3 or A6, these govern)
+
+**Controls**
+- Labelled switches are accepted (GPT's design judgement; not something the W3C patterns prescribe). The group is labelled, with the visible guidance "Animal journeys — one at a time" associated with the controls.
+- Each switch's accessible label stays the same; state text changes separately. Tab reaches each switch; Space and Enter operate it. No radio-group role and no arrow-key behaviour.
+- Focus stays on the activated switch, including while its load completes or fails.
+- **Loading counts as selected:** when B is pressed, B reads on while loading, and A is unchecked and cancelled at once.
+- **Failure policy:** if B fails, B returns to off and the error and Retry stay on B's card. Retry selects B through the same exclusive path, cancelling whatever else is selected. A is never restored automatically.
+- Announce the user's change and the meaningful completion or failure, once each; nothing per frame.
+
+**Backdrop (A-D1 option A, with a fallback)**
+- The same imagery selection and date logic as Earth now, through a small shared or isolated imagery component. The Earth now application and its collectors are not loaded to get a texture.
+- It is dated NASA GIBS VIIRS imagery chosen from a UTC date offset, not a guaranteed live or complete picture. Line on the page: "Backdrop: NASA satellite imagery for [date], not the journey dates." The existing caveat about dark or missing areas is kept.
+- **If the imagery request fails:** a plain globe with the coastline, the words "satellite backdrop unavailable", and journeys still usable. The date line is never left claiming imagery that is not shown.
+- Neither backdrop shows ground conditions at the journey's dates. No background layer suggests dates matched to the animal.
+
+**Build order (A-D2)**
+- Two reviewed stages on one branch, each kept as a named commit so the two can be compared. A passed stage is still a private candidate. The parked branch is not retired because the new build has started.
+- Stage 1's "builders unchanged" applies to the move. Stage 2 changes the GPS builder as Part B proposes.
+
+**Corrections to the T-criteria**
+- **T2 and T15, network.** "Nothing fetched beyond the page itself" was wrong. Allowed at load: the page's own assets, the pinned renderer from its CDN, the imagery, and the catalogue and manifests the cards need. **No journey coordinate file is requested before its switch is switched on.** Allowed library and imagery origins are listed in the packet. No request to the hub for any live layer.
+- **T4 and T18, shown is not the same as marker visible.** At Stage 2 the bird opens inside its first withheld span: switch on, replay bar visible, marker and accuracy hidden, the withheld message shown. T4 does not demand a marker at once. T18 keeps the old journeys' observable fix and gap behaviour; it does not keep Earth now scaffolding.
+- **T6, races.** "Only C is drawn" means no superseded response draws. A journey that finished loading before the next click is not a failure. Also tested: on then off while loading; A, B, A; Retry on one animal while another is selected; switch-off before a late response. Every object type, the playback timer and any stale camera callback are checked, not only the marker.
+- **T8, failure scope.** A bad manifest or display file affects that journey only; another verified journey stays usable. **A bad shared catalogue is global:** no journey from it can be trusted. All cards stay readable under one integrity error, and a valid retry recovers. The catalogue check is never bypassed to keep an error "on that card only".
+- **T13, Earth now comparison.** The baseline is the exact main commit merged into the branch, named in the packet, not "today's main". The packet lists the entry files and shared dependencies compared, and checks shared CSS and helpers for effects on Earth now and the other pages. The journey catalogue and data files stay in the project for the Animals page; that is not Earth now integration.
+- **T14, lifecycle.** Also: playback pauses when the tab is hidden; resize and orientation change leave the controls usable and the globe correct.
+- **T16, layout.** On narrow screens the controls and cards sit below the globe and may cover none of it. The Stage 1 packet states the actual desktop and mobile overlap targets. Checked: the page scrolls to every switch; controls stay usable when the canvas changes size; reduced-motion is respected; no auto-play and no needless continuous camera motion on entry.
+- **T17, no globe.** Also a failed renderer or library load, and a lost graphics context after load. Cards, source facts and an explanation of the selected state remain.
+
+**Links.** Existing links target the animal's switch on the Animals page without switching it on. The old private `index.html#journey=` link is simply retired.
+
+**Part B.** The bird's timestamp, spatial filter, source pins, accuracy, join and withheld-period rules stay passed; no new source audit. §11a still applies.
 
 # PART B — THE BIRD (rev 2.1, PASSED by GPT at proposal level; rev 3 changes marked)
 
@@ -253,8 +287,8 @@ Nothing is thinned, smoothed, interpolated or reordered. No coordinate of a reta
 | D2 colony-area fixes | A: withhold within 5 km of the tagging-site reference point, with the replay contract in §5 · B: show all · C: generalise | A |
 | D3 accuracy per displayed fix | yes · no | yes |
 | D4 base | own branch from `animals-journeys-preview-rc` with current main merged, private preview, then a candidate review | yes |
-| A-D1 backdrop of the Animals globe (rev 3) | A: the daily satellite picture Earth now uses, with its date stated · B: plain globe with coastline | A (Claude; GPT not yet asked) |
-| A-D2 build order (rev 3) | two reviewed stages: move the three journeys, then add the bird · or one candidate | two stages (Claude; GPT not yet asked) |
+| A-D1 backdrop of the Animals globe (rev 3) | A: the daily satellite picture Earth now uses, with its date stated · B: plain globe with coastline | A, with the plain-globe fallback of §A7 (Claude and GPT) |
+| A-D2 build order (rev 3) | two reviewed stages: move the three journeys, then add the bird · or one candidate | two stages (Claude and GPT) |
 
 Already decided by Chad (20 Nov): the globe, toggles and replay live on the Animals tab; toggles replace the dropdown; one journey at a time; the journey controls leave Earth now.
 
