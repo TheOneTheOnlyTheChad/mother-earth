@@ -17,3 +17,17 @@ Every response carried `Warning: 99 Nearest value used: time=<T>.000Z ISO8601 (m
 | night.png | 2026-11-19T00:00:00Z | 117,319 | ad76111e135cdd8e64c154d80de275e12ed41df801dac549c5e177ab325aa32c |
 | dusk.jpg | 2026-11-19T16:50:00Z | 654,042 | 3af704935eae9da360aa2a47adcb8c1faa66ab202ad6d52db8af8f6f5a1d3fbe |
 | dusk.png | 2026-11-19T16:50:00Z | 130,041 | 69c2ca8bac23583ed1e256a33dd8dbb562f4caf39a042b4b1f703d9f02e58b88 |
+
+## Derived 1,536 px inputs (not as served)
+
+`day-1536-derived.jpg`, `night-1536-derived.jpg`, `dusk-1536-derived.jpg` are the three frames above **resized here** to 1,536 px (Pillow 12.3.0,
+Lanczos, progressive JPEG, quality 88, 4:2:0) on 20 Nov 2026. They are not what EUMETView returns for a 1,536 px request. They are used only
+by `phase1/evprobe.test.mjs` and the local workerd run, to exercise the probe's code path at that size. Evidence about EUMETView's own
+1,536 px rendering is in `reviews/evidence/2026-11-20-earth-from-space-probe/validation-1536-real-frames.json` (six real frames, validated
+in the browser pane; no picture saved).
+
+| File | From | Bytes | sha256 |
+|---|---|---|---|
+| day-1536-derived.jpg | day.jpg | 595,064 | 4625662042f293b6585de7939d924900afa1bf56da8296bc3015613ec81b9651 |
+| night-1536-derived.jpg | night.jpg | 494,972 | 335bc3e2a81ea1425047c976b382e1eb729523ded274270019a80386da91928d |
+| dusk-1536-derived.jpg | dusk.jpg | 577,801 | f219f6ec295fe930ee4a4585753c32a48e354a38955e0271724b39940fbf3364 |

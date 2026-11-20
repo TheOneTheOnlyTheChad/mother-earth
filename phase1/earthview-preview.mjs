@@ -38,11 +38,13 @@ const R2 = {
   async put(k, v, o = {}) { const cur = store.get(k), c = o.onlyIf; if (c && c.etagDoesNotMatch === '*' && cur) return null; if (c && c.etagMatches && (!cur || cur.etag !== c.etagMatches)) return null;
     const b = typeof v === 'string' ? Buffer.from(v) : Buffer.from(v.buffer ? v.buffer.slice(v.byteOffset || 0, (v.byteOffset || 0) + v.byteLength) : v); const e = { b, etag: 'e' + (++seq) }; store.set(k, e); return { key: k, etag: e.etag }; },
   async get(k) { const e = store.get(k); if (!e) return null; return { etag: e.etag, async arrayBuffer() { return e.b.buffer.slice(e.b.byteOffset, e.b.byteOffset + e.b.byteLength); }, async json() { return JSON.parse(e.b.toString('utf8')); }, async text() { return e.b.toString('utf8'); } }; },
-  async head(k) { const e = store.get(k); return e ? { size: e.b.length, etag: e.etag } : null; }, async delete(k) { store.delete(k); }, async list() { return { objects: [...store.keys()].map(key => ({ key })), truncated: false }; },
+  async head(k) { const e = store.get(k); return e ? { size: e.b.length, etag: e.etag } : null; }, async delete(k) { store.delete(k); }, async list({ prefix = '' } = {}) { return { objects: [...store.keys()].filter(k => k.startsWith(prefix)).sort().map(key => ({ key, size: store.get(key).b.length })), truncated: false }; },
 };
 const stmt = sql => { const x = a => ({ async run() { if (/INSERT INTO collector_runs/.test(sql)) runs.push({ layer: a[0], at: a[1], status: a[3], http: a[4], note: a[7] }); return {}; }, async first() { return null; }, async all() { return { results: [] }; } }); return { bind: (...a) => x(a), ...x([]) }; };
 const env = { R2, DB: { prepare: stmt, async batch() { return []; } }, ADMIN_KEY: 'preview', EARTHVIEW_ENABLED: '1' };
-const runOnce = async (l, f) => { if (l) latest = l; fault = f || 'none'; try { return await W.JOBS.earthview(env, hubNow()); } finally { fault = 'none'; } };
+// The collector never creates its own storage records: they are set up the way production's will be (hold, recover as a first start, release).
+const setUp = async () => { if (store.has(W.EARTHVIEW.POINTER)) return; await W.evAdmin(env, 'hold', true, null); const d = await W.evAdmin(env, 'recover', false, null); await W.evAdmin(env, 'recover', true, d.body.plan_id); await W.evAdmin(env, 'release', true, null); };
+const runOnce = async (l, f) => { await setUp(); if (l) latest = l; fault = f || 'none'; try { return await W.JOBS.earthview(env, hubNow()); } finally { fault = 'none'; } };
 // Scenes: each is a short script of clock settings and collector runs, so a reviewer can put the page in a known state with one click.
 const SCENES = {
   'empty': { say: 'Nothing collected yet', do: async () => { reset(); setClock('2026-11-19T00:25:00Z'); } },

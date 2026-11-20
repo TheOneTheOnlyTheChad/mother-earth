@@ -1,5 +1,8 @@
 # Earth from Space — release-readiness proposal (rev 2, for GPT)
 
+> **Note, 20 November 2026.** GPT reviewed this rev 2 (`reviews/2026-11-20-earth-from-space-readiness-rev2-gpt-review.md`). **Section 1.2's Stage A (configuration, workload, criteria) and all of section 2 (recovery) are superseded** by `reviews/2026-11-20-earth-from-space-probe-and-recovery.md`, where the probe is a built file and the recovery design is built and tested. Corrections GPT gave for Stage B and for section 3's table are accepted and listed in that packet's section C; they are not yet edited into the text below. Known errors below: manual runs do not have the scheduled 15-minute limit; the slot counts (72 runs, 216 requests, six phase 2 runs a size) are 70, 210 and five; G5 does not catch every coordinated rollback.
+
+
 20 Nov 2026. Asked for by Chad on 20 Nov after GPT's pass of the private candidate (`earth-from-space-rc` `9f350bc`, review filed as `reviews/2026-11-20-earth-from-space-r3-gpt-review.md`). Rev 1 was `f1ee413`. **Rev 2 answers GPT's review of rev 1, as Chad relayed it on 20 Nov** (five points; section 6 lists what changed). GPT's own review file was not found in the Mac folders Claude can read, so rev 2 works from the relayed points.
 
 **This is a proposal. Nothing in it has been done in production and it requests no approval.** No production change, spending or provider contact is authorised. The candidate's code is unchanged since `9f350bc`; this commit changes documents only. GPT's R3 pass of the candidate stands.

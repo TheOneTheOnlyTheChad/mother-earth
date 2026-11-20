@@ -1,0 +1,19 @@
+// Earth from Space, Stage A probe Worker. REFERENCE CONFIGURATION for review: nothing is deployed from this file without Chad's own
+// Approve line, and every value below is read back from the dashboard after the upload (see the packet's checklist).
+{
+  "name": "mother-earth-evprobe",
+  "main": "evprobe.js",
+  // The hub's own values, read from its Settings page on 20 Nov 2026 (about 09:00 UTC): date 2026-10-30, no compatibility flags.
+  "compatibility_date": "2026-10-30",
+  "compatibility_flags": [],
+  // No way in: no workers.dev address, no version (preview) addresses, no routes, no custom domains.
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [],
+  // No bindings of any kind: no r2_buckets, d1_databases, kv_namespaces, services, vars, secrets.
+  "triggers": { "crons": ["*/10 * * * *"] },
+  // Cloudflare ends an invocation that uses more CPU than this.
+  "limits": { "cpu_ms": 10000 },
+  // Workers Logs for this script: the probe's own lines and Cloudflare's invocation log (outcome, CPU time, wall time), every invocation.
+  "observability": { "enabled": true, "head_sampling_rate": 1, "logs": { "enabled": true, "invocation_logs": true, "head_sampling_rate": 1 } }
+}
