@@ -1,12 +1,97 @@
-# Animals: bird journey build proposal (waved albatross, Galápagos)
+# Animals: the Animals tab with its own globe and journey toggles, and the bird journey (waved albatross, Galápagos)
 
-20 Nov 2026 · **rev 2.1** (rev 2 PASSED by GPT at proposal level, `reviews/2026-11-20-animals-bird-build-proposal-rev2-gpt-review.md`; rev 2.1 adds §11a, GPT's implementation clarifications, and changes nothing else) · **docs only.** On Chad's go of 20 Nov for the docs-only proposal ("This authorises the bird proposal only. No implementation or deployment yet."). Nothing built, no code branch cut, nothing sent. The Earth from Space probe and its files are untouched.
+20 Nov 2026 · **rev 3** · for GPT · **docs only.** Rev 3 adds Part A on Chad's design instruction of 20 Nov (his own messages): the journey globe, the journey toggles and the replay move to the Animals tab, and the journey controls leave Earth now. He stated: "This is a docs-only design instruction, not a build or deployment go." Part B is rev 2.1 of the bird proposal (rev 2 PASSED by GPT at proposal level, `reviews/2026-11-20-animals-bird-build-proposal-rev2-gpt-review.md`), changed only where the page design touches it; those places are marked "rev 3". Nothing built, no code branch cut, nothing sent. The Earth from Space probe and its files are untouched.
 
 Rev 2 replaces rev 1 in full. GPT held rev 1 (`reviews/2026-11-20-animals-bird-build-proposal-gpt-review.md`) on two design points, both right: **the 5 ms timestamp rule fails on the pinned file**, and **omitting colony-area fixes by deletion alone would make the replay say false things**. §12 lists what rev 1 got wrong.
 
 **What this proposes:** add one recorded bird to the parked Animals journey replay, as a private preview first: waved albatross `3275-30662`. Label (accepted by GPT): "Recorded movements of one breeding adult, 23 June to 15 September 2008."
 
 **Source basis:** audit D, `docs/research/animals-source-audit/BIRD-JOURNEY.md` rev 1.2, closed by GPT.
+
+# PART A — THE ANIMALS TAB (rev 3; applies to every journey, not only the bird)
+
+## A1. Chad's instruction (20 Nov, his own words, in two messages)
+
+- "one Animals header tab alongside Sun/Moon, with labelled animal toggles like the Mother Earth front-page layer switches."
+- "Only one animal journey is active at a time. Switching another on switches the previous one off. Use these toggles instead of the journey dropdown chooser."
+- "put the animal globe, journey toggles and replay on the Animals tab."
+- "Keep Earth now focused on its existing observations; remove the Animals journey controls from it in this proposed design."
+- "The Animals page should contain its globe, cards grouped Land/Sea/Air, and labelled toggles."
+- "Keep everything in the same Animals feature."
+
+## A2. What the parked build does today (read from `animals-journeys-preview-rc`, code `f00a330`)
+
+- The header already has one Animals tab: Earth now · Timeline · Moon · Sun · Animals. **No tab is added or removed by this design.**
+- The Animals page (`animals.html`) is a page of study cards with **no globe**. Each card links to `index.html#journey=<id>`.
+- The replay lives on **Earth now**: one card "Animal journey" with a single switch (`#tgl-journey`), a **dropdown** (`#journey-choose`) to pick the animal, the replay bar, a row in the Layers panel, an entry in the Key, and the script `animals-journey.js`. It draws on the Earth now globe, over that page's daily satellite picture, beside the live layers.
+- GPT's pass of the private preview was of that arrangement.
+
+## A3. The design
+
+**Header.** Unchanged: one Animals tab beside Moon and Sun.
+
+**The Animals page holds everything.**
+- **Its own globe**, the same globe library and pinned version as Earth now. No live layer, no day/night line, no search, no zoom-out sky view, no Layers panel. It exists to show one recorded journey.
+- **Journey toggles grouped Land · Sea · Air.** One labelled switch per animal, the same component as the front-page layer switches (a button with `role="switch"`, `aria-checked`, a visible label, described by its card's evidence line). Labels as the catalogue gives them, with the years: "Plains zebra, animal Z3866 (2007–2008)", "White shark, tag 118845 (2012–2013)", "False killer whale, tag 98364 (2013–2014)", and with Part B "Waved albatross, animal 3275-30662 (2008)".
+- **Cards**: each animal's card carries its toggle, its state line (off · loading · shown · could not be verified · failed, with Retry), its evidence type and its study facts. The existing "Studies, credit, licences and what was left out" content stays on the page.
+- **The replay bar** (play, pause, speed, slider, "go to the journey area", the always-visible replay line) sits with the globe and appears only while a journey is shown.
+- **No dropdown.** `#journey-choose` and the single `#tgl-journey` are removed.
+
+**One journey at a time.**
+- All off is a valid state and is the state at load: nothing is switched on, nothing is fetched beyond the page itself.
+- Switching animal B on while A is on: A is switched off first (its load aborted if still loading, its marker, line and fix marks removed from the scene, its replay stopped and the bar hidden), A's switch reads off, then B loads. The same rule the aircraft counts and positions switches follow on Earth now.
+- A late response for A that arrives after B was chosen draws nothing (the existing generation check).
+- Switching the shown journey off returns to all off.
+- One polite announcement per change, for example "Plains zebra switched off. Waved albatross loading." No announcement on every animation frame.
+- The group has a visible heading that says so: "Animal journeys — one at a time".
+
+**Links.** `animals.html#journey=<id>` scrolls to and focuses that animal's toggle and switches nothing on. `index.html#journey=…` is retired; no public page has ever carried it.
+
+**Earth now.** The journey card, its switch, the dropdown, the replay bar, the Layers row, the Key entry, the journey's part in the zoom-out view and the `animals-journey.js` script tag are removed. **Target, checked by test: after this change every Earth now file equals current main's, except for the Animals link in the header and menu.** The suites whose expectations the parked branch changed for the journey switch (switch counts, Layers rows, widths) go back to main's.
+
+**Backdrop of the Animals globe (decision A-D1).**
+- A (recommended): the same daily NASA satellite picture Earth now uses (a source already in the register), with a visible line: "Backdrop: satellite picture of [date]. It is not from the journey's dates." This is what the passed preview showed, and an inland journey (the zebra) needs land to be read against.
+- B: a plain dark globe with the Natural Earth coastline already in the repo. No current-day picture under a past journey, but the zebra's journey would have nothing around it.
+- No new source is introduced by either.
+
+**Phones and narrow widths.** Globe first, then the replay bar, then the toggles and cards, in that order; the toggles stay reachable without covering the globe. Real phone and screen reader remain unverified, as for the whole site.
+
+## A4. What this does to the earlier review
+
+- **Data is untouched.** The three existing display files, manifests and builders stay byte for byte.
+- **Page code is not.** The replay moves pages and gains a toggle group; Earth now loses its journey code. GPT's pass of `f00a330` covered the old arrangement, so **the candidate review covers the whole Animals page afresh**, including every J-criterion of the earlier journey review that still applies (verification failures, late loads, replay controls, fix and gap wording, performance at desktop and 390 px).
+- The journey script's dependencies on Earth now (the shared globe handle, the Key repaint, the Layers panel, the zoom-out class) are replaced by the Animals page's own; none may remain as a silent no-op.
+
+## A5. Build order proposed (decision A-D2)
+
+One branch, two reviewed stages, so a page-move defect is never confused with a bird defect:
+1. **Stage 1: move.** The Animals tab gets its globe, toggles and replay with the **three existing journeys only**; Earth now returns to main. Candidate and tests to GPT.
+2. **Stage 2: bird.** Part B added on top (Air group, new file fields, withholding). Candidate and tests to GPT.
+
+Alternative: both in one candidate. Faster, larger review.
+
+## A6. Interaction checks for the Animals tab (T-criteria; all run in a browser against the built page)
+
+- T1. Header: exactly one Animals tab, beside Moon and Sun, on all five pages; it is marked current on the Animals page.
+- T2. At load: every journey switch reads off; nothing is drawn; no journey file has been requested; the replay bar is hidden.
+- T3. Each switch has a visible label naming the animal and years, `role="switch"`, a correct `aria-checked`, and is described by its card's evidence line. Groups are headed Land, Sea, Air; an empty group is not shown.
+- T4. Switching one on: its state goes loading then shown; marker, line and fix marks appear; the replay bar appears; the globe moves to the journey.
+- T5. **Exclusivity:** with A shown, switching B on leaves exactly one switch on (B), removes every A object from the scene (counted), stops A's replay and shows B. Tested for every ordered pair of journeys.
+- T6. **Rapid switching:** A on, B on, C on within one second, on a slowed network: only C is ever drawn; A's and B's late responses draw nothing; exactly one switch is on at every moment after each click.
+- T7. Switching the shown journey off: nothing drawn, bar hidden, all switches off, replay time not carried into the next journey.
+- T8. Failure: a changed journey file, manifest or catalogue gives "could not be verified, nothing is drawn" on that card only, its switch returns to off or shows the failed state consistently, Retry works, and another journey can still be switched on.
+- T9. Keyboard: every switch is reachable by Tab, operable by Space and Enter, focus stays on the switch after it changes state, focus is never lost when A is switched off by B.
+- T10. Announcements: one polite message per change naming what went off and what is loading or shown; none per frame.
+- T11. Deep link `animals.html#journey=<id>`: that toggle is scrolled to and focused; nothing is switched on; an unknown id does nothing.
+- T12. No dropdown: no `select` for journeys exists on any page.
+- T13. **Earth now is clean:** no journey card, switch, replay bar, Layers row or Key entry; `animals-journey.js` is not loaded; the Earth now files equal main's except the Animals links; the suites the parked branch altered pass with main's expectations.
+- T14. Leaving and returning: navigating away and back (including the browser's back-forward cache) leaves no journey on and no animation running.
+- T15. The Animals globe shows no live layer and makes no request to the hub; under A-D1 option A its only outside request is the backdrop picture, and the backdrop's date line is shown and correct.
+- T16. Widths 360, 390, 720, 1100, 1280 and 1470 px: no overflow; the switches, the bar and the cards do not cover the globe beyond the agreed share; every switch stays operable.
+- T17. No WebGL: the page says the journey needs the 3-D globe; switches do not pretend to work; the cards and study content remain readable.
+- T18. The replay line, gap wording and marker behaviour of the three existing journeys are unchanged from the passed preview (the earlier J-criteria, rerun on the new page).
+
+# PART B — THE BIRD (rev 2.1, PASSED by GPT at proposal level; rev 3 changes marked)
 
 ## 1. Source, pinned (both files are build inputs)
 
@@ -168,6 +253,10 @@ Nothing is thinned, smoothed, interpolated or reordered. No coordinate of a reta
 | D2 colony-area fixes | A: withhold within 5 km of the tagging-site reference point, with the replay contract in §5 · B: show all · C: generalise | A |
 | D3 accuracy per displayed fix | yes · no | yes |
 | D4 base | own branch from `animals-journeys-preview-rc` with current main merged, private preview, then a candidate review | yes |
+| A-D1 backdrop of the Animals globe (rev 3) | A: the daily satellite picture Earth now uses, with its date stated · B: plain globe with coastline | A (Claude; GPT not yet asked) |
+| A-D2 build order (rev 3) | two reviewed stages: move the three journeys, then add the bird · or one candidate | two stages (Claude; GPT not yet asked) |
+
+Already decided by Chad (20 Nov): the globe, toggles and replay live on the Animals tab; toggles replace the dropdown; one journey at a time; the journey controls leave Earth now.
 
 GPT's choices are recommendations, not Chad's approval. A build starts only on Chad's own go.
 
@@ -194,9 +283,9 @@ GPT's choices are recommendations, not Chad's approval. A build starts only on C
 
 **Page**
 - B12. The three wordings (failed attempt, long gap, withheld) each appear only in their own state; "No fix was recorded" never appears for this journey; the label is exactly the accepted wording; none of the "not said" items appears.
-- B13. The Air group: chooser behaviour, the new card, keyboard and focus as for the existing groups.
+- B13. (rev 3) The Air group and the bird's toggle and card on the Animals tab: every T-criterion of Part A, with the bird as one of the journeys in T5 and T6.
 - B14. Failure paths: a changed display file, manifest or catalogue is refused with nothing drawn; a late-arriving load after switching journeys draws nothing; switching between all four journeys leaves no marker or line behind.
-- B15. Existing journeys: display files and manifests byte-identical; their suites and the full older-suite set rerun on the actual merged tree. Every unavoidable change is listed (catalogue, its pinned hash, the two script pins, the chooser, suite expectations).
+- B15. (rev 3) Existing journeys: display files and manifests byte-identical; their suites, rewritten for the Animals tab, and the full older-suite set rerun on the actual merged tree. Every unavoidable change is listed (catalogue, its pinned hash, the script pins, the toggle group, the page move, suite expectations).
 - B16. The view fits the retained journey at desktop and 390 px.
 - B17. Source guard: `_source-data/` is added to `.gitignore`, and the test run checks that no tracked file sits under it and that no source file name appears in the served tree. This reduces accidental additions; it does not make committing impossible.
 - Real phone and screen reader: unverified, as for the rest.
@@ -251,6 +340,6 @@ GPT's choices are recommendations, not Chad's approval. A build starts only on C
 
 - Nothing built; no code branch; no page file changed; nothing deployed.
 - Trips not counted or segmented. No quality rule of our own. No tag-effect or data-quality finding.
-- Whether the chooser accepts a new group without a code change: not checked. The reader was read for its validation, join and wording paths, not audited end to end.
+- (rev 3) The parked page was read for where the replay lives and what it depends on (the Earth now globe handle, Key, Layers panel, zoom-out class); it was not audited end to end, and no layout was drawn or measured. The share of the globe the controls may cover at each width is set at build and reviewed.
 - No sensitivity conclusion: D2 is Chad's decision, and no option is claimed risk-free.
 - Final bar wording: shapes only here.
