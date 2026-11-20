@@ -1,6 +1,6 @@
 # Animals: audit C, migration corridor (USGS volume 6)
 
-20 Nov 2026 · **rev 1.1** (rev 1 accepted by GPT as source-feasibility work with corrections, `reviews/2026-11-20-animals-audits-c-d-gpt-review.md`; rev 1.1 carries them and adds the class definitions read from the metadata at 14:18 UTC) · read-only research under brief C (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1), on Chad's go of 20 Nov. Nothing built, nothing sent, no account. Claude retained no raw working copies; the archive Chad downloaded remains in his Downloads.
+20 Nov 2026 · **rev 1.2** (GPT closed the corrections on rev 1.1, `reviews/2026-11-20-animals-audits-c-d-closure-gpt-review.md`; rev 1.2 makes its record updates only: the report read and the display wording) · rev 1.1 (rev 1 accepted by GPT as source-feasibility work with corrections, `reviews/2026-11-20-animals-audits-c-d-gpt-review.md`; rev 1.1 carries them and adds the class definitions read from the metadata at 14:18 UTC) · read-only research under brief C (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1), on Chad's go of 20 Nov. Nothing built, nothing sent, no account. Claude retained no raw working copies; the archive Chad downloaded remains in his Downloads.
 
 **Results**
 - **California mule deer, East Walker: usable as a source, at feasibility level. Chad chose it on 20 Nov.** Three released polygon layers, complete metadata, small geometry. Which classes are shown, and at what simplification, is not settled (§5a, §6).
@@ -98,7 +98,9 @@ The class names are not a common scale. The definitions, as each layer's metadat
 - "Used by at least one" is a union of individual footprints (each the 99% isopleth of that animal's averaged surface). It does not mean each place was used by exactly one animal.
 - **Corrected proposal, one rule for any herd: the footprint defined as "used by at least one individual" is not shown.** For East Walker that leaves Medium and High. Omitting it is a conservative display choice, not a licence restriction, and it does not show that the remaining classes, the stopovers or the winter range are free of sensitivity; those need their own judgement at the build proposal.
 - The legend and methods state the source's sampled-animal definitions for the chosen herd, not a generic low-to-high scale.
-- **Still to read before class wording is fixed (GPT): the East Walker section of the report.** The report is a PDF; Claude opens no PDFs. For GPT, or for Claude if a web-text version exists.
+- **The East Walker section of the report has been read by GPT** (SIR 2026–5123, version 1.1, August 2026, printed pages 8–9, through the PDF's text; GPT's reading, not Claude's). It confirms: Low = at least one individual; Medium = 10–20% of individuals; High = more than 20%; migration model 267 sequences from 91 animals; winter model 190 sequences from 94 animals; data from 2017, analysed through August 2024. **Method for this herd: Fixed Motion Variance for corridors, stopovers and winter range; Net Squared Displacement to delineate migration periods.** The capture sample is 125 adult females; that is not the corridor model's denominator, and the two are kept apart.
+- **Display wording (GPT, recommended; Chad's decision):** Medium and High shown with their source definitions, and the omission stated, for example "Selected higher-use migration areas. The broader Low-use footprint is omitted." Not labelled as the complete migration footprint; unshaded does not mean unused; disconnected polygons are never joined into a route.
+- The trial simplification in §6 counted all three corridor classes. The build remeasures the chosen class set and the final encoding; the indicative figures are not carried over.
 
 ## 6. Trial simplification (an audit measurement, not page work)
 
@@ -134,6 +136,6 @@ Douglas-Peucker on each ring, in the layer's own projected coordinates, toleranc
 - The report PDF, the route layers and the other nine herds: not opened.
 - No reprojection, no output file, no measured display size, no topology check after simplification.
 - The "retain ownership" wording: **GPT judged it a disclosure point, not a permission blocker** (GPT's reading of the release description and the CC0 deed). The card keeps the source and version, the exact metadata wording, credit to USGS and the originators, and says the simplified geometry is our processing. Credit is the project's requirement and good practice, not a condition invented for CC0; no endorsement is implied. No USGS enquiry is needed for this.
-- The East Walker section of the report: unread (PDF).
+- The East Walker section of the report: read by GPT, not by Claude (§5a).
 - No refresh cadence for any herd.
 - No polygon drawing work, no build.
