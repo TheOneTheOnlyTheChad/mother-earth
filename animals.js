@@ -5,10 +5,10 @@
  * Conservation and population are fixed "Not available yet" states: no source has been reviewed, and nothing stands in for
  * them. A count of tagged animals is labelled as a sample size.
  * This file fetches the journey list and one manifest per card: details for the cards, never a journey's coordinates. The globe is
- * animals-globe.js and the replay is animals-journey.js (animals-tab-rc, stage 1). It does not load app.js. */
+ * animals-globe.js and the replay is animals-journey.js (animals-tab-rc, stage 1; stage 2 adds the bird's card). It does not load app.js. */
 (() => {
   const $ = id => document.getElementById(id);
-  const A = { CATALOG: 'assets/animals/journeys-R1.catalog.json', CATALOG_SHA256: 'a25cdce33091e0b1a62f4cce35c93f26b192d92409e53dc573ea513056bf3470', BASE: 'assets/animals/',
+  const A = { CATALOG: 'assets/animals/journeys-R1.catalog.json', CATALOG_SHA256: '1386e4cc4fbc8c1c294ce867f42702c3c838fbde3c41fd9ce788fc275a77fafe', BASE: 'assets/animals/',
     UNVERIFIED: 'Study details could not be verified. No figure is shown.', FAILED: 'Study details could not be loaded. No figure is shown.' };
   // header clock (UTC) and menu, as on the other pages
   const p2 = n => String(n).padStart(2, '0'), clock = $('clock');
@@ -37,12 +37,15 @@
   function render(card, m, j) {
     set(card, 'title', m.title); set(card, 'place', m.place); set(card, 'species', m.taxon_detail_as_recorded ? `${m.species_as_recorded} (taxon detail as recorded: ${m.taxon_detail_as_recorded})` : m.species_as_recorded); set(card, 'method', m.method);
     set(card, 'animals', m.sample_sentence || `${m.animals_sampled} animals were tracked in this study. This is a sample size, not a population estimate.`);
-    set(card, 'period', `First recorded fix shown ${utc(j.first_fix_s)}. Last recorded fix shown ${utc(j.last_fix_s)}: the replay ends there.`);
+    set(card, 'period', Number.isInteger(j.record_first_s)                                          // a journey with withheld fixes: the recording period and the displayed fixes are stated apart
+      ? `Recording: ${utc(j.record_first_s)} to ${utc(j.record_last_s)}; the replay covers all of it. First displayed fix ${utc(j.first_fix_s)}. Last displayed fix ${utc(j.last_fix_s)}.`
+      : `First recorded fix shown ${utc(j.first_fix_s)}. Last recorded fix shown ${utc(j.last_fix_s)}: the replay ends there.`);
     set(card, 'times', m.time_convention);
     if (m.card) {                                                                                  // Argos journeys
-      set(card, 'shown', m.card.shown); set(card, 'notdrawn', m.card.done); set(card, 'unc', `${m.accuracy_note} ${m.card.not_route}`);
+      set(card, 'shown', (m.label_line ? m.label_line + ' ' : '') + m.card.shown); set(card, 'notdrawn', m.card.done + (m.withholding ? ' ' + m.withholding.statement : '')); set(card, 'unc', `${m.accuracy_note} ${m.card.not_route}`);
+      if (m.card.tagging) set(card, 'place', `${m.place}. ${m.card.tagging}`);
       set(card, 'rule', `${m.card.line} ${m.gap_rule.statement}`); set(card, 'simp', m.card.changes);
-      set(card, 'land', `${m.land_data.source}. Mother Earth's land test finds land in that map at that scale only; coast detail it lacks is not detected.`);
+      if (m.land_data) set(card, 'land', `${m.land_data.source}. Mother Earth's land test finds land in that map at that scale only; coast detail it lacks is not detected.`); else hideRow(card, 'land');
     } else {
       set(card, 'shown', `${m.animals_shown} animal: ${j.animal}, ${n(j.fixes)} recorded fixes.`);
       set(card, 'notdrawn', `For this animal: ${n(j.rows_without_position)} fix attempts without a position and ${n(j.rows_flagged_by_source)} fixes flagged by the source. In the whole study: ${n(m.study_totals.rows_without_position)} and ${n(m.study_totals.rows_flagged_outlier)}.`);

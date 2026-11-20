@@ -1,0 +1,67 @@
+{
+  "study": "waved-albatross-galapagos",
+  "revision": "R1",
+  "kind": "gps-filtered",
+  "label": "Waved albatross, animal 3275-30662",
+  "label_line": "Recorded movements of one breeding adult, 23 June to 15 September 2008.",
+  "title": "Galapagos Albatrosses (the study's name on Movebank)",
+  "place": "Galápagos (tagged at Punta Cevallos, the source's site name) and the eastern Pacific towards Peru",
+  "species_as_recorded": "Phoebastria irrorata",
+  "common_name": "waved albatross",
+  "dataset_doi": "10.5441/001/1.3hp3s250",
+  "dataset_url": "https://doi.org/10.5441/001/1.3hp3s250",
+  "repository": "Movebank Data Repository",
+  "licence": "CC0 1.0 Universal",
+  "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "citation_as_given": "Cruz, S., Proaño, C.B., Anderson, D., Huyvaert, K., Wikelski, M., 2013, Data from: The Environmental-Data Automated Track Annotation (Env-DATA) System--Linking animal tracks with environmental data: Movebank Data Repository. doi:10.5441/001/1.3hp3s250",
+  "paper_citation_as_given": "Dodge, S., Bohrer, G., Weinzierl, R., Davidson, S.C., Kays, R., Douglas, D., Cruz, S., Han, J., Brandes, D., Wikelski, M., 2013, The Environmental-Data Automated Track Annotation (Env-DATA) System--Linking animal tracks with environmental data: Movement Ecology, v. 1:3. doi:10.1186/2051-3933-1-3",
+  "method": "GPS tag (e-obs, 22 g), a fix attempted every 90 minutes; read out wirelessly (reference file)",
+  "time_convention": "Times are as recorded by the study: UTC, or GPS time, which differs from UTC by a few leap seconds (source README). Mother Earth rounds each time to the nearest second.",
+  "animals_sampled": 28,
+  "animals_used_in_paper": 9,
+  "sample_sentence": "One of 28 birds tagged; nine were used in the paper's analysis. These are sample sizes, not a population estimate.",
+  "reference_notes": {
+    "life_stage_field": "animal-life-stage",
+    "site_field": "study-site",
+    "comments_field": "animal-comments",
+    "deployment_comments_field": "deployment-comments"
+  },
+  "source_file": {
+    "name": "Galapagos Albatrosses.csv",
+    "bytes": 4913156,
+    "sha256": "1b62b43cfce5067193cde0fc1c5b6144eff193bd7c995160961479921fd4a8e6",
+    "retrieved": "downloaded by Chad on 20 Nov 2026 from the Movebank Data Repository record"
+  },
+  "reference_file": {
+    "name": "Galapagos Albatrosses-reference-data.csv",
+    "bytes": 6066,
+    "sha256": "1d7b24cf119f65ba7c90358b52ed5d29ec07b1b87c61ca6960b4bfad108061ad",
+    "retrieved": "downloaded by Chad on 20 Nov 2026 from the same record"
+  },
+  "columns": {
+    "manually_marked_outlier": "absent"
+  },
+  "timestamp_rule": {
+    "rounding": "nearest whole second, in integer milliseconds: seconds = (ms + 500) div 1000",
+    "allowance_ms": 25,
+    "statement": "Times are rounded to the nearest second. A source time more than 25 ms from a whole second stops the build."
+  },
+  "gap_rule": {
+    "max_join_seconds": 11700,
+    "statement": "Mother Earth does not join fixes more than 3 hours 15 minutes apart, and never joins across a withheld fix. These are display rules of Mother Earth's, not part of the study.",
+    "owner": "Mother Earth (display rule; not supplied by the researchers)"
+  },
+  "withholding": {
+    "radius_km": 5.0,
+    "sphere_radius_km": 6371.0088,
+    "formula": "great-circle distance on a sphere (haversine)",
+    "boundary": "a fix at exactly the radius or closer is withheld",
+    "centre_source": "the reference file's deployment coordinates for this animal, as given (two decimals)",
+    "owner": "Mother Earth (a project omission rule; not a scientifically established protection distance and not a guarantee of safety)"
+  },
+  "expect": {
+    "source_rows": 1338, "positioned": 1326, "failed_attempts": 12, "fixes": 981, "fixes_withheld": 345, "withheld_periods": 14,
+    "steps_joined": 966, "joined_spanning_failed": 10, "steps_separated_by_withholding": 13, "steps_separated_by_time": 1, "failed_listed": 11
+  },
+  "sensitivity": "Private preview only. Fixes within 5 km of the tagging-site reference point are withheld; every other recorded fix is shown at the source's precision. Public release needs a recorded, dataset-specific sensitivity decision."
+}

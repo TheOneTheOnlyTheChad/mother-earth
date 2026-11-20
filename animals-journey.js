@@ -41,7 +41,7 @@
   const nameOf = id => { const b = switches.find(x => x.dataset.journey === id); return b ? (b.dataset.name || id) : id; };
   const J = {
     CATALOG: 'assets/animals/journeys-R1.catalog.json',          // the list of journeys; it pins each study's manifest, which pins its display file
-    CATALOG_SHA256: 'a25cdce33091e0b1a62f4cce35c93f26b192d92409e53dc573ea513056bf3470',
+    CATALOG_SHA256: '1386e4cc4fbc8c1c294ce867f42702c3c838fbde3c41fd9ce788fc275a77fafe',
     BASE: 'assets/animals/',
     WAIT_MS: 20000,                     // a request that has not answered in 20 s is treated as failed (our number)
     ALT: 0.004,                         // line and fix marks sit just above the surface (fraction of the globe radius)
@@ -68,6 +68,8 @@
       marks: 'The fix marks are drawn large so they can be seen with the whole journey in view. Their size does not show uncertainty.',
       line: 'The line joins recorded fixes. The path between fixes was not recorded.',
       others: 'The backdrop keeps its own date; it is not matched to this journey.',
+      range: 'Recorded fix (arrow keys step from fix to fix)',
+      rangeWithheld: 'Replay position (arrow keys step between displayed fixes and the start of each withheld period)',
     },
   };
   const st = { on: false, choice: null, status: 'off', gen: 0, list: null, listTok: 0, note: '', scroll: null, man: null, jr: null, d: null, seg: null, i: 0, rt: 0, playing: false, speed: J.SPEED_DEFAULT,
@@ -106,14 +108,51 @@
     for (let i = 0; i < n; i++) { const t = d.t[i], la = d.lat[i], lo = d.lon[i];
       if (!Number.isInteger(t) || (i && t <= d.t[i - 1])) throw new Unverified('fix times are not whole seconds in increasing order');
       if (!Number.isFinite(la) || !Number.isFinite(lo) || la < b.south || la > b.north || lo < b.west || lo > b.east) throw new Unverified('a coordinate is missing or outside the study area'); }
-    if (d.schema === 2 || d.lc !== undefined || d.j !== undefined) {                       // Argos files: a class per fix and a join flag per step
-      const cm = man.class_meanings || {};
-      if (typeof d.lc !== 'string' || d.lc.length !== n || [...d.lc].some(c => !(c in cm))) throw new Unverified('the quality classes are missing or not ones the manifest explains');
+    // Argos files (schema 2, or any older-schema file that carries a class or a flag): a class per fix AND a join flag per step, as before.
+    // A schema-3 GPS file may carry join flags without classes.
+    const filtered = man.kind === 'gps-filtered', argos = d.schema === 2 || d.lc !== undefined || (d.j !== undefined && d.schema !== 3);
+    if (argos) { const cm = man.class_meanings || {};
+      if (typeof d.lc !== 'string' || d.lc.length !== n || [...d.lc].some(c => !(c in cm))) throw new Unverified('the quality classes are missing or not ones the manifest explains'); }
+    // a withheld-fix journey REQUIRES its fields: a file without one is refused, never read as an older, simpler journey
+    if (filtered) { for (const f of ['acc', 'j', 'withheld', 'failed_t']) if (!Array.isArray(d[f])) throw new Unverified(`the display file lacks "${f}", which this journey requires`);
+      if (d.schema !== 3) throw new Unverified('the display file is not the schema this journey requires'); }
+    if (argos || d.j !== undefined) {
       if (!Array.isArray(d.j) || d.j.length !== n || d.j[0] !== 0 || d.j.some(x => x !== 0 && x !== 1)) throw new Unverified('the join flags are missing or malformed');
       let k = 0; for (let i = 1; i < n; i++) { if (d.j[i] === 1) { k++; if (d.t[i] - d.t[i - 1] > rule) throw new Unverified('a join flag joins fixes further apart than the rule allows'); } }
       if (k !== jr.steps_joined) throw new Unverified('the number of joined steps does not match the manifest'); }
+    if (d.acc !== undefined) {                                                                   // the tag's accuracy estimate, one per displayed fix
+      if (!Array.isArray(d.acc) || d.acc.length !== n || d.acc.some(x => typeof x !== 'number' || !Number.isFinite(x) || x < 0)) throw new Unverified('the accuracy estimates are missing or malformed'); }
+    if (d.withheld !== undefined || d.failed_t !== undefined) {
+      const R0 = jr.record_first_s, R1 = jr.record_last_s;
+      if (!Number.isInteger(R0) || !Number.isInteger(R1) || R0 > d.t[0] || R1 < d.t[n - 1]) throw new Unverified('the recording period in the manifest is missing or does not hold the fixes');
+      const W = d.withheld === undefined ? [] : d.withheld; if (!Array.isArray(W)) throw new Unverified('the withheld periods are malformed');
+      let total = 0, prevLast = -Infinity, lo = 0;
+      for (const p of W) {
+        if (!Array.isArray(p) || p.length !== 3 || !p.every(Number.isInteger)) throw new Unverified('a withheld period is malformed');
+        const [f, l, c] = p; if (f < R0 || l > R1 || f > l || c < 1 || (c === 1) !== (f === l) || f <= prevLast) throw new Unverified('the withheld periods are out of order, overlap or lie outside the recording');
+        while (lo < n && d.t[lo] < f) lo++;                                                    // lo = first displayed fix at or after the period's start
+        if (lo < n && d.t[lo] <= l) throw new Unverified('a displayed fix lies inside a withheld period');
+        if (lo > 0 && lo < n && (!d.j || d.j[lo] !== 0)) throw new Unverified('a step is joined across a withheld period');
+        total += c; prevLast = l; }
+      if (d.withheld !== undefined && (total !== jr.fixes_withheld || W.length !== jr.withheld_periods)) throw new Unverified('the withheld counts do not match the manifest');
+      if (d.failed_t !== undefined) { const F = d.failed_t, ts = new Set(d.t);
+        if (!Array.isArray(F) || F.length !== jr.failed_listed) throw new Unverified('the failed-attempt times do not match the manifest');
+        for (let i = 0; i < F.length; i++) { const x = F[i];
+          if (!Number.isInteger(x) || x < R0 || x > R1 || (i && x <= F[i - 1]) || ts.has(x) || W.some(p => x >= p[0] && x <= p[1])) throw new Unverified('a failed-attempt time is malformed, repeated, at a fix, or inside a withheld period'); } } }
     return jr;
   }
+  /** the replay's frame for a verified journey. R0..R1 is the recording period (for journeys with nothing withheld: first to
+   *  last fix). A hidden span runs from a withheld period's first time (inclusive) to the next displayed fix (exclusive), or
+   *  through the end of the recording when no displayed fix follows. The slider's stops are the displayed fixes, the start of
+   *  each withheld period, and the two ends of the recording, in time order. */
+  function frame(d, jr) { const n = d.t.length, W = d.withheld || [];
+    st.R0 = Number.isInteger(jr.record_first_s) ? jr.record_first_s : d.t[0]; st.R1 = Number.isInteger(jr.record_last_s) ? jr.record_last_s : d.t[n - 1];
+    st.hide = W.map(p => { let k = fixAt(p[1]) + 1; return { from: p[0], to: k < n ? d.t[k] : Infinity, p }; });
+    st.stops = W.length || st.R0 !== d.t[0] || st.R1 !== d.t[n - 1] ? [...new Set([st.R0, ...d.t, ...W.map(p => p[0]), st.R1])].sort((a, b) => a - b) : d.t; }
+  /** the withheld span that holds replay time s, or null */
+  const hiddenAt = s => { const H = st.hide || []; for (const h of H) if (s >= h.from && s < h.to) return h; return null; };
+  /** index of the last slider stop at or before s */
+  const stopAt = s => { const a = st.stops; let lo = 0, hi = a.length - 1; while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (a[mid] <= s) lo = mid; else hi = mid - 1; } return lo; };
   async function load() {
     abortLoad(); const gen = ++st.gen, id = st.choice; st.status = 'loading'; paint();
     let shared = true;                                           // true while the failure would be the shared journey list's
@@ -132,11 +171,12 @@
       let d; try { d = JSON.parse(new TextDecoder().decode(db)); } catch (_) { throw new Unverified('the display file is not readable'); }
       const jr = verify(man, d, ce.animal); if (gen !== st.gen) return;
       st.man = man; st.jr = jr; st.d = d; st.ce = ce;
+      frame(d, jr);
       // seg[i] = number of line segments whose later fix has index ≤ i (a segment joins fix i−1 to fix i when they are within the rule)
       const rule = man.gap_rule.max_join_seconds, seg = new Uint32Array(d.t.length); let k = 0; for (let i = 1; i < d.t.length; i++) { if (joins(d, rule, i)) k++; seg[i] = k; } st.seg = seg;
       if (!build()) throw new NotBuilt('the globe could not take the journey');
-      st.status = 'ready'; st.playing = false; ensureBar(); setBarFrame(); paint(); seek(d.t[0], true); goArea();
-      announce(`${nameOf(id)} shown. Replay is at the first ${man.card ? 'displayed' : 'recorded'} fix.`);
+      st.status = 'ready'; st.playing = false; ensureBar(); setBarFrame(); paint(); seek(st.R0, true); goArea();
+      announce(st.hid ? `${nameOf(id)} shown. Replay is at the start of the recording. The first fixes are withheld, so no marker is shown yet.` : `${nameOf(id)} shown. Replay is at the first ${man.card ? 'displayed' : 'recorded'} fix.`);
     } catch (e) { if (gen !== st.gen) return;
       // the requested journey returns to off; its error stays on its own row (or, for the shared list, on the group); nothing else is restored
       const unv = e instanceof Unverified, detail = String(e && e.message || e);
@@ -183,7 +223,7 @@
     const line = new h.Mesh(lg, mat(J.LINE, true, 0.9)); line.raycast = () => { }; line.renderOrder = 3; line.frustumCulled = false; line.__journey = 'line';
     // the fix marks: one small filled triangle per recorded fix, lying on the surface, in time order
     // Argos journeys cover hundreds to thousands of km: their fix marks are sized to stay visible when the whole journey is in view
-    const bb = st.jr.bbox, F = new Float32Array(n * 9), s = d.lc ? Math.max(J.FIX_SIZE, 0.2 * Math.max(J.VIEW_ALT, Math.max(bb.north - bb.south, bb.east - bb.west) / 26)) : J.FIX_SIZE;
+    const bb = st.jr.bbox, F = new Float32Array(n * 9), s = (d.lc || d.acc) ? Math.max(J.FIX_SIZE, 0.2 * Math.max(J.VIEW_ALT, Math.max(bb.north - bb.south, bb.east - bb.west) / 26)) : J.FIX_SIZE;
     for (let i = 0; i < n; i++) { const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2], r = Math.hypot(x, y, z), ux = x / r, uy = y / r, uz = z / r;
       let ex = -uz, ey = 0, ez = ux; const el = Math.hypot(ex, ey, ez) || 1; ex /= el; ez /= el;                 // east-ish, on the surface
       const nx = uy * ez - uz * ey, ny = uz * ex - ux * ez, nz = ux * ey - uy * ex;                               // north-ish, on the surface
@@ -202,7 +242,7 @@
   function show() {
     const o = st.objs; if (!o) return; const i = st.i, vis = true;
     o.line.geometry.setDrawRange(0, i > 0 ? st.seg[i] * 3 : 0); o.fixes.geometry.setDrawRange(0, i >= 0 ? (i + 1) * 3 : 0);
-    o.line.visible = vis; o.fixes.visible = vis; o.marker.visible = vis && i >= 0;
+    o.line.visible = vis; o.fixes.visible = vis; o.marker.visible = vis && i >= 0 && !st.hid;        // no marker anywhere in a withheld span; track already drawn stays
     if (i >= 0) { o.marker.position.set(o.P[i * 3], o.P[i * 3 + 1], o.P[i * 3 + 2]); sizeMarker(); }
   }
   function sizeMarker() { const o = st.objs; if (!o || st.i < 0) return; let dist = 250; try { const c = o.g.camera(); dist = Math.hypot(c.position.x - o.marker.position.x, c.position.y - o.marker.position.y, c.position.z - o.marker.position.z); } catch (_) { }
@@ -210,16 +250,16 @@
 
   // ---------- replay
   /** set the replay time (whole seconds, clamped to the record); quiet = do not announce */
-  function seek(s, quiet) { if (!st.d) return; const t = st.d.t; s = Math.min(t[t.length - 1], Math.max(t[0], Math.floor(s))); st.rt = s; st.rtExact = s; st.i = fixAt(s); show(); paintBar(quiet); }
+  function seek(s, quiet) { if (!st.d) return; s = Math.min(st.R1, Math.max(st.R0, Math.floor(s))); st.rt = s; st.rtExact = s; st.i = fixAt(s); st.hid = hiddenAt(s); show(); paintBar(quiet); }
   function tick(now) {
     st.raf = 0; if (!st.playing || !st.d) return;
     const dt = Math.min(0.25, Math.max(0, (now - st.lastTick) / 1000)); st.lastTick = now;
-    const end = st.d.t[st.d.t.length - 1], next = st.rtExact + dt * st.speed;
-    if (next >= end) { st.playing = false; seek(end, false); paintCtl(); return; }                                  // stop at the last recorded fix
-    st.rtExact = next; st.rt = Math.floor(next); const i = fixAt(st.rt); if (i !== st.i) { st.i = i; show(); } else sizeMarker(); paintBar(true);
+    const end = st.R1, next = st.rtExact + dt * st.speed;
+    if (next >= end) { st.playing = false; seek(end, false); paintCtl(); return; }                                  // stop at the end of the recording
+    st.rtExact = next; st.rt = Math.floor(next); const i = fixAt(st.rt), h = hiddenAt(st.rt); if (i !== st.i || h !== st.hid) { st.i = i; st.hid = h; show(); } else sizeMarker(); paintBar(true);
     st.raf = requestAnimationFrame(tick);
   }
-  function play() { if (!st.d || st.status !== 'ready') return; const end = st.d.t[st.d.t.length - 1]; if (st.rt >= end) seek(st.d.t[0], true);
+  function play() { if (!st.d || st.status !== 'ready') return; if (st.rt >= st.R1) seek(st.R0, true);
     st.playing = true; st.lastTick = performance.now(); if (!st.raf) st.raf = requestAnimationFrame(tick); paintCtl(); }
   function pause(say) { st.playing = false; if (st.raf) { cancelAnimationFrame(st.raf); st.raf = 0; } paintCtl(); if (say) paintBar(false); }
 
@@ -258,17 +298,29 @@
     const d = st.d, i = st.i, t = d.t, rule = st.man.gap_rule.max_join_seconds, n = t.length;
     let s = `Replay time (recorded) ${utc(st.rt)}`;
     const F = !!st.man.card;                                   // a filtered journey: speak of displayed fixes
+    // a withheld span: no marker, no accuracy, and no other wording (it takes precedence over a failed attempt inside the span)
+    if (st.hid) { const [f, l, c] = st.hid.p, km = st.man.withholding ? st.man.withholding.radius_km : '';
+      return s + ` · Fixes near the tagging site are withheld: ${c} fixes between ${utc(f)} and ${utc(l)}, within ${km} km of the tagging-site reference point, are not shown. No marker is shown` +
+        (st.hid.to === Infinity ? ' · The recording ends in this withheld period' : ` · Next displayed fix ${utc(st.hid.to)}`); }
     if (i < 0) return s + (F ? ' · No fix displayed yet' : ' · No fix recorded yet');
     const age = st.rt - t[i];
     s += i === 0 && age === 0 ? ` · ${F ? J.T.firstShown : J.T.first} ${utc(t[i])}` : i === n - 1 ? ` · ${F ? J.T.lastShown : J.T.last}, ${utc(t[i])}` : ` · ${F ? J.T.midShown : 'Last recorded fix'} ${utc(t[i])}` + (age > 0 ? `, ${span(age)} earlier` : ', at this time');
     if (d.lc) { const c = d.lc[i], m = st.man.class_meanings[c]; s += ` · Argos class ${c} (${m === 'no estimate' ? 'no error estimate' : 'nominal error ' + m})`; }
-    if (i < n - 1 && t[i + 1] - t[i] > rule) s += F ? ` · No fix is displayed for ${span(t[i + 1] - t[i])} after it` : ` · No fix was recorded for ${span(t[i + 1] - t[i])} after it`;
+    if (d.acc) s += ` · Tag's accuracy estimate ${d.acc[i]} m`;
+    const next = i < n - 1 ? t[i + 1] : Infinity;
+    if (d.failed_t) { let f = null; for (const x of d.failed_t) if (x > t[i] && x < next && x <= st.rt) f = x;          // only once replay time has reached the failed attempt
+      if (f !== null) s += ` · The tag tried for a position at ${utc(f)} and got none`; }
+    if (i < n - 1 && next - t[i] > rule) {
+      if (st.man.kind === 'gps-filtered') {                                                    // never "No fix was recorded": say only what the source holds
+        const withheldNext = (st.hide || []).some(h => h.from > t[i] && h.from < next), tried = (d.failed_t || []).some(x => x > t[i] && x < next);
+        if (!withheldNext) s += tried ? ` · No position is in the source for ${span(next - t[i])} after it` : ` · No position and no attempt is in the source for ${span(next - t[i])} after it`; }
+      else s += F ? ` · No fix is displayed for ${span(next - t[i])} after it` : ` · No fix was recorded for ${span(next - t[i])} after it`; }
     return s;
   }
   function paintBar(quiet) {
     if (!st.d || $('replay').hidden) return;
     const txt = barText(); $('replay-now').textContent = txt;
-    const r = $('replay-range'); if (document.activeElement !== r || !st.dragging) r.value = String(Math.max(0, st.i)); r.setAttribute('aria-valuetext', txt);
+    const r = $('replay-range'); if (document.activeElement !== r || !st.dragging) r.value = String(stopAt(st.rt)); r.setAttribute('aria-valuetext', txt);
     if (!quiet && txt !== st.said) { st.said = txt; $('replay-say').textContent = txt; }                             // announced when the visitor moves the replay or it stops, not on every frame
   }
   function ensureBar() {
@@ -276,7 +328,7 @@
     const r = $('replay-range'), sp = $('replay-speed');
     sp.innerHTML = J.SPEEDS.map(([v, l]) => `<option value="${v}"${v === J.SPEED_DEFAULT ? ' selected' : ''}>${l}</option>`).join('');
     $('replay-play').addEventListener('click', () => st.playing ? pause(true) : play());
-    r.addEventListener('input', () => { if (!st.d) return; pause(false); seek(st.d.t[Math.min(st.d.t.length - 1, Math.max(0, +r.value))], false); });
+    r.addEventListener('input', () => { if (!st.d) return; pause(false); seek(st.stops[Math.min(st.stops.length - 1, Math.max(0, +r.value))], false); });
     sp.addEventListener('change', () => { st.speed = +sp.value || J.SPEED_DEFAULT; });
     $('replay-goto').addEventListener('click', goArea);
   }
@@ -289,13 +341,14 @@
           const dy = (top + bot) / 2 - (cv.top + cv.height / 2), fov = (o.g.camera().fov || 50) * Math.PI / 180; shift = dy * (2 * ALT * Math.tan(fov / 2) / cv.height) * 180 / Math.PI; }
         o.g.pointOfView({ lat: (b.south + b.north) / 2 + shift, lng: (b.west + b.east) / 2, altitude: ALT }, 0); sizeMarker(); } catch (_) { } }
   }
-  function setBarFrame() { const d = st.d, r = $('replay-range'); r.min = '0'; r.max = String(d.t.length - 1); r.step = '1';
-    $('replay-note').textContent = `Replay: recorded ${utcDay(d.t[0])} to ${utcDay(d.t[d.t.length - 1])}. ${J.T.others}`;
+  function setBarFrame() { const d = st.d, r = $('replay-range'); r.min = '0'; r.max = String(st.stops.length - 1); r.step = '1';
+    const lab = document.querySelector('label[for="replay-range"]'); if (lab) lab.textContent = st.hide && st.hide.length ? J.T.rangeWithheld : J.T.range;
+    $('replay-note').textContent = `Replay: recorded ${utcDay(st.R0)} to ${utcDay(st.R1)}. ${J.T.others}`;
     $('replay-rule').textContent = `${J.T.line} ${st.man.gap_rule.statement}`; }
 
   // ---------- the switches: one journey at a time
   /** everything a shown or loading journey holds is released; the selection itself is cleared by the caller */
-  function off() { st.on = false; st.gen++; abortLoad(); pause(false); clearObjs(); st.d = null; st.man = null; st.jr = null; st.seg = null; st.status = 'off'; st.said = ''; const e = $('replay-say'); if (e) e.textContent = ''; }
+  function off() { st.on = false; st.gen++; abortLoad(); pause(false); clearObjs(); st.d = null; st.man = null; st.jr = null; st.seg = null; st.hide = null; st.hid = null; st.stops = null; st.status = 'off'; st.said = ''; const e = $('replay-say'); if (e) e.textContent = ''; }
   /** make `id` the one selected journey (null = none). The previous one is switched off first; it is never restored. */
   async function select(id, quiet) {
     id = id || null; if (id === st.choice) return;
@@ -347,7 +400,7 @@
 
   ME.journey = { drawn, on: () => !!st.choice, J,
     /** read-only aids for tests and the console */
-    state: () => ({ choice: st.choice, cls: st.d && st.d.lc && st.i >= 0 ? st.d.lc[st.i] : null, on: !!st.choice, status: st.status, gen: st.gen, playing: st.playing, speed: st.speed, rt: st.rt, i: st.i, n: st.d ? st.d.t.length : 0,
+    state: () => ({ choice: st.choice, cls: st.d && st.d.lc && st.i >= 0 ? st.d.lc[st.i] : null, on: !!st.choice, status: st.status, gen: st.gen, playing: st.playing, speed: st.speed, rt: st.rt, i: st.i, n: st.d ? st.d.t.length : 0, hidden: st.d ? !!st.hid : null, hiddenPeriod: st.hid ? st.hid.p.slice() : null, R0: st.d ? st.R0 : null, R1: st.d ? st.R1 : null, stops: st.stops ? st.stops.length : 0,
       err: JSON.parse(JSON.stringify(st.err)), globeNote: st.note, listBusy: !!st.list, listTok: st.listTok, scroll: st.scroll ? { ...st.scroll } : null, catErr: st.catErr, catDetail: st.catDetail, announced: st.announced, blocked: blocked(),
       switches: Object.fromEntries(switches.map(b => { const id = b.dataset.journey, r = part(id, 'sw-retry'); return [id, { checked: b.getAttribute('aria-checked'), busy: b.getAttribute('aria-busy'), disabled: b.getAttribute('aria-disabled'),
         state: (part(id, 'sw-state') || {}).textContent, obs: (part(id, 'sw-obs') || {}).textContent, retry: r ? !r.hidden : null }]; })),

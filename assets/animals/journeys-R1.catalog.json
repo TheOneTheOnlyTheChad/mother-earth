@@ -25,6 +25,14 @@
    "animal": "98364",
    "manifest": "false-killer-whale-hawaii-R1.manifest.json",
    "manifest_sha256": "9d7fd4fcf33cfd283af151a23e866b82dadd4cbc0f8e5fdce9f14bdc70c9c4e5"
+  },
+  {
+   "id": "waved-albatross-galapagos-3275-30662",
+   "label": "Waved albatross, animal 3275-30662",
+   "group": "Air",
+   "animal": "3275-30662",
+   "manifest": "waved-albatross-galapagos-R1.manifest.json",
+   "manifest_sha256": "b9d0b021b1143c6b25efe60d638e09fb5486005ef719404bbc66b48ef9ca5555"
   }
  ]
 }
