@@ -8,14 +8,23 @@
  * own lose-context extension is used); the full-source build checks (the source files are not in the repository).
  * The line-rule and bad-content fixtures are served with their own journey-list checksum pinned in place of the real one: a
  * harness substitution, stated here.
+ * Sections 16 and 17 and checks 12h to 12m were added after GPT's Stage 1 review (phone reveal; the list Retry's lifecycle; the
+ * sampled bar-text sweep carried over from the old suite).
  * Breaks: BREAK=<name> edits one served file; the suite must then FAIL at the check named in EXPECT ("BREAK CAUGHT"), or it
  * prints BREAK MISSED. SECTIONS=1,4 runs parts.
- * Run: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules node --no-warnings phase1/animals-tab-ui.test.cjs */
+ * Needs the npm packages playwright (with its Chromium), pngjs and globe.gl@2.45.0, found through NODE_PATH (or ME_GLOBE_JS for
+ * the library file). Section 13 compares with main: from Git when the tree is a clone, or from BASE_DIR=<folder holding main's
+ * files at BASE_MAIN>; with neither, its file comparisons are reported NOT RUN and the suite exits non-zero.
+ * Run: NODE_PATH=<node_modules with playwright, pngjs, globe.gl> node --no-warnings phase1/animals-tab-ui.test.cjs */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), http = require('http'), crypto = require('crypto'), cp = require('child_process');
 const { PNG } = require('pngjs');
 const ROOT = path.join(__dirname, '..'), HUB = 'mother-earth.chadoberholzer.workers.dev';
-const GLOBE_JS = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js', 'utf8');
+// the globe library is served from a local copy in place of unpkg: ME_GLOBE_JS=<path to globe.gl.min.js>, or the globe.gl package
+// found through NODE_PATH. It must be the version the page pins (2.45.0); check 1k reads the version from the file's own banner.
+const GLOBE_PATH = process.env.ME_GLOBE_JS || (process.env.NODE_PATH || '').split(path.delimiter).filter(Boolean).map(d => path.join(d, 'globe.gl', 'dist', 'globe.gl.min.js')).find(f => fs.existsSync(f));
+if (!GLOBE_PATH) { console.log('FAIL  globe.gl@2.45.0 not found: set ME_GLOBE_JS or put the package on NODE_PATH'); process.exit(1); }
+const GLOBE_JS = fs.readFileSync(GLOBE_PATH, 'utf8'), GLOBE_VER = (/Version (\d+\.\d+\.\d+) globe\.gl/.exec(GLOBE_JS.slice(0, 400)) || [])[1] || (() => { try { return require(path.join(path.dirname(GLOBE_PATH), '..', 'package.json')).version; } catch (_) { return null; } })();
 const BASE_MAIN = process.env.BASE_MAIN || '0e620831b83b2ae7eed11a932edfd902d933f195';   // the exact main commit merged into this branch (T13 baseline)
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const BREAK = process.env.BREAK || '', EDIT = process.env.EDIT || '';
@@ -48,11 +57,23 @@ const BREAKS = {
   'announce-per-frame': [JS, "st.rtExact = next; st.rt = Math.floor(next);", "announce('t ' + next); st.rtExact = next; st.rt = Math.floor(next);"],
   // both guards removed (the switch's own and select()'s): a switch marked unavailable would then start a load
   'disabled-still-loads': [JS, "    if (why) { st.choice = null; if (!quiet) announce(`${nameOf(id)} cannot be shown. ${why}`); return paint(); }\n", '', "    if (b.getAttribute('aria-disabled') === 'true') return announce(`${nameOf(id)} cannot be shown. ${blocked()}`);\n", ''],
-  'no-pagehide-reset': [JS, "window.addEventListener('pagehide', () => { if (st.choice) select(null, true); });", ''],
+  'no-pagehide-reset': [JS, "window.addEventListener('pagehide', () => { cancelList(); if (st.choice) select(null, true); else paint(); });", "window.addEventListener('pagehide', () => { cancelList(); paint(); });"],
   'hidden-keeps-playing': [JS, "document.addEventListener('visibilitychange', () => { if (document.hidden && st.playing) pause(false); });", ''],
   'date-kept-on-fallback': [GJS, "st.backdrop === 'plain' ? (st.coast === 'failed' ? G.T.plainNoCoast : G.T.plain) : G.T.loading", "st.backdrop === 'plain' ? G.T.imagery : G.T.loading"],
   'auto-rotate': [GJS, "globe.controls().autoRotate = false;\n      st.globe = 'ok';", "globe.controls().autoRotate = true;\n      st.globe = 'ok';"],
   'coast-always-fetched': [GJS, "      size(); loadBackdrop();", "      size(); loadBackdrop(); loadCoast();"],
+  'filtered-says-recorded': [JS, "const F = !!st.man.card;", "const F = false;"],
+  'no-phone-scroll': [JS, "function showGlobe() { const box = $('an-globe-box'), panel = $('an-panel'); if (!box || !panel) return;", "function showGlobe() { const box = $('an-globe-box'), panel = $('an-panel'); return;"],
+  'scroll-on-answer': [JS, "seek(d.t[0], true); goArea();", "seek(d.t[0], true); goArea(); showGlobe();"],
+  'scroll-on-off': [JS, "if (turnOn && st.choice === id) showGlobe(); });", "showGlobe(); });"],
+  'scroll-ignores-reduced-motion': [JS, "const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),", "const reduce = false,"],
+  'deep-link-scrolls-to-globe': [JS, "b.focus({ preventScroll: true }); }", "b.focus({ preventScroll: true }); showGlobe(); }"],
+  'no-status-by-globe': [JS, "ns.textContent = t; ns.hidden = !t; }", "ns.textContent = ''; ns.hidden = true; }"],
+  'selection-keeps-list-retry': [JS, "    cancelList(); st.note = '';\n", "    st.note = '';\n"],
+  'list-retry-no-token': [JS, "} catch (e) { if (tok !== st.listTok) return; err = J.T.catFailed;", "} catch (e) { err = J.T.catFailed;"],
+  'list-retry-late-success': [JS, "const h = await hex(b); if (tok !== st.listTok) return;", "const h = await hex(b);", "const b = await r.arrayBuffer(); if (tok !== st.listTok) return;", "const b = await r.arrayBuffer();", "const r = await fetch(J.CATALOG, { cache: 'no-store', signal: c.signal }); if (tok !== st.listTok) return;", "const r = await fetch(J.CATALOG, { cache: 'no-store' });"],
+  'list-retry-no-time-limit': [JS, "L = { c, timer: setTimeout(() => c.abort(), J.WAIT_MS) }; st.list = L; paint();", "L = { c, timer: 0 }; st.list = L; paint();"],
+  'pagehide-keeps-list-retry': [JS, "window.addEventListener('pagehide', () => { cancelList(); if", "window.addEventListener('pagehide', () => { if"],
   'chooser-back': ['animals.html', '<div class="vh" id="an-say" aria-live="polite"></div>', '<select id="journey-choose"><option>x</option></select><div class="vh" id="an-say" aria-live="polite"></div>'],
   'switch-unlabelled': ['animals.html', '<span class="t">White shark, tag 118845 (2012–2013)</span>', '<span class="t"></span>'],
 };
@@ -62,7 +83,8 @@ const EDITS = { 'no-abort': [JS, "const abortLoad = () => { const c = st.abort; 
 const EXPECT = { 'not-exclusive': '3b', 'late-answer-draws': '5a', 'off-no-cancel': '5c', 'off-no-abort': '5g', 'load-on-open': '1b', 'deep-link-switches-on': '8a', 'fail-stays-on': '6a', 'list-error-local': '6h',
   'no-catalogue-check': '6h', 'no-manifest-check': '6f', 'no-display-check': '6e', 'no-content-check': '6g', 'marker-next-fix': '2d', 'future-fixes-drawn': '2e', 'join-over-rule': '12a', 'ignore-join-flags': '12c',
   'autoplay': '2b', 'announce-per-frame': '7e', 'disabled-still-loads': '11b', 'no-pagehide-reset': '9a', 'hidden-keeps-playing': '9c', 'date-kept-on-fallback': '10b', 'auto-rotate': '1g', 'coast-always-fetched': '1f',
-  'chooser-back': '1d', 'switch-unlabelled': '1c' };
+  'chooser-back': '1d', 'switch-unlabelled': '1c', 'filtered-says-recorded': '12h', 'no-phone-scroll': '16b', 'scroll-on-answer': '16c', 'scroll-on-off': '16e', 'scroll-ignores-reduced-motion': '16b',
+  'deep-link-scrolls-to-globe': '16j', 'no-status-by-globe': '16b', 'selection-keeps-list-retry': '17a', 'list-retry-no-token': '17a', 'list-retry-late-success': '17c', 'list-retry-no-time-limit': '17h', 'pagehide-keeps-list-retry': '17f' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
 
 // ---------- files
@@ -83,8 +105,8 @@ function fixture(id, mutate) { const T = JOUR[id], d = JSON.parse(JSON.stringify
   return { id, display: db, manifest: mb, cat, file: jr.file, d, m, jr }; }
 
 // ---------- server. S.over[file name] = { status, body, hold } overrides one asset; S.cat = bytes for the journey list; S.fx = a fixture
-const S = { over: {}, cat: null, fx: null, log: [], keepable: false };
-const reset = () => Object.assign(S, { over: {}, cat: null, fx: null, log: [], keepable: false });
+const S = { over: {}, q: {}, cat: null, fx: null, log: [], keepable: false };   // S.q[file name] = one-off answers, used in order before S.over
+const reset = () => Object.assign(S, { over: {}, q: {}, cat: null, fx: null, log: [], keepable: false });
 const TYPES = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.bin': 'application/octet-stream' };
 function served(f) { let t = fs.readFileSync(path.join(ROOT, f), 'utf8');
   for (const E of [BREAK && BREAKS[BREAK], EDIT && EDITS[EDIT]]) if (E && E[0] === f) for (let k = 1; k < E.length; k += 2) { const a = E[k], b = E[k + 1]; if (t.split(a).length !== 2) { console.log('FAIL  edit did not apply: ' + (BREAK || EDIT)); process.exit(1); } t = t.replace(a, b); }
@@ -93,7 +115,7 @@ function served(f) { let t = fs.readFileSync(path.join(ROOT, f), 'utf8');
 const srv = http.createServer(async (q, s) => {
   const p = decodeURIComponent(q.url.split('?')[0]), f = p.replace(/^\//, '') || 'index.html';
   const send = (code, type, body) => { s.writeHead(code, { 'content-type': type, 'cache-control': S.keepable ? 'no-cache' : 'no-store' }); s.end(body); };
-  if (p.startsWith('/assets/animals/')) { const name = p.split('/').pop(); S.log.push(name); const o = S.over[name];
+  if (p.startsWith('/assets/animals/')) { const name = p.split('/').pop(); S.log.push(name); const o = S.q[name] && S.q[name].length ? S.q[name].shift() : S.over[name];
     if (o && o.hold) await o.hold;
     if (o && o.status && o.status !== 200) return send(o.status, 'text/plain', 'no');
     if (o && o.body) return send(200, 'application/json', o.body);
@@ -131,7 +153,11 @@ async function open(browser, vp = { width: 1280, height: 860 }, hash = '', opts 
 }
 const state = page => page.evaluate(() => ({ ...ME.journey.state(), scene: ME.journey.sceneCount(), g: ME.animalsGlobe.state(), barHidden: document.getElementById('replay').hidden,
   say: document.getElementById('an-say').textContent, play: document.getElementById('replay-play').textContent, note: document.getElementById('replay-note').textContent, rule: document.getElementById('replay-rule').textContent,
-  range: document.getElementById('replay-range').value, focus: document.activeElement ? document.activeElement.id : null, integrity: document.getElementById('an-integrity').hidden ? null : document.getElementById('an-integrity-text').textContent }));
+  range: document.getElementById('replay-range').value, y: Math.round(scrollY), vh: innerHeight,
+  box: (() => { const r = document.getElementById('an-globe-box').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom) }; })(),
+  beside: (() => { const e = document.getElementById('an-status'), r = e.getBoundingClientRect(); return e.hidden ? null : { text: e.textContent, inView: r.top >= 0 && r.bottom <= innerHeight }; })(),
+  barTop: (() => { const e = document.getElementById('replay'); return e.hidden ? null : Math.round(e.getBoundingClientRect().top); })(),
+  retryBtn: (() => { const e = document.getElementById('an-integrity-retry'); return [e.textContent, e.getAttribute('aria-busy')]; })(), focus: document.activeElement ? document.activeElement.id : null, integrity: document.getElementById('an-integrity').hidden ? null : document.getElementById('an-integrity-text').textContent }));
 const checked = s => IDS.filter(id => s.switches[id].checked === 'true');
 const tgl = id => '#tgl-' + id;
 const settle = (page, id, st = 'ready') => page.waitForFunction(([i, w]) => { const s = ME.journey.state(); return w === 'off' ? s.status === 'off' : (s.choice === i && s.status === w); }, [id, st], { timeout: 30000 });
@@ -172,6 +198,7 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     ok('1i the backdrop uses Earth now\'s own selection rule: the same 36-hour date offset and layer as app.js, and the same address as index.html builds',
       app.includes('new Date(Date.now() - 36 * 3600e3).toISOString().slice(0, 10)') && app.includes(`id: '${img.G.IMG_LAYER}', sat: '${img.G.IMG_SAT}'`) && img.G.IMG_OFFSET_H === 36 && img.day === wantDay &&
       idx.includes("const gibs = '" + PREFIX + "' + IMG_DAY + '&LAYERS=' + IMG_LAYER.id;") && img.url === PREFIX + wantDay + '&LAYERS=' + img.G.IMG_LAYER && ctx._img[0] === img.url, [img.url, ctx._img]);
+    ok('1k the globe library served by this suite is the version the page pins (2.45.0)', GLOBE_VER === '2.45.0' && /unpkg\.com\/globe\.gl@2\.45\.0\//.test(fs.readFileSync(path.join(ROOT, 'animals.html'), 'utf8')), GLOBE_VER);
     // the tabs on every page
     for (const pg of ['index.html', 'timeline.html', 'moon.html', 'sun.html', 'sources.html']) { const p2 = await ctx.newPage(); await p2.goto(BASE + '/' + pg, { waitUntil: 'domcontentloaded' }); await p2.waitForTimeout(300);
       const t = await p2.evaluate(() => [...document.querySelectorAll('nav.tabs a')].map(a => a.getAttribute('href'))); ok(`1j ${pg}: one Animals tab, last, beside Moon and Sun`, t.join() === 'index.html,timeline.html,moon.html,sun.html,animals.html', t); await p2.close(); }
@@ -367,24 +394,42 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       ok(`12d ${NAME[id]}: the bar gives the Argos class of the fix and speaks of displayed fixes`, /Argos class [0-3AB] \(/.test(s.bar) && /Last displayed fix: displayed record ends here/.test(s.bar) && !/recorded fix/i.test(s.bar.replace('Replay time (recorded)', '')), s.bar);
       const k = Math.floor(D.t.length / 2), xyz = await coordsOf(o.page, D.lat[k], D.lon[k]); await o.page.evaluate(x => ME.journey.seek(x), D.t[k]); s = await state(o.page);
       ok(`12e ${NAME[id]}: the marker is on the displayed fix; its class is the file's`, near(s.objects.marker, xyz) && s.cls === D.lc[k] && s.objects.fixesShown === k + 1 && s.objects.lineShown === joinsTo(D, RULE, k), [s.cls, D.lc[k]]);
-      ok(`12f ${NAME[id]}: the row carries the manifest's own sentences`, s.switches[id].obs.includes(T.m.card.shown) && s.switches[id].obs.includes(T.m.card.not_route), s.switches[id].obs.slice(0, 200)); }
+      ok(`12f ${NAME[id]}: the row carries the manifest's own sentences`, s.switches[id].obs.includes(T.m.card.shown) && s.switches[id].obs.includes(T.m.card.not_route), s.switches[id].obs.slice(0, 200));
+      const n = D.t.length, clsWords = c => T.m.class_meanings[c] === 'no estimate' ? 'no error estimate' : 'nominal error ' + T.m.class_meanings[c];
+      const words = [], sample = [...Array(n).keys()].filter(q => q % 9 === 0 || q === n - 1 || (q < n - 1 && D.t[q + 1] - D.t[q] > RULE)).slice(0, 220);
+      for (const i of sample) { await o.page.evaluate(x => ME.journey.seek(x), D.t[i] + (i < n - 1 ? 1 : 0)); const bt = (await state(o.page)).bar; if (/was recorded|tracking record|recorded fix\b/i.test(bt.replace('Replay time (recorded)', ''))) words.push([i, bt]); }
+      ok(`12h ${NAME[id]}: at ${sample.length} sampled fixes, every ninth and every gap, the bar never says a fix "was recorded", "recorded fix" or "tracking record" (it says displayed)`, words.length === 0 && sample.length > 20, words.slice(0, 2));
+      const refused = []; for (let q = 1; q < n; q++) if (D.t[q] - D.t[q - 1] <= RULE && D.j[q] === 0) refused.push(q);
+      const picks = [1, 2, Math.floor(n / 3), Math.floor(n / 2), n - 2, n - 1].concat(refused.slice(0, 2)), bad = [];
+      for (const i of picks) { await o.page.evaluate(x => ME.journey.seek(x), D.t[i]); const q = await state(o.page);
+        if (q.i !== i || q.objects.fixesShown !== i + 1 || q.objects.lineShown !== joinsTo(D, RULE, i) || q.cls !== D.lc[i] || !q.bar.includes(`Argos class ${D.lc[i]} (${clsWords(D.lc[i])})`) || !near(q.objects.marker, q.objects.fixXYZ)) bad.push([i, q.i, q.objects.lineShown, joinsTo(D, RULE, i), q.cls]); }
+      ok(`12i ${NAME[id]}: at ${picks.length} replay times the marker is on the right fix, the class shown is that fix's, and exactly the build's joined steps up to then are drawn`, bad.length === 0, bad);
+      ok(`12j ${NAME[id]}: steps within the time limit that the build refused for land: ${refused.length}, as the manifest says`, refused.length === T.j.steps_refused_for_land, [refused.length, T.j.steps_refused_for_land]);
+      await o.page.evaluate(x => ME.journey.seek(x), D.t[n - 1]); const endBar = (await state(o.page)).bar;
+      ok(`12k ${NAME[id]}: at the last displayed fix the bar says the DISPLAYED record ends here`, endBar === `Replay time (recorded) ${utc(D.t[n - 1])} · Last displayed fix: displayed record ends here, ${utc(D.t[n - 1])} · Argos class ${D.lc[n - 1]} (${clsWords(D.lc[n - 1])})`, endBar);
+      if (id === SH) { await o.page.evaluate(x => ME.journey.seek(x), D.t[24]); const g24 = (await state(o.page)).bar;
+        ok("12l GPT's earlier case, shark index 24: the bar says no fix is DISPLAYED for 18 h 43 min 44 s", utc(D.t[24]) === '17 May 2012 08:09:01 UTC' && utc(D.t[25]) === '18 May 2012 02:52:45 UTC' && g24 === `Replay time (recorded) 17 May 2012 08:09:01 UTC · Last displayed fix 17 May 2012 08:09:01 UTC, at this time · Argos class ${D.lc[24]} (${clsWords(D.lc[24])}) · No fix is displayed for 18 h 43 min 44 s after it`, g24); }
+      if (id === W) ok("12m GPT's earlier case, whale end: the displayed record ends 12 Feb 2014 14:51:34 UTC and the bar does not call it the end of the tracking record", /Last displayed fix: displayed record ends here, 12 Feb 2014 14:51:34 UTC/.test(endBar) && !/tracking record/.test(endBar), endBar); }
     await o.ctx.close();
     for (const tz of ['Pacific/Auckland', 'America/Los_Angeles']) { reset(); const z = await open(browser, undefined, '', { extra: { timezoneId: tz, locale: 'en-US' } }); await on(z.page, Z); const s = await state(z.page);
       ok(`12g visitor in ${tz}: times are printed in UTC from the source's seconds`, s.bar.includes(utc(JOUR[Z].d.t[0])), s.bar); await z.ctx.close(); } }
 
   // ===== 13. Earth now is clean (T13 with §A7): baseline = the exact main commit merged into this branch
-  if (want(13)) { reset(); const git = a => cp.execFileSync('git', a, { cwd: ROOT, maxBuffer: 64e6 }).toString();
-    let base = true; try { git(['cat-file', '-e', BASE_MAIN + '^{commit}']); } catch (_) { base = false; }
-    ok(`13a the baseline main commit ${BASE_MAIN.slice(0, 7)} is present in this clone`, base);
-    if (base) { const mainIdx = git(['show', BASE_MAIN + ':index.html']), idx = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  if (want(13)) { reset(); const git = a => cp.execFileSync('git', a, { cwd: ROOT, maxBuffer: 64e6, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const BASE_DIR = process.env.BASE_DIR || ''; let how = '';
+    if (BASE_DIR && fs.existsSync(path.join(BASE_DIR, 'index.html'))) how = 'dir'; else { try { git(['cat-file', '-e', BASE_MAIN + '^{commit}']); how = 'git'; } catch (_) { } }
+    const mainFile = f => how === 'dir' ? fs.readFileSync(path.join(BASE_DIR, f), 'utf8') : git(['show', BASE_MAIN + ':' + f]);
+    if (!how) { fail++; failed.push('13a'); console.log(`NOT RUN  13a–13e: main ${BASE_MAIN.slice(0, 7)} is not available (no Git metadata here and no BASE_DIR). The comparisons with main were not made.`); }
+    else { ok(`13a the baseline is main ${BASE_MAIN.slice(0, 7)} (read from ${how === 'dir' ? 'BASE_DIR' : 'Git'})`, true);
+      const mainIdx = mainFile('index.html'), idx = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
       const strip = t => t.replace('    <a href="animals.html" data-view="animals">Animals</a>\n', '').replace('      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', '').replace(/style\.css\?v=\d+/, 'style.css?v=X');
       ok('13b index.html equals main\'s except the Animals tab link, the Animals menu link and the stylesheet version', strip(idx) === mainIdx.replace(/style\.css\?v=\d+/, 'style.css?v=X') && idx !== mainIdx);
       const same = ['layers.js', 'app.js', 'aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'timeline.js', 'phase1/worker.js', 'phase1/collector-mac.mjs', 'phase1/bare-earth-ui.test.cjs'];
-      const diff = same.filter(f => { try { return git(['show', BASE_MAIN + ':' + f]) !== fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch (_) { return true; } });
+      const diff = same.filter(f => { try { return mainFile(f) !== fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch (_) { return true; } });
       ok('13c Earth now\'s scripts, the Layers panel, the hub, the collector and the Bare Earth suite are byte-identical to main', diff.length === 0, diff);
-      const css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8'), mainCss = git(['show', BASE_MAIN + ':style.css']).split('\n'), cur = new Set(css.split('\n'));
-      const gone = mainCss.filter(l => !cur.has(l)); ok('13d the shared stylesheet: the only main rules changed are the header rules for five tabs (listed)', gone.length <= 4 && gone.every(l => /\.top \.promise|\.tabs a|\.top\{padding/.test(l)), gone);
-      for (const pg of ['moon.html', 'sun.html', 'timeline.html', 'sources.html']) { const a = git(['show', BASE_MAIN + ':' + pg]), b = fs.readFileSync(path.join(ROOT, pg), 'utf8'); ok(`13e ${pg} equals main's except the Animals links and the stylesheet version`, strip(b) === a.replace(/style\.css\?v=\d+/, 'style.css?v=X')); } }
+      const css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8'), mainCss = mainFile('style.css').split('\n'), cur = new Set(css.split('\n'));
+      const gone = mainCss.filter(l => !cur.has(l)); ok('13d the shared stylesheet is NOT identical to main: every main line is kept except the header rules changed for five tabs (at most 4 lines, listed on failure); the Animals rules are added', gone.length <= 4 && gone.every(l => /\.top \.promise|\.tabs a|\.top\{padding/.test(l)) && css.length > mainCss.join('\n').length, gone);
+      for (const pg of ['moon.html', 'sun.html', 'timeline.html', 'sources.html']) { const a = mainFile(pg), b = fs.readFileSync(path.join(ROOT, pg), 'utf8'); ok(`13e ${pg} equals main's except the Animals links and the stylesheet version`, strip(b) === a.replace(/style\.css\?v=\d+/, 'style.css?v=X')); } }
     const ctx = await ctxFor(browser, { width: 1280, height: 860 }); await ctx.route('**/' + HUB + '/**', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ layer: 'x', retrieved_at: new Date().toISOString(), stale_after_s: 10800, source_status: 'ok', cells: {}, record_format: 'rows', record_fields: [], records: [] }) }));
     const page = await ctx.newPage(), reqs = []; page.on('request', r => reqs.push(r.url())); await page.goto(BASE + '/index.html#journey=' + Z, { waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => window.ME && ME.layers, null, { timeout: 30000 }); await page.waitForTimeout(1500);
     const e = await page.evaluate(() => ({ ids: ['tgl-journey', 'journey-choose', 'card-journey', 'replay', 'leg-journey', 'an-globe'].filter(i => document.getElementById(i)), journey: typeof ME.journey, rows: ME.layers.rows.length, rowTxt: ME.layers.rows.map(r => r[0]).filter(t => /animal|journey/i.test(t)), scripts: [...document.scripts].map(x => x.getAttribute('src') || '').filter(x => /animals/.test(x)),
@@ -415,6 +460,88 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     await ctx.close(); reset(); S.over[JOUR[W].e.manifest] = { body: Buffer.from('{"x":1}') }; const o = await open(browser);
     const bad = await o.page.evaluate(id => { const s = document.getElementById(id); return [s.querySelector('[data-f="state"]').textContent, s.querySelector('[data-f="facts"]').hidden]; }, W);
     ok('15d a card whose manifest does not verify says so and shows no figure', /could not be verified/.test(bad[0]) && bad[1] === true, bad); await o.ctx.close(); }
+
+  // ===== 16. Phone: a press that switches a journey on brings the globe into view (GPT's Stage 1 review, finding 2)
+  if (want(16)) { const FAILED = 'The journey file could not be loaded. Nothing is drawn.';
+    const toSwitch = async (page, id) => { await page.evaluate(i => document.getElementById('tgl-' + i).scrollIntoView({ block: 'center' }), id); await page.waitForTimeout(80); };
+    const seen = s => s.box.top >= 0 && s.box.top <= 12 && s.box.bottom <= s.vh;
+    // where a thing sits on the screen: the browser keeps what is on screen in place when content above it changes height, so 'the page did not move' is checked on an element in view, not on the scroll offset
+    const topOf = (page, sel) => page.evaluate(q => Math.round(document.querySelector(q).getBoundingClientRect().top), sel);
+    for (const [w, h] of [[390, 740], [360, 560], [390, 844]]) { reset(); const { ctx, page, errs } = await open(browser, { width: w, height: h }); const tag = `${w}×${h}`; let s = await state(page);
+      ok(`16a ${tag}: nothing scrolls at page load`, s.y === 0 && s.scroll === null, [s.y, s.scroll]);
+      const g = gate(); S.over[JOUR[SH].j.file] = { hold: g.p }; await toSwitch(page, SH); const y0 = (await state(page)).y; await page.focus(tgl(SH)); await page.keyboard.press('Space'); await settle(page, SH, 'loading'); await page.waitForTimeout(150); s = await state(page);
+      ok(`16b ${tag}: at the press itself, before the journey has loaded, the globe is brought to the top of the screen, whole; one scroll, without animation under reduced motion; the loading line is beside the globe and in view; focus stays on the switch`,
+        y0 > 100 && seen(s) && s.scroll && s.scroll.n === 1 && s.scroll.behavior === 'auto' && s.beside && s.beside.text === 'White shark loading…' && s.beside.inView && s.focus === 'tgl-' + SH, { y0, y: s.y, box: s.box, scroll: s.scroll, beside: s.beside, focus: s.focus });
+      const CARD = '#' + W; await page.evaluate(q => document.querySelector(q).scrollIntoView({ block: 'start' }), CARD); await page.waitForTimeout(100); const yDown = (await state(page)).y, c0 = await topOf(page, CARD); g.go(); delete S.over[JOUR[SH].j.file]; await settle(page, SH); await page.waitForTimeout(400); s = await state(page); const c1 = await topOf(page, CARD);
+      ok(`16c ${tag}: the visitor scrolled away while it loaded; the late answer does NOT pull the page back`, yDown > 200 && Math.abs(c1 - c0) <= 2 && s.box.bottom < 0 && s.scroll.n === 1 && s.scene === 3, { yDown, c0, c1, box: s.box, n: s.scroll.n });
+      await page.evaluate(() => { ME.journey.setSpeed(3600); ME.journey.play(); }); await page.waitForTimeout(600); s = await state(page); const c2 = await topOf(page, CARD);
+      ok(`16d ${tag}: playback never scrolls the page`, s.playing === true && Math.abs(c2 - c1) <= 2 && s.scroll.n === 1, [c1, c2]);
+      await toSwitch(page, SH); const t1 = await topOf(page, tgl(SH)); await page.focus(tgl(SH)); await page.keyboard.press('Space'); await settle(page, null, 'off'); await page.waitForTimeout(150); s = await state(page); const t2 = await topOf(page, tgl(SH));
+      ok(`16e ${tag}: switching off does not take the page to the globe: the switch stays where it was on screen`, Math.abs(t2 - t1) <= 2 && s.box.bottom < 0 && s.scroll.n === 1 && checked(s).length === 0, [t1, t2, s.scroll]);
+      // a journey that loads at once: the globe and the top of the replay bar are on screen
+      await toSwitch(page, Z); await page.click(tgl(Z)); await settle(page, Z); await page.waitForTimeout(200); s = await state(page);
+      ok(`16f ${tag}: once shown, the whole globe and the start of the replay bar are on screen`, seen(s) && s.barTop !== null && s.barTop < s.vh && s.scroll.n === 2 && s.beside === null, { box: s.box, barTop: s.barTop, vh: s.vh });
+      const link = await page.evaluate(() => { const a = document.querySelector('.an-toswitches a'), r = a.getBoundingClientRect(); return { shown: getComputedStyle(a.parentElement).display !== 'none', h: r.height, inView: r.top >= 0 && r.bottom <= innerHeight, href: a.getAttribute('href') }; });
+      await page.click('.an-toswitches a'); await page.waitForTimeout(200); const back = await page.evaluate(() => { const r = document.getElementById('an-panel').getBoundingClientRect(); return r.top >= -1 && r.top < innerHeight; }); s = await state(page);
+      ok(`16g ${tag}: a link beside the globe goes back to the switches (at least 44 px high, on screen with the globe); it switches nothing and does not count as a reveal`, link.shown && link.h >= 44 && link.inView && link.href === '#an-panel' && back && s.choice === Z && s.scroll.n === 2, [link, back]);
+      // rapid switching, and off while loading
+      const g2 = gate(); S.over[JOUR[W].j.file] = { hold: g2.p }; await toSwitch(page, W); await page.click(tgl(W)); await page.waitForTimeout(100); const a1 = await state(page); await toSwitch(page, SH); await page.click(tgl(SH)); await settle(page, SH); await page.waitForTimeout(150); const a2 = await state(page); g2.go(); delete S.over[JOUR[W].j.file]; await page.waitForTimeout(400); s = await state(page);
+      ok(`16h ${tag}: two presses in a row: each press reveals the globe once; the superseded answer scrolls nothing and draws nothing`, seen(a1) && a1.scroll.n === 3 && seen(a2) && a2.scroll.n === 4 && s.scroll.n === 4 && s.y === a2.y && checked(s).join() === SH && s.n === JOUR[SH].d.t.length, [a1.scroll, a2.scroll, s.scroll]);
+      await page.click(tgl(SH), { force: true }).catch(() => {}); await page.evaluate(() => { if (ME.journey.state().choice) ME.journey.select(null); }); await page.waitForTimeout(100);
+      // failure: the message is beside the globe, on screen; the row's Retry reveals the globe again
+      S.over[JOUR[SH].j.file] = { status: 500 }; await toSwitch(page, SH); await page.click(tgl(SH)); await done(page); s = await state(page); const nFail = s.scroll.n;
+      ok(`16i ${tag}: a journey that fails after the reveal: its message is beside the globe and on screen (not only on its row below); no further scroll`, seen(s) && s.beside && s.beside.text === `White shark could not be shown. ${FAILED}` && s.beside.inView && nFail === 5 && s.switches[SH].retry === true && checked(s).length === 0, { beside: s.beside, box: s.box, n: nFail });
+      delete S.over[JOUR[SH].j.file]; await page.evaluate(i => document.querySelector(`.an-sw[data-journey="${i}"] [data-f="sw-retry"]`).scrollIntoView({ block: 'center' }), SH); await page.waitForTimeout(80); await page.click(`.an-sw[data-journey="${SH}"] [data-f="sw-retry"]`); await settle(page, SH); await page.waitForTimeout(150); s = await state(page);
+      ok(`16i2 ${tag}: the row's Retry reveals the globe again, once, and the journey is shown`, seen(s) && s.scroll.n === 6 && s.scene === 3 && s.beside === null, [s.scroll, s.box]);
+      ok(`16i3 ${tag}: no page error`, errs.length === 0, errs); await ctx.close(); }
+    { reset(); const { ctx, page } = await open(browser, { width: 390, height: 740 }, '#journey=' + W); await page.waitForTimeout(400); const s = await state(page);
+      const inView = await page.evaluate(i => { const r = document.getElementById(i).getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; }, 'tgl-' + W);
+      ok('16j phone, a link to one switch: the switch is on screen and focused; the page is not taken to the globe; nothing is on', s.focus === 'tgl-' + W && inView && s.scroll === null && s.y > 100 && checked(s).length === 0, [s.y, s.scroll, inView]); await ctx.close(); }
+    { reset(); const { ctx, page } = await open(browser, { width: 390, height: 740 }, '', { extra: { reducedMotion: 'no-preference' } }); await toSwitch(page, Z); await page.click(tgl(Z)); await settle(page, Z); await page.waitForFunction(() => { const r = document.getElementById('an-globe-box').getBoundingClientRect(); return r.top >= 0 && r.top <= 12; }, null, { timeout: 8000 }).catch(() => {}); const s = await state(page);
+      ok('16k phone without the reduced-motion setting: the reveal is a smooth scroll and ends with the globe on screen', s.scroll && s.scroll.behavior === 'smooth' && s.scroll.n === 1 && seen(s), [s.scroll, s.box]); await ctx.close(); }
+    { reset(); const { ctx, page } = await open(browser, { width: 1280, height: 600 }); await page.evaluate(i => document.getElementById('tgl-' + i).scrollIntoView({ block: 'center' }), W); const y0 = (await state(page)).y; await page.click(tgl(W)); await settle(page, W); const s = await state(page);
+      ok('16l desktop (switches beside the globe): a press does not scroll the page', s.scroll === null && s.y === y0, [s.y, y0, s.scroll]); await ctx.close(); }
+    { reset(); const noGL = ctx => ctx.addInitScript(() => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function (t, ...a) { return /webgl/.test(t) ? null : g.call(this, t, ...a); }; });
+      const { ctx, page } = await open(browser, { width: 390, height: 740 }, '', { pre: noGL }); await toSwitch(page, Z); const y0 = (await state(page)).y; await page.click(tgl(Z), { force: true }); await page.waitForTimeout(300); const s = await state(page);
+      ok('16m phone with no usable globe: a press on an unavailable switch does not scroll', s.scroll === null && s.y === y0 && checked(s).length === 0, [s.y, y0]); await ctx.close(); } }
+
+  // ===== 17. The shared list's Retry has its own bounded request (GPT's Stage 1 review, finding 1)
+  if (want(17)) { const CATN = 'journeys-R1.catalog.json', LIST_BAD = 'The list of journeys could not be verified. No journey can be shown until it verifies.', badCat = Buffer.from(CAT.toString().replace('"schema": 1', '"schema": 1 '));
+    const listError = async (browser, vp) => { reset(); const o = await open(browser, vp); S.q[CATN] = [{ body: badCat }]; await o.page.click(tgl(W)); await done(o.page); const s = await state(o.page); if (s.integrity !== LIST_BAD) throw new Error('17 setup: list error not reached: ' + s.integrity); S.log = []; return o; };
+    const aborted = o => o.failedReqs.filter(f => f[0] === CATN && /ERR_ABORTED/.test(f[1])).length;
+    { // an old Retry FAILS after a newer journey has verified and loaded
+      const o = await listError(browser), g = gate(); S.q[CATN] = [{ hold: g.p, status: 500 }]; await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => ME.journey.state().listBusy, null, { timeout: 5000 }); const busy = await state(o.page);
+      await o.page.click(tgl(Z)); await settle(o.page, Z); const before = await state(o.page); g.go(); await o.page.waitForTimeout(700); const s = await state(o.page);
+      ok('17a an old Retry that fails after a newer journey has verified and loaded changes nothing: no list error, nothing said, the journey still shown', s.integrity === null && s.catErr === '' && s.globeNote === '' && s.say === before.say && /^Plains zebra shown\./.test(s.say) && s.choice === Z && s.status === 'ready' && s.scene === 3 && s.listBusy === false, { integrity: s.integrity, say: s.say, bsay: before.say, note: s.globeNote, catErr: s.catErr, choice: s.choice, status: s.status, scene: s.scene, busy: s.listBusy });
+      ok('17b while the Retry runs its button says Checking and is marked busy; the later selection aborts the Retry\'s own request', busy.retryBtn[0] === 'Checking…' && busy.retryBtn[1] === 'true' && aborted(o) >= 1, [busy.retryBtn, o.failedReqs]); await o.ctx.close(); }
+    { // an old Retry SUCCEEDS after a newer failure of the list
+      const o = await listError(browser), g = gate(); S.q[CATN] = [{ hold: g.p }, { body: badCat }]; await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => ME.journey.state().listBusy, null, { timeout: 5000 });
+      await o.page.click(tgl(Z)); await done(o.page); const before = await state(o.page); g.go(); await o.page.waitForTimeout(700); const s = await state(o.page);
+      ok('17c an old Retry that succeeds late does not clear a newer list error or say the list verified', before.integrity === LIST_BAD && s.integrity === LIST_BAD && s.say === before.say && /^Plains zebra could not be shown\./.test(s.say) && !/verified\. Journeys can/.test(s.say) && checked(s).length === 0 && s.scene === 0, [before.say, s.say, s.integrity]); await o.ctx.close(); }
+    { // Retry, then Retry
+      const o = await listError(browser), g = gate(); S.q[CATN] = [{ hold: g.p, status: 500 }, {}]; await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => ME.journey.state().listBusy, null, { timeout: 5000 }); await o.page.click('#an-integrity-retry');
+      await o.page.waitForFunction(() => document.getElementById('an-integrity').hidden, null, { timeout: 10000 }); const before = await state(o.page); g.go(); await o.page.waitForTimeout(700); const s = await state(o.page);
+      ok('17d Retry pressed twice: the newer Retry decides; the older one\'s late failure changes and says nothing; its request was aborted', before.integrity === null && before.say === 'The list of journeys verified. Journeys can be switched on.' && s.integrity === null && s.say === before.say && s.listBusy === false && s.retryBtn[0] === 'Retry' && aborted(o) >= 1, [before.say, s.say, s.integrity]);
+      ok('17e a Retry of the list switches nothing on, draws nothing, and requests only the list', checked(s).length === 0 && s.scene === 0 && s.choice === null && s.scroll === null && S.log.length === 2 && S.log.every(n => n === CATN), S.log); await o.ctx.close(); }
+    { // Retry, then leaving the page
+      const o = await listError(browser), g = gate(); S.q[CATN] = [{ hold: g.p }]; await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => ME.journey.state().listBusy, null, { timeout: 5000 }); const before = await state(o.page);
+      await o.page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }))); await o.page.waitForTimeout(150); const mid = await state(o.page); g.go(); await o.page.waitForTimeout(700); const s = await state(o.page);
+      ok('17f leaving the page cancels a running Retry: its request is aborted, the button is back to Retry, and its late answer changes and says nothing', mid.listBusy === false && mid.retryBtn[0] === 'Retry' && mid.retryBtn[1] === null && aborted(o) >= 1 && s.integrity === LIST_BAD && s.say === before.say && s.listBusy === false, [mid.retryBtn, s.say, s.integrity]); await o.ctx.close(); }
+    { // the globe stops while a Retry runs
+      const o = await listError(browser), g = gate(); S.q[CATN] = [{ hold: g.p }]; await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => ME.journey.state().listBusy, null, { timeout: 5000 });
+      await o.page.evaluate(() => { const cv = document.querySelector('#an-globe canvas'), gl = cv.getContext('webgl2') || cv.getContext('webgl'), ext = gl && gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); else cv.dispatchEvent(new Event('webglcontextlost', { cancelable: true })); });
+      await o.page.waitForFunction(() => ME.animalsGlobe.state().globe === 'lost', null, { timeout: 15000 }); await o.page.waitForTimeout(200); const mid = await state(o.page); g.go(); await o.page.waitForTimeout(600); const s = await state(o.page);
+      ok('17g the globe stops while a Retry runs: the Retry is cancelled and its late answer changes nothing', mid.listBusy === false && s.integrity === LIST_BAD && !/verified\. Journeys can/.test(s.say) && s.listBusy === false, [mid.listBusy, s.say]); await o.ctx.close(); }
+    { // a request that never answers
+      const o = await listError(browser), never = new Promise(() => {}); const limit = await o.page.evaluate(() => { const w = ME.journey.J.WAIT_MS; ME.journey.J.WAIT_MS = 900; return w; });
+      S.q[CATN] = [{ hold: never }]; const t0 = Date.now(); await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => ME.journey.state().listBusy, null, { timeout: 5000 });
+      const ended = await o.page.waitForFunction(() => !ME.journey.state().listBusy, null, { timeout: 6000 }).then(() => true, () => false); const s = await state(o.page);
+      ok('17h a Retry whose request never answers ends at the time limit (the page\'s own limit is ' + limit + ' ms; 900 ms set for this check): the list error is said as a failure to load, the button is back to Retry, nothing is drawn', ended && Date.now() - t0 < 5000 && limit >= 5000 && s.integrity === 'The list of journeys could not be loaded. No journey can be shown until it loads.' && s.say === s.integrity && s.retryBtn[0] === 'Retry' && s.scene === 0 && checked(s).length === 0, [ended, s.integrity, s.say, limit]);
+      await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => document.getElementById('an-integrity').hidden, null, { timeout: 10000 }).catch(() => {}); await on(o.page, SH); const s2 = await state(o.page);
+      ok('17i after that, a Retry that is answered verifies the list and a journey can be shown; a journey load is not disturbed by the Retry\'s controller', s2.integrity === null && checked(s2).join() === SH && s2.scene === 3 && o.errs.length === 0, [s2.integrity, o.errs]); await o.ctx.close(); }
+    {
+      const o = await listError(browser, { width: 390, height: 740 }); await o.page.evaluate(() => document.getElementById('an-integrity-retry').scrollIntoView({ block: 'center' })); const s0 = await state(o.page); await o.page.click('#an-integrity-retry'); await o.page.waitForFunction(() => document.getElementById('an-integrity').hidden, null, { timeout: 10000 }); const s = await state(o.page);
+      ok('17j phone: the list\'s Retry does not scroll the page to the globe', s.scroll.n === s0.scroll.n && s.box.bottom < 0 && s.integrity === null, [s.y, s0.y, s.scroll]); await o.ctx.close(); } }
   } catch (e) { fail++; console.log('FAIL  suite error: ' + (e && e.stack || e).toString().slice(0, 900)); }
   await browser.close(); srv.close(); clearTimeout(wd);
   if (BREAK) { const hit = failed.some(n => n.startsWith(EXPECT[BREAK])); console.log(hit ? `BREAK CAUGHT  ${BREAK} (at "${EXPECT[BREAK]}"; ${fail} checks failed)` : `BREAK MISSED  ${BREAK}: expected a failure at "${EXPECT[BREAK]}"; failed: ${failed.slice(0, 6).join(' | ') || 'none'}`); process.exit(hit ? 0 : 1); }

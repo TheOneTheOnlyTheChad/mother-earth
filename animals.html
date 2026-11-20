@@ -6,7 +6,7 @@
 <title>Mother Earth — Animals</title>
 <meta name="description" content="Recorded animal journeys, replayed one at a time on their own globe, with their sources. Private preview.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612200100">
+<link rel="stylesheet" href="style.css?v=202612200200">
 </head>
 <body class="doc animals">
 <header class="top">
@@ -39,6 +39,8 @@
     <div class="an-globe-col">
       <div class="an-globe-box" id="an-globe-box"><div id="an-globe"></div></div>
       <div class="an-backdrop" id="an-backdrop">Backdrop: loading satellite imagery…</div>
+      <div class="an-status" id="an-status" hidden></div>
+      <p class="an-toswitches"><a href="#an-panel">Journey switches ↓</a></p>
       <div class="replay" id="replay" role="group" aria-label="Animal journey replay" hidden>
         <div class="rp-ctl">
           <button type="button" id="replay-play" aria-pressed="false">Play</button>
@@ -200,7 +202,7 @@
 </main>
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
 <script src="animals-globe.js?v=202612200100"></script>
-<script src="animals-journey.js?v=202612200100"></script>
+<script src="animals-journey.js?v=202612200200"></script>
 <script src="animals.js?v=202612200100"></script>
 </body>
 </html>

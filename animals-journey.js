@@ -70,7 +70,7 @@
       others: 'The backdrop keeps its own date; it is not matched to this journey.',
     },
   };
-  const st = { on: false, choice: null, status: 'off', gen: 0, man: null, jr: null, d: null, seg: null, i: 0, rt: 0, playing: false, speed: J.SPEED_DEFAULT,
+  const st = { on: false, choice: null, status: 'off', gen: 0, list: null, listTok: 0, note: '', scroll: null, man: null, jr: null, d: null, seg: null, i: 0, rt: 0, playing: false, speed: J.SPEED_DEFAULT,
     raf: 0, lastTick: 0, objs: null, said: '', announced: '', ctl: null, abort: null, err: {}, catErr: '', catDetail: '' };
 
   // ---------- time, in UTC, from whole seconds (the visitor's zone is never used)
@@ -143,15 +143,24 @@
       off(); st.choice = null;
       if (shared) { st.catErr = unv ? J.T.catUnverified : J.T.catFailed; st.catDetail = detail; announce(`${nameOf(id)} could not be shown. ${st.catErr}`); }
       else { st.err[id] = { kind: e instanceof NotBuilt ? 'notbuilt' : unv ? 'unverified' : 'failed', text: e instanceof NotBuilt ? J.T.notBuilt : unv ? J.T.unverified : J.T.failed, detail }; announce(`${nameOf(id)} could not be shown. ${st.err[id].text}`); }
-      paint(); }
+      st.note = st.announced; paint(); }
   }
-  /** the shared journey list on its own (the group's Retry): verify it and clear or keep the group error; switches nothing on */
+  /** the shared journey list on its own (the group's Retry): verify it and clear or keep the group error; switches nothing on.
+   *  It has its own request, time limit and token (st.list), apart from a journey load's: a newer Retry, a later selection,
+   *  leaving the page or losing the globe cancels it, and an answer that still arrives after that changes and says nothing. */
+  function cancelList() { const L = st.list; st.list = null; st.listTok++; if (L) { clearTimeout(L.timer); try { L.c.abort(); } catch (_) { } } }
   async function checkList() {
-    try { const r = await fetch(J.CATALOG, { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); const b = await r.arrayBuffer();
-      if (await hex(b) !== J.CATALOG_SHA256) { st.catErr = J.T.catUnverified; st.catDetail = 'the journey list does not match its pinned checksum'; }
-      else { JSON.parse(new TextDecoder().decode(b)); st.catErr = ''; st.catDetail = ''; announce('The list of journeys verified. Journeys can be switched on.'); }
-    } catch (e) { st.catErr = J.T.catFailed; st.catDetail = String(e && e.message || e); }
-    if (st.catErr) announce(st.catErr); paint();
+    cancelList(); const tok = st.listTok, c = new AbortController(), L = { c, timer: setTimeout(() => c.abort(), J.WAIT_MS) }; st.list = L; paint();
+    let err = '', detail = '';
+    try { const r = await fetch(J.CATALOG, { cache: 'no-store', signal: c.signal }); if (tok !== st.listTok) return; if (!r.ok) throw new Error('HTTP ' + r.status);
+      const b = await r.arrayBuffer(); if (tok !== st.listTok) return;
+      const h = await hex(b); if (tok !== st.listTok) return;
+      if (h !== J.CATALOG_SHA256) { err = J.T.catUnverified; detail = 'the journey list does not match its pinned checksum'; }
+      else JSON.parse(new TextDecoder().decode(b));
+    } catch (e) { if (tok !== st.listTok) return; err = J.T.catFailed; detail = String(e && e.message || e); }
+    finally { clearTimeout(L.timer); if (st.list === L) st.list = null; }
+    st.catErr = err; st.catDetail = detail; st.note = err;
+    announce(err || 'The list of journeys verified. Journeys can be switched on.'); paint();
   }
 
   // ---------- drawing: three objects of our own on the globe's scene (a line, the fix marks, the marker)
@@ -237,7 +246,9 @@
       if (sw) sw.textContent = cur ? (st.status === 'ready' ? 'replay' : 'loading') : e ? 'not shown' : 'off';
       if (o) o.textContent = cur ? (st.status === 'ready' ? readyText() : J.T.loading) : e ? e.text : why ? why : J.T.off;
       if (retry) retry.hidden = !(e && !cur && !why); }
-    const box = $('an-integrity'); if (box) { box.hidden = !st.catErr; const t = $('an-integrity-text'); if (t) t.textContent = st.catErr; }
+    const box = $('an-integrity'); if (box) { box.hidden = !st.catErr; const t = $('an-integrity-text'); if (t) t.textContent = st.catErr;
+      const rb = $('an-integrity-retry'); if (rb) { if (st.list) rb.setAttribute('aria-busy', 'true'); else rb.removeAttribute('aria-busy'); rb.textContent = st.list ? 'Checking…' : 'Retry'; } }
+    const ns = $('an-status'); if (ns) { const t = st.choice && st.status === 'loading' ? `${nameOf(st.choice)} loading…` : !st.choice ? st.note : ''; ns.textContent = t; ns.hidden = !t; }
     const bar = $('replay'); bar.hidden = !(st.choice && st.status === 'ready');
     if (!bar.hidden) { paintCtl(); paintBar(true); }
   }
@@ -288,6 +299,7 @@
   /** make `id` the one selected journey (null = none). The previous one is switched off first; it is never restored. */
   async function select(id, quiet) {
     id = id || null; if (id === st.choice) return;
+    cancelList(); st.note = '';
     const prev = st.choice; if (prev) off();
     st.choice = id;
     if (!id) { if (!quiet && prev) announce(`${nameOf(prev)} switched off.`); return paint(); }
@@ -297,22 +309,33 @@
     if (!quiet) announce((prev ? `${nameOf(prev)} switched off. ` : '') + `${nameOf(id)} loading.`);
     await load();
   }
+  /** One-column layout (phones): the switches sit below the globe, so a press that switches a journey on (or its Retry) brings
+   *  the globe to the top of the screen, once, at the press itself. Never when a load answers, so a late answer cannot pull the
+   *  visitor back; never on switching off, at page load, for the list's Retry or for a link to a switch. Focus is not moved.
+   *  The loading or failure line (#an-status) and a link back to the switches are beside the globe. */
+  function showGlobe() { const box = $('an-globe-box'), panel = $('an-panel'); if (!box || !panel) return;
+    const r = box.getBoundingClientRect(); if (panel.getBoundingClientRect().top < r.bottom - 1) return;              // switches beside the globe: nothing to do
+    const h = document.querySelector('header.top'), hp = h ? getComputedStyle(h).position : '', clear = h && (hp === 'sticky' || hp === 'fixed') ? Math.max(0, h.getBoundingClientRect().bottom) : 0;
+    if (r.top >= clear && r.bottom <= innerHeight) return;                                                            // already in view
+    const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches), top = Math.max(0, Math.round(scrollY + r.top - clear - 8));
+    st.scroll = { top, behavior: reduce ? 'auto' : 'smooth', n: (st.scroll ? st.scroll.n : 0) + 1 };
+    try { window.scrollTo({ top, behavior: st.scroll.behavior }); } catch (_) { window.scrollTo(0, top); } }
   for (const b of switches) b.addEventListener('click', () => { const id = b.dataset.journey;
     if (b.getAttribute('aria-disabled') === 'true') return announce(`${nameOf(id)} cannot be shown. ${blocked()}`);
-    select(id === st.choice ? null : id); });                            // pressing the selected journey's switch (shown or still loading) switches it off
-  for (const id of switches.map(b => b.dataset.journey)) { const r = part(id, 'sw-retry'); if (r) r.addEventListener('click', () => { if (st.err[id] && !blocked()) select(id); }); }
+    const turnOn = id !== st.choice; select(turnOn ? id : null); if (turnOn && st.choice === id) showGlobe(); });                            // pressing the selected journey's switch (shown or still loading) switches it off
+  for (const id of switches.map(b => b.dataset.journey)) { const r = part(id, 'sw-retry'); if (r) r.addEventListener('click', () => { if (st.err[id] && !blocked()) { select(id); if (st.choice === id) showGlobe(); } }); }
   { const r = $('an-integrity-retry'); if (r) r.addEventListener('click', checkList); }
 
   // a hidden browser tab pauses playback; the replay itself is kept
   document.addEventListener('visibilitychange', () => { if (document.hidden && st.playing) pause(false); });
   // leaving the page switches the journey off, so a page the browser keeps and restores on Back (its back/forward cache) comes
   // back with nothing on, the same as a fresh load; pageshow repeats it in case the page was frozen before pagehide ran
-  window.addEventListener('pagehide', () => { if (st.choice) select(null, true); });
+  window.addEventListener('pagehide', () => { cancelList(); if (st.choice) select(null, true); else paint(); });
   window.addEventListener('pageshow', e => { if (e.persisted && st.choice) select(null, true); });
   // keep the marker a steady size while the visitor zooms with the replay paused
   setInterval(() => { if (st.objs && !st.playing) sizeMarker(); }, 500);
   // the globe: when it stops being usable (graphics context lost) the journey is switched off and the rows say why
-  if (ME.animalsGlobe) ME.animalsGlobe.onChange(() => { if (st.choice && blocked()) { const id = st.choice; select(null, true); announce(`${nameOf(id)} switched off. ${blocked()}`); } paint(); });
+  if (ME.animalsGlobe) ME.animalsGlobe.onChange(() => { if (blocked()) cancelList(); if (st.choice && blocked()) { const id = st.choice; select(null, true); announce(`${nameOf(id)} switched off. ${blocked()}`); } paint(); });
 
   // a link to one journey (animals.html#journey=<id>, and the links on the study cards): bring that journey's switch into view
   // and focus it. Nothing is switched on. An unknown id does nothing.
@@ -325,7 +348,7 @@
   ME.journey = { drawn, on: () => !!st.choice, J,
     /** read-only aids for tests and the console */
     state: () => ({ choice: st.choice, cls: st.d && st.d.lc && st.i >= 0 ? st.d.lc[st.i] : null, on: !!st.choice, status: st.status, gen: st.gen, playing: st.playing, speed: st.speed, rt: st.rt, i: st.i, n: st.d ? st.d.t.length : 0,
-      err: JSON.parse(JSON.stringify(st.err)), catErr: st.catErr, catDetail: st.catDetail, announced: st.announced, blocked: blocked(),
+      err: JSON.parse(JSON.stringify(st.err)), globeNote: st.note, listBusy: !!st.list, listTok: st.listTok, scroll: st.scroll ? { ...st.scroll } : null, catErr: st.catErr, catDetail: st.catDetail, announced: st.announced, blocked: blocked(),
       switches: Object.fromEntries(switches.map(b => { const id = b.dataset.journey, r = part(id, 'sw-retry'); return [id, { checked: b.getAttribute('aria-checked'), busy: b.getAttribute('aria-busy'), disabled: b.getAttribute('aria-disabled'),
         state: (part(id, 'sw-state') || {}).textContent, obs: (part(id, 'sw-obs') || {}).textContent, retry: r ? !r.hidden : null }]; })),
       fixTime: st.d && st.i >= 0 ? st.d.t[st.i] : null, bar: $('replay').hidden ? null : $('replay-now').textContent, drawn: drawn(),
