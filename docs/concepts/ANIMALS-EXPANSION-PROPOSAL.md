@@ -2,7 +2,7 @@
 
 20 Nov 2026 13:04 UTC (clock reading) · **rev 2, consolidated** (passed by GPT as a planning package) · **rev 2.1, 20 Nov: §9 only, after audit B** · **docs only.** Nothing built, no Animals code branch touched, no data file downloaded or saved, no account created, no agreement accepted, no provider contacted, nothing spent. Animals implementation stays parked. The other thread's probe is untouched.
 
-Rev 2 replaces revs 1 to 1.2 in full. It folds in GPT's round 3 review (`reviews/2026-11-20-animals-expansion-round3-gpt-review.md`) and removes the override layers. What the earlier revisions got wrong is listed once, in §14. Companion files: the source-audit briefs (`ANIMALS-EXPANSION-AUDIT-BRIEFS.md`) and the penguin enquiry draft, rev 2, unsent (`docs/research/animals-source-audit/ENQUIRY-DRAFT-PENGUINS.md`).
+Rev 2 replaces revs 1 to 1.2 in full. It folds in GPT's round 3 review (`reviews/2026-11-20-animals-expansion-round3-gpt-review.md`) and removes the override layers. What the earlier revisions got wrong is listed once, in §14. Companion files: the source-audit briefs (`ANIMALS-EXPANSION-AUDIT-BRIEFS.md`) and the penguin enquiry draft, rev 2 (written unsent; an enquiry has since been SENT by Chad, see `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md`) (`docs/research/animals-source-audit/ENQUIRY-DRAFT-PENGUINS.md`).
 
 ## 1. Scope and evidence key
 
@@ -121,7 +121,7 @@ Rev 2 replaces revs 1 to 1.2 in full. It folds in GPT's round 3 review (`reviews
 - **Existing, unchanged:** NOAA Southeast Fisheries Science Center (bottlenose dolphins): sent by Chad; no reply on record. ATAP (SAIAB): contact established; substantive response pending. Neither of us checked an inbox. No follow-up and no duplicate.
 - **Worth sending, Chad's decision:** the penguin message, rev 2 of the draft. Its purpose is now reuse terms for the repository file (version B), corrections and interpretation, and whether one track could be requested. It no longer asks where the data are. A chart from version A does not wait for it.
 - **Conditional:** CMS/GIUM, only once an African migration is chosen.
-- **Worth sending, Chad's decision (rev 2.1, after audit B):** one enquiry to the IWC Secretariat. The IWC's website terms require prior written permission to republish its material, so the proposed recovery card cannot show IWC wording or figures without it. The same message asks for the abundance figure's derivation, reference year and range. Draft, unsent: `docs/research/animals-source-audit/ENQUIRY-DRAFT-IWC.md`. Audit: `docs/research/animals-source-audit/WHALE-RECOVERY.md`.
+- **Worth sending, Chad's decision (rev 2.1, after audit B):** one enquiry to the IWC Secretariat. The IWC's website terms require prior written permission to republish its material, so the proposed recovery card cannot show IWC wording or figures without it. The same message asks for the abundance figure's derivation, reference year and range. Draft: `docs/research/animals-source-audit/ENQUIRY-DRAFT-IWC.md`. **Update, 20 Nov: SENT by Chad in GPT's wording, with a penguin enquiry and a Cape Vidal enquiry; see `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md`.** Audit: `docs/research/animals-source-audit/WHALE-RECOVERY.md`.
 - **Not needed:** IUCN for a category-only card. USGS and the two Movebank packages (open licences on the records).
 - **Later:** eBird, Motus, Living Planet, an active Movebank study owner; the tracking database's formal request, only after a reply and through Chad's own account.
 

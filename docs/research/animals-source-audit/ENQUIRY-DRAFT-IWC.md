@@ -1,6 +1,8 @@
 # Animals: IWC enquiry, draft
 
-20 Nov 2026 · rev 1 · **DRAFT. NOT SENT.** For GPT, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. This is a new enquiry. It is separate from the NOAA enquiry (sent), the ATAP enquiry (contact established, response pending) and the penguin draft (unsent), and changes none of them.
+**SUPERSEDED AS A DRAFT: THE ENQUIRY HAS BEEN SENT.** Chad sent an IWC enquiry on 20 Nov 2026 from his own email (his statement of 20 Nov), using text GPT prepared; the sent text is not on record in this repository and may differ from the draft below, which is kept as history. No promise of permanently non-commercial use was made (Chad). No reply reported. Sending is not permission. No duplicate and no follow-up unless Chad decides. Record: `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md`.
+
+20 Nov 2026 · rev 1 · **Written as a draft; since SENT by Chad in GPT's wording, see the note above.** For GPT, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. This is a new enquiry. It is separate from the NOAA enquiry (sent), the ATAP enquiry (contact established, response pending) and the penguin draft (unsent), and changes none of them.
 
 ## Who and why
 - **Recipient:** the IWC Secretariat, at the address its "Copyright disclaimer" page gives for permission requests (`iwc.int/disclaimer`). No address is written in this repository.

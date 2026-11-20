@@ -1,6 +1,8 @@
 # Animals: penguin enquiry, draft
 
-20 Nov 2026 · rev 2 (GPT's round 3 replacement, adopted with small changes; passed by GPT as ready for Chad's decision) · rev 2.1 adds one optional sentence below, the draft itself unchanged · **DRAFT. NOT SENT.** For GPT, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. This is a new enquiry about penguins; it is separate from the NOAA enquiry (sent) and the ATAP enquiry (contact established, response pending), and changes neither.
+**SUPERSEDED AS A DRAFT: THE ENQUIRY HAS BEEN SENT.** Chad sent a penguin enquiry on 20 Nov 2026 from his own email (his statement of 20 Nov), using text GPT prepared; the sent text is not on record in this repository and may differ from the draft below, which is kept as history. It also asked about one historical journey. No reply reported. Sending is not permission. No duplicate and no follow-up unless Chad decides. Record: `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md`.
+
+20 Nov 2026 · rev 2 (GPT's round 3 replacement, adopted with small changes; passed by GPT as ready for Chad's decision) · rev 2.1 adds one optional sentence below, the draft itself unchanged · **Written as a draft; since SENT by Chad in GPT's wording, see the note above.** For GPT, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. This is a new enquiry about penguins; it is separate from the NOAA enquiry (sent) and the ATAP enquiry (contact established, response pending), and changes neither.
 
 ## Who
 - **Proposed recipient:** Dr Richard Sherley, through a professional contact route Chad verifies as current. He is the corresponding author on the Dryad record, the owner of the repository and a named provider of the Robben Island tracking datasets. One message to one person.

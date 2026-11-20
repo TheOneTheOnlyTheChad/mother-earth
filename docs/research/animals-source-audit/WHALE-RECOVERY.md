@@ -108,7 +108,7 @@ From the IWC's "Copyright disclaimer" page (`iwc.int/disclaimer`), read in full:
   1. **IWC permission** to display the status sentence, the figure with its range, the growth class and period, with the IWC's display guidelines and acknowledgement; and, in the same message, what year the figure refers to and what the range is.
   2. **Cape Vidal:** the values are verified by GPT. What is open is reuse of five attributed values in a newly drawn chart (§4). IWC permission would not clear this separate material.
 - If the IWC's answer on the figure is slow or negative, GPT's point applies: the dated status statement could still be used with permission, and the number left unavailable.
-- **For Chad's decision:** one enquiry to the IWC Secretariat. GPT judged it warranted and a draft justified; the draft is `docs/research/animals-source-audit/ENQUIRY-DRAFT-IWC.md`, **unsent**. Sending is a separate instruction from Chad. It is a new enquiry and changes nothing about NOAA (sent) or ATAP (contact established, response pending).
+- **For Chad's decision:** one enquiry to the IWC Secretariat. GPT judged it warranted and a draft justified; the draft is `docs/research/animals-source-audit/ENQUIRY-DRAFT-IWC.md`. **Update, 20 Nov: Chad has SENT an IWC enquiry and a separate Cape Vidal enquiry (GPT's wording); see `ENQUIRIES-EXPANSION.md`. No reply reported; sending is not permission.** Sending is a separate instruction from Chad. It is a new enquiry and changes nothing about NOAA (sent) or ATAP (contact established, response pending).
 - An unread lead: the Scientific Committee's assessment is published in the IWC's journal. Its licence and whether it states the reference year were not checked.
 
 ## 6. Not done, not claimed
