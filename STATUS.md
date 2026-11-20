@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 20 Nov 2026
 
+## 20 Nov 12:44 UTC (clock reading) — **Animals expansion proposal rev 1.1 (`animals-expansion-proposal` `ffa790f`): IWC and *Ostrich* pages read in Chad's Chrome.** (docs only; new-spec thread; nothing built, sent or spent; the shared pane not used)
+- **Chad (20 Nov):** the sites that failed in rev 1 should have been read through his Chrome extension or the pane with his sign-in; ask for access. Done for three pages, 12:42 to 12:48 UTC, in a tab Claude opened and closed.
+- **IWC status graphics (read in full):** humpback Western Indian Ocean (BSC) "Abundant and recovered after strong growth", 18,111 (15,580 to 20,700), growth 1995 to 2015 strongly increased, last update 2026: **GPT's reading confirmed.** West South Africa (BSB2) 484 (138 to 860), very low. Western South Atlantic (BSA) 11,672 (7,255 to 16,149), "not yet recovered".
+- **Change:** stock A withdrawn as the fallback recovery example (the 2019 paper's 93% and the IWC's current "not yet recovered" disagree). Recovery card = IWC stock C, with the Cape Vidal C1 shore counts as its observed series if they can be shown.
+- **2024 *Ostrich* penguin paper (publisher's page):** open access; no data-availability statement or repository in the page text; supplement is a PDF, not opened. The enquiry's first question stands.
+- **Not read:** Dryad (Chrome refused page reading on that site; Chad's permission to give). CMS, IUCN terms, Living Planet, eBird, Motus, OTN, SAEON, the tracking database's full terms, the USGS herd list and the Cape Vidal paper are still unread.
+- **Lesson:** when a workspace fetch fails or returns a tool summary, use Chad's Chrome extension (not the shared pane during the other thread's windows) and raise the site prompt, before writing "not reached".
+
 ## 20 Nov 12:34 UTC (clock reading) — **Animals (implementation still PARKED): expansion proposal rev 1 and an UNSENT penguin enquiry draft for GPT, on docs-only branch `animals-expansion-proposal` `4c682e4`.** (new-spec thread; nothing built; no Animals code branch, hub, site or probe touched; nothing sent, nothing spent)
 - **Chad's brief (20 Nov, his own message):** read GPT's expansion brief, challenge it against the full concept and the coverage record, return a docs-only proposal for every unstarted or deferred area (priorities: penguin population evidence, one whale recovery example, one migration corridor, one bird journey), draft the penguin enquiry unsent, say which other enquiries are worthwhile, keep NOAA and ATAP as recorded, leave implementation parked and the probe alone, bring it back for GPT.
 - **On the branch (cut from main `3736cc8`):** `docs/concepts/ANIMALS-EXPANSION-PROPOSAL.md` rev 1; `docs/research/animals-source-audit/ENQUIRY-DRAFT-PENGUINS.md` rev 1 (DRAFT, NOT SENT); GPT's round 1 brief filed as `reviews/2026-11-20-animals-expansion-round1-gpt-brief.md`.
