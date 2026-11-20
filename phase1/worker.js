@@ -3293,8 +3293,8 @@ async function dustRoute(env, p) {
  * Storage: earthview/current.json (frame and previous; every write conditional), earthview/state.json (the last source check and
  * the last collection outcome, kept apart from the frame), earthview/held.json (every stored picture and when it stopped being
  * current or previous). A picture is deleted ONLY in a run that has just published a newer verified frame, and only when it is
- * neither current nor previous and left that role at least GRACE_S ago. A failed or idle run deletes nothing. A run claims its
- * picture on the held list before the pointer can name it, and cleanup marks before it deletes (evCleanup), so the two are ordered.
+ * neither current nor previous and left that role at least GRACE_S ago. A failed or idle run deletes nothing. Every stored picture
+ * has a key no other run ever had or will have (a counter on the held list), so a late or repeated delete cannot reach a newer one.
  * Gate: EARTHVIEW_ENABLED=1 for the scheduled path (absent = no request at all, nothing written). /admin/run/earthview runs once.
  * Outside LAYERS, cells, history, health and the generic writeDown. Licence: CC BY 4.0; credit EUMETSAT and NASA (catalogue). */
 const EARTHVIEW = {
@@ -3519,34 +3519,30 @@ async function collectEarthView(env, ms) {
   if (dec.w !== P.w || dec.h !== P.h) return evFail(env, ms, 'picture failed validation', 200, `decoded size ${dec.w}x${dec.h}`, T, check);
   const cmp = evCompare(dec, png);
   if (!cmp.ok) return evFail(env, ms, 'picture failed validation', 200, cmp.reason + ' ' + JSON.stringify(cmp), T, check);
-  // 5. Store the picture once, under a key that names its time and content; read it back
-  const id = evKeyOf(T) + '-' + pic.sha256.slice(0, 16), key = EARTHVIEW.PREFIX + id + '/picture.jpg';
+  // 5. A KEY NO OTHER RUN HAS EVER HAD OR WILL HAVE. The held list carries a counter (next_gen) that only a conditional write can
+  //    advance; this run takes the next number and, in the same write, lists its picture as "pending" under a key that contains that
+  //    number. A key is therefore written by exactly one run, and once its object is deleted nothing ever writes that key again:
+  //    a retry of the same frame with the same bytes is a NEW number and a NEW key. So a cleanup that deletes a key late, twice, or
+  //    from an out-of-date view of the list can only delete what was already condemned; it cannot touch a picture stored since.
+  const heldEmpty = () => ({ schema: 2, next_gen: 1, items: [] }), published_at = nowIso(), runStamp = new Date(ms).toISOString(); let gen = 0;
+  await evUpdate(env, EARTHVIEW.HELD, heldEmpty, h => { gen = Math.max(1, Number(h.next_gen) || 1, ...h.items.map(x => (Number(x.gen) || 0) + 1));
+    return { ...h, schema: 2, next_gen: gen + 1, items: [...h.items, { id: evKeyOf(T) + '-' + pic.sha256.slice(0, 16) + '-g' + gen, gen, key: `${EARTHVIEW.PREFIX}${evKeyOf(T)}-${pic.sha256.slice(0, 16)}-g${gen}/picture.jpg`, bytes: pic.bytes, source_frame_time: T, published_at, left_at: null, pending: runStamp }] }; });
+  const id = evKeyOf(T) + '-' + pic.sha256.slice(0, 16) + '-g' + gen, key = `${EARTHVIEW.PREFIX}${id}/picture.jpg`;
   const stored = async () => { let b = null; try { const o = await env.R2.get(key); b = o ? await o.arrayBuffer() : null; } catch (_) { return 'unreadable'; } return !b ? 'absent' : (b.byteLength === pic.bytes && await sha256Bytes(b) === pic.sha256) ? 'same' : 'differs'; };
-  const store = async () => { try { await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return String(e).slice(0, 160); } return null; };
-  const had = await stored();
-  if (had === 'differs' || had === 'unreadable') return evFail(env, ms, 'stored copy differs', 200, key, T, check);
-  if (had === 'absent') {
-    const err = await store(); if (err) return evFail(env, ms, 'picture write failed', 200, err, T, check);
-    if (await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, key, T, check);
-  }
-  const published_at = nowIso();
-  const frame = { id, source_frame_time: T, served_time: T, time_basis: 'the server named this frame time on both responses (Warning header)', first_listed_seen_at: checkAt, fetched_at: published_at, run: new Date(ms).toISOString(),
+  // 5b. Store it, create-only (an object already at this key is never replaced), and read it back
+  let put; try { put = await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return evFail(env, ms, 'picture write failed', 200, String(e).slice(0, 160), T, check); }
+  if (put === null) return evFail(env, ms, 'picture key already in use', 200, key, T, check);
+  if (await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, key, T, check);
+  const frame = { id, source_frame_time: T, served_time: T, time_basis: 'the server named this frame time on both responses (Warning header)', first_listed_seen_at: checkAt, fetched_at: published_at, run: runStamp,
     request: { service: 'WMS 1.3.0 GetMap', layer: 'mtg_fd:' + EARTHVIEW.LAYER, crs: EARTHVIEW.CRS, crs_definition: EARTHVIEW.CRS_DEFINITION, bbox: EARTHVIEW.BBOX, width: P.w, height: P.h, format: 'image/jpeg', bgcolor: EARTHVIEW.BGCOLOR, time: T },
     picture: { file: 'picture.jpg', key, path: `/snapshot/earthview/${id}/picture.jpg`, type: 'image/jpeg', bytes: pic.bytes, sha256: pic.sha256, w: P.w, h: P.h },
     checks: { decoded: true, progressive: sc.progressive, scans: sc.scans, check_image_sha256: chk.sha256, ...cmp, ok: undefined, reason: undefined } };
-  // 6. CLAIM the picture on the held list BEFORE the pointer can name it. The claim is a conditional write that (a) refuses if a
-  //    cleanup has marked this picture for deletion, and (b) clears any grace period it had begun, so that from this write on no
-  //    cleanup can select it (cleanup selects only pictures whose grace period has run out; see step 8). The stored bytes are then
-  //    checked AGAIN, after the claim: a cleanup that finished before the claim has removed the picture and its entry, the claim made
-  //    a new entry, and the picture is stored afresh here. Nothing can remove it between this check and the pointer write.
-  const heldEmpty = () => ({ schema: 1, items: [] }); let beingRemoved = false;
-  await evUpdate(env, EARTHVIEW.HELD, heldEmpty, h => { const x = h.items.find(i => i.id === id); beingRemoved = !!(x && x.deleting); if (beingRemoved) return null;
-    const entry = { id, key, bytes: pic.bytes, source_frame_time: T, published_at: (x && x.published_at) || published_at, left_at: null, claimed_at: published_at, claimed_by: new Date(ms).toISOString() };
-    return { ...h, items: x ? h.items.map(i => i.id === id ? entry : i) : [...h.items, entry] }; });
-  if (beingRemoved) return evFail(env, ms, 'stored copy is being removed', 200, key + ' is marked for deletion by a cleanup; not published in this run', T, check);
-  const after = await stored();
-  if (after === 'absent') { const err = await store(); if (err) return evFail(env, ms, 'picture write failed', 200, 'after claim: ' + err, T, check); }
-  if (after !== 'same' && await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, 'after claim: ' + key, T, check);
+  // 6. CLAIM: the entry stops being pending. The write refuses if the entry is missing or marked for deletion (which would need this
+  //    run to have been stopped for the whole grace period); the pointer is written only after it succeeds.
+  let claimed = false;
+  await evUpdate(env, EARTHVIEW.HELD, heldEmpty, h => { const x = h.items.find(i => i.gen === gen); claimed = !!x && !x.deleting; if (!claimed) return null;
+    return { ...h, items: h.items.map(i => i.gen === gen ? { ...i, pending: undefined, left_at: null, claimed_at: nowIso() } : i) }; });
+  if (!claimed) return evFail(env, ms, 'stored copy is being removed', 200, key + ' is no longer listed, or is marked for deletion; not published', T, check);
   // 7. Move the pointer only if no other run has published this time or a later one meanwhile
   const up = await evUpdate(env, EARTHVIEW.POINTER, evEmpty, c => (c.frame && c.frame.source_frame_time >= T) ? null : { ...evEmpty(), frame, previous: c.frame || null });
   if (!up.wrote) { await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'superseded', frame_time: T, at: nowIso() } })); await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, `superseded: ${up.cur.frame.source_frame_time} was published first; ${T} not published`); return 'earthview:superseded ' + T; }
@@ -3557,25 +3553,34 @@ async function collectEarthView(env, ms) {
   return 'earthview:published ' + T;
 }
 /** Removes pictures that are neither current nor previous and left that role at least GRACE_S ago. Called only by a run that has
- * just published a newer verified frame. Why it cannot remove a picture that can still become current or previous:
- *  1. A picture becomes current only through a run that first CLAIMED it (collector step 6): a conditional write to the held list
- *     that sets left_at to null and refuses if the entry is marked "deleting".
- *  2. Here a picture is marked "deleting" by a conditional write to the same list, and only if, IN THAT WRITE'S OWN VIEW of the
- *     list, it is not in the pointer just read and its left_at is at least GRACE_S old. Both writes are conditional on the list
- *     being unchanged since it was read, so they are ordered: a claim first makes the picture ineligible (left_at null, and a later
- *     cleanup can only restart its grace period from that moment); a mark first makes the claim refuse.
- *  3. The object is deleted only after the mark is in place, and only if a second read of the pointer still does not name it.
- *     The entry is removed after the object. A mark left behind by an interrupted cleanup is finished by the next one.
- *  4. Current and previous are taken from the pointer as read here, never from what this run believes it published. */
+ * just published a newer verified frame. Any number of cleanups may overlap, stop half way, or act on an out-of-date view.
+ * WHY NO CLEANUP CAN DELETE A PICTURE THE POINTER NAMES OR MAY COME TO NAME:
+ *  1. One key, one writer, one life. A key holds a number taken from the list's counter by a conditional write (collector step 5).
+ *     Only the run that took the number writes that key, once, create-only. After its object is deleted the key is never written
+ *     again, by anyone: there is no path in this file that stores to a key it did not just allocate.
+ *  2. An entry can enter the pointer only through its own run, straight after that run's claim (step 6). It never re-enters: a
+ *     later run for the same frame is a different entry with a different key.
+ *  3. An entry is marked "deleting" only by a conditional write whose own view shows it absent from the pointer just read and at
+ *     least GRACE_S past the moment a cleanup first saw it out of role. Its own run's claim refuses a marked entry. So a marked
+ *     entry is not in the pointer and can never be put there.
+ *  4. Therefore deleting a marked entry's key is safe WHENEVER it happens and HOWEVER OFTEN: by this cleanup, by another cleanup
+ *     that found the same mark, or by a cleanup that was paused and resumes after the entry is gone. The key it deletes cannot
+ *     hold a current, previous or future picture (1 and 2). Deleting an absent key does nothing.
+ *  5. A delete that fails leaves the mark; a list update that fails after the delete leaves a marked entry with no object. Either
+ *     way the next cleanup finds the mark, deletes again (harmless) and removes the entry. Marked entries are not served.
+ *  6. Current and previous are read from the pointer here, twice; the second read guards a state rules 1 to 3 do not produce.
+ * What this rests on: R2 conditional puts behaving as probed on the production bucket; the held list not being lost (its counter
+ * would restart: step 5 also takes the counter past every number still listed, and the create-only put refuses a key that still
+ * has an object); and no run pausing for the whole grace period between its claim and its pointer write. */
 async function evCleanup(env) {
-  const heldEmpty = () => ({ schema: 1, items: [] }), liveOf = p => new Set([p && p.frame && p.frame.id, p && p.previous && p.previous.id].filter(Boolean));
+  const heldEmpty = () => ({ schema: 2, next_gen: 1, items: [] }), liveOf = p => new Set([p && p.frame && p.frame.id, p && p.previous && p.previous.id].filter(Boolean));
   const live = liveOf((await evRead(env, EARTHVIEW.POINTER, evEmpty)).cur), at = nowIso(), nowMs = Date.parse(at);
   const h = await evUpdate(env, EARTHVIEW.HELD, heldEmpty, hh => ({ ...hh, items: hh.items.map(x => x.deleting ? x : live.has(x.id) ? { ...x, left_at: null }
     : !x.left_at ? { ...x, left_at: at } : (nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 && String(x.key).startsWith(EARTHVIEW.PREFIX)) ? { ...x, deleting: at } : x) }));
   const marked = h.body.items.filter(x => x.deleting); if (!marked.length) return 0;
   const live2 = liveOf((await evRead(env, EARTHVIEW.POINTER, evEmpty)).cur), gone = [], spared = [];
-  for (const x of marked) { if (live2.has(x.id)) { spared.push(x.id); continue; } try { await env.R2.delete(x.key); gone.push(x.id); } catch (_) {} }
-  if (gone.length || spared.length) await evUpdate(env, EARTHVIEW.HELD, heldEmpty, hh => ({ ...hh, items: hh.items.filter(x => !(x.deleting && gone.includes(x.id))).map(x => x.deleting && spared.includes(x.id) ? { ...x, deleting: undefined, left_at: null } : x) }));
+  for (const x of marked) { if (live2.has(x.id)) { spared.push(x.key); continue; } try { await env.R2.delete(x.key); gone.push(x.key); } catch (_) {} }
+  if (gone.length || spared.length) await evUpdate(env, EARTHVIEW.HELD, heldEmpty, hh => ({ ...hh, items: hh.items.filter(x => !(x.deleting && gone.includes(x.key))).map(x => x.deleting && spared.includes(x.key) ? { ...x, deleting: undefined, left_at: null } : x) }));
   return gone.length;
 }
 async function runEarthView(env, ms) { let r = null; const g = await guarded(env, 'earthview', ms, async (e, m) => { r = await collectEarthView(e, m); }); return r || g; }
@@ -3589,15 +3594,15 @@ async function evRoute(env, p) {
     return json({ schema: 1, layer: 'earthview', frame: strip(cur && cur.frame), previous: strip(cur && cur.previous), source_check: (st && st.source_check) || null, collection: (st && st.collection) || null,
       limits: { waiting_s: EARTHVIEW.WAITING_LIMIT_S, provisional: true }, cadence_min: EARTHVIEW.EVERY_MIN, source: EARTHVIEW.SOURCE, collecting: env.EARTHVIEW_ENABLED === '1', now: nowIso() }, 200, { 'Cache-Control': 'no-store' });
   }
-  if (p.length !== 4 || p[3] !== 'picture.jpg' || !/^\d{8}T\d{4}Z-[0-9a-f]{16}$/.test(p[2])) return none(404, 'not found');
+  if (p.length !== 4 || p[3] !== 'picture.jpg' || !/^\d{8}T\d{4}Z-[0-9a-f]{16}-g\d{1,12}$/.test(p[2])) return none(404, 'not found');
   let cur, held; try { cur = await getJson(env, EARTHVIEW.POINTER); held = await getJson(env, EARTHVIEW.HELD); } catch (e) { return none(503, 'unreadable'); }
   const fr = cur && [cur.frame, cur.previous].find(f => f && f.id === p[2]);
-  const x = fr ? fr.picture : held && (held.items || []).filter(i => i.id === p[2] && !i.deleting).map(i => ({ key: i.key, bytes: i.bytes, sha256: null }))[0];
+  const x = fr ? fr.picture : held && (held.items || []).filter(i => i.id === p[2] && !i.deleting && !i.pending).map(i => ({ key: i.key, bytes: i.bytes, sha256: null }))[0];
   if (!x) return none(404, 'not found');
   let buf; try { const o = await env.R2.get(x.key); buf = o ? await o.arrayBuffer() : null; } catch (e) { return none(503, 'unreadable'); }
   if (!buf) return none(503, 'missing');
   const sha = await sha256Bytes(buf);
-  if (buf.byteLength !== x.bytes || (x.sha256 ? sha !== x.sha256 : sha.slice(0, 16) !== p[2].slice(-16))) return none(503, 'integrity');
+  if (buf.byteLength !== x.bytes || (x.sha256 ? sha !== x.sha256 : sha.slice(0, 16) !== p[2].split('-')[1])) return none(503, 'integrity');
   return new Response(buf, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': EARTHVIEW.CACHE_FILE, 'ETag': '"' + sha + '"', ...CORS } });
 }
 /* The JPEG decoder carried for Earth from Space: jpeg-js 0.4.4, lib/decoder.js (https://github.com/jpeg-js/jpeg-js), the JpegImage

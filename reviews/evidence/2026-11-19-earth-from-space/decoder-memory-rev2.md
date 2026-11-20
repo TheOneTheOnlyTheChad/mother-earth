@@ -1,4 +1,4 @@
-# Decoder memory and CPU, corrected (rev 2, 20 Nov 2026)
+# Decoder memory and CPU, corrected (rev 2, 20 Nov 2026; two statements revised the same day after GPT's review of `b588071`, marked below)
 
 Replaces the memory figures of `decoder-measurements-rev1-superseded.jsonl` and of packet rev 1 §4. Raw output: `decoder-measurements-rev2.jsonl` (nine runs: three real frames × three modes). Script: `phase1/earthview-decoder-measure.mjs`. Node v22, 2 vCPU cloud workspace. **None of this is a measurement inside a Cloudflare Worker.**
 
@@ -30,7 +30,9 @@ Replaces the memory figures of `decoder-measurements-rev1-superseded.jsonl` and 
 ## Against the Worker limit
 - Cloudflare's limits page: 128 MB per isolate, "including the JavaScript heap and WebAssembly allocations"; per isolate, not per invocation; one isolate can handle many concurrent requests. Its changelog of 30 Jun 2026 describes the dashboard's Memory usage figure as the V8 isolate memory at the time of each invocation, under that limit.
 - **The live hub today** (dashboard, last 24 hours, read 20 Nov 04:51 UTC; `cloudflare-dashboard-read-2026-11-20.json`): memory usage P50 2.69 MB, P90 3.24 MB, P99 and P99.9 16.86 MB; "Exceeded Memory" 0 in 3,090 invocations.
-- Adding the measured peak to the live hub's highest figure: about 17 + 49 to 54 = **roughly 66 to 71 MB of 128 MB**, if a Worker counts memory as Node's counters do. **That "if" is not established.** workerd's accounting of array storage, its collector's timing, and its own overheads are not measured here. The RSS-style figure (about 80 to 88 MB over baseline) is the pessimistic bound on this evidence; no evidence here says which is nearer.
+- **Revised (GPT, review of `b588071`).** The dashboard's 16.86 MB is a reported P99 and P99.9 over 24 hours. It is not the highest memory the hub used and not a maximum; the page gives no maximum. An earlier version of this file added it to the sampled readings and called the sum a figure against the limit: **that sum is withdrawn.** The two numbers come from different runtimes and different kinds of reading, and no combined maximum or available headroom has been measured.
+- **Revised (GPT).** The rise in Node's process RSS (about 78 to 88 MB) is an observation of another runtime's whole process. An earlier version called it a "pessimistic bound" for a Worker: **withdrawn.** Nothing here bounds a Worker's memory from above or below.
+- The readings taken with a forced collection before each one ("live") are sampled observations under collection behaviour altered by the forcing. They are not how the code runs, in Node or in a Worker.
 - The dashboard figure is taken "at the time of each invocation", so it may not show a peak inside one. A production trial would have to be judged by "Exceeded Memory" counts and by the run's own outcome, not by that chart alone.
 
 ## Shared isolate (caveat retained)
@@ -40,5 +42,5 @@ The limit is on the isolate. The same isolate may be serving page requests (`/sn
 Whole validation 348 to 375 ms: structure walk about 1 ms, JPEG decode about 330 to 350 ms, comparison about 10 to 20 ms. The live hub's CPU time today: P50 3.55 ms, P99 244 ms.
 
 ## What this does and does not support
-- It supports: the decoder's JavaScript-accounted peak is about 50 to 55 MB over baseline at 2,048 px, not 80 MB.
-- It does not support choosing a decoder option or a production trial by itself: no number here was measured in a Worker. A smaller picture, a modified decoder and a WebAssembly decoder remain unmeasured.
+- It supports: in Node, the largest sampled reading of JavaScript-accounted memory during the decode is about 49 to 55 MB over baseline at 2,048 px, not 80 MB. GPT's own run of the day frame on the Mac (Node v24.14.1, GPT's figures): 55.23 MiB sampled increase over 402 readings, 7.15 MiB retained.
+- It does not support choosing a decoder option or a production trial by itself: no number here was measured in a Worker. Worker memory, CPU, the effect of concurrent requests in the isolate, and the served-time header for this layer and projection all remain unverified. A smaller picture, a modified decoder and a WebAssembly decoder remain unmeasured.

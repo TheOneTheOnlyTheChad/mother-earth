@@ -53,7 +53,7 @@ const get = p => fetch(B + p).then(r => r.json()); const scene = n => get('/__sc
     ok('B1 current, waiting, last check time', s.head === 'Current: the newest frame the source lists' && s.lines[0] === 'Waiting for the next frame.' && s.lines[1] === 'Source last checked at 00:25 UTC.', s);
     ok('B2 source frame time in UTC with the date, machine-readable too', s.time === '00:00 UTC, 19 Nov 2026' && s.datetime === '2026-11-19T00:00:00Z', [s.time, s.datetime]);
     ok('B3 age counted from the hub’s clock, not this device’s', s.age === '25 minutes ago', s.age);
-    ok('B4 the picture is the hub’s, whole, 2048 square', /^http:\/\/127\.0\.0\.1:\d+\/snapshot\/earthview\/20261119T0000Z-[0-9a-f]{16}\/picture\.jpg$/.test(s.src) && s.nat.join() === '2048,2048', [s.src, s.nat]);
+    ok('B4 the picture is the hub’s, whole, 2048 square', /^http:\/\/127\.0\.0\.1:\d+\/snapshot\/earthview\/20261119T0000Z-[0-9a-f]{16}-g\d+\/picture\.jpg$/.test(s.src) && s.nat.join() === '2048,2048', [s.src, s.nat]);
     ok('B5 alternative text names the product and the source frame time', /Meteosat at 0° longitude/.test(s.alt) && /GeoColour/.test(s.alt) && /source frame time 00:00 UTC, 19 Nov 2026/.test(s.alt), s.alt);
     { const c = await pix(p, [[6, 6], [2040, 6], [6, 2040], [2040, 2040], [1024, 1024], [700, 500], [1300, 800], [1024, 300], [1500, 1400]]);
       ok('B6 the surround is the colour that was asked for and the disk is not', c.slice(0, 4).every(x => Math.abs(x[0] - 11) < 8 && Math.abs(x[1] - 16) < 8 && Math.abs(x[2] - 22) < 8) && c.slice(4).some(x => Math.abs(x[0] - 11) > 25 || Math.abs(x[1] - 16) > 25 || Math.abs(x[2] - 22) > 25), c);
