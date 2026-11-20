@@ -4,7 +4,8 @@
  * and shows no figure.
  * Conservation and population are fixed "Not available yet" states: no source has been reviewed, and nothing stands in for
  * them. A count of tagged animals is labelled as a sample size.
- * This file fetches the journey list and one manifest per card. It does not load the journey, the globe library or app.js. */
+ * This file fetches the journey list and one manifest per card: details for the cards, never a journey's coordinates. The globe is
+ * animals-globe.js and the replay is animals-journey.js (animals-tab-rc, stage 1). It does not load app.js. */
 (() => {
   const $ = id => document.getElementById(id);
   const A = { CATALOG: 'assets/animals/journeys-R1.catalog.json', CATALOG_SHA256: 'a25cdce33091e0b1a62f4cce35c93f26b192d92409e53dc573ea513056bf3470', BASE: 'assets/animals/',

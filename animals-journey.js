@@ -1,33 +1,44 @@
-/* Mother Earth — Animal journey: a dated replay of one tracked animal's recorded fixes (animals-zebra-preview-rc;
- * docs/concepts/ANIMALS-PROPOSAL.md rev 2.2). PRIVATE PREVIEW. From animals-journeys-preview-rc (19 Nov 2026): one switch and a
- * chooser over three recorded journeys (zebra Z3866 by GPS; white shark tag 118845 and false killer whale tag 98364 by Argos, each
- * filtered at build time by phase1/animals/build_argos_journey.py). A dated archive feature: Chad's decision of 19 Nov 2026 allows
- * recorded journeys on the Animals tab; every other layer keeps the live-feed rule.
+/* Mother Earth — Animal journeys on the Animals page: a dated replay of one tracked animal's recorded fixes.
+ * PRIVATE PREVIEW. animals-tab-rc, stage 1 (20 Nov 2026; docs/concepts/ANIMALS-BIRD-BUILD-PROPOSAL.md rev 3.1, Part A): the replay
+ * moved here from Earth now, on Chad's design instruction. This page has its own globe (animals-globe.js). Earth now carries no
+ * journey control. History: animals-zebra-preview-rc, then animals-journeys-preview-rc (one switch and a chooser on Earth now;
+ * three recorded journeys: zebra Z3866 by GPS; white shark tag 118845 and false killer whale tag 98364 by Argos, each filtered at
+ * build time by phase1/animals/build_argos_journey.py). The data files, manifests and verification are unchanged from that build.
+ * ONE JOURNEY AT A TIME. Each animal has its own labelled switch (role="switch"); there is no chooser. Nothing is on when the page
+ * opens. Switching a second animal on switches the first off at once: its request is aborted, its objects leave the scene and
+ * its replay stops; then the second loads. While it loads the second switch reads on (aria-busy). If it fails it returns to off,
+ * its error and Retry stay on its own row, and the first is NOT brought back. Retry goes through the same path as the switch.
+ * FAILURE SCOPE. A manifest or display file that fails affects that journey only. The journey list (catalogue) is shared: if it
+ * cannot be verified, no journey from it can be trusted, so that is one error for the whole group, with its own Retry.
+ * NETWORK. This file requests nothing until a switch is pressed. Then: the journey list, that study's manifest, that journey's
+ * display file. No journey's coordinates are requested before its own switch is on.
  * Argos journeys carry a quality class per fix (shown with the fix) and a per-step join flag made at build time: a step is joined
  * only if it is within the journey's time limit AND the build found the drawn line clear of land in its land map.
- * One optional layer, off on load. Nothing is requested while it is off.
  * Rules this file keeps:
  *  - Observation-based. The marker is only ever on a recorded fix: the last one at or before the replay time. Nothing is
  *    interpolated, smoothed, thinned or modelled. Only the past is drawn: fixes and lines later than the replay time are not on
  *    the globe, and scrubbing backwards removes them.
  *  - The line joins consecutive recorded fixes. It never joins two fixes more than the study's gap rule apart (the manifest's
- *    gap_rule.max_join_seconds; for this study 3 hours, a Mother Earth display rule, not the researchers').
+ *    gap_rule.max_join_seconds; a Mother Earth display rule, not the researchers').
  *  - Times are the source's own, to the second, printed in UTC. The visitor's time zone is never used.
- *  - Replay time is not the globe's time. No replay control touches another layer's clock, date, data or selection, the header
- *    clock, the imagery or the day/night shading. This file writes only to its own card, its own replay bar and its own objects.
- *  - Files are verified before anything is drawn: the manifest against the sha256 pinned here, the display file against the
- *    manifest's sha256, then counts, end times, order and coordinate ranges. A file that fails draws nothing.
- *  - Switching off stops playback, aborts a request in flight and refuses any answer that still arrives (a late answer draws nothing), removes and disposes every object
- *    this file added, hides the replay bar and takes the entry out of the Key.
- *  - The Sky zoom-out view pauses and hides the journey and restores it, paused, at the same replay time. A hidden browser tab
- *    pauses playback and keeps the replay. A new page load starts bare: nothing is remembered. Leaving the page switches the
- *    journey off, so a page restored by Back also starts bare.
- *  - Its own scene objects, never a globe.gl data layer (the page uses those for other layers and redraws them).
- * The Key and "Key · N layers" follow drawn(): the journey counts only while its objects are on the globe and visible. */
+ *  - Replay time is not the page's time. No replay control touches the header clock or the backdrop. This file writes only to
+ *    the journey rows, its own replay bar and its own objects.
+ *  - Files are verified before anything is drawn: the journey list against the sha256 pinned here, the manifest against the list,
+ *    the display file against the manifest, then counts, end times, order and coordinate ranges. A file that fails draws nothing.
+ *  - Switching off stops playback, aborts a request in flight and refuses any answer that still arrives (a late answer draws
+ *    nothing), removes and disposes every object this file added, and hides the replay bar.
+ *  - A hidden browser tab pauses playback and keeps the replay. A new page load starts with nothing on. Leaving the page switches
+ *    the journey off, so a page restored by Back also starts with nothing on.
+ *  - Its own scene objects, never a globe.gl data layer.
+ *  - No globe, no replay: with no usable 3-D globe (none at start, the library failed, or the graphics context was lost) the
+ *    switches are marked unavailable and say why; the study details stay readable. */
 (() => {
   const ME = window.ME = window.ME || {};
   const $ = id => document.getElementById(id);
-  const tgl = $('tgl-journey'); if (!tgl) return;
+  const switches = [...document.querySelectorAll('button.an-tgl[data-journey]')]; if (!switches.length) return;
+  const rowOf = id => document.querySelector('.an-sw[data-journey="' + id + '"]');
+  const part = (id, f) => { const r = rowOf(id); return r ? r.querySelector('[data-f="' + f + '"]') : null; };
+  const nameOf = id => { const b = switches.find(x => x.dataset.journey === id); return b ? (b.dataset.name || id) : id; };
   const J = {
     CATALOG: 'assets/animals/journeys-R1.catalog.json',          // the list of journeys; it pins each study's manifest, which pins its display file
     CATALOG_SHA256: 'a25cdce33091e0b1a62f4cce35c93f26b192d92409e53dc573ea513056bf3470',
@@ -41,13 +52,14 @@
     MARK_PX: 0.012,                     // marker radius as a fraction of the camera distance: about the same size at any zoom
     FIX_SIZE: 0.012,                    // fix mark half-size in globe units (globe radius 100): about 750 m on the ground
     T: {
-      off: 'Off. Switch on to load the recorded journey.',
+      off: 'Off. Switch on to replay this recorded journey on the globe.',
       loading: 'Loading the journey file…',
       unverified: 'Journey file could not be verified. Nothing is drawn.',
       failed: 'The journey file could not be loaded. Nothing is drawn.',
       noGlobe: 'The journey needs the 3-D globe, which is not available in this browser. Nothing is drawn.',
+      catUnverified: 'The list of journeys could not be verified. No journey can be shown until it verifies.',
+      catFailed: 'The list of journeys could not be loaded. No journey can be shown until it loads.',
       notBuilt: 'The globe has not finished loading, so the journey cannot be drawn yet.',
-      sky: 'Hidden while the zoom-out view is open. Paused at the same replay time.',
       first: 'First recorded fix',
       last: 'Last recorded fix: tracking record ends here',
       // filtered journeys (Argos): the source holds fixes that are not displayed, so the bar speaks of displayed fixes only.
@@ -55,11 +67,11 @@
       firstShown: 'First displayed fix', lastShown: 'Last displayed fix: displayed record ends here', midShown: 'Last displayed fix',
       marks: 'The fix marks are drawn large so they can be seen with the whole journey in view. Their size does not show uncertainty.',
       line: 'The line joins recorded fixes. The path between fixes was not recorded.',
-      others: 'Other layers on the globe retain their own dates and times; they are not matched to this journey.',
+      others: 'The backdrop keeps its own date; it is not matched to this journey.',
     },
   };
-  const st = { on: false, status: 'off', why: '', gen: 0, man: null, jr: null, d: null, seg: null, i: 0, rt: 0, playing: false, speed: J.SPEED_DEFAULT,
-    raf: 0, lastTick: 0, objs: null, sky: false, said: '', ctl: null, abort: null };
+  const st = { on: false, choice: null, status: 'off', gen: 0, man: null, jr: null, d: null, seg: null, i: 0, rt: 0, playing: false, speed: J.SPEED_DEFAULT,
+    raf: 0, lastTick: 0, objs: null, said: '', announced: '', ctl: null, abort: null, err: {}, catErr: '', catDetail: '' };
 
   // ---------- time, in UTC, from whole seconds (the visitor's zone is never used)
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -80,6 +92,7 @@
     try { const r = await fetch(url, { cache: 'no-store', signal: c.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.arrayBuffer(); } finally { clearTimeout(timer); if (st.abort === c) st.abort = null; } }
   const abortLoad = () => { const c = st.abort; st.abort = null; if (c) try { c.abort(); } catch (_) { } };
   class Unverified extends Error { }
+  class NotBuilt extends Error { }
   /** every check the display file must pass before anything is drawn; throws Unverified with the reason */
   /** a step (fix i−1 → fix i) is joined when it is within the journey's time rule and, for files that carry join flags, the build allowed it */
   const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule && (!d.j || d.j[i] === 1);
@@ -102,11 +115,13 @@
     return jr;
   }
   async function load() {
-    abortLoad(); const gen = ++st.gen; st.status = 'loading'; st.why = ''; paint();
+    abortLoad(); const gen = ++st.gen, id = st.choice; st.status = 'loading'; paint();
+    let shared = true;                                           // true while the failure would be the shared journey list's
     try {
       const cb = await get(J.CATALOG); if (gen !== st.gen) return;
       if (await hex(cb) !== J.CATALOG_SHA256) throw new Unverified('the journey list does not match its pinned checksum'); if (gen !== st.gen) return;
       let cat; try { cat = JSON.parse(new TextDecoder().decode(cb)); } catch (_) { throw new Unverified('the journey list is not readable'); }
+      shared = false; st.catErr = ''; st.catDetail = '';                       // the list verified: from here a failure is this journey's own
       const ce = (cat.journeys || []).find(j => j.id === st.choice); if (!ce) throw new Unverified('the journey list has no journey ' + st.choice);
       const mb = await get(J.BASE + ce.manifest); if (gen !== st.gen) return;
       if (await hex(mb) !== ce.manifest_sha256) throw new Unverified('the manifest does not match the checksum in the journey list'); if (gen !== st.gen) return;
@@ -119,10 +134,24 @@
       st.man = man; st.jr = jr; st.d = d; st.ce = ce;
       // seg[i] = number of line segments whose later fix has index ≤ i (a segment joins fix i−1 to fix i when they are within the rule)
       const rule = man.gap_rule.max_join_seconds, seg = new Uint32Array(d.t.length); let k = 0; for (let i = 1; i < d.t.length; i++) { if (joins(d, rule, i)) k++; seg[i] = k; } st.seg = seg;
-      if (!build()) { st.status = 'failed'; st.why = J.T.notBuilt; st.d = null; return paint(); }
-      st.status = 'ready'; st.playing = false; ensureBar(); setBarFrame(); paint(); seek(d.t[0], true);
-    } catch (e) { if (gen !== st.gen) return; clearObjs(); st.d = null;
-      st.status = e instanceof Unverified ? 'unverified' : 'failed'; st.why = e instanceof Unverified ? J.T.unverified : J.T.failed; st.detail = String(e && e.message || e); paint(); }
+      if (!build()) throw new NotBuilt('the globe could not take the journey');
+      st.status = 'ready'; st.playing = false; ensureBar(); setBarFrame(); paint(); seek(d.t[0], true); goArea();
+      announce(`${nameOf(id)} shown. Replay is at the first ${man.card ? 'displayed' : 'recorded'} fix.`);
+    } catch (e) { if (gen !== st.gen) return;
+      // the requested journey returns to off; its error stays on its own row (or, for the shared list, on the group); nothing else is restored
+      const unv = e instanceof Unverified, detail = String(e && e.message || e);
+      off(); st.choice = null;
+      if (shared) { st.catErr = unv ? J.T.catUnverified : J.T.catFailed; st.catDetail = detail; announce(`${nameOf(id)} could not be shown. ${st.catErr}`); }
+      else { st.err[id] = { kind: e instanceof NotBuilt ? 'notbuilt' : unv ? 'unverified' : 'failed', text: e instanceof NotBuilt ? J.T.notBuilt : unv ? J.T.unverified : J.T.failed, detail }; announce(`${nameOf(id)} could not be shown. ${st.err[id].text}`); }
+      paint(); }
+  }
+  /** the shared journey list on its own (the group's Retry): verify it and clear or keep the group error; switches nothing on */
+  async function checkList() {
+    try { const r = await fetch(J.CATALOG, { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); const b = await r.arrayBuffer();
+      if (await hex(b) !== J.CATALOG_SHA256) { st.catErr = J.T.catUnverified; st.catDetail = 'the journey list does not match its pinned checksum'; }
+      else { JSON.parse(new TextDecoder().decode(b)); st.catErr = ''; st.catDetail = ''; announce('The list of journeys verified. Journeys can be switched on.'); }
+    } catch (e) { st.catErr = J.T.catFailed; st.catDetail = String(e && e.message || e); }
+    if (st.catErr) announce(st.catErr); paint();
   }
 
   // ---------- drawing: three objects of our own on the globe's scene (a line, the fix marks, the marker)
@@ -162,7 +191,7 @@
   function clearObjs() { const o = st.objs; if (!o) return; for (const m of [o.line, o.fixes, o.marker]) { if (m.parent) m.parent.remove(m); if (m.geometry) m.geometry.dispose(); if (m.material) m.material.dispose(); } st.objs = null; }
   /** put on the globe exactly what was recorded up to fix i (−1 = nothing yet) */
   function show() {
-    const o = st.objs; if (!o) return; const i = st.i, vis = !st.sky;
+    const o = st.objs; if (!o) return; const i = st.i, vis = true;
     o.line.geometry.setDrawRange(0, i > 0 ? st.seg[i] * 3 : 0); o.fixes.geometry.setDrawRange(0, i >= 0 ? (i + 1) * 3 : 0);
     o.line.visible = vis; o.fixes.visible = vis; o.marker.visible = vis && i >= 0;
     if (i >= 0) { o.marker.position.set(o.P[i * 3], o.P[i * 3 + 1], o.P[i * 3 + 2]); sizeMarker(); }
@@ -181,30 +210,35 @@
     st.rtExact = next; st.rt = Math.floor(next); const i = fixAt(st.rt); if (i !== st.i) { st.i = i; show(); } else sizeMarker(); paintBar(true);
     st.raf = requestAnimationFrame(tick);
   }
-  function play() { if (!st.d || st.sky || st.status !== 'ready') return; const end = st.d.t[st.d.t.length - 1]; if (st.rt >= end) seek(st.d.t[0], true);
+  function play() { if (!st.d || st.status !== 'ready') return; const end = st.d.t[st.d.t.length - 1]; if (st.rt >= end) seek(st.d.t[0], true);
     st.playing = true; st.lastTick = performance.now(); if (!st.raf) st.raf = requestAnimationFrame(tick); paintCtl(); }
   function pause(say) { st.playing = false; if (st.raf) { cancelAnimationFrame(st.raf); st.raf = 0; } paintCtl(); if (say) paintBar(false); }
 
-  // ---------- the card, the replay bar and the Key
-  const keyRepaint = () => { if (typeof ME.paintKeyExternal === 'function') ME.paintKeyExternal(); };
+  // ---------- the journey rows, the group error and the replay bar
   const drawn = () => !!(st.objs && st.objs.line.parent && st.objs.line.visible);
+  /** why no journey can be drawn right now, or '' when the globe is usable */
+  function blocked() { if (ME.globe && ME.globe()) return ''; const g = ME.animalsGlobe && ME.animalsGlobe.state();
+    return g && g.globe === 'lost' ? ME.animalsGlobe.G.T.lost : g && g.globe === 'starting' ? J.T.notBuilt : J.T.noGlobe; }
+  /** one polite message per change (never per frame) */
+  function announce(t) { const e = $('an-say'); st.announced = t || ''; if (e) e.textContent = t || ''; }
+  function readyText() { const j = st.jr, m = st.man;
+    if (m.card) { const c = m.card; return `${c.shown} ${c.not_route} ${c.line} ${c.done} ${m.accuracy_note} ${J.T.marks} ${m.sample_sentence}`; }   // Argos journeys: the manifest carries the sentences
+    return `${j.fixes.toLocaleString('en-GB')} recorded fixes of one animal (${j.animal}), ${utcDay(j.first_fix_s)} to ${utcDay(j.last_fix_s)}. ` +
+      `${m.animals_sampled} animals were tracked in this study; ${m.animals_shown} is shown. ` +
+      (j.rows_without_position || j.rows_flagged_by_source ? `Not drawn for this animal: ${j.rows_without_position} fix attempts without a position, ${j.rows_flagged_by_source} flagged by the source. ` : '') +
+      `Location uncertainty: ${m.location_uncertainty}.`; }
   function paint() {
-    keyRepaint();
-    tgl.setAttribute('aria-checked', String(st.on)); if (st.status === 'loading') tgl.setAttribute('aria-busy', 'true'); else tgl.removeAttribute('aria-busy');
-    $('s-journey').textContent = !st.on ? 'off' : st.status === 'ready' ? 'replay' : st.status === 'loading' ? 'loading' : 'not drawn';
-    const o = $('o-journey'), retry = $('journey-retry');
-    retry.hidden = !(st.on && st.status === 'failed');
-    if (!st.on) o.textContent = st.why || J.T.off;
-    else if (st.status === 'loading') o.textContent = J.T.loading;
-    else if (st.status === 'ready' && st.man.card) { const m = st.man, c = m.card;      // Argos journeys: the manifest carries the sentences
-      o.textContent = `${c.shown} ${c.not_route} ${c.line} ${c.done} ${m.accuracy_note} ${J.T.marks} ${m.sample_sentence}` + (st.sky ? ' ' + J.T.sky : ''); }
-    else if (st.status === 'ready') { const j = st.jr, m = st.man;
-      o.textContent = `${j.fixes.toLocaleString('en-GB')} recorded fixes of one animal (${j.animal}), ${utcDay(j.first_fix_s)} to ${utcDay(j.last_fix_s)}. ` +
-        `${m.animals_sampled} animals were tracked in this study; ${m.animals_shown} is shown. ` +
-        (j.rows_without_position || j.rows_flagged_by_source ? `Not drawn for this animal: ${j.rows_without_position} fix attempts without a position, ${j.rows_flagged_by_source} flagged by the source. ` : '') +
-        `Location uncertainty: ${m.location_uncertainty}.` + (st.sky ? ' ' + J.T.sky : ''); }
-    else o.textContent = st.why;
-    const bar = $('replay'); bar.hidden = !(st.on && st.status === 'ready' && !st.sky);
+    const why = blocked();
+    for (const b of switches) { const id = b.dataset.journey, cur = id === st.choice, e = st.err[id];
+      b.setAttribute('aria-checked', String(cur));                                   // the requested selection reads on while it loads
+      if (cur && st.status === 'loading') b.setAttribute('aria-busy', 'true'); else b.removeAttribute('aria-busy');
+      if (why) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled');
+      const sw = part(id, 'sw-state'), o = part(id, 'sw-obs'), retry = part(id, 'sw-retry');
+      if (sw) sw.textContent = cur ? (st.status === 'ready' ? 'replay' : 'loading') : e ? 'not shown' : 'off';
+      if (o) o.textContent = cur ? (st.status === 'ready' ? readyText() : J.T.loading) : e ? e.text : why ? why : J.T.off;
+      if (retry) retry.hidden = !(e && !cur && !why); }
+    const box = $('an-integrity'); if (box) { box.hidden = !st.catErr; const t = $('an-integrity-text'); if (t) t.textContent = st.catErr; }
+    const bar = $('replay'); bar.hidden = !(st.choice && st.status === 'ready');
     if (!bar.hidden) { paintCtl(); paintBar(true); }
   }
   function paintCtl() { const b = $('replay-play'); if (!b) return; b.textContent = st.playing ? 'Pause' : 'Play'; b.setAttribute('aria-pressed', String(st.playing)); }
@@ -233,55 +267,70 @@
     $('replay-play').addEventListener('click', () => st.playing ? pause(true) : play());
     r.addEventListener('input', () => { if (!st.d) return; pause(false); seek(st.d.t[Math.min(st.d.t.length - 1, Math.max(0, +r.value))], false); });
     sp.addEventListener('change', () => { st.speed = +sp.value || J.SPEED_DEFAULT; });
-    $('replay-goto').addEventListener('click', () => { const o = st.objs; if (!o || !st.jr) return; const b = st.jr.bbox, ALT = Math.max(J.VIEW_ALT, Math.max(b.north - b.south, b.east - b.west) / 26);   // far enough out to hold the whole journey
+    $('replay-goto').addEventListener('click', goArea);
+  }
+  /** turn the globe to the journey (no animation): used when a journey has loaded and by the "Journey area" button */
+  function goArea() { { const o = st.objs; if (!o || !st.jr) return; const b = st.jr.bbox, ALT = Math.max(J.VIEW_ALT, Math.max(b.north - b.south, b.east - b.west) / 26);   // far enough out to hold the whole journey
       try { o.g.controls().autoRotate = false;
         // centre the journey in the part of the globe's box the replay bar does not cover (the bar sits over the top or the bottom of it)
         let shift = 0; const cv = o.g.renderer().domElement.getBoundingClientRect(), br = $('replay').getBoundingClientRect();
         if (cv.height > 0 && br.height > 0 && br.bottom > cv.top && br.top < cv.bottom) { const above = br.top - cv.top, below = cv.bottom - br.bottom, top = above >= below ? cv.top : br.bottom, bot = above >= below ? br.top : cv.bottom;   // the larger free part
           const dy = (top + bot) / 2 - (cv.top + cv.height / 2), fov = (o.g.camera().fov || 50) * Math.PI / 180; shift = dy * (2 * ALT * Math.tan(fov / 2) / cv.height) * 180 / Math.PI; }
-        o.g.pointOfView({ lat: (b.south + b.north) / 2 + shift, lng: (b.west + b.east) / 2, altitude: ALT }, 0); sizeMarker(); } catch (_) { } });
+        o.g.pointOfView({ lat: (b.south + b.north) / 2 + shift, lng: (b.west + b.east) / 2, altitude: ALT }, 0); sizeMarker(); } catch (_) { } }
   }
   function setBarFrame() { const d = st.d, r = $('replay-range'); r.min = '0'; r.max = String(d.t.length - 1); r.step = '1';
     $('replay-note').textContent = `Replay: recorded ${utcDay(d.t[0])} to ${utcDay(d.t[d.t.length - 1])}. ${J.T.others}`;
     $('replay-rule').textContent = `${J.T.line} ${st.man.gap_rule.statement}`; }
 
-  // ---------- the switch
-  async function setOn(on) {
-    if (on === st.on) return;
-    if (!on) { st.on = false; st.gen++; abortLoad(); pause(false); clearObjs(); st.d = null; st.man = null; st.jr = null; st.seg = null; st.status = 'off'; st.why = ''; st.said = ''; $('replay-say').textContent = ''; return paint(); }
-    if (!ME.globe || !ME.globe()) { st.why = J.T.noGlobe; st.status = 'off'; return paint(); }
-    st.on = true; await load();
+  // ---------- the switches: one journey at a time
+  /** everything a shown or loading journey holds is released; the selection itself is cleared by the caller */
+  function off() { st.on = false; st.gen++; abortLoad(); pause(false); clearObjs(); st.d = null; st.man = null; st.jr = null; st.seg = null; st.status = 'off'; st.said = ''; const e = $('replay-say'); if (e) e.textContent = ''; }
+  /** make `id` the one selected journey (null = none). The previous one is switched off first; it is never restored. */
+  async function select(id, quiet) {
+    id = id || null; if (id === st.choice) return;
+    const prev = st.choice; if (prev) off();
+    st.choice = id;
+    if (!id) { if (!quiet && prev) announce(`${nameOf(prev)} switched off.`); return paint(); }
+    const why = blocked();
+    if (why) { st.choice = null; if (!quiet) announce(`${nameOf(id)} cannot be shown. ${why}`); return paint(); }
+    delete st.err[id]; st.on = true;
+    if (!quiet) announce((prev ? `${nameOf(prev)} switched off. ` : '') + `${nameOf(id)} loading.`);
+    await load();
   }
-  tgl.addEventListener('click', () => setOn(!st.on));
-  // the chooser: which recorded journey the switch shows. Choosing while the switch is on clears the old journey and loads the new one.
-  const chooser = $('journey-choose'); st.choice = chooser.value;
-  chooser.addEventListener('change', () => { st.choice = chooser.value; const c = $('journey-chosen'); if (c) c.hidden = true; if (st.on) { setOn(false); setOn(true); } else paint(); });
-  $('journey-retry').addEventListener('click', () => { if (st.on && st.status === 'failed') load(); });
+  for (const b of switches) b.addEventListener('click', () => { const id = b.dataset.journey;
+    if (b.getAttribute('aria-disabled') === 'true') return announce(`${nameOf(id)} cannot be shown. ${blocked()}`);
+    select(id === st.choice ? null : id); });                            // pressing the selected journey's switch (shown or still loading) switches it off
+  for (const id of switches.map(b => b.dataset.journey)) { const r = part(id, 'sw-retry'); if (r) r.addEventListener('click', () => { if (st.err[id] && !blocked()) select(id); }); }
+  { const r = $('an-integrity-retry'); if (r) r.addEventListener('click', checkList); }
 
-  // the Sky zoom-out view: pause and hide; restore, paused, at the same replay time
-  new MutationObserver(() => { const sky = document.body.classList.contains('sky-zoom'); if (sky === st.sky) return; st.sky = sky; if (sky) pause(false); if (st.objs) show(); paint(); })
-    .observe(document.body, { attributes: true, attributeFilter: ['class'] });
   // a hidden browser tab pauses playback; the replay itself is kept
   document.addEventListener('visibilitychange', () => { if (document.hidden && st.playing) pause(false); });
   // leaving the page switches the journey off, so a page the browser keeps and restores on Back (its back/forward cache) comes
-  // back bare, the same as a fresh load; pageshow repeats it in case the page was frozen before pagehide ran
-  window.addEventListener('pagehide', () => { if (st.on) setOn(false); });
-  window.addEventListener('pageshow', e => { if (e.persisted && st.on) setOn(false); });
+  // back with nothing on, the same as a fresh load; pageshow repeats it in case the page was frozen before pagehide ran
+  window.addEventListener('pagehide', () => { if (st.choice) select(null, true); });
+  window.addEventListener('pageshow', e => { if (e.persisted && st.choice) select(null, true); });
   // keep the marker a steady size while the visitor zooms with the replay paused
-  setInterval(() => { if (st.objs && !st.playing && !st.sky) sizeMarker(); }, 500);
+  setInterval(() => { if (st.objs && !st.playing) sizeMarker(); }, 500);
+  // the globe: when it stops being usable (graphics context lost) the journey is switched off and the rows say why
+  if (ME.animalsGlobe) ME.animalsGlobe.onChange(() => { if (st.choice && blocked()) { const id = st.choice; select(null, true); announce(`${nameOf(id)} switched off. ${blocked()}`); } paint(); });
 
-  // "Choose this journey on Earth now" (from the Animals page): reveal the switch in the Layers panel; switch nothing on
-  function reveal() { const m = /journey=([A-Za-z0-9-]+)/.exec(location.hash); if (!m || ![...chooser.options].some(o => o.value === m[1])) return; chooser.value = m[1]; st.choice = m[1]; const go = () => { const btn = $('layers-btn'), panel = $('layers-panel'); if (!btn || !panel) return false; if (panel.hidden) btn.click(); if (panel.hidden) return false;
-      const row = [...document.querySelectorAll('#layers-list [data-for]')].find(r => r.dataset.for === '#tgl-journey'); if (row) row.focus(); const c = $('journey-chosen'); if (c) c.hidden = false; return true; };
-    if (!go()) { let n = 0; const iv = setInterval(() => { if (go() || ++n > 40) clearInterval(iv); }, 100); } }
+  // a link to one journey (animals.html#journey=<id>, and the links on the study cards): bring that journey's switch into view
+  // and focus it. Nothing is switched on. An unknown id does nothing.
+  function reveal() { const m = /journey=([A-Za-z0-9-]+)/.exec(location.hash); if (!m) return; const b = switches.find(x => x.dataset.journey === m[1]); if (!b) return;
+    try { b.scrollIntoView({ block: 'center' }); } catch (_) { } b.focus({ preventScroll: true }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', reveal); else reveal();
+  window.addEventListener('hashchange', reveal);
+  paint();
 
-  ME.journey = { drawn, on: () => st.on, J,
+  ME.journey = { drawn, on: () => !!st.choice, J,
     /** read-only aids for tests and the console */
-    state: () => ({ choice: st.choice, cls: st.d && st.d.lc && st.i >= 0 ? st.d.lc[st.i] : null, on: st.on, status: st.status, why: st.why, detail: st.detail || null, gen: st.gen, playing: st.playing, speed: st.speed, sky: st.sky, rt: st.rt, i: st.i, n: st.d ? st.d.t.length : 0,
+    state: () => ({ choice: st.choice, cls: st.d && st.d.lc && st.i >= 0 ? st.d.lc[st.i] : null, on: !!st.choice, status: st.status, gen: st.gen, playing: st.playing, speed: st.speed, rt: st.rt, i: st.i, n: st.d ? st.d.t.length : 0,
+      err: JSON.parse(JSON.stringify(st.err)), catErr: st.catErr, catDetail: st.catDetail, announced: st.announced, blocked: blocked(),
+      switches: Object.fromEntries(switches.map(b => { const id = b.dataset.journey, r = part(id, 'sw-retry'); return [id, { checked: b.getAttribute('aria-checked'), busy: b.getAttribute('aria-busy'), disabled: b.getAttribute('aria-disabled'),
+        state: (part(id, 'sw-state') || {}).textContent, obs: (part(id, 'sw-obs') || {}).textContent, retry: r ? !r.hidden : null }]; })),
       fixTime: st.d && st.i >= 0 ? st.d.t[st.i] : null, bar: $('replay').hidden ? null : $('replay-now').textContent, drawn: drawn(),
       objects: st.objs ? { segments: st.objs.segs, lineShown: st.objs.line.geometry.drawRange.count / 3, fixesShown: st.objs.fixes.geometry.drawRange.count / 3, markerVisible: st.objs.marker.visible,
         marker: st.objs.marker.visible ? [st.objs.marker.position.x, st.objs.marker.position.y, st.objs.marker.position.z] : null, fixXYZ: st.i >= 0 ? [st.objs.P[st.i * 3], st.objs.P[st.i * 3 + 1], st.objs.P[st.i * 3 + 2]] : null } : null }),
-    sceneCount: () => { let n = 0; try { ME.globe().scene().traverse(o => { if (o.__journey) n++; }); } catch (_) { } return n; },
-    seek: s => seek(s, false), play, pause: () => pause(true), setSpeed: v => { st.speed = v; }, fixTimes: () => st.d ? st.d.t : null, fixAt: s => st.d ? fixAt(s) : null };
+    sceneCount: () => { let n = 0; try { const g = ME.animalsGlobe ? ME.animalsGlobe.raw() : ME.globe(); g.scene().traverse(o => { if (o.__journey) n++; }); } catch (_) { } return n; },
+    select: id => select(id), seek: s => seek(s, false), play, pause: () => pause(true), setSpeed: v => { st.speed = v; }, fixTimes: () => st.d ? st.d.t : null, fixAt: s => st.d ? fixAt(s) : null, goArea };
 })();

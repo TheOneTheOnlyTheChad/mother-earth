@@ -753,11 +753,10 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
   .layers-panel{top:auto;bottom:0;left:0;width:100%;max-height:70vh;border-left:0;border-right:0;border-bottom:0}
 }
 
-/* Animal journey replay bar (animals-zebra-preview-rc, 19 Nov 2026). It takes the place the first-view line uses: that line is
-   hidden whenever a layer is on, and the bar shows only while the journey is drawn. It covers no other control. */
-.replay{position:absolute;left:173px;right:12px;top:12px;z-index:14;display:flex;flex-direction:column;gap:4px;padding:8px 10px;background:rgba(7,10,15,.9);border:1px solid var(--line-strong);font-size:12px;color:var(--fg)}
+/* Animal journey replay bar. It lives on the Animals page, under that page's globe, in the page flow: it covers no part of the
+   globe and no other control at any width (animals-tab-rc, stage 1, 20 Nov 2026; before that it sat over the Earth now globe). */
+.replay{display:flex;flex-direction:column;gap:4px;margin:8px 0 0;padding:8px 10px;background:rgba(7,10,15,.9);border:1px solid var(--line-strong);font-size:12px;color:var(--fg)}
 .replay[hidden]{display:none}
-body.sky-zoom #replay{visibility:hidden}
 .rp-ctl{display:flex;align-items:center;gap:8px}
 .rp-ctl button,.rp-ctl select,.journey-retry{min-height:44px;padding:0 12px;font:500 12px/1 var(--mono);color:var(--fg);background:transparent;border:1px solid var(--accent);cursor:pointer}
 .rp-ctl select{border-color:var(--line-strong);background:var(--card)}
@@ -770,19 +769,41 @@ body.sky-zoom #replay{visibility:hidden}
 .journey-retry{margin:6px 0}
 .journey-retry[hidden]{display:none}
 .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-@media (min-width:1101px) and (max-width:1279px){.replay{left:12px;top:64px}}
-@media (min-width:721px) and (max-width:1100px){.replay{position:static;order:1;margin:8px 0 0}}
 @media (max-width:720px){
-  .replay{left:8px;right:8px;top:auto;bottom:calc(52% + 8px);padding:6px 8px;gap:3px;font-size:11.5px}
+  .replay{padding:6px 8px;gap:3px;font-size:11.5px}
   .rp-ctl{gap:6px}
   .rp-ctl button,.rp-ctl select{padding:0 8px}
   #replay-play{min-width:56px}
   .rp-w{display:none}
   #replay-goto{text-transform:capitalize}
   .rp-note{font-size:10.5px}
-  .stage:has(.sheet.collapsed) .replay{bottom:56px}
-  #replay-rule{display:none}   /* the rule is on the card and in the Key; the phone bar keeps the time line and the not-matched line */
 }
+/* Animals page: its own globe, the journey switches beside it (below it on narrow screens), then the study cards. */
+.doc.animals main{max-width:1180px}
+.animals .an-doc{max-width:76ch;margin:0 auto}
+.an-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 12px}
+.an-stage{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:18px;align-items:start;margin:0 0 28px}
+.an-globe-col{min-width:0}
+.an-globe-box{position:relative;width:100%;height:min(54vh,600px);min-height:280px;background:#070a0f;border:1px solid var(--line);overflow:hidden}
+#an-globe{position:absolute;inset:0}
+.an-backdrop{margin:6px 0 0;font-size:11px;line-height:1.4;color:var(--dim)}
+.an-backdrop[hidden]{display:none}
+.an-panel{min-width:0;border:1px solid var(--line);background:var(--card);padding:10px 12px}
+.doc .an-panel h2{font:700 20px/1.15 var(--display);letter-spacing:.04em;margin:0 0 4px;padding:0;border:0}
+.an-note{margin:0 0 8px;font-size:12.5px;line-height:1.45;color:var(--dim)}
+.doc .an-panel h3.an-grp{font:600 15px/1.2 var(--display);letter-spacing:.08em;margin:12px 0 2px;color:var(--dim)}
+.an-sw{border-top:1px solid var(--line);padding:6px 0 8px}
+.an-sw-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px}
+.an-sw .ovl-tgl .t{font-size:13.5px}
+.an-sw .ovl-tgl[aria-busy="true"]{cursor:progress}
+.an-sw .ovl-tgl[aria-disabled="true"]{opacity:.55;cursor:default}
+.an-sw .cav,.an-sw .obs{font-size:12px;line-height:1.45;color:var(--dim);margin:2px 0 0}
+.an-sw .obs{color:#c9d3e0}
+.an-more{display:inline-block;margin-top:4px}
+.an-integrity{border:1px solid var(--accent);padding:8px 10px;margin:8px 0;font-size:12.5px;line-height:1.45}
+.an-integrity[hidden]{display:none}
+@media (max-width:900px){.an-stage{grid-template-columns:minmax(0,1fr)}.an-globe-box{height:min(56vh,520px)}}
+@media (max-width:720px){.an-globe-box{height:min(50vh,420px);min-height:240px}.doc.animals main{padding-left:12px;padding-right:12px}}
 /* Animals page (private preview) */
 .an-preview{padding:8px 10px;border:1px solid var(--accent);display:inline-block}
 .an-study{border:1px solid var(--line-strong);padding:4px 14px 10px;margin:8px 0 18px}
@@ -794,8 +815,4 @@ body.sky-zoom #replay{visibility:hidden}
 .an-go:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .an-na{color:var(--dim)}
 @media (max-width:720px){.an-facts th,.an-facts td{display:block;width:auto;padding:4px 0}.an-facts tr+tr td{border-top:0}}
-/* Animal journey chooser (animals-journeys-preview-rc) */
-.jr-l{display:block;margin:8px 0 2px;color:var(--dim);font-size:11px}
-#journey-choose{width:100%;min-height:44px;padding:0 8px;font:500 12px/1.2 var(--mono);color:var(--fg);background:var(--card);border:1px solid var(--line-strong)}
-#journey-choose:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .an-study h5{margin:14px 0 4px;font:600 13px/1.3 var(--mono)}
