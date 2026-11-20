@@ -54,7 +54,7 @@ const BREAKS = {
   'future-fixes-drawn': [JS, 'o.fixes.geometry.setDrawRange(0, i >= 0 ? (i + 1) * 3 : 0);', 'o.fixes.geometry.setDrawRange(0, st.d.t.length * 3);'],
   'join-over-rule': [JS, "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule && (!d.j || d.j[i] === 1);", "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule + 1 && (!d.j || d.j[i] === 1);"],
   'ignore-join-flags': [JS, "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule && (!d.j || d.j[i] === 1);", "const joins = (d, rule, i) => d.t[i] - d.t[i - 1] <= rule;"],
-  'autoplay': [JS, "seek(d.t[0], true); goArea();", "seek(d.t[0], true); goArea(); play();"],
+  'autoplay': [JS, "seek(st.R0, true); goArea();", "seek(st.R0, true); goArea(); play();"],
   'announce-per-frame': [JS, "st.rtExact = next; st.rt = Math.floor(next);", "announce('t ' + next); st.rtExact = next; st.rt = Math.floor(next);"],
   // both guards removed (the switch's own and select()'s): a switch marked unavailable would then start a load
   'disabled-still-loads': [JS, "    if (why) { st.choice = null; if (!quiet) announce(`${nameOf(id)} cannot be shown. ${why}`); return paint(); }\n", '', "    if (b.getAttribute('aria-disabled') === 'true') return announce(`${nameOf(id)} cannot be shown. ${blocked()}`);\n", ''],
@@ -65,7 +65,7 @@ const BREAKS = {
   'coast-always-fetched': [GJS, "      size(); loadBackdrop();", "      size(); loadBackdrop(); loadCoast();"],
   'filtered-says-recorded': [JS, "const F = !!st.man.card;", "const F = false;"],
   'no-phone-scroll': [JS, "function showGlobe() { const box = $('an-globe-box'), panel = $('an-panel'); if (!box || !panel) return;", "function showGlobe() { const box = $('an-globe-box'), panel = $('an-panel'); return;"],
-  'scroll-on-answer': [JS, "seek(d.t[0], true); goArea();", "seek(d.t[0], true); goArea(); showGlobe();"],
+  'scroll-on-answer': [JS, "seek(st.R0, true); goArea();", "seek(st.R0, true); goArea(); showGlobe();"],
   'scroll-on-off': [JS, "if (turnOn && st.choice === id) showGlobe(); });", "showGlobe(); });"],
   'scroll-ignores-reduced-motion': [JS, "const reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),", "const reduce = false,"],
   'deep-link-scrolls-to-globe': [JS, "b.focus({ preventScroll: true }); }", "b.focus({ preventScroll: true }); showGlobe(); }"],
