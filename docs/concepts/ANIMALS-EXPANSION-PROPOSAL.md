@@ -1,8 +1,35 @@
 # Animals: expansion proposal (the unstarted and deferred parts of concept rev 1)
 
-20 Nov 2026 12:32 UTC (clock reading); rev 1.1 committed 12:44 UTC (commit time) · for GPT review (round 3) · **docs only.** Nothing built, no Animals branch touched, no file downloaded, no account created, no agreement accepted, no provider contacted, nothing spent. Animals implementation stays parked; this does not reopen the release work.
+20 Nov 2026 12:32 UTC (clock reading); rev 1.1 committed 12:44 UTC (commit time); **rev 1.2** after the reads of 12:46 to 12:51 UTC · for GPT review (round 3) · **docs only.** Nothing built, no Animals branch touched, no file downloaded, no account created, no agreement accepted, no provider contacted, nothing spent. Animals implementation stays parked; this does not reopen the release work.
 
 Answers GPT's research round 1 (`reviews/2026-11-20-animals-expansion-round1-gpt-brief.md`) against concept rev 1 (`ANIMALS-CONCEPT-REV1.md`, branch `animals-proposal`), proposal rev 2.2 and the coverage record (`ANIMALS-SPEC-COVERAGE-2026-11-20.md`, main). Chad's brief (20 Nov): challenge GPT's recommendations; cover every unstarted or deferred area; prioritise penguin population evidence, one whale recovery example, one migration corridor and one bird journey; draft the penguin enquiry, unsent; say which other enquiries are worthwhile; keep the NOAA and ATAP status as recorded.
+
+## 0b. Rev 1.2: the remaining pages, read in Chad's Chrome (20 Nov, between 12:46:33 and 12:51:40 UTC, clock readings)
+
+Chad: "read all". Read as page text in a tab Claude opened and closed. Where 0b and a later section disagree, 0b is right; the sections it changes are marked.
+
+**Read, with what each establishes**
+
+1. **Dryad penguin record (the disagreement in §0 is closed: GPT was right; my first read was incomplete).**
+   - Methods: the data are **counts of occupied nests at 18 colonies in South Africa and 4 in Namibia**. Where a locality had more than one count in a year, the highest was taken to represent the pairs breeding that year. An occupied site is defined differently in the two countries (Namibia: a nest with fresh eggs or chicks; South Africa: active sites plus "potential" sites showing recent use). Groups of unguarded chicks were divided by two.
+   - Usage notes: NA marks years with no count, for logistics, or because a colony was gone (Lambert's Bay after 2005) or not yet (re)colonised (Robben Island before 1983, Stony Point before 1982, Simonstown before 1985). **The 0.1 values at the start or end of the series at those four colonies are model anchors, "do not represent real count data and should be omitted"** in any other use.
+   - **Licence shown on the record: "Public domain".** Primary article: doi `10.1002/ece3.6554`.
+   - Effect: **a first penguin chart needs no enquiry.** It needs the 3.89 KB file opened and audited (still not done), anchors dropped, NA kept as gaps, the unit named "occupied nests (taken as breeding pairs)", and the two countries' definitions stated.
+2. **The 2024 series is not the same set of colonies** (26 against 22). It must not be appended to the 2019 file as one line.
+3. **Correction to rev 1.1:** "marked open access" for the *Ostrich* paper came from a word match on the page, not an access check. Both publisher pages (that paper and the Cape Vidal paper) redirected to their abstract view. **Access status of both: not established.** Withdrawn.
+4. **Seabird Tracking Database terms (read in full).** No use in any publication, product or commercial application without permission through a data request; the owner approves, amends or refuses; use only for the purpose requested; **data may not be passed to third parties**; reproduction of the data or derived products for financial gain needs permission from the owners and from BirdLife; a "commercial request" includes use by a non-profit for revenue; maps carry a caption naming the owners and the database; BirdLife may comment on materials. Effect: a display file that visitors' browsers download is a passing-on that the request must name outright. The enquiry draft now says so (rev 1.1 of the draft).
+5. **USGS volume 6 on ScienceBase (record page).** "Creative Commons Zero v1.0 Universal (CC0-1.0) public domain dedication". Publication date on the record 2026-03-24 (the USGS product page gave 27 March). One archive of 152.69 MB and **30 child items, each a herd and a type**; the ten shown: California mule deer East Walker and West Walker, each with Migration Corridors, Migration Routes, Stopovers and Winter Ranges, and Nevada mule deer Washoe. The other twenty were not listed to me (the catalogue's list request failed). The withheld-files sentence is on the record as on the product page. An example herd for the audit: East Walker, which has all three polygon types; the choice is made at the audit.
+6. **CMS Atlas of Ungulate Migration (landing page).** Maps of high, medium and low-use corridors, "downloadable maps each accompanied by a factsheet"; "The atlas is living, and continually updated." **No licence or reuse statement on the page.** Effect: it fits the regularly-updated rule; rights remain open, so the enquiry stays conditional (§7).
+7. **IUCN Red List terms, version 3.1 (June 2024), read in full.** No commercial use of Red List Data or derivative works without written permission ("commercial" includes use by an individual for revenue); no reposting or redistribution, including inside derivative works, without a written waiver; a licence to use for conservation, education and research. **And: IUCN "places no restrictions on use of the IUCN Red List Categories associated with each named taxonomic entity."** Effect on challenge 6: a card may state a taxon's category with its year, scope and a citation. Anything else from the Red List (trend field, population figures, text, maps) is Red List Data and is not shown without a waiver. No API, no cache. No enquiry is needed for the category alone.
+8. **BirdLife South Africa's African Penguin page (page text).** Regional category 2025: EN [A2abce]. Global category 2024: CR [A3bce+4bce] (BirdLife International 2024). Regional population 8,750 breeding pairs (17,500 individuals); global 19,800, attributed to Sherley et al. 2024; regional trend "Decreasing". Citation given on the page: Hagen C 2025, in *The 2025 Red Data Book of Birds of South Africa, Lesotho and Eswatini*, BirdLife South Africa. The site's own reuse terms: not read.
+9. **Cape Vidal paper (abstract, page text):** the figures in §4 column A are confirmed as the abstract's. The survey years between 1988 and 2018 and their estimates are in the full text, not read.
+10. **Movebank packages (repository pages).** Grey-headed albatross, doi `10.5441/001/1.694p666h`, "Data from: Classification of animal movement behavior through residence in space and time", CC0 1.0; files: data 16 MB, reference data 4.08 KB, README 9.28 KB. Waved albatross, doi `10.5441/001/1.3hp3s250`, "Data from: The Environmental-Data Automated Track Annotation (Env-DATA) System…", Cruz and co-authors 2013, CC0 1.0; files: `Galapagos Albatrosses.csv` 4.69 MB, reference data 5.92 KB, README 13.84 KB. Both licences are now read on the records, not carried from the 18 Nov label. Neither file opened.
+11. **eBird Status and Trends FAQ:** commercial use, "Not at this time"; products need the terms accepted and an access form, automatic for non-commercial use. Effect: unchanged, later, and tied to decision D5.
+12. **IWC population estimates page:** as in §0a.
+
+**Opened but not read:** the Motus policy page (its text did not load into the read); an IWC status-summary address (not found). **Not opened:** OTN, SAEON, DFFE, the Living Planet policy and the NOAA stock assessment (PDFs), the full text of either paper. For those, GPT's round 1 stands as GPT's reading. One navigation went to a repository address I had guessed; nothing was read from it.
+
+**What rev 1.2 changes:** §3.1 (unit, colonies, licence and notes are now read facts; the first chart needs no reply); challenge 6 (settled by the IUCN terms as far as categories go); §5 and §6 (licences and file sizes read); §7 (the penguin enquiry is no longer a precondition for a first chart; it is for the 2023 series and for a track); D3.
 
 ## 0a. Rev 1.1: pages read in Chad's Chrome (20 Nov, between 12:41 and 12:44 UTC, bounded by a clock reading and the commit time)
 
@@ -55,13 +82,14 @@ Challenges and additions:
 | What it is | counts, 1979 to 2019, used with a state-space model to assess the species; the abstract reports about 17,700 pairs in 2019 and a decline of almost 65% since 1989 (page). Paper: *Ecology and Evolution* 10(15): 8506–8516, doi `10.1002/ece3.6554` |
 | Newer, published | Sherley and co-authors 2024 (*Ostrich*, doi above): 26 colonies, 1979 to 2023; about 44,300 pairs in 1993 and about 9,900 in 2023; a 30-year decline of 77.8% with a stated credible interval (abstract). Whether its counts are deposited: **not established** |
 | Assessments | BirdLife South Africa's page: regional Endangered (2025) and global Critically Endangered (2024), and 8,750 breeding pairs for the region (page). BirdLife's species factsheet gives the global history: Endangered 2018 and 2020, Critically Endangered 2024 (search extract) |
-| Rights | Dryad's general terms dedicate deposits to the public domain (GPT's read; not confirmed on this record by me). The 2024 paper and the BirdLife pages: terms not read |
-| Not known | the file's columns, unit per row (occupied nests, pairs), which colonies, the meaning of each blank; whether 0.1 anchors exist (§0) |
+| Rights (rev 1.2) | the record shows "Public domain" (§0b item 1). The 2024 paper and the BirdLife pages: terms not read |
+| Known from the record (rev 1.2) | unit: occupied nests, 18 South African and 4 Namibian colonies; NA and the 0.1 anchors as in §0b item 1 |
+| Not known | the file's columns and layout, which colonies by name, how many values and gaps: the file is still unopened |
 
 - **Interpretation.** Counts are counts and model estimates are model estimates; the chart shows one or the other and names it. Missing years are gaps. A press figure of 8,324 pairs for 2023 also circulates; it differs from 8,750 and from 9,900 (global). That is three figures with three scopes, which is the reason the card needs one cited series and its scope on screen.
 - **Visitor experience.** A population card under Sea or Air (Chad's choice): pairs counted by year, South Africa and Namibia apart if the file supports it, the period and the unit in the title, gaps left open; beneath it the two assessments as separate dated fields with their scope. No extinction date or countdown (concept §8), even though press reports quote one.
 - **Next audit (needs Chad's go):** open the 3.89 KB file and its notes; record columns, units, colonies, gaps and licence text; state exactly what a chart may show. Read the 2024 paper's data statement (HTML, not PDF).
-- **Dependency:** none on the parked journey code. Does not wait for any reply if the 2019 series is acceptable as a first chart, dated as such.
+- **Dependency:** none on the parked journey code. **Rev 1.2: no reply is needed for a first chart from the 2019 file** (public domain on the record), dated 1979 to 2019 and labelled as ending there.
 
 ### 3.2 Movement (separate, permission needed)
 - Seabird Tracking Database (BirdLife International). Dataset 2213: Robben Island, chick-rearing, 2008 and 2010 to 2019, GPS, 207 tracks, 185 birds, 180,360 points, **interpolated**, contains duplicate tracks; providers E. Weideman, R. Sherley, A. Makhado (page). Raw predecessors 1444 to 1446; dispersal dataset 1269 (challenge 2).
@@ -117,11 +145,11 @@ Challenges and additions:
 **Existing, unchanged:** NOAA Southeast Fisheries Science Center (bottlenose dolphins): sent by Chad, no reply on record. ATAP (SAIAB): contact established, substantive response pending. No inbox was checked today. No follow-up, no duplicate.
 
 **Worth sending (Chad's decision), in this order:**
-1. **Penguins, one message, to the corresponding author of the Dryad record.** Draft: `docs/research/animals-source-audit/ENQUIRY-DRAFT-PENGUINS.md`. Unsent.
+1. **Penguins, one message, to the corresponding author of the Dryad record.** Draft: `docs/research/animals-source-audit/ENQUIRY-DRAFT-PENGUINS.md` (rev 1.1). Unsent. **Rev 1.2: it is no longer needed for a first chart.** Its purpose is now the counts to 2023 and one track.
 2. **CMS/GIUM, only if Chad wants an African corridor before or instead of the USGS one.** Not drafted: it needs one named migration first, and choosing it needs the atlas read in the pane.
 
 **Not worth sending now:**
-- IUCN: read the terms and settle the card design first (challenge 6).
+- IUCN: **not needed for a category card** (§0b item 7). Only if Chad later wants a trend field, text or a map from the Red List.
 - IWC: only if, after the pages are read, reuse of a published estimate is unclear.
 - eBird, Motus, Living Planet, an active Movebank study owner: no module is waiting on them.
 - USGS, the albatross packages, the stock A paper: open licences on the record; an audit, not a message.
@@ -162,14 +190,14 @@ Challenges and additions:
 
 - D1. Do population charts, published corridors and dated assessment cards belong on the Animals tab, given that the 19 Nov exception names recorded journeys? (Two are regularly updated sources; the assessment card is not.)
 - D2. Corridor: the USGS example first, or hold for an African one (which needs the CMS enquiry)?
-- D3. Send the penguin enquiry as drafted, amended, or not yet?
+- D3. Send the penguin enquiry (rev 1.1 of the draft), amend it, or hold it until the 2019 chart exists? (Rev 1.2: the first chart does not depend on it.)
 - D4. Which audits to start, from §10 items 1 to 4.
 - D5. Still open from before: whether non-commercial-only sources are acceptable at all, given the project's plans.
 
 ## 12. Not done, not claimed
 
-- No data file opened. No count, unit, column or licence text verified beyond the page reads described in §0.
-- The IWC, CMS, IUCN, Living Planet, eBird, Motus, OTN and SAEON pages were not read by Claude today.
+- No data file opened. Units, colonies and licence wording are verified only as far as §0a and §0b say; no value in any file has been seen.
+- Rev 1.2: see §0b for what was and was not read; OTN, SAEON, DFFE, Motus, the Living Planet policy and the NOAA stock assessment remain unread by Claude.
 - No PDF read. No inbox checked. Nothing sent.
 - No estimate of visitors, transfer or price.
 - No implementation, and no change to any Animals branch, the hub, the site or the other thread's probe.
