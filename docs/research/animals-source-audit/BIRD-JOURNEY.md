@@ -1,12 +1,12 @@
 # Animals: audit D, bird journey (two albatross packages)
 
-20 Nov 2026 · rev 1 · for GPT · read-only research under brief D (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1), on Chad's go of 20 Nov. Nothing built, nothing sent, no account. Claude retained no raw working copies; the files Chad downloaded remain in his Downloads.
+20 Nov 2026 · **rev 1.1** (rev 1 accepted by GPT as source-feasibility work with corrections, `reviews/2026-11-20-animals-audits-c-d-gpt-review.md`; rev 1.1 carries them and adds the two reference-data files, read at 14:18 UTC) · read-only research under brief D (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1), on Chad's go of 20 Nov. Nothing built, nothing sent, no account. Claude retained no raw working copies; the files Chad downloaded remain in his Downloads.
 
 **Results**
-- **Waved albatross, Galápagos: usable.** Clean GPS file, an accuracy estimate on every fix, no date-line crossing anywhere in the file. **Recommended package.**
+- **Waved albatross, Galápagos: usable as a source, at feasibility level.** Structural checks passed and the rows without a position were identified; each positioned fix carries the tag's own accuracy estimate (not an independently measured error and not a quality pass); no date-line crossing anywhere in the file. **Recommended package; Chad agreed on 20 Nov.**
 - **Grey-headed albatross, New Zealand: usable for 6 of 24 birds without date-line support; the other 18 cross the date line.** One bird has a timestamp anomaly and is set aside.
-- **Recommended bird:** Galápagos `3275-30662` (1,326 fixes over 84 days, 1,807 km from its first fix at the farthest). Label: the neutral "recorded journey" until the reference data are read.
-- **Gap in this audit:** the two reference-data files were not among the downloads, so breeding stage, deployment site, sex and tag details are unread (§5).
+- **Provisional first-choice bird: Galápagos `3275-30662`** (1,326 fixes over 84 days, 1,807 km from its first fix at the farthest). **Its reference row is now read (§5):** adult, tagged 23 June 2008 at Punta Cevallos, nest stage "egg", no manipulation, and it is the bird the paper shows in its Figures 7 and 8. The record is a set of recorded movements over a breeding season, **not one trip and not a migration**.
+- Rev 1's gap (reference data unread) is closed for both packages. Sex is not recorded in either file.
 
 ## 1. How this was done
 
@@ -35,8 +35,9 @@ The page sizes ("16 MB", "4.69 MB") are labels; the byte counts above are from t
 - 93,474 rows, 10 columns, no ragged row, no repeated event id, all rows GPS, all visible, every row has coordinates. **24 birds.**
 - **No quality or accuracy field.** No outlier flag is set.
 - Longitudes run from −179.999863 to 179.999908: the −180 to 180 convention, with fixes on both sides of the date line. Latitudes 60.6°S to 41.6°S.
-- Fix interval: median 5 to 6 minutes. Trips of 8 to 22 days, 14 October to 12 December 2013.
+- Fix interval: median 5 to 6 minutes. Records of 8 to 22 days, 14 October to 12 December 2013, **for 23 of the 24 birds; `90494` is the exception (below).**
 - No repeated times and no out-of-order rows within any bird.
+- The six birds below are six candidates without the date-line obstacle, not six fully qualified journeys (GPT).
 - **Date-line crossings** (counted after confirming the −180 to 180 convention: a step whose longitude changes by more than 180° between consecutive fixes; no fix lies exactly on ±180):
 
 | Birds with no crossing (6) | Fixes | Days | Farthest from first fix km |
@@ -50,7 +51,7 @@ The page sizes ("16 MB", "4.69 MB") are labels; the byte counts above are from t
 
   The other 18 birds cross between 2 and 30 times each. The longest-ranging birds (`90493` 2,707 km; `89518` 2,634 km; `2` 2,316 km) all cross.
 - **Speed, as a diagnostic only:** the highest speed implied between consecutive fixes is 83 to 138 km/h per bird; no step exceeds 150 km/h. No exclusion rule is proposed from this.
-- **Anomaly: bird `90494`.** Its timestamps run from 11 January to 11 December 2013 with one gap of 720 hours (30 days), while every other bird is tracked for under 22 days in October to December. The pattern would fit dates with day and month exchanged, but that is a guess and the source says nothing. **Set aside, not used, not explained.**
+- **Anomaly: bird `90494`.** Its timestamps run from 11 January to 11 December 2013 with one gap of 720 hours (30 days), while every other bird is tracked for under 22 days in October to December. The pattern would fit dates with day and month exchanged, but that is a guess and the source says nothing. **Set aside, not used, not explained.** GPT confirmed the timestamps are so in the source (not a parsing error) and that the bird need not be chased; if it is ever proposed for display, an authoritative correction is sought first. The reference file gives this bird's deployment as 2013-01-11 00:00, the only deployment with no time of day and the only one outside October to November, so the oddity is in both files.
 - Because fixes within 5 km of the colony were removed by the authors, a track here does not begin or end at the colony.
 
 ## 4. Waved albatross: the file
@@ -61,7 +62,7 @@ The page sizes ("16 MB", "4.69 MB") are labels; the byte counts above are from t
 - Longitudes 91.37°W to 77.52°W, latitudes 12.79°S to 0.18°N: between the Galápagos and the coast of South America. **No date-line crossing; nowhere near it.**
 - Fix interval: 90 minutes. 31 May to 6 November 2008.
 - No repeated times and no out-of-order rows within any bird. Highest implied speed 61 km/h.
-- **Many birds barely move**: 11 of the 28 stay within 10 km of their first fix for the whole record (tags on birds that stayed at the colony, or short records). They are not journeys.
+- **11 of the 28 records have less than 10 km displacement from their first positioned fix; the reasons are not established** (GPT's wording; rev 1 called them "not journeys", which displacement alone cannot show). The reference file marks 19 of the 28 birds "not used in analysis" and 9 as used.
 
 | Birds that travel more than 1,000 km from the first fix | Fixes | First | Last | Days | Longest gap h | Farthest km | Path km |
 |---|---|---|---|---|---|---|---|
@@ -80,14 +81,36 @@ The page sizes ("16 MB", "4.69 MB") are labels; the byte counts above are from t
 
 ## 5. What is not known, and why
 
-- **The reference-data files were not read** (`…-reference-data.csv`, 4.08 KB and 5.92 KB). They hold, by the READMEs' attribute lists, life stage, reproductive condition, deployment site and coordinates, attachment, tag model and comments. So the kind of trip (incubation or chick-rearing foraging, or something else), the colony as the source names it, and any deployment comment are unread. They are two small files on the same two pages.
-- Neither paper was read. Both are method papers; what they say about these trips is not established.
-- Hence the neutral label "recorded journey", and no word such as "foraging trip" or "migration", until then.
+**Reference data, read 20 Nov 14:18 UTC from Chad's Downloads (rev 1.1).**
+
+| | Waved albatross | Grey-headed albatross |
+|---|---|---|
+| File | `Galapagos Albatrosses-reference-data.csv`, 6,066 bytes, sha256 `1d7b24cf119f65ba7c90358b52ed5d29ec07b1b87c61ca6960b4bfad108061ad` | `Grey-headed albatross, New Zealand (data from Torres et al. 2017)-reference-data.csv`, 4,183 bytes, sha256 `1af2559474818c1d985658b9b3656e2baa81e6f940fdc488b57d1d301b22f89a` |
+| Rows | 28, one per bird | 24, one per bird |
+| Sites | Punta Suarez 12 · Punta Cevallos 10 · Isla de la Plata 6 | Campbell Island, all 24 |
+| Life stage | adult, all | adult, all; reproductive condition "incubating", all |
+| Nest stage comment | "egg" 9 · "downy chick" 1 · blank 18 | (no such field) |
+| Tag and schedule | e-obs, 22 g, a fix every 90 minutes; read out wirelessly | igotU GT-600, a fix every 5 minutes; tag retrieved |
+| Attachment · manipulation | tape and cable ties · none | tape · none |
+| Deployment comment | "used in analysis" 8 · "used in analysis and shown in Figs 7-8" 1 · "not used in analysis" 19 | (no such field) |
+| Deployment coordinates | given to two decimals, one pair per site | one pair for all |
+| Sex | not recorded | not recorded |
+
+**The proposed bird, `3275-30662`:** tag 132; adult; deployed 2008-06-23 at Punta Cevallos; nest stage "egg"; 22 g e-obs tag; "GPS locations recorded every 90 minutes"; tape and cable ties; manipulation none; **"used in analysis and shown in Figs 7-8"**. No limitation is recorded for it. The first fix in the data file (23 June 17:58 UTC) fits the deployment date.
+
+**Paper context for the waved package (Dodge and co-authors 2013), from a summarising fetch of the open-access full text, not a full read by Claude; to be re-read before any wording is shown:** 28 adults tagged at the start of incubation; nine birds analysed, chosen for extensive movement over most of June to September 2008; the movements are described as long-range trips to foraging areas off Peru with transit flights to and from the Galápagos; the paper does not call them migration. Its Figures 7 and 8 show one bird with 1,326 locations from 23 June to 15 September 2008, which matches this bird's count and dates. The summary reports no account of GPS error or tag effects in the paper.
+
+**Grey-headed context is GPT's reading** of Torres and co-authors 2017, methods: Campbell Island, adult incubation foraging trips, five-minute GPS schedule, colony-near fixes removed. Study-level context; not a check of any one deployment. The reference file agrees on site, stage and schedule.
+
+**Label, proposed for the build proposal:** "Recorded movements of one breeding adult, 23 June to 15 September 2008", with the site and nest stage as the source gives them. Not "migration", and not "a foraging trip" in the singular: the record spans several departures and returns, which have not been counted or segmented here. The paper's own description can be quoted as the paper's once re-read.
+
+**Deployment coordinates are research context, not automatically display fields** (GPT). Whether the colony position and colony-side fixes are shown at full precision stays an explicit decision.
 
 ## 6. Recommendation
 
 - **Package: waved albatross, Galápagos.** No date-line work is needed, each fix carries an accuracy estimate (the first journey on the page that could state one from the source), and the 90-minute interval gives small files.
-- **Bird: `3275-30662`.** The farthest-ranging, 84 days, 1,326 fixes, longest gap 9 hours. Second choice `4266-84831108` (longest gap 4.5 hours).
+- **Bird: `3275-30662`, provisional first choice** (GPT confirmed 1,326 positioned fixes, 23 June to 15 September 2008, longest gap about 9.004 hours). The farthest-ranging, and the one the paper illustrates. Second choice `4266-84831108` (Punta Suarez, "used in analysis", longest gap 4.5 hours).
+- **For the build proposal (GPT):** define missing-fix and gap handling from this study's 90-minute schedule and the intended portrayal; the time convention; rounding; which quality fields are kept. Rows without a position never become zeros or interpolated points. If an accuracy claim is shown per fix, the accuracy value stays attached to its fix through processing (the trial format below drops it).
 - A gap rule is set for this study at the build proposal (fixes are 90 minutes apart by schedule); none is carried over from the zebra.
 - **Grey-headed albatross: keep as the date-line test case.** It is the right dataset for proving the crossing tests of the proposal's §10, with a bird that crosses 30 times (`61696`) and six that never do.
 
@@ -110,7 +133,9 @@ This format omits the accuracy field and everything else the existing journey en
 
 ## 8. Not done, not claimed
 
-- Reference data and both papers: unread.
+- Both papers: not read in full by Claude (the waved paper through a summarising fetch only; the grey-headed methods are GPT's reading).
+- Trips within the chosen bird's record: not counted or segmented.
+- No message to the data creators; GPT: none is required merely because the READMEs recommend contact.
 - No reason given for the `90494` anomaly.
 - No gap rule, no quality rule, no display file, no build.
 - The trial sizes are not the existing encoding and are not a cost estimate.
