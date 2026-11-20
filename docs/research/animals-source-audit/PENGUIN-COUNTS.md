@@ -1,16 +1,18 @@
 # Animals: audit A, African penguin counts
 
-20 Nov 2026 · rev 1, **part 1 of 2** · for GPT · read-only research under brief A (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1). Chad's go: 20 Nov, his own message ("go"), taken as audit A first. Nothing built, nothing sent, no account, nothing saved to the Mac or the repository.
+20 Nov 2026 · **rev 2, complete (parts 1 and 2)** · for GPT · read-only research under brief A (`docs/concepts/ANIMALS-EXPANSION-AUDIT-BRIEFS.md` rev 1.1). Chad's go: 20 Nov, his own message ("go"), taken as audit A first. Nothing built, nothing sent, no account, nothing saved to the Mac or the repository.
 
-**Status**
-- **Version B (repository file, to 2023): audited at file level. Result: requires clarification** (no licence; the anchor rule is not written down). Its contents are internally consistent.
-- **Version A (Dryad file, to 2019): NOT audited.** The record's download link answered with an automated-visitor check, not the file. Claude does not get past such checks. It needs Chad to download the file himself (§5).
+**Results**
+- **Version A (Dryad file, to 2019): usable**, for individual colony series, as a dated 2021 deposit. Public domain on its record; contents consistent with the record's notes. One caution: the author's later file revises some of its values (§6).
+- **Version B (repository file, to 2023): requires clarification** (no licence; the rule for its 0.1 markers and its unit are not written down). Its contents are internally consistent.
+- **The two files are not one series.** B is not A with four more years: 24 of the 902 colony-years they share differ (§6).
 
 ## 1. How this was done
 
 - In a tab Claude opened in Chad's Chrome and closed afterwards, 20 Nov 2026, between 13:20:55 and 13:22:49 UTC (clock readings).
 - Version B: seven requests to GitHub's public API from a `github.com` page, one at a time, no sign-in used by the requests: repository record, head commit, commit list for the CSV, file tree at the pinned commit, and the contents of three files at that commit. The files were held in the tab's memory, hashed and counted there. **Nothing was saved.** The figures below were read out of the tab as text.
-- Version A: one request to the record's own file link. It returned an HTML page titled "Validating..." from a bot-protection service, 2,881 characters, not the CSV. No further attempt was made.
+- Version A, first attempt (13:21 UTC): one scripted request to the record's file link returned an HTML page titled "Validating..." from a bot-protection service, not the CSV. No further attempt was made.
+- Version A, part 2 (13:25:59 to 13:26:22 UTC, clock readings): **Chad downloaded the dataset himself** (his message, 20 Nov) and granted his Downloads folder. Claude read `doi_10_5061_dryad_vx0k6djp7__v20210303 (1).zip` there, in the Mac shell, without unpacking it into Downloads; counted it; and compared it with version B, fetched again at the pinned commit (same 4,813 bytes and sha256 as in part 1). The working copies were in the shell's scratch folder and were removed. The two zip files in Downloads are Chad's; an identical one from 12:46 UTC was already there.
 - No separate evidence file: the results are in the tables here. The tab's raw output was not written anywhere.
 
 ## 2. Version B: identity and version
@@ -81,17 +83,72 @@ The earlier two versions of the CSV were not opened. What changed at Dyer Island
 
 **Result for version B: requires clarification.** Two things are missing and both are in the enquiry draft already: reuse terms, and the meaning of the 0.1 markers (and of the unit) for this version. With those, the file is usable for individual colony series.
 
-## 5. Version A: what is needed
+## 5. Version A: the file
 
-- The Dryad record (doi `10.5061/dryad.vx0k6djp7`) and its methods, usage notes and "Public domain" label were read on 20 Nov (proposal rev 2, §3.1). The file itself, `Afr_penguin.csv`, sits behind a bot check when requested by script.
-- **Chad's part:** open the record in his own browser and click `Afr_penguin.csv`. It will download. That puts a 3.89 KB public-domain file in his Downloads folder, which departs from the brief's "nothing saved on the Mac"; it is his choice. Claude then reads it from there (one folder prompt), hashes and counts it, and writes part 2: the same table for A, and a cell-by-cell comparison of the colony-years the two files share.
-- Until then nothing is claimed about A's contents beyond what its record says.
+| | |
+|---|---|
+| Record | Dryad doi `10.5061/dryad.vx0k6djp7`, version of 3 Mar 2021 (the download is named `…__v20210303`) |
+| Download | a zip of 4,034 bytes, sha256 `2106ce706f014f7d75008d117cba54a803664c279a5c96871396af0486866e11`, holding one file |
+| File | `Afr_penguin.csv`, **3,890 bytes**, sha256 `9c57c16809d1b886c5000555b495551f7d7cb1802cfa70c6d67323a87f40d72c` |
+| Licence | "Public domain" on the record (read 20 Nov). The zip carries no licence or readme file of its own |
+| Unit and notes | on the record: occupied nests; NA and 0.1 as described there (proposal rev 2, §3.1) |
 
-## 6. Not done, not claimed
+- 42 lines: a header and 41 rows, one per year, **1979 to 2019, consecutive, no repeated year**. 23 columns: `Year` and **22 colonies** (the first 18 South African and the last 4 Namibian, in the record's count). No ragged row. Windows line endings; no final newline.
+- 902 cells: **600 whole-number counts, 298 without a count, 4 markers of 0.1.** No zero, no other decimal, no text. One of the 298 is an empty cell, not the letters NA (Seal Island Algoa Bay, 2003).
+- **The four 0.1 markers are exactly where the record's usage notes say:** Lamberts Bay at the end (2019); Robben Island, Simonstown and Stony Point at the start (1979). So for this file the rule is written down: they are not counts and are left out.
 
-- Version A's file: not seen.
+| Colony | Counts | First | Last | Gaps inside | 0.1 at | Lowest | Highest | Last count |
+|---|---|---|---|---|---|---|---|---|
+| Lamberts Bay | 19 | 1979 | 2005 | 8 | 2019 | 9 | 50 | 10 |
+| Malgas Island | 33 | 1979 | 2019 | 8 | | 5 | 1,022 | 6 |
+| Marcus Island | 27 | 1979 | 2018 | 13 | | 4 | 1,243 | 4 |
+| Jutten Island | 30 | 1979 | 2019 | 11 | | 67 | 2,878 | 138 |
+| Vondeling Island | 32 | 1979 | 2019 | 9 | | 82 | 649 | 112 |
+| Dassen Island | 31 | 1979 | 2019 | 10 | | 1,862 | 24,901 | 1,912 |
+| Robben Island | 37 | 1983 | 2019 | 0 | 1979 | 9 | 7,798 | 1,190 |
+| Simonstown | 34 | 1985 | 2019 | 1 | 1979 | 2 | 1,227 | 932 |
+| Seal Island False Bay | 18 | 1979 | 2019 | 23 | | 31 | 95 | 44 |
+| Stony Point | 31 | 1982 | 2019 | 7 | 1979 | 1 | 2,533 | 1,705 |
+| Dyer Island | 32 | 1979 | 2019 | 9 | | 951 | 22,655 | 1,071 |
+| Geyser Island | 16 | 1979 | 2012 | 18 | | 1 | 328 | 2 |
+| Jahleel Island | 21 | 1981 | 2019 | 18 | | 50 | 578 | 55 |
+| Brenton Island | 20 | 1986 | 2019 | 14 | | 3 | 38 | 10 |
+| St Croix Island | 23 | 1979 | 2019 | 18 | | 3,638 | 19,478 | 3,638 |
+| Seal Island Algoa Bay | 20 | 1990 | 2019 | 10 | | 78 | 510 | 95 |
+| Stag Island | 20 | 1990 | 2017 | 8 | | 1 | 50 | 2 |
+| Bird Island | 26 | 1981 | 2019 | 13 | | 572 | 5,376 | 2,378 |
+| Mercury | 33 | 1985 | 2019 | 2 | | 1,126 | 3,666 | 2,221 |
+| Ichaboe | 32 | 1985 | 2019 | 3 | | 242 | 3,343 | 242 |
+| Halifax | 32 | 1981 | 2019 | 7 | | 259 | 2,224 | 825 |
+| Possession | 33 | 1985 | 2019 | 2 | | 327 | 1,205 | 657 |
+
+**For a chart from version A**
+- Individual colony series: Robben Island has no gap from 1983 to 2019; Simonstown has one; Mercury and Possession two; Ichaboe three. The three largest colonies have many gaps (Dassen 10, St Croix 18, Bird Island 13).
+- **No fixed-coverage total.** No colony is counted in every year from 1979. From 1989: Malgas, Robben Island and Simonstown only. From 2004: nine colonies (Malgas, Jutten, Vondeling, Robben Island, Simonstown, Stony Point, Dyer, Mercury, Possession), without Dassen, St Croix or Bird Island. Adding cells would be wrong for this file too.
+- What a chart may say: "Annual colony census: occupied nest sites (used as a breeding-pair proxy)", per colony, 1979 to 2019, gaps left open, the four markers left out, with the two countries' definitions and the 2021 deposit date.
+
+**Result for version A: usable**, with the caution in §6.
+
+## 6. The two files compared
+
+- Colonies: all 22 of A's are in B under the same names. B adds four: De Hoop, Pomona, Plumpudding, Sinclair.
+- Shared colony-years (22 colonies, 1979 to 2019): **902. Identical: 878. Different: 24.**
+
+| Kind of difference | Number | Where |
+|---|---|---|
+| A count in both, with a different value | 12 | Vondeling 2018 (122 → 111); Mercury 2019 (2,221 → 2,305); Ichaboe 2017, 2018, 2019 (383 → 346, 255 → 317, 242 → 229); Halifax 1986, 2016, 2017, 2018 (259 → 389, 1,656 → 1,075, 2,224 → 1,466, 1,249 → 1,170); Possession 1985, 2018, 2019 (638 → 735, 798 → 657, 657 → 693) |
+| A count in A, no count in B | 3 | Vondeling 2019 (112); Mercury 2018 (2,500); Possession 2016 (990) |
+| No count in A, a count in B | 7 | Stony Point 1987 (41); Seal Island Algoa Bay 1979 (26); Stag Island 1981 (23); Bird Island 1979 (314) and 2002 (4,459); Ichaboe 1979 (4,200) and 2016 (444) |
+| A's 0.1 marker, no entry in B | 1 | Lamberts Bay 2019 (B's marker is at 2023) |
+| Empty cell in A, NA in B | 1 | Seal Island Algoa Bay 2003 (the same state, written differently) |
+
+- Values are given as "A → B". Why they differ is not stated in either source and is not guessed here. Most are Namibian colonies and recent years.
+- **Consequences.** (1) The files cannot be joined; that rule now rests on evidence. (2) A chart from A shows the 2021 deposit as it stood, and should say that a later version by the same authors revises some values. (3) Which version the authors regard as current for the shared years is a fair question for them; the enquiry draft's request for "any corrected version" covers it.
+
+## 7. Not done, not claimed
+
 - The two earlier commits of the version B file, and all model outputs: not opened.
-- No comparison between A and B.
-- No licence for B. No statement of B's unit from its own repository.
-- The 2024 paper's methods (a PDF) were not read by Claude; whether they define the 0.1 markers for this version is not known to Claude.
+- No licence for B. No statement of B's unit or marker rule from its own repository.
+- The papers' methods (PDFs) were not read by Claude.
+- No explanation of any difference between the files.
 - No chart, no display file, no build.
