@@ -1,168 +1,183 @@
 # Earth from Space, Stage B: three validations inside the hub, nothing stored
 
-Proposal rev 1, 21 November 2026. Branch `earth-from-space-rc`, documents only. For GPT's review, then Chad's decision.
-**Nothing here is built, deployed or approved.** It answers the seven points of GPT's review of the Stage A result
-(`reviews/2026-11-21-earth-from-space-stage-a-result-gpt-review.md`).
+Proposal **rev 2**, 21 November 2026. Branch `earth-from-space-rc`, documents only. **Nothing here is built, deployed or
+approved.** Rev 2 takes in GPT's review of rev 1 (`reviews/2026-11-21-earth-from-space-stage-b-proposal-gpt-review.md`);
+the changes are listed in section 10. GPT supports a branch-only build with these corrections, **on Chad's own go**, and
+wants the implementation candidate back before any deployment or observation.
 
 ## 1. Where this starts from
 
 - Stage A (the isolated twelve-hour probe) ended on 21 Nov. Formal result: **incomplete at both sizes**, no criterion "not met"
   (`reviews/evidence/2026-11-20-earth-from-space-probe/stage-a/result/README.md`). The Worker is deleted.
-- GPT recommends going on to Stage B at 2,048 px **on Chad's explicit acceptance of the incomplete coverage**. That acceptance
-  is decision D1 below. Until Chad gives it, this proposal is preparation only.
+- GPT recommends going on to Stage B at 2,048 px **on Chad's explicit acceptance of the incomplete coverage** (D1).
 - What Stage A did not show, and Stage B is for: the same validation **in the hub's own isolate**, beside the hub's other
-  work and sharing its 128 MB. Stage A's ladder found no ceiling and sets no bound for the hub. Every Stage A run was in a
-  fresh isolate, so nothing is known about a reused one.
+  work and sharing its 128 MB. Stage A's ladder set no bound for the hub, and every Stage A run was in a fresh isolate.
 
-Stage B does not store a picture, does not switch collection on, and does not release the page. It ends with results
-returned for review.
+Stage B stores no picture, does not switch collection on and does not release the page. It ends with results returned for review.
 
 ## 2. What would be built (branch only, after Chad's go)
 
-### 2.1 One admin route
+### 2.1 One route: POST, key in a header
 
-`GET /admin/probe/earthview?key=ADMIN_KEY`, beside the hub's existing `/admin/probe/…` routes and behind the same admin-key
-check (wrong or missing key: 403, no request made).
+`POST /admin/probe/earthview`, with the admin key in the `Authorization: Bearer …` header.
 
-One call does one observation:
+- `GET`, or any other method: 405, nothing done. Any query string at all: 400, nothing done (so a key can never be accepted
+  from a URL). Missing or wrong header: 403, nothing done.
+- The route never logs a header or the key, and its three requests to EUMETSAT carry only the hub's `User-Agent`.
+- The hub's existing admin routes keep their key-in-URL form; changing them is separate scope.
+- **To verify in the candidate packet:** what Cloudflare's own invocation record stores of request headers (whether
+  `Authorization` is redacted), from Cloudflare's documentation and from the local runtime. If it is stored readable, this
+  comes back before any deployment.
+- Who calls it: a small script on the Mac that reads the key from `KEYS.md` itself, makes **one** POST, waits, and saves the
+  answer to a file. Claude does not see or type the key. Chad starts it (the Mac's sandboxed shell cannot reach the hub).
 
-1. Read EUMETSAT's frame list (one request, 30 s limit), take the newest listed GeoColour time on the ten-minute grid.
-2. Fetch the 2,048 px picture and the 256 px check image for that time (one request each, 90 s limit).
-3. Require the served-time header on **both** responses to name the requested time.
-4. Decode and compare with the same functions and limits the collector uses (`evDecode`, `evPng`, `evCompare`,
-   `EARTHVIEW.LIMITS`, unchanged).
-5. Return the result as JSON with `Cache-Control: no-store`.
+One call is one observation: read EUMETSAT's frame list, fetch the 2,048 px picture and the 256 px check image for the
+newest listed time, require the served-time header on both to name that time, decode and compare with the collector's own
+functions and limits (`evDecode`, `evPng`, `evCompare`, `EARTHVIEW.LIMITS`, unchanged), answer in JSON, `no-store`.
+At most 3 requests to EUMETSAT. No retry inside a call.
 
-At most 3 requests to EUMETSAT per call. No retry inside a call.
+### 2.2 A whole-run deadline
 
-### 2.2 It cannot write (GPT point 2)
+The collector's per-request limits (30 s list, 90 s each picture) add up to 210 s, too long for a timed observation.
+The probe gets **one deadline for the whole run: 150 s from its start**. Each request's limit is the smaller of its own
+limit and the time left; if the deadline passes, the run ends "deadline" with what it has (incomplete, by rule).
+The client waits **180 s**, once. **No client retry**: if the answer is lost, the observation is incomplete and is not repeated.
 
-- The observation is one function, `evProbeOnce(now)`. **It is not given `env`**, so it has no handle on the bucket, on
-  any other binding or on a secret. The route wrapper touches `env` only to compare the admin key and read the gate.
-- It does not call `evState`, `evFail`, `evUpdate`, `evCollect`, `evCleanup`, `evGuard` or `evAdmin`, and uses no cache API.
-- Tests, each run for **every outcome** (success; list fails, times out, unreadable; picture fails, too large, wrong type;
-  check image fails, wrong type; header missing or naming another time on either response; validation refused; decoder
-  throws; busy; gate on; wrong key): the bucket double counts every `put`, `delete`, `get`, `head`, `list` and multipart
-  call, and the count stays at zero. A static test asserts the function's source names no `env`. Breaks: adding any write,
-  or passing `env` through, must fail the suite.
-- In-memory only, lost with the isolate: the busy latch and the counters of 2.4. Nothing persists.
+### 2.3 No collection during Stage B, scheduled or manual
 
-### 2.3 Collection disabled, and no overlap (GPT points 1 and 3)
+GPT's finding, confirmed in the code: `JOBS.earthview` (the manual `/admin/run/earthview`) ignores the gate, so an unset
+gate alone does not make the probe the only Earth from Space validation.
 
-- **Gate.** The route runs only while `EARTHVIEW_ENABLED` is unset. If it is `1`, the route answers 409 "collection is on"
-  and makes no request. With the gate unset the collector makes no request and writes nothing (hub suite case A1), so in
-  Stage B the probe is the only Earth from Space validation in the hub.
-- **Latch.** A module-level flag is set before the first request and cleared in `finally`. A second call arriving in the
-  same isolate while one is running answers 409 "busy", makes no request and does no decode. Tests: two overlapping calls,
-  the second refused with zero fetches; the latch is released after success, after each failure and after a thrown error.
-- **Stated limit.** The latch is per isolate. Cloudflare may run more than one isolate, and a latch cannot see across
-  them. Operationally the three observations are called one at a time, each awaited to its answer, hours apart.
-- **Not in Stage B:** making the collector take the same latch. That touches `evCollect`, whose recovery closures GPT accepted
-  on the condition that `phase1/worker.js`'s recovery code is unchanged. It is listed as a release-stage question (section 7).
+- In the **outer dispatch**, before `runEarthView` and before the run-log wrapper `guarded`: both the scheduled path and the
+  manual job refuse unless `EARTHVIEW_ENABLED` is `1`. Refusal makes no request, validates nothing, and touches neither the
+  bucket nor the database. `evCollect`, the guards and the recovery code are **not edited**.
+- The probe route refuses (409 "collection is on") unless `EARTHVIEW_ENABLED` is unset.
+- So by configuration exactly one of the two can run. Tests: a manual call with the gate unset, while the probe is idle and
+  while a probe is in flight: zero source requests, zero validation, zero storage and database calls.
+- Consequence for later: the release plan's "first manual stored run before the gate" needs its own switch. That is a
+  release-stage decision, listed in section 7, not built here.
+- **Latch.** With collection excluded, a probe-only latch is enough: a second probe call in the same isolate while one runs
+  answers 409 "busy" with no request and no decode; released in `finally`. **Limit, stated:** it is per isolate. It cannot
+  see another isolate, and it is not a cap on requests to EUMETSAT. The budget of section 3 is kept by making three single calls.
 
-### 2.4 What each observation reports (GPT points 4 and 6)
+### 2.4 It cannot write: proof on the whole route
 
-From the route's own answer:
+- Design: the observation function `evProbeOnce(now)` is not given `env`. This is supplementary.
+- **The proof is a test of the whole route**, wrapper, error handling and deferred work included. Every binding the hub has
+  that can write is replaced by a spy: the R2 bucket (`put`, `delete`, multipart, and also `get`, `head`, `list`) and the D1
+  database (`prepare`, `batch`, `exec`, and every statement's `run`, `all`, `first`). `ctx.waitUntil` is recorded and awaited;
+  the cache API is spied. For **every outcome** the count of calls on all of them is zero: success; list fails, times out,
+  unreadable; picture fails, too large, wrong type; check image fails, wrong type (the `text/xml` case from Stage A); header
+  missing or naming another time on either response; validation refused; decoder throws; deadline; busy; collection on;
+  wrong method; query string present; wrong or missing key.
+- Breaks: adding any bucket or database call, passing `env` through, or routing the probe through `guarded` must fail the suite.
+- In memory only, lost with the isolate: the latch and the counters of 2.5.
 
-- an attempt id; hub version and a build id of the probe code; requested frame time; start and end clock readings
-- per response: HTTP status, content type, bytes, sha256, header present, the time the header names
-- validation: every figure `evCompare` returns, pass or the refusal reason; wall time of decode and compare
-- **isolate reuse:** a random isolate id made at module start; the isolate's start time and age; how many requests of any kind
-  this isolate has served; how many Earth from Space validations it has run before this one, and the previous one's attempt id.
-  That says plainly whether an observation ran cold or in a warm, reused isolate. Stage B cannot force either.
+### 2.5 What each observation records
 
-From Cloudflare, read-only in the dashboard pane, for that one request: the invocation record's outcome, CPU time and wall
-time.
+**Log lines** (safe: no key, no header), each with the attempt id, the probe build id and the isolate id: `start`,
+`fetched`, `validate-begin`, `validated`, `done`, with clock readings. Cloudflare stores them under the same request as the
+invocation record, so the lines, the saved answer (same attempt id) and **the exact invocation record** (outcome, CPU, wall)
+are tied together by Cloudflare's request id, not by time alone.
 
-**Hub health, read before and after each observation (read-only):**
+**The answer:** attempt id; hub version; build id; requested frame time; run start and end; **validation start and end**;
+per response: status, content type, bytes, sha256, header present, time named; every figure `evCompare` returns, or the
+refusal reason; whether the deadline was hit.
 
-- the hub's public status file: every other layer's last-good time and state, to see that nothing went stale or failed
-  around the observation
-- Cloudflare's invocation records for the hub from 10 minutes before to 30 minutes after: counts by outcome, any
-  `exceededMemory`, `exceededCpu` or exception, and whether scheduled runs in that window completed
-- the dashboard's memory and CPU percentiles for the hub for that hour, reported as percentiles, not maxima
+**Isolate reuse:** isolate id made at module start; the isolate's start time and age; how many requests of any kind it has
+served; how many Earth from Space validations it ran before this one, and the previous attempt id. Stage B cannot force a
+cold or a warm isolate; it reports which it got.
 
-**Confirmed, read-only, 04:29 UTC 21 Nov:** the hub has Workers Logs on with invocation logs, sampling 1, and its request
-records carry outcome, CPU time and wall time (33 records in the 15 minutes read). So criterion 4 can be read without any
-settings change. Noted from the same read: the hub does not redact query strings in its logs, so the admin key in an admin
-URL may be recorded in the account's own Workers Logs, as for every existing admin route. Not changed here; question 6.
+**Actual overlap:** from the hub's invocation records, every other invocation whose start-to-end span crosses the
+validation's start-to-end span, with its kind (which scheduled job, or a page request), CPU and outcome. An observation
+timed for a busy period that overlapped nothing is reported as such; timing alone is not counted as overlap.
 
-## 3. The three observations (GPT point 4)
+## 3. The three observations
 
-Declared in advance, in the Approve line, as three UTC windows on one day or across two. Proposed, for Chad and GPT to change:
+**Order: quiet, busy, quiet.** Windows bound the **start of the call**; the run then has its 150 s deadline. Calendar dates
+are fixed only after GPT's review of the candidate and when deployment is ready.
 
-| | Window (UTC) | SAST | Why |
-|---|---|---|---|
-| 1 | 07:20 to 07:29 | 09:20 | morning; full-disk daylight, larger picture files |
-| 2 | 12:07 to 12:09 | 14:07 | midday, **on the minute the hub's hourly job runs** (7 past), to observe the decode beside other hub work. Which scheduled job is the hub's heaviest has not been measured; it can be read from the hub's invocation records before the windows are fixed |
-| 3 | 20:40 to 20:49 | 22:40 | night; outside the 06:00 and 18:00 UTC Dust RGB runs |
+Measured from the hub's invocation records, 04:00 UTC 20 Nov to 04:00 UTC 21 Nov (457 scheduled runs, all outcome `ok`; read-only):
 
-One call per window. If a window is missed (pane signed out, Mac asleep), that observation is **not run** and is reported
-so; it is not moved. 9 requests to EUMETSAT at most in total.
+| Scheduled job | Starts | Runs | Wall, median / 95th / max | CPU, median / 95th / max |
+|---|---|---|---|---|
+| every 5 min | at :08 s of the minute | 289 | 2.2 s / 5.5 s / 9.0 s | 9 / 16 / 22 ms |
+| every 15 min | at :40 s | 96 | 8.5 s / 99 s / 135 s | 217 / 600 / 762 ms |
+| 11 and 41 past | at :38 s | 48 | 53 s / 66 s / 78 s | 23 / 208 / 228 ms |
+| hourly, 7 past | at :59 s | 24 | 25 s / 53 s / 65 s | 84 / 1,042 / 1,072 ms |
 
-Window 2 is deliberately the least comfortable one. If GPT or Chad prefer three quiet windows first, say so; the cost is
-that the first observation under load would then be a stored run.
+The hourly run is heavy four times a day, at 04:07, 10:07, 16:07 and 22:07 UTC (CPU 718, 1,072, 717 and 1,042 ms; the other
+twenty runs 57 to 174 ms).
 
-## 4. Reading the result (GPT points 4, 5 and 7)
+- **Quiet start:** between hh:21:30 and hh:22:30, or hh:51:30 and hh:52:30. The five-minute run of hh:20 has ended, and
+  the run ends by hh:25:00 at the latest, before the quarter-hour job at hh:30:40. The five-minute run at hh:25:08 falls
+  after the deadline.
+- **Busy start:** between 10:07:40 and 10:08:10 UTC, or the same seconds at 16:07 or 22:07, so the fetches run while the
+  heavy hourly job (starting hh:07:59, typically 20 to 65 s) is working and the five-minute run of hh:10:08 may follow.
+  Whether the decode itself overlapped is read afterwards (2.5), not assumed.
 
-Per observation, all of these, or it is not complete:
+Budget: **9 requests to EUMETSAT, for three single attempts.** That is the authorised budget, kept by procedure, not a cap
+the isolate enforces. A duplicate is reported. A missed, failed or lost observation is **not replaced**.
 
-1. the route's full answer was received and saved
-2. both responses usable, both headers name the requested time
-3. validation passed
-4. Cloudflare's invocation record for that request found, outcome `ok`, CPU a finite number **below 5,000 ms**
-5. the health reads before and after were made, with no `exceededMemory`, `exceededCpu` or new failure on the hub in the window
+## 4. Reading the result
+
+Per observation, complete only with all of: the saved answer; its log lines; the exact invocation record with outcome `ok`
+and a finite CPU figure; both responses usable with both headers naming the requested time; validation passed; the health
+reads before and after.
+
+**Health reads** (read-only), judged against each layer's own cadence: the hub's public status file before and after;
+the hub's invocation records from 10 minutes before the start to 30 minutes after the end; the dashboard's memory and CPU
+percentiles for the hour, as percentiles.
 
 Verdict:
 
-- **Stage B met:** three of three complete.
-- **Not met:** any observed failure of the hub or of our code: a resource ending, CPU at or over 5,000 ms, a header
-  naming another time, a validation refusal on a sound picture, another layer failing in the window with a cause in this code.
-- **Incomplete:** anything else, including an upstream failure (as in four of Stage A's 70 runs), a missed window or a
-  missing record. **No automatic extra run, no moved window, no retry.** An incomplete or not-met result goes back to GPT
-  and Chad as it is.
-- A validation refusal is diagnosed from the saved hashes before anything is concluded, as in Stage A.
+- **Met:** three of three complete, CPU below 5,000 ms each, and no hub resource ending in any window.
+- **Not met:**
+  - any `exceededMemory` or `exceededCpu` on the hub inside an observation window. This is **not met for operational
+    coexistence**, whichever request it fell on, and without claiming the probe caused it
+  - CPU at or above 5,000 ms; a header naming another time; a refusal of a picture found sound on diagnosis.
+- **Incomplete:** missing evidence, an upstream failure, a missed window, a lost answer, the deadline, or a regression on
+  another layer that could be related and is not explained.
+- **Unrelated failures, defined before running:** a layer already failing or stale in the "before" read is recorded as
+  pre-existing and does not count. A new failure counts as unrelated only if that layer's own record shows an outside cause
+  (its upstream's error or timeout, or the Mac collector's known connect timeouts) **and** no hub resource ending is in the
+  window; it is reported and does not block. Anything else is "unexplained": incomplete.
+- A validation refusal is diagnosed from the saved hashes before anything is concluded.
 
-Three observations are few. A met result means "nothing went wrong three times", not a measured memory bound.
-**Whatever the result, nothing is stored and nothing is enabled until it has been reviewed** and Chad has given the next line.
+Three observations are few. "Met" means nothing went wrong three times, not a measured memory bound. **Nothing is stored
+and nothing is enabled until the result has been reviewed** and Chad has given the next line.
 
 ## 5. What goes to production, and on which lines
 
-Stage B needs the candidate hub in production with collection off. That is a hub deploy and needs its own line.
-
-1. **Branch work (Chad's "go"):** build 2.1 to 2.4 with tests and breaks; merge current main into the branch; full hub
-   regression on the merged tree; packet to GPT with the exact file hash.
-2. **GPT's review** of that candidate.
-3. **Approve line 1, deploy:** hub from 0.6.19 to the candidate (0.6.21: Earth from Space collector dormant behind the unset
-   gate, its public read route, the storage admin routes, the probe route), `EARTHVIEW_ENABLED` not set. Read back the
-   deployed hash and settings; confirm every existing layer still updates; confirm the public Earth from Space route
-   answers "unavailable" and that no `earthview/` object exists.
-4. **Approve line 2, the three observations:** the three windows, at most 9 requests to EUMETSAT, nothing stored.
+1. **Branch work (Chad's go):** build section 2 with tests and breaks; merge current main into the branch; full hub
+   regression on the merged tree; packet with the exact hash of the **full merged Worker file**, which is what GPT reviews.
+2. **GPT's review of that candidate.** Then the calendar dates are fixed.
+3. **Approve line 1, deploy:** hub 0.6.19 to the candidate (0.6.21), `EARTHVIEW_ENABLED` not set. Read back the deployed hash
+   and settings; confirm every existing layer still updates; confirm the public Earth from Space route answers
+   "unavailable". **If the read-back finds any `earthview/` object in storage: stop and report. Nothing is deleted or
+   initialised.**
+4. **Approve line 2, the three observations:** the three start windows, 9 requests at most, nothing stored.
 5. **Result** to GPT and Chad.
 
-Lines 1 and 2 can be given together or apart; they are separate actions.
+**For visitors: no intended visible page change.** It is a production change to the hub: the dormant Earth from Space
+collector (about 1,640 added lines in `phase1/worker.js` against main, plus the probe route), its public read route and the
+storage admin routes go live behind the unset gate and the admin key.
 
-**What the deploy changes for visitors:** nothing. The page is not merged, the tab is not shown, collection is off.
-
-**Rollback:** redeploy hub 0.6.19 (main). No storage to undo, since nothing is written.
-
-**Cost:** none expected. No new binding, no storage, no new cron.
+**Rollback:** redeploy hub 0.6.19 (main). No storage to undo. **Cost:** none expected; no new binding, storage or cron.
 
 ## 6. Risks, plainly
 
-- **This is the first time the decoder runs in the live hub's isolate.** If it exceeds memory, Cloudflare's stated behaviour
-  is to let requests in flight finish and start a new isolate; requests can be cancelled under heavy load. A collector run
-  caught by that would fail once and run again on its next schedule. That is the reason for three single calls and for
-  watching the hub around each.
-- The deploy itself carries the dormant Earth from Space code into the hub (about 1,640 added lines in `phase1/worker.js` against main, before the probe route). It is behind the gate and the
-  admin key; the hub suite covers "gate unset makes no request and writes nothing".
-- EUMETSAT may fail an observation (it did 4 times in 70). That yields "incomplete", by rule.
+- First time the decoder runs in the live hub's isolate. If it exceeds memory, Cloudflare's stated behaviour is to let
+  requests in flight finish and start a new isolate; requests can be cancelled under heavy load. A collector run caught by
+  that fails once and runs again on its next schedule. The busy observation raises this chance on purpose, after a quiet one.
+- EUMETSAT may fail an observation (4 of Stage A's 70; a sample, not a forecast). That yields "incomplete".
+- Chad is needed at the Mac to start each observation's script, three times.
 
 ## 7. Not part of Stage B
 
-First stored frame; the gate; the page and tab; whether the collector should share the busy latch; morning and afternoon
-listing-delay samples; real phone, Safari and screen reader; REGISTER and Sources; lifecycle rule check; real 1,536 px
-fixtures (no longer needed if 2,048 px goes forward). Each stays on the open list.
+First stored frame and the switch a manual first run now needs (2.3); the gate; the page and tab; a collector latch;
+key-in-header for the other admin routes; morning and afternoon listing-delay samples; real phone, Safari and screen
+reader; REGISTER and Sources; lifecycle rule check.
 
 Collector behaviour is unchanged, as GPT asks: no publication without both usable responses and matching frame
 confirmation; on failure the last validated pointer and its original timestamps stay, with the existing expiry; no new
@@ -170,22 +185,26 @@ immediate retry.
 
 ## 8. Decisions for Chad
 
-- **D1.** Accept Stage A's evidence as enough to go on, with both formal verdicts recorded as incomplete? (GPT: yes.
-  Claude: yes.)
-- **D2.** 2,048 px for Stage B? (GPT: yes. Claude: yes.)
-- **D3.** The three windows of section 3, including the one on the hourly job's minute, or three quiet ones?
-- **D4.** "Go" for the branch work of section 5 step 1? This is branch work only. The deploy and the observations each
-  need their own Approve line later.
+- **D1.** Go on despite Stage A's incomplete coverage, verdicts recorded as incomplete? (GPT: yes. Claude: yes.)
+- **D2.** 2,048 px? (GPT: yes. Claude: yes.)
+- **D3.** Quiet, then one measured busy period, then quiet? (GPT: yes. Claude: yes.)
+- **D4.** "Go" for the branch build of section 5 step 1? Branch only. The deploy and the observations each need their own
+  Approve line later.
 
-## 9. Questions for GPT
+## 9. Open points for GPT at candidate review
 
-1. Is "the function is never given `env`" plus the counted bucket double enough for point 2, or do you want the route
-   to run against a binding-less stub as well?
-2. Latch in the probe only for Stage B, collector latch deferred to release: acceptable, given the gate guarantees the
-   collector is idle?
-3. Window 2 on the hourly job's minute: wanted, or too much for a first observation?
-4. Is the health read (status file, invocation outcomes for the window, hourly percentiles) the right set, and is "no
-   `exceededMemory` on the hub in the window" a fair not-met condition when the cause may be another request?
-5. Should the busiest scheduled minute be measured from the hub's invocation records first, and window 2 set on it?
-6. The admin key travels in the query string and the hub's logs do not redact query strings. Leave as is for Stage B
-   (existing behaviour of every admin route), or move the key to a header for this route?
+1. What the invocation record keeps of the `Authorization` header (2.1).
+2. The 150 s whole-run deadline and 180 s client wait.
+3. The unrelated-failure rule of section 4.
+
+## 10. What changed from rev 1
+
+| GPT's point | Rev 2 |
+|---|---|
+| 1. Manual collector ignores the gate | 2.3: scheduled and manual collection both refused in the outer dispatch while the gate is unset; tests idle and in flight; recovery internals untouched; latch limit stated |
+| 2. "No env" is not proof | 2.4: whole-route test with spies on R2 and D1, deferred work and cache; static check supplementary |
+| 3. Authentication | 2.1: POST, header only, no query string accepted, nothing logged or forwarded |
+| 4. Timing | Section 3: quiet, busy, quiet from measured job timings; windows bound starts; 2.2 whole-run deadline, one client wait, no retry; dates fixed later; actual overlap reported (2.5) |
+| 5. Health verdict | Section 4: any hub resource ending in a window is not met for coexistence; incomplete and unrelated-failure rules defined |
+| 6. Evidence | 2.5: lines, answer and exact invocation record tied by request and attempt id; validation start and end; 9 requests is a budget, duplicates reported, no replacements |
+| 7. Deployment | Section 5: full merged Worker reviewed; "no intended visible page change"; unexpected `earthview/` objects mean stop and report |
