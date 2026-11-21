@@ -24,7 +24,8 @@ const BREAKS = {
   'late-answer-draws': [JS, "function finish(tok) { if (tok !== st.tok || !st.on) return;", "function finish(tok) {", "db = await get(C.BASE + disp.file, R); if (tok !== st.tok) return;", "db = await get(C.BASE + disp.file, R);",
     "throw new Unverified('the display file does not match the manifest checksum'); if (tok !== st.tok) return;", "throw new Unverified('the display file does not match the manifest checksum');", "if (r) { clearTimeout(r.timer); try { r.c.abort(); } catch (_) { } } }", "if (r) { clearTimeout(r.timer); } }"],
   'late-answer-draws-token-only': [JS, "if (r) { clearTimeout(r.timer); try { r.c.abort(); } catch (_) { } } }", "if (r) { clearTimeout(r.timer); } }"],
-  'scroll-on-answer': [JS, "draw(g); st.status = 'shown'; st.err = '';", "draw(g); st.status = 'shown'; st.err = ''; reveal();"],
+  'scroll-on-answer': [JS, "draw(g); st.err = ''; if (st.pendingMove)", "draw(g); st.err = ''; reveal(); if (st.pendingMove)"],
+  'scroll-on-completion': [JS, "function done(g) { quiet(g); st.stage = 3;", "function done(g) { reveal(); quiet(g); st.stage = 3;"],
   'no-reveal-at-press': [JS, "st.pendingMove = true; paint(); reveal(); announce('Mule deer corridor areas loading.');", "st.pendingMove = true; paint(); announce('Mule deer corridor areas loading.');"],
   'gesture-does-not-cancel-move': [JS, "function userMoved() { st.pendingMove = false;", "function userMoved() {"],
   'journey-does-not-cancel-move': [JS, "if (!t) return; st.pendingMove = false;", "if (!t) return;"],
@@ -51,7 +52,7 @@ const BREAKS = {
   'no-draw-timeout': [JS, "if (waited > C.DRAW_WAIT_MS) return fail('failed', C.T.stalled);", ""],
   'stale-completes': [JS, "if (tok !== st.tok || !st.on || st.status !== 'loading') return; waited", "waited"],
 };
-const EXPECT = { 'no-list-check': '4a', 'no-manifest-check': '4a', 'no-display-check': '4a', 'no-structure-check': '4b', 'no-extent-check': '4b', 'high-under-medium': '2c', 'late-answer-draws': '3a', 'late-answer-draws-token-only': 'NONE', 'scroll-on-answer': '3d', 'no-reveal-at-press': '3d',
+const EXPECT = { 'no-list-check': '4a', 'no-manifest-check': '4a', 'no-display-check': '4a', 'no-structure-check': '4b', 'no-extent-check': '4b', 'high-under-medium': '2c', 'late-answer-draws': '3a', 'late-answer-draws-token-only': 'NONE', 'scroll-on-answer': '3d', 'scroll-on-completion': '3d', 'no-reveal-at-press': '3d',
   'gesture-does-not-cancel-move': '3b', 'journey-does-not-cancel-move': '3c', 'off-keeps-layers': '6a', 'scale-stays-during-motion': '5b', 'scale-no-edge-rule': '5c', 'omission-not-in-legend': '2e', 'writes-backdrop-line': '6b',
   'nesting-not-in-legend': '2e', 'retry-focus-to-switch': '3j', 'retry-hides-while-loading': '3j', 'retry-lingers-after-blur': '3j', 'retry-active-while-loading': '3j', 'facts-retry-not-held': '3k',
   'one-stage': '10a', 'high-first': '10a', 'sides-back': '10b', 'pointer-on': '10c', 'no-quiet': '10f', 'premature-shown': '10a', 'no-frame-wait': '10h', 'handed-counts-as-built': '10i', 'no-draw-timeout': '10i', 'stale-completes': '10j' };
