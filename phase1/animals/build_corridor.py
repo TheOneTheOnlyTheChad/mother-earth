@@ -186,7 +186,7 @@ def build(cfg, zbytes):
     disp = (json.dumps(display, separators=(',', ':')) + '\n').encode('utf-8'); dfile = f'{cfg["id"]}-{cfg["revision"]}.json'
     W = dict(cfg['wording']); band = None
     if rel == 'nested': band = round(src['Medium']['net_km2'] - src['High']['net_km2'], 5)
-    else: W.pop('nested_note')
+    else: stop(27, 'the two classes are not nested: this config\'s Medium wording ("includes High", the nested notes and area labels) is written for a nested source and must be rewritten and reviewed first')
     fr = lambda v: float(Fraction(v) / 2)
     manifest = {'schema': 1, 'id': cfg['id'], 'revision': cfg['revision'], 'kind': cfg['kind'], 'group': cfg['group'], 'label': cfg['label'], 'heading': cfg['heading'], 'evidence_type': cfg['evidence_type'],
         'display': {'file': dfile, 'bytes': len(disp), 'sha256': sha(disp)}, 'classes_shown': [n.lower() for n in cfg['shown']], 'class_not_shown': 'low',

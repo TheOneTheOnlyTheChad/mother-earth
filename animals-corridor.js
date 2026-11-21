@@ -10,7 +10,7 @@
 (() => {
   const ME = window.ME = window.ME || {};
   const $ = id => document.getElementById(id), root = $('cor-panel'); if (!root) return;
-  const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: 'fed2d428e06f52898f1fcd6df00e92808e8d5a2e0b36a3dfe574b3277cf700a2', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
+  const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: '80799f4bc9dae949011d4620a71a92d326b708c71354e8883b2e4e9aba791240', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
     ALT: { medium: 0.00004, high: 0.00008, lines: 0.00012 },                           // heights above the globe, in globe radii (ours): only to fix the drawing order
     FILL: { medium: 'rgba(255,196,84,0.38)', high: 'rgba(255,112,54,0.72)' }, STROKE: { medium: '#ffd98a', high: '#ffffff' }, LINE: 'rgba(170,205,255,0.55)',
     SCALE_PX: 120, SCALE_TOL: 0.05, SETTLE_MS: 160, R_KM: 6371.0088,
@@ -19,7 +19,7 @@
       noGlobe: 'The globe is not available in this browser, so the areas cannot be drawn. The description below still applies.', lost: 'The globe stopped, so the areas are no longer drawn. The description below still applies. Reload the page to use the globe again.',
       blur: 'At this close view the whole-globe backdrop is a blur: one picture for the whole Earth, about 20 km a pixel. It is context only and shows nothing about the animals or the study years.' } };
   class Unverified extends Error { }
-  const st = { facts: 'loading', factsErr: '', man: null, status: 'off', err: '', on: false, tok: 0, req: null, geo: null, pendingMove: false, drawn: false, view: '', announced: '', scale: null, moves: 0, reveals: 0, scrolls: 0, timer: 0 };
+  const st = { facts: 'loading', factsErr: '', man: null, status: 'off', err: '', on: false, tok: 0, req: null, geo: null, pendingMove: false, drawn: false, view: '', announced: '', scale: null, moves: 0, reveals: 0, scrolls: 0, timer: 0, held: '' };
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   const hex = async b => [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map(v => v.toString(16).padStart(2, '0')).join('');
   const J = b => JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(b));
@@ -34,7 +34,7 @@
     need(m.display && typeof m.display.file === 'string' && /^[a-z0-9-]+\.json$/i.test(m.display.file) && /^[0-9a-f]{64}$/.test(m.display.sha256) && m.display.bytes > 0, 'display file entry');
     need(m.relation && (m.relation.result === 'nested' || m.relation.result === 'bands'), 'relation between the classes is not bands or nested');
     for (const k of ['what', 'method_plain', 'method_detail', 'not_whole', 'sample', 'legend_high', 'legend_medium', 'legend_low', 'omission', 'unshaded', 'fixed', 'not_product', 'also', 'geometry', 'area_note', 'reference', 'plain_view', 'dates', 'preview']) need(m.wording && typeof m.wording[k] === 'string' && m.wording[k].length > 8, 'wording.' + k);
-    need(m.relation.result !== 'nested' || typeof m.wording.nested_note === 'string', 'nested note');
+    need(m.relation.result !== 'nested' || ['nested_note', 'legend_nested', 'definitions_note', 'area_medium_label', 'area_band_label'].every(k => typeof m.wording[k] === 'string' && m.wording[k].length > 8), 'nested wording');
     for (const k of ['medium', 'high']) { const f = m.facts && m.facts[k]; need(f && f.patches > 0 && f.holes >= 0 && f.points > 0 && f.source_net_area_km2 > 0 && f.extent_deg && ['west', 'east', 'south', 'north'].every(d => Number.isFinite(f.extent_deg[d])), 'facts.' + k); }
     need(m.view && Number.isFinite(m.view.lat) && Number.isFinite(m.view.lng) && m.view.altitude > 0 && m.grid && m.grid.step_deg > 0, 'view or grid');
     need(m.definitions_as_in_metadata && m.record && m.record.doi && Array.isArray(m.record.originators_as_listed) && m.record.originators_as_listed.length > 0 && m.metadata_quotes && typeof m.metadata_quotes.use === 'string', 'record');
@@ -112,29 +112,33 @@
     add('cor-omit', W.omission + ' ' + W.unshaded); if (W.nested_note) add('cor-note', W.nested_note); add('cor-note', W.method_plain); add('cor-note', W.not_whole); add('cor-note', W.sample); add('cor-note', W.dates); add('cor-note', W.fixed); add('cor-note', W.not_product); add('cor-note', W.also);
     const d = el('details', 'cor-more'), sm = el('summary', '', 'Areas in words, method, position and source'); d.append(sm);
     for (const k of ['high', 'medium']) { const f = m.facts[k], x = f.extent_deg, D = (v, a, b) => `${Math.abs(v).toFixed(3)}°${v >= 0 ? a : b}`;
-      d.append(el('p', 'cor-alt', `${k === 'high' ? 'High use' : 'Medium use'}: ${f.patches} separate ${f.patches === 1 ? 'patch' : 'patches'}, ${f.holes} ${f.holes === 1 ? 'hole' : 'holes'}, ${nf(f.source_net_area_km2)} km². From ${D(x.west, 'E', 'W')} to ${D(x.east, 'E', 'W')} and ${D(x.south, 'N', 'S')} to ${D(x.north, 'N', 'S')}.`)); }
-    if (m.medium_only_band_km2 != null) d.append(el('p', 'cor-alt', `Medium's area includes High's. The part of Medium that is not also High is ${nf(m.medium_only_band_km2)} km².`));
+      d.append(el('p', 'cor-alt', `${k === 'high' ? 'High use' : W.area_medium_label || 'Medium use'}: ${f.patches} separate ${f.patches === 1 ? 'patch' : 'patches'}, ${f.holes} ${f.holes === 1 ? 'hole' : 'holes'}, ${nf(f.source_net_area_km2)} km². From ${D(x.west, 'E', 'W')} to ${D(x.east, 'E', 'W')} and ${D(x.south, 'N', 'S')} to ${D(x.north, 'N', 'S')}.`)); }
+    if (m.medium_only_band_km2 != null && W.area_band_label) d.append(el('p', 'cor-alt', `${W.area_band_label}: ${nf(m.medium_only_band_km2)} km².`));
     d.append(el('p', 'cor-note', W.area_note), el('p', 'cor-note', m.record.location), el('p', 'cor-note', W.method_detail), el('p', 'cor-note', W.geometry), el('p', 'cor-note', W.reference));
-    d.append(el('p', 'cor-note', `Class definitions as the layer's metadata gives them. Medium: "${m.definitions_as_in_metadata.medium}" High: "${m.definitions_as_in_metadata.high}" Low (not shown): "${m.definitions_as_in_metadata.low}"`));
+    d.append(el('p', 'cor-note', `Class definitions as the layer's metadata gives them. Medium: "${m.definitions_as_in_metadata.medium}" High: "${m.definitions_as_in_metadata.high}" Low (not shown): "${m.definitions_as_in_metadata.low}"`)); if (W.definitions_note) d.append(el('p', 'cor-note', W.definitions_note));
     const src = el('p', 'cor-note'), a = el('a', '', m.record.release_title); a.href = m.record.url; a.rel = 'noopener'; src.append('Source: U.S. Geological Survey, ', a, `, doi ${m.record.doi}. Layer: ${m.record.layer_title}. Licence as the record words it: ${m.record.licence_as_on_record}. The layer's metadata also says: "${m.metadata_quotes.use}" No endorsement is implied.`); d.append(src);
     d.append(el('p', 'cor-note', `Originators as the metadata lists them (${m.record.originators_as_listed.length} entries): ${m.record.originators_as_listed.join(', ')}.`), el('p', 'cor-note', m.record.report + '.'), el('p', 'cor-note', W.preview)); box.append(d); }
   function paintLegend() { const L = $('cor-legend'), m = st.man, show = st.status === 'shown' && !!m; L.hidden = !show; if (!show) { L.textContent = ''; return; } const W = m.wording, G = ME.animalsGlobe && ME.animalsGlobe.state ? ME.animalsGlobe.state() : {};
     L.textContent = ''; const row = el('p', 'cor-lg-row'); for (const [k, t] of [['high', W.legend_high], ['medium', W.legend_medium]]) { const s = el('span', 'cor-lg-item'); s.append(el('span', 'cor-sw cor-sw-' + k), el('span', '', t)); row.append(s); } L.append(row);
-    L.append(el('p', 'cor-lg-omit', W.omission + ' ' + W.unshaded), el('p', 'cor-lg-small', W.legend_low), el('p', 'cor-lg-small', W.reference + ' ' + C.T.blur + (G.backdrop === 'plain' ? ' ' + W.plain_view : '')));
+    if (W.legend_nested) L.append(el('p', 'cor-lg-nest', W.legend_nested)); L.append(el('p', 'cor-lg-omit', W.omission + ' ' + W.unshaded), el('p', 'cor-lg-small', W.legend_low), el('p', 'cor-lg-small', W.reference + ' ' + C.T.blur + (G.backdrop === 'plain' ? ' ' + W.plain_view : '')));
     if (st.view) L.append(el('p', 'cor-lg-view', st.view)); }
-  let painted = null;
+  let painted = null; const RETRY = ['cor-retry', 'cor-facts-retry'];
   function paint() { const b = $('cor-tgl'), s = $('cor-state'), o = $('cor-obs'), ready = st.facts === 'ready';
     b.setAttribute('aria-checked', st.on ? 'true' : 'false'); b.setAttribute('aria-busy', st.status === 'loading' ? 'true' : 'false'); if (ready) b.removeAttribute('aria-disabled'); else b.setAttribute('aria-disabled', 'true');
     s.textContent = !ready ? (st.facts === 'loading' ? 'checking' : 'unavailable') : st.status === 'shown' ? 'shown' : st.status === 'loading' ? 'loading' : st.status === 'off' ? 'off' : 'not shown';
     o.textContent = !ready ? (st.facts === 'loading' ? C.T.factsLoading : st.facts === 'unverified' ? C.T.factsBad : C.T.factsFailed) : st.status === 'failed' && (st.err === C.T.noGlobe || st.err === C.T.lost) ? st.err : C.T[st.status];
-    $('cor-retry').hidden = !(ready && (st.status === 'failed' || st.status === 'unverified') && st.err !== C.T.lost); $('cor-facts-retry').hidden = !(st.facts === 'unverified' || st.facts === 'failed'); $('cor-goto').hidden = st.status !== 'shown';
+    const can = { 'cor-retry': ready && (st.status === 'failed' || st.status === 'unverified') && st.err !== C.T.lost, 'cor-facts-retry': st.facts === 'unverified' || st.facts === 'failed' };
+    for (const id of RETRY) { const r = $(id); r.hidden = !(can[id] || st.held === id); if (can[id]) r.removeAttribute('aria-disabled'); else r.setAttribute('aria-disabled', 'true'); }      // a pressed Retry stays, inactive, while it has the focus
+    $('cor-goto').hidden = st.status !== 'shown';
     if (painted !== st.man) { painted = st.man; paintFacts(); $('cor-label').textContent = st.man ? st.man.label : 'Mule deer, East Walker herd, California: migration corridor'; }
     paintLegend(); }
 
   // ---------- events
   $('cor-tgl').addEventListener('click', () => { if (st.on) off(); else on(); });
-  $('cor-retry').addEventListener('click', () => { $('cor-tgl').focus({ preventScroll: true }); on(); });          // Retry hides itself while loading, so focus goes to the switch it stands for
-  $('cor-facts-retry').addEventListener('click', () => loadFacts());
+  // A pressed Retry is never hidden or removed while it has the focus: it stays where it is through loading, success and failure, inactive until it applies again, and goes only after focus has left it.
+  for (const id of RETRY) { const r = $(id);
+    r.addEventListener('click', () => { if (r.getAttribute('aria-disabled') === 'true') return; st.held = id; if (document.activeElement !== r) r.focus({ preventScroll: true }); if (id === 'cor-retry') on(); else loadFacts(); });
+    r.addEventListener('focusout', () => setTimeout(() => { if (st.held === id && document.activeElement !== r) { st.held = ''; paint(); } }, 0)); }
   $('cor-goto').addEventListener('click', () => { const g = ME.globe && ME.globe(); if (!g || st.status !== 'shown') return; st.pendingMove = false; move(g); paintLegend(); settle(); });
   document.addEventListener('click', e => { const t = e.target && e.target.closest ? e.target.closest('[data-journey].an-tgl, .an-sw[data-journey] .journey-retry, #replay-goto') : null; if (!t) return; st.pendingMove = false;
     if (st.status === 'shown') { st.view = t.id === 'replay-goto' ? 'View moved to the journey. The corridor remains on.' : ''; settle(); } }, true);
@@ -146,6 +150,6 @@
   window.addEventListener('pageshow', e => { if (e.persisted && st.facts !== 'ready') loadFacts(); });
 
   ME.corridor = { C, on, off, km, loadFacts,
-    state: () => ({ facts: st.facts, factsErr: st.factsErr, status: st.status, err: st.err, on: st.on, busy: !!st.req, tok: st.tok, pendingMove: st.pendingMove, drawn: st.drawn, view: st.view, announced: st.announced, moves: st.moves, reveals: st.reveals, scale: st.scale ? { km: st.scale.km, px: st.scale.px, a: st.scale.a, b: st.scale.b } : null, cached: !!st.geo }) };
+    state: () => ({ facts: st.facts, factsErr: st.factsErr, status: st.status, err: st.err, on: st.on, busy: !!st.req, tok: st.tok, pendingMove: st.pendingMove, drawn: st.drawn, view: st.view, announced: st.announced, held: st.held, moves: st.moves, reveals: st.reveals, scale: st.scale ? { km: st.scale.km, px: st.scale.px, a: st.scale.a, b: st.scale.b } : null, cached: !!st.geo }) };
   paint(); loadFacts();
 })();

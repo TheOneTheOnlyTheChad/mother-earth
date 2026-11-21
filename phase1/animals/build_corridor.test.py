@@ -2,7 +2,7 @@
 """Tests for build_corridor.py and corridor_geom.py (docs/concepts/ANIMALS-CORRIDOR-PROPOSAL.md rev 2.2, K1 to K7). Standard library only.
 Part 1: made-up shapes (no source needed). Part 2: the committed output files. Part 3: the pinned zip (set ME_CORRIDOR_ZIP), else NOT RUN.
 Run: python3 -I phase1/animals/build_corridor.test.py"""
-import copy, hashlib, io, json, math, os, struct, subprocess, sys, zipfile
+import copy, hashlib, io, json, math, os, re, struct, subprocess, sys, zipfile
 from fractions import Fraction
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(HERE)); sys.path.insert(0, HERE)
 import build_corridor as B, corridor_geom as G
@@ -123,6 +123,10 @@ L = man['limits']; pr = [p for k in ('medium', 'high') for p in man['facts'][k][
 ok('2g K5 every ring\'s recorded displacement is within 0.75 m and its area change within 0.75 m times its perimeter; each class\'s rounded area is within 0.05% of its source area', all(p['max_displacement_m'] <= 0.75 and abs(p['area_change_m2']) <= 0.75 * p['perimeter_m'] + 0.1 for p in pr) and all(abs(man['facts'][k]['rounded_net_area_km2'] - man['facts'][k]['source_net_area_km2']) <= 0.0005 * man['facts'][k]['source_net_area_km2'] for k in ('medium', 'high')), max(p['max_displacement_m'] for p in pr))
 W = man['wording']
 ok('2h wording: GPT\'s method sentence and datum sentence word for word; the omission notice; no "averaged across animals"; thresholds are the layer\'s own', W['method_plain'] == 'The source models a migration-use footprint for each sampled animal, combines the footprints, and classifies areas by the share of sampled animals represented there.' and 'displayed on a WGS84 reference globe without a datum transformation. The local datum offset and absolute positional accuracy have not been established.' in W['geometry'] and W['omission'] == 'Selected higher-use migration areas. The broader Low-use footprint is omitted.' and 'averaged across animals' not in json.dumps(W) and '10–20% of the sampled population' in man['definitions_as_in_metadata']['medium'] and 'greater than 20%' in man['definitions_as_in_metadata']['high'])
+ok('2h2 GPT Stage 4 hold, point 1: the Medium legend line is neutral (a published source class that includes High, no number); High keeps its threshold as the source\'s; the nested notes say Medium contains High despite the 10 to 20% text and claim no share for the band; the full Medium area and the Medium-minus-High difference carry different labels and different values',
+   W['legend_medium'] == 'Medium use: published source class (includes High).' and not re.search(r'\d', W['legend_medium']) and W['legend_high'].endswith('as the source defines it.') and 'contain the High polygons' in W['nested_note'] and 'No share of animals has been established' in W['nested_note'] and 'no share has been established' in W['legend_nested']
+   and 'Medium polygons contain its High polygons' in W['definitions_note'] and W['area_medium_label'] != W['area_band_label'] and 'not a class in the source' in W['area_band_label'] and abs(man['facts']['medium']['source_net_area_km2'] - 279.95576) < 1e-5 and abs(man['medium_only_band_km2'] - 120.87477) < 1e-5
+   and not any(re.search(r'10\s*(–|-|to)\s*20\s*%', W[k]) for k in W if k not in ('nested_note', 'legend_nested', 'definitions_note')) and '10% or more' not in json.dumps(W, ensure_ascii=False))
 pins = {'journeys-R1.catalog.json': '1386e4cc4fbc8c1c294ce867f42702c3c838fbde3c41fd9ce788fc275a77fafe', 'populations-R1.catalog.json': '5c49f68f6d1ae076b0b2b357637a9dd93602b19d14d8214ada272b3e55d848eb'}
 ok('2i K6 the journey list and the population list are byte-identical to Stage 3', all(sha(open(os.path.join(A, n), 'rb').read()) == h for n, h in pins.items()))
 tracked = subprocess.run(['git', 'ls-files'], cwd=ROOT, capture_output=True, text=True)
@@ -174,6 +178,13 @@ else:
     }
     rs = {k: stops(fn, n) for k, (fn, n) in made.items()}
     ok('3b K1 made-up archives stop the build at the named rule: ' + '; '.join(made), all(v[0] for v in rs.values()), {k: v[1][:160] for k, v in rs.items() if not v[0]})
+    # GPT's Stage 4 hold, point 1: the Medium wording is written for a nested source, so any other relation must stop the build rather than ship that wording
+    _rel = B.relation
+    try:
+        B.relation = lambda M, H, cell: dict(_rel(M, H, cell), relation='bands', twice_area_shared=0)
+        r27 = stops(lambda: B.build(copy.deepcopy(cfg), zb), 27)
+    finally: B.relation = _rel
+    ok('3b2 if the two classes were found not nested, the build stops (rule 27) instead of publishing wording that says Medium includes High', r27[0], r27[1][:200])
     # ---- an independent reading and an independent inverse projection (K3): the authalic-latitude series, not the builder's iteration
     def shp_rings(b):
         o = 100; out = []
