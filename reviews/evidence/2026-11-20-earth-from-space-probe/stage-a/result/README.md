@@ -27,7 +27,7 @@ Every "incomplete" has one cause per size: a single phase 1 run in which EUMETSA
   "expired", no request made). No `exceededMemory`, no `exceededCpu`.
 - **66 runs clean.** 116 picture checks made, 116 passed, 0 refused. The picture response named the requested time in 70 of 70
   runs; the check-image response did in all 66 runs where it was a picture.
-- **4 runs ended "fetch failed"**, all on the check image, the picture itself being sound each time:
+- **4 runs ended "fetch failed"**, all on the check image. In each the picture response arrived and named the requested time, but the picture check did not run, so those four pictures are not validated:
   - k=7, 14:10 UTC, 1,536 px, phase 1: HTTP 503
   - k=18, 16:00 UTC, 2,048 px, phase 1: HTTP 503
   - k=70, 00:40 UTC, 2,048 px, phase 3 at 96 MiB: HTTP 200 with `text/xml` in place of a picture
@@ -73,3 +73,13 @@ account". The hub `mother-earth` was not touched.
 The rule returns incomplete results for a decision. The choices are to accept the evidence as it stands (17 of 18 per size
 with no observed failure, plus everything above), or a short top-up run, which needs a new Approve line. Stage B is not
 built and not approved.
+
+## Corrections after GPT's review (21 Nov 2026, `reviews/2026-11-21-earth-from-space-stage-a-result-gpt-review.md`)
+
+- The four fetch-failed runs: the picture arrived, validation did not run (wording above corrected).
+- Four failures in 70 is what was observed in these twelve hours, not a forecast; outages can cluster.
+- The ladder found no ceiling and sets no bound on the hub's memory.
+- All 70 attempts ran in different isolates. Six validations inside one invocation (phase 2) do not show what a reused, warm
+  isolate does across invocations.
+- Both formal verdicts stay INCOMPLETE. GPT recommends accepting the evidence as enough to prepare Stage B at 2,048 px, on
+  Chad's explicit acceptance of the incomplete coverage. That is not a Stage A pass and not production clearance.
