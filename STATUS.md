@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 21 Nov 2026
 
+## 21 Nov 07:27 UTC (clock reading) — **Animals: East Walker corridor build proposal rev 1 written and with GPT. Docs only; nothing built.** (branch `animals-expansion-proposal` `1e5c6d1`; new-spec thread)
+- **Chad's go (21 Nov, his own message):** "Go: East Walker corridor proposal, docs only, for GPT review. Medium and High only, with the omitted Low-use footprint stated clearly. No implementation or deployment."
+- **Proposal:** `docs/concepts/ANIMALS-CORRIDOR-PROPOSAL.md` rev 1. A corridor card on the Animals tab: Medium and High use polygons on the page's globe under their own switch, the source's definitions in a legend, and the notice "Selected higher-use migration areas. The broader Low-use footprint is omitted." always visible. No Low coordinate is written to any output. Acceptance criteria K1 to K25; decisions C-D0 to C-D5 for Chad after GPT's review.
+- **Measured for it (Claude, from the pinned archive on the Mac, read inside the zip; scratch scripts removed, no output kept):** inner file hashes; Medium 27,966 points in 6 rings (280.0 km2), High 20,623 points in 3 rings (159.1 km2); the inverse Albers projection reproduces the metadata's four bounding values to four decimals; every source vertex of the two classes, rounded to about a metre, encodes to 244,276 bytes (32,276 gzipped) on a trial. So the proposal recommends no simplification.
+- **Two refinements to audit C recorded in the proposal:** the audit's "bounds" are the projected box's corners, not the shapes' extent; "outlines follow a fine raster" is not supported (dense curves, about 5 m spacing).
+- **Not measured:** overlap between Medium and High; self-crossing; the regional backdrop picture; drawing speed. Listed as things to prove first in a build.
+- **Next:** GPT's review; then Chad's decisions and his own build go. No implementation, merge or deployment.
+
 ## 21 Nov 07:20 UTC (clock reading) — **Animals: GPT PASSED Stage 3 r2 (African penguin colony census) for private preview. Nothing merged, nothing deployed.** (branch only; code `a23dda8`, head `6cf2318`; new-spec thread)
 - **GPT's review (relayed by Chad, 21 Nov): PASS for private preview, no new hold.** Filed `reviews/2026-11-21-animals-tab-stage3-r2-gpt-review.md` on `animals-tab-rc`. GPT checked the change and hashes, confirmed the census data and journey files unchanged, and exercised desktop-to-phone and phone-to-desktop resizing in Chrome. It did not rerun the browser suites; those totals stay Claude's runs.
 - **All three stages on `animals-tab-rc` are now passed as private previews:** the Animals tab with three journeys, the bird, the penguin census. `animals-tab-rc` is the current combined Animals preview.
