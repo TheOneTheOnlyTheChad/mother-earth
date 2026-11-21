@@ -1,0 +1,973 @@
+{
+"build": "full",
+"started": "2026-11-21T19:01:31.926Z",
+"ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.8103.78 Safari/537.36",
+"backdrop": "plain",
+"runs": [
+{
+"run": 1,
+"profiled": true,
+"to_second_frame_ms": 873,
+"tasks": [
+{
+"type": "longtask",
+"start": 1,
+"ms": 52
+},
+{
+"type": "longtask",
+"start": 54,
+"ms": 56
+},
+{
+"type": "longtask",
+"start": 110,
+"ms": 112
+},
+{
+"type": "longtask",
+"start": 223,
+"ms": 186
+},
+{
+"type": "longtask",
+"start": 455,
+"ms": 144
+},
+{
+"type": "longtask",
+"start": 600,
+"ms": 65
+},
+{
+"type": "long-animation-frame",
+"start": 110,
+"ms": 126
+},
+{
+"type": "longtask",
+"start": 665,
+"ms": 205
+},
+{
+"type": "longtask",
+"start": 871,
+"ms": 168
+},
+{
+"type": "long-animation-frame",
+"start": 599,
+"ms": 69
+},
+{
+"type": "longtask",
+"start": 1040,
+"ms": 174
+},
+{
+"type": "longtask",
+"start": 1215,
+"ms": 169
+}
+],
+"longest_task_ms": 205,
+"profile": {
+"total_ms": 1624,
+"self_top": [
+[
+"(program)",
+1374.8
+],
+[
+"geoStream @globe.gl.min.js:61640",
+34.7
+],
+[
+"Adder @globe.gl.min.js:60158",
+26.2
+],
+[
+"linePoint @globe.gl.min.js:61786",
+23.2
+],
+[
+"distanceSqToSegment @globe.gl.min.js:10669",
+12.2
+],
+[
+"checkGeometryIntersection @globe.gl.min.js:20299",
+9.7
+],
+[
+"f @globe.gl.min.js:64998",
+8.5
+],
+[
+"intersectTriangle @globe.gl.min.js:11025",
+8.1
+],
+[
+"earcutLinked @globe.gl.min.js:64362",
+7.8
+],
+[
+"lengthPoint @globe.gl.min.js:63016",
+7.2
+],
+[
+"isEarHashed @globe.gl.min.js:64438",
+7
+],
+[
+"areaPoint @globe.gl.min.js:61693",
+6.3
+],
+[
+"getVertexPosition @globe.gl.min.js:20035",
+5.9
+],
+[
+"getProgramInfoLog",
+5.6
+],
+[
+"lengthPointFirst @globe.gl.min.js:63010",
+4.4
+],
+[
+"(garbage collector)",
+4
+],
+[
+"flatten @globe.gl.min.js:64913",
+3.7
+],
+[
+"polar2Cartesian$2 @globe.gl.min.js:65321",
+3.3
+],
+[
+"fromBufferAttribute @globe.gl.min.js:5533",
+3.3
+],
+[
+"polar2Cartesian$1 @globe.gl.min.js:70728",
+3.1
+],
+[
+"merge @globe.gl.min.js:60293",
+3
+],
+[
+"flatten$1 @globe.gl.min.js:60287",
+2.5
+],
+[
+"subVectors @globe.gl.min.js:4655",
+2.4
+],
+[
+"attachShader",
+1.9
+],
+[
+"e.animateOnce @globe.gl.min.js:68160",
+1.9
+],
+[
+"setFromBufferAttribute @globe.gl.min.js:9353",
+1.8
+],
+[
+"genPolygon @globe.gl.min.js:65229",
+1.8
+],
+[
+"ConicPolygonGeometry @globe.gl.min.js:70607",
+1.7
+],
+[
+"addGroup @globe.gl.min.js:70642",
+1.7
+],
+[
+"eliminateHole @globe.gl.min.js:64575",
+1.7
+],
+[
+"intersectObjects @globe.gl.min.js:37691",
+1.6
+],
+[
+"disable @globe.gl.min.js:48460",
+1.6
+],
+[
+"ascSort @globe.gl.min.js:37707",
+1.4
+],
+[
+"streamLine @globe.gl.min.js:61626",
+1.4
+],
+[
+"concatGroup @globe.gl.min.js:65300",
+1.4
+],
+[
+"(anonymous) @globe.gl.min.js:65097",
+1.4
+],
+[
+"length$1 @globe.gl.min.js:63030",
+1.4
+],
+[
+"getX @globe.gl.min.js:17938",
+1.3
+],
+[
+"_computeIntersections @globe.gl.min.js:20131",
+1.3
+],
+[
+"computeVertexNormals @globe.gl.min.js:19400",
+1.3
+],
+[
+"findHoleBridge @globe.gl.min.js:64589",
+1.2
+],
+[
+"(anonymous) @globe.gl.min.js:60955",
+1.1
+],
+[
+"geoPolygonTriangulate @globe.gl.min.js:70386",
+1.1
+],
+[
+"(anonymous) @globe.gl.min.js:70508",
+1.1
+],
+[
+"linkedList @globe.gl.min.js:64320",
+1.1
+]
+],
+"inclusive_top": [
+[
+"(root)",
+1624.1
+],
+[
+"(program)",
+1374.8
+],
+[
+"(anonymous) @globe.gl.min.js:167354",
+175.8
+],
+[
+"(anonymous) @globe.gl.min.js:68126",
+175.8
+],
+[
+"digest @globe.gl.min.js:68114",
+175.8
+],
+[
+"update @globe.gl.min.js:167313",
+175.8
+],
+[
+"(anonymous) @globe.gl.min.js:58402",
+175.8
+],
+[
+"invokeFunc @globe.gl.min.js:58185",
+175.8
+],
+[
+"trailingEdge @globe.gl.min.js:58234",
+175.8
+],
+[
+"timerExpired @globe.gl.min.js:58225",
+175.8
+],
+[
+"ConicPolygonGeometry @globe.gl.min.js:70607",
+123.5
+],
+[
+"geoPolygonTriangulate @globe.gl.min.js:70386",
+103.6
+],
+[
+"geoStream @globe.gl.min.js:61640",
+79.2
+],
+[
+"length$1 @globe.gl.min.js:63030",
+73.1
+],
+[
+"geoDistance$1 @globe.gl.min.js:63039",
+73.1
+],
+[
+"comp.<computed> @globe.gl.min.js:58443",
+66.6
+],
+[
+"GeoJsonGeometry @globe.gl.min.js:65128",
+52.3
+],
+[
+"scale @animals-corridor.js:97",
+46.3
+],
+[
+"(anonymous) @animals-corridor.js:103",
+46.3
+],
+[
+"toGlobeCoords @globe.gl.min.js:177060",
+46
+],
+[
+"intersectObjects @globe.gl.min.js:37691",
+44.6
+],
+[
+"intersectingObjects @globe.gl.min.js:176459",
+44.6
+],
+[
+"streamGeometry @globe.gl.min.js:61578",
+44.5
+],
+[
+"streamLine @globe.gl.min.js:61626",
+43.4
+],
+[
+"(anonymous) @globe.gl.min.js:70505",
+42.4
+],
+[
+"interpolateContourPoints @globe.gl.min.js:70503",
+42.4
+],
+[
+"genPolygon @globe.gl.min.js:65229",
+42.1
+],
+[
+"(anonymous) @globe.gl.min.js:70508",
+41.8
+],
+[
+"intersect @globe.gl.min.js:37713",
+41.6
+],
+[
+"(anonymous) @globe.gl.min.js:65230",
+38.4
+],
+[
+"interpolateLine @globe.gl.min.js:65092",
+34.6
+],
+[
+"(anonymous) @globe.gl.min.js:65097",
+33.7
+],
+[
+"streamPolygon @globe.gl.min.js:61633",
+32.8
+],
+[
+"Polygon @globe.gl.min.js:61613",
+32.8
+],
+[
+"geoBounds @globe.gl.min.js:61883",
+32.8
+],
+[
+"boundsRingPoint @globe.gl.min.js:61845",
+30.3
+],
+[
+"at @animals-corridor.js:98",
+29.7
+],
+[
+"Adder @globe.gl.min.js:60158",
+26.2
+],
+[
+"raycast @globe.gl.min.js:20085",
+25.5
+],
+[
+"checkGeometryIntersection @globe.gl.min.js:20299",
+23.7
+],
+[
+"linePoint @globe.gl.min.js:61786",
+23.2
+],
+[
+"_computeIntersections @globe.gl.min.js:20131",
+22
+],
+[
+"earcut @globe.gl.min.js:64280",
+21.2
+],
+[
+"tick @globe.gl.min.js:176293",
+20.6
+],
+[
+"_animationCycle @globe.gl.min.js:177006",
+20.6
+]
+]
+}
+},
+{
+"run": 2,
+"profiled": false,
+"to_second_frame_ms": 796,
+"tasks": [
+{
+"type": "longtask",
+"start": 1,
+"ms": 56
+},
+{
+"type": "longtask",
+"start": 60,
+"ms": 124
+},
+{
+"type": "longtask",
+"start": 184,
+"ms": 180
+},
+{
+"type": "longtask",
+"start": 408,
+"ms": 140
+},
+{
+"type": "longtask",
+"start": 549,
+"ms": 70
+},
+{
+"type": "long-animation-frame",
+"start": 57,
+"ms": 141
+},
+{
+"type": "longtask",
+"start": 620,
+"ms": 174
+},
+{
+"type": "longtask",
+"start": 795,
+"ms": 158
+},
+{
+"type": "longtask",
+"start": 953,
+"ms": 158
+},
+{
+"type": "long-animation-frame",
+"start": 548,
+"ms": 74
+},
+{
+"type": "longtask",
+"start": 1112,
+"ms": 161
+}
+],
+"longest_task_ms": 180
+},
+{
+"run": 3,
+"profiled": false,
+"to_second_frame_ms": 661,
+"tasks": [
+{
+"type": "longtask",
+"start": 2,
+"ms": 57
+},
+{
+"type": "longtask",
+"start": 60,
+"ms": 100
+},
+{
+"type": "longtask",
+"start": 160,
+"ms": 168
+},
+{
+"type": "longtask",
+"start": 329,
+"ms": 129
+},
+{
+"type": "longtask",
+"start": 497,
+"ms": 103
+},
+{
+"type": "long-animation-frame",
+"start": 59,
+"ms": 113
+},
+{
+"type": "longtask",
+"start": 600,
+"ms": 58
+},
+{
+"type": "longtask",
+"start": 659,
+"ms": 153
+},
+{
+"type": "longtask",
+"start": 813,
+"ms": 154
+},
+{
+"type": "longtask",
+"start": 967,
+"ms": 169
+}
+],
+"longest_task_ms": 169
+},
+{
+"run": 4,
+"profiled": false,
+"to_second_frame_ms": 821,
+"tasks": [
+{
+"type": "longtask",
+"start": 2,
+"ms": 61
+},
+{
+"type": "longtask",
+"start": 64,
+"ms": 96
+},
+{
+"type": "longtask",
+"start": 161,
+"ms": 215
+},
+{
+"type": "longtask",
+"start": 413,
+"ms": 140
+},
+{
+"type": "longtask",
+"start": 554,
+"ms": 68
+},
+{
+"type": "long-animation-frame",
+"start": 64,
+"ms": 112
+},
+{
+"type": "longtask",
+"start": 622,
+"ms": 198
+},
+{
+"type": "longtask",
+"start": 821,
+"ms": 186
+},
+{
+"type": "longtask",
+"start": 1007,
+"ms": 187
+},
+{
+"type": "long-animation-frame",
+"start": 553,
+"ms": 70
+},
+{
+"type": "longtask",
+"start": 1196,
+"ms": 187
+}
+],
+"longest_task_ms": 215
+},
+{
+"run": 5,
+"profiled": false,
+"to_second_frame_ms": 693,
+"tasks": [
+{
+"type": "longtask",
+"start": 1,
+"ms": 63
+},
+{
+"type": "longtask",
+"start": 65,
+"ms": 63
+},
+{
+"type": "longtask",
+"start": 129,
+"ms": 97
+},
+{
+"type": "longtask",
+"start": 227,
+"ms": 211
+},
+{
+"type": "longtask",
+"start": 478,
+"ms": 140
+},
+{
+"type": "longtask",
+"start": 618,
+"ms": 72
+},
+{
+"type": "longtask",
+"start": 690,
+"ms": 201
+},
+{
+"type": "long-animation-frame",
+"start": 129,
+"ms": 114
+},
+{
+"type": "longtask",
+"start": 892,
+"ms": 185
+},
+{
+"type": "long-animation-frame",
+"start": 618,
+"ms": 75
+},
+{
+"type": "longtask",
+"start": 1077,
+"ms": 184
+}
+],
+"longest_task_ms": 211
+}
+],
+"errs": [],
+"control": {
+"window_ms": 2500,
+"tasks": [
+52,
+50,
+51,
+50,
+50,
+53,
+57,
+53,
+52,
+50,
+51,
+51,
+50,
+53,
+52,
+54,
+56,
+50,
+52,
+52,
+50,
+50,
+51,
+51,
+58,
+51,
+50,
+50,
+50
+],
+"profile": {
+"total_ms": 2608,
+"self_top": [
+[
+"(program)",
+2593.4
+],
+[
+"(garbage collector)",
+7.3
+],
+[
+"(idle)",
+3
+],
+[
+"setProgram @globe.gl.min.js:56257",
+1.4
+],
+[
+"requestAnimationFrame",
+1
+],
+[
+"needsUpdate @globe.gl.min.js:40695",
+1
+],
+[
+"arraysEqual$1 @globe.gl.min.js:43675",
+0.3
+],
+[
+"getNormalMatrix @globe.gl.min.js:5938",
+0.3
+],
+[
+"setClear @globe.gl.min.js:40498",
+0.3
+],
+[
+"getRGB @globe.gl.min.js:15755",
+0.2
+],
+[
+"applyMatrix4 @globe.gl.min.js:7993",
+0.2
+]
+],
+"inclusive_top": [
+[
+"(root)",
+2608.3
+],
+[
+"(program)",
+2593.4
+],
+[
+"(garbage collector)",
+7.3
+],
+[
+"WebGLRenderer.render @globe.gl.min.js:55606",
+3.6
+],
+[
+"render @globe.gl.min.js:173521",
+3.6
+],
+[
+"render @globe.gl.min.js:173267",
+3.6
+],
+[
+"tick @globe.gl.min.js:176293",
+3.6
+],
+[
+"comp.<computed> @globe.gl.min.js:58443",
+3.6
+],
+[
+"_animationCycle @globe.gl.min.js:177006",
+3.6
+],
+[
+"(idle)",
+3
+],
+[
+"renderObject @globe.gl.min.js:56079",
+3
+],
+[
+"renderObjects @globe.gl.min.js:56052",
+3
+],
+[
+"renderScene @globe.gl.min.js:55906",
+3
+],
+[
+"WebGLRenderer.renderBufferDirect @globe.gl.min.js:55171",
+2.7
+],
+[
+"setProgram @globe.gl.min.js:56257",
+1.7
+],
+[
+"requestAnimationFrame",
+1
+],
+[
+"e.animateOnce @globe.gl.min.js:68160",
+1
+],
+[
+"e.onFrame @globe.gl.min.js:68160",
+1
+],
+[
+"(anonymous) @globe.gl.min.js:68160",
+1
+],
+[
+"needsUpdate @globe.gl.min.js:40695",
+1
+],
+[
+"setup @globe.gl.min.js:40571",
+1
+],
+[
+"setClear @globe.gl.min.js:40498",
+0.5
+],
+[
+"render @globe.gl.min.js:40303",
+0.5
+],
+[
+"arraysEqual$1 @globe.gl.min.js:43675",
+0.3
+],
+[
+"setValueM4 @globe.gl.min.js:43895",
+0.3
+],
+[
+"setValue @globe.gl.min.js:44681",
+0.3
+],
+[
+"getNormalMatrix @globe.gl.min.js:5938",
+0.3
+],
+[
+"getRGB @globe.gl.min.js:15755",
+0.2
+],
+[
+"applyMatrix4 @globe.gl.min.js:7993",
+0.2
+],
+[
+"projectObject @globe.gl.min.js:55792",
+0.2
+]
+]
+}
+},
+"mesh": [
+{
+"type": "Mesh",
+"mat": "MeshPhongMaterial",
+"verts": 4186,
+"index": 23760,
+"groups": []
+},
+{
+"type": "Mesh",
+"mat": "MeshBasicMaterial",
+"verts": 16471,
+"index": 96120,
+"groups": []
+},
+{
+"type": "Mesh",
+"mat": "MeshPhongMaterial",
+"verts": 92883,
+"index": null,
+"groups": []
+},
+{
+"type": "LineSegments",
+"mat": "LineBasicMaterial",
+"verts": 6461,
+"index": 12816,
+"groups": [
+12816
+]
+},
+{
+"type": "Mesh",
+"mat": "ShaderMaterial",
+"verts": 4186,
+"index": 23760,
+"groups": []
+},
+{
+"type": "Mesh",
+"mat": "MeshBasicMaterial(transparent)|MeshBasicMaterial(transparent)",
+"verts": 27063,
+"index": 81186,
+"groups": [
+81186
+]
+},
+{
+"type": "LineSegments",
+"mat": "LineBasicMaterial",
+"verts": 27063,
+"index": 54120,
+"groups": [
+53120,
+1000
+]
+},
+{
+"type": "Mesh",
+"mat": "MeshBasicMaterial(transparent)|MeshBasicMaterial(transparent)",
+"verts": 20242,
+"index": 60720,
+"groups": [
+60720
+]
+},
+{
+"type": "LineSegments",
+"mat": "LineBasicMaterial",
+"verts": 20242,
+"index": 40480,
+"groups": [
+40240,
+240
+]
+}
+]
+}
