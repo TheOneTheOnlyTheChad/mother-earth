@@ -138,7 +138,7 @@ const srv = http.createServer(async (q, s) => {
     if (o && o.hold) await o.hold;
     if (o && o.status && o.status !== 200) return send(o.status, 'text/plain', 'no');
     if (o && o.body) return send(200, 'application/json', o.body);
-    if (name.endsWith('.catalog.json')) return send(200, 'application/json', S.cat || (S.fx ? S.fx.cat : CAT));
+    if (name === 'journeys-R1.catalog.json') return send(200, 'application/json', S.cat || (S.fx ? S.fx.cat : CAT));        // the journey list only; the census section's own list is served as it is
     if (S.fx && name === JOUR[S.fx.id].e.manifest) return send(200, 'application/json', S.fx.manifest);
     if (S.fx && name === S.fx.file) return send(200, 'application/json', S.fx.display);
     return fs.existsSync(path.join(ROOT, 'assets/animals', name)) ? send(200, 'application/json', real(name)) : send(404, 'text/plain', ''); }
@@ -167,6 +167,7 @@ async function open(browser, vp = { width: 1280, height: 860 }, hash = '', opts 
   await page.waitForFunction(() => window.ME && ME.journey && ME.animalsGlobe && ME.animalsPage, null, { timeout: 30000 });
   if (!opts.noWait) await page.waitForFunction(() => { const g = ME.animalsGlobe.state(); return g.globe !== 'ok' || (g.backdrop === 'imagery') || (g.backdrop === 'plain' && g.coast !== 'loading' && g.coast !== 'idle'); }, null, { timeout: 30000 });
   await page.waitForFunction(() => [...document.querySelectorAll('.an-study [data-f="state"]')].every(e => !/Checking/.test(e.textContent)), null, { timeout: 30000 });
+  await page.waitForFunction(() => !window.ME.census || ME.census.state().status !== 'loading', null, { timeout: 30000 });        // the census section (stage 3) has settled too
   await page.waitForTimeout(400);
   return { ctx, page, errs, reqs, failedReqs };
 }
@@ -205,8 +206,8 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     ok('1d no chooser: the only select on the page is the replay speed; no radio semantics', dom.selects.join() === 'replay-speed' && dom.radios === 0, [dom.selects, dom.radios]);
     ok('1e the switches are one labelled group that says "one at a time"; groups are Land, Sea and Air', dom.group.role === 'group' && /one at a time/i.test(dom.group.name) && /Switching another on switches the first off/.test(dom.group.desc) && /Nothing is on when the page opens/.test(dom.group.desc) && dom.groups.join() === 'Land,Sea,Air', dom);
     const assets = S.log.slice(), allowed = u => u.startsWith(BASE) || /^https:\/\/unpkg\.com\/globe\.gl@2\.45\.0\//.test(u) || /^https:\/\/fonts\.googleapis\.com\//.test(u) || /^https:\/\/gibs\.earthdata\.nasa\.gov\//.test(u) || u.startsWith('blob:') || u.startsWith('data:');
-    ok('1f network at load: the journey list and one manifest per card; NO journey display file; no coastline file while imagery is shown; one imagery request; no hub request; only the allowed origins',
-      assets.filter(n => /catalog/.test(n)).length >= 1 && assets.filter(n => /manifest/.test(n)).length === IDS.length && !assets.some(n => IDS.some(id => n === JOUR[id].j.file)) && !assets.includes('coast-50m.bin') && ctx._img.length === 1 && !reqs.some(u => u.includes(HUB)) && reqs.every(allowed), { assets, img: ctx._img.length, other: reqs.filter(u => !allowed(u)) });
+    ok('1f network at load: the journey list and one manifest per card, and the three small files of the census section (stage 3); NO journey display file; no coastline file while imagery is shown; one imagery request; no hub request; only the allowed origins',
+      assets.filter(n => /catalog/.test(n)).length >= 1 && assets.filter(n => /manifest/.test(n) && !/census/.test(n)).length === IDS.length && assets.filter(n => /census|populations/.test(n)).length === 3 && !assets.some(n => IDS.some(id => n === JOUR[id].j.file)) && !assets.includes('coast-50m.bin') && ctx._img.length === 1 && !reqs.some(u => u.includes(HUB)) && reqs.every(allowed), { assets, img: ctx._img.length, other: reqs.filter(u => !allowed(u)) });
     ok('1g the globe is ready, still (no auto-rotation), showing the whole Earth; the backdrop line gives the picture\'s own date and says it is not the journey dates',
       s.g.globe === 'ok' && s.g.autoRotate === false && Math.abs(s.g.view.altitude - 2.2) < 0.01 && s.g.backdrop === 'imagery' && /^Backdrop: NASA satellite imagery for \d{2} [A-Z][a-z]{2} \d{4} \(NASA GIBS, VIIRS NOAA-21\), not the journey dates\./.test(s.g.note) && /Dark areas/.test(s.g.note), s.g);
     ok('1h the header has the five tabs with Animals current', dom.tabs.map(t => t[0]).join() === 'Earth now,Timeline,Moon,Sun,Animals' && dom.tabs[4][1] === 'page' && dom.tabs.slice(0, 4).every(t => !t[1]), dom.tabs);
