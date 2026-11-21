@@ -1,6 +1,6 @@
 # Earth from Space, Stage B: three validations inside the hub, nothing stored
 
-Proposal **rev 2**, 21 November 2026. Branch `earth-from-space-rc`, documents only. **Nothing here is built, deployed or
+Proposal **rev 2.1**, 21 November 2026 (rev 2 with the adjudication wording of section 4 tightened after GPT's review of the candidate, `reviews/2026-11-21-earth-from-space-stage-b-candidate-gpt-review.md`; nothing else changed). Branch `earth-from-space-rc`, documents only. **Nothing here is built, deployed or
 approved.** Rev 2 takes in GPT's review of rev 1 (`reviews/2026-11-21-earth-from-space-stage-b-proposal-gpt-review.md`);
 the changes are listed in section 10. GPT supports a branch-only build with these corrections, **on Chad's own go**, and
 wants the implementation candidate back before any deployment or observation.
@@ -28,8 +28,10 @@ Stage B stores no picture, does not switch collection on and does not release th
 - **To verify in the candidate packet:** what Cloudflare's own invocation record stores of request headers (whether
   `Authorization` is redacted), from Cloudflare's documentation and from the local runtime. If it is stored readable, this
   comes back before any deployment.
-- Who calls it: a small script on the Mac that reads the key from `KEYS.md` itself, makes **one** POST, waits, and saves the
-  answer to a file. Claude does not see or type the key. Chad starts it (the Mac's sandboxed shell cannot reach the hub).
+- Who calls it: `phase1/earthview-stage-b-call.sh` on the Mac, which reads the key from `KEYS.md` itself, claims the
+  observation number atomically before anything else (a claim is never released, so an observation is never called twice),
+  starts curl with `-q` and an emptied environment so that no inherited setting can add a request, makes **one** POST, waits,
+  and saves the answer. Claude does not see or type the key. Chad starts it (the Mac's sandboxed shell cannot reach the hub).
 
 One call is one observation: read EUMETSAT's frame list, fetch the 2,048 px picture and the 256 px check image for the
 newest listed time, require the served-time header on both to name that time, decode and compare with the collector's own
@@ -121,28 +123,46 @@ the isolate enforces. A duplicate is reported. A missed, failed or lost observat
 
 ## 4. Reading the result
 
+**Two different spans of time, not to be confused:**
+
+- the **call-start window**: the 60 s in which the one call may start (section 3);
+- the **assessment interval** of an observation: from **10 minutes before the call starts to 30 minutes after the run ends**
+  (its `ended_at`; for a lost answer, 180 s after the call started). All hub health and resource evidence is judged over
+  this interval. It is fixed here and is not shortened or lengthened after the fact.
+
 Per observation, complete only with all of: the saved answer; its log lines; the exact invocation record with outcome `ok`
-and a finite CPU figure; both responses usable with both headers naming the requested time; validation passed; the health
-reads before and after.
+and a finite CPU figure; both responses usable with both headers naming the requested time; validation passed;
+`deadline_hit` false; the health reads before and after.
 
 **Health reads** (read-only), judged against each layer's own cadence: the hub's public status file before and after;
-the hub's invocation records from 10 minutes before the start to 30 minutes after the end; the dashboard's memory and CPU
-percentiles for the hour, as percentiles.
+every hub invocation record in the assessment interval; the dashboard's memory and CPU percentiles for the hour, as
+percentiles.
 
-Verdict:
+Verdict, in this order. **An observed not-met condition always takes precedence**: lateness, a lost answer or any other
+incompleteness never masks it.
 
-- **Met:** three of three complete, CPU below 5,000 ms each, and no hub resource ending in any window.
-- **Not met:**
-  - any `exceededMemory` or `exceededCpu` on the hub inside an observation window. This is **not met for operational
+- **Not met**, if any of these is observed, whatever else is missing:
+  - any `exceededMemory` or `exceededCpu` on the hub inside the assessment interval. This is **not met for operational
     coexistence**, whichever request it fell on, and without claiming the probe caused it
-  - CPU at or above 5,000 ms; a header naming another time; a refusal of a picture found sound on diagnosis.
-- **Incomplete:** missing evidence, an upstream failure, a missed window, a lost answer, the deadline, or a regression on
-  another layer that could be related and is not explained.
-- **Unrelated failures, defined before running:** a layer already failing or stale in the "before" read is recorded as
-  pre-existing and does not count. A new failure counts as unrelated only if that layer's own record shows an outside cause
-  (its upstream's error or timeout, or the Mac collector's known connect timeouts) **and** no hub resource ending is in the
-  window; it is reported and does not block. Anything else is "unexplained": incomplete.
+  - the observation's CPU at or above 5,000 ms
+  - a header naming another time
+  - a refusal of a picture found sound on diagnosis.
+- **Met:** three of three complete, with none of the above.
+- **Incomplete:** everything else, including: missing evidence; an upstream failure; a missed window; a lost answer; the
+  deadline; **`deadline_hit` true even when the validation succeeded** (its figures are kept and reported, and it is still
+  incomplete); and **any new failure, timeout or staleness on another layer inside the assessment interval** unless the
+  rule below is satisfied.
+- **Other layers.** A layer already failing or stale in the "before" read is recorded as pre-existing and is not counted.
+  A **new** failure or timeout coinciding with the observation is **unexplained, and the observation incomplete**, by
+  default: shared hub workload can contribute to a timeout without any `exceededMemory` event, and **a familiar error
+  label is not evidence of an outside cause**. It may be called unrelated only on **independent evidence** that does not
+  come from the hub's own record of that failure, such as: the same upstream failing for a request made from outside the
+  hub in the same minutes (the browser pane, or the Mac collector's own log for a Mac-collected layer); the upstream's own
+  published status; or the failure being on the Mac collector's side of a layer the hub does not fetch. The evidence is
+  named in the result. Without it, the word "unrelated" is not used.
 - A validation refusal is diagnosed from the saved hashes before anything is concluded.
+- The `Authorization` masking is re-read on the first Stage B invocation record before observation 2 is started; if the
+  key is stored readable, the remaining observations stop and it comes back to GPT and Chad.
 
 Three observations are few. "Met" means nothing went wrong three times, not a measured memory bound. **Nothing is stored
 and nothing is enabled until the result has been reviewed** and Chad has given the next line.

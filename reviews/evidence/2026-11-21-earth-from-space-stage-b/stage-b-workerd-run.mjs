@@ -23,7 +23,7 @@ async function hub(extra, fn) { const reqs = [], out = [];
   const stored = async () => { const b = await mf.getR2Bucket('R2'), l = await b.list(); const db = await mf.getD1Database('DB'); const t = await db.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name NOT LIKE '\\_cf%' ESCAPE '\\' AND name NOT LIKE 'sqlite%'").first(); return `bucket ${l.objects.length} objects, database ${t.n} tables`; };
   try { await fn({ mf, reqs, out, stored }); } finally { await mf.dispose(); } }
 const script = async (n, start, env = {}) => { const o = path.join(tmp, 'out-' + Math.random().toString(16).slice(2));   // not execFileSync: the stubbed service answers from this process
-  const { code, text } = await new Promise(res => execFile('bash', [path.join(P1, 'earthview-stage-b-call.sh'), String(n), start, '60'], { env: { ...process.env, HUB, OUT: o, KEYS_FILE: keys, ...env }, encoding: 'utf8' }, (e, so, se) => res({ code: e ? e.code : 0, text: String(so || '') + String(se || '') })));
+  const { code, text } = await new Promise(res => execFile('bash', [path.join(P1, 'earthview-stage-b-call.sh'), String(n), start, '60'], { env: { ...process.env, STAGE_B_TEST_HUB: HUB, OUT: o, KEYS_FILE: keys, ...env }, encoding: 'utf8' }, (e, so, se) => res({ code: e ? e.code : 0, text: String(so || '') + String(se || '') })));
   const body = path.join(o, `observation-${n}.json`), meta = path.join(o, `observation-${n}.meta.txt`);
   return { code, text, o, j: fs.existsSync(body) ? JSON.parse(fs.readFileSync(body, 'utf8')) : null, meta: fs.existsSync(meta) ? fs.readFileSync(meta, 'utf8') : '' }; };
 const nowIso = (d = 0) => new Date(Date.now() + d).toISOString().replace(/\.\d+Z$/, 'Z');
