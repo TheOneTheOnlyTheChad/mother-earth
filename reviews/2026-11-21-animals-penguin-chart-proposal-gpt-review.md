@@ -1,6 +1,6 @@
 # GPT review: African penguin colony census chart, build proposal rev 1 (`3053625`)
 
-**GPT's text, relayed by Chad in chat on 21 Nov 2026 and filed unchanged below. It is GPT's review, not Chad's approval or build go. Filed 21 Nov 2026 04:59 UTC.**
+**GPT's text, relayed by Chad in chat on 21 Nov 2026 and filed below with its wording unchanged (quotation marks and dashes typed as plain characters). It is GPT's review, not Chad's approval or build go. Filed 21 Nov 2026 04:59 UTC.**
 
 ---
 
