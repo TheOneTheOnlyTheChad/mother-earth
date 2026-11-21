@@ -157,7 +157,7 @@ A class's **filled area** is its outer rings less their holes. The relation is d
 22. **The relation, by those areas:**
    - **bands**: I is exactly zero. The filled interiors are disjoint.
    - **nested**: I is exactly A(H), and A(H) is less than A(M). Every part of High's filled area is in Medium's.
-   - **mixed**: anything else: 0 < I < A(H) (partial overlap or partial containment), or I equal to A(M) (Medium inside High), or the two equal.
+   - **mixed**: anything else: 0 < I < A(H) (partial overlap or partial containment), or I equal to A(M) (Medium inside High, including the case where the two filled areas are the same).
 23. **Boundary contact between the classes is recorded as evidence and does not decide the relation by itself.** Recorded, with positions: the number of proper crossings; the number of point contacts (a vertex on the other's boundary, or a shared vertex, without crossing); the total length along which the two boundaries coincide. Policy: contact that encloses no shared area leaves the relation as the areas give it (bands that share an edge are bands; nested High touching Medium's boundary from inside is nested), and is shown in the manifest. **A proper crossing is impossible when I is zero or I equals A(H); if the build finds one together with either, its own evidence disagrees with itself and it stops as unresolved.**
 24. **Unresolved stops.** If the arrangement cannot be completed, the face-area check of 20 fails, or the second calculation in K1b disagrees, the relation is unresolved and the build stops and reports. No point is moved and no tolerance is introduced to get an answer.
 25. **Mixed stops the build** for a decision, with I, the faces concerned and their positions reported.
@@ -328,7 +328,7 @@ GPT closed hold 1 and accepted the rest of rev 2's answers, noting that the disp
 | GPT's point | Rev 2.1 |
 |---|---|
 | Remaining hold 2: "bands" ignored the crossing count; a vertex-only test misses real overlap (the crossing rectangles) | (Replaced again in rev 2.2, §14: rev 2.1's one-point-per-component test was still unsound.) §5.4 rewritten: exact proper-crossing tests and component containment with holes respected decide the relation together; bands means disjoint filled interiors; any proper crossing is mixed; partial containment is mixed. The counterexample and four more relation cases are in K1 |
-| The 0.01 m and 1.5 m distances are not proof of noise | §5.4 (24): near-boundary cases are reported separately; an unresolved component or any source-to-output difference stops for review; nothing is discarded |
+| The 0.01 m and 1.5 m distances are not proof of noise | Near-boundary cases are reported separately and decide nothing (now §5.4 (27)); any source-to-output difference stops for review; nothing is discarded. (Rev 2.1's "unresolved component" rule went with its test; see §14) |
 | Remaining hold 3: the phone reveal was timed by the response | §6.1: the reveal is at the press of the switch or Retry, as the journeys'; no answer scrolls the page; no scroll on off, load, list retries or unavailable controls. Camera movement is separate; "late" is defined as stale or superseded; a picture answer owns no camera move or scroll. K17 and K22 (held geometry, scroll away, release; Retry; failure; reduced motion) |
 | Scale during motion | §6.3 and K26: hidden when movement or resize begins, tested during movement |
 | K5 area scope | §5.1 (5) and K5: 0.001 km² is for source areas against §3.2; rounded areas use their own bounds; both recorded |
