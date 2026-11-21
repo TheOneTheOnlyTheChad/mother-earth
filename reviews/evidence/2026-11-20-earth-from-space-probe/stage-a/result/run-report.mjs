@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const repo = new URL('../../../../../', import.meta.url).pathname;
+const { evaluate } = await import(repo + 'phase1/evprobe.report.mjs');
+const P = (await import(repo + 'reviews/evidence/2026-11-20-earth-from-space-probe/stage-a/evprobe-20261120T130000Z.js')).default.__probe;
+const dir = process.argv[2];
+const lines = fs.readFileSync(dir + '/lines.jsonl', 'utf8').split('\n').filter(Boolean).map(l => JSON.parse(l));
+const invocations = JSON.parse(fs.readFileSync(dir + '/invocations.json', 'utf8'));
+const r = await evaluate({ start: P.PROBE_START, build: P.EVPROBE_BUILD, lines, invocations, diagnoses: {} }, P.evprobePlan);
+const detail = r.slots_detail; delete r.slots_detail; for (const s of Object.values(r.sizes)) delete s.ladder_runs;
+console.log(JSON.stringify(r, null, 1));
