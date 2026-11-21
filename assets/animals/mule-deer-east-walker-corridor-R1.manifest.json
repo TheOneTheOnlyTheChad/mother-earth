@@ -1,0 +1,379 @@
+{
+ "schema": 1,
+ "id": "mule-deer-east-walker-corridor",
+ "revision": "R1",
+ "kind": "published-corridor",
+ "group": "Land",
+ "label": "Mule deer, East Walker herd, California: migration corridor (data 2017 to 2024)",
+ "heading": "Mule deer, East Walker herd: published migration-use areas",
+ "evidence_type": "published corridor or range",
+ "display": {
+  "file": "mule-deer-east-walker-corridor-R1.json",
+  "bytes": 244650,
+  "sha256": "1462eae8dcc554f01b2dd86068d3ed0100e25f2a71a0862e0f77792aaca0ea40"
+ },
+ "classes_shown": [
+  "medium",
+  "high"
+ ],
+ "class_not_shown": "low",
+ "low_note": "The Low class was read only to check the file's record order, counts and net area. No Low record, ring, polygon or coordinate array is in the display file, this manifest or the list.",
+ "low_checked": {
+  "points": 84582,
+  "rings": 14,
+  "source_net_area_km2": 1431.13194
+ },
+ "facts": {
+  "medium": {
+   "patches": 4,
+   "holes": 2,
+   "points": 27966,
+   "source_net_area_km2": 279.95576,
+   "rounded_net_area_km2": 279.95577,
+   "extent_deg": {
+    "west": -119.35472,
+    "east": -119.00505,
+    "south": 38.15105,
+    "north": 38.49731
+   },
+   "per_ring": [
+    {
+     "ring": 0,
+     "role": "outer",
+     "points": 141,
+     "perimeter_m": 707.0,
+     "source_area_m2": 27927.8,
+     "rounded_area_m2": 27870.5,
+     "area_change_m2": -57.3,
+     "area_change_bound_m2": 530.2,
+     "max_displacement_m": 0.677
+    },
+    {
+     "ring": 1,
+     "role": "outer",
+     "points": 26561,
+     "perimeter_m": 155092.2,
+     "source_area_m2": 279849836.9,
+     "rounded_area_m2": 279849959.0,
+     "area_change_m2": 122.1,
+     "area_change_bound_m2": 116319.2,
+     "max_displacement_m": 0.705
+    },
+    {
+     "ring": 2,
+     "role": "hole",
+     "points": 81,
+     "perimeter_m": 481.1,
+     "source_area_m2": 13393.0,
+     "rounded_area_m2": 13377.0,
+     "area_change_m2": -16.1,
+     "area_change_bound_m2": 360.8,
+     "max_displacement_m": 0.636
+    },
+    {
+     "ring": 3,
+     "role": "hole",
+     "points": 421,
+     "perimeter_m": 2026.3,
+     "source_area_m2": 250253.2,
+     "rounded_area_m2": 250262.3,
+     "area_change_m2": 9.1,
+     "area_change_bound_m2": 1519.7,
+     "max_displacement_m": 0.693
+    },
+    {
+     "ring": 4,
+     "role": "outer",
+     "points": 501,
+     "perimeter_m": 2418.5,
+     "source_area_m2": 207042.3,
+     "rounded_area_m2": 207036.3,
+     "area_change_m2": -6.0,
+     "area_change_bound_m2": 1813.9,
+     "max_displacement_m": 0.701
+    },
+    {
+     "ring": 5,
+     "role": "outer",
+     "points": 261,
+     "perimeter_m": 1489.6,
+     "source_area_m2": 134596.9,
+     "rounded_area_m2": 134547.1,
+     "area_change_m2": -49.7,
+     "area_change_bound_m2": 1117.2,
+     "max_displacement_m": 0.691
+    }
+   ]
+  },
+  "high": {
+   "patches": 2,
+   "holes": 1,
+   "points": 20623,
+   "source_net_area_km2": 159.08099,
+   "rounded_net_area_km2": 159.08113,
+   "extent_deg": {
+    "west": -119.34028,
+    "east": -119.02332,
+    "south": 38.17891,
+    "north": 38.47388
+   },
+   "per_ring": [
+    {
+     "ring": 0,
+     "role": "outer",
+     "points": 20121,
+     "perimeter_m": 106790.4,
+     "source_area_m2": 158979923.7,
+     "rounded_area_m2": 158980141.9,
+     "area_change_m2": 218.2,
+     "area_change_bound_m2": 80092.8,
+     "max_displacement_m": 0.706
+    },
+    {
+     "ring": 1,
+     "role": "hole",
+     "points": 121,
+     "perimeter_m": 1327.3,
+     "source_area_m2": 56136.8,
+     "rounded_area_m2": 56148.3,
+     "area_change_m2": 11.5,
+     "area_change_bound_m2": 995.4,
+     "max_displacement_m": 0.669
+    },
+    {
+     "ring": 2,
+     "role": "outer",
+     "points": 381,
+     "perimeter_m": 2071.7,
+     "source_area_m2": 157202.9,
+     "rounded_area_m2": 157139.8,
+     "area_change_m2": -63.2,
+     "area_change_bound_m2": 1553.8,
+     "max_displacement_m": 0.683
+    }
+   ]
+  }
+ },
+ "medium_only_band_km2": 120.87477,
+ "relation": {
+  "result": "nested",
+  "method": "exact; boundaries of the two classes do not meet, so each ring lies wholly inside or outside every other; shared area from exact ring areas (docs/concepts/ANIMALS-CORRIDOR-PROPOSAL.md section 5.4, MVP narrowing: any boundary contact between the classes stops the build as unresolved)",
+  "source": {
+   "proper_crossings": 0,
+   "point_contacts": 0,
+   "coincident_stretches": 0,
+   "area_medium_m2": 279955757.61390954,
+   "area_high_m2": 159080989.77873433,
+   "area_shared_m2": 159080989.77873433,
+   "shared_equals_high_exactly": true
+  },
+  "rounded": {
+   "proper_crossings": 0,
+   "point_contacts": 0,
+   "coincident_stretches": 0,
+   "twice_area_medium_units2": 577007262,
+   "twice_area_high_units2": 327885949,
+   "twice_area_shared_units2": 327885949,
+   "shared_equals_high_exactly": true
+  }
+ },
+ "definitions_as_in_metadata": {
+  "low": "This represents the \"low use\" corridor or the footprint used by at least one individual.",
+  "medium": "This value represents the \"medium use\" corridor or the combined animal utilization distributions for 10–20% of the sampled population.",
+  "high": "This value represents the \"high use\" corridor or the combined animal utilization distributions for greater than 20% of sampled population."
+ },
+ "metadata_quotes": {
+  "sample": "They were developed from 267 migration sequences collected from a sample size of 91 animals comprising GPS locations collected every 1-24 hours.",
+  "use": "Dataset authors will retain ownership of the data provided. The burden for determining fitness for use lies entirely with the user. For purposes of publication or dissemination, citations, or credit should be given to the authors/originators listed herein.",
+  "process_footprint": "We then defined a migration footprint for each individual as the 99% isopleth of this UD.",
+  "process_stack": "We stacked up all the individual footprints for a given population, and defined different levels of corridor use based on the number of individuals using a given pixel.",
+  "process_generic_thresholds": "We defined low-use corridors as areas traversed by ≥1 individual during migration, medium-use corridors were used by ≥10% of individuals within the population, and high-use corridors were used by ≥20% individuals within the population.",
+  "process_grid": "We then converted these corridors from a grid-based format to a polygon format, while removing isolated use polygons of less than 20,000 m^2 (i.e., less than approximately 5 acres)."
+ },
+ "projection": {
+  "name": "Albers equal-area conic",
+  "datum": "NAD83(NSRS2007)",
+  "a": 6378137.0,
+  "inv_f": 298.257222101,
+  "sp1": 29.5,
+  "sp2": 45.5,
+  "lat0": 23.0,
+  "lon0": -96.0,
+  "fe": 0.0,
+  "fn": 0.0,
+  "conversion": "inverse Albers for the ellipsoid; result is geographic on NAD83(NSRS2007); no datum transformation applied",
+  "rounding_deg": 1e-05,
+  "corner_check": {
+   "computed": {
+    "west": -119.8921,
+    "east": -118.8154,
+    "south": 37.963,
+    "north": 38.6056
+   },
+   "metadata": {
+    "west": -119.8921,
+    "east": -118.8154,
+    "north": 38.6056,
+    "south": 37.963
+   }
+  }
+ },
+ "limits": {
+  "round_deg": 1e-05,
+  "max_displacement_m": 0.75,
+  "ring_area_bound_m_per_perimeter_m": 0.75,
+  "class_area_fraction": 0.0005,
+  "source_area_tolerance_km2": 0.001,
+  "grid_cell_source_m": 25.0,
+  "grid_cell_output_units": 30,
+  "near_source_m": 0.01,
+  "near_output_m": 1.5
+ },
+ "wording": {
+  "what": "Published, modelled migration-use areas from a sample of collared animals. Not the path of any one animal, not the herd's whole range, and not where animals are now.",
+  "method_plain": "The source models a migration-use footprint for each sampled animal, combines the footprints, and classifies areas by the share of sampled animals represented there.",
+  "method_detail": "Each animal's migration maps are averaged across its own years; its footprint is the 99% isopleth of that map; the footprints are stacked and counted; the result is converted from a grid to polygons and isolated polygons under 20,000 m² are removed. Method named in the report for this herd: Fixed Motion Variance, with Net Squared Displacement to mark migration periods.",
+  "not_whole": "The sampled animals are not the whole herd. The areas are modelled use, not observations of animals at every point.",
+  "sample": "267 migration sequences from 91 collared animals. GPS fixes every 1 to 24 hours.",
+  "legend_high": "High use: more than 20% of the sampled animals.",
+  "legend_medium": "Medium use: 10 to 20% of the sampled animals.",
+  "legend_low": "Not shown: the source's Low class, the broader footprint used by at least one sampled animal.",
+  "omission": "Selected higher-use migration areas. The broader Low-use footprint is omitted.",
+  "unshaded": "Unshaded does not mean unused.",
+  "nested_note": "In the source's file the Medium polygons contain the High polygons. High is drawn on top, so the lighter band you see is the part of Medium that is not also High.",
+  "fixed": "This is a fixed, dated product. Nothing on the record says it is refreshed on a schedule.",
+  "not_product": "Not a navigation, hunting, access or boundary product.",
+  "also": "Also in the release and not shown here: stopovers, winter range and per-animal routes.",
+  "geometry": "No simplification: every outline point of the two published classes is kept. Coordinates were inverse-projected in NAD83(NSRS2007), rounded to 0.00001°, and displayed on a WGS84 reference globe without a datum transformation. The local datum offset and absolute positional accuracy have not been established.",
+  "area_note": "Area of the published polygons, computed by us in the source's equal-area projection.",
+  "reference": "Reference lines: latitude and longitude every quarter of a degree. No place names, roads or borders are drawn.",
+  "plain_view": "Plain globe; no coastline lies in this view.",
+  "dates": "Data years: 2017, analysed through August 2024. Release date on the record: 24 March 2026. Record last checked: 21 Nov 2026.",
+  "preview": "Private preview: not on the live site."
+ },
+ "view": {
+  "lat": 38.325,
+  "lng": -119.18,
+  "altitude": 0.035
+ },
+ "grid": {
+  "step_deg": 0.25,
+  "south": 37.75,
+  "north": 38.75,
+  "west": -119.75,
+  "east": -118.5
+ },
+ "record": {
+  "release_title": "Ungulate Migrations of the Western United States, Volume 6",
+  "doi": "10.5066/P1ETBSYE",
+  "url": "https://doi.org/10.5066/P1ETBSYE",
+  "licence_as_on_record": "Creative Commons Zero v1.0 Universal (CC0-1.0) public domain dedication",
+  "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "record_publication_date": "2026-03-24",
+  "record_read": "20 Nov 2026, on the ScienceBase record (audit C)",
+  "report": "U.S. Geological Survey Scientific Investigations Report 2026-5123, version 1.1 (August 2026); its East Walker section was read by GPT, not by Claude",
+  "method_for_this_herd": "Fixed Motion Variance; migration periods marked by Net Squared Displacement (from the report, as read by GPT)",
+  "data_years": "2017, analysed through August 2024 (the report, as read by GPT); the metadata gives 2017 to 2024",
+  "location": "Eastern California, near Bridgeport.",
+  "checked": "21 Nov 2026",
+  "layer_title": "California Mule Deer East Walker Migration Corridors",
+  "metadata_pubdate": "2025",
+  "publisher": "U.S. Geological Survey",
+  "originators_as_listed": [
+   "Tom Stephenson",
+   "David German",
+   "Jane McKeever",
+   "Matthew Kauffman",
+   "Blake Lowrey",
+   "Jennifer L. McKee",
+   "Chloe Beaupre",
+   "Jeffrey Beck",
+   "Jon Beckmann",
+   "Scott Bergen",
+   "Regan Berkley",
+   "Nathan Borg",
+   "Peyton Carl",
+   "Michelle Cowardin",
+   "Sarah Dewey",
+   "Katie M. Dugger",
+   "Amy Ehrhart",
+   "Jessica Fort",
+   "Eric Freeman",
+   "Ian Freeman",
+   "Emily R. Gelzer",
+   "David German",
+   "Jacob Gray",
+   "Evan Greenspan",
+   "Zach Gregory",
+   "Emily Hagler",
+   "Makeda Hanson",
+   "Valerie D. Hinojoza-Rood",
+   "Pat Hnilicka",
+   "Nick Jaffe",
+   "Andrew F. Jakes",
+   "Aran Johnson",
+   "Jaron T. Kolek",
+   "Art Lawson",
+   "Zach Lockyer",
+   "Daryl Lutz",
+   "Cody McKee",
+   "Jane McKeever",
+   "Jerod Merkle",
+   "Matt Mumma",
+   "Dennis Newman",
+   "Erika Peckham",
+   "Jill E. Randall",
+   "Adele K. Reinking",
+   "Robert Ritson",
+   "William J. Rudd",
+   "Brianna M. Russo",
+   "Hall Sawyer",
+   "Cody Schroeder",
+   "Brandon Scurlock",
+   "Jeff Short",
+   "Bret Stansberry",
+   "Erik Steiner",
+   "Alethea Steingisser",
+   "Tom Stephenson",
+   "Eric VanNatta",
+   "Cody F. Wallace",
+   "Brad Weinmeister",
+   "Don Whittaker",
+   "Tatjana Woody",
+   "Sean Yancey"
+  ]
+ },
+ "source": {
+  "zip": {
+   "name": "ungulate-migrations-volume-6.zip",
+   "bytes": 160106900,
+   "sha256": "9bb5989ceab03235f42426ef51baafadd35eb6bf4ca9a4aaf19d17f6d39e4965"
+  },
+  "inner_dir": "Vol_6_FinalData_AllDataFiles_ForSB_MultFol/CA_MuleDeer_EastWalker_Corridors/",
+  "files": {
+   "shp": {
+    "name": "CA_MuleDeer_EastWalker_Corridors.shp",
+    "bytes": 2131084,
+    "sha256": "365522c5945a54b3b19d446f290912d2720efa9c6a0294914ee77fbe96bf2f1d"
+   },
+   "dbf": {
+    "name": "CA_MuleDeer_EastWalker_Corridors.dbf",
+    "bytes": 1397,
+    "sha256": "12ef7c4605af6db921d61f7fae83bf219ab5482ce071a228727027ad92ffe302"
+   },
+   "prj": {
+    "name": "CA_MuleDeer_EastWalker_Corridors.prj",
+    "bytes": 464,
+    "sha256": "c8a79e5f788ac300753a916cb2ee3cc9ae246323bc870d487c00c0edc4a1ac3a"
+   },
+   "xml": {
+    "name": "CA_MuleDeer_EastWalker_Corridors.xml",
+    "bytes": 25155,
+    "sha256": "f8e6bb31b6b06f74ac2a63b913f687bd7295148d283fb52bfd4efa84ab6b4a85"
+   }
+  }
+ },
+ "builder": "phase1/animals/build_corridor.py",
+ "config": "phase1/animals/mule-deer-east-walker-corridor.json",
+ "sensitivity": "No finding is made. Omitting Low is a display choice, not evidence that the shown classes are insensitive. Public release needs Chad's recorded decision."
+}

@@ -1,0 +1,70 @@
+{
+ "id": "mule-deer-east-walker-corridor", "revision": "R1", "kind": "published-corridor", "group": "Land",
+ "label": "Mule deer, East Walker herd, California: migration corridor (data 2017 to 2024)",
+ "heading": "Mule deer, East Walker herd: published migration-use areas",
+ "evidence_type": "published corridor or range",
+ "source_zip": {"name": "ungulate-migrations-volume-6.zip", "bytes": 160106900, "sha256": "9bb5989ceab03235f42426ef51baafadd35eb6bf4ca9a4aaf19d17f6d39e4965"},
+ "inner_dir": "Vol_6_FinalData_AllDataFiles_ForSB_MultFol/CA_MuleDeer_EastWalker_Corridors/",
+ "inner": {
+  "shp": {"name": "CA_MuleDeer_EastWalker_Corridors.shp", "bytes": 2131084, "sha256": "365522c5945a54b3b19d446f290912d2720efa9c6a0294914ee77fbe96bf2f1d"},
+  "dbf": {"name": "CA_MuleDeer_EastWalker_Corridors.dbf", "bytes": 1397, "sha256": "12ef7c4605af6db921d61f7fae83bf219ab5482ce071a228727027ad92ffe302"},
+  "prj": {"name": "CA_MuleDeer_EastWalker_Corridors.prj", "bytes": 464, "sha256": "c8a79e5f788ac300753a916cb2ee3cc9ae246323bc870d487c00c0edc4a1ac3a"},
+  "xml": {"name": "CA_MuleDeer_EastWalker_Corridors.xml", "bytes": 25155, "sha256": "f8e6bb31b6b06f74ac2a63b913f687bd7295148d283fb52bfd4efa84ab6b4a85"}
+ },
+ "prj_text": "PROJCS[\"NAD_1983_NSRS2007_Contiguous_USA_Albers\",GEOGCS[\"GCS_NAD_1983_NSRS2007\",DATUM[\"D_NAD_1983_NSRS2007\",SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Albers\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-96.0],PARAMETER[\"Standard_Parallel_1\",29.5],PARAMETER[\"Standard_Parallel_2\",45.5],PARAMETER[\"Latitude_Of_Origin\",23.0],UNIT[\"Meter\",1.0]]",
+ "projection": {"name": "Albers equal-area conic", "datum": "NAD83(NSRS2007)", "a": 6378137.0, "inv_f": 298.257222101, "sp1": 29.5, "sp2": 45.5, "lat0": 23.0, "lon0": -96.0, "fe": 0.0, "fn": 0.0},
+ "dbf_fields": ["State", "Species", "Herd", "DataType", "Contour"],
+ "dbf_rows": [["CA", "MuleDeer", "EastWalker", "Corridors", "Low"], ["CA", "MuleDeer", "EastWalker", "Corridors", "Medium"], ["CA", "MuleDeer", "EastWalker", "Corridors", "High"]],
+ "metadata_bounds": {"west": -119.8921, "east": -118.8154, "north": 38.6056, "south": 37.963},
+ "quotes": {
+  "def_low": "This represents the \"low use\" corridor or the footprint used by at least one individual.",
+  "def_medium": "This value represents the \"medium use\" corridor or the combined animal utilization distributions for 10–20% of the sampled population.",
+  "def_high": "This value represents the \"high use\" corridor or the combined animal utilization distributions for greater than 20% of sampled population.",
+  "sample": "They were developed from 267 migration sequences collected from a sample size of 91 animals comprising GPS locations collected every 1-24 hours.",
+  "use": "Dataset authors will retain ownership of the data provided. The burden for determining fitness for use lies entirely with the user. For purposes of publication or dissemination, citations, or credit should be given to the authors/originators listed herein.",
+  "process_stack": "We stacked up all the individual footprints for a given population, and defined different levels of corridor use based on the number of individuals using a given pixel.",
+  "process_footprint": "We then defined a migration footprint for each individual as the 99% isopleth of this UD.",
+  "process_generic_thresholds": "We defined low-use corridors as areas traversed by ≥1 individual during migration, medium-use corridors were used by ≥10% of individuals within the population, and high-use corridors were used by ≥20% individuals within the population.",
+  "process_grid": "We then converted these corridors from a grid-based format to a polygon format, while removing isolated use polygons of less than 20,000 m^2 (i.e., less than approximately 5 acres)."
+ },
+ "expect": {
+  "Low": {"rings": 14, "outer": 1, "holes": 13, "points": 84582, "area_km2": 1431.13194},
+  "Medium": {"rings": 6, "outer": 4, "holes": 2, "points": 27966, "area_km2": 279.95576},
+  "High": {"rings": 3, "outer": 2, "holes": 1, "points": 20623, "area_km2": 159.08099}
+ },
+ "shown": ["Medium", "High"],
+ "limits": {"round_deg": 1e-05, "max_displacement_m": 0.75, "ring_area_bound_m_per_perimeter_m": 0.75, "class_area_fraction": 0.0005, "source_area_tolerance_km2": 0.001, "grid_cell_source_m": 25.0, "grid_cell_output_units": 30, "near_source_m": 0.01, "near_output_m": 1.5},
+ "record": {
+  "release_title": "Ungulate Migrations of the Western United States, Volume 6", "doi": "10.5066/P1ETBSYE", "url": "https://doi.org/10.5066/P1ETBSYE",
+  "licence_as_on_record": "Creative Commons Zero v1.0 Universal (CC0-1.0) public domain dedication", "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "record_publication_date": "2026-03-24", "record_read": "20 Nov 2026, on the ScienceBase record (audit C)",
+  "report": "U.S. Geological Survey Scientific Investigations Report 2026-5123, version 1.1 (August 2026); its East Walker section was read by GPT, not by Claude",
+  "method_for_this_herd": "Fixed Motion Variance; migration periods marked by Net Squared Displacement (from the report, as read by GPT)",
+  "data_years": "2017, analysed through August 2024 (the report, as read by GPT); the metadata gives 2017 to 2024",
+  "location": "Eastern California, near Bridgeport.", "checked": "21 Nov 2026"
+ },
+ "view": {"lat": 38.325, "lng": -119.18, "altitude": 0.035},
+ "grid": {"step_deg": 0.25, "south": 37.75, "north": 38.75, "west": -119.75, "east": -118.5},
+ "wording": {
+  "what": "Published, modelled migration-use areas from a sample of collared animals. Not the path of any one animal, not the herd's whole range, and not where animals are now.",
+  "method_plain": "The source models a migration-use footprint for each sampled animal, combines the footprints, and classifies areas by the share of sampled animals represented there.",
+  "method_detail": "Each animal's migration maps are averaged across its own years; its footprint is the 99% isopleth of that map; the footprints are stacked and counted; the result is converted from a grid to polygons and isolated polygons under 20,000 m² are removed. Method named in the report for this herd: Fixed Motion Variance, with Net Squared Displacement to mark migration periods.",
+  "not_whole": "The sampled animals are not the whole herd. The areas are modelled use, not observations of animals at every point.",
+  "sample": "267 migration sequences from 91 collared animals. GPS fixes every 1 to 24 hours.",
+  "legend_high": "High use: more than 20% of the sampled animals.",
+  "legend_medium": "Medium use: 10 to 20% of the sampled animals.",
+  "legend_low": "Not shown: the source's Low class, the broader footprint used by at least one sampled animal.",
+  "omission": "Selected higher-use migration areas. The broader Low-use footprint is omitted.",
+  "unshaded": "Unshaded does not mean unused.",
+  "nested_note": "In the source's file the Medium polygons contain the High polygons. High is drawn on top, so the lighter band you see is the part of Medium that is not also High.",
+  "fixed": "This is a fixed, dated product. Nothing on the record says it is refreshed on a schedule.",
+  "not_product": "Not a navigation, hunting, access or boundary product.",
+  "also": "Also in the release and not shown here: stopovers, winter range and per-animal routes.",
+  "geometry": "No simplification: every outline point of the two published classes is kept. Coordinates were inverse-projected in NAD83(NSRS2007), rounded to 0.00001°, and displayed on a WGS84 reference globe without a datum transformation. The local datum offset and absolute positional accuracy have not been established.",
+  "area_note": "Area of the published polygons, computed by us in the source's equal-area projection.",
+  "reference": "Reference lines: latitude and longitude every quarter of a degree. No place names, roads or borders are drawn.",
+  "plain_view": "Plain globe; no coastline lies in this view.",
+  "dates": "Data years: 2017, analysed through August 2024. Release date on the record: 24 March 2026. Record last checked: 21 Nov 2026.",
+  "preview": "Private preview: not on the live site."
+ }
+}
