@@ -234,7 +234,7 @@ def build(cfg, animal, raw, ref_raw):
     rec0, rec1 = ev[0][0], ev[-1][0]
     km = ('%g' % radius)
     card = {
-        'note': cfg['label_line'] + ' A dated replay, not current. Private preview.',
+        'note': cfg['label_line'] + ' A dated replay, not current.',
         'shown': f"{n(len(t))} of {n(positioned)} recorded fixes are shown. {n(withheld)} fixes within {km} km of the tagging-site reference point are withheld by Mother Earth.",
         'done': f"Times are rounded to the nearest second. The line never crosses a withheld period. {n(joined_failed)} joins span a time when the tag tried and got no position. "
                 f"{n(len(failed_all))} attempts got no position and are not drawn.",

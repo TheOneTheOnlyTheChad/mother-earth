@@ -127,8 +127,8 @@ ok('2h2 GPT Stage 4 hold, point 1: the Medium legend line is neutral (a publishe
    W['legend_medium'] == 'Medium use: published source class (includes High).' and not re.search(r'\d', W['legend_medium']) and W['legend_high'].endswith('as the source defines it.') and 'contain the High polygons' in W['nested_note'] and 'No share of animals has been established' in W['nested_note'] and 'no share has been established' in W['legend_nested']
    and 'Medium polygons contain its High polygons' in W['definitions_note'] and W['area_medium_label'] != W['area_band_label'] and 'not a class in the source' in W['area_band_label'] and abs(man['facts']['medium']['source_net_area_km2'] - 279.95576) < 1e-5 and abs(man['medium_only_band_km2'] - 120.87477) < 1e-5
    and not any(re.search(r'10\s*(–|-|to)\s*20\s*%', W[k]) for k in W if k not in ('nested_note', 'legend_nested', 'definitions_note')) and '10% or more' not in json.dumps(W, ensure_ascii=False))
-pins = {'journeys-R1.catalog.json': '1386e4cc4fbc8c1c294ce867f42702c3c838fbde3c41fd9ce788fc275a77fafe', 'populations-R1.catalog.json': '5c49f68f6d1ae076b0b2b357637a9dd93602b19d14d8214ada272b3e55d848eb'}
-ok('2i K6 the journey list and the population list are byte-identical to Stage 3', all(sha(open(os.path.join(A, n), 'rb').read()) == h for n, h in pins.items()))
+pins = {'journeys-R1.catalog.json': '5eb789b10488b68cb5e471309ebc517199b1dbce00e5ac719d84f3b4b42c5452', 'populations-R1.catalog.json': 'ba1ce1e8fc3143d1cd0d2e8ac9b9f8f2d64b3cecd889387b8da9422df4d58d36'}
+ok('2i K6 the journey list and the population list are the release builds of 21 Nov 2026 (wording-only rebuilds; pinned here)', all(sha(open(os.path.join(A, n), 'rb').read()) == h for n, h in pins.items()))
 tracked = subprocess.run(['git', 'ls-files'], cwd=ROOT, capture_output=True, text=True)
 if tracked.returncode == 0: ok('2j K7 no source file is tracked in the repository (no .shp, .dbf, .prj, .zip)', not [f for f in tracked.stdout.split('\n') if f.lower().endswith(('.shp', '.dbf', '.prj', '.shx', '.zip'))])
 else: print('NOT RUN  2j as a tracked-file check: this copy has no Git metadata')

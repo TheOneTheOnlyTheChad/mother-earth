@@ -55,7 +55,7 @@
  },
  "simplification": "filtered, not thinned or smoothed: see the stages. This is not the study's modelled track",
  "card_text": {
-  "note": "Recorded Argos satellite fixes of one white shark, 9 May 2012 to 29 Sep 2013, after filtering. A dated replay, not current. Experimental. Private preview.",
+  "note": "Recorded Argos satellite fixes of one white shark, 9 May 2012 to 29 Sep 2013, after filtering. A dated replay, not current. Experimental.",
   "shown": "{n} recorded fixes of one shark (tag 118845). {weak}% of them are the two weakest Argos classes, A and B.",
   "done": "{candidates} recorded fixes for this tag. Mother Earth left out {speed} under its own speed-consistency rule ({limit}, the study authors' limit; the rule favours better-rated fixes, is experimental and can remove a correct fix), {isolated} more than {iso} hours from any other, and {land} that fall on land in Natural Earth's 1:10m map. {n} are shown. Fixes more than {join} hours apart, and {refused} pairs whose joining line would cross land in that map, are not joined.",
   "line": "The line joins recorded fixes no more than {join} hours apart: {joined} of {steps} steps. It is not the shark's route. For most of the period there is no line.",

@@ -11,7 +11,7 @@
 (() => {
   const ME = window.ME = window.ME || {};
   const $ = id => document.getElementById(id);
-  const C = { CATALOG: 'assets/animals/populations-R1.catalog.json', CATALOG_SHA256: '5c49f68f6d1ae076b0b2b357637a9dd93602b19d14d8214ada272b3e55d848eb', BASE: 'assets/animals/', ID: 'african-penguin-census', WAIT_MS: 20000, NARROW_PX: 560,
+  const C = { CATALOG: 'assets/animals/populations-R1.catalog.json', CATALOG_SHA256: 'ba1ce1e8fc3143d1cd0d2e8ac9b9f8f2d64b3cecd889387b8da9422df4d58d36', BASE: 'assets/animals/', ID: 'african-penguin-census', WAIT_MS: 20000, NARROW_PX: 560,
     T: { checking: 'Checking the census file…', unverified: 'The census file could not be verified. Nothing is shown.', failed: 'The census file could not be loaded. Nothing is shown.',
       ready: 'Census file verified.', open: 'Open the larger chart and the table', close: 'Close' } };
   const root = $('an-census'); if (!root) return;

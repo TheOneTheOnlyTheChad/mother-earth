@@ -137,7 +137,7 @@ ok('2j the record block carries the citations and licence as read on the record,
 txt = json.dumps(M, ensure_ascii=False).lower()
 ok('2k the manifest calls the differences nothing but differences, shows no later-file value, and carries no total, trend or category', 'correct' not in txt and not any(k in M for k in ('total', 'trend', 'category', 'status')) and 'endangered' not in txt)
 jl = open(os.path.join(A, 'journeys-R1.catalog.json'), 'rb').read()
-ok('2l P26 the journey list is byte-identical to Stage 2\'s (sha256 1386e4cc…), so every journey manifest and display file it pins is unchanged; the census is not in it', sha(jl) == '1386e4cc4fbc8c1c294ce867f42702c3c838fbde3c41fd9ce788fc275a77fafe' and b'penguin' not in jl and all(sha(open(os.path.join(A, e['manifest']), 'rb').read()) == e['manifest_sha256'] for e in json.loads(jl)['journeys']))
+ok('2l P26 the journey list is the release build of 21 Nov 2026 (pinned here); the census is not in it', sha(jl) == '5eb789b10488b68cb5e471309ebc517199b1dbce00e5ac719d84f3b4b42c5452' and b'penguin' not in jl and all(sha(open(os.path.join(A, e['manifest']), 'rb').read()) == e['manifest_sha256'] for e in json.loads(jl)['journeys']))
 tracked = None
 try: tracked = subprocess.run(['git', 'ls-files'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.splitlines()
 except Exception: pass

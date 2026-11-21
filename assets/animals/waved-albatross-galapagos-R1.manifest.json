@@ -66,7 +66,7 @@
   "statement": "Mother Earth withholds every fix within 5 km of the tagging-site reference point. That point is the reference file's deployment location, given to two decimals; it is a tagging-site reference, not a nest position."
  },
  "simplification": "filtered, not thinned or smoothed: fixes near the tagging site are withheld; every other recorded fix is in the display file",
- "sensitivity": "Private preview only. Fixes within 5 km of the tagging-site reference point are withheld; every other recorded fix is shown at the source's precision. Public release needs a recorded, dataset-specific sensitivity decision.",
+ "sensitivity": "Release decision by the site owner, 21 Nov 2026: fixes within 5 km of the tagging-site reference point are withheld; every other recorded fix is shown at the source's precision; animal identifier only.",
  "journeys": [
   {
    "animal": "3275-30662",
@@ -112,7 +112,7 @@
   }
  ],
  "card": {
-  "note": "Recorded movements of one breeding adult, 23 June to 15 September 2008. A dated replay, not current. Private preview.",
+  "note": "Recorded movements of one breeding adult, 23 June to 15 September 2008. A dated replay, not current.",
   "shown": "981 of 1,326 recorded fixes are shown. 345 fixes within 5 km of the tagging-site reference point are withheld by Mother Earth.",
   "done": "Times are rounded to the nearest second. The line never crosses a withheld period. 10 joins span a time when the tag tried and got no position. 12 attempts got no position and are not drawn.",
   "line": "The line joins displayed fixes no more than 3 hours 15 minutes apart with no withheld fix between them: 966 of 980 steps.",

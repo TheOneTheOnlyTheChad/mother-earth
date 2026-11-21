@@ -125,7 +125,7 @@
   }
  ],
  "card": {
-  "note": "Recorded Argos satellite fixes of one white shark, 9 May 2012 to 29 Sep 2013, after filtering. A dated replay, not current. Experimental. Private preview.",
+  "note": "Recorded Argos satellite fixes of one white shark, 9 May 2012 to 29 Sep 2013, after filtering. A dated replay, not current. Experimental.",
   "shown": "755 recorded fixes of one shark (tag 118845). 69% of them are the two weakest Argos classes, A and B.",
   "done": "1,004 recorded fixes for this tag. Mother Earth left out 208 under its own speed-consistency rule (3 m/s, the study authors' limit; the rule favours better-rated fixes, is experimental and can remove a correct fix), 1 more than 72 hours from any other, and 40 that fall on land in Natural Earth's 1:10m map. 755 are shown. Fixes more than 12 hours apart, and 2 pairs whose joining line would cross land in that map, are not joined.",
   "line": "The line joins recorded fixes no more than 12 hours apart: 616 of 754 steps. It is not the shark's route. For most of the period there is no line.",

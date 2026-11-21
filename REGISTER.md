@@ -491,3 +491,87 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **Reuse terms — that repository's `LICENSE.md`, read 16 Nov 2026 (Claude):** "Everything here is public domain … No permission is needed to use Natural Earth. Crediting the authors is unnecessary." Credited in Sources all the same.
 - **Our modifications (`phase1/build-coast.py`, which rebuilds the file byte for byte from the pinned source):** lines under about 0.4° across dropped, the rest thinned to within 0.02° and rounded to 0.01°; shipped as `assets/coast-50m.bin`.
 - **Why a static source is here:** kept as a fixed map reference by Chad's decision of 16 Nov 2026. The rule for new features is live feeds; this is a reference line for reading a live layer, not a layer.
+
+## Movebank Data Repository — "Migratory Burchell's zebra (Equus burchellii) in northern Botswana", doi `10.5441/001/1.f3550b4f` — recorded journey of one animal — **dated archive; shown on the Animals page once released**
+- **Filed:** with the Animals release merge, on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Source file:** `Migratory Burchell's zebra (Equus burchellii) in northern Botswana.csv`, 15,651,785 bytes, sha256 `c91054627d7d60d50cd9cb59b3d52609df5d17e6985d147742bcf9a6da488824`; first retrieved 19 Nov 2026; downloaded again by Chad 21 Nov 2026 (same bytes) and kept on the Mac in `_source-data/animals-journeys/`, never in the repository.
+- **Request method:** none at run time. No refresh: a closed archive.
+- **Reuse terms:** CC0 1.0 Universal on the repository record (audit of 18 to 19 Nov 2026; the DOI did not resolve in GPT's check of 20 Nov, so that audit carries forward). Citation shown as the repository gives it.
+- **What we ship:** `assets/animals/zebra-botswana-Z3866-R1.json` (`8d00aa32…1bb6`) and its manifest (`ddb1cd5d…40b2`), rebuilt byte for byte by `phase1/animals/build_journey.py`.
+- **Our modifications:** one animal of seven selected; 3 rows without a position left out; nothing else changed. Fixes more than 3 hours apart are not joined (Mother Earth's display rule, provisional).
+- **Time and precision:** the source's notes allow UTC or GPS time; decimal places in the file are not a statement of accuracy.
+- **Sensitivity decision (Chad, 21 Nov 2026, his own message agreeing Claude's recommendation):** shown as recorded at the source's precision, collar number only. Considered: a completed track from 2007 to 2008, open at this precision under CC0 since 2013. A replay makes those coordinates easier to inspect than the file does; the collar number is not anonymity. A decision, not a finding that the data expose no sensitive site.
+- **Why an archive is here:** Chad's decisions of 19 to 21 Nov 2026: recorded animal journeys, dated population evidence and the dated corridor product are allowed on the Animals tab as dated archive features; all other layers keep the live-feed rule.
+- **Commercial use:** CC0 sets no condition.
+
+## Zenodo — "Satellite tracking data of white sharks in the southwest Indian Ocean (2012-2014)", version 1.0.0, doi `10.5281/zenodo.5575189` — recorded journey of one animal — **dated archive; shown on the Animals page once released**
+- **Filed:** with the Animals release merge, on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Source file:** `south_african_white_shark_ARGOS_tracks.csv`, 1,830,322 bytes, sha256 `156b1ee2d72b20244ad378020abd7da30e8c006fc58c7e72e6864f1f23a0029d`; first retrieved 19 Nov 2026; downloaded again by Chad 21 Nov 2026 (same bytes), kept in `_source-data/animals-journeys/`.
+- **Request method:** none at run time. No refresh.
+- **Reuse terms:** CC BY 4.0 (audit of 19 Nov 2026; in GPT's check of 20 Nov the record's licence field did not render, so that audit carries forward). Requires credit, a link to the licence and a statement of changes: all three are on the card and in Sources.
+- **What we ship:** `assets/animals/white-shark-sa-118845-R1.json` (`fb6d4079…6f71`) and its manifest (`0522ca17…9564`), built by `phase1/animals/build_argos_journey.py`.
+- **Our modifications:** one tag of 34 selected; 1,004 rows, 755 displayed (208 by the speed-consistency rule, 1 isolated by more than 72 hours, 40 on land). Nothing moved, smoothed or interpolated.
+- **Our rules (experimental; ours, not the study's):** speed consistency at 3 m/s; 72-hour isolation; land test against Natural Earth 1:10m; join limit 12 hours; no join where the drawn chord crosses land. Passed by GPT as provisional display choices, not validated routes.
+- **Identity:** tag number shown; the file's given names are not. Not anonymity: the public record is linkable.
+- **Sensitivity decision (Chad, 21 Nov 2026, his own message agreeing Claude's recommendation):** shown as displayed, tag number only. Considered: a protected, high-profile species; publicly known tagging areas; a record from 2012 to 2013; Argos precision. A decision, not a finding of no risk.
+- **No enquiry sent to the authors of this dataset.** Not required by the licence.
+- **Why an archive is here:** Chad's decisions of 19 to 21 Nov 2026: recorded animal journeys, dated population evidence and the dated corridor product are allowed on the Animals tab as dated archive features; all other layers keep the live-feed rule.
+- **Commercial use:** CC BY 4.0 allows it with the same credit.
+
+## US IOOS Animal Telemetry Network — false killer whale, ptt id 98364, deployment `573c6646d76c5c52816a4b92` — recorded journey of one animal — **dated archive; shown on the Animals page once released**
+- **Filed:** with the Animals release merge, on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Source file:** `atn_98364_false-killer-whale_trajectory_20131023-20140223.nc`, 319,596 bytes, sha256 `9896550eeeff21ff6fed461d0d13d0f6f2b759e5cca726e58d7308b254c4d3f6`; first retrieved 19 Nov 2026 from ATN's staging folder for NCEI; downloaded again by Chad 21 Nov 2026 (same bytes), kept in `_source-data/animals-journeys/`. Not verified byte for byte against NCEI's archived copy.
+- **Request method:** none at run time. No refresh.
+- **Reuse terms:** CC0 1.0 on the data.gov and OBIS records for this deployment (the data.gov record read by GPT, 20 Nov 2026). The file's own text: free to use and redistribute; acknowledge ATN or the citation; contact with the authors "strongly encouraged" (not required).
+- **What we ship:** `assets/animals/false-killer-whale-hawaii-98364-R1.json` (`7cb4bd44…5c84`) and its manifest (`705368a0…29ea`), same builder.
+- **Our modifications:** 824 rows, 661 displayed (tagging row; 129 failing the data centre's checks; 1 marked invalid; 30 by the speed-consistency rule at 20 km/h; 2 isolated). The source runs to 22 Feb 2014; the displayed replay ends 12 Feb 2014. Join limit 6 hours; no join across land. Experimental rules, as above.
+- **Population:** Oleson, Bradford and Martien (2023), NOAA Technical Memorandum NMFS-PIFSC-150, doi `10.25923/c9qv-2v95`, Table 1, lists tag 98364 among tags on Hawaiʻi pelagic false killer whales (read by GPT, not by Claude). Stated in Sources as the report's listing only. The report's track span (22 Oct 2013 to 22 Feb 2014) differs from the displayed span; the source file's deployment-time discrepancy is not resolved by it.
+- **Identity:** tag number shown; the catalogue id in the file is not. Not anonymity.
+- **Sensitivity decision (Chad, 21 Nov 2026, his own message agreeing Claude's recommendation):** shown as displayed, tag number only; all three first animals released together.
+- **Why an archive is here:** Chad's decisions of 19 to 21 Nov 2026: recorded animal journeys, dated population evidence and the dated corridor product are allowed on the Animals tab as dated archive features; all other layers keep the live-feed rule.
+- **Commercial use:** CC0 sets no condition.
+
+## Natural Earth — 1:10m land polygons, repository commit `ca96624a56bd078437bca8184e78163e5039ad19` (VERSION 5.2.0-pre) — **build-time land test for the two sea journeys; not shipped, not drawn**
+- **Filed:** with the Animals release merge, on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Source:** `ne_10m_land.geojson` from github.com/nvkelso/natural-earth-vector at that commit, sha256 `1ac90796408bc6ad6911d69448485d3c4dbf2190370080368a09976e1c9f7416` (fetched again 21 Nov 2026, same hash).
+- **Request method:** none at run time; read once at build.
+- **Reuse terms:** public domain, as the existing Natural Earth entry. A different file and version from that entry (1:50m coastline, 5.1.2), so entered separately.
+- **Use:** fixes on land are left out; a line is refused where its drawn chord crosses land. A display test at a coarse scale.
+
+## Movebank Data Repository — "Galapagos Albatrosses", doi `10.5441/001/1.3hp3s250` — recorded movements of one bird — **dated archive; shown on the Animals page once released**
+- **Filed:** with the Animals release merge, on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Source files:** `Galapagos Albatrosses.csv`, 4,913,156 bytes, sha256 `1b62b43cfce5067193cde0fc1c5b6144eff193bd7c995160961479921fd4a8e6`, and `Galapagos Albatrosses-reference-data.csv`, 6,066 bytes, sha256 `1d7b24cf119f65ba7c90358b52ed5d29ec07b1b87c61ca6960b4bfad108061ad`; downloaded by Chad 20 Nov 2026; kept in `_source-data/animals-expansion/`.
+- **Request method:** none at run time. No refresh.
+- **Reuse terms:** CC0 1.0 Universal on the repository record (audit D, 20 Nov 2026).
+- **What we ship:** `assets/animals/waved-albatross-galapagos-3275-30662-R1.json` (`42611030…2375`) and its manifest (`266ebc98…13e4`), built by `phase1/animals/build_gps_filtered_journey.py`.
+- **Our modifications:** bird `3275-30662` of 28 selected; 981 of 1,326 recorded fixes displayed; 345 fixes within 5 km of the tagging-site reference point withheld, and no line crosses a withheld period; times rounded to the nearest second; join limit 3 hours 15 minutes.
+- **Label:** "Recorded movements of one breeding adult, 23 June to 15 September 2008" (accepted by GPT): not one trip, not migration.
+- **Sensitivity decision (Chad, 21 Nov 2026, his own message agreeing Claude's recommendation):** shown as built: fixes near the tagging site withheld, every other fix at the source's precision, bird identifier only.
+- **Why an archive is here:** Chad's decisions of 19 to 21 Nov 2026: recorded animal journeys, dated population evidence and the dated corridor product are allowed on the Animals tab as dated archive features; all other layers keep the live-feed rule.
+- **Commercial use:** CC0 sets no condition.
+
+## Dryad — "Data from: The conservation status and population decline of the African penguin deconstructed in space and time", doi `10.5061/dryad.vx0k6djp7`, version of 3 Mar 2021 — colony counts 1979 to 2019 — **dated population evidence; shown on the Animals page once released**
+- **Filed:** with the Animals release merge, on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Source file:** `doi_10_5061_dryad_vx0k6djp7__v20210303.zip`, 4,034 bytes, sha256 `2106ce706f014f7d75008d117cba54a803664c279a5c96871396af0486866e11`; downloaded by Chad 20 Nov 2026; kept in `_source-data/animals-expansion/`.
+- **Request method:** none at run time. No refresh.
+- **Reuse terms:** the record shows "License: Public domain", linking to CC0 1.0 (read by Claude on the record page, 21 Nov 2026; audit A passed by GPT within its scope).
+- **What we ship:** `assets/animals/african-penguin-census-R1.json` (`d8068a48…4094`), its manifest (`77d93cc1…2c50`) and the list `populations-R1.catalog.json` (`ba1ce1e8…8d36`), built by `phase1/animals/build_census.py`.
+- **Our modifications:** none to the counts. 22 colony charts; 600 counts in 902 colony-years; no totals; no positions; nothing on the globe.
+- **Not used:** the authors' later file to 2023 (repository `rbsherley/AP_IUCN_CR`, no licence shown); never joined to this one.
+- **Enquiry:** sent by Chad to Dr Richard Sherley on 20 Nov 2026 (counts reuse and one historical journey); no reply reported; this entry does not depend on it.
+- **Sensitivity decision (Chad, 21 Nov 2026, his own message agreeing Claude's recommendation):** colony names as the file gives them; no positions; nothing on the globe.
+- **Why an archive is here:** Chad's decisions of 19 to 21 Nov 2026: recorded animal journeys, dated population evidence and the dated corridor product are allowed on the Animals tab as dated archive features; all other layers keep the live-feed rule.
+- **Commercial use:** CC0 sets no condition.
+
+## U.S. Geological Survey — Ungulate Migrations of the Western United States, Volume 6, doi `10.5066/P1ETBSYE`, layer "California Mule Deer East Walker Migration Corridors" — published corridor classes — **dated product; shown on the Animals page once released**
+- **Filed:** with the Animals release merge, on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Source file:** `ungulate-migrations-volume-6.zip`, 160,106,900 bytes, sha256 `9bb5989ceab03235f42426ef51baafadd35eb6bf4ca9a4aaf19d17f6d39e4965`; downloaded by Chad 20 Nov 2026; kept in `_source-data/animals-expansion/`.
+- **Request method:** none at run time. No refresh.
+- **Reuse terms:** CC0-1.0 on the ScienceBase record (audit C, 20 Nov 2026). The layer metadata also carries "retain ownership" wording; disclosed in Sources as it stands.
+- **What we ship:** `assets/animals/mule-deer-east-walker-corridor-R1.json` (`1462eae8…ea40`), its manifest (`1a8e2d96…6132`) and the list `corridors-R1.catalog.json` (`47a029f0…74f5`), built by `phase1/animals/build_corridor.py`.
+- **Our modifications:** Medium and High classes only; coordinates converted from the layer's Albers projection and rounded (all 48,589 vertices; independently matched by GPT); nothing simplified. Low is never in the shipped files.
+- **Known discrepancy in the source:** its Medium polygons contain its High polygons although the attribute text gives Medium as 10 to 20%; shown as published, labelled "published source class (includes High)".
+- **Sensitivity decision (Chad, 21 Nov 2026, his own message agreeing Claude's recommendation):** Medium and High shown as published; Low omitted with the omission stated on the page. Omitting Low is a display choice, not evidence that the shown classes are insensitive.
+- **Performance exception (Chad, 21 Nov 2026):** released with the 500 ms main-thread task criterion not met on the test Mac (474 to 689 ms, instrumented) and about 20 frames a second close over the corridor; stated under the page's known limits in Sources.
+- **Why an archive is here:** Chad's decisions of 19 to 21 Nov 2026: recorded animal journeys, dated population evidence and the dated corridor product are allowed on the Animals tab as dated archive features; all other layers keep the live-feed rule.
+- **Commercial use:** CC0 sets no condition.

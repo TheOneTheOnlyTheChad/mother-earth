@@ -73,7 +73,7 @@
   "total_differing_cells": 23
  },
  "simplification": "none: every cell of the deposit is in the display file as one of three states; nothing is summed, smoothed, filled or reordered",
- "sensitivity": "Private preview only. Colony names as the file gives them; no positions; nothing on the globe.",
+ "sensitivity": "Release decision by the site owner, 21 Nov 2026: colony names as the file gives them; no positions; nothing on the globe.",
  "display": {
   "file": "african-penguin-census-R1.json",
   "bytes": 4933,

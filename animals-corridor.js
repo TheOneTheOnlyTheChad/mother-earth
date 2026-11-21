@@ -10,7 +10,7 @@
 (() => {
   const ME = window.ME = window.ME || {};
   const $ = id => document.getElementById(id), root = $('cor-panel'); if (!root) return;
-  const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: '80799f4bc9dae949011d4620a71a92d326b708c71354e8883b2e4e9aba791240', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
+  const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: '47a029f074dc24e93bcc43e19ad065e71a00f70a1ca2084d3f5c04d7cb1174f5', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
     ALT: { medium: 0.00004, high: 0.00008, lines: 0.00012 },                           // heights above the globe, in globe radii (ours): only to fix the drawing order
     FILL: { medium: 'rgba(255,196,84,0.38)', high: 'rgba(255,112,54,0.72)' }, STROKE: { medium: '#ffd98a', high: '#ffffff' }, LINE: 'rgba(170,205,255,0.55)',
     SCALE_PX: 120, SCALE_TOL: 0.05, SETTLE_MS: 160, R_KM: 6371.0088,

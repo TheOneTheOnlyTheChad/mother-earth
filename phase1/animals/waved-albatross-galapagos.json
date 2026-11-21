@@ -63,5 +63,5 @@
     "source_rows": 1338, "positioned": 1326, "failed_attempts": 12, "fixes": 981, "fixes_withheld": 345, "withheld_periods": 14,
     "steps_joined": 966, "joined_spanning_failed": 10, "steps_separated_by_withholding": 13, "steps_separated_by_time": 1, "failed_listed": 11
   },
-  "sensitivity": "Private preview only. Fixes within 5 km of the tagging-site reference point are withheld; every other recorded fix is shown at the source's precision. Public release needs a recorded, dataset-specific sensitivity decision."
+  "sensitivity": "Release decision by the site owner, 21 Nov 2026: fixes within 5 km of the tagging-site reference point are withheld; every other recorded fix is shown at the source's precision; animal identifier only."
 }

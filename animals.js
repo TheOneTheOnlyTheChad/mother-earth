@@ -8,7 +8,7 @@
  * animals-globe.js and the replay is animals-journey.js (animals-tab-rc, stage 1; stage 2 adds the bird's card). It does not load app.js. */
 (() => {
   const $ = id => document.getElementById(id);
-  const A = { CATALOG: 'assets/animals/journeys-R1.catalog.json', CATALOG_SHA256: '1386e4cc4fbc8c1c294ce867f42702c3c838fbde3c41fd9ce788fc275a77fafe', BASE: 'assets/animals/',
+  const A = { CATALOG: 'assets/animals/journeys-R1.catalog.json', CATALOG_SHA256: '5eb789b10488b68cb5e471309ebc517199b1dbce00e5ac719d84f3b4b42c5452', BASE: 'assets/animals/',
     UNVERIFIED: 'Study details could not be verified. No figure is shown.', FAILED: 'Study details could not be loaded. No figure is shown.' };
   // header clock (UTC) and menu, as on the other pages
   const p2 = n => String(n).padStart(2, '0'), clock = $('clock');

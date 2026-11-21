@@ -54,7 +54,7 @@
  },
  "simplification": "filtered, not thinned or smoothed: see the stages",
  "card_text": {
-  "note": "Recorded Argos satellite fixes of one false killer whale, 23 Oct 2013 to 12 Feb 2014, after filtering. A dated replay, not current. Experimental. Private preview.",
+  "note": "Recorded Argos satellite fixes of one false killer whale, 23 Oct 2013 to 12 Feb 2014, after filtering. A dated replay, not current. Experimental.",
   "shown": "{n} recorded fixes of one whale (tag 98364). {weak}% of them are Argos classes 0, A or B.",
   "done": "Shown: Argos fixes that passed the data centre's time, location and speed checks. Mother Earth then left out 1 fix the satellite system marks invalid, {speed} fixes under its own speed-consistency rule ({limit}, favouring better-rated fixes; an experimental rule that can remove a correct fix), {isolated} fixes more than {iso} hours from any other, and {land} on land in Natural Earth's 1:10m map. {n} are shown. Fixes more than {join} hours apart are not joined ({refused} joining lines refused for crossing land).",
   "line": "The line joins recorded fixes no more than {join} hours apart: {joined} of {steps} steps. It is not the whale's route.",

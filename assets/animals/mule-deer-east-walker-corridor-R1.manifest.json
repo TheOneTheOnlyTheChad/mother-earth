@@ -253,7 +253,7 @@
   "reference": "Reference lines: latitude and longitude every quarter of a degree. No place names, roads or borders are drawn.",
   "plain_view": "Plain globe; no coastline lies in this view.",
   "dates": "Data years: 2017, analysed through August 2024. Release date on the record: 24 March 2026. Record last checked: 21 Nov 2026.",
-  "preview": "Private preview: not on the live site."
+  "preview": "A dated archive item: published areas from a past study, not a live feed."
  },
  "view": {
   "lat": 38.35,
@@ -379,5 +379,5 @@
  },
  "builder": "phase1/animals/build_corridor.py",
  "config": "phase1/animals/mule-deer-east-walker-corridor.json",
- "sensitivity": "No finding is made. Omitting Low is a display choice, not evidence that the shown classes are insensitive. Public release needs Chad's recorded decision."
+ "sensitivity": "No finding is made. Omitting Low is a display choice, not evidence that the shown classes are insensitive. Release decision by the site owner, 21 Nov 2026: the Medium and High classes are shown as published and Low stays omitted."
 }

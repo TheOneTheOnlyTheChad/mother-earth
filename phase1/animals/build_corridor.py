@@ -203,7 +203,7 @@ def build(cfg, zbytes):
         'record': dict(cfg['record'], layer_title=un('title')[0], metadata_pubdate=un('pubdate')[0], publisher=(un('publish') or [''])[0], originators_as_listed=un('origin')),
         'source': {'zip': cfg['source_zip'], 'inner_dir': cfg['inner_dir'], 'files': cfg['inner']},
         'builder': 'phase1/animals/build_corridor.py', 'config': 'phase1/animals/' + os.path.basename(cfg.get('_path', '')),
-        'sensitivity': 'No finding is made. Omitting Low is a display choice, not evidence that the shown classes are insensitive. Public release needs Chad\'s recorded decision.'}
+        'sensitivity': 'No finding is made. Omitting Low is a display choice, not evidence that the shown classes are insensitive. Release decision by the site owner, 21 Nov 2026: the Medium and High classes are shown as published and Low stays omitted.'}
     man = (json.dumps(manifest, indent=1, ensure_ascii=False) + '\n').encode('utf-8'); mfile = f'{cfg["id"]}-{cfg["revision"]}.manifest.json'
     catalog = {'schema': 1, 'revision': 'R1', 'note': 'Published corridor products for the Animals page. Separate from the journey list and the population list. A page draws nothing from a manifest whose checksum differs from the one here.',
         'corridors': [{'id': cfg['id'], 'label': cfg['label'], 'group': cfg['group'], 'kind': cfg['kind'], 'manifest': mfile, 'manifest_sha256': sha(man)}]}

@@ -41,7 +41,7 @@
   const nameOf = id => { const b = switches.find(x => x.dataset.journey === id); return b ? (b.dataset.name || id) : id; };
   const J = {
     CATALOG: 'assets/animals/journeys-R1.catalog.json',          // the list of journeys; it pins each study's manifest, which pins its display file
-    CATALOG_SHA256: '1386e4cc4fbc8c1c294ce867f42702c3c838fbde3c41fd9ce788fc275a77fafe',
+    CATALOG_SHA256: '5eb789b10488b68cb5e471309ebc517199b1dbce00e5ac719d84f3b4b42c5452',
     BASE: 'assets/animals/',
     WAIT_MS: 20000,                     // a request that has not answered in 20 s is treated as failed (our number)
     ALT: 0.004,                         // line and fix marks sit just above the surface (fraction of the globe radius)
