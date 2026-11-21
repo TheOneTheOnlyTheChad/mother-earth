@@ -11,11 +11,11 @@
 (() => {
   const ME = window.ME = window.ME || {};
   const $ = id => document.getElementById(id);
-  const C = { CATALOG: 'assets/animals/populations-R1.catalog.json', CATALOG_SHA256: '5c49f68f6d1ae076b0b2b357637a9dd93602b19d14d8214ada272b3e55d848eb', BASE: 'assets/animals/', ID: 'african-penguin-census', WAIT_MS: 20000,
+  const C = { CATALOG: 'assets/animals/populations-R1.catalog.json', CATALOG_SHA256: '5c49f68f6d1ae076b0b2b357637a9dd93602b19d14d8214ada272b3e55d848eb', BASE: 'assets/animals/', ID: 'african-penguin-census', WAIT_MS: 20000, NARROW_PX: 560,
     T: { checking: 'Checking the census file…', unverified: 'The census file could not be verified. Nothing is shown.', failed: 'The census file could not be loaded. Nothing is shown.',
       ready: 'Census file verified.', open: 'Open the larger chart and the table', close: 'Close' } };
   const root = $('an-census'); if (!root) return;
-  const st = { status: 'loading', detail: '', tok: 0, req: null, man: null, d: null, open: -1, announced: '' };
+  const st = { status: 'loading', detail: '', tok: 0, req: null, man: null, d: null, open: -1, announced: '', draw: null, narrow: false };
   const nf = x => Number(x).toLocaleString('en-GB');
   const hex = async buf => [...new Uint8Array(await crypto.subtle.digest('SHA-256', buf))].map(b => b.toString(16).padStart(2, '0')).join('');
   class Unverified extends Error { }
@@ -143,13 +143,18 @@
     d.years.forEach((y, i) => { const r = el('tr'), a = el('th', '', String(y)); a.scope = 'row'; const v = c.v[i], cell = el('td', v === null ? 'cen-none' : v === 'm' ? 'cen-mark' : 'cen-count', v === null ? W.no_count : v === 'm' ? W.marker : nf(v)); cell.dataset.state = v === null ? 'none' : v === 'm' ? 'marker' : 'count'; r.append(a, cell); body.append(r); });
     t.append(th, body); tb.append(t);
     const top = scaleTop(mc.highest_value), sc = el('p', 'cen-scaleline', `Chart scale: 0 to ${nf(top)} occupied nest sites. Years ${m.period.first_year} to ${m.period.last_year}. A dot is one count; a line joins counts in consecutive years only.`); sc.id = 'cen-scaleline';
-    box.append(head, sc, chart(d.years, c.v, true, `${c.name}. ${W.unit} ${sumText(mc)} Scale from 0 to ${nf(top)}.`, box.clientWidth < 560), notes, tb);
+    st.draw = narrow => chart(d.years, c.v, true, `${c.name}. ${W.unit} ${sumText(mc)} Scale from 0 to ${nf(top)}.`, narrow); st.narrow = box.clientWidth < C.NARROW_PX;
+    box.append(head, sc, st.draw(st.narrow), notes, tb);
     if (was >= 0 && $('cen-card-' + was)) $('cen-card-' + was).setAttribute('aria-expanded', 'false');
     $('cen-card-' + k).setAttribute('aria-expanded', 'true');
     h.focus({ preventScroll: true }); try { box.scrollIntoView({ block: 'nearest', behavior: 'auto' }); } catch (_) { }
     announce(`${c.name}: larger chart and table opened.`);
   }
-  function closeDetail(refocus) { const k = st.open, box = $('cen-detail'); if (k < 0) return; st.open = -1; box.hidden = true; box.textContent = '';
+  /** The open larger chart follows its box: when the box crosses the narrow width, only the drawing is replaced.
+   *  Nothing else is touched: no announcement, no focus move, no scrolling; the table, its scroll position and the selection stay. */
+  function fitDetail() { const box = $('cen-detail'); if (st.open < 0 || !st.draw || box.hidden) return; const narrow = box.clientWidth < C.NARROW_PX; if (narrow === st.narrow) return;
+    const old = box.querySelector('svg.cen-svg-big'); if (!old) return; st.narrow = narrow; old.replaceWith(st.draw(narrow)); }
+  function closeDetail(refocus) { const k = st.open, box = $('cen-detail'); if (k < 0) return; st.open = -1; st.draw = null; box.hidden = true; box.textContent = '';
     const b = $('cen-card-' + k); if (b) { b.setAttribute('aria-expanded', 'false'); if (refocus) b.focus(); }
     announce(`${st.d.colonies[k].name}: larger chart and table closed.`); }
   function paint() { const ready = st.status === 'ready', bad = st.status === 'unverified' || st.status === 'failed';
@@ -157,14 +162,15 @@
     const rb = $('cen-retry'); rb.hidden = !bad; root.setAttribute('aria-busy', st.status === 'loading' ? 'true' : 'false');
     $('cen-body').hidden = !ready; const box = $('cen-detail');
     if (!ready) { $('cen-intro').textContent = ''; $('cen-dates').textContent = ''; $('cen-source').textContent = ''; $('cen-grid').textContent = ''; box.textContent = ''; box.hidden = true; $('cen-title').textContent = ''; return; }
-    $('cen-title').textContent = st.man.label; paintIntro(); paintGrid(); box.textContent = ''; box.hidden = true; }
+    $('cen-title').textContent = st.man.label; paintIntro(); paintGrid(); box.textContent = ''; box.hidden = true; st.draw = null; }
 
+  if (typeof ResizeObserver === 'function') new ResizeObserver(fitDetail).observe($('cen-detail')); else window.addEventListener('resize', fitDetail);
   $('cen-retry').addEventListener('click', () => load(true));
   $('cen-detail').addEventListener('keydown', e => { if (e.key === 'Escape' && st.open >= 0) { e.preventDefault(); closeDetail(true); } });
   window.addEventListener('pagehide', () => { if (st.req) { cancel(); if (st.status === 'loading') { st.status = 'failed'; st.detail = 'cancelled when the page was left'; paint(); } } });
   window.addEventListener('pageshow', e => { if (e.persisted && st.status !== 'ready') load(false); });
 
   ME.census = { C, load, open: openDetail, close: closeDetail, scaleTop, summarise,
-    state: () => ({ status: st.status, detail: st.detail, busy: !!st.req, tok: st.tok, open: st.open, announced: st.announced, colonies: st.d ? st.d.colonies.length : 0 }) };
+    state: () => ({ status: st.status, detail: st.detail, busy: !!st.req, tok: st.tok, open: st.open, narrow: st.narrow, announced: st.announced, colonies: st.d ? st.d.colonies.length : 0 }) };
   load(false);
 })();
