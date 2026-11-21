@@ -11,12 +11,13 @@
  *   inventory-unstable-view inventory-one-pass inventory-first-page-only pending-called-missing marked-called-missing
  *   adopted-called-missing no-fence no-random recover-keeps-key recover-pointer-unconditional recover-unverified
  *   recover-without-hold recover-any-plan recover-list-before-inventory recover-deletes dry-run-applies release-unchecked
- *   cleanup-pointer-unfenced admin-open */
+ *   cleanup-pointer-unfenced admin-open manual-ignores-gate */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import zlib from 'node:zlib'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url)), FX = path.join(HERE, 'earthview-fixtures');
 const BREAK = process.env.BREAK || '';
 const BREAKS = {
   'gate-ignored': ["const e = env.EARTHVIEW_ENABLED !== '1' ?", 'const e = false ?'],
+  'manual-ignores-gate': ["  earthview: async (env, ms) => env.EARTHVIEW_ENABLED !== '1' ? 'earthview:not run (EARTHVIEW_ENABLED unset)' : runEarthView(env, ms),", "  earthview: async (env, ms) => runEarthView(env, ms),"],
   'no-header-ok': ["    if (!f.served) return evFail(env, ms, 'served time not confirmed'", "    if (false) return evFail(env, ms, 'served time not confirmed'"],
   'mismatch-ok': ["    if (f.served !== T) return evFail(env, ms, 'served a different frame'", "    if (false) return evFail(env, ms, 'served a different frame'"],
   'check-header-skipped': ["  for (const [what, f] of [['picture', pic], ['check image', chk]]) {\n    if (!f.served)", "  for (const [what, f] of [['picture', pic]]) {\n    if (!f.served)"],
@@ -176,6 +177,8 @@ const tAdd = (t, min) => new Date(Date.parse(t) + min * MIN).toISOString().repla
 // ===== A. gate and schedule
 { const w = await world(); delete w.env.EARTHVIEW_ENABLED; use(w); setNow(T0); const r = await W.JOBS.five(w.env, T0);
   ok('A1 flag unset: the five-minute job makes no EUMETSAT request and writes nothing', /earthview:not scheduled/.test(r) && !w.reqs.length && !w.puts.some(k => /^earthview/.test(k)), [r, w.reqs.length, w.puts]);
+  { const n0 = w.runs.length, g0 = w.store.size, p0 = w.puts.length; w.order.length = 0; const m = await W.JOBS.earthview(w.env, T0), rr = await (await route(w, '/admin/run/earthview?key=k')).json();
+    ok('A1b flag unset: the MANUAL job and /admin/run/earthview do not run either: no request, no write, no run-log row (0.6.21)', m === 'earthview:not run (EARTHVIEW_ENABLED unset)' && rr.result === m && !w.reqs.length && w.puts.length === p0 && !w.deletes.length && w.runs.length === n0 && w.store.size === g0 && !w.order.length, [m, rr, w.reqs.length, w.puts, w.runs.length - n0, w.order]); }
   const w2 = await world(); use(w2); const at4 = Date.UTC(2026, 10, 19, 11, 24, 0), at5 = Date.UTC(2026, 10, 19, 11, 25, 0);
   setNow(at5); const r5 = await W.JOBS.five(w2.env, at5); ok('A2 flag set, minute 25: skipped (every ten minutes)', /earthview:skipped/.test(r5) && !w2.reqs.length, r5);
   setNow(at4); const r4 = await W.JOBS.five(w2.env, at4); ok('A3 flag set, minute 24: runs, and after the earthquake collector', /earthview:published/.test(r4) && w2.order.indexOf('other') >= 0 && w2.order.indexOf('other') < w2.order.indexOf('eumetsat'), [r4, w2.order.slice(0, 4)]); }
