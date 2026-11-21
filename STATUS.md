@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 21 Nov 2026
 
+## 21 Nov 07:02 UTC (clock reading) — **Animals: GPT held Stage 3 on one bounded point; fixed in r2, which is with GPT. Nothing merged, nothing deployed.** (branch only; code `a23dda8`, head `9d94efd`; new-spec thread)
+- **GPT's review of `6c301c5` (relayed by Chad, 21 Nov): BOUNDED HOLD.** Filed `reviews/2026-11-21-animals-tab-stage3-gpt-review.md` on `animals-tab-rc`. GPT's own checks passed (41 builder tests with the pinned zip; byte-identical rebuild; independent parsing of all 902 states; 22 charts and tables in Chrome; journey files and scripts identical to Stage 2). Accepted: marker explanation, licence wording, rounded scales, methods summary, later-file difference counts. **GPT: Chad's Go accepted the offered P-D0 line; no further restatement is needed for this feature.**
+- **The one fix:** a larger chart opened at desktop width kept its wide drawing when the window was narrowed to 390 px (labels about 5.7 px). **r2:** the open chart now follows its box; only the drawing is replaced; selection, scale, table, focus and expanded state are kept; nothing is announced, focused or scrolled. Three files changed (`animals-census.js`, its suite, the script's version tag in `animals.html`); data files and builder unchanged.
+- **Tests (Claude's runs):** census page suite 71 of 71 (wide-first 1280, 390, 360, 1280 and narrow-first 390, 360, 1280, 390 added), 24 of 24 breaks; combined-page suite 277 of 277; builder 38 without the zip. Table position is checked by the row in view (the caption re-wraps), in Chromium only. Older page suites not rerun (their files are unchanged); `mobile-pass` and `key-drawn-ui` NOT run.
+- **Packet:** `reviews/2026-11-21-animals-tab-stage3-rc-r2.md`. Mac `_review/animals-tab-stage3-a23dda8/`; the `6c301c5` copy moved to `_to_delete/`.
+- **Next:** GPT's closure review of r2. The corridor proposal is not started and needs Chad's go.
+
 ## 21 Nov 06:31 UTC (clock reading) — **Earth from Space Stage B: GPT accepted the final-newline difference of the deployed hub (relayed by Chad); no corrective deploy, no pause; the three observations proceed under Chad's existing line.** (record only; hub live 0.6.21, deployed sha256 `2028e2da…01c3`; Earth from Space thread)
 - GPT verified independently that the reviewed Worker minus its final LF is 532,761 bytes with that hash. Its words are appended to `reviews/evidence/2026-11-21-earth-from-space-stage-b/deployment-read-back-2026-11-21.md` on the branch. Each observation's evidence cites the deployed hash.
 
