@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 21 Nov 2026
 
+## 21 Nov 07:20 UTC (clock reading) — **Animals: GPT PASSED Stage 3 r2 (African penguin colony census) for private preview. Nothing merged, nothing deployed.** (branch only; code `a23dda8`, head `6cf2318`; new-spec thread)
+- **GPT's review (relayed by Chad, 21 Nov): PASS for private preview, no new hold.** Filed `reviews/2026-11-21-animals-tab-stage3-r2-gpt-review.md` on `animals-tab-rc`. GPT checked the change and hashes, confirmed the census data and journey files unchanged, and exercised desktop-to-phone and phone-to-desktop resizing in Chrome. It did not rerun the browser suites; those totals stay Claude's runs.
+- **All three stages on `animals-tab-rc` are now passed as private previews:** the Animals tab with three journeys, the bird, the penguin census. `animals-tab-rc` is the current combined Animals preview.
+- **Outstanding, per GPT:** real phone and Safari, screen reader, performance, public-release checks. **This clears no merge or deployment.**
+- **Next, each needing Chad's go:** the corridor proposal (East Walker mule deer, not started). Release questions (Sources page, REGISTER, sensitivity decisions, GPT's corrections to the release documents) are Chad's.
+
 ## 21 Nov 07:02 UTC (clock reading) — **Animals: GPT held Stage 3 on one bounded point; fixed in r2, which is with GPT. Nothing merged, nothing deployed.** (branch only; code `a23dda8`, head `9d94efd`; new-spec thread)
 - **GPT's review of `6c301c5` (relayed by Chad, 21 Nov): BOUNDED HOLD.** Filed `reviews/2026-11-21-animals-tab-stage3-gpt-review.md` on `animals-tab-rc`. GPT's own checks passed (41 builder tests with the pinned zip; byte-identical rebuild; independent parsing of all 902 states; 22 charts and tables in Chrome; journey files and scripts identical to Stage 2). Accepted: marker explanation, licence wording, rounded scales, methods summary, later-file difference counts. **GPT: Chad's Go accepted the offered P-D0 line; no further restatement is needed for this feature.**
 - **The one fix:** a larger chart opened at desktop width kept its wide drawing when the window was narrowed to 390 px (labels about 5.7 px). **r2:** the open chart now follows its box; only the drawing is replaced; selection, scale, table, focus and expanded state are kept; nothing is announced, focused or scrolled. Three files changed (`animals-census.js`, its suite, the script's version tag in `animals.html`); data files and builder unchanged.
