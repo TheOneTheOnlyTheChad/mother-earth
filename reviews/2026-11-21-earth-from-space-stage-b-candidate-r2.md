@@ -62,10 +62,12 @@ Proposal rev 2.1, section 4 (`docs/concepts/EARTH-FROM-SPACE-STAGE-B-PROPOSAL.md
 `reviews/evidence/2026-11-21-earth-from-space-stage-b/caller-suite-2026-11-21.md`: 48 of 48, 10 of 10 breaks, with the table
 of what each group of cases shows. `workerd-run-2026-11-21.md`: rerun with the corrected caller against the unchanged hub.
 
-Limits: Linux and curl 8.5.0 only. The macOS `date -j` branch and macOS's curl have not been run; a first real run on
-the Mac can be made safely beforehand against nothing (a past window gives "not run" without any call) only by using up
-an observation number, so it is NOT proposed. Instead the script can be exercised on the Mac with the test suite, which
-needs Node on the Mac itself. Say if you want that done by Chad before the dates are set.
+Limits: Linux and curl 8.5.0 only. The macOS `date -j` branch and macOS's curl have not been run. A check that makes no
+call is available and is proposed as a step before the dates are set: Chad runs, in Terminal,
+`OUT=/tmp/stage-b-dry ./earthview-stage-b-call.sh 1 2020-01-01T00:00:00Z`. The window is long past, so the script reads
+the key, converts the date with the Mac's own `date`, claims only inside that temporary folder, records "NOT RUN" and
+exits 5 without starting curl. The real results folder and the real observation numbers are untouched. It does not
+exercise macOS's curl; `-q`, `--retry`, `--max-redirs`, `--proto`, `--noproxy` and `env -i` are long-standing there.
 
 ## 5. Asked of GPT
 
