@@ -6,7 +6,7 @@
 <title>Mother Earth — Animals</title>
 <meta name="description" content="Recorded animal journeys, replayed one at a time on their own globe, with their sources. Private preview.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612200200">
+<link rel="stylesheet" href="style.css?v=202612210100">
 </head>
 <body class="doc animals">
 <header class="top">
@@ -97,6 +97,23 @@
       </div>
       <div class="vh" id="an-say" aria-live="polite"></div>
     </div>
+  </section>
+
+  <section class="an-census" id="an-census" aria-labelledby="cen-h" aria-busy="true">
+    <h2 id="cen-h">Population counts</h2>
+    <p class="an-note">Dated counts from published records. Nothing here is drawn on the globe, and nothing here is a live feed.</p>
+    <div class="cen-card-head"><span class="ev obs">Census counts</span> <span class="cen-group">Sea</span></div>
+    <h3 id="cen-title"></h3>
+    <p class="cen-state" id="cen-state">Checking the census file…</p>
+    <button type="button" class="journey-retry" id="cen-retry" hidden>Retry</button>
+    <div id="cen-body" hidden>
+      <div id="cen-intro"></div>
+      <dl class="cen-dates" id="cen-dates"></dl>
+      <div id="cen-grid"></div>
+      <div class="cen-detail" id="cen-detail" role="region" aria-labelledby="cen-dh" hidden></div>
+      <div id="cen-source"></div>
+    </div>
+    <div class="vh" id="cen-say" aria-live="polite"></div>
   </section>
 
   <div class="an-doc">
@@ -243,5 +260,6 @@
 <script src="animals-globe.js?v=202612200100"></script>
 <script src="animals-journey.js?v=202612200300"></script>
 <script src="animals.js?v=202612200300"></script>
+<script src="animals-census.js?v=202612210100"></script>
 </body>
 </html>

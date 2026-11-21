@@ -1,0 +1,78 @@
+{
+  "study": "african-penguin-census",
+  "revision": "R1",
+  "kind": "colony-census",
+  "group": "Sea",
+  "label": "African penguin: colony census, 1979 to 2019",
+  "species_as_recorded": "Spheniscus demersus",
+  "common_name": "African penguin",
+  "dataset_doi": "10.5061/dryad.vx0k6djp7",
+  "dataset_url": "https://doi.org/10.5061/dryad.vx0k6djp7",
+  "repository": "Dryad",
+  "deposit_version": "2021-03-03",
+  "record": {
+    "read": "read by Claude on the Dryad record page in Chad's browser pane, 21 Nov 2026 (between 05:06 and 05:09 UTC, clock readings either side)",
+    "checked": "21 Nov 2026",
+    "dataset_citation_as_given": "Sherley, Richard; Crawford, Robert; de Blocq, Andrew et al. (2021). Data from: The conservation status and population decline of the African penguin deconstructed in space and time [Dataset]. Dryad. https://doi.org/10.5061/dryad.vx0k6djp7",
+    "paper_citation_as_given": "Sherley, Richard B. et al. (2020), The conservation status and population decline of the African penguin deconstructed in space and time, Ecology and Evolution, Journal-article, https://doi.org/10.1002/ece3.6554",
+    "licence_as_given": "Public domain",
+    "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "licence_note": "The record shows \"License: Public domain\"; that text links to the Creative Commons CC0 1.0 page.",
+    "deposit_version_as_given": "Published Mar 03, 2021 on Dryad (\"Mar 03, 2021 version files\")",
+    "funding_as_given": "Pew Charitable Trusts"
+  },
+  "source_zip": {
+    "name": "doi_10_5061_dryad_vx0k6djp7__v20210303.zip",
+    "bytes": 4034,
+    "sha256": "2106ce706f014f7d75008d117cba54a803664c279a5c96871396af0486866e11",
+    "retrieved": "downloaded by Chad on 20 Nov 2026 from the Dryad record"
+  },
+  "source_file": {
+    "name": "Afr_penguin.csv",
+    "bytes": 3890,
+    "sha256": "9c57c16809d1b886c5000555b495551f7d7cb1802cfa70c6d67323a87f40d72c"
+  },
+  "years": { "first": 1979, "last": 2019 },
+  "colonies": ["Lamberts Bay", "Malgas Island", "Marcus Island", "Jutten Island", "Vondeling Island", "Dassen Island", "Robben Island", "Simonstown", "Seal Island False Bay", "Stony Point", "Dyer Island", "Geyser Island", "Jahleel Island", "Brenton Island", "St Croix Island", "Seal Island Algoa Bay", "Stag Island", "Bird Island", "Mercury", "Ichaboe", "Halifax", "Possession"],
+  "countries": [
+    { "name": "South Africa", "first": "Lamberts Bay", "count": 18 },
+    { "name": "Namibia", "first": "Mercury", "count": 4 }
+  ],
+  "markers": [["Lamberts Bay", 2019], ["Robben Island", 1979], ["Simonstown", 1979], ["Stony Point", 1979]],
+  "expect": { "counts": 600, "no_count": 298, "markers": 4, "empty_cells": 1 },
+  "wording": {
+    "unit": "Annual colony census: occupied nest sites (used as a breeding-pair proxy).",
+    "unit_detail": "Each yearly value is the highest count available for that colony in that year (the record's methods). It is not a count of individual birds, and it is not doubled into individuals. The record says an occupied site in Namibia was a nest with fresh eggs or chicks, and in South Africa also a site defended by an adult or showing recent signs of use.",
+    "version_note": "Historical census data from the 2021 deposit, ending in 2019. The authors' later analysis file extends to 2023 and differs in some overlapping entries. This chart uses the earlier deposit throughout.",
+    "no_total": "No total is shown because the colonies counted vary between years; adding the available entries would not compare the same coverage or establish a complete population total.",
+    "one_colony": "A rise at one colony does not show recovery of the species.",
+    "scales": "Each chart has its own vertical scale, printed on it. Heights must not be compared between charts.",
+    "no_count": "No count in this file",
+    "no_count_general": "The record's usage notes say NA marks years in which counts were not conducted, for logistical reasons or because a colony had gone or had not yet been colonised or recolonised. Mother Earth does not give a reason for any single missing entry and says nothing here about whether a colony exists today.",
+    "marker": "Not a count: model marker, left out",
+    "marker_note": "The file holds a 0.1 marker at {year}. The record's usage notes say these markers were entered to anchor the authors' model at an end of a series where they knew the population was zero, that they are not count data, and that they should be left out. It is left out here.",
+    "archive": "A dated record that ends in 2019. Not a live feed and not updated."
+  },
+  "later_file": {
+    "what": "the authors' later analysis file, Afr_penguin_2023_JARAinput.csv, in the GitHub repository rbsherley/AP_IUCN_CR",
+    "commit": "682766636a8a0ebcdd5a1b3959f291444cb83db4",
+    "sha256": "647ea16a0b091fe444253ed3366438111b1498082f42a1ea24bdac83de045a43",
+    "source_of_these_counts": "Mother Earth's audit docs/research/animals-source-audit/PENGUIN-COUNTS.md rev 2.1, section 6 (comparison of the 902 shared colony-years; that file is not stored and not shown)",
+    "sentence": "The authors' later file has different entries for this colony in {n} of the shared years. Its values are not shown here.",
+    "differing_cells": [
+      ["Vondeling Island", 2018], ["Vondeling Island", 2019],
+      ["Mercury", 2019], ["Mercury", 2018],
+      ["Ichaboe", 2017], ["Ichaboe", 2018], ["Ichaboe", 2019], ["Ichaboe", 1979], ["Ichaboe", 2016],
+      ["Halifax", 1986], ["Halifax", 2016], ["Halifax", 2017], ["Halifax", 2018],
+      ["Possession", 1985], ["Possession", 2018], ["Possession", 2019], ["Possession", 2016],
+      ["Stony Point", 1987],
+      ["Seal Island Algoa Bay", 1979],
+      ["Stag Island", 1981],
+      ["Bird Island", 1979], ["Bird Island", 2002],
+      ["Lamberts Bay", 2019]
+    ],
+    "expect_total": 23,
+    "not_counted": "One further literal difference, Seal Island Algoa Bay 2003, is only an empty cell in this file against NA in the later one: the same state, not counted."
+  },
+  "sensitivity": "Private preview only. Colony names as the file gives them; no positions; nothing on the globe."
+}

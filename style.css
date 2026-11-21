@@ -810,6 +810,46 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
 @media (max-width:720px){.an-globe-box{height:min(50vh,420px);min-height:240px}.doc.animals main{padding-left:12px;padding-right:12px}}
 /* Animals page (private preview) */
 .an-preview{padding:8px 10px;border:1px solid var(--accent);display:inline-block}
+/* Animals page: population counts (animals-tab-rc stage 3). In the page flow; nothing here touches the globe. */
+.an-census{margin:0 0 28px;border-top:1px solid var(--line-strong);padding-top:14px}
+.an-census h3{margin:6px 0 4px}
+.cen-card-head{display:flex;gap:8px;align-items:center;font-size:11px}
+.cen-state{margin:4px 0 8px;font-size:13px;color:var(--dim)}
+#cen-intro p{margin:0 0 6px;font-size:13px;line-height:1.5;max-width:900px}
+#cen-intro .cen-unit{color:var(--fg);font-size:14px}
+.cen-dates{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0 12px;font-size:12.5px}
+.cen-dates dt{color:var(--dim)} .cen-dates dd{margin:0}
+.cen-country{margin:14px 0 6px;font:600 13px/1.3 var(--mono)}
+.cen-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.cen-card{display:flex;flex-direction:column;gap:4px;min-width:0;min-height:44px;text-align:left;font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);padding:8px 10px;cursor:pointer}
+.cen-card:hover{border-color:var(--line-strong)} .cen-card:focus-visible,.cen-close:focus-visible,.cen-tablebox:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cen-card[aria-expanded="true"]{border-color:var(--accent)}
+.cen-name{font:600 13.5px/1.3 var(--mono)}
+.cen-sum{font-size:11.5px;line-height:1.4;color:var(--dim)}
+.cen-open{font-size:11.5px;color:var(--accent)}
+.cen-svg{display:block;width:100%;height:auto}
+.cen-svg .cen-axis{stroke:var(--line-strong);stroke-width:1}
+.cen-svg .cen-grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.cen-svg .cen-line{fill:none;stroke:#8fd3ff;stroke-width:1.4;stroke-linejoin:round}
+.cen-svg .cen-dot{fill:#e8f4ff;stroke:#0b1220;stroke-width:.6}
+.cen-svg text{fill:var(--dim);font:10px var(--mono)}
+.cen-svg-big text{font-size:12px}
+.cen-svg-big{max-width:900px}
+.cen-svg-narrow text{font-size:11px}
+.cen-scaleline{margin:6px 0;font-size:12.5px;color:var(--dim)}
+.cen-detail{border:1px solid var(--accent);background:var(--card);padding:10px 12px;margin:14px 0}
+.cen-detail[hidden]{display:none}
+.cen-dhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cen-dh{margin:0;font:600 14px/1.3 var(--mono)} .cen-dh:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cen-close{min-height:44px;min-width:44px;padding:0 14px;font:inherit;color:var(--fg);background:transparent;border:1px solid var(--line-strong);cursor:pointer}
+.cen-notes p{margin:6px 0;font-size:12.5px;line-height:1.45}
+.cen-tablebox{max-height:340px;overflow:auto;border:1px solid var(--line);margin-top:8px}
+.cen-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.cen-table caption{text-align:left;padding:6px 8px;color:var(--dim)}
+.cen-table th,.cen-table td{text-align:left;padding:4px 8px;border-top:1px solid var(--line)}
+.cen-table thead th{position:sticky;top:0;background:var(--card)}
+.cen-table td.cen-none,.cen-table td.cen-mark{color:var(--dim)}
+.cen-src{margin:6px 0;font-size:12px;line-height:1.45;overflow-wrap:anywhere;max-width:900px}
 .an-study{border:1px solid var(--line-strong);padding:4px 14px 10px;margin:8px 0 18px}
 .an-facts{width:100%;border-collapse:collapse;margin:8px 0}
 .an-facts th{width:30%;text-align:left;vertical-align:top;font-weight:500;color:var(--dim);padding:6px 10px 6px 0}
