@@ -1,0 +1,51 @@
+{"way":"reload","state":"nothing on","rep":0,"first":{"dcl":430,"load":430,"record":1207,"globe":1513},"next":{"dcl":341,"load":348,"record":1029,"globe":1328}}
+{"way":"reload","state":"nothing on","rep":1,"first":{"dcl":370,"load":380,"record":1118,"globe":1457},"next":{"dcl":374,"load":382,"record":1194,"globe":1473}}
+{"way":"reload","state":"journey","rep":0,"first":{"dcl":348,"load":355,"record":1047,"globe":1329},"next":{"dcl":432,"load":436,"record":1119,"globe":1402}}
+{"way":"reload","state":"journey","rep":1,"first":{"dcl":415,"load":415,"record":986,"globe":1259},"next":{"dcl":407,"load":414,"record":850,"globe":1128}}
+{"way":"reload","state":"corridor","rep":0,"first":{"dcl":391,"load":391,"record":1197,"globe":1506},"next":{"dcl":1144,"load":1147,"record":1860,"globe":2143}}
+{"way":"reload","state":"corridor","rep":1,"first":{"dcl":375,"load":380,"record":949,"globe":1226},"next":{"dcl":942,"load":944,"record":1672,"globe":1946}}
+{"way":"reload","state":"corridor and journey","rep":0,"first":{"dcl":366,"load":366,"record":1156,"globe":1410},"next":{"dcl":1091,"load":1091,"record":1745,"globe":2039}}
+{"way":"reload","state":"corridor and journey","rep":1,"first":{"dcl":474,"load":479,"record":1204,"globe":1484},"next":{"dcl":1038,"load":1038,"record":1605,"globe":1942}}
+{"way":"same tab, navigate again","state":"nothing on","rep":0,"first":{"dcl":422,"load":429,"record":1268,"globe":1568},"next":{"dcl":437,"load":442,"record":1137,"globe":1411}}
+{"way":"same tab, navigate again","state":"nothing on","rep":1,"first":{"dcl":409,"load":409,"record":1167,"globe":1433},"next":{"dcl":360,"load":364,"record":1049,"globe":1334}}
+{"way":"same tab, navigate again","state":"journey","rep":0,"first":{"dcl":369,"load":374,"record":1060,"globe":1326},"next":{"dcl":341,"load":346,"record":1056,"globe":1323}}
+{"way":"same tab, navigate again","state":"journey","rep":1,"first":{"dcl":387,"load":392,"record":1136,"globe":1493},"next":{"dcl":379,"load":380,"record":1033,"globe":1324}}
+{"way":"same tab, navigate again","state":"corridor","rep":0,"first":{"dcl":475,"load":478,"record":1284,"globe":1585},"next":{"dcl":1062,"load":1063,"record":1762,"globe":2061}}
+{"way":"same tab, navigate again","state":"corridor","rep":1,"first":{"dcl":433,"load":433,"record":1173,"globe":1473},"next":{"dcl":1229,"load":1232,"record":1963,"globe":2325}}
+{"way":"same tab, navigate again","state":"corridor and journey","rep":0,"first":{"dcl":453,"load":458,"record":1259,"globe":1597},"next":{"dcl":1050,"load":1051,"record":1767,"globe":2042}}
+{"way":"same tab, navigate again","state":"corridor and journey","rep":1,"first":{"dcl":407,"load":407,"record":1123,"globe":1410},"next":{"dcl":1215,"load":1221,"record":1981,"globe":2294}}
+{"way":"new tab, old tab left open","state":"nothing on","rep":0,"first":{"dcl":398,"load":401,"record":1129,"globe":1385},"next":{"dcl":3940,"load":3940,"record":5351,"globe":5953}}
+{"way":"new tab, old tab left open","state":"nothing on","rep":1,"first":{"dcl":465,"load":470,"record":1197,"globe":1533},"next":{"dcl":2083,"load":2084,"record":4131,"globe":4666}}
+{"way":"new tab, old tab left open","state":"journey","rep":0,"first":{"dcl":397,"load":397,"record":1214,"globe":1468},"next":{"dcl":1240,"load":1241,"record":3104,"globe":3326}}
+{"way":"new tab, old tab left open","state":"journey","rep":1,"first":{"dcl":410,"load":413,"record":1064,"globe":1377},"next":{"dcl":985,"load":989,"record":2716,"globe":3194}}
+{"way":"new tab, old tab left open","state":"corridor","rep":0,"first":{"dcl":412,"load":417,"record":1099,"globe":1415},"next":{"dcl":4203,"load":4223,"record":12012,"globe":14201}}
+{"way":"new tab, old tab left open","state":"corridor","rep":1,"first":{"dcl":1310,"load":1316,"record":1989,"globe":2296},"next":{"dcl":4067,"load":4092,"record":11821,"globe":14216}}
+{"way":"new tab, old tab left open","state":"corridor and journey","rep":0,"first":{"dcl":1325,"load":1329,"record":2063,"globe":2370},"next":{"dcl":4738,"load":4750,"record":12398,"globe":14836}}
+{"way":"new tab, old tab left open","state":"corridor and journey","rep":1,"first":{"dcl":1164,"load":1164,"record":1908,"globe":2218},"next":{"dcl":6390,"load":6394,"record":11303,"globe":13525}}
+{"way":"old context closed, new context","state":"nothing on","rep":0,"first":{"dcl":1264,"load":1264,"record":2005,"globe":2280},"next":{"dcl":379,"load":379,"record":1093,"globe":1395,"close":10}}
+{"way":"old context closed, new context","state":"nothing on","rep":1,"first":{"dcl":420,"load":425,"record":1105,"globe":1389},"next":{"dcl":394,"load":396,"record":864,"globe":1139,"close":22}}
+{"way":"old context closed, new context","state":"journey","rep":0,"first":{"dcl":329,"load":330,"record":920,"globe":1210},"next":{"dcl":349,"load":349,"record":1111,"globe":1394,"close":9}}
+{"way":"old context closed, new context","state":"journey","rep":1,"first":{"dcl":420,"load":421,"record":1076,"globe":1348},"next":{"dcl":394,"load":395,"record":831,"globe":1141,"close":6}}
+{"way":"old context closed, new context","state":"corridor","rep":0,"first":{"dcl":365,"load":368,"record":1089,"globe":1369},"next":{"dcl":967,"load":969,"record":1708,"globe":1998,"close":6}}
+{"way":"old context closed, new context","state":"corridor","rep":1,"first":{"dcl":535,"load":538,"record":1282,"globe":1574},"next":{"dcl":967,"load":968,"record":1641,"globe":1930,"close":25}}
+{"way":"old context closed, new context","state":"corridor and journey","rep":0,"first":{"dcl":422,"load":430,"record":1160,"globe":1438},"next":{"dcl":386,"load":387,"record":1057,"globe":1325,"close":15}}
+{"way":"old context closed, new context","state":"corridor and journey","rep":1,"first":{"dcl":458,"load":464,"record":1146,"globe":1431},"next":{"dcl":1153,"load":1157,"record":1794,"globe":2091,"close":11}}
+
+median ms over 2 runs: the following page (and, for comparison, the first page of the same run)
+way | state before | DOM ready | load | record checked | globe ready | first page: globe ready
+reload | nothing on | 341 | 348 | 1029 | 1328 | 1457
+reload | journey | 407 | 414 | 850 | 1128 | 1259
+reload | corridor | 942 | 944 | 1672 | 1946 | 1226
+reload | corridor and journey | 1038 | 1038 | 1605 | 1942 | 1410
+same tab, navigate again | nothing on | 360 | 364 | 1049 | 1334 | 1433
+same tab, navigate again | journey | 341 | 346 | 1033 | 1323 | 1326
+same tab, navigate again | corridor | 1062 | 1063 | 1762 | 2061 | 1473
+same tab, navigate again | corridor and journey | 1050 | 1051 | 1767 | 2042 | 1410
+new tab, old tab left open | nothing on | 2083 | 2084 | 4131 | 4666 | 1385
+new tab, old tab left open | journey | 985 | 989 | 2716 | 3194 | 1377
+new tab, old tab left open | corridor | 4067 | 4092 | 11821 | 14201 | 1415
+new tab, old tab left open | corridor and journey | 4738 | 4750 | 11303 | 13525 | 2218
+old context closed, new context | nothing on | 379 | 379 | 864 | 1139 | 1389
+old context closed, new context | journey | 349 | 349 | 831 | 1141 | 1210
+old context closed, new context | corridor | 967 | 968 | 1641 | 1930 | 1369
+old context closed, new context | corridor and journey | 386 | 387 | 1057 | 1325 | 1431
