@@ -2,6 +2,16 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 21 Nov 2026
+
+## 21 Nov 04:02 UTC (clock reading) — **Earth from Space Stage A: the twelve-hour probe ended; result by the reviewed rule is INCOMPLETE at both sizes (no criterion "not met"); logs exported; Worker `mother-earth-evprobe` DELETED.** (production: the hub was not touched, live 0.6.19; the delete is the last step of Chad's Approve line of 20 Nov; nothing extended, rerun or added; Earth from Space thread)
+- **Result** (`phase1/evprobe.report.mjs`, unchanged, with the deployed file's start and build): criteria 1 to 4 incomplete and criterion 5 met, at 2,048 px and at 1,536 px. One cause per size: a single phase 1 run in which EUMETSAT did not return the check image (HTTP 503; 14:10 UTC at 1,536 px, 16:00 UTC at 2,048 px), so the time confirmation was observed in 17 of 18 runs per size with 0 failures.
+- **Observed:** 70 runs planned, 70 attempts, one per slot, no duplicate delivery; 84 Cloudflare invocation records, all outcome `ok`, no memory or CPU ending; 66 runs clean; 116 picture checks, 116 passed, 0 refused. CPU maximum for one check 1,016 ms at 2,048 px and 637 ms at 1,536 px (line 5,000 ms); six checks in one run 3,681 and 3,129 ms. Memory ladder: 2 of 2 clean at 16 to 80 MiB extra at both sizes; at 96 MiB 1 of 2, the other being a fetch failure (HTTP 200 with `text/xml` for the check image, 00:40 and 00:50 UTC), not a memory ending. The ladder found no ceiling. At most 210 requests to EUMETSAT, the planned figure.
+- **Export:** read-only from Chad's signed-in dashboard pane at 03:57 UTC; 480 probe lines and 84 invocation records; the page's sha256 of both files equals the repository copies (how: the result README).
+- **Deleted** 04:01:43 UTC 21 Nov; read back: the account's Workers are `mother-earth` only.
+- **Evidence:** `earth-from-space-rc` `8214b1b`, `reviews/evidence/2026-11-20-earth-from-space-probe/stage-a/result/` (README, `lines.jsonl`, `invocations.json`, `result.json`).
+- **Next:** GPT, then Chad: accept the evidence as it stands, or a short top-up run (new Approve line). Stage B not built, not approved. Not recorded earlier: reads of the probe's logs at 13:25, 17:48 and 20:22 UTC 20 Nov (read-only).
+
 # 20 Nov 2026
 
 ## 20 Nov 19:25 UTC (clock reading) — **Animals: Stage 2 candidate (the waved albatross) is built on `animals-tab-rc` and is with GPT for candidate review. Nothing merged, nothing deployed.** (branch only; code `ec19905`, head `774e66e`; new-spec thread)
