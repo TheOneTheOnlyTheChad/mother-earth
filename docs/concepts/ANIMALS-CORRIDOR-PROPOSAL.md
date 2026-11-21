@@ -1,6 +1,6 @@
 # Animals: East Walker mule deer migration corridor. Build proposal
 
-21 Nov 2026 · **rev 2** · docs only. **GPT held rev 1 on three bounded corrections** (`reviews/2026-11-21-animals-corridor-proposal-gpt-review.md`); rev 2 makes them and GPT's smaller points (§12 lists each). GPT accepted the herd, the Medium and High only design and the visible omission wording. **Nothing is built. Chad's decisions (§9) and his own build go are needed after GPT closes the hold.** No public-release clearance. Written 07:40 UTC (clock reading).
+21 Nov 2026 · **rev 2.1** · docs only. **GPT held rev 1 on three bounded corrections** (`reviews/2026-11-21-animals-corridor-proposal-gpt-review.md`). **On rev 2 GPT closed hold 1 and left two narrow corrections** (`reviews/2026-11-21-animals-corridor-proposal-rev2-gpt-review.md`): the Medium and High relation test (§5.4) and the phone reveal (§6.1). Rev 2.1 makes those two and GPT's short clarifications; §13 lists each. GPT accepted the herd, the Medium and High only design and the visible omission wording; its recommended decisions are unchanged. **Nothing is built. Chad's decisions (§9) and his own build go are needed after GPT clears the proposal.** No public-release clearance. Written 07:51 UTC (clock reading).
 
 Authority: Chad's order of 20 Nov (bird, penguin chart, then corridor), his choice of the East Walker herd and his decision of 20 Nov ("Medium and High only, with a visible note that the broader Low-use footprint is omitted; not presented as the complete migration extent"), and his go of 21 Nov: "East Walker corridor proposal, docs only, for GPT review. Medium and High only, with the omitted Low-use footprint stated clearly. No implementation or deployment." Source audit: `docs/research/animals-source-audit/CORRIDOR-USGS.md` rev 1.2 (closed by GPT). Design base: `ANIMALS-EXPANSION-PROPOSAL.md` rev 2, §2, §5 and §10.
 
@@ -129,7 +129,7 @@ The two classes span about 30 km by 38 km. The whole-globe backdrop is one pictu
 2. The `.prj` text equals the pinned text exactly, and its parameters equal the config's.
 3. A polygon shapefile with exactly 3 records; `.dbf` fields State, Species, Herd, DataType, Contour with CA, MuleDeer, EastWalker, Corridors and Low, Medium, High in that order.
 4. The metadata `.xml` contains, word for word, the three class definitions, the sample sentence, the use constraint and the process sentences the config quotes.
-5. Per class: rings, outer rings, holes and points equal the config (exact); net projected area equals the pinned full-precision value within **0.001 km²**.
+5. Per class: rings, outer rings, holes and points equal the config (exact); the **source's** net projected area equals the pinned full-precision value within **0.001 km²**. (Rounded areas have their own bounds, 16.)
 
 ### 5.2 Validity of the source geometry (full precision, projected metres)
 6. Every coordinate finite.
@@ -149,9 +149,17 @@ The two classes span about 30 km by 38 km. The whole-globe backdrop is one pictu
 18. The corners of the projected bounding box, converted, equal the metadata's four bounding values to four decimals.
 
 ### 5.4 Relation between Medium and High (measured in the source and in the output; never repaired)
-19. Every High vertex is classed against Medium's filled area (inside, on the boundary, outside), and every Medium vertex against High's; proper crossings between a Medium segment and a High segment are counted. "On the boundary" means within 0.01 m in the source and within 1.5 m in the rounded output; anything nearer than that is treated as numerical noise, not as overlap.
-20. The relation is recorded as one of: **bands** (neither class has a vertex strictly inside the other's fill), **nested** (every High vertex is inside or on Medium's fill), or **mixed**.
-21. **Mixed stops the build** for a decision. **A relation in the output that differs from the source's stops the build.** Either way High is drawn above Medium and the legend's definitions do not change.
+A class's **filled area** is its outer rings less their holes. A **component** is one outer ring with its holes. The relation is decided from two kinds of evidence together:
+19. **Proper crossings.** Every Medium boundary segment is tested against every High boundary segment. A proper crossing is two segments meeting at a single point inside both. The sign tests are computed exactly (rational arithmetic on the source's numbers; whole-number arithmetic on the rounded output), so no tolerance decides whether a crossing exists. Segments that run along each other are not crossings; their shared length is recorded as shared boundary.
+20. **Containment, holes respected.** For every component of each class, a point strictly inside that component is tested against the other class's filled area: inside, or not. The point and its distance from every boundary are recorded.
+21. **The relation:**
+   - **bands**: no proper crossing, and no component of either class has its inside point in the other's filled area. That is, the two filled interiors are disjoint. (High lying in a hole of Medium is bands.)
+   - **nested**: no proper crossing; every High component's inside point is in Medium's filled area; no Medium component's inside point is in High's.
+   - **mixed**: anything else. In particular **any proper crossing**; some High components inside Medium and others not; any Medium component inside High.
+22. **Mixed stops the build** for a decision; the crossings and the components concerned are reported with their positions.
+23. **Source against output.** The relation, the number of proper crossings (which must be none for bands or nested) and every component's inside-or-not result must be the same in the rounded output as in the source. **Any difference stops the build for review.**
+24. **Near-boundary cases are reported, never used to excuse anything.** Vertices of one class within 0.01 m (source) or 1.5 m (output) of the other class's boundary are counted and listed as near-boundary. Those distances mark where rounding could matter (1.5 m is two independently rounded boundaries moving towards each other); they are **not** a claim that anything nearer is numerical noise. If a component's inside point is itself within that distance of the other class's boundary, the result for that component is **unresolved**, and an unresolved result stops the build for review. Nothing is discarded and then described as unchanged.
+- Either way High is drawn above Medium and the legend's definitions do not change.
 
 ### 5.5 Outputs
 - **Low is read only for checks 1 to 5 on its record. No Low record, ring, polygon or coordinate array is written to any output.**
@@ -166,8 +174,10 @@ The two classes span about 30 km by 38 km. The whole-globe backdrop is one pictu
 - **Camera.** The camera is shared. It moves only on an explicit action by the visitor:
   - switching the corridor on, or pressing "Go to the corridor area", moves it to the corridor;
   - a journey's own switch or "go to the journey area" moves it to the journey, without changing the corridor's state.
-  - When both are on, one of them is off-screen. The card of the one not in view says so: "Shown on the globe, out of the current view. Use Go to the corridor area." (and the matching line for the journey).
-- **One move per action, and it can be cancelled.** The move for "switch on" happens once, when the geometry is drawn. That pending move is **cancelled** if, before it happens, the visitor switches the corridor off, selects or moves to a journey, drags, zooms or otherwise moves the camera, or presses another go-to button. **A late geometry or picture answer never moves the camera.** Reduced motion: the move is a jump, not an animation. On a phone the globe is brought into view once, at the same moment, under the same cancellation rule.
+  - **View status makes no claim about what is visible.** After a go-to, the legend says what was done: "View moved to the corridor. The journey remains on." (and "View moved to the journey. The corridor remains on."). When the visitor then drags or zooms, that line is removed; nothing is inferred from the last go-to about what is or is not in view at the current zoom.
+- **Bringing the globe into view on a phone is page scrolling, and it happens at the press** (the journeys' rule, as passed at Stage 1): once, immediately, when the visitor presses the corridor switch on or the card's Retry, with the loading or failure status shown beside the globe. **No answer scrolls the page:** not geometry success or failure, not picture success or failure. No scroll for switching off, for page load, for background or list retries, or for a control that is unavailable. Focus stays on the control used. Reduced motion: the scroll is a jump, not a glide.
+- **Moving the camera is separate from scrolling the page.** The camera move for "switch on" is deferred until the geometry is drawn, and it happens only if that press is **still current**: the load it started has not been superseded or cancelled, and since the press there has been no switch-off, no journey selection or journey go-to, no drag, zoom or other camera gesture, and no other go-to. Scrolling the page does not cancel it, because the camera move does not move the page.
+- **"Late" means stale or superseded:** an answer whose load is no longer the current one. A current answer may complete its own pending camera move; a stale answer does nothing at all. **A regional-picture answer never owns a camera move or a scroll**, current or not.
 - **Backdrop text.** The whole-globe backdrop line belongs to the globe module. The regional picture has **its own separate line** in the corridor's legend. Neither module writes the other's line; a whole-globe backdrop answer arriving while the regional picture is shown changes only the globe's line.
 - **Off cancels everything pending.** Switching off aborts the geometry request and the picture request, invalidates their tokens, cancels the pending camera move, removes the corridor's objects and legend, and announces once. A late success or failure after that draws nothing, announces nothing, writes no status and restores no text.
 - **Declared changes to shared code.** If close viewing or independent drawing needs any change to `animals-globe.js`, the coastline drawing or the journey script (zoom limits, render order, the handle the scripts share), the packet lists each change, and **the whole combined-page suite with all its breaks is rerun**. "Journey scripts untouched" is not offered as proof that journey behaviour is unchanged; the suite is.
@@ -181,17 +191,18 @@ The two classes span about 30 km by 38 km. The whole-globe backdrop is one pictu
 | Box | 37.8, −119.8, 38.8, −118.6 (1.0° by 1.2°), fixed in the manifest |
 | Size and format | 960 by 800 pixels, JPEG. **That is the requested spacing (0.00125° a pixel), not the imagery's native resolution**, which is read from GIBS's layer documentation at build and stated on the card |
 | Limits | fetch limit 20 s; decode limit 5 s; the answer must be an image of exactly the requested size, else invalid |
-| Request cap | at most one automatic request per page load, made when the switch first goes on; kept in memory and reused for every later switch-on; a further request only on the visitor's Retry, at most three in a page load |
+| Request cap | **at most three requests in total per page load, including the first automatic one.** The automatic request is made when the switch first goes on. A successful picture is kept in memory and reused for every later switch-on. A switch-off that aborts the automatic request **has used that attempt**; later toggles do not start it again by themselves |
+| Asking again | when the picture is not loaded (failed, invalid, or aborted) and attempts remain, the picture's own line carries a button, "Try the regional picture again", which works while the corridor is on and needs no switch to be toggled. After the third request: "No further attempts on this visit. Reload the page to try again." |
 | Never | no request on pan, zoom, resize or animation frame |
 | Failure | failed or invalid: "Regional satellite picture unavailable"; lines, labels, scale and polygons still shown |
 
 - This request pattern is recorded in the source and release notes for the register work. It is the same dataset as the page's backdrop, asked for a region.
-- The picture loads independently of the geometry: either may fail without the other.
+- **Loading and error handling are independent; the picture never outlives the geometry.** A picture failure leaves the verified polygons shown. A geometry load or verification failure returns the corridor to off and removes and invalidates the regional picture with everything else the corridor owns: no regional picture is ever left on the globe without the corridor's polygons.
 
 ### 6.3 The scale bar
 - It states the ground distance, along the surface, between the two globe points under the bar's two ends, at the centre of the canvas.
 - It is shown only while (a) both ends are on the globe, and (b) the same pixel length measured at the left and right edges of the corridor box differs from the centre's by no more than 5%. Otherwise it is hidden, not shown wrong.
-- It is recalculated when a camera movement ends and on resize, not on every frame.
+- **It is hidden the moment a camera movement or a resize begins**, and shown again, freshly checked, once the view is still. A stale length is never left on screen during motion. It is not recomputed on every frame.
 - Its label reads "Scale at the centre of the view".
 
 ### 6.4 Loading, failure and access
@@ -216,16 +227,16 @@ Reported in the packet, on the suite's software renderer and on Chad's Mac in Ch
 1. The regional picture: that the request of §6.2 returns this layer, what its native resolution is, and that it lies on the globe without a seam or a visible offset against the latitude and longitude lines. If not, C-D4 falls back to B and that is reported.
 2. That the camera can come close enough for the two classes to be told apart at desktop and 390 px, and that legend, notice and globe fit without covering each other, with and without a journey shown.
 3. The drawing figures of §6.5.
-4. Checks 6 to 12 and 19 to 21 on the real source. If the source itself fails one, stop: nothing is repaired.
+4. Checks 6 to 12 and 19 to 24 on the real source. If the source itself fails one, stop: nothing is repaired.
 
 ## 8. Acceptance criteria (to become tests)
 
 **Builder**
-- K1 Each stop condition 1 to 21 of §5 stops the build, shown with a made-up archive re-pinned so that the named rule is what stops it; an un-pinned change stops at the checksum. Made-up cases include: a hole outside every outer ring, a hole inside two, overlapping outer rings, overlapping holes, a ring that touches itself, two rings touching, a zero-area ring, a ring of collinear points, a non-finite coordinate, a mixed Medium and High relation, and a relation that changes on rounding.
+- K1 Each stop condition 1 to 24 of §5 stops the build, shown with a made-up archive re-pinned so that the named rule is what stops it; an un-pinned change stops at the checksum. Made-up cases include: a hole outside every outer ring, a hole inside two, overlapping outer rings, overlapping holes, a ring that touches itself, two rings touching, a zero-area ring, a ring of collinear points, a non-finite coordinate, a relation that changes on rounding, an unresolved component, and these relation cases: **two crossing rectangles (Medium x from −200 to 200 m, y from −50 to 50; High x from −50 to 50, y from −200 to 200: no vertex of either inside the other, four proper crossings, 10,000 m² of overlap; must be mixed, never bands; GPT's counterexample)**; one High component inside Medium and another outside (mixed); a Medium component inside High (mixed); High inside a hole of Medium (bands); High wholly inside Medium (nested).
 - K2 Outputs rebuild byte-identically from the pinned zip; `--check` reports the same.
-- K3 **Independent projection evidence.** The test has its own shapefile reader and an inverse projection written from a different formulation (the authalic-latitude series, not the builder's iteration), and it is checked against **fixtures that do not come from our code**: (a) the metadata's four bounding values (the source's own software); (b) the worked numerical example for the ellipsoidal Albers projection in Snyder, *Map Projections: A Working Manual* (USGS Professional Paper 1395), with the numbers copied from the printed text at build and the page cited; (c) GPT's independently computed values for a stated set of vertices, labelled as GPT's. Only then is it compared with the builder for every vertex of both classes.
+- K3 **Independent projection evidence.** The test has its own shapefile reader and an inverse projection written from a different formulation (the authalic-latitude series, not the builder's iteration). Before it is compared with the builder it is checked against **fixtures that do not come from our code**: (a) the metadata's four bounding values, which come from the source's own software; (b) the worked numerical example for the ellipsoidal Albers projection in Snyder, *Map Projections: A Working Manual* (USGS Professional Paper 1395), with the numbers copied from the printed text at build and the page cited in the packet. Then it converts every vertex of both classes and is compared with the builder. **No point-by-point fixture from GPT exists today:** GPT's reviews supplied areas, extents and the envelope check, which are used as such (§3.2). If GPT supplies vertex values at candidate review they are added and labelled as GPT's; none is invented or attributed. The printed example and the independent full-data calculation must be real and cited at candidate review.
 - K4 **No Low geometry in the outputs.** The test decodes every geometry in the display file and requires exactly the intended rings: Medium's 6 and High's 3, each equal vertex for vertex to the test's own conversion of that source ring, and nothing else. It requires that no class record, ring, polygon or coordinate array for Low exists in the display file, manifest or list. (A single number that happens to equal a Low coordinate is not leakage and is not tested for.)
-- K5 Counts exact; net areas within 0.001 km² of §3.2; per-ring displacement at most 0.75 m; per-ring area change within 0.75 m × perimeter; per-class area within 0.05%; the manifest's per-ring tables equal the test's own computation.
+- K5 Counts exact. **Source** net areas (full precision, before rounding) within 0.001 km² of §3.2. **Rounded** areas are not compared with §3.2: each rounded ring is within 0.75 m × its perimeter of its own source ring, and each class's rounded net area within 0.05% of its source net area. Both sets are recorded. Per-ring displacement at most 0.75 m. The manifest's per-ring tables equal the test's own computation.
 - K6 The journey list, the population list and every existing data file are byte-identical to Stage 3.
 - K7 Only three files are written; no source file is in the repository.
 
@@ -238,22 +249,24 @@ Reported in the packet, on the suite's software renderer and on Chad's Mac in Ch
 - K13 Claims: none of the forbidden statements of §4.5 appears (a list of patterns, as for the census); 91 never appears as a herd size; 125 never appears as the corridor sample; "averaged across animals" never describes the corridor.
 - K14 One changed digit in the list, the manifest or the display file: "could not be verified", nothing drawn, Retry recovers with good files. Re-pinned structural faults (a third class, a class named Low, a missing hole, an open ring, a vertex outside the extent) are refused.
 - K15 Geometry races, each with the held request confirmed in flight: on then off while loading; on, off, on; a held answer arriving after off draws nothing, announces nothing and writes no status; the time limit ends a load that never answers.
-- K16 **Picture races, separately from geometry:** picture held while geometry succeeds; geometry held while picture succeeds; off and Retry during each; a held picture arriving after off is not added to the scene and writes no line; the request cap holds across ten toggles (one request); no request on pan, zoom or resize; an answer of the wrong size or type is refused.
-- K17 **Late answers never move the camera:** with a pending switch-on move, each of off, a journey selected, a drag, a zoom and another go-to cancels it; the camera is where the visitor left it after the answer arrives.
-- K18 **Both on.** With a journey shown: switching the corridor on and off leaves every journey-owned object, the replay state and the journey's switch unchanged (counted before and after), and the reverse. Each go-to moves the camera and changes neither state. The out-of-view line appears on the right card. The census is unaffected and unaffecting.
+- K16 **Picture races, separately from geometry:** picture held while geometry succeeds; geometry held while picture succeeds; off and Retry during each; a held picture arriving after off is not added to the scene and writes no line; **a geometry failure removes a picture already shown**; the cap is three requests in total: ten toggles after a success make one request; an automatic request aborted by off is not restarted by later toggles and is offered through "Try the regional picture again"; a fourth request is never made; no request on pan, zoom or resize; an answer of the wrong size or type is refused.
+- K17 **Camera:** with geometry held and a pending switch-on move, each of off, a journey selected, a journey go-to, a drag, a zoom and another go-to cancels it, and the camera is where the visitor left it after the answer arrives; with none of those, the current answer completes the move once; a stale answer (superseded load) never moves it; a picture answer never moves it. Scrolling the page alone does not cancel the camera move.
+- K18 **Both on.** With a journey shown: switching the corridor on and off leaves every journey-owned object, the replay state and the journey's switch unchanged (counted before and after), and the reverse. Each go-to moves the camera and changes neither state. The view-status line says what the go-to did, is removed after a drag and after a zoom, and no text anywhere says an item is in or out of view. The census is unaffected and unaffecting.
 - K19 **Off removes only corridor-owned things:** its scene objects, legend, labels, scale bar and regional picture, counted before and after, with a journey shown and without; the globe module's backdrop line is unchanged by the corridor at any point.
 - K20 A whole-globe backdrop answer (success and failure) arriving while the regional picture is shown changes only the globe's line; the plain-globe wording at the corridor view is as §4.3.
 - K21 Regional picture failure: lines, labels, scale bar and polygons still shown; the line says unavailable and gives no date. A successful picture is never called unavailable.
-- K22 Phone: switching on brings the whole globe into view once; reduced motion respected; no camera movement at load.
+- K22 **Phone, geometry held:** press the switch on; the globe is in view **before** the answer is released; scroll away to another card; release the answer; **the page is where the visitor left it** (scroll position unchanged), the polygons are drawn, and focus is unchanged. The same with the card's Retry after a failure, with a geometry failure released instead of a success, and with a held picture released after scrolling away. Reduced motion: the reveal is a jump. No scroll at page load, on switch-off, on a list retry, or from an unavailable control. No camera movement at load.
 - K23 Layout at 360, 390, 720, 900, 1100, 1280, 1470 px, **with the corridor alone and with a journey also shown (replay bar present)**: nothing overflows; legend and notice do not cover the globe on narrow screens; switch and buttons at least 44 px.
 - K24 Keyboard and announcements as §6.4.
 - K25 No globe (library failure) and lost context, **each with the corridor alone and with a journey also selected**: both cards, the legend text, the omission notice and the text alternative remain; nothing is drawn into a lost context.
-- K26 Scale bar: where shown, its stated length is within 3% of the surface distance between the two globe points under its ends; it is hidden in each invalid case of §6.3 (an end off the globe; the 5% rule at a far view); the labelled lines are at the stated quarter degrees within one pixel.
+- K26 Scale bar: where shown, its stated length is within 3% of the surface distance between the two globe points under its ends; it is hidden in each invalid case of §6.3 (an end off the globe; the 5% rule at a far view); **it is hidden during a camera movement and during a resize, checked while the movement is in progress, not only after it**; the labelled lines are at the stated quarter degrees within one pixel.
 - K27 The drawing figures of §6.5 are produced by the suite and printed; the Mac figures are taken by hand and stated as such.
 - K28 The combined page suite with all its breaks and the census suite still pass; Earth now files equal the baseline as before.
 - K29 Private-preview wording as on the other cards.
 
-## 9. Decisions for Chad (after GPT closes the hold)
+## 9. Decisions for Chad (after GPT clears the proposal)
+
+**The build go must say, in Chad's own words, that he knows the built corridor files will sit on a public branch.** Suggested: "Go: corridor Stage 4 on animals-tab-rc, C-D0 yes, A, A, A, A, A. I know the derived corridor files committed to the public branch will be publicly downloadable, though not on the live site."
 
 GPT's recommendations are in brackets; they are not Chad's decisions and not a build go.
 - **C-D0** The rule covers a published, dated corridor product (§2). Recommended: yes. [GPT: yes]
@@ -269,7 +282,8 @@ GPT asked that this be established, not assumed.
 - **The repository is public.** A file on any branch can be downloaded by anyone who knows or finds its address. Checked 21 Nov: a data file on `animals-tab-rc` answers HTTP 200 from GitHub's raw-file address without signing in.
 - **GitHub Pages serves `main` only**, so nothing on `animals-tab-rc` is on the live site, linked from it, or indexed as part of it.
 - So "private preview" here means **not on the live site and not announced**. It is **not access control**. A built corridor display file on the branch would be publicly downloadable, as the four journey files and the census file already are.
-- For this product that is a published, CC0, aggregate layer the USGS distributes itself; GPT identified no further enquiry as necessary for a private preview. It is still Chad's to know before a build go, and the public-release sensitivity decision stays his and separate.
+- An unlinked branch is not guaranteed to stay unindexed by search engines or code search.
+- **So GPT's earlier finding ("no additional enquiry … for a genuinely local/private preview") does not by itself clear putting derived corridor files on this public branch.** GPT's rev 2 review: before a build writes and pushes display files there, **Chad's own go must explicitly cover that known exposure** of this published aggregate product. It can be part of the ordinary build go; no email and no separate approval step. Suggested words for that go are in §9. Release on the live page stays separate, with his sensitivity decision.
 
 ## 11. Not done, not claimed
 
@@ -289,10 +303,10 @@ GPT asked that this be established, not assumed.
 | Hold 2: validity beyond crossings | §5.2 checks 6 to 12 on the source and again on the output (17): finite, distinct non-collinear vertices, non-zero area, orientation kept, simple rings, hole assignment, disjoint holes, disjoint outers, an explicit touching policy; stop and report, no repair |
 | Hold 2: numeric rounding limits | 0.75 m displacement per vertex; per-ring area change within 0.75 m × perimeter; per-class 0.05%; expected areas within 0.001 km² |
 | Hold 2: independent projection evidence | K3: a different formulation, checked against the metadata's values, a printed reference example and GPT's values before it is compared with the builder; round-trip agreement no longer offered as independent |
-| Hold 2: cross-class relation | §5.4: measured in source and output, noise defined, mixed or changed relation stops the build |
+| Hold 2: cross-class relation | §5.4: measured in source and output; mixed or changed relation stops the build. (Rev 2's vertex-only definition and its "noise" wording were wrong; replaced in rev 2.1, §13) |
 | Hold 2: K4 | Rewritten: decode all geometries, exactly the intended rings, no Low record or array; shared numbers are not leakage |
 | Hold 2: K9 holes | Per class: a class does not fill its own holes; High may occupy a Medium hole |
-| Hold 3: shared globe | §6.1: ownership of objects, camera and backdrop text; one cancellable move per action; off cancels and removes only corridor resources; late answers draw, announce, write and move nothing; declared shared-code changes rerun the whole suite. K10 and K19 scoped to corridor-owned objects; K15 to K20 |
+| Hold 3: shared globe | §6.1: ownership of objects, camera and backdrop text; one cancellable move per action (the phone reveal corrected in rev 2.1, §13); off cancels and removes only corridor resources; late answers draw, announce, write and move nothing; declared shared-code changes rerun the whole suite. K10 and K19 scoped to corridor-owned objects; K15 to K20 |
 | Datum | GPT's sentence used word for word (§4.4, §5.3); "order of a metre" removed; no alignment promise (§4.5) |
 | Regional GIBS | §6.2: exact layer, endpoint, version, CRS and axis order, box, size, date rule, limits, cap, caching; requested against native resolution; cloud never called unavailable; context only |
 | Audit refinements | First accepted. Second reworded: the visual inference is withdrawn and nothing is concluded about origin; the source's grid-to-polygon step is quoted |
@@ -301,3 +315,20 @@ GPT asked that this be established, not assumed.
 | K20 and K22 with both active | K23 and K25 |
 | Coastline fallback at close zoom | §4.3 last point; K20 |
 | Sensitivity and "private" | §10; stopovers, winter range and routes excluded from this proposal (§4.5, C-D2) |
+
+## 13. GPT's review of rev 2, and what rev 2.1 changed
+
+GPT closed hold 1 and accepted the rest of rev 2's answers, noting that the displacement and area limits are declared acceptance limits, not guarantees the source will pass: everything still has to be measured, and a failed limit is reported, never repaired or loosened.
+
+| GPT's point | Rev 2.1 |
+|---|---|
+| Remaining hold 2: "bands" ignored the crossing count; a vertex-only test misses real overlap (the crossing rectangles) | §5.4 rewritten: exact proper-crossing tests and component containment with holes respected decide the relation together; bands means disjoint filled interiors; any proper crossing is mixed; partial containment is mixed. The counterexample and four more relation cases are in K1 |
+| The 0.01 m and 1.5 m distances are not proof of noise | §5.4 (24): near-boundary cases are reported separately; an unresolved component or any source-to-output difference stops for review; nothing is discarded |
+| Remaining hold 3: the phone reveal was timed by the response | §6.1: the reveal is at the press of the switch or Retry, as the journeys'; no answer scrolls the page; no scroll on off, load, list retries or unavailable controls. Camera movement is separate; "late" is defined as stale or superseded; a picture answer owns no camera move or scroll. K17 and K22 (held geometry, scroll away, release; Retry; failure; reduced motion) |
+| Scale during motion | §6.3 and K26: hidden when movement or resize begins, tested during movement |
+| K5 area scope | §5.1 (5) and K5: 0.001 km² is for source areas against §3.2; rounded areas use their own bounds; both recorded |
+| Image cap | §6.2: three in total including the first; an aborted automatic request has used its attempt; "Try the regional picture again" works without toggling anything; K16 |
+| Geometry against image failure | §6.2: independent loading and errors; a geometry failure removes the picture; K16 |
+| View status | §6.1: says what the go-to did, removed on a gesture, no claim about visibility; K18 |
+| K3 fixture provenance | K3: no GPT point fixtures exist today and none is attributed; the printed example and the full-data calculation must be real and cited at candidate review |
+| Private-preview disclosure | §10 and §9: Chad's build go must acknowledge the public branch in his own words; an unlinked branch is not guaranteed unindexed |
