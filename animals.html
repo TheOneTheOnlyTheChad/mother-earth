@@ -6,7 +6,7 @@
 <title>Mother Earth — Animals</title>
 <meta name="description" content="Recorded animal journeys, replayed one at a time on their own globe, with their sources. Private preview.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612210100">
+<link rel="stylesheet" href="style.css?v=202612210300">
 </head>
 <body class="doc animals">
 <header class="top">
@@ -37,8 +37,9 @@
 
   <section class="an-stage" id="an-stage" aria-label="Animal journey globe and switches">
     <div class="an-globe-col">
-      <div class="an-globe-box" id="an-globe-box"><div id="an-globe"></div></div>
+      <div class="an-globe-box" id="an-globe-box"><div id="an-globe"></div><div class="cor-scale" id="cor-scale" hidden><div class="cor-scale-bar" id="cor-scale-bar"></div><div class="cor-scale-text" id="cor-scale-text"></div></div></div>
       <div class="an-backdrop" id="an-backdrop">Backdrop: loading satellite imagery…</div>
+      <div class="cor-legend" id="cor-legend" hidden></div>
       <div class="an-status" id="an-status" hidden></div>
       <p class="an-toswitches"><a href="#an-panel">Journey switches ↓</a></p>
       <div class="replay" id="replay" role="group" aria-label="Animal journey replay" hidden>
@@ -96,6 +97,22 @@
         <a class="an-more small" href="#waved-albatross-galapagos-3275-30662">Study, credit, licence and what was left out ↓</a>
       </div>
       <div class="vh" id="an-say" aria-live="polite"></div>
+    </div>
+    <div class="an-panel cor-panel" id="cor-panel" role="group" aria-labelledby="cor-h" aria-describedby="cor-group-note">
+      <h2 id="cor-h">Published corridors</h2>
+      <p class="an-note" id="cor-group-note">A published map of modelled migration use, drawn on the same globe. It has its own switch and does not switch a journey off. Nothing is on when the page opens.</p>
+      <h3 class="an-grp">Land</h3>
+      <div class="an-sw" id="cor-card">
+        <div class="an-sw-h"><span class="ev comp">Published corridor or range</span><span class="state" id="cor-state">checking</span></div>
+        <button class="ovl-tgl tgl an-tgl" type="button" role="switch" aria-checked="false" aria-disabled="true" id="cor-tgl" aria-describedby="cor-ev"><span class="box" aria-hidden="true"></span><span class="t" id="cor-label">Mule deer, East Walker herd, California: migration corridor</span></button>
+        <div class="cav" id="cor-ev">Published, modelled areas from a sample of collared animals. A dated product, not current. Private preview.</div>
+        <div class="obs" id="cor-obs">Checking the corridor record…</div>
+        <button type="button" class="journey-retry" id="cor-retry" hidden>Retry</button>
+        <button type="button" class="journey-retry" id="cor-facts-retry" hidden>Retry the corridor record</button>
+        <button type="button" class="journey-retry" id="cor-goto" hidden>Go to the corridor area</button>
+        <div class="cor-about" id="cor-about"></div>
+      </div>
+      <div class="vh" id="cor-say" aria-live="polite"></div>
     </div>
   </section>
 
@@ -261,5 +278,6 @@
 <script src="animals-journey.js?v=202612200300"></script>
 <script src="animals.js?v=202612200300"></script>
 <script src="animals-census.js?v=202612210200"></script>
+<script src="animals-corridor.js?v=202612210300"></script>
 </body>
 </html>

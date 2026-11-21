@@ -72,7 +72,7 @@ def validate(rings, cell, n0, what):
             if not (isinstance(p[0], int) or (math.isfinite(p[0]) and math.isfinite(p[1]))): stop(n0, f'{what} ring {ri}: a coordinate is not finite')
         if len(r) < 4 or r[0] != r[-1]: stop(n0 + 1, f'{what} ring {ri}: not closed, or fewer than three sides')
         if any(r[i] == r[i + 1] for i in range(len(r) - 1)): stop(n0 + 1, f'{what} ring {ri}: two successive vertices are equal')
-        if G.area2(r) == 0: stop(n0 + 1, f'{what} ring {ri}: zero area (its vertices are on one line)')
+        if G.area2(r) == 0: stop(n0 + 1, f'{what} ring {ri}: zero signed area (its vertices are on one line, or it folds back on itself)')
     segs = []; owner = []
     for ri, r in enumerate(rings):
         for si, s in enumerate(G.segments(r)): segs.append(s); owner.append((ri, si, len(r) - 1))

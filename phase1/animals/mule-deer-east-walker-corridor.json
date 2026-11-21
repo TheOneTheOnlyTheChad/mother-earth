@@ -43,8 +43,8 @@
   "data_years": "2017, analysed through August 2024 (the report, as read by GPT); the metadata gives 2017 to 2024",
   "location": "Eastern California, near Bridgeport.", "checked": "21 Nov 2026"
  },
- "view": {"lat": 38.325, "lng": -119.18, "altitude": 0.035},
- "grid": {"step_deg": 0.25, "south": 37.75, "north": 38.75, "west": -119.75, "east": -118.5},
+ "view": {"lat": 38.35, "lng": -119.15, "altitude": 0.02},
+ "grid": {"step_deg": 0.25, "south": 38.0, "north": 38.75, "west": -119.5, "east": -118.75},
  "wording": {
   "what": "Published, modelled migration-use areas from a sample of collared animals. Not the path of any one animal, not the herd's whole range, and not where animals are now.",
   "method_plain": "The source models a migration-use footprint for each sampled animal, combines the footprints, and classifies areas by the share of sampled animals represented there.",

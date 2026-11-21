@@ -252,16 +252,16 @@
   "preview": "Private preview: not on the live site."
  },
  "view": {
-  "lat": 38.325,
-  "lng": -119.18,
-  "altitude": 0.035
+  "lat": 38.35,
+  "lng": -119.15,
+  "altitude": 0.02
  },
  "grid": {
   "step_deg": 0.25,
-  "south": 37.75,
+  "south": 38.0,
   "north": 38.75,
-  "west": -119.75,
-  "east": -118.5
+  "west": -119.5,
+  "east": -118.75
  },
  "record": {
   "release_title": "Ungulate Migrations of the Western United States, Volume 6",
