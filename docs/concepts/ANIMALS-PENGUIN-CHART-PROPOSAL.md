@@ -1,6 +1,6 @@
 # Animals: African penguin colony census chart. Build proposal
 
-21 Nov 2026 · **rev 1** · docs only · for GPT's review, then Chad's decisions. **Nothing is built. No approval is requested for a build, a merge or a deployment.**
+21 Nov 2026 · **rev 1.1** · docs only. **GPT found rev 1 suitable for a private-preview build with refinements** (`reviews/2026-11-21-animals-penguin-chart-proposal-gpt-review.md`); rev 1.1 carries them (§4, §6, §7, §11) and GPT asked for no further proposal review. **Nothing is built. Chad's decisions (§8) and his own build go are still needed.** No public-release clearance.
 
 Authority: Chad's order of 20 Nov ("bird, dated penguin chart from version A through 2019, then corridor") and his "Go" of 21 Nov for this proposal. Source audit: `docs/research/animals-source-audit/PENGUIN-COUNTS.md` rev 2.1 (passed by GPT within its scope). Design base: `ANIMALS-EXPANSION-PROPOSAL.md` rev 2, §2 and §3.1.
 
@@ -40,19 +40,20 @@ Chad's standing rule: new features are live or regularly updated feeds only, **e
 
 ### 4.2 The charts (recommended: every colony, each in its own small chart)
 - **22 small charts, one per colony, in the file's own order**, under two sub-headings: South Africa (18) and Namibia (4) [C for the split].
-- Each small chart: years 1979 to 2019 across, occupied nest sites up, **from zero**, linear. Its own vertical scale, with the scale's top value printed on it, because colonies range from tens to tens of thousands. A sentence above the grid says the scales differ and that heights must not be compared between charts.
-- **A dot for every count. A line joins two counts only when they are in consecutive years.** A year with no count is a visible gap; a count with no neighbour stands as a single dot. This is the chart's version of the journeys' "no line across a gap" rule.
+- Each small chart: the same 1979 to 2019 span across, in every chart; occupied nest sites up, **from zero**, linear. Its own vertical scale, because colonies range from tens to tens of thousands. **Every chart prints its own scale top and its unit** (GPT); the sentence above the grid, that scales differ and heights must not be compared between charts, is an addition, not the only notice.
+- **A dot for every count. A line joins two counts only when they are in consecutive years.** A year with no count is a visible gap; a count with no neighbour stands as a single dot. No dashed bridge, no interpolation (accepted by GPT). This is the chart's version of the journeys' "no line across a gap" rule.
 - Under each chart, in words: the colony's name as the file gives it, how many of the 41 years have a count, first and last counted year with their values, and the highest value with its year.
-- Selecting a small chart opens the same chart larger, with a **table of every year**: the count, "no count", or "not a count: model marker, left out". The table is the text alternative; it is in the page, not behind a hover.
-- **The four markers are never drawn.** The colony's notes say, from the record: "The file holds a 0.1 marker at [year]. The authors say it is not a count; it is left out." Where the record gives the reason (colony not yet settled, or colony gone), that reason is quoted as the record's.
+- Selecting a small chart opens the same chart larger, with a **table of every year**: the count, "No count in this file", or "Not a count: model marker, left out". The table is the text alternative; it is in the page, not behind a hover.
+- **The four markers are never drawn** and are identified separately in the table; they are not census observations. The colony's notes carry a short explanation attributed to the record: "The file holds a 0.1 marker at [year]. The authors say it is not a count; it is left out."
+- **"No count in this file"** is the wording for a missing entry (GPT). One general sentence, attributed to the record, says that missing entries include years a colony was not counted for practical reasons and years before a colony was established or after it was gone. **No reason is inferred for any single missing entry, and nothing is said about whether a colony exists today.**
 - No zero is plotted that the file does not contain (it contains none).
 
 ### 4.3 What the card says
-- Unit (GPT's wording): "Annual colony census: occupied nest sites (used as a breeding-pair proxy)." Then: the two countries define an occupied site differently; these are not counts of birds; values are not doubled into individuals.
+- Unit (GPT's wording): "Annual colony census: occupied nest sites (used as a breeding-pair proxy)." Then, stated outright (GPT): each yearly value is the highest count available for that colony in that year; it is not a count of individual birds; the two countries define an occupied site differently; values are not doubled into individuals.
 - Version note (GPT's wording, from the audit): "Historical census data from the 2021 deposit, ending in 2019. The authors' later analysis file extends to 2023 and differs in some overlapping entries. This chart uses the earlier deposit throughout."
 - Three separate dates: period covered (1979 to 2019), the deposit's version date (3 Mar 2021), the date we last checked the record.
-- "A rise at one colony does not show recovery of the species. No total is shown: colonies were counted in different years, so adding up what is present would invent a trend."
-- **Colonies the later file differs on** carry a line in their details: "The authors' later file has different entries for this colony in N of the shared years." The later file's values are **not** shown. N per colony, from the audit's comparison [A]: Ichaboe 5, Halifax 4, Possession 4, Vondeling Island 2, Mercury 2, Bird Island 2, Stony Point 1, Seal Island Algoa Bay 1, Stag Island 1, Lamberts Bay 1 (the marker's position). 23 in all; the 24th difference is only how an empty cell is written and is not counted. The other 12 colonies carry no such line.
+- "A rise at one colony does not show recovery of the species." And (GPT's wording): "No total is shown because the colonies counted vary between years; adding the available entries would not compare the same coverage or establish a complete population total."
+- **Colonies the later file differs on** carry a line in their details: "The authors' later file has different entries for this colony in N of the shared years." The later file's values are **not** shown, and the differences are never called corrections. N per colony, from the audit's comparison [A]: Ichaboe 5, Halifax 4, Possession 4, Vondeling Island 2, Mercury 2, Bird Island 2, Stony Point 1, Seal Island Algoa Bay 1, Stag Island 1, Lamberts Bay 1 (the marker's position). 23 in all; the 24th difference is only how an empty cell is written and is not counted. The other 12 colonies carry no such line.
 - Source, licence, both citations as given, and a link to the record.
 
 ### 4.4 What it never shows
@@ -74,17 +75,17 @@ Chad's standing rule: new features are live or regularly updated feeds only, **e
 - **Three cell states are kept apart** in the output: a count (integer), no count (`null`), marker (`"m"`). An empty cell and `NA` both become "no count", and the manifest says one cell was empty rather than `NA` (Seal Island Algoa Bay, 2003).
 - **Display file**: years once, then per colony its name and 41 states. Trial size measured from the pinned file: **4,852 bytes, 1,813 gzipped**. Plus a manifest (source pins, licence, citations, unit text, marker rule, per-colony summary figures, the later-file difference counts with the audit named as their source, check date).
 - The per-colony summaries (years counted, first, last, highest) are **computed by the builder**, never typed. The page prints them from the manifest.
-- The later-file difference counts are the one hand-entered table: they come from the audit's comparison against the repository file at its pinned commit, which is not stored. The config names that audit and the file's sha256 (`647ea16a…`). GPT is asked whether that is acceptable or whether the line should be dropped.
+- The later-file difference counts are the one hand-entered table: they come from the audit's comparison against the repository file at its pinned commit, which is not stored. **GPT: they may stay as audited metadata**, with the audit and the pinned comparison identified (the config and manifest name the audit, the repository commit and the file's sha256 `647ea16a…`). **The colony-to-count mapping is to be verified independently at build** (GPT), by a second derivation from the audit's list of differing cells, and checked again by GPT on the candidate.
 - **Its own list file and its own script** (`assets/animals/populations-R1.catalog.json`, `animals-census.js`), so the journeys' list, its pinned checksum and the journeys' scripts do not change. Same pattern as the journeys: list pinned in the script, manifest pinned in the list, display file pinned in the manifest; nothing is drawn until all three verify.
 - `--check` rebuilds in memory and compares (0 same, 3 missing or different, 2 stopped), as the bird's builder does.
 - No hub, no schedule, no key, no storage, no third-party request. Charts are drawn as inline SVG by the page's own script; no chart library.
 
 ## 6. Page behaviour [P]
 
-- The section loads its three small files when the page opens (about 2 KB gzipped of data). The journeys' network contract is unchanged: no journey coordinate file before its switch is on.
+- The section loads its three small files when the page opens (about 2 KB gzipped of data). **Loading is bounded** (a time limit, as for the journeys), and **Retry has its own request, limit and token**: a newer Retry or leaving the page cancels an older one, and a late answer changes and says nothing (GPT; the lesson of Stage 1's hold). The journeys' network contract is unchanged: no journey coordinate file before its switch is on.
 - Verification failure: no chart and no number is shown; the section says "The census file could not be verified. Nothing is shown." with a Retry. The journeys are unaffected, and a journey failure does not affect this section.
 - No WebGL needed. The section works when the globe cannot start.
-- Keyboard: each small chart is a button with a name that states the colony and that it opens the detail; Escape or a Close button returns focus to it. One polite announcement on open and close.
+- Keyboard and the detail view (GPT asked for this to be defined): each small chart is a button whose name states the colony and that it opens the detail. The detail opens **in the page, directly after the grid, as a labelled region** (not a modal: nothing is trapped or hidden behind it); focus moves to its heading; Close and Escape return focus to the chart's button; opening another colony replaces it. The table is a real table with a caption, a header row and row headers for the years; it is reached by Tab and read with ordinary table keys; if it is wider or taller than its box, the box is focusable and scrolls with the arrow keys. One polite announcement on open and on close.
 - No animation. Colour is not the only carrier: dots, gaps and words carry the states.
 - Widths 360 to 1,470 px: the grid goes from one column to several; no sideways overflow; the detail table scrolls inside its own box if needed.
 
@@ -113,13 +114,24 @@ Page
 
 Deliberate breaks for each of P8 to P13, as in the earlier suites.
 
+**Added on GPT's review (rev 1.1):**
+- **P18** The page validates the display file's **structure** after the checksums and before drawing: the year list, 22 colonies with 41 entries each, every entry one of the three states, the markers only where the manifest says, and each colony's summary recomputed from the entries and equal to the manifest's. A file that passes its checksum but fails any of these is refused (fixtures re-pinned so the structural check is the one that refuses).
+- **P19** Builder tests on made-up copies **re-pin** the zip and CSV checksums in a copy of the config, so each parser rule is reached and is the rule that stops the build; a separate test shows an un-pinned change stops at the checksum.
+- **P20** Drawing, on made-up series: an isolated dot (no neighbour either side); a leading gap; a trailing gap; a single counted year; two counted years one year apart (joined) and two years apart (not joined).
+- **P21** For every chart the **drawn** scale equals the **printed** scale: the highest dot's position maps back to its value under the printed top, within a pixel.
+- **P22** All 902 states are checked in the page: each of the 22 detail tables is read and compared with the display file, cell by cell.
+- **P23** Loading is bounded; Retry's lifecycle: old Retry failing late after a success, old Retry succeeding late after a newer failure, Retry then Retry, Retry then leaving the page, a request that never answers.
+- **P24** The detail view: focus on open, focus return on Close and on Escape, replacing one colony with another, table caption and headers, keyboard reach of a scrolling table box.
+- **P25** Claims, not words: the checks look for an unsupported **assertion** (a figure presented as a total; a statement that the series is current or updated; a category), and they accept the page's own negative statements such as "not a live feed" and "no total is shown". A bare word ban is not used.
+- **P26** The combined page: the four journeys' files are byte-identical to `ec19905`; the full existing suite passes on the combined page, the phone reveal included; the census section does not move the globe, the switches or the reveal target.
+
 ## 8. Decisions for Chad
 
 | | Question | Recommended |
 |---|---|---|
 | **P-D0** | Record that dated population evidence is allowed on the Animals tab (§2) | Yes, in his words |
 | **P-D1** | Layout: **A** all 22 colonies as small charts with a larger detail view · **B** one chart at a time chosen with labelled buttons (like the animal switches) | **A**. Every colony is visible at once, nothing is hidden behind a choice, and no colony is picked to tell a story. B is simpler on a phone |
-| **P-D2** | Colonies: **A** all 22 · **B** a named subset with few gaps (Robben Island, Simonstown, Mercury, Possession, Ichaboe) | **A**. A subset of well-counted colonies leaves out the three largest (Dassen, St Croix, Bird Island) |
+| **P-D2** | Colonies: **A** all 22 · **B** a named subset with few gaps (Robben Island, Simonstown, Mercury, Possession, Ichaboe) | **A**. A subset of well-counted colonies leaves out several large colonies (GPT's correction: "largest" was undefined; by highest recorded count the top three are Dassen, Dyer and St Croix) |
 | **P-D3** | Joins: **A** only consecutive counted years · **B** also a dashed line across gaps | **A**. A dashed line still suggests a path the file does not hold |
 | **P-D4** | Where to build: **A** as a third stage on `animals-tab-rc`, reviewed by GPT as its own candidate · **B** a separate branch from it | **A**. One combined preview; the stage's commit keeps it separable |
 
@@ -133,6 +145,24 @@ No money, no account, no message to anyone. Not for decision here: the assessmen
 4. Is the marker wording right, and may the record's reason for each marker be quoted?
 5. Is anything in §4.4 missing?
 6. Does the separate list file and script meet the "journeys untouched" aim, or should populations join the journey list?
+
+## 11. GPT's review of rev 1, and what rev 1.1 changed
+
+Filed unchanged: `reviews/2026-11-21-animals-penguin-chart-proposal-gpt-review.md`. Verdict: suitable for a private-preview build with refinements; recommends P-D0 yes and A for P-D1 to P-D4; Chad's own build go still required; no new source audit or author reply needed for version A; no public-release clearance.
+
+| GPT's point | Where it is now |
+|---|---|
+| 1 Separate zero-based scales accepted; each chart prints scale and unit; same x span | §4.2 |
+| 2 Isolated dots; joins only between consecutive counted years | §4.2 |
+| 3 "No count in this file"; general explanation only; no per-entry reason, no present-day claim | §4.2 |
+| 4 Markers omitted, identified in the table, short attributed explanation | §4.2 |
+| 5 "several large colonies" | §8, P-D2 |
+| 6 Highest count of the year, not birds; the replacement "no total" sentence | §4.3 |
+| 7 Difference counts stay as audited metadata; mapping verified independently; never "corrections" | §4.3, §5 |
+| 8 Separate census list and script kept | §5 |
+| 9 Stronger checks | §6, P18 to P26 |
+
+§9's questions are answered by that review and are kept only as the record of what was asked.
 
 ## 10. Not done, not claimed
 
