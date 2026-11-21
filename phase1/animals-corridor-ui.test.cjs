@@ -40,14 +40,17 @@ const BREAKS = {
   'facts-retry-not-held': [JS, "if (id === 'cor-retry') on(); else loadFacts(); });", "if (id === 'cor-retry') on(); else { st.held = ''; loadFacts(); } });"],
   'writes-backdrop-line': [JS, "st.drawn = true; }", "st.drawn = true; document.getElementById('an-backdrop').textContent = 'Corridor shown.'; }"],
   // drawing cost (section 10)
+  'one-stage': [JS, "g.polygonsData(feats.slice(0, 1))", "g.polygonsData(feats)"],
+  'high-first': [JS, "g.polygonsData(feats.slice(0, 1))", "g.polygonsData(feats.slice(1))"],
   'sides-back': [JS, ".polygonSideColor(() => null)", ".polygonSideColor(() => 'rgba(0,0,0,0)')"],
   'pointer-on': ['animals-globe.js', "Globe()(el).enablePointerInteraction(false)", "Globe()(el)"],
-  'no-quiet': [JS, "setTimeout(() => quiet(g), C.QUIET_MS);", ""],
+  'stage-ignores-off': [JS, "if (b === st.build && st.drawn) { g.polygonsData(feats); st.both = true;", "{ g.polygonsData(feats); st.both = true;"],
+  'no-quiet': [JS, "if (b === st.build && st.drawn) quiet(g);", ""],
 };
 const EXPECT = { 'no-list-check': '4a', 'no-manifest-check': '4a', 'no-display-check': '4a', 'no-structure-check': '4b', 'no-extent-check': '4b', 'high-under-medium': '2c', 'late-answer-draws': '3a', 'late-answer-draws-token-only': 'NONE', 'scroll-on-answer': '3d', 'no-reveal-at-press': '3d',
   'gesture-does-not-cancel-move': '3b', 'journey-does-not-cancel-move': '3c', 'off-keeps-layers': '6a', 'scale-stays-during-motion': '5b', 'scale-no-edge-rule': '5c', 'omission-not-in-legend': '2e', 'writes-backdrop-line': '6b',
   'nesting-not-in-legend': '2e', 'retry-focus-to-switch': '3j', 'retry-hides-while-loading': '3j', 'retry-lingers-after-blur': '3j', 'retry-active-while-loading': '3j', 'facts-retry-not-held': '3k',
-  'sides-back': '10b', 'pointer-on': '10c', 'no-quiet': '10f' };
+  'one-stage': '10a', 'high-first': '10a', 'sides-back': '10b', 'pointer-on': '10c', 'stage-ignores-off': '10d', 'no-quiet': '10f' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
 
 // ---------- the committed files, and this suite's own reading of them
@@ -246,17 +249,17 @@ const arrived = async (name, n = 1) => { for (let i = 0; i < 400; i++) { if (S.l
   // ===== 10. Drawing cost (review branch animals-perf-rc): what is handed to the library, and when. No timing limits here: times are measured on the Mac.
   if (want(10)) { reset(); const { ctx, page, errs } = await open(); await page.click('#cor-tgl'); await shown(page); await page.waitForTimeout(900); await page.click('#cor-tgl'); await page.waitForTimeout(500);
     const objs = `(() => { const g = ME.animalsGlobe.raw(), rows = []; g.scene().traverse(o => { if (o.__globeObjType === 'polygon') { const [m, l] = o.children; rows.push({ mesh: m.geometry && m.geometry.attributes && m.geometry.attributes.position ? m.geometry.attributes.position.count : 0, line: l.geometry && l.geometry.attributes && l.geometry.attributes.position ? l.geometry.attributes.position.count : 0, sides: m.geometry && m.geometry.parameters ? m.geometry.parameters.includeSides : null, top: m.geometry && m.geometry.parameters ? m.geometry.parameters.closedTop : null, quiet: Object.prototype.hasOwnProperty.call(m, 'raycast') && Object.prototype.hasOwnProperty.call(l, 'raycast') }); } }); return rows; })()`;
-    const a = await page.evaluate(async objs => { const g = ME.animalsGlobe.raw(); document.getElementById('cor-tgl').click(); const first = g.polygonsData().map(d => d.key), s0 = ME.corridor.state(); await new Promise(r => setTimeout(r, 900)); return { first, status0: s0.status, then: g.polygonsData().map(d => d.key), pointer: g.enablePointerInteraction(), rows: eval(objs), scale: !!ME.corridor.state().scale }; }, objs);
+    const a = await page.evaluate(async objs => { const g = ME.animalsGlobe.raw(); document.getElementById('cor-tgl').click(); const first = g.polygonsData().map(d => d.key), s0 = ME.corridor.state(); await new Promise(r => setTimeout(r, 900)); return { first, both0: s0.both, status0: s0.status, then: g.polygonsData().map(d => d.key), both: ME.corridor.state().both, pointer: g.enablePointerInteraction(), rows: eval(objs), scale: !!ME.corridor.state().scale }; }, objs);
     const patches = MAN.facts.medium.patches + MAN.facts.high.patches;
-    ok('10a with the display data already in memory, a press hands the library both classes together, Medium then High, and they stay', a.first.join() === 'medium,high' && a.status0 === 'shown' && a.then.join() === 'medium,high', [a.first, a.then]);
+    ok('10a with the display data already in memory, a press hands the library Medium alone first (the class whose published area contains High) and High with it straight after; the card reports "both" only then', a.first.join() === 'medium' && a.both0 === false && a.status0 === 'shown' && a.then.join() === 'medium,high' && a.both === true, [a.first, a.both0, a.then, a.both]);
     ok('10b no side walls and no added points: every patch is built with a top and no sides, and its filled mesh has exactly as many vertices as its outline', a.rows.length === patches && a.rows.every(r => r.sides === false && r.top === true && r.mesh > 0 && r.mesh === r.line), a.rows);
     ok('10c the Animals globe does not run the library\'s pointer hit test (nothing on this page is hovered or clicked on the globe)', a.pointer === false, a.pointer);
-    ok('10f once the shapes are built, this script\'s own shapes are left out of the library\'s screen-point test, and the scale bar is still shown', a.scale && a.rows.length === patches && a.rows.every(r => r.quiet), [a.scale, a.rows.map(r => r.quiet)]);
+    ok('10f once both classes are built, this script\'s own shapes are left out of the library\'s screen-point test, and the scale bar is still shown', a.scale && a.rows.length === patches && a.rows.every(r => r.quiet), [a.scale, a.rows.map(r => r.quiet)]);
     await page.click('#cor-tgl'); await page.waitForTimeout(500);
     const d = await page.evaluate(async objs => { const g = ME.animalsGlobe.raw(), b = document.getElementById('cor-tgl'); b.click(); b.click(); await new Promise(r => setTimeout(r, 700)); return { n: g.polygonsData().length, st: ME.corridor.state(), rows: eval(objs).length }; }, objs);
-    ok('10d switched on and off at once: nothing of the corridor is left on the globe', d.n === 0 && d.st.status === 'off' && d.st.drawn === false && d.rows === 0, [d.n, d.st.status, d.rows]);
+    ok('10d switched off between the two hand-overs: nothing is given to the library afterwards and nothing of the corridor is left on the globe', d.n === 0 && d.st.status === 'off' && d.st.both === false && d.st.drawn === false && d.rows === 0, [d.n, d.st.status, d.st.both, d.rows]);
     const e = await page.evaluate(async objs => { const g = ME.animalsGlobe.raw(), b = document.getElementById('cor-tgl'); b.click(); b.click(); b.click(); await new Promise(r => setTimeout(r, 900)); return { keys: g.polygonsData().map(x => x.key), st: ME.corridor.state(), rows: eval(objs) }; }, objs);
-    ok('10e on, off, on in quick succession: exactly Medium and High are drawn once each, complete', e.keys.join() === 'medium,high' && e.st.status === 'shown' && e.rows.length === patches && e.rows.every(r => r.mesh === r.line && r.mesh > 0 && r.quiet), [e.keys, e.rows.length, e.rows.map(r => r.quiet)]);
+    ok('10e on, off, on in quick succession: exactly Medium and High are drawn once each, complete', e.keys.join() === 'medium,high' && e.st.status === 'shown' && e.st.both === true && e.rows.length === patches && e.rows.every(r => r.mesh === r.line && r.mesh > 0), [e.keys, e.st.both, e.rows.length]);
     ok('10g no page error in this section', errs.length === 0, errs); await ctx.close(); }
   } catch (e) { fail++; console.log('FAIL  suite error: ' + (e && e.stack || e).toString().slice(0, 900)); }
   await browser.close(); srv.close(); clearTimeout(wd);

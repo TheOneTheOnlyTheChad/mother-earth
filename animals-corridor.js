@@ -13,13 +13,13 @@
   const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: '47a029f074dc24e93bcc43e19ad065e71a00f70a1ca2084d3f5c04d7cb1174f5', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
     ALT: { medium: 0.00004, high: 0.00008, lines: 0.00012 },                           // heights above the globe, in globe radii (ours): only to fix the drawing order
     FILL: { medium: 'rgba(255,196,84,0.38)', high: 'rgba(255,112,54,0.72)' }, STROKE: { medium: '#ffd98a', high: '#ffffff' }, LINE: 'rgba(170,205,255,0.55)',
-    SCALE_PX: 120, SCALE_TOL: 0.05, SETTLE_MS: 160, QUIET_MS: 20, R_KM: 6371.0088,
+    SCALE_PX: 120, SCALE_TOL: 0.05, SETTLE_MS: 160, STAGE_MS: 20, R_KM: 6371.0088,
     T: { off: 'Off. Switch on to draw these published areas on the globe.', loading: 'Checking the published areas…', shown: 'Shown on the globe.', unverified: 'The corridor files could not be verified, so nothing is drawn.', failed: 'The corridor files could not be loaded.',
       factsLoading: 'Checking the corridor record…', factsBad: 'The corridor record could not be verified, so this switch is unavailable.', factsFailed: 'The corridor record could not be loaded, so this switch is unavailable.',
       noGlobe: 'The globe is not available in this browser, so the areas cannot be drawn. The description below still applies.', lost: 'The globe stopped, so the areas are no longer drawn. The description below still applies. Reload the page to use the globe again.',
       blur: 'At this close view the whole-globe backdrop is a blur: one picture for the whole Earth, about 20 km a pixel. It is context only and shows nothing about the animals or the study years.' } };
   class Unverified extends Error { }
-  const st = { facts: 'loading', factsErr: '', man: null, status: 'off', err: '', on: false, tok: 0, req: null, geo: null, pendingMove: false, drawn: false, view: '', announced: '', scale: null, moves: 0, reveals: 0, scrolls: 0, timer: 0, held: '' };
+  const st = { facts: 'loading', factsErr: '', man: null, status: 'off', err: '', on: false, tok: 0, req: null, geo: null, pendingMove: false, drawn: false, view: '', announced: '', scale: null, build: 0, both: false, moves: 0, reveals: 0, scrolls: 0, timer: 0, held: '' };
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   const hex = async b => [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map(v => v.toString(16).padStart(2, '0')).join('');
   const J = b => JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(b));
@@ -72,15 +72,15 @@
 
   // ---------- drawing: only this script's three layers
   function draw(g) { const m = st.man, feats = ['medium', 'high'].map(k => ({ key: k, geometry: { type: 'MultiPolygon', coordinates: st.geo[k] } }));
-    g.polygonsData(feats).polygonGeoJsonGeometry(d => d.geometry).polygonCapColor(d => C.FILL[d.key]).polygonSideColor(() => null).polygonStrokeColor(d => C.STROKE[d.key]).polygonAltitude(d => C.ALT[d.key]).polygonsTransitionDuration(0).polygonLabel(() => '');
-    setTimeout(() => quiet(g), C.QUIET_MS);                                        // after the library has built the shapes (it does so in a timer of its own, straight after this call)
+    const b = ++st.build; g.polygonsData(feats.slice(0, 1)).polygonGeoJsonGeometry(d => d.geometry).polygonCapColor(d => C.FILL[d.key]).polygonSideColor(() => null).polygonStrokeColor(d => C.STROKE[d.key]).polygonAltitude(d => C.ALT[d.key]).polygonsTransitionDuration(0).polygonLabel(() => '');
+    st.both = false; setTimeout(() => { if (b === st.build && st.drawn) { g.polygonsData(feats); st.both = true; setTimeout(() => { if (b === st.build && st.drawn) quiet(g); }, C.STAGE_MS); } }, C.STAGE_MS);      // the library builds each class in a task of its own: Medium (which contains High) first, High straight after
     const G = m.grid, lines = [], labels = [], n = v => Math.round(v * 1e6) / 1e6;
     for (let la = G.south; la <= G.north + 1e-9; la += G.step_deg) { const pts = []; for (let lo = G.west; lo <= G.east + 1e-9; lo += G.step_deg / 5) pts.push([n(la), n(lo)]); lines.push({ kind: 'lat', v: n(la), pts }); labels.push({ kind: 'lat', lat: n(la), lng: G.west, text: `${Math.abs(n(la)).toFixed(2)}°${la >= 0 ? 'N' : 'S'}` }); }
     for (let lo = G.west; lo <= G.east + 1e-9; lo += G.step_deg) { const pts = []; for (let la = G.south; la <= G.north + 1e-9; la += G.step_deg / 5) pts.push([n(la), n(lo)]); lines.push({ kind: 'lng', v: n(lo), pts }); labels.push({ kind: 'lng', lat: G.south, lng: n(lo), text: `${Math.abs(n(lo)).toFixed(2)}°${lo >= 0 ? 'E' : 'W'}` }); }
     g.pathsData(lines).pathPoints(d => d.pts).pathPointLat(p => p[0]).pathPointLng(p => p[1]).pathPointAlt(() => C.ALT.lines).pathColor(() => C.LINE).pathStroke(null).pathDashLength(1).pathDashGap(0).pathTransitionDuration(0);
     g.htmlElementsData(labels).htmlLat(d => d.lat).htmlLng(d => d.lng).htmlAltitude(() => C.ALT.lines).htmlElement(d => { const e = el('div', 'cor-tick', ''); e.append(el('span', 'cor-tick-' + d.kind, d.text)); e.setAttribute('aria-hidden', 'true'); return e; });
     st.drawn = true; }
-  function clearOwned() { const g = ME.animalsGlobe && ME.animalsGlobe.raw && ME.animalsGlobe.raw(); if (g && st.drawn) { try { g.polygonsData([]); g.pathsData([]); g.htmlElementsData([]); } catch (_) { } } st.drawn = false; st.view = ''; hideScale(); }
+  function clearOwned() { st.build++; st.both = false; const g = ME.animalsGlobe && ME.animalsGlobe.raw && ME.animalsGlobe.raw(); if (g && st.drawn) { try { g.polygonsData([]); g.pathsData([]); g.htmlElementsData([]); } catch (_) { } } st.drawn = false; st.view = ''; hideScale(); }
 
   // ---------- camera (one move per press, only while that press is current) and the page scroll (only at a press)
   function move(g) { try { g.controls().autoRotate = false; g.pointOfView(st.man.view, 0); st.moves++; } catch (_) { } st.view = (ME.journey && ME.journey.on && ME.journey.on()) ? 'View moved to the corridor. The journey remains on.' : 'View moved to the corridor.'; }
@@ -91,7 +91,7 @@
 
   // ---------- scale bar: valid at the centre of the view, hidden whenever that cannot be shown to hold
   const km = (a, b) => { const R = Math.PI / 180, dl = (b.lat - a.lat) * R, dn = (b.lng - a.lng) * R, h = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * R) * Math.cos(b.lat * R) * Math.sin(dn / 2) ** 2; return 2 * C.R_KM * Math.asin(Math.min(1, Math.sqrt(h))); };
-  const noRay = () => { };                                                       // the scale bar asks the library where screen points meet the globe; once they are built, this script's own shapes are left out of that test
+  const noRay = () => { };                                                       // the scale bar asks the library where screen points meet the globe; once both classes are built, this script's own shapes are left out of that test
   function quiet(g) { try { g.scene().traverse(o => { if (o.__globeObjType === 'polygon' || o.__globeObjType === 'path') o.traverse(c => { c.raycast = noRay; }); }); } catch (_) { } }
   function hideScale() { st.scale = null; const s = $('cor-scale'); if (s) s.hidden = true; }
   function scale() { const g = ME.globe && ME.globe(), box = $('an-globe'), s = $('cor-scale'); if (!s) return; if (!g || st.status !== 'shown' || !box) return hideScale();
@@ -153,6 +153,6 @@
   window.addEventListener('pageshow', e => { if (e.persisted && st.facts !== 'ready') loadFacts(); });
 
   ME.corridor = { C, on, off, km, loadFacts,
-    state: () => ({ facts: st.facts, factsErr: st.factsErr, status: st.status, err: st.err, on: st.on, busy: !!st.req, tok: st.tok, pendingMove: st.pendingMove, drawn: st.drawn, view: st.view, announced: st.announced, held: st.held, moves: st.moves, reveals: st.reveals, scale: st.scale ? { km: st.scale.km, px: st.scale.px, a: st.scale.a, b: st.scale.b } : null, cached: !!st.geo }) };
+    state: () => ({ facts: st.facts, factsErr: st.factsErr, status: st.status, err: st.err, on: st.on, busy: !!st.req, tok: st.tok, pendingMove: st.pendingMove, drawn: st.drawn, both: st.both, view: st.view, announced: st.announced, held: st.held, moves: st.moves, reveals: st.reveals, scale: st.scale ? { km: st.scale.km, px: st.scale.px, a: st.scale.a, b: st.scale.b } : null, cached: !!st.geo }) };
   paint(); loadFacts();
 })();
