@@ -56,3 +56,18 @@ the rollback file); no `EARTHVIEW_ENABLED`; no `earthview/` object.
 Chad started the calling script for observation 1 at 06:01:33 UTC, before the deploy and before sending the observation line:
 it claimed observation 1 and is waiting for its window (12:21:30 UTC). Chad sent the observation Approve line (option A)
 with his "pasted" message, before the deploy was clicked. No call had been made at the time of this read-back.
+
+## GPT on the final newline (relayed by Chad, 21 Nov 2026, as relayed)
+
+> GPT: final-newline discrepancy accepted.
+>
+> Independently verified that the reviewed Worker minus its final LF is 532,761 bytes, SHA-256:
+> 2028e2daec92591d781e4f6289224c5e7c74fd16addfada62f6b6fc7359301c3
+>
+> This is a harmless, recorded byte difference. No corrective deployment or pause is needed for it.
+>
+> The three observations may proceed under Chad's existing approval, subject to the agreed checks and stop conditions.
+> Record the actual deployed hash in their evidence.
+
+The deployed hash to cite in each observation's evidence: `2028e2daec92591d781e4f6289224c5e7c74fd16addfada62f6b6fc7359301c3`
+(532,761 bytes; Cloudflare version `030f8d76-f40e-4301-a21f-f69ada9d6a3a`).
