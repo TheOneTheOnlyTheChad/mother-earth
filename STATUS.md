@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 21 Nov 2026
 
+## 21 Nov 06:31 UTC (clock reading) — **Earth from Space Stage B: GPT accepted the final-newline difference of the deployed hub (relayed by Chad); no corrective deploy, no pause; the three observations proceed under Chad's existing line.** (record only; hub live 0.6.21, deployed sha256 `2028e2da…01c3`; Earth from Space thread)
+- GPT verified independently that the reviewed Worker minus its final LF is 532,761 bytes with that hash. Its words are appended to `reviews/evidence/2026-11-21-earth-from-space-stage-b/deployment-read-back-2026-11-21.md` on the branch. Each observation's evidence cites the deployed hash.
+
 ## 21 Nov 06:19 UTC (clock reading) — **PRODUCTION: hub 0.6.21 DEPLOYED 06:08:56 UTC on Chad's own Approve line (Earth from Space Stage B; collection OFF, `EARTHVIEW_ENABLED` unset). Chad also sent the observation line (option A, today). No observation has run yet.** (hub live is now 0.6.21, was 0.6.19; page unchanged; nothing stored; Earth from Space thread)
 - **Deployed code:** the reviewed `phase1/worker.js` at `earth-from-space-rc` `559f2e4` (sha256 `7cbc8cc4…dc853`) **without its final newline**: 532,761 bytes, sha256 `2028e2da…01c3`, which is exactly `head -c -1` of the reviewed file. The paste did not carry the last byte. Reported to Chad and for GPT; not corrected (a second deploy would need its own line).
 - **Read back 06:09 to 06:19 UTC:** `/` says 0.6.21; 24 bindings unchanged; no `EARTHVIEW_ENABLED`; four crons unchanged; no object under `earthview/`; 20 fetch and 4 scheduled invocations on the new version all `ok`; the five-minute job logs `earthview:not scheduled (EARTHVIEW_ENABLED unset)`; forest, usgs and firms ran ok after the deploy. Three `/status` rows not ok, all from before the deploy: `opensky-bbox` (31 Oct), `firms:recovery` (03:00 UTC), `ships` degraded (05:51 UTC).
