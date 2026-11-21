@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 21 Nov 2026
 
+## 21 Nov 11:15 UTC (clock reading) — **Animals handover: constraints from the Earth from Space thread, relayed by Chad (new-spec thread; docs only)**
+- **The live hub is 0.6.21** (deployed 21 Nov 06:08:56 UTC on Chad's Approve line) **and is NOT the file on main** (main still has 0.6.19). **Never deploy the hub from main:** that would undo the Earth from Space work.
+- **Earth from Space Stage B runs today:** observations at 12:21, 16:07 and 20:21 UTC. Until its result is read (about 21:00 UTC): **no hub deploy at all**; a page merge to main is allowed but must stay outside 12:11 to 12:55, 15:57 to 16:45 and 20:11 to 20:55 UTC. After 21:00 UTC a page merge is free at any time. A hub deploy still needs the Earth from Space thread's say-so.
+- **Animals is page files only.** Checked by this thread at 11:15 UTC: `phase1/worker.js` is identical on `animals-tab-rc` and main. Branch work, tests and packets are unaffected.
+- **Do not touch:** the hub, branch `earth-from-space-rc`, Mac `_review/earth-from-space-*` (especially `_review/earth-from-space-stage-b/results` and its `.claim` folders), or the Cloudflare tab in the browser pane.
+- **Shared files as before:** pull main before every edit of STATUS.md or HANDOVER.md, add only own entries, never rewrite the other thread's text, never force-push; `project_read` before `project_write` of the two shared Project docs.
+- **Later:** both features change the header tab row. Whichever merges second merges main first and reruns `header-tabs` and `desktop-overflow`.
+- No Animals merge is authorised in any case: Stage 4 is on GPT's bounded hold (entry below).
+
 ## 21 Nov 11:11 UTC (clock reading) — **Animals: GPT HELD the Stage 4 MVP candidate `379cf18` on bounded points. This thread hands over here; nothing was changed after the review. Nothing merged, nothing deployed.** (branch `animals-tab-rc` head `c7a2c09`; new-spec thread)
 - **GPT's candidate review (relayed by Chad, 21 Nov, full text attached): BOUNDED HOLD.** Filed `reviews/2026-11-21-animals-tab-stage4-gpt-review.md` on the branch. No new proposal round and no general geometry engine asked for.
 - **GPT's own checks:** all twelve file hashes match; builder suite 33 passed on the review copy; exact rebuild and `--check`; a separate reader and inverse projection (bisection) matched all 48,589 rounded vertices exactly; strip areas agree and support nested; in Chrome the corridor draws, coexists with a journey, the phone reveal works on a normal switch-on, no sideways overflow at six widths.
