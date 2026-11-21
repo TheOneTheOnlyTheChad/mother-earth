@@ -1,0 +1,12 @@
+Final regression, tree 4aa5c004dcccc4678674b276668327bc779485fd, 21 Nov 2026, software renderer (SwiftShader), Claude's runs
+animals-corridor-ui: animals-corridor-ui: 61 passed, 0 failed
+info  switch on to shown, software renderer: 4039 ms (includes fetch, checksum, decode, draw)
+animals-tab-ui: animals-tab-ui: 277 passed, 0 failed
+animals-census-ui: animals-census-ui: 71 passed, 0 failed
+bare-earth-ui: bare-earth-ui: 190 passed, 0 failed
+layer-switches-ui: layer-switches-ui: 68 passed, 0 failed
+timeline-ui: timeline-ui: 594 pass, 0 fail
+desktop-overflow: desktop-overflow: 286 pass, 0 fail
+smoke-fixes: smoke-fixes: 113 passed, 0 failed
+build_corridor.test.py: 36 passed with the pinned zip, 28 without; K3(b) Snyder printed example NOT DONE
+build_corridor.py --check: same, same, same

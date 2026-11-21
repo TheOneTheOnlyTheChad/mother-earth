@@ -1,0 +1,28 @@
+Deliberate breaks, corridor suite, tree f6b7c22 then 4aa5c00 (UTC times, workspace clock)
+=== nesting-not-in-legend (section 2) 11:39:46
+BREAK CAUGHT  nesting-not-in-legend (at "2e"; 1 checks failed)
+=== omission-not-in-legend (section 2) 11:39:56
+BREAK CAUGHT  omission-not-in-legend (at "2e"; 1 checks failed)
+=== retry-focus-to-switch (section 3) 11:40:07
+BREAK CAUGHT  retry-focus-to-switch (at "3j"; 5 checks failed)
+=== retry-hides-while-loading (section 3) 11:44:58
+BREAK MISSED  retry-hides-while-loading: expected a failure at "3j"; failed: 3d K22 phone, geometry held, Retry: the globe is brought into v
+=== retry-lingers-after-blur (section 3) 11:50:32
+BREAK CAUGHT  retry-lingers-after-blur (at "3j"; 4 checks failed)
+=== retry-active-while-loading (section 3) 11:56:00
+BREAK CAUGHT  retry-active-while-loading (at "3j"; 3 checks failed)
+=== facts-retry-not-held (section 3) 12:01:50
+BREAK CAUGHT  facts-retry-not-held (at "3k"; 1 checks failed)
+=== scroll-on-answer (section 3) 12:07:46
+BREAK CAUGHT  scroll-on-answer (at "3d"; 2 checks failed)
+=== no-reveal-at-press (section 3) 12:12:45
+BREAK CAUGHT  no-reveal-at-press (at "3d"; 5 checks failed)
+=== no-list-check (section 4) 12:17:41
+BREAK CAUGHT  no-list-check (at "4a"; 1 checks failed)
+=== no-manifest-check (section 4) 12:18:39
+BREAK CAUGHT  no-manifest-check (at "4a"; 1 checks failed)
+=== no-display-check (section 4) 12:19:36
+BREAK CAUGHT  no-display-check (at "4a"; 1 checks failed)
+=== done 12:20:35
+retry-hides-while-loading rerun after the check was repaired (tree 4aa5c00): BREAK CAUGHT (at 3j; 5 checks failed)
+combined suite, tree 4aa5c00: BREAK CAUGHT chooser-back (1d); BREAK CAUGHT switch-unlabelled (1c)

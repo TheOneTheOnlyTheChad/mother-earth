@@ -1,0 +1,827 @@
+{
+ "done": true,
+ "started": "2026-11-21T12:28:40.067Z",
+ "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.8103.78 Safari/537.36",
+ "dpr": 1,
+ "viewport": [
+  1280,
+  860
+ ],
+ "visibility": "visible",
+ "focus": true,
+ "runs": [
+  {
+   "i": 0,
+   "t0": 35282,
+   "syncPressMs": 1.4,
+   "vertices": {
+    "medium": 83898,
+    "high": 61869
+   },
+   "pixels": {
+    "high": [
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      56
+     ]
+    ],
+    "medium": [
+     [
+      147,
+      138,
+      116
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      111,
+      98,
+      69
+     ]
+    ],
+    "none": [
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ]
+    ]
+   },
+   "colour": {
+    "high": [
+     189,
+     91,
+     55
+    ],
+    "medium": [
+     120,
+     108,
+     81
+    ],
+    "ground": [
+     21,
+     38,
+     59
+    ],
+    "highVsGround": 176,
+    "mediumVsGround": 123,
+    "highVsMedium": 76
+   },
+   "firstFrameMs": 561.5,
+   "nextFrameCallbackMs": 1708.4,
+   "status": "shown",
+   "longestTaskMs": 1210,
+   "longestAnimationFrameMs": 0,
+   "tasksOver50": 4
+  },
+  {
+   "i": 1,
+   "t0": 41098.799999999814,
+   "syncPressMs": 1,
+   "vertices": {
+    "medium": 83898,
+    "high": 61869
+   },
+   "pixels": {
+    "high": [
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      56
+     ]
+    ],
+    "medium": [
+     [
+      147,
+      138,
+      116
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      111,
+      98,
+      69
+     ]
+    ],
+    "none": [
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ]
+    ]
+   },
+   "colour": {
+    "high": [
+     189,
+     91,
+     55
+    ],
+    "medium": [
+     120,
+     108,
+     81
+    ],
+    "ground": [
+     21,
+     38,
+     59
+    ],
+    "highVsGround": 176,
+    "mediumVsGround": 123,
+    "highVsMedium": 76
+   },
+   "firstFrameMs": 376.8,
+   "nextFrameCallbackMs": 1424.8,
+   "status": "shown",
+   "longestTaskMs": 1086,
+   "longestAnimationFrameMs": 0,
+   "tasksOver50": 3
+  },
+  {
+   "i": 2,
+   "t0": 46655.89999999991,
+   "syncPressMs": 2,
+   "vertices": {
+    "medium": 83898,
+    "high": 61869
+   },
+   "pixels": {
+    "high": [
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      56
+     ]
+    ],
+    "medium": [
+     [
+      147,
+      138,
+      116
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      111,
+      98,
+      69
+     ]
+    ],
+    "none": [
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ]
+    ]
+   },
+   "colour": {
+    "high": [
+     189,
+     91,
+     55
+    ],
+    "medium": [
+     120,
+     108,
+     81
+    ],
+    "ground": [
+     21,
+     38,
+     59
+    ],
+    "highVsGround": 176,
+    "mediumVsGround": 123,
+    "highVsMedium": 76
+   },
+   "firstFrameMs": 388.2,
+   "nextFrameCallbackMs": 1417.4,
+   "status": "shown",
+   "longestTaskMs": 1073,
+   "longestAnimationFrameMs": 0,
+   "tasksOver50": 3
+  },
+  {
+   "i": 3,
+   "t0": 52221.69999999972,
+   "syncPressMs": 0.9,
+   "vertices": {
+    "medium": 83898,
+    "high": 61869
+   },
+   "pixels": {
+    "high": [
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      56
+     ]
+    ],
+    "medium": [
+     [
+      147,
+      138,
+      116
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      111,
+      98,
+      69
+     ]
+    ],
+    "none": [
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ]
+    ]
+   },
+   "colour": {
+    "high": [
+     189,
+     91,
+     55
+    ],
+    "medium": [
+     120,
+     108,
+     81
+    ],
+    "ground": [
+     21,
+     38,
+     59
+    ],
+    "highVsGround": 176,
+    "mediumVsGround": 123,
+    "highVsMedium": 76
+   },
+   "firstFrameMs": 432.9,
+   "nextFrameCallbackMs": 1451.4,
+   "status": "shown",
+   "longestTaskMs": 1058,
+   "longestAnimationFrameMs": 0,
+   "tasksOver50": 4
+  },
+  {
+   "i": 4,
+   "t0": 57784.69999999972,
+   "syncPressMs": 1.4,
+   "vertices": {
+    "medium": 83898,
+    "high": 61869
+   },
+   "pixels": {
+    "high": [
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      56
+     ]
+    ],
+    "medium": [
+     [
+      147,
+      138,
+      116
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      111,
+      98,
+      69
+     ]
+    ],
+    "none": [
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ]
+    ]
+   },
+   "colour": {
+    "high": [
+     189,
+     91,
+     55
+    ],
+    "medium": [
+     120,
+     108,
+     81
+    ],
+    "ground": [
+     21,
+     38,
+     59
+    ],
+    "highVsGround": 176,
+    "mediumVsGround": 123,
+    "highVsMedium": 76
+   },
+   "firstFrameMs": 423,
+   "nextFrameCallbackMs": 1521.5,
+   "status": "shown",
+   "longestTaskMs": 1136,
+   "longestAnimationFrameMs": 0,
+   "tasksOver50": 4
+  },
+  {
+   "i": 5,
+   "t0": 63345.69999999972,
+   "syncPressMs": 1,
+   "vertices": {
+    "medium": 83898,
+    "high": 61869
+   },
+   "pixels": {
+    "high": [
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      56
+     ]
+    ],
+    "medium": [
+     [
+      147,
+      138,
+      116
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      111,
+      98,
+      69
+     ]
+    ],
+    "none": [
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ]
+    ]
+   },
+   "colour": {
+    "high": [
+     189,
+     91,
+     55
+    ],
+    "medium": [
+     120,
+     108,
+     81
+    ],
+    "ground": [
+     21,
+     38,
+     59
+    ],
+    "highVsGround": 176,
+    "mediumVsGround": 123,
+    "highVsMedium": 76
+   },
+   "firstFrameMs": 445.5,
+   "nextFrameCallbackMs": 1610.3,
+   "status": "shown",
+   "longestTaskMs": 1215,
+   "longestAnimationFrameMs": 0,
+   "tasksOver50": 4
+  },
+  {
+   "i": 6,
+   "t0": 69131.59999999963,
+   "syncPressMs": 4.4,
+   "vertices": {
+    "medium": 83898,
+    "high": 61869
+   },
+   "pixels": {
+    "high": [
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      55
+     ],
+     [
+      189,
+      91,
+      56
+     ]
+    ],
+    "medium": [
+     [
+      147,
+      138,
+      116
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      110,
+      98,
+      69
+     ],
+     [
+      111,
+      98,
+      69
+     ]
+    ],
+    "none": [
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ],
+     [
+      21,
+      38,
+      59
+     ]
+    ]
+   },
+   "colour": {
+    "high": [
+     189,
+     91,
+     55
+    ],
+    "medium": [
+     120,
+     108,
+     81
+    ],
+    "ground": [
+     21,
+     38,
+     59
+    ],
+    "highVsGround": 176,
+    "mediumVsGround": 123,
+    "highVsMedium": 76
+   },
+   "firstFrameMs": 433.6,
+   "nextFrameCallbackMs": 1524.1,
+   "status": "shown",
+   "longestTaskMs": 1126,
+   "longestAnimationFrameMs": 0,
+   "tasksOver50": 4
+  }
+ ],
+ "orbits": [
+  {
+   "label": "nothing on",
+   "orbit": "close",
+   "frames": 57,
+   "medianMs": 83.4,
+   "p95Ms": 116.7,
+   "worstMs": 116.7,
+   "over33ms": 57,
+   "over50ms": 57,
+   "visibility": "visible"
+  },
+  {
+   "label": "nothing on",
+   "orbit": "whole",
+   "frames": 39,
+   "medianMs": 133.3,
+   "p95Ms": 150.1,
+   "worstMs": 166.6,
+   "over33ms": 39,
+   "over50ms": 39,
+   "visibility": "visible"
+  },
+  {
+   "label": "corridor",
+   "orbit": "close",
+   "frames": 5,
+   "medianMs": 1199.9,
+   "p95Ms": 1583.3,
+   "worstMs": 1583.3,
+   "over33ms": 5,
+   "over50ms": 5,
+   "visibility": "visible"
+  },
+  {
+   "label": "corridor",
+   "orbit": "whole",
+   "frames": 4,
+   "medianMs": 1566.7,
+   "p95Ms": 2333.2,
+   "worstMs": 2333.2,
+   "over33ms": 4,
+   "over50ms": 4,
+   "visibility": "visible"
+  },
+  {
+   "label": "corridor and journey",
+   "orbit": "close",
+   "frames": 5,
+   "medianMs": 1316.7,
+   "p95Ms": 1566.5,
+   "worstMs": 1566.5,
+   "over33ms": 5,
+   "over50ms": 5,
+   "visibility": "visible"
+  },
+  {
+   "label": "corridor and journey",
+   "orbit": "whole",
+   "frames": 4,
+   "medianMs": 1666.6,
+   "p95Ms": 2266.5,
+   "worstMs": 2266.5,
+   "over33ms": 4,
+   "over50ms": 4,
+   "visibility": "visible"
+  }
+ ],
+ "notes": [],
+ "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+ "canvas": [
+  727,
+  462
+ ],
+ "coldSwitchOnToShownMs": 2,
+ "bothOn": {
+  "corridor": "shown",
+  "journey": "ready",
+  "journeyOn": true
+ },
+ "summary": {
+  "firstFrameMedianMs": 432.9,
+  "firstFrameWorstMs": 561.5,
+  "longestTaskWorstMs": 1215,
+  "longestAnimationFrameWorstMs": 0,
+  "limits": {
+   "firstDrawMs": 1500,
+   "taskMs": 500
+  }
+ },
+ "finished": "2026-11-21T12:30:41.420Z",
+ "visibilityAtEnd": "visible"
+}

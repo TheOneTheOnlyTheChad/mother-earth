@@ -21,7 +21,7 @@ let pass = 0, fail = 0;
 const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log('FAIL', name, info ? JSON.stringify(info) : ''); } };
 (async () => {
   const b = await chromium.launch();
-  for (const fonts of ['real', 'fallback']) for (const w of [721, 760, 900, 901, 1101, 1139, 1140, 1150, 1186, 1200, 1279, 1280, 1366, 1440, 1920]) {   // both sides of 900/901, 1139/1140 and 1279/1280
+  for (const fonts of ['real', 'fallback']) for (const w of [721, 760, 761, 900, 901, 1101, 1139, 1140, 1186, 1199, 1200, 1279, 1280, 1365, 1366, 1440, 1920]) {   // both sides of 760/761, 900/901, 1199/1200, 1279/1280 and 1365/1366
     const tag = `${fonts} ${w}`;
     const p = await b.newPage({ viewport: { width: w, height: 860 } });
     await p.route(/fonts\.googleapis/, r => fonts === 'real' ? r.fulfill({ contentType: 'text/css', body: CSS }) : r.abort());
@@ -42,8 +42,8 @@ const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log(
     ok(`${tag}: no horizontal overflow`, m.sw <= m.W, m);
     ok(`${tag}: header and stage no wider than the window`, m.header <= m.W + 0.5 && m.rightCol <= m.W + 0.5, m);
     ok(`${tag}: Menu on screen and clickable`, m.menuRight <= m.W && m.menuHit, m);
-    // Four tabs (Moon, Sun added): below 1140 px the promise is hidden, never shrunk or cut; from 1140 px it is shown in full at 11 px.
-    if (w < 1140) ok(`${tag}: promise hidden (too tight beside four tabs)`, !m.promiseShown, m);
+    // Five tabs (Animals added, 19 Nov 2026): below 1200 px the promise is hidden, never shrunk or cut; from 1200 px it is shown in full at 11 px. (With four tabs the line was 1140 px.)
+    if (w < 1200) ok(`${tag}: promise hidden (too tight beside five tabs)`, !m.promiseShown, m);
     else { ok(`${tag}: promise shown in full (≤ 2 lines, nothing cut)`, m.promiseShown && !m.promiseCut && m.promiseLines <= 2, m);
       ok(`${tag}: promise at 11 px`, m.promiseFont === '11px', m); }
     ok(`${tag}: clock keeps its UTC label, clear of the Menu button`, m.utcShown && m.clockRight <= m.menuLeft + 0.5, m);

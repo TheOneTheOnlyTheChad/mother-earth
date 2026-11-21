@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mother Earth — Animals</title>
+<meta name="description" content="Recorded animal journeys, replayed one at a time on their own globe, with their sources. Dated archive records, not live observations.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=202612210400">
+</head>
+<body class="doc animals">
+<header class="top">
+  <h1>Mother Earth</h1>
+  <div class="promise">Animals — recorded journeys</div>
+  <nav class="tabs" aria-label="Views">
+    <a href="index.html" data-view="earth">Earth now</a>
+    <a href="timeline.html" data-view="timeline">Timeline</a>
+    <a href="moon.html" data-view="moon">Moon</a>
+    <a href="sun.html" data-view="sun">Sun</a>
+    <a href="animals.html" data-view="animals" aria-current="page">Animals</a>
+  </nav>
+  <div class="clock" id="clock">--:--:--<span>UTC</span></div>
+  <nav class="menu" aria-label="Pages">
+    <button id="menu-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list">Menu</button>
+    <ul id="menu-list" role="menu">
+      <li role="none"><a role="menuitem" href="index.html" data-page="world">World View</a></li>
+      <li role="none"><a role="menuitem" href="timeline.html" data-page="timeline">Timeline</a></li>
+      <li role="none"><a role="menuitem" href="moon.html" data-page="moon">Moon</a></li>
+      <li role="none"><a role="menuitem" href="sun.html" data-page="sun">Sun</a></li>
+      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>
+      <li role="none"><a role="menuitem" href="sources.html" data-page="sources">Sources &amp; Details</a></li>
+    </ul>
+  </nav>
+</header>
+<main>
+  <p class="an-top"><a class="small" href="index.html">← World View</a> <span class="an-preview"><b>Dated archive.</b> Recorded journeys, dated counts and one published corridor. None of it is a live feed.</span></p>
+
+  <section class="an-stage" id="an-stage" aria-label="Animal journey globe and switches">
+    <div class="an-globe-col">
+      <div class="an-globe-box" id="an-globe-box"><div id="an-globe"></div><div class="cor-scale" id="cor-scale" hidden><div class="cor-scale-bar" id="cor-scale-bar"></div><div class="cor-scale-text" id="cor-scale-text"></div></div></div>
+      <div class="an-backdrop" id="an-backdrop">Backdrop: loading satellite imagery…</div>
+      <div class="cor-legend" id="cor-legend" hidden></div>
+      <div class="an-status" id="an-status" hidden></div>
+      <p class="an-toswitches"><a href="#an-panel">Journey switches ↓</a></p>
+      <div class="replay" id="replay" role="group" aria-label="Animal journey replay" hidden>
+        <div class="rp-ctl">
+          <button type="button" id="replay-play" aria-pressed="false">Play</button>
+          <label class="vh" for="replay-range">Recorded fix (arrow keys step from fix to fix)</label>
+          <input type="range" id="replay-range" min="0" max="0" step="1" value="0">
+          <label class="vh" for="replay-speed">Speed: replay time per second</label>
+          <select id="replay-speed"></select>
+          <button type="button" id="replay-goto" aria-label="Go to the journey area on the globe"><span class="rp-w">Journey </span>area</button>
+        </div>
+        <div class="rp-now" id="replay-now"></div>
+        <div class="rp-note" id="replay-note"></div>
+        <div class="rp-note" id="replay-rule"></div>
+        <div class="vh" id="replay-say" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="an-panel" id="an-panel" role="group" aria-labelledby="an-group-h" aria-describedby="an-group-note">
+      <h2 id="an-group-h">Animal journeys — one at a time</h2>
+      <p class="an-note" id="an-group-note">Switch one journey on to replay it on the globe. Switching another on switches the first off. Nothing is on when the page opens.</p>
+      <div class="an-integrity" id="an-integrity" hidden><span id="an-integrity-text"></span> <button type="button" class="journey-retry" id="an-integrity-retry">Retry</button></div>
+      <h3 class="an-grp">Land</h3>
+      <div class="an-sw" data-journey="zebra-botswana-Z3866">
+        <div class="an-sw-h"><span class="ev obs">Observed</span><span class="state" data-f="sw-state">off</span></div>
+        <button class="ovl-tgl tgl an-tgl" type="button" role="switch" aria-checked="false" id="tgl-zebra-botswana-Z3866" data-journey="zebra-botswana-Z3866" data-name="Plains zebra" aria-describedby="ev-zebra-botswana-Z3866"><span class="box" aria-hidden="true"></span><span class="t">Plains zebra, animal Z3866 (2007–2008)</span></button>
+        <div class="cav" id="ev-zebra-botswana-Z3866">Recorded GPS fixes of one animal. A dated record, not current.</div>
+        <div class="obs" data-f="sw-obs">Off. Switch on to replay this recorded journey on the globe.</div>
+        <button type="button" class="journey-retry" data-f="sw-retry" hidden>Retry</button>
+        <a class="an-more small" href="#zebra-botswana-Z3866">Study, credit, licence and what was left out ↓</a>
+      </div>
+      <h3 class="an-grp">Sea</h3>
+      <div class="an-sw" data-journey="white-shark-sa-118845">
+        <div class="an-sw-h"><span class="ev obs">Observed</span><span class="state" data-f="sw-state">off</span></div>
+        <button class="ovl-tgl tgl an-tgl" type="button" role="switch" aria-checked="false" id="tgl-white-shark-sa-118845" data-journey="white-shark-sa-118845" data-name="White shark" aria-describedby="ev-white-shark-sa-118845"><span class="box" aria-hidden="true"></span><span class="t">White shark, tag 118845 (2012–2013)</span></button>
+        <div class="cav" id="ev-white-shark-sa-118845">Argos satellite fixes of one animal, with fixes left out under Mother Earth's experimental rules. A dated record, not current.</div>
+        <div class="obs" data-f="sw-obs">Off. Switch on to replay this recorded journey on the globe.</div>
+        <button type="button" class="journey-retry" data-f="sw-retry" hidden>Retry</button>
+        <a class="an-more small" href="#white-shark-sa-118845">Study, credit, licence and what was left out ↓</a>
+      </div>
+      <div class="an-sw" data-journey="false-killer-whale-hawaii-98364">
+        <div class="an-sw-h"><span class="ev obs">Observed</span><span class="state" data-f="sw-state">off</span></div>
+        <button class="ovl-tgl tgl an-tgl" type="button" role="switch" aria-checked="false" id="tgl-false-killer-whale-hawaii-98364" data-journey="false-killer-whale-hawaii-98364" data-name="False killer whale" aria-describedby="ev-false-killer-whale-hawaii-98364"><span class="box" aria-hidden="true"></span><span class="t">False killer whale, tag 98364 (2013–2014)</span></button>
+        <div class="cav" id="ev-false-killer-whale-hawaii-98364">Argos satellite fixes of one animal, with fixes left out under Mother Earth's experimental rules. A dated record, not current.</div>
+        <div class="obs" data-f="sw-obs">Off. Switch on to replay this recorded journey on the globe.</div>
+        <button type="button" class="journey-retry" data-f="sw-retry" hidden>Retry</button>
+        <a class="an-more small" href="#false-killer-whale-hawaii-98364">Study, credit, licence and what was left out ↓</a>
+      </div>
+      <h3 class="an-grp">Air</h3>
+      <div class="an-sw" data-journey="waved-albatross-galapagos-3275-30662">
+        <div class="an-sw-h"><span class="ev obs">Observed</span><span class="state" data-f="sw-state">off</span></div>
+        <button class="ovl-tgl tgl an-tgl" type="button" role="switch" aria-checked="false" id="tgl-waved-albatross-galapagos-3275-30662" data-journey="waved-albatross-galapagos-3275-30662" data-name="Waved albatross" aria-describedby="ev-waved-albatross-galapagos-3275-30662"><span class="box" aria-hidden="true"></span><span class="t">Waved albatross, animal 3275-30662 (2008)</span></button>
+        <div class="cav" id="ev-waved-albatross-galapagos-3275-30662"><span data-f="sw-label">Recorded movements of one breeding adult, 23 June to 15 September 2008.</span> GPS fixes of one bird; fixes near the tagging site are withheld by Mother Earth. A dated record, not current.</div>
+        <div class="obs" data-f="sw-obs">Off. Switch on to replay this recorded journey on the globe.</div>
+        <button type="button" class="journey-retry" data-f="sw-retry" hidden>Retry</button>
+        <a class="an-more small" href="#waved-albatross-galapagos-3275-30662">Study, credit, licence and what was left out ↓</a>
+      </div>
+      <div class="vh" id="an-say" aria-live="polite"></div>
+    </div>
+    <div class="an-panel cor-panel" id="cor-panel" role="group" aria-labelledby="cor-h" aria-describedby="cor-group-note">
+      <h2 id="cor-h">Published corridors</h2>
+      <p class="an-note" id="cor-group-note">A published map of modelled migration use, drawn on the same globe. It has its own switch and does not switch a journey off. Nothing is on when the page opens.</p>
+      <h3 class="an-grp">Land</h3>
+      <div class="an-sw" id="cor-card">
+        <div class="an-sw-h"><span class="ev comp">Published corridor or range</span><span class="state" id="cor-state">checking</span></div>
+        <button class="ovl-tgl tgl an-tgl" type="button" role="switch" aria-checked="false" aria-disabled="true" id="cor-tgl" aria-describedby="cor-ev"><span class="box" aria-hidden="true"></span><span class="t" id="cor-label">Mule deer, East Walker herd, California: migration corridor</span></button>
+        <div class="cav" id="cor-ev">Published, modelled areas from a sample of collared animals. A dated product, not current.</div>
+        <div class="obs" id="cor-obs">Checking the corridor record…</div>
+        <button type="button" class="journey-retry" id="cor-retry" hidden>Retry</button>
+        <button type="button" class="journey-retry" id="cor-facts-retry" hidden>Retry the corridor record</button>
+        <button type="button" class="journey-retry" id="cor-goto" hidden>Go to the corridor area</button>
+        <div class="cor-about" id="cor-about"></div>
+      </div>
+      <div class="vh" id="cor-say" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="an-census" id="an-census" aria-labelledby="cen-h" aria-busy="true">
+    <h2 id="cen-h">Population counts</h2>
+    <p class="an-note">Dated counts from published records. Nothing here is drawn on the globe, and nothing here is a live feed.</p>
+    <div class="cen-card-head"><span class="ev obs">Census counts</span> <span class="cen-group">Sea</span></div>
+    <h3 id="cen-title"></h3>
+    <p class="cen-state" id="cen-state">Checking the census file…</p>
+    <button type="button" class="journey-retry" id="cen-retry" hidden>Retry</button>
+    <div id="cen-body" hidden>
+      <div id="cen-intro"></div>
+      <dl class="cen-dates" id="cen-dates"></dl>
+      <div id="cen-grid"></div>
+      <div class="cen-detail" id="cen-detail" role="region" aria-labelledby="cen-dh" hidden></div>
+      <div id="cen-source"></div>
+    </div>
+    <div class="vh" id="cen-say" aria-live="polite"></div>
+  </section>
+
+  <div class="an-doc">
+  <h2 id="journeys">Recorded animal journeys</h2>
+  <p>A journey here is a set of positions recorded by a tag on one animal, replayed against the dates they were recorded. It is a dated record, not a live position. The marker is always on a recorded fix. The line joins recorded fixes; the path between fixes was not recorded.</p>
+  <p id="an-archive"><b>An archive feature.</b> Every other layer on Mother Earth shows live or regularly updated data. These journeys are finished studies from past years, shown as dated records. If regularly updated tracking is added later it will carry its own dates and freshness labels.</p>
+  <p id="an-experimental"><b>The two sea journeys are experimental.</b> Their positions are Argos satellite fixes, far less exact than GPS. Mother Earth has left out fixes under rules of its own, listed on each card. They are display choices, not a reconstruction of where the animal went. A gap in a sea journey means no fix is displayed there; the source may hold fixes that were left out. On the globe their fix marks are drawn large so they can be seen; the size of a mark does not show uncertainty.</p>
+
+  <h3>Land</h3>
+  <section class="an-study" id="zebra-botswana-Z3866" data-journey="zebra-botswana-Z3866" aria-labelledby="zebra-botswana-Z3866-h">
+    <h4 id="zebra-botswana-Z3866-h">Plains zebra, northern Botswana — animal Z3866</h4>
+    <p class="an-state" data-f="state" aria-live="polite">Checking the study file…</p>
+    <table class="an-facts" data-f="facts" hidden>
+      <tbody>
+        <tr><th scope="row">Study</th><td data-f="title"></td></tr>
+        <tr><th scope="row">Place</th><td data-f="place"></td></tr>
+        <tr><th scope="row">Species as recorded</th><td data-f="species"></td></tr>
+        <tr><th scope="row">Tracking method</th><td data-f="method"></td></tr>
+        <tr><th scope="row">Animals</th><td data-f="animals"></td></tr>
+        <tr><th scope="row">Shown</th><td data-f="shown"></td></tr>
+        <tr><th scope="row">Recorded</th><td data-f="period"></td></tr>
+        <tr><th scope="row">Left out</th><td data-f="notdrawn"></td></tr>
+        <tr><th scope="row">Times</th><td data-f="times"></td></tr>
+        <tr><th scope="row">Accuracy</th><td data-f="unc"></td></tr>
+        <tr><th scope="row">Line rule</th><td data-f="rule"></td></tr>
+        <tr><th scope="row">Changes made</th><td data-f="simp"></td></tr>
+        <tr><th scope="row">Dataset</th><td data-f="doi"></td></tr>
+        <tr><th scope="row">Licence</th><td data-f="lic"></td></tr>
+        <tr><th scope="row">Citation</th><td data-f="cite"></td></tr>
+        <tr><th scope="row">Paper or project</th><td data-f="paper"></td></tr>
+        <tr><th scope="row">Land map used</th><td data-f="land"></td></tr>
+      </tbody>
+    </table>
+    <p><a class="an-go" data-f="go" href="#journey=zebra-botswana-Z3866">Go to this journey's switch</a><span class="small"> — moves to the switch beside the globe. Nothing is switched on for you.</span></p>
+    <h5>Conservation assessment</h5>
+    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <h5>Population</h5>
+    <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
+    <p class="small" data-f="sample">7 animals were tracked in this study. This is a sample size, not a population estimate.</p>
+  </section>
+
+  <h3>Sea</h3>
+  <section class="an-study" id="white-shark-sa-118845" data-journey="white-shark-sa-118845" aria-labelledby="white-shark-sa-118845-h">
+    <h4 id="white-shark-sa-118845-h">White shark, South African coast — tag 118845</h4>
+    <p class="an-state" data-f="state" aria-live="polite">Checking the study file…</p>
+    <table class="an-facts" data-f="facts" hidden>
+      <tbody>
+        <tr><th scope="row">Study</th><td data-f="title"></td></tr>
+        <tr><th scope="row">Place</th><td data-f="place"></td></tr>
+        <tr><th scope="row">Species as recorded</th><td data-f="species"></td></tr>
+        <tr><th scope="row">Tracking method</th><td data-f="method"></td></tr>
+        <tr><th scope="row">Animals</th><td data-f="animals"></td></tr>
+        <tr><th scope="row">Shown</th><td data-f="shown"></td></tr>
+        <tr><th scope="row">Recorded</th><td data-f="period"></td></tr>
+        <tr><th scope="row">Left out</th><td data-f="notdrawn"></td></tr>
+        <tr><th scope="row">Times</th><td data-f="times"></td></tr>
+        <tr><th scope="row">Accuracy</th><td data-f="unc"></td></tr>
+        <tr><th scope="row">Line rule</th><td data-f="rule"></td></tr>
+        <tr><th scope="row">Changes made</th><td data-f="simp"></td></tr>
+        <tr><th scope="row">Dataset</th><td data-f="doi"></td></tr>
+        <tr><th scope="row">Licence</th><td data-f="lic"></td></tr>
+        <tr><th scope="row">Citation</th><td data-f="cite"></td></tr>
+        <tr><th scope="row">Paper or project</th><td data-f="paper"></td></tr>
+        <tr><th scope="row">Land map used</th><td data-f="land"></td></tr>
+      </tbody>
+    </table>
+    <p><a class="an-go" data-f="go" href="#journey=white-shark-sa-118845">Go to this journey's switch</a><span class="small"> — moves to the switch beside the globe. Nothing is switched on for you.</span></p>
+    <h5>Conservation assessment</h5>
+    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <h5>Population</h5>
+    <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
+    <p class="small" data-f="sample">34 sharks were tagged in this study. This is a sample size, not a population estimate.</p>
+  </section>
+  <section class="an-study" id="false-killer-whale-hawaii-98364" data-journey="false-killer-whale-hawaii-98364" aria-labelledby="false-killer-whale-hawaii-98364-h">
+    <h4 id="false-killer-whale-hawaii-98364-h">False killer whale, Hawaiian waters — tag 98364</h4>
+    <p class="an-state" data-f="state" aria-live="polite">Checking the study file…</p>
+    <table class="an-facts" data-f="facts" hidden>
+      <tbody>
+        <tr><th scope="row">Study</th><td data-f="title"></td></tr>
+        <tr><th scope="row">Place</th><td data-f="place"></td></tr>
+        <tr><th scope="row">Species as recorded</th><td data-f="species"></td></tr>
+        <tr><th scope="row">Tracking method</th><td data-f="method"></td></tr>
+        <tr><th scope="row">Animals</th><td data-f="animals"></td></tr>
+        <tr><th scope="row">Shown</th><td data-f="shown"></td></tr>
+        <tr><th scope="row">Recorded</th><td data-f="period"></td></tr>
+        <tr><th scope="row">Left out</th><td data-f="notdrawn"></td></tr>
+        <tr><th scope="row">Times</th><td data-f="times"></td></tr>
+        <tr><th scope="row">Accuracy</th><td data-f="unc"></td></tr>
+        <tr><th scope="row">Line rule</th><td data-f="rule"></td></tr>
+        <tr><th scope="row">Changes made</th><td data-f="simp"></td></tr>
+        <tr><th scope="row">Dataset</th><td data-f="doi"></td></tr>
+        <tr><th scope="row">Licence</th><td data-f="lic"></td></tr>
+        <tr><th scope="row">Citation</th><td data-f="cite"></td></tr>
+        <tr><th scope="row">Paper or project</th><td data-f="paper"></td></tr>
+        <tr><th scope="row">Land map used</th><td data-f="land"></td></tr>
+      </tbody>
+    </table>
+    <p><a class="an-go" data-f="go" href="#journey=false-killer-whale-hawaii-98364">Go to this journey's switch</a><span class="small"> — moves to the switch beside the globe. Nothing is switched on for you.</span></p>
+    <h5>Conservation assessment</h5>
+    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <h5>Population</h5>
+    <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
+    <p class="small" data-f="sample">This file is the record of one tagged whale. One animal is not a population estimate.</p>
+  </section>
+
+  <h3>Air</h3>
+  <section class="an-study" id="waved-albatross-galapagos-3275-30662" data-journey="waved-albatross-galapagos-3275-30662" aria-labelledby="waved-albatross-galapagos-3275-30662-h">
+    <h4 id="waved-albatross-galapagos-3275-30662-h">Waved albatross, animal 3275-30662</h4>
+    <p class="an-state" data-f="state" aria-live="polite">Checking the study file…</p>
+    <table class="an-facts" data-f="facts" hidden>
+      <tbody>
+        <tr><th scope="row">Study</th><td data-f="title"></td></tr>
+        <tr><th scope="row">Place</th><td data-f="place"></td></tr>
+        <tr><th scope="row">Species as recorded</th><td data-f="species"></td></tr>
+        <tr><th scope="row">Tracking method</th><td data-f="method"></td></tr>
+        <tr><th scope="row">Animals</th><td data-f="animals"></td></tr>
+        <tr><th scope="row">Shown</th><td data-f="shown"></td></tr>
+        <tr><th scope="row">Recorded</th><td data-f="period"></td></tr>
+        <tr><th scope="row">Left out</th><td data-f="notdrawn"></td></tr>
+        <tr><th scope="row">Times</th><td data-f="times"></td></tr>
+        <tr><th scope="row">Accuracy</th><td data-f="unc"></td></tr>
+        <tr><th scope="row">Line rule</th><td data-f="rule"></td></tr>
+        <tr><th scope="row">Changes made</th><td data-f="simp"></td></tr>
+        <tr><th scope="row">Dataset</th><td data-f="doi"></td></tr>
+        <tr><th scope="row">Licence</th><td data-f="lic"></td></tr>
+        <tr><th scope="row">Citation</th><td data-f="cite"></td></tr>
+        <tr><th scope="row">Paper or project</th><td data-f="paper"></td></tr>
+        <tr><th scope="row">Land map used</th><td data-f="land"></td></tr>
+      </tbody>
+    </table>
+    <p><a class="an-go" data-f="go" href="#journey=waved-albatross-galapagos-3275-30662">Go to this journey's switch</a><span class="small"> — moves to the switch beside the globe. Nothing is switched on for you.</span></p>
+    <h5>Conservation assessment</h5>
+    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <h5>Population</h5>
+    <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
+    <p class="small" data-f="sample">One of 28 birds tagged; nine were used in the paper's analysis. These are sample sizes, not a population estimate.</p>
+  </section>
+
+  <h2 id="replay-time">Replay time is not today</h2>
+  <p>These journeys were recorded between 2007 and 2014. The globe on this page shows no current observations. Its backdrop is a satellite picture with its own date, stated under the globe; it is not from a journey's dates and is not matched to one. If that picture cannot be loaded the globe is plain, with a coastline outline. Nothing on this page says why an animal moved.</p>
+  </div>
+</main>
+<script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
+<script src="animals-globe.js?v=202612200100"></script>
+<script src="animals-journey.js?v=202612220100"></script>
+<script src="animals.js?v=202612220100"></script>
+<script src="animals-census.js?v=202612220100"></script>
+<script src="animals-corridor.js?v=202612220100"></script>
+</body>
+</html>

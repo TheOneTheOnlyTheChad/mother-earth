@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "revision": "R1",
+ "note": "Published corridor products for the Animals page. Separate from the journey list and the population list. A page draws nothing from a manifest whose checksum differs from the one here.",
+ "corridors": [
+  {
+   "id": "mule-deer-east-walker-corridor",
+   "label": "Mule deer, East Walker herd, California: migration corridor (data 2017 to 2024)",
+   "group": "Land",
+   "kind": "published-corridor",
+   "manifest": "mule-deer-east-walker-corridor-R1.manifest.json",
+   "manifest_sha256": "1a8e2d96e8e38a5092076ec5d45d6f68e1e6fae18c70692824dc1d553a1b6132"
+  }
+ ]
+}

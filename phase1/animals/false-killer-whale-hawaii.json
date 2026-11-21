@@ -1,0 +1,64 @@
+{
+ "study": "false-killer-whale-hawaii",
+ "revision": "R1",
+ "animal": "98364",
+ "label": "False killer whale, tag 98364",
+ "reader": "atn-netcdf",
+ "title": "False killer whale (Pseudorca crassidens) location data from a satellite telemetry tag (ptt id 98364) deployed in the North Pacific Ocean from 2013-10-23 to 2014-02-23",
+ "place": "Hawaiian Islands and the North Pacific to the east",
+ "species_as_recorded": "Pseudorca crassidens",
+ "common_name": "false killer whale",
+ "method": "Wildlife Computers SPOT5 satellite tag; positions by Argos (Doppler)",
+ "animals_sampled": null,
+ "sample_sentence": "This file is the record of one tagged whale. One animal is not a population estimate.",
+ "time_convention": "Times are as stored in the file: seconds since 1990-01-01 UTC.",
+ "location_uncertainty": "an Argos quality class per fix; an error radius for 6% of the file's rows, not shown",
+ "dataset_doi": null,
+ "dataset_id": "ATN deployment 573c6646d76c5c52816a4b92",
+ "dataset_url": "https://portal.atn.ioos.us/",
+ "repository": "US IOOS Animal Telemetry Network (ATN)",
+ "licence": "CC0 1.0 on the data.gov and OBIS records; the file's own terms ask that ATN or the citation be acknowledged",
+ "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+ "paper_citation_as_given": "Project named in the file: Odontocete Tagging in the Main Hawaiian Islands, 2007-2025.",
+ "source_file": {
+  "name": "atn_98364_false-killer-whale_trajectory_20131023-20140223.nc",
+  "bytes": 319596,
+  "sha256": "9896550eeeff21ff6fed461d0d13d0f6f2b759e5cca726e58d7308b254c4d3f6",
+  "retrieved_utc": "2026-11-19T08:31:51Z",
+  "retrieved_from": "https://ncei.axiomdatascience.com/atn/prod/ (ATN's staging folder for NCEI)"
+ },
+ "land_data": {
+  "file": "ne_10m_land.geojson",
+  "sha256": "1ac90796408bc6ad6911d69448485d3c4dbf2190370080368a09976e1c9f7416",
+  "source": "Natural Earth 1:10m land polygons, github.com/nvkelso/natural-earth-vector at commit ca96624a56bd078437bca8184e78163e5039ad19 (VERSION 5.2.0-pre)",
+  "scale": "1:10m",
+  "licence": "public domain"
+ },
+ "class_meanings": {
+  "3": "under 250 m",
+  "2": "250 to 500 m",
+  "1": "500 to 1,500 m",
+  "0": "over 1,500 m",
+  "A": "no estimate",
+  "B": "no estimate"
+ },
+ "accuracy_note": "Positions are Argos satellite fixes. Each carries a quality class. The satellite system's nominal error estimates are under 250 m (class 3), 250–500 m (2), 500–1,500 m (1) and over 1,500 m (0); classes A and B have no estimate. These are nominal estimates, not guaranteed limits: real errors can be larger.",
+ "rule": {
+  "speed_limit_m_per_s": 5.555555555555555,
+  "speed_limit_label": "20 km/h",
+  "speed_limit_source": "the tagging group's stated maximum rate of movement for this species in its own filter (Baird et al. 2011 report); a sourced parameter, not a proven speed ceiling",
+  "anchor_classes": "32",
+  "isolation_hours": 72,
+  "join_hours": 6,
+  "weak_classes": "0AB"
+ },
+ "simplification": "filtered, not thinned or smoothed: see the stages",
+ "card_text": {
+  "note": "Recorded Argos satellite fixes of one false killer whale, 23 Oct 2013 to 12 Feb 2014, after filtering. A dated replay, not current. Experimental.",
+  "shown": "{n} recorded fixes of one whale (tag 98364). {weak}% of them are Argos classes 0, A or B.",
+  "done": "Shown: Argos fixes that passed the data centre's time, location and speed checks. Mother Earth then left out 1 fix the satellite system marks invalid, {speed} fixes under its own speed-consistency rule ({limit}, favouring better-rated fixes; an experimental rule that can remove a correct fix), {isolated} fixes more than {iso} hours from any other, and {land} on land in Natural Earth's 1:10m map. {n} are shown. Fixes more than {join} hours apart are not joined ({refused} joining lines refused for crossing land).",
+  "line": "The line joins recorded fixes no more than {join} hours apart: {joined} of {steps} steps. It is not the whale's route.",
+  "not_route": "Recorded Argos fixes after filtering. Not a reconstruction of where the whale went. The file's last fixes, to 22 Feb 2014, stand alone in time and are left out, so the replay ends 12 Feb 2014.",
+  "changes": "Changes made: fixes left out by the stages listed; the tagging position is not part of the track (its time in the file is eight hours before the file's own deployment start); nothing moved, smoothed or interpolated."
+ }
+}

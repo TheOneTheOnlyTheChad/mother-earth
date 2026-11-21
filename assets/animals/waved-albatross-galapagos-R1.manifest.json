@@ -1,0 +1,124 @@
+{
+ "schema": 3,
+ "kind": "gps-filtered",
+ "id": "waved-albatross-galapagos-R1",
+ "study": "waved-albatross-galapagos",
+ "revision": "R1",
+ "animal": "3275-30662",
+ "label": "Waved albatross, animal 3275-30662",
+ "label_line": "Recorded movements of one breeding adult, 23 June to 15 September 2008.",
+ "title": "Galapagos Albatrosses (the study's name on Movebank)",
+ "place": "Galápagos (tagged at Punta Cevallos, the source's site name) and the eastern Pacific towards Peru",
+ "common_name": "waved albatross",
+ "species_as_recorded": "Phoebastria irrorata",
+ "method": "GPS tag (e-obs, 22 g), a fix attempted every 90 minutes; read out wirelessly (reference file)",
+ "animals_sampled": 28,
+ "animals_used_in_paper": 9,
+ "animals_shown": 1,
+ "sample_sentence": "One of 28 birds tagged; nine were used in the paper's analysis. These are sample sizes, not a population estimate.",
+ "time_convention": "Times are as recorded by the study: UTC, or GPS time, which differs from UTC by a few leap seconds (source README). Mother Earth rounds each time to the nearest second.",
+ "location_uncertainty": "the tag's own horizontal accuracy estimate per fix (the tag maker's estimate, not a measured error)",
+ "accuracy_note": "Each displayed fix carries the tag's own accuracy estimate (median 4 m, largest 65 m among the 981 displayed). It is the tag's estimate, not a measured error.",
+ "dataset_doi": "10.5441/001/1.3hp3s250",
+ "dataset_url": "https://doi.org/10.5441/001/1.3hp3s250",
+ "repository": "Movebank Data Repository",
+ "licence": "CC0 1.0 Universal",
+ "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+ "citation_as_given": "Cruz, S., Proaño, C.B., Anderson, D., Huyvaert, K., Wikelski, M., 2013, Data from: The Environmental-Data Automated Track Annotation (Env-DATA) System--Linking animal tracks with environmental data: Movebank Data Repository. doi:10.5441/001/1.3hp3s250",
+ "paper_citation_as_given": "Dodge, S., Bohrer, G., Weinzierl, R., Davidson, S.C., Kays, R., Douglas, D., Cruz, S., Han, J., Brandes, D., Wikelski, M., 2013, The Environmental-Data Automated Track Annotation (Env-DATA) System--Linking animal tracks with environmental data: Movement Ecology, v. 1:3. doi:10.1186/2051-3933-1-3",
+ "source_file": {
+  "name": "Galapagos Albatrosses.csv",
+  "bytes": 4913156,
+  "sha256": "1b62b43cfce5067193cde0fc1c5b6144eff193bd7c995160961479921fd4a8e6",
+  "retrieved": "downloaded by Chad on 20 Nov 2026 from the Movebank Data Repository record"
+ },
+ "reference_file": {
+  "name": "Galapagos Albatrosses-reference-data.csv",
+  "bytes": 6066,
+  "sha256": "1d7b24cf119f65ba7c90358b52ed5d29ec07b1b87c61ca6960b4bfad108061ad",
+  "retrieved": "downloaded by Chad on 20 Nov 2026 from the same record"
+ },
+ "built_from": "the two pinned source files",
+ "outlier_field": "the source file has no manually-marked-outlier column; that is an absent field, not a statement that the source checked and found none",
+ "timestamp_rule": {
+  "rounding": "nearest whole second, in integer milliseconds: seconds = (ms + 500) div 1000",
+  "allowance_ms": 25,
+  "statement": "Times are rounded to the nearest second. A source time more than 25 ms from a whole second stops the build.",
+  "measured_max_ms": 21,
+  "applied": "to every source row of the animal, positioned or not, before any omission"
+ },
+ "gap_rule": {
+  "max_join_seconds": 11700,
+  "statement": "Mother Earth does not join fixes more than 3 hours 15 minutes apart, and never joins across a withheld fix. These are display rules of Mother Earth's, not part of the study.",
+  "owner": "Mother Earth (display rule; not supplied by the researchers)"
+ },
+ "withholding": {
+  "radius_km": 5.0,
+  "sphere_radius_km": 6371.0088,
+  "formula": "great-circle distance on a sphere (haversine)",
+  "boundary": "a fix at exactly the radius or closer is withheld",
+  "centre_source": "the reference file's deployment coordinates for this animal, as given (two decimals)",
+  "owner": "Mother Earth (a project omission rule; not a scientifically established protection distance and not a guarantee of safety)",
+  "centre": {
+   "lat": "-1.39",
+   "lon": "-89.62"
+  },
+  "statement": "Mother Earth withholds every fix within 5 km of the tagging-site reference point. That point is the reference file's deployment location, given to two decimals; it is a tagging-site reference, not a nest position."
+ },
+ "simplification": "filtered, not thinned or smoothed: fixes near the tagging site are withheld; every other recorded fix is in the display file",
+ "sensitivity": "Release decision by the site owner, 21 Nov 2026: fixes within 5 km of the tagging-site reference point are withheld; every other recorded fix is shown at the source's precision; animal identifier only.",
+ "journeys": [
+  {
+   "animal": "3275-30662",
+   "file": "waved-albatross-galapagos-3275-30662-R1.json",
+   "bytes": 40759,
+   "sha256": "4261103073f5f66c9c59c6ea0251993d745c7aad6523bd393235d2e811b62375",
+   "first_fix": "2008-06-29T01:30:54Z",
+   "last_fix": "2008-09-15T13:30:18Z",
+   "first_fix_s": 1214703054,
+   "last_fix_s": 1221485418,
+   "record_first": "2008-06-23T17:58:44Z",
+   "record_last": "2008-09-15T13:30:18Z",
+   "record_first_s": 1214243924,
+   "record_last_s": 1221485418,
+   "steps": 980,
+   "failed_inside_withheld_period": 1,
+   "longest_withheld_period_s": 518456,
+   "accuracy_m": {
+    "min": 2.05,
+    "median": 4.35,
+    "p95": 17.92,
+    "max": 65.28,
+    "over_25": 28,
+    "over_50": 4
+   },
+   "bbox": {
+    "south": -12.794643,
+    "north": -0.4196057,
+    "west": -90.9507913,
+    "east": -77.5187383
+   },
+   "source_rows": 1338,
+   "positioned": 1326,
+   "failed_attempts": 12,
+   "fixes": 981,
+   "fixes_withheld": 345,
+   "withheld_periods": 14,
+   "steps_joined": 966,
+   "joined_spanning_failed": 10,
+   "steps_separated_by_withholding": 13,
+   "steps_separated_by_time": 1,
+   "failed_listed": 11
+  }
+ ],
+ "card": {
+  "note": "Recorded movements of one breeding adult, 23 June to 15 September 2008. A dated replay, not current.",
+  "shown": "981 of 1,326 recorded fixes are shown. 345 fixes within 5 km of the tagging-site reference point are withheld by Mother Earth.",
+  "done": "Times are rounded to the nearest second. The line never crosses a withheld period. 10 joins span a time when the tag tried and got no position. 12 attempts got no position and are not drawn.",
+  "line": "The line joins displayed fixes no more than 3 hours 15 minutes apart with no withheld fix between them: 966 of 980 steps.",
+  "not_route": "The path between fixes was not observed. The line is not the bird's flight path.",
+  "changes": "Changes made to the dataset (CC0 1.0): one bird selected; fixes near the tagging site withheld; times rounded to the nearest second; nothing moved, smoothed or interpolated. The archived source is unchanged.",
+  "accuracy": "Each displayed fix carries the tag's own accuracy estimate (median 4 m, largest 65 m among the 981 displayed). It is the tag's estimate, not a measured error.",
+  "tagging": "Tagged 23 Jun 2008 at Punta Cevallos (the source's site name); life stage as recorded: adult; the source's comment: “Nest stage: egg”; deployment comment: “used in analysis and shown in Figs 7-8”."
+ }
+}

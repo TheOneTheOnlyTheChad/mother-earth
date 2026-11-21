@@ -1,0 +1,152 @@
+{
+ "study": "false-killer-whale-hawaii",
+ "revision": "R1",
+ "animal": "98364",
+ "label": "False killer whale, tag 98364",
+ "title": "False killer whale (Pseudorca crassidens) location data from a satellite telemetry tag (ptt id 98364) deployed in the North Pacific Ocean from 2013-10-23 to 2014-02-23",
+ "place": "Hawaiian Islands and the North Pacific to the east",
+ "species_as_recorded": "Pseudorca crassidens",
+ "common_name": "false killer whale",
+ "method": "Wildlife Computers SPOT5 satellite tag; positions by Argos (Doppler)",
+ "animals_sampled": null,
+ "sample_sentence": "This file is the record of one tagged whale. One animal is not a population estimate.",
+ "time_convention": "Times are as stored in the file: seconds since 1990-01-01 UTC.",
+ "location_uncertainty": "an Argos quality class per fix; an error radius for 6% of the file's rows, not shown",
+ "dataset_doi": null,
+ "dataset_id": "ATN deployment 573c6646d76c5c52816a4b92",
+ "dataset_url": "https://portal.atn.ioos.us/",
+ "repository": "US IOOS Animal Telemetry Network (ATN)",
+ "licence": "CC0 1.0 on the data.gov and OBIS records; the file's own terms ask that ATN or the citation be acknowledged",
+ "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+ "paper_citation_as_given": "Project named in the file: Odontocete Tagging in the Main Hawaiian Islands, 2007-2025.",
+ "source_file": {
+  "name": "atn_98364_false-killer-whale_trajectory_20131023-20140223.nc",
+  "bytes": 319596,
+  "sha256": "9896550eeeff21ff6fed461d0d13d0f6f2b759e5cca726e58d7308b254c4d3f6",
+  "retrieved_utc": "2026-11-19T08:31:51Z",
+  "retrieved_from": "https://ncei.axiomdatascience.com/atn/prod/ (ATN's staging folder for NCEI)"
+ },
+ "land_data": {
+  "file": "ne_10m_land.geojson",
+  "sha256": "1ac90796408bc6ad6911d69448485d3c4dbf2190370080368a09976e1c9f7416",
+  "source": "Natural Earth 1:10m land polygons, github.com/nvkelso/natural-earth-vector at commit ca96624a56bd078437bca8184e78163e5039ad19 (VERSION 5.2.0-pre)",
+  "scale": "1:10m",
+  "licence": "public domain"
+ },
+ "class_meanings": {
+  "3": "under 250 m",
+  "2": "250 to 500 m",
+  "1": "500 to 1,500 m",
+  "0": "over 1,500 m",
+  "A": "no estimate",
+  "B": "no estimate"
+ },
+ "accuracy_note": "Positions are Argos satellite fixes. Each carries a quality class. The satellite system's nominal error estimates are under 250 m (class 3), 250–500 m (2), 500–1,500 m (1) and over 1,500 m (0); classes A and B have no estimate. These are nominal estimates, not guaranteed limits: real errors can be larger.",
+ "simplification": "filtered, not thinned or smoothed: see the stages",
+ "citation_as_given": "Baird, Robin; Hanson, M. Bradley; Schorr, Gregory S.; Webster, Daniel L.; McSweeney, Daniel J.; Gorgone, Annie M.; Mahaffy, Sabre D.; Holzer, Damon; Oleson, Erin M.; Andrews, Russel D.; Anderson, David; Bradford, Amanda L.. (2025). False killer whale (Pseudorca crassidens) location data from a satellite telemetry tag (ptt id 98364) deployed in the North Pacific Ocean from 2013-10-23 to 2014-02-23, deployment id 573c6646d76c5c52816a4b92. [Dataset]. US Integrated Ocean Observing System (IOOS) Animal Telemetry Network (ATN).",
+ "licence_text_in_file": "These data may be used and redistributed for free, but are not intended for legal use, since they may contain inaccuracies. No person or group associated with these data makes any warranty, expressed or implied, including warranties of merchantability and fitness for a particular purpose, or assumes any legal liability for the accuracy, completeness or usefulness of this information. This disclaimer applies to both individual use of these data and aggregate use with other data. It is strongly recommended that users read and fully comprehend associated metadata prior to use. Please acknowledge the U.S. Animal Telemetry Network (ATN) or the specified citation as the source from which these data were obtained in any publications and/or representations of these data. Communication and collaboration with dataset authors are strongly encouraged.",
+ "deployment_start_in_file": "2013-10-23T07:16:00Z",
+ "kind": "argos",
+ "schema": 2,
+ "animals_shown": 1,
+ "built_from": "full source file",
+ "rule": {
+  "speed_limit_m_per_s": 5.555555555555555,
+  "speed_limit_label": "20 km/h",
+  "speed_limit_source": "the tagging group's stated maximum rate of movement for this species in its own filter (Baird et al. 2011 report); a sourced parameter, not a proven speed ceiling",
+  "anchor_classes": "32",
+  "isolation_hours": 72,
+  "join_hours": 6,
+  "weak_classes": "0AB"
+ },
+ "stages": [
+  {
+   "stage": "rows in the source file",
+   "rows_out": 824
+  },
+  {
+   "stage": "tagging row (type \"User\") left out",
+   "rows_in": 824,
+   "removed": 1,
+   "rows_out": 823
+  },
+  {
+   "stage": "rows that did not pass the data centre's time, location and speed checks",
+   "rows_in": 823,
+   "removed": 129,
+   "rows_out": 694
+  },
+  {
+   "stage": "Argos class Z (marked invalid by the satellite system)",
+   "rows_in": 694,
+   "removed": 1,
+   "rows_out": 693
+  },
+  {
+   "stage": "speed consistency (experimental rule; limit 20 km/h; classes 3 2 first)",
+   "rows_in": 693,
+   "removed": 30,
+   "rows_out": 663
+  },
+  {
+   "stage": "more than 72 hours from any other kept fix",
+   "rows_in": 663,
+   "removed": 2,
+   "rows_out": 661
+  },
+  {
+   "stage": "on land in the pinned Natural Earth 1:10m land file",
+   "rows_in": 661,
+   "removed": 0,
+   "rows_out": 661,
+   "removed_by_class": {}
+  }
+ ],
+ "gap_rule": {
+  "max_join_seconds": 21600,
+  "statement": "Mother Earth does not join fixes more than 6 hours apart, or where the line would cross land in its land map. These are display rules of Mother Earth's, not part of the study."
+ },
+ "journeys": [
+  {
+   "animal": "98364",
+   "file": "false-killer-whale-hawaii-98364-R1.json",
+   "bytes": 19958,
+   "sha256": "7cb4bd447c27ab988e92f5149620a98ea7376d940b1d257a8025cb36f7865c84",
+   "fixes": 661,
+   "first_fix": "2013-10-23T03:02:00Z",
+   "last_fix": "2014-02-12T14:51:34Z",
+   "first_fix_s": 1382497320,
+   "last_fix_s": 1392216694,
+   "bbox": {
+    "south": 17.326,
+    "north": 24.6164,
+    "west": -157.41,
+    "east": -137.8672
+   },
+   "steps": 660,
+   "steps_within_join_limit": 554,
+   "steps_refused_for_land": 0,
+   "steps_joined": 554,
+   "classes": {
+    "3": 14,
+    "2": 101,
+    "1": 189,
+    "0": 119,
+    "A": 121,
+    "B": 117
+   },
+   "weak_class_share_percent": 54,
+   "gaps_over_rule": 106,
+   "longest_gap_s": 392296,
+   "newly_isolated_after_all_stages_not_removed": 0
+  }
+ ],
+ "card": {
+  "note": "Recorded Argos satellite fixes of one false killer whale, 23 Oct 2013 to 12 Feb 2014, after filtering. A dated replay, not current. Experimental.",
+  "shown": "661 recorded fixes of one whale (tag 98364). 54% of them are Argos classes 0, A or B.",
+  "done": "Shown: Argos fixes that passed the data centre's time, location and speed checks. Mother Earth then left out 1 fix the satellite system marks invalid, 30 fixes under its own speed-consistency rule (20 km/h, favouring better-rated fixes; an experimental rule that can remove a correct fix), 2 fixes more than 72 hours from any other, and 0 on land in Natural Earth's 1:10m map. 661 are shown. Fixes more than 6 hours apart are not joined (0 joining lines refused for crossing land).",
+  "line": "The line joins recorded fixes no more than 6 hours apart: 554 of 660 steps. It is not the whale's route.",
+  "not_route": "Recorded Argos fixes after filtering. Not a reconstruction of where the whale went. The file's last fixes, to 22 Feb 2014, stand alone in time and are left out, so the replay ends 12 Feb 2014.",
+  "changes": "Changes made: fixes left out by the stages listed; the tagging position is not part of the track (its time in the file is eight hours before the file's own deployment start); nothing moved, smoothed or interpolated."
+ }
+}

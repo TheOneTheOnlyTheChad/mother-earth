@@ -1,0 +1,44 @@
+{
+  "study": "zebra-botswana",
+  "revision": "R1",
+  "title": "Migratory Burchell's zebra (Equus burchellii) in northern Botswana",
+  "place": "Okavango Delta to Makgadikgadi grasslands, northern Botswana",
+  "species_as_recorded": "Equus burchellii",
+  "taxon_detail_as_recorded": "Equus burchelli antiquorum",
+  "common_name": "plains zebra (Burchell's zebra)",
+  "dataset_doi": "10.5441/001/1.f3550b4f",
+  "dataset_url": "https://doi.org/10.5441/001/1.f3550b4f",
+  "repository": "Movebank Data Repository",
+  "movebank_study_id": "10898263",
+  "licence": "CC0 1.0 Universal",
+  "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "citation_as_given": "Bartlam-Brooks HLA, Harris S. 2013. Data from: In search of greener pastures: using satellite images to predict the effects of environmental change on zebra migration. Movebank Data Repository. https://doi.org/10.5441/001/1.f3550b4f",
+  "paper_citation_as_given": "Bartlam-Brooks HLA, Beck PSA, Bohrer G, Harris S (2013) In search of greener pastures—using satellite images to predict the effects of environmental change on zebra migration. Journal of Geophysical Research: Biogeosciences v 188, p 1–11. doi:10.1002/jgrg.20096",
+  "method": "GPS collar (Vectronic Aerospace GPS-Plus 4D), fixes hourly or every 15 minutes",
+  "time_convention": "Times are as recorded by the study: UTC, or GPS time, which differs from UTC by a few leap seconds (source README).",
+  "location_uncertainty": "not supplied by the dataset",
+  "animals_sampled": 7,
+  "study_totals": { "rows": 53794, "usable_fixes": 53776, "rows_without_position": 17, "rows_flagged_outlier": 1 },
+  "source_file": {
+    "name": "Migratory Burchell's zebra (Equus burchellii) in northern Botswana.csv",
+    "bytes": 15651785,
+    "sha256": "c91054627d7d60d50cd9cb59b3d52609df5d17e6985d147742bcf9a6da488824",
+    "retrieved_utc": "2026-11-19T02:29:17Z",
+    "retrieved_from": "https://datarepository.movebank.org (bitstream 9672ab98-93db-4943-bbb0-ef1a9435545d)"
+  },
+  "extracts": {
+    "Z3866": {
+      "derivation": "the source file's header line and every source line whose individual-local-identifier is Z3866, bytes unchanged, joined with LF; made in the browser from the full file whose sha256 is the source_file sha256 above",
+      "rows": 13048,
+      "bytes": 3782817,
+      "sha256": "76bb97e2238c53eb7e12854ac4b2fa07678b1c856029e037e14d7e2440f6baaf"
+    }
+  },
+  "gap_rule": {
+    "max_join_seconds": 10800,
+    "statement": "Mother Earth does not join fixes more than 3 hours apart. This is a display rule, not part of the study.",
+    "owner": "Mother Earth (provisional display rule; not supplied by the researchers)"
+  },
+  "simplification": "none: every usable recorded fix of the animal is in the display file",
+  "sensitivity": "Release decision by the site owner, 21 Nov 2026: completed historical track shown as recorded at the source's precision, collar identifier only."
+}

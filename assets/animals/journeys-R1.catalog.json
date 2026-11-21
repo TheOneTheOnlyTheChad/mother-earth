@@ -1,0 +1,38 @@
+{
+ "schema": 1,
+ "note": "Journeys offered by the animal switches on the Animals page. Dated archive records.",
+ "journeys": [
+  {
+   "id": "zebra-botswana-Z3866",
+   "label": "Plains zebra, animal Z3866",
+   "group": "Land",
+   "animal": "Z3866",
+   "manifest": "zebra-botswana-R1.manifest.json",
+   "manifest_sha256": "ddb1cd5d23976615ab72a076b56d2cb026c55f9ba8e9c58efe7fb48686c640b2"
+  },
+  {
+   "id": "white-shark-sa-118845",
+   "label": "White shark, tag 118845",
+   "group": "Sea",
+   "animal": "118845",
+   "manifest": "white-shark-sa-R1.manifest.json",
+   "manifest_sha256": "0522ca171b28a4ea329fa4a557c3dc3e700bbfe1ee506c973e0438ec51539564"
+  },
+  {
+   "id": "false-killer-whale-hawaii-98364",
+   "label": "False killer whale, tag 98364",
+   "group": "Sea",
+   "animal": "98364",
+   "manifest": "false-killer-whale-hawaii-R1.manifest.json",
+   "manifest_sha256": "705368a0f36a89e4db4544e143a2cff998796b7fe13247f49ceac80aed9429ea"
+  },
+  {
+   "id": "waved-albatross-galapagos-3275-30662",
+   "label": "Waved albatross, animal 3275-30662",
+   "group": "Air",
+   "animal": "3275-30662",
+   "manifest": "waved-albatross-galapagos-R1.manifest.json",
+   "manifest_sha256": "266ebc98153944004b460ae2a03ab71bec9c8d9f5fba2ffb5c8a06f2161a13e4"
+  }
+ ]
+}

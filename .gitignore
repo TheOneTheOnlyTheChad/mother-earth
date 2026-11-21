@@ -12,3 +12,6 @@ phase1/state/
 # satellite benchmark: frozen third-party data stays private until reuse is established (2 Nov 2026)
 bench-private/
 __pycache__/
+
+# animal source data stays on the Mac only: never committed, never served (20 Nov 2026)
+_source-data/

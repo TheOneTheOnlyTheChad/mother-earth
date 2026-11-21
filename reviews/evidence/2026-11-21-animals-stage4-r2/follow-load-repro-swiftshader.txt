@@ -1,0 +1,14 @@
+{"rep":0,"corridor":true,"firstPage":{"dcl":368,"record":1090},"closeMs":45,"nextPage":{"dcl":2032,"record":2527}}
+{"rep":1,"corridor":true,"firstPage":{"dcl":433,"record":1086},"closeMs":12,"nextPage":{"dcl":2069,"record":2781}}
+{"rep":2,"corridor":true,"firstPage":{"dcl":391,"record":1082},"closeMs":12,"nextPage":{"dcl":2335,"record":3130}}
+{"rep":3,"corridor":true,"firstPage":{"dcl":407,"record":1168},"closeMs":10,"nextPage":{"dcl":2336,"record":3124}}
+{"rep":4,"corridor":true,"firstPage":{"dcl":439,"record":1219},"closeMs":9,"nextPage":{"dcl":2183,"record":2969}}
+{"rep":5,"corridor":true,"firstPage":{"dcl":370,"record":1170},"closeMs":5,"nextPage":{"dcl":2585,"record":3356}}
+{"rep":6,"corridor":true,"firstPage":{"dcl":387,"record":1146},"closeMs":10,"nextPage":{"dcl":2373,"record":3067}}
+{"rep":7,"corridor":true,"firstPage":{"dcl":471,"record":1254},"closeMs":13,"nextPage":{"dcl":2363,"record":3067}}
+
+CONTROL (journey only, no corridor):
+{"rep":0,"corridor":false,"firstPage":{"dcl":458,"record":1320},"closeMs":18,"nextPage":{"dcl":416,"record":1295}}
+{"rep":1,"corridor":false,"firstPage":{"dcl":455,"record":1423},"closeMs":8,"nextPage":{"dcl":361,"record":991}}
+{"rep":2,"corridor":false,"firstPage":{"dcl":387,"record":1109},"closeMs":11,"nextPage":{"dcl":437,"record":1223}}
+{"rep":3,"corridor":false,"firstPage":{"dcl":432,"record":1340},"closeMs":17,"nextPage":{"dcl":357,"record":1156}}

@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "revision": "R1",
+ "note": "Population evidence for the Animals page. Separate from the journey list. A page draws nothing from a manifest whose checksum differs from the one here.",
+ "populations": [
+  {
+   "id": "african-penguin-census",
+   "label": "African penguin: colony census, 1979 to 2019",
+   "group": "Sea",
+   "kind": "colony-census",
+   "manifest": "african-penguin-census-R1.manifest.json",
+   "manifest_sha256": "77d93cc11e8f758111ca94481812dfe8d17791be00fcbfcbf971158c2f052c50"
+  }
+ ]
+}

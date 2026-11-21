@@ -369,9 +369,11 @@ details.cd>.cav{margin-top:2px}
 .tabs a:hover,.tabs a:focus-visible{background:rgba(140,170,200,.12)}
 .tabs a[aria-current="page"]{background:rgba(255,179,71,.14);color:var(--accent)}
 @media (min-width:721px) and (max-width:1279px){.top{gap:8px}.top h1{font-size:20px}.tabs a{padding:0 6px;letter-spacing:.02em;font-size:13px}}   /* four tabs on a one-row header */
-@media (min-width:721px) and (max-width:1139px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside four tabs: hide it rather than shrink or cut it */
-@media (max-width:420px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* four tabs on a narrow phone */
-@media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}   /* narrow one-row header: the clock keeps its UTC label */
+@media (min-width:721px) and (max-width:1199px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside five tabs: hide it rather than shrink or cut it (was 1139 px with four tabs) */
+@media (min-width:1280px) and (max-width:1365px){.tabs a{padding:0 6px;letter-spacing:.02em;font-size:13px}}   /* five tabs: with stand-in fonts the full-size tabs cut the promise at 1280 px; compact tabs run to 1365 px */
+@media (max-width:480px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* five tabs on a phone: at full size they need 468 px, so the compact size now runs to 480 px (was 420 px with four tabs) */
+@media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}
+@media (min-width:721px) and (max-width:760px){.tabs a{padding:0 4px}}   /* five tabs: the one-row header was 2 px too wide at 721 px */   /* narrow one-row header: the clock keeps its UTC label */
 /* phone: two fixed rows — title · clock · Menu, then the two tabs. A grid, not a wrapping flex row: with
    fallback fonts at 390 px the wrapping row split into three lines and pushed the title above the header.
    Rows 44 + 44 px (touch targets kept), 2 px gap, 2 px top/bottom padding = 94 px (was 56 px without tabs). */
@@ -750,3 +752,140 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
   .bare-hint .bh-b{display:none}
   .layers-panel{top:auto;bottom:0;left:0;width:100%;max-height:70vh;border-left:0;border-right:0;border-bottom:0}
 }
+
+/* Animal journey replay bar. It lives on the Animals page, under that page's globe, in the page flow: it covers no part of the
+   globe and no other control at any width (animals-tab-rc, stage 1, 20 Nov 2026; before that it sat over the Earth now globe). */
+.replay{display:flex;flex-direction:column;gap:4px;margin:8px 0 0;padding:8px 10px;background:rgba(7,10,15,.9);border:1px solid var(--line-strong);font-size:12px;color:var(--fg)}
+.replay[hidden]{display:none}
+.rp-ctl{display:flex;align-items:center;gap:8px}
+.rp-ctl button,.rp-ctl select,.journey-retry{min-height:44px;padding:0 12px;font:500 12px/1 var(--mono);color:var(--fg);background:transparent;border:1px solid var(--accent);cursor:pointer}
+.rp-ctl select{border-color:var(--line-strong);background:var(--card)}
+#replay-play{min-width:72px}
+.rp-ctl input[type=range]{flex:1 1 60px;min-width:60px;min-height:44px;margin:0;accent-color:var(--accent)}
+.rp-ctl button,.rp-ctl select{flex:none;white-space:nowrap}
+.rp-ctl button:focus-visible,.rp-ctl select:focus-visible,.rp-ctl input:focus-visible,.journey-retry:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rp-now{font-variant-numeric:tabular-nums;line-height:1.35}
+.rp-note{color:var(--dim);font-size:11px;line-height:1.35}
+.journey-retry{margin:6px 0}
+.journey-retry[hidden]{display:none}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (max-width:720px){
+  .replay{padding:6px 8px;gap:3px;font-size:11.5px}
+  .rp-ctl{gap:6px}
+  .rp-ctl button,.rp-ctl select{padding:0 8px}
+  #replay-play{min-width:56px}
+  .rp-w{display:none}
+  #replay-goto{text-transform:capitalize}
+  .rp-note{font-size:10.5px}
+}
+/* Animals page: its own globe, the journey switches beside it (below it on narrow screens), then the study cards. */
+.doc.animals main{max-width:1180px}
+.animals .an-doc{max-width:76ch;margin:0 auto}
+.an-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 12px}
+.an-stage{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:18px;align-items:start;margin:0 0 28px}
+.an-globe-col{min-width:0}
+.an-globe-box{position:relative;width:100%;height:min(54vh,600px);min-height:280px;background:#070a0f;border:1px solid var(--line);overflow:hidden}
+#an-globe{position:absolute;inset:0}
+.an-backdrop{margin:6px 0 0;font-size:11px;line-height:1.4;color:var(--dim)}
+.an-backdrop[hidden]{display:none}
+.an-status{margin:6px 0 0;font-size:13px;line-height:1.4;color:var(--fg)}
+.an-status[hidden]{display:none}
+.an-toswitches{display:none;margin:6px 0 0;font-size:13px}
+.an-toswitches a{display:inline-block;padding:12px 0;min-height:44px;box-sizing:border-box}
+.an-panel{min-width:0;border:1px solid var(--line);background:var(--card);padding:10px 12px}
+.doc .an-panel h2{font:700 20px/1.15 var(--display);letter-spacing:.04em;margin:0 0 4px;padding:0;border:0}
+.an-note{margin:0 0 8px;font-size:12.5px;line-height:1.45;color:var(--dim)}
+.doc .an-panel h3.an-grp{font:600 15px/1.2 var(--display);letter-spacing:.08em;margin:12px 0 2px;color:var(--dim)}
+.an-sw{border-top:1px solid var(--line);padding:6px 0 8px}
+.an-sw-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px}
+.an-sw .ovl-tgl .t{font-size:13.5px}
+.an-sw .ovl-tgl[aria-busy="true"]{cursor:progress}
+.an-sw .ovl-tgl[aria-disabled="true"]{opacity:.55;cursor:default}
+.an-sw .cav,.an-sw .obs{font-size:12px;line-height:1.45;color:var(--dim);margin:2px 0 0}
+.an-sw .obs{color:#c9d3e0}
+.an-more{display:inline-block;margin-top:4px}
+.an-integrity{border:1px solid var(--accent);padding:8px 10px;margin:8px 0;font-size:12.5px;line-height:1.45}
+.an-integrity[hidden]{display:none}
+@media (max-width:900px){.an-stage{grid-template-columns:minmax(0,1fr)}.an-toswitches{display:block}.an-globe-box{height:min(56vh,520px)}}
+@media (max-width:720px){.an-globe-box{height:min(50vh,420px);min-height:240px}.doc.animals main{padding-left:12px;padding-right:12px}}
+/* Animals page (private preview) */
+.an-preview{padding:8px 10px;border:1px solid var(--accent);display:inline-block}
+/* Animals page: population counts (animals-tab-rc stage 3). In the page flow; nothing here touches the globe. */
+.an-census{margin:0 0 28px;border-top:1px solid var(--line-strong);padding-top:14px}
+.an-census h3{margin:6px 0 4px}
+.cen-card-head{display:flex;gap:8px;align-items:center;font-size:11px}
+.cen-state{margin:4px 0 8px;font-size:13px;color:var(--dim)}
+#cen-intro p{margin:0 0 6px;font-size:13px;line-height:1.5;max-width:900px}
+#cen-intro .cen-unit{color:var(--fg);font-size:14px}
+.cen-dates{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0 12px;font-size:12.5px}
+.cen-dates dt{color:var(--dim)} .cen-dates dd{margin:0}
+.cen-country{margin:14px 0 6px;font:600 13px/1.3 var(--mono)}
+.cen-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.cen-card{display:flex;flex-direction:column;gap:4px;min-width:0;min-height:44px;text-align:left;font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);padding:8px 10px;cursor:pointer}
+.cen-card:hover{border-color:var(--line-strong)} .cen-card:focus-visible,.cen-close:focus-visible,.cen-tablebox:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cen-card[aria-expanded="true"]{border-color:var(--accent)}
+.cen-name{font:600 13.5px/1.3 var(--mono)}
+.cen-sum{font-size:11.5px;line-height:1.4;color:var(--dim)}
+.cen-open{font-size:11.5px;color:var(--accent)}
+.cen-svg{display:block;width:100%;height:auto}
+.cen-svg .cen-axis{stroke:var(--line-strong);stroke-width:1}
+.cen-svg .cen-grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.cen-svg .cen-line{fill:none;stroke:#8fd3ff;stroke-width:1.4;stroke-linejoin:round}
+.cen-svg .cen-dot{fill:#e8f4ff;stroke:#0b1220;stroke-width:.6}
+.cen-svg text{fill:var(--dim);font:10px var(--mono)}
+.cen-svg-big text{font-size:12px}
+.cen-svg-big{max-width:900px}
+.cen-svg-narrow text{font-size:11px}
+.cen-scaleline{margin:6px 0;font-size:12.5px;color:var(--dim)}
+.cen-detail{border:1px solid var(--accent);background:var(--card);padding:10px 12px;margin:14px 0}
+.cen-detail[hidden]{display:none}
+.cen-dhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cen-dh{margin:0;font:600 14px/1.3 var(--mono)} .cen-dh:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cen-close{min-height:44px;min-width:44px;padding:0 14px;font:inherit;color:var(--fg);background:transparent;border:1px solid var(--line-strong);cursor:pointer}
+.cen-notes p{margin:6px 0;font-size:12.5px;line-height:1.45}
+.cen-tablebox{max-height:340px;overflow:auto;border:1px solid var(--line);margin-top:8px}
+.cen-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.cen-table caption{text-align:left;padding:6px 8px;color:var(--dim)}
+.cen-table th,.cen-table td{text-align:left;padding:4px 8px;border-top:1px solid var(--line)}
+.cen-table thead th{position:sticky;top:0;background:var(--card)}
+.cen-table td.cen-none,.cen-table td.cen-mark{color:var(--dim)}
+.cen-src{margin:6px 0;font-size:12px;line-height:1.45;overflow-wrap:anywhere;max-width:900px}
+.an-study{border:1px solid var(--line-strong);padding:4px 14px 10px;margin:8px 0 18px}
+.an-facts{width:100%;border-collapse:collapse;margin:8px 0}
+.an-facts th{width:30%;text-align:left;vertical-align:top;font-weight:500;color:var(--dim);padding:6px 10px 6px 0}
+.an-facts td{padding:6px 0;overflow-wrap:anywhere}
+.an-facts tr+tr th,.an-facts tr+tr td{border-top:1px solid var(--line)}
+.an-go{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--accent);color:var(--fg);text-decoration:none}
+.an-go:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.an-na{color:var(--dim)}
+@media (max-width:720px){.an-facts th,.an-facts td{display:block;width:auto;padding:4px 0}.an-facts tr+tr td{border-top:0}}
+.an-study h5{margin:14px 0 4px;font:600 13px/1.3 var(--mono)}
+/* ---- Animals page: published corridor (stage 4 MVP). Its panel sits under the journey switches; its legend under the globe. */
+.an-globe-col{grid-row:1 / span 2}
+.cor-panel{grid-column:2}
+@media (max-width:900px){.an-globe-col{grid-row:auto}.cor-panel{grid-column:auto}}
+.cor-about p{font-size:12px;line-height:1.45;margin:6px 0 0;color:#c9d3e0}
+.cor-about .cor-omit,.cor-legend .cor-lg-omit{font-weight:700;color:var(--fg)}
+.cor-leg{list-style:none;margin:6px 0 0;padding:0;font-size:12px;line-height:1.4}
+.cor-leg li{display:flex;gap:8px;align-items:flex-start;margin:3px 0}
+.cor-sw{flex:0 0 22px;width:22px;height:12px;margin-top:2px;box-sizing:border-box}
+.cor-sw-high{background:rgba(255,112,54,.85);border:2px solid #fff}
+.cor-sw-medium{background:rgba(255,196,84,.45);border:1px solid #ffd98a}
+.cor-sw-low{background:transparent;border:1px dashed var(--dim)}
+.cor-more{margin:8px 0 0;font-size:12px}
+.cor-more summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--accent)}
+.cor-legend{margin:6px 0 0;padding:6px 8px;border:1px solid var(--line);background:var(--card);font-size:12px;line-height:1.4}
+.cor-legend[hidden]{display:none}
+.cor-legend p{margin:3px 0}
+.cor-lg-row{display:flex;flex-wrap:wrap;gap:4px 16px}
+.cor-lg-item{display:inline-flex;gap:6px;align-items:flex-start}
+.cor-lg-small{color:var(--dim);font-size:11px}
+.cor-lg-view{color:#9fd8ff}
+#cor-retry[aria-disabled="true"],#cor-facts-retry[aria-disabled="true"]{opacity:.55;cursor:default}
+.cor-scale{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;font:500 11px/1.2 var(--mono);color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+.cor-scale[hidden]{display:none}
+.cor-scale-bar{height:6px;border:2px solid #fff;border-top:0;box-sizing:border-box;box-shadow:0 0 2px #000}
+.cor-tick{font:500 10px/1 var(--mono);color:#cfe2ff;text-shadow:0 0 3px #000,0 0 3px #000;white-space:nowrap;pointer-events:none}
+.cor-tick span{position:absolute}
+.cor-tick-lat{right:6px;top:-5px}
+.cor-tick-lng{left:0;top:8px;transform:translateX(-50%)}
