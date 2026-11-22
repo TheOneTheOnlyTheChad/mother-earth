@@ -291,7 +291,7 @@
    "across": 24,
    "up": 20
   },
-  "edge_half_width_deg": 0.006,
+  "edge_half_width_deg": 0.004,
   "source_grid": {
    "tile_matrix_set": "250m",
    "deg_per_pixel": 0.002197265625,

@@ -12,7 +12,7 @@
 (() => {
   const ME = window.ME = window.ME || {};
   const $ = id => document.getElementById(id), root = $('cor-panel'); if (!root) return;
-  const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: 'db435b5cec8504d503b38c3b73c33ec64d566b4ebdf015de5fac95fce94002bf', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
+  const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: 'c9dcf4e76a737c3fbf9f15f3a56fd4b3fc0babefe290501b7ed2339f9fe50651', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
     ALT: { medium: 0.00004, high: 0.00008, lines: 0.00012 },                           // heights above the globe, in globe radii (ours): only to fix the drawing order
     FILL: { medium: 'rgba(255,196,84,0.38)', high: 'rgba(255,112,54,0.72)' }, STROKE: { medium: '#ffd98a', high: '#ffffff' }, LINE: 'rgba(170,205,255,0.55)',
     PIC: { ALT: 0.00002, EDGE_ALT: 0.00003, EDGE: 0x0b1524 },                         // the picture and the dark edge lie under Medium; their order is fixed by draw order, not by these heights
