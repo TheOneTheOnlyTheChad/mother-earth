@@ -1,12 +1,13 @@
 # Earth from Space — email alarm assessment (runbook 2a), read-only (22 Nov 2026) — rev 2
 
 **Rev 2, 22 Nov 2026 15:06 UTC (clock reading),** after the review Chad sent back in the thread on 22 Nov (five points and a cost
-note; section 9 lists each and what changed). Sections 3 to 5 and 8 are rewritten; section 6 reworded. Still
-read-only: **nothing has been created, enabled or changed.**
+note; section 9 lists each and what changed). Sections 3 to 5 and 8 are rewritten; section 6 reworded. **State now (see sections 10 and 11): one throwaway Worker, `mother-earth-alarmtest`, exists with its address off;
+no monitor exists; `mother-earth` is unchanged.** Sections 1 to 9 were written before anything was created and
+describe the read-only assessment as it then stood.
 
 Written 22 Nov 2026 14:54 UTC (clock reading), on Chad's go of 22 Nov: "Go ahead with the read-only email-alarm assessment:
 availability, actual detection coverage, delivery options and cost. Show me the proposed configuration before
-creating or enabling anything." **Nothing was created, enabled or changed.** One monitor form was opened in the
+creating or enabling anything." **At that time nothing had been created, enabled or changed** (historical; see the state line above). One monitor form was opened in the
 dashboard to read its options and left without saving; the monitors list was read back empty afterwards.
 `EARTHVIEW_ENABLED` stays `manual`.
 
@@ -262,3 +263,44 @@ has not been observed.
    with a certainly-true condition on the hub's own rows and record coverage of CPU and memory endings as untested.
 4. Stop here: delete the test Worker, create nothing, and write "no alarm; reasons in section 10" into the Stage D
    package.
+
+## 11. Review of the stop, and one later naming check (22 Nov 2026 15:19 UTC, clock reading)
+
+Review relayed by Chad in the thread (22 Nov): stopping was right; **do not continue with `__unknown__`**; keep the
+test Worker's address off; make one later read-only check for its proper name without more traffic; if naming
+resolves, bring back a revised form-native test plan with the window limitation stated; if not, stop the
+resource-test route; delivery-only testing stays an option with CPU, memory and scheduled coverage recorded as
+untested; avoid the undocumented API route for this trial; fix the opening wording (done above).
+
+**Corrections accepted**
+
+- Section 10's option 3 suggested pointing the test at `__unknown__`, and Claude told Chad the test Worker was "the
+  only thing that would produce unnamed rows". **That was wrong on this document's own evidence** (124 unnamed rows
+  earlier in the week). Withdrawn. An email from such a monitor would have needed correlating with the failure's
+  timestamp, invocation type and outcome before it counted as evidence.
+- **One successful test cannot tell the two window behaviours apart.** A rolling 15-minute read and an average of
+  earlier one-minute results would both catch an ordinary failure whose row arrives promptly. A form-native test can
+  show delivery and detection in that test; it cannot show protection against late-arriving rows.
+- **Sampling makes any monitor on this dataset supplementary warning coverage.** Even three clean legs would not
+  establish that every future failure produces an email.
+
+**Naming check, read-only, 15:18:54 UTC (about nine minutes after the test Worker's two invocations; no new traffic:
+its invocation records still show only 15:09:16 and 15:09:39, and its address is off)**
+
+- Rows with `scriptName` `mother-earth-alarmtest` since 15:00: **none**.
+- Rows with `scriptName` `__unknown__` today: exactly two, fetch, success, at 15:09:16 and 15:09:39, both with script
+  version `b6c8e9b2-c273-4586-a92b-eb162578b2b2`. They match the test Worker's two invocations to the second.
+- Unnamed rows 15 to 22 Nov by day: 16 Nov 10 fetch; 20 Nov 87 cron and 2 fetch; 21 Nov 25 cron; 22 Nov the 2 above.
+  **The 20 and 21 Nov rows fit the Stage A probe Worker (created 20 Nov, cron-driven, deleted 21 Nov); if they are
+  its rows, a Worker that lived for more than twelve hours was never recorded under its name, or lost it on
+  deletion. Which of the two is not established. The 16 Nov rows are unexplained.**
+- This was an early read, not the "later" one asked for. **One more read is scheduled for about two hours after
+  creation; it is the last.** If the name has not appeared, the resource-test route stops and the test Worker is
+  deleted under the existing approval's "delete the test Worker".
+
+**The Stage C row:** the attribution of 55.48 MB rests on the row's `timestamp` 11:51:11, type fetch and
+`cpuTimeUs` 536,696 matching the run's invocation record (11:51:11.167 start, CPU 536 ms). On that correlation it is
+the isolate's memory at the end of that invocation. It establishes neither peak memory nor headroom.
+
+**Where this leaves the alarm:** the assessment has exposed limits; **it has not established a dependable alarm.**
+Stage C is unaffected.
