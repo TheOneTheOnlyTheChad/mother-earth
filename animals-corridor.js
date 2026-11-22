@@ -1,25 +1,29 @@
 /* Mother Earth — a published corridor on the Animals page's globe (animals-tab-rc, stage 4 MVP;
- * docs/concepts/ANIMALS-CORRIDOR-PROPOSAL.md rev 2.2, with Chad's choice C-D4 B: labelled lines and a scale, no regional picture).
- * PRIVATE PREVIEW. Two published polygon classes for one herd (Medium and High use). The source's Low class is NOT in the files
+ * docs/concepts/ANIMALS-CORRIDOR-PROPOSAL.md rev 2.2; C-D4 A since docs/concepts/ANIMALS-SATELLITE-PROPOSAL.md rev 1.1: labelled lines,
+ * a scale, and one regional satellite picture under the areas). Two published polygon classes for one herd (Medium and High use). The source's Low class is NOT in the files
  * this script reads and is never drawn. Nothing here is a path, a position or a count of animals.
  * Trust chain: this script pins the corridor list; the list pins the manifest; the manifest pins the display file; then a
  * structure check; only then is anything drawn. Its own switch, request, time limit and token: independent of the journeys.
- * Shared globe (proposal 6.1): this script owns three globe layers and nothing else (polygons, paths, html elements; the
- * journeys use none of them), its legend and its scale bar. Off removes only those. The page is scrolled only at a press of
+ * Shared globe (proposal 6.1): this script owns three globe layers (polygons, paths, html elements; the journeys use none of
+ * them), two meshes of its own for the regional picture and the dark edge under the lines, its legend and its scale bar, and
+ * nothing else. Off removes only those. The regional picture (proposal 6.2) is independent of the areas: it never delays or
+ * decides "shown", it is drawn only while the areas are shown, and a failed picture leaves the areas as they are. The page is scrolled only at a press of
  * the switch or Retry, never by an answer. The camera is moved once per press, and only if that press is still current. */
 (() => {
   const ME = window.ME = window.ME || {};
   const $ = id => document.getElementById(id), root = $('cor-panel'); if (!root) return;
-  const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: '47a029f074dc24e93bcc43e19ad065e71a00f70a1ca2084d3f5c04d7cb1174f5', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
+  const C = { CATALOG: 'assets/animals/corridors-R1.catalog.json', CATALOG_SHA256: 'c9dcf4e76a737c3fbf9f15f3a56fd4b3fc0babefe290501b7ed2339f9fe50651', BASE: 'assets/animals/', ID: 'mule-deer-east-walker-corridor', WAIT_MS: 20000,
     ALT: { medium: 0.00004, high: 0.00008, lines: 0.00012 },                           // heights above the globe, in globe radii (ours): only to fix the drawing order
     FILL: { medium: 'rgba(255,196,84,0.38)', high: 'rgba(255,112,54,0.72)' }, STROKE: { medium: '#ffd98a', high: '#ffffff' }, LINE: 'rgba(170,205,255,0.55)',
+    PIC: { ALT: 0.00002, EDGE_ALT: 0.00003, EDGE: 0x0b1524 },                         // the picture and the dark edge lie under Medium; their order is fixed by draw order, not by these heights
     SCALE_PX: 120, SCALE_TOL: 0.05, SETTLE_MS: 160, DRAW_WAIT_MS: 10000, R_KM: 6371.0088,
     T: { off: 'Off. Switch on to draw these published areas on the globe.', loading: 'Checking the published areas…', drawing: 'Drawing the published areas…', stalled: 'The areas could not be drawn in time, so nothing is drawn.', shown: 'Shown on the globe.', unverified: 'The corridor files could not be verified, so nothing is drawn.', failed: 'The corridor files could not be loaded.',
       factsLoading: 'Checking the corridor record…', factsBad: 'The corridor record could not be verified, so this switch is unavailable.', factsFailed: 'The corridor record could not be loaded, so this switch is unavailable.',
       noGlobe: 'The globe is not available in this browser, so the areas cannot be drawn. The description below still applies.', lost: 'The globe stopped, so the areas are no longer drawn. The description below still applies. Reload the page to use the globe again.',
       blur: 'At this close view the whole-globe backdrop is a blur: one picture for the whole Earth, about 20 km a pixel. It is context only and shows nothing about the animals or the study years.' } };
   class Unverified extends Error { }
-  const st = { facts: 'loading', factsErr: '', man: null, status: 'off', err: '', on: false, tok: 0, req: null, geo: null, pendingMove: false, drawn: false, view: '', announced: '', scale: null, stage: 0, feats: null, moves: 0, reveals: 0, scrolls: 0, timer: 0, held: '' };
+  const st = { facts: 'loading', factsErr: '', man: null, status: 'off', err: '', on: false, tok: 0, req: null, geo: null, pendingMove: false, drawn: false, view: '', announced: '', scale: null, stage: 0, feats: null, moves: 0, reveals: 0, scrolls: 0, timer: 0, held: '', picHeld: false,
+    pic: { status: 'idle', err: '', used: 0, tok: 0, ctrl: null, bitmap: null, mesh: null, shown: false, attachErr: '', say: false, fetchMs: null, decodeMs: null, attachMs: null, frameMs: null } };
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   const hex = async b => [...new Uint8Array(await crypto.subtle.digest('SHA-256', b))].map(v => v.toString(16).padStart(2, '0')).join('');
   const J = b => JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(b));
@@ -33,11 +37,14 @@
     need(m && m.schema === 1 && m.id === C.ID, 'not this corridor'); need(Array.isArray(m.classes_shown) && m.classes_shown.join() === 'medium,high' && m.class_not_shown === 'low', 'classes are not Medium and High with Low left out');
     need(m.display && typeof m.display.file === 'string' && /^[a-z0-9-]+\.json$/i.test(m.display.file) && /^[0-9a-f]{64}$/.test(m.display.sha256) && m.display.bytes > 0, 'display file entry');
     need(m.relation && (m.relation.result === 'nested' || m.relation.result === 'bands'), 'relation between the classes is not bands or nested');
-    for (const k of ['what', 'method_plain', 'method_detail', 'not_whole', 'sample', 'legend_high', 'legend_medium', 'legend_low', 'omission', 'unshaded', 'fixed', 'not_product', 'also', 'geometry', 'area_note', 'reference', 'plain_view', 'dates', 'preview']) need(m.wording && typeof m.wording[k] === 'string' && m.wording[k].length > 8, 'wording.' + k);
+    for (const k of ['what', 'method_plain', 'method_detail', 'not_whole', 'sample', 'legend_high', 'legend_medium', 'legend_low', 'omission', 'unshaded', 'fixed', 'not_product', 'also', 'geometry', 'area_note', 'reference', 'plain_view', 'dates', 'preview', 'picture_shown', 'picture_grid', 'picture_method', 'picture_loading', 'picture_unavailable', 'picture_retry', 'picture_spent']) need(m.wording && typeof m.wording[k] === 'string' && m.wording[k].length > 8, 'wording.' + k);
     need(m.relation.result !== 'nested' || ['nested_note', 'legend_nested', 'definitions_note', 'area_medium_label', 'area_band_label'].every(k => typeof m.wording[k] === 'string' && m.wording[k].length > 8), 'nested wording');
     for (const k of ['medium', 'high']) { const f = m.facts && m.facts[k]; need(f && f.patches > 0 && f.holes >= 0 && f.points > 0 && f.source_net_area_km2 > 0 && f.extent_deg && ['west', 'east', 'south', 'north'].every(d => Number.isFinite(f.extent_deg[d])), 'facts.' + k); }
     need(m.view && Number.isFinite(m.view.lat) && Number.isFinite(m.view.lng) && m.view.altitude > 0 && m.grid && m.grid.step_deg > 0, 'view or grid');
     need(m.definitions_as_in_metadata && m.record && m.record.doi && Array.isArray(m.record.originators_as_listed) && m.record.originators_as_listed.length > 0 && m.metadata_quotes && typeof m.metadata_quotes.use === 'string', 'record');
+    const p = m.picture, b = p && p.box, G = m.grid; need(b && ['south', 'west', 'north', 'east'].every(k => Number.isFinite(b[k])) && b.south < G.south && b.north > G.north && b.west < G.west && b.east > G.east, 'picture box');
+    need(Number.isInteger(p.width) && Number.isInteger(p.height) && p.width > 0 && p.width <= 1024 && p.height > 0 && p.height <= 1024 && p.format === 'image/jpeg' && p.max_requests === 3 && p.fetch_limit_ms > 0 && p.decode_limit_ms > 0, 'picture size or limits');
+    need(p.mesh_cells && Number.isInteger(p.mesh_cells.across) && Number.isInteger(p.mesh_cells.up) && p.mesh_cells.across > 0 && p.mesh_cells.across <= 64 && p.mesh_cells.up > 0 && p.mesh_cells.up <= 64 && p.edge_half_width_deg > 0 && p.edge_half_width_deg < G.step_deg / 4 && m.wording.picture_shown.split('{date}').length === 2, 'picture mesh or wording');
     need(!JSON.stringify(m.facts).toLowerCase().includes('"low"'), 'facts name a Low class'); }
   function decode(man, d) { const need = (c, w) => { if (!c) throw new Unverified('display file: ' + w); };
     need(d && d.schema === 1 && d.id === C.ID && d.units_per_degree === 100000, 'header'); need(Array.isArray(d.classes) && d.classes.length === 2 && d.classes[0].key === 'medium' && d.classes[1].key === 'high', 'exactly the classes Medium and High, in that order');
@@ -92,6 +99,62 @@
     st.drawn = true; }
   function clearOwned() { st.stage = 0; st.feats = null; const g = ME.animalsGlobe && ME.animalsGlobe.raw && ME.animalsGlobe.raw(); if (g && st.drawn) { try { g.polygonsData([]); g.pathsData([]); g.htmlElementsData([]); } catch (_) { } } st.drawn = false; st.view = ''; hideScale(); }
 
+  // ---------- the regional picture (proposal 6.2). One automatic request at the first switch-on; a valid picture is kept in memory and reused;
+  // any further request comes only from its own button; three requests at most per page load, an aborted one included. Never asked for on pan,
+  // zoom, resize or frame. It is drawn only while the areas are shown, and counts as shown only once it is attached and a frame has been drawn.
+  const live = () => st.on && (st.status === 'loading' || st.status === 'shown');
+  function picUrl() { const A = ME.animalsGlobe, p = st.man.picture, b = p.box, u = A && typeof A.IMG_URL === 'string' ? A.IMG_URL : ''; let n = 0;      // the page's own endpoint, layer and date; only the size and the box differ
+    const out = u.replace(/([?&])WIDTH=\d+/, (_, c) => { n++; return c + 'WIDTH=' + p.width; }).replace(/([?&])HEIGHT=\d+/, (_, c) => { n++; return c + 'HEIGHT=' + p.height; }).replace(/([?&])BBOX=[^&]*/, (_, c) => { n++; return c + 'BBOX=' + [b.south, b.west, b.north, b.east].join(','); });
+    return n === 3 && /[?&]VERSION=1\.3\.0(&|$)/.test(out) && /[?&]CRS=EPSG:4326(&|$)/.test(out) && /[?&]FORMAT=image\/jpeg(&|$)/.test(out) ? out : null; }
+  function picRequest() { const P = st.pic, p = st.man.picture; if (P.ctrl || P.bitmap || P.used >= p.max_requests) return;
+    const url = picUrl(); if (!url) { P.status = 'failed'; P.err = 'the page\'s backdrop request could not be read'; return; }
+    const tok = ++P.tok, c = new AbortController(), timer = setTimeout(() => c.abort(), p.fetch_limit_ms), t0 = performance.now(); P.used++; P.ctrl = c; P.status = 'loading'; P.err = '';
+    (async () => { try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error('HTTP ' + r.status);
+        const type = (r.headers.get('content-type') || '').toLowerCase(); if (!type.startsWith('image/')) throw new Error('the answer is not an image (' + (type || 'no type') + ')');
+        const blob = await r.blob(); clearTimeout(timer); if (tok !== P.tok) return; if (!blob.size) throw new Error('the picture is empty'); const t1 = performance.now(); let late = false, dt = 0;
+        const job = createImageBitmap(blob); job.then(b => { if (late) { try { b.close(); } catch (_) { } } }, () => { });
+        const bm = await Promise.race([job, new Promise((_, rej) => { dt = setTimeout(() => { late = true; rej(new Error('the picture could not be decoded in time')); }, p.decode_limit_ms); })]); clearTimeout(dt);
+        if (tok !== P.tok) { try { bm.close(); } catch (_) { } return; }                                     // a stale answer draws nothing and keeps nothing
+        if (bm.width !== p.width || bm.height !== p.height) { const got = bm.width + ' by ' + bm.height; try { bm.close(); } catch (_) { } throw new Error('the picture is ' + got + ', not ' + p.width + ' by ' + p.height); }
+        P.bitmap = bm; P.status = 'ready'; P.fetchMs = Math.round(t1 - t0); P.decodeMs = Math.round(performance.now() - t1);
+      } catch (e) { clearTimeout(timer); if (tok !== P.tok) return; P.status = 'failed'; P.err = String(e && e.message || e); }
+      if (tok !== P.tok) return; P.ctrl = null; paint(); if (P.say && P.status === 'failed') { P.say = false; announce(picText()); } })(); }
+  function picAbort() { const P = st.pic, c = P.ctrl; if (!c) return; P.tok++; P.ctrl = null; P.status = 'failed'; P.err = 'stopped when the areas were switched off'; P.say = false; try { c.abort(); } catch (_) { } }      // the attempt is spent
+  function picDetach() { const P = st.pic, box = $('an-globe-box'); if (P.mesh) { for (const o of P.mesh) { try { if (o.parent) o.parent.remove(o); o.geometry.dispose(); const t = o.material.emissiveMap || o.material.map; if (t) t.dispose(); o.material.dispose(); } catch (_) { } } }
+    P.mesh = null; P.shown = false; if (box) box.classList.remove('cor-pic-on'); }                               // the decoded picture itself stays in memory for the next switch-on
+  function picAttach() { const P = st.pic, g = ME.globe && ME.globe(), m = st.man, p = m.picture; if (!g || P.mesh || P.attachErr || !P.bitmap) return;
+    const made = [];
+    try { const t0 = performance.now(), gm = g.globeMaterial(); let gmesh = null; g.scene().traverse(x => { if (x.isMesh && (Array.isArray(x.material) ? x.material[0] : x.material) === gm) gmesh = x; });
+      const pos = gmesh && gmesh.geometry && gmesh.geometry.getAttribute && gmesh.geometry.getAttribute('position'); if (!gmesh || !gmesh.parent || !pos) throw new Error('the globe is not ready for the picture');
+      let Tex = gm.map && gm.map.constructor; if (!Tex) { const pp = g.postProcessingComposer && g.postProcessingComposer(), rt = pp && pp.renderTarget1; Tex = rt && rt.texture && rt.texture.constructor; } if (typeof Tex !== 'function') throw new Error('this browser\'s globe gives no way to hold a picture');
+      const Geo = Object.getPrototypeOf(gmesh.geometry.constructor), F = a => new pos.constructor(new Float32Array(a), 3), b = p.box, nx = p.mesh_cells.across, ny = p.mesh_cells.up, xyz = [], uv = [], idx = [];
+      for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) { const c = g.getCoords(b.south + (b.north - b.south) * j / ny, b.west + (b.east - b.west) * i / nx, C.PIC.ALT); xyz.push(c.x, c.y, c.z); uv.push(i / nx, 1 - j / ny); }      // the picture's first row is its north edge
+      for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const a = j * (nx + 1) + i, e = a + nx + 1; idx.push(a, a + 1, e + 1, a, e + 1, e); }
+      const flat = () => { const k = new gm.constructor(); k.color.set(0x000000); if (k.specular) k.specular.set(0x000000); k.side = 2; k.depthWrite = false; k.polygonOffset = true; k.polygonOffsetFactor = -1; k.polygonOffsetUnits = -1; return k; };
+      const mesh = (geo, mat, order) => { const o = new gmesh.constructor(geo, mat); o.raycast = noRay; o.frustumCulled = false; o.renderOrder = order; o.__corridorPicture = true; made.push(o); return o; };
+      const tex = new Tex(P.bitmap); tex.flipY = false; if ('colorSpace' in tex) tex.colorSpace = (gm.map && gm.map.colorSpace) || 'srgb'; tex.needsUpdate = true;
+      const pm = flat(); if (pm.emissive) { pm.emissive.set(0xffffff); pm.emissiveMap = tex; } else { pm.color.set(0xffffff); pm.map = tex; }
+      const pg = new Geo(); pg.setAttribute('position', F(xyz)); pg.setAttribute('uv', new pos.constructor(new Float32Array(uv), 2)); pg.setIndex(idx); pg.computeVertexNormals(); mesh(pg, pm, 1);
+      // S-D2: a thin dark edge under each reference line, so the pale lines stay readable on bright cloud. Own geometry; the library's layers are not touched.
+      const G = m.grid, hw = p.edge_half_width_deg, q = [], put = (la, lo) => { const c = g.getCoords(la, lo, C.PIC.EDGE_ALT); q.push(c.x, c.y, c.z); }, quad = (a, b2, c, d) => { put(...a); put(...b2); put(...c); put(...a); put(...c); put(...d); }, ds = G.step_deg / 5;
+      for (let la = G.south; la <= G.north + 1e-9; la += G.step_deg) for (let lo = G.west; lo < G.east - 1e-9; lo += ds) quad([la - hw, lo], [la + hw, lo], [la + hw, lo + ds], [la - hw, lo + ds]);
+      for (let lo = G.west; lo <= G.east + 1e-9; lo += G.step_deg) for (let la = G.south; la < G.north - 1e-9; la += ds) { const w = hw / Math.cos((la + ds / 2) * Math.PI / 180); quad([la, lo - w], [la, lo + w], [la + ds, lo + w], [la + ds, lo - w]); }
+      const em = flat(); if (em.emissive) em.emissive.set(C.PIC.EDGE); else em.color.set(C.PIC.EDGE); const eg = new Geo(); eg.setAttribute('position', F(q)); eg.computeVertexNormals(); mesh(eg, em, 2);
+      for (const o of made) gmesh.parent.add(o); P.mesh = made; P.shown = false; P.attachMs = Math.round((performance.now() - t0) * 10) / 10;
+      const R = g.renderer(), f0 = R.info.render.frame, mine = made, tA = performance.now(), step = () => { if (st.pic.mesh !== mine) return; let f = f0; try { f = R.info.render.frame; } catch (_) { }
+        if (f > f0) { P.shown = true; P.frameMs = Math.round(performance.now() - tA); const box = $('an-globe-box'); if (box) box.classList.add('cor-pic-on'); paintPic(); paintLegend(); if (P.say) { P.say = false; announce('Regional satellite picture shown.'); } return; } requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    } catch (e) { for (const o of made) { try { if (o.parent) o.parent.remove(o); o.geometry.dispose(); o.material.dispose(); } catch (_) { } } P.mesh = null; P.shown = false; P.attachErr = String(e && e.message || e); P.status = 'failed'; P.err = P.attachErr; } }
+  /** keeps the picture in step with the areas: asked for once, drawn only while the areas are shown, removed with them */
+  function picSync() { const P = st.pic; if (!st.man) return; if (!live()) { picAbort(); picDetach(); return; }
+    if (P.status === 'idle' && P.used === 0) picRequest();
+    if (st.status === 'shown' && P.bitmap && !P.mesh && !P.attachErr) picAttach(); }
+  const picCan = () => { const P = st.pic; return !!st.man && live() && !P.bitmap && !P.ctrl && !P.attachErr && P.status === 'failed' && P.used < st.man.picture.max_requests; };
+  function picText() { const P = st.pic, W = st.man.wording; if (P.shown) return W.picture_shown.replace('{date}', (ME.animalsGlobe && ME.animalsGlobe.IMG_LABEL) || 'the backdrop date') + ' ' + W.picture_grid;
+    if (P.status === 'failed') return W.picture_unavailable + (P.used >= st.man.picture.max_requests && !P.attachErr ? ' ' + W.picture_spent : ''); return W.picture_loading; }
+  function paintPic() { const box = $('cor-pic'), r = $('cor-pic-retry'); if (!box || !r) return; const on = !!st.man && live(); box.hidden = !on; if (!on) { st.picHeld = false; return; }
+    $('cor-pic-text').textContent = picText(); r.textContent = st.man.wording.picture_retry; const can = picCan(); r.hidden = !(can || st.picHeld); if (can) r.removeAttribute('aria-disabled'); else r.setAttribute('aria-disabled', 'true'); }
+
   // ---------- camera (one move per press, only while that press is current) and the page scroll (only at a press)
   function move(g) { try { g.controls().autoRotate = false; g.pointOfView(st.man.view, 0); st.moves++; } catch (_) { } st.view = (ME.journey && ME.journey.on && ME.journey.on()) ? 'View moved to the corridor. The journey remains on.' : 'View moved to the corridor.'; }
   function reveal() { const box = $('an-globe-box'); if (!box) return; const r = box.getBoundingClientRect(); if (root.getBoundingClientRect().top < r.bottom - 1) return;      // the switch is beside the globe
@@ -127,13 +190,13 @@
     for (const k of ['high', 'medium']) { const f = m.facts[k], x = f.extent_deg, D = (v, a, b) => `${Math.abs(v).toFixed(3)}°${v >= 0 ? a : b}`;
       d.append(el('p', 'cor-alt', `${k === 'high' ? 'High use' : W.area_medium_label || 'Medium use'}: ${f.patches} separate ${f.patches === 1 ? 'patch' : 'patches'}, ${f.holes} ${f.holes === 1 ? 'hole' : 'holes'}, ${nf(f.source_net_area_km2)} km². From ${D(x.west, 'E', 'W')} to ${D(x.east, 'E', 'W')} and ${D(x.south, 'N', 'S')} to ${D(x.north, 'N', 'S')}.`)); }
     if (m.medium_only_band_km2 != null && W.area_band_label) d.append(el('p', 'cor-alt', `${W.area_band_label}: ${nf(m.medium_only_band_km2)} km².`));
-    d.append(el('p', 'cor-note', W.area_note), el('p', 'cor-note', m.record.location), el('p', 'cor-note', W.method_detail), el('p', 'cor-note', W.geometry), el('p', 'cor-note', W.reference));
+    d.append(el('p', 'cor-note', W.area_note), el('p', 'cor-note', m.record.location), el('p', 'cor-note', W.method_detail), el('p', 'cor-note', W.geometry), el('p', 'cor-note', W.reference), el('p', 'cor-note', W.picture_method + ' ' + W.picture_grid));
     d.append(el('p', 'cor-note', `Class definitions as the layer's metadata gives them. Medium: "${m.definitions_as_in_metadata.medium}" High: "${m.definitions_as_in_metadata.high}" Low (not shown): "${m.definitions_as_in_metadata.low}"`)); if (W.definitions_note) d.append(el('p', 'cor-note', W.definitions_note));
     const src = el('p', 'cor-note'), a = el('a', '', m.record.release_title); a.href = m.record.url; a.rel = 'noopener'; src.append('Source: U.S. Geological Survey, ', a, `, doi ${m.record.doi}. Layer: ${m.record.layer_title}. Licence as the record words it: ${m.record.licence_as_on_record}. The layer's metadata also says: "${m.metadata_quotes.use}" No endorsement is implied.`); d.append(src);
     d.append(el('p', 'cor-note', `Originators as the metadata lists them (${m.record.originators_as_listed.length} entries): ${m.record.originators_as_listed.join(', ')}.`), el('p', 'cor-note', m.record.report + '.'), el('p', 'cor-note', W.preview)); box.append(d); }
   function paintLegend() { const L = $('cor-legend'), m = st.man, show = st.status === 'shown' && !!m; L.hidden = !show; if (!show) { L.textContent = ''; return; } const W = m.wording, G = ME.animalsGlobe && ME.animalsGlobe.state ? ME.animalsGlobe.state() : {};
     L.textContent = ''; const row = el('p', 'cor-lg-row'); for (const [k, t] of [['high', W.legend_high], ['medium', W.legend_medium]]) { const s = el('span', 'cor-lg-item'); s.append(el('span', 'cor-sw cor-sw-' + k), el('span', '', t)); row.append(s); } L.append(row);
-    if (W.legend_nested) L.append(el('p', 'cor-lg-nest', W.legend_nested)); L.append(el('p', 'cor-lg-omit', W.omission + ' ' + W.unshaded), el('p', 'cor-lg-small', W.legend_low), el('p', 'cor-lg-small', W.reference + ' ' + C.T.blur + (G.backdrop === 'plain' ? ' ' + W.plain_view : '')));
+    if (W.legend_nested) L.append(el('p', 'cor-lg-nest', W.legend_nested)); L.append(el('p', 'cor-lg-omit', W.omission + ' ' + W.unshaded), el('p', 'cor-lg-small', W.legend_low), el('p', 'cor-lg-small', W.reference + (st.pic.shown ? '' : ' ' + C.T.blur) + (G.backdrop === 'plain' ? ' ' + W.plain_view : '')));
     if (st.view) L.append(el('p', 'cor-lg-view', st.view)); }
   let painted = null; const RETRY = ['cor-retry', 'cor-facts-retry'];
   function paint() { const b = $('cor-tgl'), s = $('cor-state'), o = $('cor-obs'), ready = st.facts === 'ready';
@@ -144,7 +207,7 @@
     for (const id of RETRY) { const r = $(id); r.hidden = !(can[id] || st.held === id); if (can[id]) r.removeAttribute('aria-disabled'); else r.setAttribute('aria-disabled', 'true'); }      // a pressed Retry stays, inactive, while it has the focus
     $('cor-goto').hidden = st.status !== 'shown';
     if (painted !== st.man) { painted = st.man; paintFacts(); $('cor-label').textContent = st.man ? st.man.label : 'Mule deer, East Walker herd, California: migration corridor'; }
-    paintLegend(); }
+    picSync(); paintLegend(); paintPic(); }
 
   // ---------- events
   $('cor-tgl').addEventListener('click', () => { if (st.on) off(); else on(); });
@@ -152,6 +215,8 @@
   for (const id of RETRY) { const r = $(id);
     r.addEventListener('click', () => { if (r.getAttribute('aria-disabled') === 'true') return; st.held = id; if (document.activeElement !== r) r.focus({ preventScroll: true }); if (id === 'cor-retry') on(); else loadFacts(); });
     r.addEventListener('focusout', () => setTimeout(() => { if (st.held === id && document.activeElement !== r) { st.held = ''; paint(); } }, 0)); }
+  { const r = $('cor-pic-retry'); if (r) { r.addEventListener('click', () => { if (r.getAttribute('aria-disabled') === 'true' || !picCan()) return; st.picHeld = true; if (document.activeElement !== r) r.focus({ preventScroll: true }); st.pic.say = true; picRequest(); paint(); announce(st.man.wording.picture_loading); });
+    r.addEventListener('focusout', () => setTimeout(() => { if (st.picHeld && document.activeElement !== r) { st.picHeld = false; paintPic(); } }, 0)); } }
   $('cor-goto').addEventListener('click', () => { const g = ME.globe && ME.globe(); if (!g || st.status !== 'shown') return; st.pendingMove = false; move(g); paintLegend(); settle(); });
   document.addEventListener('click', e => { const t = e.target && e.target.closest ? e.target.closest('[data-journey].an-tgl, .an-sw[data-journey] .journey-retry, #replay-goto') : null; if (!t) return; st.pendingMove = false;
     if (st.status === 'shown') { st.view = t.id === 'replay-goto' ? 'View moved to the journey. The corridor remains on.' : ''; settle(); } }, true);
@@ -163,6 +228,6 @@
   window.addEventListener('pageshow', e => { if (e.persisted && st.facts !== 'ready') loadFacts(); });
 
   ME.corridor = { C, on, off, km, loadFacts,
-    state: () => ({ facts: st.facts, factsErr: st.factsErr, status: st.status, err: st.err, on: st.on, busy: !!st.req, tok: st.tok, pendingMove: st.pendingMove, drawn: st.drawn, stage: st.stage, view: st.view, announced: st.announced, held: st.held, moves: st.moves, reveals: st.reveals, scale: st.scale ? { km: st.scale.km, px: st.scale.px, a: st.scale.a, b: st.scale.b } : null, cached: !!st.geo }) };
+    state: () => ({ pic: { status: st.pic.status, err: st.pic.err, used: st.pic.used, busy: !!st.pic.ctrl, cached: !!st.pic.bitmap, attached: !!st.pic.mesh, shown: st.pic.shown, attachErr: st.pic.attachErr, fetchMs: st.pic.fetchMs, decodeMs: st.pic.decodeMs, attachMs: st.pic.attachMs, frameMs: st.pic.frameMs }, facts: st.facts, factsErr: st.factsErr, status: st.status, err: st.err, on: st.on, busy: !!st.req, tok: st.tok, pendingMove: st.pendingMove, drawn: st.drawn, stage: st.stage, view: st.view, announced: st.announced, held: st.held, moves: st.moves, reveals: st.reveals, scale: st.scale ? { km: st.scale.km, px: st.scale.px, a: st.scale.a, b: st.scale.b } : null, cached: !!st.geo }) };
   paint(); loadFacts();
 })();

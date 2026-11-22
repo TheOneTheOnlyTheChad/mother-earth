@@ -889,3 +889,8 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
 .cor-tick span{position:absolute}
 .cor-tick-lat{right:6px;top:-5px}
 .cor-tick-lng{left:0;top:8px;transform:translateX(-50%)}
+.cor-pic{margin:6px 0 0;padding:6px 8px;border:1px solid var(--line);background:var(--card);font-size:12px;line-height:1.4}
+.cor-pic[hidden]{display:none}
+.cor-pic .journey-retry{margin:6px 0 0}
+#cor-pic-retry[aria-disabled="true"]{opacity:.55;cursor:default}
+.cor-pic-on .cor-tick{color:#fff;text-shadow:-1px 0 #000,1px 0 #000,0 -1px #000,0 1px #000,0 0 3px #000,0 0 3px #000}

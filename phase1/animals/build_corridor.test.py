@@ -127,6 +127,11 @@ ok('2h2 GPT Stage 4 hold, point 1: the Medium legend line is neutral (a publishe
    W['legend_medium'] == 'Medium use: published source class (includes High).' and not re.search(r'\d', W['legend_medium']) and W['legend_high'].endswith('as the source defines it.') and 'contain the High polygons' in W['nested_note'] and 'No share of animals has been established' in W['nested_note'] and 'no share has been established' in W['legend_nested']
    and 'Medium polygons contain its High polygons' in W['definitions_note'] and W['area_medium_label'] != W['area_band_label'] and 'not a class in the source' in W['area_band_label'] and abs(man['facts']['medium']['source_net_area_km2'] - 279.95576) < 1e-5 and abs(man['medium_only_band_km2'] - 120.87477) < 1e-5
    and not any(re.search(r'10\s*(–|-|to)\s*20\s*%', W[k]) for k in W if k not in ('nested_note', 'legend_nested', 'definitions_note')) and '10% or more' not in json.dumps(W, ensure_ascii=False))
+PIC = man['picture']
+ok('2j the regional picture is fixed in the record (corridor proposal 6.2): box 37.8, -119.8, 38.8, -118.6 containing the reference grid; 960 by 800 JPEG at equal spacing; 20 s and 5 s limits; three requests; the sentence names its date once and says cloud, gaps or pass edges; the grid sentence is GPT\'s; no instrument figure in the wording',
+   PIC['box'] == {'south': 37.8, 'west': -119.8, 'north': 38.8, 'east': -118.6} and PIC['width'] == 960 and PIC['height'] == 800 and PIC['format'] == 'image/jpeg' and abs(1.2 / 960 - 1.0 / 800) < 1e-15 and PIC['fetch_limit_ms'] == 20000 and PIC['decode_limit_ms'] == 5000 and PIC['max_requests'] == 3
+   and PIC['box']['south'] < man['grid']['south'] and PIC['box']['north'] > man['grid']['north'] and PIC['box']['west'] < man['grid']['west'] and PIC['box']['east'] > man['grid']['east'] and W['picture_shown'].count('{date}') == 1 and 'It may contain cloud, gaps or visible edges between satellite passes.' in W['picture_shown']
+   and "It is not from the study's years and shows nothing about the animals or their habitat then." in W['picture_shown'] and W['picture_grid'] == 'GIBS image grid about 250 m per pixel, enlarged for display.' and 'not the instrument\'s detail and not a positional accuracy' in W['picture_method'] and not re.search(r'375|750', json.dumps(W)))
 pins = {'journeys-R1.catalog.json': '5eb789b10488b68cb5e471309ebc517199b1dbce00e5ac719d84f3b4b42c5452', 'populations-R1.catalog.json': 'ba1ce1e8fc3143d1cd0d2e8ac9b9f8f2d64b3cecd889387b8da9422df4d58d36'}
 ok('2i K6 the journey list and the population list are the release builds of 21 Nov 2026 (wording-only rebuilds; pinned here)', all(sha(open(os.path.join(A, n), 'rb').read()) == h for n, h in pins.items()))
 tracked = subprocess.run(['git', 'ls-files'], cwd=ROOT, capture_output=True, text=True)
@@ -185,6 +190,13 @@ else:
         r27 = stops(lambda: B.build(copy.deepcopy(cfg), zb), 27)
     finally: B.relation = _rel
     ok('3b2 if the two classes were found not nested, the build stops (rule 27) instead of publishing wording that says Medium includes High', r27[0], r27[1][:200])
+    def badpic(f):
+        def go():
+            c = copy.deepcopy(cfg); f(c); return B.build(c, zb)
+        return go
+    r28 = {'box inside the reference grid': stops(badpic(lambda c: c['picture']['box'].update(south=38.1)), 28), 'unequal spacing': stops(badpic(lambda c: c['picture'].update(height=700)), 28), 'four requests': stops(badpic(lambda c: c['picture'].update(max_requests=4)), 28),
+           'a longer fetch limit': stops(badpic(lambda c: c['picture'].update(fetch_limit_ms=60000)), 28), 'sentence without its date': stops(badpic(lambda c: c['wording'].update(picture_shown='Regional backdrop.')), 28), 'PNG': stops(badpic(lambda c: c['picture'].update(format='image/png')), 28)}
+    ok('3b3 a regional picture that leaves corridor proposal 6.2 stops the build (rule 28): ' + '; '.join(r28), all(v[0] for v in r28.values()), {k: v[1][:160] for k, v in r28.items() if not v[0]})
     # ---- an independent reading and an independent inverse projection (K3): the authalic-latitude series, not the builder's iteration
     def shp_rings(b):
         o = 100; out = []
