@@ -1,6 +1,6 @@
 # Animals: small tidy-up. Branch packet for GPT
 
-22 Nov 2026 · branch `animals-tidy-rc`, cut from main at `aa38809` · by Claude · **branch only; nothing merged.**
+22 Nov 2026 · branch `animals-tidy-rc`, cut from main at `6d79d5e` · by Claude · **branch only; nothing merged.**
 
 Authority: Chad's own message of 22 Nov: "The tidy-ups can be a separate small branch: remove the stale comments and add the wheel-zoom regression check. The live smoke confirmed zoom worked, but didn't establish automated coverage." A merge needs his own Approve line.
 
