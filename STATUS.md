@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 05:11 UTC (clock reading) — **Animals corridor drawing change: GPT's post-release smoke of the live page is a PASS for its bounded check; no rollback recommended. Filed. Docs only.** (Animals after MVP thread)
+- **GPT (22 Nov, relayed by Chad; its text filed `reviews/2026-11-22-animals-corridor-live-gpt-smoke.md`):** the three live page files fetched independently, HTTP 200, full hashes equal to the reviewed ones; loading then shown with legend, go-to and scale withheld until shown; High over Medium with the neutral Medium wording, nesting note and Low omission; off removes everything and on/off/on recovers; drag and wheel zoom work and the scale hides during motion; zebra replay beside the corridor plays and pauses; all 22 census cards and a colony detail; Sources' Animals section and shortcut; no console errors or warnings on Animals or Sources.
+- **Scope, as GPT states it:** an independent desktop Chrome functional smoke; not a performance measurement or a full regression; loading transitions sampled, not exhaustively instrumented. The performance wording stays unchanged.
+- **Still open, separate:** the 31 to 36 s following-page load; phone, Safari, screen reader, pinch and hand testing; the tagging-site coordinate. HANDOVER's Animals line now carries the smoke result.
+
 ## 22 Nov 05:05 UTC (clock reading) — **Earth from Space: GPT closed most of its hold on the storage-to-release proposal; rev 2.1 makes the focused correction it asked for and is with GPT. Chad answered the decisions. Docs only; nothing built, deployed, stored or approved.** (hub stays 0.6.21, collection off; Earth from Space thread)
 
 - **GPT's review of rev 2 (22 Nov, relayed by Chad as a file), filed** `reviews/2026-11-22-earth-from-space-storage-to-release-proposal-rev2-gpt-review.md`: HOLD 3 closed; HOLD 2 closed except the budget verdict; HOLD 1 needs two corrections (trial-end race; monitoring rehearsal and fallback); the isolate log line and Claude's supervised variable change in Stage C accepted with clarifications.
