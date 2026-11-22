@@ -1,0 +1,113 @@
+shell used for the script: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)
+
+earthview-admin: 109 passed, 0 failed
+FAIL  G1 C1 status: the note's request line is exactly "request: GET <hub>/admin/earthview/status"
+      got: "request: GET http://127.0.0.1:53821/admin/earthview/status echo ?/admin/earthview/status;; esac )"
+FAIL  G2 C1 status: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\nDone: HTTP 200"}
+FAIL  G1 C3 recover-plan: the note's request line is exactly "request: GET <hub>/admin/earthview/recover"
+      got: "request: GET http://127.0.0.1:53821/admin/earthview/recover echo ?/admin/earthview/recover;; esac )"
+FAIL  G2 C3 recover-plan: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\nDone: HTTP 200"}
+FAIL  G1 C5a sweep-plan: the note's request line is exactly "request: GET <hub>/admin/earthview/sweep"
+      got: "request: GET http://127.0.0.1:53821/admin/earthview/sweep echo ?/admin/earthview/sweep;; esac )"
+FAIL  G2 C5a sweep-plan: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\nDone: HTTP 200"}
+FAIL  G1 C5b release-plan: the note's request line is exactly "request: GET <hub>/admin/earthview/release"
+      got: "request: GET http://127.0.0.1:53821/admin/earthview/release echo ?/admin/earthview/release;; esac )"
+FAIL  G2 C5b release-plan: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\nDone: HTTP 200"}
+FAIL  G1 C2-hold hold: the note's request line is exactly "request: POST <hub>/admin/earthview/hold?apply=1"
+      got: "request: POST http://127.0.0.1:53821/admin/earthview/hold echo ?apply=1;; esac )"
+FAIL  G2 C2-hold hold: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"Calling the hub once at 2026-11-22T07:55:20Z for step C2-hold (hold). Do not start it again.\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-adm"}
+FAIL  G1 C4-recover recover-apply 0123456789abcdef: the note's request line is exactly "request: POST <hub>/admin/earthview/recover?apply=1&plan=0123456789abcdef"
+      got: "request: POST http://127.0.0.1:53821/admin/earthview/recover echo ?apply=1&plan=0123456789abcdef;; esac )"
+FAIL  G2 C4-recover recover-apply 0123456789abcdef: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"Calling the hub once at 2026-11-22T07:55:20Z for step C4-recover (recover-apply). Do not start it again.\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr000"}
+FAIL  G1 C5-sweep sweep-apply 0123456789abcdef: the note's request line is exactly "request: POST <hub>/admin/earthview/sweep?apply=1&plan=0123456789abcdef"
+      got: "request: POST http://127.0.0.1:53821/admin/earthview/sweep echo ?apply=1&plan=0123456789abcdef;; esac )"
+FAIL  G2 C5-sweep sweep-apply 0123456789abcdef: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"Calling the hub once at 2026-11-22T07:55:20Z for step C5-sweep (sweep-apply). Do not start it again.\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/"}
+FAIL  G1 C5-release release-apply: the note's request line is exactly "request: POST <hub>/admin/earthview/release?apply=1"
+      got: "request: POST http://127.0.0.1:53821/admin/earthview/release echo ?apply=1;; esac )"
+FAIL  G2 C5-release release-apply: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"Calling the hub once at 2026-11-22T07:55:20Z for step C5-release (release-apply). Do not start it again.\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr000"}
+FAIL  G1 C7-run-1 run: the note's request line is exactly "request: POST <hub>/admin/run/earthview"
+      got: "request: POST http://127.0.0.1:53821/admin/run/earthview echo ?/admin/run/earthview;; esac )"
+FAIL  G2 C7-run-1 run: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n","text":"Calling the hub once at 2026-11-22T07:55:20Z for step C7-run-1 (run). Do not start it again.\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-adm"}
+FAIL  G4 a refused call (409) still has an exact request line, every field, and no shell diagnostic
+      got: {"code":8,"m":["step: C2-hold","command: hold","request: POST http://127.0.0.1:53821/admin/earthview/hold echo ?apply=1;; esac )","called_at: 2026-11-22T07:55:20Z","answered_at: 2026-11-22T07:55:20Z","curl_exit: 0","http_status: 409","answer_file: C2-hold.json (58 bytes)","curl_message: ",""],"text":"Calling the hub once at 2026-11-22T07:55:20Z for step C2-hold (hold). Do not start it again.\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\nThe hub answe
+FAIL  G5 an interrupted call: the note still has step, command, the exact request line and the INTERRUPTED result; no shell diagnostic
+      got: {"code":9,"m2":["step: C4-recover","command: recover-apply","request: POST http://127.0.0.1:53821/admin/earthview/recover echo ?apply=1&plan=0123456789abcdef;; esac )","result: INTERRUPTED at 2026-11-22T07:55:21Z (after the call was started). Not repeated: reconcile.",""],"text":"Calling the hub once at 2026-11-22T07:55:20Z for step C4-recover (recover-apply). Do not start it again.\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: syntax error near unexpected token `newline'\n/var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-biIS12/admin.sh: command substitution: line 106: ` case \"$URLPATH\" in *\\?*'\n"}
+shell used for the script: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)
+
+earthview-admin [BREAK=note-case-in-substitution]: 89 passed, 20 failed
+FAIL  G1 C2-hold hold: the note's request line is exactly "request: POST <hub>/admin/earthview/hold?apply=1"
+      got: "request: POST http://127.0.0.1:53857/admin/earthview/hold"
+FAIL  G1 C4-recover recover-apply 0123456789abcdef: the note's request line is exactly "request: POST <hub>/admin/earthview/recover?apply=1&plan=0123456789abcdef"
+      got: "request: POST http://127.0.0.1:53857/admin/earthview/recover"
+FAIL  G1 C5-sweep sweep-apply 0123456789abcdef: the note's request line is exactly "request: POST <hub>/admin/earthview/sweep?apply=1&plan=0123456789abcdef"
+      got: "request: POST http://127.0.0.1:53857/admin/earthview/sweep"
+FAIL  G1 C5-release release-apply: the note's request line is exactly "request: POST <hub>/admin/earthview/release?apply=1"
+      got: "request: POST http://127.0.0.1:53857/admin/earthview/release"
+FAIL  G4 a refused call (409) still has an exact request line, every field, and no shell diagnostic
+      got: {"code":8,"m":["step: C2-hold","command: hold","request: POST http://127.0.0.1:53857/admin/earthview/hold","called_at: 2026-11-22T07:55:29Z","answered_at: 2026-11-22T07:55:29Z","curl_exit: 0","http_status: 409","answer_file: C2-hold.json (58 bytes)","curl_message: ",""],"text":"Calling the hub once at 2026-11-22T07:55:29Z for step C2-hold (hold). Do not start it again.\nThe hub answered HTTP 409, saved as received in /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-h9nxZF/out-64/C2-hold.json. Tell Claude before doing anything else.\n"}
+FAIL  G5 an interrupted call: the note still has step, command, the exact request line and the INTERRUPTED result; no shell diagnostic
+      got: {"code":9,"m2":["step: C4-recover","command: recover-apply","request: POST http://127.0.0.1:53857/admin/earthview/recover","result: INTERRUPTED at 2026-11-22T07:55:30Z (after the call was started). Not repeated: reconcile.",""],"text":"Calling the hub once at 2026-11-22T07:55:29Z for step C4-recover (recover-apply). Do not start it again.\n"}
+shell used for the script: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)
+
+earthview-admin [BREAK=note-request-wrong]: 103 passed, 6 failed
+FAIL  G3 C1 status: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C1","command: status","request: GET http://127.0.0.1:53893/admin/earthview/status","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C1.1.json (37 bytes)","curl_message: ",""]
+FAIL  G3 C3 recover-plan: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C3","command: recover-plan","request: GET http://127.0.0.1:53893/admin/earthview/recover","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C3.1.json (37 bytes)","curl_message: ",""]
+FAIL  G3 C5a sweep-plan: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C5a","command: sweep-plan","request: GET http://127.0.0.1:53893/admin/earthview/sweep","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C5a.1.json (37 bytes)","curl_message: ",""]
+FAIL  G3 C5b release-plan: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C5b","command: release-plan","request: GET http://127.0.0.1:53893/admin/earthview/release","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C5b.1.json (37 bytes)","curl_message: ",""]
+FAIL  G3 C2-hold hold: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C2-hold","command: hold","request: POST http://127.0.0.1:53893/admin/earthview/hold?apply=1","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C2-hold.json (37 bytes)","curl_message: ",""]
+FAIL  G3 C4-recover recover-apply 0123456789abcdef: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C4-recover","command: recover-apply","request: POST http://127.0.0.1:53893/admin/earthview/recover?apply=1&plan=0123456789abcdef","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C4-recover.json (37 bytes)","curl_message: ",""]
+FAIL  G3 C5-sweep sweep-apply 0123456789abcdef: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C5-sweep","command: sweep-apply","request: POST http://127.0.0.1:53893/admin/earthview/sweep?apply=1&plan=0123456789abcdef","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C5-sweep.json (37 bytes)","curl_message: ",""]
+FAIL  G3 C5-release release-apply: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C5-release","command: release-apply","request: POST http://127.0.0.1:53893/admin/earthview/release?apply=1","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C5-release.json (37 bytes)","curl_message: ",""]
+FAIL  G3 C7-run-1 run: the note holds exactly its nine fields, in order, and nothing else
+      got: ["step: C7-run-1","command: run","request: POST http://127.0.0.1:53893/admin/run/earthview","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 200","answer_file: C7-run-1.json (37 bytes)","curl_message: ",""]
+FAIL  G4 a refused call (409) still has an exact request line, every field, and no shell diagnostic
+      got: {"code":8,"m":["step: C2-hold","command: hold","request: POST http://127.0.0.1:53893/admin/earthview/hold?apply=1","called_at: 2026-11-22T07:55:37Z","answered_at: 2026-11-22T07:55:37Z","http_status: 409","answer_file: C2-hold.json (58 bytes)","curl_message: ",""],"text":"Calling the hub once at 2026-11-22T07:55:37Z for step C2-hold (hold). Do not start it again.\nThe hub answered HTTP 409, saved as received in /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-20eYjz/out-64/C2-hold.json. Tell Claude before doing anything else.\n"}
+shell used for the script: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)
+
+earthview-admin [BREAK=note-field-dropped]: 99 passed, 10 failed
+FAIL  G2 C1 status: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"admin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-55/C1.1.json\nTell Claude that step C1 has run.\n"}
+FAIL  G2 C3 recover-plan: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"admin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-56/C3.1.json\nTell Claude that step C3 has run.\n"}
+FAIL  G2 C5a sweep-plan: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"admin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-57/C5a.1.json\nTell Claude that step C5a has run.\n"}
+FAIL  G2 C5b release-plan: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"admin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-58/C5b.1.json\nTell Claude that step C5b has run.\n"}
+FAIL  G2 C2-hold hold: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"Calling the hub once at 2026-11-22T07:55:45Z for step C2-hold (hold). Do not start it again.\nadmin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-59/C2-hold.json\nTell Claude that step C"}
+FAIL  G2 C4-recover recover-apply 0123456789abcdef: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"Calling the hub once at 2026-11-22T07:55:45Z for step C4-recover (recover-apply). Do not start it again.\nadmin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-60/C4-recover.json\nTell Cla"}
+FAIL  G2 C5-sweep sweep-apply 0123456789abcdef: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"Calling the hub once at 2026-11-22T07:55:45Z for step C5-sweep (sweep-apply). Do not start it again.\nadmin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-61/C5-sweep.json\nTell Claude th"}
+FAIL  G2 C5-release release-apply: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"Calling the hub once at 2026-11-22T07:55:45Z for step C5-release (release-apply). Do not start it again.\nadmin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-62/C5-release.json\nTell Cla"}
+FAIL  G2 C7-run-1 run: a successful call writes nothing to standard error and no shell diagnostic anywhere
+      got: {"code":0,"err":"admin.sh: command substitution: line 106: syntax error near unexpected token\n","text":"Calling the hub once at 2026-11-22T07:55:45Z for step C7-run-1 (run). Do not start it again.\nadmin.sh: command substitution: line 106: syntax error near unexpected token\nDone: HTTP 200. Saved /var/folders/2z/q8n_35k52rq23p8by65qbdtr0000gn/T/ev-admin-c5bZja/out-63/C7-run-1.json\nTell Claude that step "}
+shell used for the script: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)
+
+earthview-admin [BREAK=stderr-noise]: 100 passed, 9 failed
+ProductName:		macOS
+ProductVersion:		26.5.2
+BuildVersion:		25F84
+GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)
+curl 8.7.1 (x86_64-apple-darwin25.0) libcurl/8.7.1 (SecureTransport) LibreSSL/3.3.6 zlib/1.2.12 nghttp2/1.68.1
+v24.14.1
+ee08092ecdd61f1937ef65e283c9b196d00c47a38740bd671525a4a108adaa31  phase1/earthview-admin.sh
+5f9398ef2b8e7953c05859c21093cee86b9859b17d47e30d7ba6a0a22a686378  phase1/earthview-admin.test.mjs

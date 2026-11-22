@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 08:00 UTC (clock reading) — **Earth from Space: caller r2 PASSED by GPT (focused review); caller readiness restored. Chad's native run: 109 passed, 0 failed, and the old line restored fails 20 checks under bash 3.2.57. Stage C stays stopped after C1 until Chad's continuation line with a fresh window. Docs only; nothing called on the hub.** (hub stays 0.6.22, gate unset; Earth from Space thread)
+
+- **Native macOS run (Chad, Terminal, output modified 07:55:46 UTC):** suite 109 of 109; `note-case-in-substitution` 89 passed, 20 failed; `note-request-wrong` 6 failed; `note-field-dropped` 10 failed; `stderr-noise` 9 failed. Raw output sha256 `eca68d81…adb3`, filed under `reviews/evidence/2026-11-22-earth-from-space-stage-c/`. **Not run natively:** the 18 earlier breaks.
+- **GPT's review** (relayed by Chad, filed unchanged): `reviews/2026-11-22-earth-from-space-caller-r2-gpt-review.md`. Not an authorisation. No Worker redeployment needed.
+- **Caller for Stage C from now:** `phase1/earthview-admin.sh` sha256 `ee08092ecdd61f1937ef65e283c9b196d00c47a38740bd671525a4a108adaa31` (branch `earth-from-space-rc` `c3e3e74`; Mac `_review/earth-from-space-0.6.22-caller-r2/phase1/`). The r1 script (`20726534…407b`) is not used again.
+- **Continuation plan GPT accepted:** refresh the runbook preconditions and check the r2 hash; a fresh `status` saved as C1.2 beside C1.1; check its note and Cloudflare's record before C2; then C2 onward. C1.1 and its malformed note are kept; no claim is cleared; unexpected state means stop and reconcile.
+
 ## 22 Nov 07:48 UTC (clock reading) — **Earth from Space STAGE C STOPPED AFTER C1 on GPT's recommendation: the caller script has a line macOS bash 3.2 cannot parse. C2 was not run; nothing on the hub was changed. Caller r2 (one-line fix, new checks) is on the branch and with GPT; a native rerun by Chad is owed.** (hub stays 0.6.22, gate unset, `earthview/` empty; Earth from Space thread)
 
 - **Chad's Stage C line (his own message, 22 Nov):** sent, window 08:21 to 08:24 UTC. Section 0 reads were clean (usage: Workers requests 86.11k of 10M, CPU 770.23k ms of 30M, R2 Class A 58.8k of 1M, Class B 92.08k of 10M, storage 0.53 of 10 GB-months; **Workers Observability volume not read: missing**). That window is not used.
