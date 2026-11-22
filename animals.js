@@ -1,4 +1,4 @@
-/* Mother Earth — Animals page (animals-zebra-preview-rc; ANIMALS-PROPOSAL rev 2.2 §3, §7). PRIVATE PREVIEW.
+/* Mother Earth — Animals page (animals-zebra-preview-rc; ANIMALS-PROPOSAL rev 2.2 §3, §7).
  * Each study card is filled from the same manifest the globe uses, after the same checksum tests (the pinned journey list, then
  * each manifest against the list), so the page and the globe cannot disagree. A card whose manifest cannot be verified says so
  * and shows no figure.

@@ -1,5 +1,5 @@
 /* Mother Earth — the Animals page's own globe (animals-tab-rc, stage 1; docs/concepts/ANIMALS-BIRD-BUILD-PROPOSAL.md rev 3.1,
- * Part A). PRIVATE PREVIEW. A plain reference globe for one recorded journey at a time. It carries NO live layer, no day/night
+ * Part A). A plain reference globe for one recorded journey at a time. It carries NO live layer, no day/night
  * line, no search and no zoom-out view, and it makes no request to the hub.
  * Backdrop (Chad, 20 Nov 2026): the same dated NASA GIBS picture Earth now uses, chosen by the same rule (the UTC date 36 hours
  * before now; one VIIRS true-colour layer). The rule is repeated here so this page does not load the Earth now application; the

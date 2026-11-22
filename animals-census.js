@@ -1,4 +1,4 @@
-/* Mother Earth — Animals page, population counts (animals-tab-rc, stage 3; ANIMALS-PENGUIN-CHART-PROPOSAL rev 1.1). PRIVATE PREVIEW.
+/* Mother Earth — Animals page, population counts (animals-tab-rc, stage 3; ANIMALS-PENGUIN-CHART-PROPOSAL rev 1.1).
  * One card: the yearly census of occupied nest sites at each African penguin colony in one pinned, public-domain deposit,
  * 1979 to 2019, exactly as deposited. A dated record, not a feed.
  * What this file does: fetches its own list, the manifest the list pins, and the display file the manifest pins; checks each
