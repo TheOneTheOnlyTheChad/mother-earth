@@ -41,14 +41,14 @@
 >
 > 4. Section 5 asks for a copy of products published using Red List Data. Does that apply to a page like this? If it does, is a link to the page the right form, and where should it go?
 >
-> If anything above is wrong or out of date, I would be glad to be corrected. The Animals page will not show these blocks until the points above are settled.
+> If anything above is wrong or out of date, I would be glad to be corrected. The Animals page will not show these blocks until points 1 to 3 are settled.
 >
 > Ta
 > Chad
 > Mother Earth, Cape Town
 
 ## Notes for the reviewer
-- "The Animals page will not show these blocks until the points above are settled" is a commitment about the website only. It does not call the records unpublished, because the repository copies are public. Chad may prefer to drop the sentence.
+- "The Animals page will not show these blocks until points 1 to 3 are settled" is a commitment about the website only. It does not call the records unpublished, because the repository copies are public. Chad may prefer to drop the sentence.
 - "Personal, non-commercial … my own working dashboard" is from Chad's own words of 22 Nov. No promise is made that it stays so for ever.
 - The page address is public and is given. The repository is public too, and rev 2 says so in point 2.
 - Point 4 asks; it does not send a copy. If IUCN says a link is wanted, sending it after release is a second, short message of Chad's.
