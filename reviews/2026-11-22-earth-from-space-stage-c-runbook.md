@@ -206,3 +206,7 @@ Expected last line: `earthview-admin: 80 passed, 0 failed`. The file `NATIVE-CAL
 the evidence, with `sw_vers`, `bash --version | head -1`, `curl --version | head -1` and `node -v` added beneath it.
 Any failure is a finding about the script on macOS and is fixed and reviewed before Stage C; it is not explained away.
 Until that output exists, this item is **open**.
+
+**22 Nov, later: the output exists.** Chad ran it natively (macOS 26.5.2, bash 3.2.57, curl 8.7.1, node v24.14.1):
+`earthview-admin: 80 passed, 0 failed`. Filed with its limits (the 18 breaks were not run on macOS) in
+`reviews/evidence/2026-11-22-earth-from-space-0.6.22/native-caller-run-2026-11-22.md`. This item is answered, for GPT to close.

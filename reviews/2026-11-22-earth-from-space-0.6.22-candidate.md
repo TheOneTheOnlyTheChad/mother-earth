@@ -196,3 +196,7 @@ GPT: focused Worker code review **PASS**; operational package on **HOLD** for fo
 (`reviews/2026-11-22-earth-from-space-0.6.22-candidate-gpt-review.md`). The Worker file is unchanged. The runbook is
 rev 2 with the three corrections. **Still open: a native macOS run of the caller suite** (runbook section 5). Nothing
 is deployed, stored or enabled.
+
+**Later on 22 Nov:** the native macOS run was made by Chad: 80 passed, 0 failed
+(`reviews/evidence/2026-11-22-earth-from-space-0.6.22/native-caller-run-2026-11-22.md`, with its limits). All four
+items of the hold are now answered and returned to GPT for closure. Nothing is deployed, stored or enabled.
