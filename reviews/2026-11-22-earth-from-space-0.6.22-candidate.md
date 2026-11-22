@@ -200,3 +200,7 @@ is deployed, stored or enabled.
 **Later on 22 Nov:** the native macOS run was made by Chad: 80 passed, 0 failed
 (`reviews/evidence/2026-11-22-earth-from-space-0.6.22/native-caller-run-2026-11-22.md`, with its limits). All four
 items of the hold are now answered and returned to GPT for closure. Nothing is deployed, stored or enabled.
+
+**GPT's focused closure, 22 Nov: PASS.** All four hold items closed
+(`reviews/2026-11-22-earth-from-space-0.6.22-closure-gpt-review.md`). Not production clearance: the REGISTER filing,
+the deploy and Stage C each still need Chad's own Approve line.

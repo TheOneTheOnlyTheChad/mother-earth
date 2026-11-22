@@ -2,7 +2,9 @@
 
 22 Nov 2026. **Rev 2** answers GPT's review of the candidate (`reviews/2026-11-22-earth-from-space-0.6.22-candidate-gpt-review.md`):
 trial-end ordering (3.3, 3.4), account-usage reads (0.7, 3.1, 3.4), pause ownership if C6 is refused (1, 3.0), the
-email alarm as a pre-D task (2a), and the native caller run still owed (5). Part of the 0.6.22 candidate packet. **Nothing here is approved.** Each block needs Chad's own Approve line
+email alarm as a pre-D task (2a), and the native caller run (5: **done 22 Nov**, 80 passed, 0 failed, evidence
+`reviews/evidence/2026-11-22-earth-from-space-0.6.22/native-caller-run-2026-11-22.md`; GPT closed the hold,
+`reviews/2026-11-22-earth-from-space-0.6.22-closure-gpt-review.md`). Part of the 0.6.22 candidate packet. **Nothing here is approved.** Each block needs Chad's own Approve line
 (proposal rev 2.2 section 10). Times are filled in when a line is asked for. Commands are run by Chad in Terminal from the
 reviewed copy of the branch on the Mac, in the folder that holds `earthview-admin.sh`:
 
@@ -191,7 +193,7 @@ with the plan id (`D6-recover`), `sweep-plan` and `sweep-apply` if it would add 
 `release-apply` (`D8-release`). Recovery deletes nothing and copies the kept pictures to new keys. Design and tests:
 reviewed 20 Nov, unchanged in 0.6.22.
 
-## 5. Owed before the caller script is used on the hub: a native macOS run of its suite
+## 5. Before the caller script is used on the hub: a native macOS run of its suite (DONE 22 Nov)
 
 GPT's sandbox could not open a local port, so `earthview-admin.sh` has been tested on Linux only (80 of 80; 18 breaks).
 Before Stage C, in an ordinary Terminal on the Mac (a made-up key, temporary files, a local stand-in; it contacts
@@ -209,4 +211,4 @@ Until that output exists, this item is **open**.
 
 **22 Nov, later: the output exists.** Chad ran it natively (macOS 26.5.2, bash 3.2.57, curl 8.7.1, node v24.14.1):
 `earthview-admin: 80 passed, 0 failed`. Filed with its limits (the 18 breaks were not run on macOS) in
-`reviews/evidence/2026-11-22-earth-from-space-0.6.22/native-caller-run-2026-11-22.md`. This item is answered, for GPT to close.
+`reviews/evidence/2026-11-22-earth-from-space-0.6.22/native-caller-run-2026-11-22.md`. GPT closed it on 22 Nov (the 18 breaks stay Linux-only evidence).
