@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 15:01 UTC (clock reading) — **Animals regional satellite picture: GPT's bounded live smoke PASSED (desktop Chrome, functional scope), no rollback recommended. Docs only.** (Animals satellite picture thread)
+- **Relayed by Chad, filed unchanged:** `reviews/2026-11-22-animals-satellite-live-gpt-smoke.md`. GPT's check, about 14:53 to 14:57 UTC, on the live page: picture loaded with its 21 Nov date and legend; off and on restored it; zoom, drag and the return to the corridor worked; the zebra replay ran alongside the corridor; no console error or warning captured.
+- **GPT's own limits:** one desktop Chrome session, sampled screenshots and page states; it did not compare served file hashes or verify the commit identifiers; no timing, no continuous-motion or perimeter certification, no mobile, Safari or screen reader, no request-count audit, no full regression. **Chad's accepted 562 ms deviation and the stills-only edge check stay recorded and unchanged; this smoke does not close or replace them.**
+- **Still open:** docs branch `animals-satellite-proposal` (`726fbba`) needs Chad's own docs-only line; close-out (delete merged `animals-satellite-rc`, sync the Mac's main, move the three Mac review folders, handover).
+
 ## 22 Nov 14:55 UTC (clock reading) — **Earth from Space: read-only email-alarm assessment done on Chad's go; a monitor is PROPOSED, nothing created. `EARTHVIEW_ENABLED` stays `manual`. Docs only.** (hub 0.6.22 unchanged; Earth from Space thread)
 
 - **Chad's go (his own message):** read-only assessment only; show the configuration before creating anything; no rehearsal, Stage D, provider message or other production change. He also accepted the Stage C closure.
