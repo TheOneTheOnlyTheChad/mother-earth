@@ -6,7 +6,7 @@
 <title>Mother Earth — Animals</title>
 <meta name="description" content="Recorded animal journeys, replayed one at a time on their own globe, with their sources. Dated archive records, not live observations.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202612240100">
+<link rel="stylesheet" href="style.css?v=202612250100">
 </head>
 <body class="doc animals">
 <header class="top">
@@ -133,6 +133,10 @@
     </div>
     <div class="vh" id="cen-say" aria-live="polite"></div>
   </section>
+  <section class="as-sec" id="as-penguin" aria-labelledby="as-pen-h">
+    <h3 class="as-h" id="as-pen-h">African penguin: conservation assessment</h3>
+    <div class="an-assess" data-assess="african-penguin-census"><p class="an-na">Checking the assessment record…</p></div>
+  </section>
 
   <div class="an-doc">
   <h2 id="journeys">Recorded animal journeys</h2>
@@ -167,7 +171,7 @@
     </table>
     <p><a class="an-go" data-f="go" href="#journey=zebra-botswana-Z3866">Go to this journey's switch</a><span class="small"> — moves to the switch beside the globe. Nothing is switched on for you.</span></p>
     <h5>Conservation assessment</h5>
-    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <div class="an-assess" data-assess="zebra-botswana-Z3866"><p class="an-na">Checking the assessment record…</p></div>
     <h5>Population</h5>
     <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
     <p class="small" data-f="sample">7 animals were tracked in this study. This is a sample size, not a population estimate.</p>
@@ -200,7 +204,7 @@
     </table>
     <p><a class="an-go" data-f="go" href="#journey=white-shark-sa-118845">Go to this journey's switch</a><span class="small"> — moves to the switch beside the globe. Nothing is switched on for you.</span></p>
     <h5>Conservation assessment</h5>
-    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <div class="an-assess" data-assess="white-shark-sa-118845"><p class="an-na">Checking the assessment record…</p></div>
     <h5>Population</h5>
     <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
     <p class="small" data-f="sample">34 sharks were tagged in this study. This is a sample size, not a population estimate.</p>
@@ -231,7 +235,7 @@
     </table>
     <p><a class="an-go" data-f="go" href="#journey=false-killer-whale-hawaii-98364">Go to this journey's switch</a><span class="small"> — moves to the switch beside the globe. Nothing is switched on for you.</span></p>
     <h5>Conservation assessment</h5>
-    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <div class="an-assess" data-assess="false-killer-whale-hawaii-98364"><p class="an-na">Checking the assessment record…</p></div>
     <h5>Population</h5>
     <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
     <p class="small" data-f="sample">This file is the record of one tagged whale. One animal is not a population estimate.</p>
@@ -264,7 +268,7 @@
     </table>
     <p><a class="an-go" data-f="go" href="#journey=waved-albatross-galapagos-3275-30662">Go to this journey's switch</a><span class="small"> — moves to the switch beside the globe. Nothing is switched on for you.</span></p>
     <h5>Conservation assessment</h5>
-    <p class="an-na" data-f="cons">Not available yet. No assessment source has been reviewed for display on Mother Earth.</p>
+    <div class="an-assess" data-assess="waved-albatross-galapagos-3275-30662"><p class="an-na">Checking the assessment record…</p></div>
     <h5>Population</h5>
     <p class="an-na" data-f="pop">Not available yet. No population series has been reviewed.</p>
     <p class="small" data-f="sample">One of 28 birds tagged; nine were used in the paper's analysis. These are sample sizes, not a population estimate.</p>
@@ -277,8 +281,9 @@
 <script src="https://unpkg.com/globe.gl@2.45.0/dist/globe.gl.min.js"></script>
 <script src="animals-globe.js?v=202612230100"></script>
 <script src="animals-journey.js?v=202612220100"></script>
-<script src="animals.js?v=202612220100"></script>
+<script src="animals.js?v=202612250100"></script>
 <script src="animals-census.js?v=202612220100"></script>
 <script src="animals-corridor.js?v=202612240100"></script>
+<script src="animals-assessment.js?v=202612250100"></script>
 </body>
 </html>

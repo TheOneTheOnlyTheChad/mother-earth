@@ -1,0 +1,164 @@
+{
+ "schema": 1,
+ "kind": "red-list-assessments",
+ "revision": "R1",
+ "source": {
+  "name": "The IUCN Red List of Threatened Species",
+  "terms": "IUCN Red List Terms and Conditions of Use, version 3.1 (June 2024)",
+  "terms_url": "https://www.iucnredlist.org/terms/terms-of-use"
+ },
+ "cadence_months": 6,
+ "record_count": 5,
+ "records": [
+  {
+   "card": "zebra-botswana-Z3866",
+   "common_name": "plains zebra",
+   "scientific_name": "Equus quagga",
+   "assessment_id": "e.T41013A45172424",
+   "url": "https://www.iucnredlist.org/species/41013/45172424",
+   "doi_url": "https://dx.doi.org/10.2305/IUCN.UK.2016-2.RLTS.T41013A45172424.en",
+   "citation": "King, S.R.B. & Moehlman, P.D. 2016. Equus quagga. The IUCN Red List of Threatened Species 2016: e.T41013A45172424.",
+   "scope": "global",
+   "category": "Near Threatened",
+   "assessed": "2016-06-20",
+   "published_year": 2016,
+   "version_note": null,
+   "shown": {
+    "kind": "journey",
+    "animal": "collared zebra",
+    "place": "northern Botswana",
+    "first_year": 2007,
+    "last_year": 2008
+   },
+   "status": "usable",
+   "edition_at_check": "2026-1",
+   "last_successful_check": "2026-11-22",
+   "last_attempt": {
+    "date": "2026-11-22",
+    "result": "ok"
+   },
+   "next_check_due": "2027-05-22"
+  },
+  {
+   "card": "white-shark-sa-118845",
+   "common_name": "white shark",
+   "scientific_name": "Carcharodon carcharias",
+   "assessment_id": "e.T3855A212629880",
+   "url": "https://www.iucnredlist.org/species/3855/212629880",
+   "doi_url": "https://dx.doi.org/10.2305/IUCN.UK.2022-1.RLTS.T3855A212629880.en",
+   "citation": "Rigby, C.L., Barreto, R., Carlson, J., Fernando, D., Fordham, S., Francis, M.P., Herman, K., Jabado, R.W., Jones, G.C.A., Liu, K.M., Lowe, C.G, Marshall, A., Pacoureau, N., Romanov, E., Sherley, R.B. & Winker, H. 2022. Carcharodon carcharias (amended version of 2019 assessment). The IUCN Red List of Threatened Species 2022: e.T3855A212629880.",
+   "scope": "global",
+   "category": "Vulnerable",
+   "assessed": "2018-11-07",
+   "published_year": 2022,
+   "version_note": {
+    "kind": "amended",
+    "of_year": 2019
+   },
+   "shown": {
+    "kind": "journey",
+    "animal": "tagged shark",
+    "place": "the waters off South Africa and southern Mozambique",
+    "first_year": 2012,
+    "last_year": 2013
+   },
+   "status": "usable",
+   "edition_at_check": "2026-1",
+   "last_successful_check": "2026-11-22",
+   "last_attempt": {
+    "date": "2026-11-22",
+    "result": "ok"
+   },
+   "next_check_due": "2027-05-22"
+  },
+  {
+   "card": "false-killer-whale-hawaii-98364",
+   "common_name": "false killer whale",
+   "scientific_name": "Pseudorca crassidens",
+   "assessment_id": "e.T18596A145357488",
+   "url": "https://www.iucnredlist.org/species/18596/145357488",
+   "doi_url": "https://dx.doi.org/10.2305/IUCN.UK.2018-2.RLTS.T18596A145357488.en",
+   "citation": "Baird, R.W. 2018. Pseudorca crassidens (errata version published in 2019). The IUCN Red List of Threatened Species 2018: e.T18596A145357488.",
+   "scope": "global",
+   "category": "Near Threatened",
+   "assessed": "2018-07-23",
+   "published_year": 2018,
+   "version_note": {
+    "kind": "errata",
+    "year": 2019
+   },
+   "shown": {
+    "kind": "journey",
+    "animal": "tagged whale",
+    "place": "Hawaiian waters and the North Pacific to the east",
+    "first_year": 2013,
+    "last_year": 2014,
+    "stock_not_verified": true
+   },
+   "status": "usable",
+   "edition_at_check": "2026-1",
+   "last_successful_check": "2026-11-22",
+   "last_attempt": {
+    "date": "2026-11-22",
+    "result": "ok"
+   },
+   "next_check_due": "2027-05-22"
+  },
+  {
+   "card": "waved-albatross-galapagos-3275-30662",
+   "common_name": "waved albatross",
+   "scientific_name": "Phoebastria irrorata",
+   "assessment_id": "e.T22698320A132641638",
+   "url": "https://www.iucnredlist.org/species/22698320/132641638",
+   "doi_url": "https://dx.doi.org/10.2305/IUCN.UK.2018-2.RLTS.T22698320A132641638.en",
+   "citation": "BirdLife International 2018. Phoebastria irrorata. The IUCN Red List of Threatened Species 2018: e.T22698320A132641638.",
+   "scope": "global",
+   "category": "Critically Endangered",
+   "assessed": "2018-08-07",
+   "published_year": 2018,
+   "version_note": null,
+   "shown": {
+    "kind": "journey",
+    "animal": "tagged bird",
+    "place": "the Galápagos and the eastern Pacific",
+    "first_year": 2008,
+    "last_year": 2008
+   },
+   "status": "usable",
+   "edition_at_check": "2026-1",
+   "last_successful_check": "2026-11-22",
+   "last_attempt": {
+    "date": "2026-11-22",
+    "result": "ok"
+   },
+   "next_check_due": "2027-05-22"
+  },
+  {
+   "card": "african-penguin-census",
+   "common_name": "African penguin",
+   "scientific_name": "Spheniscus demersus",
+   "assessment_id": "e.T22697810A256021744",
+   "url": "https://www.iucnredlist.org/species/22697810/256021744",
+   "doi_url": "https://dx.doi.org/10.2305/IUCN.UK.2024-2.RLTS.T22697810A256021744.en",
+   "citation": "BirdLife International 2024. Spheniscus demersus. The IUCN Red List of Threatened Species 2024: e.T22697810A256021744.",
+   "scope": "global",
+   "category": "Critically Endangered",
+   "assessed": "2024-07-04",
+   "published_year": 2024,
+   "version_note": null,
+   "shown": {
+    "kind": "census",
+    "first_year": 1979,
+    "last_year": 2019
+   },
+   "status": "usable",
+   "edition_at_check": "2026-1",
+   "last_successful_check": "2026-11-22",
+   "last_attempt": {
+    "date": "2026-11-22",
+    "result": "ok"
+   },
+   "next_check_due": "2027-05-22"
+  }
+ ]
+}

@@ -2,8 +2,9 @@
  * Each study card is filled from the same manifest the globe uses, after the same checksum tests (the pinned journey list, then
  * each manifest against the list), so the page and the globe cannot disagree. A card whose manifest cannot be verified says so
  * and shows no figure.
- * Conservation and population are fixed "Not available yet" states: no source has been reviewed, and nothing stands in for
- * them. A count of tagged animals is labelled as a sample size.
+ * Population is a fixed "Not available yet" state: no population series has been reviewed, and nothing stands in for it.
+ * A count of tagged animals is labelled as a sample size. The conservation assessment block on each card is filled by
+ * animals-assessment.js from its own pinned file; this file does not touch it.
  * This file fetches the journey list and one manifest per card: details for the cards, never a journey's coordinates. The globe is
  * animals-globe.js and the replay is animals-journey.js (animals-tab-rc, stage 1; stage 2 adds the bird's card). It does not load app.js. */
 (() => {
