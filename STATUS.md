@@ -2,6 +2,16 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 22 Nov 2026
+
+## 22 Nov 02:28 UTC (clock reading) — **Animals corridor candidate r2: served-tree Mac confirmation RUN, all runs valid, both limits met; record and raw results on `animals-perf-rc` (`f122612`, code `15dc2a7`) for GPT. Nothing merged, nothing deployed; live page unchanged.** (Animals after MVP thread)
+- **Set-up:** Chad at the Mac served `_review/animals-perf-rc-r2/` on 127.0.0.1:8912; Claude's own Chrome tab, closed after; nine served files hashed in the page and equal to the branch; tab visible and focused throughout; a capture-health check before every timed window, all passed, no record missing.
+- **Candidate (page clock 02:23:08 to 02:23:53 UTC):** nothing-on control no task of 50 ms or more; longest task at switch-on 76, 66, 74, 74, 65, 73, 64 ms (limit 500); press to the first frame in which the page reports shown, that is both classes built and a frame drawn since, 115, 113, 111, 115, 119, 112, 103 ms (limit 1,500); five-second close-view frame intervals median 16.7 ms, worst 17.8, no long task, for nothing on, corridor, and corridor with the zebra journey.
+- **The live page in the same session (main's code):** longest task 108 to 123 ms plus an 80 to 82 ms scale-bar task; close view 16.7 ms. **On the Mac as it was this morning the live page is itself inside the limit.** The fixed loop ran in about 250 ms this morning against about 1,900 ms on 21 Nov evening, so the Mac was about eight times slower then; cause not established. The recorded exception (474 to 689 ms, about 20 frames a second) matches the slow state. The candidate is faster in both states (slow state: 569 to 664 ms down to 166 to 294 ms, 66 ms frames down to 16.7). **The exception is not to be called closed for all conditions: observed, machine-state dependent, removed by the candidate in the two states measured.**
+- **Interaction with real pointer events:** off during drawing leaves nothing; drag and wheel zoom move the view, the scale bar is absent during motion and correct after (20 km, 50 km); go-to returns; zebra replay plays and pauses with the corridor shown. Not done: pinch, Safari, phone, screen reader, a person's own hand.
+- **Where:** `reviews/2026-11-22-animals-corridor-cost-mac-confirmation.md`; raw `reviews/evidence/2026-11-21-animals-corridor-cost/mac-confirm-served-candidate-2026-11-22.json` and `mac-confirm-live-main-2026-11-22.json`; Mac `_review/animals-perf-rc-r2/read/00-MAC-CONFIRMATION.md.txt`. Chad's Terminal server on port 8912 is his to stop.
+- **Next:** GPT's review of r2 and this confirmation; then, if GPT clears it, the exact Approve line for Chad. Still open and untouched: the 31 to 36 s following-page load; phone, Safari, screen reader; the tagging-site coordinate; the Mac's own copy of `sources.html`.
+
 # 21 Nov 2026
 
 ## 21 Nov 21:00 UTC (clock reading; work done 19:14 to 20:18 UTC, this entry held until after the 20:11 to 20:55 UTC window) — **Animals corridor cost: GPT's BOUNDED HOLD on `62121d1` answered in candidate r2 on `animals-perf-rc` (`5b53c8c`, code `15dc2a7`). The served-tree Mac confirmation is NOT yet run: it needs Chad at the Mac. Nothing merged, nothing deployed; live page unchanged.** (Animals after MVP thread)
