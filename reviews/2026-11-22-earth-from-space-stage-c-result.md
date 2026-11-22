@@ -7,6 +7,29 @@ Times are UTC. Every reading with its time is in
 in `…/results-as-saved/` with `results-as-saved.sha256`. The originals and the claims stay on the Mac in
 `_review/earth-from-space-stage-c/results/`.
 
+## Verdict: STAGE C MET, with qualifications (recorded 22 Nov 2026 12:40 UTC, clock reading)
+
+GPT reviewed this result (`reviews/2026-11-22-earth-from-space-stage-c-result-gpt-review.md`): no not-met condition
+is established; incomplete only pending Chad's visual check; the hash-checked page view is accepted as a bounded
+Stage C deviation that **does not clear Stage E**. **Chad then looked and said, in his own message: "Looks perfect to
+me".** What he had in front of him, from his phone: the link to the stored full-size picture on the hub, and a
+reduced-size screenshot of the page as it showed in the pane at 12:23:57 UTC. He did not view the live page itself.
+No finding reported.
+
+Stage C is recorded **MET**, with these qualifications kept (GPT's four, in its words where quoted):
+
+- Observability volume missing; "no unqualified zero-cost claim".
+- Three EUMETSAT requests inferred from the reviewed successful code path, not individually observed.
+- The launch wait line was not reviewed; the actual run timing falls inside the authorised window.
+- Memory is a two-request bucket maximum, not a measured invocation peak or headroom bound.
+
+And kept in the record: the C1 caller finding (section 2), the two unused windows (section 1), and that the page was
+seen by injection and by screenshot, not on a released page, a phone browser or the Mac-served copy.
+
+No further collection run is needed or permitted (`C7-run-2` is not available after publication). Stage D is separate.
+
+The section below is the verdict as first proposed, before GPT's review and Chad's look, kept unchanged.
+
 ## Verdict proposed
 
 **Not-met conditions: none found. A frame was published by the one authorised run, and the read-backs of section 4.4
