@@ -1,4 +1,4 @@
-# Earth from Space — from the first stored picture to the page: proposal (rev 2, for GPT)
+# Earth from Space — from the first stored picture to the page: proposal (rev 2.1, for GPT)
 
 22 Nov 2026. Asked for by GPT's review of the Stage B result and started on Chad's "Go" of 22 Nov. **Docs only. Nothing
 here is built, deployed, stored, enabled or approved.** Every production step named below needs Chad's own exact
@@ -9,6 +9,13 @@ Approve line; the lines are sketched in section 10 and are not requests yet.
 can actually be carried out (5.5 to 5.7); the result rule is measurable (5.8); Stage C's retry and verdict are bounded
 (4.3 to 4.5); the REGISTER draft moves to Stage C (7); and the factual corrections are made. Section 13 lists every
 change. Rev 1.1 only reworded the memory paragraph of rev 1.
+
+**Rev 2.1 (22 Nov)** is the focused correction GPT asked for in its review of rev 2
+(`reviews/2026-11-22-earth-from-space-storage-to-release-proposal-rev2-gpt-review.md`): the trial's end is enforced
+by an **admission window in the hub**, not by a person arriving in time (5.1); monitoring gets a **pre-D rehearsal**
+and a named fallback, with its limits stated (5.5); a demonstrated budget breach is **not met** (5.8); slot and
+counter wording is tightened (5.8, section 9). It also records Chad's decisions of 22 Nov (section 11). Section 14
+lists the changes. Everything else in rev 2 that GPT accepted carries forward unchanged.
 
 State it starts from: hub **0.6.21** live (deployed code sha256 `2028e2da…01c3`), `EARTHVIEW_ENABLED` not set, no object
 under `earthview/` in storage, the tab not on the live page. Main's `phase1/worker.js` is still 0.6.19 and is the
@@ -22,13 +29,14 @@ Three separate stages, each with its own approval, its own read-backs and its ow
 | Stage | What happens | Requests to EUMETSAT | What becomes public |
 |---|---|---|---|
 | **C. First stored picture** | Storage is set up; **one** manual run stores one verified frame; nothing is scheduled | 3; 6 only if the one conditional second attempt is used | The hub's record and one picture become **publicly downloadable by URL** |
-| **D. Scheduled collection, a finite trial** | Exactly 288 ten-minute slots (48 hours), then collection returns to `manual` by default | at most 3 per slot, 864 in all (schedule-derived, see 5.2) | The same URLs, now changing |
+| **D. Scheduled collection, a finite trial** | 288 ten-minute slots (48 hours) inside an admission window the hub enforces; then the variable returns to `manual` | at most 3 per slot, 864 in all (see 5.2) | The same URLs, now changing |
 | **E. Page release** | The tab, the page, Sources go live | none added | The feature |
 
 A stage starts only after the one before it has a written result that GPT has read and Chad has accepted.
 
 One more hub version (**0.6.22**) is needed before Stage C: the three-state gate (section 2), the key in a header for
-the Earth from Space admin routes (section 3), a caller script, and one log line (section 9). That candidate goes to
+the Earth from Space admin routes (section 3), a caller script, an admission window for scheduled runs (5.1) and one
+log line (section 9). That candidate goes to
 GPT before any deploy.
 
 ## 1. Evidence this rests on, and its limits
@@ -153,7 +161,10 @@ C6 follows C5 so that storage is set up and released while no run of any kind ca
 **Why Claude makes the change in C6.** Stage D's emergency pause (5.6) is this same change in the other direction.
 Claude's code uploads to this account are refused by a safety check, and whether Claude can change one plain variable
 in the dashboard is **untested**. C6 tests it under Chad's eye, on his line, where a failure costs nothing: if Claude
-cannot do it, Chad does it, and Stage D's pause arrangements are rewritten before Stage D is asked for.
+cannot do it, Chad does it, the limitation is recorded, and Stage D's pause ownership is rewritten before Stage D is
+asked for. **If the dashboard refuses Claude's change, Claude does not try another interface to get round the
+refusal.** A success here shows that Claude can make the change with the pane open; it does not show that unattended
+monitoring will be available (5.5).
 
 C7's window is hh:21 to hh:24 or hh:51 to hh:54, minutes that were quiet on 21 Nov. That is a preference, not a
 guarantee of a quiet hub.
@@ -227,16 +238,41 @@ is deleted: the collector deletes only after publishing a newer frame.
 
 ## 5. Stage D — scheduled collection, as a finite trial
 
-### 5.1 Start, slots and end
+### 5.1 Start, slots and end: an admission window the hub enforces
 
-- **Start:** `EARTHVIEW_ENABLED` is changed from `manual` to `1` and read back. The read-back time is **T0**.
-- **Slot 1** is the first five-minute tick after T0 whose minute is 0 to 4 past a ten-minute mark. Slots follow every
-  ten minutes. **The trial is exactly 288 slots.**
-- **End:** when slot 288's invocation has ended (its record is read), the variable is set back to **`manual`**, read
-  back, and in-flight work is reconciled (5.6). **This is the default and needs no decision.** Collection does not
-  continue while the result is read.
-- **Any continuation** is a separate Approve line with its own end time, monitoring and request allowance.
-- **No manual run** is made during the trial. One would need its own authorisation and is counted separately.
+Rev 2 ended the trial by waiting for slot 288's record and then changing the variable. GPT is right that this can
+admit slot 289: an invocation may outlast ten minutes, and records and inspections arrive late. **A person cannot be
+the boundary.** So the boundary moves into the hub (0.6.22):
+
+- Two more plain variables: **`EARTHVIEW_FROM`** and **`EARTHVIEW_UNTIL`**, each a UTC time on a ten-minute mark.
+- The scheduled path runs a picture run **only if** `EARTHVIEW_ENABLED` is `1` **and** both times parse **and**
+  `FROM` ≤ the trigger's own scheduled time < `UNTIL`. Anything else (either missing, unparseable, not on a
+  ten-minute mark, `UNTIL` not after `FROM`, a window longer than 48 hours) **fails closed**: no request, nothing
+  written, one "not scheduled" line saying why.
+- The comparison uses **Cloudflare's scheduled time for the trigger**, not the clock when the code happens to run. A
+  trigger scheduled before `UNTIL` and delivered late is slot 288 or earlier; one scheduled at or after `UNTIL` is
+  refused however early it is delivered.
+- With `FROM` = the first slot's time and `UNTIL` = `FROM` + 48 hours, the scheduled opportunities inside the window
+  are the 288 ten-minute marks from `FROM` to `UNTIL` − 10 min. **No 289th can be admitted, whoever is or is not
+  watching.** That is what lets "288 slots, at most 864 requests" stand.
+- The window does not apply to the manual run (which `1` also allows). A manual run during the trial is unauthorised
+  and is a budget breach (5.8); the caller script has no step id for one.
+
+**Start.** One dashboard change sets `EARTHVIEW_FROM`, `EARTHVIEW_UNTIL` and `EARTHVIEW_ENABLED` = `1` together, at
+least 15 minutes before `FROM`, and is read back (all three values, code hash, bindings, crons). The ticks before
+`FROM` must log "not scheduled (before the window)"; that is the first evidence the window works.
+
+**End.** Admission ends at `UNTIL` by itself. At the first inspection after `UNTIL`, the variable is set to `manual`
+(tidying, not the boundary), read back, and admitted work is reconciled as in 5.6: every invocation scheduled before
+`UNTIL` has an end record; the two ticks after `UNTIL` logged "not scheduled (after the window)". Collection does not
+continue while the result is read. **Any continuation** is a separate Approve line with its own window.
+
+**Shown in the candidate, before any approval:** through the real scheduled handler with a controllable scheduled
+time: the tick before `FROM`, at `FROM`, the last one before `UNTIL`, at `UNTIL`, after it; a late-delivered trigger
+on each side; every malformed combination; each refusal with zero source and storage calls; a break for each. And
+the count: a simulated 49 hours of five-minute triggers admits exactly 288 picture runs.
+
+**No manual run** is made during the trial.
 
 ### 5.2 Request budget
 
@@ -246,8 +282,8 @@ is deleted: the collector deletes only after publishing a newer frame.
 | Picture and check image, only when a newer frame is listed | 2 | at most 576 |
 | **Total to EUMETSAT** | **at most 3** | **at most 864** |
 
-This ceiling is **derived from the schedule and the code path** (one run per slot, no retry inside a run). It is not a
-counter the hub enforces. The trial's report counts actual requests from the run log and compares. A frame that failed
+The **slot count is enforced** by the admission window (5.1). The **per-slot figure is derived from the code path**
+(one run per slot, no retry inside a run) and is not a counter the hub enforces. The trial's report counts actual requests from the run log and compares. A frame that failed
 is asked for again by the next slot only while it is still the newest listed, so a failing source costs the same 3 per
 slot. Chad's open question, whether sustained requests need a note to EUMETSAT first, is his to answer before Stage D
 (decision D3).
@@ -291,27 +327,57 @@ earlier collectors had completed by then is what the trial reads.
 
 ### 5.5 Monitoring: what is actually covered
 
-A chat thread is not an unattended monitor, and this proposal does not pretend otherwise. What is proposed:
+A chat thread is not an unattended monitor. With the admission window, monitoring no longer bounds the trial; it
+decides how soon a stop condition is acted on.
 
-- **Inspections by Claude at fixed times, one per hour, 49 in all** (T0 + 15 min, then hourly, then the end), each
-  started by a scheduled message in this thread. Each reads, read-only: the hub's invocation records since the last
-  inspection (every outcome, CPU, the picture runs' log lines), the run log's `earthview` outcomes slot by slot, the
-  other layers' public status, and the R2 object count under `earthview/`.
-- **What that depends on:** the Mac awake, the Claude desktop app open, the dashboard tab signed in, and this thread
-  alive, for 48 hours including two nights. Chad kept the Mac open overnight for Stage A. He is asked to do the same.
-- **Maximum inspection interval: 60 minutes by plan.** So a stop condition can go undetected for up to about an hour,
-  plus the time to act. "Immediate" in rev 1 was wrong; **"paused on detection"** is what can be delivered.
-- **If an inspection cannot read** (Mac asleep, tab signed out): Claude sends a push notification to Chad's phone and
-  says so in the thread; the interval is recorded as **unmonitored**. Claude cannot pause either while the pane is
-  unreachable. After **two** consecutive unreadable inspections the notification asks Chad to pause from his phone
-  (the variable in Cloudflare's dashboard). Unmonitored intervals are reported in the result and are never treated
-  as clean; what happened in them is read from Cloudflare's stored records once access returns.
-- **An independent alarm** is wanted and not yet established: whether Cloudflare can notify Chad by email on Worker
-  errors for this account is to be checked and reported in the candidate packet. If it can, it is set up before
-  Stage D on Chad's line. If it cannot, the hourly inspection is the only detection, and that is stated in the
-  approval line.
-- `status` (needs the key) is run by Chad's script once a day, under step ids `D-status-1` and `D-status-2`, and at
-  the end.
+**The plan (accepted by Chad, 22 Nov: the Mac stays on for as long as needed).** Inspections by Claude once an hour,
+49 in all, each started by a scheduled message in this thread, each reading, read-only: the hub's invocation records
+since the last inspection, the `earthview` outcomes slot by slot, the other layers' public status, the R2 object
+count. **One hour is a planned interval that the owner accepts, not a guaranteed maximum.** It holds only while the
+Mac is awake, the Claude app is open, the dashboard tab is signed in and this thread is alive.
+
+**What can fail, and what then happens:**
+
+| Failure | Who can notice | What happens |
+|---|---|---|
+| An inspection starts but cannot read (Mac asleep, tab signed out, pane unreachable) | Claude, in that inspection | **On the first one:** push notification to Chad asking him to pause from his phone; the thread says so; the interval is recorded as unmonitored. Not two: the first. |
+| An inspection **never starts** (the scheduled message is not delivered, the thread is dead) | **Nobody at that moment.** An inspection that never starts cannot notify anyone | The next inspection that does start compares the clock with the last inspection's time, finds the gap, and notifies as above. If none ever starts again, only the heartbeat below reveals it |
+| Worker errors on the hub | Cloudflare's email alarm, **if** one exists for this account (to be established in the candidate packet) | Email to Chad. This detects hub errors. It does **not** detect a missed inspection |
+
+**Heartbeat, so that a silence means something.** Every completed inspection between 06:00 and 22:00 SAST sends Chad
+one short push ("Earth from Space inspection n of 49: clean" or what was found). **Fallback owner: Chad.** If 90
+minutes pass in those hours with no push, he pauses from his phone: Cloudflare dashboard, variable to `manual`.
+Expected action time: within 30 minutes of noticing.
+
+**Stated limitation, overnight.** Between 22:00 and 06:00 SAST no heartbeat is sent and Chad is asleep. A missed
+launch in those hours is detected only by a later inspection that does launch, or by Chad at 06:00. So for up to
+about eight hours a night, twice, a stop condition could go unacted on if the inspections themselves fail. In that
+time the hub keeps to its window and its three requests per slot; the risk carried is to the hub's other layers
+(conditions 1, 2, 7), not to the budget. Stage A ran unattended overnight on the same footing. **This limitation
+is written into the Stage D approval line for Chad to accept in words.** The alternatives, if he does not: push
+heartbeats through the night; or a supervised trial of daytime windows only, which could not observe the 24-hour
+cleanup and would need a different result rule. Extending a short window from each inspection was considered and
+rejected: every variable change makes a new Worker version and restarts isolates, which would disturb the thing
+being measured.
+
+**Pre-D rehearsal (harmless; required before the Stage D line is asked for).** With the variable at `manual` after
+Stage C, on Chad's go, for four hours:
+
+1. four scheduled messages, one an hour: each must **actually launch** an inspection (shown by its entry in the thread
+   with a clock reading);
+2. each must **read the intended records** (invocation records, run log, status file, R2 count) and say what it read;
+3. each sends the heartbeat push; **Chad confirms in the thread that each reached his phone**, with the time;
+4. **a missed launch on purpose:** the third message is not scheduled. The fourth inspection must detect the
+   two-hour gap by itself and send the missed-inspection notification; and Chad, not having had the third push,
+   notes when he noticed;
+5. an unreadable inspection on purpose, if Chad agrees: he closes the dashboard tab before one inspection; it must
+   notify rather than report clean.
+
+The rehearsal makes no change to the hub and no request to EUMETSAT. Its record goes in the Stage D packet. If any of
+1 to 4 fails, Stage D is not asked for on this monitoring plan.
+
+`status` (needs the key) is run by Chad's script once a day, under step ids `D-status-1` and `D-status-2`, and at the
+end.
 
 ### 5.6 Stop conditions, and what a pause is
 
@@ -326,14 +392,16 @@ A chat thread is not an unattended monitor, and this proposal does not pretend o
 7. another layer newly `down` or `degraded` since T0;
 8. no frame published for six consecutive slots while successful source checks list a newer frame than the one held
    (this is where persistent check-image failures, missing served-time headers and wrong-frame headers land);
-9. the trial's actual request count exceeding 3 per slot.
+9. any observed request-budget excess: more than 3 requests to EUMETSAT in a slot, a picture run outside the window,
+   or a manual run.
 
 Conditions 6 and 8 pause the trial; they do not by themselves say whose fault it was (5.8).
 
 **The pause procedure** (decision D2: Chad's Stage D line authorises Claude to do exactly this, for all nine
 conditions, and nothing else):
 
-1. Set `EARTHVIEW_ENABLED` to `manual` in the dashboard. Note the time.
+1. Set `EARTHVIEW_ENABLED` to `manual` in the dashboard (the two window variables are left as they are: with the
+   gate at `manual` they admit nothing). Note the time.
 2. **Read back** the variable, the deployed code hash, bindings and crons.
 3. **A pause does not cancel admitted invocations.** Read the invocation records until every invocation that started
    before the read-back has an end record, and for at least 15 minutes; list any picture run among them and what it
@@ -344,11 +412,14 @@ conditions, and nothing else):
 7. Nothing is repaired, deleted, recovered or restarted. No storage is deleted while an earlier writer could still
    repopulate it. Any next step is Chad's.
 
+If Claude cannot make the change (pane unreachable, or the dashboard refuses it), Claude does not look for another
+way in: it notifies Chad, who is the fallback owner of the pause.
+
 A hold (Chad's script) is the second lever. It also only prevents new runs.
 
 ### 5.7 What is recorded for every slot
 
-Each of the 288 slots is classified from the run log and the invocation records as exactly one of: **published**;
+Each of the 288 scheduled opportunities is classified from the run log and the invocation records as exactly one of: **published**;
 **nothing newer**; **superseded**; **source check failed** (with cause); **picture or check image failed** (which,
 with cause); **served time missing** (no header); **wrong frame named**; **validation refused** (with the recorded
 reason and figures); **storage stop**; **not run** (no invocation found for the slot, or the gate line says so);
@@ -372,8 +443,9 @@ between polls. So the measure is built from what it saw:
   with a failed check, `not run` or `unknown` are counted separately and are not folded into the ratio.
 
 **Validation refusals, classified.** A refusal is examined, not assumed. The refused picture is not stored, so the
-evidence is the recorded reason and figures and, where needed, a fresh request for that same frame time from Chad's
-Mac. Up to **12** such diagnostic requests are allowed in total, counted separately from the 864, and named in the
+evidence is the reason and figures the run recorded for the **original** bytes and, as context only, a fresh request
+for that same frame time from Chad's Mac. **A re-requested picture that is sound does not establish that the
+original refused bytes were sound**; it can only inform the reading of the recorded figures. Up to **12** such diagnostic requests are allowed in total, counted separately from the 864, and named in the
 Approve line. Each refusal ends as: **faulty frame correctly refused**; **sound frame wrongly refused**; or
 **unclassified** (the evidence does not decide; a re-request is not proof of what was served the first time).
 
@@ -381,9 +453,12 @@ Approve line. Each refusal ends as: **faulty frame correctly refused**; **sound 
 
 - **Not met:** stop condition 1, 4 or 5 occurred; or condition 2, 3 or 7 occurred and is not shown unrelated by
   independent evidence; or any **sound frame wrongly refused** ("not met for validation"); or a pointer picture was
-  deleted or unreadable at any time.
+  deleted or unreadable at any time; or **a demonstrated request-budget breach ("not met for budget compliance")**:
+  more than 3 requests to EUMETSAT in any slot, a picture run admitted outside the window, an unauthorised manual
+  run, or a total over 864. The 12 diagnostic requests are counted separately; more than 12 is a breach too.
 - **Met**, only with all of:
-  - all 288 slots completed without a pause;
+  - **all 288 scheduled opportunities accounted for** in the ledger (some outcomes are deliberately `not run`) and
+    no pause;
   - no slot `unknown`; every `not run` explained;
   - **published eligible times at least 80% of eligible times, and at least 230 eligible times seen.** 80% is a
     provisional checkpoint for Chad to approve or change **before the start** (decision D4), not a derived number;
@@ -394,8 +469,9 @@ Approve line. Each refusal ends as: **faulty frame correctly refused**; **sound 
     scheduled job, **or** an explicit statement that none occurred (which leaves those cases unobserved and is said
     so in the result);
   - no unmonitored interval whose stored records could not be read afterwards.
-- **Incomplete:** everything else: a pause for conditions 6, 8 or 9 or for a source-side cause; fewer than 230
-  eligible times; a ratio under 80% whose misses are source failures; any unclassified refusal; any missing evidence.
+- **Incomplete:** everything else: a pause for conditions 6 or 8 or for a source-side cause; fewer than 230
+  eligible times; a ratio under 80% whose misses are source failures; any unclassified refusal; **a request count
+  that cannot be established** (unknown is incomplete; observed excess is not met); any missing evidence.
 
 Persistent source-side trouble therefore yields **incomplete**, never met and never not-met for the hub: check-image
 failures, missing served-time headers and wrong-frame headers are counted by kind, and each wrong-frame occurrence is
@@ -493,13 +569,29 @@ picture, retention tied to the grace period, no visitor-triggered request to EUM
 1. The three-state gate (section 2), tested through the actual handlers and the five-minute wrapper.
 2. Header-only key for the Earth from Space admin routes and the manual run (section 3).
 3. `phase1/earthview-admin.sh` with step ids and atomic claims, and its suite (section 3).
-4. **One log line per picture run** (new in rev 2): isolate id, isolate age, scheduled runs and validations already
-   made in that isolate, and the slot's scheduled time, using the counters the probe already keeps; the validation
-   counter is incremented by collector validations too. This is what lets repeated and shared-isolate validation be
-   evidenced (5.7). It writes nothing to storage and changes no decision.
-5. Nothing else. The decoder, the validation limits, the storage records, the guards, recovery and the probe route's
+4. **The admission window** for scheduled runs (5.1): `EARTHVIEW_FROM` and `EARTHVIEW_UNTIL`, compared with the
+   trigger's scheduled time, failing closed.
+5. **One log line per picture run**, with fields that mean what they say (GPT's clarification):
+   - `scheduled_time` (Cloudflare's, for the trigger) and `run` (the run's own stamp, the same one in the stored
+     record and the run log), so each line is tied to one slot and one run;
+   - `isolate` and `isolate_age_ms`;
+   - `scheduled_before`: scheduled invocations this isolate had **begun before this one**. The existing counter
+     increments at handler entry and so already includes the current invocation; the line reports that value minus
+     one and names it so. The raw value is not labelled "earlier";
+   - `crons_before`: those earlier scheduled invocations **counted by cron expression** (a small per-isolate tally
+     added at handler entry), so the line can say which kinds of job had run in this isolate, not only how many;
+   - `validations_before`: validations (collector or probe) **completed** in this isolate before this run's own
+     began; the counter is incremented after a validation returns, pass or refuse;
+   - `fetches_before`: HTTP requests the isolate had begun.
+   **What the counters establish and what they do not:** that this isolate had earlier begun N scheduled invocations
+   of the listed kinds and completed M validations. They do not show that any of them was still running, nor what
+   memory it left. Overlap in time is read from invocation records, separately. The trial's conclusions are limited
+   to that. Candidate tests assert each field's meaning (first invocation in an isolate reports 0 and an empty tally;
+   the current invocation is never counted as earlier; a refused validation still counts as completed).
+   The line writes nothing to storage and changes no decision.
+6. Nothing else. The decoder, the validation limits, the storage records, the guards, recovery and the probe route's
    rules are unchanged; the recovery span's hash is asserted unchanged by the existing static check.
-6. Main merged into the branch first.
+7. Main merged into the branch first.
 
 Packet to GPT: the diff; the suites with breaks; the runbook for sections 4 and 5 as numbered commands with step ids;
 the REGISTER draft; Cloudflare's limits for scheduled and HTTP invocations as configured on this account, quoted from
@@ -513,35 +605,41 @@ Each is sent by Chad himself, in his own message, with hashes and times filled i
 1. `Approve: deploy hub 0.6.22 from earth-from-space-rc <commit>, phase1/worker.js sha256 <hash>, code only, EARTHVIEW_ENABLED left unset; read back hash and settings; stop and report if any earthview/ object exists`
 2. `Approve: file the EUMETSAT GeoColour REGISTER entry as drafted in <file>` (recommended before Stage C; required before Stage D)
 3. `Approve: Earth from Space Stage C on hub 0.6.22 under proposal rev <n> section 4: set up storage (hold, recover first start, release); Claude sets EARTHVIEW_ENABLED to manual in the dashboard while I watch; one manual run started by me in the window <start UTC>; one further run only under section 4.3, not later than 40 minutes after the first; at most 6 requests to EUMETSAT; no scheduled collection` — plus, if the REGISTER entry is not yet filed: `; I approve one frame being publicly downloadable by URL before the REGISTER entry is filed`
-4. `Approve: Earth from Space Stage D under proposal rev <n> section 5: set EARTHVIEW_ENABLED to 1 at <time UTC> for exactly 288 slots, then back to manual; at most 864 requests to EUMETSAT plus at most 12 diagnostic requests; no manual run; hourly inspections with my Mac kept awake; Claude may set the variable to manual, and only that, on any stop condition of section 5.6 and at the end`
-5. Stage E's line (the merge) comes with the release packet.
+4. `Approve: Earth from Space monitoring rehearsal under proposal rev <n> section 5.5: four hourly read-only inspections with the variable at manual, test notifications to my phone; no change to the hub, no request to EUMETSAT`
+5. `Approve: Earth from Space Stage D under proposal rev <n> section 5: set EARTHVIEW_FROM <time UTC>, EARTHVIEW_UNTIL <time UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at most 12 diagnostic requests; no manual run; hourly inspections planned, with my Mac kept awake; I accept that between 22:00 and 06:00 SAST a missed inspection may go unnoticed until morning; Claude may set EARTHVIEW_ENABLED to manual, and only that, on any stop condition of section 5.6 and after the window ends`
+6. Stage E's line (the merge) comes with the release packet.
 
-## 11. Decisions for Chad
+## 11. Decisions for Chad, and his answers of 22 Nov
 
-- **D1.** Accept the three stages C, D, E and one more hub version (0.6.22) before C.
-- **D2.** May Claude pause the trial (set the variable to `manual`, nothing else) on any stop condition and at the
-  end? Without it, a pause waits until you are reached. (Recommended: yes.)
-- **D3.** Do sustained requests to EUMETView (up to 864 in 48 hours) need a note to EUMETSAT first? Open since 20 Nov.
-- **D4.** The publication checkpoint for "met": 80% of eligible times, with at least 230 seen. Approve, or name
-  another number, before the start.
-- **D5.** REGISTER entry filed before Stage C (recommended), or Stage C as an explicitly approved public experiment
-  with the entry filed before Stage D.
-- **D6.** Can the Mac stay awake with the Claude app open for the 48 hours, two nights included? If not, the trial's
-  monitoring has gaps of the length of each night, and that would be written into the line.
-- **D7.** No supplementary busy observation with the probe (GPT does not require one). (Recommended: none.)
+Chad, 22 Nov, in his own message with GPT's review of rev 2: "Mac can stay on as long as you need it and yes to your
+other suggestions". Recorded against the decisions that carried a recommendation. **These are decisions on the
+proposal. None is an Approve line; no production step is authorised by them.**
+
+| | Decision | Answer |
+|---|---|---|
+| D1 | Three stages C, D, E and one more hub version (0.6.22) before C | **Yes** |
+| D2 | Claude may pause the trial (variable to `manual`, nothing else) on any stop condition and after the window | **Yes** (to be repeated in the Stage D line) |
+| D3 | Do sustained requests to EUMETView (up to 864 in 48 hours) need a note to EUMETSAT first? | **Open.** No recommendation was given; Chad's call |
+| D4 | Publication checkpoint: 80% of eligible times, at least 230 seen | **Yes**, as the provisional checkpoint |
+| D5 | REGISTER entry filed before Stage C | **Yes** (still needs his filing line) |
+| D6 | Mac awake with the Claude app open for the 48 hours | **Yes**: "as long as you need it" |
+| D7 | No supplementary busy observation | **Yes: none** |
+
+New in rev 2.1, for Chad:
+
+- **D8.** Accept in the Stage D line that between 22:00 and 06:00 SAST a missed inspection may go unnoticed until
+  morning (5.5), or choose night-time heartbeat pushes instead.
+- **D9.** In the rehearsal, close the dashboard tab once on purpose to prove an unreadable inspection notifies (5.5,
+  step 5). Optional.
 
 ## 12. Questions for GPT
 
-- **Q1.** Do 5.5 and 5.6 close HOLD 1? In particular: is a 60-minute maximum inspection interval, dependent on the Mac
-  and the thread, with a push notification and Chad's phone as the fallback, acceptable for this trial if stated in
-  the approval line?
-- **Q2.** Does 5.8 close HOLD 2: the eligible-time definition, the 230 minimum, the three-way classification of
-  refusals, the 12 diagnostic requests?
-- **Q3.** Does 4.3 to 4.5 close HOLD 3: the positive list of source failures, the 40-minute latest start, no retry
-  after a lost answer?
-- **Q4.** Is the one added log line (section 9 item 4) acceptable inside the 0.6.22 scope?
-- **Q5.** Should Claude making the variable change in C6 be kept as the rehearsal of the pause lever, or would you
-  rather Chad make every production change in Stage C?
+- **Q1.** Does the admission window (5.1) close the trial-end race? Is comparing against the trigger's scheduled time
+  the right boundary, and is a 48-hour maximum window the right fail-closed limit?
+- **Q2.** Does 5.5 close the monitoring correction: the rehearsal's five steps, the daytime heartbeat with Chad as
+  fallback owner, and the overnight limitation stated for his acceptance?
+- **Q3.** Is the budget-breach verdict in 5.8 as you meant it?
+- **Q4.** Are the log line's field definitions (section 9 item 5) sufficient, including the per-cron tally?
 
 ## 13. Changes from rev 1.1 (GPT's review of 22 Nov)
 
@@ -564,3 +662,28 @@ Each is sent by Chad himself, in his own message, with hashes and times filled i
 | Q4: REGISTER draft in the Stage C packet; public downloadability acknowledged; "private in effect" removed | section 7, 4.6, 4.7, section 10 |
 | Q5: limited scope; never a real credential in a URL; masking verified on a harmless call first | section 3 |
 | Q6: late storage stop; 146 not a bound; direct-URL traffic and caching; shared-isolate validation evidenced; packet contents; four records plus one picture | 5.3, 5.10, section 8, 5.7 and section 9 item 4, section 9, 4.4 |
+
+## 14. Changes from rev 2 (GPT's review of rev 2, 22 Nov)
+
+| GPT's point | Where answered |
+|---|---|
+| Trial-end race: a fixed admission end, independent of slot 288's completion; demonstrate it in the candidate | 5.1 (admission window in the hub), section 9 item 4 |
+| Do not keep "exactly 288 / at most 864" with an end that can admit more | 5.1, 5.2 |
+| Hourly inspection is a planned interval the owner accepts, not a guaranteed maximum | 5.5 |
+| Pre-D rehearsal: launch, read, notification reaches the phone, missed launch detected | 5.5 (five steps), section 10 line 4 |
+| An inspection that never starts notifies nobody; a Worker-error alarm does not detect a missed inspection | 5.5 (table) |
+| Notify and ask Chad to pause on the first unreadable or missed inspection; name the fallback owner and action time | 5.5 |
+| State the limitation if missed-launch detection is unavailable | 5.5 (overnight), section 10 line 5, D8 |
+| "All 288 scheduled opportunities accounted for" | 5.7, 5.8 |
+| A re-requested sound image does not establish the original was sound | 5.8 |
+| Demonstrated budget breach is NOT MET; unknown counts INCOMPLETE; diagnostics separate | 5.6 (9), 5.8 |
+| Scheduled counter includes the current invocation; define prior and current; job kind; tie to scheduled time and run; tests | section 9 item 5 |
+| C6: if refused, Chad does it; do not switch interfaces | 4.2, 5.6 |
+| Chad's decisions of 22 Nov | section 11 |
+
+Accepted by GPT in its review of rev 2 and carried forward unchanged: the pause authority, reconciliation and
+no-repair limits; the eligible-time definition, slot ledger, 230 minimum, 80% checkpoint, refusal classification,
+cleanup evidence and 5,000 ms checkpoint as provisional criteria; all of HOLD 3 (source-failure list, reconciliation,
+healthy hub, the 10 to 40 minute window, no retry after lost answers or excluded findings, atomic claims; wrong-frame
+evidence as incomplete in these stages, sound-frame refusal as not met); the isolate log line; the supervised C6
+rehearsal.
