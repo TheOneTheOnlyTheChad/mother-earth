@@ -85,3 +85,22 @@ header key and the unset gate.
   the ships evidence differently.
 - **Chad, after GPT:** go on to the next stage's proposal (first stored frame and the gate, which needs the new manual-run
   step noted in the candidate packet), or approve one more observation first.
+
+## Addendum, 22 Nov 2026: the hourly CPU and memory percentiles (late)
+
+Proposal rev 2.1 section 4 asks for "the dashboard's memory and CPU percentiles for the hour". This result, as written
+on 21 Nov, did not contain them and did not say so. They were not captured on the day. GPT's review of 22 Nov
+(`reviews/2026-11-22-earth-from-space-stage-b-result-gpt-review.md`) found the gap. They are historical figures, so
+they were read on 22 Nov at 03:46:59Z and 03:47:27Z, read-only, with no call to the hub:
+`reviews/evidence/2026-11-21-earth-from-space-stage-b/dashboard-percentiles-2026-11-22.md`.
+
+| Hour UTC | Invocations | Status | CPU P50 / P90 / P99 / P999 | Memory P50 / P90 / P99 / P999 |
+|---|---|---|---|---|
+| 12 (obs 1) | 125 | success only, 0 errors | 3.7 / 11.3 / 185 / 827 ms | 3.16 / 3.43 / 16.2 / 54.8 MB |
+| 16 (obs 2) | 118 | success only, 0 errors | 3.8 / 11.4 / 588 / 814 ms | 3.16 / 3.43 / 34.8 / 54.8 MB |
+| 20 (obs 3) | 136 | success only, 0 errors | 3.8 / 10.4 / 535 / 821 ms | 3.16 / 3.43 / 31.3 / 54.4 MB |
+
+The probe invocations read 54,827,181, 54,818,477 and 54,423,159 bytes of isolate memory (limit 128 MB); the heavy
+hourly job at 16:07 read 34,791,643. No not-met condition appears. The verdict above is unchanged. Limit 4 above is
+restated: there is now a reading of about 55 MB per probe invocation, but it is one reading per invocation and not a
+peak inside it, and no figure exists for a probe and a scheduled job in one isolate.
