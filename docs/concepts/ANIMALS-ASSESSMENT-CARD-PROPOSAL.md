@@ -1,6 +1,6 @@
 # Animals: the conservation assessment card. Short proposal
 
-22 Nov 2026 · **rev 1** · docs only · branch `animals-assessment-proposal` · for GPT's review, then Chad's decisions. By Claude ("Animals satellite picture" thread).
+22 Nov 2026 · **rev 1.1** · docs only · branch `animals-assessment-proposal`. **GPT reviewed rev 1: worth pursuing; section 6 step 1 is the right next step; no category is cleared for display** (`reviews/2026-11-22-animals-assessment-and-tidy-gpt-review.md`, relayed by Chad). Rev 1.1 applies GPT's four corrections (§2, §4, §6, §7) and records its recommendations in §5. Chad's own choices and his go for the evidence step are still his. By Claude ("Animals satellite picture" thread).
 
 Authority: Chad's own message of 22 Nov: the assessment card next, "a short proposal first, so we can judge what it adds and what evidence supports it." Nothing here authorises a source audit, a build, a message to anyone, or any change to the live page.
 
@@ -14,10 +14,15 @@ Each of the four journey cards (plains zebra, white shark, false killer whale, w
 
 One short block per animal, in words, no colour and no arrow:
 
-> **Extinction-risk category:** [category], IUCN Red List, [global or regional] assessment of [the assessed species or population], assessed [date]. Checked by Mother Earth on [date]. [Link to the assessment.]
+> **Extinction-risk category:** [category], IUCN Red List, [global] assessment of [the assessed species, by scientific name], assessed [assessment date], published [publication or version date]. Checked by Mother Earth on [check date]. [Link to the assessment.]
 > **This is not about the animal shown.** The assessment covers [the whole species worldwide]; the journey is one [animal] from [place and years].
+> **Population trend:** not shown here; see the assessment.
 
-That is all. It answers one question a reader has when watching a recorded journey ("how is this species doing?") with the one widely used, dated answer, and it says plainly what that answer does not cover.
+That is all. The question the card answers is narrow: **what extinction-risk category did this dated assessment assign?** It does not say how the species is doing now, it is not a legal listing, and it is not a trend. It says plainly what the answer does not cover.
+
+Three dates, never merged or inferred from one another or from a website's "updated" label: the assessment date, the publication or version date, and Mother Earth's check date.
+
+For the penguin card the second line reads differently: the assessment covers the species as a whole at its date; the chart beside it is counts of occupied nest sites at named colonies from 1979 to 2019, a different thing from a different source.
 
 **What it does not add, on purpose:** no population trend (the Red List's trend field may not be copied without IUCN's permission, and Chad's rule is that a risk category is never a trend), no population number, no criteria string, no summary text, no map, no logo. The penguin card already shows counted pairs from its own cleared source; the two stay separate fields.
 
@@ -43,29 +48,35 @@ That is all. It answers one question a reader has when watching a recorded journ
 - **Accepted design: hand-kept.** A small file in the repository, one record per animal: category, scope, assessed taxon, assessment date, the assessment's citation and link, the date we checked. The page reads that file. No request to IUCN from the reader's browser or the hub.
 - **Why this is honest for an archive item:** Red List assessments change every several years, not daily. Each card shows its assessment date and our check date, so a stale card is visibly dated, never silently wrong.
 - **The tension:** Chad's standing rule is hub-first, no manual steps as the design. The Red List has an API, but it needs an account and token and has its own terms, which nobody here has read. Using it is a separate source audit and possibly an enquiry.
-- **Proposed:** hand-kept for this build, with a written re-check (who, how often, what happens when a category changes), and the API route recorded as a later option, not started.
+- **Proposed:** hand-kept for this build, and the API route recorded as a later option, not started. No API audit is needed for the hand-kept approach (GPT).
+- **Maintenance states (criterion C5 carried in, as GPT asked). A date on the card does not by itself stop a record being superseded, so the record has states:**
+  - **Checked:** the last check succeeded on the stated date; the record is shown.
+  - **Latest check failed:** the source could not be read. A permitted, dated record stays shown with its dates and a notice that the latest check failed. **The successful-check date is never moved forward by a failed attempt.**
+  - **Check overdue:** the re-check date has passed with no attempt. The record stays shown with a notice that its check is overdue.
+  - **Withdrawn, replaced, or permission lost:** the record is not shown; the card returns to "Not available" until a reviewed, usable replacement is filed.
+- **Owner and cadence, to be fixed before any build:** proposed owner Claude in a Mother Earth thread on Chad's go, recorded in STATUS; proposed cadence every six months and whenever IUCN announces a Red List update that names one of the five species. Both are proposals for Chad.
 
 ## 5. Decisions for Chad (after GPT's review)
 
 | | Question | Options | Recommended |
 |---|---|---|---|
-| A-D1 | Which cards | A: the four journey cards (the heading is already there). B: those plus the penguin card. C: all six. | B. The penguin is the one animal where the category adds most beside its counts. Mule deer adds little. |
-| A-D2 | Scope shown | A: the global Red List category only. B: global, plus a regional one where it covers the animal's place. | A for this build. A regional list is a different publisher with unread terms, and only the penguin clearly has one that applies. |
-| A-D3 | Trend | A: no trend line at all. B: a line saying "Population trend: not shown here; see the assessment." | B. It keeps trend and risk visibly separate, as the concept asks, without copying IUCN's field. |
-| A-D4 | Keeping it current | A: hand-kept file with a stated re-check. B: audit the Red List API for the hub first. | A now; B recorded for later. |
-| A-D5 | Look | A: words only. B: the Red List's category colours. | A. No colour-coded alarm; and the colours and logo are IUCN's. |
+| A-D1 | Which cards | A: the four journey cards (the heading is already there). B: those plus the penguin card. C: all six. | B. The penguin is the one animal where the category adds most beside its counts. Mule deer adds little. **GPT: B.** |
+| A-D2 | Scope shown | A: the global Red List category only. B: global, plus a regional one where it covers the animal's place. | A for this build. A regional list is a different publisher with unread terms, and only the penguin clearly has one that applies. **GPT: A.** |
+| A-D3 | Trend | A: no trend line at all. B: a line saying "Population trend: not shown here; see the assessment." | B. It keeps trend and risk visibly separate, as the concept asks, without copying IUCN's field. **GPT: B.** |
+| A-D4 | Keeping it current | A: hand-kept file with a stated re-check. B: audit the Red List API for the hub first. | A now; B recorded for later. **GPT: A, with a named owner and a concrete re-check cadence before build.** |
+| A-D5 | Look | A: words only. B: the Red List's category colours. | A. No colour-coded alarm; and the colours and logo are IUCN's. **GPT: A.** |
 
 ## 6. If Chad says go: the order
 
-1. **Source read, docs only (the evidence step).** Open the six Red List assessment pages and the current terms in Chad's Chrome (the site does not read as plain text), and record for each: category, scope, assessed taxon, assessment date, citation, link, and the exact terms sentence relied on. Also read BirdLife's terms if any card would cite BirdLife. Report anything that does not match the table above. No account, no API, no message to anyone.
-2. Build proposal or straight to a branch build, as GPT advises, against C1 to C6 with the wording of §2.
+1. **Source read, docs only (the evidence step).** Open the Red List assessment pages for the five species of A-D1 B and the current terms in Chad's Chrome (the site does not read as plain text). Record for each: the exact scientific name and the assessment identifier, global or regional scope, category, assessment date, publication or version date, citation and link, and our check date; and for the terms, their version and date and the clause relied on, in context. BirdLife's terms are read only if BirdLife material would actually be used. Mule deer is optional discovery, not needed for the build. **If a primary assessment cannot be read, that card stays "Not available"; a search extract is never substituted.** Report anything that does not match the table in §3. No account, no API, no message to anyone.
+2. The short evidence record and any design change go back to GPT. If the record confirms this bounded design, no second full proposal: a branch build brief with the records, the maintenance states and the C1 to C6 checks is enough (GPT).
 3. GPT's candidate review. Chad's own Approve lines for the REGISTER entry (IUCN is a new source) and for any merge.
 
 ## 7. What could stop it
 
 - The terms no longer say what was read on 20 Nov, or say less than "category for a named taxon may be shown".
 - An assessment page cannot be read reliably, or its scope cannot be matched to our animal in plain words.
-- The false killer whale: if the only honest statement is "global category for the species; this animal's stock has no Red List assessment of its own", the card must say exactly that or stay "Not available".
+- The false killer whale: the card states only the scope that was verified, and that no stock-specific assessment was verified for this card. It does not claim that none exists because none was found (GPT's correction).
 
 ## 8. Sources for this note (all read 22 Nov as search extracts; none is the Red List itself)
 
