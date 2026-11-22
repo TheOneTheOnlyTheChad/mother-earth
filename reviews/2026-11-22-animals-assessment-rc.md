@@ -44,18 +44,22 @@ Animals does not touch the hub. Nothing is fetched from the Red List by the page
 
 **A limit, stated.** No rule can see a failed attempt typed in as a successful check (builder test 9c records this). That honesty rests on the person doing the check and on the STATUS entry for it.
 
-## 4. Criteria C1 to C6
+## 4. Criteria C1 to C6 (corrected 22 Nov after GPT's candidate review: the first mapping misread C6 and blurred C2 and C4)
 
-| | Criterion (short) | State | Evidence |
+The criteria are quoted in short from `docs/concepts/ANIMALS-PROPOSAL.md` §8, lines C1 to C6.
+
+| | Criterion, as written | State | Evidence |
 |---|---|---|---|
-| C1 | Reuse terms read and recorded | **OPEN on R1.** Section 3 covers the category. The date and scope fields beside it are not settled. | Evidence record §1; GPT's evidence review; enquiry draft |
-| C2 | Scope stated; not the animal shown | Met on the branch | UI 2a ("global assessment of"), 2c, 2f, 6c |
-| C3 | Risk category never presented as a trend | Met on the branch | UI 2d; builder rule 1; break `trend-shown` |
-| C4 | Right assessment for the right taxon | Met on the branch | Builder rule 4, S2, S3; UI 2a, 2b |
-| C5 | Dated; failed check, withdrawal and replacement handled | Met on the branch | UI 4a to 4e, 5a to 5c, 6a to 6f |
-| C6 | Words only; no alarm colour | Met on the branch | UI 2e; break `colour-badge` |
+| C1 | A source audit has been reviewed and its terms allow the intended display (and caching, if cached) | **OPEN on R1.** The terms were read by Claude and by GPT. They allow non-commercial use and free the category. Section 4 separately bars reposting and redistribution, and does not say the category's exemption reaches the assessment date, publication year and scope, on the page or in the served file. | Evidence record §1; GPT's evidence and candidate reviews |
+| C2 | The card shows the category, the assessment date, the scope and the assessed taxon, each from the source | Built on the branch. Whether the date and scope may be published is R1. | UI 2a, 2b; builder S1 to S4 |
+| C3 | Population trend, where the source gives one, is a separate field from the risk category, with its period | **Not built as written, by Chad's decision A-D3 B:** no trend value is shown; a line says so and points to the assessment. Risk is never worded as trend. | UI 2d; builder rule 1; break `trend-shown` |
+| C4 | Where the assessed unit differs from the tracked animals, the card says so in words | Built on the branch | UI 2c, 2f, 2g; break `claims-no-stock-assessment` |
+| C5 | A failed retrieval does not erase a permitted, dated assessment; "Not available" when the terms no longer allow display or the assessment is withdrawn or replaced; never shown without its date | Built on the branch, for a hand-kept record (the "retrieval" is the six-monthly check by a person) | UI 4a to 4e, 5a to 5c, 6a to 6f |
+| C6 | Until C1 is met the card reads "Not available yet" | **PENDING for the public page, on R1.** The live page still reads "Not available yet" and stays so until C1 is met. The filled blocks exist only on this branch, built for review under Chad's branch-build line. They are not a claim that C6 is satisfied. | Live `animals.html` unchanged; this branch unmerged |
 
-Criterion wording here is Claude's short form of `docs/concepts/ANIMALS-PROPOSAL.md` §8C; GPT should read the originals.
+"Words only, no colour" is decision A-D5 A, not a criterion. It is built and tested (UI 2e; break `colour-badge`).
+
+**Where the five records can already be read.** The repository is public. This branch and the docs branch are pushed to it, so the hand-kept record, the shipped JSON file, the tests and the evidence record are publicly reachable there now, though the website does not show or serve them. Checked: the branch's files were fetched from GitHub's raw address at commit `ff393e1` from the Mac's shell with no credentials (22 Nov). "Branch only" means not on the website; it does not mean private. Whether to leave them there while R1 is open is Chad's decision (section 7).
 
 ## 5. Test results (Claude's runs, cloud workspace, Chromium with software rendering)
 
@@ -80,7 +84,8 @@ Criterion wording here is Claude's short form of `docs/concepts/ANIMALS-PROPOSAL
 
 ## 7. What a release still needs
 
-- **R1 closed** by IUCN's answer (Chad's message to send).
+- **R1 closed**: the permission basis for publishing the assessment date, publication year and scope beside the category, on the page, in the served JSON file and in the public repository. It can close through a clear IUCN statement that applies, or through IUCN's answer to a question. Claude looked for such a statement on 22 Nov in two more places on the Red List site, the Summary Terms page and the FAQ page, and found none: the summary restates non-commercial use, attribution and no redistribution, with waiver by permission; the FAQ says the data are free for non-commercial use. Neither mentions the category exemption or its reach. The categories themselves are not waiting on permission.
+- **Chad's decision on the branch files** already in the public repository (leave them, described honestly in any enquiry; or remove the branches from GitHub until R1 closes, which does not recall copies already fetched).
 - GPT's pass on this candidate.
 - Chad's own Approve lines: file the REGISTER entry, then merge.
 - After release: the served-file check, and R2 (the copy to IUCN) tracked to closure.
