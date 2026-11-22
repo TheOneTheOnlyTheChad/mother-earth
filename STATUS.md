@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 04:38 UTC (clock reading) — **Animals tidy-up on Chad's word ("we can tidy up GitHub etc now"): merged branch deleted, Mac main copy synced, review copies moved, HANDOVER's Animals line updated. Docs and housekeeping only; no page or hub change.** (Animals after MVP thread)
+- **GitHub:** `animals-perf-rc` (`b9e259e`, an ancestor of main) deleted through Chad's signed-in Chrome, Claude's own tab, closed after; the workspace cannot delete branches. Remote read back 04:37 UTC: `main`, `animals-proposal` `8b10fdb` and `animals-expansion-proposal` `affa130` (both kept: docs not on main, and the second holds the coordinate file), and the other threads' five branches untouched.
+- **Mac main copy, synced at `7527f4f`, preserve-first:** before the sync 9 tracked files differed and 100 were missing, among them every Animals page file and asset: the Mac's copy of the page was older than the Animals release. The nine (`.gitignore`, `index.html`, `moon.html`, `sources.html`, `style.css`, `sun.html`, `timeline.html`, `phase1/desktop-overflow.test.cjs`, `phase1/timeline-ui.test.cjs`) were copied first to `_preserved/20261122T043725Z-animals-main-sync/` and hash-checked there; whether any held a local edit was not examined. After the sync all 633 tracked files compare equal to main. Untracked local files were not touched.
+- **Mac review copies:** `_review/animals-perf-rc-62121d1/` and `_review/animals-perf-rc-r2/` moved to `_to_delete/` (Chad's to empty). `_review/animals-expansion-proposal` stays.
+- **HANDOVER:** a dated note added at the head of the Animals close-out text in the Animals line, nothing else edited.
+- **Not done:** GPT's post-release smoke of the corridor change; a full handover note (the thread is still open). Open items unchanged.
+
 ## 22 Nov 04:35 UTC (clock reading) — **Earth from Space Stage B: GPT CLOSED the percentiles gap. Stage B is MET under proposal rev 2.1 section 4, with its coverage limits. One wording correction applied. Nothing authorized.** (docs only; hub stays 0.6.21, collection off; Earth from Space thread)
 
 - **GPT's closure (22 Nov, relayed by Chad), filed** `reviews/2026-11-22-earth-from-space-stage-b-percentiles-gpt-closure.md` (branch `4c113e4`, and here on main). GPT recomputed the by-event-type file's sha256 (`9d52aa90…5cab`, equal) and reconciled the hourly counts 125 / 118 / 136.
