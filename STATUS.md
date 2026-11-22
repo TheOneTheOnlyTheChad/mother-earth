@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 04:35 UTC (clock reading) — **Earth from Space Stage B: GPT CLOSED the percentiles gap. Stage B is MET under proposal rev 2.1 section 4, with its coverage limits. One wording correction applied. Nothing authorized.** (docs only; hub stays 0.6.21, collection off; Earth from Space thread)
+
+- **GPT's closure (22 Nov, relayed by Chad), filed** `reviews/2026-11-22-earth-from-space-stage-b-percentiles-gpt-closure.md` (branch `4c113e4`, and here on main). GPT recomputed the by-event-type file's sha256 (`9d52aa90…5cab`, equal) and reconciled the hourly counts 125 / 118 / 136.
+- **Correction to the two entries below (22 Nov 03:49 and 04:08 UTC) and to the HANDOVER text that says "probe invocations about 54.4 to 54.8 MB":** a bucket's maximum CPU and maximum memory need not belong to one invocation. Correct wording: the fetch-minute buckets containing the probes report maximum isolate-memory readings of 54,827,181, 54,818,477 and 54,423,159 bytes; each holds two or three invocations; attributing those maxima to the probes is an inference, not an invocation-level measurement. The 16:07 cron bucket holds one invocation (34,791,643 bytes). Sampled readings, not peaks, not decoder allocations; **never add the two figures** to predict shared-isolate headroom.
+- **Kept on record:** the percentiles were captured late (an omission on the day); the hourly file is a transcription whose raw response was not retained.
+- **Limits retained:** busy coexistence not observed; distinct isolates; no repeated validation in one isolate; no memory bound; validation not timeable from runtime timestamps.
+- **Proposal for the next stages is now rev 1.1** (section 1 point 3 reworded only): `docs/concepts/EARTH-FROM-SPACE-STORAGE-TO-RELEASE-PROPOSAL.md`, sha256 `79cc77ce…c5108`; Mac `_review/earth-from-space-storage-to-release-proposal/read/01-PROPOSAL-rev1.1.txt`. **Next:** GPT's review of that proposal, then Chad's decisions D1 to D6. No hub action without his own Approve line.
+
 ## 22 Nov 04:08 UTC (clock reading) — **Earth from Space: proposal rev 1 for the stages after Stage B is written and with GPT and Chad. Docs only; nothing built, deployed, stored or approved.** (hub stays 0.6.21, collection off; Earth from Space thread)
 
 - **On Chad's "Go" (22 Nov), after GPT's review of the Stage B result.** `docs/concepts/EARTH-FROM-SPACE-STORAGE-TO-RELEASE-PROPOSAL.md` on `earth-from-space-rc` `c399911`; Mac `_review/earth-from-space-storage-to-release-proposal/read/`.
