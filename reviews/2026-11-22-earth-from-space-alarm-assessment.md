@@ -201,3 +201,64 @@ Stage D.
 | Throwaway CPU test proves CPU coverage only; memory and scheduled are separate | Section 5 has three legs, each with what it shows and does not show |
 | Stopped-trigger monitor out; "would not catch" becomes "not demonstrated" | Sections 3 and 4 |
 | Cost: keep ingestion and storage separate; the later reading cannot establish Stage C's incremental cost | Section 6 |
+
+## 10. First attempt under Chad's Approve line: STOPPED before any monitor or test leg (22 Nov 2026 15:14 UTC, clock reading)
+
+Chad's line (his own message, 22 Nov): create the test Worker and test monitor, run T-cpu, T-mem and T-cron, delete
+both, then create Monitor A only if the legs are clean. **Done: the test Worker only. Not done: any monitor, any test
+leg, Monitor A.** Stopped under section 4's own rule ("if the preview refuses the query, nothing is saved and the
+difference is reported") and because of a second finding that would have made the test legs meaningless.
+
+**What exists now**
+
+- Worker `mother-earth-alarmtest`, created 15:08:51 UTC from `phase1/alarmtest/worker.js` at branch commit `cb1fafe`
+  (627 bytes, sha256 `9ea8f9352189ca7435a6cef05fb664331b3a25022739e1a468ba6294fcb942d1`, read back equal). 0 bindings, no
+  cron, no route. Its workers.dev address was switched on at 15:09:00 and **switched off again at 15:13:57** so the
+  `/cpu` and `/mem` paths are not reachable while the test is on hold. It was invoked twice, both on `/`
+  (15:09:16 and 15:09:39, outcome ok, CPU 0 ms). `/cpu`, `/mem` and the cron were never used.
+- No monitor. Notification policies read back 15:13:57: the budget alert only.
+- `mother-earth`: 25 bindings, `EARTHVIEW_ENABLED` `manual`, unchanged.
+
+**Finding 1: the dashboard's form rejects the approved query.** The form rewrites custom SQL before running it,
+wrapping each condition in brackets, so the time condition becomes `("timestamp" >= (NOW() - INTERVAL '15' MINUTE))`.
+The SQL API answers that form with `422 Input was invalid: recursion limit exceeded`. The same query without the
+added brackets runs (HTTP 200) when sent to the SQL API directly. So a manual relative time range cannot be saved in
+working order through the form as it is today. (The time column is `timestamp`, not `datetime`.)
+
+**Finding 2: a new Worker's rows are not recorded under its name.** Three to four minutes after the test Worker's
+two invocations, the dataset held no row with `scriptName` `mother-earth-alarmtest`; it held 2 rows for the same
+period under `scriptName` `__unknown__`. (The week's 124 `__unknown__` rows are probably the deleted Stage A probe;
+not established.) A test monitor filtering on the test Worker's name would therefore never fire, and a silent test
+would have been indistinguishable from "the alarm does not work". Whether the name appears after some longer delay
+has not been observed.
+
+**Read on the way, by read-only queries to the SQL API (15:10 to 15:13 UTC)**
+
+- Columns confirmed from the dataset's own listing: `scriptName`, `status`, `timestamp`, `invocationType` (fetch,
+  cron, …), `cpuTimeUs`, `memoryUsageBytes`, `sampleInterval`, `httpResponseStatus`.
+- **An ungrouped `count()` with nothing matching returns one row with the number 0**, not an empty result. That
+  settles the SQL half of the stopped-trigger question; how a monitor treats a 0 is still not demonstrated.
+- **Hub rows arrive quickly:** at 15:13:35 the newest `mother-earth` row was stamped 15:13:05. One observation.
+- **Sampling is real on this account.** Today to 15:00: 2,260 hub rows with `sampleInterval` 1, 54 with 2 and 10 with
+  10. The rows above 1 fall where several requests arrived in the same second (for example the eight health reads
+  Claude fired together at 07:31:02, 08:01:09 and 11:38:06). **So one failing invocation inside such a burst could be
+  left out of the dataset, and no monitor on this dataset can be promised to see every failure.** Scheduled ticks are
+  spaced out and were not seen sampled, which is not a guarantee.
+- **The Stage C run has its own row:** `timestamp` 2026-11-22 11:51:11, fetch, status success, `cpuTimeUs` 536,696,
+  `memoryUsageBytes` 55,476,085, one full garbage collection (52,430 µs), `sampleInterval` 1. The dataset describes
+  `memoryUsageBytes` as "V8 isolate memory usage at the end of the invocation". **So the 55.48 MB belongs to the
+  run's own row, not merely to a two-request minute bucket; it is still the isolate's memory at the end of the
+  invocation, not a peak and not a headroom bound.**
+
+**Options for Chad (none taken)**
+
+1. **Form-native window:** no time condition in the SQL; let the form supply the range and set its "Average over"
+   to 15m with "greater than 0", run every minute. It saves through the form. Whether that window re-reads the last
+   15 minutes or only averages past one-minute results is not documented; the test would show it.
+2. **Create through the API with the unbracketed query.** Keeps the approved query exactly. It is the same signed-in
+   dashboard session, but not the form, and the policy fields for a monitor are not documented for hand use.
+3. For the test legs, either wait and see whether the test Worker's name appears in the dataset, or point the test
+   monitor at `scriptName` `__unknown__` (it would also see any other unnamed script's rows), or test delivery only
+   with a certainly-true condition on the hub's own rows and record coverage of CPU and memory endings as untested.
+4. Stop here: delete the test Worker, create nothing, and write "no alarm; reasons in section 10" into the Stage D
+   package.

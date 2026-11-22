@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 15:14 UTC (clock reading) — **Earth from Space alarm: on Chad's Approve line the throwaway Worker `mother-earth-alarmtest` was created, then the work was STOPPED before any monitor or test leg. No monitor exists. The test Worker still exists (no bindings, no cron, workers.dev address switched off). `mother-earth` untouched; `EARTHVIEW_ENABLED` stays `manual`.** (production: one extra Worker on the account; hub 0.6.22 unchanged; Earth from Space thread)
+
+- **Chad's line (his own message):** create the test Worker and test monitor, run T-cpu, T-mem, T-cron, delete both, then create the hub monitor only if clean.
+- **Created 15:08:51 UTC:** `mother-earth-alarmtest` from `phase1/alarmtest/worker.js` at `cb1fafe` (sha256 `9ea8f935…42d1`, read back equal). Invoked twice on `/` only (ok, CPU 0 ms). Address on 15:09:00, **off 15:13:57**. `/cpu`, `/mem` and the cron never used.
+- **Stopped, two findings:** (1) the dashboard form rewrites the approved query with extra brackets and the SQL API then refuses it (`recursion limit exceeded`); the unbracketed query runs when sent directly. (2) The new Worker's rows are in the dataset under `scriptName` `__unknown__`, not its name, so the test monitor as designed would never fire.
+- **Read on the way:** `count()` with nothing matching returns a numeric 0; hub rows arrive within about 30 s (one observation); **sampling is real** (rows with `sampleInterval` 2 and 10 where several requests land in the same second), so no monitor on this dataset can be promised to see every failure. **The Stage C run's own row: CPU 536,696 µs, `memoryUsageBytes` 55,476,085 (isolate memory at the end of the invocation; not a peak, not a bound).**
+- **File:** `reviews/2026-11-22-earth-from-space-alarm-assessment.md` rev 2 section 10 (branch `earth-from-space-rc` `5a31394`, copied here). **Next:** Chad chooses among the four options there. Until then: one idle test Worker to delete or reuse.
+
 ## 22 Nov 15:04 UTC (clock reading) — **Animals: the satellite picture's docs branch is on main, on Chad's own line. Docs only. No Animals branch is left unmerged.** (Animals satellite picture thread)
 - **Chad's line (his own message):** "Approve: merge animals-satellite-proposal 726fbba into main (docs only)". Spent. Five files came in, all docs: `docs/concepts/ANIMALS-SATELLITE-PROPOSAL.md` (rev 1.1), `reviews/2026-11-22-animals-satellite-proof.md`, `reviews/2026-11-22-animals-satellite-proposal-gpt-review.md` and the two proof screenshots.
 - **Tidy-up on his word ("you can clean up for now"), thread stays open:** merged branches `animals-satellite-rc` and `animals-satellite-proposal` to be deleted on GitHub, the Mac's copy of main synced, the Mac review folders moved to `_to_delete/`. What was actually done is in this thread's HANDOVER line once done.
