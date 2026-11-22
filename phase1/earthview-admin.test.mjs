@@ -4,7 +4,10 @@
  * BREAK=<name> weakens a copy of the script; each must fail:
  *   check-then-create claim-released no-q no-env-clear retry-allowed redirects-followed key-on-command-line key-in-url
  *   non-200-ok run-any-step step-not-matched read-only-claims plan-unchecked run2-any-time run2-after-published
- *   run2-after-lost overwrite-read mutate-by-get */
+ *   run2-after-lost overwrite-read mutate-by-get note-request-wrong note-field-dropped stderr-noise
+ *   note-case-in-substitution (the defect found on 22 Nov 2026 in Stage C step C1: a case inside $( ), which bash 3.2 cannot
+ *   parse. It fails ONLY under a bash that cannot parse it, so it is the native macOS negative control: run it there.
+ *   Under bash 4 or later the old line works and this break reports 0 failed; that is expected and proves nothing.) */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import http from 'node:http'; import { spawn } from 'node:child_process'; import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url)), BREAK = process.env.BREAK || '';
 const BREAKS = {
@@ -25,6 +28,10 @@ const BREAKS = {
   'run2-after-published': ["  if [ -s \"$B1\" ] && grep -q 'published' \"$B1\"; then", '  if false; then'],
   'run2-after-lost': ['  if [ ! -s "$B1" ]; then unset KEY', '  if false; then unset KEY'],
   'overwrite-read': ['  K=1; while ! ( set -o noclobber; : > "$OUT/$STEP.$K.meta.txt" ) 2>/dev/null; do K=$((K + 1));', '  K=1; while false; do K=$((K + 1));'],
+  'note-case-in-substitution': [`printf 'request: %s %s%s\\n' "$METHOD" "$HUB" "$URLPATH"; cat; }`, 'echo "request: $METHOD $HUB${URLPATH%%\\?*}$( case "$URLPATH" in *\\?*) echo "?${URLPATH#*\\?}";; esac )"; cat; }'],
+  'note-request-wrong': [`printf 'request: %s %s%s\\n' "$METHOD" "$HUB" "$URLPATH"; cat; }`, `printf 'request: %s %s%s\\n' "$METHOD" "$HUB" "\${URLPATH%%\\?*}"; cat; }`],
+  'note-field-dropped': ['echo "curl_exit: $RC"; echo "http_status: $HTTP"', 'echo "http_status: $HTTP"'],
+  'stderr-noise': ['echo "Done: HTTP 200. Saved $BODY"; echo', 'echo "admin.sh: command substitution: line 106: syntax error near unexpected token" >&2; echo "Done: HTTP 200. Saved $BODY"; echo'],
   'mutate-by-get': ["  hold)          MUT=yes; METHOD=POST; WORD=hold;", "  hold)          MUT=yes; METHOD=GET; WORD=hold;"],
 };
 let src = fs.readFileSync(path.join(HERE, 'earthview-admin.sh'), 'utf8');
@@ -47,9 +54,9 @@ await new Promise(r => server.listen(0, '127.0.0.1', r)); const HUB = `http://12
 const reset = (mode = 'ok', body = null) => { S.reqs.length = 0; S.mode = mode; S.body = body; for (const r of S.hold.splice(0)) try { r.destroy(); } catch (_) { } };
 let nOut = 0; const newOut = () => path.join(TMP, 'out-' + (nOut++));
 function launch(args, o = {}) { const out = o.out || newOut(), env = { PATH: o.path || process.env.PATH, HOME: o.home || TMP, OUT: out, KEYS_FILE: o.keys || KEYS, EV_ADMIN_TEST_HUB: HUB, EV_ADMIN_TEST_MAX_TIME: String(o.maxTime || 20), ...(o.env || {}) };
-  const child = spawn('bash', [SCRIPT, ...args], { env, detached: true, stdio: ['ignore', 'pipe', 'pipe'] }); let text = '';
-  child.stdout.on('data', d => { text += d; }); child.stderr.on('data', d => { text += d; });
-  return { child, out, done: new Promise(res => child.on('close', (code, signal) => res({ code, signal, text, out }))) }; }
+  const child = spawn('bash', [SCRIPT, ...args], { env, detached: true, stdio: ['ignore', 'pipe', 'pipe'] }); let text = '', err = '';
+  child.stdout.on('data', d => { text += d; }); child.stderr.on('data', d => { text += d; err += d; });
+  return { child, out, done: new Promise(res => child.on('close', (code, signal) => res({ code, signal, text, err, out }))) }; }
 const run = (args, o) => launch(args, o).done;
 const files = out => fs.existsSync(out) ? fs.readdirSync(out).sort() : [];
 const read = (out, f) => { try { return fs.readFileSync(path.join(out, f), 'utf8'); } catch (_) { return ''; } };
@@ -135,6 +142,25 @@ const isoAgo = s => new Date(Date.now() - s * 1000).toISOString().replace(/\.\d+
   reset(); const out = newOut(); fs.mkdirSync(out, { recursive: true }); seed(out, { age: 720, body: SRC_FAIL }); await run(['C7-run-2', 'run'], { out }); const again = await run(['C7-run-2', 'run'], { out });
   ok('F the second run cannot be started twice either', again.code === 4 && S.reqs.length === 1, { code: again.code, reqs: S.reqs.length }); }
 
+// ===== G. The note file of every step, and no shell diagnostics (added 22 Nov 2026 after Stage C step C1 on macOS bash 3.2)
+{ const table = [
+    [['C1', 'status'], 'GET', '/admin/earthview/status', 'C1.1'], [['C3', 'recover-plan'], 'GET', '/admin/earthview/recover', 'C3.1'], [['C5a', 'sweep-plan'], 'GET', '/admin/earthview/sweep', 'C5a.1'], [['C5b', 'release-plan'], 'GET', '/admin/earthview/release', 'C5b.1'],
+    [['C2-hold', 'hold'], 'POST', '/admin/earthview/hold?apply=1', 'C2-hold'], [['C4-recover', 'recover-apply', PLAN], 'POST', '/admin/earthview/recover?apply=1&plan=' + PLAN, 'C4-recover'], [['C5-sweep', 'sweep-apply', PLAN], 'POST', '/admin/earthview/sweep?apply=1&plan=' + PLAN, 'C5-sweep'],
+    [['C5-release', 'release-apply'], 'POST', '/admin/earthview/release?apply=1', 'C5-release'], [['C7-run-1', 'run'], 'POST', '/admin/run/earthview', 'C7-run-1'],
+  ];
+  const DIAG = /syntax error|command substitution|unexpected token|unexpected EOF|command not found|bad substitution|: line \d+:/;
+  const T = '20\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ';
+  for (const [args, method, url, base] of table) { reset(); const r = await run(args); const meta = read(r.out, base + '.meta.txt'), lines = meta.split('\n');
+    ok(`G1 ${args.join(' ')}: the note's request line is exactly "request: ${method} <hub>${url}"`, lines[2] === `request: ${method} ${HUB}${url}` && meta.split('\n').filter(l => /^request:/.test(l)).length === 1, lines[2]);
+    ok(`G2 ${args.join(' ')}: a successful call writes nothing to standard error and no shell diagnostic anywhere`, r.code === 0 && r.err === '' && !DIAG.test(r.text) && !DIAG.test(meta), { code: r.code, err: r.err, text: r.text.slice(0, 300) });
+    const want = [`^step: ${args[0]}$`, `^command: ${args[1]}$`, '^request: ', `^called_at: ${T}$`, `^answered_at: ${T}$`, '^curl_exit: 0$', '^http_status: 200$', `^answer_file: ${base.replace(/\./g, '\\.')}\\.json \\(\\d+ bytes\\)$`, '^curl_message: $', '^$'];
+    ok(`G3 ${args.join(' ')}: the note holds exactly its nine fields, in order, and nothing else`, lines.length === want.length && want.every((w, i) => new RegExp(w).test(lines[i])), lines); }
+  reset('409'); const r = await run(['C2-hold', 'hold']); const m = read(r.out, 'C2-hold.meta.txt').split('\n');
+  ok('G4 a refused call (409) still has an exact request line, every field, and no shell diagnostic', r.code === 8 && m[2] === `request: POST ${HUB}/admin/earthview/hold?apply=1` && m[6] === 'http_status: 409' && m.length === 10 && !DIAG.test(r.text), { code: r.code, m, text: r.text });
+  reset('hang'); const l = launch(['C4-recover', 'recover-apply', PLAN], { maxTime: 30 }); await sleep(700); process.kill(-l.child.pid, 'SIGINT'); const r2 = await l.done; const m2 = read(r2.out, 'C4-recover.meta.txt').split('\n');
+  ok('G5 an interrupted call: the note still has step, command, the exact request line and the INTERRUPTED result; no shell diagnostic', r2.code === 9 && m2[0] === 'step: C4-recover' && m2[1] === 'command: recover-apply' && m2[2] === `request: POST ${HUB}/admin/earthview/recover?apply=1&plan=${PLAN}` && /^result: INTERRUPTED at /.test(m2[3]) && !DIAG.test(r2.text), { code: r2.code, m2, text: r2.text }); }
+
 server.close(); for (const r of S.hold) try { r.destroy(); } catch (_) { }
 try { fs.rmSync(TMP, { recursive: true, force: true }); } catch (_) { }
+{ const v = await new Promise(res => { const c = spawn('bash', ['--version']); let o = ''; c.stdout.on('data', d => { o += d; }); c.on('close', () => res(o.split('\n')[0])); c.on('error', () => res('bash not found')); }); console.log('shell used for the script: ' + v); }
 console.log(`\nearthview-admin${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

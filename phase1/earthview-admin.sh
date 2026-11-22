@@ -103,7 +103,7 @@ else
   BASE="$OUT/$STEP.$K"
 fi
 BODY="$BASE.json"; META="$BASE.meta.txt"
-note() { { echo "step: $STEP"; echo "command: $CMD"; echo "request: $METHOD $HUB${URLPATH%%\?*}$( case "$URLPATH" in *\?*) echo "?${URLPATH#*\?}";; esac )"; cat; } > "$META"; }
+note() { { echo "step: $STEP"; echo "command: $CMD"; printf 'request: %s %s%s\n' "$METHOD" "$HUB" "$URLPATH"; cat; } > "$META"; }
 CALLED=no; DONE=no
 trap 'unset KEY; if [ "$DONE" = no ]; then printf "result: INTERRUPTED at %s (%s). Not repeated: reconcile.\n" "$(utc)" "$([ "$CALLED" = yes ] && echo "after the call was started" || echo "before any call")" | note; fi; rm -f "$META.err"; exit 9' INT TERM HUP
 T0=$(utc); CALLED=yes
