@@ -1,5 +1,0 @@
-C1.2 CF: 2026-11-22T08:05:30.570Z GET /admin/earthview/status 200 ok cpu 2 wall 1392 auth masked ua curl/8.7.1 (read 08:06:11Z)
-CF admin records read 08:11:51Z (all resp 200 ok, auth masked, curl/8.7.1): 08:07:00.285 POST hold?apply=1 cpu3 wall1991; 08:08:12.433 GET status; 08:08:39.585 GET recover; 08:09:10.634 POST recover?apply=1&plan=294e508d75476393 cpu7 wall5196; 08:10:16.305 GET status; 08:10:51.817 GET sweep; 08:11:04.021 GET release
-R2 earthview/ at 08:11:51Z: current.json 177, epochs/e20261122T080906Z-768e695ccab9b063.json 303, held.json 143
-C6: variable EARTHVIEW_ENABLED=manual added via dashboard Settings form by Claude; deployment created_on 2026-11-22T08:14:00.325Z source dash; read back 08:14:16Z: code 17798a44…a080, 25 bindings (14 plain, 9 secret, d1, r2), crons unchanged, hub / 0.6.22, value equals 'manual'
-C6 tick: 08:15:10Z five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED is manual) (read 08:16:06Z); previous 08:10:10 said unset. C5s status 08:12:36Z: no hold, pointer+list present same epoch, 0 objects, guards pass
