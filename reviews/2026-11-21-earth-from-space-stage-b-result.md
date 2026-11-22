@@ -100,7 +100,7 @@ they were read on 22 Nov at 03:46:59Z and 03:47:27Z, read-only, with no call to 
 | 16 (obs 2) | 118 | success only, 0 errors | 3.8 / 11.4 / 588 / 814 ms | 3.16 / 3.43 / 34.8 / 54.8 MB |
 | 20 (obs 3) | 136 | success only, 0 errors | 3.8 / 10.4 / 535 / 821 ms | 3.16 / 3.43 / 31.3 / 54.4 MB |
 
-The probe invocations read 54,827,181, 54,818,477 and 54,423,159 bytes of isolate memory (limit 128 MB); the heavy
-hourly job at 16:07 read 34,791,643. No not-met condition appears. The verdict above is unchanged. Limit 4 above is
-restated: there is now a reading of about 55 MB per probe invocation, but it is one reading per invocation and not a
-peak inside it, and no figure exists for a probe and a scheduled job in one isolate.
+The fetch-minute buckets containing the probes report maximum isolate-memory readings of 54,827,181, 54,818,477 and 54,423,159 bytes. Each contains two or three invocations. Attribution of those memory maxima to the probes is an inference, not an invocation-level measurement. (Wording corrected 22 Nov after GPT's closure review; limit 128 MB per isolate.) The 16:07 cron bucket holds one invocation, the heavy hourly job, and read 34,791,643 bytes. The figures are not to be added. No not-met condition appears. The verdict above is unchanged. Limit 4 above is
+restated: there are sampled isolate-memory readings of about 55 MB in the probes' minutes, which are not peaks, not
+decoder allocations and not tied to an invocation by measurement; no figure exists for a probe and a scheduled job in
+one isolate. There is still no memory bound.

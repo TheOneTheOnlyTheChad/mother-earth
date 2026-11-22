@@ -1,9 +1,14 @@
-# Earth from Space — from the first stored picture to the page: proposal (rev 1, for GPT)
+# Earth from Space — from the first stored picture to the page: proposal (rev 1.1, for GPT)
 
 22 Nov 2026. Asked for by GPT's review of the Stage B result (`reviews/2026-11-22-earth-from-space-stage-b-result-gpt-review.md`)
 and started on Chad's "Go" of 22 Nov. **Docs only. Nothing here is built, deployed, stored, enabled or approved.** Every
 production step named below needs Chad's own exact Approve line; the lines are sketched in section 10 and are not
 requests yet.
+
+**Rev 1.1 (22 Nov):** section 1 point 3 reworded after GPT's closure of the Stage B percentiles gap
+(`reviews/2026-11-22-earth-from-space-stage-b-percentiles-gpt-closure.md`): Stage B is **MET** under proposal rev 2.1
+section 4 with its coverage limits; the memory figures are bucket maxima, not invocation-level measurements. Nothing
+else changed from rev 1.
 
 State it starts from: hub **0.6.21** live (deployed code sha256 `2028e2da…01c3`), `EARTHVIEW_ENABLED` not set, no object
 under `earthview/` in storage, the tab not on the live page. Main's `phase1/worker.js` is still 0.6.19 and is the
@@ -31,9 +36,11 @@ Carried from Stage A and Stage B, unchanged, into every decision below:
 1. **Busy coexistence was not observed.** All three Stage B runs were quiet; run 2 ended 4.6 s before the heavy hourly job.
 2. **Three different isolates, each on its first validation.** No second validation in one isolate; no isolate shared
    with a scheduled job.
-3. **Memory: a reading, not a bound.** Each probe invocation read about 54.4 to 54.8 MB of isolate memory against a
-   128 MB limit; the heavy hourly job read 34.8 MB. One reading per invocation, not the peak during decoding. Nothing
-   measured for both in one isolate.
+3. **No memory bound.** The fetch-minute buckets containing the three probes report maximum isolate-memory readings
+   of 54,827,181, 54,818,477 and 54,423,159 bytes (limit 128 MB per isolate). Each bucket holds two or three
+   invocations, so tying those maxima to the probes is an inference, not an invocation-level measurement. The heavy
+   hourly job's bucket (one invocation) read 34,791,643 bytes. These are sampled isolate-memory readings, not peaks
+   and not decoder allocations, and they are not to be added to predict headroom in a shared isolate.
 4. **Validation cannot be timed from inside the runtime.** The runtime's clock does not advance during computation, so
    start and end read the same. This is "unmeasurable", not "zero cost". The only cost figure is whole-request CPU
    (587 to 827 ms in Stage B; at most 1,016 ms in Stage A), which is not decoder time alone.

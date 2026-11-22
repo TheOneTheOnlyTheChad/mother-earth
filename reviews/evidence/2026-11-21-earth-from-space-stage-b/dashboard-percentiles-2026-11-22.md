@@ -43,16 +43,18 @@ MB here is bytes / 1,000,000. Cloudflare's limit is 128 MB per isolate.
 | obs 2's minute, the hourly job | 16:07 | cron | 1 | 814,174 us | 34,791,643 bytes | 4 |
 | obs 3 | 20:21 | fetch | 2 | 820,742 us | 54,423,159 bytes | 1 |
 
-The max CPU figures equal the CPU on each probe's invocation record (827, 587, 820 ms) and on the 16:07:58 hourly job
-(814 ms), so the highest-memory row in each of those minutes is taken to be the same invocation. That is an inference
-from equal figures in a bucket of two or three invocations: the dataset does not name the invocation.
+**Attribution (corrected 22 Nov after GPT's closure review).** A bucket's maximum CPU and maximum memory are separate
+maxima and need not belong to the same invocation. The fetch-minute buckets containing the probes report maximum isolate-memory readings of 54,827,181, 54,818,477 and 54,423,159 bytes. Each contains two or three invocations. Attribution of those memory maxima to the probes is an inference, not an invocation-level measurement. The 16:07 cron bucket contains one invocation, so its
+34,791,643-byte reading is that invocation's. The CPU maxima do equal the CPU on each probe's invocation record (827,
+587, 820 ms) and on the 16:07:58 hourly job (814 ms).
 
 ## What it shows
 
 1. **No invocation of the hub in any of these hours had a status other than `success`**, and the error count is 0 in
    every bucket. This agrees with the invocation records already in the observation files.
-2. **The probe's isolate held about 54.4 to 54.8 MB at the probe's invocation**, in all three runs. That is the highest
-   memory figure of the whole day's hours read here, and about 43% of the 128 MB limit.
+2. **The fetch-minute buckets containing the probes report maximum isolate-memory readings of about 54.4 to 54.8 MB**,
+   the highest of the hours read here, about 43% of the 128 MB limit. That these are the probes' readings is an
+   inference (see Attribution).
 3. **Other work reaches similar order.** Hours without a probe peak at about 47.5 MB (11, 13, 15, 19, 21 UTC on 21 Nov;
    the same on 20 Nov under hub 0.6.19), and the heavy hourly job at 16:07 on 21 Nov shows 34.8 MB.
 4. Wasm memory is 0 throughout.
@@ -62,14 +64,15 @@ from equal figures in a bucket of two or three invocations: the dataset does not
 - Cloudflare describes the figure as the V8 isolate's memory "at the time of each invocation" and the percentiles as
   reservoir-sampled. It is **one reading per invocation, not a peak inside the invocation**. Decoding could have
   touched more than 54.8 MB for a moment and this figure would not show it.
-- The three probes ran in isolates that had run no scheduled job (0 scheduled runs each). The figures therefore say
-  nothing direct about a probe and a heavy job **in one isolate**. Adding 54.8 MB and 34.8 MB gives about 90 MB, under
-  the limit, but memory does not have to add like that and this is arithmetic, not an observation.
+- These are sampled isolate-memory readings, not measured invocation peaks and not decoder allocations.
+- The three probes ran in isolates that had run no scheduled job (0 scheduled runs each). The figures say nothing about
+  a probe and a heavy job **in one isolate**, and the probe-associated and scheduled-job figures are **not to be added**
+  to predict shared-isolate headroom.
 - Three readings are still three readings.
 
 ## Effect on the Stage B verdict
 
 The health read that section 4 asked for is now on file, late. It contains no not-met condition (no `exceededMemory`,
 no `exceededCpu`, no non-success status). The verdict stays as written, **met by the letter**, with the limits already
-stated; the memory limit is now better described: "a reading of about 55 MB per probe invocation, no peak figure, no
-shared-isolate figure" in place of "nothing known".
+stated. Memory remains without a bound: there are sampled readings of about 55 MB in the probes' minutes, with no peak
+figure, no invocation-level attribution and no shared-isolate figure.

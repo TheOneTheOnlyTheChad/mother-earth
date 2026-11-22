@@ -39,15 +39,16 @@ with no call to the hub, and are filed as
 addendum on the result document points to them.
 
 In short: every hub invocation in the three observation hours has status `success`; CPU P999 for those hours is 827,
-814 and 821 ms; memory P999 is 54.8, 54.8 and 54.4 MB, which are the probe invocations' own readings, against a 128 MB
-per-isolate limit. The figure is one reading per invocation, not a peak inside it, and none of the three isolates had
-run a scheduled job. The verdict is unchanged: met by the letter, with the limits stated.
+814 and 821 ms; memory P999 is 54.8, 54.8 and 54.4 MB against a 128 MB per-isolate limit. Those maxima fall in the probes' minutes;
+that they are the probes' own readings is an inference, not an invocation-level measurement (corrected 22 Nov after
+GPT's closure review). They are sampled readings, not peaks, and none of the three isolates had run a scheduled job. The verdict is unchanged: met by the letter, with the limits stated.
 
 ## Carried into Chad's next decision, as GPT asks
 
 - busy coexistence not observed (observation 2 ended before the hourly job);
 - three distinct isolates, each on its first validation; no repeated validation in one isolate;
-- no memory bound: now a reading of about 55 MB per probe invocation, with no peak figure and no shared-isolate figure;
+- no memory bound: sampled readings of about 55 MB in the probes' minutes, with no peak figure, no invocation-level
+  attribution and no shared-isolate figure;
 - validation time unmeasurable with runtime timestamps; whole-request CPU is not decoder time.
 
 A supplementary busy observation, if Chad wants one, is a newly authorized extra attempt, never a replacement: one
