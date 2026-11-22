@@ -1,5 +1,5 @@
 /* Mother Earth — Animal journeys on the Animals page: a dated replay of one tracked animal's recorded fixes.
- * PRIVATE PREVIEW. animals-tab-rc, stage 1 (20 Nov 2026; docs/concepts/ANIMALS-BIRD-BUILD-PROPOSAL.md rev 3.1, Part A): the replay
+ * animals-tab-rc, stage 1 (20 Nov 2026; docs/concepts/ANIMALS-BIRD-BUILD-PROPOSAL.md rev 3.1, Part A): the replay
  * moved here from Earth now, on Chad's design instruction. This page has its own globe (animals-globe.js). Earth now carries no
  * journey control. History: animals-zebra-preview-rc, then animals-journeys-preview-rc (one switch and a chooser on Earth now;
  * three recorded journeys: zebra Z3866 by GPS; white shark tag 118845 and false killer whale tag 98364 by Argos, each filtered at

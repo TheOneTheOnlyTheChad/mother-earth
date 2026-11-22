@@ -808,7 +808,7 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
 .an-integrity[hidden]{display:none}
 @media (max-width:900px){.an-stage{grid-template-columns:minmax(0,1fr)}.an-toswitches{display:block}.an-globe-box{height:min(56vh,520px)}}
 @media (max-width:720px){.an-globe-box{height:min(50vh,420px);min-height:240px}.doc.animals main{padding-left:12px;padding-right:12px}}
-/* Animals page (private preview) */
+/* Animals page */
 .an-preview{padding:8px 10px;border:1px solid var(--accent);display:inline-block}
 /* Animals page: population counts (animals-tab-rc stage 3). In the page flow; nothing here touches the globe. */
 .an-census{margin:0 0 28px;border-top:1px solid var(--line-strong);padding-top:14px}
