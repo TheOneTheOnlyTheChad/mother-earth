@@ -4,6 +4,18 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 12:25 UTC (clock reading) — **Earth from Space STAGE C: ONE PICTURE IS STORED. Chad's one manual run (11:51:10 UTC) published the 11:20 UTC frame; record and picture agree; CPU 536 ms; no failed invocation. Result written with two open qualifications. `EARTHVIEW_ENABLED` stays `manual`: nothing runs by itself. The frame is publicly downloadable by URL. The tab is NOT on the live page.** (production: one picture and four small records under `earthview/`; hub code 0.6.22 unchanged; Earth from Space thread)
+
+- **Chad's line for the run (his own message):** one manual run in the window 11:51 to 11:54 UTC with caller r2. Pre-check 11:37:56 UTC clean (every tick since 08:15 logged "not scheduled (EARTHVIEW_ENABLED is manual)"; no admin call; storage unchanged). The run was started by a one-line wait Claude gave him (not reviewed by GPT; it only timed the start of the reviewed script).
+- **Run:** `earthview:published 2026-11-22T11:20:00Z`, wall 19.3 s. Log pair `run-start` / `run-end`, exec `c7bfdf8e3784`, isolate `d388b18b`, `validations_before` 0, validated true. Cloudflare: POST `/admin/run/earthview` 200, outcome ok, whole-invocation CPU 536 ms, key masked.
+- **Stored:** `current.json`, `held.json`, `state.json`, one epoch marker, one picture `frames/e20261122T080906Z-768e695ccab9b063/20261122T1120Z-83c417a3246fcea9-g1-4be14d9d1ed424fd3857a435/picture.jpg` (653,791 B, sha256 `83c417a3…c899`). Public read-back equal in hash and size. C8 status: 1 picture in role as current, guards pass.
+- **Memory:** the minute bucket holding the run (two requests) peaked at 55.48 MB; attributing it to the run is an inference; no bound claimed.
+- **After:** 88 invocations 11:41 to 12:21 UTC all ok; settings re-read 12:22 (25 bindings, variable `manual`, code hash unchanged). Usage 12:23 UTC: Workers requests 88.63k, CPU 816.88k ms, R2 storage 0.56 GB-months, cost $0.00.
+- **Open qualifications (result section "Verdict proposed"):** Chad has not yet said he looked at the picture, and the page look was made by hash-checked injection against the live hub, not the Mac-served copy; Workers Observability volume was not read (missing). Requests to EUMETSAT are counted from the code path (3), not from a per-request log.
+- **Kept in the record:** the C1 caller finding (fixed in r2, GPT PASS) and two unused windows (08:21 and 08:51 UTC).
+- **Files:** `reviews/2026-11-22-earth-from-space-stage-c-result.md`; evidence `reviews/evidence/2026-11-22-earth-from-space-stage-c/` (branch `earth-from-space-rc` `d4f66ca`, copied here).
+- **Next:** Chad's look; GPT's review of the result; then, each on Chad's own line: email-alarm assessment (runbook 2a), monitoring rehearsal, later Stage D (D3, D8 open). No further run is authorised.
+
 ## 22 Nov 09:54 UTC (clock reading) — **Earth from Space Stage C: storage is set up and `EARTHVIEW_ENABLED` is `manual` (steps C1 to C6 done with caller r2 on Chad's continuation line). The manual run C7-run-1 was NOT made: Chad became unavailable before the 08:51 to 08:54 UTC window, which has lapsed. Nothing is stored; nothing runs by itself.** (production: one variable added, R2 records created under `earthview/`; hub code 0.6.22 unchanged; Earth from Space thread)
 
 - **Chad's continuation line (his own message):** Stage C with caller r2 (`ee08092e…aa31`), window 08:51 to 08:54 UTC. Mac script hash checked by Claude and by Chad (`shasum`) before use.
