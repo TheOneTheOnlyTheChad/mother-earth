@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 05:05 UTC (clock reading) — **Earth from Space: GPT closed most of its hold on the storage-to-release proposal; rev 2.1 makes the focused correction it asked for and is with GPT. Chad answered the decisions. Docs only; nothing built, deployed, stored or approved.** (hub stays 0.6.21, collection off; Earth from Space thread)
+
+- **GPT's review of rev 2 (22 Nov, relayed by Chad as a file), filed** `reviews/2026-11-22-earth-from-space-storage-to-release-proposal-rev2-gpt-review.md`: HOLD 3 closed; HOLD 2 closed except the budget verdict; HOLD 1 needs two corrections (trial-end race; monitoring rehearsal and fallback); the isolate log line and Claude's supervised variable change in Stage C accepted with clarifications.
+- **Rev 2.1** (`docs/concepts/EARTH-FROM-SPACE-STORAGE-TO-RELEASE-PROPOSAL.md`, branch `2e6a30a`, sha256 `dd10f90b…49a98`; Mac `read/01-PROPOSAL-rev2.1.txt`):
+  - **The trial's end is enforced by the hub, not by a person:** two more variables, `EARTHVIEW_FROM` and `EARTHVIEW_UNTIL`; a scheduled picture run is admitted only when the gate is `1` and the trigger's own scheduled time is inside the window; everything else fails closed. 288 opportunities, no 289th. Added to the 0.6.22 scope.
+  - **Monitoring:** hourly is a planned interval Chad accepts, not a guarantee. A harmless four-hour rehearsal before Stage D must show that scheduled messages launch inspections, that they read the records, that pushes reach Chad's phone, and that a deliberately missed launch is detected. Daytime heartbeat push per inspection with Chad as fallback owner (pause from his phone if 90 minutes pass silent). Overnight (22:00 to 06:00 SAST) a missed inspection may go unnoticed until morning: stated, for his acceptance in the Stage D line.
+  - **A demonstrated request-budget breach is NOT MET**; an unknown count is incomplete.
+  - Log-line fields defined so that "before" excludes the current invocation; a per-cron tally added.
+- **Chad's decisions (22 Nov, his own message: "Mac can stay on as long as you need it and yes to your other suggestions"):** D1 three stages and 0.6.22 yes; D2 Claude may pause yes; D4 80% with at least 230 yes; D5 REGISTER filed before Stage C yes; D6 Mac stays on yes; D7 no extra busy observation. **D3 (a note to EUMETSAT first) stays open: no recommendation was given.** These are not Approve lines.
+- **Next:** GPT's review of rev 2.1; then, since D1 is yes, the 0.6.22 candidate on the branch on Chad's go, back to GPT. No hub action without Chad's own Approve line.
+
 ## 22 Nov 04:45 UTC (clock reading) — **Earth from Space: GPT HELD the storage-to-release proposal rev 1.1 on three bounded points; rev 2 answers them and is with GPT and Chad. Docs only; nothing built, deployed, stored or approved.** (hub stays 0.6.21, collection off; Earth from Space thread)
 
 - **GPT's review (22 Nov, relayed by Chad as a file), filed** `reviews/2026-11-22-earth-from-space-storage-to-release-proposal-gpt-review.md`. It supports the C/D/E separation and the focused 0.6.22 scope (three-state gate: yes; header-only key limited to the Earth from Space routes: yes; no new whole-run deadline: acceptable). Holds: (1) a finite trial with stops that can be carried out; (2) a measurable result rule; (3) Stage C's retry and verdict. No decoder or storage redesign requested.
