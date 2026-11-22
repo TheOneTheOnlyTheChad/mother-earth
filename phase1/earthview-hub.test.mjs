@@ -11,20 +11,21 @@
  *   inventory-unstable-view inventory-one-pass inventory-first-page-only pending-called-missing marked-called-missing
  *   adopted-called-missing no-fence no-random recover-keeps-key recover-pointer-unconditional recover-unverified
  *   recover-without-hold recover-any-plan recover-list-before-inventory recover-deletes dry-run-applies release-unchecked
- *   cleanup-pointer-unfenced admin-open manual-ignores-gate */
+ *   cleanup-pointer-unfenced admin-open manual-ignores-gate
+ *   (0.6.22, section V) validation-snapshot-at-start refusal-not-counted pass-not-counted counted-at-begin no-run-end-line */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import zlib from 'node:zlib'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url)), FX = path.join(HERE, 'earthview-fixtures');
 const BREAK = process.env.BREAK || '';
 const BREAKS = {
-  'gate-ignored': ["const e = env.EARTHVIEW_ENABLED !== '1' ?", 'const e = false ?'],
-  'manual-ignores-gate': ["  earthview: async (env, ms) => env.EARTHVIEW_ENABLED !== '1' ? 'earthview:not run (EARTHVIEW_ENABLED unset)' : runEarthView(env, ms),", "  earthview: async (env, ms) => runEarthView(env, ms),"],
+  'gate-ignored': ["const e = !adm.admit ?", 'const e = false ?'],
+  'manual-ignores-gate': ["{ const why = evManualGate(env); return why ?", "{ const why = null; return why ?"],
   'no-header-ok': ["    if (!f.served) return evFail(env, ms, 'served time not confirmed'", "    if (false) return evFail(env, ms, 'served time not confirmed'"],
   'mismatch-ok': ["    if (f.served !== T) return evFail(env, ms, 'served a different frame'", "    if (false) return evFail(env, ms, 'served a different frame'"],
   'check-header-skipped': ["  for (const [what, f] of [['picture', pic], ['check image', chk]]) {\n    if (!f.served)", "  for (const [what, f] of [['picture', pic]]) {\n    if (!f.served)"],
-  'scans-any': ["  if (!sc.complete) return evFail(", '  if (false) return evFail('],
+  'scans-any': ["  if (!sc.complete) return vFail(", '  if (false) return vFail('],
   'trailing-ok': ["  if (i !== u8.length) return bad('bytes after the end marker');", ''],
-  'decode-error-ignored': ["  if (dec.error) return evFail(env, ms, 'picture failed validation', 200, 'decode: ' + dec.error, T, check);", ''],
-  'no-compare': ["  if (!cmp.ok) return evFail(env, ms, 'picture failed validation'", "  if (false) return evFail(env, ms, 'picture failed validation'"],
+  'decode-error-ignored': ["  if (dec.error) return vFail(env, ms, 'picture failed validation', 200, 'decode: ' + dec.error, T, check);", ''],
+  'no-compare': ["  if (!cmp.ok) return vFail(env, ms, 'picture failed validation'", "  if (false) return vFail(env, ms, 'picture failed validation'"],
   'pointer-on-fail': ["  await logRun(env, 'earthview', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : ''));", "  try { await env.R2.put(EARTHVIEW.POINTER, JSON.stringify(evPointer('e20260101T000000Z-0000000000000000'))); } catch (_) {}\n  await logRun(env, 'earthview', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : ''));"],
   'no-grace': ['nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 &&', 'nowMs - Date.parse(x.left_at) >= 0 &&'],
   'delete-idle': ["    await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, 'nothing newer: '", "    try { const h = await getJson(env, EARTHVIEW.HELD); for (const x of (h && h.items) || []) if (Date.now() - Date.parse(x.published_at) > EARTHVIEW.GRACE_S * 1000) await env.R2.delete(x.key); } catch (_) {}\n    await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, 'nothing newer: '"],
@@ -61,14 +62,19 @@ const BREAKS = {
   'recover-any-plan': ["    if (planGiven !== plan_id) return out({ plan, plan_id, refused: 'what was found does not give the plan id that was passed; read the dry run again' }, 409);\n    const steps = [], epoch = evNewEpoch();", "    const steps = [], epoch = evNewEpoch();"],
   'recover-list-before-inventory': ["    const objs = await evListAll(env, EARTHVIEW.PREFIX), inRole = new Map(", "    const objs = s.objects.concat(Object.values(made).map(f => ({ key: f.picture.key, size: f.picture.bytes }))), inRole = new Map("],
   'recover-deletes': ["    steps.push('R4 pointer installed');", "    steps.push('R4 pointer installed'); for (const k of s.keep) await env.R2.delete(k.frame.picture.key);"],
-  'dry-run-applies': ["try { const r = await evAdmin(env, p[2] || 'status', req.method === 'POST' && url.searchParams.get('apply') === '1',", "try { const r = await evAdmin(env, p[2] || 'status', true,"],
+  'dry-run-applies': ["try { const r = await evAdmin(env, p[2], req.method === 'POST' && url.searchParams.get('apply') === '1',", "try { const r = await evAdmin(env, p[2], true,"],
   'release-unchecked': ["    if (why) return out({ refused: why }, 409);\n    if (!apply) return out({ would: 'remove the hold' });", "    if (!apply) return out({ would: 'remove the hold' });"],
   'cleanup-pointer-unfenced': ["  const pointer = async () => evFence(epoch, c => c)((await evGet(env, EARTHVIEW.POINTER)).cur);", "  const pointer = async () => (await evGet(env, EARTHVIEW.POINTER)).cur;"],
-  'admin-open': ["      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403, { 'Cache-Control': 'no-store' });\n      try { const r = await evAdmin(", "      try { const r = await evAdmin("],
+  'admin-open': ["      const refuse = evAuth(req, env, url, ['GET', 'POST']); if (refuse) return refuse;\n", ""],
   'serve-pending': ["&& !i.deleting && !i.pending).map(", "&& !i.deleting).map("],
   'cleanup-own-view': ["  const live = liveOf(await pointer()), at = nowIso(), nowMs = Date.parse(at);", "  const live = new Set(), at = nowIso(), nowMs = Date.parse(at);"],
   'no-second-pointer-read': ["  const live2 = liveOf(await pointer()), gone = [], spared = [];", "  const live2 = new Set(), gone = [], spared = [];"],
   'serve-marked': ["&& !i.deleting && !i.pending).map(", "&& !i.pending).map("],
+  'validation-snapshot-at-start': [["function evValidationBegin(x) { if (x) x.validations_before = EVB.validations; }", "function evValidationBegin(x) { }"], ["  const x = { exec: evHex(6), validations_before: null, validated: null },", "  const x = { exec: evHex(6), validations_before: EVB.validations, validated: null },"]],
+  'refusal-not-counted': ["  const vFail = (...a) => { evValidated(x, false); return evFail(...a); }; evValidationBegin(x);", "  const vFail = (...a) => { if (x) x.validated = false; return evFail(...a); }; evValidationBegin(x);"],
+  'pass-not-counted': ["function evValidated(x, ok) { EVB.validations++; if (x) x.validated = ok; }", "function evValidated(x, ok) { if (!ok) EVB.validations++; if (x) x.validated = ok; }"],
+  'counted-at-begin': [["function evValidationBegin(x) { if (x) x.validations_before = EVB.validations; }", "function evValidationBegin(x) { if (x) x.validations_before = EVB.validations; EVB.validations++; }"], ["function evValidated(x, ok) { EVB.validations++; if (x) x.validated = ok; }", "function evValidated(x, ok) { if (x) x.validated = ok; }"]],
+  'no-run-end-line': ["  console.log(JSON.stringify({ earthview: 'run-end', exec: x.exec, trigger, run: at, isolate: i && i.isolate, validations_before: x.validations_before, validated: x.validated, result }));\n", ""],
   'type-any': ["  if (type !== spec.type) return { ok: false, reason: what + ' not a picture', http: 200, detail: type };   // EUMETView answers a bad time with HTTP 200 and XML", ''],
 };
 let src = fs.readFileSync(process.env.WORKER || path.join(HERE, 'worker.js'), 'utf8');
@@ -80,6 +86,10 @@ if (process.env.FAST) { const head = "function evDecode(u8) {\n  try {"; if (src
   src = src.replace(head, "const __memo = new Map();\nfunction evDecode(u8) { let k = 2166136261; for (let i = 0; i < u8.length; i++) k = Math.imul(k ^ u8[i], 16777619) >>> 0; k = u8.length + ':' + k; if (__memo.has(k)) return __memo.get(k); const r = __evDecode(u8); if (!r.error) { __memo.set(k, r); if (__memo.size > 12) __memo.delete(__memo.keys().next().value); } return r; }\nfunction __evDecode(u8) {\n  try {"); }
 const tmp = path.join(os.tmpdir(), `worker-ev-${process.pid}.mjs`); fs.writeFileSync(tmp, src);
 const W = await import(pathToFileURL(tmp).href); fs.unlinkSync(tmp);
+// 0.6.22: the collector's two log lines per run are collected here instead of being printed among the results
+const EVLOG = []; { const out = console.log.bind(console); console.log = (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('{"earthview"')) EVLOG.push(JSON.parse(a[0])); else if (typeof a[0] === 'string' && a[0].startsWith('{"probe"')) { } else out(...a); }; }
+let nFresh = 0; /** another copy of the same file under test: its own isolate counters (section V) */
+const fresh = async () => { const t = path.join(os.tmpdir(), `worker-ev-${process.pid}-v${nFresh++}.mjs`); fs.writeFileSync(t, src); try { return await import(pathToFileURL(t).href); } finally { fs.unlinkSync(t); } };
 for (const ev of ['uncaughtException', 'unhandledRejection']) process.on(ev, e => { console.log('FAIL  suite stopped on an error: ' + String(e && e.stack || e).split('\n').slice(0, 3).join(' | ')); process.exit(1); });
 let pass = 0, fail = 0; const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? '\n      got: ' + JSON.stringify(got).slice(0, 700) : ''}`); } };
 const sha = b => crypto.createHash('sha256').update(Buffer.from(b)).digest('hex');
@@ -139,7 +149,7 @@ function world0() {
     async delete(key) { await w.fire('delete', key); if (w.deleteFail) throw new Error('R2 delete failed (test)'); w.deletes.push(key); store.delete(key); },
   };
   const DB = { prepare(sql) { return { bind(...a) { return { async run() { if (/INSERT INTO collector_runs/.test(sql)) { runs.push({ layer: a[0], status: a[3], http: a[4], note: a[7] }); w.order.push('run:' + a[0]); } return {}; }, async first() { return null; }, async all() { return { results: [] }; } }; }, async first() { return null; }, async all() { return { results: [] }; }, async run() { return {}; } }; } };
-  w.env = { R2, DB, EARTHVIEW_ENABLED: '1', ADMIN_KEY: 'k' };
+  w.env = { R2, DB, EARTHVIEW_ENABLED: '1', EARTHVIEW_FROM: '2026-11-18T12:00:00Z', EARTHVIEW_UNTIL: '2026-11-20T12:00:00Z', ADMIN_KEY: 'k' };   // 0.6.22: the scheduled path needs the admission window too
   w.fetch = async (url, init) => { const u = String(url);
     if (!u.includes('view.eumetsat.int')) { w.order.push('other'); throw new Error('unexpected fetch ' + u); }
     w.order.push('eumetsat'); reqs.push(u);
@@ -157,7 +167,8 @@ const use = w => { globalThis.fetch = w.fetch; };
 /** runs fn with the random source returning one repeated byte */
 const fixedRandom = async (byte, fn) => { const wc = globalThis.crypto; Object.defineProperty(wc, 'getRandomValues', { value: b => b.fill(byte), configurable: true, writable: true }); try { return await fn(); } finally { delete wc.getRandomValues; } };
 /** /admin/earthview/<action>: a dry run unless apply; returns the JSON body with .http */
-const admin = async (w, action, { apply = false, plan = null } = {}) => { const r = await W.default.fetch(new Request(`https://hub.test/admin/earthview/${action}?key=k${apply ? '&apply=1' : ''}${plan ? '&plan=' + plan : ''}`, { method: apply ? 'POST' : 'GET' }), w.env, { waitUntil() { } }); return { http: r.status, ...(await r.json()) }; };
+const AUTH = { Authorization: 'Bearer k' };
+const admin = async (w, action, { apply = false, plan = null } = {}) => { const r = await W.default.fetch(new Request(`https://hub.test/admin/earthview/${action}?${apply ? 'apply=1' : ''}${plan ? '&plan=' + plan : ''}`, { method: apply ? 'POST' : 'GET', headers: AUTH }), w.env, { waitUntil() { } }); return { http: r.status, ...(await r.json()) }; };
 /** hold, recover (with the dry run's plan id), sweep if anything is unlisted, release */
 const recover = async w => { await admin(w, 'hold', { apply: true }); const d = await admin(w, 'recover'), r = await admin(w, 'recover', { apply: true, plan: d.plan_id }); return { d, r }; };
 const release = async w => { const sw = await admin(w, 'sweep'); if (sw.plan && sw.plan.add.length) await admin(w, 'sweep', { apply: true, plan: sw.plan_id }); return admin(w, 'release', { apply: true }); };
@@ -170,6 +181,8 @@ const state = async w => { const o = await w.env.R2.get(W.EARTHVIEW.STATE); retu
 const held = async w => { const o = await w.env.R2.get(W.EARTHVIEW.HELD); return o ? (await o.json()).items : []; };
 const frames = w => [...w.store.keys()].filter(k => k.startsWith('earthview/frames/')).sort();
 const route = (w, p) => W.default.fetch(new Request('https://hub.test' + p), w.env, { waitUntil() { } });
+/** 0.6.22: the manual run is a POST with the key in the Authorization header and no query string */
+const runRoute = w => W.default.fetch(new Request('https://hub.test/admin/run/earthview', { method: 'POST', headers: AUTH }), w.env, { waitUntil() { } });
 const run = async (w, ms) => { use(w); setNow(ms); return W.JOBS.earthview(w.env, ms); };
 const maps = w => w.reqs.filter(u => /GetMap/.test(u));
 const tAdd = (t, min) => new Date(Date.parse(t) + min * MIN).toISOString().replace('.000Z', 'Z');
@@ -177,7 +190,7 @@ const tAdd = (t, min) => new Date(Date.parse(t) + min * MIN).toISOString().repla
 // ===== A. gate and schedule
 { const w = await world(); delete w.env.EARTHVIEW_ENABLED; use(w); setNow(T0); const r = await W.JOBS.five(w.env, T0);
   ok('A1 flag unset: the five-minute job makes no EUMETSAT request and writes nothing', /earthview:not scheduled/.test(r) && !w.reqs.length && !w.puts.some(k => /^earthview/.test(k)), [r, w.reqs.length, w.puts]);
-  { const n0 = w.runs.length, g0 = w.store.size, p0 = w.puts.length; w.order.length = 0; const m = await W.JOBS.earthview(w.env, T0), rr = await (await route(w, '/admin/run/earthview?key=k')).json();
+  { const n0 = w.runs.length, g0 = w.store.size, p0 = w.puts.length; w.order.length = 0; const m = await W.JOBS.earthview(w.env, T0), rr = await (await runRoute(w)).json();
     ok('A1b flag unset: the MANUAL job and /admin/run/earthview do not run either: no request, no write, no run-log row (0.6.21)', m === 'earthview:not run (EARTHVIEW_ENABLED unset)' && rr.result === m && !w.reqs.length && w.puts.length === p0 && !w.deletes.length && w.runs.length === n0 && w.store.size === g0 && !w.order.length, [m, rr, w.reqs.length, w.puts, w.runs.length - n0, w.order]); }
   const w2 = await world(); use(w2); const at4 = Date.UTC(2026, 10, 19, 11, 24, 0), at5 = Date.UTC(2026, 10, 19, 11, 25, 0);
   setNow(at5); const r5 = await W.JOBS.five(w2.env, at5); ok('A2 flag set, minute 25: skipped (every ten minutes)', /earthview:skipped/.test(r5) && !w2.reqs.length, r5);
@@ -442,7 +455,7 @@ const soundR = async (w, name) => { const p = await ptr(w), h = await held(w);
   await stops('M2 hold, manual job', w, 'collection is held');
   use(w); const at4 = Date.UTC(2026, 10, 19, 13, 4, 0); setNow(at4); const n = w.reqs.length, r5 = await W.JOBS.five(w.env, at4);
   ok('M2 hold, scheduled job: stopped the same way, no request to the source', /earthview:down collection is held/.test(r5) && !w.reqs.slice(n).some(u => /eumetsat/.test(u)), r5);
-  const ar = await (await route(w, '/admin/run/earthview?key=k')).json(); ok('M2 hold, the admin run route: stopped the same way', ar.result === 'earthview:down collection is held', ar);
+  const ar = await (await runRoute(w)).json(); ok('M2 hold, the admin run route: stopped the same way', ar.result === 'earthview:down collection is held', ar);
   const rel = await release(w); w.latest = '2026-11-19T11:30:00Z'; const r = await run(w, T0 + 120 * MIN); ok('M2 after release the next run publishes', rel.result === 'released' && /published 2026-11-19T11:30/.test(r), [rel, r]); }
 { const w = await three(); w.store.delete(W.EARTHVIEW.HELD); await stops('M3 the list is gone', w, 'storage record needs repair', /list missing/);
   ok('M3 the list was not recreated and no number was taken', !w.store.has(W.EARTHVIEW.HELD) && frames(w).length === 3);
@@ -491,10 +504,10 @@ const soundR = async (w, name) => { const p = await ptr(w), h = await held(w);
   ok('N1 still held until released; then the first frame is published', held1 === 'earthview:down collection is held' && rel.result === 'released' && !w.store.has(W.EARTHVIEW.HOLD) && /published/.test(r1), [held1, rel, r1]); }
 { // N2: every dry run writes nothing, whatever is passed; and the admin key is required
   const w = await three(); await admin(w, 'hold', { apply: true }); w.store.delete(W.EARTHVIEW.HELD); const d = await admin(w, 'recover'), before = snap(w), out = [];
-  for (const a of ['status', 'hold', 'recover', 'sweep', 'release', 'nonsense']) { const r = await W.default.fetch(new Request(`https://hub.test/admin/earthview/${a}?key=k&apply=1&plan=${d.plan_id}`), w.env, { waitUntil() { } }); out.push(r.status); }
-  const noApply = await W.default.fetch(new Request(`https://hub.test/admin/earthview/recover?key=k&plan=${d.plan_id}`, { method: 'POST' }), w.env, { waitUntil() { } });
+  for (const a of ['status', 'hold', 'recover', 'sweep', 'release', 'nonsense']) { const r = await W.default.fetch(new Request(`https://hub.test/admin/earthview/${a}?apply=1&plan=${d.plan_id}`, { headers: AUTH }), w.env, { waitUntil() { } }); out.push(r.status); }
+  const noApply = await W.default.fetch(new Request(`https://hub.test/admin/earthview/recover?plan=${d.plan_id}`, { method: 'POST', headers: AUTH }), w.env, { waitUntil() { } });
   ok('N2 GET with apply=1 and the right plan id, and POST without apply=1: nothing is written by any action', !changedSince(w, before, () => false).length && noApply.status === 200 && !(await noApply.json()).applied, [out, changedSince(w, before, () => false)]);
-  const nk = await W.default.fetch(new Request(`https://hub.test/admin/earthview/recover?apply=1&plan=${d.plan_id}`, { method: 'POST' }), w.env, { waitUntil() { } }), bad = await W.default.fetch(new Request(`https://hub.test/admin/earthview/release?key=nope&apply=1`, { method: 'POST' }), w.env, { waitUntil() { } });
+  const nk = await W.default.fetch(new Request(`https://hub.test/admin/earthview/recover?apply=1&plan=${d.plan_id}`, { method: 'POST' }), w.env, { waitUntil() { } }), bad = await W.default.fetch(new Request(`https://hub.test/admin/earthview/release?apply=1`, { method: 'POST', headers: { Authorization: 'Bearer nope' } }), w.env, { waitUntil() { } });
   ok('N2 without the admin key: 403 and nothing written', nk.status === 403 && bad.status === 403 && !changedSince(w, before, () => false).length, [nk.status, bad.status]); }
 { // N3: the list is lost. Recovery keeps current and previous under NEW keys, adopts every other picture out of role, deletes nothing.
   const w = await three(), before = await ptr(w), oldKeys = frames(w); w.store.delete(W.EARTHVIEW.HELD);
@@ -566,7 +579,7 @@ const pendingDeleteWorld = async () => { const w = await world(); await pubs(w, 
 // oldRun starts a run that will stop at a pause point; recovery (or part of it) happens; the run is let go.
 const twoWorld = async () => pubs(await world(), 2);
 const startOld = async (w, g, hook, how = 'job') => { w.once.push(hook); w.latest = '2026-11-19T11:20:00Z'; use(w); setNow(T0 + 20 * MIN);
-  const pr = how === 'job' ? W.collectEarthView(w.env, T0 + 20 * MIN) : how === 'scheduled' ? W.JOBS.five(w.env, Date.UTC(2026, 10, 19, 11, 44, 0)) : route(w, '/admin/run/earthview?key=k').then(r => r.json()).then(j => j.result);
+  const pr = how === 'job' ? W.collectEarthView(w.env, T0 + 20 * MIN) : how === 'scheduled' ? W.JOBS.five(w.env, Date.UTC(2026, 10, 19, 11, 44, 0)) : runRoute(w).then(r => r.json()).then(j => j.result);
   await g.reached; return { pr }; };   // wrapped: returning the promise itself from an async function would wait for the run
 for (const how of ['job', 'scheduled', 'manual route']) { // O1: paused before it takes a number; recovery completes; it resumes
   const w = await twoWorld(), g = gate(), { pr: pa } = await startOld(w, g, g.hook('get', 'held.json', 2), how); if (how === 'scheduled') setNow(Date.UTC(2026, 10, 19, 11, 44, 0));
@@ -637,4 +650,55 @@ for (const how of ['job', 'scheduled', 'manual route']) { // O1: paused before i
   await stops('P4 the next run', w, 'storage record needs repair', /listed picture\(s\) not stored/, later + 10 * MIN);
   const { d, r } = await recover(w), rel = await release(w); w.latest = '2026-11-19T11:40:00Z'; const n = await run(w, later + 20 * MIN);
   ok('P4 recovery says neither picture can be kept, installs an empty pointer, and the next run publishes', d.plan.not_kept.length === 2 && r.result === 'recovered' && rel.result === 'released' && /published 2026-11-19T11:40/.test(n), [d.plan.not_kept, n]); await soundR(w, 'P4 after'); }
+// ===== V. 0.6.22: validation counting and the run-end line (each case on a fresh copy of the file, so the isolate's counters start at zero)
+{ const setUp = async (X, w) => { use(w); const f = (a, q, m) => X.default.fetch(new Request(`https://hub.test/admin/earthview/${a}${q}`, { method: m, headers: AUTH }), w.env, { waitUntil() { } }).then(r => r.json());
+    await f('hold', '?apply=1', 'POST'); const d = await f('recover', '', 'GET'); const r = await f('recover', '?apply=1&plan=' + d.plan_id, 'POST'), rel = await f('release', '?apply=1', 'POST'); if (r.result !== 'recovered' || rel.result !== 'released') throw new Error('V set-up failed'); };
+  const manual = async (X, w, ms) => { use(w); setNow(ms); const n = EVLOG.length, r = await X.JOBS.earthview(w.env, ms, true, X.evbSeen('fetch')); return { r, lines: EVLOG.slice(n) }; };
+  { const X = await fresh(), w = world0(); await setUp(X, w);
+    const a = await manual(X, w, T0);
+    ok('V1 a run that validates and publishes: run-start then run-end with the same exec; validations_before 0 (none completed in this isolate), validated true', /published/.test(a.r) && a.lines.length === 2 && a.lines[0].earthview === 'run-start' && a.lines[1].earthview === 'run-end' && a.lines[0].exec === a.lines[1].exec && a.lines[1].validations_before === 0 && a.lines[1].validated === true && a.lines[1].result === a.r && X.EVB.validations === 1, [a, X.EVB.validations]);
+    const b = await manual(X, w, T0 + 10 * MIN);
+    ok('V2 nothing newer listed: the run never starts a validation, so validations_before and validated are null and the count does not move', /nothing newer/.test(b.r) && b.lines[1].validations_before === null && b.lines[1].validated === null && X.EVB.validations === 1, [b, X.EVB.validations]);
+    w.latest = '2026-11-19T11:10:00Z'; w.pic = { body: DAMAGED['five of ten scans, then an end marker'], type: 'image/jpeg' };
+    const c = await manual(X, w, T0 + 20 * MIN); w.pic = null;
+    ok('V3 a REFUSED validation is a completed validation: validated false, validations_before 1, and the count moves to 2', /picture failed validation/.test(c.r) && c.lines[1].validations_before === 1 && c.lines[1].validated === false && X.EVB.validations === 2, [c, X.EVB.validations]);
+    w.chk = { body: mkPng(discOf(0.2)), type: 'image/png' };
+    const d = await manual(X, w, T0 + 30 * MIN); w.chk = null;
+    ok('V4 a refusal at the comparison (the last validation step) counts too: validations_before 2, count 3', /failed validation/.test(d.r) && d.lines[1].validations_before === 2 && d.lines[1].validated === false && X.EVB.validations === 3, [d, X.EVB.validations]);
+    const e = await manual(X, w, T0 + 40 * MIN);
+    ok('V5 the next good run reports the three earlier validations, passes and refusals alike', /published/.test(e.r) && e.lines[1].validations_before === 3 && e.lines[1].validated === true && X.EVB.validations === 4, [e, X.EVB.validations]);
+    w.warn = null; w.latest = '2026-11-19T11:20:00Z'; const f = await manual(X, w, T0 + 50 * MIN); w.warn = 'echo';
+    ok('V6 a run stopped BEFORE validation (no served-time header) does not count as a validation', /served time not confirmed/.test(f.r) && f.lines[1].validations_before === null && X.EVB.validations === 4, [f, X.EVB.validations]); }
+  // the snapshot is taken immediately before the run's own validation, not when the run starts
+  { const X = await fresh(), w1 = world0(), w2 = world0(); await setUp(X, w1); await setUp(X, w2);
+    let release; const gate = new Promise(r => { release = r; }); const f1 = w1.fetch;
+    const held = async (url, init) => { const r = await f1(url, init); if (/image\/png/.test(String(url))) await gate; return r; };   // run 1 waits with its check image in hand
+    setNow(T0); const n = EVLOG.length; globalThis.fetch = held; const p1 = X.JOBS.earthview(w1.env, T0, true, X.evbSeen('fetch'));
+    await new Promise(r => setTimeout(r, 400));
+    ok('V7 run 1 has started (run-start written) and is waiting before its validation; nothing has been validated yet', EVLOG.slice(n).filter(l => l.earthview === 'run-start').length === 1 && X.EVB.validations === 0, [EVLOG.slice(n).length, X.EVB.validations]);
+    use(w2); const r2 = await X.JOBS.earthview(w2.env, T0, true, X.evbSeen('fetch'));
+    ok('V7 meanwhile run 2, in the same isolate, validates and publishes', /published/.test(r2) && X.EVB.validations === 1, [r2, X.EVB.validations]);
+    release(); const r1 = await p1; const ends = EVLOG.slice(n).filter(l => l.earthview === 'run-end');
+    ok('V8 run 1 then validates: its validations_before is 1, the count at the moment its own validation began, not the 0 of when it started', /published/.test(r1) && ends.length === 2 && ends[0].validations_before === 0 && ends[1].validations_before === 1 && X.EVB.validations === 2, [ends, X.EVB.validations]); }
+  // a validation that has BEGUN but not finished is not a completed one
+  { const X = await fresh(), w1 = world0(), w2 = world0(); await setUp(X, w1); await setUp(X, w2);
+    const RealDS = globalThis.DecompressionStream; let gateDS = null, release;
+    globalThis.DecompressionStream = class { constructor(f) { const ds = new RealDS(f), g = gateDS; this.writable = ds.writable; this.readable = g ? ds.readable.pipeThrough(new TransformStream({ async start() { await g; } })) : ds.readable; } };
+    try { gateDS = new Promise(r => { release = r; }); use(w1); setNow(T0); const n = EVLOG.length, p1 = X.JOBS.earthview(w1.env, T0, true, X.evbSeen('fetch'));
+      await new Promise(r => setTimeout(r, 500)); gateDS = null;   // run 1 is now inside its validation, waiting on the check image's inflate
+      ok('V11 run 1 is inside its validation (both images fetched, nothing stored yet) and the completed count is still 0', w1.reqs.length === 3 && !w1.puts.some(k => /picture\.jpg$/.test(k)) && X.EVB.validations === 0, [w1.reqs.length, w1.puts, X.EVB.validations]);
+      use(w2); const r2 = await X.JOBS.earthview(w2.env, T0, true, X.evbSeen('fetch')); const e2 = EVLOG.slice(n).filter(l => l.earthview === 'run-end')[0];
+      ok('V11 run 2 validates meanwhile: its validations_before is 0, because run 1 has begun a validation but not completed it', /published/.test(r2) && e2.validations_before === 0 && X.EVB.validations === 1, [r2, e2, X.EVB.validations]);
+      release(); const r1 = await p1, e1 = EVLOG.slice(n).filter(l => l.earthview === 'run-end')[1];
+      ok('V12 run 1 completes: its own validations_before stays the 0 it recorded when it began, and the count is now 2', /published/.test(r1) && e1.validations_before === 0 && e1.validated === true && X.EVB.validations === 2, [r1, e1, X.EVB.validations]);
+    } finally { globalThis.DecompressionStream = RealDS; } }
+  // a probe validation and a collector validation share the one count
+  { const X = await fresh(), wp = world0(); delete wp.env.EARTHVIEW_ENABLED; use(wp); setNow(T0);
+    const pr = await (await X.default.fetch(new Request('https://hub.test/admin/probe/earthview', { method: 'POST', headers: AUTH }), wp.env, { waitUntil() { } })).json();
+    const w = world0(); await setUp(X, w); const a = await manual(X, w, T0);
+    ok('V9 after one Stage B probe validation in this isolate, the collector run reports validations_before 1', pr.outcome === 'validated' && /published/.test(a.r) && a.lines[1].validations_before === 1, [pr.outcome, a.lines[1]]); }
+  // collectEarthView called without a run record (as the older sections of this suite do) still works and still counts
+  { const X = await fresh(), w = world0(); await setUp(X, w); use(w); setNow(T0); const r = await X.collectEarthView(w.env, T0);
+    ok('V10 the collector called with no run record: publishes as before, and the validation is counted', /published/.test(r) && X.EVB.validations === 1, [r, X.EVB.validations]); }
+}
 console.log(`\nearthview-hub${BREAK ? ' [BREAK=' + BREAK + ']' : ''}: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

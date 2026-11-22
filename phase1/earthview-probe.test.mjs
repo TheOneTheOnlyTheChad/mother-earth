@@ -10,19 +10,26 @@
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import crypto from 'node:crypto'; import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url)), FX = path.join(HERE, 'earthview-fixtures');
 const BREAK = process.env.BREAK || '';
-// sha256 of worker.js from "/* ---- Storage records, guards and recovery" up to evRoute, as GPT accepted it at 3c7598b (collector, guards, fence, cleanup, admin)
-const RECOVERY_SHA = 'cbe5dc6ff44b857151450c7bb4d07268f6b1f27c3a6aa23cec4b61a8267c1ef6';
+// The span GPT accepted at 3c7598b ran from "/* ---- Storage records, guards and recovery" up to evRoute (sha256 cbe5dc6f…1ef6 as one piece).
+// 0.6.22 adds validation counting inside evCollect, so the span is asserted in three parts, each against the text of 0.6.21 (559f2e4):
+//   A  records, guards, state, failure report (up to collectEarthView): byte for byte
+//   C  collectEarthView and evCollect: byte for byte ONCE the 0.6.22 additions are taken back out (the test removes exactly: the x
+//      parameter threaded through two signatures and one call, one added line before step 4, one added line after it, and the
+//      seven "return vFail(" that were "return evFail(")
+//   B  pointer shape, cleanup, runEarthView, hold/recover/sweep/release (up to evRoute): byte for byte
+const SPAN_A_SHA = 'aec1c2d6df390386eb67e3e2ee1febdfc5b6309ffac6ccba5114e1e4bf630dd3', SPAN_B_SHA = '13b2c17e66652484edecdca4d6ead2df46eab36628f8d5eb2999b8511510b9d1', SPAN_C_OLD_SHA = 'f026f233f6058425598967af63de449c86768da4ef0e4707cd896de850f5ce10';
+const V_BEGIN = "  const vFail = (...a) => { evValidated(x, false); return evFail(...a); }; evValidationBegin(x);   // 0.6.22: counts only (EVB); see evValidationBegin\n", V_END = "  evValidated(x, true);\n";
 const BREAKS = {
   'get-ok': ["  if (req.method !== 'POST') return no(405, 'POST only');\n  if (url.search)", "  if (url.search)"],
   'query-accepted': ["  if (url.search) return no(400, 'no query string is accepted');\n", ""],
-  'key-from-query': [["  if (url.search) return no(400, 'no query string is accepted');\n", ""], ["req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');", "(req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY && url.searchParams.get('key') !== env.ADMIN_KEY)) return no(403, 'forbidden');"]],
-  'no-auth': ["  if (!env.ADMIN_KEY || req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');\n", ""],
-  'bare-key-ok': ["req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');", "(req.headers.get('authorization') || '').replace(/^Bearer /, '') !== env.ADMIN_KEY) return no(403, 'forbidden');"],
+  'key-from-query': [["  if (url.search) return no(400, 'no query string is accepted');\n", ""], ["req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');\n  if (env.EARTHVIEW_ENABLED !== undefined)", "(req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY && url.searchParams.get('key') !== env.ADMIN_KEY)) return no(403, 'forbidden');\n  if (env.EARTHVIEW_ENABLED !== undefined)"]],
+  'no-auth': ["  if (!env.ADMIN_KEY || req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');\n  if (env.EARTHVIEW_ENABLED !== undefined)", "  if (env.EARTHVIEW_ENABLED !== undefined)"],
+  'bare-key-ok': ["req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');\n  if (env.EARTHVIEW_ENABLED !== undefined)", "(req.headers.get('authorization') || '').replace(/^Bearer /, '') !== env.ADMIN_KEY) return no(403, 'forbidden');\n  if (env.EARTHVIEW_ENABLED !== undefined)"],
   'gate-not-checked': ["  if (env.EARTHVIEW_ENABLED !== undefined) return no(409, 'collection is on (EARTHVIEW_ENABLED is set)');\n", ""],
   'gate-only-one': ["  if (env.EARTHVIEW_ENABLED !== undefined) return no(409,", "  if (env.EARTHVIEW_ENABLED === '1') return no(409,"],
   'no-latch': ["  if (EVB.busy) return no(409, 'busy');\n", ""],
   'latch-not-released': ["  finally { EVB.busy = false; }\n}", "  finally { }\n}"],
-  'manual-ignores-gate': ["  earthview: async (env, ms) => env.EARTHVIEW_ENABLED !== '1' ? 'earthview:not run (EARTHVIEW_ENABLED unset)' : runEarthView(env, ms),", "  earthview: async (env, ms) => runEarthView(env, ms),"],
+  'manual-ignores-gate': ["{ const why = evManualGate(env); return why ?", "{ const why = null; return why ?"],
   'route-writes-bucket': ["  try { return json(await evProbeOnce(), 200, NS); }", "  try { const o = await evProbeOnce(); try { await env.R2.put('earthview/probe-last.json', JSON.stringify(o)); } catch (_) {} return json(o, 200, NS); }"],
   'route-writes-db': ["  try { return json(await evProbeOnce(), 200, NS); }", "  try { const o = await evProbeOnce(); try { await logRun(env, 'earthview', Date.now(), 'ok', 200, 0, 0, 'probe ' + o.outcome); } catch (_) {} return json(o, 200, NS); }"],
   'error-path-writes': ["  catch (e) { return json({ layer: 'earthview', probe: 'stage-b', outcome: 'internal error',", "  catch (e) { try { await evFail(env, Date.now(), 'internal error', 0, 'probe'); } catch (_) {} return json({ layer: 'earthview', probe: 'stage-b', outcome: 'internal error',"],
@@ -126,11 +133,11 @@ let firstAttempt = null;
   firstAttempt = j && j.attempt;
   ok('B1 answers 200, no-store, outcome validated', r.http === 200 && r.cache === 'no-store' && j.outcome === 'validated', { http: r.http, cache: r.cache, outcome: j && j.outcome });
   ok('B2 exactly three upstream requests, in order: frame list, 2,048 px JPEG, 256 px PNG, both for the newest listed time', w.reqs.length === 3 && j.requests_made === 3 && /GetCapabilities/.test(w.reqs[0].u) && /width=2048&height=2048&format=image\/jpeg/.test(w.reqs[1].u) && w.reqs[1].u.endsWith('&time=' + t) && /width=256&height=256&format=image\/png&transparent=true/.test(w.reqs[2].u) && w.reqs[2].u.endsWith('&time=' + t), w.reqs.map(q => q.u.slice(-90)));
-  ok('B3 upstream requests carry the hub User-Agent and nothing else: no key, no Authorization', w.reqs.every(q => Object.keys(q.headers).join() === 'User-Agent' && /^mother-earth-collector\/0\.6\.21 /.test(q.headers['User-Agent'])) && !JSON.stringify(w.reqs).includes(KEY), w.reqs.map(q => q.headers));
+  ok('B3 upstream requests carry the hub User-Agent and nothing else: no key, no Authorization', w.reqs.every(q => Object.keys(q.headers).join() === 'User-Agent' && /^mother-earth-collector\/0\.6\.22 /.test(q.headers['User-Agent'])) && !JSON.stringify(w.reqs).includes(KEY), w.reqs.map(q => q.headers));
   ok('B4 NO binding was touched: bucket, database, cache, deferred work', untouched(w), { calls: w.calls, deferred: w.deferred.length });
   ok('B5 the answer names the frame, both responses and their hashes', j.frame_time === t && j.size === 2048 && j.header_ok === true && j.picture.ok && j.check.ok && j.picture.sha256 === sha(jpg(Date.parse(t) / 6e5)) && j.check.sha256 === sha(png(Date.parse(t) / 6e5)) && j.picture.header_names === t && j.check.header_names === t && j.picture.type === 'image/jpeg' && j.check.type === 'image/png' && j.picture.bytes > 100000, j);
   ok('B6 validation figures, with its own start and end', j.validation.ok === true && j.validation.agreement > 0.85 && j.validation.scans >= 1 && typeof j.validation.started_at === 'string' && j.validation.ended_at >= j.validation.started_at && Number.isFinite(j.validation.wall_ms) && j.started_at <= j.validation.started_at && j.validation.ended_at <= j.ended_at, j.validation);
-  ok('B7 run start, end, deadline and build are stated', j.deadline_ms === 150000 && j.deadline_hit === false && j.build === W.EVB.BUILD && j.hub === '0.6.21' && /^[0-9a-f]{12}$/.test(j.attempt) && Number.isFinite(j.wall_ms), j);
+  ok('B7 run start, end, deadline and build are stated', j.deadline_ms === 150000 && j.deadline_hit === false && j.build === W.EVB.BUILD && j.hub === '0.6.22' && /^[0-9a-f]{12}$/.test(j.attempt) && Number.isFinite(j.wall_ms), j);
   ok('B8 log lines: start, fetched, validate-begin, validated, done, each with the attempt, build and isolate', L.map(l => l.ev).join() === 'start,fetched,validate-begin,validated,done' && L.every(l => l.attempt === j.attempt && l.build === j.build && l.isolate === j.isolate.id && typeof l.at === 'string'), L.map(l => [l.ev, l.attempt, l.isolate]));
   ok('B9 no log line and no part of the answer contains the key or the word Bearer', !w.logs.join('\n').includes(KEY) && !/bearer/i.test(w.logs.join('\n')) && !JSON.stringify(j).includes(KEY), w.logs);
   ok('B10 the done line agrees with the answer', (() => { const d = L[L.length - 1]; return d.outcome === j.outcome && d.requests_made === 3 && d.header_ok === true && d.frame_time === t && d.deadline_hit === false; })(), L[L.length - 1]);
@@ -204,7 +211,7 @@ let firstAttempt = null;
   const r2 = await W.default.fetch(new Request('https://hub.test/admin/probe/earthview', { method: 'POST', headers: { authorization: 'Bearer ' + KEY } }), w.env, w.ctx), j2 = await r2.json();
   ok('E2 a second call meanwhile: 409 "busy", no request, no validation, no binding touched', r2.status === 409 && j2.error === 'busy' && w.reqs.length === 2 && untouched(w) && r2.headers.get('cache-control') === 'no-store', { s: r2.status, j2, reqs: w.reqs.length });
   // F. collection is excluded while the probe is in flight
-  const m1 = await W.JOBS.earthview(w.env, Date.now()), rr = await W.default.fetch(new Request('https://hub.test/admin/run/earthview?key=' + KEY), w.env, w.ctx), m2 = await rr.json();
+  const m1 = await W.JOBS.earthview(w.env, Date.now()), rr = await W.default.fetch(new Request('https://hub.test/admin/run/earthview', { method: 'POST', headers: { Authorization: 'Bearer ' + KEY } }), w.env, w.ctx), m2 = await rr.json();
   ok('F1 probe in flight, gate unset: the manual collector job does not run: no request, no validation, no bucket or database call', m1 === 'earthview:not run (EARTHVIEW_ENABLED unset)' && w.reqs.length === 2 && untouched(w), { m1, reqs: w.reqs.length, calls: w.calls });
   ok('F2 probe in flight, gate unset: /admin/run/earthview answers the same and does nothing', rr.status === 200 && m2.result === 'earthview:not run (EARTHVIEW_ENABLED unset)' && w.reqs.length === 2 && untouched(w), { m2, calls: w.calls });
   release(); const j1 = await (await p1).json();
@@ -213,15 +220,17 @@ let firstAttempt = null;
 }
 // ===== F. Collection is excluded while the gate is unset, probe idle
 { const W = await load(), w = world(W); use(w);
-  const m1 = await W.JOBS.earthview(w.env, Date.now()), rr = await W.default.fetch(new Request('https://hub.test/admin/run/earthview?key=' + KEY), w.env, w.ctx), m2 = await rr.json();
+  const m1 = await W.JOBS.earthview(w.env, Date.now()), rr = await W.default.fetch(new Request('https://hub.test/admin/run/earthview', { method: 'POST', headers: { Authorization: 'Bearer ' + KEY } }), w.env, w.ctx), m2 = await rr.json();
   ok('F3 probe idle, gate unset: the manual job does not run and touches nothing', m1 === 'earthview:not run (EARTHVIEW_ENABLED unset)' && w.reqs.length === 0 && untouched(w), { m1, calls: w.calls });
   ok('F4 probe idle, gate unset: /admin/run/earthview does not run and touches nothing', m2.result === 'earthview:not run (EARTHVIEW_ENABLED unset)' && w.reqs.length === 0 && untouched(w), { m2, calls: w.calls });
   for (const v of ['0', '', 'yes', 'true']) { const wv = world(W); wv.env.EARTHVIEW_ENABLED = v; use(wv); const m = await W.JOBS.earthview(wv.env, Date.now());
-    ok(`F5 gate set to ${JSON.stringify(v)} (not "1"): the manual job still does not run`, m === 'earthview:not run (EARTHVIEW_ENABLED unset)' && wv.reqs.length === 0 && untouched(wv), m);
+    ok(`F5 gate set to ${JSON.stringify(v)} (neither "manual" nor "1"): the manual job still does not run`, m === 'earthview:not run (EARTHVIEW_ENABLED has an unknown value)' && wv.reqs.length === 0 && untouched(wv), m);
     const r = await call(wv); ok(`F6 gate set to ${JSON.stringify(v)}: the probe refuses too (409), so a half-set gate runs nothing`, r.http === 409 && wv.reqs.length === 0 && untouched(wv), r); }
   { const wv = world(W); wv.env.EARTHVIEW_ENABLED = '1'; const r = await call(wv);
     ok('F7 gate on: the probe refuses with 409 "collection is on", no request, nothing touched', r.http === 409 && /collection is on/.test(r.j.error) && wv.reqs.length === 0 && untouched(wv) && lines(wv).length === 0, r); }
-  { const five = (baseSrc.match(/const e = env\.EARTHVIEW_ENABLED !== '1' \? 'earthview:not scheduled \(EARTHVIEW_ENABLED unset\)' : /g) || []).length;
+  { const wv = world(W); wv.env.EARTHVIEW_ENABLED = 'manual'; const r = await call(wv);
+    ok('F7b gate "manual" (0.6.22): the probe refuses with 409, no request, nothing touched', r.http === 409 && /collection is on/.test(r.j.error) && wv.reqs.length === 0 && untouched(wv) && lines(wv).length === 0, r); }
+  { const five = baseSrc.split("const e = !adm.admit ? 'earthview:not scheduled (' + adm.why + ')' : ").length - 1;
     ok('F8 the scheduled path keeps its own refusal ahead of the collector (covered by the hub suite, case A1)', five === 1, five); }
 }
 
@@ -234,6 +243,11 @@ let firstAttempt = null;
   ok('H3 the observation, the validation and the route call no storage, run-log, guard, cache or deferred-work function', !banned.test(once) && !banned.test(val) && !banned.test(routeSrc), [once.match(banned), val.match(banned), routeSrc.match(banned)]);
   ok('H4 the route reads env only for the key and the gate', (routeSrc.match(/env\.[A-Za-z0-9_]+/g) || []).every(x => x === 'env.ADMIN_KEY' || x === 'env.EARTHVIEW_ENABLED'), routeSrc.match(/env\.[A-Za-z0-9_]+/g));
   ok('H5 the observation makes its requests in exactly three places and has no loop', (once.match(/\bfetch\(|evFetch\(/g) || []).length === 3 && !/\b(for|while)\s*\(/.test(once), once.match(/\bfetch\(|evFetch\(/g));
-  ok('H6 the collector, its guards and the recovery code are byte for byte the reviewed ones', (() => { const a = baseSrc.indexOf('/* ---- Storage records, guards and recovery'), b = baseSrc.indexOf('async function evRoute(env, p) {'); return a > 0 && b > a && sha(baseSrc.slice(a, b)) === RECOVERY_SHA; })(), (() => { const a = baseSrc.indexOf('/* ---- Storage records, guards and recovery'), b = baseSrc.indexOf('async function evRoute(env, p) {'); return sha(baseSrc.slice(a, b)); })());
+  { const a = baseSrc.indexOf('/* ---- Storage records, guards and recovery'), c = baseSrc.indexOf('async function collectEarthView(env, ms'), p = baseSrc.indexOf('const evPointer = epoch'), r = baseSrc.indexOf('async function evRoute(env, p) {');
+    const A = baseSrc.slice(a, c), C = baseSrc.slice(c, p), B = baseSrc.slice(p, r), once = (t, x) => t.split(x).length === 2;
+    ok('H6a records, guards, state and failure report are byte for byte those of 0.6.21', a > 0 && c > a && sha(A) === SPAN_A_SHA, sha(A));
+    ok('H6b cleanup, hold, recover, sweep and release are byte for byte those of 0.6.21', p > c && r > p && sha(B) === SPAN_B_SHA, sha(B));
+    const back = C.replace('async function collectEarthView(env, ms, x) {', 'async function collectEarthView(env, ms) {').replace('v => { T = v.T; check = v.check; }, x); }', 'v => { T = v.T; check = v.check; }); }').replace('async function evCollect(env, ms, note, x) {', 'async function evCollect(env, ms, note) {').replace(V_BEGIN, '').replace(V_END, '').split('return vFail(').join('return evFail(');
+    ok('H6c the collector is that of 0.6.21 once exactly the 0.6.22 counting additions are removed (one begin line, one end line, seven vFail, the x parameter)', once(C, V_BEGIN) && once(C, V_END) && C.split('return vFail(').length === 8 && sha(back) === SPAN_C_OLD_SHA, [once(C, V_BEGIN), once(C, V_END), C.split('return vFail(').length - 1, sha(back)]); }
 }
 realLog(`\n${fail ? 'FAILED' : 'PASSED'}: ${pass} passed, ${fail} failed${BREAK ? '  (BREAK=' + BREAK + ')' : ''}`); process.exit(fail ? 1 : 0);

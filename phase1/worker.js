@@ -35,8 +35,11 @@
  *   POST /admin/probe/earthview  (0.6.21, Stage B) key in the Authorization header ONLY ("Bearer <ADMIN_KEY>"); no query string accepted.
  *                           ONE no-store validation of the newest GeoColour frame in this isolate: at most 3 upstream requests, a
  *                           150 s whole-run deadline, nothing stored. Runs only while EARTHVIEW_ENABLED is unset.
- *   GET|POST /admin/earthview/<status|hold|recover|sweep|release>?key=ADMIN_KEY (0.6.20) Earth from Space storage. GET is a dry run that
+ *   GET|POST /admin/earthview/<status|hold|recover|sweep|release> (0.6.20) Earth from Space storage. GET is a dry run that
  *                           writes nothing; POST with apply=1 acts (recover and sweep also need plan=<id> from the dry run).
+ *                           0.6.22: key in the Authorization header ONLY ("Bearer <ADMIN_KEY>"); a request with key= in its URL is refused (400).
+ *   POST /admin/run/earthview (0.6.22) one manual collection. Key in the Authorization header ONLY; no query string. Runs only while
+ *                           EARTHVIEW_ENABLED is "manual" or "1". The other /admin/run/<job> routes are unchanged.
  *   GET /catalogue/sky/<revision> (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a) the FIXED Sky catalogue (Moon/Sun daily distances, NASA/JPL
  *                           Horizons): versioned only — an id not in SKY_REVISIONS (exact key match), a malformed path or the bare
  *                           /catalogue/sky → 404 without any R2 read; a known revision whose stored bytes are missing or fail the pin → 503.
@@ -78,7 +81,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.21';
+const COLLECTOR_VERSION = '0.6.22';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2396,7 +2399,7 @@ export { AIRCRAFT_LAYER, AIRCRAFT_FIELDS, AIRCRAFT_MAX_AGE_S, AIRCRAFT_TEXT, air
 export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
-export { EARTHVIEW, evLatest, evKeyOf, evJpegScans, evDecode, evPng, evCompare, evFetch, collectEarthView, evRoute, evGuard, evAdmin, evCleanup, EvStop, EV_STOP, EV_JPEG, DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache, EVB, evbSeen, evProbeValidate, evProbeOnce, evProbeRoute };
+export { EARTHVIEW, evLatest, evKeyOf, evJpegScans, evDecode, evPng, evCompare, evFetch, collectEarthView, evRoute, evGuard, evAdmin, evCleanup, EvStop, EV_STOP, EV_JPEG, DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache, EVB, evbSeen, evProbeValidate, evProbeOnce, evProbeRoute, evMark, evAdmit, evManualGate, evValidationBegin, evValidated, runEarthViewLogged, evAuth, EV_ADMIN_ACTIONS, EV_WINDOW_MAX_MS };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -3303,8 +3306,10 @@ async function dustRoute(env, p) {
  * a later run write an old key, and a late or repeated delete cannot reach a newer picture. The collector never creates or repairs
  * the pointer or the list: /admin/earthview/{status,hold,recover,sweep,release} does, under a hold (see "Storage records, guards
  * and recovery" below).
- * Gate: EARTHVIEW_ENABLED=1 for the scheduled path AND, since 0.6.21, for the manual /admin/run/earthview (absent = no request at
- * all, nothing written, by either path). The Stage B probe (POST /admin/probe/earthview) runs only while it is absent.
+ * Gate (0.6.22, three states; any other value refuses everything): EARTHVIEW_ENABLED absent = only the Stage B probe may run;
+ * "manual" = only the manual POST /admin/run/earthview; "1" = the manual run, and the scheduled path for trigger times inside the
+ * admission window EARTHVIEW_FROM <= scheduled time < EARTHVIEW_UNTIL (evAdmit, below the Stage B probe). A refusal makes no
+ * request and reads or writes nothing under earthview/.
  * Outside LAYERS, cells, history, health and the generic writeDown. Licence: CC BY 4.0; credit EUMETSAT and NASA (catalogue). */
 const EARTHVIEW = {
   CAP: 'https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetCapabilities&version=1.3.0&namespace=mtg_fd',
@@ -3567,12 +3572,12 @@ async function evFail(env, ms, reason, http, detail, T, check) {
   await logRun(env, 'earthview', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : ''));
   return 'earthview:down ' + reason;
 }
-async function collectEarthView(env, ms) {
+async function collectEarthView(env, ms, x) {
   let T = null, check = null;
-  try { return await evCollect(env, ms, v => { T = v.T; check = v.check; }); }
+  try { return await evCollect(env, ms, v => { T = v.T; check = v.check; }, x); }
   catch (e) { if (e instanceof EvStop) return evFail(env, ms, e.reason, 0, e.detail, T, check); throw e; }
 }
-async function evCollect(env, ms, note) {
+async function evCollect(env, ms, note, x) {
   // 0. Guards: hold, records present, epochs agree, pointer pictures in role, inventory. A stop here makes no request to the source.
   const { epoch } = await evGuard(env);
   // 1. Source check: which frames does the service list? A failure here is recorded as a failed CHECK, never as a delay at the source.
@@ -3601,17 +3606,19 @@ async function evCollect(env, ms, note) {
     if (f.served !== T) return evFail(env, ms, 'served a different frame', 200, `${what}: asked ${T}, server named ${f.served}`, T, check);
   }
   // 4. The delivered picture itself: structure to the last byte, every scan present, then a full decode
+  const vFail = (...a) => { evValidated(x, false); return evFail(...a); }; evValidationBegin(x);   // 0.6.22: counts only (EVB); see evValidationBegin
   const u8 = new Uint8Array(pic.buf), sc = evJpegScans(u8);
-  if (!sc.ok) return evFail(env, ms, 'picture failed validation', 200, 'structure: ' + sc.reason, T, check);
-  if (sc.w !== P.w || sc.h !== P.h || sc.components !== 3) return evFail(env, ms, 'picture failed validation', 200, `size ${sc.w}x${sc.h}, ${sc.components} components`, T, check);
-  if (!sc.complete) return evFail(env, ms, 'picture failed validation', 200, `scans incomplete: ${sc.missing} coefficient positions not delivered at full precision in ${sc.scans} scans`, T, check);
+  if (!sc.ok) return vFail(env, ms, 'picture failed validation', 200, 'structure: ' + sc.reason, T, check);
+  if (sc.w !== P.w || sc.h !== P.h || sc.components !== 3) return vFail(env, ms, 'picture failed validation', 200, `size ${sc.w}x${sc.h}, ${sc.components} components`, T, check);
+  if (!sc.complete) return vFail(env, ms, 'picture failed validation', 200, `scans incomplete: ${sc.missing} coefficient positions not delivered at full precision in ${sc.scans} scans`, T, check);
   const png = await evPng(new Uint8Array(chk.buf), C.w * C.h);
-  if (!png || png.w !== C.w || png.h !== C.h) return evFail(env, ms, 'check image failed validation', 200, 'does not decode as ' + C.w + 'x' + C.h + ' RGBA', T, check);
+  if (!png || png.w !== C.w || png.h !== C.h) return vFail(env, ms, 'check image failed validation', 200, 'does not decode as ' + C.w + 'x' + C.h + ' RGBA', T, check);
   const dec = evDecode(u8);
-  if (dec.error) return evFail(env, ms, 'picture failed validation', 200, 'decode: ' + dec.error, T, check);
-  if (dec.w !== P.w || dec.h !== P.h) return evFail(env, ms, 'picture failed validation', 200, `decoded size ${dec.w}x${dec.h}`, T, check);
+  if (dec.error) return vFail(env, ms, 'picture failed validation', 200, 'decode: ' + dec.error, T, check);
+  if (dec.w !== P.w || dec.h !== P.h) return vFail(env, ms, 'picture failed validation', 200, `decoded size ${dec.w}x${dec.h}`, T, check);
   const cmp = evCompare(dec, png);
-  if (!cmp.ok) return evFail(env, ms, 'picture failed validation', 200, cmp.reason + ' ' + JSON.stringify(cmp), T, check);
+  if (!cmp.ok) return vFail(env, ms, 'picture failed validation', 200, cmp.reason + ' ' + JSON.stringify(cmp), T, check);
+  evValidated(x, true);
   // 5. A KEY NO OTHER RUN HAS HAD OR WILL HAVE. The run draws 96 random bits; the key holds them, beside the epoch and a number
   //    from the list. In one fenced conditional write the run takes the number and lists its picture as "pending" under that key,
   //    so an entry always exists before its object does. Only this run writes the key, once, create-only; once its object is
@@ -5670,9 +5677,72 @@ async function collectSunface(env, ms) {
  * - Runs only while EARTHVIEW_ENABLED is unset; with it unset neither the scheduled nor the manual collector runs (JOBS above).
  * - One at a time PER ISOLATE (EVB.busy). The latch cannot see another isolate and is not a cap on upstream requests.
  * - In memory only, lost with the isolate: the latch and the counters below. Log lines carry no header and no key. */
-const EVB = { DEADLINE_MS: 150000, BUILD: 'stage-b-1', id: null, born: null, fetches: 0, scheduled: 0, validations: 0, last_attempt: null, busy: false };
-/** Called once per invocation of either handler: names the isolate on its first request and counts what it has served. */
-function evbSeen(kind) { if (EVB.id === null) { EVB.id = evHex(4); EVB.born = Date.now(); } if (kind === 'fetch') EVB.fetches++; else EVB.scheduled++; }
+const EVB = { DEADLINE_MS: 150000, BUILD: 'stage-b-1', id: null, born: null, fetches: 0, scheduled: 0, crons: {}, validations: 0, last_attempt: null, busy: false };
+/** Called once per invocation of either handler, as its FIRST statement: names the isolate on its first request and counts what it
+ * has served. 0.6.22: returns a frozen SNAPSHOT of the counts as they stood BEFORE this invocation was added, taken here, before any
+ * await. "Before" values are read from this snapshot and never from the live counters later (another invocation may have begun
+ * while this one awaited). crons_before is a copy of the per-cron tally of scheduled invocations begun earlier in this isolate. */
+function evbSeen(kind, cron) {
+  if (EVB.id === null) { EVB.id = evHex(4); EVB.born = Date.now(); }
+  const c = kind === 'scheduled' ? (cron === undefined || cron === null ? 'unknown' : String(cron)) : null;
+  const snap = Object.freeze({ kind: kind === 'fetch' ? 'fetch' : 'scheduled', cron: c, isolate: EVB.id, isolate_age_ms: Date.now() - EVB.born,
+    scheduled_before: EVB.scheduled, fetches_before: EVB.fetches, crons_before: Object.freeze({ ...EVB.crons }) });
+  if (kind === 'fetch') EVB.fetches++; else { EVB.scheduled++; EVB.crons[c] = (EVB.crons[c] || 0) + 1; }
+  return snap;
+}
+/* ---- 0.6.22: admission of collector runs, the key in a header, and two log lines per run (STORAGE-TO-RELEASE proposal rev 2.2) ---- */
+const EV_WINDOW_MAX_MS = 48 * 3600 * 1000;
+/** A UTC time on a ten-minute mark, written exactly as 2026-11-24T06:00:00Z; anything else is null. */
+function evMark(v) {
+  if (typeof v !== 'string' || !/^\d{4}-\d\d-\d\dT\d\d:\d0:00Z$/.test(v)) return null;
+  const t = Date.parse(v);
+  return Number.isNaN(t) || new Date(t).toISOString() !== v.replace(/Z$/, '.000Z') ? null : t;
+}
+/** May the SCHEDULED path run the collector for the trigger whose scheduled time is ms? { admit: true } or { admit: false, why }.
+ * Admits only with the gate at "1" and a readable window FROM <= ms < UNTIL of at most 48 hours. It selects scheduled TIMES: it is
+ * not a wall-clock deadline (an admitted trigger delivered late still runs), it does not deduplicate a time delivered twice, and it
+ * does not count requests. Everything else fails closed. Reads env only. */
+function evAdmit(env, ms) {
+  const g = env.EARTHVIEW_ENABLED;
+  if (g !== '1') return { admit: false, why: g === undefined ? 'EARTHVIEW_ENABLED unset' : g === 'manual' ? 'EARTHVIEW_ENABLED is manual' : 'EARTHVIEW_ENABLED has an unknown value' };
+  const from = evMark(env.EARTHVIEW_FROM), until = evMark(env.EARTHVIEW_UNTIL);
+  if (from === null || until === null) return { admit: false, why: 'window not set or not readable' };
+  if (until <= from) return { admit: false, why: 'window empty or inverted' };
+  if (until - from > EV_WINDOW_MAX_MS) return { admit: false, why: 'window longer than 48 hours' };
+  if (typeof ms !== 'number' || !Number.isFinite(ms)) return { admit: false, why: 'no scheduled time' };
+  if (ms < from) return { admit: false, why: 'before the window' };
+  if (ms >= until) return { admit: false, why: 'after the window' };
+  return { admit: true };
+}
+/** May the MANUAL run go ahead? Only with the gate at "manual" or "1". */
+const evManualGate = env => env.EARTHVIEW_ENABLED === '1' || env.EARTHVIEW_ENABLED === 'manual' ? null : env.EARTHVIEW_ENABLED === undefined ? 'EARTHVIEW_ENABLED unset' : 'EARTHVIEW_ENABLED has an unknown value';
+/** Validation counting for the collector (called from evCollect step 4). Begin: the count of validations COMPLETED in this isolate is
+ * copied onto the run's own record at the statement before its validation starts; nothing is awaited in between. End: the count is
+ * incremented when the validation returns, pass or refuse. Counts only: neither changes what the collector decides or stores. */
+function evValidationBegin(x) { if (x) x.validations_before = EVB.validations; }
+function evValidated(x, ok) { EVB.validations++; if (x) x.validated = ok; }
+/** One collector run with its two log lines. "run-start" is written before anything is fetched, so it exists even if Cloudflare ends
+ * the invocation during the decode; "run-end" carries validations_before and the result. exec is drawn per execution, so two
+ * executions of the same scheduled time have different records. Writes nothing to storage itself. */
+async function runEarthViewLogged(env, ms, trigger, inv) {
+  const x = { exec: evHex(6), validations_before: null, validated: null }, at = new Date(ms).toISOString(), i = inv || null;
+  console.log(JSON.stringify({ earthview: 'run-start', exec: x.exec, trigger, scheduled_time: trigger === 'scheduled' ? at : null, run: at, hub: COLLECTOR_VERSION, cron: i && i.cron,
+    isolate: i && i.isolate, isolate_age_ms: i && i.isolate_age_ms, scheduled_before: i && i.scheduled_before, crons_before: i && i.crons_before, fetches_before: i && i.fetches_before }));
+  let r = null; const g = await guarded(env, 'earthview', ms, async (e, m) => { r = await collectEarthView(e, m, x); });
+  const result = r || g;
+  console.log(JSON.stringify({ earthview: 'run-end', exec: x.exec, trigger, run: at, isolate: i && i.isolate, validations_before: x.validations_before, validated: x.validated, result }));
+  return result;
+}
+/** The key in the Authorization header only, for the Earth from Space admin routes and the manual run. A Response to refuse with,
+ * else null. Order: method, then a key in the URL (refused before any comparison), then the header. Reads nothing but env.ADMIN_KEY. */
+function evAuth(req, env, url, methods) {
+  const no = (status, error) => json({ layer: 'earthview', error }, status, { 'Cache-Control': 'no-store' });
+  if (!methods.includes(req.method)) return no(405, methods.join(' or ') + ' only');
+  if (url.searchParams.has('key')) return no(400, 'the key is not accepted in the URL; send it in the Authorization header');
+  if (!env.ADMIN_KEY || req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');
+  return null;
+}
+const EV_ADMIN_ACTIONS = ['status', 'hold', 'recover', 'sweep', 'release'];
 /** The collector's validation of one delivered picture against its check image (steps 4 and 5 of evCollect), with no storage step. */
 async function evProbeValidate(picBuf, chkBuf) {
   const P = EARTHVIEW.PICTURE, C = EARTHVIEW.CHECK, u8 = new Uint8Array(picBuf), sc = evJpegScans(u8), no = detail => ({ ok: false, reason: 'picture failed validation', detail });
@@ -5793,19 +5863,20 @@ async function guarded(env, layer, ms, fn) {
  * so that a handled failure is never reported as a plain "ran". */
 async function runWind(env, ms) { let r = null; const g = await guarded(env, 'wind', ms, async (e, m) => { r = await collectWind(e, m); }); return r || g; }
 const JOBS = {
-  five: async (env, ms) => {
+  five: async (env, ms, _manual, inv) => {
     const a = (await Promise.all([
       guarded(env, 'usgs', ms, collectUsgs),
       env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky', ms, collectOpenskyWorld) : 'opensky:parked',
     ])).join('; ');
-    // Earth from Space rides this trigger every other tick (ten minutes), AFTER earthquakes, so a slow picture never delays them.
-    // With the flag unset: no request, nothing written.
-    const e = env.EARTHVIEW_ENABLED !== '1' ? 'earthview:not scheduled (EARTHVIEW_ENABLED unset)' : (new Date(ms).getUTCMinutes() % EARTHVIEW.EVERY_MIN) < 5 ? await runEarthView(env, ms) : 'earthview:skipped (every ten minutes)';
+    // Earth from Space rides this trigger every other tick (ten minutes), awaited AFTER the collectors above have finished.
+    // 0.6.22: admitted only by evAdmit (gate "1" and the trigger's scheduled time inside the window). Not admitted: no request, nothing read or written.
+    const adm = evAdmit(env, ms);
+    const e = !adm.admit ? 'earthview:not scheduled (' + adm.why + ')' : (new Date(ms).getUTCMinutes() % EARTHVIEW.EVERY_MIN) < 5 ? await runEarthViewLogged(env, ms, 'scheduled', inv) : 'earthview:skipped (every ten minutes)';
     return a + '; ' + e;
   },
-  // manual: /admin/run/earthview (admin key). 0.6.21: refused while the gate is unset, exactly as the scheduled path is, BEFORE the collector
-  // and its run-log wrapper: no request, no validation, nothing read or written. With the gate unset nothing collects (Stage B relies on it).
-  earthview: async (env, ms) => env.EARTHVIEW_ENABLED !== '1' ? 'earthview:not run (EARTHVIEW_ENABLED unset)' : runEarthView(env, ms),
+  // manual: POST /admin/run/earthview (key in the Authorization header). Refused unless the gate is "manual" or "1" (0.6.22), BEFORE the
+  // collector and its run-log wrapper: no request, no validation, nothing read or written. With the gate unset nothing collects (Stage B relies on it).
+  earthview: async (env, ms, _manual, inv) => { const why = evManualGate(env); return why ? 'earthview:not run (' + why + ')' : runEarthViewLogged(env, ms, 'manual', inv); },
   minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
   firms: async (env, ms) => { const f = await guarded(env, 'firms', ms, env.FIRMS_PIPELINE === 'v2' ? collectFirmsV2 : collectFirms); let s; try { s = await collectShipsFallback(env, ms); } catch (e) { s = 'ships-fallback:threw ' + String(e).slice(0, 80); } return f + '; ' + s; },
   'ships-fallback': async (env, ms) => collectShipsFallback(env, ms),   // manual: /admin/run/ships-fallback (same gates)
@@ -6183,16 +6254,16 @@ function json(obj, status = 200, extra = {}) {
 
 export default {
   async scheduled(event, env, ctx) {
-    evbSeen('scheduled');
+    const inv = evbSeen('scheduled', event.cron);   // 0.6.22: the snapshot is taken here, first, before any await
     const job = jobForCron(event.cron);
     if (!job) { console.log('unknown cron', event.cron); return; }
-    const p = JOBS[job](env, event.scheduledTime).then(r => console.log(job, typeof r === 'string' ? r : JSON.stringify(r))).catch(e => console.log(job, 'failed', String(e)));
+    const p = JOBS[job](env, event.scheduledTime, undefined, inv).then(r => console.log(job, typeof r === 'string' ? r : JSON.stringify(r))).catch(e => console.log(job, 'failed', String(e)));
     ctx.waitUntil(p);
     return p;
   },
 
   async fetch(req, env) {
-    evbSeen('fetch');
+    const inv = evbSeen('fetch');   // 0.6.22: snapshot first, before any await
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
     const p = url.pathname.split('/').filter(Boolean);
@@ -6207,9 +6278,22 @@ export default {
     }
     if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'earthview' && p.length === 3) return evProbeRoute(req, env, url);   // 0.6.21 Stage B: POST, key in a header, nothing stored
     if (p[0] === 'admin' && p[1] === 'earthview') {   // Earth from Space storage: status, hold, recover, sweep, release. A dry run unless POST with apply=1.
-      if (!env.ADMIN_KEY || url.searchParams.get('key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403, { 'Cache-Control': 'no-store' });
-      try { const r = await evAdmin(env, p[2] || 'status', req.method === 'POST' && url.searchParams.get('apply') === '1', url.searchParams.get('plan')); return json(r.body, r.status, { 'Cache-Control': 'no-store' }); }
-      catch (e) { return json({ layer: 'earthview', action: p[2] || 'status', applied: false, refused: e instanceof EvStop ? e.reason : 'internal error', detail: String((e && e.detail) || e).slice(0, 300) }, e instanceof EvStop ? 409 : 500, { 'Cache-Control': 'no-store' }); }
+      // 0.6.22: exact path and a known action, then method, then the key (header only), all BEFORE anything is read from storage.
+      const NS = { 'Cache-Control': 'no-store' };
+      if (p.length !== 3 || !EV_ADMIN_ACTIONS.includes(p[2])) return json({ layer: 'earthview', error: 'unknown action', actions: EV_ADMIN_ACTIONS }, 404, NS);
+      const refuse = evAuth(req, env, url, ['GET', 'POST']); if (refuse) return refuse;
+      for (const k of url.searchParams.keys()) if (k !== 'apply' && k !== 'plan') return json({ layer: 'earthview', error: 'unknown parameter' }, 400, NS);
+      try { const r = await evAdmin(env, p[2], req.method === 'POST' && url.searchParams.get('apply') === '1', url.searchParams.get('plan')); return json(r.body, r.status, NS); }
+      catch (e) { return json({ layer: 'earthview', action: p[2], applied: false, refused: e instanceof EvStop ? e.reason : 'internal error', detail: String((e && e.detail) || e).slice(0, 300) }, e instanceof EvStop ? 409 : 500, NS); }
+    }
+    if (p[0] === 'admin' && p[1] === 'run' && p[2] === 'earthview') {   // 0.6.22: the manual collector run. POST, key in a header, no query string.
+      const NS = { 'Cache-Control': 'no-store' };
+      if (p.length !== 3) return json({ layer: 'earthview', error: 'not found' }, 404, NS);
+      const refuse = evAuth(req, env, url, ['POST']); if (refuse) return refuse;
+      if (url.search) return json({ layer: 'earthview', error: 'no query string is accepted' }, 400, NS);
+      const t0 = Date.now();
+      try { const r = await JOBS.earthview(env, t0, true, inv); return json({ job: 'earthview', result: r, wall_ms: Date.now() - t0 }, 200, NS); }
+      catch (e) { return json({ job: 'earthview', error: String(e).slice(0, 300), wall_ms: Date.now() - t0 }, 500, NS); }
     }
     if (p[0] === 'health') {   // 0.5.3: external monitor checks; HEAD is the UptimeRobot HTTP monitor's default request
       if (req.method !== 'GET' && req.method !== 'HEAD') return json({ error: 'GET or HEAD only' }, 405, { 'Cache-Control': 'no-store' });
