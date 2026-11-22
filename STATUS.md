@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 04:08 UTC (clock reading) — **Earth from Space: proposal rev 1 for the stages after Stage B is written and with GPT and Chad. Docs only; nothing built, deployed, stored or approved.** (hub stays 0.6.21, collection off; Earth from Space thread)
+
+- **On Chad's "Go" (22 Nov), after GPT's review of the Stage B result.** `docs/concepts/EARTH-FROM-SPACE-STORAGE-TO-RELEASE-PROPOSAL.md` on `earth-from-space-rc` `c399911`; Mac `_review/earth-from-space-storage-to-release-proposal/read/`.
+- **Three separate stages:** C first stored picture (storage set up by hold, recover "first start", release; one manual run; nothing scheduled; 3 requests, 6 if the one permitted second attempt is used); D scheduled collection as a 48-hour trial with stop conditions and a result rule (at most 432 requests a day); E page release (merge main first, suites, REGISTER, merge).
+- **Two findings that need one more hub version (0.6.22) before Stage C:** (1) no way exists today to store one frame without starting the schedule, so the gate gets a third value `manual` (manual run only); (2) the Earth from Space admin routes and the manual run take the key in the URL and the hub's logs keep query strings, so those routes move to the `Authorization` header and refuse `key=`. Plus a caller script for Chad (`phase1/earthview-admin.sh`) on the Stage B caller's pattern. Not built.
+- **A schedule fact used in it:** the picture run starts at hh:x0:08 and the heavy hourly job at hh:07:59, so by schedule they do not coincide; the nearest neighbour is the fifteen-minute job at hh:00:40 and hh:30:40. Overlaps are to be reported in the trial, not required.
+- **Open for Chad (D1 to D6 in the proposal):** accept the three stages and 0.6.22; whether Claude may set the variable back to `manual` on stop conditions if he cannot be reached; whether EUMETSAT needs a note first; whether collection continues after the 48 hours; REGISTER before Stage D or with the page; no supplementary busy observation recommended.
+- **Next:** GPT's review of the proposal; then, on Chad's go, the 0.6.22 candidate on the branch. No hub action without his own Approve line.
+
 ## 22 Nov 03:49 UTC (clock reading) — **ANIMALS CORRIDOR DRAWING CHANGE IS LIVE. Merged on Chad's own Approve line: merge `87704e0` (push read back 03:46:33 UTC). Served files checked on the live site, live read done.** (production: page only, three files; hub not touched; Animals after MVP thread)
 - **Chad's line (22 Nov, his own message):** "Approve: merge animals-perf-rc b9e259e into main (Animals corridor drawing change goes live)". Spent. Any further production step needs a new exact line.
 - **Merge:** `animals-perf-rc` `b9e259e` into main `86048fc`, no force, no conflict. Page files changed on main: `animals.html` (sha256 `e8caad57…1629`), `animals-globe.js` (`3a7ba3cb…9494`), `animals-corridor.js` (`4754dbb6…3527`): the files GPT passed (`15dc2a7`) and that were served on the Mac. Also `phase1/animals-corridor-ui.test.cjs` and the review and evidence files.
