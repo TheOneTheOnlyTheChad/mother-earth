@@ -1,0 +1,7066 @@
+{
+ "captured_utc": "2026-11-18T16:50:03.188Z",
+ "origin": "https://datarepository.movebank.org",
+ "note": "Figures computed in the browser pane from the repository files as served; the raw data files were read in memory and not saved.",
+ "items": {
+  "zebra_parent": {
+   "id": "c9b4f9b5-875a-4b61-a5d6-c2e59ffe0aca",
+   "name": "Data from: In search of greener pastures: using satellite images to predict the effects of environmental change on zebra migration",
+   "handle": "10255/move.342",
+   "discoverable": true,
+   "withdrawn": false,
+   "lastModified": "2024-08-20T07:36:20.273+00:00",
+   "metadata": {
+    "datacite.RelatedIdentifier": [
+     "https://doi.org/10.1002/jgrg.20096"
+    ],
+    "datacite.RelatedIdentifier.relatedIdentifierType": [
+     "DOI"
+    ],
+    "datacite.RelatedIdentifier.relationType": [
+     "IsSupplementTo"
+    ],
+    "dc.contributor.author": [
+     "Bartlam-Brooks, Hattie L.A.",
+     "Harris, Stephen"
+    ],
+    "dc.date.accessioned": [
+     "2013-08-01T10:37:06Z"
+    ],
+    "dc.date.available": [
+     "2013-08-01T10:37:06Z"
+    ],
+    "dc.date.issued": [
+     "2013-08-01"
+    ],
+    "dc.date.submitted": [
+     "2013"
+    ],
+    "dc.identifier.citation": [
+     "Bartlam-Brooks HLA, Beck PSA, Bohrer G, Harris S (2013) In search of greener pastures—using satellite images to predict the effects of environmental change on zebra migration. Journal of Geophysical Research: Biogeosciences v 188, p 1–11. doi:10.1002/jgrg.20096"
+    ],
+    "dc.identifier.doi": [
+     "doi:10.5441/001/1.f3550b4f"
+    ],
+    "dc.identifier.uri": [
+     "https://datarepository.movebank.org/handle/10255/move.342"
+    ],
+    "dc.language.iso": [
+     "eng"
+    ],
+    "dc.relation": [
+     "Journal of Geophysical Research: Biogeosciences"
+    ],
+    "dc.relation.haspart": [
+     "doi:10.5441/001/1.f3550b4f/1",
+     "doi:10.5441/001/1.f3550b4f/2"
+    ],
+    "dc.relation.isreferencedby": [
+     "doi:10.1002/jgrg.20096"
+    ],
+    "dc.rights": [
+     "CC0 1.0 Universal"
+    ],
+    "dc.rights.uri": [
+     "http://creativecommons.org/publicdomain/zero/1.0/"
+    ],
+    "dc.subject": [
+     "climate change",
+     "environmental uncertainty",
+     "global positioning system",
+     "individual-based modeling",
+     "migration",
+     "movement modeling",
+     "normalized difference vegetation index",
+     "remote sensing",
+     "tropical rainfall measuring mission",
+     "zebra"
+    ],
+    "dc.title": [
+     "Data from: In search of greener pastures: using satellite images to predict the effects of environmental change on zebra migration"
+    ],
+    "dc.type": [
+     "Article"
+    ],
+    "dspace.entity.type": [
+     "Datapackage"
+    ],
+    "mdr.animal.count": [
+     "7"
+    ],
+    "mdr.citation.CSE": [
+     "Bartlam-Brooks HLA, Harris S. 2013. Data from: In search of greener pastures: using satellite images to predict the effects of environmental change on zebra migration. Movebank Data Repository. <a href=\"https://doi.org/10.5441/001/1.f3550b4f\">https://doi.org/10.5441/001/1.f3550b4f</a>"
+    ],
+    "mdr.journal.title": [
+     "Journal of Geophysical Research: Biogeosciences"
+    ],
+    "mdr.location.count": [
+     "53793"
+    ],
+    "mdr.study.id": [
+     "10898263"
+    ],
+    "sensor.name": [
+     "GPS"
+    ]
+   },
+   "files": [
+    {
+     "bundle": "ORIGINAL",
+     "name": "Migratory Burchell's zebra (Equus burchellii) in northern Botswana-reference data.csv",
+     "bytes": 1251,
+     "checksum": {
+      "checkSumAlgorithm": "MD5",
+      "value": "2bcf0ccf7c1140584280a4d25a9d4bbf"
+     },
+     "uuid": "2f9f6e10-d570-4f83-bee8-98acf20ec8c2",
+     "desc": "dataset-file"
+    },
+    {
+     "bundle": "ORIGINAL",
+     "name": "README.txt",
+     "bytes": 9421,
+     "checksum": {
+      "checkSumAlgorithm": "MD5",
+      "value": "2f044afba824d2a53b50478eb9a2f414"
+     },
+     "uuid": "3fa5d4d2-8159-4b2c-bb88-0ee7242abf4e",
+     "desc": "dc_readme"
+    },
+    {
+     "bundle": "ORIGINAL",
+     "name": "Migratory Burchell's zebra (Equus burchellii) in northern Botswana.csv",
+     "bytes": 15651785,
+     "checksum": {
+      "checkSumAlgorithm": "MD5",
+      "value": "218ded3ff70a62536d4643a58e44f3e2"
+     },
+     "uuid": "9672ab98-93db-4943-bbb0-ef1a9435545d",
+     "desc": "dataset-file"
+    },
+    {
+     "bundle": "TEXT",
+     "name": "README.txt.txt",
+     "bytes": 9314,
+     "checksum": {
+      "checkSumAlgorithm": "MD5",
+      "value": "fd4244ab1c2f95a23652ec9efbc2e28c"
+     },
+     "uuid": "44dc158e-4a32-4f23-aeca-49acdb7f042b",
+     "desc": "Extracted text"
+    },
+    {
+     "bundle": "TEXT",
+     "name": "README.txt.txt",
+     "bytes": 9422,
+     "checksum": {
+      "checkSumAlgorithm": "MD5",
+      "value": "6a3a1c35dbd577e56afc987490a57bbf"
+     },
+     "uuid": "dc4f6b68-87bf-416f-b39b-cec76f8789f7",
+     "desc": "Extracted text"
+    }
+   ]
+  },
+  "zebra_data": {
+   "id": "ea46bc43-3895-4b33-ba82-422cdb3041ce",
+   "name": "Migratory Burchell's zebra (Equus burchellii) in northern Botswana",
+   "handle": null,
+   "discoverable": false,
+   "withdrawn": false,
+   "lastModified": "2023-05-02T16:58:14.630+00:00",
+   "metadata": {
+    "dc.contributor.author": [
+     "Bartlam-Brooks, Hattie L.A.",
+     "Harris, Stephen"
+    ],
+    "dc.date.accessioned": [
+     "2013-08-01T10:37:11Z"
+    ],
+    "dc.date.available": [
+     "2013-08-01T10:37:11Z"
+    ],
+    "dc.date.issued": [
+     "2013-08-01"
+    ],
+    "dc.identifier.citation": [
+     "Bartlam-Brooks HLA, Beck PSA, Bohrer G, Harris S (2013) In search of greener pastures—using satellite images to predict the effects of environmental change on zebra migration. Journal of Geophysical Research: Biogeosciences v 188, p 1–11. doi:10.1002/jgrg.20096"
+    ],
+    "dc.identifier.doi": [
+     "doi:10.5441/001/1.f3550b4f/1"
+    ],
+    "dc.identifier.uri": [
+     "https://datarepository.movebank.org/handle/10255/move.343"
+    ],
+    "dc.relation.ispartof": [
+     "doi:10.5441/001/1.f3550b4f"
+    ],
+    "dc.relation.isreferencedby": [
+     "doi:10.1002/jgrg.20096"
+    ],
+    "dc.rights": [
+     "CC0 1.0 Universal"
+    ],
+    "dc.rights.uri": [
+     "http://creativecommons.org/publicdomain/zero/1.0/"
+    ],
+    "dc.subject": [
+     "Equus burchelli",
+     "zebra",
+     "animal migration",
+     "animal tracking",
+     "Botswana",
+     "Okavango Delta"
+    ],
+    "dc.title": [
+     "Migratory Burchell's zebra (Equus burchellii) in northern Botswana"
+    ],
+    "dc.type": [
+     "Dataset"
+    ],
+    "dspace.entity.type": [
+     "Datapackage"
+    ],
+    "dwc.ScientificName": [
+     "Equus burchelli"
+    ],
+    "mdr.citation.CSE": [
+     "Bartlam-Brooks HLA, Harris S. 2013. Migratory Burchell's zebra (Equus burchellii) in northern Botswana. Movebank Data Repository. <a href=\"https://doi.org/10.5441/001/1.f3550b4f/1\">https://doi.org/10.5441/001/1.f3550b4f/1</a>"
+    ]
+   },
+   "files": []
+  },
+  "zebra_ref": {
+   "id": "78a47d4b-ce32-42b6-be9f-37d330d376f0",
+   "name": "Migratory Burchell's zebra (Equus burchellii) in northern Botswana-reference data",
+   "handle": null,
+   "discoverable": false,
+   "withdrawn": false,
+   "lastModified": "2023-05-02T16:52:11.872+00:00",
+   "metadata": {
+    "dc.contributor.author": [
+     "Bartlam-Brooks, Hattie L.A.",
+     "Harris, Stephen"
+    ],
+    "dc.date.accessioned": [
+     "2013-08-01T10:37:12Z"
+    ],
+    "dc.date.available": [
+     "2013-08-01T10:37:12Z"
+    ],
+    "dc.date.issued": [
+     "2013-08-01"
+    ],
+    "dc.identifier.citation": [
+     "Bartlam-Brooks HLA, Beck PSA, Bohrer G, Harris S (2013) In search of greener pastures—using satellite images to predict the effects of environmental change on zebra migration. Journal of Geophysical Research: Biogeosciences v 188, p 1–11. doi:10.1002/jgrg.20096"
+    ],
+    "dc.identifier.doi": [
+     "doi:10.5441/001/1.f3550b4f/2"
+    ],
+    "dc.identifier.uri": [
+     "https://datarepository.movebank.org/handle/10255/move.344"
+    ],
+    "dc.relation.ispartof": [
+     "doi:10.5441/001/1.f3550b4f"
+    ],
+    "dc.relation.isreferencedby": [
+     "doi:10.1002/jgrg.20096"
+    ],
+    "dc.rights": [
+     "CC0 1.0 Universal"
+    ],
+    "dc.rights.uri": [
+     "http://creativecommons.org/publicdomain/zero/1.0/"
+    ],
+    "dc.subject": [
+     "Equus burchelli",
+     "zebra",
+     "animal migration",
+     "animal tracking",
+     "Botswana",
+     "Okavango Delta"
+    ],
+    "dc.title": [
+     "Migratory Burchell's zebra (Equus burchellii) in northern Botswana-reference data"
+    ],
+    "dc.type": [
+     "Dataset"
+    ],
+    "dspace.entity.type": [
+     "Datapackage"
+    ],
+    "dwc.ScientificName": [
+     "Equus burchelli"
+    ],
+    "mdr.citation.CSE": [
+     "Bartlam-Brooks HLA, Harris S. 2013. Migratory Burchell's zebra (Equus burchellii) in northern Botswana-reference data. Movebank Data Repository. <a href=\"https://doi.org/10.5441/001/1.f3550b4f/2\">https://doi.org/10.5441/001/1.f3550b4f/2</a>"
+    ]
+   },
+   "files": []
+  },
+  "whale_parent": {
+   "id": "b7853a1e-43fc-483d-906a-6991ec676413",
+   "name": "Data from: Behavioural estimation of blue whale movements in the Northeast Pacific from state-space model analysis of satellite tracks",
+   "handle": "10255/move.837",
+   "discoverable": true,
+   "withdrawn": false,
+   "lastModified": "2024-08-20T07:36:22.198+00:00",
+   "metadata": {
+    "datacite.RelatedIdentifier": [
+     "https://doi.org/10.3354/esr00239"
+    ],
+    "datacite.RelatedIdentifier.relatedIdentifierType": [
+     "DOI"
+    ],
+    "datacite.RelatedIdentifier.relationType": [
+     "IsSupplementTo"
+    ],
+    "dc.contributor.author": [
+     "Mate, Bruce R.",
+     "Palacios, Daniel M.",
+     "Irvine, Ladd M.",
+     "Follett, Tomas M."
+    ],
+    "dc.date.accessioned": [
+     "2019-02-08T19:26:47Z"
+    ],
+    "dc.date.available": [
+     "2019-02-08T19:26:47Z"
+    ],
+    "dc.date.issued": [
+     "2019-02-08"
+    ],
+    "dc.date.submitted": [
+     "2019"
+    ],
+    "dc.identifier.citation": [
+     "Bailey H, Mate BR, Palacios DM, Irvine L, Bograd SJ, Costa DP (2009) Behavioural estimation of blue whale movements in the Northeast Pacific from state-space model analysis of satellite tracks. Endangered Species Research 10: 93–106. doi:10.3354/esr00239"
+    ],
+    "dc.identifier.doi": [
+     "doi:10.5441/001/1.5ph88fk2"
+    ],
+    "dc.identifier.uri": [
+     "https://datarepository.movebank.org/handle/10255/move.837"
+    ],
+    "dc.language.iso": [
+     "eng"
+    ],
+    "dc.relation": [
+     "Endangered Species Research"
+    ],
+    "dc.relation.haspart": [
+     "doi:10.5441/001/1.5ph88fk2/1",
+     "doi:10.5441/001/1.5ph88fk2/2"
+    ],
+    "dc.relation.isreferencedby": [
+     "doi:10.3354/esr00239",
+     "doi:10.1073/pnas.1819031116",
+     "doi:10.5670/oceanog.2004.71",
+     "doi:10.1016/j.dsr2.2006.01.010",
+     "doi:10.1111/1365-2664.12820",
+     "doi:10.1371/journal.pone.0102959",
+     "doi:10.1111/j.1748-7692.1999.tb00888.x"
+    ],
+    "dc.rights": [
+     "CC0 1.0 Universal"
+    ],
+    "dc.rights.uri": [
+     "http://creativecommons.org/publicdomain/zero/1.0/"
+    ],
+    "dc.subject": [
+     "Balaenoptera musculus",
+     "animal migration",
+     "animal movement",
+     "animal tracking",
+     "area-restricted search",
+     "Argos",
+     "Baja California",
+     "Balaenoptera musculus",
+     "blue whale",
+     "Pacific Ocean",
+     "satellite telemetry"
+    ],
+    "dc.title": [
+     "Data from: Behavioural estimation of blue whale movements in the Northeast Pacific from state-space model analysis of satellite tracks"
+    ],
+    "dc.type": [
+     "Article"
+    ],
+    "dspace.entity.type": [
+     "Datapackage"
+    ],
+    "dwc.ScientificName": [
+     "Balaenoptera musculus"
+    ],
+    "mdr.animal.count": [
+     "143"
+    ],
+    "mdr.citation.CSE": [
+     "Mate BR, Palacios DM, Irvine LM, Follett TM. 2019. Data from: Behavioural estimation of blue whale movements in the Northeast Pacific from state-space model analysis of satellite tracks. Movebank Data Repository. <a href=\"https://doi.org/10.5441/001/1.5ph88fk2\">https://doi.org/10.5441/001/1.5ph88fk2</a>"
+    ],
+    "mdr.journal.title": [
+     "Endangered Species Research"
+    ],
+    "mdr.location.count": [
+     "15778"
+    ],
+    "mdr.study.id": [
+     "650188969"
+    ],
+    "sensor.name": [
+     "GPS"
+    ]
+   },
+   "files": [
+    {
+     "bundle": "ORIGINAL",
+     "name": "Blue whales Eastern North Pacific 1993-2008 - Argos Data.csv",
+     "bytes": 4353684,
+     "checksum": "f8a5c8dce82f98ef3aaa13e525de594e",
+     "uuid": "bab61b80-771a-4568-bfb4-41ff356ee8c6",
+     "desc": "dataset-file"
+    },
+    {
+     "bundle": "ORIGINAL",
+     "name": "README.txt",
+     "bytes": 15043,
+     "checksum": "f311cd62b73b683aa723ac369f3f5e4b",
+     "uuid": "ed3d2f36-d101-41db-88db-a638926e566b",
+     "desc": "dc_readme"
+    },
+    {
+     "bundle": "ORIGINAL",
+     "name": "Blue whales Eastern North Pacific 1993-2008 - Argos Data-reference-data.csv",
+     "bytes": 30266,
+     "checksum": "c878fe7623a866258e0930710f928a9f",
+     "uuid": "c4ddbb3c-b643-4cd3-b424-9c3da17a5c8b",
+     "desc": "dataset-file"
+    },
+    {
+     "bundle": "TEXT",
+     "name": "README.txt.txt",
+     "bytes": 14880,
+     "checksum": "27cca9dcdc62464857c4a9bda2355ce1",
+     "uuid": "3579a5b3-ce62-4872-a58d-16dd07ab8108",
+     "desc": "Extracted text"
+    },
+    {
+     "bundle": "TEXT",
+     "name": "README.txt.txt",
+     "bytes": 15044,
+     "checksum": "967fd42ba55b66f5d0fe4c9e7f34b893",
+     "uuid": "521b3f32-6e2f-4901-9cf5-6e5291dfc2d1",
+     "desc": "Extracted text"
+    }
+   ]
+  },
+  "whale_data": {
+   "id": "534b6861-c139-4ab9-abfd-c7a043e8570f",
+   "name": "Blue whales Eastern North Pacific 1993-2008 - Argos Data",
+   "handle": null,
+   "discoverable": false,
+   "withdrawn": false,
+   "lastModified": "2023-05-02T16:48:32.779+00:00",
+   "metadata": {
+    "dc.contributor.author": [
+     "Mate, Bruce R.",
+     "Palacios, Daniel M.",
+     "Irvine, Ladd M.",
+     "Follett, Tomas M."
+    ],
+    "dc.date.accessioned": [
+     "2019-02-08T19:26:49Z"
+    ],
+    "dc.date.available": [
+     "2019-02-08T19:26:49Z"
+    ],
+    "dc.date.issued": [
+     "2019-02-08"
+    ],
+    "dc.identifier.citation": [
+     "Bailey H, Mate BR, Palacios DM, Irvine L, Bograd SJ, Costa DP (2009) Behavioural estimation of blue whale movements in the Northeast Pacific from state-space model analysis of satellite tracks. Endangered Species Research 10: 93–106. doi:10.3354/esr00239"
+    ],
+    "dc.identifier.doi": [
+     "doi:10.5441/001/1.5ph88fk2/1"
+    ],
+    "dc.identifier.uri": [
+     "https://datarepository.movebank.org/handle/10255/move.838"
+    ],
+    "dc.relation.ispartof": [
+     "doi:10.5441/001/1.5ph88fk2"
+    ],
+    "dc.relation.isreferencedby": [
+     "doi:10.3354/esr00239",
+     "doi:10.1073/pnas.1819031116",
+     "doi:10.5670/oceanog.2004.71",
+     "doi:10.1016/j.dsr2.2006.01.010",
+     "doi:10.1111/1365-2664.12820",
+     "doi:10.1371/journal.pone.0102959",
+     "doi:10.1111/j.1748-7692.1999.tb00888.x"
+    ],
+    "dc.rights": [
+     "CC0 1.0 Universal"
+    ],
+    "dc.rights.uri": [
+     "http://creativecommons.org/publicdomain/zero/1.0/"
+    ],
+    "dc.subject": [
+     "animal foraging",
+     "animal migration",
+     "animal movement",
+     "animal tracking",
+     "area-restricted search",
+     "Argos",
+     "Baja California",
+     "Balaenoptera musculus",
+     "blue whale",
+     "Pacific Ocean",
+     "satellite telemetry"
+    ],
+    "dc.title": [
+     "Blue whales Eastern North Pacific 1993-2008 - Argos Data"
+    ],
+    "dc.type": [
+     "Dataset"
+    ],
+    "dspace.entity.type": [
+     "Datapackage"
+    ],
+    "dwc.ScientificName": [
+     "Balaenoptera musculus"
+    ],
+    "mdr.citation.CSE": [
+     "Mate BR, Palacios DM, Irvine LM, Follett TM. 2019. Blue whales Eastern North Pacific 1993-2008 - Argos Data. Movebank Data Repository. <a href=\"https://doi.org/10.5441/001/1.5ph88fk2/1\">https://doi.org/10.5441/001/1.5ph88fk2/1</a>"
+    ]
+   },
+   "files": []
+  },
+  "whale_ref": {
+   "id": "ee77a68d-6025-437d-9ebf-8794fb74b013",
+   "name": "Blue whales Eastern North Pacific 1993-2008 - Argos Data-reference-data",
+   "handle": null,
+   "discoverable": false,
+   "withdrawn": false,
+   "lastModified": "2023-05-02T16:58:27.199+00:00",
+   "metadata": {
+    "dc.contributor.author": [
+     "Mate, Bruce R.",
+     "Palacios, Daniel M.",
+     "Irvine, Ladd M.",
+     "Follett, Tomas M."
+    ],
+    "dc.date.accessioned": [
+     "2019-02-08T19:26:50Z"
+    ],
+    "dc.date.available": [
+     "2019-02-08T19:26:50Z"
+    ],
+    "dc.date.issued": [
+     "2019-02-08"
+    ],
+    "dc.identifier.citation": [
+     "Bailey H, Mate BR, Palacios DM, Irvine L, Bograd SJ, Costa DP (2009) Behavioural estimation of blue whale movements in the Northeast Pacific from state-space model analysis of satellite tracks. Endangered Species Research 10: 93–106. doi:10.3354/esr00239"
+    ],
+    "dc.identifier.doi": [
+     "doi:10.5441/001/1.5ph88fk2/2"
+    ],
+    "dc.identifier.uri": [
+     "https://datarepository.movebank.org/handle/10255/move.839"
+    ],
+    "dc.relation.ispartof": [
+     "doi:10.5441/001/1.5ph88fk2"
+    ],
+    "dc.relation.isreferencedby": [
+     "doi:10.3354/esr00239",
+     "doi:10.1073/pnas.1819031116",
+     "doi:10.5670/oceanog.2004.71",
+     "doi:10.1016/j.dsr2.2006.01.010",
+     "doi:10.1111/1365-2664.12820",
+     "doi:10.1371/journal.pone.0102959",
+     "doi:10.1111/j.1748-7692.1999.tb00888.x"
+    ],
+    "dc.rights": [
+     "CC0 1.0 Universal"
+    ],
+    "dc.rights.uri": [
+     "http://creativecommons.org/publicdomain/zero/1.0/"
+    ],
+    "dc.subject": [
+     "animal foraging",
+     "animal migration",
+     "animal movement",
+     "animal tracking",
+     "area-restricted search",
+     "Argos",
+     "Baja California",
+     "Balaenoptera musculus",
+     "blue whale",
+     "Pacific Ocean",
+     "satellite telemetry"
+    ],
+    "dc.title": [
+     "Blue whales Eastern North Pacific 1993-2008 - Argos Data-reference-data"
+    ],
+    "dc.type": [
+     "Dataset"
+    ],
+    "dspace.entity.type": [
+     "Datapackage"
+    ],
+    "dwc.ScientificName": [
+     "Balaenoptera musculus"
+    ],
+    "mdr.citation.CSE": [
+     "Mate BR, Palacios DM, Irvine LM, Follett TM. 2019. Blue whales Eastern North Pacific 1993-2008 - Argos Data-reference-data. Movebank Data Repository. <a href=\"https://doi.org/10.5441/001/1.5ph88fk2/2\">https://doi.org/10.5441/001/1.5ph88fk2/2</a>"
+    ]
+   },
+   "files": []
+  }
+ },
+ "files": {
+  "zebra_readme": {
+   "bytes": 9421,
+   "sha256": "9c96d81f15e799f94d90fa4d091a8ea6a2fbcd5a1d0d5dd5455cd397924342d1"
+  },
+  "zebra_reference": {
+   "bytes": 1251,
+   "sha256": "4faceb06b40002f64d1c1e77a33a8df52c9cc5c8825979563d027eb1dff5fd8b",
+   "text": "tag-id,animal-id,deploy-on-date,deploy-off-date,animal-taxon,animal-sex,animal-taxon-detail,animal-life-stage,tag-manufacturer-name,tag-model,tag-mass,tag-attachment-type,duty-cycle\r3743,Z3743,2007-10-28,2008-08-28,Equus burchellii,f,Equus burchelli antiquorum,3-5 yr,Vectronic Aerospace GmbH,GPS-Plus 4D,950.0,collar,hourly fixes\r3864,Z3864,2007-10-25,2008-01-05,Equus burchellii,f,Equus burchelli antiquorum,>5 yr,Vectronic Aerospace GmbH,GPS-Plus 4D,950.0,collar,hourly fixes\r3866,Z3866,2007-10-25,2008-10-22,Equus burchellii,f,Equus burchelli antiquorum,>5 yr,Vectronic Aerospace GmbH,GPS-Plus 4D,950.0,collar,hourly fixes\r6399,Z6399,2008-10-24,2009-06-01,Equus burchellii,f,Equus burchelli antiquorum,3-5 yr,Vectronic Aerospace GmbH,GPS-Plus IRIDIUM 4D,950.0,collar,hourly fixes\r6402,Z6402,2008-10-24,2009-04-21,Equus burchellii,f,Equus burchelli antiquorum,>5 yr,Vectronic Aerospace GmbH,GPS-Plus IRIDIUM 4D,950.0,collar,hourly fixes\r6405,Z6405,2008-08-27,2009-03-31,Equus burchellii,f,Equus burchelli antiquorum,>5 yr,Vectronic Aerospace GmbH,GPS-Plus IRIDIUM 4D,950.0,collar,hourly fixes\r6407,Z6407,2008-08-27,2009-05-27,Equus burchellii,f,Equus burchelli antiquorum,>5 yr,Vectronic Aerospace GmbH,GPS-Plus IRIDIUM 4D,950.0,collar,hourly fixes"
+  },
+  "zebra_data": {
+   "bytes": 15651785,
+   "sha256": "c91054627d7d60d50cd9cb59b3d52609df5d17e6985d147742bcf9a6da488824",
+   "fetched_utc": "2026-11-18T16:46:06.465Z"
+  },
+  "whale_readme": {
+   "bytes": 15043,
+   "sha256": "0814e3e6a30db68c357fe4b3bfa518267daf040bc1035303dcc4e89157b516a4"
+  },
+  "whale_reference": {
+   "bytes": 30266,
+   "sha256": "f321895e9cfc07effd8dfd288e448ca7ab40ea71943bddda211d43dbfc6a3c37"
+  },
+  "whale_data": {
+   "bytes": 4353684,
+   "sha256": "43178b0d2313a44d90dbe519d3ef767e5fd65b7a233c8532d42156e7fb53e5a6",
+   "fetched_utc": "2026-11-18T16:47:45.569Z"
+  }
+ },
+ "zebra": {
+  "analysis": {
+   "header": [
+    "event-id",
+    "visible",
+    "timestamp",
+    "location-long",
+    "location-lat",
+    "manually-marked-outlier",
+    "sensor-type",
+    "individual-taxon-canonical-name",
+    "tag-local-identifier",
+    "individual-local-identifier",
+    "study-name",
+    "utm-easting",
+    "utm-northing",
+    "utm-zone",
+    "study-timezone",
+    "study-local-timestamp"
+   ],
+   "rows": 53794,
+   "ragged": 0,
+   "badT": 0,
+   "fill": {
+    "event-id": 53794,
+    "visible": 53794,
+    "timestamp": 53794,
+    "location-long": 53777,
+    "location-lat": 53777,
+    "manually-marked-outlier": 1,
+    "sensor-type": 53794,
+    "individual-taxon-canonical-name": 53794,
+    "tag-local-identifier": 53794,
+    "individual-local-identifier": 53794,
+    "study-name": 53794,
+    "utm-easting": 53777,
+    "utm-northing": 53777,
+    "utm-zone": 53777,
+    "study-timezone": 53794,
+    "study-local-timestamp": 53794
+   },
+   "per": {
+    "Z3864": {
+     "rows": 2721,
+     "withPos": 2720,
+     "visTrue": 2721,
+     "visFalse": 0,
+     "usable": 2720,
+     "first": "2007-10-25T00:02:11.000Z",
+     "last": "2008-01-05T04:30:06.000Z",
+     "days": 72.2,
+     "gapH": {
+      "p10": 0.248,
+      "median": 0.262,
+      "p90": 1.006,
+      "p99": 1.011,
+      "max": 35.2
+     },
+     "over2h": 2,
+     "over6h": 1,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [
+      "35.2 h from 2007-11-20T21:00:26.000Z"
+     ],
+     "lat": [
+      -20.687,
+      -19.392
+     ],
+     "lon": [
+      23.523,
+      25.088
+     ],
+     "sensors": {
+      "gps": 2721
+     }
+    },
+    "Z3743": {
+     "rows": 10925,
+     "withPos": 10912,
+     "visTrue": 10924,
+     "visFalse": 1,
+     "usable": 10911,
+     "first": "2007-10-28T00:00:24.000Z",
+     "last": "2008-08-28T09:00:41.000Z",
+     "days": 305.4,
+     "gapH": {
+      "p10": 0.248,
+      "median": 0.991,
+      "p90": 1.007,
+      "p99": 1.012,
+      "max": 10.8
+     },
+     "over2h": 4,
+     "over6h": 1,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      -20.721,
+      19.718
+     ],
+     "lon": [
+      -135,
+      25.353
+     ],
+     "sensors": {
+      "gps": 10925
+     }
+    },
+    "Z3866": {
+     "rows": 13048,
+     "withPos": 13045,
+     "visTrue": 13048,
+     "visFalse": 0,
+     "usable": 13045,
+     "first": "2007-10-25T08:01:53.000Z",
+     "last": "2008-10-22T23:00:45.000Z",
+     "days": 363.6,
+     "gapH": {
+      "p10": 0.248,
+      "median": 0.991,
+      "p90": 1.007,
+      "p99": 1.012,
+      "max": 2
+     },
+     "over2h": 2,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      -20.794,
+      -19.385
+     ],
+     "lon": [
+      23.517,
+      25.187
+     ],
+     "sensors": {
+      "gps": 13048
+     }
+    },
+    "Z6402": {
+     "rows": 4837,
+     "withPos": 4837,
+     "visTrue": 4837,
+     "visFalse": 0,
+     "usable": 4837,
+     "first": "2008-10-24T07:00:42.000Z",
+     "last": "2009-04-21T07:00:37.000Z",
+     "days": 179,
+     "gapH": {
+      "p10": 0.249,
+      "median": 0.996,
+      "p90": 1.009,
+      "p99": 4.03,
+      "max": 38.4
+     },
+     "over2h": 146,
+     "over6h": 31,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [
+      "38.4 h from 2009-03-07T11:00:06.000Z",
+      "27.7 h from 2009-03-14T06:00:07.000Z"
+     ],
+     "lat": [
+      -20.798,
+      -19.39
+     ],
+     "lon": [
+      23.526,
+      25.199
+     ],
+     "sensors": {
+      "gps": 4837
+     }
+    },
+    "Z6405": {
+     "rows": 6194,
+     "withPos": 6194,
+     "visTrue": 6194,
+     "visFalse": 0,
+     "usable": 6194,
+     "first": "2008-08-27T05:00:44.000Z",
+     "last": "2009-03-31T19:00:19.000Z",
+     "days": 216.6,
+     "gapH": {
+      "p10": 0.249,
+      "median": 0.998,
+      "p90": 1.008,
+      "p99": 1.014,
+      "max": 8
+     },
+     "over2h": 4,
+     "over6h": 1,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      -20.812,
+      -19.386
+     ],
+     "lon": [
+      23.528,
+      25.261
+     ],
+     "sensors": {
+      "gps": 6194
+     }
+    },
+    "Z6407": {
+     "rows": 9680,
+     "withPos": 9680,
+     "visTrue": 9680,
+     "visFalse": 0,
+     "usable": 9680,
+     "first": "2008-08-27T08:01:17.000Z",
+     "last": "2009-05-27T12:00:38.000Z",
+     "days": 273.2,
+     "gapH": {
+      "p10": 0.248,
+      "median": 0.991,
+      "p90": 1.007,
+      "p99": 1.015,
+      "max": 2
+     },
+     "over2h": 2,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      -20.786,
+      -19.388
+     ],
+     "lon": [
+      23.522,
+      25.222
+     ],
+     "sensors": {
+      "gps": 9680
+     }
+    },
+    "Z6399": {
+     "rows": 6389,
+     "withPos": 6389,
+     "visTrue": 6389,
+     "visFalse": 0,
+     "usable": 6389,
+     "first": "2008-10-24T09:01:48.000Z",
+     "last": "2009-06-01T15:00:08.000Z",
+     "days": 220.2,
+     "gapH": {
+      "p10": 0.249,
+      "median": 0.998,
+      "p90": 1.008,
+      "p99": 1.016,
+      "max": 11
+     },
+     "over2h": 2,
+     "over6h": 1,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      -20.795,
+      -19.208
+     ],
+     "lon": [
+      23.42,
+      25.236
+     ],
+     "sensors": {
+      "gps": 6389
+     }
+    }
+   },
+   "distinct": {
+    "visible": [
+     [
+      "true",
+      53793
+     ],
+     [
+      "false",
+      1
+     ]
+    ],
+    "manually-marked-outlier": [
+     [
+      "true",
+      1
+     ]
+    ],
+    "sensor-type": [
+     [
+      "gps",
+      53794
+     ]
+    ],
+    "individual-taxon-canonical-name": [
+     [
+      "Equus burchellii",
+      53794
+     ]
+    ],
+    "tag-local-identifier": [
+     [
+      "3866",
+      13048
+     ],
+     [
+      "3743",
+      10925
+     ],
+     [
+      "6407",
+      9680
+     ],
+     [
+      "6399",
+      6389
+     ],
+     [
+      "6405",
+      6194
+     ],
+     [
+      "6402",
+      4837
+     ],
+     [
+      "3864",
+      2721
+     ]
+    ],
+    "individual-local-identifier": [
+     [
+      "Z3866",
+      13048
+     ],
+     [
+      "Z3743",
+      10925
+     ],
+     [
+      "Z6407",
+      9680
+     ],
+     [
+      "Z6399",
+      6389
+     ],
+     [
+      "Z6405",
+      6194
+     ],
+     [
+      "Z6402",
+      4837
+     ],
+     [
+      "Z3864",
+      2721
+     ]
+    ],
+    "study-name": [
+     [
+      "Migratory Burchell's zebra (Equus burchellii) in northern Botswana (Bartlam-Brooks et al. 2013)",
+      53794
+     ]
+    ],
+    "utm-zone": [
+     [
+      "35S",
+      35573
+     ],
+     [
+      "34S",
+      18203
+     ],
+     [
+      "8N",
+      1
+     ]
+    ],
+    "study-timezone": [
+     [
+      "Central African Time",
+      53794
+     ]
+    ]
+   }
+  },
+  "extra": {
+   "outlier": [
+    {
+     "ev": "209298472",
+     "id": "Z3743",
+     "t": "2008-07-15 15:01:39.000",
+     "lon": "-135.0",
+     "lat": "19.7176819",
+     "vis": "false",
+     "out": "true"
+    }
+   ],
+   "nopos": [
+    "Z3864 2007-12-10 11:03:08.000",
+    "Z3743 2007-11-09 07:03:08.000",
+    "Z3743 2007-11-11 15:03:11.000",
+    "Z3743 2007-12-21 12:03:10.000",
+    "Z3743 2008-02-16 15:03:08.000",
+    "Z3743 2008-05-07 13:03:10.000",
+    "Z3743 2008-05-12 10:03:04.000",
+    "Z3743 2008-05-21 07:03:10.000",
+    "Z3743 2008-05-31 00:03:06.000",
+    "Z3743 2008-07-15 12:01:39.000",
+    "Z3743 2008-07-15 13:01:39.000",
+    "Z3743 2008-07-15 14:01:39.000",
+    "Z3743 2008-08-15 08:03:07.000",
+    "Z3743 2008-08-17 23:03:10.000",
+    "Z3866 2008-01-09 22:03:06.000",
+    "Z3866 2008-04-24 07:03:06.000",
+    "Z3866 2008-09-06 07:03:06.000"
+   ],
+   "tsFmt": [
+    "9999-99-99 99:99:99.999"
+   ],
+   "eventIdDuplicates": 0,
+   "outOfOrderInFile": 0,
+   "out": {
+    "Z3864": {
+     "n": 2720,
+     "cls": {
+      "~15min": 1362,
+      "~30min": 0,
+      "~60min": 1354,
+      "other_under_2h": 1,
+      "over_2h": 2
+     },
+     "lon": [
+      23.5233825,
+      25.0876289
+     ],
+     "lat": [
+      -20.6873338,
+      -19.3915311
+     ],
+     "firstPos": [
+      23.523616,
+      -19.3915311
+     ],
+     "lastPos": [
+      24.995666,
+      -20.6066866
+     ],
+     "farthestFromFirstKm": 211.3,
+     "pathKm": 1130,
+     "maxStepKm": 31.5,
+     "maxStepAt": "2007-11-22T08:13:53.000Z",
+     "maxSpeedKmh": 6.9,
+     "maxSpeedAt": "2007-11-01T00:45:11.000Z",
+     "months": [
+      "2007-10 n=168 lon 23.82 lat -19.58 [23.52..24.16]",
+      "2007-11 n=1046 lon 24.39 lat -20.12 [23.97..24.93]",
+      "2007-12 n=1103 lon 24.94 lat -20.59 [24.81..25.09]",
+      "2008-01 n=403 lon 24.98 lat -20.59 [24.94..25.00]"
+     ]
+    },
+    "Z3743": {
+     "n": 10911,
+     "cls": {
+      "~15min": 4801,
+      "~30min": 0,
+      "~60min": 6098,
+      "other_under_2h": 7,
+      "over_2h": 4
+     },
+     "lon": [
+      23.4894343,
+      25.3526906
+     ],
+     "lat": [
+      -20.7209728,
+      -19.3733736
+     ],
+     "firstPos": [
+      23.6829521,
+      -19.450994
+     ],
+     "lastPos": [
+      23.5299457,
+      -19.3899775
+     ],
+     "farthestFromFirstKm": 209,
+     "pathKm": 3750,
+     "maxStepKm": 5.6,
+     "maxStepAt": "2008-05-08T15:00:44.000Z",
+     "maxSpeedKmh": 9.4,
+     "maxSpeedAt": "2008-08-05T06:45:41.000Z",
+     "months": [
+      "2007-10 n=96 lon 23.69 lat -19.46 [23.53..23.79]",
+      "2007-11 n=1078 lon 24.25 lat -19.93 [23.52..25.08]",
+      "2007-12 n=1103 lon 24.98 lat -20.59 [24.80..25.08]",
+      "2008-01 n=1104 lon 25.04 lat -20.57 [24.89..25.30]",
+      "2008-02 n=1055 lon 25.12 lat -20.48 [24.95..25.32]",
+      "2008-03 n=1104 lon 25.28 lat -20.49 [25.16..25.35]",
+      "2008-04 n=1080 lon 25.28 lat -20.47 [25.12..25.35]",
+      "2008-05 n=1100 lon 24.59 lat -20.09 [23.51..25.35]",
+      "2008-06 n=1080 lon 23.55 lat -19.45 [23.49..23.63]",
+      "2008-07 n=1095 lon 23.52 lat -19.42 [23.50..23.54]",
+      "2008-08 n=1016 lon 23.55 lat -19.41 [23.50..23.59]"
+     ]
+    },
+    "Z3866": {
+     "n": 13045,
+     "cls": {
+      "~15min": 5760,
+      "~30min": 0,
+      "~60min": 7281,
+      "other_under_2h": 1,
+      "over_2h": 2
+     },
+     "lon": [
+      23.5174979,
+      25.1871951
+     ],
+     "lat": [
+      -20.7941391,
+      -19.385163
+     ],
+     "firstPos": [
+      23.5545038,
+      -19.4197468
+     ],
+     "lastPos": [
+      23.5962208,
+      -19.4310398
+     ],
+     "farthestFromFirstKm": 209.5,
+     "pathKm": 4089,
+     "maxStepKm": 6.4,
+     "maxStepAt": "2008-03-25T18:00:41.000Z",
+     "maxSpeedKmh": 6.6,
+     "maxSpeedAt": "2007-12-01T10:45:19.000Z",
+     "months": [
+      "2007-10 n=160 lon 23.71 lat -19.47 [23.55..23.82]",
+      "2007-11 n=1080 lon 24.13 lat -19.82 [23.79..24.96]",
+      "2007-12 n=1104 lon 24.95 lat -20.61 [24.77..25.12]",
+      "2008-01 n=1103 lon 24.98 lat -20.63 [24.85..25.06]",
+      "2008-02 n=1056 lon 24.98 lat -20.62 [24.83..25.15]",
+      "2008-03 n=1104 lon 25.03 lat -20.55 [24.90..25.19]",
+      "2008-04 n=1079 lon 24.91 lat -20.46 [24.79..24.98]",
+      "2008-05 n=1104 lon 24.15 lat -19.95 [23.65..24.80]",
+      "2008-06 n=1080 lon 23.74 lat -19.53 [23.52..23.96]",
+      "2008-07 n=1104 lon 23.64 lat -19.44 [23.59..23.73]",
+      "2008-08 n=1104 lon 23.62 lat -19.43 [23.57..23.66]",
+      "2008-09 n=1079 lon 23.61 lat -19.42 [23.53..23.66]",
+      "2008-10 n=888 lon 23.59 lat -19.42 [23.53..23.61]"
+     ]
+    },
+    "Z6402": {
+     "n": 4837,
+     "cls": {
+      "~15min": 1479,
+      "~30min": 3,
+      "~60min": 3139,
+      "other_under_2h": 69,
+      "over_2h": 146
+     },
+     "lon": [
+      23.5259343,
+      25.1994562
+     ],
+     "lat": [
+      -20.7979949,
+      -19.3895207
+     ],
+     "firstPos": [
+      23.6029641,
+      -19.4288147
+     ],
+     "lastPos": [
+      24.508933,
+      -20.3551241
+     ],
+     "farthestFromFirstKm": 206.6,
+     "pathKm": 2211,
+     "maxStepKm": 15,
+     "maxStepAt": "2009-04-07T13:14:25.000Z",
+     "maxSpeedKmh": 7.8,
+     "maxSpeedAt": "2008-11-14T14:00:09.000Z",
+     "months": [
+      "2008-10 n=185 lon 23.59 lat -19.42 [23.53..23.61]",
+      "2008-11 n=1721 lon 24.25 lat -19.94 [23.53..25.10]",
+      "2008-12 n=849 lon 25.00 lat -20.54 [24.88..25.12]",
+      "2009-01 n=744 lon 24.93 lat -20.66 [24.78..25.13]",
+      "2009-02 n=580 lon 25.10 lat -20.52 [24.99..25.20]",
+      "2009-03 n=459 lon 24.95 lat -20.55 [24.83..25.12]",
+      "2009-04 n=299 lon 24.93 lat -20.39 [24.51..25.04]"
+     ]
+    },
+    "Z6405": {
+     "n": 6194,
+     "cls": {
+      "~15min": 1344,
+      "~30min": 0,
+      "~60min": 4844,
+      "other_under_2h": 1,
+      "over_2h": 4
+     },
+     "lon": [
+      23.5275278,
+      25.2607009
+     ],
+     "lat": [
+      -20.8115613,
+      -19.3855829
+     ],
+     "firstPos": [
+      23.6206822,
+      -19.5584529
+     ],
+     "lastPos": [
+      24.962655,
+      -20.3600144
+     ],
+     "farthestFromFirstKm": 203.1,
+     "pathKm": 2531,
+     "maxStepKm": 15.1,
+     "maxStepAt": "2008-08-27T06:01:23.000Z",
+     "maxSpeedKmh": 14.9,
+     "maxSpeedAt": "2008-08-27T06:01:23.000Z",
+     "months": [
+      "2008-08 n=112 lon 23.61 lat -19.43 [23.60..23.64]",
+      "2008-09 n=1728 lon 23.59 lat -19.43 [23.53..23.62]",
+      "2008-10 n=743 lon 23.59 lat -19.43 [23.53..23.63]",
+      "2008-11 n=719 lon 24.68 lat -20.27 [23.53..25.08]",
+      "2008-12 n=744 lon 25.06 lat -20.51 [24.89..25.17]",
+      "2009-01 n=744 lon 24.97 lat -20.65 [24.85..25.15]",
+      "2009-02 n=672 lon 25.17 lat -20.50 [24.99..25.26]",
+      "2009-03 n=732 lon 24.91 lat -20.60 [24.73..25.17]"
+     ]
+    },
+    "Z6407": {
+     "n": 9680,
+     "cls": {
+      "~15min": 4172,
+      "~30min": 0,
+      "~60min": 5501,
+      "other_under_2h": 4,
+      "over_2h": 2
+     },
+     "lon": [
+      23.5217247,
+      25.2220094
+     ],
+     "lat": [
+      -20.7859808,
+      -19.3878048
+     ],
+     "firstPos": [
+      23.6099118,
+      -19.4215606
+     ],
+     "lastPos": [
+      24.4252033,
+      -20.1921113
+     ],
+     "farthestFromFirstKm": 206.2,
+     "pathKm": 3406,
+     "maxStepKm": 5.1,
+     "maxStepAt": "2008-09-24T10:00:12.000Z",
+     "maxSpeedKmh": 9.4,
+     "maxSpeedAt": "2008-11-10T16:00:16.000Z",
+     "months": [
+      "2008-08 n=112 lon 23.58 lat -19.45 [23.52..23.62]",
+      "2008-09 n=1727 lon 23.60 lat -19.43 [23.52..23.62]",
+      "2008-10 n=1752 lon 23.59 lat -19.43 [23.53..23.62]",
+      "2008-11 n=1728 lon 24.34 lat -20.01 [23.53..25.13]",
+      "2008-12 n=848 lon 25.03 lat -20.53 [24.85..25.18]",
+      "2009-01 n=744 lon 24.96 lat -20.65 [24.80..25.14]",
+      "2009-02 n=670 lon 25.13 lat -20.51 [25.01..25.22]",
+      "2009-03 n=743 lon 24.99 lat -20.60 [24.80..25.21]",
+      "2009-04 n=720 lon 25.01 lat -20.37 [24.84..25.19]",
+      "2009-05 n=636 lon 24.79 lat -20.50 [24.42..25.11]"
+     ]
+    },
+    "Z6399": {
+     "n": 6389,
+     "cls": {
+      "~15min": 1484,
+      "~30min": 0,
+      "~60min": 4902,
+      "other_under_2h": 0,
+      "over_2h": 2
+     },
+     "lon": [
+      23.4200914,
+      25.236121
+     ],
+     "lat": [
+      -20.7951354,
+      -19.207541
+     ],
+     "firstPos": [
+      23.6218876,
+      -19.3277527
+     ],
+     "lastPos": [
+      23.9086954,
+      -19.6505962
+     ],
+     "farthestFromFirstKm": 214.6,
+     "pathKm": 3038,
+     "maxStepKm": 14.2,
+     "maxStepAt": "2009-02-27T03:00:18.000Z",
+     "maxSpeedKmh": 6.3,
+     "maxSpeedAt": "2008-11-08T07:00:09.000Z",
+     "months": [
+      "2008-10 n=183 lon 23.52 lat -19.32 [23.42..23.69]",
+      "2008-11 n=1727 lon 24.59 lat -20.27 [23.69..25.18]",
+      "2008-12 n=849 lon 25.04 lat -20.55 [24.86..25.24]",
+      "2009-01 n=744 lon 24.95 lat -20.66 [24.80..25.09]",
+      "2009-02 n=662 lon 25.07 lat -20.53 [24.88..25.21]",
+      "2009-03 n=744 lon 24.96 lat -20.59 [24.82..25.16]",
+      "2009-04 n=720 lon 24.70 lat -20.23 [23.98..25.15]",
+      "2009-05 n=744 lon 24.20 lat -20.02 [23.91..24.48]",
+      "2009-06 n=16 lon 23.91 lat -19.64 [23.91..23.92]"
+     ]
+    }
+   },
+   "coordDecimals": [
+    6,
+    7,
+    5,
+    4,
+    0
+   ]
+  },
+  "sizes": {
+   "points": 53776,
+   "gapsOver3h": {
+    "Z3864": 1,
+    "Z3743": 1,
+    "Z3866": 0,
+    "Z6402": 88,
+    "Z6405": 2,
+    "Z6407": 0,
+    "Z6399": 1
+   },
+   "gapsOver3hTotal": 93,
+   "hourlyThinnedPoints": 38436,
+   "fifteenMinByUtcHour": [
+    856,
+    860,
+    860,
+    860,
+    859,
+    855,
+    852,
+    853,
+    856,
+    856,
+    857,
+    847,
+    844,
+    844,
+    844,
+    845,
+    844,
+    844,
+    844,
+    844,
+    844,
+    844,
+    845,
+    845
+   ],
+   "fifteenMinDays": {
+    "Z3864": "17 days with 15-min fixes, 2007-11-01 .. 2008-01-05",
+    "Z3743": "61 days with 15-min fixes, 2007-11-01 .. 2008-08-06",
+    "Z3866": "72 days with 15-min fixes, 2007-11-01 .. 2008-10-06",
+    "Z6402": "20 days with 15-min fixes, 2008-11-01 .. 2009-03-25",
+    "Z6405": "15 days with 15-min fixes, 2008-09-01 .. 2008-09-15",
+    "Z6407": "47 days with 15-min fixes, 2008-09-01 .. 2008-12-02",
+    "Z6399": "17 days with 15-min fixes, 2008-11-01 .. 2008-12-02"
+   },
+   "sizeAll": {
+    "raw": 645312,
+    "gzip": 274777
+   },
+   "sizeTwoRoundTrips": {
+    "raw": 287472,
+    "gzip": 121190
+   },
+   "sizeOne": {
+    "raw": 156540,
+    "gzip": 66356
+   }
+  }
+ },
+ "whale": {
+  "analysis": {
+   "header": [
+    "event-id",
+    "visible",
+    "timestamp",
+    "location-long",
+    "location-lat",
+    "argos:best-level",
+    "argos:calcul-freq",
+    "argos:iq",
+    "argos:lat1",
+    "argos:lat2",
+    "argos:lc",
+    "argos:lon1",
+    "argos:lon2",
+    "argos:nb-mes",
+    "argos:nb-mes-120",
+    "manually-marked-outlier",
+    "sensor-type",
+    "individual-taxon-canonical-name",
+    "tag-local-identifier",
+    "individual-local-identifier",
+    "study-name"
+   ],
+   "rows": 16249,
+   "ragged": 0,
+   "badT": 0,
+   "fill": {
+    "event-id": 16249,
+    "visible": 16249,
+    "timestamp": 16249,
+    "location-long": 16249,
+    "location-lat": 16249,
+    "argos:best-level": 15941,
+    "argos:calcul-freq": 15910,
+    "argos:iq": 15424,
+    "argos:lat1": 16249,
+    "argos:lat2": 16019,
+    "argos:lc": 15980,
+    "argos:lon1": 16249,
+    "argos:lon2": 16018,
+    "argos:nb-mes": 16021,
+    "argos:nb-mes-120": 15910,
+    "manually-marked-outlier": 471,
+    "sensor-type": 16249,
+    "individual-taxon-canonical-name": 16249,
+    "tag-local-identifier": 16249,
+    "individual-local-identifier": 16249,
+    "study-name": 16249
+   },
+   "per": {
+    "1993CA-Bmu-00834": {
+     "rows": 5,
+     "withPos": 5,
+     "visTrue": 4,
+     "visFalse": 1,
+     "usable": 4,
+     "first": "1993-08-29T01:13:00.000Z",
+     "last": "1993-09-01T01:57:39.000Z",
+     "days": 3,
+     "gapH": {
+      "p10": 0.171,
+      "median": 12.885,
+      "p90": 59.688,
+      "p99": 59.688,
+      "max": 59.7
+     },
+     "over2h": 2,
+     "over6h": 2,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      36.981,
+      38.231
+     ],
+     "lon": [
+      -122.827,
+      -122.407
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 4
+     }
+    },
+    "1993CA-Bmu-10823": {
+     "rows": 5,
+     "withPos": 5,
+     "visTrue": 2,
+     "visFalse": 3,
+     "usable": 2,
+     "first": "1993-08-28T18:20:00.000Z",
+     "last": "1993-09-01T22:35:12.000Z",
+     "days": 4.2,
+     "gapH": {
+      "p10": 100.253,
+      "median": 100.253,
+      "p90": 100.253,
+      "p99": 100.253,
+      "max": 100.3
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.012,
+      38.584
+     ],
+     "lon": [
+      -123.466,
+      -122.242
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 4
+     }
+    },
+    "1993CA-Bmu-10833": {
+     "rows": 2,
+     "withPos": 2,
+     "visTrue": 1,
+     "visFalse": 1,
+     "usable": 1,
+     "first": "1993-08-28T18:54:00.000Z",
+     "last": "1993-08-28T18:54:00.000Z",
+     "days": 0,
+     "gapH": {
+      "p10": null,
+      "median": null,
+      "p90": null,
+      "p99": null,
+      "max": null
+     },
+     "over2h": 0,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.022,
+      37.089
+     ],
+     "lon": [
+      -122.415,
+      -122.065
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 1
+     }
+    },
+    "1993CA-Bmu-10836": {
+     "rows": 6,
+     "withPos": 6,
+     "visTrue": 6,
+     "visFalse": 0,
+     "usable": 6,
+     "first": "1993-08-31T23:40:00.000Z",
+     "last": "1993-09-04T16:35:40.000Z",
+     "days": 3.7,
+     "gapH": {
+      "p10": 4.005,
+      "median": 13.036,
+      "p90": 35.877,
+      "p99": 35.877,
+      "max": 35.9
+     },
+     "over2h": 5,
+     "over6h": 4,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      36.59,
+      37.198
+     ],
+     "lon": [
+      -123.41,
+      -122.377
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 5
+     }
+    },
+    "1994CA-Bmu-10820": {
+     "rows": 6,
+     "withPos": 6,
+     "visTrue": 6,
+     "visFalse": 0,
+     "usable": 6,
+     "first": "1994-09-13T21:28:00.000Z",
+     "last": "1994-09-19T13:28:52.000Z",
+     "days": 5.7,
+     "gapH": {
+      "p10": 2.066,
+      "median": 20.552,
+      "p90": 61.246,
+      "p99": 61.246,
+      "max": 61.2
+     },
+     "over2h": 5,
+     "over6h": 4,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      36.866,
+      37.779
+     ],
+     "lon": [
+      -126.949,
+      -122.779
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 5
+     }
+    },
+    "1994CA-Bmu-10821": {
+     "rows": 2,
+     "withPos": 2,
+     "visTrue": 2,
+     "visFalse": 0,
+     "usable": 2,
+     "first": "1994-09-13T20:31:00.000Z",
+     "last": "1994-09-14T00:23:34.000Z",
+     "days": 0.2,
+     "gapH": {
+      "p10": 3.876,
+      "median": 3.876,
+      "p90": 3.876,
+      "p99": 3.876,
+      "max": 3.9
+     },
+     "over2h": 1,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.6,
+      37.669
+     ],
+     "lon": [
+      -123.056,
+      -123
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 1
+     }
+    },
+    "1994CA-Bmu-10822": {
+     "rows": 5,
+     "withPos": 5,
+     "visTrue": 2,
+     "visFalse": 3,
+     "usable": 2,
+     "first": "1994-09-13T22:35:00.000Z",
+     "last": "1994-09-14T00:21:58.000Z",
+     "days": 0.1,
+     "gapH": {
+      "p10": 1.783,
+      "median": 1.783,
+      "p90": 1.783,
+      "p99": 1.783,
+      "max": 1.8
+     },
+     "over2h": 0,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      36.063,
+      38.12
+     ],
+     "lon": [
+      -123.424,
+      -122.148
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 4
+     }
+    },
+    "1994CA-Bmu-10823": {
+     "rows": 13,
+     "withPos": 13,
+     "visTrue": 12,
+     "visFalse": 1,
+     "usable": 12,
+     "first": "1994-09-14T21:22:00.000Z",
+     "last": "1994-09-23T00:13:26.000Z",
+     "days": 8.1,
+     "gapH": {
+      "p10": 0.73,
+      "median": 4.525,
+      "p90": 31.412,
+      "p99": 118.947,
+      "max": 118.9
+     },
+     "over2h": 7,
+     "over6h": 5,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      36.798,
+      39.033
+     ],
+     "lon": [
+      -123.611,
+      -121.669
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 12
+     }
+    },
+    "1994CA-Bmu-10824": {
+     "rows": 3,
+     "withPos": 3,
+     "visTrue": 3,
+     "visFalse": 0,
+     "usable": 3,
+     "first": "1994-09-14T22:00:00.000Z",
+     "last": "1994-09-15T04:03:58.000Z",
+     "days": 0.3,
+     "gapH": {
+      "p10": 1.674,
+      "median": 4.392,
+      "p90": 4.392,
+      "p99": 4.392,
+      "max": 4.4
+     },
+     "over2h": 1,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.584,
+      37.745
+     ],
+     "lon": [
+      -123.125,
+      -122.807
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 2
+     }
+    },
+    "1994CA-Bmu-10828": {
+     "rows": 95,
+     "withPos": 95,
+     "visTrue": 93,
+     "visFalse": 2,
+     "usable": 93,
+     "first": "1994-10-01T19:00:00.000Z",
+     "last": "1994-10-15T16:00:22.000Z",
+     "days": 13.9,
+     "gapH": {
+      "p10": 0.65,
+      "median": 1.737,
+      "p90": 9.396,
+      "p99": 14.026,
+      "max": 14
+     },
+     "over2h": 38,
+     "over6h": 27,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      27.299,
+      34.656
+     ],
+     "lon": [
+      -121.303,
+      -114.168
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 94
+     }
+    },
+    "1994CA-Bmu-10829": {
+     "rows": 22,
+     "withPos": 22,
+     "visTrue": 21,
+     "visFalse": 1,
+     "usable": 21,
+     "first": "1994-09-27T20:55:00.000Z",
+     "last": "1994-09-30T05:06:58.000Z",
+     "days": 2.3,
+     "gapH": {
+      "p10": 0.256,
+      "median": 1.596,
+      "p90": 9.071,
+      "p99": 9.565,
+      "max": 9.6
+     },
+     "over2h": 6,
+     "over6h": 4,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.737,
+      34.786
+     ],
+     "lon": [
+      -120.508,
+      -119.867
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 21
+     }
+    },
+    "1994CA-Bmu-00848": {
+     "rows": 8,
+     "withPos": 8,
+     "visTrue": 8,
+     "visFalse": 0,
+     "usable": 8,
+     "first": "1994-10-06T18:58:00.000Z",
+     "last": "1994-10-08T04:01:11.000Z",
+     "days": 1.4,
+     "gapH": {
+      "p10": 0.638,
+      "median": 1.897,
+      "p90": 14.412,
+      "p99": 14.412,
+      "max": 14.4
+     },
+     "over2h": 3,
+     "over6h": 2,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.594,
+      34.173
+     ],
+     "lon": [
+      -123.227,
+      -119.941
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 7
+     }
+    },
+    "1994CA-Bmu-23029": {
+     "rows": 9,
+     "withPos": 9,
+     "visTrue": 9,
+     "visFalse": 0,
+     "usable": 9,
+     "first": "1994-10-07T17:27:00.000Z",
+     "last": "1994-10-08T14:36:12.000Z",
+     "days": 0.9,
+     "gapH": {
+      "p10": 0.65,
+      "median": 1.712,
+      "p90": 7.764,
+      "p99": 7.764,
+      "max": 7.8
+     },
+     "over2h": 2,
+     "over6h": 1,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.107,
+      34.275
+     ],
+     "lon": [
+      -121.098,
+      -119.773
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 8
+     }
+    },
+    "1995CA-Bmu-04172": {
+     "rows": 35,
+     "withPos": 35,
+     "visTrue": 30,
+     "visFalse": 5,
+     "usable": 30,
+     "first": "1995-08-23T19:09:00.000Z",
+     "last": "1995-09-11T14:08:48.000Z",
+     "days": 18.8,
+     "gapH": {
+      "p10": 1.615,
+      "median": 11.318,
+      "p90": 27.767,
+      "p99": 84.971,
+      "max": 85
+     },
+     "over2h": 25,
+     "over6h": 23,
+     "over24h": 4,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      25.015,
+      34.752
+     ],
+     "lon": [
+      -150.886,
+      -98.563
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 34
+     }
+    },
+    "1995CA-Bmu-04173": {
+     "rows": 66,
+     "withPos": 66,
+     "visTrue": 59,
+     "visFalse": 7,
+     "usable": 59,
+     "first": "1995-09-18T20:30:00.000Z",
+     "last": "1995-10-06T15:06:53.000Z",
+     "days": 17.8,
+     "gapH": {
+      "p10": 1.682,
+      "median": 7.173,
+      "p90": 13.521,
+      "p99": 23.784,
+      "max": 23.8
+     },
+     "over2h": 47,
+     "over6h": 31,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      26.437,
+      35.72
+     ],
+     "lon": [
+      -124.916,
+      -113.41
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 65
+     }
+    },
+    "1995CA-Bmu-04176": {
+     "rows": 54,
+     "withPos": 54,
+     "visTrue": 54,
+     "visFalse": 0,
+     "usable": 54,
+     "first": "1995-10-02T21:37:00.000Z",
+     "last": "1995-11-14T01:55:03.000Z",
+     "days": 42.2,
+     "gapH": {
+      "p10": 4.059,
+      "median": 11.299,
+      "p90": 59.704,
+      "p99": 83.861,
+      "max": 83.9
+     },
+     "over2h": 53,
+     "over6h": 41,
+     "over24h": 14,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      19.704,
+      34.061
+     ],
+     "lon": [
+      -125.7,
+      -108.601
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 53
+     }
+    },
+    "1995CA-Bmu-23037": {
+     "rows": 4,
+     "withPos": 4,
+     "visTrue": 4,
+     "visFalse": 0,
+     "usable": 4,
+     "first": "1995-09-11T18:06:00.000Z",
+     "last": "1995-09-12T03:04:20.000Z",
+     "days": 0.4,
+     "gapH": {
+      "p10": 1.583,
+      "median": 2.918,
+      "p90": 4.471,
+      "p99": 4.471,
+      "max": 4.5
+     },
+     "over2h": 2,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.858,
+      34.115
+     ],
+     "lon": [
+      -120.609,
+      -119.759
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 3
+     }
+    },
+    "1995CA-Bmu-23040": {
+     "rows": 155,
+     "withPos": 155,
+     "visTrue": 146,
+     "visFalse": 9,
+     "usable": 146,
+     "first": "1995-09-18T23:21:00.000Z",
+     "last": "1995-12-08T14:01:00.000Z",
+     "days": 80.6,
+     "gapH": {
+      "p10": 1.703,
+      "median": 10.684,
+      "p90": 25.296,
+      "p99": 60.076,
+      "max": 83.7
+     },
+     "over2h": 127,
+     "over6h": 101,
+     "over24h": 15,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      9.662,
+      35.327
+     ],
+     "lon": [
+      -165.662,
+      -96.245
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 154
+     }
+    },
+    "1995CA-Bmu-23041": {
+     "rows": 57,
+     "withPos": 57,
+     "visTrue": 56,
+     "visFalse": 1,
+     "usable": 56,
+     "first": "1995-09-10T20:42:00.000Z",
+     "last": "1995-09-21T11:04:05.000Z",
+     "days": 10.6,
+     "gapH": {
+      "p10": 1.662,
+      "median": 3.983,
+      "p90": 7.918,
+      "p99": 11.231,
+      "max": 11.2
+     },
+     "over2h": 38,
+     "over6h": 22,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      31.311,
+      34.528
+     ],
+     "lon": [
+      -121.377,
+      -119.314
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 56
+     }
+    },
+    "1995CA-Bmu-23042": {
+     "rows": 39,
+     "withPos": 39,
+     "visTrue": 33,
+     "visFalse": 6,
+     "usable": 33,
+     "first": "1995-08-23T22:02:00.000Z",
+     "last": "1995-09-11T11:11:28.000Z",
+     "days": 18.5,
+     "gapH": {
+      "p10": 2.828,
+      "median": 9.669,
+      "p90": 23.648,
+      "p99": 57.947,
+      "max": 57.9
+     },
+     "over2h": 30,
+     "over6h": 22,
+     "over24h": 3,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      23.292,
+      47.913
+     ],
+     "lon": [
+      -130.214,
+      -79.078
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 38
+     }
+    },
+    "1995CA-Bmu-23043": {
+     "rows": 3,
+     "withPos": 3,
+     "visTrue": 2,
+     "visFalse": 1,
+     "usable": 2,
+     "first": "1995-10-02T19:54:00.000Z",
+     "last": "1995-10-03T02:11:45.000Z",
+     "days": 0.3,
+     "gapH": {
+      "p10": 6.296,
+      "median": 6.296,
+      "p90": 6.296,
+      "p99": 6.296,
+      "max": 6.3
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.031,
+      35.219
+     ],
+     "lon": [
+      -124.999,
+      -92.309
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 2
+     }
+    },
+    "1995CA-Bmu-00837": {
+     "rows": 39,
+     "withPos": 39,
+     "visTrue": 39,
+     "visFalse": 0,
+     "usable": 39,
+     "first": "1995-09-19T22:28:00.000Z",
+     "last": "1995-09-30T03:12:18.000Z",
+     "days": 10.2,
+     "gapH": {
+      "p10": 1.649,
+      "median": 4.78,
+      "p90": 16.661,
+      "p99": 23.961,
+      "max": 24
+     },
+     "over2h": 27,
+     "over6h": 12,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      32.501,
+      34.29
+     ],
+     "lon": [
+      -122.056,
+      -118.033
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 38
+     }
+    },
+    "1995CA-Bmu-00841": {
+     "rows": 45,
+     "withPos": 45,
+     "visTrue": 44,
+     "visFalse": 1,
+     "usable": 44,
+     "first": "1995-09-10T22:41:00.000Z",
+     "last": "1995-09-26T10:11:38.000Z",
+     "days": 15.5,
+     "gapH": {
+      "p10": 1.646,
+      "median": 5.355,
+      "p90": 16.37,
+      "p99": 102.376,
+      "max": 102.4
+     },
+     "over2h": 32,
+     "over6h": 17,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      32.401,
+      34.537
+     ],
+     "lon": [
+      -120.94,
+      -119.474
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 44
+     }
+    },
+    "1995CA-Bmu-00845": {
+     "rows": 9,
+     "withPos": 9,
+     "visTrue": 9,
+     "visFalse": 0,
+     "usable": 9,
+     "first": "1995-09-10T23:40:00.000Z",
+     "last": "1995-09-13T02:43:34.000Z",
+     "days": 2.1,
+     "gapH": {
+      "p10": 1.651,
+      "median": 4.37,
+      "p90": 17.523,
+      "p99": 17.523,
+      "max": 17.5
+     },
+     "over2h": 6,
+     "over6h": 3,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      32.015,
+      34.419
+     ],
+     "lon": [
+      -122.882,
+      -119.665
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 8
+     }
+    },
+    "1995CA-Bmu-02082": {
+     "rows": 5,
+     "withPos": 5,
+     "visTrue": 5,
+     "visFalse": 0,
+     "usable": 5,
+     "first": "1995-10-02T18:14:00.000Z",
+     "last": "1995-10-14T15:33:52.000Z",
+     "days": 11.9,
+     "gapH": {
+      "p10": 11.38,
+      "median": 94.477,
+      "p90": 162.296,
+      "p99": 162.296,
+      "max": 162.3
+     },
+     "over2h": 4,
+     "over6h": 4,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      32.657,
+      33.994
+     ],
+     "lon": [
+      -120.525,
+      -119.972
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 4
+     }
+    },
+    "1995CA-Bmu-02083": {
+     "rows": 6,
+     "withPos": 6,
+     "visTrue": 6,
+     "visFalse": 0,
+     "usable": 6,
+     "first": "1995-08-08T22:20:00.000Z",
+     "last": "1995-08-20T21:28:31.000Z",
+     "days": 12,
+     "gapH": {
+      "p10": 3.808,
+      "median": 61.207,
+      "p90": 90.003,
+      "p99": 90.003,
+      "max": 90
+     },
+     "over2h": 5,
+     "over6h": 4,
+     "over24h": 4,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      32.172,
+      34.351
+     ],
+     "lon": [
+      -125.818,
+      -119.844
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 5
+     }
+    },
+    "1995CA-Bmu-23031": {
+     "rows": 11,
+     "withPos": 11,
+     "visTrue": 11,
+     "visFalse": 0,
+     "usable": 11,
+     "first": "1995-10-02T19:10:00.000Z",
+     "last": "1995-10-07T21:16:21.000Z",
+     "days": 5.1,
+     "gapH": {
+      "p10": 1.778,
+      "median": 9.721,
+      "p90": 45.987,
+      "p99": 45.987,
+      "max": 46
+     },
+     "over2h": 8,
+     "over6h": 6,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.29,
+      34.668
+     ],
+     "lon": [
+      -121.06,
+      -120.364
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 10
+     }
+    },
+    "1998CA-Bmu-00823": {
+     "rows": 140,
+     "withPos": 140,
+     "visTrue": 132,
+     "visFalse": 8,
+     "usable": 132,
+     "first": "1998-10-10T22:58:00.000Z",
+     "last": "1998-12-10T11:00:54.000Z",
+     "days": 60.5,
+     "gapH": {
+      "p10": 0.738,
+      "median": 7.872,
+      "p90": 23.69,
+      "p99": 56.349,
+      "max": 80.9
+     },
+     "over2h": 107,
+     "over6h": 79,
+     "over24h": 12,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      22.936,
+      42.223
+     ],
+     "lon": [
+      -124.938,
+      -111.517
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 139
+     }
+    },
+    "1998CA-Bmu-00824": {
+     "rows": 37,
+     "withPos": 37,
+     "visTrue": 36,
+     "visFalse": 1,
+     "usable": 36,
+     "first": "1998-08-12T21:04:00.000Z",
+     "last": "1999-04-10T11:55:00.000Z",
+     "days": 240.6,
+     "gapH": {
+      "p10": 4.052,
+      "median": 19.329,
+      "p90": 54.766,
+      "p99": 4626.088,
+      "max": 4626.1
+     },
+     "over2h": 33,
+     "over6h": 30,
+     "over24h": 12,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "4626.1 h from 1998-08-12T21:04:00.000Z",
+      "457.4 h from 1999-02-21T15:09:18.000Z"
+     ],
+     "lat": [
+      25.533,
+      37.01
+     ],
+     "lon": [
+      -125.554,
+      -112.277
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 36
+     }
+    },
+    "1998CA-Bmu-00826": {
+     "rows": 118,
+     "withPos": 118,
+     "visTrue": 112,
+     "visFalse": 6,
+     "usable": 112,
+     "first": "1998-08-12T22:50:00.000Z",
+     "last": "1998-09-18T15:43:08.000Z",
+     "days": 36.7,
+     "gapH": {
+      "p10": 0.729,
+      "median": 7.601,
+      "p90": 15.734,
+      "p99": 25.585,
+      "max": 38.4
+     },
+     "over2h": 90,
+     "over6h": 62,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.04,
+      38.5
+     ],
+     "lon": [
+      -123.716,
+      -116.956
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 117
+     }
+    },
+    "1998CA-Bmu-00827": {
+     "rows": 3,
+     "withPos": 3,
+     "visTrue": 2,
+     "visFalse": 1,
+     "usable": 2,
+     "first": "1998-08-26T21:52:00.000Z",
+     "last": "1998-09-13T03:33:35.000Z",
+     "days": 17.2,
+     "gapH": {
+      "p10": 413.693,
+      "median": 413.693,
+      "p90": 413.693,
+      "p99": 413.693,
+      "max": 413.7
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 1,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "413.7 h from 1998-08-26T21:52:00.000Z"
+     ],
+     "lat": [
+      33.386,
+      34.617
+     ],
+     "lon": [
+      -120.559,
+      -119.036
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 2
+     }
+    },
+    "1998CA-Bmu-00833": {
+     "rows": 72,
+     "withPos": 72,
+     "visTrue": 67,
+     "visFalse": 5,
+     "usable": 67,
+     "first": "1998-08-24T20:35:00.000Z",
+     "last": "1998-09-09T15:44:26.000Z",
+     "days": 15.8,
+     "gapH": {
+      "p10": 0.345,
+      "median": 4.371,
+      "p90": 11.548,
+      "p99": 23.641,
+      "max": 23.6
+     },
+     "over2h": 45,
+     "over6h": 30,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      29.389,
+      35.584
+     ],
+     "lon": [
+      -128.308,
+      -116.785
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 71
+     }
+    },
+    "1998CA-Bmu-01390": {
+     "rows": 3,
+     "withPos": 3,
+     "visTrue": 3,
+     "visFalse": 0,
+     "usable": 3,
+     "first": "1998-08-28T22:04:00.000Z",
+     "last": "1998-08-29T16:22:20.000Z",
+     "days": 0.8,
+     "gapH": {
+      "p10": 0.807,
+      "median": 17.498,
+      "p90": 17.498,
+      "p99": 17.498,
+      "max": 17.5
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.607,
+      37.983
+     ],
+     "lon": [
+      -123.582,
+      -123.054
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 2
+     }
+    },
+    "1998CA-Bmu-04174": {
+     "rows": 198,
+     "withPos": 198,
+     "visTrue": 191,
+     "visFalse": 7,
+     "usable": 191,
+     "first": "1998-08-24T21:45:00.000Z",
+     "last": "1998-11-07T03:17:49.000Z",
+     "days": 74.2,
+     "gapH": {
+      "p10": 0.466,
+      "median": 8.377,
+      "p90": 20.047,
+      "p99": 47.687,
+      "max": 48.5
+     },
+     "over2h": 146,
+     "over6h": 114,
+     "over24h": 8,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      20.239,
+      39.429
+     ],
+     "lon": [
+      -124.658,
+      -109.047
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 197
+     }
+    },
+    "1998CA-Bmu-04175": {
+     "rows": 178,
+     "withPos": 178,
+     "visTrue": 171,
+     "visFalse": 7,
+     "usable": 171,
+     "first": "1998-10-10T20:04:00.000Z",
+     "last": "1998-12-10T16:22:21.000Z",
+     "days": 60.8,
+     "gapH": {
+      "p10": 0.828,
+      "median": 7.63,
+      "p90": 19.632,
+      "p99": 35.702,
+      "max": 36.5
+     },
+     "over2h": 137,
+     "over6h": 99,
+     "over24h": 4,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      22.115,
+      42.832
+     ],
+     "lon": [
+      -127.583,
+      -111.452
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 177
+     }
+    },
+    "1998CA-Bmu-10823": {
+     "rows": 246,
+     "withPos": 246,
+     "visTrue": 240,
+     "visFalse": 6,
+     "usable": 240,
+     "first": "1998-08-31T22:18:00.000Z",
+     "last": "1999-02-14T15:58:22.000Z",
+     "days": 166.7,
+     "gapH": {
+      "p10": 0.671,
+      "median": 8.228,
+      "p90": 27.537,
+      "p99": 147.694,
+      "max": 983.8
+     },
+     "over2h": 191,
+     "over6h": 144,
+     "over24h": 26,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "983.8 h from 1999-01-04T16:13:10.000Z",
+      "252.2 h from 1998-12-17T03:55:43.000Z"
+     ],
+     "lat": [
+      8.466,
+      36.414
+     ],
+     "lon": [
+      -123.844,
+      -93.624
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 245
+     }
+    },
+    "1999CA-Bmu-00830": {
+     "rows": 64,
+     "withPos": 64,
+     "visTrue": 62,
+     "visFalse": 2,
+     "usable": 62,
+     "first": "1999-07-21T18:58:00.000Z",
+     "last": "1999-08-21T23:30:33.000Z",
+     "days": 31.2,
+     "gapH": {
+      "p10": 0.661,
+      "median": 8.549,
+      "p90": 23.836,
+      "p99": 68.999,
+      "max": 69
+     },
+     "over2h": 50,
+     "over6h": 39,
+     "over24h": 6,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      31.44,
+      34.976
+     ],
+     "lon": [
+      -126.021,
+      -117.318
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 63
+     }
+    },
+    "1999CA-Bmu-00832": {
+     "rows": 2,
+     "withPos": 2,
+     "visTrue": 1,
+     "visFalse": 1,
+     "usable": 1,
+     "first": "1999-07-23T18:27:00.000Z",
+     "last": "1999-07-23T18:27:00.000Z",
+     "days": 0,
+     "gapH": {
+      "p10": null,
+      "median": null,
+      "p90": null,
+      "p99": null,
+      "max": null
+     },
+     "over2h": 0,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.406,
+      34.12
+     ],
+     "lon": [
+      -120.11,
+      -111.771
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 1
+     }
+    },
+    "1999CA-Bmu-00834": {
+     "rows": 134,
+     "withPos": 134,
+     "visTrue": 131,
+     "visFalse": 3,
+     "usable": 131,
+     "first": "1999-07-29T19:29:00.000Z",
+     "last": "1999-11-22T03:20:13.000Z",
+     "days": 115.3,
+     "gapH": {
+      "p10": 1.985,
+      "median": 14.453,
+      "p90": 38.499,
+      "p99": 109.457,
+      "max": 153.8
+     },
+     "over2h": 116,
+     "over6h": 110,
+     "over24h": 31,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      23.237,
+      38.606
+     ],
+     "lon": [
+      -137.942,
+      -111.759
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 133
+     }
+    },
+    "1999CA-Bmu-00837": {
+     "rows": 33,
+     "withPos": 33,
+     "visTrue": 32,
+     "visFalse": 1,
+     "usable": 32,
+     "first": "1999-08-01T16:52:00.000Z",
+     "last": "1999-10-01T02:37:50.000Z",
+     "days": 60.4,
+     "gapH": {
+      "p10": 9.407,
+      "median": 33.868,
+      "p90": 110.234,
+      "p99": 192.41,
+      "max": 192.4
+     },
+     "over2h": 29,
+     "over6h": 29,
+     "over24h": 16,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      31.54,
+      38.196
+     ],
+     "lon": [
+      -123.391,
+      -111.868
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 32
+     }
+    },
+    "1999CA-Bmu-00838": {
+     "rows": 281,
+     "withPos": 281,
+     "visTrue": 276,
+     "visFalse": 5,
+     "usable": 276,
+     "first": "1999-10-02T21:42:00.000Z",
+     "last": "2000-05-17T22:18:11.000Z",
+     "days": 228,
+     "gapH": {
+      "p10": 3.503,
+      "median": 12.365,
+      "p90": 44.402,
+      "p99": 119.808,
+      "max": 160.2
+     },
+     "over2h": 258,
+     "over6h": 215,
+     "over24h": 63,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      21.376,
+      35.043
+     ],
+     "lon": [
+      -122.502,
+      -108.128
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 280
+     }
+    },
+    "1999CA-Bmu-00845": {
+     "rows": 2,
+     "withPos": 2,
+     "visTrue": 2,
+     "visFalse": 0,
+     "usable": 2,
+     "first": "1999-10-08T20:51:00.000Z",
+     "last": "1999-10-10T22:25:38.000Z",
+     "days": 2.1,
+     "gapH": {
+      "p10": 49.577,
+      "median": 49.577,
+      "p90": 49.577,
+      "p99": 49.577,
+      "max": 49.6
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.992,
+      34.038
+     ],
+     "lon": [
+      -120.691,
+      -120.58
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 1
+     }
+    },
+    "1999CA-Bmu-00849": {
+     "rows": 2,
+     "withPos": 2,
+     "visTrue": 2,
+     "visFalse": 0,
+     "usable": 2,
+     "first": "1999-10-08T20:22:00.000Z",
+     "last": "1999-11-14T22:23:25.000Z",
+     "days": 37.1,
+     "gapH": {
+      "p10": 890.024,
+      "median": 890.024,
+      "p90": 890.024,
+      "p99": 890.024,
+      "max": 890
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 1,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "890 h from 1999-10-08T20:22:00.000Z"
+     ],
+     "lat": [
+      17.209,
+      34.035
+     ],
+     "lon": [
+      -120.575,
+      -111.788
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 1
+     }
+    },
+    "1999CA-Bmu-01388": {
+     "rows": 2,
+     "withPos": 2,
+     "visTrue": 2,
+     "visFalse": 0,
+     "usable": 2,
+     "first": "1999-10-08T23:06:00.000Z",
+     "last": "2000-06-26T02:36:17.000Z",
+     "days": 261.1,
+     "gapH": {
+      "p10": 6267.505,
+      "median": 6267.505,
+      "p90": 6267.505,
+      "p99": 6267.505,
+      "max": 6267.5
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 1,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "6267.5 h from 1999-10-08T23:06:00.000Z"
+     ],
+     "lat": [
+      26.651,
+      34.017
+     ],
+     "lon": [
+      -120.581,
+      -115.816
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 1
+     }
+    },
+    "1999CA-Bmu-02082": {
+     "rows": 83,
+     "withPos": 83,
+     "visTrue": 80,
+     "visFalse": 3,
+     "usable": 80,
+     "first": "1999-10-03T23:17:00.000Z",
+     "last": "1999-11-03T14:26:35.000Z",
+     "days": 30.6,
+     "gapH": {
+      "p10": 0.278,
+      "median": 8.882,
+      "p90": 23.56,
+      "p99": 37.399,
+      "max": 37.4
+     },
+     "over2h": 60,
+     "over6h": 45,
+     "over24h": 4,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      30.369,
+      35.33
+     ],
+     "lon": [
+      -138.688,
+      -116.964
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 82
+     }
+    },
+    "1999CA-Bmu-04172": {
+     "rows": 195,
+     "withPos": 195,
+     "visTrue": 188,
+     "visFalse": 7,
+     "usable": 188,
+     "first": "1999-10-08T18:43:00.000Z",
+     "last": "2000-01-10T10:27:54.000Z",
+     "days": 93.7,
+     "gapH": {
+      "p10": 1.444,
+      "median": 8.634,
+      "p90": 23.769,
+      "p99": 83.672,
+      "max": 88.7
+     },
+     "over2h": 165,
+     "over6h": 123,
+     "over24h": 15,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      7.21,
+      35.041
+     ],
+     "lon": [
+      -121.662,
+      -71.87
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 194
+     }
+    },
+    "1999CA-Bmu-04173": {
+     "rows": 32,
+     "withPos": 32,
+     "visTrue": 32,
+     "visFalse": 0,
+     "usable": 32,
+     "first": "1999-10-02T22:42:00.000Z",
+     "last": "2000-02-11T13:58:38.000Z",
+     "days": 131.6,
+     "gapH": {
+      "p10": 9.273,
+      "median": 31.954,
+      "p90": 312.167,
+      "p99": 620.287,
+      "max": 620.3
+     },
+     "over2h": 30,
+     "over6h": 28,
+     "over24h": 17,
+     "over7d": 5,
+     "dupTimes": 0,
+     "biggest": [
+      "620.3 h from 1999-11-07T14:36:26.000Z",
+      "465.4 h from 1999-10-09T01:36:56.000Z",
+      "375.2 h from 2000-01-06T11:09:33.000Z",
+      "312.2 h from 1999-12-17T02:23:31.000Z"
+     ],
+     "lat": [
+      23.036,
+      34.159
+     ],
+     "lon": [
+      -121.58,
+      -111.096
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 31
+     }
+    },
+    "1999CA-Bmu-04176": {
+     "rows": 251,
+     "withPos": 251,
+     "visTrue": 243,
+     "visFalse": 8,
+     "usable": 243,
+     "first": "1999-10-03T16:42:00.000Z",
+     "last": "2000-05-04T02:22:21.000Z",
+     "days": 213.4,
+     "gapH": {
+      "p10": 3.209,
+      "median": 12.394,
+      "p90": 47.09,
+      "p99": 127.009,
+      "max": 158.8
+     },
+     "over2h": 228,
+     "over6h": 195,
+     "over24h": 59,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      20.892,
+      35.063
+     ],
+     "lon": [
+      -121.311,
+      -107.934
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 250
+     }
+    },
+    "1999CA-Bmu-10821": {
+     "rows": 30,
+     "withPos": 30,
+     "visTrue": 28,
+     "visFalse": 2,
+     "usable": 28,
+     "first": "1999-10-08T18:16:00.000Z",
+     "last": "1999-12-01T14:08:58.000Z",
+     "days": 53.8,
+     "gapH": {
+      "p10": 1.775,
+      "median": 12.547,
+      "p90": 57.003,
+      "p99": 836.119,
+      "max": 836.1
+     },
+     "over2h": 24,
+     "over6h": 20,
+     "over24h": 7,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "836.1 h from 1999-10-08T18:16:00.000Z"
+     ],
+     "lat": [
+      21.461,
+      34.019
+     ],
+     "lon": [
+      -120.575,
+      -107.125
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 29
+     }
+    },
+    "1999CA-Bmu-10824": {
+     "rows": 148,
+     "withPos": 148,
+     "visTrue": 146,
+     "visFalse": 2,
+     "usable": 146,
+     "first": "1999-07-27T19:36:00.000Z",
+     "last": "1999-11-16T16:39:40.000Z",
+     "days": 111.9,
+     "gapH": {
+      "p10": 0.793,
+      "median": 11.373,
+      "p90": 34.694,
+      "p99": 205.009,
+      "max": 421.1
+     },
+     "over2h": 121,
+     "over6h": 103,
+     "over24h": 24,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "421.1 h from 1999-10-30T03:31:45.000Z"
+     ],
+     "lat": [
+      18.619,
+      37.795
+     ],
+     "lon": [
+      -123.349,
+      -110.432
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 147
+     }
+    },
+    "1999CA-Bmu-23030": {
+     "rows": 207,
+     "withPos": 207,
+     "visTrue": 193,
+     "visFalse": 14,
+     "usable": 193,
+     "first": "1999-10-08T18:56:00.000Z",
+     "last": "2000-03-27T15:37:10.000Z",
+     "days": 170.9,
+     "gapH": {
+      "p10": 2.743,
+      "median": 12.531,
+      "p90": 47.563,
+      "p99": 119.818,
+      "max": 132
+     },
+     "over2h": 175,
+     "over6h": 146,
+     "over24h": 50,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      22.885,
+      36.083
+     ],
+     "lon": [
+      -150.469,
+      -100.306
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 206
+     }
+    },
+    "1999CA-Bmu-23031": {
+     "rows": 28,
+     "withPos": 28,
+     "visTrue": 28,
+     "visFalse": 0,
+     "usable": 28,
+     "first": "1999-10-03T16:59:00.000Z",
+     "last": "1999-12-15T01:38:25.000Z",
+     "days": 72.4,
+     "gapH": {
+      "p10": 7.36,
+      "median": 27.968,
+      "p90": 117.107,
+      "p99": 467.008,
+      "max": 467
+     },
+     "over2h": 27,
+     "over6h": 26,
+     "over24h": 16,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "467 h from 1999-11-25T14:37:55.000Z"
+     ],
+     "lat": [
+      22.411,
+      34.154
+     ],
+     "lon": [
+      -120.623,
+      -108.478
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 27
+     }
+    },
+    "1999CA-Bmu-23033": {
+     "rows": 25,
+     "withPos": 25,
+     "visTrue": 24,
+     "visFalse": 1,
+     "usable": 24,
+     "first": "1999-07-20T18:18:00.000Z",
+     "last": "1999-08-28T00:04:00.000Z",
+     "days": 38.2,
+     "gapH": {
+      "p10": 0.625,
+      "median": 8.683,
+      "p90": 60.106,
+      "p99": 600.841,
+      "max": 600.8
+     },
+     "over2h": 19,
+     "over6h": 14,
+     "over24h": 5,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "600.8 h from 1999-07-25T12:09:58.000Z"
+     ],
+     "lat": [
+      21.818,
+      36.162
+     ],
+     "lon": [
+      -122.138,
+      -116.279
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 24
+     }
+    },
+    "1999CA-Bmu-23038": {
+     "rows": 160,
+     "withPos": 160,
+     "visTrue": 158,
+     "visFalse": 2,
+     "usable": 158,
+     "first": "1999-07-22T16:17:00.000Z",
+     "last": "1999-09-03T23:37:31.000Z",
+     "days": 43.3,
+     "gapH": {
+      "p10": 0.321,
+      "median": 6.468,
+      "p90": 12.297,
+      "p99": 23.849,
+      "max": 60.1
+     },
+     "over2h": 118,
+     "over6h": 80,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      10.502,
+      35.21
+     ],
+     "lon": [
+      -122.718,
+      -65.419
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 159
+     }
+    },
+    "1999CA-Bmu-23043": {
+     "rows": 437,
+     "withPos": 437,
+     "visTrue": 422,
+     "visFalse": 15,
+     "usable": 422,
+     "first": "1999-07-22T15:56:00.000Z",
+     "last": "1999-12-17T16:33:51.000Z",
+     "days": 148,
+     "gapH": {
+      "p10": 0.454,
+      "median": 6.658,
+      "p90": 15.878,
+      "p99": 52.049,
+      "max": 83.7
+     },
+     "over2h": 317,
+     "over6h": 224,
+     "over24h": 27,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      19.848,
+      38.559
+     ],
+     "lon": [
+      -124.349,
+      -107.664
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 436
+     }
+    },
+    "2000CA-Bmu-00826": {
+     "rows": 17,
+     "withPos": 17,
+     "visTrue": 15,
+     "visFalse": 2,
+     "usable": 15,
+     "first": "2000-10-06T00:24:00.000Z",
+     "last": "2000-10-11T12:32:56.000Z",
+     "days": 5.5,
+     "gapH": {
+      "p10": 0.268,
+      "median": 10.034,
+      "p90": 20.947,
+      "p99": 24.676,
+      "max": 24.7
+     },
+     "over2h": 12,
+     "over6h": 9,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.038,
+      38.43
+     ],
+     "lon": [
+      -123.534,
+      -121.351
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 16
+     }
+    },
+    "2000CA-Bmu-00827": {
+     "rows": 8,
+     "withPos": 8,
+     "visTrue": 8,
+     "visFalse": 0,
+     "usable": 8,
+     "first": "2000-10-04T20:53:00.000Z",
+     "last": "2000-10-07T02:20:06.000Z",
+     "days": 2.2,
+     "gapH": {
+      "p10": 2.444,
+      "median": 3.191,
+      "p90": 23.651,
+      "p99": 23.651,
+      "max": 23.7
+     },
+     "over2h": 7,
+     "over6h": 3,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.617,
+      37.825
+     ],
+     "lon": [
+      -124.049,
+      -122.943
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 7
+     }
+    },
+    "2000CA-Bmu-01386": {
+     "rows": 205,
+     "withPos": 205,
+     "visTrue": 203,
+     "visFalse": 2,
+     "usable": 203,
+     "first": "2000-10-05T23:59:00.000Z",
+     "last": "2001-02-09T00:00:51.000Z",
+     "days": 126,
+     "gapH": {
+      "p10": 2.888,
+      "median": 11.232,
+      "p90": 32.033,
+      "p99": 61.399,
+      "max": 84.9
+     },
+     "over2h": 192,
+     "over6h": 149,
+     "over24h": 31,
+     "over7d": 0,
+     "dupTimes": 1,
+     "biggest": [],
+     "lat": [
+      10.49,
+      42.177
+     ],
+     "lon": [
+      -125.981,
+      -97.044
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 204
+     }
+    },
+    "2000CA-Bmu-01390": {
+     "rows": 142,
+     "withPos": 142,
+     "visTrue": 139,
+     "visFalse": 3,
+     "usable": 139,
+     "first": "2000-10-07T17:38:00.000Z",
+     "last": "2001-07-08T12:43:16.000Z",
+     "days": 273.8,
+     "gapH": {
+      "p10": 2.572,
+      "median": 23.643,
+      "p90": 99.477,
+      "p99": 459.154,
+      "max": 704.3
+     },
+     "over2h": 130,
+     "over6h": 111,
+     "over24h": 61,
+     "over7d": 4,
+     "dupTimes": 0,
+     "biggest": [
+      "704.3 h from 2000-10-10T15:08:41.000Z",
+      "459.2 h from 2000-11-08T23:25:20.000Z",
+      "315 h from 2001-06-22T00:10:44.000Z",
+      "250.6 h from 2001-06-02T02:18:06.000Z"
+     ],
+     "lat": [
+      4.606,
+      38.218
+     ],
+     "lon": [
+      -123.126,
+      -91.415
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 141
+     }
+    },
+    "2000CA-Bmu-10823": {
+     "rows": 4,
+     "withPos": 4,
+     "visTrue": 4,
+     "visFalse": 0,
+     "usable": 4,
+     "first": "2000-10-04T19:51:00.000Z",
+     "last": "2000-10-05T15:23:29.000Z",
+     "days": 0.8,
+     "gapH": {
+      "p10": 2.419,
+      "median": 3.829,
+      "p90": 13.294,
+      "p99": 13.294,
+      "max": 13.3
+     },
+     "over2h": 3,
+     "over6h": 1,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.151,
+      37.782
+     ],
+     "lon": [
+      -123.333,
+      -122.852
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 3
+     }
+    },
+    "2000CA-Bmu-10825": {
+     "rows": 28,
+     "withPos": 28,
+     "visTrue": 25,
+     "visFalse": 3,
+     "usable": 25,
+     "first": "2000-10-06T00:09:00.000Z",
+     "last": "2000-10-23T23:48:31.000Z",
+     "days": 18,
+     "gapH": {
+      "p10": 2.462,
+      "median": 13.144,
+      "p90": 37.693,
+      "p99": 56.434,
+      "max": 56.4
+     },
+     "over2h": 23,
+     "over6h": 19,
+     "over24h": 7,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      36.331,
+      39.326
+     ],
+     "lon": [
+      -124.036,
+      -113.873
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 27
+     }
+    },
+    "2000CA-Bmu-10827": {
+     "rows": 8,
+     "withPos": 8,
+     "visTrue": 8,
+     "visFalse": 0,
+     "usable": 8,
+     "first": "2000-10-04T19:14:00.000Z",
+     "last": "2000-10-07T02:20:35.000Z",
+     "days": 2.3,
+     "gapH": {
+      "p10": 2.436,
+      "median": 4.427,
+      "p90": 23.657,
+      "p99": 23.657,
+      "max": 23.7
+     },
+     "over2h": 7,
+     "over6h": 3,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.6,
+      38.112
+     ],
+     "lon": [
+      -124.962,
+      -122.992
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 7
+     }
+    },
+    "2000CA-Bmu-10828": {
+     "rows": 22,
+     "withPos": 22,
+     "visTrue": 22,
+     "visFalse": 0,
+     "usable": 22,
+     "first": "2000-10-05T23:37:00.000Z",
+     "last": "2000-12-02T23:22:28.000Z",
+     "days": 58,
+     "gapH": {
+      "p10": 9.661,
+      "median": 23.871,
+      "p90": 171.171,
+      "p99": 335.615,
+      "max": 335.6
+     },
+     "over2h": 21,
+     "over6h": 19,
+     "over24h": 10,
+     "over7d": 3,
+     "dupTimes": 0,
+     "biggest": [
+      "335.6 h from 2000-11-18T23:45:34.000Z"
+     ],
+     "lat": [
+      9.833,
+      38.265
+     ],
+     "lon": [
+      -124.082,
+      -100.526
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 21
+     }
+    },
+    "2000CA-Bmu-10832": {
+     "rows": 305,
+     "withPos": 305,
+     "visTrue": 304,
+     "visFalse": 1,
+     "usable": 304,
+     "first": "2000-10-04T21:55:00.000Z",
+     "last": "2001-07-15T23:30:23.000Z",
+     "days": 284.1,
+     "gapH": {
+      "p10": 2.273,
+      "median": 11.276,
+      "p90": 45.666,
+      "p99": 144.466,
+      "max": 868.9
+     },
+     "over2h": 275,
+     "over6h": 232,
+     "over24h": 66,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "868.9 h from 2000-10-04T21:55:00.000Z"
+     ],
+     "lat": [
+      6.87,
+      37.62
+     ],
+     "lon": [
+      -123.03,
+      -95.254
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 304
+     }
+    },
+    "2000CA-Bmu-23029": {
+     "rows": 62,
+     "withPos": 62,
+     "visTrue": 58,
+     "visFalse": 4,
+     "usable": 58,
+     "first": "2000-10-06T22:36:00.000Z",
+     "last": "2000-12-04T02:28:45.000Z",
+     "days": 58.2,
+     "gapH": {
+      "p10": 2.611,
+      "median": 13.951,
+      "p90": 44.976,
+      "p99": 167.52,
+      "max": 167.5
+     },
+     "over2h": 55,
+     "over6h": 47,
+     "over24h": 16,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      32.647,
+      44.298
+     ],
+     "lon": [
+      -151.57,
+      -121.97
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 61
+     }
+    },
+    "2000CA-Bmu-23035": {
+     "rows": 4,
+     "withPos": 4,
+     "visTrue": 3,
+     "visFalse": 1,
+     "usable": 3,
+     "first": "2000-10-07T22:43:00.000Z",
+     "last": "2000-10-10T02:50:46.000Z",
+     "days": 2.2,
+     "gapH": {
+      "p10": 20.946,
+      "median": 31.183,
+      "p90": 31.183,
+      "p99": 31.183,
+      "max": 31.2
+     },
+     "over2h": 2,
+     "over6h": 2,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.109,
+      37.77
+     ],
+     "lon": [
+      -123.073,
+      -122.137
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 3
+     }
+    },
+    "2000CA-Bmu-23042": {
+     "rows": 3,
+     "withPos": 3,
+     "visTrue": 3,
+     "visFalse": 0,
+     "usable": 3,
+     "first": "2000-10-07T22:19:00.000Z",
+     "last": "2000-10-09T15:33:13.000Z",
+     "days": 1.7,
+     "gapH": {
+      "p10": 17.57,
+      "median": 23.667,
+      "p90": 23.667,
+      "p99": 23.667,
+      "max": 23.7
+     },
+     "over2h": 2,
+     "over6h": 2,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.57,
+      37.748
+     ],
+     "lon": [
+      -123.081,
+      -122.803
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 2
+     }
+    },
+    "2001MX-Bmu-10831": {
+     "rows": 268,
+     "withPos": 268,
+     "visTrue": 253,
+     "visFalse": 15,
+     "usable": 253,
+     "first": "2001-03-26T20:26:00.000Z",
+     "last": "2001-10-26T00:01:23.000Z",
+     "days": 213.1,
+     "gapH": {
+      "p10": 2.829,
+      "median": 11.262,
+      "p90": 34.916,
+      "p99": 168.005,
+      "max": 504.3
+     },
+     "over2h": 240,
+     "over6h": 187,
+     "over24h": 43,
+     "over7d": 3,
+     "dupTimes": 0,
+     "biggest": [
+      "504.3 h from 2001-04-02T02:11:21.000Z",
+      "285.2 h from 2001-04-23T02:31:00.000Z"
+     ],
+     "lat": [
+      18.987,
+      32.134
+     ],
+     "lon": [
+      -117.857,
+      -106.542
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 267
+     }
+    },
+    "2002MX-Bmu-00837": {
+     "rows": 99,
+     "withPos": 99,
+     "visTrue": 97,
+     "visFalse": 2,
+     "usable": 97,
+     "first": "2002-03-23T18:08:00.000Z",
+     "last": "2002-06-28T23:04:12.000Z",
+     "days": 97.2,
+     "gapH": {
+      "p10": 2.696,
+      "median": 14.124,
+      "p90": 50.809,
+      "p99": 229.577,
+      "max": 229.6
+     },
+     "over2h": 91,
+     "over6h": 83,
+     "over24h": 30,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      22.683,
+      33.244
+     ],
+     "lon": [
+      -118.281,
+      -110.261
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 98
+     }
+    },
+    "2002MX-Bmu-00840": {
+     "rows": 408,
+     "withPos": 408,
+     "visTrue": 393,
+     "visFalse": 15,
+     "usable": 393,
+     "first": "2002-03-21T20:29:00.000Z",
+     "last": "2002-10-01T02:18:30.000Z",
+     "days": 193.2,
+     "gapH": {
+      "p10": 0.539,
+      "median": 10.756,
+      "p90": 23.807,
+      "p99": 47.222,
+      "max": 58.9
+     },
+     "over2h": 338,
+     "over6h": 269,
+     "over24h": 38,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      22.213,
+      30.402
+     ],
+     "lon": [
+      -118.566,
+      -108.934
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 407
+     }
+    },
+    "2004CA-Bmu-00832": {
+     "rows": 11,
+     "withPos": 11,
+     "visTrue": 10,
+     "visFalse": 1,
+     "usable": 10,
+     "first": "2004-07-29T02:44:00.000Z",
+     "last": "2004-08-07T12:27:41.000Z",
+     "days": 9.4,
+     "gapH": {
+      "p10": 0.214,
+      "median": 11.317,
+      "p90": 119.622,
+      "p99": 119.622,
+      "max": 119.6
+     },
+     "over2h": 8,
+     "over6h": 8,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.302,
+      38.314
+     ],
+     "lon": [
+      -123.997,
+      -122.264
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 10
+     }
+    },
+    "2004CA-Bmu-00834": {
+     "rows": 69,
+     "withPos": 69,
+     "visTrue": 68,
+     "visFalse": 1,
+     "usable": 68,
+     "first": "2004-08-12T20:55:00.000Z",
+     "last": "2004-10-22T15:09:08.000Z",
+     "days": 70.8,
+     "gapH": {
+      "p10": 0.447,
+      "median": 10.233,
+      "p90": 59.486,
+      "p99": 470.907,
+      "max": 470.9
+     },
+     "over2h": 56,
+     "over6h": 43,
+     "over24h": 11,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "470.9 h from 2004-09-01T12:00:45.000Z"
+     ],
+     "lat": [
+      20.357,
+      35.397
+     ],
+     "lon": [
+      -121.833,
+      -108.295
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 68
+     }
+    },
+    "2004CA-Bmu-00840": {
+     "rows": 332,
+     "withPos": 332,
+     "visTrue": 317,
+     "visFalse": 15,
+     "usable": 317,
+     "first": "2004-08-20T17:06:00.000Z",
+     "last": "2006-01-06T16:08:02.000Z",
+     "days": 504,
+     "gapH": {
+      "p10": 0.68,
+      "median": 12.307,
+      "p90": 96.03,
+      "p99": 314.595,
+      "max": 480.2
+     },
+     "over2h": 281,
+     "over6h": 240,
+     "over24h": 119,
+     "over7d": 16,
+     "dupTimes": 0,
+     "biggest": [
+      "480.2 h from 2005-11-11T13:00:02.000Z",
+      "395.6 h from 2005-07-01T15:21:43.000Z",
+      "347.1 h from 2004-12-09T12:32:27.000Z",
+      "314.6 h from 2005-10-23T00:09:50.000Z"
+     ],
+     "lat": [
+      21.723,
+      44.101
+     ],
+     "lon": [
+      -127.046,
+      -108.451
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 331
+     }
+    },
+    "2004CA-Bmu-00849": {
+     "rows": 179,
+     "withPos": 179,
+     "visTrue": 178,
+     "visFalse": 1,
+     "usable": 178,
+     "first": "2004-08-12T21:22:00.000Z",
+     "last": "2004-11-05T23:24:49.000Z",
+     "days": 85.1,
+     "gapH": {
+      "p10": 0.365,
+      "median": 8.459,
+      "p90": 24.68,
+      "p99": 61.108,
+      "max": 68.7
+     },
+     "over2h": 148,
+     "over6h": 109,
+     "over24h": 18,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.002,
+      38.194
+     ],
+     "lon": [
+      -124.75,
+      -119.791
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 178
+     }
+    },
+    "2004CA-Bmu-01389": {
+     "rows": 126,
+     "withPos": 126,
+     "visTrue": 120,
+     "visFalse": 6,
+     "usable": 120,
+     "first": "2004-08-13T19:33:00.000Z",
+     "last": "2004-11-09T23:25:53.000Z",
+     "days": 88.2,
+     "gapH": {
+      "p10": 0.376,
+      "median": 9.971,
+      "p90": 35.089,
+      "p99": 250.636,
+      "max": 408
+     },
+     "over2h": 96,
+     "over6h": 78,
+     "over24h": 19,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "408 h from 2004-09-02T02:05:29.000Z",
+      "250.6 h from 2004-08-20T02:16:50.000Z"
+     ],
+     "lat": [
+      33.472,
+      39.707
+     ],
+     "lon": [
+      -125.142,
+      -119.436
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 125
+     }
+    },
+    "2004CA-Bmu-04175": {
+     "rows": 198,
+     "withPos": 198,
+     "visTrue": 192,
+     "visFalse": 6,
+     "usable": 192,
+     "first": "2004-08-20T16:30:00.000Z",
+     "last": "2004-12-03T02:24:37.000Z",
+     "days": 104.4,
+     "gapH": {
+      "p10": 0.576,
+      "median": 9.511,
+      "p90": 34.84,
+      "p99": 82.827,
+      "max": 83
+     },
+     "over2h": 164,
+     "over6h": 121,
+     "over24h": 25,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      13.489,
+      42.955
+     ],
+     "lon": [
+      -126.06,
+      -106.107
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 197
+     }
+    },
+    "2004CA-Bmu-10821": {
+     "rows": 285,
+     "withPos": 285,
+     "visTrue": 248,
+     "visFalse": 37,
+     "usable": 248,
+     "first": "2004-08-12T23:21:00.000Z",
+     "last": "2005-01-24T23:48:22.000Z",
+     "days": 165,
+     "gapH": {
+      "p10": 0.834,
+      "median": 11.269,
+      "p90": 34.959,
+      "p99": 74.962,
+      "max": 111.4
+     },
+     "over2h": 222,
+     "over6h": 179,
+     "over24h": 40,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      23.169,
+      45.888
+     ],
+     "lon": [
+      -127.079,
+      -108.961
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 284
+     }
+    },
+    "2004CA-Bmu-10834": {
+     "rows": 253,
+     "withPos": 253,
+     "visTrue": 242,
+     "visFalse": 11,
+     "usable": 242,
+     "first": "2004-08-12T22:30:00.000Z",
+     "last": "2004-11-05T15:53:51.000Z",
+     "days": 84.7,
+     "gapH": {
+      "p10": 0.338,
+      "median": 7.925,
+      "p90": 20.359,
+      "p99": 39.703,
+      "max": 59
+     },
+     "over2h": 196,
+     "over6h": 136,
+     "over24h": 8,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.757,
+      40.94
+     ],
+     "lon": [
+      -129.537,
+      -119.327
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 252
+     }
+    },
+    "2004CA-Bmu-10843": {
+     "rows": 360,
+     "withPos": 360,
+     "visTrue": 351,
+     "visFalse": 9,
+     "usable": 351,
+     "first": "2004-08-03T02:29:00.000Z",
+     "last": "2005-01-02T02:17:49.000Z",
+     "days": 152,
+     "gapH": {
+      "p10": 0.267,
+      "median": 8.008,
+      "p90": 23.687,
+      "p99": 75.146,
+      "max": 96.2
+     },
+     "over2h": 273,
+     "over6h": 197,
+     "over24h": 31,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      21.334,
+      44.737
+     ],
+     "lon": [
+      -133.957,
+      -119.853
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 359
+     }
+    },
+    "2004CA-Bmu-23030": {
+     "rows": 31,
+     "withPos": 31,
+     "visTrue": 31,
+     "visFalse": 0,
+     "usable": 31,
+     "first": "2004-08-13T17:45:00.000Z",
+     "last": "2004-08-26T12:09:38.000Z",
+     "days": 12.8,
+     "gapH": {
+      "p10": 0.426,
+      "median": 8.682,
+      "p90": 21.632,
+      "p99": 40.097,
+      "max": 40.1
+     },
+     "over2h": 26,
+     "over6h": 18,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.096,
+      38.444
+     ],
+     "lon": [
+      -125.015,
+      -120.008
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 30
+     }
+    },
+    "2004CA-Bmu-23034": {
+     "rows": 208,
+     "withPos": 208,
+     "visTrue": 202,
+     "visFalse": 6,
+     "usable": 202,
+     "first": "2004-08-03T00:10:00.000Z",
+     "last": "2005-01-14T02:35:17.000Z",
+     "days": 164.1,
+     "gapH": {
+      "p10": 0.77,
+      "median": 11.232,
+      "p90": 44.947,
+      "p99": 122.874,
+      "max": 194.8
+     },
+     "over2h": 180,
+     "over6h": 149,
+     "over24h": 56,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      29.903,
+      38.987
+     ],
+     "lon": [
+      -124.491,
+      -120.26
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 207
+     }
+    },
+    "2004CA-Bmu-23036": {
+     "rows": 3,
+     "withPos": 3,
+     "visTrue": 2,
+     "visFalse": 1,
+     "usable": 2,
+     "first": "2004-07-29T02:37:00.000Z",
+     "last": "2004-08-02T02:40:31.000Z",
+     "days": 4,
+     "gapH": {
+      "p10": 96.059,
+      "median": 96.059,
+      "p90": 96.059,
+      "p99": 96.059,
+      "max": 96.1
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.433,
+      38.222
+     ],
+     "lon": [
+      -123.663,
+      -121.473
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 2
+     }
+    },
+    "2004CA-Bmu-23043": {
+     "rows": 149,
+     "withPos": 149,
+     "visTrue": 149,
+     "visFalse": 0,
+     "usable": 149,
+     "first": "2004-08-07T18:01:00.000Z",
+     "last": "2004-10-22T02:26:05.000Z",
+     "days": 75.4,
+     "gapH": {
+      "p10": 2.506,
+      "median": 10.861,
+      "p90": 23.971,
+      "p99": 35.183,
+      "max": 37.2
+     },
+     "over2h": 134,
+     "over6h": 104,
+     "over24h": 14,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.805,
+      34.8
+     ],
+     "lon": [
+      -122.391,
+      -119.861
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 148
+     }
+    },
+    "2004CA-Bmu-10820": {
+     "rows": 60,
+     "withPos": 60,
+     "visTrue": 59,
+     "visFalse": 1,
+     "usable": 59,
+     "first": "2004-08-12T20:02:00.000Z",
+     "last": "2004-09-02T02:02:51.000Z",
+     "days": 20.3,
+     "gapH": {
+      "p10": 0.368,
+      "median": 7.848,
+      "p90": 20.532,
+      "p99": 34.914,
+      "max": 34.9
+     },
+     "over2h": 48,
+     "over6h": 31,
+     "over24h": 2,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.742,
+      34.926
+     ],
+     "lon": [
+      -121.184,
+      -120.105
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 59
+     }
+    },
+    "2004CA-Bmu-10825": {
+     "rows": 23,
+     "withPos": 23,
+     "visTrue": 23,
+     "visFalse": 0,
+     "usable": 23,
+     "first": "2004-08-19T23:58:00.000Z",
+     "last": "2004-08-26T15:32:01.000Z",
+     "days": 6.6,
+     "gapH": {
+      "p10": 0.295,
+      "median": 3.239,
+      "p90": 20.958,
+      "p99": 27.072,
+      "max": 27.1
+     },
+     "over2h": 16,
+     "over6h": 10,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.411,
+      39.785
+     ],
+     "lon": [
+      -124.345,
+      -122.606
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 22
+     }
+    },
+    "2004CA-Bmu-10829": {
+     "rows": 3,
+     "withPos": 3,
+     "visTrue": 3,
+     "visFalse": 0,
+     "usable": 3,
+     "first": "2004-08-19T01:44:00.000Z",
+     "last": "2004-08-20T02:40:21.000Z",
+     "days": 1,
+     "gapH": {
+      "p10": 0.405,
+      "median": 24.534,
+      "p90": 24.534,
+      "p99": 24.534,
+      "max": 24.5
+     },
+     "over2h": 1,
+     "over6h": 1,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.402,
+      37.64
+     ],
+     "lon": [
+      -123.258,
+      -123.052
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 2
+     }
+    },
+    "2004CA-Bmu-10831": {
+     "rows": 110,
+     "withPos": 110,
+     "visTrue": 110,
+     "visFalse": 0,
+     "usable": 110,
+     "first": "2004-08-19T23:39:00.000Z",
+     "last": "2004-10-04T02:50:30.000Z",
+     "days": 45.1,
+     "gapH": {
+      "p10": 0.396,
+      "median": 8.146,
+      "p90": 21.247,
+      "p99": 37.335,
+      "max": 72.4
+     },
+     "over2h": 90,
+     "over6h": 64,
+     "over24h": 7,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.073,
+      38.309
+     ],
+     "lon": [
+      -124.739,
+      -121.7
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 109
+     }
+    },
+    "2004CA-Bmu-10833": {
+     "rows": 263,
+     "withPos": 263,
+     "visTrue": 254,
+     "visFalse": 9,
+     "usable": 254,
+     "first": "2004-08-02T01:41:00.000Z",
+     "last": "2004-10-21T02:51:26.000Z",
+     "days": 80,
+     "gapH": {
+      "p10": 0.254,
+      "median": 7.371,
+      "p90": 16.08,
+      "p99": 37.998,
+      "max": 58.9
+     },
+     "over2h": 197,
+     "over6h": 130,
+     "over24h": 8,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      37.61,
+      49.261
+     ],
+     "lon": [
+      -127.761,
+      -122.712
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 262
+     }
+    },
+    "2004CA-Bmu-10840": {
+     "rows": 13,
+     "withPos": 13,
+     "visTrue": 13,
+     "visFalse": 0,
+     "usable": 13,
+     "first": "2004-08-12T16:13:00.000Z",
+     "last": "2004-08-16T12:22:59.000Z",
+     "days": 3.8,
+     "gapH": {
+      "p10": 2.039,
+      "median": 9.819,
+      "p90": 12.296,
+      "p99": 13.175,
+      "max": 13.2
+     },
+     "over2h": 11,
+     "over6h": 8,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.019,
+      34.277
+     ],
+     "lon": [
+      -120.831,
+      -119.877
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 12
+     }
+    },
+    "2005CA-Bmu-00834": {
+     "rows": 254,
+     "withPos": 254,
+     "visTrue": 241,
+     "visFalse": 13,
+     "usable": 241,
+     "first": "2005-08-19T16:50:00.000Z",
+     "last": "2005-11-21T12:40:38.000Z",
+     "days": 93.8,
+     "gapH": {
+      "p10": 0.245,
+      "median": 8.271,
+      "p90": 16.346,
+      "p99": 58.116,
+      "max": 108.4
+     },
+     "over2h": 192,
+     "over6h": 138,
+     "over24h": 13,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      28.644,
+      49.331
+     ],
+     "lon": [
+      -157.11,
+      -118.605
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 253
+     }
+    },
+    "2005CA-Bmu-00845": {
+     "rows": 46,
+     "withPos": 46,
+     "visTrue": 45,
+     "visFalse": 1,
+     "usable": 45,
+     "first": "2005-08-16T01:40:00.000Z",
+     "last": "2005-09-11T02:50:25.000Z",
+     "days": 26,
+     "gapH": {
+      "p10": 2.054,
+      "median": 11.289,
+      "p90": 24.903,
+      "p99": 61.042,
+      "max": 61
+     },
+     "over2h": 40,
+     "over6h": 34,
+     "over24h": 6,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.958,
+      40.979
+     ],
+     "lon": [
+      -124.554,
+      -119.875
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 45
+     }
+    },
+    "2005CA-Bmu-00849": {
+     "rows": 50,
+     "withPos": 50,
+     "visTrue": 50,
+     "visFalse": 0,
+     "usable": 50,
+     "first": "2005-08-14T18:01:00.000Z",
+     "last": "2005-10-03T23:29:26.000Z",
+     "days": 50.2,
+     "gapH": {
+      "p10": 3.016,
+      "median": 16.189,
+      "p90": 68.75,
+      "p99": 116.47,
+      "max": 116.5
+     },
+     "over2h": 48,
+     "over6h": 42,
+     "over24h": 15,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.137,
+      38.739
+     ],
+     "lon": [
+      -123.581,
+      -120.682
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 49
+     }
+    },
+    "2005CA-Bmu-01388": {
+     "rows": 75,
+     "withPos": 75,
+     "visTrue": 75,
+     "visFalse": 0,
+     "usable": 75,
+     "first": "2005-08-15T20:45:00.000Z",
+     "last": "2005-09-26T23:03:35.000Z",
+     "days": 42.1,
+     "gapH": {
+      "p10": 0.603,
+      "median": 10.527,
+      "p90": 32.251,
+      "p99": 72.498,
+      "max": 72.5
+     },
+     "over2h": 65,
+     "over6h": 50,
+     "over24h": 12,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      32.569,
+      36.931
+     ],
+     "lon": [
+      -124.169,
+      -120.815
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 74
+     }
+    },
+    "2005CA-Bmu-01389": {
+     "rows": 126,
+     "withPos": 126,
+     "visTrue": 123,
+     "visFalse": 3,
+     "usable": 123,
+     "first": "2005-08-14T21:07:00.000Z",
+     "last": "2005-10-22T12:50:09.000Z",
+     "days": 68.7,
+     "gapH": {
+      "p10": 0.898,
+      "median": 10.614,
+      "p90": 23.832,
+      "p99": 61.222,
+      "max": 106.2
+     },
+     "over2h": 109,
+     "over6h": 81,
+     "over24h": 11,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.189,
+      40.053
+     ],
+     "lon": [
+      -124.378,
+      -120.899
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 125
+     }
+    },
+    "2005CA-Bmu-01390": {
+     "rows": 285,
+     "withPos": 285,
+     "visTrue": 284,
+     "visFalse": 1,
+     "usable": 284,
+     "first": "2005-08-18T22:12:00.000Z",
+     "last": "2006-04-10T23:45:42.000Z",
+     "days": 235.1,
+     "gapH": {
+      "p10": 2.112,
+      "median": 11.003,
+      "p90": 48.541,
+      "p99": 85.049,
+      "max": 154.1
+     },
+     "over2h": 255,
+     "over6h": 211,
+     "over24h": 80,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      8.227,
+      36.974
+     ],
+     "lon": [
+      -124.543,
+      -92.486
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 284
+     }
+    },
+    "2005CA-Bmu-02082": {
+     "rows": 26,
+     "withPos": 26,
+     "visTrue": 26,
+     "visFalse": 0,
+     "usable": 26,
+     "first": "2005-08-19T22:32:00.000Z",
+     "last": "2005-08-30T02:37:13.000Z",
+     "days": 10.2,
+     "gapH": {
+      "p10": 0.338,
+      "median": 10.252,
+      "p90": 15.679,
+      "p99": 44.838,
+      "max": 44.8
+     },
+     "over2h": 21,
+     "over6h": 16,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      36.193,
+      38.463
+     ],
+     "lon": [
+      -124.372,
+      -121.919
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 25
+     }
+    },
+    "2005CA-Bmu-10820": {
+     "rows": 99,
+     "withPos": 99,
+     "visTrue": 97,
+     "visFalse": 2,
+     "usable": 97,
+     "first": "2005-08-15T20:00:00.000Z",
+     "last": "2005-09-25T02:25:00.000Z",
+     "days": 40.3,
+     "gapH": {
+      "p10": 0.234,
+      "median": 9.973,
+      "p90": 23.45,
+      "p99": 50.46,
+      "max": 50.5
+     },
+     "over2h": 75,
+     "over6h": 61,
+     "over24h": 4,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.035,
+      45.571
+     ],
+     "lon": [
+      -125.179,
+      -120.194
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 98
+     }
+    },
+    "2005CA-Bmu-10821": {
+     "rows": 294,
+     "withPos": 294,
+     "visTrue": 288,
+     "visFalse": 6,
+     "usable": 288,
+     "first": "2005-08-14T21:39:00.000Z",
+     "last": "2006-02-17T23:26:17.000Z",
+     "days": 187.1,
+     "gapH": {
+      "p10": 0.45,
+      "median": 9.396,
+      "p90": 34.719,
+      "p99": 152.616,
+      "max": 372.8
+     },
+     "over2h": 235,
+     "over6h": 174,
+     "over24h": 38,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "372.8 h from 2005-11-15T23:33:46.000Z",
+      "324.5 h from 2006-01-22T23:38:51.000Z"
+     ],
+     "lat": [
+      6.339,
+      39.547
+     ],
+     "lon": [
+      -136.101,
+      -101.167
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 293
+     }
+    },
+    "2005CA-Bmu-10823": {
+     "rows": 37,
+     "withPos": 37,
+     "visTrue": 28,
+     "visFalse": 9,
+     "usable": 28,
+     "first": "2005-08-15T18:00:00.000Z",
+     "last": "2005-11-17T15:22:41.000Z",
+     "days": 93.9,
+     "gapH": {
+      "p10": 11.256,
+      "median": 48.886,
+      "p90": 248.534,
+      "p99": 419.219,
+      "max": 419.2
+     },
+     "over2h": 27,
+     "over6h": 25,
+     "over24h": 18,
+     "over7d": 3,
+     "dupTimes": 0,
+     "biggest": [
+      "419.2 h from 2005-10-14T15:23:32.000Z",
+      "335.5 h from 2005-11-01T02:36:39.000Z",
+      "248.5 h from 2005-08-15T18:00:00.000Z"
+     ],
+     "lat": [
+      29.281,
+      41.277
+     ],
+     "lon": [
+      -124.31,
+      -115.58
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 36
+     }
+    },
+    "2005CA-Bmu-10826": {
+     "rows": 76,
+     "withPos": 76,
+     "visTrue": 75,
+     "visFalse": 1,
+     "usable": 75,
+     "first": "2005-08-16T00:55:00.000Z",
+     "last": "2005-10-24T23:17:50.000Z",
+     "days": 69.9,
+     "gapH": {
+      "p10": 2.126,
+      "median": 12.425,
+      "p90": 51.164,
+      "p99": 117.596,
+      "max": 117.6
+     },
+     "over2h": 68,
+     "over6h": 56,
+     "over24h": 21,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      32.148,
+      36.672
+     ],
+     "lon": [
+      -123.113,
+      -117.444
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 75
+     }
+    },
+    "2005CA-Bmu-10828": {
+     "rows": 5,
+     "withPos": 5,
+     "visTrue": 4,
+     "visFalse": 1,
+     "usable": 4,
+     "first": "2005-08-11T18:30:00.000Z",
+     "last": "2005-08-14T02:16:57.000Z",
+     "days": 2.3,
+     "gapH": {
+      "p10": 3.096,
+      "median": 23.799,
+      "p90": 28.887,
+      "p99": 28.887,
+      "max": 28.9
+     },
+     "over2h": 3,
+     "over6h": 2,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      36.017,
+      37.473
+     ],
+     "lon": [
+      -122.975,
+      -121.592
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 4
+     }
+    },
+    "2005CA-Bmu-10829": {
+     "rows": 330,
+     "withPos": 330,
+     "visTrue": 320,
+     "visFalse": 10,
+     "usable": 320,
+     "first": "2005-08-07T19:07:00.000Z",
+     "last": "2006-02-17T12:18:13.000Z",
+     "days": 193.7,
+     "gapH": {
+      "p10": 0.397,
+      "median": 9.37,
+      "p90": 34.996,
+      "p99": 132.732,
+      "max": 384.3
+     },
+     "over2h": 265,
+     "over6h": 198,
+     "over24h": 39,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "384.3 h from 2006-01-14T12:26:10.000Z"
+     ],
+     "lat": [
+      20.202,
+      48.849
+     ],
+     "lon": [
+      -128.825,
+      176.676
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 329
+     }
+    },
+    "2005CA-Bmu-10830": {
+     "rows": 21,
+     "withPos": 21,
+     "visTrue": 20,
+     "visFalse": 1,
+     "usable": 20,
+     "first": "2005-08-14T20:23:00.000Z",
+     "last": "2005-12-01T02:26:35.000Z",
+     "days": 108.3,
+     "gapH": {
+      "p10": 13.408,
+      "median": 48.456,
+      "p90": 366.228,
+      "p99": 1104.074,
+      "max": 1104.1
+     },
+     "over2h": 19,
+     "over6h": 18,
+     "over24h": 15,
+     "over7d": 4,
+     "dupTimes": 0,
+     "biggest": [
+      "1104.1 h from 2005-09-26T02:00:34.000Z",
+      "366.2 h from 2005-08-14T20:23:00.000Z"
+     ],
+     "lat": [
+      36.299,
+      44.468
+     ],
+     "lon": [
+      -125.824,
+      -121.988
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 20
+     }
+    },
+    "2005CA-Bmu-10833": {
+     "rows": 56,
+     "withPos": 56,
+     "visTrue": 56,
+     "visFalse": 0,
+     "usable": 56,
+     "first": "2005-08-06T23:00:00.000Z",
+     "last": "2005-10-25T02:06:24.000Z",
+     "days": 79.1,
+     "gapH": {
+      "p10": 2.757,
+      "median": 23.573,
+      "p90": 93.04,
+      "p99": 192.209,
+      "max": 192.2
+     },
+     "over2h": 51,
+     "over6h": 45,
+     "over24h": 21,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.991,
+      37.393
+     ],
+     "lon": [
+      -123.249,
+      -120.611
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 55
+     }
+    },
+    "2006CA-Bmu-00825": {
+     "rows": 2,
+     "withPos": 2,
+     "visTrue": 2,
+     "visFalse": 0,
+     "usable": 2,
+     "first": "2006-09-12T22:33:00.000Z",
+     "last": "2006-09-13T00:51:40.000Z",
+     "days": 0.1,
+     "gapH": {
+      "p10": 2.311,
+      "median": 2.311,
+      "p90": 2.311,
+      "p99": 2.311,
+      "max": 2.3
+     },
+     "over2h": 1,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.056,
+      34.065
+     ],
+     "lon": [
+      -120.626,
+      -120.598
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 1
+     }
+    },
+    "2006CA-Bmu-00832": {
+     "rows": 177,
+     "withPos": 177,
+     "visTrue": 172,
+     "visFalse": 5,
+     "usable": 172,
+     "first": "2006-09-12T22:57:00.000Z",
+     "last": "2006-12-09T03:44:04.000Z",
+     "days": 87.2,
+     "gapH": {
+      "p10": 0.177,
+      "median": 11.103,
+      "p90": 23.891,
+      "p99": 51.503,
+      "max": 69.1
+     },
+     "over2h": 135,
+     "over6h": 121,
+     "over24h": 17,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      11.09,
+      35.389
+     ],
+     "lon": [
+      -124.74,
+      -99.225
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 176
+     }
+    },
+    "2006CA-Bmu-00838": {
+     "rows": 42,
+     "withPos": 42,
+     "visTrue": 42,
+     "visFalse": 0,
+     "usable": 42,
+     "first": "2006-09-12T23:51:00.000Z",
+     "last": "2006-11-08T03:58:28.000Z",
+     "days": 56.2,
+     "gapH": {
+      "p10": 0.952,
+      "median": 23.571,
+      "p90": 84.797,
+      "p99": 131.029,
+      "max": 131
+     },
+     "over2h": 36,
+     "over6h": 35,
+     "over24h": 16,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      16.967,
+      34.309
+     ],
+     "lon": [
+      -121.116,
+      -103.88
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 41
+     }
+    },
+    "2006CA-Bmu-02083": {
+     "rows": 371,
+     "withPos": 371,
+     "visTrue": 371,
+     "visFalse": 0,
+     "usable": 371,
+     "first": "2006-09-14T18:08:00.000Z",
+     "last": "2007-06-28T22:57:31.000Z",
+     "days": 287.2,
+     "gapH": {
+      "p10": 0.163,
+      "median": 10.939,
+      "p90": 44.566,
+      "p99": 96.051,
+      "max": 168.3
+     },
+     "over2h": 284,
+     "over6h": 251,
+     "over24h": 107,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      6.194,
+      34.335
+     ],
+     "lon": [
+      -121.391,
+      -88.351
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 370
+     }
+    },
+    "2006CA-Bmu-04175": {
+     "rows": 94,
+     "withPos": 94,
+     "visTrue": 93,
+     "visFalse": 1,
+     "usable": 93,
+     "first": "2006-09-13T00:13:00.000Z",
+     "last": "2007-08-05T23:51:58.000Z",
+     "days": 327,
+     "gapH": {
+      "p10": 10.373,
+      "median": 47.616,
+      "p90": 133.234,
+      "p99": 2351.675,
+      "max": 2351.7
+     },
+     "over2h": 84,
+     "over6h": 84,
+     "over24h": 63,
+     "over7d": 6,
+     "dupTimes": 0,
+     "biggest": [
+      "2351.7 h from 2006-09-13T23:24:08.000Z",
+      "384.3 h from 2007-04-01T23:18:53.000Z",
+      "384.2 h from 2007-01-05T23:19:49.000Z"
+     ],
+     "lat": [
+      22.578,
+      34.126
+     ],
+     "lon": [
+      -120.615,
+      -110.02
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 93
+     }
+    },
+    "2006CA-Bmu-10831": {
+     "rows": 267,
+     "withPos": 267,
+     "visTrue": 264,
+     "visFalse": 3,
+     "usable": 264,
+     "first": "2006-09-14T17:50:00.000Z",
+     "last": "2007-06-15T00:00:58.000Z",
+     "days": 273.3,
+     "gapH": {
+      "p10": 0.229,
+      "median": 12.373,
+      "p90": 58.86,
+      "p99": 144.522,
+      "max": 192.2
+     },
+     "over2h": 218,
+     "over6h": 201,
+     "over24h": 88,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      18.61,
+      42.835
+     ],
+     "lon": [
+      -141.834,
+      -114.307
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 266
+     }
+    },
+    "2006CA-Bmu-10834": {
+     "rows": 4,
+     "withPos": 4,
+     "visTrue": 4,
+     "visFalse": 0,
+     "usable": 4,
+     "first": "2006-09-14T21:25:00.000Z",
+     "last": "2006-09-18T02:09:35.000Z",
+     "days": 3.2,
+     "gapH": {
+      "p10": 1.581,
+      "median": 12.981,
+      "p90": 62.181,
+      "p99": 62.181,
+      "max": 62.2
+     },
+     "over2h": 2,
+     "over6h": 2,
+     "over24h": 1,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.103,
+      34.207
+     ],
+     "lon": [
+      -121.329,
+      -120.605
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 3
+     }
+    },
+    "2006CA-Bmu-10839": {
+     "rows": 72,
+     "withPos": 72,
+     "visTrue": 72,
+     "visFalse": 0,
+     "usable": 72,
+     "first": "2006-09-14T17:37:00.000Z",
+     "last": "2006-10-21T23:09:55.000Z",
+     "days": 37.2,
+     "gapH": {
+      "p10": 2.257,
+      "median": 10.723,
+      "p90": 23.964,
+      "p99": 58.364,
+      "max": 58.4
+     },
+     "over2h": 64,
+     "over6h": 49,
+     "over24h": 7,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.912,
+      49.324
+     ],
+     "lon": [
+      -134.998,
+      -119.75
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 71
+     }
+    },
+    "2006CA-Bmu-10840": {
+     "rows": 26,
+     "withPos": 26,
+     "visTrue": 26,
+     "visFalse": 0,
+     "usable": 26,
+     "first": "2006-09-14T18:55:00.000Z",
+     "last": "2007-04-13T23:38:02.000Z",
+     "days": 211.2,
+     "gapH": {
+      "p10": 4.638,
+      "median": 85.043,
+      "p90": 696.076,
+      "p99": 1042.331,
+      "max": 1042.3
+     },
+     "over2h": 23,
+     "over6h": 22,
+     "over24h": 17,
+     "over7d": 7,
+     "dupTimes": 0,
+     "biggest": [
+      "1042.3 h from 2006-09-18T02:13:32.000Z",
+      "1031.7 h from 2006-11-29T12:37:55.000Z",
+      "696.1 h from 2006-10-31T12:33:22.000Z",
+      "565.1 h from 2007-02-10T23:06:06.000Z"
+     ],
+     "lat": [
+      9.013,
+      34.109
+     ],
+     "lon": [
+      -120.699,
+      -91.998
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 25
+     }
+    },
+    "2006CA-Bmu-23036": {
+     "rows": 81,
+     "withPos": 81,
+     "visTrue": 73,
+     "visFalse": 8,
+     "usable": 73,
+     "first": "2006-09-12T23:41:00.000Z",
+     "last": "2006-11-30T03:56:14.000Z",
+     "days": 78.2,
+     "gapH": {
+      "p10": 0.043,
+      "median": 13.033,
+      "p90": 48.065,
+      "p99": 384.267,
+      "max": 384.3
+     },
+     "over2h": 57,
+     "over6h": 54,
+     "over24h": 21,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "384.3 h from 2006-09-18T00:37:53.000Z"
+     ],
+     "lat": [
+      21.234,
+      42.352
+     ],
+     "lon": [
+      -124.96,
+      -109.318
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 80
+     }
+    },
+    "2006CA-Bmu-23039": {
+     "rows": 129,
+     "withPos": 129,
+     "visTrue": 129,
+     "visFalse": 0,
+     "usable": 129,
+     "first": "2006-09-26T20:51:00.000Z",
+     "last": "2007-01-31T12:46:59.000Z",
+     "days": 126.7,
+     "gapH": {
+      "p10": 0.085,
+      "median": 11.309,
+      "p90": 58.415,
+      "p99": 202.981,
+      "max": 303.5
+     },
+     "over2h": 96,
+     "over6h": 93,
+     "over24h": 35,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "303.5 h from 2006-09-26T20:51:00.000Z"
+     ],
+     "lat": [
+      22.831,
+      34.524
+     ],
+     "lon": [
+      -120.984,
+      -108.173
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 128
+     }
+    },
+    "2007CA-Bmu-00827": {
+     "rows": 7,
+     "withPos": 7,
+     "visTrue": 7,
+     "visFalse": 0,
+     "usable": 7,
+     "first": "2007-09-09T20:51:00.000Z",
+     "last": "2007-09-10T05:35:10.000Z",
+     "days": 0.4,
+     "gapH": {
+      "p10": 0.677,
+      "median": 1.037,
+      "p90": 3.565,
+      "p99": 3.565,
+      "max": 3.6
+     },
+     "over2h": 1,
+     "over6h": 0,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.957,
+      34.175
+     ],
+     "lon": [
+      -120.257,
+      -119.938
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 6
+     }
+    },
+    "2007CA-Bmu-00831": {
+     "rows": 204,
+     "withPos": 204,
+     "visTrue": 200,
+     "visFalse": 4,
+     "usable": 200,
+     "first": "2007-09-07T01:05:00.000Z",
+     "last": "2008-02-03T05:11:22.000Z",
+     "days": 149.2,
+     "gapH": {
+      "p10": 0.28,
+      "median": 7.19,
+      "p90": 41.32,
+      "p99": 130.872,
+      "max": 132
+     },
+     "over2h": 157,
+     "over6h": 123,
+     "over24h": 67,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      22.727,
+      34.522
+     ],
+     "lon": [
+      -121.846,
+      -108.135
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 203
+     }
+    },
+    "2007CA-Bmu-00835": {
+     "rows": 32,
+     "withPos": 32,
+     "visTrue": 31,
+     "visFalse": 1,
+     "usable": 31,
+     "first": "2007-09-09T19:39:00.000Z",
+     "last": "2007-10-14T18:59:54.000Z",
+     "days": 35,
+     "gapH": {
+      "p10": 0.327,
+      "median": 6.82,
+      "p90": 65.579,
+      "p99": 240.774,
+      "max": 240.8
+     },
+     "over2h": 23,
+     "over6h": 16,
+     "over24h": 10,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "240.8 h from 2007-09-12T18:01:11.000Z"
+     ],
+     "lat": [
+      30.471,
+      39.72
+     ],
+     "lon": [
+      -124.831,
+      -111.339
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 31
+     }
+    },
+    "2007CA-Bmu-00836": {
+     "rows": 80,
+     "withPos": 80,
+     "visTrue": 77,
+     "visFalse": 3,
+     "usable": 77,
+     "first": "2007-09-17T15:44:00.000Z",
+     "last": "2007-11-06T10:45:53.000Z",
+     "days": 49.8,
+     "gapH": {
+      "p10": 2.386,
+      "median": 11.319,
+      "p90": 37.346,
+      "p99": 96.067,
+      "max": 96.1
+     },
+     "over2h": 69,
+     "over6h": 52,
+     "over24h": 11,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      31.884,
+      35.083
+     ],
+     "lon": [
+      -122.357,
+      -116.256
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 79
+     }
+    },
+    "2007CA-Bmu-00847": {
+     "rows": 39,
+     "withPos": 39,
+     "visTrue": 38,
+     "visFalse": 1,
+     "usable": 38,
+     "first": "2007-09-07T23:42:00.000Z",
+     "last": "2008-01-04T21:59:17.000Z",
+     "days": 118.9,
+     "gapH": {
+      "p10": 0.565,
+      "median": 20.999,
+      "p90": 60.486,
+      "p99": 1741.602,
+      "max": 1741.6
+     },
+     "over2h": 32,
+     "over6h": 31,
+     "over24h": 18,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "1741.6 h from 2007-09-07T23:42:00.000Z",
+      "298.9 h from 2007-11-19T13:18:09.000Z"
+     ],
+     "lat": [
+      25.528,
+      34.13
+     ],
+     "lon": [
+      -120.024,
+      -113.075
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 38
+     }
+    },
+    "2007CA-Bmu-01385": {
+     "rows": 284,
+     "withPos": 284,
+     "visTrue": 283,
+     "visFalse": 1,
+     "usable": 283,
+     "first": "2007-09-07T00:09:00.000Z",
+     "last": "2008-03-26T12:23:37.000Z",
+     "days": 201.5,
+     "gapH": {
+      "p10": 0.297,
+      "median": 6.648,
+      "p90": 42.791,
+      "p99": 84.522,
+      "max": 131.1
+     },
+     "over2h": 221,
+     "over6h": 161,
+     "over24h": 94,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      18.653,
+      53.148
+     ],
+     "lon": [
+      -150.563,
+      -102.534
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 283
+     }
+    },
+    "2007CA-Bmu-04172": {
+     "rows": 57,
+     "withPos": 57,
+     "visTrue": 55,
+     "visFalse": 2,
+     "usable": 55,
+     "first": "2007-09-06T22:56:00.000Z",
+     "last": "2007-10-04T05:41:51.000Z",
+     "days": 27.3,
+     "gapH": {
+      "p10": 0.525,
+      "median": 6.012,
+      "p90": 34.909,
+      "p99": 43.079,
+      "max": 43.1
+     },
+     "over2h": 39,
+     "over6h": 27,
+     "over24h": 14,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.468,
+      36.886
+     ],
+     "lon": [
+      -123.998,
+      -117.358
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 56
+     }
+    },
+    "2007CA-Bmu-04174": {
+     "rows": 360,
+     "withPos": 360,
+     "visTrue": 357,
+     "visFalse": 3,
+     "usable": 357,
+     "first": "2007-09-06T21:10:00.000Z",
+     "last": "2008-05-05T18:46:40.000Z",
+     "days": 241.9,
+     "gapH": {
+      "p10": 0.236,
+      "median": 6.779,
+      "p90": 36.364,
+      "p99": 78.412,
+      "max": 522.4
+     },
+     "over2h": 276,
+     "over6h": 205,
+     "over24h": 108,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "522.4 h from 2007-09-10T05:37:53.000Z"
+     ],
+     "lat": [
+      17.98,
+      34.388
+     ],
+     "lon": [
+      -125.81,
+      -107.093
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 359
+     }
+    },
+    "2007CA-Bmu-05670": {
+     "rows": 88,
+     "withPos": 88,
+     "visTrue": 88,
+     "visFalse": 0,
+     "usable": 88,
+     "first": "2007-09-06T22:19:00.000Z",
+     "last": "2008-01-20T05:30:46.000Z",
+     "days": 135.3,
+     "gapH": {
+      "p10": 0.242,
+      "median": 7.321,
+      "p90": 54.721,
+      "p99": 850.43,
+      "max": 850.4
+     },
+     "over2h": 69,
+     "over6h": 59,
+     "over24h": 37,
+     "over7d": 3,
+     "dupTimes": 0,
+     "biggest": [
+      "850.4 h from 2007-09-08T18:37:11.000Z",
+      "240.4 h from 2008-01-10T05:06:02.000Z"
+     ],
+     "lat": [
+      9.276,
+      34.243
+     ],
+     "lon": [
+      -130.531,
+      -96.789
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 87
+     }
+    },
+    "2007CA-Bmu-05801": {
+     "rows": 152,
+     "withPos": 152,
+     "visTrue": 148,
+     "visFalse": 4,
+     "usable": 148,
+     "first": "2007-09-17T21:14:00.000Z",
+     "last": "2008-02-21T00:01:46.000Z",
+     "days": 156.1,
+     "gapH": {
+      "p10": 0.504,
+      "median": 7.481,
+      "p90": 54.969,
+      "p99": 138.558,
+      "max": 150.8
+     },
+     "over2h": 125,
+     "over6h": 100,
+     "over24h": 64,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      7.482,
+      34.433
+     ],
+     "lon": [
+      -121.202,
+      -92.723
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 151
+     }
+    },
+    "2007CA-Bmu-10836": {
+     "rows": 466,
+     "withPos": 466,
+     "visTrue": 456,
+     "visFalse": 10,
+     "usable": 456,
+     "first": "2007-09-08T17:37:00.000Z",
+     "last": "2008-05-16T05:30:10.000Z",
+     "days": 250.5,
+     "gapH": {
+      "p10": 0.26,
+      "median": 6.263,
+      "p90": 35.304,
+      "p99": 54.442,
+      "max": 127
+     },
+     "over2h": 348,
+     "over6h": 238,
+     "over24h": 121,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      25.522,
+      35.245
+     ],
+     "lon": [
+      -123.218,
+      -109.6
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 465
+     }
+    },
+    "2007CA-Bmu-10838": {
+     "rows": 279,
+     "withPos": 279,
+     "visTrue": 277,
+     "visFalse": 2,
+     "usable": 277,
+     "first": "2007-09-07T21:46:00.000Z",
+     "last": "2008-03-02T05:38:20.000Z",
+     "days": 176.3,
+     "gapH": {
+      "p10": 0.269,
+      "median": 6.767,
+      "p90": 40.149,
+      "p99": 83.927,
+      "max": 138.1
+     },
+     "over2h": 211,
+     "over6h": 156,
+     "over24h": 84,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      20.864,
+      43.424
+     ],
+     "lon": [
+      -138.183,
+      -110.42
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 278
+     }
+    },
+    "2007CA-Bmu-10842": {
+     "rows": 26,
+     "withPos": 26,
+     "visTrue": 26,
+     "visFalse": 0,
+     "usable": 26,
+     "first": "2007-09-06T22:41:00.000Z",
+     "last": "2007-09-18T12:52:22.000Z",
+     "days": 11.6,
+     "gapH": {
+      "p10": 0.631,
+      "median": 5.396,
+      "p90": 29.948,
+      "p99": 47.26,
+      "max": 47.3
+     },
+     "over2h": 18,
+     "over6h": 11,
+     "over24h": 6,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.929,
+      34.401
+     ],
+     "lon": [
+      -121.432,
+      -119.804
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 25
+     }
+    },
+    "2007CA-Bmu-23034": {
+     "rows": 33,
+     "withPos": 33,
+     "visTrue": 33,
+     "visFalse": 0,
+     "usable": 33,
+     "first": "2007-09-09T17:44:00.000Z",
+     "last": "2007-11-06T00:17:27.000Z",
+     "days": 57.3,
+     "gapH": {
+      "p10": 2.19,
+      "median": 10.232,
+      "p90": 12.444,
+      "p99": 1123.463,
+      "max": 1123.5
+     },
+     "over2h": 29,
+     "over6h": 21,
+     "over24h": 1,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "1123.5 h from 2007-09-09T17:44:00.000Z"
+     ],
+     "lat": [
+      33.11,
+      34.135
+     ],
+     "lon": [
+      -120.088,
+      -118.02
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 32
+     }
+    },
+    "2007CA-Bmu-23043": {
+     "rows": 212,
+     "withPos": 212,
+     "visTrue": 208,
+     "visFalse": 4,
+     "usable": 208,
+     "first": "2007-09-06T23:33:00.000Z",
+     "last": "2008-02-01T12:14:14.000Z",
+     "days": 147.5,
+     "gapH": {
+      "p10": 0.295,
+      "median": 6.954,
+      "p90": 42.173,
+      "p99": 55.586,
+      "max": 251.9
+     },
+     "over2h": 162,
+     "over6h": 120,
+     "over24h": 69,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [
+      "251.9 h from 2008-01-22T00:19:07.000Z"
+     ],
+     "lat": [
+      5.514,
+      34.392
+     ],
+     "lon": [
+      -120.647,
+      -54.362
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 211
+     }
+    },
+    "2008CA-Bmu-00825": {
+     "rows": 399,
+     "withPos": 399,
+     "visTrue": 394,
+     "visFalse": 5,
+     "usable": 394,
+     "first": "2008-07-24T17:53:00.000Z",
+     "last": "2009-04-10T12:34:34.000Z",
+     "days": 259.8,
+     "gapH": {
+      "p10": 0.235,
+      "median": 6.981,
+      "p90": 36.428,
+      "p99": 83.682,
+      "max": 96.1
+     },
+     "over2h": 313,
+     "over6h": 237,
+     "over24h": 125,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      20.242,
+      43.653
+     ],
+     "lon": [
+      -147.102,
+      -109.575
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 398
+     }
+    },
+    "2008CA-Bmu-00830": {
+     "rows": 230,
+     "withPos": 230,
+     "visTrue": 221,
+     "visFalse": 9,
+     "usable": 221,
+     "first": "2008-07-25T23:45:00.000Z",
+     "last": "2008-11-12T21:09:23.000Z",
+     "days": 109.9,
+     "gapH": {
+      "p10": 0.352,
+      "median": 9.832,
+      "p90": 23.934,
+      "p99": 75.801,
+      "max": 95.3
+     },
+     "over2h": 187,
+     "over6h": 142,
+     "over24h": 21,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      9.822,
+      35.937
+     ],
+     "lon": [
+      -124.872,
+      30.101
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 229
+     }
+    },
+    "2008CA-Bmu-00840": {
+     "rows": 190,
+     "withPos": 190,
+     "visTrue": 185,
+     "visFalse": 5,
+     "usable": 185,
+     "first": "2008-07-27T15:34:00.000Z",
+     "last": "2008-10-31T21:36:18.000Z",
+     "days": 96.3,
+     "gapH": {
+      "p10": 0.347,
+      "median": 9.782,
+      "p90": 23.796,
+      "p99": 216.049,
+      "max": 251.3
+     },
+     "over2h": 155,
+     "over6h": 116,
+     "over24h": 12,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "251.3 h from 2008-10-21T10:17:49.000Z"
+     ],
+     "lat": [
+      27.754,
+      34.418
+     ],
+     "lon": [
+      -131.324,
+      -106.251
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 189
+     }
+    },
+    "2008CA-Bmu-01386": {
+     "rows": 363,
+     "withPos": 363,
+     "visTrue": 351,
+     "visFalse": 12,
+     "usable": 351,
+     "first": "2008-07-27T16:26:00.000Z",
+     "last": "2009-02-24T21:23:10.000Z",
+     "days": 212.2,
+     "gapH": {
+      "p10": 0.33,
+      "median": 9.712,
+      "p90": 34.956,
+      "p99": 136.061,
+      "max": 192.2
+     },
+     "over2h": 295,
+     "over6h": 225,
+     "over24h": 48,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      17.181,
+      48.024
+     ],
+     "lon": [
+      -140.371,
+      -106.238
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 362
+     }
+    },
+    "2008CA-Bmu-04176": {
+     "rows": 284,
+     "withPos": 284,
+     "visTrue": 280,
+     "visFalse": 4,
+     "usable": 280,
+     "first": "2008-07-27T17:48:00.000Z",
+     "last": "2009-03-18T13:24:36.000Z",
+     "days": 233.8,
+     "gapH": {
+      "p10": 0.657,
+      "median": 10.209,
+      "p90": 47.276,
+      "p99": 154.345,
+      "max": 538.3
+     },
+     "over2h": 246,
+     "over6h": 194,
+     "over24h": 57,
+     "over7d": 2,
+     "dupTimes": 0,
+     "biggest": [
+      "538.3 h from 2008-12-02T00:35:14.000Z"
+     ],
+     "lat": [
+      10.9,
+      45.552
+     ],
+     "lon": [
+      -150.188,
+      -107.873
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 283
+     }
+    },
+    "2008CA-Bmu-04177": {
+     "rows": 245,
+     "withPos": 245,
+     "visTrue": 231,
+     "visFalse": 14,
+     "usable": 231,
+     "first": "2008-07-27T22:15:00.000Z",
+     "last": "2008-10-23T21:22:51.000Z",
+     "days": 88,
+     "gapH": {
+      "p10": 0.318,
+      "median": 8.561,
+      "p90": 21.065,
+      "p99": 37.483,
+      "max": 57.8
+     },
+     "over2h": 195,
+     "over6h": 138,
+     "over24h": 6,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      25.4,
+      38.434
+     ],
+     "lon": [
+      -125.997,
+      -107.06
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 244
+     }
+    },
+    "2008CA-Bmu-05644": {
+     "rows": 62,
+     "withPos": 62,
+     "visTrue": 62,
+     "visFalse": 0,
+     "usable": 62,
+     "first": "2008-07-26T02:05:00.000Z",
+     "last": "2008-09-03T05:06:40.000Z",
+     "days": 39.1,
+     "gapH": {
+      "p10": 0.219,
+      "median": 7.069,
+      "p90": 35.974,
+      "p99": 54.554,
+      "max": 54.6
+     },
+     "over2h": 46,
+     "over6h": 37,
+     "over24h": 19,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      30.996,
+      36.011
+     ],
+     "lon": [
+      -125.268,
+      -119.424
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 61
+     }
+    },
+    "2008CA-Bmu-05701": {
+     "rows": 4,
+     "withPos": 4,
+     "visTrue": 3,
+     "visFalse": 1,
+     "usable": 3,
+     "first": "2008-07-26T21:10:00.000Z",
+     "last": "2008-07-27T18:19:44.000Z",
+     "days": 0.9,
+     "gapH": {
+      "p10": 3.42,
+      "median": 17.742,
+      "p90": 17.742,
+      "p99": 17.742,
+      "max": 17.7
+     },
+     "over2h": 2,
+     "over6h": 1,
+     "over24h": 0,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      34.113,
+      34.455
+     ],
+     "lon": [
+      -120.097,
+      -119.559
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 3
+     }
+    },
+    "2008CA-Bmu-05878": {
+     "rows": 40,
+     "withPos": 40,
+     "visTrue": 37,
+     "visFalse": 3,
+     "usable": 37,
+     "first": "2008-07-27T17:31:00.000Z",
+     "last": "2008-08-27T05:57:10.000Z",
+     "days": 30.5,
+     "gapH": {
+      "p10": 0.202,
+      "median": 11.421,
+      "p90": 47.238,
+      "p99": 99.837,
+      "max": 99.8
+     },
+     "over2h": 28,
+     "over6h": 23,
+     "over24h": 13,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      29.942,
+      37.44
+     ],
+     "lon": [
+      -122.92,
+      -113.869
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 39
+     }
+    },
+    "2008CA-Bmu-10821": {
+     "rows": 156,
+     "withPos": 156,
+     "visTrue": 153,
+     "visFalse": 3,
+     "usable": 153,
+     "first": "2008-07-28T00:14:00.000Z",
+     "last": "2008-10-31T21:35:13.000Z",
+     "days": 95.9,
+     "gapH": {
+      "p10": 0.864,
+      "median": 10.547,
+      "p90": 34.954,
+      "p99": 93.426,
+      "max": 119.7
+     },
+     "over2h": 135,
+     "over6h": 105,
+     "over24h": 20,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      33.973,
+      48.463
+     ],
+     "lon": [
+      -153.993,
+      -118.909
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 155
+     }
+    },
+    "2008CA-Bmu-10839": {
+     "rows": 156,
+     "withPos": 156,
+     "visTrue": 143,
+     "visFalse": 13,
+     "usable": 143,
+     "first": "2008-07-28T23:00:00.000Z",
+     "last": "2008-09-27T13:38:26.000Z",
+     "days": 60.6,
+     "gapH": {
+      "p10": 0.383,
+      "median": 10.344,
+      "p90": 21.046,
+      "p99": 56.141,
+      "max": 58.9
+     },
+     "over2h": 119,
+     "over6h": 96,
+     "over24h": 4,
+     "over7d": 0,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      29.866,
+      38.103
+     ],
+     "lon": [
+      -134.559,
+      -115.704
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 155
+     }
+    },
+    "2008CR-Bmu-00846": {
+     "rows": 354,
+     "withPos": 354,
+     "visTrue": 354,
+     "visFalse": 0,
+     "usable": 354,
+     "first": "2008-01-17T16:17:00.000Z",
+     "last": "2008-07-31T11:46:47.000Z",
+     "days": 195.8,
+     "gapH": {
+      "p10": 0.276,
+      "median": 8.227,
+      "p90": 36.493,
+      "p99": 88.119,
+      "max": 229.7
+     },
+     "over2h": 306,
+     "over6h": 212,
+     "over24h": 51,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      6.244,
+      29.094
+     ],
+     "lon": [
+      -116.095,
+      -87.547
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 353
+     }
+    },
+    "2008CR-Bmu-01388": {
+     "rows": 323,
+     "withPos": 323,
+     "visTrue": 322,
+     "visFalse": 1,
+     "usable": 322,
+     "first": "2008-01-14T05:00:00.000Z",
+     "last": "2008-06-13T19:08:34.000Z",
+     "days": 151.6,
+     "gapH": {
+      "p10": 0.27,
+      "median": 8.144,
+      "p90": 23.809,
+      "p99": 96.104,
+      "max": 226.3
+     },
+     "over2h": 272,
+     "over6h": 187,
+     "over24h": 30,
+     "over7d": 1,
+     "dupTimes": 0,
+     "biggest": [],
+     "lat": [
+      7.784,
+      31.318
+     ],
+     "lon": [
+      -119.172,
+      -85.381
+     ],
+     "sensors": {
+      "gps": 1,
+      "argos-doppler-shift": 322
+     }
+    }
+   },
+   "distinct": {
+    "visible": [
+     [
+      "true",
+      15778
+     ],
+     [
+      "false",
+      471
+     ]
+    ],
+    "argos:lc": [
+     [
+      "B",
+      4862
+     ],
+     [
+      "0",
+      4352
+     ],
+     [
+      "A",
+      2839
+     ],
+     [
+      "1",
+      2083
+     ],
+     [
+      "Z",
+      1191
+     ],
+     [
+      "2",
+      653
+     ]
+    ],
+    "argos:nb-mes-120": [
+     [
+      "0",
+      15806
+     ],
+     [
+      "1",
+      69
+     ],
+     [
+      "2",
+      26
+     ],
+     [
+      "3",
+      5
+     ],
+     [
+      "4",
+      4
+     ]
+    ],
+    "manually-marked-outlier": [
+     [
+      "true",
+      471
+     ]
+    ],
+    "sensor-type": [
+     [
+      "argos-doppler-shift",
+      16106
+     ],
+     [
+      "gps",
+      143
+     ]
+    ],
+    "individual-taxon-canonical-name": [
+     [
+      "Balaenoptera musculus",
+      16249
+     ]
+    ],
+    "study-name": [
+     [
+      "Blue whales Eastern North Pacific 1993-2008 - Argos Data",
+      16249
+     ]
+    ]
+   }
+  },
+  "extra": {
+   "lcVisible": {
+    "0": 4266,
+    "1": 2080,
+    "2": 653,
+    "(gps row)": 143,
+    "B": 4690,
+    "A": 2781,
+    "Z": 1039,
+    "(none)": 126
+   },
+   "lcOutliers": {
+    "0": 86,
+    "1": 3,
+    "B": 172,
+    "Z": 152,
+    "A": 58
+   },
+   "sensVis": {
+    "gps": 143,
+    "argos-doppler-shift": 15635
+   },
+   "visButOutlier": 0,
+   "outButVisible": 0,
+   "lon": [
+    -151.57,
+    -87.54700000000003
+   ],
+   "lat": [
+    6.194,
+    53.148
+   ],
+   "animals": 143,
+   "gpsFirst": 143,
+   "dupT": 1,
+   "gapH": {
+    "p10": 0.46,
+    "median": 9.87,
+    "p90": 37.24,
+    "p99": 133.23,
+    "max": "261.1 d"
+   },
+   "byYear": {
+    "1993": 4,
+    "1994": 9,
+    "1995": 14,
+    "1998": 9,
+    "1999": 19,
+    "2000": 12,
+    "2001": 1,
+    "2002": 2,
+    "2004": 19,
+    "2005": 15,
+    "2006": 11,
+    "2007": 15,
+    "2008": 13
+   },
+   "top": [
+    {
+     "id": "2004CA-Bmu-00840",
+     "n": 317,
+     "good": 47,
+     "first": "2004-08-20",
+     "last": "2006-01-06",
+     "days": 504,
+     "medGapH": 12.3,
+     "maxGapD": 20,
+     "gaps3d": 46,
+     "gaps10d": 7,
+     "lat": "21.7..44.1",
+     "lon": "-127.0..-108.5",
+     "maxSpKmh": 116
+    },
+    {
+     "id": "2006CA-Bmu-04175",
+     "n": 93,
+     "good": 19,
+     "first": "2006-09-13",
+     "last": "2007-08-05",
+     "days": 327,
+     "medGapH": 47.6,
+     "maxGapD": 98,
+     "gaps3d": 28,
+     "gaps10d": 3,
+     "lat": "22.6..34.1",
+     "lon": "-120.6..-110.0",
+     "maxSpKmh": 36
+    },
+    {
+     "id": "2006CA-Bmu-02083",
+     "n": 371,
+     "good": 66,
+     "first": "2006-09-14",
+     "last": "2007-06-28",
+     "days": 287,
+     "medGapH": 10.9,
+     "maxGapD": 7,
+     "gaps3d": 15,
+     "gaps10d": 0,
+     "lat": "6.2..34.3",
+     "lon": "-121.4..-88.4",
+     "maxSpKmh": 3836
+    },
+    {
+     "id": "2000CA-Bmu-10832",
+     "n": 304,
+     "good": 38,
+     "first": "2000-10-04",
+     "last": "2001-07-15",
+     "days": 284,
+     "medGapH": 11.3,
+     "maxGapD": 36.2,
+     "gaps3d": 15,
+     "gaps10d": 1,
+     "lat": "6.9..37.6",
+     "lon": "-123.0..-95.3",
+     "maxSpKmh": 193
+    },
+    {
+     "id": "2000CA-Bmu-01390",
+     "n": 139,
+     "good": 8,
+     "first": "2000-10-07",
+     "last": "2001-07-08",
+     "days": 274,
+     "medGapH": 23.6,
+     "maxGapD": 29.3,
+     "gaps3d": 22,
+     "gaps10d": 4,
+     "lat": "7.0..37.6",
+     "lon": "-123.1..-91.4",
+     "maxSpKmh": 77
+    },
+    {
+     "id": "2006CA-Bmu-10831",
+     "n": 264,
+     "good": 37,
+     "first": "2006-09-14",
+     "last": "2007-06-15",
+     "days": 273,
+     "medGapH": 12.4,
+     "maxGapD": 8,
+     "gaps3d": 21,
+     "gaps10d": 0,
+     "lat": "18.6..42.8",
+     "lon": "-141.8..-114.3",
+     "maxSpKmh": 160
+    },
+    {
+     "id": "1999CA-Bmu-01388",
+     "n": 2,
+     "good": 0,
+     "first": "1999-10-08",
+     "last": "2000-06-26",
+     "days": 261,
+     "medGapH": 6267.5,
+     "maxGapD": 261.1,
+     "gaps3d": 1,
+     "gaps10d": 1,
+     "lat": "26.7..34.0",
+     "lon": "-120.6..-115.8",
+     "maxSpKmh": 0
+    },
+    {
+     "id": "2008CA-Bmu-00825",
+     "n": 394,
+     "good": 121,
+     "first": "2008-07-24",
+     "last": "2009-04-10",
+     "days": 260,
+     "medGapH": 7,
+     "maxGapD": 4,
+     "gaps3d": 4,
+     "gaps10d": 0,
+     "lat": "20.2..43.7",
+     "lon": "-147.1..-109.6",
+     "maxSpKmh": 1578
+    }
+   ],
+   "mostFixes": [
+    {
+     "id": "2007CA-Bmu-10836",
+     "n": 456,
+     "good": 146,
+     "first": "2007-09-08",
+     "last": "2008-05-16",
+     "days": 250,
+     "medGapH": 6.3,
+     "maxGapD": 5.3,
+     "gaps3d": 3,
+     "gaps10d": 0,
+     "lat": "25.5..34.9",
+     "lon": "-123.2..-109.6",
+     "maxSpKmh": 381
+    },
+    {
+     "id": "1999CA-Bmu-23043",
+     "n": 422,
+     "good": 54,
+     "first": "1999-07-22",
+     "last": "1999-12-17",
+     "days": 148,
+     "medGapH": 6.7,
+     "maxGapD": 3.5,
+     "gaps3d": 2,
+     "gaps10d": 0,
+     "lat": "19.8..38.6",
+     "lon": "-124.3..-107.7",
+     "maxSpKmh": 187
+    },
+    {
+     "id": "2008CA-Bmu-00825",
+     "n": 394,
+     "good": 121,
+     "first": "2008-07-24",
+     "last": "2009-04-10",
+     "days": 260,
+     "medGapH": 7,
+     "maxGapD": 4,
+     "gaps3d": 4,
+     "gaps10d": 0,
+     "lat": "20.2..43.7",
+     "lon": "-147.1..-109.6",
+     "maxSpKmh": 1578
+    },
+    {
+     "id": "2002MX-Bmu-00840",
+     "n": 393,
+     "good": 25,
+     "first": "2002-03-21",
+     "last": "2002-10-01",
+     "days": 193,
+     "medGapH": 10.8,
+     "maxGapD": 2.5,
+     "gaps3d": 0,
+     "gaps10d": 0,
+     "lat": "22.2..30.4",
+     "lon": "-118.6..-108.9",
+     "maxSpKmh": 289
+    },
+    {
+     "id": "2006CA-Bmu-02083",
+     "n": 371,
+     "good": 66,
+     "first": "2006-09-14",
+     "last": "2007-06-28",
+     "days": 287,
+     "medGapH": 10.9,
+     "maxGapD": 7,
+     "gaps3d": 15,
+     "gaps10d": 0,
+     "lat": "6.2..34.3",
+     "lon": "-121.4..-88.4",
+     "maxSpKmh": 3836
+    }
+   ],
+   "withGood50": 17,
+   "speedOver20": 115,
+   "refRows": 143,
+   "refHeader": [
+    "tag-id",
+    "animal-id",
+    "animal-taxon",
+    "deploy-on-date",
+    "deploy-off-date",
+    "animal-life-stage",
+    "animal-sex",
+    "attachment-type",
+    "deploy-on-latitude",
+    "deploy-on-longitude",
+    "deployment-id",
+    "manipulation-type",
+    "study-site",
+    "tag-manufacturer-name",
+    "tag-model",
+    "tag-readout-method"
+   ],
+   "rfill": {
+    "tag-id": 143,
+    "animal-id": 143,
+    "animal-taxon": 143,
+    "deploy-on-date": 143,
+    "deploy-off-date": 143,
+    "animal-life-stage": 143,
+    "animal-sex": 38,
+    "attachment-type": 143,
+    "deploy-on-latitude": 143,
+    "deploy-on-longitude": 143,
+    "deployment-id": 143,
+    "manipulation-type": 143,
+    "study-site": 143,
+    "tag-manufacturer-name": 143,
+    "tag-model": 143,
+    "tag-readout-method": 143
+   },
+   "rdist": {
+    "animal-taxon": {
+     "Balaenoptera musculus": 143
+    },
+    "animal-life-stage": {
+     "adult": 143
+    },
+    "animal-sex": {
+     " ": 105,
+     "m": 20,
+     "f": 18
+    },
+    "attachment-type": {
+     "implant": 143
+    },
+    "manipulation-type": {
+     "none": 143
+    },
+    "tag-manufacturer-name": {
+     "Telonics, Inc": 142,
+     "Wildlife Computers, Inc": 1
+    },
+    "tag-model": {
+     "ST6": 12,
+     "ST10": 15,
+     "ST15": 109,
+     "ST21": 6,
+     "MK10": 1
+    },
+    "tag-readout-method": {
+     "satellite": 143
+    }
+   },
+   "defLc": "Argos LC: The location class retrieved from Argos. Allowed values are 0, 1, 2, 3, A, B, and Z (definition from Argos User's Manual 2011).\n\texample: A\n\tunits: none",
+   "defBest": "Argos best level: Best signal strength, Argos DIAG format file (definition from Argos User's Manual 2011).\n\texample: -117\n\tunits: decibels (dB)",
+   "defIq": "Argos IQ: This quality indicator gives information on the transmitter in terms of two digits, X and Y. X is the first digit and indicates residual error on the frequency calculation; Y is the second digit and indicates transmitter oscillator frequency drift between two satellite passes. Values provided in Argos DIAG format files (definition from Argos User's Manual 2011). Values obtained through some Argos channels do not include leading 0s, so 1-digit values indicate X = 0 and blank values or values of \"0\" indicate both X and Y = 0. Allowed values are\nX=0: No calculation of residual frequency error (fewer than four messages received)\nX=1,2,3: Unsatisfactory convergence of calculation\nX=4: Residual frequency error > 1.5 Hz\nX=5: 0.15 Hz < residual frequency error < 1.5 Hz\nX=6: Residual frequency error < 0.15 Hz\nY=0: No check on transmit frequency drift, as the two results are more than 12",
+   "defLat1": "Argos lat1: Solution 1. platform latitude in degrees and thousandths of degrees, Argos DIAG format file (definition from Argos User's Manual 2011).\n\texample: 19.493\n\tunits: decimal degrees, WGS84 reference system",
+   "defLat2": "Argos lat2: Solution 2. platform latitude in degrees and thousandths of degrees, Argos DIAG format file (definition from Argos User's Manual 2011).\n\texample: 14.773\n\tunits: decimal degrees, WGS84 reference system",
+   "defOut": "manually marked outlier: Identifies events flagged manually as outliers, typically using the Event Editor in Movebank and may also include outliers identified using other methods. Outliers have the value TRUE.\nTHIS DATASET: Locations on land and extreme outliers were manually flagged.",
+   "defVis": "visible: Determines whether an event is visible on the Movebank Search map. Values are calculated automatically, with TRUE indicating the event has not been flagged as an outlier by \"algorithm marked outlier\", \"import marked outlier\" or \"manually marked outlier\", or that user has overridden the results of these outlier attributes using \"manually marked valid\" = TRUE. Allowed values are TRUE or FALSE."
+  },
+  "sizes": {
+   "points": 15778,
+   "sizeAll": {
+    "raw": 189336,
+    "gzip": 113740
+   },
+   "crossesDateLine": false
+  }
+ },
+ "request_log": [
+  "2026-11-18T16:45:25.272Z GET /server/api/core/items/c9b4f9b5-875a-4b61-a5d6-c2e59ffe0aca 200",
+  "2026-11-18T16:45:25.897Z GET /server/api/core/items/c9b4f9b5-875a-4b61-a5d6-c2e59ffe0aca/bundles?size=20 200",
+  "2026-11-18T16:45:26.514Z GET /server/api/core/bundles/c5959f3b-7d23-453d-9afb-340aeb383793/bitstreams?size=50 200",
+  "2026-11-18T16:45:27.167Z GET /server/api/core/bundles/de134b14-3bfe-4b36-b1bb-52b65b36d4b2/bitstreams?size=50 200",
+  "2026-11-18T16:45:27.793Z GET /server/api/core/items/ea46bc43-3895-4b33-ba82-422cdb3041ce 200",
+  "2026-11-18T16:45:28.412Z GET /server/api/core/items/ea46bc43-3895-4b33-ba82-422cdb3041ce/bundles?size=20 200",
+  "2026-11-18T16:45:29.046Z GET /server/api/core/items/78a47d4b-ce32-42b6-be9f-37d330d376f0 200",
+  "2026-11-18T16:45:29.728Z GET /server/api/core/items/78a47d4b-ce32-42b6-be9f-37d330d376f0/bundles?size=20 200",
+  "2026-11-18T16:45:39.265Z GET /server/api/core/bitstreams/3fa5d4d2-8159-4b2c-bb88-0ee7242abf4e/content 200 9421 B (zebra README)",
+  "2026-11-18T16:45:41.384Z GET /server/api/core/bitstreams/2f9f6e10-d570-4f83-bee8-98acf20ec8c2/content 200 1251 B (zebra reference data)",
+  "2026-11-18T16:46:02.131Z GET /server/api/core/bitstreams/9672ab98-93db-4943-bbb0-ef1a9435545d/content 200 15651785 B (zebra data csv)",
+  "2026-11-18T16:47:27.840Z GET /server/api/core/items/b7853a1e-43fc-483d-906a-6991ec676413 200",
+  "2026-11-18T16:47:29.089Z GET /server/api/core/items/b7853a1e-43fc-483d-906a-6991ec676413/bundles?size=20 200",
+  "2026-11-18T16:47:30.372Z GET /server/api/core/bundles/e7b42bac-d397-417d-8974-2e017c42d195/bitstreams?size=50 200",
+  "2026-11-18T16:47:31.089Z GET /server/api/core/bundles/7749aaf7-c6c1-4b7c-916a-dc7b6f560452/bitstreams?size=50 200",
+  "2026-11-18T16:47:31.766Z GET /server/api/core/items/534b6861-c139-4ab9-abfd-c7a043e8570f 200",
+  "2026-11-18T16:47:32.474Z GET /server/api/core/items/534b6861-c139-4ab9-abfd-c7a043e8570f/bundles?size=20 200",
+  "2026-11-18T16:47:33.189Z GET /server/api/core/items/ee77a68d-6025-437d-9ebf-8794fb74b013 200",
+  "2026-11-18T16:47:33.806Z GET /server/api/core/items/ee77a68d-6025-437d-9ebf-8794fb74b013/bundles?size=20 200",
+  "2026-11-18T16:47:41.516Z GET /server/api/core/bitstreams/ed3d2f36-d101-41db-88db-a638926e566b/content 200 15043 B (whale README)",
+  "2026-11-18T16:47:42.728Z GET /server/api/core/bitstreams/c4ddbb3c-b643-4cd3-b424-9c3da17a5c8b/content 200 30266 B (whale reference data)",
+  "2026-11-18T16:47:43.631Z GET /server/api/core/bitstreams/bab61b80-771a-4568-bfb4-41ff356ee8c6/content 200 4353684 B (whale data csv)"
+ ]
+}

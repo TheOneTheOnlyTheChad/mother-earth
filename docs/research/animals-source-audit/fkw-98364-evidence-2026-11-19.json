@@ -1,0 +1,367 @@
+{
+ "obs": 824,
+ "time_nan": 0,
+ "lat_nan": 0,
+ "lon_nan": 0,
+ "time_first": "2013-10-22T23:16:00Z",
+ "time_last": "2014-02-22T15:28:47Z",
+ "time_sorted": true,
+ "dup_times": 57,
+ "type": {
+  "User": 1,
+  "Argos": 823
+ },
+ "location_class": {
+  "nan": 1,
+  "B": 149,
+  "1": 233,
+  "3": 17,
+  "A": 152,
+  "0": 156,
+  "2": 115,
+  "Z": 1
+ },
+ "instrument": {
+  "SPOT": 824
+ },
+ "comment_values": {
+  "": 822,
+  "Lon > 4 deviations from mean": 2
+ },
+ "type_by_class": {
+  "User | nan": 1,
+  "Argos | B": 149,
+  "Argos | 1": 233,
+  "Argos | 3": 17,
+  "Argos | A": 152,
+  "Argos | 0": 156,
+  "Argos | 2": 115,
+  "Argos | Z": 1
+ },
+ "lat_range": [
+  17.326,
+  25.2792
+ ],
+ "lon_range": [
+  -157.41,
+  -135.3302
+ ],
+ "qartod_time_flag": {
+  "4": 1,
+  "1": 823
+ },
+ "qartod_speed_flag": {
+  "2": 1,
+  "1": 694,
+  "4": 113,
+  "3": 16
+ },
+ "qartod_location_flag": {
+  "1": 824
+ },
+ "qartod_rollup_flag": {
+  "4": 114,
+  "1": 694,
+  "3": 16
+ },
+ "error_radius": {
+  "fill": 775,
+  "populated": 49,
+  "min": 239,
+  "median": 1025.0,
+  "max": 37839,
+  "zeros": 0
+ },
+ "semi_major_axis": {
+  "fill": 776,
+  "populated": 48,
+  "min": 440,
+  "median": 2775.5,
+  "max": 250048,
+  "zeros": 0
+ },
+ "semi_minor_axis": {
+  "fill": 776,
+  "populated": 48,
+  "min": 81,
+  "median": 266.0,
+  "max": 1618,
+  "zeros": 0
+ },
+ "ellipse_orientation": {
+  "fill": 776,
+  "populated": 48,
+  "min": 11,
+  "median": 79.5,
+  "max": 169,
+  "zeros": 0
+ },
+ "offset": {
+  "fill": 824,
+  "populated": 0,
+  "min": null,
+  "median": null,
+  "max": null,
+  "zeros": 0
+ },
+ "offset_orientation": {
+  "fill": 824,
+  "populated": 0,
+  "min": null,
+  "median": null,
+  "max": null,
+  "zeros": 0
+ },
+ "count": {
+  "fill": 824,
+  "populated": 0,
+  "min": null,
+  "median": null,
+  "max": null,
+  "zeros": 0
+ },
+ "z": {
+  "fill": 0,
+  "populated": 824,
+  "min": 0,
+  "median": 0.0,
+  "max": 0,
+  "zeros": 824
+ },
+ "ptt": {
+  "fill": 0,
+  "populated": 824,
+  "min": 98364,
+  "median": 98364.0,
+  "max": 98364,
+  "zeros": 0
+ },
+ "gpe_msd": {
+  "nan": 824,
+  "populated": 0
+ },
+ "gpe_u": {
+  "nan": 824,
+  "populated": 0
+ },
+ "deploy_id": "PcTag041",
+ "trajectory": "573c6646d76c5c52816a4b92",
+ "animal": "HIPc626",
+ "animal_life_stage": "adult",
+ "animal_sex": "not specified",
+ "instrument_tag": "Wildlife Computers SPOT5",
+ "instrument_location": "Wildlife Computers SPOT5",
+ "taxon_name": "Pseudorca crassidens",
+ "taxon_lsid": "urn:lsid:marinespecies.org:taxname:137104",
+ "animal_age": "-9999",
+ "animal_weight": "nan",
+ "animal_length": "nan",
+ "animal_length_2": "nan",
+ "rollup_by_class": {
+  "0 | 1": 125,
+  "0 | 3": 4,
+  "0 | 4": 27,
+  "1 | 1": 201,
+  "1 | 3": 5,
+  "1 | 4": 27,
+  "2 | 1": 104,
+  "2 | 4": 11,
+  "3 | 1": 14,
+  "3 | 4": 3,
+  "A | 1": 125,
+  "A | 3": 3,
+  "A | 4": 24,
+  "B | 1": 124,
+  "B | 3": 4,
+  "B | 4": 21,
+  "Z | 1": 1,
+  "nan | 4": 1
+ },
+ "error_radius_populated_by_class": {
+  "1": 26,
+  "0": 14,
+  "3": 1,
+  "2": 8
+ },
+ "ellipse_populated_by_class": {
+  "1": 26,
+  "0": 13,
+  "3": 1,
+  "2": 8
+ },
+ "error_radius_median_by_class": {
+  "3": 239.0,
+  "2": 338.0,
+  "1": 941.5,
+  "0": 2685.5
+ },
+ "all_rows": {
+  "points": 824,
+  "gap_h_median": 1.25,
+  "gap_h_p90": 6.46,
+  "gap_h_max": 125.5,
+  "gaps_over_24h": 22,
+  "gaps_over_72h": 7,
+  "zero_gaps": 57,
+  "steps_over_10kmh": 218,
+  "steps_over_20kmh": 97,
+  "steps_over_50kmh": 40,
+  "max_kmh": 1148.0
+ },
+ "rollup_pass_only": {
+  "points": 694,
+  "gap_h_median": 1.68,
+  "gap_h_p90": 7.29,
+  "gap_h_max": 125.5,
+  "gaps_over_24h": 22,
+  "gaps_over_72h": 7,
+  "zero_gaps": 0,
+  "steps_over_10kmh": 153,
+  "steps_over_20kmh": 32,
+  "steps_over_50kmh": 0,
+  "max_kmh": 49.9
+ },
+ "rollup_pass_or_suspect": {
+  "points": 710,
+  "gap_h_median": 1.66,
+  "gap_h_p90": 7.15,
+  "gap_h_max": 125.5,
+  "gaps_over_24h": 22,
+  "gaps_over_72h": 7,
+  "zero_gaps": 0,
+  "steps_over_10kmh": 166,
+  "steps_over_20kmh": 46,
+  "steps_over_50kmh": 0,
+  "max_kmh": 49.9
+ },
+ "argos_class_321": {
+  "points": 365,
+  "gap_h_median": 3.1,
+  "gap_h_p90": 14.95,
+  "gap_h_max": 112.1,
+  "gaps_over_24h": 23,
+  "gaps_over_72h": 4,
+  "zero_gaps": 25,
+  "steps_over_10kmh": 50,
+  "steps_over_20kmh": 15,
+  "steps_over_50kmh": 6,
+  "max_kmh": 225.0
+ },
+ "first_rows": [
+  [
+   "2013-10-22T23:16:00Z",
+   "User",
+   "nan",
+   19.2137,
+   -156.0558,
+   4,
+   -9999,
+   -9999,
+   ""
+  ],
+  [
+   "2013-10-23T03:02:00Z",
+   "Argos",
+   "B",
+   19.012,
+   -156.035,
+   1,
+   -9999,
+   -9999,
+   ""
+  ],
+  [
+   "2013-10-23T06:30:33Z",
+   "Argos",
+   "1",
+   18.971,
+   -156.115,
+   1,
+   -9999,
+   -9999,
+   ""
+  ],
+  [
+   "2013-10-23T08:11:27Z",
+   "Argos",
+   "1",
+   18.91,
+   -156.072,
+   1,
+   -9999,
+   -9999,
+   ""
+  ],
+  [
+   "2013-10-23T08:46:23Z",
+   "Argos",
+   "B",
+   18.908,
+   -156.02,
+   1,
+   -9999,
+   -9999,
+   ""
+  ],
+  [
+   "2013-10-23T16:04:17Z",
+   "Argos",
+   "B",
+   18.24,
+   -156.034,
+   1,
+   -9999,
+   -9999,
+   ""
+  ]
+ ],
+ "global": {
+  "title": "False killer whale (Pseudorca crassidens) location data from a satellite telemetry tag (ptt id 98364) deployed in the North Pacific Ocean from 2013-10-23 to 2014-02-23, deployment id 573c6646d76c5c52816a4b92",
+  "id": "573c6646d76c5c52816a4b92",
+  "ptt_id": "98364",
+  "animal_id": "HIPc626",
+  "animal_scientific_name": "Pseudorca crassidens",
+  "project": "Odontocete Tagging in the Main Hawaiian Islands, 2007-2025",
+  "source": "Service Argos",
+  "tagtype": "spot5",
+  "processing_level": "NetCDF file created from position data obtained from Wildlife Computers API.",
+  "history": "2022-05-21T16:19:22Z - Created by the IOOS ATN DAC from the Wildlife Computers API",
+  "date_created": "2025-03-05T23:23:35Z",
+  "date_modified": "2025-03-05T23:23:35Z",
+  "time_coverage_start": "2013-10-22T23:16:00Z",
+  "time_coverage_end": "2014-02-22T15:28:47Z",
+  "deployment_start_datetime": "2013-10-23T07:16:00Z",
+  "deployment_end_datetime": "2014-02-23T00:30:00Z",
+  "deployment_start_lat": "19.2137",
+  "deployment_start_lon": "-156.05579",
+  "license": "These data may be used and redistributed for free, but are not intended for legal use, since they may contain inaccuracies. No person or group associated with these data makes any warranty, expressed or implied, including warranties of merchantability and fitness for a particular purpose, or assumes any legal liability for the accuracy, completeness or usefulness of this information. This disclaimer applies to both individual use of these data and aggregate use with other data. It is strongly recommended that users read and fully comprehend associated metadata prior to use. Please acknowledge the U.S. Animal Telemetry Network (ATN) or the specified citation as the source from which these data were obtained in any publications and/or representations of these data. Communication and collaboration with dataset authors are strongly encouraged.",
+  "citation": "Baird, Robin; Hanson, M. Bradley; Schorr, Gregory S.; Webster, Daniel L.; McSweeney, Daniel J.; Gorgone, Annie M.; Mahaffy, Sabre D.; Holzer, Damon; Oleson, Erin M.; Andrews, Russel D.; Anderson, David; Bradford, Amanda L.. (2025). False killer whale (Pseudorca crassidens) location data from a satellite telemetry tag (ptt id 98364) deployed in the North Pacific Ocean from 2013-10-23 to 2014-02-23, deployment id 573c6646d76c5c52816a4b92. [Dataset]. US Integrated Ocean Observing System (IOOS) Animal Telemetry Network (ATN).",
+  "Conventions": "CF-1.10, ACDD-1.3, IOOS-1.2, ATN Satellite Telemetry Specification v1.0",
+  "institution": "Cascadia Research Collective",
+  "publisher_name": "US Integrated Ocean Observing System (IOOS) Animal Telemetry Network (ATN)",
+  "sea_name": "North Pacific Ocean",
+  "geospatial_lat_min": "17.326",
+  "geospatial_lat_max": "25.2792",
+  "geospatial_lon_min": "-157.41",
+  "geospatial_lon_max": "-135.3302"
+ },
+ "location_class_attrs": {
+  "coordinates": "time z lon lat",
+  "standard_name": "quality_flag",
+  "comment": "Quality codes from the ARGOS satellite (in meters): G,3,2,1,0,A,B,Z. See http://www.argos-system.org/manual/3-location/34_location_classes.htm",
+  "long_name": "Location Quality Code from ARGOS satellite system",
+  "code_values": "G,3,2,1,0,A,B,Z",
+  "code_meanings": "estimated error less than 100m and 1+ messages received per satellite pass, estimated error less than 250m and 4+ messages received per satellite pass, estimated error between 250m and 500m and 4+ messages per satellite pass, estimated error between 500m and 1500m and 4+ messages per satellite pass, estimated error greater than 1500m and 4+ messages received per satellite pass, no least squares estimated error or unbounded kalman filter estimated error and 3 messages received per satellite pass, no least squares estimated error or unbounded kalman filter estimated error and 1 or 2 messages received per satellite pass, invalid location (available for Service Plus or Auxilliary Location Processing)",
+  "instrument": "instrument_location",
+  "platform": "animal",
+  "ancillary_variables": "lat lon",
+  "coverage_content_type": "qualityInformation"
+ },
+ "modeled_string_context": [
+  [
+   "instrument_location",
+   "location_type",
+   "argos / modeled"
+  ]
+ ]
+}
