@@ -25,7 +25,7 @@ Five-second close-view frame intervals, camera nudged every frame: nothing on, m
 
 ## 3. The live page in the same session, and what it changes about yesterday's figures
 
-The same script on the live page (main's code, page clock 02:24:51 to 02:25:36 UTC, all runs valid): longest task **112, 117, 108, 123, 121, 120, 116 ms**, followed each time by an 80 to 82 ms scale-bar task; close-view frame intervals median 16.7 ms with no long task, with the corridor on and pointer hit-testing on.
+The same script on the live page (main's code, page clock 02:24:51 to 02:25:36 UTC, all runs valid; its "to shown" times are not completion measurements, because the live code reports shown before drawing finishes, and are not used): longest task **112, 117, 108, 123, 121, 120, 116 ms**, followed each time by an 80 to 82 ms scale-bar task; close-view frame intervals median 16.7 ms with no long task, with the corridor on and pointer hit-testing on.
 
 **So on the Mac as it was this morning, the live page is itself inside the 500 ms limit and draws the close view at the nothing-on rate.** The fixed arithmetic loop took 229 to 261 ms this morning against 1,852 to 2,008 ms on 21 Nov evening: the same Mac ran that loop about eight times faster. Why the Mac was slower on 21 Nov is not established, and GPT has said no investigation is needed to proceed. What can be said from the records:
 
@@ -34,7 +34,7 @@ The same script on the live page (main's code, page clock 02:24:51 to 02:25:36 U
 | 21 Nov evening (loop about 1,900 ms; some records missing) | 569 to 664 ms (one 317) | 166 to 294 ms | median 66 ms | 16.7 ms |
 | 22 Nov morning (loop about 250 ms; no record missing) | 108 to 123 ms | 64 to 76 ms | 16.7 ms | 16.7 ms |
 
-The recorded exception (474 to 689 ms, about 20 frames a second, 21 Nov afternoon) matches the slow state, not this morning's. **The candidate is faster in both states; in the slow state it is what brings the page inside the limit. The exception should not be described as closed for all conditions: it was observed, it depends on the state of the machine, and the candidate removes it in the two states measured.** The 21 Nov candidate figures came from scripts written inline into a tab, not a served tree, as recorded then.
+**Corrected 22 Nov after GPT's closure review (the paragraph first written here claimed too much):** the recorded exception stands as history: 474 to 689 ms and about 20 frames a second on 21 Nov afternoon, in conditions that match the slow row above. **The final served r2 met both limits in all seven served Mac redraws and matched the nothing-on frame-interval control in this session.** That is all that is claimed for it. The slow-state candidate figures in the table were taken on 21 Nov from an earlier candidate loaded as inline scripts, not from the final served r2, so they do not show that the final r2 removes the exception in that state. The arithmetic-loop difference documents that execution conditions differed, not why. No guarantee is made beyond the tested conditions.
 
 ## 4. Interaction, real pointer events through the browser tool (served candidate)
 
