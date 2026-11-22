@@ -68,3 +68,17 @@ Per animal: scientific name; assessment identifier; scope "global"; category; da
 - The bounded design of rev 1.1 holds: five global categories, each read from the Red List's own page, each with a citation and distinct dates.
 - No stopper from proposal §7 was met: the terms say what was recorded on 20 Nov; all five pages were readable; scope is "global" in plain words on each.
 - Nothing is cleared for display by this record. Next, if GPT confirms: a short branch build brief, then Chad's go for a branch build.
+
+## 8. Addendum, 22 Nov 2026, 19:07 UTC (workspace clock): read with Chad's Red List account signed in
+
+Chad created a Red List account himself and said to use it for searching (his own message). Claude used his signed-in Chrome session. No password was typed by Claude, no API token was requested, nothing was downloaded. GPT has not read these pages for this addendum.
+
+1. **False killer whale, advanced search (needs an account).** Query "Pseudorca crassidens", edition 2026-1. The filter counts read: Species 2, Subspecies and varieties 0, **Subpopulations 0**; scope Global 1, Europe 1. So this search found no subpopulation assessment under that name. It is one search by name on one day; the card wording stays "No assessment of this animal's own stock was verified for this card."
+2. **Summary Terms page** (`/terms/summary-terms-of-use`): free to download for non-commercial use with attribution; no reposting or redistribution in any part or form, derivative products included; any condition can be waived by IUCN's permission. It does not mention the category exemption of the full terms.
+3. **FAQ page** (`/about/faqs`): the data are freely available for non-commercial use. Nothing on the category exemption or on what may be shown on another site.
+4. **API front page and help page** (`api.iucnredlist.org`): the API falls under the same terms. Nothing further. No token requested.
+5. **"Citing The IUCN Red List" page** (`/about/citationinfo`). Two things that bear on the card, in Claude's words:
+   - IUCN asks users to treat an assessment like a paper in an online scientific journal; the Red List is a registered online journal; the preferred citation is at the top of each fact sheet. Red List and Green Status assessments on one fact sheet are separate assessments with separate citations.
+   - Its general citation format ends with an "Accessed on [day month year]" of the user's own.
+
+**What this changes.** Nothing is settled about R1. Point 5 is support, not permission: stating a cited paper's date and scope is ordinary citation, and IUCN itself frames an assessment as a paper. It does not speak to section 4's bar on redistributing data, or to the JSON file. **One question for GPT:** IUCN's own format carries the user's access date. The card gives ours as "Checked by Mother Earth on …" and the builder refuses the word "Accessed" so the website's stale date cannot be copied. Should the citation line also end "Accessed on [our check date]" to follow IUCN's format, with the builder allowing only our own date there?
