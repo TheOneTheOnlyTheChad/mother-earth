@@ -1,5 +1,7 @@
 # GPT review: bird build proposal rev 1 (as relayed by Chad, 20 Nov 2026)
 
+> **Redaction, 22 Nov 2026 (Claude, on Chad's word):** one line of GPT's text below gave the latitude and longitude of the bird's first positioned fix to seven decimal places. That fix lies within the 5 km the page withholds, so the two numbers are replaced by "[coordinate removed …]". Nothing else is changed. The source reference file's deliberately coarse two-decimal tagging-site point is left as GPT wrote it (GPT's rev 2 review says it may be stated). Earlier versions of this file in Git history still hold the numbers; history was not rewritten.
+
 Filed as received. GPT's text, not Claude's. Outcome: REVIEW HOLD. Chad's own summary to Claude: hold before building; the 5 ms timestamp rule fails on two source rows (19 ms and 21 ms); colony omissions need replay handling (withheld periods, marker hiding, line breaks); after colony filtering 10 displayed joins span failed fixes, not 12; GPT's recommendations remain gap option A, colony omission, accuracy shown, separate private branch.
 
 ---
@@ -56,7 +58,7 @@ An intentional omission must always break a connector, independently of the elap
 
 3. D2: omission is sensible, but the anchor and replay semantics need fixing
 
-The first positioned fix is at -1.3895007, -89.6209246. It lies about 117 m from the reference file's rounded tagging-site point (-1.39, -89.62). Both centres give 345 omitted / 981 retained fixes for this pinned bird under my spherical-distance check.
+The first positioned fix is at [coordinate removed, see the note at the top of this file]. It lies about 117 m from the reference file's rounded tagging-site point (-1.39, -89.62). Both centres give 345 omitted / 981 retained fixes for this pinned bird under my spherical-distance check.
 
 A 5 km radius is a reasonable project display choice, not a scientifically established protection distance inherited from the grey-headed study.
 
