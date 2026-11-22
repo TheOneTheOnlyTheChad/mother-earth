@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 17:11 UTC (clock reading) — **Earth from Space alarm: review of the stop accepted (no `__unknown__` route, no undocumented API route); final naming check at 17:10:43 UTC found the test Worker's rows now under its own name. Nothing tested, nothing deleted, no monitor. A revised form-native test plan is with Chad. `EARTHVIEW_ENABLED` stays `manual`. Docs only.** (hub 0.6.22 unchanged; Earth from Space thread)
+
+- **State:** Worker `mother-earth-alarmtest` exists (no bindings, no cron, address off, two harmless invocations at 15:09 UTC, none since). Notification policies: the budget alert only. `mother-earth` unchanged.
+- **Naming:** the test Worker's two rows were `__unknown__` at 15:18 UTC and carried its name at 17:10 UTC: a new Worker's rows are named late (after more than 9 minutes, within 2 hours). Whether a row written now is named at once is not established.
+- **Limits written into the plan (assessment section 12.1):** a clean test cannot tell which window behaviour the form uses, so it shows no protection against a late-arriving row; the dataset is sampled, so this is supplementary warning coverage, **not a dependable alarm**; an email counts only when correlated with the failure's own row.
+- **Corrections on record:** Claude's suggestion to test against `__unknown__` and its claim that only the test Worker produces unnamed rows were wrong and are withdrawn (assessment section 11).
+- **Next:** Chad chooses: the revised form-native test (new Approve line; about an hour and a half with him at the Mac), a delivery-only test, or stop and delete the test Worker. File: `reviews/2026-11-22-earth-from-space-alarm-assessment.md` sections 10 to 12 (branch `earth-from-space-rc` `7d73f5d`, copied here).
+
 ## 22 Nov 15:14 UTC (clock reading) — **Earth from Space alarm: on Chad's Approve line the throwaway Worker `mother-earth-alarmtest` was created, then the work was STOPPED before any monitor or test leg. No monitor exists. The test Worker still exists (no bindings, no cron, workers.dev address switched off). `mother-earth` untouched; `EARTHVIEW_ENABLED` stays `manual`.** (production: one extra Worker on the account; hub 0.6.22 unchanged; Earth from Space thread)
 
 - **Chad's line (his own message):** create the test Worker and test monitor, run T-cpu, T-mem, T-cron, delete both, then create the hub monitor only if clean.

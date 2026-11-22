@@ -304,3 +304,67 @@ the isolate's memory at the end of that invocation. It establishes neither peak 
 
 **Where this leaves the alarm:** the assessment has exposed limits; **it has not established a dependable alarm.**
 Stage C is unaffected.
+
+## 12. Final naming check: the name HAS appeared. Nothing tested, nothing deleted (22 Nov 2026 17:11 UTC, clock reading)
+
+Read-only, 17:10:43 UTC, two hours after the test Worker was created. No traffic was generated: the test Worker's
+invocation records still show only 15:09:16 and 15:09:39, its address is off, it has no cron.
+
+- Rows with `scriptName` `mother-earth-alarmtest` since 15:00: **two**, fetch, success, at 15:09:16 and 15:09:39.
+- Rows with `scriptName` `__unknown__` today: **none**. The two rows that were unnamed at 15:18 are now under the
+  Worker's name.
+- So **a new Worker's rows are first recorded as `__unknown__` and are given its name later: after more than 9
+  minutes and within 2 hours** (two readings; the moment is not known). Whether a row written *now*, with the name
+  already known, is named at once is **not established**. The Stage A probe's rows being unnamed today is then more
+  likely an effect of its deletion; also not established.
+- Scripts on the account: `mother-earth`, `mother-earth-alarmtest`. Notification policies: the budget alert only.
+
+By the agreed rule: **no test was run and the Worker was not deleted.** A revised form-native plan follows for Chad's
+decision. Nothing in it is approved.
+
+### 12.1 Revised test plan, form-native (NOT approved, NOT run)
+
+**Test monitor "TEST alarmtest, delete"** (Cloudflare dashboard form, Threshold, Custom SQL, automatic time range):
+
+| Setting | Value |
+|---|---|
+| Query | `SELECT count() AS "value" FROM "events"."workersInvocations" WHERE "scriptName" = 'mother-earth-alarmtest' AND "status" NOT IN ('success', 'clientDisconnected')` (no time condition; the form supplies the range) |
+| Trigger when | Query result > 0 |
+| Average over | 15m |
+| Run every | Automatic (one minute for this dataset) |
+| Repeat notification after | 1h |
+| Destination | Email, Chad's address, typed by him |
+
+Saved only if the form's preview runs without error and shows 0.
+
+**Steps**
+
+0. **Naming pre-check (no failure):** switch the address on; one request to `/`; read when its row appears and under
+   which name. **If it is `__unknown__`, stop: the legs would be invisible to the monitor.** One observation of row
+   delay.
+1. **T-cpu**, 2. **T-mem**, 3. **T-cron**, as in section 5, each once, at least 20 minutes apart, the address switched
+   off between and after.
+4. For each leg, **an email counts as evidence only when correlated with the failure's own row**: its `timestamp`,
+   `invocationType` (fetch or cron) and `status` label, and the invocation record's outcome (`exceededCpu` or
+   `exceededMemory`). Chad reports when each email reached his phone. Each delay is one observation.
+5. Delete the test monitor and the test Worker; read back that only `mother-earth` and the budget alert remain.
+6. Only if every leg run is clean: create the hub monitor with the same settings and `scriptName` `mother-earth`.
+
+**What a clean run would show:** that this dataset, this query shape and this notification chain produced an email
+for a CPU ending and a memory ending of a fetch invocation and a CPU ending of a scheduled invocation, on a
+different Worker, when the row arrived promptly.
+
+**What it cannot show, however clean:**
+
+- **Which window behaviour the form uses.** A rolling 15-minute read and an average of earlier one-minute results
+  would both catch a failure whose row arrives promptly. So it shows **no protection against a late-arriving row.**
+- **That every failure produces an email.** The dataset is sampled; a failure inside a burst of same-second requests
+  can be left out. **This is supplementary warning coverage, not a dependable alarm.**
+- Anything about `mother-earth` directly: the hub monitor is the same query with another name, an inference.
+- A missed inspection, a source failure, a validation refusal, stopped triggers.
+
+**Cost and time:** as section 5 (two CPU legs of up to 30 s each; a handful of invocations). About an hour and a half
+with Chad at the Mac to type his address into the form twice and to confirm three emails from his phone.
+
+**Alternatives still open:** a delivery-only test against the hub's own rows (CPU, memory and scheduled coverage
+recorded as untested); or stop, delete the test Worker, and record "no alarm" for Stage D with these reasons.
