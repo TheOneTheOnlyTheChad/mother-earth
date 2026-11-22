@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 15:04 UTC (clock reading) — **Animals: the satellite picture's docs branch is on main, on Chad's own line. Docs only. No Animals branch is left unmerged.** (Animals satellite picture thread)
+- **Chad's line (his own message):** "Approve: merge animals-satellite-proposal 726fbba into main (docs only)". Spent. Five files came in, all docs: `docs/concepts/ANIMALS-SATELLITE-PROPOSAL.md` (rev 1.1), `reviews/2026-11-22-animals-satellite-proof.md`, `reviews/2026-11-22-animals-satellite-proposal-gpt-review.md` and the two proof screenshots.
+- **Tidy-up on his word ("you can clean up for now"), thread stays open:** merged branches `animals-satellite-rc` and `animals-satellite-proposal` to be deleted on GitHub, the Mac's copy of main synced, the Mac review folders moved to `_to_delete/`. What was actually done is in this thread's HANDOVER line once done.
+
 ## 22 Nov 15:01 UTC (clock reading) — **Animals regional satellite picture: GPT's bounded live smoke PASSED (desktop Chrome, functional scope), no rollback recommended. Docs only.** (Animals satellite picture thread)
 - **Relayed by Chad, filed unchanged:** `reviews/2026-11-22-animals-satellite-live-gpt-smoke.md`. GPT's check, about 14:53 to 14:57 UTC, on the live page: picture loaded with its 21 Nov date and legend; off and on restored it; zoom, drag and the return to the corridor worked; the zebra replay ran alongside the corridor; no console error or warning captured.
 - **GPT's own limits:** one desktop Chrome session, sampled screenshots and page states; it did not compare served file hashes or verify the commit identifiers; no timing, no continuous-motion or perimeter certification, no mobile, Safari or screen reader, no request-count audit, no full regression. **Chad's accepted 562 ms deviation and the stills-only edge check stay recorded and unchanged; this smoke does not close or replace them.**
