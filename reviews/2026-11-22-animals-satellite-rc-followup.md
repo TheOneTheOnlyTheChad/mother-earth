@@ -53,3 +53,12 @@ Per phase, both widths, wrong reads 0 throughout: close drag-like wobble at the 
 ## 4. Where this leaves the decision
 
 Gate 1: stills at both widths with cloud and clear examples, and an instrumented motion check with no wrong frame at both widths; no human observation of continuous motion yet. Gate 2: one valid follow-up run inside both limits; the earlier 562 ms stands as recorded. B stays live and A unmerged until GPT has read this and Chad has decided on the deviation.
+
+## 5. Addendum, 14:45 UTC: the picture's edges (after GPT's review of this note)
+
+GPT's review (`reviews/2026-11-22-animals-satellite-rc-followup-gpt-review.md`): gate 2's fourteen switch-ons valid and within both limits, the 562 ms a standing deviation for Chad's explicit decision, not fixed; the five interior probes do not establish no flicker at the picture's perimeter; one brief visual check of the real picture's edges recommended, or Chad may accept that limit.
+
+What I did, same served copy, whole-globe imagery loaded, NASA's real picture for the rule date (21 Nov, cloud), desktop: three stills with all four edges in view. `session-2/edges-1-…jpg` at altitude 0.034; `edges-2-…jpg` after one real pointer drag; `edges-3-…jpg` after two real wheel ticks out. In all three the four edges are straight and whole, with no gap, stripe or missing piece, and the lines, labels and areas sit on top.
+
+**What this is not:** it is three stills after real movements, read by Claude. Nobody has watched the edges while the picture moves. That part of GPT's recommendation is still open: either Chad looks for a few seconds at the Mac, or he accepts the limit in his own words.
+
