@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 07:31 UTC (clock reading) — **HUB 0.6.22 DEPLOYED on Chad's own Approve line: code only, `EARTHVIEW_ENABLED` left unset. Nothing is collected or stored for Earth from Space; the tab is not on the page.** (production: hub code; no setting, binding, cron or page file changed; Earth from Space thread)
+
+- **Chad's line (his own message):** "Approve: deploy hub 0.6.22 from earth-from-space-rc b8e55e8, phase1/worker.js sha256 17798a44a217bdb3eafe1ccd8852833cc050b9bb0e9094f65c59a2db2eeda080, code only, EARTHVIEW_ENABLED left unset; read back hash and settings; stop and report if any earthview/ object exists".
+- **Before (dashboard tab, 07:28:37 UTC):** code `2028e2da…01c3`, 532,761 bytes (the 0.6.21 file of `559f2e4` without its final newline; also read through the connector at 07:24 UTC); 24 bindings (13 plain, 9 secret, D1, R2); crons `*/5`, `*/15`, `11,41`, `:07`; no `EARTHVIEW_*` variable; no object under `earthview/`.
+- **Deploy:** file fetched in the dashboard tab from raw.githubusercontent at `b8e55e8` (540,792 bytes, sha256 `17798a44…a080`, checked there); `earthview/` and settings re-read immediately before; content-only upload by Claude, PUT 07:29:48 to 07:29:52 UTC, HTTP 200, Cloudflare `modified_on` 07:29:51.923 UTC. The upload was not refused this time; Chad's paste was not needed.
+- **After (07:30:14 UTC):** code read back `17798a44a217bdb3eafe1ccd8852833cc050b9bb0e9094f65c59a2db2eeda080`, 540,792 bytes (exact, final newline included); hub `/` reports 0.6.22; 24 bindings, same types; 4 crons unchanged; no `EARTHVIEW_*` variable; `earthview/` empty.
+- **First tick that started after the deploy:** `*/5` at 07:30:09 UTC, outcome ok, CPU 6 ms, wall 869 ms, log line `five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)`. The 07:30 `*/15` invocation had not appeared in the records at the 07:30:55 read (not read since).
+- **Health (07:31:02 UTC):** the eight `/health/` URLs all 200. `/snapshot/earthview/meta` answers 200 with `frame: null`. `/status` last runs: ships `degraded`, `opensky-bbox` and `firms:recovery` `down`, the rest `ok`; these three were NOT compared with a reading from before the deploy.
+- **Rollback:** hub 0.6.21 = `phase1/worker.js` at `559f2e4` (sha256 `7cbc8cc4…c853`; live form without final newline `2028e2da…01c3`). **Never main's file (0.6.19).** Main is not the live hub.
+- **Next:** Stage C by runbook rev 2, on Chad's own Stage C line; runbook section 0 reads first (usage figures 0.7, lifecycle rules 0.3, baseline percentiles 0.6 still to be read).
+
 ## 22 Nov 07:23 UTC (clock reading) — **Earth from Space: the EUMETSAT GeoColour REGISTER entry is FILED on Chad's own Approve line, before any picture is stored. Docs only; nothing deployed, stored or enabled.** (production: main is served by Pages, so this is a publication of a document; no page or hub file changed; hub stays 0.6.21, gate unset; Earth from Space thread)
 
 - **Chad's line (his own message):** "Approve: file the EUMETSAT GeoColour REGISTER entry as drafted in reviews/2026-11-22-earth-from-space-register-draft.md".
