@@ -128,7 +128,12 @@ What that means here, and no more:
 - **Scheduled picture runs** ride the `*/5` trigger: 30 s of CPU for the whole invocation (the earlier collectors
   included), 15 minutes of wall time. Stage B's whole-invocation CPU was 0.59 to 0.83 s; our own checkpoint is 5,000 ms.
 - **The manual run of Stage C is an HTTP request**: 30 s of CPU by default; it does not inherit the scheduled limits.
-  I did not find a wall-time limit stated for HTTP requests on that page and do not assert one.
+  On duration the same page says: "There is no hard limit on duration for HTTP-triggered Workers", "As long as the
+  client remains connected, the Worker can continue processing", and "When the client disconnects or the response is
+  complete, tasks associated with that request may be canceled." (Corrected 22 Nov after GPT's review: the first
+  version of this packet said no such statement had been found.) So the caller's 300-second client time-out is not
+  proof that the invocation has ended, and it may or may not have been cancelled: **a lost answer is reconciled, never
+  assumed to have done nothing and never repeated.**
 - Nothing of ours interrupts the decode; these platform limits are the only enforcement during it.
 
 ## 6. Account reads for the packet (read-only, 22 Nov 05:53 UTC, dashboard tab)
@@ -184,3 +189,10 @@ a month; a cleanup that deletes adds one or two writes to a published run. The p
 His go for nothing further is needed for review. After GPT: his line to file the REGISTER entry; his line to deploy
 0.6.22 (by his paste into the Cloudflare editor, as for every hub deploy); his Stage C line; then the rehearsal line;
 then the Stage D line with D8's acceptance in words. D3 (a note to EUMETSAT) is open. No provider message is authorised.
+
+## 10. After GPT's review (22 Nov)
+
+GPT: focused Worker code review **PASS**; operational package on **HOLD** for four bounded items
+(`reviews/2026-11-22-earth-from-space-0.6.22-candidate-gpt-review.md`). The Worker file is unchanged. The runbook is
+rev 2 with the three corrections. **Still open: a native macOS run of the caller suite** (runbook section 5). Nothing
+is deployed, stored or enabled.
