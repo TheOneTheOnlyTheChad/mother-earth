@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 07:23 UTC (clock reading) — **Earth from Space: the EUMETSAT GeoColour REGISTER entry is FILED on Chad's own Approve line, before any picture is stored. Docs only; nothing deployed, stored or enabled.** (production: main is served by Pages, so this is a publication of a document; no page or hub file changed; hub stays 0.6.21, gate unset; Earth from Space thread)
+
+- **Chad's line (his own message):** "Approve: file the EUMETSAT GeoColour REGISTER entry as drafted in reviews/2026-11-22-earth-from-space-register-draft.md".
+- **What was done:** the drafted entry appended to the end of `REGISTER.md`, unchanged except its "Filed" line (date and his line). No existing line of the register changed. `REGISTER.md` sha256 after filing `f0f14e6818d37121d201567c18748d022fdd7250c8b8a9d6344a3d3e50eee887`. The draft file's title now says it is filed.
+- **What the entry does not claim:** a reading of the EUMETSAT Data Policy PDF for GeoColour (unread by Claude and Chad). D3 (a note to EUMETSAT before sustained requests) is still Chad's open question; no enquiry sent.
+- **Runbook precondition 0.4 is met.** Next, each on Chad's own line: deploy hub 0.6.22 (after fresh reads of the live hub), then Stage C.
+
 ## 22 Nov 07:20 UTC (clock reading) — **Earth from Space: GPT CLOSED its hold on the 0.6.22 operational package (focused closure PASS, all four items). Chad's native macOS run of the caller suite is on file: 80 passed, 0 failed. Hub 0.6.22 is reviewed and NOT deployed. Docs only; nothing deployed, stored or enabled.** (hub stays 0.6.21, gate unset; Earth from Space thread, continued in a new thread)
 
 - **Native run (the one open item):** Chad ran `node --no-warnings phase1/earthview-admin.test.mjs` in an ordinary Terminal on the Mac from the review copy at `b8e55e8`: `earthview-admin: 80 passed, 0 failed`. macOS 26.5.2, bash 3.2.57, curl 8.7.1, node v24.14.1 (captured by a second command in the same Terminal). Output file sha256 `5572e62e…6808` (282 bytes; its first 38 bytes are the run output as first written, `9b93f968…fa73`). The script and suite in the Mac folder equal the branch. Evidence and limits: `reviews/evidence/2026-11-22-earth-from-space-0.6.22/native-caller-run-2026-11-22.md`.
