@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 12:40 UTC (clock reading) — **Earth from Space STAGE C MET, with qualifications. GPT reviewed the result (no not-met condition); Chad looked at the stored picture and the page screenshot and reported no problem ("Looks perfect to me"). One frame is stored and public by URL; `EARTHVIEW_ENABLED` stays `manual`; nothing runs by itself; the tab is NOT on the live page. Docs only since the last entry.** (hub 0.6.22 unchanged; Earth from Space thread)
+
+- **Qualifications kept:** Workers Observability volume not read (no unqualified zero-cost claim); the three EUMETSAT requests are inferred from the code path; the wait line that timed the run was not reviewed (the run fell inside the authorised window); memory 55.48 MB is a two-request minute-bucket maximum, not an invocation peak or a headroom bound; the page was seen by hash-checked injection and by a reduced screenshot on Chad's phone, which does **not** clear Stage E.
+- **Kept in the record:** the C1 caller finding (r2 fixes it; the 18 earlier breaks not rerun on macOS) and two unused windows.
+- **Files (branch `earth-from-space-rc` `4f0375d`, copied here):** `reviews/2026-11-22-earth-from-space-stage-c-result.md` (verdict section added on top; the proposed verdict kept beneath), `reviews/2026-11-22-earth-from-space-stage-c-result-gpt-review.md`.
+- **Next, each on Chad's own line, none requested yet:** (1) email-alarm assessment (runbook 2a; a settings change; cost to be shown first); (2) monitoring rehearsal (runbook 2: four hourly opportunities, the third omitted; harmless); (3) Stage D, with D8 accepted in words and D3 decided, and the caller r2 hash in its package. D9 optional. **No collection run is authorised.**
+- **Mac `_review/` kept for now:** `earth-from-space-0.6.22-candidate/`, `earth-from-space-0.6.22-caller-r2/` (the script Stage D's status steps need), `earth-from-space-stage-c/` (originals and claims: do not move while Stage D may need the claims).
+
 ## 22 Nov 12:25 UTC (clock reading) — **Earth from Space STAGE C: ONE PICTURE IS STORED. Chad's one manual run (11:51:10 UTC) published the 11:20 UTC frame; record and picture agree; CPU 536 ms; no failed invocation. Result written with two open qualifications. `EARTHVIEW_ENABLED` stays `manual`: nothing runs by itself. The frame is publicly downloadable by URL. The tab is NOT on the live page.** (production: one picture and four small records under `earthview/`; hub code 0.6.22 unchanged; Earth from Space thread)
 
 - **Chad's line for the run (his own message):** one manual run in the window 11:51 to 11:54 UTC with caller r2. Pre-check 11:37:56 UTC clean (every tick since 08:15 logged "not scheduled (EARTHVIEW_ENABLED is manual)"; no admin call; storage unchanged). The run was started by a one-line wait Claude gave him (not reviewed by GPT; it only timed the start of the reviewed script).
