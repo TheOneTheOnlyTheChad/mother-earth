@@ -1,0 +1,9 @@
+step: C2-hold
+command: hold
+request: POST https://mother-earth.chadoberholzer.workers.dev/admin/earthview/hold?apply=1
+called_at: 2026-11-22T08:06:57Z
+answered_at: 2026-11-22T08:07:00Z
+curl_exit: 0
+http_status: 200
+answer_file: C2-hold.json (356 bytes)
+curl_message: 

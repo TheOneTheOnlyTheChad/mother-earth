@@ -1,0 +1,9 @@
+step: C5-release
+command: release-apply
+request: POST https://mother-earth.chadoberholzer.workers.dev/admin/earthview/release?apply=1
+called_at: 2026-11-22T08:11:32Z
+answered_at: 2026-11-22T08:11:35Z
+curl_exit: 0
+http_status: 200
+answer_file: C5-release.json (477 bytes)
+curl_message: 

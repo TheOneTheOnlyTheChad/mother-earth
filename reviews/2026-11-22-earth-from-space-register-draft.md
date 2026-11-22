@@ -1,4 +1,4 @@
-# REGISTER entry for Earth from Space — DRAFT, not filed (22 Nov 2026)
+# REGISTER entry for Earth from Space — draft of 22 Nov 2026 (**FILED in `REGISTER.md` on main, 22 Nov 2026, on Chad's own Approve line; the text below the line is the draft as reviewed, unchanged**)
 
 For the Stage C packet, as GPT asked (review of proposal rev 1.1). Chad decided on 22 Nov that the entry is filed
 **before Stage C**. It is filed only on his own line: `Approve: file the EUMETSAT GeoColour REGISTER entry as drafted in

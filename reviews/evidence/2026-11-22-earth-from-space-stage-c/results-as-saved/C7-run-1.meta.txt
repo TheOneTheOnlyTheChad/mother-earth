@@ -1,0 +1,9 @@
+step: C7-run-1
+command: run
+request: POST https://mother-earth.chadoberholzer.workers.dev/admin/run/earthview
+called_at: 2026-11-22T11:51:10Z
+answered_at: 2026-11-22T11:51:30Z
+curl_exit: 0
+http_status: 200
+answer_file: C7-run-1.json (87 bytes)
+curl_message: 
