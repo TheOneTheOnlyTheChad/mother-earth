@@ -1,0 +1,9 @@
+step: C5b
+command: release-plan
+request: GET https://mother-earth.chadoberholzer.workers.dev/admin/earthview/release
+called_at: 2026-11-22T08:11:01Z
+answered_at: 2026-11-22T08:11:03Z
+curl_exit: 0
+http_status: 200
+answer_file: C5b.1.json (484 bytes)
+curl_message: 

@@ -1,0 +1,9 @@
+step: C5a
+command: sweep-plan
+request: GET https://mother-earth.chadoberholzer.workers.dev/admin/earthview/sweep
+called_at: 2026-11-22T08:10:49Z
+answered_at: 2026-11-22T08:10:51Z
+curl_exit: 0
+http_status: 200
+answer_file: C5a.1.json (667 bytes)
+curl_message: 

@@ -1,0 +1,9 @@
+step: C2s
+command: status
+request: GET https://mother-earth.chadoberholzer.workers.dev/admin/earthview/status
+called_at: 2026-11-22T08:08:09Z
+answered_at: 2026-11-22T08:08:12Z
+curl_exit: 0
+http_status: 200
+answer_file: C2s.1.json (437 bytes)
+curl_message: 
