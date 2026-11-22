@@ -56,6 +56,7 @@ const BREAKS = {
   'stale-completes': [JS, "if (tok !== st.tok || !st.on || st.status !== 'loading') return; waited", "waited"],
   // wheel zoom (section 12)
   'wheel-not-a-move': [JS, "ct.addEventListener('start', userMoved);", ""],
+  'wheel-stale-scale': [JS, "ct.addEventListener('start', userMoved); ct.addEventListener('end', () => { if (st.status === 'shown') settle(); }", "ct.addEventListener('start', () => { st.pendingMove = false; if (st.view) { st.view = ''; } paintLegend(); }); ct.addEventListener('end', () => { }"],
   // the regional picture (section 11)
   'pic-auto-again': [JS, "if (P.status === 'idle' && P.used === 0) picRequest();", "if (!P.bitmap && !P.ctrl) picRequest();"],
   'pic-no-cap': [JS, "if (P.ctrl || P.bitmap || P.used >= p.max_requests) return;", "if (P.ctrl || P.bitmap) return;", " && P.status === 'failed' && P.used < st.man.picture.max_requests; };", " && P.status === 'failed'; };"],
@@ -81,7 +82,7 @@ const EXPECT = { 'no-list-check': '4a', 'no-manifest-check': '4a', 'no-display-c
   'nesting-not-in-legend': '2e', 'retry-focus-to-switch': '3j', 'retry-hides-while-loading': '3j', 'retry-lingers-after-blur': '3j', 'retry-active-while-loading': '3j', 'facts-retry-not-held': '3k',
   'one-stage': '10a', 'high-first': '10a', 'sides-back': '10b', 'pointer-on': '10c', 'no-quiet': '10f', 'premature-shown': '10a', 'no-frame-wait': '10h', 'handed-counts-as-built': '10i', 'no-draw-timeout': '10i', 'stale-completes': '10j',
   'pic-auto-again': '11j', 'pic-no-cap': '11i', 'pic-xml-accepted': '11h', 'pic-any-size': '11h', 'pic-before-areas': '11e', 'pic-shown-at-attach': '11g', 'pic-stays-after-off': '11d', 'pic-no-abort-on-off': '11j', 'pic-refetch-on-reenable': '11d', 'pic-flipped': '11c', 'pic-box-order': '11b',
-  'pic-raycast': '11b', 'pic-no-edge': '11b', 'pic-fails-areas': '11h', 'pic-request-on-move': '11m', 'pic-retry-hides-focused': '11h', 'pic-delays-areas': '11f', 'pic-late-keeps': '11j', 'wheel-not-a-move': '12a' };
+  'pic-raycast': '11b', 'pic-no-edge': '11b', 'pic-fails-areas': '11h', 'pic-request-on-move': '11m', 'pic-retry-hides-focused': '11h', 'pic-delays-areas': '11f', 'pic-late-keeps': '11j', 'wheel-not-a-move': '12a', 'wheel-stale-scale': '12a' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
 
 // ---------- the committed files, and this suite's own reading of them
@@ -414,9 +415,12 @@ const arrived = async (name, n = 1) => { for (let i = 0; i < 400; i++) { if (S.l
   if (want(12)) { reset(); const { ctx, page, errs } = await open(); await page.click('#cor-tgl'); await shown(page); const s0 = await state(page), box = await page.locator('#an-globe').boundingBox(), cx = box.x + box.width / 2, cy = box.y + box.height / 2;
     const settle = async () => { let last = null; for (let i = 0; i < 40; i++) { await page.waitForTimeout(200); const v = (await state(page)).view; if (last && Math.abs(v.altitude - last.altitude) < 1e-7) break; last = v; } await page.waitForTimeout(500); return state(page); };
     await page.mouse.move(cx, cy); await page.mouse.wheel(0, 240); const s1 = await settle();
-    ok('12a wheel out over the globe: the view moves further away and stays over the same place, the page itself does not scroll, the areas stay shown, the wheel counts as the visitor\'s own move (the line "View moved to the corridor." goes) and the scale is worked out again for the new view',
-      s0.status === 'shown' && Math.abs(s0.view.altitude - MAN.view.altitude) < 1e-6 && s0.legend.includes('View moved to the corridor.') && s1.view.altitude > s0.view.altitude * 1.05 && Math.abs(s1.view.lat - s0.view.lat) < 0.3 && Math.abs(s1.view.lng - s0.view.lng) < 0.3 && s1.scrollY === s0.scrollY && s1.status === 'shown' && s1.polys.join() === 'medium,high' && !s1.legend.includes('View moved to the corridor.') && !s1.scaleHidden && !!s1.scaleText && !s1.gotoHidden,
-      [s0.view, s1.view, s0.scrollY, s1.scrollY, s1.status, s1.legend.slice(-60), s0.scaleText, s1.scaleText]);
+    // this suite's own measurement of the bar after the zoom (as in 5a): the surface distance between the globe points under its two ends
+    const own12 = await page.evaluate(() => { const g = ME.animalsGlobe.raw(), el = document.getElementById('an-globe'), bar = document.getElementById('cor-scale-bar').getBoundingClientRect(), bx = el.getBoundingClientRect(), y = el.clientHeight / 2; return { a: g.toGlobeCoords(bar.left - bx.left, y), b: g.toGlobeCoords(bar.right - bx.left, y), w: bar.width }; });
+    const R12 = Math.PI / 180, hav12 = (a, b) => a && b ? 2 * 6371.0088 * Math.asin(Math.sqrt(Math.sin((b.lat - a.lat) * R12 / 2) ** 2 + Math.cos(a.lat * R12) * Math.cos(b.lat * R12) * Math.sin((b.lng - a.lng) * R12 / 2) ** 2)) : NaN, d12 = hav12(own12.a, own12.b), stated12 = parseFloat(s1.scaleText);
+    ok('12a wheel out over the globe: the view moves further away and stays over the same place, the page itself does not scroll, the areas stay shown, the wheel counts as the visitor\'s own move (the line "View moved to the corridor." goes) and the scale shown afterwards is right for the new view: its stated length is within 3% of the surface distance between the globe points under its two ends (this suite\'s own measurement)',
+      s0.status === 'shown' && Math.abs(s0.view.altitude - MAN.view.altitude) < 1e-6 && s0.legend.includes('View moved to the corridor.') && s1.view.altitude > s0.view.altitude * 1.05 && Math.abs(s1.view.lat - s0.view.lat) < 0.3 && Math.abs(s1.view.lng - s0.view.lng) < 0.3 && s1.scrollY === s0.scrollY && s1.status === 'shown' && s1.polys.join() === 'medium,high' && !s1.legend.includes('View moved to the corridor.') && !s1.scaleHidden && /km · scale at the centre of the view/.test(s1.scaleText) && Math.abs(stated12 - d12) / d12 <= 0.03 && !s1.gotoHidden,
+      [s0.view, s1.view, s0.scrollY, s1.scrollY, s1.status, s1.legend.slice(-60), s0.scaleText, s1.scaleText, d12, own12.w]);
     await page.mouse.move(cx, cy); await page.mouse.wheel(0, -120); const s2 = await settle();
     ok('12b wheel in: the view comes closer again and stays above the surface; the page still does not scroll', s2.view.altitude < s1.view.altitude * 0.98 && s2.view.altitude > 0 && s2.scrollY === s0.scrollY && s2.status === 'shown', [s1.view.altitude, s2.view.altitude, s2.scrollY]);
     await page.click('#cor-goto'); await page.waitForTimeout(600); const s3 = await state(page);
