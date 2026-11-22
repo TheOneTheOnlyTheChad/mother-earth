@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 22 Nov 2026
 
+## 22 Nov 07:48 UTC (clock reading) — **Earth from Space STAGE C STOPPED AFTER C1 on GPT's recommendation: the caller script has a line macOS bash 3.2 cannot parse. C2 was not run; nothing on the hub was changed. Caller r2 (one-line fix, new checks) is on the branch and with GPT; a native rerun by Chad is owed.** (hub stays 0.6.22, gate unset, `earthview/` empty; Earth from Space thread)
+
+- **Chad's Stage C line (his own message, 22 Nov):** sent, window 08:21 to 08:24 UTC. Section 0 reads were clean (usage: Workers requests 86.11k of 10M, CPU 770.23k ms of 30M, R2 Class A 58.8k of 1M, Class B 92.08k of 10M, storage 0.53 of 10 GB-months; **Workers Observability volume not read: missing**). That window is not used.
+- **C1 (Chad, Terminal, 07:35:02 UTC):** `status` answered 200: pointer missing, list missing, 0 objects, no hold. Cloudflare's record: one `GET /admin/earthview/status`, `authorization` masked, no key or query in the URL. **But the script printed two bash syntax errors for its line 106 and wrote a malformed request line into `C1.1.meta.txt`.** The request to the hub is built elsewhere and was correct.
+- **Why the native 80 of 80 missed it:** no check read the note's request line or looked for shell diagnostics. The pass was true and did not cover this.
+- **Caller r2** (branch `earth-from-space-rc` `11c0bc1`): `phase1/earthview-admin.sh` sha256 `ee08092e…aa31` (was `20726534…407b`), one line changed; suite `d6d95179…7c1b` → `5f9398ef…6378`, section G added (exact note request lines, no standard error on success, nine fields, refused and interrupted notes). Linux: 109 passed, 0 failed; 21 breaks fail the suite. **The break that restores the old line (`note-case-in-substitution`) reports 0 failed on Linux, because bash 5 parses it; it can only be shown natively on macOS and is NOT yet shown.** `phase1/worker.js` unchanged.
+- **Evidence kept, nothing overwritten or cleared:** `reviews/evidence/2026-11-22-earth-from-space-stage-c/` (C1 files as saved, section 0 reads); finding and package `reviews/2026-11-22-earth-from-space-stage-c-c1-finding.md`. Mac: `_review/earth-from-space-0.6.22-caller-r2/`.
+- **Next:** Chad's native run of the r2 suite and the negative control; GPT's focused review; then Chad's continuation line with a fresh window.
+
 ## 22 Nov 07:31 UTC (clock reading) — **HUB 0.6.22 DEPLOYED on Chad's own Approve line: code only, `EARTHVIEW_ENABLED` left unset. Nothing is collected or stored for Earth from Space; the tab is not on the page.** (production: hub code; no setting, binding, cron or page file changed; Earth from Space thread)
 
 - **Chad's line (his own message):** "Approve: deploy hub 0.6.22 from earth-from-space-rc b8e55e8, phase1/worker.js sha256 17798a44a217bdb3eafe1ccd8852833cc050b9bb0e9094f65c59a2db2eeda080, code only, EARTHVIEW_ENABLED left unset; read back hash and settings; stop and report if any earthview/ object exists".
