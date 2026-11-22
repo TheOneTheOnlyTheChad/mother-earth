@@ -1,4 +1,4 @@
-# Earth from Space — from the first stored picture to the page: proposal (rev 2.1, for GPT)
+# Earth from Space — from the first stored picture to the page: proposal (rev 2.2; passed by GPT at proposal level as rev 2.1)
 
 22 Nov 2026. Asked for by GPT's review of the Stage B result and started on Chad's "Go" of 22 Nov. **Docs only. Nothing
 here is built, deployed, stored, enabled or approved.** Every production step named below needs Chad's own exact
@@ -9,6 +9,11 @@ Approve line; the lines are sketched in section 10 and are not requests yet.
 can actually be carried out (5.5 to 5.7); the result rule is measurable (5.8); Stage C's retry and verdict are bounded
 (4.3 to 4.5); the REGISTER draft moves to Stage C (7); and the factual corrections are made. Section 13 lists every
 change. Rev 1.1 only reworded the memory paragraph of rev 1.
+
+**Rev 2.2 (22 Nov)** is editorial: GPT **PASSED rev 2.1 at proposal level** and closed its hold
+(`reviews/2026-11-22-earth-from-space-storage-to-release-proposal-rev2.1-gpt-closure.md`), asking for no further
+round. Its clarifications for the candidate and runbook are written in where they belong (5.1, 5.5, 5.6, section 9
+item 5) and listed in that review file. Rev 2.2 was not sent for another review.
 
 **Rev 2.1 (22 Nov)** is the focused correction GPT asked for in its review of rev 2
 (`reviews/2026-11-22-earth-from-space-storage-to-release-proposal-rev2-gpt-review.md`): the trial's end is enforced
@@ -92,8 +97,9 @@ scheduled collection**.
 Two one-line conditions change (`JOBS.earthview` accepts `manual` or `1`; the scheduled line stays `=== '1'`). The
 probe route's rule is unchanged, so a supplementary busy observation stays possible only while the variable is not set.
 Tests (as GPT asks): every cell of the table through the **actual handlers**, the five-minute scheduled wrapper
-included, each refusal asserted to make **zero** requests to the source and **zero** storage calls of any kind (spies
-on fetch, R2, D1, caches), with a break for each cell. Unknown values fail closed.
+included, each refusal asserted to do **zero Earth from Space work**: no request to EUMETSAT and no read or write of
+any `earthview/` record (spies on fetch, R2, D1, caches), **while the wrapper's other collectors run normally** in
+the same invocation, with a break for each cell. Unknown values fail closed.
 
 Alternatives considered and not proposed: setting `1` and trying to finish between two ticks (a race against a
 schedule we do not control); using the storage hold to block the scheduler (a hold blocks the manual run too).
@@ -254,7 +260,15 @@ the boundary.** So the boundary moves into the hub (0.6.22):
   refused however early it is delivered.
 - With `FROM` = the first slot's time and `UNTIL` = `FROM` + 48 hours, the scheduled opportunities inside the window
   are the 288 ten-minute marks from `FROM` to `UNTIL` − 10 min. **No 289th can be admitted, whoever is or is not
-  watching.** That is what lets "288 slots, at most 864 requests" stand.
+  watching.** That is what lets "288 opportunities" stand; the 864 stays a ceiling that is audited, not
+  enforced.
+- **What the window is and is not** (GPT's closure). It selects **eligible scheduled timestamps**. It is not a
+  wall-clock deadline: an eligible trigger delivered late may execute after `UNTIL`; that work is reconciled and is
+  not a breach merely for running late. And it selects 288 **distinct** opportunities but does **not deduplicate**:
+  if the platform delivered the same scheduled timestamp twice, both would be admitted. It is not an exactly-once
+  mechanism and not an enforced 864-request counter. The candidate gives a repeated timestamp explicit, tested
+  behaviour and execution records that can be told apart (each run's own stamp and isolate line); actual request
+  counts are audited from the records.
 - The window does not apply to the manual run (which `1` also allows). A manual run during the trial is unauthorised
   and is a budget breach (5.8); the caller script has no step id for one.
 
@@ -363,12 +377,12 @@ being measured.
 **Pre-D rehearsal (harmless; required before the Stage D line is asked for).** With the variable at `manual` after
 Stage C, on Chad's go, for four hours:
 
-1. four scheduled messages, one an hour: each must **actually launch** an inspection (shown by its entry in the thread
-   with a clock reading);
+1. **four hourly opportunities, the third omitted: actual launches 1, 2 and 4.** Each scheduled message must
+   **actually launch** an inspection (shown by its entry in the thread with a clock reading);
 2. each must **read the intended records** (invocation records, run log, status file, R2 count) and say what it read;
 3. each sends the heartbeat push; **Chad confirms in the thread that each reached his phone**, with the time;
-4. **a missed launch on purpose:** the third message is not scheduled. The fourth inspection must detect the
-   two-hour gap by itself and send the missed-inspection notification; and Chad, not having had the third push,
+4. **the missed launch:** the third opportunity has no message. The fourth inspection must detect the two-hour gap
+   by itself and send the missed-inspection notification; and Chad, not having had the third push,
    notes when he noticed;
 5. an unreadable inspection on purpose, if Chad agrees: he closes the dashboard tab before one inspection; it must
    notify rather than report clean.
@@ -392,8 +406,8 @@ end.
 7. another layer newly `down` or `degraded` since T0;
 8. no frame published for six consecutive slots while successful source checks list a newer frame than the one held
    (this is where persistent check-image failures, missing served-time headers and wrong-frame headers land);
-9. any observed request-budget excess: more than 3 requests to EUMETSAT in a slot, a picture run outside the window,
-   or a manual run.
+9. any observed request-budget excess: more than 3 requests to EUMETSAT in a slot, a picture run for a scheduled
+   time outside the window, a manual run, a running total over 864, or more than 12 diagnostic requests.
 
 Conditions 6 and 8 pause the trial; they do not by themselves say whose fault it was (5.8).
 
@@ -575,19 +589,24 @@ picture, retention tied to the grace period, no visitor-triggered request to EUM
    - `scheduled_time` (Cloudflare's, for the trigger) and `run` (the run's own stamp, the same one in the stored
      record and the run log), so each line is tied to one slot and one run;
    - `isolate` and `isolate_age_ms`;
-   - `scheduled_before`: scheduled invocations this isolate had **begun before this one**. The existing counter
-     increments at handler entry and so already includes the current invocation; the line reports that value minus
-     one and names it so. The raw value is not labelled "earlier";
-   - `crons_before`: those earlier scheduled invocations **counted by cron expression** (a small per-isolate tally
-     added at handler entry), so the line can say which kinds of job had run in this isolate, not only how many;
-   - `validations_before`: validations (collector or probe) **completed** in this isolate before this run's own
-     began; the counter is incremented after a validation returns, pass or refuse;
+   - `scheduled_before`: scheduled invocations this isolate had **begun before this one**. **Captured as an
+     immutable snapshot at handler entry, before the current invocation is added and before any await** (GPT's
+     closure). Reading the live counter later and subtracting one is wrong: another invocation may have started
+     while this one awaited. The raw live value is never labelled "earlier";
+   - `crons_before`: those earlier scheduled invocations **counted by cron expression**, a **copy** of the
+     per-isolate tally taken in the same entry snapshot, so the line can say which kinds of job had begun in this
+     isolate, not only how many;
+   - `validations_before`: validations (collector or probe) **completed** in this isolate, snapshotted immediately
+     before this run's own validation begins, with no await between snapshot and start; the counter is incremented
+     after a validation returns, pass or refuse;
    - `fetches_before`: HTTP requests the isolate had begun.
    **What the counters establish and what they do not:** that this isolate had earlier begun N scheduled invocations
    of the listed kinds and completed M validations. They do not show that any of them was still running, nor what
    memory it left. Overlap in time is read from invocation records, separately. The trial's conclusions are limited
    to that. Candidate tests assert each field's meaning (first invocation in an isolate reports 0 and an empty tally;
-   the current invocation is never counted as earlier; a refused validation still counts as completed).
+   the current invocation is never counted as earlier; a refused validation still counts as completed; **A starts, A
+   awaits, B starts, A resumes: A's "before" values are unchanged**). The counters establish earlier starts and
+   completed validations as defined; they do not establish simultaneous execution or memory headroom.
    The line writes nothing to storage and changes no decision.
 6. Nothing else. The decoder, the validation limits, the storage records, the guards, recovery and the probe route's
    rules are unchanged; the recovery span's hash is asserted unchanged by the existing static check.
@@ -627,7 +646,8 @@ proposal. None is an Approve line; no production step is authorised by them.**
 
 New in rev 2.1, for Chad:
 
-- **D8.** Accept in the Stage D line that between 22:00 and 06:00 SAST a missed inspection may go unnoticed until
+- **D8.** (Chad's own future acceptance; keeping the Mac awake does not by itself accept it.) Accept in the Stage D
+  line that between 22:00 and 06:00 SAST a missed inspection may go unnoticed until
   morning (5.5), or choose night-time heartbeat pushes instead.
 - **D9.** In the rehearsal, close the dashboard tab once on purpose to prove an unreadable inspection notifies (5.5,
   step 5). Optional.
