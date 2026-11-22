@@ -253,7 +253,14 @@
   "reference": "Reference lines: latitude and longitude every quarter of a degree. No place names, roads or borders are drawn.",
   "plain_view": "Plain globe; no coastline lies in this view.",
   "dates": "Data years: 2017, analysed through August 2024. Release date on the record: 24 March 2026. Record last checked: 21 Nov 2026.",
-  "preview": "A dated archive item: published areas from a past study, not a live feed."
+  "preview": "A dated archive item: published areas from a past study, not a live feed.",
+  "picture_shown": "Regional backdrop: NASA satellite imagery for {date}. It may contain cloud, gaps or visible edges between satellite passes. It is not from the study's years and shows nothing about the animals or their habitat then.",
+  "picture_grid": "GIBS image grid about 250 m per pixel, enlarged for display.",
+  "picture_method": "The regional backdrop is one picture requested from NASA GIBS for a fixed box around the herd, for the same date as the page's whole-globe backdrop. Its grid spacing is not the instrument's detail and not a positional accuracy. The box's edge is where the requested picture ends, nothing more.",
+  "picture_loading": "Regional satellite picture: loading…",
+  "picture_unavailable": "Regional satellite picture unavailable.",
+  "picture_retry": "Try the regional picture again",
+  "picture_spent": "No further attempts on this visit. Reload the page to try again."
  },
  "view": {
   "lat": 38.35,
@@ -266,6 +273,31 @@
   "north": 38.75,
   "west": -119.5,
   "east": -118.75
+ },
+ "picture": {
+  "box": {
+   "south": 37.8,
+   "west": -119.8,
+   "north": 38.8,
+   "east": -118.6
+  },
+  "width": 960,
+  "height": 800,
+  "format": "image/jpeg",
+  "fetch_limit_ms": 20000,
+  "decode_limit_ms": 5000,
+  "max_requests": 3,
+  "mesh_cells": {
+   "across": 24,
+   "up": 20
+  },
+  "edge_half_width_deg": 0.006,
+  "source_grid": {
+   "tile_matrix_set": "250m",
+   "deg_per_pixel": 0.002197265625,
+   "read": "NASA GIBS WMTS capabilities, read 22 Nov 2026"
+  },
+  "request": "docs/concepts/ANIMALS-CORRIDOR-PROPOSAL.md section 6.2: same endpoint, layer and date rule as the page's whole-globe backdrop; WMS 1.3.0, EPSG:4326, box in the order south, west, north, east"
  },
  "record": {
   "release_title": "Ungulate Migrations of the Western United States, Volume 6",

@@ -185,6 +185,15 @@ def build(cfg, zbytes):
     display = {'schema': 1, 'id': cfg['id'], 'revision': cfg['revision'], 'units_per_degree': S, 'ring_encoding': 'first vertex as whole numbers (longitude, latitude, in units), then steps from the previous vertex; the closing vertex is not repeated', 'classes': classes}
     disp = (json.dumps(display, separators=(',', ':')) + '\n').encode('utf-8'); dfile = f'{cfg["id"]}-{cfg["revision"]}.json'
     W = dict(cfg['wording']); band = None
+    # the regional picture (proposal 6.2): a fixed request box that contains the reference grid, equal spacing both ways, bounded sizes and limits
+    PIC = cfg['picture']; pb = PIC['box']; gr = cfg['grid']
+    if not (pb['south'] < gr['south'] and pb['north'] > gr['north'] and pb['west'] < gr['west'] and pb['east'] > gr['east']): stop(28, 'the picture box does not contain the reference grid')
+    if not (isinstance(PIC['width'], int) and isinstance(PIC['height'], int) and 0 < PIC['width'] <= 1024 and 0 < PIC['height'] <= 1024 and PIC['format'] == 'image/jpeg'): stop(28, 'picture size or format')
+    if abs((pb['east'] - pb['west']) / PIC['width'] - (pb['north'] - pb['south']) / PIC['height']) > 1e-12: stop(28, 'the picture is not asked for at equal spacing in latitude and longitude')
+    if not (PIC['max_requests'] == 3 and PIC['fetch_limit_ms'] == 20000 and PIC['decode_limit_ms'] == 5000): stop(28, 'picture limits differ from proposal section 6.2')
+    for k in ('picture_shown', 'picture_grid', 'picture_method', 'picture_loading', 'picture_unavailable', 'picture_retry', 'picture_spent'):
+        if not (isinstance(W.get(k), str) and len(W[k]) > 8): stop(28, 'wording.' + k)
+    if W['picture_shown'].count('{date}') != 1: stop(28, 'the picture sentence must name its date once')
     if rel == 'nested': band = round(src['Medium']['net_km2'] - src['High']['net_km2'], 5)
     else: stop(27, 'the two classes are not nested: this config\'s Medium wording ("includes High", the nested notes and area labels) is written for a nested source and must be rewritten and reviewed first')
     fr = lambda v: float(Fraction(v) / 2)
@@ -199,7 +208,7 @@ def build(cfg, zbytes):
         'definitions_as_in_metadata': {'low': cfg['quotes']['def_low'], 'medium': cfg['quotes']['def_medium'], 'high': cfg['quotes']['def_high']},
         'metadata_quotes': {k: cfg['quotes'][k] for k in ('sample', 'use', 'process_footprint', 'process_stack', 'process_generic_thresholds', 'process_grid')},
         'projection': dict(P, conversion='inverse Albers for the ellipsoid; result is geographic on NAD83(NSRS2007); no datum transformation applied', rounding_deg=L['round_deg'], corner_check={'computed': {k: round(v, 4) for k, v in gotb.items()}, 'metadata': mb}),
-        'limits': L, 'wording': W, 'view': cfg['view'], 'grid': cfg['grid'],
+        'limits': L, 'wording': W, 'view': cfg['view'], 'grid': cfg['grid'], 'picture': PIC,
         'record': dict(cfg['record'], layer_title=un('title')[0], metadata_pubdate=un('pubdate')[0], publisher=(un('publish') or [''])[0], originators_as_listed=un('origin')),
         'source': {'zip': cfg['source_zip'], 'inner_dir': cfg['inner_dir'], 'files': cfg['inner']},
         'builder': 'phase1/animals/build_corridor.py', 'config': 'phase1/animals/' + os.path.basename(cfg.get('_path', '')),
