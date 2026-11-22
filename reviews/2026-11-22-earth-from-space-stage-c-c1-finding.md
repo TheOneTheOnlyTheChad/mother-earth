@@ -94,3 +94,28 @@ The one-line diff; section G and the four new breaks; and, once Chad has run the
 C1's evidence stays. `status` is read-only, so a fresh status read under the fixed script is saved as `C1.2` beside
 `C1.1`; nothing is cleared or overwritten. The Stage C line of 22 Nov named the window 08:21 to 08:24 UTC, which is
 not used; a new line and window are needed.
+
+## 8. Native macOS results for caller r2 (added 22 Nov 2026 07:56 UTC, clock reading)
+
+Chad ran the suite and the four new breaks in an ordinary Terminal on the Mac, from
+`_review/earth-from-space-0.6.22-caller-r2/`, one paste, output kept unchanged:
+`reviews/evidence/2026-11-22-earth-from-space-stage-c/NATIVE-CALLER-RUN-r2.txt` (22,038 bytes, sha256
+`eca68d81b3bd9e2d6b9d7f30b7377b0a0352865a225ee1fdb26e792ac673adb3`, Mac modification time 2026-11-22T07:55:46Z).
+Every run reports `shell used for the script: GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)`.
+
+| Run | Native macOS, bash 3.2.57 | Linux, bash 5.2.21 |
+|---|---|---|
+| suite, fixed script | **109 passed, 0 failed** | 109 passed, 0 failed |
+| `note-case-in-substitution` (the old line 106 restored) | **89 passed, 20 failed**: G1 and G2 for all nine commands, G4, G5 | 109 passed, 0 failed (bash 5 parses it) |
+| `note-request-wrong` | 103 passed, 6 failed | same |
+| `note-field-dropped` | 99 passed, 10 failed | same |
+| `stderr-noise` | 100 passed, 9 failed | same |
+
+Versions and hashes printed by the same paste: macOS 26.5.2 (25F84); bash 3.2.57; curl 8.7.1; node v24.14.1;
+`phase1/earthview-admin.sh` `ee08092ecdd61f1937ef65e283c9b196d00c47a38740bd671525a4a108adaa31`;
+`phase1/earthview-admin.test.mjs` `5f9398ef2b8e7953c05859c21093cee86b9859b17d47e30d7ba6a0a22a686378` (both equal to
+the branch at `11c0bc1`).
+
+So the defect is reproduced natively by the negative control, and the fixed script passes the new checks on the shell
+that failed. **Not run natively:** the 18 earlier breaks. Claude did not watch the run; the evidence is the retained
+output and Chad's word. Nothing was called on the hub.
