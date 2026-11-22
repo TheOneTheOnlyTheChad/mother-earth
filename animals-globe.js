@@ -105,7 +105,7 @@
   else {
     try {
       if (typeof Globe === 'undefined') throw new Error('globe.gl did not load (script blocked, or no network when the page opened)');
-      globe = Globe()(el).width(el.clientWidth || 300).height(el.clientHeight || 300).backgroundColor('#070a0f').showAtmosphere(true).atmosphereColor('#4a6a9a').atmosphereAltitude(.18);
+      globe = Globe()(el).enablePointerInteraction(false).width(el.clientWidth || 300).height(el.clientHeight || 300).backgroundColor('#070a0f').showAtmosphere(true).atmosphereColor('#4a6a9a').atmosphereAltitude(.18);
       const gm = globe.globeMaterial(); if (gm.color) gm.color.set(G.PLAIN);
       globe.pointOfView(G.VIEW, 0); globe.controls().autoRotate = false;
       st.globe = 'ok';

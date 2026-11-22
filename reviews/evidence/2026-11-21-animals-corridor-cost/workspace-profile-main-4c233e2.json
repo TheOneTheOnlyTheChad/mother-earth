@@ -1,0 +1,1061 @@
+{
+"build": "full",
+"started": "2026-11-21T18:10:14.342Z",
+"ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.8103.78 Safari/537.36",
+"backdrop": "plain",
+"runs": [
+{
+"run": 1,
+"profiled": true,
+"to_second_frame_ms": 2672,
+"tasks": [
+{
+"type": "longtask",
+"start": 1,
+"ms": 56
+},
+{
+"type": "longtask",
+"start": 58,
+"ms": 60
+},
+{
+"type": "longtask",
+"start": 119,
+"ms": 201
+},
+{
+"type": "longtask",
+"start": 320,
+"ms": 784
+},
+{
+"type": "longtask",
+"start": 1111,
+"ms": 111
+},
+{
+"type": "longtask",
+"start": 1222,
+"ms": 710
+},
+{
+"type": "long-animation-frame",
+"start": 119,
+"ms": 241
+},
+{
+"type": "longtask",
+"start": 1933,
+"ms": 722
+},
+{
+"type": "long-animation-frame",
+"start": 1105,
+"ms": 132
+},
+{
+"type": "longtask",
+"start": 2656,
+"ms": 700
+}
+],
+"longest_task_ms": 784,
+"profile": {
+"total_ms": 4830,
+"self_top": [
+[
+"(program)",
+4366.3
+],
+[
+"checkGeometryIntersection @globe.gl.min.js:20299",
+79.9
+],
+[
+"intersectTriangle @globe.gl.min.js:11025",
+43.7
+],
+[
+"geoStream @globe.gl.min.js:61640",
+30.5
+],
+[
+"_computeIntersections @globe.gl.min.js:20131",
+26.2
+],
+[
+"Adder @globe.gl.min.js:60158",
+22.2
+],
+[
+"getVertexPosition @globe.gl.min.js:20035",
+20.7
+],
+[
+"linePoint @globe.gl.min.js:61786",
+18.5
+],
+[
+"getProgramInfoLog",
+15.9
+],
+[
+"polar2Cartesian$1 @globe.gl.min.js:70728",
+14.4
+],
+[
+"distanceSqToSegment @globe.gl.min.js:10669",
+12.9
+],
+[
+"checkIntersection$1 @globe.gl.min.js:20268",
+12.5
+],
+[
+"areaPoint @globe.gl.min.js:61693",
+9.3
+],
+[
+"lengthPoint @globe.gl.min.js:63016",
+8.7
+],
+[
+"merge @globe.gl.min.js:60293",
+8.6
+],
+[
+"lengthPointFirst @globe.gl.min.js:63010",
+7.7
+],
+[
+"isEarHashed @globe.gl.min.js:64438",
+7.6
+],
+[
+"fromBufferAttribute @globe.gl.min.js:5533",
+7.4
+],
+[
+"(garbage collector)",
+6.3
+],
+[
+"checkIntersection @globe.gl.min.js:25113",
+6.1
+],
+[
+"flatten$1 @globe.gl.min.js:60287",
+6
+],
+[
+"addGroup @globe.gl.min.js:70642",
+5.1
+],
+[
+"polar2Cartesian$2 @globe.gl.min.js:65321",
+4.9
+],
+[
+"f @globe.gl.min.js:64998",
+4.8
+],
+[
+"flatten @globe.gl.min.js:64913",
+4.6
+],
+[
+"computeVertexNormals @globe.gl.min.js:19400",
+4.6
+],
+[
+"getProgram @globe.gl.min.js:56110",
+3.8
+],
+[
+"sortLinked @globe.gl.min.js:64668",
+3.8
+],
+[
+"intersectObjects @globe.gl.min.js:37691",
+3.3
+],
+[
+"ascSort @globe.gl.min.js:37707",
+3.1
+],
+[
+"WebGLRenderer.renderBufferDirect @globe.gl.min.js:55171",
+2.9
+],
+[
+"Float32BufferAttribute @globe.gl.min.js:18430",
+2.3
+],
+[
+"computeBoundingSphere @globe.gl.min.js:19116",
+2
+],
+[
+"streamLine @globe.gl.min.js:61626",
+2
+],
+[
+"generateTorso @globe.gl.min.js:70681",
+1.7
+],
+[
+"setFromBufferAttribute @globe.gl.min.js:9353",
+1.7
+],
+[
+"bimap @globe.gl.min.js:60967",
+1.7
+],
+[
+"geoPolygonTriangulate @globe.gl.min.js:70386",
+1.7
+],
+[
+"(anonymous)",
+1.6
+],
+[
+"(anonymous) @globe.gl.min.js:70487",
+1.2
+],
+[
+"applyUpdate @globe.gl.min.js:167937",
+1.2
+],
+[
+"findHoleBridge @globe.gl.min.js:64589",
+1.2
+],
+[
+"normalizeNormals @globe.gl.min.js:19496",
+1.1
+],
+[
+"indexCurve @globe.gl.min.js:64651",
+1.1
+],
+[
+"generateVertices @globe.gl.min.js:70666",
+1.1
+]
+],
+"inclusive_top": [
+[
+"(root)",
+4829.5
+],
+[
+"(program)",
+4366.3
+],
+[
+"comp.<computed> @globe.gl.min.js:58443",
+251
+],
+[
+"intersectObjects @globe.gl.min.js:37691",
+210.3
+],
+[
+"intersectingObjects @globe.gl.min.js:176459",
+210.3
+],
+[
+"intersect @globe.gl.min.js:37713",
+203.9
+],
+[
+"digest @globe.gl.min.js:68114",
+201.6
+],
+[
+"(anonymous) @globe.gl.min.js:58402",
+201.6
+],
+[
+"invokeFunc @globe.gl.min.js:58185",
+201.6
+],
+[
+"trailingEdge @globe.gl.min.js:58234",
+201.6
+],
+[
+"timerExpired @globe.gl.min.js:58225",
+201.6
+],
+[
+"(anonymous) @globe.gl.min.js:68126",
+200.1
+],
+[
+"update @globe.gl.min.js:167313",
+198
+],
+[
+"(anonymous) @globe.gl.min.js:167354",
+197.3
+],
+[
+"raycast @globe.gl.min.js:20085",
+182.8
+],
+[
+"_computeIntersections @globe.gl.min.js:20131",
+181.1
+],
+[
+"checkGeometryIntersection @globe.gl.min.js:20299",
+154.9
+],
+[
+"ConicPolygonGeometry @globe.gl.min.js:70607",
+147.2
+],
+[
+"tick @globe.gl.min.js:176293",
+140.3
+],
+[
+"_animationCycle @globe.gl.min.js:177006",
+140.3
+],
+[
+"scale @animals-corridor.js:94",
+110.7
+],
+[
+"(anonymous) @animals-corridor.js:100",
+110.7
+],
+[
+"toGlobeCoords @globe.gl.min.js:177060",
+110.4
+],
+[
+"geoPolygonTriangulate @globe.gl.min.js:70386",
+91.9
+],
+[
+"at @animals-corridor.js:95",
+78.4
+],
+[
+"geoStream @globe.gl.min.js:61640",
+78.3
+],
+[
+"length$1 @globe.gl.min.js:63030",
+71.2
+],
+[
+"geoDistance$1 @globe.gl.min.js:63039",
+71.2
+],
+[
+"checkIntersection$1 @globe.gl.min.js:20268",
+54.3
+],
+[
+"GeoJsonGeometry @globe.gl.min.js:65128",
+48.7
+],
+[
+"streamGeometry @globe.gl.min.js:61578",
+47.8
+],
+[
+"streamLine @globe.gl.min.js:61626",
+47.5
+],
+[
+"intersectTriangle @globe.gl.min.js:11025",
+43.7
+],
+[
+"genPolygon @globe.gl.min.js:65229",
+42.4
+],
+[
+"(anonymous) @globe.gl.min.js:65230",
+39.9
+],
+[
+"WebGLRenderer.render @globe.gl.min.js:55606",
+37.9
+],
+[
+"render @globe.gl.min.js:173521",
+37.9
+],
+[
+"render @globe.gl.min.js:173267",
+37.9
+],
+[
+"(anonymous) @globe.gl.min.js:70505",
+37.3
+],
+[
+"interpolateContourPoints @globe.gl.min.js:70503",
+37.3
+],
+[
+"(anonymous) @globe.gl.min.js:70508",
+37
+],
+[
+"interpolateLine @globe.gl.min.js:65092",
+34.7
+],
+[
+"(anonymous) @globe.gl.min.js:65097",
+34.2
+],
+[
+"WebGLRenderer.renderBufferDirect @globe.gl.min.js:55171",
+30.8
+],
+[
+"renderObject @globe.gl.min.js:56079",
+30.8
+]
+]
+}
+},
+{
+"run": 2,
+"profiled": false,
+"to_second_frame_ms": 2469,
+"tasks": [
+{
+"type": "longtask",
+"start": 1,
+"ms": 53
+},
+{
+"type": "longtask",
+"start": 57,
+"ms": 51
+},
+{
+"type": "longtask",
+"start": 109,
+"ms": 195
+},
+{
+"type": "longtask",
+"start": 304,
+"ms": 740
+},
+{
+"type": "longtask",
+"start": 1046,
+"ms": 100
+},
+{
+"type": "longtask",
+"start": 1146,
+"ms": 667
+},
+{
+"type": "long-animation-frame",
+"start": 109,
+"ms": 229
+},
+{
+"type": "longtask",
+"start": 1814,
+"ms": 641
+},
+{
+"type": "longtask",
+"start": 2456,
+"ms": 649
+},
+{
+"type": "long-animation-frame",
+"start": 1045,
+"ms": 115
+}
+],
+"longest_task_ms": 740
+},
+{
+"run": 3,
+"profiled": false,
+"to_second_frame_ms": 2429,
+"tasks": [
+{
+"type": "longtask",
+"start": 1,
+"ms": 58
+},
+{
+"type": "longtask",
+"start": 60,
+"ms": 186
+},
+{
+"type": "longtask",
+"start": 247,
+"ms": 742
+},
+{
+"type": "longtask",
+"start": 993,
+"ms": 107
+},
+{
+"type": "longtask",
+"start": 1101,
+"ms": 666
+},
+{
+"type": "long-animation-frame",
+"start": 60,
+"ms": 222
+},
+{
+"type": "longtask",
+"start": 1769,
+"ms": 647
+},
+{
+"type": "longtask",
+"start": 2416,
+"ms": 641
+}
+],
+"longest_task_ms": 742
+},
+{
+"run": 4,
+"profiled": false,
+"to_second_frame_ms": 2397,
+"tasks": [
+{
+"type": "longtask",
+"start": 1,
+"ms": 51
+},
+{
+"type": "longtask",
+"start": 55,
+"ms": 180
+},
+{
+"type": "longtask",
+"start": 235,
+"ms": 733
+},
+{
+"type": "longtask",
+"start": 971,
+"ms": 102
+},
+{
+"type": "longtask",
+"start": 1074,
+"ms": 670
+},
+{
+"type": "long-animation-frame",
+"start": 53,
+"ms": 213
+},
+{
+"type": "longtask",
+"start": 1745,
+"ms": 640
+},
+{
+"type": "longtask",
+"start": 2386,
+"ms": 639
+}
+],
+"longest_task_ms": 733
+},
+{
+"run": 5,
+"profiled": false,
+"to_second_frame_ms": 2405,
+"tasks": [
+{
+"type": "longtask",
+"start": 1,
+"ms": 52
+},
+{
+"type": "longtask",
+"start": 54,
+"ms": 181
+},
+{
+"type": "longtask",
+"start": 235,
+"ms": 733
+},
+{
+"type": "longtask",
+"start": 972,
+"ms": 102
+},
+{
+"type": "longtask",
+"start": 1074,
+"ms": 677
+},
+{
+"type": "long-animation-frame",
+"start": 53,
+"ms": 214
+},
+{
+"type": "longtask",
+"start": 1752,
+"ms": 642
+},
+{
+"type": "longtask",
+"start": 2394,
+"ms": 642
+},
+{
+"type": "long-animation-frame",
+"start": 969,
+"ms": 118
+}
+],
+"longest_task_ms": 733
+}
+],
+"errs": [],
+"control": {
+"window_ms": 2500,
+"tasks": [
+55,
+55,
+54,
+56,
+58,
+56,
+55,
+51,
+56,
+53,
+54,
+55,
+55,
+57,
+55,
+64,
+57,
+60,
+60,
+61,
+59,
+54,
+60,
+54,
+51,
+52,
+52,
+58,
+53,
+55,
+54,
+55,
+51,
+51,
+53,
+52,
+51,
+55,
+51,
+51,
+52,
+52,
+50,
+59,
+55
+],
+"profile": {
+"total_ms": 2642,
+"self_top": [
+[
+"(program)",
+2475.5
+],
+[
+"checkGeometryIntersection @globe.gl.min.js:20299",
+43.1
+],
+[
+"_computeIntersections @globe.gl.min.js:20131",
+25.7
+],
+[
+"getVertexPosition @globe.gl.min.js:20035",
+16.7
+],
+[
+"distanceSqToSegment @globe.gl.min.js:10669",
+15.5
+],
+[
+"intersectTriangle @globe.gl.min.js:11025",
+13.1
+],
+[
+"checkIntersection$1 @globe.gl.min.js:20268",
+13
+],
+[
+"(idle)",
+9.3
+],
+[
+"intersect @globe.gl.min.js:37713",
+6.7
+],
+[
+"(garbage collector)",
+6.2
+],
+[
+"requestAnimationFrame",
+4.6
+],
+[
+"checkIntersection @globe.gl.min.js:25113",
+4
+],
+[
+"updateMatrixWorld @globe.gl.min.js:14115",
+2.8
+],
+[
+"needsUpdate @globe.gl.min.js:40695",
+1.4
+],
+[
+"getNormalMatrix @globe.gl.min.js:5938",
+1.1
+],
+[
+"getInterpolatedAttribute @globe.gl.min.js:14800",
+0.5
+],
+[
+"getX @globe.gl.min.js:17938",
+0.5
+],
+[
+"PerformanceObserver.observe.entryTypes",
+0.3
+],
+[
+"raycast @globe.gl.min.js:24977",
+0.3
+],
+[
+"getBarycoord @globe.gl.min.js:14697",
+0.3
+],
+[
+"fromBufferAttribute @globe.gl.min.js:8577",
+0.3
+],
+[
+"comp.<computed> @globe.gl.min.js:58443",
+0.2
+],
+[
+"WebGLRenderer.render @globe.gl.min.js:55606",
+0.2
+],
+[
+"clear",
+0.2
+],
+[
+"projectObject @globe.gl.min.js:55792",
+0.2
+],
+[
+"entries @globe.gl.min.js:68080",
+0
+]
+],
+"inclusive_top": [
+[
+"(root)",
+2641.6
+],
+[
+"(program)",
+2475.5
+],
+[
+"comp.<computed> @globe.gl.min.js:58443",
+146.2
+],
+[
+"_animationCycle @globe.gl.min.js:177006",
+146.2
+],
+[
+"tick @globe.gl.min.js:176293",
+145.7
+],
+[
+"intersect @globe.gl.min.js:37713",
+139.7
+],
+[
+"intersectObjects @globe.gl.min.js:37691",
+139.7
+],
+[
+"intersectingObjects @globe.gl.min.js:176459",
+139.7
+],
+[
+"raycast @globe.gl.min.js:20085",
+112.6
+],
+[
+"_computeIntersections @globe.gl.min.js:20131",
+112.4
+],
+[
+"checkGeometryIntersection @globe.gl.min.js:20299",
+85.2
+],
+[
+"checkIntersection$1 @globe.gl.min.js:20268",
+25.8
+],
+[
+"checkIntersection @globe.gl.min.js:25113",
+19.6
+],
+[
+"getVertexPosition @globe.gl.min.js:20035",
+16.7
+],
+[
+"distanceSqToSegment @globe.gl.min.js:10669",
+15.5
+],
+[
+"raycast @globe.gl.min.js:24977",
+14
+],
+[
+"intersectTriangle @globe.gl.min.js:11025",
+13.1
+],
+[
+"(idle)",
+9.3
+],
+[
+"(garbage collector)",
+6.2
+],
+[
+"render @globe.gl.min.js:173521",
+5.8
+],
+[
+"render @globe.gl.min.js:173267",
+5.8
+],
+[
+"WebGLRenderer.render @globe.gl.min.js:55606",
+5.6
+],
+[
+"requestAnimationFrame",
+4.6
+],
+[
+"e.onFrame @globe.gl.min.js:68160",
+4.1
+],
+[
+"(anonymous) @globe.gl.min.js:68160",
+4.1
+],
+[
+"e.animateOnce @globe.gl.min.js:68160",
+4.1
+],
+[
+"updateMatrixWorld @globe.gl.min.js:14115",
+2.8
+],
+[
+"renderObject @globe.gl.min.js:56079",
+2.5
+],
+[
+"renderObjects @globe.gl.min.js:56052",
+2.5
+],
+[
+"renderScene @globe.gl.min.js:55906",
+2.5
+],
+[
+"updateMatrixWorld @globe.gl.min.js:21178",
+2.1
+],
+[
+"needsUpdate @globe.gl.min.js:40695",
+1.4
+],
+[
+"setup @globe.gl.min.js:40571",
+1.4
+],
+[
+"WebGLRenderer.renderBufferDirect @globe.gl.min.js:55171",
+1.4
+],
+[
+"getNormalMatrix @globe.gl.min.js:5938",
+1.1
+],
+[
+"getInterpolatedAttribute @globe.gl.min.js:14800",
+0.8
+],
+[
+"getX @globe.gl.min.js:17938",
+0.5
+],
+[
+"PerformanceObserver.observe.entryTypes",
+0.3
+],
+[
+"getBarycoord @globe.gl.min.js:14697",
+0.3
+],
+[
+"fromBufferAttribute @globe.gl.min.js:8577",
+0.3
+],
+[
+"clear",
+0.2
+],
+[
+"WebGLRenderer.clear @globe.gl.min.js:54958",
+0.2
+],
+[
+"projectObject @globe.gl.min.js:55792",
+0.2
+],
+[
+"entries @globe.gl.min.js:68080",
+0
+],
+[
+"(anonymous) @globe.gl.min.js:166332",
+0
+]
+]
+}
+},
+"mesh": [
+{
+"type": "Mesh",
+"mat": "MeshPhongMaterial",
+"verts": 4186,
+"index": 23760,
+"groups": []
+},
+{
+"type": "Mesh",
+"mat": "MeshBasicMaterial",
+"verts": 16471,
+"index": 96120,
+"groups": []
+},
+{
+"type": "Mesh",
+"mat": "MeshPhongMaterial",
+"verts": 92883,
+"index": null,
+"groups": []
+},
+{
+"type": "LineSegments",
+"mat": "LineBasicMaterial",
+"verts": 6461,
+"index": 12816,
+"groups": [
+12816
+]
+},
+{
+"type": "Mesh",
+"mat": "ShaderMaterial",
+"verts": 4186,
+"index": 23760,
+"groups": []
+},
+{
+"type": "Mesh",
+"mat": "MeshBasicMaterial(transparent)|MeshBasicMaterial(transparent)",
+"verts": 81189,
+"index": 243564,
+"groups": [
+162378,
+81186
+]
+},
+{
+"type": "LineSegments",
+"mat": "LineBasicMaterial",
+"verts": 27063,
+"index": 54120,
+"groups": [
+53120,
+1000
+]
+},
+{
+"type": "Mesh",
+"mat": "MeshBasicMaterial(transparent)|MeshBasicMaterial(transparent)",
+"verts": 60726,
+"index": 182172,
+"groups": [
+121452,
+60720
+]
+},
+{
+"type": "LineSegments",
+"mat": "LineBasicMaterial",
+"verts": 20242,
+"index": 40480,
+"groups": [
+40240,
+240
+]
+}
+]
+}

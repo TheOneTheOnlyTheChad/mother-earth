@@ -1,0 +1,235 @@
+{
+"done": true,
+"started": "2026-11-21T18:16:25.295Z",
+"ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.8103.78 Safari/537.36",
+"visibility": "visible",
+"focus": true,
+"variants": [
+{
+"label": "as drawn",
+"longest": [
+847,
+885,
+853
+],
+"tasks": [
+[
+61,
+58,
+199,
+847
+],
+[
+62,
+62,
+204,
+885
+],
+[
+59,
+59,
+191,
+853
+]
+],
+"scripts": [
+[
+[
+199,
+"TimerHandler"
+],
+[
+27,
+"FrameRequestCallback"
+]
+]
+]
+},
+{
+"label": "no outline",
+"longest": [
+797,
+754,
+785
+],
+"tasks": [
+[
+59,
+166,
+797
+],
+[
+54,
+142,
+754
+],
+[
+59,
+57,
+139,
+785
+]
+],
+"scripts": [
+[
+[
+167,
+"TimerHandler"
+],
+[
+19,
+"FrameRequestCallback"
+]
+]
+]
+},
+{
+"label": "no side walls",
+"longest": [
+251,
+261,
+256
+],
+"tasks": [
+[
+63,
+58,
+156,
+251,
+177,
+176,
+176
+],
+[
+59,
+58,
+148,
+261,
+174,
+171,
+173
+],
+[
+57,
+57,
+152,
+256,
+176,
+182,
+175
+]
+],
+"scripts": [
+[
+[
+157,
+"TimerHandler"
+],
+[
+14,
+"FrameRequestCallback"
+]
+]
+]
+},
+{
+"label": "no outline, no side walls",
+"longest": [
+186,
+191,
+185
+],
+"tasks": [
+[
+57,
+59,
+97,
+186,
+136,
+135,
+134,
+136
+],
+[
+57,
+102,
+191,
+134,
+140,
+134,
+139
+],
+[
+57,
+104,
+185,
+137,
+136,
+134,
+140,
+130
+]
+],
+"scripts": [
+[
+[
+97,
+"TimerHandler"
+],
+[
+7,
+"FrameRequestCallback"
+]
+]
+]
+},
+{
+"label": "as drawn (again)",
+"longest": [
+884,
+843,
+841
+],
+"tasks": [
+[
+59,
+61,
+204,
+884
+],
+[
+60,
+60,
+199,
+843
+],
+[
+59,
+185,
+841
+]
+],
+"scripts": []
+}
+],
+"bench_ms": [
+803,
+794,
+796
+],
+"features": [
+[
+"medium",
+4,
+27966
+],
+[
+"high",
+2,
+20623
+]
+],
+"bench_end_ms": 800,
+"ended": "2026-11-21T18:17:26.126Z",
+"note": "Reload the page: the polygon options of this tab were changed."
+}
