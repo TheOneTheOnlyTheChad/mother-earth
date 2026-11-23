@@ -1,0 +1,37 @@
+# Paired browser-suite run, hub-to-main candidate. Claude's workspace, 23 Nov 2026, between about 18:10 and 18:40 UTC.
+# baseline = main fb30ee9 ; candidate = hub-to-main 6d2781c. Same machine, same kit, same server (phase1/serve-core-on.py on 8899), sequential, baseline first.
+# Kit: /home/claude/spike (globe.gl 2.45.0, pngjs, astronomy-engine, satellite.js 6.0.2, fontsource fonts); Playwright from /opt/npm-tools/node_modules, Chromium 157.0.8103.78;
+# orbital fixture rebuilt per tree by that tree's own phase1/orbital-fixture.build.mjs; Ocean Heat snapshot from git db5eedd.
+# columns: tree|suite|exit code|seconds|last line of the suite's output
+baseline|place-ui|rc=0|8s|place-ui: 35 passed, 0 failed
+baseline|fires-wording-ui|rc=0|11s|fires-wording-ui: 35 passed, 0 failed
+baseline|fire-status-ui|rc=0|33s|fire-status-ui: 279 passed, 0 failed
+baseline|legend-active-ui|rc=0|71s|legend-active-ui: 548 passed, 0 failed
+baseline|quakes-ships-status-ui|rc=0|29s|quakes-ships-status-ui: 124 passed, 0 failed
+baseline|oceanheat-ui|rc=0|128s|109 passed, 0 failed
+baseline|ships-retain-ui|rc=0|39s|ships-retain-ui: 42 passed, 0 failed
+baseline|status-notes-ui|rc=0|10s|status-notes-ui: 17 passed, 0 failed
+baseline|timeline-changes-ui|rc=0|34s|timeline-changes-ui: 173 pass, 0 fail
+baseline|osmc-reliability-ui|rc=1|16s|osmc-reliability-ui: 40 passed, 1 failed
+baseline|skycraft-ui|rc=0|21s|PASS  skycraft-ui: 77 passed, 0 failed
+baseline|key-drawn-ui|rc=0|69s|key-drawn-ui: 70 passed, 0 failed
+baseline|mobile-pass|rc=0|112s|131 passed, 0 failed
+baseline|animals-tab-ui|rc=1|306s|animals-tab-ui: 274 passed, 3 failed
+baseline|orbital-browser|rc=0|60s|113 passed, 0 failed  · 60 s
+candidate|place-ui|rc=0|8s|place-ui: 35 passed, 0 failed
+candidate|fires-wording-ui|rc=0|10s|fires-wording-ui: 35 passed, 0 failed
+candidate|fire-status-ui|rc=0|34s|fire-status-ui: 279 passed, 0 failed
+candidate|legend-active-ui|rc=0|70s|legend-active-ui: 548 passed, 0 failed
+candidate|quakes-ships-status-ui|rc=0|29s|quakes-ships-status-ui: 124 passed, 0 failed
+candidate|oceanheat-ui|rc=0|126s|109 passed, 0 failed
+candidate|ships-retain-ui|rc=0|34s|ships-retain-ui: 42 passed, 0 failed
+candidate|status-notes-ui|rc=0|10s|status-notes-ui: 17 passed, 0 failed
+candidate|timeline-changes-ui|rc=0|33s|timeline-changes-ui: 173 pass, 0 fail
+candidate|osmc-reliability-ui|rc=1|14s|osmc-reliability-ui: 40 passed, 1 failed
+candidate|skycraft-ui|rc=0|18s|PASS  skycraft-ui: 77 passed, 0 failed
+candidate|key-drawn-ui|rc=0|66s|key-drawn-ui: 70 passed, 0 failed
+candidate|mobile-pass|rc=0|108s|131 passed, 0 failed
+candidate|animals-tab-ui|rc=1|307s|animals-tab-ui: 274 passed, 3 failed
+candidate|orbital-browser|rc=0|59s|113 passed, 0 failed  · 59 s
+# orbital-browser was run alone on each tree after the others (19:02 to 19:04 UTC), with the fixture rebuilt by that tree first.
+# orbital fixture build output, both trees: 32509 {"active":0,"inactive":0,"rocket_body":2205,"debris":10118,"unknown_type":1232,"payload_status_unknown":0,"payload_unmatched":0,"payload_status_unavailable":18954} 5433426 94513bef7a0d

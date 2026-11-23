@@ -1,0 +1,119 @@
+# Non-browser suites, hub-to-main candidate. Claude's workspace, 23 Nov 2026. baseline = main fb30ee9 (18:41 to 18:49 UTC); candidate = hub-to-main 6d2781c (18:49 to 19:00 UTC).
+# env for both: NODE_PATH=/opt/npm-tools/node_modules:/home/claude/spike/node_modules  OH_SNAPSHOT_DIR=<Ocean Heat snapshot from git db5eedd>. Sequential, 300 s limit each.
+# columns: exit code|suite|last line of output.  phase1/orbital.test.mjs is a manual tool that needs a file argument, not a suite (START-HERE.md).
+## baseline
+0|phase1/aircraft-counts.test.mjs|aircraft-counts+positions: 75 passed, 0 failed
+0|phase1/arts-hub.test.mjs|arts-hub: 54 passed, 0 failed
+0|phase1/buoy-temp.test.mjs|37 passed, 0 failed
+0|phase1/drifters-hub.test.mjs|12 passed
+0|phase1/duration-contract.test.mjs|ALL CHECKS PASSED
+0|phase1/dustrgb-hub.test.mjs|dustrgb-hub: 174 passed, 0 failed
+0|phase1/firms-guard.test.mjs|firms-guard: 19 passed, 0 failed
+0|phase1/firms-v2.test.mjs|firms-v2: 61 passed, 0 failed, 7 skipped
+0|phase1/health-hub.test.mjs|29 passed, 0 failed
+0|phase1/history-hub.test.mjs|history-hub: 33 passed, 0 failed
+0|phase1/kp-degraded.test.mjs|kp-degraded: 29 passed, 0 failed
+0|phase1/moon-light.test.mjs|moon-light: 27 passed, 0 failed
+0|phase1/night-lights.test.mjs|night-lights logic: 49 passed, 0 failed
+0|phase1/oceanheat-hub.test.mjs|48 passed, 0 failed
+0|phase1/orbital-hub.test.mjs|13/13 passed
+0|phase1/orbital-ui.test.mjs|38 passed, 0 failed
+2|phase1/orbital.test.mjs|usage: node phase1/orbital.test.mjs <gp.csv>
+0|phase1/osmc-reliability-hub.test.mjs|osmc-reliability-hub: 27 passed, 0 failed
+0|phase1/place-rows.test.mjs|place-rows: 7 passed
+0|phase1/plastic-hub.test.mjs|11 passed
+0|phase1/satellites-hub.test.mjs|12 passed (2000 rows, synthetic)
+0|phase1/search.realdata.test.mjs|50 passed, 0 failed   [real records: usgs 50, ships 3735, firms 3657 — runs 2026-11-02T06:30:08.442Z / 2026-11-02T06:05:01.422Z / 2026-11-02T06:15:4
+0|phase1/search.test.mjs|111 passed, 0 failed
+0|phase1/ships-diagnostics.test.mjs|ships-diagnostics: 102 passed, 0 failed
+0|phase1/ships-fallback.test.mjs|7 passed
+0|phase1/ships-late.test.mjs|7 passed
+0|phase1/ships-probe.test.mjs|11 passed
+0|phase1/ships-retain-hub.test.mjs|ships-retain-hub: 35 passed, 0 failed
+0|phase1/sky-build.test.mjs|sky-build: 35 passed, 0 failed
+0|phase1/sky-hub.test.mjs|sky-hub: 46 passed, 0 failed
+0|phase1/sky-scene-hub.test.mjs|sky-scene-hub: 7 passed, 0 failed
+0|phase1/sky-scene-ref.test.mjs|7 passed, 0 failed
+0|phase1/skycraft-hub.test.mjs|PASS  skycraft-hub: 164 passed, 0 failed
+0|phase1/solar.test.mjs|26 passed, 0 failed
+0|phase1/spacetrack-probe.test.mjs|11/11 passed
+0|phase1/status-notes-hub.test.mjs|6 passed, 0 failed
+0|phase1/sunface-hub.test.mjs|PASS  sunface-hub: 171 passed, 0 failed
+0|phase1/timeline-catalogue-hub.test.mjs|timeline-catalogue-hub: 73 passed, 0 failed
+0|phase1/timeline-changes-build.test.mjs|timeline-changes-build: 45 passed, 0 failed
+0|phase1/wind-hub.test.mjs|ok  wind-hub: 103 passed, 0 failed
+finished 18:49:23 UTC
+## candidate
+0|phase1/aircraft-counts.test.mjs|aircraft-counts+positions: 75 passed, 0 failed
+0|phase1/arts-hub.test.mjs|arts-hub: 54 passed, 0 failed
+0|phase1/buoy-temp.test.mjs|37 passed, 0 failed
+0|phase1/drifters-hub.test.mjs|12 passed
+0|phase1/duration-contract.test.mjs|ALL CHECKS PASSED
+0|phase1/dustrgb-hub.test.mjs|dustrgb-hub: 174 passed, 0 failed
+0|phase1/earthview-admin.test.mjs|earthview-admin: 109 passed, 0 failed
+0|phase1/earthview-gate.test.mjs|earthview-gate: 163 passed, 0 failed
+0|phase1/earthview-health.test.mjs|earthview-health: 49 passed, 0 failed
+0|phase1/earthview-hub.test.mjs|earthview-hub: 309 passed, 0 failed
+0|phase1/earthview-probe.test.mjs|PASSED: 117 passed, 0 failed
+0|phase1/earthview-stage-b-call.test.mjs|PASSED: 48 passed, 0 failed
+0|phase1/evprobe.test.mjs|evprobe: 94 passed, 0 failed
+0|phase1/firms-guard.test.mjs|firms-guard: 19 passed, 0 failed
+0|phase1/firms-v2.test.mjs|firms-v2: 61 passed, 0 failed, 7 skipped
+0|phase1/health-hub.test.mjs|29 passed, 0 failed
+0|phase1/history-hub.test.mjs|history-hub: 33 passed, 0 failed
+0|phase1/hub-alignment.test.mjs|hub-alignment: 6 passed, 0 failed (worker.js = deployed hub 0.6.24)
+0|phase1/kp-degraded.test.mjs|kp-degraded: 29 passed, 0 failed
+0|phase1/moon-light.test.mjs|moon-light: 27 passed, 0 failed
+0|phase1/night-lights.test.mjs|night-lights logic: 49 passed, 0 failed
+0|phase1/oceanheat-hub.test.mjs|48 passed, 0 failed
+0|phase1/orbital-hub.test.mjs|13/13 passed
+0|phase1/orbital-ui.test.mjs|38 passed, 0 failed
+2|phase1/orbital.test.mjs|usage: node phase1/orbital.test.mjs <gp.csv>
+0|phase1/osmc-reliability-hub.test.mjs|osmc-reliability-hub: 27 passed, 0 failed
+0|phase1/place-rows.test.mjs|place-rows: 7 passed
+0|phase1/plastic-hub.test.mjs|11 passed
+0|phase1/satellites-hub.test.mjs|12 passed (2000 rows, synthetic)
+0|phase1/search.realdata.test.mjs|50 passed, 0 failed   [real records: usgs 50, ships 3735, firms 3657 — runs 2026-11-02T06:30:08.442Z / 2026-11-02T06:05:01.422Z / 2026-11-02T06:15:4
+0|phase1/search.test.mjs|111 passed, 0 failed
+0|phase1/ships-diagnostics.test.mjs|ships-diagnostics: 102 passed, 0 failed
+0|phase1/ships-fallback.test.mjs|7 passed
+0|phase1/ships-late.test.mjs|7 passed
+0|phase1/ships-probe.test.mjs|11 passed
+0|phase1/ships-retain-hub.test.mjs|ships-retain-hub: 35 passed, 0 failed
+0|phase1/sky-build.test.mjs|sky-build: 35 passed, 0 failed
+0|phase1/sky-hub.test.mjs|sky-hub: 46 passed, 0 failed
+0|phase1/sky-scene-hub.test.mjs|sky-scene-hub: 7 passed, 0 failed
+0|phase1/sky-scene-ref.test.mjs|7 passed, 0 failed
+0|phase1/skycraft-hub.test.mjs|PASS  skycraft-hub: 164 passed, 0 failed
+0|phase1/solar.test.mjs|26 passed, 0 failed
+0|phase1/spacetrack-probe.test.mjs|11/11 passed
+0|phase1/status-notes-hub.test.mjs|6 passed, 0 failed
+0|phase1/sunface-hub.test.mjs|PASS  sunface-hub: 171 passed, 0 failed
+0|phase1/timeline-catalogue-hub.test.mjs|timeline-catalogue-hub: 74 passed, 0 failed
+0|phase1/timeline-changes-build.test.mjs|timeline-changes-build: 45 passed, 0 failed
+0|phase1/wind-hub.test.mjs|ok  wind-hub: 103 passed, 0 failed
+finished 19:00:43 UTC
+## candidate, breaks
+earthview-health-breaks: 38 of 38 breaks caught
+hub-alignment breaks (BREAK=one-byte-changed, version-line-changed, record-names-another-hash, candidate-on-a-stale-base, record-without-a-readback): each exits 1
+## rerun on the final content commit bd335df (built on main f835415), 23 Nov 2026 about 19:27 UTC, after the wording correction and the rebase
+# columns: exit code|suite|last line.  The five hub-alignment breaks must exit 1.
+0|hub-alignment|hub-alignment: 6 passed, 0 failed (worker.js = deployed hub 0.6.24)
+0|earthview-admin|earthview-admin: 109 passed, 0 failed
+0|earthview-gate|earthview-gate: 163 passed, 0 failed
+0|earthview-health|earthview-health: 49 passed, 0 failed
+0|earthview-hub|earthview-hub: 309 passed, 0 failed
+0|earthview-probe|PASSED: 117 passed, 0 failed
+0|earthview-stage-b-call|PASSED: 48 passed, 0 failed
+0|evprobe|evprobe: 94 passed, 0 failed
+0|timeline-catalogue-hub|timeline-catalogue-hub: 74 passed, 0 failed
+0|health-hub|29 passed, 0 failed
+0|history-hub|history-hub: 33 passed, 0 failed
+0|sunface-hub|PASS  sunface-hub: 171 passed, 0 failed
+0|wind-hub|ok  wind-hub: 103 passed, 0 failed
+1|hub-alignment BREAK=one-byte-changed|must be 1
+1|hub-alignment BREAK=version-line-changed|must be 1
+1|hub-alignment BREAK=record-names-another-hash|must be 1
+1|hub-alignment BREAK=candidate-on-a-stale-base|must be 1
+1|hub-alignment BREAK=record-without-a-readback|must be 1
+check-manifest (BASE f835415, content commit bd335df): 14 passed, 0 failed; 126 changed paths, 126 in the manifest, 61 left as on BASE
