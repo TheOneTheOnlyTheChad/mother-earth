@@ -93,3 +93,10 @@ All by Claude, in its own pane tab on the Cloudflare dashboard (bucket `mother-e
 - **No public effect (17:07:35 UTC, own pane tab on the hub):** `/` reports 0.6.23; `/catalogue/timeline/tl-2026-11-R3` 404 "unknown revision"; R2 and R1 routes 200 with their exact bytes.
 - The object is now uploaded: any change to the catalogue bytes, a release-date slip included, needs a new revision id and key; this object would stay, unused.
 - Section 6's "Nothing is uploaded to R2" is superseded by this section. Still not done: hub 0.6.24 deploy (Earth from Space thread), the live check of the R3 route, the page merge.
+
+## 9. Live check of the R3 route, 23 Nov 2026 17:22:35 UTC (Claude's own read, own pane tab, closed after)
+The Earth from Space thread reports hub 0.6.24 deployed 17:18:38 UTC on Chad's own line (their record: `reviews/2026-11-23-earth-from-space-0.6.24-candidate.md` section 8 on `earth-from-space-rc` `e9242a4`). Read here, independently:
+- `/catalogue/timeline/tl-2026-11-R3`: 200, application/json, 31,636 B, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993` (exact); schema 3, release_date 2026-11-24, previous `tl-2026-11-R2`.
+- `/catalogue/timeline/tl-2026-11-R2`: 200, 18,120 B, `2f39aa30…0356`. `/catalogue/timeline/tl-2026-11-R1` and `/catalogue/timeline`: 200, 15,656 B, `096ae648…0fbe`.
+- `/` reports 0.6.24. All four catalogue answers carry `access-control-allow-origin: *`.
+Not done: the page merge. By the release-day rule (TIMELINE-INBOX-AND-CHANGES-PROPOSAL section 3.5) it belongs to the UTC day 24 Nov, latest start 22:00 UTC.
