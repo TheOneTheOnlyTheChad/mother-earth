@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 10:40 UTC (clock reading) — **Timeline: proposal for one developed event (end-Cretaceous: image, readable opening, detail) written for GPT's review. Docs only. Nothing researched, built or stored.** (live page unchanged, merge `03aff0a`; hub untouched; Timeline feature thread)
+- **Chad's own line (23 Nov):** "Go: write the docs-only proposal for one developed end-Cretaceous event, incorporating GPT's points. Include proposed source and image checks, the local preview approach and any licence decisions. No build or release yet."
+- **File:** `docs/concepts/TIMELINE-STORY-PROPOSAL.md` rev 1 (main; Project `claude/concepts/`; Mac `_review/timeline-story-proposal/read/`). First slice of stage 2. Schema 3 for this entry only (an opening whose every sentence names its supporting claims; an image record with licence and hash); a capped source and image check; a local preview with a rehearsal revision that never touches the hub; decisions S1–S4 and L1–L4 for Chad.
+- **Flagged in it:** a release needs a new catalogue revision and so a Worker pin and hub deploy. The live hub is 0.6.22 from `earth-from-space-rc`; the route (H1–H3) is to be agreed with that thread before any build that needs it. The preview does not.
+- **Next:** GPT's review; Chad's decisions. No research or build before his own go.
+
 ## 23 Nov 10:37 UTC (clock reading) — **Earth from Space: GPT accepted the rehearsal result as FAILED and recommends an independent phone alarm and a repeat (relayed by Chad). Amendment A1 written for review. NOT started, nothing scheduled. `EARTHVIEW_ENABLED` stays `manual`. Docs only.** (hub 0.6.22 unchanged; Earth from Space thread)
 - **A1:** Chad's own clock-app alarms 10 minutes after each of the four opportunities, proved with a test alarm at readiness; at each alarm he looks for one named push and writes what the phone shows there and then; separate verdicts for the human fallback, Claude's ledger detection and delivery; gap alert kept apart from the heartbeat; cleanup scheduled at readiness; Mac mirror checked by hash.
 - **Correction carried into the result:** if inspections stop altogether and nobody checks independently, detection time is unbounded, by day or night.
