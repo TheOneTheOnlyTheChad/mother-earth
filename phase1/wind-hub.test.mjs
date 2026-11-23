@@ -219,7 +219,7 @@ const call = async (w, pathname) => W.default.fetch(new Request('https://hub.tes
   { const rg = w.reqs.filter(q => q.kind === 'range'), rest = w.reqs.filter(q => q.kind !== 'range');
     ok('B the six range downloads send cache: no-store and no cf setting', rg.length === 6 && rg.every(q => q.cache === 'no-store' && q.cf === undefined), rg.map(q => ({ cache: q.cache, cf: q.cf })));
     ok('B the index request and the object check keep their setting (cf cacheTtl 0, no cache option)', rest.length === 2 && rest.every(q => q.cf && q.cf.cacheTtl === 0 && q.cache === undefined), rest.map(q => ({ kind: q.kind, cache: q.cache, cf: q.cf })));
-    ok('B every request carries the collector User-Agent', w.reqs.every(q => q.ua === 'mother-earth-collector/0.6.22 (open project; github.com/TheOneTheOnlyTheChad)'), w.reqs.map(q => q.ua)); }
+    ok('B every request carries the collector User-Agent', w.reqs.every(q => q.ua === 'mother-earth-collector/0.6.23 (open project; github.com/TheOneTheOnlyTheChad)'), w.reqs.map(q => q.ua)); }
   ok('B the grid writes were create-only and the manifest write conditional', STATS.unconditionalGridPuts === 0 && STATS.unconditionalPointerPuts === 0, STATS);
   // same hour again: nothing newer
   const n0 = w.reqs.length; await W.collectWind(w.env, at(16, 5));

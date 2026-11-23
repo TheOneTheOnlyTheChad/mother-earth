@@ -260,9 +260,9 @@ await t('H8. a run note carrying the FIRMS key (fetch error with the URL) is red
 });
 
 // ================= H9 routing
-await t('H9. unknown check → 404 listing the checks; POST → 405; the 8 known checks are exactly the monitor list', async () => {
+await t('H9. unknown check → 404 listing the checks; POST → 405; the known checks are exactly the 8 of the monitor list plus the two Earth from Space checks (0.6.23)', async () => {
   const { env } = await healthyHub();
-  const u = await check(env, '/health/archive/ships'); assert.equal(u.status, 404); assert.deepEqual(u.body.checks.sort(), ALL.slice().sort());
+  const u = await check(env, '/health/archive/ships'); assert.equal(u.status, 404); assert.deepEqual(u.body.checks.sort(), [...ALL, '/health/runs/earthview', '/health/trial/earthview'].sort());   // 0.6.23: two Earth from Space checks (their own suite: earthview-health.test.mjs)
   assert.equal((await check(env, '/health/runs/firms', 'POST')).status, 405);
   assert.equal((await check(env, '/health')).status, 404);
 });

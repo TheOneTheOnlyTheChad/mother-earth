@@ -81,7 +81,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.22';
+const COLLECTOR_VERSION = '0.6.23';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2399,7 +2399,7 @@ export { AIRCRAFT_LAYER, AIRCRAFT_FIELDS, AIRCRAFT_MAX_AGE_S, AIRCRAFT_TEXT, air
 export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
-export { EARTHVIEW, evLatest, evKeyOf, evJpegScans, evDecode, evPng, evCompare, evFetch, collectEarthView, evRoute, evGuard, evAdmin, evCleanup, EvStop, EV_STOP, EV_JPEG, DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache, EVB, evbSeen, evProbeValidate, evProbeOnce, evProbeRoute, evMark, evAdmit, evManualGate, evValidationBegin, evValidated, runEarthViewLogged, evAuth, EV_ADMIN_ACTIONS, EV_WINDOW_MAX_MS };
+export { EARTHVIEW, evLatest, evKeyOf, evJpegScans, evDecode, evPng, evCompare, evFetch, collectEarthView, evRoute, evGuard, evAdmin, evCleanup, EvStop, EV_STOP, EV_JPEG, DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, EVH, evhKind, evhConfig, evhEvaluate, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache, EVB, evbSeen, evProbeValidate, evProbeOnce, evProbeRoute, evMark, evAdmit, evManualGate, evValidationBegin, evValidated, runEarthViewLogged, evAuth, EV_ADMIN_ACTIONS, EV_WINDOW_MAX_MS };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -2774,7 +2774,7 @@ const HEALTH = {
   missedSlots: 3, marginS: 300,          // overdue = 3 consecutive slots without the thing + 5 min for an in-flight run
   checkpointOverdueS: 2 * 3600,          // a closed day is due at end + 30 min (HIST_GRACE_MS); failing from end + 2 h
   newGapS: 24 * 3600,                    // a gap counts as a NEW incident for 24 h after it was recorded; it stays listed after that
-  checks: { runs: ['usgs', 'firms'], publication: ['usgs', 'firms'], archive: HIST.checkpointLayers, coverage: HIST.checkpointLayers },
+  checks: { runs: ['usgs', 'firms', 'earthview'], publication: ['usgs', 'firms'], archive: HIST.checkpointLayers, coverage: HIST.checkpointLayers, trial: ['earthview'] },   // 0.6.23: runs/earthview, trial/earthview
   boundaryNote: 'no detections processed yet for today',   // collectFirms' expected-empty note before FIRMS_DAY_BOUNDARY_H
 };
 const healthAllowS = layer => HEALTH.missedSlots * HEALTH.cadenceS[layer] + HEALTH.marginS;
@@ -2912,8 +2912,112 @@ async function healthCoverage(env, layer, nowMs) {
   if (c.input_status === 'current') return { healthy: true, reasons: [], facts };
   return { healthy: false, reasons: [`${layer} checkpoint for ${y} was built from a ${c.input_status} input (cutoff ${c.cutoff}; ${c.failed_runs_after_cutoff} failed runs after it)`], facts };
 }
+/* ---- 0.6.23: Earth from Space trial health (EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL rev 3.1) ----
+ * GET|HEAD /health/runs/earthview   503 while a scheduled time of the current trial is overdue (no end-of-run row), or the gate is
+ *                                   off during the trial, or the configuration or the rows cannot be read.
+ * GET|HEAD /health/trial/earthview  503 once the trial's rows show stop condition 3 (a storage stop), 6 (three adjacent settled
+ *                                   slots each holding a validation refusal) or 8 (six adjacent settled slots, none with a current
+ *                                   frame, at least one showing the source listing a newer one), or a row this code cannot read.
+ * A TRIAL is the pair EARTHVIEW_FROM / EARTHVIEW_UNTIL; its SLOTS are the ten-minute marks FROM <= s < UNTIL, the same scheduled
+ * times evAdmit selects. The health request's own clock decides only which slots are DUE (now >= s + 20 min); it changes nothing
+ * about admission and is not a deadline for admitted work. Everything is derived on each request from collector_runs: nothing is
+ * written, nothing is fetched, no collection runs. So a finding stays until the window variables are removed (closeout), and a
+ * later good run does not clear it. What this cannot know is said in the proposal (sections 3.1, 3.5, 3.6, 7): it keeps no history
+ * of the gate; a manual run exactly on a mark looks like that slot's run; rows finished after UNTIL + 24 h are not read.
+ * Public answers carry fixed reason codes, times and counts only: never a run note. */
+const EVH = { SLOT_MS: 600e3, ALLOW_MS: 1200e3, HORIZON_MS: 24 * 3600e3, ROW_LIMIT: 2000, LIST_MAX: 20, C6_RUN: 3, C8_RUN: 6 };
+const EVH_POST_CHECK = ['served time not confirmed', 'served a different frame', 'picture write failed', 'picture key already in use', 'picture read-back differs', 'stored copy is being removed'];
+const EVH_FETCH_FAIL = /^(picture|check image) (request failed|http error|not a picture|size out of range)$/;
+/** What one collector_runs row of the earthview layer establishes, from its status and the FIXED phrase its note starts with. */
+function evhKind(row) {
+  const note = typeof row.note === 'string' ? row.note : '', reason = note.split(' — ')[0];
+  if (row.status === 'ok') {
+    if (Number(row.records) === 1 && note.startsWith('frame ')) return 'published';
+    if (Number(row.records) === 0 && note.startsWith('nothing newer: ')) return 'nothing_newer';
+    if (Number(row.records) === 0 && note.startsWith('superseded: ')) return 'superseded';
+    return 'unrecognised';
+  }
+  if (row.status !== 'down') return 'unrecognised';
+  if (reason === EV_STOP.REPAIR || reason === EV_STOP.CHANGED || reason === EV_STOP.BUSY) return 'storage_stop';
+  if (reason === EV_STOP.HELD || reason === EV_STOP.UNSET) return 'guard_refused';
+  if (reason === 'source check failed') return 'source_check_failed';
+  if (reason === 'picture failed validation' || reason === 'check image failed validation') return 'validation_refused';
+  if (EVH_POST_CHECK.includes(reason) || EVH_FETCH_FAIL.test(reason)) return 'post_check_failure';
+  if (reason === 'internal error') return 'internal_error';
+  return 'unrecognised';
+}
+/** The trial's configuration, in order of precedence (proposal 3.5 rows 1 to 4). Reads env only. */
+function evhConfig(env) {
+  const g = env.EARTHVIEW_ENABLED, gate = g === undefined ? 'unset' : g === 'manual' ? 'manual' : g === '1' ? '1' : 'unknown';
+  if (gate === 'unknown') return { gate, fail: 'gate_unknown_value' };
+  const hasF = env.EARTHVIEW_FROM !== undefined, hasU = env.EARTHVIEW_UNTIL !== undefined;
+  if (!hasF && !hasU) return gate === '1' ? { gate, fail: 'gate_on_without_window' } : { gate, none: true };
+  const from = evMark(env.EARTHVIEW_FROM), until = evMark(env.EARTHVIEW_UNTIL);
+  if (from === null || until === null || until <= from || until - from > EV_WINDOW_MAX_MS) return { gate, fail: 'window_not_readable' };
+  return { gate, from, until };
+}
+/** Both verdicts for the current trial at nowMs. Pure apart from ONE bounded, indexed read of collector_runs. Throws nothing. */
+async function evhEvaluate(env, nowMs) {
+  const iso = ms => new Date(ms).toISOString(), c = evhConfig(env);
+  const both = (code, state, facts) => ({ runs: { healthy: false, reasons: [code], facts: { state, ...facts } }, trial: { healthy: false, reasons: [code], facts: { state, ...facts } } });
+  if (c.fail) return both(c.fail, { gate_unknown_value: 'gate has an unknown value', gate_on_without_window: 'gate is 1 with no window', window_not_readable: 'window not readable' }[c.fail], { gate: c.gate });
+  if (c.none) { const f = { state: 'no trial configured', gate: c.gate }; return { runs: { healthy: true, reasons: [], facts: f }, trial: { healthy: true, reasons: [], facts: f } }; }
+  const { from, until, gate } = c, on = gate === '1', nSlots = (until - from) / EVH.SLOT_MS, last = until - EVH.SLOT_MS + EVH.ALLOW_MS;
+  const base = { gate, from: iso(from), until: iso(until), slots: nSlots, allow_s: EVH.ALLOW_MS / 1000 };
+  if (nowMs < from) {
+    const f = { state: on ? 'armed' : 'window set but gate is not 1', ...base };
+    return { runs: { healthy: on, reasons: on ? [] : ['not_collecting'], facts: f }, trial: { healthy: true, reasons: [], facts: f } };
+  }
+  // The rows of this trial: finished inside [FROM, UNTIL + 24 h), oldest first, through the (layer, finished_at) index, bounded.
+  let rows;
+  try {
+    const r = await env.DB.prepare('SELECT started_at, finished_at, status, records, note FROM collector_runs WHERE layer = ? AND finished_at >= ? AND finished_at < ? ORDER BY finished_at LIMIT ?')
+      .bind('earthview', iso(from), iso(until + EVH.HORIZON_MS), EVH.ROW_LIMIT).all();
+    rows = r && r.results;
+    if (!Array.isArray(rows)) throw new Error('no result list');
+  } catch (_) { return both('rows_unreadable', 'rows unreadable', base); }
+  if (rows.length >= EVH.ROW_LIMIT) return both('too_many_rows', 'too many rows to evaluate', { ...base, rows_read: rows.length });
+  // Per slot: flags that are true if ANY of its rows says so. A good row never removes a bad flag; evidence that the held frame
+  // was current counts only from a row finished at or before the slot's due time.
+  const slot = Array.from({ length: nSlots }, () => ({ rows: 0, refused: false, storage_stop: false, newer_listed: false, current: false, unrecognised: false }));
+  let outside = 0;
+  for (const row of rows) {
+    const s = Date.parse(row.started_at), f = Date.parse(row.finished_at);
+    if (!Number.isFinite(f) || f > nowMs + HEALTH_SKEW_MS) return both('rows_unreadable', 'rows unreadable', base);
+    if (!Number.isFinite(s) || s < from || s >= until || (s - from) % EVH.SLOT_MS !== 0) { outside++; continue; }
+    const x = slot[(s - from) / EVH.SLOT_MS], k = evhKind(row); x.rows++;
+    if (k === 'unrecognised') x.unrecognised = true;
+    if (k === 'storage_stop') x.storage_stop = true;
+    if (k === 'validation_refused') x.refused = true;
+    if (k === 'validation_refused' || k === 'post_check_failure') x.newer_listed = true;
+    if ((k === 'published' || k === 'superseded' || k === 'nothing_newer') && f <= s + EVH.ALLOW_MS) x.current = true;
+  }
+  const at = i => iso(from + i * EVH.SLOT_MS);
+  let settled = 0; while (settled < nSlots && nowMs >= from + settled * EVH.SLOT_MS + EVH.ALLOW_MS) settled++;   // due at equality
+  const overdue = [], complete = slot.filter(x => x.rows > 0).length;
+  for (let i = 0; i < settled; i++) if (!slot[i].rows) overdue.push(at(i));
+  // trial findings. c3 and unrecognised: any slot of the trial, settled or not. c6 and c8: settled slots only, in scheduled order.
+  const findings = [];
+  slot.forEach((x, i) => { if (x.storage_stop) findings.push({ code: 'storage_stop', slot: at(i) }); if (x.unrecognised) findings.push({ code: 'unrecognised_outcome', slot: at(i) }); });
+  for (let i = 0; i + EVH.C6_RUN <= settled; i++) if (slot.slice(i, i + EVH.C6_RUN).every(x => x.refused)) { findings.push({ code: 'three_slots_refused', slot: at(i) }); break; }
+  for (let i = 0; i + EVH.C8_RUN <= settled; i++) { const w = slot.slice(i, i + EVH.C8_RUN); if (w.every(x => !x.current) && w.some(x => x.newer_listed)) { findings.push({ code: 'six_slots_without_a_current_frame', slot: at(i) }); break; } }
+  const runsReasons = [];
+  if (!on && nowMs < last) runsReasons.push('not_collecting');
+  if (overdue.length) runsReasons.push('completion_missing');
+  const trialReasons = [...new Set(findings.map(x => x.code))];
+  const ended = nowMs >= last, clean = !overdue.length && !findings.length;
+  const state = ended ? (clean ? 'trial complete, nothing outstanding' : 'trial ended with outstanding findings')
+    : !on ? 'trial window set but not collecting' : nowMs < from + EVH.ALLOW_MS ? 'starting' : 'active';
+  const facts = { state, ...base, settled, complete, overdue: overdue.length, overdue_slots: overdue.slice(0, EVH.LIST_MAX), findings: findings.slice(0, EVH.LIST_MAX), rows_read: rows.length, rows_outside_slots: outside };
+  return { runs: { healthy: !runsReasons.length, reasons: runsReasons, facts }, trial: { healthy: !trialReasons.length, reasons: trialReasons, facts } };
+}
+/** Never lets an exception's text reach a public answer: anything unexpected is the fixed code rows_unreadable, failing. */
+const evhSafe = async (env, nowMs, which) => { try { return (await evhEvaluate(env, nowMs))[which]; } catch (_) { return { healthy: false, reasons: ['rows_unreadable'], facts: { state: 'rows unreadable' } }; } };
+const healthEvRuns = (env, _layer, nowMs) => evhSafe(env, nowMs, 'runs');
+const healthEvTrial = (env, _layer, nowMs) => evhSafe(env, nowMs, 'trial');
 async function health(req, env, check, layer) {
-  const fn = { runs: healthRuns, publication: healthPublication, archive: healthArchive, coverage: healthCoverage }[check];
+  const fn = layer === 'earthview' ? { runs: healthEvRuns, trial: healthEvTrial }[check]   // 0.6.23
+    : { runs: healthRuns, publication: healthPublication, archive: healthArchive, coverage: healthCoverage }[check];
   const nowMs = Date.now(), hdr = { 'Cache-Control': 'no-store, max-age=0' };
   const known = fn && (HEALTH.checks[check] || []).includes(layer);
   let out;
