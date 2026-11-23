@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 17:07:13 UTC — **R2 UPLOAD DONE: `ref/timeline/tl-2026-11-R3.json`, read back exact** (Timeline thread; Chad: "Approve: upload phase1/timeline/catalogue/tl-2026-11-R3.json (31,636 B, sha256 f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993) to R2 as ref/timeline/tl-2026-11-R3.json, and read it back. No Worker change, no merge.")
+- **Before:** destination 404; `ref/timeline/` held R1 and R2 only; source at `timeline-story-rc` `36c6cb0` read 31,636 B, `f1a5fab2…0993`.
+- **Upload (dashboard R2 objects API, Claude's own pane tab, closed after):** HTTP 200, size 31,636, etag `1c9a29d624aa7c70a3c6796b2191fc8f`, version `7e5df69fbda0ed02f93bb5982f6f8e93`, uploaded 17:07:13.194Z.
+- **Read back:** 200, 31,636 B, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993` (exact). R1 (`096ae648…0fbe`) and R2 (`2f39aa30…0356`) read back unchanged.
+- **No public effect (17:07:35 UTC):** hub `/` reports 0.6.23; `/catalogue/timeline/tl-2026-11-R3` 404 "unknown revision"; R1 and R2 routes serve their exact bytes.
+- The object is uploaded, so changed catalogue bytes (a date slip past 24 Nov included) need a new revision id and key.
+- **Not done:** hub 0.6.24 deploy (Earth from Space thread, Chad's own line), the live check of the R3 route, the page merge. Record: `reviews/2026-11-23-timeline-story-release-rc.md` section 8 on `timeline-story-rc`.
+
 ## 23 Nov 16:52 UTC (clock reading) — **Hub 0.6.24 candidate built for the Timeline pin `tl-2026-11-R3` (route H1). On its own branch, ready for GPT. Not deployed; nothing uploaded, pinned or changed in any account** (production: none; Earth from Space thread)
 - **Branch `earth-from-space-0.6.24-rc` `8b80989`**, cut from `earth-from-space-rc` `9f2c7ad`. Kept off `earth-from-space-rc` until a deploy is approved, so that branch's `phase1/worker.js` still equals the live hub (0.6.23).
 - **On whose word:** the Timeline thread's "bytes final" (`timeline-story-rc` `36c6cb0`) was relayed here by Chad without a line of his own to this thread; H1 is named in his go to the Timeline thread. Started as branch work on that basis and recorded as that.
