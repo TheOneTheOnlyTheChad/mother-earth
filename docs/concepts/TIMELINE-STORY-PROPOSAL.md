@@ -1,5 +1,7 @@
 # Timeline — one developed event: the end-Cretaceous story (image, readable opening, detail)
 
+**Rev 2.1, 23 Nov 2026 11:19 UTC (clock reading). DECIDED, and the research done. Docs only.** Chad's own message, 23 Nov 2026, in reply to rev 2: "i agree go". That is his agreement to all eight decisions in section 8 as recommended there (S1 sourced causes: yes · S2 no reconstructions in this slice · S3 images in the public repository under `assets/timeline/` only where the licence permits · L1 public domain, CC0, CC BY preferred · L2 CC BY-SA case by case, brought to him first · L3 skip non-commercial-only and no-derivatives · L4 skip images that need permission · S4 a three-hour total cap), and his go for the capped source and image check. Nothing else in this document is changed by rev 2.1. The check ran 11:02:24–11:14:50 UTC on 23 Nov under a search plan frozen first; its records are private (Timeline inbox item TL-IN-0002: evidence record and frozen review snapshot) and wait for GPT's review. No build, no hub step, no image stored, no enquiry.
+
 **Rev 2, 23 Nov 2026 10:57 UTC (clock reading). Docs only.** GPT reviewed rev 1 from the Mac copy (sha256 `3fc5a33b…fc9f7`; relayed by Chad; filed unchanged as `reviews/2026-11-23-timeline-story-proposal-gpt-review.md`). Verdict: sound direction; revise bounded points before research or build decisions; nothing authorised; no source or image cleared. Its answers and corrections are applied below and marked (GPT). **Relayed GPT text is not Chad's approval: the decisions in §8 and the go for the capped research are still Chad's to give.** Nothing is researched, built, stored or approved, and no source or image was opened for this proposal.
 
 **Rev 1, 23 Nov 2026 10:19 UTC.** Written by Claude (Timeline feature thread) on Chad's own line: "Go: write the docs-only proposal for one developed end-Cretaceous event, incorporating GPT's points. Include proposed source and image checks, the local preview approach and any licence decisions. No build or release yet."
@@ -80,7 +82,7 @@ Route as START-HERE §4t: private inbox item → evidence record → frozen revi
 - **Failure:** if the image does not load, the caption and story stand, with a plain line that the image could not be loaded; no broken-image frame.
 - **Explorer:** marks unchanged; no thumbnails on the axis in this slice.
 
-## 8. Decisions for Chad (GPT's recommendation beside each; none is decided)
+## 8. Decisions for Chad (GPT's recommendation beside each) — **all eight decided as recommended, 23 Nov 2026: Chad, "i agree go"**
 - **S1 Causes.** May the story give a sourced, reviewed explanation of cause? *Claude and GPT: yes.* Attributed where attribution is what the evidence supports; not every sentence forced into "the authors state"; competing mechanisms not given equal weight by default; material uncertainty visible beside the opening.
 - **S2 Reconstructions.** *Claude and GPT: none in this slice.* A later proposal can take them up.
 - **S3 Where images live.** *Claude and GPT: the public repository under `assets/timeline/`, only where the selected item's licence permits redistribution.* Each asset's licence and provenance are recorded per asset and are separate from the code's AGPL licence. No blanket approval of any collection.
