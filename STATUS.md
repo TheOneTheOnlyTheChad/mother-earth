@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 11:28 UTC (clock reading) — **Earth from Space independent monitoring: Chad decided M1 to M8 in his own line ("M1 to M8 yes"). Design decisions only; no action authorised. Docs only.** (hub 0.6.22 unchanged; Earth from Space thread)
+- **Decided:** build the UptimeRobot extension in place of heartbeats; a hub redeploy before Stage D; three daytime reads at 07:00, 13:00, 20:00 SAST; no second provider; alert on one overdue slot; include the disposable fixture test; delete the leftover "ME alert test" monitor.
+- **Still needing their own lines:** the 0.6.23 branch build (his go, after GPT's check of rev 3); the deploy; the two monitors; the fixture test; the monitor deletion.
+- **File:** `docs/concepts/EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL.md` rev 3 section 11 (branch `earth-from-space-rc` `b26f4cb`, copied here).
+
 ## 23 Nov 11:26 UTC (clock reading) — **Earth from Space independent monitoring: UptimeRobot account read (signed in by Chad, read-only, nothing changed); proposal rev 3 answers GPT's rev 2 review. Decisions M1 to M8 are recommendations awaiting Chad's own line. Docs only: nothing built, no setting changed, no Stage D.** (hub 0.6.22 unchanged; Earth from Space thread)
 - **Account, as read about 11:10 to 11:25 UTC:** Free plan; nine monitors, none paused. The eight `usgs` and `firms` health monitors are Up, 5-minute interval, E-mail and iPhone push selected on each, "no delay, no repeat", no maintenance window. The hub's log shows them polling by HEAD. **A ninth, "ME alert test" (a 404 address), is a leftover from 6 Nov and has been Down since then**; deleting it is proposed (M8, Chad's own line). Five incidents on record, including `publication/firms` open 7 h 26 min on 19 Nov.
 - **Rev 3 contract changes:** a manual run on an exact ten-minute mark is a stated blind spot; repeats of a slot are read as flags and a good row never removes a bad one; only slots past their 20 minutes can build a streak; the state table is ordered by precedence (gate `1` with no window fails; unknown gate fails at every stage); reads are bounded and fail closed on truncation or an unrecognised outcome; closeout preserves the evidence first.

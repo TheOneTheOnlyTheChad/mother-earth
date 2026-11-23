@@ -8,8 +8,7 @@ go of the same day. Section 13 maps every review point to its answer.
 **Nothing here is built, deployed, configured or approved. It does not clear Stage D.** No setting was changed in
 any account for it.
 
-**Decisions are not yet Chad's.** M1 to M7 below are GPT's recommendations, relayed by Chad. Rev 2 recorded M1 to
-M4 as his choices; that was wrong on provenance and is corrected in section 11.
+**Decisions:** Chad decided M1 to M8 in his own line after rev 3 was written (section 11). They authorise no action.
 
 ## 0. In short
 
@@ -323,10 +322,16 @@ not impossible to test safely.** Rev 1 was wrong to say so.
 - Rehearsal amendment A1 is not run.
 - The Stage D line states section 7's exposure in words. Stage D keeps its own line.
 
-## 11. Decisions (none made yet by Chad's own line)
+## 11. Decisions
 
-**Correction of provenance:** rev 2 recorded M1 to M4 as Chad's choices. They were GPT's recommendations, in text
-Chad relayed. They are recorded here as recommendations until Chad confirms them in his own words.
+**Decided by Chad, his own message in the thread, 23 Nov 2026 (recorded 11:28 UTC, clock reading): "M1 to M8 yes".**
+All eight stand as in the table's "Claude proposes" column. These are decisions on the design. **They authorise no
+action:** the build is branch work on his go after GPT's check of rev 3; the deploy, the two monitors, the fixture
+test and the deletion under M8 each need his own Approve line.
+
+History of this section: rev 2 recorded M1 to M4 as his choices when they were GPT's recommendations; rev 3
+corrected that; his own line then followed.
+
 
 | # | Question | GPT recommends | Claude proposes |
 |---|---|---|---|
