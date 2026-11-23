@@ -1,8 +1,10 @@
-# Earth from Space — monitoring rehearsal plan (23 Nov 2026) — rev 2, for a focused check, NOT started
+# Earth from Space — monitoring rehearsal plan (23 Nov 2026) — rev 2.1, carried into execution, NOT started
 
 **Rev 2, 23 Nov 2026 04:25 UTC (clock reading),** after the review relayed by Chad in the thread on 23 Nov (four
 mechanics; section 11 lists each and where it went). The test push, the ledger and the identical scheduled messages
 were accepted and stand. Proposal rev 2.2 section 5.5 and runbook rev 2 section 2 are the basis.
+**Rev 2.1, 23 Nov 2026 04:37 UTC (clock reading):** the focused check relayed by Chad on 23 Nov found no further
+review round needed and asked for four points to be carried into execution (section 11, last four rows).
 **Nothing here is approved or scheduled. A rehearsal that is met does not clear Stage D.**
 
 ## 0. Basis: no email alarm exists
@@ -19,7 +21,7 @@ Hub state throughout: `EARTHVIEW_ENABLED=manual`, hub 0.6.22. **No change to the
 request to EUMETSAT.** All reads are read-only.
 
 Four hourly opportunities. T is the start time in Chad's Approve line, on the hour.
-**The whole rehearsal lies inside 06:00 to 22:00 SAST: T no earlier than 06:00 and no later than 18:30.**
+**The whole rehearsal lies inside 06:00 to 22:00 SAST. T is on the hour: no earlier than 06:00, no later than 18:00.**
 
 | Opportunity | Due | Scheduled task | Heartbeat push | Purpose |
 |---|---|---|---|---|
@@ -54,10 +56,15 @@ and T is not moved without Chad.
 2. **Which opportunity this is: from the task, not from the clock.** The delivered task carries its id and the
    time it fired. The ledger's task table maps that id to its opportunity number and due time. **The clock is
    never rounded to choose an opportunity.** Launch delay = clock minus due time. Over 10 minutes is **late**
-   (section 6).
+   (section 6). **If the delivery does not carry a task id that is in the table, the opportunity is not guessed:**
+   the inspection says so, the ledger line records "identity not established", and R1 for that opportunity is
+   **incomplete**. (Observed in this thread on 23 Nov: two scheduled deliveries each carried their task id and
+   the time they fired. Readiness lists the ids back; the first delivery of the rehearsal confirms the rest.)
 3. **Gap rule, before anything else is read.** Read the ledger's last **completed** inspection. If its clock time
-   is more than 75 minutes ago, this is a missed inspection. The rule uses the ledger and the clock only. (For
-   opportunity 1 there is no earlier inspection; the rule does not apply and the ledger line says so.)
+   is more than 75 minutes ago, this is a missed inspection. The rule uses the ledger and the clock only.
+   **If the ledger holds no completed inspection at all, the rule measures from T:** more than 75 minutes after T
+   with nothing completed is a **startup gap**, flagged and alerted in the same way. (Opportunity 1 on time
+   measures about zero and does not fire.)
 4. **If the gap rule fired, push the gap alert at once, before any dashboard read:** "Earth from Space rehearsal:
    MISSED INSPECTION. Last completed <time>, now <time>, gap <minutes>. In Stage D you would pause now." The same
    in the thread, with the clock time of the push. **A blocked or slow read cannot delay it.**
@@ -86,7 +93,10 @@ and T is not moved without Chad.
   that is recorded and the inspection goes on.
 - **Header, written at readiness:** T; the task table (task id, opportunity number, due time) for the three tasks.
 - **One line per launched inspection:** opportunity number, task id, due time, launch clock time, delay in minutes,
-  gap-rule result (and the gap alert's push time if it fired), reads `completed` or `failed`, heartbeat push time.
+  gap-rule result (and the gap alert's push time if it fired), **read cut-off time** (the clock time up to which
+  the records were read), reads `completed` or `failed`, **completion clock time**, heartbeat push time.
+- "Last completed inspection" means the last line marked `completed`, by its completion time.
+- **Every scheduled inspection must reach this same working copy.** If it cannot, step 6 applies.
 - Only a line marked `completed` counts as a completed inspection.
 - At the end it goes into the result document unchanged.
 
@@ -96,6 +106,7 @@ and T is not moved without Chad.
 
 - **His clock runs from actual receipt.** His deadline is **90 minutes after the last inspection heartbeat reached
   his phone**, by the time shown on the phone. T + 150 is only the nominal deadline.
+- **If the first heartbeat never arrives, his first 90 minutes run from T.**
 - **Only an inspection heartbeat push counts.** The test push does not. Claude's replies in the thread, including
   "recorded", are not heartbeats and **do not reset his clock**, even if the app shows a notification for them.
 - He writes one line in the thread in his own words giving **two times separately: when he noticed, and when he
@@ -167,7 +178,7 @@ and T is not moved without Chad.
 
 ## 10. The line that would start it (Chad's own words, after the focused check)
 
-`Approve: Earth from Space monitoring rehearsal under proposal rev 2.2 section 5.5 and reviews/2026-11-23-earth-from-space-rehearsal-plan.md rev 2: readiness with one test push, then four hourly opportunities from <T, SAST> with the third omitted (scheduled inspections due at T, T+60 and T+180 minutes), read-only, with the variable at manual, notifications to my phone; outstanding tasks deleted afterwards; no change to the hub, no request to EUMETSAT`
+`Approve: Earth from Space monitoring rehearsal under proposal rev 2.2 section 5.5 and reviews/2026-11-23-earth-from-space-rehearsal-plan.md rev 2.1: readiness with one test push, then four hourly opportunities from <T, SAST> with the third omitted (scheduled inspections due at T, T+60 and T+180 minutes), read-only, with the variable at manual, notifications to my phone; outstanding tasks deleted afterwards; no change to the hub, no request to EUMETSAT`
 
 Example T: 10:00 SAST (due 10:00, 11:00, 13:00; nominal deadline for noticing 12:30; end 13:30). Readiness then
 starts by about 09:30.
@@ -185,3 +196,7 @@ each of R1 to R4b marked met, failed or incomplete, every late launch, and what 
 | 4. Readiness finished before T (scheduler, push, shared ledger); all within daytime hours; outstanding tasks cleaned up | Sections 1, 2, 4 and 8 |
 | Weaker daytime coverage after a failure needs a revised Stage D basis and is not a pass | Section 7, first row |
 | A rehearsal pass does not clear Stage D | Header; section 6 |
+| Focused check: shared ledger reading accepted; record completion and read cut-off times beside launch times | Section 4 |
+| Focused check: a missing first heartbeat starts Chad's clock at T; a later inspection finding no completed entry flags the startup gap | Section 5; section 3 step 3 |
+| Focused check: verify the scheduler supplies the task identity; if it cannot be established, incomplete, not a guess | Section 3 step 2 |
+| Focused check: T is on the hour, so the latest start is 18:00 SAST | Section 1 |
