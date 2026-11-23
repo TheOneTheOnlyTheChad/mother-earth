@@ -425,20 +425,27 @@ settings and left without saving.
    hours. Whether that was noticed is not recorded and is not assumed. It is the same exposure section 7 names.
 5. On the Free plan a 503 is "down" and nothing needs configuring to make it so.
 
-**"ME alert test" deleted, 23 Nov 2026, on Chad's own line** ("Approve: delete the UptimeRobot monitor "ME alert
-test" (the leftover 404 test from 6 Nov); no other monitor or setting changed").
+**"ME alert test": deletion approved by Chad on 23 Nov, attempted, and NOT done. Corrected 14:02 UTC (clock reading).**
+
+Chad's line: "Approve: delete the UptimeRobot monitor "ME alert test" (the leftover 404 test from 6 Nov); no other
+monitor or setting changed".
 
 - **Preserved first** (read 11:35 UTC): address `/health/test/firms`; HTTP monitor, 5-minute interval; E-mail and
   iPhone push selected, SMS and voice off; region Europe; no status page; two incidents, both 404 Not Found:
-  6 Nov 18:11:54 to 18:18:45 SAST (6 min 51 s) and 6 Nov 18:21:57 SAST, open for 16 days 19 hours when deleted.
-- **Deleted** through the monitor's own menu; the confirmation named "ME alert test" only; confirmed about
-  11:36:55 UTC. Nothing else was opened for change.
-- **Read back from the hub's side, 11:41:55 UTC:** the last request to `/health/test/firms` was at 11:33:57; the
-  one due about 11:39 did not come. The eight real addresses went on being polled every five minutes (for example
-  `runs/firms` 11:31:07, 11:36:12, 11:41:16).
-- **Not yet read back in the UptimeRobot dashboard:** its page would not finish loading after the deletion (the
-  browser pane was not in view). **To be read at the next look: eight monitors, all Up, none paused.** Until then
-  the dashboard read-back is incomplete, not passed (written 11:42 UTC).
+  6 Nov 18:11:54 to 18:18:45 SAST (6 min 51 s) and 6 Nov 18:21:57 SAST, still open.
+- **Attempt, about 11:36:55 UTC:** the monitor's menu, "Delete monitor", and the confirmation's Delete button were
+  pressed while the browser pane was not in view. **The deletion did not take effect.**
+- **What Claude then wrote was wrong.** An earlier version of this section and of STATUS said the monitor was
+  deleted and that the hub's log confirmed it, because one poll expected about 11:39 had not arrived. **That
+  inference was unsound:** this monitor's polls are irregular while it is down (the hub's log shows 11:33:57,
+  11:46:57, 12:01:10, and later 13:43:33, 13:53:40). One missing poll proved nothing.
+- **Read 14:00 UTC:** the dashboard lists nine monitors, "ME alert test" Down, 1 Down and 8 Up; the hub is still
+  being polled at `/health/test/firms`. A second attempt at 14:01 could not be completed: the pane went out of
+  view again and the confirmation did not open.
+- **State now: nine monitors, exactly as read at 11:10 to 11:25 UTC. Nothing in the account has changed.** The
+  deletion stays approved and outstanding; it is done only with the pane in view, and read back in the dashboard
+  before it is reported.
+
 
 ## 13. Review points and where they went
 
@@ -485,7 +492,7 @@ test" (the leftover 404 test from 6 Nov); no other monitor or setting changed").
 | Contact and device details, confirmation count unknown; the fixture test supplies current delivery evidence | Section 12 "not read"; test 5 |
 | "No delay, no repeat": one opportunity to notice | Section 12; to be stated in the Stage D basis |
 | Prove HEAD equals GET, no-store, no collection or writes in the health path | 9.1 |
-| M8: delete the stale test monitor after preserving its settings and incidents | Done on Chad's line, 23 Nov (section 12, last paragraph) |
+| M8: delete the stale test monitor after preserving its settings and incidents | Approved by Chad; **attempted and not done**; outstanding (section 12, last paragraph) |
 
 ## 14. Sources
 

@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 14:02 UTC (clock reading) — **CORRECTION: the UptimeRobot monitor "ME alert test" was NOT deleted. The entry of 11:4x UTC below that says it was is wrong.** (production: nothing changed in UptimeRobot; nine monitors as before; hub 0.6.22 unchanged; Earth from Space thread)
+- **What happened:** the delete was pressed about 11:36:55 UTC while the browser pane was out of view and did not take effect. Claude reported it as done and called one missing poll "hub-side confirmation". **That inference was unsound:** the down monitor's polls are irregular (11:33:57, 11:46:57, 12:01:10, 13:43:33, 13:53:40 in the hub's log).
+- **Read 14:00 UTC:** dashboard shows nine monitors, "ME alert test" still Down, 1 Down and 8 Up. A second attempt could not be completed (pane out of view again).
+- **Standing:** Chad's Approve line for the deletion is unspent. It is done only with the browser pane in view and reported only after the dashboard itself shows eight monitors.
+- **Corrected in:** monitoring proposal section 12 and the 0.6.23 candidate packet (branch `earth-from-space-rc` `5d289e6`, copied here).
+
 ## 23 Nov 13:59 UTC (clock reading) — **Earth from Space: hub 0.6.23 candidate built on the branch on Chad's go. Two read-only trial health checks. NOT deployed; no setting, monitor or account changed; no Stage D.** (production: none; live hub is still 0.6.22, read 13:58 UTC; Earth from Space thread)
 - **Candidate:** `phase1/worker.js` 0.6.23, sha256 `111fdd101a9b7bbbefc174f0f7f432890a913b08b4334f19b13a4c5a29e55db8`, 550,699 bytes, at branch `earth-from-space-rc` `114dc5b`. Adds `/health/runs/earthview` and `/health/trial/earthview` to the monitoring proposal's rev 3.1 brief.
 - **Health-only change, shown:** taking the five edits back out gives the 0.6.22 file byte for byte. One effect outside the health path: the version string in the User-Agent and run log lines reads 0.6.23.

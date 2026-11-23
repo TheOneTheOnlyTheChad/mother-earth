@@ -109,7 +109,7 @@ plus the two new ones. No other assertion was changed.
    no window variables (state row 3). So creating the two monitors before a trial raises no alert.
 4. **Not done in this build:** the hub file's header comment does not list the two new addresses; the reviewed
    plan for the disposable fixture test (M6) is not written yet; the runbook revision is not written yet.
-5. **Still outstanding from before:** the UptimeRobot dashboard read-back after deleting "ME alert test".
+5. **Correction to earlier reports:** the leftover monitor "ME alert test" was **not** deleted. The attempt at 11:37 UTC did not take effect and Claude's report of it was wrong (proposal section 12). The account still has nine monitors. The deletion stays approved and outstanding.
 
 ## 6. What a deploy would need (not asked for here)
 
