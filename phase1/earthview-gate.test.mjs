@@ -232,7 +232,7 @@ for (const [label, g] of [['unset', undefined], ['"manual"', 'manual'], ['"0"', 
 // ===== L. The snapshot: "before" means before this invocation began, and stays what it was
 { const W = await load(), w = world({ ...WIN }); setNow(at(7, 10));
   const t1 = await tick(W, w, at(7, 10));
-  ok('L1 the first invocation in an isolate reports nothing before it: 0 scheduled, 0 fetches, an empty per-cron tally, an isolate id, an age, its cron and the hub version', t1.lines[0].scheduled_before === 0 && t1.lines[0].fetches_before === 0 && JSON.stringify(t1.lines[0].crons_before) === '{}' && /^[0-9a-f]{8}$/.test(t1.lines[0].isolate) && t1.lines[0].isolate_age_ms >= 0 && t1.lines[0].cron === FIVE && t1.lines[0].hub === '0.6.23', t1.lines[0]);
+  ok('L1 the first invocation in an isolate reports nothing before it: 0 scheduled, 0 fetches, an empty per-cron tally, an isolate id, an age, its cron and the hub version', t1.lines[0].scheduled_before === 0 && t1.lines[0].fetches_before === 0 && JSON.stringify(t1.lines[0].crons_before) === '{}' && /^[0-9a-f]{8}$/.test(t1.lines[0].isolate) && t1.lines[0].isolate_age_ms >= 0 && t1.lines[0].cron === FIVE && t1.lines[0].hub === '0.6.24', t1.lines[0]);
   use(w); await W.default.fetch(new Request('https://hub.test/health'), w.env, CTX); await W.default.fetch(new Request('https://hub.test/health'), w.env, CTX);
   await W.default.scheduled({ cron: '7 * * * *', scheduledTime: at(7, 7, 59) }, { ...w.env, R2: w.env.R2, DB: w.env.DB }, CTX).catch(() => { });
   await W.default.scheduled({ cron: '*/15 * * * *', scheduledTime: at(7, 15, 40) }, w.env, CTX).catch(() => { });

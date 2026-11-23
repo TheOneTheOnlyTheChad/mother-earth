@@ -113,7 +113,7 @@ const isoOf = hd => new Date(Date.parse(hd)).toISOString().replace('.000Z', 'Z')
 
 // ---------- B. first publication
 { const w = use(world()); const lm = w.lm, t0 = Date.now(); await run(w); const p = w.ptr(), im = p.image;
-  ok('B request carries the application User-Agent and a timeout', w.reqs[0].ua === S.UA && /mother-earth-collector\/0\.6\.23 /.test(S.UA) && w.reqs[0].signal, w.reqs[0]);
+  ok('B request carries the application User-Agent and a timeout', w.reqs[0].ua === S.UA && /mother-earth-collector\/0\.6\.24 /.test(S.UA) && w.reqs[0].signal, w.reqs[0]);
   ok('B pointer names an image', !!im && im.sha256 === sha(w.body) && im.bytes === w.body.length && im.w === 1024 && im.h === 1024, im);
   ok('B three times kept apart: observed_at null, file_updated = Last-Modified, retrieved_at = hub clock', im.observed_at === null && im.file_updated === isoOf(lm) && Date.parse(im.retrieved_at) >= t0 && im.last_modified_header === lm, im);
   ok('B id is file-updated time + hash prefix', im.id === isoOf(lm).replace(/[-:]/g, '') + '-' + sha(w.body).slice(0, 16), im.id);

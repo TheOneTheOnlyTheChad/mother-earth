@@ -81,7 +81,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.23';
+const COLLECTOR_VERSION = '0.6.24';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -6223,9 +6223,16 @@ const TIMELINE_REVISIONS = Object.freeze({
     fileSha256: '2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356',
     bytes: 18120,
   }),
+  // 0.6.24 (TIMELINE-STORY-PROPOSAL rev 2.1, hub route H1): schema 3 — the end-Cretaceous story. Additive pin; R1 and R2 unchanged.
+  'tl-2026-11-R3': Object.freeze({
+    key: 'ref/timeline/tl-2026-11-R3.json',
+    revision: 'tl-2026-11-R3',
+    fileSha256: 'f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993',
+    bytes: 31636,
+  }),
 });
 const TIMELINE_LEGACY = 'tl-2026-11-R1';    // what the unversioned /catalogue/timeline serves — permanently (pages built before 0.6.4 expect it)
-const TIMELINE_CURRENT = 'tl-2026-11-R2';   // discovery metadata only; no route serves "current" implicitly
+const TIMELINE_CURRENT = 'tl-2026-11-R3';   // discovery metadata only; no route serves "current" implicitly
 const TIMELINE = TIMELINE_REVISIONS[TIMELINE_LEGACY];   // = the legacy pin (kept for the 0.6.3 name)
 /** The pin for an exact revision id, or null. Own-property lookup only: no pattern-built R2 keys, so no path tricks. */
 function timelinePin(rev, table = TIMELINE_REVISIONS) {

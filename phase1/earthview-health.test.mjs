@@ -351,7 +351,7 @@ await t('H1 HEAD gives the same status as GET with no body; every answer is no-s
   const cases = [[makeEnv({}), F], [trial('1'), F - 60e3], [trial('manual'), F + 60e3], [(() => { const h = trial('1'); ins(h, slot(0), 'repair'); return h; })(), F + 5 * MIN], [trial('1'), LAST], [makeEnv({ EARTHVIEW_ENABLED: 'x' }), F]];
   for (const [h, when] of cases) for (const w of ['runs', 'trial']) { at(when); const g = await get(h, w), hd = await get(h, w, 'HEAD');
     eq(hd.status, g.status, w); eq(hd.text, ''); for (const r of [g, hd]) { yes(/no-store/.test(r.headers.get('cache-control') || ''), 'no-store'); eq(r.headers.get('x-health'), g.status === 200 ? 'ok' : 'failing'); }
-    eq([g.body.check, g.body.healthy, g.body.collector_version], [w + '/earthview', g.status === 200, '0.6.23']); }
+    eq([g.body.check, g.body.healthy, g.body.collector_version], [w + '/earthview', g.status === 200, '0.6.24']); }
 });
 await t('H2 no run note reaches the answer: fixed codes, times and counts only', async () => {
   const h = trial('1'); for (const [i, k] of ['pub', 'refused', 'repair', 'internal', 'weirdNote', 'sup', 'picfail'].entries()) ins(h, slot(i), k);

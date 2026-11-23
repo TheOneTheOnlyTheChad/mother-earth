@@ -296,7 +296,7 @@ await t('PD4. counts kept from a good run after a failed update (buoys last_atte
   await env.R2.put('latest-cells/drifters.json', JSON.stringify({ layer: 'drifters', retrieved_at: T, source_status: 'ok', stale_after_s: 14400, cells: { '14_52': { count: 1 } }, last_attempt: { failed_at: new Date(NOW - 60e3).toISOString(), reason: 'http 522' } }));
   const s = (await (await get(env, '/place/g4/14_52?layers=drifters')).json()).layers.drifters;
   assert.equal(s.state, 'ok'); assert.equal(s.count, 1); assert.equal(s.last_attempt.reason, 'http 522');
-  assert.equal((await (await get(env, '/')).json()).version, '0.6.23');
+  assert.equal((await (await get(env, '/')).json()).version, '0.6.24');
 });
 await t('PD5. down counts and NO records file at all → "down" (not "withheld … records unreadable"); the records file is not read', async () => {
   const { env, store, gets, resetGets } = makeEnv(); const d = await pdDown(env, store); pdClear();
