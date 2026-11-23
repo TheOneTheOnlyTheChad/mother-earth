@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 17:48 UTC (clock reading) — **Plan written for bringing main level with the deployed hub (asked by Chad through the Timeline thread). Docs only; nothing merged, nothing deleted** (production: none; Earth from Space thread)
+- **Plan:** `reviews/2026-11-23-hub-to-main-plan.md` rev 1, for GPT and then Chad's own line. **Not a merge of `earth-from-space-rc`:** that branch also carries the unreleased Earth from Space tab and page, and merging it would publish them (Stage E; Stage D is not cleared). Instead one commit on main copying the hub file, its hub suites and the records, with no page file; nothing deployed. Starts after the Timeline page merge of 24 Nov, from a fresh pull.
+- **Proof planned:** the deployed code, the commit's file and main's file as served, all sha256 `db4f9cdf…1aa5`; served page hashes identical before and after.
+- **Open gap, stated:** the browser suites that load `worker.js` (13 counted) did not run in Claude's workspace; they need a Mac run before the line is asked for.
+- **Branches:** `earth-from-space-0.6.24-rc` is fully contained in `earth-from-space-rc` and can go; Claude's attempt to delete it was refused by a permission check on Claude's side, so **it still exists**. `earth-from-space-proposal` holds two files found nowhere else and is kept until they are on main. `earth-from-space-rc` is kept until Stage E.
+- **Unchanged:** nobody deploys a `worker.js` built from main until that commit lands.
+
 ## 23 Nov 17:22:35 UTC — **Timeline thread's own live read of `tl-2026-11-R3` on hub 0.6.24: exact bytes. Page not merged** (production: none by this thread)
 - `/catalogue/timeline/tl-2026-11-R3`: 200, 31,636 B, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993`; schema 3, release_date 2026-11-24. R2 route `2f39aa30…0356`; R1 route and the unversioned route `096ae648…0fbe`. `/` reports 0.6.24.
 - The mandatory check before the page merge is met. The merge belongs to the UTC day 24 Nov (latest start 22:00 UTC) and waits for Chad's own Approve line. Record: `reviews/2026-11-23-timeline-story-release-rc.md` section 9 on `timeline-story-rc`.
