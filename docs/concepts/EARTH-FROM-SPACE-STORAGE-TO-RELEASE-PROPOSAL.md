@@ -1,4 +1,12 @@
-# Earth from Space — from the first stored picture to the page: proposal (rev 2.2; passed by GPT at proposal level as rev 2.1)
+# Earth from Space — from the first stored picture to the page: proposal (rev 2.3 DRAFT; rev 2.1 passed by GPT at proposal level)
+
+**Rev 2.3 (23 Nov 2026, 15:16 UTC clock reading) is a DRAFT and has not been reviewed.** It changes Stage D's
+monitoring only: 5.1 (end and closeout), 5.5 (rewritten), 5.6 (who pauses), section 10 (lines 4 and 5) and section
+11 (D8, D9). Section 15 lists each change. Everything else is rev 2.2 word for word; rev 2.2 itself is this file at
+commit `40ddecb`. Reason: the Cloudflare email alarm proved unreliable (22 and 23 Nov), the monitoring rehearsal
+failed (23 Nov), and Chad decided on independent monitoring ("M1 to M8 yes", 23 Nov;
+`EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL.md` rev 3.1). Hub 0.6.23 with the two health addresses is live.
+Stages A, B and C are done; the text about them below is history. **Stage D is not cleared.**
 
 22 Nov 2026. Asked for by GPT's review of the Stage B result and started on Chad's "Go" of 22 Nov. **Docs only. Nothing
 here is built, deployed, stored, enabled or approved.** Every production step named below needs Chad's own exact
@@ -276,10 +284,17 @@ the boundary.** So the boundary moves into the hub (0.6.22):
 least 15 minutes before `FROM`, and is read back (all three values, code hash, bindings, crons). The ticks before
 `FROM` must log "not scheduled (before the window)"; that is the first evidence the window works.
 
-**End.** Admission ends at `UNTIL` by itself. At the first inspection after `UNTIL`, the variable is set to `manual`
-(tidying, not the boundary), read back, and admitted work is reconciled as in 5.6: every invocation scheduled before
-`UNTIL` has an end record; the two ticks after `UNTIL` logged "not scheduled (after the window)". Collection does not
-continue while the result is read. **Any continuation** is a separate Approve line with its own window.
+**End (rev 2.3).** Admission ends at `UNTIL` by itself. The gate stays at `1` until the last slot's due time,
+`UNTIL` + 10 minutes: set to `manual` earlier, the runs health address would answer "not collecting" and raise an
+alert for nothing. At the first read after that, the ticks scheduled at or after `UNTIL` are checked ("not scheduled
+(after the window)"), the gate is set to `manual` (tidying, not the boundary), read back, and admitted work is
+reconciled as in 5.6. Collection does not continue while the result is read. **Any continuation** is a separate
+Approve line with its own window.
+
+**Closeout (rev 2.3).** The two window variables stay set while the result is written, so the health addresses keep
+answering for this trial. They are removed on Chad's own line, **after** the trial's rows, the health answers and
+the monitors' logs have been saved and the result reviewed. The monitors then show "Up": that means closed out,
+not passed. Runbook rev 3, sections 5 and 6.
 
 **Shown in the candidate, before any approval:** through the real scheduled handler with a controllable scheduled
 time: the tick before `FROM`, at `FROM`, the last one before `UNTIL`, at `UNTIL`, after it; a late-delivered trigger
@@ -339,56 +354,45 @@ earlier collectors had completed by then is what the trial reads.
   contains a picture run is a stop condition and a not-met finding. It is a checkpoint we chose, far below any
   platform limit expected; the candidate packet states the platform limit beside it.
 
-### 5.5 Monitoring: what is actually covered
+### 5.5 Monitoring: what is actually covered (rewritten in rev 2.3)
 
-A chat thread is not an unattended monitor. With the admission window, monitoring no longer bounds the trial; it
+Rev 2.2 planned 49 hourly inspections by Claude, a heartbeat push after each, Chad noticing a missing push, and
+possibly a Cloudflare email alarm. **None of that stands.** The email alarm was tested and is unreliable; none
+exists. In the rehearsal of 23 Nov the inspections and the gap detection worked, and Chad did not notice the
+missing heartbeat: the fallback failed, and that result stands. He also found hourly pushes too much.
+
+A chat thread is not an unattended monitor. With the admission window, monitoring does not bound the trial; it
 decides how soon a stop condition is acted on.
 
-**The plan (accepted by Chad, 22 Nov: the Mac stays on for as long as needed).** Inspections by Claude once an hour,
-49 in all, each started by a scheduled message in this thread, each reading, read-only: the hub's invocation records
-since the last inspection, the `earthview` outcomes slot by slot, the other layers' public status, the R2 object
-count. **One hour is a planned interval that the owner accepts, not a guaranteed maximum.** It holds only while the
-Mac is awake, the Claude app is open, the dashboard tab is signed in and this thread is alive.
+**The plan (Chad's decisions M1 to M8, 23 Nov; design in the monitoring proposal rev 3.1):**
 
-**What can fail, and what then happens:**
+- **Two UptimeRobot monitors** poll two read-only health addresses on the hub every five minutes, independent of
+  the thread, the Mac and the browser login. `/health/runs/earthview` fails while a slot of the trial has no
+  end-of-run record 20 minutes after its time, or while the gate is off during the trial.
+  `/health/trial/earthview` fails once the records show a storage stop (condition 3), three adjacent refused slots
+  (6) or six adjacent slots without a current frame while a newer one is listed (8), and stays failed until
+  closeout. Healthy is silent. A failure sends one email and one phone push.
+- **Three reads a day by Claude**, at 07:00, 13:00 and 20:00 SAST, each started by a scheduled message, for
+  everything the monitors cannot see. A clean read sends no push.
 
-| Failure | Who can notice | What happens |
-|---|---|---|
-| An inspection starts but cannot read (Mac asleep, tab signed out, pane unreachable) | Claude, in that inspection | **On the first one:** push notification to Chad asking him to pause from his phone; the thread says so; the interval is recorded as unmonitored. Not two: the first. |
-| An inspection **never starts** (the scheduled message is not delivered, the thread is dead) | **Nobody at that moment.** An inspection that never starts cannot notify anyone | The next inspection that does start compares the clock with the last inspection's time, finds the gap, and notifies as above. If none ever starts again, only the heartbeat below reveals it |
-| Worker errors on the hub | Cloudflare's email alarm, **if** one exists for this account (to be established in the candidate packet) | Email to Chad. This detects hub errors. It does **not** detect a missed inspection |
+**What this does not cover (monitoring proposal section 7; accepted by Chad in words in his Stage D line):**
 
-**Heartbeat, so that a silence means something.** Every completed inspection between 06:00 and 22:00 SAST sends Chad
-one short push ("Earth from Space inspection n of 49: clean" or what was found). **Fallback owner: Chad.** If 90
-minutes pass in those hours with no push, he pauses from his phone: Cloudflare dashboard, variable to `manual`.
-Expected action time: within 30 minutes of noticing.
+| Exposure | What it means |
+|---|---|
+| Nothing pauses by itself | The monitors detect. Chad pauses from his phone, or Claude at a read if his line allows it |
+| "No delay, no repeat" | One alert, once. Missed, nothing reminds. At night it waits until seen |
+| Seen only by a read | Conditions 2, 4, 5, 7 (other than `usgs` and `firms`) and 9; a resource ending whose slot still completed. **Found only if a later read takes place.** Longest gap 11 hours overnight. If the reads stop, possibly not during the trial at all |
+| A read that never starts | Tells nobody. The next read that starts finds the gap |
+| The watcher itself | Nothing detects UptimeRobot failing silently. One provider (M4) |
+| The 24-hour horizon | The health addresses do not read rows finished more than 24 hours after `UNTIL`. Claude's closeout read has no cutoff |
+| The gate's history | The health addresses do not record that a pause happened. The ledger does |
+| A wrong picture that passes validation | No monitor looks at pictures |
 
-**Stated limitation, overnight.** Between 22:00 and 06:00 SAST no heartbeat is sent and Chad is asleep. A missed
-launch in those hours is detected only by a later inspection that does launch, or by Chad at 06:00. So for up to
-about eight hours a night, twice, a stop condition could go unacted on if the inspections themselves fail. In that
-time the hub keeps to its window and its three requests per slot; the risk carried is to the hub's other layers
-(conditions 1, 2, 7), not to the budget. Stage A ran unattended overnight on the same footing. **This limitation
-is written into the Stage D approval line for Chad to accept in words.** The alternatives, if he does not: push
-heartbeats through the night; or a supervised trial of daytime windows only, which could not observe the 24-hour
-cleanup and would need a different result rule. Extending a short window from each inspection was considered and
-rejected: every variable change makes a new Worker version and restarts isolates, which would disturb the thing
-being measured.
+**This is a weaker basis than rev 2.2 described.** It is offered because rev 2.2's safety net failed its test.
 
-**Pre-D rehearsal (harmless; required before the Stage D line is asked for).** With the variable at `manual` after
-Stage C, on Chad's go, for four hours:
-
-1. **four hourly opportunities, the third omitted: actual launches 1, 2 and 4.** Each scheduled message must
-   **actually launch** an inspection (shown by its entry in the thread with a clock reading);
-2. each must **read the intended records** (invocation records, run log, status file, R2 count) and say what it read;
-3. each sends the heartbeat push; **Chad confirms in the thread that each reached his phone**, with the time;
-4. **the missed launch:** the third opportunity has no message. The fourth inspection must detect the two-hour gap
-   by itself and send the missed-inspection notification; and Chad, not having had the third push,
-   notes when he noticed;
-5. an unreadable inspection on purpose, if Chad agrees: he closes the dashboard tab before one inspection; it must
-   notify rather than report clean.
-
-The rehearsal makes no change to the hub and no request to EUMETSAT. Its record goes in the Stage D packet. If any of
-1 to 4 fails, Stage D is not asked for on this monitoring plan.
+**Before the Stage D line is asked for** (runbook rev 3, section 1): the two monitors created and read back; the
+fixture alert test run and reviewed (`reviews/2026-11-23-earth-from-space-alert-test-plan.md`), or its absence
+stated; this revision and the runbook reviewed; Chad able to reach the pause on his phone.
 
 `status` (needs the key) is run by Chad's script once a day, under step ids `D-status-1` and `D-status-2`, and at the
 end.
@@ -428,6 +432,11 @@ conditions, and nothing else):
 
 If Claude cannot make the change (pane unreachable, or the dashboard refuses it), Claude does not look for another
 way in: it notifies Chad, who is the fallback owner of the pause.
+
+**Rev 2.3.** On an alert between reads, **Chad is the first owner of the pause**, from his phone; Claude pauses at
+a read, or sooner if Chad asks in the thread. A pause during the window makes the runs health address answer "not
+collecting", so the pause itself raises one alert (unless that monitor is already down): expected, and recorded.
+Every pause and resumption goes into the ledger with its times.
 
 A hold (Chad's script) is the second lever. It also only prevents new runs.
 
@@ -624,8 +633,9 @@ Each is sent by Chad himself, in his own message, with hashes and times filled i
 1. `Approve: deploy hub 0.6.22 from earth-from-space-rc <commit>, phase1/worker.js sha256 <hash>, code only, EARTHVIEW_ENABLED left unset; read back hash and settings; stop and report if any earthview/ object exists`
 2. `Approve: file the EUMETSAT GeoColour REGISTER entry as drafted in <file>` (recommended before Stage C; required before Stage D)
 3. `Approve: Earth from Space Stage C on hub 0.6.22 under proposal rev <n> section 4: set up storage (hold, recover first start, release); Claude sets EARTHVIEW_ENABLED to manual in the dashboard while I watch; one manual run started by me in the window <start UTC>; one further run only under section 4.3, not later than 40 minutes after the first; at most 6 requests to EUMETSAT; no scheduled collection` — plus, if the REGISTER entry is not yet filed: `; I approve one frame being publicly downloadable by URL before the REGISTER entry is filed`
-4. `Approve: Earth from Space monitoring rehearsal under proposal rev <n> section 5.5: four hourly read-only inspections with the variable at manual, test notifications to my phone; no change to the hub, no request to EUMETSAT`
-5. `Approve: Earth from Space Stage D under proposal rev <n> section 5: set EARTHVIEW_FROM <time UTC>, EARTHVIEW_UNTIL <time UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at most 12 diagnostic requests; no manual run; hourly inspections planned, with my Mac kept awake; I accept that between 22:00 and 06:00 SAST a missed inspection may go unnoticed until morning; Claude may set EARTHVIEW_ENABLED to manual, and only that, on any stop condition of section 5.6 and after the window ends`
+4. *(Rev 2.3: used on 23 Nov; the rehearsal failed. Not asked for again.)* `Approve: Earth from Space monitoring rehearsal under proposal rev <n> section 5.5: four hourly read-only inspections with the variable at manual, test notifications to my phone; no change to the hub, no request to EUMETSAT`
+5. *(Rev 2.3.)* `Approve: Earth from Space Stage D under proposal rev 2.3 section 5 and runbook rev 3: set EARTHVIEW_FROM <time UTC>, EARTHVIEW_UNTIL <time UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at most 12 diagnostic requests; no manual run; watched by the UptimeRobot monitors "ME runs earthview" and "ME trial earthview" and by three reads a day by Claude (07:00, 13:00, 20:00 SAST) with my Mac kept awake; I accept that nothing pauses the trial by itself; that an alert is sent once and not repeated, and at night waits until I see it; that what the two monitors do not cover is found only if a later read happens, up to 11 hours apart, or not during the trial if the reads stop; that the monitors do not read rows finished more than 24 hours after the end; Claude may set EARTHVIEW_ENABLED to manual, and only that, on any stop condition of section 5.6 and at the end of the trial`
+5a. *(Rev 2.3.)* `Approve: Earth from Space Stage D closeout: remove EARTHVIEW_FROM and EARTHVIEW_UNTIL from the mother-earth Worker after the evidence is saved and the result reviewed; EARTHVIEW_ENABLED stays manual; read back`
 6. Stage E's line (the merge) comes with the release packet.
 
 ## 11. Decisions for Chad, and his answers of 22 Nov
@@ -651,6 +661,9 @@ New in rev 2.1, for Chad:
   morning (5.5), or choose night-time heartbeat pushes instead.
 - **D9.** In the rehearsal, close the dashboard tab once on purpose to prove an unreadable inspection notifies (5.5,
   step 5). Optional.
+
+**Rev 2.3:** D8 is replaced by the acceptance written into line 5 of section 10 (5.5's table). D9 is retired with
+the rehearsal. D3 is still open and still Chad's.
 
 ## 12. Questions for GPT
 
@@ -707,3 +720,20 @@ cleanup evidence and 5,000 ms checkpoint as provisional criteria; all of HOLD 3 
 healthy hub, the 10 to 40 minute window, no retry after lost answers or excluded findings, atomic claims; wrong-frame
 evidence as incomplete in these stages, sound-frame refusal as not met); the isolate log line; the supervised C6
 rehearsal.
+
+## 15. Changes in rev 2.3 (23 Nov 2026; draft, not reviewed)
+
+| Where | Change | Why |
+|---|---|---|
+| 5.1, End | The gate stays at `1` until `UNTIL` + 10 minutes, then `manual` | An earlier `manual` makes the runs health address fail (`not collecting`) |
+| 5.1, Closeout (new) | Window variables removed last, on their own line, after evidence and review | Monitoring proposal 3.7: removing them is the acknowledgment; "Up" then means closed out |
+| 5.5 | Rewritten: two UptimeRobot monitors and three reads a day; no hourly inspections, no heartbeat, no "90 minutes" duty, no email alarm, no rehearsal | Alarm unreliable; rehearsal failed; Chad's M1 to M8 |
+| 5.5 | The exposure table | Monitoring proposal section 7, section 12 ("no delay, no repeat"), 3.6 (the 24-hour horizon) |
+| 5.6 | Chad first owner of a pause on an alert; the pause raises one expected alert; ledger | Monitoring proposal 3.5, section 10 |
+| Section 10 | Line 4 marked used; line 5 rewritten; line 5a added | The acceptance is stated in words |
+| Section 11 | D8 replaced, D9 retired | As above |
+| Unchanged | 5.2 to 5.4, 5.7 to 5.11, the nine stop conditions, the result rule, the 288 slots and 864 requests | Not touched by the monitoring decision |
+
+**Not changed and worth saying:** 5.8 still requires "no pause" for **met**, and "no unmonitored interval whose
+stored records could not be read afterwards". A missed read whose records were read later does not by itself break
+that.
