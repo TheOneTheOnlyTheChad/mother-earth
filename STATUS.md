@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 04:38 UTC (clock reading) — **Earth from Space rehearsal plan rev 2.1: the focused check (relayed by Chad) asked for no further review round; its four points are carried in. Waiting for Chad's own Approve line with a start time. NOT started, nothing scheduled. Docs only.** (hub 0.6.22 unchanged; Earth from Space thread)
+- **Carried in:** read cut-off and completion times in the ledger; Chad's first 90 minutes run from T if heartbeat 1 never arrives, and an inspection finding no completed entry more than 75 minutes after T flags a startup gap; an inspection whose task identity cannot be established is incomplete, not guessed; T on the hour, latest 18:00 SAST.
+- **File:** `reviews/2026-11-23-earth-from-space-rehearsal-plan.md` rev 2.1 (branch `earth-from-space-rc` `ff5f6a3`, copied here). A met rehearsal does not clear Stage D.
+
 ## 23 Nov 04:25 UTC (clock reading) — **Earth from Space rehearsal plan rev 2, after the review relayed by Chad: four mechanics tightened. For a focused check. NOT started, nothing scheduled. Docs only.** (hub 0.6.22 unchanged; Earth from Space thread)
 - **Changes:** Chad's 90 minutes run from the last heartbeat's actual receipt on his phone, with noticed and posted times recorded separately, and "recorded" replies not counting as heartbeats; an inspection's opportunity is taken from its scheduled task and due time, never from rounding the clock, and a launch over 10 minutes late stays a finding for review before "met"; the gap alert is pushed before any dashboard read, and a failed inspection does not become the "last completed inspection"; readiness (push, scheduler listed back, ledger in the workspace and on the Mac, reads) is finished 15 minutes before T, the whole rehearsal lies in 06:00 to 22:00 SAST, and outstanding tasks are deleted afterwards.
 - **Also written in:** accepting weaker daytime coverage after a failure needs a revised Stage D basis and is not a pass; a met rehearsal does not clear Stage D.
