@@ -79,3 +79,18 @@ not changed.**
   to be noticed); or put Stage D on a **revised basis** that states this weaker daytime coverage, reviewed by GPT
   and accepted by Chad in words. Accepting weaker coverage does not turn this rehearsal into a pass.
 - For GPT's review. Nothing is scheduled. `EARTHVIEW_ENABLED` stays `manual`.
+
+## 7. After GPT's review (23 Nov 2026)
+
+GPT accepted the verdict (`reviews/2026-11-23-earth-from-space-rehearsal-result-gpt-review.md`). Read this result
+with these corrections:
+
+- **"Hub clean"** in the thread and in heartbeat texts meant no new issue bearing on the rehearsal. Three layers
+  were down throughout. Invocation totals are sample-weighted estimates, not exact counts.
+- **Duration:** the planned three-and-a-half-hour structure (inspections 09:00 to 12:00 SAST, closeout about
+  12:31), not "four hours".
+- **Section 6, second route, corrected:** "found only by a later inspection" holds only if a later inspection
+  starts. If inspections stop altogether and Chad does not check independently, **there is no bounded detection
+  time**, by day or night.
+- The headline is one failed item (R4a) plus incomplete delivery timing for the final two pushes. Neither is waived.
+- Next: amendment A1 (`reviews/2026-11-23-earth-from-space-rehearsal-amendment.md`), for review. Nothing scheduled.
