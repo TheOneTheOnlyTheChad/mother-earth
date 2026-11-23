@@ -38,7 +38,7 @@ const T = 'e-big5-end-triassic', LINK = `${T}-chg-${REV}-1`, REC = `change-${REV
 // ---- breaks on the served script / page
 const JS = (() => {
   if (BREAK === 'fragment-only-link') return must(JS0, "  const rec = $(a.dataset.change); if (!rec) return;   // no such record: the plain link is left to the browser", "  return;");
-  const PUT = "  put({ change: a.dataset.change, k: ++seq, p: at ? at.k : 0, from: from !== null ? { entryK: from, link: a.id } : null }, '#' + a.dataset.change);";
+  const PUT = "  put({ change: a.dataset.change, k: ++seq, p: keyOf(at), from: from !== null ? { entryK: from, link: a.id } : null }, '#' + a.dataset.change);";
   const BACKL = "const l = left && left.change && left.from && left.from.entryK === st.k ? $(left.from.link) : null;";
   if (BREAK === 'back-loses-entry') return must(JS0, PUT, PUT.replace('  put(', '  swap('));
   // the defect GPT found in fe4cf18: ONE remembered jump in page memory instead of a return target stored with each jump
@@ -51,7 +51,7 @@ const JS = (() => {
   return JS0;
 })();
 const HTML = (() => {
-  if (BREAK === 'stale-js-version') return must(HTML0, 'timeline.js?v=202611301000', 'timeline.js?v=202611221000');
+  if (BREAK === 'stale-js-version') return must(HTML0, 'timeline.js?v=202612250100', 'timeline.js?v=202611221000');
   if (BREAK === 'dropped-anchor') return must(HTML0, 'id="e-pliny-ep-6-16-debate"', 'id="e-pliny-ep-6-16-debate-x"');
   return HTML0;
 })();

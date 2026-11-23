@@ -26,8 +26,8 @@ const must = (s, a, b) => { if (!s.includes(a)) throw new Error('break anchor mi
 function brokenJs() {
   if (BREAK === 'no-focus-return') return must(JS, '(focusEl || pageHeading()).focus();', 'pageHeading().focus();');
   if (BREAK === 'close-keeps-fragment') return must(JS, "swap(null, location.pathname + location.search);   // clears the fragment", '');
-  if (BREAK === 'shortcut-fragment') return must(must(JS, "put({ entry: id, x, opener, oid: a.id || null, k, p: at ? at.k : 0 }, '#' + id);", "put({ entry: id, x, opener, oid: a.id || null, k, p: at ? at.k : 0 }, '#' + id + (x ? '-' + x : ''));"),
-    "swap({ entry: id, x, opener, oid: a.id || null, direct: cur.direct, k: cur.k, p: history.state.p || 0 }, '#' + id);", "swap({ entry: id, x, opener, oid: a.id || null, direct: cur.direct, k: cur.k, p: history.state.p || 0 }, '#' + id + (x ? '-' + x : ''));");
+  if (BREAK === 'shortcut-fragment') return must(must(JS, "put({ entry: id, x, opener, oid: a.id || null, k, p: keyOf(at) }, '#' + id);", "put({ entry: id, x, opener, oid: a.id || null, k, p: keyOf(at) }, '#' + id + (x ? '-' + x : ''));"),
+    "swap({ entry: id, x, opener, oid: (a && a.id) || null, direct: cur.direct, k: cur.k, p: (history.state && history.state.p) || 0 }, '#' + id);", "swap({ entry: id, x, opener, oid: (a && a.id) || null, direct: cur.direct, k: cur.k, p: (history.state && history.state.p) || 0 }, '#' + id + (x ? '-' + x : ''));");
   if (BREAK === 'no-inert') return must(JS, 'others().forEach(n => { n.inert = phone; });', 'others().forEach(n => { n.inert = false; });');
   if (BREAK === 'switch-pushes') return must(JS, 'if (cur && !detail.hidden && history.state && history.state.entry === cur.id) {', 'if (false) {');
   if (BREAK === 'whole-card') return JS + "\ndocument.querySelectorAll('.card').forEach(c => c.addEventListener('click', ev => { if (!ev.target.closest('a')) c.querySelector('.ctitle a').click(); }));";

@@ -1,0 +1,28 @@
+start 2026-11-23T07:56:15Z
+timeline.html, tl-2026-11-R2.json (sha256 2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356) and timeline.js BUILD 202612250100 match the generator output
+generator --check exit=0
+timeline-changes-build.test.mjs exit=0 | timeline-changes-build: 45 passed, 0 failed
+timeline-catalogue-hub.test.mjs exit=0 | timeline-catalogue-hub: 73 passed, 0 failed
+timeline-ui.test.cjs exit=0 | timeline-ui: 594 pass, 0 fail
+timeline-axis.test.cjs exit=0 | timeline-axis: 96 pass, 0 fail
+timeline-changes-ui.test.cjs exit=0 | timeline-changes-ui: 173 pass, 0 fail
+timeline-travel-ui.test.cjs exit=0 | timeline-travel-ui: 162 pass, 0 fail
+timeline-mixed-assets.test.cjs exit=0 | timeline-mixed-assets: 18 pass, 0 fail
+travel BREAK=nonlinear exit=1 | timeline-travel-ui: 147 pass, 15 fail (BREAK=nonlinear)
+travel BREAK=no-clamp exit=1 | timeline-travel-ui: 160 pass, 2 fail (BREAK=no-clamp)
+travel BREAK=pan-pushes exit=1 | timeline-travel-ui: 153 pass, 9 fail (BREAK=pan-pushes)
+travel BREAK=state-clobber exit=1 | timeline-travel-ui: 159 pass, 3 fail (BREAK=state-clobber)
+travel BREAK=no-restore exit=1 | timeline-travel-ui: 159 pass, 3 fail (BREAK=no-restore)
+travel BREAK=wheel-always exit=1 | timeline-travel-ui: 161 pass, 1 fail (BREAK=wheel-always)
+travel BREAK=zoom-always exit=1 | timeline-travel-ui: 160 pass, 2 fail (BREAK=zoom-always)
+travel BREAK=no-clip exit=1 | timeline-travel-ui: 158 pass, 4 fail (BREAK=no-clip)
+travel BREAK=requests exit=1 | timeline-travel-ui: 161 pass, 1 fail (BREAK=requests)
+travel BREAK=resize-moves-window exit=1 | timeline-travel-ui: 153 pass, 9 fail (BREAK=resize-moves-window)
+travel BREAK=bad-state-accepted exit=1 | timeline-travel-ui: 154 pass, 8 fail (BREAK=bad-state-accepted)
+travel BREAK=nav-pushes exit=1 | timeline-travel-ui: 160 pass, 2 fail (BREAK=nav-pushes)
+travel BREAK=plans-focusable exit=1 | timeline-travel-ui: 161 pass, 1 fail (BREAK=plans-focusable)
+travel BREAK=new-sentence exit=1 | timeline-travel-ui: 161 pass, 1 fail (BREAK=new-sentence)
+travel BREAK=chart-under-how exit=1 | timeline-travel-ui: 161 pass, 1 fail (BREAK=chart-under-how)
+travel OLD=1 (commit a44e31d page) exit=1 | timeline-travel-ui: 0 pass, 1 fail (threw)
+mixed BREAK=no-style-guard exit=1 | timeline-mixed-assets: 16 pass, 2 fail
+end 2026-11-23T08:12:56Z

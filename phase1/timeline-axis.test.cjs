@@ -108,7 +108,7 @@ const axisInfo = p => p.evaluate(() => {
         win: document.querySelector('#axis .win').textContent, bands: document.querySelectorAll('#axis .band').length, cb: document.querySelectorAll('#axis .cb').length,
         key: document.querySelector('#axis .key').textContent, lanesHidden: getComputedStyle(document.querySelector('.lanes')).display === 'none' }));
       ok('Pliny is never on the axis', !d.pliny);
-      ok('overview strip with the explorable window marked; window line says "this release"', d.ov && /This release: the last ~538\.8 million years/.test(d.win), d.win);
+      ok('overview strip with the window marked; the window line gives both edges, the unit and the span', d.ov && d.win === 'Showing 538.8 to 0 Ma (million years ago). Span 538.8 million years. Older on the left.', d.win);
       ok('12 period bands from the chart; 5 chart-boundary lines', d.bands === 12 && d.cb === 5, [d.bands, d.cb]);
       ok('key explains every glyph on the axis', ['uncertainty stated', 'uncertainty not stated', 'placed at a dated event', 'approximate interval', 'modelled range'].every(s => d.key.includes(s)) && !d.key.includes('no older than'), d.key);
       const ka = await p.evaluate(() => { const k = document.querySelector('#axis .key'); return { hidden: k.closest('[aria-hidden="true"]') !== null, glyphsHidden: [...k.querySelectorAll('.g')].every(g => g.closest('[aria-hidden="true"]')) }; });
@@ -137,9 +137,9 @@ const axisInfo = p => p.evaluate(() => {
     // keyboard order: marks are reachable with Tab; nothing in the empty lanes takes focus
     await p.focus('#axis-h').catch(() => {}); await p.evaluate(() => document.getElementById('axis-h').setAttribute('tabindex', '-1')); await p.focus('#axis-h');
     const seen = [];
-    for (let i = 0; i < 12; i++) { await p.keyboard.press('Tab'); seen.push(await p.evaluate(() => (document.activeElement.dataset && document.activeElement.dataset.entry) || document.activeElement.id || document.activeElement.className || document.activeElement.tagName)); }
-    // schema 2: the "What changed" link in the page-updated line is one Tab stop before the axis; then the period list, then the marks
-    ok(`${w}: Tab reaches the What changed link, the period list, then the five marks in order`, seen[0] === 'tl-changes-link' && seen[1] === 'periods-btn' && seen.slice(2, 7).join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].join(), seen);
+    for (let i = 0; i < 17; i++) { await p.keyboard.press('Tab'); seen.push(await p.evaluate(() => (document.activeElement.dataset && (document.activeElement.dataset.entry || document.activeElement.dataset.act || document.activeElement.dataset.preset)) || document.activeElement.id || document.activeElement.className || document.activeElement.tagName)); }
+    // the "What changed" link, then the toolbar (each a native control), the List link, the explorer itself, the five marks, then the period list
+    ok(`${w}: Tab reaches What changed, the toolbar, List, the explorer, the five marks in order, then the period list`, seen.join() === ['tl-changes-link', 'older', 'newer', 'in', 'out', 'earth', 'complex', 'reset', 'tlist', 'xpl', ID.o, ID.ff, ID.p, ID.t, ID.k, 'periods-btn'].join() + ',' + seen[16], seen);
     await c.close();
   }
 
@@ -251,9 +251,9 @@ const axisInfo = p => p.evaluate(() => {
     const W = 538.8, exp = x => (W - x) / W * t7.laneW;
     ok('true endpoints: a ≥ 4 px interval spans its own ages', /mk-true/.test(t7.cls) && Math.abs(t7.left - exp(445)) < 1.5 && Math.abs(t7.right - exp(425)) < 1.5, t7);
     await c7.close();
-    const c8 = await ctx(b, { viewport: { width: 1280, height: 860 } }); const p8 = await c8.newPage();
+    const c8 = await ctx(b, { viewport: { width: 800, height: 860 } }); const p8 = await c8.newPage();
     await p8.goto(BASE + '/timeline.html'); await settle(p8);
-    ok('true endpoints: the real 2-Myr interval (< 4 px here) stays a compact symbol', await p8.evaluate(() => !document.querySelector('#axis a.mk[data-entry="e-big5-end-ordovician"]').classList.contains('mk-true')));
+    ok('true endpoints: the real 2-Myr interval (< 4 px at 800 wide) stays a compact symbol', await p8.evaluate(() => !document.querySelector('#axis a.mk[data-entry="e-big5-end-ordovician"]').classList.contains('mk-true')));
     await c8.close();
   }
 
@@ -262,7 +262,7 @@ const axisInfo = p => p.evaluate(() => {
     const c = await ctx(b, { js: false }); const p = await c.newPage();
     await p.goto(BASE + '/timeline.html');
     const m = await p.evaluate(() => ({ lanes: [...document.querySelectorAll('.lanes .lane')].map(l => l.textContent.trim()),
-      claims: [...document.querySelectorAll('article.entry.ep section.claim')].map(s => [s.dataset.claimType, s.querySelector('h4').textContent]),
+      claims: [...document.querySelectorAll('article.entry.ep section.claim')].map(s => [s.dataset.claimType, s.querySelector('h5').textContent]),
       eps: [...document.querySelectorAll('article.entry.ep')].map(a => a.id), noscript: document.querySelector('noscript') !== null,
       permalinks: [...document.querySelectorAll('#dated .card .ctitle a')].map(a => a.getAttribute('href')) }));
     ok('no-JS: four lanes named, three "no entries yet"', m.lanes.length === 4 && m.lanes.filter(l => /No (dated )?entries/.test(l)).length === 3, m.lanes);
