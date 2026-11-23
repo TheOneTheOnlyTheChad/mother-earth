@@ -1,4 +1,8 @@
-# Earth from Space — from the first stored picture to the page: proposal (rev 2.3 DRAFT; rev 2.1 passed by GPT at proposal level)
+# Earth from Space — from the first stored picture to the page: proposal (rev 2.4 DRAFT; rev 2.1 passed by GPT at proposal level)
+
+**Rev 2.4, 23 Nov 2026 19:40 UTC (clock reading): brought up to date; no change of design.** Hub 0.6.24 is live (0.6.23
+plus the Timeline pin) and main's hub file is the deployed file since landing `7adef36`. Section 16 lists the three
+places changed. Rev 2.3's own note follows. **GPT has reviewed neither 2.3 nor 2.4; 2.4 is the version to review.**
 
 **Rev 2.3 (23 Nov 2026, 15:16 UTC clock reading) is a DRAFT and has not been reviewed.** It changes Stage D's
 monitoring only: 5.1 (end and closeout), 5.5 (rewritten), 5.6 (who pauses), section 10 (lines 4 and 5) and section
@@ -529,7 +533,10 @@ A frame is never replaced by an older one, and a failed or idle run deletes noth
 ### 5.11 Way back from Stage D
 
 The pause of 5.6; a hold; `recover` if a record is lost or rolled back (built, tested and reviewed on 20 Nov; runbook
-in the Stage D packet); main's 0.6.19 file for the code. Storage is untouched by a code rollback.
+in the Stage D packet). **For the code (rev 2.4):** the file before the live 0.6.24 is 0.6.23 (`566a11b`); it lacks the
+Timeline pin `tl-2026-11-R3`, so a rollback is its own approved step with the Timeline thread told first
+(`docs/HUB-DEPLOY-RULE.md`, condition 6). Main's 0.6.19 file is no longer the rollback file: main holds the deployed
+hub. Storage is untouched by a code rollback.
 
 ## 6. Stage E — page release
 
@@ -544,8 +551,10 @@ a separately authorised continuation (5.1), with its own monitoring and request 
 2. Release packet and GPT's release review of the merged tree.
 3. Chad's line to merge (the REGISTER entry is already filed by then, section 7).
 4. Served-hash check of every page file, a live read, GPT's smoke test.
-5. The hub file on main is brought to the live version in the same merge, so that main equals live again and the
-   "never deploy the hub from main" warning can be retired. Stated here because it is easy to forget.
+5. *(Rev 2.4: done on 23 Nov, ahead of this stage.)* The hub file on main is the live version since landing
+   `7adef36`, and the "never deploy the hub from main" warning is retired (`docs/HUB-DEPLOY-RULE.md`). What is left
+   for step 1 is the page: `earth-from-space-rc` has not had main merged into it, and its hub file and hub suites
+   are already identical to main's.
 
 Way back: revert the merge commit (own line). The hub and storage are unaffected by a page revert.
 
@@ -634,7 +643,7 @@ Each is sent by Chad himself, in his own message, with hashes and times filled i
 2. `Approve: file the EUMETSAT GeoColour REGISTER entry as drafted in <file>` (recommended before Stage C; required before Stage D)
 3. `Approve: Earth from Space Stage C on hub 0.6.22 under proposal rev <n> section 4: set up storage (hold, recover first start, release); Claude sets EARTHVIEW_ENABLED to manual in the dashboard while I watch; one manual run started by me in the window <start UTC>; one further run only under section 4.3, not later than 40 minutes after the first; at most 6 requests to EUMETSAT; no scheduled collection` — plus, if the REGISTER entry is not yet filed: `; I approve one frame being publicly downloadable by URL before the REGISTER entry is filed`
 4. *(Rev 2.3: used on 23 Nov; the rehearsal failed. Not asked for again.)* `Approve: Earth from Space monitoring rehearsal under proposal rev <n> section 5.5: four hourly read-only inspections with the variable at manual, test notifications to my phone; no change to the hub, no request to EUMETSAT`
-5. *(Rev 2.3.)* `Approve: Earth from Space Stage D under proposal rev 2.3 section 5 and runbook rev 3: set EARTHVIEW_FROM <time UTC>, EARTHVIEW_UNTIL <time UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at most 12 diagnostic requests; no manual run; watched by the UptimeRobot monitors "ME runs earthview" and "ME trial earthview" and by three reads a day by Claude (07:00, 13:00, 20:00 SAST) with my Mac kept awake; I accept that nothing pauses the trial by itself; that an alert is sent once and not repeated, and at night waits until I see it; that what the two monitors do not cover is found only if a later read happens, up to 11 hours apart, or not during the trial if the reads stop; that the monitors do not read rows finished more than 24 hours after the end; Claude may set EARTHVIEW_ENABLED to manual, and only that, on any stop condition of section 5.6 and at the end of the trial`
+5. *(Rev 2.3, numbers updated in 2.4.)* `Approve: Earth from Space Stage D under proposal rev 2.4 section 5 and runbook rev 3.1: set EARTHVIEW_FROM <time UTC>, EARTHVIEW_UNTIL <time UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at most 12 diagnostic requests; no manual run; watched by the UptimeRobot monitors "ME runs earthview" and "ME trial earthview" and by three reads a day by Claude (07:00, 13:00, 20:00 SAST) with my Mac kept awake; I accept that nothing pauses the trial by itself; that an alert is sent once and not repeated, and at night waits until I see it; that what the two monitors do not cover is found only if a later read happens, up to 11 hours apart, or not during the trial if the reads stop; that the monitors do not read rows finished more than 24 hours after the end; Claude may set EARTHVIEW_ENABLED to manual, and only that, on any stop condition of section 5.6 and at the end of the trial`
 5a. *(Rev 2.3.)* `Approve: Earth from Space Stage D closeout: remove EARTHVIEW_FROM and EARTHVIEW_UNTIL from the mother-earth Worker after the evidence is saved and the result reviewed; EARTHVIEW_ENABLED stays manual; read back`
 6. Stage E's line (the merge) comes with the release packet.
 
@@ -734,6 +743,16 @@ rehearsal.
 | Section 11 | D8 replaced, D9 retired | As above |
 | Unchanged | 5.2 to 5.4, 5.7 to 5.11, the nine stop conditions, the result rule, the 288 slots and 864 requests | Not touched by the monitoring decision |
 
-**Not changed and worth saying:** 5.8 still requires "no pause" for **met**, and "no unmonitored interval whose
+## 16. Changes in rev 2.4 (23 Nov 2026; draft, not reviewed)
+
+Brought up to date after hub 0.6.24 and the hub-to-main landing; no change of design.
+
+| Where | Change |
+|---|---|
+| 5.11 | The code rollback file is 0.6.23, not main's 0.6.19; it lacks the Timeline pin, so a rollback is its own approved step |
+| Section 6, step 5 | Marked done: main's hub file is the live one; the old warning is retired |
+| Section 10, line 5 | Revision numbers |
+
+**Not changed and worth saying (from rev 2.3):** 5.8 still requires "no pause" for **met**, and "no unmonitored interval whose
 stored records could not be read afterwards". A missed read whose records were read later does not by itself break
 that.

@@ -1,4 +1,10 @@
-# Earth from Space — runbook for Stage D on the independent-monitoring basis (runbook rev 3, DRAFT for review)
+# Earth from Space — runbook for Stage D on the independent-monitoring basis (runbook rev 3.1, DRAFT for review)
+
+**Rev 3.1, 23 Nov 2026 19:40 UTC (clock reading): brought up to date, nothing else changed.** Since rev 3 was written the
+hub went to 0.6.24 (the Timeline pin; Earth from Space code unchanged) and main's hub file became the deployed file
+(landing `7adef36`). Changed here: the hub version in the basis and P1; P1a (no hub deploy during the trial); P8
+(the review copy comes from main); the rollback note in section 8; the revision numbers in the line. **GPT had not
+yet reviewed rev 3; this is the version to review.**
 
 23 Nov 2026, 15:16 UTC (clock reading). Written on Chad's go of 23 Nov for docs work. **Docs only. Nothing here is
 approved, scheduled or set. Stage D is not cleared.**
@@ -9,7 +15,8 @@ the hourly inspections, the heartbeat pushes, the "90 minutes without a push" du
 the replacement has been tested and this runbook accepted** (monitoring proposal section 10).
 
 **Basis.** Monitoring proposal rev 3.1 with Chad's "M1 to M8 yes"; storage-to-release proposal rev 2.3 (draft,
-same commit) sections 5.1, 5.5, 5.6; hub 0.6.23 live since 23 Nov 14:47 UTC.
+same commit) sections 5.1, 5.5, 5.6; **hub 0.6.24 live since 23 Nov 17:18 UTC** (0.6.23 with the Timeline pin added;
+the Earth from Space code and the two health addresses are unchanged from 0.6.23).
 
 **If anything on the day differs from what a step says it should show: stop, and nothing further is done until
 Chad and Claude have looked at it.**
@@ -38,14 +45,15 @@ Every item done, recorded, and where it says so reviewed. A missing item is **op
 
 | # | Item | State on 23 Nov |
 |---|---|---|
-| P1 | Hub 0.6.23 live, read back | **Done** 23 Nov |
+| P1 | Hub with the two health addresses live, read back | **Done** 23 Nov (0.6.23 at 14:47 UTC; now 0.6.24, `db4f9cdf…1aa5`, last read back 19:32 UTC) |
+| P1a | **No hub deploy between the Stage D line and the closeout** (`docs/HUB-DEPLOY-RULE.md`, condition 9). Any other thread's hub change waits, or goes before the line | At the time |
 | P2 | REGISTER entry for GeoColour filed | **Done** 22 Nov |
 | P3 | UptimeRobot monitors "ME runs earthview" and "ME trial earthview" created on Chad's line and read back (address, interval, contacts), both Up | Open |
 | P4 | The fixture alert test (`reviews/2026-11-23-earth-from-space-alert-test-plan.md`) run and its result read by GPT; or, if Chad decides against it, the generic delivery test, with "live true positive untested" stated in the Stage D line | Open (plan in review) |
-| P5 | This runbook and proposal rev 2.3 read by GPT and accepted by Chad | Open |
+| P5 | This runbook and proposal rev 2.4 read by GPT and accepted by Chad | Open |
 | P6 | **Phone pause, looked at once:** Chad opens the hub's variables on his phone in the Cloudflare dashboard, reaches the edit form for `EARTHVIEW_ENABLED`, and **cancels without saving.** The exact taps are written into section 4 from what he saw | Open |
 | P7 | Chad's answer on D3: does EUMETSAT need a note before sustained requests? | Open (his call) |
-| P8 | A fresh copy of the branch on the Mac for the status calls: `_review/earth-from-space-stage-d/`, `phase1/earthview-admin.sh` hash checked against the branch | Open |
+| P8 | A fresh copy of **main** on the Mac for the status calls: `_review/earth-from-space-stage-d/`, `phase1/earthview-admin.sh` hash checked against main (the script is on main since the hub-to-main landing) | Open |
 | P9 | The read tasks of section 3 created and **listed back** (ids and due times), after the line and before `FROM` | At the time |
 | P10 | Hub health on the day: status file; the last hour's invocations all `ok`; the eight existing monitors Up | At the time |
 
@@ -195,7 +203,7 @@ The two monitors stay. They are silent while no trial is configured.
 
 ## 7. The Stage D line (sketch, not a request)
 
-`Approve: Earth from Space Stage D under proposal rev 2.3 section 5 and runbook rev 3: set EARTHVIEW_FROM <UTC>,
+`Approve: Earth from Space Stage D under proposal rev 2.4 section 5 and runbook rev 3.1: set EARTHVIEW_FROM <UTC>,
 EARTHVIEW_UNTIL <UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at
 most 12 diagnostic requests; no manual run; watched by the UptimeRobot monitors "ME runs earthview" and "ME trial
 earthview" and by three reads a day by Claude (07:00, 13:00, 20:00 SAST) with my Mac kept awake; I accept that
@@ -210,6 +218,12 @@ Closeout (section 6, step 4) is a separate line.
 ## 8. Recovery
 
 Unchanged: Stage C runbook section 4.
+
+**Code rollback during or after the trial (rev 3.1).** The file before 0.6.24 is 0.6.23 (`566a11b`, `7141beb8…afa1`).
+**It does not have the Timeline pin `tl-2026-11-R3`.** If the Timeline page that names R3 has been released by then,
+rolling the hub back to 0.6.23 makes that page fall back to its plain list. A code rollback is therefore not a
+routine step of this runbook: the pause (section 4) is. A rollback needs its own line and the Timeline thread told
+first (`docs/HUB-DEPLOY-RULE.md`, condition 6).
 
 ## 9. Decisions for Chad
 

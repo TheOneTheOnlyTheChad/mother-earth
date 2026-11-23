@@ -1,10 +1,15 @@
-# Earth from Space — the fixture alert test (monitoring proposal 9.5, decision M6): plan rev 1, NOT built, NOT approved
+# Earth from Space — the fixture alert test (monitoring proposal 9.5, decision M6): plan rev 1.1, NOT built, NOT approved
+
+**Rev 1.1, 23 Nov 2026 19:40 UTC (clock reading): brought up to date, nothing else changed.** The hub is now 0.6.24 and
+its file is on main, so the fixture copies the health code from main, not from `566a11b`. **The throwaway Worker is
+not the hub: `docs/HUB-DEPLOY-RULE.md` does not cover it, and creating it still needs Chad's own line as section 10
+says.** GPT had not yet reviewed rev 1; this is the version to review.
 
 23 Nov 2026, 15:16 UTC (clock reading). Written on Chad's go of 23 Nov for docs work ("1.", choosing the docs first).
 **Docs only. Nothing here is built, created, deployed or scheduled.** For GPT's review, then Chad.
 
 Basis: `docs/concepts/EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL.md` rev 3.1, section 9 test 5, and Chad's
-"M1 to M8 yes" (section 11 there). Hub 0.6.23 is live with the two health addresses; both answer 200
+"M1 to M8 yes" (section 11 there). Hub 0.6.24 is live with the two health addresses (0.6.23 at the time of rev 1); both answer 200
 `no trial configured`. The two real monitors do not exist yet.
 
 ## 0. In short
@@ -48,7 +53,7 @@ reminds.
 
 | Part | Source |
 |---|---|
-| `EVH`, `EVH_POST_CHECK`, `EVH_FETCH_FAIL`, `evhKind`, `evhConfig`, `evhEvaluate`, `evhSafe`, `healthEvRuns`, `healthEvTrial`, `health`, and what they use (`EV_STOP`, `EV_WINDOW_MAX_MS`, `evMark`, `HEALTH_SKEW_MS`, `healthNote`, `redactText`, `CORS`, `json`, `COLLECTOR_VERSION`) | **Copied byte for byte** from `phase1/worker.js` at `566a11b` (the deployed 0.6.23, sha256 `7141beb8…afa1`) by a build script. The script fails if any copied span differs from the source |
+| `EVH`, `EVH_POST_CHECK`, `EVH_FETCH_FAIL`, `evhKind`, `evhConfig`, `evhEvaluate`, `evhSafe`, `healthEvRuns`, `healthEvTrial`, `health`, and what they use (`EV_STOP`, `EV_WINDOW_MAX_MS`, `evMark`, `HEALTH_SKEW_MS`, `healthNote`, `redactText`, `CORS`, `json`, `COLLECTOR_VERSION`) | **Copied byte for byte** from `phase1/worker.js` on main (the deployed 0.6.24, sha256 `db4f9cdf…1aa5`, on main since landing `7adef36`; the health code is byte for byte what 0.6.23 had, and `COLLECTOR_VERSION`, which the answer reports, is now `0.6.24`) by a build script. The script fails if any copied span differs from the source |
 | `HEALTH.checks` | Only the two entries used: `runs: ['earthview']`, `trial: ['earthview']`. **Fixture, stated** |
 | The `env` handed to the health code | **Fixture.** Before the simulated closeout: gate `1`, `EARTHVIEW_FROM`, `EARTHVIEW_UNTIL`. From the simulated closeout on: gate `manual`, no window. Decided by the clock |
 | `env.DB` | **Fixture.** A stand-in that answers the production query from made-up rows held in the script. It applies the query's own bounds (layer, `finished_at` range, order, limit) and **one rule of its own: a row is returned only once the clock has reached its `finished_at`.** That is how a "late" row arrives with nobody touching anything |
@@ -86,7 +91,9 @@ Each 503 lasts 50 minutes: about ten polls at five minutes.
 
 ### 2.3 Its own offline suite (branch work, before any line is asked for)
 
-1. Every copied span equals the source at `566a11b`; a changed byte fails the build.
+1. Every copied span equals the source: `phase1/worker.js` on main, which `phase1/hub-alignment.test.mjs` holds to
+   the recorded deployed hash. A changed byte fails the build. If the hub is deployed again before the test, the
+   fixture is rebuilt from the new file and its hash re-quoted.
 2. With a controlled clock, the Worker's own `fetch` gives the table of 2.2 at each boundary: one millisecond
    before and at `T0` + 50, `T0` + 100, `T0` + 120 min 15 s, `T0` + 170.
 3. `HEAD` and `GET` give the same status and headers; every answer is `no-store`; unknown paths are 404.

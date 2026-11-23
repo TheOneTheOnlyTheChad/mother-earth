@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 19:41 UTC (clock reading) — **Earth from Space thread closed out for the night: the three Stage D documents brought up to date, handover written. Docs only; nothing changed in production** (production: none; Earth from Space thread)
+- **Chad, his own message:** do the document update and the handover tonight (items 3 and 5 of the list offered).
+- **Brought up to date, no change of design:** Stage D runbook **rev 3.1**, storage-to-release proposal **rev 2.4**, alert test plan **rev 1.1**. They named hub 0.6.23, commit `566a11b` and main's 0.6.19 as the rollback file; they now name the live 0.6.24, main as the source of the hub file, and 0.6.23 as the rollback (which lacks the Timeline R3 pin, so a rollback is its own approved step). Runbook gains P1a: no hub deploy between the Stage D line and the closeout. **GPT has reviewed none of the three; these are the versions to review.**
+- **Handover:** `reviews/2026-11-23-earth-from-space-handover-2.md` (replaces the afternoon note). HANDOVER.md points to it.
+- **Mac:** `_review/earth-from-space-stage-d-docs/` refreshed with the updated documents and kept for GPT; earlier copies moved to `_to_delete/`. Repo mirror synced to main's tip, preserve-first (figures in the thread).
+- **State, unchanged:** hub 0.6.24 live, `EARTHVIEW_ENABLED` `manual`, no window; main = deployed hub; eight UptimeRobot monitors, none for Earth from Space; Stage D not cleared.
+- **Next:** GPT's review of the three documents; then the two monitors (Chad's own line), the alert test build (his go) and run (his line).
+
 ## 23 Nov 19:36 UTC (clock reading) — **Hub-to-main close-out: branches `hub-to-main` and `earth-from-space-proposal` deleted on Chad's word and read back. Nothing else changed** (GitHub only; Earth from Space thread)
 - **Chad, his own message:** "You can delete the branches".
 - **Checked first:** `hub-to-main` (`7adef36`) is contained in main; every file on `earth-from-space-proposal` (`7e3ea60`) exists on main, and its two formerly unique files are identical there.
