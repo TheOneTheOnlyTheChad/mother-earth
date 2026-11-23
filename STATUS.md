@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 10:11 UTC (clock reading) — **Timeline explorer: clean-up after the release, on Chad's word. The thread stays open for more Timeline work. Docs only.** (live page unchanged, merge `03aff0a`; Timeline feature thread)
+- **Branch `timeline-travel-rc` deleted on GitHub** (fully merged, `3d4815e`; the row's Delete branch button in the pane; `git push --delete` was refused as before). Remaining branches, none of them this thread's: `animals-assessment-rc`, `cape-town-public-proposal`, `cape-town-station-rc`, `earth-from-space-proposal`, `earth-from-space-rc`, `widths-preview-rc`.
+- **Mac:** `_review/timeline-travel-rc/` and `_review/timeline-travel-proposal/` moved to `_to_delete/`. Other threads' review copies untouched. The Mac folder was synced to main `98ffc17` at 10:08 UTC (one file preserved first, `STATUS.md`, equal to commit `3934ac2`).
+
 ## 23 Nov 10:08 UTC (clock reading) — **RELEASED: Timeline explorer, stage 1 ("travelling through time"). Live page = merge `03aff0a` (pushed 10:05:11 UTC). No hub change, no R2 change; catalogue `tl-2026-11-R2` unchanged.** (page: `timeline.html`, `timeline.js`, `style.css`; hub 0.6.22 untouched; Timeline feature thread)
 - **Chad's own line (his message, 23 Nov):** "Approve: merge timeline-travel-rc into main (page change: Timeline explorer stage 1; no hub or R2 change)".
 - **What went live:** the Timeline's deep-time axis is now an explorer: one linear scale per window from 4567–0 Ma down to 1 Ma; Older, Newer, Zoom in, Zoom out, Whole Earth, Complex life, Reset view, List; drag; wheel zoom once the timeline is clicked; clusters with a list at every zoom; ranges and stated margins drawn to scale and clipped at the edges; the window kept in each history entry (pan and zoom add none); each story's existing claims regrouped under "How we know", "Context and limits", "Chart reference", "Review and changes" with no sentence added. `timeline.js?v=202612250400`; `style.css?v=202612250400` on the Timeline page only.
