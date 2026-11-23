@@ -1,6 +1,6 @@
 # Animals assessment card: integration with current main, and release checklist (draft)
 
-Written by Claude, 23 Nov 2026, 04:47 UTC (workspace clock reading), "Animals assessment" thread. Branch `animals-assessment-rc` only.
+Written by Claude, 23 Nov 2026, 04:47 UTC (workspace clock reading), "Animals assessment" thread. Branch `animals-assessment-rc` only. **Rev 1.1, 23 Nov:** GPT's document fixes applied (`reviews/2026-11-23-animals-assessment-release-prep-gpt-review.md`): the account wording, a check after the REGISTER commit (new step 7), and the rollback wording. GPT: the checklist order is sound; no further full review round for these edits.
 
 **A DRAFT. NOTHING IS RELEASED. R1 IS UNRESOLVED.** No merge to main, no REGISTER filing, no IUCN message, no API token. This checklist cannot be run past step 1 while R1 is open.
 
@@ -41,13 +41,13 @@ Logs: `reviews/evidence/2026-11-23-animals-assessment-integration/`. Chromium th
 
 ### Three points for GPT's eye (documents, not code)
 
-1. **REGISTER draft rev 3** (`reviews/2026-11-22-animals-assessment-register-draft.md`). One correction of fact: rev 2 said no account is used. Chad's Red List account was used once, for the subpopulation search; no shown value comes from it. Also added: the citation access date, the "ccessed" upkeep note, the four GPT reviews, and R1 split into the three places it must cover.
+1. **REGISTER draft rev 3** (`reviews/2026-11-22-animals-assessment-register-draft.md`). One correction of fact: rev 2 said no account is used. Chad's Red List account was used for the subpopulation search and to open the "API access" page; no shown value comes from it, and no token was requested. Also added: the citation access date, the "ccessed" upkeep note, the four GPT reviews, and R1 split into the three places it must cover.
 2. **The Sources page sentence** for the five cards (`sources.html`, Animals section) says the cards are shown "under its Terms and Conditions of Use, version 3.1". That wording was reviewed with the candidate. It names the terms and not whatever finally resolves R1. It should be read again against R1's actual resolution before release (step 2).
 3. **Version stamps.** `animals.html` on the branch loads `style.css`, `animals.js` and `animals-assessment.js` with `?v=202612250100`. The stamp was set on 22 Nov and not moved for the 23 Nov citation change. The live site has never served `animals-assessment.js`, so no visitor holds an old copy. A browser that opened the Mac review copy before 23 Nov may. Proposed: leave it, and move all three stamps only if the code changes again before release.
 
 ## Part B. Release checklist (draft; not started)
 
-Order matters. Each step names who does it. Steps 4 to 9 need Chad's own lines, written fresh; every earlier Approve line is spent.
+Order matters. Each step names who does it. Steps 5, 6 and 8 need Chad's own words, written fresh; every earlier Approve line is spent.
 
 **Gate: R1.**
 
@@ -76,29 +76,34 @@ Order matters. Each step names who does it. Steps 4 to 9 need Chad's own lines, 
    - That R2 follows after release.
 6. **Chad's line to file REGISTER.** *Chad, then Claude.* Proposed wording, not valid until R1 is resolved and the draft completed:
    `Approve: file the IUCN Red List entry in REGISTER as written in reviews/2026-11-22-animals-assessment-register-draft.md rev <n>`
-   - Pull main, add the entry after the Dryad penguin entry, commit, push. Docs only.
-7. **Chad's line to merge.** *Chad, then Claude.* Proposed wording, same condition:
+   - Pull main, add the entry after the Dryad penguin entry, commit, push. Docs only. REGISTER is filed before the release merge, as its own commit.
+7. **Check again after the REGISTER commit.** *Claude.* That commit moves main, so before the merge line is used:
+   - Merge the new main into the branch. Confirm it brings `REGISTER.md` and nothing unexpected; list every file.
+   - Confirm the reviewed code is preserved: the page, script, style, data and test files hash the same as at GPT's release review.
+   - Rerun the six checks if any file other than docs came in.
+   - Give Chad the exact commit for his merge line.
+8. **Chad's line to merge.** *Chad, then Claude.* Proposed wording, same condition:
    `Approve: merge animals-assessment-rc <commit> into main (Animals conservation assessment card goes live)`
    - No-ff merge. No force-push. Push with `git -c push.negotiate=true push`.
-8. **Served-file check.** *Claude, in Chrome; the workspace cannot reach the live site.*
+9. **Served-file check.** *Claude, in Chrome; the workspace cannot reach the live site.*
    - Hash every `.html`, `.js` and `.css` at the site root as served, with `no-store`, against the merge commit. The set now includes `animals-assessment.js`.
    - Hash `assets/animals/assessments-R1.json` as served: `b1c7afa9…8265`.
    - Open the Animals page with a fresh query string. Read all five blocks: category, dates, citation ending "Accessed on 22 November 2026.", both links.
    - Confirm the page makes no request to `iucnredlist.org`.
-9. **Record.** *Claude.* STATUS entry with the clock time; this thread's HANDOVER line; Project copies; Mac main synced, old files preserved first.
-10. **GPT's live smoke**, if Chad wants one. *Chad's call.*
+10. **Record.** *Claude.* STATUS entry with the clock time; this thread's HANDOVER line; Project copies; Mac main synced, old files preserved first.
+11. **GPT's live smoke**, if Chad wants one. *Chad's call.*
 
 **After release:**
 
-11. **R2: the copy to IUCN under section 5 of the terms.** *Chad sends; Claude tracks.* **[OPEN. PENDING.]** Stays open in REGISTER until a copy or link in the form IUCN accepts has been sent, with its date, or IUCN has said it is not needed.
-12. **Upkeep.** Next check of the five records due **22 May 2027**, and whenever IUCN announces an update naming one of the five. Nothing reminds anyone. A citation caught by the "ccessed" rule needs review, not an edit of the rule.
-13. **Close-out.** Delete the merged branch on GitHub; move the Mac review copies to `_to_delete/`.
+12. **R2: the copy to IUCN under section 5 of the terms.** *Chad sends; Claude tracks.* **[OPEN. PENDING.]** Stays open in REGISTER until a copy or link in the form IUCN accepts has been sent, with its date, or IUCN has said it is not needed.
+13. **Upkeep.** Next check of the five records due **22 May 2027**, and whenever IUCN announces an update naming one of the five. Nothing reminds anyone. A citation caught by the "ccessed" rule needs review, not an edit of the rule.
+14. **Close-out.** Delete the merged branch on GitHub; move the Mac review copies to `_to_delete/`.
 
-**Rollback.** Revert the merge commit on main, on Chad's own line. The page then reads "Not available yet" again for the five cards. REGISTER is corrected to match in the same step. No hub change is involved, so there is nothing to roll back on Cloudflare.
+**Rollback.** Revert the merge commit on main, on Chad's own line. That restores the four journey cards' placeholder ("Not available yet. No assessment source has been reviewed for display on Mother Earth.") and removes the separate African penguin assessment section, which does not exist on the page before release. REGISTER is corrected to match in the same step. No hub change is involved, so there is nothing to roll back on Cloudflare.
 
 ## Part C. What is true today
 
-- The live page shows "Not available yet" for all five. Nothing here changes it.
+- The live page shows the "Not available yet" placeholder on the four journey cards and has no penguin assessment section. Nothing here changes it.
 - The candidate is code-reviewed by GPT (22 Nov, and the citation diff on 23 Nov) and integrated with main as of `7960335`.
 - The branch is in the public repository, so its five records can be read on GitHub now. Chad knows and chose to leave them.
 - Open: R1; Chad's release decisions and lines; R2. Not tested: a real phone, Safari, a screen reader, print, a Mac or real-browser run of the citation change.

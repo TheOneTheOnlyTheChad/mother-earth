@@ -1,6 +1,6 @@
 # Animals assessment card: REGISTER entry, draft
 
-23 Nov 2026 · **rev 3** · **A DRAFT. NOTHING IS FILED. R1 IS UNRESOLVED.** By Claude ("Animals assessment" thread), on Chad's line of 23 Nov: "Finish the REGISTER and release checklist as drafts, keeping R1 explicitly unresolved. Branch only; no merge, token or follow-up."
+23 Nov 2026 · **rev 3.1** (GPT's four document fixes of 23 Nov applied; `reviews/2026-11-23-animals-assessment-release-prep-gpt-review.md`) · **A DRAFT. NOTHING IS FILED. R1 IS UNRESOLVED.** By Claude ("Animals assessment" thread), on Chad's line of 23 Nov: "Finish the REGISTER and release checklist as drafts, keeping R1 explicitly unresolved. Branch only; no merge, token or follow-up."
 
 **This draft cannot be filed as it stands.** It is filed only on Chad's own Approve line, and only after R1 is resolved and the two R1 fields below are completed from what actually resolves it. Everything else in the entry is finished. Three places are deliberately left open and are marked **[OPEN …]**: the R1 basis, the reply record, and R2.
 
@@ -12,9 +12,9 @@ Proposed as a new section of `REGISTER.md`, placed after the Dryad penguin entry
 
 ## IUCN — The IUCN Red List of Threatened Species, edition 2026-1 — global categories for five species — **hand-kept dated record; shown on the Animals page once released**
 
-- **Filed:** with the assessment card's release merge, on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Filed:** before the assessment card's release merge, as its own docs-only commit on main, on Chad's own Approve line (date and line recorded in STATUS). The release merge follows on a separate line.
 - **Source:** the Red List's own assessment pages on `iucnredlist.org`, edition 2026-1, read in a browser on 22 Nov 2026 by Claude and, separately the same day, by GPT. Evidence: `reviews/2026-11-22-animals-assessment-evidence.md` and `reviews/2026-11-22-animals-assessment-evidence-gpt-review.md`. No file was downloaded. The five assessments shown were read on public pages.
-- **Account, API, token:** Chad made a Red List account himself. Claude used his signed-in browser once, on 22 Nov 2026, for an advanced search by name for false killer whale subpopulation assessments (0 found; evidence record section 8). No value on a card comes from that search. The API is not used. No token has been requested.
+- **Account, API, token:** Chad made a Red List account himself. Claude used his signed-in browser for two things: an advanced search by name for false killer whale subpopulation assessments on 22 Nov 2026 (0 found; evidence record section 8), and opening the account's "API access" page on 23 Nov 2026 to read what it says (evidence record section 9; the "Request a token" button was not pressed). No value on a card comes from the account: the five assessments shown were read on public assessment pages. The API is not used. No token has been requested.
 - **Request method:** none at run time. The page fetches one file from this site. Nothing is fetched from the Red List by the page or the hub.
 - **Reuse terms:** IUCN Red List Terms and Conditions of Use, version 3.1 (June 2024), read by Claude and by GPT.
   - Section 3 places no restriction on use of the Red List Categories for each named taxon. The five category words are not waiting on permission.
@@ -38,6 +38,6 @@ Proposed as a new section of `REGISTER.md`, placed after the Dryad penguin entry
 - **Upkeep note on the citation rule:** the page refuses any citation containing "ccessed". The rule is broad and case-sensitive. It is acceptable for these five citations (GPT, 23 Nov 2026). A future legitimate citation caught by it shows "Not available" and needs review, not a quiet edit of the rule.
 - **Sensitivity:** none arises from this entry. It shows published species-level categories, no positions and no individual animal.
 - **Why a hand-kept record is here:** Chad's decisions of 22 Nov 2026 (A-D1 B, A-D2 A, A-D3 B, A-D4 A, A-D5 A). It is a dated record with a stated check cycle, shown only on the Animals tab; every other layer keeps the live-feed rule.
-- **Commercial use:** the terms cover non-commercial use; anything else needs IUCN's permission. Mother Earth makes no commercial use.
+- **Commercial use:** Mother Earth makes none. The terms permit non-commercial use, and section 3 separately places no restriction on use of the Red List Categories for each named taxon. Nothing wider is claimed here: any future use beyond this entry is reviewed separately against the terms then in force.
 - **Copy to IUCN (terms section 5):** **[OPEN: R2, PENDING. Stays pending after release until a copy or link in the form IUCN accepts has actually been sent, with its date, or IUCN has said it is not needed. Not sent as of 23 Nov 2026. Sending it is Chad's.]**
 - **Enquiry:** sent by Chad from his own email to the Red List Unit on 23 Nov 2026 (text: `docs/research/animals-source-audit/ENQUIRY-DRAFT-IUCN.md` rev 2.3). It asks about the fields beside the category, their storage and distribution, the copy under section 5, and use of the API for re-checks. Sending grants no permission and silence grants none. **[OPEN: any reply, filed unchanged, with its date. No reply reported as of 23 Nov 2026.]**
