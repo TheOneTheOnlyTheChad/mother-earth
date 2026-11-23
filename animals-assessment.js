@@ -1,7 +1,8 @@
 /* Mother Earth — Animals page, conservation assessment blocks (animals-assessment-rc; ANIMALS-ASSESSMENT-CARD-BUILD-BRIEF rev 1).
  * Five blocks, words only: the GLOBAL IUCN Red List category of the species on each of four journey cards and the penguin
  * census card, with the assessment's own date, publication year, version note, citation and link, the Red List edition, and
- * the date Mother Earth last checked it. A dated record kept by hand, not a feed.
+ * the date Mother Earth last checked it. A dated record kept by hand, not a feed. The citation ends "Accessed on" that same
+ * successful-check date, as IUCN's citation guidance asks; a failed attempt moves neither.
  * What this file does: fetches ONE file from this site (assets/animals/assessments-R1.json), checks it against the checksum
  * pinned below, checks each record's shape, then fills each block from its record. It never contacts the Red List.
  * What it never shows: a trend, criteria, a regional category, a Green Status value, a population number, a colour or a badge.
@@ -32,7 +33,7 @@
 
   /** the shape this page needs before it will print a category; the builder's fuller rules ran when the file was made */
   function wellFormed(r) {
-    if (!r || !str(r.card) || !str(r.common_name) || !str(r.scientific_name) || !str(r.citation)) return false;
+    if (!r || !str(r.card) || !str(r.common_name) || !str(r.scientific_name) || !str(r.citation) || /ccessed/.test(r.citation)) return false;   // an access date typed into the record is the website's, not ours
     const id = /^e\.T([1-9]\d*)A([1-9]\d*)$/.exec(r.assessment_id || ''); if (!id) return false;
     if (r.url !== `https://www.iucnredlist.org/species/${id[1]}/${id[2]}` || !str(r.doi_url) || !r.doi_url.startsWith('https://dx.doi.org/10.2305/IUCN.UK.') || !r.doi_url.includes(`.T${id[1]}A${id[2]}.`)) return false;
     if (r.scope !== 'global' || !A.CATEGORIES.includes(r.category)) return false;
@@ -68,7 +69,9 @@
     const cat = el('p', 'as-cat'); cat.append(el('b', '', 'Extinction-risk category:'), ` ${r.category}. IUCN Red List, global assessment of ${r.common_name} (`, el('i', '', r.scientific_name), `), assessed ${day(r.assessed)}. ${published(r)} Red List edition ${r.edition_at_check}. Checked by Mother Earth on ${day(r.last_successful_check)}.`);
     const cite = el('p', 'as-cite'); const a = el('a', '', r.doi_url); a.href = r.doi_url; a.target = '_blank'; a.rel = 'noopener';
     const pg = el('a', '', 'Assessment page'); pg.href = r.url; pg.target = '_blank'; pg.rel = 'noopener';
-    cite.append(`Citation: ${r.citation} `, a, '. ', pg, '.');
+    // IUCN's citation format ends with the user's own access date. Ours is the last SUCCESSFUL check: never the reader's clock,
+    // the build date, a failed attempt's date, or the date the Red List page prints (the record may not carry the word at all).
+    cite.append(`Citation: ${r.citation} `, a, `. Accessed on ${day(r.last_successful_check)}. `, pg, '.');
     box.append(cat, cite, unit(r), el('p', 'as-trend', A.T.trend));
     const notices = [];
     if (r.last_attempt.result === 'failed') { notices.push('failed'); box.append(el('p', 'as-note as-failed', `The latest check on ${day(r.last_attempt.date)} could not be completed.`)); }

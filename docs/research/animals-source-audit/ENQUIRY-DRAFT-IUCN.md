@@ -1,6 +1,6 @@
 # Animals: IUCN Red List enquiry, draft
 
-22 Nov 2026 · **rev 2** (GPT's candidate review applied: the real distribution is described, the repository's visibility is stated, point 2 no longer commits to a fallback) · **A DRAFT. NOT SENT.** For GPT's review, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. No follow-up is sent automatically. This is a new enquiry, separate from the NOAA, ATAP, penguin, IWC and Cape Vidal enquiries (all sent by Chad earlier).
+23 Nov 2026 · **rev 2.1** (two wording edits after GPT found rev 2 fit to send: the purpose is given as a personal control centre, and the re-check is worded as a plan. **GPT's exact wording for these two edits did not reach Claude; the wording below is Claude's reading of them, for Chad or GPT to correct.**) · rev 2 was: (GPT's candidate review applied: the real distribution is described, the repository's visibility is stated, point 2 no longer commits to a fallback) · **A DRAFT. NOT SENT.** For GPT's review, then Chad's decision. Only Chad sends, from his own email, if he chooses to. Sending grants no permission and silence grants none. No follow-up is sent automatically. This is a new enquiry, separate from the NOAA, ATAP, penguin, IWC and Cape Vidal enquiries (all sent by Chad earlier).
 
 ## Who and why
 - **Recipient:** the IUCN Red List Unit, at the contact the Red List's terms page gives in its section 16 (`iucnredlist.org/terms/terms-of-use`). No address is written in this repository.
@@ -19,7 +19,7 @@
 >
 > Dear Red List Unit
 >
-> I run Mother Earth, a personal, non-commercial website that presents observations of the planet with their sources, dates and limits (https://theonetheonlythechad.github.io/mother-earth/). It carries no advertising and makes no charge. It is my own working dashboard rather than a mass-audience site, though the address is public.
+> I run Mother Earth, a personal, non-commercial website that presents observations of the planet with their sources, dates and limits (https://theonetheonlythechad.github.io/mother-earth/). It carries no advertising and makes no charge. It is my personal control centre, a working dashboard for my own use and not a site built for a wide audience, though the address is public.
 >
 > Its Animals page shows a few recorded animal journeys and one set of penguin colony counts from open datasets. On five cards I would like to state, in words only, the species' global Red List Category, so that a reader does not mistake one tracked animal for the state of its species.
 >
@@ -35,7 +35,7 @@
 >
 >    I would not show population trend, criteria, range, maps, text from the assessment, regional assessments, Green Status, or the Red List logo or colours.
 >
-> 2. How it is stored and served. Nothing is downloaded from the Red List by the page. I typed the five records by hand from your assessment pages and re-check them against the current edition every six months. They are held in my code repository, and the page would read them from a small static JSON file served to visitors with the page, from which it builds the sentences. The repository is public. The website does not show or serve these records yet, but the working copies, with the fields listed in point 1, are already in that public repository on a development branch. Does your answer to point 1 cover this storage and distribution of those fields, as well as the sentences on the page? If it does not, please say so and I will change it.
+> 2. How it is stored and served. Nothing is downloaded from the Red List by the page. I typed the five records by hand from your assessment pages on 22 November 2026, and I plan to re-check them against the current edition every six months. They are held in my code repository, and the page would read them from a small static JSON file served to visitors with the page, from which it builds the sentences. The repository is public. The website does not show or serve these records yet, but the working copies, with the fields listed in point 1, are already in that public repository on a development branch. Does your answer to point 1 cover this storage and distribution of those fields, as well as the sentences on the page? If it does not, please say so and I will change it.
 >
 > 3. If the date, publication year or scope need permission that the category does not, please tell me what I may show and hold. A narrower answer would lead me to revise the design and have it reviewed again before anything goes on the page.
 >
@@ -53,3 +53,4 @@
 - The page address is public and is given. The repository is public too, and rev 2 says so in point 2.
 - Point 4 asks; it does not send a copy. If IUCN says a link is wanted, sending it after release is a second, short message of Chad's.
 - Sign-off "Ta" is Chad's standing choice.
+- If the card's citation gains "Accessed on 22 November 2026" (built on the branch on 23 Nov, on GPT's recommendation from IUCN's citation guidance), point 1's list already covers it: "the date I checked".

@@ -74,6 +74,19 @@ The criteria are quoted in short from `docs/concepts/ANIMALS-PROPOSAL.md` §8, l
 
 **`wrong-assessment-date` stands in for the Green Status risk.** The Green Status dates on the white shark and penguin pages were not recorded in the evidence record, so the break uses another date. What is proven: any assessment date other than the reviewed one fails.
 
+## 5a. Change of 23 Nov: the citation's access date (GPT's recommendation, relayed by Chad; filed as `reviews/2026-11-23-animals-assessment-citation-gpt-review.md`)
+
+IUCN's citation guidance (`/about/citationinfo`, read by Claude and separately by GPT) ends a citation with the user's own access date. Built as GPT set out:
+
+- The citation on each card now ends "Accessed on 22 November 2026." The page builds it from `last_successful_check`. It is never the reader's clock, the build date, a failed attempt's date, or the date the Red List page prints.
+- The hand-kept citation still carries no access date, and the builder still refuses one (rule 4). The page now refuses such a record too.
+- "Checked by Mother Earth on …" stays as the upkeep statement. For this workflow the two dates are the same date by design.
+- Files changed: `animals-assessment.js` (two lines and a comment), `phase1/animals-assessment-ui.test.cjs`. The shipped JSON file and its checksum are unchanged.
+
+Checks (Claude's runs): `animals-assessment-ui` **51 passed, 0 failed** (2b now requires exactly one access date, the right one, on all five; new 4f: unchanged after a failed attempt; 4c and 4e: unchanged when overdue and when failed and overdue; new 6g: a typed-in "Accessed" date is not shown). Builder tests 86 passed, 0 failed. Three new breaks, each run alone, each caught: `accessed-from-failed-attempt`, `accessed-from-readers-clock`, `imported-accessed-kept`. **Not rerun after this change:** the earlier 15 breaks and the tab, census and corridor suites. The change touches only the citation line; the tab suite reads only the start of the block.
+
+Also on 23 Nov: the signed-in advanced search for *Pseudorca crassidens* found 0 subpopulation assessments (evidence record §8). GPT: it strengthens the evidence; the card's "not verified" wording stays.
+
 ## 6. What GPT is asked
 
 1. Do the five differences in section 2 stand?
