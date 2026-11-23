@@ -68,7 +68,7 @@ Order matters. Each step names who does it. Steps 4 to 9 need Chad's own lines, 
 3. **Integrate and test again.** *Claude.*
    - Merge current main into the branch. Report every non-docs file it brings.
    - Rerun the six checks above, one at a time. If any page file changed since `70aeb62`, also rerun the 18 breaks.
-   - If main brought changes to `style.css`, `sources.html` or the header, run the suites that cover them (`desktop-overflow`, `header-tabs`, `smoke-fixes`) with the right local server.
+   - If main brought changes to `style.css`, `sources.html` or the header, run the suites that cover them (`desktop-overflow`, `smoke-fixes`, and any header suite main carries by then) with the right local server.
    - Sync a review copy to the Mac for GPT.
 4. **GPT's release review** of the final tree and documents. *Chad relays it; filed unchanged.* A relayed review is not Chad's approval.
 5. **Chad's decisions, in his own words.** *Chad.*
