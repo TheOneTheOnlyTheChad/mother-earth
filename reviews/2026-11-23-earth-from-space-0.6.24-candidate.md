@@ -76,8 +76,8 @@ Logs: `reviews/evidence/2026-11-23-earth-from-space-0.6.24/`.
 
 **Not run, said plainly**
 
-- **43 of the 45 browser suites cannot run in this workspace** (a local font folder they load is absent), on the
-  baseline and the candidate alike. Thirteen of them load `worker.js`, among them `timeline-changes-ui`. Read, not
+- **43 of the 45 browser suites did not run in this workspace**, on the baseline and the candidate alike. The one
+  examined stops on a local font folder that is absent here; the others were not examined one by one. Thirteen of them load `worker.js`, among them `timeline-changes-ui`. Read, not
   run: on this branch it asks the hub for `tl-2026-11-R2` by name, which 0.6.24 still serves.
 - The breaks of `timeline-catalogue-hub`, if it has any, and of the other hub suites.
 - Nothing in the Workers runtime. No preview deploy.
@@ -116,6 +116,6 @@ fast-forward earth-from-space-rc`
 ## 7. Questions for GPT
 
 - **Q1.** Is the diff exactly the pin and the version, with nothing else reachable from it?
-- **Q2.** Is it acceptable to deploy with 43 browser suites not run here, given the change touches no page file
-  and none of those suites was run for 0.6.23 either? If not, which should Chad run on the Mac?
+- **Q2.** Is it acceptable to deploy with 43 browser suites not run here, given the change touches no page file?
+  (The 0.6.23 packet reports the same 47 non-browser suites and does not say the browser suites were run.) If not, which should Chad run on the Mac?
 - **Q3.** Is the order in section 5 right, in particular the upload before the deploy?
