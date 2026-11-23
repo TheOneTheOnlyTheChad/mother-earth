@@ -14,7 +14,7 @@ const old = f => execFileSync('git', ['show', 'a44e31d:' + f], { cwd: ROOT, maxB
 const GUARD = "styled = getComputedStyle(E.xpl).touchAction === 'pan-y';";
 const cur = f => { let t = fs.readFileSync(ROOT + '/' + f, 'utf8');   // BREAK=no-style-guard must make this suite fail
   if (process.env.BREAK === 'no-style-guard' && f === 'timeline.js') { if (t.split(GUARD).length !== 2) throw new Error('break anchor missing'); t = t.replace(GUARD, 'styled = true;'); } return t; };
-const CAT = fs.readFileSync(ROOT + '/phase1/timeline/catalogue/tl-2026-11-R2.json');
+const CATOF = u => fs.readFileSync(ROOT + '/phase1/timeline/catalogue/' + u.split('/').pop() + '.json');   // each page asks for its own revision by name
 (async () => {
   const b = await chromium.launch(); let bad = 0;
   const boxes = async (page, css, w, h) => { const c = await b.newContext({ viewport: { width: w, height: h } });
@@ -36,7 +36,7 @@ const CAT = fs.readFileSync(ROOT + '/phase1/timeline/catalogue/tl-2026-11-R2.jso
     ['new page + OLD script', cur('timeline.html'), old('timeline.js'), cur('style.css'), 'off:build'], ['OLD page + new script', old('timeline.html'), cur('timeline.js'), cur('style.css'), 'off:build']]) for (const w of [1280, 390]) {
     const c = await b.newContext({ viewport: { width: w, height: 844 } });
     await c.route(/fonts\.googleapis|unpkg|gibs|jsdelivr/, r => r.abort());
-    await c.route(/workers\.dev\/catalogue\/timeline/, r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: CAT }));
+    await c.route(/workers\.dev\/catalogue\/timeline/, r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: CATOF(r.request().url()) }));
     await c.route(/timeline\.html/, r => r.fulfill({ contentType: 'text/html', body: html })); await c.route(/timeline\.js/, r => r.fulfill({ contentType: 'application/javascript', body: js })); await c.route(/style\.css/, r => r.fulfill({ contentType: 'text/css', body: css }));
     const p = await c.newPage(); const errs = []; p.on('pageerror', e => errs.push(String(e)));
     await p.goto(BASE + '/timeline.html'); await p.waitForFunction(() => window.TL_AXIS && window.TL_AXIS.state !== 'pending'); await p.waitForTimeout(200);

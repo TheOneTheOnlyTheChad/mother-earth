@@ -74,7 +74,9 @@ const page = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8');
 ok('R1 frozen: the committed R1 file equals its known pin (literal), byte for byte', sha(FILE) === R1_SHA && FILE.length === R1_BYTES && W.TIMELINE.fileSha256 === R1_SHA && W.TIMELINE.bytes === R1_BYTES, [sha(FILE), FILE.length]);
 const CUR = W.TIMELINE_REVISIONS[W.TIMELINE_CURRENT];
 ok('current pin = sha256 and size of the committed current catalogue', W.TIMELINE_CURRENT === CUR_ID && CUR.fileSha256 === sha(FILE_CUR) && CUR.bytes === FILE_CUR.length && CUR.key === 'ref/timeline/' + CUR_ID + '.json', [CUR, sha(FILE_CUR), FILE_CUR.length]);
-ok('page embeds the current catalogue hash and revision', page.includes(`data-catalogue-sha="${sha(FILE_CUR)}"`) && page.includes(`data-catalogue-rev="${CUR_ID}"`));
+// The page may be built for a later revision than the Worker beside this file pins (the deployed hub is built on another branch).
+// What must hold here: the page embeds the hash of the committed catalogue file for the revision it names.
+ok('page embeds the hash of the committed catalogue file for the revision it names', (() => { const m = page.match(/data-catalogue-sha="([0-9a-f]{64})" data-catalogue-rev="([^"]+)"/); return !!m && sha(fs.readFileSync(path.join(HERE, 'timeline/catalogue/' + m[2] + '.json'))) === m[1]; })());
 const J = JSON.parse(FILE.toString('utf8'));
 ok('five episodes on the extinctions lane, Pliny on the shelf only', J.entries.length === 5 && J.entries.every(e => e.lane === 'extinctions') && J.shelf.length === 1 && J.shelf[0].axis === false && !J.entries.some(e => e.id === 'e-pliny-ep-6-16'));
 ok('four lanes, three without entries', J.lanes.map(l => l.id).join() === 'earth-life,extinctions,relatives,history' && J.lanes.filter(l => l.status !== 'active').length === 3);

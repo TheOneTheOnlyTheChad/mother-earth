@@ -262,7 +262,8 @@ const axisInfo = p => p.evaluate(() => {
     const c = await ctx(b, { js: false }); const p = await c.newPage();
     await p.goto(BASE + '/timeline.html');
     const m = await p.evaluate(() => ({ lanes: [...document.querySelectorAll('.lanes .lane')].map(l => l.textContent.trim()),
-      claims: [...document.querySelectorAll('article.entry.ep section.claim')].map(s => [s.dataset.claimType, s.querySelector('h5').textContent]),
+      claims: [...document.querySelectorAll('article.entry.ep section.claim:not(.told)')].map(s => [s.dataset.claimType, s.querySelector('h5').textContent]),
+      told: [...document.querySelectorAll('article.entry.ep section.claim.told')].map(s => [s.dataset.claimType, !!s.querySelector('h5'), !!s.querySelector('.srcnote a')]),
       eps: [...document.querySelectorAll('article.entry.ep')].map(a => a.id), noscript: document.querySelector('noscript') !== null,
       permalinks: [...document.querySelectorAll('#dated .card .ctitle a')].map(a => a.getAttribute('href')) }));
     ok('no-JS: four lanes named, three "no entries yet"', m.lanes.length === 4 && m.lanes.filter(l => /No (dated )?entries/.test(l)).length === 3, m.lanes);
@@ -271,6 +272,7 @@ const axisInfo = p => p.evaluate(() => {
       extinction_onset_estimate: 'Estimated extinction onset', extinction_horizon_approx: 'Approximate age of the extinction level in the rock record', dated_event_age: 'Impact age',
       extinction_placement_tied: 'Extinction placed at the dated impact (synchrony evidence cited)', chart_boundary: 'ICS chart boundary (v2026-06)', context: 'Context' };
     ok('no-JS: every claim carries its own fixed label', m.claims.length > 0 && m.claims.every(([t, l]) => want[t] === l) && Object.keys(want).every(t => m.claims.some(([x]) => x === t)), m.claims);
+    ok('no-JS: an attributed finding (schema 3) is a sentence with its own citation and no repeated label', m.told.every(([t, h, src]) => (t === 'cause_account' || t === 'disagreement') && !h && src), m.told);
     ok('no-JS: permalinks point at the pre-rendered entries', m.permalinks.join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].map(i => '#' + i).join(), m.permalinks);
     await p.goto(BASE + '/timeline.html#' + ID.p);
     ok('no-JS: a permalink lands on its entry', await p.evaluate(id => { const r = document.getElementById(id).getBoundingClientRect(); return r.top >= -2 && r.top < innerHeight; }, ID.p));

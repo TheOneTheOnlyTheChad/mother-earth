@@ -28,8 +28,10 @@ const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log(
 const must = (s, a, b) => { if (!s.includes(a)) throw new Error('break anchor missing: ' + a.slice(0, 70)); return s.replace(a, b); };
 const git = (ref, f) => { try { return execFileSync('git', ['-C', ROOT, 'show', `${ref}:${f}`], { maxBuffer: 1 << 26 }); } catch (e) { throw new Error(`commit ${ref} is not in this clone: git fetch --depth=400 origin main`); } };
 
-const REV = 'tl-2026-11-R2', R1 = 'tl-2026-11-R1';
-const CAT = fs.readFileSync(path.join(TL, 'catalogue', REV + '.json')), CAT1 = fs.readFileSync(path.join(TL, 'catalogue', R1 + '.json'));
+// REV names the revision whose change record this suite follows (tl-2026-11-R2-1, the End-Triassic wording). CUR is the revision the
+// committed page is built for; its catalogue is the one the page pins and the fake hub serves.
+const REV = 'tl-2026-11-R2', R1 = 'tl-2026-11-R1', CUR = JSON.parse(fs.readFileSync(path.join(TL, 'BUILD.json'), 'utf8')).catalogue_revision;
+const CAT = fs.readFileSync(path.join(TL, 'catalogue', CUR + '.json')), CAT1 = fs.readFileSync(path.join(TL, 'catalogue', R1 + '.json'));
 const R1_SHA = '096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe';
 const HTML0 = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'), JS0 = fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8');
 const R1_HTML = git(R1_COMMIT, 'timeline.html'), R1_JS = git(R1_COMMIT, 'timeline.js');
@@ -51,7 +53,7 @@ const JS = (() => {
   return JS0;
 })();
 const HTML = (() => {
-  if (BREAK === 'stale-js-version') return must(HTML0, 'timeline.js?v=202612250400', 'timeline.js?v=202611221000');
+  if (BREAK === 'stale-js-version') return must(HTML0, 'timeline.js?v=' + (JS0.match(/const BUILD = '(\d+)';/) || [])[1], 'timeline.js?v=202611221000');
   if (BREAK === 'dropped-anchor') return must(HTML0, 'id="e-pliny-ep-6-16-debate"', 'id="e-pliny-ep-6-16-debate-x"');
   return HTML0;
 })();
@@ -73,7 +75,8 @@ let fxN = 0;
 function fixture(edit) {
   const dir = path.join(TMP, 'fx' + (++fxN)); fs.mkdirSync(path.join(dir, 'catalogue'), { recursive: true });
   for (const f of ['BUILD.json', 'big5.json', 'changes.json', 'chart-v2026-06.5.json', 'entry-pliny-ep-6-16.json']) fs.copyFileSync(path.join(TL, f), path.join(dir, f));
-  for (const f of [R1, REV]) fs.copyFileSync(path.join(TL, 'catalogue', f + '.json'), path.join(dir, 'catalogue', f + '.json'));
+  for (const f of [R1, REV, CUR]) fs.copyFileSync(path.join(TL, 'catalogue', f + '.json'), path.join(dir, 'catalogue', f + '.json'));
+  if (fs.existsSync(path.join(TL, 'assets'))) fs.cpSync(path.join(TL, 'assets'), path.join(dir, 'assets'), { recursive: true });
   const page = path.join(dir, 'timeline.html'); fs.writeFileSync(page, HTML0);
   const J = f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')), W = (f, o) => fs.writeFileSync(path.join(dir, f), JSON.stringify(o, null, 1) + '\n');
   edit({ J, W });
@@ -85,13 +88,20 @@ function fixture(edit) {
 (async () => {
   // ---- hubs: the real worker code, in-memory R2
   const loadWorker = async (src, name) => { const f = path.join(TMP, name); fs.writeFileSync(f, src); return (await import(pathToFileURL(f).href)).default; };
-  const newHub = await loadWorker(fs.readFileSync(path.join(__dirname, 'worker.js')), 'hub-new.mjs');
+  // The Worker in this repository is not the deployed hub and has no pin for the current revision; the deployed hub's next
+  // version is built on another branch. "pinned hub" here = this file plus, in memory only, exactly what that version adds:
+  // one table entry for CUR and TIMELINE_CURRENT. "unpinned hub" = this file as it is.
+  const W0 = fs.readFileSync(path.join(__dirname, 'worker.js'), 'utf8'), TA = "  }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';", CA = "const TIMELINE_CURRENT = 'tl-2026-11-R2';";
+  if (W0.split(TA).length !== 2 || W0.split(CA).length !== 2) throw new Error('worker anchors missing');
+  const newHub = await loadWorker(W0.replace(TA, `  }),\n  '${CUR}': Object.freeze({ key: 'ref/timeline/${CUR}.json', revision: '${CUR}', fileSha256: '${sha(CAT)}', bytes: ${CAT.length} }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';`).replace(CA, `const TIMELINE_CURRENT = '${CUR}';`), 'hub-new.mjs');
+  const unpinnedHub = await loadWorker(W0, 'hub-unpinned.mjs');
   const oldHubSrc = git(OLD_HUB_COMMIT, 'phase1/worker.js');
   const oldHub = await loadWorker(oldHubSrc, 'hub-old.mjs');
   const KEY = r => `ref/timeline/${r}.json`;
   const envOf = objects => ({ DB: { prepare() { const st = { bind: () => st, first: async () => null, all: async () => ({ results: [] }), run: async () => ({}) }; return st; } },
     R2: { get: async k => { const b = objects[k]; return b ? { arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) } : null; } } });
-  const BOTH = { [KEY(R1)]: CAT1, [KEY(REV)]: CAT };
+  const CAT2 = fs.readFileSync(path.join(TL, 'catalogue', REV + '.json'));
+  const BOTH = { [KEY(R1)]: CAT1, [KEY(REV)]: CAT2, [KEY(CUR)]: CAT };
   const seenHub = [];
   const hubRoute = (worker, objects) => async route => {
     const url = route.request().url(); const res = await worker.fetch(new Request(url), envOf(objects));
@@ -133,14 +143,14 @@ function fixture(edit) {
         val: tx(q('#' + T + '-c0 .cval')), src: tx(q('#' + T + '-c0 .srcnote')), order: [...document.querySelectorAll('main > section, main > p')].map(n => n.id || n.className), sw: document.documentElement.scrollWidth, iw: innerWidth };
     }, { REC, T });
     const rel = JSON.parse(CAT).release.release_date, relText = `${+rel.slice(8)} Nov 2026`;
-    ok('B: "Timeline page updated <release day> · revision tl-2026-11-R2 · What changed"', m.updated === `Timeline page updated ${relText} · revision tl-2026-11-R2 · What changed` && m.updatedT.length === 1 && m.updatedT[0][0] === rel, m.updated);
-    ok('B: release headings, newest first, each with its own date', m.heads.join('|') === `${relText} — revision tl-2026-11-R2|10 Nov 2026 — revision tl-2026-11-R1 (first release)` && m.headT[0][0][0] === rel && m.headT[1][0][0] === '2026-11-10', m.heads);
+    ok(`B: "Timeline page updated <release day> · revision ${CUR} · What changed"`, m.updated === `Timeline page updated ${relText} · revision ${CUR} · What changed` && m.updatedT.length === 1 && m.updatedT[0][0] === rel, m.updated);
+    ok('B: release headings, newest first, each with its own date', m.heads.join('|') === `${relText} — revision ${CUR}|12 Nov 2026 — revision tl-2026-11-R2|10 Nov 2026 — revision tl-2026-11-R1 (first release)` && m.headT[0][0][0] === rel && m.headT[1][0][0] === '2026-11-12' && m.headT[2][0][0] === '2026-11-10', m.heads);
     ok('B: the R2 change record, word for word as approved', m.rec === 'Wording clarified: End-Triassic mass extinction. The label "Approximate age of the extinction horizon" now reads "Approximate age of the extinction level in the rock record", with the matching change in the entry text. Why: plainer wording for a general reader. Dates, sources and the mark on the axis are unchanged. The entry\'s evidence was last reviewed 10 Nov 2026. Open the entry', m.rec);
     ok('B: the R1 records', m.r1.join('|') === 'Added the conventional Big Five mass extinctions on the deep-time axis, placed on the ICS chart (v2026-06).|The Pliny entry (on this page since 9 Nov 2026) moved into the catalogue. It stays on the dates-without-a-year shelf.', m.r1);
     ok('B: the entry line, word for word as approved', m.rev === 'Evidence last reviewed: 10 Nov 2026 · Changed in revision tl-2026-11-R2: wording clarified', m.rev);
     ok('B: release date and evidence-last-reviewed are separate elements with their own <time> values', m.revT.length === 1 && m.revT[0][0] === '2026-11-10' && m.recT.length === 1 && m.recT[0][0] === '2026-11-10' && m.updatedT[0][0] === rel && rel !== '2026-11-10', [m.revT, m.recT, m.updatedT]);
-    ok('B: every entry carries its own review date (Big Five 10 Nov, Pliny 9 Nov); only End-Triassic says "Changed in"', m.revs.length === 6 && m.revs.filter(([i, t]) => /^e-big5/.test(i) && /^Evidence last reviewed: 10 Nov 2026/.test(t)).length === 5
-      && m.revs.some(([i, t]) => i === 'e-pliny-ep-6-16-rev' && t === 'Evidence last reviewed: 9 Nov 2026') && m.revs.filter(([, t]) => /Changed in/.test(t)).length === 1, m.revs);
+    ok('B: every entry carries its own review date (Big Five 10 Nov, Pliny 9 Nov); End-Triassic and End-Cretaceous say "Changed in"; the End-Cretaceous account has its own scoped note', m.revs.length === 7 && m.revs.some(([i, t]) => i === 'e-big5-end-cretaceous-srev' && /^Account and image reviewed: 23 Nov 2026\./.test(t)) && m.revs.filter(([i, t]) => /^e-big5/.test(i) && /^Evidence last reviewed: 10 Nov 2026/.test(t)).length === 5
+      && m.revs.some(([i, t]) => i === 'e-pliny-ep-6-16-rev' && t === 'Evidence last reviewed: 9 Nov 2026') && m.revs.filter(([, t]) => /Changed in/.test(t)).map(([i]) => i).join() === 'e-big5-end-triassic-rev,e-big5-end-cretaceous-rev', m.revs);
     ok('B: approved label on the entry and the card; approved text (option A)', m.label === 'Approximate age of the extinction level in the rock record' && m.cardLabel === 'Approximate age of the extinction level in the rock record:'
       && m.text === 'In each of the three sections studied, a large sulfur-isotope shift about 201.5 million years ago coincides with the level in the rock record that marks the extinction.', [m.label, m.cardLabel, m.text]);
     ok('B: value, source and its checked date unchanged', m.val === '~201.5 Ma (approximate, as stated)' && /He T et al\. \(2020\)/.test(m.src) && /\(checked 10 Nov 2026\)/.test(m.src), [m.val, m.src]);
@@ -164,7 +174,9 @@ function fixture(edit) {
   {
     const ids = h => [...h.toString('utf8').matchAll(/\sid="([^"]+)"/g)].map(m => m[1]);
     const old = ids(R1_HTML), now = new Set(ids(HTML));
-    ok('C: every id on the released R1 page exists on the candidate page', old.length >= 60 && old.includes('e-pliny-ep-6-16-debate') && old.includes('card-e-big5-end-cretaceous') && old.every(i => now.has(i)), [old.length, old.filter(i => !now.has(i))]);
+    // tl-2026-11-R3 retired one claim (the End-Cretaceous context line "Causes are not shown in this release."): its two element ids are gone and are not reused.
+    const RETIRED = ['e-big5-end-cretaceous-c2', 'e-big5-end-cretaceous-c2-h'];
+    ok('C: every id on the released R1 page exists on the candidate page, except the two ids of the one retired claim', old.length >= 60 && old.includes('e-pliny-ep-6-16-debate') && old.includes('card-e-big5-end-cretaceous') && JSON.stringify(old.filter(i => !now.has(i))) === JSON.stringify(RETIRED), [old.length, old.filter(i => !now.has(i))]);
     ok('C: new anchors are additions only (#changes, #change-<revision>-<n>)', now.has('changes') && now.has(REC) && now.has('change-tl-2026-11-R1-1') && now.has('change-tl-2026-11-R1-2'));
     for (const x of ['conv', 'debate']) {
       let c = await ctx({ jsOn: false }); let p = await c.newPage(); await p.goto(BASE + '/timeline.html#e-pliny-ep-6-16-' + x);
@@ -181,12 +193,12 @@ function fixture(edit) {
   // ================= D. page and hub pairs
   const pairs = [
     // [label, html, js, worker, objects, expect(axis) -> bool, wanted catalogue request]
-    ['new page + new script + candidate hub (R1 and R2 stored)', HTML, JS, newHub, BOTH, a => a.state === 'on' && a.marks === 5, REV],
+    ['new page + new script + pinned hub (R1, R2 and the current revision stored)', HTML, JS, newHub, BOTH, a => a.state === 'on' && a.marks === 5, CUR],
     ['REAL R1 page + R1 script + candidate hub: the old matched pair keeps its axis', R1_HTML.toString('utf8'), R1_JS.toString('utf8'), newHub, BOTH, a => a.state === 'on' && a.marks === 5, R1],
     ['MIXED: R1 page that re-fetches the script and gets the NEW one → build guard, static list', R1_HTML.toString('utf8'), JS, newHub, BOTH, a => a.state === 'off' && a.reason === 'build' && a.offShown, null],
     ['MIXED: new page with the cached OLD script → build guard, static list', HTML, R1_JS.toString('utf8'), newHub, BOTH, a => a.state === 'off' && a.reason === 'build' && a.offShown, null],
-    ['new page + new script + previous hub 0.6.8 (no R2 pin) → 404, static list', HTML, JS, oldHub, { [KEY(R1)]: CAT1 }, a => a.state === 'off' && a.reason === 'http 404' && a.offShown, REV],
-    ['new page + candidate hub before the R2 upload → 503, static list', HTML, JS, newHub, { [KEY(R1)]: CAT1 }, a => a.state === 'off' && a.reason === 'http 503' && a.offShown, REV],
+    ['new page + new script + unpinned hub (no pin for the current revision) → 404, static list', HTML, JS, unpinnedHub, { [KEY(R1)]: CAT1, [KEY(REV)]: CAT2 }, a => a.state === 'off' && a.reason === 'http 404' && a.offShown, CUR],
+    ['new page + pinned hub before the catalogue upload → 503, static list', HTML, JS, newHub, { [KEY(R1)]: CAT1, [KEY(REV)]: CAT2 }, a => a.state === 'off' && a.reason === 'http 503' && a.offShown, CUR],
     ['REAL R1 page + R1 script + previous hub 0.6.8 (today\'s production pair)', R1_HTML.toString('utf8'), R1_JS.toString('utf8'), oldHub, { [KEY(R1)]: CAT1 }, a => a.state === 'on' && a.marks === 5, R1],
   ];
   for (const [label, html, js, worker, objects, want, rev] of pairs) {
@@ -207,7 +219,7 @@ function fixture(edit) {
   }
   { // legacy URL on the candidate hub, asked directly as an old cached page would
     const r = await newHub.fetch(new Request('https://mother-earth.chadoberholzer.workers.dev/catalogue/timeline'), envOf(BOTH)); const body = Buffer.from(await r.arrayBuffer());
-    ok('D candidate hub: the legacy URL returns R1\'s original bytes while R2 is current', r.status === 200 && sha(body) === R1_SHA, [r.status, sha(body).slice(0, 12)]);
+    ok('D pinned hub: the legacy URL returns R1\'s original bytes while a later revision is current', r.status === 200 && sha(body) === R1_SHA, [r.status, sha(body).slice(0, 12)]);
   }
   ok('D asset version: the candidate page asks for a different timeline.js ?v= than the R1 page', (m => m && !R1_HTML.toString('utf8').includes(m[0]))(HTML.match(/timeline\.js\?v=\d+/)), HTML.match(/timeline\.js\?v=\d+/));
 
@@ -324,6 +336,7 @@ function fixture(edit) {
 
   // ================= G. fixture: a partial re-check (three different dates in three places)
   {
+    const rel0 = JSON.parse(CAT).release.release_date;
     const f = fixture(({ J, W }) => { const d = J('big5.json'); d.sources.he2020.checked = '2026-11-11'; d.sources.he2020.status = d.sources.he2020.status.replace('checked 10 Nov 2026', 'checked 11 Nov 2026'); W('big5.json', d); });
     ok('G: the generator accepts a source checked after the entry-wide review (both on or before the release day)', f.code === 0, f.out.slice(-300));
     if (f.code === 0) {
@@ -332,7 +345,7 @@ function fixture(edit) {
         head: document.querySelector('#rel-tl-2026-11-R2-h time').getAttribute('datetime'), rec: document.querySelector(`#${REC} time`).getAttribute('datetime'), updated: document.querySelector('#tl-updated time').getAttribute('datetime') }), { T, REC });
       ok('G rendered: entry "Evidence last reviewed" = 10 Nov 2026 (the entry-wide review)', m.entry === '2026-11-10' && m.entryText === '10 Nov 2026', m);
       ok('G rendered: the source line shows its own later date, 11 Nov 2026', /\(checked 11 Nov 2026\)/.test(m.src) && !/checked 10 Nov/.test(m.src), m.src);
-      ok('G rendered: What changed heading and page line show the release day; the change record quotes the entry-wide date', m.head === '2026-11-12' && m.updated === '2026-11-12' && m.rec === '2026-11-10', m);
+      ok('G rendered: What changed heading and page line show the release day; the change record quotes the entry-wide date', m.head === '2026-11-12' && m.updated === rel0 && m.rec === '2026-11-10', m);
       await c.close();
     }
   }
@@ -343,7 +356,7 @@ function fixture(edit) {
     const NEWTXT = prev.when_text.replace('251.941', '251.902').replace('0.037', '0.024');
     const FX = 'tl-2026-12-T1';
     const f = fixture(({ J, W }) => {
-      const bd = J('BUILD.json'); bd.catalogue_revision = FX; bd.release_date = '2026-12-01'; bd.previous = REV; bd.generated_at = '2026-12-01T00:00:00Z'; W('BUILD.json', bd);
+      const bd = J('BUILD.json'); bd.catalogue_revision = FX; bd.release_date = '2026-12-01'; bd.previous = CUR; bd.generated_at = '2026-12-01T00:00:00Z'; W('BUILD.json', bd);
       const d = J('big5.json'); d.sources.fixture2026 = { citation: 'Fixture A, Fixture B (2026) Synthetic test source. Journal of Fixtures 1: 1', doi: '10.0000/fixture', licence: 'CC BY 4.0', status: 'Synthetic fixture, not a real source (checked 30 Nov 2026)', checked: '2026-11-30' };
       const ep = d.episodes.find(e => e.id === 'e-big5-end-permian'), cl = ep.claims.find(k => k.claim_type === 'extinction_onset_estimate');
       cl.when.ma = 251.902; cl.when.pm = 0.024; cl.source = 'fixture2026'; cl.locator = 'Table 1'; ep.evidence_reviewed.date = '2026-11-30'; W('big5.json', d);
@@ -363,9 +376,9 @@ function fixture(edit) {
       ok('H: old and new values side by side in the change record', m.was && m.now && m.was.startsWith(prev.when_text) && m.now.startsWith(NEWTXT) && /Why: synthetic fixture, newer dating\./.test(m.rec), [m.was, m.now]);
       ok('H: the OLD side carries its own citation and checked date (Burgess 2017, 10 Nov 2026)', m.was && /Burgess SD, Muirhead JD, Bowring SA \(2017\)/.test(m.was) && /checked 10 Nov 2026/.test(m.was) && !/Fixture A/.test(m.was), m.was);
       ok('H: the NEW side carries its own citation and checked date (fixture source, 30 Nov 2026)', m.now && /Fixture A, Fixture B \(2026\)/.test(m.now) && /checked 30 Nov 2026/.test(m.now) && !/Burgess/.test(m.now), m.now);
-      ok('H: the entry keeps the earlier value visible, labelled with the revision that showed it, with its old source', m.earlier && m.earlier.includes('Earlier dating') && m.earlier.includes('Shown in revision tl-2026-11-R2: ' + prev.when_text) && /Burgess SD/.test(m.earlier) && !/Fixture A/.test(m.earlier), m.earlier);
+      ok('H: the entry keeps the earlier value visible, labelled with the revision that showed it, with its old source', m.earlier && m.earlier.includes('Earlier dating') && m.earlier.includes('Shown in revision ' + CUR + ': ' + prev.when_text) && /Burgess SD/.test(m.earlier) && !/Fixture A/.test(m.earlier), m.earlier);
       ok('H: the entry now shows the new value and source; its line says what changed', m.cur === NEWTXT && /Fixture A/.test(m.curSrc) && m.rev === `Evidence last reviewed: 30 Nov 2026 · Changed in revision ${FX}: date revised`, [m.cur, m.rev]);
-      ok('H: three releases listed, newest first', m.heads.length === 3 && /^1 Dec 2026 — revision tl-2026-12-T1$/.test(m.heads[0]) && /tl-2026-11-R2$/.test(m.heads[1]), m.heads);
+      ok('H: four releases listed, newest first', m.heads.length === 4 && /^1 Dec 2026 — revision tl-2026-12-T1$/.test(m.heads[0]) && m.heads[1].endsWith(CUR) && /tl-2026-11-R2$/.test(m.heads[2]), m.heads);
       await c.close();
       // and the page script accepts the fixture catalogue (mark drawn from the new value)
       c = await ctx({ html: f.html.replace(/timeline\.js\?v=\d+/, 'timeline.js?v=202611301000'), hub: r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body: f.cat }) }); p = await c.newPage();

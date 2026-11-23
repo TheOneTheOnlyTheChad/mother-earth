@@ -59,8 +59,17 @@ const big = (E, f) => { const b = E.J('big5.json'); f(E.kpg(b), b); E.W('big5.js
 
 // ---------- A. the released build is untouched
 { const r = spawnSync('python3', [path.join(TL, 'build_timeline.py'), '--check'], { encoding: 'utf8' });
-  ok('A: the released page and catalogue still equal the generator output (tl-2026-11-R2, sha256 2f39aa30…0356)', r.status === 0 && r.stdout.includes('2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356'), r.stdout + r.stderr); }
-ok('A: production big5.json carries no story field', !/"story"|"chart_claim_id"/.test(fs.readFileSync(path.join(TL, 'big5.json'), 'utf8')));
+  ok('A: the committed page, catalogue, script key and published image files equal the generator output', r.status === 0, r.stdout + r.stderr); }
+ok('A: the previous release is frozen: catalogue/tl-2026-11-R2.json is the published file (sha256 2f39aa30…0356, 18,120 B)', createHash('sha256').update(fs.readFileSync(path.join(TL, 'catalogue/tl-2026-11-R2.json'))).digest('hex') === '2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356' && fs.statSync(path.join(TL, 'catalogue/tl-2026-11-R2.json')).size === 18120);
+{ const prod = J(path.join(TL, 'big5.json')), reh = J(path.join(RH, 'big5.json')); const kp = o => JSON.stringify(o.episodes.find(e => e.id === KPG));
+  ok('A: the release source and the rehearsal source hold the same End-Cretaceous episode and the same sources; the other four episodes are equal too', kp(prod) === kp(reh) && JSON.stringify(prod.sources) === JSON.stringify(reh.sources) && JSON.stringify(prod.episodes) === JSON.stringify(reh.episodes));
+  const B = J(path.join(TL, 'BUILD.json')), pubd = path.join(ROOT, 'assets/timeline', B.catalogue_revision);
+  ok('A: release build identity: a release revision id (not a rehearsal id), schema 3', /^tl-\d{4}-\d{2}-R\d+$/.test(B.catalogue_revision) && B.schema === 3, B);
+  ok('A: the published image files are the NASA bytes, and the folder holds nothing else but SOURCE.json', Object.keys(NASA).every(f => { const b = fs.readFileSync(path.join(pubd, f)); return sha(b) === NASA[f][0] && b.length === NASA[f][1]; }) && fs.readdirSync(pubd).sort().join() === [...Object.keys(NASA), 'SOURCE.json'].sort().join());
+  const pg = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'), cat = fs.readFileSync(path.join(TL, 'catalogue', B.catalogue_revision + '.json')), c = JSON.parse(cat);
+  ok('A: the committed page pins the committed catalogue, states schema 3, and refers to the published files by the release revision', pg.includes(`data-catalogue-sha="${sha(cat)}"`) && pg.includes(`data-catalogue-rev="${B.catalogue_revision}"`) && pg.includes('data-catalogue-schema="3"') && pg.includes(`assets/timeline/${B.catalogue_revision}/PIA03379-fig1-1024.jpg`) && !/tl-2026-11-T1|Rehearsal|rehearsal/.test(pg));
+  const ck = c.entries.find(e => e.id === KPG), got = { ...Object.fromEntries(ck.story.opening.map(o => [o.id, o.text])), ...Object.fromEntries(ck.claims.filter(q => q.id in SNAP).map(q => [q.id, q.text])) };
+  ok('A: the release catalogue carries the snapshot\'s sentences word for word, and no rehearsal id anywhere', Object.keys(SNAP).every(i => SNAP[i] === got[i]) && Object.keys(got).length === Object.keys(SNAP).length && !/tl-\d{4}-\d{2}-T\d|rehearsal/i.test(cat.toString('utf8')), Object.keys(SNAP).filter(i => SNAP[i] !== got[i])); }
 
 // ---------- B. the rehearsal catalogue
 const G = gen(); const C = G.cat, R2 = J(path.join(TL, 'catalogue/tl-2026-11-R2.json'));

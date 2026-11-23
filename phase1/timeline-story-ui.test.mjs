@@ -158,7 +158,8 @@ await refuses('an image in the page that the catalogue does not have', k => { de
 for (const v of ['4', '', 'three']) { const pg = (await (await fetch(`${B}/with-image/timeline.html`)).text()).replace('data-catalogue-schema="3"', `data-catalogue-schema="${v}"`); const T = await open('with-image', { page: pg });
   ok(`G: a page that states schema "${v}" is refused (explorer off, list stays)`, T.axis === 'off:validation: catalogue identity' && T.errs.length === 0, T.axis); await T.c.close(); }
 // ---------- G. mixed builds fail safe
-const show = f => execFileSync('git', ['show', 'origin/main:' + f], { cwd: ROOT, maxBuffer: 1 << 26 }).toString();
+const RELEASED = '03aff0a';   // the page and script live before this release (tl-2026-11-R2, schema 2); a fixed commit, because main moves at the merge
+const show = f => execFileSync('git', ['show', RELEASED + ':' + f], { cwd: ROOT, maxBuffer: 1 << 26 }).toString();
 { const R2 = fs.readFileSync(path.join(ROOT, 'phase1/timeline/catalogue/tl-2026-11-R2.json'));
   const hubTo = (c, body) => c.route(/catalogue\/timeline/, r => r.fulfill({ contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' }, body }));
   const T1cat = Buffer.from(await (await fetch(`${B}/with-image/hub/catalogue/timeline/${REV}`)).arrayBuffer());
@@ -173,10 +174,39 @@ const show = f => execFileSync('git', ['show', 'origin/main:' + f], { cwd: ROOT,
   const p = await c.newPage(); await p.goto(`${B}/with-image/timeline.html`); await p.waitForFunction(() => window.TL_AXIS.state !== 'pending'); const st = await p.evaluate(() => window.TL_AXIS.state + ':' + window.TL_AXIS.reason);
   ok('G: the new page, built for schema 3, refuses a schema-2 catalogue even when its hash is pinned', st === 'off:validation: catalogue identity', st); await c.close();
   // the new script with the released page and catalogue: the released pair still works (schema 2 path unchanged)
-  const c3 = await browser.newContext(); await c3.route(/fonts\./, r => r.abort()); await hubTo(c3, R2); await c3.route(/timeline\.html/, r => r.fulfill({ contentType: 'text/html', body: fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8') }));
+  const c3 = await browser.newContext(); await c3.route(/fonts\./, r => r.abort()); await hubTo(c3, R2); await c3.route(/timeline\.html/, r => r.fulfill({ contentType: 'text/html', body: show('timeline.html') }));
   await c3.route(/timeline\.js/, async r => r.fulfill({ contentType: 'application/javascript', body: brokenJs(await (await fetch(r.request().url())).text()) }));
   const p3 = await c3.newPage(); const e3 = []; p3.on('pageerror', e => e3.push(String(e))); await p3.goto(`${B}/with-image/timeline.html`); await p3.waitForFunction(() => window.TL_AXIS.state !== 'pending');
-  ok('G: this branch\'s script with the released page and released catalogue (schema 2) still draws the explorer', (await p3.evaluate(() => window.TL_AXIS.state)) === 'on' && e3.length === 0, e3); await c3.close(); }
+  const s3 = await p3.evaluate(() => window.TL_AXIS.state + ':' + window.TL_AXIS.reason);
+  ok('G: this script with the previously released page (another build key) leaves the list as the only view', s3 === 'off:build' && e3.length === 0, [s3, e3]); await c3.close();
+  // the schema-2 path itself still works in this script: the released page with only its build key moved to this script's
+  const c4 = await browser.newContext(); await c4.route(/fonts\./, r => r.abort()); await hubTo(c4, R2); const KEY = (fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8').match(/const BUILD = '(\d+)';/) || [])[1];
+  await c4.route(/timeline\.html/, r => r.fulfill({ contentType: 'text/html', body: show('timeline.html').replace(/202612250400/g, KEY) }));
+  await c4.route(/timeline\.js/, async r => r.fulfill({ contentType: 'application/javascript', body: brokenJs(await (await fetch(r.request().url())).text()) }));
+  const p4 = await c4.newPage(); const e4 = []; p4.on('pageerror', e => e4.push(String(e))); await p4.goto(`${B}/with-image/timeline.html`); await p4.waitForFunction(() => window.TL_AXIS.state !== 'pending');
+  ok('G: a schema-2 page and catalogue (the previous release, build key aligned) still draw the explorer with this script', (await p4.evaluate(() => window.TL_AXIS.state)) === 'on' && e4.length === 0, e4); await c4.close(); }
+
+// ---------- R. the RELEASE build in this repository (not the rehearsal): the committed page, script, stylesheet, catalogue and
+// published image files, served by route from the files on disk; the hub address answered with the committed catalogue
+{ const BUILD = JSON.parse(fs.readFileSync(path.join(ROOT, 'phase1/timeline/BUILD.json'), 'utf8')), RREV = BUILD.catalogue_revision, O = 'https://release.test';   // https so the page has crypto.subtle; every request is answered by route, nothing leaves the machine
+  const TY = { html: 'text/html', js: 'application/javascript', css: 'text/css', jpg: 'image/jpeg', json: 'application/json' };
+  for (const [w, dpr] of [[1280, 1], [390, 3]]) { const c = await browser.newContext({ viewport: { width: w, height: 844 }, deviceScaleFactor: dpr }); const reqs = [], errs = [];
+    await c.route(/fonts\.(googleapis|gstatic)/, r => r.abort());
+    await c.route(/workers\.dev\/catalogue\/timeline\//, r => { const rev = r.request().url().split('/').pop(); r.fulfill({ contentType: TY.json, headers: { 'Access-Control-Allow-Origin': '*' }, body: fs.readFileSync(path.join(ROOT, 'phase1/timeline/catalogue', rev + '.json')) }); });
+    await c.route(O + '/**', r => { const f = path.join(ROOT, new URL(r.request().url()).pathname); if (!f.startsWith(ROOT + path.sep) || !fs.existsSync(f)) return r.fulfill({ status: 404, body: '' });
+      let body = fs.readFileSync(f); if (BREAK && f.endsWith('timeline.js')) body = brokenJs(body.toString('utf8')); r.fulfill({ contentType: TY[f.split('.').pop()] || 'application/octet-stream', body }); });
+    const p = await c.newPage(); p.on('pageerror', e => errs.push(String(e))); p.on('request', r => reqs.push(r.url()));
+    await p.goto(O + '/timeline.html'); await p.waitForFunction(() => window.TL_AXIS && window.TL_AXIS.state !== 'pending'); await p.waitForTimeout(250);
+    const axis = await p.evaluate(() => window.TL_AXIS.state + ':' + window.TL_AXIS.reason), hub = reqs.filter(u => /workers\.dev/.test(u)), img0 = reqs.filter(u => /assets\/timeline/.test(u)).length;
+    ok(`R ${w}: the release page draws the explorer from ${RREV} (schema 3), asking the hub once for that revision by name; no banner; no page error`, axis === 'on:null' && hub.length === 1 && hub[0].endsWith('/catalogue/timeline/' + RREV) && !(await p.$('#rehearsal-banner')) && errs.length === 0, [axis, hub, errs]);
+    await p.click(CARD); await p.waitForFunction(id => { const i = document.getElementById(id + '-img'); return i.complete && i.naturalWidth > 0; }, KPG); await p.waitForTimeout(200); const st = await story(p);
+    const imgs = reqs.filter(u => /assets\/timeline/.test(u));
+    ok(`R ${w}: no image before opening; on opening, one request for a published file under assets/timeline/${RREV}/ (${imgs.map(u => u.split('/').pop()).join()})`, img0 === 0 && imgs.length === 1 && imgs[0].startsWith(`${O}/assets/timeline/${RREV}/PIA03379-fig1-`), imgs);
+    ok(`R ${w}: the story is the snapshot's (six sentences, eight findings), with the scoped review note and the "Changed in revision ${RREV}" line; no overflow`, st.open && JSON.stringify(st.sents) === JSON.stringify(WANT) && JSON.stringify(st.told) === JSON.stringify(FINDINGS) && st.sw <= st.iw
+      && await p.evaluate(([id, rv]) => document.getElementById(id + '-srev').textContent.startsWith('Account and image reviewed: 23 Nov 2026.') && document.getElementById(id + '-rev').textContent.includes(`Changed in revision ${rv}: account and image added`), [KPG, RREV]), st.sents.length);
+    const other = reqs.filter(u => !u.startsWith(O) && !/fonts\.|workers\.dev\/catalogue\/timeline/.test(u));
+    ok(`R ${w}: nothing is requested from any host but the page's own, the hub's catalogue address and the font hosts`, other.length === 0, other);
+    await c.close(); } }
 
 await browser.close(); server.close(); fs.rmSync(TMP, { recursive: true, force: true });
 console.log(`timeline-story-ui: ${pass} pass, ${fail} fail${real ? '' : ' — on FIXTURE images'}${BREAK ? ' (BREAK=' + BREAK + ')' : ''}`);
