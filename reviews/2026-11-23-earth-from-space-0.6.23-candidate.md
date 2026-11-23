@@ -175,3 +175,44 @@ off-mark row and a readable before-FROM row carrying the same note stay ignored,
 **Not done, unchanged from section 5:** the file header comment still does not list the two addresses; live D1 and
 CPU measurements; the fixture test plan; the runbook revision; the leftover monitor "ME alert test" is still not
 deleted (Chad's Approve line unspent, to be done with the dashboard in view and read back).
+
+## 9. GPT's recheck of r1, and the deploy (23 Nov 2026)
+
+**GPT's recheck (as relayed by Chad in the thread; the full text was not given to Claude):** H1 closed. 49 tests
+passed; 38 of 38 breaks caught; the updated test fails against the old code; reversing the full diff reproduces the
+retained 0.6.22 Worker exactly. No remaining code hold. Not a Stage D clearance; live checks and alert-path testing
+remain.
+
+**Chad's own line:** "Approve: deploy hub 0.6.23 from earth-from-space-rc 566a11b, phase1/worker.js sha256
+7141beb89e8e81ef351ddcc53e8654b1ddcbdb0048c8ffcb6b0d0ed7d7b3afa1, code only, EARTHVIEW_ENABLED left at manual, no
+window variables; read back hash and settings".
+
+**Before (dashboard tab, 14:47:05 UTC):** code `17798a44…a080`, 540,792 bytes (0.6.22); 25 bindings (14 plain, 9
+secret, D1, R2); `EARTHVIEW_ENABLED` = `manual`, no other `EARTHVIEW_*` variable; crons `*/5`, `*/15`, `11,41`, `:07`;
+compatibility date 2026-10-30. Five objects under `earthview/` (Stage C's), listed with size, etag and time.
+
+**Deploy:** file fetched in the dashboard tab from raw.githubusercontent at `566a11b` (551,047 bytes, sha256
+`7141beb8…afa1`, checked there against the approved hash; live code re-read as 0.6.22 immediately before);
+content-only upload by Claude, PUT 14:47:24.3 to 14:47:28.3 UTC, HTTP 200, Cloudflare `modified_on` 14:47:27.927 UTC.
+
+**After (14:47:40 UTC):** code read back `7141beb89e8e81ef351ddcc53e8654b1ddcbdb0048c8ffcb6b0d0ed7d7b3afa1`, 551,047
+bytes; hub `/` reports 0.6.23; 25 bindings, same types; `EARTHVIEW_ENABLED` = `manual`, no window variables; four
+crons unchanged; the five `earthview/` objects identical (key, size, etag, time).
+
+**Proposal test 2, as far as it was run:**
+
+- `/health/runs/earthview` and `/health/trial/earthview`: GET 200 and HEAD 200, `no-store`, state "no trial
+  configured", gate `manual`, `collector_version` 0.6.23.
+- The eight existing addresses: GET 200 and HEAD 200, healthy. `/health/publication/earthview` and
+  `/health/test/firms`: 404, as designed.
+- Cloudflare's records, 14:47:28 to 14:50:37 UTC: 30 invocations, all outcome ok. The four requests to the two new
+  addresses: CPU 0 to 1 ms, wall at most 2 ms. 23 requests to the older health addresses: CPU 0 to 5 ms.
+- First scheduled invocation after the deploy: `*/5` at 14:50:11 UTC, outcome ok, CPU 9 ms, wall 2,537 ms.
+
+**Not measured, said plainly:** with no window set the two new checks return before reading D1, so **D1 rows read
+by them is zero by construction and the cost of a real evaluation (a trial's rows) has not been measured live.**
+That needs a window, so it belongs to the fixture test or Stage D. The run log line of the 14:50 tick was not read.
+`/status` layer states were not compared before and after. The 14:55 and later ticks were not read.
+
+**Rollback:** hub 0.6.22 = `phase1/worker.js` at `114dc5b~1` on this branch (sha256 `17798a44…a080`, 540,792 bytes).
+Never main's file.
