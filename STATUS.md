@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 17:57 UTC (clock reading) — **Hub-to-main plan rev 2, answering GPT's review of rev 1 (relayed by Chad: "revise the plan before the landing candidate"). Docs only; nothing landed, nothing deleted** (production: none; Earth from Space thread)
+- **GPT's review, as relayed:** `reviews/2026-11-23-hub-to-main-plan-gpt-review.md` (selective copy accepted; exact manifest, publication review, named browser-suite list with matched baseline, a stronger replacement rule; no landing or deletion authorised). The full saved review was not read by Claude.
+- **Rev 2:** `reviews/2026-11-23-hub-to-main-plan.md`. Sources named (`earth-from-space-rc` `e9242a4`, `earth-from-space-proposal` `7e3ea60`). **Provisional manifest of 181 paths with hashes** (`reviews/evidence/2026-11-23-hub-to-main/manifest-provisional.txt`): 113 new, 60 already identical on main, 6 hub files main has not touched, 2 records decided one by one. Publication scan of the text files: the hub's public address and the Mac user folder name (both already on main), placeholders and test keys; no mail address, phone number, account id or real key found; the scan's limits are stated.
+- **Found:** `animals-tab-ui` check 13c requires `phase1/worker.js` to equal a pinned earlier main and **will fail after the landing by design**; three options put to Chad and GPT (plan section 5). The test pictures' note says the site does not serve them, which the landing makes untrue; corrected in the landing commit.
+- **Browser suites, provisional on main `3e9d5a3`:** 13 consumers of the hub file (two only through a helper), 1 guard, 2 comment-only. **They do not run in Claude's workspace; a matched before-and-after run on the Mac is required and is open.**
+- **Replacement rule for hub deploys** rewritten as nine conditions (plan section 7). The old rule stands until the landing.
+- **All counts are recounted on fresh main after the Timeline merge of 24 Nov.**
+
 ## 23 Nov 17:53 UTC (clock reading) — **Branch `earth-from-space-0.6.24-rc` deleted on Chad's word and read back. Nothing else changed** (GitHub only; Earth from Space thread)
 - **Chad, his own message:** "you delete what needs to be you have my permission".
 - **Deleted:** `earth-from-space-0.6.24-rc`, after checking it was fully contained in `earth-from-space-rc`. Done through the GitHub branches page in the browser pane (pane displayed; the workspace's git connection would not delete). **Read back with `git ls-remote`:** only `earth-from-space-proposal` and `earth-from-space-rc` remain of the Earth from Space branches; `earth-from-space-rc` still at `e9242a4`.
