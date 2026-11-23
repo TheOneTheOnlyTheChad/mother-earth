@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 15:19 UTC (clock reading) — **Earth from Space, new thread: three documents drafted for GPT on Chad's go. Stage D runbook rev 3, proposal rev 2.3 (monitoring only), fixture alert test plan rev 1. Docs only; nothing built, created, deployed or approved** (production: none; Earth from Space thread)
+- **Chad, his own message:** "1." to the choice offered (docs first: revise the runbook and the Stage D basis, and write the alert test plan). A go for branch and docs work. Not an Approve line.
+- **On `earth-from-space-rc` `9f2c7ad`:**
+  - `reviews/2026-11-23-earth-from-space-stage-d-runbook.md` (new): Stage D on the independent-monitoring basis. Three reads a day (07:00, 13:00, 20:00 SAST), no heartbeat, no hourly inspection; who notices which stop condition; a pause raises one expected "not collecting" alert; the gate stays at `1` until `UNTIL` + 10 min; closeout removes the window variables last, on its own line, after evidence is saved; the exposure Chad would accept is written out (nothing pauses by itself; one alert, no repeat; reads up to 11 hours apart; the 24-hour read horizon).
+  - `docs/concepts/EARTH-FROM-SPACE-STORAGE-TO-RELEASE-PROPOSAL.md` rev 2.3 DRAFT: 5.1 end and closeout, 5.5 rewritten, 5.6 pause ownership, section 10 lines 4, 5, 5a, section 11; change table in section 15. Rev 2.2 is the file at `40ddecb`.
+  - `reviews/2026-11-23-earth-from-space-alert-test-plan.md` (new): proposal 9.5. A throwaway Worker with no bindings holding the hub's health code byte for byte and made-up rows; it answers 200, 503, 200 by the clock; two temporary monitors; four messages to Chad's phone over about three hours; cleanup and a three-part result rule.
+  - `reviews/2026-11-22-earth-from-space-stage-c-runbook.md`: an add-only note that its sections 2, 2a and 3 are being replaced.
+- **Said plainly:** the alert test as planned measures CPU, **not D1 rows read** (no database in the fixture); the plan gives the choice (section 7). The old runbook duties are retired only when the replacement is tested and accepted.
+- **Not done:** GPT's review of any of the three; the fixture Worker and its suite (not built); the two real monitors; the phone look at the pause; Stage D. **Stage D is not cleared.**
+- **Unchanged, not re-read in this thread:** live hub 0.6.23, gate `manual`, no window; UptimeRobot eight monitors. The browser pane was not opened.
+
 ## 23 Nov 14:52 UTC (clock reading) — **HUB 0.6.23 DEPLOYED on Chad's own Approve line: code only, `EARTHVIEW_ENABLED` left at `manual`, no window. Two read-only Earth from Space health addresses now live. Thread closed out; handover written** (production: hub code only; Earth from Space thread)
 - **GPT's recheck (relayed by Chad):** H1 closed, no code hold. **Chad's line:** "Approve: deploy hub 0.6.23 from earth-from-space-rc 566a11b, phase1/worker.js sha256 7141beb89e8e81ef351ddcc53e8654b1ddcbdb0048c8ffcb6b0d0ed7d7b3afa1, code only, EARTHVIEW_ENABLED left at manual, no window variables; read back hash and settings".
 - **Before (14:47:05 UTC):** code `17798a44…a080` (0.6.22), 25 bindings, gate `manual`, four crons, five `earthview/` objects.
