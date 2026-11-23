@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 04:17 UTC (clock reading) — **Earth from Space: alarm exercise accepted as unsuccessful (relayed by Chad in the thread); monitoring rehearsal plan written for review on the basis that no email alarm exists. NOT started, nothing scheduled. `EARTHVIEW_ENABLED` stays `manual`. Docs only.** (hub 0.6.22 unchanged; Earth from Space thread)
+- **Plan:** `reviews/2026-11-23-earth-from-space-rehearsal-plan.md` (branch `earth-from-space-rc` `80d88f3`, copied here). Four hourly opportunities, the third omitted (inspections at T, T+60, T+180 minutes); a test push first; one ledger file and a clock-only gap rule (over 75 minutes); Chad's noticing (deadline T+150) and Claude's detection at inspection 4 recorded separately; a table of what follows if either misses.
+- **Stated limits:** neither detection is blind; hub errors, the unreadable inspection (D9), overnight and 48-hour endurance are not shown.
+- **Next:** GPT's review of the plan; then Chad's own Approve line with a start time. Nothing runs before that.
+
 ## 23 Nov 04:02 UTC (clock reading) — **Earth from Space alarm test run on Chad's own Approve line: NOT CLEAN. One email for two recorded failures; the scheduled leg did not run. Test monitor and test Worker deleted. The `mother-earth` monitor was NOT created. `EARTHVIEW_ENABLED` stays `manual`.** (production: test objects removed, account back to one Worker and the budget alert; hub 0.6.22 unchanged; Earth from Space thread)
 - **Legs (UTC):** T-cpu 02:58:37, row `exceededResources`, **no email (finding, cause not established)**. T-mem 03:21:38, row `exceededMemory`, alert start 03:23:46, email at Chad's phone 05:27 SAST, about 5.5 minutes after (one observation, not a promised response time; tied to the row by timing only); resolved email 05:42 SAST. **T-cron did not run**: a single-firing cron set 3 minutes ahead never fired (Claude's deviation from the planned every-minute cron; not retried). Incomplete, not a pass.
 - **Read back 04:01:49 UTC:** scripts `mother-earth` only; policies the budget alert only; hub code `17798a44a217…`, 540,792 B, 25 bindings, `EARTHVIEW_ENABLED=manual`, four crons, 5 objects under `earthview/`.
