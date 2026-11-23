@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 10:37 UTC (clock reading) — **Earth from Space: GPT accepted the rehearsal result as FAILED and recommends an independent phone alarm and a repeat (relayed by Chad). Amendment A1 written for review. NOT started, nothing scheduled. `EARTHVIEW_ENABLED` stays `manual`. Docs only.** (hub 0.6.22 unchanged; Earth from Space thread)
+- **A1:** Chad's own clock-app alarms 10 minutes after each of the four opportunities, proved with a test alarm at readiness; at each alarm he looks for one named push and writes what the phone shows there and then; separate verdicts for the human fallback, Claude's ledger detection and delivery; gap alert kept apart from the heartbeat; cleanup scheduled at readiness; Mac mirror checked by hash.
+- **Correction carried into the result:** if inspections stop altogether and nobody checks independently, detection time is unbounded, by day or night.
+- **Open for Chad before Stage D:** an hourly alarm for 48 hours is about 33 alarms; the repeat should use the pattern he would really keep.
+- **Files:** `reviews/2026-11-23-earth-from-space-rehearsal-amendment.md`, `…-rehearsal-result-gpt-review.md`, result section 7 (branch `earth-from-space-rc` `771b0a7`, copied here). **Next:** review of A1; then Chad's own Approve line with a date and start time.
+
 ## 23 Nov 10:32 UTC (clock reading) — **Earth from Space monitoring rehearsal run on Chad's own Approve line (T = 09:00 SAST): FAILED on R4a. Chad did not notice the missing third heartbeat; he learned of it from Claude's gap alert at 12:00 SAST. Claude's side ran as planned. Stage D is not asked for on this monitoring plan. Hub unchanged, `EARTHVIEW_ENABLED` stays `manual`.** (production: none; hub 0.6.22 unchanged; Earth from Space thread)
 - **Met:** R1 (inspections 1, 2 and 4 launched from their own tasks at 07:00:33, 08:01:11, 10:00:30 UTC; no late launch), R2 (all reads completed each time; hub clean, no picture run), R4b (gap of 119 minutes found from the ledger and clock; alert pushed before the reads).
 - **Failed:** R4a. Heartbeat 2 reached his phone 10:01 SAST; deadline 11:31; no line from him until after the alert; his words: "yes i learned it from your phone push". **Incomplete:** phone receipt times for the two 12:00 pushes (they arrived; times could not be read).
