@@ -8,7 +8,7 @@
  *   needs a static server on the repo (default http://127.0.0.1:8899).
  * Breaks (each must make the suite fail): BREAK=nonlinear|no-clamp|pan-pushes|state-clobber|no-restore|wheel-always|
  *   zoom-always|zoom-outer-only|no-clip|requests|resize-moves-window|bad-state-accepted|nav-pushes|plans-focusable|new-sentence|chart-under-how|
- *   restore-reveals|stale-status|no-win-memory|no-unload-save
+ *   restore-reveals|stale-status|no-win-memory|no-unload-save|no-focus-guard|mark-x-in-state
  * OLD=1 serves the three page files from commit a44e31d instead (the control: the suite must fail on the page before this work).
  * PERF=1 adds the timing section (figures are printed, never judged here).
  */
@@ -42,6 +42,9 @@ const JS = (() => {
   // GPT's H1: restoring a history entry re-centres on the story's mark
   if (BREAK === 'restore-reveals') return must(JS0, "show(st.entry, st.x, !validWin(st.win));", "show(st.entry, st.x, true);");
   if (BREAK === 'stale-status') return must(JS0, "  if (!m || inView(m) || document.activeElement !== E.xpl) lostId = null;", "  if (!m) lostId = null;");
+  if (BREAK === 'no-focus-guard') return must(JS0, "    if (!xpl.contains(document.activeElement)) { setWheel(false); return; }", '');
+  // found in the pane at rev 3: the mark's pixel position was stored under the attribute that names a section to expand
+  if (BREAK === 'mark-x-in-state') return must(must(JS0, 'data-px="${g.x.toFixed(2)}"', 'data-x="${g.x.toFixed(2)}"'), 'x: parseFloat(el.dataset.px),', 'x: parseFloat(el.dataset.x),');
   if (BREAK === 'no-win-memory') return must(JS0, "  const m = st.k ? winMem.get(st.k) : null, w =", "  const m = null, w =");
   if (BREAK === 'no-unload-save') return must(JS0, "addEventListener('beforeunload', saveNow);\naddEventListener('pagehide', saveNow);", "");
   if (BREAK === 'no-clip') return must(JS0, "(e.from - e.to) / s * laneW >= TRUE_PX && e.from > b && e.to < a) {", "(e.from - e.to) / s * laneW >= TRUE_PX && m.ma <= a && m.ma >= b) {");
@@ -191,10 +194,10 @@ function checkPositions(name, s, a, b, cat = C) {
     await setWin(p, [W, 0]);
     const views = await p.evaluate(() => { let s = 20261123; const rnd = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
       const x = document.getElementById('xpl'), out = [], sels = ['[data-act="older"]', '[data-act="newer"]', '[data-act="in"]', '[data-act="out"]', '[data-act="in"]', '[data-act="in"]', '[data-preset="earth"]', '[data-preset="complex"]', '[data-act="reset"]'];
-      x.click();   // wheel on
+      x.focus(); x.click();   // focus in the explorer, wheel on
       for (let i = 0; i < 200; i++) { const k = Math.floor(rnd() * 13);
         if (k < 9) document.querySelector(sels[k]).click();
-        else if (k < 11) { const r = x.getBoundingClientRect(); x.dispatchEvent(new WheelEvent('wheel', { deltaY: (rnd() - 0.5) * 4000, clientX: r.left + rnd() * r.width, clientY: r.top + 50, bubbles: true, cancelable: true })); }
+        else if (k < 11) { x.focus(); if (!window.TL_AXIS.wheel) x.click(); const r = x.getBoundingClientRect(); x.dispatchEvent(new WheelEvent('wheel', { deltaY: (rnd() - 0.5) * 4000, clientX: r.left + rnd() * r.width, clientY: r.top + 50, bubbles: true, cancelable: true })); }
         else { x.focus(); x.dispatchEvent(new KeyboardEvent('keydown', { key: ['ArrowLeft', 'ArrowRight', '+', '-'][Math.floor(rnd() * 4)], bubbles: true, cancelable: true })); }
         out.push([...window.TL_AXIS.view, document.querySelectorAll('#xpl .track a.mk').length]); }
       return out; });
@@ -216,6 +219,12 @@ function checkPositions(name, s, a, b, cat = C) {
     const y0 = await p.evaluate(() => scrollY);
     await p.mouse.move(T.x, T.y); await p.mouse.wheel(0, 240); await p.waitForTimeout(200);
     ok('C not activated: the wheel scrolls the page and the window stays', sameWin(await view(p), [W, 0]) && (await p.evaluate(() => scrollY)) > y0, [await view(p), y0, await p.evaluate(() => scrollY)]);
+    // keyboard focus in the explorer is not activation either: with a mark focused and wheel zoom off, the wheel still belongs to the page
+    await p.evaluate(() => document.getElementById('xpl').scrollIntoView({ block: 'center' })); await p.waitForTimeout(80);
+    await p.focus(`#xpl a.mk[data-entry="${ID.p}"]`);
+    const Tf = await p.evaluate(() => { const r = document.querySelector('#xpl .track').getBoundingClientRect(); return { x: r.left + r.width * 0.5, y: r.top + 90 }; }), yf = await p.evaluate(() => scrollY);
+    await p.mouse.move(Tf.x, Tf.y); await p.mouse.wheel(0, 240); await p.waitForTimeout(200);
+    ok('C focus on a mark, wheel zoom not turned on: the wheel scrolls the page and the window stays', sameWin(await view(p), [W, 0]) && (await p.evaluate(() => scrollY)) > yf && (await p.evaluate(() => window.TL_AXIS.wheel)) === false, [await view(p), yf, await p.evaluate(() => scrollY)]);
     await p.evaluate(() => document.getElementById('xpl').scrollIntoView({ block: 'center' })); await p.waitForTimeout(80);
     const T2 = await p.evaluate(() => { const r = document.querySelector('#xpl .track').getBoundingClientRect(); return { x: r.left + r.width * 0.5, y: r.top + 90 }; });
     ok('C the hint says how to turn wheel zoom on', /Click the timeline, or press Enter on it, to zoom with the mouse wheel/.test(await p.textContent('#tl-whint')));
@@ -235,6 +244,12 @@ function checkPositions(name, s, a, b, cat = C) {
     const ld = await p.evaluate(() => { const r = document.querySelector('.axiswrap .coverage').getBoundingClientRect(); return { x: r.left + 30, y: r.top + 5 }; });
     await p.mouse.click(ld.x, ld.y); await p.waitForTimeout(80);
     ok('C a click somewhere else turns wheel zoom off', (await p.evaluate(() => window.TL_AXIS.wheel)) === false);
+    // focus gone but no focusout delivered (a background window does this; found in the desktop app's pane): the wheel must still not zoom
+    const g = await p.evaluate(() => { const x = document.getElementById('xpl'); x.focus(); x.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      const mute = e => e.stopImmediatePropagation(); window.addEventListener('focusout', mute, true); document.getElementById('tl-changes-link').focus(); window.removeEventListener('focusout', mute, true);
+      const on0 = window.TL_AXIS.wheel, v0 = [...window.TL_AXIS.view], q = x.getBoundingClientRect(), ev = new WheelEvent('wheel', { deltaY: -500, clientX: q.left + 200, clientY: q.top + 60, bubbles: true, cancelable: true });
+      x.dispatchEvent(ev); return { on0, v0, v1: [...window.TL_AXIS.view], on1: window.TL_AXIS.wheel, prevented: ev.defaultPrevented }; });
+    ok('C focus left without a focusout event: the next wheel does not zoom, is left to the page, and wheel zoom is off', g.on0 === true && sameWin(g.v0, g.v1) && g.on1 === false && g.prevented === false, g);
     await p.evaluate(() => document.getElementById('xpl').focus()); await p.keyboard.press('Enter'); await p.waitForTimeout(40);
     await p.keyboard.press('Escape'); await p.waitForTimeout(60);
     ok('C Esc releases the wheel', (await p.evaluate(() => window.TL_AXIS.wheel)) === false);
@@ -290,7 +305,7 @@ function checkPositions(name, s, a, b, cat = C) {
     ok(`E ${w}: ten pan and zoom steps add no history entry; the window is in the current entry's state`, s.len === len0 && sameWin(s.s && s.s.win, X), [s.len, len0, s.s]);
     await p.focus(`#xpl a.mk[data-entry="${ID.t}"]`); await p.keyboard.press('Enter'); await p.waitForTimeout(250);
     s = await st();
-    ok(`E ${w}: opening a story adds one entry whose state has the entry, its keys and the window`, s.len === len0 + 1 && s.s.entry === ID.t && s.s.k > 0 && 'p' in s.s && sameWin(s.s.win, X) && s.hash === '#' + ID.t && s.act === ID.t + '-h', s);
+    ok(`E ${w}: opening a story adds one entry whose state has the entry, its keys and the window`, s.len === len0 + 1 && s.s.entry === ID.t && s.s.k > 0 && 'p' in s.s && s.s.x === null && sameWin(s.s.win, X) && s.hash === '#' + ID.t && s.act === ID.t + '-h', s);   // x names a section to expand: none for a mark
     if (w > 720) {   // the explorer is still usable beside the panel
       await click('[data-act="newer"]'); await click('[data-act="in"]'); await p.waitForTimeout(80);
       s = await st(); const Y = await view(p);
@@ -443,7 +458,7 @@ function checkPositions(name, s, a, b, cat = C) {
     ok('E2 key zoom then Back in the same instant: the window had not reached the state yet, and Back still restores the landing window', !sameWin(r1.v, r1.saved) && sameWin(await view(p), [W, 0]), r1);
     await p.goForward(); await p.waitForTimeout(250); s = await st();
     ok('E2 Forward then returns to the window the key press made, and writes it into the state', s.open && sameWin(await view(p), r1.v) && sameWin(s.s.win, r1.v), [await view(p), r1.v, s.s.win]);
-    const r2 = await p.evaluate(() => { const x = document.getElementById('xpl'); x.click(); const q = x.getBoundingClientRect(); x.dispatchEvent(new WheelEvent('wheel', { deltaY: -400, clientX: q.left + q.width / 2, clientY: q.top + 60, bubbles: true, cancelable: true })); const v = [...window.TL_AXIS.view], saved = history.state.win; location.reload(); return { v, saved }; });
+    const r2 = await p.evaluate(() => { const x = document.getElementById('xpl'); x.focus(); x.click(); const q = x.getBoundingClientRect(); x.dispatchEvent(new WheelEvent('wheel', { deltaY: -400, clientX: q.left + q.width / 2, clientY: q.top + 60, bubbles: true, cancelable: true })); const v = [...window.TL_AXIS.view], saved = history.state.win; location.reload(); return { v, saved }; });
     await p.waitForTimeout(400); await settle(p); await p.waitForTimeout(150);
     ok('E2 wheel zoom then reload in the same instant: the reloaded page has the zoomed window', !sameWin(r2.v, r2.saved) && sameWin(await view(p), r2.v) && (await st()).open, [r2, await view(p)]);
     // a plotted entry, then Pliny (no axis age), then a plotted entry again, all in one history entry

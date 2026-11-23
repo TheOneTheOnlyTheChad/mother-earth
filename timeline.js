@@ -21,7 +21,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202612250300';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202612250400';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
@@ -496,7 +496,7 @@ function render() {
     const cont = drawn && (g.clipL || g.clipR) ? ` Continues beyond this view on ${g.clipL && g.clipR ? 'both sides' : g.clipL ? 'the older side' : 'the newer side'}.` : '';
     return `<a class="mk mk-${m.shape.replace(/ /g, ' mk-')}${drawn ? ' mk-true' : ''}${drawn && g.clipL ? ' clipl' : ''}${drawn && g.clipR ? ' clipr' : ''}${sel(m.id) ? ' sel' : ''}" href="#${esc(m.id)}" data-entry="${esc(m.id)}" data-opener="mark"`
       + (sel(m.id) ? ' aria-current="true"' : '')
-      + (inCluster ? '' : ` data-x="${g.x.toFixed(2)}" style="left:${pc(g.x)}%${drawn ? `;--w:${g.w.toFixed(2)}px` : ''}"`) + ` aria-label="${esc(m.label + cont)}"><span class="gw" aria-hidden="true"><span class="g"></span></span>`
+      + (inCluster ? '' : ` data-px="${g.x.toFixed(2)}" style="left:${pc(g.x)}%${drawn ? `;--w:${g.w.toFixed(2)}px` : ''}"`) + ` aria-label="${esc(m.label + cont)}"><span class="gw" aria-hidden="true"><span class="g"></span></span>`
       + (inCluster ? `<span class="cn">${esc(m.title)}</span>` : `<span class="ml" aria-hidden="true"><span class="mlf">${esc(m.title)}</span><span class="mls">${esc(m.short)}</span></span>`) + `</a>`;
   };
   const cluster = (g, i) => {
@@ -563,7 +563,7 @@ function fitBands() {
 // titles sit under their marks on up to LABEL_ROWS rows, joined by a plain leader. A label may move sideways and down;
 // the mark never moves. Where the full title cannot be placed the short code is tried; hover or focus shows the full title
 function layoutLabels() {
-  const info = [...E.track.querySelectorAll(':scope > a.mk')].map(el => ({ el, x: parseFloat(el.dataset.x),
+  const info = [...E.track.querySelectorAll(':scope > a.mk')].map(el => ({ el, x: parseFloat(el.dataset.px),
     wf: el.querySelector('.mlf').getBoundingClientRect().width, ws: el.querySelector('.mls').getBoundingClientRect().width }));
   const leftOf = (x, w) => Math.min(Math.max(x - w / 2, 0), Math.max(0, laneW - w));
   // one kind of label for the whole view: every full title if they all fit, otherwise every short code (those that fit)
@@ -637,6 +637,7 @@ function wireExplorer() {
   }, true);
   xpl.addEventListener('wheel', ev => {
     if (!wheelOn) return;                                               // not activated: the page scrolls as usual
+    if (!xpl.contains(document.activeElement)) { setWheel(false); return; }   // focus is no longer here (and no focusout was delivered, e.g. the window was in the background): released, the page scrolls
     ev.preventDefault();
     const k = ev.deltaMode === 1 ? 16 : 1, r = E.track.getBoundingClientRect(), s = view.a - view.b;
     if (Math.abs(ev.deltaX) > Math.abs(ev.deltaY)) pan(-ev.deltaX * k / laneW * s, 'soon');
