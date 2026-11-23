@@ -2,6 +2,14 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 23 Nov 2026
+
+## 23 Nov 02:50 UTC (clock reading) — **Animals assessment card: built on a branch and reviewed by GPT, NOT released. Chad sent an enquiry to the IUCN Red List Unit himself this morning; no reply reported. Nothing changed on the live page.** (page: none; Animals satellite picture thread)
+- **Enquiry SENT by Chad** from his own email on 23 Nov 2026, 04:49 SAST (the time on the sent message in his screenshot). Text: `docs/research/animals-source-audit/ENQUIRY-DRAFT-IUCN.md` rev 2.3 on branch `animals-assessment-rc`, found fit to send by GPT. It asks whether the assessment date, publication year and scope may be shown and held beside the Red List category (page, served JSON file, public repository), whether IUCN wants a copy or link, and whether the API may be used for re-checks. **No reply reported. No follow-up, no duplicate. Sending grants no permission. No API token requested.**
+- **Branch `animals-assessment-rc` `7be31cc` (unmerged):** five words-only blocks (plains zebra, white shark, false killer whale, waved albatross, African penguin) with the global category, dates, citation and our check date, from a hand-kept pinned record. Chad's own lines: go for the evidence step; decisions A-D1 B, A-D2 A, A-D3 B, A-D4 A, A-D5 A; owner and six-month re-check (next due 22 May 2027); "Go: assessment card build on a branch … Branch only, no merge". GPT's candidate review (22 Nov): no release-blocking code defect; the citation access-date change of 23 Nov is not yet code-reviewed by GPT. Claude's runs: builder tests 86 passed, page suite 51 passed, 18 deliberate breaks caught (15 before the last edits), tab 277, census 71, corridor 102.
+- **What blocks release:** the permission basis for the fields beside the category (open until IUCN answers or a clear statement is found); then Chad's own Approve lines for REGISTER and the merge. The repository is public, so the branch's files are readable there now; the website does not show or serve them. Chad was told; no change made.
+- Packet: `reviews/2026-11-22-animals-assessment-rc.md` on the branch. Whale recovery example still parked for an IWC reply (none reported).
+
 # 22 Nov 2026
 
 ## 22 Nov 17:33 UTC (clock reading) — **Animals tidy-up merged on Chad's own line: stale "private preview" comments removed from five page files, and a wheel-zoom check added to the corridor suite. Comments and a test only; no behaviour change, no version-stamp bump. Assessment card: proposal rev 1.1 and the evidence record are on a docs branch for GPT, nothing cleared for display.** (page: merge `27357b7`; Animals satellite picture thread)
