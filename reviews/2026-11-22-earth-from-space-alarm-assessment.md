@@ -368,3 +368,66 @@ with Chad at the Mac to type his address into the form twice and to confirm thre
 
 **Alternatives still open:** a delivery-only test against the hub's own rows (CPU, memory and scheduled coverage
 recorded as untested); or stop, delete the test Worker, and record "no alarm" for Stage D with these reasons.
+
+## 13. The section 12.1 test, run on Chad's Approve line of 23 Nov: NOT CLEAN. Real monitor NOT created (23 Nov 2026 04:01 UTC, clock reading)
+
+**Verdict: one email for two recorded failures; the scheduled leg did not run. The legs are not clean, so the
+`mother-earth` monitor was not created. Test monitor and test Worker deleted. Hub unchanged.**
+
+All times UTC, from clock readings in the browser session unless marked. Each delay is one observation, not a
+promised response time.
+
+**Before the legs**
+
+- 02:51:22 account re-check clean (scripts `mother-earth`, `mother-earth-alarmtest`; one policy, the budget alert;
+  hub code `17798a44a217…`, 25 bindings, `EARTHVIEW_ENABLED=manual`, 5 objects under `earthview/`).
+- Naming pre-check: address on 02:51:41; one request 02:52:06.861; row present under the name
+  `mother-earth-alarmtest` at 02:53:11 (absent at 02:52:54). Address off 02:53:22.
+- Monitor "TEST alarmtest, delete" created 02:57:26.695 (policy record) through the dashboard form: the section 12.1
+  query, above 0, average over 15m, run every Automatic (saved as 1m), repeat 1h; preview ran without error and
+  showed 0. Email destination typed by Chad. The form added the account condition and brackets to the query.
+
+**Legs**
+
+| Leg | Fired | Row in `events.workersInvocations` | Row first seen | Alert | Email at Chad's phone |
+|---|---|---|---|---|---|
+| T-cpu | 02:58:37.116 (`/cpu`) | 02:58:37, `fetch`, `exceededResources`, cpuTimeUs 32,500,000, sampleInterval 1 | between 03:00:03 and 03:00:34 | none in the notification history | **none (finding)** |
+| T-mem | 03:21:37.867 (`/mem`) | 03:21:38, `fetch`, `exceededMemory`, cpuTimeUs 123,236, sampleInterval 1 | between 03:22:11 and 03:22:44 | start 03:23:46.690, value 0.0667; history "sent" 03:27:06.574 | 05:27 SAST (03:27), from Chad's screenshot |
+| T-cron | **did not run** | none | n/a | n/a | n/a |
+
+- **T-cpu produced no email.** Chad reported none; the notification history holds no entry for it. The monitor's
+  own preview at 03:21 showed the averaged value above 0 after T-cpu. **Cause not established.** T-cpu fired 71 s
+  after the monitor was created; whether that matters is not shown.
+- **T-cpu's status was `exceededResources`, not `exceededCpu`** as the plan expected. The query still counts it.
+  The request was aborted on the client side after 15 s (a slip in the test script; the invocation ran on to
+  32.5 s CPU). T-mem was sent with no early abort.
+- **T-mem's email is tied to its row by timing only.** The email does not name a row. Alert start is about 2 min 9 s
+  after the row's timestamp; the email about 5.5 min after. A second notification followed: state END, alert start
+  time shown 03:38:46.690, value 0, sent 03:42:06.336; Chad's "Resolved" email shows 5:42 AM SAST.
+- **T-cron: incomplete, not a pass.** At 03:44:08 one temporary cron `47 3 23 11 *` was added (a single firing at
+  03:47, chosen by Claude instead of the planned every-minute cron so that it could not fire twice; a deviation
+  from section 12.1, not reviewed). No invocation was recorded: the SQL dataset (read 03:49:55) and
+  `workersInvocationsAdaptive` (read 03:50:24) show only the three fetch rows. Cron removed 03:48:32, read back 0.
+  Likely a new cron needs longer than 3 minutes to become active; not proven. Not retried (a missed attempt is
+  not replaced).
+
+**Clean-up, read back 04:01:49**
+
+- Test monitor deleted through the dashboard (Chad chose to stop, 23 Nov). Test Worker deleted 04:01:39 (200).
+- Scripts: `mother-earth` only. Policies: the budget alert only.
+- Hub: code sha256 `17798a44a217bdb3eafe1ccd8852833cc050b9bb0e9094f65c59a2db2eeda080`, 540,792 B; 25 bindings;
+  `EARTHVIEW_ENABLED=manual`; crons `*/5`, `*/15`, `11,41`, `:07`; 5 objects under `earthview/`.
+
+**What this shows and does not show**
+
+- Shown once: a recorded `exceededMemory` failure on a fetch produced an email about 5.5 minutes later, and a
+  resolved email about 15 minutes after that.
+- Shown once: a recorded `exceededResources` failure produced **no** email. So a recorded failure does not
+  reliably produce one. This is weaker than "supplementary warning coverage" as section 12.1 worded it.
+- Not tested: a scheduled invocation's failure; anything on `mother-earth`; late-arriving rows; sampling.
+- Not read: whether the monitor evaluated during T-cpu's window (the dashboard shows no evaluation log that was
+  found).
+
+**Position for Stage D:** no Cloudflare email alarm exists. It does not change the overnight exposure, does not
+replace the monitoring rehearsal, and does not clear Stage D. Any further alarm work needs a new plan, GPT's
+review and Chad's own Approve line.
