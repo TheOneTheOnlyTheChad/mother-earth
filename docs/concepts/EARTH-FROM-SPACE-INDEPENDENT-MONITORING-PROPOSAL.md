@@ -1,4 +1,11 @@
-# Earth from Space — monitoring independent of the thread, the Mac and the browser login: proposal rev 3 (23 Nov 2026) — docs only
+# Earth from Space — monitoring independent of the thread, the Mac and the browser login: proposal rev 3.1 (23 Nov 2026) — docs only; the build brief
+
+**Rev 3.1, 23 Nov 2026 11:41 UTC (clock reading):** three corrections from GPT's review of rev 3
+(`reviews/2026-11-23-earth-from-space-independent-monitoring-proposal-rev3-gpt-review.md`): startup grace does not
+excuse a recorded failure (3.5); the pause guarantee is narrowed to what the records can show (3.5, 3.7); the
+24-hour read horizon is stated as a limit that can exclude late bad rows as well as late good ones (3.6). GPT:
+with these adopted, no further full proposal round is needed. **This revision is the brief for the branch build,
+which still needs Chad's go.**
 
 **Rev 3, 23 Nov 2026 11:26 UTC (clock reading),** after GPT's review of rev 2
 (`reviews/2026-11-23-earth-from-space-independent-monitoring-proposal-rev2-gpt-review.md`) and a signed-in,
@@ -184,15 +191,27 @@ applies decides. "Gate" is `EARTHVIEW_ENABLED`.
 | 4 | Only one window variable set; or either unreadable; or `UNTIL` ≤ `FROM`; or longer than 48 hours | **503** | **503** | `window not readable` |
 | 5 | Valid window, now < `FROM`, gate `1` | 200 | 200 | `armed, starts <FROM>` |
 | 6 | Valid window, now < `FROM`, gate not `1` | **503** | 200 | `window set but gate is not 1` |
-| 7 | Valid window, `FROM` ≤ now < `FROM` + `ALLOW`, gate `1` | 200 | 200 | `starting` (no slot is due; at `FROM` + `ALLOW` exactly, row 8 applies) |
+| 7 | Valid window, `FROM` ≤ now < `FROM` + `ALLOW`, gate `1` | 200, **unless the rows cannot be read** | 200, **unless** a row already recorded shows a storage stop or an unrecognised outcome, or the rows cannot be read | `starting` (no slot is due; at `FROM` + `ALLOW` exactly, row 8 applies) |
 | 8 | Valid window, `FROM` + `ALLOW` ≤ now < `LAST`, gate `1` | by 3.4 | by 3.4 | `active` |
 | 9 | Valid window, `FROM` ≤ now < `LAST`, gate not `1` | **503** | by 3.4 | `trial window set but not collecting` |
 | 10 | Valid window, now ≥ `LAST`, nothing overdue and no finding | 200 | 200 | `trial complete, nothing outstanding` (the gate's value is reported, and no longer decides) |
 | 11 | Valid window, now ≥ `LAST`, something overdue or found | **503** as applies | **503** as applies | `trial ended with outstanding findings`; if the gate was not `1`, also `not collecting` |
 
-- **A pause** is row 9, then row 11: 503 "not collecting" throughout, because the slots that passed while paused
-  are overdue and stay so. **A pause is never reported as a recovery,** and a gate switched off by mistake during
-  a trial alerts.
+- **What startup excuses, and what it does not.** Before any slot is due, a missing completion is not a
+  failure and no c6 or c8 streak can exist. **Startup does not excuse** a storage stop already recorded, an
+  unrecognised outcome on a row of this trial, a read that is incomplete, or a read or parse failure: each is
+  evaluated first and answers 503 at once. (First slot 07:00, storage stop recorded 07:02, poll at 07:05: 503.)
+- **A gate that is off during the trial answers 503 "not collecting" while it is off** (rows 6, 9, 11). A gate
+  switched off by mistake therefore alerts.
+- **What these addresses do not keep: a history of the gate.** They read the gate as it is now and the rows as
+  they are. They cannot show that collection was never paused:
+  - a pause and resume between two scheduled times loses no slot and leaves no trace here;
+  - a pause after the last trigger was admitted can show red while off and green at row 10, with no closeout;
+  - a paused slot whose trigger arrives late after resumption completes, and its overdue finding clears (3.1).
+  **A completed trial's 200 does not prove there was no pause.** Slots that really were missed, and qualifying
+  outcomes that really were recorded, are kept by their own rules. Every deliberate pause and resumption, and its
+  effect on the Stage D verdict, is recorded in the operational ledger and the result, and preserved at closeout.
+  A permanent, independently detectable pause latch would be further design work; it is not claimed here.
 - **An unknown gate is refused at every stage** (row 1 comes first), including after the window.
 - **The window ending is not evidence of recovery** (row 11).
 - **Residual limitation:** if the gate and both window variables are removed together during a trial, by mistake,
@@ -206,7 +225,14 @@ applies decides. "Gate" is `EARTHVIEW_ENABLED`.
 - **288 slots do not bound the rows.** Repeats and stray rows add to them. If the query returns its limit, the
   evidence may be incomplete: **both checks answer 503 `too many rows to evaluate`.** They never treat a
   truncated read as a complete one.
-- A row finished more than 24 hours after `UNTIL` is not read; its slot stays overdue. That errs toward alerting.
+- **The read has a finite horizon: `UNTIL` + 24 hours.** A row finished after that is not read, whatever it
+  says. If it would have completed an overdue slot, the slot stays overdue: that errs toward alerting. **If it
+  is a late repeat recording a failure for a slot an earlier good row already completed, the failure is not
+  seen and nothing turns red.** So "a finding is kept for the whole trial" means: for qualifying rows inside the
+  read range, not for any execution at any later time. This limit goes into the revised Stage D basis and the
+  closeout procedure (the closeout read of the rows is made without the horizon, by Claude, from the logs and the
+  table). If it is not acceptable, the query strategy is changed explicitly; the present cutoff is not claimed to
+  fail safely in every case.
 - Any row whose status or phrase is not in section 2's table makes its slot `unrecognised`: 503, not ignored.
 - An exception, an unreadable time or a missing table: 503, as the existing checks.
 - **D1 rows read and CPU per request are measured on the candidate** with end-of-trial and repeat-heavy fixtures.
@@ -218,7 +244,8 @@ applies decides. "Gate" is `EARTHVIEW_ENABLED`.
   removing the two window variables in the dashboard, on Chad's line, **after the result has been reviewed and
   the trial's rows and the health answers have been copied into the result document.** UptimeRobot will then show
   "Up". **That means closed out. It does not mean a failed trial passed.**
-- **Pause and resume inside one window:** the paused slots stay overdue and `runs` stays 503 for that trial.
+- **Pause and resume inside one window:** slots that were missed stay overdue unless a late run completes them;
+  the addresses hold no record of the pause itself (3.5). The ledger does.
 - **A new window is a new trial.** It is never set to hide an unresolved result: the earlier trial's result is
   written first.
 
@@ -293,6 +320,14 @@ pings.** It is offered because the hourly design's safety net failed its rehears
      time (does not set `current`); `superseded` rows;
    - **failure, then a good run, then the next poll: still 503**; a failure in the last slot: 503 after the window;
    - truncation at the row limit, an unrecognised phrase, unreadable rows, exceptions: each 503;
+   - **startup:** a storage stop recorded before any slot is due (503); an unrecognised row at startup (503); a
+     read failure at startup (503); a merely missing first completion at startup (200);
+   - **pause limits, documented as such:** a short pause that misses no slot (green; no trace); a paused slot
+     completed late (finding clears);
+   - **read horizon:** a slot completed by a good row, then a storage-stop repeat after `UNTIL` + 24 hours (not
+     seen; documented); a good row frozen out at the slot's due time, at equality and one millisecond after;
+   - **HEAD and GET give the same verdict; every answer is `no-store`; the health path makes no upstream request,
+     no write, no collection** (asserted by the suite, not only stated);
    - deliberate breaks, each caught.
 2. **Live, after deploy, gate still `manual` and no window:** both addresses answer 200 `no trial configured`;
    the eight existing ones as before; deployed hash equals the built file; nothing under `earthview/` changed;
@@ -390,6 +425,21 @@ settings and left without saving.
    hours. Whether that was noticed is not recorded and is not assumed. It is the same exposure section 7 names.
 5. On the Free plan a 503 is "down" and nothing needs configuring to make it so.
 
+**"ME alert test" deleted, 23 Nov 2026, on Chad's own line** ("Approve: delete the UptimeRobot monitor "ME alert
+test" (the leftover 404 test from 6 Nov); no other monitor or setting changed").
+
+- **Preserved first** (read 11:35 UTC): address `/health/test/firms`; HTTP monitor, 5-minute interval; E-mail and
+  iPhone push selected, SMS and voice off; region Europe; no status page; two incidents, both 404 Not Found:
+  6 Nov 18:11:54 to 18:18:45 SAST (6 min 51 s) and 6 Nov 18:21:57 SAST, open for 16 days 19 hours when deleted.
+- **Deleted** through the monitor's own menu; the confirmation named "ME alert test" only; confirmed about
+  11:36:55 UTC. Nothing else was opened for change.
+- **Read back from the hub's side, 11:41:55 UTC:** the last request to `/health/test/firms` was at 11:33:57; the
+  one due about 11:39 did not come. The eight real addresses went on being polled every five minutes (for example
+  `runs/firms` 11:31:07, 11:36:12, 11:41:16).
+- **Not yet read back in the UptimeRobot dashboard:** its page would not finish loading after the deletion (the
+  browser pane was not in view). **To be read at the next look: eight monitors, all Up, none paused.** Until then
+  the dashboard read-back is incomplete, not passed (written 11:42 UTC).
+
 ## 13. Review points and where they went
 
 ### Rev 1 review (GPT, 23 Nov)
@@ -424,6 +474,19 @@ settings and left without saving.
 | M1 to M4 provenance | Section 11 |
 | M5, M6, M7 | Section 11, as recommendations |
 
+### Rev 3 review (GPT, 23 Nov) and where each point went
+
+| GPT's point | Answer in rev 3.1 |
+|---|---|
+| 1. Startup grace must not mask a recorded adverse result or unreadable evidence | 3.5 row 7 and the bullet under the table; fixtures in 9.1 |
+| 2. Narrow the pause-history guarantee; no claim that a pause is always visible; ledger carries it | 3.5; 3.7; fixtures in 9.1 |
+| 3. The 24-hour horizon can exclude late bad evidence too | 3.6; fixture in 9.1; carried to the Stage D basis and closeout |
+| Settings read on one monitor and assumed on the others | Section 12 already says so; the two new monitors are read back in full (test 3) |
+| Contact and device details, confirmation count unknown; the fixture test supplies current delivery evidence | Section 12 "not read"; test 5 |
+| "No delay, no repeat": one opportunity to notice | Section 12; to be stated in the Stage D basis |
+| Prove HEAD equals GET, no-store, no collection or writes in the health path | 9.1 |
+| M8: delete the stale test monitor after preserving its settings and incidents | Done on Chad's line, 23 Nov (section 12, last paragraph) |
+
 ## 14. Sources
 
 - `phase1/worker.js` at `earth-from-space-rc` (0.6.22): `logRun`, `guarded`, `evAdmit`, `evMark`, `evCollect`,
@@ -431,5 +494,5 @@ settings and left without saving.
 - Cloudflare Workers limits page (wall time of a scheduled invocation), read 23 Nov 2026.
 - `HANDOVER.md`, `STATUS.md` on main (UptimeRobot set up 6 Nov).
 - The twelve health addresses, read 23 Nov 10:52 UTC.
-- GPT's two reviews, with its list of UptimeRobot primary pages.
+- GPT's three reviews, with its list of UptimeRobot primary pages.
 - The UptimeRobot dashboard, signed in by Chad, read 23 Nov 2026; the hub's request log for the same minutes.
