@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 14:52 UTC (clock reading) — **HUB 0.6.23 DEPLOYED on Chad's own Approve line: code only, `EARTHVIEW_ENABLED` left at `manual`, no window. Two read-only Earth from Space health addresses now live. Thread closed out; handover written** (production: hub code only; Earth from Space thread)
+- **GPT's recheck (relayed by Chad):** H1 closed, no code hold. **Chad's line:** "Approve: deploy hub 0.6.23 from earth-from-space-rc 566a11b, phase1/worker.js sha256 7141beb89e8e81ef351ddcc53e8654b1ddcbdb0048c8ffcb6b0d0ed7d7b3afa1, code only, EARTHVIEW_ENABLED left at manual, no window variables; read back hash and settings".
+- **Before (14:47:05 UTC):** code `17798a44…a080` (0.6.22), 25 bindings, gate `manual`, four crons, five `earthview/` objects.
+- **Deploy:** content-only upload by Claude through the dashboard tab, file fetched from GitHub at `566a11b` and hash-checked there; PUT 14:47:24 to 14:47:28 UTC, HTTP 200.
+- **After (14:47:40 UTC):** code read back `7141beb8…afa1`, 551,047 B; hub reports 0.6.23; 25 bindings, same types; gate `manual`, no window; crons unchanged; `earthview/` objects identical.
+- **Checks:** `/health/runs/earthview` and `/health/trial/earthview` GET and HEAD 200, "no trial configured"; the eight existing addresses 200; 30 invocations to 14:50:37 all ok; new addresses CPU 0 to 1 ms; first `*/5` tick 14:50:11 ok, CPU 9 ms.
+- **Not measured:** D1 rows read and CPU of a real trial evaluation (no window, so the checks return before reading D1); later ticks; `/status` layers before and after.
+- **Rollback:** 0.6.22 = `phase1/worker.js` at `114dc5b~1` on `earth-from-space-rc`. **Never main's file (0.6.19).**
+- **Close-out:** handover `reviews/2026-11-23-earth-from-space-handover.md`; record in the candidate packet section 9; Mac `_review/` copies of this thread moved to `_to_delete/`; no scheduled tasks left; branch kept (it is the live hub's source).
+- **Parked, each on Chad's own line:** the two UptimeRobot monitors; the disposable-Worker alert test (plan not written); runbook revision; Stage D; Stage E. **Stage D is not cleared.**
+
 ## 23 Nov 14:41 UTC (clock reading) — **Timeline story: the NASA files are in, the preview ran on the Mac, GPT reviewed the branch, and its one unmet point (citation numbers that did nothing) is fixed on `timeline-story-rc`. Nothing merged, uploaded, pinned or deployed.** (live page unchanged, merge `03aff0a`; hub untouched; Timeline feature thread)
 - **Supersedes the 14:14 entry on one point:** Chad fetched the two NASA image files on the Mac; their hashes equal review snapshot 2 (checked by Claude on the Mac and in the workspace, and independently by GPT). They are on the branch.
 - **Preview:** Chad ran `node phase1/timeline/preview.mjs` in Terminal. Claude's pane pass (14:19–14:20 UTC, 588 px wide) and GPT's own look (desktop and a 390-px viewport in Chrome) both found the four states working: with image, no image, image fails, catalogue refused.
