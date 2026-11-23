@@ -99,6 +99,7 @@ Also on 23 Nov: the signed-in advanced search for *Pseudorca crassidens* found 0
 
 - **R1 closed**: the permission basis for publishing the assessment date, publication year and scope beside the category, on the page, in the served JSON file and in the public repository. It can close through a clear IUCN statement that applies, or through IUCN's answer to a question. Claude looked for such a statement on 22 Nov in two more places on the Red List site, the Summary Terms page and the FAQ page, and found none: the summary restates non-commercial use, attribution and no redistribution, with waiver by permission; the FAQ says the data are free for non-commercial use. Neither mentions the category exemption or its reach. The categories themselves are not waiting on permission.
 - **Chad's decision on the branch files** already in the public repository (leave them, described honestly in any enquiry; or remove the branches from GitHub until R1 closes, which does not recall copies already fetched).
-- GPT's pass on this candidate.
+- **Enquiry sent by Chad to the Red List Unit on 23 Nov 2026** (rev 2.3; no reply reported). It also asks about the API; no token is requested before a reply.
+- GPT's candidate review found no release-blocking code defect (22 Nov). The citation access-date change of 23 Nov has not had a code-diff review by GPT.
 - Chad's own Approve lines: file the REGISTER entry, then merge.
 - After release: the served-file check, and R2 (the copy to IUCN) tracked to closure.
