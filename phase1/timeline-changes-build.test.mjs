@@ -24,7 +24,6 @@ const SRC2 = path.join(TL, 'fixtures/tl-2026-11-R2-src');
 const B = process.env.BREAK || '';
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 let pass = 0, fail = 0;
-const require_git = (ref, f) => spawnSync('git', ['-C', ROOT, 'show', `${ref}:${f}`], { maxBuffer: 1 << 26 }).stdout;
 const ok = (n, c, got) => { if (c) pass++; else { fail++; console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 500)}` : ''}`); } };
 
 // ---- generator source, optionally weakened
@@ -75,7 +74,8 @@ const catBytes = fs.readFileSync(path.join(TL, 'catalogue', BUILD.catalogue_revi
 const PAGE_NOW = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'), js = fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8');
 const f0 = fixture(); const r0 = f0.run(); ok('the R2 sources as released build with the current generator', r0.code === 0, r0.out.slice(-200));
 const page = r0.code === 0 ? f0.html() : '';   // the R2 page as the current generator writes it
-ok('the frozen R2 source copies are the released files (commit 03aff0a)', ['BUILD.json', 'big5.json', 'changes.json'].every(f => { try { return fs.readFileSync(path.join(SRC2, f)).equals(require_git('03aff0a', 'phase1/timeline/' + f)); } catch (e) { return false; } }));
+// literal hashes, so the check does not need a git checkout; they are the files of commit 03aff0a (verified with git when this was written)
+ok('the frozen R2 source copies are the released files (literal sha256 of each)', Object.entries({"BUILD.json": "3f24e65e81556bc9f0ed9a4dda8645e17e903c904b3de5fcb8267a43d57b2321", "big5.json": "9dbd45a710ef93e145f3a25e0a25e2362cbec7d91a47bddd4a8a9429e2be5463", "changes.json": "155915436ace7e7c9f37d3a6fd6e7948512c48603a636d534f72f1164a9c6d1a"}).every(([f, x]) => sha(fs.readFileSync(path.join(SRC2, f))) === x));
 ok('R2: schema 2, revision tl-2026-11-R2, previous = R1 (the last reader-facing release)', C.schema === 2 && C.catalogue_revision === 'tl-2026-11-R2' && C.release.revision === 'tl-2026-11-R2' && C.release.previous === 'tl-2026-11-R1', C.release);
 ok('R2: releases = R1 (10 Nov 2026, first release) then R2', C.releases.length === 2 && C.releases[0].revision === 'tl-2026-11-R1' && C.releases[0].release_date === '2026-11-10' && C.releases[1].revision === 'tl-2026-11-R2' && C.releases[1].release_date === C.release.release_date, C.releases);
 const byId = Object.fromEntries([...C.entries, ...C.shelf].map(e => [e.id, e]));

@@ -44,7 +44,7 @@ Five existing suites were written with R2 as the current release. They were migr
 |---|---|
 | `timeline-story-build` | 98 pass, 0 fail |
 | `timeline-story-ui` | 127 pass, 0 fail (includes section R on the release build at 1280 and 390 px) |
-| `timeline-changes-build` | 49 pass (on the frozen R2 sources) |
+| `timeline-changes-build` | 49 pass (on the frozen R2 sources; after rev 1 its one git-dependent check was replaced by literal hashes so it also runs in a copy without git: found when it failed 48/1 in the Mac review copy) |
 | `timeline-catalogue-hub` | 73 pass (main's Worker; one assertion changed, section 4.1) |
 | `timeline-ui` | 594 pass (no change to the suite) |
 | `timeline-axis` | 97 pass |
