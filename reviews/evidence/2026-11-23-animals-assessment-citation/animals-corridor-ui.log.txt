@@ -1,0 +1,6 @@
+start 2026-11-23T03:40:38Z
+info  switch on to shown, software renderer: 3307 ms (includes fetch, checksum, decode, draw)
+
+animals-corridor-ui: 102 passed, 0 failed
+exit 0
+end 2026-11-23T03:49:19Z

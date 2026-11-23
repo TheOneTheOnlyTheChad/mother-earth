@@ -1,0 +1,12 @@
+const { chromium } = require('playwright'); const http = require('http'), fs = require('fs'), path = require('path');
+const ROOT = process.argv[2]; const GL = fs.readFileSync('/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js');
+const types = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json' };
+const srv = http.createServer((q, r) => { const p = decodeURIComponent(q.url.split('?')[0]); const f = path.join(ROOT, p === '/' ? 'index.html' : p); if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { r.writeHead(404); return r.end(); } r.writeHead(200, { 'content-type': types[path.extname(f)] || 'application/octet-stream' }); r.end(fs.readFileSync(f)); });
+srv.listen(0, '127.0.0.1', async () => { const port = srv.address().port; const b = await chromium.launch(); const out = [];
+  for (const w of [360, 390, 1280]) { const ctx = await b.newContext({ viewport: { width: w, height: 844 } }); const page = await ctx.newPage();
+    await page.route('**/*', rt => { const u = rt.request().url(); if (u.startsWith(`http://127.0.0.1:${port}/`)) return rt.continue(); if (/globe\.gl/.test(u)) return rt.fulfill({ contentType: 'application/javascript', body: GL }); return rt.abort(); });
+    await page.goto(`http://127.0.0.1:${port}/animals.html`); await page.waitForFunction(() => document.querySelectorAll('.as-cite').length === 5, null, { timeout: 30000 });
+    out.push(await page.evaluate(() => { const vw = document.documentElement.clientWidth; const r = document.createRange(); let worst = 0, n = 0;
+      for (const c of document.querySelectorAll('.as-cite')) { const tw = document.createTreeWalker(c, NodeFilter.SHOW_TEXT); let t; while (t = tw.nextNode()) { r.selectNodeContents(t); for (const q of r.getClientRects()) { n++; worst = Math.max(worst, q.right); } } }
+      return { viewport: vw, pageScrollWidth: document.documentElement.scrollWidth, citeTextRects: n, rightmostCiteTextEdge: Math.round(worst * 10) / 10, cites: [...document.querySelectorAll('.as-cite')].filter(c => /\. Accessed on 22 November 2026\. Assessment page\.$/.test(c.textContent)).length }; })); await ctx.close(); }
+  console.log(JSON.stringify(out)); await b.close(); srv.close(); });

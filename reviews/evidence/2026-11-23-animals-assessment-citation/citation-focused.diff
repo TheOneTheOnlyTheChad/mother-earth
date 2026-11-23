@@ -1,0 +1,121 @@
+diff --git a/animals-assessment.js b/animals-assessment.js
+index 46ecc19..bb5c30d 100644
+--- a/animals-assessment.js
++++ b/animals-assessment.js
+@@ -1,7 +1,8 @@
+ /* Mother Earth — Animals page, conservation assessment blocks (animals-assessment-rc; ANIMALS-ASSESSMENT-CARD-BUILD-BRIEF rev 1).
+  * Five blocks, words only: the GLOBAL IUCN Red List category of the species on each of four journey cards and the penguin
+  * census card, with the assessment's own date, publication year, version note, citation and link, the Red List edition, and
+- * the date Mother Earth last checked it. A dated record kept by hand, not a feed.
++ * the date Mother Earth last checked it. A dated record kept by hand, not a feed. The citation ends "Accessed on" that same
++ * successful-check date, as IUCN's citation guidance asks; a failed attempt moves neither.
+  * What this file does: fetches ONE file from this site (assets/animals/assessments-R1.json), checks it against the checksum
+  * pinned below, checks each record's shape, then fills each block from its record. It never contacts the Red List.
+  * What it never shows: a trend, criteria, a regional category, a Green Status value, a population number, a colour or a badge.
+@@ -32,7 +33,7 @@
+ 
+   /** the shape this page needs before it will print a category; the builder's fuller rules ran when the file was made */
+   function wellFormed(r) {
+-    if (!r || !str(r.card) || !str(r.common_name) || !str(r.scientific_name) || !str(r.citation)) return false;
++    if (!r || !str(r.card) || !str(r.common_name) || !str(r.scientific_name) || !str(r.citation) || /ccessed/.test(r.citation)) return false;   // an access date typed into the record is the website's, not ours
+     const id = /^e\.T([1-9]\d*)A([1-9]\d*)$/.exec(r.assessment_id || ''); if (!id) return false;
+     if (r.url !== `https://www.iucnredlist.org/species/${id[1]}/${id[2]}` || !str(r.doi_url) || !r.doi_url.startsWith('https://dx.doi.org/10.2305/IUCN.UK.') || !r.doi_url.includes(`.T${id[1]}A${id[2]}.`)) return false;
+     if (r.scope !== 'global' || !A.CATEGORIES.includes(r.category)) return false;
+@@ -68,7 +69,9 @@
+     const cat = el('p', 'as-cat'); cat.append(el('b', '', 'Extinction-risk category:'), ` ${r.category}. IUCN Red List, global assessment of ${r.common_name} (`, el('i', '', r.scientific_name), `), assessed ${day(r.assessed)}. ${published(r)} Red List edition ${r.edition_at_check}. Checked by Mother Earth on ${day(r.last_successful_check)}.`);
+     const cite = el('p', 'as-cite'); const a = el('a', '', r.doi_url); a.href = r.doi_url; a.target = '_blank'; a.rel = 'noopener';
+     const pg = el('a', '', 'Assessment page'); pg.href = r.url; pg.target = '_blank'; pg.rel = 'noopener';
+-    cite.append(`Citation: ${r.citation} `, a, '. ', pg, '.');
++    // IUCN's citation format ends with the user's own access date. Ours is the last SUCCESSFUL check: never the reader's clock,
++    // the build date, a failed attempt's date, or the date the Red List page prints (the record may not carry the word at all).
++    cite.append(`Citation: ${r.citation} `, a, `. Accessed on ${day(r.last_successful_check)}. `, pg, '.');
+     box.append(cat, cite, unit(r), el('p', 'as-trend', A.T.trend));
+     const notices = [];
+     if (r.last_attempt.result === 'failed') { notices.push('failed'); box.append(el('p', 'as-note as-failed', `The latest check on ${day(r.last_attempt.date)} could not be completed.`)); }
+diff --git a/phase1/animals-assessment-ui.test.cjs b/phase1/animals-assessment-ui.test.cjs
+index 57fbbd4..3e9d555 100644
+--- a/phase1/animals-assessment-ui.test.cjs
++++ b/phase1/animals-assessment-ui.test.cjs
+@@ -33,23 +33,23 @@ const CARDS = [Z, SH, WH, AL, PE];
+ const TAIL = ' Red List edition 2026-1. Checked by Mother Earth on 22 November 2026.';
+ const WANT = {
+   [Z]: { cat: 'Extinction-risk category: Near Threatened. IUCN Red List, global assessment of plains zebra (Equus quagga), assessed 20 June 2016. Published 2016.' + TAIL,
+-    cite: 'Citation: King, S.R.B. & Moehlman, P.D. 2016. Equus quagga. The IUCN Red List of Threatened Species 2016: e.T41013A45172424. https://dx.doi.org/10.2305/IUCN.UK.2016-2.RLTS.T41013A45172424.en. Assessment page.',
++    cite: 'Citation: King, S.R.B. & Moehlman, P.D. 2016. Equus quagga. The IUCN Red List of Threatened Species 2016: e.T41013A45172424. https://dx.doi.org/10.2305/IUCN.UK.2016-2.RLTS.T41013A45172424.en. Accessed on 22 November 2026. Assessment page.',
+     page: 'https://www.iucnredlist.org/species/41013/45172424', years: [2007, 2008],
+     unit: 'This is not about the animal shown. The assessment covers the species worldwide; the journey is one collared zebra tracked in northern Botswana, 2007 to 2008.' },
+   [SH]: { cat: 'Extinction-risk category: Vulnerable. IUCN Red List, global assessment of white shark (Carcharodon carcharias), assessed 7 November 2018. This version published 2022, an amended version of the 2019 assessment.' + TAIL,
+-    cite: 'Citation: Rigby, C.L., Barreto, R., Carlson, J., Fernando, D., Fordham, S., Francis, M.P., Herman, K., Jabado, R.W., Jones, G.C.A., Liu, K.M., Lowe, C.G, Marshall, A., Pacoureau, N., Romanov, E., Sherley, R.B. & Winker, H. 2022. Carcharodon carcharias (amended version of 2019 assessment). The IUCN Red List of Threatened Species 2022: e.T3855A212629880. https://dx.doi.org/10.2305/IUCN.UK.2022-1.RLTS.T3855A212629880.en. Assessment page.',
++    cite: 'Citation: Rigby, C.L., Barreto, R., Carlson, J., Fernando, D., Fordham, S., Francis, M.P., Herman, K., Jabado, R.W., Jones, G.C.A., Liu, K.M., Lowe, C.G, Marshall, A., Pacoureau, N., Romanov, E., Sherley, R.B. & Winker, H. 2022. Carcharodon carcharias (amended version of 2019 assessment). The IUCN Red List of Threatened Species 2022: e.T3855A212629880. https://dx.doi.org/10.2305/IUCN.UK.2022-1.RLTS.T3855A212629880.en. Accessed on 22 November 2026. Assessment page.',
+     page: 'https://www.iucnredlist.org/species/3855/212629880', years: [2012, 2013],
+     unit: 'This is not about the animal shown. The assessment covers the species worldwide; the journey is one tagged shark tracked in the waters off South Africa and southern Mozambique, 2012 to 2013.' },
+   [WH]: { cat: 'Extinction-risk category: Near Threatened. IUCN Red List, global assessment of false killer whale (Pseudorca crassidens), assessed 23 July 2018. Published 2018; errata version published in 2019.' + TAIL,
+-    cite: 'Citation: Baird, R.W. 2018. Pseudorca crassidens (errata version published in 2019). The IUCN Red List of Threatened Species 2018: e.T18596A145357488. https://dx.doi.org/10.2305/IUCN.UK.2018-2.RLTS.T18596A145357488.en. Assessment page.',
++    cite: 'Citation: Baird, R.W. 2018. Pseudorca crassidens (errata version published in 2019). The IUCN Red List of Threatened Species 2018: e.T18596A145357488. https://dx.doi.org/10.2305/IUCN.UK.2018-2.RLTS.T18596A145357488.en. Accessed on 22 November 2026. Assessment page.',
+     page: 'https://www.iucnredlist.org/species/18596/145357488', years: [2013, 2014],
+     unit: 'This is not about the animal shown. The assessment covers the species worldwide; the journey is one tagged whale tracked in Hawaiian waters and the North Pacific to the east, 2013 to 2014. No assessment of this animal’s own stock was verified for this card.' },
+   [AL]: { cat: 'Extinction-risk category: Critically Endangered. IUCN Red List, global assessment of waved albatross (Phoebastria irrorata), assessed 7 August 2018. Published 2018.' + TAIL,
+-    cite: 'Citation: BirdLife International 2018. Phoebastria irrorata. The IUCN Red List of Threatened Species 2018: e.T22698320A132641638. https://dx.doi.org/10.2305/IUCN.UK.2018-2.RLTS.T22698320A132641638.en. Assessment page.',
++    cite: 'Citation: BirdLife International 2018. Phoebastria irrorata. The IUCN Red List of Threatened Species 2018: e.T22698320A132641638. https://dx.doi.org/10.2305/IUCN.UK.2018-2.RLTS.T22698320A132641638.en. Accessed on 22 November 2026. Assessment page.',
+     page: 'https://www.iucnredlist.org/species/22698320/132641638', years: [2008, 2008],
+     unit: 'This is not about the animal shown. The assessment covers the species worldwide; the journey is one tagged bird tracked in the Galápagos and the eastern Pacific, 2008.' },
+   [PE]: { cat: 'Extinction-risk category: Critically Endangered. IUCN Red List, global assessment of African penguin (Spheniscus demersus), assessed 4 July 2024. Published 2024.' + TAIL,
+-    cite: 'Citation: BirdLife International 2024. Spheniscus demersus. The IUCN Red List of Threatened Species 2024: e.T22697810A256021744. https://dx.doi.org/10.2305/IUCN.UK.2024-2.RLTS.T22697810A256021744.en. Assessment page.',
++    cite: 'Citation: BirdLife International 2024. Spheniscus demersus. The IUCN Red List of Threatened Species 2024: e.T22697810A256021744. https://dx.doi.org/10.2305/IUCN.UK.2024-2.RLTS.T22697810A256021744.en. Accessed on 22 November 2026. Assessment page.',
+     page: 'https://www.iucnredlist.org/species/22697810/256021744',
+     unit: 'The assessment covers the species as a whole at its date. The charts above are counts of occupied nest sites at named colonies, 1979 to 2019, from a different source.' } };
+ const TREND = 'Population trend: not shown here; see the assessment.';
+@@ -71,10 +71,13 @@ const BREAKS = {
+   'never-overdue': [JS, "if (today > r.next_check_due) {", "if (false) {"],
+   'failed-not-said': [JS, "if (r.last_attempt.result === 'failed') {", "if (false) {"],
+   'contacts-red-list': [JS, "  load();\n})();", "  fetch('https://www.iucnredlist.org/species/41013/45172424').catch(() => { }); load();\n})();"],
++  'accessed-from-failed-attempt': [JS, "`. Accessed on ${day(r.last_successful_check)}. `", "`. Accessed on ${day(r.last_attempt.date)}. `"],
++  'accessed-from-readers-clock': [JS, "`. Accessed on ${day(r.last_successful_check)}. `", "`. Accessed on ${day(today)}. `"],
++  'imported-accessed-kept': [JS, " || /ccessed/.test(r.citation)) return false;", ") return false;"],
+   'colour-badge': [JS, "const cat = el('p', 'as-cat');", "const cat = el('p', 'as-cat'); cat.style.backgroundColor = 'rgb(200, 30, 30)';"],
+ };
+ const EXPECT = { 'wrong-assessment-date': '2a', 'wrong-category': '2a', 'whale-this-version-2018': '2a', 'failed-advances-check-date': '4b', 'suppressed-shows-category': '5a', 'trend-shown': '2d', 'regional-shown': '6c',
+-  'claims-no-stock-assessment': '2c', 'no-pin-check': '6a', 'no-shape-check': '6b', 'overdue-hides-failed': '4e', 'never-overdue': '4c', 'failed-not-said': '4a', 'contacts-red-list': '7a', 'colour-badge': '2e' };
++  'claims-no-stock-assessment': '2c', 'no-pin-check': '6a', 'no-shape-check': '6b', 'overdue-hides-failed': '4e', 'never-overdue': '4c', 'failed-not-said': '4a', 'contacts-red-list': '7a', 'colour-badge': '2e', 'accessed-from-failed-attempt': '4f', 'accessed-from-readers-clock': '2b', 'imported-accessed-kept': '6g' };
+ if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
+ 
+ /** a changed assessment file (harness fixture) */
+@@ -135,7 +138,7 @@ const by = (r, card) => r.blocks.find(b => b.card === card);
+     if (want(2)) { reset(); const o = await open(browser), r = await read(o.page);
+       for (const c of CARDS) { const b = by(r, c) || {};
+         ok(`2a ${c}: the category sentence is the reviewed category, species, assessment date, publication wording, edition and check date, word for word`, b.cat === WANT[c].cat, b.cat);
+-        ok(`2b ${c}: the citation is the reviewed one, with a link to its DOI and a link to its own assessment page, and no "Accessed" date`, b.cite === WANT[c].cite && !/ccessed/.test(b.text || '') && b.links && b.links.length === 2 && b.links[0][1] === WANT[c].cite.match(/https:\S+\.en/)[0] && b.links[1][1] === WANT[c].page && b.links.every(l => l[2] === '_blank' && l[3] === 'noopener'), [b.cite, b.links]);
++        ok(`2b ${c}: the citation is the reviewed one, with a link to its DOI and a link to its own assessment page, ending with exactly one "Accessed on" date, which is our successful check (22 November 2026)`, b.cite === WANT[c].cite && ((b.text || '').match(/Accessed on/g) || []).length === 1 && / Accessed on 22 November 2026\. Assessment page\.$/.test(b.cite || '') && b.links && b.links.length === 2 && b.links[0][1] === WANT[c].cite.match(/https:\S+\.en/)[0] && b.links[1][1] === WANT[c].page && b.links.every(l => l[2] === '_blank' && l[3] === 'noopener'), [b.cite, b.links]);
+         ok(`2c ${c}: the "what is shown" sentence is as reviewed`, b.unit === WANT[c].unit, b.unit);
+         ok(`2d ${c}: the trend line says trend is not shown, and nothing in the block gives a trend, criteria, a regional or Green Status value, or says a stock assessment does not exist`, b.trend === TREND && !FORBID.test(b.text || ''), [b.trend, (b.text || '').match(FORBID)]);
+         ok(`2e ${c}: words only: no picture, no inline style, no background colour, one text colour, the species name in italics`, b.pictures === 0 && b.bg && b.bg.length === 0 && b.colours.length === 1 && b.italics.length === 1 && WANT[c].cat.includes(`(${b.italics[0]})`), [b.pictures, b.bg, b.colours, b.italics]); }
+@@ -148,16 +151,17 @@ const by = (r, card) => r.blocks.find(b => b.card === card);
+       { reset(); S.fx = fx(d => { rec(d, Z).last_attempt = { date: '2027-03-01', result: 'failed' }; }); const o = await open(browser, '2027-03-02T10:00:00Z'), r = await read(o.page), b = by(r, Z);
+         ok('4a latest check failed: the category is still shown, with the notice naming the failed attempt\'s own date, and no overdue notice', b.state === 'shown' && b.notices === 'failed' && b.failed === 'The latest check on 1 March 2027 could not be completed.' && !b.overdue && CATWORDS.test(b.cat || ''), [b.state, b.notices, b.failed, b.overdue]);
+         ok('4b after a failed attempt the "Checked by Mother Earth on" date is still the last SUCCESSFUL check, 22 November 2026', b.cat === WANT[Z].cat, b.cat);
++        ok('4f after a failed attempt the citation still ends "Accessed on 22 November 2026", once: the failed attempt\'s date is not an access date', b.cite === WANT[Z].cite && (b.text.match(/Accessed on/g) || []).length === 1, b.cite);
+         ok('4a the other four blocks carry no notice', CARDS.filter(c => c !== Z).every(c => by(r, c).notices === '' && by(r, c).state === 'shown'));
+         await o.ctx.close(); }
+       { reset(); const o = await open(browser, '2027-05-23T00:30:00Z'), r = await read(o.page);
+-        ok('4c overdue: the day after the due date every block keeps its category and adds "This record’s check is overdue. It was due on 22 May 2027."', r.blocks.every(b => b.state === 'shown' && b.notices === 'overdue' && b.overdue === 'This record’s check is overdue. It was due on 22 May 2027.' && b.cat === WANT[b.card].cat), r.blocks.map(b => [b.card, b.notices, b.overdue]));
++        ok('4c overdue: the day after the due date every block keeps its category and adds "This record’s check is overdue. It was due on 22 May 2027."', r.blocks.every(b => b.state === 'shown' && b.notices === 'overdue' && b.overdue === 'This record’s check is overdue. It was due on 22 May 2027.' && b.cat === WANT[b.card].cat && b.cite === WANT[b.card].cite), r.blocks.map(b => [b.card, b.notices, b.overdue]));
+         await o.ctx.close(); }
+       { reset(); const o = await open(browser, '2027-05-22T23:30:00Z'), r = await read(o.page);
+         ok('4d on the due date itself (UTC) nothing is overdue', r.blocks.every(b => b.state === 'shown' && b.notices === '' && !b.overdue), r.blocks.map(b => [b.card, b.notices]));
+         await o.ctx.close(); }
+       { reset(); S.fx = fx(d => { rec(d, PE).last_attempt = { date: '2027-05-30', result: 'failed' }; }); const o = await open(browser, '2027-06-01T10:00:00Z'), r = await read(o.page), b = by(r, PE);
+-        ok('4e failed AND overdue: both notices are shown, neither hides the other, and the successful-check date has not moved', b.state === 'shown' && b.notices === 'failed overdue' && b.failed === 'The latest check on 30 May 2027 could not be completed.' && /It was due on 22 May 2027\.$/.test(b.overdue || '') && b.cat === WANT[PE].cat, [b.notices, b.failed, b.overdue, b.cat]);
++        ok('4e failed AND overdue: both notices are shown, neither hides the other, and the successful-check date has not moved', b.state === 'shown' && b.notices === 'failed overdue' && b.failed === 'The latest check on 30 May 2027 could not be completed.' && /It was due on 22 May 2027\.$/.test(b.overdue || '') && b.cat === WANT[PE].cat && b.cite === WANT[PE].cite, [b.notices, b.failed, b.overdue, b.cat]);
+         await o.ctx.close(); } }
+     // ---------- 5. suppression
+     if (want(5)) { const WHY = 'The assessment was replaced and the new one has not been reviewed.';
+@@ -187,6 +191,9 @@ const by = (r, card) => r.blocks.find(b => b.card === card);
+       { reset(); S.fx = fx(d => { d.records = d.records.filter(x => x.card !== PE); d.records.push(JSON.parse(JSON.stringify(rec(d, Z)))); }); const o = await open(browser), r = await read(o.page);
+         ok('6e a card with no record, and a card with two records, each read "Not available. No assessment record is filed for this card."; the rest are shown', by(r, PE).text === 'Not available. No assessment record is filed for this card.' && by(r, Z).text === by(r, PE).text && [SH, WH, AL].every(c => by(r, c).cat === WANT[c].cat), [by(r, PE).text, by(r, Z).text]);
+         await o.ctx.close(); }
++      { reset(); S.fx = fx(d => { rec(d, SH).citation += ' Accessed on 19 November 2026.'; }); const o = await open(browser), r = await read(o.page), b = by(r, SH);
++        ok('6g a record whose citation carries a typed-in "Accessed" date (the website\'s own stale date) is not shown, even correctly pinned; the other four are shown with one access date each', b.state === 'unavailable' && !/Accessed/.test(b.text) && CARDS.filter(c => c !== SH).every(c => by(r, c).cite === WANT[c].cite), [b.state, b.text]);
++        await o.ctx.close(); }
+       { reset(); S.raw = Buffer.from('{not json'); const o = await open(browser), r = await read(o.page);
+         ok('6f a file that is not JSON: all five "could not be verified", no page error', r.status === 'unverified' && o.errs.length === 0 && r.blocks.every(b => /could not be verified\.$/.test(b.text)), [r.status, o.errs]);
+         await o.ctx.close(); } }

@@ -1,0 +1,6 @@
+start 2026-11-23T03:27:24Z
+NOT RUN  13a–13e: main 0e62083 is not available (no Git metadata here and no BASE_DIR). The comparisons with main were not made.
+
+animals-tab-ui: 269 passed, 1 failed
+exit 1
+end 2026-11-23T03:33:57Z

@@ -1,0 +1,1 @@
+[{"viewport":360,"pageScrollWidth":360,"citeTextRects":63,"rightmostCiteTextEdge":339.5,"cites":0},{"viewport":390,"pageScrollWidth":390,"citeTextRects":56,"rightmostCiteTextEdge":368.4,"cites":0},{"viewport":1280,"pageScrollWidth":1280,"citeTextRects":37,"rightmostCiteTextEdge":1129.6,"cites":0}]

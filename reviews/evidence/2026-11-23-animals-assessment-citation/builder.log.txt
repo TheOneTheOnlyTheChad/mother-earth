@@ -1,0 +1,9 @@
+start 2026-11-23T03:19:43Z
+PASSED  86 passed, 0 failed
+exit 0
+identical: assessments-R1.json  sha256 b1c7afa961875ab302eff3556110d78fe60b7422fdd015178214cd9fe5d58265
+check exit 0
+b1c7afa961875ab302eff3556110d78fe60b7422fdd015178214cd9fe5d58265  assets/animals/assessments-R1.json
+2df25f9a3128a10b79fd660790fb6b89e2043a89643d865e8ba6ad457e923a1a  animals-assessment.js
+9424eb130bf83280ff49f2df200a85d60dd0aeb354aef7ef33e511467bee902f  phase1/animals-assessment-ui.test.cjs
+end 2026-11-23T03:19:44Z

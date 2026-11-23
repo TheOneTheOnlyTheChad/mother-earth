@@ -1,0 +1,22 @@
+=== BREAK=accessed-from-failed-attempt 2026-11-23T03:23:17Z
+FAIL  4f after a failed attempt the citation still ends "Accessed on 22 November 2026", once: the failed attempt's date is not an access date
+FAIL  4e failed AND overdue: both notices are shown, neither hides the other, and the successful-check date has not moved
+BREAK CAUGHT  accessed-from-failed-attempt (at "4f"; 2 checks failed)
+=== BREAK=accessed-from-readers-clock 2026-11-23T03:23:27Z
+FAIL  2b zebra-botswana-Z3866: the citation is the reviewed one, with a link to its DOI and a link to its own assessment page, ending with exactly one "Accessed on" date, which is our successful check (22 November 2026)
+FAIL  2b white-shark-sa-118845: the citation is the reviewed one, with a link to its DOI and a link to its own assessment page, ending with exactly one "Accessed on" date, which is our successful check (22 November 2026)
+FAIL  2b false-killer-whale-hawaii-98364: the citation is the reviewed one, with a link to its DOI and a link to its own assessment page, ending with exactly one "Accessed on" date, which is our successful check (22 November 2026)
+FAIL  2b waved-albatross-galapagos-3275-30662: the citation is the reviewed one, with a link to its DOI and a link to its own assessment page, ending with exactly one "Accessed on" date, which is our successful check (22 November 2026)
+FAIL  2b african-penguin-census: the citation is the reviewed one, with a link to its DOI and a link to its own assessment page, ending with exactly one "Accessed on" date, which is our successful check (22 November 2026)
+FAIL  4f after a failed attempt the citation still ends "Accessed on 22 November 2026", once: the failed attempt's date is not an access date
+FAIL  4c overdue: the day after the due date every block keeps its category and adds "This record’s check is overdue. It was due on 22 May 2027."
+FAIL  4e failed AND overdue: both notices are shown, neither hides the other, and the successful-check date has not moved
+FAIL  6g a record whose citation carries a typed-in "Accessed" date (the website's own stale date) is not shown, even correctly pinned; the other four are shown with one access date each
+BREAK CAUGHT  accessed-from-readers-clock (at "2b"; 9 checks failed)
+=== BREAK=imported-accessed-kept 2026-11-23T03:23:38Z
+FAIL  6g a record whose citation carries a typed-in "Accessed" date (the website's own stale date) is not shown, even correctly pinned; the other four are shown with one access date each
+BREAK CAUGHT  imported-accessed-kept (at "6g"; 1 checks failed)
+=== BREAK=failed-advances-check-date 2026-11-23T03:23:48Z
+FAIL  4b after a failed attempt the "Checked by Mother Earth on" date is still the last SUCCESSFUL check, 22 November 2026
+FAIL  4e failed AND overdue: both notices are shown, neither hides the other, and the successful-check date has not moved
+BREAK CAUGHT  failed-advances-check-date (at "4b"; 2 checks failed)

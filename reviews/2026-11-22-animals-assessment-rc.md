@@ -85,6 +85,8 @@ IUCN's citation guidance (`/about/citationinfo`, read by Claude and separately b
 
 Checks (Claude's runs): `animals-assessment-ui` **51 passed, 0 failed** (2b now requires exactly one access date, the right one, on all five; new 4f: unchanged after a failed attempt; 4c and 4e: unchanged when overdue and when failed and overdue; new 6g: a typed-in "Accessed" date is not shown). Builder tests 86 passed, 0 failed. Three new breaks, each run alone, each caught: `accessed-from-failed-attempt`, `accessed-from-readers-clock`, `imported-accessed-kept`. **Not rerun after this change:** the earlier 15 breaks and the tab, census and corridor suites. The change touches only the citation line; the tab suite reads only the start of the block.
 
+**Update, 23 Nov 03:50 UTC (Claude):** the reruns named above as not done have now been done on `7be31cc`: all 18 breaks caught, tab 277, census 71, corridor 102, all passing. The focused package for GPT is `reviews/2026-11-23-animals-assessment-citation-diff.md`.
+
 Also on 23 Nov: the signed-in advanced search for *Pseudorca crassidens* found 0 subpopulation assessments (evidence record §8). GPT: it strengthens the evidence; the card's "not verified" wording stays.
 
 ## 6. What GPT is asked
