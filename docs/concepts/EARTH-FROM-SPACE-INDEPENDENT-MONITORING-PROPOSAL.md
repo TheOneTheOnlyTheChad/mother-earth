@@ -1,26 +1,23 @@
-# Earth from Space — monitoring independent of the thread, the Mac and the browser login: proposal rev 2 (23 Nov 2026) — docs only
+# Earth from Space — monitoring independent of the thread, the Mac and the browser login: proposal rev 3 (23 Nov 2026) — docs only
 
-**Rev 2, 23 Nov 2026 11:05 UTC (clock reading),** after GPT's review of rev 1
-(`reviews/2026-11-23-earth-from-space-independent-monitoring-proposal-gpt-review.md`) and Chad's choices relayed
-with it: **M1 yes to the direction; M2 a redeploy in principle; M3 three sustainable daytime reads on a revised
-basis; M4 no second provider.** Section 13 maps each review point to its answer. Rev 1 was written the same day on
-Chad's go ("draft a docs-only proposal for monitoring Earth from Space independently of this thread, the Mac and
-browser login…").
+**Rev 3, 23 Nov 2026 11:26 UTC (clock reading),** after GPT's review of rev 2
+(`reviews/2026-11-23-earth-from-space-independent-monitoring-proposal-rev2-gpt-review.md`) and a signed-in,
+read-only reading of the UptimeRobot account (section 12). Earlier: rev 2 after GPT's first review; rev 1 on Chad's
+go of the same day. Section 13 maps every review point to its answer.
 
-**Nothing here is built, deployed, configured or approved. It does not clear Stage D.** Reads made for it were of
-the repo's code and of public addresses.
+**Nothing here is built, deployed, configured or approved. It does not clear Stage D.** No setting was changed in
+any account for it.
 
-**Two things rev 2 could not do, both waiting for Chad at the Mac (section 12):** read the UptimeRobot account's
-actual configuration, and read UptimeRobot's own help pages. The plan terms below are therefore **GPT's reading of
-UptimeRobot's primary pages**, not Claude's.
+**Decisions are not yet Chad's.** M1 to M7 below are GPT's recommendations, relayed by Chad. Rev 2 recorded M1 to
+M4 as his choices; that was wrong on provenance and is corrected in section 11.
 
 ## 0. In short
 
 - The hub already has an independent watcher: UptimeRobot polls eight public health addresses every five minutes.
-  It watches earthquakes and fires only. **Whether those eight monitors are enabled with a phone alert attached
-  today has not been read** (section 12).
+  It watches earthquakes and fires only. **Read today in the account:** all eight are enabled, polled by HEAD
+  every five minutes, with email and iPhone push selected on each (section 12).
 - **Proposal:** two read-only health addresses for Earth from Space and two more monitors. Healthy is silent.
-- **What rev 2 changes:** the checks are defined **slot by slot over the whole trial**, from the records that
+- **Since rev 1:** the checks are defined **slot by slot over the whole trial**, from the records that
   actually exist, so that a failure stays visible after a later good run and after the window ends; the trial
   states are in one table; the tolerance is derived, not asserted; the dependence on the thread is stated as a
   weakening.
@@ -30,7 +27,7 @@ UptimeRobot's primary pages**, not Claude's.
 
 | What | Independent of thread, Mac, login? | Covers Earth from Space? | State |
 |---|---|---|---|
-| **UptimeRobot, 8 monitors** on `/health/<check>/<layer>`: runs, publication, archive, coverage × `usgs`, `firms` | Yes | **No.** The four `earthview` addresses answer 404 (read 10:52 UTC, 23 Nov) | Set up 6 Nov; phone alert tested then with the Mac closed; a real `publication/firms` alert on a later night (project records). The eight addresses answered 200 at 10:52 UTC. **A 200 from an address does not show that its monitor is enabled or that a phone alert is attached. The account was not read** |
+| **UptimeRobot, 8 monitors** on `/health/<check>/<layer>`: runs, publication, archive, coverage × `usgs`, `firms` | Yes | **No.** The four `earthview` addresses answer 404 (read 10:52 UTC, 23 Nov) | **Read in the account 23 Nov (section 12):** all eight Up and enabled, 5-minute interval, email and iPhone push on each, no maintenance window. The hub's own log shows them arriving by HEAD with UptimeRobot's user agent. A ninth, "ME alert test", is a leftover from 6 Nov and has been Down ever since |
 | Hub's own records: `collector_runs` (D1), `/status`, logs | Records, not alerts | Yes | Live |
 | Cloudflare email monitor | Yes | Would have | Tested 23 Nov: not reliable. None exists. Not reopened |
 | Claude's reads through the dashboard tab | **No** | Yes, in detail | Rehearsed 23 Nov: launches, reads and gap detection worked |
@@ -96,9 +93,16 @@ decide which slots are due.** It does not change admission and it is not a deadl
 - **A slot is overdue when now ≥ s + 20 minutes and it is not complete.**
 - A late-delivered trigger that then runs writes its row and the slot becomes complete. That is a true resolution,
   not a hidden failure.
-- **Rows that cannot refresh the trial:** a manual run's row (its `started_at` is not a ten-minute mark; a manual
-  run during the trial is itself stop condition 9); Stage C's row and any earlier trial's rows (their times are
-  outside this window).
+- **Rows from outside the trial.** Stage C's row and any earlier trial's rows have times outside this window and
+  are not read.
+- **A manual run is a blind spot, stated.** The row has no field saying whether a run was scheduled or manual, and
+  a manual run's `started_at` is the time of the request. If a manual request landed exactly on a ten-minute mark
+  inside the window, to the millisecond, its row would be indistinguishable from that slot's scheduled row and
+  would make the slot look complete. **This record alone cannot exclude it.** What stands against it: manual runs
+  are forbidden during Stage D (stop condition 9, and Chad's line); the thread's reads see manual runs in the logs,
+  where the trigger kind is recorded; the offline suite includes this collision as a documented case. Recording
+  the trigger kind in the row would close it, and would be a change to collection: **not proposed here; a
+  separate reviewed change if wanted.**
 
 **Why 20 minutes.** Cloudflare's limits page gives a scheduled invocation at most 15 minutes of wall time
 (developers.cloudflare.com/workers/platform/limits, read 23 Nov 2026). The run starts after the `usgs` and aircraft
@@ -115,82 +119,117 @@ It is not an observation of any of them.
 these records hold to stop conditions 1 and 2, which say "any". The cost is an alert for a single trigger that
 Cloudflare delivers late or not at all. **This is decision M5.**
 
-### 3.2 Slot outcome (used for the stop conditions)
+### 3.2 Which slots may be judged
 
-For a complete slot, from its rows: **published** if any row is a published or superseded row; else **nothing
-newer** if any row says so; else **storage stop**, **validation refused**, **post-check failure**, **source check
-failed**, **guard refused** or **internal error** by the phrase of its row (if several rows disagree, the first in
-this order that applies).
+- A slot is **due** when now ≥ s + 20 minutes. **At equality it is due.**
+- A slot is **settled** when it is due. A settled slot is either complete or overdue.
+- **Only settled slots take part in any streak.** Future slots, and slots still inside their 20 minutes, are not
+  failures and are not "not published": they are not counted at all. Streaks are read in scheduled order over
+  settled slots only, so an early failure followed by slots that are not yet due cannot make a streak.
+- Slots do not exist at or after `UNTIL`. A streak cannot run past the last slot.
 
-### 3.3 The two checks, evaluated over the whole trial
+### 3.3 What each slot's rows say (duplicates included)
 
-Both read every Earth from Space row of the current trial on each poll: rows with `finished_at` ≥ `FROM`, through
-the existing `(layer, finished_at)` index, then matched to slots. At most a few hundred rows.
+A slot may have several rows. Each row is read by its fixed phrase (section 2) into one of: published; superseded;
+nothing newer; storage stop; validation refused; other post-check failure; source check failed; guard refused;
+internal error; **unrecognised** (a status or phrase not in the table).
+
+A slot then carries **flags**, each true if **any** of its rows says so:
+
+| Flag | True when the slot has a row that is |
+|---|---|
+| `refused` | validation refused |
+| `storage_stop` | a storage stop |
+| `newer_listed` | validation refused, or any other post-check failure (both show the source listing a newer frame) |
+| `current` | published, superseded or nothing newer, **and that row finished at or before the slot's due time** |
+| `unrecognised` | unrecognised |
+
+- **A good row never removes a bad flag.** A repeat of a slot that succeeds does not erase a refusal or a storage
+  stop recorded for that slot.
+- **`superseded` is not "published in this slot".** It records that another execution had already published that
+  frame. It is evidence that the held frame was current, so it sets `current`, like "nothing newer".
+- **Evidence that clears is frozen at the slot's due time; evidence of failure is accepted whenever it arrives.**
+  A good row that appears after a slot is due cannot switch off a finding already made.
+
+### 3.4 The two checks, evaluated over the whole trial
 
 | Address | 503 when, for the current trial | Stays 503 |
 |---|---|---|
-| `/health/runs/earthview` | any due slot is overdue; or the configuration is in a failing state (3.4) | until that slot becomes complete, or the trial is closed out |
-| `/health/trial/earthview` | **(c3)** any slot's rows include a storage stop; **(c6)** any three consecutive slots are each *validation refused*; **(c8)** any six consecutive slots contain no *published* and no *nothing newer* slot and at least one slot whose row shows the source listing a newer frame (post-check failure or validation refused) | **until the trial is closed out. A later good run does not clear it** |
+| `/health/runs/earthview` | any settled slot is overdue; or the configuration is in a failing state (3.5); or the rows could not be read completely (3.6) | until that slot becomes complete, or the trial is closed out |
+| `/health/trial/earthview` | **(c3)** any slot has `storage_stop`; **(c6)** any three adjacent settled slots each have `refused`; **(c8)** any six adjacent settled slots of which none has `current` and at least one has `newer_listed`; or any slot is `unrecognised`; or the rows could not be read completely | **until the trial is closed out** |
 
-- **This is the answer to "a failure must not vanish between polls".** The checks do not ask "does the latest run
-  look bad". They ask "has this happened anywhere in this trial's records". Nothing is written by a health
-  request and nothing in collection changes to support it: the records are already kept.
-- **What cannot be decided from the rows, and is therefore not claimed:**
-  - c6 and c8 across an overdue slot: an overdue slot has no outcome. It **breaks** a c6 streak and counts as "not
-    published" in c8. The overdue slot is itself alarming on the other address.
-  - c8 when every row in the six is `source check failed`, `internal error`, a guard refusal or a storage stop:
-    none shows the source listing a newer frame, so c8 does not fire. A source outage is recorded, not alarmed.
-  - `internal error`: where the run failed is not in the row.
-  - "The frame held" at each moment is taken from the rows' own words, not re-read from storage.
-- The body carries the state, the counts, and for each finding the slot time and the fixed phrase only. No raw
-  note text beyond what the existing checks already publish (cut to 160 characters, secrets removed).
+- **c6, the reading chosen and why.** Stop condition 6 says "three consecutive slots ending in a validation
+  refusal". With repeats, three readings are possible: each of three adjacent slots holds **at least one** refusal;
+  each holds **only** refusals; or three consecutive **attempts** were refused. Rev 3 takes the first. It is the
+  only one that a later repeated success cannot mask, and it errs toward alerting. It can alert where the
+  strictest reading would not; that is accepted and listed here.
+- **An overdue slot inside a streak:** it has no rows, so it is not `refused` (it breaks c6) and not `current`
+  (it counts toward c8's six). It is alarming on the other address in its own right.
+- **What cannot be decided from the rows, and is not claimed:** c8 when none of the six shows `newer_listed`
+  (all source-check failures, internal errors, guard refusals, storage stops or overdue): a source outage is
+  recorded, not alarmed. Where an `internal error` happened in the run. The frame actually held, which is taken
+  from the rows' words and not re-read from storage. A manual run on an exact mark (3.1).
+- **The public answer** carries the state, counts, and for each finding the slot time and a **fixed reason code**
+  from a closed list. **No note text is published by these two checks.**
 
-### 3.4 States
+### 3.5 States, in order of precedence
 
-`ALLOW` is 20 minutes. "Closed out" means the two window variables have been removed (3.5).
+`ALLOW` is 20 minutes. `LAST` is the last slot's due time: `UNTIL` − 10 minutes + `ALLOW`. The first rule that
+applies decides. "Gate" is `EARTHVIEW_ENABLED`.
 
-| # | Gate | Window variables | Clock | `runs` | `trial` | Body state |
-|---|---|---|---|---|---|---|
-| 1 | unset or `manual` | none | any | 200 | 200 | `no trial configured` |
-| 2 | any other value | any | any | **503** | **503** | `gate has an unknown value` |
-| 3 | any | only one set; or unreadable; or `UNTIL` ≤ `FROM`; or longer than 48 hours | any | **503** | **503** | `window not readable` |
-| 4 | `1` | valid | before `FROM` | 200 | 200 | `armed, starts <FROM>` |
-| 5 | `1` | valid | `FROM` to `FROM` + ALLOW | 200 | by its rules | `starting` (no slot is due yet) |
-| 6 | `1` | valid | active, slots due | by 3.3 | by 3.3 | `active` |
-| 7 | not `1` | valid | before the last slot is due | **503** | by 3.3 | `trial window set but not collecting` |
-| 8 | any | valid | after `UNTIL`, last slot not yet due | by 3.3 | by 3.3 | `ending` |
-| 9 | any | valid | every slot due, none overdue, no finding | 200 | 200 | `trial complete, nothing outstanding` |
-| 10 | any | valid | every slot due, something overdue or found | **503** as applies | **503** as applies | `trial ended with outstanding findings` |
+| Order | Condition | `runs` | `trial` | State in the body |
+|---|---|---|---|---|
+| 1 | Gate is anything other than unset, `manual` or `1` | **503** | **503** | `gate has an unknown value` |
+| 2 | Neither window variable is set, gate is `1` | **503** | **503** | `gate is 1 with no window` |
+| 3 | Neither window variable is set, gate unset or `manual` | 200 | 200 | `no trial configured` |
+| 4 | Only one window variable set; or either unreadable; or `UNTIL` ≤ `FROM`; or longer than 48 hours | **503** | **503** | `window not readable` |
+| 5 | Valid window, now < `FROM`, gate `1` | 200 | 200 | `armed, starts <FROM>` |
+| 6 | Valid window, now < `FROM`, gate not `1` | **503** | 200 | `window set but gate is not 1` |
+| 7 | Valid window, `FROM` ≤ now < `FROM` + `ALLOW`, gate `1` | 200 | 200 | `starting` (no slot is due; at `FROM` + `ALLOW` exactly, row 8 applies) |
+| 8 | Valid window, `FROM` + `ALLOW` ≤ now < `LAST`, gate `1` | by 3.4 | by 3.4 | `active` |
+| 9 | Valid window, `FROM` ≤ now < `LAST`, gate not `1` | **503** | by 3.4 | `trial window set but not collecting` |
+| 10 | Valid window, now ≥ `LAST`, nothing overdue and no finding | 200 | 200 | `trial complete, nothing outstanding` (the gate's value is reported, and no longer decides) |
+| 11 | Valid window, now ≥ `LAST`, something overdue or found | **503** as applies | **503** as applies | `trial ended with outstanding findings`; if the gate was not `1`, also `not collecting` |
 
-- **Row 7 is deliberate.** A pause (gate to `manual`, window left as it is, exactly the pause procedure) answers
-  503 "not collecting". **A pause is therefore never reported as a recovery,** and a gate switched off by mistake
-  during a trial raises an alert. Chad gets one alert when Claude pauses; that is the intended notice.
-- **Rows 8 to 10 are the closeout.** The last slots are judged after `UNTIL` like any others. **The window ending
-  is not evidence of recovery:** findings stay 503 until closeout.
-- **Residual limitation, stated:** if the gate and both window variables are removed together during a trial, by
-  mistake, the state is row 1 and the checks are silent. The configuration alone cannot tell that from a trial that
-  was never set. This is not an armed-trial watchdog in that one case.
-- Unreadable or malformed configuration is never healthy (rows 2 and 3), matching the collector, which admits
-  nothing in those cases.
+- **A pause** is row 9, then row 11: 503 "not collecting" throughout, because the slots that passed while paused
+  are overdue and stay so. **A pause is never reported as a recovery,** and a gate switched off by mistake during
+  a trial alerts.
+- **An unknown gate is refused at every stage** (row 1 comes first), including after the window.
+- **The window ending is not evidence of recovery** (row 11).
+- **Residual limitation:** if the gate and both window variables are removed together during a trial, by mistake,
+  the state is row 3 and the checks are silent. The configuration alone cannot tell that from no trial.
 
-### 3.5 Acknowledgment, reset and trial identity
+### 3.6 Bounded reads, failing closed
 
-- **A trial is identified by its `FROM` and `UNTIL` values.** Rows are in or out of it by their times.
+- The query is bounded on both sides and by count: `layer = 'earthview'`, `finished_at` ≥ `FROM`, `finished_at` <
+  `UNTIL` + 24 hours, through the existing `(layer, finished_at)` index, in order, **at most 2,000 rows**; then
+  only rows whose `started_at` is a slot of this trial are used.
+- **288 slots do not bound the rows.** Repeats and stray rows add to them. If the query returns its limit, the
+  evidence may be incomplete: **both checks answer 503 `too many rows to evaluate`.** They never treat a
+  truncated read as a complete one.
+- A row finished more than 24 hours after `UNTIL` is not read; its slot stays overdue. That errs toward alerting.
+- Any row whose status or phrase is not in section 2's table makes its slot `unrecognised`: 503, not ignored.
+- An exception, an unreadable time or a missing table: 503, as the existing checks.
+- **D1 rows read and CPU per request are measured on the candidate** with end-of-trial and repeat-heavy fixtures.
+
+### 3.7 Acknowledgment, reset and trial identity
+
+- **A trial is identified by its `FROM` and `UNTIL` values.**
 - **There is no acknowledge button and no health write.** Findings are acknowledged by **closing the trial out**:
-  removing the two window variables in the dashboard, on Chad's line, after the result has been reviewed. The
-  checks then answer row 1. UptimeRobot will report "up" at that point; it means "closed out", and the result
-  document says what was outstanding.
-- **Pause and resume inside one window:** the slots that passed while paused are overdue and stay so. `runs`
-  stays 503 for the rest of that trial. That is accurate: those slots did not complete. A restart after a pause is
-  a new decision and, if wanted clean, a new window.
-- **A new window is a new trial.** Earlier findings are outside it.
+  removing the two window variables in the dashboard, on Chad's line, **after the result has been reviewed and
+  the trial's rows and the health answers have been copied into the result document.** UptimeRobot will then show
+  "Up". **That means closed out. It does not mean a failed trial passed.**
+- **Pause and resume inside one window:** the paused slots stay overdue and `runs` stays 503 for that trial.
+- **A new window is a new trial.** It is never set to hide an unresolved result: the earlier trial's result is
+  written first.
 
 ## 4. At UptimeRobot (a settings change, later, on its own line)
 
-Two monitors, "ME runs earthview" and "ME trial earthview", with the same settings as the existing eight **once
-those have been read** (section 12): method, interval, timeout, confirmation, accepted statuses, contacts, and the
-phone alert selected on each. GPT's reading of UptimeRobot's help pages: push is available on the Free plan and
-must be selected per monitor.
+Two monitors, "ME runs earthview" and "ME trial earthview", set as the existing eight are today (section 12):
+5-minute interval, 30-second timeout, default location, **E-mail and Push in-app (iPhone) both selected on each**,
+"no delay, no repeat". On the Free plan the method and the accepted status codes cannot be chosen; the account
+uses HEAD (seen in the hub's log) and counts 2xx and 3xx as up, so 503 and 404 are down. The proposal relies on
+nothing beyond that. After creation both are read back from the account (test 3).
 
 ## 5. What Chad sees, and when
 
@@ -222,19 +261,19 @@ pings.** It is offered because the hourly design's safety net failed its rehears
   addresses show traffic, not that UptimeRobot evaluated them or delivered anything; the addresses are public and
   anyone may request them; the request log is sampled. **It is a hint, not a monitor of the watcher.**
 - **Other ways to hear nothing:** a blind spot in these rules; a mistake in the health code; an alert suppressed
-  at the provider; the phone unavailable; the both-removed configuration case (3.4).
+  at the provider; the phone unavailable; the both-removed configuration case (3.5).
 - **A wrong picture that passes validation.** No monitor looks at pictures.
 - **One provider** is a single point for the alarm. Accepted as a stated limitation (M4).
 
 ## 8. Costs
 
 - **Money:** none found. GPT's reading of UptimeRobot's current terms and Free-plan help page: commercial and
-  personal use permitted, 50 monitors, five-minute checks, fair-use policy applies. Eight monitors are in use
-  by the project's records; this adds two. **This account's own plan and contacts are unread** (section 12).
+  personal use permitted, 50 monitors, five-minute checks, fair-use policy applies. **The account is on the Free
+  plan and has nine monitors** (section 12); this adds two.
 - **Hub load, nominal:** two addresses every five minutes is 576 requests a day. Confirmation probes, retries and
-  anyone else requesting the public addresses add to that. Each request reads the trial's rows through an index
-  (at most a few hundred by the end) and no object storage. **D1 rows read and CPU per request are to be measured
-  on the candidate, not assumed small.**
+  anyone else requesting the public addresses add to that. Each request reads the trial's rows through an index,
+  bounded as in 3.6, and no object storage. **D1 rows read and CPU per request are to be measured on the
+  candidate, not assumed small.**
 - **The health code makes no request to EUMETSAT, no admin action, no collection, no cleanup, no write.** Answers
   are `no-store`; HEAD and GET give the same verdict.
 - **A hub change before Stage D (M2):** built on the then-live hub (0.6.22 from its branch, not main's older
@@ -244,11 +283,18 @@ pings.** It is offered because the hourly design's safety net failed its rehears
 
 ## 9. Bounded tests (none run; each live part on its own line)
 
-1. **Offline, on the branch,** production functions against a fake clock and fake rows. Every row of the state
-   table. Slot rules: exact mark, duplicate rows, a manual row, an earlier trial's row, a late row resolving a
-   slot. Each of c3, c6, c8 and its near misses. **Failure, then a good run, then the next poll: still 503.**
-   **A failure in the last slot before `UNTIL`: 503 after the window.** Unreadable rows and exceptions: 503.
-   Deliberate breaks, each caught.
+1. **Offline, on the branch,** production functions against a fake clock and fake rows:
+   - every row of the state table, and each precedence boundary (gate `1` with no window; unknown gate after the
+     window; exactly `FROM` + `ALLOW`; exactly `LAST`);
+   - slots: exact mark; the exact s + 20 minutes boundary; repeats; an earlier trial's row; a late row resolving
+     an overdue slot; **a manual-looking row on an exact mark, recorded as the known blind spot**;
+   - streaks: **an early failure followed by slots not yet due (no finding)**; incomplete slots across the end
+     of the window; each of c3, c6, c8 and its near misses;
+   - **mixed good and bad repeats in one slot:** refusal then success (still `refused`); success after the due
+     time (does not set `current`); `superseded` rows;
+   - **failure, then a good run, then the next poll: still 503**; a failure in the last slot: 503 after the window;
+   - truncation at the row limit, an unrecognised phrase, unreadable rows, exceptions: each 503;
+   - deliberate breaks, each caught.
 2. **Live, after deploy, gate still `manual` and no window:** both addresses answer 200 `no trial configured`;
    the eight existing ones as before; deployed hash equals the built file; nothing under `earthview/` changed;
    D1 rows read and CPU per health request measured.
@@ -277,46 +323,101 @@ not impossible to test safely.** Rev 1 was wrong to say so.
 - Rehearsal amendment A1 is not run.
 - The Stage D line states section 7's exposure in words. Stage D keeps its own line.
 
-## 11. Decisions
+## 11. Decisions (none made yet by Chad's own line)
 
-Chad's, as relayed 23 Nov: **M1 yes** (develop this in place of heartbeat pushes and silence-noticing). **M2 yes
-in principle** (redeploy, on the terms in section 8). **M3 three sustainable daytime reads**, on a revised Stage D
-basis that accepts section 7. **M4 no second provider.**
+**Correction of provenance:** rev 2 recorded M1 to M4 as Chad's choices. They were GPT's recommendations, in text
+Chad relayed. They are recorded here as recommendations until Chad confirms them in his own words.
 
-New in rev 2:
+| # | Question | GPT recommends | Claude proposes |
+|---|---|---|---|
+| M1 | Develop this in place of heartbeat pushes and silence-noticing? | Yes | Yes |
+| M2 | A hub redeploy before Stage D, on section 8's terms? | Yes in principle | Yes |
+| M3 | Three daytime reads by Claude, on a revised Stage D basis accepting section 7? | Yes, three | Yes |
+| M4 | A second monitoring company? | Not by default | No |
+| M5 | Alert on one overdue slot, or three in a row? | One | One |
+| M6 | The disposable fixture test (9.5), on its own later line and reviewed plan? | Yes | Yes |
+| M7 | Read times | 07:00, 13:00, 20:00 SAST if they suit Chad; 11-hour overnight gap stated | The same |
+| M8 | Delete the leftover "ME alert test" monitor (section 12)? A settings change, on Chad's own line | not yet seen by GPT | Yes |
 
-- **M5.** Alert on **one** overdue slot (proposed), or only on three in a row as in rev 1?
-- **M6.** Include test 5, the disposable fixture, on its own later line? Proposed: yes; it is the only live proof
-  that a 503 from these functions reaches the phone.
-- **M7.** The three read times. Proposed 07:00, 13:00 and 20:00 SAST; Chad to say what he can sustain.
+## 12. The UptimeRobot account, read 23 Nov 2026 (signed in by Chad; read-only; nothing changed)
 
-## 12. Not done in rev 2, and what it needs
+Read through the dashboard pages between about 11:10 and 11:25 UTC. Edit forms were opened to read their
+settings and left without saving.
 
-- **The UptimeRobot account was not read.** It needs Chad's sign-in in the browser pane and his go to open the
-  site there. To read, read-only: the monitors' addresses, enabled state, interval, method, timeout, confirmation
-  and accepted statuses, alert delay, contacts and whether push is selected on each, maintenance windows, and any
-  open incident. **Until then, section 1's "existing watcher" is the project's record of 6 Nov, not today's
-  reading.**
-- **UptimeRobot's help and terms pages were not read by Claude** (the fetch needed an approval while Chad was
-  away). The terms quoted are GPT's reading of the primary pages listed in its review.
+- **Plan: Free** (the dashboard says so). No maintenance window exists. No chat or webhook integration is added.
+- **Nine monitors, none paused: 8 Up, 1 Down.**
+
+| Monitor | Address under the hub | Interval | E-mail | Push (iPhone) | SMS, voice | State |
+|---|---|---|---|---|---|---|
+| ME runs usgs | `/health/runs/usgs` | 5 min | on | on | off | Up 16 days |
+| ME runs firms | `/health/runs/firms` | 5 min | on | on | off | Up 16 days |
+| ME publication usgs | `/health/publication/usgs` | 5 min | on | on | off | Up 16 days |
+| ME publication firms | `/health/publication/firms` | 5 min | on | on | off | Up 3 days 23 h |
+| ME archive usgs | `/health/archive/usgs` | 5 min | on | on | off | Up 16 days |
+| ME archive firms | `/health/archive/firms` | 5 min | on | on | off | Up 16 days |
+| ME coverage usgs | `/health/coverage/usgs` | 5 min | on | on | off | Up 16 days |
+| ME coverage firms | `/health/coverage/firms` | 5 min | on | on | off | Up 16 days 11 h |
+| **ME alert test** | `/health/test/firms` (404 by design) | 5 min | on | on | off | **Down since 6 Nov 18:21 SAST, incident still open** |
+
+- **Alert timing on every contact: "No delay, no repeat".** One notification when an incident opens; none while
+  it stays open.
+- **Read on one monitor ("ME runs usgs") and assumed the same on the others, which were not opened that far:**
+  request timeout 30 seconds; follow redirections on; up status codes 2xx and 3xx, changeable only on a paid plan;
+  HTTP method changeable only on a paid plan; location default; region shown as Europe.
+- **Method, from the hub's side:** in 12 minutes to 11:24 UTC the hub logged 18 requests to `/health/…` with
+  UptimeRobot's user agent, all **HEAD**: two or three to each of the eight (200) and one to the test address
+  (404). So the monitors are polling now, by HEAD.
+- **Incidents on record (five):** `coverage/firms` 6 Nov 18:00 to 7 Nov 02:04 SAST; the alert test, twice, 6 Nov;
+  `publication/firms` 7 Nov 02:39 to 05:47; **`publication/firms` 19 Nov 06:36 to 14:02 SAST, 7 hours 26 minutes.**
+- **Not read:** how many failed checks open an incident (not shown on the pages read); the alert contact's own
+  page (whether the email is verified, which device holds the push); the billing page; whether any alert was
+  seen or acted on at the time.
+
+**What this adds to the picture**
+
+1. The existing watcher is real and current: enabled, polling by HEAD, email and phone push selected.
+2. **"ME alert test" is a leftover.** It has shown Down for 16 days, polls the hub 288 times a day, and keeps the
+   account's summary at "1 Down". Because alerts do not repeat, it is silent. It is harmless and it is clutter:
+   **M8** proposes deleting it. A fresh delivery test (9.4) needs a new down event in any case.
+3. **"No repeat" matters for Stage D.** One alert, once. If it is missed, nothing reminds. The incident stays
+   open on the dashboard and in the app.
+4. **An alert being sent is not an alert being acted on.** The 19 Nov incident stayed open for over seven daytime
+   hours. Whether that was noticed is not recorded and is not assumed. It is the same exposure section 7 names.
+5. On the Free plan a 503 is "down" and nothing needs configuring to make it so.
 
 ## 13. Review points and where they went
 
+### Rev 1 review (GPT, 23 Nov)
+
 | GPT's point | Answer |
 |---|---|
-| 1. Resolve the exact evidence first; no "narrow later" | Section 2 (fields, phrases, what each row establishes); 3.3 (what cannot be decided) |
+| 1. Resolve the exact evidence first; no "narrow later" | Section 2 (fields, phrases, what each row establishes); 3.4 (what cannot be decided) |
 | 1. Scheduled time is not completion time; name the freshness | 3.1: "slot completion" |
 | 1. Exclude manual, Stage C and earlier-trial rows; do not count repeats as slots | 3.1 |
 | 1. Why 35 minutes; exact inequality; delayed and still-running runs; "completion missing", not a cause | 3.1: 20 minutes, derived; overdue rule; late rows resolve; no cause named |
-| 2. State table, malformed configuration, last slots, expiry is not recovery, pause is not recovery, residual limitation | 3.4 and 3.5 |
-| 3. Stop conditions must not vanish between polls; no health writes; reset and identity; tests | 3.3, 3.5; tests in 9.1 |
-| 4. Read the real monitor configuration | **Not done**; section 12 |
+| 2. State table, malformed configuration, last slots, expiry is not recovery, pause is not recovery, residual limitation | 3.5 and 3.7 |
+| 3. Stop conditions must not vanish between polls; no health writes; reset and identity; tests | 3.3, 3.4, 3.7; tests in 9.1 |
+| 4. Read the real monitor configuration | Done in rev 3: section 12 |
 | 4. no-store, HEAD equals GET, nothing secret, no collection; load measured, not assumed | Section 8 |
 | 4. The timing is an estimate, not a bound | Section 5 |
 | 5. A live positive need not break collection; fixture option; "untested", not "impossible" | 9.5, M6 |
 | 6. What depends on the thread; "if a later read takes place"; polling is not a monitor of the watcher; "both must fail" too strong | Section 7 |
 | M1 to M4 | Section 11 |
 | Free plan terms | Section 8, attributed to GPT's reading |
+
+### Rev 2 review (GPT, 23 Nov) and where each point went
+
+| GPT's point | Answer |
+|---|---|
+| A manual request can land exactly on a mark; the row cannot tell | 3.1: stated as a blind spot; operational ban, the thread's log reads, a documented test case; a provenance field not proposed here |
+| A successful duplicate must not mask a qualifying failure; define c6; superseded; c8's evidence; mixed fixtures | 3.3 (flags; a good row never removes a bad flag; `superseded` sets `current`, not "published"); 3.4 (c6 reading chosen and why); 9.1 |
+| Only elapsed slots may build a streak; boundaries | 3.2; 9.1 |
+| State table exhaustive, precedence explicit | 3.5 |
+| Row limits are not slot limits; bound the query; fail closed on truncation and unrecognised outcomes; no raw note in public answers | 3.6; 3.4 last bullet |
+| The account read is a real precondition | Done: section 12 |
+| Closeout: preserve evidence first; a new window must not hide a result | 3.7 |
+| M1 to M4 provenance | Section 11 |
+| M5, M6, M7 | Section 11, as recommendations |
 
 ## 14. Sources
 
@@ -325,4 +426,5 @@ New in rev 2:
 - Cloudflare Workers limits page (wall time of a scheduled invocation), read 23 Nov 2026.
 - `HANDOVER.md`, `STATUS.md` on main (UptimeRobot set up 6 Nov).
 - The twelve health addresses, read 23 Nov 10:52 UTC.
-- GPT's review, with its list of UptimeRobot primary pages.
+- GPT's two reviews, with its list of UptimeRobot primary pages.
+- The UptimeRobot dashboard, signed in by Chad, read 23 Nov 2026; the hub's request log for the same minutes.
