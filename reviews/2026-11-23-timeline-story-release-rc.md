@@ -82,3 +82,14 @@ Breaks rerun on this build, each failing as it must: `timeline-story-ui` `eager-
 3. Hub 0.6.24 built on `earth-from-space-rc` by that thread, reviewed by GPT, deployed; `GET /catalogue/timeline/tl-2026-11-R3` returns the exact bytes; R1 and R2 still served.
 4. Page merge. The image files reach the Pages origin with the same merge as the page that refers to them; the page falls back to its list until the hub answers for R3, so the hub pin goes first. Then served-hash and live checks.
 A page rollback comes before any hub rollback; the additive pin can stay.
+
+## 8. R2 upload done, 23 Nov 2026 17:07:13 UTC
+Chad's line: "Approve: upload phase1/timeline/catalogue/tl-2026-11-R3.json (31,636 B, sha256 f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993) to R2 as ref/timeline/tl-2026-11-R3.json, and read it back. No Worker change, no merge."
+All by Claude, in its own pane tab on the Cloudflare dashboard (bucket `mother-earth`), then closed. Times are the Mac browser's clock.
+- **Before (17:06:59 UTC):** destination 404 "The specified key does not exist"; `ref/timeline/` held R1 (15,656 B) and R2 (18,120 B) only. Source read from raw.githubusercontent at commit `36c6cb0`: 200, 31,636 B, sha256 `f1a5fab2…0993`. Source hash and absence checked again immediately before the write.
+- **Upload:** dashboard R2 objects API `PUT` at 17:07:12.494Z: HTTP 200, success, size 31,636, storage class Standard, content type application/json, etag `1c9a29d624aa7c70a3c6796b2191fc8f`, version `7e5df69fbda0ed02f93bb5982f6f8e93`, uploaded 17:07:13.194Z.
+- **Read back:** HTTP 200, 31,636 B, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993` (exact).
+- **R1 and R2 untouched:** read back 15,656 B `096ae648…0fbe` and 18,120 B `2f39aa30…0356`; listing shows their uploads of 10 Nov 06:06:51 and 12 Nov 11:09:38, etags unchanged.
+- **No public effect (17:07:35 UTC, own pane tab on the hub):** `/` reports 0.6.23; `/catalogue/timeline/tl-2026-11-R3` 404 "unknown revision"; R2 and R1 routes 200 with their exact bytes.
+- The object is now uploaded: any change to the catalogue bytes, a release-date slip included, needs a new revision id and key; this object would stay, unused.
+- Section 6's "Nothing is uploaded to R2" is superseded by this section. Still not done: hub 0.6.24 deploy (Earth from Space thread), the live check of the R3 route, the page merge.
