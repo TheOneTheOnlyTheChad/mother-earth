@@ -1,0 +1,5 @@
+ HANDOVER.md                                        |   2 +
+ STATUS.md                                          |  31 ++++
+ ...2026-11-22-earth-from-space-alarm-assessment.md |  63 +++++++
+ .../2026-11-23-earth-from-space-rehearsal-plan.md  | 187 +++++++++++++++++++++
+ 4 files changed, 283 insertions(+)

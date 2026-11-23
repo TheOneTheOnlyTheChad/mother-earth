@@ -1,0 +1,12 @@
+A	animals-assessment.js
+M	animals.html
+M	animals.js
+A	assets/animals/assessments-R1.json
+A	phase1/animals-assessment-ui.test.cjs
+M	phase1/animals-census-ui.test.cjs
+M	phase1/animals-tab-ui.test.cjs
+A	phase1/animals/build_assessments.py
+A	phase1/animals/build_assessments.test.py
+A	phase1/animals/red-list-assessments.json
+M	sources.html
+M	style.css
