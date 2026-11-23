@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 17:22:35 UTC — **Timeline thread's own live read of `tl-2026-11-R3` on hub 0.6.24: exact bytes. Page not merged** (production: none by this thread)
+- `/catalogue/timeline/tl-2026-11-R3`: 200, 31,636 B, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993`; schema 3, release_date 2026-11-24. R2 route `2f39aa30…0356`; R1 route and the unversioned route `096ae648…0fbe`. `/` reports 0.6.24.
+- The mandatory check before the page merge is met. The merge belongs to the UTC day 24 Nov (latest start 22:00 UTC) and waits for Chad's own Approve line. Record: `reviews/2026-11-23-timeline-story-release-rc.md` section 9 on `timeline-story-rc`.
+
 ## 23 Nov 17:21 UTC (clock reading) — **HUB 0.6.24 DEPLOYED on Chad's own Approve line: the Timeline pin `tl-2026-11-R3` and the version number, code only. Read back. The hub serves R3 with its exact bytes; R1 and R2 unchanged. `EARTHVIEW_ENABLED` still `manual`, no window** (production: hub code only; Earth from Space thread, for the Timeline release)
 - **Chad's line (this thread):** "Approve: deploy hub 0.6.24 from earth-from-space-0.6.24-rc 8b80989, phase1/worker.js sha256 db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5, code only (the Timeline pin tl-2026-11-R3 and the version number), EARTHVIEW_ENABLED left at manual, no window variables; read back hash and settings; then fast-forward earth-from-space-rc". **No GPT review of this candidate was relayed to this thread before it.**
 - **Before (17:17:42 UTC):** code `7141beb8…afa1` (0.6.23), 25 bindings, gate `manual`, four crons, five `earthview/` objects; the R3 object already in storage (31,636 B, etag `1c9a29d6…fc8f`, the Timeline thread's upload of 17:07:13).
