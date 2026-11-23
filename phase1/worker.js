@@ -2921,8 +2921,9 @@ async function healthCoverage(env, layer, nowMs) {
  * A TRIAL is the pair EARTHVIEW_FROM / EARTHVIEW_UNTIL; its SLOTS are the ten-minute marks FROM <= s < UNTIL, the same scheduled
  * times evAdmit selects. The health request's own clock decides only which slots are DUE (now >= s + 20 min); it changes nothing
  * about admission and is not a deadline for admitted work. Everything is derived on each request from collector_runs: nothing is
- * written, nothing is fetched, no collection runs. So a finding stays until the window variables are removed (closeout), and a
- * later good run does not clear it. What this cannot know is said in the proposal (sections 3.1, 3.5, 3.6, 7): it keeps no history
+ * written, nothing is fetched, no collection runs. So a TRIAL finding stays until the window variables are removed (closeout), and a
+ * later good run does not clear it; an overdue slot on the runs check clears when its end-of-run row arrives. A row whose finish
+ * time is more than HEALTH_SKEW_MS (5 min) after the request's clock, or whose start or finish time cannot be parsed, fails both. What this cannot know is said in the proposal (sections 3.1, 3.5, 3.6, 7): it keeps no history
  * of the gate; a manual run exactly on a mark looks like that slot's run; rows finished after UNTIL + 24 h are not read.
  * Public answers carry fixed reason codes, times and counts only: never a run note. */
 const EVH = { SLOT_MS: 600e3, ALLOW_MS: 1200e3, HORIZON_MS: 24 * 3600e3, ROW_LIMIT: 2000, LIST_MAX: 20, C6_RUN: 3, C8_RUN: 6 };
@@ -2984,7 +2985,8 @@ async function evhEvaluate(env, nowMs) {
   for (const row of rows) {
     const s = Date.parse(row.started_at), f = Date.parse(row.finished_at);
     if (!Number.isFinite(f) || f > nowMs + HEALTH_SKEW_MS) return both('rows_unreadable', 'rows unreadable', base);
-    if (!Number.isFinite(s) || s < from || s >= until || (s - from) % EVH.SLOT_MS !== 0) { outside++; continue; }
+    if (!Number.isFinite(s)) return both('rows_unreadable', 'rows unreadable', base);   // cannot be assigned to a slot or excluded from one
+    if (s < from || s >= until || (s - from) % EVH.SLOT_MS !== 0) { outside++; continue; }
     const x = slot[(s - from) / EVH.SLOT_MS], k = evhKind(row); x.rows++;
     if (k === 'unrecognised') x.unrecognised = true;
     if (k === 'storage_stop') x.storage_stop = true;

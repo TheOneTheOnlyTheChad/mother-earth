@@ -18,7 +18,7 @@ export const BREAKS = {
   'due-after-equality': ['nowMs >= from + settled * EVH.SLOT_MS + EVH.ALLOW_MS) settled++', 'nowMs > from + settled * EVH.SLOT_MS + EVH.ALLOW_MS) settled++'],
   'allow-30-minutes': ['const EVH = { SLOT_MS: 600e3, ALLOW_MS: 1200e3,', 'const EVH = { SLOT_MS: 600e3, ALLOW_MS: 1800e3,'],
   'off-mark-row-counts': ['|| (s - from) % EVH.SLOT_MS !== 0) { outside++; continue; }', ') { outside++; continue; }\n    if ((s - from) % EVH.SLOT_MS !== 0) { slot[Math.floor((s - from) / EVH.SLOT_MS)].rows++; continue; }'],
-  'earlier-trial-row-counts': ['if (!Number.isFinite(s) || s < from || s >= until ||', 'if (!Number.isFinite(s) || s >= until ||'],
+  'earlier-trial-row-counts': ['    if (s < from || s >= until ||', '    if (s >= until ||'],
   // ---- configuration precedence
   'unknown-gate-ok': ["  if (gate === 'unknown') return { gate, fail: 'gate_unknown_value' };\n", ''],
   'gate-on-without-window-ok': ["return gate === '1' ? { gate, fail: 'gate_on_without_window' } : { gate, none: true };", 'return { gate, none: true };'],
@@ -48,6 +48,7 @@ export const BREAKS = {
   // ---- reads
   'truncation-ok': ["  if (rows.length >= EVH.ROW_LIMIT) return both('too_many_rows',", "  if (false) return both('too_many_rows',"],
   'read-failure-is-empty': ["  } catch (_) { return both('rows_unreadable', 'rows unreadable', base); }", '  } catch (_) { rows = []; }'],
+  'unreadable-start-skipped': ["    if (!Number.isFinite(s)) return both('rows_unreadable', 'rows unreadable', base);", '    if (!Number.isFinite(s)) { outside++; continue; }'],
   'future-row-accepted': ['if (!Number.isFinite(f) || f > nowMs + HEALTH_SKEW_MS) return both(', 'if (!Number.isFinite(f)) return both('],
   'no-horizon': ['iso(until + EVH.HORIZON_MS), EVH.ROW_LIMIT)', 'iso(until + 4000 * EVH.HORIZON_MS), EVH.ROW_LIMIT)'],
   'rows-before-from-read': ["AND finished_at >= ? AND finished_at < ? ORDER BY finished_at LIMIT ?')\n      .bind('earthview', iso(from),", "AND finished_at >= ? AND finished_at < ? ORDER BY finished_at LIMIT ?')\n      .bind('earthview', iso(0),"],
@@ -305,6 +306,17 @@ await t('R3 no table, an unreadable time or a time in the future in a row: both 
   ins(a, slot(0), 'nn', { finished: F + 3600e3 }); at(F + 30 * MIN); eq(await both(a), [503, 503], 'a row finished in the future');
   const b = trial('1'); b.db.prepare('INSERT INTO collector_runs (layer, started_at, finished_at, status, http_status, records, bytes, note) VALUES (?,?,?,?,?,?,?,?)').run('earthview', iso(slot(0)), '2026-11-24T06:01:00.000Zzz', 'ok', 200, 0, 0, 'nothing newer: A listed, B held');
   at(F + 30 * MIN); eq(await both(b), [503, 503], 'an unreadable finished_at');
+});
+await t('R8 (GPT H1) a row whose scheduled time cannot be read fails both, even with every slot complete; a readable off-mark row is still ignored', async () => {
+  const st = h => h.db.prepare('INSERT INTO collector_runs (layer, started_at, finished_at, status, http_status, records, bytes, note) VALUES (?,?,?,?,?,?,?,?)');
+  for (const bad of ['BADSTART-not-a-time', '', '2026-11-24T06:00:00.000Zzz-BADSTART']) {
+    const h = trial('1'); fill(h, 12); st(h).run('earthview', bad, '2026-11-24T06:02:00.000Z', 'down', 200, 0, 0, 'storage record needs repair — SECRETNOTE');
+    for (const when of [F + 30 * MIN, LAST, LAST + 3600e3]) { at(when); for (const w of ['runs', 'trial']) for (const m of ['GET', 'HEAD']) {
+      const g = await get(h, w, m); eq(g.status, 503, JSON.stringify(bad) + ' ' + w + ' ' + m + ' ' + iso(when)); yes(!g.text.includes('SECRETNOTE') && !g.text.includes('BADSTART'), 'row text in the answer');
+      if (m === 'GET') { eq(g.body.reasons, ['rows_unreadable']); eq(g.body.facts.state, 'rows unreadable'); } } }
+  }
+  const ok = trial('1'); fill(ok, 12); st(ok).run('earthview', iso(slot(3) + 1234), '2026-11-24T06:32:00.000Z', 'down', 200, 0, 0, 'storage record needs repair — SECRETNOTE'); st(ok).run('earthview', iso(F - SLOT), '2026-11-24T06:02:00.000Z', 'down', 200, 0, 0, 'storage record needs repair');
+  at(LAST); eq(await both(ok), [200, 200], 'readable but off the marks, or before FROM: not a slot of this trial');
 });
 await t('R4 KNOWN LIMIT, the 24-hour horizon: a late bad repeat of a completed slot finished after UNTIL + 24 h is not seen; just inside it, it is', async () => {
   const h = trial('1'); fill(h, 12); ins(h, slot(4), 'repair', { finished: U + 86400e3 }); at(U + 2 * 86400e3); eq(await both(h), [200, 200], 'finished exactly at UNTIL + 24 h: outside the read');

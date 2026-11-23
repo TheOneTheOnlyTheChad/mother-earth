@@ -127,3 +127,51 @@ plus the two new ones. No other assertion was changed.
     node --no-warnings phase1/earthview-health.test.mjs
     node phase1/earthview-health-breaks.mjs
     node --no-warnings phase1/health-hub.test.mjs
+
+## 8. Return 1 (r1): GPT finding H1 fixed (23 Nov 2026, 14:29 UTC clock reading)
+
+GPT's review: `reviews/2026-11-23-earth-from-space-0.6.23-candidate-gpt-review.md` (one hold, H1). **Still branch
+work only: nothing deployed, no setting, monitor or account changed, Stage D not cleared.** Sections 1 to 7 above
+describe the first candidate (`114dc5b`) and are kept as written; where they differ, this section is current.
+
+**H1, accepted as found.** A row whose `started_at` cannot be parsed was counted as "outside this trial" and
+skipped, so both addresses could answer 200 while that row carried a storage stop. Brief section 3.6 says
+unreadable times fail closed. My case R3 claimed to cover it but only tested `finished_at`.
+
+**The change (two edits to `phase1/worker.js`, nothing else in the hub file):**
+
+1. The fix, as GPT's minimal separation: a non-finite parsed `started_at` now returns `rows_unreadable` on both
+   addresses before the readable outside-window and off-mark exclusions, which are kept unchanged.
+2. Comment only (GPT's two wording notes): the block comment now says a TRIAL finding stays until closeout while an
+   overdue slot clears when its row arrives, and that the future-time rule is the existing `HEALTH_SKEW_MS`
+   allowance of five minutes on `finished_at`, not "any time ahead".
+
+**Suite:** new case **R8** (every slot complete, plus one row with an unreadable `started_at` and a storage-stop
+note; three unreadable forms: text, empty, a malformed time; at three clock readings; GET and HEAD on both
+addresses: 503, reason `rows_unreadable`, state "rows unreadable", no row text in the answer; and a readable
+off-mark row and a readable before-FROM row carrying the same note stay ignored, 200 and 200). New break
+`unreadable-start-skipped` (the rejection turned back into a skip): caught by R8 alone. The existing break
+`earlier-trial-row-counts` had its search pattern updated because the line it edits changed.
+
+| File | sha256 | Bytes |
+|---|---|---|
+| `phase1/worker.js` | `7141beb89e8e81ef351ddcc53e8654b1ddcbdb0048c8ffcb6b0d0ed7d7b3afa1` | 551047 |
+| `phase1/earthview-health.test.mjs` | `d4a5d4e817ec63aa1d06186b9a4a3fd09ddfc0663a7fdf57be6b9d1b28ebef09` | 41290 |
+| `phase1/earthview-health-breaks.mjs` | `ac813ae71f8648b4bc0e5e208d0e246d42f6ff46ce8917b3f853a49eb520c84c` | unchanged |
+| `phase1/evprobe.js` | `09c688683d903ba69ca3bdeef5c507d2a4fc9bfea3782523532fa74b1246f799` | rebuilt, unchanged |
+
+**Results on r1 (this container, Node v22.23.5):**
+
+- New suite: **49 passed, 0 failed.** Breaks: **38 of 38 caught.**
+- Health-only check repeated: reversing the full diff against r1 gives 540,792 bytes, sha256
+  `17798a44a217bdb3eafe1ccd8852833cc050b9bb0e9094f65c59a2db2eeda080` (the retained 0.6.22 file).
+- Relevant health regression: `health-hub` 29 passed, 0 failed. `health-breaks.mjs` still 14 of 19 (the older
+  weakness in section 5.1, unchanged, still needing its own look; not claimed as complete coverage).
+- Wider suites: 47 suite files in `phase1/`. **42 pass** (the new one included). **5 not run** as before (night-lights,
+  sky-scene-ref, solar, oceanheat-hub, orbital: files this container does not have). Three (earthview-hub,
+  ships-fallback, ships-retain-hub) timed out at 100 s when all were run six at a time, and passed when run on
+  their own (309; 7; 35). Section 4's count of 39 was of the suites listed there.
+
+**Not done, unchanged from section 5:** the file header comment still does not list the two addresses; live D1 and
+CPU measurements; the fixture test plan; the runbook revision; the leftover monitor "ME alert test" is still not
+deleted (Chad's Approve line unspent, to be done with the dashboard in view and read back).
