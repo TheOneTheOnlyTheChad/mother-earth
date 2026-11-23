@@ -4,6 +4,17 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 17:23 UTC (clock reading) — **HUB 0.6.24 DEPLOYED on Chad's own Approve line: the Timeline pin `tl-2026-11-R3` and the version number, code only. Read back. The hub serves R3 with its exact bytes; R1 and R2 unchanged. `EARTHVIEW_ENABLED` still `manual`, no window** (production: hub code only; Earth from Space thread, for the Timeline release)
+- **Chad's line (this thread):** "Approve: deploy hub 0.6.24 from earth-from-space-0.6.24-rc 8b80989, phase1/worker.js sha256 db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5, code only (the Timeline pin tl-2026-11-R3 and the version number), EARTHVIEW_ENABLED left at manual, no window variables; read back hash and settings; then fast-forward earth-from-space-rc". **No GPT review of this candidate was relayed to this thread before it.**
+- **Before (17:17:42 UTC):** code `7141beb8…afa1` (0.6.23), 25 bindings, gate `manual`, four crons, five `earthview/` objects; the R3 object already in storage (31,636 B, etag `1c9a29d6…fc8f`, the Timeline thread's upload of 17:07:13).
+- **Deploy:** content-only upload by Claude through the dashboard tab (pane displayed), file fetched from GitHub at `8b80989` and hash-checked there; PUT 17:18:35 to 17:18:38 UTC, HTTP 200.
+- **After (17:18:57 UTC):** code read back `db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5`, 551,400 B; 0.6.24; 25 bindings, same types; gate `manual`, no window; crons unchanged; `earthview/` and `ref/timeline/` objects identical.
+- **Live checks (17:19:05 UTC):** `GET /catalogue/timeline/tl-2026-11-R3` → 200, 31,636 B, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993`; legacy and R1 → R1's bytes; R2 → R2's bytes; an unknown revision → 404; `/` lists R1, R2, R3 with current R3; all ten health addresses GET and HEAD 200 (the two `earthview` ones "no trial configured"). First `*/5` run after the deploy (scheduled 17:20:07) ok, from the hub's run record.
+- **`earth-from-space-rc` fast-forwarded** to the deployed commit; head now `e9242a4` (record added). **The live hub is that branch's `phase1/worker.js`. Never main's (0.6.19).** Rollback: 0.6.23 at `566a11b`.
+- **Not read:** Cloudflare's invocation records and CPU after the deploy; later ticks; `/status` layers; UptimeRobot.
+- **For the Timeline thread:** the hub pin is in place; the page merge is theirs, on Chad's own line. Record: `reviews/2026-11-23-earth-from-space-0.6.24-candidate.md` section 8 on `earth-from-space-rc`.
+- **Earth from Space, unchanged:** Stage D not cleared; the three documents of 15:19 UTC are with GPT. The fixture alert test plan now copies the health code from `8b80989`, not `566a11b` (the health code is byte for byte the same).
+
 ## 23 Nov 17:07:13 UTC — **R2 UPLOAD DONE: `ref/timeline/tl-2026-11-R3.json`, read back exact** (Timeline thread; Chad: "Approve: upload phase1/timeline/catalogue/tl-2026-11-R3.json (31,636 B, sha256 f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993) to R2 as ref/timeline/tl-2026-11-R3.json, and read it back. No Worker change, no merge.")
 - **Before:** destination 404; `ref/timeline/` held R1 and R2 only; source at `timeline-story-rc` `36c6cb0` read 31,636 B, `f1a5fab2…0993`.
 - **Upload (dashboard R2 objects API, Claude's own pane tab, closed after):** HTTP 200, size 31,636, etag `1c9a29d624aa7c70a3c6796b2191fc8f`, version `7e5df69fbda0ed02f93bb5982f6f8e93`, uploaded 17:07:13.194Z.
