@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 14:14 UTC (clock reading) — **Timeline story: branch candidate `timeline-story-rc` (`98d88f9`) built on Chad's go. Not yet a preview: the two NASA image files are not in the branch. Nothing merged, uploaded, pinned or deployed.** (live page unchanged, merge `03aff0a`; hub untouched; Timeline feature thread)
+- **Chad's own line:** "Go: branch build of the end-Cretaceous story from snapshot 2, sha256 d532063d5df9f19d8262e34a3d8ef3c38cdfb1b58b24f4d09cd05999d479219a. I accept NASA's reuse policy as the basis for the PIA03379 annotated image, this image only."
+- **Built on the branch:** schema 3 in the generator (the released `tl-2026-11-R2` still builds byte for byte); story validation and open-on-demand image loading in `timeline.js`; story styles; rehearsal sources for `tl-2026-11-T1`; the preview helper `phase1/timeline/preview.mjs` (127.0.0.1 only, no client code); two new suites.
+- **Results, workspace only:** all nine Timeline suites pass (new: story-build 87, story-ui 93; unchanged: 45, 73, 594, 96, 173, 209, 18). **The two new suites ran on fixture images**; one check (the repository's image files are the NASA bytes) is reported NOT RUN.
+- **Why the image files are missing:** neither the workspace shell nor the Mac shell reaches NASA (proxy 403), and a folder-access request for the Mac's Downloads folder was refused. The files' hashes were measured in a browser tab three times on 23 Nov and matched snapshot 2 each time. Chad is needed to place the two files; then the hashes are checked, the files committed and the story suites rerun on the real bytes.
+- **Not done:** the helper run on the Mac, Claude's pane pass, any phone or Safari check, 200 % zoom and text spacing for the story.
+- **For GPT, listed in the record:** nine points where the build departs from the proposal or adds reader-facing words that snapshot 2 does not contain (among them: a schema pin on the page in place of "schema 3 only"; opening sentences may name evidence items as well as claims; groups not collapsed; the wording of the public change record).
+- **Record:** `reviews/2026-11-23-timeline-story-rc.md` on the branch; review copies on the Mac under `_review/timeline-story-rc/read/`.
+
 ## 23 Nov 14:02 UTC (clock reading) — **CORRECTION: the UptimeRobot monitor "ME alert test" was NOT deleted. The entry of 11:4x UTC below that says it was is wrong.** (production: nothing changed in UptimeRobot; nine monitors as before; hub 0.6.22 unchanged; Earth from Space thread)
 - **What happened:** the delete was pressed about 11:36:55 UTC while the browser pane was out of view and did not take effect. Claude reported it as done and called one missing poll "hub-side confirmation". **That inference was unsound:** the down monitor's polls are irregular (11:33:57, 11:46:57, 12:01:10, 13:43:33, 13:53:40 in the hub's log).
 - **Read 14:00 UTC:** dashboard shows nine monitors, "ME alert test" still Down, 1 Down and 8 Up. A second attempt could not be completed (pane out of view again).
