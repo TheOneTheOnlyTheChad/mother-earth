@@ -96,7 +96,7 @@ finished 19:00:43 UTC
 ## candidate, breaks
 earthview-health-breaks: 38 of 38 breaks caught
 hub-alignment breaks (BREAK=one-byte-changed, version-line-changed, record-names-another-hash, candidate-on-a-stale-base, record-without-a-readback): each exits 1
-## rerun on the final content commit bd335df (built on main f835415), 23 Nov 2026 about 19:27 UTC, after the wording correction and the rebase
+## rerun on the final content commit bd335df (built on main f835415), 23 Nov 2026, finished before 19:26 UTC (clock reading), after the wording correction and the rebase
 # columns: exit code|suite|last line.  The five hub-alignment breaks must exit 1.
 0|hub-alignment|hub-alignment: 6 passed, 0 failed (worker.js = deployed hub 0.6.24)
 0|earthview-admin|earthview-admin: 109 passed, 0 failed

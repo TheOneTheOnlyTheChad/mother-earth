@@ -1,6 +1,6 @@
 # Hub-to-main: the landing candidate (23 Nov 2026) — NOT LANDED
 
-**Rev 2 of this record, 23 Nov 2026 19:25 UTC (clock reading).** After GPT's review of the candidate, as relayed by
+**Rev 2 of this record, 23 Nov 2026, written after the 19:21:16 UTC read-back of the live hub.** (Three times in rev 2 as first committed were estimates, not readings; they are replaced here by readings, in a third commit that changes this record and one evidence file only.) After GPT's review of the candidate, as relayed by
 Chad in his own message: GPT accepts the paired workspace evidence and the integration content; one documentation
 correction first; then manifest update, rebase onto current main, scope and identity checks rerun, and the exact
 final commit presented for Chad's landing approval. Chad: the three existing Animals failures and the known buoy
@@ -32,8 +32,8 @@ folder; rev 1's review had earlier been filed here only as Chad relayed it). Sec
 |---|---|
 | Branch | `hub-to-main` |
 | Content commit (the 126 integration paths) | `bd335df79348921d5da69fc473e1ce77d2c1f1b4` |
-| **Final commit, the one a landing line names** | the head of the branch: the content commit plus one commit adding the nine evidence files (this record among them, which is why it cannot print its own id). Named in the review copy's read-me, in `STATUS.md` and in the landing line |
-| Built on main | `f8354155b34780f9230c13b85b215a8cd93e6d38` (main's tip, read 23 Nov 19:20 UTC) |
+| **Final commit, the one a landing line names** | the head of the branch: the content commit plus the commits that add and correct the nine evidence files (this record among them, which is why it cannot print its own id). Named in the review copy's read-me, in `STATUS.md` and in the landing line |
+| Built on main | `f8354155b34780f9230c13b85b215a8cd93e6d38` (main's tip; read with `git ls-remote` at 19:26 UTC, clock reading, still this commit) |
 | Earlier form, reviewed by GPT and tested | head `8cddc0f`, content `6d2781c`, on main `fb30ee9`. The final content differs from it by 8 lines of `docs/HUB-DEPLOY-RULE.md` and nothing else |
 | Sources | `earth-from-space-rc` `e9242a4aa881`; `earth-from-space-proposal` `7e3ea60cb173`; the branch left main at `7cc18c8` |
 | `phase1/worker.js` | sha256 `db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5`, 551,400 bytes: the deployed hub 0.6.24 |
@@ -227,7 +227,7 @@ change), not a one-off Mac command.
 
 ### 7.5 Rerun on the final commit (23 Nov, after the rebase)
 
-On content commit `bd335df`, Claude's workspace, about 19:27 UTC. Full lines: `suites-non-browser.txt`, last section.
+On content commit `bd335df`, Claude's workspace, between the 19:21:16 UTC read-back and 19:26 UTC (clock reading at the end). Full lines: `suites-non-browser.txt`, last section.
 
 - `check-manifest` against main `f835415`: 14 passed, 0 failed; 126 changed paths, all in the manifest; 61 left as on main.
 - `hub-alignment`: 6 passed; its five breaks each fail.
