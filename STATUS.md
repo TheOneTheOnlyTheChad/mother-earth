@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 10:53 UTC (clock reading) — **Earth from Space: proposal written, on Chad's go, for monitoring that does not depend on the thread, the Mac or the browser login. Docs only: nothing built, no setting changed, no Stage D.** (hub 0.6.22 unchanged; Earth from Space thread)
+- **Existing monitoring assessed:** UptimeRobot's eight monitors (runs, publication, archive, coverage for `usgs` and `firms`) are independent and live; all eight health addresses answered 200 at 10:52 UTC. **None covers Earth from Space** (`/health/…/earthview` is 404). Because Earth from Space starts after `usgs` has been recorded in the same invocation, the existing monitors would not notice a picture run being ended.
+- **Proposed:** two new read-only, window-aware health addresses on the hub (`runs/earthview` for missing expected runs, `trial/earthview` for stop conditions 3, 6, 8) and two more UptimeRobot monitors. Healthy checks are logged, not pushed. Heartbeat pushes, the "notice the silence" fallback and amendment A1 would be withdrawn.
+- **Said plainly in it:** it detects but cannot pause; several stop conditions stay with the thread's reads; no fully independent detector of the watcher's own failure; it needs a hub change (0.6.23) and a deploy before Stage D.
+- **File:** `docs/concepts/EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL.md` (branch `earth-from-space-rc` `07df1ab`, copied here). **Next:** GPT's review; Chad's decisions M1 to M4.
+
 ## 23 Nov 10:40 UTC (clock reading) — **Timeline: proposal for one developed event (end-Cretaceous: image, readable opening, detail) written for GPT's review. Docs only. Nothing researched, built or stored.** (live page unchanged, merge `03aff0a`; hub untouched; Timeline feature thread)
 - **Chad's own line (23 Nov):** "Go: write the docs-only proposal for one developed end-Cretaceous event, incorporating GPT's points. Include proposed source and image checks, the local preview approach and any licence decisions. No build or release yet."
 - **File:** `docs/concepts/TIMELINE-STORY-PROPOSAL.md` rev 1 (main; Project `claude/concepts/`; Mac `_review/timeline-story-proposal/read/`). First slice of stage 2. Schema 3 for this entry only (an opening whose every sentence names its supporting claims; an image record with licence and hash); a capped source and image check; a local preview with a rehearsal revision that never touches the hub; decisions S1–S4 and L1–L4 for Chad.
