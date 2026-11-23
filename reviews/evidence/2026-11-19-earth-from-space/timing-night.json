@@ -1,0 +1,30 @@
+{
+  "what": "Night listing-delay sample. One GetCapabilities read a minute from the browser pane (https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetCapabilities&version=1.3.0&namespace=mtg_fd); for layer mtg_fd:rgb_geocolour, the first read at which each frame time appeared as the newest listed. Read-only.",
+  "started": "2026-11-19T17:33:01.176Z", "last_read": "2026-11-19T20:33:23.223Z", "collected_at": "2026-11-19T20:34:51Z", "planned_s": 10800, "interval_s": 60, "reads": 176, "failed_reads": 0,
+  "delay_s_means": "first_seen minus the frame time. Each first_seen is late by up to the gap since prev_read (about 61 to 69 s) plus the listing's cache age.",
+  "log": [
+    {"newest":"2026-11-19T17:00:00Z","first_seen":"2026-11-19T17:33:01.410Z","prev_read":null,"delay_s":1981,"cache_age_s":162,"x_cache":"HIT Varnish","http":200,"note":"already listed when the sample began; not a transition"},
+    {"newest":"2026-11-19T17:10:00Z","first_seen":"2026-11-19T17:34:03.584Z","prev_read":"2026-11-19T17:33:01.410Z","delay_s":1444,"cache_age_s":24,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T17:20:00Z","first_seen":"2026-11-19T17:44:23.601Z","prev_read":"2026-11-19T17:43:22.243Z","delay_s":1464,"cache_age_s":54,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T17:30:00Z","first_seen":"2026-11-19T17:54:41.387Z","prev_read":"2026-11-19T17:53:40.457Z","delay_s":1481,"cache_age_s":52,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T17:40:00Z","first_seen":"2026-11-19T18:00:55.321Z","prev_read":"2026-11-19T17:59:46.082Z","delay_s":1255,"cache_age_s":0,"x_cache":"MISS Varnish","http":200},
+    {"newest":"2026-11-19T17:50:00Z","first_seen":"2026-11-19T18:12:16.954Z","prev_read":"2026-11-19T18:11:15.271Z","delay_s":1337,"cache_age_s":52,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T18:00:00Z","first_seen":"2026-11-19T18:22:41.333Z","prev_read":"2026-11-19T18:21:40.262Z","delay_s":1361,"cache_age_s":36,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T18:10:00Z","first_seen":"2026-11-19T18:32:55.019Z","prev_read":"2026-11-19T18:31:52.855Z","delay_s":1375,"cache_age_s":40,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T18:30:00Z","first_seen":"2026-11-19T18:53:31.430Z","prev_read":"2026-11-19T18:52:30.348Z","delay_s":1411,"cache_age_s":52,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T18:40:00Z","first_seen":"2026-11-19T19:03:44.543Z","prev_read":"2026-11-19T19:02:42.771Z","delay_s":1425,"cache_age_s":57,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T18:50:00Z","first_seen":"2026-11-19T19:09:50.857Z","prev_read":"2026-11-19T19:08:49.497Z","delay_s":1191,"cache_age_s":6,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T19:00:00Z","first_seen":"2026-11-19T19:20:11.620Z","prev_read":"2026-11-19T19:19:09.418Z","delay_s":1212,"cache_age_s":24,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T19:10:00Z","first_seen":"2026-11-19T19:33:42.283Z","prev_read":"2026-11-19T19:32:40.824Z","delay_s":1422,"cache_age_s":5,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T19:20:00Z","first_seen":"2026-11-19T19:40:49.781Z","prev_read":"2026-11-19T19:39:48.346Z","delay_s":1250,"cache_age_s":29,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T19:30:00Z","first_seen":"2026-11-19T19:54:13.650Z","prev_read":"2026-11-19T19:53:11.614Z","delay_s":1454,"cache_age_s":53,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T19:40:00Z","first_seen":"2026-11-19T20:00:30.636Z","prev_read":"2026-11-19T19:59:21.314Z","delay_s":1231,"cache_age_s":0,"x_cache":"MISS Varnish","http":200},
+    {"newest":"2026-11-19T19:50:00Z","first_seen":"2026-11-19T20:10:50.546Z","prev_read":"2026-11-19T20:09:41.567Z","delay_s":1251,"cache_age_s":0,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T20:00:00Z","first_seen":"2026-11-19T20:21:01.268Z","prev_read":"2026-11-19T20:20:00.605Z","delay_s":1261,"cache_age_s":30,"x_cache":"HIT Varnish","http":200},
+    {"newest":"2026-11-19T20:10:00Z","first_seen":"2026-11-19T20:31:21.468Z","prev_read":"2026-11-19T20:30:20.299Z","delay_s":1281,"cache_age_s":32,"x_cache":"HIT Varnish","http":200}
+  ],
+  "summary": { "transitions": 18, "delay_s_min": 1191, "delay_s_median": 1349, "delay_s_max": 1481, "delay_min_minutes": 19.9, "delay_median_minutes": 22.5, "delay_max_minutes": 24.7,
+    "skipped_as_newest": ["2026-11-19T18:20:00Z"],
+    "skipped_note": "The newest listed time went from 18:10 (still newest at the 18:52:30 read) to 18:30 (18:53:31). 18:20 was never the newest in any read. Whether it was listed at all was not checked: the sample recorded only the newest time." },
+  "limits": "One evening, three hours, 18 transitions. Preliminary evidence of typical delay, not a bound. Morning and afternoon samples not yet run."
+}

@@ -444,9 +444,13 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       const mainIdx = mainFile('index.html'), idx = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
       const strip = t => t.replace('    <a href="animals.html" data-view="animals">Animals</a>\n', '').replace('      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', '').replace(/style\.css\?v=\d+/, 'style.css?v=X');
       ok('13b index.html equals main\'s except the Animals tab link, the Animals menu link and the stylesheet version', strip(idx) === mainIdx.replace(/style\.css\?v=\d+/, 'style.css?v=X') && idx !== mainIdx);
-      const same = ['layers.js', 'app.js', 'aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'timeline.js', 'phase1/worker.js', 'phase1/collector-mac.mjs', 'phase1/bare-earth-ui.test.cjs'];
+      const same = ['layers.js', 'app.js', 'aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'timeline.js', 'phase1/collector-mac.mjs', 'phase1/bare-earth-ui.test.cjs'];
+      // 23 Nov 2026 (hub-to-main alignment, Chad's decision G-a): 'phase1/worker.js' left this list. Main's hub file is now the DEPLOYED hub
+      // (0.6.24), which is not the file at this suite's pinned baseline and never will be again. The hub is protected instead by
+      // phase1/hub-alignment.test.mjs, which holds phase1/worker.js to the recorded deployed hash (phase1/DEPLOYED-HUB.json).
+      // Every other file in this list, and checks 13a, 13b, 13d and 13e, are unchanged.
       const diff = same.filter(f => { try { return mainFile(f) !== fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch (_) { return true; } });
-      ok('13c Earth now\'s scripts, the Layers panel, the hub, the collector and the Bare Earth suite are byte-identical to main', diff.length === 0, diff);
+      ok('13c Earth now\'s scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs)', diff.length === 0, diff);
       const css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8'), mainCss = mainFile('style.css').split('\n'), cur = new Set(css.split('\n'));
       const gone = mainCss.filter(l => !cur.has(l)); ok('13d the shared stylesheet is NOT identical to main: every main line is kept except the header rules changed for five tabs (at most 4 lines, listed on failure); the Animals rules are added', gone.length <= 4 && gone.every(l => /\.top \.promise|\.tabs a|\.top\{padding/.test(l)) && css.length > mainCss.join('\n').length, gone);
       for (const pg of ['moon.html', 'sun.html', 'timeline.html', 'sources.html']) { const a = mainFile(pg), b = fs.readFileSync(path.join(ROOT, pg), 'utf8'); const sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/, rel = pg === 'sources.html';      // release: sources.html alone gains one Animals section

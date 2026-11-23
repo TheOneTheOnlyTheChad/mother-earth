@@ -1,5 +1,10 @@
 # Earth from Space — runbook for Stage C, the monitoring rehearsal and Stage D (rev 2, with the 0.6.22 candidate)
 
+**Added 23 Nov 2026 (add-only note):** sections 2, 2a and 3 below are being replaced by
+`reviews/2026-11-23-earth-from-space-stage-d-runbook.md` (runbook rev 3, draft in review). Until that is accepted
+they are not to be used for Stage D: the email alarm does not exist and the rehearsal of section 2 failed on 23 Nov.
+Sections 0, 1, 4 and 5 are the record of Stage C and stand.
+
 22 Nov 2026. **Rev 2** answers GPT's review of the candidate (`reviews/2026-11-22-earth-from-space-0.6.22-candidate-gpt-review.md`):
 trial-end ordering (3.3, 3.4), account-usage reads (0.7, 3.1, 3.4), pause ownership if C6 is refused (1, 3.0), the
 email alarm as a pre-D task (2a), and the native caller run (5: **done 22 Nov**, 80 passed, 0 failed, evidence

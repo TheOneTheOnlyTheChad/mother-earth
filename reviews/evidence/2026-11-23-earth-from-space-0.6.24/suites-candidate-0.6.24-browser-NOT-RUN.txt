@@ -1,0 +1,45 @@
+0|phase1/aircraft-dots-page.test.cjs|aircraft-dots-page: 45 passed, 0 failed
+1|phase1/arts-ui.test.cjs|Node.js v22.23.5
+1|phase1/backdrop-layer.test.cjs|Node.js v22.23.5
+1|phase1/bare-earth-ui.test.cjs|    at UtilityScript.<anonymous> (<anonymous>:1:44)
+1|phase1/buoy-temp-ui.test.cjs|Node.js v22.23.5
+1|phase1/cell-perf-ui.test.cjs|Node.js v22.23.5
+1|phase1/desktop-overflow.test.cjs|Node.js v22.23.5
+1|phase1/drifters-ui.test.cjs|Node.js v22.23.5
+1|phase1/dustrgb-ui.test.cjs|Node.js v22.23.5
+0|phase1/earthview-ui.test.cjs|earthview-ui: 79 passed, 0 failed
+1|phase1/fire-status-ui.test.cjs|Node.js v22.23.5
+1|phase1/fires-wording-ui.test.cjs|Node.js v22.23.5
+1|phase1/freshness-wording-ui.test.cjs|Node.js v22.23.5
+1|phase1/header-tabs.test.cjs|Node.js v22.23.5
+1|phase1/kept-ui.test.cjs|Node.js v22.23.5
+1|phase1/key-drawn-ui.test.cjs|Node.js v22.23.5
+1|phase1/layer-switches-ui.test.cjs|    at UtilityScript.<anonymous> (<anonymous>:1:44)
+1|phase1/legend-active-ui.test.cjs|Node.js v22.23.5
+1|phase1/mobile-pass.test.cjs|Node.js v22.23.5
+1|phase1/moon-globe.test.cjs|Node.js v22.23.5
+1|phase1/moon-lit.test.cjs|Node.js v22.23.5
+1|phase1/moon-lro-path.test.cjs|Node.js v22.23.5
+1|phase1/night-lights-ui.test.cjs|Node.js v22.23.5
+1|phase1/oceanheat-ui.test.cjs|Node.js v22.23.5
+1|phase1/optional-layers-status-ui.test.cjs|Node.js v22.23.5
+1|phase1/orbital-browser.test.cjs|Node.js v22.23.5
+1|phase1/osmc-reliability-ui.test.cjs|Node.js v22.23.5
+1|phase1/place-ui.test.cjs|Node.js v22.23.5
+1|phase1/plastic-ui.test.cjs|Node.js v22.23.5
+1|phase1/quakes-ships-status-ui.test.cjs|Node.js v22.23.5
+1|phase1/search-ui.test.cjs|Node.js v22.23.5
+1|phase1/ships-retain-ui.test.cjs|Node.js v22.23.5
+1|phase1/sky-ui.test.cjs|Node.js v22.23.5
+1|phase1/sky-zoom-ui.test.cjs|Node.js v22.23.5
+1|phase1/skycraft-ui.test.cjs|FAIL  suite stopped on an error: Error: ENOENT: no such file or directory, open '/home/claude/spike/node_modules/globe.gl/dist/globe.gl.min.js' |     at Object.
+1|phase1/smoke-fixes.test.cjs|    at async <repo>/phase1/smoke-fixes.test.cjs:73:33
+1|phase1/status-notes-ui.test.cjs|Node.js v22.23.5
+1|phase1/sun-globe.test.cjs|Node.js v22.23.5
+1|phase1/terminator-behaviour.test.cjs|Node.js v22.23.5
+1|phase1/terminator-ui.test.cjs|Node.js v22.23.5
+1|phase1/timeline-axis.test.cjs|Node.js v22.23.5
+1|phase1/timeline-changes-ui.test.cjs|Node.js v22.23.5
+2|phase1/timeline-ui.test.cjs|}
+1|phase1/ux-round1.test.cjs|Node.js v22.23.5
+1|phase1/wind-ui.test.cjs|Node.js v22.23.5

@@ -1,0 +1,246 @@
+{
+ "start": "2026-11-20T13:00:00Z",
+ "build": "b512f2c92211-53f3982760b8",
+ "slots": 72,
+ "runs_planned": 70,
+ "excluded": [
+  "2026-11-20T18:00:00Z",
+  "2026-11-20T18:10:00Z"
+ ],
+ "requests_planned_at_most": 210,
+ "attempts_observed": 70,
+ "requests_observed_at_most": 210,
+ "ticks_not_run": [],
+ "lines_without_attempt_id": 0,
+ "forward": "undecided: the experiment is incomplete",
+ "sizes": {
+  "1536": {
+   "verdict": "incomplete",
+   "criteria": {
+    "1": "incomplete",
+    "2": "incomplete",
+    "3": "incomplete",
+    "4": "incomplete",
+    "5": "met"
+   },
+   "runs": {
+    "phase1": {
+     "planned": 18,
+     "clean": 17,
+     "not_run": 0,
+     "other": 1
+    },
+    "phase2": {
+     "planned": 5,
+     "clean": 5,
+     "not_run": 0,
+     "other": 0
+    },
+    "phase3": {
+     "planned": 12,
+     "clean": 11,
+     "not_run": 0,
+     "other": 1
+    }
+   },
+   "ended_for_resources_in_phases_1_2": [],
+   "header": {
+    "planned": 18,
+    "observed_matching": 17,
+    "failures": []
+   },
+   "refusals": [],
+   "cpu": {
+    "single_validation_max_ms": 637,
+    "valid_figures": 18,
+    "planned": 18,
+    "six_validations_max_ms": 3129,
+    "limit_ms": 5000
+   },
+   "ladder": [
+    {
+     "mib": 16,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 32,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 48,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 64,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 80,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 96,
+     "planned": 2,
+     "clean": 1,
+     "ended_for_resources": 0,
+     "died_at": []
+    }
+   ],
+   "not_clean": [
+    {
+     "k": 7,
+     "at": "2026-11-20T14:10:00Z",
+     "phase": 1,
+     "state": "not clean",
+     "why": [
+      "attempt 2862d199de11: ended without validating: fetch failed"
+     ]
+    },
+    {
+     "k": 71,
+     "at": "2026-11-21T00:50:00Z",
+     "phase": 3,
+     "state": "not clean",
+     "why": [
+      "attempt e32215bbc190: ended without validating: fetch failed"
+     ]
+    }
+   ],
+   "coverage": {
+    "distinct_frames": 35,
+    "first": "2026-11-20T12:40:00Z",
+    "last": "2026-11-21T00:20:00Z"
+   },
+   "notes": []
+  },
+  "2048": {
+   "verdict": "incomplete",
+   "criteria": {
+    "1": "incomplete",
+    "2": "incomplete",
+    "3": "incomplete",
+    "4": "incomplete",
+    "5": "met"
+   },
+   "runs": {
+    "phase1": {
+     "planned": 18,
+     "clean": 17,
+     "not_run": 0,
+     "other": 1
+    },
+    "phase2": {
+     "planned": 5,
+     "clean": 5,
+     "not_run": 0,
+     "other": 0
+    },
+    "phase3": {
+     "planned": 12,
+     "clean": 11,
+     "not_run": 0,
+     "other": 1
+    }
+   },
+   "ended_for_resources_in_phases_1_2": [],
+   "header": {
+    "planned": 18,
+    "observed_matching": 17,
+    "failures": []
+   },
+   "refusals": [],
+   "cpu": {
+    "single_validation_max_ms": 1016,
+    "valid_figures": 18,
+    "planned": 18,
+    "six_validations_max_ms": 3681,
+    "limit_ms": 5000
+   },
+   "ladder": [
+    {
+     "mib": 16,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 32,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 48,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 64,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 80,
+     "planned": 2,
+     "clean": 2,
+     "ended_for_resources": 0,
+     "died_at": []
+    },
+    {
+     "mib": 96,
+     "planned": 2,
+     "clean": 1,
+     "ended_for_resources": 0,
+     "died_at": []
+    }
+   ],
+   "not_clean": [
+    {
+     "k": 18,
+     "at": "2026-11-20T16:00:00Z",
+     "phase": 1,
+     "state": "not clean",
+     "why": [
+      "attempt d67c328e92ce: ended without validating: fetch failed"
+     ]
+    },
+    {
+     "k": 70,
+     "at": "2026-11-21T00:40:00Z",
+     "phase": 3,
+     "state": "not clean",
+     "why": [
+      "attempt b5033bf69ef1: ended without validating: fetch failed"
+     ]
+    }
+   ],
+   "coverage": {
+    "distinct_frames": 35,
+    "first": "2026-11-20T12:30:00Z",
+    "last": "2026-11-21T00:10:00Z"
+   },
+   "notes": []
+  }
+ }
+}

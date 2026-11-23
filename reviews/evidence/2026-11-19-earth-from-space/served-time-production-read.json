@@ -1,0 +1,10 @@
+{
+  "what": "Read-only GET of the public production route https://mother-earth.chadoberholzer.workers.dev/snapshot/dustrgb/meta from the browser pane. No admin route, no write, no probe.",
+  "read_at": "2026-11-19T18:33:03Z",
+  "hub_version": "0.6.19",
+  "why_it_bears_on_earth_from_space": "The Dust RGB collector (live since 13 Nov 2026) asks the same EUMETView WMS for another layer of the same satellite and records whether the Warning header that names the served time arrived. Earth from Space depends on that header arriving at a Cloudflare Worker.",
+  "frame": { "id": "20261119T1740Z-94c3f42933ac7267", "requested_time": "2026-11-19T17:40:00Z", "served_time": "2026-11-19T17:40:00Z", "served_time_source": "server Warning header", "picture_warning_header_present": true, "mask_warning_header_present": true, "fetched_at": "2026-11-19T18:08:26.750Z" },
+  "previous": { "id": "20261119T0540Z-c83f75a4b9708161", "requested_time": "2026-11-19T05:40:00Z", "served_time": "2026-11-19T05:40:00Z", "picture_warning_header_present": true, "mask_warning_header_present": true },
+  "earlier_record": "STATUS.md, 13 Nov 2026 04:23 UTC: 'The served-time header DID reach the production Worker (GPT's Playground probes had it absent).'",
+  "limits": "Two runs today and one on 13 Nov, for layer mtg_fd:rgb_dust in EPSG:4326. Not read: the run log for every run since 13 Nov (admin route; not used). Not tested: layer mtg_fd:rgb_geocolour in EPSG:900003 from a Worker. GPT's Workers Playground probes on 12 Nov had the header absent, so its arrival is not guaranteed for every route into the service."
+}

@@ -32,6 +32,14 @@
  *   GET /snapshot/wind/meta, /snapshot/wind/grid/<sha256>.i16 (0.6.16) modelled wind at three heights from NOAA/NCEP GFS (manifest + the
  *                           current and previous revision's grids). Scheduled job gated by WIND_ENABLED=1; /admin/run/wind runs it once.
  *   GET /admin/probe/skycraft?key=ADMIN_KEY (0.6.12) exactly ONE Horizons request with the application User-Agent; stores nothing
+ *   POST /admin/probe/earthview  (0.6.21, Stage B) key in the Authorization header ONLY ("Bearer <ADMIN_KEY>"); no query string accepted.
+ *                           ONE no-store validation of the newest GeoColour frame in this isolate: at most 3 upstream requests, a
+ *                           150 s whole-run deadline, nothing stored. Runs only while EARTHVIEW_ENABLED is unset.
+ *   GET|POST /admin/earthview/<status|hold|recover|sweep|release> (0.6.20) Earth from Space storage. GET is a dry run that
+ *                           writes nothing; POST with apply=1 acts (recover and sweep also need plan=<id> from the dry run).
+ *                           0.6.22: key in the Authorization header ONLY ("Bearer <ADMIN_KEY>"); a request with key= in its URL is refused (400).
+ *   POST /admin/run/earthview (0.6.22) one manual collection. Key in the Authorization header ONLY; no query string. Runs only while
+ *                           EARTHVIEW_ENABLED is "manual" or "1". The other /admin/run/<job> routes are unchanged.
  *   GET /catalogue/sky/<revision> (0.6.5; SKY-TWO-CLOCKS-PROPOSAL rev 3 §5a) the FIXED Sky catalogue (Moon/Sun daily distances, NASA/JPL
  *                           Horizons): versioned only — an id not in SKY_REVISIONS (exact key match), a malformed path or the bare
  *                           /catalogue/sky → 404 without any R2 read; a known revision whose stored bytes are missing or fail the pin → 503.
@@ -73,7 +81,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.19';
+const COLLECTOR_VERSION = '0.6.24';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -2391,7 +2399,7 @@ export { AIRCRAFT_LAYER, AIRCRAFT_FIELDS, AIRCRAFT_MAX_AGE_S, AIRCRAFT_TEXT, air
 export { WIND, GRIBWIND, windNoteRelevant, windSeenMerge, runWind, windCandidates, windObject, windRanges, windPtr, windUpdate, windFail, windFetchRange, collectWind, windRoute };
 export { SUNFACE, sunStamp, sunFetch, sunPtr, sunUpdate, sunFail, collectSunface, sunProbe, sunRoute };
 export { SKYCRAFT, CRAFT_REVISIONS, hzUrl, hzParse, hzSegmentOf, hzFitThrough, craftStudyEpochs, collectSkycraft, craftProbe, craftSnapRoute, craftCatRoute };
-export { DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache };
+export { EARTHVIEW, evLatest, evKeyOf, evJpegScans, evDecode, evPng, evCompare, evFetch, collectEarthView, evRoute, evGuard, evAdmin, evCleanup, EvStop, EV_STOP, EV_JPEG, DUSTRGB, dustLatest, dustKeyOf, jpegCheck, pngInfo, pngAlpha, dustServed, dustFetch, dustFail, dustPtr, dustUpdate, dustInflate, dustBody, collectDustRgb, dustRoute, JOBS, OCEANHEAT_REVISIONS, OCEANHEAT_CURRENT, OCEANHEAT_CACHE_OK, oceanHeatPin, oceanHeatRoute, oceanHeatFile, SKY_REVISIONS, SKY_CURRENT, skyPin, skyRoute, skyCatalogue, ARTS, artsSnapshot, TIMELINE, TIMELINE_REVISIONS, TIMELINE_LEGACY, TIMELINE_CURRENT, timelinePin, timelineRoute, timelineCatalogue, kpStatus, KP, shipsReason, collectSwpc, collectUsgs, fvProbeR2, fvFetchToRaw, cellId, fvWork, fvRegister, fvProcess, fvDownForInput, fvDownNoInput, fvCheckpointNew, fvPlaceSection, FV, FVSQL, fvOrder, fvCas, fvWriter, fvLines, fvHasher, collectFirmsV2, fvPublish, fvPlaceFirms, fvPlace, fvBoundedGunzip, fvCheckpointCandidate, firmsParse, firmsRowProblem, checkpointCoverage, backfillCoverage, FIRMS_MAX_PARSE_BYTES, orbBuild, orbClassify, ORB_CLASSES, hourlyBatch, SHIPS_LOOKBACK_H, driftBuild, csvFields, collectDrifters, PLASTIC, plDay, unzipText, odvSamples, plasticValidate, plasticVerify, collectPlastic, versionParts, stripVolatile, firesDaily, cellAreaKm2, validCell, histCheckpointsDue, histCheckpointOne, listSnapshots, historyState, archiveHealth, HIST_GRACE_MS, HEALTH, health, healthDeadline, EVH, evhKind, evhConfig, evhEvaluate, healthNote, redactText, redactStatus, tAt, histVersion, histQuakes, histDrifters, histSeaIce, histOrbital, HIST, PLACE, placeCache, EVB, evbSeen, evProbeValidate, evProbeOnce, evProbeRoute, evMark, evAdmit, evManualGate, evValidationBegin, evValidated, runEarthViewLogged, evAuth, EV_ADMIN_ACTIONS, EV_WINDOW_MAX_MS };
 
 // ---------------------------------------------------------------- Orbital job (0.3.0) — Space-Track GP → validated, classified element file
 
@@ -2766,7 +2774,7 @@ const HEALTH = {
   missedSlots: 3, marginS: 300,          // overdue = 3 consecutive slots without the thing + 5 min for an in-flight run
   checkpointOverdueS: 2 * 3600,          // a closed day is due at end + 30 min (HIST_GRACE_MS); failing from end + 2 h
   newGapS: 24 * 3600,                    // a gap counts as a NEW incident for 24 h after it was recorded; it stays listed after that
-  checks: { runs: ['usgs', 'firms'], publication: ['usgs', 'firms'], archive: HIST.checkpointLayers, coverage: HIST.checkpointLayers },
+  checks: { runs: ['usgs', 'firms', 'earthview'], publication: ['usgs', 'firms'], archive: HIST.checkpointLayers, coverage: HIST.checkpointLayers, trial: ['earthview'] },   // 0.6.23: runs/earthview, trial/earthview
   boundaryNote: 'no detections processed yet for today',   // collectFirms' expected-empty note before FIRMS_DAY_BOUNDARY_H
 };
 const healthAllowS = layer => HEALTH.missedSlots * HEALTH.cadenceS[layer] + HEALTH.marginS;
@@ -2904,8 +2912,114 @@ async function healthCoverage(env, layer, nowMs) {
   if (c.input_status === 'current') return { healthy: true, reasons: [], facts };
   return { healthy: false, reasons: [`${layer} checkpoint for ${y} was built from a ${c.input_status} input (cutoff ${c.cutoff}; ${c.failed_runs_after_cutoff} failed runs after it)`], facts };
 }
+/* ---- 0.6.23: Earth from Space trial health (EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL rev 3.1) ----
+ * GET|HEAD /health/runs/earthview   503 while a scheduled time of the current trial is overdue (no end-of-run row), or the gate is
+ *                                   off during the trial, or the configuration or the rows cannot be read.
+ * GET|HEAD /health/trial/earthview  503 once the trial's rows show stop condition 3 (a storage stop), 6 (three adjacent settled
+ *                                   slots each holding a validation refusal) or 8 (six adjacent settled slots, none with a current
+ *                                   frame, at least one showing the source listing a newer one), or a row this code cannot read.
+ * A TRIAL is the pair EARTHVIEW_FROM / EARTHVIEW_UNTIL; its SLOTS are the ten-minute marks FROM <= s < UNTIL, the same scheduled
+ * times evAdmit selects. The health request's own clock decides only which slots are DUE (now >= s + 20 min); it changes nothing
+ * about admission and is not a deadline for admitted work. Everything is derived on each request from collector_runs: nothing is
+ * written, nothing is fetched, no collection runs. So a TRIAL finding stays until the window variables are removed (closeout), and a
+ * later good run does not clear it; an overdue slot on the runs check clears when its end-of-run row arrives. A row whose finish
+ * time is more than HEALTH_SKEW_MS (5 min) after the request's clock, or whose start or finish time cannot be parsed, fails both. What this cannot know is said in the proposal (sections 3.1, 3.5, 3.6, 7): it keeps no history
+ * of the gate; a manual run exactly on a mark looks like that slot's run; rows finished after UNTIL + 24 h are not read.
+ * Public answers carry fixed reason codes, times and counts only: never a run note. */
+const EVH = { SLOT_MS: 600e3, ALLOW_MS: 1200e3, HORIZON_MS: 24 * 3600e3, ROW_LIMIT: 2000, LIST_MAX: 20, C6_RUN: 3, C8_RUN: 6 };
+const EVH_POST_CHECK = ['served time not confirmed', 'served a different frame', 'picture write failed', 'picture key already in use', 'picture read-back differs', 'stored copy is being removed'];
+const EVH_FETCH_FAIL = /^(picture|check image) (request failed|http error|not a picture|size out of range)$/;
+/** What one collector_runs row of the earthview layer establishes, from its status and the FIXED phrase its note starts with. */
+function evhKind(row) {
+  const note = typeof row.note === 'string' ? row.note : '', reason = note.split(' — ')[0];
+  if (row.status === 'ok') {
+    if (Number(row.records) === 1 && note.startsWith('frame ')) return 'published';
+    if (Number(row.records) === 0 && note.startsWith('nothing newer: ')) return 'nothing_newer';
+    if (Number(row.records) === 0 && note.startsWith('superseded: ')) return 'superseded';
+    return 'unrecognised';
+  }
+  if (row.status !== 'down') return 'unrecognised';
+  if (reason === EV_STOP.REPAIR || reason === EV_STOP.CHANGED || reason === EV_STOP.BUSY) return 'storage_stop';
+  if (reason === EV_STOP.HELD || reason === EV_STOP.UNSET) return 'guard_refused';
+  if (reason === 'source check failed') return 'source_check_failed';
+  if (reason === 'picture failed validation' || reason === 'check image failed validation') return 'validation_refused';
+  if (EVH_POST_CHECK.includes(reason) || EVH_FETCH_FAIL.test(reason)) return 'post_check_failure';
+  if (reason === 'internal error') return 'internal_error';
+  return 'unrecognised';
+}
+/** The trial's configuration, in order of precedence (proposal 3.5 rows 1 to 4). Reads env only. */
+function evhConfig(env) {
+  const g = env.EARTHVIEW_ENABLED, gate = g === undefined ? 'unset' : g === 'manual' ? 'manual' : g === '1' ? '1' : 'unknown';
+  if (gate === 'unknown') return { gate, fail: 'gate_unknown_value' };
+  const hasF = env.EARTHVIEW_FROM !== undefined, hasU = env.EARTHVIEW_UNTIL !== undefined;
+  if (!hasF && !hasU) return gate === '1' ? { gate, fail: 'gate_on_without_window' } : { gate, none: true };
+  const from = evMark(env.EARTHVIEW_FROM), until = evMark(env.EARTHVIEW_UNTIL);
+  if (from === null || until === null || until <= from || until - from > EV_WINDOW_MAX_MS) return { gate, fail: 'window_not_readable' };
+  return { gate, from, until };
+}
+/** Both verdicts for the current trial at nowMs. Pure apart from ONE bounded, indexed read of collector_runs. Throws nothing. */
+async function evhEvaluate(env, nowMs) {
+  const iso = ms => new Date(ms).toISOString(), c = evhConfig(env);
+  const both = (code, state, facts) => ({ runs: { healthy: false, reasons: [code], facts: { state, ...facts } }, trial: { healthy: false, reasons: [code], facts: { state, ...facts } } });
+  if (c.fail) return both(c.fail, { gate_unknown_value: 'gate has an unknown value', gate_on_without_window: 'gate is 1 with no window', window_not_readable: 'window not readable' }[c.fail], { gate: c.gate });
+  if (c.none) { const f = { state: 'no trial configured', gate: c.gate }; return { runs: { healthy: true, reasons: [], facts: f }, trial: { healthy: true, reasons: [], facts: f } }; }
+  const { from, until, gate } = c, on = gate === '1', nSlots = (until - from) / EVH.SLOT_MS, last = until - EVH.SLOT_MS + EVH.ALLOW_MS;
+  const base = { gate, from: iso(from), until: iso(until), slots: nSlots, allow_s: EVH.ALLOW_MS / 1000 };
+  if (nowMs < from) {
+    const f = { state: on ? 'armed' : 'window set but gate is not 1', ...base };
+    return { runs: { healthy: on, reasons: on ? [] : ['not_collecting'], facts: f }, trial: { healthy: true, reasons: [], facts: f } };
+  }
+  // The rows of this trial: finished inside [FROM, UNTIL + 24 h), oldest first, through the (layer, finished_at) index, bounded.
+  let rows;
+  try {
+    const r = await env.DB.prepare('SELECT started_at, finished_at, status, records, note FROM collector_runs WHERE layer = ? AND finished_at >= ? AND finished_at < ? ORDER BY finished_at LIMIT ?')
+      .bind('earthview', iso(from), iso(until + EVH.HORIZON_MS), EVH.ROW_LIMIT).all();
+    rows = r && r.results;
+    if (!Array.isArray(rows)) throw new Error('no result list');
+  } catch (_) { return both('rows_unreadable', 'rows unreadable', base); }
+  if (rows.length >= EVH.ROW_LIMIT) return both('too_many_rows', 'too many rows to evaluate', { ...base, rows_read: rows.length });
+  // Per slot: flags that are true if ANY of its rows says so. A good row never removes a bad flag; evidence that the held frame
+  // was current counts only from a row finished at or before the slot's due time.
+  const slot = Array.from({ length: nSlots }, () => ({ rows: 0, refused: false, storage_stop: false, newer_listed: false, current: false, unrecognised: false }));
+  let outside = 0;
+  for (const row of rows) {
+    const s = Date.parse(row.started_at), f = Date.parse(row.finished_at);
+    if (!Number.isFinite(f) || f > nowMs + HEALTH_SKEW_MS) return both('rows_unreadable', 'rows unreadable', base);
+    if (!Number.isFinite(s)) return both('rows_unreadable', 'rows unreadable', base);   // cannot be assigned to a slot or excluded from one
+    if (s < from || s >= until || (s - from) % EVH.SLOT_MS !== 0) { outside++; continue; }
+    const x = slot[(s - from) / EVH.SLOT_MS], k = evhKind(row); x.rows++;
+    if (k === 'unrecognised') x.unrecognised = true;
+    if (k === 'storage_stop') x.storage_stop = true;
+    if (k === 'validation_refused') x.refused = true;
+    if (k === 'validation_refused' || k === 'post_check_failure') x.newer_listed = true;
+    if ((k === 'published' || k === 'superseded' || k === 'nothing_newer') && f <= s + EVH.ALLOW_MS) x.current = true;
+  }
+  const at = i => iso(from + i * EVH.SLOT_MS);
+  let settled = 0; while (settled < nSlots && nowMs >= from + settled * EVH.SLOT_MS + EVH.ALLOW_MS) settled++;   // due at equality
+  const overdue = [], complete = slot.filter(x => x.rows > 0).length;
+  for (let i = 0; i < settled; i++) if (!slot[i].rows) overdue.push(at(i));
+  // trial findings. c3 and unrecognised: any slot of the trial, settled or not. c6 and c8: settled slots only, in scheduled order.
+  const findings = [];
+  slot.forEach((x, i) => { if (x.storage_stop) findings.push({ code: 'storage_stop', slot: at(i) }); if (x.unrecognised) findings.push({ code: 'unrecognised_outcome', slot: at(i) }); });
+  for (let i = 0; i + EVH.C6_RUN <= settled; i++) if (slot.slice(i, i + EVH.C6_RUN).every(x => x.refused)) { findings.push({ code: 'three_slots_refused', slot: at(i) }); break; }
+  for (let i = 0; i + EVH.C8_RUN <= settled; i++) { const w = slot.slice(i, i + EVH.C8_RUN); if (w.every(x => !x.current) && w.some(x => x.newer_listed)) { findings.push({ code: 'six_slots_without_a_current_frame', slot: at(i) }); break; } }
+  const runsReasons = [];
+  if (!on && nowMs < last) runsReasons.push('not_collecting');
+  if (overdue.length) runsReasons.push('completion_missing');
+  const trialReasons = [...new Set(findings.map(x => x.code))];
+  const ended = nowMs >= last, clean = !overdue.length && !findings.length;
+  const state = ended ? (clean ? 'trial complete, nothing outstanding' : 'trial ended with outstanding findings')
+    : !on ? 'trial window set but not collecting' : nowMs < from + EVH.ALLOW_MS ? 'starting' : 'active';
+  const facts = { state, ...base, settled, complete, overdue: overdue.length, overdue_slots: overdue.slice(0, EVH.LIST_MAX), findings: findings.slice(0, EVH.LIST_MAX), rows_read: rows.length, rows_outside_slots: outside };
+  return { runs: { healthy: !runsReasons.length, reasons: runsReasons, facts }, trial: { healthy: !trialReasons.length, reasons: trialReasons, facts } };
+}
+/** Never lets an exception's text reach a public answer: anything unexpected is the fixed code rows_unreadable, failing. */
+const evhSafe = async (env, nowMs, which) => { try { return (await evhEvaluate(env, nowMs))[which]; } catch (_) { return { healthy: false, reasons: ['rows_unreadable'], facts: { state: 'rows unreadable' } }; } };
+const healthEvRuns = (env, _layer, nowMs) => evhSafe(env, nowMs, 'runs');
+const healthEvTrial = (env, _layer, nowMs) => evhSafe(env, nowMs, 'trial');
 async function health(req, env, check, layer) {
-  const fn = { runs: healthRuns, publication: healthPublication, archive: healthArchive, coverage: healthCoverage }[check];
+  const fn = layer === 'earthview' ? { runs: healthEvRuns, trial: healthEvTrial }[check]   // 0.6.23
+    : { runs: healthRuns, publication: healthPublication, archive: healthArchive, coverage: healthCoverage }[check];
   const nowMs = Date.now(), hdr = { 'Cache-Control': 'no-store, max-age=0' };
   const known = fn && (HEALTH.checks[check] || []).includes(layer);
   let out;
@@ -3282,6 +3396,1632 @@ async function dustRoute(env, p) {
   if (buf.byteLength !== x.bytes || await sha256Bytes(buf) !== x.sha256) return none(503, 'integrity');
   return new Response(buf, { headers: { 'Content-Type': x.type, 'Cache-Control': DUSTRGB.CACHE_FILE, 'ETag': '"' + x.sha256 + '"', ...CORS } });
 }
+
+/* ---------- Earth from Space (EUMETSAT "GeoColour RGB - MTG - 0 degree", EO:EUM:DAT:0913) — EARTH-FROM-SPACE-PROPOSAL rev 2
+ * Every ten minutes the hub reads which frames EUMETView lists and, when a newer one is listed, asks for that exact frame time:
+ * one 2048 x 2048 JPEG in the geostationary projection EUMETView's own viewer defines (EPSG:900003, "+proj=geos +h=35785831.0
+ * +lon_0=0"), surround painted in the page's background colour by the service, and one 256 x 256 transparent PNG of the same view.
+ * A frame is PUBLISHED ONLY IF, for both responses, the server's Warning header names a served time equal to the time asked for.
+ * A different time, or no header, publishes nothing: the pointer does not move and no requested time is ever shown as a frame time.
+ * The delivered JPEG itself is decoded in full here (EV_JPEG, below) and checked, and compared coarsely with the decoded PNG.
+ * Storage: earthview/current.json (frame and previous; every write conditional and fenced by an epoch), earthview/state.json (the
+ * last source check and the last collection outcome, kept apart from the frame; for the page only), earthview/held.json (every
+ * stored picture and when it stopped being current or previous). A picture is deleted ONLY in a run that has just published a newer
+ * verified frame, and only when it is neither current nor previous and left that role at least GRACE_S ago. A failed or idle run
+ * deletes nothing. Every stored picture has a key holding 96 random bits drawn by its own run, so no restore of any record can make
+ * a later run write an old key, and a late or repeated delete cannot reach a newer picture. The collector never creates or repairs
+ * the pointer or the list: /admin/earthview/{status,hold,recover,sweep,release} does, under a hold (see "Storage records, guards
+ * and recovery" below).
+ * Gate (0.6.22, three states; any other value refuses everything): EARTHVIEW_ENABLED absent = only the Stage B probe may run;
+ * "manual" = only the manual POST /admin/run/earthview; "1" = the manual run, and the scheduled path for trigger times inside the
+ * admission window EARTHVIEW_FROM <= scheduled time < EARTHVIEW_UNTIL (evAdmit, below the Stage B probe). A refusal makes no
+ * request and reads or writes nothing under earthview/.
+ * Outside LAYERS, cells, history, health and the generic writeDown. Licence: CC BY 4.0; credit EUMETSAT and NASA (catalogue). */
+const EARTHVIEW = {
+  CAP: 'https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetCapabilities&version=1.3.0&namespace=mtg_fd',
+  MAP: 'https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&layers=mtg_fd:rgb_geocolour&styles=&crs=EPSG:900003&bbox=-5500000,-5500000,5500000,5500000',
+  LAYER: 'rgb_geocolour', CRS: 'EPSG:900003', CRS_DEFINITION: '+proj=geos +h=35785831.0 +lon_0=0', BBOX: [-5500000, -5500000, 5500000, 5500000],
+  BGCOLOR: '0x0B1016', BG: [11, 16, 22],
+  PICTURE: { w: 2048, h: 2048, maxBytes: 3 * 1024 * 1024, type: 'image/jpeg' }, CHECK: { w: 256, h: 256, maxBytes: 1024 * 1024, type: 'image/png' },
+  // Validation limits. Each is relative to the SAME run's check image or to the colour that was asked for; none is a fixed disk size.
+  // Set from the fixtures named in the review packet (three real frames and the damaged set); provisional until more frames are seen.
+  LIMITS: { BG_TOLERANCE: 16, SURROUND_SHARE_MIN: 0.98, DISK_LUMA_SD_MIN: 12, AGREEMENT_MIN: 0.85, DISK_SAMPLES_MIN: 2000, SURROUND_SAMPLES_MIN: 500 },
+  DECODE: { maxResolutionInMP: 5, maxMemoryUsageInMB: 96 },
+  EVERY_MIN: 10, TIMEOUT_MS: 90000, LIST_TIMEOUT_MS: 30000, GRACE_S: 86400,
+  POINTER: 'earthview/current.json', STATE: 'earthview/state.json', HELD: 'earthview/held.json', PREFIX: 'earthview/frames/',
+  HOLD: 'earthview/hold.json', EPOCHS: 'earthview/epochs/', LIST_PAGE: 1000, LIST_PAGES_MAX: 20, INVENTORY_TRIES: 4,
+  CACHE_FILE: 'public, max-age=86400, immutable',
+  WAITING_LIMIT_S: 2700,   // provisional: after this long with nothing newer listed, the page says so plainly. Not a delay bound.
+  SOURCE: { product: 'GeoColour RGB - MTG - 0 degree', collection: 'EO:EUM:DAT:0913', catalogue: 'https://user.eumetsat.int/catalogue/EO:EUM:DAT:0913', licence: 'CC BY 4.0',
+    licence_url: 'https://creativecommons.org/licenses/by/4.0/', credit: 'Contains modified EUMETSAT Meteosat data', night_background: 'NASA Black Marble (a static layer; not current city lights)',
+    service: 'EUMETView WMS, layer mtg_fd:rgb_geocolour', satellite: 'Meteosat Third Generation', instrument: 'Flexible Combined Imager (FCI)' },
+};
+/** Newest advertised time of the GeoColour layer from a GetCapabilities document, on the 10-minute grid; else null. Only that layer's own element is read. */
+function evLatest(xml) {
+  const s = String(xml), n = /<Name>\s*(?:mtg_fd:)?rgb_geocolour\s*<\/Name>/.exec(s);
+  if (!n) return null;
+  const rest = s.slice(n.index + n[0].length), end = rest.search(/<\/Layer>|<Layer\b/), own = end < 0 ? rest : rest.slice(0, end);
+  let def = null;
+  for (const d of own.matchAll(/<Dimension\b([^>]*)>/g)) { if (!/\bname="time"/.test(d[1])) continue; const m = /\bdefault="([^"]+)"/.exec(d[1]); def = m ? m[1] : null; break; }
+  if (!def) return null;
+  const t = def.replace(/\.000Z$/, 'Z');
+  if (!/^\d{4}-\d\d-\d\dT\d\d:\d0:00Z$/.test(t) || Number.isNaN(Date.parse(t))) return null;
+  return t;
+}
+const evKeyOf = t => t.replace(/[-:]/g, '').replace(/00Z$/, 'Z');
+/** Walks EVERY segment of a JPEG, scans included, to its end. Reports the frame type and size, each scan's coefficient range and
+ * precision, whether the file ends exactly at its end marker, and whether the scans between them deliver every coefficient of every
+ * component at full precision (a progressive file cut short after an early scan still has valid syntax; this is what catches it).
+ * Returns { ok:false, reason } or { ok:true, progressive, w, h, components, scans, complete, missing }. Not a decode. */
+function evJpegScans(u8) {
+  const bad = reason => ({ ok: false, reason });
+  if (u8.length < 4 || u8[0] !== 0xff || u8[1] !== 0xd8) return bad('no start marker');
+  let i = 2, frame = null, scans = 0, ended = false; const cov = new Map();
+  while (i + 1 < u8.length) {
+    if (u8[i] !== 0xff) return bad('segment out of step at ' + i);
+    const k = u8[i + 1];
+    if (k === 0xff) { i++; continue; }
+    if (k === 0xd9) { ended = true; i += 2; break; }
+    if (k === 0xd8 || (k >= 0xd0 && k <= 0xd7) || k === 0x01) { i += 2; continue; }
+    if (i + 4 > u8.length) return bad('cut inside a segment header');
+    const len = (u8[i + 2] << 8) | u8[i + 3];
+    if (len < 2 || i + 2 + len > u8.length) return bad('segment runs past the end');
+    if (k >= 0xc0 && k <= 0xcf && k !== 0xc4 && k !== 0xc8 && k !== 0xcc) {
+      if (frame) return bad('more than one frame');
+      const n = u8[i + 9]; if (len < 8 + 3 * n || !n) return bad('frame header too short');
+      frame = { type: k, progressive: k === 0xc2, h: (u8[i + 5] << 8) | u8[i + 6], w: (u8[i + 7] << 8) | u8[i + 8], ids: [] };
+      for (let c = 0; c < n; c++) { const id = u8[i + 10 + 3 * c]; frame.ids.push(id); cov.set(id, { dc: -1, ac: new Int8Array(64).fill(-1) }); }
+      if (k !== 0xc0 && k !== 0xc1 && k !== 0xc2) return bad('frame type not handled');
+      i += 2 + len; continue;
+    }
+    if (k === 0xda) {
+      if (!frame) return bad('scan before frame');
+      const ns = u8[i + 4]; if (len !== 6 + 2 * ns || !ns) return bad('scan header size');
+      const ss = u8[i + 5 + 2 * ns], se = u8[i + 6 + 2 * ns], al = u8[i + 7 + 2 * ns] & 15;
+      if (se > 63 || ss > se) return bad('scan range');
+      for (let c = 0; c < ns; c++) { const cv = cov.get(u8[i + 5 + 2 * c]); if (!cv) return bad('scan names an unknown component');
+        const low = frame.progressive ? al : 0;
+        for (let z = ss; z <= se; z++) { if (z === 0) { if (cv.dc < 0 || low < cv.dc) cv.dc = low; } else if (cv.ac[z] < 0 || low < cv.ac[z]) cv.ac[z] = low; } }
+      scans++; i += 2 + len;
+      for (;;) {   // entropy-coded data runs to the next real marker (FF followed by anything but 00 or a restart marker)
+        const j = u8.indexOf(0xff, i); if (j < 0 || j + 1 >= u8.length) return bad('scan data runs past the end');
+        const m = u8[j + 1]; if (m === 0x00 || (m >= 0xd0 && m <= 0xd7)) { i = j + 2; continue; }
+        if (m === 0xff) { i = j + 1; continue; }
+        i = j; break;
+      }
+      continue;
+    }
+    i += 2 + len;
+  }
+  if (!frame) return bad('no frame header');
+  if (!ended) return bad('no end marker');
+  if (i !== u8.length) return bad('bytes after the end marker');
+  if (!scans) return bad('no scan');
+  let missing = 0; for (const cv of cov.values()) { if (cv.dc !== 0) missing++; for (let z = 1; z < 64; z++) if (cv.ac[z] !== 0) missing++; }
+  return { ok: true, progressive: frame.progressive, w: frame.w, h: frame.h, components: frame.ids.length, scans, complete: missing === 0, missing };
+}
+/** Decodes the whole JPEG with the decoder carried below (strict: a damaged scan throws). Returns the three component planes as the
+ * file stores them (luma at full size, colour at half), or { error }. The colour conversion to RGB is not run: the checks read the
+ * planes directly, which roughly halves the memory a decode needs. */
+function evDecode(u8) {
+  try {
+    const d = new EV_JPEG(); d.opts = { tolerantDecoding: false, formatAsRGBA: false, useTArray: true, colorTransform: undefined, ...EARTHVIEW.DECODE };
+    EV_JPEG.resetMaxMemoryUsage(EARTHVIEW.DECODE.maxMemoryUsageInMB * 1024 * 1024);
+    d.parse(u8);
+    if (!d.components || d.components.length !== 3) return { error: 'not a three-component picture' };
+    return { w: d.width, h: d.height, planes: d.components.map(c => ({ lines: c.lines, sx: c.scaleX, sy: c.scaleY })) };
+  } catch (e) { return { error: String((e && e.message) || e).slice(0, 120) }; }
+}
+/** Fully decodes an 8-bit RGBA PNG: every chunk checksum verified, the data inflated to exactly the size the header promises, every
+ * row unfiltered. Returns { w, h, rgba } or null for anything wrong or any other form (interlaced, palette, 16-bit). */
+async function evPng(u8, maxPixels) {
+  const info = pngInfo(u8); if (!info || !info.complete || info.colour !== 6 || u8[24] !== 8 || u8[26] !== 0 || u8[27] !== 0 || u8[28] !== 0) return null;
+  const { w, h } = info; if (!w || !h || w * h > maxPixels) return null;
+  const u32 = i => ((u8[i] << 24) | (u8[i + 1] << 16) | (u8[i + 2] << 8) | u8[i + 3]) >>> 0, parts = [];
+  for (let i = 8; i + 12 <= u8.length;) { const len = u32(i), end = i + 12 + len; if (end > u8.length) return null;
+    let c = 0xffffffff; for (let j = i + 4; j < i + 8 + len; j++) c = DUST_CRC[(c ^ u8[j]) & 0xff] ^ (c >>> 8);
+    if (((c ^ 0xffffffff) >>> 0) !== u32(i + 8 + len)) return null;
+    if (String.fromCharCode(u8[i + 4], u8[i + 5], u8[i + 6], u8[i + 7]) === 'IDAT') parts.push(u8.subarray(i + 8, i + 8 + len));
+    i = end; }
+  if (!parts.length) return null;
+  const stride = w * 4, raw = (await dustInflate(parts, h * (stride + 1))).data; if (!raw) return null;
+  const rgba = new Uint8Array(w * h * 4);
+  for (let y = 0; y < h; y++) { const r = y * (stride + 1), f = raw[r], cur = r + 1, up = cur - (stride + 1); if (f > 4) return null;
+    for (let x = 0; x < stride; x++) { const a = x >= 4 ? raw[cur + x - 4] : 0, b = y ? raw[up + x] : 0, c = (y && x >= 4) ? raw[up + x - 4] : 0;
+      let add = 0; if (f === 1) add = a; else if (f === 2) add = b; else if (f === 3) add = (a + b) >> 1; else if (f === 4) { const pp = a + b - c, pa = Math.abs(pp - a), pb = Math.abs(pp - b), pc = Math.abs(pp - c); add = pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
+      raw[cur + x] = (raw[cur + x] + add) & 0xff; }
+    rgba.set(raw.subarray(cur, cur + stride), y * stride); }
+  return { w, h, rgba };
+}
+/** Compares the decoded picture with the decoded check image of the same request. The check image's transparency says where the
+ * disk is IN THIS RUN; nothing here assumes a disk size. Measures: (1) where the check image is clear, the picture must be the
+ * background colour that was asked for; (2) inside the disk the picture must not be flat; (3) block by block, the picture's
+ * brightness must follow the check image's. Returns the measurements and { ok, reason }. */
+function evCompare(dec, png, L = EARTHVIEW.LIMITS, bg = EARTHVIEW.BG) {
+  const n = png.w, step = dec.w / n; if (png.w !== png.h || dec.w !== dec.h || step !== Math.floor(step)) return { ok: false, reason: 'sizes do not correspond' };
+  const [Y, Cb, Cr] = dec.planes, A = (x, y) => png.rgba[(y * n + x) * 4 + 3];
+  const inner = (x, y, v) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= n || yy >= n) { if (v !== 0) return false; continue; } if (A(xx, yy) !== v) return false; } return true; };
+  let edgeOpaque = 0; for (let k = 0; k < n; k++) { if (A(k, 0)) edgeOpaque++; if (A(k, n - 1)) edgeOpaque++; if (A(0, k)) edgeOpaque++; if (A(n - 1, k)) edgeOpaque++; }
+  let sN = 0, sIn = 0, sWorst = 0, dN = 0, sp = 0, sj = 0, spp = 0, sjj = 0, spj = 0, opaque = 0;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const a = A(x, y); if (a === 255) opaque++;
+    const px = Math.floor((x + 0.5) * step), py = Math.floor((y + 0.5) * step);
+    if (a === 0 && inner(x, y, 0)) {   // well inside the surround: the picture must show the colour that was asked for
+      const yy = Y.lines[py][px], cb = Cb.lines[Math.floor(py * Cb.sy)][Math.floor(px * Cb.sx)] - 128, cr = Cr.lines[Math.floor(py * Cr.sy)][Math.floor(px * Cr.sx)] - 128;
+      const d = Math.max(Math.abs(yy + 1.402 * cr - bg[0]), Math.abs(yy - 0.3441363 * cb - 0.71413636 * cr - bg[1]), Math.abs(yy + 1.772 * cb - bg[2]));
+      sN++; if (d <= L.BG_TOLERANCE) sIn++; if (d > sWorst) sWorst = d;
+    } else if (a === 255 && inner(x, y, 255)) {   // well inside the disk: block mean brightness of the picture against the check image's pixel
+      let m = 0; const x0 = x * step, y0 = y * step; for (let v = 0; v < step; v++) { const row = Y.lines[y0 + v]; for (let u = 0; u < step; u++) m += row[x0 + u]; } m /= step * step;
+      const o = (y * n + x) * 4, p = 0.299 * png.rgba[o] + 0.587 * png.rgba[o + 1] + 0.114 * png.rgba[o + 2];
+      dN++; sp += p; sj += m; spp += p * p; sjj += m * m; spj += p * m;
+    }
+  }
+  const sd = dN ? Math.sqrt(Math.max(0, sjj / dN - (sj / dN) ** 2)) : 0, sdP = dN ? Math.sqrt(Math.max(0, spp / dN - (sp / dN) ** 2)) : 0;
+  const agreement = dN && sd > 0 && sdP > 0 ? (spj / dN - (sp / dN) * (sj / dN)) / (sd * sdP) : 0;
+  const m = { check_opaque_share: +(opaque / (n * n)).toFixed(4), check_opaque_on_frame_edge: edgeOpaque, surround_samples: sN, surround_share_background: sN ? +(sIn / sN).toFixed(4) : 0, surround_worst_difference: +sWorst.toFixed(1),
+    disk_samples: dN, disk_brightness_spread: +sd.toFixed(1), agreement: +agreement.toFixed(4) };
+  const fail = edgeOpaque ? 'disk touches the frame edge' : dN < L.DISK_SAMPLES_MIN ? 'check image shows no disk' : sN < L.SURROUND_SAMPLES_MIN ? 'check image shows no surround'
+    : m.surround_share_background < L.SURROUND_SHARE_MIN ? 'surround is not the background colour' : sd < L.DISK_LUMA_SD_MIN ? 'picture is blank inside the disk' : agreement < L.AGREEMENT_MIN ? 'picture does not match the check image' : null;
+  return { ok: !fail, reason: fail, ...m };
+}
+/** One response from EUMETView, read with a size limit. { ok, buf, bytes, sha256, warn_present, served } or { ok:false, reason, http, detail }. Reasons are fixed phrases (public). */
+async function evFetch(what, url, spec, timeoutMs = EARTHVIEW.TIMEOUT_MS) {   // timeoutMs: only the Stage B probe passes one (its whole-run deadline); the collector's limit is unchanged
+  let r;
+  try { r = await fetch(url, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(timeoutMs) }); } catch (e) { return { ok: false, reason: what + ' request failed', http: 0, detail: String(e).slice(0, 160) }; }
+  if (r.status !== 200) return { ok: false, reason: what + ' http error', http: r.status };
+  const type = (r.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+  if (type !== spec.type) return { ok: false, reason: what + ' not a picture', http: 200, detail: type };   // EUMETView answers a bad time with HTTP 200 and XML
+  const got = await dustBody(r, spec.maxBytes);
+  if (got.error) return { ok: false, reason: what + ' request failed', http: 200, detail: got.error };
+  if (got.over || !got.buf.byteLength) return { ok: false, reason: what + ' size out of range', http: 200, detail: got.over ? 'over ' + spec.maxBytes : '0' };
+  const warn = r.headers.get('warning');
+  return { ok: true, buf: got.buf, bytes: got.buf.byteLength, sha256: await sha256Bytes(got.buf), warn_present: warn !== null, served: dustServed(warn) };
+}
+/* ---- Storage records, guards and recovery (review of readiness rev 2, 20 Nov 2026) ----
+ * RECORDS. earthview/current.json (the pointer: frame, previous), earthview/held.json (the list: every stored picture), both stamped
+ * with an EPOCH; earthview/epochs/<epoch>.json (a create-only marker per epoch); earthview/hold.json (present = no run may start).
+ * earthview/state.json (last source check, last outcome) is for the page only: NO guard reads it, so a failure report cannot
+ * destroy evidence a guard uses, and a failed write to it is not a safety failure.
+ * THE COLLECTOR NEVER CREATES THE POINTER OR THE LIST. They are created only by evRecover (admin, under a hold), for a first start
+ * and for a repair alike. A run that finds either missing stops. There is no counter that could silently restart.
+ * KEYS. earthview/frames/<epoch>/<time>-<sha16>-g<n>-<24 hex>/picture.jpg. The 24 hex digits are 96 random bits drawn by the run;
+ * the write is create-only. No restore of any record can make a later run issue an old key again, short of drawing the same value.
+ * A STOP is an EvStop: the run stores nothing more, deletes nothing, publishes nothing and reports one fixed phrase. */
+class EvStop extends Error { constructor(reason, detail) { super(reason); this.reason = reason; this.detail = detail || null; } }
+const EV_STOP = { HELD: 'collection is held', UNSET: 'storage is not set up', REPAIR: 'storage record needs repair', BUSY: 'storage busy', CHANGED: 'storage changed during the run' };
+const evHex = n => { const b = new Uint8Array(n); crypto.getRandomValues(b); let s = ''; for (const x of b) s += x.toString(16).padStart(2, '0'); return s; };
+const evEpochOk = e => typeof e === 'string' && /^e\d{8}T\d{6}Z-[0-9a-f]{16}$/.test(e);
+const evNewEpoch = () => 'e' + nowIso().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z') + '-' + evHex(8);
+const evIdOk = id => typeof id === 'string' && /^\d{8}T\d{4}Z-[0-9a-f]{16}-g\d{1,12}-[0-9a-f]{24}$/.test(id);
+const evPutJson = (env, key, body, onlyIf) => env.R2.put(key, JSON.stringify(body), { httpMetadata: { contentType: 'application/json' }, onlyIf });
+/** One record as stored: { cur, etag }. cur is null when there is no object and undefined when the object does not parse. */
+async function evGet(env, key) { const o = await env.R2.get(key); if (!o) return { cur: null, etag: null }; let cur; try { cur = await o.json(); } catch (_) { cur = undefined; } return { cur: cur === null ? undefined : cur, etag: o.etag }; }
+/** Read, change, write of one small record; every write is conditional on what was read (or on there being nothing). change(cur)
+ * returns the new body, or null to leave it, or throws EvStop. It runs again on EVERY retry, against what was just read, so a
+ * fence inside it is checked again each time. */
+async function evUpdate(env, key, change) {
+  for (let i = 0; i < 5; i++) {
+    const { cur, etag } = await evGet(env, key), body = change(cur);
+    if (body === null) return { cur, body: null, wrote: false };
+    const r = await evPutJson(env, key, body, etag ? { etagMatches: etag } : { etagDoesNotMatch: '*' });
+    if (r !== null) return { cur, body, wrote: true };
+  }
+  throw new EvStop(EV_STOP.BUSY, 'record kept changing; gave up after 5 tries: ' + key);
+}
+/** THE FENCE. Wraps a change so that it applies only to a record still stamped with the epoch this run started under. Recovery
+ * changes the epoch; from then on every write by an earlier run, scheduled or manual, however long it has been going, stops here. */
+const evFence = (epoch, change) => cur => { if (!cur || cur.epoch !== epoch) throw new EvStop(EV_STOP.CHANGED, 'the record is no longer stamped ' + epoch); return change(cur); };
+/** Every object under a prefix, all pages. */
+async function evListAll(env, prefix) {
+  const out = []; let cursor;
+  for (let i = 0; i < EARTHVIEW.LIST_PAGES_MAX; i++) { const r = await env.R2.list({ prefix, cursor, limit: EARTHVIEW.LIST_PAGE });
+    for (const o of r.objects) out.push({ key: o.key, size: o.size });
+    if (!r.truncated) return out; cursor = r.cursor; }
+  throw new EvStop(EV_STOP.REPAIR, 'more than ' + EARTHVIEW.LIST_PAGES_MAX + ' pages of objects under ' + prefix);
+}
+/** GUARDS, at the start of every run (scheduled or manual) before any request or write. Returns { epoch } or throws EvStop.
+ *  G0 a hold record exists                                   -> "collection is held"
+ *  G1 neither pointer nor list exists                        -> "storage is not set up" (first start, or everything lost: a person decides)
+ *     one of them is missing or unreadable                   -> "storage record needs repair"
+ *  G2 the epochs differ, or the epoch has no marker          -> repair
+ *  G4 the pointer names a picture that is outside this epoch, not on the list, marked or pending -> repair (confirmed on a second read)
+ *  G5 INVENTORY against a STABLE view: the list is read, every page of this epoch's prefix is listed, the list's version is read
+ *     again. If it changed, the pass is discarded and repeated. A mismatch (a stored picture not on the list; or a claimed, unmarked
+ *     entry of this epoch with no picture) must be found by TWO stable passes before it is called repair. Passes that keep being
+ *     overtaken end as "storage busy": this run collects nothing, and nothing is said to be broken.
+ * G5 is a consistency check. It does not detect every restore: one after which the records and the stored pictures agree passes.
+ * Pending entries without a picture and marked entries without a picture are legitimate and never reported. Entries whose key is
+ * outside this epoch's prefix (pictures adopted by a recovery) are not checked: an old delete may still remove them, harmlessly. */
+async function evGuard(env, opt = {}) {
+  const repair = d => new EvStop(EV_STOP.REPAIR, d);
+  if (!opt.ignoreHold && await env.R2.head(EARTHVIEW.HOLD)) throw new EvStop(EV_STOP.HELD, null);
+  // Pointer first, then list: a frame the pointer names was claimed on the list before the pointer was written.
+  const read = async () => { const P = await evGet(env, EARTHVIEW.POINTER), H = await evGet(env, EARTHVIEW.HELD);
+    if (P.cur === null && H.cur === null) throw new EvStop(EV_STOP.UNSET, 'no pointer and no list');
+    if (!P.cur || !H.cur || !Array.isArray(H.cur.items)) throw repair(`pointer ${P.cur === null ? 'missing' : P.cur ? 'present' : 'unreadable'}, list ${H.cur === null ? 'missing' : H.cur && Array.isArray(H.cur.items) ? 'present' : 'unreadable'}`);
+    if (!evEpochOk(P.cur.epoch) || H.cur.epoch !== P.cur.epoch) throw repair(`epochs differ: pointer ${String(P.cur.epoch).slice(0, 40)}, list ${String(H.cur.epoch).slice(0, 40)}`);
+    return { P: P.cur, H: H.cur }; };
+  const role = (P, H, prefix) => { for (const [name, f] of [['current', P.frame], ['previous', P.previous]]) { if (!f) continue;
+    if (!f.picture || !String(f.picture.key).startsWith(prefix)) return name + ' picture is outside this epoch';
+    const x = H.items.find(i => i.id === f.id);
+    if (!x || x.key !== f.picture.key) return name + ' picture is not on the list';
+    if (x.deleting) return name + ' picture is marked for deletion'; if (x.pending) return name + ' picture is still pending on the list'; } return null; };
+  let v = await read(); const epoch = v.P.epoch, prefix = EARTHVIEW.PREFIX + epoch + '/';
+  if (!await env.R2.head(EARTHVIEW.EPOCHS + epoch + '.json')) throw repair('no marker for epoch ' + epoch);
+  if (role(v.P, v.H, prefix)) { v = await read(); if (v.P.epoch !== epoch) throw new EvStop(EV_STOP.CHANGED, 'epoch changed during the guards'); const again = role(v.P, v.H, prefix); if (again) throw repair(again); }
+  const pass = async () => { const a = await evGet(env, EARTHVIEW.HELD);
+    if (!a.cur || a.cur.epoch !== epoch || !Array.isArray(a.cur.items)) throw new EvStop(EV_STOP.CHANGED, 'the list changed epoch or became unreadable during the inventory');
+    const objs = await evListAll(env, prefix), b = await env.R2.head(EARTHVIEW.HELD);
+    if (!b || b.etag !== a.etag) return null;   // overtaken: not a finding
+    const stored = new Set(objs.map(o => o.key)), listed = new Set(a.cur.items.map(i => i.key));
+    const unlisted = objs.filter(o => !listed.has(o.key)).map(o => o.key), missing = a.cur.items.filter(i => String(i.key).startsWith(prefix) && !i.deleting && !i.pending && !stored.has(i.key)).map(i => i.key);
+    return { unlisted, missing, sig: JSON.stringify([unlisted, missing]) }; };
+  let first = null, verdict = null;
+  for (let t = 0; t < EARTHVIEW.INVENTORY_TRIES && !verdict; t++) { const r = await pass(); if (!r) continue;
+    if (!r.unlisted.length && !r.missing.length) verdict = 'clean'; else if (first && first.sig === r.sig) verdict = 'mismatch'; else first = r; }
+  if (!verdict) throw new EvStop(EV_STOP.BUSY, first ? 'a mismatch was seen once and could not be confirmed against a stable view' : 'the list kept changing during the inventory');
+  if (verdict === 'mismatch') throw repair(`inventory: ${first.unlisted.length} stored picture(s) not on the list, ${first.missing.length} listed picture(s) not stored; ` + [...first.unlisted, ...first.missing].slice(0, 3).join(' '));
+  return { epoch };
+}
+const evStateEmpty = () => ({ schema: 1, layer: 'earthview', run: null, source_check: null, collection: null });
+/** Records the last source check and the last collection outcome, for the page. Ordered by run time: a run that started earlier
+ * never replaces a later run's record. Not a safety record (no guard reads it); a failure to write it is deliberately not fatal. */
+async function evState(env, ms, patch) {
+  const run = new Date(ms).toISOString();
+  try { await evUpdate(env, EARTHVIEW.STATE, c => { const cur = c || evStateEmpty(); return (cur.run && cur.run > run) ? null : { ...cur, ...patch(cur), run, collector_version: COLLECTOR_VERSION }; }); } catch (_) {}
+}
+/** A failed collection: nothing published, the pointer and the list untouched, the outcome recorded with a fixed public phrase; detail goes to collector_runs only. */
+async function evFail(env, ms, reason, http, detail, T, check) {
+  const at = nowIso();
+  await evState(env, ms, cur => ({ ...(check ? { source_check: check } : {}), collection: { outcome: 'failed', frame_time: T || null, reason, http: http || 0, at,
+    consecutive_failures: ((cur.collection && cur.collection.outcome === 'failed' && cur.collection.consecutive_failures) || 0) + 1 } }));
+  await logRun(env, 'earthview', ms, 'down', http || 0, 0, 0, reason + (detail ? ' — ' + detail : ''));
+  return 'earthview:down ' + reason;
+}
+async function collectEarthView(env, ms, x) {
+  let T = null, check = null;
+  try { return await evCollect(env, ms, v => { T = v.T; check = v.check; }, x); }
+  catch (e) { if (e instanceof EvStop) return evFail(env, ms, e.reason, 0, e.detail, T, check); throw e; }
+}
+async function evCollect(env, ms, note, x) {
+  // 0. Guards: hold, records present, epochs agree, pointer pictures in role, inventory. A stop here makes no request to the source.
+  const { epoch } = await evGuard(env);
+  // 1. Source check: which frames does the service list? A failure here is recorded as a failed CHECK, never as a delay at the source.
+  let r; const checkAt = nowIso();
+  try { r = await fetch(EARTHVIEW.CAP, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(EARTHVIEW.LIST_TIMEOUT_MS) }); } catch (e) { return evFail(env, ms, 'source check failed', 0, String(e).slice(0, 160), null, { ok: false, at: checkAt, reason: 'no answer' }); }
+  if (r.status !== 200) { try { await r.body.cancel(); } catch (_) {} return evFail(env, ms, 'source check failed', r.status, null, null, { ok: false, at: checkAt, reason: 'http error', http: r.status }); }
+  let xml; try { xml = await r.text(); } catch (e) { return evFail(env, ms, 'source check failed', 200, String(e).slice(0, 160), null, { ok: false, at: checkAt, reason: 'unreadable' }); }
+  const T = evLatest(xml);
+  if (!T) return evFail(env, ms, 'source check failed', 200, 'no advertised time for ' + EARTHVIEW.LAYER, null, { ok: false, at: checkAt, reason: 'frame list unreadable' });
+  const age = Number(r.headers.get('age')), check = { ok: true, at: checkAt, newest: T, cache_age_s: Number.isFinite(age) && r.headers.get('age') !== null ? age : null };
+  note({ T, check });
+  const cur = evFence(epoch, c => c)((await evGet(env, EARTHVIEW.POINTER)).cur);
+  if (cur.frame && T <= cur.frame.source_frame_time) {   // nothing newer listed: no picture request, the pointer untouched
+    await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'nothing newer', frame_time: T, at: nowIso() } }));
+    await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, 'nothing newer: ' + T + ' listed, ' + cur.frame.source_frame_time + ' held');
+    return 'earthview:nothing newer ' + T;
+  }
+  // 2. The delivered picture and the check image, for exactly that time
+  const q = `&time=${T}`, P = EARTHVIEW.PICTURE, C = EARTHVIEW.CHECK;
+  const picUrl = `${EARTHVIEW.MAP}&width=${P.w}&height=${P.h}&format=image/jpeg&bgcolor=${EARTHVIEW.BGCOLOR}${q}`, chkUrl = `${EARTHVIEW.MAP}&width=${C.w}&height=${C.h}&format=image/png&transparent=true${q}`;
+  const pic = await evFetch('picture', picUrl, P); if (!pic.ok) return evFail(env, ms, pic.reason, pic.http, pic.detail, T, check);
+  const chk = await evFetch('check image', chkUrl, C); if (!chk.ok) return evFail(env, ms, chk.reason, chk.http, chk.detail, T, check);
+  // 3. Served time: strict. A different frame is refused; no statement of the served time is refused too.
+  for (const [what, f] of [['picture', pic], ['check image', chk]]) {
+    if (!f.served) return evFail(env, ms, 'served time not confirmed', 200, what + ': ' + (f.warn_present ? 'header present but names no time' : 'no Warning header'), T, check);
+    if (f.served !== T) return evFail(env, ms, 'served a different frame', 200, `${what}: asked ${T}, server named ${f.served}`, T, check);
+  }
+  // 4. The delivered picture itself: structure to the last byte, every scan present, then a full decode
+  const vFail = (...a) => { evValidated(x, false); return evFail(...a); }; evValidationBegin(x);   // 0.6.22: counts only (EVB); see evValidationBegin
+  const u8 = new Uint8Array(pic.buf), sc = evJpegScans(u8);
+  if (!sc.ok) return vFail(env, ms, 'picture failed validation', 200, 'structure: ' + sc.reason, T, check);
+  if (sc.w !== P.w || sc.h !== P.h || sc.components !== 3) return vFail(env, ms, 'picture failed validation', 200, `size ${sc.w}x${sc.h}, ${sc.components} components`, T, check);
+  if (!sc.complete) return vFail(env, ms, 'picture failed validation', 200, `scans incomplete: ${sc.missing} coefficient positions not delivered at full precision in ${sc.scans} scans`, T, check);
+  const png = await evPng(new Uint8Array(chk.buf), C.w * C.h);
+  if (!png || png.w !== C.w || png.h !== C.h) return vFail(env, ms, 'check image failed validation', 200, 'does not decode as ' + C.w + 'x' + C.h + ' RGBA', T, check);
+  const dec = evDecode(u8);
+  if (dec.error) return vFail(env, ms, 'picture failed validation', 200, 'decode: ' + dec.error, T, check);
+  if (dec.w !== P.w || dec.h !== P.h) return vFail(env, ms, 'picture failed validation', 200, `decoded size ${dec.w}x${dec.h}`, T, check);
+  const cmp = evCompare(dec, png);
+  if (!cmp.ok) return vFail(env, ms, 'picture failed validation', 200, cmp.reason + ' ' + JSON.stringify(cmp), T, check);
+  evValidated(x, true);
+  // 5. A KEY NO OTHER RUN HAS HAD OR WILL HAVE. The run draws 96 random bits; the key holds them, beside the epoch and a number
+  //    from the list. In one fenced conditional write the run takes the number and lists its picture as "pending" under that key,
+  //    so an entry always exists before its object does. Only this run writes the key, once, create-only; once its object is
+  //    deleted nothing writes that key again: a retry of the same frame with the same bytes draws a new value. So a cleanup that
+  //    deletes a key late, twice, or from an out-of-date view of the list can only delete what was already condemned.
+  const published_at = nowIso(), runStamp = new Date(ms).toISOString(), rand = evHex(12); let gen = 0;
+  const idOf = g => evKeyOf(T) + '-' + pic.sha256.slice(0, 16) + '-g' + g + '-' + rand, keyOf = g => `${EARTHVIEW.PREFIX}${epoch}/${idOf(g)}/picture.jpg`;
+  await evUpdate(env, EARTHVIEW.HELD, evFence(epoch, h => { gen = Math.max(1, Number(h.next_gen) || 1, ...h.items.map(x => (Number(x.gen) || 0) + 1));
+    return { ...h, next_gen: gen + 1, items: [...h.items, { id: idOf(gen), gen, key: keyOf(gen), bytes: pic.bytes, source_frame_time: T, published_at, left_at: null, pending: runStamp }] }; }));
+  const id = idOf(gen), key = keyOf(gen);
+  const stored = async () => { let b = null; try { const o = await env.R2.get(key); b = o ? await o.arrayBuffer() : null; } catch (_) { return 'unreadable'; } return !b ? 'absent' : (b.byteLength === pic.bytes && await sha256Bytes(b) === pic.sha256) ? 'same' : 'differs'; };
+  // 5b. Store it, create-only (an object already at this key is never replaced), and read it back
+  let put; try { put = await env.R2.put(key, pic.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: pic.sha256, source_frame_time: T }, onlyIf: { etagDoesNotMatch: '*' } }); } catch (e) { return evFail(env, ms, 'picture write failed', 200, String(e).slice(0, 160), T, check); }
+  if (put === null) return evFail(env, ms, 'picture key already in use', 200, key, T, check);
+  if (await stored() !== 'same') return evFail(env, ms, 'picture read-back differs', 200, key, T, check);
+  const frame = { id, source_frame_time: T, served_time: T, time_basis: 'the server named this frame time on both responses (Warning header)', first_listed_seen_at: checkAt, fetched_at: published_at, run: runStamp,
+    request: { service: 'WMS 1.3.0 GetMap', layer: 'mtg_fd:' + EARTHVIEW.LAYER, crs: EARTHVIEW.CRS, crs_definition: EARTHVIEW.CRS_DEFINITION, bbox: EARTHVIEW.BBOX, width: P.w, height: P.h, format: 'image/jpeg', bgcolor: EARTHVIEW.BGCOLOR, time: T },
+    picture: { file: 'picture.jpg', key, path: `/snapshot/earthview/${id}/picture.jpg`, type: 'image/jpeg', bytes: pic.bytes, sha256: pic.sha256, w: P.w, h: P.h },
+    checks: { decoded: true, progressive: sc.progressive, scans: sc.scans, check_image_sha256: chk.sha256, ...cmp, ok: undefined, reason: undefined } };
+  // 6. CLAIM (fenced): the entry stops being pending. The write refuses if the entry is missing or marked for deletion (which would
+  //    need this run to have been stopped for the whole grace period); the pointer is written only after it succeeds.
+  let claimed = false;
+  await evUpdate(env, EARTHVIEW.HELD, evFence(epoch, h => { const x = h.items.find(i => i.key === key); claimed = !!x && !x.deleting; if (!claimed) return null;
+    return { ...h, items: h.items.map(i => i.key === key ? { ...i, pending: undefined, left_at: null, claimed_at: nowIso() } : i) }; }));
+  if (!claimed) return evFail(env, ms, 'stored copy is being removed', 200, key + ' is no longer listed, or is marked for deletion; not published', T, check);
+  // 7. PUBLISH (fenced): move the pointer only if it is still this epoch's and no run has published this time or a later one meanwhile
+  const up = await evUpdate(env, EARTHVIEW.POINTER, evFence(epoch, c => (c.frame && c.frame.source_frame_time >= T) ? null : { ...evPointer(epoch), frame, previous: c.frame || null }));
+  if (!up.wrote) { await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'superseded', frame_time: T, at: nowIso() } })); await logRun(env, 'earthview', ms, 'ok', 200, 0, 0, `superseded: ${up.cur.frame.source_frame_time} was published first; ${T} not published`); return 'earthview:superseded ' + T; }
+  await evState(env, ms, () => ({ source_check: check, collection: { outcome: 'published', frame_time: T, at: published_at } }));
+  // 8. Cleanup, only here: a newer verified frame has just been published. Its failure never undoes the publication.
+  let deleted = 0, cleanupNote = ''; try { deleted = await evCleanup(env, epoch); } catch (e) { cleanupNote = '; cleanup stopped: ' + String((e && e.reason) || e).slice(0, 80); }
+  await logRun(env, 'earthview', ms, 'ok', 200, 1, pic.bytes, `frame ${T} as ${id}; agreement ${cmp.agreement}; ${deleted} old picture(s) deleted${cleanupNote}`);
+  return 'earthview:published ' + T;
+}
+const evPointer = epoch => ({ schema: 2, layer: 'earthview', epoch, frame: null, previous: null, collector_version: COLLECTOR_VERSION });
+/** Removes pictures that are neither current nor previous and left that role at least GRACE_S ago. Called only by a run that has
+ * just published a newer verified frame. Any number of cleanups may overlap, stop half way, or act on an out-of-date view.
+ * WHY NO CLEANUP DELETES A PICTURE THE POINTER NAMES OR MAY COME TO NAME (within what the collector itself can do):
+ *  1. One key, one writer, one life. A key holds 96 random bits drawn by its run (collector step 5). Only that run writes the key,
+ *     once, create-only. After its object is deleted nothing writes that key again: no path in this file stores to a key it did
+ *     not just make, and recovery copies to keys it has just made too.
+ *  2. An entry enters the pointer only through its own run, straight after that run's claim (step 6), or through a recovery, which
+ *     makes a new entry under a new key. An entry never re-enters.
+ *  3. An entry is marked "deleting" only by a fenced conditional write whose own view shows it absent from the pointer just read
+ *     and at least GRACE_S past the moment a cleanup first saw it out of role. Its own run's claim refuses a marked entry.
+ *  4. Therefore deleting a marked entry's key is safe whenever it happens and however often, as far as any run can arrange.
+ *  5. A delete that fails leaves the mark; a list update that fails after the delete leaves a marked entry with no object. The next
+ *     cleanup finds the mark, deletes again (harmless) and removes the entry. Marked entries are not served.
+ *  6. Current and previous are read from the pointer here, twice, each time with the epoch checked; the second read guards a state
+ *     rules 1 to 3 do not produce.
+ * WHAT RULES 1 TO 4 DO NOT COVER: someone outside the collector putting back an OLDER POINTER that names a key whose delete is
+ * already pending. No check here can stop that delete. evRecover is the answer: it never keeps a restored key; it copies the
+ * verified pictures to new keys before it installs a pointer, so a pending delete can only reach the old copies.
+ * Rests on: R2 conditional puts behaving as probed on the production bucket; crypto.getRandomValues being unpredictable; and no
+ * run pausing for the whole grace period between its claim and its pointer write. */
+async function evCleanup(env, epoch) {
+  const liveOf = p => new Set([p && p.frame && p.frame.id, p && p.previous && p.previous.id].filter(Boolean));
+  const pointer = async () => evFence(epoch, c => c)((await evGet(env, EARTHVIEW.POINTER)).cur);
+  const live = liveOf(await pointer()), at = nowIso(), nowMs = Date.parse(at);
+  const h = await evUpdate(env, EARTHVIEW.HELD, evFence(epoch, hh => ({ ...hh, items: hh.items.map(x => x.deleting ? x : live.has(x.id) ? { ...x, left_at: null }
+    : !x.left_at ? { ...x, left_at: at } : (nowMs - Date.parse(x.left_at) >= EARTHVIEW.GRACE_S * 1000 && String(x.key).startsWith(EARTHVIEW.PREFIX)) ? { ...x, deleting: at } : x) })));
+  const marked = h.body.items.filter(x => x.deleting); if (!marked.length) return 0;
+  const live2 = liveOf(await pointer()), gone = [], spared = [];
+  for (const x of marked) { if (live2.has(x.id)) { spared.push(x.key); continue; } try { await env.R2.delete(x.key); gone.push(x.key); } catch (_) {} }
+  if (gone.length || spared.length) await evUpdate(env, EARTHVIEW.HELD, evFence(epoch, hh => ({ ...hh, items: hh.items.filter(x => !(x.deleting && gone.includes(x.key))).map(x => x.deleting && spared.includes(x.key) ? { ...x, deleting: undefined, left_at: null } : x) })));
+  return gone.length;
+}
+async function runEarthView(env, ms) { let r = null; const g = await guarded(env, 'earthview', ms, async (e, m) => { r = await collectEarthView(e, m); }); return r || g; }
+/* ---- Hold, recover, sweep, release: /admin/earthview/<action> (admin key). Every action is a DRY RUN that writes nothing unless it
+ * is a POST with apply=1; recover and sweep also need plan=<id> from a dry run, and refuse if what they find no longer gives that
+ * id. ORDER OF A RECOVERY (also the first start), and what holds in every gap:
+ *   hold    writes earthview/hold.json, create-only. From then on no NEW run starts (guard G0), scheduled or manual. Runs already
+ *           going are not stopped by it; nothing below assumes they have ended, however long they last.
+ *   recover R1 reads the pointer, the list and every object; reads the current and previous pictures WHOLE and checks each against
+ *              the size and hash the pointer records. One that is missing or differs is not kept (the plan says so, by role).
+ *           R2 makes a new epoch and writes its marker, create-only (the plan is in it).
+ *           R3 writes each kept picture's bytes, from memory, to a NEW key under the new epoch; reads each back.
+ *              [until here nothing live has changed; an earlier run can still publish, and if one does, R4 refuses]
+ *           R4 THE FENCE ON PUBLICATION: one conditional write of the pointer, on the exact version R1 read: new epoch, the kept
+ *              frames under their new keys. If the pointer changed since R1, nothing is installed and recovery ends ("pointer
+ *              changed"); it is NOT retried against a pointer the plan never saw. After R4 the page is served from the new keys,
+ *              and no earlier run can publish: its pointer write meets the new epoch and stops.
+ *              [gap R4..R5: the list still carries the old epoch. Earlier runs can still take a number, store and claim on it; they
+ *               stop at the pointer. An earlier cleanup stops at its pointer read; one already past it deletes only keys it had
+ *               marked, none of which the new pointer names. New runs: held, and G2 stops them too.]
+ *           R5 lists every object under earthview/frames/ and writes the list: new epoch, the kept pictures in role, EVERY other
+ *              object out of role with its grace period starting now. The new body does not depend on the old one, so a conflict
+ *              is simply retried (5 times). After R5 no earlier run can write the list either.
+ *              [if R5 cannot be written the records disagree: G2 keeps every run stopped; recover is run again, whole]
+ *           R6 reads back: epochs agree, both kept pictures present, in role and matching.
+ *           Recovery DELETES NOTHING. A failed recovery is never resumed: it is run again from R1 with a new epoch; what the failed
+ *           one left (its marker, its copies) is unlisted until the next R5 adopts the copies as out-of-role pictures.
+ *   sweep   adds any object under earthview/frames/ that the list does not know, out of role (a picture an earlier run finished
+ *           storing after R5). May be repeated.
+ *   release refuses unless: a hold exists; every guard passes (stable inventory included); a sweep would add nothing; the current
+ *           and previous pictures read back whole and match. Then it removes the hold.
+ * WHAT AN EARLIER RUN CAN STILL DO AFTER A RECOVERY, for as long as it lives: finish storing a picture under the OLD epoch's prefix
+ * (unlisted; a leak until a sweep adopts it; the guards do not look there), and carry out a delete it had already decided (an old
+ * key). Neither can reach a picture the recovered pointer names. */
+async function evSurvey(env) {
+  const hold = await evGet(env, EARTHVIEW.HOLD), P = await evGet(env, EARTHVIEW.POINTER), H = await evGet(env, EARTHVIEW.HELD);
+  const objects = await evListAll(env, EARTHVIEW.PREFIX), markers = await evListAll(env, EARTHVIEW.EPOCHS);
+  const keep = [], drop = [];
+  for (const [role, f] of [['current', P.cur && P.cur.frame], ['previous', P.cur && P.cur.previous]]) { if (!f) continue;
+    let buf = null, why = null; try { const o = f.picture && f.picture.key ? await env.R2.get(f.picture.key) : null; buf = o ? await o.arrayBuffer() : null; } catch (_) { why = 'unreadable'; }
+    if (!why && !buf) why = 'missing'; if (!why && (buf.byteLength !== f.picture.bytes || await sha256Bytes(buf) !== f.picture.sha256)) why = 'differs from the record';
+    if (why) drop.push({ role, id: f.id, source_frame_time: f.source_frame_time, why }); else keep.push({ role, frame: f, buf }); }
+  const listed = new Set(((H.cur && Array.isArray(H.cur.items)) ? H.cur.items : []).map(i => i.key));
+  return { hold, P, H, objects, markers, keep, drop, unlisted: objects.filter(o => !listed.has(o.key)) };
+}
+const evPlanId = async plan => (await sha256Bytes(new TextEncoder().encode(JSON.stringify(plan)))).slice(0, 16);
+async function evAdmin(env, action, apply, planGiven) {
+  const s = await evSurvey(env), at = nowIso(), rec = x => x.cur === null ? 'missing' : x.cur ? 'present' : 'unreadable';
+  let guards = 'pass'; try { await evGuard(env, { ignoreHold: true }); } catch (e) { if (!(e instanceof EvStop)) throw e; guards = e.reason + (e.detail ? ': ' + e.detail : ''); }
+  const seen = { hold: s.hold.cur ? s.hold.cur : s.hold.cur === null ? null : 'unreadable', pointer: rec(s.P), pointer_epoch: (s.P.cur && s.P.cur.epoch) || null, list: rec(s.H), list_epoch: (s.H.cur && s.H.cur.epoch) || null,
+    list_entries: s.H.cur && Array.isArray(s.H.cur.items) ? s.H.cur.items.length : null, objects: s.objects.length, epoch_markers: s.markers.length, unlisted_objects: s.unlisted.length, guards,
+    current: (s.P.cur && s.P.cur.frame && s.P.cur.frame.source_frame_time) || null, previous: (s.P.cur && s.P.cur.previous && s.P.cur.previous.source_frame_time) || null };
+  const out = (extra, status = 200) => ({ status, body: { layer: 'earthview', action, applied: false, at, seen, ...extra } });
+  if (action === 'status') return out({});
+  if (action === 'hold') {
+    if (s.hold.etag) return out({ result: 'already held' });
+    if (!apply) return out({ would: 'write the hold record' });
+    const r = await evPutJson(env, EARTHVIEW.HOLD, { schema: 1, layer: 'earthview', held_at: at, collector_version: COLLECTOR_VERSION }, { etagDoesNotMatch: '*' });
+    return out({ applied: r !== null, result: r !== null ? 'held' : 'already held' });
+  }
+  if (action === 'recover') {
+    const first = !s.P.etag && !s.H.etag && !s.objects.length && !s.markers.length;
+    const kept = s.keep.map(k => ({ role: k.role, from_id: k.frame.id, source_frame_time: k.frame.source_frame_time, sha256: k.frame.picture.sha256, bytes: k.frame.picture.bytes }));
+    const plan = { action, mode: first ? 'first start' : 'recovery', pointer_version: s.P.etag, list_version: s.H.etag, keep: kept, not_kept: s.drop, objects: s.objects.length };
+    const plan_id = await evPlanId(plan);
+    if (!apply) return out({ plan, plan_id, would: first ? 'create an empty pointer and list under a new epoch' : 'copy the kept pictures to new keys, install a pointer and a list under a new epoch; delete nothing' });
+    if (!s.hold.etag) return out({ plan, plan_id, refused: 'no hold: hold first' }, 409);
+    if (planGiven !== plan_id) return out({ plan, plan_id, refused: 'what was found does not give the plan id that was passed; read the dry run again' }, 409);
+    const steps = [], epoch = evNewEpoch();
+    // R2 marker
+    if (await evPutJson(env, EARTHVIEW.EPOCHS + epoch + '.json', { schema: 1, layer: 'earthview', epoch, started_at: at, plan_id, plan, collector_version: COLLECTOR_VERSION }, { etagDoesNotMatch: '*' }) === null) return out({ plan_id, steps, refused: 'epoch marker already exists; run again' }, 500);
+    steps.push('R2 marker ' + epoch);
+    // R3 copies under new keys, from the bytes already verified in memory
+    const made = {};
+    for (const [n, k] of s.keep.entries()) { const f = k.frame, id = `${evKeyOf(f.source_frame_time)}-${f.picture.sha256.slice(0, 16)}-g${n + 1}-${evHex(12)}`, key = `${EARTHVIEW.PREFIX}${epoch}/${id}/picture.jpg`;
+      const put = await env.R2.put(key, k.buf, { httpMetadata: { contentType: 'image/jpeg' }, customMetadata: { sha256: f.picture.sha256, source_frame_time: f.source_frame_time }, onlyIf: { etagDoesNotMatch: '*' } });
+      if (put === null) return out({ plan_id, epoch, steps, refused: 'a copy key was already in use; nothing installed; run again' }, 500);
+      const o = await env.R2.get(key), back = o ? await o.arrayBuffer() : null;
+      if (!back || back.byteLength !== f.picture.bytes || await sha256Bytes(back) !== f.picture.sha256) return out({ plan_id, epoch, steps, refused: 'a copy did not read back; nothing installed; run again' }, 500);
+      made[k.role] = { ...f, id, recovered_from: f.id, picture: { ...f.picture, key, path: `/snapshot/earthview/${id}/picture.jpg` } }; steps.push(`R3 ${k.role} copied to ${id}`); }
+    // R4 the fence on publication: the pointer, on exactly the version R1 read. Never retried.
+    const frame = made.current || made.previous || null, previous = made.current ? (made.previous || null) : null;
+    const pr = await evPutJson(env, EARTHVIEW.POINTER, { ...evPointer(epoch), frame, previous, recovered_at: at }, s.P.etag ? { etagMatches: s.P.etag } : { etagDoesNotMatch: '*' });
+    if (pr === null) return out({ plan_id, epoch, steps, refused: 'pointer changed during recovery; nothing was installed; read the dry run again' }, 409);
+    steps.push('R4 pointer installed');
+    // R5 the list, from an inventory taken AFTER the fence
+    const objs = await evListAll(env, EARTHVIEW.PREFIX), inRole = new Map([frame, previous].filter(Boolean).map((f, i) => [f.picture.key, { f, gen: i + 1 }]));
+    const items = objs.map(o => { const r = inRole.get(o.key), id = (o.key.slice(0, -'/picture.jpg'.length).split('/').pop());
+      return r ? { id: r.f.id, gen: r.gen, key: o.key, bytes: r.f.picture.bytes, source_frame_time: r.f.source_frame_time, published_at: at, left_at: null, claimed_at: at, recovered: true }
+        : { id: o.key.endsWith('/picture.jpg') && evIdOk(id) ? id : null, gen: 0, key: o.key, bytes: o.size, source_frame_time: null, published_at: null, left_at: at, recovered: true }; });
+    const body = { schema: 3, layer: 'earthview', epoch, next_gen: inRole.size + 1, recovered_at: at, items }; let wrote = false;
+    for (let i = 0; i < 5 && !wrote; i++) { const h = await evGet(env, EARTHVIEW.HELD); wrote = await evPutJson(env, EARTHVIEW.HELD, body, h.etag ? { etagMatches: h.etag } : { etagDoesNotMatch: '*' }) !== null; }
+    if (!wrote) return out({ plan_id, epoch, steps, applied: true, refused: 'the list could not be written; the records disagree and every run stays stopped; run recover again' }, 500);
+    steps.push(`R5 list written with ${items.length} picture(s), ${inRole.size} in role`);
+    // R6 read back
+    let verified = 'pass'; try { await evGuard(env, { ignoreHold: true }); } catch (e) { if (!(e instanceof EvStop)) throw e; verified = e.reason + (e.detail ? ': ' + e.detail : ''); }
+    return out({ plan_id, epoch, steps, applied: true, result: 'recovered', guards_after: verified, kept: [frame, previous].filter(Boolean).map(f => ({ id: f.id, source_frame_time: f.source_frame_time })), not_kept: s.drop, still: 'held; sweep, then release' });
+  }
+  if (action === 'sweep') {
+    if (!s.H.cur || !evEpochOk(s.H.cur.epoch)) return out({ refused: 'no readable list: recover first' }, 409);
+    const plan = { action, epoch: s.H.cur.epoch, list_version: s.H.etag, add: s.unlisted.map(o => o.key) }, plan_id = await evPlanId(plan);
+    if (!apply) return out({ plan, plan_id, would: `add ${plan.add.length} picture(s) to the list, out of role` });
+    if (!s.hold.etag) return out({ plan, plan_id, refused: 'no hold: hold first' }, 409);
+    if (planGiven !== plan_id) return out({ plan, plan_id, refused: 'what was found does not give the plan id that was passed; read the dry run again' }, 409);
+    let added = 0; await evUpdate(env, EARTHVIEW.HELD, evFence(plan.epoch, h => { const have = new Set(h.items.map(i => i.key)), add = s.unlisted.filter(o => !have.has(o.key)); added = add.length; if (!added) return null;
+      return { ...h, items: [...h.items, ...add.map(o => { const id = o.key.slice(0, -'/picture.jpg'.length).split('/').pop(); return { id: o.key.endsWith('/picture.jpg') && evIdOk(id) ? id : null, gen: 0, key: o.key, bytes: o.size, source_frame_time: null, published_at: null, left_at: at, swept: true }; })] }; }));
+    return out({ plan_id, applied: added > 0, result: `added ${added}` });
+  }
+  if (action === 'release') {
+    const why = !s.hold.etag ? 'not held' : guards !== 'pass' ? 'guards: ' + guards : s.unlisted.length ? `${s.unlisted.length} stored picture(s) are not on the list: sweep first` : s.drop.length ? `${s.drop[0].role} picture is ${s.drop[0].why}` : null;
+    if (why) return out({ refused: why }, 409);
+    if (!apply) return out({ would: 'remove the hold' });
+    await env.R2.delete(EARTHVIEW.HOLD);
+    return out({ applied: true, result: 'released' });
+  }
+  return out({ refused: 'unknown action', actions: ['status', 'hold', 'recover', 'sweep', 'release'] }, 404);
+}
+/** GET /snapshot/earthview/meta and /snapshot/earthview/<frame id>/picture.jpg. A picture is served for any frame still on the held
+ * list (current, previous, or inside its grace period), and only if the stored bytes match what was recorded at publication. */
+async function evRoute(env, p) {
+  const none = (status, reason) => json({ layer: 'earthview', status: 'unavailable', reason }, status, { 'Cache-Control': 'no-store' });
+  if (p.length === 3 && p[2] === 'meta') {
+    let cur, st; try { cur = await getJson(env, EARTHVIEW.POINTER); st = await getJson(env, EARTHVIEW.STATE); } catch (e) { return none(503, 'unreadable'); }
+    const strip = f => f ? { ...f, picture: f.picture && { ...f.picture, key: undefined } } : null;
+    return json({ schema: 1, layer: 'earthview', frame: strip(cur && cur.frame), previous: strip(cur && cur.previous), source_check: (st && st.source_check) || null, collection: (st && st.collection) || null,
+      limits: { waiting_s: EARTHVIEW.WAITING_LIMIT_S, provisional: true }, cadence_min: EARTHVIEW.EVERY_MIN, source: EARTHVIEW.SOURCE, collecting: env.EARTHVIEW_ENABLED === '1', now: nowIso() }, 200, { 'Cache-Control': 'no-store' });
+  }
+  if (p.length !== 4 || p[3] !== 'picture.jpg' || !evIdOk(p[2])) return none(404, 'not found');
+  let cur, held; try { cur = await getJson(env, EARTHVIEW.POINTER); held = await getJson(env, EARTHVIEW.HELD); } catch (e) { return none(503, 'unreadable'); }
+  const fr = cur && [cur.frame, cur.previous].find(f => f && f.id === p[2]);
+  const x = fr ? fr.picture : held && (held.items || []).filter(i => i.id === p[2] && !i.deleting && !i.pending).map(i => ({ key: i.key, bytes: i.bytes, sha256: null }))[0];
+  if (!x) return none(404, 'not found');
+  let buf; try { const o = await env.R2.get(x.key); buf = o ? await o.arrayBuffer() : null; } catch (e) { return none(503, 'unreadable'); }
+  if (!buf) return none(503, 'missing');
+  const sha = await sha256Bytes(buf);
+  if (buf.byteLength !== x.bytes || (x.sha256 ? sha !== x.sha256 : sha.slice(0, 16) !== p[2].split('-')[1])) return none(503, 'integrity');
+  return new Response(buf, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': EARTHVIEW.CACHE_FILE, 'ETag': '"' + sha + '"', ...CORS } });
+}
+/* The JPEG decoder carried for Earth from Space: jpeg-js 0.4.4, lib/decoder.js (https://github.com/jpeg-js/jpeg-js), the JpegImage
+ * class only, unmodified; the package's own decode() wrapper and its colour conversion are not used. Its licence notice follows. */
+const EV_JPEG = (() => {
+/* -*- tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- /
+/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
+/*
+   Copyright 2011 notmasteryet
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
+// - The JPEG specification can be found in the ITU CCITT Recommendation T.81
+//   (www.w3.org/Graphics/JPEG/itu-t81.pdf)
+// - The JFIF specification can be found in the JPEG File Interchange Format
+//   (www.w3.org/Graphics/JPEG/jfif3.pdf)
+// - The Adobe Application-Specific JPEG markers in the Supporting the DCT Filters
+//   in PostScript Level 2, Technical Note #5116
+//   (partners.adobe.com/public/developer/en/ps/sdk/5116.DCT_Filter.pdf)
+
+var JpegImage = (function jpegImage() {
+  "use strict";
+  var dctZigZag = new Int32Array([
+     0,
+     1,  8,
+    16,  9,  2,
+     3, 10, 17, 24,
+    32, 25, 18, 11, 4,
+     5, 12, 19, 26, 33, 40,
+    48, 41, 34, 27, 20, 13,  6,
+     7, 14, 21, 28, 35, 42, 49, 56,
+    57, 50, 43, 36, 29, 22, 15,
+    23, 30, 37, 44, 51, 58,
+    59, 52, 45, 38, 31,
+    39, 46, 53, 60,
+    61, 54, 47,
+    55, 62,
+    63
+  ]);
+
+  var dctCos1  =  4017   // cos(pi/16)
+  var dctSin1  =   799   // sin(pi/16)
+  var dctCos3  =  3406   // cos(3*pi/16)
+  var dctSin3  =  2276   // sin(3*pi/16)
+  var dctCos6  =  1567   // cos(6*pi/16)
+  var dctSin6  =  3784   // sin(6*pi/16)
+  var dctSqrt2 =  5793   // sqrt(2)
+  var dctSqrt1d2 = 2896  // sqrt(2) / 2
+
+  function constructor() {
+  }
+
+  function buildHuffmanTable(codeLengths, values) {
+    var k = 0, code = [], i, j, length = 16;
+    while (length > 0 && !codeLengths[length - 1])
+      length--;
+    code.push({children: [], index: 0});
+    var p = code[0], q;
+    for (i = 0; i < length; i++) {
+      for (j = 0; j < codeLengths[i]; j++) {
+        p = code.pop();
+        p.children[p.index] = values[k];
+        while (p.index > 0) {
+          if (code.length === 0)
+            throw new Error('Could not recreate Huffman Table');
+          p = code.pop();
+        }
+        p.index++;
+        code.push(p);
+        while (code.length <= i) {
+          code.push(q = {children: [], index: 0});
+          p.children[p.index] = q.children;
+          p = q;
+        }
+        k++;
+      }
+      if (i + 1 < length) {
+        // p here points to last code
+        code.push(q = {children: [], index: 0});
+        p.children[p.index] = q.children;
+        p = q;
+      }
+    }
+    return code[0].children;
+  }
+
+  function decodeScan(data, offset,
+                      frame, components, resetInterval,
+                      spectralStart, spectralEnd,
+                      successivePrev, successive, opts) {
+    var precision = frame.precision;
+    var samplesPerLine = frame.samplesPerLine;
+    var scanLines = frame.scanLines;
+    var mcusPerLine = frame.mcusPerLine;
+    var progressive = frame.progressive;
+    var maxH = frame.maxH, maxV = frame.maxV;
+
+    var startOffset = offset, bitsData = 0, bitsCount = 0;
+    function readBit() {
+      if (bitsCount > 0) {
+        bitsCount--;
+        return (bitsData >> bitsCount) & 1;
+      }
+      bitsData = data[offset++];
+      if (bitsData == 0xFF) {
+        var nextByte = data[offset++];
+        if (nextByte) {
+          throw new Error("unexpected marker: " + ((bitsData << 8) | nextByte).toString(16));
+        }
+        // unstuff 0
+      }
+      bitsCount = 7;
+      return bitsData >>> 7;
+    }
+    function decodeHuffman(tree) {
+      var node = tree, bit;
+      while ((bit = readBit()) !== null) {
+        node = node[bit];
+        if (typeof node === 'number')
+          return node;
+        if (typeof node !== 'object')
+          throw new Error("invalid huffman sequence");
+      }
+      return null;
+    }
+    function receive(length) {
+      var n = 0;
+      while (length > 0) {
+        var bit = readBit();
+        if (bit === null) return;
+        n = (n << 1) | bit;
+        length--;
+      }
+      return n;
+    }
+    function receiveAndExtend(length) {
+      var n = receive(length);
+      if (n >= 1 << (length - 1))
+        return n;
+      return n + (-1 << length) + 1;
+    }
+    function decodeBaseline(component, zz) {
+      var t = decodeHuffman(component.huffmanTableDC);
+      var diff = t === 0 ? 0 : receiveAndExtend(t);
+      zz[0]= (component.pred += diff);
+      var k = 1;
+      while (k < 64) {
+        var rs = decodeHuffman(component.huffmanTableAC);
+        var s = rs & 15, r = rs >> 4;
+        if (s === 0) {
+          if (r < 15)
+            break;
+          k += 16;
+          continue;
+        }
+        k += r;
+        var z = dctZigZag[k];
+        zz[z] = receiveAndExtend(s);
+        k++;
+      }
+    }
+    function decodeDCFirst(component, zz) {
+      var t = decodeHuffman(component.huffmanTableDC);
+      var diff = t === 0 ? 0 : (receiveAndExtend(t) << successive);
+      zz[0] = (component.pred += diff);
+    }
+    function decodeDCSuccessive(component, zz) {
+      zz[0] |= readBit() << successive;
+    }
+    var eobrun = 0;
+    function decodeACFirst(component, zz) {
+      if (eobrun > 0) {
+        eobrun--;
+        return;
+      }
+      var k = spectralStart, e = spectralEnd;
+      while (k <= e) {
+        var rs = decodeHuffman(component.huffmanTableAC);
+        var s = rs & 15, r = rs >> 4;
+        if (s === 0) {
+          if (r < 15) {
+            eobrun = receive(r) + (1 << r) - 1;
+            break;
+          }
+          k += 16;
+          continue;
+        }
+        k += r;
+        var z = dctZigZag[k];
+        zz[z] = receiveAndExtend(s) * (1 << successive);
+        k++;
+      }
+    }
+    var successiveACState = 0, successiveACNextValue;
+    function decodeACSuccessive(component, zz) {
+      var k = spectralStart, e = spectralEnd, r = 0;
+      while (k <= e) {
+        var z = dctZigZag[k];
+        var direction = zz[z] < 0 ? -1 : 1;
+        switch (successiveACState) {
+        case 0: // initial state
+          var rs = decodeHuffman(component.huffmanTableAC);
+          var s = rs & 15, r = rs >> 4;
+          if (s === 0) {
+            if (r < 15) {
+              eobrun = receive(r) + (1 << r);
+              successiveACState = 4;
+            } else {
+              r = 16;
+              successiveACState = 1;
+            }
+          } else {
+            if (s !== 1)
+              throw new Error("invalid ACn encoding");
+            successiveACNextValue = receiveAndExtend(s);
+            successiveACState = r ? 2 : 3;
+          }
+          continue;
+        case 1: // skipping r zero items
+        case 2:
+          if (zz[z])
+            zz[z] += (readBit() << successive) * direction;
+          else {
+            r--;
+            if (r === 0)
+              successiveACState = successiveACState == 2 ? 3 : 0;
+          }
+          break;
+        case 3: // set value for a zero item
+          if (zz[z])
+            zz[z] += (readBit() << successive) * direction;
+          else {
+            zz[z] = successiveACNextValue << successive;
+            successiveACState = 0;
+          }
+          break;
+        case 4: // eob
+          if (zz[z])
+            zz[z] += (readBit() << successive) * direction;
+          break;
+        }
+        k++;
+      }
+      if (successiveACState === 4) {
+        eobrun--;
+        if (eobrun === 0)
+          successiveACState = 0;
+      }
+    }
+    function decodeMcu(component, decode, mcu, row, col) {
+      var mcuRow = (mcu / mcusPerLine) | 0;
+      var mcuCol = mcu % mcusPerLine;
+      var blockRow = mcuRow * component.v + row;
+      var blockCol = mcuCol * component.h + col;
+      // If the block is missing and we're in tolerant mode, just skip it.
+      if (component.blocks[blockRow] === undefined && opts.tolerantDecoding)
+        return;
+      decode(component, component.blocks[blockRow][blockCol]);
+    }
+    function decodeBlock(component, decode, mcu) {
+      var blockRow = (mcu / component.blocksPerLine) | 0;
+      var blockCol = mcu % component.blocksPerLine;
+      // If the block is missing and we're in tolerant mode, just skip it.
+      if (component.blocks[blockRow] === undefined && opts.tolerantDecoding)
+        return;
+      decode(component, component.blocks[blockRow][blockCol]);
+    }
+
+    var componentsLength = components.length;
+    var component, i, j, k, n;
+    var decodeFn;
+    if (progressive) {
+      if (spectralStart === 0)
+        decodeFn = successivePrev === 0 ? decodeDCFirst : decodeDCSuccessive;
+      else
+        decodeFn = successivePrev === 0 ? decodeACFirst : decodeACSuccessive;
+    } else {
+      decodeFn = decodeBaseline;
+    }
+
+    var mcu = 0, marker;
+    var mcuExpected;
+    if (componentsLength == 1) {
+      mcuExpected = components[0].blocksPerLine * components[0].blocksPerColumn;
+    } else {
+      mcuExpected = mcusPerLine * frame.mcusPerColumn;
+    }
+    if (!resetInterval) resetInterval = mcuExpected;
+
+    var h, v;
+    while (mcu < mcuExpected) {
+      // reset interval stuff
+      for (i = 0; i < componentsLength; i++)
+        components[i].pred = 0;
+      eobrun = 0;
+
+      if (componentsLength == 1) {
+        component = components[0];
+        for (n = 0; n < resetInterval; n++) {
+          decodeBlock(component, decodeFn, mcu);
+          mcu++;
+        }
+      } else {
+        for (n = 0; n < resetInterval; n++) {
+          for (i = 0; i < componentsLength; i++) {
+            component = components[i];
+            h = component.h;
+            v = component.v;
+            for (j = 0; j < v; j++) {
+              for (k = 0; k < h; k++) {
+                decodeMcu(component, decodeFn, mcu, j, k);
+              }
+            }
+          }
+          mcu++;
+
+          // If we've reached our expected MCU's, stop decoding
+          if (mcu === mcuExpected) break;
+        }
+      }
+
+      if (mcu === mcuExpected) {
+        // Skip trailing bytes at the end of the scan - until we reach the next marker
+        do {
+          if (data[offset] === 0xFF) {
+            if (data[offset + 1] !== 0x00) {
+              break;
+            }
+          }
+          offset += 1;
+        } while (offset < data.length - 2);
+      }
+
+      // find marker
+      bitsCount = 0;
+      marker = (data[offset] << 8) | data[offset + 1];
+      if (marker < 0xFF00) {
+        throw new Error("marker was not found");
+      }
+
+      if (marker >= 0xFFD0 && marker <= 0xFFD7) { // RSTx
+        offset += 2;
+      }
+      else
+        break;
+    }
+
+    return offset - startOffset;
+  }
+
+  function buildComponentData(frame, component) {
+    var lines = [];
+    var blocksPerLine = component.blocksPerLine;
+    var blocksPerColumn = component.blocksPerColumn;
+    var samplesPerLine = blocksPerLine << 3;
+    // Only 1 used per invocation of this function and garbage collected after invocation, so no need to account for its memory footprint.
+    var R = new Int32Array(64), r = new Uint8Array(64);
+
+    // A port of poppler's IDCT method which in turn is taken from:
+    //   Christoph Loeffler, Adriaan Ligtenberg, George S. Moschytz,
+    //   "Practical Fast 1-D DCT Algorithms with 11 Multiplications",
+    //   IEEE Intl. Conf. on Acoustics, Speech & Signal Processing, 1989,
+    //   988-991.
+    function quantizeAndInverse(zz, dataOut, dataIn) {
+      var qt = component.quantizationTable;
+      var v0, v1, v2, v3, v4, v5, v6, v7, t;
+      var p = dataIn;
+      var i;
+
+      // dequant
+      for (i = 0; i < 64; i++)
+        p[i] = zz[i] * qt[i];
+
+      // inverse DCT on rows
+      for (i = 0; i < 8; ++i) {
+        var row = 8 * i;
+
+        // check for all-zero AC coefficients
+        if (p[1 + row] == 0 && p[2 + row] == 0 && p[3 + row] == 0 &&
+            p[4 + row] == 0 && p[5 + row] == 0 && p[6 + row] == 0 &&
+            p[7 + row] == 0) {
+          t = (dctSqrt2 * p[0 + row] + 512) >> 10;
+          p[0 + row] = t;
+          p[1 + row] = t;
+          p[2 + row] = t;
+          p[3 + row] = t;
+          p[4 + row] = t;
+          p[5 + row] = t;
+          p[6 + row] = t;
+          p[7 + row] = t;
+          continue;
+        }
+
+        // stage 4
+        v0 = (dctSqrt2 * p[0 + row] + 128) >> 8;
+        v1 = (dctSqrt2 * p[4 + row] + 128) >> 8;
+        v2 = p[2 + row];
+        v3 = p[6 + row];
+        v4 = (dctSqrt1d2 * (p[1 + row] - p[7 + row]) + 128) >> 8;
+        v7 = (dctSqrt1d2 * (p[1 + row] + p[7 + row]) + 128) >> 8;
+        v5 = p[3 + row] << 4;
+        v6 = p[5 + row] << 4;
+
+        // stage 3
+        t = (v0 - v1+ 1) >> 1;
+        v0 = (v0 + v1 + 1) >> 1;
+        v1 = t;
+        t = (v2 * dctSin6 + v3 * dctCos6 + 128) >> 8;
+        v2 = (v2 * dctCos6 - v3 * dctSin6 + 128) >> 8;
+        v3 = t;
+        t = (v4 - v6 + 1) >> 1;
+        v4 = (v4 + v6 + 1) >> 1;
+        v6 = t;
+        t = (v7 + v5 + 1) >> 1;
+        v5 = (v7 - v5 + 1) >> 1;
+        v7 = t;
+
+        // stage 2
+        t = (v0 - v3 + 1) >> 1;
+        v0 = (v0 + v3 + 1) >> 1;
+        v3 = t;
+        t = (v1 - v2 + 1) >> 1;
+        v1 = (v1 + v2 + 1) >> 1;
+        v2 = t;
+        t = (v4 * dctSin3 + v7 * dctCos3 + 2048) >> 12;
+        v4 = (v4 * dctCos3 - v7 * dctSin3 + 2048) >> 12;
+        v7 = t;
+        t = (v5 * dctSin1 + v6 * dctCos1 + 2048) >> 12;
+        v5 = (v5 * dctCos1 - v6 * dctSin1 + 2048) >> 12;
+        v6 = t;
+
+        // stage 1
+        p[0 + row] = v0 + v7;
+        p[7 + row] = v0 - v7;
+        p[1 + row] = v1 + v6;
+        p[6 + row] = v1 - v6;
+        p[2 + row] = v2 + v5;
+        p[5 + row] = v2 - v5;
+        p[3 + row] = v3 + v4;
+        p[4 + row] = v3 - v4;
+      }
+
+      // inverse DCT on columns
+      for (i = 0; i < 8; ++i) {
+        var col = i;
+
+        // check for all-zero AC coefficients
+        if (p[1*8 + col] == 0 && p[2*8 + col] == 0 && p[3*8 + col] == 0 &&
+            p[4*8 + col] == 0 && p[5*8 + col] == 0 && p[6*8 + col] == 0 &&
+            p[7*8 + col] == 0) {
+          t = (dctSqrt2 * dataIn[i+0] + 8192) >> 14;
+          p[0*8 + col] = t;
+          p[1*8 + col] = t;
+          p[2*8 + col] = t;
+          p[3*8 + col] = t;
+          p[4*8 + col] = t;
+          p[5*8 + col] = t;
+          p[6*8 + col] = t;
+          p[7*8 + col] = t;
+          continue;
+        }
+
+        // stage 4
+        v0 = (dctSqrt2 * p[0*8 + col] + 2048) >> 12;
+        v1 = (dctSqrt2 * p[4*8 + col] + 2048) >> 12;
+        v2 = p[2*8 + col];
+        v3 = p[6*8 + col];
+        v4 = (dctSqrt1d2 * (p[1*8 + col] - p[7*8 + col]) + 2048) >> 12;
+        v7 = (dctSqrt1d2 * (p[1*8 + col] + p[7*8 + col]) + 2048) >> 12;
+        v5 = p[3*8 + col];
+        v6 = p[5*8 + col];
+
+        // stage 3
+        t = (v0 - v1 + 1) >> 1;
+        v0 = (v0 + v1 + 1) >> 1;
+        v1 = t;
+        t = (v2 * dctSin6 + v3 * dctCos6 + 2048) >> 12;
+        v2 = (v2 * dctCos6 - v3 * dctSin6 + 2048) >> 12;
+        v3 = t;
+        t = (v4 - v6 + 1) >> 1;
+        v4 = (v4 + v6 + 1) >> 1;
+        v6 = t;
+        t = (v7 + v5 + 1) >> 1;
+        v5 = (v7 - v5 + 1) >> 1;
+        v7 = t;
+
+        // stage 2
+        t = (v0 - v3 + 1) >> 1;
+        v0 = (v0 + v3 + 1) >> 1;
+        v3 = t;
+        t = (v1 - v2 + 1) >> 1;
+        v1 = (v1 + v2 + 1) >> 1;
+        v2 = t;
+        t = (v4 * dctSin3 + v7 * dctCos3 + 2048) >> 12;
+        v4 = (v4 * dctCos3 - v7 * dctSin3 + 2048) >> 12;
+        v7 = t;
+        t = (v5 * dctSin1 + v6 * dctCos1 + 2048) >> 12;
+        v5 = (v5 * dctCos1 - v6 * dctSin1 + 2048) >> 12;
+        v6 = t;
+
+        // stage 1
+        p[0*8 + col] = v0 + v7;
+        p[7*8 + col] = v0 - v7;
+        p[1*8 + col] = v1 + v6;
+        p[6*8 + col] = v1 - v6;
+        p[2*8 + col] = v2 + v5;
+        p[5*8 + col] = v2 - v5;
+        p[3*8 + col] = v3 + v4;
+        p[4*8 + col] = v3 - v4;
+      }
+
+      // convert to 8-bit integers
+      for (i = 0; i < 64; ++i) {
+        var sample = 128 + ((p[i] + 8) >> 4);
+        dataOut[i] = sample < 0 ? 0 : sample > 0xFF ? 0xFF : sample;
+      }
+    }
+
+    requestMemoryAllocation(samplesPerLine * blocksPerColumn * 8);
+
+    var i, j;
+    for (var blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
+      var scanLine = blockRow << 3;
+      for (i = 0; i < 8; i++)
+        lines.push(new Uint8Array(samplesPerLine));
+      for (var blockCol = 0; blockCol < blocksPerLine; blockCol++) {
+        quantizeAndInverse(component.blocks[blockRow][blockCol], r, R);
+
+        var offset = 0, sample = blockCol << 3;
+        for (j = 0; j < 8; j++) {
+          var line = lines[scanLine + j];
+          for (i = 0; i < 8; i++)
+            line[sample + i] = r[offset++];
+        }
+      }
+    }
+    return lines;
+  }
+
+  function clampTo8bit(a) {
+    return a < 0 ? 0 : a > 255 ? 255 : a;
+  }
+
+  constructor.prototype = {
+    load: function load(path) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", path, true);
+      xhr.responseType = "arraybuffer";
+      xhr.onload = (function() {
+        // TODO catch parse error
+        var data = new Uint8Array(xhr.response || xhr.mozResponseArrayBuffer);
+        this.parse(data);
+        if (this.onload)
+          this.onload();
+      }).bind(this);
+      xhr.send(null);
+    },
+    parse: function parse(data) {
+      var maxResolutionInPixels = this.opts.maxResolutionInMP * 1000 * 1000;
+      var offset = 0, length = data.length;
+      function readUint16() {
+        var value = (data[offset] << 8) | data[offset + 1];
+        offset += 2;
+        return value;
+      }
+      function readDataBlock() {
+        var length = readUint16();
+        var array = data.subarray(offset, offset + length - 2);
+        offset += array.length;
+        return array;
+      }
+      function prepareComponents(frame) {
+        // According to the JPEG standard, the sampling factor must be between 1 and 4
+        // See https://github.com/libjpeg-turbo/libjpeg-turbo/blob/9abeff46d87bd201a952e276f3e4339556a403a3/libjpeg.txt#L1138-L1146
+        var maxH = 1, maxV = 1;
+        var component, componentId;
+        for (componentId in frame.components) {
+          if (frame.components.hasOwnProperty(componentId)) {
+            component = frame.components[componentId];
+            if (maxH < component.h) maxH = component.h;
+            if (maxV < component.v) maxV = component.v;
+          }
+        }
+        var mcusPerLine = Math.ceil(frame.samplesPerLine / 8 / maxH);
+        var mcusPerColumn = Math.ceil(frame.scanLines / 8 / maxV);
+        for (componentId in frame.components) {
+          if (frame.components.hasOwnProperty(componentId)) {
+            component = frame.components[componentId];
+            var blocksPerLine = Math.ceil(Math.ceil(frame.samplesPerLine / 8) * component.h / maxH);
+            var blocksPerColumn = Math.ceil(Math.ceil(frame.scanLines  / 8) * component.v / maxV);
+            var blocksPerLineForMcu = mcusPerLine * component.h;
+            var blocksPerColumnForMcu = mcusPerColumn * component.v;
+            var blocksToAllocate = blocksPerColumnForMcu * blocksPerLineForMcu;
+            var blocks = [];
+
+            // Each block is a Int32Array of length 64 (4 x 64 = 256 bytes)
+            requestMemoryAllocation(blocksToAllocate * 256);
+
+            for (var i = 0; i < blocksPerColumnForMcu; i++) {
+              var row = [];
+              for (var j = 0; j < blocksPerLineForMcu; j++)
+                row.push(new Int32Array(64));
+              blocks.push(row);
+            }
+            component.blocksPerLine = blocksPerLine;
+            component.blocksPerColumn = blocksPerColumn;
+            component.blocks = blocks;
+          }
+        }
+        frame.maxH = maxH;
+        frame.maxV = maxV;
+        frame.mcusPerLine = mcusPerLine;
+        frame.mcusPerColumn = mcusPerColumn;
+      }
+      var jfif = null;
+      var adobe = null;
+      var pixels = null;
+      var frame, resetInterval;
+      var quantizationTables = [], frames = [];
+      var huffmanTablesAC = [], huffmanTablesDC = [];
+      var fileMarker = readUint16();
+      var malformedDataOffset = -1;
+      this.comments = [];
+      if (fileMarker != 0xFFD8) { // SOI (Start of Image)
+        throw new Error("SOI not found");
+      }
+
+      fileMarker = readUint16();
+      while (fileMarker != 0xFFD9) { // EOI (End of image)
+        var i, j, l;
+        switch(fileMarker) {
+          case 0xFF00: break;
+          case 0xFFE0: // APP0 (Application Specific)
+          case 0xFFE1: // APP1
+          case 0xFFE2: // APP2
+          case 0xFFE3: // APP3
+          case 0xFFE4: // APP4
+          case 0xFFE5: // APP5
+          case 0xFFE6: // APP6
+          case 0xFFE7: // APP7
+          case 0xFFE8: // APP8
+          case 0xFFE9: // APP9
+          case 0xFFEA: // APP10
+          case 0xFFEB: // APP11
+          case 0xFFEC: // APP12
+          case 0xFFED: // APP13
+          case 0xFFEE: // APP14
+          case 0xFFEF: // APP15
+          case 0xFFFE: // COM (Comment)
+            var appData = readDataBlock();
+
+            if (fileMarker === 0xFFFE) {
+              var comment = String.fromCharCode.apply(null, appData);
+              this.comments.push(comment);
+            }
+
+            if (fileMarker === 0xFFE0) {
+              if (appData[0] === 0x4A && appData[1] === 0x46 && appData[2] === 0x49 &&
+                appData[3] === 0x46 && appData[4] === 0) { // 'JFIF\x00'
+                jfif = {
+                  version: { major: appData[5], minor: appData[6] },
+                  densityUnits: appData[7],
+                  xDensity: (appData[8] << 8) | appData[9],
+                  yDensity: (appData[10] << 8) | appData[11],
+                  thumbWidth: appData[12],
+                  thumbHeight: appData[13],
+                  thumbData: appData.subarray(14, 14 + 3 * appData[12] * appData[13])
+                };
+              }
+            }
+            // TODO APP1 - Exif
+            if (fileMarker === 0xFFE1) {
+              if (appData[0] === 0x45 &&
+                appData[1] === 0x78 &&
+                appData[2] === 0x69 &&
+                appData[3] === 0x66 &&
+                appData[4] === 0) { // 'EXIF\x00'
+                this.exifBuffer = appData.subarray(5, appData.length);
+              }
+            }
+
+            if (fileMarker === 0xFFEE) {
+              if (appData[0] === 0x41 && appData[1] === 0x64 && appData[2] === 0x6F &&
+                appData[3] === 0x62 && appData[4] === 0x65 && appData[5] === 0) { // 'Adobe\x00'
+                adobe = {
+                  version: appData[6],
+                  flags0: (appData[7] << 8) | appData[8],
+                  flags1: (appData[9] << 8) | appData[10],
+                  transformCode: appData[11]
+                };
+              }
+            }
+            break;
+
+          case 0xFFDB: // DQT (Define Quantization Tables)
+            var quantizationTablesLength = readUint16();
+            var quantizationTablesEnd = quantizationTablesLength + offset - 2;
+            while (offset < quantizationTablesEnd) {
+              var quantizationTableSpec = data[offset++];
+              requestMemoryAllocation(64 * 4);
+              var tableData = new Int32Array(64);
+              if ((quantizationTableSpec >> 4) === 0) { // 8 bit values
+                for (j = 0; j < 64; j++) {
+                  var z = dctZigZag[j];
+                  tableData[z] = data[offset++];
+                }
+              } else if ((quantizationTableSpec >> 4) === 1) { //16 bit
+                for (j = 0; j < 64; j++) {
+                  var z = dctZigZag[j];
+                  tableData[z] = readUint16();
+                }
+              } else
+                throw new Error("DQT: invalid table spec");
+              quantizationTables[quantizationTableSpec & 15] = tableData;
+            }
+            break;
+
+          case 0xFFC0: // SOF0 (Start of Frame, Baseline DCT)
+          case 0xFFC1: // SOF1 (Start of Frame, Extended DCT)
+          case 0xFFC2: // SOF2 (Start of Frame, Progressive DCT)
+            readUint16(); // skip data length
+            frame = {};
+            frame.extended = (fileMarker === 0xFFC1);
+            frame.progressive = (fileMarker === 0xFFC2);
+            frame.precision = data[offset++];
+            frame.scanLines = readUint16();
+            frame.samplesPerLine = readUint16();
+            frame.components = {};
+            frame.componentsOrder = [];
+
+            var pixelsInFrame = frame.scanLines * frame.samplesPerLine;
+            if (pixelsInFrame > maxResolutionInPixels) {
+              var exceededAmount = Math.ceil((pixelsInFrame - maxResolutionInPixels) / 1e6);
+              throw new Error(`maxResolutionInMP limit exceeded by ${exceededAmount}MP`);
+            }
+
+            var componentsCount = data[offset++], componentId;
+            var maxH = 0, maxV = 0;
+            for (i = 0; i < componentsCount; i++) {
+              componentId = data[offset];
+              var h = data[offset + 1] >> 4;
+              var v = data[offset + 1] & 15;
+              var qId = data[offset + 2];
+
+              if ( h <= 0 || v <= 0 ) {
+                throw new Error('Invalid sampling factor, expected values above 0');
+              }
+
+              frame.componentsOrder.push(componentId);
+              frame.components[componentId] = {
+                h: h,
+                v: v,
+                quantizationIdx: qId
+              };
+              offset += 3;
+            }
+            prepareComponents(frame);
+            frames.push(frame);
+            break;
+
+          case 0xFFC4: // DHT (Define Huffman Tables)
+            var huffmanLength = readUint16();
+            for (i = 2; i < huffmanLength;) {
+              var huffmanTableSpec = data[offset++];
+              var codeLengths = new Uint8Array(16);
+              var codeLengthSum = 0;
+              for (j = 0; j < 16; j++, offset++) {
+                codeLengthSum += (codeLengths[j] = data[offset]);
+              }
+              requestMemoryAllocation(16 + codeLengthSum);
+              var huffmanValues = new Uint8Array(codeLengthSum);
+              for (j = 0; j < codeLengthSum; j++, offset++)
+                huffmanValues[j] = data[offset];
+              i += 17 + codeLengthSum;
+
+              ((huffmanTableSpec >> 4) === 0 ?
+                huffmanTablesDC : huffmanTablesAC)[huffmanTableSpec & 15] =
+                buildHuffmanTable(codeLengths, huffmanValues);
+            }
+            break;
+
+          case 0xFFDD: // DRI (Define Restart Interval)
+            readUint16(); // skip data length
+            resetInterval = readUint16();
+            break;
+
+          case 0xFFDC: // Number of Lines marker
+            readUint16() // skip data length
+            readUint16() // Ignore this data since it represents the image height
+            break;
+            
+          case 0xFFDA: // SOS (Start of Scan)
+            var scanLength = readUint16();
+            var selectorsCount = data[offset++];
+            var components = [], component;
+            for (i = 0; i < selectorsCount; i++) {
+              component = frame.components[data[offset++]];
+              var tableSpec = data[offset++];
+              component.huffmanTableDC = huffmanTablesDC[tableSpec >> 4];
+              component.huffmanTableAC = huffmanTablesAC[tableSpec & 15];
+              components.push(component);
+            }
+            var spectralStart = data[offset++];
+            var spectralEnd = data[offset++];
+            var successiveApproximation = data[offset++];
+            var processed = decodeScan(data, offset,
+              frame, components, resetInterval,
+              spectralStart, spectralEnd,
+              successiveApproximation >> 4, successiveApproximation & 15, this.opts);
+            offset += processed;
+            break;
+
+          case 0xFFFF: // Fill bytes
+            if (data[offset] !== 0xFF) { // Avoid skipping a valid marker.
+              offset--;
+            }
+            break;
+          default:
+            if (data[offset - 3] == 0xFF &&
+                data[offset - 2] >= 0xC0 && data[offset - 2] <= 0xFE) {
+              // could be incorrect encoding -- last 0xFF byte of the previous
+              // block was eaten by the encoder
+              offset -= 3;
+              break;
+            }
+            else if (fileMarker === 0xE0 || fileMarker == 0xE1) {
+              // Recover from malformed APP1 markers popular in some phone models.
+              // See https://github.com/eugeneware/jpeg-js/issues/82
+              if (malformedDataOffset !== -1) {
+                throw new Error(`first unknown JPEG marker at offset ${malformedDataOffset.toString(16)}, second unknown JPEG marker ${fileMarker.toString(16)} at offset ${(offset - 1).toString(16)}`);
+              }
+              malformedDataOffset = offset - 1;
+              const nextOffset = readUint16();
+              if (data[offset + nextOffset - 2] === 0xFF) {
+                offset += nextOffset - 2;
+                break;
+              }
+            }
+            throw new Error("unknown JPEG marker " + fileMarker.toString(16));
+        }
+        fileMarker = readUint16();
+      }
+      if (frames.length != 1)
+        throw new Error("only single frame JPEGs supported");
+
+      // set each frame's components quantization table
+      for (var i = 0; i < frames.length; i++) {
+        var cp = frames[i].components;
+        for (var j in cp) {
+          cp[j].quantizationTable = quantizationTables[cp[j].quantizationIdx];
+          delete cp[j].quantizationIdx;
+        }
+      }
+
+      this.width = frame.samplesPerLine;
+      this.height = frame.scanLines;
+      this.jfif = jfif;
+      this.adobe = adobe;
+      this.components = [];
+      for (var i = 0; i < frame.componentsOrder.length; i++) {
+        var component = frame.components[frame.componentsOrder[i]];
+        this.components.push({
+          lines: buildComponentData(frame, component),
+          scaleX: component.h / frame.maxH,
+          scaleY: component.v / frame.maxV
+        });
+      }
+    },
+    getData: function getData(width, height) {
+      var scaleX = this.width / width, scaleY = this.height / height;
+
+      var component1, component2, component3, component4;
+      var component1Line, component2Line, component3Line, component4Line;
+      var x, y;
+      var offset = 0;
+      var Y, Cb, Cr, K, C, M, Ye, R, G, B;
+      var colorTransform;
+      var dataLength = width * height * this.components.length;
+      requestMemoryAllocation(dataLength);
+      var data = new Uint8Array(dataLength);
+      switch (this.components.length) {
+        case 1:
+          component1 = this.components[0];
+          for (y = 0; y < height; y++) {
+            component1Line = component1.lines[0 | (y * component1.scaleY * scaleY)];
+            for (x = 0; x < width; x++) {
+              Y = component1Line[0 | (x * component1.scaleX * scaleX)];
+
+              data[offset++] = Y;
+            }
+          }
+          break;
+        case 2:
+          // PDF might compress two component data in custom colorspace
+          component1 = this.components[0];
+          component2 = this.components[1];
+          for (y = 0; y < height; y++) {
+            component1Line = component1.lines[0 | (y * component1.scaleY * scaleY)];
+            component2Line = component2.lines[0 | (y * component2.scaleY * scaleY)];
+            for (x = 0; x < width; x++) {
+              Y = component1Line[0 | (x * component1.scaleX * scaleX)];
+              data[offset++] = Y;
+              Y = component2Line[0 | (x * component2.scaleX * scaleX)];
+              data[offset++] = Y;
+            }
+          }
+          break;
+        case 3:
+          // The default transform for three components is true
+          colorTransform = true;
+          // The adobe transform marker overrides any previous setting
+          if (this.adobe && this.adobe.transformCode)
+            colorTransform = true;
+          else if (typeof this.opts.colorTransform !== 'undefined')
+            colorTransform = !!this.opts.colorTransform;
+
+          component1 = this.components[0];
+          component2 = this.components[1];
+          component3 = this.components[2];
+          for (y = 0; y < height; y++) {
+            component1Line = component1.lines[0 | (y * component1.scaleY * scaleY)];
+            component2Line = component2.lines[0 | (y * component2.scaleY * scaleY)];
+            component3Line = component3.lines[0 | (y * component3.scaleY * scaleY)];
+            for (x = 0; x < width; x++) {
+              if (!colorTransform) {
+                R = component1Line[0 | (x * component1.scaleX * scaleX)];
+                G = component2Line[0 | (x * component2.scaleX * scaleX)];
+                B = component3Line[0 | (x * component3.scaleX * scaleX)];
+              } else {
+                Y = component1Line[0 | (x * component1.scaleX * scaleX)];
+                Cb = component2Line[0 | (x * component2.scaleX * scaleX)];
+                Cr = component3Line[0 | (x * component3.scaleX * scaleX)];
+
+                R = clampTo8bit(Y + 1.402 * (Cr - 128));
+                G = clampTo8bit(Y - 0.3441363 * (Cb - 128) - 0.71413636 * (Cr - 128));
+                B = clampTo8bit(Y + 1.772 * (Cb - 128));
+              }
+
+              data[offset++] = R;
+              data[offset++] = G;
+              data[offset++] = B;
+            }
+          }
+          break;
+        case 4:
+          if (!this.adobe)
+            throw new Error('Unsupported color mode (4 components)');
+          // The default transform for four components is false
+          colorTransform = false;
+          // The adobe transform marker overrides any previous setting
+          if (this.adobe && this.adobe.transformCode)
+            colorTransform = true;
+          else if (typeof this.opts.colorTransform !== 'undefined')
+            colorTransform = !!this.opts.colorTransform;
+
+          component1 = this.components[0];
+          component2 = this.components[1];
+          component3 = this.components[2];
+          component4 = this.components[3];
+          for (y = 0; y < height; y++) {
+            component1Line = component1.lines[0 | (y * component1.scaleY * scaleY)];
+            component2Line = component2.lines[0 | (y * component2.scaleY * scaleY)];
+            component3Line = component3.lines[0 | (y * component3.scaleY * scaleY)];
+            component4Line = component4.lines[0 | (y * component4.scaleY * scaleY)];
+            for (x = 0; x < width; x++) {
+              if (!colorTransform) {
+                C = component1Line[0 | (x * component1.scaleX * scaleX)];
+                M = component2Line[0 | (x * component2.scaleX * scaleX)];
+                Ye = component3Line[0 | (x * component3.scaleX * scaleX)];
+                K = component4Line[0 | (x * component4.scaleX * scaleX)];
+              } else {
+                Y = component1Line[0 | (x * component1.scaleX * scaleX)];
+                Cb = component2Line[0 | (x * component2.scaleX * scaleX)];
+                Cr = component3Line[0 | (x * component3.scaleX * scaleX)];
+                K = component4Line[0 | (x * component4.scaleX * scaleX)];
+
+                C = 255 - clampTo8bit(Y + 1.402 * (Cr - 128));
+                M = 255 - clampTo8bit(Y - 0.3441363 * (Cb - 128) - 0.71413636 * (Cr - 128));
+                Ye = 255 - clampTo8bit(Y + 1.772 * (Cb - 128));
+              }
+              data[offset++] = 255-C;
+              data[offset++] = 255-M;
+              data[offset++] = 255-Ye;
+              data[offset++] = 255-K;
+            }
+          }
+          break;
+        default:
+          throw new Error('Unsupported color mode');
+      }
+      return data;
+    },
+    copyToImageData: function copyToImageData(imageData, formatAsRGBA) {
+      var width = imageData.width, height = imageData.height;
+      var imageDataArray = imageData.data;
+      var data = this.getData(width, height);
+      var i = 0, j = 0, x, y;
+      var Y, K, C, M, R, G, B;
+      switch (this.components.length) {
+        case 1:
+          for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+              Y = data[i++];
+
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = Y;
+              imageDataArray[j++] = Y;
+              if (formatAsRGBA) {
+                imageDataArray[j++] = 255;
+              }
+            }
+          }
+          break;
+        case 3:
+          for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+              R = data[i++];
+              G = data[i++];
+              B = data[i++];
+
+              imageDataArray[j++] = R;
+              imageDataArray[j++] = G;
+              imageDataArray[j++] = B;
+              if (formatAsRGBA) {
+                imageDataArray[j++] = 255;
+              }
+            }
+          }
+          break;
+        case 4:
+          for (y = 0; y < height; y++) {
+            for (x = 0; x < width; x++) {
+              C = data[i++];
+              M = data[i++];
+              Y = data[i++];
+              K = data[i++];
+
+              R = 255 - clampTo8bit(C * (1 - K / 255) + K);
+              G = 255 - clampTo8bit(M * (1 - K / 255) + K);
+              B = 255 - clampTo8bit(Y * (1 - K / 255) + K);
+
+              imageDataArray[j++] = R;
+              imageDataArray[j++] = G;
+              imageDataArray[j++] = B;
+              if (formatAsRGBA) {
+                imageDataArray[j++] = 255;
+              }
+            }
+          }
+          break;
+        default:
+          throw new Error('Unsupported color mode');
+      }
+    }
+  };
+
+
+  // We cap the amount of memory used by jpeg-js to avoid unexpected OOMs from untrusted content.
+  var totalBytesAllocated = 0;
+  var maxMemoryUsageBytes = 0;
+  function requestMemoryAllocation(increaseAmount = 0) {
+    var totalMemoryImpactBytes = totalBytesAllocated + increaseAmount;
+    if (totalMemoryImpactBytes > maxMemoryUsageBytes) {
+      var exceededAmount = Math.ceil((totalMemoryImpactBytes - maxMemoryUsageBytes) / 1024 / 1024);
+      throw new Error(`maxMemoryUsageInMB limit exceeded by at least ${exceededAmount}MB`);
+    }
+
+    totalBytesAllocated = totalMemoryImpactBytes;
+  }
+
+  constructor.resetMaxMemoryUsage = function (maxMemoryUsageBytes_) {
+    totalBytesAllocated = 0;
+    maxMemoryUsageBytes = maxMemoryUsageBytes_;
+  };
+
+  constructor.getBytesAllocated = function () {
+    return totalBytesAllocated;
+  };
+
+  constructor.requestMemoryAllocation = requestMemoryAllocation;
+
+  return constructor;
+})();
+return JpegImage;
+})();
 
 /* ---------- Wind by height (NOAA/NCEP GFS, 0.25 degree, analysis hour f000) — 0.6.16, GLOBAL-WIND-BUILD-PROPOSAL rev 2 (§11 governs)
  * Each scheduled hour the hub looks for the newest GFS run whose f000 index exists on NOAA's open-data mirror. If that run is newer
@@ -4035,6 +5775,153 @@ async function collectSunface(env, ms) {
   await logRun(env, 'sunface', ms, 'ok', 200, 1, f.bytes, `image ${id}; file updated ${stamp.iso}; observation time not known`);
   return 'sunface:published ' + id;
 }
+/* ---- Stage B probe: POST /admin/probe/earthview (0.6.21; EARTH-FROM-SPACE-STAGE-B-PROPOSAL rev 2) ----
+ * ONE validation of the newest GeoColour frame inside this isolate, with the collector's own decode and comparison, and NOTHING stored.
+ * - evProbeOnce() is given no env: it has no handle on the bucket, the database or a secret. The route reads env only for the key and the gate.
+ * - It calls none of evState, evFail, evUpdate, evCollect, evCleanup, evGuard, evAdmin, logRun or guarded, and uses no cache.
+ * - At most 3 upstream requests (frame list, picture, check image), no retry, one deadline for the whole run (EVB.DEADLINE_MS).
+ * - Runs only while EARTHVIEW_ENABLED is unset; with it unset neither the scheduled nor the manual collector runs (JOBS above).
+ * - One at a time PER ISOLATE (EVB.busy). The latch cannot see another isolate and is not a cap on upstream requests.
+ * - In memory only, lost with the isolate: the latch and the counters below. Log lines carry no header and no key. */
+const EVB = { DEADLINE_MS: 150000, BUILD: 'stage-b-1', id: null, born: null, fetches: 0, scheduled: 0, crons: {}, validations: 0, last_attempt: null, busy: false };
+/** Called once per invocation of either handler, as its FIRST statement: names the isolate on its first request and counts what it
+ * has served. 0.6.22: returns a frozen SNAPSHOT of the counts as they stood BEFORE this invocation was added, taken here, before any
+ * await. "Before" values are read from this snapshot and never from the live counters later (another invocation may have begun
+ * while this one awaited). crons_before is a copy of the per-cron tally of scheduled invocations begun earlier in this isolate. */
+function evbSeen(kind, cron) {
+  if (EVB.id === null) { EVB.id = evHex(4); EVB.born = Date.now(); }
+  const c = kind === 'scheduled' ? (cron === undefined || cron === null ? 'unknown' : String(cron)) : null;
+  const snap = Object.freeze({ kind: kind === 'fetch' ? 'fetch' : 'scheduled', cron: c, isolate: EVB.id, isolate_age_ms: Date.now() - EVB.born,
+    scheduled_before: EVB.scheduled, fetches_before: EVB.fetches, crons_before: Object.freeze({ ...EVB.crons }) });
+  if (kind === 'fetch') EVB.fetches++; else { EVB.scheduled++; EVB.crons[c] = (EVB.crons[c] || 0) + 1; }
+  return snap;
+}
+/* ---- 0.6.22: admission of collector runs, the key in a header, and two log lines per run (STORAGE-TO-RELEASE proposal rev 2.2) ---- */
+const EV_WINDOW_MAX_MS = 48 * 3600 * 1000;
+/** A UTC time on a ten-minute mark, written exactly as 2026-11-24T06:00:00Z; anything else is null. */
+function evMark(v) {
+  if (typeof v !== 'string' || !/^\d{4}-\d\d-\d\dT\d\d:\d0:00Z$/.test(v)) return null;
+  const t = Date.parse(v);
+  return Number.isNaN(t) || new Date(t).toISOString() !== v.replace(/Z$/, '.000Z') ? null : t;
+}
+/** May the SCHEDULED path run the collector for the trigger whose scheduled time is ms? { admit: true } or { admit: false, why }.
+ * Admits only with the gate at "1" and a readable window FROM <= ms < UNTIL of at most 48 hours. It selects scheduled TIMES: it is
+ * not a wall-clock deadline (an admitted trigger delivered late still runs), it does not deduplicate a time delivered twice, and it
+ * does not count requests. Everything else fails closed. Reads env only. */
+function evAdmit(env, ms) {
+  const g = env.EARTHVIEW_ENABLED;
+  if (g !== '1') return { admit: false, why: g === undefined ? 'EARTHVIEW_ENABLED unset' : g === 'manual' ? 'EARTHVIEW_ENABLED is manual' : 'EARTHVIEW_ENABLED has an unknown value' };
+  const from = evMark(env.EARTHVIEW_FROM), until = evMark(env.EARTHVIEW_UNTIL);
+  if (from === null || until === null) return { admit: false, why: 'window not set or not readable' };
+  if (until <= from) return { admit: false, why: 'window empty or inverted' };
+  if (until - from > EV_WINDOW_MAX_MS) return { admit: false, why: 'window longer than 48 hours' };
+  if (typeof ms !== 'number' || !Number.isFinite(ms)) return { admit: false, why: 'no scheduled time' };
+  if (ms < from) return { admit: false, why: 'before the window' };
+  if (ms >= until) return { admit: false, why: 'after the window' };
+  return { admit: true };
+}
+/** May the MANUAL run go ahead? Only with the gate at "manual" or "1". */
+const evManualGate = env => env.EARTHVIEW_ENABLED === '1' || env.EARTHVIEW_ENABLED === 'manual' ? null : env.EARTHVIEW_ENABLED === undefined ? 'EARTHVIEW_ENABLED unset' : 'EARTHVIEW_ENABLED has an unknown value';
+/** Validation counting for the collector (called from evCollect step 4). Begin: the count of validations COMPLETED in this isolate is
+ * copied onto the run's own record at the statement before its validation starts; nothing is awaited in between. End: the count is
+ * incremented when the validation returns, pass or refuse. Counts only: neither changes what the collector decides or stores. */
+function evValidationBegin(x) { if (x) x.validations_before = EVB.validations; }
+function evValidated(x, ok) { EVB.validations++; if (x) x.validated = ok; }
+/** One collector run with its two log lines. "run-start" is written before anything is fetched, so it exists even if Cloudflare ends
+ * the invocation during the decode; "run-end" carries validations_before and the result. exec is drawn per execution, so two
+ * executions of the same scheduled time have different records. Writes nothing to storage itself. */
+async function runEarthViewLogged(env, ms, trigger, inv) {
+  const x = { exec: evHex(6), validations_before: null, validated: null }, at = new Date(ms).toISOString(), i = inv || null;
+  console.log(JSON.stringify({ earthview: 'run-start', exec: x.exec, trigger, scheduled_time: trigger === 'scheduled' ? at : null, run: at, hub: COLLECTOR_VERSION, cron: i && i.cron,
+    isolate: i && i.isolate, isolate_age_ms: i && i.isolate_age_ms, scheduled_before: i && i.scheduled_before, crons_before: i && i.crons_before, fetches_before: i && i.fetches_before }));
+  let r = null; const g = await guarded(env, 'earthview', ms, async (e, m) => { r = await collectEarthView(e, m, x); });
+  const result = r || g;
+  console.log(JSON.stringify({ earthview: 'run-end', exec: x.exec, trigger, run: at, isolate: i && i.isolate, validations_before: x.validations_before, validated: x.validated, result }));
+  return result;
+}
+/** The key in the Authorization header only, for the Earth from Space admin routes and the manual run. A Response to refuse with,
+ * else null. Order: method, then a key in the URL (refused before any comparison), then the header. Reads nothing but env.ADMIN_KEY. */
+function evAuth(req, env, url, methods) {
+  const no = (status, error) => json({ layer: 'earthview', error }, status, { 'Cache-Control': 'no-store' });
+  if (!methods.includes(req.method)) return no(405, methods.join(' or ') + ' only');
+  if (url.searchParams.has('key')) return no(400, 'the key is not accepted in the URL; send it in the Authorization header');
+  if (!env.ADMIN_KEY || req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');
+  return null;
+}
+const EV_ADMIN_ACTIONS = ['status', 'hold', 'recover', 'sweep', 'release'];
+/** The collector's validation of one delivered picture against its check image (steps 4 and 5 of evCollect), with no storage step. */
+async function evProbeValidate(picBuf, chkBuf) {
+  const P = EARTHVIEW.PICTURE, C = EARTHVIEW.CHECK, u8 = new Uint8Array(picBuf), sc = evJpegScans(u8), no = detail => ({ ok: false, reason: 'picture failed validation', detail });
+  if (!sc.ok) return no('structure: ' + sc.reason);
+  if (sc.w !== P.w || sc.h !== P.h || sc.components !== 3) return no(`size ${sc.w}x${sc.h}, ${sc.components} components`);
+  if (!sc.complete) return no(`scans incomplete: ${sc.missing} coefficient positions not delivered at full precision in ${sc.scans} scans`);
+  const png = await evPng(new Uint8Array(chkBuf), C.w * C.h);
+  if (!png || png.w !== C.w || png.h !== C.h) return { ok: false, reason: 'check image failed validation', detail: 'does not decode as ' + C.w + 'x' + C.h + ' RGBA' };
+  const dec = evDecode(u8);
+  if (dec.error) return no('decode: ' + dec.error);
+  if (dec.w !== P.w || dec.h !== P.h) return no(`decoded size ${dec.w}x${dec.h}`);
+  const cmp = evCompare(dec, png);
+  if (!cmp.ok) return { ...cmp, ok: false, reason: 'picture failed validation', detail: cmp.reason, progressive: sc.progressive, scans: sc.scans };
+  return { ...cmp, ok: true, reason: null, progressive: sc.progressive, scans: sc.scans };
+}
+/** One observation. No env. Outcomes: validated | validation refused | served time not confirmed | fetch failed | deadline. */
+async function evProbeOnce() {
+  const t0 = Date.now(), dl = t0 + EVB.DEADLINE_MS, attempt = evHex(6), P = EARTHVIEW.PICTURE, C = EARTHVIEW.CHECK, iso = ms => new Date(ms).toISOString();
+  const left = () => dl - Date.now(), limit = own => Math.max(1, Math.min(own, left()));
+  const isolate = { id: EVB.id, started_at: EVB.born === null ? null : iso(EVB.born), age_ms: EVB.born === null ? null : t0 - EVB.born, requests_served: EVB.fetches, scheduled_runs: EVB.scheduled, validations_before: EVB.validations, previous_attempt: EVB.last_attempt };
+  const say = (ev, o) => console.log(JSON.stringify({ probe: 'earthview-stage-b', attempt, build: EVB.BUILD, isolate: EVB.id, ev, at: nowIso(), ...o }));
+  const out = { schema: 1, layer: 'earthview', probe: 'stage-b', attempt, build: EVB.BUILD, hub: COLLECTOR_VERSION, size: P.w, started_at: iso(t0), deadline_ms: EVB.DEADLINE_MS, isolate,
+    requests_made: 0, frame_time: null, list: null, picture: null, check: null, header_ok: null, validation: null, deadline_hit: false, outcome: null, ended_at: null, wall_ms: null };
+  const late = () => { if (left() > 0) return false; out.deadline_hit = true; return true; };
+  const end = outcome => { const t = Date.now(); late(); out.outcome = outcome; out.ended_at = iso(t); out.wall_ms = t - t0;
+    say('done', { outcome, frame_time: out.frame_time, header_ok: out.header_ok, requests_made: out.requests_made, deadline_hit: out.deadline_hit, wall_ms: out.wall_ms }); return out; };
+  const failed = () => end(late() ? 'deadline' : 'fetch failed');
+  say('start', { hub: COLLECTOR_VERSION, size: P.w, deadline_ms: EVB.DEADLINE_MS, isolate_state: isolate });
+  // 1. The frame list: which time is newest?
+  let xml = null; out.requests_made++;
+  try { const r = await fetch(EARTHVIEW.CAP, { headers: { 'User-Agent': UA }, cf: { cacheTtl: 0 }, signal: AbortSignal.timeout(limit(EARTHVIEW.LIST_TIMEOUT_MS)) });
+    if (r.status !== 200) { try { await r.body.cancel(); } catch (_) {} out.list = { ok: false, reason: 'http error', http: r.status }; } else xml = await r.text(); }
+  catch (e) { out.list = { ok: false, reason: 'no answer', detail: String(e).slice(0, 160) }; }
+  if (out.list) return failed();
+  const T = evLatest(xml);
+  if (!T) { out.list = { ok: false, reason: 'frame list unreadable' }; return failed(); }
+  out.list = { ok: true, newest: T }; out.frame_time = T;
+  if (late()) return end('deadline');
+  // 2. The delivered picture and the check image for exactly that time (the collector's own addresses and reader)
+  const q = `&time=${T}`, picUrl = `${EARTHVIEW.MAP}&width=${P.w}&height=${P.h}&format=image/jpeg&bgcolor=${EARTHVIEW.BGCOLOR}${q}`, chkUrl = `${EARTHVIEW.MAP}&width=${C.w}&height=${C.h}&format=image/png&transparent=true${q}`;
+  const side = (f, spec) => f.ok ? { ok: true, http: 200, type: spec.type, bytes: f.bytes, sha256: f.sha256, header_present: f.warn_present, header_names: f.served } : { ok: false, reason: f.reason, http: f.http, detail: f.detail || null };
+  out.requests_made++; const pic = await evFetch('picture', picUrl, P, limit(EARTHVIEW.TIMEOUT_MS)); out.picture = side(pic, P);
+  if (!pic.ok) return failed();
+  if (late()) return end('deadline');
+  out.requests_made++; const chk = await evFetch('check image', chkUrl, C, limit(EARTHVIEW.TIMEOUT_MS)); out.check = side(chk, C);
+  if (!chk.ok) return failed();
+  // 3. Served time: strict, on both responses
+  out.header_ok = pic.served === T && chk.served === T;
+  say('fetched', { frame_time: T, header_ok: out.header_ok, picture: out.picture, check: out.check });
+  if (!out.header_ok) return end('served time not confirmed');
+  if (late()) return end('deadline');
+  // 4. The validation itself, timed
+  const v0 = Date.now(); say('validate-begin', { frame_time: T });
+  let v; try { v = await evProbeValidate(pic.buf, chk.buf); } catch (e) { v = { ok: false, reason: 'validation threw', detail: String((e && e.message) || e).slice(0, 160) }; }
+  const v1 = Date.now(); out.validation = { ...v, started_at: iso(v0), ended_at: iso(v1), wall_ms: v1 - v0 };
+  EVB.validations++; EVB.last_attempt = attempt;
+  say('validated', { frame_time: T, ...out.validation });
+  return end(v.ok ? 'validated' : 'validation refused');
+}
+/** The route. Anything but a POST with the key in the Authorization header and no query string is refused before anything is done. */
+async function evProbeRoute(req, env, url) {
+  const NS = { 'Cache-Control': 'no-store' }, no = (status, error) => json({ layer: 'earthview', probe: 'stage-b', error }, status, NS);
+  if (req.method !== 'POST') return no(405, 'POST only');
+  if (url.search) return no(400, 'no query string is accepted');
+  if (!env.ADMIN_KEY || req.headers.get('authorization') !== 'Bearer ' + env.ADMIN_KEY) return no(403, 'forbidden');
+  if (env.EARTHVIEW_ENABLED !== undefined) return no(409, 'collection is on (EARTHVIEW_ENABLED is set)');
+  if (EVB.busy) return no(409, 'busy');
+  EVB.busy = true;
+  try { return json(await evProbeOnce(), 200, NS); }
+  catch (e) { return json({ layer: 'earthview', probe: 'stage-b', outcome: 'internal error', detail: String((e && e.message) || e).slice(0, 200) }, 500, NS); }
+  finally { EVB.busy = false; }
+}
+
 /** /admin/probe/sunface — EXACTLY ONE upstream request (the image). Stores and publishes nothing. Reports what the projection and the time rules need. */
 async function sunProbe() {
   const t0 = Date.now(), f = await sunFetch(), now = Date.now();
@@ -4070,6 +5957,7 @@ async function guarded(env, layer, ms, fn) {
     if (layer === 'firms' && env.FIRMS_PIPELINE === 'v2') { try { await logRun(env, layer, ms, 'down', 0, 0, 0, note); await fvDownNoInput(env, ms, note); } catch (_) {} }   // v2 never calls the unconditional writeDown
     else if (layer === 'drifters') { try { await driftFail(env, ms, 'internal_error', note, 0); } catch (_) {} }
     else if (layer === 'dustrgb') { try { await dustFail(env, ms, 'internal error', 0, note); } catch (_) {} }
+    else if (layer === 'earthview') { try { await evFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // never the generic writeDown
     else if (layer === 'wind') { try { await windFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.16: never the generic writeDown
     else if (layer === 'sunface') { try { await sunFail(env, ms, 'down', 'internal error', 0, note); } catch (_) {} }   // 0.6.13: never the generic writeDown
     else if (layer === 'skycraft') { try { await craftFail(env, ms, 'internal error', 0, note); } catch (_) {} }   // 0.6.12: never the generic writeDown   // 0.6.11: never the generic writeDown (no cells, no envelope)   // 0.6.8: buoys never call the unconditional writeDown
@@ -4081,10 +5969,20 @@ async function guarded(env, layer, ms, fn) {
  * so that a handled failure is never reported as a plain "ran". */
 async function runWind(env, ms) { let r = null; const g = await guarded(env, 'wind', ms, async (e, m) => { r = await collectWind(e, m); }); return r || g; }
 const JOBS = {
-  five: async (env, ms) => (await Promise.all([
-    guarded(env, 'usgs', ms, collectUsgs),
-    env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky', ms, collectOpenskyWorld) : 'opensky:parked',
-  ])).join('; '),
+  five: async (env, ms, _manual, inv) => {
+    const a = (await Promise.all([
+      guarded(env, 'usgs', ms, collectUsgs),
+      env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky', ms, collectOpenskyWorld) : 'opensky:parked',
+    ])).join('; ');
+    // Earth from Space rides this trigger every other tick (ten minutes), awaited AFTER the collectors above have finished.
+    // 0.6.22: admitted only by evAdmit (gate "1" and the trigger's scheduled time inside the window). Not admitted: no request, nothing read or written.
+    const adm = evAdmit(env, ms);
+    const e = !adm.admit ? 'earthview:not scheduled (' + adm.why + ')' : (new Date(ms).getUTCMinutes() % EARTHVIEW.EVERY_MIN) < 5 ? await runEarthViewLogged(env, ms, 'scheduled', inv) : 'earthview:skipped (every ten minutes)';
+    return a + '; ' + e;
+  },
+  // manual: POST /admin/run/earthview (key in the Authorization header). Refused unless the gate is "manual" or "1" (0.6.22), BEFORE the
+  // collector and its run-log wrapper: no request, no validation, nothing read or written. With the gate unset nothing collects (Stage B relies on it).
+  earthview: async (env, ms, _manual, inv) => { const why = evManualGate(env); return why ? 'earthview:not run (' + why + ')' : runEarthViewLogged(env, ms, 'manual', inv); },
   minute: async (env, ms) => env.OPENSKY_ENABLED === '1' ? guarded(env, 'opensky-bbox', ms, collectOpenskyBbox) : 'opensky-bbox:parked (disable the * * * * * trigger)',
   firms: async (env, ms) => { const f = await guarded(env, 'firms', ms, env.FIRMS_PIPELINE === 'v2' ? collectFirmsV2 : collectFirms); let s; try { s = await collectShipsFallback(env, ms); } catch (e) { s = 'ships-fallback:threw ' + String(e).slice(0, 80); } return f + '; ' + s; },
   'ships-fallback': async (env, ms) => collectShipsFallback(env, ms),   // manual: /admin/run/ships-fallback (same gates)
@@ -4325,9 +6223,16 @@ const TIMELINE_REVISIONS = Object.freeze({
     fileSha256: '2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356',
     bytes: 18120,
   }),
+  // 0.6.24 (TIMELINE-STORY-PROPOSAL rev 2.1, hub route H1): schema 3 — the end-Cretaceous story. Additive pin; R1 and R2 unchanged.
+  'tl-2026-11-R3': Object.freeze({
+    key: 'ref/timeline/tl-2026-11-R3.json',
+    revision: 'tl-2026-11-R3',
+    fileSha256: 'f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993',
+    bytes: 31636,
+  }),
 });
 const TIMELINE_LEGACY = 'tl-2026-11-R1';    // what the unversioned /catalogue/timeline serves — permanently (pages built before 0.6.4 expect it)
-const TIMELINE_CURRENT = 'tl-2026-11-R2';   // discovery metadata only; no route serves "current" implicitly
+const TIMELINE_CURRENT = 'tl-2026-11-R3';   // discovery metadata only; no route serves "current" implicitly
 const TIMELINE = TIMELINE_REVISIONS[TIMELINE_LEGACY];   // = the legacy pin (kept for the 0.6.3 name)
 /** The pin for an exact revision id, or null. Own-property lookup only: no pattern-built R2 keys, so no path tricks. */
 function timelinePin(rev, table = TIMELINE_REVISIONS) {
@@ -4462,14 +6367,16 @@ function json(obj, status = 200, extra = {}) {
 
 export default {
   async scheduled(event, env, ctx) {
+    const inv = evbSeen('scheduled', event.cron);   // 0.6.22: the snapshot is taken here, first, before any await
     const job = jobForCron(event.cron);
     if (!job) { console.log('unknown cron', event.cron); return; }
-    const p = JOBS[job](env, event.scheduledTime).then(r => console.log(job, typeof r === 'string' ? r : JSON.stringify(r))).catch(e => console.log(job, 'failed', String(e)));
+    const p = JOBS[job](env, event.scheduledTime, undefined, inv).then(r => console.log(job, typeof r === 'string' ? r : JSON.stringify(r))).catch(e => console.log(job, 'failed', String(e)));
     ctx.waitUntil(p);
     return p;
   },
 
   async fetch(req, env) {
+    const inv = evbSeen('fetch');   // 0.6.22: snapshot first, before any await
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
     const p = url.pathname.split('/').filter(Boolean);
@@ -4482,6 +6389,25 @@ export default {
       if (req.method !== 'POST') return json({ error: 'POST only (this can write history)' }, 405);
       return reaggregate(req, env, url, p[2] || '');
     }
+    if (p[0] === 'admin' && p[1] === 'probe' && p[2] === 'earthview' && p.length === 3) return evProbeRoute(req, env, url);   // 0.6.21 Stage B: POST, key in a header, nothing stored
+    if (p[0] === 'admin' && p[1] === 'earthview') {   // Earth from Space storage: status, hold, recover, sweep, release. A dry run unless POST with apply=1.
+      // 0.6.22: exact path and a known action, then method, then the key (header only), all BEFORE anything is read from storage.
+      const NS = { 'Cache-Control': 'no-store' };
+      if (p.length !== 3 || !EV_ADMIN_ACTIONS.includes(p[2])) return json({ layer: 'earthview', error: 'unknown action', actions: EV_ADMIN_ACTIONS }, 404, NS);
+      const refuse = evAuth(req, env, url, ['GET', 'POST']); if (refuse) return refuse;
+      for (const k of url.searchParams.keys()) if (k !== 'apply' && k !== 'plan') return json({ layer: 'earthview', error: 'unknown parameter' }, 400, NS);
+      try { const r = await evAdmin(env, p[2], req.method === 'POST' && url.searchParams.get('apply') === '1', url.searchParams.get('plan')); return json(r.body, r.status, NS); }
+      catch (e) { return json({ layer: 'earthview', action: p[2], applied: false, refused: e instanceof EvStop ? e.reason : 'internal error', detail: String((e && e.detail) || e).slice(0, 300) }, e instanceof EvStop ? 409 : 500, NS); }
+    }
+    if (p[0] === 'admin' && p[1] === 'run' && p[2] === 'earthview') {   // 0.6.22: the manual collector run. POST, key in a header, no query string.
+      const NS = { 'Cache-Control': 'no-store' };
+      if (p.length !== 3) return json({ layer: 'earthview', error: 'not found' }, 404, NS);
+      const refuse = evAuth(req, env, url, ['POST']); if (refuse) return refuse;
+      if (url.search) return json({ layer: 'earthview', error: 'no query string is accepted' }, 400, NS);
+      const t0 = Date.now();
+      try { const r = await JOBS.earthview(env, t0, true, inv); return json({ job: 'earthview', result: r, wall_ms: Date.now() - t0 }, 200, NS); }
+      catch (e) { return json({ job: 'earthview', error: String(e).slice(0, 300), wall_ms: Date.now() - t0 }, 500, NS); }
+    }
     if (p[0] === 'health') {   // 0.5.3: external monitor checks; HEAD is the UptimeRobot HTTP monitor's default request
       if (req.method !== 'GET' && req.method !== 'HEAD') return json({ error: 'GET or HEAD only' }, 405, { 'Cache-Control': 'no-store' });
       return health(req, env, p[1] || '', p[2] || '');
@@ -4489,6 +6415,7 @@ export default {
     if (req.method !== 'GET') return json({ error: 'GET only' }, 405);
 
     if (p[0] === 'snapshot' && p[1] === 'wind') return windRoute(env, p);   // 0.6.16: manifest + the current and previous revision's grids; outside LAYERS
+    if (p[0] === 'snapshot' && p[1] === 'earthview') return evRoute(env, p);   // Earth from Space: record plus held pictures; outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'dustrgb') return dustRoute(env, p);   // 0.6.11: pointer + the current and previous frame files; outside LAYERS
     if (p[0] === 'snapshot' && p[1] === 'arts' && p.length === 2) return artsSnapshot(env);   // 0.6.2: fixed catalogue, outside LAYERS
     if (p[0] === 'catalogue' && p[1] === 'timeline') return timelineRoute(env, url.pathname);   // 0.6.3 legacy URL (pinned to R1) + 0.6.4 /<revision>; outside LAYERS
