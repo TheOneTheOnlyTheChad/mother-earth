@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 10:32 UTC (clock reading) — **Earth from Space monitoring rehearsal run on Chad's own Approve line (T = 09:00 SAST): FAILED on R4a. Chad did not notice the missing third heartbeat; he learned of it from Claude's gap alert at 12:00 SAST. Claude's side ran as planned. Stage D is not asked for on this monitoring plan. Hub unchanged, `EARTHVIEW_ENABLED` stays `manual`.** (production: none; hub 0.6.22 unchanged; Earth from Space thread)
+- **Met:** R1 (inspections 1, 2 and 4 launched from their own tasks at 07:00:33, 08:01:11, 10:00:30 UTC; no late launch), R2 (all reads completed each time; hub clean, no picture run), R4b (gap of 119 minutes found from the ledger and clock; alert pushed before the reads).
+- **Failed:** R4a. Heartbeat 2 reached his phone 10:01 SAST; deadline 11:31; no line from him until after the alert; his words: "yes i learned it from your phone push". **Incomplete:** phone receipt times for the two 12:00 pushes (they arrived; times could not be read).
+- **Found on the way:** other threads push to the same phone and look alike, so a missing heartbeat is easy to overlook.
+- **Cleanup 10:31 UTC:** no scheduled task outstanding; hub read back unchanged.
+- **File:** `reviews/2026-11-23-earth-from-space-rehearsal-result.md`, evidence in `reviews/evidence/2026-11-23-earth-from-space-rehearsal/` (branch `earth-from-space-rc` `b807c8f`, copied here). **Next:** GPT's review; then Chad chooses between a changed fallback with a new rehearsal and a revised Stage D basis. No email alarm exists.
+
 ## 23 Nov 10:11 UTC (clock reading) — **Timeline explorer: clean-up after the release, on Chad's word. The thread stays open for more Timeline work. Docs only.** (live page unchanged, merge `03aff0a`; Timeline feature thread)
 - **Branch `timeline-travel-rc` deleted on GitHub** (fully merged, `3d4815e`; the row's Delete branch button in the pane; `git push --delete` was refused as before). Remaining branches, none of them this thread's: `animals-assessment-rc`, `cape-town-public-proposal`, `cape-town-station-rc`, `earth-from-space-proposal`, `earth-from-space-rc`, `widths-preview-rc`.
 - **Mac:** `_review/timeline-travel-rc/` and `_review/timeline-travel-proposal/` moved to `_to_delete/`. Other threads' review copies untouched. The Mac folder was synced to main `98ffc17` at 10:08 UTC (one file preserved first, `STATUS.md`, equal to commit `3934ac2`).
