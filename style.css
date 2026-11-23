@@ -564,7 +564,7 @@ body.tl .axis .xpl .cl .clz button{width:100%;min-height:44px;margin-top:4px;bor
 body.tl .axis .xpl .nomk{position:absolute;left:0;right:0;top:34px;margin:0;padding:0 8px;text-align:center;font-size:13px;color:var(--dim);cursor:default}
 body.tl .axis .xpl .nomk button{min-height:44px;margin-left:8px;padding:6px 12px;border:1px solid var(--line-strong);background:var(--card);color:var(--fg);font:600 12px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 body.tl .axis .xpl .scale{position:relative;height:26px;border-top:1px solid var(--line-strong);font:500 11px/22px var(--mono);color:var(--fg);background:rgba(7,12,19,.8)}
-body.tl .axis .xpl .tk{position:absolute;transform:translateX(-50%);opacity:.85}
+body.tl .axis .xpl .tk{position:absolute;transform:translateX(-50%);opacity:.85;white-space:nowrap}
 body.tl .axis .xpl .tk::before{content:"";position:absolute;left:50%;top:-4px;width:1px;height:5px;background:var(--fg)}
 body.tl .axis .xpl .tk.last{transform:translateX(-100%)}
 body.tl .axis .xpl .tk.last::before{left:100%}

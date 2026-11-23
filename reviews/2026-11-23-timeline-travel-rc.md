@@ -1,5 +1,7 @@
 # Timeline explorer, stage 1 — branch build record (for GPT's review)
 
+**Rev 2, 23 Nov 2026 08:28 UTC (clock reading): a real-browser pass by Claude (section 7), one cosmetic fix from it, stylesheet key moved to `202612250200` on the Timeline page.** Code otherwise as rev 1. After the fix: generator `--check` passes; `timeline-changes-build` 45, `timeline-axis` 96, `timeline-travel-ui` 162, `timeline-mixed-assets` 18, `timeline-ui` 594, `timeline-changes-ui` 173 passed (each alone, 08:23–08:27 UTC). The deliberate breaks were not rerun after this one-line stylesheet change.
+
 **Rev 1, 23 Nov 2026 08:15 UTC (clock reading).** Branch `timeline-travel-rc`, from main `a44e31d`. Built by Claude (Timeline feature thread) on Chad's own line of 23 Nov, "i agree on all 6 you can go" (T1–T6 in `docs/concepts/TIMELINE-TRAVEL-PROPOSAL.md` rev 2.1). **Branch only. Not merged, nothing live, no Worker or R2 change, no source request. No release clearance is asked for here.** Every figure below was produced by Claude in the cloud workspace (Chromium under Playwright, 2 CPU cores, software rendering) unless it says otherwise.
 
 ## 1. What was built
@@ -56,11 +58,26 @@ Method: the page's own Zoom in, Older, Zoom out, Newer buttons in turn; 20 warm-
 Run at 08:14 UTC; each cell is the largest of the three runs' values. Against the targets: script and redraw 16 ms median with five entries and 33 ms with 200 are met here. "To second frame" cannot be less than two frames (33.3 ms at 60 Hz), so the 50 ms target says only that no frame was missed at the 95th percentile. These figures say nothing about Chad's Mac or phone.
 
 ## 5. Not done, and not claimed
-- No real browser, no phone, no Safari, no screen reader. The touch check is a touch-enabled Chromium context. The 200 % case is browser zoom (a 640 px layout at double density), not text-only enlargement.
+- No phone, no Safari, no screen reader, and no pass in Chad's own Chrome (the real-browser pass in section 7 is the Claude desktop app's browser pane). The touch check is a touch-enabled Chromium context. The 200 % case is browser zoom (a 640 px layout at double density), not text-only enlargement.
 - `desktop-overflow`, `mobile-pass` and `header-tabs` were not run: the header is untouched.
 - The click that ends a drag is also suppressed in code, but no test can show that line matters in Chromium (the redraw already replaces the pressed mark). It is defence only and has no break.
 - **Publisher landing pages for the six cited sources have not been read again.** That is a pre-release step (proposal §3), not done for this branch.
 - No GPT smoke test yet. A served copy is in the Mac folder (below).
+
+## 7. Real-browser pass (Claude, browser pane of the Claude desktop app on Chad's Mac, 23 Nov 08:20–08:25 UTC)
+The pane is Chromium 156 with the Mac's own graphics. Page: the Mac review copy at commit `98d1418`, served by Chad's local server on 127.0.0.1:8899; `timeline.js`, `timeline.html` and `style.css` hashed in the tab and equal to the branch's. **The catalogue came from the live hub** (not a test double): the explorer went on, so the hub's bytes matched the page's pinned sha256.
+- At the pane's own width (588 px): explorer on, five marks with short codes, 12 bands, no page overflow. Zoom in and Older gave 471.45–202.05 Ma, saved in the state, history length unchanged. Whole Earth: the no-bands statement shown, one cluster of four with "Zoom to these". Reset returned to 538.8–0.
+- At an emulated 1280 × 860, with real mouse input:
+  - a 160 px drag on the timeline moved the window to 607.99–69.19 Ma, exactly 160 px of time; no entry added; nothing opened;
+  - the same drag started ON the end-Permian mark gave the same window and opened nothing;
+  - a click on a mark straight after that drag opened its story (a drag does not block the next click);
+  - a click on the end-Permian mark opened its story beside the explorer: heading focused, mark selected and 0 px from its computed position on the narrowed 734 px track, panel 512 px, headings "How we know", "Chart reference", "Review and changes", no overflow;
+  - Older entry switched to Frasnian–Famennian in the same history entry; Zoom in with the story open added no entry;
+  - browser Back closed the story, restored 538.8–0 (the window it was opened from) and put focus on the mark of the entry last shown;
+  - the wheel before activation scrolled the page 200 px and left the window alone; after a click on the timeline it zoomed (538.8 → 361.2 Ma span), the age under the pointer stayed 435.45 Ma, the page did not scroll; Esc released it.
+- Leaving the page and coming back with the browser's Forward restored the stored window.
+- **Found and fixed:** when the newest tick sat at the right edge its "Ma" dropped to a second line. Ticks no longer wrap (`style.css`, one rule).
+- Not covered by this pass: keyboard-only use, the phone sheet, touch, clusters opened by real clicks, reduced motion. Those rest on the workspace suite. One early click in this pass landed on nothing because the tool's coordinate frame was stale after a navigation; it was repeated with a fresh frame.
 
 ## 6. For GPT
 1. Section 2, points 1 to 4 and 6: accept or correct.
