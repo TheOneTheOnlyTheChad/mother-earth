@@ -1,0 +1,32 @@
+start 2026-11-23T08:50:58Z
+generator --check exit=0
+timeline-changes-build.test.mjs exit=0 | timeline-changes-build: 45 passed, 0 failed
+timeline-catalogue-hub.test.mjs exit=0 | timeline-catalogue-hub: 73 passed, 0 failed
+timeline-ui.test.cjs exit=0 | timeline-ui: 594 pass, 0 fail
+timeline-axis.test.cjs exit=0 | timeline-axis: 96 pass, 0 fail
+timeline-changes-ui.test.cjs exit=0 | timeline-changes-ui: 173 pass, 0 fail
+timeline-travel-ui.test.cjs exit=0 | timeline-travel-ui: 207 pass, 0 fail
+timeline-mixed-assets.test.cjs exit=0 | timeline-mixed-assets: 18 pass, 0 fail
+travel BREAK=restore-reveals exit=1 | timeline-travel-ui: 201 pass, 6 fail (BREAK=restore-reveals) | first: FAIL E2 Forward restores the saved 404.1–269.4 exactly: the window is not re-centred on 
+travel BREAK=zoom-outer-only exit=1 | timeline-travel-ui: 205 pass, 2 fail (BREAK=zoom-outer-only) | first: FAIL F2 two at one age plus one 0.03 Ma away: "Zoom to these" is not offered while a membe
+travel BREAK=stale-status exit=1 | timeline-travel-ui: 206 pass, 1 fail (BREAK=stale-status) | first: FAIL E3 the mark is back in the window (zoomed out by keyboard, focus still on the explore
+travel BREAK=no-win-memory exit=1 | timeline-travel-ui: 206 pass, 1 fail (BREAK=no-win-memory) | first: FAIL E2 Forward then returns to the window the key press made, and writes it into the stat
+travel BREAK=no-unload-save exit=1 | timeline-travel-ui: 206 pass, 1 fail (BREAK=no-unload-save) | first: FAIL E2 wheel zoom then reload in the same instant: the reloaded page has the zoomed windo
+travel BREAK=zoom-always exit=1 | timeline-travel-ui: 204 pass, 3 fail (BREAK=zoom-always) | first: FAIL F 0.005 Ma apart: "Zoom to these" is never offered, at any zoom, for members that can
+travel BREAK=nonlinear exit=1 | timeline-travel-ui: 190 pass, 17 fail (BREAK=nonlinear)
+travel BREAK=no-clamp exit=1 | timeline-travel-ui: 205 pass, 2 fail (BREAK=no-clamp)
+travel BREAK=pan-pushes exit=1 | timeline-travel-ui: 111 pass, 16 fail (threw)
+travel BREAK=state-clobber exit=1 | timeline-travel-ui: 197 pass, 10 fail (BREAK=state-clobber)
+travel BREAK=no-restore exit=1 | timeline-travel-ui: 117 pass, 10 fail (threw)
+travel BREAK=wheel-always exit=1 | timeline-travel-ui: 206 pass, 1 fail (BREAK=wheel-always)
+travel BREAK=no-clip exit=1 | timeline-travel-ui: 203 pass, 4 fail (BREAK=no-clip)
+travel BREAK=requests exit=1 | timeline-travel-ui: 206 pass, 1 fail (BREAK=requests)
+travel BREAK=resize-moves-window exit=1 | timeline-travel-ui: 186 pass, 21 fail (BREAK=resize-moves-window)
+travel BREAK=bad-state-accepted exit=1 | timeline-travel-ui: 199 pass, 8 fail (BREAK=bad-state-accepted)
+travel BREAK=nav-pushes exit=1 | timeline-travel-ui: 202 pass, 5 fail (BREAK=nav-pushes)
+travel BREAK=plans-focusable exit=1 | timeline-travel-ui: 206 pass, 1 fail (BREAK=plans-focusable)
+travel BREAK=new-sentence exit=1 | timeline-travel-ui: 206 pass, 1 fail (BREAK=new-sentence)
+travel BREAK=chart-under-how exit=1 | timeline-travel-ui: 206 pass, 1 fail (BREAK=chart-under-how)
+travel OLD=1 (commit a44e31d page) exit=1 | timeline-travel-ui: 0 pass, 1 fail (threw)
+mixed BREAK=no-style-guard exit=1 | timeline-mixed-assets: 16 pass, 2 fail
+end 2026-11-23T09:17:08Z

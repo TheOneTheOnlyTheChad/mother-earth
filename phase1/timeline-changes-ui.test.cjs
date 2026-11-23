@@ -51,7 +51,7 @@ const JS = (() => {
   return JS0;
 })();
 const HTML = (() => {
-  if (BREAK === 'stale-js-version') return must(HTML0, 'timeline.js?v=202612250100', 'timeline.js?v=202611221000');
+  if (BREAK === 'stale-js-version') return must(HTML0, 'timeline.js?v=202612250300', 'timeline.js?v=202611221000');
   if (BREAK === 'dropped-anchor') return must(HTML0, 'id="e-pliny-ep-6-16-debate"', 'id="e-pliny-ep-6-16-debate-x"');
   return HTML0;
 })();

@@ -7,7 +7,8 @@
  * Run: NODE_PATH=/opt/npm-tools/node_modules node --no-warnings phase1/timeline-travel-ui.test.cjs [base-url]
  *   needs a static server on the repo (default http://127.0.0.1:8899).
  * Breaks (each must make the suite fail): BREAK=nonlinear|no-clamp|pan-pushes|state-clobber|no-restore|wheel-always|
- *   zoom-always|no-clip|requests|resize-moves-window|bad-state-accepted|nav-pushes|plans-focusable|new-sentence|chart-under-how
+ *   zoom-always|zoom-outer-only|no-clip|requests|resize-moves-window|bad-state-accepted|nav-pushes|plans-focusable|new-sentence|chart-under-how|
+ *   restore-reveals|stale-status|no-win-memory|no-unload-save
  * OLD=1 serves the three page files from commit a44e31d instead (the control: the suite must fail on the page before this work).
  * PERF=1 adds the timing section (figures are printed, never judged here).
  */
@@ -29,13 +30,20 @@ let pass = 0, fail = 0;
 const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log('FAIL', name, info === undefined ? '' : JSON.stringify(info).slice(0, 500)); } };
 const must = (s, a, b) => { if (s.split(a).length !== 2) throw new Error('break anchor not found exactly once: ' + a.slice(0, 70)); return s.replace(a, b); };
 const JS = (() => {
-  if (BREAK === 'nonlinear') return must(JS0, "const { a, b } = view, s = a - b, px = v => (a - v) / s * laneW;\n  const e = m.ext;", "const { a, b } = view, s = a - b, px = v => Math.sqrt(Math.max(0, (a - v) / s)) * laneW;\n  const e = m.ext;");
+  if (BREAK === 'nonlinear') return must(JS0, "  const s = a - b, px = v => (a - v) / s * laneW;\n  const e = m.ext;", "  const s = a - b, px = v => Math.sqrt(Math.max(0, (a - v) / s)) * laneW;\n  const e = m.ext;");
   if (BREAK === 'no-clamp') return must(JS0, "  return { a: r6(o), b: r6(o - s) };", "  return { a: r6(a), b: r6(b) };");
-  if (BREAK === 'pan-pushes') return must(JS0, "try { history.replaceState({ ...(st || {}), win: [view.a, view.b] }, '', location.href);", "try { history.pushState({ ...(st || {}), win: [view.a, view.b] }, '', location.href);");
-  if (BREAK === 'state-clobber') return must(JS0, "try { history.replaceState({ ...(st || {}), win: [view.a, view.b] }, '', location.href);", "try { history.replaceState({ win: [view.a, view.b] }, '', location.href);");
-  if (BREAK === 'no-restore') return must(JS0, "  if (st && view && validWin(st.win)) setView(st.win[0], st.win[1], false);   // each history entry restores its own window", '');
+  if (BREAK === 'pan-pushes') return must(JS0, "try { history.replaceState({ ...(st || {}), k, win: [view.a, view.b] }, '', location.href);", "try { history.pushState({ ...(st || {}), k, win: [view.a, view.b] }, '', location.href);");
+  if (BREAK === 'state-clobber') return must(JS0, "try { history.replaceState({ ...(st || {}), k, win: [view.a, view.b] }, '', location.href);", "try { history.replaceState({ k, win: [view.a, view.b] }, '', location.href);");
+  if (BREAK === 'no-restore') return must(JS0, "  restoreWin(st);                                         // each history entry restores its own window", '');
   if (BREAK === 'wheel-always') return must(JS0, "    if (!wheelOn) return;                                               // not activated: the page scrolls as usual", '');
-  if (BREAK === 'zoom-always') return must(JS0, "const tgt = sep > 0 && sep / MIN_SPAN * laneW >= CLUSTER_PX ? ", "const tgt = true ? ");
+  if (BREAK === 'zoom-always') return must(JS0, "  return alone === ids.size ? tgt : null;", "  return tgt;");
+  // the rule GPT found wanting (rev 2 of the build record): only the outermost separation is asked about
+  if (BREAK === 'zoom-outer-only') return must(JS0, "  return alone === ids.size ? tgt : null;", "  return sep / MIN_SPAN * laneW >= CLUSTER_PX ? tgt : null;");
+  // GPT's H1: restoring a history entry re-centres on the story's mark
+  if (BREAK === 'restore-reveals') return must(JS0, "show(st.entry, st.x, !validWin(st.win));", "show(st.entry, st.x, true);");
+  if (BREAK === 'stale-status') return must(JS0, "  if (!m || inView(m) || document.activeElement !== E.xpl) lostId = null;", "  if (!m) lostId = null;");
+  if (BREAK === 'no-win-memory') return must(JS0, "  const m = st.k ? winMem.get(st.k) : null, w =", "  const m = null, w =");
+  if (BREAK === 'no-unload-save') return must(JS0, "addEventListener('beforeunload', saveNow);\naddEventListener('pagehide', saveNow);", "");
   if (BREAK === 'no-clip') return must(JS0, "(e.from - e.to) / s * laneW >= TRUE_PX && e.from > b && e.to < a) {", "(e.from - e.to) / s * laneW >= TRUE_PX && m.ma <= a && m.ma >= b) {");
   if (BREAK === 'requests') return must(JS0, "  view = v;\n  if (E) render();", "  view = v; fetch(location.pathname + '?again=' + Math.random()).catch(() => {});\n  if (E) render();");
   if (BREAK === 'resize-moves-window') return must(JS0, "Math.abs(E.track.clientWidth - laneW) >= 1) render(); }).observe(axis);", "Math.abs(E.track.clientWidth - laneW) >= 1) { view = clampWin(view.a * 0.9, view.b); render(); } }).observe(axis);");
@@ -215,10 +223,23 @@ function checkPositions(name, s, a, b, cat = C) {
     const y1 = await p.evaluate(() => scrollY);
     await p.mouse.wheel(0, 240); await p.waitForTimeout(200);
     let v = await view(p);
-    ok('C activated by a click on the timeline: the wheel zooms, the page does not scroll, and the hint says how to release', (await p.evaluate(() => window.TL_AXIS.wheel)) === true && !sameWin(v, [W, 0]) && (await p.evaluate(() => scrollY)) === y1 && /Wheel zoom is on\. Press Esc/.test(await p.textContent('#tl-whint')), [v, y1]);
+    ok('C activated by a click on the timeline: the wheel zooms, the page does not scroll, and the hint says how to release', (await p.evaluate(() => window.TL_AXIS.wheel)) === true && !sameWin(v, [W, 0]) && (await p.evaluate(() => scrollY)) === y1 && (await p.textContent('#tl-whint')) === 'Wheel zoom is on while the pointer is over the timeline. Press Esc, or click or Tab somewhere else, to turn it off.', [v, y1]);
+    // the pointer leaving is NOT a release: over the rest of the page the wheel scrolls the page; back over the timeline it zooms again
+    const vOn = await view(p), hd = await p.evaluate(() => { const r = document.getElementById('tl-heading').getBoundingClientRect(); return { x: r.left + 40, y: Math.max(70, r.top + 5) }; });
+    await p.mouse.move(hd.x, hd.y); const y2 = await p.evaluate(() => scrollY); await p.mouse.wheel(0, 120); await p.waitForTimeout(200);
+    ok('C pointer moved off the timeline: the wheel scrolls the page, the window stays, wheel zoom is still on', sameWin(await view(p), vOn) && (await p.evaluate(() => scrollY)) !== y2 && (await p.evaluate(() => window.TL_AXIS.wheel)) === true, [await view(p), y2, await p.evaluate(() => scrollY)]);
+    await p.evaluate(() => document.getElementById('xpl').scrollIntoView({ block: 'center' })); await p.waitForTimeout(80);
+    const T3 = await p.evaluate(() => { const r = document.querySelector('#xpl .track').getBoundingClientRect(); return { x: r.left + r.width * 0.5, y: r.top + 90 }; });
+    await p.mouse.move(T3.x, T3.y); await p.mouse.wheel(0, -240); await p.waitForTimeout(200);
+    ok('C pointer back over the timeline: the wheel zooms again without a new click', !sameWin(await view(p), vOn) && (await p.evaluate(() => window.TL_AXIS.wheel)) === true, await view(p));
+    const ld = await p.evaluate(() => { const r = document.querySelector('.axiswrap .coverage').getBoundingClientRect(); return { x: r.left + 30, y: r.top + 5 }; });
+    await p.mouse.click(ld.x, ld.y); await p.waitForTimeout(80);
+    ok('C a click somewhere else turns wheel zoom off', (await p.evaluate(() => window.TL_AXIS.wheel)) === false);
+    await p.evaluate(() => document.getElementById('xpl').focus()); await p.keyboard.press('Enter'); await p.waitForTimeout(40);
     await p.keyboard.press('Escape'); await p.waitForTimeout(60);
     ok('C Esc releases the wheel', (await p.evaluate(() => window.TL_AXIS.wheel)) === false);
     // with a story open: the first Esc releases the wheel and the story stays open
+    await p.evaluate(() => document.querySelector('[data-act="reset"]').click()); await p.waitForTimeout(60);
     await p.click(`#xpl a.mk[data-entry="${ID.k}"]`); await p.waitForTimeout(250);
     await p.evaluate(() => document.getElementById('xpl').focus()); await p.keyboard.press('Enter'); await p.waitForTimeout(60);
     ok('C Enter on the explorer turns wheel zoom on', (await p.evaluate(() => window.TL_AXIS.wheel)) === true);
@@ -334,7 +355,7 @@ function checkPositions(name, s, a, b, cat = C) {
       const seen = [];
       for (const win of [[W, 0], [300, 200], [255, 249], [252.5, 251.5]]) { await setWin(p2, win); const q = await snap(p2); const k = q.clustered.find(x => x.has.includes(ID.p) && x.has.includes(ID.t)); seen.push([win, !!k, k && k.zoom]); }
       ok(`F ${nm}: one control at every zoom, down to the narrowest window`, seen.every(x => x[1]), seen);
-      ok(`F ${nm}: "Zoom to these" is never offered where it cannot separate them`, nm === 'coincident' ? seen.every(x => !x[2]) : !seen[3][2], seen);
+      ok(`F ${nm}: "Zoom to these" is never offered, at any zoom, for members that can never stand apart`, seen.every(x => !x[2]), seen);
       await p2.click(`#xpl .cl[data-has~="${ID.t}"] > button`); await p2.waitForTimeout(80);
       await p2.click(`#xpl .cl ul a.mk[data-entry="${ID.t}"]`); await p2.waitForTimeout(250);
       ok(`F ${nm}: at the narrowest window each member still opens from the list`, await p2.evaluate(i => !document.getElementById('detail').hidden && location.hash === '#' + i, ID.t));
@@ -342,6 +363,140 @@ function checkPositions(name, s, a, b, cat = C) {
       ok(`F ${nm}: Back returns focus to the cluster`, await p2.evaluate(() => !!document.activeElement.closest('#xpl .cl')));
       await c2.close();
     }
+  }
+
+  // ---------- F2. "Zoom to these" is judged in its real target window, member by member (GPT review of rev 2, H2)
+  {
+    const fx = mut => { const J = JSON.parse(CAT.toString('utf8')); mut(J); return { J, buf: Buffer.from(JSON.stringify(J)) }; };
+    const point = (J, i, ma) => { const w = J.entries[i].claims[0].when; if ('from_ma' in w) { w.from_ma = ma; w.to_ma = ma; } else w.ma = ma; };
+    for (const [nm, mut] of [['two at one age plus one 0.03 Ma away', J => { point(J, 3, 251.941); point(J, 0, 251.971); }], ['two 0.0005 Ma apart plus one 0.03 Ma away', J => { point(J, 3, 251.9415); point(J, 0, 251.971); }]]) {
+      const { buf } = fx(mut), c = await ctx(b, { cat: buf }), p = await open(c), seen = [];
+      for (const win of [[O, 0], [W, 0], [300, 200], [255, 249], [252.5, 251.5]]) { await setWin(p, win); const q = await snap(p);
+        for (const k of q.clustered.filter(x => x.has.includes(ID.p))) seen.push([win, k.has.length, k.zoom]); }
+      ok(`F2 ${nm}: the pair that can never separate is in a cluster at every zoom`, seen.length === 5 && seen.every(x => x[1] >= 2), seen);
+      ok(`F2 ${nm}: "Zoom to these" is not offered while a member could not stand alone in its target window`, seen.every(x => !x[2]), seen);
+      await setWin(p, [W, 0]); await p.click(`#xpl .cl[data-has~="${ID.p}"] > button`); await p.waitForTimeout(80);
+      const list = await p.evaluate(i => [...document.querySelectorAll(`#xpl .cl[data-has~="${i}"] ul a.mk`)].map(a => a.dataset.entry), ID.p);
+      ok(`F2 ${nm}: the list still holds every member and each is a link`, list.length === 3 && [ID.o, ID.p, ID.t].every(i => list.includes(i)), list);
+      await c.close();
+    }
+    { // three that CAN all stand apart: offered, and after it each is its own mark
+      const { J, buf } = fx(J => { point(J, 0, 300); }), c = await ctx(b, { cat: buf }), p = await open(c);
+      await setWin(p, [O, 0]); let q = await snap(p); const k = q.clustered.find(x => x.has.includes(ID.p));
+      ok('F2 three separable members (300, 251.9, 201.5 Ma) share a control at whole Earth and "Zoom to these" is offered', !!k && k.has.length === 3 && k.zoom, q.clustered);
+      await p.click(`#xpl .cl[data-has~="${ID.p}"] > button`); await p.click(`#xpl .cl[data-has~="${ID.p}"] [data-zoomto]`); await p.waitForTimeout(150);
+      q = await snap(p); const v = await view(p);
+      ok('F2 after "Zoom to these" all three are separate marks inside the window', [ID.o, ID.p, ID.t].every(i => q.marks.some(m => m.id === i)) && !q.clustered.some(x => x.has.some(i => [ID.o, ID.p, ID.t].includes(i))), [v, q.marks.map(m => m.id), q.clustered]);
+      checkPositions('F2 after zoom-to', q, v[0], v[1], J);
+      await c.close();
+    }
+  }
+
+  // ---------- E2. a saved window wins over the story's mark (GPT review of rev 2, H1) and the paths around it
+  {
+    const c = await ctx(b), p = await open(c);
+    const click = sel => p.evaluate(s => document.querySelector(s).click(), sel);
+    const st = () => p.evaluate(() => ({ len: history.length, s: history.state, hash: location.hash, open: !document.getElementById('detail').hidden, act: document.activeElement.id || (document.activeElement.dataset && document.activeElement.dataset.entry) || document.activeElement.tagName,
+      sheet: document.getElementById('detail').classList.contains('tlsheet'), nav: !document.getElementById('d-nav').hidden, sel: (document.querySelector('#xpl a.mk.sel') || { dataset: {} }).dataset.entry || null }));
+    await click('[data-act="reset"]'); await click('[data-act="in"]'); await click('[data-act="older"]');
+    const X = await view(p);
+    await p.click(`#xpl a.mk[data-entry="${ID.p}"]`); await p.waitForTimeout(250);
+    await click('[data-act="in"]'); await p.waitForTimeout(80);
+    const Y = await view(p); let s = await st();
+    ok('E2 GPT\'s steps: 471.45–202.05, story open, Zoom in → 404.1–269.4 with the story still open and its mark outside the window', sameWin(X, [471.45, 202.05]) && sameWin(Y, [404.1, 269.4]) && s.open && s.s.entry === ID.p && sameWin(s.s.win, Y) && Y[1] > 251.941, [X, Y, s.s]);
+    await p.goBack(); await p.waitForTimeout(250);
+    ok('E2 Back restores 471.45–202.05', sameWin(await view(p), X) && !(await st()).open, await view(p));
+    await p.goForward(); await p.waitForTimeout(250); s = await st();
+    ok('E2 Forward restores the saved 404.1–269.4 exactly: the window is not re-centred on the story\'s mark', s.open && s.hash === '#' + ID.p && sameWin(await view(p), Y) && sameWin(s.s.win, Y), [await view(p), s.s.win]);
+    await p.reload(); await settle(p); await p.waitForTimeout(150); s = await st();
+    ok('E2 reload with that saved window: story open, window still 404.1–269.4', s.open && sameWin(await view(p), Y) && sameWin(s.s.win, Y) && s.act === ID.p + '-h', [await view(p), s]);
+    // an explicit open of an entry outside the window still reveals it, at the same scale
+    await p.goBack(); await p.waitForTimeout(250); await setWin(p, [150, 100]);
+    await p.click(`#card-${ID.p} .ctitle a`); await p.waitForTimeout(250); let v = await view(p);
+    ok('E2 an explicit open of an entry outside the window brings its mark in, span unchanged', near(v[0] - v[1], 50) && v[0] >= 251.941 && v[1] <= 251.941 && (await st()).sel === ID.p, v);
+    await p.goBack(); await p.waitForTimeout(250);
+    ok('E2 Back from that restores 150–100', sameWin(await view(p), [150, 100]), await view(p));
+    // the change-record round trip with a saved window that excludes the story's mark
+    await setWin(p, [W, 0]); await p.click(`#xpl a.mk[data-entry="${ID.t}"]`); await p.waitForTimeout(250);
+    await click('[data-act="in"]'); await click('[data-act="older"]'); await click('[data-act="in"]'); await p.waitForTimeout(80);
+    const Z = await view(p);
+    await p.click('#d-body a[data-change]'); await p.waitForTimeout(250); s = await st();
+    ok('E2 story with its mark outside the window → "Changed in": the record\'s entry carries the same window', Z[1] > 201.5 && !!s.s.change && sameWin(s.s.win, Z), [Z, s.s]);
+    await click('[data-act="older"]'); await p.waitForTimeout(60); const Z2 = await view(p);
+    await p.goBack(); await p.waitForTimeout(250); s = await st();
+    ok('E2 Back from the record: story reopens with its own saved window, not re-centred, focus on the link used', s.open && s.s.entry === ID.t && sameWin(await view(p), Z) && /-chg-/.test(s.act), [await view(p), Z, s.act]);
+    await p.goForward(); await p.waitForTimeout(250);
+    ok('E2 Forward to the record restores the record\'s window', sameWin(await view(p), Z2), [await view(p), Z2]);
+    // resize with a change record current, then with a story current: pixels change, the age window does not
+    await p.setViewportSize({ width: 390, height: 844 }); await p.waitForTimeout(300);
+    ok('E2 resize 1280 → 390 on a change record: same age window, saved state unchanged', sameWin(await view(p), Z2) && sameWin(await p.evaluate(() => history.state.win), Z2), await view(p));
+    await p.goBack(); await p.waitForTimeout(300); s = await st();
+    ok('E2 at 390 Back from the record reopens the story as a sheet with the story\'s window', s.open && s.sheet && sameWin(await view(p), Z), [await view(p), s.sheet]);
+    await p.setViewportSize({ width: 1280, height: 860 }); await p.waitForTimeout(300); s = await st();
+    ok('E2 resize 390 → 1280 with the story open: it becomes the side panel, same age window', s.open && !s.sheet && sameWin(await view(p), Z) && sameWin(s.s.win, Z), [await view(p), s.sheet]);
+    await p.goBack(); await p.waitForTimeout(250);
+    ok('E2 Back closes it and restores the landing window', sameWin(await view(p), [W, 0]) && !(await st()).open, await view(p));
+    // input that saves 200 ms later (keys, wheel), then Back or reload at once
+    await p.click(`#xpl a.mk[data-entry="${ID.k}"]`); await p.waitForTimeout(250);
+    const r1 = await p.evaluate(() => { const x = document.getElementById('xpl'); x.focus(); x.dispatchEvent(new KeyboardEvent('keydown', { key: '+', bubbles: true, cancelable: true })); const v = [...window.TL_AXIS.view], saved = history.state.win; history.back(); return { v, saved }; });
+    await p.waitForTimeout(250);
+    ok('E2 key zoom then Back in the same instant: the window had not reached the state yet, and Back still restores the landing window', !sameWin(r1.v, r1.saved) && sameWin(await view(p), [W, 0]), r1);
+    await p.goForward(); await p.waitForTimeout(250); s = await st();
+    ok('E2 Forward then returns to the window the key press made, and writes it into the state', s.open && sameWin(await view(p), r1.v) && sameWin(s.s.win, r1.v), [await view(p), r1.v, s.s.win]);
+    const r2 = await p.evaluate(() => { const x = document.getElementById('xpl'); x.click(); const q = x.getBoundingClientRect(); x.dispatchEvent(new WheelEvent('wheel', { deltaY: -400, clientX: q.left + q.width / 2, clientY: q.top + 60, bubbles: true, cancelable: true })); const v = [...window.TL_AXIS.view], saved = history.state.win; location.reload(); return { v, saved }; });
+    await p.waitForTimeout(400); await settle(p); await p.waitForTimeout(150);
+    ok('E2 wheel zoom then reload in the same instant: the reloaded page has the zoomed window', !sameWin(r2.v, r2.saved) && sameWin(await view(p), r2.v) && (await st()).open, [r2, await view(p)]);
+    // a plotted entry, then Pliny (no axis age), then a plotted entry again, all in one history entry
+    await p.goto(BASE + '/timeline.html'); await settle(p); await click('[data-act="in"]'); const P0 = await view(p), len = (await st()).len;
+    await p.click(`#xpl a.mk[data-entry="${ID.p}"]`); await p.waitForTimeout(250);
+    await p.click(`#card-${ID.pl} .ctitle a`); await p.waitForTimeout(250); s = await st();
+    ok('E2 story open → Pliny from its card: same history entry, window kept, no mark selected, no entry navigation, heading focused', s.len === len + 1 && s.s.entry === ID.pl && sameWin(s.s.win, P0) && sameWin(await view(p), P0) && s.sel === null && !s.nav && s.act === ID.pl + '-h', s);
+    await p.click(`#xpl a.mk[data-entry="${ID.t}"]`); await p.waitForTimeout(250); s = await st();
+    ok('E2 Pliny → a plotted entry from its mark: same history entry, mark selected, navigation back', s.len === len + 1 && s.s.entry === ID.t && s.sel === ID.t && s.nav && sameWin(await view(p), P0), s);
+    await p.goBack(); await p.waitForTimeout(250); s = await st();
+    ok('E2 Back closes it: window restored, focus on the control last used (the end-Triassic mark)', !s.open && sameWin(await view(p), P0) && s.act === ID.t, s);
+    ok('E2: no page errors', p.errs.length === 0, p.errs);
+    await c.close();
+    // phone: the full change-record chain, with the window checked at every step
+    const c2 = await ctx(b, { viewport: { width: 390, height: 844 } }), p2 = await open(c2);
+    const st2 = () => p2.evaluate(() => ({ s: history.state, open: !document.getElementById('detail').hidden, act: document.activeElement.id || document.activeElement.tagName, inert: document.getElementById('tl-main').inert }));
+    await p2.evaluate(() => { document.querySelector('[data-act="in"]').click(); document.querySelector('[data-act="newer"]').click(); }); const M = await view(p2);
+    await p2.click(`#xpl a.mk[data-entry="${ID.t}"]`); await p2.waitForTimeout(300);
+    await p2.click('#d-body a[data-change]'); await p2.waitForTimeout(300); let q = await st2();
+    ok('E2 390: "Changed in" closes the sheet, focuses the record, keeps the window', !q.open && !q.inert && /^change-/.test(q.act) && !!q.s.change && sameWin(await view(p2), M), q);
+    await p2.goBack(); await p2.waitForTimeout(300); q = await st2();
+    ok('E2 390: Back reopens the sheet with focus on the link used, same window', q.open && /-chg-/.test(q.act) && sameWin(await view(p2), M), q);
+    await p2.goForward(); await p2.waitForTimeout(300); q = await st2();
+    ok('E2 390: Forward returns to the record, sheet closed, same window', !q.open && /^change-/.test(q.act) && sameWin(await view(p2), M), q);
+    await p2.click('#change-' + REV + '-1-open'); await p2.waitForTimeout(300); q = await st2();
+    ok('E2 390: "Open the entry" from the record opens the story', q.open && q.s.entry === ID.t && sameWin(await view(p2), M), q);
+    await p2.goBack(); await p2.waitForTimeout(300); q = await st2();
+    ok('E2 390: Back returns to the record with focus on "Open the entry"', !q.open && q.act === 'change-' + REV + '-1-open' && sameWin(await view(p2), M), q);
+    ok('E2 390: no page errors', p2.errs.length === 0, p2.errs);
+    await c2.close();
+  }
+
+  // ---------- E3. the "outside this view" status is true or empty (GPT review of rev 2, H3)
+  {
+    const c = await ctx(b), p = await open(c);
+    const stat = () => p.evaluate(() => ({ t: document.getElementById('tl-xstat').textContent, role: document.getElementById('tl-xstat').getAttribute('role'), act: document.activeElement.id || (document.activeElement.dataset && document.activeElement.dataset.entry) || document.activeElement.tagName }));
+    const lose = () => p.evaluate(i => { const x = document.getElementById('xpl'); x.focus(); x.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      document.querySelector(`#xpl a.mk[data-entry="${i}"]`).focus(); const q = x.getBoundingClientRect();
+      for (let n = 0; n < 6; n++) x.dispatchEvent(new WheelEvent('wheel', { deltaY: -600, clientX: q.left + 20, clientY: q.top + 60, bubbles: true, cancelable: true })); return [...window.TL_AXIS.view]; }, ID.k);
+    let v = await lose(), s = await stat();
+    ok('E3 a focused mark leaves the window: focus goes to the explorer and the status line names it', v[1] > 66.02 && s.act === 'xpl' && s.t === 'End-Cretaceous mass extinction is outside this view.' && s.role === 'status', [v, s]);
+    await p.evaluate(() => { const x = document.getElementById('xpl'); for (let n = 0; n < 12; n++) x.dispatchEvent(new KeyboardEvent('keydown', { key: '-', bubbles: true, cancelable: true })); });
+    s = await stat(); v = await view(p);
+    ok('E3 the mark is back in the window (zoomed out by keyboard, focus still on the explorer): the status line is empty', v[1] <= 66.02 && v[0] >= 66.02 && s.act === 'xpl' && s.t === '', [v, s]);
+    await p.evaluate(() => document.querySelector('[data-act="reset"]').click()); await lose();
+    ok('E3 lost again …', (await stat()).t !== '');
+    await p.click('[data-act="reset"]'); await p.waitForTimeout(60); s = await stat();
+    ok('E3 … then Reset view: empty', s.t === '' && sameWin(await view(p), [W, 0]), s);
+    await lose(); await p.click(`#card-${ID.t} .ctitle a`); await p.waitForTimeout(250); s = await stat();
+    ok('E3 lost, then another story is opened: empty', s.t === '' && s.act === ID.t + '-h', s);
+    await p.click('#d-body a[data-change]'); await p.waitForTimeout(250);
+    ok('E3 still empty on the change record', (await stat()).t === '');
+    await c.close();
   }
 
   // ---------- G. an interval that crosses the window edge is drawn clipped, marked as continuing, with its real ends in text

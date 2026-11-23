@@ -21,7 +21,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202612250100';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202612250300';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
@@ -100,7 +100,7 @@ function applyMode() {
   document.body.classList.toggle('dopen', !phone);
 }
 
-function show(id, x) {
+function show(id, x, reveal) {   // reveal: an explicit open brings the mark into the window; restoring a history entry never moves its saved window
   const art = entries.get(id); if (!art) return false;
   if (body.firstElementChild && body.firstElementChild !== art) home.appendChild(body.firstElementChild);
   body.appendChild(art);
@@ -108,7 +108,8 @@ function show(id, x) {
   const sec = xSection(id, x); if (sec && sec.classList.contains('xp')) setX(sec, true);
   detail.hidden = false; applyMode();
   body.scrollTop = 0;
-  revealMark(id); markSel(); paintNav();
+  if (reveal !== false) revealMark(id);
+  markSel(); paintNav(); refreshStat();
   return true;
 }
 function hide(focusEl) {
@@ -116,13 +117,14 @@ function hide(focusEl) {
   detail.hidden = true; document.body.classList.remove('dopen'); applyMode();   // inert and scroll lock removed before focus moves
   cur = null; wide = false; markSel(); paintNav();
   (focusEl || pageHeading()).focus();
+  refreshStat();
 }
 const focusHeading = id => { const h = $(id + '-h'); if (h) h.focus(); };
 // the visual half of closing, with no history call and no focus move (used by the "Changed in …" jump)
 function closeVisual() {
   const art = body.firstElementChild; if (art) home.appendChild(art);
   detail.hidden = true; document.body.classList.remove('dopen'); applyMode();   // inert and scroll lock released
-  cur = null; wide = false; markSel(); paintNav();
+  cur = null; wide = false; markSel(); paintNav(); refreshStat();
 }
 function reveal(rec) { rec.scrollIntoView({ block: 'start' }); rec.focus({ preventScroll: true }); }
 
@@ -192,8 +194,8 @@ document.addEventListener('keydown', ev => {
 addEventListener('popstate', ev => {
   const st = ev.state, left = at;                         // left = the state of the entry we came from
   at = st || null;
-  clearTimeout(saveT);                                    // a pending save belongs to the entry we left, never to this one
-  if (st && view && validWin(st.win)) setView(st.win[0], st.win[1], false);   // each history entry restores its own window
+  clearTimeout(saveT); pending = false;                   // a pending save belongs to the entry we left (its window is in winMem), never to this one
+  restoreWin(st);                                         // each history entry restores its own window
   if (st && st.change) {                                  // onto a "Changed in …" jump
     const rec = $(st.change); if (!rec) return;
     if (left && left.entry && left.p === st.k) {          // Back from an entry that was opened FROM this record: close it, focus its opener
@@ -207,7 +209,7 @@ addEventListener('popstate', ev => {
   }
   if (st && st.entry && entries.has(st.entry)) {          // Forward (or Back onto an open state): reopen with the stored expander
     cur = { id: st.entry, x: st.x || null, k: st.k, direct: !!st.direct };
-    show(st.entry, st.x);
+    show(st.entry, st.x, !validWin(st.win));   // a saved window wins: the story may be open with its mark outside it
     const l = left && left.change && left.from && left.from.entryK === st.k ? $(left.from.link) : null;   // Back from a jump: the link THAT jump stored
     if (l) {   // focus again after the browser's own fragment handling, which can drop it (as in focusSoon)
       l.focus(); setTimeout(() => { if (cur && cur.k === st.k && !detail.hidden && document.activeElement !== l) l.focus(); }, 0);
@@ -242,7 +244,7 @@ function fromHash(onLoad) {
   const st = history.state;
   if (onLoad && st && st.entry && entries.has(st.entry) && h === st.entry) {   // reload of an opened state: opener memory is gone
     cur = { id: st.entry, x: st.x || null, k: st.k, direct: !!st.direct };
-    if (show(st.entry, st.x)) focusSoon(st.entry); return;
+    if (show(st.entry, st.x, false)) focusSoon(st.entry); return;   // reload: the stored window is applied when the catalogue arrives (initView)
   }
   if (entries.has(h)) return direct(h, null);
   const m = h.match(/^(.*)-(conv|debate)$/);
@@ -359,15 +361,21 @@ function clampWin(a, b) {
   return { a: r6(o), b: r6(o - s) };
 }
 const withWin = st => view ? { ...(st || {}), win: [view.a, view.b] } : st;
-// the window is merged into the state of the history entry we are on; nothing else in that state is touched
+// the window is merged into the state of the history entry we are on; nothing else in that state is touched. A state
+// with no key gets one, so the newest window of every entry can also be held in page memory (winMem): wheel and key
+// input save 200 ms later, and a Back or Forward inside that interval must still find the window it left.
+const winMem = new Map();
+let pending = false;            // a deferred save is waiting
 function saveWin() {
-  clearTimeout(saveT);
+  clearTimeout(saveT); pending = false;
   if (!view) return;
   const st = history.state;
-  if (st && Array.isArray(st.win) && st.win[0] === view.a && st.win[1] === view.b) return;
-  try { history.replaceState({ ...(st || {}), win: [view.a, view.b] }, '', location.href); at = history.state; } catch (err) { /* a browser's replaceState rate limit: the next save carries the window */ }
+  if (st && st.k && Array.isArray(st.win) && st.win[0] === view.a && st.win[1] === view.b) return;
+  const k = (st && st.k) || ++seq;
+  winMem.set(k, [view.a, view.b]);
+  try { history.replaceState({ ...(st || {}), k, win: [view.a, view.b] }, '', location.href); at = history.state; } catch (err) { /* a browser's replaceState rate limit: the next save carries the window */ }
 }
-const saveSoon = () => { clearTimeout(saveT); saveT = setTimeout(saveWin, 200); };
+const saveSoon = () => { clearTimeout(saveT); const k = history.state && history.state.k; if (!k) return saveWin(); winMem.set(k, [view.a, view.b]); pending = true; saveT = setTimeout(saveWin, 200); };
 function setView(a, b, save) {
   if (!lim || !isNum(a) || !isNum(b)) return false;
   const v = clampWin(a, b);
@@ -377,6 +385,18 @@ function setView(a, b, save) {
   if (save === 'soon') saveSoon(); else if (save !== false) saveWin();
   return true;
 }
+// arriving on a history entry: its newest window (page memory if it is ahead of the stored state), written back at once
+function restoreWin(st) {
+  if (!view || !st) return;
+  const m = st.k ? winMem.get(st.k) : null, w = validWin(m) ? m : validWin(st.win) ? st.win : null;
+  if (!w) return;
+  setView(w[0], w[1], false);
+  if (!Array.isArray(st.win) || st.win[0] !== view.a || st.win[1] !== view.b) saveWin();
+}
+// a reload or leaving inside the deferred-save interval: beforeunload is the one a reload honours; pagehide covers the rest
+const saveNow = () => { if (pending) saveWin(); };
+addEventListener('beforeunload', saveNow);
+addEventListener('pagehide', saveNow);
 const zoomAt = (f, at_, save) => { const s = view.a - view.b, s2 = Math.min(Math.max(s * f, MIN_SPAN), lim.O), a = at_ + (view.a - at_) * (s2 / s); return setView(a, a - s2, save); };
 const pan = (d, save) => setView(view.a + d, view.b + d, save);
 const landing = () => ({ a: lim.W, b: 0 });
@@ -387,9 +407,9 @@ function initView() {
   if (cur && !(st && validWin(st.win))) { const m = MARKS.find(x => x.id === cur.id); if (m && (m.ma > view.a || m.ma < view.b)) view = { a: lim.O, b: 0 }; }
 }
 
-// ----- geometry of one mark in the current window (null = not drawn)
-function geom(m) {
-  const { a, b } = view, s = a - b, px = v => (a - v) / s * laneW;
+// ----- geometry of one mark in a window a–b (null = not drawn)
+function geomAt(m, a, b) {
+  const s = a - b, px = v => (a - v) / s * laneW;
   const e = m.ext;
   if (e && (e.from - e.to) / s * laneW >= TRUE_PX && e.from > b && e.to < a) {   // wide enough and intersecting: drawn at its true ends, clipped to the window
     const f = Math.min(e.from, a), t = Math.max(e.to, b);
@@ -398,7 +418,25 @@ function geom(m) {
   if (m.ma > a || m.ma < b) return null;
   return { m, x: px(m.ma), w: 0, tw: false, clipL: false, clipR: false };
 }
+const geom = m => geomAt(m, view.a, view.b);
 const inView = m => !!view && !!geom(m);
+// what a window would show: marks in order, and the controls they share. Clusters: neighbours closer than CLUSTER_PX share
+// one control, cut at CLUSTER_MAX; positions are never moved to make room. The same rule serves the screen and "Zoom to these"
+function groupsAt(a, b) {
+  const gs = MARKS.map(m => geomAt(m, a, b)).filter(Boolean).sort((x, y) => x.x - y.x || (x.m.id < y.m.id ? -1 : 1)), groups = [];
+  for (const g of gs) { const last = groups[groups.length - 1]; if (last && g.x - last.x1 < CLUSTER_PX && g.x - last.x0 < CLUSTER_MAX) { last.items.push(g); last.x1 = g.x; } else groups.push({ x0: g.x, x1: g.x, items: [g] }); }
+  return { gs, groups };
+}
+// "Zoom to these": the window that frames a cluster's members, offered only if in THAT window, under the same rule, every
+// member stands alone. Members at one age, or too close for the narrowest window, never qualify; their list stays the control
+function zoomTarget(items) {
+  const ages = items.map(x => x.m.ma), hi = Math.max(...ages), lo = Math.min(...ages), sep = hi - lo;
+  if (!(sep > 0)) return null;
+  const s = Math.max(sep * (1 + 2 * PAD), MIN_SPAN), tgt = clampWin((hi + lo) / 2 + s / 2, (hi + lo) / 2 - s / 2);
+  if (tgt.a === view.a && tgt.b === view.b) return null;
+  const ids = new Set(items.map(x => x.m.id)), alone = groupsAt(tgt.a, tgt.b).groups.filter(q => q.items.length === 1 && ids.has(q.items[0].m.id)).length;
+  return alone === ids.size ? tgt : null;
+}
 
 const fmt = (v, s) => String(+v.toFixed(s >= 100 ? 1 : s >= 10 ? 2 : 3));
 const TICK_STEPS = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
@@ -451,10 +489,7 @@ function render() {
   const actEl = document.activeElement, inDyn = !!actEl && E.track.contains(actEl);
   const had = inDyn ? (actEl.dataset.entry || ((actEl.closest('.cl') || { dataset: {} }).dataset.has || '').split(' ')[0] || null) : null;
 
-  const gs = MARKS.map(geom).filter(Boolean).sort((x, y) => x.x - y.x || (x.m.id < y.m.id ? -1 : 1));
-  // clusters: neighbours closer than CLUSTER_PX share one control; positions are never moved to make room
-  const groups = [];
-  for (const g of gs) { const last = groups[groups.length - 1]; if (last && g.x - last.x1 < CLUSTER_PX && g.x - last.x0 < CLUSTER_MAX) { last.items.push(g); last.x1 = g.x; } else groups.push({ x0: g.x, x1: g.x, items: [g] }); }
+  const { gs, groups } = groupsAt(a, b);
   const sel = id => !!cur && !detail.hidden && cur.id === id;
   const mk = (g, inCluster) => {
     const m = g.m, drawn = !inCluster && g.tw;
@@ -465,10 +500,8 @@ function render() {
       + (inCluster ? `<span class="cn">${esc(m.title)}</span>` : `<span class="ml" aria-hidden="true"><span class="mlf">${esc(m.title)}</span><span class="mls">${esc(m.short)}</span></span>`) + `</a>`;
   };
   const cluster = (g, i) => {
-    const ages = g.items.map(x => x.m.ma), hi = Math.max(...ages), lo = Math.min(...ages), sep = hi - lo;
-    // "Zoom to these" only when it can separate them: never for coincident members, never when the narrowest window would still cluster them
-    const tgt = sep > 0 && sep / MIN_SPAN * laneW >= CLUSTER_PX ? clampWin((hi + lo) / 2 + Math.max(sep * (1 + 2 * PAD), MIN_SPAN) / 2, (hi + lo) / 2 - Math.max(sep * (1 + 2 * PAD), MIN_SPAN) / 2) : null;
-    const zoom = tgt && (tgt.a !== a || tgt.b !== b) ? `<li class="clz"><button type="button" data-zoomto="${tgt.a},${tgt.b}">Zoom to these</button></li>` : '';
+    const tgt = zoomTarget(g.items);
+    const zoom = tgt ? `<li class="clz"><button type="button" data-zoomto="${tgt.a},${tgt.b}">Zoom to these</button></li>` : '';
     return `<div class="cl" data-has="${esc(g.items.map(x => x.m.id).join(' '))}" style="left:${pc((g.items[0].x + g.items[g.items.length - 1].x) / 2)}%">`
       + `<button type="button" aria-expanded="false" aria-controls="cl-${i}" aria-label="${g.items.length} entries close together: ${esc(g.items.map(x => x.m.title).join(', '))}">${g.items.length}</button>`
       + `<ul id="cl-${i}" hidden>${g.items.map(x => `<li>${mk(x, true)}</li>`).join('')}${zoom}</ul></div>`;
@@ -506,9 +539,19 @@ function render() {
   if (inDyn) {   // the focused mark was replaced: its new control (mark or cluster), else the explorer itself, named in the status line
     const t = had ? backTarget(had) : null;
     if (t && E.track.contains(t)) t.focus({ preventScroll: true });
-    else { E.xpl.focus({ preventScroll: true }); const m = MARKS.find(x => x.id === had); if (m) E.stat.textContent = `${m.title} is outside this view.`; }
+    else { E.xpl.focus({ preventScroll: true }); lostId = had; }
   }
-  paintNav();
+  paintNav(); refreshStat();
+}
+// the status line says a focused mark left the view only while that is so: it is cleared when the mark is back in the window
+// or focus has moved off the explorer (another story, Reset, any other control)
+let lostId = null;
+function refreshStat() {
+  if (!E) return;
+  const m = lostId ? MARKS.find(x => x.id === lostId) : null;
+  if (!m || inView(m) || document.activeElement !== E.xpl) lostId = null;
+  const txt = lostId ? `${m.title} is outside this view.` : '';
+  if (E.stat.textContent !== txt) E.stat.textContent = txt;
 }
 // a band shows its name where the name fits, else its code, else nothing (names and ages are always in the period list)
 function fitBands() {
@@ -549,15 +592,15 @@ function revealMark(id) {
 function setWheel(on) {
   wheelOn = on; axisState.wheel = on;
   E.xpl.classList.toggle('wheel', on);
-  E.hint.textContent = on ? 'Wheel zoom is on. Press Esc, or leave the timeline, to release it.'
+  E.hint.textContent = on ? 'Wheel zoom is on while the pointer is over the timeline. Press Esc, or click or Tab somewhere else, to turn it off.'
     : 'Drag to move. Click the timeline, or press Enter on it, to zoom with the mouse wheel; arrow keys move and + or − zoom while it has focus.';
 }
-function doAct(act) {
+function doAct(act, save) {   // save 'soon' for input that can repeat quickly (a held key)
   const s = view.a - view.b, mid = (view.a + view.b) / 2;
-  if (act === 'older') pan(s * PAN_STEP);
-  else if (act === 'newer') pan(-s * PAN_STEP);
-  else if (act === 'in') zoomAt(1 / ZOOM_STEP, mid);
-  else if (act === 'out') zoomAt(ZOOM_STEP, mid);
+  if (act === 'older') pan(s * PAN_STEP, save);
+  else if (act === 'newer') pan(-s * PAN_STEP, save);
+  else if (act === 'in') zoomAt(1 / ZOOM_STEP, mid, save);
+  else if (act === 'out') zoomAt(ZOOM_STEP, mid, save);
   else if (act === 'reset') setView(lim.W, 0);
   else if (act === 'nearest') { const m = MARKS.slice().sort((x, y) => Math.abs(x.ma - mid) - Math.abs(y.ma - mid))[0]; if (m) setView(m.ma + s / 2, m.ma - s / 2); }
 }
@@ -604,9 +647,11 @@ function wireExplorer() {
     if (ev.target !== xpl || ev.metaKey || ev.ctrlKey || ev.altKey) return;   // marks and buttons keep their own native keys
     const act = { ArrowLeft: 'older', ArrowRight: 'newer', '+': 'in', '=': 'in', '-': 'out', '−': 'out' }[ev.key];
     if (ev.key === 'Enter') { ev.preventDefault(); setWheel(!wheelOn); }
-    else if (act) { ev.preventDefault(); doAct(act); clearTimeout(saveT); saveSoon(); }
+    else if (act) { ev.preventDefault(); doAct(act, 'soon'); }
   });
-  xpl.addEventListener('focusout', ev => { if (wheelOn && !xpl.contains(ev.relatedTarget)) setWheel(false); });
+  // wheel zoom follows keyboard focus, not the pointer: it ends when focus leaves the explorer. A pointer that merely moves away
+  // changes nothing (the wheel then scrolls whatever it is over, and zooms again when it comes back)
+  xpl.addEventListener('focusout', ev => { if (wheelOn && !xpl.contains(ev.relatedTarget)) setWheel(false); if (ev.relatedTarget !== xpl) { lostId = null; refreshStat(); } });
   if (typeof ResizeObserver === 'function') new ResizeObserver(() => { if (axisState.state === 'on' && view && Math.abs(E.track.clientWidth - laneW) >= 1) render(); }).observe(axis);
   else addEventListener('resize', () => { if (axisState.state === 'on' && view) render(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (axisState.state === 'on' && view) render(); });
