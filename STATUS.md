@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 14:30 UTC (clock reading) — **Earth from Space hub 0.6.23: GPT's review held on one finding (H1); fixed on the branch as r1, returned for a bounded recheck. Nothing deployed**
+- **GPT's finding H1:** a `collector_runs` row whose `started_at` cannot be parsed was skipped as "outside the trial", so both health addresses could answer 200 while it carried a storage stop. The brief says unreadable times fail closed. Accepted as found.
+- **Fix (branch `earth-from-space-rc` `566a11b`):** such a row now returns `rows_unreadable` on both addresses; readable outside-window and off-mark rows are still ignored. One comment reworded. Hub file sha256 `7141beb89e8e81ef351ddcc53e8654b1ddcbdb0048c8ffcb6b0d0ed7d7b3afa1`, 551,047 B.
+- **Tests:** new case R8 and break `unreadable-start-skipped`; suite 49 passed, 0 failed; 38 of 38 breaks caught; reversing the full diff still gives the 0.6.22 file byte for byte; 42 of 47 suite files pass, 5 not run (missing local files, as before).
+- **Files:** `reviews/2026-11-23-earth-from-space-0.6.23-candidate.md` section 8; `reviews/2026-11-23-earth-from-space-0.6.23-candidate-gpt-review.md`. Mac: `_review/earth-from-space-0.6.23-candidate/r1/`.
+- **Unchanged and outstanding:** live hub is 0.6.22, `EARTHVIEW_ENABLED` is `manual`; "ME alert test" still not deleted (Chad's Approve line unspent); older `health-breaks.mjs` 14 of 19; live measurements, fixture plan and runbook not written. Stage D not cleared.
+- **Next:** GPT's recheck of r1, then Chad's own Approve line for the deploy.
+
 ## 23 Nov 14:14 UTC (clock reading) — **Timeline story: branch candidate `timeline-story-rc` (`98d88f9`) built on Chad's go. Not yet a preview: the two NASA image files are not in the branch. Nothing merged, uploaded, pinned or deployed.** (live page unchanged, merge `03aff0a`; hub untouched; Timeline feature thread)
 - **Chad's own line:** "Go: branch build of the end-Cretaceous story from snapshot 2, sha256 d532063d5df9f19d8262e34a3d8ef3c38cdfb1b58b24f4d09cd05999d479219a. I accept NASA's reuse policy as the basis for the PIA03379 annotated image, this image only."
 - **Built on the branch:** schema 3 in the generator (the released `tl-2026-11-R2` still builds byte for byte); story validation and open-on-demand image loading in `timeline.js`; story styles; rehearsal sources for `tl-2026-11-T1`; the preview helper `phase1/timeline/preview.mjs` (127.0.0.1 only, no client code); two new suites.
