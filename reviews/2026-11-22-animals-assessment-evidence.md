@@ -82,3 +82,17 @@ Chad created a Red List account himself and said to use it for searching (his ow
    - Its general citation format ends with an "Accessed on [day month year]" of the user's own.
 
 **What this changes.** Nothing is settled about R1. Point 5 is support, not permission: stating a cited paper's date and scope is ordinary citation, and IUCN itself frames an assessment as a paper. It does not speak to section 4's bar on redistributing data, or to the JSON file. **One question for GPT:** IUCN's own format carries the user's access date. The card gives ours as "Checked by Mother Earth on …" and the builder refuses the word "Accessed" so the website's stale date cannot be copied. Should the citation line also end "Accessed on [our check date]" to follow IUCN's format, with the builder allowing only our own date there?
+
+## 9. Addendum, 2026-11-23 02:33 UTC (workspace clock): the Red List API, what its own page says
+
+Chad asked (his own message) to look at where the API is set up and what it says about usage, before deciding whether IUCN needs to be contacted. Claude read the API front page (`api.iucnredlist.org`, "IUCN Red List API v4", edition 2026-1) and opened the account's "API access" page in Chad's signed-in Chrome. **No token was requested.** GPT has not read these pages for this addendum.
+
+In Claude's words, the API page says:
+1. A key is requested from the "API access" link on the account page. That page shows one button, "Request a token", and nothing else. Claude did not press it: requesting a token is itself agreement to the Terms of Use, and creating an access key is Chad's decision.
+2. The API falls under the same Terms of Use as the Red List. A token used in breach is revoked.
+3. Use is for non-commercial purposes; commercial use is forbidden. Scraping, or frequent calls without delays, may be rate limited or revoked.
+4. The API is primarily for conservation, in education and research. Access may be restricted for uses outside that mission; the page's examples include mobile apps, computing courses, and visualisation projects unrelated to conservation.
+5. Data change only with a new Red List edition. Frequent users are advised to cache, and to **check for permission first by contacting the Red List**, then refresh the cache at each new edition.
+6. Citation for API use: IUCN 2026, IUCN Red List of Threatened Species, Version 2026-1.
+
+**What this means for R1.** The API does not carry a different or wider permission: same terms, and for keeping a copy it says to ask the Red List first. So the API is not a way round the open question; it points to the same contact. What an API token would add is the upkeep route (a scripted check of five records at each new edition, in place of a person reading five pages), which is decision A-D4 option B, recorded for later and not started.
