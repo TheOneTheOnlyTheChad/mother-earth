@@ -1,0 +1,63 @@
+{
+ "about": "Where the image files in this folder came from. Rights basis accepted by Chad on 23 Nov 2026 for this image only: NASA's Images and Media Usage Guidelines (a published reuse policy; not CC0, not CC BY, not a public-domain dedication).",
+ "record": {
+  "institution": "NASA/JPL",
+  "id": "PIA03379",
+  "title": "Shaded Relief with Height as Color, Yucatan Peninsula, Mexico",
+  "figure": "Figure 1, the record's own annotated version",
+  "page": "https://science.nasa.gov/photojournal/shaded-relief-with-height-as-color-yucatan-peninsula-mexico/",
+  "credit_on_record": "NASA/JPL",
+  "record_date": "2003-03-06"
+ },
+ "rights": {
+  "basis": "NASA Images and Media Usage Guidelines",
+  "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "read": "2026-11-23",
+  "accepted_by": "Chad, 23 Nov 2026, this image only"
+ },
+ "original": {
+  "url": "https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia03/pia03379/figures/PIA03379-fig1.jpg",
+  "bytes": 1506683,
+  "pixels": [
+   3010,
+   1708
+  ],
+  "sha256": "e9c6931831fe0f8cef6fd3c54e682f44cca63c462494e2e9b8262b9be4d0f451",
+  "last_modified": "2024-11-23T15:39:58Z",
+  "retrieved": "2026-11-23T11:30:58Z",
+  "note": "read and hashed in a browser tab; not stored"
+ },
+ "files": [
+  {
+   "file": "PIA03379-fig1-800.jpg",
+   "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia03/pia03379/figures/PIA03379-fig1.jpg?w=800",
+   "bytes": 81202,
+   "pixels": [
+    800,
+    454
+   ],
+   "sha256": "8886a64a79c60e6b382c1aed2a417b18f97d439f8892a13105a79140af99351e",
+   "hashed": [
+    "2026-11-23T11:30:58Z",
+    "2026-11-23T11:31:09Z",
+    "2026-11-23T13:52:35Z"
+   ]
+  },
+  {
+   "file": "PIA03379-fig1-1024.jpg",
+   "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia03/pia03379/figures/PIA03379-fig1.jpg?w=1024",
+   "bytes": 144324,
+   "pixels": [
+    1024,
+    581
+   ],
+   "sha256": "a1ab53fc7f6227e2176da674cfc943b2cae3a5e97209e7050e2d7cef390bb770",
+   "hashed": [
+    "2026-11-23T11:30:58Z",
+    "2026-11-23T11:31:09Z",
+    "2026-11-23T13:52:35Z"
+   ]
+  }
+ ],
+ "measured_by": "Claude, in the browser pane; nobody else has checked the hashes"
+}

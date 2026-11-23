@@ -9,6 +9,10 @@
   {
    "revision": "tl-2026-11-R2",
    "release_date": "2026-11-12"
+  },
+  {
+   "revision": "tl-2026-11-R3",
+   "release_date": "2026-11-24"
   }
  ],
  "changes": [
@@ -57,6 +61,21 @@
    },
    "why": "plainer wording for a general reader",
    "unchanged": "Dates, sources and the mark on the axis are unchanged."
+  },
+  {
+   "id": "tl-2026-11-R3-1",
+   "revision": "tl-2026-11-R3",
+   "kind": "revised",
+   "what": "account",
+   "entries": [
+    "e-big5-end-cretaceous"
+   ],
+   "title": "Account and image added: End-Cretaceous mass extinction.",
+   "short": "account and image added",
+   "text": "The entry now opens with a short account of what the evidence shows, gives attributed findings on what caused the extinction, including where studies differ, and shows one image.",
+   "retired": "Causes are not shown in this release.",
+   "why": "the earlier entry presented timing claims without a cause account",
+   "unchanged": "Dates, the earlier sources and the mark on the axis are unchanged."
   }
  ]
 }

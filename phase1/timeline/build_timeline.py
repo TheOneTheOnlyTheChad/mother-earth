@@ -713,8 +713,18 @@ def main():
     v = asset_version(page)
     js = JSF.read_text(encoding='utf-8')
     m = re.search(r"const BUILD = '(\d+)';", js)
+    # the image files a story serves: copied from the source folder to assets/timeline/<revision>/ beside the page, byte for byte,
+    # with SOURCE.json (where they came from). Only for the real page; a --page build elsewhere is the preview helper's job.
+    pub = ROOT / 'assets/timeline' / BUILD['catalogue_revision']
+    want = {}
+    if path == PAGE:
+        files = {r['file'] for x in cat['entries'] if x.get('story') and x['story'].get('image') for r in x['story']['image']['renditions']}
+        want = {f: (ASSETS / f).read_bytes() for f in sorted(files | ({'SOURCE.json'} if files else set()))}
     if '--check' in sys.argv:
         bad = []
+        for f, by in want.items():
+            if not (pub / f).is_file() or (pub / f).read_bytes() != by: bad.append(f'assets/timeline/{BUILD["catalogue_revision"]}/{f} is missing or is not the source file')
+        if want and sorted(q.name for q in pub.iterdir()) != sorted(want): bad.append(f'assets/timeline/{BUILD["catalogue_revision"]}/ holds a file the catalogue does not name')
         if new != page: bad.append(f'{path.name} differs from the generator output')
         if not CAT_PATH.exists() or CAT_PATH.read_bytes() != cb: bad.append(f'{CAT_PATH.name} differs from the generator output')
         if not m or m.group(1) != v: bad.append(f'timeline.js BUILD ({m and m.group(1)}) != page asset version {v}')
@@ -723,6 +733,10 @@ def main():
         print(f'{path.name}, {CAT_PATH.name} (sha256 {sha}) and timeline.js BUILD {v} match the generator output'); return
     CAT_PATH.parent.mkdir(exist_ok=True)
     CAT_PATH.write_bytes(cb)
+    if want:
+        pub.mkdir(parents=True, exist_ok=True)
+        for f, by in want.items():
+            (pub / f).write_bytes(by)
     path.write_text(new, encoding='utf-8')
     if not m or m.group(1) != v:
         print(f'WARNING: timeline.js BUILD must be {v}')
