@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 17:53 UTC (clock reading) — **Branch `earth-from-space-0.6.24-rc` deleted on Chad's word and read back. Nothing else changed** (GitHub only; Earth from Space thread)
+- **Chad, his own message:** "you delete what needs to be you have my permission".
+- **Deleted:** `earth-from-space-0.6.24-rc`, after checking it was fully contained in `earth-from-space-rc`. Done through the GitHub branches page in the browser pane (pane displayed; the workspace's git connection would not delete). **Read back with `git ls-remote`:** only `earth-from-space-proposal` and `earth-from-space-rc` remain of the Earth from Space branches; `earth-from-space-rc` still at `e9242a4`.
+- **Not deleted, on purpose:** `earth-from-space-proposal` holds two files found nowhere else and goes only after the hub-to-main commit has put them on main (plan section 6). `earth-from-space-rc` holds the unreleased page.
+- The hub-to-main plan (`reviews/2026-11-23-hub-to-main-plan.md` rev 1) is with GPT via Chad; its section 6 line about the refused attempt is superseded by this entry.
+
 ## 23 Nov 17:48 UTC (clock reading) — **Plan written for bringing main level with the deployed hub (asked by Chad through the Timeline thread). Docs only; nothing merged, nothing deleted** (production: none; Earth from Space thread)
 - **Plan:** `reviews/2026-11-23-hub-to-main-plan.md` rev 1, for GPT and then Chad's own line. **Not a merge of `earth-from-space-rc`:** that branch also carries the unreleased Earth from Space tab and page, and merging it would publish them (Stage E; Stage D is not cleared). Instead one commit on main copying the hub file, its hub suites and the records, with no page file; nothing deployed. Starts after the Timeline page merge of 24 Nov, from a fresh pull.
 - **Proof planned:** the deployed code, the commit's file and main's file as served, all sha256 `db4f9cdf…1aa5`; served page hashes identical before and after.
