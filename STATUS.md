@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 14:34 UTC (clock reading) — **Earth from Space: UptimeRobot monitor "ME alert test" deleted on Chad's Approve line and read back in the dashboard**
+- **Done at 14:32 UTC with the browser pane displayed:** monitor 804578254 deleted through its own menu and confirmation. **Read back after a reload:** its page is the dashboard's 404; the list shows eight monitors, all Up, none Down or Paused (archive, coverage, publication, runs × firms, usgs). Nothing else changed.
+- **This closes M8.** The two failed attempts earlier today stay on record (14:02 UTC correction entry). Record: proposal section 12.1.
+- **Unchanged:** live hub 0.6.22, gate `manual`; 0.6.23 r1 is with GPT for the H1 recheck; no deploy, no new monitors, Stage D not cleared.
+
 ## 23 Nov 14:30 UTC (clock reading) — **Earth from Space hub 0.6.23: GPT's review held on one finding (H1); fixed on the branch as r1, returned for a bounded recheck. Nothing deployed**
 - **GPT's finding H1:** a `collector_runs` row whose `started_at` cannot be parsed was skipped as "outside the trial", so both health addresses could answer 200 while it carried a storage stop. The brief says unreadable times fail closed. Accepted as found.
 - **Fix (branch `earth-from-space-rc` `566a11b`):** such a row now returns `rows_unreadable` on both addresses; readable outside-window and off-mark rows are still ignored. One comment reworded. Hub file sha256 `7141beb89e8e81ef351ddcc53e8654b1ddcbdb0048c8ffcb6b0d0ed7d7b3afa1`, 551,047 B.

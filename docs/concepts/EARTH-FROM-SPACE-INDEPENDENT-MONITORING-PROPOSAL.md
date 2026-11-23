@@ -503,3 +503,13 @@ monitor or setting changed".
 - The twelve health addresses, read 23 Nov 10:52 UTC.
 - GPT's three reviews, with its list of UptimeRobot primary pages.
 - The UptimeRobot dashboard, signed in by Chad, read 23 Nov 2026; the hub's request log for the same minutes.
+
+### 12.1 "ME alert test" deleted and read back (23 Nov 2026, 14:32 UTC, clock reading)
+
+Done on Chad's own line ("Approve: delete the UptimeRobot monitor "ME alert test" (the leftover 404 test from 6 Nov);
+no other monitor or setting changed"), with the browser pane displayed on the UptimeRobot tab (Chad: "uptime is open
+in your browser pane"). Monitor page 804578254, menu, "Delete monitor", confirmation naming "ME alert test", Delete,
+confirmed just before 14:32:54 UTC. **Read back in the dashboard itself after a reload:** the monitor's own address
+answers the dashboard's 404 page; the monitors list shows **eight**, all Up, none Down, none Paused: ME archive,
+coverage, publication and runs, each for firms and usgs. No other monitor or setting was touched. The two failed
+attempts earlier today stay recorded above as they happened.
