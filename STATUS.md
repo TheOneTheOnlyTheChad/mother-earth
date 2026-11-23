@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 19:36 UTC (clock reading) — **Hub-to-main close-out: branches `hub-to-main` and `earth-from-space-proposal` deleted on Chad's word and read back. Nothing else changed** (GitHub only; Earth from Space thread)
+- **Chad, his own message:** "You can delete the branches".
+- **Checked first:** `hub-to-main` (`7adef36`) is contained in main; every file on `earth-from-space-proposal` (`7e3ea60`) exists on main, and its two formerly unique files are identical there.
+- **Deleted** through the GitHub branches page in the browser pane (pane displayed), one at a time with the list filtered to that branch. **Read back with `git ls-remote`:** of these, only `earth-from-space-rc` (`e9242a4`) remains, with `main`.
+- **Kept:** `earth-from-space-rc` holds the unreleased Earth from Space tab and page. Main has not been merged into it; that is separate reviewed branch work.
+- **Hub-to-main is closed out.** Main's tip for other threads is the commit carrying this entry; the landing is `7adef36`.
+
 ## 23 Nov 19:33 UTC (clock reading) — **HUB-TO-MAIN LANDED on Chad's own Approve line: main's `phase1/worker.js` is now the deployed hub 0.6.24, byte for byte. Fast-forward to `7adef36`. Nothing deployed. Read back. The existing page files are unchanged** (main only; Earth from Space thread, owner of this integration)
 - **Chad's line:** "Approve: land hub-to-main 7adef364602092440cfce52c3cacc5552b80de02 on main by fast-forward: 135 changed paths, being the 126 integration paths of manifest-final.txt and the nine evidence files; phase1/worker.js sha256 db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5 (the deployed hub 0.6.24); no page file; nothing deployed; read back the three hashes and the served page hashes".
 - **Before it:** GPT accepted the paired workspace evidence and the integration content (relayed by Chad) and asked for one wording correction: `docs/HUB-DEPLOY-RULE.md` had claimed the offline alignment check would show Cloudflare moving ahead of main. It cannot (it compares files in the repository only); the rule and the record now say so. The same 126 paths were then rebuilt on main `f835415`; scope and identity checks rerun; final commit reported to Chad before anything was pushed.
