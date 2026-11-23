@@ -376,32 +376,56 @@ def snap_line(v):  # one side of a date change, with ITS OWN citation and checke
             f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(sn["licence"])} · checked {tdate(sn["checked"])}')
 
 
+GROUPS = (('how', 'How we know'), ('context', 'Context and limits'), ('chart', 'Chart reference'))
+
+
+def claim_group(c):  # which heading an existing claim sits under; the claim itself is unchanged
+    return 'chart' if c['claim_type'] == 'chart_boundary' else 'context' if c['claim_type'] == 'context' else 'how'
+
+
 def ep_article(ep, changes=()):
+    """An episode in full. Its claims are grouped under plain headings (TIMELINE-TRAVEL-PROPOSAL rev 2.1 §3.11): the dated
+    claims from sources, then context, then the chart reference on its own, then review and changes. Every claim keeps its
+    label, value, text, source and id exactly as the catalogue has them; no sentence is added. An empty group is not written."""
     i = ep['id']; parts = []
     by = {c['id']: c for c in changes}
-    for n, c in enumerate(ep['claims']):
-        cid = f'{i}-c{n}'
-        val = f'<p class="cval">{e(c["when_text"])}</p>' if c.get('when_text') else ''
-        asm = ('<p>Assumes: ' + '; '.join(e(a) for a in c['assumptions']) + '.</p>') if c.get('assumptions') else ''
-        also = src_line(c.get('also'), None) if c.get('also') else ''
-        parts.append(f'      <section class="es claim" id="{cid}" data-claim-type="{c["claim_type"]}" aria-labelledby="{cid}-h">\n'
-                     f'        <h4 id="{cid}-h">{e(c["label"])}</h4>\n'
-                     f'        {val}<p>{e(c["text"])}</p>{asm}\n'
-                     f'        {src_line(c.get("source"), c.get("locator"))}{also}\n'
-                     f'      </section>')
+    order = [claim_group(c) for c in ep['claims']]
+    if order != sorted(order, key=[k for k, _ in GROUPS].index):
+        raise SystemExit(f'{i}: claims are not in group order (dated, context, chart)')
+    for gk, gl in GROUPS:
+        inner = []
+        for n, c in enumerate(ep['claims']):
+            if claim_group(c) != gk:
+                continue
+            cid = f'{i}-c{n}'
+            val = f'<p class="cval">{e(c["when_text"])}</p>' if c.get('when_text') else ''
+            asm = ('<p>Assumes: ' + '; '.join(e(a) for a in c['assumptions']) + '.</p>') if c.get('assumptions') else ''
+            also = src_line(c.get('also'), None) if c.get('also') else ''
+            inner.append(f'        <section class="es claim" id="{cid}" data-claim-type="{c["claim_type"]}" aria-labelledby="{cid}-h">\n'
+                         f'          <h5 id="{cid}-h">{e(c["label"])}</h5>\n'
+                         f'          {val}<p>{e(c["text"])}</p>{asm}\n'
+                         f'          {src_line(c.get("source"), c.get("locator"))}{also}\n'
+                         f'        </section>')
+        if inner:
+            parts.append(f'      <section class="grp" data-grp="{gk}" aria-labelledby="{i}-g-{gk}">\n'
+                         f'        <h4 class="gh" id="{i}-g-{gk}">{gl}</h4>\n' + '\n'.join(inner) + '\n      </section>')
+    tail = []
     for r in ep['revisions']:  # an earlier date stays visible in the entry, labelled with the revision that showed it
         c = by[r]
         if c['what'] != 'date':
             continue
         was = next(x['revision'] for x in reversed(REL_BEFORE[c['revision']]))
-        parts.append(f'      <section class="es earlier" id="{i}-earlier-{e(r)}" aria-labelledby="{i}-earlier-{e(r)}-h">\n'
-                     f'        <h4 id="{i}-earlier-{e(r)}-h">Earlier dating</h4>\n'
-                     f'        <p>Shown in revision {e(was)}: <span class="was">{snap_line(c["before"])}</span>.</p>\n'
-                     f'      </section>')
+        tail.append(f'        <section class="es earlier" id="{i}-earlier-{e(r)}" aria-labelledby="{i}-earlier-{e(r)}-h">\n'
+                    f'          <h5 id="{i}-earlier-{e(r)}-h">Earlier dating</h5>\n'
+                    f'          <p>Shown in revision {e(was)}: <span class="was">{snap_line(c["before"])}</span>.</p>\n'
+                    f'        </section>')
+    tail.append(f'        {rev_line(i, ep["evidence_reviewed"], ep["revisions"], changes)}')
+    parts.append(f'      <section class="grp" data-grp="review" aria-labelledby="{i}-g-review">\n'
+                 f'        <h4 class="gh" id="{i}-g-review">Review and changes</h4>\n' + '\n'.join(tail) + '\n      </section>')
     scope = f'\n      <p class="scope">{e(ep["scope"])}</p>' if ep.get('scope') else ''
     return (f'    <article class="entry ep" id="{i}" aria-labelledby="{i}-h">\n'
             f'      <h3 class="eh" id="{i}-h" tabindex="-1">{e(ep["title"])}</h3>{scope}\n'
-            + '\n'.join(parts) + f'\n      {rev_line(i, ep["evidence_reviewed"], ep["revisions"], changes)}\n    </article>')
+            + '\n'.join(parts) + '\n    </article>')
 
 
 def change_item(c, cat):

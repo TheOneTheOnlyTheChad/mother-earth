@@ -104,7 +104,9 @@ const R1_JS_V = '202611221000', v = (page.match(/timeline\.js\?v=(\d+)/) || [])[
 ok('asset version: timeline.js ?v= is new, equals the page build id and the script BUILD', v && v !== R1_JS_V && page.includes(`data-build="${v}"`) && js.includes(`const BUILD = '${v}';`), v);
 { // loosened for dustrgb-rc: a later release bumps style.css again, so pin "same on all three pages, and not older than this build" rather than "equal to this build"
   const sv = ['timeline.html', 'index.html', 'sources.html'].map(f => (fs.readFileSync(path.join(ROOT, f), 'utf8').match(/style\.css\?v=(\d+)/) || [])[1]);
-  ok('asset version: style.css ?v= is the same on all three pages and not older than this build', sv.every(x => x && x === sv[0]) && Number(sv[0]) >= Number(v), sv); }
+  // timeline-travel-rc (TIMELINE-TRAVEL-PROPOSAL rev 2.1 §3, "Shared stylesheet"): the explorer's rules are all under body.tl, so only the Timeline
+  // page takes a new key; index and sources keep theirs. Still pinned: index = sources, and Timeline's key is not older than theirs or than this build.
+  ok('asset version: style.css ?v= is the same on index and sources; the Timeline key is not older than theirs or than this build', sv.every(Boolean) && sv[1] === sv[2] && Number(sv[0]) >= Number(sv[1]) && Number(sv[0]) >= Number(v), sv); }
 
 // =====================================================================================================================
 // 2. the unchanged fixture builds, byte-identical to the committed catalogue (the fixture mechanism itself)

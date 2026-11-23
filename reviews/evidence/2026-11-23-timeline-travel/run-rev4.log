@@ -1,0 +1,19 @@
+start 2026-11-23T09:26:12Z
+generator --check exit=0
+timeline-travel-ui.test.cjs exit=0 | timeline-travel-ui: 208 pass, 0 fail
+timeline-changes-build.test.mjs exit=0 | timeline-changes-build: 45 passed, 0 failed
+timeline-catalogue-hub.test.mjs exit=0 | timeline-catalogue-hub: 73 passed, 0 failed
+timeline-axis.test.cjs exit=0 | timeline-axis: 96 pass, 0 fail
+timeline-mixed-assets.test.cjs exit=0 | timeline-mixed-assets: 18 pass, 0 fail
+timeline-changes-ui.test.cjs exit=0 | timeline-changes-ui: 173 pass, 0 fail
+timeline-ui.test.cjs exit=0 | timeline-ui: 594 pass, 0 fail
+travel BREAK=no-focus-guard exit=1 | timeline-travel-ui: 207 pass, 1 fail (BREAK=no-focus-guard) | first: FAIL C focus left without a focusout event: the next wheel does not zo
+travel BREAK=mark-x-in-state exit=1 | timeline-travel-ui: 206 pass, 2 fail (BREAK=mark-x-in-state) | first: FAIL E 1280: opening a story adds one entry whose state has the entry,
+travel BREAK=wheel-always exit=0 | timeline-travel-ui: 208 pass, 0 fail (BREAK=wheel-always) | first: 
+travel BREAK=no-unload-save exit=1 | timeline-travel-ui: 207 pass, 1 fail (BREAK=no-unload-save) | first: FAIL E2 wheel zoom then reload in the same instant: the reloaded page 
+travel BREAK=restore-reveals exit=1 | timeline-travel-ui: 202 pass, 6 fail (BREAK=restore-reveals) | first: FAIL E2 Forward restores the saved 404.1–269.4 exactly: the window i
+end 2026-11-23T09:35:21Z
+timeline-travel-ui.test.cjs (after adding the focused-mark wheel check) exit=0 | timeline-travel-ui: 209 pass, 0 fail
+travel BREAK=wheel-always (rerun) exit=1 | timeline-travel-ui: 208 pass, 1 fail (BREAK=wheel-always) | first: FAIL C focus on a mark, wheel zoom not turned on: the wheel scrolls th
+travel BREAK=no-focus-guard (rerun) exit=1 | timeline-travel-ui: 208 pass, 1 fail (BREAK=no-focus-guard) | first: FAIL C focus left without a focusout event: the next wheel does not zo
+end 2026-11-23T09:38:57Z
