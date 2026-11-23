@@ -119,3 +119,59 @@ fast-forward earth-from-space-rc`
 - **Q2.** Is it acceptable to deploy with 43 browser suites not run here, given the change touches no page file?
   (The 0.6.23 packet reports the same 47 non-browser suites and does not say the browser suites were run.) If not, which should Chad run on the Mac?
 - **Q3.** Is the order in section 5 right, in particular the upload before the deploy?
+
+## 8. The deploy (23 Nov 2026) — DONE and read back
+
+**Chad's own line, in this thread:** "Approve: deploy hub 0.6.24 from earth-from-space-0.6.24-rc 8b80989,
+phase1/worker.js sha256 db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5, code only (the Timeline pin
+tl-2026-11-R3 and the version number), EARTHVIEW_ENABLED left at manual, no window variables; read back hash and
+settings; then fast-forward earth-from-space-rc".
+
+**GPT's review of this candidate: none was relayed to this thread before the line.** Section 7's questions are
+unanswered here. Recorded as that; the deploy rests on Chad's line.
+
+**The Timeline thread's upload (their note, relayed by Chad):** `ref/timeline/tl-2026-11-R3.json` uploaded and read
+back 17:07:13 UTC. **Seen here before the deploy** (bucket listing, 17:18:08 UTC): that key, 31,636 bytes, etag
+`1c9a29d624aa7c70a3c6796b2191fc8f`, modified 17:07:13.194 UTC; R1 and R2 objects as before.
+
+All reads below through the Cloudflare dashboard tab's own session, **browser pane displayed**. Times UTC, from the
+browser's clock.
+
+**Before (17:17:42 to 17:18:08):** deployed code, one module `worker.js`, 551,047 bytes, sha256 `7141beb8…afa1`,
+reports 0.6.23, `TIMELINE_CURRENT` R2. 25 bindings (14 plain, 9 secret, D1, R2). `EARTHVIEW_ENABLED` = `manual`, no
+other `EARTHVIEW_*` variable. Crons `*/5`, `*/15`, `11,41`, `:07`. Compatibility date 2026-10-30. Five objects under
+`earthview/` listed with size, etag and time.
+
+**Deploy:** file fetched in the tab from raw.githubusercontent at `8b80989963e1f5d0694a7b729411a812b0948527`:
+551,400 bytes, sha256 `db4f9cdf…1aa5`, equal to the approved hash (17:18:22). Live code re-read as 0.6.23
+(`7141beb8…afa1`) at 17:18:35.159. **Content-only upload by Claude, PUT 17:18:35.161 to 17:18:38.776, HTTP 200,
+success; Cloudflare `modified_on` 17:18:38.221.**
+
+**After (17:18:57):** code read back `db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5`, 551,400
+bytes (with its final newline), reports 0.6.24, `TIMELINE_CURRENT` R3. 25 bindings, same types. `EARTHVIEW_ENABLED`
+= `manual`, no window variables. Four crons unchanged. Compatibility date unchanged. The five `earthview/` objects
+identical (key, size, etag, time); the three `ref/timeline/` objects identical.
+
+**Live checks on the hub's public address (17:19:05):**
+
+| Address | Answer |
+|---|---|
+| `/` | version 0.6.24; timeline: legacy revision R1, current `tl-2026-11-R3`, revisions R1, R2, R3 |
+| `/catalogue/timeline/tl-2026-11-R3` | **200, 31,636 bytes, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993`** |
+| `/catalogue/timeline` and `/catalogue/timeline/tl-2026-11-R1` | 200, 15,656 bytes, sha256 `096ae648…0fbe` (R1) |
+| `/catalogue/timeline/tl-2026-11-R2` | 200, 18,120 bytes, sha256 `2f39aa30…0356` (R2) |
+| `/catalogue/timeline/tl-2026-11-R4` (does not exist) | 404 |
+| The eight existing health addresses | GET 200 and HEAD 200, verdict ok, `collector_version` 0.6.24 |
+| `/health/runs/earthview`, `/health/trial/earthview` | GET 200 and HEAD 200, `no trial configured` |
+
+**First `*/5` run after the deploy,** from the hub's own run record (`/health/runs/usgs`, read 17:20:22): scheduled
+17:20:07.867, finished 17:20:11.997, status ok. `earthview/` still identical at that read.
+
+**`earth-from-space-rc` fast-forwarded** to `8b80989` and pushed (17:19 UTC). Its `phase1/worker.js` equals the live
+hub again.
+
+**Not read, said plainly:** Cloudflare's invocation records (outcomes and CPU) after the deploy; the 17:20 tick's log
+line; later ticks; `/status` layer states before and after; UptimeRobot (the tab was not opened to read).
+
+**Rollback:** hub 0.6.23 = `phase1/worker.js` at `566a11b` (sha256 `7141beb8…afa1`, 551,047 bytes). The R3 pin is
+additive: a page rollback comes first and the pin can stay. Never main's file (0.6.19).
