@@ -1,0 +1,70 @@
+# Timeline story (end-Cretaceous) — branch candidate `timeline-story-rc`
+
+**Rev 1, 23 Nov 2026 14:08 UTC (clock reading). Branch build only.** Nothing is merged, uploaded, pinned or deployed; the hub and R2 are untouched; the live page is unchanged (merge `03aff0a`).
+**Chad's own line, 23 Nov 2026:** "Go: branch build of the end-Cretaceous story from snapshot 2, sha256 d532063d5df9f19d8262e34a3d8ef3c38cdfb1b58b24f4d09cd05999d479219a. I accept NASA's reuse policy as the basis for the PIA03379 annotated image, this image only."
+Governing documents: `docs/concepts/TIMELINE-STORY-PROPOSAL.md` rev 2.1; review snapshot 2 (private; hash above); GPT's reviews `reviews/2026-11-23-timeline-story-snapshot1-gpt-review.md` and `…snapshot2-gpt-review.md`.
+
+## 1. State in one paragraph
+The generator, the page script, the stylesheet, the rehearsal sources, the preview helper and two new suites are built. All nine Timeline suites pass in the workspace. **The candidate is not ready for review as a preview yet, for one reason: the two NASA image files are not in the repository.** Neither the workspace shell nor the Mac shell can reach NASA (proxy 403), and a folder-access request for the Mac's Downloads folder was refused, so the bytes could not be brought in. Until they are, the rehearsal build stops at the generator's hash check (as designed), the helper cannot be run, and Claude's own real-browser pass has not been done. The suites ran on **fixture images** of the same pixel sizes and say so on every line that matters.
+
+## 2. What was built
+- **Generator** `phase1/timeline/build_timeline.py`: schema 3. An episode may carry explicit claim ids, a `story` (typed evidence items, an opening whose sentences each name what supports them, a heading for the attributed findings, one image with every rendition recorded) and a chart-claim id. New refusals in `check_story` and the change-record rules. Image bytes are checked against the record (sha256, size, pixel size read from the file itself; no image library needed). **With `schema: 2` nothing of this is written: the released `tl-2026-11-R2` still builds byte for byte (sha256 `2f39aa30…0356`), and story fields in a schema 2 source are refused.**
+- **Rehearsal sources** `phase1/timeline/rehearsal/`: `BUILD.json` (`tl-2026-11-T1`, schema 3), `big5.json` (the four other episodes identical to production; the end-Cretaceous episode as snapshot 2 fixes it), `changes.json` (one new record), `assets/SOURCE.json` (where the image files come from, hashes, rights basis). **The image files themselves are missing (section 1).**
+- **Page script** `timeline.js`: validates a schema 3 catalogue's story structure against the catalogue and against the pre-rendered page; fetches an entry's image only when its story is first opened (`hydrate`); a failed image is withdrawn and one plain line is shown.
+- **Stylesheet** `style.css`: the story's figure, caption, opening, sources list and findings, all under `body.tl .entry`.
+- **Preview helper** `phase1/timeline/preview.mjs`: builds four states with the real generator (with-image, no-image, image-fails, catalogue-refused) into a folder outside the repository and serves them on 127.0.0.1 only. Two declared changes to served copies, each required to match exactly once: the hub address in `timeline.js`, and one banner line in `timeline.html`. It has no client code and so contacts nothing.
+- **Suites** `phase1/timeline-story-build.test.mjs` (generator, refusals, helper) and `phase1/timeline-story-ui.test.mjs` (Chromium against the helper), with `phase1/timeline/story-fixture.mjs`.
+
+## 3. Where the build departs from the proposal or adds reader-facing words. Each needs GPT's eye
+1. **Schema pin instead of "schema 3 only".** The proposal says the script validates schema 3 and refuses anything else. Built instead: the page states the schema it was generated for (`data-catalogue-schema="3"`; no attribute means 2, as released) and the script refuses a catalogue of any other schema. Reason: the committed page on this branch is still the released R2 page, and with a schema-3-only script it would fall back to the list and five existing suites would have nothing to test. Both mixed cases the proposal names are refused and tested (released page and script given a schema 3 catalogue; schema-3 page given a schema 2 catalogue), each with the hash pin moved so that only the schema check can refuse.
+2. **What an opening sentence's support points at.** The proposal says supporting claim ids. Built: a sentence may name a claim id or an evidence item id (a passage or an agency record) in the same entry. Reason: snapshot 2 fixes the reader-facing sentences and maps each straight to a source and place; turning each passage into a displayed claim would have added sentences nobody reviewed. op-3 names claim `c0` and four evidence items; the others name evidence items.
+3. **Detail groups are not collapsed.** The proposal lets them close by default where everything stays reachable. Built: all groups open, as today. Collapsing touches focus, deep links and the other four entries, and is left for a decision after the preview.
+4. **Citation marks are not links.** Each opening sentence carries bracketed numbers; the numbered sources sit in a native disclosure ("Sources for these sentences") that opens on request. In-page fragment links were avoided because the page keeps one shareable fragment per entry.
+5. **Reader-facing words that are not in snapshot 2** (new, unreviewed): the disclosure label "Sources for these sentences"; the failure line "The image could not be loaded. Its description and the account below do not depend on it."; the rights link text "used under NASA's Images and Media Usage Guidelines"; "Read as: abstract only." after a citation; the public change record ("Account and image added: End-Cretaceous mass extinction. The entry now opens with a short account of what the evidence shows, gives attributed findings on what caused the extinction, including where studies differ, and shows one image. The earlier line "Causes are not shown in this release." is retired. Why: the entry gave dates only. Dates, the earlier sources and the mark on the axis are unchanged."); the entry line "Changed in revision …: account and image added"; and two claim-type labels held in the data but not displayed ("Attributed account of the cause", "Attributed finding that qualifies or differs").
+6. **Citations of the four added works** are written from what Claude read on the publishers' pages. Schulte et al. 2010 is cited without volume and pages because Claude did not read them. Licence wording for Schoene, Renne and Schulte is "no open licence stated on the page read".
+7. **The asset-version key is not bumped** (`202612250400`). A release must bump it; that is a release step.
+8. **Released-source dates left alone.** Wilf 2023 and O'Connor 2024 keep "checked 10 Nov 2026" in the two released claims, so those claims stay byte-identical; the added works say 23 Nov 2026. The entry-wide "evidence last reviewed" date did not move.
+9. **Not built:** a generator step that copies image files into `assets/timeline/<revision>/` for a release (the helper does it for the rehearsal); the production comparison list of proposal §9 (a release document).
+
+## 4. Results (workspace Chromium and Node; each suite run alone)
+| Suite | Result | Note |
+|---|---|---|
+| `timeline-story-build` (new) | 87 pass, 0 fail, **1 NOT RUN** | on fixture images; the check that the repository's image files are the NASA bytes could not run |
+| `timeline-story-ui` (new) | 93 pass, 0 fail | on fixture images; each break makes it fail: `eager-image` 12 failures, `no-story-validate` 15, `no-schema-pin` at least 1 (measured as 2 when the baseline had 1) |
+| `timeline-changes-build` | 45 pass | unchanged suite |
+| `timeline-catalogue-hub` | 73 pass | unchanged suite; the Worker is not touched |
+| `timeline-ui` | 594 pass | unchanged suite, released page with this branch's script |
+| `timeline-axis` | 96 pass | unchanged suite |
+| `timeline-changes-ui` | 173 pass | unchanged suite |
+| `timeline-travel-ui` | 209 pass | unchanged suite |
+| `timeline-mixed-assets` | 18 pass | unchanged suite; rerun after the last stylesheet edit |
+
+Log: `reviews/evidence/2026-11-23-timeline-story/run.log` (the nine suites in sequence). After that run two stylesheet rules for the story were adjusted; `timeline-story-ui`, `timeline-story-build` and `timeline-mixed-assets` were run again and passed; the other six were not rerun (they do not open a story).
+
+**What the new suites establish, on fixture images:**
+- the rehearsal builds as schema 3; the four other entries are identical to the released catalogue and are pre-rendered byte for byte as on the released page; the two released timing claims and the chart claim are unchanged apart from carrying ids; the retired line is gone and its id is not reused; the entry-wide review date did not move;
+- every reader-facing sentence, the heading, caption, alt text and credit equal snapshot 2 word for word (the suite holds the snapshot's text as literals), and there is no other sentence in the opening or the findings;
+- 29 refusals by the generator, each by fixture, and 14 by the page with the hash pin moved so only validation can refuse; among them a reconstruction, labelled or not;
+- one **review fixture that is not a validator test**: a sentence whose support id is valid but unrelated builds. Only the matrix review can catch that;
+- markup in a text field is written as text;
+- **image requests, measured** at 1280 (1x), 800 (1x), 390 (3x) and 360 (2x): none before a story is opened; none when an entry without an image is opened; exactly one on first open, and it is the file the browser then shows; none on zoom, pan, reopening, Back or Forward. Which file the browser chose is printed per width in the log line. Known exceptions that were not exercised: a resize that selects the other file, a retry, cache eviction;
+- the image box is reserved before the image arrives and stays put within half a pixel (the two files' proportions differ by 0.02 %);
+- image fails to load: the image is withdrawn, one line says so, caption and account stand; no image: the story is complete; catalogue refused: the list stays and the entry still opens; JavaScript off: the same content in the same order with an ordinary image;
+- no request to any host but the helper (fonts are aborted in the suite);
+- the helper: refuses to build inside the repository or under a non-rehearsal revision id; the served script differs from the committed file in exactly one line; the stylesheet, the catalogue and the image files are served as the bytes on disk; one-byte-changed catalogue in the refused state; GET only; path traversal, the source folder and other revisions refused; every request logged; no client code.
+
+**Claude's own look** (workspace Chromium screenshots, fixture image, 1280 and 390 wide): the panel reads in order image, caption, credit, opening, sources, groups; nothing overflows. This is not the pane pass and not a phone.
+
+## 5. Not done, and not claimed
+- **The NASA image files are not in the repository; no test has run on them.** Their hashes were measured three times in a browser tab on 23 Nov (11:30:58Z, 11:31:09Z, 13:52:35Z) and were identical each time.
+- Claude's real-browser pass in the pane, the helper run on the Mac, and any phone, Safari or screen-reader check.
+- 200 % zoom, text spacing and reduced motion were not tested for the story.
+- A resize between the two renditions, and what a slow or interrupted image does beyond a clean failure.
+- Legibility of the annotated image in the built panel: untested, because the built panel has only shown a fixture.
+- Nothing about the Worker pin, R2, cross-origin headers or the Pages origin; that is the release route.
+
+## 6. What Chad is needed for
+Put the two NASA files into `phase1/timeline/rehearsal/assets/` of the review copy on the Mac (commands in the thread). Claude then checks their sha256 against snapshot 2, commits them, reruns the two story suites on the real bytes, and the helper can be started in Terminal for the pane pass and for GPT.
+
+## 7. Changed files
+`phase1/timeline/build_timeline.py`, `timeline.js`, `style.css`; new: `phase1/timeline/preview.mjs`, `phase1/timeline/story-fixture.mjs`, `phase1/timeline/rehearsal/{BUILD.json,big5.json,changes.json,assets/SOURCE.json}`, `phase1/timeline-story-build.test.mjs`, `phase1/timeline-story-ui.test.mjs`, this record and its log. Unchanged: `timeline.html`, `phase1/timeline/{big5.json,changes.json,BUILD.json}`, `phase1/timeline/catalogue/*`, `phase1/worker.js`, every other page.

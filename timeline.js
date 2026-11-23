@@ -100,10 +100,22 @@ function applyMode() {
   document.body.classList.toggle('dopen', !phone);
 }
 
+// An entry's image is fetched only when its story is first opened: the pre-rendered <img> has no src (a <noscript> copy
+// serves readers without JavaScript). One rendition is chosen by the browser from srcset. A failed load leaves the caption
+// and the account standing, with one plain line.
+function hydrate(art) {
+  art.querySelectorAll('img.simg[data-src]').forEach(img => {
+    const fig = img.closest('figure'), fail = fig && fig.querySelector('.imgfail');
+    img.addEventListener('error', () => { img.hidden = true; if (fig) fig.classList.add('failed'); if (fail) fail.hidden = false; }, { once: true });
+    img.sizes = img.dataset.sizes || ''; img.srcset = img.dataset.srcset || ''; img.src = img.dataset.src;
+    img.removeAttribute('data-src'); img.removeAttribute('data-srcset'); img.removeAttribute('data-sizes');
+  });
+}
 function show(id, x, reveal) {   // reveal: an explicit open brings the mark into the window; restoring a history entry never moves its saved window
   const art = entries.get(id); if (!art) return false;
   if (body.firstElementChild && body.firstElementChild !== art) home.appendChild(body.firstElementChild);
   body.appendChild(art);
+  hydrate(art);
   art.querySelectorAll('section.xp').forEach(s => setX(s, false));
   const sec = xSection(id, x); if (sec && sec.classList.contains('xp')) setX(sec, true);
   detail.hidden = false; applyMode();
@@ -251,7 +263,7 @@ function fromHash(onLoad) {
   if (m && entries.has(m[1])) return direct(m[1], m[2]);
 }
 // ---------- deep-time explorer (build proposal rev 1.1 §1–§4; TIMELINE-TRAVEL-PROPOSAL rev 2.1 §3)
-const LABELS = {
+const LABELS2 = {
   extinction_interval_approx: 'Approximate extinction interval',
   boundary_age_bound: 'Boundary age: no older than',
   boundary_age_range_modelled: 'Modelled boundary-age range',
@@ -278,8 +290,64 @@ const axisState = { state: 'pending', reason: null, view: null, wheel: false };
 window.TL_AXIS = axisState;     // read-only test/console aid
 
 const isNum = v => typeof v === 'number' && isFinite(v);
+// The page says which catalogue schema it was built for (no attribute = schema 2, as released). A catalogue of any other
+// schema is refused, so a schema-3 catalogue never draws on a schema-2 page and the reverse (STORY proposal rev 2.1 §4).
+const pageSchema = wrap && wrap.dataset.catalogueSchema === '3' ? 3 : 2;
+const STORY_LABELS = { cause_account: 'Attributed account of the cause', disagreement: 'Attributed finding that qualifies or differs' };
+const IMAGE_KINDS = ['photograph', 'measured_image'], IMAGE_BYTES_MAX = 300000;
+const MEDIA = { 'image/jpeg': /\.jpe?g$/i, 'image/png': /\.png$/i, 'image/webp': /\.webp$/i };
+// schema 3: structure only. Ids exist, are unique and resolve; fields are present and well formed; the page carries what
+// the catalogue describes. Whether a passage supports a sentence is the reviewer's matrix, not a check a script can make.
+function storyBad(e) {
+  const str = v => typeof v === 'string' && v.trim() !== '', idre = /^[a-z][a-z0-9-]*$/;
+  const cids = e.claims.map((k, n) => k.id || 'c' + n);
+  if (cids.some(k => !idre.test(k)) || new Set(cids).size !== cids.length) return 'claim ids';
+  if (e.claims.some(k => (k.claim_type in STORY_LABELS) && !(k.id && k.source && k.locator))) return 'account claim';
+  if (e.claims.some((k, n) => !$(`${e.id}-${cids[n]}`))) return 'claim not on the page';
+  const st = e.story;
+  if (st == null) return e.claims.some(k => k.claim_type in STORY_LABELS) ? 'account without story' : null;
+  const evs = st.evidence, ops = st.opening;
+  if (!Array.isArray(evs) || !Array.isArray(ops) || !ops.length || !str(st.heading)) return 'story shape';
+  const ids = [...cids, ...evs.map(v => v && v.id), ...ops.map(o => o && o.id)];
+  if (ids.some(k => typeof k !== 'string' || !idre.test(k)) || new Set(ids).size !== ids.length) return 'story ids';
+  const known = new Set([...cids, ...evs.map(v => v.id)]);
+  for (const v of evs) {
+    if (v.type === 'passage') { if (!v.source || !str(v.source.citation) || !str(v.locator)) return 'evidence ' + v.id; }
+    else if (v.type === 'collection_record') { if (!str(v.institution) || !str(v.record) || !str(v.url) || v.url.indexOf('https://') !== 0) return 'evidence ' + v.id; }
+    else return 'evidence type ' + v.id;
+  }
+  for (const o of ops) {
+    if (!str(o.text) || (o.kind !== 'evidence' && o.kind !== 'structural') || !Array.isArray(o.supports) || o.supports.some(k => !known.has(k))) return 'sentence ' + o.id;
+    if (o.kind === 'evidence' && !o.supports.length) return 'unsupported sentence ' + o.id;
+    const el = $(`${e.id}-${o.id}`); if (!el || el.textContent !== o.text) return 'sentence not on the page ' + o.id;
+  }
+  const im = st.image, fig = $(e.id + '-fig');
+  if (im == null) return fig ? 'image on the page, none in the catalogue' : null;
+  if (IMAGE_KINDS.indexOf(im.kind) < 0) return 'image kind';
+  if (['alt', 'caption', 'creator', 'credit', 'licence', 'licence_url', 'source_page'].some(k => !str(im[k]))) return 'image fields';
+  if (!Array.isArray(im.supports) || !im.supports.length || im.supports.some(k => !known.has(k))) return 'image support';
+  const rs = im.renditions; if (!Array.isArray(rs) || !rs.length) return 'image renditions';
+  let total = 0;
+  for (const r of rs) {
+    if (!r || typeof r.file !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(r.file) || r.file.indexOf('..') >= 0) return 'image file';
+    if (!(r.media_type in MEDIA) || !MEDIA[r.media_type].test(r.file)) return 'image media type';
+    if (typeof r.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(r.sha256) || !Number.isInteger(r.bytes) || r.bytes <= 0) return 'image record';
+    if (!Array.isArray(r.pixels) || r.pixels.length !== 2 || r.pixels.some(v => !Number.isInteger(v) || v <= 0) || !str(r.modification)) return 'image record';
+    total += r.bytes;
+  }
+  if (total > IMAGE_BYTES_MAX) return 'image bytes';
+  const img = $(e.id + '-img');
+  if (!fig || !img || fig.dataset.kind !== im.kind || img.alt !== im.alt) return 'image not on the page';
+  const want = rs.map(r => `assets/timeline/${c_rev}/${r.file}`).sort().join();
+  const have = (img.dataset.srcset || img.getAttribute('srcset') || '').split(',').map(x => x.trim().split(' ')[0]).sort().join();
+  if (want !== have) return 'image files not the ones on the page';
+  return null;
+}
+let c_rev = '';
 function validate(c) {
-  if (!c || c.catalogue !== 'timeline' || c.schema !== 2) return 'catalogue identity';
+  if (!c || c.catalogue !== 'timeline' || c.schema !== pageSchema) return 'catalogue identity';
+  const LABELS = pageSchema === 3 ? Object.assign({}, LABELS2, STORY_LABELS) : LABELS2;
+  c_rev = c.catalogue_revision;
   if (c.catalogue_revision !== wrap.dataset.catalogueRev) return 'revision';
   const ch = c.chart;
   if (!ch || !ch.window || !isNum(ch.window.ma) || !ch.overview || !isNum(ch.overview.ma) || ch.overview.ma <= ch.window.ma) return 'chart bounds';
@@ -320,6 +388,8 @@ function validate(c) {
     if (!$('change-' + ch.id)) return 'change not on the page ' + ch.id;        // the pre-rendered record this catalogue describes
   }
   if (all.some(e => e.revisions.some(r => !seen.has(r)))) return 'unknown revision';
+  if (pageSchema === 3) for (const e of c.entries) { const bad = storyBad(e); if (bad) return 'story ' + e.id + ': ' + bad; }
+  else if (c.entries.some(e => e.story || e.claims.some(k => k.id))) return 'story fields in schema 2';
   return null;
 }
 

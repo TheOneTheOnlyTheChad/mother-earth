@@ -12,6 +12,10 @@ every entry carries evidence_reviewed (the entry-wide review date, set explicitl
 BUILD.json carries release_date (the reader-facing page release day) and previous (the last reader-facing release).
 The previous revision's catalogue file is read as a frozen reference and is never rewritten.
 
+Schema 3 (TIMELINE-STORY-PROPOSAL rev 2.1): an episode may carry a `story` (an opening whose sentences each name what
+supports them, typed evidence items, one image with every served rendition recorded) and explicit claim ids. Nothing of
+schema 3 is written when BUILD.json says schema 2, so an earlier revision still builds byte for byte.
+
 Deterministic: output depends only on the source JSON (chart-v2026-06.5.json, big5.json, entry-*.json, BUILD.json).
 The catalogue (phase1/timeline/catalogue/<revision>.json) is the single source for the hub route /catalogue/timeline
 and for the pre-rendered list; the page embeds its sha256 and the build id (= the ?v= asset version), and the script
@@ -44,6 +48,14 @@ CLAIM_LABELS = {
     'chart_boundary': 'ICS chart boundary (v2026-06)',
     'context': 'Context',
 }
+SCHEMA = BUILD['schema']
+STORY_LABELS = {'cause_account': 'Attributed account of the cause', 'disagreement': 'Attributed finding that qualifies or differs'}
+if SCHEMA >= 3:
+    CLAIM_LABELS.update(STORY_LABELS)
+ASSETS = TL / 'assets'                  # image files for this source folder; hashes are checked against these bytes
+IMAGE_KINDS = ('photograph', 'measured_image')      # 'reconstruction' is a defined value this slice refuses, labelled or not
+MEDIA = {'image/jpeg': ('.jpg', '.jpeg'), 'image/png': ('.png',), 'image/webp': ('.webp',)}
+IMAGE_BYTES_MAX = 300000                # total across an entry's shipped renditions (proposal rev 2 section 7; GPT 23 Nov)
 BOUNDARY_NAMES = {'ordovician-silurian': 'Ordovician–Silurian', 'frasnian-famennian': 'Frasnian–Famennian',
                   'permian-triassic': 'Permian–Triassic', 'triassic-jurassic': 'Triassic–Jurassic',
                   'cretaceous-paleogene': 'Cretaceous–Paleogene'}
@@ -205,6 +217,9 @@ def revisions_of(entry_id):  # change ids that REVISED this entry (its first app
 
 
 def catalogue():
+    if SCHEMA < 3 and any(ep.get('story') or ep.get('chart_claim_id') or any(c.get('id') or c['claim_type'] in STORY_LABELS for c in ep['claims'])
+                          for ep in BIG5['episodes']):
+        raise SystemExit('refused: story fields in a schema 2 source')
     eps = []
     for ep in BIG5['episodes']:
         claims = []
@@ -217,6 +232,8 @@ def catalogue():
                 d['assumptions'] = c['assumptions']
             if c.get('also'):
                 d['also'] = src_obj(c['also'])
+            if SCHEMA >= 3 and c.get('id'):
+                d['id'] = c['id']
             claims.append(d)
         b = CHART['boundaries'][ep['chart_boundary']]
         claims.append({'claim_type': 'chart_boundary', 'label': CLAIM_LABELS['chart_boundary'], 'axis': False,
@@ -225,9 +242,18 @@ def catalogue():
                        'when_text': boundary_text(ep['chart_boundary']),
                        'text': 'Shown beside the source value, not merged with it. The chart supplies the boundary only, not the event date.',
                        'source': None, 'locator': None})
+        if SCHEMA >= 3 and ep.get('chart_claim_id'):
+            claims[-1]['id'] = ep['chart_claim_id']
         eps.append({'id': ep['id'], 'lane': 'extinctions', 'title': ep['title'], 'short': ep['short'], 'axis': True,
                     'scope': ep.get('scope'), 'claims': claims, 'evidence_reviewed': ep.get('evidence_reviewed'),
                     'revisions': revisions_of(ep['id'])})
+        if SCHEMA >= 3 and ep.get('story'):
+            st = json.loads(json.dumps(ep['story']))
+            st.pop('snapshot_sha256', None)      # the reviewed snapshot's hash stays in the source file, not in shipped data
+            for ev in st.get('evidence', []):
+                if ev.get('type') == 'passage':
+                    ev['source'] = src_obj(ev.get('source'))
+            eps[-1]['story'] = st
     pliny = json.loads(ENTRIES[0].read_text(encoding='utf-8'))
     shelf = [{'id': pliny['id'], 'lane': 'history', 'title': pliny['title']['text'], 'axis': False,
               'when': {'type': 'partial_date', 'day': pliny['date_line']['day'],
@@ -310,7 +336,18 @@ def check_rules(cat, cb):
         if c['kind'] not in ('added', 'revised'): no(f"{c['id']} kind {c['kind']!r}")
         if not c.get('entries') or any(i not in ids for i in c['entries']): no(f"{c['id']} names an unknown entry")
         if c['kind'] == 'revised':
-            if c['what'] not in ('wording', 'date') or not c.get('short') or not c.get('why') or len(c['entries']) != 1: no(f"{c['id']} is incomplete")
+            if c['what'] not in ('wording', 'date') + (('account',) if SCHEMA >= 3 else ()) or not c.get('short') or not c.get('why') or len(c['entries']) != 1: no(f"{c['id']} is incomplete")
+            if c['what'] == 'account':      # an account and image added to an entry; an earlier line it retires is kept here, word for word
+                if not c.get('title') or not c.get('text'): no(f"{c['id']} is incomplete")
+                if c['revision'] == rel['revision']:
+                    ent = next(x for x in cat['entries'] if x['id'] == c['entries'][0])
+                    if not ent.get('story'): no(f"{c['id']} names an entry with no account")
+                    if c.get('retired'):
+                        prev = json.loads((TL / 'catalogue' / (rel['previous'] + '.json')).read_text(encoding='utf-8'))
+                        pe = next((x for x in prev['entries'] if x['id'] == ent['id']), {})
+                        if not any(k['text'] == c['retired'] for k in pe.get('claims', [])): no(f"{c['id']} 'retired' is not a line {rel['previous']} showed")
+                        if any(k['text'] == c['retired'] for k in ent['claims']): no(f"{c['id']} 'retired' is still in the entry")
+                continue
             for side in ('before', 'after'):
                 v = c.get(side) or {}
                 if c['what'] == 'wording' and not (v.get('label') and v.get('text')): no(f"{c['id']} {side} wording missing")
@@ -334,10 +371,98 @@ def check_rules(cat, cb):
                     if c['before']['when_text'] != pc['when_text']: no(f"{c['id']} 'before' is not the value {rel['previous']} showed")
     for x in cat['entries'] + cat['shelf']:
         if any(r not in seen for r in x['revisions']): no(f"{x['id']} lists an unknown change")
+    if cat['schema'] >= 3:
+        for x in cat['entries']:
+            check_story(x, day, no)
     # privacy: inbox fields and private paths stay out of shipped data
     low = cb.decode('utf-8').lower()
     for bad in (r'tl-in-\d', r'timeline-inbox/', r'(?<!docs/)research/', r'_review/', r'/users/', r'_to_delete'):
         if re.search(bad, low): no(f'shipped data contains a private reference ({bad})')
+
+
+def claim_id(c, n):  # a claim's stable id inside its entry: its own, or its position as in schema 2 (c0, c1, ...)
+    return c.get('id') or f'c{n}'
+
+
+def image_pixels(b):
+    """(width, height) of a JPEG or PNG, read from its own bytes; None if neither."""
+    if b[:8] == b'\x89PNG\r\n\x1a\n' and b[12:16] == b'IHDR':
+        return int.from_bytes(b[16:20], 'big'), int.from_bytes(b[20:24], 'big')
+    if b[:2] == b'\xff\xd8':
+        i = 2
+        while i + 9 < len(b) and b[i] == 0xFF:
+            m = b[i + 1]
+            if m in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+                return int.from_bytes(b[i + 7:i + 9], 'big'), int.from_bytes(b[i + 5:i + 7], 'big')
+            i += 2 + int.from_bytes(b[i + 2:i + 4], 'big')
+    return None
+
+
+def check_story(x, day, no):
+    """Structure only (proposal rev 2 section 4): ids exist, are unique and resolve; required fields are present and well
+    formed; image bytes equal their record. Whether a passage supports a sentence is the reviewer's matrix, not this."""
+    i = x['id']; st = x.get('story')
+    cids = [claim_id(c, n) for n, c in enumerate(x['claims'])]
+    idre = re.compile(r'[a-z][a-z0-9-]*')
+    if any(not isinstance(k, str) or not idre.fullmatch(k) for k in cids): no(f'{i} has a malformed claim id')
+    if len(set(cids)) != len(cids): no(f'{i} has a duplicate claim id')
+    for c in x['claims']:
+        if c['claim_type'] in STORY_LABELS and not (c.get('id') and c.get('source') and c.get('locator')):
+            no(f"{i} claim {c.get('id')} has no evidence record")
+        if (c.get('source') or {}).get('read') not in (None, 'abstract only'): no(f'{i} source read state')
+    if not st:
+        if any(c['claim_type'] in STORY_LABELS for c in x['claims']): no(f'{i} has account claims and no story')
+        return
+    evs, ops = st.get('evidence') or [], st.get('opening') or []
+    ids = cids + [v.get('id') for v in evs] + [o.get('id') for o in ops]
+    if any(not isinstance(k, str) or not idre.fullmatch(k) for k in ids): no(f'{i} has a malformed id')
+    if len(set(ids)) != len(ids): no(f'{i} has a duplicate id')
+    known = set(cids) | {v['id'] for v in evs}
+    for v in evs:
+        if v.get('type') == 'passage':
+            s = v.get('source')
+            if not s or not v.get('locator') or not is_date(s.get('checked')) or s['checked'] > day: no(f"{i} evidence {v['id']} is incomplete")
+            if f"(checked {fmt_date(s['checked'])})" not in s['status']: no(f"{i} evidence {v['id']}: status text and checked date disagree")
+        elif v.get('type') == 'collection_record':
+            if not all(isinstance(v.get(k), str) and v[k] for k in ('institution', 'record', 'title', 'url')) or not v['url'].startswith('https://') \
+               or not is_date(v.get('checked')) or v['checked'] > day: no(f"{i} evidence {v['id']} is incomplete")
+        else:
+            no(f"{i} evidence {v.get('id')} has an unknown type")   # chart_reference and dataset are defined but not used in this slice
+    if not ops: no(f'{i} story has no opening')
+    for o in ops:
+        if not isinstance(o.get('text'), str) or not o['text'].strip() or o.get('kind') not in ('evidence', 'structural'): no(f"{i} sentence {o['id']} is malformed")
+        sup = o.get('supports')
+        if not isinstance(sup, list) or any(k not in known for k in sup): no(f"{i} sentence {o['id']} names support that does not exist")
+        if o['kind'] == 'evidence' and not sup: no(f"{i} sentence {o['id']} is an evidence sentence with no support")
+    if not isinstance(st.get('heading'), str) or not st['heading'].strip(): no(f'{i} story has no heading for its attributed findings')
+    im = st.get('image')
+    if im is None:
+        return
+    if im.get('kind') not in IMAGE_KINDS: no(f"{i} image kind {im.get('kind')!r} is not allowed in this slice")
+    for k in ('alt', 'caption', 'creator', 'credit', 'licence', 'licence_url', 'source_page'):
+        if not isinstance(im.get(k), str) or not im[k].strip(): no(f'{i} image has no {k}')
+    if not im['licence_url'].startswith('https://') or not im['source_page'].startswith('https://'): no(f'{i} image links must be https')
+    if not isinstance(im.get('supports'), list) or not im['supports'] or any(k not in known for k in im['supports']): no(f'{i} image names support that does not exist')
+    rs = im.get('renditions')
+    if not isinstance(rs, list) or not rs: no(f'{i} image has no rendition')
+    total = 0
+    for r in rs:
+        f = r.get('file')
+        if not isinstance(f, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*', f) or '..' in f: no(f'{i} image file {f!r} is not a plain file name')
+        if r.get('media_type') not in MEDIA or not f.lower().endswith(MEDIA[r['media_type']]): no(f'{i} image {f} media type')
+        if not isinstance(r.get('sha256'), str) or not re.fullmatch(r'[0-9a-f]{64}', r['sha256']): no(f'{i} image {f} has no sha256')
+        if not isinstance(r.get('bytes'), int) or r['bytes'] <= 0: no(f'{i} image {f} has no size')
+        px = r.get('pixels')
+        if not isinstance(px, list) or len(px) != 2 or any(not isinstance(v, int) or v <= 0 for v in px): no(f'{i} image {f} has no pixel size')
+        if not isinstance(r.get('modification'), str) or not r['modification'].strip(): no(f'{i} image {f} does not say how it differs from the original')
+        fp = ASSETS / f
+        if not fp.is_file(): no(f'{i} image {f} is not in the assets folder')
+        b = fp.read_bytes()
+        if len(b) != r['bytes'] or hashlib.sha256(b).hexdigest() != r['sha256']: no(f'{i} image {f}: the bytes on disk are not the bytes recorded')
+        if image_pixels(b) != tuple(px): no(f'{i} image {f}: pixel size on disk is not the size recorded')
+        total += r['bytes']
+    if len({r['file'] for r in rs}) != len(rs): no(f'{i} image lists a file twice')
+    if total > IMAGE_BYTES_MAX: no(f'{i} image renditions total {total} B, over {IMAGE_BYTES_MAX}')
 
 
 CAT_PATH = TL / 'catalogue' / (BUILD['catalogue_revision'] + '.json')
@@ -366,7 +491,8 @@ def src_line(s, locator):
         return ''
     loc = f' · {e(locator)}' if locator else ''
     return (f'<p class="srcnote">{e(s["citation"])}{loc}. <a href="{e(s["url"])}" target="_blank" rel="noopener">doi {e(s["doi"])} '
-            f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(s["licence"])}. {e(s["status"])}.</p>')
+            f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(s["licence"])}. {e(s["status"])}.'
+            + (f' Read as: {e(s["read"])}.' if s.get('read') else '') + '</p>')
 
 
 def snap_line(v):  # one side of a date change, with ITS OWN citation and checked date (not the entry's current source)
@@ -376,11 +502,56 @@ def snap_line(v):  # one side of a date change, with ITS OWN citation and checke
             f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(sn["licence"])} · checked {tdate(sn["checked"])}')
 
 
-GROUPS = (('how', 'How we know'), ('context', 'Context and limits'), ('chart', 'Chart reference'))
+GROUPS = (('how', 'How we know'), ('interp', None), ('context', 'Context and limits'), ('chart', 'Chart reference'))
 
 
 def claim_group(c):  # which heading an existing claim sits under; the claim itself is unchanged
-    return 'chart' if c['claim_type'] == 'chart_boundary' else 'context' if c['claim_type'] == 'context' else 'how'
+    return ('chart' if c['claim_type'] == 'chart_boundary' else 'context' if c['claim_type'] == 'context'
+            else 'interp' if c['claim_type'] in STORY_LABELS else 'how')
+
+
+def story_head(ep):
+    """The image and the opening of an entry that has an account. All text is escaped; nothing here is HTML from the data."""
+    i, st = ep['id'], ep['story']; out = []
+    im = st.get('image')
+    if im:
+        rs = sorted(im['renditions'], key=lambda r: r['pixels'][0])
+        big = rs[-1]; base = f'assets/timeline/{e(BUILD["catalogue_revision"])}/'
+        srcset = ', '.join(f'{base}{e(r["file"])} {r["pixels"][0]}w' for r in rs)
+        attrs = f'alt="{e(im["alt"])}" width="{big["pixels"][0]}" height="{big["pixels"][1]}"'
+        sizes = '(max-width: 760px) calc(100vw - 32px), 480px'
+        out.append(f'      <figure class="sfig" id="{i}-fig" data-kind="{e(im["kind"])}">\n'
+                   f'        <img class="simg" id="{i}-img" {attrs} data-src="{base}{e(big["file"])}" data-srcset="{srcset}" data-sizes="{sizes}">\n'
+                   f'        <noscript><img class="simg" {attrs} src="{base}{e(big["file"])}" srcset="{srcset}" sizes="{sizes}"></noscript>\n'
+                   f'        <p class="imgfail" id="{i}-imgfail" hidden>The image could not be loaded. Its description and the account below do not depend on it.</p>\n'
+                   f'        <figcaption id="{i}-cap">{e(im["caption"])} <span class="icred"><a href="{e(im["source_page"])}" target="_blank" rel="noopener">{e(im["credit"])} '
+                   f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · <a href="{e(im["licence_url"])}" target="_blank" rel="noopener">{e(im["licence"])} '
+                   f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a></span></figcaption>\n'
+                   f'      </figure>')
+    evs = st['evidence']; num_of = {}
+    for o in st['opening']:
+        for k in o['supports']:
+            if k not in num_of and any(v['id'] == k for v in evs):
+                num_of[k] = len(num_of) + 1
+    sents = []
+    for o in st['opening']:
+        marks = ''.join(f'<sup class="cite">[{num_of[k]}]</sup>' for k in o['supports'] if k in num_of)
+        sents.append(f'<span class="ops" id="{i}-{e(o["id"])}" data-kind="{e(o["kind"])}">{e(o["text"])}</span>{marks}')
+    out.append(f'      <p class="opening" id="{i}-opening">' + ' '.join(sents) + '</p>')
+    items = []
+    for v in sorted((v for v in evs if v['id'] in num_of), key=lambda v: num_of[v['id']]):
+        if v['type'] == 'passage':
+            s = v['source']
+            body = (f'{e(s["citation"])} · {e(v["locator"])}. <a href="{e(s["url"])}" target="_blank" rel="noopener">doi {e(s["doi"])} '
+                    f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · licence: {e(s["licence"])}. {e(s["status"])}.'
+                    + (f' Read as: {e(s["read"])}.' if s.get('read') else ''))
+        else:
+            body = (f'{e(v["institution"])}, record {e(v["record"])}: {e(v["title"])}. <a href="{e(v["url"])}" target="_blank" rel="noopener">record '
+                    f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · read {tdate(v["checked"])}.')
+        items.append(f'          <li id="{i}-{e(v["id"])}" value="{num_of[v["id"]]}">{body}</li>')
+    out.append(f'      <details class="opsrc" id="{i}-opsrc">\n        <summary>Sources for these sentences</summary>\n        <ol>\n'
+               + '\n'.join(items) + '\n        </ol>\n      </details>')
+    return '\n'.join(out)
 
 
 def ep_article(ep, changes=()):
@@ -392,12 +563,21 @@ def ep_article(ep, changes=()):
     order = [claim_group(c) for c in ep['claims']]
     if order != sorted(order, key=[k for k, _ in GROUPS].index):
         raise SystemExit(f'{i}: claims are not in group order (dated, context, chart)')
+    st = ep.get('story')
     for gk, gl in GROUPS:
+        if gk == 'interp':
+            gl = st['heading'] if st else None
         inner = []
         for n, c in enumerate(ep['claims']):
             if claim_group(c) != gk:
                 continue
-            cid = f'{i}-c{n}'
+            cid = f'{i}-{claim_id(c, n)}'
+            if gk == 'interp':          # an attributed finding: the sentence and its own citation, no repeated label
+                inner.append(f'        <section class="es claim told" id="{cid}" data-claim-type="{c["claim_type"]}">\n'
+                             f'          <p>{e(c["text"])}</p>\n'
+                             f'          {src_line(c.get("source"), c.get("locator"))}{src_line(c.get("also"), None) if c.get("also") else ""}\n'
+                             f'        </section>')
+                continue
             val = f'<p class="cval">{e(c["when_text"])}</p>' if c.get('when_text') else ''
             asm = ('<p>Assumes: ' + '; '.join(e(a) for a in c['assumptions']) + '.</p>') if c.get('assumptions') else ''
             also = src_line(c.get('also'), None) if c.get('also') else ''
@@ -423,8 +603,9 @@ def ep_article(ep, changes=()):
     parts.append(f'      <section class="grp" data-grp="review" aria-labelledby="{i}-g-review">\n'
                  f'        <h4 class="gh" id="{i}-g-review">Review and changes</h4>\n' + '\n'.join(tail) + '\n      </section>')
     scope = f'\n      <p class="scope">{e(ep["scope"])}</p>' if ep.get('scope') else ''
-    return (f'    <article class="entry ep" id="{i}" aria-labelledby="{i}-h">\n'
-            f'      <h3 class="eh" id="{i}-h" tabindex="-1">{e(ep["title"])}</h3>{scope}\n'
+    head = ('\n' + story_head(ep)) if st else ''
+    return (f'    <article class="entry ep{" story" if st else ""}" id="{i}" aria-labelledby="{i}-h">\n'
+            f'      <h3 class="eh" id="{i}-h" tabindex="-1">{e(ep["title"])}</h3>{scope}{head}\n'
             + '\n'.join(parts) + '\n    </article>')
 
 
@@ -437,7 +618,10 @@ def change_item(c, cat):
     ent = ents[c['entries'][0]]
     reviewed = f'The entry\'s evidence was last reviewed {tdate(ent["evidence_reviewed"]["date"])}.'
     opener = (f'<a class="chgopen" id="{e(cid)}-open" href="#{e(ent["id"])}" data-entry="{e(ent["id"])}" data-opener="change">Open the entry</a>')
-    if c['what'] == 'wording':
+    if c['what'] == 'account':
+        was = f' The earlier line "{e(c["retired"])}" is retired.' if c.get('retired') else ''
+        body = f'<b>{e(c["title"])}</b> {e(c["text"])}{was} Why: {e(c["why"])}. {e(c["unchanged"])} {reviewed} {opener}'
+    elif c['what'] == 'wording':
         body = (f'<b>{e(c["title"])}</b> The label "{e(c["before"]["label"])}" now reads "{e(c["after"]["label"])}", with the matching change '
                 f'in the entry text. Why: {e(c["why"])}. {e(c["unchanged"])} {reviewed} {opener}')
     else:  # date: old and new side by side, each with its own citation and checked date
@@ -476,7 +660,7 @@ def render(page, cat, sha):
     return '\n'.join([
         BEGIN,
         f'  <section id="axis-wrap" class="axiswrap" aria-labelledby="axis-h" data-catalogue-sha="{sha}" '
-        f'data-catalogue-rev="{e(cat["catalogue_revision"])}" data-build="{v}">',
+        f'data-catalogue-rev="{e(cat["catalogue_revision"])}" data-build="{v}"' + (f' data-catalogue-schema="{cat["schema"]}"' if cat['schema'] >= 3 else '') + '>',
         '    <h3 id="axis-h">Deep time</h3>',
         f'    <p class="coverage">{e(cat["coverage"])}</p>',
         f'    <p class="updated" id="tl-updated">Timeline page updated {tdate(rel["release_date"])} · revision {e(rel["revision"])} · <a id="tl-changes-link" href="#changes">What changed</a></p>',
