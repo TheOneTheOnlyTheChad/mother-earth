@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 13:59 UTC (clock reading) — **Earth from Space: hub 0.6.23 candidate built on the branch on Chad's go. Two read-only trial health checks. NOT deployed; no setting, monitor or account changed; no Stage D.** (production: none; live hub is still 0.6.22, read 13:58 UTC; Earth from Space thread)
+- **Candidate:** `phase1/worker.js` 0.6.23, sha256 `111fdd101a9b7bbbefc174f0f7f432890a913b08b4334f19b13a4c5a29e55db8`, 550,699 bytes, at branch `earth-from-space-rc` `114dc5b`. Adds `/health/runs/earthview` and `/health/trial/earthview` to the monitoring proposal's rev 3.1 brief.
+- **Health-only change, shown:** taking the five edits back out gives the 0.6.22 file byte for byte. One effect outside the health path: the version string in the User-Agent and run log lines reads 0.6.23.
+- **Tests here:** new suite 48 passed; 37 of 37 deliberate breaks caught; 39 existing hub suites passed; five suites not run (they need local files this container lacks). Six suites' pinned version strings and one check-list assertion were updated.
+- **Finding, older and not caused by this:** the 0.5.3 health suite's own break runner catches 14 of 19 here, and the same five are missed on the unchanged 0.6.22 file. Needs its own look.
+- **Not done:** D1 rows read and CPU on the hub (after a deploy); the fixture test's plan; the runbook revision; the UptimeRobot dashboard read-back after the test monitor's deletion.
+- **Files:** `reviews/2026-11-23-earth-from-space-0.6.23-candidate.md` (copied here); Mac `_review/earth-from-space-0.6.23-candidate/`. **Next:** GPT's candidate review; then Chad's own Approve line for the deploy.
+
 ## 23 Nov 13:48 UTC (clock reading) — **Timeline story: GPT's focused review passes snapshot 2 for a branch preview. Waiting for Chad's own image decision and his branch-build line. Nothing built; no hub step; nothing cleared for upload, merge or release.** (live page unchanged, merge `03aff0a`; hub untouched; Timeline feature thread)
 - **GPT's review (relayed by Chad; filed unchanged):** `reviews/2026-11-23-timeline-story-snapshot2-gpt-review.md`. GPT verified both hashes (snapshot 2 `d532063d…219a`, evidence record 2 `273177fe…891d`), accepted every sentence, closed its snapshot 1 holds, and accepted NASA's annotated Figure 1 as the preview image (kind `measured_image`). No snapshot 3 required.
 - **Corrections GPT made to its own review 1:** "resolution" was its paraphrase, not the Renne abstract's word; the 200 KB figure came from the older proposal. **The governing budget is 300,000 bytes in total across an entry's shipped renditions** (proposal rev 2, section 7); the proposed pair is 225,526 bytes.
