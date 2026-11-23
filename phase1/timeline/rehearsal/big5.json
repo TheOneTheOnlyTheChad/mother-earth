@@ -324,6 +324,10 @@
    "story": {
     "snapshot_sha256": "d532063d5df9f19d8262e34a3d8ef3c38cdfb1b58b24f4d09cd05999d479219a",
     "heading": "Evidence and interpretations",
+    "reviewed": {
+     "date": "2026-11-23",
+     "scope": "This covers the added sentences, their sources and the image record. It is not a review of the entry as a whole; the earlier timing claims keep their own dates."
+    },
     "evidence": [
      {
       "id": "ev-oconnor-intro",

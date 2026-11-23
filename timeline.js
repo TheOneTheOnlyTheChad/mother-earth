@@ -110,6 +110,13 @@ function hydrate(art) {
     img.sizes = img.dataset.sizes || ''; img.srcset = img.dataset.srcset || ''; img.src = img.dataset.src;
     img.removeAttribute('data-src'); img.removeAttribute('data-srcset'); img.removeAttribute('data-sizes');
   });
+  // a sentence's source number opens the sources list and goes to that source: a button, no fragment, no history entry
+  art.querySelectorAll('sup.cite[data-src]').forEach(sup => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cite'; b.dataset.src = sup.dataset.src; b.textContent = sup.textContent;
+    b.setAttribute('aria-label', `Source ${sup.dataset.n} for this sentence`);
+    b.addEventListener('click', () => { const li = $(b.dataset.src), box = li && li.closest('details'); if (!li) return; if (box) box.open = true; li.scrollIntoView({ block: 'nearest' }); li.focus({ preventScroll: true }); });
+    sup.replaceWith(b);
+  });
 }
 function show(id, x, reveal) {   // reveal: an explicit open brings the mark into the window; restoring a history entry never moves its saved window
   const art = entries.get(id); if (!art) return false;
@@ -292,7 +299,9 @@ window.TL_AXIS = axisState;     // read-only test/console aid
 const isNum = v => typeof v === 'number' && isFinite(v);
 // The page says which catalogue schema it was built for (no attribute = schema 2, as released). A catalogue of any other
 // schema is refused, so a schema-3 catalogue never draws on a schema-2 page and the reverse (STORY proposal rev 2.1 §4).
-const pageSchema = wrap && wrap.dataset.catalogueSchema === '3' ? 3 : 2;
+// absent attribute = the released schema 2; "3" = schema 3; any other value is not a schema this script knows, and no catalogue matches it
+const schemaAttr = wrap ? wrap.dataset.catalogueSchema : undefined;
+const pageSchema = schemaAttr === undefined ? 2 : schemaAttr === '3' ? 3 : NaN;
 const STORY_LABELS = { cause_account: 'Attributed account of the cause', disagreement: 'Attributed finding that qualifies or differs' };
 const IMAGE_KINDS = ['photograph', 'measured_image'], IMAGE_BYTES_MAX = 300000;
 const MEDIA = { 'image/jpeg': /\.jpe?g$/i, 'image/png': /\.png$/i, 'image/webp': /\.webp$/i };
@@ -321,6 +330,8 @@ function storyBad(e) {
     if (o.kind === 'evidence' && !o.supports.length) return 'unsupported sentence ' + o.id;
     const el = $(`${e.id}-${o.id}`); if (!el || el.textContent !== o.text) return 'sentence not on the page ' + o.id;
   }
+  const rv = st.reviewed;
+  if (!rv || typeof rv.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(rv.date) || !str(rv.scope) || !$(e.id + '-srev')) return 'story review';
   const im = st.image, fig = $(e.id + '-fig');
   if (im == null) return fig ? 'image on the page, none in the catalogue' : null;
   if (IMAGE_KINDS.indexOf(im.kind) < 0) return 'image kind';

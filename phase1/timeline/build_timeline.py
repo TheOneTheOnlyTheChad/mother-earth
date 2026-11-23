@@ -435,6 +435,8 @@ def check_story(x, day, no):
         if not isinstance(sup, list) or any(k not in known for k in sup): no(f"{i} sentence {o['id']} names support that does not exist")
         if o['kind'] == 'evidence' and not sup: no(f"{i} sentence {o['id']} is an evidence sentence with no support")
     if not isinstance(st.get('heading'), str) or not st['heading'].strip(): no(f'{i} story has no heading for its attributed findings')
+    rv = st.get('reviewed')
+    if not isinstance(rv, dict) or not is_date(rv.get('date')) or rv['date'] > day or not isinstance(rv.get('scope'), str) or not rv['scope'].strip(): no(f'{i} story has no dated, scoped review of its own')
     im = st.get('image')
     if im is None:
         return
@@ -523,7 +525,7 @@ def story_head(ep):
         out.append(f'      <figure class="sfig" id="{i}-fig" data-kind="{e(im["kind"])}">\n'
                    f'        <img class="simg" id="{i}-img" {attrs} data-src="{base}{e(big["file"])}" data-srcset="{srcset}" data-sizes="{sizes}">\n'
                    f'        <noscript><img class="simg" {attrs} src="{base}{e(big["file"])}" srcset="{srcset}" sizes="{sizes}"></noscript>\n'
-                   f'        <p class="imgfail" id="{i}-imgfail" hidden>The image could not be loaded. Its description and the account below do not depend on it.</p>\n'
+                   f'        <p class="imgfail" id="{i}-imgfail" hidden>The image could not be loaded. Its caption and the account remain available.</p>\n'
                    f'        <figcaption id="{i}-cap">{e(im["caption"])} <span class="icred"><a href="{e(im["source_page"])}" target="_blank" rel="noopener">{e(im["credit"])} '
                    f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · <a href="{e(im["licence_url"])}" target="_blank" rel="noopener">{e(im["licence"])} '
                    f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a></span></figcaption>\n'
@@ -535,7 +537,7 @@ def story_head(ep):
                 num_of[k] = len(num_of) + 1
     sents = []
     for o in st['opening']:
-        marks = ''.join(f'<sup class="cite">[{num_of[k]}]</sup>' for k in o['supports'] if k in num_of)
+        marks = ''.join(f'<sup class="cite" data-src="{i}-{e(k)}" data-n="{num_of[k]}">[{num_of[k]}]</sup>' for k in o['supports'] if k in num_of)
         sents.append(f'<span class="ops" id="{i}-{e(o["id"])}" data-kind="{e(o["kind"])}">{e(o["text"])}</span>{marks}')
     out.append(f'      <p class="opening" id="{i}-opening">' + ' '.join(sents) + '</p>')
     items = []
@@ -548,7 +550,7 @@ def story_head(ep):
         else:
             body = (f'{e(v["institution"])}, record {e(v["record"])}: {e(v["title"])}. <a href="{e(v["url"])}" target="_blank" rel="noopener">record '
                     f'<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a> · read {tdate(v["checked"])}.')
-        items.append(f'          <li id="{i}-{e(v["id"])}" value="{num_of[v["id"]]}">{body}</li>')
+        items.append(f'          <li id="{i}-{e(v["id"])}" value="{num_of[v["id"]]}" tabindex="-1">{body}</li>')
     out.append(f'      <details class="opsrc" id="{i}-opsrc">\n        <summary>Sources for these sentences</summary>\n        <ol>\n'
                + '\n'.join(items) + '\n        </ol>\n      </details>')
     return '\n'.join(out)
@@ -600,6 +602,8 @@ def ep_article(ep, changes=()):
                     f'          <p>Shown in revision {e(was)}: <span class="was">{snap_line(c["before"])}</span>.</p>\n'
                     f'        </section>')
     tail.append(f'        {rev_line(i, ep["evidence_reviewed"], ep["revisions"], changes)}')
+    if st and st.get('reviewed'):   # a scoped review of the added account, beside the entry-wide date and never instead of it
+        tail.append(f'        <p class="rev srev" id="{i}-srev">Account and image reviewed: {tdate(st["reviewed"]["date"])}. {e(st["reviewed"]["scope"])}</p>')
     parts.append(f'      <section class="grp" data-grp="review" aria-labelledby="{i}-g-review">\n'
                  f'        <h4 class="gh" id="{i}-g-review">Review and changes</h4>\n' + '\n'.join(tail) + '\n      </section>')
     scope = f'\n      <p class="scope">{e(ep["scope"])}</p>' if ep.get('scope') else ''

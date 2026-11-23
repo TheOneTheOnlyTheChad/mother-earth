@@ -101,6 +101,9 @@ const outside = P.replace(A, '');
 const R2P = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'); const artOf = (pg, id) => { const a = pg.slice(pg.indexOf(`id="${id}" aria-labelledby`) - 40); return a.slice(a.indexOf('<article'), a.indexOf('</article>')); };
 ok('C: the other four entries are pre-rendered byte for byte as on the released page', ['e-big5-end-ordovician', 'e-big5-frasnian-famennian', 'e-big5-end-permian', 'e-big5-end-triassic'].every(i => artOf(P, i) === artOf(R2P, i) && artOf(P, i).length > 500));
 ok('C: no image is referenced outside the entry that has one', !/assets\/timeline/.test(outside));
+ok('C: each opening sentence carries its source numbers, and each number names a source in the list', (A.match(/<sup class="cite" data-src="[^"]+" data-n="\d">\[\d\]<\/sup>/g) || []).length === 11 && [...A.matchAll(/<sup class="cite" data-src="([^"]+)"/g)].every(m => A.includes(`<li id="${m[1]}" value=`)));
+ok('C: the failure line and the scoped review note read as agreed with GPT; the entry-wide review line is still there', A.includes('The image could not be loaded. Its caption and the account remain available.') && A.includes('Account and image reviewed: <time datetime="2026-11-23">23 Nov 2026</time>. This covers the added sentences, their sources and the image record.') && A.includes('Evidence last reviewed: <time datetime="2026-11-10">10 Nov 2026</time>'));
+ok('C: the change record gives the agreed reason', P.includes('Why: the earlier entry presented timing claims without a cause account.'));
 
 // ---------- D. refusals, each by fixture (the generator must stop and say why)
 const refused = (name, mut, word) => { const r = gen(mut); ok('D refused: ' + name, r.code !== 0 && /refused/.test(r.err) && (!word || r.err.includes(word)), r.err.slice(-200)); };
@@ -127,15 +130,15 @@ refused('an image file given as an external address', E => big(E, k => { k.story
 refused('an image that is not in the assets folder', E => fs.renameSync(path.join(E.src, 'assets/PIA03379-fig1-800.jpg'), path.join(E.src, 'assets/moved.jpg')), 'not in the assets folder');
 refused('a reconstruction', E => big(E, k => { k.story.image.kind = 'reconstruction'; }), 'not allowed');
 refused('a reconstruction that is labelled as one', E => big(E, k => { k.story.image.kind = 'reconstruction'; k.story.image.caption = 'Artist\'s reconstruction. ' + k.story.image.caption; k.story.image.label = 'reconstruction'; }), 'not allowed');
-refused('renditions over the byte budget in total', E => { execFileSync('python3', ['-c', `
-from PIL import Image
-import os, sys
-Image.frombytes('RGB',(700,700),os.urandom(700*700*3)).save(sys.argv[1],quality=95)`, path.join(E.src, 'assets/big.jpg')]); const by = fs.readFileSync(path.join(E.src, 'assets/big.jpg'));
-  big(E, k => k.story.image.renditions.push({ file: 'big.jpg', sha256: sha(by), bytes: by.length, pixels: [700, 700], media_type: 'image/jpeg', modification: 'test' })); }, 'over 300000');
+refused('renditions over the byte budget in total', E => {   // a third file: the 1024-px image with padding after its end, so its record is true and only the total is wrong (no image library needed)
+  const by = Buffer.concat([fs.readFileSync(path.join(E.src, 'assets/PIA03379-fig1-1024.jpg')), Buffer.alloc(100000)]); fs.writeFileSync(path.join(E.src, 'assets/big.jpg'), by);
+  big(E, k => k.story.image.renditions.push({ file: 'big.jpg', sha256: sha(by), bytes: by.length, pixels: [1024, 581], media_type: 'image/jpeg', modification: 'test' })); }, 'over 300000');
 refused('story fields in a schema 2 source', E => { const b = E.J('BUILD.json'); b.schema = 2; E.W('BUILD.json', b); const c = E.J('changes.json'); c.changes.pop(); E.W('changes.json', c); }, 'schema 2');
 refused('a change record that retires a line the previous release never showed', E => { const c = E.J('changes.json'); c.changes.at(-1).retired = 'Something else.'; E.W('changes.json', c); }, 'retired');
 refused('a change record that retires a line the entry still shows', E => big(E, k => { k.claims.at(-1).text = 'Causes are not shown in this release.'; }), 'still in the entry');
 refused('an "account added" change for an entry with no account', E => { const c = E.J('changes.json'); c.changes.at(-1).entries = ['e-big5-end-permian']; E.W('changes.json', c); }, 'no account');
+refused('an account with no dated review of its own', E => big(E, k => { delete k.story.reviewed; }), 'scoped review');
+refused('an account review dated after the release day', E => big(E, k => { k.story.reviewed.date = '2026-12-01'; }), 'scoped review');
 refused('a private reference in shipped data', E => big(E, k => { k.story.opening[0].text += ' See TL-IN-0002.'; }), 'private');
 { const r = gen(E => big(E, k => { k.story.opening[0].text = 'A <b>bold</b> & "quoted" <img src=x onerror=alert(1)> sentence.'; k.story.image.caption = '<script>alert(1)</script>' + k.story.image.caption; k.story.image.alt = '"><script>x</script>'; }));
   ok('D: markup in a text field is written as text, never as HTML', r.code === 0 && r.page.includes('A &lt;b&gt;bold&lt;/b&gt; &amp; &quot;quoted&quot; &lt;img src=x onerror=alert(1)&gt; sentence.') && r.page.includes('&lt;script&gt;alert(1)&lt;/script&gt;') && !/<script>alert|<b>bold|<img src=x/.test(r.page) && r.page.includes('alt="&quot;&gt;&lt;script&gt;x&lt;/script&gt;"'), r.err); }

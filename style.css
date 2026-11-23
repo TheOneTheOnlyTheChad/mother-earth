@@ -519,6 +519,10 @@ body.tl .entry .sfig .icred a{padding:6px 2px}
 body.tl .entry .sfig .imgfail{color:var(--fg);font-size:13px;border:1px solid var(--line);padding:10px 12px;margin:0}
 body.tl .entry .opening{font-size:16px;line-height:1.6;max-width:66ch;margin:10px 0 4px}
 body.tl .entry .opening .cite{color:var(--dim);font:10px var(--mono);margin-left:1px}
+body.tl .entry .opening button.cite{background:none;border:0;color:var(--accent);cursor:pointer;padding:6px 3px;margin:-6px 0;vertical-align:super;text-decoration:underline}
+body.tl .entry .opening button.cite:focus-visible,body.tl .entry .opsrc li:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body.tl .entry .opsrc li:focus{outline:1px solid var(--line);outline-offset:2px}
+body.tl .entry .srev{border-top:0;margin-top:4px;padding-top:0}
 body.tl .entry .opsrc{margin:2px 0 0;max-width:72ch}
 body.tl .entry .opsrc summary{color:var(--dim);font-size:12px;cursor:pointer;padding:8px 0}
 body.tl .entry .opsrc ol{color:var(--dim);font-size:12px;padding-left:22px;margin:2px 0 0}

@@ -3,7 +3,7 @@
  * Workspace Chromium (Playwright). The page, script, stylesheet, catalogue and images are the helper's; nothing is mocked
  * except where a check says so (delayed image, mutated catalogue, mixed builds).
  * Run: NODE_PATH=/opt/npm-tools/node_modules node --no-warnings phase1/timeline-story-ui.test.mjs
- * Breaks, each of which must make the suite fail: BREAK=eager-image | no-story-validate | no-schema-pin
+ * Breaks, each of which must make the suite fail: BREAK=eager-image | no-story-validate | no-schema-pin | inert-cites | cite-history
  * Without the NASA files in phase1/timeline/rehearsal/assets/ it runs on FIXTURE images and says so.
  */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { createHash } from 'node:crypto';
@@ -22,11 +22,13 @@ const WANT = [...SRC.story.opening.map(o => o.text)], FINDINGS = SRC.claims.filt
 const must = (t, a, b) => { if (t.split(a).length !== 2) throw new Error('break anchor missing: ' + a.slice(0, 50)); return t.replace(a, b); };
 const brokenJs = js => BREAK === 'eager-image' ? must(js, "document.body.classList.add('js');", "document.body.classList.add('js'); setTimeout(() => entries.forEach(a => hydrate(a)), 0);")
   : BREAK === 'no-story-validate' ? must(js, "function storyBad(e) {", "function storyBad(e) { return null;")
-  : BREAK === 'no-schema-pin' ? must(js, "c.schema !== pageSchema", "false") : js;
+  : BREAK === 'no-schema-pin' ? must(js, "c.schema !== pageSchema", "false")
+  : BREAK === 'inert-cites' ? must(js, "art.querySelectorAll('sup.cite[data-src]').forEach(sup => {", "[].forEach(sup => {")
+  : BREAK === 'cite-history' ? must(js, "if (box) box.open = true;", "if (box) box.open = true; location.hash = b.dataset.src;") : js;
 
 const browser = await chromium.launch();
-async function open(state, { w = 1280, h = 860, dpr = 1, js = true, hash = '', imgDelay = 0, mutate = null, page: pageBody = null, script = null } = {}) {
-  const c = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr, javaScriptEnabled: js });
+async function open(state, { w = 1280, h = 860, dpr = 1, js = true, hash = '', imgDelay = 0, mutate = null, page: pageBody = null, script = null, motion = 'no-preference' } = {}) {
+  const c = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr, javaScriptEnabled: js, reducedMotion: motion });
   const reqs = [], imgs = [], errs = [];
   await c.route(/fonts\.(googleapis|gstatic)/, r => r.abort());
   if (imgDelay) await c.route(/assets\/timeline\//, async r => { await new Promise(z => setTimeout(z, imgDelay)); r.continue(); });
@@ -73,7 +75,17 @@ for (const [w, h, dpr] of [[1280, 860, 1], [390, 844, 3], [360, 740, 2], [800, 9
   ok(`${L}: the opening is the snapshot's six sentences, in order, and is visible`, JSON.stringify(s.sents) === JSON.stringify(WANT) && s.opVis, s.sents);
   ok(`${L}: the attributed findings are the snapshot's eight, in order, under "Evidence and interpretations"`, JSON.stringify(s.told) === JSON.stringify(FINDINGS) && s.heads.join('|') === 'How we know|Evidence and interpretations|Context and limits|Chart reference|Review and changes', [s.heads, s.told.length]);
   ok(`${L}: caption and credit are shown; the sources list for the opening is closed until asked for`, s.cap.startsWith(SRC.story.image.caption) && s.cap.includes('Image: NASA/JPL (PIA03379)') && s.srcOpen === false);
-  await T.p.click(`#${KPG}-opsrc summary`); ok(`${L}: the sources list opens on request, with seven numbered sources`, await T.p.evaluate(id => { const d = document.getElementById(id + '-opsrc'); return d.open && d.querySelectorAll('li').length === 7; }, KPG));
+  // a sentence's source number is a button: it opens the list and goes to that source, with no fragment and no history entry
+  const h0 = await T.p.evaluate(() => [history.length, location.hash]); const cites = await T.p.evaluate(id => [...document.querySelectorAll(`#${id}-opening .cite`)].map(b => [b.tagName, b.textContent, b.getAttribute('aria-label'), b.dataset.src]), KPG);
+  ok(`${L}: the eleven source numbers are buttons with a spoken name ("Source 1 for this sentence")`, cites.length === 11 && cites.every(c => c[0] === 'BUTTON' && /^\[\d\]$/.test(c[1]) && c[2] === `Source ${c[1][1]} for this sentence`), cites.slice(0, 2));
+  await T.p.click(`#${KPG}-opening .cite >> nth=10`); await T.p.waitForTimeout(150);
+  let cs = await T.p.evaluate(id => { const d = document.getElementById(id + '-opsrc'), a = document.activeElement, q = a.getBoundingClientRect(), pb = document.getElementById('d-body').getBoundingClientRect(); return { open: d.open, focus: a.id, text: a.textContent.slice(0, 20), inView: q.top >= pb.top - 1 && q.bottom <= pb.bottom + 1, hist: [history.length, location.hash] }; }, KPG);
+  ok(`${L}: clicking the last sentence's number opens the list, focuses source 7 (O'Connor, Fig. 1) and brings it into view`, cs.open && cs.focus === cites[10][3] && cs.focus === KPG + '-ev-oconnor-fig1' && cs.inView, cs);
+  ok(`${L}: that added no history entry and left the entry's shareable fragment alone`, JSON.stringify(cs.hist) === JSON.stringify(h0), [h0, cs.hist]);
+  await T.p.evaluate(id => { document.getElementById(id + '-opsrc').open = false; }, KPG); await T.p.focus(`#${KPG}-opening .cite >> nth=0`); await T.p.keyboard.press('Enter'); await T.p.waitForTimeout(120);
+  cs = await T.p.evaluate(id => ({ open: document.getElementById(id + '-opsrc').open, focus: document.activeElement.id, hist: [history.length, location.hash] }), KPG);
+  ok(`${L}: by keyboard (focus the first number, Enter): the list opens and source 1 has focus, again with no history entry`, cs.open && cs.focus === KPG + '-ev-oconnor-intro' && JSON.stringify(cs.hist) === JSON.stringify(h0), cs);
+  ok(`${L}: the sources list has seven numbered sources`, await T.p.evaluate(id => { const d = document.getElementById(id + '-opsrc'); return d.open && d.querySelectorAll('li').length === 7; }, KPG));
   const n0 = T.imgs.length, v0 = await T.p.evaluate(() => JSON.stringify(window.TL_AXIS.view));
   if (w > 760) { await T.p.focus('.xpl'); for (const k of ['+', '+', 'ArrowLeft', 'ArrowRight', '-']) { await T.p.keyboard.press(k); await T.p.waitForTimeout(80); } }
   else { await T.p.keyboard.press('Escape'); await T.p.waitForTimeout(200); await T.p.focus('.xpl'); for (const k of ['+', '+', 'ArrowLeft', '-']) { await T.p.keyboard.press(k); await T.p.waitForTimeout(80); } await T.p.click(CARD); await T.p.waitForTimeout(300); }
@@ -87,6 +99,17 @@ for (const [w, h, dpr] of [[1280, 860, 1], [390, 844, 3], [360, 740, 2], [800, 9
 }
 { const T = await open('with-image', { hash: '#' + KPG }); await T.p.waitForTimeout(500); const s = await story(T.p);
   ok('A direct link to the entry opens the story, with one image request', s.open && T.imgs.length === 1 && s.hash === '#' + KPG, [s.open, T.imgs]); await T.c.close(); }
+
+// ---------- A2. larger text and reduced motion (WCAG 1.4.4, 1.4.10, 1.4.12; reduced motion). Workspace Chromium only
+{ const T = await open('with-image', { w: 640, h: 430, dpr: 2 }); await T.p.click(CARD); await T.p.waitForTimeout(700); const s = await story(T.p);   // 1280 px at 200 % zoom lays out as 640 CSS px
+  ok('A2 200 % zoom (1280 px window, 640 CSS px): the story opens, the image fits, nothing overflows sideways', s.open && s.img.done && s.img.box[2] <= s.panel && s.sw <= s.iw && s.sents.length === 6, [s.sw, s.iw, s.img.box]); await T.c.close(); }
+{ const T = await open('with-image', { w: 320, h: 640, dpr: 2 }); await T.p.click(CARD); await T.p.waitForTimeout(700); const s = await story(T.p);   // 1280 px at 400 % zoom: the reflow width
+  ok('A2 320 CSS px (reflow at 400 %): the story opens with no sideways overflow', s.open && s.sw <= s.iw && s.img.box[2] <= s.panel, [s.sw, s.iw]); await T.c.close(); }
+for (const w of [1280, 390]) { const T = await open('with-image', { w }); await T.p.addStyleTag({ content: '*{line-height:1.5 !important;letter-spacing:.12em !important;word-spacing:.16em !important} p{margin-bottom:2em !important}' }); await T.p.click(CARD); await T.p.waitForTimeout(700); const s = await story(T.p);
+  const clipped = await T.p.evaluate(id => [...document.getElementById(id).querySelectorAll('p, li, figcaption, h3, h4, h5, summary, button')].filter(e => e.getClientRects().length && (e.scrollWidth > e.clientWidth + 1 || (getComputedStyle(e).overflow !== 'visible' && e.scrollHeight > e.clientHeight + 1))).map(e => e.tagName + '.' + e.className), KPG);
+  ok(`A2 ${w}: with the text-spacing overrides nothing in the story is clipped and nothing overflows sideways`, s.open && s.sw <= s.iw && clipped.length === 0, [s.sw, s.iw, clipped]); await T.c.close(); }
+{ const T = await open('with-image', { w: 390, motion: 'reduce' }); await T.p.click(CARD); await T.p.waitForTimeout(500); const s = await story(T.p);
+  ok('A2 reduced motion: the story opens, the image loads, focus is on the heading, no page error', s.open && s.img.done && s.focus === KPG + '-h' && T.errs.length === 0, T.errs); await T.c.close(); }
 
 // ---------- B. the image fails to load: the caption and the account stand
 for (const w of [1280, 390]) { const T = await open('image-fails', { w }); await T.p.click(CARD); await T.p.waitForTimeout(700); const s = await story(T.p);
@@ -115,6 +138,7 @@ for (const w of [1280, 390]) { const T = await open('no-image', { w }); await T.
 // ---------- F. the page refuses a catalogue that breaks the story rules (pin moved to the changed bytes, so only validation refuses)
 const refuses = async (name, mutate) => { const T = await open('with-image', { mutate }); ok('F refused by the page: ' + name + ` (${T.axis})`, /^off:validation: story /.test(T.axis) && T.errs.length === 0, T.axis); await T.c.close(); };
 { const T = await open('with-image', { mutate: () => {} }); ok('F control: the same route with an unchanged catalogue draws the explorer', T.axis === 'on', T.axis); await T.c.close(); }
+await refuses('an account with no review of its own', k => { delete k.story.reviewed; });
 await refuses('a duplicate id', k => { k.story.opening[1].id = 'ca-1'; });
 await refuses('a dangling support reference', k => { k.story.opening[0].supports = ['ev-nowhere']; });
 await refuses('an evidence sentence with no support', k => { k.story.opening[0].supports = []; });
@@ -130,6 +154,9 @@ await refuses('renditions over the byte budget', k => { k.story.image.renditions
 await refuses('image files that are not the ones on the page', k => { k.story.image.renditions[0].file = 'other.jpg'; });
 await refuses('an image in the page that the catalogue does not have', k => { delete k.story.image; });
 
+// a schema value this script does not know is not treated as schema 2 or 3: the page is refused whatever the catalogue
+for (const v of ['4', '', 'three']) { const pg = (await (await fetch(`${B}/with-image/timeline.html`)).text()).replace('data-catalogue-schema="3"', `data-catalogue-schema="${v}"`); const T = await open('with-image', { page: pg });
+  ok(`G: a page that states schema "${v}" is refused (explorer off, list stays)`, T.axis === 'off:validation: catalogue identity' && T.errs.length === 0, T.axis); await T.c.close(); }
 // ---------- G. mixed builds fail safe
 const show = f => execFileSync('git', ['show', 'origin/main:' + f], { cwd: ROOT, maxBuffer: 1 << 26 }).toString();
 { const R2 = fs.readFileSync(path.join(ROOT, 'phase1/timeline/catalogue/tl-2026-11-R2.json'));
