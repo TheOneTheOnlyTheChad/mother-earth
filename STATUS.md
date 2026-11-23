@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 23 Nov 2026
 
+## 23 Nov 15:20 UTC (clock reading) — **Timeline story: GPT's focused recheck closes the branch-preview review of `timeline-story-rc` (head `c6fa359` when checked; code at `61a9160`). No remaining code hold. Not a release clearance: nothing merged, uploaded, pinned or deployed.** (live page unchanged, merge `03aff0a`; hub untouched; Timeline feature thread)
+- **GPT's recheck (relayed by Chad; filed unchanged):** `reviews/2026-11-23-timeline-story-rc-gpt-recheck.md`. Hashes of the Mac files matched; citation buttons tried by mouse, Enter and Space, also at 390 px, with Back and Forward; unknown-schema refusal accepted by code reading; both wording changes and the scoped review note accepted; GPT's own runs: story-build 93/93, changes-build 45/45. The browser suites and breaks remain Claude's runs only.
+- **Claude's pane check of the fix (14:48 UTC):** eleven source buttons; activation opens the list at the right source; history length and fragment unchanged.
+- **Corrections on the record (branch record rev 4b, 4c):** the "rev 2 seen instead of rev 3" gap was most likely a stale file delivered by the copy to the Mac, not timing; copies are now hashed on the Mac. And only the generator, not the page, refuses a scoped review dated after the release day.
+- **Open, none of it started:** the release route. A release revision id, the asset-version bump, production asset packaging and a served-file comparison, the hub route (H1, H2 or H3, to agree with the Earth from Space thread, whose hub is live and ahead of main), REGISTER, and Chad's own Approve lines. Also undone by anyone: a real phone, Safari, a screen reader, a true 200 % browser zoom.
+
 ## 23 Nov 15:19 UTC (clock reading) — **Earth from Space, new thread: three documents drafted for GPT on Chad's go. Stage D runbook rev 3, proposal rev 2.3 (monitoring only), fixture alert test plan rev 1. Docs only; nothing built, created, deployed or approved** (production: none; Earth from Space thread)
 - **Chad, his own message:** "1." to the choice offered (docs first: revise the runbook and the Stage D basis, and write the alert test plan). A go for branch and docs work. Not an Approve line.
 - **On `earth-from-space-rc` `9f2c7ad`:**
