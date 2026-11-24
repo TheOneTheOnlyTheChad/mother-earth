@@ -324,6 +324,7 @@ const BAD = [
   ['a bracket with its ends reversed', o => { const w = AX(o, 0).when; [w.from_ma, w.to_ma] = [w.to_ma, w.from_ma]; const s = AX(o, 0).source_values; [s.from, s.to] = [s.to, s.from]; }],
   ['a bracket older than the chart', o => { AX(o, 0).when.from_ma = 5000; AX(o, 0).source_values.from = 5000000; }],
   ['stored ages that are not the source values', o => { AX(o, 0).when.from_ma = 0.336; }],
+  ['stored ages that are not the source values, with the words and date line following the stored ages', o => { const a = AX(o, 0); a.when.from_ma = 0.336; a.text = a.text.replace('335,000', '336,000'); a.when_text = a.when_text.replace('335,000', '336,000'); }],
   ['a source unit this build does not know', o => { AX(o, 0).source_units = 'Ma'; AX(o, 0).source_values.unit = 'Ma'; }],
   ['a calibrated date counted from another year', o => { AX(o, 3).when.datum_ce = 2026; }],
   ['a calibration curve this build does not know', o => { AX(o, 3).when.curve = 'IntCal13'; }],
