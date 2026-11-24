@@ -667,7 +667,7 @@ def render(page, cat, sha):
         f'data-catalogue-rev="{e(cat["catalogue_revision"])}" data-build="{v}"' + (f' data-catalogue-schema="{cat["schema"]}"' if cat['schema'] >= 3 else '') + '>',
         '    <h3 id="axis-h">Deep time</h3>',
         f'    <p class="coverage">{e(cat["coverage"])}</p>',
-        f'    <p class="updated" id="tl-updated">Timeline page updated {tdate(rel["release_date"])} · revision {e(rel["revision"])} · <a id="tl-changes-link" href="#changes">What changed</a></p>',
+        f'    <p class="updated" id="tl-updated">Revision {e(rel["revision"])}, released {tdate(rel["release_date"])} · <a id="tl-changes-link" href="#changes">What changed</a></p>',
         '    <div id="axis" class="axis" hidden></div>',
         '    <p id="axis-off" class="axisoff" role="status" hidden>The timeline axis is unavailable right now; every entry, date and source is listed below.</p>',
         '    <noscript><p class="axisoff">The timeline axis needs JavaScript; every entry, date and source is listed below.</p></noscript>',
