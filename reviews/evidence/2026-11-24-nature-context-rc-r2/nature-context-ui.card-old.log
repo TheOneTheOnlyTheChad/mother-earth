@@ -1,0 +1,5 @@
+FAIL  B1 card: page-owned unit, no "published in the last 7 days"
+      got: {"v":"199,622","small":"alert pixels (10 m) · published in the last 7 days","o":"5 of 559 tropical land cells answered, each with its own first-detection date and query time; dataset versions v20261119 (1), v20261122 (1), v20261123 (2); version not resolved for 1 cell; 1 cell carries an unrecognised confidence category, not included"}
+isolation: 106 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui (BREAK=card-old): 77 passed, 1 failed — B1

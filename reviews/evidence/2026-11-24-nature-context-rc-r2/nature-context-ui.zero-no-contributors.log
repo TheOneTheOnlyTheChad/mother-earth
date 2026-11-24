@@ -1,0 +1,11 @@
+FAIL  A6 all incomplete: total null, reason "none of the 1 answered cell has a complete count"
+      got: {"n":0,"hi":0,"cells":1,"counted":0,"versions":{"v20261123":1},"unresolved":0,"unknownCells":0,"missingCells":1,"total":0,"countWhy":"none of the 1 answered cell has a complete count","versionText":"v20261123 (1)","qualifier":"1 cell without a complete count, not included"}
+FAIL  A6 no cells: total null, reason "no cell has answered yet"
+      got: {"n":0,"hi":0,"cells":0,"counted":0,"versions":{},"unresolved":0,"unknownCells":0,"missingCells":0,"total":0,"countWhy":"no cell has answered yet","versionText":"none resolved","qualifier":""}
+FAIL  B15 all incomplete: card shows no number and says count not available (not stale, not an outage)
+      got: {"v":"0","m":"Global Nature Watch · integrated alerts · count not available — none of the 1 answered cell has a complete count · last run 25 min ago","o":"1 of 559 tropical land cells answered, each with its own first-detection date and query time; dataset versions v20261123 (1); 1 cell without a complete count, not included"}
+FAIL  B15 all incomplete: report says count not available, never a 0
+      got: "As of 07:10 UTC: 0 earthquakes M2.5+ observed in the last 24 h (USGS; feed generated –, 0 s old at retrieval; retrieved 60 s ago); fires: unknown — source returned an empty file (0 bytes) — not a validated zero; 0 vessel identities received during a undefined s AIS sample ending 07:09 UTC (aisstream.io, undefined Class A + undefined Class B; about every 30 min while the home Mac is awake and online (launchd; verified by two unattended samples, 1 Nov 2026) — gaps when it sleeps; terrestrial receivers only; positions between samples unknown); 0 forest-disturbance alert pixels summed across 0 cel"
+isolation: 103 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui (BREAK=zero-no-contributors): 74 passed, 4 failed — A6 B15

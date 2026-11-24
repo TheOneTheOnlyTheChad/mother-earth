@@ -1,0 +1,10 @@
+FAIL  A5 collection: one daily snapshot (several same-day queries are one row), no pixel history
+      got: "1 queries of this cell retained, 2026-11-23 to 2026-11-23 (at most one per UTC day: the day's latest answered query; not every query, and no pixel history)"
+FAIL  A5 collection: plural
+      got: "12 queries of this cell retained, 2026-11-02 to 2026-11-23 (at most one per UTC day: the day's latest answered query; not every query, and no pixel history)"
+FAIL  B2 panel: collection line counts daily snapshots
+      got: "12 queries of this cell retained, 2026-11-02 to 2026-11-23 (at most one per UTC day: the day's latest answered query; not every query, and no pixel history)"
+FAIL  B2 panel: no "queries of this cell retained" anywhere
+isolation: 37 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui (BREAK=queries): 54 passed, 4 failed — A5 B2

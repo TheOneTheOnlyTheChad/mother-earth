@@ -1,0 +1,7 @@
+FAIL  B11 Sources Measures: page-owned forest Quantity
+      got: "Forest disturbance10 m alert pixels published in the last 7 days per 4° cell, by GFW confidence (nominal | high | highest) — counts of pixels, never hectares or trends; detection date ≠ clearing date"
+FAIL  B12 nowhere on Sources: "published in the last 7 days" or "published in the 7 days"
+      got: "sqFire detectionsqShipsqForest disturbance10 m alert pixels published in the last 7 days per 4° cell, by GFW"
+isolation: 103 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui (BREAK=hub-quantity): 76 passed, 2 failed — B11 B12

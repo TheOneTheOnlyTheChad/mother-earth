@@ -1,0 +1,224 @@
+diff --git a/app.js b/app.js
+index be86456..492aa61 100644
+--- a/app.js
++++ b/app.js
+@@ -476,11 +476,11 @@ ME.readings = function () {
+     mode: s && /cloud/.test(s.collected_by || '') ? ME.SHIPS_CLOUD_TEXT : SHIPS_MODE.text, coverage: 'terrestrial AIS only — a cell with no vessels is not an empty sea; positions between samples unknown', quantity: s && s.quantity,
+     window: sample ? `${sample.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (sample.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours shown yet — ${ME.kept('ships')}` };
+   const fo = state.forest, ffo = ME.freshness('forest');
+-  const fsum = fo ? Object.values(fo.cells || {}).reduce((a, c) => { a.n += c.count || 0; a.hi += (c.confidence && c.confidence.highest) || 0; a.cells++; return a; }, { n: 0, hi: 0, cells: 0 }) : { n: 0, hi: 0, cells: 0 };
+-  R.forest = { label: LABEL.forest, source: SOURCE.forest, fresh: ffo, value: ffo.grade !== 'unknown' ? fsum.n : null, highest: fsum.hi, cells: fsum.cells, sweep: fo && fo.sweep, unit: 'alert pixels (10 m) · published in the last 7 days',
+-    observed: fo && fo.sweep ? `${fo.sweep.answered} of ${fo.sweep.cells_total} tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset ${fo.source_version || 'latest'}` : '', retrieved: fo && fo.retrieved_at,
+-    coverage: 'alert systems operate between 30°N and 30°S only — cells outside are unknown by definition, not zero; inside, cloud and alert-system coverage vary (partial); counts can fall when low-confidence alerts are retracted', quantity: fo && fo.quantity,
+-    window: 'alerts whose detection date falls in the 7 days before each cell\'s query; detection date ≠ clearing date', cadence: '6 cells every 30 min (one GFW query each, sequential); full sweep ≈ 2 days', comparison: `none of ours shown yet — ${ME.kept('forest')}`,
++  const fsum = ME.forestSummary(fo && fo.cells);   // nature-context-rc: a sum across cells with their own windows, versions and query times
++  R.forest = { label: LABEL.forest, source: SOURCE.forest, fresh: ffo, value: ffo.grade !== 'unknown' ? fsum.n : null, highest: fsum.hi, cells: fsum.cells, counted: fsum.counted, versionText: fsum.versionText, qualifier: fsum.qualifier, sweep: fo && fo.sweep, unit: 'alert pixels (10 m) · first detected in each cell\'s own window',
++    observed: fo && fo.sweep ? `${fo.sweep.answered} of ${fo.sweep.cells_total} tropical land cells answered, each with its own first-detection date and query time; dataset versions ${fsum.versionText}${fsum.qualifier ? '; ' + fsum.qualifier : ''}` : '', retrieved: fo && fo.retrieved_at,
++    coverage: 'alert systems operate between 30°N and 30°S only — cells outside are unknown by definition, not zero; inside, cloud and alert-system coverage vary (partial); counts can fall when low-confidence alerts are retracted', quantity: fo ? ME.FOREST_QUANTITY : null,   // page-owned (N3): the hub's string still says "published"; it is not printed for forest
++    window: ME.FOREST_WINDOW, cadence: ME.FOREST_CADENCE, comparison: `none of ours shown yet — ${ME.kept('forest')}`,
+     caveat: 'GFW: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment' };
+   const k = state.swpc, fk = ME.freshness('swpc');
+   R.swpc = { label: LABEL.swpc, source: SOURCE.swpc, fresh: fk, value: k && k.index && fk.grade !== 'unknown' ? k.index.value : null, unit: 'planetary Kp (0–9)',
+@@ -512,7 +512,7 @@ ME.report = function (R) {
+   parts.push(R.usgs.value !== null ? `${R.usgs.value.toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS; ${R.usgs.observed}; retrieved ${ago(R.usgs.retrieved)})` : `earthquakes: unknown — ${R.usgs.fresh.why}`);
+   parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections so far today, UTC (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'marked degraded by our collector; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
+   parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)${R.ships.fresh.attempt ? ' — ' + R.ships.fresh.attempt.replace(/\.$/, '').replace(/^Latest/, 'latest') : ''}` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
+-  parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels published in the last 7 days across ${R.forest.cells} queried cells (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; sweep ${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells; 10 m pixels, not hectares; detection date ≠ clearing date; not for area or trend)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
++  parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels summed across ${R.forest.counted} cells, each counted from its own first-detection date at its own query time (dataset versions ${R.forest.versionText}${R.forest.qualifier ? '; ' + R.forest.qualifier : ''}); not one common period and not a trend (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; ${R.forest.sweep ? `${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells answered; ` : ''}10 m pixels, not hectares; first detection is not the date of clearing)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
+   parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value}, ${ME.kpWhen(R.swpc.observedAt)} (NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; marked degraded by our collector' : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
+   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa${R.co2.date ? ` on ${R.co2.date}` : ' (date not supplied)'} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
+   parts.push(R.seaice.north !== null ? `${R.seaice.datesDiffer ? `sea ice: Arctic ${num(R.seaice.north)} M km² ${R.seaice.date ? 'on ' + R.seaice.date : '(date not supplied)'}, Antarctic ${num(R.seaice.south)} M km² ${R.seaice.dateS ? 'on ' + R.seaice.dateS : '(date not supplied)'}` : R.seaice.date ? `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km²` : `sea ice (dates not supplied): Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km²`} (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
+@@ -819,6 +819,85 @@ ME.menu = function () {
+ };
+ // ---------- Place view (§ proposal rev 2): everything the hub holds for one 4° cell. Pure: the hub's /place envelope → inspector rows.
+ // Each layer keeps its own date, evidence label, coverage statement and limits; nothing links layers; nothing absent becomes zero.
++// ---------- Forest wording (nature-context-rc, proposal rev 2 + GPT's rev 2 review, 24 Nov 2026). Pure helpers, one set for the place
++// panel, the cell inspector, the card, the report and Sources. What the hub's query counts: pixels FIRST DETECTED on or after the
++// cell's own `since` (GNW keeps each pixel's earliest detection date), as held in the dataset version that answered. The query has
++// no upper date bound and the version id is provenance, not a date: no end date is printed and none is derived from "vYYYYMMDD".
++// Three ages are never merged: the cell's own query age, the layer run's age (ME.freshness / stale_after_s), the dataset version.
++ME.FOREST_KNOWN = ['nominal', 'high', 'highest'];
++ME.FOREST_AGE_LIMIT_S = 4 * 86400;   // provisional display threshold (Chad, 24 Nov 2026): strictly MORE than four days is "older"
++ME.FOREST_SKEW_S = 300;              // the project's future-skew tolerance (Kp rule): ahead by up to 5 min is "ahead", never fresh
++ME.FOREST_QUANTITY = '10 m alert pixels first detected on or after each cell\'s own date, as held in the dataset version named for that cell, grouped by GNW confidence (nominal · high · highest); pixels, never hectares or a trend; first detection is not the date of clearing.';
++ME.FOREST_WINDOW = 'each cell from its own first-detection date (the collector normally asks from 7 days before the query\'s scheduled time; a retried cell keeps its first date); no common period across cells';
++ME.FOREST_CADENCE = '6 cells per run, two runs an hour; about two days for all 559 cells when every query answers; retries lengthen it';
++ME.forestSince = c => { const v = c && c.since; if (v === undefined || v === null || v === '') return { ok: false, text: 'first-detection start date not recorded' };
++  const d = ME.validDate(v); return d ? { ok: true, date: d, text: `first detected on or after ${d}` } : { ok: false, text: 'first-detection start date unreadable' }; };
++ME.forestVersion = c => { const v = c && c.version; return typeof v === 'string' && /^v\d{8}$/.test(v) ? { ok: true, id: v, text: `as held in version ${v}` } : { ok: false, text: 'dataset version not resolved' }; };
++// The cell's own query time. Missing ≠ unreadable ≠ impossible calendar day ≠ ahead of the page clock; none of them is ever fresh.
++ME.forestAge = (iso, nowMs = Date.now()) => {
++  if (iso === undefined || iso === null || iso === '') return { state: 'missing', text: 'query time not recorded' };
++  const m = typeof iso === 'string' ? ME.RUN_TIME.exec(iso) : null;
++  if (!m) return { state: 'malformed', text: 'query time unreadable' };
++  if (!ME.validDate(m[1]) || !Number.isFinite(Date.parse(iso))) return { state: 'impossible', text: 'query time is not a real calendar day' };
++  const s = (nowMs - Date.parse(iso)) / 1000, at = when(iso);
++  if (s < -ME.FOREST_SKEW_S) return { state: 'future', text: `query time unknown: ${at} is more than 5 minutes ahead of this page's clock` };
++  if (s < 0) return { state: 'ahead', at, text: `queried ${at} (ahead of this page's clock by ${Math.ceil(-s)} s, within the 5-minute tolerance; no age is claimed)` };
++  const age = s < 5400 ? Math.round(s / 60) + ' min' : s < 172800 ? (s / 3600).toFixed(1) + ' h' : (s / 86400).toFixed(1) + ' days';
++  const old = s > ME.FOREST_AGE_LIMIT_S;
++  return { state: old ? 'old' : 'ok', ageS: s, old, at, text: `queried ${at} (${age} ago)${old ? ` · <b>older than 4 days</b>: this cell was last queried ${at}` : ''}` };
++};
++// Confidence groups as delivered. A known group the source did not supply is "not provided", never 0. Any other key is listed
++// as unrecognised (escaped) and kept OUT of the total, which then says it covers the three known groups only.
++ME.forestConf = conf => {
++  const c = conf && typeof conf === 'object' ? conf : {}, known = {}, unknown = [];
++  for (const k of ME.FOREST_KNOWN) known[k] = has(c[k]) ? +c[k] : null;
++  for (const k of Object.keys(c)) if (!ME.FOREST_KNOWN.includes(k)) unknown.push([k, has(c[k]) ? +c[k] : null]);
++  const missing = ME.FOREST_KNOWN.filter(k => known[k] === null);
++  const total = missing.length ? null : ME.FOREST_KNOWN.reduce((a, k) => a + known[k], 0);
++  const groups = ME.FOREST_KNOWN.map(k => `${k} ${fmt(known[k], { zeroNote: null })}`).join(' · ');
++  const extra = unknown.map(([k, v]) => `unrecognised category '${esc(k)}': ${fmt(v, { zeroNote: null })}`).join(' · ');
++  return { known, unknown, missing, total, groups, extra };
++};
++// One answered forest cell → the place row's text (HTML; every source value escaped). nowMs is the page clock.
++ME.forestCellLine = (c, nowMs = Date.now()) => {
++  const cf = ME.forestConf(c && c.confidence), si = ME.forestSince(c), ve = ME.forestVersion(c), ag = ME.forestAge(c && c.queried_at, nowMs);
++  const n = cf.total !== null ? cf.total : has(c && c.count) && !cf.missing.length ? +c.count : null;
++  const head = n === null ? `count not available (${esc(cf.missing.join(', '))} not provided)` : `${fmt(n)} alert pixels (10 m)`;
++  const qual = cf.unknown.length && n !== null ? ` across the three known categories; ${cf.unknown.length === 1 ? 'the unrecognised category is' : 'the unrecognised categories are'} listed separately and not included` : '';
++  const zero = n === 0 && !cf.unknown.some(([, v]) => v) ? ' — no matching alert pixel was returned within the contributing systems\' monitored tree-cover and forest masks for this filter. Not proof that nothing was disturbed, and not complete monitoring of the cell' : '';
++  const grade = (c && c.coverage && c.coverage.grade) || 'partial';
++  return `${head}${qual}, ${esc(si.text)}, ${esc(ve.text)}, ${ag.text}${zero} · ${cf.groups}${cf.extra ? ' · ' + cf.extra : ''} · coverage ${esc(grade)}` +
++    ` <span class="q">· pixels, not hectares or a trend; first detection is not the date of clearing; confidence can rise, or an alert can be removed, after this query; when confidence changed is not supplied by the source</span>`;
++};
++// The whole layer: a sum across cells, each with its own start, version and query time. Never one common interval.
++ME.forestSummary = cells => {
++  const out = { n: 0, hi: 0, cells: 0, counted: 0, versions: {}, unresolved: 0, unknownCells: 0, missingCells: 0 };
++  for (const c of Object.values(cells || {})) {
++    out.cells++; const cf = ME.forestConf(c && c.confidence), ve = ME.forestVersion(c);
++    if (ve.ok) out.versions[ve.id] = (out.versions[ve.id] || 0) + 1; else out.unresolved++;
++    if (cf.unknown.some(([, v]) => v)) out.unknownCells++;
++    const n = cf.total !== null ? cf.total : null;
++    if (n === null) { out.missingCells++; continue; }
++    out.n += n; out.hi += cf.known.highest; out.counted++;
++  }
++  const vs = Object.keys(out.versions).sort();
++  out.versionText = (vs.length ? vs.map(v => `${v} (${out.versions[v]})`).join(', ') : 'none resolved') + (out.unresolved ? `; version not resolved for ${out.unresolved} cell${out.unresolved === 1 ? '' : 's'}` : '');
++  out.qualifier = [out.unknownCells ? `${out.unknownCells} cell${out.unknownCells === 1 ? ' carries' : 's carry'} an unrecognised confidence category, not included` : '',
++    out.missingCells ? `${out.missingCells} cell${out.missingCells === 1 ? '' : 's'} without a complete count, not included` : ''].filter(Boolean).join('; ');
++  return out;
++};
++// The place panel's forest section, every state. `stale` is the envelope's own stale test (layer run age), passed in by placeRows.
++ME.forestPlace = (s, nowMs = Date.now(), stale = false) => {
++  const st = s || { state: 'unavailable' };
++  const run = st.source_status === 'down' ? ` <span class="q">· <b>the latest forest run${st.retrieved_at ? ` (${esc(when(st.retrieved_at))})` : ''} did not succeed</b>${st.state === 'ok' ? '; this cell\'s value is from its own query' : ''}</span>`
++    : stale ? ` <span class="q">· the layer's last recorded run was ${esc(when(st.retrieved_at))}, older than its refresh limit${st.state === 'ok' ? '; this cell is judged by its own query time' : ''}</span>`
++    : st.retrieved_at ? ` <span class="q">· layer run ${esc(when(st.retrieved_at))}</span>` : '';
++  if (st.state === 'ok' && st.cell) return ME.forestCellLine(st.cell, nowMs) + run;
++  if (st.state === 'not_covered') return 'not covered — the alert systems run between 30°N and 30°S; within that band, latitude alone does not make a cell monitored forest' + run;
++  if (st.state === 'pending') return 'unknown — in the sweep, not answered yet (no count, no query time)' + run;
++  if (st.state === 'down') return `unknown — ${esc(st.note || 'the collector reported down')}` + run;
++  return `unknown — ${esc(st.note || st.why || 'no forest answer for this cell')}` + run;
++};
+ ME.PLACE_ORDER = ['usgs', 'firms', 'ships', 'forest', 'drifters', 'plastic'];
+ ME.PLACE_OPTIONAL = ['drifters', 'plastic'];
+ ME.PLACE_NONE = {
+@@ -847,6 +926,9 @@ ME.placeRows = function (P, nowMs = Date.now()) {
+     if (s.state === 'off_not_requested') { rows.push([name, `layer off · <button type="button" class="placeload" data-place-layer="${l}">Load this layer's data for this place</button> <span class="q">fetches data for this panel only; the layer stays off on the globe</span>`]); continue; }
+     const stale = s.retrieved_at && s.stale_after_s && (nowMs - Date.parse(s.retrieved_at)) / 1000 > s.stale_after_s;
+     const meta = s.retrieved_at ? ` <span class="q">· retrieved ${esc(when(s.retrieved_at))}${stale ? ' · <b>stale</b>: older than its refresh limit' : ''}</span>` : '';
++    // Forest (nature-context-rc): its own rows. The layer run and the cell are judged separately: an explicit `down` says the latest
++    // run did not succeed; an old envelope with status ok only says the last recorded run is old. Neither changes the cell's value or time.
++    if (l === 'forest') { rows.push([name + ' · containing 4° cell', ME.forestPlace(s, nowMs, stale)]); continue; }
+     // Fires (fire-status-rc, A2): a down run is unknown here as it is on the card, whatever `state` the hub sent. Hub 0.6.14 tests
+     // `!cells.cells` and a down run publishes `cells: {}`, so its own down branch is skipped and the section arrives as
+     // "withheld — records and counts are not from the same collector run". The section's own source_status and note decide.
+@@ -856,8 +938,6 @@ ME.placeRows = function (P, nowMs = Date.now()) {
+     if (s.state === 'not_covered') { rows.push([name, `not covered — ${esc(s.why)}${meta}`]); continue; }
+     if (s.state === 'pending') { rows.push([name, `unknown — ${esc(s.why)}${meta}`]); continue; }
+     if (s.state === 'no_records') { rows.push([name, `${esc(ME.PLACE_NONE[l] || 'no records reached us for this cell')}${meta}`]); continue; }
+-    if (l === 'forest') { const cf = (s.cell && s.cell.confidence) || {};
+-      rows.push([name, `${fmt(s.cell.count)} alert pixels (10 m) published in the 7 days from ${esc(s.cell.since || MISSING)} · nominal ${fmt(cf.nominal, { zeroNote: null })} · high ${fmt(cf.high, { zeroNote: null })} · highest ${fmt(cf.highest, { zeroNote: null })} · queried ${esc(when(s.cell.queried_at))} <span class="q">· pixels, not hectares or trends</span>${meta}`]); continue; }
+     const objs = rowsToObjects({ record_fields: s.record_fields, records: s.records });
+     const cov = (s.cell && s.cell.coverage) || s.coverage_default;
+     const head = `${s.records_total} ${l === 'plastic' ? 'dated sample' + (s.records_total === 1 ? '' : 's') + ' (2011–2024 programme; not current water)' : l === 'drifters' ? 'buoy' + (s.records_total === 1 ? '' : 's') + ' with a latest fix here (each at its own time)' : l === 'ships' ? 'vessel' + (s.records_total === 1 ? '' : 's') + ' heard in the latest sample' : l === 'firms' ? 'detection' + (s.records_total === 1 ? '' : 's') + ' so far today (UTC)' : 'event' + (s.records_total === 1 ? '' : 's') + ' in the feed window'}`;
+@@ -877,7 +957,7 @@ ME.placeRows = function (P, nowMs = Date.now()) {
+     if (!a.last_7d.hours_aggregated) { rows.push(['Collection · ' + LABEL[l], `unknown — no aggregated hour of ours is on record for the last 7 days${a.retention_start ? ` (record retained since ${esc(a.retention_start)})` : ''}. <span class="q">Neither collection nor its absence is the source's geographic coverage.</span>`]); continue; }
+     const part = (o, h) => o.hours_aggregated ? `${o.hours_with_a_usable_sample} of ${o.hours_aggregated} aggregated hour${o.hours_aggregated === 1 ? '' : 's'}` + (o.hours_aggregated < h ? ` (of ${h} h in the period)` : '') : `unknown (no aggregated hour of the ${h} h is on record)`;
+     rows.push(['Collection · ' + LABEL[l], `our collector produced a usable sample in ${part(a.last_24h, 24)} over the last 24 h and ${part(a.last_7d, 168)} over the last 7 days (all places at once); records for this cell reached us in ${b.last_24h_hours} h of the last 24 h and ${b.last_7d_hours} h of the last 7 days. Retained since ${esc(b.retention_start || a.retention_start || MISSING)}; first retained report here: ${esc(b.first_report_retained || 'none retained')}. <span class="q">Neither is the source's geographic coverage.</span>`]); }
+-  if (C && C.forest) rows.push(['Collection · ' + LABEL.forest, C.forest.queries_retained ? `${C.forest.queries_retained} queries of this cell retained (${esc(C.forest.first_query)} to ${esc(C.forest.last_query)})` : 'no query of this cell retained']);
++  if (C && C.forest) rows.push(['Collection · ' + LABEL.forest, C.forest.queries_retained ? `${fmt(C.forest.queries_retained, { zeroNote: null })} daily snapshot${+C.forest.queries_retained === 1 ? '' : 's'} of this cell retained, ${esc(C.forest.first_query || MISSING)} to ${esc(C.forest.last_query || MISSING)} <span class="q">(at most one per UTC day: the day's latest answered query; not every query, and no pixel history)</span>` : 'no daily snapshot of this cell retained']);
+   if (!C && P.collection_note) rows.push(['Collection', `unknown — ${esc(P.collection_note)}`]);
+   rows.push(['Not place-based', 'Kp index, CO₂, sea ice, orbital objects and day/night have no value for a single cell — details below']);
+   rows.push(['Why not per place', Object.entries(P.not_place_based || {}).map(([k, v]) => `${esc(LABEL[k] || (k === 'orbital' ? 'Orbital objects' : k === 'daynight' ? 'Day/night' : k))}: ${esc(v)}`).join('<br>'), 'more']);
+diff --git a/index.html b/index.html
+index d7b0f82..2e06bbb 100644
+--- a/index.html
++++ b/index.html
+@@ -138,7 +138,7 @@
+           <div class="head"><span class="pip"></span><span class="name">Forest disturbance</span><span class="state" id="s-forest">loading</span></div>
+           <button class="ovl-tgl tgl" type="button" id="tgl-forest" data-layer="forest" role="switch" aria-checked="false" aria-describedby="ev-forest"><span class="box" aria-hidden="true"></span><span class="t">Forest disturbance — show on the globe</span></button>
+           <div class="evl" id="ev-forest"><span class="ev obs">Observed</span> satellite-derived alerts — interpreted by the source, not ground-verified</div>
+-          <div class="value"><span id="v-forest">–</span><small>alert pixels (10 m) · published in the last 7 days</small></div>
++          <div class="value"><span id="v-forest">–</span><small>alert pixels (10 m) · first detected in each cell's own window</small></div>
+           <div class="obs" id="o-forest">loading…</div>
+           <div class="src" id="m-forest">Global Nature Watch · integrated alerts (GLAD-L, GLAD-S2, RADD)</div>
+           <details class="cd"><summary>Details</summary><div class="cav">Counts of 10 m pixels, not hectares; detection date ≠ clearing date; tropics only (30°N–30°S); not for area or trend. <a class="more" href="sources.html#forest">details</a></div></details>
+@@ -499,7 +499,7 @@
+   <div id="layers-list"></div>
+   <button type="button" class="lp-off" id="layers-off">Switch everything off</button>
+ </div>
+-<script src="app.js?v=202612181200"></script>
++<script src="app.js?v=202612241000"></script>
+ <script src="arts.js?v=202611291000"></script>
+ <script src="sky.js?v=202611291000"></script>
+ <script src="skyscene.js?v=202612101000"></script>
+@@ -629,7 +629,7 @@ function cellGeom(id) {
+ const STROKE = { adequate: 'rgba(214,221,232,1)', partial: 'rgba(214,221,232,.8)', unknown: 'rgba(255,90,60,.95)' };
+ const FILL = { adequate: 'rgba(214,221,232,.10)', partial: 'rgba(214,221,232,.05)', unknown: 'rgba(255,90,60,.12)' };
+ const forestFill = n => { const t = n <= 0 ? 0 : Math.min(1, Math.log10(n + 1) / 5); return `rgba(111,211,122,${(0.06 + 0.5 * t).toFixed(2)})`; };   // 0 → faint, 10^5 pixels → 0.56; log scale so the Amazon doesn't drown the rest
+-const windowText = (layer, snap) => layer === 'plastic' ? `dated samples ${snap && snap.window_start ? snap.window_start.slice(0, 4) : ''}–${snap && snap.window_end ? snap.window_end.slice(0, 4) : ''}, each on its own sampling date` : layer === 'drifters' ? 'latest fix per buoy reported in the 24 h before this run' : layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : layer === 'forest' ? 'alert pixels published in the 7 days before this cell\'s query' : 'in the last 24 h';
++const windowText = (layer, snap) => layer === 'plastic' ? `dated samples ${snap && snap.window_start ? snap.window_start.slice(0, 4) : ''}–${snap && snap.window_end ? snap.window_end.slice(0, 4) : ''}, each on its own sampling date` : layer === 'drifters' ? 'latest fix per buoy reported in the 24 h before this run' : layer === 'ships' ? `received during a ${(snap && snap.window_s) || 60} s AIS sample ending ${snap && snap.window_end ? hhmm(snap.window_end) : '–'}` : layer === 'firms' ? 'so far today (UTC; resets 00:00 UTC)' : layer === 'forest' ? 'alert pixels (10 m), first detected on or after this cell\'s own date (see Queried)' : 'in the last 24 h';
+ // show only fields the RECORD envelope publishes — record_fields lives on /snapshot/<layer>, never on /cells/<layer> (measured 1 Nov 2026)
+ const hasField = (layer, name) => !!(pmeta[layer] && pmeta[layer].fields && pmeta[layer].fields.includes(name));
+ 
+@@ -940,7 +940,7 @@ function inspectCell(p) {
+     ['Everything here', `<button type="button" class="placelink" data-cell="${esc(p.id)}">Everything we hold for this cell, all layers</button>`],
+     ['Selected', `one ${ME.CELL_DEG}° × ${ME.CELL_DEG}° coverage cell — totals for the cell, not a single record`],
+     ['Cell total', `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
+-    ['Quantity', esc(snap.quantity || '')],
++    ['Quantity', esc(p.layer === 'forest' ? ME.FOREST_QUANTITY : (snap.quantity || ''))],   // forest: page-owned (nature-context-rc, N3); the hub string still says "published"
+     ['Coverage', `${p.grade} — ${esc(p.cell.coverage ? p.cell.coverage.evidence : MISSING)}`],
+     ['Collector', `${fresh.grade} — ${esc(fresh.why)}`],
+     ['Retrieved', ME.stamp(snap.retrieved_at) || '–'],
+@@ -949,12 +949,12 @@ function inspectCell(p) {
+   if (p.layer === 'drifters') rows.push(['Caveat', 'buoys are sparse: a cell with no buoy is not evidence of anything about that water']);
+   if (p.layer === 'plastic') rows.push(['Caveat', 'dated samples at tow-start locations, not current positions; a missing marker does not establish plastic-free water']);
+   if (p.layer === 'firms') rows.push(['Caveat', 'NASA: not for tactical decisions or local-scale conditions; detections per pass, cloud may hide']);
+-  if (p.layer === 'forest') {
+-    const c = p.cell.confidence || {};
++  if (p.layer === 'forest') {   // nature-context-rc: the same helpers as the place panel (app.js ME.forest*); no end date, three ages kept apart
++    const cf = ME.forestConf(p.cell.confidence), si = ME.forestSince(p.cell), ve = ME.forestVersion(p.cell), ag = ME.forestAge(p.cell.queried_at);
+     rows.splice(2, 0,
+-      ['By confidence', `nominal ${fmt(c.nominal, { zeroNote: null })} · high ${fmt(c.high, { zeroNote: null })} · highest ${fmt(c.highest, { zeroNote: null })} (highest = detected by more than one alert system)`],
+-      ['Queried', `${when(p.cell.queried_at)} · alerts dated from ${esc(p.cell.since || MISSING)} · dataset ${esc(p.cell.version || 'latest')}`]);
+-    rows.push(['Caveat', 'Global Nature Watch: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment; 10 m pixels, not hectares; detection date ≠ clearing date; counts can fall when low-confidence alerts are retracted'], ['Citation', esc(snap.citation || '')], ['Records', 'this layer publishes counts per cell only — there are no individual records to open']);
++      ['By confidence', `${cf.groups}${cf.extra ? ' · ' + cf.extra + ' <span class="q">(not included in the total)</span>' : ''} <span class="q">(highest = detected by more than one alert system)</span>`],
++      ['Queried', `${ag.text} · ${esc(si.text)} · ${esc(ve.text)}`]);
++    rows.push(['Caveat', 'Global Nature Watch: alerts detect tree-cover disturbance and do not distinguish human-caused loss from other types; not for area estimates or trend assessment; 10 m pixels, not hectares; first detection is not the date of clearing; confidence can rise, or an alert can be removed, after this query; when confidence changed is not supplied by the source'], ['Citation', esc(snap.citation || '')], ['Records', 'this layer publishes counts per cell only — there are no individual records to open']);
+   }
+   if (p.layer === 'ships') rows.push(
+     // three different durations, kept apart: two measured, one inferred — and none of them is geographic coverage
+diff --git a/sources.html b/sources.html
+index 4fb786f..5b822da 100644
+--- a/sources.html
++++ b/sources.html
+@@ -277,7 +277,7 @@
+ 
+   <p class="back"><a href="index.html">← Back to World View</a></p>
+ </main>
+-<script src="app.js?v=202612181200"></script>
++<script src="app.js?v=202612241000"></script>
+ <script>
+ (() => {
+ const { $, esc, ago, hhmm, state, LABEL, LAYERS, SOURCE, TIER } = ME;
+@@ -309,7 +309,7 @@ function renderAll() {
+   $('limits-body').innerHTML = [
+     `<p><b>Aircraft — counts per area, and rounded positions without identifiers.</b> ${esc((rules.find(x => x.section === 'aircraft') || {}).v || '')}</p>`,
+     `<p><b>Fires.</b> ${esc((rules.find(x => x.section === 'firms' && x.k === 'Source caveat') || {}).v || '')} One detection per satellite pass, not one fire; cloud may hide detections. The count is <b>today (UTC) so far</b>: the FIRMS area API with day_range=1 returns the current UTC date only, so it resets at 00:00 UTC and refills as near-real-time processing lands, about 2–3 h after each pass (confirmed 1 Nov 2026 after a run of empty files between 02:15 and 03:45 UTC). An empty response is shown as unknown, never as zero.</p>`,
+-    `<p><b>Forest disturbance.</b> ${esc((rules.find(x => x.section === 'forest' && x.k === 'Source caveat') || {}).v || '')} Counts are 10 m alert pixels published in the 7 days before each cell's query — never hectares, never a trend. Only cells between 30°N and 30°S with land are queried (559 at 4°, six every 30 minutes, so a full sweep takes about two days and each cell shows its own query time); the rest of the globe is outside the alert systems and is shown as nothing, not as zero. Coverage inside the tropics is graded partial: the three systems (GLAD-L Landsat, GLAD-S2 and RADD Sentinel) have different forest masks and coverage periods, cloud varies, and GLAD-L 30 m pixels are resampled to 10 m so integrated counts exceed native GLAD-L counts. ${esc((rules.find(x => x.section === 'forest' && x.k === 'Attribution') || {}).v || '')}</p>`,
++    `<p><b>Forest disturbance.</b> ${esc((rules.find(x => x.section === 'forest' && x.k === 'Source caveat') || {}).v || '')} Counts are 10 m alert pixels first detected on or after each cell's own start date (the integrated layer keeps each pixel's earliest detection date), as held in that query's dataset version — never hectares, never a trend, and no common period across cells: the collector normally asks from 7 days before a query's scheduled time, and a retried cell keeps its first date. Only cells between 30°N and 30°S with land are queried (559 at 4°, six per run, two runs an hour: about two days for all of them when every query answers, longer when queries are retried; each cell shows its own query time, and one queried more than 4 days ago is marked older); the rest of the globe is outside the alert systems and is shown as nothing, not as zero. Coverage inside the tropics is graded partial: the three systems (GLAD-L Landsat, GLAD-S2 and RADD Sentinel) have different forest masks and coverage periods, cloud varies, and GLAD-L 30 m pixels are resampled to 10 m so integrated counts exceed native GLAD-L counts. ${esc((rules.find(x => x.section === 'forest' && x.k === 'Attribution') || {}).v || '')}</p>`,
+     `<p><b>Ships.</b> ${esc((rules.find(x => x.section === 'ships' && x.k === 'Source terms') || {}).v || '')} Terrestrial receivers only: a cell with no vessels is not an empty sea. Samples, not a continuous feed; current positions are unknown between samples; mode: ${esc(ME.SHIPS_MODE.text)}.</p>`,
+     `<p><b>Sea ice.</b> ${esc((rules.find(x => x.section === 'seaice' && x.k === 'Map layer') || {}).v || '')}</p>`,
+     `<p><b>Kp, CO₂, sea ice</b> are indices, not map layers: one planetary number, one station, two hemispheres. A degraded source state means the latest observation is older than its product's refresh and is shown with its observation time.</p>`,

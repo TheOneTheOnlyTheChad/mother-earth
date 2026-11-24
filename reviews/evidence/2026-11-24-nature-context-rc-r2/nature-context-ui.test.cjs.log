@@ -1,0 +1,3 @@
+isolation: 104 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui: 78 passed, 0 failed

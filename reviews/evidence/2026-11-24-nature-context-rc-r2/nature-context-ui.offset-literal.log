@@ -1,0 +1,9 @@
+FAIL  A7 +02:00 and Z forms of one instant read the same: 06:10 UTC, 60 min ago
+      got: {"z":"queried 2026-11-24 06:10 UTC (60 min ago)","o":"queried 2026-11-24 08:10 UTC (60 min ago)"}
+FAIL  A7 offset form ahead by exactly 300 s: within tolerance
+      got: {"state":"ahead","at":"2026-11-24 09:15 UTC","text":"queried 2026-11-24 09:15 UTC (ahead of this page's clock by 300 s, within the 5-minute tolerance; no age is claimed)"}
+FAIL  A7 offset form ahead by 301 s: query time unknown, shown as 07:15 UTC
+      got: {"state":"future","text":"query time unknown: 2026-11-24 09:15 UTC is more than 5 minutes ahead of this page's clock"}
+isolation: 105 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui (BREAK=offset-literal): 75 passed, 3 failed — A7
