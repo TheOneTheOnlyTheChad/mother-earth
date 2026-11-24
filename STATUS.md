@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 03:23:01 UTC (clock reading) — **Timeline story thread CLOSED: GPT passed the test-only commit `1d0c6dd`; handover written** (docs only)
+- **GPT's review (24 Nov, read by Claude from the Mac file Chad named, filed unchanged):** `reviews/2026-11-24-timeline-changes-ui-1d0c6dd-gpt-review.md`, sha256 `cbe1fbaf29bf102870a23729b4e547ce9c26c787d2d80378e5d84fbb75938143`. PASS; no page or hub rollback recommended. GPT independently ran the changed fixture block and the Worker's catalogue route (pinned 200 / missing object 503 / unpinned 404 with no R2 read) and verified the packet's 21 hashes; **no browser suite ran in its review**, so 173/173, the 14 breaks and the 172/173 control remain Claude's results.
+- **GPT's two follow-ups, recommended and not commissioned:** a permanent break `unpinned-is-pinned`; the previous revision read from `BUILD.json`. Test-only; neither blocks the close-out. Recorded in HANDOVER.
+- **Release identities, final:** page merge `19f4e07`; catalogue `tl-2026-11-R3` `f1a5fab2…0993` (31,636 B); hub 0.6.24 `db4f9cdf…1aa5`.
+- **Still open:** a real phone, Safari, a screen reader, true 200 % browser zoom.
+- **HANDOVER:** this thread's line is now the Timeline "NEXT THREAD STARTS HERE" block. Mac review copy `_review/timeline-changes-ui-1d0c6dd/` moved to `_to_delete/`; Mac and Project copies synced after this commit.
+
 ## 24 Nov 03:18 UTC (clock reading) — **Animals: test-only candidate for the tab suite's three baseline failures, on branch `animals-baseline-repair-rc` (`0b28745`), for GPT. Not merged; nothing deployed; no page, hub or data file changed.** (page: none; Animals thread)
 - **Asked for by Chad and GPT (Chad's own message, 24 Nov).** The three failures on main `3160658` are 13c, 13d and 13e of `phase1/animals-tab-ui.test.cjs`: `timeline.js`, three `body.tl` stylesheet lines and `timeline.html` no longer match the suite's pinned main `0e62083`, because the Timeline releases of 23 and 24 Nov changed them.
 - **The candidate:** the old baseline is not moved and no check is removed. Those three Timeline items are held to the Timeline release merge `19f4e07` by new checks 13f to 13i (one new constant, `TL_MAIN`); every other file stays on `0e62083`. 13i is stricter than 13d was for those lines (order, additions).
