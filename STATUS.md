@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 14:14 UTC (clock reading) — **Animals: journey context proposal (Nature context Workstream C, taken over on Chad's instruction) on branch `animals-journey-context-proposal` (`3c07ecd`), for GPT. Docs only; nothing built, fetched or cleared.** (page: none; Animals thread)
+- **Record:** `docs/concepts/ANIMALS-JOURNEY-CONTEXT-PROPOSAL.md` rev 1, from the hand-off `NATURE-CONTEXT-JOURNEY-HANDOFF.md` (main `a501352`) and the spec's §7.
+- **Proposal in brief:** a dated block "The land around it, at the time" on the zebra card (2007–08) and the East Walker corridor card (2017–24) only. Fire detections from the FIRMS standard-processing archive and Hansen tree cover loss for the same period, counted in the 4° cells the track touches. No route intersection, buffer or inference. It is a fixed pinned file built once, with no hub route or schedule. The three sea journeys get one sentence: no land context, recorded at sea. Integrated alerts and our own `forest_daily` do not reach those periods and are not used; soil carbon stays with Workstream B.
+- **Decisions put to Chad:** J-D1 to J-D6 (archive exception, which journeys, products, spatial unit, present-day line, fire sensor), with Claude's recommendations.
+- **For GPT:** Mac `_review/animals-journey-context-proposal/read/` (the proposal, the hand-off and the spec as text; hashes equal to the branch).
+- **Also on record:** the `NC_MAIN` pin landed with the Nature context release (`4ed4ca6` is in main). `animals-assessment-rc` `ab1a223` parked, R1 open.
+
 ## 24 Nov 14:05 UTC (clock reading) — **Nature context: close-out items 1–5 done after the release; thread stays open for Chad's choice of the next part of the spec** (page: none; Nature context thread)
 - **Mac `_review/`:** this thread's four copies (`nature-context-rc-879cea8`, `-rc-90eb522`, `nature-context-release-f75c167`, `-release-782da28`) moved to `_to_delete/`. Left in `_review/` because they belong to other threads: `animals-nc-pin-rc` (Animals owner; its branch is merged and deleted), Cape Town, Earth from Space and widths copies.
 - **Branches:** the three release branches deleted (previous entry). Remaining on GitHub, each another thread's: `animals-assessment-rc`, `cape-town-public-proposal`, `cape-town-station-rc`, `earth-from-space-fixtures-rc`, `earth-from-space-rc`, `earth-from-space-stage-d-docs-r2`, `timeline-finds-rc`, `widths-preview-rc`.
