@@ -1,0 +1,48 @@
+=== BREAK=earth-script-edited
+FAIL  13c Earth now's scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs; timeline.js: 13g)
+      got: ["app.js"]
+BREAK CAUGHT  earth-script-edited (at "13c"; 1 checks failed)
+exit=0
+=== BREAK=shared-rule-dropped
+FAIL  13d the shared stylesheet is NOT identical to main: every main line is kept except the header rules changed for five tabs (at most 4 lines, listed on failure); the Animals rules are added (the Timeline's body.tl lines: 13i)
+      got: [".top{height:var(--header);display:flex;align-items:center;gap:16px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--panel)}","@media (min-width:721px) and (max-width:1139px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside four tabs: hide it rather than shrink or cut it */","@media (max-width:420px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* four tabs on a narrow phone */","@media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}   /* narrow one-row header: the clock keeps its UTC label */"]
+BREAK CAUGHT  shared-rule-dropped (at "13d"; 1 checks failed)
+exit=0
+=== BREAK=moon-page-edited
+FAIL  13e moon.html equals main's except the Animals links and the stylesheet version
+BREAK CAUGHT  moon-page-edited (at "13e moon.html"; 1 checks failed)
+exit=0
+=== BREAK=tl-script-edited
+FAIL  13g timeline.js is byte-identical to main's at the Timeline baseline
+BREAK CAUGHT  tl-script-edited (at "13g"; 1 checks failed)
+exit=0
+=== BREAK=tl-page-edited
+FAIL  13h timeline.html is byte-identical to main's at the Timeline baseline; it carries the Animals tab link and menu link once each; and its header equals main 0e62083's except those two links
+      got: {"whole":false,"links":true,"header":true}
+BREAK CAUGHT  tl-page-edited (at "13h"; 1 checks failed)
+exit=0
+=== BREAK=tl-page-animals-tab-gone
+FAIL  13h timeline.html is byte-identical to main's at the Timeline baseline; it carries the Animals tab link and menu link once each; and its header equals main 0e62083's except those two links
+      got: {"whole":false,"links":false,"header":true}
+BREAK CAUGHT  tl-page-animals-tab-gone (at "13h"; 1 checks failed)
+exit=0
+=== BREAK=tl-page-header-edited
+FAIL  13h timeline.html is byte-identical to main's at the Timeline baseline; it carries the Animals tab link and menu link once each; and its header equals main 0e62083's except those two links
+      got: {"whole":false,"links":false,"header":false}
+BREAK CAUGHT  tl-page-header-edited (at "13h"; 1 checks failed)
+exit=0
+=== BREAK=tl-rule-dropped
+FAIL  13i the stylesheet's body.tl lines are exactly main's at the Timeline baseline, in order (first difference listed on failure)
+      got: {"baseline":235,"here":234,"at":1,"baselineLine":"body.tl .tlmain{max-width:1400px;margin:0 auto;padding:16px}","hereLine":"body.tl .tlmain h2{font:700 26px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;margin:4px 0 6px}"}
+BREAK CAUGHT  tl-rule-dropped (at "13i"; 1 checks failed)
+exit=0
+=== BREAK=tl-rule-edited
+FAIL  13i the stylesheet's body.tl lines are exactly main's at the Timeline baseline, in order (first difference listed on failure)
+      got: {"baseline":235,"here":235,"at":1,"baselineLine":"body.tl .tlmain{max-width:1400px;margin:0 auto;padding:16px}","hereLine":"body.tl .tlmain{max-width:1401px;margin:0 auto;padding:16px}"}
+BREAK CAUGHT  tl-rule-edited (at "13i"; 1 checks failed)
+exit=0
+=== BREAK=tl-rule-added
+FAIL  13i the stylesheet's body.tl lines are exactly main's at the Timeline baseline, in order (first difference listed on failure)
+      got: {"baseline":235,"here":236,"at":2,"baselineLine":"body.tl .tlmain h2{font:700 26px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;margin:4px 0 6px}","hereLine":"body.tl .tlmain{color:red}"}
+BREAK CAUGHT  tl-rule-added (at "13i"; 1 checks failed)
+exit=0

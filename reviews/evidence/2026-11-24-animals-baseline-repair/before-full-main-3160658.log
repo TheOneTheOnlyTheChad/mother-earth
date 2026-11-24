@@ -1,0 +1,8 @@
+FAIL  13c Earth now's scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs)
+      got: ["timeline.js"]
+FAIL  13d the shared stylesheet is NOT identical to main: every main line is kept except the header rules changed for five tabs (at most 4 lines, listed on failure); the Animals rules are added
+      got: ["@media (min-width:721px) and (max-width:1139px){.top .promise{display:none}}   /* too tight for the promise's two full lines beside four tabs: hide it rather than shrink or cut it */","@media (max-width:420px){.tabs a{padding:0 4px;letter-spacing:.03em;font-size:13px}}   /* four tabs on a narrow phone */","@media (min-width:721px) and (max-width:900px){.top{padding:0 10px}.top .clock{font-size:17px}.menu>button{padding:0 10px}}   /* narrow one-row header: the clock keeps its UTC label */","body.tl .tlmain{max-width:1100px;margin:0 auto;padding:16px}","body.tl .detail.tlpanel{top:var(--header);right:0;bottom:0;width:440px}","body.tl.dopen .tlmain{margin-right:440px}"]
+FAIL  13e timeline.html equals main's except the Animals links and the stylesheet version
+
+animals-tab-ui: 274 passed, 3 failed
+exit=1
