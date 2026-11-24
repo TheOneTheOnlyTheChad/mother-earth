@@ -1,0 +1,442 @@
+[
+ {
+  "viewport": 1280,
+  "window_ma": [
+   538.8,
+   0
+  ],
+  "coarse": true,
+  "W": 1246,
+  "view": [
+   538.8,
+   0
+  ],
+  "rows": [],
+  "ticks": "0 Ma 50 100 150 200 250 300 350 400 450 500",
+  "rowH": [],
+  "laneH": 65,
+  "lrH": 134
+ },
+ {
+  "viewport": 1280,
+  "window_ma": [
+   2,
+   0
+  ],
+  "coarse": false,
+  "W": 1246,
+  "view": [
+   2,
+   0
+  ],
+  "rows": [
+   {
+    "id": "f-dinaledi-chamber",
+    "true_": true,
+    "glyph": 61.7,
+    "hitW": 61.7,
+    "hitH": 32
+   },
+   {
+    "id": "f-omo-1",
+    "true_": true,
+    "glyph": 27.4,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-xiahe-2",
+    "true_": true,
+    "glyph": 10,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-la-ferrassie-bone",
+    "true_": false,
+    "glyph": 14.1,
+    "hitW": 44,
+    "hitH": 32
+   }
+  ],
+  "ticks": "0.0 Ma 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0",
+  "rowH": [
+   53,
+   53,
+   53,
+   53
+  ],
+  "laneH": 212,
+  "lrH": 281
+ },
+ {
+  "viewport": 1280,
+  "window_ma": [
+   1,
+   0
+  ],
+  "coarse": false,
+  "W": 1246,
+  "view": [
+   1,
+   0
+  ],
+  "rows": [
+   {
+    "id": "f-dinaledi-chamber",
+    "true_": true,
+    "glyph": 123.3,
+    "hitW": 123.3,
+    "hitH": 32
+   },
+   {
+    "id": "f-omo-1",
+    "true_": true,
+    "glyph": 54.8,
+    "hitW": 54.8,
+    "hitH": 32
+   },
+   {
+    "id": "f-xiahe-2",
+    "true_": true,
+    "glyph": 19.9,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-la-ferrassie-bone",
+    "true_": false,
+    "glyph": 14.1,
+    "hitW": 44,
+    "hitH": 32
+   }
+  ],
+  "ticks": "0 100 200 300 400 500 600 700 800 900 1,000",
+  "rowH": [
+   53,
+   53,
+   53,
+   53
+  ],
+  "laneH": 212,
+  "lrH": 281
+ },
+ {
+  "viewport": 1280,
+  "window_ma": [
+   0.4,
+   0
+  ],
+  "coarse": false,
+  "W": 1246,
+  "view": [
+   0.4,
+   0
+  ],
+  "rows": [
+   {
+    "id": "f-dinaledi-chamber",
+    "true_": true,
+    "glyph": 308.4,
+    "hitW": 308.4,
+    "hitH": 32
+   },
+   {
+    "id": "f-omo-1",
+    "true_": true,
+    "glyph": 137,
+    "hitW": 137,
+    "hitH": 32
+   },
+   {
+    "id": "f-xiahe-2",
+    "true_": true,
+    "glyph": 49.8,
+    "hitW": 49.8,
+    "hitH": 32
+   },
+   {
+    "id": "f-la-ferrassie-bone",
+    "true_": false,
+    "glyph": 14.1,
+    "hitW": 44,
+    "hitH": 32
+   }
+  ],
+  "ticks": "0 50 100 150 200 250 300 350 400",
+  "rowH": [
+   53,
+   53,
+   53,
+   53
+  ],
+  "laneH": 212,
+  "lrH": 281
+ },
+ {
+  "viewport": 1280,
+  "window_ma": [
+   0.05,
+   0
+  ],
+  "coarse": false,
+  "W": 1246,
+  "view": [
+   0.05,
+   0
+  ],
+  "rows": [
+   {
+    "id": "f-dinaledi-chamber",
+    "off": "Older than this view."
+   },
+   {
+    "id": "f-omo-1",
+    "off": "Its dated layer is older than this view."
+   },
+   {
+    "id": "f-xiahe-2",
+    "true_": true,
+    "glyph": 398.7,
+    "hitW": 398.7,
+    "hitH": 32
+   },
+   {
+    "id": "f-la-ferrassie-bone",
+    "true_": true,
+    "glyph": 22.4,
+    "hitW": 44,
+    "hitH": 32
+   }
+  ],
+  "ticks": "0 5 10 15 20 25 30 35 40 45 50",
+  "rowH": [
+   61,
+   77,
+   53,
+   53
+  ],
+  "laneH": 244,
+  "lrH": 313
+ },
+ {
+  "viewport": 390,
+  "window_ma": [
+   538.8,
+   0
+  ],
+  "coarse": true,
+  "W": 356,
+  "view": [
+   538.8,
+   0
+  ],
+  "rows": [],
+  "ticks": "0 Ma 200 400",
+  "rowH": [],
+  "laneH": 133,
+  "lrH": 252.4
+ },
+ {
+  "viewport": 390,
+  "window_ma": [
+   2,
+   0
+  ],
+  "coarse": false,
+  "W": 356,
+  "view": [
+   2,
+   0
+  ],
+  "rows": [
+   {
+    "id": "f-dinaledi-chamber",
+    "true_": true,
+    "glyph": 17.6,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-omo-1",
+    "true_": true,
+    "glyph": 7.8,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-xiahe-2",
+    "true_": false,
+    "glyph": 14,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-la-ferrassie-bone",
+    "true_": false,
+    "glyph": 14.1,
+    "hitW": 44,
+    "hitH": 32
+   }
+  ],
+  "ticks": "0.0 Ma 0.5 1.0 1.5 2.0",
+  "rowH": [
+   69,
+   85,
+   69,
+   85
+  ],
+  "laneH": 308,
+  "lrH": 427.4
+ },
+ {
+  "viewport": 390,
+  "window_ma": [
+   1,
+   0
+  ],
+  "coarse": false,
+  "W": 356,
+  "view": [
+   1,
+   0
+  ],
+  "rows": [
+   {
+    "id": "f-dinaledi-chamber",
+    "true_": true,
+    "glyph": 35.2,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-omo-1",
+    "true_": true,
+    "glyph": 15.7,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-xiahe-2",
+    "true_": true,
+    "glyph": 5.7,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-la-ferrassie-bone",
+    "true_": false,
+    "glyph": 14.1,
+    "hitW": 44,
+    "hitH": 32
+   }
+  ],
+  "ticks": "0 500 1,000",
+  "rowH": [
+   69,
+   85,
+   69,
+   85
+  ],
+  "laneH": 308,
+  "lrH": 427.4
+ },
+ {
+  "viewport": 390,
+  "window_ma": [
+   0.4,
+   0
+  ],
+  "coarse": false,
+  "W": 356,
+  "view": [
+   0.4,
+   0
+  ],
+  "rows": [
+   {
+    "id": "f-dinaledi-chamber",
+    "true_": true,
+    "glyph": 88.1,
+    "hitW": 88.1,
+    "hitH": 32
+   },
+   {
+    "id": "f-omo-1",
+    "true_": true,
+    "glyph": 39.2,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-xiahe-2",
+    "true_": true,
+    "glyph": 14.2,
+    "hitW": 44,
+    "hitH": 32
+   },
+   {
+    "id": "f-la-ferrassie-bone",
+    "true_": false,
+    "glyph": 14.1,
+    "hitW": 44,
+    "hitH": 32
+   }
+  ],
+  "ticks": "0 200 400",
+  "rowH": [
+   69,
+   85,
+   69,
+   85
+  ],
+  "laneH": 308,
+  "lrH": 427.4
+ },
+ {
+  "viewport": 390,
+  "window_ma": [
+   0.05,
+   0
+  ],
+  "coarse": false,
+  "W": 356,
+  "view": [
+   0.05,
+   0
+  ],
+  "rows": [
+   {
+    "id": "f-dinaledi-chamber",
+    "off": "Older than this view."
+   },
+   {
+    "id": "f-omo-1",
+    "off": "Its dated layer is older than this view."
+   },
+   {
+    "id": "f-xiahe-2",
+    "true_": true,
+    "glyph": 113.9,
+    "hitW": 113.9,
+    "hitH": 32
+   },
+   {
+    "id": "f-la-ferrassie-bone",
+    "true_": true,
+    "glyph": 6.4,
+    "hitW": 44,
+    "hitH": 32
+   }
+  ],
+  "ticks": "0 20 40",
+  "rowH": [
+   93,
+   109,
+   69,
+   85
+  ],
+  "laneH": 356,
+  "lrH": 475.4
+ }
+]

@@ -1,0 +1,10 @@
+no-find-checks exit=1 43 | C refused: a fifth find (one sub-row each; never clustered)
+ban-sources exit=1 44 | B the rehearsal source builds (refused: f-dinaledi-chamber: a comparative word in a find title)
+midpoint exit=1 2 | B each axis claim reads as its source states it: two ends, a limit with its ± and sigma, a calibrated range with its datum and probability
+pm-dropped exit=1 1 | B each axis claim reads as its source states it: two ends, a limit with its ± and sigma, a calibrated range with its datum and probability
+fifth-allowed exit=1 1 | C refused: a fifth find (one sub-row each; never clustered)
+finds-at-schema-3 exit=1 2 | A a finds file beside schema-3 sources changes nothing: the same R3 bytes and the same page
+notation-unchecked exit=1 2 | C refused: a calibrated range with one end taken from another published calculation (GPT's reproduction: 41,700 to 40,827)
+words-unchecked exit=1 1 | C refused: notation and values changed together, the claim's own words not
+record-unchecked exit=1 3 | C refused: notation, values and words all changed to a mixed result: not the result the evidence record lists
+clock-in-catalogue exit=1 1 | D the device clock at 1990 and at 2090 gives byte-identical catalogues and pages; the check mode agrees across the two clocks

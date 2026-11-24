@@ -1,0 +1,128 @@
+ok   A 1280@1x: the explorer draws from the rehearsal catalogue (schema 3) with no page error
+ok   A 1280@1x: banner "Rehearsal tl-2026-11-T1: not published"
+ok   A 1280@1x: no image request before a story is opened
+ok   A 1280@1x: opening an entry that has no image fetches no image
+ok   A 1280@1x: the story opens and focus goes to its heading
+ok   A 1280@1x: exactly one image request on first open (PIA03379-fig1-800.jpg), and it is the file the browser shows
+ok   A 1280@1x: the image box is reserved before the image arrives and does not move when it does (position inside the entry and size 0,56.4,479,272.6)
+ok   A 1280@1x: the image keeps its own proportions and fits the panel
+ok   A 1280@1x: no sideways overflow
+ok   A 1280@1x: the opening is the snapshot's six sentences, in order, and is visible
+ok   A 1280@1x: the attributed findings are the snapshot's eight, in order, under "Evidence and interpretations"
+ok   A 1280@1x: caption and credit are shown; the sources list for the opening is closed until asked for
+ok   A 1280@1x: the eleven source numbers are buttons with a spoken name ("Source 1 for this sentence")
+ok   A 1280@1x: clicking the last sentence's number opens the list, focuses source 7 (O'Connor, Fig. 1) and brings it into view
+ok   A 1280@1x: that added no history entry and left the entry's shareable fragment alone
+ok   A 1280@1x: by keyboard (focus the first number, Enter): the list opens and source 1 has focus, again with no history entry
+ok   A 1280@1x: the sources list has seven numbered sources
+ok   A 1280@1x: zooming and panning the timeline (and reopening the story) fetches no further image
+ok   A 1280@1x: Back closes the story, Forward reopens it with the image, with no new request
+ok   A 1280@1x: no request to any other host (the live hub, R2 and NASA are never contacted)
+ok   A 390@3x: the explorer draws from the rehearsal catalogue (schema 3) with no page error
+ok   A 390@3x: banner "Rehearsal tl-2026-11-T1: not published"
+ok   A 390@3x: no image request before a story is opened
+ok   A 390@3x: opening an entry that has no image fetches no image
+ok   A 390@3x: the story opens and focus goes to its heading
+ok   A 390@3x: exactly one image request on first open (PIA03379-fig1-1024.jpg), and it is the file the browser shows
+ok   A 390@3x: the image box is reserved before the image arrives and does not move when it does (position inside the entry and size 0,82.8,358,204)
+ok   A 390@3x: the image keeps its own proportions and fits the panel
+ok   A 390@3x: no sideways overflow
+ok   A 390@3x: the opening is the snapshot's six sentences, in order, and is visible
+ok   A 390@3x: the attributed findings are the snapshot's eight, in order, under "Evidence and interpretations"
+ok   A 390@3x: caption and credit are shown; the sources list for the opening is closed until asked for
+ok   A 390@3x: the eleven source numbers are buttons with a spoken name ("Source 1 for this sentence")
+ok   A 390@3x: clicking the last sentence's number opens the list, focuses source 7 (O'Connor, Fig. 1) and brings it into view
+ok   A 390@3x: that added no history entry and left the entry's shareable fragment alone
+ok   A 390@3x: by keyboard (focus the first number, Enter): the list opens and source 1 has focus, again with no history entry
+ok   A 390@3x: the sources list has seven numbered sources
+ok   A 390@3x: zooming and panning the timeline (and reopening the story) fetches no further image
+ok   A 390@3x: Back closes the story, Forward reopens it with the image, with no new request
+ok   A 390@3x: no request to any other host (the live hub, R2 and NASA are never contacted)
+ok   A 360@2x: the explorer draws from the rehearsal catalogue (schema 3) with no page error
+ok   A 360@2x: banner "Rehearsal tl-2026-11-T1: not published"
+ok   A 360@2x: no image request before a story is opened
+ok   A 360@2x: opening an entry that has no image fetches no image
+ok   A 360@2x: the story opens and focus goes to its heading
+ok   A 360@2x: exactly one image request on first open (PIA03379-fig1-800.jpg), and it is the file the browser shows
+ok   A 360@2x: the image box is reserved before the image arrives and does not move when it does (position inside the entry and size 0,82.8,328,187)
+ok   A 360@2x: the image keeps its own proportions and fits the panel
+ok   A 360@2x: no sideways overflow
+ok   A 360@2x: the opening is the snapshot's six sentences, in order, and is visible
+ok   A 360@2x: the attributed findings are the snapshot's eight, in order, under "Evidence and interpretations"
+ok   A 360@2x: caption and credit are shown; the sources list for the opening is closed until asked for
+ok   A 360@2x: the eleven source numbers are buttons with a spoken name ("Source 1 for this sentence")
+ok   A 360@2x: clicking the last sentence's number opens the list, focuses source 7 (O'Connor, Fig. 1) and brings it into view
+ok   A 360@2x: that added no history entry and left the entry's shareable fragment alone
+ok   A 360@2x: by keyboard (focus the first number, Enter): the list opens and source 1 has focus, again with no history entry
+ok   A 360@2x: the sources list has seven numbered sources
+ok   A 360@2x: zooming and panning the timeline (and reopening the story) fetches no further image
+ok   A 360@2x: Back closes the story, Forward reopens it with the image, with no new request
+ok   A 360@2x: no request to any other host (the live hub, R2 and NASA are never contacted)
+ok   A 800@1x: the explorer draws from the rehearsal catalogue (schema 3) with no page error
+ok   A 800@1x: banner "Rehearsal tl-2026-11-T1: not published"
+ok   A 800@1x: no image request before a story is opened
+ok   A 800@1x: opening an entry that has no image fetches no image
+ok   A 800@1x: the story opens and focus goes to its heading
+ok   A 800@1x: exactly one image request on first open (PIA03379-fig1-800.jpg), and it is the file the browser shows
+ok   A 800@1x: the image box is reserved before the image arrives and does not move when it does (position inside the entry and size 0,56.4,367,209.1)
+ok   A 800@1x: the image keeps its own proportions and fits the panel
+ok   A 800@1x: no sideways overflow
+ok   A 800@1x: the opening is the snapshot's six sentences, in order, and is visible
+ok   A 800@1x: the attributed findings are the snapshot's eight, in order, under "Evidence and interpretations"
+ok   A 800@1x: caption and credit are shown; the sources list for the opening is closed until asked for
+ok   A 800@1x: the eleven source numbers are buttons with a spoken name ("Source 1 for this sentence")
+ok   A 800@1x: clicking the last sentence's number opens the list, focuses source 7 (O'Connor, Fig. 1) and brings it into view
+ok   A 800@1x: that added no history entry and left the entry's shareable fragment alone
+ok   A 800@1x: by keyboard (focus the first number, Enter): the list opens and source 1 has focus, again with no history entry
+ok   A 800@1x: the sources list has seven numbered sources
+ok   A 800@1x: zooming and panning the timeline (and reopening the story) fetches no further image
+ok   A 800@1x: Back closes the story, Forward reopens it with the image, with no new request
+ok   A 800@1x: no request to any other host (the live hub, R2 and NASA are never contacted)
+ok   A direct link to the entry opens the story, with one image request
+ok   A2 200 % zoom (1280 px window, 640 CSS px): the story opens, the image fits, nothing overflows sideways
+ok   A2 320 CSS px (reflow at 400 %): the story opens with no sideways overflow
+ok   A2 1280: with the text-spacing overrides nothing in the story is clipped and nothing overflows sideways
+ok   A2 390: with the text-spacing overrides nothing in the story is clipped and nothing overflows sideways
+ok   A2 reduced motion: the story opens, the image loads, focus is on the heading, no page error
+ok   B 1280: the image is withdrawn and one plain line says it could not be loaded; no broken frame
+ok   B 1280: caption, opening and findings are all still there; no page error; no overflow
+ok   B 390: the image is withdrawn and one plain line says it could not be loaded; no broken frame
+ok   B 390: caption, opening and findings are all still there; no page error; no overflow
+ok   C 1280: explorer on; the story has no figure, makes no image request, and is otherwise the same
+ok   C 390: explorer on; the story has no figure, makes no image request, and is otherwise the same
+ok   D: a catalogue with one byte changed is refused by the page (explorer off, list message shown)
+ok   D: the entry still opens from the list with its account and image
+ok   E no JavaScript: the entry is in the page with the image loaded as an ordinary image, its alt text, the six sentences and the eight findings
+ok   E no JavaScript: order heading, image, opening, sources, then the groups; every claim visible
+ok   F control: the same route with an unchanged catalogue draws the explorer
+ok   F refused by the page: an account with no review of its own (off:validation: story e-big5-end-cretaceous: story review)
+ok   F refused by the page: a duplicate id (off:validation: story e-big5-end-cretaceous: story ids)
+ok   F refused by the page: a dangling support reference (off:validation: story e-big5-end-cretaceous: sentence op-1)
+ok   F refused by the page: an evidence sentence with no support (off:validation: story e-big5-end-cretaceous: unsupported sentence op-1)
+ok   F refused by the page: a sentence that is not the one on the page (off:validation: story e-big5-end-cretaceous: sentence not on the page op-1)
+ok   F refused by the page: an attributed finding with no source (off:validation: story e-big5-end-cretaceous: account claim)
+ok   F refused by the page: a reconstruction (off:validation: story e-big5-end-cretaceous: image kind)
+ok   F refused by the page: a reconstruction with a label (off:validation: story e-big5-end-cretaceous: image kind)
+ok   F refused by the page: an image file given as a path (off:validation: story e-big5-end-cretaceous: image file)
+ok   F refused by the page: an image file given as an external address (off:validation: story e-big5-end-cretaceous: image file)
+ok   F refused by the page: an image with no hash (off:validation: story e-big5-end-cretaceous: image record)
+ok   F refused by the page: an image with no licence (off:validation: story e-big5-end-cretaceous: image fields)
+ok   F refused by the page: renditions over the byte budget (off:validation: story e-big5-end-cretaceous: image bytes)
+ok   F refused by the page: image files that are not the ones on the page (off:validation: story e-big5-end-cretaceous: image files not the ones on the page)
+ok   F refused by the page: an image in the page that the catalogue does not have (off:validation: story e-big5-end-cretaceous: image on the page, none in the catalogue)
+ok   G: a page that states schema "4" is refused (explorer off, list stays)
+ok   G: a page that states schema "" is refused (explorer off, list stays)
+ok   G: a page that states schema "three" is refused (explorer off, list stays)
+ok   G: the released page and script refuse the schema-3 catalogue even when its hash is pinned (list only)
+ok   G: the new page, built for schema 3, refuses a schema-2 catalogue even when its hash is pinned
+ok   G: this script with the previously released page (another build key) leaves the list as the only view
+ok   G: a schema-2 page and catalogue (the previous release, build key aligned) still draw the explorer with this script
+ok   R 1280: the release page draws the explorer from tl-2026-11-R3 (schema 3), asking the hub once for that revision by name; no banner; no page error
+ok   R 1280: no image before opening; on opening, one request for a published file under assets/timeline/tl-2026-11-R3/ (PIA03379-fig1-800.jpg)
+ok   R 1280: the story is the snapshot's (six sentences, eight findings), with the scoped review note and the "Changed in revision tl-2026-11-R3" line; no overflow
+ok   R 1280: nothing is requested from any host but the page's own, the hub's catalogue address and the font hosts
+ok   R 390: the release page draws the explorer from tl-2026-11-R3 (schema 3), asking the hub once for that revision by name; no banner; no page error
+ok   R 390: no image before opening; on opening, one request for a published file under assets/timeline/tl-2026-11-R3/ (PIA03379-fig1-1024.jpg)
+ok   R 390: the story is the snapshot's (six sentences, eight findings), with the scoped review note and the "Changed in revision tl-2026-11-R3" line; no overflow
+ok   R 390: nothing is requested from any host but the page's own, the hub's catalogue address and the font hosts
+timeline-story-ui: 127 pass, 0 fail

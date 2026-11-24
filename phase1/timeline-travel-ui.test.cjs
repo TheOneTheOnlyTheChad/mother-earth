@@ -495,7 +495,8 @@ function checkPositions(name, s, a, b, cat = C) {
   {
     const c = await ctx(b), p = await open(c);
     const stat = () => p.evaluate(() => ({ t: document.getElementById('tl-xstat').textContent, role: document.getElementById('tl-xstat').getAttribute('role'), act: document.activeElement.id || (document.activeElement.dataset && document.activeElement.dataset.entry) || document.activeElement.tagName }));
-    const lose = () => p.evaluate(i => { const x = document.getElementById('xpl'); x.focus(); x.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    // turns wheel zoom on if it is off (Enter toggles it). Before the wheel fix of 24 Nov 2026 a redraw always turned it off, so a plain Enter here happened to work
+    const lose = () => p.evaluate(i => { const x = document.getElementById('xpl'); x.focus(); if (!window.TL_AXIS.wheel) x.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
       document.querySelector(`#xpl a.mk[data-entry="${i}"]`).focus(); const q = x.getBoundingClientRect();
       for (let n = 0; n < 6; n++) x.dispatchEvent(new WheelEvent('wheel', { deltaY: -600, clientX: q.left + 20, clientY: q.top + 60, bubbles: true, cancelable: true })); return [...window.TL_AXIS.view]; }, ID.k);
     let v = await lose(), s = await stat();
