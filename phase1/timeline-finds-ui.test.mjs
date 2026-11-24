@@ -19,6 +19,8 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), BREAK = process.env.BREAK || '', OLD = process.env.OLD === '1';
 const sha = b => createHash('sha256').update(b).digest('hex');
 let pass = 0, fail = 0; const ok = (name, cond, info) => { if (cond) { pass++; console.log('ok   ' + name); } else { fail++; console.log('FAIL ' + name + (info !== undefined ? '  → ' + JSON.stringify(info).slice(0, 600) : '')); } };
+process.on('uncaughtException', e => { console.log('FAIL the suite ran to its end  → ' + String(e && e.message).split('\n')[0]); console.log(`timeline-finds-ui: ${pass} pass, ${fail + 1} fail (stopped early)`); process.exit(1); });
+process.on('unhandledRejection', e => { throw e; });
 const REV = 'tl-2026-11-T2', R3 = 'tl-2026-11-R3', PORT = 8796, B = `http://127.0.0.1:${PORT}`, ST = 'with-image';
 const RH = path.join(ROOT, 'phase1/timeline/rehearsal-finds');
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'tl-finds-ui-'));
@@ -86,6 +88,8 @@ const rows = p => p.evaluate(() => { const ft = document.querySelector('#xpl .ft
     return { id: row.dataset.find, box: r(row), cap: row.querySelector('.fcap').textContent, off: row.querySelector('.foff') ? row.querySelector('.foff').textContent : null, go: !!row.querySelector('.fgo'),
       n: row.querySelectorAll('a').length, cls: a ? a.className : null, label: a ? a.getAttribute('aria-label') : null, hit: a ? r(a) : null, g: a ? r(a.querySelector('.g')) : null,
       tick: a && a.querySelector('.ftk') ? r(a.querySelector('.ftk')) : null, chev: a && a.querySelector('.fch') ? r(a.querySelector('.fch')) : null }; }) }; });
+// the same, with the rows looked up by find (so a check about one find reads that find's row whatever the order drawn)
+const rowsBy = async p => { const R = await rows(p); R.rows = IDS.map(i => R.rows.find(r => r.id === i) || { id: i, cls: null, box: {}, cap: '', label: '' }); return R; };
 const pxOf = (W, a, b, ma) => (a - ma) / (a - b) * W;
 
 for (const [w, h] of [[1280, 900], [390, 844]]) {
@@ -100,9 +104,9 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   ok(`A ${L}: the lane's fixed sentence is on the lane, word for word`, lane.note === NOTE, lane.note);
   ok(`A ${L}: the lane is no longer listed as "not on the timeline yet"`, !/relatives/i.test(lane.plans), lane.plans);
   // ---------- B. landing view: four rows, four separate links, nothing between them
-  let R = await rows(p);
+  let R = await rows(p); const ORDER = R.rows.map(r => r.id);
   ok(`B ${L}: the lane holds exactly four rows and nothing else (no element joins two finds)`, R.kids.length === 4 && R.kids.every(k => k === 'DIV.frow'), R.kids);
-  ok(`B ${L}: rows are in a fixed order, by each find's finite age, oldest first`, JSON.stringify(R.rows.map(r => r.id)) === JSON.stringify(IDS), R.rows.map(r => r.id));
+  ok(`B ${L}: rows are in a fixed order, by each find's finite age, oldest first`, JSON.stringify(ORDER) === JSON.stringify(IDS), ORDER);
   ok(`B ${L}: rows do not overlap each other`, R.rows.every((r, i) => i === 0 || r.box.t >= R.rows[i - 1].box.b - 0.5), R.rows.map(r => [r.box.t, r.box.b]));
   const anchors = await p.evaluate(ids => ids.map(i => document.querySelectorAll(`#axis a.mk[data-entry="${i}"]`).length), IDS);
   ok(`B ${L}: every find has exactly one link of its own in the explorer, and none sits inside a cluster or on the extinctions track`, anchors.every(n => n === 1) && R.rows.every(r => r.n === 1) && (await p.evaluate(() => document.querySelectorAll('#xpl .track a.mk[data-entry^="f-"], #xpl .cl a[data-entry^="f-"]').length)) === 0, [anchors, R.rows.map(r => r.n)]);
@@ -110,7 +114,7 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   const mids = ['285,500', '40,000', '41,250'];
   ok(`B ${L}: each link's spoken name carries the title, the attribution, the claim's label and its date in words; no midpoint is ever printed`, R.rows.every((r, i) => { const f = SRC.finds[i]; return r.label.startsWith(f.title + '. Attributed to ' + f.attributed_to.name + '. ') && !mids.some(m => r.label.includes(m) || r.cap.includes(m)); }), R.rows.map(r => r.label));
   // ---------- C. the "Last 400,000 years" view
-  await p.click('[data-preset="recent"]'); await p.waitForTimeout(250); R = await rows(p);
+  await p.click('[data-preset="recent"]'); await p.waitForTimeout(250); R = await rowsBy(p);
   ok(`C ${L}: "Last 400,000 years" shows 0.4 to 0 Ma and is marked pressed`, JSON.stringify(await view(p)) === '[0.4,0]' && (await p.getAttribute('[data-preset="recent"]', 'aria-pressed')) === 'true', await view(p));
   const W = R.W, k = W / 400;   // pixels per thousand years in this view
   const want = { 'f-dinaledi-chamber': 99 * k, 'f-omo-1': 44 * k, 'f-xiahe-2': 16 * k };
@@ -121,30 +125,30 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   const sc = await p.evaluate(() => ({ ticks: [...document.querySelectorAll('#xpl .scale .tk')].map(e => e.textContent), unit: (document.querySelector('#xpl .scale .tku') || {}).textContent || null, win: document.getElementById('tl-win').textContent, sw: document.documentElement.scrollWidth, iw: innerWidth }));
   ok(`C ${L}: ticks are in thousands of years (${sc.ticks.join(' ')}), the unit is written once, and the sentence above says the same in years`, sc.ticks.length >= 2 && sc.ticks.every(t => /^[\d,]+$/.test(t)) && new Set(sc.ticks).size === sc.ticks.length && sc.ticks.includes('0') && sc.unit === 'thousand years ago' && sc.win === 'Showing 400,000 to 0 years ago. Span 400,000 years. Older on the left.', sc);
   ok(`C ${L}: no sideways overflow`, sc.sw <= sc.iw, [sc.sw, sc.iw]);
-  ok(`C ${L}: the extinctions lane, empty in this range, says so for its own lane only`, /No entries on this lane in this range\./.test(await p.textContent('#xpl .track .nomk')));
+  ok(`C ${L}: the extinctions lane, empty in this range, says so for its own lane only`, /No entries on this lane in this range\./.test(await p.evaluate(() => (document.querySelector('#xpl .track .nomk') || { textContent: '' }).textContent)));
   if (process.env.MEASURE) console.log(`MEASURE ${L} window 0.4 Ma, lane ${W} px: ` + R.rows.map(r => `${r.id} glyph ${r.g.w} hit ${r.hit.w}`).join(' · '));
   // ---------- D. the limit (Omo I): a tick at the dated layer, a band for that layer's own ±, an open ‹ of fixed length
   const omo = R.rows[1];
   ok(`D ${L}: Omo I is drawn as a limit: its own glyph class, a tick and an open chevron`, / mk-f-limit/.test(omo.cls) && !!omo.tick && !!omo.chev, omo);
   ok(`D ${L}: the band is the dated layer's ± (211 to 255 thousand years) and the tick is at the layer's age (233)`, near(omo.g.l, pxOf(W, 0.4, 0, 0.255), 1.2) && near(omo.g.r, pxOf(W, 0.4, 0, 0.211), 1.2) && near((omo.tick.l + omo.tick.r) / 2, pxOf(W, 0.4, 0, 0.233), 1.2), [omo.g, omo.tick]);
-  ok(`D ${L}: the chevron sits wholly on the older side of the band and ends in nothing`, omo.chev.r <= omo.g.l + 0.5 && omo.chev.l >= 0, [omo.chev, omo.g]);
+  ok(`D ${L}: the chevron sits wholly on the older side of the band and ends in nothing`, !!omo.chev && omo.chev.r <= omo.g.l + 0.5 && omo.chev.l >= 0, [omo.chev, omo.g]);
   ok(`D ${L}: the caption says, in words and without the panel, that the layer is dated 233,000 ± 22,000 years (2σ), that the find is older, and that the older limit is unknown`, /^Omo I · older than a dated layer above it; the layer is dated 233,000 ± 22,000 years ago \(2σ\); older limit unknown$/.test(omo.cap), omo.cap);
   ok(`D ${L}: its spoken name says the same`, /Older than a dated layer above it: the layer is dated 233,000 ± 22,000 years ago \(2σ\); older limit unknown\.$/.test(omo.label), omo.label);
-  await setWin(p, 0.3, 0.1); const o2 = (await rows(p)).rows[1];
-  ok(`D ${L}: at another zoom the band is wider but the chevron is the same size in pixels (it has no length in years)`, o2.g.w > omo.g.w * 1.5 && near(o2.chev.w, omo.chev.w, 0.6), [omo.chev.w, o2.chev.w, omo.g.w, o2.g.w]);
-  await setWin(p, 0.24, 0.04); const o3 = (await rows(p)).rows[1];
+  await setWin(p, 0.3, 0.1); const o2 = (await rowsBy(p)).rows[1];
+  ok(`D ${L}: at another zoom the band is wider but the chevron is the same size in pixels (it has no length in years)`, !!o2.chev && !!omo.chev && o2.g.w > omo.g.w * 1.5 && near(o2.chev.w, omo.chev.w, 0.6), [omo.chev, o2.chev, omo.g, o2.g]);
+  await setWin(p, 0.24, 0.04); const o3 = (await rowsBy(p)).rows[1];
   ok(`D ${L}: band cut by the older edge of the view: marked as continuing (‹), tick still at 233, and no chevron drawn inside the cut`, / clipl/.test(o3.cls) && !o3.chev && !!o3.tick && near((o3.tick.l + o3.tick.r) / 2, pxOf(W, 0.24, 0.04, 0.233), 1.2), o3);
-  await setWin(p, 0.3, 0.225); const o4 = (await rows(p)).rows[1];
+  await setWin(p, 0.3, 0.225); const o4 = (await rowsBy(p)).rows[1];
   ok(`D ${L}: band cut by the newer edge: marked as continuing (›), chevron still open on the older side`, / clipr/.test(o4.cls) && !!o4.chev && !!o4.tick, o4);
-  await setWin(p, 0.5, 0.3); const o5 = (await rows(p)).rows[1];
+  await setWin(p, 0.5, 0.3); const o5 = (await rowsBy(p)).rows[1];
   ok(`D ${L}: view older than the dated layer: no mark, and the row says the find is older than that layer by an unknown amount (never "not in this range")`, o5.cls === null && o5.off === 'Its dated layer is newer than this view; the find is older than that layer, by an unknown amount.' && o5.go, o5);
-  await setWin(p, 0.2, 0); const o6 = (await rows(p)).rows[1];
+  await setWin(p, 0.2, 0); const o6 = (await rowsBy(p)).rows[1];
   ok(`D ${L}: view newer than the dated layer: no mark, the row says its dated layer is older than this view, and offers "Bring into view"`, o6.cls === null && o6.off === 'Its dated layer is older than this view.' && o6.go, o6);
   await p.click('.frow[data-find="f-omo-1"] .fgo'); await p.waitForTimeout(250);
   const v6 = await view(p), f6 = await p.evaluate(() => document.activeElement && document.activeElement.dataset.entry);
   ok(`D ${L}: "Bring into view" frames the dated layer's finite ± at the same span (0.333 to 0.133 Ma); the unknown older side adds nothing; focus goes to the find`, near(v6[0], 0.333, 0.0005) && near(v6[1], 0.133, 0.0005) && f6 === 'f-omo-1', [v6, f6]);
   // ---------- E. the narrowest window
-  await setWin(p, 0.05, 0); R = await rows(p); const k5 = R.W / 50;
+  await setWin(p, 0.05, 0); R = await rowsBy(p); const k5 = R.W / 50;
   ok(`E ${L}: at the narrowest window (50,000 years) the La Ferrassie date is drawn at its true ends (${R.rows[3].g.w} px for 900 years)`, / mk-true/.test(R.rows[3].cls) && near(R.rows[3].g.w, 0.9 * k5, 1.2) && near(R.rows[3].g.l, pxOf(R.W, 0.05, 0, 0.0417), 1.2), R.rows[3]);
   ok(`E ${L}: the Xiahe layer bracket, which contains that date in time, is on its own row and neither hides the other`, / mk-true/.test(R.rows[2].cls) && near(R.rows[2].g.w, 16 * k5, 1.5) && R.rows[2].box.b <= R.rows[3].box.t + 0.5, [R.rows[2].g, R.rows[3].g]);
   ok(`E ${L}: Zoom in is unavailable at the limit and a click does not change the window`, (await p.getAttribute('[data-act="in"]', 'aria-disabled')) === 'true' && (await p.click('[data-act="in"]', { force: true }), JSON.stringify(await view(p)) === '[0.05,0]'), await view(p));
