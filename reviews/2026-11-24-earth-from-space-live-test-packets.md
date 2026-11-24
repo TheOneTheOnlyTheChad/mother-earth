@@ -1,4 +1,11 @@
-# Earth from Space — the two live tests: exact packets for Chad's separate approval (rev 1)
+# Earth from Space — the two live tests: exact packets for Chad's separate approval (rev 1.1)
+
+**Rev 1.1, 24 Nov 2026 03:29 UTC (clock reading): GPT's check of rev 1 adopted**
+(`EARTH-FROM-SPACE-LIVE-TEST-PACKETS-REVIEW-2026-11-24.md`: files pass, 74 of 74, all ten live files match their hashes;
+packet 2 acceptable as written; packet 1 needed two instruction fixes). Changed, packet 1 only: **1.2a added** (the
+allowance and usage, now read, and made a condition of creating anything); **M0 and M5 rewritten** (an unreadable usage
+read stops before M1; the one narrow exception for a refused seed); **1.4a added** (evidence rules for the day); the line
+in 1.5 now names rev 1.1. Section 2.5 gains one sentence. **No file was rebuilt; every hash is unchanged.**
 
 24 Nov 2026, 03:20 UTC (clock reading). Branch `earth-from-space-fixtures-rc`. Prepared after GPT's PASS of the branch
 candidate (`EARTH-FROM-SPACE-FIXTURES-RC-REVIEW-2026-11-24.md`, 24 Nov: no blocking finding; it ran the suite itself).
@@ -57,18 +64,48 @@ are valid on whatever later day the measurement is made. They do not need rebuil
 Claude does not look for another way in:** Chad makes that step and Claude reads it back, or the test stops.
 **The seed is loaded through the database's own console in the dashboard**, one file at a time, statement by statement.
 
+## 1.2a The allowance and usage: read before the line is asked for (GPT's D1-1)
+
+Read from the account's D1 page, read-only, **24 Nov 2026 03:28 UTC** (the browser pane was not displayed at the time;
+nothing was changed). Billing period 30 October to 30 November.
+
+| | Used this period | Allowance | This test is expected to add |
+|---|---|---|---|
+| Rows read | 7.59 million | 25 billion | under 2 million |
+| Rows written | 1.46 million | 50 million | some tens of thousands (about 10,100 rows seeded over the four sets, their index entries, and the deletes between sets) |
+| Storage | 111.05 MB | 5 GB | a few MB for under an hour |
+| Databases | 1 (`mother-earth`) | 50,000 | 1, deleted the same day |
+
+Billable usage shown for the period: $0.00. **"Expected to add" is an expectation, not a measurement.** The same read is
+made again at M0 on the day and at M7.
+
 ## 1.3 Steps
 
 | # | Step | Must show, or stop |
 |---|---|---|
-| M0 | Read-only preflight: the clock; the hub (code hash `db4f9cdf…1aa5`, gate `manual`, no window, 25 bindings, four crons); the account's lists of Workers and D1 databases; **the D1 allowance and this month's usage so far** | Clock after 24 Nov 03:10 UTC. No Worker or database of these names exists. Usage recorded, or recorded as unreadable |
+| M0 | Read-only preflight: the clock; the hub (code hash `db4f9cdf…1aa5`, gate `manual`, no window, 25 bindings, four crons); the account's lists of Workers and D1 databases; **the D1 allowance and usage, as in 1.2a** | Clock after 24 Nov 03:10 UTC. No Worker or database of these names exists. **Rows read, rows written and storage each read, with its allowance, and each with room for the "expected to add" of 1.2a. If any of them cannot be read, or the room is not there: stop before M1 and report. Nothing is created.** Going on without that read needs Chad's own decision on that changed basis |
 | M1 | Create the database | Listed, empty, id recorded |
 | M2 | Run `seed-schema.sql` in its console | `SELECT name, type FROM sqlite_master`: the table `collector_runs` and its two indexes |
 | M3 | Create the Worker; add the binding; address on; logs on | The settings of 1.2. Code hash equal |
 | M4 | **With the table empty:** `GET` both health paths; `GET /health/runs/usgs` | Both 503, `completion_missing`, 288 overdue. The wrong path 404. **First sight of what D1 returns:** if `X-Evd1-Rows-Read` reads `unavailable`, stop and report: Chad decides whether to go on with totals only, named as totals |
-| M5 | For S1, S2, S3, S0 in that order: (a) `seed-clear.sql`, count 0; (b) the set's seed file; (c) counts read back: rows in the table, rows in the read range; (d) the database's metrics read (**after seeding, before the requests**); (e) `measure-in-pane.js` once, on the Worker's own address, its origin typed in from M3's read-back: 80 requests; (f) its JSON saved as it came; (g) the metrics read again | (c) equals `expected.json`. (e) every status and state equals `expected.json`. **A seed statement D1 refuses: that set is not run, the refusal is recorded word for word, and the next set goes ahead** |
+| M5 | For S1, S2, S3, S0 in that order: (a) `seed-clear.sql`, count 0; (b) the set's seed file; (c) counts read back: rows in the table, rows in the read range; (d) the database's metrics read (**after seeding, before the requests**); (e) `measure-in-pane.js` once, on the Worker's own address, its origin typed in from M3's read-back: 80 requests; (f) its JSON saved as it came; (g) the metrics read again | (a) the count is 0. (c) equals `expected.json`. (e) every `GET`'s status and state, and every `HEAD`'s status and `X-Health`, equal `expected.json`, and every request carries the measurement headers. **The one exception to the stop rule is 1.3a** |
 | M6 | Save the Worker's invocation records for the test (time, method, path, status, CPU, wall time), with the count the source reports beside the count saved; save the database's metrics | Whatever cannot be read is recorded as not read |
 | M7 | **Cleanup, always:** delete the Worker; delete the database; read back both lists; the address no longer answers as the fixture; the hub read of M0 again | Neither name listed. Hub unchanged |
+
+### 1.3a The one exception to "stop": a seed statement D1 refuses (GPT's D1-2)
+
+Everything else that differs from what a step must show stops the measurement and goes to M7. **This case alone goes on,
+and only like this:**
+
+1. The refusal is saved word for word.
+2. **That whole set is not run.** No measurement request is made against a partly seeded table.
+3. **No SQL is changed and nothing is retried.**
+4. `seed-clear.sql` is run and the count is read. **Only if the clear succeeds and the count is 0** does the next
+   unchanged, reviewed set begin.
+5. If the clear fails, the count is not 0, or anything else unexpected happens: the measurement stops and goes to M7.
+
+**A set that was not run leaves the cost evidence incomplete. Runbook P4a is not closed by a measurement with a set
+missing.**
 
 About 330 requests in all. `measure-in-pane.js` makes `GET` and `HEAD` requests to the two health paths of that Worker
 and nothing else. Its `wall_ms` is the browser's latency, not the Worker's wall time.
@@ -83,9 +120,21 @@ sum of the measured requests, **with the seed's reads and writes kept out by the
 that). A per-request figure that D1 did not return is recorded as missing: **a total is never written as one request's
 figure.** Expected money: none. That is an expectation; the allowance and actual usage are read at M0 and M7.
 
+## 1.4a Evidence rules for the day (GPT's check, section 4)
+
+- **`HEAD` has no body.** The helper records no state for a `HEAD`; that is correct and is not a failed measurement.
+- **D1's own per-request figure is the primary evidence.** The database's totals may lag and include other reads (the
+  count checks, the console, the dashboard itself). The before-and-after readings are saved with their real times. A
+  difference that is not explained is flagged. Subtraction alone is not claimed to isolate the 80 requests.
+- **The helper returns its batch at the end.** If it is interrupted, the invocation records that exist are saved, the
+  batch is marked partial, and it is not run again.
+- **Unavailable D1 metadata, CPU or log evidence is a limit to be reviewed. It does not pass P4a by itself.**
+- **Cleanup is always attempted and always read back.** A deletion that is refused is reported with the resource that
+  remains. Cleanup is never called complete on an attempted delete.
+
 ## 1.5 The line
 
-`Approve: Earth from Space D1 cost measurement under plan rev 1.2 section 7 and packet rev 1: create the D1 database
+`Approve: Earth from Space D1 cost measurement under plan rev 1.2 section 7 and packet rev 1.1: create the D1 database
 mother-earth-evd1test and the Worker mother-earth-evd1 from phase1/evh-fixture/live/d1-2026-11-24T0400Z/evh-d1-worker.js
 sha256 2afd3bdf1b08cfbe5c1a851580fd06d6030e1f16e30bfa4cd56164639a0d654f, bound only to that database, its workers.dev
 address on; load row sets S1, S2, S3 and S0 in turn from that folder and make the stated requests; save the figures; then
@@ -164,9 +213,13 @@ by email; each cell received (with the time, and whether received or seen), not 
 met" or "not met" and P4 stays open until Chad decides, in his own line. **C. How long?** One observation each, never a
 bound. A Down alert within 15 minutes of onset is the target, not a promise; later than that is a finding.
 
+**All three verdicts are read together. Eight messages do not excuse an incident in the wrong phase (A), and a receipt
+that was not observed is not assumed.** T0 is not moved without Chad; if a build's deadlines are missed, that build is not
+reused for another time.
+
 ## 2.6 The line (T0 and hash filled in for the day he chooses)
 
-`Approve: Earth from Space fixture alert test under plan rev 1.2 and packet rev 1: create the Worker mother-earth-evhtest
+`Approve: Earth from Space fixture alert test under plan rev 1.2 and packet rev 1.1: create the Worker mother-earth-evhtest
 from phase1/evh-fixture/live/alert-<T0 folder>/evh-alert-worker.js sha256 <hash from 2.1> with no bindings and its
 workers.dev address on, T0 <UTC time>; create the UptimeRobot monitors "TEST evh runs DELETE" and "TEST evh trial DELETE"
 on its two health addresses, set as the existing eight; I record the messages on my phone and in my mailbox; then delete
@@ -187,6 +240,5 @@ both monitors and the Worker and read back; no change to the mother-earth Worker
   went through the dashboard tab's session; a throwaway Worker has not been created that way by this thread. 1.2 says what
   happens if it is refused.
 - Whether the D1 console takes each seed statement as written, and what D1 returns as `meta`.
-- Where on the dashboard this month's D1 usage and the allowance are shown.
 - The existing monitors' settings were read on 23 Nov, not today.
 - The built files were produced and the suite run in Claude's workspace only.
