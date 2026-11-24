@@ -1,0 +1,252 @@
+ok   A 1280: the explorer draws from the rehearsal catalogue (schema 4) with no page error
+ok   A 1280: banner "Rehearsal tl-2026-11-T2: not published"
+ok   A 1280: the lane is "Humans and human relatives (4 finds)", the extinctions lane still counts its own five
+ok   A 1280: the lane's fixed sentence is on the lane, word for word
+ok   A 1280: the lane is no longer listed as "not on the timeline yet"
+ok   Z 1280: at the landing view the lane is compact: no row and no mark, one sentence, the zoom button and one link per find, in row order
+ok   Z 1280: it never says there are no finds in this period
+ok   Z 1280: no find link or row reaches past the explorer's edges
+ok   Z 1280: the button and each link are at least 24 px high
+ok   Z 1280: the extinctions track still shows its five entries (marks or cluster members)
+ok   Z 1280: the button opens the 400,000-year view and moves focus to the first find's own link (the button itself is gone)
+ok   Z 1280: the compact lane is lower than the drawn rows (134 px against 281 px)
+ok   B 1280: the lane holds exactly one row per find (4) and nothing else (no element joins two finds)
+ok   B 1280: rows are in a fixed order, by each find's finite age, oldest first
+ok   B 1280: rows do not overlap each other
+ok   B 1280: every find has exactly one link of its own in the explorer, and none sits inside a cluster or on the extinctions track
+ok   B 1280: each link's spoken name carries the title, the attribution, the claim's label and its date in words; no midpoint is ever printed
+ok   C 1280: "Last 400,000 years" shows 0.4 to 0 Ma and is marked pressed
+ok   C 1280: the Dinaledi bracket, the Omo eruption band and the Xiahe bracket are drawn to scale (glyph widths 308.38, 137.05, 49.83 px in a 1246 px lane)
+ok   C 1280: their ends sit at their stated ages (Dinaledi 335 and 236, Xiahe 48 and 32 thousand years)
+ok   C 1280: the La Ferrassie date, too narrow to draw to scale here, is a mark at its place with its own glyph
+ok   C 1280: every find's link is at least 44 px wide and 24 px high whatever its glyph's width (hit area ≠ glyph)
+ok   C 1280: ticks are in thousands of years (0 50 100 150 200 250 300 350 400), the unit is written once, and the sentence above says the same in years
+ok   C 1280: no sideways overflow
+ok   C 1280: the extinctions lane, empty in this range, says so for its own lane only
+ok   D 1280: Omo I is drawn as a limit: its own glyph class, a tick and an open chevron
+ok   D 1280: the band is the dated layer's ± (211 to 255 thousand years) and the tick is at the layer's age (233)
+ok   D 1280: the chevron sits wholly on the older side of the band and ends in nothing
+ok   D 1280: the caption says, in words and without the panel, that the layer is dated 233,000 ± 22,000 years (2σ), that the find is older, and that the older limit is unknown
+ok   D 1280: its spoken name says the same
+ok   D 1280: at another zoom the band is wider but the chevron is the same size in pixels (it has no length in years)
+ok   D 1280: band cut by the older edge of the view: marked as continuing (‹), tick still at 233, and no chevron drawn inside the cut
+ok   D 1280: band cut by the newer edge: marked as continuing (›), chevron still open on the older side
+ok   D 1280: view older than the dated layer: no mark, and the row says the find is older than that layer by an unknown amount (never "not in this range")
+ok   D 1280: view newer than the dated layer: no mark, the row says its dated layer is older than this view, and offers "Bring into view"
+ok   D 1280: "Bring into view" frames the dated layer's finite ± at the same span (0.333 to 0.133 Ma); the unknown older side adds nothing; focus goes to the find
+ok   E 1280: at the narrowest window (50,000 years) the La Ferrassie date is drawn at its true ends (22.42 px for 900 years)
+ok   E 1280: the Xiahe layer bracket, which contains that date in time, is on its own row and neither hides the other
+ok   E 1280: Zoom in is unavailable at the limit and a click does not change the window
+ok   E 1280: ticks at the narrowest window are finer than 100,000 years and distinct (0 5 10 15 20 25 30 35 40 45 50)
+ok   E 1280: a stored window narrower than the limit is refused: the landing view
+ok   J 1280: at a 2.2 Ma window the lane is compact (the threshold is "wider than 2 Ma")
+ok   J 1280: a 2.2 Ma window is ticked in Ma, labels distinct, and the sentence above agrees
+ok   J 1280: at a 2 Ma window the lane is drawn row by row (the threshold is "wider than 2 Ma")
+ok   J 1280: a 2 Ma window is ticked in Ma, labels distinct, and the sentence above agrees
+ok   J 1280: at a 1.9 Ma window the lane is drawn row by row (the threshold is "wider than 2 Ma")
+ok   J 1280: a 1.9 Ma window is ticked in thousands of years, labels distinct, and the sentence above agrees
+ok   J 1280: at a 1 Ma window the lane is drawn row by row (the threshold is "wider than 2 Ma")
+ok   J 1280: a 1 Ma window is ticked in thousands of years, labels distinct, and the sentence above agrees
+ok   T 1280: at 538.8 to 0 Ma the end labels (0 Ma, 500) lie wholly inside the explorer, at least 3 px from its border
+ok   T 1280: at 538.8 to 0 Ma every tick line is at its own coordinate
+ok   T 1280: at 2.2 to 0 Ma the end labels (0.0 Ma, 2.2) lie wholly inside the explorer, at least 3 px from its border
+ok   T 1280: at 2.2 to 0 Ma every tick line is at its own coordinate
+ok   T 1280: at 2 to 0 Ma the end labels (0.0 Ma, 2.0) lie wholly inside the explorer, at least 3 px from its border
+ok   T 1280: at 2 to 0 Ma every tick line is at its own coordinate
+ok   T 1280: at 1.9 to 0 Ma the end labels (0, 1,800) lie wholly inside the explorer, at least 3 px from its border
+ok   T 1280: at 1.9 to 0 Ma every tick line is at its own coordinate
+ok   T 1280: at 0.4 to 0 Ma the end labels (0, 400) lie wholly inside the explorer, at least 3 px from its border
+ok   T 1280: at 0.4 to 0 Ma every tick line is at its own coordinate
+ok   T 1280: at 0.3 to 0.1 Ma the end labels (100, 300) lie wholly inside the explorer, at least 3 px from its border
+ok   T 1280: at 0.3 to 0.1 Ma every tick line is at its own coordinate
+ok   T 1280: at 0.05 to 0 Ma the end labels (0, 50) lie wholly inside the explorer, at least 3 px from its border
+ok   T 1280: at 0.05 to 0 Ma every tick line is at its own coordinate
+ok   F 1280 Dinaledi: its link opens its own entry, focus on the heading, a history entry of its own, and its mark is the selected one
+ok   F 1280 Dinaledi: the panel shows every claim of the source file in order, each under its fixed label, with the source's own notation and what it means
+ok   F 1280 Dinaledi: no sideways overflow with the panel open
+ok   F 1280 Dinaledi: Back returns to the entry it left, closes the find, and focus returns to that find's own link
+ok   F 1280 Dinaledi: Forward reopens the same entry
+ok   F 1280 Omo I: its link opens its own entry, focus on the heading, a history entry of its own, and its mark is the selected one
+ok   F 1280 Omo I: the panel shows every claim of the source file in order, each under its fixed label, with the source's own notation and what it means
+ok   F 1280 Omo I: no sideways overflow with the panel open
+ok   F 1280 Omo I: Back returns to the entry it left, closes the find, and focus returns to that find's own link
+ok   F 1280 Omo I: Forward reopens the same entry
+ok   F 1280 Xiahe 2: its link opens its own entry, focus on the heading, a history entry of its own, and its mark is the selected one
+ok   F 1280 Xiahe 2: the panel shows every claim of the source file in order, each under its fixed label, with the source's own notation and what it means
+ok   F 1280 Xiahe 2: no sideways overflow with the panel open
+ok   F 1280 Xiahe 2: Back returns to the entry it left, closes the find, and focus returns to that find's own link
+ok   F 1280 Xiahe 2: Forward reopens the same entry
+ok   F 1280 La Ferrassie: its link opens its own entry, focus on the heading, a history entry of its own, and its mark is the selected one
+ok   F 1280 La Ferrassie: the panel shows every claim of the source file in order, each under its fixed label, with the source's own notation and what it means
+ok   F 1280 La Ferrassie: no sideways overflow with the panel open
+ok   F 1280 La Ferrassie: Back returns to the entry it left, closes the find, and focus returns to that find's own link
+ok   F 1280 La Ferrassie: Forward reopens the same entry
+ok   F 1280: after a redraw (the window resized) focus is still on the same find's link
+ok   F 1280: the finds can be reached by Tab, in row order, each one stop
+ok   V 1280: at the 400,000-year view each find's link, reached by Tab, shows a solid accent outline of at least 2 px, inside the explorer and not covered
+ok   V 1280: at the 50,000-year view the same holds for each drawn find (La Ferrassie's short range included) and each "Bring into view" button
+ok   V 1280: at the landing view the same holds for the compact lane's button and each find link
+FAIL W 1280: one wheel step out past 2 Ma with Omo I's row link focused: focus moves to Omo I's link in the compact lane  → {"before":[true,"f-omo-1","mk fmk mk-f-limit mk-true"],"after":{"v":[3.462026,0],"cls":"xpl hasf"}}
+ok   W 1280: one wheel step in below 2 Ma with Omo I's compact link focused: focus moves to Omo I's own row link
+ok   W 1280: a find opened from the compact lane opens its entry and brings its own dated range into a drawn view
+FAIL W 1280: Back closes it, restores the view it was opened from (the landing view, compact) and returns focus to the Xiahe 2 link that opened it  → {"open":false,"cls":"","id":"f-xiahe-2","v":[538.8,0]}
+ok   W 1280: Forward reopens Xiahe 2 in a drawn view
+FAIL W 1280: in the compact lane a redraw (the window resized) keeps focus on the same find's link
+ok   1280: nothing was requested from any other host
+ok   1280: no page error in the whole run
+ok   K 1280: a direct link to f-omo-1 opens it on the "Last 400,000 years" view, where all four finds are
+ok   K 1280: a direct link to f-la-ferrassie-bone opens it on the "Last 400,000 years" view, where all four finds are
+ok   A 390: the explorer draws from the rehearsal catalogue (schema 4) with no page error
+ok   A 390: banner "Rehearsal tl-2026-11-T2: not published"
+ok   A 390: the lane is "Humans and human relatives (4 finds)", the extinctions lane still counts its own five
+ok   A 390: the lane's fixed sentence is on the lane, word for word
+ok   A 390: the lane is no longer listed as "not on the timeline yet"
+ok   Z 390: at the landing view the lane is compact: no row and no mark, one sentence, the zoom button and one link per find, in row order
+ok   Z 390: it never says there are no finds in this period
+ok   Z 390: no find link or row reaches past the explorer's edges
+ok   Z 390: the button and each link are at least 24 px high
+ok   Z 390: the extinctions track still shows its five entries (marks or cluster members)
+ok   Z 390: the button opens the 400,000-year view and moves focus to the first find's own link (the button itself is gone)
+ok   Z 390: the compact lane is lower than the drawn rows (252 px against 427 px)
+ok   B 390: the lane holds exactly one row per find (4) and nothing else (no element joins two finds)
+ok   B 390: rows are in a fixed order, by each find's finite age, oldest first
+ok   B 390: rows do not overlap each other
+ok   B 390: every find has exactly one link of its own in the explorer, and none sits inside a cluster or on the extinctions track
+ok   B 390: each link's spoken name carries the title, the attribution, the claim's label and its date in words; no midpoint is ever printed
+ok   C 390: "Last 400,000 years" shows 0.4 to 0 Ma and is marked pressed
+ok   C 390: the Dinaledi bracket, the Omo eruption band and the Xiahe bracket are drawn to scale (glyph widths 88.11, 39.16, 14.23 px in a 356 px lane)
+ok   C 390: their ends sit at their stated ages (Dinaledi 335 and 236, Xiahe 48 and 32 thousand years)
+ok   C 390: the La Ferrassie date, too narrow to draw to scale here, is a mark at its place with its own glyph
+ok   C 390: every find's link is at least 44 px wide and 24 px high whatever its glyph's width (hit area ≠ glyph)
+ok   C 390: ticks are in thousands of years (0 200 400), the unit is written once, and the sentence above says the same in years
+ok   C 390: no sideways overflow
+ok   C 390: the extinctions lane, empty in this range, says so for its own lane only
+ok   D 390: Omo I is drawn as a limit: its own glyph class, a tick and an open chevron
+ok   D 390: the band is the dated layer's ± (211 to 255 thousand years) and the tick is at the layer's age (233)
+ok   D 390: the chevron sits wholly on the older side of the band and ends in nothing
+ok   D 390: the caption says, in words and without the panel, that the layer is dated 233,000 ± 22,000 years (2σ), that the find is older, and that the older limit is unknown
+ok   D 390: its spoken name says the same
+ok   D 390: at another zoom the band is wider but the chevron is the same size in pixels (it has no length in years)
+ok   D 390: band cut by the older edge of the view: marked as continuing (‹), tick still at 233, and no chevron drawn inside the cut
+ok   D 390: band cut by the newer edge: marked as continuing (›), chevron still open on the older side
+ok   D 390: view older than the dated layer: no mark, and the row says the find is older than that layer by an unknown amount (never "not in this range")
+ok   D 390: view newer than the dated layer: no mark, the row says its dated layer is older than this view, and offers "Bring into view"
+ok   D 390: "Bring into view" frames the dated layer's finite ± at the same span (0.333 to 0.133 Ma); the unknown older side adds nothing; focus goes to the find
+ok   E 390: at the narrowest window (50,000 years) the La Ferrassie date is drawn at its true ends (6.41 px for 900 years)
+ok   E 390: the Xiahe layer bracket, which contains that date in time, is on its own row and neither hides the other
+ok   E 390: Zoom in is unavailable at the limit and a click does not change the window
+ok   E 390: ticks at the narrowest window are finer than 100,000 years and distinct (0 20 40)
+ok   E 390: a stored window narrower than the limit is refused: the landing view
+ok   J 390: at a 2.2 Ma window the lane is compact (the threshold is "wider than 2 Ma")
+ok   J 390: a 2.2 Ma window is ticked in Ma, labels distinct, and the sentence above agrees
+ok   J 390: at a 2 Ma window the lane is drawn row by row (the threshold is "wider than 2 Ma")
+ok   J 390: a 2 Ma window is ticked in Ma, labels distinct, and the sentence above agrees
+ok   J 390: at a 1.9 Ma window the lane is drawn row by row (the threshold is "wider than 2 Ma")
+ok   J 390: a 1.9 Ma window is ticked in thousands of years, labels distinct, and the sentence above agrees
+ok   J 390: at a 1 Ma window the lane is drawn row by row (the threshold is "wider than 2 Ma")
+ok   J 390: a 1 Ma window is ticked in thousands of years, labels distinct, and the sentence above agrees
+ok   T 390: at 538.8 to 0 Ma the end labels (0 Ma, 400) lie wholly inside the explorer, at least 3 px from its border
+ok   T 390: at 538.8 to 0 Ma every tick line is at its own coordinate
+ok   T 390: at 2.2 to 0 Ma the end labels (0 Ma, 2) lie wholly inside the explorer, at least 3 px from its border
+ok   T 390: at 2.2 to 0 Ma every tick line is at its own coordinate
+ok   T 390: at 2 to 0 Ma the end labels (0.0 Ma, 2.0) lie wholly inside the explorer, at least 3 px from its border
+ok   T 390: at 2 to 0 Ma every tick line is at its own coordinate
+ok   T 390: at 1.9 to 0 Ma the end labels (0, 1,000) lie wholly inside the explorer, at least 3 px from its border
+ok   T 390: at 1.9 to 0 Ma every tick line is at its own coordinate
+ok   T 390: at 0.4 to 0 Ma the end labels (0, 400) lie wholly inside the explorer, at least 3 px from its border
+ok   T 390: at 0.4 to 0 Ma every tick line is at its own coordinate
+ok   T 390: at 0.3 to 0.1 Ma the end labels (100, 300) lie wholly inside the explorer, at least 3 px from its border
+ok   T 390: at 0.3 to 0.1 Ma every tick line is at its own coordinate
+ok   T 390: at 0.05 to 0 Ma the end labels (0, 40) lie wholly inside the explorer, at least 3 px from its border
+ok   T 390: at 0.05 to 0 Ma every tick line is at its own coordinate
+ok   F 390 Dinaledi: its link opens its own entry, focus on the heading, a history entry of its own, and its mark is the selected one
+ok   F 390 Dinaledi: the panel shows every claim of the source file in order, each under its fixed label, with the source's own notation and what it means
+ok   F 390 Dinaledi: no sideways overflow with the panel open
+ok   F 390 Dinaledi: Back returns to the entry it left, closes the find, and focus returns to that find's own link
+ok   F 390 Dinaledi: Forward reopens the same entry
+ok   F 390 Omo I: its link opens its own entry, focus on the heading, a history entry of its own, and its mark is the selected one
+ok   F 390 Omo I: the panel shows every claim of the source file in order, each under its fixed label, with the source's own notation and what it means
+ok   F 390 Omo I: no sideways overflow with the panel open
+ok   F 390 Omo I: Back returns to the entry it left, closes the find, and focus returns to that find's own link
+ok   F 390 Omo I: Forward reopens the same entry
+ok   F 390 Xiahe 2: its link opens its own entry, focus on the heading, a history entry of its own, and its mark is the selected one
+ok   F 390 Xiahe 2: the panel shows every claim of the source file in order, each under its fixed label, with the source's own notation and what it means
+ok   F 390 Xiahe 2: no sideways overflow with the panel open
+ok   F 390 Xiahe 2: Back returns to the entry it left, closes the find, and focus returns to that find's own link
+ok   F 390 Xiahe 2: Forward reopens the same entry
+ok   F 390 La Ferrassie: its link opens its own entry, focus on the heading, a history entry of its own, and its mark is the selected one
+ok   F 390 La Ferrassie: the panel shows every claim of the source file in order, each under its fixed label, with the source's own notation and what it means
+ok   F 390 La Ferrassie: no sideways overflow with the panel open
+ok   F 390 La Ferrassie: Back returns to the entry it left, closes the find, and focus returns to that find's own link
+ok   F 390 La Ferrassie: Forward reopens the same entry
+ok   F 390: after a redraw (the window resized) focus is still on the same find's link
+ok   F 390: the finds can be reached by Tab, in row order, each one stop
+ok   V 390: at the 400,000-year view each find's link, reached by Tab, shows a solid accent outline of at least 2 px, inside the explorer and not covered
+ok   V 390: at the 50,000-year view the same holds for each drawn find (La Ferrassie's short range included) and each "Bring into view" button
+ok   V 390: at the landing view the same holds for the compact lane's button and each find link
+FAIL W 390: one wheel step out past 2 Ma with Omo I's row link focused: focus moves to Omo I's link in the compact lane  → {"before":[true,"f-omo-1","mk fmk mk-f-limit mk-true"],"after":{"v":[3.462026,0],"cls":"xpl hasf"}}
+ok   W 390: one wheel step in below 2 Ma with Omo I's compact link focused: focus moves to Omo I's own row link
+ok   W 390: a find opened from the compact lane opens its entry and brings its own dated range into a drawn view
+FAIL W 390: Back closes it, restores the view it was opened from (the landing view, compact) and returns focus to the Xiahe 2 link that opened it  → {"open":false,"cls":"","id":"f-xiahe-2","v":[538.8,0]}
+ok   W 390: Forward reopens Xiahe 2 in a drawn view
+FAIL W 390: in the compact lane a redraw (the window resized) keeps focus on the same find's link
+ok   390: nothing was requested from any other host
+ok   390: no page error in the whole run
+ok   K 390: a direct link to f-omo-1 opens it on the "Last 400,000 years" view, where all four finds are
+ok   K 390: a direct link to f-la-ferrassie-bone opens it on the "Last 400,000 years" view, where all four finds are
+ok   L 1280: with the device clock at 1990 and at 2090, every find's drawn ends, tick, chevron, caption, spoken name, the window sentence and the entries' text are identical
+ok   L 390: with the device clock at 1990 and at 2090, every find's drawn ends, tick, chevron, caption, spoken name, the window sentence and the entries' text are identical
+ok   M 1280: a rehearsal with three finds draws (on); the lane is "(3 finds)"; the compact lane has three links in row order
+ok   M 1280: at the 400,000-year view it has three rows, in order, and nothing else
+ok   M 1280: no page error
+ok   M 390: a rehearsal with three finds draws (on); the lane is "(3 finds)"; the compact lane has three links in row order
+ok   M 390: at the 400,000-year view it has three rows, in order, and nothing else
+ok   M 390: no page error
+ok   G no JavaScript: the lane sentence, one card and one complete, visible entry per find are in the page
+ok   G no JavaScript: the lane list counts them
+ok   H control: the same route with an unchanged catalogue draws the explorer
+ok   H refused by the page: a limit pointing the other way (off:validation: find f-omo-1: limit)
+ok   H refused by the page: a limit with no uncertainty (off:validation: find f-omo-1: limit reference)
+ok   H refused by the page: a limit whose uncertainty is text (off:validation: claim time f-omo-1)
+ok   H refused by the page: a limit with a negative uncertainty (off:validation: find f-omo-1: limit reference)
+ok   H refused by the page: a limit whose reference is null (off:validation: claim time f-omo-1)
+ok   H refused by the page: a limit whose ± reaches below zero (off:validation: find f-omo-1: limit reference)
+ok   H refused by the page: a limit given an older end (off:validation: find f-omo-1: limit)
+ok   H refused by the page: a limit with an unknown sigma (off:validation: find f-omo-1: limit)
+ok   H refused by the page: a bracket with its ends reversed (off:validation: find f-dinaledi-chamber: bracket ends)
+ok   H refused by the page: a bracket older than the chart (off:validation: outside window f-dinaledi-chamber)
+ok   H refused by the page: stored ages that are not the source values (off:validation: find f-dinaledi-chamber: stored ages differ from the source values)
+ok   H refused by the page: a source unit this build does not know (off:validation: find f-dinaledi-chamber: source units)
+ok   H refused by the page: a calibrated date counted from another year (off:validation: find f-la-ferrassie-bone: calibration)
+ok   H refused by the page: a calibration curve this build does not know (off:validation: find f-la-ferrassie-bone: calibration)
+ok   H refused by the page: a probability of zero (off:validation: find f-la-ferrassie-bone: probability)
+ok   H refused by the page: a probability that is not the notation's (off:validation: find f-la-ferrassie-bone: probability is not the source notation's)
+ok   H refused by the page: a radiocarbon measurement with no uncertainty (off:validation: find f-la-ferrassie-bone: laboratory measurement)
+ok   H refused by the page: a date with no source notation (off:validation: find f-xiahe-2: source notation)
+ok   H refused by the page: a date with no stated confidence (off:validation: find f-xiahe-2: source notation)
+ok   H refused by the page: two axis claims on one find (off:validation: story f-dinaledi-chamber: claim ids)
+ok   H refused by the page: a find with no "what was dated" (off:validation: find f-xiahe-2: dated_material)
+ok   H refused by the page: a find with an empty association (off:validation: find f-xiahe-2: claim record)
+ok   H refused by the page: a find with no site (off:validation: find f-dinaledi-chamber: find)
+ok   H refused by the page: an attribution basis this build does not know (off:validation: find f-xiahe-2: attribution)
+ok   H refused by the page: an attribution that is not the one on the page (off:validation: find f-xiahe-2: attribution not on the page)
+ok   H refused by the page: a group identifier used as the specimen (off:validation: find f-omo-1: specimen id)
+ok   H refused by the page: a find carrying an account (off:validation: story f-dinaledi-chamber: sentence not on the page op-1)
+ok   H refused by the page: a find claim on the extinctions lane (off:validation: find claim on the extinctions lane e-big5-end-ordovician)
+ok   H refused by the page: a changed lane sentence (off:validation: find note)
+ok   H refused by the page: a find moved to another lane (off:validation: entry f-dinaledi-chamber)
+ok   H refused by the page: a calibrated range with one end taken from another published calculation (GPT's reproduction: 41,700 to 40,827) (off:validation: find f-la-ferrassie-bone: source notation and stored values disagree)
+ok   H refused by the page: notation, values and date line changed together, the claim's own words not (off:validation: find f-la-ferrassie-bone: the claim does not give the stored numbers)
+ok   H refused by the page: a bracket whose notation has a third number (off:validation: find f-xiahe-2: source notation and stored values disagree)
+ok   H refused by the page: a limit written without its ± (off:validation: find f-omo-1: source notation and stored values disagree)
+ok   H refused by the page: a bracket given a probability (off:validation: find f-dinaledi-chamber: source notation and stored values disagree)
+ok   H refused by the page: a find axis claim naming no selected result (off:validation: find f-dinaledi-chamber: selected result)
+ok   I the released page and script (main) with the released catalogue still draw the explorer here
+ok   I a 50,000-year window saved by the new page is refused by the released script: its landing view
+ok   I the released script refuses the schema-4 catalogue even when its revision and hash are pinned (off:validation: catalogue identity); the list stays
+ok   I this script with the released page (schema 3, build key aligned) refuses the schema-4 catalogue (off:validation: catalogue identity)
+ok   I the new page, built for schema 4, refuses the schema-3 catalogue even when pinned (off:validation: catalogue identity); its list stays
+ok   I the new page with the released script (another build key) leaves the list as the only view (off:build)
+ok   I this script with the released page and catalogue (build key aligned) draws the explorer exactly as before: no finds lane, no extra view button
+ok   I there, with no finds, the narrowest window is still 1 Ma: a stored 50,000-year window is refused
+timeline-finds-ui: 245 pass, 6 fail (BREAK=compact-backtarget)

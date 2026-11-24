@@ -1,0 +1,75 @@
+ok   A the released sources still give the released page and catalogue (tl-2026-11-R3, sha256 f1a5fab2…) with this generator
+ok   A a fresh build from the released sources is byte-identical to the committed R3 catalogue and to the committed page
+ok   A a finds file beside schema-3 sources changes nothing: the same R3 bytes and the same page
+ok   A the rehearsal folder holds no file of the released revision and nothing under assets/timeline or the published catalogue folder names T2
+ok   B the rehearsal source builds (timeline.html written; tl-2026-11-T2.json 48118 B sha256 0afd1910ba01ee30e3e03513032f8f252578466bc4da2e734bdd3fab658bdf9b)
+ok   B catalogue tl-2026-11-T2, schema 4, previous tl-2026-11-R3; five extinctions and four finds
+ok   B the five extinction entries are, field for field, the ones R3 serves
+ok   B the lane sentence and the axis convention are in the catalogue
+ok   B each axis claim reads as its source states it: two ends, a limit with its ± and sigma, a calibrated range with its datum and probability
+ok   B no midpoint and no single "about" age for a bracket or a limit anywhere in the finds
+ok   B every find keeps its claims in the source file's order, with the notation, units, values, confidence and calibration untouched
+ok   B attribution, place and the two outside identifiers are carried as given; none is used as a name
+ok   B "Homo longi" appears nowhere in the catalogue or the page (the paper's own wording, "Denisovan lineage", is used)
+ok   B the catalogue carries no private path, inbox id or folder of the Mac packet
+ok   B the page has the finds section with the lane sentence, four cards and four entries, and pins this catalogue's hash
+ok   B the check mode agrees with what was just written
+ok   B a second build from the same sources is byte-identical
+ok   B a source whose own title has the word "oldest" (Vidal et al. 2022) is accepted: the wording rules read our text, not citations
+ok   C control: a fixture that changes nothing of substance still builds
+FAIL C refused: a fifth find (one sub-row each; never clustered)  → [0,"timeline.html written; tl-2026-11-T2.json 51270 B sha256 e97d563c2444b7ee26cdeeb458088e54ece64631f8377772df1521eff377f9c7"]
+FAIL C refused: schema 4 with no find  → [0,"timeline.html written; tl-2026-11-T2.json 32049 B sha256 24e9ec8c88a2558bbeb52a746275a0512050a0e86198bd47c09ab311e18a930f"]
+FAIL C refused: a find title with a comparative word ("The oldest …")  → [0,"timeline.html written; tl-2026-11-T2.json 48136 B sha256 67465c3959e51c758dc2788ea440799df5d956224db5d8dfab828fa7e3a45f18"]
+FAIL C refused: a short title with "first"  → [0,"timeline.html written; tl-2026-11-T2.json 48124 B sha256 c622ed4938c7867098247a27868fb6a780840668c37b8bc687a077032b311721"]
+FAIL C refused: our text saying a group "died out"  → [0,"timeline.html written; tl-2026-11-T2.json 48151 B sha256 f2713505dfda74ca0aff0e5523bce80a58659ce77ab112535661438d5cab0af7"]
+FAIL C refused: our text saying two groups "met"  → [0,"timeline.html written; tl-2026-11-T2.json 48143 B sha256 f843233ad640c7b7ee8efc78a04ac7df9848f70cbec14c0bf64bd2ed7a8a1187"]
+FAIL C refused: our text saying "evolved into"  → [0,"timeline.html written; tl-2026-11-T2.json 48147 B sha256 275da78e7207425d66c4dd6b5f938967e523bd4e3ddf881bcf7117e9f866d17c"]
+FAIL C refused: a find with no site  → [0,"timeline.html written; tl-2026-11-T2.json 48102 B sha256 a065d8962d1456a776bfc2ba8c545178bf1816f80a042a9f3c6a000122ac6f85"]
+FAIL C refused: a find with no place  → [1,"xt\"][1:])} · {e(f[\"site\"])}, {e(f[\"where\"])}{spec}</p>\\n'\n                                                                                                                  ~^^^^^^^^^\nKeyError: 'where'"]
+FAIL C refused: a find with no attribution basis  → [1,"turn f\"Attributed to {at['name']} {FIND_BASIS[at['basis']]}.\" + (f\" {at['qualified']}\" if at.get('qualified') else '')\n                                                    ~~^^^^^^^^^\nKeyError: 'basis'"]
+FAIL C refused: an attribution basis this build does not know  → [1,"urn f\"Attributed to {at['name']} {FIND_BASIS[at['basis']]}.\" + (f\" {at['qualified']}\" if at.get('qualified') else '')\n                                         ~~~~~~~~~~^^^^^^^^^^^^^\nKeyError: 'tools'"]
+FAIL C refused: a group identifier substituted for the specimen  → [0,"timeline.html written; tl-2026-11-T2.json 48122 B sha256 fbe6a774027b5fe01bb2d2f949b32c8b7fadcc293ef9a5266e370671dd24333d"]
+FAIL C refused: a link that is not an identifier  → [0,"timeline.html written; tl-2026-11-T2.json 48121 B sha256 8624fc4c7a5752f5b9a927f3a182e896653ec42c7e2bff7f6802de469ada2467"]
+FAIL C refused: two axis claims  → [0,"timeline.html written; tl-2026-11-T2.json 49088 B sha256 3cdc666c704b6c1399d2922c598769d732632ae63256cc96cd4941326100d7fa"]
+FAIL C refused: no axis claim  → [1,"laude/mother-earth/phase1/timeline/build_timeline.py\", line 878, in render\n    '\\n'.join(find_card(x) for x in fs),\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: generator raised StopIteration"]
+FAIL C refused: a bracket claim carrying a limit  → [0,"timeline.html written; tl-2026-11-T2.json 48182 B sha256 560576c7ce4f24e3c9e7a89e5fe2eec973c5280fcccdd103b16f2a7105f13f7b"]
+ok   C refused: a limit with its ± dropped
+FAIL C refused: a limit with a zero ±  → [0,"timeline.html written; tl-2026-11-T2.json 48109 B sha256 ca8e593c9f363e7a71c4c8b23c30be2931169f9e04bf919a96c6ed1e63442b91"]
+FAIL C refused: a limit given an invented older end  → [0,"timeline.html written; tl-2026-11-T2.json 48132 B sha256 2ef14c3a7698ebe90da5c1ba23ca23fe1c75e6879c3b7d16feaddc18331a4b43"]
+FAIL C refused: a limit pointing the newer way  → [0,"timeline.html written; tl-2026-11-T2.json 48120 B sha256 402411d381cf020efd10f7e65375d494dc679197ded475244f883649764e24bf"]
+FAIL C refused: a limit with a sigma of 3  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 bb9e4ad98d55166530ee83f64264608e19d35d4d245c316a65bc3ba1d7aa56be"]
+FAIL C refused: a limit whose ± leaves the chart  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 30cf3611e404029b09536f91a55c7c5a5b878c8e77451c78e5a78e82571622c4"]
+FAIL C refused: a bracket with reversed ends  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 fef9d27253c7c308f71cb59c74e07a0ed958e989053aab9c2331a748ba48b3a3"]
+ok   C refused: a bracket end that is text
+FAIL C refused: a bracket with an extra field  → [0,"timeline.html written; tl-2026-11-T2.json 48132 B sha256 64ac9224f1212a08656fb173df45976cec4cf123243320a163b274cd882a5ed6"]
+FAIL C refused: stored ages that are not the source values  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 ebd0526cf8a66987b82dbe8136eb0b70356b45de7e126f68a2fda58801e17574"]
+FAIL C refused: a source unit this build does not know  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 586600fb90e911818ace589e8d97fff9d7b42b89cd9667625fefa114186b72ba"]
+FAIL C refused: a date with no source notation  → [1,"t\">As the source writes it: {e(c[\"source_notation\"])}. {e(c[\"confidence\"])}{cal}</p>')\n                                                                 ~^^^^^^^^^^^^^^^^^^^\nKeyError: 'source_notation'"]
+FAIL C refused: a date with no stated confidence  → [0,"timeline.html written; tl-2026-11-T2.json 48051 B sha256 2600998fa9b2755938b57d628c5b98ede641fd7beb6f7d3fca17525b41084de8"]
+FAIL C refused: a calibrated date counted from this year  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 7b7352fbf8b7b3e9e61b4b32991eb91d17ff739085d7d7f0291398a0e159a7c6"]
+FAIL C refused: calibrated ends beside uncalibrated units (mixed endpoints)  → [0,"timeline.html written; tl-2026-11-T2.json 48104 B sha256 9760709b9fec85564f30acda787389637aa69d6f755408851bc3b0bd1bcdbebe"]
+FAIL C refused: a calibration curve this build does not know  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 11e8a041c0f0eddf45ef291a78049d9118dd35bf6b576d97efa679c9b750fa83"]
+FAIL C refused: a probability that is not the notation's  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 9d883ba530ebb8489c3f3d3d9aceb3d8a56b1497077c62c30ce2eea83b2d2862"]
+FAIL C refused: a calibrated date with no laboratory number  → [0,"timeline.html written; tl-2026-11-T2.json 48109 B sha256 be982b4eea8128ba72a3ba2a2f48bdca214fe53314aa49289a9ef1c37bf618c9"]
+FAIL C refused: a find with no "what was dated"  → [0,"timeline.html written; tl-2026-11-T2.json 47476 B sha256 bafa41b7a1627c2875e1911b09a9639f1b7e8a2a3279c601402e66f668e998b3"]
+FAIL C refused: a find with two association claims  → [0,"timeline.html written; tl-2026-11-T2.json 48811 B sha256 054fc214e351c20c05bba5da436bd43784476b8f8f90a44dcdc4e9b40f68791d"]
+FAIL C refused: a find claim with no source  → [0,"timeline.html written; tl-2026-11-T2.json 47736 B sha256 a142dcbd1817a906160d4e48a161ca326a84ae973398f62f586dec1056ae4ecc"]
+ok   C refused: a claim type that is not a find's
+ok   C refused: a find id that does not start with f-
+ok   C refused: an evidence record that is a private path
+ok   C refused: a source checked after the release day
+ok   C refused: a change record that names a find the catalogue does not have
+FAIL C refused: a calibrated range with one end taken from another published calculation (GPT's reproduction: 41,700 to 40,827)  → [0,"timeline.html written; tl-2026-11-T2.json 48122 B sha256 6b77ba85179ddae907973fcaed5b717687f63e0d75dddfb9c2ed541bf5288267"]
+FAIL C refused: notation and values changed together, the claim's own words not  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 5a2fe4bd529e8f41b634b9870eef10293f93c661ba5fcd577939efc8b6295114"]
+FAIL C refused: notation, values and words all changed to a mixed result: not the result the evidence record lists  → [0,"timeline.html written; tl-2026-11-T2.json 48124 B sha256 6e9991420cb2495102613f7cf6a68d1da7de52c6c45198737735b622b1d70d4e"]
+FAIL C refused: an axis claim naming no selected result  → [0,"timeline.html written; tl-2026-11-T2.json 48101 B sha256 2ff2a82a74e4ed5c8d7d76d39fba12800f22a61bb52baa27827fd2172d4d492c"]
+FAIL C refused: a result id the evidence record does not list  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 87d3c4c647dbdd761168426323fc22286f1204d12ea665496f877fde46083d64"]
+FAIL C refused: two finds naming one result  → [0,"timeline.html written; tl-2026-11-T2.json 48118 B sha256 a490358c231ad240ed7c3f91daf2c1706906971864afa6585a10f60e5c92298a"]
+FAIL C refused: a limit written without its ±  → [0,"timeline.html written; tl-2026-11-T2.json 48112 B sha256 cfd96824aadc6eaa62f3a656781b242827aef30809f8a7555b7525c8eafa636c"]
+FAIL C refused: a bracket given a probability  → [0,"timeline.html written; tl-2026-11-T2.json 48124 B sha256 40fd36375320a9982121f527a0370f540b65765e746594367c5dfe47713a28fc"]
+ok   C refused: a published-style revision id on a finds build with no release record
+ok   D control: 3 finds build, with the same lane, the same checks and 3 entries on it
+ok   D control: 1 find build, with the same lane, the same checks and 1 entry on it
+ok   D the device clock at 1990 and at 2090 gives byte-identical catalogues and pages; the check mode agrees across the two clocks
+ok   D the fake clock itself works (2090 seen by time and datetime)
+timeline-finds-build: 31 pass, 43 fail (BREAK=no-find-checks)
