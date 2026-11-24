@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 02:48:03 UTC — **TIMELINE PAGE RELEASED: end-Cretaceous story, `tl-2026-11-R3`; main `1d0c6dd`; served hashes and live page checked** (Timeline thread; Chad: "Approve: merge timeline-story-rc into main (page release: end-Cretaceous story, tl-2026-11-R3, release date 24 Nov 2026), with served-hash and live checks.")
+- **Merge `ea39975`** of `timeline-story-rc` `efeb145` on main `419ccb4`. One conflict (`phase1/timeline-catalogue-hub.test.mjs`) resolved to main's version. Page files changed: `timeline.html`, `timeline.js`, `style.css`; new `assets/timeline/tl-2026-11-R3/`. `phase1/worker.js` untouched (`db4f9cdf…1aa5`, hub-alignment 6 pass).
+- **`1d0c6dd`, test only, not on the reviewed branch:** `timeline-changes-ui` now builds its pinned and unpinned hub fixtures from the aligned Worker (it stopped with "worker anchors missing" on the merged tree). No served byte changed. Not seen by GPT.
+- **Before the push:** hub 0.6.24, R3 route exact (02:47:29 UTC); ten Timeline suites and the generator check pass on the merged tree, 0 failures.
+- **Served (02:48:55 UTC):** page, script, stylesheet, both image renditions and SOURCE.json equal the release hashes. **Live (02:49:14 UTC):** the entry opens with its account, image, credit, scoped review note and working citation buttons; footer shows 24 Nov 2026 and R3.
+- **Known effect on another thread's suite:** `animals-tab-ui` 13c, 13d, 13e compare page files with a fixed earlier main and will keep failing until that baseline moves.
+- **Not done:** real phone, Safari, screen reader, 200 % zoom; REGISTER, START-HERE, HANDOVER entries; Mac sync; Project copies. Record: `reviews/2026-11-23-timeline-story-release-rc.md` section 10 (commit `3467e5f`; that commit's message names STATUS but carries the record only).
+
 ## 24 Nov 02:45 UTC (clock reading) — **Animals: NOAA's first reply to the bottlenose dolphin enquiry recorded. Contact established; two questions asked; no data access, no permission. Docs only; nothing changed on the live page.** (page: none; Animals thread)
 - **The reply (pasted by Chad on 24 Nov; shown in his mail view as Mon 23 Nov, 10:22 PM, time zone not stated):** Dr Jenny Litz, Marine Mammal Branch Chief, NOAA Southeast Fisheries Science Center. They are looking into it. She asks whether Gulf tracks are acceptable as well as mid-Atlantic coast tracks, and whether the aim is the journey of just a few animals. A fuller answer is likely after the Thanksgiving holiday.
 - **Recorded:** `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` rev 3: section A filled from the pasted thread (who it is now with, the bounce, the resend shown as Wed 18 Nov), the reply and the covering note quoted, contact details left out.
