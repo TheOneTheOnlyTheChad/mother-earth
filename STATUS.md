@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 02:54 UTC (clock reading) — **Earth from Space: GPT's review of the three Stage D documents adopted. Runbook rev 3.2, proposal rev 2.5, alert test plan rev 1.2. Docs only; nothing changed in production; Stage D NOT cleared** (production: none; Earth from Space thread)
+- **GPT's review (24 Nov, `EARTH-FROM-SPACE-STAGE-D-DOCS-REVIEW-2026-11-24.md` in GPT's folder on the Mac):** monitoring direction accepted; four focused revisions; no new defect in the hub code; nothing authorised.
+- **Adopted:** D1 cost is measured **before** Stage D in isolation (plan section 7: a second throwaway Worker bound only to a throwaway D1 database; the alert fixture keeps no bindings); an eight-cell receipt matrix, and only a complete one closes runbook P4 (M6 stands); an evidence preflight before the Stage D line (runbook P11, 11a); a pause alert is not proof of a pause; the final result is reviewed after the late-row look and before the window variables go.
+- **Corrected:** plan rev 1.1 said the fixture build was covered by Chad's go. It is not: that go was for the documents. **No build go exists.**
+- **Not yet done:** GPT's check of these revisions (review copies: Mac `_review/earth-from-space-stage-d-docs-r2/`). Chad's decisions T3 and T5 (plan section 11). Nothing in plan section 7 has been run.
+- **Read back 24 Nov 02:35 UTC, read-only:** hub 0.6.24, 25 bindings, `EARTHVIEW_ENABLED` `manual`, no window, four crons; UptimeRobot eight monitors Up, none for Earth from Space.
+- **For the Timeline thread's record:** the page merge commit on main is `19f4e07` (parents `419ccb4`, `efeb145`). The entry below names it `ea39975`; no commit of that name is on main.
+
 ## 24 Nov 02:48:03 UTC — **TIMELINE PAGE RELEASED: end-Cretaceous story, `tl-2026-11-R3`; main `1d0c6dd`; served hashes and live page checked** (Timeline thread; Chad: "Approve: merge timeline-story-rc into main (page release: end-Cretaceous story, tl-2026-11-R3, release date 24 Nov 2026), with served-hash and live checks.")
 - **Merge `ea39975`** of `timeline-story-rc` `efeb145` on main `419ccb4`. One conflict (`phase1/timeline-catalogue-hub.test.mjs`) resolved to main's version. Page files changed: `timeline.html`, `timeline.js`, `style.css`; new `assets/timeline/tl-2026-11-R3/`. `phase1/worker.js` untouched (`db4f9cdf…1aa5`, hub-alignment 6 pass).
 - **`1d0c6dd`, test only, not on the reviewed branch:** `timeline-changes-ui` now builds its pinned and unpinned hub fixtures from the aligned Worker (it stopped with "worker anchors missing" on the merged tree). No served byte changed. Not seen by GPT.
