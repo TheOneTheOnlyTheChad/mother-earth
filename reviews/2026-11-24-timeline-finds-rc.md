@@ -140,7 +140,7 @@ Rendered in Chromium; glyph width excludes the link's padding. Full figures: `â€
 | 0.05 Ma | 1280 / 390 | off view | off view | 398.7 / 113.9 | 22.4 / 6.4 |
 
 Every link is at least 44 Ã— 32 px at every window. "Mark" is a 14 px glyph at the date's place, not to scale.
-Reading: at today's 1 Ma limit the La Ferrassie range can never be drawn to scale, and Xiahe is 5.7 px on a phone. At 0.05 Ma both are to scale at 1280; on a phone La Ferrassie is 6.4 px wide inside a 44 px link. The 400,000-year view shows three of four to scale at 1280 and one (Dinaledi, plus the Omo band at 39 px) at 390.
+Reading: at today's 1 Ma limit the La Ferrassie range can never be drawn to scale, and Xiahe is 5.7 px on a phone. At 0.05 Ma both are to scale at 1280; on a phone La Ferrassie is 6.4 px wide inside a 44 px link. The 400,000-year view draws three of the four to scale at both widths; at 390 the Omo band is 39 px and the Xiahe bracket 14 px.
 
 ## 7. Known weaknesses, for GPT's judgement
 
