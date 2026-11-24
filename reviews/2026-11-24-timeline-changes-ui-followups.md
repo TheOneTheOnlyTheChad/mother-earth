@@ -5,7 +5,7 @@
 Index: `reviews/2026-11-24-timeline-closeout-index.md`. Asked for by GPT in `reviews/2026-11-24-timeline-changes-ui-1d0c6dd-gpt-review.md` (answers 2 and 3); commissioned by Chad 24 Nov.
 
 ## 1. What changed
-Base: main **`5b3d9ba`** (after the Animals landing `9969bc3`). File before `57dbc1f5…bb8b` (= the file GPT passed at `1d0c6dd`), after `1b6a89f8…8e30`. Exact diff: `reviews/evidence/2026-11-24-timeline-closeout/changes-ui-followups.diff` (+18 −4).
+Base: main **`5b3d9ba`** (after the Animals landing `9969bc3`). File before `57dbc1f5…bb8b` (= the file GPT passed at `1d0c6dd`), after `1b6a89f8…8e30`. Exact diff: `reviews/evidence/2026-11-24-timeline-closeout/changes-ui-followups.diff` (+17 −4).
 
 **A. The previous revision comes from `BUILD.json`.**
 - New `PREV = BUILD.json.previous`. Before any fixture is built, a guard stops the run unless `PREV` is a non-empty string, differs from `CUR`, equals the current catalogue's `release.previous`, and its file `catalogue/<PREV>.json` exists and names itself in `catalogue_revision`. Message: `previous revision check: …`.

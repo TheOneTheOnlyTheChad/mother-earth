@@ -8,7 +8,7 @@ Each item stands alone; review and answer them separately.
 | # | Item | Kind | Document | Changes in the repository |
 |---|---|---|---|---|
 | **1** | Travel record §9: the `data-px` fix and the wheel focus guard (commit `4913d18`, released in `03aff0a`, still in `19f4e07`) | Review of released code; fresh runs | `reviews/2026-11-24-timeline-travel-s9-review.md` | none (evidence only) |
-| **2** | `timeline-changes-ui`: permanent break `unpinned-is-pinned`; previous revision from `BUILD.json` checked against `release.previous`; `REV = R2` kept fixed | **Test only**, one file | `reviews/2026-11-24-timeline-changes-ui-followups.md` | `phase1/timeline-changes-ui.test.cjs` (+18 −4) |
+| **2** | `timeline-changes-ui`: permanent break `unpinned-is-pinned`; previous revision from `BUILD.json` checked against `release.previous`; `REV = R2` kept fixed | **Test only**, one file | `reviews/2026-11-24-timeline-changes-ui-followups.md` | `phase1/timeline-changes-ui.test.cjs` (+17 −4) |
 | **3** | "Timeline page updated" line: what its date is, and accurate wording | **Proposal, docs only** | `docs/concepts/TIMELINE-DATE-LABEL-PROPOSAL.md` | none |
 
 Evidence for all three: `reviews/evidence/2026-11-24-timeline-closeout/` (diffs, run logs, `SHA256SUMS`).
