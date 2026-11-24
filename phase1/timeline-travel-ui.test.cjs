@@ -20,12 +20,26 @@ const ROOT = path.resolve(__dirname, '..');
 const BREAK = process.env.BREAK || '', OLD = !!process.env.OLD, PERF = !!process.env.PERF;
 const OLD_COMMIT = 'a44e31d';   // main before this work (a fixed commit: "main" moves at the merge)
 const rd = f => OLD ? execFileSync('git', ['show', OLD_COMMIT + ':' + f], { cwd: ROOT, maxBuffer: 1 << 26 }).toString('utf8') : fs.readFileSync(path.join(ROOT, f), 'utf8');
-const REV = JSON.parse(fs.readFileSync(path.join(ROOT, 'phase1/timeline/BUILD.json'), 'utf8')).catalogue_revision;
+// From R4 (24 Nov 2026) the released page also has the finds lane, whose own rules (a 0.05 Ma narrowest window, thousand-year
+// ticks, the compact lane) are tested by timeline-finds-ui. This suite tests the explorer itself, as it is on a page WITHOUT finds:
+// the page is generated here, with this checkout's generator and script, from the frozen sources of the published R3
+// (phase1/timeline/fixtures/tl-2026-11-R3-src), and the hub route answers with the published R3 bytes. OLD=1 is unchanged.
+const R3PAGE = (() => { if (OLD) return null; const os = require('os'), { spawnSync } = require('child_process'), TL = path.join(ROOT, 'phase1/timeline');
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'tl-travel-r3-')), src = path.join(d, 'src'); fs.mkdirSync(path.join(src, 'catalogue'), { recursive: true });
+  for (const f of ['chart-v2026-06.5.json', 'entry-pliny-ep-6-16.json']) fs.copyFileSync(path.join(TL, f), path.join(src, f));
+  for (const f of ['BUILD.json', 'changes.json', 'big5.json']) fs.copyFileSync(path.join(TL, 'fixtures/tl-2026-11-R3-src', f), path.join(src, f));
+  for (const f of fs.readdirSync(path.join(TL, 'catalogue'))) fs.copyFileSync(path.join(TL, 'catalogue', f), path.join(src, 'catalogue', f));
+  fs.cpSync(path.join(TL, 'assets'), path.join(src, 'assets'), { recursive: true });
+  const pg = path.join(d, 'timeline.html'); fs.copyFileSync(path.join(ROOT, 'timeline.html'), pg);
+  const r = spawnSync('python3', [path.join(TL, 'build_timeline.py'), '--src', src, '--page', pg], { encoding: 'utf8' });
+  if (r.status !== 0) throw new Error('could not generate the R3 page: ' + r.stdout + r.stderr);
+  return fs.readFileSync(pg, 'utf8'); })();
+const REV = OLD ? JSON.parse(fs.readFileSync(path.join(ROOT, 'phase1/timeline/BUILD.json'), 'utf8')).catalogue_revision : 'tl-2026-11-R3';
 const CAT = fs.readFileSync(path.join(ROOT, 'phase1/timeline/catalogue/' + REV + '.json'));
 const C = JSON.parse(CAT.toString('utf8'));
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const SHA = sha(CAT);
-const HTML0 = rd('timeline.html'), JS0 = rd('timeline.js'), CSS0 = rd('style.css');
+const HTML0 = R3PAGE || rd('timeline.html'), JS0 = rd('timeline.js'), CSS0 = rd('style.css');
 let pass = 0, fail = 0;
 const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log('FAIL', name, info === undefined ? '' : JSON.stringify(info).slice(0, 500)); } };
 const must = (s, a, b) => { if (s.split(a).length !== 2) throw new Error('break anchor not found exactly once: ' + a.slice(0, 70)); return s.replace(a, b); };

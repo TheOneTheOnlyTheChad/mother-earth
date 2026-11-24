@@ -11,6 +11,7 @@
  *         hit-area | row-order
  *   rev 2: coarse-off | coarse-at-2 | tick-centred | focus-none | notation-unchecked | words-unchecked | clock-datum | compact-focus |
  *          compact-backtarget
+ *   release: span-eps (the narrowest window judged without allowing for the 1e-6 rounding of its ends)
  *   rev 3: wheel-redraw-release (the released behaviour: a redraw of the focused mark turns the wheel off) | wheel-trap (focus leaving never releases it)
  * Control: OLD=1 serves main's timeline.js instead; the suite must fail.
  * MEASURE=1 prints the drawn widths (figures are printed, never judged, beyond the checks below).
@@ -70,6 +71,7 @@ const brokenJs = js => {
     case 'wheel-redraw-release': return must(js, "addEventListener('focusout', ev => { if (redrawing) return; ", "addEventListener('focusout', ev => { ");
     case 'wheel-trap': return must(must(js, "addEventListener('focusout', ev => { if (redrawing) return; if (wheelOn && !xpl.contains(ev.relatedTarget)) setWheel(false);", "addEventListener('focusout', ev => { if (redrawing) return;"),
       "  if (wheelOn && E && !E.xpl.contains(document.activeElement)) setWheel(false);\n}", "}").replace("if (!xpl.contains(document.activeElement)) { setWheel(false); return; }", "if (false) { return; }");
+    case 'span-eps': return must(js, 'const SPAN_EPS = 2e-6;', 'const SPAN_EPS = 1e-9;');
     case '': case 'hit-area': case 'focus-none': return js;
     default: throw new Error('unknown BREAK ' + BREAK);
   }
@@ -155,6 +157,15 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   ok(`Z ${L}: no find link or row reaches past the explorer's edges`, z.inside, z);
   ok(`Z ${L}: the button and each link are at least 24 px high`, z.sizes.every(h => h >= 24), z.sizes);
   ok(`Z ${L}: the extinctions track still shows its five entries (marks or cluster members)`, (await p.evaluate(() => new Set([...document.querySelectorAll('#xpl .track a.mk')].map(a => a.dataset.entry)).size)) === 5);
+  // a cluster on the extinctions lane opens its list over the finds lane: its own buttons are the topmost thing where they are drawn
+  { await setWin(p, 4567, 0); const cls = await p.evaluate(() => [...document.querySelectorAll('#xpl .track .cl')].map(c => c.dataset.has)); const res = [];   // the whole span: the extinctions cluster
+    for (const has of cls) { await p.click(`#xpl .track .cl[data-has="${has}"] > button`); await p.waitForTimeout(150);
+      res.push(await p.evaluate(h => { const ul = document.querySelector(`#xpl .track .cl[data-has="${h}"] > ul`); if (!ul || ul.hidden) return [h, 'closed'];
+        const bs = [...ul.querySelectorAll('a, button')]; bs[bs.length - 1].scrollIntoView({ block: 'nearest' });
+        return [h, bs.every(b => { const q = b.getBoundingClientRect(), e = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return !!e && (e === b || b.contains(e)); })]; }, has));
+      await p.keyboard.press('Escape'); await p.waitForTimeout(100); }
+    ok(`Z ${L}: at the whole span, each extinction cluster's open list (${cls.length}) is drawn over the finds lane: every link and button in it is the topmost element`, cls.length > 0 && res.every(r => r[1] === true), [cls, res]); }
+  await setWin(p, 538.8, 0);
   await p.focus('#xpl .ftrack .fzb'); await p.keyboard.press('Enter'); await p.waitForTimeout(250);
   ok(`Z ${L}: the button opens the 400,000-year view and moves focus to the first find's own link (the button itself is gone)`, JSON.stringify(await view(p)) === '[0.4,0]' && (await p.evaluate(() => document.activeElement && document.activeElement.classList.contains('fmk') && document.activeElement.dataset.entry)) === IDS[0], [await view(p), await p.evaluate(() => document.activeElement && document.activeElement.outerHTML.slice(0, 80))]);
   // ---------- B. the 400,000-year view: one row per find, one link each, nothing between them
@@ -209,6 +220,10 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   const t5 = await p.evaluate(() => [...document.querySelectorAll('#xpl .scale .tk')].map(e => e.textContent));
   ok(`E ${L}: ticks at the narrowest window are finer than 100,000 years and distinct (${t5.join(' ')})`, t5.length >= 2 && new Set(t5).size === t5.length && t5.every(t => /^\d+$/.test(t) && +t <= 50), t5);
   if (process.env.MEASURE) console.log(`MEASURE ${L} window 0.05 Ma, lane ${R.W} px: ` + R.rows.filter(r => r.g).map(r => `${r.id} glyph ${r.g.w} hit ${r.hit.w}`).join(' · '));
+  // deep in time, where each end is rounded to 1e-6 Ma: the narrowest window still counts as the narrowest (found by the travel suite on
+  // the R4 candidate at 336.775 to 336.725 Ma: Zoom in stayed enabled and did nothing)
+  for (const [a, b] of [[336.775, 336.725], [336.775001, 336.725], [336.775, 336.725001]]) { await setWin(p, a, b); const v = await view(p);
+    ok(`E ${L}: a stored ${a} to ${b} Ma window (span ${(a - b).toFixed(6)}) is kept (to within the 1e-6 rounding of its ends, not refused for the landing view), and Zoom in is unavailable there`, Math.abs(v[0] - a) <= 2e-6 && Math.abs(v[1] - b) <= 2e-6 && (await p.getAttribute('[data-act="in"]', 'aria-disabled')) === 'true', v); }
   await setWin(p, 0.03, 0);
   ok(`E ${L}: a stored window narrower than the limit is refused: the landing view`, JSON.stringify(await view(p)) === '[538.8,0]', await view(p));
   // ---------- J. tick units either side of 2 million years

@@ -623,6 +623,7 @@ body.tl .axis .xpl .tk.first::before{left:0}
 body.tl .axis .xpl .tk.first{padding-left:4px}
 body.tl .axis .xpl .tk.last{padding-right:4px}
 body.tl .axis .xpl .ftrack.coarse{border-top:1px dashed var(--line)}
+body.tl .axis .xpl .lr.act.fl{z-index:1}   /* below the extinctions lane, so that lane's cluster list opens over the finds rows (R4 release candidate) */
 body.tl .axis .xpl .fcz{padding:6px 8px 8px;font:500 12px/1.5 var(--mono);color:var(--fg);cursor:default}
 body.tl .axis .xpl .fcz p{margin:0}
 body.tl .axis .xpl .fczl{margin-top:4px!important;display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}

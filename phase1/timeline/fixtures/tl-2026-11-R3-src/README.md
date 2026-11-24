@@ -1,0 +1,1 @@
+The source files of the published Timeline revision tl-2026-11-R3 (schema 3, released 24 Nov 2026), frozen when R4 became the release (24 Nov 2026), as they were at commit eec006c (= main 72ea123). Suites build R3 from these with the current generator and require the published bytes (catalogue/tl-2026-11-R3.json, sha256 f1a5fab2…0993, 31,636 B). Not release sources. Never edited.

@@ -34,12 +34,14 @@ const gen = (args, fakeT) => { const [a, b] = PATCH[BREAK] || ['', '']; const r 
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'tl-finds-build-'));
 let n = 0;
 /** A complete source folder: the released sources, with the rehearsal's own files over them, then `change(dir)`. */
-function source(change, { rehearsal = true } = {}) {
+function source(change, { rehearsal = true, r3 = false } = {}) {
   const dir = path.join(TMP, 's' + (++n)), src = path.join(dir, 'src');
   fs.mkdirSync(path.join(src, 'catalogue'), { recursive: true }); fs.mkdirSync(path.join(src, 'assets'), { recursive: true });
   for (const f of ['chart-v2026-06.5.json', 'entry-pliny-ep-6-16.json', 'big5.json', 'changes.json', 'BUILD.json']) fs.copyFileSync(path.join(TL, f), path.join(src, f));
   for (const f of fs.readdirSync(path.join(TL, 'catalogue'))) fs.copyFileSync(path.join(TL, 'catalogue', f), path.join(src, 'catalogue', f));
   for (const f of fs.readdirSync(path.join(TL, 'assets'))) fs.copyFileSync(path.join(TL, 'assets', f), path.join(src, 'assets', f));
+  if (r3) { for (const f of ['BUILD.json', 'changes.json', 'big5.json']) fs.copyFileSync(path.join(R3SRC, f), path.join(src, f)); }   // the frozen R3 sources: no finds file
+  else if (!rehearsal) fs.copyFileSync(path.join(TL, 'finds.json'), path.join(src, 'finds.json'));     // the release sources
   if (rehearsal) for (const f of fs.readdirSync(RH)) fs.copyFileSync(path.join(RH, f), path.join(src, f));
   if (change) change(src);
   const page = path.join(dir, 'timeline.html'); fs.copyFileSync(path.join(ROOT, 'timeline.html'), page);
@@ -50,14 +52,26 @@ const edit = (f, fn) => src => { const p = path.join(src, f), o = J(p); fn(o); f
 const finds = fn => edit('finds.json', fn);
 const AX = (o, i) => o.finds[i].claims.find(k => k.axis);
 
-// ---------- A. the released page and catalogue, by this generator, are what main has
+// ---------- A. the release (R4) is what the committed files hold; the published R3 is still what this generator makes from R3's frozen sources
+const R4 = 'tl-2026-11-R4', R4_SHA = '74b1f8b165283b98023876fbd9e64b876bea17030973bfbc4ebea5f3ec8900ca', R4_BYTES = 48134, R3SRC = path.join(TL, 'fixtures/tl-2026-11-R3-src');
 { const r = gen(['--check']);
-  ok(`A the released sources still give the released page and catalogue (${R3}, sha256 ${R3_SHA}…) with this generator`, r.code === 0 && r.out.includes(`${R3}.json (sha256 ${R3_SHA}`), r.out);
-  const m = run(null, { rehearsal: false }), live = fs.readFileSync(path.join(TL, 'catalogue', R3 + '.json'));
-  ok('A a fresh build from the released sources is byte-identical to the committed R3 catalogue and to the committed page', m.code === 0 && m.cat && Buffer.compare(m.cat, live) === 0 && m.html === fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'), [m.code, m.out]);
-  const f = run(src => fs.copyFileSync(path.join(RH, 'finds.json'), path.join(src, 'finds.json')), { rehearsal: false });
-  ok('A a finds file beside schema-3 sources changes nothing: the same R3 bytes and the same page', f.code === 0 && f.cat && Buffer.compare(f.cat, live) === 0 && f.html === m.html && !/id="finds"/.test(f.html), [f.code, f.out]);
-  ok('A the rehearsal folder holds no file of the released revision and nothing under assets/timeline or the published catalogue folder names T2', !fs.existsSync(path.join(TL, 'catalogue', REV + '.json')) && !fs.existsSync(path.join(ROOT, 'assets/timeline', REV)) && !fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8').includes(REV) && !fs.readFileSync(path.join(ROOT, 'phase1/worker.js'), 'utf8').includes(REV)); }
+  ok(`A the release sources give the committed page and catalogue (${R4}, sha256 ${R4_SHA.slice(0, 8)}…) with this generator`, r.code === 0 && r.out.includes(`${R4}.json (sha256 ${R4_SHA})`), r.out);
+  const cat4 = fs.readFileSync(path.join(TL, 'catalogue', R4 + '.json')), B4 = J(path.join(TL, 'BUILD.json'));
+  ok('A the committed R4 catalogue is the frozen candidate: 48,134 B, sha256 74b1f8b1…00ca, schema 4, release date 25 Nov 2026, previous R3', sha(cat4) === R4_SHA && cat4.length === R4_BYTES && B4.catalogue_revision === R4 && B4.schema === 4 && B4.release_date === '2026-11-25' && B4.previous === R3, [sha(cat4), cat4.length, B4]);
+  const m = run(null, { rehearsal: false });
+  ok('A a fresh build from the release sources is byte-identical to the committed R4 catalogue and to the committed page', m.code === 0 && m.cat && Buffer.compare(m.cat, cat4) === 0 && m.html === fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'), [m.code, m.out]);
+  const live3 = fs.readFileSync(path.join(TL, 'catalogue', R3 + '.json'));
+  ok(`A the published R3 file is unchanged (${R3}, sha256 ${R3_SHA}…, 31,636 B)`, sha(live3).startsWith(R3_SHA) && live3.length === 31636);
+  const g3 = run(null, { rehearsal: false, r3: true });
+  ok('A this generator still makes the published R3 catalogue byte for byte from its frozen sources, with a schema-3 page and no finds section', g3.code === 0 && g3.cat && Buffer.compare(g3.cat, live3) === 0 && g3.html.includes(`data-catalogue-sha="${sha(live3)}"`) && g3.html.includes('data-catalogue-schema="3"') && !/id="finds"/.test(g3.html), [g3.code, g3.out]);
+  const f = run(src => fs.copyFileSync(path.join(RH, 'finds.json'), path.join(src, 'finds.json')), { rehearsal: false, r3: true });
+  ok('A a finds file beside schema-3 sources changes nothing: the same R3 bytes and the same page', f.code === 0 && f.cat && Buffer.compare(f.cat, live3) === 0 && f.html === g3.html && !/id="finds"/.test(f.html), [f.code, f.out]);
+  ok('A nothing published names the rehearsal revision T2: no catalogue file, no image folder, not the page, not the hub file', !fs.existsSync(path.join(TL, 'catalogue', REV + '.json')) && !fs.existsSync(path.join(ROOT, 'assets/timeline', REV)) && !fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8').includes(REV) && !fs.readFileSync(path.join(ROOT, 'phase1/worker.js'), 'utf8').includes(REV) && !cat4.toString().includes(REV));
+  const rel = JSON.parse(cat4), rf = J(path.join(TL, 'finds.json')), hf = J(path.join(RH, 'finds.json'));
+  ok('A the release finds are the rehearsal finds GPT accepted, claim for claim; only the file note differs', JSON.stringify(rf.finds) === JSON.stringify(hf.finds) && JSON.stringify(rf.sources) === JSON.stringify(hf.sources) && rf.axis_convention === hf.axis_convention && rf.note !== hf.note && /^Release source for tl-2026-11-R4/.test(rf.note));
+  const ch = rel.changes.filter(c => c.revision === R4);
+  ok('A the R4 change record: one record, "added", naming the four finds, in the reviewed words', ch.length === 1 && ch[0].kind === 'added' && ch[0].entries.join() === 'f-dinaledi-chamber,f-omo-1,f-xiahe-2,f-la-ferrassie-bone' && ch[0].text === 'Opened the Humans and human relatives lane with four dated finds. Each mark is the date or age limit one source gives for one find or deposit. It is not a record of how long a group lived.', ch);
+  ok('A the release catalogue carries no rehearsal word or rehearsal note', !/rehears|not published/i.test(cat4.toString()), null); }
 
 // ---------- B. the rehearsal builds, and says what the source file says
 const G = run(null); const SRC = J(path.join(RH, 'finds.json'));

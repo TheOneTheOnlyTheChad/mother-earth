@@ -21,7 +21,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202612250800';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202612250900';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
@@ -524,7 +524,11 @@ const r6 = v => Math.round(v * 1e6) / 1e6;
 
 // ----- the window: validation, clamping, history
 const validWin = w => !!lim && Array.isArray(w) && w.length === 2 && isNum(w[0]) && isNum(w[1])
-  && w[1] >= 0 && w[0] <= lim.O && w[0] - w[1] >= MIN_SPAN - 1e-9;
+  && w[1] >= 0 && w[0] <= lim.O && w[0] - w[1] >= MIN_SPAN - SPAN_EPS;
+// Both ends of a window are rounded to 1e-6 Ma, so its span can differ from the narrowest window by up to 1e-6 either way. The
+// narrowest window must count as the narrowest (Zoom in unavailable, a stored one accepted) after that rounding. Seen at 0.05 Ma
+// deep in time: 336.775001 to 336.725 (R4 release candidate, 24 Nov 2026); the same could happen at 1 Ma before
+const SPAN_EPS = 2e-6;
 function clampWin(a, b) {
   const s = Math.min(Math.max(a - b, MIN_SPAN), lim.O);
   const o = Math.min(Math.max(a, s), lim.O);
@@ -764,7 +768,7 @@ function renderNow() {
     : `Showing ${fmt(a, s)} to ${fmt(b, s)} Ma (million years ago). Span ${fmt(s, s)} million years. Older on the left.`)
     + (a > lim.W ? ` Older than ${c.chart.window.approximate ? '~' : ''}${c.chart.window.ma_text || lim.W} Ma this release has no period bands and no reviewed entries.` : '');
   const dis = (sel_, on) => axis.querySelector(sel_).setAttribute('aria-disabled', String(on));
-  dis('[data-act="older"]', a >= lim.O); dis('[data-act="newer"]', b <= 0); dis('[data-act="in"]', s <= MIN_SPAN + 1e-9); dis('[data-act="out"]', s >= lim.O);
+  dis('[data-act="older"]', a >= lim.O); dis('[data-act="newer"]', b <= 0); dis('[data-act="in"]', s <= MIN_SPAN + SPAN_EPS); dis('[data-act="out"]', s >= lim.O);
   axis.querySelector('[data-preset="earth"]').setAttribute('aria-pressed', String(a === lim.O && b === 0));
   axis.querySelector('[data-preset="complex"]').setAttribute('aria-pressed', String(a === lim.W && b === 0));
   const rec = axis.querySelector('[data-preset="recent"]'); if (rec) rec.setAttribute('aria-pressed', String(a === RECENT && b === 0));
