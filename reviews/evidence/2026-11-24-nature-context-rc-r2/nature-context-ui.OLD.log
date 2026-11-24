@@ -1,0 +1,122 @@
+FAIL  F1 the row names its scope: containing 4° cell
+      got: "Forest disturbance"
+FAIL  F1 count, start date, version, query time and age, groups, coverage
+      got: "199,592 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 198,963 · high 95 · highest 534 · queried 2026-11-23 09:42 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F1 caveats: pixels not hectares, first detection ≠ clearing, confidence can change, change time not supplied
+      got: "199,592 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 198,963 · high 95 · highest 534 · queried 2026-11-23 09:42 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F1 no fixed window, no end date, no "published"
+      got: "199,592 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 198,963 · high 95 · highest 534 · queried 2026-11-23 09:42 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F2 a valid zero is the source's, inside the monitored masks, not proof, coverage stays partial
+      got: "0 (source-reported zero) alert pixels (10 m) published in the 7 days from 2026-11-15 · nominal 0 · high 0 · highest 0 · queried 2026-11-22 17:42 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F3 outside coverage: not covered, latitude alone is not forest, never zero
+      got: "not covered — outside the swept tropical land cells (alert systems run between 30°N and 30°S only) · retrieved 2026-11-24 06:45 UTC"
+FAIL  F5 exactly 4 days: no warning
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-13 · nominal 10 · high 0 · highest 0 · queried 2026-11-20 07:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F6 4 days + 1 s: warning, actual age and query time shown
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-13 · nominal 10 · high 0 · highest 0 · queried 2026-11-20 07:09 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F7 missing query time
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 10 · high 0 · highest 0 · queried source time not supplied · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F7 malformed query time
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 10 · high 0 · highest 0 · queried yesterday UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F7 impossible calendar day (31 February)
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 10 · high 0 · highest 0 · queried 2026-02-31 09:00 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F8 ahead by 299 s: ahead within tolerance, no age, no negative "ago"
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-17 · nominal 10 · high 0 · highest 0 · queried 2026-11-24 07:14 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F8 ahead by exactly 300 s: still within tolerance
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-17 · nominal 10 · high 0 · highest 0 · queried 2026-11-24 07:15 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F8 ahead by 301 s: query time unknown
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-17 · nominal 10 · high 0 · highest 0 · queried 2026-11-24 07:15 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F9 missing since: not recorded, not the envelope's 2026-11-17
+      got: "10 alert pixels (10 m) published in the 7 days from not provided · nominal 10 · high 0 · highest 0 · queried 2026-11-24 06:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F9 impossible since (31 November): unreadable
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-31 · nominal 10 · high 0 · highest 0 · queried 2026-11-24 06:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F10 version "latest": not resolved, no date made from it
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 10 · high 0 · highest 0 · queried 2026-11-24 06:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F11 unknown categories listed (non-zero and zero) and total qualified
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 7 · high 2 · highest 1 · queried 2026-11-24 06:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F11 a provider key is escaped, never markup
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 7 · high 2 · highest 1 · queried 2026-11-24 06:10 UTC <span class=\"q\">· pixels, not hectares or trends</span> <span class=\"q\">· retrieved 2026-11-24 06:45 UTC</span>"
+FAIL  F11 zero known with a non-zero unknown: no "nothing returned" claim
+      got: "0 (source-reported zero) alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 0 · high 0 · highest 0 · queried 2026-11-24 06:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F11 a known group missing: highest "not provided", no total, not 0
+      got: "5 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 5 · high 0 · highest not provided · queried 2026-11-24 06:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F12 run down with a retained cell: cell kept with its own time; the failure is stated
+      got: "199,592 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 198,963 · high 95 · highest 534 · queried 2026-11-23 09:42 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  A1 stale envelope, status ok: "last recorded run … older than its refresh limit", never "did not succeed"
+      got: "199,592 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 198,963 · high 95 · highest 534 · queried 2026-11-23 09:42 UTC · pixels, not hectares or trends · retrieved 2026-11-24 01:10 UTC · stale: older than its refresh limit"
+FAIL  F14 a 20-day window prints its own since; no "7 days" claimed for the cell
+      got: "42 alert pixels (10 m) published in the 7 days from 2026-11-01 · nominal 40 · high 2 · highest 0 · queried 2026-11-21 09:00 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  F15 fresh envelope, old cell: cell warning shown, layer not called stale
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-14 · nominal 10 · high 0 · highest 0 · queried 2026-11-19 07:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  A3 pending: unknown, no count, no query or first-asked time invented
+      got: "unknown — in the sweep, not answered yet · retrieved 2026-11-24 06:45 UTC"
+FAIL  A5 collection: one daily snapshot (several same-day queries are one row), no pixel history
+      got: "1 queries of this cell retained (2026-11-23 to 2026-11-23)"
+FAIL  A5 collection: plural
+      got: "12 queries of this cell retained (2026-11-02 to 2026-11-23)"
+FAIL  A2 summary
+      got: "TypeError: ME.forestSummary is not a function"
+FAIL  A6 summary
+      got: "TypeError: ME.forestSummary is not a function"
+FAIL  A7 offsets
+      got: "TypeError: ME.forestAge is not a function"
+FAIL  A8 raw count disagrees with the groups: the groups' sum is shown and the disagreement said
+      got: "12 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 10 · high 0 · highest 0 · queried 2026-11-24 06:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  A8 no raw count, complete groups: the sum, no disagreement note
+      got: "not provided alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 8 · high 1 · highest 1 · queried 2026-11-24 06:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  B1 card: page-owned unit, no "published in the last 7 days"
+      got: {"v":"199,622","small":"alert pixels (10 m) · published in the last 7 days","o":"5 of 559 tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset v20261123"}
+FAIL  B1 card: the total is the sum of complete cells; versions listed with counts, the unresolved cell and the unknown category named
+      got: {"v":"199,622","small":"alert pixels (10 m) · published in the last 7 days","o":"5 of 559 tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset v20261123"}
+FAIL  B2 panel: forest row label and corrected wording on the page
+      got: "199,592 alert pixels (10 m) published in the 7 days from 2026-11-16 · nominal 198,963 · high 95 · highest 534 · queried 2026-11-23 09:42 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  B2 panel: collection line counts daily snapshots
+      got: "12 queries of this cell retained (2026-11-02 to 2026-11-23)"
+FAIL  B2 panel: no "queries of this cell retained" anywhere
+FAIL  B3 panel: a cell queried 5 days before the page clock carries the warning; the 25-min-old layer is not called stale
+      got: "10 alert pixels (10 m) published in the 7 days from 2026-11-14 · nominal 10 · high 0 · highest 0 · queried 2026-11-19 07:10 UTC · pixels, not hectares or trends · retrieved 2026-11-24 06:45 UTC"
+FAIL  B4 panel: a provider key reaches the page as text, not markup
+      got: "<dt>Selected</dt><dd>4° cell 22_29 (g4:22_29) · 6°S–2°S, 64°W–60°W · about 197,000 km² (cells shrink toward the poles)</dd><dt>Read this first</dt><dd><b class=\"pstmt\">Listed together because they share this 4° cell. Nothing here states a connection between them.</b></dd><dt>Earthquakes</dt><dd>none in the feed window (M2.5+, last 24 h) reached us for this cell — not a statement that none occurred"
+FAIL  B5 pending: unknown, no count, no time
+      got: "unknown — in the sweep, not answered yet · retrieved 2026-11-24 06:45 UTC"
+FAIL  B5 Cape Town's cell: not covered, page-owned wording
+      got: "not covered — x · retrieved 2026-11-24 06:45 UTC"
+FAIL  B7 cell inspector: page-owned Quantity, not the hub's "published" string
+      got: {"opened":true,"q":"10 m alert pixels published in the last 7 days per 4° cell, by GFW confidence (nominal | high | highest) — counts of pixels, never hectares or trends; detection date ≠ clearing date"}
+FAIL  B7 cell inspector: Queried row has age, own since and version; groups list the unrecognised key as excluded
+      got: ["2026-11-24 06:10 UTC · alerts dated from 2026-11-16 · dataset v20261123","nominal 7 · high 2 · highest 1 (highest = detected by more than one alert system)"]
+FAIL  B7 cell inspector: Cell total has no fixed window and carries the panel's qualification
+      got: "10 alert pixels published in the 7 days before this cell's query"
+FAIL  B10 report: a sum across cells with their own dates, versions listed, not one common period
+      got: "As of 07:10 UTC: 0 earthquakes M2.5+ observed in the last 24 h (USGS; feed generated –, 0 s old at retrieval; retrieved 60 s ago); fires: unknown — source returned an empty file (0 bytes) — not a validated zero; 0 vessel identities received during a undefined s AIS sample ending 07:09 UTC (aisstream.io, undefined Class A + undefined Class B; about every 30 min while the home Mac is awake and online (launchd; verified by two unattended samples, 1 Nov 2026) — gaps when it sleeps; terrestrial receivers only; positions between samples unknown); 199,622 forest-disturbance alert pixels published in the last 7 days across 5 queried cells (535 highest-confidence; Global Nature Watch integrated aler
+FAIL  B11 Sources Measures: page-owned forest Quantity
+      got: "Forest disturbance10 m alert pixels published in the last 7 days per 4° cell, by GFW confidence (nominal | high | highest) — counts of pixels, never hectares or trends; detection date ≠ clearing date"
+FAIL  B11 Sources Windows: own date per cell, no common period; cadence says retries lengthen the sweep
+      got: "Forest disturbancealerts whose detection date falls in the 7 days before each cell's query; detection date ≠ clearing date6 cells every 30 min (one GFW query each, sequential); full sweep ≈ 2 days"
+FAIL  B12 Sources forest paragraph: first detected, no "published in the 7 days", the 4-day mark explained
+      got: "Forest disturbance. Global Nature Watch (read 1 Nov 2026): \"these alerts detect forest or tree cover disturbances. This product does not distinguish between human-caused and other disturbance types\"; \"We do not recommend using deforestation alerts for global or regional trend assessment, nor for area estimates.\" Recent alerts include false positives that may later be removed; GLAD low-confidence alerts are removed after 180 days, RADD after 90. Counts are 10 m alert pixels published in the 7 days before each cell's query — never hectares, never a trend. Only cells between 30°N and 30°S with land are queried (559 at 4°, six every 30 minutes, so a full sweep takes about two days and each 
+FAIL  B12 nowhere on Sources: "published in the last 7 days" or "published in the 7 days"
+      got: "n samples unknown); 199,622 forest-disturbance alert pixels published in the last 7 days across 5 queried ce"
+FAIL  B15 all incomplete: card shows no number and says count not available (not stale, not an outage)
+      got: {"v":"5","m":"Global Nature Watch · integrated alerts · across 1 cells, 0 highest-confidence · last run 25 min ago","o":"1 of 559 tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset v20261123"}
+FAIL  B15 all incomplete: report says count not available, never a 0
+      got: "As of 07:10 UTC: 0 earthquakes M2.5+ observed in the last 24 h (USGS; feed generated –, 0 s old at retrieval; retrieved 60 s ago); fires: unknown — source returned an empty file (0 bytes) — not a validated zero; 0 vessel identities received during a undefined s AIS sample ending 07:09 UTC (aisstream.io, undefined Class A + undefined Class B; about every 30 min while the home Mac is awake and online (launchd; verified by two unattended samples, 1 Nov 2026) — gaps when it sleeps; terrestrial receivers only; positions between samples unknown); 5 forest-disturbance alert pixels published in the la"
+FAIL  B16 inspector, incomplete groups: Cell total says count not available like the panel, not the raw 5
+      got: {"total":"5 alert pixels published in the 7 days before this cell's query","conf":"nominal 5 · high 0 · highest not provided (highest = detected by more than one alert system)"}
+FAIL  B17 no cells: the existing unknown rule applies (no number, no "0 highest", "no cell has answered yet"); report unknown, never 0
+      got: {"card":{"v":"–","m":"Global Nature Watch · integrated alerts · across 0 cells, 0 highest-confidence · last run 25 min ago · no cell has answered yet — the sweep has not started","o":"0 of 559 tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset v20261123"},"rep":"forest disturbance: unknown — no cell has answered yet — the sweep has not started"}
+FAIL  B18 one complete zero: card 0 and report "0 … summed across 1 cell"
+      got: {"card":{"v":"0","m":"Global Nature Watch · integrated alerts · across 1 cells, 0 highest-confidence · last run 25 min ago","o":"1 of 559 tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset v20261123"},"rep":"forest-disturbance alert pixels published in the last 7 days across 1 queried cells (0 highest-confidence"}
+FAIL  B19 mixed: card sums the 3 complete cells, names the incomplete one
+      got: {"v":"199,609","m":"Global Nature Watch · integrated alerts · across 4 cells, 535 highest-confidence · last run 25 min ago","o":"4 of 559 tropical land cells queried (each cell carries its own query time; sweep ≈ 2 days); dataset v20261123"}
+FAIL  B19 mixed: report sums 3 cells and names the exclusion
+      got: "As of 07:10 UTC: 0 earthquakes M2.5+ observed in the last 24 h (USGS; feed generated –, 0 s old at retrieval; retrieved 60 s ago); fires: unknown — source returned an empty file (0 bytes) — not a validated zero; 0 vessel identities received during a undefined s AIS sample ending 07:09 UTC (aisstream.io, undefined Class A + undefined Class B; about every 30 min while the home Mac is awake and online (launchd; verified by two unattended samples, 1 Nov 2026) — gaps when it sleeps; terrestrial recei"
+FAIL  B19 inspector, raw count disagrees: groups' sum with the disagreement said
+      got: {"total":"12 alert pixels published in the 7 days before this cell's query","conf":"nominal 10 · high 0 · highest 0 (highest = detected by more than one alert system)"}
+FAIL  B19 inspector, no raw count: the groups' sum, no "undefined"
+      got: {"total":"undefined alert pixels published in the 7 days before this cell's query","conf":"nominal 8 · high 1 · highest 1 (highest = detected by more than one alert system)"}
+FAIL  B19 inspector, incomplete cell in a mixed layer: count not available
+      got: {"total":"5 alert pixels published in the 7 days before this cell's query","conf":"nominal 5 · high 0 · highest not provided (highest = detected by more than one alert system)"}
+isolation: 105 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui (OLD=1: main's page files): 13 passed, 60 failed — F1 F2 F3 F5 F6 F7 F8 F9 F10 F11 F12 A1 F14 F15 A3 A5 A2 A6 A7 A8 B1 B2 B3 B4 B5 B7 B10 B11 B12 B15 B16 B17 B18 B19

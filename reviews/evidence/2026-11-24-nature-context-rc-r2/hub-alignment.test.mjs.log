@@ -1,0 +1,7 @@
+ok    the record is readable: hub name, version, sha256, byte count, deploy time and read-back time
+ok    worker.js states exactly one version
+ok    phase1/worker.js is the recorded deployed hub byte for byte, or the recorded candidate built on it
+ok    byte count agrees with the record
+ok    the version in the file is the version in the record
+ok    a tree holding the deployed file carries no stale candidate entry
+hub-alignment: 6 passed, 0 failed (worker.js = deployed hub 0.6.24)

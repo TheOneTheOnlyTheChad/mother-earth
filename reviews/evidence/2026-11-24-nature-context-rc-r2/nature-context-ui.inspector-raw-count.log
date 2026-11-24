@@ -1,0 +1,13 @@
+FAIL  B7 cell inspector: Cell total has no fixed window and carries the panel's qualification
+      got: "10 alert pixels (10 m), first detected on or after this cell's own date (see Queried)"
+FAIL  B16 inspector, incomplete groups: Cell total says count not available like the panel, not the raw 5
+      got: {"total":"5 alert pixels (10 m), first detected on or after this cell's own date (see Queried)","conf":"nominal 5 · high 0 · highest not provided (highest = detected by more than one alert system)"}
+FAIL  B19 inspector, raw count disagrees: groups' sum with the disagreement said
+      got: {"total":"12 alert pixels (10 m), first detected on or after this cell's own date (see Queried)","conf":"nominal 10 · high 0 · highest 0 (highest = detected by more than one alert system)"}
+FAIL  B19 inspector, no raw count: the groups' sum, no "undefined"
+      got: {"total":"undefined alert pixels (10 m), first detected on or after this cell's own date (see Queried)","conf":"nominal 8 · high 1 · highest 1 (highest = detected by more than one alert system)"}
+FAIL  B19 inspector, incomplete cell in a mixed layer: count not available
+      got: {"total":"5 alert pixels (10 m), first detected on or after this cell's own date (see Queried)","conf":"nominal 5 · high 0 · highest not provided (highest = detected by more than one alert system)"}
+isolation: 103 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui (BREAK=inspector-raw-count): 73 passed, 5 failed — B7 B16 B19

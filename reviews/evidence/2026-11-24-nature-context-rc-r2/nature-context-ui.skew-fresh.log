@@ -1,0 +1,7 @@
+FAIL  F8 ahead by 301 s: query time unknown
+      got: "10 alert pixels (10 m), first detected on or after 2026-11-17, as held in version v20261123, queried 2026-11-24 07:15 UTC (ahead of this page's clock by 301 s, within the 5-minute tolerance; no age is claimed) · nominal 10 · high 0 · highest 0 · coverage partial · pixels, not hectares or a trend; first detection is not the date of clearing; confidence can rise, or an alert can be removed, after this query; when confidence changed is not supplied by the source · layer run 2026-11-24 06:45 UTC"
+FAIL  A7 offset form ahead by 301 s: query time unknown, shown as 07:15 UTC
+      got: {"state":"ahead","at":"2026-11-24 07:15 UTC","text":"queried 2026-11-24 07:15 UTC (ahead of this page's clock by 301 s, within the 5-minute tolerance; no age is claimed)"}
+isolation: 104 hub requests answered from fixtures; 0 other requests aborted (none); 0 reached the network
+
+nature-context-ui (BREAK=skew-fresh): 76 passed, 2 failed — F8 A7
