@@ -1,6 +1,6 @@
 # Animals tab suite: baseline repair for the Timeline's files (test-only candidate)
 
-24 Nov 2026 03:17 UTC (clock reading) · rev 1 · for GPT · branch `animals-baseline-repair-rc`, cut from main `3160658` · **one test file changed; no page file, no hub file, no data file; not merged, nothing deployed**
+24 Nov 2026 03:17 UTC (clock reading) · rev 1.1 (24 Nov 2026 03:30 UTC, clock reading: section 7 added, GPT's review and the fresh-main integration check; sections 1 to 6 unchanged) · for GPT · branch `animals-baseline-repair-rc`, cut from main `3160658` · **one test file changed; no page file, no hub file, no data file; not merged, nothing deployed**
 
 Asked for by Chad and GPT on 24 Nov 2026 (Chad's own message to the Animals thread). All runs below are Claude's, in the cloud workspace, one at a time. No Mac run and no real-browser run was made; none is needed for a file comparison, but that is stated, not assumed away.
 
@@ -81,3 +81,28 @@ The first three show the protection left on `0e62083` still works. Two controls:
 - Changed: `phase1/animals-tab-ui.test.cjs` (diff from main `3160658`: `evidence/2026-11-24-animals-baseline-repair/suite.diff`).
 - Added: this record and `reviews/evidence/2026-11-24-animals-baseline-repair/` (seven logs, the diff, the commit list).
 - Mac review copy: `~/Documents/Mother Earth/_review/animals-baseline-repair-rc/`, plain-text copies under `read/`.
+
+## 7. After review: GPT's verdict and the fresh-main integration check (rev 1.1)
+
+**GPT's review, filed unchanged:** `reviews/2026-11-24-animals-baseline-repair-rc-gpt-review.md` (read by Claude from GPT's own folder on the Mac, sha256 `21509e95…6052`, 6,514 bytes; relayed by Chad on 24 Nov). Outcome: PASS for the targeted test-only candidate, no blocking finding, the four points of section 5 accepted. It is not a merge or deployment authorisation. GPT did not rerun the browser suite, the breaks or the historical comparisons; those remain Claude's workspace evidence. GPT independently ran 13h's predicate on controlled text and isolated the header clause (whole true, links true, header false: fail), which closes the limit stated in section 4.
+
+**Integration check, as GPT's section 5 asks.** Main `9036552` merged into the branch as `42fe5b7`, no conflict. Main brought documents only since `3160658` (13 files: STATUS, HANDOVER, START-HERE, REGISTER, review files and logs).
+
+| Check on the integrated tree `42fe5b7` | Result | Log (`evidence/…/integration-42fe5b7/`) |
+|---|---|---|
+| Whole suite | **280 passed, 0 failed**, exit 0 | `full.log` |
+| The ten section-13 breaks, each alone | ten caught at the named check, none failed to apply | `breaks.log` |
+| `phase1/hub-alignment.test.mjs` | 6 passed, 0 failed | `hub-alignment.log` |
+
+- Against main `9036552`, the branch differs in one functional file, `phase1/animals-tab-ui.test.cjs` (sha256 `83ff9b18…03ad`, the value GPT computed); everything else that differs is this record, GPT's review and the evidence folder.
+- `timeline.js`, `timeline.html` and `style.css` on the integrated tree are byte-identical to `19f4e07`; `phase1/worker.js` is the deployed 0.6.24 file (`db4f9cdf…1aa5`).
+- Runs are Claude's, cloud workspace, one at a time. No Mac, phone, Safari or accessibility run; a file-comparison repair gives none.
+
+**Carried forward from GPT's review, not done here (the reviewed test file is unchanged):**
+1. Two checks are labelled 13f (the new Timeline-baseline check and the older Earth-now isolation check). Rename one at the next change to the suite.
+2. Moving `TL_MAIN` belongs in the Timeline release checklist, prepared on the integrated release candidate, to an accepted release whose file changes were reviewed.
+3. If this lands, merge then-current main into `animals-assessment-rc` before its next candidate or release review and rerun the suite there.
+4. A Mac rerun with `BASE_DIR` / `TL_DIR` must use verified exports of the named commits.
+
+**Landing** is Chad's own line. Landing changes no page, hub or data file: the live site is unchanged by it.
+
