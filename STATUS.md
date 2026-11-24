@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 18:52 UTC (clock reading) — **Timeline R4: final combined tree tested; waiting for Chad's own page line. Page NOT released (still R3); release is for 25 Nov UTC, from 02:00 SAST** (page: none; Timeline thread)
+- Combined tree `8ea37a7` on `timeline-finds-release-rc` (the reviewed candidate + the landed hub 0.6.25): served page files byte-identical to the candidate GPT passed. All 14 release suites pass, among them `animals-tab-ui` 282 / 0 and `nature-context-ui` 78 / 0; `hub-alignment` reports deployed 0.6.25.
+- The release page, fetched from GitHub at that commit and hash-checked, draws from the **live** hub's R4 route (18:08:59 UTC).
+- Record: packet §10 on the branch (`reviews/2026-11-24-timeline-r4-release-candidate.md`).
+
 ## 24 Nov 18:01:46 UTC — **HUB 0.6.25 DEPLOYED and landed on main: Timeline pin `tl-2026-11-R4`. Main's `phase1/worker.js` = the deployed hub. Page NOT released (still R3)** (production: hub code only; Timeline thread; Chad: "Approve: deploy hub 0.6.25 from timeline-r4-hub-rc 0235545, phase1/worker.js sha256 d54323183ebd49acb1818b2cb68dc31a56e95c6ddc2fc8635303311837e9e24d, code only (Timeline pin tl-2026-11-R4, TIMELINE_CURRENT and the version number), no settings change; read back hash and settings; then land it on main")
 - **Read back (18:02:15 UTC):** code 551,780 B, sha256 `d54323183ebd49acb1818b2cb68dc31a56e95c6ddc2fc8635303311837e9e24d`, exact. 25 bindings with the same names and values, four crons, compatibility date and the `earthview/` objects unchanged; `EARTHVIEW_ENABLED=manual`, no window variables.
 - **Served:** hub reports 0.6.25, current R4. R4 route 200, 48,134 B, `74b1f8b1…00ca`; R1, R2, R3 and the unversioned route exact. First scheduled runs after the deploy ok; all ten health addresses healthy at 18:06:53 UTC.
