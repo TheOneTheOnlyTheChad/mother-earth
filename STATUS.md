@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 16:16 UTC (clock reading) — **Timeline: RELEASE CANDIDATE `tl-2026-11-R4` (Humans and human relatives, four finds) prepared on two branches and handed to GPT. Nothing uploaded, pinned, deployed or merged; the live page still serves R3** (page: none; Timeline thread)
+- **Chad's go (24 Nov)** after GPT passed the wheel fix: take the four-find work through release-candidate preparation and review, then deployment on his Approve lines.
+- **Page candidate:** branch `timeline-finds-release-rc` `9b83b5c` (tested tree `f464fa8`, page commit H `643bb9a`), off fresh main `72ea123`. Catalogue `tl-2026-11-R4`, schema 4, **48,134 B, sha256 `74b1f8b1…00ca`, release date in the catalogue 25 Nov 2026**. Packet: `reviews/2026-11-24-timeline-r4-release-candidate.md`; freeze record `docs/research/TIMELINE-HUMAN-RELATIVES-FREEZE-R4.md`; REGISTER entry (marked release candidate), all on that branch.
+- **Hub candidate:** branch `timeline-r4-hub-rc` `0235545`: hub 0.6.25 = the R4 pin, `TIMELINE_CURRENT` and the version (`worker.js` `d5432318…e24d`, 551,780 B). Code only. Packet: `reviews/2026-11-24-hub-0.6.25-candidate.md` on that branch. **Earth from Space thread: this is a hub candidate from the Timeline thread under the deploy rule; your gate, variables and objects are not touched.**
+- **Two fixes found by the release run** (in H): the narrowest window is judged with an allowance for the rounding of its ends; an extinction cluster's list now opens over the finds lane (its "Zoom to these" button was covered; this was in the rehearsal too).
+- **Results on `f464fa8`:** `timeline-finds-ui` 281 / 0, `timeline-finds-build` 80 / 0, the other ten Timeline suites pass (seven migrated to R4 as the release, listed in the packet), **`animals-tab-ui` 282 / 0 with `TL_MAIN` moved to `643bb9a` and nothing else moved; `nature-context-ui` 78 / 0**; 30 browser breaks, 10 build breaks and the old-script control each fail a named check. `app.js`, `index.html`, `sources.html` untouched.
+- **Order:** GPT's review → R2 upload and read-back → hub 0.6.25 and its landing on main → page release on 25 Nov. Each production step on Chad's own Approve line. Live hub read 15:46 UTC: 0.6.24, R1–R3 exact, R4 404.
+
 ## 24 Nov 14:42 UTC (clock reading) — **Soil carbon (Workstream B): bounded methods and aggregation assessment DONE on Chad's go (dated-model exception accepted; option (a) download). Docs only; nothing built, uploaded or deployed** (page: none; Nature context thread)
 - **Standing decision recorded (Chad, 24 Nov):** dated snapshots and modelled datasets are allowed, with labelling, version-check and preservation rules (START-HERE §2, `7e959ed`; project memory).
 - **Journey context (Workstream C) handed to the Animals thread:** `docs/concepts/NATURE-CONTEXT-JOURNEY-HANDOFF.md` (`a501352`).
