@@ -1,0 +1,105 @@
+diff --git a/phase1/animals-tab-ui.test.cjs b/phase1/animals-tab-ui.test.cjs
+index 30b66c9..0cfa362 100644
+--- a/phase1/animals-tab-ui.test.cjs
++++ b/phase1/animals-tab-ui.test.cjs
+@@ -15,7 +15,8 @@
+  * prints BREAK MISSED. SECTIONS=1,4 runs parts.
+  * Needs the npm packages playwright (with its Chromium), pngjs and globe.gl@2.45.0, found through NODE_PATH (or ME_GLOBE_JS for
+  * the library file). Section 13 compares with main: from Git when the tree is a clone, or from BASE_DIR=<folder holding main's
+- * files at BASE_MAIN>; with neither, its file comparisons are reported NOT RUN and the suite exits non-zero.
++ * files at BASE_MAIN>; with neither, its file comparisons are reported NOT RUN and the suite exits non-zero. The Timeline's files are
++ * compared with main at TL_MAIN the same way (Git, or TL_DIR=<folder holding main's files at TL_MAIN>).
+  * Run: NODE_PATH=<node_modules with playwright, pngjs, globe.gl> node --no-warnings phase1/animals-tab-ui.test.cjs */
+ const { chromium } = require('playwright');
+ const fs = require('fs'), path = require('path'), http = require('http'), crypto = require('crypto'), cp = require('child_process');
+@@ -27,6 +28,10 @@ const GLOBE_PATH = process.env.ME_GLOBE_JS || (process.env.NODE_PATH || '').spli
+ if (!GLOBE_PATH) { console.log('FAIL  globe.gl@2.45.0 not found: set ME_GLOBE_JS or put the package on NODE_PATH'); process.exit(1); }
+ const GLOBE_JS = fs.readFileSync(GLOBE_PATH, 'utf8'), GLOBE_VER = (/Version (\d+\.\d+\.\d+) globe\.gl/.exec(GLOBE_JS.slice(0, 400)) || [])[1] || (() => { try { return require(path.join(path.dirname(GLOBE_PATH), '..', 'package.json')).version; } catch (_) { return null; } })();
+ const BASE_MAIN = process.env.BASE_MAIN || '0e620831b83b2ae7eed11a932edfd902d933f195';   // the exact main commit merged into this branch (T13 baseline)
++// The Timeline's own files (timeline.js, timeline.html, the stylesheet's body.tl rules) are released by the Timeline thread and have
++// moved on since BASE_MAIN. They are held to the main commit of the Timeline's latest release instead (checks 13f to 13i). Every
++// other file stays on BASE_MAIN. A Timeline release moves TL_MAIN, and nothing else, in the commit that records the release.
++const TL_MAIN = process.env.TL_MAIN || '19f4e077b94d3b66b226be3e0b6549e299ad1130';   // merge of tl-2026-11-R3 (24 Nov 2026)
+ const sha = b => crypto.createHash('sha256').update(b).digest('hex');
+ const BREAK = process.env.BREAK || '', EDIT = process.env.EDIT || '';
+ const ONLY = (process.env.SECTIONS || '').split(',').filter(Boolean).map(Number), want = n => !ONLY.length || ONLY.includes(n);
+@@ -94,6 +99,19 @@ const BREAKS = {
+ };
+ // EDIT=no-abort is not a break: requests are no longer aborted, and section 5 must STILL pass apart from the two checks that the
+ // request itself was aborted (5b, 5g). It shows the generation check alone refuses a superseded answer.
++// Section 13 breaks: each makes one unintended change to a file the comparisons read (nothing on disk changes).
++Object.assign(BREAKS, {
++  'earth-script-edited': ['app.js', 'ME.REFRESH_MS = 5 * 60e3;', 'ME.REFRESH_MS = 5 * 60e3; '],
++  'shared-rule-dropped': ['style.css', '\n.top{', '\n.top.x{'],
++  'moon-page-edited': ['moon.html', '</title>', ' </title>'],
++  'tl-script-edited': ['timeline.js', 'const MIN_SPAN = 1', 'const MIN_SPAN = 2'],
++  'tl-page-edited': ['timeline.html', '</title>', ' </title>'],
++  'tl-page-animals-tab-gone': ['timeline.html', '    <a href="animals.html" data-view="animals">Animals</a>\n', ''],
++  'tl-page-header-edited': ['timeline.html', '<a href="animals.html" data-view="animals">Animals</a>', '<a href="animals.html" data-view="animals">Animals</a><a href="x.html">X</a>'],
++  'tl-rule-dropped': ['style.css', 'body.tl .tlmain{max-width:1400px;margin:0 auto;padding:16px}\n', ''],
++  'tl-rule-edited': ['style.css', 'body.tl .tlmain{max-width:1400px;', 'body.tl .tlmain{max-width:1401px;'],
++  'tl-rule-added': ['style.css', 'body.tl .tlmain{max-width:1400px;margin:0 auto;padding:16px}\n', 'body.tl .tlmain{max-width:1400px;margin:0 auto;padding:16px}\nbody.tl .tlmain{color:red}\n'],
++});
+ const EDITS = { 'no-abort': [JS, "const abortLoad = () => { const c = st.abort; st.abort = null; if (c) try { c.abort(); } catch (_) { } };", "const abortLoad = () => { st.abort = null; };"] };
+ const EXPECT = { 'not-exclusive': '3b', 'late-answer-draws': '5a', 'off-no-cancel': '5c', 'off-no-abort': '5g', 'load-on-open': '1b', 'deep-link-switches-on': '8a', 'fail-stays-on': '6a', 'list-error-local': '6h',
+   'no-catalogue-check': '6h', 'no-manifest-check': '6f', 'no-display-check': '6e', 'no-content-check': '6g', 'marker-next-fix': '2d', 'future-fixes-drawn': '2e', 'join-over-rule': '12a', 'ignore-join-flags': '12c',
+@@ -101,7 +119,9 @@ const EXPECT = { 'not-exclusive': '3b', 'late-answer-draws': '5a', 'off-no-cance
+   'chooser-back': '1d', 'switch-unlabelled': '1c', 'filtered-says-recorded': '12h', 'no-phone-scroll': '16b', 'scroll-on-answer': '16c', 'scroll-on-off': '16e', 'scroll-ignores-reduced-motion': '16b',
+   'deep-link-scrolls-to-globe': '16j', 'no-status-by-globe': '16b', 'selection-keeps-list-retry': '17a', 'list-retry-no-token': '17a', 'list-retry-late-success': '17c', 'list-retry-no-time-limit': '17h', 'pagehide-keeps-list-retry': '17f',
+   'marker-in-withheld': '18c', 'hidden-ends-at-last-withheld': '18c', 'tried-before-reached': '18e', 'accuracy-in-withheld': '18a', 'replay-starts-at-first-fix': '18a', 'replay-ends-at-last-fix': '18m',
+-  'bird-says-not-displayed': '18f', 'new-fields-optional': '19a', 'no-acc-check': '19b', 'no-inside-period-check': '19d', 'join-across-withheld-accepted': '19c', 'no-failed-check': '19e', 'stops-skip-withheld-starts': '18i' };
++  'bird-says-not-displayed': '18f', 'new-fields-optional': '19a', 'no-acc-check': '19b', 'no-inside-period-check': '19d', 'join-across-withheld-accepted': '19c', 'no-failed-check': '19e', 'stops-skip-withheld-starts': '18i',
++  'earth-script-edited': '13c', 'shared-rule-dropped': '13d', 'moon-page-edited': '13e moon.html', 'tl-script-edited': '13g', 'tl-page-edited': '13h', 'tl-page-animals-tab-gone': '13h', 'tl-page-header-edited': '13h',
++  'tl-rule-dropped': '13i', 'tl-rule-edited': '13i', 'tl-rule-added': '13i' };
+ if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
+ 
+ // ---------- files
+@@ -441,20 +461,40 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
+     const mainFile = f => how === 'dir' ? fs.readFileSync(path.join(BASE_DIR, f), 'utf8') : git(['show', BASE_MAIN + ':' + f]);
+     if (!how) { fail++; failed.push('13a'); console.log(`NOT RUN  13a–13e: main ${BASE_MAIN.slice(0, 7)} is not available (no Git metadata here and no BASE_DIR). The comparisons with main were not made.`); }
+     else { ok(`13a the baseline is main ${BASE_MAIN.slice(0, 7)} (read from ${how === 'dir' ? 'BASE_DIR' : 'Git'})`, true);
+-      const mainIdx = mainFile('index.html'), idx = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
++      const mainIdx = mainFile('index.html'), idx = served('index.html');
+       const strip = t => t.replace('    <a href="animals.html" data-view="animals">Animals</a>\n', '').replace('      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', '').replace(/style\.css\?v=\d+/, 'style.css?v=X');
+       ok('13b index.html equals main\'s except the Animals tab link, the Animals menu link and the stylesheet version', strip(idx) === mainIdx.replace(/style\.css\?v=\d+/, 'style.css?v=X') && idx !== mainIdx);
+-      const same = ['layers.js', 'app.js', 'aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'timeline.js', 'phase1/collector-mac.mjs', 'phase1/bare-earth-ui.test.cjs'];
++      const same = ['layers.js', 'app.js', 'aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'phase1/collector-mac.mjs', 'phase1/bare-earth-ui.test.cjs'];
+       // 23 Nov 2026 (hub-to-main alignment, Chad's decision G-a): 'phase1/worker.js' left this list. Main's hub file is now the DEPLOYED hub
+       // (0.6.24), which is not the file at this suite's pinned baseline and never will be again. The hub is protected instead by
+       // phase1/hub-alignment.test.mjs, which holds phase1/worker.js to the recorded deployed hash (phase1/DEPLOYED-HUB.json).
+       // Every other file in this list, and checks 13a, 13b, 13d and 13e, are unchanged.
+-      const diff = same.filter(f => { try { return mainFile(f) !== fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch (_) { return true; } });
+-      ok('13c Earth now\'s scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs)', diff.length === 0, diff);
+-      const css = fs.readFileSync(path.join(ROOT, 'style.css'), 'utf8'), mainCss = mainFile('style.css').split('\n'), cur = new Set(css.split('\n'));
+-      const gone = mainCss.filter(l => !cur.has(l)); ok('13d the shared stylesheet is NOT identical to main: every main line is kept except the header rules changed for five tabs (at most 4 lines, listed on failure); the Animals rules are added', gone.length <= 4 && gone.every(l => /\.top \.promise|\.tabs a|\.top\{padding/.test(l)) && css.length > mainCss.join('\n').length, gone);
+-      for (const pg of ['moon.html', 'sun.html', 'timeline.html', 'sources.html']) { const a = mainFile(pg), b = fs.readFileSync(path.join(ROOT, pg), 'utf8'); const sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/, rel = pg === 'sources.html';      // release: sources.html alone gains one Animals section
+-        ok(`13e ${pg} equals main's except the Animals links and the stylesheet version${rel ? ', and (release) the one added Animals section with its shortcut in the Sections list, which names all six sources and the omitted Low class and never says private preview' : ''}`, strip(rel ? b.replace(sec, '').replace(' · <a href="#animals">Animals</a>', '') : b) === a.replace(/style\.css\?v=\d+/, 'style.css?v=X') && (!rel || (sec.test(b) && b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2 && ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].every(x => b.includes(x)) && !/private preview/i.test(b)))); } }
++      // 24 Nov 2026 (baseline repair): 'timeline.js' left this list, 'timeline.html' left 13e, and 13d no longer judges the stylesheet's
++      // body.tl lines. The Timeline releases of 23 and 24 Nov changed all three, as they should. They are held to main at TL_MAIN by
++      // 13f to 13i below, so each is still compared with a pinned commit; only the commit differs. Nothing else moved off BASE_MAIN.
++      const diff = same.filter(f => { try { return mainFile(f) !== served(f); } catch (_) { return true; } });
++      ok('13c Earth now\'s scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs; timeline.js: 13g)', same.length === 16 && diff.length === 0, diff);
++      const css = served('style.css'), mainCss = mainFile('style.css').split('\n'), cur = new Set(css.split('\n')), isTl = l => /body\.tl/.test(l);
++      const gone = mainCss.filter(l => !cur.has(l) && !isTl(l)); ok('13d the shared stylesheet is NOT identical to main: every main line is kept except the header rules changed for five tabs (at most 4 lines, listed on failure); the Animals rules are added (the Timeline\'s body.tl lines: 13i)', gone.length <= 4 && gone.every(l => /\.top \.promise|\.tabs a|\.top\{padding/.test(l)) && css.length > mainCss.join('\n').length, gone);
++      for (const pg of ['moon.html', 'sun.html', 'sources.html']) { const a = mainFile(pg), b = served(pg); const sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/, rel = pg === 'sources.html';      // release: sources.html alone gains one Animals section
++        ok(`13e ${pg} equals main's except the Animals links and the stylesheet version${rel ? ', and (release) the one added Animals section with its shortcut in the Sections list, which names all six sources and the omitted Low class and never says private preview' : ''}`, strip(rel ? b.replace(sec, '').replace(' · <a href="#animals">Animals</a>', '') : b) === a.replace(/style\.css\?v=\d+/, 'style.css?v=X') && (!rel || (sec.test(b) && b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2 && ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].every(x => b.includes(x)) && !/private preview/i.test(b)))); }
++      // ----- the Timeline's own files, against main at TL_MAIN (the Timeline's latest release)
++      const TL_DIR = process.env.TL_DIR || ''; let tlHow = '';
++      if (TL_DIR && fs.existsSync(path.join(TL_DIR, 'timeline.html'))) tlHow = 'dir'; else { try { git(['cat-file', '-e', TL_MAIN + '^{commit}']); tlHow = 'git'; } catch (_) { } }
++      const tlFile = f => tlHow === 'dir' ? fs.readFileSync(path.join(TL_DIR, f), 'utf8') : git(['show', TL_MAIN + ':' + f]);
++      if (!tlHow) { fail++; failed.push('13f'); console.log(`NOT RUN  13f–13i: main ${TL_MAIN.slice(0, 7)} is not available (no Git metadata here and no TL_DIR). The Timeline comparisons were not made.`); }
++      else { ok(`13f the Timeline baseline is main ${TL_MAIN.slice(0, 7)} (read from ${tlHow === 'dir' ? 'TL_DIR' : 'Git'}), and it is not the older baseline`, TL_MAIN !== BASE_MAIN);
++        // 13g protects: nothing but a Timeline release changes the Timeline's script (it was one of the files in 13c)
++        ok('13g timeline.js is byte-identical to main\'s at the Timeline baseline', tlFile('timeline.js') === served('timeline.js'));
++        // 13h protects what 13e protected for this page: nothing but a Timeline release changes it, and all the Animals work ever added
++        // to it is its two links. The page pins its own stylesheet version, so the version is compared too (13e set it aside).
++        { const b = served('timeline.html'), tabL = '    <a href="animals.html" data-view="animals">Animals</a>\n', menuL = '      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', hd = t => (/<header[\s\S]*?<\/header>/.exec(t) || [''])[0], oldHd = hd(mainFile('timeline.html'));
++          const whole = b === tlFile('timeline.html'), links = b.split(tabL).length === 2 && b.split(menuL).length === 2, header = oldHd.length > 200 && hd(b).replace(tabL, '').replace(menuL, '') === oldHd;
++          ok(`13h timeline.html is byte-identical to main's at the Timeline baseline; it carries the Animals tab link and menu link once each; and its header equals main ${BASE_MAIN.slice(0, 7)}'s except those two links`, whole && links && header, { whole, links, header }); }
++        // 13i protects what 13d protected for these lines, and more: the stylesheet's Timeline rules are exactly the Timeline release's,
++        // in the same order (none dropped, none edited, none added by other work)
++        { const tl = t => t.split('\n').filter(isTl), a = tl(tlFile('style.css')), b = tl(css), i = a.findIndex((l, k) => l !== b[k]);
++          ok('13i the stylesheet\'s body.tl lines are exactly main\'s at the Timeline baseline, in order (first difference listed on failure)', a.length > 100 && a.length === b.length && i < 0, { baseline: a.length, here: b.length, at: i, baselineLine: a[i], hereLine: b[i] }); } } }
+     const ctx = await ctxFor(browser, { width: 1280, height: 860 }); await ctx.route('**/' + HUB + '/**', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ layer: 'x', retrieved_at: new Date().toISOString(), stale_after_s: 10800, source_status: 'ok', cells: {}, record_format: 'rows', record_fields: [], records: [] }) }));
+     const page = await ctx.newPage(), reqs = []; page.on('request', r => reqs.push(r.url())); await page.goto(BASE + '/index.html#journey=' + Z, { waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => window.ME && ME.layers, null, { timeout: 30000 }); await page.waitForTimeout(1500);
+     const e = await page.evaluate(() => ({ ids: ['tgl-journey', 'journey-choose', 'card-journey', 'replay', 'leg-journey', 'an-globe'].filter(i => document.getElementById(i)), journey: typeof ME.journey, rows: ME.layers.rows.length, rowTxt: ME.layers.rows.map(r => r[0]).filter(t => /animal|journey/i.test(t)), scripts: [...document.scripts].map(x => x.getAttribute('src') || '').filter(x => /animals/.test(x)),
