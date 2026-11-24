@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 07:07 UTC (clock reading) — **Timeline: Human relatives proposal REV 2 after GPT's review of rev 1 (direction accepted, targeted revisions). Docs only; no source cleared; Chad's H1–H5 still open** (page: none; Timeline thread)
+- GPT's review filed unchanged: `reviews/2026-11-24-timeline-human-relatives-proposal-rev1-gpt-review.md` (11,893 B, sha256 `57b91c7d8afa609f97cc4ba2ef3951a74f0bc162d44212ea51aca058ef8e675c`).
+- **Rev 2 of `docs/concepts/TIMELINE-HUMAN-RELATIVES-PROPOSAL.md`:** each dated find or deposit is plotted on its own, with no bar joining a group's claims; an age limit stays an age limit (Omo I is older than a dated eruption, not dated itself); the modelled Neanderthal disappearance is out of the slice; the source rule requires verified full-text passages (publisher or legitimate archive) and treats licence as a recorded fact, with an open-licence-only rule left as Chad's H2b; no target count; GPT's minimum requirements for the build proposal listed. Proposed lane name "Humans and human relatives" (H3, Chad's).
+- **Leads file rev 1.1:** a corrections block. The Vidal read was a model's summary of the page, not a full read; "not open" meant only "no open licence seen".
+- **Waiting on:** Chad's H1–H5, then his go for the bounded source check.
+
 ## 24 Nov 06:47 UTC (clock reading) — **Timeline: Human relatives proposal rev 1 DRAFTED on Chad's "go" (audit and draft only). Nothing built; no source cleared; nothing in REGISTER** (page: none; Timeline thread)
 - **Files:** `docs/concepts/TIMELINE-HUMAN-RELATIVES-PROPOSAL.md` (sha256 `97c3254d44493092405b646979397921fd8345242b0d6cdecfbf9dad9a382873`) and its leads `docs/research/TIMELINE-HUMAN-RELATIVES-SOURCE-LEADS-2026-11-24.md` (`790ba415865d16877fe4f84025add5f4e2061238143bc2da0c0c1532ff07d844`).
 - **The leads are a first pass, not a source check.** One source was read in full (Vidal et al. 2022, CC BY 4.0, Omo I at least 233 ± 22 thousand years, with a supplementary-table correction on the page). Every other figure was seen as an abstract in a search result or a repository record. Two of three full-text pages answered with a browser check; two page reads needed an approval that went unanswered and were not made.

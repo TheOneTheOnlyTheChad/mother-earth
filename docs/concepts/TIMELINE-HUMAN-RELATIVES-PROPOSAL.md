@@ -1,103 +1,105 @@
-# Timeline: Human relatives, a bounded first slice — proposal (rev 1, docs only)
+# Timeline: Humans and human relatives, a bounded first slice — proposal (rev 2, docs only)
 
-24 Nov 2026 · Claude · Timeline thread · on Chad's "go" (audit and proposal draft; nothing built).
-**Proposal only. No source is cleared, no catalogue or page is changed, nothing is filed in REGISTER. Each later step needs its own go; anything live needs Chad's own Approve line.**
+24 Nov 2026 · Claude · Timeline thread.
+**Proposal only. No source or date is cleared, no catalogue or page is changed, nothing is filed in REGISTER. Each later step needs its own go; anything live needs Chad's own Approve line.**
 
-Order note: Chad's T6 (`docs/concepts/TIMELINE-TRAVEL-PROPOSAL.md`) put the source refresh before this proposal. On 24 Nov he asked for this first. The source refresh re-checks the Big Five sources and does not feed this slice; it stays queued.
+**Rev 2 (24 Nov 2026, docs only).** GPT reviewed rev 1 (sha256 `97c3254d…2873`) at commit `4bd6962`: direction accepted, targeted revisions needed before a build proposal; filed unchanged as `reviews/2026-11-24-timeline-human-relatives-proposal-rev1-gpt-review.md`. Its amendments are applied below and marked (GPT). **GPT's recommendations on H1–H5 are not Chad's decisions; those are still open (§8).** Rev 1 is in Git at `4bd6962`.
 
-Leads behind this proposal: `docs/research/TIMELINE-HUMAN-RELATIVES-SOURCE-LEADS-2026-11-24.md`. **That file is a first pass, not a source check: one source was read in full, the rest were seen as abstracts.**
+What changed from rev 1: each find or deposit is plotted on its own, with no bar joining a group's claims (GPT); an age limit stays an age limit (GPT); the modelled Neanderthal estimate is out of this slice (GPT); the source rule now separates "the passage was verified" from "the licence is open" (GPT); no target number of entries (GPT); the build proposal's minimum requirements are listed (GPT).
 
-## 1. What is already decided (not reopened here)
-- The lane "Human relatives" is on the page, empty, labelled "No entries yet" (D5, 10 Nov; T3, 23 Nov).
-- Entries are **overlapping evidence ranges**. An overlap in time says nothing about shared place or contact. Ancestry or contact is shown only where a source supports that specific relationship (`TIMELINE-DEEP-TIME-PROPOSAL.md`).
+Order note: Chad's T6 put the Big Five source refresh before this proposal. On 24 Nov he asked for this first; the refresh stays queued.
+
+Leads: `docs/research/TIMELINE-HUMAN-RELATIVES-SOURCE-LEADS-2026-11-24.md` (rev 1.1). **A first pass, not a source check. No figure in this proposal is verified.**
+
+## 1. Already decided (not reopened here)
+- The lane is on the page, empty, labelled "No entries yet" (D5, 10 Nov; T3, 23 Nov).
+- An overlap in time says nothing about shared place or contact. Ancestry or contact is shown only where a source supports that specific relationship (`TIMELINE-DEEP-TIME-PROPOSAL.md`).
 - Smithsonian Human Origins is for orientation and source-finding only.
 - The constitution: only observations with provenance, time and place; what is modelled says so; named things carry a stable public identifier where one exists.
 
-## 2. What the leads changed
-I proposed "five or six well-dated relatives, both ends, open primary sources". **The leads do not support that.**
-- Only one group (Homo naledi) has both ends in one open source, and that range is the age of one cave deposit.
-- Every other open lead gives one end only, at one site or in one region.
-- Several familiar dates (the last Homo erectus at Ngandong, Homo floresiensis at Liang Bua, the Europe-wide Neanderthal date) are in papers with no open licence seen.
+## 2. The unit: one dated find or deposit
+**The plotted thing is a specific find or deposit, at a named site, with the date or age limit a source assigns to it and the group the source attributes it to.** Not a group, and not a group's lifespan.
 
-So the unit of this lane should not be "a species and its lifespan". It should be **a dated piece of evidence, at a named place, attributed to a named group**.
+- **Each claim is drawn on its own** (GPT): its own stable id, title, geometry and source. Nothing joins two claims: no line, no filled span, even for the same group. A joining bar would fill an undated gap and mix places and kinds of date.
+- A group entry may still exist as a container that lists its claims. It has no geometry of its own.
+- **Titles are neutral and name the find and site** (GPT): "Omo I, Omo-Kibish, Ethiopia", with "attributed to Homo sapiens" beside it. Not "earliest Homo sapiens in eastern Africa": that is a wider comparative claim that needs its own support and goes out of date.
+- A range is allowed where a source brackets **one** dated context (one deposit, one layer). It is never an occupation span.
+- No find here establishes how long a group lived.
 
-## 3. The proposed shape
-**3.1 An entry is one group. Its claims are dated evidence, each at a place.**
-- Title: the group's name as the source uses it (for example "Homo naledi").
-- Each claim: what was dated, where, by which method in plain words, the date with the source's own uncertainty, and the source.
-- The bar on the lane runs between the group's oldest and youngest **plotted** claims. Its label says "Dated evidence", never "lived from … to …".
-- An entry with one dated claim is drawn as that claim alone (a mark, or a short bar where the claim is itself a range).
+**Lane text (GPT's wording, proposed as written):**
+> Marks and ranges show dates or age limits assigned to particular finds or deposits. They do not show how long a group lived. Overlap in date does not establish shared place or contact.
 
-**3.2 Four kinds of date, kept apart.** The catalogue already has shapes for each; the reader sees which it is.
+**Sentences the lane never writes:** "first appeared", "died out", "evolved into", "ancestor of", "met", "interbred with", "the first human", "earliest", "latest".
 
-| Kind | Example lead | Existing shape |
-|---|---|---|
-| A deposit's or layer's age bracket | Homo naledi, Dinaledi Chamber, 335–236 thousand years ago; the Denisovan rib's layer, about 48–32 | `interval` |
-| A minimum or maximum age only | Omo I, at least 233 ± 22 thousand years, no maximum | `bound` |
-| A measured age of one find | none in the open leads yet | `measured` / `point` |
-| A modelled estimate beyond the dated record | Neanderthal disappearance in France and northern Spain | `interval_modelled` |
+## 3. What a claim must record (GPT, §3 of its review)
+The build proposal defines the fields; this is the minimum.
+- **Identity and attribution:** specimen or collection id where there is one; site; the group as the source names it; how it was attributed (anatomy, proteins, DNA) and any stated dispute. Wikidata identifiers for group and site are added for linking only; they do not establish the identification.
+- **What was dated, and what that says about the find.** Kept as separate facts: the material dated, the method in plain words, the number with the source's own notation, units and confidence level, and the relationship between the dated material and the find (for example "the dated ash lies above the fossil level").
+- **Kind of constraint:** a bracket for one context; a limit on one side; a direct date on the find.
+- **Reference system:** whether the source counts in calibrated years BP, radiocarbon years BP, ka or Ma, kept as written; one stated conversion to the axis; the source's precision kept.
 
-A bound is drawn open-ended on its unknown side and says so. A modelled estimate is labelled "modelled" and names its region.
+**Omo I as the worked case (GPT).** The paper dates an eruption (233 ± 22 thousand years, 2σ as reported) whose ash overlies the fossil level, so the fossil is older than that eruption. That is **not** a date on the fossil. It must not be drawn as a point at 233, as a 211–255 interval for the fossil, or as a hard line at 233 with the uncertainty dropped. The source check and the build proposal choose and justify the drawing. An open-ended mark means "age limit", not "present through all earlier time".
 
-**3.3 Sentences the lane never writes.** "First appeared", "died out", "evolved into", "ancestor of", "met", "interbred with", "the first human". The earliest dated fossil is not the origin and the latest is not the extinction. A fixed line on the lane says: *"Bars show dated evidence. A group may have lived earlier or later than its evidence, and two bars that overlap in time may be half a world apart."*
+The same care applies to the Denisovan rib (the layer was dated; the rib is in the layer) and to any deposit bracket.
 
-**3.4 Fossils only in this slice.** Dates of tools attributed to a group (Mousterian, the Liang Bua artefacts) and dates from genetics (divergence times, interbreeding) stay out. Each would be its own later claim type.
+## 4. The source rule (H2, revised)
+Two separate questions (GPT):
+- **Verification, required for every plotted claim:** the passage that carries the number, and the passage that ties it to the find, were read in full text at the publisher **or at a legitimate repository or archive**, with the version and locator recorded; the source's status (corrections, retractions) was checked separately. **A number seen only in an abstract is not plotted.** A model's summary of a page is discovery material, not a read.
+- **Access and reuse, recorded, not a gate by itself:** where the text was read, which version, the licence statement as written, and what we reuse (we cite and paraphrase; this slice has no images). "Licence not seen" is recorded as that, never as "not open".
 
-**3.5 Place and identifiers.** Every claim names its site and country as the source does. Group and site carry a Wikidata identifier where one exists; these are looked up in the source check, not from memory.
+**H2b, Chad's choice:** also require an open licence for every source, as all six Big Five sources happened to have. *I do not recommend it for this slice:* we reproduce no text or image, and it would exclude well-supported finds for a reason that is not about the evidence. GPT: keep it only as an explicit, conservative project choice.
 
-## 4. The first slice
-**Rule proposed (H2):** an end is plotted only if its source's full text and licence were read on the publisher's page (or by Chad or GPT, recorded as such) and its status was checked. An end with no such source is **not plotted and said to be not shown**, with the reason. This is the rule the Big Five met: all six sources are CC BY 4.0 and were read.
+A browser check on a publisher's page is not a source failure and is never bypassed; an archive copy may establish the passage, or Chad or GPT reads the page and that is recorded.
 
-Candidates, from the leads, in the order I would check them:
+## 5. Candidates for the source check
+**No target count (GPT).** Whatever passes is shown. Nothing is added to reach a number, and an unplotted find is never read as an absent population.
 
-| # | Entry | Claim(s) | Source | What must still be shown |
+| # | Claim (neutral title) | Attributed to | Lead, unverified | Source lead |
 |---|---|---|---|---|
-| 1 | **Homo naledi** | Dinaledi Chamber deposit, 335–236 thousand years ago | Dirks et al. 2017, eLife | Passage, licence and status on the page |
-| 2 | **Homo sapiens** (earliest dated in eastern Africa) | Omo I, at least 233 ± 22 thousand years (2σ); no maximum | Vidal et al. 2022, Nature, CC BY 4.0 (read) | Status re-read; the supplementary-table correction shown with the claim |
-| 3 | **Denisovans** | Rib, Baishiya Karst Cave, layer dated about 48–32 thousand years ago | Xia et al. 2024, Nature | Passage and licence; whether the date is the layer's; the protein-based identification stated |
-| 4 | **Neanderthals** | Modelled disappearance in France and northern Spain | Djakovic et al. 2022, Scientific Reports | The dates (not yet seen); the paper's own limits |
-| 5 | **Homo erectus** | Drimolen, about 2.04–1.95 million years ago | Martin et al. 2026, Annals of Human Biology | Licence; whether an open source carries the dating itself (it is from a 2020 Science paper) |
+| 1 | Dinaledi Chamber fossils, Rising Star Cave, South Africa | Homo naledi | deposit bracketed 335–236 thousand years ago | Dirks et al. 2017, eLife, doi 10.7554/eLife.24231 |
+| 2 | Omo I, Omo-Kibish, Ethiopia | Homo sapiens | older than an eruption dated 233 ± 22 thousand years (2σ as reported); no older limit | Vidal et al. 2022, Nature, doi 10.1038/s41586-021-04275-8 |
+| 3 | Rib, layer 3, Baishiya Karst Cave, Tibetan Plateau | Denisovan lineage (by proteins) | layer bracketed about 48–32 thousand years ago | Xia et al. 2024, Nature, doi 10.1038/s41586-024-07612-9 |
+| 4 | DNH 134 and DNH 127, Drimolen Main Quarry, South Africa | Homo erectus | deposit about 2.04–1.95 million years ago | Martin et al. 2026, Ann. Hum. Biol., doi 10.1080/03014460.2026.2725046; dating in Herries et al. 2020, Science |
+| 5 | Ngandong bone bed, Java | Homo erectus | 117–108 thousand years ago | Rizal et al. 2020, Nature, doi 10.1038/s41586-019-1863-2 |
+| 6 | Skeletal remains, Liang Bua, Flores | Homo floresiensis | about 100–60 thousand years ago | Sutikna et al. 2016, Nature |
+| 7 | A directly dated Neanderthal fossil | Neanderthals | none yet | to be found; Djakovic et al. 2022 includes a set of directly dated remains (GPT) |
 
-Expected outcome: **three to five entries.** Any that fails the check drops out; the slice is not padded to reach a number.
+5 and 6 are candidates only if a full text can be verified under §4. 7 is one dated fossil, never the disappearance model.
 
-**Named and not plotted** (a plain line under the lane, like today's coverage plans): the last Homo erectus at Ngandong, Homo floresiensis at Liang Bua, the earlier relatives (australopiths and older). Reason given: "no source we could read and cite in full yet".
+**Out of this slice, each a later proposal:** modelled regional disappearance (GPT, Chad's H4 pending); tool-industry dates; genetic divergence or interbreeding dates (protein or DNA used to **attribute** a fossil is a different thing and is in); ancestry or contact lines; stories, images, reconstructions; the earlier relatives.
 
-**Out of this slice, each a later proposal:** ancestry or contact lines; stories and images; reconstructions; tool and genetic dates; the earlier relatives; a full Neanderthal or Homo erectus range across sites.
+**Coverage wording (GPT):** no row of "missing" groups beside the plotted ones. One short limitation line, and an optional review list that names the find and says "not yet reviewed for this page" or "full text not yet verified". Never "less established" or "unplottable".
 
-## 5. What it means for the explorer (for planning; not authorised)
-- **Scale.** The landing view spans 538.8 million years. All of these entries fall in the last 2.1 million, about 0.4 % of that width: one cluster at the right-hand edge. The lane needs its own view. The "Human relatives" preset is a plain label today by design, because the lane has no reviewed entries (`TIMELINE-TRAVEL-PROPOSAL.md` §3); with entries it would become a button. Its window is set by the slice (about 2.2–0 million years if Homo erectus passes; about 0.4–0 if not).
-- **Narrowest window.** It is 1 million years today (T5, provisional). Four of the five candidates lie within the last 0.34 million, and the Denisovan and Neanderthal claims within the last 0.05. At 1 million years those two sit in the last 5 % of the width. The slice probably needs a narrower limit; the build proposal measures it and proposes a number.
-- **Units.** The axis is in Ma. Entries here read better in thousands of years ("335–236 thousand years ago"), with the axis unchanged.
-- **Clusters.** At the landing view the lane's entries form one cluster; the existing cluster list handles that. To be tested, not assumed.
+## 6. Explorer and catalogue (for planning; not authorised)
+- **Scale.** The landing view spans 538.8 million years; every candidate falls in the last 2.1 million, about 0.4 % of that width. The lane needs its own view; the "Human relatives" preset is a plain label today by design and would become a button.
+- **A limit with an unknown side must not set the view** (GPT): zoom-to-fit never invents the unknown end; clipping and open-end drawing are specified and tested.
+- **Narrowest window** (1 million years today, provisional): any change is chosen only after measuring the candidate geometry (GPT). No number is proposed here.
+- **Also to specify and test** (GPT): clusters at small scale; several claims for one group; overlapping contexts; minimum target sizes; selection and history identity per claim; saved older view states; old page with new script and the reverse.
+- **Schema.** New claim types with fixed labels, and the page's script refuses a catalogue whose labels differ from its own, so this is schema 4 with a new script, a new catalogue revision, upload and read-back, a reviewed hub pin, then the page, in that order. Older catalogues and routes stay as they are. Generator and page validators change together and fail safe on anything unsupported.
+- **Lane name and status.** If Chad takes H3: "Humans and human relatives", status active, coverage sentence rewritten.
+- **Animals `TL_MAIN`** moves through a stable reviewed page commit, as on 24 Nov.
+- **No new cost line.**
 
-## 6. What it means for the catalogue and release (for planning; not authorised)
-- **New claim types**, for example `dated_fossil_deposit`, `dated_fossil_minimum_age`, `modelled_regional_disappearance`, each with a fixed label. The page's script refuses any catalogue whose claim labels differ from its own list (`timeline.js`, "claim labels"). So this is **a new schema (4), a new script, a new catalogue revision, an R2 upload and a hub pin**: a full release like R3's, not a page-only one. Old pages must go on refusing the new catalogue, as the mixed-asset rules require.
-- **Lane status** for `relatives` changes from "No entries yet" to active, and the coverage sentence is rewritten.
-- **Animals `TL_MAIN`** moves in the same release, in the order GPT set on 24 Nov (page commit, then the pin).
-- **No new cost line.** One more small object in R2.
+This is a bounded slice, not a general database of human relatives, an ancestry graph or a map (GPT).
 
 ## 7. Steps, each with its own go
-1. **Chad's decisions H1–H5 below; GPT's review of this proposal.**
-2. **Bounded source check** (research, text only, time-capped): read each candidate's passage, licence and status on the publisher's page; look for later papers that revise each date; Wikidata identifiers; proposed REGISTER entries (filed only on Chad's line). **Chad may be needed at the screen:** on 24 Nov two of three full-text pages answered with a browser check, and two page reads needed an approval that went unanswered.
-3. **Build proposal** (schema 4, claim types, wording, the preset, the narrowest window, fixtures and breaks).
+1. **Chad's H1–H5 (§8).**
+2. **Bounded source check** (research, text only, capped). For each candidate: full text located (publisher or archive, version recorded); the number's passage and the association's passage preserved with locators and hashes in the Mac packet; licence statement as written; status at Crossref and the publisher; later papers that revise the date; Wikidata identifiers. The Vidal correction's exact date and what it changed. **It stops with a clear partial audit when time or access runs out** (GPT). **An unanswered access request is never treated as granted** (GPT). Chad may be needed at the screen for pages that answer with a browser check.
+3. **Build proposal** meeting §3 and §6.
 4. **Branch build, suites, GPT.**
 5. **Release** on Chad's own Approve line, on the catalogue's UTC day.
 
 ## 8. Decisions for Chad
-- **H1. The unit.** Dated evidence at a place, attributed to a group (§3), instead of a species lifespan. *Recommended.*
-- **H2. The source rule.** Plot only what was read in full with its licence and status; name the rest as not shown (§4). *Recommended.* The alternative is to plot paywalled dates from their abstracts, which adds Ngandong and Liang Bua but breaks the rule the Big Five met.
-- **H3. Our own species on this lane.** Omo I is Homo sapiens. Options: (a) include it, since the lane's point is who was alive when, and say plainly that it is us; (b) leave it for the Human history lane. *I lean (a); the lane's name then needs a look ("Humans and human relatives"?).*
-- **H4. The modelled Neanderthal claim.** Include a modelled, regional estimate in the first slice, or keep the first slice to dated finds only. *I lean: keep it out of the first slice unless the source check finds a dated-fossil source we can read.*
-- **H5. Time cap for the source check.** The Big Five check had a 3-hour cap and used 11 minutes of search before its review rounds. *Suggested: 3 hours including the write-up.*
+| | Decision | Claude | GPT |
+|---|---|---|---|
+| **H1** | The unit is one dated find or deposit, each drawn on its own, no joining bar (§2) | yes | yes |
+| **H2** | Plot only claims whose passages were verified in full text, publisher or archive; never from an abstract (§4) | yes | yes |
+| **H2b** | Also require an open licence for every source | no | only as a deliberate conservative choice |
+| **H3** | Include our own species; rename the lane "Humans and human relatives" | yes | yes |
+| **H4** | Keep the modelled Neanderthal disappearance out of this slice | yes | yes |
+| **H5** | Source-check cap: 3 hours including the write-up, stop with a partial audit if it runs out | yes | yes |
 
-## 9. Questions for GPT
-1. Is "dated evidence at a place" the right unit, and does the fixed lane sentence in §3.3 say enough?
-2. Is a bar between a group's oldest and youngest plotted claims acceptable when the two ends are different kinds of date, or should each claim be drawn on its own with no joining bar?
-3. Is the H2 source rule right, or too strict for a field where key dates sit in subscription journals?
-4. Is naming unplotted groups under the lane helpful, or does it invite the reading that we judged them less real?
-5. Anything in §6 that would make schema 4 harder than it looks?
-
-## 10. Limits of this draft
-- Figures in §3–§5 come from the leads file and carry its limits. Only Vidal 2022 was read in full.
-- The explorer percentages are arithmetic on the current constants (538.8 Ma landing span, 1 Ma narrowest window), not measurements of a drawn page.
+## 9. Limits of this draft
+- Every figure comes from the leads file and is unverified.
+- The explorer percentage is arithmetic on the current constants, not a measurement of a drawn page.
 - No look yet at how other sites present this; no reader testing.

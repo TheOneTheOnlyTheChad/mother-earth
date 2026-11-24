@@ -2,6 +2,16 @@
 
 **24 Nov 2026, about 06:35–06:50 UTC. Claude, Timeline thread, on Chad's "go" for the audit and a proposal draft. Text only: no PDF opened. Nothing built, nothing filed in REGISTER.**
 
+## Rev 1.1 — corrections after GPT's review (24 Nov 2026; the text below is otherwise rev 1, sha256 `790ba415…d844` at commit `4bd6962`)
+GPT's review: `reviews/2026-11-24-timeline-human-relatives-proposal-rev1-gpt-review.md`. Read the rest of this file with these corrections.
+1. **Vidal 2022 was not "read in full".** The fetch tool returned a model's summary of the PMC page, not the page's text, and no passage or locator was kept. Treat that read as reported and provisional, like every other lead here, until the source check preserves the passages.
+2. **"Not open" in the Standing column means only "no open licence was seen in an abstract-level record".** It says nothing about whether an open or archived full text exists. The "CC BY 4.0" for Martin 2026 came from a news site's image credit and is not the paper's licence statement.
+3. **The "one end / both ends" framing is wrong.** Each lead is a date or age limit for one find or deposit. The Denisovan rib's layer bracket has two numbers for one context; it is not one end of a species range. No lead here is an end of anything.
+4. **Omo I:** 233 ± 22 thousand years is the reported age of an eruption whose ash overlies the fossil level. It limits the fossil's age from one side; it is not a date on the fossil.
+5. **The Vidal page's "2/4/2022" notice:** its exact date and what it changed are for the source check. "Corrected publication" does not mean retraction, and nothing seen says a plotted age changed.
+6. **A browser check on a page is an access obstacle, not a finding about the source.**
+7. **Djakovic 2022** contains both a model over archaeological occurrences and a set of directly dated Neanderthal remains (GPT's reading of the abstract and methods). The model is out of the first slice; a single dated fossil from it could be a candidate.
+
 **What this is.** A search for which human relatives have dated evidence in sources we could read and cite, done to size the first slice in `docs/concepts/TIMELINE-HUMAN-RELATIVES-PROPOSAL.md`. **It is not the bounded source check.** One source was read on its full-text page. Every other figure below was seen only in an abstract shown by a search result or a university repository record, and is marked so. No value here may go into a catalogue until its passage is read on the publisher's page and its status is checked, as was done for the Big Five (`docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md`).
 
 **How pages were reached.** Web search, then the workspace's page-fetch tool, which returns a model's summary of the page rather than the page bytes. Results:
