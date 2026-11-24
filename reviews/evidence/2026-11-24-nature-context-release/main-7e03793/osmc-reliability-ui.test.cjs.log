@@ -1,0 +1,4 @@
+FAIL  old page: no page errors
+      got: ["TypeError: Cannot read properties of null (reading 'addEventListener')"]
+
+osmc-reliability-ui: 40 passed, 1 failed

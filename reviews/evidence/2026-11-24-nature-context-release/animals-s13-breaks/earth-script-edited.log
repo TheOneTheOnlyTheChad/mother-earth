@@ -1,0 +1,3 @@
+FAIL  13c Earth now's scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs; timeline.js: 13g; app.js: 13k)
+      got: ["layers.js"]
+BREAK CAUGHT  earth-script-edited (at "13c"; 1 checks failed)

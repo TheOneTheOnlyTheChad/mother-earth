@@ -1,0 +1,22 @@
+globe.gl — page loads @2.45.0, test serves @2.45.0 (expected 2.45.0)
+   [timing] page loaded: +1.1s
+   [timing] cadence+toggles done: +7.7s
+   [timing] page loaded: +8.9s
+   [timing] ordinary-cadence (real timers) done: +75.2s
+   [timing] page loaded: +76.2s
+   [timing] rotating-globe done: +79.4s
+   [timing] page loaded: +80.5s
+   [timing] no-webgl done: +81.0s
+   [timing] page loaded: +82.1s
+   [timing] failed-harvest done: +84.0s
+   [timing] page loaded: +85.1s
+   [timing] phone done: +86.3s
+
+47 passed, 0 failed
+
+Three limits — different kinds of statement, reported SEPARATELY and never summed:
+  measured agreement : solar position vs astronomy-engine ... within 0.0124°
+  quantisation bound : 1024x512 texture ..................... ~0.35° per pixel
+  drift bound        : up to one minute between repaints .... up to 0.25° of rotation
+  Only the first is a measurement. Summing them would assert a combined bound nobody measured.
+  Separately: the geometric boundary is ~0.83° from an observed sunrise (refraction + solar disc).

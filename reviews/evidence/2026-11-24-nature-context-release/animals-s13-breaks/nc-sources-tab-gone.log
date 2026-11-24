@@ -1,0 +1,3 @@
+FAIL  13e sources.html is byte-identical to the file at the Nature context baseline 90eb522; it carries the Animals tab link and menu link once each and main 0e62083's header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview
+      got: {"whole":false,"links":false,"header":true,"section":true,"shortcut":true,"missing":[],"noPreview":true}
+BREAK CAUGHT  nc-sources-tab-gone (at "13e sources.html"; 1 checks failed)

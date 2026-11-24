@@ -1,0 +1,21 @@
+Agreement with astronomy-engine over 2024-01-01 → 2030-01-01, 7,516 samples at 7 h steps
+  angular separation of the subsolar directions:
+    mean 0.0040°   P50 0.0037°   P95 0.0081°   P99 0.0103°   max 0.0124°  (worst at 2026-04-09T19:00:00.000Z)
+  (agreement with one reference; not a claim of absolute accuracy)
+
+At the 2026 season instants (reference: astronomy-engine Seasons):
+  2026 March equinox       ours lat    0.0020°  ref    0.0001°  sep 0.0081°
+  2026 June solstice       ours lat   23.4351°  ref   23.4386°  sep 0.0035°
+  2026 September equinox   ours lat    0.0030°  ref    0.0000°  sep 0.0056°
+  2026 December solstice   ours lat  -23.4351°  ref  -23.4369°  sep 0.0023°
+
+Illumination test vs the reference's solar altitude: 10,080 points, 0 disagreements
+  every disagreement lies within 0.000° of the horizon — i.e. hard against the terminator itself
+
+Documented assumption, quantified at our boundary (equator, 2026-04-10T09:00:00.000Z):
+  reference GEOMETRIC solar altitude  -0.078°  — this is the boundary we draw
+  reference REFRACTED solar altitude  0.416°  — the Sun already appears above the horizon here
+  Observed sunrise further includes the solar semi-diameter (~16'); together with refraction (~34') that is about 0.83°.
+  So this line is NOT sunrise, and is not presented as one.
+
+26 passed, 0 failed

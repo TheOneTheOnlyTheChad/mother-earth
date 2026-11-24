@@ -1,0 +1,84 @@
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - A1. HISTORY_ENABLED unset: usgs + firms runs write NO archive object and NO history row (publishing unchanged)
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - A2. HISTORY_ENABLED=1 through the real scheduled jobs: usgs revisions written; firms state started
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+ok - B1. same revision received again → no duplicate row; a new USGS `updated` → a new row, the earlier one kept
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - C1. day D pulled twice, then D+1: checkpoint = D's LAST snapshot (cutoff = its retrieved_at); fires_daily per cell; FRP max null when no value
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - C2. the first run ever (no previous day known) keeps nothing — no invented checkpoint
+ok - D1. repeat retrieval (only times differ) → NO new object; the version's retrieval count and last time advance
+ok - D2. a changed CHECK result only → "processing" version kept; a changed value → "data"; both → "data+processing"
+ok - D3. sea ice: the access date inside the citation and the retrieval time are volatile — same values twice = repeat
+ok - E1. identical buoy + fix time + values repeats ignored (incl. missing SST); a corrected position or SST under the same key is kept
+history usgs-revisions failed Error: D1 stub: forced failure
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+ok - F1. a history failure never stops publishing: forced D1 failure on quake_revisions → usgs still published, run logged ok
+ok - G1. sections are independent; records and counts paired per layer; a run mismatch is WITHHELD (never mixed)
+ok - G2. a write between the two reads is re-read once: consistent after the re-read → served; still inconsistent → withheld
+ok - G3. optional layers: OFF → not read at all (no R2 read of their files); ?layers=plastic → read and returned (every sample)
+ok - G4. any cell can be selected: an empty-ocean cell returns every layer as no_records / not_covered — never an error, never a zero claim
+ok - G5. collection evidence: collector-ran hours vs hours records reached us HERE vs retention start vs first report for this cell — kept apart
+ok - G6. the place endpoint is read-only: no R2 write, no D1 change
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+ok - PD1. first counts read is down → state "down" with that envelope's note and metadata, no count, no records (usgs via the real writeDown; firms legacy, ships, buoys, microplastic)
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+ok - PD2. usgs: first read ok but not paired, the pairing re-read finds DOWN counts → "down" from the re-read envelope (never "withheld"), records not read again
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+ok - PD2. drifters: first read ok but not paired, the pairing re-read finds DOWN counts → "down" from the re-read envelope (never "withheld"), records not read again
+ok - PD3. a genuine mismatch on both reads is still "withheld" (records and counts from different runs, neither down); a consistent re-read is still served
+ok - PD4. counts kept from a good run after a failed update (buoys last_attempt, source_status ok) are not "down"; the collector version is 0.6.16
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+ok - PD5. down counts and NO records file at all → "down" (not "withheld … records unreadable"); the records file is not read
+ok - R1. (GPT #1) a retry that finds a newer matching pair returns the NEWER pair's metadata, records and run reference
+ok - R2. (GPT #2) fires daily FRP: none valid → sum and max null; a reported 0 stays 0; mixed → sum over valid values only, frp_n says how many
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+history firms-checkpoint failed Error: R2 stub: forced put failure (once)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - R3. (GPT #3) the archive write fails at the first attempt → publishing continues; the next run completes D from the retained snapshot (cutoff = D's last pull)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+history firms-checkpoint failed Error: D1 stub: forced failure (once)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - R4. (GPT #3) partial D1 failure (object written, fires_daily batch fails) → finished next run; no duplicates; marker only after completion
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+history firms-checkpoint failed Error: R2 stub: forced put failure (once)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - R5. a due day whose retained snapshots have expired becomes a GAP with the reason — no checkpoint invented
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+history firms-checkpoint failed Error: D1 stub: forced failure (once)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P1. (GPT probe) a history write fails on the LAST run of D → the checkpoint still uses D's latest snapshot (23:55), not an earlier one (22:00)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P2. (GPT probe) out of order within D: a run with an EARLIER full timestamp (23:40) written after 23:55 never becomes the checkpoint input
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P3. (GPT probe) overlapping attempts for the same day (one paused mid-way, the other completes, the first resumes) → one marker, one consistent result, nothing rolled back
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P4. (GPT probe) completed work is recognised: marker present and input since expired → stays done, never becomes a gap
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+history firms-checkpoint failed Error: R2 stub: forced put failure (once)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P5. archive health in /status: pending (closed, not completed) days with their age, gaps with reasons, last completed, recent history failures
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+ok - R6. the hub reports collecting-now and retained-history SEPARATELY: off+none, on, off-after-trial (retained, not deleted), unreadable → unknown
+
+history-hub: 33 passed, 0 failed

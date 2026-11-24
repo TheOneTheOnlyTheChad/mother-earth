@@ -1,0 +1,3 @@
+FAIL  13b index.html is byte-identical to the file at the Nature context baseline 90eb522; it carries the Animals tab link and menu link once each; and its header equals main 0e62083's except those two links
+      got: {"whole":false,"links":false,"header":true}
+BREAK CAUGHT  nc-index-tab-gone (at "13b"; 1 checks failed)
