@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 06:41 UTC (clock reading) — **Timeline date label W1: GPT's independent live smoke PASSED, no rollback recommended. Chad asked to look into the Human relatives proposal next** (page: none; Timeline thread)
+- GPT's record filed unchanged as `reviews/2026-11-24-timeline-date-label-live-gpt-smoke.md` (3,703 B, sha256 `94d86b83c7c3fd7d8dab061c130dee7d3f637f3315d454c5346ee673168dbb02`; landed in `f08c3f3`, whose message names STATUS although this entry followed in the next commit). Desktop browser at 1280 × 720, about 06:30–06:32 UTC: exact label; What changed jump; five marks; end-Cretaceous story and image; Back/Forward keep the saved window; no console errors or warnings; all three served hashes match by independent HTTP reads.
+- GPT's limits: a focused smoke, not a full regression; the merge identity was not re-audited through Git. Real phone, Safari, screen reader, true 200 % zoom and the live no-image and image-failure states remain open.
+- **Order note:** T6 put the source refresh before the Human relatives proposal. Chad's message of 24 Nov asks for the proposal first; the source refresh is not done and stays queued.
+
 ## 24 Nov 06:16 UTC (clock reading) — **Timeline date label W1 RELEASED on Chad's own Approve line: merge `7c94f89` (of `timeline-date-label-rc` `f646e2a`). Page-only; catalogue, R2 and hub unchanged** (page: `timeline.html`; Timeline thread)
 - **Chad's line:** "Approve: merge timeline-date-label-rc f646e2a into main (Timeline date label W1; page-only, timeline.html one line; Animals TL_MAIN to fbad1b6)". GPT passed the candidate first (`reviews/2026-11-24-timeline-date-label-rc-gpt-review.md`, sha256 `f77616e1e079df591e8f1552374ad7ae23316eb34ce6147d49fa2300bc5fc634`; no blocking finding).
 - **Integrated tree (merge on fresh main `911a5f8`, before the push):** generator `--check` exit 0; `hub-alignment` 6/0, `timeline-changes-ui` 173/0, `animals-tab-ui` 280/0. Hashes equal GPT's table: `timeline.html` `9fa7b4e6…f5e9`, `timeline.js` `55043697…7524`, `style.css` `6b6115b2…2956`, R3 `f1a5fab2…0993`, `worker.js` `db4f9cdf…1aa5`, Animals suite `bc15522c…8060`.
