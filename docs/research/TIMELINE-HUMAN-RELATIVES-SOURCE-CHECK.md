@@ -1,4 +1,4 @@
-# Timeline — Humans and human relatives: bounded source check (record: identifiers, hashes, dispositions)
+# Timeline — Humans and human relatives: bounded source check (record: identifiers, hashes, dispositions) · rev 1.3
 
 **24 Nov 2026. Claude, Timeline thread, on Chad's line "H1–H5 as recommended, H2b no, go source check".** Reads 07:08:40–07:14 UTC, in the browser pane of the Claude desktop app on Chad's Mac. Cap: 3 hours including write-up; used about 20 minutes. Text only, no PDF. **Nothing is built, nothing is in a catalogue, nothing is filed in REGISTER. Claude's dispositions below are not clearance: GPT has not reviewed this record.**
 
@@ -19,6 +19,25 @@ GPT's review, filed unchanged: `reviews/2026-11-24-timeline-human-relatives-sour
 - **C2 is no longer pending on the table.** The claim records which calibration its number belongs to. It is still a one-sided limit from an eruption above the fossil, not a date on the fossil.
 - **Not closed:** the 2023 La Ferrassie paper (doi 10.48738/2023.iss1.811). The journal's site did not load in the browser pane on two tries or for the fetch tool, and the copy a search shows is a PDF. C7 stays "accepted, one later paper unread". C4's primary dating: the publisher asks for paid access; Drimolen stays held.
 - Mac packet: `ADDENDUM-1.md` and `supp/` beside `REPORT.md`.
+
+## Rev 1.3 — La Ferrassie's later paper read; one selected result per find (24 Nov 2026)
+**The later paper was read by GPT, not by Claude.** GPT read the relevant passages of Guérin et al. 2023 in the publisher's full-text PDF (`reviews/2026-11-24-timeline-finds-rc-gpt-review.md` §2 Q4; locators p.99 introduction, p.106 comparison, p.115 Figure 9 caption and implications, p.116 conclusion). HAL answered GPT with an access-denied page, which was not bypassed. Claude could not retrieve the PDF (proxy refusal from both the cloud workspace and the Mac shell); the fetch tool returned a model summary of the full text that agrees with GPT's reading. No copy is kept.
+
+**What the paper says, as GPT reports it (paraphrase, not quotation):**
+- It does not replace the fragment's direct date. **44.9–44.1 ka is where the 95 % intervals of three individuals (LF1, LF2, LF8) overlap**, the range in which they could have been contemporaries. It is not LF8's date. *(Claude's packet of 24 Nov, §8, read the abstract as an individual age. That was wrong and is corrected in packet rev 2.)*
+- Its model for LF8 is **44.9–39.9 ka at 95 % credibility**.
+- It keeps the fragment's direct date (41.7–40.8 ka, 95 %) as **an alternative for LF8, if the fragment belongs to LF8**, and says that **assignment has not been demonstrated**.
+
+**C7 disposition after rev 1.3:** still **PASS as a direct date on the bone fragment**. The dated object is the fragment, never "the LF8 child". The fragment's link to LF8 stays qualified: the 2020 authors' inference, which the 2023 paper says is not demonstrated. The 2023 LF8 model may be stated beside it, as the later paper's model for the individual, never as the fragment's date; the three-individual overlap is not shown. **The "later paper unread" dependency is closed** by GPT's passage check. The claim is not frozen: wording review, final locators and the freeze record are later work. The 2023 paper's licence: the PDF header states all rights reserved (as reported); the HAL record states CC BY-NC-SA. We cite and paraphrase only.
+
+**One selected result per find.** Each find's axis claim names exactly one published result, by the id below, and stores that result's own notation, numbers and precision. The generator refuses a find whose `result` is not in this table or whose `source_notation` differs from the notation recorded here (rehearsal rev 2). This is the evidence boundary for result identity: a validator can check that the numbers match the selected result; it cannot check the paper.
+
+| Result | Find | Source | Published notation, as stored | What it is | Locator |
+|---|---|---|---|---|---|
+| `C1.r1` | Dinaledi Chamber deposit | Dirks et al. 2017 | `between 236 ka and 335 ka` | Bracket for the deposit: older side from dated teeth (the authors' preferred scenario), younger side from the oldest overlying flowstone | Abstract; Discussion |
+| `C2.r1` | Omo I | Vidal et al. 2022 | `233 ± 22 kyr` | Composite eruption age, 71 grains, 2σ, Kuiper et al. 2008 calibration (Renne et al. 2011 gives 234 ± 22; not used) | Abstract; main text; corrected Supplementary Table 3 |
+| `C3.r1` | Xiahe 2 | Xia et al. 2024 | `48–32 ka` | Layer 3's widest age range, as reported and applied by this paper | Section "A new Denisovan individual" |
+| `C7.r1` | La Ferrassie bone fragment | Balzeau et al. 2020 | `41.7–40.8 ka cal BP (95.4%)` | ETH-99102, 36,170 ± 220 radiocarbon years BP, calibrated with OxCal 4.4 and IntCal20, 95.4 % range. **The 2022 recalibration (41,696–40,827 cal BP) is a different result and is never mixed with this one.** | Abstract; Results; Table 1 |
 
 Rule applied (proposal rev 2 §4, Chad's H2): a claim is plottable only if the passage carrying its number and the passage tying that number to the find were read in full text, at the publisher or a legitimate archive, and the source's status was checked. A number seen only in an abstract is not plottable. Licence is recorded, not a gate (H2b: no).
 

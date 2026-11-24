@@ -77,20 +77,19 @@ Chad
 
 ---
 
-## E4. La Ferrassie (before claim C7 is frozen) — to the corresponding author of Guérin et al. 2023, PaleoAnthropology 2023:1, 98–118, doi 10.48738/2023.iss1.811
+## E4. La Ferrassie (optional: a check of our wording) — to the corresponding author of Guérin et al. 2023, PaleoAnthropology 2023:1, 98–118, doi 10.48738/2023.iss1.811
 
-**Subject:** Your 2023 La Ferrassie chronology paper: the journal's site is not loading
+**Rev 3 (24 Nov 2026).** The earlier E4 asked for the paper because the journal's site was not loading. That is out of date: GPT has since read the relevant passages in the publisher's full text (source check rev 1.3). **E4 is now optional.** Send it only if Chad wants the authors to check our wording. Not sent.
+
+**Subject:** A wording check: the La Ferrassie bone fragment and your 2023 model
 
 Hello,
 
 I run Mother Earth, a small non-commercial website that shows dated observations of the planet with their sources. We are adding a few dated human-relative fossils to its timeline, each shown as the date a paper assigns to one find, with the paper cited.
 
-We plan to show the directly dated hominin bone from the La Ferrassie 8 context (ETH-99102; 41.7 to 40.8 thousand calibrated years BP at 95.4 %, from the 2020 Scientific Reports paper). Before we do, we want to read your 2023 paper on the ages of the La Ferrassie individuals, in case it changes or qualifies that date or the bone's link to LF8. The journal's site has not loaded for us on several tries.
+We plan to show the directly dated hominin bone fragment from the La Ferrassie 8 context (ETH-99102; 41.7 to 40.8 thousand calibrated years BP at 95.4 %, from the 2020 Scientific Reports paper). Beside it we would add, in our own words: that your 2023 paper models the age of La Ferrassie 8 at 44.9 to 39.9 thousand years ago (95 % credibility); that it keeps the fragment's direct date as an alternative if the fragment belongs to La Ferrassie 8; and that this assignment has not been demonstrated. We would not show the interval in which the three individuals could have been contemporaries as a date for any one of them.
 
-Could you tell us:
-
-1. Does the 2023 chronological model change the age we should give for that bone, or for LF8?
-2. Is there a copy we could read (a repository record, or the text of the relevant section)? We would not pass it on or reproduce it.
+Is that a fair reading of your paper? If not, we would be grateful for a correction.
 
 Thank you for the work, and for any help.
 
