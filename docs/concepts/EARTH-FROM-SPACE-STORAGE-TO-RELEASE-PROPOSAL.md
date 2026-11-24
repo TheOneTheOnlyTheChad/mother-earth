@@ -1,8 +1,15 @@
-# Earth from Space — from the first stored picture to the page: proposal (rev 2.4 DRAFT; rev 2.1 passed by GPT at proposal level)
+# Earth from Space — from the first stored picture to the page: proposal (rev 2.5 DRAFT; rev 2.1 passed by GPT at proposal level)
+
+**Rev 2.5, 24 Nov 2026 02:44 UTC (clock reading): GPT's review of rev 2.4 adopted**
+(`EARTH-FROM-SPACE-STAGE-D-DOCS-REVIEW-2026-11-24.md` in GPT's folder on the Mac: monitoring direction accepted,
+focused revisions, Stage D not cleared). Section 17 lists the changes: 5.1 (end and closeout), 5.5 (what must be
+done before the line), 5.6 (what a pause alert shows), section 10 line 5, section 12 (marked historical). **No
+change of design.** The decisions on admission, budget breach, slot accounting and the result rule stay closed.
+**GPT has not reviewed rev 2.5.** Rev 2.4's note follows.
 
 **Rev 2.4, 23 Nov 2026 19:40 UTC (clock reading): brought up to date; no change of design.** Hub 0.6.24 is live (0.6.23
 plus the Timeline pin) and main's hub file is the deployed file since landing `7adef36`. Section 16 lists the three
-places changed. Rev 2.3's own note follows. **GPT has reviewed neither 2.3 nor 2.4; 2.4 is the version to review.**
+places changed. Rev 2.3's own note follows. *(Written at rev 2.4, before GPT's review of 24 Nov.)* GPT had then reviewed neither 2.3 nor 2.4.
 
 **Rev 2.3 (23 Nov 2026, 15:16 UTC clock reading) is a DRAFT and has not been reviewed.** It changes Stage D's
 monitoring only: 5.1 (end and closeout), 5.5 (rewritten), 5.6 (who pauses), section 10 (lines 4 and 5) and section
@@ -290,7 +297,8 @@ least 15 minutes before `FROM`, and is read back (all three values, code hash, b
 
 **End (rev 2.3).** Admission ends at `UNTIL` by itself. The gate stays at `1` until the last slot's due time,
 `UNTIL` + 10 minutes: set to `manual` earlier, the runs health address would answer "not collecting" and raise an
-alert for nothing. At the first read after that, the ticks scheduled at or after `UNTIL` are checked ("not scheduled
+alert for nothing. **(Rev 2.5) That is for a trial ending normally. A stop condition overrides it: the pause is
+made at once.** At the first read after that, the ticks scheduled at or after `UNTIL` are checked ("not scheduled
 (after the window)"), the gate is set to `manual` (tidying, not the boundary), read back, and admitted work is
 reconciled as in 5.6. Collection does not continue while the result is read. **Any continuation** is a separate
 Approve line with its own window.
@@ -298,7 +306,9 @@ Approve line with its own window.
 **Closeout (rev 2.3).** The two window variables stay set while the result is written, so the health addresses keep
 answering for this trial. They are removed on Chad's own line, **after** the trial's rows, the health answers and
 the monitors' logs have been saved and the result reviewed. The monitors then show "Up": that means closed out,
-not passed. Runbook rev 3, sections 5 and 6.
+not passed. **(Rev 2.5) A result written before the look for late rows is provisional; the final result is issued
+after that look and reviewed before the variables are removed. A read of the rows covers the rows present at that
+read: it does not show that no admitted trigger will run later still.** Runbook rev 3.2, sections 5 and 6.
 
 **Shown in the candidate, before any approval:** through the real scheduled handler with a controllable scheduled
 time: the tick before `FROM`, at `FROM`, the last one before `UNTIL`, at `UNTIL`, after it; a late-delivered trigger
@@ -394,9 +404,18 @@ decides how soon a stop condition is acted on.
 
 **This is a weaker basis than rev 2.2 described.** It is offered because rev 2.2's safety net failed its test.
 
-**Before the Stage D line is asked for** (runbook rev 3, section 1): the two monitors created and read back; the
-fixture alert test run and reviewed (`reviews/2026-11-23-earth-from-space-alert-test-plan.md`), or its absence
-stated; this revision and the runbook reviewed; Chad able to reach the pause on his phone.
+**Before the Stage D line is asked for** (runbook rev 3.2, section 1; rewritten in rev 2.5):
+
+- the two monitors created and read back;
+- **the fixture alert test run and reviewed** (`reviews/2026-11-23-earth-from-space-alert-test-plan.md`, rev 1.2),
+  with Down and recovery for both monitors received by push and by email. Chad chose this test (M6). A partial
+  result does not close this item by itself: it closes then only on Chad's own line naming what is unreliable or
+  unproven. The generic delivery test replaces it only if Chad changes M6 in his own words;
+- **D1 rows read and CPU measured in isolation** (the same plan, section 7; monitoring proposal 3.6);
+- **the evidence preflight** (runbook section 11a): that this Worker's records are kept, unsampled and readable in
+  full for the length of the trial and its closeout;
+- this revision and the runbook reviewed;
+- Chad's look at the pause on his phone, which rehearses reaching it and does not prove a save works there.
 
 `status` (needs the key) is run by Chad's script once a day, under step ids `D-status-1` and `D-status-2`, and at the
 end.
@@ -439,7 +458,10 @@ way in: it notifies Chad, who is the fallback owner of the pause.
 
 **Rev 2.3.** On an alert between reads, **Chad is the first owner of the pause**, from his phone; Claude pauses at
 a read, or sooner if Chad asks in the thread. A pause during the window makes the runs health address answer "not
-collecting", so the pause itself raises one alert (unless that monitor is already down): expected, and recorded.
+collecting", so the pause itself may raise one alert (unless that monitor is already down): expected, and recorded.
+**(Rev 2.5) An alert does not show the pause worked, and no alert does not show it failed: the variable read back
+and the scheduler's refusals show it.** After `UNTIL` + 10 minutes the gate no longer decides the health answer, so
+no new alert caused by the gate is expected then; findings already recorded still alert.
 Every pause and resumption goes into the ledger with its times.
 
 A hold (Chad's script) is the second lever. It also only prevents new runs.
@@ -643,7 +665,7 @@ Each is sent by Chad himself, in his own message, with hashes and times filled i
 2. `Approve: file the EUMETSAT GeoColour REGISTER entry as drafted in <file>` (recommended before Stage C; required before Stage D)
 3. `Approve: Earth from Space Stage C on hub 0.6.22 under proposal rev <n> section 4: set up storage (hold, recover first start, release); Claude sets EARTHVIEW_ENABLED to manual in the dashboard while I watch; one manual run started by me in the window <start UTC>; one further run only under section 4.3, not later than 40 minutes after the first; at most 6 requests to EUMETSAT; no scheduled collection` — plus, if the REGISTER entry is not yet filed: `; I approve one frame being publicly downloadable by URL before the REGISTER entry is filed`
 4. *(Rev 2.3: used on 23 Nov; the rehearsal failed. Not asked for again.)* `Approve: Earth from Space monitoring rehearsal under proposal rev <n> section 5.5: four hourly read-only inspections with the variable at manual, test notifications to my phone; no change to the hub, no request to EUMETSAT`
-5. *(Rev 2.3, numbers updated in 2.4.)* `Approve: Earth from Space Stage D under proposal rev 2.4 section 5 and runbook rev 3.1: set EARTHVIEW_FROM <time UTC>, EARTHVIEW_UNTIL <time UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at most 12 diagnostic requests; no manual run; watched by the UptimeRobot monitors "ME runs earthview" and "ME trial earthview" and by three reads a day by Claude (07:00, 13:00, 20:00 SAST) with my Mac kept awake; I accept that nothing pauses the trial by itself; that an alert is sent once and not repeated, and at night waits until I see it; that what the two monitors do not cover is found only if a later read happens, up to 11 hours apart, or not during the trial if the reads stop; that the monitors do not read rows finished more than 24 hours after the end; Claude may set EARTHVIEW_ENABLED to manual, and only that, on any stop condition of section 5.6 and at the end of the trial`
+5. *(Rev 2.3, numbers updated in 2.5.)* `Approve: Earth from Space Stage D under proposal rev 2.5 section 5 and runbook rev 3.2: set EARTHVIEW_FROM <time UTC>, EARTHVIEW_UNTIL <time UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at most 12 diagnostic requests; no manual run; watched by the UptimeRobot monitors "ME runs earthview" and "ME trial earthview" and by three reads a day by Claude (07:00, 13:00, 20:00 SAST) with my Mac kept awake; I accept that nothing pauses the trial by itself; that an alert is sent once and not repeated, and at night waits until I see it; that what the two monitors do not cover is found only if a later read happens, up to 11 hours apart, or not during the trial if the reads stop; that the monitors do not read rows finished more than 24 hours after the end; Claude may set EARTHVIEW_ENABLED to manual, and only that, on any stop condition of section 5.6 and at the end of the trial`
 5a. *(Rev 2.3.)* `Approve: Earth from Space Stage D closeout: remove EARTHVIEW_FROM and EARTHVIEW_UNTIL from the mother-earth Worker after the evidence is saved and the result reviewed; EARTHVIEW_ENABLED stays manual; read back`
 6. Stage E's line (the merge) comes with the release packet.
 
@@ -674,7 +696,11 @@ New in rev 2.1, for Chad:
 **Rev 2.3:** D8 is replaced by the acceptance written into line 5 of section 10 (5.5's table). D9 is retired with
 the rehearsal. D3 is still open and still Chad's.
 
-## 12. Questions for GPT
+## 12. Questions for GPT (historical: answered in GPT's reviews of 22 Nov)
+
+*(Rev 2.5.) These were rev 2's questions. Q2 asks about the hourly heartbeat design, which was retired on 23 Nov
+(5.5). No question is open here. The current questions were in the runbook and the alert test plan, and GPT
+answered them on 24 Nov.*
 
 - **Q1.** Does the admission window (5.1) close the trial-end race? Is comparing against the trigger's scheduled time
   the right boundary, and is a 48-hour maximum window the right fail-closed limit?
@@ -756,3 +782,16 @@ Brought up to date after hub 0.6.24 and the hub-to-main landing; no change of de
 **Not changed and worth saying (from rev 2.3):** 5.8 still requires "no pause" for **met**, and "no unmonitored interval whose
 stored records could not be read afterwards". A missed read whose records were read later does not by itself break
 that.
+
+## 17. Changes in rev 2.5 (24 Nov 2026; GPT's review of rev 2.4 adopted; not yet re-read)
+
+| Where | Change | Why (GPT, 24 Nov) |
+|---|---|---|
+| 5.1 End | A stop condition overrides leaving the gate at `1` until the last slot is due | Accepted for a normal end only |
+| 5.1 Closeout | The result is provisional until the late-row look; a final result is reviewed before the variables are removed; what a read of the rows can and cannot show | Final result after the late look |
+| 5.5 | The list of what must be done before the Stage D line: the fixture test with complete receipts (M6 stands), the isolated D1 measurement, the evidence preflight, the phone look's limit | P4 was ambiguous; 3.6 requires measurement before the trial; retention was unchecked |
+| 5.6 | A pause alert is not proof of a pause | Variable read back and scheduler refusals are |
+| Section 10, line 5 | Revision numbers | |
+| Section 12 | Marked historical | It asked an obsolete heartbeat question |
+| Throughout | References to runbook rev 3 now say rev 3.2 | Stale references |
+

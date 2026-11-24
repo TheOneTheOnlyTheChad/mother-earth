@@ -1,10 +1,18 @@
-# Earth from Space — runbook for Stage D on the independent-monitoring basis (runbook rev 3.1, DRAFT for review)
+# Earth from Space — runbook for Stage D on the independent-monitoring basis (runbook rev 3.2, DRAFT for review)
+
+**Rev 3.2, 24 Nov 2026 02:42 UTC (clock reading): GPT's review of rev 3.1 adopted**
+(`EARTH-FROM-SPACE-STAGE-D-DOCS-REVIEW-2026-11-24.md` in GPT's folder on the Mac; outcome: direction accepted,
+focused revisions needed, Stage D not cleared). Changed: section 0 (points 7 and 8); P4 rewritten, P4a and P11
+added, P6's limit stated; 3.3 is a hold point; 3A saves raw records at every read; section 4 step 3 (a pause alert
+is not proof of a pause); section 5 (a stop condition overrides the wait; the alert wording); section 6 (the result
+is provisional until the late look, then a final result is reviewed before the variables go); section 10 now
+records GPT's answers; section 11. **No change of design. GPT has not reviewed rev 3.2.**
 
 **Rev 3.1, 23 Nov 2026 19:40 UTC (clock reading): brought up to date, nothing else changed.** Since rev 3 was written the
 hub went to 0.6.24 (the Timeline pin; Earth from Space code unchanged) and main's hub file became the deployed file
 (landing `7adef36`). Changed here: the hub version in the basis and P1; P1a (no hub deploy during the trial); P8
-(the review copy comes from main); the rollback note in section 8; the revision numbers in the line. **GPT had not
-yet reviewed rev 3; this is the version to review.**
+(the review copy comes from main); the rollback note in section 8; the revision numbers in the line. *(Written at rev 3.1, before GPT's review of 24 Nov.)* GPT had
+not then reviewed rev 3.
 
 23 Nov 2026, 15:16 UTC (clock reading). Written on Chad's go of 23 Nov for docs work. **Docs only. Nothing here is
 approved, scheduled or set. Stage D is not cleared.**
@@ -14,7 +22,7 @@ the hourly inspections, the heartbeat pushes, the "90 minutes without a push" du
 0, 1, 4 and 5 of that file are the record of Stage C and stand as written. **The old duties are retired only when
 the replacement has been tested and this runbook accepted** (monitoring proposal section 10).
 
-**Basis.** Monitoring proposal rev 3.1 with Chad's "M1 to M8 yes"; storage-to-release proposal rev 2.3 (draft,
+**Basis.** Monitoring proposal rev 3.1 with Chad's "M1 to M8 yes"; storage-to-release proposal rev 2.5 (draft,
 same commit) sections 5.1, 5.5, 5.6; **hub 0.6.24 live since 23 Nov 17:18 UTC** (0.6.23 with the Timeline pin added;
 the Earth from Space code and the two health addresses are unchanged from 0.6.23).
 
@@ -35,6 +43,10 @@ Said here in full, and repeated in his Approve line (section 7):
 5. **The monitors do not read rows finished more than 24 hours after the trial's end.** A late bad row for a slot
    that already had a good one would not turn anything red. Claude's closeout read has no such cutoff.
 6. **A wrong picture that passes validation is seen by nobody** until someone looks at it.
+7. **The health addresses keep no history of the gate.** That a pause happened is recorded only in the ledger
+   (section 4, step 7).
+8. **Findings outside the read range are not kept by the monitors.** Point 5 is the case that matters. Nothing here
+   claims a finding is retained beyond that range.
 
 This is a **weaker** basis than the hourly inspections of proposal rev 2.2. It is offered because that design's
 safety net failed its rehearsal on 23 Nov.
@@ -49,13 +61,15 @@ Every item done, recorded, and where it says so reviewed. A missing item is **op
 | P1a | **No hub deploy between the Stage D line and the closeout** (`docs/HUB-DEPLOY-RULE.md`, condition 9). Any other thread's hub change waits, or goes before the line | At the time |
 | P2 | REGISTER entry for GeoColour filed | **Done** 22 Nov |
 | P3 | UptimeRobot monitors "ME runs earthview" and "ME trial earthview" created on Chad's line and read back (address, interval, contacts), both Up | Open |
-| P4 | The fixture alert test (`reviews/2026-11-23-earth-from-space-alert-test-plan.md`) run and its result read by GPT; or, if Chad decides against it, the generic delivery test, with "live true positive untested" stated in the Stage D line | Open (plan in review) |
-| P5 | This runbook and proposal rev 2.4 read by GPT and accepted by Chad | Open |
-| P6 | **Phone pause, looked at once:** Chad opens the hub's variables on his phone in the Cloudflare dashboard, reaches the edit form for `EARTHVIEW_ENABLED`, and **cancels without saving.** The exact taps are written into section 4 from what he saw | Open |
+| P4 | The fixture alert test (`reviews/2026-11-23-earth-from-space-alert-test-plan.md`, rev 1.2) run and its result read by GPT, **with all eight receipts of its section 6 matrix recorded as received** (runs Down, runs recovery, trial Down, trial recovery, each by push and by email). **Anything less leaves P4 open.** It closes then only on Chad's own line naming the channel or the recovery path that is unreliable or unproven and accepting Stage D on that revised basis. **The generic delivery test in place of the fixture test is not an option here: Chad chose the fixture test (M6). It becomes one only if he changes that decision in his own words** | Open (fixture not built) |
+| P4a | **D1 cost measured before the trial** (monitoring proposal 3.6): the isolated measurement of the alert test plan, section 7, run and its result read by GPT. Deferring it into the trial would change an adopted requirement and needs Chad's own line saying so | Open (plan in review) |
+| P5 | This runbook (rev 3.2) and proposal rev 2.5 read by GPT and accepted by Chad | Open (rev 3.1 and 2.4 reviewed 24 Nov: revisions asked for, made here, not yet re-read) |
+| P6 | **Phone pause, looked at once:** Chad opens the hub's variables on his phone in the Cloudflare dashboard, reaches the edit form for `EARTHVIEW_ENABLED`, and **cancels without saving.** The exact taps are written into section 4 from what he saw, with the gate's value as shown. **This rehearses getting there. It does not prove that saving a pause works on that phone**, and no live toggle is made to prove it | Open |
 | P7 | Chad's answer on D3: does EUMETSAT need a note before sustained requests? | Open (his call) |
 | P8 | A fresh copy of **main** on the Mac for the status calls: `_review/earth-from-space-stage-d/`, `phase1/earthview-admin.sh` hash checked against main (the script is on main since the hub-to-main landing) | Open |
-| P9 | The read tasks of section 3 created and **listed back** (ids and due times), after the line and before `FROM` | At the time |
+| P9 | The read tasks of section 3A created and **listed back** (ids and due times), after the line and before `FROM` | At the time |
 | P10 | Hub health on the day: status file; the last hour's invocations all `ok`; the eight existing monitors Up | At the time |
+| P11 | **Evidence preflight** (section 11a), done and recorded before the line is asked for: this Worker's actual log retention and sampling; which of the figures the reads need are available, from where, and for how long; a query or export that returns **every** record of an interval, shown complete on a known interval; where D1 rows read comes from. A source that cannot be read is named as such | Open |
 
 ## 2. Who notices what
 
@@ -94,22 +108,33 @@ An overdue slot says "completion missing". It does not say why.
 4. Ticks before `FROM` must log `earthview:not scheduled (before the window)`. Anything else: set the gate back
    to `manual` and stop.
 5. Both health addresses (GET): 200, state `armed`. Both monitors Up.
-6. Create the read tasks (section 3.3) and list them back (P9).
+6. Create the read tasks (section 3A) and list them back (P9).
 
 ### 3.3 The start read (at `FROM` + 30 minutes, Chad still there)
 
-- The first slots have `run-start` and `run-end` lines; their rows are in `collector_runs` with `started_at` on
-  the exact mark. **This is the first live sight of a scheduled row** (monitoring proposal section 2). If the
-  marks are not exact, every slot will look incomplete and the runs monitor will alarm: pause and report.
-- Health addresses: state `active`, nothing overdue.
-- **D1 rows read and CPU of a health request in state `active`**, from the invocation records: the first real
-  figures (not measured before; they are small while the trial is young, and are read again at every read).
-- Then Chad may leave the Mac. **It stays awake with the Claude app open for the 48 hours.**
+**A hold point: Chad does not leave the Mac until all of this has been seen.**
+
+- The first slots have `run-start` and `run-end` lines; their rows are in `collector_runs` with `started_at`
+  equal to **the scheduled timestamp on the ten-minute mark**. That is the trigger's scheduled time, not the second
+  Cloudflare actually started it: a trigger delivered late is an accepted limit, not a fault. **This is the first
+  live sight of a scheduled row** (monitoring proposal section 2). If `started_at` is not the scheduled mark, every
+  slot will look incomplete and the runs monitor will alarm: pause and report.
+- Health addresses: state `active`; the first slot that has come due is accounted for; nothing overdue.
+- **D1 rows read and CPU of a health request in state `active`**, from the source named in the preflight (P11),
+  set beside the isolated measurement (P4a). They are small while the trial is young and are read again at every
+  read. If they cannot be read, that is said, and Chad decides whether to go on.
+- **If this read finds an overdue slot or any adverse finding: pause (section 4). Nobody leaves.**
+- Only then may Chad leave the Mac. **It stays awake with the Claude app open for the 48 hours.**
 
 ## 3A. The reads (Claude, read-only; 07:00, 13:00 and 20:00 SAST)
 
 Each read is started by a scheduled message in the thread. **No push is sent for a clean read.** Each read writes
 one ledger entry in the thread and in the result file, with a clock reading.
+
+**Each read saves its raw records** (the invocation records, the log lines, the `collector_runs` rows since the
+last read) into the evidence folder, with how they were obtained and the evidence that the set is complete: the
+count the source reports against the count saved, every page fetched. **A truncated or sampled set is flagged. If a
+source the read needs cannot be read, the interval is not called clean.**
 
 1. Clock reading. Compare with the last read's time. **A read more than 60 minutes late, or a missing one, is
    recorded as a gap and pushed to Chad once.**
@@ -146,9 +171,11 @@ way in: it pushes to Chad.
 
 1. Set `EARTHVIEW_ENABLED` to `manual`. Note the time. The two window variables stay.
 2. Read back the variable, code hash, bindings, crons.
-3. **The pause itself turns "ME runs earthview" red** (`not_collecting`) within a poll or two, and one alert is
-   sent, unless that monitor was already Down. **That alert is expected. It confirms the pause; it is not a new
-   fault.**
+3. **What shows the pause worked is step 2 (the variable read back) and step 5 (the scheduler's refusals). An
+   alert does not.** A pause made before `LAST` can turn "ME runs earthview" red (`not_collecting`) if it was Up,
+   and one alert may follow: that alert is expected and is not a new fault. **But none may come:** a monitor that
+   is already Down opens no new incident; after `LAST` the gate no longer decides the health answer; and delivery
+   can fail. No alert is not evidence that the pause failed, and an alert is not evidence that it worked.
 4. Read invocation records until every invocation that began before the read-back has ended, and for at least 15
    minutes. List any picture run among them and what it did. A trigger scheduled inside the window and delivered
    late may still run after `UNTIL`: that is reconciled, not a breach.
@@ -164,12 +191,16 @@ A paused trial is not **met** (proposal 5.8).
 
 `LAST` = `UNTIL` + 10 minutes. Admission ends at `UNTIL` by itself, whoever is watching.
 
-1. **The gate is left at `1` until `LAST`.** Setting it to `manual` earlier would turn the runs monitor red for
-   nothing.
+1. **For a trial ending normally, the gate is left at `1` until `LAST`.** Setting it to `manual` earlier would
+   turn the runs monitor red for nothing. This is tidy-up timing, not more admission: admission ends at `UNTIL`
+   by the scheduled timestamp. **A stop condition overrides it: the pause of section 4 is made at once, before
+   `LAST` or not.**
 2. At the first read at or after `LAST`: any tick scheduled at or after `UNTIL` must have logged
    `earthview:not scheduled (after the window)`, with no `run-start` line.
-3. **Then the gate is set to `manual`** (section 4, steps 1, 2, 4, 5, 6) and read back. No alert is expected:
-   after `LAST` the gate no longer decides the health answer.
+3. **Then the gate is set to `manual`** (section 4, steps 1, 2, 4, 5, 6) and read back. **No new alert caused
+   by the gate is expected after `LAST`**, because the gate no longer decides the health answer. **Recorded
+   findings still apply:** this read may itself find a storage stop or a late row, and that alerts as it would at
+   any other time.
 4. Chad: `bash earthview-admin.sh D-status-3 status`.
 5. **Usage read**, compared with the start.
 
@@ -189,10 +220,15 @@ In this order. **The window variables are removed last, and only after the evide
    - each monitor's log and incidents from UptimeRobot (pane displayed; Chad at the Mac);
    - the ledger of reads, gaps, pauses and pushes;
    - what Chad received on his phone and by email, and when.
-2. **The result** is written by the rule of proposal 5.8 and goes to GPT and Chad.
+2. **The result** is written by the rule of proposal 5.8 and goes to GPT and Chad. **Written before the late look
+   it is provisional, and says so.**
 3. **A last look for late rows:** if step 1 was made less than 24 hours after `UNTIL`, the `collector_runs` read
-   is repeated once after `UNTIL` + 24 hours and anything new is added to the result.
-4. **Only then, on Chad's own line:** remove `EARTHVIEW_FROM` and `EARTHVIEW_UNTIL`; read back (the variables are
+   is repeated once after `UNTIL` + 24 hours. **Known limit, kept:** a read with no upper time limit covers the
+   rows present at that read. It cannot show that no trigger admitted inside the window will run later still. The
+   look at +24 hours is not a bound on how late a trigger can be delivered.
+4. **The final result** is issued after the late look (the provisional one amended, or confirmed unchanged) and
+   **reviewed by GPT before anything is removed.** No evidence and no earlier finding is deleted.
+5. **Only then, on Chad's own line:** remove `EARTHVIEW_FROM` and `EARTHVIEW_UNTIL`; read back (the variables are
    gone, gate `manual`, code hash unchanged, 25 bindings, crons unchanged; both addresses 200 `no trial
    configured`; both monitors Up).
 
@@ -203,7 +239,7 @@ The two monitors stay. They are silent while no trial is configured.
 
 ## 7. The Stage D line (sketch, not a request)
 
-`Approve: Earth from Space Stage D under proposal rev 2.4 section 5 and runbook rev 3.1: set EARTHVIEW_FROM <UTC>,
+`Approve: Earth from Space Stage D under proposal rev 2.5 section 5 and runbook rev 3.2: set EARTHVIEW_FROM <UTC>,
 EARTHVIEW_UNTIL <UTC, 48 hours later> and EARTHVIEW_ENABLED 1; 288 slots; at most 864 requests to EUMETSAT plus at
 most 12 diagnostic requests; no manual run; watched by the UptimeRobot monitors "ME runs earthview" and "ME trial
 earthview" and by three reads a day by Claude (07:00, 13:00, 20:00 SAST) with my Mac kept awake; I accept that
@@ -213,7 +249,7 @@ during the trial if the reads stop; that the monitors do not read rows finished 
 Claude may set EARTHVIEW_ENABLED to manual, and only that, on any stop condition of section 5.6 and at the end of
 the trial`
 
-Closeout (section 6, step 4) is a separate line.
+Closeout (section 6, step 5) is a separate line. It is cleanup: it is not acceptance of a provisional result.
 
 ## 8. Recovery
 
@@ -233,21 +269,44 @@ first (`docs/HUB-DEPLOY-RULE.md`, condition 6).
 | R2 | The phone look (P6) before Stage D: open the edit form on your phone and cancel? About five minutes | Yes |
 | R3 | A push for a missed or unreadable read, and for nothing else routine? | Yes |
 
-## 10. Questions for GPT
+## 10. GPT's answers to rev 3.1's questions (24 Nov 2026), and where each is adopted
 
-- **Q1.** Does section 0 state the exposure of monitoring proposal section 7, "no delay, no repeat" and the
-  24-hour horizon fully enough for the Stage D line?
-- **Q2.** Is leaving the gate at `1` until `LAST` (section 5) right, given that an earlier `manual` would raise a
-  `not_collecting` alert?
-- **Q3.** Is the closeout order right: evidence, result, late-row look, then the window variables on their own
-  line?
-- **Q4.** Is the phone look (P6) a sufficient check that Chad can pause, without making a change?
-- **Q5.** Should the first live sight of a scheduled row (3.3) be a hold point: no leaving the Mac until it is
-  seen on the exact mark?
+| Question | GPT's answer | Where |
+|---|---|---|
+| Q1. Does section 0 state the exposure fully enough? | Substantially. State watcher silence, the wrong-picture limit and the gate-history limit; do not imply findings outside the horizon are kept; amend P4, cost and evidence | Section 0 points 4, 6, 7, 8; P4, P4a, P11 |
+| Q2. Gate left at `1` until `LAST`? | Accepted for a normal end. A stop condition overrides it. Admission still ends at `UNTIL` | Section 5 step 1 |
+| Q3. Closeout order? | Accepted, with a final result issued and reviewed after the late look. Nothing deleted | Section 6 steps 2 to 5 |
+| Q4. Is the phone look enough? | As a rehearsal of getting there. Not proof that a save works. Record the limit, the gate's value and the taps. No live toggle | P6 |
+| Q5. First scheduled row a hold point? | **Yes.** No leaving until a scheduled row with its scheduled timestamp is seen, the first due slot is accounted for and the cost evidence is readable. On an overdue slot or adverse finding: pause | 3.3 |
+
+GPT also said the 12:30 SAST start is a reasonable proposal and that no date or window is approved by its review.
+
+**No new question for GPT in rev 3.2.** It is returned for a check that the points above were adopted as meant.
 
 ## 11. Not checked while writing this
 
 - The exact taps on Cloudflare's mobile dashboard (P6 is for that).
 - Whether the invocation records show D1 rows read per request, or only the account's total (3.3 and 3A step 8
   record whichever exists, and say which).
-- Workers log retention.
+- Workers log retention, sampling and export on this account. **Not checked; P11 is for that.**
+
+## 11a. The evidence preflight (P11): what is to be established, read-only, before the Stage D line
+
+Cloudflare's documentation, read 24 Nov 2026, says Workers Logs are kept seven days on the Paid plan, that the
+head sampling rate defaults to 1 (every request), and that logs can be queried in the dashboard's Query Builder or
+exported. D1's documentation says rows read is returned with each query and that D1 metrics are kept 31 days.
+**That shows the evidence can exist. It does not show this Worker's settings, or that each figure the reads need is
+kept that long.** So, on the account itself, with the Cloudflare tab displayed:
+
+1. The `mother-earth` Worker's observability settings as they are: logs on or off, the sampling rate. Read, not
+   changed. If the rate is below 1, the reads cannot count every invocation, and that goes to Chad before any line.
+2. For each figure a read uses (invocation outcome, CPU, the `run-start` and `run-end` lines, wall time): where it
+   is read, how far back it goes, and whether it is exact or a percentile.
+3. One query or export that returns every record of a known past hour, with the count the source reports beside
+   the count obtained. The method is written into section 3A.
+4. D1 rows read: whether one health request's figure can be obtained, or only a total for the database over a
+   period. **A total is not passed off as one request's figure.** Worker logs and D1 metrics are different sources
+   and are named separately.
+
+The preflight changes no setting. If it shows a setting must change (sampling, for one), that is its own approved
+step.

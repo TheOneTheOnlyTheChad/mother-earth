@@ -1,14 +1,23 @@
-# Earth from Space — the fixture alert test (monitoring proposal 9.5, decision M6): plan rev 1.1, NOT built, NOT approved
+# Earth from Space — the fixture alert test (monitoring proposal 9.5, decision M6): plan rev 1.2, NOT built, NOT approved
+
+**Rev 1.2, 24 Nov 2026 02:43 UTC (clock reading): GPT's review of rev 1.1 adopted**
+(`EARTH-FROM-SPACE-STAGE-D-DOCS-REVIEW-2026-11-24.md` in GPT's folder on the Mac). Changed: section 1 (what the CPU
+figure is); 2.1 (the router); 2.2 (how many rows the polls see; the 120 min 15 s boundary); 2.3 (router cases);
+section 6 (the receipt matrix; what closes the Stage D prerequisite; 15 minutes is a target); **section 7 rewritten:
+D1 cost is measured before Stage D, in isolation, as its own approved step**; section 8 (the fixture test is
+Chad's chosen test, M6); section 10 (**the fixture build is NOT yet authorised: that sentence in rev 1.1 was
+wrong**); sections 11 to 13. GPT checked the timeline of 2.2 against the exact Worker and found it behaves as
+described. **GPT has not reviewed rev 1.2.**
 
 **Rev 1.1, 23 Nov 2026 19:40 UTC (clock reading): brought up to date, nothing else changed.** The hub is now 0.6.24 and
 its file is on main, so the fixture copies the health code from main, not from `566a11b`. **The throwaway Worker is
 not the hub: `docs/HUB-DEPLOY-RULE.md` does not cover it, and creating it still needs Chad's own line as section 10
-says.** GPT had not yet reviewed rev 1; this is the version to review.
+says.** *(Written at rev 1.1, before GPT's review of 24 Nov.)* GPT had not then reviewed rev 1.
 
 23 Nov 2026, 15:16 UTC (clock reading). Written on Chad's go of 23 Nov for docs work ("1.", choosing the docs first).
 **Docs only. Nothing here is built, created, deployed or scheduled.** For GPT's review, then Chad.
 
-Basis: `docs/concepts/EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL.md` rev 3.1, section 9 test 5, and Chad's
+Basis: `docs/concepts/EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL.md` rev 3.1, section 9 test 5 and section 3.6, and Chad's
 "M1 to M8 yes" (section 11 there). Hub 0.6.24 is live with the two health addresses (0.6.23 at the time of rev 1); both answer 200
 `no trial configured`. The two real monitors do not exist yet.
 
@@ -32,7 +41,7 @@ Basis: `docs/concepts/EARTH-FROM-SPACE-INDEPENDENT-MONITORING-PROPOSAL.md` rev 3
 | A Down alert reaches Chad's phone and his email, and how long each took | Delivery at night, on another day, or with the phone off |
 | A recovery message follows when the address answers 200 again | That an alert is **acted on**. Sent is not acted on (proposal section 12, point 4) |
 | Roughly how many failed polls open an incident (from the poll log against the incident's start) | The hub's own route, its D1 read, or real run records |
-| CPU of the production evaluation over a full 288-slot trial, in the Workers runtime | **D1 rows read.** The fixture has no database (section 7) |
+| **Fixture CPU:** the CPU of each poll's evaluation in the Workers runtime, over the 261 to 281 rows the fixture returns during the test (2.2). Not the hub's CPU, and not a bound on it | **D1 rows read, or the hub's CPU for a completed trial.** The fixture has no database. Section 7 measures those separately |
 | That one monitor going Down does not disturb the other | c6 and c8 live. Only a storage stop is exercised here; the offline suite covers the rest |
 
 **"No delay, no repeat" is part of what is being tested:** each Down is announced once. If it is missed, nothing
@@ -57,7 +66,7 @@ reminds.
 | `HEALTH.checks` | Only the two entries used: `runs: ['earthview']`, `trial: ['earthview']`. **Fixture, stated** |
 | The `env` handed to the health code | **Fixture.** Before the simulated closeout: gate `1`, `EARTHVIEW_FROM`, `EARTHVIEW_UNTIL`. From the simulated closeout on: gate `manual`, no window. Decided by the clock |
 | `env.DB` | **Fixture.** A stand-in that answers the production query from made-up rows held in the script. It applies the query's own bounds (layer, `finished_at` range, order, limit) and **one rule of its own: a row is returned only once the clock has reached its `finished_at`.** That is how a "late" row arrives with nobody touching anything |
-| The router | **Fixture.** `GET` or `HEAD` on `/health/<check>/<layer>` goes to the production `health`; anything else is 404 |
+| The router | **Fixture.** Only the two exact paths `/health/runs/earthview` and `/health/trial/earthview`, by `GET` or `HEAD`, go to the production `health`. **Everything else is answered 404 by the router itself and never reaches the copied code**: the copied `health` refers to other layers' handlers, which are not copied, so a general `/health/*` route could throw instead of answering 404 (GPT, 24 Nov) |
 
 **Stated plainly: the closeout and the arrival of rows are simulated by the fixture's clock rules.** The verdicts,
 status codes, headers and bodies come from the production functions.
@@ -67,8 +76,10 @@ status codes, headers and bodies come from the production functions.
 `T0` is a ten-minute mark, set in Chad's Approve line. The build script takes `T0` and writes the Worker file; the
 file's sha256 is quoted in the same line.
 
-- `FROM` = `T0` − 44 h. `UNTIL` = `T0` + 4 h. **288 slots**, so each evaluation is the size of a real one near the
-  end of a trial.
+- `FROM` = `T0` − 44 h. `UNTIL` = `T0` + 4 h. **288 slots are allocated. The polls do not see 288 completed
+  rows:** a row is returned only once the clock has reached it, so the query returns 261 rows at `T0` − 30 min,
+  268 at the first Down, 274 at the runs recovery and 281 just before the simulated closeout (GPT's independent
+  count, 24 Nov). **This is not a measurement of a completed 288-row trial.** That is section 7's.
 - Every slot has one good row (`ok`, `nothing newer: …`) finished 15 s after its mark, **except two:**
 
 | Slot | Its row | Effect, from the production rules |
@@ -83,8 +94,8 @@ file's sha256 is quoted in the same line.
 |---|---|---|---|
 | before `T0` + 50 | 200 `active` | 200 | none |
 | `T0` + 50 to `T0` + 100 | **503** | 200 | **1. runs Down** |
-| `T0` + 100 to `T0` + 120 | 200 | 200 | **2. runs Up** |
-| `T0` + 120 to `T0` + 170 | 200 | **503** | **3. trial Down** |
+| `T0` + 100 to `T0` + 120 min 15 s | 200 | 200 | **2. runs Up** |
+| `T0` + 120 min 15 s to `T0` + 170 | 200 | **503** | **3. trial Down** |
 | from `T0` + 170 | 200 | 200 | **4. trial Up** |
 
 Each 503 lasts 50 minutes: about ten polls at five minutes.
@@ -96,7 +107,10 @@ Each 503 lasts 50 minutes: about ten polls at five minutes.
    fixture is rebuilt from the new file and its hash re-quoted.
 2. With a controlled clock, the Worker's own `fetch` gives the table of 2.2 at each boundary: one millisecond
    before and at `T0` + 50, `T0` + 100, `T0` + 120 min 15 s, `T0` + 170.
-3. `HEAD` and `GET` give the same status and headers; every answer is `no-store`; unknown paths are 404.
+3. `HEAD` and `GET` give the same status and headers; every answer is `no-store`. **The router:** an unknown
+   layer (`/health/runs/usgs`), an unknown check (`/health/coverage/earthview`), a trailing or doubled separator,
+   a longer path, a query string on a wrong path, and every method other than `GET` and `HEAD` each give 404 (or
+   405 for the method, whichever the build fixes and the suite states) **and none throws**.
 4. The Worker makes no outbound request and reads no binding (asserted with spies).
 5. Two `T0` values a day apart give files that differ only in the `T0` line.
 6. Deliberate breaks of the fixture's own rules (arrival rule off; closeout never; wrong slot), each caught.
@@ -158,44 +172,118 @@ Three verdicts, kept apart. **Not met takes precedence. Missing evidence is inco
 - **Not met:** a 503 phase with no incident; or an incident on the wrong monitor or in a 200 phase.
 - **Incomplete:** the logs could not be read.
 
-**B. Did it reach Chad?** (from his screenshots and mailbox)
-- **Met:** both Down messages arrived by push **and** by email before that monitor's recovery.
-- **Partly met:** both Down messages arrived, but on one channel only. The missing channel is named and goes into
-  the Stage D basis as unreliable.
-- **Not met:** a Down message arrived on neither channel before its recovery.
-- Recovery messages are recorded; their absence is a finding, not a failure of B.
+**B. Did it reach Chad?** (from his phone and his mailbox). One matrix, eight cells:
+
+| | Push | Email |
+|---|---|---|
+| runs Down | | |
+| runs recovery | | |
+| trial Down | | |
+| trial recovery | | |
+
+Each cell is one of: **received**, with the time it was received or seen and which of the two that is; **not
+received**, where the phone or mailbox was checked and it is not there; **evidence missing**, where it cannot be
+said either way. A known delivery failure and an unknown receipt are different things and are kept apart. **A
+missing screenshot does not prove non-delivery.**
+
+- **Met:** all eight cells received, and each Down received before that monitor's recovery.
+- **Partly met:** anything between. **A partial result stays partial.** Every cell that is not "received" is named.
+- **Not met:** a Down message received on neither channel before its recovery.
+
+**What this means for Stage D (runbook P4).** Chad chose this test (M6) to see Down and recovery reach his phone
+and his email with the Mac closed. **Only "met" closes P4.** With "partly met", P4 stays open until Chad, in his own
+line, names the channel or the recovery path that is unreliable or unproven and accepts Stage D on that revised
+basis. With "not met" or "incomplete", P4 is open. Not met takes precedence over incomplete.
 
 **C. How long?** One observation each, never a bound: 503 onset → first failing poll → incident opened → push
-seen → email received. **Expectation written down beforehand: a Down alert within 15 minutes of onset.** Over 15
-minutes is recorded as a finding; over 30 minutes changes the "roughly 25 to 30 minutes" estimate in proposal
-section 5 and is carried into the Stage D basis.
+seen → email received. **A Down alert within 15 minutes of onset is the target written down beforehand. It is a
+target, not something the service promises.** Over 15 minutes is a finding **even if the alert arrived before the
+recovery.** A late recovery is not used to make a late Down look timely: each is timed from its own onset. The
+"roughly 25 to 30 minutes" estimate in proposal section 5 is updated from what is observed, whichever way it
+moves, and stays an estimate: one test is never a maximum.
 
-**Also recorded:** how many failed polls preceded each incident; CPU per request of the 288-slot evaluation (every
-poll's figure, with minimum, median, maximum); anything requested by anyone other than UptimeRobot.
+**Also recorded:** how many failed polls preceded each incident; fixture CPU per request (every poll's figure, with minimum, median, maximum, and the rows returned at that poll); anything requested by anyone other than UptimeRobot.
 
 **A met result shows that this path worked on that day. It does not clear Stage D.**
 
-## 7. D1 rows read: what this test does not measure, and the choice
+## 7. D1 cost: measured before Stage D, in isolation (rewritten in rev 1.2)
 
-The handover expected this test to measure "D1 rows read and CPU for a real trial evaluation". **With no bindings
-it measures CPU only.** The CPU figure includes the stand-in's own filtering and sorting, which on the hub is D1's
-work, so it overstates the hub's CPU if anything.
+**Why this changed.** Monitoring proposal 3.6 requires D1 rows read and CPU per request to be measured with
+end-of-trial and repeat-heavy fixtures. Rev 1.1 proposed leaving the first real figure to the trial itself (option
+R-a). GPT's review: that changes the adopted requirement; it is not another way of meeting it. **Rev 1.2 proposes
+measuring it beforehand, apart from the alert test.** If Chad prefers to defer it into the trial after all, that is
+his own decision to change the prerequisite, recorded as that (T3).
 
-What is already known about rows read: the query is bounded to 2,000 rows by its `LIMIT`; the offline suite (case
-R7) shows SQLite answers it through the `(layer, finished_at)` index without a scan; a real trial holds about 288
-rows. Two addresses polled every five minutes is 576 requests a day, so about 166,000 rows read a day at 288 rows,
-and at most about 1.15 million a day at the limit.
+**Three statements in rev 1.1 are withdrawn:**
 
-| Option | What it adds | What it costs |
+- "Bounded to 2,000 rows by its `LIMIT`." **`LIMIT 2000` bounds the rows returned to the evaluation. It does not
+  bound the rows D1 bills as read**, which counts what the query reads or scans, index entries included.
+- "About 166,000 rows read a day … at most about 1.15 million." Those are **illustrations of rows returned** (576
+  polls a day times 288, or times 2,000). They are not measured D1 usage and not upper bounds. Extra polls and
+  manual health reads add to the real number.
+- "It overstates the hub's CPU if anything." **Unsupported.** D1's response handling and the runtime differ from
+  the stand-in. The alert fixture's figure is fixture CPU and nothing more.
+
+### 7.1 What is created (nothing in production is touched)
+
+- **A throwaway D1 database, `mother-earth-evd1test`.** Created empty. The `collector_runs` table and its two
+  indexes are created from the exact statements in `phase1/schema.sql` on main; the build checks them against that
+  file. **It is not the hub's database and nothing binds it to the hub.**
+- **A throwaway Worker, `mother-earth-evd1`,** with one binding: `DB` → that database. No R2, no secrets, no cron,
+  no route. It holds the same byte-for-byte health code as the alert fixture (2.1) and the same two-path router.
+  Its window and clock are fixed per row set, so the answer does not drift while it is measured. **This is a
+  second Worker, not the alert fixture: the alert fixture keeps no bindings**, as proposal 9.5 says.
+- **A thin recorder around `env.DB`: fixture, stated.** It passes each call straight to D1 unchanged and copies the
+  `rows_read` and duration figures D1 returns with the result into a response header. The query text, its bound
+  values and its result are untouched; the suite shows the health answer is byte-identical with and without the
+  recorder.
+- Its `workers.dev` address is on for the measurement and reads only made-up rows. Logs on, sampling 100%.
+
+### 7.2 The row sets (made up; loaded one at a time, the table emptied between)
+
+| Set | Rows | Expected answer |
 |---|---|---|
-| **R-a (proposed): keep the test with no bindings.** Rows read is measured on the hub at the start of Stage D, from the first polls in state `active`, and is a named read in the runbook | Nothing new to create | The first real figure arrives inside the trial, when it is small (few rows yet) |
-| R-b: give the test Worker its own throwaway D1 database, loaded with the fixture rows through `phase1/schema.sql` | A real D1 read of a full-size trial before Stage D | One more thing to create and delete; departs from "no bindings" in proposal 9.5; needs the plan revised and re-reviewed |
+| **S1. A completed normal trial** | 288 slots, one good row each, all finished; clock fixed just after `LAST` | 200, complete |
+| **S2. Repeat-heavy** | 288 slots with repeats and stray rows, about 1,900 rows inside the read range | 200 or 503 as the rows dictate, stated beforehand; evaluated in full |
+| **S3. At the cap** | 2,000 or more rows inside the read range | **503 `too many rows to evaluate`** |
+| **S0. Other layers present** | S1 plus several thousand rows of other layers and of `earthview` outside the range | As S1. Shows whether rows read follows the range or the table |
+
+### 7.3 What is measured
+
+For each set, each of the two addresses, `GET` and `HEAD`, **20 requests each**: `rows_read` and duration from D1's
+own result; CPU and wall time from the Worker's invocation record; the status and state of the answer. Reported as
+every figure, with minimum, median and maximum. **Rows read is set beside rows returned, so the difference is on
+the page.** Afterwards, D1's own metrics for the database are read and compared with the sum of the per-request
+figures.
+
+### 7.4 What it shows and does not show
+
+It shows what the production query costs in real D1 on these row sets. **It does not show the hub's cost during a
+trial:** the hub's table holds every layer's rows and has its own size and history, and S0 only approximates that.
+The figures are read again on the hub itself at the start read and at every read of Stage D (runbook 3.3 and 3A),
+from the source the evidence preflight names (runbook P11).
+
+### 7.5 Cost, and cleanup
+
+- **Money: none expected.** A few thousand rows written and well under a million read, once. The account is on
+  Workers Paid; the D1 allowance and the month's usage so far are read and recorded before the line is asked for.
+- Cleanup the same day: save the request log and D1's metrics; delete the Worker; delete the database; read back
+  that neither is in the account's lists; one read of the hub to show nothing changed.
+
+### 7.6 Order
+
+It is independent of the alert test and of the two real monitors. It needs Chad at the Mac for about 40 minutes
+(the Cloudflare tab displayed), on a weekday in daytime. It does not use his phone. **Nothing is retried: a set
+that did not run is recorded as not run.**
 
 ## 8. The generic delivery test (proposal 9.4)
 
-The fixture test delivers a real Down alert to the same contacts, so it gives the delivery evidence 9.4 was for,
-and more. **Proposed: if this test runs, 9.4 is not run separately.** If this test is not run, 9.4 stands as the
-smaller alternative. Chad's call (T2 below).
+**The fixture test is the test Chad chose (M6).** It is not swapped for the generic delivery test by leaving it out
+or by noting that it was not run: that needs Chad to change M6 in his own words.
+
+A fixture test that is **met** on its delivery matrix (section 6 B) gives everything 9.4 was for, and 9.4 is then
+not run as well. **A fixture test that merely ran does not:** if it ends partly met, not met or incomplete, 9.4 is
+not thereby dropped, and what happens next is Chad's decision.
 
 ## 9. Cost and exposure
 
@@ -206,8 +294,10 @@ smaller alternative. Chad's call (T2 below).
 
 ## 10. Approval lines (sketches, not requests)
 
-The build of the fixture Worker and its suite on the branch is covered by Chad's go. The live test needs his own
-line, with the values filled in at the time:
+**The build is not yet authorised.** Chad's go of 23 Nov ("1.") was for the documents first, and M1 to M8 are
+design decisions. Building the two throwaway Workers and their suites on a branch needs a separate go from him;
+none has been given. **Rev 1.1 said the build was covered. That was wrong.** After his go: the branch build, GPT's
+review of that exact candidate, then his own line for each live step, with the values filled in at the time:
 
 `Approve: Earth from Space fixture alert test under plan rev <n>: create the Worker mother-earth-evhtest from
 <file> sha256 <hash> with no bindings and its workers.dev address on, T0 <UTC time>; create the UptimeRobot
@@ -215,30 +305,45 @@ monitors "TEST evh runs DELETE" and "TEST evh trial DELETE" on its two health ad
 eight; I record the four messages on my phone; then delete both monitors and the Worker and read back; no change
 to the mother-earth Worker or to any other monitor`
 
+`Approve: Earth from Space D1 cost measurement under plan rev <n> section 7: create the D1 database
+mother-earth-evd1test and the Worker mother-earth-evd1 from <file> sha256 <hash>, bound only to that database, its
+workers.dev address on; load row sets S1, S2, S3 and S0 in turn and make the stated requests; save the figures; then
+delete the Worker and the database and read back; no change to the mother-earth Worker, its database or any
+monitor`
+
 ## 11. Decisions for Chad
 
 | # | Question | Claude proposes |
 |---|---|---|
 | T1 | Run this test before the two real monitors are created, or after? They do not depend on each other | Either. Creating the real two first is a five-minute job and lets the cleanup read back "ten, none named TEST" |
-| T2 | Drop the separate generic delivery test (9.4) if this one runs? | Yes |
-| T3 | D1 rows read: R-a or R-b (section 7)? | R-a |
+| T2 | Drop the separate generic delivery test (9.4) once this one is **met** on its delivery matrix? (If it ends partly met or worse, you decide then) | Yes |
+| T3 | D1 cost: measure it beforehand in isolation (section 7), or change the prerequisite and take the first figure inside the trial? | **Beforehand** (GPT's recommendation, and what monitoring proposal 3.6 says) |
+| T5 | Your go for the branch build of the two throwaway Workers and their suites (branch work only; nothing created in any account) | Yes, when you are ready |
 | T4 | A day and a `T0` that suit: about 30 minutes at the Mac before, phone with you for three hours, 20 minutes at the Mac after | A weekday `T0` of 10:00 SAST |
 
-## 12. Questions for GPT
+## 12. GPT's answers to rev 1.1's questions (24 Nov 2026), and where each is adopted
 
-- **Q1.** Is the split in 2.1 acceptable: production verdict code byte for byte, with the row arrival and the
-  closeout simulated by the fixture's clock?
-- **Q2.** Is one overdue slot and one storage stop enough for the live true positive, with c6 and c8 left to the
-  offline suite?
-- **Q3.** Is the result rule right, in particular "partly met" for one channel and the 15-minute expectation?
-- **Q4.** Is one row per slot (288 rows) the right size for the CPU figure, or should a near-limit set (about
-  1,900 rows) be measured as well?
-- **Q5.** R-a or R-b for rows read?
-- **Q6.** Is the screenshot an acceptable receipt record?
+| Question | GPT's answer | Where |
+|---|---|---|
+| Q1. Production code and fixture split? | Accepted in principle. Verify the copied spans against the exact Worker, name every simulated piece, and route only the two exact paths (or copy the full dependencies). Test unknown layers and checks, separators, methods, `HEAD` and `GET` | 2.1 (router), 2.3 items 1 and 3 |
+| Q2. One overdue slot and one storage stop enough? | Yes for this two-monitor delivery exercise. It does not exercise every stop condition live | Section 1 |
+| Q3. "Partly met" and the 15 minutes? | Keep partial outcomes, with the receipt matrix and an explicit rule for the Stage D prerequisite. 15 minutes is a target only | Section 6 B and C |
+| Q4. 288 rows or near the limit? | Both, and the 2,000-row refusal. Keep cost measurement apart from delivery if the load would disturb it | Section 7 (S1, S2, S3) |
+| Q5. R-a or R-b? | Real D1 before Stage D, in isolation. R-a as written does not meet the adopted prerequisite | Section 7 |
+| Q6. Is a screenshot a receipt? | Yes, as a record of when Chad saw it. Its capture time is not the receipt time: use the notification's own time if shown, or call it "seen by". Email received time and the provider's sent time stay distinct. Screenshots stay private | Section 4 ("What a screenshot proves"), section 6 B |
+
+**Screenshots are personal and are not put in the public repository.** The result records the times read from them.
+
+**No new question for GPT in rev 1.2,** beyond whether section 7's measurement is the isolated measurement it meant.
 
 ## 13. Not checked while writing this
 
 - Whether a new Worker's logs are readable in the dashboard at once (the alarm test of 22 Nov found a new Worker's
   rows recorded as `__unknown__` in a different tool). Checked at readiness; the fallback is in section 2.
 - How many failed polls open a UptimeRobot incident. This test is where it is observed.
+- **Section 7 is a design. Nothing in it has been run.** Whether `rows_read` reaches the Worker in the result's
+  metadata exactly as Cloudflare's documentation describes is checked in the branch suite against the local D1
+  emulator and then on the day; if it does not, the per-request figure is taken from D1's own metrics and the plan
+  says which was used.
+- The account's D1 allowance and usage this month (7.5).
 - UptimeRobot's current Free-plan terms were not re-read today; the figures are those in proposal section 8.
