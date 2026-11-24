@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 17:57 UTC (clock reading) — **Timeline R4: GPT PASSES the page candidate `9b83b5c` and the hub 0.6.25 candidate `0235545`. Catalogue bytes final. Waiting for Chad's own upload line; nothing uploaded, deployed or merged** (page: none; Timeline thread)
+- GPT's review filed unchanged: `reviews/2026-11-24-timeline-r4-page-and-hub-release-gpt-review.md` (sha256 `8d18f046…a63f`). Technical passes only; no production step is approved by it. Suite migrations and the source freeze accepted, with the stated limits kept on record: `timeline-travel-ui` is a schema-3 run, not a full R4 travel run; the older `health-breaks` and `firms-v2-breaks` runners miss some breaks on main and candidate alike; no real phone, Safari, screen reader, 200 % zoom or physical wheel.
+- **Chad (24 Nov): keep the 25 Nov 2026 page release date.** The catalogue is final: `tl-2026-11-R4`, 48,134 B, sha256 `74b1f8b165283b98023876fbd9e64b876bea17030973bfbc4ebea5f3ec8900ca`.
+- **Order, each on Chad's own line:** R2 upload and read-back → hub 0.6.25 deploy, read-back and landing on main → final combined tree tested → page release on 25 Nov (UTC date; from 02:00 SAST). **Earth from Space and other threads: please make no hub change while this is in progress.** Nature context resumes after the Timeline close-out.
+
 ## 24 Nov 16:16 UTC (clock reading) — **Timeline: RELEASE CANDIDATE `tl-2026-11-R4` (Humans and human relatives, four finds) prepared on two branches and handed to GPT. Nothing uploaded, pinned, deployed or merged; the live page still serves R3** (page: none; Timeline thread)
 - **Chad's go (24 Nov)** after GPT passed the wheel fix: take the four-find work through release-candidate preparation and review, then deployment on his Approve lines.
 - **Page candidate:** branch `timeline-finds-release-rc` `9b83b5c` (tested tree `f464fa8`, page commit H `643bb9a`), off fresh main `72ea123`. Catalogue `tl-2026-11-R4`, schema 4, **48,134 B, sha256 `74b1f8b1…00ca`, release date in the catalogue 25 Nov 2026**. Packet: `reviews/2026-11-24-timeline-r4-release-candidate.md`; freeze record `docs/research/TIMELINE-HUMAN-RELATIVES-FREEZE-R4.md`; REGISTER entry (marked release candidate), all on that branch.
