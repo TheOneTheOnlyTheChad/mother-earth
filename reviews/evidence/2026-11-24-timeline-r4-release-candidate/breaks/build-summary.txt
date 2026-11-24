@@ -1,0 +1,10 @@
+no-find-checks exit=1 43 | C refused: a fifth find (one sub-row each; never clustered)
+ban-sources exit=1 46 | A the release sources give the committed page and catalogue (tl-2026-11-R4, sha256 74b1f8b1…) with this generator
+midpoint exit=1 4 | A the release sources give the committed page and catalogue (tl-2026-11-R4, sha256 74b1f8b1…) with this generator
+pm-dropped exit=1 3 | A the release sources give the committed page and catalogue (tl-2026-11-R4, sha256 74b1f8b1…) with this generator
+fifth-allowed exit=1 1 | C refused: a fifth find (one sub-row each; never clustered)
+finds-at-schema-3 exit=1 2 | A a finds file beside schema-3 sources changes nothing: the same R3 bytes and the same page
+notation-unchecked exit=1 2 | C refused: a calibrated range with one end taken from another published calculation (GPT's reproduction: 41,700 to 40,827)
+words-unchecked exit=1 1 | C refused: notation and values changed together, the claim's own words not
+record-unchecked exit=1 3 | C refused: notation, values and words all changed to a mixed result: not the result the evidence record lists
+clock-in-catalogue exit=1 3 | A the release sources give the committed page and catalogue (tl-2026-11-R4, sha256 74b1f8b1…) with this generator

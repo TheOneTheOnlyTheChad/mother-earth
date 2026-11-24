@@ -1,0 +1,100 @@
+ok   A: the committed page, catalogue, script key and published image files equal the generator output
+ok   A: the previous release is frozen: catalogue/tl-2026-11-R2.json is the published file (sha256 2f39aa30…0356, 18,120 B)
+ok   A: the release source and the rehearsal source hold the same End-Cretaceous episode and the same sources; the other four episodes are equal too
+ok   A: release build identity: a release revision id (not a rehearsal id), schema 4 (tl-2026-11-R4 carries the story unchanged; R3, schema 3, is checked below as published)
+ok   A: the published image files are the NASA bytes, and the folder holds nothing else but SOURCE.json
+ok   A: the committed page pins the committed catalogue, states schema 4, and refers to the published files by the release revision
+ok   A: the release catalogue carries the snapshot's sentences word for word, and no rehearsal id anywhere
+ok   A: the published R3 catalogue (schema 3) still carries the same sentences, and R4 carries the end-Cretaceous entry exactly as R3 does
+ok   B: the rehearsal sources build (schema 3, revision tl-2026-11-T1, previous tl-2026-11-R2)
+ok   B: the other four entries are identical to the released catalogue, key for key
+ok   B: the two released timing claims are unchanged apart from carrying their ids c0 and c1
+ok   B: the chart-boundary claim is unchanged and keeps its id c3
+ok   B: the released context line "Causes are not shown in this release." is gone and its id c2 is not reused
+ok   B: the entry-wide evidence_reviewed date did not move
+ok   B: every reader-facing sentence equals review snapshot 2, word for word, and there is no other
+ok   B: order as in the snapshot (opening op-1…op-5; then ca-1…di-4; then lim-1)
+ok   B: heading "Evidence and interpretations"; caption, alt text and credit as in the snapshot; kind measured_image
+ok   B: Renne 2013 and Schulte 2010 are marked "abstract only" wherever they are cited
+ok   B: image renditions total 225526 B, within 300,000
+ok   B: the committed rehearsal source names the two NASA files with the hashes and sizes of snapshot 2
+ok   B: the image files in the repository are those bytes
+ok   B: nothing private in the shipped data (no inbox id, private path or snapshot hash)
+ok   B: the public change record (account and image added) keeps the retired line word for word
+ok   C: the page says which schema it was built for (data-catalogue-schema="3")
+ok   C: order in the entry: heading, image, opening, its sources, how we know, evidence and interpretations, context, chart, review
+ok   C: the image without JavaScript: a <noscript> <img> with src, srcset, alt, width and height; the scripted <img> has no src
+ok   C: every sentence of the snapshot is in the entry, escaped, each under its own id
+ok   C: no element carries the retired id …-c2; the four other entries keep their claim ids
+ok   C: credit and rights line link to the NASA record and to NASA's guidelines; no licence badge wording
+ok   C: the other four entries are pre-rendered byte for byte as on the released page
+ok   C: no image is referenced outside the entry that has one
+ok   C: each opening sentence carries its source numbers, and each number names a source in the list
+ok   C: the failure line and the scoped review note read as agreed with GPT; the entry-wide review line is still there
+ok   C: the change record gives the agreed reason
+ok   D refused: a duplicate id (an opening sentence reusing a claim id)
+ok   D refused: two claims with the same id
+ok   D refused: a malformed id
+ok   D refused: a dangling support reference
+ok   D refused: an evidence sentence with no support
+ok   D refused: a sentence of an unknown kind
+ok   D refused: an attributed finding with no source
+ok   D refused: an attributed finding with no locator
+ok   D refused: an evidence item of an unknown type
+ok   D refused: a collection record with no address
+ok   D refused: an image whose bytes differ from the recorded hash (one byte changed on disk)
+ok   D refused: an image with the wrong recorded size
+ok   D refused: an image with the wrong recorded pixel size
+ok   D refused: an image with a missing hash
+ok   D refused: an image whose media type does not match its file
+ok   D refused: an image with no licence field
+ok   D refused: an image with no licence address
+ok   D refused: an image file given as a path
+ok   D refused: an image file that climbs out of the folder
+ok   D refused: an image file given as an external address
+ok   D refused: an image that is not in the assets folder
+ok   D refused: a reconstruction
+ok   D refused: a reconstruction that is labelled as one
+ok   D refused: renditions over the byte budget in total
+ok   D refused: story fields in a schema 2 source
+ok   D refused: a change record that retires a line the previous release never showed
+ok   D refused: a change record that retires a line the entry still shows
+ok   D refused: an "account added" change for an entry with no account
+ok   D refused: an account with no dated review of its own
+ok   D refused: an account review dated after the release day
+ok   D refused: a private reference in shipped data
+ok   D: markup in a text field is written as text, never as HTML
+ok   D REVIEW FIXTURE (not a validator test): a sentence whose support id is valid but points at an unrelated source BUILDS. Only the matrix review can catch it
+ok   D: the same account with no image builds, with no figure and no asset reference in the page
+ok   E: the helper refuses to build inside the repository
+ok   E: the helper refuses a revision id that is not a rehearsal id (never builds under a release id)
+ok   E: four states built: with-image, no-image, image-fails, catalogue-refused
+ok   E with-image: the served timeline.js differs from the committed file in exactly one line, the hub address
+ok   E with-image: style.css is the committed file, byte for byte
+ok   E with-image: the page carries one banner line and is otherwise the generator's output
+ok   E with-image: the page pins the catalogue the helper will serve
+ok   E no-image: the served timeline.js differs from the committed file in exactly one line, the hub address
+ok   E no-image: style.css is the committed file, byte for byte
+ok   E no-image: the page carries one banner line and is otherwise the generator's output
+ok   E no-image: the page pins the catalogue the helper will serve
+ok   E image-fails: the served timeline.js differs from the committed file in exactly one line, the hub address
+ok   E image-fails: style.css is the committed file, byte for byte
+ok   E image-fails: the page carries one banner line and is otherwise the generator's output
+ok   E image-fails: the page pins the catalogue the helper will serve
+ok   E catalogue-refused: the served timeline.js differs from the committed file in exactly one line, the hub address
+ok   E catalogue-refused: style.css is the committed file, byte for byte
+ok   E catalogue-refused: the page carries one banner line and is otherwise the generator's output
+ok   E catalogue-refused: the page pins the catalogue the helper will serve
+ok   E: the no-image state is a different catalogue with no image; the other three share one
+ok   E: the helper listens on 127.0.0.1 only
+ok   E: the catalogue is served as the bytes on disk (sha256 equals the page pin)
+ok   E: the catalogue-refused state serves the same catalogue with exactly one byte changed
+ok   E: PIA03379-fig1-800.jpg is served as the bytes on disk
+ok   E: PIA03379-fig1-1024.jpg is served as the bytes on disk
+ok   E: the image-fails state refuses the image (404) and serves the page
+ok   E: every response carries the policy that keeps the page to this helper and the two font hosts (no other host may be contacted)
+ok   E: GET only (POST → 405, HEAD → 405)
+ok   E: paths that leave the build folder, the source folder, other revisions and unknown paths are refused (404)
+ok   E: every request is logged, refusals included
+ok   E: the helper has no client code: it cannot contact the live hub, R2 or any other host
+timeline-story-build: 99 pass, 0 fail
