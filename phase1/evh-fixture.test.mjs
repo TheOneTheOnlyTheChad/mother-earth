@@ -201,6 +201,15 @@ for (const name of ['S1', 'S2', 'S3', 'S0']) { // equal to the REAL hub's answer
   ok(dead.status === 503 && dead.body.reasons.join() === 'rows_unreadable' && !dead.text.includes('boom') && dead.headers['x-evd1-queries'] === '0', 'C12 a database that fails gives the production 503 rows_unreadable, with none of the error text');
   const empty = seeded(null), z = await call(d1W, B, RUNS, 'GET', { DB: d1Over(empty) });
   ok(z.status === 503 && z.body.reasons.join() === 'completion_missing' && z.body.facts.overdue === 288, 'C13 an empty table (between two row sets) answers 503 with 288 overdue: a forgotten seed cannot pass for a clean set');
+  { // C13b (24 Nov, after the live measurement's M4): an empty table answers runs 503 and trial 200, on the fixture and on the real hub
+    let fine = 0, n = 0;
+    for (const method of ['GET', 'HEAD']) for (const w of [d1W, hub]) {
+      const env = w === hub ? { ...winEnv(), DB: d1Over(empty) } : { DB: d1Over(empty) };
+      const r = await call(w, B, RUNS, method, env), t = await call(w, B, TRIAL, method, env); n++;
+      const bodies = method === 'HEAD' || (r.body.reasons.join() === 'completion_missing' && r.body.facts.overdue === 288 && t.body.reasons.length === 0 && t.body.facts.overdue === 288 && t.body.facts.state === 'trial ended with outstanding findings');
+      if (r.status === 503 && r.headers['x-health'] === 'failing' && t.status === 200 && t.headers['x-health'] === 'ok' && bodies) fine++;
+    }
+    ok(fine === n && n === 4, `C13b an empty table: runs 503 completion_missing (288 overdue), trial 200 with no reasons, on the D1 Worker and the REAL hub, GET and HEAD (${fine} of ${n})`); }
   let touched = 0; const counting = { prepare() { touched++; throw new Error('x'); } };
   eq(await routerFaults(d1W, { DB: counting }), 0, 'C14 the D1 Worker\'s router: the same wrong paths and methods are 404 and 405, none throws');
   ok(touched === 0, 'C15 a wrong path or method never touches the database');
