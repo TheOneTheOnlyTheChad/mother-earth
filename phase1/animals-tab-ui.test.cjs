@@ -31,7 +31,7 @@ const BASE_MAIN = process.env.BASE_MAIN || '0e620831b83b2ae7eed11a932edfd902d933
 // The Timeline's own files (timeline.js, timeline.html, the stylesheet's body.tl rules) are released by the Timeline thread and have
 // moved on since BASE_MAIN. They are held to the main commit of the Timeline's latest release instead (checks 13f to 13i). Every
 // other file stays on BASE_MAIN. A Timeline release moves TL_MAIN, and nothing else, in the commit that records the release.
-const TL_MAIN = process.env.TL_MAIN || '19f4e077b94d3b66b226be3e0b6549e299ad1130';   // merge of tl-2026-11-R3 (24 Nov 2026)
+const TL_MAIN = process.env.TL_MAIN || 'fbad1b60bf1311528bde320d13b59637123265fc';   // Timeline date label W1, page commit H (24 Nov 2026); before it 19f4e07, merge of tl-2026-11-R3
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const BREAK = process.env.BREAK || '', EDIT = process.env.EDIT || '';
 const ONLY = (process.env.SECTIONS || '').split(',').filter(Boolean).map(Number), want = n => !ONLY.length || ONLY.includes(n);
