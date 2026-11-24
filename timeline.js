@@ -21,7 +21,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202612250700';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202612250800';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
@@ -669,7 +669,16 @@ function build() {
 }
 
 // redraw the window's contents. Bands, ticks, marks and clusters all come from the same { a, b } and the same measured width
+// A redraw replaces the focused mark's element, which sends focus out of the explorer for a moment before render() puts it on the
+// mark's new control. That internal transfer is not the reader leaving: wheel zoom stays on through it. Only Escape, Enter again, or
+// focus actually ending up outside the explorer turns it off (GPT, rehearsal rev 2 recheck; the defect predates the finds lane)
+let redrawing = false;
 function render() {
+  redrawing = true;
+  try { renderNow(); } finally { redrawing = false; }
+  if (wheelOn && E && !E.xpl.contains(document.activeElement)) setWheel(false);
+}
+function renderNow() {
   const c = CAT, { a, b } = view, s = a - b;
   laneW = Math.max(1, E.track.clientWidth);
   const px = v => (a - v) / s * laneW, pc = x => (x / laneW * 100).toFixed(3);
@@ -881,7 +890,7 @@ function wireExplorer() {
   });
   // wheel zoom follows keyboard focus, not the pointer: it ends when focus leaves the explorer. A pointer that merely moves away
   // changes nothing (the wheel then scrolls whatever it is over, and zooms again when it comes back)
-  xpl.addEventListener('focusout', ev => { if (wheelOn && !xpl.contains(ev.relatedTarget)) setWheel(false); if (ev.relatedTarget !== xpl) { lostId = null; refreshStat(); } });
+  xpl.addEventListener('focusout', ev => { if (redrawing) return; if (wheelOn && !xpl.contains(ev.relatedTarget)) setWheel(false); if (ev.relatedTarget !== xpl) { lostId = null; refreshStat(); } });
   if (typeof ResizeObserver === 'function') new ResizeObserver(() => { if (axisState.state === 'on' && view && Math.abs(E.track.clientWidth - laneW) >= 1) render(); }).observe(axis);
   else addEventListener('resize', () => { if (axisState.state === 'on' && view) render(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (axisState.state === 'on' && view) render(); });

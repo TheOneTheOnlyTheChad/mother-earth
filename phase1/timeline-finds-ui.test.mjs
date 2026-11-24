@@ -11,6 +11,7 @@
  *         hit-area | row-order
  *   rev 2: coarse-off | coarse-at-2 | tick-centred | focus-none | notation-unchecked | words-unchecked | clock-datum | compact-focus |
  *          compact-backtarget
+ *   rev 3: wheel-redraw-release (the released behaviour: a redraw of the focused mark turns the wheel off) | wheel-trap (focus leaving never releases it)
  * Control: OLD=1 serves main's timeline.js instead; the suite must fail.
  * MEASURE=1 prints the drawn widths (figures are printed, never judged, beyond the checks below).
  */
@@ -66,6 +67,9 @@ const brokenJs = js => {
     case 'clock-datum': return must(js, ': { from: w.from_ma, to: w.to_ma };\n  return { id: e.id', ": (d => ({ from: w.from_ma + d, to: w.to_ma + d }))(w.type === 'calibrated' ? (new Date().getUTCFullYear() - 1950) / 1e6 : 0);\n  return { id: e.id");
     case 'compact-focus': return must(js, "if (fr) { setView(RECENT, 0); const el = axis.querySelector('.ftrack a.mk'); if (el) el.focus({ preventScroll: true }); return; }", 'if (fr) { setView(RECENT, 0); return; }');
     case 'compact-backtarget': return must(js, ' || visible(document.querySelector(`#axis .ftrack a.fzl[data-entry="${CSS.escape(id)}"]`))', '');
+    case 'wheel-redraw-release': return must(js, "addEventListener('focusout', ev => { if (redrawing) return; ", "addEventListener('focusout', ev => { ");
+    case 'wheel-trap': return must(must(js, "addEventListener('focusout', ev => { if (redrawing) return; if (wheelOn && !xpl.contains(ev.relatedTarget)) setWheel(false);", "addEventListener('focusout', ev => { if (redrawing) return;"),
+      "  if (wheelOn && E && !E.xpl.contains(document.activeElement)) setWheel(false);\n}", "}").replace("if (!xpl.contains(document.activeElement)) { setWheel(false); return; }", "if (false) { return; }");
     case '': case 'hit-area': case 'focus-none': return js;
     default: throw new Error('unknown BREAK ' + BREAK);
   }
@@ -97,7 +101,8 @@ async function open({ w = 1280, h = 900, js = true, hash = '', mutate = null, pa
   const axis = js ? await p.evaluate(() => window.TL_AXIS.state + (window.TL_AXIS.reason ? ':' + window.TL_AXIS.reason : '')) : 'no-js';
   return { c, p, reqs, errs, axis };
 }
-const setWin = async (p, a, b) => { await p.evaluate(([a, b]) => { history.replaceState({ ...(history.state || {}), k: (history.state && history.state.k) || 9001, win: [a, b] }, '', location.href); }, [a, b]); await p.reload({ waitUntil: 'load' }); await p.waitForFunction(() => window.TL_AXIS && window.TL_AXIS.state !== 'pending'); await p.waitForTimeout(200); };
+// waits out the page's own delayed window save (200 ms after wheel or held-key input; flushed when the page is left), which would otherwise overwrite the stored window
+const setWin = async (p, a, b) => { await p.waitForTimeout(300); await p.evaluate(([a, b]) => { history.replaceState({ ...(history.state || {}), k: (history.state && history.state.k) || 9001, win: [a, b] }, '', location.href); }, [a, b]); await p.reload({ waitUntil: 'load' }); await p.waitForFunction(() => window.TL_AXIS && window.TL_AXIS.state !== 'pending'); await p.waitForTimeout(200); };
 const view = p => p.evaluate(() => window.TL_AXIS.view);
 const near = (x, y, t = 1) => Math.abs(x - y) <= t;
 // what the finds lane shows: per row, the link (hit area), the glyph (drawn extent), the tick and the open chevron
@@ -257,11 +262,16 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
     const before = await p.evaluate(() => [window.TL_AXIS.wheel, document.activeElement.dataset.entry, document.activeElement.className]);
     const xb = await p.evaluate(() => { const q = document.getElementById('xpl').getBoundingClientRect(); return { x: q.right - 20, y: q.top + 60 }; }); await p.mouse.move(xb.x, xb.y);
     await p.mouse.wheel(0, dy); await p.waitForTimeout(350);
-    return { before, after: await p.evaluate(() => { const a = document.activeElement; return { v: window.TL_AXIS.view, cls: a.className, id: a.dataset.entry }; }) }; };
+    const after = await p.evaluate(() => { const a = document.activeElement; return { v: window.TL_AXIS.view, cls: a.className, id: a.dataset.entry, wheel: window.TL_AXIS.wheel, shown: document.getElementById('xpl').classList.contains('wheel') }; });
+    await p.mouse.wheel(0, dy > 0 ? -100 : 100); await p.waitForTimeout(250);
+    const next = await p.evaluate(() => ({ v: window.TL_AXIS.view, wheel: window.TL_AXIS.wheel }));
+    return { before, after, next }; };
   const wo = await wheelStep(1.9, 'f-omo-1', '#xpl .ftrack a.fmk', 300);
-  ok(`W ${L}: one wheel step out past 2 Ma with Omo I's row link focused: focus moves to Omo I's link in the compact lane`, wo.before[0] === true && wo.before[1] === 'f-omo-1' && wo.after.v[0] - wo.after.v[1] > 2 && /\bfzl\b/.test(wo.after.cls) && wo.after.id === 'f-omo-1', wo);
+  ok(`W ${L}: one wheel step out past 2 Ma with Omo I's row link focused: focus moves to Omo I's link in the compact lane`, wo.before[0] === true && wo.before[1] === 'f-omo-1' && wo.after.v[0] - wo.after.v[1] > 2 && /\bfzl\b/.test(wo.after.cls) && wo.after.id === 'f-omo-1' && wo.after.wheel && wo.after.shown, wo);
+  ok(`W ${L}: after that step wheel zoom is still on, and the next wheel input zooms again`, wo.next.wheel && JSON.stringify(wo.next.v) !== JSON.stringify(wo.after.v), wo);
   const wi = await wheelStep(2.4, 'f-omo-1', '#xpl .ftrack a.fzl', -300);
-  ok(`W ${L}: one wheel step in below 2 Ma with Omo I's compact link focused: focus moves to Omo I's own row link`, wi.before[0] === true && wi.before[1] === 'f-omo-1' && wi.after.v[0] - wi.after.v[1] <= 2 && /\bfmk\b/.test(wi.after.cls) && wi.after.id === 'f-omo-1', wi);
+  ok(`W ${L}: one wheel step in below 2 Ma with Omo I's compact link focused: focus moves to Omo I's own row link`, wi.before[0] === true && wi.before[1] === 'f-omo-1' && wi.after.v[0] - wi.after.v[1] <= 2 && /\bfmk\b/.test(wi.after.cls) && wi.after.id === 'f-omo-1' && wi.after.wheel && wi.after.shown, wi);
+  ok(`W ${L}: after that step wheel zoom is still on, and the next wheel input zooms again`, wi.next.wheel && JSON.stringify(wi.next.v) !== JSON.stringify(wi.after.v), wi);
   await p.keyboard.press('Escape');
   // opening a find from the compact lane brings its finite reference into view; Back returns focus to that find's row link
   await setWin(p, 538.8, 0); await p.focus('#xpl .ftrack a.fzl[data-entry="f-xiahe-2"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
@@ -277,6 +287,33 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   await setWin(p, 538.8, 0); await p.focus('#xpl .ftrack a.fzl[data-entry="f-omo-1"]'); await p.setViewportSize({ width: w - 30, height: h }); await p.waitForTimeout(350);
   ok(`W ${L}: in the compact lane a redraw (the window resized) keeps focus on the same find's link`, (await p.evaluate(() => document.activeElement && document.activeElement.dataset.entry)) === 'f-omo-1');
   await p.setViewportSize({ width: w, height: h }); await p.waitForTimeout(250);
+  // ---------- R. repeated wheel steps with a mark focused: wheel zoom stays on through every redraw; Escape, Tab out and click out release it
+  const st = () => p.evaluate(() => { const a = document.activeElement, cl = a && a.closest('.cl'); return { v: window.TL_AXIS.view, wheel: window.TL_AXIS.wheel, shown: document.getElementById('xpl').classList.contains('wheel'),
+    id: a && (a.dataset.entry || (cl && cl.dataset.has) || a.id || a.tagName), cls: a && a.className, inX: !!a && document.getElementById('xpl').contains(a) }; });
+  const arm = async (a, b, sel, id) => { await setWin(p, a, b); await p.focus('#xpl'); await p.keyboard.press('Enter');
+    for (let i = 0; i < 30; i++) { await p.keyboard.press('Tab'); if (await p.evaluate(([s, id]) => { const e = document.activeElement; return !!e && e.matches(s) && (!id || e.dataset.entry === id); }, [sel, id])) break; }
+    const q = await p.evaluate(() => { const r = document.activeElement.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }); await p.mouse.move(q.x, q.y); return st(); };
+  const steps = async (n, dy) => { const out = []; for (let i = 0; i < n; i++) { await p.mouse.wheel(0, dy); await p.waitForTimeout(120); out.push(await st()); } return out; };
+  const span = q => q.v[0] - q.v[1], mono = (qs, s0, up) => qs.every((q, i) => (up ? span(q) > (i ? span(qs[i - 1]) : s0) + 1e-9 : span(q) < (i ? span(qs[i - 1]) : s0) - 1e-9));
+  for (const [id, a, dir] of [['f-omo-1', 0.4, 1], ['f-xiahe-2', 0.4, -1]]) { const s0 = await arm(a, 0, '#xpl .ftrack a.fmk', id), qs = await steps(3, 100 * dir);
+    ok(`R ${L}: three wheel steps ${dir > 0 ? 'out' : 'in'} with ${id} focused: every step zooms, wheel zoom stays on and shown, focus stays on that find's row link`, s0.wheel && mono(qs, span(s0), dir > 0) && qs.every(q => q.wheel && q.shown && q.id === id && /\bfmk\b/.test(q.cls) && span(q) <= 2), [s0, qs]); }
+  { const s0 = await arm(1.2, 0, '#xpl .ftrack a.fmk', 'f-omo-1'), out = await steps(5, 100);
+    // zooming in keeps the time under the pointer: put the pointer over Omo I's dated layer (233,000 years) in the compact view
+    const px = await p.evaluate(() => { const r = document.querySelector('#xpl .track').getBoundingClientRect(), [a, b] = window.TL_AXIS.view; return { x: r.left + (a - 0.233) / (a - b) * r.width, y: r.top + 10 }; });
+    await p.mouse.move(px.x, px.y); const back = await steps(6, -100);
+    ok(`R ${L}: five steps out from 1.2 Ma with Omo I focused cross 2 Ma; every step zooms; wheel stays on; focus is on Omo I throughout (row link, then its compact link)`, s0.wheel && mono(out, span(s0), true) && out.every(q => q.wheel && q.shown && q.id === 'f-omo-1' && (span(q) > 2 ? /\bfzl\b/ : /\bfmk\b/).test(q.cls)) && span(out[4]) > 2, [s0, out]);
+    ok(`R ${L}: six steps back in cross 2 Ma again with the same find and the wheel still on`, mono(back, span(out[4]), false) && back.every(q => q.wheel && q.shown && q.id === 'f-omo-1' && (span(q) > 2 ? /\bfzl\b/ : /\bfmk\b/).test(q.cls)) && span(back[5]) <= 2, back); }
+  { const s0 = await arm(538.8, 0, '#xpl .track a.mk', null), qs = await steps(3, -100);
+    ok(`R ${L}: an extinction mark (the common redraw path): three steps in, every step zooms, wheel stays on, focus stays on the same entry (${s0.id})`, s0.wheel && /^e-/.test(s0.id) && mono(qs, span(s0), false) && qs.every(q => q.wheel && q.shown && q.inX && String(q.id).split(' ').includes(String(s0.id).split(' ')[0])), [s0, qs]); }
+  const pageScrolls = async () => { const y0 = await p.evaluate(() => scrollY), v0 = (await st()).v; await p.mouse.wheel(0, 300); await p.waitForTimeout(300); const y1 = await p.evaluate(() => scrollY), v1 = (await st()).v;
+    await p.evaluate(y => scrollTo(0, y), y0); await p.waitForTimeout(100); return { scrolled: y1 > y0, same: JSON.stringify(v0) === JSON.stringify(v1), y0, y1 }; };
+  for (const how of ['Escape', 'Tab out', 'click out']) { const s0 = await arm(0.4, 0, '#xpl .ftrack a.fmk', 'f-omo-1'); await steps(2, 100);
+    if (how === 'Escape') await p.keyboard.press('Escape');
+    else if (how === 'Tab out') { for (let i = 0; i < 40 && (await st()).inX; i++) await p.keyboard.press('Tab'); }
+    else await p.mouse.click(4, 4);
+    const s1 = await st(); const q = await p.evaluate(() => { const r = document.getElementById('xpl').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + 60 }; }); await p.mouse.move(q.x, q.y);
+    const sc = await pageScrolls();
+    ok(`R ${L}: ${how} turns wheel zoom off (and the hint says so); a wheel over the timeline then scrolls the page and leaves the view alone`, s0.wheel && !s1.wheel && !s1.shown && sc.scrolled && sc.same, [s0.wheel, s1, sc]); }
   ok(`${L}: nothing was requested from any other host`, T.reqs.every(u => u.startsWith(B) || /fonts\.(googleapis|gstatic)/.test(u)), T.reqs.filter(u => !u.startsWith(B)).slice(0, 3));
   ok(`${L}: no page error in the whole run`, T.errs.length === 0, T.errs);
   await T.c.close();
@@ -378,6 +415,11 @@ for (const [name, mut] of BAD) { const X = await open({ mutate: mut });
   ok(`I the new page with the released script (another build key) leaves the list as the only view (${X.axis})`, X.axis === 'off:build', X.axis); await X.c.close();
   X = await open({ page: oldPage.replace(`data-build="${oldBuild}"`, `data-build="${newBuild}"`), script: newJs, catalogue: R3B });
   const v = X.axis === 'on' ? await X.p.evaluate(() => ({ ft: !!document.querySelector('#xpl .ftrack'), recent: !!document.querySelector('[data-preset="recent"]'), hasf: document.getElementById('xpl').className, nomk: null })) : null;
+  if (X.axis === 'on') { const p = X.p; await p.focus('#xpl'); await p.keyboard.press('Enter'); for (let i = 0; i < 30; i++) { await p.keyboard.press('Tab'); if (await p.evaluate(() => document.activeElement.matches('#xpl .track a.mk'))) break; }
+    const id0 = await p.evaluate(() => document.activeElement.dataset.entry), q = await p.evaluate(() => { const r = document.activeElement.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }); await p.mouse.move(q.x, q.y);
+    const qs = []; for (let i = 0; i < 3; i++) { await p.mouse.wheel(0, -100); await p.waitForTimeout(150); qs.push(await p.evaluate(() => ({ v: window.TL_AXIS.view, wheel: window.TL_AXIS.wheel, id: document.activeElement.dataset.entry || (document.activeElement.closest('.cl') || { dataset: {} }).dataset.has }))); }
+    ok(`I on the released page and catalogue, three wheel steps with an extinction mark focused (${id0}): every step zooms and wheel zoom stays on`, /^e-/.test(id0) && qs.every((x, i) => x.wheel && (x.v[0] - x.v[1]) < (i ? qs[i - 1].v[0] - qs[i - 1].v[1] : 538.8) - 1e-9 && String(x.id).split(' ').includes(id0)), [id0, qs]);
+    await p.keyboard.press('Escape'); await p.waitForTimeout(300); }
   ok('I this script with the released page and catalogue (build key aligned) draws the explorer exactly as before: no finds lane, no extra view button', X.axis === 'on' && v && !v.ft && !v.recent && v.hasf === 'xpl', [X.axis, v]);
   if (X.axis === 'on') { await X.p.evaluate(() => history.replaceState({ k: 78, win: [0.05, 0] }, '', location.href)); await X.p.reload({ waitUntil: 'load' }); await X.p.waitForFunction(() => window.TL_AXIS && window.TL_AXIS.state !== 'pending'); await X.p.waitForTimeout(200);
     ok('I there, with no finds, the narrowest window is still 1 Ma: a stored 50,000-year window is refused', JSON.stringify(await view(X.p)) === '[538.8,0]', await view(X.p)); }
