@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 09:37 UTC (clock reading) — **Timeline: Humans and human relatives. Chad's own line: "B1–B6 yes, B2 L1, go rehearsal build, PDFs allowed." Rehearsal build STARTED on a branch; nothing uploaded, pinned or released** (page: none; Timeline thread)
+- **Decided by Chad:** B1 one entry per find · B2 = L1 (tick, labelled eruption band, fixed-length chevron) · B3 a sub-row per find · B4 the "Last 400,000 years" view and a 0.05 Ma narrowest window, provisional until measured · B5 thousands-of-years ticks · B6 build now, La Ferrassie unfrozen.
+- **Rule change by Chad: PDFs from authors, publishers or legitimate repositories are allowed for private reading.** They stay out of the repository and are never passed on. Earlier "text only, no PDFs" lines in the records describe the rule as it was until now.
+- Enquiry drafts corrected as GPT asked (rev 2). Not sent; Chad sends.
+- The build incorporates GPT's review `reviews/2026-11-24-timeline-human-relatives-build-proposal-rev1-gpt-review.md`. Branch and packet to follow.
+
 ## 24 Nov 09:26 UTC (clock reading) — **Timeline: Humans and human relatives. GPT ACCEPTED the build proposal's direction for an unpublished rehearsal build, with specifications to incorporate. NOT STARTED: Chad's own go is still needed** (page: none; Timeline thread)
 - GPT's review filed unchanged: `reviews/2026-11-24-timeline-human-relatives-build-proposal-rev1-gpt-review.md` (13,372 B, sha256 `919528b0de3f65436c86f173d48c68c86cda6f0b83d7a4536be507a4eff69e49`). No further proposal round asked for.
 - **GPT recommends:** B1 yes; B2 L1 (labelled eruption band and fixed-length chevron; L2 as fallback if the band cannot be told apart on sight); B3 yes, a fifth find to be refused rather than clustered; B4 provisional until measured; B5 yes with finer tick steps, not only a changed unit; B6 build the rehearsal now, La Ferrassie unfrozen. Omo's corrected table independently read by GPT: closed.

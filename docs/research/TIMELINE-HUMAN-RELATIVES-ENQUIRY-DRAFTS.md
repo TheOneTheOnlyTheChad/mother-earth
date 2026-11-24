@@ -4,7 +4,10 @@
 
 **Why these four.** Each asks for the one thing the source check could not read (`docs/research/TIMELINE-HUMAN-RELATIVES-SOURCE-CHECK.md`). A reply lets a claim be verified; it does not clear it. GPT and Chad still review.
 
-**One thing for Chad to decide before sending:** authors usually reply with a PDF. Our standing rule is text only, no PDFs. Either the rule is lifted for a file an author sends us directly, or each email asks for the passages as text. The drafts ask for the passages as text and say a copy of the article is welcome; Chad can cut either half.
+**Rev 2 (24 Nov 2026), after GPT's review and Chad's line "PDFs allowed":**
+- Wording corrected as GPT asked: "we only show claims whose relevant dating and association passages we have checked in the full text" (the rule is passage verification, not a cover-to-cover read).
+- **PDFs from authors, publishers or legitimate repositories are now allowed for private reading** (Chad, 24 Nov). So each draft keeps both halves: the passages as text, or a copy of the article. A copy is read privately, kept out of this repository, and never passed on. A reply is evidence to review, not clearance.
+- Take each corresponding author's current address from the article itself or an official institutional page (GPT). Chad sends.
 
 ---
 
@@ -16,7 +19,7 @@ Hello,
 
 I run Mother Earth, a small non-commercial website that shows dated observations of the planet with their sources. We are adding a few dated human-relative fossils to its timeline, each shown as the date or age limit a paper assigns to one find, with the paper cited.
 
-We would like to include DNH 134 from Drimolen Main Quarry. We have read the structured summary on the journal's page, but not the article itself, and we only show what we have read in full. Could you help with either of these?
+We would like to include DNH 134 from Drimolen Main Quarry. We have read the structured summary on the journal's page, but not the article itself, and we only show claims whose relevant dating and association passages we have checked in the full text. Could you help with either of these?
 
 1. The passages that give the age of the deposit (about 2.04 to 1.95 million years) and that tie DNH 134 to it, as text; or
 2. A copy of the article for our own reading. We would not pass it on or reproduce it; we cite and paraphrase only.
@@ -38,7 +41,7 @@ Hello,
 
 I run Mother Earth, a small non-commercial website that shows dated observations of the planet with their sources. We are adding a few dated human-relative fossils to its timeline, each shown as the date or age limit a paper assigns to one find, with the paper cited.
 
-We would like to include the Homo erectus bone bed at Ngandong. We have read the abstract only, and we show only what we have read in full. Could you help with either of these?
+We would like to include the Homo erectus bone bed at Ngandong. We have read the abstract only, and we only show claims whose relevant dating and association passages we have checked in the full text. Could you help with either of these?
 
 1. The passages that give the modelled age of the bone bed (117 to 108 thousand years) and say what was dated and how the fossils relate to it, as text; or
 2. A copy of the article for our own reading. We would not pass it on or reproduce it; we cite and paraphrase only.
@@ -60,7 +63,7 @@ Hello,
 
 I run Mother Earth, a small non-commercial website that shows dated observations of the planet with their sources. We are adding a few dated human-relative fossils to its timeline, each shown as the date or age limit a paper assigns to one find, with the paper cited.
 
-We would like to include the Homo floresiensis skeletal remains at Liang Bua. We have read the abstract only, and we show only what we have read in full. Could you help with either of these?
+We would like to include the Homo floresiensis skeletal remains at Liang Bua. We have read the abstract only, and we only show claims whose relevant dating and association passages we have checked in the full text. Could you help with either of these?
 
 1. The passages that give the age of the skeletal remains and the deposits containing them (about 100 to 60 thousand years) and say what was dated, as text; or
 2. A copy of the article for our own reading. We would not pass it on or reproduce it; we cite and paraphrase only.
