@@ -1,0 +1,12 @@
+{
+  "what": "Step M4, empty table, 24 Nov 2026 03:36:57.802Z (browser clock), requests from the pane on the measurement Worker's own address. Preserved as read; the packet had expected 503 on both addresses (wrong: see the result record, section 2).",
+  "responses": [
+    {"method": "GET", "path": "/health/runs/earthview", "status": 503, "x_health": "failing", "cache_control": "no-store, max-age=0", "reasons": ["completion_missing"], "state": "trial ended with outstanding findings", "overdue": 288, "collector_version": "0.6.24", "x_evd1_queries": "1", "x_evd1_rows_read": "1", "x_evd1_rows_written": "0", "x_evd1_rows_returned": "0", "x_evd1_sql_duration_ms": "0.1591",
+     "x_evd1_meta": "{\"served_by\":\"v3-prod\",\"served_by_region\":\"WEUR\",\"served_by_colo\":\"MAD\",\"served_by_primary\":true,\"timings\":{\"sql_duration_ms\":0.1591},\"duration\":0.1591,\"changes\":0,\"last_row_id\":0,\"changed_db\":false,\"size_after\":28672,\"rows_read\":1,\"rows_written\":0,\"total_attempts\":1}"},
+    {"method": "GET", "path": "/health/trial/earthview", "status": 200, "x_health": "ok", "cache_control": "no-store, max-age=0", "reasons": [], "state": "trial ended with outstanding findings", "overdue": 288, "collector_version": "0.6.24", "x_evd1_queries": "1", "x_evd1_rows_read": "1", "x_evd1_rows_written": "0", "x_evd1_rows_returned": "0", "x_evd1_sql_duration_ms": "0.0883",
+     "x_evd1_meta": "{\"served_by\":\"v3-prod\",\"served_by_region\":\"WEUR\",\"served_by_colo\":\"MAD\",\"served_by_primary\":true,\"timings\":{\"sql_duration_ms\":0.0883},\"duration\":0.0883,\"changes\":0,\"last_row_id\":0,\"changed_db\":false,\"size_after\":28672,\"rows_read\":1,\"rows_written\":0,\"total_attempts\":1}"},
+    {"method": "HEAD", "path": "/health/runs/earthview", "status": 503, "x_health": "failing", "cache_control": "no-store, max-age=0", "x_evd1_queries": "1", "x_evd1_rows_read": "1", "x_evd1_rows_written": "0", "x_evd1_rows_returned": "0", "x_evd1_sql_duration_ms": "0.0931"},
+    {"method": "GET", "path": "/health/runs/usgs", "status": 404, "cache_control": "no-store, max-age=0", "error": "not found", "measurement_headers": "none"},
+    {"method": "GET", "path": "/", "status": 404, "cache_control": "no-store, max-age=0", "error": "not found", "measurement_headers": "none"}
+  ]
+}

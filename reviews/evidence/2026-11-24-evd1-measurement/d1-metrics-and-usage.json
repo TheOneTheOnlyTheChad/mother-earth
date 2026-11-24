@@ -1,0 +1,16 @@
+{
+  "what": "D1's own aggregate figures for the throwaway database (GraphQL d1AnalyticsAdaptiveGroups, date 2026-11-24 to 2026-11-25), and the account's D1 usage page. AGGREGATES, not per-request figures. They lag: the 03:40:15 reading did not yet include the S1 seed written about 03:39.",
+  "database": {"name": "mother-earth-evd1test", "uuid": "2fcea1dc-c88e-4ea5-af89-efb8f6b623bc", "created": "2026-11-24T03:33:59.393Z"},
+  "analytics_readings": [
+    {"at": "2026-11-24T03:40:15.523Z", "readQueries": 5, "writeQueries": 3, "rowsRead": 18, "rowsWritten": 6},
+    {"at": "2026-11-24T03:41:58.547Z", "readQueries": 5, "writeQueries": 3, "rowsRead": 18, "rowsWritten": 6},
+    {"at": "2026-11-24T03:49:47.075Z", "readQueries": 334, "writeQueries": 15, "rowsRead": 378973, "rowsWritten": 34495}
+  ],
+  "per_request_sum_for_comparison": {"M4": 3, "S1": 23040, "S2": 152000, "S3": 160000, "S0": 23120, "total": 358163,
+    "note": "80 x rows_read per set, from each request's own D1 metadata. The remaining 20,810 rows read in the last aggregate come from the console's seed, clear and count statements; they were not attributed statement by statement."},
+  "account_usage_page": [
+    {"at": "2026-11-24T03:28:41Z", "rows_read": "7.59M / 25B", "rows_written": "1.46M / 50M", "storage": "111.05 MB / 5 GB", "databases": "1 / 50,000", "billable": "$0.00"},
+    {"at": "2026-11-24T03:33:35Z", "rows_read": "7.59M / 25B", "rows_written": "1.46M / 50M", "storage": "111.05 MB / 5 GB", "databases": "1 / 50,000", "billable": "$0.00"},
+    {"at": "2026-11-24T03:55:21Z", "rows_read": "7.97M / 25B", "rows_written": "1.5M / 50M", "storage": "112.05 MB / 5 GB", "databases": "1 / 50,000", "billable": "$0.00"}
+  ]
+}
