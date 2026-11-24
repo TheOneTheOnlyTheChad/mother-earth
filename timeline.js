@@ -21,7 +21,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const PHONE = 720;
-const BUILD = '202612250600';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
+const BUILD = '202612250700';   // = the ?v= of this file in timeline.html (build_timeline.py --check enforces it)
 const HUB = 'https://mother-earth.chadoberholzer.workers.dev';
 const TIMEOUT_MS = 10000;
 
@@ -83,7 +83,7 @@ const isPhone = () => innerWidth <= PHONE;
 const cardTitle = id => { const a = document.querySelector(`#card-${CSS.escape(id)} .ctitle a`); return a && a.offsetParent ? a : null; };
 // where focus returns when there is no recorded opener: the entry's axis mark, else its cluster button, else its card title
 const visible = el => el && el.offsetParent ? el : null;
-const backTarget = id => visible(document.querySelector(`#axis a.mk[data-entry="${CSS.escape(id)}"]`))
+const backTarget = id => visible(document.querySelector(`#axis a.mk[data-entry="${CSS.escape(id)}"]`)) || visible(document.querySelector(`#axis .ftrack a.fzl[data-entry="${CSS.escape(id)}"]`))
   || visible(document.querySelector(`#axis .cl[data-has~="${CSS.escape(id)}"] > button`)) || cardTitle(id);
 const pageHeading = () => $('tl-heading');
 const others = () => [...document.body.children].filter(n => n !== detail && n.tagName !== 'SCRIPT');
@@ -298,6 +298,7 @@ const FIND_NOTE = 'Marks and ranges show dates or age limits assigned to particu
 const MIN_SPAN_FINDS = 0.05;    // Ma: the narrowest window on a page that has finds. Provisional until measured (build proposal §5)
 const RECENT = 0.4;             // Ma: the "Last 400,000 years" view
 const KA_BELOW = 2;             // Ma: on a page that has finds, a window narrower than this is ticked in thousands of years
+const COARSE_ABOVE = 2;         // Ma: in a wider window the finds are not resolved; the lane shows one short explanation and a zoom button instead of its rows (GPT)
 const CLUSTER_PX = 16;          // marks closer than this share one cluster control
 const CLUSTER_MAX = 32;         // a run of close marks is cut into controls no wider than this, so a dense view is many short lists, not one long one
 const TRUE_PX = 4;              // an extent at least this wide is drawn at its true endpoints
@@ -411,8 +412,23 @@ function findsBad(c) {
       if (!isNum(w.ref_ma) || !isNum(w.ref_pm) || !(w.ref_pm > 0) || !(O >= w.ref_ma + w.ref_pm && w.ref_ma - w.ref_pm >= 0)) return bad('limit reference');
       if (!same(w.ref_ma, sv.ref) || !same(w.ref_pm, sv.pm)) return bad('stored ages differ from the source values');
     }
+    // one selected published result: the stored numbers are the notation's own, at its precision, and the claim's words and its
+    // date line give the same numbers (GPT, rehearsal review Q5; the generator also checks the result id against the evidence record)
+    if (!/^C\d+\.r\d+$/.test(String(a.result))) return bad('selected result');
+    if (notationBad(a.source_notation, w, sv)) return bad('source notation and stored values disagree');
+    const y6 = v => Math.round(v * 1e6).toLocaleString('en-US'), say = w.type === 'limit' ? [y6(w.ref_ma), y6(w.ref_pm)] : [y6(w.from_ma), y6(w.to_ma)];
+    if (say.some(y => a.text.indexOf(y) < 0 || a.when_text.indexOf(y) < 0)) return bad('the claim does not give the stored numbers');
   }
   return null;
+}
+function notationBad(n, w, sv) {   // mirror of the generator's notation_bad
+  const m = /\((\d+(?:\.\d+)?)\s*%\)/.exec(n), rest = m ? n.slice(0, m.index) + n.slice(m.index + m[0].length) : n, nums = (rest.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+  if (w.type === 'limit') return m || nums.length !== 2 || rest.indexOf('±') < 0 || nums[0] !== sv.ref || nums[1] !== sv.pm;
+  if (nums.length !== 2) return true;
+  const a = nums.slice().sort((x, y) => x - y), b = [sv.from, sv.to].sort((x, y) => x - y);
+  if (a[0] !== b[0] || a[1] !== b[1]) return true;
+  if (w.type === 'calibrated') return !m || Number(m[1]) !== w.probability;
+  return !!m;
 }
 let c_rev = '';
 function validate(c) {
@@ -684,7 +700,14 @@ function render() {
     : `<p class="nomk">${FINDS.length ? 'No entries on this lane in this range.' : 'No reviewed entries in this range.'} <button type="button" data-act="nearest">Go to the nearest entries</button></p>`;
   // finds: one sub-row each, in a fixed order, each with its own caption in words. Nothing is drawn between two finds. A limit's
   // band is its dated layer's ±; its open ‹ has a fixed length in pixels and no older end. A find outside the window says so
-  if (E.ftrack) E.ftrack.innerHTML = FINDS.map(m => {
+  // wider than COARSE_ABOVE the finds are not resolved: no row is drawn and no mark is shifted to stay in view. The lane says so,
+  // offers the 400,000-year view and keeps one link per find, which opens its entry (and so brings its finite reference into view)
+  const coarse = FINDS.length > 0 && s > COARSE_ABOVE + 1e-9;
+  if (E.ftrack) E.ftrack.classList.toggle('coarse', coarse);
+  if (E.ftrack && coarse) E.ftrack.innerHTML = `<div class="fcz"><p class="fczt">Not resolved at this scale. These finds are drawn, one row each, in a window of 2 million years or less.</p>`
+    + `<p class="fczl"><button type="button" class="fzb" data-find-recent>Show the last 400,000 years</button> <span class="fzo">Open a find:</span> `
+    + FINDS.map(m => `<a class="fzl${sel(m.id) ? ' sel' : ''}" href="#${esc(m.id)}" data-entry="${esc(m.id)}" data-opener="find-list"${sel(m.id) ? ' aria-current="true"' : ''}>${esc(m.short)}</a>`).join(' · ') + `</p></div>`;
+  else if (E.ftrack) E.ftrack.innerHTML = FINDS.map(m => {
     const g = geomAt(m, a, b), lim_ = m.kind === 'limit';
     let link = '', offv = '';
     if (g) {
@@ -716,9 +739,13 @@ function render() {
   const step = (ka ? KA_STEPS : TICK_STEPS).find(t => s / t <= Math.max(2, Math.floor(laneW / (ka ? 90 : 80)))) || 1000, dec = step < 1 ? 1 : 0;
   const ticks = [];
   for (let k = Math.ceil(b / step - 1e-9); k * step <= a + 1e-9; k++) { const t = k * step, x = px(t);
-    ticks.push(`<span class="tk${x > laneW - 30 ? ' last' : x < 16 ? ' first' : ''}" style="left:${pc(x)}%">${ka ? (Math.round(t * 1000) + 0).toLocaleString('en-US') : t.toFixed(dec)}${ticks.length || ka ? '' : '<span class="unit"> Ma</span>'}</span>`); }   // the unit rides on the newest tick
+    ticks.push(`<span class="tk" data-x="${x.toFixed(2)}" style="left:${pc(x)}%">${ka ? (Math.round(t * 1000) + 0).toLocaleString('en-US') : t.toFixed(dec)}${ticks.length || ka ? '' : '<span class="unit"> Ma</span>'}</span>`); }   // the unit rides on the newest tick
   E.scale.innerHTML = ticks.join('') + (ka ? '<span class="tku">thousand years ago</span>' : '');
   E.scale.classList.toggle('ka', ka);
+  // a label that would cross either end of the scale is aligned to start (or end) at its tick instead of centred on it; the tick line
+  // stays at its coordinate and the text is inset from the explorer's border
+  for (const el of E.scale.querySelectorAll('.tk')) { const x = +el.dataset.x, w = el.getBoundingClientRect().width;
+    const first = x - w / 2 < 4, last = !first && x + w / 2 > laneW - 4; el.classList.toggle('first', first); el.classList.toggle('last', last); }
 
   fitBands(); layoutLabels();
 
@@ -778,14 +805,16 @@ function layoutLabels() {
 }
 function markSel() {
   if (!E) return;
-  for (const el of axis.querySelectorAll('.track a.mk, .ftrack a.mk')) { const on = !!cur && !detail.hidden && el.dataset.entry === cur.id;
+  for (const el of axis.querySelectorAll('.track a.mk, .ftrack a.mk, .ftrack a.fzl')) { const on = !!cur && !detail.hidden && el.dataset.entry === cur.id;
     el.classList.toggle('sel', on); if (on) el.setAttribute('aria-current', 'true'); else el.removeAttribute('aria-current'); }
 }
 // an opened story's mark is brought into the window without changing the scale; an entry with no axis age changes nothing
 function revealMark(id) {
   if (!view || !E) return;
-  const m = MARKS.find(x => x.id === id); if (!m || inView(m)) return;
-  const s = view.a - view.b;
+  const m = MARKS.find(x => x.id === id), s = view.a - view.b;
+  // a find in a window too wide to draw it (the compact lane) is brought into a drawn view: the recent view if it is inside, else its finite extent
+  if (m && m.lane === 'relatives' && s > COARSE_ABOVE + 1e-9) { const w = findWin(m, RECENT); setView(w.a, w.b); return; }
+  if (!m || inView(m)) return;
   if (m.lane === 'relatives') { const w = findWin(m, s); setView(w.a, w.b); return; }
   setView(m.ma + s / 2, m.ma - s / 2);
 }
@@ -862,6 +891,7 @@ axis.addEventListener('click', ev => {
   const t = ev.target;
   const ab = t.closest('[data-act]'); if (ab) { if (ab.getAttribute('aria-disabled') !== 'true') doAct(ab.dataset.act); return; }
   const pb0 = t.closest('[data-preset]'); if (pb0) { if (pb0.dataset.preset === 'earth') setView(lim.O, 0); else if (pb0.dataset.preset === 'recent') setView(RECENT, 0); else setView(lim.W, 0); return; }
+  const fr = t.closest('[data-find-recent]'); if (fr) { setView(RECENT, 0); const el = axis.querySelector('.ftrack a.mk'); if (el) el.focus({ preventScroll: true }); return; }
   const fg = t.closest('[data-find-go]'); if (fg) { const m = FINDS.find(x => x.id === fg.dataset.findGo); if (m) { const w = findWin(m, view.a - view.b); setView(w.a, w.b);
     const el = axis.querySelector(`.ftrack a.mk[data-entry="${CSS.escape(m.id)}"]`); if (el) el.focus({ preventScroll: true }); } return; }
   const zb = t.closest('[data-zoomto]'); if (zb) { const [a, b] = zb.dataset.zoomto.split(',').map(Number); setView(a, b); return; }

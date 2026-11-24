@@ -5,6 +5,7 @@
  * Run: node phase1/timeline-finds-build.test.mjs
  * Breaks (the generator is run from a patched copy held in memory; no file in the repository changes):
  *   BREAK=no-find-checks | ban-sources | midpoint | pm-dropped | fifth-allowed | finds-at-schema-3
+ *   rev 2: notation-unchecked | words-unchecked | record-unchecked | clock-in-catalogue
  */
 import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path'; import { spawnSync, execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto'; import { fileURLToPath } from 'node:url';
@@ -21,10 +22,14 @@ const PATCH = { '': null,
   'midpoint': ["        return f\"{years(w['from_ma'])} to {years(w['to_ma'])} years ago\"", "        return f\"about {years((w['from_ma'] + w['to_ma']) / 2)} years ago\""],
   'pm-dropped': ["        return f\"the layer is dated {years(w['ref_ma'])} ± {years(w['ref_pm'])} years ago ({w['sigma']}σ); older limit unknown\"", "        return f\"the layer is dated {years(w['ref_ma'])} years ago; older limit unknown\""],
   'fifth-allowed': ['FIND_MAX = 4 ', 'FIND_MAX = 9 '],
+  'notation-unchecked': ["        bad_n = notation_bad(a['source_notation'], w, sv)\n", "        bad_n = None\n"],
+  'words-unchecked': ["        if any(y not in a['text'] for y in say):", "        if False:"],
+  'record-unchecked': ["        if len(rows) != 1: no(f'{i}: result {r} is not listed once in its evidence record')\n        if f\"`{a['source_notation']}`\" not in rows[0]:", "        if False:"],
+  'clock-in-catalogue': ["        out['find_note'] = FIND_NOTE", "        out['find_note'] = FIND_NOTE; out['axis_convention'] += ' ' + __import__('time').strftime('%Y')"],
   'finds-at-schema-3': ["FINDS = json.loads((TL / 'finds.json').read_text(encoding='utf-8')) if SCHEMA >= 4 else None", "FINDS = json.loads((TL / 'finds.json').read_text(encoding='utf-8')) if (TL / 'finds.json').exists() else None\nSCHEMA = 4 if FINDS else SCHEMA"] };
 if (!(BREAK in PATCH)) throw new Error('unknown BREAK ' + BREAK);
-const RUNNER = `import sys\nP, a, b = sys.argv[1], sys.argv[2], sys.argv[3]\ns = open(P, encoding='utf-8').read()\nif a:\n    assert s.count(a) == 1, 'break anchor missing'\n    s = s.replace(a, b)\nsys.argv = [P] + sys.argv[4:]\nexec(compile(s, P, 'exec'), {'__name__': '__main__', '__file__': P})\n`;
-const gen = args => { const [a, b] = PATCH[BREAK] || ['', '']; const r = spawnSync('python3', ['-c', RUNNER, GEN, a, b, ...args], { encoding: 'utf8' }); return { code: r.status, out: (r.stdout + r.stderr).trim() }; };
+const RUNNER = `import sys, os\nif os.environ.get('FAKE_T'):\n    import time, datetime as _dt\n    _T = float(os.environ['FAKE_T'])\n    time.time = lambda: _T\n    _lt = time.localtime; time.localtime = lambda s=None: _lt(_T if s is None else s)\n    _gt = time.gmtime; time.gmtime = lambda s=None: _gt(_T if s is None else s)\n    _st = time.strftime; time.strftime = lambda f, t=None: _st(f, _gt(_T) if t is None else t)\n    class _FD(_dt.datetime):\n        @classmethod\n        def now(cls, tz=None): return cls.fromtimestamp(_T, tz)\n        @classmethod\n        def utcnow(cls): return cls.utcfromtimestamp(_T)\n    class _FDa(_dt.date):\n        @classmethod\n        def today(cls): return cls.fromtimestamp(_T)\n    _dt.datetime = _FD; _dt.date = _FDa\nP, a, b = sys.argv[1], sys.argv[2], sys.argv[3]\ns = open(P, encoding='utf-8').read()\nif a:\n    assert s.count(a) == 1, 'break anchor missing'\n    s = s.replace(a, b)\nsys.argv = [P] + sys.argv[4:]\nexec(compile(s, P, 'exec'), {'__name__': '__main__', '__file__': P})\n`;
+const gen = (args, fakeT) => { const [a, b] = PATCH[BREAK] || ['', '']; const r = spawnSync('python3', ['-c', RUNNER, GEN, a, b, ...args], { encoding: 'utf8', env: { ...process.env, ...(fakeT ? { FAKE_T: String(fakeT) } : {}) } }); return { code: r.status, out: (r.stdout + r.stderr).trim() }; };
 
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'tl-finds-build-'));
 let n = 0;
@@ -40,7 +45,7 @@ function source(change, { rehearsal = true } = {}) {
   const page = path.join(dir, 'timeline.html'); fs.copyFileSync(path.join(ROOT, 'timeline.html'), page);
   return { src, page };
 }
-const run = (change, o) => { const s = source(change, o); const r = gen(['--src', s.src, '--page', s.page]); return { ...s, ...r, html: fs.readFileSync(s.page, 'utf8'), cat: r.code === 0 ? (f => fs.existsSync(f) ? fs.readFileSync(f) : null)(path.join(s.src, 'catalogue', J(path.join(s.src, 'BUILD.json')).catalogue_revision + '.json')) : null }; };
+const run = (change, o, fakeT) => { const s = source(change, o); const r = gen(['--src', s.src, '--page', s.page], fakeT); return { ...s, ...r, html: fs.readFileSync(s.page, 'utf8'), cat: r.code === 0 ? (f => fs.existsSync(f) ? fs.readFileSync(f) : null)(path.join(s.src, 'catalogue', J(path.join(s.src, 'BUILD.json')).catalogue_revision + '.json')) : null }; };
 const edit = (f, fn) => src => { const p = path.join(src, f), o = J(p); fn(o); fs.writeFileSync(p, JSON.stringify(o, null, 1) + '\n'); };
 const finds = fn => edit('finds.json', fn);
 const AX = (o, i) => o.finds[i].claims.find(k => k.axis);
@@ -122,11 +127,31 @@ const REFUSE = [
   ['an evidence record that is a private path', finds(o => { o.finds[0].evidence_reviewed.records = ['research/timeline-human-relatives/2026-11-24-claude/REPORT.md']; }), /not a file in the public repo|private reference/],
   ['a source checked after the release day', finds(o => { o.sources.dirks2017.checked = '2026-12-01'; o.sources.dirks2017.status = o.sources.dirks2017.status.replace('24 Nov 2026', '1 Dec 2026'); }), /after the release day/],
   ['a change record that names a find the catalogue does not have', edit('changes.json', o => { o.changes.at(-1).entries.push('f-not-there'); }), /unknown entry/],
+  // rev 2: one selected published result (GPT's reproduction first, exactly as GPT made it at source level)
+  ['a calibrated range with one end taken from another published calculation (GPT\'s reproduction: 41,700 to 40,827)', finds(o => { AX(o, 3).when.to_ma = 0.040827; AX(o, 3).source_values.to = 40.827; }), /notation and stored values disagree/],
+  ['notation and values changed together, the claim\'s own words not', finds(o => { const a = AX(o, 3); a.when.to_ma = 0.0407; a.source_values.to = 40.7; a.source_notation = a.source_notation.replace('40.8', '40.7'); }), /own words do not give the stored numbers/],
+  ['notation, values and words all changed to a mixed result: not the result the evidence record lists', finds(o => { const a = AX(o, 3); a.when.to_ma = 0.040827; a.source_values.to = 40.827; a.source_notation = '41.7–40.827 ka cal BP (95.4%)'; a.text = a.text.replace('40,800', '40,827'); }), /not the one its evidence record lists for C7\.r1/],
+  ['an axis claim naming no selected result', finds(o => { delete AX(o, 0).result; }), /names no selected result/],
+  ['a result id the evidence record does not list', finds(o => { AX(o, 2).result = 'C3.r9'; }), /not listed once in its evidence record/],
+  ['two finds naming one result', finds(o => { AX(o, 2).result = 'C1.r1'; }), /not the one its evidence record lists for C1\.r1/],
+  ['a limit written without its ±', finds(o => { AX(o, 1).source_notation = '233 kyr'; }), /written as a value ± its uncertainty/],
+  ['a bracket given a probability', finds(o => { AX(o, 0).source_notation = 'between 236 ka and 335 ka (95%)'; }), /carries no probability|evidence record/],
   ['a published-style revision id on a finds build with no release record', edit('BUILD.json', o => { o.catalogue_revision = 'tl-2026-11-R4'; }), /last release is not this build|refused/],
 ];
 { const c = run(finds(o => { o.note = (o.note || '') + ' '; })); ok('C control: a fixture that changes nothing of substance still builds', c.code === 0, c.out); }
 for (const [name, change, want] of REFUSE) { const r = run(change);
   ok(`C refused: ${name}`, r.code !== 0 && want.test(r.out) && !fs.existsSync(path.join(r.src, 'catalogue', REV + '.json')), [r.code, r.out.slice(-200)]); }
+
+// ---------- D. controls: fewer finds build the same way; the device clock changes no byte
+const drop = keep => src => { finds(o => { o.finds = o.finds.filter(f => keep.includes(f.id)); })(src); edit('changes.json', o => { for (const c of o.changes) if (c.entries) c.entries = c.entries.filter(i => !i.startsWith('f-') || keep.includes(i)); })(src); };
+for (const keep of [['f-dinaledi-chamber', 'f-omo-1', 'f-xiahe-2'], ['f-omo-1']]) { const r = run(drop(keep));
+  const c = r.cat ? JSON.parse(r.cat) : null;
+  ok(`D control: ${keep.length} find${keep.length > 1 ? 's' : ''} build, with the same lane, the same checks and ${keep.length} entr${keep.length > 1 ? 'ies' : 'y'} on it`, r.code === 0 && !!c && c.entries.filter(e => e.lane === 'relatives').map(e => e.id).join() === keep.join() && (r.html.match(/<article class="entry ep find"/g) || []).length === keep.length, [r.code, r.out.slice(-200)]); }
+{ const t1 = Date.UTC(1990, 5, 1) / 1000, t2 = Date.UTC(2090, 5, 1) / 1000, a = run(null, {}, t1), b = run(null, {}, t2);
+  const yr = gen(['--src', a.src, '--page', a.page, '--check'], t2);
+  ok('D the device clock at 1990 and at 2090 gives byte-identical catalogues and pages; the check mode agrees across the two clocks', a.code === 0 && b.code === 0 && a.cat && b.cat && Buffer.compare(a.cat, b.cat) === 0 && a.html === b.html && yr.code === 0, [a.code, b.code, a.cat && sha(a.cat), b.cat && sha(b.cat), yr.out.slice(-160)]);
+  const probe = spawnSync('python3', ['-c', RUNNER.split('P, a, b =')[0] + "import time, datetime\nprint(time.strftime('%Y'), datetime.datetime.now().year, datetime.date.today().year)"], { encoding: 'utf8', env: { ...process.env, FAKE_T: String(t2) } });
+  ok('D the fake clock itself works (2090 seen by time and datetime)', probe.stdout.trim() === '2090 2090 2090', probe.stdout + probe.stderr); }
 
 console.log(`timeline-finds-build: ${pass} pass, ${fail} fail` + (BREAK ? ` (BREAK=${BREAK})` : ''));
 process.exit(fail ? 1 : 0);

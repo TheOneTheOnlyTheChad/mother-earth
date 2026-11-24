@@ -303,7 +303,7 @@ def catalogue():
                  'text': c['text'], 'source': src_obj(c.get('source')), 'locator': c.get('locator')}
             if 'when' in c:
                 d['when'] = c['when']; d['when_text'] = find_when_text(c['when'])
-                for k in ('source_notation', 'source_units', 'source_values', 'confidence', 'calibration'):
+                for k in ('result', 'source_notation', 'source_units', 'source_values', 'confidence', 'calibration'):
                     if k in c: d[k] = c[k]
             claims.append(d)
         finds.append({'id': f['id'], 'lane': 'relatives', 'title': f['title'], 'short': f['short'], 'axis': True, 'scope': None,
@@ -509,6 +509,39 @@ def check_finds(cat, no):
             if not (fin(w.get('ref_ma')) and fin(w.get('ref_pm'))) or w['ref_pm'] <= 0: no(f'{i}: limit reference or uncertainty')
             if not (O >= w['ref_ma'] + w['ref_pm'] and w['ref_ma'] - w['ref_pm'] >= 0): no(f'{i}: limit reference ± uncertainty leaves the chart')
             if not (same(w['ref_ma'], sv.get('ref')) and same(w['ref_pm'], sv.get('pm'))): no(f'{i}: stored ages differ from the source values')
+
+        # one selected published result (GPT, rehearsal review Q5). The stored numbers must be the numbers of the notation the source
+        # writes, at its precision; the claim's own words must say the same numbers; and the notation must be the one the public evidence
+        # record lists for that result id. Two editable copies of a number agreeing with each other proves nothing on its own
+        bad_n = notation_bad(a['source_notation'], w, sv)
+        if bad_n: no(f'{i}: source notation and stored values disagree ({bad_n})')
+        say = [years(w['from_ma']), years(w['to_ma'])] if w['type'] != 'limit' else [years(w['ref_ma']), years(w['ref_pm'])]
+        if any(y not in a['text'] for y in say): no(f"{i}: the claim's own words do not give the stored numbers ({', '.join(say)})")
+        r = a.get('result')
+        if not (isinstance(r, str) and re.fullmatch(r'C\d+\.r\d+', r)): no(f'{i}: the axis claim names no selected result')
+        rows = [ln for rec in (x.get('evidence_reviewed') or {}).get('records', []) if (ROOT / rec).is_file()
+                for ln in (ROOT / rec).read_text(encoding='utf-8').splitlines() if ln.startswith('|') and f'`{r}`' in ln.split('|')[1]]
+        if len(rows) != 1: no(f'{i}: result {r} is not listed once in its evidence record')
+        if f"`{a['source_notation']}`" not in rows[0]: no(f'{i}: source notation is not the one its evidence record lists for {r}')
+
+
+NUM = re.compile(r'\d+(?:\.\d+)?')
+
+
+def notation_bad(notation, w, sv):
+    """The numbers a source writes, against the stored source values: the same numbers at the same precision, or a reason."""
+    m = re.search(r'\((\d+(?:\.\d+)?)\s*%\)', notation)
+    rest = notation[:m.start()] + notation[m.end():] if m else notation
+    nums = NUM.findall(rest)
+    if w.get('type') == 'limit':
+        if m or len(nums) != 2 or '±' not in rest: return 'a limit is written as a value ± its uncertainty'
+        if [float(n) for n in nums] != [sv.get('ref'), sv.get('pm')]: return f"notation {nums[0]} ± {nums[1]}, stored {sv.get('ref')} ± {sv.get('pm')}"
+        return None
+    if len(nums) != 2: return f'{len(nums)} numbers in the notation, not two ends'
+    if sorted(float(n) for n in nums) != sorted([sv.get('from'), sv.get('to')]): return f"notation ends {' and '.join(nums)}, stored {sv.get('from')} and {sv.get('to')}"
+    if w.get('type') == 'calibrated' and (not m or float(m.group(1)) != w.get('probability')): return 'the probability is not the notation\'s'
+    if w.get('type') == 'interval' and m: return 'a bracket carries no probability'
+    return None
 
 
 def claim_id(c, n):  # a claim's stable id inside its entry: its own, or its position as in schema 2 (c0, c1, ...)

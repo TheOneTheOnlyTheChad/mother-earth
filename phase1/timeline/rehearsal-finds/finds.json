@@ -5,7 +5,8 @@
   "dirks2017": {"citation": "Dirks et al. (2017) The age of Homo naledi and associated sediments in the Rising Star Cave, South Africa. eLife 6: e24231", "doi": "10.7554/eLife.24231", "licence": "CC BY 4.0", "status": "No correction, retraction or expression of concern found on the publisher's page (checked 24 Nov 2026)", "checked": "2026-11-24"},
   "vidal2022": {"citation": "Vidal et al. (2022) Age of the oldest known Homo sapiens from eastern Africa. Nature 601: 579–583", "doi": "10.1038/s41586-021-04275-8", "licence": "CC BY 4.0", "status": "Change history on the publisher's page, 4 Feb 2022: two supplementary tables were replaced; the corrected Supplementary Table 3 carries this result. No retraction or expression of concern found (checked 24 Nov 2026)", "checked": "2026-11-24"},
   "xia2024": {"citation": "Xia et al. (2024) Middle and Late Pleistocene Denisovan subsistence at Baishiya Karst Cave. Nature 632: 108–113", "doi": "10.1038/s41586-024-07612-9", "licence": "CC BY 4.0", "status": "No correction, retraction or expression of concern found on the publisher's page (checked 24 Nov 2026)", "checked": "2026-11-24"},
-  "balzeau2020": {"citation": "Balzeau et al. (2020) Pluridisciplinary evidence for burial for the La Ferrassie 8 Neandertal child. Scientific Reports 10: 21230", "doi": "10.1038/s41598-020-77611-z", "licence": "CC BY 4.0", "status": "No correction, retraction or expression of concern found on the publisher's page (checked 24 Nov 2026)", "checked": "2026-11-24"}
+  "balzeau2020": {"citation": "Balzeau et al. (2020) Pluridisciplinary evidence for burial for the La Ferrassie 8 Neandertal child. Scientific Reports 10: 21230", "doi": "10.1038/s41598-020-77611-z", "licence": "CC BY 4.0", "status": "No correction, retraction or expression of concern found on the publisher's page (checked 24 Nov 2026)", "checked": "2026-11-24"},
+  "guerin2023": {"citation": "Guérin et al. (2023) A Third Neanderthal Individual from La Ferrassie Dated to the End of the Middle Paleolithic. PaleoAnthropology 2023(1): 98–118", "doi": "10.48738/2023.iss1.811", "licence": "Not confirmed: the publisher's PDF is reported to state all rights reserved; the HAL record states CC BY-NC-SA. Cited and paraphrased only", "status": "Passages read by GPT in the publisher's full text. DataCite record findable, no related correction listed; Crossref holds no record of this DOI (checked 24 Nov 2026)", "checked": "2026-11-24"}
  },
  "finds": [
   {
@@ -17,7 +18,7 @@
    "claims": [
     {"id": "d1", "claim_type": "find_context_bracket", "axis": true,
      "when": {"type": "interval", "from_ma": 0.335, "to_ma": 0.236},
-     "source_notation": "between 236 ka and 335 ka", "source_units": "ka", "source_values": {"unit": "ka", "from": 335, "to": 236},
+     "result": "C1.r1", "source_notation": "between 236 ka and 335 ka", "source_units": "ka", "source_values": {"unit": "ka", "from": 335, "to": 236},
      "confidence": "A bracket set by two dating methods. It is not a statistical range.",
      "text": "The source brackets the time the fossils were laid down in the chamber between 335,000 and 236,000 years ago.",
      "source": "dirks2017", "locator": "Abstract; Discussion"},
@@ -35,7 +36,7 @@
    "claims": [
     {"id": "o1", "claim_type": "find_older_than_dated_layer", "axis": true,
      "when": {"type": "limit", "ref_ma": 0.233, "ref_pm": 0.022, "sigma": 2, "side": "older"},
-     "source_notation": "233 ± 22 kyr", "source_units": "kyr", "source_values": {"unit": "kyr", "ref": 233, "pm": 22},
+     "result": "C2.r1", "source_notation": "233 ± 22 kyr", "source_units": "kyr", "source_values": {"unit": "kyr", "ref": 233, "pm": 22},
      "confidence": "2σ, on the age of the eruption. It is not an uncertainty on the fossil's age.",
      "calibration": "Kuiper et al. 2008. Under Renne et al. 2011 the same measurements give 234 ± 22.",
      "text": "Omo I is older than a volcanic eruption dated 233,000 ± 22,000 years ago. The source calls this a minimum age for the fossil and gives no maximum.",
@@ -54,7 +55,7 @@
    "claims": [
     {"id": "x1", "claim_type": "find_context_bracket", "axis": true,
      "when": {"type": "interval", "from_ma": 0.048, "to_ma": 0.032},
-     "source_notation": "48–32 ka", "source_units": "ka", "source_values": {"unit": "ka", "from": 48, "to": 32},
+     "result": "C3.r1", "source_notation": "48–32 ka", "source_units": "ka", "source_values": {"unit": "ka", "from": 48, "to": 32},
      "confidence": "The age range of layer 3 as the source reports and applies it. It is not a date on the rib.",
      "text": "The rib comes from layer 3 of the cave, which the source dates to 48,000 to 32,000 years ago.",
      "source": "xia2024", "locator": "Section 'A new Denisovan individual'"},
@@ -67,19 +68,20 @@
   {
    "id": "f-la-ferrassie-bone", "title": "Bone fragment from the La Ferrassie 8 burial context, La Ferrassie, France", "short": "La Ferrassie",
    "find": {"specimen": null, "context": "the La Ferrassie 8 burial context", "site": "La Ferrassie", "where": "France"},
-   "attributed_to": {"name": "Neandertal", "basis": "mitochondrial_dna", "qualified": "The authors judge the fragment most likely part of the La Ferrassie 8 child's skeleton. That link is their inference."},
+   "attributed_to": {"name": "Neandertal", "basis": "mitochondrial_dna", "qualified": "The 2020 authors judge the fragment most likely part of the La Ferrassie 8 child's skeleton. A 2023 study says that has not been demonstrated."},
    "links": {"group": "Q40171", "site": "Q39656"},
    "evidence_reviewed": {"date": "2026-11-24", "records": ["docs/research/TIMELINE-HUMAN-RELATIVES-SOURCE-CHECK.md"]},
    "claims": [
     {"id": "l1", "claim_type": "find_direct_date_calibrated", "axis": true,
      "when": {"type": "calibrated", "from_ma": 0.0417, "to_ma": 0.0408, "probability": 95.4, "datum_ce": 1950, "curve": "IntCal20", "lab_id": "ETH-99102", "c14_bp": 36170, "c14_pm": 220},
-     "source_notation": "41.7–40.8 ka cal BP (95.4%)", "source_units": "ka cal BP", "source_values": {"unit": "ka cal BP", "from": 41.7, "to": 40.8},
+     "result": "C7.r1", "source_notation": "41.7–40.8 ka cal BP (95.4%)", "source_units": "ka cal BP", "source_values": {"unit": "ka cal BP", "from": 41.7, "to": 40.8},
      "confidence": "The 95.4 % calibrated range. The ± on the radiocarbon measurement is the laboratory's own uncertainty and is a separate figure.",
      "text": "A bone fragment was radiocarbon-dated directly. Calibrated, its date falls between 41,700 and 40,800 years before 1950, at 95.4 % probability.",
      "source": "balzeau2020", "locator": "Abstract; Results; Table 1"},
     {"id": "l2", "claim_type": "dated_material", "text": "The bone fragment itself, by radiocarbon: laboratory number ETH-99102, 36,170 ± 220 radiocarbon years BP, calibrated with IntCal20.", "source": "balzeau2020", "locator": "Results; Methods"},
     {"id": "l3", "claim_type": "find_association", "text": "The date is on the find itself. The fragment was picked out by its proteins and grouped with Neandertals by its mitochondrial DNA.", "source": "balzeau2020", "locator": "Abstract; Results"},
-    {"id": "l4", "claim_type": "context", "text": "The range is the uncertainty of one date, not a length of time. Provisional: a 2023 study that models the ages of the La Ferrassie individuals has not been read yet."}
+    {"id": "l4", "claim_type": "context", "text": "The range is the uncertainty of one date on this fragment, not a length of time."},
+    {"id": "l5", "claim_type": "context", "text": "A later study models the age of the La Ferrassie 8 child at 44,900 to 39,900 years ago, at 95 % credibility. It keeps this fragment's date as an alternative for the child, if the fragment belongs to it, and says that has not been demonstrated. That model is for the individual, not a date on this fragment.", "source": "guerin2023", "locator": "pp. 99, 115, 116 (passages read by GPT)"}
    ]
   }
  ]

@@ -9,6 +9,8 @@
  *   BREAK=join-bar | limit-as-point | limit-as-bar | pm-dropped | open-side-fit | chevron-scales | datum-unchecked | values-unchecked |
  *         midpoint-as-age | finds-clustered | no-finds-validate | min-span | ka-always | coarse-ticks | offscreen-text | no-bring |
  *         hit-area | row-order
+ *   rev 2: coarse-off | coarse-at-2 | tick-centred | focus-none | notation-unchecked | words-unchecked | clock-datum | compact-focus |
+ *          compact-backtarget
  * Control: OLD=1 serves main's timeline.js instead; the suite must fail.
  * MEASURE=1 prints the drawn widths (figures are printed, never judged, beyond the checks below).
  */
@@ -21,11 +23,17 @@ const sha = b => createHash('sha256').update(b).digest('hex');
 let pass = 0, fail = 0; const ok = (name, cond, info) => { if (cond) { pass++; console.log('ok   ' + name); } else { fail++; console.log('FAIL ' + name + (info !== undefined ? '  → ' + JSON.stringify(info).slice(0, 600) : '')); } };
 process.on('uncaughtException', e => { console.log('FAIL the suite ran to its end  → ' + String(e && e.message).split('\n')[0]); console.log(`timeline-finds-ui: ${pass} pass, ${fail + 1} fail (stopped early)`); process.exit(1); });
 process.on('unhandledRejection', e => { throw e; });
-const REV = 'tl-2026-11-T2', R3 = 'tl-2026-11-R3', PORT = 8796, B = `http://127.0.0.1:${PORT}`, ST = 'with-image';
+const REV = 'tl-2026-11-T2', R3 = 'tl-2026-11-R3', PORT = +(process.env.TL_PORT || 8796), B = `http://127.0.0.1:${PORT}`, ST = 'with-image';
 const RH = path.join(ROOT, 'phase1/timeline/rehearsal-finds');
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'tl-finds-ui-'));
 const rep = build(path.join(TMP, 'preview'), PORT, { rehearsal: RH }); const server = serve(path.join(TMP, 'preview'), PORT, rep, () => {}); await new Promise(r => server.once('listening', r));
 const SRC = JSON.parse(fs.readFileSync(path.join(RH, 'finds.json'), 'utf8'));
+// a control with three finds (La Ferrassie left out): the lane is not built for exactly four (GPT, rev 2)
+const RH3 = path.join(TMP, 'rehearsal-3'), PORT3 = PORT + 2, B3 = `http://127.0.0.1:${PORT3}`; fs.mkdirSync(RH3);
+fs.copyFileSync(path.join(RH, 'BUILD.json'), path.join(RH3, 'BUILD.json'));
+{ const f = JSON.parse(fs.readFileSync(path.join(RH, 'finds.json'), 'utf8')); f.finds = f.finds.filter(x => x.id !== 'f-la-ferrassie-bone'); delete f.sources.balzeau2020; delete f.sources.guerin2023; fs.writeFileSync(path.join(RH3, 'finds.json'), JSON.stringify(f, null, 1));
+  const ch = JSON.parse(fs.readFileSync(path.join(RH, 'changes.json'), 'utf8')); for (const c of ch.changes) if (c.entries) c.entries = c.entries.filter(i => i !== 'f-la-ferrassie-bone'); fs.writeFileSync(path.join(RH3, 'changes.json'), JSON.stringify(ch, null, 1)); }
+const rep3 = build(path.join(TMP, 'preview-3'), PORT3, { rehearsal: RH3 }); const server3 = serve(path.join(TMP, 'preview-3'), PORT3, rep3, () => {}); await new Promise(r => server3.once('listening', r));
 const IDS = ['f-dinaledi-chamber', 'f-omo-1', 'f-xiahe-2', 'f-la-ferrassie-bone'];
 const NOTE = 'Marks and ranges show dates or age limits assigned to particular finds or deposits. They do not show how long a group lived. Overlap in date does not establish shared place or contact.';
 const git = f => execFileSync('git', ['-C', ROOT, 'show', 'main:' + f], { maxBuffer: 1 << 26 }).toString();
@@ -50,19 +58,30 @@ const brokenJs = js => {
     case 'offscreen-text': return must(js, "'Its dated layer is newer than this view; the find is older than that layer, by an unknown amount.'", "'Newer than this view.'");
     case 'no-bring': return must(js, "const fg = t.closest('[data-find-go]'); if (fg) {", 'const fg = null; if (fg) {');
     case 'row-order': return must(js, ".sort((x, y) => y.key - x.key || (x.id < y.id ? -1 : 1));", ".sort((x, y) => x.key - y.key || (x.id < y.id ? -1 : 1));");
-    case '': case 'hit-area': return js;
+    case 'coarse-off': return must(js, 'const coarse = FINDS.length > 0 && s > COARSE_ABOVE + 1e-9;', 'const coarse = false;');
+    case 'coarse-at-2': return must(js, 'const coarse = FINDS.length > 0 && s > COARSE_ABOVE + 1e-9;', 'const coarse = FINDS.length > 0 && s >= COARSE_ABOVE - 1e-9;');
+    case 'tick-centred': return must(js, 'const first = x - w / 2 < 4, last = !first && x + w / 2 > laneW - 4;', 'const first = false, last = false;');
+    case 'notation-unchecked': return must(js, 'if (notationBad(a.source_notation, w, sv))', 'if (false)');
+    case 'words-unchecked': return must(js, 'if (say.some(y =>', 'if (false && say.some(y =>');
+    case 'clock-datum': return must(js, ': { from: w.from_ma, to: w.to_ma };\n  return { id: e.id', ": (d => ({ from: w.from_ma + d, to: w.to_ma + d }))(w.type === 'calibrated' ? (new Date().getUTCFullYear() - 1950) / 1e6 : 0);\n  return { id: e.id");
+    case 'compact-focus': return must(js, "if (fr) { setView(RECENT, 0); const el = axis.querySelector('.ftrack a.mk'); if (el) el.focus({ preventScroll: true }); return; }", 'if (fr) { setView(RECENT, 0); return; }');
+    case 'compact-backtarget': return must(js, ' || visible(document.querySelector(`#axis .ftrack a.fzl[data-entry="${CSS.escape(id)}"]`))', '');
+    case '': case 'hit-area': case 'focus-none': return js;
     default: throw new Error('unknown BREAK ' + BREAK);
   }
 };
-const brokenCss = css => BREAK === 'hit-area' ? must(css, 'body.tl .axis .xpl .fmk{top:0;height:32px;min-width:44px;', 'body.tl .axis .xpl .fmk{top:0;height:32px;min-width:4px;') : css;
+const brokenCss = css => BREAK === 'hit-area' ? must(css, 'body.tl .axis .xpl .fmk{top:0;height:32px;min-width:44px;', 'body.tl .axis .xpl .fmk{top:0;height:32px;min-width:4px;')
+  : BREAK === 'focus-none' ? css + '\nbody.tl .axis .xpl .fmk:focus-visible,body.tl .axis .xpl .fzl:focus-visible,body.tl .axis .xpl .fzb:focus-visible{outline:none!important;background:none!important}\n' : css;
+const EVID = process.env.EVID || '';   // a folder for focus screenshots (evidence only; nothing is judged from them)
 
 const browser = await chromium.launch();
-async function open({ w = 1280, h = 900, js = true, hash = '', mutate = null, page: pageBody = null, script = null, catalogue = null, state = null } = {}) {
+async function open({ w = 1280, h = 900, js = true, hash = '', mutate = null, page: pageBody = null, script = null, catalogue = null, state = null, clockAt = null, base = B } = {}) {
   const c = await browser.newContext({ viewport: { width: w, height: h }, javaScriptEnabled: js });
+  if (clockAt) await c.clock.setFixedTime(new Date(clockAt));
   const reqs = [], errs = [];
   await c.route(/fonts\.(googleapis|gstatic)/, r => r.abort());
   if (BREAK || script || OLD) await c.route(/timeline\.js/, async r => { const body = script || (OLD ? git('timeline.js').replace(HUB_LINE, HUB) : brokenJs(await (await fetch(r.request().url())).text())); r.fulfill({ contentType: 'application/javascript', body }); });
-  if (BREAK === 'hit-area') await c.route(/style\.css/, async r => r.fulfill({ contentType: 'text/css', body: brokenCss(await (await fetch(r.request().url())).text()) }));
+  if (BREAK === 'hit-area' || BREAK === 'focus-none') await c.route(/style\.css/, async r => r.fulfill({ contentType: 'text/css', body: brokenCss(await (await fetch(r.request().url())).text()) }));
   if (mutate) {   // a catalogue changed by the fixture, with the page's pin moved to the changed bytes, so only validation can refuse it
     const o = JSON.parse(await (await fetch(`${B}/${ST}/hub/catalogue/timeline/${REV}`)).text()); mutate(o);
     const body = Buffer.from(JSON.stringify(o)); const pg = (await (await fetch(`${B}/${ST}/timeline.html`)).text()).replace(/data-catalogue-sha="[0-9a-f]{64}"/, `data-catalogue-sha="${sha(body)}"`);
@@ -71,8 +90,8 @@ async function open({ w = 1280, h = 900, js = true, hash = '', mutate = null, pa
   if (catalogue) await c.route(/hub\/catalogue\/timeline/, r => r.fulfill({ contentType: 'application/json', body: catalogue }));
   if (pageBody) await c.route(/timeline\.html/, r => r.fulfill({ contentType: 'text/html', body: pageBody }));
   const p = await c.newPage(); p.on('pageerror', e => errs.push(String(e))); p.on('request', r => reqs.push(r.url()));
-  if (state) { await p.goto(`${B}/${ST}/timeline.html`, { waitUntil: 'load' }); await p.evaluate(s => history.replaceState(s, '', location.href), state); await p.reload({ waitUntil: 'load' }); }
-  else await p.goto(`${B}/${ST}/timeline.html${hash}`, { waitUntil: 'load' });
+  if (state) { await p.goto(`${base}/${ST}/timeline.html`, { waitUntil: 'load' }); await p.evaluate(s => history.replaceState(s, '', location.href), state); await p.reload({ waitUntil: 'load' }); }
+  else await p.goto(`${base}/${ST}/timeline.html${hash}`, { waitUntil: 'load' });
   if (js) await p.waitForFunction(() => window.TL_AXIS && window.TL_AXIS.state !== 'pending');
   await p.waitForTimeout(250);
   const axis = js ? await p.evaluate(() => window.TL_AXIS.state + (window.TL_AXIS.reason ? ':' + window.TL_AXIS.reason : '')) : 'no-js';
@@ -91,6 +110,27 @@ const rows = p => p.evaluate(() => { const ft = document.querySelector('#xpl .ft
 // the same, with the rows looked up by find (so a check about one find reads that find's row whatever the order drawn)
 const rowsBy = async p => { const R = await rows(p); R.rows = IDS.map(i => R.rows.find(r => r.id === i) || { id: i, cls: null, box: {}, cap: '', label: '' }); return R; };
 const pxOf = (W, a, b, ma) => (a - ma) / (a - b) * W;
+const COARSE_TEXT = 'Not resolved at this scale. These finds are drawn, one row each, in a window of 2 million years or less.';
+const compact = p => p.evaluate(() => { const ft = document.querySelector('#xpl .ftrack'), x = document.getElementById('xpl').getBoundingClientRect();
+  const els = [...ft.querySelectorAll('.fzb, a.fzl')], rs = els.map(e => e.getBoundingClientRect());
+  return { coarse: ft.classList.contains('coarse'), rows: ft.querySelectorAll('.frow').length, marks: ft.querySelectorAll('a.mk').length, text: (ft.querySelector('.fczt') || {}).textContent, btn: (ft.querySelector('.fzb') || {}).textContent,
+    links: [...ft.querySelectorAll('a.fzl')].map(a => ({ id: a.dataset.entry, text: a.textContent, href: a.getAttribute('href') })), all: ft.textContent,
+    inside: rs.every(r => r.left >= x.left && r.right <= x.right), sizes: rs.map(r => Math.round(r.height)), h: Math.round(document.querySelector('#xpl .lr.fl').getBoundingClientRect().height) }; });
+// the scale's first and last labels: text inside the explorer by a margin, and each tick line still at its own coordinate
+const tickEnds = p => p.evaluate(() => { const x = document.getElementById('xpl').getBoundingClientRect(), sc = document.querySelector('#xpl .scale').getBoundingClientRect();
+  return [...document.querySelectorAll('#xpl .scale .tk')].map(e => { const rg = document.createRange(); rg.selectNodeContents(e); const t = rg.getBoundingClientRect(), q = e.getBoundingClientRect(), cs = getComputedStyle(e, '::before');
+    const line = q.left + (cs.left.endsWith('px') ? parseFloat(cs.left) : 0) - sc.left;
+    return { t: e.textContent, inL: +(t.left - x.left).toFixed(1), inR: +(x.right - t.right).toFixed(1), x: +e.dataset.x, line: +line.toFixed(1) }; }); });
+// keyboard focus on an element: the browser's own :focus-visible state, a solid outline of at least 2 px in the accent colour, the outline's box
+// inside the viewport and the explorer, and the element the topmost thing at the outline's own pixels
+const focusLook = p => p.evaluate(() => { const a = document.activeElement, cs = getComputedStyle(a), q = a.getBoundingClientRect(), x = document.getElementById('xpl').getBoundingClientRect();
+  const probe = document.createElement('i'); probe.style.color = 'var(--accent)'; a.parentNode.appendChild(probe); const accent = getComputedStyle(probe).color; probe.remove();
+  const ow = parseFloat(cs.outlineWidth) || 0, off = parseFloat(cs.outlineOffset) || 0, e = ow + off, box = { l: q.left - e, r: q.right + e, t: q.top - e, b: q.bottom + e };
+  const at = (px, py) => { const el = document.elementFromPoint(px, py); return !!el && (el === a || a.contains(el)); };
+  const inset = off < 0 ? -off - ow / 2 : -(off + ow / 2), my = (q.top + q.bottom) / 2, mx = (q.left + q.right) / 2;
+  return { id: a.dataset.entry || a.className, fv: a.matches(':focus-visible'), style: cs.outlineStyle, width: ow, colour: cs.outlineColor, accent,
+    inside: box.l >= Math.max(0, x.left - 4) && box.r <= Math.min(innerWidth, x.right + 4) && box.t >= 0 && box.b <= innerHeight,
+    top: off < 0 ? at(q.left + inset + 0.5, my) && at(q.right - inset - 0.5, my) && at(mx, q.top + inset + 0.5) : true }; });
 
 for (const [w, h] of [[1280, 900], [390, 844]]) {
   const L = `${w}`;
@@ -100,17 +140,26 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   if (T.axis !== 'on') { await T.c.close(); continue; }
   ok(`A ${L}: banner "Rehearsal ${REV}: not published"`, (await p.textContent('#rehearsal-banner')).includes(`Rehearsal ${REV}: not published`));
   const lane = await p.evaluate(() => { const f = document.querySelector('#xpl .lr.fl'), m = document.querySelector('#xpl .lr.act:not(.fl)'); return { fl: f && f.getAttribute('aria-label'), ln: f && f.querySelector('.ln').textContent, note: f && f.querySelector('.fnote').textContent, main: m && m.getAttribute('aria-label'), plans: document.querySelector('.plans').textContent }; });
-  ok(`A ${L}: the lane is "Humans and human relatives (4 finds)", the extinctions lane still counts its own five`, lane.fl === 'Humans and human relatives (4 finds)' && lane.main === 'Mass extinctions (5 entries)', lane);
+  ok(`A ${L}: the lane is "Humans and human relatives (${IDS.length} finds)", the extinctions lane still counts its own five`, lane.fl === `Humans and human relatives (${IDS.length} finds)` && lane.main === 'Mass extinctions (5 entries)', lane);
   ok(`A ${L}: the lane's fixed sentence is on the lane, word for word`, lane.note === NOTE, lane.note);
   ok(`A ${L}: the lane is no longer listed as "not on the timeline yet"`, !/relatives/i.test(lane.plans), lane.plans);
-  // ---------- B. landing view: four rows, four separate links, nothing between them
+  // ---------- Z. landing view (538.8 Ma): the finds are not resolved; the lane says so instead of drawing edge-clipped or shifted marks (GPT, rev 2)
+  const z = await compact(p);
+  ok(`Z ${L}: at the landing view the lane is compact: no row and no mark, one sentence, the zoom button and one link per find, in row order`, z.coarse && z.rows === 0 && z.marks === 0 && z.text === COARSE_TEXT && z.btn === 'Show the last 400,000 years' && JSON.stringify(z.links.map(l => l.id)) === JSON.stringify(IDS) && z.links.every((l, i) => l.text === SRC.finds.find(f => f.id === IDS[i]).short && l.href === '#' + IDS[i]), z);
+  ok(`Z ${L}: it never says there are no finds in this period`, !/\bno (finds|entries)\b|not in this range|none in/i.test(z.all), z.all);
+  ok(`Z ${L}: no find link or row reaches past the explorer's edges`, z.inside, z);
+  ok(`Z ${L}: the button and each link are at least 24 px high`, z.sizes.every(h => h >= 24), z.sizes);
+  ok(`Z ${L}: the extinctions track still shows its five entries (marks or cluster members)`, (await p.evaluate(() => new Set([...document.querySelectorAll('#xpl .track a.mk')].map(a => a.dataset.entry)).size)) === 5);
+  await p.focus('#xpl .ftrack .fzb'); await p.keyboard.press('Enter'); await p.waitForTimeout(250);
+  ok(`Z ${L}: the button opens the 400,000-year view and moves focus to the first find's own link (the button itself is gone)`, JSON.stringify(await view(p)) === '[0.4,0]' && (await p.evaluate(() => document.activeElement && document.activeElement.classList.contains('fmk') && document.activeElement.dataset.entry)) === IDS[0], [await view(p), await p.evaluate(() => document.activeElement && document.activeElement.outerHTML.slice(0, 80))]);
+  // ---------- B. the 400,000-year view: one row per find, one link each, nothing between them
   let R = await rows(p); const ORDER = R.rows.map(r => r.id);
-  ok(`B ${L}: the lane holds exactly four rows and nothing else (no element joins two finds)`, R.kids.length === 4 && R.kids.every(k => k === 'DIV.frow'), R.kids);
+  ok(`Z ${L}: the compact lane is lower than the drawn rows (${z.h} px against ${Math.round(await p.evaluate(() => document.querySelector('#xpl .lr.fl').getBoundingClientRect().height))} px)`, z.h < await p.evaluate(() => document.querySelector('#xpl .lr.fl').getBoundingClientRect().height) - 50);
+  ok(`B ${L}: the lane holds exactly one row per find (${IDS.length}) and nothing else (no element joins two finds)`, R.kids.length === IDS.length && R.kids.every(k => k === 'DIV.frow'), R.kids);
   ok(`B ${L}: rows are in a fixed order, by each find's finite age, oldest first`, JSON.stringify(ORDER) === JSON.stringify(IDS), ORDER);
   ok(`B ${L}: rows do not overlap each other`, R.rows.every((r, i) => i === 0 || r.box.t >= R.rows[i - 1].box.b - 0.5), R.rows.map(r => [r.box.t, r.box.b]));
   const anchors = await p.evaluate(ids => ids.map(i => document.querySelectorAll(`#axis a.mk[data-entry="${i}"]`).length), IDS);
   ok(`B ${L}: every find has exactly one link of its own in the explorer, and none sits inside a cluster or on the extinctions track`, anchors.every(n => n === 1) && R.rows.every(r => r.n === 1) && (await p.evaluate(() => document.querySelectorAll('#xpl .track a.mk[data-entry^="f-"], #xpl .cl a[data-entry^="f-"]').length)) === 0, [anchors, R.rows.map(r => r.n)]);
-  ok(`B ${L}: the extinctions track still shows its five entries (marks or cluster members)`, (await p.evaluate(() => new Set([...document.querySelectorAll('#xpl .track a.mk')].map(a => a.dataset.entry)).size)) === 5);
   const mids = ['285,500', '40,000', '41,250'];
   ok(`B ${L}: each link's spoken name carries the title, the attribution, the claim's label and its date in words; no midpoint is ever printed`, R.rows.every((r, i) => { const f = SRC.finds[i]; return r.label.startsWith(f.title + '. Attributed to ' + f.attributed_to.name + '. ') && !mids.some(m => r.label.includes(m) || r.cap.includes(m)); }), R.rows.map(r => r.label));
   // ---------- C. the "Last 400,000 years" view
@@ -160,7 +209,13 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   // ---------- J. tick units either side of 2 million years
   for (const [a, mode] of [[2.2, 'Ma'], [2, 'Ma'], [1.9, 'ka'], [1, 'ka']]) { await setWin(p, a, 0);
     const s = await p.evaluate(() => ({ ticks: [...document.querySelectorAll('#xpl .scale .tk')].map(e => e.textContent), unit: (document.querySelector('#xpl .scale .tku') || {}).textContent || null, win: document.getElementById('tl-win').textContent }));
+    const cz = await compact(p);
+    ok(`J ${L}: at a ${a} Ma window the lane is ${a > 2 ? 'compact' : 'drawn row by row'} (the threshold is "wider than 2 Ma")`, a > 2 ? cz.coarse && cz.rows === 0 : !cz.coarse && cz.rows === IDS.length, cz);
     ok(`J ${L}: a ${a} Ma window is ticked in ${mode === 'Ma' ? 'Ma' : 'thousands of years'}, labels distinct, and the sentence above agrees`, s.ticks.length >= 2 && new Set(s.ticks).size === s.ticks.length && (mode === 'Ma' ? s.unit === null && / Ma$/.test(s.ticks[0]) && /million years ago/.test(s.win) : s.unit === 'thousand years ago' && s.ticks.every(t => /^[\d,]+$/.test(t)) && / years ago\. Span /.test(s.win) && !/Ma/.test(s.win)), s); }
+  // ---------- T. the scale's end labels are never cut, and no tick line moves to make room
+  for (const [a, b] of [[538.8, 0], [2.2, 0], [2, 0], [1.9, 0], [0.4, 0], [0.3, 0.1], [0.05, 0]]) { await setWin(p, a, b); const t = await tickEnds(p), e = [t[0], t[t.length - 1]];
+    ok(`T ${L}: at ${a} to ${b} Ma the end labels (${e.map(q => q.t).join(', ')}) lie wholly inside the explorer, at least 3 px from its border`, t.length >= 2 && t.every(q => q.inL >= 3 && q.inR >= 3), e);
+    ok(`T ${L}: at ${a} to ${b} Ma every tick line is at its own coordinate`, t.every(q => Math.abs(q.line - q.x) <= 1), t.filter(q => Math.abs(q.line - q.x) > 1)); }
   // ---------- F. each find opens on its own, with its own history entry, and comes back to its own link
   await setWin(p, 0.4, 0);
   for (const f of SRC.finds) {
@@ -183,6 +238,45 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
   await p.focus(`#xpl .ftrack a.mk[data-entry="f-xiahe-2"]`); await p.setViewportSize({ width: w - 40, height: h }); await p.waitForTimeout(350);
   ok(`F ${L}: after a redraw (the window resized) focus is still on the same find's link`, (await p.evaluate(() => document.activeElement && document.activeElement.dataset.entry)) === 'f-xiahe-2');
   ok(`F ${L}: the finds can be reached by Tab, in row order, each one stop`, await (async () => { await p.focus('#xpl'); const seen = []; for (let i = 0; i < 12 && seen.length < 4; i++) { await p.keyboard.press('Tab'); const id = await p.evaluate(() => { const a = document.activeElement; return a && a.closest('.ftrack') && a.dataset.entry; }); if (id) seen.push(id); } return JSON.stringify(seen) === JSON.stringify(IDS); })());
+  await p.setViewportSize({ width: w, height: h }); await p.waitForTimeout(250);
+  // ---------- V. keyboard focus is visible on every find control, at both widths: the Omo chevron row and La Ferrassie's short glyph included
+  const tabLooks = async (sel, n, tag) => { await p.focus('#xpl'); const out = []; for (let i = 0; i < 24 && out.length < n; i++) { await p.keyboard.press('Tab');
+      if (await p.evaluate(s => !!document.activeElement && document.activeElement.matches(s), sel)) { const f = await focusLook(p); out.push(f);
+        if (EVID) await p.screenshot({ path: path.join(EVID, `focus-${L}-${tag}-${out.length}-${String(f.id).replace(/[^a-z0-9-]/gi, '')}.png`), clip: await p.evaluate(() => { const q = document.activeElement.closest('.frow, .fcz, .ftrack').getBoundingClientRect(); return { x: 0, y: Math.max(0, q.top - 4), width: innerWidth, height: Math.min(q.height + 8, 160) }; }) }); } }
+    return out; };
+  const good = f => f.fv && f.style === 'solid' && f.width >= 2 && f.colour === f.accent && f.inside && f.top;
+  await setWin(p, 0.4, 0); let V = await tabLooks('#xpl .ftrack a.mk', IDS.length, '400ka');
+  ok(`V ${L}: at the 400,000-year view each find's link, reached by Tab, shows a solid accent outline of at least 2 px, inside the explorer and not covered`, V.length === IDS.length && V.every(good) && JSON.stringify(V.map(f => f.id)) === JSON.stringify(IDS), V);
+  await setWin(p, 0.05, 0); V = await tabLooks('#xpl .ftrack a.mk, #xpl .ftrack .fgo', IDS.length, '50ka');
+  ok(`V ${L}: at the 50,000-year view the same holds for each drawn find (La Ferrassie's short range included) and each "Bring into view" button`, V.length === IDS.length && V.every(good), V);
+  await setWin(p, 538.8, 0); V = await tabLooks('#xpl .ftrack .fzb, #xpl .ftrack a.fzl', IDS.length + 1, 'landing');
+  ok(`V ${L}: at the landing view the same holds for the compact lane's button and each find link`, V.length === IDS.length + 1 && V.every(good), V);
+  // ---------- W. crossing 2 Ma with one wheel step while a find has focus: focus stays on that find, in whichever form the lane has
+  const wheelStep = async (a, id, sel, dy) => { await setWin(p, a, 0); await p.focus('#xpl'); await p.keyboard.press('Enter');
+    for (let i = 0; i < 16; i++) { await p.keyboard.press('Tab'); if (await p.evaluate(([id, sel]) => !!document.activeElement && document.activeElement.matches(sel) && document.activeElement.dataset.entry === id, [id, sel])) break; }
+    const before = await p.evaluate(() => [window.TL_AXIS.wheel, document.activeElement.dataset.entry, document.activeElement.className]);
+    const xb = await p.evaluate(() => { const q = document.getElementById('xpl').getBoundingClientRect(); return { x: q.right - 20, y: q.top + 60 }; }); await p.mouse.move(xb.x, xb.y);
+    await p.mouse.wheel(0, dy); await p.waitForTimeout(350);
+    return { before, after: await p.evaluate(() => { const a = document.activeElement; return { v: window.TL_AXIS.view, cls: a.className, id: a.dataset.entry }; }) }; };
+  const wo = await wheelStep(1.9, 'f-omo-1', '#xpl .ftrack a.fmk', 300);
+  ok(`W ${L}: one wheel step out past 2 Ma with Omo I's row link focused: focus moves to Omo I's link in the compact lane`, wo.before[0] === true && wo.before[1] === 'f-omo-1' && wo.after.v[0] - wo.after.v[1] > 2 && /\bfzl\b/.test(wo.after.cls) && wo.after.id === 'f-omo-1', wo);
+  const wi = await wheelStep(2.4, 'f-omo-1', '#xpl .ftrack a.fzl', -300);
+  ok(`W ${L}: one wheel step in below 2 Ma with Omo I's compact link focused: focus moves to Omo I's own row link`, wi.before[0] === true && wi.before[1] === 'f-omo-1' && wi.after.v[0] - wi.after.v[1] <= 2 && /\bfmk\b/.test(wi.after.cls) && wi.after.id === 'f-omo-1', wi);
+  await p.keyboard.press('Escape');
+  // opening a find from the compact lane brings its finite reference into view; Back returns focus to that find's row link
+  await setWin(p, 538.8, 0); await p.focus('#xpl .ftrack a.fzl[data-entry="f-xiahe-2"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(300);
+  const q1 = await p.evaluate(() => ({ open: !document.getElementById("detail").hidden, hash: location.hash, v: window.TL_AXIS.view, focus: document.activeElement.id }));
+  ok(`W ${L}: a find opened from the compact lane opens its entry and brings its own dated range into a drawn view`, q1.open && q1.hash === "#f-xiahe-2" && q1.focus === "f-xiahe-2-h" && q1.v[0] - q1.v[1] <= 2 && q1.v[0] >= 0.048 && q1.v[1] <= 0.032, q1);
+  await p.goBack(); await p.waitForTimeout(300);
+  const q2 = await p.evaluate(() => ({ open: !document.getElementById("detail").hidden, cls: document.activeElement.className, id: document.activeElement.dataset.entry, v: window.TL_AXIS.view }));
+  ok(`W ${L}: Back closes it, restores the view it was opened from (the landing view, compact) and returns focus to the Xiahe 2 link that opened it`, !q2.open && /\bfzl\b/.test(q2.cls) && q2.id === "f-xiahe-2" && JSON.stringify(q2.v) === '[538.8,0]', q2);
+  await p.goForward(); await p.waitForTimeout(300);
+  const q3 = await p.evaluate(() => ({ open: !document.getElementById("detail").hidden, hash: location.hash, v: window.TL_AXIS.view }));
+  ok(`W ${L}: Forward reopens Xiahe 2 in a drawn view`, q3.open && q3.hash === '#f-xiahe-2' && q3.v[0] - q3.v[1] <= 2, q3);
+  await p.goBack(); await p.waitForTimeout(250);
+  await setWin(p, 538.8, 0); await p.focus('#xpl .ftrack a.fzl[data-entry="f-omo-1"]'); await p.setViewportSize({ width: w - 30, height: h }); await p.waitForTimeout(350);
+  ok(`W ${L}: in the compact lane a redraw (the window resized) keeps focus on the same find's link`, (await p.evaluate(() => document.activeElement && document.activeElement.dataset.entry)) === 'f-omo-1');
+  await p.setViewportSize({ width: w, height: h }); await p.waitForTimeout(250);
   ok(`${L}: nothing was requested from any other host`, T.reqs.every(u => u.startsWith(B) || /fonts\.(googleapis|gstatic)/.test(u)), T.reqs.filter(u => !u.startsWith(B)).slice(0, 3));
   ok(`${L}: no page error in the whole run`, T.errs.length === 0, T.errs);
   await T.c.close();
@@ -191,11 +285,29 @@ for (const [w, h] of [[1280, 900], [390, 844]]) {
     ok(`K ${L}: a direct link to ${id} opens it on the "Last 400,000 years" view, where all four finds are`, D.axis === 'on' && JSON.stringify(await view(D.p)) === '[0.4,0]' && await D.p.evaluate(i => !document.getElementById('detail').hidden && document.getElementById('detail').contains(document.getElementById(i)), id), [D.axis, D.axis === 'on' ? await view(D.p) : null]); await D.c.close(); }
 }
 
+// ---------- L. the device clock changes nothing the lane draws or says (GPT, rev 2: the same claim at two clocks far apart)
+for (const [w, h] of [[1280, 900], [390, 844]]) {
+  const geo = async at => { const C = await open({ w, h, clockAt: at }); const out = [];
+    if (C.axis === 'on') for (const [a, b] of [[0.4, 0], [0.05, 0]]) { await setWin(C.p, a, b); const R2 = await rows(C.p);
+      out.push(R2.rows.map(r => [r.id, r.cap, r.label, r.off, r.g && [r.g.l, r.g.r], r.tick && r.tick.l, r.chev && r.chev.l]), await C.p.evaluate(() => document.getElementById('tl-win').textContent)); }
+    out.push(await C.p.evaluate(() => [...document.querySelectorAll('article.entry.find')].map(a => a.textContent)));
+    const yr = await C.p.evaluate(() => new Date().getUTCFullYear()); await C.c.close(); return { ax: C.axis, yr, out: JSON.stringify(out) }; };
+  const g1 = await geo('1990-06-01T12:00:00Z'), g2 = await geo('2090-06-01T12:00:00Z');
+  let d = 0; while (d < g1.out.length && g1.out[d] === g2.out[d]) d++;
+  ok(`L ${w}: with the device clock at ${g1.yr} and at ${g2.yr}, every find's drawn ends, tick, chevron, caption, spoken name, the window sentence and the entries' text are identical`, g1.ax === 'on' && g2.ax === 'on' && g1.yr === 1990 && g2.yr === 2090 && g1.out === g2.out, [g1.ax, g2.ax, g1.yr, g2.yr, g1.out.slice(Math.max(0, d - 80), d + 80), g2.out.slice(Math.max(0, d - 80), d + 80)]);
+}
+// ---------- M. three finds: the same lane, rows and compact form, nothing assumes four
+for (const [w, h] of [[1280, 900], [390, 844]]) { const M = await open({ w, h, base: B3 });
+  const z3 = M.axis === 'on' ? await compact(M.p) : null, lab = M.axis === 'on' ? await M.p.evaluate(() => document.querySelector('#xpl .lr.fl').getAttribute('aria-label')) : null;
+  ok(`M ${w}: a rehearsal with three finds draws (${M.axis}); the lane is "(3 finds)"; the compact lane has three links in row order`, M.axis === 'on' && lab === 'Humans and human relatives (3 finds)' && z3.coarse && JSON.stringify(z3.links.map(l => l.id)) === JSON.stringify(IDS.slice(0, 3)), [M.axis, lab, z3]);
+  if (M.axis === 'on') { await setWin(M.p, 0.4, 0); const R3r = await rows(M.p);
+    ok(`M ${w}: at the 400,000-year view it has three rows, in order, and nothing else`, R3r.kids.length === 3 && JSON.stringify(R3r.rows.map(r => r.id)) === JSON.stringify(IDS.slice(0, 3)), R3r.kids); }
+  ok(`M ${w}: no page error`, M.errs.length === 0, M.errs); await M.c.close(); }
 // ---------- G. with JavaScript off the four finds are in the page, complete
 { const N = await open({ js: false });
   const g = await N.p.evaluate(() => ({ cards: [...document.querySelectorAll('#finds .card.find .ctitle')].map(e => e.textContent), note: document.getElementById('finds-note').textContent, arts: [...document.querySelectorAll('article.entry.find')].map(a => ({ id: a.id, n: a.querySelectorAll('section.claim').length, vis: a.getClientRects().length > 0, attr: a.querySelector('.fattr').textContent })), lanes: [...document.querySelectorAll('.lanes .lane')].map(e => e.textContent) }));
-  ok('G no JavaScript: the lane sentence, four find cards and four complete, visible entries are in the page', g.note === NOTE && JSON.stringify(g.cards) === JSON.stringify(SRC.finds.map(f => f.title)) && g.arts.length === 4 && g.arts.every((a, i) => a.vis && a.n === SRC.finds[i].claims.length), g);
-  ok('G no JavaScript: the lane list counts them', g.lanes.includes('Humans and human relatives (4)'), g.lanes);
+  ok('G no JavaScript: the lane sentence, one card and one complete, visible entry per find are in the page', g.note === NOTE && JSON.stringify(g.cards) === JSON.stringify(SRC.finds.map(f => f.title)) && g.arts.length === IDS.length && g.arts.every((a, i) => a.vis && a.n === SRC.finds[i].claims.length), g);
+  ok('G no JavaScript: the lane list counts them', g.lanes.includes(`Humans and human relatives (${IDS.length})`), g.lanes);
   await N.c.close(); }
 
 // ---------- H. a malformed find is refused by the page (the catalogue's hash is pinned to the changed bytes, so only validation can refuse it)
@@ -231,6 +343,13 @@ const BAD = [
   ['a find claim on the extinctions lane', o => { o.entries.find(e => e.lane === 'extinctions').claims.push(JSON.parse(JSON.stringify(AX(o, 0)))); }],
   ['a changed lane sentence', o => { o.find_note = o.find_note.replace('do not show', 'show'); }],
   ['a find moved to another lane', o => { F(o, 0).lane = 'history'; }],
+  // rev 2: one selected published result (GPT's reproduction first, exactly as GPT made it)
+  ['a calibrated range with one end taken from another published calculation (GPT\'s reproduction: 41,700 to 40,827)', o => { const a = AX(o, 3); a.when.to_ma = 0.040827; a.source_values.to = 40.827; a.when_text = a.when_text.replace('40,800', '40,827'); }],
+  ['notation, values and date line changed together, the claim\'s own words not', o => { const a = AX(o, 3); a.when.to_ma = 0.0407; a.source_values.to = 40.7; a.source_notation = a.source_notation.replace('40.8', '40.7'); a.when_text = a.when_text.replace('40,800', '40,700'); }],
+  ['a bracket whose notation has a third number', o => { AX(o, 2).source_notation = '48–32–30 ka'; }],
+  ['a limit written without its ±', o => { AX(o, 1).source_notation = '233 kyr'; }],
+  ['a bracket given a probability', o => { AX(o, 0).source_notation += ' (95%)'; }],
+  ['a find axis claim naming no selected result', o => { delete AX(o, 0).result; }],
 ];
 { const C = await open({}); ok('H control: the same route with an unchanged catalogue draws the explorer', C.axis === 'on', C.axis); await C.c.close(); }
 for (const [name, mut] of BAD) { const X = await open({ mutate: mut });
@@ -263,6 +382,6 @@ for (const [name, mut] of BAD) { const X = await open({ mutate: mut });
     ok('I there, with no finds, the narrowest window is still 1 Ma: a stored 50,000-year window is refused', JSON.stringify(await view(X.p)) === '[538.8,0]', await view(X.p)); }
   await X.c.close(); }
 
-await browser.close(); server.close();
+await browser.close(); server.close(); server3.close();
 console.log(`timeline-finds-ui: ${pass} pass, ${fail} fail` + (BREAK ? ` (BREAK=${BREAK})` : '') + (OLD ? ' (OLD=1)' : ''));
 process.exit(fail ? 1 : 0);
