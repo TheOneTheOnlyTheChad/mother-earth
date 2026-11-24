@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 03:16:00 UTC (clock reading) — **Timeline thread: CORRECTION, the page-release merge is `19f4e07`, not `ea39975`; review packet for GPT on the test-only commit `1d0c6dd`** (docs only)
+- **The error:** every record this thread wrote today named the merge `ea39975`. That commit was a first local attempt at the merge on the tip `6dcda3c`; main was then found to have moved to `419ccb4`, the merge was rebuilt as **`19f4e07`** and pushed, and the old number was carried into the records. `ea39975` is not on GitHub. The Earth from Space thread recorded the right number in its own entry.
+- **Why it matters:** the rollback instruction. **Rollback of the page release = revert `19f4e07`.**
+- **Corrected in place (own text only):** REGISTER entry, START-HERE live line, this thread's HANDOVER line, release record section 10 (with a correction line), this thread's release entry below. Also wrong in what was said to Chad and relayed to the Earth from Space thread; said to Chad now.
+- **Review packet for GPT:** `reviews/2026-11-24-timeline-changes-ui-fixture-review.md` with `reviews/evidence/2026-11-24-timeline-changes-ui-fixture/` (exact diff `19f4e07`→`1d0c6dd`, one file, 13 added and 7 removed; before: stops with "worker anchors missing"; after: 173 pass; the other direction 173 pass; all 14 breaks fail; one ad hoc fixture check). The packet's first commit `27456ed` carried the wrong number and a diff with two unrelated documents; replaced in this commit.
+
 ## 24 Nov 02:58:27 UTC (clock reading) — **Timeline story thread: close-out done after the R3 page release** (docs only; Chad's go for the close-out, 24 Nov)
 - **Filed on main (`f8b8a7a`):** REGISTER entry "Timeline end-Cretaceous story" (sources and the one NASA image, rights basis as Chad accepted it); START-HERE live line and §4ai; one HANDOVER line.
 - **Branch:** `timeline-story-rc` deleted on the GitHub branches page (git and the API refuse deletes through the session proxy); `git fetch -p` shows it gone. Remaining remote branches belong to other threads: `animals-assessment-rc`, `cape-town-public-proposal`, `cape-town-station-rc`, `earth-from-space-rc`, `earth-from-space-stage-d-docs-r2`, `widths-preview-rc`.
@@ -23,7 +29,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **For the Timeline thread's record:** the page merge commit on main is `19f4e07` (parents `419ccb4`, `efeb145`). The entry below names it `ea39975`; no commit of that name is on main.
 
 ## 24 Nov 02:48:03 UTC — **TIMELINE PAGE RELEASED: end-Cretaceous story, `tl-2026-11-R3`; main `1d0c6dd`; served hashes and live page checked** (Timeline thread; Chad: "Approve: merge timeline-story-rc into main (page release: end-Cretaceous story, tl-2026-11-R3, release date 24 Nov 2026), with served-hash and live checks.")
-- **Merge `ea39975`** of `timeline-story-rc` `efeb145` on main `419ccb4`. One conflict (`phase1/timeline-catalogue-hub.test.mjs`) resolved to main's version. Page files changed: `timeline.html`, `timeline.js`, `style.css`; new `assets/timeline/tl-2026-11-R3/`. `phase1/worker.js` untouched (`db4f9cdf…1aa5`, hub-alignment 6 pass).
+- **Merge `19f4e07`** (corrected 24 Nov; first written as `ea39975`, see the correction entry above) of `timeline-story-rc` `efeb145` on main `419ccb4`. One conflict (`phase1/timeline-catalogue-hub.test.mjs`) resolved to main's version. Page files changed: `timeline.html`, `timeline.js`, `style.css`; new `assets/timeline/tl-2026-11-R3/`. `phase1/worker.js` untouched (`db4f9cdf…1aa5`, hub-alignment 6 pass).
 - **`1d0c6dd`, test only, not on the reviewed branch:** `timeline-changes-ui` now builds its pinned and unpinned hub fixtures from the aligned Worker (it stopped with "worker anchors missing" on the merged tree). No served byte changed. Not seen by GPT.
 - **Before the push:** hub 0.6.24, R3 route exact (02:47:29 UTC); ten Timeline suites and the generator check pass on the merged tree, 0 failures.
 - **Served (02:48:55 UTC):** page, script, stylesheet, both image renditions and SOURCE.json equal the release hashes. **Live (02:49:14 UTC):** the entry opens with its account, image, credit, scoped review note and working citation buttons; footer shows 24 Nov 2026 and R3.

@@ -4,9 +4,9 @@ For GPT. Written by Claude (Timeline thread), 24 Nov 2026. Docs only; no live ch
 Everything below was run by Claude in its workspace unless a line says otherwise.
 
 ## 1. What to review
-One commit on main, `1d0c6dd`, made on 24 Nov 2026 directly after the page-release merge `ea39975` and pushed with it (02:48:03 UTC).
+One commit on main, `1d0c6dd`, made on 24 Nov 2026 directly after the page-release merge `19f4e07` and pushed with it (02:48:03 UTC).
 It changes one file, `phase1/timeline-changes-ui.test.cjs`: 13 lines added, 7 removed. It was not on the reviewed branch `timeline-story-rc`.
-- Exact diff: `reviews/evidence/2026-11-24-timeline-changes-ui-fixture/1d0c6dd.diff` (`git diff ea39975 1d0c6dd`).
+- Exact diff: `reviews/evidence/2026-11-24-timeline-changes-ui-fixture/1d0c6dd.diff` (`git diff 19f4e07 1d0c6dd`).
 - Test file sha256 before: `5d7cc3342fe8d8c1dd6c72ed69b4fe8e7a5fdec8e5e58a1f8053e70b7dc3983b`; after: `57dbc1f53bbc0b0cd291864b608d73a3a546445a6a0ce047b3f05183a65fbb8b` (unchanged on main since).
 - No page file, catalogue, generator or Worker byte changed. `phase1/worker.js` is `db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5` on both sides (the deployed hub 0.6.24).
 
@@ -29,13 +29,15 @@ This was missed before the release go: the suite had been run on the branch (173
 Logs are in `reviews/evidence/2026-11-24-timeline-changes-ui-fixture/`. Each log's first lines give the tree, the Worker hash and the test-file hash.
 | Run | Tree | Result | Log |
 |---|---|---|---|
-| Before | merge `ea39975` (old test file, aligned Worker) | stops: "worker anchors missing", exit 2, 0 checks run | `before-ea39975.log` |
+| Before | merge `19f4e07` (old test file, aligned Worker) | stops: "worker anchors missing", exit 2, 0 checks run | `before-19f4e07.log` |
 | After | main `3160658` (test file as at `1d0c6dd`) | 173 pass, 0 fail | `after-main.log` |
 | Other direction | branch tip `efeb145` (Worker without the pin) with the new test file copied in | 173 pass, 0 fail | `fallback-efeb145-plus-new-test.log` |
 | The suite's 14 breaks, after | main `3160658` | each fails, 1 to 38 failing checks | `breaks-main.log` |
 | Ad hoc: unpinned fixture left equal to the pinned Worker | main `3160658`, temporary copies of the test, deleted after | with the new guard: stops with the guard's message; with the guard also removed: 1 fail, "D new page + new script + unpinned hub … → 404, static list" (the hub answered 503) | `adhoc-unpinned-fixture.log` |
 Earlier, on the merged tree at `6dcda3c` before the push: 173 pass (recorded in `reviews/2026-11-23-timeline-story-release-rc.md` section 10; no separate log kept).
 The suite takes about 35 seconds here.
+
+Correction, 24 Nov: this packet was first committed (`27456ed`) naming the merge `ea39975`, a discarded local attempt that was never pushed, and its diff file wrongly included two documents from other threads. The merge on main is `19f4e07`; the diff file and the "before" run were redone against it (same result).
 
 ## 5. Not done
 - No break was added for the new fixture code; the ad hoc run in section 4 is the only evidence that a wrong unpinned fixture is caught, and its two temporary files are not in the repository.
@@ -52,5 +54,5 @@ The suite takes about 35 seconds here.
 To rerun: a checkout of main at `3160658` or later, `python3 -m http.server 8899 --bind 127.0.0.1` in it, then `node --no-warnings phase1/timeline-changes-ui.test.cjs` (needs Playwright and commits `cc91165` and `95ffad0` in the clone).
 
 ## 8. Unchanged by this packet
-Release identities: page merge `ea39975`; catalogue `tl-2026-11-R3`, 31,636 B, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993`; hub 0.6.24 `db4f9cdf…1aa5`.
+Release identities: page merge `19f4e07`; catalogue `tl-2026-11-R3`, 31,636 B, sha256 `f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993`; hub 0.6.24 `db4f9cdf…1aa5`.
 Still open on the release: a real phone, Safari, a screen reader, true 200 % browser zoom.

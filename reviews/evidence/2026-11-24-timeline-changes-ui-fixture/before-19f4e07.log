@@ -1,7 +1,7 @@
-# tree: ea39975 
+# tree: 19f4e07 
 # worker.js sha256: db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5
 # test file sha256: 5d7cc3342fe8d8c1dd6c72ed69b4fe8e7a5fdec8e5e58a1f8053e70b7dc3983b
-# start 2026-11-24T03:04:49Z
+# start 2026-11-24T03:15:43Z
 Error: worker anchors missing
     at /home/claude/wt-before/phase1/timeline-changes-ui.test.cjs:95:69
     at Object.<anonymous> (/home/claude/wt-before/phase1/timeline-changes-ui.test.cjs:393:3)
@@ -12,4 +12,4 @@ Error: worker anchors missing
     at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
     at node:internal/main/run_main_module:36:49
-# exit 2 end 2026-11-24T03:04:49Z
+# exit 2 end 2026-11-24T03:15:43Z
