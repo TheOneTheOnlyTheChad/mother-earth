@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 02:58:27 UTC (clock reading) — **Timeline story thread: close-out done after the R3 page release** (docs only; Chad's go for the close-out, 24 Nov)
+- **Filed on main (`f8b8a7a`):** REGISTER entry "Timeline end-Cretaceous story" (sources and the one NASA image, rights basis as Chad accepted it); START-HERE live line and §4ai; one HANDOVER line.
+- **Branch:** `timeline-story-rc` deleted on the GitHub branches page (git and the API refuse deletes through the session proxy); `git fetch -p` shows it gone. Remaining remote branches belong to other threads: `animals-assessment-rc`, `cape-town-public-proposal`, `cape-town-station-rc`, `earth-from-space-rc`, `earth-from-space-stage-d-docs-r2`, `widths-preview-rc`.
+- **Mac sync at `f8b8a7a`, preserve-first:** 948 files compared; 899 already equal, 29 new, 20 differed. All 20 old copies are in `_preserved/20261124T025617Z/` and each equals an earlier commit's version (no local edits found). Seven of them were other threads' documents not yet synced (four Earth from Space, one Animals, STATUS, HANDOVER). `claude/STATUS.md` and `claude/START-HERE.md` on the Mac updated too (old copies preserved). After the copy every file equals main.
+- **Mac `_review/`:** this thread's four folders (`timeline-story-kpg`, `-proposal`, `-rc`, `-release`) moved to `_to_delete/`. Five folders of other threads left in place. The sync tarball is in `_to_delete/` too. Chad's local preview server, if still running in Terminal, was serving from the moved `timeline-story-rc` folder.
+- **Private inbox:** the item for this slice is marked released on the Mac and in the Project (old Mac copies preserved).
+- **Project docs written:** `claude/STATUS.md`, `claude/START-HERE.md`, `claude/HANDOVER.md` (the Project copies of the last two were several threads old), both Timeline story records, the inbox index and item.
+- **Clean:** both workspace clones have nothing uncommitted or unpushed.
+- **Open, carried:** real phone, Safari, screen reader, true 200 % zoom; the no-image and image-failure states not exercised on the live page; GPT has not seen `1d0c6dd` (test only); `animals-tab-ui` 13c–13e. No "NEXT THREAD STARTS HERE" block or handover note written: the thread is not being ended on Chad's word yet.
+
 ## 24 Nov 02:54 UTC (clock reading) — **Earth from Space: GPT's review of the three Stage D documents adopted. Runbook rev 3.2, proposal rev 2.5, alert test plan rev 1.2. Docs only; nothing changed in production; Stage D NOT cleared** (production: none; Earth from Space thread)
 - **GPT's review (24 Nov, `EARTH-FROM-SPACE-STAGE-D-DOCS-REVIEW-2026-11-24.md` in GPT's folder on the Mac):** monitoring direction accepted; four focused revisions; no new defect in the hub code; nothing authorised.
 - **Adopted:** D1 cost is measured **before** Stage D in isolation (plan section 7: a second throwaway Worker bound only to a throwaway D1 database; the alert fixture keeps no bindings); an eight-cell receipt matrix, and only a complete one closes runbook P4 (M6 stands); an evidence preflight before the Stage D line (runbook P11, 11a); a pause alert is not proof of a pause; the final result is reviewed after the late-row look and before the window variables go.
