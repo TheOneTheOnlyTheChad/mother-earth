@@ -1,0 +1,12 @@
+{
+  "kind": "alert",
+  "when": "2026-11-25T08:00:00Z",
+  "source": "phase1/worker.js",
+  "source_sha256": "db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5",
+  "files": {
+    "evh-alert-worker.js": {
+      "bytes": 15575,
+      "sha256": "9dbd1e8ca8d61045c4ada09209f042e70ea02d4fbfe7faf62a259b4c9d2a61c2"
+    }
+  }
+}

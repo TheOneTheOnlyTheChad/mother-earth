@@ -57,11 +57,20 @@ ok(SQL === 'SELECT started_at, finished_at, status, records, note FROM collector
   eq(diff(alertText, buildAlert(SRC, '2026-11-27T08:00:00Z')), ['const FX_T0'], 'A9 two alert builds a day apart differ only in the FX_T0 line');
   eq(diff(d1Text, buildD1(SRC, '2026-11-28T09:30:00Z')), ['const FX_B', 'const FX_WINDOW'], 'A10 two D1 builds a day apart differ only in the FX_B line and the window derived from it');
   ok(buildAlert(SRC, T0text) === alertText && buildD1(SRC, Btext) === d1Text, 'A11 the build is repeatable'); }
-{ // the committed example files are what the build gives for the example times: they cannot go stale unnoticed
-  const ex = f => fs.readFileSync(path.join(HERE, 'evh-fixture', 'example', f), 'utf8'), rs = rowSets(Btext);
-  ok(ex('evh-alert-worker.js') === alertText && ex('evh-d1-worker.js') === d1Text && ex('seed-schema.sql') === schemaStatements(SCHEMA).join('\n') + '\n'
-    && Object.entries(rs.sets).every(([k, v]) => ex(`seed-${k}.sql`).split('\n').slice(1).join('\n') === v.sql.join('\n') + '\n') && JSON.parse(ex('expected.json')).B === Btext,
-    'A13 the example files in phase1/evh-fixture/example/ are exactly what the build gives for T0 ' + T0text + ' and B ' + Btext); }
+{ // every committed built file is exactly what the build gives for its times: neither the examples nor a live build can go stale unnoticed
+  const filesFor = (kind, when) => { if (kind === 'alert') return { 'evh-alert-worker.js': buildAlert(SRC, when) };
+    const rs = rowSets(when), o = { 'evh-d1-worker.js': buildD1(SRC, when), 'seed-schema.sql': schemaStatements(SCHEMA).join('\n') + '\n', 'seed-clear.sql': rs.clear + '\n' };
+    for (const [k, v] of Object.entries(rs.sets)) o[`seed-${k}.sql`] = `-- ${k}: ${v.what}. ${v.rows_in_table} rows in the table, ${v.rows_in_read_range} in the read range.\n` + v.sql.join('\n') + '\n';
+    o['expected.json'] = JSON.stringify({ B: when, window: rs.window, sets: Object.fromEntries(Object.entries(rs.sets).map(([k, v]) => [k, { what: v.what, rows_in_table: v.rows_in_table, rows_in_read_range: v.rows_in_read_range, expect: v.expect }])) }, null, 2) + '\n';
+    return o; };
+  const held = (dir, builds) => { const want = Object.assign({}, ...builds.map(([k, w]) => filesFor(k, w))), have = fs.readdirSync(dir).filter(f => f !== 'BUILD.json').sort();
+    return JSON.stringify(have) === JSON.stringify(Object.keys(want).sort()) && have.every(f => fs.readFileSync(path.join(dir, f), 'utf8') === want[f]); };
+  const FX = path.join(HERE, 'evh-fixture');
+  ok(held(path.join(FX, 'example'), [['alert', T0text], ['d1', Btext]]), 'A13 every file in phase1/evh-fixture/example/ is exactly what the build gives for T0 ' + T0text + ' and B ' + Btext + ', and no other file is there');
+  const live = path.join(FX, 'live'), dirs = fs.existsSync(live) ? fs.readdirSync(live).sort() : [];
+  for (const d of dirs) { const b = JSON.parse(fs.readFileSync(path.join(live, d, 'BUILD.json'), 'utf8'));
+    ok(b.source_sha256 === sha(SRC) && held(path.join(live, d), [[b.kind, b.when]]) && Object.entries(b.files).every(([f, x]) => sha(fs.readFileSync(path.join(live, d, f), 'utf8')) === x.sha256),
+      `A14 live build ${d}: every file is what the build gives for ${b.kind} ${b.when} from this worker.js, and its hashes are those recorded in BUILD.json`); } }
 { let bad = 0; for (const v of ['2026-11-26T08:05:00Z', '2026-11-26T08:00:00.000Z', '2026-11-26 08:00:00Z', '2026-02-30T08:00:00Z', '', undefined]) { try { mark(v, 'T0'); } catch (_) { bad++; } }
   ok(bad === 6, 'A12 a time that is not an exact ten-minute mark is refused'); }
 

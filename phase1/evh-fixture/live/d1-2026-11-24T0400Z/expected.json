@@ -1,0 +1,64 @@
+{
+  "B": "2026-11-24T04:00:00Z",
+  "window": {
+    "from": "2026-11-22T03:00:00.000Z",
+    "until": "2026-11-24T03:00:00.000Z",
+    "read_range_end": "2026-11-25T03:00:00.000Z",
+    "valid_for_clock_from": "2026-11-24T03:10:00.000Z"
+  },
+  "sets": {
+    "S1": {
+      "what": "a completed normal trial: 288 slots, one good row each",
+      "rows_in_table": 288,
+      "rows_in_read_range": 288,
+      "expect": {
+        "runs": 200,
+        "trial": 200,
+        "state": "trial complete, nothing outstanding",
+        "rows_returned": 288,
+        "complete": 288,
+        "rows_outside_slots": 0
+      }
+    },
+    "S2": {
+      "what": "repeat-heavy: 288 slots with 6 rows each (1,728) and 172 stray rows, 1,900 in the read range",
+      "rows_in_table": 1900,
+      "rows_in_read_range": 1900,
+      "expect": {
+        "runs": 200,
+        "trial": 200,
+        "state": "trial complete, nothing outstanding",
+        "rows_returned": 1900,
+        "complete": 288,
+        "rows_outside_slots": 172
+      }
+    },
+    "S3": {
+      "what": "at the cap: 288 slots with 7 rows each, 2,016 in the read range",
+      "rows_in_table": 2016,
+      "rows_in_read_range": 2016,
+      "expect": {
+        "runs": 503,
+        "trial": 503,
+        "state": "too many rows to evaluate",
+        "rows_returned": 2000,
+        "reasons": [
+          "too_many_rows"
+        ]
+      }
+    },
+    "S0": {
+      "what": "S1 with 5,000 rows of five other layers and 600 earthview rows finished before the read range",
+      "rows_in_table": 5888,
+      "rows_in_read_range": 288,
+      "expect": {
+        "runs": 200,
+        "trial": 200,
+        "state": "trial complete, nothing outstanding",
+        "rows_returned": 288,
+        "complete": 288,
+        "rows_outside_slots": 0
+      }
+    }
+  }
+}

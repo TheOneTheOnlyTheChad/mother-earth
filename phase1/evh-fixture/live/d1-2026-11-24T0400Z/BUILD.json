@@ -1,0 +1,40 @@
+{
+  "kind": "d1",
+  "when": "2026-11-24T04:00:00Z",
+  "source": "phase1/worker.js",
+  "source_sha256": "db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5",
+  "files": {
+    "evh-d1-worker.js": {
+      "bytes": 15065,
+      "sha256": "2afd3bdf1b08cfbe5c1a851580fd06d6030e1f16e30bfa4cd56164639a0d654f"
+    },
+    "expected.json": {
+      "bytes": 1796,
+      "sha256": "23c7e4ff4704b37688d07b7401466debf1a62a5e834e53e2374fddd480651bf3"
+    },
+    "seed-S0.sql": {
+      "bytes": 1450,
+      "sha256": "5a270e3373a292366838078458e6b283f52f4eedcbe7b46e2233859a5253846b"
+    },
+    "seed-S1.sql": {
+      "bytes": 505,
+      "sha256": "f39ed4705fd2c5faf11911d5a5784e93a452731c6fc2457de4dfb11701468410"
+    },
+    "seed-S2.sql": {
+      "bytes": 1419,
+      "sha256": "86bfb4e28f4cb6843b8ddc59f01718570b4ef50b3c3fee6d79b822f35004d0ec"
+    },
+    "seed-S3.sql": {
+      "bytes": 982,
+      "sha256": "e6b26a5d77126290a1903bed88325f60bb69eb2d6ba921f1e3b1ff366b24ee3b"
+    },
+    "seed-clear.sql": {
+      "bytes": 28,
+      "sha256": "81e63ac7e7ecb51509ac29d18ddf2a01de8ef20941cc138736d5501e525fc78a"
+    },
+    "seed-schema.sql": {
+      "bytes": 420,
+      "sha256": "ddea3595fc868a40523dca8d8e61539e0e18cf268915c314244e8f63d7e21ad0"
+    }
+  }
+}

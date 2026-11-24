@@ -18,7 +18,7 @@ deployed 0.6.24 (`db4f9cdf…1aa5`, 551,400 bytes) and `hub-alignment` passes 6 
 | `phase1/evh-fixture/build.mjs` | The build. `alert <T0>` writes the alert-test Worker (plan 2 to 6). `d1 <B>` writes the D1 measurement Worker, the schema, four row sets and `expected.json` (plan 7). It reads `phase1/worker.js` and `phase1/schema.sql` and writes files. It contacts nothing |
 | `phase1/evh-fixture.test.mjs` | The suite: **71 checks, 71 pass**. `node --no-warnings phase1/evh-fixture.test.mjs`. No network, no account. Needs Node with `node:sqlite` (22 or later) |
 | `phase1/evh-fixture/measure-in-pane.js` | The measurement requests for one row set: 20 each of runs GET, runs HEAD, trial GET, trial HEAD (plan 7.3) |
-| `phase1/evh-fixture/example/` | **Examples only**, for reading: both Workers and the seed files as built for T0 `2026-11-26T08:00:00Z` and B `2026-11-27T09:30:00Z`. Check A13 holds them to the build. **These are not the files for the day**: the real T0 and B are set in Chad's lines, the files rebuilt, and their hashes quoted then |
+| `phase1/evh-fixture/example/` | **Examples only**, for reading: both Workers and the seed files as built for T0 `2026-11-26T08:00:00Z` and B `2026-11-27T09:30:00Z`. Check A13 holds every file there to the build (extended after GPT's review, which found the first form compared less than it claimed). **These are not the files for the day**: the real T0 and B are set in Chad's lines, the files rebuilt, and their hashes quoted then |
 
 Example hashes (reproducible with the two build commands): alert Worker 15,575 bytes `e09eeb57f47c2b535f4d7fa0c7483c619c465b0a8fc8f22d6b36dd46febd4865`;
 D1 Worker 15,065 bytes `41614a57969285a0776599f480a1931243c611f33cf168667d392f063c9a8931`.
@@ -100,8 +100,10 @@ An empty table answers 503 with 288 overdue (C13), so a forgotten seed cannot pa
 - **Nothing has run on Cloudflare.** No `rows_read` figure exists. `node:sqlite` is not D1 and reports none; the suite
   proves the plumbing with a stand-in value.
 - Whether D1 returns `meta.rows_read` to a Worker exactly as its documentation describes, and whether its duration field
-  is named `duration`. The header takes either `duration` or `sql_duration_ms`, and the whole meta is also returned
-  as `X-Evd1-Meta` so nothing is lost if a name differs.
+  is named `duration`. The header takes either `duration` or `sql_duration_ms`, and the first 900 characters of the
+  meta are also returned as `X-Evd1-Meta`. *(Corrected after GPT's review: that header is a bounded excerpt and may be cut
+  mid-value. The numeric headers are taken from the full meta before the cut. A figure missing from them is recorded as
+  missing.)*
 - Whether D1 accepts the seed statements as written (a recursive counter of up to 5,000 steps). If it refuses one, that
   set is not run and the seed is revised and re-reviewed; nothing is improvised on the day.
 - How the seed is loaded on the day (the D1 console in the dashboard, or the Cloudflare connector). To be fixed in the
@@ -116,3 +118,15 @@ An empty table answers 503 with 288 overdue (C13), so a forgotten seed cannot pa
 2. The D1 measurement: `Approve:` line as sketched in plan section 10, with B and the rebuilt file's hash.
 3. The alert test: `Approve:` line as sketched in plan section 10, with T0 and the rebuilt file's hash.
 4. Results to GPT. Then the remaining runbook prerequisites (P3, P6, P7, P11).
+
+## 9. After GPT's review (24 Nov: PASS, no blocking finding; `EARTH-FROM-SPACE-FIXTURES-RC-REVIEW-2026-11-24.md`)
+
+GPT ran the suite itself: 71 passed, 0 failed. Its three non-blocking corrections, adopted:
+
+1. `X-Evd1-Meta` is a bounded excerpt, not the whole meta (section 7, corrected).
+2. A13 now compares **every** file in `example/` with the build and fails on an extra file. A14 does the same for each live
+   build under `phase1/evh-fixture/live/` and checks the hashes recorded in its `BUILD.json`.
+3. `measure-in-pane.js` now refuses to run unless the page's origin is the measurement Worker's, typed in from the account
+   read-back. Its `wall_ms` is labelled as browser latency. An interrupted run is recorded as partial and not rerun.
+
+The live-test packets are `reviews/2026-11-24-earth-from-space-live-test-packets.md`.
