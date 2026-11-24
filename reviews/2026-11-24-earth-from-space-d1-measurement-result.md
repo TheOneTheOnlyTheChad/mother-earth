@@ -1,4 +1,9 @@
-# Earth from Space — the D1 cost measurement: result (rev 1)
+# Earth from Space — the D1 cost measurement: result (rev 1.1)
+
+**Rev 1.1, 24 Nov 2026 04:07 UTC (clock reading): GPT's review recorded (section 9).** GPT accepted the measurement: **runbook
+P4a is satisfied**, no repeat needed. One wording correction is made, in section 5 and in a new evidence file
+`d1-metrics-and-usage.amendment-1.json` (the original evidence files are kept unchanged). Section 4 now lists the setup reads
+explicitly. Nothing else changed.
 
 24 Nov 2026. Run on Chad's own Approve line of 24 Nov (packet rev 1.1, `reviews/2026-11-24-earth-from-space-live-test-packets.md`,
 packet 1), with his continuation line after the stop at M4. Times are UTC clock readings; SAST is UTC + 2.
@@ -75,8 +80,10 @@ helper with only the origin filled in. Statuses: S1, S2, S0 all 200 `ok`, "trial
 
 - D1 query time and rows read are from D1's metadata returned with each query. CPU and wall time are from the Worker's
   invocation records (read through the account's Observability query, 20-second windows, none at the 100-record limit):
-  **327 records**, every outcome `ok` = 7 at M4 (including one `favicon.ico` from the pane opening the page, and one `GET /`
-  not named in the packet's M4) + 4 × 80.
+  **327 records**, every outcome `ok` = 7 setup reads at M4 + 4 × 80 measurement requests. *(Rev 1.1, listed explicitly.)*
+  The seven setup reads: the page-opening `GET /health/runs/earthview` (503) and the `favicon.ico` the pane fetched with it
+  (404); then `GET /health/runs/earthview` (503), `GET /health/trial/earthview` (200), `HEAD /health/runs/earthview` (503),
+  `GET /health/runs/usgs` (404) and `GET /` (404, not named in the packet). None is part of the 320-request result.
 - The browser's own latency (`wall_ms` in the measurement files) is not the Worker's wall time and is not used above.
 - **Every request was served by D1's primary in Western Europe (`MAD`).** The hub's own database may be placed elsewhere.
 
@@ -90,9 +97,13 @@ figures are read at Stage D's start read and every read after.
 
 The database's analytics, read three times: 03:40:15 and 03:41:58 (both 18 rows read, 6 written: **lagging**, since the S1
 seed of about 03:39 was not yet in them), and 03:49:47 (**378,973 rows read, 34,495 written, 334 read queries, 15 write
-queries**). The 80-request sums from the per-request figures come to 358,163 rows read (with M4's 3). The other 20,810 rows
-read are the console's seed, clear and count statements; they were not attributed one by one. **This is aggregate evidence
-only.**
+queries**). The four measured batches come to 358,160 rows read from the per-request figures, and the three M4 responses
+preserved with their metadata add 3: **358,163 for the captured query metadata**. *(Rev 1.1, corrected after GPT's review.)*
+That is not every Worker query: the page-opening `GET /health/runs/earthview` at 03:36:52.965 was a fourth M4 evaluation whose
+rows read was not preserved. **The 20,810 difference is an unreconciled aggregate remainder:** consistent with that query and
+with the console's schema, seed, clear and count statements, but not attributed statement by statement, and the readings lag.
+Rev 1 said all 20,810 were console reads; that was not established. **This is aggregate evidence only, and the aggregate
+reconciliation step of the packet is not met** (section 6, item 3).
 
 ## 6. Departures from the packet, all listed
 
@@ -125,3 +136,17 @@ reasons.
 - A general rule that D1 reads stop at the `LIMIT`; only this query, this index and these row sets were measured.
 - Per-statement attribution of the seed and console reads in the totals.
 - Nothing here bears on alert delivery: that is packet 2.
+
+## 9. GPT's review (24 Nov 2026; `EARTH-FROM-SPACE-D1-MEASUREMENT-RESULT-REVIEW-2026-11-24.md`)
+
+**Accepted. Runbook P4a is satisfied on this evidence; no repeat measurement.** GPT verified every checksum, parsed all four
+measurement files and the 327 invocation records, recomputed the statistics, and ran the suite with C13b itself (75 passed,
+0 failed). It accepted the M4 stop, the disclosure and Chad's continuation; the C13b test-only follow-up; and the measurement
+despite the missing per-set aggregate snapshots, because the per-query data and invocation records are complete. It asked that
+the aggregate step not be presented as met, and that the 20,810 remainder be labelled unreconciled (done in rev 1.1). It notes
+the account-session upload was Chad's specific acceptance after disclosure and gives no standing authority to substitute
+methods later.
+
+**Still open before a Stage D line:** the alert test (packet 2) and its review (P4), the two real monitors (P3), the phone look
+(P6), the EUMETSAT answer (P7), the evidence preflight (P11), Chad's acceptance of the documents (P5), and his fresh Stage D line.
+

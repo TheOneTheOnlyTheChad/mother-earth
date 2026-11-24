@@ -1,0 +1,11 @@
+{
+  "amends": "d1-metrics-and-usage.json (kept unchanged), field per_request_sum_for_comparison.note",
+  "made": "2026-11-24T04:07:00Z, after GPT's review EARTH-FROM-SPACE-D1-MEASUREMENT-RESULT-REVIEW-2026-11-24.md, section 3",
+  "per_request_sum_for_comparison": {
+    "S1_S2_S3_S0": 358160,
+    "M4_three_preserved_query_responses": 3,
+    "captured_query_metadata_total": 358163,
+    "not_captured": "One further Worker health evaluation: the page-opening GET /health/runs/earthview at 2026-11-24T03:36:52.965Z (invocations.csv). Its rows_read was not preserved and is not assumed.",
+    "note": "378,973 - 358,163 = 20,810 is an UNRECONCILED AGGREGATE REMAINDER. It is consistent with the uncaptured Worker query above and with the console's schema, seed, clear and count statements, but it is not attributed statement by statement, and the aggregate readings lag. 358,163 is not a complete accounting of every Worker query."
+  }
+}
