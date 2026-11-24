@@ -9,7 +9,9 @@
  *   keyboard; no horizontal overflow at 360 px.
  * Controls: OLD=1 serves main's page files (git show origin/main:<file>) — the new checks must fail there.
  *   BREAK=published | queries | never-old | ge-limit | hub-quantity | stale-is-failure | unknown-in-total | skew-fresh | no-escape |
- *         card-old | common-interval | since-from-envelope   each must fail.
+ *         card-old | common-interval | since-from-envelope | zero-no-contributors | inspector-raw-count | offset-literal   each must fail.
+ * rev 2 (GPT's candidate review H1–H3): A6–A8 and B15–B19 — no contributing count is not zero; one count policy on the panel and the
+ *   inspector; a timezone offset is converted, not relabelled UTC.
  * Run: NODE_PATH=/opt/npm-tools/node_modules node --no-warnings phase1/nature-context-ui.test.cjs
  * Needs /home/claude/spike/node_modules with globe.gl@2.45.0 and @fontsource/{ibm-plex-mono,barlow-condensed} (as the other page suites).
  */
@@ -42,6 +44,9 @@ const served = { 'index.html': coreOn(read('index.html')), 'app.js': read('app.j
   if (BREAK === 'no-escape') rep('app.js', "`unrecognised category '${esc(k)}'", "`unrecognised category '${k}'");
   if (BREAK === 'card-old') rep('index.html', "<small>alert pixels (10 m) · first detected in each cell's own window</small>", '<small>alert pixels (10 m) · published in the last 7 days</small>');
   if (BREAK === 'common-interval') rep('app.js', 'not one common period and not a trend', 'in the last 7 days');
+  if (BREAK === 'zero-no-contributors') rep('app.js', 'out.total = out.counted ? out.n : null;', 'out.total = out.n;');
+  if (BREAK === 'inspector-raw-count') rep('index.html', "['Cell total', p.layer === 'forest' ?", "['Cell total', false ?");
+  if (BREAK === 'offset-literal') rep('app.js', 'at = when(new Date(Date.parse(iso)).toISOString());', 'at = when(iso);');
   if (BREAK === 'since-from-envelope') rep('app.js', 'ME.forestSince = c => { const v = c && c.since;', 'ME.forestSince = c => { const v = (c && c.since) || "2026-11-17";');
 }
 
@@ -69,6 +74,8 @@ const C = {
   F11m: cell(5, { nominal: 5, high: 0 }, '2026-11-16', at(3600e3), 'v20261123'),
   F14: cell(42, { nominal: 40, high: 2, highest: 0 }, '2026-11-01', '2026-11-21T09:00:00Z', 'v20261121'),
   F15: cell(10, { nominal: 10, high: 0, highest: 0 }, '2026-11-14', at(5 * D), 'v20261119'),
+  DIS: cell(12, { nominal: 10, high: 0, highest: 0 }, '2026-11-16', at(3600e3), 'v20261123'),          // the hub's count disagrees with the groups
+  NORAW: cell(undefined, { nominal: 8, high: 1, highest: 1 }, '2026-11-16', at(3600e3), 'v20261123'), // no raw count, complete groups
 };
 const ENV = (extra = {}) => ({ layer: 'forest', retrieved_at: at(25 * 60e3), run_ref: 'forest@x', collector_version: '0.6.24', source_status: 'ok', stale_after_s: 14400,
   window_start: '2026-11-17', window_end: '2026-11-24', quantity: '10 m alert pixels published in the last 7 days per 4° cell, by GFW confidence (nominal | high | highest) — counts of pixels, never hectares or trends; detection date ≠ clearing date',
@@ -153,6 +160,26 @@ const A = () => {
     const S = ME.forestSummary({ a: C.F1, b: C.F2, c: C.F10, d: C.F11, e: C.F11m });
     ok('A2 summary: sum of complete cells only, versions listed with counts, unresolved named, qualifiers', S.n === 199592 + 0 + 10 + 10 && S.counted === 4 && S.cells === 5 && S.versionText === 'v20261122 (1), v20261123 (3); version not resolved for 1 cell' && /1 cell carries an unrecognised confidence category, not included/.test(S.qualifier) && /1 cell without a complete count, not included/.test(S.qualifier), S);
   } catch (e) { ok('A2 summary', false, String(e)); }
+  // A6 (GPT H1): no contributing count is unavailable, with a completeness reason; a complete zero stays a zero
+  try {
+    const all = ME.forestSummary({ a: C.F11m }), none = ME.forestSummary({}), zero = ME.forestSummary({ b: C.F2 }), mix = ME.forestSummary({ a: C.F1, b: C.F11m });
+    ok('A6 all incomplete: total null, reason "none of the 1 answered cell has a complete count"', all.total === null && all.countWhy === 'none of the 1 answered cell has a complete count', all);
+    ok('A6 no cells: total null, reason "no cell has answered yet"', none.total === null && none.countWhy === 'no cell has answered yet', none);
+    ok('A6 one complete zero: a genuine 0, no reason', zero.total === 0 && zero.countWhy === null, zero);
+    ok('A6 mixed: sum over the complete cell, the incomplete one named as left out', mix.total === 199592 && mix.countWhy === null && /1 cell without a complete count, not included/.test(mix.qualifier), mix);
+  } catch (e) { ok('A6 summary', false, String(e)); }
+  // A7 (GPT H3): an offset time is the same instant as its Z form, shown in UTC; the skew boundary holds for offsets too
+  try {
+    const z = ME.forestAge('2026-11-24T06:10:00Z', T).text, o = ME.forestAge('2026-11-24T08:10:00+02:00', T).text;
+    ok('A7 +02:00 and Z forms of one instant read the same: 06:10 UTC, 60 min ago', z === o && /^queried 2026-11-24 06:10 UTC \(60 min ago\)$/.test(o), { z, o });
+    ok('A7 offset form ahead by exactly 300 s: within tolerance', /ahead of this page's clock by 300 s/.test(ME.forestAge('2026-11-24T09:15:00+02:00', T).text) && /07:15 UTC/.test(ME.forestAge('2026-11-24T09:15:00+02:00', T).text), ME.forestAge('2026-11-24T09:15:00+02:00', T));
+    ok('A7 offset form ahead by 301 s: query time unknown, shown as 07:15 UTC', /^query time unknown: 2026-11-24 07:15 UTC is more than 5 minutes ahead/.test(ME.forestAge('2026-11-24T09:15:01+02:00', T).text), ME.forestAge('2026-11-24T09:15:01+02:00', T));
+  } catch (e) { ok('A7 offsets', false, String(e)); }
+  // A8 (GPT H2): the count policy on a single cell
+  r = fr(placeOf('x', fs1(C.DIS)));
+  ok('A8 raw count disagrees with the groups: the groups\' sum is shown and the disagreement said', /^10 alert pixels \(10 m\) \(the hub's own count field says 12; the sum of the three known categories is shown\), first detected/.test(r.text), r.text);
+  r = fr(placeOf('x', fs1(C.NORAW)));
+  ok('A8 no raw count, complete groups: the sum, no disagreement note', /^10 alert pixels \(10 m\), first detected/.test(r.text) && !/count field/.test(r.text), r.text);
 };
 
 // ---- Part B: the pages in a browser, every request intercepted
@@ -170,6 +197,7 @@ const server = http.createServer((req, res) => {   // this suite's own server: t
   res.writeHead(200, { 'content-type': f.endsWith('.css') ? 'text/css' : f.endsWith('.js') ? 'application/javascript' : f.endsWith('.json') ? 'application/json' : 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
 });
 
+let cellsOverride = null;
 const B = async () => {
   await new Promise(r => server.listen(PORT, '127.0.0.1', r));
   const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
@@ -186,7 +214,7 @@ const B = async () => {
         const pl = /^\/place\/g4\/(\w+)$/.exec(p);
         if (pl) return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify((PLACES[pl[1]] || (() => placeOf(pl[1], { ...ENV(), state: 'not_covered', why: 'x' })))()) });
         if (p === '/') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ name: 'mother-earth', version: '0.6.24' }) });
-        if (p === '/cells/forest' || p === '/snapshot/forest') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(cellsEnv()) });
+        if (p === '/cells/forest' || p === '/snapshot/forest') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(cellsOverride ? { ...cellsEnv(), cells: cellsOverride, sweep: { ...cellsEnv().sweep, answered: Object.keys(cellsOverride).length } } : cellsEnv()) });
         const m = /^\/(cells|snapshot)\/(\w+)$/.exec(p);
         if (m) return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(genericEnv(m[2])) });
         unknownHub.push(p); return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' });
@@ -240,7 +268,7 @@ const B = async () => {
   const opened = await page.evaluate(() => ME.openCell('forest', '22_29')); await page.waitForTimeout(150); rows = await panelRows(page);
   ok('B7 cell inspector: page-owned Quantity, not the hub\'s "published" string', opened && /^10 m alert pixels first detected on or after each cell's own date, as held in the dataset version named for that cell/.test(rowT(rows, /^Quantity$/)) && !/published/.test(rows.map(r => r[1]).join(' ')), { opened, q: rowT(rows, /^Quantity$/) });
   ok('B7 cell inspector: Queried row has age, own since and version; groups list the unrecognised key as excluded', /^queried .* \(60 min ago\) · first detected on or after 2026-11-16 · as held in version v20261123$/.test(rowT(rows, /^Queried$/)) && /unrecognised category '<b>low<\/b>': 4 · unrecognised category 'spare': 0 \(not included in the total\)/.test(rowT(rows, /^By confidence$/)), [rowT(rows, /^Queried$/), rowT(rows, /^By confidence$/)]);
-  ok('B7 cell inspector: Cell total has no fixed window', /^10 alert pixels \(10 m\), first detected on or after this cell's own date \(see Queried\)$/.test(rowT(rows, /^Cell total$/)), rowT(rows, /^Cell total$/));
+  ok('B7 cell inspector: Cell total has no fixed window and carries the panel\'s qualification', /^10 alert pixels \(10 m\) across the three known categories; the unrecognised categories are listed separately and not included, first detected on or after this cell's own date \(see Queried\)$/.test(rowT(rows, /^Cell total$/)), rowT(rows, /^Cell total$/));
   ok('B8 no page errors on World View', perr.length === 0, perr);
   await ctx.close();
 
@@ -268,6 +296,36 @@ const B = async () => {
   ok('B12 nowhere on Sources: "published in the last 7 days" or "published in the 7 days"', !/published in the (last )?7 days/.test(S.body), (S.body.match(/.{60}published in the (last )?7 days.{20}/) || [''])[0]);
   ok('B13 no page errors on Sources', perr.length === 0, perr);
   await ctx.close();
+
+  // ---- rev 2 (GPT H1, H2): other forest envelopes, on the card, the report and the cell inspector
+  const variant = async (name, cells, inspect = []) => {
+    cellsOverride = cells;
+    let v = await open('index.html');
+    try { await v.page.waitForFunction(() => { const o = document.getElementById('o-forest'); return o && o.textContent && o.textContent !== 'loading…'; }, null, { timeout: 30000 }); } catch (_) { }
+    const card = await v.page.evaluate(() => ({ v: document.getElementById('v-forest').textContent, m: document.getElementById('m-forest').textContent, o: document.getElementById('o-forest').textContent }));
+    const ins = {};
+    for (const id of inspect) { await v.page.evaluate(i => ME.openCell('forest', i), id); await v.page.waitForTimeout(120); const rr = await panelRows(v.page); ins[id] = { total: rowT(rr, /^Cell total$/), conf: rowT(rr, /^By confidence$/) }; }
+    const e1 = v.perr; await v.ctx.close();
+    v = await open('sources.html');
+    try { await v.page.waitForFunction(() => /forest disturbance/i.test(document.getElementById('report-text').textContent), null, { timeout: 30000 }); } catch (_) { }
+    const rep = await v.page.evaluate(() => document.getElementById('report-text').textContent); const e2 = v.perr; await v.ctx.close();
+    cellsOverride = null; return { card, ins, rep, perr: [...e1, ...e2] };
+  };
+  let V = await variant('all-incomplete', { '23_29': C.F11m }, ['23_29']);
+  ok('B15 all incomplete: card shows no number and says count not available (not stale, not an outage)', V.card.v === '–' && /count not available — none of the 1 answered cell has a complete count/.test(V.card.m) && !/stale|did not succeed/.test(V.card.m), V.card);
+  ok('B15 all incomplete: report says count not available, never a 0', /forest disturbance: count not available — none of the 1 answered cell has a complete count \(a question of the cells' counts, not of the latest run\)/.test(V.rep) && !/\b0 forest-disturbance/.test(V.rep), V.rep.slice(0, 600));
+  ok('B16 inspector, incomplete groups: Cell total says count not available like the panel, not the raw 5', /^count not available \(highest not provided\), first detected/.test(V.ins['23_29'].total) && /highest not provided/.test(V.ins['23_29'].conf), V.ins['23_29']);
+  V = await variant('empty', {});
+  ok('B17 no cells: the existing unknown rule applies (no number, no "0 highest", "no cell has answered yet"); report unknown, never 0', V.card.v === '–' && /no cell has answered yet/.test(V.card.m) && !/\b0 highest/.test(V.card.m) && /forest disturbance: unknown — no cell has answered yet/.test(V.rep) && !/\b0 forest-disturbance/.test(V.rep), { card: V.card, rep: (V.rep.match(/forest[^;]{0,200}/i) || [''])[0] });
+  V = await variant('one-zero', { '15_49': C.F2 });
+  ok('B18 one complete zero: card 0 and report "0 … summed across 1 cell"', V.card.v === '0' && /\b0 forest-disturbance alert pixels summed across 1 cell, each counted/.test(V.rep), { card: V.card, rep: (V.rep.match(/forest[^;]{0,200}/i) || [''])[0] });
+  V = await variant('mixed', { '21_29': C.F1, '23_29': C.F11m, '24_29': C.DIS, '25_29': C.NORAW }, ['23_29', '24_29', '25_29']);
+  ok('B19 mixed: card sums the 3 complete cells, names the incomplete one', V.card.v === (199592 + 10 + 10).toLocaleString('en') && /across the 3 of 4 cells with a complete count/.test(V.card.m) && /1 cell without a complete count, not included/.test(V.card.o), V.card);
+  ok('B19 mixed: report sums 3 cells and names the exclusion', /199,612 forest-disturbance alert pixels summed across 3 cells, .*1 cell without a complete count, not included/.test(V.rep), V.rep.slice(0, 500));
+  ok('B19 inspector, raw count disagrees: groups\' sum with the disagreement said', /^10 alert pixels \(10 m\) \(the hub's own count field says 12; the sum of the three known categories is shown\), first detected/.test(V.ins['24_29'].total), V.ins['24_29']);
+  ok('B19 inspector, no raw count: the groups\' sum, no "undefined"', /^10 alert pixels \(10 m\), first detected/.test(V.ins['25_29'].total) && !/undefined/.test(V.ins['25_29'].total), V.ins['25_29']);
+  ok('B19 inspector, incomplete cell in a mixed layer: count not available', /^count not available \(highest not provided\)/.test(V.ins['23_29'].total), V.ins['23_29']);
+  ok('B19 no page errors in the variants', V.perr.length === 0, V.perr);
 
   // ---- isolation (GPT rev 2 review §4): nothing left this suite; no GNW request at all; place requests only for the cells opened
   ok('B14 saved data only: no request reached any provider (every non-local request answered from fixtures or aborted); none to Global Nature Watch', !aborted.some(a => /globalforestwatch|globalnaturewatch|wri\.org/.test(a)), aborted);

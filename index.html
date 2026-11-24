@@ -939,7 +939,8 @@ function inspectCell(p) {
   const rows = [
     ['Everything here', `<button type="button" class="placelink" data-cell="${esc(p.id)}">Everything we hold for this cell, all layers</button>`],
     ['Selected', `one ${ME.CELL_DEG}° × ${ME.CELL_DEG}° coverage cell — totals for the cell, not a single record`],
-    ['Cell total', `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
+    ['Cell total', p.layer === 'forest' ? (k => `${k.head}${k.qual}${k.note}, first detected on or after this cell's own date (see Queried)`)(ME.forestCount(p.cell))   // GPT H2: the panel's count policy
+      : `${p.cell.count} ${windowText(p.layer, snap)}` + (p.cell.count_m45 !== undefined ? ` (${p.cell.count_m45} at M4.5+)` : '')],
     ['Quantity', esc(p.layer === 'forest' ? ME.FOREST_QUANTITY : (snap.quantity || ''))],   // forest: page-owned (nature-context-rc, N3); the hub string still says "published"
     ['Coverage', `${p.grade} — ${esc(p.cell.coverage ? p.cell.coverage.evidence : MISSING)}`],
     ['Collector', `${fresh.grade} — ${esc(fresh.why)}`],
@@ -1574,7 +1575,7 @@ function cards() {
   $('m-ships').innerHTML = `aisstream.io${R.ships.retrievedAge ? ` · retrieved ${esc(R.ships.retrievedAge)}` : ''} · ${esc(R.ships.mode)}${R.ships.fresh.grade === 'unknown' ? ` · <b>current positions unknown — ${esc(R.ships.retrievedAge ? R.ships.fresh.why.replace(` (${R.ships.retrievedAge})`, '') : R.ships.fresh.why)}</b>` : shipsNote ? ` · <b>${esc(shipsNote)}${shipsShown ? ` Showing ships from the ${esc(ME.shipsSampleTime(state.ships))} sample.` : ''}</b>` : ''}`;   // the age is shown once, with the retrieval label
   setState('forest', R.forest.fresh); $('v-forest').textContent = R.forest.value === null ? '–' : R.forest.value.toLocaleString();
   $('o-forest').textContent = R.forest.observed || 'no sweep yet';
-  $('m-forest').innerHTML = `Global Nature Watch · integrated alerts · across ${R.forest.cells} cells, ${R.forest.highest.toLocaleString()} highest-confidence · last run ${ago(R.forest.retrieved)}${R.forest.fresh.grade === 'unknown' ? ` · <b>${esc(R.forest.fresh.why)}</b>` : ''}`;
+  $('m-forest').innerHTML = `Global Nature Watch · integrated alerts · ${R.forest.countWhy ? `<b>count not available — ${esc(R.forest.countWhy)}</b> · ` : R.forest.value === null ? '' : `${R.forest.highest.toLocaleString()} highest-confidence across the ${R.forest.counted} of ${R.forest.cells} cells with a complete count · `}last run ${ago(R.forest.retrieved)}${R.forest.fresh.grade === 'unknown' ? ` · <b>${esc(R.forest.fresh.why)}</b>` : ''}`;   // GPT H1
   setState('swpc', R.swpc.fresh); $('v-swpc').textContent = R.swpc.value === null ? '–' : Number(R.swpc.value).toFixed(2);
   $('kp-bar').style.width = R.swpc.value === null ? '0' : (R.swpc.value / 9 * 100) + '%';
   $('o-swpc').textContent = R.swpc.observed || 'no snapshot yet';

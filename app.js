@@ -477,7 +477,7 @@ ME.readings = function () {
     window: sample ? `${sample.window_s} s listening sample per snapshot (duty cycle ≈ ${(100 * (sample.window_s || 60) / 1800).toFixed(1)}% at a 30-min cadence)` : '60 s sample', cadence: SHIPS_MODE.text, comparison: `none of ours shown yet — ${ME.kept('ships')}` };
   const fo = state.forest, ffo = ME.freshness('forest');
   const fsum = ME.forestSummary(fo && fo.cells);   // nature-context-rc: a sum across cells with their own windows, versions and query times
-  R.forest = { label: LABEL.forest, source: SOURCE.forest, fresh: ffo, value: ffo.grade !== 'unknown' ? fsum.n : null, highest: fsum.hi, cells: fsum.cells, counted: fsum.counted, versionText: fsum.versionText, qualifier: fsum.qualifier, sweep: fo && fo.sweep, unit: 'alert pixels (10 m) · first detected in each cell\'s own window',
+  R.forest = { label: LABEL.forest, source: SOURCE.forest, fresh: ffo, value: ffo.grade !== 'unknown' ? fsum.total : null, countWhy: ffo.grade !== 'unknown' ? fsum.countWhy : null, highest: fsum.hi, cells: fsum.cells, counted: fsum.counted, versionText: fsum.versionText, qualifier: fsum.qualifier, sweep: fo && fo.sweep, unit: 'alert pixels (10 m) · first detected in each cell\'s own window',
     observed: fo && fo.sweep ? `${fo.sweep.answered} of ${fo.sweep.cells_total} tropical land cells answered, each with its own first-detection date and query time; dataset versions ${fsum.versionText}${fsum.qualifier ? '; ' + fsum.qualifier : ''}` : '', retrieved: fo && fo.retrieved_at,
     coverage: 'alert systems operate between 30°N and 30°S only — cells outside are unknown by definition, not zero; inside, cloud and alert-system coverage vary (partial); counts can fall when low-confidence alerts are retracted', quantity: fo ? ME.FOREST_QUANTITY : null,   // page-owned (N3): the hub's string still says "published"; it is not printed for forest
     window: ME.FOREST_WINDOW, cadence: ME.FOREST_CADENCE, comparison: `none of ours shown yet — ${ME.kept('forest')}`,
@@ -512,7 +512,7 @@ ME.report = function (R) {
   parts.push(R.usgs.value !== null ? `${R.usgs.value.toLocaleString()} earthquakes M2.5+ observed in the last 24 h (USGS; ${R.usgs.observed}; retrieved ${ago(R.usgs.retrieved)})` : `earthquakes: unknown — ${R.usgs.fresh.why}`);
   parts.push(R.firms.value !== null ? `${R.firms.value.toLocaleString()} fire detections so far today, UTC (NASA FIRMS, ${state.firms.scope || 'world'}; retrieved ${ago(R.firms.retrieved)}; cloud may hide detections; ${R.firms.fresh.grade === 'partial' ? 'marked degraded by our collector; ' : ''}detections per pass, not a fire census)` : `fires: unknown — ${R.firms.fresh.why}`);
   parts.push(R.ships.value !== null ? `${R.ships.value.toLocaleString()} vessel identities received during a ${state.ships.window_s} s AIS sample ending ${hhmm(R.ships.sampleEnd)} (aisstream.io, ${state.ships.class_a} Class A + ${state.ships.class_b} Class B; ${R.ships.mode}; terrestrial receivers only; positions between samples unknown)${R.ships.fresh.attempt ? ' — ' + R.ships.fresh.attempt.replace(/\.$/, '').replace(/^Latest/, 'latest') : ''}` : `ships: unknown — ${R.ships.fresh.why}${R.ships.lastSample !== null ? `; last sample ${R.ships.lastSample.toLocaleString()} vessels ending ${hhmm(R.ships.sampleEnd)}, current positions unknown` : ''}`);
-  parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels summed across ${R.forest.counted} cells, each counted from its own first-detection date at its own query time (dataset versions ${R.forest.versionText}${R.forest.qualifier ? '; ' + R.forest.qualifier : ''}); not one common period and not a trend (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; ${R.forest.sweep ? `${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells answered; ` : ''}10 m pixels, not hectares; first detection is not the date of clearing)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
+  parts.push(R.forest.value !== null ? `${R.forest.value.toLocaleString()} forest-disturbance alert pixels summed across ${R.forest.counted} cell${R.forest.counted === 1 ? '' : 's'}, each counted from its own first-detection date at its own query time (dataset versions ${R.forest.versionText}${R.forest.qualifier ? '; ' + R.forest.qualifier : ''}); not one common period and not a trend (${R.forest.highest.toLocaleString()} highest-confidence; Global Nature Watch integrated alerts; ${R.forest.sweep ? `${R.forest.sweep.answered} of ${R.forest.sweep.cells_total} tropical land cells answered; ` : ''}10 m pixels, not hectares; first detection is not the date of clearing)` : R.forest.countWhy ? `forest disturbance: count not available — ${R.forest.countWhy} (a question of the cells' counts, not of the latest run)` : `forest disturbance: unknown — ${R.forest.fresh.why}`);
   parts.push(R.swpc.value !== null ? `Kp ${R.swpc.value}, ${ME.kpWhen(R.swpc.observedAt)} (NOAA SWPC${R.swpc.fresh.grade === 'partial' ? '; marked degraded by our collector' : ''})` : `Kp: unknown — ${R.swpc.fresh.why}`);
   parts.push(R.co2.value !== null ? `CO₂ ${num(R.co2.value)} ppm at Mauna Loa${R.co2.date ? ` on ${R.co2.date}` : ' (date not supplied)'} (NOAA GML, preliminary; ${R.co2.comparison})` : `CO₂: unknown — ${R.co2.fresh.why}`);
   parts.push(R.seaice.north !== null ? `${R.seaice.datesDiffer ? `sea ice: Arctic ${num(R.seaice.north)} M km² ${R.seaice.date ? 'on ' + R.seaice.date : '(date not supplied)'}, Antarctic ${num(R.seaice.south)} M km² ${R.seaice.dateS ? 'on ' + R.seaice.dateS : '(date not supplied)'}` : R.seaice.date ? `sea ice on ${R.seaice.date}: Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km²` : `sea ice (dates not supplied): Arctic ${num(R.seaice.north)} M km², Antarctic ${num(R.seaice.south)} M km²`} (NSIDC; ${R.seaice.comparison}; baseline NSIDC\'s, subtraction ours)` : `sea ice: unknown — ${R.seaice.fresh.why}`);
@@ -839,7 +839,7 @@ ME.forestAge = (iso, nowMs = Date.now()) => {
   const m = typeof iso === 'string' ? ME.RUN_TIME.exec(iso) : null;
   if (!m) return { state: 'malformed', text: 'query time unreadable' };
   if (!ME.validDate(m[1]) || !Number.isFinite(Date.parse(iso))) return { state: 'impossible', text: 'query time is not a real calendar day' };
-  const s = (nowMs - Date.parse(iso)) / 1000, at = when(iso);
+  const s = (nowMs - Date.parse(iso)) / 1000, at = when(new Date(Date.parse(iso)).toISOString());   // the parsed instant in UTC: an offset form (+02:00) is converted, not relabelled (GPT H3)
   if (s < -ME.FOREST_SKEW_S) return { state: 'future', text: `query time unknown: ${at} is more than 5 minutes ahead of this page's clock` };
   if (s < 0) return { state: 'ahead', at, text: `queried ${at} (ahead of this page's clock by ${Math.ceil(-s)} s, within the 5-minute tolerance; no age is claimed)` };
   const age = s < 5400 ? Math.round(s / 60) + ' min' : s < 172800 ? (s / 3600).toFixed(1) + ' h' : (s / 86400).toFixed(1) + ' days';
@@ -858,15 +858,21 @@ ME.forestConf = conf => {
   const extra = unknown.map(([k, v]) => `unrecognised category '${esc(k)}': ${fmt(v, { zeroNote: null })}`).join(' · ');
   return { known, unknown, missing, total, groups, extra };
 };
-// One answered forest cell → the place row's text (HTML; every source value escaped). nowMs is the page clock.
-ME.forestCellLine = (c, nowMs = Date.now()) => {
-  const cf = ME.forestConf(c && c.confidence), si = ME.forestSince(c), ve = ME.forestVersion(c), ag = ME.forestAge(c && c.queried_at, nowMs);
-  const n = cf.total !== null ? cf.total : has(c && c.count) && !cf.missing.length ? +c.count : null;
+// One count policy for every forest surface (GPT H2): the total is the sum of the three known groups, and only when all three are
+// supplied; otherwise "count not available". The hub's own `count` field is not used for display; if it disagrees with the sum, say so.
+ME.forestCount = c => {
+  const cf = ME.forestConf(c && c.confidence), n = cf.total;
   const head = n === null ? `count not available (${esc(cf.missing.join(', '))} not provided)` : `${fmt(n)} alert pixels (10 m)`;
   const qual = cf.unknown.length && n !== null ? ` across the three known categories; ${cf.unknown.length === 1 ? 'the unrecognised category is' : 'the unrecognised categories are'} listed separately and not included` : '';
+  const note = n !== null && has(c && c.count) && +c.count !== n ? ` <span class="q">(the hub's own count field says ${esc(String(c.count))}; the sum of the three known categories is shown)</span>` : '';
+  return { cf, n, head, qual, note };
+};
+// One answered forest cell → the place row's text (HTML; every source value escaped). nowMs is the page clock.
+ME.forestCellLine = (c, nowMs = Date.now()) => {
+  const { cf, n, head, qual, note } = ME.forestCount(c), si = ME.forestSince(c), ve = ME.forestVersion(c), ag = ME.forestAge(c && c.queried_at, nowMs);
   const zero = n === 0 && !cf.unknown.some(([, v]) => v) ? ' — no matching alert pixel was returned within the contributing systems\' monitored tree-cover and forest masks for this filter. Not proof that nothing was disturbed, and not complete monitoring of the cell' : '';
   const grade = (c && c.coverage && c.coverage.grade) || 'partial';
-  return `${head}${qual}, ${esc(si.text)}, ${esc(ve.text)}, ${ag.text}${zero} · ${cf.groups}${cf.extra ? ' · ' + cf.extra : ''} · coverage ${esc(grade)}` +
+  return `${head}${qual}${note}, ${esc(si.text)}, ${esc(ve.text)}, ${ag.text}${zero} · ${cf.groups}${cf.extra ? ' · ' + cf.extra : ''} · coverage ${esc(grade)}` +
     ` <span class="q">· pixels, not hectares or a trend; first detection is not the date of clearing; confidence can rise, or an alert can be removed, after this query; when confidence changed is not supplied by the source</span>`;
 };
 // The whole layer: a sum across cells, each with its own start, version and query time. Never one common interval.
@@ -880,6 +886,10 @@ ME.forestSummary = cells => {
     if (n === null) { out.missingCells++; continue; }
     out.n += n; out.hi += cf.known.highest; out.counted++;
   }
+  // GPT H1: a total exists only when at least one cell has a complete count. No contributors → unavailable, with the reason (count
+  // completeness, not the run's freshness). A complete all-zero cell is a genuine zero; a mixed sum states what it left out.
+  out.total = out.counted ? out.n : null;
+  out.countWhy = out.counted ? null : out.cells ? `none of the ${out.cells} answered cell${out.cells === 1 ? ' has' : 's has'} a complete count` : 'no cell has answered yet';
   const vs = Object.keys(out.versions).sort();
   out.versionText = (vs.length ? vs.map(v => `${v} (${out.versions[v]})`).join(', ') : 'none resolved') + (out.unresolved ? `; version not resolved for ${out.unresolved} cell${out.unresolved === 1 ? '' : 's'}` : '');
   out.qualifier = [out.unknownCells ? `${out.unknownCells} cell${out.unknownCells === 1 ? ' carries' : 's carry'} an unrecognised confidence category, not included` : '',
