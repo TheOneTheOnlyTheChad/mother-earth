@@ -37,8 +37,9 @@ const W = await import(pathToFileURL(tmp).href), worker = W.default;
 const FILE = fs.readFileSync(path.join(HERE, 'timeline/catalogue/tl-2026-11-R1.json'));
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const R1_SHA = '096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe', R1_BYTES = 15656;   // the published R1 pin, frozen
-const PREV_ID = 'tl-2026-11-R2', FILE_PREV = fs.readFileSync(path.join(HERE, 'timeline/catalogue/' + PREV_ID + '.json'));   // 0.6.24: R2 is no longer current and must still be served
-const CUR_ID = 'tl-2026-11-R3', FILE_CUR = fs.readFileSync(path.join(HERE, 'timeline/catalogue/' + CUR_ID + '.json'));
+const OLD_ID = 'tl-2026-11-R2', FILE_OLD = fs.readFileSync(path.join(HERE, 'timeline/catalogue/' + OLD_ID + '.json'));   // 0.6.24: R2 is no longer current and must still be served
+const PREV_ID = 'tl-2026-11-R3', FILE_PREV = fs.readFileSync(path.join(HERE, 'timeline/catalogue/' + PREV_ID + '.json'));   // 0.6.25: R3 is no longer current and must still be served
+const CUR_ID = 'tl-2026-11-R4', FILE_CUR = fs.readFileSync(path.join(HERE, 'timeline/catalogue/' + CUR_ID + '.json'));
 // FIXTURE R2: same shape, its own revision id, key and bytes. Loaded into a second worker copy whose table holds R1 + R2
 // and whose TIMELINE_CURRENT is R2 (the legacy pin stays R1). Nothing here is published.
 const R2ID = 'tl-2026-12-R2', R2KEY = 'ref/timeline/tl-2026-12-R2.json';
@@ -46,7 +47,7 @@ const FILE2 = Buffer.from(JSON.stringify({ ...JSON.parse(FILE.toString('utf8')),
 const tableAnchor = "  }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';";
 if (!src.includes(tableAnchor)) throw new Error('fixture anchor missing (revision table)');
 let src2 = src.replace(tableAnchor, `  }),\n  '${R2ID}': Object.freeze({ key: '${R2KEY}', revision: '${R2ID}', fileSha256: '${sha(FILE2)}', bytes: ${FILE2.length} }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';`);
-const curAnchor = "const TIMELINE_CURRENT = 'tl-2026-11-R3';";
+const curAnchor = "const TIMELINE_CURRENT = 'tl-2026-11-R4';";
 if (!src2.includes(curAnchor)) throw new Error('fixture anchor missing (current)');
 src2 = src2.replace(curAnchor, `const TIMELINE_CURRENT = '${R2ID}';`);
 const tmp2 = path.join(path.dirname(tmp), 'worker-fixture.mjs');
@@ -118,9 +119,9 @@ const notJson = Buffer.from('not json'); const rn = await W.timelineCatalogue(en
 ok('hash matches but not JSON → 503 invalid', rn.status === 503 && (await rn.json()).reason === 'invalid');
 
 // ---- 0.6.4: versioned route on the real table
-ok('real table: R1 + R2 + R3, legacy = R1, current = R3, R1 and R2 pins unchanged', Object.keys(W.TIMELINE_REVISIONS).join() === 'tl-2026-11-R1,tl-2026-11-R2,tl-2026-11-R3' && W.TIMELINE_REVISIONS[PREV_ID].fileSha256 === '2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356' && W.TIMELINE_REVISIONS[PREV_ID].bytes === 18120 && W.TIMELINE_REVISIONS[PREV_ID].key === 'ref/timeline/tl-2026-11-R2.json' && W.TIMELINE_LEGACY === 'tl-2026-11-R1' && W.TIMELINE_CURRENT === CUR_ID && W.TIMELINE === W.TIMELINE_REVISIONS['tl-2026-11-R1']);
+ok('real table: R1 + R2 + R3 + R4, legacy = R1, current = R4, R1, R2 and R3 pins unchanged', Object.keys(W.TIMELINE_REVISIONS).join() === 'tl-2026-11-R1,tl-2026-11-R2,tl-2026-11-R3,tl-2026-11-R4' && W.TIMELINE_REVISIONS[OLD_ID].fileSha256 === '2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356' && W.TIMELINE_REVISIONS[OLD_ID].bytes === 18120 && W.TIMELINE_REVISIONS[OLD_ID].key === 'ref/timeline/tl-2026-11-R2.json' && W.TIMELINE_REVISIONS[PREV_ID].fileSha256 === 'f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993' && W.TIMELINE_REVISIONS[PREV_ID].bytes === 31636 && W.TIMELINE_REVISIONS[PREV_ID].key === 'ref/timeline/tl-2026-11-R3.json' && W.TIMELINE_LEGACY === 'tl-2026-11-R1' && W.TIMELINE_CURRENT === CUR_ID && W.TIMELINE === W.TIMELINE_REVISIONS['tl-2026-11-R1']);
 { // 0.6.9 on the REAL table: both R1 routes return R1's original bytes while R2 is current; R2 only by its own id and pin
-  const both = () => env(null, { objects: { [W.TIMELINE.key]: FILE, [W.TIMELINE_REVISIONS[PREV_ID].key]: FILE_PREV, [CUR.key]: FILE_CUR } });
+  const both = () => env(null, { objects: { [W.TIMELINE.key]: FILE, [W.TIMELINE_REVISIONS[OLD_ID].key]: FILE_OLD, [W.TIMELINE_REVISIONS[PREV_ID].key]: FILE_PREV, [CUR.key]: FILE_CUR } });
   for (const u of ['/catalogue/timeline', '/catalogue/timeline/tl-2026-11-R1']) {
     const x = await get(both(), u); const bb = Buffer.from(await x.arrayBuffer());
     ok(`real table: ${u} → R1's original bytes (known pin) while R2 is current`, x.status === 200 && sha(bb) === R1_SHA && bb.length === R1_BYTES && x.headers.get('ETag') === `"${R1_SHA}"`, [x.status, sha(bb).slice(0, 12)]);
@@ -128,7 +129,9 @@ ok('real table: R1 + R2 + R3, legacy = R1, current = R3, R1 and R2 pins unchange
   const x2 = await get(both(), '/catalogue/timeline/' + CUR_ID); const b2 = Buffer.from(await x2.arrayBuffer());
   ok('real table: /catalogue/timeline/<current> → its exact bytes, its own ETag, CORS', x2.status === 200 && sha(b2) === sha(FILE_CUR) && x2.headers.get('ETag') === `"${sha(FILE_CUR)}"` && x2.headers.get('Access-Control-Allow-Origin') === '*', [x2.status, sha(b2).slice(0, 12)]);
   { const xp = await get(both(), '/catalogue/timeline/' + PREV_ID); const bp = Buffer.from(await xp.arrayBuffer());   // 0.6.24: the previous revision keeps being served, byte for byte
-    ok('real table: /catalogue/timeline/tl-2026-11-R2 is still served: R2 exact bytes, its own ETag', xp.status === 200 && sha(bp) === sha(FILE_PREV) && xp.headers.get('ETag') === `"${sha(FILE_PREV)}"`, [xp.status, sha(bp).slice(0, 12)]); }
+    ok('real table: /catalogue/timeline/tl-2026-11-R3 is still served: R3 exact bytes, its own ETag', xp.status === 200 && sha(bp) === sha(FILE_PREV) && xp.headers.get('ETag') === `"${sha(FILE_PREV)}"`, [xp.status, sha(bp).slice(0, 12)]); }
+  { const xo = await get(both(), '/catalogue/timeline/' + OLD_ID); const bo = Buffer.from(await xo.arrayBuffer());
+    ok('real table: /catalogue/timeline/tl-2026-11-R2 is still served: R2 exact bytes, its own ETag', xo.status === 200 && sha(bo) === sha(FILE_OLD) && xo.headers.get('ETag') === `"${sha(FILE_OLD)}"`, [xo.status, sha(bo).slice(0, 12)]); }
   const sw = await get(env(null, { objects: { [W.TIMELINE.key]: FILE_CUR, [CUR.key]: FILE } }), '/catalogue/timeline');
   ok('real table: legacy key holding R2 bytes → 503 integrity (never served as R1)', sw.status === 503 && (await sw.json()).reason === 'integrity');
   const miss = await get(env(null, { objects: { [W.TIMELINE.key]: FILE } }), '/catalogue/timeline/' + CUR_ID);
@@ -166,7 +169,7 @@ ok('timelinePin: exact own keys only', W.timelinePin('tl-2026-11-R1') === W.TIME
 
 // ---- 0.6.4: the bug this release prevents — R2 published and marked current; pages built for R1 must still get R1
 const fx = () => env(null, { objects: { [W.TIMELINE.key]: FILE, [R2KEY]: FILE2 } });
-ok('fixture: table R1 + R2 + R3 + the fixture revision, current = the fixture, legacy = R1', Object.keys(W2.TIMELINE_REVISIONS).join() === `tl-2026-11-R1,tl-2026-11-R2,tl-2026-11-R3,${R2ID}` && W2.TIMELINE_CURRENT === R2ID && W2.TIMELINE_LEGACY === 'tl-2026-11-R1');
+ok('fixture: table R1 + R2 + R3 + R4 + the fixture revision, current = the fixture, legacy = R1', Object.keys(W2.TIMELINE_REVISIONS).join() === `tl-2026-11-R1,tl-2026-11-R2,tl-2026-11-R3,tl-2026-11-R4,${R2ID}` && W2.TIMELINE_CURRENT === R2ID && W2.TIMELINE_LEGACY === 'tl-2026-11-R1');
 r = await get(fx(), '/catalogue/timeline', 'GET', worker2); body = Buffer.from(await r.arrayBuffer());
 ok('fixture: LEGACY URL still returns R1 exact bytes while R2 is current', r.status === 200 && sha(body) === sha(FILE), [r.status, sha(body).slice(0, 12)]);
 r = await get(fx(), '/catalogue/timeline/tl-2026-11-R1', 'GET', worker2); body = Buffer.from(await r.arrayBuffer());
@@ -177,7 +180,7 @@ reads.length = 0;
 r = await get(fx(), '/catalogue/timeline/tl-2026-13-R3', 'GET', worker2);
 ok('fixture: unknown revision → 404, no R2 read', r.status === 404 && reads.length === 0, [r.status, reads]);
 const d0 = dbTouched.length; const root2 = await (await get(fx(), '/', 'GET', worker2)).json(); dbTouched.length = d0;   // the index reads D1 for its history summary; not the route
-ok('fixture root: path/revision describe the legacy response (R1); current names R2; both revisions listed', root2.catalogues.timeline.path === '/catalogue/timeline' && root2.catalogues.timeline.revision === 'tl-2026-11-R1' && root2.catalogues.timeline.current === R2ID && root2.catalogues.timeline.revisions.join() === `tl-2026-11-R1,tl-2026-11-R2,tl-2026-11-R3,${R2ID}`, root2.catalogues.timeline);
+ok('fixture root: path/revision describe the legacy response (R1); current names R2; both revisions listed', root2.catalogues.timeline.path === '/catalogue/timeline' && root2.catalogues.timeline.revision === 'tl-2026-11-R1' && root2.catalogues.timeline.current === R2ID && root2.catalogues.timeline.revisions.join() === `tl-2026-11-R1,tl-2026-11-R2,tl-2026-11-R3,tl-2026-11-R4,${R2ID}`, root2.catalogues.timeline);
 const swapped = { [W.TIMELINE.key]: FILE2, [R2KEY]: FILE };
 r = await get(env(null, { objects: swapped }), '/catalogue/timeline/' + R2ID, 'GET', worker2);
 ok('fixture: R2 key holding R1 bytes → 503 integrity (each revision checked against its own pin)', r.status === 503 && (await r.json()).reason === 'integrity');
@@ -189,7 +192,7 @@ ok('timeline.js fetches /catalogue/timeline/<its data-catalogue-rev>', js.includ
 // ---- outside the collector
 ok('no D1 touched by the route', dbTouched.length === 0, dbTouched);
 const root = await (await get(env(FILE), '/')).json().catch(() => null);
-ok('/ lists the catalogue: legacy path + revision (R1), current, versioned path, revisions; version >= 0.6.4 (numeric comparison; sky-rc: 0.6.5)', root && (v => { const a = String(v).split('.').map(Number), b = [0, 6, 4]; if (a.length !== 3 || a.some(n => !Number.isInteger(n))) return false; for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] > b[i]; return true; })(root.version) && root.catalogues.timeline.path === '/catalogue/timeline' && root.catalogues.timeline.revision === 'tl-2026-11-R1' && root.catalogues.timeline.current === CUR_ID && root.catalogues.timeline.versioned_path === '/catalogue/timeline/<revision>' && root.catalogues.timeline.revisions.join() === 'tl-2026-11-R1,tl-2026-11-R2,tl-2026-11-R3' && root.endpoints.includes('/catalogue/timeline') && root.endpoints.includes('/catalogue/timeline/<revision>'), root && root.catalogues);
+ok('/ lists the catalogue: legacy path + revision (R1), current, versioned path, revisions; version >= 0.6.4 (numeric comparison; sky-rc: 0.6.5)', root && (v => { const a = String(v).split('.').map(Number), b = [0, 6, 4]; if (a.length !== 3 || a.some(n => !Number.isInteger(n))) return false; for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] > b[i]; return true; })(root.version) && root.catalogues.timeline.path === '/catalogue/timeline' && root.catalogues.timeline.revision === 'tl-2026-11-R1' && root.catalogues.timeline.current === CUR_ID && root.catalogues.timeline.versioned_path === '/catalogue/timeline/<revision>' && root.catalogues.timeline.revisions.join() === 'tl-2026-11-R1,tl-2026-11-R2,tl-2026-11-R3,tl-2026-11-R4' && root.endpoints.includes('/catalogue/timeline') && root.endpoints.includes('/catalogue/timeline/<revision>'), root && root.catalogues);
 ok('not a layer (no cells route)', (await get(env(FILE), '/cells/timeline')).status === 404);
 ok('/catalogue/<other> is not a catalogue (falls through to the hub index)', await (async () => { const j = await (await get(env(FILE), '/catalogue/arts')).json(); return j.name === 'Mother Earth collector' && !('entries' in j); })());
 

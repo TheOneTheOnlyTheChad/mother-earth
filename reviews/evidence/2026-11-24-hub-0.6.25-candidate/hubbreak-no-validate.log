@@ -1,0 +1,3 @@
+FAIL  hash matches but wrong revision → 503 invalid
+
+timeline-catalogue-hub: 74 passed, 1 failed [BREAK=no-validate]

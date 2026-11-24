@@ -1,0 +1,16 @@
+ok - A. csvFields keeps a quoted country with a comma as ONE field
+ok - B. real shape: 1,296 drawn, the 10 future-stamped fixes refused and counted, NaN SST → null (never 0)
+ok - C. wrong header (e.g. an HTML error page sent with 200) → refused
+ok - D. too few buoys → refused; a fall below 50 % of the previous valid count → refused
+ok - E. duplicate ids, impossible positions, bad times, wrong field counts: refused and counted, never drawn
+ok - F. implausible SST is blanked (null) and counted, the position still drawn
+hourly {"swpc":"swpc:ran","co2":"co2:ran","seaice":"seaice:skipped (runs 03/09/15/21 UTC)","satellites":"satellites:not scheduled (SATELLITES_ENABLED unset)","drifters":"drifters:not scheduled (DRIFTERS_ENABLED unset)","plastic":"plastic:not scheduled (PLASTIC_ENABLED unset)","dustrgb":"dustrgb:not scheduled (DUSTRGB_ENABLED unset)","skycraft":"skycraft:not scheduled (SKYCRAFT_ENABLED unset)","sunface":"sunface:not scheduled (SUNFACE_ENABLED unset)","wind":"wind:not scheduled (WIND_ENABLED unset)","batch":{"opensky":"parked","ships":{"files":0,"ok":0,"status":"absent","rejected":0,"cells":0,"changed":0},"ships_late":[],"usgs":{"ok":0,"events":0,"changed":0},"firms":{"ok":false}}}
+hourly {"swpc":"swpc:ran","co2":"co2:ran","seaice":"seaice:skipped (runs 03/09/15/21 UTC)","satellites":"satellites:not scheduled (SATELLITES_ENABLED unset)","drifters":"drifters:ran","plastic":"plastic:not scheduled (PLASTIC_ENABLED unset)","dustrgb":"dustrgb:not scheduled (DUSTRGB_ENABLED unset)","skycraft":"skycraft:not scheduled (SKYCRAFT_ENABLED unset)","sunface":"sunface:not scheduled (SUNFACE_ENABLED unset)","wind":"wind:not scheduled (WIND_ENABLED unset)","batch":{"opensky":"parked","ships":{"files":0,"ok":0,"status":"absent","rejected":0,"cells":0,"changed":0},"ships_late":[],"usgs":{"ok":0,"events":0,"changed":0},"firms":{"ok":false}}}
+ok - G. schedule gate: hourly job makes NO OSMC request without DRIFTERS_ENABLED=1, exactly ONE with it
+ok - H. a good run publishes ONE current snapshot (records + counts, same run) and no history objects
+ok - I. HTTP 500 → down recorded; the previous valid snapshot AND its counts stay served with their own times (0.6.8; races in osmc-reliability-hub.test.mjs)
+ok - I. HTML with 200 → down recorded; the previous valid snapshot AND its counts stay served with their own times (0.6.8; races in osmc-reliability-hub.test.mjs)
+ok - I. a count collapse → down recorded; the previous valid snapshot AND its counts stay served with their own times (0.6.8; races in osmc-reliability-hub.test.mjs)
+ok - I. a network error → down recorded; the previous valid snapshot AND its counts stay served with their own times (0.6.8; races in osmc-reliability-hub.test.mjs)
+
+12 passed

@@ -1,0 +1,7 @@
+FAIL  missing → 503 missing, no-store
+      got: [200,null,"public, max-age=60"]
+FAIL  real table: R2 pinned but not uploaded → 503 missing (the pre-upload state)
+FAIL  known revision, object missing → 503 missing (not 404)
+      got: [200,null]
+
+timeline-catalogue-hub: 72 passed, 3 failed [BREAK=serve-on-missing]

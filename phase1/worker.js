@@ -81,7 +81,7 @@
  */
 
 const SCHEMA_VERSION = 1;
-const COLLECTOR_VERSION = '0.6.24';
+const COLLECTOR_VERSION = '0.6.25';
 const CELL_DEG = 4;                       // §4.2: stay at 4° until needed
 const OPENSKY_DAILY_CREDITS = 4000;       // §4.3
 const OPENSKY_SOFT = 0.80, OPENSKY_HARD = 0.95;
@@ -6230,9 +6230,16 @@ const TIMELINE_REVISIONS = Object.freeze({
     fileSha256: 'f1a5fab24c6297eaabed701bb56c4c7466007fb43ece6036f008b2f3ed3e0993',
     bytes: 31636,
   }),
+  // 0.6.25 (TIMELINE-HUMAN-RELATIVES-BUILD-PROPOSAL rev 1): schema 4 — the Humans and human relatives lane, four finds. Additive pin; R1, R2 and R3 unchanged.
+  'tl-2026-11-R4': Object.freeze({
+    key: 'ref/timeline/tl-2026-11-R4.json',
+    revision: 'tl-2026-11-R4',
+    fileSha256: '74b1f8b165283b98023876fbd9e64b876bea17030973bfbc4ebea5f3ec8900ca',
+    bytes: 48134,
+  }),
 });
 const TIMELINE_LEGACY = 'tl-2026-11-R1';    // what the unversioned /catalogue/timeline serves — permanently (pages built before 0.6.4 expect it)
-const TIMELINE_CURRENT = 'tl-2026-11-R3';   // discovery metadata only; no route serves "current" implicitly
+const TIMELINE_CURRENT = 'tl-2026-11-R4';   // discovery metadata only; no route serves "current" implicitly
 const TIMELINE = TIMELINE_REVISIONS[TIMELINE_LEGACY];   // = the legacy pin (kept for the 0.6.3 name)
 /** The pin for an exact revision id, or null. Own-property lookup only: no pattern-built R2 keys, so no path tricks. */
 function timelinePin(rev, table = TIMELINE_REVISIONS) {
