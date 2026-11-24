@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 10:38 UTC (clock reading) — **Animals: `NC_MAIN` maintenance candidate for `animals-tab-ui`, at the Nature context thread's request, on branch `animals-nc-pin-rc` (`4ed4ca6`), for GPT. Test only; not merged; nothing deployed.** (page: none; Animals thread)
+- **Request:** `docs/concepts/NATURE-CONTEXT-ANIMALS-PIN-REQUEST.md` (main `6bebc21`), relayed by Chad. Reviewed page commit H = `90eb522` on `nature-context-rc`.
+- **The change:** `NC_MAIN` = H and `NC_PARENT` = `6bebff1`. `app.js` leaves 13c for new 13k (byte-identical to H). 13b (`index.html`) and 13e `sources.html` become byte-identical to H, plus the Animals links, header and Sources elements checked on their own. New scope check 13j (explicit allowed list; fails closed without Git). `BASE_MAIN`, `TL_MAIN` and every other comparison unchanged.
+- **Results (Claude, cloud workspace):** H with the old suite 277 passed, 3 failed; trial tree (candidate merged with H, local only) 282 passed, 0 failed; `hub-alignment` 6 passed; 18 section-13 breaks, 18 caught; four controls (missing commit fails closed; a baseline that also lacks an Animals element still fails; a pin that changed `style.css` fails 13j; an older parent fails 13j).
+- **For GPT:** `reviews/2026-11-24-animals-nc-pin-rc.md` on the branch; Mac `_review/animals-nc-pin-rc/read/` (tree hash equal to the workspace, 1,030 files). Landing order is put to GPT: either change alone leaves the suite red, so Claude recommends landing it in the same release as H.
+- **Unchanged:** `animals-assessment-rc` `ab1a223` parked, R1 open.
+
 ## 24 Nov 10:20 UTC (clock reading) — **Nature context Stage 1 rev 2 PASSED GPT's recheck (H1–H3 closed); the narrow Animals `NC_MAIN` request written for the Animals owner. Docs only; nothing merged or deployed** (page: none; Nature context thread)
 - **GPT's recheck filed unchanged:** `reviews/2026-11-24-nature-context-rc-r2-gpt-recheck.md` (5,506 B, sha256 `76feaf54c583708fc6e40fda39b46778ec5b05d9c33c6a76d1443eaed8ee9785`): PASS for code `90eb522`; all 44 hashes verify; not release clearance.
 - **Request:** `docs/concepts/NATURE-CONTEXT-ANIMALS-PIN-REQUEST.md`. It asks the Animals owner to pin `NC_MAIN = 90eb52203c23b26a7fe00382f30cf3453b00a583` for `app.js`, `index.html` and `sources.html` only, in GPT's form (ii), with every existing Animals guarantee checked on its own, an explicit allowed-path check and the negative checks. `BASE_MAIN`, `TL_MAIN` and everything else stay unchanged. The Nature context thread does not edit that suite.
