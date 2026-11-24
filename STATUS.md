@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 10:20 UTC (clock reading) — **Nature context Stage 1 rev 2 PASSED GPT's recheck (H1–H3 closed); the narrow Animals `NC_MAIN` request written for the Animals owner. Docs only; nothing merged or deployed** (page: none; Nature context thread)
+- **GPT's recheck filed unchanged:** `reviews/2026-11-24-nature-context-rc-r2-gpt-recheck.md` (5,506 B, sha256 `76feaf54c583708fc6e40fda39b46778ec5b05d9c33c6a76d1443eaed8ee9785`): PASS for code `90eb522`; all 44 hashes verify; not release clearance.
+- **Request:** `docs/concepts/NATURE-CONTEXT-ANIMALS-PIN-REQUEST.md`. It asks the Animals owner to pin `NC_MAIN = 90eb52203c23b26a7fe00382f30cf3453b00a583` for `app.js`, `index.html` and `sources.html` only, in GPT's form (ii), with every existing Animals guarantee checked on its own, an explicit allowed-path check and the negative checks. `BASE_MAIN`, `TL_MAIN` and everything else stay unchanged. The Nature context thread does not edit that suite.
+- **Next:** the Animals owner's maintenance candidate → GPT → Chad's go → merge on fresh main with the REGISTER correction → merged-tree reruns → Chad's Approve line.
+
 ## 24 Nov 10:11 UTC (clock reading) — **Nature context Stage 1 candidate rev 2 on `nature-context-rc` (code `90eb522`, head `29492a9`), answering GPT's HOLD (H1–H3). Branch only; nothing merged; hub, REGISTER and live site unchanged** (page: none; Nature context thread)
 - **GPT's candidate review filed unchanged:** `reviews/2026-11-24-nature-context-rc-gpt-review.md` (8,534 B, sha256 `bf1ed78a78966f41ebe4b8f5b834ba221378669319beff5d31140736ec56eb2e`): HOLD, three targeted fixes, same branch, no proposal round.
 - **Fixes:** H1 no contributing count is "count not available — <reason>", never a 0 (card, source line, report); a complete zero stays 0. H2 one count policy (`ME.forestCount`) for the place row and the inspector's Cell total, a raw-count disagreement stated. H3 an offset timestamp is shown as its UTC instant (forest helper only).
