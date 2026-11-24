@@ -2,19 +2,12 @@
   "hub": "mother-earth",
   "what_this_is": "What was read back from Cloudflare after the last hub deploy. phase1/hub-alignment.test.mjs holds phase1/worker.js to it. Updated by hand in the commit that records a deploy; see docs/HUB-DEPLOY-RULE.md. It is a record of a reading, not a live check.",
   "deployed": {
-    "version": "0.6.24",
-    "worker_sha256": "db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5",
-    "worker_bytes": 551400,
-    "deployed_at": "2026-11-23T17:18:38Z",
-    "read_back_at": "2026-11-23T17:18:57Z",
-    "source": "earth-from-space-rc at 8b80989 (reviews/2026-11-23-earth-from-space-0.6.24-candidate.md, section 8)",
-    "rollback": "0.6.23: phase1/worker.js at 566a11b, sha256 7141beb89e8e81ef351ddcc53e8654b1ddcbdb0048c8ffcb6b0d0ed7d7b3afa1, 551047 bytes"
-  },
-  "candidate": {
     "version": "0.6.25",
     "worker_sha256": "d54323183ebd49acb1818b2cb68dc31a56e95c6ddc2fc8635303311837e9e24d",
     "worker_bytes": 551780,
-    "base_sha256": "db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5",
-    "what": "Timeline pin tl-2026-11-R4 (schema 4, 48,134 B, sha256 74b1f8b165283b98023876fbd9e64b876bea17030973bfbc4ebea5f3ec8900ca), TIMELINE_CURRENT R4, version 0.6.25. Additive: R1, R2, R3 and the legacy pin unchanged. Code only; no bindings, variables, crons or stored-data change. Branch timeline-r4-hub-rc. NOT deployed."
+    "deployed_at": "2026-11-24T18:01:46Z",
+    "read_back_at": "2026-11-24T18:02:15Z",
+    "source": "timeline-r4-hub-rc at 0235545 (reviews/2026-11-24-hub-0.6.25-candidate.md, section 9)",
+    "rollback": "0.6.24: phase1/worker.js at 72ea123, sha256 db4f9cdfd351aed3b920d1b0b87c63dfe260ebb150867be8a4772403b9a01aa5, 551400 bytes. Not while the page pins tl-2026-11-R4: roll the page back first"
   }
 }
