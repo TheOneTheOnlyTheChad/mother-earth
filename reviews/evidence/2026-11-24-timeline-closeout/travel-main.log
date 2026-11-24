@@ -1,0 +1,109 @@
+### 04:37:10 X=1
+timeline-travel-ui: 209 pass, 0 fail
+exit=0
+### 04:38:16 BREAK=bad-state-accepted
+FAIL E 390: stored window refused (newer than today) → landing window, explorer on [15,0]
+FAIL E 390: stored window refused (narrower than the limit) → landing window, explorer on [100,99]
+timeline-travel-ui: 201 pass, 8 fail (BREAK=bad-state-accepted)
+exit=1
+### 04:39:23 BREAK=chart-under-how
+FAIL J (JavaScript off) every claim keeps its id, label, value, text and source link, under its heading; the chart boundary is alone under "Chart reference"; nothing else is in the story [["e-big5-end-permian","groups",[["how","How we know"],["how","Chart reference"],["review","Review and changes"]]],["e-big5-end-permian",1,"claim identity, label, value or group",{"id":"e-big5-end-permian-c1","typ
+timeline-travel-ui: 208 pass, 1 fail (BREAK=chart-under-how)
+exit=1
+### 04:40:30 BREAK=mark-x-in-state
+FAIL E 1280: opening a story adds one entry whose state has the entry, its keys and the window {"len":3,"s":{"entry":"e-big5-end-triassic","x":"944.68","opener":"mark","oid":null,"k":1795495237882,"p":1795495237881,"win":[252.5625,185.2125]},"hash":"#e-big5-end-triassic","open":true,"act":"e-big5-end-triassic-h"}
+FAIL E 390: opening a story adds one entry whose state has the entry, its keys and the window {"len":3,"s":{"entry":"e-big5-end-triassic","x":"269.91","opener":"mark","oid":null,"k":1795495242619,"p":1795495242618,"win":[252.5625,185.2125]},"hash":"#e-big5-end-triassic","open":true,"act":"e-big5-end-triassic-h"}
+timeline-travel-ui: 207 pass, 2 fail (BREAK=mark-x-in-state)
+exit=1
+### 04:41:37 BREAK=nav-pushes
+FAIL J older: the Frasnian–Famennian story replaces it in the same history entry, and is announced {"hidden":false,"o":"false","n":"false","msg":"","wide":false,"hash":"#e-big5-frasnian-famennian","len":4,"entry":"e-big5-frasnian-famennian","pos":"Now showing: Frasnian–Famennian extinction (Late Devonian)","labels":["Older plotted entry on this view","Newer plotted entry on this view"]}
+FAIL J Back after two switches closes the story (one history entry in all) and focus goes to the mark now shown 
+timeline-travel-ui: 204 pass, 5 fail (BREAK=nav-pushes)
+exit=1
+### 04:42:44 BREAK=new-sentence
+FAIL J (JavaScript off) every claim keeps its id, label, value, text and source link, under its heading; the chart boundary is alone under "Chart reference"; nothing else is in the story [["e-big5-end-permian","how","something other than its claims",["H4.gh","P","SECTION.es.claim"]]]
+timeline-travel-ui: 208 pass, 1 fail (BREAK=new-sentence)
+exit=1
+### 04:43:50 BREAK=no-clamp
+FAIL B widest: zooming out stops at the whole span; Older, Newer and Zoom out unavailable; Whole Earth pressed [2620.250001,-1946.749999]
+FAIL B seeded 200 operations: never an inverted, empty or out-of-range window [[561.513955,-219.179955,5],[756.687433,-24.006478,5],[561.513955,-219.179956,5]]
+timeline-travel-ui: 207 pass, 2 fail (BREAK=no-clamp)
+exit=1
+### 04:44:58 BREAK=no-clip
+FAIL G 434,420: every mark sits at its catalogue age on a linear scale; none drawn outside the window [["e-big5-end-ordovician","missing"]]
+FAIL G 434,420: drawn although its midpoint (435) is outside; clip marks older ; real ends in its label 
+timeline-travel-ui: 205 pass, 4 fail (BREAK=no-clip)
+exit=1
+### 04:46:06 BREAK=no-focus-guard
+FAIL C focus left without a focusout event: the next wheel does not zoom, is left to the page, and wheel zoom is off {"on0":true,"v0":[704.770444,165.970444],"v1":[650.374999,452.161556],"on1":true,"prevented":true}
+timeline-travel-ui: 208 pass, 1 fail (BREAK=no-focus-guard)
+exit=1
+### 04:47:13 BREAK=no-restore
+[2m  - waiting for locator('#xpl a.mk[data-entry="e-big5-end-cretaceous"]')[22m
+
+timeline-travel-ui: 119 pass, 10 fail (threw)
+exit=1
+### 04:48:10 BREAK=no-unload-save
+FAIL E2 wheel zoom then reload in the same instant: the reloaded page has the zoomed window [{"v":[329.924611,208.875389],"saved":[404.1,134.7]},[404.1,134.7]]
+timeline-travel-ui: 208 pass, 1 fail (BREAK=no-unload-save)
+exit=1
+### 04:49:18 BREAK=no-win-memory
+FAIL E2 Forward then returns to the window the key press made, and writes it into the state [[538.8,0],[404.1,134.7],[538.8,0]]
+timeline-travel-ui: 208 pass, 1 fail (BREAK=no-win-memory)
+exit=1
+### 04:50:25 BREAK=nonlinear
+FAIL K 1280 story open: every mark sits at its catalogue age on a linear scale; none drawn outside the window [["e-big5-end-ordovician","x",307.875,129.14476614699328],["e-big5-frasnian-famennian","x",408.5625,227.42011878247953],["e-big5-end-permian","x",535.5625,390.78416109873785],["e-big5-end-triassic","x",580.734375,459.4992576095026],["e-big5-end-cretaceous","x",687.546875,644.0618411284336]
+FAIL K 1280×500 (short) story open: every mark sits at its catalogue age on a linear scale; none drawn outside the window [["e-big5-end-ordovician","x",307.875,129.14476614699328],["e-big5-frasnian-famennian","x",408.5625,227.42011878247953],["e-big5-end-permian","x",535.5625,390.78416109873785],["e-big5-end-triassic","x",580.734375,459.4992576095026],["e-big5-end-cretaceous","x",687.546875,644.0
+timeline-travel-ui: 192 pass, 17 fail (BREAK=nonlinear)
+exit=1
+### 04:51:31 BREAK=pan-pushes
+[2m  - waiting for locator('#xpl a.mk[data-entry="e-big5-end-cretaceous"]')[22m
+
+timeline-travel-ui: 113 pass, 16 fail (threw)
+exit=1
+### 04:52:28 BREAK=plans-focusable
+FAIL K coverage plans: plain text in the catalogue's words, not controls, no Tab stop {"text":"Not on the timeline yet: Human relatives (no entries yet) · Human history (no dated entries on the axis yet)","stops":1,"tag":"SPAN","role":null}
+timeline-travel-ui: 208 pass, 1 fail (BREAK=plans-focusable)
+exit=1
+### 04:53:35 BREAK=requests
+FAIL I after load: pan, zoom, presets, drag, wheel, opening, switching and closing a story make no request, except at most one image file for a story that has an image ["http://127.0.0.1:8899/timeline.html?again=0.12079643534187468","http://127.0.0.1:8899/timeline.html?again=0.5465206351586067","http://127.0.0.1:8899/timeline.html?again=0.5131547685444063","http://127.0.0.1:8899/timeline.html?agai
+timeline-travel-ui: 208 pass, 1 fail (BREAK=requests)
+exit=1
+### 04:54:42 BREAK=resize-moves-window
+FAIL E2 Pliny → a plotted entry from its mark: same history entry, mark selected, navigation back {"len":5,"s":{"entry":"e-big5-end-triassic","x":null,"opener":"mark","oid":null,"direct":false,"k":1795496111658,"p":1795496111657,"win":[363.69,134.7]},"hash":"#e-big5-end-triassic","open":true,"act":"e-big5-end-triassic-h","sheet":false,"nav":true,"sel":"e-big5-end-triassic"}
+FAIL E2 Back closes it: window restored, focus on the control last used (the end-Triassic mark) {"len":5,"s":{"k":1795496111657,"win":[404.1,134.7]},"hash":"","open":false,"act":"e-big5-end-triassic","sheet":false,"nav":false,"sel":null}
+timeline-travel-ui: 188 pass, 21 fail (BREAK=resize-moves-window)
+exit=1
+### 04:55:49 BREAK=restore-reveals
+FAIL E2 resize 390 → 1280 with the story open: it becomes the side panel, same age window [[268.85,134.15],false]
+FAIL E2 Forward then returns to the window the key press made, and writes it into the state [[269.4,0],[404.1,134.7],[269.4,0]]
+timeline-travel-ui: 203 pass, 6 fail (BREAK=restore-reveals)
+exit=1
+### 04:56:57 BREAK=stale-status
+FAIL E3 the mark is back in the window (zoomed out by keyboard, focus still on the explorer): the status line is empty [[4567,0],{"t":"End-Cretaceous mass extinction is outside this view.","role":"status","act":"xpl"}]
+timeline-travel-ui: 208 pass, 1 fail (BREAK=stale-status)
+exit=1
+### 04:58:04 BREAK=state-clobber
+FAIL E2 resize 390 → 1280 with the story open: it becomes the side panel, same age window [[268.85,134.15],false]
+FAIL E2 wheel zoom then reload in the same instant: the reloaded page has the zoomed window [{"v":[329.924611,208.875389],"saved":[404.1,134.7]},[538.8,0]]
+timeline-travel-ui: 199 pass, 10 fail (BREAK=state-clobber)
+exit=1
+### 04:59:11 BREAK=wheel-always
+FAIL C focus on a mark, wheel zoom not turned on: the wheel scrolls the page and the window stays [[870.740888,0],258,258]
+timeline-travel-ui: 208 pass, 1 fail (BREAK=wheel-always)
+exit=1
+### 05:00:18 BREAK=zoom-always
+FAIL F2 two at one age plus one 0.03 Ma away: "Zoom to these" is not offered while a member could not stand alone in its target window [[[4567,0],3,true],[[538.8,0],3,true],[[300,200],3,true],[[255,249],3,true],[[252.5,251.5],2,false]]
+FAIL F2 two 0.0005 Ma apart plus one 0.03 Ma away: "Zoom to these" is not offered while a member could not stand alone in its target window [[[4567,0],3,true],[[538.8,0],3,true],[[300,200],3,true],[[255,249],3,true],[[252.5,251.5],2,true]]
+timeline-travel-ui: 206 pass, 3 fail (BREAK=zoom-always)
+exit=1
+### 05:01:26 BREAK=zoom-outer-only
+FAIL F2 two at one age plus one 0.03 Ma away: "Zoom to these" is not offered while a member could not stand alone in its target window [[[4567,0],3,true],[[538.8,0],3,true],[[300,200],3,true],[[255,249],3,true],[[252.5,251.5],2,false]]
+FAIL F2 two 0.0005 Ma apart plus one 0.03 Ma away: "Zoom to these" is not offered while a member could not stand alone in its target window [[[4567,0],3,true],[[538.8,0],3,true],[[300,200],3,true],[[255,249],3,true],[[252.5,251.5],2,false]]
+timeline-travel-ui: 207 pass, 2 fail (BREAK=zoom-outer-only)
+exit=1
+### 05:02:33 OLD=1
+FAIL suite threw page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+timeline-travel-ui: 0 pass, 1 fail (threw)
+exit=1
+### 05:02:34 end

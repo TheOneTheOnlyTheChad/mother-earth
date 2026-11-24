@@ -12,7 +12,12 @@
  *   BREAK=fragment-only-link | back-loses-entry | close-handler-reused | no-focus | single-jump-memory | no-return-target |
  *         no-schema2-validate | guard-off |
  *         stale-js-version | dropped-anchor | review-date-from-release | review-date-from-latest-source |
- *         old-value-hidden | snapshot-by-key
+ *         old-value-hidden | snapshot-by-key |
+ *         unpinned-is-pinned | previous-drift
+ *   unpinned-is-pinned and previous-drift count as caught only when the run stops with that fixture guard's own message
+ *   ("worker fixtures: the unpinned copy still names …" / "previous revision check: …"), not on any other failure.
+ * Control (not a break): BREAK=unpinned-is-pinned FIXTURE_GUARD=off skips the fixture guard; the compatibility check D
+ *   "unpinned hub … → 404" must then fail, because a pinned hub answers 503 for the missing object.
  */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), os = require('os'), crypto = require('crypto');
@@ -33,6 +38,13 @@ const git = (ref, f) => { try { return execFileSync('git', ['-C', ROOT, 'show', 
 const REV = 'tl-2026-11-R2', R1 = 'tl-2026-11-R1', CUR = JSON.parse(fs.readFileSync(path.join(TL, 'BUILD.json'), 'utf8')).catalogue_revision;
 const CAT = fs.readFileSync(path.join(TL, 'catalogue', CUR + '.json')), CAT1 = fs.readFileSync(path.join(TL, 'catalogue', R1 + '.json'));
 const R1_SHA = '096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe';
+// PREV is the reader-facing release before CUR, read from BUILD.json "previous" (GPT's follow-up to 1d0c6dd, 24 Nov 2026). It must
+// be a non-empty revision other than CUR, equal the current catalogue's own release.previous, and have its committed catalogue file.
+// REV above stays fixed: it names the historical change record this suite follows, not "the previous release".
+const PREV = BREAK === 'previous-drift' ? R1 : JSON.parse(fs.readFileSync(path.join(TL, 'BUILD.json'), 'utf8')).previous;
+{ const rel = JSON.parse(CAT).release || {}, f = path.join(TL, 'catalogue', PREV + '.json');
+  if (!(typeof PREV === 'string' && PREV && PREV !== CUR && rel.previous === PREV && fs.existsSync(f) && JSON.parse(fs.readFileSync(f, 'utf8')).catalogue_revision === PREV))
+    throw new Error(`previous revision check: BUILD.json previous ${JSON.stringify(PREV)} must differ from ${CUR}, equal the catalogue's release.previous ${JSON.stringify(rel.previous)} and have its catalogue file`); }
 const HTML0 = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'), JS0 = fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8');
 const R1_HTML = git(R1_COMMIT, 'timeline.html'), R1_JS = git(R1_COMMIT, 'timeline.js');
 const T = 'e-big5-end-triassic', LINK = `${T}-chg-${REV}-1`, REC = `change-${REV}-1`, OPEN = REC + '-open';
@@ -75,7 +87,7 @@ let fxN = 0;
 function fixture(edit) {
   const dir = path.join(TMP, 'fx' + (++fxN)); fs.mkdirSync(path.join(dir, 'catalogue'), { recursive: true });
   for (const f of ['BUILD.json', 'big5.json', 'changes.json', 'chart-v2026-06.5.json', 'entry-pliny-ep-6-16.json']) fs.copyFileSync(path.join(TL, f), path.join(dir, f));
-  for (const f of [R1, REV, CUR]) fs.copyFileSync(path.join(TL, 'catalogue', f + '.json'), path.join(dir, 'catalogue', f + '.json'));
+  for (const f of new Set([R1, REV, PREV, CUR])) fs.copyFileSync(path.join(TL, 'catalogue', f + '.json'), path.join(dir, 'catalogue', f + '.json'));
   if (fs.existsSync(path.join(TL, 'assets'))) fs.cpSync(path.join(TL, 'assets'), path.join(dir, 'assets'), { recursive: true });
   const page = path.join(dir, 'timeline.html'); fs.writeFileSync(page, HTML0);
   const J = f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')), W = (f, o) => fs.writeFileSync(path.join(dir, f), JSON.stringify(o, null, 1) + '\n');
@@ -92,13 +104,14 @@ function fixture(edit) {
   // "pinned hub" = this file as it is. "unpinned hub" = this file with, in memory only, the one table entry for CUR removed
   // and TIMELINE_CURRENT set back to the revision before it. A Worker that does not yet pin CUR is handled the other way round.
   const W0 = fs.readFileSync(path.join(__dirname, 'worker.js'), 'utf8'), TA = "  }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';";
-  const CA = `const TIMELINE_CURRENT = '${CUR}';`, CA_PREV = "const TIMELINE_CURRENT = 'tl-2026-11-R2';";
+  const CA = `const TIMELINE_CURRENT = '${CUR}';`, CA_PREV = `const TIMELINE_CURRENT = '${PREV}';`;
   const ENTRY = new RegExp(`\\n  '${CUR}': Object\\.freeze\\(\\{[^}]*\\}\\),(?=\\n\\}\\);\\nconst TIMELINE_LEGACY)`);
   let pinnedSrc, unpinnedSrc;
   if (W0.split(CA).length === 2 && ENTRY.test(W0)) { pinnedSrc = W0; unpinnedSrc = W0.replace(ENTRY, '').replace(CA, CA_PREV); }
   else if (W0.split(TA).length === 2 && W0.split(CA_PREV).length === 2) { unpinnedSrc = W0; pinnedSrc = W0.replace(TA, `  }),\n  '${CUR}': Object.freeze({ key: 'ref/timeline/${CUR}.json', revision: '${CUR}', fileSha256: '${sha(CAT)}', bytes: ${CAT.length} }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';`).replace(CA_PREV, CA); }
   else throw new Error('worker anchors missing');
-  if (unpinnedSrc.includes(`'${CUR}'`) || !pinnedSrc.includes(`fileSha256: '${sha(CAT)}'`)) throw new Error('worker fixtures: the unpinned copy still names the current revision, or the pinned copy lacks its hash');
+  if (BREAK === 'unpinned-is-pinned') unpinnedSrc = pinnedSrc;   // the fixture fault the guard below exists for
+  if ((process.env.FIXTURE_GUARD !== 'off' && unpinnedSrc.includes(`'${CUR}'`)) || !pinnedSrc.includes(`fileSha256: '${sha(CAT)}'`)) throw new Error('worker fixtures: the unpinned copy still names the current revision, or the pinned copy lacks its hash');
   const newHub = await loadWorker(pinnedSrc, 'hub-new.mjs');
   const unpinnedHub = await loadWorker(unpinnedSrc, 'hub-unpinned.mjs');
   const oldHubSrc = git(OLD_HUB_COMMIT, 'phase1/worker.js');

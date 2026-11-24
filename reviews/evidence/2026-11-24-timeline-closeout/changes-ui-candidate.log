@@ -1,0 +1,95 @@
+### 04:22:37 X=1
+timeline-changes-ui: 173 pass, 0 fail
+exit=0
+### 04:23:11 BREAK=fragment-only-link
+FAIL F2 1280 … → Back: closed, on the record's entry, focus on "Open the entry" {"open":false,"entry":null,"active":"","hash":"#change-tl-2026-11-R2-1","inert":0,"locked":false,"role":"region","state":{"k":1795494221697,"win":[538.8,0]},"rec":{"top":524,"inView":true,"covered":false},"len":5}
+FAIL F2 1280 … → Back: the original entry, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#e-big5-end-triassic","inert":0,"locked":false,"role":"region","state":{"entry":"e-big5-end-triassic","x":null,"opener":"title","oid":null,"k":1795494221694,"p":0,"win":[538.8,0]},"rec":{"top":1479,"inView":false,"covered":true},"len":5}
+FAIL F2 1280 … → Back: the entry, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#e-big5-end-triassic","inert":0,"locked":false,"role":"region","state":{"entry":"e-big5-end-triassic","x":null,"opener":"title","oid":null,"k":1795494223371,"p":0,"win":[538.8,0]},"rec":{"top":1479,"inView":false,"covered":true},"len":5}
+timeline-changes-ui: 135 pass, 38 fail (BREAK=fragment-only-link)
+exit=1
+### 04:23:45 BREAK=back-loses-entry
+FAIL F2 1280 repeated: Back 1 → entry open, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"change-tl-2026-11-R2-1","hash":"#change-tl-2026-11-R2-1","inert":0,"locked":false,"role":"region","state":{"change":"change-tl-2026-11-R2-1","k":1795494239145,"p":1795494239143,"from":{"entryK":1795494239143,"link":"e-big5-end-triassic-chg-tl-2026-11-R2-1"},"win":[538.8,0]},"rec":{"top":524,"inView":true,"covered":false},"len":4}
+FAIL F2 1280 repeated: Back 2 → the change record's entry, entry closed, focus on "Open the entry" {"open":false,"entry":null,"active":"change-tl-2026-11-R2-1-open","hash":"","inert":0,"locked":false,"role":"region","state":{"k":1795494239144,"win":[538.8,0]},"rec":{"top":1319,"inView":false,"covered":true},"len":4}
+FAIL F2 1280: the sequence stays on the page "Error: page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')\n    at eval (eval at evaluate (:311:30), <anonymous>:1:123)\n    at UtilityScript.evaluate (<anonymous>"
+timeline-changes-ui: 107 pass, 20 fail (BREAK=back-loses-entry)
+exit=1
+### 04:24:01 BREAK=close-handler-reused
+FAIL F 390 direct: the Back/Forward sequence stays on the page "TimeoutError: page.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#d-close')\u001b[22m\n\u001b[2m    - locator resolved to <button id=\"d-close\" type=\"button\" class=\"dclose\" aria-label=\"C"
+FAIL F2 390 repeated: second jump lands on the record, focused {"open":false,"entry":null,"active":"change-tl-2026-11-R2-1-open","hash":"","inert":0,"locked":false,"role":"dialog","state":{"k":1795494284909,"win":[538.8,0]},"rec":{"top":227,"inView":true,"covered":false},"len":3}
+FAIL F2 390: the sequence stays on the page "Error: page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect')\n    at eval (eval at evaluate (:311:30), <anonymous>:1:123)\n    at UtilityScript.evaluate (<anonymous>"
+timeline-changes-ui: 138 pass, 10 fail (BREAK=close-handler-reused)
+exit=1
+### 04:24:55 BREAK=no-focus
+FAIL F2 1280 repeated: Forward → record, focused {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-chg-tl-2026-11-R2-1","hash":"#change-tl-2026-11-R2-1","inert":0,"locked":false,"role":"region","state":{"change":"change-tl-2026-11-R2-1","k":1795494319878,"p":1795494319876,"from":{"entryK":1795494319876,"link":"e-big5-end-triassic-chg-tl-2026-11-R2-1"},"win":[538.8,0]},"rec":{"top":684,"inView":true,"covered":false},"len":6}
+FAIL F2 1280 repeated: Forward → the second jump's record, focused {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#change-tl-2026-11-R2-1","inert":0,"locked":false,"role":"region","state":{"change":"change-tl-2026-11-R2-1","k":1795494319880,"p":1795494319879,"from":{"entryK":1795494319879,"link":"e-big5-end-triassic-chg-tl-2026-11-R2-1"},"win":[538.8,0]},"rec":{"top":524,"inView":true,"covered":false},"len":6}
+FAIL F2 1280 reload → Forward: the change record, focused {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#change-tl-2026-11-R2-1","inert":0,"locked":false,"role":"region","state":{"change":"change-tl-2026-11-R2-1","k":1795494322402,"p":1795494322400,"from":{"entryK":1795494322400,"link":"e-big5-end-triassic-chg-tl-2026-11-R2-1"},"win":[538.8,0]},"rec":{"top":524,"inView":true,"covered":false},"len":4}
+timeline-changes-ui: 157 pass, 16 fail (BREAK=no-focus)
+exit=1
+### 04:25:29 BREAK=single-jump-memory
+FAIL F2 1280 reload → Forward → Back: entry open, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#e-big5-end-triassic","inert":0,"locked":false,"role":"region","state":{"entry":"e-big5-end-triassic","x":null,"opener":"title","oid":null,"k":1795494355944,"p":0,"win":[538.8,0]},"rec":{"top":1408,"inView":false,"covered":true},"len":4}
+FAIL F2 1280 reload on the record → Back: the entry opens, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#e-big5-end-triassic","inert":0,"locked":false,"role":"region","state":{"entry":"e-big5-end-triassic","x":null,"opener":"title","oid":null,"k":1795494357634,"p":0,"win":[538.8,0]},"rec":{"top":1479,"inView":false,"covered":true},"len":5}
+FAIL F2 1280 … → Back: the original entry, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#e-big5-end-triassic","inert":0,"locked":false,"role":"region","state":{"entry":"e-big5-end-triassic","x":null,"opener":"title","oid":null,"k":1795494359330,"p":0,"win":[538.8,0]},"rec":{"top":1479,"inView":false,"covered":true},"len":5}
+timeline-changes-ui: 165 pass, 8 fail (BREAK=single-jump-memory)
+exit=1
+### 04:26:02 BREAK=no-return-target
+FAIL F2 1280 reload on the record → Back: the entry opens, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#e-big5-end-triassic","inert":0,"locked":false,"role":"region","state":{"entry":"e-big5-end-triassic","x":null,"opener":"title","oid":null,"k":1795494391352,"p":0,"win":[538.8,0]},"rec":{"top":1479,"inView":false,"covered":true},"len":5}
+FAIL F2 1280 … → Back: the original entry, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#e-big5-end-triassic","inert":0,"locked":false,"role":"region","state":{"entry":"e-big5-end-triassic","x":null,"opener":"title","oid":null,"k":1795494393048,"p":0,"win":[538.8,0]},"rec":{"top":1479,"inView":false,"covered":true},"len":5}
+FAIL F2 1280 … → Back: the entry, focus on "Changed in …" {"open":true,"entry":"e-big5-end-triassic","active":"e-big5-end-triassic-h","hash":"#e-big5-end-triassic","inert":0,"locked":false,"role":"region","state":{"entry":"e-big5-end-triassic","x":null,"opener":"title","oid":null,"k":1795494394719,"p":0,"win":[538.8,0]},"rec":{"top":1479,"inView":false,"covered":true},"len":5}
+timeline-changes-ui: 153 pass, 20 fail (BREAK=no-return-target)
+exit=1
+### 04:26:36 BREAK=no-schema2-validate
+FAIL E a change of an unknown kind → axis off (validation), list and What changed still there {"state":"on","reason":null,"marks":5,"offShown":false,"cards":5,"shelf":1}
+FAIL E changes missing → axis off (validation), list and What changed still there {"state":"on","reason":null,"marks":5,"offShown":false,"cards":5,"shelf":1}
+FAIL E a nested null → axis off (validation), list and What changed still there {"state":"on","reason":null,"marks":5,"offShown":false,"cards":5,"shelf":1}
+timeline-changes-ui: 161 pass, 12 fail (BREAK=no-schema2-validate)
+exit=1
+### 04:27:09 BREAK=guard-off
+FAIL D MIXED: R1 page that re-fetches the script and gets the NEW one → build guard, static list {"state":"off","reason":"validation: catalogue identity","marks":0,"offShown":true,"cards":5,"shelf":1}
+FAIL D MIXED: R1 page that re-fetches the script and gets the NEW one → build guard, static list: no catalogue request at all [{"url":"https://mother-earth.chadoberholzer.workers.dev/catalogue/timeline/tl-2026-11-R1","status":200,"sha":"096ae648479b744f458cdf5d042667c6a6262114ee63252cf132c41f99050fbe"}]
+timeline-changes-ui: 171 pass, 2 fail (BREAK=guard-off)
+exit=1
+### 04:27:43 BREAK=stale-js-version
+FAIL D asset version: the candidate page asks for a different timeline.js ?v= than the R1 page ["timeline.js?v=202611221000"]
+timeline-changes-ui: 172 pass, 1 fail (BREAK=stale-js-version)
+exit=1
+### 04:28:16 BREAK=dropped-anchor
+FAIL C: every id on the released R1 page exists on the candidate page, except the two ids of the one retired claim [81,["e-pliny-ep-6-16-debate","e-big5-end-cretaceous-c2","e-big5-end-cretaceous-c2-h"]]
+FAIL C no-JS: #e-pliny-ep-6-16-debate lands on its section 
+FAIL C JS: #e-pliny-ep-6-16-debate opens the entry with that section expanded, focus on its heading {"open":true,"entry":"e-pliny-ep-6-16","expanded":null,"hash":"#e-pliny-ep-6-16","active":"e-pliny-ep-6-16-h"}
+timeline-changes-ui: 170 pass, 3 fail (BREAK=dropped-anchor)
+exit=1
+### 04:28:49 BREAK=review-date-from-release
+FAIL G rendered: entry "Evidence last reviewed" = 10 Nov 2026 (the entry-wide review) {"entry":"2026-11-24","entryText":"24 Nov 2026","src":"He T et al. (2020) An enormous sulfur isotope excursion indicates marine anoxia during the end-Triassic mass extinction. Science Advances 6: eabb6704 · Results, sulfate sulfur-isotope trends. doi 10.1126/sciadv.abb6704 ↗ (opens in a new tab) · licence: CC BY 4.0. No correction, retraction or expression of concern in the article text on the publisher's page (checked 11 Nov 2026).","head":"2026-11-12","rec":"2026-11-10","updated":"2026-11-24"}
+FAIL H: the entry now shows the new value and source; its line says what changed ["251.902 ± 0.024 Ma (uncertainty as stated by the source)","Evidence last reviewed: 1 Dec 2026 · Changed in revision tl-2026-12-T1: date revised"]
+timeline-changes-ui: 171 pass, 2 fail (BREAK=review-date-from-release)
+exit=1
+### 04:29:23 BREAK=review-date-from-latest-source
+FAIL G rendered: entry "Evidence last reviewed" = 10 Nov 2026 (the entry-wide review) {"entry":"2026-11-23","entryText":"23 Nov 2026","src":"He T et al. (2020) An enormous sulfur isotope excursion indicates marine anoxia during the end-Triassic mass extinction. Science Advances 6: eabb6704 · Results, sulfate sulfur-isotope trends. doi 10.1126/sciadv.abb6704 ↗ (opens in a new tab) · licence: CC BY 4.0. No correction, retraction or expression of concern in the article text on the publisher's page (checked 11 Nov 2026).","head":"2026-11-12","rec":"2026-11-10","updated":"2026-11-24"}
+timeline-changes-ui: 172 pass, 1 fail (BREAK=review-date-from-latest-source)
+exit=1
+### 04:29:56 BREAK=old-value-hidden
+FAIL H: old and new values side by side in the change record [null,"251.902 ± 0.024 Ma (uncertainty as stated by the source) — Fixture A, Fixture B (2026) Synthetic test source. Journal of Fixtures 1: 1 · Table 1. source ↗ (opens in a new tab) · licence: CC BY 4.0 · checked 30 Nov 2026"]
+FAIL H: the OLD side carries its own citation and checked date (Burgess 2017, 10 Nov 2026) null
+FAIL H: the entry keeps the earlier value visible, labelled with the revision that showed it, with its old source null
+timeline-changes-ui: 170 pass, 3 fail (BREAK=old-value-hidden)
+exit=1
+### 04:30:30 BREAK=snapshot-by-key
+FAIL H: old and new values side by side in the change record ["251.902 ± 0.024 Ma (uncertainty as stated by the source) — Fixture A, Fixture B (2026) Synthetic test source. Journal of Fixtures 1: 1 · Table 1. source ↗ (opens in a new tab) · licence: CC BY 4.0 · checked 30 Nov 2026","251.902 ± 0.024 Ma (uncertainty as stated by the source) — Fixture A, Fixture B (2026) Synthetic test source. Journal of Fixtures 1: 1 · Table 1. source ↗ (opens in a new tab) · licence: CC BY 4.0 · checked 30 Nov 2026"]
+FAIL H: the OLD side carries its own citation and checked date (Burgess 2017, 10 Nov 2026) "251.902 ± 0.024 Ma (uncertainty as stated by the source) — Fixture A, Fixture B (2026) Synthetic test source. Journal of Fixtures 1: 1 · Table 1. source ↗ (opens in a new tab) · licence: CC BY 4.0 · checked 30 Nov 2026"
+FAIL H: the entry keeps the earlier value visible, labelled with the revision that showed it, with its old source "Earlier dating Shown in revision tl-2026-11-R3: 251.902 ± 0.024 Ma (uncertainty as stated by the source) — Fixture A, Fixture B (2026) Synthetic test source. Journal of Fixtures 1: 1 · Table 1. source ↗ (opens in a new tab) · licence: CC BY 4.0 · checked 30 Nov 2026."
+timeline-changes-ui: 170 pass, 3 fail (BREAK=snapshot-by-key)
+exit=1
+### 04:31:03 BREAK=unpinned-is-pinned
+Error: worker fixtures: the unpinned copy still names the current revision, or the pinned copy lacks its hash
+exit=2
+### 04:31:03 BREAK=previous-drift
+
+Error: previous revision check: BUILD.json previous "tl-2026-11-R1" must differ from tl-2026-11-R3, equal the catalogue's release.previous "tl-2026-11-R2" and have its catalogue file
+
+Node.js v22.23.5
+exit=1
+### 04:31:03 BREAK=unpinned-is-pinned FIXTURE_GUARD=off
+FAIL D new page + new script + unpinned hub (no pin for the current revision) → 404, static list {"state":"off","reason":"http 503","marks":0,"offShown":true,"cards":5,"shelf":1}
+timeline-changes-ui: 172 pass, 1 fail (BREAK=unpinned-is-pinned)
+exit=1
+### 04:31:37 end
