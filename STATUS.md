@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 10:11 UTC (clock reading) — **Nature context Stage 1 candidate rev 2 on `nature-context-rc` (code `90eb522`, head `29492a9`), answering GPT's HOLD (H1–H3). Branch only; nothing merged; hub, REGISTER and live site unchanged** (page: none; Nature context thread)
+- **GPT's candidate review filed unchanged:** `reviews/2026-11-24-nature-context-rc-gpt-review.md` (8,534 B, sha256 `bf1ed78a78966f41ebe4b8f5b834ba221378669319beff5d31140736ec56eb2e`): HOLD, three targeted fixes, same branch, no proposal round.
+- **Fixes:** H1 no contributing count is "count not available — <reason>", never a 0 (card, source line, report); a complete zero stays 0. H2 one count policy (`ME.forestCount`) for the place row and the inspector's Cell total, a raw-count disagreement stated. H3 an offset timestamp is shown as its UTC instant (forest helper only).
+- **Tests:** `nature-context-ui` 78/0; `OLD=1` 13/60; all 15 breaks fail (three new); fifteen existing suites pass unchanged; `animals-tab-ui` 277/3, exactly 13b/13c/13e as disclosed (not a passing suite). Packet `reviews/2026-11-24-nature-context-rc-r2.md` with evidence and 44-entry `SHA256SUMS`. Mac copy `_review/nature-context-rc-90eb522/` now carries all three GPT reviews (self-contained).
+- **Next:** GPT rechecks rev 2.
+
 ## 24 Nov 09:37 UTC (clock reading) — **Timeline: Humans and human relatives. Chad's own line: "B1–B6 yes, B2 L1, go rehearsal build, PDFs allowed." Rehearsal build STARTED on a branch; nothing uploaded, pinned or released** (page: none; Timeline thread)
 - **Decided by Chad:** B1 one entry per find · B2 = L1 (tick, labelled eruption band, fixed-length chevron) · B3 a sub-row per find · B4 the "Last 400,000 years" view and a 0.05 Ma narrowest window, provisional until measured · B5 thousands-of-years ticks · B6 build now, La Ferrassie unfrozen.
 - **Rule change by Chad: PDFs from authors, publishers or legitimate repositories are allowed for private reading.** They stay out of the repository and are never passed on. Earlier "text only, no PDFs" lines in the records describe the rule as it was until now.
