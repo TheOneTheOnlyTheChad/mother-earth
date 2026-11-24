@@ -1,0 +1,50 @@
+FAIL  unknown/malformed revision "tl-2026-11-R9" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "TL-2026-11-R1" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "tl-2026-11-R1%2Fx" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "..%2F..%2Fsecret" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "%2E%2E%2Fref%2Ftimeline%2Ftl-2026-11-R1." → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "%E0%A4%A" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "%20" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "__proto__" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "constructor" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "toString" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "hasOwnProperty" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "tl-2026-11-R1/extra" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "tl-2026-11-R1.json" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  unknown/malformed revision "ref%2Ftimeline%2Ftl-2026-11-R1.json" → 404 unknown revision, no R2 read, no-store
+      got: [503,{"kind":"catalogue","catalogue":"timeline","status":"unavailable","reason":"missing"},["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  loose separators "/catalogue/timeline//" → 404 unknown revision, no R2 read
+      got: [503,"unavailable",["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  loose separators "/catalogue/timeline//tl-2026-11-R1" → 404 unknown revision, no R2 read
+      got: [503,"unavailable",["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  loose separators "/catalogue/timeline/tl-2026-11-R1/" → 404 unknown revision, no R2 read
+      got: [503,"unavailable",["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  loose separators "/catalogue/timeline///" → 404 unknown revision, no R2 read
+      got: [503,"unavailable",["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  loose separators "//catalogue/timeline" → 404 unknown revision, no R2 read
+      got: [503,"unavailable",["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  loose separators "/catalogue//timeline" → 404 unknown revision, no R2 read
+      got: [503,"unavailable",["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  loose separators "/catalogue//timeline/tl-2026-11-R1" → 404 unknown revision, no R2 read
+      got: [503,"unavailable",["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  loose separators "/catalogue/timeline/tl-2026-11-R1//" → 404 unknown revision, no R2 read
+      got: [503,"unavailable",["ref/timeline/tl-2026-11-R4.json"]]
+FAIL  fixture: unknown revision → 404, no R2 read
+      got: [200,["ref/timeline/tl-2026-12-R2.json"]]
+
+timeline-catalogue-hub: 51 passed, 24 failed [BREAK=serve-unknown-as-current]

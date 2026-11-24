@@ -1,0 +1,15 @@
+FAIL  200, byte-identical body
+      got: 503
+FAIL  ETag = file hash; CORS open; max-age 60
+FAIL  read error → 503 unreadable
+      got: [503,"missing"]
+FAIL  one changed byte → 503 integrity
+      got: [503,"missing"]
+FAIL  real table: /catalogue/timeline → R1's original bytes (known pin) while R2 is current
+      got: [200,"74b1f8b16528"]
+FAIL  trailing slash = the legacy URL (R1)
+FAIL  single trailing slash on the legacy URL → R1 (alias kept, one read)
+FAIL  fixture: LEGACY URL still returns R1 exact bytes while R2 is current
+      got: [200,"81cd2d5b657c"]
+
+timeline-catalogue-hub: 67 passed, 8 failed [BREAK=legacy-follows-current]

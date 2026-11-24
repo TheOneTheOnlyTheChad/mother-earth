@@ -1,0 +1,17 @@
+ok - A. wrong admin key → 403, no request
+ok - B. secrets missing → refused, no request, nothing stored
+ok - C. outside off-peak minutes (:00, :05, :25, :30, :35, :55) → refused, no request
+ok - D. success: login → ONE GP query → logout; measured; no credentials or cookie in the result or state
+ok - E. second call 30 min later (still off-peak) → refused by the hourly guard, no request
+ok - F. login failed → no GP query, status auth_or_reach_failed, Space-Track body shown
+ok - G. login HTTP 522 (unreachable from Cloudflare) → no GP query, recorded
+ok - H. empty HTTP 200 GP body (what the pane saw) → gp_failed with empty_body true, no retry
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+forest forest:ran; orbital:not scheduled (ORBITAL_ENABLED unset)
+hourly {"swpc":"swpc:ran","co2":"co2:ran","seaice":"seaice:skipped (runs 03/09/15/21 UTC)","satellites":"satellites:not scheduled (SATELLITES_ENABLED unset)","drifters":"drifters:not scheduled (DRIFTERS_ENABLED unset)","plastic":"plastic:not scheduled (PLASTIC_ENABLED unset)","dustrgb":"dustrgb:not scheduled (DUSTRGB_ENABLED unset)","skycraft":"skycraft:not scheduled (SKYCRAFT_ENABLED unset)","sunface":"sunface:not scheduled (SUNFACE_ENABLED unset)","wind":"wind:not scheduled (WIND_ENABLED unset)","batch":{"opensky":"parked","ships":"error TypeError: env.R2.list is not a function","ships_late":"error TypeError: env.R2.list is not a function","usgs":{"ok":0,"events":0,"changed":0},"firms":{"ok":false}}}
+ok - I. the probe is not a job and no cron reaches Space-Track
+ok - J. ?last=1 reads the stored result without any request
+ok - K. orbital-build: 403 without key, 404 with nothing staged, runs on the staged copy without any request and writes nothing
+
+11/11 passed

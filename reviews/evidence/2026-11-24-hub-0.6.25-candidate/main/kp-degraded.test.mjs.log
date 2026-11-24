@@ -1,0 +1,31 @@
+ok - normal cadence: value first seen 3.13 h after its interval start → ok
+ok - normal cadence: the same value an hour and two later (4.13 h, 5.13 h) → ok (was degraded under the 4 h rule)
+ok - delayed replacement (next value first seen at 4.13 h): the old value at 6.13 h → ok
+ok - boundary: 1 s under 7.5 h → ok; exactly 7.5 h → degraded; 1 s over → degraded
+ok - missing replacement: first hourly run past the limit (8.13 h) → degraded, reason = our observation-age limit from the interval start
+ok - invalid time_tag (unparseable, null, number) → degraded with its own reason, never ok
+ok - future time_tag beyond 5 min skew → degraded (time_tag_in_future); within skew → ok
+ok - clock-skew boundary: exactly 300 s ahead → ok; 301 s ahead → degraded (time_tag_in_future)
+ok - synthetic ages sampled across the reported 4–8 Nov range (3.13–6.13 h, 0.25 h steps; not a replay of the 102 measured runs) → 0 degraded
+ok - collectSwpc at 5.13 h (was degraded): envelope ok, no status_reason, interval start + end published
+ok - collectSwpc at 8.13 h: envelope degraded with status_reason observation_older_than_limit
+ok - collectSwpc with an invalid newest time_tag: degraded (time_tag_invalid), value still published
+ok - collectUsgs with no metadata.generated → degraded (outcome unchanged) with feed_age_unknown, never feed_not_refreshed
+ok - collectUsgs with a stale feed: degraded with feed_not_refreshed (limit 600 s); fresh feed: ok, no reason
+ok - Kp degraded: names our observation-age limit, the interval start and "provisional"; never blames the source
+ok - Kp invalid / future timestamps: their own wording, no age claimed
+ok - usgs, co2, seaice: freshness-rule wording with their own limits (days for daily products)
+ok - ships (Mac envelope, no reason code): flowing fraction < 90% → flow wording, never "late"
+ok - ships (Mac envelope): overlong → overlong wording (not described as low flow), never "late"
+ok - ships (cloud fallback reason codes): both conditions worded from the hub reason
+ok - cloud ships, generated fields → renderer: 76 s, 75.04 s, 75.0001 s overlong; 0.899, 0.8999 flow — condition never contradicted
+ok - Mac ships (elapsed_wall_s published to 0.1 s, collector unchanged): 76.3 s states it; a rounded 75.0 s says "exceeded" + "rounded to 0.1 s", no invented digits
+ok - unknown reason / no reason (older hub): neutral collection-quality wording, no cause invented, never "source flagged"
+ok - forest keeps its specific sweep wording (not routed through the degraded text)
+ok - readings/report with a normal Kp timestamp: card + summary show the interval and "began … ago"
+ok - readings/report with an INVALID Kp timestamp: "interval time unknown", no NaN, no "unknown interval (began"
+ok - readings/report with a FUTURE Kp timestamp: "timestamp later than our clock", never a negative age
+ok - usgs collector → page: missing metadata.generated reads as unknown age, never "beyond our limit"
+ok - Kp shown as an interval, not an instant: "00:00–03:00 UTC"; summary never says "source degraded"
+
+kp-degraded: 29 passed, 0 failed

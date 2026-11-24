@@ -1,0 +1,153 @@
+ok - S0. every statement the worker runs equals docs/design-checks/firms-state.sql.mjs (whitespace-normalised; INPUT has real bindings)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - S1. legacy default: FIRMS_PIPELINE unset → the legacy collector runs, no v2 rows, legacy snapshot keys
+SKIP - 1a. real 5 Nov 23:45 file (5,311,642 B): v2 latest/firms.json == legacy snapshot (every record, cell, by_hour, header field) apart from raw key, run_id, format — real file not present
+SKIP - 1b. real file: latest-cells == legacy cells envelope (cells + by_hour, needed by aggregateFirms) apart from raw/run_id; files paired by run_id + retrieved_at — real file not present
+SKIP - 1c. real file: raw stored byte-identical in 2 multipart parts (5 MiB + rest), sha256 recorded; snapshot lines all ≤ 4 KiB; D1 state complete; run log as legacy — real file not present
+SKIP - 1d. real file: /place for the 3 busiest cells, 40 other cells and an empty cell == legacy answer (records 8 newest, ties in legacy order, totals) — real file not present
+SKIP - 1e. real file: next-day checkpoint == legacy (gz content = snapshot bytes; fires_daily rows equal; coverage equal); parsed content equal to legacy checkpoint — real file not present
+SKIP - 1f. two real files on one day (15:30 then 23:45): the later replaces both published files; checkpoint uses 23:45; the 15:30 output stays published, never re-chosen — real files not present
+ok - P1. A stalls; B claims, commits, publishes; A resumes with a read error → fenced, B's counts file untouched
+ok - P2. an older input's failure (fence passed) cannot replace a newer run's counts: ordered by input time
+ok - P3. a genuine failure of the newest input (malformed row) publishes down with its input time; real failure time in the body; no partial snapshot
+ok - P8. older writer paused between head() and put while a newer run publishes → its conditional put gets null → re-head → stops (newer)
+ok - P9. both shared objects absent: created once each with create-only; a second create-only gets null
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P10. create-only NOT verified (FIRMS_CREATE_ONLY unset): absent → nothing written, output stays pending; set verified → the next run publishes it
+ok - P11. legacy latest/ uploaded before our retrieval → older (replaced); uploaded after → UNCERTAIN: deferred, not overwritten, not superseded
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P12. DOWN → SUCCESS, same input, through the scheduled job: attempt 1 fails (snapshot write), next run retries it → its counts file becomes ok, then the new run publishes
+ok - P14. SUCCESS → delayed FAILURE: A's fence passes, A pauses before its head(); B claims, commits, publishes; A resumes → counts stay ok
+ok - P15. same race at the put itself: A's down head() saw nothing, B publishes ok, A's create-only put → null → re-head → stop
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P16. DISCOVERY REPAIR via the job: records published, counts put fails → next run finds it (>= current) and writes the counts only, records untouched
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P17. lost D1 latest_at after a successful R2 write → next run reconciles; records not rewritten; only the counts written
+ok - P18. lost D1 cells_at after both R2 writes → next run reconciles with ZERO R2 writes for the repair
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - P19. an OLDER run's pending repair is never chosen once a newer run is current; swept as superseded
+ok - P20. repair attempts are bounded: the counts put keeps failing → 3 publication claims, then publish-bound and out of discovery
+ok - C1. exclusive claim: two attempts on one input at once → one proceeds, the other "claim lost"; one output
+ok - C2. attempts bounded at 3: three failing attempts (each after its lease) → the input leaves discovery; a 4th claim inserts nothing
+ok - C3. a live lease blocks a second claim; after the lease expires a new attempt may claim; the stale attempt's commit is fenced
+ok - C4. a collecting run whose retrieved_at is already taken (here by a down run) abandons: nothing registered, never re-stamped
+ok - C5. no-input down runs re-stamp +1 ms at most 3 times, then refuse; the body carries the real failure time
+ok - C6. cutover is written once, by the first registration; later registrations leave it
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - C7. expiry sweep: an unprocessed input older than 36 h is expired, never started; a superseded one is swept by the next publication
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - F1. resource guard: a 9 MiB file is archived (multipart, byte-identical), not processed; note text as legacy; /health/publication fails on the guard
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - F2. HTTP 500, network error, Invalid key: down with the legacy note prefixes; counts file down; records kept
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - F3. Content-Length mismatch → "truncated response", nothing registered; a line over 4 KiB → run fails "line longer", attempt aborted, no snapshot
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:threw Error: D1 stub: forced failure; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - F4. an uncaught error in the v2 job (D1 down at the sweep) never calls the unconditional writeDown: counts written through CAS with its own identity
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - F5. multipart part failure while archiving raw → upload aborted, nothing left, run down
+ok - F6. a download that stalls after the headers is aborted at the download limit: down "download timed out", nothing registered, no raw left
+ok - F7. /admin/probe/r2-conditional: admin key required; every check true on R2 semantics; nothing left under probe/
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G1a. ROLLBACK: v2 publishes 23:00, FIRMS_PIPELINE unset, legacy publishes 23:45 → the checkpoint is the 23:45 legacy file (2 records)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G1b. mixed day the other way: legacy 22:00, v2 re-enabled, v2 23:00 → the v2 output; then a legacy-only next day after another rollback → legacy
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+history firms-checkpoint failed Error: committed-output read failed; checkpoint deferred: Error: D1 stub: forced failure
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G2a. a failed committed-output read DEFERS the checkpoint (history failure logged, no gap, no marker); the next run completes it from the committed snapshot
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+history firms-checkpoint failed Error: D1 stub: forced failure
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+history firms-checkpoint failed Error: D1 stub: forced failure
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G2b. other unreadable state defers too: the completion-marker read, and a fires_daily batch failing half-way (no marker; retry completes, rows not doubled)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G2c. the checkpoint never reads the cutover setting: a failing firms_settings read changes nothing; missing tables with v2 OFF = no committed outputs; with v2 ON = deferred
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G2d. cutover-state read failure after a ROLLBACK (v2 off, v2 has run): the checkpoint is deferred — no gap, no marker; next run completes with the right input
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G2e. v2 never ran and is off (the "deploy 0.6.0 with v2 off" state): the checkpoint runs the legacy selection — its only firms_* access is one firms_settings read; it never reads firms_outputs/inputs/attempts/identity
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G3a. a sidecar with the right run but wrong attempt/token/counts is REJECTED and rebuilt from the committed snapshot: marker 1 record, fires_daily = firesDaily(snapshot)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G3b. every sidecar fault is caught (size, run, token, attempt, retrieved_at, records, by_cell/cells/by_hour sums); a missing sidecar is rebuilt
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G3c. a committed snapshot whose bytes no longer match its commit → checkpoint REFUSED: no marker, no fires_daily, no checkpoint object; also refused when its metadata token differs
+ok - G3d. publication applies the same checks: a wrong sidecar → counts rebuilt from the committed snapshot; a snapshot with another token → nothing published
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G4a. GPT case: records published, counts put fails; next run repairs counts then its fresh fetch fails → /health/publication/firms 200 (log agrees with the pair completion)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G4b. …and the age is NOT reset: if fresh fetches keep failing, the check fails once the 09:00 data is overdue (09:50:40), exactly as without a repair
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G4c. a v2 publication whose latest ok log is for ANOTHER run is reported, not hidden
+ok - G5a. GPT case: probe multipart PART failure → rejects, every upload aborted, nothing left (uploads tracked, not inferred from a listing)
+ok - G5b. probe failure at multipart COMPLETE, at the abort test's part, and at a plain put → each rejects with 0 uploads open and 0 probe objects
+firms firms:threw Error: R2 stub: forced complete failure raw/firms/2026-11-07T09-45Z-179404474000; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - G5c. the writer itself never leaves an upload open: complete() failing during a collect → upload aborted, run down, nothing registered
+SKIP - G6. ROLLBACK BY REDEPLOY: the live 0.5.3 code (OLD_WORKER = main:phase1/worker.js) checkpoints a v2-written day correctly and keeps collecting/publishing, health up — set OLD_WORKER to a copy of main:phase1/worker.js (git show main:phase1/worker.js > /tmp/w053.mjs)
+ok - N1. header-only FIRMS file WITHOUT a trailing newline (the real 122-byte post-midnight file): legacy parse = 0 rows, not "malformed line 2"
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - N2. the nightly case end to end, both pipelines: 00:00 UTC header-only (no newline) → down with the boundary note, health/publication stays 200 (expected empty day), records kept
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - L1. checkpoint input = the LATEST publication of either kind (legacy key + retrieval time; the cutover is not a filter)
+ok - L2. legacy-only day: legacy snapshot checkpointed by the legacy path; fires_daily from it
+ok - L3. negative control: a legacy snapshot 1 byte over L_json → gap recorded, the object is never read; at exactly L_json it is read
+ok - L4. bounded gunzip: a legacy checkpoint decompressing to L_json + 1 is refused (null) before parsing; exactly L_json is returned
+ok - L5. /place during the switch: legacy latest/ + new counts (run_id on one side only) → withheld; legacy latest/ over L_json → withheld, not parsed
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - PDL1. lines/1: the first counts read is down (the v2 writer's own envelope) → "down" with its note and run metadata, no count, no records
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - PDL2. lines/1: first read ok but not the records' run, the pairing re-read finds DOWN counts → "down" from the re-read envelope (never "withheld")
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - PDL3. lines/1: a genuine mismatch on both reads is still "withheld"; a matching pair is still served
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - PDL4. lines/1: down counts while every scan slot is taken → "down" at once (not "busy" beside a down envelope; no wait, no scan)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - B1. /place scan cap: 2 concurrent scans per isolate; a 3rd waits ≤ 2 s then answers "busy" (counts still given)
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+ok - B2. /place answer cache stays ≤ 256 KB (LRU) across 1,200 distinct cells (≈ 0.6 MB of answers); repeat answers equal fresh scans
+
+firms-v2: 61 passed, 0 failed, 7 skipped
