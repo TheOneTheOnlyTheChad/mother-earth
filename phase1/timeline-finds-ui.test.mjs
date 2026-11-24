@@ -413,7 +413,7 @@ for (const [name, mut] of BAD) { const X = await open({ mutate: mut });
   ok(`I the new page, built for schema 4, refuses the schema-3 catalogue even when pinned (${X.axis}); its list stays`, /^off:/.test(X.axis) && (await st(X.p)).off, X.axis); await X.c.close();
   X = await open({ page: newPage, script: oldJs });
   ok(`I the new page with the released script (another build key) leaves the list as the only view (${X.axis})`, X.axis === 'off:build', X.axis); await X.c.close();
-  X = await open({ page: oldPage.replace(`data-build="${oldBuild}"`, `data-build="${newBuild}"`), script: newJs, catalogue: R3B });
+  X = await open({ page: oldPage.replace(`data-build="${oldBuild}"`, `data-build="${newBuild}"`), script: brokenJs(newJs), catalogue: R3B });   // this script, with any break applied, so the wheel check below is sensitive to it
   const v = X.axis === 'on' ? await X.p.evaluate(() => ({ ft: !!document.querySelector('#xpl .ftrack'), recent: !!document.querySelector('[data-preset="recent"]'), hasf: document.getElementById('xpl').className, nomk: null })) : null;
   if (X.axis === 'on') { const p = X.p; await p.focus('#xpl'); await p.keyboard.press('Enter'); for (let i = 0; i < 30; i++) { await p.keyboard.press('Tab'); if (await p.evaluate(() => document.activeElement.matches('#xpl .track a.mk'))) break; }
     const id0 = await p.evaluate(() => document.activeElement.dataset.entry), q = await p.evaluate(() => { const r = document.activeElement.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }); await p.mouse.move(q.x, q.y);
