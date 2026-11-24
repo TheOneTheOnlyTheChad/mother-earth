@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 03:31 UTC (clock reading) — **Animals baseline repair: GPT's review is a PASS with no blocking finding; fresh-main integration check done on the branch (`animals-baseline-repair-rc` `333fc9d`). Waiting for Chad's own landing line. Not merged; nothing deployed.** (page: none; Animals thread)
+- **GPT's review (relayed by Chad; read by Claude from GPT's folder on the Mac and filed unchanged on the branch):** `reviews/2026-11-24-animals-baseline-repair-rc-gpt-review.md`. The separate Timeline pin is accepted; all four points put to GPT accepted. GPT isolated 13h's header clause itself. GPT did not rerun the browser suite or the breaks: the 280 result is Claude's workspace evidence. Not a merge authorisation.
+- **Integration:** main `9036552` merged into the branch (`42fe5b7`), no conflict; main had brought documents only. On that tree: whole suite 280 passed, 0 failed; ten section-13 breaks, ten caught; `hub-alignment` 6 passed. The one functional difference from main is `phase1/animals-tab-ui.test.cjs` (sha256 `83ff9b18…03ad`, the value GPT computed).
+- **Carried forward, not done:** two checks share the label 13f (rename at the next suite change); moving `TL_MAIN` belongs in the Timeline release checklist; after a landing, main is merged into `animals-assessment-rc` before its next review.
+- **Record:** `reviews/2026-11-24-animals-baseline-repair-rc.md` rev 1.1 on the branch; Mac `_review/animals-baseline-repair-rc/integrated-333fc9d/`.
+- **Unchanged:** `animals-assessment-rc` `ab1a223` parked, R1 open.
+
 ## 24 Nov 03:23:01 UTC (clock reading) — **Timeline story thread CLOSED: GPT passed the test-only commit `1d0c6dd`; handover written** (docs only)
 - **GPT's review (24 Nov, read by Claude from the Mac file Chad named, filed unchanged):** `reviews/2026-11-24-timeline-changes-ui-1d0c6dd-gpt-review.md`, sha256 `cbe1fbaf29bf102870a23729b4e547ce9c26c787d2d80378e5d84fbb75938143`. PASS; no page or hub rollback recommended. GPT independently ran the changed fixture block and the Worker's catalogue route (pinned 200 / missing object 503 / unpinned 404 with no R2 read) and verified the packet's 21 hashes; **no browser suite ran in its review**, so 173/173, the 14 breaks and the 172/173 control remain Claude's results.
 - **GPT's two follow-ups, recommended and not commissioned:** a permanent break `unpinned-is-pinned`; the previous revision read from `BUILD.json`. Test-only; neither blocks the close-out. Recorded in HANDOVER.
