@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 14:05 UTC (clock reading) — **Nature context: close-out items 1–5 done after the release; thread stays open for Chad's choice of the next part of the spec** (page: none; Nature context thread)
+- **Mac `_review/`:** this thread's four copies (`nature-context-rc-879cea8`, `-rc-90eb522`, `nature-context-release-f75c167`, `-release-782da28`) moved to `_to_delete/`. Left in `_review/` because they belong to other threads: `animals-nc-pin-rc` (Animals owner; its branch is merged and deleted), Cape Town, Earth from Space and widths copies.
+- **Branches:** the three release branches deleted (previous entry). Remaining on GitHub, each another thread's: `animals-assessment-rc`, `cape-town-public-proposal`, `cape-town-station-rc`, `earth-from-space-fixtures-rc`, `earth-from-space-rc`, `earth-from-space-stage-d-docs-r2`, `timeline-finds-rc`, `widths-preview-rc`.
+- **Mac sync:** whole repo at `b13074c`, preserve-first (229 files; every preserved copy matched an earlier commit; re-compare clean).
+- **Clean checkouts:** the workspace clone is clean on `main` = origin; the baseline worktree is removed.
+- **Not done:** the Project doc `claude/STATUS.md` was not refreshed (other threads edit STATUS concurrently); treat it as stale and read the repo copy.
+- **Next (Nature context), for Chad to choose:** (1) soil carbon C1 bounded methods and aggregation assessment, docs only (proposal rev 2 §5; needs his go, N5); (2) journey context proposal (Workstream C, with the Animals owner); (3) global integrated disturbance alerts measurement (N6, parked); (4) hub `quantity` string fix (hub owner, own Approve line).
+
 ## 24 Nov 13:58 UTC (clock reading) — **Nature context RELEASED on Chad's own Approve line: main fast-forwarded to `782da28` and pushed 13:54:16 UTC; served files hash-verified; live read done. No hub deploy** (page: `782da28`; Nature context thread)
 - **Approve line (Chad, his own message):** "Approve: publish Nature context release `782da288f30defe462647ce38844281131ed35ed` to main (forest wording, Animals NC_MAIN pin, REGISTER correction); no hub deploy."
 - **Before the push:** main still `bd7dd16`, an ancestor of `782da28` (fast-forward; no new reconciliation needed). Reconciled tree `3064f37` had passed the four final checks (nature-context-ui 78/0, animals-tab-ui 282/0, hub-alignment 6/0, place-ui 35/0) and GPT's combined review (`reviews/2026-11-24-animals-nc-pin-and-nature-context-release-gpt-review.md`, sha256 `0c14820b…8949`: Animals patch PASS unchanged; combined bytes accepted with the disclosed limits).
