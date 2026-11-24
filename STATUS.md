@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 17:59:14 UTC — **R2 UPLOAD DONE: `ref/timeline/tl-2026-11-R4.json`, read back exact. Hub preflight done; waiting for Chad's own hub line. Hub not deployed, page not released** (Timeline thread; Chad: "Approve: upload phase1/timeline/catalogue/tl-2026-11-R4.json (48,134 B, sha256 74b1f8b165283b98023876fbd9e64b876bea17030973bfbc4ebea5f3ec8900ca) to R2 as ref/timeline/tl-2026-11-R4.json, and read it back")
+- **Before (17:58:59 UTC):** destination empty; `ref/timeline/` held R1, R2, R3 only. Source read from the branch at `9b83b5c`: 48,134 B, `74b1f8b1…00ca`.
+- **Upload (dashboard R2 objects API, Claude's own pane tab):** HTTP 200, size 48,134, etag `faf15e78734e2ce896ace97555cc4c1a`, version `7e5df149c0cdbfe8cd47b5b0740c7075`, uploaded 17:59:14.528Z.
+- **Read back (17:59:21 UTC):** 200, 48,134 B, sha256 `74b1f8b165283b98023876fbd9e64b876bea17030973bfbc4ebea5f3ec8900ca` (exact). R1 `096ae648…0fbe`, R2 `2f39aa30…0356`, R3 `f1a5fab2…0993` read back unchanged, with their earlier upload times.
+- **No public effect (17:59:50 UTC):** hub `/` reports 0.6.24, current R3; `/catalogue/timeline/tl-2026-11-R4` 404 "unknown revision"; R1–R3 routes exact.
+- **Hub preflight, read-only (17:59:37 UTC):** deployed code read back from Cloudflare = 551,400 B, `db4f9cdf…1aa5` (0.6.24, = main's file). 25 bindings, `EARTHVIEW_ENABLED=manual`, no window variables; crons `*/5`, `*/15`, `11,41`, `7`; compatibility date 2026-10-30; five `earthview/` objects, last changed 22 Nov. Candidate file at `0235545` read from GitHub: 551,780 B, `d5432318…e24d`. Main's `worker.js` unchanged since the candidate was cut.
+- The object is uploaded: changed catalogue bytes, a date slip past 25 Nov included, now need a new revision id and key.
+- **Not done:** hub 0.6.25 deploy, its landing on main, the combined-tree test, the page release.
+
 ## 24 Nov 17:57 UTC (clock reading) — **Timeline R4: GPT PASSES the page candidate `9b83b5c` and the hub 0.6.25 candidate `0235545`. Catalogue bytes final. Waiting for Chad's own upload line; nothing uploaded, deployed or merged** (page: none; Timeline thread)
 - GPT's review filed unchanged: `reviews/2026-11-24-timeline-r4-page-and-hub-release-gpt-review.md` (sha256 `8d18f046…a63f`). Technical passes only; no production step is approved by it. Suite migrations and the source freeze accepted, with the stated limits kept on record: `timeline-travel-ui` is a schema-3 run, not a full R4 travel run; the older `health-breaks` and `firms-v2-breaks` runners miss some breaks on main and candidate alike; no real phone, Safari, screen reader, 200 % zoom or physical wheel.
 - **Chad (24 Nov): keep the 25 Nov 2026 page release date.** The catalogue is final: `tl-2026-11-R4`, 48,134 B, sha256 `74b1f8b165283b98023876fbd9e64b876bea17030973bfbc4ebea5f3ec8900ca`.
