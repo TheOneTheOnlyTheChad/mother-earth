@@ -85,11 +85,11 @@ An empty table answers 503 with 288 overdue (C13), so a forgotten seed cannot pa
 - **A (13):** the hub file is the recorded deployed one; 19 spans found once and in both built files; the query is the
   reviewed one; a changed source, a missing span and a doubled span are each noticed; two builds a day apart differ only in
   the time lines; the examples equal the build.
-- **B (14):** the timetable of plan 2.2 at every boundary (1 ms before, at, 1 ms after) and every five minutes;
+- **B (17):** the timetable of plan 2.2 at every boundary (1 ms before, at, 1 ms after) and every five minutes;
   runs 503 at T0 + 50 min for slot A only, recovery at T0 + 100; trial 503 at T0 + 120 min 15 s, closeout at T0 + 170;
   **rows returned 261, 268, 274, 281** at the four points GPT counted; `HEAD` and `GET` alike; equality with the real
   hub; 24 wrong paths and five other methods; no outbound request; **nothing read from the env**.
-- **C (16 named, 26 checks):** the schema statements; each set's row counts and verdicts at four clock times; the validity
+- **C (25):** the schema statements; each set's row counts and verdicts at four clock times; the validity
   bound; SQLite's plan uses the `(layer, finished_at)` index with no scan and no sort; equality with the real hub; the
   recorder passes the query and its values unchanged; "unavailable" when no figure exists; a failing database; an empty
   table; the router.
