@@ -134,7 +134,7 @@ Lane height (heading, sentence and content): landing view **134 px at 1280, 252 
 ## 7. Not proved, and not approved
 
 - Focus was checked by computed style, `:focus-visible` and hit-testing, plus screenshots; not on a real phone, Safari, a screen reader or true 200 % zoom.
-- One existing behaviour is unchanged and worth naming: with the mouse wheel turned on and a mark focused, the first wheel step that redraws the mark turns the wheel off (the explorer's own rule, all marks). Crossing 2 Ma with focus on a find therefore happens in one step; the W checks use single steps.
+- Seen while writing the W checks, not traced: with the wheel turned on and a find's link focused, the first wheel step zoomed (0.4 to 0.646 Ma) and further steps did nothing. I have not checked whether main behaves the same with an extinction mark focused, or why. The W checks therefore cross 2 Ma in one step. Worth a look before a release candidate.
 - The rehearsal change record, final entry count and lane wording still need review with the release data.
 - Not a release candidate: no freeze record, REGISTER rows, Animals `TL_MAIN` maintenance, hub pin or upload. `BASE_MAIN` untouched. Nature context's `NC_MAIN` work is on its own branch and was not touched.
 
