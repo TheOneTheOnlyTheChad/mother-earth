@@ -53,6 +53,15 @@ One browser globe showing the latest observations of the planet from open live f
 - **Measure, don't assume.** Every limit/cost claim gets measured on the real platform and the number written down with the date.
 - **Running cost as low as possible (updated 6 Nov 2026).** The $0 target ended when Cloudflare Workers Paid ($5/month) started on 3 Nov. Cost is now accepted where it buys something, kept to the minimum. Name every new line item, with its amount, before it is incurred; Chad decides.
 - **MVP lives in the now.** Page reads `latest/*` only; history accumulates cheaply for phase-3 baselines.
+- **Dated snapshots and modelled datasets are allowed (Chad, 24 Nov 2026; standing; supersedes the 15 Nov feature rule and the 19 Nov "one archive feature" line below).** Every such product must:
+  - say plainly whether it is a model or an observation, never blurring the two;
+  - state its reporting period, source and version, and its limitations;
+  - never present historical data as live.
+  Lifecycle:
+  - check for a newer version before freezing a candidate, and periodically during maintenance;
+  - propose a sensible review cadence for each product;
+  - keep the last-checked date visible in the records;
+  - preserve earlier versions, and review the changes before replacing pinned data.
 - **Keys are shared and recorded.** He is fine with Claude knowing them. Record: `~/Documents/Mother Earth/KEYS.md` (gitignored). Secrets can't be read back from Cloudflare, so the value goes into KEYS.md *first*, then into Cloudflare.
 - **Reviews (updated 1 Nov 2026):** GPT and Gemini are watching the site grow and want to assist, but they do not weigh in on every decision — Chad pulls them in when he sees something worth a three-way chat; otherwise Claude judges and builds. Claude stays sole code writer/deployer.
 - **Honesty over polish.** If a layer can't be shown honestly (e.g. sea-ice imagery blind in polar night), say "not shown" with the measured reason rather than paint something.
@@ -332,7 +341,7 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Sun picture watch (05:00 UTC read):** 23 hourly runs ok; about 4.9 MB a day, 1.8 GB a year; no retention; no pressure against R2's 10 GB free tier verified. Bucket total and lifecycle rules not verified. Cleanup stays a separate proposal and must keep `sunface/seen/`.
 
 ## 4ac. Thread facts (15–16 Nov 2026, Night lights thread)
-- **Chad's feature rule (15 Nov):** "if they arent live feeds or at least regularly updated things then we drop it". "The Ground Moved" (mapped faults; GEM's last release 2019) was dropped under it. Night lights passed.
+- **(Superseded 24 Nov 2026 by the dated/modelled rule in §2.)** **Chad's feature rule (15 Nov):** "if they arent live feeds or at least regularly updated things then we drop it". "The Ground Moved" (mapped faults; GEM's last release 2019) was dropped under it. Night lights passed.
 - **Night lights is page-only, direct from the reader's browser to NASA GIBS** (WMS 1.3.0, EPSG:4326, `BBOX` south,west,north,east). Layers `VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance` and `VIIRS_NOAA20_Clear_Sky_Confidence_Night`; values are read from picture colours through NASA's two colour keys (`colormaps/v1.3/*.xml`). No hub request, nothing stored. REGISTER: under the NASA GIBS entry (filed 16 Nov). GIBS returns an empty 302-byte picture for a date out of range and never substitutes a date.
 - **Our rules:** newest UTC date whose displayed 2048 × 1024 frame has no more than 1% no data in 30°S–30°N, judged on the full frame (probe 512 × 256 first; four dates at most); comparison uses clear-sky confidence 0.95 or more on both nights, in whole hundredths (a 32-bit 0.95 fails "0.95 or more"); three shares "of the area in view"; no totals; never "power", "outage", "blackout"; every GIBS request has a 20-second limit (`WAIT_MS`, Claude's number).
 - **The globe library (three-globe in globe.gl 2.45.0) puts a picture on the globe when its load finishes, not in the order asked.** `nightlights.js` puts a gate on `globeMaterial().map`: while the layer has asked for a picture nothing else is let on, and a retired night picture is never let on. The wording (imagery line, its full form, the Sky label via `ME.zoomImgLabel`) is written when a picture is let through, from that picture's own date. `ME.nightLights.state()` shows `pending` and `gate`. A globe.gl upgrade must rerun `night-lights-ui` (sections S, S2, S3, V).
@@ -361,7 +370,7 @@ Metrics: `…/workers/services/view/mother-earth/production/metrics` — read wi
 - **Secrets:** `KEYS.md` on the Mac must never be printed; use scripts that read it themselves. Its contents reached tool output once this thread through a failed redaction; nothing was repeated or committed.
 
 ## 4ag. Thread facts (19 Nov 2026, Animals thread)
-- **Recorded animal journeys are the one archive feature** (Chad, 19 Nov): allowed on the Animals tab only; every other layer keeps the live-feed rule.
+- **(Superseded 24 Nov 2026 by the dated/modelled rule in §2; journeys stay on the Animals tab.)** **Recorded animal journeys are the one archive feature** (Chad, 19 Nov): allowed on the Animals tab only; every other layer keeps the live-feed rule.
 - **Five header tabs.** Tabs go compact at 480 px and below and between 1280 and 1365 px; header padding is 4 px between 721 and 760 px; the promise line is hidden below 1200 px. Older suites' expectations were updated on the Animals branches (five tabs, 17 switches, 1200 px).
 - **Journey files are verified, not trusted:** pinned list → manifest → display file, each by sha256, in the page. A changed data file needs the pin in `animals-journey.js` changed with it, and the script's `?v=`.
 - **Switching off must abort the request**, not only ignore its answer (`AbortController`, plus a generation guard). `pagehide` and `pageshow` (persisted) reset the journey so Back never restores a drawn one.
