@@ -83,3 +83,10 @@ From `/cells/forest` (hub 0.6.24) at 07:06–07:09 UTC:
 - Forest wording appears in `index.html` (card), `app.js` (place row, report line), `sources.html`, `phase1/worker.js` (`quantity`), `REGISTER.md`.
 - `app.js` and `index.html` are shared page files: `animals-tab-ui` holds them to main at `BASE_MAIN` `0e620831…f195` (check 13b for `index.html`; the `same` list for `app.js`, `layers.js` and others). Any change to either fails those checks until the Animals owner moves `BASE_MAIN` after a reviewed page commit; never move it to hide an unrelated change.
 - Forest sweep cadence: cron `11,41 * * * *` (two runs an hour), `FOREST_PER_RUN` 6, so 559 cells take about 47 hours with no retries; today's oldest cell query was 67.9 hours old.
+
+## Amendment, 24 Nov 2026 (after GPT's Stage 0 review, `reviews/2026-11-24-nature-context-stage0-gpt-review.md`)
+The notes above are kept as written. Three readings are corrected here:
+- **§3 "12 queries of this cell retained"** is the hub's label. `forest_daily` has `PRIMARY KEY (cell_id, date)` and the collector writes `INSERT OR REPLACE`, so the number is retained daily snapshots (at most one per cell per UTC day), not every query.
+- **§4 "The API copy stopped in April 2025"** means only that the latest versions of `nasa_viirs_fire_alerts` on the Data API, read on 24 Nov 2026, were `v20250424` and `v20250425`. It is not evidence that GNW stopped that delivery path or its fire alerts elsewhere.
+- **§2 "7 to 10 calendar days"** describes the windows seen on 24 Nov only. A retried cell keeps its first `since` and no maximum retry age is enforced, so windows can be longer. Today's range is evidence, not a limit.
+- Also found while writing rev 2: the hub `quantity` string reaches the Sources "Measures" table and the rules list through `R.forest.quantity` in `app.js`, and `R.forest.unit` / `R.forest.window` repeat the "7 days" wording.
