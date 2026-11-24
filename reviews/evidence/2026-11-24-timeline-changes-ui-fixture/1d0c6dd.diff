@@ -1,0 +1,31 @@
+diff --git a/phase1/timeline-changes-ui.test.cjs b/phase1/timeline-changes-ui.test.cjs
+index dda8280..f779cd7 100644
+--- a/phase1/timeline-changes-ui.test.cjs
++++ b/phase1/timeline-changes-ui.test.cjs
+@@ -88,13 +88,19 @@ function fixture(edit) {
+ (async () => {
+   // ---- hubs: the real worker code, in-memory R2
+   const loadWorker = async (src, name) => { const f = path.join(TMP, name); fs.writeFileSync(f, src); return (await import(pathToFileURL(f).href)).default; };
+-  // The Worker in this repository is not the deployed hub and has no pin for the current revision; the deployed hub's next
+-  // version is built on another branch. "pinned hub" here = this file plus, in memory only, exactly what that version adds:
+-  // one table entry for CUR and TIMELINE_CURRENT. "unpinned hub" = this file as it is.
+-  const W0 = fs.readFileSync(path.join(__dirname, 'worker.js'), 'utf8'), TA = "  }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';", CA = "const TIMELINE_CURRENT = 'tl-2026-11-R2';";
+-  if (W0.split(TA).length !== 2 || W0.split(CA).length !== 2) throw new Error('worker anchors missing');
+-  const newHub = await loadWorker(W0.replace(TA, `  }),\n  '${CUR}': Object.freeze({ key: 'ref/timeline/${CUR}.json', revision: '${CUR}', fileSha256: '${sha(CAT)}', bytes: ${CAT.length} }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';`).replace(CA, `const TIMELINE_CURRENT = '${CUR}';`), 'hub-new.mjs');
+-  const unpinnedHub = await loadWorker(W0, 'hub-unpinned.mjs');
++  // Since the hub-to-main landing (23 Nov 2026) the Worker in this repository is the deployed hub and pins the current revision.
++  // "pinned hub" = this file as it is. "unpinned hub" = this file with, in memory only, the one table entry for CUR removed
++  // and TIMELINE_CURRENT set back to the revision before it. A Worker that does not yet pin CUR is handled the other way round.
++  const W0 = fs.readFileSync(path.join(__dirname, 'worker.js'), 'utf8'), TA = "  }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';";
++  const CA = `const TIMELINE_CURRENT = '${CUR}';`, CA_PREV = "const TIMELINE_CURRENT = 'tl-2026-11-R2';";
++  const ENTRY = new RegExp(`\\n  '${CUR}': Object\\.freeze\\(\\{[^}]*\\}\\),(?=\\n\\}\\);\\nconst TIMELINE_LEGACY)`);
++  let pinnedSrc, unpinnedSrc;
++  if (W0.split(CA).length === 2 && ENTRY.test(W0)) { pinnedSrc = W0; unpinnedSrc = W0.replace(ENTRY, '').replace(CA, CA_PREV); }
++  else if (W0.split(TA).length === 2 && W0.split(CA_PREV).length === 2) { unpinnedSrc = W0; pinnedSrc = W0.replace(TA, `  }),\n  '${CUR}': Object.freeze({ key: 'ref/timeline/${CUR}.json', revision: '${CUR}', fileSha256: '${sha(CAT)}', bytes: ${CAT.length} }),\n});\nconst TIMELINE_LEGACY = 'tl-2026-11-R1';`).replace(CA_PREV, CA); }
++  else throw new Error('worker anchors missing');
++  if (unpinnedSrc.includes(`'${CUR}'`) || !pinnedSrc.includes(`fileSha256: '${sha(CAT)}'`)) throw new Error('worker fixtures: the unpinned copy still names the current revision, or the pinned copy lacks its hash');
++  const newHub = await loadWorker(pinnedSrc, 'hub-new.mjs');
++  const unpinnedHub = await loadWorker(unpinnedSrc, 'hub-unpinned.mjs');
+   const oldHubSrc = git(OLD_HUB_COMMIT, 'phase1/worker.js');
+   const oldHub = await loadWorker(oldHubSrc, 'hub-old.mjs');
+   const KEY = r => `ref/timeline/${r}.json`;

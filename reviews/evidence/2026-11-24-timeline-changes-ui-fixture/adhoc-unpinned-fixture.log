@@ -1,0 +1,7 @@
+# ad hoc, main 3160658, 2026-11-24T03:14:16Z: the unpinned fixture left equal to the pinned Worker
+## with the fixture guard in place:
+Error: worker fixtures: the unpinned copy still names the current revision, or the pinned copy lacks its hash
+## with the guard also removed:
+FAIL D new page + new script + unpinned hub (no pin for the current revision) → 404, static list {"state":"off","reason":"http 503","marks":0,"offShown":true,"cards":5,"shelf":1}
+timeline-changes-ui: 172 pass, 1 fail
+# end 2026-11-24T03:14:50Z

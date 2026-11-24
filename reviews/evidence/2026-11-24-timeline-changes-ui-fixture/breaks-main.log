@@ -1,0 +1,16 @@
+# breaks on main 3160658, start 2026-11-24T03:06:08Z
+BREAK=fragment-only-link exit=1 :: timeline-changes-ui: 135 pass, 38 fail (BREAK=fragment-only-link) :: FAIL lines 38
+BREAK=back-loses-entry exit=1 :: timeline-changes-ui: 107 pass, 20 fail (BREAK=back-loses-entry) :: FAIL lines 20
+BREAK=close-handler-reused exit=1 :: timeline-changes-ui: 138 pass, 10 fail (BREAK=close-handler-reused) :: FAIL lines 10
+BREAK=no-focus exit=1 :: timeline-changes-ui: 157 pass, 16 fail (BREAK=no-focus) :: FAIL lines 16
+BREAK=single-jump-memory exit=1 :: timeline-changes-ui: 165 pass, 8 fail (BREAK=single-jump-memory) :: FAIL lines 8
+BREAK=no-return-target exit=1 :: timeline-changes-ui: 153 pass, 20 fail (BREAK=no-return-target) :: FAIL lines 20
+BREAK=no-schema2-validate exit=1 :: timeline-changes-ui: 161 pass, 12 fail (BREAK=no-schema2-validate) :: FAIL lines 12
+BREAK=guard-off exit=1 :: timeline-changes-ui: 171 pass, 2 fail (BREAK=guard-off) :: FAIL lines 2
+BREAK=stale-js-version exit=1 :: timeline-changes-ui: 172 pass, 1 fail (BREAK=stale-js-version) :: FAIL lines 1
+BREAK=dropped-anchor exit=1 :: timeline-changes-ui: 170 pass, 3 fail (BREAK=dropped-anchor) :: FAIL lines 3
+BREAK=review-date-from-release exit=1 :: timeline-changes-ui: 171 pass, 2 fail (BREAK=review-date-from-release) :: FAIL lines 2
+BREAK=review-date-from-latest-source exit=1 :: timeline-changes-ui: 172 pass, 1 fail (BREAK=review-date-from-latest-source) :: FAIL lines 1
+BREAK=old-value-hidden exit=1 :: timeline-changes-ui: 170 pass, 3 fail (BREAK=old-value-hidden) :: FAIL lines 3
+BREAK=snapshot-by-key exit=1 :: timeline-changes-ui: 170 pass, 3 fail (BREAK=snapshot-by-key) :: FAIL lines 3
+# end 2026-11-24T03:14:05Z
