@@ -2,6 +2,14 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 24 Nov 2026
+
+## 24 Nov 02:45 UTC (clock reading) — **Animals: NOAA's first reply to the bottlenose dolphin enquiry recorded. Contact established; two questions asked; no data access, no permission. Docs only; nothing changed on the live page.** (page: none; Animals thread)
+- **The reply (pasted by Chad on 24 Nov; shown in his mail view as Mon 23 Nov, 10:22 PM, time zone not stated):** Dr Jenny Litz, Marine Mammal Branch Chief, NOAA Southeast Fisheries Science Center. They are looking into it. She asks whether Gulf tracks are acceptable as well as mid-Atlantic coast tracks, and whether the aim is the journey of just a few animals. A fuller answer is likely after the Thanksgiving holiday.
+- **Recorded:** `docs/research/animals-source-audit/ENQUIRIES-ANIMALS.md` rev 3: section A filled from the pasted thread (who it is now with, the bounce, the resend shown as Wed 18 Nov), the reply and the covering note quoted, contact details left out.
+- **Not permission, not access.** Answering the two questions is Chad's; Claude sends nothing. His answer follows his 23 Nov rule on describing Mother Earth. A dataset, if offered, is a new study with its own audit.
+- **Unchanged:** `animals-assessment-rc` `ab1a223` parked, R1 open. Cape Vidal: the reply of 23 Nov (a call on Thursday) pasted again, nothing new. IUCN, ATAP, penguins, IWC: no reply reported. No follow-ups.
+
 # 23 Nov 2026
 
 ## 23 Nov 19:41 UTC (clock reading) — **Earth from Space thread closed out for the night: the three Stage D documents brought up to date, handover written. Docs only; nothing changed in production** (production: none; Earth from Space thread)
