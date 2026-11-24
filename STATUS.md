@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 18:01:46 UTC — **HUB 0.6.25 DEPLOYED and landed on main: Timeline pin `tl-2026-11-R4`. Main's `phase1/worker.js` = the deployed hub. Page NOT released (still R3)** (production: hub code only; Timeline thread; Chad: "Approve: deploy hub 0.6.25 from timeline-r4-hub-rc 0235545, phase1/worker.js sha256 d54323183ebd49acb1818b2cb68dc31a56e95c6ddc2fc8635303311837e9e24d, code only (Timeline pin tl-2026-11-R4, TIMELINE_CURRENT and the version number), no settings change; read back hash and settings; then land it on main")
+- **Read back (18:02:15 UTC):** code 551,780 B, sha256 `d54323183ebd49acb1818b2cb68dc31a56e95c6ddc2fc8635303311837e9e24d`, exact. 25 bindings with the same names and values, four crons, compatibility date and the `earthview/` objects unchanged; `EARTHVIEW_ENABLED=manual`, no window variables.
+- **Served:** hub reports 0.6.25, current R4. R4 route 200, 48,134 B, `74b1f8b1…00ca`; R1, R2, R3 and the unversioned route exact. First scheduled runs after the deploy ok; all ten health addresses healthy at 18:06:53 UTC.
+- **Landed:** `timeline-r4-hub-rc` (`eab3bd3`) merged into main with `phase1/DEPLOYED-HUB.json` set to the read-back. No page file in the merge. `hub-alignment` 6 / 0 (deployed 0.6.25), `timeline-catalogue-hub` 75 / 0 on main.
+- **Rollback:** 0.6.24, `db4f9cdf…1aa5`, `phase1/worker.js` at `72ea123`. **Not once the page pins R4** (page first).
+- **Every thread: the hub is now 0.6.25; build hub candidates on this main.** Record: `reviews/2026-11-24-hub-0.6.25-candidate.md` §9.
+- **Next:** the page branch takes this main, the combined tree is tested, then Chad's page line; release on 25 Nov UTC (from 02:00 SAST).
+
 ## 24 Nov 17:59:14 UTC — **R2 UPLOAD DONE: `ref/timeline/tl-2026-11-R4.json`, read back exact. Hub preflight done; waiting for Chad's own hub line. Hub not deployed, page not released** (Timeline thread; Chad: "Approve: upload phase1/timeline/catalogue/tl-2026-11-R4.json (48,134 B, sha256 74b1f8b165283b98023876fbd9e64b876bea17030973bfbc4ebea5f3ec8900ca) to R2 as ref/timeline/tl-2026-11-R4.json, and read it back")
 - **Before (17:58:59 UTC):** destination empty; `ref/timeline/` held R1, R2, R3 only. Source read from the branch at `9b83b5c`: 48,134 B, `74b1f8b1…00ca`.
 - **Upload (dashboard R2 objects API, Claude's own pane tab):** HTTP 200, size 48,134, etag `faf15e78734e2ce896ace97555cc4c1a`, version `7e5df149c0cdbfe8cd47b5b0740c7075`, uploaded 17:59:14.528Z.
