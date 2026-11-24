@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 06:47 UTC (clock reading) — **Timeline: Human relatives proposal rev 1 DRAFTED on Chad's "go" (audit and draft only). Nothing built; no source cleared; nothing in REGISTER** (page: none; Timeline thread)
+- **Files:** `docs/concepts/TIMELINE-HUMAN-RELATIVES-PROPOSAL.md` (sha256 `97c3254d44493092405b646979397921fd8345242b0d6cdecfbf9dad9a382873`) and its leads `docs/research/TIMELINE-HUMAN-RELATIVES-SOURCE-LEADS-2026-11-24.md` (`790ba415865d16877fe4f84025add5f4e2061238143bc2da0c0c1532ff07d844`).
+- **The leads are a first pass, not a source check.** One source was read in full (Vidal et al. 2022, CC BY 4.0, Omo I at least 233 ± 22 thousand years, with a supplementary-table correction on the page). Every other figure was seen as an abstract in a search result or a repository record. Two of three full-text pages answered with a browser check; two page reads needed an approval that went unanswered and were not made.
+- **Finding:** the bound first suggested to Chad (five or six relatives, both ends, open primary sources) does not hold. Only Homo naledi has both ends in one open source, and that is one cave deposit. The proposal changes the unit to dated evidence at a named place, attributed to a group, and expects three to five entries.
+- **It would be a full release** (new claim types, so schema 4, a new script, a catalogue revision, R2 and a hub pin), not page-only. Nothing of that is authorised.
+- **Waiting on:** Chad's H1–H5 and GPT's review of the proposal. The source refresh (T6) stays queued behind it by Chad's choice of 24 Nov.
+
 ## 24 Nov 06:41 UTC (clock reading) — **Timeline date label W1: GPT's independent live smoke PASSED, no rollback recommended. Chad asked to look into the Human relatives proposal next** (page: none; Timeline thread)
 - GPT's record filed unchanged as `reviews/2026-11-24-timeline-date-label-live-gpt-smoke.md` (3,703 B, sha256 `94d86b83c7c3fd7d8dab061c130dee7d3f637f3315d454c5346ee673168dbb02`; landed in `f08c3f3`, whose message names STATUS although this entry followed in the next commit). Desktop browser at 1280 × 720, about 06:30–06:32 UTC: exact label; What changed jump; five marks; end-Cretaceous story and image; Back/Forward keep the saved window; no console errors or warnings; all three served hashes match by independent HTTP reads.
 - GPT's limits: a focused smoke, not a full regression; the merge identity was not re-audited through Git. Real phone, Safari, screen reader, true 200 % zoom and the live no-image and image-failure states remain open.
