@@ -1,0 +1,53 @@
+ok - 0. hub reports at least 0.6.19 (0.0 s)
+ok - 1. an eligible ok sample is published: records and counts name the same run; records carry run metadata; no attempt note (0.0 s)
+ok - 2. an ordinary low-flow sample (53 of 60 s, degraded, not overlong) is eligible: it is published and it is retained after a failure (0.0 s)
+ok - 3. a failure after a good sample: counts keep the sample unchanged and gain last_attempt; records untouched; raw note only in the log and the dated object (0.0 s)
+ok - 4. a note that is not one of the collector's fixed phrases is never published: the public reason is a fixed phrase (0.0 s)
+ok - 5. the 17 Nov case: a 381.5 s, 700-vessel overlong sample after a 3,000-vessel sample is NOT published (0.0 s)
+ok - 6. nothing to keep: a failure, and an overlong sample, each give a down-shaped counts file with a fixed phrase; no records are shown as current (0.0 s)
+ok - 7. three-hour life: at 2 h 59 min the sample is kept; at 3 h it is not; attempts never move its time; an expired sample is not brought back (0.0 s)
+ok - 8. recovery: the next eligible sample replaces both files and the attempt note is gone (0.0 s)
+ok - 9. order against last_attempt: an older failure arriving late does not replace a later one (0.0 s)
+ok - 10. a delayed eligible sample newer than the retained one but older than a recorded failure: it becomes the retained sample and the later failure is kept (0.1 s)
+ok - 11. an eligible sample older than the published one is archived only (0.0 s)
+ok - 12. /place: an attempt beside a retained sample is listed with it; once the sample is three hours old the section is withheld (0.0 s)
+ok - 13. fallback scheduling: failures do not make the old sample look new; the fallback fires on the sample's real age, and its own failure is a fixed phrase (0.0 s)
+ok - 14. a failure loses its counts write to a newer eligible sample: it re-reads and attaches nothing obsolete (0.0 s)
+ok - 15. a failure loses its counts write to an OLDER-run sample published meanwhile: it re-reads and is recorded on that sample (0.0 s)
+ok - 16. a later failure lands BETWEEN an eligible sample's records write and its counts write: one coherent result, the failure kept (0.0 s)
+ok - 17. an OLDER failure lands between the two writes: it completes the sample's counts and attaches nothing (0.0 s)
+ok - 18. a newer eligible sample is published while an older one is between its two writes: the newer one stands in both files (0.0 s)
+ok - 19. a newer eligible sample is published just before an older one's records write: the older one is refused and archived only (0.0 s)
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+ok - 20. a writer interrupted between its two writes: readers withhold records; the next failure repairs the pair and is recorded on it (0.0 s)
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+ok - 21. …and the next eligible sample repairs it too (by replacing both files) (0.0 s)
+shipsRecordAttempt: counts changed twice while writing; left alone
+ok - 22. retry exhausted (counts change twice under a failure): it stops, changes nothing more, and the run is still logged (0.0 s)
+ok - 23. retry exhausted for an eligible sample (counts change twice after its records write): readers withhold; the next write repairs (0.0 s)
+ok - 24. two writers at once, both orders: fallback failure and Mac failure; the later run is the note that stands (0.0 s)
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+ok - 27. an older eligible upload (S < E < N) arriving after N was interrupted: N's counts are completed BEFORE E is archived (0.0 s)
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+ok - 28. …and a LATER last_attempt already on the counts is preserved by that repair (consecutive 1) (0.0 s)
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+ok - 29. …an attempt note OLDER than the repaired sample is not carried onto it (0.0 s)
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+ok - 30. a conflict during that repair: the counts change once under it, it reads again and completes (0.0 s)
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+shipsRepair: counts changed twice while repairing; left alone
+ok - 31. …the counts change twice under the repair: it stops, nothing is overwritten, the conflict is answered and logged, readers still withhold; the next write repairs (0.0 s)
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+shipsPublishEligible failed Error: R2 stub: forced put failure latest-cells/ships.json
+shipsRepair: counts changed twice while repairing; left alone
+shipsRecordAttempt: counts changed twice while writing; left alone
+ok - 32. a repair made by a failure is on that failure's collector_runs row; a failure whose repair conflicts says so (0.0 s)
+shipsRecordAttempt: counts changed twice while writing; left alone
+shipsRecordAttempt: counts changed twice while writing; left alone
+ok - 33. exhausted conflicts are on the collector_runs row with the true status and note: Mac overlong sample; fallback failure (0.0 s)
+ok - 25. the fallback publishes an eligible sample by the same rule: after a Mac failure it replaces the old sample and the note goes (60.0 s)
+ok - 26. an overlong fallback sample is not published either: the retained sample stays and the attempt is recorded (60.1 s)
+shipsRecordAttempt: counts changed twice while writing; left alone
+ok - 34. an overlong fallback sample whose counts write is contended twice: the conflict is on its collector_runs row with its own status (60.0 s)
+
+ships-retain-hub: 35 passed, 0 failed

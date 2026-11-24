@@ -1,0 +1,17 @@
+ok - A. first run: stamp check then one data request; CSV + meta published
+ok - A2. GET /elements/satellites serves the stored CSV byte-for-byte, CORS + sha header
+ok - B. same stamp: no data request at all
+ok - C. newer stamp, data 403: recorded down with the body; previous file and times kept
+ok - D. truncated body (cut mid-line): validation fails; previous kept
+ok - E. complete lines but far fewer rows than the last valid file: refused
+ok - F. wrong header (e.g. an HTML error page with 200): refused
+ok - G. stamp page 500 or no stamp: down, no data request
+ok - H. newer stamp + valid data: replaced, new times, D1 run rows logged
+ok - H2. meta write fails after the new CSV was stored: previous meta + CSV keep serving; new orphan removed
+hourly {"swpc":"swpc:ran","co2":"co2:ran","seaice":"seaice:ran","satellites":"satellites:not scheduled (SATELLITES_ENABLED unset)","drifters":"drifters:not scheduled (DRIFTERS_ENABLED unset)","plastic":"plastic:not scheduled (PLASTIC_ENABLED unset)","dustrgb":"dustrgb:not scheduled (DUSTRGB_ENABLED unset)","skycraft":"skycraft:not scheduled (SKYCRAFT_ENABLED unset)","sunface":"sunface:not scheduled (SUNFACE_ENABLED unset)","wind":"wind:not scheduled (WIND_ENABLED unset)","batch":{"opensky":"parked","ships":"error TypeError: env.R2.list is not a function","ships_late":"error TypeError: env.R2.list is not a function","usgs":{"ok":0,"events":0,"changed":0},"firms":{"ok":false}}}
+hourly {"swpc":"swpc:ran","co2":"co2:ran","seaice":"seaice:skipped (runs 03/09/15/21 UTC)","satellites":"satellites:skipped (odd UTC hours only)","drifters":"drifters:not scheduled (DRIFTERS_ENABLED unset)","plastic":"plastic:not scheduled (PLASTIC_ENABLED unset)","dustrgb":"dustrgb:not scheduled (DUSTRGB_ENABLED unset)","skycraft":"skycraft:not scheduled (SKYCRAFT_ENABLED unset)","sunface":"sunface:not scheduled (SUNFACE_ENABLED unset)","wind":"wind:not scheduled (WIND_ENABLED unset)","batch":{"opensky":"parked","ships":"error TypeError: env.R2.list is not a function","ships_late":"error TypeError: env.R2.list is not a function","usgs":{"ok":0,"events":0,"changed":0},"firms":{"ok":false}}}
+hourly {"swpc":"swpc:ran","co2":"co2:ran","seaice":"seaice:ran","satellites":"satellites:ran","drifters":"drifters:not scheduled (DRIFTERS_ENABLED unset)","plastic":"plastic:not scheduled (PLASTIC_ENABLED unset)","dustrgb":"dustrgb:not scheduled (DUSTRGB_ENABLED unset)","skycraft":"skycraft:not scheduled (SKYCRAFT_ENABLED unset)","sunface":"sunface:not scheduled (SUNFACE_ENABLED unset)","wind":"wind:not scheduled (WIND_ENABLED unset)","batch":{"opensky":"parked","ships":"error TypeError: env.R2.list is not a function","ships_late":"error TypeError: env.R2.list is not a function","usgs":{"ok":0,"events":0,"changed":0},"firms":{"ok":false}}}
+ok - I. scheduled hourly job: never runs satellites unless SATELLITES_ENABLED=1, and then only on odd UTC hours
+ok - J. no element file yet: 404 JSON, not a crash
+
+12 passed (2000 rows, synthetic)

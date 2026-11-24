@@ -1,0 +1,9 @@
+ok - no aggregated hours on record → "unknown", never "0 of 24 h"
+ok - partial aggregation: counts stated against the hours actually aggregated, the period named separately
+ok - the last 24 h unknown while the 7 days are known
+ok - a source-reported forest zero is labelled as the source's zero
+ok - every no-records wording carries its limit; none says a bare zero
+ok - stale layer flagged against its own refresh limit
+ok - source text is escaped (no markup reaches the page)
+
+place-rows: 7 passed

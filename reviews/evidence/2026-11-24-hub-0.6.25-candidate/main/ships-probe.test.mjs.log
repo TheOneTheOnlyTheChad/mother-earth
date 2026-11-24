@@ -1,0 +1,13 @@
+ok - A. wrong admin key → 403, no connection
+ok - B. no AISSTREAM_KEY secret → refused, no connection
+ok - C. one 10 s listen: counts messages + unique vessels by class; parse error counted; nothing published; key not stored
+ok - D. second probe inside 10 min → refused before connecting
+ok - E. Cloudflare cannot reach aisstream (522 / no upgrade) → down, reason recorded
+ok - F. network error → down, reason recorded, nothing else written
+ok - G. aisstream rejects the subscription (bad key) → down with the source error
+ok - H. binary frames are decoded (aisstream sends bytes)
+ok - I. window is clamped to 10–90 s
+ok - J. every frame shape decodes: Blob, Uint8Array, ArrayBuffer, string — and the shape is recorded
+ok - K. a frame the handler cannot process is counted as a handler error, never silently dropped
+
+11 passed

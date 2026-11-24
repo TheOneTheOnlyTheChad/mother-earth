@@ -1,0 +1,6 @@
+FAIL  one changed byte → 503 integrity
+      got: [503,"invalid"]
+FAIL  real table: legacy key holding R2 bytes → 503 integrity (never served as R1)
+FAIL  fixture: R2 key holding R1 bytes → 503 integrity (each revision checked against its own pin)
+
+timeline-catalogue-hub: 72 passed, 3 failed [BREAK=no-hash]
