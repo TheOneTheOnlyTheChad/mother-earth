@@ -20,7 +20,7 @@ t('the last 24 h unknown while the 7 days are known', () => {
 });
 t('a source-reported forest zero is labelled as the source\'s zero', () => {
   const s = text(ME.placeRows(base({ forest: { layer: 'forest', state: 'ok', cell: { count: 0, confidence: { nominal: 0, high: 0, highest: 0 }, since: '2026-10-28', queried_at: '2026-11-04T02:42:00Z' } } })));
-  assert.match(s, /Forest disturbance: 0 \(source-reported zero\) alert pixels/);
+  assert.match(s, /Forest disturbance · containing 4° cell: 0 \(source-reported zero\) alert pixels/);   // nature-context-rc: the row now names its scope
 });
 t('every no-records wording carries its limit; none says a bare zero', () => {
   const L = Object.fromEntries(['usgs', 'firms', 'ships', 'drifters', 'plastic'].map(l => [l, { layer: l, state: 'no_records', count: 0, retrieved_at: '2026-11-05T06:00:00Z' }]));
