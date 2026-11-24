@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 07:45 UTC (clock reading) — **Timeline: Humans and human relatives BUILD PROPOSAL rev 1 drafted on Chad's "go", and four enquiry drafts. Docs only; nothing built, branched or sent** (page: none; Timeline thread)
+- `docs/concepts/TIMELINE-HUMAN-RELATIVES-BUILD-PROPOSAL.md`: four finds (Dinaledi Chamber, Omo I, Xiahe 2, the La Ferrassie bone), one entry and one mark per find, nothing joining them; three new axis claim types (deposit or layer bracket; older than a dated layer; direct calibrated radiocarbon date) with the source's own notation, units and confidence kept; calibrated years counted from 1950, never the device clock; a lane view "Last 400,000 years" and a narrowest window of 0.05 Ma, both to be confirmed by measurement; schema 4, so a full release in the usual order. Decisions B1–B6 for Chad; six questions for GPT.
+- **Pixel figures in it are arithmetic** from two mark positions the travel suite logged, not measurements.
+- `docs/research/TIMELINE-HUMAN-RELATIVES-ENQUIRY-DRAFTS.md`: drafts E1–E4 to the authors of the Drimolen, Ngandong, Liang Bua and 2023 La Ferrassie papers. **Not sent; Chad sends.** No address is in the repository. Chad confirmed the PaleoAnthropology site does not load for him either, and that the other publishers ask for payment.
+- **Waiting on:** GPT's review of the build proposal; Chad's B1–B6; then his go for a branch build.
+
 ## 24 Nov 07:41 UTC (clock reading) — **Timeline: Humans and human relatives. Omo I's corrected supplementary table checked: it carries 233 ± 22. C2 no longer pending. Docs only** (page: none; Timeline thread)
 - Source-check record rev 1.2. The corrected Supplementary Table 3 (publisher's spreadsheet, sha256 `8db1b690…6020`, downloaded on Chad's yes) gives the composite as 233 ± 22 thousand years at 2σ under the Kuiper et al. 2008 calibration, 234 ± 22 under Renne et al. 2011.
 - **Set for the build proposal:** C1 Dinaledi, C2 Omo I (one-sided limit), C3 Xiahe 2 (layer age as reported by Xia et al. 2024), C7 La Ferrassie bone. **Held:** Drimolen (the 2020 dating paper needs paid access; Chad checked). **Out:** Ngandong, Liang Bua. **Still unread:** the 2023 La Ferrassie paper (site not loading; PDF only otherwise).
