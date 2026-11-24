@@ -1,0 +1,8 @@
+FAIL  13b index.html is byte-identical to the file at the Nature context baseline 90eb522; it carries the Animals tab link and menu link once each; and its header equals main 0e62083's except those two links
+      got: {"whole":false,"links":true,"header":true}
+FAIL  13k app.js is byte-identical to the file at the Nature context baseline 90eb522
+FAIL  13e sources.html is byte-identical to the file at the Nature context baseline 90eb522; it carries the Animals tab link and menu link once each and main 0e62083's header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview
+      got: {"whole":false,"links":true,"header":true,"section":true,"shortcut":true,"missing":[],"noPreview":true}
+
+animals-tab-ui: 11 passed, 3 failed
+exit=1

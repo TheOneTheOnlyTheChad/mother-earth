@@ -1,0 +1,7 @@
+NOT RUN  13b: the Nature context baseline 0000000 is not available.
+NOT RUN  13k: the Nature context baseline 0000000 is not available.
+NOT RUN  13e sources.html: the Nature context baseline 0000000 is not available.
+NOT RUN  13j: 6bebff1..0000000 cannot be read from Git (or 6bebff1 is not an ancestor). The scope check was not made.
+
+animals-tab-ui: 10 passed, 4 failed
+exit=1

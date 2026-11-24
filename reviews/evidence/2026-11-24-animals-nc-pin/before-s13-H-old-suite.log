@@ -1,0 +1,7 @@
+FAIL  13b index.html equals main's except the Animals tab link, the Animals menu link and the stylesheet version
+FAIL  13c Earth now's scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs; timeline.js: 13g)
+      got: ["app.js"]
+FAIL  13e sources.html equals main's except the Animals links and the stylesheet version, and (release) the one added Animals section with its shortcut in the Sections list, which names all six sources and the omitted Low class and never says private preview
+
+animals-tab-ui: 9 passed, 3 failed
+exit=1
