@@ -22,7 +22,7 @@ and for the pre-rendered list; the page embeds its sha256 and the build id (= th
 draws the axis only when both match (TIMELINE-DEEP-TIME-BUILD-PROPOSAL rev 1.1 §3–§4). Everything between
 <!-- TIMELINE:BEGIN --> and <!-- TIMELINE:END --> is generated; edit the JSON, not the HTML.
 """
-import hashlib, html, json, pathlib, re, sys
+import hashlib, html, json, math, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PAGE = ROOT / 'timeline.html'
@@ -52,6 +52,25 @@ SCHEMA = BUILD['schema']
 STORY_LABELS = {'cause_account': 'Attributed account of the cause', 'disagreement': 'Attributed finding that qualifies or differs'}
 if SCHEMA >= 3:
     CLAIM_LABELS.update(STORY_LABELS)
+# schema 4: dated finds on the "Humans and human relatives" lane (TIMELINE-HUMAN-RELATIVES-BUILD-PROPOSAL rev 1; GPT 24 Nov 2026).
+# One entry is one find or deposit with exactly one axis claim; nothing joins two finds. The page's script carries the same tables.
+FIND_AXIS = {'find_context_bracket': 'interval', 'find_older_than_dated_layer': 'limit', 'find_direct_date_calibrated': 'calibrated'}
+FIND_LABELS = {'find_context_bracket': 'Age bracket of the deposit or layer', 'find_older_than_dated_layer': 'Older than a dated layer above it',
+               'find_direct_date_calibrated': 'Direct radiocarbon date, calibrated', 'dated_material': 'What was dated',
+               'find_association': 'How the date relates to the find', 'reported_by': 'Reported by'}
+FIND_BASIS = {'anatomy': 'by its anatomy', 'proteins': 'by its proteins', 'mitochondrial_dna': 'by its mitochondrial DNA'}
+FIND_UNITS = {'ka': 1000.0, 'kyr': 1000.0, 'ka cal BP': 1000.0}     # the source's unit -> how many of it make one Ma
+FIND_MAX = 4                    # one sub-row each; a fifth find is refused, not clustered (GPT)
+FIND_NOTE = ('Marks and ranges show dates or age limits assigned to particular finds or deposits. They do not show how long a group lived. '
+             'Overlap in date does not establish shared place or contact.')
+# our own interpretive wording only (never a source's title or citation): whole words and phrases
+FIND_TITLE_BAN = re.compile(r'\b(earliest|latest|oldest|youngest|first|last)\b', re.I)
+FIND_TEXT_BAN = re.compile(r'\b(first appeared|last appeared|died out|went extinct|became extinct|evolved into|evolved from|ancestor of|'
+                           r'descended from|interbred|the first human|lived from|lived until|met)\b', re.I)
+FINDS = json.loads((TL / 'finds.json').read_text(encoding='utf-8')) if SCHEMA >= 4 else None
+if SCHEMA >= 4:
+    CLAIM_LABELS.update(FIND_LABELS)
+    LANES = [(i, 'Humans and human relatives' if i == 'relatives' else l) for i, l in LANES]
 ASSETS = TL / 'assets'                  # image files for this source folder; hashes are checked against these bytes
 IMAGE_KINDS = ('photograph', 'measured_image')      # 'reconstruction' is a defined value this slice refuses, labelled or not
 MEDIA = {'image/jpeg': ('.jpg', '.jpeg'), 'image/png': ('.png',), 'image/webp': ('.webp',)}
@@ -199,6 +218,28 @@ def when_text(w, claims=None):
     raise SystemExit(f'unknown when type {t}')
 
 
+def years(ma):  # a stored Ma value as whole years, "335,000"
+    return f'{round(ma * 1e6):,}'
+
+
+def find_when_text(w):
+    try:
+        return _find_when_text(w)
+    except (KeyError, TypeError, ValueError):
+        raise SystemExit('refused: malformed find date ' + json.dumps(w, sort_keys=True)[:160])
+
+
+def _find_when_text(w):
+    t = w['type']
+    if t == 'interval':
+        return f"{years(w['from_ma'])} to {years(w['to_ma'])} years ago"
+    if t == 'limit':
+        return f"the layer is dated {years(w['ref_ma'])} ± {years(w['ref_pm'])} years ago ({w['sigma']}σ); older limit unknown"
+    if t == 'calibrated':
+        return f"{years(w['from_ma'])} to {years(w['to_ma'])} calibrated years before {w['datum_ce']} ({w['probability']} % range)"
+    raise SystemExit(f'unknown find when type {t}')
+
+
 def boundary_text(key):
     b = CHART['boundaries'][key]
     pm = f" ± {pmn(b['margin'])}" if b['margin'] is not None else ''
@@ -208,7 +249,7 @@ def boundary_text(key):
 def src_obj(key):
     if key is None:
         return None
-    s = dict(BIG5['sources'][key]); s['key'] = key; s['url'] = 'https://doi.org/' + s['doi']
+    s = dict(BIG5['sources'][key] if key in BIG5['sources'] else FINDS['sources'][key]); s['key'] = key; s['url'] = 'https://doi.org/' + s['doi']
     return s
 
 
@@ -254,6 +295,20 @@ def catalogue():
                 if ev.get('type') == 'passage':
                     ev['source'] = src_obj(ev.get('source'))
             eps[-1]['story'] = st
+    finds = []
+    for f in (FINDS['finds'] if FINDS else []):
+        claims = []
+        for c in f['claims']:
+            d = {'id': c['id'], 'claim_type': c['claim_type'], 'label': CLAIM_LABELS[c['claim_type']], 'axis': bool(c.get('axis')),
+                 'text': c['text'], 'source': src_obj(c.get('source')), 'locator': c.get('locator')}
+            if 'when' in c:
+                d['when'] = c['when']; d['when_text'] = find_when_text(c['when'])
+                for k in ('source_notation', 'source_units', 'source_values', 'confidence', 'calibration'):
+                    if k in c: d[k] = c[k]
+            claims.append(d)
+        finds.append({'id': f['id'], 'lane': 'relatives', 'title': f['title'], 'short': f['short'], 'axis': True, 'scope': None,
+                      'find': f['find'], 'attributed_to': f['attributed_to'], 'links': f['links'], 'claims': claims,
+                      'evidence_reviewed': f.get('evidence_reviewed'), 'revisions': revisions_of(f['id'])})
     pliny = json.loads(ENTRIES[0].read_text(encoding='utf-8'))
     shelf = [{'id': pliny['id'], 'lane': 'history', 'title': pliny['title']['text'], 'axis': False,
               'when': {'type': 'partial_date', 'day': pliny['date_line']['day'],
@@ -261,7 +316,7 @@ def catalogue():
               'note': 'Day and month only; never placed on the axis.', 'evidence_reviewed': pliny.get('evidence_reviewed'),
               'revisions': revisions_of(pliny['id'])}]
     src = CHART['source']
-    return {
+    out = {
         'catalogue': 'timeline', 'catalogue_revision': BUILD['catalogue_revision'], 'schema': BUILD['schema'],
         'generated_at': BUILD['generated_at'],
         'release': {'revision': BUILD['catalogue_revision'], 'release_date': BUILD['release_date'], 'previous': BUILD['previous']},
@@ -270,7 +325,7 @@ def catalogue():
                   'licence': src['licence'], 'licence_url': src['licence_url'], 'citation': src['citation'], 'units': 'Ma',
                   'margin_meaning': src['margin_meaning'], 'window': CHART['window'], 'overview': CHART['overview'],
                   'periods': CHART['periods']},
-        'lanes': [{'id': i, 'label': l, 'status': 'active' if i == 'extinctions' else EMPTY[i]} for i, l in LANES],
+        'lanes': [{'id': i, 'label': l, 'status': 'active' if i == 'extinctions' or (i == 'relatives' and finds) else EMPTY[i]} for i, l in LANES],
         'claim_labels': CLAIM_LABELS,
         'coverage': 'This release shows the conventional Big Five mass extinctions, placed on the ICS chart. '
                     'Empty stretches are not periods where nothing happened. Lanes fill as their evidence is checked.',
@@ -278,6 +333,14 @@ def catalogue():
         'credit': 'Chart: ICS International Chronostratigraphic Chart v2026-06 (CC BY 4.0). Episode sources as cited in each '
                   'entry (CC BY 4.0 unless stated). Values reformatted by Mother Earth.',
     }
+    if finds:
+        out['entries'] = eps + finds
+        out['axis_convention'] = FINDS['axis_convention']
+        out['find_note'] = FIND_NOTE
+        out['coverage'] = ('This release shows the conventional Big Five mass extinctions, placed on the ICS chart, and '
+                           f'{len(finds)} dated finds of humans and human relatives reviewed for this page. Other finds are not yet '
+                           'reviewed, or their full text is not yet verified. Empty stretches are not periods where nothing happened.')
+    return out
 
 
 def cat_bytes():
@@ -374,10 +437,78 @@ def check_rules(cat, cb):
     if cat['schema'] >= 3:
         for x in cat['entries']:
             check_story(x, day, no)
+    if cat['schema'] >= 4:
+        check_finds(cat, no)
+    elif any(x['lane'] != 'extinctions' or any(k['claim_type'] in FIND_LABELS for k in x['claims']) for x in cat['entries']):
+        no('find fields in a catalogue below schema 4')
     # privacy: inbox fields and private paths stay out of shipped data
     low = cb.decode('utf-8').lower()
     for bad in (r'tl-in-\d', r'timeline-inbox/', r'(?<!docs/)research/', r'_review/', r'/users/', r'_to_delete'):
         if re.search(bad, low): no(f'shipped data contains a private reference ({bad})')
+
+
+def check_finds(cat, no):
+    """Schema 4. Each find is one entry with exactly one axis claim of a find type, its number in finite Ma, the source's own
+    notation, units and confidence beside it, and what was dated and how that relates to the find. Semantics are checked, not
+    just presence (GPT, 24 Nov 2026). An unknown type or field value is refused."""
+    fin = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+    txt = lambda v: isinstance(v, str) and v.strip() != ''
+    O = cat['chart']['overview']['ma']
+    finds = [x for x in cat['entries'] if x['lane'] == 'relatives']
+    if not finds: no('schema 4 with no find')
+    if len(finds) > FIND_MAX: no(f'{len(finds)} finds: at most {FIND_MAX}, one sub-row each')
+    if not txt(cat.get('axis_convention')) or cat.get('find_note') != FIND_NOTE: no('axis convention or lane note missing')
+    for x in cat['entries']:
+        if x['lane'] == 'extinctions':
+            if any(k['claim_type'] in FIND_LABELS or (k.get('when') or {}).get('type') in ('limit', 'calibrated') for k in x['claims']): no(f"{x['id']}: a find claim on the extinctions lane")
+            continue
+        if x['lane'] != 'relatives': no(f"{x['id']}: lane {x['lane']!r}")
+        i = x['id']
+        if not re.fullmatch(r'f-[a-z0-9]+(-[a-z0-9]+)*', i): no(f'{i}: a find id starts with f-')
+        if x.get('story'): no(f'{i}: a find has no account or image in this slice')
+        f, at, ln = x.get('find') or {}, x.get('attributed_to') or {}, x.get('links') or {}
+        if not txt(f.get('site')) or not txt(f.get('where')) or not txt(f.get('context')): no(f'{i}: find site, place or context missing')
+        if f.get('specimen') is not None and not txt(f['specimen']): no(f'{i}: specimen is empty')
+        if txt(f.get('specimen')) and (re.fullmatch(r'Q\d+', f['specimen']) or f['specimen'] in ln.values()): no(f'{i}: a group or site identifier is not a specimen id')
+        if not txt(at.get('name')) or at.get('basis') not in FIND_BASIS: no(f'{i}: attribution name or basis')
+        if at.get('qualified') is not None and not txt(at['qualified']): no(f'{i}: attribution qualification is empty')
+        if set(ln) != {'group', 'site'} or any(not re.fullmatch(r'Q[1-9]\d*', str(v)) for v in ln.values()): no(f'{i}: links')
+        if FIND_TITLE_BAN.search(x['title']) or FIND_TITLE_BAN.search(x['short']): no(f'{i}: a comparative word in a find title')
+        ids = [k.get('id') for k in x['claims']]
+        if any(not txt(k) for k in ids) or len(set(ids)) != len(ids): no(f'{i}: claim ids')
+        ax = [k for k in x['claims'] if k['axis']]
+        if len(ax) != 1 or ax[0]['claim_type'] not in FIND_AXIS: no(f'{i}: exactly one axis claim of a find type')
+        for k in x['claims']:
+            if k['claim_type'] not in FIND_LABELS and k['claim_type'] != 'context': no(f"{i}: claim type {k['claim_type']!r} is not a find's")
+            if not txt(k.get('text')): no(f"{i}: claim {k['id']} has no text")
+            if FIND_TEXT_BAN.search(k['text']): no(f"{i}: claim {k['id']} makes a claim this lane never makes ({FIND_TEXT_BAN.search(k['text']).group(0)!r})")
+            if k['claim_type'] in FIND_LABELS and not (k.get('source') and txt(k.get('locator'))): no(f"{i}: claim {k['id']} has no source or locator")
+        if at.get('qualified') and FIND_TEXT_BAN.search(at['qualified']): no(f'{i}: attribution wording')
+        for need in ('dated_material', 'find_association'):
+            if sum(k['claim_type'] == need for k in x['claims']) != 1: no(f'{i}: exactly one {need} claim')
+        a = ax[0]; w = a.get('when') or {}; sv = a.get('source_values') or {}
+        if w.get('type') != FIND_AXIS[a['claim_type']]: no(f"{i}: {a['claim_type']} needs a {FIND_AXIS[a['claim_type']]} date")
+        if not all(txt(a.get(q)) for q in ('source_notation', 'source_units', 'confidence')): no(f'{i}: source notation, units or confidence missing')
+        if a['source_units'] not in FIND_UNITS or sv.get('unit') != a['source_units']: no(f"{i}: source units {a.get('source_units')!r}")
+        per = FIND_UNITS[a['source_units']]; same = lambda ma, v: fin(v) and abs(ma * per - v) < 1e-9
+        if w['type'] in ('interval', 'calibrated'):
+            if set(w) - {'type', 'from_ma', 'to_ma', 'probability', 'datum_ce', 'curve', 'lab_id', 'c14_bp', 'c14_pm'}: no(f'{i}: unknown date field')
+            if not (fin(w.get('from_ma')) and fin(w.get('to_ma'))) or not (O >= w['from_ma'] > w['to_ma'] >= 0): no(f'{i}: bracket ends')
+            if not (same(w['from_ma'], sv.get('from')) and same(w['to_ma'], sv.get('to'))): no(f'{i}: stored ages differ from the source values')
+        if w['type'] == 'interval' and set(w) != {'type', 'from_ma', 'to_ma'}: no(f'{i}: a bracket carries only its two ends')
+        if w['type'] == 'calibrated':
+            if w.get('datum_ce') != 1950 or a['source_units'] != 'ka cal BP': no(f'{i}: calibrated ages count from 1950')
+            if w.get('curve') != 'IntCal20': no(f"{i}: calibration curve {w.get('curve')!r} is not one this build knows")
+            if not fin(w.get('probability')) or not (0 < w['probability'] <= 100): no(f'{i}: probability')
+            if not txt(w.get('lab_id')) or not (fin(w.get('c14_bp')) and w['c14_bp'] > 0 and fin(w.get('c14_pm')) and w['c14_pm'] > 0): no(f'{i}: laboratory measurement')
+            if f"{w['probability']}%" not in a['source_notation'].replace(' ', ''): no(f'{i}: the stated probability is not the source notation\'s')
+        if w['type'] == 'limit':
+            if set(w) != {'type', 'ref_ma', 'ref_pm', 'sigma', 'side'}: no(f'{i}: limit fields')
+            if w.get('side') != 'older': no(f"{i}: limit side {w.get('side')!r}")
+            if w.get('sigma') not in (1, 2): no(f'{i}: limit sigma')
+            if not (fin(w.get('ref_ma')) and fin(w.get('ref_pm'))) or w['ref_pm'] <= 0: no(f'{i}: limit reference or uncertainty')
+            if not (O >= w['ref_ma'] + w['ref_pm'] and w['ref_ma'] - w['ref_pm'] >= 0): no(f'{i}: limit reference ± uncertainty leaves the chart')
+            if not (same(w['ref_ma'], sv.get('ref')) and same(w['ref_pm'], sv.get('pm'))): no(f'{i}: stored ages differ from the source values')
 
 
 def claim_id(c, n):  # a claim's stable id inside its entry: its own, or its position as in schema 2 (c0, c1, ...)
@@ -613,6 +744,53 @@ def ep_article(ep, changes=()):
             + '\n'.join(parts) + '\n    </article>')
 
 
+def find_attr(x):
+    at = x['attributed_to']
+    return f"Attributed to {at['name']} {FIND_BASIS[at['basis']]}." + (f" {at['qualified']}" if at.get('qualified') else '')
+
+
+def find_card(x):
+    a = next(c for c in x['claims'] if c['axis']); i = x['id']
+    return (f'      <li class="card ep find" id="card-{i}">\n'
+            f'        <h4 class="ctitle"><a href="#{i}" data-entry="{i}" data-opener="title">{e(x["title"])}</a></h4>\n'
+            f'        <p class="dline"><span class="clab">{e(a["label"])}:</span> {e(a["when_text"])}</p>\n'
+            f'        <p class="fattr">{e(find_attr(x))}</p>\n'
+            f'      </li>')
+
+
+def find_article(x, changes=()):
+    """A find in full: who it is attributed to and on what basis, the one dated claim with the source's own notation, what was
+    dated, how that relates to the find, and its limits. Every sentence is the catalogue's; nothing is added here."""
+    i, f = x['id'], x['find']; how, ctx = [], []
+    for c in x['claims']:
+        cid = f'{i}-{c["id"]}'
+        val = ''
+        if c['axis']:
+            cal = f' Calibration: {e(c["calibration"])}' if c.get('calibration') else ''
+            val = (f'<p class="cval">{e(c["when_text"])}</p>'
+                   f'<p class="fnot" id="{cid}-not">As the source writes it: {e(c["source_notation"])}. {e(c["confidence"])}{cal}</p>')
+        sec = (f'        <section class="es claim" id="{cid}" data-claim-type="{c["claim_type"]}" aria-labelledby="{cid}-h">\n'
+               f'          <h5 id="{cid}-h">{e(c["label"])}</h5>\n'
+               f'          {val}<p>{e(c["text"])}</p>\n'
+               f'          {src_line(c.get("source"), c.get("locator"))}\n'
+               f'        </section>')
+        (ctx if c['claim_type'] == 'context' else how).append(sec)
+    parts = [f'      <section class="grp" data-grp="how" aria-labelledby="{i}-g-how">\n'
+             f'        <h4 class="gh" id="{i}-g-how">Dated evidence</h4>\n' + '\n'.join(how) + '\n      </section>']
+    if ctx:
+        parts.append(f'      <section class="grp" data-grp="context" aria-labelledby="{i}-g-context">\n'
+                     f'        <h4 class="gh" id="{i}-g-context">Context and limits</h4>\n' + '\n'.join(ctx) + '\n      </section>')
+    parts.append(f'      <section class="grp" data-grp="review" aria-labelledby="{i}-g-review">\n'
+                 f'        <h4 class="gh" id="{i}-g-review">Review and changes</h4>\n'
+                 f'        {rev_line(i, x["evidence_reviewed"], x["revisions"], changes)}\n      </section>')
+    spec = f' · specimen {e(f["specimen"])}' if f.get('specimen') else ''
+    return (f'    <article class="entry ep find" id="{i}" aria-labelledby="{i}-h">\n'
+            f'      <h3 class="eh" id="{i}-h" tabindex="-1">{e(x["title"])}</h3>\n'
+            f'      <p class="scope fattr" id="{i}-attr">{e(find_attr(x))}</p>\n'
+            f'      <p class="fplace" id="{i}-place">{e(f["context"][0].upper() + f["context"][1:])} · {e(f["site"])}, {e(f["where"])}{spec}</p>\n'
+            + '\n'.join(parts) + '\n    </article>')
+
+
 def change_item(c, cat):
     """One public change record, as a reader sees it."""
     ents = {x['id']: x for x in cat['entries'] + cat['shelf']}
@@ -649,15 +827,27 @@ def render(page, cat, sha):
     xs = [json.loads(p.read_text(encoding='utf-8')) for p in ENTRIES]
     shelf = [x for x in xs if x['placement']['kind'] == 'no-year-shelf']
     shelf.sort(key=lambda x: (x['placement']['day_of_year_order']['month'], x['placement']['day_of_year_order']['day']))
-    eps = cat['entries']
+    eps = [x for x in cat['entries'] if x['lane'] == 'extinctions']
+    fs = [x for x in cat['entries'] if x['lane'] == 'relatives']
     cards = '\n'.join(card(x) for x in shelf)
     ep_cards = '\n'.join(ep_card(x) for x in eps)
     srev = {x['id']: x['revisions'] for x in cat['shelf']}
     full = ('\n'.join(entry(x, srev[x['id']], cat['changes']) for x in xs) + '\n'
-            + '\n'.join(ep_article(x, cat['changes']) for x in eps))
+            + '\n'.join(ep_article(x, cat['changes']) for x in eps)
+            + ''.join('\n' + find_article(x, cat['changes']) for x in fs))
     rel = cat['release']
+    n_in = {'extinctions': len(eps), 'relatives': len(fs)}
+    find_block = [] if not fs else [
+        '  <section id="finds" class="dated finds" aria-labelledby="finds-h">',
+        f'    <h3 id="finds-h">{e(next(l["label"] for l in cat["lanes"] if l["id"] == "relatives"))} <span class="n">({len(fs)})</span></h3>',
+        f'    <p class="note" id="finds-note">{e(cat["find_note"])}</p>',
+        '    <ul class="cards">',
+        '\n'.join(find_card(x) for x in fs),
+        '    </ul>',
+        '  </section>',
+        '']
     lanes = '\n'.join(f'      <li class="lane" data-lane="{l["id"]}">{e(l["label"])}'
-                      + (f' <span class="n">({len(eps)})</span>' if l['status'] == 'active' else f' · {e(l["status"])}') + '</li>'
+                      + (f' <span class="n">({n_in[l["id"]]})</span>' if l['status'] == 'active' else f' · {e(l["status"])}') + '</li>'
                       for l in cat['lanes'])
     v = asset_version(page)
     ext = '<span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span>'
@@ -678,7 +868,7 @@ def render(page, cat, sha):
         f'<a href="{e(cat["chart"]["licence_url"])}" target="_blank" rel="noopener">CC BY 4.0 {ext}</a> · {e(cat["chart"]["citation"])}.</p>',
         '  </section>',
         '',
-        f'  <p class="counts"><a href="#dated">Dated entries ({len(eps)})</a> · <a href="#shelf">Dates without a year ({len(shelf)})</a></p>',
+        f'  <p class="counts"><a href="#dated">Dated entries ({len(eps)})</a> · ' + (f'<a href="#finds">Dated finds ({len(fs)})</a> · ' if fs else '') + f'<a href="#shelf">Dates without a year ({len(shelf)})</a></p>',
         '',
         '  <section id="dated" class="dated" aria-labelledby="dated-h">',
         f'    <h3 id="dated-h">Dated entries <span class="n">({len(eps)})</span></h3>',
@@ -688,6 +878,7 @@ def render(page, cat, sha):
         '    </ul>',
         '  </section>',
         '',
+        *find_block,
         '  <section id="shelf" class="shelf" aria-labelledby="shelf-h">',
         f'    <h3 id="shelf-h">Dates without a year <span class="n">({len(shelf)})</span></h3>',
         '    <p class="note">Shown here, not on the axis, because their source gives a day and month but no year. Ordered by day of year only; nothing here implies a year.</p>',

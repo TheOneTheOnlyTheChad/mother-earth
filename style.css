@@ -591,6 +591,34 @@ body.tl .axis .xpl .tk::before{content:"";position:absolute;left:50%;top:-4px;wi
 body.tl .axis .xpl .tk.last{transform:translateX(-100%)}
 body.tl .axis .xpl .tk.last::before{left:100%}
 body.tl .axis .xpl .tk.first{transform:none}
+/* Dated finds (catalogue schema 4): one sub-row per find on the "Humans and human relatives" lane. Nothing is drawn between two finds.
+   The link is the hit area (44 px wide at least); the glyph inside it (.g) is the drawn extent and is measured on its own. */
+body.tl .axis .xpl.hasf{padding-top:34px}
+body.tl .axis .xpl .lr.fl{border-top:1px solid var(--line-strong);background:rgba(7,12,19,.6)}
+body.tl .axis .xpl .lr.fl .ln{margin-top:6px}
+body.tl .axis .xpl .fnote{margin:0 8px 4px;max-width:110ch;font:400 12px/1.4 var(--mono);color:var(--dim);cursor:default}
+body.tl .axis .xpl .frow{position:relative;border-top:1px dashed var(--line)}
+body.tl .axis .xpl .fcap{margin:0;padding:4px 8px 0;font:500 12px/16px var(--mono);color:var(--fg);cursor:default}
+body.tl .axis .xpl .fcap .ft{font-weight:700}
+body.tl .axis .xpl .fcap .foff{color:var(--dim)}
+body.tl .axis .xpl .fgo{min-height:24px;margin:0 0 0 4px;padding:2px 8px;border:1px solid var(--line-strong);background:var(--card);color:var(--fg);font:600 11px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+body.tl .axis .xpl .fline{position:relative;height:32px}
+body.tl .axis .xpl .fline::before{content:"";position:absolute;left:0;right:0;top:16px;height:1px;background:var(--line)}
+body.tl .axis .xpl .fmk{top:0;height:32px;min-width:44px;padding-top:0;justify-content:center}
+body.tl .axis .xpl .fmk .gw{display:flex;align-items:center;justify-content:center}
+body.tl .axis .xpl .mk-f-bracket .g{width:14px;height:12px;box-sizing:border-box;border-left:2px solid var(--fg);border-right:2px solid var(--fg);background:linear-gradient(var(--fg),var(--fg)) center/100% 2px no-repeat}
+body.tl .axis .xpl .mk-f-bracket.mk-true .g{width:var(--w)}
+body.tl .axis .xpl .mk-f-cal .g{width:10px;height:10px;background:var(--accent);transform:rotate(45deg)}
+body.tl .axis .xpl .mk-f-cal.mk-true .g{width:var(--w);height:8px;transform:none}
+body.tl .axis .xpl .mk-f-limit .g{width:2px;height:14px}
+body.tl .axis .xpl .mk-f-limit.mk-true .g{width:var(--w);box-sizing:border-box;border:1px dashed var(--fg);background:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 2px,transparent 2px 6px)}
+body.tl .axis .xpl .fmk .ftk{position:absolute;top:50%;left:calc(50% + var(--tx,0px));width:2px;height:22px;margin:-11px 0 0 -1px;background:var(--fg)}
+body.tl .axis .xpl .fmk .fch{position:absolute;top:50%;left:calc(50% - var(--w,0px)/2 - 16px);width:9px;height:9px;margin-top:-5px;box-sizing:border-box;border-left:2px solid var(--fg);border-bottom:2px solid var(--fg);transform:rotate(45deg)}
+body.tl .axis .xpl .scale.ka{height:40px}
+body.tl .axis .xpl .scale .tku{position:absolute;right:6px;bottom:0;font:500 11px/16px var(--mono);color:var(--dim)}
+body.tl .card.find .fattr,body.tl .entry.find .fattr{margin:2px 0 0;font-size:13px}
+body.tl .entry.find .fplace{margin:2px 0 8px;font-size:13px;color:var(--dim)}
+body.tl .entry.find .fnot{margin:2px 0 6px;font-size:12px;line-height:1.45;color:var(--dim)}
 body.tl .axis .xpl .tk.first::before{left:0}
 body.tl .axis .xpl .unit{position:absolute;left:100%;padding-left:4px;color:var(--dim)}
 body.tl .axis .xpl .tk.last .unit{position:static;padding-left:0}
