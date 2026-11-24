@@ -5,6 +5,12 @@
 
 **Rev 2 (24 Nov 2026, docs only).** GPT reviewed rev 1 (sha256 `97c3254d…2873`) at commit `4bd6962`: direction accepted, targeted revisions needed before a build proposal; filed unchanged as `reviews/2026-11-24-timeline-human-relatives-proposal-rev1-gpt-review.md`. Its amendments are applied below and marked (GPT). **GPT's recommendations on H1–H5 are not Chad's decisions; those are still open (§8).** Rev 1 is in Git at `4bd6962`.
 
+**Rev 2.1 (24 Nov 2026, docs only): current status. The text below is rev 2 (sha256 `023b9a38…d7ff` at `80d1d64`) and is kept as written; where it differs from this block, this block is current.**
+- **Decided by Chad, in his own message:** "H1–H5 as recommended, H2b no, go source check". H1 one dated find or deposit per mark, no joining bar · H2 verified full-text passages only · H2b no open-licence-only rule · H3 our own species included, lane "Humans and human relatives" · H4 modelled Neanderthal disappearance out · H5 three-hour cap. §8's table is now a record of those decisions.
+- **GPT accepted rev 2's design changes** (`reviews/2026-11-24-timeline-human-relatives-source-check-gpt-review.md`). No build or release is cleared.
+- **The source check is done:** `docs/research/TIMELINE-HUMAN-RELATIVES-SOURCE-CHECK.md` (rev 1.1). "No figure in this proposal is verified" and §5's candidate table are superseded by it. **Selected set now:** C1 Dinaledi Chamber deposit (accepted) · C7 the directly dated bone from the La Ferrassie 8 context (accepted; one 2023 paper still to read) · C3 the Xiahe 2 rib, as the layer age reported by Xia et al. 2024 (accepted in that wording) · C2 Omo I as a one-sided limit (pending the corrected supplementary table). **Held:** C4 DNH 134, Drimolen. **Excluded:** DNH 127 as its own claim; it is not combined with DNH 134 as §5's row 4 did. **Out, not verified:** Ngandong, Liang Bua.
+- **Next:** the build proposal, on Chad's go, meeting §3, §6 and GPT's list in its two reviews.
+
 What changed from rev 1: each find or deposit is plotted on its own, with no bar joining a group's claims (GPT); an age limit stays an age limit (GPT); the modelled Neanderthal estimate is out of this slice (GPT); the source rule now separates "the passage was verified" from "the licence is open" (GPT); no target number of entries (GPT); the build proposal's minimum requirements are listed (GPT).
 
 Order note: Chad's T6 put the Big Five source refresh before this proposal. On 24 Nov he asked for this first; the refresh stays queued.

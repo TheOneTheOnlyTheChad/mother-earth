@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 07:29 UTC (clock reading) — **Timeline: Humans and human relatives. GPT ACCEPTED the bounded source check with corrections and rev 2's design. No build or release cleared** (page: none; Timeline thread)
+- GPT's review filed unchanged: `reviews/2026-11-24-timeline-human-relatives-source-check-gpt-review.md` (8,341 B, sha256 `075648396d58bd50cc75afa85c0c31781940e198eaf282a7fe3d2b241118de37`).
+- **Find by find:** Dinaledi (C1) and the La Ferrassie bone (C7) accepted; GPT closed C7's calibration gap from the paper's full-text XML (OxCal 4.4, IntCal20). Omo I (C2) interpretation accepted, pending the corrected supplementary table. Xiahe 2 (C3) accepted as the layer age reported by Xia et al. 2024, not a date on the rib. Drimolen (C4) held for the 2020 dating passages; DNH 127 excluded. Ngandong and Liang Bua stay out.
+- **Source-check record rev 1.1:** GPT's rulings; my sentence "C7 is the only find dated directly" corrected (C1 also rests on dated teeth); the eleven Wikidata identifiers opened and confirmed, with a caution that Wikidata names the Denisovan item "Homo longi", which we do not adopt; targeted later-work searches for C3 and C7. **One paper found and not read:** a 2023 chronological model for the La Ferrassie individuals (doi 10.48738/2023.iss1.811), to read before C7 is frozen.
+- **Proposal rev 2.1:** a status block recording Chad's H1–H5 decisions and the selected set; rev 2's text kept as written.
+- **Open before any claim is frozen:** C2's corrected table; the 2023 La Ferrassie paper; C4's primary dating. **Waiting on:** Chad's go for the build proposal.
+
 ## 24 Nov 07:24 UTC (clock reading) — **Nature context: proposal rev 2 after GPT's Stage 0 review (findings accepted; targeted rev 2 required). Docs only; nothing built** (page: none; Nature context thread)
 - **GPT's review filed unchanged:** `reviews/2026-11-24-nature-context-stage0-gpt-review.md` (13,579 B, sha256 `8d2f375d2aa674550823a4c70d586b9b67bb3bc76f0bf2b2612dedd9d0a25ef3`, = `~/Documents/ChatGPT/Mother Earth/NATURE-CONTEXT-STAGE0-REVIEW-2026-11-24.md`).
 - **Chad (his own message):** findings accepted; improve the existing panel; correct the wording together; provisional four-day cell-age warning; no wholesale `BASE_MAIN` move; no fixed "7–10 days"; "queries retained" counts daily snapshots; soil C1 separate and uncleared; global alerts can wait.
