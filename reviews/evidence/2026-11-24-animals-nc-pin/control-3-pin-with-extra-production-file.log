@@ -1,0 +1,5 @@
+FAIL  13j 6bebff1..c499bf8 changes only app.js, index.html and sources.html among production files, plus the three listed tests and the Nature context records (anything else listed on failure)
+      got: ["style.css"]
+
+animals-tab-ui: 13 passed, 1 failed
+exit=1
