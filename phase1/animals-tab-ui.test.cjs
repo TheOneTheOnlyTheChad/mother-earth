@@ -16,7 +16,8 @@
  * Needs the npm packages playwright (with its Chromium), pngjs and globe.gl@2.45.0, found through NODE_PATH (or ME_GLOBE_JS for
  * the library file). Section 13 compares with main: from Git when the tree is a clone, or from BASE_DIR=<folder holding main's
  * files at BASE_MAIN>; with neither, its file comparisons are reported NOT RUN and the suite exits non-zero. The Timeline's files are
- * compared with main at TL_MAIN the same way (Git, or TL_DIR=<folder holding main's files at TL_MAIN>).
+ * compared with main at TL_MAIN the same way (Git, or TL_DIR=<folder holding main's files at TL_MAIN>). The Nature context page files
+ * are compared with NC_MAIN (Git, or NC_DIR=<folder holding the files at NC_MAIN>); its scope check 13j needs Git and fails closed without it.
  * Run: NODE_PATH=<node_modules with playwright, pngjs, globe.gl> node --no-warnings phase1/animals-tab-ui.test.cjs */
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), http = require('http'), crypto = require('crypto'), cp = require('child_process');
@@ -32,6 +33,13 @@ const BASE_MAIN = process.env.BASE_MAIN || '0e620831b83b2ae7eed11a932edfd902d933
 // moved on since BASE_MAIN. They are held to the main commit of the Timeline's latest release instead (checks 13f to 13i). Every
 // other file stays on BASE_MAIN. A Timeline release moves TL_MAIN, and nothing else, in the commit that records the release.
 const TL_MAIN = process.env.TL_MAIN || 'fbad1b60bf1311528bde320d13b59637123265fc';   // Timeline date label W1, page commit H (24 Nov 2026); before it 19f4e07, merge of tl-2026-11-R3
+// Nature context (24 Nov 2026, the Animals owner's maintenance at the Nature context thread's request, docs/concepts/NATURE-CONTEXT-ANIMALS-PIN-REQUEST.md):
+// its reviewed page commit changes app.js, index.html and sources.html. Those three are held to that commit, NC_MAIN, by 13b, 13e
+// (sources.html) and 13k; the Animals guarantees on index.html and sources.html are checked on their own, not inherited from the pin;
+// 13j checks that NC_MAIN changed no other production file since NC_PARENT. Only a Nature context release moves NC_MAIN (and
+// NC_PARENT with it), in the commit that records the release. Every other file stays on BASE_MAIN or TL_MAIN.
+const NC_MAIN = process.env.NC_MAIN || '90eb52203c23b26a7fe00382f30cf3453b00a583';     // Nature context page commit H, passed by GPT's recheck (24 Nov 2026)
+const NC_PARENT = process.env.NC_PARENT || '6bebff18ffb0886719a3587a9199d9c158b39f50';   // the main commit H's work started from
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const BREAK = process.env.BREAK || '', EDIT = process.env.EDIT || '';
 const ONLY = (process.env.SECTIONS || '').split(',').filter(Boolean).map(Number), want = n => !ONLY.length || ONLY.includes(n);
@@ -101,7 +109,15 @@ const BREAKS = {
 // request itself was aborted (5b, 5g). It shows the generation check alone refuses a superseded answer.
 // Section 13 breaks: each makes one unintended change to a file the comparisons read (nothing on disk changes).
 Object.assign(BREAKS, {
-  'earth-script-edited': ['app.js', 'ME.REFRESH_MS = 5 * 60e3;', 'ME.REFRESH_MS = 5 * 60e3; '],
+  'earth-script-edited': ['layers.js', 'const ROWS = GROUPS.flatMap(g => g[1]);', 'const ROWS = GROUPS.flatMap(g => g[1]); '],
+  'nc-app-edited': ['app.js', 'ME.REFRESH_MS = 5 * 60e3;', 'ME.REFRESH_MS = 5 * 60e3; '],
+  'nc-index-edited': ['index.html', '</title>', ' </title>'],
+  'nc-index-tab-gone': ['index.html', '    <a href="animals.html" data-view="animals">Animals</a>\n', ''],
+  'nc-index-menu-gone': ['index.html', '      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', ''],
+  'nc-sources-edited': ['sources.html', '</title>', ' </title>'],
+  'nc-sources-tab-gone': ['sources.html', '    <a href="animals.html" data-view="animals">Animals</a>\n', ''],
+  'nc-sources-id-gone': ['sources.html', 'ptt id 98364', 'ptt id 98365'],
+  'nc-sources-shortcut-gone': ['sources.html', ' · <a href="#animals">Animals</a> · <a href="#search">Search</a>', ' · <a href="#search">Search</a>'],
   'shared-rule-dropped': ['style.css', '\n.top{', '\n.top.x{'],
   'moon-page-edited': ['moon.html', '</title>', ' </title>'],
   'tl-script-edited': ['timeline.js', 'const MIN_SPAN = 1', 'const MIN_SPAN = 2'],
@@ -120,7 +136,7 @@ const EXPECT = { 'not-exclusive': '3b', 'late-answer-draws': '5a', 'off-no-cance
   'deep-link-scrolls-to-globe': '16j', 'no-status-by-globe': '16b', 'selection-keeps-list-retry': '17a', 'list-retry-no-token': '17a', 'list-retry-late-success': '17c', 'list-retry-no-time-limit': '17h', 'pagehide-keeps-list-retry': '17f',
   'marker-in-withheld': '18c', 'hidden-ends-at-last-withheld': '18c', 'tried-before-reached': '18e', 'accuracy-in-withheld': '18a', 'replay-starts-at-first-fix': '18a', 'replay-ends-at-last-fix': '18m',
   'bird-says-not-displayed': '18f', 'new-fields-optional': '19a', 'no-acc-check': '19b', 'no-inside-period-check': '19d', 'join-across-withheld-accepted': '19c', 'no-failed-check': '19e', 'stops-skip-withheld-starts': '18i',
-  'earth-script-edited': '13c', 'shared-rule-dropped': '13d', 'moon-page-edited': '13e moon.html', 'tl-script-edited': '13g', 'tl-page-edited': '13h', 'tl-page-animals-tab-gone': '13h', 'tl-page-header-edited': '13h',
+  'earth-script-edited': '13c', 'nc-app-edited': '13k', 'nc-index-edited': '13b', 'nc-index-tab-gone': '13b', 'nc-index-menu-gone': '13b', 'nc-sources-edited': '13e sources.html', 'nc-sources-tab-gone': '13e sources.html', 'nc-sources-id-gone': '13e sources.html', 'nc-sources-shortcut-gone': '13e sources.html', 'shared-rule-dropped': '13d', 'moon-page-edited': '13e moon.html', 'tl-script-edited': '13g', 'tl-page-edited': '13h', 'tl-page-animals-tab-gone': '13h', 'tl-page-header-edited': '13h',
   'tl-rule-dropped': '13i', 'tl-rule-edited': '13i', 'tl-rule-added': '13i' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
 
@@ -459,12 +475,23 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     const BASE_DIR = process.env.BASE_DIR || ''; let how = '';
     if (BASE_DIR && fs.existsSync(path.join(BASE_DIR, 'index.html'))) how = 'dir'; else { try { git(['cat-file', '-e', BASE_MAIN + '^{commit}']); how = 'git'; } catch (_) { } }
     const mainFile = f => how === 'dir' ? fs.readFileSync(path.join(BASE_DIR, f), 'utf8') : git(['show', BASE_MAIN + ':' + f]);
+    // the Nature context baseline (NC_MAIN): read from NC_DIR or Git; without either, its checks fail closed (13j)
+    const NC_DIR = process.env.NC_DIR || ''; let ncHow = '';
+    if (NC_DIR && fs.existsSync(path.join(NC_DIR, 'index.html'))) ncHow = 'dir'; else { try { git(['cat-file', '-e', NC_MAIN + '^{commit}']); ncHow = 'git'; } catch (_) { } }
+    const ncFile = f => ncHow === 'dir' ? fs.readFileSync(path.join(NC_DIR, f), 'utf8') : git(['show', NC_MAIN + ':' + f]);
+    const tabL = '    <a href="animals.html" data-view="animals">Animals</a>\n', menuL = '      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', hdr = t => (/<header[\s\S]*?<\/header>/.exec(t) || [''])[0];
+    // the Animals guarantees on a page, checked on their own: both links once each, and the header equals BASE_MAIN's except those links
+    const animalsHead = (b, base) => { const h0 = hdr(base); return { links: b.split(tabL).length === 2 && b.split(menuL).length === 2, header: h0.length > 200 && hdr(b).replace(tabL, '').replace(menuL, '') === h0 }; };
     if (!how) { fail++; failed.push('13a'); console.log(`NOT RUN  13a–13e: main ${BASE_MAIN.slice(0, 7)} is not available (no Git metadata here and no BASE_DIR). The comparisons with main were not made.`); }
     else { ok(`13a the baseline is main ${BASE_MAIN.slice(0, 7)} (read from ${how === 'dir' ? 'BASE_DIR' : 'Git'})`, true);
       const mainIdx = mainFile('index.html'), idx = served('index.html');
       const strip = t => t.replace('    <a href="animals.html" data-view="animals">Animals</a>\n', '').replace('      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', '').replace(/style\.css\?v=\d+/, 'style.css?v=X');
-      ok('13b index.html equals main\'s except the Animals tab link, the Animals menu link and the stylesheet version', strip(idx) === mainIdx.replace(/style\.css\?v=\d+/, 'style.css?v=X') && idx !== mainIdx);
-      const same = ['layers.js', 'app.js', 'aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'phase1/collector-mac.mjs', 'phase1/bare-earth-ui.test.cjs'];
+      // 13b (24 Nov 2026, Nature context): was 'index.html equals main's except the Animals links and the stylesheet version'. The page now
+      // carries the Nature context release, so it is held byte-for-byte to NC_MAIN, and the Animals guarantees are checked on their own.
+      if (!ncHow) { fail++; failed.push('13b'); console.log(`NOT RUN  13b: the Nature context baseline ${NC_MAIN.slice(0, 7)} is not available.`); }
+      else { const whole = idx === ncFile('index.html'), g = animalsHead(idx, mainIdx);
+        ok(`13b index.html is byte-identical to the file at the Nature context baseline ${NC_MAIN.slice(0, 7)}; it carries the Animals tab link and menu link once each; and its header equals main ${BASE_MAIN.slice(0, 7)}'s except those two links`, whole && g.links && g.header, { whole, links: g.links, header: g.header }); }
+      const same = ['layers.js', 'aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'phase1/collector-mac.mjs', 'phase1/bare-earth-ui.test.cjs'];
       // 23 Nov 2026 (hub-to-main alignment, Chad's decision G-a): 'phase1/worker.js' left this list. Main's hub file is now the DEPLOYED hub
       // (0.6.24), which is not the file at this suite's pinned baseline and never will be again. The hub is protected instead by
       // phase1/hub-alignment.test.mjs, which holds phase1/worker.js to the recorded deployed hash (phase1/DEPLOYED-HUB.json).
@@ -472,12 +499,28 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       // 24 Nov 2026 (baseline repair): 'timeline.js' left this list, 'timeline.html' left 13e, and 13d no longer judges the stylesheet's
       // body.tl lines. The Timeline releases of 23 and 24 Nov changed all three, as they should. They are held to main at TL_MAIN by
       // 13f to 13i below, so each is still compared with a pinned commit; only the commit differs. Nothing else moved off BASE_MAIN.
+      // 24 Nov 2026 (Nature context): 'app.js' left this list. It is held to NC_MAIN by 13k. The other 15 files stay on BASE_MAIN.
       const diff = same.filter(f => { try { return mainFile(f) !== served(f); } catch (_) { return true; } });
-      ok('13c Earth now\'s scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs; timeline.js: 13g)', same.length === 16 && diff.length === 0, diff);
+      ok('13c Earth now\'s scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs; timeline.js: 13g; app.js: 13k)', same.length === 15 && !same.includes('app.js') && diff.length === 0, diff);
+      if (ncHow) ok(`13k app.js is byte-identical to the file at the Nature context baseline ${NC_MAIN.slice(0, 7)}`, served('app.js') === ncFile('app.js'));
+      else { fail++; failed.push('13k'); console.log(`NOT RUN  13k: the Nature context baseline ${NC_MAIN.slice(0, 7)} is not available.`); }
       const css = served('style.css'), mainCss = mainFile('style.css').split('\n'), cur = new Set(css.split('\n')), isTl = l => /body\.tl/.test(l);
       const gone = mainCss.filter(l => !cur.has(l) && !isTl(l)); ok('13d the shared stylesheet is NOT identical to main: every main line is kept except the header rules changed for five tabs (at most 4 lines, listed on failure); the Animals rules are added (the Timeline\'s body.tl lines: 13i)', gone.length <= 4 && gone.every(l => /\.top \.promise|\.tabs a|\.top\{padding/.test(l)) && css.length > mainCss.join('\n').length, gone);
-      for (const pg of ['moon.html', 'sun.html', 'sources.html']) { const a = mainFile(pg), b = served(pg); const sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/, rel = pg === 'sources.html';      // release: sources.html alone gains one Animals section
+      for (const pg of ['moon.html', 'sun.html']) { const a = mainFile(pg), b = served(pg); const sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/, rel = false;      // 24 Nov 2026: sources.html left this loop for the check below (Nature context)
         ok(`13e ${pg} equals main's except the Animals links and the stylesheet version${rel ? ', and (release) the one added Animals section with its shortcut in the Sections list, which names all six sources and the omitted Low class and never says private preview' : ''}`, strip(rel ? b.replace(sec, '').replace(' · <a href="#animals">Animals</a>', '') : b) === a.replace(/style\.css\?v=\d+/, 'style.css?v=X') && (!rel || (sec.test(b) && b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2 && ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].every(x => b.includes(x)) && !/private preview/i.test(b)))); }
+      // 13e sources.html (24 Nov 2026, Nature context): byte-identical to NC_MAIN, plus every Animals guarantee the old check made, on its own
+      { const b = served('sources.html'), sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/;
+        if (!ncHow) { fail++; failed.push('13e sources.html'); console.log(`NOT RUN  13e sources.html: the Nature context baseline ${NC_MAIN.slice(0, 7)} is not available.`); }
+        else { const whole = b === ncFile('sources.html'), g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
+            ids = ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].filter(x => !b.includes(x)), noPreview = !/private preview/i.test(b);
+          ok(`13e sources.html is byte-identical to the file at the Nature context baseline ${NC_MAIN.slice(0, 7)}; it carries the Animals tab link and menu link once each and main ${BASE_MAIN.slice(0, 7)}'s header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview`, whole && g.links && g.header && section && shortcut && ids.length === 0 && noPreview, { whole, links: g.links, header: g.header, section, shortcut, missing: ids, noPreview }); } }
+      // 13j (24 Nov 2026, Nature context): NC_MAIN descends from NC_PARENT and changed no production file but the three above
+      { let names = null; try { git(['merge-base', '--is-ancestor', NC_PARENT, NC_MAIN]); names = git(['diff', '--name-only', NC_PARENT, NC_MAIN]).split('\n').filter(Boolean); } catch (_) { }
+        if (!names) { fail++; failed.push('13j'); console.log(`NOT RUN  13j: ${NC_PARENT.slice(0, 7)}..${NC_MAIN.slice(0, 7)} cannot be read from Git (or ${NC_PARENT.slice(0, 7)} is not an ancestor). The scope check was not made.`); }
+        else { const PAGES = ['app.js', 'index.html', 'sources.html'], TESTS = ['phase1/nature-context-ui.test.cjs', 'phase1/place-rows.test.mjs', 'phase1/place-ui.test.cjs'],
+            RECORD = f => /^reviews\/2026-11-24-nature-context-[a-z0-9.-]+\.md$/.test(f) || /^reviews\/evidence\/2026-11-24-nature-context-rc\/[^/]+$/.test(f),
+            other = names.filter(f => !PAGES.includes(f) && !TESTS.includes(f) && !RECORD(f));
+          ok(`13j ${NC_PARENT.slice(0, 7)}..${NC_MAIN.slice(0, 7)} changes only app.js, index.html and sources.html among production files, plus the three listed tests and the Nature context records (anything else listed on failure)`, other.length === 0 && PAGES.every(f => names.includes(f)) && NC_MAIN !== BASE_MAIN && NC_MAIN !== TL_MAIN, other); } }
       // ----- the Timeline's own files, against main at TL_MAIN (the Timeline's latest release)
       const TL_DIR = process.env.TL_DIR || ''; let tlHow = '';
       if (TL_DIR && fs.existsSync(path.join(TL_DIR, 'timeline.html'))) tlHow = 'dir'; else { try { git(['cat-file', '-e', TL_MAIN + '^{commit}']); tlHow = 'git'; } catch (_) { } }
