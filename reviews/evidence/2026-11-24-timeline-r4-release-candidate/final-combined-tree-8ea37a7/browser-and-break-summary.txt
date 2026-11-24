@@ -1,0 +1,14 @@
+timeline-finds-ui.test.mjs exit=0 timeline-finds-ui: 281 pass, 0 fail
+timeline-axis.test.cjs exit=0 timeline-axis: 97 pass, 0 fail
+timeline-mixed-assets.test.cjs exit=0 timeline-mixed-assets: 18 pass, 0 fail
+timeline-changes-ui.test.cjs exit=0 timeline-changes-ui: 173 pass, 0 fail
+timeline-story-ui.test.mjs exit=0 timeline-story-ui: 127 pass, 0 fail
+timeline-travel-ui.test.cjs exit=0 timeline-travel-ui: 209 pass, 0 fail
+timeline-ui.test.cjs exit=0 timeline-ui: 594 pass, 0 fail
+nature-context-ui.test.cjs exit=0 nature-context-ui: 78 passed, 0 failed
+animals-tab-ui exit=0 animals-tab-ui: 282 passed, 0 failed
+BREAK wheel-redraw-release exit=1 fails=19
+BREAK span-eps exit=1 fails=4
+BREAK finds-clustered exit=1 fails=24
+BREAK no-finds-validate exit=1 fails=30
+DONE
