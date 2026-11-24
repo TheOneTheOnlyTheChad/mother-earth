@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 07:41 UTC (clock reading) — **Timeline: Humans and human relatives. Omo I's corrected supplementary table checked: it carries 233 ± 22. C2 no longer pending. Docs only** (page: none; Timeline thread)
+- Source-check record rev 1.2. The corrected Supplementary Table 3 (publisher's spreadsheet, sha256 `8db1b690…6020`, downloaded on Chad's yes) gives the composite as 233 ± 22 thousand years at 2σ under the Kuiper et al. 2008 calibration, 234 ± 22 under Renne et al. 2011.
+- **Set for the build proposal:** C1 Dinaledi, C2 Omo I (one-sided limit), C3 Xiahe 2 (layer age as reported by Xia et al. 2024), C7 La Ferrassie bone. **Held:** Drimolen (the 2020 dating paper needs paid access; Chad checked). **Out:** Ngandong, Liang Bua. **Still unread:** the 2023 La Ferrassie paper (site not loading; PDF only otherwise).
+- Chad granted `~/Downloads` for this. An article PDF he downloaded there was left unopened (text-only rule).
+
 ## 24 Nov 07:29 UTC (clock reading) — **Timeline: Humans and human relatives. GPT ACCEPTED the bounded source check with corrections and rev 2's design. No build or release cleared** (page: none; Timeline thread)
 - GPT's review filed unchanged: `reviews/2026-11-24-timeline-human-relatives-source-check-gpt-review.md` (8,341 B, sha256 `075648396d58bd50cc75afa85c0c31781940e198eaf282a7fe3d2b241118de37`).
 - **Find by find:** Dinaledi (C1) and the La Ferrassie bone (C7) accepted; GPT closed C7's calibration gap from the paper's full-text XML (OxCal 4.4, IntCal20). Omo I (C2) interpretation accepted, pending the corrected supplementary table. Xiahe 2 (C3) accepted as the layer age reported by Xia et al. 2024, not a date on the rib. Drimolen (C4) held for the 2020 dating passages; DNH 127 excluded. Ngandong and Liang Bua stay out.
