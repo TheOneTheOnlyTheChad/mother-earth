@@ -4,6 +4,10 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 04:08 UTC (clock reading) — **Earth from Space: GPT ACCEPTED the D1 cost measurement. Runbook P4a is satisfied; no repeat. Stage D NOT cleared** (production: none; Earth from Space thread)
+- GPT verified every checksum, recomputed the 320 records and ran the suite with C13b (75 of 75). One wording correction, made as result rev 1.1 on `earth-from-space-fixtures-rc` (`9457622`): the 20,810-row aggregate remainder is now labelled unreconciled (one page-opening Worker query's rows read was not captured; the aggregates lag). Original evidence kept; the correction is a separate amendment file.
+- Still open before a Stage D line: alert test (packet 2) and its review (P4), the two real monitors (P3), phone look (P6), EUMETSAT answer (P7), evidence preflight (P11), Chad's acceptance of the documents (P5).
+
 ## 24 Nov 03:55 UTC (clock reading) — **Earth from Space: D1 cost measurement RUN on Chad's own Approve line (packet rev 1.1, packet 1). Throwaway Worker `mother-earth-evd1` and database `mother-earth-evd1test` created, measured, DELETED and read back. Hub unchanged. Stage D NOT cleared** (Cloudflare: two throwaway resources, now gone; Earth from Space thread)
 - **Stopped at M4** (03:37 UTC): on an empty table the packet expected both addresses 503; `trial` answered 200. The packet was wrong, not the code (`trial` fails only on recorded findings). Chad's continuation line corrected M4 to *runs 503, trial 200*; actual answers preserved.
 - **All four row sets ran in full**, 320 requests, every status and state as expected. **D1 returned `rows_read` per query:** 288 (S1), 1,900 (S2), 2,000 (S3, the 2,000-row refusal), 289 (S0, mixed table). Worker CPU median 1 to 3 ms, highest 21 ms.
