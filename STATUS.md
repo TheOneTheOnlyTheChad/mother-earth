@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 03:18 UTC (clock reading) — **Animals: test-only candidate for the tab suite's three baseline failures, on branch `animals-baseline-repair-rc` (`0b28745`), for GPT. Not merged; nothing deployed; no page, hub or data file changed.** (page: none; Animals thread)
+- **Asked for by Chad and GPT (Chad's own message, 24 Nov).** The three failures on main `3160658` are 13c, 13d and 13e of `phase1/animals-tab-ui.test.cjs`: `timeline.js`, three `body.tl` stylesheet lines and `timeline.html` no longer match the suite's pinned main `0e62083`, because the Timeline releases of 23 and 24 Nov changed them.
+- **The candidate:** the old baseline is not moved and no check is removed. Those three Timeline items are held to the Timeline release merge `19f4e07` by new checks 13f to 13i (one new constant, `TL_MAIN`); every other file stays on `0e62083`. 13i is stricter than 13d was for those lines (order, additions).
+- **Results (Claude, cloud workspace, one at a time):** whole suite on main 274 passed, 3 failed; on the candidate 280 passed, 0 failed. Ten new section-13 breaks, ten caught; two controls (the old pin brings the failures back; a Timeline baseline without the Animals link fails 13h). No Mac or real-browser run.
+- **For GPT:** `reviews/2026-11-24-animals-baseline-repair-rc.md` on the branch; Mac `_review/animals-baseline-repair-rc/read/` (whole-tree hash equal to the workspace checkout, 958 files). Open point put to GPT: a second pinned commit must be moved at each Timeline release.
+- **Unchanged:** `animals-assessment-rc` `ab1a223` parked, R1 open; it carries the old suite until main is merged into it at release time.
+
 ## 24 Nov 03:16:00 UTC (clock reading) — **Timeline thread: CORRECTION, the page-release merge is `19f4e07`, not `ea39975`; review packet for GPT on the test-only commit `1d0c6dd`** (docs only)
 - **The error:** every record this thread wrote today named the merge `ea39975`. That commit was a first local attempt at the merge on the tip `6dcda3c`; main was then found to have moved to `419ccb4`, the merge was rebuilt as **`19f4e07`** and pushed, and the old number was carried into the records. `ea39975` is not on GitHub. The Earth from Space thread recorded the right number in its own entry.
 - **Why it matters:** the rollback instruction. **Rollback of the page release = revert `19f4e07`.**
