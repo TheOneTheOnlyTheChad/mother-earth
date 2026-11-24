@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
-## 24 Nov 18:52 UTC (clock reading) — **Timeline R4: final combined tree tested; waiting for Chad's own page line. Page NOT released (still R3); release is for 25 Nov UTC, from 02:00 SAST** (page: none; Timeline thread)
+## 24 Nov 18:43 UTC (clock reading) — **Timeline R4: final combined tree tested; waiting for Chad's own page line. Page NOT released (still R3); release is for 25 Nov UTC, from 02:00 SAST** (page: none; Timeline thread)
 - Combined tree `8ea37a7` on `timeline-finds-release-rc` (the reviewed candidate + the landed hub 0.6.25): served page files byte-identical to the candidate GPT passed. All 14 release suites pass, among them `animals-tab-ui` 282 / 0 and `nature-context-ui` 78 / 0; `hub-alignment` reports deployed 0.6.25.
 - The release page, fetched from GitHub at that commit and hash-checked, draws from the **live** hub's R4 route (18:08:59 UTC).
 - Record: packet §10 on the branch (`reviews/2026-11-24-timeline-r4-release-candidate.md`).
