@@ -1,5 +1,5 @@
 {
- "about": "The five mass-extinction episodes for the first deep-time release (TIMELINE-DEEP-TIME-BUILD-PROPOSAL rev 1.1). Values are as the named sources state them; wording is ours unless quoted. Evidence record: docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md (rev 2) and the packet research/timeline-big-five/2026-11-10-claude/ on the Mac.",
+ "about": "The five mass-extinction episodes for the first deep-time release (TIMELINE-DEEP-TIME-BUILD-PROPOSAL rev 1.1). Values are as the named sources state them; wording is ours unless quoted. Evidence record: docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md (rev 2) and the packet research/timeline-big-five/2026-11-10-claude/ on the Mac. Since tl-2026-11-R3 (schema 3) the end-Cretaceous episode carries an account: an opening, attributed findings and one image, as fixed by the reviewed wording snapshot (sha256 d532063d5df9f19d8262e34a3d8ef3c38cdfb1b58b24f4d09cd05999d479219a) and recorded in reviews/2026-11-23-timeline-story-rc.md.",
  "sources": {
   "harper2024": {
    "citation": "Harper DAT (2024) Late Ordovician Mass Extinction: Earth, fire and ice. National Science Review 11(1): nwad319",
@@ -42,6 +42,36 @@
    "licence": "CC BY 4.0",
    "status": "No correction, retraction or expression of concern in the article text on the publisher's page (checked 10 Nov 2026)",
    "checked": "2026-11-10"
+  },
+  "hull2020": {
+   "citation": "Hull PM et al. (2020) On impact and volcanism across the Cretaceous-Paleogene boundary. Science 367 (6475)",
+   "doi": "10.1126/science.aay5055",
+   "licence": "copyright the authors, exclusive licensee AAAS (not an open licence)",
+   "status": "No correction, retraction or expression of concern on the publisher's page (checked 23 Nov 2026)",
+   "checked": "2026-11-23"
+  },
+  "schoene2019": {
+   "citation": "Schoene B et al. (2019) U-Pb constraints on pulsed eruption of the Deccan Traps across the end-Cretaceous mass extinction. Science 363: 862–866",
+   "doi": "10.1126/science.aau2422",
+   "licence": "no open licence stated on the page read",
+   "status": "No correction, retraction or expression of concern on the publisher's page (checked 23 Nov 2026)",
+   "checked": "2026-11-23"
+  },
+  "renne2013": {
+   "citation": "Renne PR et al. (2013) Time scales of critical events around the Cretaceous-Paleogene boundary. Science 339: 684–687",
+   "doi": "10.1126/science.1230492",
+   "licence": "no open licence stated on the page read",
+   "status": "No correction, retraction or expression of concern on the publisher's page (checked 23 Nov 2026)",
+   "checked": "2026-11-23",
+   "read": "abstract only"
+  },
+  "schulte2010": {
+   "citation": "Schulte P et al. (2010) The Chicxulub asteroid impact and mass extinction at the Cretaceous-Paleogene boundary. Science",
+   "doi": "10.1126/science.1177265",
+   "licence": "no open licence stated on the page read",
+   "status": "No correction, retraction or expression of concern on the publisher's page (checked 23 Nov 2026)",
+   "checked": "2026-11-23",
+   "read": "abstract only"
   }
  },
  "episodes": [
@@ -194,6 +224,7 @@
    "chart_boundary": "cretaceous-paleogene",
    "claims": [
     {
+     "id": "c0",
      "claim_type": "dated_event_age",
      "axis": true,
      "when": {
@@ -206,6 +237,7 @@
      "locator": "Introduction"
     },
     {
+     "id": "c1",
      "claim_type": "extinction_placement_tied",
      "axis": true,
      "when": {
@@ -217,8 +249,66 @@
      "locator": "Introduction"
     },
     {
+     "id": "ca-1",
+     "claim_type": "cause_account",
+     "text": "Wilf and colleagues (2023) call the impact the extinction's \"unique cause\".",
+     "source": "wilf2023",
+     "locator": "Introduction"
+    },
+    {
+     "id": "ca-2",
+     "claim_type": "cause_account",
+     "text": "Schulte and colleagues (2010), in a synthesis of rock records from around the world, concluded that the impact triggered the extinction.",
+     "source": "schulte2010",
+     "locator": "Abstract"
+    },
+    {
+     "id": "ca-3",
+     "claim_type": "cause_account",
+     "text": "Hull and colleagues (2020), using carbon-cycle models and past-temperature records, found support for the main Deccan gas release beginning and ending before the impact, with only the impact coinciding with the extinction.",
+     "source": "hull2020",
+     "locator": "Abstract"
+    },
+    {
+     "id": "di-1",
+     "claim_type": "disagreement",
+     "text": "Other studies examine what part was played by the Deccan Traps, a volcanic province in what is now India.",
+     "source": "oconnor2024",
+     "locator": "Introduction",
+     "also": "hull2020"
+    },
+    {
+     "id": "di-2",
+     "claim_type": "disagreement",
+     "text": "Schoene and colleagues (2019) dated the start of one pulse of eruptions to tens of thousands of years before the impact and the extinction.",
+     "source": "schoene2019",
+     "locator": "Abstract"
+    },
+    {
+     "id": "di-2b",
+     "claim_type": "disagreement",
+     "text": "They say their findings support models in which both events drove the environmental deterioration linked to the extinction.",
+     "source": "schoene2019",
+     "locator": "Abstract"
+    },
+    {
+     "id": "di-3",
+     "claim_type": "disagreement",
+     "text": "O'Connor and colleagues (2024) note that the dating does not exclude Deccan volcanism as a contributing or primary cause.",
+     "source": "oconnor2024",
+     "locator": "Introduction"
+    },
+    {
+     "id": "di-4",
+     "claim_type": "disagreement",
+     "text": "Their own temperature records, from two sites in the western United States, suggest that on land volcanic climate change was not the primary cause.",
+     "source": "oconnor2024",
+     "locator": "Abstract and Discussion"
+    },
+    {
+     "id": "lim-1",
      "claim_type": "context",
-     "text": "Causes are not shown in this release.",
+     "text": "This entry does not show how the extinction unfolded for each group of living things, or how long recovery took.",
      "source": null,
      "locator": null
     }
@@ -229,6 +319,158 @@
      "docs/research/TIMELINE-BIG-FIVE-SOURCE-CHECK.md",
      "REGISTER.md"
     ]
+   },
+   "chart_claim_id": "c3",
+   "story": {
+    "snapshot_sha256": "d532063d5df9f19d8262e34a3d8ef3c38cdfb1b58b24f4d09cd05999d479219a",
+    "heading": "Evidence and interpretations",
+    "reviewed": {
+     "date": "2026-11-23",
+     "scope": "This covers the added sentences, their sources and the image record. It is not a review of the entry as a whole; the earlier timing claims keep their own dates."
+    },
+    "evidence": [
+     {
+      "id": "ev-oconnor-intro",
+      "type": "passage",
+      "source": "oconnor2024",
+      "locator": "Introduction"
+     },
+     {
+      "id": "ev-wilf-intro",
+      "type": "passage",
+      "source": "wilf2023",
+      "locator": "Introduction"
+     },
+     {
+      "id": "ev-schulte-abs",
+      "type": "passage",
+      "source": "schulte2010",
+      "locator": "Abstract"
+     },
+     {
+      "id": "ev-nasa-pia01723",
+      "type": "collection_record",
+      "institution": "NASA/JPL",
+      "record": "PIA01723",
+      "title": "Space Radar Image of the Yucatan Impact Crater Site",
+      "url": "https://photojournal.jpl.nasa.gov/catalog/PIA01723",
+      "checked": "2026-11-23"
+     },
+     {
+      "id": "ev-nasa-pia03379",
+      "type": "collection_record",
+      "institution": "NASA/JPL",
+      "record": "PIA03379",
+      "title": "Shaded Relief with Height as Color, Yucatan Peninsula, Mexico",
+      "url": "https://science.nasa.gov/photojournal/shaded-relief-with-height-as-color-yucatan-peninsula-mexico/",
+      "checked": "2026-11-23"
+     },
+     {
+      "id": "ev-renne-abs",
+      "type": "passage",
+      "source": "renne2013",
+      "locator": "Abstract"
+     },
+     {
+      "id": "ev-oconnor-fig1",
+      "type": "passage",
+      "source": "oconnor2024",
+      "locator": "Abstract; Fig. 1 caption and the passage after it"
+     }
+    ],
+    "opening": [
+     {
+      "id": "op-1",
+      "text": "About 66 million years ago, a mass extinction marked the end of the Cretaceous Period.",
+      "kind": "evidence",
+      "supports": [
+       "ev-oconnor-intro",
+       "ev-wilf-intro"
+      ]
+     },
+     {
+      "id": "op-2",
+      "text": "An estimated three-quarters of species were lost, including every dinosaur that was not a bird.",
+      "kind": "evidence",
+      "supports": [
+       "ev-oconnor-intro",
+       "ev-wilf-intro"
+      ]
+     },
+     {
+      "id": "op-3",
+      "text": "At that time a large asteroid struck what is now Mexico's Yucatán Peninsula, forming the Chicxulub crater, now buried beneath younger rock.",
+      "kind": "evidence",
+      "supports": [
+       "c0",
+       "ev-wilf-intro",
+       "ev-schulte-abs",
+       "ev-nasa-pia01723",
+       "ev-nasa-pia03379"
+      ]
+     },
+     {
+      "id": "op-4",
+      "text": "Renne and colleagues (2013) reported dating that places the impact and the extinction within 32,000 years of each other.",
+      "kind": "evidence",
+      "supports": [
+       "ev-renne-abs"
+      ]
+     },
+     {
+      "id": "op-4b",
+      "text": "That figure is a limit on how far apart the two could be, not a measured gap between them.",
+      "kind": "evidence",
+      "supports": [
+       "ev-renne-abs"
+      ]
+     },
+     {
+      "id": "op-5",
+      "text": "At two sites in the western United States, researchers identified the boundary by shock-altered minerals, an unusual enrichment in iridium, and the disappearance of fossil pollen and spores.",
+      "kind": "evidence",
+      "supports": [
+       "ev-oconnor-fig1"
+      ]
+     }
+    ],
+    "image": {
+     "kind": "measured_image",
+     "alt": "Colour relief map of the north-west corner of the Yucatán Peninsula. A dashed semicircle labelled \"Trough\" curves inland from the coast. Arrows labelled \"Cenotes (sinkholes)\" point to small pits along it.",
+     "caption": "Radar height map of the north-west Yucatán Peninsula, Mexico, with NASA's labels. The dashed line follows a shallow trough, 3 to 5 metres deep and about 5 kilometres wide, which NASA describes as a surface expression of the buried crater's outer boundary. Sinkholes (cenotes) are marked along it. Heights are greatly exaggerated. This is a rendering of elevation measurements, not a photograph of the crater. Data: Shuttle Radar Topography Mission, February 2000.",
+     "supports": [
+      "ev-nasa-pia03379"
+     ],
+     "creator": "NASA/JPL",
+     "credit": "Image: NASA/JPL (PIA03379)",
+     "licence": "used under NASA's Images and Media Usage Guidelines",
+     "licence_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+     "source_page": "https://science.nasa.gov/photojournal/shaded-relief-with-height-as-color-yucatan-peninsula-mexico/",
+     "renditions": [
+      {
+       "file": "PIA03379-fig1-800.jpg",
+       "sha256": "8886a64a79c60e6b382c1aed2a417b18f97d439f8892a13105a79140af99351e",
+       "bytes": 81202,
+       "pixels": [
+        800,
+        454
+       ],
+       "media_type": "image/jpeg",
+       "modification": "none: the bytes NASA's image service returned for width 800"
+      },
+      {
+       "file": "PIA03379-fig1-1024.jpg",
+       "sha256": "a1ab53fc7f6227e2176da674cfc943b2cae3a5e97209e7050e2d7cef390bb770",
+       "bytes": 144324,
+       "pixels": [
+        1024,
+        581
+       ],
+       "media_type": "image/jpeg",
+       "modification": "none: the bytes NASA's image service returned for width 1024"
+      }
+     ]
+    }
    }
   }
  ]

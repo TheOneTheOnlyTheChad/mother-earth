@@ -483,10 +483,10 @@ function checkPositions(name, s, a, b, cat = C) {
     ok('E2 390: Back reopens the sheet with focus on the link used, same window', q.open && /-chg-/.test(q.act) && sameWin(await view(p2), M), q);
     await p2.goForward(); await p2.waitForTimeout(300); q = await st2();
     ok('E2 390: Forward returns to the record, sheet closed, same window', !q.open && /^change-/.test(q.act) && sameWin(await view(p2), M), q);
-    await p2.click('#change-' + REV + '-1-open'); await p2.waitForTimeout(300); q = await st2();
+    await p2.click('#change-tl-2026-11-R2-1-open'); await p2.waitForTimeout(300); q = await st2();
     ok('E2 390: "Open the entry" from the record opens the story', q.open && q.s.entry === ID.t && sameWin(await view(p2), M), q);
     await p2.goBack(); await p2.waitForTimeout(300); q = await st2();
-    ok('E2 390: Back returns to the record with focus on "Open the entry"', !q.open && q.act === 'change-' + REV + '-1-open' && sameWin(await view(p2), M), q);
+    ok('E2 390: Back returns to the record with focus on "Open the entry"', !q.open && q.act === 'change-tl-2026-11-R2-1-open' && sameWin(await view(p2), M), q);
     ok('E2 390: no page errors', p2.errs.length === 0, p2.errs);
     await c2.close();
   }
@@ -544,7 +544,7 @@ function checkPositions(name, s, a, b, cat = C) {
     const base = J.entries[2]; J.entries = []; let arts = '';
     for (let i = 0; i < 200; i++) { const e = JSON.parse(JSON.stringify(base)); e.id = 'e-fx-' + i; e.title = 'Fixture entry ' + i; e.short = 'F' + i; e.revisions = [];
       e.claims[0].when.ma = Math.round(rnd() * 5300000) / 10000 + 2; J.entries.push(e);
-      arts += `<article class="entry ep" id="${e.id}" aria-labelledby="${e.id}-h"><h3 class="eh" id="${e.id}-h" tabindex="-1">${e.title}</h3></article>`; }
+      arts += `<article class="entry ep" id="${e.id}" aria-labelledby="${e.id}-h"><h3 class="eh" id="${e.id}-h" tabindex="-1">${e.title}</h3>${e.claims.map((k, n) => `<section class="es claim" id="${e.id}-c${n}"></section>`).join('')}</article>`; }   // schema 3: the page must carry an element for each claim the catalogue lists
     J.changes = J.changes.filter(x => false); J.shelf.forEach(x => { x.revisions = []; });
     const fx = Buffer.from(JSON.stringify(J)), html = HTML.replace('<section id="entries" class="entries" aria-label="Entries in full">', '<section id="entries" class="entries" aria-label="Entries in full">' + arts);
     for (const [w, h] of [[1280, 860], [390, 844]]) {
@@ -573,7 +573,8 @@ function checkPositions(name, s, a, b, cat = C) {
     const T = await p.evaluate(() => { const r = document.querySelector('#xpl .track').getBoundingClientRect(); return { x: r.left + 300, y: r.top + 90 }; });
     await p.mouse.move(T.x, T.y); await p.mouse.down(); await p.mouse.move(T.x + 150, T.y, { steps: 5 }); await p.mouse.up();
     await p.mouse.click(T.x, T.y); await p.mouse.wheel(0, -400); await p.waitForTimeout(500);
-    ok('I after load: pan, zoom, presets, drag, wheel, opening, switching and closing a story make zero requests', reqs.length === 0, reqs);
+    { const imgs = reqs.filter(u => /\/assets\/timeline\//.test(u)), rest = reqs.filter(u => !/\/assets\/timeline\//.test(u));
+    ok('I after load: pan, zoom, presets, drag, wheel, opening, switching and closing a story make no request, except at most one image file for a story that has an image', rest.length === 0 && imgs.length <= 1, reqs); }
     await c.close();
   }
 
@@ -583,11 +584,12 @@ function checkPositions(name, s, a, b, cat = C) {
     const arts = await p.evaluate(() => [...document.querySelectorAll('article.entry.ep')].map(a => ({ id: a.id, scope: (a.querySelector(':scope > .scope') || {}).textContent || null,
       top: [...a.children].map(x => x.tagName + (x.dataset.grp ? ':' + x.dataset.grp : x.className ? '.' + x.className : '')),
       groups: [...a.querySelectorAll(':scope > section.grp')].map(g => ({ k: g.dataset.grp, h: g.querySelector(':scope > h4').textContent, kids: [...g.children].map(x => x.tagName + (x.className ? '.' + x.className.split(' ').join('.') : '')),
-        claims: [...g.querySelectorAll(':scope > section.claim')].map(s => ({ id: s.id, type: s.dataset.claimType, h: s.querySelector('h5').textContent, val: (s.querySelector('.cval') || {}).textContent || null,
+        claims: [...g.querySelectorAll(':scope > section.claim')].map(s => ({ id: s.id, type: s.dataset.claimType, h: (s.querySelector('h5') || {}).textContent, val: (s.querySelector('.cval') || {}).textContent || null,
           ps: [...s.querySelectorAll(':scope > p:not(.cval):not(.srcnote)')].map(x => x.textContent), src: [...s.querySelectorAll('.srcnote a')].map(x => x.getAttribute('href')) })) })) })));
     const HEAD = { how: 'How we know', context: 'Context and limits', chart: 'Chart reference', review: 'Review and changes' }, grp = t => t === 'chart_boundary' ? 'chart' : t === 'context' ? 'context' : 'how';
     const bad = [];
-    for (const e of C.entries) { const a = arts.find(x => x.id === e.id); if (!a) { bad.push([e.id, 'missing']); continue; }
+    // an entry with an account (schema 3) has its own structure and its own suites (timeline-story-*); this block holds every OTHER entry to the stage-1 rule
+    for (const e of C.entries.filter(e => !e.story)) { const a = arts.find(x => x.id === e.id); if (!a) { bad.push([e.id, 'missing']); continue; }
       if (a.top.some(t => !/^(H3\.eh|P\.scope|SECTION:(how|context|chart|review))$/.test(t))) bad.push([e.id, 'something outside the groups', a.top]);
       if ((a.scope || null) !== (e.scope || null)) bad.push([e.id, 'scope']);
       const want = ['how', 'context', 'chart'].filter(k => e.claims.some(q => grp(q.claim_type) === k)).concat('review');
@@ -671,7 +673,8 @@ function checkPositions(name, s, a, b, cat = C) {
   }
 
   // ---------- L. the catalogue is byte-identical and the generator agrees with the page
-  ok('L catalogue file unchanged: sha256 2f39aa30…0356', SHA === '2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356', SHA);
+  { const r2 = sha(fs.readFileSync(path.join(ROOT, 'phase1/timeline/catalogue/tl-2026-11-R2.json')));   // the explorer's release left the catalogue alone; later releases add files and never rewrite this one
+    ok('L the catalogue released with the explorer is unchanged on disk: tl-2026-11-R2, sha256 2f39aa30…0356', r2 === '2f39aa3001c382a1c466386a88364cecec3583aa7767ba8c7c766a6c715a0356', r2); }
   if (!OLD) { let out = ''; try { out = execFileSync('python3', [path.join(ROOT, 'phase1/timeline/build_timeline.py'), '--check'], { cwd: ROOT }).toString(); } catch (e) { out = 'FAILED ' + (e.stdout || '') + (e.stderr || ''); }
     ok('L build_timeline.py --check passes (page, catalogue and script build agree)', /match the generator output/.test(out), out.slice(0, 300)); }
 

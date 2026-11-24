@@ -1,0 +1,40 @@
+== story-ui BREAK=eager-image
+exit 1
+timeline-story-ui: 113 pass, 14 fail (BREAK=eager-image)
+== story-ui BREAK=no-story-validate
+exit 1
+timeline-story-ui: 112 pass, 15 fail (BREAK=no-story-validate)
+== story-ui BREAK=no-schema-pin
+exit 1
+timeline-story-ui: 123 pass, 4 fail (BREAK=no-schema-pin)
+== story-ui BREAK=inert-cites
+exit 1
+timeline-story-ui: 111 pass, 16 fail (BREAK=inert-cites)
+== story-ui BREAK=cite-history
+exit 1
+timeline-story-ui: 111 pass, 16 fail (BREAK=cite-history)
+== changes-build BREAK=date-after-release
+exit 1
+timeline-changes-build: 47 passed, 2 failed [BREAK=date-after-release]
+== changes-build BREAK=orphan-change
+exit 1
+timeline-changes-build: 48 passed, 1 failed [BREAK=orphan-change]
+== changes-build BREAK=review-derived-from-sources
+exit 1
+timeline-changes-build: 48 passed, 1 failed [BREAK=review-derived-from-sources]
+== changes-build BREAK=inbox-allowed
+exit 1
+timeline-changes-build: 47 passed, 2 failed [BREAK=inbox-allowed]
+== changes-build BREAK=private-record-allowed
+exit 1
+timeline-changes-build: 47 passed, 2 failed [BREAK=private-record-allowed]
+== changes-build BREAK=after-unchecked
+exit 1
+timeline-changes-build: 47 passed, 2 failed [BREAK=after-unchecked]
+== changes-build BREAK=previous-unchecked
+exit 1
+timeline-changes-build: 48 passed, 1 failed [BREAK=previous-unchecked]
+== changes-build BREAK=r1-mutated
+exit 1
+timeline-changes-build: 48 passed, 1 failed [BREAK=r1-mutated]
+ALLDONE

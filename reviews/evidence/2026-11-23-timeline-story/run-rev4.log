@@ -1,0 +1,43 @@
+== node phase1/timeline-changes-build.test.mjs
+exit 0
+timeline-changes-build: 45 passed, 0 failed
+== node phase1/timeline-catalogue-hub.test.mjs
+exit 0
+timeline-catalogue-hub: 73 passed, 0 failed
+== node --no-warnings phase1/timeline-story-build.test.mjs
+exit 0
+timeline-story-build: 93 pass, 0 fail
+== node --no-warnings phase1/timeline-story-ui.test.mjs
+exit 0
+timeline-story-ui: 118 pass, 0 fail
+== node --no-warnings phase1/timeline-ui.test.cjs
+exit 0
+timeline-ui: 594 pass, 0 fail
+== node --no-warnings phase1/timeline-axis.test.cjs
+exit 0
+timeline-axis: 96 pass, 0 fail
+== node --no-warnings phase1/timeline-changes-ui.test.cjs
+exit 0
+timeline-changes-ui: 173 pass, 0 fail
+== node --no-warnings phase1/timeline-mixed-assets.test.cjs
+exit 0
+timeline-mixed-assets: 18 pass, 0 fail
+== node --no-warnings phase1/timeline-travel-ui.test.cjs
+exit 0
+timeline-travel-ui: 209 pass, 0 fail
+== BREAK=eager-image story-ui
+exit 1
+timeline-story-ui: 106 pass, 12 fail (BREAK=eager-image)
+== BREAK=no-story-validate story-ui
+exit 1
+timeline-story-ui: 103 pass, 15 fail (BREAK=no-story-validate)
+== BREAK=no-schema-pin story-ui
+exit 1
+timeline-story-ui: 114 pass, 4 fail (BREAK=no-schema-pin)
+== BREAK=inert-cites story-ui
+exit 1
+timeline-story-ui: 102 pass, 16 fail (BREAK=inert-cites)
+== BREAK=cite-history story-ui
+exit 1
+timeline-story-ui: 102 pass, 16 fail (BREAK=cite-history)
+ALLDONE

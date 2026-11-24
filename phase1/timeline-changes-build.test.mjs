@@ -18,6 +18,9 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url)), ROOT = path.join(HERE, '..'), TL = path.join(HERE, 'timeline');
 const GEN = path.join(TL, 'build_timeline.py');
+// Since tl-2026-11-R3 the release sources are schema 3. This suite keeps testing the R2 change-record rules on the R2 source files
+// as released (frozen copy), built with the CURRENT generator: an earlier revision must still build byte for byte.
+const SRC2 = path.join(TL, 'fixtures/tl-2026-11-R2-src');
 const B = process.env.BREAK || '';
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 let pass = 0, fail = 0;
@@ -48,7 +51,8 @@ const gen = args => { const r = spawnSync('python3', ['-c', RUNNER, ...args], { 
 let n = 0;
 function fixture(edit) {
   const dir = path.join(TMP, 'fx' + (++n)); fs.mkdirSync(path.join(dir, 'catalogue'), { recursive: true });
-  for (const f of ['BUILD.json', 'big5.json', 'changes.json', 'chart-v2026-06.5.json', 'entry-pliny-ep-6-16.json']) fs.copyFileSync(path.join(TL, f), path.join(dir, f));
+  for (const f of ['BUILD.json', 'big5.json', 'changes.json']) fs.copyFileSync(path.join(SRC2, f), path.join(dir, f));
+  for (const f of ['chart-v2026-06.5.json', 'entry-pliny-ep-6-16.json']) fs.copyFileSync(path.join(TL, f), path.join(dir, f));
   fs.copyFileSync(path.join(TL, 'catalogue/tl-2026-11-R1.json'), path.join(dir, 'catalogue/tl-2026-11-R1.json'));
   const page = path.join(dir, 'timeline.html'); fs.copyFileSync(path.join(ROOT, 'timeline.html'), page);
   const J = f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')), W = (f, o) => fs.writeFileSync(path.join(dir, f), JSON.stringify(o, null, 1) + '\n');
@@ -65,9 +69,13 @@ if (B === 'r1-mutated') r1 = Buffer.from(r1.toString('utf8').replace('201.5', '2
 ok('R1 frozen: the committed tl-2026-11-R1.json equals its published pin (literal sha256 and size)', sha(r1) === R1_SHA && r1.length === R1_BYTES, [sha(r1), r1.length]);
 const chk = spawnSync('python3', [GEN, '--check'], { encoding: 'utf8' });
 ok('generator --check passes on the committed page, catalogue and script build', chk.status === 0, (chk.stdout + chk.stderr).trim());
-const BUILD = JSON.parse(fs.readFileSync(path.join(TL, 'BUILD.json'), 'utf8'));
+const BUILD = JSON.parse(fs.readFileSync(path.join(SRC2, 'BUILD.json'), 'utf8'));
 const catBytes = fs.readFileSync(path.join(TL, 'catalogue', BUILD.catalogue_revision + '.json')), C = JSON.parse(catBytes), P = JSON.parse(r1);
-const page = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'), js = fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8');
+const PAGE_NOW = fs.readFileSync(path.join(ROOT, 'timeline.html'), 'utf8'), js = fs.readFileSync(path.join(ROOT, 'timeline.js'), 'utf8');
+const f0 = fixture(); const r0 = f0.run(); ok('the R2 sources as released build with the current generator', r0.code === 0, r0.out.slice(-200));
+const page = r0.code === 0 ? f0.html() : '';   // the R2 page as the current generator writes it
+// literal hashes, so the check does not need a git checkout; they are the files of commit 03aff0a (verified with git when this was written)
+ok('the frozen R2 source copies are the released files (literal sha256 of each)', Object.entries({"BUILD.json": "3f24e65e81556bc9f0ed9a4dda8645e17e903c904b3de5fcb8267a43d57b2321", "big5.json": "9dbd45a710ef93e145f3a25e0a25e2362cbec7d91a47bddd4a8a9429e2be5463", "changes.json": "155915436ace7e7c9f37d3a6fd6e7948512c48603a636d534f72f1164a9c6d1a"}).every(([f, x]) => sha(fs.readFileSync(path.join(SRC2, f))) === x));
 ok('R2: schema 2, revision tl-2026-11-R2, previous = R1 (the last reader-facing release)', C.schema === 2 && C.catalogue_revision === 'tl-2026-11-R2' && C.release.revision === 'tl-2026-11-R2' && C.release.previous === 'tl-2026-11-R1', C.release);
 ok('R2: releases = R1 (10 Nov 2026, first release) then R2', C.releases.length === 2 && C.releases[0].revision === 'tl-2026-11-R1' && C.releases[0].release_date === '2026-11-10' && C.releases[1].revision === 'tl-2026-11-R2' && C.releases[1].release_date === C.release.release_date, C.releases);
 const byId = Object.fromEntries([...C.entries, ...C.shelf].map(e => [e.id, e]));
@@ -97,11 +105,11 @@ ok('page: the approved public change record, word for word', page.includes(EXPEC
 ok('page: the approved entry line, word for word', page.includes('Evidence last reviewed: <time datetime="2026-11-10">10 Nov 2026</time> · Changed in revision tl-2026-11-R2: <a class="chg" id="e-big5-end-triassic-chg-tl-2026-11-R2-1" href="#change-tl-2026-11-R2-1" data-change="change-tl-2026-11-R2-1">wording clarified</a>'));
 ok('page: "Timeline page updated" carries the release date and revision', new RegExp(`Timeline page updated <time datetime="${C.release.release_date}">[^<]+</time> · revision tl-2026-11-R2 · <a id="tl-changes-link" href="#changes">What changed</a>`).test(page));
 // privacy: inbox fields and private paths stay out of shipped data and pages
-for (const [name, text] of [['catalogue', catBytes.toString('utf8')], ['timeline.html', page], ['timeline.js', js], ['changes.json', fs.readFileSync(path.join(TL, 'changes.json'), 'utf8')]])
+for (const [name, text] of [['catalogue', catBytes.toString('utf8')], ['the current catalogue', fs.readFileSync(path.join(TL, 'catalogue', JSON.parse(fs.readFileSync(path.join(TL, 'BUILD.json'), 'utf8')).catalogue_revision + '.json'), 'utf8')], ['timeline.html', PAGE_NOW], ['the R2 page', page], ['timeline.js', js], ['changes.json', fs.readFileSync(path.join(TL, 'changes.json'), 'utf8')]])
   ok(`privacy: no inbox id, inbox path or private path in ${name}`, !/TL-IN-\d|timeline-inbox\/|"inbox"|(?<!docs\/)research\/|_review\/|\/Users\/|_to_delete/i.test(text));
 // asset versions
-const R1_JS_V = '202611221000', v = (page.match(/timeline\.js\?v=(\d+)/) || [])[1];
-ok('asset version: timeline.js ?v= is new, equals the page build id and the script BUILD', v && v !== R1_JS_V && page.includes(`data-build="${v}"`) && js.includes(`const BUILD = '${v}';`), v);
+const R1_JS_V = '202611221000', v = (PAGE_NOW.match(/timeline\.js\?v=(\d+)/) || [])[1];
+ok('asset version: timeline.js ?v= is new, equals the page build id and the script BUILD', v && v !== R1_JS_V && PAGE_NOW.includes(`data-build="${v}"`) && js.includes(`const BUILD = '${v}';`), v);
 { // loosened for dustrgb-rc: a later release bumps style.css again, so pin "same on all three pages, and not older than this build" rather than "equal to this build"
   const sv = ['timeline.html', 'index.html', 'sources.html'].map(f => (fs.readFileSync(path.join(ROOT, f), 'utf8').match(/style\.css\?v=(\d+)/) || [])[1]);
   // timeline-travel-rc (TIMELINE-TRAVEL-PROPOSAL rev 2.1 §3, "Shared stylesheet"): the explorer's rules are all under body.tl, so only the Timeline
