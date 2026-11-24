@@ -1,0 +1,2 @@
+-- S1: a completed normal trial: 288 slots, one good row each. 288 rows in the table, 288 in the read range.
+WITH RECURSIVE n(i) AS (SELECT 0 UNION ALL SELECT i + 1 FROM n WHERE i < 287) INSERT INTO collector_runs (layer, started_at, finished_at, status, http_status, records, bytes, note) SELECT 'earthview', strftime('%Y-%m-%dT%H:%M:%fZ', 1795595400 + i * 600, 'unixepoch'), strftime('%Y-%m-%dT%H:%M:%fZ', 1795595400 + i * 600 + 15, 'unixepoch'), 'ok', 200, 0, 0, 'nothing newer: fixture frame' FROM n;
