@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 24 Nov 2026
 
+## 24 Nov 04:12 UTC (clock reading) — **Animals baseline repair LANDED on Chad's own Approve line: merge `9969bc3` (of `animals-baseline-repair-rc` `333fc9d`). Test file and records only; no page, hub or data file changed; the live site is unchanged.** (page: none; Animals thread)
+- **Chad's line:** "Approve: merge animals-baseline-repair-rc 333fc9d into main (test file and records only; no page, hub or data change)".
+- **Merged at 04:11 UTC (push time, clock reading) onto main `a72e9d0`.** Main had gained two documents-only commits since the integration check (Earth from Space STATUS); no conflict. The merge brings 15 files: `phase1/animals-tab-ui.test.cjs` (sha256 `83ff9b18…03ad`, the reviewed file), the record, GPT's review and 12 evidence files. Checked on the merged tree: no page file and `phase1/worker.js` unchanged; section 13 12 passed; `hub-alignment` 6 passed. Remote main read back equal to the local merge.
+- **Not done:** deleting the merged branch on GitHub. `git push --delete` and the GitHub API are refused by the session's git proxy, and the branches-page delete click was refused by the session's safety check. The branch is 0 ahead of main; it stays until Chad says how he wants it deleted.
+- **Carried forward:** rename one of the two checks labelled 13f at the next suite change; moving `TL_MAIN` belongs in the Timeline release checklist; main goes into `animals-assessment-rc` before its next review (R1 still open, branch `ab1a223` parked).
+
 ## 24 Nov 04:08 UTC (clock reading) — **Earth from Space: GPT ACCEPTED the D1 cost measurement. Runbook P4a is satisfied; no repeat. Stage D NOT cleared** (production: none; Earth from Space thread)
 - GPT verified every checksum, recomputed the 320 records and ran the suite with C13b (75 of 75). One wording correction, made as result rev 1.1 on `earth-from-space-fixtures-rc` (`9457622`): the 20,810-row aggregate remainder is now labelled unreconciled (one page-opening Worker query's rows read was not captured; the aggregates lag). Original evidence kept; the correction is a separate amendment file.
 - Still open before a Stage D line: alert test (packet 2) and its review (P4), the two real monitors (P3), phone look (P6), EUMETSAT answer (P7), evidence preflight (P11), Chad's acceptance of the documents (P5).
