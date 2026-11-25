@@ -6,6 +6,8 @@
 
 *Rev 1.2, 25 Nov 2026 11:53 UTC (clock reading; Claude, "Animals 5" thread): a first reply to enquiry D (IWC) is recorded in "Replies" below, with the text Chad pasted. It gives the abundance figure's reference year, the three quantiles and a source, and states the IWC's position on links. It does not say in terms that the proposed card may be shown. It has not been reviewed by GPT. Nothing is cleared by it. Row D of the table and "What is not on record" are updated to match; nothing else changed.*
 
+*Rev 1.3, 25 Nov 2026 11:58 UTC (clock reading; Claude, same thread): the document linked in the IWC reply has now been read by Claude, from the copy Chad downloaded, on his word ("you can read it"), a one-off departure from the text-only rule. What it says is in the new part "The linked document" under D. It explains the method and confirms the classes and the status sentence. It does not contain the abundance figure or its range, and says nothing on reuse. Nothing is cleared.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
@@ -70,9 +72,20 @@
 - Nothing on display guidelines beyond signposting and credit, on how the 2015 assessment date and the page's "last update: 2026" label should be presented, on the Relative Abundance or 20-year change classes, or on scope or duration.
 - Nothing about Cape Vidal, which is separate material with a separate rights holder.
 
-**A difference to settle before any use.** The reply gives the 5 % value as **16580**. Audit B recorded the graphics page's range on 20 Nov 2026 as **15,580**-20,700 (`WHALE-RECOVERY.md` §2). One of these differs from the other by exactly 1,000. Which is right is not established here: the IWC page was not re-read and the linked document was not opened.
+**A difference to settle before any use.** The reply gives the 5 % value as **16580**. Audit B recorded the graphics page's range on 20 Nov 2026 as **15,580**-20,700 (`WHALE-RECOVERY.md` §2). One of these differs from the other by exactly 1,000. Which is right is not established here: the IWC page was not re-read, and the linked document contains none of these numbers (below).
 
-**Not read.** The link in the reply is to a PDF in the IWC archive. Under the project's text-only rule Claude has not opened it. Paper SC/66A/SH03 has not been read either.
+**The linked document (read by Claude, 25 Nov 2026).**
+- **What was read.** Chad downloaded the file from the link in the reply and said "you can read it". Claude read his copy: `download.pdf` in his Downloads folder, 1,167,719 B, sha256 `46e1ebef54b97015998f24daeb2115f1fdc3b04822102a67a530e71ca1f8b3ae`, 31 pages, text extracted with `pdftotext`. The file is not committed. That it is the file behind the reply's link rests on Chad's statement; Claude did not fetch the link.
+- **What it is.** "Annex O, Report of the Sub-Committee on Stock Abundance and Status" of the IWC Scientific Committee. Page footers read "Annex O – SAS … June 2026"; the file's own creation date is 21 May 2026.
+- **Item 5.3.5 (pages 11–12).** An In-depth Assessment of Southern Hemisphere humpback whales was completed in 2016, with Jackson et al. (2015) as the summary. Its results were used for the status "thermometers". The stocks are described as fully model-assessed. The Status Summary and Status Details text is not yet complete. BSC1 and BSC2 were combined into one BSC group, and the BSC drafts needed minor extra calculations, set out in Appendix 4.
+- **Appendix 4, part 2 (page 28).** Results had been computed separately for substocks C1 and C2, as 1,000 sets of numbers (abundance in 1995 and 2015 and carrying capacity for each). Relative Abundance and 20-Year Change are computed from the summed substocks in each set, and the median, 5th and 95th percentiles are taken over the 1,000 values. Total 2015 abundance "was calculated similarly".
+- **Appendix 5 (page 31).** All Southern Hemisphere humpback assessment dates on the status pages are to be 2015. Table 1 gives, for BSC, Western Indian Ocean: Relative Abundance "Very Good"; 20-year "Strongly Increased"; brief statement "Abundant and recovered after strong growth". These match what audit B recorded from the graphics page on 20 Nov.
+- **Item 5.2 (page 10).** The status pages' standard interval is 90 %.
+- **What it does not contain.** The numbers 18,111, 16,580, 15,580 and 20,700 do not appear anywhere in the extracted text. Nothing in it addresses copyright, reuse or permission for the status pages.
+
+**What the reply and the document together establish (Claude's reading, for GPT).** The abundance figure is a 2015 model estimate: the median over 1,000 model results for C1 and C2 summed, with the 5th and 95th percentiles as its range. That closes the audit's three open points on reference year, derivation and the meaning of the range, subject to GPT's review. It does not settle the lower value, and it does not settle permission.
+
+**Not read.** Paper SC/66A/SH03.
 
 **Still open for D:** whether the reply covers displaying the five items or only linking; the 15,580 / 16580 difference; display guidelines and the acknowledgement wording; how the two dates are presented; any condition on scope or duration. She invites further questions. Any answer or further question to the IWC is Chad's to decide and send; nothing is sent or chased by Claude.
 

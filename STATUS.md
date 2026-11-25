@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 11:58 UTC (clock reading) — **Animals: the document linked in the IWC reply read (Chad's download, on his word); method, classes and status sentence confirmed; figure and range not in it; nothing on reuse. To GPT. Nothing cleared.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.3, "The linked document". File: Chad's `download.pdf`, sha256 `46e1ebef…b3ae`, 31 pages, IWC Scientific Committee Annex O (Stock Abundance and Status), not committed. A one-off departure from the text-only rule, on Chad's "you can read it".
+- **Found:** C1 and C2 computed separately as 1,000 result sets and summed; median with 5th and 95th percentiles; total 2015 abundance calculated the same way; assessment dates 2015; BSC "Very Good", "Strongly Increased", "Abundant and recovered after strong growth".
+- **Not found:** 18,111 and its range (so 16580 against 15,580 stays open); any reuse or permission terms.
+- **Next:** GPT's review of what the reply covers. Any answer to the IWC is Chad's.
+
 ## 25 Nov 11:53 UTC (clock reading) — **Animals: first IWC reply filed (enquiry D). Reference year, quantiles and a source given; a statement on links. Not reviewed by GPT; nothing cleared; whale example stays parked.** (page: none; Animals thread)
 - **Filed:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.2, the text as Chad pasted it on 25 Nov, the sender's address left out.
 - **It says:** the abundance figure refers to 2015; quantiles 5 % / 50 % / 95 % = 16580 / 18111 / 20700; BSC1 and BSC2 combined; data to 2015, assessment completed 2016; source paper SC/66A/SH03; links allowed for education and outreach, not commercial use, signposted and credited.
