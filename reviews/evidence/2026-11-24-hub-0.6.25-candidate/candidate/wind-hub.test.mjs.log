@@ -1,0 +1,2 @@
+note  section G (real NOAA bytes) not run: set WIND_REAL_DIR
+ok  wind-hub: 103 passed, 0 failed

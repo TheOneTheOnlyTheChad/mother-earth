@@ -1,0 +1,15 @@
+timeline-finds-ui.test.mjs exit=0 timeline-finds-ui: 281 pass, 0 fail
+timeline-finds-build.test.mjs exit=0 timeline-finds-build: 80 pass, 0 fail
+timeline-changes-build.test.mjs exit=0 timeline-changes-build: 49 passed, 0 failed
+timeline-story-build.test.mjs exit=0 timeline-story-build: 99 pass, 0 fail
+timeline-catalogue-hub.test.mjs exit=0 timeline-catalogue-hub: 74 passed, 0 failed
+hub-alignment.test.mjs exit=0 hub-alignment: 6 passed, 0 failed (worker.js = deployed hub 0.6.24)
+timeline-axis.test.cjs exit=0 timeline-axis: 97 pass, 0 fail
+timeline-mixed-assets.test.cjs exit=0 timeline-mixed-assets: 18 pass, 0 fail
+timeline-changes-ui.test.cjs exit=0 timeline-changes-ui: 173 pass, 0 fail
+timeline-story-ui.test.mjs exit=0 timeline-story-ui: 127 pass, 0 fail
+timeline-travel-ui.test.cjs exit=0 timeline-travel-ui: 209 pass, 0 fail
+timeline-ui.test.cjs exit=0 timeline-ui: 594 pass, 0 fail
+nature-context-ui.test.cjs exit=0 nature-context-ui: 78 passed, 0 failed (first attempt could not start: the workspace lacked the suite's local globe and font files; installed, then run)
+animals-tab-ui (TL_MAIN 643bb9a in the file) exit=0 animals-tab-ui: 282 passed, 0 failed
+DONE

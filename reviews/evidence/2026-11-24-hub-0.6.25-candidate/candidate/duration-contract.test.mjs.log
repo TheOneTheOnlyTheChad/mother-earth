@@ -1,0 +1,29 @@
+duration contract under test: window 10 s · overlong > 12.5 s · hard stop 20 s
+
+=== Case A — position delivered AFTER the hard deadline ===
+ships: window=10s wall=25.1s mono=0.1s overlong=true status=degraded socket=25.1s flowing=0.1s(inferred) interruptions=1 (25s) quiet_at_end=25.0s messages=2 vessels=2 (A=2 B=0) no_source_time=0 older_ignored=0 compression=true parseErrors=0 close={"code":4000,"reason":"overlong on resumption"}
+ships: outcome=overlong after=25.1s opened=true confirmed=true messages=2 first_interruption=2026-11-24T15:59:26.645Z..2026-11-24T15:59:51.646Z (25s) close=4000/overlong on resumption
+  PASS  run completed (no hang)  — real elapsed 0.1 s
+  PASS  early records kept  — rows: 111111111, 222222222
+  PASS  late record REJECTED before touching the vessel map  — vessel count 2, expected 2
+  PASS  socket closed by the guard  — closes: [{"code":4000,"reason":"overlong on resumption","atOffsetMs":25000}]
+  PASS  close reason names the cause  — ["overlong on resumption"]
+  PASS  sample marked overlong  — elapsed_wall_s 25.1, threshold 12.5 s
+  PASS  sample unusable (degraded, not ok)  — status degraded
+  PASS  elapsed not counted as listening  — elapsed 25.1 s vs flowing 0.1 s (inferred)
+  PASS  sleep detector retired, not republished as evidence  — no slept_* field
+  PASS  three measured durations present and distinct  — socket 25.1s, gaps 25s, elapsed 25.1s
+
+=== Case B — deadline passes, no further message ever arrives ===
+ships: window=10s wall=35.0s mono=10.0s overlong=true status=degraded socket=35.0s flowing=0.0s(inferred) interruptions=1 (35s) quiet_at_end=34.9s messages=2 vessels=2 (A=2 B=0) no_source_time=0 older_ignored=0 compression=true parseErrors=0 close={"code":1000,"reason":"window done"}
+ships: outcome=overlong after=35.0s opened=true confirmed=true messages=2 first_interruption=2026-11-24T15:59:26.707Z..2026-11-24T16:00:01.656Z (35s) close=1000/window done
+  PASS  run completed (no hang)  — real elapsed 10.0 s
+  PASS  early records kept  — rows: 111111111, 222222222
+  PASS  run ended with no message after the deadline (cleanup not dependent on onmessage)  — closes: ["window done"]
+  PASS  sample marked overlong  — elapsed_wall_s 35, threshold 12.5 s
+  PASS  sample unusable (degraded, not ok)  — status degraded
+  PASS  elapsed not counted as listening  — elapsed 35 s vs flowing 0 s (inferred)
+  PASS  sleep detector retired, not republished as evidence  — no slept_* field
+  PASS  three measured durations present and distinct  — socket 35s, gaps 35s, elapsed 35s
+
+ALL CHECKS PASSED

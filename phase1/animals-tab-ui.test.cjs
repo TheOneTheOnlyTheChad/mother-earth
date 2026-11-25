@@ -32,7 +32,7 @@ const BASE_MAIN = process.env.BASE_MAIN || '0e620831b83b2ae7eed11a932edfd902d933
 // The Timeline's own files (timeline.js, timeline.html, the stylesheet's body.tl rules) are released by the Timeline thread and have
 // moved on since BASE_MAIN. They are held to the main commit of the Timeline's latest release instead (checks 13f to 13i). Every
 // other file stays on BASE_MAIN. A Timeline release moves TL_MAIN, and nothing else, in the commit that records the release.
-const TL_MAIN = process.env.TL_MAIN || 'fbad1b60bf1311528bde320d13b59637123265fc';   // Timeline date label W1, page commit H (24 Nov 2026); before it 19f4e07, merge of tl-2026-11-R3
+const TL_MAIN = process.env.TL_MAIN || '643bb9a7e9c63045dec3eac87837212f05841a3f';   // Timeline R4 (Humans and human relatives), page commit H (24 Nov 2026); before it fbad1b6 (date label W1), 19f4e07 (merge of tl-2026-11-R3)
 // Nature context (24 Nov 2026, the Animals owner's maintenance at the Nature context thread's request, docs/concepts/NATURE-CONTEXT-ANIMALS-PIN-REQUEST.md):
 // its reviewed page commit changes app.js, index.html and sources.html. Those three are held to that commit, NC_MAIN, by 13b, 13e
 // (sources.html) and 13k; the Animals guarantees on index.html and sources.html are checked on their own, not inherited from the pin;

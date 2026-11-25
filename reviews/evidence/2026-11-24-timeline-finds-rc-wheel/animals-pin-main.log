@@ -1,0 +1,7 @@
+FAIL  13g timeline.js is byte-identical to main's at the Timeline baseline
+FAIL  13h timeline.html is byte-identical to main's at the Timeline baseline; it carries the Animals tab link and menu link once each; and its header equals main 0e62083's except those two links
+      got: {"whole":false,"links":true,"header":true}
+FAIL  13i the stylesheet's body.tl lines are exactly main's at the Timeline baseline, in order (first difference listed on failure)
+      got: {"baseline":235,"here":273,"at":201,"baselineLine":"body.tl .axis .xpl .tk.first::before{left:0}","hereLine":"body.tl .axis .xpl.hasf{padding-top:34px}"}
+
+animals-tab-ui: 277 passed, 3 failed

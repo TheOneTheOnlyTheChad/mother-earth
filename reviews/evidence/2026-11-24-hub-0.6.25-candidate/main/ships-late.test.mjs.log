@@ -1,0 +1,9 @@
+ok - A. hour 22 has no file at its 23:07 batch → absent (correct at that moment)
+ok - B. the 22:06 sample reports down at 23:13 → the 00:07 batch re-aggregates hour 22 to down (received 1)
+ok - C. a late USABLE sample upgrades the hour (absent → degraded 1/2), and its counts are aggregated
+ok - D. no churn: once caught up, later batches do not rewrite the hour
+ok - E. on-time hours are never re-aggregated
+ok - F. bounded: a sample arriving more than 6 h late is NOT picked up (left for /admin/reaggregate)
+ok - G. an hour with files but no row (batch missed) is aggregated by the next batch
+
+7 passed

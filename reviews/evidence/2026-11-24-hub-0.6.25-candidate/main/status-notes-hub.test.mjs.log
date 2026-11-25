@@ -1,0 +1,8 @@
+ok - S1. /status answers 200, no-store
+ok - S2. absent by path: no seeded last_runs row has a note key or any marker
+ok - S3. structured fields: exactly the six, with the seeded values and types (latest row per layer)
+ok - S4. archive_health keeps its own scoped notes, at their exact paths (redacted, cut as today)
+ok - S5. D1 preserved: every seeded note reads back byte-identical after the request
+ok - S6. the rest of the response is present
+
+6 passed, 0 failed

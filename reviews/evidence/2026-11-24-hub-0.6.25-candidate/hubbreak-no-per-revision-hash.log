@@ -1,0 +1,11 @@
+FAIL  real table: /catalogue/timeline/<current> → its exact bytes, its own ETag, CORS
+      got: [503,"96eab43f7c78"]
+FAIL  real table: /catalogue/timeline/tl-2026-11-R3 is still served: R3 exact bytes, its own ETag
+      got: [503,"96eab43f7c78"]
+FAIL  real table: /catalogue/timeline/tl-2026-11-R2 is still served: R2 exact bytes, its own ETag
+      got: [503,"96eab43f7c78"]
+FAIL  fixture: /catalogue/timeline/<R2> returns R2 exact bytes (checked against its own pin)
+      got: [503,"96eab43f7c78"]
+FAIL  fixture: R2 key holding R1 bytes → 503 integrity (each revision checked against its own pin)
+
+timeline-catalogue-hub: 70 passed, 5 failed [BREAK=no-per-revision-hash]

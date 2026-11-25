@@ -1,0 +1,44 @@
+FAIL A 1280: the explorer draws from the rehearsal catalogue (schema 4) with no page error  → ["off:build",[]]
+FAIL A 390: the explorer draws from the rehearsal catalogue (schema 4) with no page error  → ["off:build",[]]
+ok   G no JavaScript: the lane sentence, four find cards and four complete, visible entries are in the page
+ok   G no JavaScript: the lane list counts them
+FAIL H control: the same route with an unchanged catalogue draws the explorer  → "off:build"
+FAIL H refused by the page: a limit pointing the other way (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a limit with no uncertainty (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a limit whose uncertainty is text (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a limit with a negative uncertainty (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a limit whose reference is null (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a limit whose ± reaches below zero (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a limit given an older end (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a limit with an unknown sigma (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a bracket with its ends reversed (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a bracket older than the chart (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: stored ages that are not the source values (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a source unit this build does not know (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a calibrated date counted from another year (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a calibration curve this build does not know (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a probability of zero (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a probability that is not the notation's (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a radiocarbon measurement with no uncertainty (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a date with no source notation (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a date with no stated confidence (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: two axis claims on one find (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a find with no "what was dated" (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a find with an empty association (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a find with no site (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: an attribution basis this build does not know (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: an attribution that is not the one on the page (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a group identifier used as the specimen (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a find carrying an account (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a find claim on the extinctions lane (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a changed lane sentence (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+FAIL H refused by the page: a find moved to another lane (off:build)  → ["off:build",{"cards":9,"off":true,"marks":0}]
+ok   I the released page and script (main) with the released catalogue still draw the explorer here
+ok   I a 50,000-year window saved by the new page is refused by the released script: its landing view
+ok   I the released script refuses the schema-4 catalogue even when its revision and hash are pinned (off:validation: catalogue identity); the list stays
+ok   I this script with the released page (schema 3, build key aligned) refuses the schema-4 catalogue (off:validation: catalogue identity)
+ok   I the new page, built for schema 4, refuses the schema-3 catalogue even when pinned (off:build); its list stays
+ok   I the new page with the released script (another build key) leaves the list as the only view (off:build)
+ok   I this script with the released page and catalogue (build key aligned) draws the explorer exactly as before: no finds lane, no extra view button
+ok   I there, with no finds, the narrowest window is still 1 Ma: a stored 50,000-year window is refused
+timeline-finds-ui: 10 pass, 33 fail (OLD=1)

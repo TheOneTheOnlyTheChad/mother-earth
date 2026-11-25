@@ -1,0 +1,31 @@
+forest forest:ran; orbital:ran
+ok - A. scheduled run at 13:41 UTC (odd hour): ONE GP request → validated → published (21000 rows)
+forest forest:ran; orbital:skipped (odd UTC hours at :41 only)
+forest forest:ran; orbital:skipped (odd UTC hours at :41 only)
+hourly {"swpc":"swpc:ran","co2":"co2:ran","seaice":"seaice:ran","satellites":"satellites:not scheduled (SATELLITES_ENABLED unset)","drifters":"drifters:not scheduled (DRIFTERS_ENABLED unset)","plastic":"plastic:not scheduled (PLASTIC_ENABLED unset)","dustrgb":"dustrgb:not scheduled (DUSTRGB_ENABLED unset)","skycraft":"skycraft:not scheduled (SKYCRAFT_ENABLED unset)","sunface":"sunface:not scheduled (SUNFACE_ENABLED unset)","wind":"wind:not scheduled (WIND_ENABLED unset)","batch":{"opensky":"parked","ships":{"files":0,"ok":0,"status":"absent","rejected":0,"cells":0,"changed":0},"ships_late":[],"usgs":{"ok":0,"events":0,"changed":0},"firms":{"ok":false}}}
+firms firms:ran; ships-fallback:off (SHIPS_FALLBACK unset)
+five usgs:ran; opensky:parked; earthview:not scheduled (EARTHVIEW_ENABLED unset)
+forest forest:ran; orbital:not scheduled (ORBITAL_ENABLED unset)
+ok - B. not scheduled: even hour, :11 tick, ORBITAL_ENABLED unset, other crons → no Space-Track request
+forest forest:ran; orbital:ran
+ok - C. login rejected → down, last good kept
+forest forest:ran; orbital:ran
+ok - D. login 522 → down, last good kept
+forest forest:ran; orbital:ran
+ok - E. GP HTTP 500 → down, last good kept, no retry
+forest forest:ran; orbital:ran
+ok - F. GP empty 200 → down, last good kept
+forest forest:ran; orbital:ran
+ok - G. truncated mid-row → validation failed, last good kept
+forest forest:ran; orbital:ran
+ok - H. cut on a complete row at 80 % → refused by the previous-rows floor
+forest forest:ran; orbital:ran
+ok - I. meta write fails → orphan CSV removed, last good kept
+forest forest:ran; orbital:ran
+ok - J. a later valid run replaces: new file + meta, previous CSV deleted, exactly one current file
+forest forest:ran; orbital:ran
+ok - K. hourly guard shared with the probe: a probe GP request < 60 min before a slot blocks the job
+ok - L. manual /admin/run/orbital obeys the off-peak and hourly guards
+ok - M. Satellites layer untouched by the orbital job
+
+13/13 passed

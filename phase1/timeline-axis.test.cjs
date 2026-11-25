@@ -74,8 +74,9 @@ const axisInfo = p => p.evaluate(() => {
     ok(`${w}: five marks, oldest on the left`, a.marks.length === 5 && a.marks.map(m => m.id).join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].join() && a.marks.every((m, i) => !i || m.x > a.marks[i - 1].x), a.marks.map(m => [m.id, Math.round(m.x)]));
     const e = await p.evaluate(() => { const em = document.querySelector('#axis .empties'); return { h: em.getBoundingClientRect().height, rows: em.querySelectorAll('.lr.empty').length,
       text: [...em.querySelectorAll('.lr.empty')].map(r => r.textContent.trim()), focusables: em.querySelectorAll('a,button,[tabindex],input').length }; });
-    ok(`${w}: three empty lanes, zero Tab stops`, e.rows === 3 && e.focusables === 0, e);
-    ok(`${w}: empty lane wording`, e.text.join('|') === 'Earth systems and life · No entries yet|Human relatives · No entries yet|Human history · No dated entries on the axis yet', e.text);
+    // R4 (24 Nov 2026): the relatives lane has entries, so two lanes are empty
+    ok(`${w}: two empty lanes, zero Tab stops`, e.rows === 2 && e.focusables === 0, e);
+    ok(`${w}: empty lane wording`, e.text.join('|') === 'Earth systems and life · No entries yet|Human history · No dated entries on the axis yet', e.text);
     if (w === 390) ok('390×844: three empty rows ≤ 96 CSS px together', e.h <= 96, e.h);
     const bc = await p.evaluate(() => [...document.querySelectorAll('#axis .band b')].map(x => ({ t: x.textContent, clip: x.scrollWidth > x.clientWidth + 1 })));
     ok(`${w}: no period code is clipped (codes only where they fit)`, bc.length === 12 && bc.every(x => !x.clip), bc.filter(x => x.clip));
@@ -137,9 +138,10 @@ const axisInfo = p => p.evaluate(() => {
     // keyboard order: marks are reachable with Tab; nothing in the empty lanes takes focus
     await p.focus('#axis-h').catch(() => {}); await p.evaluate(() => document.getElementById('axis-h').setAttribute('tabindex', '-1')); await p.focus('#axis-h');
     const seen = [];
-    for (let i = 0; i < 17; i++) { await p.keyboard.press('Tab'); seen.push(await p.evaluate(() => (document.activeElement.dataset && (document.activeElement.dataset.entry || document.activeElement.dataset.act || document.activeElement.dataset.preset)) || document.activeElement.id || document.activeElement.className || document.activeElement.tagName)); }
-    // the "What changed" link, then the toolbar (each a native control), the List link, the explorer itself, the five marks, then the period list
-    ok(`${w}: Tab reaches What changed, the toolbar, List, the explorer, the five marks in order, then the period list`, seen.join() === ['tl-changes-link', 'older', 'newer', 'in', 'out', 'earth', 'complex', 'reset', 'tlist', 'xpl', ID.o, ID.ff, ID.p, ID.t, ID.k, 'periods-btn'].join() + ',' + seen[16], seen);
+    for (let i = 0; i < 23; i++) { await p.keyboard.press('Tab'); seen.push(await p.evaluate(() => (document.activeElement.dataset && (document.activeElement.dataset.entry || document.activeElement.dataset.act || document.activeElement.dataset.preset)) || document.activeElement.id || document.activeElement.className || document.activeElement.tagName)); }
+    // the "What changed" link, then the toolbar (each a native control; R4 adds "Last 400,000 years"), the List link, the explorer itself,
+    // the five marks, the finds lane at this scale (its zoom button, then one link per find, in row order), then the period list
+    ok(`${w}: Tab reaches What changed, the toolbar, List, the explorer, the five marks in order, the finds lane's button and four finds, then the period list`, seen.join() === ['tl-changes-link', 'older', 'newer', 'in', 'out', 'earth', 'complex', 'recent', 'reset', 'tlist', 'xpl', ID.o, ID.ff, ID.p, ID.t, ID.k, 'fzb', 'f-dinaledi-chamber', 'f-omo-1', 'f-xiahe-2', 'f-la-ferrassie-bone', 'periods-btn'].join() + ',' + seen[22], seen);
     await c.close();
   }
 
@@ -266,11 +268,14 @@ const axisInfo = p => p.evaluate(() => {
       told: [...document.querySelectorAll('article.entry.ep section.claim.told')].map(s => [s.dataset.claimType, !!s.querySelector('h5'), !!s.querySelector('.srcnote a')]),
       eps: [...document.querySelectorAll('article.entry.ep')].map(a => a.id), noscript: document.querySelector('noscript') !== null,
       permalinks: [...document.querySelectorAll('#dated .card .ctitle a')].map(a => a.getAttribute('href')) }));
-    ok('no-JS: four lanes named, three "no entries yet"', m.lanes.length === 4 && m.lanes.filter(l => /No (dated )?entries/.test(l)).length === 3, m.lanes);
-    ok('no-JS: five episode entries pre-rendered', m.eps.join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].join(), m.eps);
+    ok('no-JS: four lanes named, two "no entries yet" (R4: the relatives lane has four)', m.lanes.length === 4 && m.lanes.filter(l => /No (dated )?entries/.test(l)).length === 2 && m.lanes.includes('Humans and human relatives (4)'), m.lanes);
+    ok('no-JS: five episode entries and four find entries pre-rendered', m.eps.join() === [ID.o, ID.ff, ID.p, ID.t, ID.k, 'f-dinaledi-chamber', 'f-omo-1', 'f-xiahe-2', 'f-la-ferrassie-bone'].join(), m.eps);
     const want = { extinction_interval_approx: 'Approximate extinction interval', boundary_age_bound: 'Boundary age: no older than', boundary_age_range_modelled: 'Modelled boundary-age range',
       extinction_onset_estimate: 'Estimated extinction onset', extinction_horizon_approx: 'Approximate age of the extinction level in the rock record', dated_event_age: 'Impact age',
-      extinction_placement_tied: 'Extinction placed at the dated impact (synchrony evidence cited)', chart_boundary: 'ICS chart boundary (v2026-06)', context: 'Context' };
+      extinction_placement_tied: 'Extinction placed at the dated impact (synchrony evidence cited)', chart_boundary: 'ICS chart boundary (v2026-06)', context: 'Context',
+      // R4: the find claims' fixed labels (build_timeline.py FIND_LABELS)
+      find_context_bracket: 'Age bracket of the deposit or layer', find_older_than_dated_layer: 'Older than a dated layer above it', find_direct_date_calibrated: 'Direct radiocarbon date, calibrated',
+      dated_material: 'What was dated', find_association: 'How the date relates to the find', reported_by: 'Reported by' };
     ok('no-JS: every claim carries its own fixed label', m.claims.length > 0 && m.claims.every(([t, l]) => want[t] === l) && Object.keys(want).every(t => m.claims.some(([x]) => x === t)), m.claims);
     ok('no-JS: an attributed finding (schema 3) is a sentence with its own citation and no repeated label', m.told.every(([t, h, src]) => (t === 'cause_account' || t === 'disagreement') && !h && src), m.told);
     ok('no-JS: permalinks point at the pre-rendered entries', m.permalinks.join() === [ID.o, ID.ff, ID.p, ID.t, ID.k].map(i => '#' + i).join(), m.permalinks);

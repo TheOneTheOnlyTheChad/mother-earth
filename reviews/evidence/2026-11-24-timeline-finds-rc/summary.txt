@@ -1,0 +1,15 @@
+timeline-finds-build.test.mjs exit=0 timeline-finds-build: 62 pass, 0 fail
+timeline-changes-build.test.mjs exit=0 timeline-changes-build: 49 passed, 0 failed
+timeline-story-build.test.mjs exit=0 timeline-story-build: 98 pass, 0 fail
+timeline-catalogue-hub.test.mjs exit=0 timeline-catalogue-hub: 74 passed, 0 failed
+hub-alignment.test.mjs exit=0 hub-alignment: 6 passed, 0 failed (worker.js = deployed hub 0.6.24)
+timeline-finds-ui.test.mjs exit=0 timeline-finds-ui: 171 pass, 0 fail
+timeline-axis.test.cjs exit=0 timeline-axis: 97 pass, 0 fail
+timeline-mixed-assets.test.cjs exit=0 timeline-mixed-assets: 18 pass, 0 fail
+timeline-changes-ui.test.cjs exit=0 timeline-changes-ui: 173 pass, 0 fail
+timeline-story-ui.test.mjs exit=0 timeline-story-ui: 127 pass, 0 fail
+timeline-travel-ui.test.cjs exit=0 timeline-travel-ui: 209 pass, 0 fail
+timeline-ui.test.cjs exit=0 timeline-ui: 594 pass, 0 fail
+animals pin as on main exit=1 animals-tab-ui: 277 passed, 3 failed
+animals TL_MAIN=H env exit=0 animals-tab-ui: 280 passed, 0 failed
+DONE

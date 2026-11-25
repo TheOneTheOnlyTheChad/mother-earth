@@ -1,0 +1,51 @@
+ok - S1 no window, gate unset or manual: both 200, "no trial configured"
+ok - S2 an unknown gate value fails both, with no window, with a valid window, before, during and after it
+ok - S3 gate "1" with neither window variable fails both
+ok - S4 a window that cannot be read fails both, whatever the gate: one variable, off the mark, inverted, empty, over 48 hours
+ok - S5 before FROM: gate "1" is armed (200, 200); gate off is "window set but gate is not 1" (runs 503, trial 200)
+ok - S6 starting: no slot is due until FROM + 20 min; a missing first completion is not a failure before then, and is one AT that instant
+ok - S7 gate off during the trial: runs 503 "not collecting", from FROM until the last slot is due
+ok - S8 after the last slot is due: every slot complete and no finding is 200, 200, whatever the gate now is (unknown still fails)
+ok - S9 the last slot is judged after UNTIL: not due one millisecond before LAST, overdue at LAST, and still 503 a day later
+ok - S10 a trial that ended with a finding stays 503 on the trial address and says so
+ok - T1 only a row whose scheduled time is exactly a slot of this trial completes it: off the mark, before FROM, at UNTIL and other layers do not
+ok - T2 several rows for one scheduled time are one slot, not several
+ok - T3 a late run that finishes resolves its overdue slot (a true resolution)
+ok - T4 KNOWN LIMIT: a row whose scheduled time is exactly a mark completes that slot, whoever made it (a manual run on the mark cannot be told apart)
+ok - T5 the number of slots is (UNTIL - FROM) / 10 min; a 48-hour trial has 288
+ok - C3 a storage stop on any run of the trial fails the trial address: each of the three phrases; a guard refusal does not
+ok - C3b failure, then a good run, then the next poll: still 503; and still 503 after the window
+ok - C3c a storage stop in the last slot before UNTIL is a finding after the window
+ok - C3d startup does not excuse a recorded storage stop: first slot 06:00, stop recorded 06:02, poll 06:05 → trial 503, runs 200
+ok - C6 three adjacent settled slots each with a validation refusal fail the trial; two do not; a check-image refusal counts
+ok - C6b a slot counts as refused if ANY of its rows is a refusal: a success before it, or after it, does not mask it
+ok - C6c only settled slots build a streak: two refused and a third refused but not yet due is no finding until it is due
+ok - C6d an overdue slot between refusals breaks the streak (it alarms on the runs address instead)
+ok - C8 six adjacent settled slots with no current frame and at least one showing a newer frame listed fail the trial; five do not
+ok - C8b six slots of source-check failures, internal errors or guard refusals alone are not condition 8 (a source outage is recorded, not alarmed)
+ok - C8c "nothing newer", "published" and "superseded" each break the run of six
+ok - C8d good evidence is frozen at the slot's due time: at equality it counts, one millisecond later it does not
+ok - C8e an overdue slot counts as "no current frame"; an early failure followed by slots not yet due is no finding
+ok - C8f incomplete slots across the end of the window: a run of six that reaches the last slot is judged only when that slot is due
+ok - U1 a row this code cannot read fails the trial: an unknown status, an unknown failure phrase, an unknown "ok" note; also during startup
+ok - U2 every failure phrase the collector can write is one this code recognises (read from worker.js itself)
+ok - R1 if the read returns its limit the evidence may be incomplete: both 503 "too_many_rows"; one row fewer is evaluated
+ok - R2 a failed read fails both, at startup too, and the exception's text is not in the answer
+ok - R3 no table, an unreadable time or a time in the future in a row: both 503
+ok - R8 (GPT H1) a row whose scheduled time cannot be read fails both, even with every slot complete; a readable off-mark row is still ignored
+ok - R4 KNOWN LIMIT, the 24-hour horizon: a late bad repeat of a completed slot finished after UNTIL + 24 h is not seen; just inside it, it is
+ok - R5 the horizon the other way: a row finished after UNTIL + 24 h does not complete an overdue slot (it errs toward alerting)
+ok - R6 rows finished before FROM are not read at all (an earlier trial, Stage C)
+ok - R7 one bounded SELECT per answer, through the (layer, finished_at) index, and nothing else
+ok - P1 KNOWN LIMIT: a pause that misses no slot leaves no trace: every slot complete and the gate back at "1" is 200, 200
+ok - P2 KNOWN LIMIT: gate off after the last trigger was admitted: red while off, green once the last slot is due and complete, with no closeout
+ok - P3 a slot that really was missed while paused stays overdue after the gate is back on
+ok - H1 HEAD gives the same status as GET with no body; every answer is no-store and carries X-Health
+ok - H2 no run note reaches the answer: fixed codes, times and counts only
+ok - H3 the other checks do not exist for earthview, and the trial check does not exist for other layers: 404
+ok - H4 the long lists are capped at 20 entries while the counts stay exact
+ok - H5 anything unexpected inside the evaluation is the fixed code rows_unreadable, failing, with none of the exception's text
+ok - I1 a scheduled Earth from Space run writes its row with the trigger's scheduled time exactly on the mark, and that row completes the slot
+ok - I2 with the gate at "manual" the scheduled job writes no Earth from Space row, and the runs address says "not collecting"
+
+earthview-health: 49 passed, 0 failed

@@ -1,0 +1,13 @@
+ok   A 1280: the explorer draws from the rehearsal catalogue (schema 4) with no page error
+ok   A 1280: banner "Rehearsal tl-2026-11-T2: not published"
+ok   A 1280: the lane is "Humans and human relatives (4 finds)", the extinctions lane still counts its own five
+ok   A 1280: the lane's fixed sentence is on the lane, word for word
+ok   A 1280: the lane is no longer listed as "not on the timeline yet"
+FAIL Z 1280: at the landing view the lane is compact: no row and no mark, one sentence, the zoom button and one link per find, in row order  → {"coarse":false,"rows":4,"marks":4,"links":[],"all":"Dinaledi · age bracket of the deposit or layer: 335,000 to 236,000 years agoOmo I · older than a dated layer above it; the layer is dated 233,000 ± 22,000 years ago (2σ); older limit unknownXiahe 2 · age bracket of the deposit or layer: 48,000 to 32,000 years agoLa Ferrassie · direct radiocarbon date, calibrated: 41,700 to 40,800 calibrated years before 1950 (95.4 % range)","inside":true,"sizes":[],"h":281}
+ok   Z 1280: it never says there are no finds in this period
+ok   Z 1280: no find link or row reaches past the explorer's edges
+ok   Z 1280: the button and each link are at least 24 px high
+ok   Z 1280: the extinctions track still shows its five entries (marks or cluster members)
+ok   Z 1280: at the whole span, each extinction cluster's open list (1) is drawn over the finds lane: every link and button in it is the topmost element
+FAIL the suite ran to its end  → page.focus: Timeout 30000ms exceeded.
+timeline-finds-ui: 10 pass, 2 fail (stopped early)

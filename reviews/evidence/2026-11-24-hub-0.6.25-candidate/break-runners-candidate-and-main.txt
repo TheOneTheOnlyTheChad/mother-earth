@@ -1,0 +1,12 @@
+earthview-health-breaks exit=0 38 of 38 breaks caught
+health-breaks exit=1 14 of 19 breaks caught
+firms-v2-breaks exit=1 39 of 41 breaks caught
+place-down-breaks exit=0 place-down-breaks: every break bites, in the expected cases only
+status-notes-breaks exit=0 all caught
+BASE earthview-health-breaks exit=0 38 of 38 breaks caught
+BASE health-breaks exit=1 14 of 19 breaks caught
+BASE firms-v2-breaks exit=1 39 of 41 breaks caught
+BASE place-down-breaks exit=0 place-down-breaks: every break bites, in the expected cases only
+BASE status-notes-breaks exit=0 all caught
+
+[exited with code 0]

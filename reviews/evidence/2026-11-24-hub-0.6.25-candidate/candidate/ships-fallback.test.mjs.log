@@ -1,0 +1,9 @@
+ok - A. SHIPS_FALLBACK unset → off, no connection (0.0 s)
+ok - B. a home sample 10 min old → not needed, no connection (0.0 s)
+ok - C. home sample 50 min old → ONE 60 s cloud sample, published in the Mac envelope shape, labelled cloud (60.0 s)
+ok - D. a second attempt inside 25 min → waiting, no connection (60.0 s)
+ok - E. a home sample landing DURING the listen wins: cloud sample archived only, latest untouched (60.0 s)
+ok - F. Cloudflare cannot connect → down recorded, last good sample still served (0.0 s)
+ok - G. aisstream rejects the key → down, nothing published (0.0 s)
+
+7 passed

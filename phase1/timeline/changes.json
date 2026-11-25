@@ -13,6 +13,10 @@
   {
    "revision": "tl-2026-11-R3",
    "release_date": "2026-11-24"
+  },
+  {
+   "revision": "tl-2026-11-R4",
+   "release_date": "2026-11-25"
   }
  ],
  "changes": [
@@ -76,6 +80,19 @@
    "retired": "Causes are not shown in this release.",
    "why": "the earlier entry presented timing claims without a cause account",
    "unchanged": "Dates, the earlier sources and the mark on the axis are unchanged."
+  },
+  {
+   "id": "tl-2026-11-R4-1",
+   "revision": "tl-2026-11-R4",
+   "kind": "added",
+   "what": "entries",
+   "entries": [
+    "f-dinaledi-chamber",
+    "f-omo-1",
+    "f-xiahe-2",
+    "f-la-ferrassie-bone"
+   ],
+   "text": "Opened the Humans and human relatives lane with four dated finds. Each mark is the date or age limit one source gives for one find or deposit. It is not a record of how long a group lived."
   }
  ]
 }

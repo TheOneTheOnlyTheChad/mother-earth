@@ -6,6 +6,7 @@
  *   node phase1/timeline/preview.mjs --port 8790     another port
  *   node phase1/timeline/preview.mjs --out <dir>     build into <dir> (must be outside the repository and empty or absent)
  *   node phase1/timeline/preview.mjs --build-only    build, print the report, do not serve
+ *   node phase1/timeline/preview.mjs --src <dir>     another rehearsal source folder (e.g. phase1/timeline/rehearsal-finds)
  *
  * What it does. For each of four states it runs the REAL generator (build_timeline.py --src … --page …) on the rehearsal
  * sources (phase1/timeline/rehearsal/) and copies the REAL timeline.js and style.css beside the result:
@@ -57,8 +58,12 @@ export function build(out, port, opts = {}) {
     fs.mkdirSync(path.join(src, 'catalogue'), { recursive: true }); fs.mkdirSync(path.join(src, 'assets'), { recursive: true });
     for (const f of ['chart-v2026-06.5.json', 'entry-pliny-ep-6-16.json']) fs.copyFileSync(path.join(TL, f), path.join(src, f));
     for (const f of fs.readdirSync(path.join(TL, 'catalogue'))) fs.copyFileSync(path.join(TL, 'catalogue', f), path.join(src, 'catalogue', f));
-    for (const f of ['BUILD.json', 'big5.json', 'changes.json']) fs.copyFileSync(path.join(rh, f), path.join(src, f));
-    for (const f of fs.readdirSync(path.join(rh, 'assets'))) fs.copyFileSync(path.join(rh, 'assets', f), path.join(src, 'assets', f));
+    // a rehearsal folder may hold only what differs from the released sources: a file it lacks is the released one (BUILD.json is always its own)
+    const from = f => fs.existsSync(path.join(rh, f)) ? path.join(rh, f) : path.join(TL, f);
+    fs.copyFileSync(path.join(rh, 'BUILD.json'), path.join(src, 'BUILD.json'));
+    for (const f of ['big5.json', 'changes.json']) fs.copyFileSync(from(f), path.join(src, f));
+    if (fs.existsSync(path.join(rh, 'finds.json'))) fs.copyFileSync(path.join(rh, 'finds.json'), path.join(src, 'finds.json'));
+    for (const f of fs.readdirSync(from('assets'))) fs.copyFileSync(path.join(from('assets'), f), path.join(src, 'assets', f));
     if (st === 'no-image') {     // the same account with no image: a different catalogue, built by the same generator
       const b = JSON.parse(fs.readFileSync(path.join(src, 'big5.json'), 'utf8'));
       for (const ep of b.episodes) if (ep.story) delete ep.story.image;
@@ -119,7 +124,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const port = Number(arg('--port') || 8787);
   const out = arg('--out') || fs.mkdtempSync(path.join(os.tmpdir(), 'me-timeline-rehearsal-'));
   let report;
-  try { report = build(out, port); } catch (e) { console.error('preview stopped: ' + (e.stderr ? String(e.stderr).trim() || e.message : e.message)); process.exit(1); }
+  try { report = build(out, port, arg('--src') ? { rehearsal: path.resolve(arg('--src')) } : {}); } catch (e) { console.error('preview stopped: ' + (e.stderr ? String(e.stderr).trim() || e.message : e.message)); process.exit(1); }
   console.log(`Rehearsal ${report.revision}: not published. Built in ${report.out}`);
   console.log(`timeline.js   committed sha256 ${report.committed['timeline.js']}`);
   for (const l of report.js_diff) console.log('  ' + l);
