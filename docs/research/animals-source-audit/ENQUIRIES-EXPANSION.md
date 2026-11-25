@@ -16,12 +16,14 @@
 
 *Rev 1.7, 25 Nov 2026 12:35 UTC (clock reading; Claude, same thread): under E, Chad's message to Cape Vidal about the call is recorded as sent, on his statement. Nothing else changed.*
 
+*Rev 1.8, 25 Nov 2026 15:48 UTC (clock reading; Claude, same thread): a third IWC reply is recorded under D as a factual summary. It answers the display question with a yes for the status sentence, credited to the IWC with a link to the page. The full thread Chad pasted also puts on record, privately, the texts of his enquiry of 20 Nov and his reply of 25 Nov. Not reviewed by GPT when written. Nothing is built or released.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
 |---|---|---|---|---|
 | C | African penguins | Dr Richard Sherley (University of Exeter) | "African penguin count data and one historical journey for Mother Earth" | **SENT by Chad, 20 Nov 2026.** No reply reported |
-| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Metadata closed; lower value and display permission open.** **Chad REPLIED to the IWC, 25 Nov 2026 (two questions: the lower value; display permission and conditions).** **Second reply 25 Nov 2026: use the website's values; permission question passed to a copied colleague, not yet answered.** See "Replies" |
+| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Metadata closed; lower value and display permission open.** **Chad REPLIED to the IWC, 25 Nov 2026 (two questions: the lower value; display permission and conditions).** **Second reply 25 Nov 2026: use the website's values.** **Third reply 25 Nov 2026: yes to the status sentence, credited to the IWC with a link; scope for the figure and classes not stated in terms.** See "Replies" |
 | E | Cape Vidal | Christopher Wilkinson (University of Pretoria) | "Cape Vidal humpback estimates: proposed attributed chart on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 23 Nov 2026: proposes a chat or call on Thursday. No question answered; no permission given.** See "Replies" |
 
 ## What each asked (Chad's summary)
@@ -30,8 +32,8 @@
 - **E, Cape Vidal:** whether our reading of Table 3's five 6–30 July estimates is fair; reuse terms; the right permission contact. It described a newly drawn chart with publicly delivered values, without reproducing the published table, figure or PDF.
 
 ## What is not on record
-- The sent texts of C and D (E's sent text is on record from 23 Nov, below). **GPT prepared all three**; they are not Claude's drafts (`ENQUIRY-DRAFT-PENGUINS.md`, `ENQUIRY-DRAFT-IWC.md`), which are kept as history and may differ. Claude wrote no Cape Vidal draft.
-- The times C and D were sent.
+- The sent text of C. (E's sent text is on record from 23 Nov, below. D's sent texts, the enquiry of 20 Nov and Chad's reply of 25 Nov, are on record privately from 25 Nov, rev 1.8, and summarised under D.) **GPT prepared all three**; they are not Claude's drafts (`ENQUIRY-DRAFT-PENGUINS.md`, `ENQUIRY-DRAFT-IWC.md`), which are kept as history and may differ. Claude wrote no Cape Vidal draft.
+- The time C was sent. (D was sent on 20 Nov 2026 at 14:03 by the time shown in the thread, time zone not stated.)
 - Any reply to C. (D's first reply is on record from 25 Nov, below.) GPT has not checked the inbox (Chad).
 
 ## Replies
@@ -98,6 +100,24 @@
 - No answer yet on wording, citation, conditions or how the non-commercial restriction applies.
 
 **State for D:** metadata closed; lower value settled as the website's 15,580, subject to GPT's review; display permission open and awaiting the IWC colleague. Whale example parked.
+
+### D, IWC: third reply, 25 Nov 2026
+
+**How it reached this record.** Chad pasted the whole thread into the Claude thread on 25 Nov 2026 ("ok full reply received now"). Claude has not seen the inbox. The paste showed the newest message as received "5:44 PM (1 minute ago)" in Chad's mail view, time zone not stated; the workspace clock read 15:47:26 UTC (17:47 SAST) when Claude first checked it. It is from the IWC's Media and Communications Manager, the colleague named in the second reply, to Chad and the same three other recipients. The full thread is kept privately (Mac `research/animals-correspondence/2026-11-25-iwc/IWC-full-thread-2026-11-25-1744.txt`, sha256 `39866c4d…7296`). Names, addresses, phone numbers and the IWC's postal address are left out of this public repository.
+
+**What the thread now puts on record (summary).**
+- **Chad's enquiry, 20 Nov 2026, to the IWC Secretariat:** described Mother Earth as a public website and the text and numbers as delivered publicly to visitors' browsers; asked permission for four items (the status sentence; 18,111 with 15,580–20,700; Relative Abundance Very Good; growth 1995–2015 Strongly Increased); asked the five questions summarised above; said he would not reproduce the IWC's graphics.
+- **Chad's reply, 25 Nov 2026:** asked the two questions in the drafts (the lower value; display permission and conditions for the same four items). His sent text differs from the drafts in its last paragraph. It says the page is private; promises to keep the IWC updated about every future feature use of the project as he builds; and says he has added the three IWC recipients' email addresses for access.
+- **Third reply:** "yes" to the second question, to use "the status sentence as written below", credited to the International Whaling Commission with a link to the relevant webpage.
+
+**What it covers (Claude's reading, for GPT).**
+- **Clearly covered:** the status sentence, "Abundant and recovered after strong growth.", credited to the International Whaling Commission, with a link to the IWC status graphics page.
+- **Not stated in terms:** whether the "yes" also covers the abundance figure with its range and the two classes. The question it answers named all four; the answer names only "the status sentence". Until that is settled, only the sentence is treated as cleared.
+- **The description it was given against.** Chad's reply called the page private. On 25 Nov 2026 the repository and the GitHub Pages site were public (GitHub API, read 15:47:26 UTC: `visibility: public`, `has_pages: true`), and no change to access is recorded that day. What "added your email addresses for access" refers to is not on record. Whether to correct the description with the IWC is Chad's decision.
+- **Chad's commitment:** to keep the IWC updated about future feature use. Recorded as his.
+- No conditions beyond credit and a link were named; nothing on duration.
+
+**State for D:** metadata closed; lower value settled (15,580, the website's); permission given for the status sentence with credit and link; scope for the figure and classes open; the description of the page as private does not match its recorded state. Whale example parked (Cape Vidal also open).
 
 ### E, Cape Vidal: first reply, 23 Nov 2026
 

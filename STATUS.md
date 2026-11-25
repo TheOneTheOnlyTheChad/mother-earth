@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 15:48 UTC (clock reading) — **Animals: third IWC reply filed. YES to the status sentence, credited to the IWC with a link. Figure and classes not named in the answer. Chad's reply described the page as private; the site and repository are public. Nothing built; whale example parked.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.8, summary only. Full thread, including Chad's sent enquiry of 20 Nov and reply of 25 Nov, kept privately on the Mac.
+- **Checked:** GitHub API 15:47:26 UTC, `visibility: public`, `has_pages: true`; no access change recorded today.
+- **Open:** whether the permission covers 18,111 (15,580–20,700) and the two classes; whether Chad corrects the description of the page. Both his. Cape Vidal still open.
+- **Next:** GPT reviews what the reply covers.
+
 ## 25 Nov 15:03 UTC (clock reading) — **Tides: first branch build on Chad's own go. Branch `tides-rc` `00aa7b9` for GPT's review. Not merged, nothing live, no hub change** (page: none; Tides thread)
 - **Chad's line (25 Nov):** "Go: Tides branch build as in that block (D2 pinned Earth, D3 pinned Sun, D4 unlinked, D5 extras out, no header clock)." He added that he is in constant contact with NASA, who know what Mother Earth does.
 - **Built:** `tides.html`, `tides-model.js`, `tides.js`, `tides.css`, two pinned references with `assets/tides/SOURCE.json`, build scripts, two suites. No existing file changed; no page links to Tides yet.
