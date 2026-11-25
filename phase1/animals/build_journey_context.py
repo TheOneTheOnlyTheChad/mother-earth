@@ -11,7 +11,7 @@ Method (evidence record rev 1.3 and build brief): region = 4-degree cells 17_50 
 MODIS_SP rows with type 0, all confidence levels, Terra and Aqua, acquisition time within [first fix, last fix] rounded
 to whole minutes, clipped to the half-open union, identical rows counted once, conflicting rows stop the build;
 loss = Hansen GFC v1.13 pixels with datamask 1, treecover2000 >= 30 and lossyear 7 or 8, area from each pixel row's
-WGS84 ellipsoidal area. Needs numpy, tifffile and imagecodecs (decoding only). Memory is bounded: rasters are read
+WGS84 ellipsoidal area. Needs numpy, tifffile and imagecodecs (tifffile's strip decoder is used, so each row is exactly 40,000 pixels). Memory is bounded: rasters are read
 one strip (one row) at a time in blocks of BLOCK rows.
 """
 import argparse, csv, hashlib, io, json, math, os, resource, sys, time
@@ -142,7 +142,7 @@ def open_band(path, top, west):
     return tf, p
 
 def hansen(hdir):
-    import numpy as np, imagecodecs
+    import numpy as np
     man = json.load(open(os.path.join(hdir, 'manifest.json')))
     if man.get('state') != 'complete': raise Refuse('the Hansen download is not complete')
     for f, (pin, _, _) in HANSEN.items():
@@ -159,9 +159,10 @@ def hansen(hdir):
             for b, (tf, p) in bands.items():
                 arr = np.empty((min(BLOCK, rows.stop - r0), 32000), dtype=np.uint8)
                 for k in range(arr.shape[0]):
-                    r = r0 + k; fh[b].seek(p.dataoffsets[r]); data = imagecodecs.lzw_decode(fh[b].read(p.databytecounts[r]))
-                    if len(data) != 40000: raise Refuse(f'{b} {tile} row {r} decoded to {len(data)} bytes')
-                    arr[k] = np.frombuffer(data, dtype=np.uint8)[:32000]
+                    r = r0 + k; fh[b].seek(p.dataoffsets[r]); seg = p.decode(fh[b].read(p.databytecounts[r]), r)[0]
+                    seg = np.asarray(seg).reshape(-1)       # tifffile's own strip decoder: exactly one row (a raw LZW decode can run a few bytes past the strip)
+                    if seg.size != 40000 or seg.dtype != np.uint8: raise Refuse(f'{b} {tile} row {r} decoded to {seg.size} values')
+                    arr[k] = seg[:32000]
                 block[b] = arr
             dm, tc, ly = block['datamask'], block['treecover2000'], block['lossyear']
             if dm.max() > 2: raise Refuse(f'datamask value {int(dm.max())} in {tile}')
