@@ -1,0 +1,8 @@
+FAIL  World View on: "collecting; retained since 2026-11-06"
+      got: null
+FAIL  World View on → off: retained range kept, "collection is off now — retained history is not deleted"
+      got: null
+FAIL  World View → unreadable: "could not be read just now", never "no history"
+      got: null
+
+kept-ui: 18 passed, 3 failed

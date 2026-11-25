@@ -1,0 +1,25 @@
+PASS endpoint minutes: 08:00 on 25 Oct out, 08:01 in (unpadded "801" and padded "0801"), 23:00 on 22 Oct in, 23:01 out
+PASS 13 month rows; the first is "25–31 Oct 2007" and the last "1–22 Oct 2008", both part-months; the eleven between are whole
+PASS the part-month ends use the minute-rounded fixes
+PASS monthly rows sum to the total
+PASS a row outside the requested box stops the build (the extractor's own row check)
+PASS edges: 24° E (shared) counts once, in 17_51; 28° E and 18° S (outer north/east) are outside; 22° S (outer south) is inside 17_50
+PASS an identical row in two responses counts once and is recorded as dropped
+PASS two rows with the same identity but different values stop the build
+PASS type 2 and 3 are counted apart and never in the shown count
+PASS a header-only response is a valid zero: total 0, every month 0
+PASS a row with time 2460 stops the build
+PASS a row outside its window stops the build
+PASS the WGS84 area formula reproduces the Earth's surface, 510,065,621.7 km²
+PASS one 4° zebra cell is 185,321.0 km² on the ellipsoid (the hub grid's sphere gives 185,861)
+PASS Hansen rows and columns used: every pixel centre inside the half-open union, none on a line, the two tiles meeting at 20° S without overlap
+PASS the builder refuses a FIRMS folder that does not pass the verifier
+
+16 passed, 0 failed
+ok    the record is readable: hub name, version, sha256, byte count, deploy time and read-back time
+ok    worker.js states exactly one version
+ok    phase1/worker.js is the recorded deployed hub byte for byte, or the recorded candidate built on it
+ok    byte count agrees with the record
+ok    the version in the file is the version in the record
+ok    a tree holding the deployed file carries no stale candidate entry
+hub-alignment: 6 passed, 0 failed (worker.js = deployed hub 0.6.25)

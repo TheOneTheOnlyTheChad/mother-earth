@@ -1,0 +1,44 @@
+PASS  0 the committed context file is the pinned one (6b67818b4fb2…) and the served script carries that pin
+PASS  1a the context file is not requested while the block is off screen, and is requested once it comes on screen
+PASS  1a (cont.) requested exactly once; the block is verified against the pin
+PASS  1b heading, labelling and live state
+PASS  1c the journey period (25 October 2007 to 22 October 2008) and the area (20–28° E, 18–22° S, about 371,700 km², far larger than the zebra used) are stated
+PASS  1c the fire line: label with collection and file version, 21,744, the minute interval, Terra and Aqua, all confidence levels, not a count of fires, cloud hides some; coverage: no dates listed
+PASS  1d the monthly table is a closed disclosure of 13 rows; first "25–31 Oct 2007, part-month from 08:01", last "1–22 Oct 2008, part-month to 23:00"; every count as in the file; total row 21,744
+PASS  1e the monthly rows, worked out here, sum to the total
+PASS  1f the loss value (about 245.0 ha; 2007 145.1, 2008 99.9) sits in one sentence with the calendar-year wording, the 30 % threshold and the relative-indicator caution
+PASS  1g the closing sentence is present, exactly, and is the last thing in the block
+PASS  1h sources: NASA FIRMS (MODIS) with the LANCE acknowledgement verbatim, the Hansen credit, CC BY 4.0 linked, and the local-scale caveat
+PASS  1i "How these figures were made" is closed and states: per-cell and per-satellite counts, what was left out, the ellipsoid and grid areas, pixels left out, no data, every caution
+PASS  1j the zebra card's study facts are still filled and verified (the block changes nothing else)
+PASS  1k no page errors
+PASS  1l the monthly disclosure opens from the keyboard and shows its table
+PASS  1m at 390 px the block, with both disclosures open, does not overflow sideways
+PASS  2a a file that does not match the pin is refused and no figure is shown
+PASS  2b a failed request says it could not be loaded and shows no figure
+PASS  2c monthly rows that do not sum to the total are refused
+PASS  2d a changed closing sentence is refused
+PASS  2e a loss record without the calendar-year wording is refused
+PASS  2f unknown coverage says "Coverage unknown", never "No dates are listed"; the total is still shown
+PASS  2g an incomplete record says "Incomplete", shows no total, no monthly table and no per-cell counts
+PASS  2h a valid zero reads "no detections in the record", not as a number, and differs from no data
+PASS  2i listed missing dates are named in the coverage line and marked on their month
+PASS  2j a no-data area is stated beside the loss value and never counted as zero loss
+PASS  2k a fire interval that is not the journey rounded down to whole minutes is refused
+PASS  2l per-cell loss that does not add up to the total is refused
+PASS  2m a first row not marked as a part-month is refused
+PASS  2n a missing Hansen credit is refused
+
+30 passed, 0 failed
+BREAK CAUGHT  no-pin-check at 2a
+BREAK CAUGHT  no-sum-check at 2c
+BREAK CAUGHT  no-closing-check at 2d
+BREAK CAUGHT  no-interval-check at 2k
+BREAK CAUGHT  unknown-as-no-gaps at 2f
+BREAK CAUGHT  incomplete-shows-total at 2g
+BREAK CAUGHT  zero-as-number at 2h
+BREAK CAUGHT  months-open at 1d
+BREAK CAUGHT  eager-load at 1a
+BREAK CAUGHT  mismatch-dropped at 1f
+BREAK CAUGHT  nodata-hidden at 2j
+BREAK CAUGHT  gaps-not-marked at 2i

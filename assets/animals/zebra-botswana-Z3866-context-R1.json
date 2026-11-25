@@ -1,0 +1,267 @@
+{
+ "schema": 1,
+ "id": "zebra-botswana-Z3866-context-R1",
+ "heading": "Historical regional land context",
+ "journey": {
+  "id": "zebra-botswana-Z3866-R1",
+  "fixes": 13045,
+  "first_fix_utc": "2007-10-25T08:01:53Z",
+  "last_fix_utc": "2008-10-22T23:00:45Z",
+  "sha256": "8d00aa32dc728dee09f7136835b5b1d32e3cc19469250ad29bf73506a1141bb6"
+ },
+ "region": {
+  "cells": [
+   "17_50",
+   "17_51"
+  ],
+  "bounds": {
+   "west": 20.0,
+   "south": -22.0,
+   "east": 28.0,
+   "north": -18.0
+  },
+  "area_km2_hub_grid": 371722,
+  "rule": "the 4-degree cells of the hub grid that contain a retained displayed fix; half-open; no cell inferred between fixes"
+ },
+ "fires": {
+  "product": "NASA FIRMS active fire detections, MODIS standard processing (MODIS_SP)",
+  "collection_wording": "MODIS Collection 6 standard processing; file version 6.03",
+  "versions_in_file": [
+   "6.03"
+  ],
+  "what_is_counted": "presumed vegetation-fire detections (type 0), all confidence levels, Terra and Aqua; detections, not fires",
+  "interval_utc": {
+   "from": "2007-10-25T08:01Z",
+   "to": "2008-10-22T23:00Z",
+   "rounding": "the first and last retained fixes rounded down to whole minutes; FIRMS acquisition times are given in whole minutes"
+  },
+  "count": 21744,
+  "by_month": [
+   {
+    "label": "25–31 Oct 2007",
+    "from_utc": "2007-10-25T08:01Z",
+    "to_utc": "2007-10-31T23:59Z",
+    "part_month": true,
+    "count": 13
+   },
+   {
+    "label": "Nov 2007",
+    "from_utc": "2007-11-01T00:00Z",
+    "to_utc": "2007-11-30T23:59Z",
+    "part_month": false,
+    "count": 360
+   },
+   {
+    "label": "Dec 2007",
+    "from_utc": "2007-12-01T00:00Z",
+    "to_utc": "2007-12-31T23:59Z",
+    "part_month": false,
+    "count": 35
+   },
+   {
+    "label": "Jan 2008",
+    "from_utc": "2008-01-01T00:00Z",
+    "to_utc": "2008-01-31T23:59Z",
+    "part_month": false,
+    "count": 3
+   },
+   {
+    "label": "Feb 2008",
+    "from_utc": "2008-02-01T00:00Z",
+    "to_utc": "2008-02-29T23:59Z",
+    "part_month": false,
+    "count": 14
+   },
+   {
+    "label": "Mar 2008",
+    "from_utc": "2008-03-01T00:00Z",
+    "to_utc": "2008-03-31T23:59Z",
+    "part_month": false,
+    "count": 13
+   },
+   {
+    "label": "Apr 2008",
+    "from_utc": "2008-04-01T00:00Z",
+    "to_utc": "2008-04-30T23:59Z",
+    "part_month": false,
+    "count": 26
+   },
+   {
+    "label": "May 2008",
+    "from_utc": "2008-05-01T00:00Z",
+    "to_utc": "2008-05-31T23:59Z",
+    "part_month": false,
+    "count": 119
+   },
+   {
+    "label": "Jun 2008",
+    "from_utc": "2008-06-01T00:00Z",
+    "to_utc": "2008-06-30T23:59Z",
+    "part_month": false,
+    "count": 316
+   },
+   {
+    "label": "Jul 2008",
+    "from_utc": "2008-07-01T00:00Z",
+    "to_utc": "2008-07-31T23:59Z",
+    "part_month": false,
+    "count": 591
+   },
+   {
+    "label": "Aug 2008",
+    "from_utc": "2008-08-01T00:00Z",
+    "to_utc": "2008-08-31T23:59Z",
+    "part_month": false,
+    "count": 2689
+   },
+   {
+    "label": "Sep 2008",
+    "from_utc": "2008-09-01T00:00Z",
+    "to_utc": "2008-09-30T23:59Z",
+    "part_month": false,
+    "count": 11141
+   },
+   {
+    "label": "1–22 Oct 2008",
+    "from_utc": "2008-10-01T00:00Z",
+    "to_utc": "2008-10-22T23:00Z",
+    "part_month": true,
+    "count": 6424
+   }
+  ],
+  "by_cell": {
+   "17_50": 15520,
+   "17_51": 6224
+  },
+  "by_satellite": {
+   "Aqua": 13240,
+   "Terra": 8504
+  },
+  "excluded": {
+   "other_types": {
+    "2": 3
+   },
+   "outside_interval": 22,
+   "outside_union": 2,
+   "identical_rows_dropped": 0
+  },
+  "coverage": {
+   "state": "complete",
+   "gap_days_listed_in_interval": [],
+   "statement": "No dates are listed in the provider's missing-data table for this period",
+   "limitation": "cloud and unobserved times hide detections; the missing-data table does not describe cloud"
+  },
+  "provenance": {
+   "fetch_manifest_sha256": "b1d97b55046266d4d80a536516e785d11f7f014d4fc5dac5ef148b5e189b482d",
+   "extractor_sha256": "62e29621bdb2637a7c60a5de6955f316931f9710a18ef48fccb716b6a5b4a752",
+   "requests": 81,
+   "retrieved_utc": "20261125T050326Z",
+   "gap_list_sha256": "8b9c8d5d1ff198ee84538a38ccc10e3a7870f17806b79ff1735ac3d780b282be",
+   "availability": {
+    "min_date": "2000-11-01",
+    "max_date": "2026-08-31"
+   }
+  },
+  "credit": "NASA FIRMS (MODIS); LANCE acknowledgement on every page"
+ },
+ "loss": {
+  "product": "Hansen/UMD/Google/USGS/NASA Global Forest Change, version 1.13 (2000–2025)",
+  "what_is_counted": "approximate mapped tree-cover loss area: pixels mapped as land, with tree cover in 2000 of at least 30 % (vegetation taller than 5 m), whose loss year is 2007 or 2008",
+  "years": [
+   2007,
+   2008
+  ],
+  "threshold": "tree cover in 2000 ≥ 30 %",
+  "mismatch": "Mapped tree-cover loss in the calendar years 2007 and 2008; these years extend beyond the recorded journey.",
+  "union": {
+   "land_km2": 370207.3,
+   "water_km2": 434.7,
+   "nodata_km2": 0.0,
+   "treecover2000_ge30_km2": 493.6,
+   "loss_ha": {
+    "2007": 145.1,
+    "2008": 99.9
+   },
+   "loss_pixels": {
+    "2007": 1991,
+    "2008": 1369
+   }
+  },
+  "by_cell": {
+   "17_50": {
+    "land_km2": 185308.4,
+    "water_km2": 12.6,
+    "nodata_km2": 0.0,
+    "treecover2000_ge30_km2": 161.8,
+    "loss_ha": {
+     "2007": 33.0,
+     "2008": 14.2
+    },
+    "loss_pixels": {
+     "2007": 453,
+     "2008": 194
+    },
+    "loss_2007_2008_pixels_not_counted": 10374
+   },
+   "17_51": {
+    "land_km2": 184898.9,
+    "water_km2": 422.1,
+    "nodata_km2": 0.0,
+    "treecover2000_ge30_km2": 331.8,
+    "loss_ha": {
+     "2007": 112.1,
+     "2008": 85.7
+    },
+    "loss_pixels": {
+     "2007": 1538,
+     "2008": 1175
+    },
+    "loss_2007_2008_pixels_not_counted": 78528
+   }
+  },
+  "cautions": [
+   "A relative indicator, not a measured total: the authors say definitive area estimates should not be made from pixel counts.",
+   "Years before 2011 have not been reprocessed with the newer method; these values are not comparable with later years or with the corridor.",
+   "Gross loss (stand replacement or forest to non-forest), not deforestation, net loss or a cause.",
+   "No-data area is reported separately and is never counted as zero loss."
+  ],
+  "method": {
+   "pixel_area": "each row's WGS84 ellipsoidal area from the raster's own georeferencing (0.00025 degrees, tile corners 20 E 10 S and 20 E 20 S)",
+   "assignment": "pixel centres, half-open cells; rows 32000–39999 of tile 10S_020E and 0–7999 of 20S_020E, columns 0–31999",
+   "area_reference": {
+    "wgs84_total_km2": 510065621.7,
+    "expected_km2": 510065621.7,
+    "ok": true
+   },
+   "mask_conservation": {
+    "17_50": {
+     "cell_area_km2": 185321.0,
+     "mask_sum_km2": 185321.0,
+     "relative_difference": 4.726642129079415e-12
+    },
+    "17_51": {
+     "cell_area_km2": 185321.0,
+     "mask_sum_km2": 185321.0,
+     "relative_difference": 4.729112241330267e-12
+    }
+   }
+  },
+  "provenance": {
+   "release": "GFC-2025-v1.13",
+   "files": {
+    "Hansen_GFC-2025-v1.13_lossyear_10S_020E.tif": "cc1a73d3380940a2d311588132d2be2034b74b5b6b9396a489d2d438a92e777f",
+    "Hansen_GFC-2025-v1.13_treecover2000_10S_020E.tif": "d3606e340c181b551b98f2f73c30d1383d83293c0442eb025bebb0d97fc38b0a",
+    "Hansen_GFC-2025-v1.13_datamask_10S_020E.tif": "34b68ccf3537d0032f53a0707a0c2791c81a59c1a09f3e869b65ba1159d44c34",
+    "Hansen_GFC-2025-v1.13_lossyear_20S_020E.tif": "35fec7711598c0914b30da86ea533834f11566f562e7075e0a51b1bfee0f2c13",
+    "Hansen_GFC-2025-v1.13_treecover2000_20S_020E.tif": "a53059f5cdbc66f86f671b131ab62633d422e424c45c8e706fed34912af7d05e",
+    "Hansen_GFC-2025-v1.13_datamask_20S_020E.tif": "2d65b797f1148241c61d66fc9376bb99843c2bb84a4c4bf1d5c5b08d120a3396"
+   },
+   "licence": "CC BY 4.0",
+   "credit": "Source: Hansen/UMD/Google/USGS/NASA"
+  }
+ },
+ "closing": "These are regional observations. They do not show where the zebra went, what it encountered or how it was affected.",
+ "builder": {
+  "version": "C1a-1"
+ }
+}

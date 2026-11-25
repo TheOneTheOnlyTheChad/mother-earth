@@ -48,6 +48,8 @@ const ok = (n, c, got) => { if (c) pass++; else { fail++; failed.push(n); consol
 const wd = setTimeout(() => { console.log('FAIL  suite exceeded 20 min'); process.exit(1); }, 20 * 60e3);
 
 const JS = 'animals-journey.js', GJS = 'animals-globe.js';
+// the exact Sources block reviewed for the zebra's historical regional land context (C1a); 13e allows this one line and nothing else
+const CTX_SOURCES = "  <p><b>Historical regional land context for the zebra: the two 4° grid cells 20–28° E, 18–22° S, over the recorded journey.</b> Fire detections: <a href=\"https://firms.modaps.eosdis.nasa.gov/\" target=\"_blank\" rel=\"noopener\">NASA FIRMS</a>, MODIS Collection 6 standard processing (file version 6.03); presumed vegetation fires (type 0), all confidence levels, Terra and Aqua; read 25 Nov 2026. We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for Earth observations (LANCE) (https://earthdata.nasa.gov/lance), part of NASA's Earth Science Data and Information System (ESDIS). Tree-cover loss: <a href=\"https://storage.googleapis.com/earthenginepartners-hansen/GFC-2025-v1.13/download.html\" target=\"_blank\" rel=\"noopener\">Hansen/UMD/Google/USGS/NASA Global Forest Change 2000–2025, version 1.13</a>, tiles 10S_020E and 20S_020E, where tree cover in 2000 was at least 30 %. Source: Hansen/UMD/Google/USGS/NASA. Licence <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noopener\">CC BY 4.0</a>. Only totals by month, grid cell and year are published; the source files are not. A detection marks a satellite pixel with an active fire and is not a count of fires. The loss figure is a relative indicator for the calendar years 2007 and 2008, which extend beyond the journey. Neither shows where the zebra went, what it encountered or how it was affected. Not for local-scale or tactical decisions.</p>";
 const BREAKS = {
   'not-exclusive': [JS, "const prev = st.choice; if (prev) off();", "const prev = null;"],
   // with the request no longer aborted AND the generation check gone, a superseded answer would draw
@@ -117,6 +119,9 @@ Object.assign(BREAKS, {
   'nc-sources-edited': ['sources.html', '</title>', ' </title>'],
   'nc-sources-tab-gone': ['sources.html', '    <a href="animals.html" data-view="animals">Animals</a>\n', ''],
   'nc-sources-id-gone': ['sources.html', 'ptt id 98364', 'ptt id 98365'],
+  'ctx-sources-edited': ['sources.html', 'which extend beyond the journey', 'which match the journey'],
+  'ctx-sources-dropped': ['sources.html', CTX_SOURCES + '\n', ''],
+  'ctx-sources-moved': ['sources.html', CTX_SOURCES + '\n', '', '  <h2 id="search">', CTX_SOURCES + '\n  <h2 id="search">'],
   'nc-sources-shortcut-gone': ['sources.html', ' · <a href="#animals">Animals</a> · <a href="#search">Search</a>', ' · <a href="#search">Search</a>'],
   'shared-rule-dropped': ['style.css', '\n.top{', '\n.top.x{'],
   'moon-page-edited': ['moon.html', '</title>', ' </title>'],
@@ -136,7 +141,7 @@ const EXPECT = { 'not-exclusive': '3b', 'late-answer-draws': '5a', 'off-no-cance
   'deep-link-scrolls-to-globe': '16j', 'no-status-by-globe': '16b', 'selection-keeps-list-retry': '17a', 'list-retry-no-token': '17a', 'list-retry-late-success': '17c', 'list-retry-no-time-limit': '17h', 'pagehide-keeps-list-retry': '17f',
   'marker-in-withheld': '18c', 'hidden-ends-at-last-withheld': '18c', 'tried-before-reached': '18e', 'accuracy-in-withheld': '18a', 'replay-starts-at-first-fix': '18a', 'replay-ends-at-last-fix': '18m',
   'bird-says-not-displayed': '18f', 'new-fields-optional': '19a', 'no-acc-check': '19b', 'no-inside-period-check': '19d', 'join-across-withheld-accepted': '19c', 'no-failed-check': '19e', 'stops-skip-withheld-starts': '18i',
-  'earth-script-edited': '13c', 'nc-app-edited': '13k', 'nc-index-edited': '13b', 'nc-index-tab-gone': '13b', 'nc-index-menu-gone': '13b', 'nc-sources-edited': '13e sources.html', 'nc-sources-tab-gone': '13e sources.html', 'nc-sources-id-gone': '13e sources.html', 'nc-sources-shortcut-gone': '13e sources.html', 'shared-rule-dropped': '13d', 'moon-page-edited': '13e moon.html', 'tl-script-edited': '13g', 'tl-page-edited': '13h', 'tl-page-animals-tab-gone': '13h', 'tl-page-header-edited': '13h',
+  'earth-script-edited': '13c', 'nc-app-edited': '13k', 'nc-index-edited': '13b', 'nc-index-tab-gone': '13b', 'nc-index-menu-gone': '13b', 'nc-sources-edited': '13e sources.html', 'nc-sources-tab-gone': '13e sources.html', 'nc-sources-id-gone': '13e sources.html', 'nc-sources-shortcut-gone': '13e sources.html', 'ctx-sources-edited': '13e sources.html', 'ctx-sources-dropped': '13e sources.html', 'ctx-sources-moved': '13e sources.html', 'shared-rule-dropped': '13d', 'moon-page-edited': '13e moon.html', 'tl-script-edited': '13g', 'tl-page-edited': '13h', 'tl-page-animals-tab-gone': '13h', 'tl-page-header-edited': '13h',
   'tl-rule-dropped': '13i', 'tl-rule-edited': '13i', 'tl-rule-added': '13i' };
 if (BREAK && !(BREAKS[BREAK] && EXPECT[BREAK])) { console.log('FAIL  unknown break ' + BREAK); process.exit(1); }
 
@@ -511,9 +516,13 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       // 13e sources.html (24 Nov 2026, Nature context): byte-identical to NC_MAIN, plus every Animals guarantee the old check made, on its own
       { const b = served('sources.html'), sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/;
         if (!ncHow) { fail++; failed.push('13e sources.html'); console.log(`NOT RUN  13e sources.html: the Nature context baseline ${NC_MAIN.slice(0, 7)} is not available.`); }
-        else { const whole = b === ncFile('sources.html'), g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
+        else { // 25 Nov 2026 (Animals journey context C1a, GPT's candidate review item 3): the file at NC_MAIN plus exactly one reviewed block,
+          // CTX_SOURCES, inserted on the line after the zebra's source paragraph. Everything else stays byte-for-byte NC_MAIN's.
+          const nc = ncFile('sources.html'), at = nc.split('\n').findIndex(l => l.startsWith('  <p><b>Plains zebra, collar Z3866')), ncl = nc.split('\n');
+          const expected = at < 0 || nc.includes(CTX_SOURCES) ? null : [...ncl.slice(0, at + 1), CTX_SOURCES, ...ncl.slice(at + 1)].join('\n');
+          const whole = expected !== null && b === expected, g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
             ids = ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].filter(x => !b.includes(x)), noPreview = !/private preview/i.test(b);
-          ok(`13e sources.html is byte-identical to the file at the Nature context baseline ${NC_MAIN.slice(0, 7)}; it carries the Animals tab link and menu link once each and main ${BASE_MAIN.slice(0, 7)}'s header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview`, whole && g.links && g.header && section && shortcut && ids.length === 0 && noPreview, { whole, links: g.links, header: g.header, section, shortcut, missing: ids, noPreview }); } }
+          ok(`13e sources.html is byte-identical to the file at the Nature context baseline ${NC_MAIN.slice(0, 7)} plus only the reviewed zebra land-context block after the zebra's source paragraph; it carries the Animals tab link and menu link once each and main ${BASE_MAIN.slice(0, 7)}'s header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview`, whole && g.links && g.header && section && shortcut && ids.length === 0 && noPreview, { whole, links: g.links, header: g.header, section, shortcut, missing: ids, noPreview }); } }
       // 13j (24 Nov 2026, Nature context): NC_MAIN descends from NC_PARENT and changed no production file but the three above
       { let names = null; try { git(['merge-base', '--is-ancestor', NC_PARENT, NC_MAIN]); names = git(['diff', '--name-only', NC_PARENT, NC_MAIN]).split('\n').filter(Boolean); } catch (_) { }
         if (!names) { fail++; failed.push('13j'); console.log(`NOT RUN  13j: ${NC_PARENT.slice(0, 7)}..${NC_MAIN.slice(0, 7)} cannot be read from Git (or ${NC_PARENT.slice(0, 7)} is not an ancestor). The scope check was not made.`); }
