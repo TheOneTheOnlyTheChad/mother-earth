@@ -1061,3 +1061,4 @@ body.sky-zoom #layers-btn,body.sky-zoom #bare-hint,body.sky-zoom #layers-panel{v
 .soilkey li{display:flex;align-items:center;gap:6px}
 .soilsw{display:inline-block;flex:0 0 auto;width:14px;height:10px;border:1.5px solid transparent;border-radius:1px}
 .soilper summary{cursor:pointer}
+.inspector.soilview dl{grid-template-columns:minmax(0,1fr);gap:0 0}.inspector.soilview dt{margin-top:8px;color:var(--dim)}.inspector.soilview dd{margin:0}   /* soil inspector: stacked like the place view, so the figures get the panel's width (GPT preview review H3) */

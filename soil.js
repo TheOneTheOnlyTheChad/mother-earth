@@ -21,8 +21,11 @@
     PERIODS: ['2001_2005', '2006_2010', '2011_2015', '2016_2020', '2021_2024'],
     COMPONENTS: ['drained', 'burned'],
     BINS: [0, 1e3, 1e4, 1e5, 1e6, 1e7, Infinity],             // t CO2e per year per WHOLE 4° cell; decades, fixed (proposal §1b)
-    HUE: '205,170,110',                                       // muted ochre: apart from fires (orange), buoys (yellow), forest (green)
-    ALPHA: [0.16, 0.26, 0.38, 0.50, 0.64, 0.80],              // 25 Nov look: the two lowest bins at .10/.18 were hard to tell from the sea
+    // One-hue sequential ramp (ochre), dark → light for a dark globe, in OKLCH: L .40/.51/.62/.72/.82/.92, hue 55–90°. Adjacent classes
+    // differ by OKLab ΔE 10.2–11.4 (×100; target ≥ 8). Fills are near-opaque (0.88) so cloud, sea and land under a cell do not change its
+    // class (GPT preview review P2, 25 Nov: alpha-only steps of one colour blended on the real imagery). Thin dark cell edges separate fills.
+    RAMP: ['#6a3913', '#925512', '#b7761f', '#d49838', '#e8bd6d', '#f7e3b0'],
+    OPACITY: 0.88,
   };
   const NR = 45, NC = 90, COVERAGE = ['complete', 'incomplete', 'none'], STATES = ['positive', 'zero', 'unknown'];
   const st = { on: false, comp: 'drained', status: 'idle', why: null, table: null, sel: null, loading: null, requests: [] };
@@ -108,7 +111,8 @@
     if (p.coverage === 'incomplete') parts.push(`incomplete model coverage: source raster cells covering about ${fmt(p.incomplete_source_footprint_km2, 'km²')} within this 4° cell have missing estimates. Values sum the available raster cells`);
     return { kind: 'values', text: parts.join(' · ') };
   }
-  // layer class: unavailable | no-soil | outside | unknown | zero | { bin, incomplete }
+  // layer class: unavailable | no-soil | outside | unknown | { zero: true, incomplete } | { bin, incomplete }
+  // Coverage is kept for zeros as for values (GPT preview review H1): a 0 summed over part of a cell is drawn as incomplete too.
   function cellClass(id, comp = st.comp, period = S.PERIOD) {
     if (!ready() || !S.COMPONENTS.includes(comp) || !S.PERIODS.includes(period) || !inDomain(id)) return 'unavailable';
     if (!inSubset(id)) return 'outside';
@@ -116,7 +120,7 @@
     const p = rec.periods[period], s = p[comp];
     if (!rec.has_mapped_organic_soil && s.state === 'zero') return 'no-soil';
     if (s.state === 'unknown') return 'unknown';
-    if (s.state === 'zero') return 'zero';
+    if (s.state === 'zero') return { zero: true, incomplete: p.coverage === 'incomplete' };
     let i = 0; while (!(S.BINS[i] <= s.Mg && s.Mg < S.BINS[i + 1])) i++;
     return { bin: i, incomplete: p.coverage === 'incomplete' };
   }
@@ -144,27 +148,29 @@
   S.inspectRows = id => [
     ['Everything here', `<button type="button" class="placelink" data-cell="${esc(id)}">Everything we hold for this cell, all layers</button>`],
     ['Selected', `4° cell ${esc(id)} · ${bounds(id)} — a whole-cell total, outlined on the globe; not a value at the point you clicked`],
-    [LABEL, rowHtml(id)],
+    ['Modelled values', rowHtml(id)],
     ['Shown on the globe', `${st.comp} emissions, 2021–2024 average, in t CO₂e per year per whole 4° cell. Cells shrink toward the poles, so colours compare cell totals, not emissions per km².`],
     ['Source', `Glen, E. et al. (2026). Global organic soil disturbance and greenhouse gas emissions, 2001 to 2024: model outputs (version 1.0.1). Zenodo. doi:10.5281/zenodo.22137130 · CC BY 4.0 · summed by Mother Earth from the 1 km maps into 4° cells. <a class="more" href="sources.html#soil">details</a>`],
   ];
 
   // ---------- the globe layer (drawn through the page's cell polygons; index.html render() asks for S.polys)
-  const fillFor = i => `rgba(${S.HUE},${S.ALPHA[i]})`;
+  const rgba = (hex, a) => `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},${a})`;
+  const fillFor = i => rgba(S.RAMP[i], S.OPACITY);
   const STYLE = {
-    stroke: `rgba(${S.HUE},.45)`, zeroStroke: `rgba(${S.HUE},.9)`, incStroke: 'rgba(236,240,246,.95)', clear: 'rgba(0,0,0,0)',
+    stroke: 'rgba(20,12,4,.75)', zeroStroke: rgba(S.RAMP[3], 1), incStroke: 'rgba(186,140,255,1)', clear: 'rgba(0,0,0,0)',
     unknownStroke: 'rgba(255,90,60,.95)', unknownFill: 'rgba(255,90,60,.12)', selStroke: 'rgba(255,255,255,1)',
   };
-  let drawnCells = 0;
+  // drawnCells: cells carrying a model value or a model zero (what the Key counts); unknownCells: outlined as unknown only (not counted,
+  // as the Key's definition says; GPT preview review H2). The selection outline is never counted.
+  let drawnCells = 0, unknownCells = 0;
   S.polys = (matFor, cellGeom) => {
-    const out = []; drawnCells = 0;
+    const out = []; drawnCells = 0; unknownCells = 0;
     if (st.on && ready()) for (const id of Object.keys(st.table.cells)) {
       const k = cellClass(id); let fill, stroke, what;
-      if (k === 'zero') { fill = STYLE.clear; stroke = STYLE.zeroStroke; what = `0 assigned by this model (${st.comp})`; }
-      else if (k === 'unknown') { fill = STYLE.unknownFill; stroke = STYLE.unknownStroke; what = 'unknown — no estimate for any part of this cell'; }
-      else if (k && typeof k === 'object') { fill = fillFor(k.bin); stroke = k.incomplete ? STYLE.incStroke : STYLE.stroke; what = `${st.comp} ≈ ${fmt(st.table.cells[id].periods[S.PERIOD][st.comp].Mg, 't CO₂e per year')}${k.incomplete ? ' · incomplete model coverage' : ''}`; }
+      if (k === 'unknown') { fill = STYLE.unknownFill; stroke = STYLE.unknownStroke; what = 'unknown — no estimate for any part of this cell'; unknownCells++; }
+      else if (k && k.zero) { fill = STYLE.clear; stroke = k.incomplete ? STYLE.incStroke : STYLE.zeroStroke; what = `0 assigned by this model (${st.comp})${k.incomplete ? ' · incomplete model coverage' : ''}`; drawnCells++; }
+      else if (k && typeof k === 'object') { fill = fillFor(k.bin); stroke = k.incomplete ? STYLE.incStroke : STYLE.stroke; what = `${st.comp} ≈ ${fmt(st.table.cells[id].periods[S.PERIOD][st.comp].Mg, 't CO₂e per year')}${k.incomplete ? ' · incomplete model coverage' : ''}`; drawnCells++; }
       else continue;   // no-soil, outside, unavailable: nothing drawn
-      drawnCells++;
       out.push({ layer: 'soil', id, soil: k, fill, stroke, mat: matFor ? matFor(fill) : undefined, geom: cellGeom(id),
         label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL}</b> · cell ${id}<br>${esc(what)}<br><span style="color:#7f8da3">2021–2024 average · whole 4° cell · modelled</span></div>` });
     }
@@ -173,7 +179,7 @@
     if (st.on && st.sel && inDomain(st.sel)) out.push({ layer: 'soil-sel', id: st.sel, fill: STYLE.clear, stroke: STYLE.selStroke, alt: 0.009, mat: matFor ? matFor(STYLE.clear) : undefined, geom: cellGeom(st.sel), label: `<div style="font:12px IBM Plex Mono,monospace">Selected 4° cell ${st.sel}</div>` });
     return out;
   };
-  S.drawn = () => st.on && drawnCells > 0;
+  S.drawn = () => st.on && drawnCells > 0;   // a value or a model zero; unknown-only outlines do not count
   // the selected-cell outline: while the place panel or a soil inspector shows a cell (proposal §1b)
   S.select = id => { st.sel = inDomain(id) ? id : null; redraw(); };
   S.clear = () => { if (st.sel === null) return; st.sel = null; redraw(); };
@@ -183,12 +189,12 @@
   // ---------- the card
   const $ = id => document.getElementById(id);
   function keyHtml() {
-    const lab = ['below 1,000', '1,000–10,000', '10,000–100,000', '100,000–1,000,000', '1,000,000–10,000,000', '10,000,000 or more'];
+    const lab = ['more than 0, below 1,000', '1,000–10,000', '10,000–100,000', '100,000–1,000,000', '1,000,000–10,000,000', '10,000,000 or more'];
     const sw = (fill, stroke) => `<span class="soilsw" style="background:${fill};border-color:${stroke}"></span>`;
     return `<div class="soilcap">t CO₂e per year per whole 4° cell, 2021–2024 average (modelled)</div><ul class="soilkey">` +
       lab.map((l, i) => `<li>${sw(fillFor(i), STYLE.stroke)}${l}</li>`).join('') +
-      `<li>${sw(STYLE.clear, STYLE.zeroStroke)}0 assigned by this model (not proof of no emission)</li>` +
-      `<li>${sw(fillFor(3), STYLE.incStroke)}light outline: incomplete model coverage (a sum over the available raster cells)</li>` +
+      `<li>${sw(STYLE.clear, STYLE.zeroStroke)}hollow: 0 assigned by this model (not proof of no emission)</li>` +
+      `<li>${sw(fillFor(3), STYLE.incStroke)}violet outline: incomplete model coverage — filled, a sum over the available raster cells; hollow, a 0 over them</li>` +
       `<li>${sw(STYLE.unknownFill, STYLE.unknownStroke)}unknown: no estimate for the cell</li>` +
       `<li>${sw(STYLE.clear, STYLE.selStroke)}white outline: the selected cell</li>` +
       `<li>${sw(STYLE.clear, 'rgba(0,0,0,0)')}not drawn: no organic soil mapped${st.table && st.table.meta.fixture ? ', or (this preview) not in the fixture' : ''}</li></ul>`;
@@ -203,7 +209,7 @@
     if (st.status === 'loading' || st.status === 'idle') { s.textContent = 'loading'; o.textContent = 'Loading the modelled 4° table…'; return; }
     if (!ready()) { s.textContent = 'unknown'; o.textContent = `Unknown — the soil table is not available (${st.why}). Nothing is drawn.`; return; }
     s.textContent = 'on';
-    o.textContent = `${st.comp === 'drained' ? 'Drained' : 'Burned'} organic soils · 2021–2024 average · ${drawnCells} cells drawn${st.table.meta.fixture ? ` (preview fixture: ${st.table.meta.fixture.subset_cells.length} of 4,050 cells)` : ''} · Glen et al. 2026 v1.0.1 · checked ${S.CHECKED}.`;
+    o.textContent = `${st.comp === 'drained' ? 'Drained' : 'Burned'} organic soils · 2021–2024 average · ${drawnCells} cells drawn${unknownCells ? ` and ${unknownCells} outlined as unknown` : ''}${st.table.meta.fixture ? ` (preview fixture: ${st.table.meta.fixture.subset_cells.length} of 4,050 cells)` : ''} · Glen et al. 2026 v1.0.1 · checked ${S.CHECKED}.`;
   }
   S.paint = paint;
   function wire() {
@@ -217,6 +223,6 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 
-  S.test = { fmt, inDomain, validate, cellText, cellClass, state: () => ({ on: st.on, comp: st.comp, status: st.status, why: st.why, sel: st.sel, requests: [...st.requests], drawn: drawnCells }) };
+  S.test = { fmt, inDomain, validate, cellText, cellClass, state: () => ({ on: st.on, comp: st.comp, status: st.status, why: st.why, sel: st.sel, requests: [...st.requests], drawn: drawnCells, unknown: unknownCells }) };
   ME.soil = S;
 })();

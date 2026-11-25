@@ -6,7 +6,7 @@
 <title>Mother Earth</title>
 <meta name="description" content="See what was observed, what differs from its own comparison period, and what remains unknown — including unknown coverage.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611251000">
+<link rel="stylesheet" href="style.css?v=202611251400">
 </head>
 <body class="world">
 <header class="top">
@@ -521,7 +521,7 @@
   <button type="button" class="lp-off" id="layers-off">Switch everything off</button>
 </div>
 <script src="app.js?v=202612241000"></script>
-<script src="soil.js?v=202611251200"></script>
+<script src="soil.js?v=202611251400"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612101000"></script>
@@ -787,6 +787,7 @@ let lastFocus = null;          // restored when the inspector closes
 var ohTap = null;              // Ocean heat: the tap's own lat/lng for the view it opened (var: assigned by globe handlers set up earlier)
 let inspCtx = null;            // { layer, recs } so a listed record can be opened on its own
 function openInspector(title, rows) {
+  $('insp').classList.remove('soilview');   // soil-preview-rc: only the soil inspector stacks its rows; every other view keeps its layout
   closeKey(false);   // the Key and the inspector never overlap: opening one closes the other
   lastFocus = document.activeElement;
   fillInspector(title, rows);
@@ -809,7 +810,7 @@ function closeInspector() {
   if (!$('insp').classList.contains('show')) return;
   $('insp').classList.remove('show');
   if (lastFocus && document.contains(lastFocus) && typeof lastFocus.focus === 'function') lastFocus.focus();
-  lastFocus = null; inspCtx = null; placeCtx = null; ohTap = null; $('insp').classList.remove('placeview');
+  lastFocus = null; inspCtx = null; placeCtx = null; ohTap = null; $('insp').classList.remove('placeview'); $('insp').classList.remove('soilview');
   if (ME.soil) ME.soil.clear();   // soil-preview-rc: the outline goes with the panel
 }
 $('insp-x').onclick = closeInspector;
@@ -828,6 +829,7 @@ let placeCtx = null, placeSeq = 0;
 ME.placeLog = [];   // test aid: every /place request path, in order
 function openPlace(id) {
   placeCtx = { id, extra: new Set() };
+  $('insp').classList.remove('soilview');
   if (ME.soil) ME.soil.select(id);   // soil-preview-rc: the selected cell is outlined while its panel is open
   $('insp').classList.add('placeview');
   openInspector(`Everything here · cell ${id}`, [['Loading', 'reading what the hub holds for this cell…']]);
@@ -959,7 +961,8 @@ const SRC_LINK = {
 const srcLink = layer => `<a href="${SRC_LINK[layer][0]}" target="_blank" rel="noopener">${esc(SRC_LINK[layer][1])}</a>`;
 
 function inspectCell(p) {
-  if (p.layer === 'soil' || p.layer === 'soil-sel') { $('insp').classList.remove('placeview'); placeCtx = null; inspCtx = null; openInspector(`Organic-soil emissions (modelled) · cell ${p.id}`, ME.soil.inspectRows(p.id)); ME.soil.select(p.id); return; }   // soil-preview-rc
+  $('insp').classList.remove('soilview');
+  if (p.layer === 'soil' || p.layer === 'soil-sel') { $('insp').classList.remove('placeview'); placeCtx = null; inspCtx = null; openInspector(`Organic-soil emissions (modelled) · cell ${p.id}`, ME.soil.inspectRows(p.id)); $('insp').classList.add('soilview'); ME.soil.select(p.id); return; }   // soil-preview-rc
   $('insp').classList.remove('placeview'); placeCtx = null;
   const snap = state[p.layer]; const fresh = ME.freshness(p.layer);
   const paired = p.layer !== 'forest' && usable(p.layer);

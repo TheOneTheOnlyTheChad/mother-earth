@@ -216,9 +216,9 @@ check('G6 pinned identity: exact bytes load; a truncated or different file does 
 
 # ---------- H. layer classes (rev 3 §1b) ----------
 check('H1 22_70 drained in the top class', layer_class(tab, '22_70', 'drained') == ('bin', 5, False))
-check('H2 13_27 is a model zero, not no-soil or unknown', layer_class(tab, '13_27', 'drained') == 'zero')
+check('H2 13_27 is a model zero over complete coverage, not no-soil or unknown', layer_class(tab, '13_27', 'drained') == ('zero', False))
 check('H3 14_49 is no-soil', layer_class(tab, '14_49', 'burned') == 'no-soil')
-check('H4 38_39 2011-15 burned zero over incomplete coverage', layer_class(tab, '38_39', 'burned', '2011_2015') == 'zero' and layer_class(tab, '38_39', 'drained', '2011_2015')[2] is True)
+check('H4 38_39 2011-15: the burned zero keeps its incomplete coverage, like the drained value (GPT preview review H1)', layer_class(tab, '38_39', 'burned', '2011_2015') == ('zero', True) and layer_class(tab, '38_39', 'drained', '2011_2015')[2] is True)
 check('H5 invalid table, component or period is unavailable', layer_class({'meta': {}, 'cells': {}}, '22_70', 'drained') == 'unavailable'
       and layer_class(tab, '22_70', 'total') == 'unavailable' and layer_class(tab, '22_70', 'drained', '1999_2000') == 'unavailable')
 check('H6 coverage none is unknown, never zero', layer_class(nonecov, '22_70', 'drained') == 'unknown' and layer_class(nonecov, '22_70', 'burned') == 'unknown')
