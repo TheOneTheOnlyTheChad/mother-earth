@@ -1,6 +1,6 @@
 # Animals journey context: evidence record (Nature context Workstream C)
 
-25 Nov 2026 03:55 UTC (clock reading) · **rev 1.1** (adds §4a, the pilot's measured results, and the zebra extraction's final budget; the rest of rev 1 is unchanged) · Animals thread · for GPT · **evidence step only: nothing is built. No large download; no corridor extraction.**
+25 Nov 2026 04:19 UTC (clock reading) · **rev 1.2** (GPT's evidence review of 25 Nov folded in: §0 Chad's acceptances, §1 boundary prose, §3 version and gap-list wording, §4a budget wording, new §4b the extractor, §5 file count, §6 note; rev 1.1 added §4a) · Animals thread · for GPT · **nothing built; no extraction run; no tiles downloaded; corridor parked.**
 
 Follows the proposal `docs/concepts/ANIMALS-JOURNEY-CONTEXT-PROPOSAL.md` rev 1 and GPT's review `reviews/2026-11-25-animals-journey-context-proposal-gpt-review.md` (filed unchanged). GPT's corrections A to E are folded in here and in the build brief `docs/concepts/ANIMALS-JOURNEY-CONTEXT-BUILD-BRIEF.md`. No separate proposal revision is made.
 
@@ -13,6 +13,12 @@ Follows the proposal `docs/concepts/ANIMALS-JOURNEY-CONTEXT-PROPOSAL.md` rev 1 a
 - **J-D5 B:** no present-day line or link.
 - **J-D6 A:** MODIS standard processing for both.
 - **Go:** the bounded evidence step, with the exact budget before a small zebra pilot. **No full corridor extraction.**
+- **Chad, 25 Nov, after GPT's evidence review** (`reviews/2026-11-25-animals-journey-context-evidence-gpt-review.md`, filed unchanged):
+  - accepts the six whole-file downloads (about 976.6 MB);
+  - accepts the 30 % threshold, labelled as applying to tree cover in 2000;
+  - accepts the collapsed monthly table;
+  - asks for the full zebra extractor with GPT's corrections and offline controls, returned for GPT's targeted check **before he runs it or downloads the tiles**;
+  - keeps the corridor parked.
 
 Ownership is unchanged: soil carbon, the global alerts and the hub's forest wording stay with the Nature context thread. No hub change, schedule, new account or provider correspondence is part of this slice.
 
@@ -27,7 +33,7 @@ Ownership is unchanged: soil carbon, the global alerts and the hub's forest word
 
 Claude reproduced these cells and areas, and they agree with GPT's independent figures. The builder freezes the cell set against the source file's hash and fails if either changes. **These are broad regions:** the zebra's is about 370,000 km², not the zebra's surroundings.
 
-**One mask, no double counting.** Each FIRMS detection and each Hansen pixel is assigned by its own centre to at most one cell. Hansen pixel centres sit at a quarter-pixel offset (0.000125°) from every 4° line, so none falls on a boundary. A FIRMS detection that falls exactly on a cell's north or east edge belongs to the next cell, so it is outside the union. A provider request may cover a box larger than the union, so every row is clipped to the union before counting.
+**One mask, no double counting.** Each FIRMS detection and each Hansen pixel is assigned by its own centre to exactly one cell, half-open. A point on the internal 24° E line between the zebra's two cells goes to the eastern cell (`17_51`) and stays inside the union. Only points on the union's outer north (18° S) or east (28° E) edge fall outside it. Hansen pixel centres sit **half a pixel** (0.000125° of a 0.00025° pixel) from every 4° line, so none falls on a boundary. FIRMS returns rows on the closed box, so every row is clipped to the half-open union before counting. The geometric rule and its tests are authoritative over this prose.
 
 ## 2. Time
 
@@ -42,7 +48,7 @@ Claude reproduced these cells and areas, and they agree with GPT's independent f
 |---|---|---|
 | Area request | `/api/area/csv/[MAP_KEY]/[SOURCE]/[west,south,east,north]/[DAY_RANGE]/[DATE]` returns DATE to DATE + DAY_RANGE − 1. **DAY_RANGE is 1 to 5.** The proposal's "up to 10 days" was wrong; GPT's correction stands | FIRMS Area API page, read 25 Nov |
 | Source | `MODIS_SP` = "MODIS Standard Processing". The live layer's `VIIRS_NOAA20_NRT` is a different product | same |
-| Collection | "Collection 6.1 has been available since April 2021 and is the latest collection available." The `version` field of each row is kept and reported | FIRMS FAQ |
+| Collection | The FAQ says Collection 6.1 is the latest. **The rows themselves read `6.03`.** GPT read NASA GIBS's documented VERSION value map, which gives `6.03` = "Collection 6 Standard processing". Wording accepted: "MODIS Collection 6 standard processing; file version 6.03". `version` is stored as text, never as a number or as 6.1. Any other label in the full extraction is kept literally unless a documented mapping exists | FIRMS FAQ; GIBS Python usage page (GPT, 25 Nov) |
 | Allowance | 5,000 transactions per 10 minutes per key (REGISTER, from the key's issue email, 30 Oct 2026). The live hub makes about 96 a day. The data-availability page says a request for ALL sensors costs 5 transactions. **The cost of one area request is not stated; the pilot measures it** | REGISTER; Data Availability page |
 | Gap list | Fetched keyless from the page's own data call (`/api/missing_data/?action=fetch_data`, 24,691 bytes, sha256 `8b9c8d5d…82be`, 25 Nov 03:42 UTC). 171 standard-data rows. **No Terra or Aqua MODIS day is listed in the zebra's period.** In 2017–2024 it lists 28: Terra 11–22 Oct 2022 and Aqua 1–16 Apr 2022. The FAQ says it "will only show the days where there is no data for the satellite/sensor combination": it does not describe cloud. GPT's read found the table not loading; this read loaded the same data through the page's own call | Missing-data page and FAQ |
 | What a detection is | The centre of a pixel flagged as containing one or more active fires. Usually vegetation fires, but volcanoes and gas flares occur. Cloud hides detections. The FAQ advises against estimating burned area from detections | FIRMS FAQ |
@@ -50,13 +56,13 @@ Claude reproduced these cells and areas, and they agree with GPT's independent f
 | Terms and credit | Already filed in REGISTER (LANCE acknowledgment, local-scale caveat, open use). The FAQ adds "NASA FIRMS" for captions. The journey block reuses the existing footer acknowledgement and adds "NASA FIRMS (MODIS)" beside the value | REGISTER; FAQ |
 
 **Policy for the count (fixed before any data is seen):**
-- Count **detections, never fires**: all rows inside the region and interval, Terra and Aqua together.
+- Count **presumed vegetation-fire detections** (`type` 0), never fires: all confidence levels, Terra and Aqua together, inside the region and interval. A missing or unknown `type` stops the extraction (the schema is frozen); it never widens the count to all hotspots.
 - **Confidence is not used as a filter.** The FAQ's caution is stated instead.
-- **Volcano and other non-vegetation rows:** if the standard rows carry a `type` field, only `type 0` (presumed vegetation fire) is counted, and the excluded rows are counted by type in the file. If the field is absent, all rows are counted and the block says so. The pilot shows which.
-- **Duplicates:** a row identical on latitude, longitude, `acq_date`, `acq_time` and satellite counts once; the number dropped is recorded. Windows never overlap.
+- **Other types** (1 volcano, 2 other static land source, 3 offshore) are counted separately in the context file, never in the shown count. The pilot showed the field is present.
+- **Duplicates:** a row identical in every field counts once, and the number dropped is recorded. Two rows that share latitude, longitude, `acq_date`, `acq_time` and satellite but differ elsewhere are a **conflict**: the builder stops and reports it rather than keeping either. Windows never overlap.
 - **Coverage states, kept apart:**
   - a failed request leaves the whole result incomplete;
-  - a day in the gap list is a known database gap, and is named;
+  - a day in the gap list is a known database gap, and is named. With no days listed, the block says **"No dates are listed in the provider's missing-data table for this period"**, never that every observation was available. An unreadable or failed list is "coverage unknown", never an empty list;
   - cloud and unobserved days are an observation limit, always stated, never measured here.
 - **Zero detections** is shown as "no detections in the record", never as "no fire". **A partial result is never shown as a total.**
 
@@ -102,21 +108,45 @@ Chad ran the pilot script unchanged (sha256 `91be1a2e…a027`) and pasted its si
 - **No duplicates**, and all 33 rows fall inside the half-open union. None falls before 08:01 on 25 Oct (the first is 23:53 that day), so the endpoint filter removed nothing here. The dedupe and clipping rules stay as written.
 - **Confidence** ran 22–100 with day and night rows; no filter is applied (§3).
 - **Repeatable:** the repeated request gave the same bytes.
-- **Transactions:** 31 used across the six requests, an upper bound because the live hub may have used the key in those 22 seconds. The split between requests isn't published, so the budget below assumes the worst case: all 31 on the three area requests, about 10.3 each.
+- **Transactions:** 31 used across the six requests in that interval; the live hub may also have used the key then. The split between requests isn't published. Assigning all 31 to the three area requests gives an **observed average of about 10.3 per area request**. That is an upper estimate from this sample, not a proven maximum for future requests (GPT).
 - **No key** appears in anything written. The manifest's "asked" fields read `[KEY]`; the only long hex strings in it are sha256 values.
 
 **Final budget for the full zebra extraction (C1a, only after GPT and Chad's go):**
 - 73 area requests, 25 Oct 2007 to 22 Oct 2008 in 5-day windows (the last 4 days), over exactly `20,-22,28,-18`, `MODIS_SP`.
-- Plus one availability request and key-status reads before the first area request and after every 15th: 5 status reads. That is **79 HTTP requests**.
-- One at a time, 3 s apart, 60 s timeout, no automatic retries: about 4–5 minutes.
-- **Transactions:** worst case 73 × 10.3 ≈ **755**, against 5,000 per 10 minutes.
-- **Stop rules:**
-  - before starting, or at any status read, if 2,000 or more are already used, which leaves the live hub (about one request every 15 minutes) far inside the limit;
-  - at the first failed or non-CSV response; the extraction is then marked incomplete and nothing is built from it;
-  - if any status read is 4,000 or more.
+- Plus one availability request, key-status reads before the first window and after windows 15, 30, 45, 60 and 73 (six reads), and one keyless request for the missing-data list. That is **80 requests to the keyed API and 1 keyless: 81 HTTP requests**.
+- One at a time, 3 s apart, 60 s timeout, no automatic retries: **typically about 4–5 minutes**. Slow responses can make it longer; there is no promised maximum.
+- **Transactions: estimated about 755** (73 × 10.3), against 5,000 per 10 minutes. This is an estimate, not a maximum. What actually limits the run is the stop rules below, which read the real count.
+- **Stop rules** (enforced by the extractor; §4b): at any key-status read that is unreadable or not in the expected form; at any read showing 2,000 or more already used, which keeps at least 3,000 in reserve for other users of the key including the live hub; at the first failed, oversized or invalid response. A stopped run is marked so and nothing is built from it.
 - **Private cache:** about 73 CSVs. The pilot's 33 rows for 10 days took 2.9 KB, so the year is expected at well under 1 MB; the extraction stops if the cache passes 20 MB.
 - Same key handling as the pilot.
-- **The corridor is not included:** 585 requests, worst case about 6,000 transactions, which would itself need spreading over at least two 10-minute windows. It gets its own budget line and go.
+- **The corridor is not included:** 585 requests, an estimated 6,000 transactions on the same sample, which would need spreading across several 10-minute windows. It gets its own budget line and go.
+
+## 4b. The full zebra extractor (for GPT's targeted check; not run)
+
+`phase1/animals/journey_context_firms_fetch.py`, run by Chad in Terminal like the pilot, after GPT's check and Chad's go. It uses the standard library only and the same key handling: the key is read from `KEYS.md` by the script and never printed, logged or written. GPT's five corrections:
+
+1. **Fails closed on status.** Every key-status read must be HTTP 200 JSON with `transaction_limit` exactly 5000, a non-negative integer `current_transactions` and `transaction_interval` "10 minutes", or the run stops. It also stops at 2,000 or more used. Status is read before any availability or area request, after windows 15, 30, 45 and 60, and after the last window. A drop between readings is recorded as an accounting-window reset; no negative figure is computed. Availability must name `MODIS_SP` with dates covering 25 Oct 2007 to 22 Oct 2008, or the run stops before any area request.
+2. **Bytes bounded while reading.** Each response is read in 64 KB chunks: at most 2 MB for a data response, 64 KB for an error body, and 20 MB for the whole run counting the response being read. Data goes to a `.part` file, renamed only after every check. Leftover partial files are renamed `.incomplete`.
+3. **Strict CSV.** Strict UTF-8; the exact 15-field MODIS header; every row parsed. Checks: coordinates inside the requested box; `acq_date` a real date inside the window; `acq_time` 1–4 digits, padded and then checked as HHMM (so `2460` fails); satellite Terra or Aqua; instrument MODIS; confidence 0–100; `version` a version label stored as text; `type` 0–3; day/night D or N; the five numeric fields numeric. Header-only CSV is a valid zero; anything else (HTML, a plausible prefix, a short row) stops the run.
+4. **Provenance equals stored bytes.** The sha256 is of exactly the bytes stored. A response that would be stored and contains the key is not stored at all, and the run stops with a redacted record. Key-status bodies are never stored, only their parsed numbers.
+5. **Explicit end.** The manifest is written on every exit with state `complete`, `stopped` or `invalid` and the reason. `complete` requires every planned window stored in order, every file matching its hash, the final status read, and exactly 81 requests. Only `complete` prints `COMPLETE` and exits 0; anything else prints the state and "do not build from it" and exits 1.
+
+**The missing-data list** is fetched by the extractor itself (keyless) and stored with its hash, so the builder has frozen provenance from the run. Parsing is strict: table rows of exactly four cells, and at least one standard-data row. An unreadable list stops the run; it is never treated as an empty list. Claude checked this against the live list in the pane on 25 Nov: 171 rows, all with four cells, sha256 `8b9c8d5d…82be`, unchanged since the morning.
+
+**Verifier for the builder:** `phase1/animals/journey_context_verify.py`. It makes no network call. It refuses a manifest that isn't `complete`, a window missing or out of order against the plan, any stored file absent or not matching its hash, missing availability or gap-list provenance, leftover partial files, and a request count other than planned. The builder calls it before reading anything.
+
+**Offline controls:** `python3 -I phase1/animals/journey_context_firms_fetch.test.py`, **39 passed, 0 failed** (Claude, cloud workspace, 25 Nov). Each case runs the real extractor against a local stand-in server, with a fake key and the test caps. The fake key was absent from everything printed or written in every case. Cases:
+- **the plan:** 73 windows and 81 requests;
+- **test-only caps:** ignored without the test host;
+- **complete runs:** a full run, all header-only, and an accounting-window reset;
+- **status:** HTTP 500, non-JSON, a missing field, the wrong limit, a non-integer count, already busy, and an unreadable final read (73 windows stored but not complete);
+- **availability:** short coverage;
+- **gap list:** unreadable, and no rows;
+- **area responses:** HTML with a plausible prefix, time `2460`, the wrong header, a date outside the window, a wrong satellite, outside the box, a short row, an echoed key, an oversize response, the run's cache cap, a small HTTP 500, an oversize error body, a dropped connection;
+- **no key row:** nothing requested or written;
+- **verifier:** refuses an altered file, a missing file, a missing gap list, a manifest not complete, missing gap provenance, a missing window, and a leftover partial file.
+
+Two defects were found and fixed while writing these controls. A gap-list body with no table rows was first accepted as an empty list; it now stops the run. A key echoed inside a status body first stopped the run although status bodies are never stored; that check now applies only to stored responses. The real status response did not contain the key in the pilot.
 
 ## 5. Hansen / UMD Global Forest Change: what was read and measured
 
@@ -140,7 +170,7 @@ Chad ran the pilot script unchanged (sha256 `91be1a2e…a027`) and pasted its si
 | `50N_120W` | 57.1 MB | 426.2 MB | 15.4 MB | corridor (40–42° N), later |
 
 **Download plan:**
-- **Zebra:** six whole tiles, **976.6 MB**, downloaded once by Chad in his browser to Downloads, checked against the store's MD5 and hashed with sha256, then moved to a private Mac folder. Never committed or served.
+- **Zebra:** six whole files (two tiles × three layers), **976.6 MB** (accepted by Chad, 25 Nov), downloaded once by Chad in his browser to Downloads, checked against the store's MD5 and hashed with sha256, then moved to a private Mac folder. Never committed or served.
 - **Corridor:** **707.6 MB**, later, under its own go.
 - **Why whole tiles:** each row is its own strip, so the builder could read only the rows it needs. But only the browser pane reaches the store, and whole files are the simpler route to verify and repeat. GPT may prefer row reads.
 
@@ -148,13 +178,11 @@ Chad ran the pilot script unchanged (sha256 `91be1a2e…a027`) and pasted its si
 
 - **Heading:** "Historical regional land context", as GPT suggested, on both cards.
 - **Products:** fires and tree-cover loss both pass the evidence so far.
-- **Fires still depend on the pilot:** the cost per request, whether `type` is present, and whether the answer repeats.
+- *(Superseded by §4a: the pilot has run.)*
 - **Tree-cover loss carries strong caveats:** relative indicator, older method for 2007–08, approximate area, threshold applied to 2000. In the zebra's region, sampled canopy peaks at 54 %. So loss at a 30 % threshold may be very small or zero there, and the block must say what zero means.
-- **Threshold:** proposed **30 %** (the common GFW default), stated beside the value. A different threshold is a decision for Chad after GPT.
+- **Threshold: 30 %** of tree cover in 2000, labelled beside the value (accepted by Chad, 25 Nov). It is a selection threshold, not a habitat definition. It is never changed after seeing the result.
 
-## 7. Open, for GPT
+## 7. Open, for GPT (rev 1.2)
 
-1. The pilot's results and the zebra's final budget (§4a). Whether to describe the MODIS collection beyond the file's `6.03`.
-2. Whole-tile download versus row reads (§5).
-3. The 30 % canopy threshold.
-4. Whether to show per-month fire counts for the zebra, or only the interval total with the part-months named. The brief proposes the total plus a 13-row month table: two part-months and eleven whole months.
+1. GPT's targeted check of the extractor, its verifier and the offline controls (§4b).
+2. After that check and Chad's go: Chad runs the extractor in Terminal and downloads the six Hansen files; then the C1a build on a branch.

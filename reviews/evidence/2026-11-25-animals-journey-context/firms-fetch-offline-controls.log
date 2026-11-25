@@ -1,0 +1,41 @@
+PASS plan: 73 windows (72 of five days, one of four), 25 Oct 2007 to 22 Oct 2008
+PASS plan: status reads after windows 15, 30, 45, 60 and 73; 81 HTTP requests (80 keyed + 1 keyless)
+PASS test-only caps cannot be set without the test host
+PASS without the test host, ME_TEST_* caps are ignored and spacing stays 3 s
+PASS ok: state complete, exit 0, 73 windows, key absent
+PASS header_only: state complete, exit 0, 73 windows, key absent
+PASS status_reset: state complete, exit 0, 73 windows, key absent
+PASS status_500: state stopped, exit 1, "HTTP 500", 0 windows, key absent
+PASS status_bad_json: state stopped, exit 1, "not readable JSON", 0 windows, key absent
+PASS status_missing_field: state stopped, exit 1, "expected allowance", 0 windows, key absent
+PASS status_wrong_limit: state stopped, exit 1, "expected allowance", 0 windows, key absent
+PASS status_float: state stopped, exit 1, "expected allowance", 0 windows, key absent
+PASS status_busy: state stopped, exit 1, "already used", 0 windows, key absent
+PASS avail_short: state invalid, exit 1, "does not cover", 0 windows, key absent
+PASS status_final_bad: state stopped, exit 1, "not readable JSON", 73 windows, key absent
+PASS gap_bad: state invalid, exit 1, "never an empty one", 0 windows, key absent
+PASS gap_no_rows: state invalid, exit 1, "never an empty one", 0 windows, key absent
+PASS area_html: state invalid, exit 1, "frozen MODIS header", 2 windows, key absent
+PASS area_bad_time: state invalid, exit 1, "valid HHMM", 2 windows, key absent
+PASS area_wrong_header: state invalid, exit 1, "frozen MODIS header", 2 windows, key absent
+PASS area_outside_date: state invalid, exit 1, "outside the requested window", 2 windows, key absent
+PASS area_bad_sat: state invalid, exit 1, "Terra or Aqua", 2 windows, key absent
+PASS area_outside_box: state invalid, exit 1, "outside the requested box", 2 windows, key absent
+PASS area_short_row: state invalid, exit 1, "fields, expected", 2 windows, key absent
+PASS area_key_echo: state invalid, exit 1, "contained the key", 2 windows, key absent
+PASS area_oversize: state stopped, exit 1, "byte cap", 2 windows, key absent
+PASS ok: state stopped, exit 1, "cache cap", key absent
+PASS area_500: state stopped, exit 1, "HTTP 500", 2 windows, key absent
+PASS area_500_big: state stopped, exit 1, "byte cap (65536)", 2 windows, key absent
+PASS area_drop: state stopped, exit 1, "failed", 2 windows, key absent
+PASS no KEYS.md row: stops before any request, writes nothing
+PASS verifier: a complete run is usable
+PASS verifier: an altered window file is refused
+PASS verifier: a missing window file is refused
+PASS verifier: a missing gap list is refused
+PASS verifier: a manifest not marked complete is refused
+PASS verifier: a manifest without gap-list provenance is refused
+PASS verifier: a missing window in the manifest is refused
+PASS verifier: a leftover partial file is refused
+
+39 passed, 0 failed
