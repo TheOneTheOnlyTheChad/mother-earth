@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 19:05 UTC (clock reading) — **Tides released: merge `54642c5` on main, 37 of 37 served files verified live; page only, no hub change** (page: Tides; Tides thread)
+- **Filed unchanged:** `reviews/2026-11-25-tides-release-rc-gpt-review.md` (sha256 `e7f1cff5…9160`, relayed by Chad): release content PASS.
+- **Reconciled:** main `3b3dc4d` merged into `tides-nav-rc` → `a503def`; delta from GPT's reviewed `72e0011` was records only (`STATUS.md`, the filed review); all 37 manifest files byte-identical.
+- **Chad's own line (25 Nov):** "Approve: release Tides from tides-nav-rc a503defe551cabaaa71d9bbc69e9a5413aba0435 to main (page only, no hub deploy)".
+- **Release:** `git merge --no-ff` → `54642c5` (parents `3b3dc4d`, `a503def`; tree = `a503def`), pushed 18:55:54 UTC. Served check in the browser pane 18:58:16 UTC: 37 checked, 37 ok, none bad (reviewed manifest, not regenerated).
+- **Live checks (pane, github.io):** World View → Tides tab opens the page (canvas, Tides marked current); First quarter → slider 90, neap text; Moon-only mode and Angled view switch; Reset → 0°, New Moon, both bodies, Overhead, spring text; `sources.html#tides` link lands on the Tides section and the shortcut exists; the Tides tab opens Tides from Moon and from Animals.
+- **Records:** REGISTER "Tides explorer" now released; START-HERE live line (served count 37).
+- **Next (each its own short round, GPT look + Chad's Approve):** dedication line at the bottom of `tides.html` ("Dedicated to my friend Mark Tobias"); GPT's wording narrowing in Sources and REGISTER ("nothing is fetched" → "no tide observations or live feeds are fetched"). Branch deletes `tides-rc`, `tides-nav-rc`; Mac `_review/` copies to `_to_delete/`.
+
 ## 25 Nov 18:49 UTC (clock reading) — **Tides: navigation PASS (GPT); final release candidate `tides-nav-rc` `72e0011` for GPT's review. Not merged, nothing live, no hub change** (page: none; Tides thread)
 - **Filed unchanged:** `reviews/2026-11-25-tides-nav-rc-gpt-review.md` (sha256 `a53a1d5d…587f6c`, relayed by Chad). Chad's own line: "Navigation PASS. Keep Tides after Sun. Prepare the final release candidate… Return the exact final commit for GPT review. No merge or deployment yet."
 - **Added for release (payload `54cbc0d`):** Tides section and shortcut on `sources.html`; REGISTER "Tides explorer" entry (model sources, both pinned references with hashes, dates, changes, terms, limits; the Sun as an Earth-facing reference; PI not notified); served-file manifest of 37 files (`phase1/tides/release_manifest.mjs`, `reviews/evidence/2026-11-25-tides-release-manifest.json`).
