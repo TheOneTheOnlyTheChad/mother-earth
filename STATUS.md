@@ -4,6 +4,15 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 15:03 UTC (clock reading) — **Tides: first branch build on Chad's own go. Branch `tides-rc` `00aa7b9` for GPT's review. Not merged, nothing live, no hub change** (page: none; Tides thread)
+- **Chad's line (25 Nov):** "Go: Tides branch build as in that block (D2 pinned Earth, D3 pinned Sun, D4 unlinked, D5 extras out, no header clock)." He added that he is in constant contact with NASA, who know what Mother Earth does.
+- **Built:** `tides.html`, `tides-model.js`, `tides.js`, `tides.css`, two pinned references with `assets/tides/SOURCE.json`, build scripts, two suites. No existing file changed; no page links to Tides yet.
+- **Images:** Earth = GIBS VIIRS NOAA-21, 22 Jun 2026 (four candidate requests, the planned maximum; chosen in the Overhead and Angled views). Sun = one hub picture (SDO file updated 25 Nov 14:00 UTC), wrapped by `sunglobe.js`'s own code. No collector touched.
+- **One departure:** display constants tuned once and frozen at base 1.15, factor 0.12 (proposal had 1.12, 0.08), so the 3-D change is visible.
+- **Evidence:** `tides-model` 42 passed, 6/6 breaks caught; `tides-ui` 53 passed, 8/8 breaks caught; real browser on Chad's Mac (pane, M3) passed. Packet `reviews/2026-11-25-tides-rc.md`. Mac review copy `_review/tides-rc/`.
+- **Not verified:** real phone, Safari, screen reader, trackpad pinch, loading cost against `moon.html`.
+- **Next:** GPT reviews the branch. Then Chad's preview judgement; then the navigation candidate; then his Approve line for release.
+
 ## 25 Nov 14:27 UTC (clock reading) — **Tides: GPT PASSES proposal rev 2 as a build proposal; recheck filed; image-use gate reads done. Waiting for Chad's own go. Nothing built, branched or fetched** (page: none; hub untouched; Tides thread)
 - **Filed unchanged:** `reviews/2026-11-25-tides-proposal-rev2-gpt-recheck.md` (sha256 `9594c9dd…ddaf`, relayed by Chad). R1–R3 closed. GPT recommends D2 pinned Earth, D3 pinned Sun, D4 unlinked first build, D5 optional controls left out, and supports no running UTC clock in the Tides header. One wording note for T7: the Sun needs no lighting-induced shading; its own picture's brightness variation and the plain unseen region stay.
 - **Gate reads (Claude, browser pane):** `docs/research/tides/TIDES-IMAGE-USE-READS-2026-11-25.md`. GIBS guidance, Earthdata data-use guidance and SDO's rules page read directly. Neither stops a dated reference copy. Open and named: a layer-level restriction check for the chosen Earth frame; the standing SDO reading (display texture, PI not notified).
