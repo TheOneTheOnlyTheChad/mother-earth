@@ -8,6 +8,8 @@
 
 *Rev 1.3, 25 Nov 2026 11:58 UTC (clock reading; Claude, same thread): the document linked in the IWC reply has now been read by Claude, from the copy Chad downloaded, on his word ("you can read it"), a one-off departure from the text-only rule. What it says is in the new part "The linked document" under D. It explains the method and confirms the classes and the status sentence. It does not contain the abundance figure or its range, and says nothing on reuse. Nothing is cleared.*
 
+*Rev 1.4, 25 Nov 2026 12:05 UTC (clock reading; Claude, same thread), after GPT's review: (1) the verbatim text of the IWC reply is taken out of this public file and replaced by a factual summary; the full email is kept privately (GPT: removing addresses does not turn a private email into a public source). Revisions 1.2 and 1.3 in this repository's history still hold the text; history is not rewritten. (2) GPT's review is summarised under D. (3) One page reference corrected (item 5.2). The Cape Vidal reply and enquiry under E are unchanged, pending Chad's word.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
@@ -30,35 +32,9 @@
 
 ### D, IWC: first reply, 25 Nov 2026
 
-**How it reached this record.** Chad pasted the email into the Claude thread on 25 Nov 2026 ("ok we got one reply"). Claude has not seen the inbox. The paste showed it as received "1:46 PM (4 minutes ago)" in Chad's mail view; the time zone is not stated in the paste. The workspace clock read 11:52:36 UTC (13:52 SAST) shortly after the paste arrived. The subject line shown was "Re: Permission and clarification: Western Indian Ocean humpback status on Mother Earth". The paste showed it addressed to Chad and three others, shown as "Julie, Statistics, Kate". The sender's email address is left out of this public repository; Chad holds it. The enquiry as sent was not quoted in the paste and is still not on record. GPT had not reviewed the reply when this was written.
+**How it reached this record.** Chad pasted the email into the Claude thread on 25 Nov 2026 ("ok we got one reply"). Claude has not seen the inbox. The paste showed it as received "1:46 PM (4 minutes ago)" in Chad's mail view; the time zone is not stated in the paste. The workspace clock read 11:52:36 UTC (13:52 SAST) shortly after the paste arrived. The subject line shown was "Re: Permission and clarification: Western Indian Ocean humpback status on Mother Earth". The paste showed it addressed to Chad and three other recipients. Names and addresses are left out of this public repository; Chad holds them. The enquiry as sent was not quoted in the paste and is still not on record. GPT had not reviewed the reply when this was written.
 
-**The reply, as pasted, from Isidora Katara, PhD (IWC Statistics and Modelling):**
-
-> Dear Chad,
->
-> Thank you for your interest in the work of IWC.
->
-> We allow links to web content if it is for education and outreach, but not for commercial use.  All links should be clearly signposted and credited to the International Whaling Commission.
->
-> The abundance figure refers to 2015.
-> I would suggest for details you see https://archive.iwc.int/pages/download.php?ref=22706&ext=pdf&alternative=7830&noattach=true&k=
-> The source is the 2015 assessment, and a summary can be found in Jackson, J.A., Ross-Gillespie, A., Butterworth, D., Findlay, K., Holloway, S., Robbins, J., Rosenbaum, H., Weinrich, M., Baker, C.S., Zerbini, A. (2015). Southern Hemisphere humpback whale Comprehensive Assessment - a synthesis and summary: 2005-2015. Paper SC/66A/SH03 presented to the IWC Scientific Committee, May 2015, San Diego, CA, USA. [Available from: http://www.iwc.int].
->
-> The assessments were done for BSC1 and BSC2 and the results had to be combined for BSC. I will not go into details, but the values you see are the quantiles
->       5%      50%      95%
->     16580   18111     20700
->
-> The assessment data are indeed up to 2015, and the assessment itself was completed in 2016.
-> If you have any other questions or need more clarifications, please reach out.
->
-> Kind Regards,
->
-> Isidora
->
-> Isidora Katara, PhD
-> IWC Statistics and Modelling
->
-> I choose to work flexibly & send emails outside regular office hours. You don't need to respond to my emails outside yours.
+**The reply.** From a member of the IWC Secretariat's statistics and modelling staff. Its text is not reproduced here (rev 1.4). The full email as Chad pasted it is kept privately: Mac `research/animals-correspondence/2026-11-25-iwc/`, with GPT's review and the linked document. Its factual content is summarised below; the link it gave was `https://archive.iwc.int/pages/download.php?ref=22706&ext=pdf&alternative=7830&noattach=true&k=`.
 
 **What it says (Claude's reading; not GPT's, not a decision).**
 - **Reference year:** "The abundance figure refers to 2015."
@@ -80,10 +56,21 @@
 - **Item 5.3.5 (pages 11–12).** An In-depth Assessment of Southern Hemisphere humpback whales was completed in 2016, with Jackson et al. (2015) as the summary. Its results were used for the status "thermometers". The stocks are described as fully model-assessed. The Status Summary and Status Details text is not yet complete. BSC1 and BSC2 were combined into one BSC group, and the BSC drafts needed minor extra calculations, set out in Appendix 4.
 - **Appendix 4, part 2 (page 28).** Results had been computed separately for substocks C1 and C2, as 1,000 sets of numbers (abundance in 1995 and 2015 and carrying capacity for each). Relative Abundance and 20-Year Change are computed from the summed substocks in each set, and the median, 5th and 95th percentiles are taken over the 1,000 values. Total 2015 abundance "was calculated similarly".
 - **Appendix 5 (page 31).** All Southern Hemisphere humpback assessment dates on the status pages are to be 2015. Table 1 gives, for BSC, Western Indian Ocean: Relative Abundance "Very Good"; 20-year "Strongly Increased"; brief statement "Abundant and recovered after strong growth". These match what audit B recorded from the graphics page on 20 Nov.
-- **Item 5.2 (page 10).** The status pages' standard interval is 90 %.
+- **Item 5.2 (pages 10–11; the statement is on page 11).** The status pages' standard interval is 90 %. (Page reference corrected in rev 1.4, GPT. For BSC the percentiles on page 28 are the basis, not another stock's interval.)
 - **What it does not contain.** The numbers 18,111, 16,580, 15,580 and 20,700 do not appear anywhere in the extracted text. Nothing in it addresses copyright, reuse or permission for the status pages.
 
 **What the reply and the document together establish (Claude's reading, for GPT).** The abundance figure is a 2015 model estimate: the median over 1,000 model results for C1 and C2 summed, with the 5th and 95th percentiles as its range. That closes the audit's three open points on reference year, derivation and the meaning of the range, subject to GPT's review. It does not settle the lower value, and it does not settle permission.
+
+**GPT's review, 25 Nov 2026 (summary; GPT's file is kept privately with the correspondence, sha256 `02b625ab…441e`, because it carries a draft email).**
+- **What GPT did:** hashed the PDF independently (same sha256), read pages 10–12, 28 and 31, searched all 31 pages for the four numbers (none present), and re-read the IWC graphics page and disclaimer by web retrieval.
+- **Permission:** the reply covers signposted, credited links for education and outreach, not commercial use. It does not explicitly permit showing the status sentence, the estimate and range and the two classes on our page. Not clearance for the card.
+- **Lower value:** the graphics page still shows 15,580; the reply says 16,580. Keep both with their provenance; do not choose, average or recompute. Ask the IWC which is correct and what to cite. The numeric gate stays open.
+- **Metadata: closed** at the level this presentation needs. Reference year 2015 (the reply). Derivation: a model-based combined-stock estimate from 1,000 result sets of C1 and C2, combined within each set (Annex O, Appendix 4 part 2, p. 28); not a census, not a sum of substock medians, not Cape Vidal counts. Range: 5th and 95th percentiles with the median; say "5th–95th percentile range", never "95 % confidence interval", and not "credible interval" without checking the assessment's method.
+- **Dates kept separate:** estimate year 2015; assessment completed 2016; status-page assessment label 2015; webpage update label 2026; Annex O June 2026; our own checked date. Jackson et al. keeps its 2015 citation year.
+- **Further question:** one short follow-up is warranted if Chad wants the card and not a link only, asking just the lower value and explicit display permission with its conditions. Chad's to decide and send.
+- **Claude's own check, 25 Nov:** a summarising web fetch of the graphics page also returned 18,111 (15,580-20,700) and "last update: 2026". Discovery-level only, not a browser read.
+
+**State for D after the review:** metadata closed; the exact lower value open; permission open. Whale example parked.
 
 **Not read.** Paper SC/66A/SH03.
 
