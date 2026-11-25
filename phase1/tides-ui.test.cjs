@@ -88,9 +88,9 @@ async function sceneXY(p, x, y, z) { return p.evaluate(([x, y, z]) => { const s 
   try {
     // ---------- T1: a separate view; existing files untouched (first slice adds files only)
     let changed = []; try { changed = execFileSync('git', ['-C', ROOT, 'diff', '--name-status', 'origin/main...HEAD'], { encoding: 'utf8' }).trim().split('\n').filter(Boolean); } catch (e) { changed = ['git-unavailable']; }
-    // navigation stage (tides-nav-rc): the only existing files changed are the six pages' headers, the stylesheet's TIDES-NAV block and
+    // navigation stage and release candidate (tides-nav-rc): the only existing files changed are REGISTER.md (the Tides entry), the six pages' headers (sources.html also its Tides section), the stylesheet's TIDES-NAV block and
     // index.html's promise wrapper, and the test suites that count the tabs; checked file by file by phase1/tides-nav.test.cjs and the packet
-    const NAV_FILES = ['animals.html', 'index.html', 'moon.html', 'sources.html', 'style.css', 'sun.html', 'timeline.html', 'phase1/desktop-overflow.test.cjs', 'phase1/timeline-ui.test.cjs', 'phase1/timeline-mixed-assets.test.cjs', 'phase1/animals-tab-ui.test.cjs'];
+    const NAV_FILES = ['REGISTER.md', 'animals.html', 'index.html', 'moon.html', 'sources.html', 'style.css', 'sun.html', 'timeline.html', 'phase1/desktop-overflow.test.cjs', 'phase1/timeline-ui.test.cjs', 'phase1/timeline-mixed-assets.test.cjs', 'phase1/animals-tab-ui.test.cjs'];
     const modified = changed.filter(l => !/^A\t/.test(l) && !/\t(STATUS\.md|docs\/|reviews\/)/.test(l)).filter(l => !NAV_FILES.includes(l.split('\t')[1]));
     ok('T1a besides new files, this branch changes only the navigation files (headers, stylesheet, the suites that count tabs)', modified.length === 0, modified);
     ok('T1b every other page links to tides.html exactly twice: one tab, one Menu item', ['index.html', 'timeline.html', 'moon.html', 'sun.html', 'animals.html', 'sources.html'].every(f => { const t = fs.readFileSync(path.join(ROOT, f), 'utf8'); return (t.match(/href="tides\.html"/g) || []).length === 2 && t.includes('<a href="tides.html" data-view="tides">Tides</a>') && t.includes('<a role="menuitem" href="tides.html" data-page="tides">Tides</a>'); }));

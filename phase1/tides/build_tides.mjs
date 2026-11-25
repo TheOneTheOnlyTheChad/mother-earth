@@ -27,6 +27,10 @@ for (const e of src.images) for (const f of [e, e.original].filter(x => x && x.p
   if (sha !== f.sha256) bad.push(f.path + ': sha256 ' + sha + ' is not the recorded ' + f.sha256);
   if (b.length !== f.bytes) bad.push(f.path + ': ' + b.length + ' B is not the recorded ' + f.bytes);
 }
+// sources.html's Tides section states the same rule and constants (written by hand; checked here)
+{ const sp = fs.readFileSync(path.join(root, 'sources.html'), 'utf8'), sec = (sp.match(/<h2 id="tides">[\s\S]*?(?=<h2 id=)/) || [''])[0];
+  const want = ['Drawn radius = ' + M.BASE + ' + ' + M.K + ' × value', M.A_SUN + ' × P2(angle to the Sun)', M.REV];
+  if (!sec) bad.push('sources.html has no Tides section'); else for (const w of want) if (!sec.includes(w)) bad.push('sources.html Tides section does not state: ' + w); }
 if (src.model !== M.REV) bad.push('SOURCE.json names model ' + src.model + ', tides-model.js is ' + M.REV);
 if (bad.length) { bad.forEach(x => console.error('DIFFERENT  ' + x)); process.exit(1); }
 console.log(check ? 'tides: cross-section and ' + src.images.length + ' image records agree' : 'tides: image records agree');
