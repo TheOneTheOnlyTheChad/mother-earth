@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 12:12 UTC (clock reading) — **Animals: Chad has replied to the IWC (lower value; display permission and conditions). Waiting. Whale example parked.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.5. Sent by Chad, his statement; Claude saw no message. No follow-up or duplicate; sending and silence grant nothing.
+
 ## 25 Nov 12:05 UTC (clock reading) — **Animals: GPT's review of the IWC reply recorded. Metadata closed (2015; model-based combined estimate; 5th–95th percentile range). Lower value and display permission OPEN. Reply text moved out of the public record. Whale example parked.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.4. GPT's review file and the full email are kept privately on the Mac (`research/animals-correspondence/2026-11-25-iwc/`), not in this repository; revisions 1.2 and 1.3 in history still hold the reply text.
 - **Open:** 15,580 on the IWC graphics page against 16,580 in the reply; explicit permission to show the sentence, figure and classes on our page.

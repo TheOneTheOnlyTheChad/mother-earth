@@ -10,12 +10,14 @@
 
 *Rev 1.4, 25 Nov 2026 12:05 UTC (clock reading; Claude, same thread), after GPT's review: (1) the verbatim text of the IWC reply is taken out of this public file and replaced by a factual summary; the full email is kept privately (GPT: removing addresses does not turn a private email into a public source). Revisions 1.2 and 1.3 in this repository's history still hold the text; history is not rewritten. (2) GPT's review is summarised under D. (3) One page reference corrected (item 5.2). The Cape Vidal reply and enquiry under E are unchanged, pending Chad's word.*
 
+*Rev 1.5, 25 Nov 2026 12:12 UTC (clock reading; Claude, same thread): Chad says he has replied to the IWC ("replied", his message of 25 Nov). Recorded under D and in the table. Claude did not send, see or check any message. Nothing else changed.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
 |---|---|---|---|---|
 | C | African penguins | Dr Richard Sherley (University of Exeter) | "African penguin count data and one historical journey for Mother Earth" | **SENT by Chad, 20 Nov 2026.** No reply reported |
-| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Not reviewed; nothing cleared.** See "Replies" |
+| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Metadata closed; lower value and display permission open.** **Chad REPLIED to the IWC, 25 Nov 2026 (two questions: the lower value; display permission and conditions). No answer reported.** See "Replies" |
 | E | Cape Vidal | Christopher Wilkinson (University of Pretoria) | "Cape Vidal humpback estimates: proposed attributed chart on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 23 Nov 2026: proposes a chat or call on Thursday. No question answered; no permission given.** See "Replies" |
 
 ## What each asked (Chad's summary)
@@ -71,6 +73,8 @@
 - **Claude's own check, 25 Nov:** a summarising web fetch of the graphics page also returned 18,111 (15,580-20,700) and "last update: 2026". Discovery-level only, not a browser read.
 
 **State for D after the review:** metadata closed; the exact lower value open; permission open. Whale example parked.
+
+**Chad's reply to the IWC, 25 Nov 2026.** Chad told Claude "replied" on 25 Nov 2026; the workspace clock read 12:12 UTC when this was written. The time he sent it is not on record. Drafts by GPT and Claude asked two things only: which lower value is correct with a source to cite, and whether the status sentence, estimate with its range and the two classes may be shown on our page, with any wording, citation or conditions. Which text he sent, and whether he changed it, is not on record here; the drafts are in the Claude thread and the private correspondence folder. **SENT. Never describe it as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 **Not read.** Paper SC/66A/SH03.
 
