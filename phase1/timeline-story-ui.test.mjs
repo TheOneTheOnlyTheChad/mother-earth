@@ -188,7 +188,8 @@ const show = f => execFileSync('git', ['show', RELEASED + ':' + f], { cwd: ROOT,
 
 // ---------- R. the RELEASE build in this repository (not the rehearsal): the committed page, script, stylesheet, catalogue and
 // published image files, served by route from the files on disk; the hub address answered with the committed catalogue
-{ const BUILD = JSON.parse(fs.readFileSync(path.join(ROOT, 'phase1/timeline/BUILD.json'), 'utf8')), RREV = BUILD.catalogue_revision, O = 'https://release.test';   // https so the page has crypto.subtle; every request is answered by route, nothing leaves the machine
+{ const BUILD = JSON.parse(fs.readFileSync(path.join(ROOT, 'phase1/timeline/BUILD.json'), 'utf8')), RREV = BUILD.catalogue_revision, SREV = 'tl-2026-11-R3', O = 'https://release.test';   // SREV: the revision whose change record added the account (R3); the release revision RREV moves on (R4)
+    // https so the page has crypto.subtle; every request is answered by route, nothing leaves the machine
   const TY = { html: 'text/html', js: 'application/javascript', css: 'text/css', jpg: 'image/jpeg', json: 'application/json' };
   for (const [w, dpr] of [[1280, 1], [390, 3]]) { const c = await browser.newContext({ viewport: { width: w, height: 844 }, deviceScaleFactor: dpr }); const reqs = [], errs = [];
     await c.route(/fonts\.(googleapis|gstatic)/, r => r.abort());
@@ -202,8 +203,8 @@ const show = f => execFileSync('git', ['show', RELEASED + ':' + f], { cwd: ROOT,
     await p.click(CARD); await p.waitForFunction(id => { const i = document.getElementById(id + '-img'); return i.complete && i.naturalWidth > 0; }, KPG); await p.waitForTimeout(200); const st = await story(p);
     const imgs = reqs.filter(u => /assets\/timeline/.test(u));
     ok(`R ${w}: no image before opening; on opening, one request for a published file under assets/timeline/${RREV}/ (${imgs.map(u => u.split('/').pop()).join()})`, img0 === 0 && imgs.length === 1 && imgs[0].startsWith(`${O}/assets/timeline/${RREV}/PIA03379-fig1-`), imgs);
-    ok(`R ${w}: the story is the snapshot's (six sentences, eight findings), with the scoped review note and the "Changed in revision ${RREV}" line; no overflow`, st.open && JSON.stringify(st.sents) === JSON.stringify(WANT) && JSON.stringify(st.told) === JSON.stringify(FINDINGS) && st.sw <= st.iw
-      && await p.evaluate(([id, rv]) => document.getElementById(id + '-srev').textContent.startsWith('Account and image reviewed: 23 Nov 2026.') && document.getElementById(id + '-rev').textContent.includes(`Changed in revision ${rv}: account and image added`), [KPG, RREV]), st.sents.length);
+    ok(`R ${w}: the story is the snapshot's (six sentences, eight findings), with the scoped review note and the "Changed in revision ${SREV}" line; no overflow`, st.open && JSON.stringify(st.sents) === JSON.stringify(WANT) && JSON.stringify(st.told) === JSON.stringify(FINDINGS) && st.sw <= st.iw
+      && await p.evaluate(([id, rv]) => document.getElementById(id + '-srev').textContent.startsWith('Account and image reviewed: 23 Nov 2026.') && document.getElementById(id + '-rev').textContent.includes(`Changed in revision ${rv}: account and image added`), [KPG, SREV]), st.sents.length);
     const other = reqs.filter(u => !u.startsWith(O) && !/fonts\.|workers\.dev\/catalogue\/timeline/.test(u));
     ok(`R ${w}: nothing is requested from any host but the page's own, the hub's catalogue address and the font hosts`, other.length === 0, other);
     await c.close(); } }

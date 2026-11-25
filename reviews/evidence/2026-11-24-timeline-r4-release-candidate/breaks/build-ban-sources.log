@@ -1,0 +1,69 @@
+FAIL A the release sources give the committed page and catalogue (tl-2026-11-R4, sha256 74b1f8b1…) with this generator  → "refused: f-dinaledi-chamber: a comparative word in a find title"
+ok   A the committed R4 catalogue is the frozen candidate: 48,134 B, sha256 74b1f8b1…00ca, schema 4, release date 25 Nov 2026, previous R3
+FAIL A a fresh build from the release sources is byte-identical to the committed R4 catalogue and to the committed page  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+ok   A the published R3 file is unchanged (tl-2026-11-R3, sha256 f1a5fab2…, 31,636 B)
+ok   A this generator still makes the published R3 catalogue byte for byte from its frozen sources, with a schema-3 page and no finds section
+ok   A a finds file beside schema-3 sources changes nothing: the same R3 bytes and the same page
+ok   A nothing published names the rehearsal revision T2: no catalogue file, no image folder, not the page, not the hub file
+ok   A the release finds are the rehearsal finds GPT accepted, claim for claim; only the file note differs
+ok   A the R4 change record: one record, "added", naming the four finds, in the reviewed words
+ok   A the release catalogue carries no rehearsal word or rehearsal note
+FAIL B the rehearsal source builds (refused: f-dinaledi-chamber: a comparative word in a find title)  → "refused: f-dinaledi-chamber: a comparative word in a find title"
+FAIL B a source whose own title has the word "oldest" (Vidal et al. 2022) is accepted: the wording rules read our text, not citations
+FAIL C control: a fixture that changes nothing of substance still builds  → "refused: f-dinaledi-chamber: a comparative word in a find title"
+ok   C refused: a fifth find (one sub-row each; never clustered)
+ok   C refused: schema 4 with no find
+ok   C refused: a find title with a comparative word ("The oldest …")
+ok   C refused: a short title with "first"
+FAIL C refused: our text saying a group "died out"  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: our text saying two groups "met"  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: our text saying "evolved into"  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+ok   C refused: a find with no site
+FAIL C refused: a find with no place  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a find with no attribution basis  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: an attribution basis this build does not know  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a group identifier substituted for the specimen  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a link that is not an identifier  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: two axis claims  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: no axis claim  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a bracket claim carrying a limit  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+ok   C refused: a limit with its ± dropped
+FAIL C refused: a limit with a zero ±  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a limit given an invented older end  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a limit pointing the newer way  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a limit with a sigma of 3  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a limit whose ± leaves the chart  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a bracket with reversed ends  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+ok   C refused: a bracket end that is text
+FAIL C refused: a bracket with an extra field  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: stored ages that are not the source values  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a source unit this build does not know  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a date with no source notation  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a date with no stated confidence  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a calibrated date counted from this year  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: calibrated ends beside uncalibrated units (mixed endpoints)  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a calibration curve this build does not know  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a probability that is not the notation's  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a calibrated date with no laboratory number  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a find with no "what was dated"  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a find with two association claims  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a find claim with no source  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+ok   C refused: a claim type that is not a find's
+ok   C refused: a find id that does not start with f-
+ok   C refused: an evidence record that is a private path
+ok   C refused: a source checked after the release day
+ok   C refused: a change record that names a find the catalogue does not have
+FAIL C refused: a calibrated range with one end taken from another published calculation (GPT's reproduction: 41,700 to 40,827)  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: notation and values changed together, the claim's own words not  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: notation, values and words all changed to a mixed result: not the result the evidence record lists  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: an axis claim naming no selected result  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a result id the evidence record does not list  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: two finds naming one result  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a limit written without its ±  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL C refused: a bracket given a probability  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+ok   C refused: a published-style revision id on a finds build with no release record
+FAIL D control: 3 finds build, with the same lane, the same checks and 3 entries on it  → [1,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+FAIL D control: 1 find build, with the same lane, the same checks and 1 entry on it  → [1,"refused: f-omo-1: a comparative word in a find title"]
+FAIL D the device clock at 1990 and at 2090 gives byte-identical catalogues and pages; the check mode agrees across the two clocks  → [1,1,null,null,"refused: f-dinaledi-chamber: a comparative word in a find title"]
+ok   D the fake clock itself works (2090 seen by time and datetime)
+timeline-finds-build: 22 pass, 46 fail (BREAK=ban-sources)

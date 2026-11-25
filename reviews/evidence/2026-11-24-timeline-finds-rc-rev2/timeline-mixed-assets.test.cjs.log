@@ -1,0 +1,19 @@
+index.html 1280: 868 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+index.html 390: 868 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+sources.html 1280: 1229 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+sources.html 390: 1229 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+moon.html 1280: 106 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+moon.html 390: 106 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+sun.html 1280: 97 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+sun.html 390: 97 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+animals.html 1280: 1396 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+animals.html 390: 1396 elements; old vs old again: 0 differ; old vs branch stylesheet: 0 differ
+ok   mixed 1280: new page + new script + OLD stylesheet: axis off:stylesheet; overflow false; list cards 5; a card opens true; page errors 0
+ok   mixed 390: new page + new script + OLD stylesheet: axis off:stylesheet; overflow false; list cards 5; a card opens true; page errors 0
+ok   mixed 1280: OLD page + OLD script + new stylesheet: axis on; overflow false; list cards 5; a card opens true; page errors 0
+ok   mixed 390: OLD page + OLD script + new stylesheet: axis on; overflow false; list cards 5; a card opens true; page errors 0
+ok   mixed 1280: new page + OLD script: axis off:build; overflow false; list cards 5; a card opens true; page errors 0
+ok   mixed 390: new page + OLD script: axis off:build; overflow false; list cards 5; a card opens true; page errors 0
+ok   mixed 1280: OLD page + new script: axis off:build; overflow false; list cards 5; a card opens true; page errors 0
+ok   mixed 390: OLD page + new script: axis off:build; overflow false; list cards 5; a card opens true; page errors 0
+timeline-mixed-assets: 18 pass, 0 fail
