@@ -40,6 +40,17 @@ const TL_MAIN = process.env.TL_MAIN || '643bb9a7e9c63045dec3eac87837212f05841a3f
 // NC_PARENT with it), in the commit that records the release. Every other file stays on BASE_MAIN or TL_MAIN.
 const NC_MAIN = process.env.NC_MAIN || '90eb52203c23b26a7fe00382f30cf3453b00a583';     // Nature context page commit H, passed by GPT's recheck (24 Nov 2026)
 const NC_PARENT = process.env.NC_PARENT || '6bebff18ffb0886719a3587a9199d9c158b39f50';   // the main commit H's work started from
+// Organic-soil emissions (25 Nov 2026, Nature context thread; GPT's preview round-2 recheck, release-scope requirements 1–4):
+// its reviewed payload commit SOIL_MAIN changes index.html, sources.html, layers.js, style.css and the Bare Earth suite, and adds soil.js
+// and its table. index.html and sources.html (13b, 13e), layers.js and the Bare Earth suite (13c) are held to SOIL_MAIN; app.js stays
+// on NC_MAIN (13k: soil does not touch it); 13j and its anchors are the 24 Nov guarantee and do not move. 13m checks that SOIL_MAIN
+// changed exactly the literal file list since SOIL_PARENT (fresh main), and 13n that the maintenance commit after it changed only this
+// suite. BASE_MAIN and TL_MAIN do not move. Only an organic-soil release moves SOIL_MAIN (and SOIL_PARENT with it).
+const SOIL_MAIN = process.env.SOIL_MAIN || '86071bfc4d019cd400019e98eed3ab49c1cf6415';     // soil-release-rc payload: full table, fixture retired
+const SOIL_PARENT = process.env.SOIL_PARENT || 'af89de247471c768f047e40fb4a749e0e69f1d7d';   // fresh main the release branched from
+const SOIL_FILES = ['REGISTER.md', 'assets/soil/g4-soil-v1.0.1.json', 'docs/research/soil-c1/soil_controls.py', 'docs/research/soil-c1/soil_reference.py', 'index.html', 'layers.js',
+  'phase1/bare-earth-ui.test.cjs', 'phase1/soil-ui.test.cjs', 'soil.js', 'sources.html', 'style.css'];   // literal: the exact changed-path set of SOIL_PARENT..SOIL_MAIN
+const SOIL_TABLE_SHA = 'c5c01ff5a4300ace1e7348d6d25edb079ea424810e70d50a291afd0ffadb30cf';
 const sha = b => crypto.createHash('sha256').update(b).digest('hex');
 const BREAK = process.env.BREAK || '', EDIT = process.env.EDIT || '';
 const ONLY = (process.env.SECTIONS || '').split(',').filter(Boolean).map(Number), want = n => !ONLY.length || ONLY.includes(n);
@@ -484,6 +495,9 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
     const NC_DIR = process.env.NC_DIR || ''; let ncHow = '';
     if (NC_DIR && fs.existsSync(path.join(NC_DIR, 'index.html'))) ncHow = 'dir'; else { try { git(['cat-file', '-e', NC_MAIN + '^{commit}']); ncHow = 'git'; } catch (_) { } }
     const ncFile = f => ncHow === 'dir' ? fs.readFileSync(path.join(NC_DIR, f), 'utf8') : git(['show', NC_MAIN + ':' + f]);
+    // the organic-soil baseline (SOIL_MAIN): Git only; without it, its checks fail closed (13b, 13c, 13e, 13m, 13n)
+    let soilHow = ''; try { git(['cat-file', '-e', SOIL_MAIN + '^{commit}']); soilHow = 'git'; } catch (_) { }
+    const soilFile = f => git(['show', SOIL_MAIN + ':' + f]);
     const tabL = '    <a href="animals.html" data-view="animals">Animals</a>\n', menuL = '      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', hdr = t => (/<header[\s\S]*?<\/header>/.exec(t) || [''])[0];
     // the Animals guarantees on a page, checked on their own: both links once each, and the header equals BASE_MAIN's except those links
     const animalsHead = (b, base) => { const h0 = hdr(base); return { links: b.split(tabL).length === 2 && b.split(menuL).length === 2, header: h0.length > 200 && hdr(b).replace(tabL, '').replace(menuL, '') === h0 }; };
@@ -493,10 +507,14 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       const strip = t => t.replace('    <a href="animals.html" data-view="animals">Animals</a>\n', '').replace('      <li role="none"><a role="menuitem" href="animals.html" data-page="animals">Animals</a></li>\n', '').replace(/style\.css\?v=\d+/, 'style.css?v=X');
       // 13b (24 Nov 2026, Nature context): was 'index.html equals main's except the Animals links and the stylesheet version'. The page now
       // carries the Nature context release, so it is held byte-for-byte to NC_MAIN, and the Animals guarantees are checked on their own.
-      if (!ncHow) { fail++; failed.push('13b'); console.log(`NOT RUN  13b: the Nature context baseline ${NC_MAIN.slice(0, 7)} is not available.`); }
-      else { const whole = idx === ncFile('index.html'), g = animalsHead(idx, mainIdx);
-        ok(`13b index.html is byte-identical to the file at the Nature context baseline ${NC_MAIN.slice(0, 7)}; it carries the Animals tab link and menu link once each; and its header equals main ${BASE_MAIN.slice(0, 7)}'s except those two links`, whole && g.links && g.header, { whole, links: g.links, header: g.header }); }
-      const same = ['layers.js', 'aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'phase1/collector-mac.mjs', 'phase1/bare-earth-ui.test.cjs'];
+      // 25 Nov 2026 (organic soil): held to SOIL_MAIN instead of NC_MAIN; the Animals guarantees are still checked on their own.
+      if (!soilHow) { fail++; failed.push('13b'); console.log(`NOT RUN  13b: the organic-soil baseline ${SOIL_MAIN.slice(0, 7)} is not available.`); }
+      else { const whole = idx === soilFile('index.html'), g = animalsHead(idx, mainIdx);
+        ok(`13b index.html is byte-identical to the file at the organic-soil baseline ${SOIL_MAIN.slice(0, 7)}; it carries the Animals tab link and menu link once each; and its header equals main ${BASE_MAIN.slice(0, 7)}'s except those two links`, whole && g.links && g.header, { whole, links: g.links, header: g.header }); }
+      const same = ['aircraft.js', 'wind.js', 'nightlights.js', 'dustrgb.js', 'oceanheat.js', 'sky.js', 'skyscene.js', 'arts.js', 'craft.js', 'moonglobe.js', 'moonlight.js', 'sunglobe.js', 'phase1/collector-mac.mjs'];
+      // 25 Nov 2026 (organic soil): 'layers.js' and 'phase1/bare-earth-ui.test.cjs' left this list; the soil release adds one Layers row and
+      // the Bare Earth suite counts it. Both are held to SOIL_MAIN below; the other 13 files stay on BASE_MAIN.
+      const SOIL_SAME = ['layers.js', 'phase1/bare-earth-ui.test.cjs'];
       // 23 Nov 2026 (hub-to-main alignment, Chad's decision G-a): 'phase1/worker.js' left this list. Main's hub file is now the DEPLOYED hub
       // (0.6.24), which is not the file at this suite's pinned baseline and never will be again. The hub is protected instead by
       // phase1/hub-alignment.test.mjs, which holds phase1/worker.js to the recorded deployed hash (phase1/DEPLOYED-HUB.json).
@@ -506,7 +524,8 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
       // 13f to 13i below, so each is still compared with a pinned commit; only the commit differs. Nothing else moved off BASE_MAIN.
       // 24 Nov 2026 (Nature context): 'app.js' left this list. It is held to NC_MAIN by 13k. The other 15 files stay on BASE_MAIN.
       const diff = same.filter(f => { try { return mainFile(f) !== served(f); } catch (_) { return true; } });
-      ok('13c Earth now\'s scripts, the Layers panel, the collector and the Bare Earth suite are byte-identical to main (the hub: see phase1/hub-alignment.test.mjs; timeline.js: 13g; app.js: 13k)', same.length === 15 && !same.includes('app.js') && diff.length === 0, diff);
+      const soilDiff = soilHow ? SOIL_SAME.filter(f => { try { return soilFile(f) !== served(f); } catch (_) { return true; } }) : SOIL_SAME.map(f => f + ' (baseline not available)');
+      ok(`13c Earth now's scripts and the collector are byte-identical to main; the Layers panel and the Bare Earth suite are byte-identical to the organic-soil baseline ${SOIL_MAIN.slice(0, 7)} (the hub: see phase1/hub-alignment.test.mjs; timeline.js: 13g; app.js: 13k)`, same.length === 13 && !same.includes('app.js') && diff.length === 0 && soilDiff.length === 0, diff.concat(soilDiff));
       if (ncHow) ok(`13k app.js is byte-identical to the file at the Nature context baseline ${NC_MAIN.slice(0, 7)}`, served('app.js') === ncFile('app.js'));
       else { fail++; failed.push('13k'); console.log(`NOT RUN  13k: the Nature context baseline ${NC_MAIN.slice(0, 7)} is not available.`); }
       const css = served('style.css'), mainCss = mainFile('style.css').split('\n'), cur = new Set(css.split('\n')), isTl = l => /body\.tl/.test(l);
@@ -515,14 +534,13 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
         ok(`13e ${pg} equals main's except the Animals links and the stylesheet version${rel ? ', and (release) the one added Animals section with its shortcut in the Sections list, which names all six sources and the omitted Low class and never says private preview' : ''}`, strip(rel ? b.replace(sec, '').replace(' · <a href="#animals">Animals</a>', '') : b) === a.replace(/style\.css\?v=\d+/, 'style.css?v=X') && (!rel || (sec.test(b) && b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2 && ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].every(x => b.includes(x)) && !/private preview/i.test(b)))); }
       // 13e sources.html (24 Nov 2026, Nature context): byte-identical to NC_MAIN, plus every Animals guarantee the old check made, on its own
       { const b = served('sources.html'), sec = /  <h2 id="animals">[\s\S]*?(?=  <h2 id="search">)/;
-        if (!ncHow) { fail++; failed.push('13e sources.html'); console.log(`NOT RUN  13e sources.html: the Nature context baseline ${NC_MAIN.slice(0, 7)} is not available.`); }
-        else { // 25 Nov 2026 (Animals journey context C1a, GPT's candidate review item 3): the file at NC_MAIN plus exactly one reviewed block,
-          // CTX_SOURCES, inserted on the line after the zebra's source paragraph. Everything else stays byte-for-byte NC_MAIN's.
-          const nc = ncFile('sources.html'), at = nc.split('\n').findIndex(l => l.startsWith('  <p><b>Plains zebra, collar Z3866')), ncl = nc.split('\n');
-          const expected = at < 0 || nc.includes(CTX_SOURCES) ? null : [...ncl.slice(0, at + 1), CTX_SOURCES, ...ncl.slice(at + 1)].join('\n');
-          const whole = expected !== null && b === expected, g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
+        if (!ncHow || !soilHow) { fail++; failed.push('13e sources.html'); console.log(`NOT RUN  13e sources.html: the baseline ${!soilHow ? SOIL_MAIN.slice(0, 7) : NC_MAIN.slice(0, 7)} is not available.`); }
+        else { // 25 Nov 2026 (organic soil): byte-identical to the file at SOIL_MAIN, which already holds the reviewed zebra block (C1a). The
+          // block is still checked on its own: present once, on the line after the zebra's source paragraph. Animals guarantees as before.
+          const bl = b.split('\n'), at = bl.findIndex(l => l.startsWith('  <p><b>Plains zebra, collar Z3866')), ctxOk = at >= 0 && bl[at + 1] === CTX_SOURCES && b.split(CTX_SOURCES).length === 2;
+          const whole = soilHow ? b === soilFile('sources.html') : false, g = animalsHead(b, mainFile('sources.html')), section = sec.test(b), shortcut = b.split(' · <a href="#animals">Animals</a> · <a href="#search">Search</a>').length === 2,
             ids = ['10.5441/001/1.f3550b4f', '10.5281/zenodo.5575189', 'ptt id 98364', '10.5441/001/1.3hp3s250', '10.5061/dryad.vx0k6djp7', '10.5066/P1ETBSYE', 'Low-use class'].filter(x => !b.includes(x)), noPreview = !/private preview/i.test(b);
-          ok(`13e sources.html is byte-identical to the file at the Nature context baseline ${NC_MAIN.slice(0, 7)} plus only the reviewed zebra land-context block after the zebra's source paragraph; it carries the Animals tab link and menu link once each and main ${BASE_MAIN.slice(0, 7)}'s header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview`, whole && g.links && g.header && section && shortcut && ids.length === 0 && noPreview, { whole, links: g.links, header: g.header, section, shortcut, missing: ids, noPreview }); } }
+          ok(`13e sources.html is byte-identical to the file at the organic-soil baseline ${SOIL_MAIN.slice(0, 7)}; the reviewed zebra land-context block is present once, after the zebra's source paragraph; it carries the Animals tab link and menu link once each and main ${BASE_MAIN.slice(0, 7)}'s header except those links; its Animals section, its one shortcut in the Sections list, all six sources and the omitted Low class are present; it never says private preview`, whole && ctxOk && g.links && g.header && section && shortcut && ids.length === 0 && noPreview, { whole, ctxOk, links: g.links, header: g.header, section, shortcut, missing: ids, noPreview }); } }
       // 13j (24 Nov 2026, Nature context): NC_MAIN descends from NC_PARENT and changed no production file but the three above
       { let names = null; try { git(['merge-base', '--is-ancestor', NC_PARENT, NC_MAIN]); names = git(['diff', '--name-only', NC_PARENT, NC_MAIN]).split('\n').filter(Boolean); } catch (_) { }
         if (!names) { fail++; failed.push('13j'); console.log(`NOT RUN  13j: ${NC_PARENT.slice(0, 7)}..${NC_MAIN.slice(0, 7)} cannot be read from Git (or ${NC_PARENT.slice(0, 7)} is not an ancestor). The scope check was not made.`); }
@@ -530,6 +548,23 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
             RECORD = f => /^reviews\/2026-11-24-nature-context-[a-z0-9.-]+\.md$/.test(f) || /^reviews\/evidence\/2026-11-24-nature-context-rc\/[^/]+$/.test(f),
             other = names.filter(f => !PAGES.includes(f) && !TESTS.includes(f) && !RECORD(f));
           ok(`13j ${NC_PARENT.slice(0, 7)}..${NC_MAIN.slice(0, 7)} changes only app.js, index.html and sources.html among production files, plus the three listed tests and the Nature context records (anything else listed on failure)`, other.length === 0 && PAGES.every(f => names.includes(f)) && NC_MAIN !== BASE_MAIN && NC_MAIN !== TL_MAIN, other); } }
+      // 13m (25 Nov 2026, organic soil): SOIL_MAIN descends from SOIL_PARENT and its changed paths are EXACTLY the literal SOIL_FILES list
+      // (nothing more, nothing missing: index.html and sources.html must change, app.js must not). The retired preview fixture is absent at
+      // both anchors and the full table is present with its pinned hash. The integrated tree serves SOIL_MAIN's soil.js and table.
+      { let names = null; try { git(['merge-base', '--is-ancestor', SOIL_PARENT, SOIL_MAIN]); names = git(['diff', '--name-only', SOIL_PARENT, SOIL_MAIN]).split('\n').filter(Boolean); } catch (_) { }
+        if (!names) { fail++; failed.push('13m'); console.log(`NOT RUN  13m: ${SOIL_PARENT.slice(0, 7)}..${SOIL_MAIN.slice(0, 7)} cannot be read from Git (or ${SOIL_PARENT.slice(0, 7)} is not an ancestor). The scope check was not made.`); }
+        else { const extra = names.filter(f => !SOIL_FILES.includes(f)), missing = SOIL_FILES.filter(f => !names.includes(f)), has = (c, f) => { try { git(['cat-file', '-e', c + ':' + f]); return true; } catch (_) { return false; } };
+          const fixtureGone = !has(SOIL_PARENT, 'assets/soil/g4-soil-fixture-v1.0.1.json') && !has(SOIL_MAIN, 'assets/soil/g4-soil-fixture-v1.0.1.json') && !fs.existsSync(path.join(ROOT, 'assets/soil/g4-soil-fixture-v1.0.1.json'));
+          let tableOk = false; try { const tb = cp.execFileSync('git', ['show', SOIL_MAIN + ':assets/soil/g4-soil-v1.0.1.json'], { cwd: ROOT, maxBuffer: 64e6 }); tableOk = sha(tb) === SOIL_TABLE_SHA && sha(fs.readFileSync(path.join(ROOT, 'assets/soil/g4-soil-v1.0.1.json'))) === SOIL_TABLE_SHA; } catch (_) { }
+          const soilJs = served('soil.js') === soilFile('soil.js');
+          ok(`13m ${SOIL_PARENT.slice(0, 7)}..${SOIL_MAIN.slice(0, 7)} changes exactly the ${SOIL_FILES.length} listed files (app.js not among them; index.html and sources.html among them); the preview fixture is absent; the full table carries its pinned hash here and at ${SOIL_MAIN.slice(0, 7)}; soil.js here is ${SOIL_MAIN.slice(0, 7)}'s`, extra.length === 0 && missing.length === 0 && !names.includes('app.js') && fixtureGone && tableOk && soilJs && SOIL_MAIN !== NC_MAIN && SOIL_MAIN !== BASE_MAIN, { extra, missing, fixtureGone, tableOk, soilJs }); } }
+      // 13n (25 Nov 2026, organic soil): the maintenance that moved these pins is the first commit after SOIL_MAIN, on the path to here, that
+      // touches this suite. Its parent is SOIL_MAIN and it changes this suite and nothing else. (It cannot name its own hash; this binds it.)
+      { let ok13n = null, info = {}; try { const firsts = git(['log', '--reverse', '--ancestry-path', '--format=%H', SOIL_MAIN + '..HEAD', '--', 'phase1/animals-tab-ui.test.cjs']).split('\n').filter(Boolean);
+          const m = firsts[0]; if (m) { const parents = git(['log', '-1', '--format=%P', m]).trim().split(' '), files = git(['diff-tree', '--no-commit-id', '--name-only', '-r', m]).split('\n').filter(Boolean); info = { commit: m.slice(0, 7), parents, files }; ok13n = parents.length === 1 && parents[0] === SOIL_MAIN && files.length === 1 && files[0] === 'phase1/animals-tab-ui.test.cjs'; }
+          else { const cur = (() => { try { return git(['diff', '--name-only', SOIL_MAIN, '--', 'phase1/animals-tab-ui.test.cjs']).trim(); } catch (_) { return 'x'; } })(); info = { uncommitted: cur }; ok13n = cur === 'phase1/animals-tab-ui.test.cjs' && git(['diff', '--name-only', SOIL_MAIN]).split('\n').filter(Boolean).every(f => f === 'phase1/animals-tab-ui.test.cjs'); } } catch (_) { }
+        if (ok13n === null) { fail++; failed.push('13n'); console.log('NOT RUN  13n: the maintenance commit after SOIL_MAIN could not be read from Git.'); }
+        else ok('13n the Animals-suite maintenance after the organic-soil payload changes only this suite, on top of SOIL_MAIN (before it is committed: the working tree differs from SOIL_MAIN in this suite only)', ok13n, info); }
       // ----- the Timeline's own files, against main at TL_MAIN (the Timeline's latest release)
       const TL_DIR = process.env.TL_DIR || ''; let tlHow = '';
       if (TL_DIR && fs.existsSync(path.join(TL_DIR, 'timeline.html'))) tlHow = 'dir'; else { try { git(['cat-file', '-e', TL_MAIN + '^{commit}']); tlHow = 'git'; } catch (_) { } }
@@ -549,9 +584,9 @@ const gate = () => { let go; const p = new Promise(r => { go = r; }); return { p
           ok('13i the stylesheet\'s body.tl lines are exactly main\'s at the Timeline baseline, in order (first difference listed on failure)', a.length > 100 && a.length === b.length && i < 0, { baseline: a.length, here: b.length, at: i, baselineLine: a[i], hereLine: b[i] }); } } }
     const ctx = await ctxFor(browser, { width: 1280, height: 860 }); await ctx.route('**/' + HUB + '/**', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ layer: 'x', retrieved_at: new Date().toISOString(), stale_after_s: 10800, source_status: 'ok', cells: {}, record_format: 'rows', record_fields: [], records: [] }) }));
     const page = await ctx.newPage(), reqs = []; page.on('request', r => reqs.push(r.url())); await page.goto(BASE + '/index.html#journey=' + Z, { waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => window.ME && ME.layers, null, { timeout: 30000 }); await page.waitForTimeout(1500);
-    const e = await page.evaluate(() => ({ ids: ['tgl-journey', 'journey-choose', 'card-journey', 'replay', 'leg-journey', 'an-globe'].filter(i => document.getElementById(i)), journey: typeof ME.journey, rows: ME.layers.rows.length, rowTxt: ME.layers.rows.map(r => r[0]).filter(t => /animal|journey/i.test(t)), scripts: [...document.scripts].map(x => x.getAttribute('src') || '').filter(x => /animals/.test(x)),
+    const e = await page.evaluate(() => ({ ids: ['tgl-journey', 'journey-choose', 'card-journey', 'replay', 'leg-journey', 'an-globe'].filter(i => document.getElementById(i)), journey: typeof ME.journey, rows: ME.layers.rows.length, soilRows: ME.layers.rows.filter(r => r[0] === 'Organic-soil emissions (modelled)').length, rowTxt: ME.layers.rows.map(r => r[0]).filter(t => /animal|journey/i.test(t)), scripts: [...document.scripts].map(x => x.getAttribute('src') || '').filter(x => /animals/.test(x)),
       txt: /Animal journey/.test(document.body.textContent), panel: document.getElementById('layers-panel').hidden }));
-    ok('13f Earth now carries no journey card, switch, chooser, replay bar, Key entry or Layers row, loads no Animals script, and the old link opens nothing', e.ids.length === 0 && e.journey === 'undefined' && e.rows === 16 && e.rowTxt.length === 0 && e.scripts.length === 0 && !e.txt && e.panel === true && !reqs.some(u => /assets\/animals\//.test(u)), e);
+    ok('13f Earth now carries no journey card, switch, chooser, replay bar, Key entry or Layers row, loads no Animals script, and the old link opens nothing; its Layers list has 17 rows, one of them "Organic-soil emissions (modelled)" (organic soil, 25 Nov 2026)', e.ids.length === 0 && e.journey === 'undefined' && e.rows === 17 && e.soilRows === 1 && e.rowTxt.length === 0 && e.scripts.length === 0 && !e.txt && e.panel === true && !reqs.some(u => /assets\/animals\//.test(u)), e);
     await ctx.close(); }
 
   // ===== 14. Layout (T16 with §A7): the stated target is NO overlap of the globe at any width (bar and switches are in the page flow)
