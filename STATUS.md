@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
-## 25 Nov 07:09 UTC (clock reading) — **Animals journey context C1a CLOSED OUT: GPT's live smoke PASS filed unchanged; branch deleted; Mac tidied and synced; handover written. Corridor and reply-dependent work parked.** (page: none; Animals thread)
+## 25 Nov 07:07 UTC (clock reading) — **Animals journey context C1a CLOSED OUT: GPT's live smoke PASS filed unchanged; branch deleted; Mac tidied and synced; handover written. Corridor and reply-dependent work parked.** (page: none; Animals thread)
 - **GPT's live smoke:** PASS, no rollback (`reviews/2026-11-25-animals-journey-context-c1a-gpt-live-smoke.md`, `d2802bbb…162b1a`). Served hashes match; deferred loading seen; figures, disclosures, 390 px fit, keyboard, Sources paragraph and no switch activation confirmed; no console errors.
 - **Open, recorded:** real phone, Safari, screen reader, print, true 200 % zoom. `kept-ui`'s three World View failures exist on main without this work.
 - **GitHub:** `animals-journey-context-proposal` deleted (fully merged; the git proxy refused with 403, done on GitHub's branches page). `animals-assessment-rc` kept; no other thread's branch touched.
