@@ -142,6 +142,8 @@
 
 **Chad's call with the IWC, 25 Nov 2026 (Chad's account, as he gave it to Claude; Claude was not on the call).** She had tried to phone him and he called her back. He corrected the description of the page as private. By his account she said she is fine with it, because Mother Earth is not being advertised publicly. Time of the call not on record. A call leaves no record of its own: this line is Chad's account, not the IWC's words. The written permission above is unchanged by it.
 
+**Chad's confirming email after the call, 25 Nov 2026.** Chad told Claude "ok sent" on 25 Nov 2026 (workspace clock 15:53 UTC when recorded). Claude drafted a confirming email to the IWC's Media and Communications Manager in the thread; which text he sent is not on record here. The draft confirmed the correction (the page can currently be reached by anyone with the link and is not advertised publicly) and that the status summary may appear on it with credit and a link. **SENT. No reply needed or chased.**
+
 **State for D after GPT's review:** closed for this candidate. Permission for the attributed five-line summary above, credit to the International Whaling Commission and a link to the status graphics page; contextual scope only. The "private" description was corrected by Chad on the phone (his account, above); GPT asks for no further enquiry. Whale example parked: Cape Vidal is still open, and building waits on Chad's go.
 
 ### E, Cape Vidal: first reply, 23 Nov 2026

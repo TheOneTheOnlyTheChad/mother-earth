@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 15:53 UTC (clock reading) — **Animals: Chad's confirming email to the IWC after the call sent. Next: Cape Vidal call, 26 Nov.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.11.
+
 ## 25 Nov 15:52 UTC (clock reading) — **Animals: Chad phoned the IWC and corrected the "private" description; by his account she is fine with it as Mother Earth is not advertised publicly.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.10, labelled as Chad's account. Written permission unchanged; IWC closed for this candidate.
 
