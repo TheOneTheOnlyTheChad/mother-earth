@@ -655,15 +655,21 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **Filed:** 25 Nov 2026 with the release candidate, on Chad's own go ("Go: prepare the soil release candidate."). The release merge and its hash are recorded here on release.
 - **Read:**
   - by Claude, 24–25 Nov 2026: the Zenodo record metadata and version list (API);
-  - `readme_data.md` in full (24 Nov downloaded; 25 Nov rendered preview);
-  - `license_and_attribution.md` in full (25 Nov; manifest SHA-256 `65d86603…4c9d`);
+  - `readme_data.md` in full (24 Nov through the browser pane, not saved; 25 Nov as the rendered preview page);
+  - `license_and_attribution.md` in full (25 Nov, the saved copy described below; manifest SHA-256 `65d86603…4c9d`);
   - `release_manifest.csv` and `data_dictionary.csv`;
   - the associated paper (Glen et al. 2026, *Frontiers in Environmental Science*, DOI 10.3389/fenvs.2026.1761716), §2.1–2.6, §3.1–3.2, §3.8–3.9 and §4.5, in full text.
-- **Downloaded:** on Chad's yes, through the browser pane, three files only, kept on the Mac and never in the repository:
-  - `organic_soil_emissions_1km_v1_0_1.zip` (212,800,018 B, SHA-256 `5c082884…a1473`);
-  - `organic_soil_cover_percent_1km.tif` (108,618,168 B, `7b35b59a…0e5e0e`);
-  - `tabular_data_v1_0_1.zip` (842,116 B, `3108fefe…f4a8`).
+- **Data payloads downloaded:** three, each on Chad's own yes, through the browser pane, kept on the Mac and never in the repository:
+  - `organic_soil_emissions_1km_v1_0_1.zip` (212,800,018 B, SHA-256 `5c082884…a1473`; 24 Nov);
+  - `organic_soil_cover_percent_1km.tif` (108,618,168 B, `7b35b59a…0e5e0e`; 24 Nov);
+  - `tabular_data_v1_0_1.zip` (842,116 B, `3108fefe…f4a8`; 25 Nov, T1).
   - All match Zenodo's MD5 and the release manifest's SHA-256.
+  - The emissions zip (24 Nov) and the tables zip (25 Nov) each arrived twice, because a second click was needed; the copies are identical.
+- **Supporting documentation:**
+  - On 24 Nov the record metadata, `readme_data.md`, `data_dictionary.csv`, `release_manifest.csv`, `state_codes.csv` and `license_and_attribution.md` were read through the browser pane and web fetches, not saved as files.
+  - On 25 Nov `release_manifest.csv` and the version list were read again the same way.
+  - `readme_data.md` was read again as Zenodo's rendered preview page.
+  - **`license_and_attribution.md` was saved to the Mac's Downloads at 07:52 UTC on 25 Nov, before Chad's T1 go.** An attempt to open it as a page reported "failed", but the browser had saved it. This was disclosed the same day. It is 5,008 B, and its SHA-256 `65d86603…4c9d` matches the manifest. It was then read in full and used as the licence evidence.
 - **Licence and credit:** data and documentation CC BY 4.0 (read in full); model code GPL-3.0-only (not used). Preferred attribution as given on Sources. The creators and WRI do not endorse Mother Earth.
 - **What we compute:**
   - `docs/research/soil-c1/soil_build.py` sums the ten 1 km maps (Mg CO₂e per 1 km cell per year) into Mother Earth's 4° cells by exact equal-area overlap on the maps' own CEA grid, with every input fail-closed checked;
