@@ -4,6 +4,9 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 12:35 UTC (clock reading) — **Animals: Chad has emailed Cape Vidal to confirm tomorrow's call (26 Nov). Call sheet prepared privately. Nothing answered or cleared.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.7. The call sheet is a private document of Chad's, not in this repository. Anything agreed on a call counts only once it is in writing.
+
 ## 25 Nov 12:20 UTC (Mac clock) — **Organic-soil emissions: release candidate `soil-release-rc` `d2d597b` for GPT review, on Chad's go. Not merged or deployed; no hub change** (Nature context thread)
 - **Version check before freezing:** 10:40 UTC, v1.0.1 only.
 - **Payload `86071bf`:**

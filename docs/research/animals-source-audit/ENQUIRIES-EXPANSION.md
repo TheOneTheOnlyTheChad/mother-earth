@@ -14,6 +14,8 @@
 
 *Rev 1.6, 25 Nov 2026 12:18 UTC (clock reading; Claude, same thread): a second IWC reply is recorded under D as a factual summary (full text kept privately). It says to use the values on the website, and passes the display-permission question to a colleague who was copied. Not reviewed by GPT when written. Permission is still open; nothing is cleared.*
 
+*Rev 1.7, 25 Nov 2026 12:35 UTC (clock reading; Claude, same thread): under E, Chad's message to Cape Vidal about the call is recorded as sent, on his statement. Nothing else changed.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
@@ -147,6 +149,8 @@
 >
 > Ta
 > Chad
+
+**Chad's message about the call, 25 Nov 2026.** Chad told Claude on 25 Nov 2026 that he has emailed to ask whether the call tomorrow (Thursday 26 Nov 2026) is still on, and that any time suits him. Its text and send time are not on record; the workspace clock read 12:35 UTC when this was written. Claude did not send or see it. **SENT. Not a follow-up on the questions; no duplicate. No reply reported.**
 
 **Still open for E:** the fairness of the reading; corrections or limitations; uncertainty for those cells; reuse terms and the right permission contact; any non-commercial or other condition.
 
