@@ -18,12 +18,14 @@
 
 *Rev 1.8, 25 Nov 2026 15:48 UTC (clock reading; Claude, same thread): a third IWC reply is recorded under D as a factual summary. It answers the display question with a yes for the status sentence, credited to the IWC with a link to the page. The full thread Chad pasted also puts on record, privately, the texts of his enquiry of 20 Nov and his reply of 25 Nov. Not reviewed by GPT when written. Nothing is built or released.*
 
+*Rev 1.9, 25 Nov 2026 15:49 UTC (clock reading; Claude, same thread): GPT's review of the IWC correspondence (relayed by Chad) is summarised under D. GPT reads the third reply as permission for the whole attributed summary the question described, in that context only. The IWC enquiry is closed for this candidate. Nothing is built or released.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
 |---|---|---|---|---|
 | C | African penguins | Dr Richard Sherley (University of Exeter) | "African penguin count data and one historical journey for Mother Earth" | **SENT by Chad, 20 Nov 2026.** No reply reported |
-| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Metadata closed; lower value and display permission open.** **Chad REPLIED to the IWC, 25 Nov 2026 (two questions: the lower value; display permission and conditions).** **Second reply 25 Nov 2026: use the website's values.** **Third reply 25 Nov 2026: yes to the status sentence, credited to the IWC with a link; scope for the figure and classes not stated in terms.** See "Replies" |
+| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Metadata closed; lower value and display permission open.** **Chad REPLIED to the IWC, 25 Nov 2026 (two questions: the lower value; display permission and conditions).** **Second reply 25 Nov 2026: use the website's values.** **Third reply 25 Nov 2026: yes, credited to the IWC with a link.** **GPT, 25 Nov: permission for the attributed five-line summary in that context; numbers settled; no further enquiry needed for this candidate. CLOSED for this candidate.** See "Replies" |
 | E | Cape Vidal | Christopher Wilkinson (University of Pretoria) | "Cape Vidal humpback estimates: proposed attributed chart on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 23 Nov 2026: proposes a chat or call on Thursday. No question answered; no permission given.** See "Replies" |
 
 ## What each asked (Chad's summary)
@@ -117,7 +119,26 @@
 - **Chad's commitment:** to keep the IWC updated about future feature use. Recorded as his.
 - No conditions beyond credit and a link were named; nothing on duration.
 
-**State for D:** metadata closed; lower value settled (15,580, the website's); permission given for the status sentence with credit and link; scope for the figure and classes open; the description of the page as private does not match its recorded state. Whale example parked (Cape Vidal also open).
+**State for D before GPT's review (kept as written):** metadata closed; lower value settled (15,580, the website's); permission given for the status sentence with credit and link; scope for the figure and classes open; the description of the page as private does not match its recorded state.
+
+**GPT's review of the correspondence, 25 Nov 2026 (relayed by Chad; summary; GPT's text kept privately, sha256 `5ecb0253…3ddc`, because it names IWC staff).**
+- **Scope:** the "yes" answers Chad's second question, which described the whole summary, so GPT supports proceeding with that exact attributed summary. This is contextual scope: not blanket permission for other IWC material, and not for commercial use.
+- **What may be shown, credited to the International Whaling Commission with a link to the status graphics page:**
+
+| Field | Value |
+|---|---|
+| Status sentence | "Abundant and recovered after strong growth." |
+| Estimated abundance in 2015 | 18,111 |
+| 5th–95th percentile range | 15,580–20,700 |
+| Relative Abundance | "Very Good" |
+| 1995–2015 change | "Strongly Increased" |
+
+- **Numbers:** settled by the instruction to use the website's values. The 2015 reference year is kept apart from the website's 2026 update label.
+- **Records:** full correspondence private; public records carry the permission summary, attribution and source link, with no private contact details.
+- **Description of Mother Earth:** Chad's personal control centre. Hosting and access are not to be called private because the intended use is personal; the actual access state is recorded separately. On 25 Nov 2026 it was public (above).
+- **No further IWC enquiry is needed for this candidate.** Implementation stays parked while Tides is active. A build, its review and any release each need Chad's go.
+
+**State for D after GPT's review:** closed for this candidate. Permission for the attributed five-line summary above, credit to the International Whaling Commission and a link to the status graphics page; contextual scope only. Whether to correct the "private" description with the IWC remains Chad's decision; GPT asks for no further enquiry. Whale example parked: Cape Vidal is still open, and building waits on Chad's go.
 
 ### E, Cape Vidal: first reply, 23 Nov 2026
 

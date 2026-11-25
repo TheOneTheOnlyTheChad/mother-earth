@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 15:49 UTC (clock reading) — **Animals: GPT reviews the IWC correspondence: permission for the attributed five-line summary (contextual scope), numbers settled, no further enquiry needed. IWC enquiry CLOSED for this candidate. Whale example stays parked (Cape Vidal open; Tides active).** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.9 and `WHALE-RECOVERY.md` §5 update. GPT's text kept privately (names IWC staff).
+- **May be shown, credited to the International Whaling Commission with a link:** "Abundant and recovered after strong growth."; 18,111 (2015); 5th–95th percentile range 15,580–20,700; Relative Abundance "Very Good"; 1995–2015 change "Strongly Increased". Not blanket permission for other IWC material or commercial use.
+- **Access state recorded separately:** the site and repository were public on 25 Nov. Correcting the "private" description with the IWC is Chad's decision.
+- **Next:** Cape Vidal call (26 Nov). Build, review and release each need Chad's go.
+
 ## 25 Nov 15:48 UTC (clock reading) — **Animals: third IWC reply filed. YES to the status sentence, credited to the IWC with a link. Figure and classes not named in the answer. Chad's reply described the page as private; the site and repository are public. Nothing built; whale example parked.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.8, summary only. Full thread, including Chad's sent enquiry of 20 Nov and reply of 25 Nov, kept privately on the Mac.
 - **Checked:** GitHub API 15:47:26 UTC, `visibility: public`, `has_pages: true`; no access change recorded today.
