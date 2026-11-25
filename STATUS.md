@@ -4,10 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
-## 25 Nov 13:59 UTC (clock reading) — **Tides: new thread; GPT's spec filed; Claude's implementation proposal rev 1 for GPT review. Docs only. Nothing built, branched, fetched or deployed** (page: none; hub untouched; Tides thread)
+## 25 Nov 13:59 UTC (clock reading) — **Tides: new thread; GPT's spec filed; Claude's implementation proposal rev 1.1 for GPT review. Docs only. Nothing built, branched, fetched or deployed** (page: none; hub untouched; Tides thread)
 - **This thread now owns Tides** (Chad, 25 Nov). Organic-soil emissions is closed (merge `01c789c`, close-out `d85524f`) and is not reopened. The other open Nature context items are separate mini specs, not this thread's. The later Sun reference-globe investigation is a separate workstream and no prerequisite.
 - **Filed unchanged:** GPT's "Tides explorer, spec rev 1" (24 Nov) as `docs/concepts/TIDES-EXPLORER-SPEC-GPT-rev1.md` (sha256 `539ef06d…d927`, 17,595 B, from the Mac folder `Documents/ChatGPT/Mother Earth/`).
 - **Proposal:** `docs/concepts/TIDES-EXPLORER-PROPOSAL.md` rev 1 (the spec's §10 deliverable). Main points: a page-only, computed mechanism view with no hub change; two pinned, dated reference images proposed for Earth and Sun because the live daily Earth frame is black north of 66°N in this season and the default view looks down on the North Pole; Moon asset reused unchanged; equation confirmed against Stewart §17.4 (read in full text in the browser pane; Sun-to-Moon ratio 0.46051 there), with the equilibrium-height step stated as ours; model surface lifted to 1.12 Earth radii so lows stay visible; first build without navigation links; T1–T10 mapped to evidence.
+- **Rev 1.1 (14:01 UTC, clock reading):** a second source for the potential added (Fitzpatrick, UT Austin notes, equations 12.1–12.14, text relayed by Chad; the pane refused the site's certificate). It agrees with Stewart. The potential-to-height step is still ours.
 - **Not done:** no image fetched, no terms page re-read, the NOAA pages in the spec not read by Claude, no header measurement at six or seven tabs, no prototype.
 - **Also this thread:** the Project copies of START-HERE and STATUS were found stale (they ended at the Timeline R4 release) and were refreshed from main.
 - **Next:** GPT reviews the proposal. Then Chad's decisions D1–D7 and his own go for a branch build. No build, merge or deployment before that.

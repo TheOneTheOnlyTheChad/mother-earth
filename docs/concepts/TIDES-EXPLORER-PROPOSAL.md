@@ -1,5 +1,7 @@
 # Tides explorer: Claude's implementation proposal
 
+**Rev 1.1, 25 Nov 2026, 14:01 UTC (clock reading). Docs only.** Adds a second source for the tide-generating potential in section 3 (Fitzpatrick, text relayed by Chad). No other change; D7 narrowed, not closed.
+
 **Rev 1, 25 Nov 2026, 13:58 UTC (clock reading). Docs only.** Written by Claude (Tides thread) against GPT's "Tides explorer, spec rev 1" (24 Nov 2026), filed unchanged as `docs/concepts/TIDES-EXPLORER-SPEC-GPT-rev1.md` (sha256 `539ef06d…d927`, 17,595 B, from the Mac folder `Documents/ChatGPT/Mother Earth/`). Baseline: main `d85524f`. **Nothing is built, branched, fetched or deployed. No hub change is proposed.** Each decision in section 7 is Chad's; a build needs his own go.
 
 Not part of this proposal: the later Sun reference-globe investigation (a separate workstream; nothing here depends on it or starts it).
@@ -41,6 +43,9 @@ Image budget: Moon 458 KB (held). Earth and Sun sizes are unknown until fetched;
 - Stewart expands the Moon's potential at Earth's surface in Legendre polynomials and keeps the third term as the tide-generating potential: V = −γM r² / (2R³) · (3 cos²φ − 1), with φ the angle from the Earth–Moon line. That is −(γM r²/R³) · P2(cos φ): the spec's P2 form. (The LibreTexts copy prints "e cos²φ" in that one line; the line above it and the later expansions give 3. Recorded as a typo in the copy.)
 - He states the first term gives no force and the second is the uniform pull that keeps Earth in its orbit, and that the derivation "does not involve centripetal acceleration". This supports teaching point 1 as the spec words it.
 - He gives the Sun-to-Moon ratio of the same coefficient as **0.46051**. Our own arithmetic from standard masses and mean distances gives 0.4595. Both round to the spec's **0.46**.
+- **Second source, relayed by Chad (25 Nov 2026), not read by Claude in the pane** (the site's certificate was refused there): R. Fitzpatrick, University of Texas at Austin, fluid mechanics notes, "Tide Generating Potential", https://farside.ph.utexas.edu/teaching/336L/Fluidhtml/node163.html , equations 12.1–12.14, as pasted by Chad in the thread. It defines P2(x) = (3x² − 1)/2 (12.9) and gives the tide-generating potential as −(G m′/r′) [1 + (r/r′)² P2(cos γ) + O(r/r′)³] (12.14): a constant plus the same P2 term as Stewart, with the truncation justified by a/r′ ≪ 1. It agrees with Stewart and with the spec's form.
+  - The two texts frame the removed first-order term differently. Fitzpatrick subtracts the common centripetal acceleration of the planet's points about the centre of mass; Stewart says the derivation needs no centripetal acceleration and calls that term the uniform pull that keeps Earth in orbit. Both remove the same uniform term and reach the same result. The page will use the spec's wording ("relative to the acceleration of Earth's centre") and will not say the far bulge is caused by centrifugal force.
+  - The pasted section stops at the potential. It does not give the surface height either, so the step below is still ours. The same notes continue to later sections that may state it; they were not read.
 - **One step is ours, not quoted.** Stewart gives the potential, not the equilibrium surface height. The static surface that balances V against gravity is ζ = −V/g, so ζ = (γM r²/(g R³)) · P2(cos φ): about +0.36 m under the Moon and −0.18 m at right angles for the Moon alone (our arithmetic; Sun 0.16 m and −0.08 m). Stewart quotes Cartwright on the balance behind this (the horizontal force "has to be balanced by an opposing slope of the sea surface"). A direct quotation of the height formula sits in Pugh (1987) and similar texts that I could reach only as PDFs, which were not opened (D7).
 - Not read by Claude: the five NOAA pages in spec §9. They are GPT's reads. The four HTML pages will be read directly in the pane before any page wording is final; the Swanson PDF stays GPT's read unless Chad says to open it.
 
@@ -123,7 +128,7 @@ Image budget: Moon 458 KB (held). Earth and Sun sizes are unknown until fetched;
 | D4 | First build without navigation links; navigation as a separate measured candidate, agreed with the Animals and Earth from Space threads | Yes |
 | D5 | Arrows, phase icon and wheel/pinch zoom left out of the first slice | Yes |
 | D6 | `tides.css` for the first slice | Yes |
-| D7 | Equation source: accept Stewart §17.4 plus the one stated step · or a go to open one PDF textbook source for the height formula | Accept; GPT to check the step |
+| D7 | Equation source: the potential now rests on two texts (Stewart read by Claude; Fitzpatrick relayed by Chad). Still ours: the one step from potential to surface height. Accept it · or supply the later Fitzpatrick section that states it · or a go to open one PDF textbook source | Accept; GPT to check the step |
 
 ## 8. Maintenance, if built
 
