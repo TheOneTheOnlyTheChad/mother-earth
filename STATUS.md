@@ -4,6 +4,55 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 04:32 UTC (clock reading) — **Animals journey context: GPT's targeted extractor review filed (HOLD on H1, H2); both fixed on the branch with focused offline controls; back to GPT for recheck. Not run; no tiles downloaded; corridor parked.** (page: none; Animals thread; branch `animals-journey-context-proposal` `0fce44a`)
+- **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-extractor-gpt-review.md` (sha256 `e8818215…cafd`).
+- **H1:** the missing-data list is now parsed with the standard library's HTML parser. Attributed rows are read; real dates and known satellite labels are required; anything unreadable stops the run. A live-list fixture (sha256 `8b9c8d5d…82be`) parses to 171 rows with no MODIS gap in the interval.
+- **H2:** the verifier holds its own fixed product, region, interval and plan, and pins the approved extractor (sha256 `62e29621…a752`). It re-checks every window and the status readings, and re-parses the saved provenance.
+- **Controls:** 72 passed, 0 failed, in the workspace and on the Mac shell. GPT's reproductions pass on the new code and fail on the old (`h1h2-old-vs-new.log`).
+- **Replacement hashes:**
+  - `journey_context_firms_fetch.py` `62e29621…a752`
+  - `journey_context_verify.py` `4bdaf0a7…ab00`
+  - `journey_context_firms_fetch.test.py` `3f7ade9c…1cd9`
+  - fixture `8b9c8d5d…82be`
+- **Records:** evidence rev 1.3, §4c. Mac `_review/animals-journey-context-extractor-h1h2/` (earlier copy moved to `_to_delete/`).
+
+## 25 Nov 04:20 UTC (clock reading) — **Animals journey context: GPT's evidence review filed (pilot PASS; full run held for five extractor fixes); Chad's acceptances; full zebra extractor with those fixes, a verifier and 39 offline controls, back to GPT for a targeted check. Not run; no tiles downloaded; corridor parked.** (page: none; Animals thread; branch `animals-journey-context-proposal` `e76d4de`)
+- **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-evidence-gpt-review.md` (sha256 `b242f682…a836`). `6.03` reads as "Collection 6 standard processing" per NASA GIBS's value map (GPT's read).
+- **Chad, 25 Nov:** accepts the six whole-file Hansen downloads (976.6 MB), the labelled 30 % year-2000 threshold and the collapsed monthly table; extractor back to GPT before he runs it.
+- **Extractor** `phase1/animals/journey_context_firms_fetch.py` (sha256 `91c115a0…8d77`):
+  - 81 requests (80 keyed, 1 keyless missing-data list).
+  - Stops on any unreadable or ill-formed key status, or at 2,000 used.
+  - Bytes are capped while reading.
+  - Strict CSV validation; the stored bytes are the hashed bytes.
+  - An explicit end state: complete, stopped or invalid.
+  - Transactions are estimated at about 755, an estimate and not a maximum.
+- **Verifier** `journey_context_verify.py` refuses anything incomplete or altered.
+- **Controls:** `journey_context_firms_fetch.test.py`, 39 passed in the workspace and 39 on the Mac shell (Python 3.10). Two defects were found and fixed while writing them (an empty gap list accepted; a key in a status body treated as fatal).
+- **Records:** evidence rev 1.2, build brief rev 1.2. Mac `_review/animals-journey-context-extractor/` (`read/` as text, `run/` runnable; hashes equal to the branch).
+
+## 25 Nov 03:55 UTC (clock reading) — **Animals journey context: FIRMS pilot run by Chad (Terminal, 03:50 UTC); results and the zebra's final budget in the evidence record rev 1.1; package to GPT. Nothing built.** (page: none; Animals thread; branch `animals-journey-context-proposal` `2c19327`)
+- **Pilot:** six requests, all 200.
+  - 33 MODIS detections in two 5-day windows.
+  - The repeated request was byte-identical.
+  - The `type` field is present; `version` reads `6.03`; `acq_time` is unpadded.
+  - 31 transactions used in total (upper bound); no key in any output.
+  - Raw files stay private on the Mac (`research/animals-journey-context/20261125T035048Z-firms-pilot/`).
+- **Zebra extraction budget (C1a, not run):** 79 requests, worst case about 755 transactions against 5,000 per 10 minutes. Stops at 2,000 already used, at the first failure, or past 20 MB.
+- **For GPT:** Mac `_review/animals-journey-context-evidence/read/` (evidence rev 1.1, build brief rev 1.1, proposal, GPT's earlier review, pilot script, pilot manifest; hashes equal to the branch).
+
+## 25 Nov 03:49 UTC (clock reading) — **Animals journey context: Chad's decisions and evidence-step go; GPT's proposal review filed; evidence record and build brief written; FIRMS pilot script ready on the Mac for Chad's Terminal run. Nothing built; no key used yet; no large download.** (page: none; Animals thread; branch `animals-journey-context-proposal` `9209abd`)
+- **Chad, 25 Nov:** his standing dated-data exception covers historical journey context; J-D2 C (zebra and East Walker only), J-D3 A subject to evidence, J-D4 A, J-D5 B, J-D6 A; go for the bounded evidence step with GPT's corrections folded in; exact budget before a small zebra pilot; no full corridor extraction.
+- **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-proposal-gpt-review.md` (sha256 `0ad6893b…a8`).
+- **Evidence (Claude, 25 Nov, browser pane; text only):**
+  - FIRMS area requests take 1–5 days, not 10.
+  - FIRMS's gap list (fetched keyless) names no MODIS gap day in the zebra's period and 28 in 2017–24, all in 2022.
+  - Hansen v1.13 covers 2000–2025 under CC BY 4.0; years before 2011 are not reprocessed; the authors warn against definitive area from pixel counts.
+  - The tile encoding was measured from the files: `lossyear` runs 0–25 (the page's prose says 1–20); pixels are 0.00025°.
+  - Tile sizes come from headers only: zebra 976.6 MB, corridor 707.6 MB.
+  - Region and areas frozen: zebra 371,722 km² (`17_50`, `17_51`), corridor 151,515 km² (`32_15`).
+- **Pilot:** `phase1/animals/journey_context_firms_pilot.py` (sha256 `91be1a2e…a027`), also at `research/animals-journey-context/` on the Mac. At most six requests, no retries, a stop rule, and the key is read by the script and never printed (offline-tested). Neither shell reaches FIRMS, so Chad runs it in Terminal.
+- **Next:** pilot result → evidence rev 1.1 with the zebra's final budget → GPT → Chad's C1a go.
+
 ## 25 Nov 03:26:28 UTC (clock reading) — **Timeline R4: GPT's live smoke PASS; enquiries E1–E4 sent by Chad; Drimolen author replied with the article; thread handed over** (page: none; docs only; Timeline thread)
 - **GPT's scoped live smoke test: PASS, no rollback recommended** (about 03:13–03:19 UTC). Filed unchanged: `reviews/2026-11-25-timeline-r4-live-smoke-gpt-review.md` (sha256 `8ebe60f7…a355`). Three page hashes matched; catalogue validated through the live page (its shell request to the hub got 403). Still open after it: real phone, Safari, screen reader, true 200 % zoom, physical wheel.
 - **Enquiries E1 (Drimolen), E2 (Ngandong), E3 (Liang Bua), E4 (La Ferrassie wording) are SENT** by Chad from his own address, 25 Nov (his statement). No address in the repo. Record: `docs/research/TIMELINE-HUMAN-RELATIVES-ENQUIRY-DRAFTS.md` rev 4.
