@@ -243,12 +243,12 @@
           <div class="ovl opt-wind opt-soil" id="card-soil">
             <div class="ovl-h">Organic-soil emissions <span class="ev comp">Modelled</span><span class="state" id="s-soil">off</span></div>
             <button class="ovl-tgl" type="button" id="tgl-soil" role="switch" aria-checked="false" aria-describedby="soil-note"><span class="box" aria-hidden="true"></span><span class="t">Organic-soil emissions (modelled) — 2021–2024 average</span></button>
-            <div class="cav" id="soil-note">Modelled, not measured: greenhouse-gas emissions from drained and burned organic soils, as yearly averages for 2021–2024, summed per 4° cell. A dated model, not live and not this year. <b>Preview fixture</b>: a subset of cells.</div>
+            <div class="cav" id="soil-note">Modelled, not measured: greenhouse-gas emissions from drained and burned organic soils, as yearly averages for 2021–2024, summed per 4° cell. A dated model, not live and not this year.</div>
             <div class="wind-levels" id="soil-comp" role="radiogroup" aria-label="Which emissions">
               <button type="button" role="radio" aria-checked="false" data-comp="drained" disabled>Drained</button>
               <button type="button" role="radio" aria-checked="false" data-comp="burned" disabled>Burned</button>
             </div>
-            <div class="obs" id="o-soil" aria-live="polite">Off. Switch on to load the modelled 4° table (preview fixture).</div>
+            <div class="obs" id="o-soil" aria-live="polite">Off. Switch on to load the modelled 4° table.</div>
             <div class="src soilkeybox" id="soil-key" hidden></div>
             <details class="scope" id="soil-scope">
               <summary>What this is and is not</summary>
@@ -521,7 +521,7 @@
   <button type="button" class="lp-off" id="layers-off">Switch everything off</button>
 </div>
 <script src="app.js?v=202612241000"></script>
-<script src="soil.js?v=202611251400"></script>
+<script src="soil.js?v=202611251600"></script>
 <script src="arts.js?v=202611291000"></script>
 <script src="sky.js?v=202611291000"></script>
 <script src="skyscene.js?v=202612101000"></script>
@@ -695,7 +695,7 @@ function render() {
         label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL[layer]}</b> · cell ${id}<br>${cell.count} ${windowText(layer, snap)} · coverage: ${grade}<br><span style="color:#7f8da3">${esc(cell.coverage ? cell.coverage.evidence : '')}</span></div>` });
     }
   }
-  if (ME.soil) polys.push(...ME.soil.polys(matFor, cellGeom));   // soil-preview-rc: page-owned modelled cells and the selected-cell outline
+  if (ME.soil) polys.push(...ME.soil.polys(matFor, cellGeom));   // soil (soil-release-rc): page-owned modelled cells and the selected-cell outline
   globe.polygonsData(polys);
   driftDrawnGrade = on.drifters && state.drifters ? ME.freshness('drifters').grade : null;
   // first cells of the session: globe.gl builds them with its own materials; once one exists, redraw once with shared ones
@@ -749,7 +749,7 @@ function paintLegend() {
   for (const [k] of SHEET_DRAWN) { const e = $('leg-' + k); e.hidden = !d.includes(k); if (e.hidden) continue; e.querySelector('.lsep').hidden = first; first = false; }
   $('leg-none').hidden = d.length > 0;   // the sentence is true only when no layer at all is drawn: day/night, ocean heat, night lights and orbital count too
 }
-ME.redraw = () => render();   // soil-preview-rc: soil.js redraws through the one render path
+ME.redraw = () => render();   // soil (soil-release-rc): soil.js redraws through the one render path
 ME.legendState = () => { const vis = n => [...n.childNodes].map(c => c.nodeType === 3 ? c.textContent : c.nodeType === 1 && !c.hidden ? vis(c) : '').join('');   // the text a reader sees: hidden parts left out at any depth
   return { line: vis($('leg-line')).replace(/\s+/g, ' ').trim(), geom: JSON.parse(JSON.stringify(drawnGeom)), empty: !$('leg-none').hidden }; };   // read-only test aid
 function paintKey() {
@@ -787,7 +787,7 @@ let lastFocus = null;          // restored when the inspector closes
 var ohTap = null;              // Ocean heat: the tap's own lat/lng for the view it opened (var: assigned by globe handlers set up earlier)
 let inspCtx = null;            // { layer, recs } so a listed record can be opened on its own
 function openInspector(title, rows) {
-  $('insp').classList.remove('soilview');   // soil-preview-rc: only the soil inspector stacks its rows; every other view keeps its layout
+  $('insp').classList.remove('soilview');   // soil (soil-release-rc): only the soil inspector stacks its rows; every other view keeps its layout
   closeKey(false);   // the Key and the inspector never overlap: opening one closes the other
   lastFocus = document.activeElement;
   fillInspector(title, rows);
@@ -811,7 +811,7 @@ function closeInspector() {
   $('insp').classList.remove('show');
   if (lastFocus && document.contains(lastFocus) && typeof lastFocus.focus === 'function') lastFocus.focus();
   lastFocus = null; inspCtx = null; placeCtx = null; ohTap = null; $('insp').classList.remove('placeview'); $('insp').classList.remove('soilview');
-  if (ME.soil) ME.soil.clear();   // soil-preview-rc: the outline goes with the panel
+  if (ME.soil) ME.soil.clear();   // soil (soil-release-rc): the outline goes with the panel
 }
 $('insp-x').onclick = closeInspector;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInspector(); });
@@ -830,7 +830,7 @@ ME.placeLog = [];   // test aid: every /place request path, in order
 function openPlace(id) {
   placeCtx = { id, extra: new Set() };
   $('insp').classList.remove('soilview');
-  if (ME.soil) ME.soil.select(id);   // soil-preview-rc: the selected cell is outlined while its panel is open
+  if (ME.soil) ME.soil.select(id);   // soil (soil-release-rc): the selected cell is outlined while its panel is open
   $('insp').classList.add('placeview');
   openInspector(`Everything here · cell ${id}`, [['Loading', 'reading what the hub holds for this cell…']]);
   loadPlace();
@@ -842,7 +842,7 @@ async function loadPlace() {
   ME.placeLog.push(path);
   let P, err = null;
   try { P = await ME.getJson(path); } catch (e) { err = e; }
-  if (ME.soil) await ME.soil.ensure();   // soil-preview-rc: the page-owned row needs the pinned table; it never waits on the hub
+  if (ME.soil) await ME.soil.ensure();   // soil (soil-release-rc): the page-owned row needs the pinned table; it never waits on the hub
   if (placeCtx !== ctx || seq !== placeSeq || !$('insp').classList.contains('show')) return;   // closed or superseded meanwhile
   const soilRow = rows => { if (!ME.soil) return rows; const i = rows.findIndex(r => r && typeof r[0] === 'string' && r[0].startsWith(LABEL.forest)); rows.splice(i < 0 ? Math.min(2, rows.length) : i + 1, 0, ME.soil.placeRow(ctx.id)); return rows; };   // page-owned, after forest
   if (err || !P || !P.layers) { fillInspector(`Everything here · cell ${ctx.id}`, soilRow([['Unknown', `the hub could not be read for this cell (${esc(String(err && err.message || 'no data'))}) — nothing is shown rather than a guess`]])); return; }
@@ -962,7 +962,7 @@ const srcLink = layer => `<a href="${SRC_LINK[layer][0]}" target="_blank" rel="n
 
 function inspectCell(p) {
   $('insp').classList.remove('soilview');
-  if (p.layer === 'soil' || p.layer === 'soil-sel') { $('insp').classList.remove('placeview'); placeCtx = null; inspCtx = null; openInspector(`Organic-soil emissions (modelled) · cell ${p.id}`, ME.soil.inspectRows(p.id)); $('insp').classList.add('soilview'); ME.soil.select(p.id); return; }   // soil-preview-rc
+  if (p.layer === 'soil' || p.layer === 'soil-sel') { $('insp').classList.remove('placeview'); placeCtx = null; inspCtx = null; openInspector(`Organic-soil emissions (modelled) · cell ${p.id}`, ME.soil.inspectRows(p.id)); $('insp').classList.add('soilview'); ME.soil.select(p.id); return; }   // soil (soil-release-rc)
   $('insp').classList.remove('placeview'); placeCtx = null;
   const snap = state[p.layer]; const fresh = ME.freshness(p.layer);
   const paired = p.layer !== 'forest' && usable(p.layer);

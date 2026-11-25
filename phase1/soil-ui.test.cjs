@@ -1,17 +1,19 @@
-/* Mother Earth — Organic-soil emissions (modelled): fixture preview (soil-preview-rc, 25 Nov 2026).
+/* Mother Earth — Organic-soil emissions (modelled): release candidate with the full 790-record table (soil-release-rc, 25 Nov 2026);
+ * first reviewed as the fixture preview (soil-preview-rc e51ca61, GPT recheck PASS).
  * Proposal: docs/concepts/NATURE-CONTEXT-SOIL-PROPOSAL.md rev 3 (§1 row, §1b optional globe layer); Chad's S1–S4 of 25 Nov 2026.
  * Reference contract: docs/research/soil-c1/soil_reference.py (GPT rev 2 recheck R2-1). The page must reproduce it.
  *
  * Part A (no browser): soil.js in a VM with Node's WebCrypto. fmt, cell text and layer classes against the Python reference for every
- *   fixture cell and period; whole-table validation (GPT's three reproductions and 18 mutations); the pinned fingerprint; the fixture
- *   subset rule (a cell outside the fixture is never "no organic soil").
+ *   record and period of the full table; whole-table validation (GPT's three reproductions and the mutations); the pinned fingerprint;
+ *   a preview fixture is refused.
  * Part B (Chromium + SwiftShader, served by this suite): every non-local request intercepted; hub paths answered from small fixtures
  *   or 404; anything else aborted and listed. Bare start, switching on, drained/burned, colours by class, the selected-cell outline,
  *   the inspector, the place panel with the layer off, the hub-error path, a tampered table, Sources, keyboard, 360 px.
  * Controls: OLD=1 serves main's page files (git show origin/main:<file>) — the soil checks must fail there.
- *   BREAK=no-hash | sparse-first | zero-positive | combined | no-outline | subset-nosoil | load-at-start | no-incomplete | bins-shifted |
+ *   BREAK=no-hash | sparse-first | zero-positive | combined | no-outline | fixture-accepted | load-at-start | no-incomplete | bins-shifted |
  *         zero-drops-coverage | unknown-counts | no-soilview | alpha-only   each must fail.
  * Round 2 (GPT preview review, 25 Nov: P2, H1–H3): A13, B19–B23; palette and key wording in B2–B4.
+ * Release candidate: full table (A1–A4 over every record), no fixture wording on any surface (B24), render timing with all 790 cells (B25).
  * Run: NODE_PATH=/opt/npm-tools/node_modules node --no-warnings phase1/soil-ui.test.cjs
  * Needs /home/claude/spike/node_modules with globe.gl@2.45.0 and @fontsource/{ibm-plex-mono,barlow-condensed} (as the other page suites).
  */
@@ -28,7 +30,7 @@ let pass = 0, fail = 0; const failed = [];
 const ok = (n, c, got) => { if (c) pass++; else { fail++; failed.push(n.split(' ')[0]); console.log(`FAIL  ${n}${got !== undefined ? `\n      got: ${JSON.stringify(got).slice(0, 700)}` : ''}`); } };
 const wd = setTimeout(() => { console.log('FAIL  suite exceeded 8 min — failure, not a hang'); process.exit(1); }, 8 * 60e3);
 
-const TABLE = 'assets/soil/g4-soil-fixture-v1.0.1.json';
+const TABLE = 'assets/soil/g4-soil-v1.0.1.json';
 const read = f => { if (!OLD) return fs.readFileSync(path.join(ROOT, f), 'utf8'); try { return cp.execFileSync('git', ['show', 'origin/main:' + f], { cwd: ROOT, maxBuffer: 64e6, stdio: ['ignore', 'pipe', 'ignore'] }).toString(); } catch (_) { return ''; } };
 const served = { 'index.html': read('index.html'), 'sources.html': read('sources.html'), 'soil.js': read('soil.js') };
 { const rep = (f, a, b) => { const was = served[f]; served[f] = served[f].replace(a, b); if (served[f] === was) { console.log(`FAIL  break ${BREAK} did not apply`); process.exit(1); } };
@@ -41,13 +43,13 @@ const served = { 'index.html': read('index.html'), 'sources.html': read('sources
   if (BREAK === 'alpha-only') rep('soil.js', "const fillFor = i => rgba(S.RAMP[i], S.OPACITY);", "const fillFor = i => rgba(S.RAMP[3], [0.16, 0.26, 0.38, 0.50, 0.64, 0.80][i]);");
   if (BREAK === 'combined') rep('soil.js', "parts.push(rec.has_mapped_organic_soil ?", "parts.push(`total ≈ ${fmt((p.drained.Mg || 0) + (p.burned.Mg || 0), 't CO₂e per year')}`); parts.push(rec.has_mapped_organic_soil ?");
   if (BREAK === 'no-outline') rep('soil.js', "if (st.on && st.sel && inDomain(st.sel)) out.push(", "if (false) out.push(");
-  if (BREAK === 'subset-nosoil') rep('soil.js', "const inSubset = id => !st.table.meta.fixture ||", "const inSubset = id => true ||");
+  if (BREAK === 'fixture-accepted') rep('soil.js', "if (m.fixture !== undefined) return 'a preview fixture, not the full table';", "");
   if (BREAK === 'load-at-start') rep('soil.js', "    paint();\n  }\n  if (document.readyState", "    paint(); loadTable();\n  }\n  if (document.readyState");
   if (BREAK === 'no-incomplete') rep('soil.js', "if (p.coverage === 'incomplete') parts.push(", "if (false) parts.push(");
   if (BREAK === 'bins-shifted') rep('soil.js', "BINS: [0, 1e3, 1e4, 1e5, 1e6, 1e7, Infinity],", "BINS: [0, 1e2, 1e3, 1e4, 1e5, 1e6, Infinity],");
 }
 const RAW = fs.readFileSync(path.join(ROOT, TABLE)); const FIX = JSON.parse(RAW);
-const SUB = FIX.meta.fixture.subset_cells, PERIODS = ['2001_2005', '2006_2010', '2011_2015', '2016_2020', '2021_2024'];
+const SUB = Object.keys(FIX.cells).concat(['14_49', '10_10', '0_0']), PERIODS = ['2001_2005', '2006_2010', '2011_2015', '2016_2020', '2021_2024'];
 
 // ---------------- Part A: soil.js in a VM, against the Python reference
 async function A() {
@@ -58,13 +60,13 @@ async function A() {
     ctx.window.crypto = ctx.crypto; vm.createContext(ctx); vm.runInContext(served['soil.js'], ctx); return ctx.window.ME.soil;
   };
   const S = mkS(); await S.ensure();
-  ok('A1 the pinned fixture loads and validates', S.test.state().status === 'ok', S.test.state());
-  // Python reference for the same fixture: values text (subset cells only), classes and fmt
+  ok('A1 the pinned full table (790 records) loads and validates', S.test.state().status === 'ok', S.test.state());
+  // Python reference for the same table: values text for every record and three absent cells, classes and fmt
   const ref = JSON.parse(cp.execFileSync('python3', ['-I', '-c', `
 import sys, json; sys.path.insert(0, ${JSON.stringify(path.join(ROOT, 'docs/research/soil-c1'))})
 import soil_reference as R
 t = json.load(open(${JSON.stringify(path.join(ROOT, TABLE))}))
-sub = t['meta']['fixture']['subset_cells']
+sub = list(t['cells']) + ['14_49', '10_10', '0_0']
 nums = sorted({r['organic_km2'] for r in t['cells'].values()} | {q[c]['Mg'] for r in t['cells'].values() for q in r['periods'].values() for c in ('drained','burned') if q[c]['Mg'] is not None} | {q['incomplete_source_footprint_km2'] for r in t['cells'].values() for q in r['periods'].values()} | {0.0, 0.004, 0.0099, 0.01, 0.0105, 9.94, 9.95, 9.96, 99.5, 999.9, 1e9})
 print(json.dumps(dict(
   fmt={repr(x): R.fmt(x, 'u') for x in nums},
@@ -72,11 +74,11 @@ print(json.dumps(dict(
   cls={f'{c}|{k}|{p}': (lambda v: v if isinstance(v, str) else list(v))(R.layer_class(t, c, k, p)) for c in sub for k in ('drained', 'burned') for p in R.PERIODS})))
 `], { maxBuffer: 64e6 }).toString());
   const fbad = Object.entries(ref.fmt).filter(([x, y]) => S.test.fmt(Number(x), 'u') !== y);
-  ok(`A2 fmt equals the reference for ${Object.keys(ref.fmt).length} values (every stored number in the fixture and the rounding edges)`, !fbad.length, fbad.slice(0, 5).map(([x, y]) => [x, y, S.test.fmt(Number(x), 'u')]));
+  ok(`A2 fmt equals the reference for ${Object.keys(ref.fmt).length} values (every stored number in the table and the rounding edges)`, !fbad.length, fbad.slice(0, 5).map(([x, y]) => [x, y, S.test.fmt(Number(x), 'u')]));
   const tbad = Object.entries(ref.text).filter(([k, y]) => { const [c, p] = k.split('|'), j = S.test.cellText(c, p); return j.kind === 'values' || j.kind === 'no-soil' ? j.text !== y : !/^unknown/.test(y); });
-  ok(`A3 cell text equals the reference for every fixture cell and period (${Object.keys(ref.text).length})`, !tbad.length, tbad.slice(0, 3).map(([k, y]) => [k, y, S.test.cellText(...k.split('|')).text]));
+  ok(`A3 cell text equals the reference for every record and period, and three absent cells (${Object.keys(ref.text).length})`, !tbad.length, tbad.slice(0, 3).map(([k, y]) => [k, y, S.test.cellText(...k.split('|')).text]));
   const cbad = Object.entries(ref.cls).filter(([k, y]) => { const [c, comp, per] = k.split('|'), j = S.test.cellClass(c, comp, per); return JSON.stringify(typeof j === 'string' ? j : j.zero ? ['zero', j.incomplete] : ['bin', j.bin, j.incomplete]) !== JSON.stringify(y); });
-  ok(`A4 layer class equals the reference for every fixture cell, both components, every period (${Object.keys(ref.cls).length})`, !cbad.length, cbad.slice(0, 5).map(([k, y]) => [k, y, S.test.cellClass(...k.split('|'))]));
+  ok(`A4 layer class equals the reference for every record and absent cell, both components, every period (${Object.keys(ref.cls).length})`, !cbad.length, cbad.slice(0, 5).map(([k, y]) => [k, y, S.test.cellClass(...k.split('|'))]));
   // GPT R2-1 reproductions and mutations: each makes the table unavailable
   const clone = () => JSON.parse(RAW);
   ok('A5 empty meta and cells is not a table (R2-1)', S.test.validate({ meta: {}, cells: {} }) !== null);
@@ -90,17 +92,16 @@ print(json.dumps(dict(
     'period missing in a record': t => { delete t.cells['22_70'].periods['2001_2005']; }, 'zero with a value': t => { t.cells['13_27'].periods['2021_2024'].drained.Mg = 5; },
     'positive with 0': t => { t.cells['22_70'].periods['2021_2024'].burned.Mg = 0; }, 'unknown under complete coverage': t => { Object.assign(t.cells['22_70'].periods['2021_2024'].burned, { state: 'unknown', Mg: null }); },
     'complete with a footprint': t => { t.cells['22_70'].periods['2021_2024'].incomplete_source_footprint_km2 = 1; }, 'incomplete without a footprint': t => { t.cells['38_39'].periods['2011_2015'].incomplete_source_footprint_km2 = 0; },
-    'unknown coverage word': t => { t.cells['22_70'].periods['2021_2024'].coverage = 'partial'; }, 'record outside the fixture subset': t => { t.cells['0_0'] = t.cells['22_70']; },
-    'duplicate subset id': t => { t.meta.fixture.subset_cells.push('22_70'); },
+    'unknown coverage word': t => { t.cells['22_70'].periods['2021_2024'].coverage = 'partial'; }, 'a preview fixture (meta.fixture present)': t => { t.meta.fixture = { subset_cells: Object.keys(t.cells) }; },
   };
   const mbad = Object.entries(muts).filter(([, f]) => { const t = clone(); f(t); return S.test.validate(t) === null; }).map(([k]) => k);
   ok(`A6 ${Object.keys(muts).length} malformed tables are each refused`, !mbad.length, mbad);
-  ok('A7 the real fixture validates', S.test.validate(clone()) === null, S.test.validate(clone()));
+  ok('A7 the full table validates', S.test.validate(clone()) === null, S.test.validate(clone()));
   // fingerprint: a table one byte different is not used, and nothing is read as zero or "no soil"
   mkS.bytes = Buffer.from(RAW.toString().replace('"organic_km2":', '"organic_km2" :')); const T2 = mkS(); await T2.ensure(); mkS.bytes = null;
   ok('A8 a table that is not the pinned bytes is unavailable everywhere (valid JSON, same content, one space added)', T2.test.state().status === 'unavailable' && /pinned/.test(T2.test.state().why) && /^unknown/.test(T2.test.cellText('14_49').text) && T2.test.cellClass('22_70') === 'unavailable', T2.test.state());
-  // fixture subset: outside is unknown, never "no organic soil"
-  ok('A9 a cell outside the fixture is unknown (not "no organic soil"); 14_49 inside it is "no organic soil mapped"', S.test.cellText('10_10').kind === 'outside' && !/no organic soil mapped/.test(S.test.cellText('10_10').text) && S.test.cellClass('10_10') === 'outside' && S.test.cellClass('14_49') === 'no-soil');
+  // absent cells, after validation only: no organic soil mapped
+  ok('A9 cells absent from the validated table read "no organic soil mapped" and are not drawn; an unvalidated table never reads absence', S.test.cellText('14_49').text === 'no organic soil mapped in this cell by this model' && S.test.cellText('10_10').kind === 'no-soil' && S.test.cellClass('10_10') === 'no-soil' && /^unknown/.test(T2.test.cellText('10_10').text));
   const all = SUB.flatMap(c => PERIODS.map(p => S.test.cellText(c, p).text)).join('\n');
   ok('A10 no combined total, no positive shown as 0, the neutral zero sentence', !/total ≈/.test(all) && !/(drained|burned) ≈ 0 /.test(all) && /0 assigned by this model in this period; this does not establish zero real-world emissions/.test(all));
   ok('A11 38_39 2011–15 and 2016–20 carry the incomplete-coverage wording; 2021–24 does not', /source raster cells covering about 10 km² within this 4° cell have missing estimates\. Values sum the available raster cells/.test(S.test.cellText('38_39', '2011_2015').text) && /about 6\.5 km²/.test(S.test.cellText('38_39', '2016_2020').text) && !/incomplete/.test(S.test.cellText('38_39').text));
@@ -159,8 +160,8 @@ async function B() {
   const lay = await page.evaluate(() => ME.layers ? ME.layers.state() : null);
   ok('B2 the Layers list counts it: one row under Analysed and modelled, "1 on", the first-view hint gone', !!lay && lay.n === 1 && lay.on.join() === 'Organic-soil emissions (modelled)' && lay.hint === false && /1 on/.test(lay.label), lay);
   const exp = FIX.cells, drawnD = Object.keys(exp).filter(id => exp[id].has_mapped_organic_soil);
-  ok('B2 on: one table request; every fixture record with mapped soil drawn (drained), and nothing else', tableReqs.length === 1 && P.filter(p => p.layer === 'soil').length === drawnD.length && P.every(p => p.layer !== 'soil' || exp[p.id]), { reqs: tableReqs.length, drawn: P.filter(p => p.layer === 'soil').length, want: drawnD.length });
-  ok('B2 card, key and legend: on, drained checked, the scale with its states, the Key counts the layer once, the legend line names it', on1.s === 'on' && on1.o.includes(`Drained organic soils · 2021–2024 average · ${P.filter(p => p.layer === 'soil').length} cells drawn (preview fixture: 82 of 4,050 cells)`) && on1.radios === 'drained=true,burned=false' && on1.key.filter(k => k === 'soil').length === 1 && /Organic-soil emissions \(modelled, 2021–2024, whole 4° cells\)/.test(on1.leg) && /10,000,000 or more/.test(on1.keybox) && /hollow: 0 assigned by this model/.test(on1.keybox) && /more than 0, below 1,000/.test(on1.keybox) && /violet outline: incomplete model coverage — filled, a sum over the available raster cells; hollow, a 0 over them/.test(on1.keybox) && /not in the fixture/.test(on1.keybox), on1);
+  ok('B2 on: one table request; every record with mapped soil drawn (drained: 790), and nothing else', tableReqs.length === 1 && P.filter(p => p.layer === 'soil').length === drawnD.length && P.every(p => p.layer !== 'soil' || exp[p.id]), { reqs: tableReqs.length, drawn: P.filter(p => p.layer === 'soil').length, want: drawnD.length });
+  ok('B2 card, key and legend: on, drained checked, the scale with its states, the Key counts the layer once, the legend line names it', on1.s === 'on' && on1.o.includes(`Drained organic soils · 2021–2024 average · ${P.filter(p => p.layer === 'soil').length} cells drawn · Glen`) && P.filter(p => p.layer === 'soil').length === 790 && on1.radios === 'drained=true,burned=false' && on1.key.filter(k => k === 'soil').length === 1 && /Organic-soil emissions \(modelled, 2021–2024, whole 4° cells\)/.test(on1.leg) && /10,000,000 or more/.test(on1.keybox) && /hollow: 0 assigned by this model/.test(on1.keybox) && /more than 0, below 1,000/.test(on1.keybox) && /violet outline: incomplete model coverage — filled, a sum over the available raster cells; hollow, a 0 over them/.test(on1.keybox) && /not drawn: no organic soil mapped/.test(on1.keybox) && !/fixture|preview/i.test(on1.keybox + on1.o), on1);
   const fillOf = (id, layer = 'soil') => (P.find(p => p.layer === layer && p.id === id) || {}).fill;
   const RAMP = ['106,57,19', '146,85,18', '183,118,31', '212,152,56', '232,189,109', '247,227,176'], bin = v => [1e3, 1e4, 1e5, 1e6, 1e7, Infinity].findIndex(b => v < b);
   const wrongFill = drawnD.filter(id => { const s = exp[id].periods['2021_2024'].drained; const want = s.state === 'zero' ? 'rgba(0,0,0,0)' : `rgba(${RAMP[bin(s.Mg)]},0.88)`; return fillOf(id) !== want; });
@@ -201,9 +202,9 @@ async function B() {
   ok('B9 …and the outline goes with the panel', !P.some(p => p.layer === 'soil-sel') && P.some(p => p.layer === 'soil'));
   await page.click('#tgl-soil'); await page.waitForTimeout(200);
   await page.evaluate(() => ME.openPlace('10_10')); await waitPlace(page); rows = await panelRows(page);
-  ok('B10 a cell outside the fixture: unknown, not "no organic soil", and says it is the preview fixture', /^unknown — this cell is not in the preview's fixture/.test(rowT(rows, /^Organic-soil emissions/)) && /preview fixture/.test(rowT(rows, /^Organic-soil emissions/)), rowT(rows, /^Organic-soil emissions/));
+  ok('B10 a cell with no record (10_10): no organic soil mapped, with no fixture wording', rowT(rows, /^Organic-soil emissions/) === 'no organic soil mapped in this cell by this model', rowT(rows, /^Organic-soil emissions/));
   await page.evaluate(() => ME.openPlace('14_49')); await waitPlace(page); rows = await panelRows(page);
-  ok('B11 Cape Town 14_49 (in the fixture, no record): no organic soil mapped', rowT(rows, /^Organic-soil emissions/) === 'no organic soil mapped in this cell by this model', rowT(rows, /^Organic-soil emissions/));
+  ok('B11 Cape Town 14_49 (no record): no organic soil mapped', rowT(rows, /^Organic-soil emissions/) === 'no organic soil mapped in this cell by this model', rowT(rows, /^Organic-soil emissions/));
   placeDown = true; await page.evaluate(() => ME.openPlace('22_70')); await waitPlace(page); rows = await panelRows(page); placeDown = false;
   ok('B12 hub unreadable for the place: the page-owned soil row is still shown beside the unknown hub row', /^Unknown$/.test(rows[0] && rows[0][0]) && /drained ≈ 310,000,000/.test(rowT(rows, /^Organic-soil emissions/)), rows.map(r => r[0]));
   ok('B13 no page errors on World View', perr.length === 0, perr);
@@ -272,10 +273,25 @@ async function B() {
   ok('B15 360 px: nothing in the soil card overflows the viewport', over.length === 0 && await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), over);
   await ctx.close();
 
+  // B24: no fixture or preview wording on any World View surface the layer writes; B25: render timing with the full table
+  ({ ctx, page, perr } = await open('index.html'));
+  try { await page.waitForFunction(() => window.ME && ME.globe, null, { timeout: 30000 }); } catch (_) { }
+  const t0 = await page.evaluate(() => performance.now()); await page.click('#tgl-soil');
+  await page.waitForFunction(() => document.getElementById('s-soil').textContent === 'on', null, { timeout: 20000 }).catch(() => { });
+  const t1 = await page.evaluate(() => performance.now());
+  const rt = await page.evaluate(() => { const r = []; for (let i = 0; i < 5; i++) { const a = performance.now(); ME.redraw(); r.push(performance.now() - a); } return r.map(x => Math.round(x)); });
+  await page.click('#soil-comp button[data-comp="burned"]'); await page.waitForTimeout(200);
+  await page.evaluate(() => ME.openCell('soil', '22_70')); await page.waitForTimeout(200);
+  const txt = await page.evaluate(() => [document.getElementById('card-soil').textContent, document.getElementById('insp').textContent, ME.legendState().line].join(' '));
+  ok('B24 no "fixture" or "preview" wording on the card, key, inspector or legend', !/fixture|preview/i.test(txt), txt.match(/.{0,40}(fixture|preview).{0,40}/i));
+  console.log(`timing (SwiftShader, this container): switch on → drawn ${Math.round(t1 - t0)} ms; redraw ×5 ${rt.join(', ')} ms; polygons ${(await polys(page)).length}`);
+  ok('B25 the full table switches on within 20 s and redraws within 3 s here (SwiftShader software rendering; timings printed)', t1 - t0 < 20000 && Math.max(...rt) < 3000, { on: t1 - t0, rt });
+  await ctx.close();
+
   // Sources
   ({ ctx, page, perr } = await open('sources.html'));
   const src = await page.evaluate(() => { const h = document.getElementById('soil'); let t = ''; for (let e = h && h.nextElementSibling; e && e.tagName !== 'H2'; e = e.nextElementSibling) t += e.textContent + '\n'; return { h: h && h.textContent, t, toc: [...document.querySelectorAll('nav.toc a')].filter(a => a.getAttribute('href') === '#soil').length }; });
-  ok('B16 Sources: one section and one shortcut; citation, DOI, licence, modelled, whole-cell, separate components, our changes, the table difference, zero and missing, limits, the scenario bounds, version check, the preview fixture', src.toc === 1 && /modelled, optional layer; preview/.test(src.h || '') && ['10.5281/zenodo.22137130', 'CC BY 4.0', 'Modelled, not measured', 'whole 4° cell', 'never added together', 'not the publishers\' own figures', 'about 0.07% higher for drainage', 'not proof of no emission', 'incomplete model coverage', '1.50–3.97', '0.7–4.5', 'not probabilistic intervals', 'last checked 25 Nov 2026', 'fixture'].every(x => src.t.includes(x)), { h: src.h, toc: src.toc, missing: ['10.5281/zenodo.22137130', 'CC BY 4.0', 'Modelled, not measured', 'whole 4° cell', 'never added together', 'not the publishers\' own figures', 'about 0.07% higher for drainage', 'not proof of no emission', 'incomplete model coverage', '1.50–3.97', '0.7–4.5', 'not probabilistic intervals', 'last checked 25 Nov 2026', 'fixture'].filter(x => !src.t.includes(x)) });
+  ok('B16 Sources: one section and one shortcut; citation, DOI, licence, modelled, whole-cell, separate components, our changes, the table difference, zero and missing, limits, the scenario bounds, version check, the file read; no preview or fixture wording', src.toc === 1 && /modelled, optional layer\)$/.test(src.h || '') && !/preview|fixture/i.test(src.h + src.t) && ['10.5281/zenodo.22137130', 'CC BY 4.0', 'Modelled, not measured', 'whole 4° cell', 'never added together', 'not the publishers\' own figures', 'about 0.07% higher for drainage', 'not proof of no emission', 'incomplete model coverage', '1.50–3.97', '0.7–4.5', 'not probabilistic intervals', 'last checked 25 Nov 2026', 'g4-soil-v1.0.1.json', '790'].every(x => src.t.includes(x)), { h: src.h, toc: src.toc, missing: ['10.5281/zenodo.22137130', 'CC BY 4.0', 'Modelled, not measured', 'whole 4° cell', 'never added together', 'not the publishers\' own figures', 'about 0.07% higher for drainage', 'not proof of no emission', 'incomplete model coverage', '1.50–3.97', '0.7–4.5', 'not probabilistic intervals', 'last checked 25 Nov 2026', 'g4-soil-v1.0.1.json', '790'].filter(x => !src.t.includes(x)) });
   ok('B17 Sources: no page errors', perr.length === 0, perr);
   await ctx.close();
   ok('B18 isolation: nothing left the suite except answered fixtures (no Zenodo, no WRI)', !aborted.some(a => /zenodo|wri\.org|frontiersin/.test(a)), aborted);

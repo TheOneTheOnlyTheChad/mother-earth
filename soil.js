@@ -1,12 +1,13 @@
-/* Mother Earth — Organic-soil emissions (modelled): fixture preview (soil-preview-rc, 25 Nov 2026).
+/* Mother Earth — Organic-soil emissions (modelled) (soil-release-rc, 25 Nov 2026; reviewed as the fixture preview soil-preview-rc e51ca61).
  * Proposal: docs/concepts/NATURE-CONTEXT-SOIL-PROPOSAL.md rev 3 (§1 row, §1b optional globe layer); Chad's S1–S4 of 25 Nov.
  * Reference contract: docs/research/soil-c1/soil_reference.py. Every text and class here reproduces it (tests: phase1/soil-ui.test.cjs).
  * - MODELLED, not measured: Glen et al. 2026 model outputs v1.0.1, 2021–2024 annual average, whole 4° cell totals.
  * - Nothing is requested at load. The table is read when the layer is switched on, or when a place panel needs its row.
  * - The table's bytes are checked against the pinned SHA-256, then the WHOLE table is validated, before any record is used and
  *   before an absent cell is ever read as "no organic soil mapped". Any failure: unknown everywhere, nothing drawn, never zero.
- * - PREVIEW: the pinned table is a fixture, a subset of real records. A cell outside the fixture's subset is "not in this preview's
- *   fixture" (unknown), never "no organic soil".
+ * - The pinned table is the full 4° table (790 records; built by docs/research/soil-c1/soil_build.py). A cell in the 45 × 90 domain
+ *   that is not listed has no mapped organic soil (the table's sparse rule, applied only after validation). A table that carries the
+ *   preview's fixture metadata is refused: the release never reads a subset as the whole.
  * - States come from the record's flags, never from formatted numbers. Display is two significant figures; a positive never shows 0.
  * - The layer draws the same 4° cells as the data: no points, no hotspots inside a cell, no combined total, one period.
  */
@@ -14,9 +15,9 @@
   const ME = window.ME = window.ME || {};
   const esc = ME.esc || (s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
   const S = {
-    TABLE: 'assets/soil/g4-soil-fixture-v1.0.1.json',
-    SHA256: 'a789a6b88f21ebb5606c919a13d99c2fb22ce4c14e5b72ed5ec34ca4ece736da',
-    CHECKED: '25 Nov 2026',                                   // last version check (record 22137130: total 1, v1.0.1 latest), 07:51 UTC
+    TABLE: 'assets/soil/g4-soil-v1.0.1.json',
+    SHA256: 'c5c01ff5a4300ace1e7348d6d25edb079ea424810e70d50a291afd0ffadb30cf',
+    CHECKED: '25 Nov 2026',                                   // last version check (record 22137130: total 1, v1.0.1 latest), 10:40 UTC
     PERIOD: '2021_2024',
     PERIODS: ['2001_2005', '2006_2010', '2011_2015', '2016_2020', '2021_2024'],
     COMPONENTS: ['drained', 'burned'],
@@ -48,10 +49,7 @@
     if (!isObj(m.totals) || Object.keys(m.totals).sort().join() !== S.PERIODS.join()) return 'unexpected reporting periods';
     if (typeof m.sparse_rule !== 'string' || !m.sparse_rule.includes('not listed has no mapped organic soil')) return 'sparse rule missing';
     const ids = Object.keys(t.cells); if (!ids.length) return 'no cells';
-    if (m.fixture !== undefined) {   // preview fixture: the subset it holds, exactly
-      const sub = isObj(m.fixture) && Array.isArray(m.fixture.subset_cells) ? m.fixture.subset_cells : null;
-      if (!sub || !sub.length || !sub.every(inDomain) || new Set(sub).size !== sub.length || !ids.every(k => sub.includes(k))) return 'fixture subset malformed';
-    }
+    if (m.fixture !== undefined) return 'a preview fixture, not the full table';   // the release reads the whole table or nothing
     for (const id of ids) {
       const r = t.cells[id], bad = why => `malformed record ${id}: ${why}`;
       if (!inDomain(id)) return bad('id outside the 45 × 90 domain');
@@ -93,14 +91,12 @@
     return st.loading;
   }
   const ready = () => st.status === 'ok' && !!st.table;
-  const inSubset = id => !st.table.meta.fixture || st.table.meta.fixture.subset_cells.includes(id);
 
-  // { kind, text } for one cell and period; kind: unavailable | outside | no-soil | none | values
+  // { kind, text } for one cell and period; kind: unavailable | no-soil | none | values
   function cellText(id, period = S.PERIOD) {
     if (!ready()) return { kind: 'unavailable', text: st.status === 'loading' || st.status === 'idle' ? 'loading the soil table…' : 'unknown — the soil table is not available' + (st.why ? ` (${st.why})` : '') };
     if (!inDomain(id)) return { kind: 'unavailable', text: 'unknown — not a 4-degree cell' };
     if (!S.PERIODS.includes(period)) return { kind: 'unavailable', text: 'unknown — no such reporting period in this product' };
-    if (!inSubset(id)) return { kind: 'outside', text: 'unknown — this cell is not in the preview\'s fixture (a subset of the table); not “no organic soil”' };
     const rec = st.table.cells[id];
     if (!rec) return { kind: 'no-soil', text: 'no organic soil mapped in this cell by this model' };
     const p = rec.periods[period];
@@ -111,11 +107,10 @@
     if (p.coverage === 'incomplete') parts.push(`incomplete model coverage: source raster cells covering about ${fmt(p.incomplete_source_footprint_km2, 'km²')} within this 4° cell have missing estimates. Values sum the available raster cells`);
     return { kind: 'values', text: parts.join(' · ') };
   }
-  // layer class: unavailable | no-soil | outside | unknown | { zero: true, incomplete } | { bin, incomplete }
+  // layer class: unavailable | no-soil | unknown | { zero: true, incomplete } | { bin, incomplete }
   // Coverage is kept for zeros as for values (GPT preview review H1): a 0 summed over part of a cell is drawn as incomplete too.
   function cellClass(id, comp = st.comp, period = S.PERIOD) {
     if (!ready() || !S.COMPONENTS.includes(comp) || !S.PERIODS.includes(period) || !inDomain(id)) return 'unavailable';
-    if (!inSubset(id)) return 'outside';
     const rec = st.table.cells[id]; if (!rec) return 'no-soil';
     const p = rec.periods[period], s = p[comp];
     if (!rec.has_mapped_organic_soil && s.state === 'zero') return 'no-soil';
@@ -138,11 +133,10 @@
     const rows = S.PERIODS.map(p => `<li><b>${plabel(p)}</b> · ${esc(cellText(id, p).text)}</li>`).join('');
     return `<details class="soilper"><summary>Show all reporting periods</summary><p class="q">${PERIOD_WARN}</p><ul class="plist">${rows}</ul></details>`;
   }
-  const previewNote = () => st.table && st.table.meta.fixture ? ' <span class="q">· <b>preview fixture</b>: a subset of the table</span>' : '';
   function rowHtml(id) {
     const t = cellText(id);
-    if (t.kind !== 'values') return esc(t.text) + (t.kind === 'outside' ? previewNote() : '');
-    return `modelled, not measured · <b>2021–2024 average</b> · ${esc(t.text)} <span class="q">${CAVEAT} Source checked ${S.CHECKED}.</span>${previewNote()}${periodsHtml(id)}`;
+    if (t.kind !== 'values') return esc(t.text);
+    return `modelled, not measured · <b>2021–2024 average</b> · ${esc(t.text)} <span class="q">${CAVEAT} Source checked ${S.CHECKED}.</span>${periodsHtml(id)}`;
   }
   S.placeRow = id => [LABEL + ' · whole containing 4° cell', rowHtml(id)];
   S.inspectRows = id => [
@@ -170,7 +164,7 @@
       if (k === 'unknown') { fill = STYLE.unknownFill; stroke = STYLE.unknownStroke; what = 'unknown — no estimate for any part of this cell'; unknownCells++; }
       else if (k && k.zero) { fill = STYLE.clear; stroke = k.incomplete ? STYLE.incStroke : STYLE.zeroStroke; what = `0 assigned by this model (${st.comp})${k.incomplete ? ' · incomplete model coverage' : ''}`; drawnCells++; }
       else if (k && typeof k === 'object') { fill = fillFor(k.bin); stroke = k.incomplete ? STYLE.incStroke : STYLE.stroke; what = `${st.comp} ≈ ${fmt(st.table.cells[id].periods[S.PERIOD][st.comp].Mg, 't CO₂e per year')}${k.incomplete ? ' · incomplete model coverage' : ''}`; drawnCells++; }
-      else continue;   // no-soil, outside, unavailable: nothing drawn
+      else continue;   // no-soil, unavailable: nothing drawn
       out.push({ layer: 'soil', id, soil: k, fill, stroke, mat: matFor ? matFor(fill) : undefined, geom: cellGeom(id),
         label: `<div style="font:12px IBM Plex Mono,monospace"><b>${LABEL}</b> · cell ${id}<br>${esc(what)}<br><span style="color:#7f8da3">2021–2024 average · whole 4° cell · modelled</span></div>` });
     }
@@ -197,19 +191,19 @@
       `<li>${sw(fillFor(3), STYLE.incStroke)}violet outline: incomplete model coverage — filled, a sum over the available raster cells; hollow, a 0 over them</li>` +
       `<li>${sw(STYLE.unknownFill, STYLE.unknownStroke)}unknown: no estimate for the cell</li>` +
       `<li>${sw(STYLE.clear, STYLE.selStroke)}white outline: the selected cell</li>` +
-      `<li>${sw(STYLE.clear, 'rgba(0,0,0,0)')}not drawn: no organic soil mapped${st.table && st.table.meta.fixture ? ', or (this preview) not in the fixture' : ''}</li></ul>`;
+      `<li>${sw(STYLE.clear, 'rgba(0,0,0,0)')}not drawn: no organic soil mapped</li></ul>`;
   }
   function paint() {
     const tgl = $('tgl-soil'); if (!tgl) return;
     tgl.setAttribute('aria-checked', String(st.on));
     const s = $('s-soil'), o = $('o-soil'), k = $('soil-key');
     for (const b of document.querySelectorAll('#soil-comp button')) { const c = b.dataset.comp; b.setAttribute('aria-checked', String(st.on && st.comp === c)); b.disabled = !st.on; b.tabIndex = st.comp === c ? 0 : -1; }
-    if (!st.on) { s.textContent = 'off'; o.textContent = 'Off. Switch on to load the modelled 4° table (preview fixture).'; k.hidden = true; return; }
+    if (!st.on) { s.textContent = 'off'; o.textContent = 'Off. Switch on to load the modelled 4° table.'; k.hidden = true; return; }
     k.hidden = !ready(); if (ready()) k.innerHTML = keyHtml();
     if (st.status === 'loading' || st.status === 'idle') { s.textContent = 'loading'; o.textContent = 'Loading the modelled 4° table…'; return; }
     if (!ready()) { s.textContent = 'unknown'; o.textContent = `Unknown — the soil table is not available (${st.why}). Nothing is drawn.`; return; }
     s.textContent = 'on';
-    o.textContent = `${st.comp === 'drained' ? 'Drained' : 'Burned'} organic soils · 2021–2024 average · ${drawnCells} cells drawn${unknownCells ? ` and ${unknownCells} outlined as unknown` : ''}${st.table.meta.fixture ? ` (preview fixture: ${st.table.meta.fixture.subset_cells.length} of 4,050 cells)` : ''} · Glen et al. 2026 v1.0.1 · checked ${S.CHECKED}.`;
+    o.textContent = `${st.comp === 'drained' ? 'Drained' : 'Burned'} organic soils · 2021–2024 average · ${drawnCells} cells drawn${unknownCells ? ` and ${unknownCells} outlined as unknown` : ''} · Glen et al. 2026 v1.0.1 · checked ${S.CHECKED}.`;
   }
   S.paint = paint;
   function wire() {

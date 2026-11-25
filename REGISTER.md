@@ -650,3 +650,32 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **Cautions shown:** the authors advise against definitive area estimates from pixel counts (a relative indicator, not a measured total); years before 2011 are not reprocessed with the newer method; gross loss, not deforestation or a cause; the calendar years extend beyond the recorded journey.
 - **What we ship:** aggregates only, in the same context file as the FIRMS entry above.
 - **Commercial use:** CC BY 4.0 permits it with attribution; Mother Earth makes none.
+
+## WRI Land & Carbon Lab et al. — "Global organic soil disturbance and greenhouse gas emissions, 2001 to 2024: model outputs", version 1.0.1 (Zenodo record 22137130, DOI 10.5281/zenodo.22137130; concept 22137129) — Organic-soil emissions (modelled) optional layer and Everything-here row — **dated model; release candidate on branch `soil-release-rc`, not on the page until the release merge**
+- **Filed:** 25 Nov 2026 with the release candidate, on Chad's own go ("Go: prepare the soil release candidate."). The release merge and its hash are recorded here on release.
+- **Read:**
+  - by Claude, 24–25 Nov 2026: the Zenodo record metadata and version list (API);
+  - `readme_data.md` in full (24 Nov downloaded; 25 Nov rendered preview);
+  - `license_and_attribution.md` in full (25 Nov; manifest SHA-256 `65d86603…4c9d`);
+  - `release_manifest.csv` and `data_dictionary.csv`;
+  - the associated paper (Glen et al. 2026, *Frontiers in Environmental Science*, DOI 10.3389/fenvs.2026.1761716), §2.1–2.6, §3.1–3.2, §3.8–3.9 and §4.5, in full text.
+- **Downloaded:** on Chad's yes, through the browser pane, three files only, kept on the Mac and never in the repository:
+  - `organic_soil_emissions_1km_v1_0_1.zip` (212,800,018 B, SHA-256 `5c082884…a1473`);
+  - `organic_soil_cover_percent_1km.tif` (108,618,168 B, `7b35b59a…0e5e0e`);
+  - `tabular_data_v1_0_1.zip` (842,116 B, `3108fefe…f4a8`).
+  - All match Zenodo's MD5 and the release manifest's SHA-256.
+- **Licence and credit:** data and documentation CC BY 4.0 (read in full); model code GPL-3.0-only (not used). Preferred attribution as given on Sources. The creators and WRI do not endorse Mother Earth.
+- **What we compute:**
+  - `docs/research/soil-c1/soil_build.py` sums the ten 1 km maps (Mg CO₂e per 1 km cell per year) into Mother Earth's 4° cells by exact equal-area overlap on the maps' own CEA grid, with every input fail-closed checked;
+  - NaN is never summed, and the footprint of incomplete source cells is carried;
+  - states are decided before rounding, and values are stored to 6 significant figures.
+  - **Output:** `assets/soil/g4-soil-v1.0.1.json`, 790 cells, 684,135 B, SHA-256 `c5c01ff5a4300ace1e7348d6d25edb079ea424810e70d50a291afd0ffadb30cf`.
+  - These 4° totals are Mother Earth's, not the publishers' figures.
+- **Agreement with the publishers:** summed over the world, the map totals are about 0.06–0.08% higher for drainage (about 0.004% for fire) than the publishers' country and global tables and the paper. The publishers state that table totals and map sums may differ (administrative boundaries, area weights). The difference is documented, and its exact causes are not quantified (`docs/research/soil-c1/SOIL-C1-TABLES-CHECK-2026-11-25.md`).
+- **What is shown:**
+  - the 2021–2024 yearly average, drained and burned separately, never added, in t CO₂e per year per whole 4° cell, modelled and not measured;
+  - earlier periods per cell behind a disclosure, with no trend;
+  - zero is the model's zero; incomplete coverage is marked; an unavailable table is unknown, never zero.
+- **Cautions shown** (paper §4.5 and the data guide): fire conservative; drainage inferred; static infrastructure; no drainage age or rewetting; incomplete extraction coverage; threshold choice first-order; global scenario bounds 1.50–3.97 Gt (emission factors) and about 0.7–4.5 Gt (combined envelope), which are not cell uncertainties.
+- **Version check:** last checked 25 Nov 2026 10:40 UTC (one version, 1.0.1, `is_last`). Monthly while the publishers' open 30 m release is being prepared, then quarterly, and on any erratum. 1.0.1 is kept when a newer version is reviewed; the replacement is reviewed (diff of global and per-cell sums and states) before it is used.
+- **Commercial use:** CC BY 4.0 permits it with attribution; Mother Earth makes none.
