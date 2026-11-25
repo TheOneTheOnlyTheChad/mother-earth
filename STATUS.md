@@ -4,6 +4,12 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 19:15 UTC (clock reading) — **Tides dedication line live: merge `1cc3f87` on main, 37 of 37 served files verified; page only, no hub change** (page: Tides; Tides thread)
+- **Change:** `tides.html` only — "Dedicated to my friend Mark Tobias" as the last line of the page, under "Sources and method" (`<p class="dim">`). `tides.html` `77dd7829…a746`, 22,831 B. Packet `reviews/2026-11-25-tides-dedication-rc.md`.
+- **Review and approval:** GPT's OK relayed by Chad (no written review file); Chad's own line (25 Nov): "gpt happy i am happy: approved lets get it live", for `tides-dedication-rc` `2618182` (the only candidate put to him).
+- **Release:** `git merge --no-ff` → `1cc3f87` (tree = `2618182`), pushed 19:11:44 UTC. Served check in the browser pane 19:13:45 UTC against `reviews/evidence/2026-11-25-tides-dedication-manifest.json`: 37 checked, 37 ok. The line shows at the bottom of the live Tides page.
+- **Next (morning):** GPT's wording narrowing in Sources and REGISTER ("nothing is fetched" → "no tide observations or live feeds are fetched"); touches `sources.html`, so the Animals Tides pins need a narrow update.
+
 ## 25 Nov 19:05 UTC (clock reading) — **Tides released: merge `54642c5` on main, 37 of 37 served files verified live; page only, no hub change** (page: Tides; Tides thread)
 - **Filed unchanged:** `reviews/2026-11-25-tides-release-rc-gpt-review.md` (sha256 `e7f1cff5…9160`, relayed by Chad): release content PASS.
 - **Reconciled:** main `3b3dc4d` merged into `tides-nav-rc` → `a503def`; delta from GPT's reviewed `72e0011` was records only (`STATUS.md`, the filed review); all 37 manifest files byte-identical.
