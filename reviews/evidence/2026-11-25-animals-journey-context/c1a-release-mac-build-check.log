@@ -1,0 +1,36 @@
+Mac shell (Linux VM on Chad's Mac: Linux 6.8.0-149-generic aarch64, Python 3.10.12, 4 CPUs, 3906 MiB RAM), 2026-11-25T06:12Z
+Scripts from commit ff76240b28c20579e60ffa0ee63208846673326e, sha256:
+880dc87c3e9cb8b98bc1f01b374085d203fcd220976d39d002534189451a5ca3  build_journey_context.py
+59c9b2f462180c8dbd2f85352c2602bf79fc07e46ef5c3709d3f9c93a78a6a42  build_journey_context.test.py
+62e29621bdb2637a7c60a5de6955f316931f9710a18ef48fccb716b6a5b4a752  journey_context_firms_fetch.py
+4bdaf0a7d4cc06dc86b95d9b2a3bdbd517d6387b696b0a1f7fe9686d9468ab00  journey_context_verify.py
+6b67818b4fb2c334bce958f1b50a3a8d3e66fd69269357dee35650ffe922a21e  out/zebra-botswana-Z3866-context-R1.json
+$ /usr/bin/time -v /tmp/anvenv/bin/python -I build_journey_context.py --firms <private>/20261125T050326Z-firms-zebra --hansen <private>/hansen-GFC-2025-v1.13 --journey <journey file, sha256 8d00aa32…1bb6> --out out/zebra-botswana-Z3866-context-R1.json --check
+built in 18.1 s; peak resident memory 104.7 MiB (ru_maxrss raw 107208 KiB, platform linux); 7879 bytes; sha256 6b67818b4fb2c334bce958f1b50a3a8d3e66fd69269357dee35650ffe922a21e
+CHECK OK: identical
+	User time (seconds): 6.04
+	System time (seconds): 8.94
+	Percent of CPU this job got: 82%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:18.17
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 107208
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 47426
+	Voluntary context switches: 4411
+	Involuntary context switches: 252
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 72
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
+exit 0
+$ python -I build_journey_context.test.py
+
+17 passed, 0 failed

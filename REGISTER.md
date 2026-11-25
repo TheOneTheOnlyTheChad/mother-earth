@@ -630,3 +630,23 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **Data status:** observed satellite imagery, shown as a picture. Known limits stated in Sources: faint local damage in a late scan of a progressive JPEG may pass the checks; the night-side lights are not current.
 - **Open:** D3 above; the Data Policy PDF unread for this product; morning and afternoon listing-delay samples; validation limits rest on few frames.
 - **Commercial use:** CC BY 4.0 permits it with attribution; Mother Earth makes none.
+
+## NASA FIRMS — MODIS standard processing (`MODIS_SP`) area archive, grid cells 17_50 and 17_51 (20–28° E, 18–22° S), 25 Oct 2007 to 22 Oct 2008 — historical regional land context for the zebra journey — **dated archive; aggregated counts on the Animals page once released**
+- **Filed:** with the Animals journey context release merge (C1a), on Chad's own Approve line (date and line recorded in STATUS at the merge).
+- **Read:** 25 Nov 2026 (area API, availability, missing-data list); extraction run by Chad in Terminal at 05:03 UTC with the reviewed extractor (`62e29621…a752`): 73 windows, 81 requests, 21,771 rows, about 729 transactions against 5,000 per 10 minutes. Verified by `journey_context_verify.py` (`4bdaf0a7…ab00`). Raw CSVs and the fetch manifest (`b1d97b55…482d`) kept on the Mac in `research/animals-journey-context/`, never in the repository. The key is read by the script from the private key file and is in no stored response.
+- **Request method:** none at run time; no refresh. A closed period.
+- **Product wording:** "MODIS Collection 6 standard processing; file version 6.03" (`6.03` read as Collection 6 standard processing per NASA GIBS's value map, GPT's read of 25 Nov 2026).
+- **What we count:** presumed vegetation-fire detections (type 0), all confidence levels, Terra and Aqua, between the first and last retained fixes rounded down to whole minutes (25 Oct 2007 08:01 to 22 Oct 2008 23:00 UTC), in the half-open union of the two cells; identical rows dropped; rows sharing an identity but differing elsewhere stop the build. Result: 21,744. Left out: 3 of type 2, 22 outside the period, 2 outside the cells.
+- **Gaps:** no MODIS dates listed in the provider's missing-data table for the period (list fixture `8b9c8d5d…82be`). The list does not describe cloud.
+- **Terms and acknowledgement:** as for the FIRMS NRT entry above: the LANCE sentence in its required form and the local-scale caveat. Both sit in the block on the zebra card (the Animals page has no footer) and in Sources.
+- **What we ship:** aggregates only, in `assets/animals/zebra-botswana-Z3866-context-R1.json` (`6b67818b…a21e`), built offline by `phase1/animals/build_journey_context.py` and reproduced byte for byte with `--check`.
+- **Commercial use:** NASA data, open sharing; Mother Earth makes none.
+
+## Hansen/UMD/Google/USGS/NASA — Global Forest Change 2000–2025, version 1.13, tiles 10S_020E and 20S_020E (`lossyear`, `treecover2000`, `datamask`) — historical regional land context for the zebra journey — **dated product; aggregated areas on the Animals page once released**
+- **Filed:** with the Animals journey context release merge (C1a), on Chad's own Approve line.
+- **Downloaded:** by Chad, 25 Nov 2026, with `journey_context_hansen_fetch.py` (`1c5c63d1…99ad`): six whole files, 976.6 MB, each checked against its published length and MD5, no retries. Kept on the Mac in `research/animals-journey-context/hansen-GFC-2025-v1.13/`, never in the repository. Full sha256 of each file pinned in the builder.
+- **Licence and credit:** CC BY 4.0; credit "Source: Hansen/UMD/Google/USGS/NASA", shown with the figure and in Sources.
+- **What we compute:** for the calendar years 2007 and 2008, pixels mapped as land with tree cover in 2000 of at least 30 % (vegetation taller than 5 m) whose loss year is that year, summed with each row's WGS84 ellipsoidal pixel area. Result: about 145.1 ha (2007) and 99.9 ha (2008). Land, water and no-data areas reported separately; no-data never counts as zero loss.
+- **Cautions shown:** the authors advise against definitive area estimates from pixel counts (a relative indicator, not a measured total); years before 2011 are not reprocessed with the newer method; gross loss, not deforestation or a cause; the calendar years extend beyond the recorded journey.
+- **What we ship:** aggregates only, in the same context file as the FIRMS entry above.
+- **Commercial use:** CC BY 4.0 permits it with attribution; Mother Earth makes none.
