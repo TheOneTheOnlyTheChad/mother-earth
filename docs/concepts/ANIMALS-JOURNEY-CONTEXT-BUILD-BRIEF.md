@@ -1,6 +1,6 @@
 # Animals journey context: build brief (stage C1, zebra first)
 
-25 Nov 2026 03:48 UTC (clock reading) · rev 1 · Animals thread · for GPT, then Chad's go · **brief only: nothing is built**
+25 Nov 2026 03:48 UTC (clock reading) · rev 1.1 (§4 tests and §5 order updated after the pilot) · Animals thread · for GPT, then Chad's go · **brief only: nothing is built**
 
 Based on `ANIMALS-JOURNEY-CONTEXT-EVIDENCE.md` rev 1. The design follows the proposal as corrected by GPT's review and Chad's decisions of 25 Nov.
 
@@ -24,13 +24,14 @@ Based on `ANIMALS-JOURNEY-CONTEXT-EVIDENCE.md` rev 1. The design follows the pro
 > **Historical regional land context**
 > **Recorded journey:** 25 October 2007 to 22 October 2008 (UTC).
 > **Area used for this context:** two 4° grid cells, 20–28° E, 18–22° S, about 371,700 km². This is far larger than the area the zebra used.
-> **Fire detections (NASA FIRMS, MODIS):** `n` detections from 25 Oct 2007 08:01 to 22 Oct 2008 23:00 UTC in that area. A detection marks a satellite pixel with an active fire; it is not a count of fires, and cloud hides some. [Coverage line: "No days with missing MODIS data are listed for this period" / the named gap days / "Incomplete: …"]
+> **Fire detections (NASA FIRMS, MODIS standard processing, version as given in the file):** `n` detections from 25 Oct 2007 08:01 to 22 Oct 2008 23:00 UTC in that area. A detection marks a satellite pixel with an active fire; it is not a count of fires, and cloud hides some. [Coverage line: "No days with missing MODIS data are listed for this period" / the named gap days / "Incomplete: …"]
 > **Mapped tree-cover loss (Hansen/UMD/Google/USGS/NASA, v1.13):** about `x` ha in the calendar years 2007 and 2008 (these years extend beyond the recorded journey), where tree cover in 2000 was at least 30 %. A relative indicator, not a measured total; years before 2011 use an older method.
 > These are regional observations. They do not show where the zebra went, what it encountered or how it was affected.
 
 ## 4. Tests (new suite `animals-context-ui` and builder tests; existing suites unchanged)
 
 GPT's cases, each with a deliberate break:
+- unpadded `acq_time` (`919` is 09:19) and a CSV with no final newline;
 - endpoint minutes (a detection one minute before the first fix is excluded, one at the last fix's minute is included);
 - part-month labels at both ends;
 - calendar-year mismatch wording sits next to the loss value;
@@ -50,8 +51,7 @@ Regression on fresh main with every pin as it is: `BASE_MAIN`, `TL_MAIN` (Timeli
 
 ## 5. Order from here
 
-1. Chad runs the FIRMS pilot (one command; evidence §4).
-2. Claude adds the measured results to the evidence record (rev 1.1) and sets the zebra extraction's final budget.
-3. GPT reviews the evidence and this brief.
-4. Chad's go for C1a: the zebra extraction run by Chad, the tile download by Chad, then the build on a branch.
-5. Candidate, GPT, Chad's lines. C1b only after that, on its own go.
+1. Done: Chad ran the FIRMS pilot (25 Nov); results and the zebra's final budget are in evidence §4a (rev 1.1).
+2. GPT reviews the evidence and this brief.
+3. Chad's go for C1a: the zebra extraction run by Chad, the tile download by Chad, then the build on a branch.
+4. Candidate, GPT, Chad's lines. C1b only after that, on its own go.

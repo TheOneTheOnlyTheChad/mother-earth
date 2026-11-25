@@ -1,6 +1,6 @@
 # Animals journey context: evidence record (Nature context Workstream C)
 
-25 Nov 2026 03:48 UTC (clock reading) · rev 1 · Animals thread · for GPT · **evidence step only: nothing is built. The FIRMS pilot (§4) waits for Chad's Terminal run. No large download made; no corridor extraction.**
+25 Nov 2026 03:55 UTC (clock reading) · **rev 1.1** (adds §4a, the pilot's measured results, and the zebra extraction's final budget; the rest of rev 1 is unchanged) · Animals thread · for GPT · **evidence step only: nothing is built. No large download; no corridor extraction.**
 
 Follows the proposal `docs/concepts/ANIMALS-JOURNEY-CONTEXT-PROPOSAL.md` rev 1 and GPT's review `reviews/2026-11-25-animals-journey-context-proposal-gpt-review.md` (filed unchanged). GPT's corrections A to E are folded in here and in the build brief `docs/concepts/ANIMALS-JOURNEY-CONTEXT-BUILD-BRIEF.md`. No separate proposal revision is made.
 
@@ -77,9 +77,46 @@ Claude reproduced these cells and areas, and they agree with GPT's independent f
 - Output goes to the private Mac folder `research/animals-journey-context/<stamp>-firms-pilot/`: raw CSVs and a manifest with no key, giving bytes, sha256, rows, acquisition dates, satellites, `version` values, timings, the transaction difference and whether the repeat matched. Nothing goes in the repository.
 - **Measures:** the transaction cost per area request, whether `type` is present, `version` values, repeatability, timing.
 
-**The full zebra extraction (build stage, not now):** 73 area requests (364 days ÷ 5, the last one 4 days) plus 3 status and availability requests = **76 HTTP requests**, about 4 minutes at 3 s apart. Ceiling: stop at the first failure, or when the pilot-measured cost times the requests done would pass 500 transactions. Private cache: 73 CSVs, expected to be small (the pilot sets the expected size).
+**The full zebra extraction (build stage, not now): final budget in §4a.**
 
 **The corridor (not authorised now):** 585 area requests for 2017–2024 over `-120,38,-116,42`. It gets its own budget line and Chad's go after the zebra build.
+
+## 4a. The pilot's measured results (run by Chad in Terminal, 25 Nov 2026, 03:50:48 UTC)
+
+Chad ran the pilot script unchanged (sha256 `91be1a2e…a027`) and pasted its six printed lines into the thread. Claude read the output folder through the Mac shell. The folder is private, Mac only: `research/animals-journey-context/20261125T035048Z-firms-pilot/`, with the manifest's sha256 `b948cb6e…d3`.
+
+| # | Request | Status | Bytes | Time | Result |
+|---|---|---|---|---|---|
+| 1 | key status | 200 | 96 | 6.8 s | `current_transactions` 0, limit 5,000 per "10 minutes" |
+| 2 | `MODIS_SP` availability | 200 | 56 | 1.2 s | `MODIS_SP,2000-11-01,2026-08-31`: the standard record covers the zebra's and the corridor's periods |
+| 3 | area 25–29 Oct 2007 | 200 | 1,011 | 2.0 s | 11 detections, 25–26 Oct, Terra and Aqua |
+| 4 | area 30 Oct – 3 Nov 2007 | 200 | 1,881 | 2.4 s | 22 detections, 31 Oct – 3 Nov |
+| 5 | request 3 again | 200 | 1,011 | 1.1 s | **byte-identical to 3** (sha256 `25b73082…9071` both) |
+| 6 | key status | 200 | 97 | 1.7 s | `current_transactions` 31 |
+
+**What it settles:**
+- **Header**, exactly: `latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,instrument,confidence,version,bright_t31,frp,daynight,type`. **The `type` field is present**, so the type-0 rule in §3 applies. All 33 pilot rows are `type` 0. The builder still counts other types separately if they appear.
+- **`version` reads `6.03` on every row.** The FAQ says Collection 6.1 is current. The file's own value is recorded as found and shown as "MODIS Collection 6 standard processing, version 6.03 as given in the file", not as 6.1. **Open point for GPT:** whether to state the collection beyond the file's value.
+- **`acq_time` is unpadded** (`919` = 09:19 UTC). The builder pads it to four digits before any comparison. A test covers it.
+- **Files have no final newline.** Rows are counted by a CSV reader, never by line count: the shell's `wc -l` gave 10 and 21 where the CSV holds 11 and 22.
+- **No duplicates**, and all 33 rows fall inside the half-open union. None falls before 08:01 on 25 Oct (the first is 23:53 that day), so the endpoint filter removed nothing here. The dedupe and clipping rules stay as written.
+- **Confidence** ran 22–100 with day and night rows; no filter is applied (§3).
+- **Repeatable:** the repeated request gave the same bytes.
+- **Transactions:** 31 used across the six requests, an upper bound because the live hub may have used the key in those 22 seconds. The split between requests isn't published, so the budget below assumes the worst case: all 31 on the three area requests, about 10.3 each.
+- **No key** appears in anything written. The manifest's "asked" fields read `[KEY]`; the only long hex strings in it are sha256 values.
+
+**Final budget for the full zebra extraction (C1a, only after GPT and Chad's go):**
+- 73 area requests, 25 Oct 2007 to 22 Oct 2008 in 5-day windows (the last 4 days), over exactly `20,-22,28,-18`, `MODIS_SP`.
+- Plus one availability request and key-status reads before the first area request and after every 15th: 5 status reads. That is **79 HTTP requests**.
+- One at a time, 3 s apart, 60 s timeout, no automatic retries: about 4–5 minutes.
+- **Transactions:** worst case 73 × 10.3 ≈ **755**, against 5,000 per 10 minutes.
+- **Stop rules:**
+  - before starting, or at any status read, if 2,000 or more are already used, which leaves the live hub (about one request every 15 minutes) far inside the limit;
+  - at the first failed or non-CSV response; the extraction is then marked incomplete and nothing is built from it;
+  - if any status read is 4,000 or more.
+- **Private cache:** about 73 CSVs. The pilot's 33 rows for 10 days took 2.9 KB, so the year is expected at well under 1 MB; the extraction stops if the cache passes 20 MB.
+- Same key handling as the pilot.
+- **The corridor is not included:** 585 requests, worst case about 6,000 transactions, which would itself need spreading over at least two 10-minute windows. It gets its own budget line and go.
 
 ## 5. Hansen / UMD Global Forest Change: what was read and measured
 
@@ -117,7 +154,7 @@ Claude reproduced these cells and areas, and they agree with GPT's independent f
 
 ## 7. Open, for GPT
 
-1. The pilot itself (§4): its result goes back to GPT with the build brief's final budget.
+1. The pilot's results and the zebra's final budget (§4a). Whether to describe the MODIS collection beyond the file's `6.03`.
 2. Whole-tile download versus row reads (§5).
 3. The 30 % canopy threshold.
 4. Whether to show per-month fire counts for the zebra, or only the interval total with the part-months named. The brief proposes the total plus a 13-row month table: two part-months and eleven whole months.
