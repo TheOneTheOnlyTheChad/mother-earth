@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 06:58 UTC (clock reading) — **Animals journey context C1a RELEASED: zebra historical regional land context live on the Animals page (merge `64e9cf59`) on Chad's Approve line; served hashes match; scoped live check passed; live smoke to GPT.** (pages: Animals, Sources; Animals thread)
+- **Chad, 25 Nov:** "Approve: merge animals-journey-context-proposal at `16133f23…ee742ee19d`… preserving current main, with served-hash verification and the scoped live check. No hub change; corridor remains parked." GPT's release recheck PASS, filed unchanged (`reviews/2026-11-25-animals-journey-context-c1a-gpt-release-recheck.md`, `c8dd2124…cdd4`).
+- **Merge** `64e9cf59` (parents `9a06ba33`, `16133f23`), 06:54:07 UTC; tree equals the reviewed head; no hub change.
+- **Served (06:56:07 UTC):** `animals.html`, `animals-context.js`, `style.css`, the context file, `sources.html` and `REGISTER.md` all match the reviewed hashes. REGISTER's two new entries are then completed with the merge identity (this commit).
+- **Live check (06:57):** block idle until near screen, one request, verified; 21,744 detections; about 245.0 ha beside the calendar-year wording; disclosures closed; closing sentence and credits present; Sources paragraph after the zebra's. Not checked: phone, Safari, screen reader, print, 200 % zoom.
+- **Record:** `reviews/2026-11-25-animals-journey-context-c1a-release.md`, with the live-smoke request to GPT. Branch kept until close-out. Corridor (C1b) parked.
+
 ## 25 Nov 06:33 UTC (clock reading) — **Animals journey context C1a: GPT's candidate review filed (PASS for the feature; four release items); final release tree prepared and tested on fresh main; back to GPT for the bounded release recheck. Not merged; corridor parked.** (pages: Animals and Sources, branch only; Animals thread; branch `animals-journey-context-proposal`)
 - **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-c1a-gpt-review.md` (sha256 `b4c1bb3d…ec44`). Chad accepts the near-screen loading, the acknowledgement in the block, "about 245.0 ha" and the two disclosed area bases.
 - **Memory:** the build ran in a Linux VM on the Mac, not on macOS; the old "105 MB" was MiB. The builder now labels by platform; re-measured 104.7 MiB (raw 107,208 KiB; `/usr/bin/time` agrees), `--check` identical.

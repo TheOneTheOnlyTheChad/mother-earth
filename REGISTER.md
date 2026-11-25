@@ -631,8 +631,8 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **Open:** D3 above; the Data Policy PDF unread for this product; morning and afternoon listing-delay samples; validation limits rest on few frames.
 - **Commercial use:** CC BY 4.0 permits it with attribution; Mother Earth makes none.
 
-## NASA FIRMS — MODIS standard processing (`MODIS_SP`) area archive, grid cells 17_50 and 17_51 (20–28° E, 18–22° S), 25 Oct 2007 to 22 Oct 2008 — historical regional land context for the zebra journey — **dated archive; aggregated counts on the Animals page once released**
-- **Filed:** with the Animals journey context release merge (C1a), on Chad's own Approve line (date and line recorded in STATUS at the merge).
+## NASA FIRMS — MODIS standard processing (`MODIS_SP`) area archive, grid cells 17_50 and 17_51 (20–28° E, 18–22° S), 25 Oct 2007 to 22 Oct 2008 — historical regional land context for the zebra journey — **dated archive; aggregated counts on the Animals page since 25 Nov 2026 (release `64e9cf59`)**
+- **Filed:** 25 Nov 2026 with the Animals journey context release merge (C1a), `64e9cf59` (06:54:07 UTC), on Chad's own Approve line naming `animals-journey-context-proposal` at `16133f23`; GPT's release recheck PASS.
 - **Read:** 25 Nov 2026 (area API, availability, missing-data list); extraction run by Chad in Terminal at 05:03 UTC with the reviewed extractor (`62e29621…a752`): 73 windows, 81 requests, 21,771 rows, about 729 transactions against 5,000 per 10 minutes. Verified by `journey_context_verify.py` (`4bdaf0a7…ab00`). Raw CSVs and the fetch manifest (`b1d97b55…482d`) kept on the Mac in `research/animals-journey-context/`, never in the repository. The key is read by the script from the private key file and is in no stored response.
 - **Request method:** none at run time; no refresh. A closed period.
 - **Product wording:** "MODIS Collection 6 standard processing; file version 6.03" (`6.03` read as Collection 6 standard processing per NASA GIBS's value map, GPT's read of 25 Nov 2026).
@@ -642,8 +642,8 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **What we ship:** aggregates only, in `assets/animals/zebra-botswana-Z3866-context-R1.json` (`6b67818b…a21e`), built offline by `phase1/animals/build_journey_context.py` and reproduced byte for byte with `--check`.
 - **Commercial use:** NASA data, open sharing; Mother Earth makes none.
 
-## Hansen/UMD/Google/USGS/NASA — Global Forest Change 2000–2025, version 1.13, tiles 10S_020E and 20S_020E (`lossyear`, `treecover2000`, `datamask`) — historical regional land context for the zebra journey — **dated product; aggregated areas on the Animals page once released**
-- **Filed:** with the Animals journey context release merge (C1a), on Chad's own Approve line.
+## Hansen/UMD/Google/USGS/NASA — Global Forest Change 2000–2025, version 1.13, tiles 10S_020E and 20S_020E (`lossyear`, `treecover2000`, `datamask`) — historical regional land context for the zebra journey — **dated product; aggregated areas on the Animals page since 25 Nov 2026 (release `64e9cf59`)**
+- **Filed:** 25 Nov 2026 with the Animals journey context release merge (C1a), `64e9cf59` (06:54:07 UTC), on Chad's own Approve line naming `animals-journey-context-proposal` at `16133f23`; GPT's release recheck PASS.
 - **Downloaded:** by Chad, 25 Nov 2026, with `journey_context_hansen_fetch.py` (`1c5c63d1…99ad`): six whole files, 976.6 MB, each checked against its published length and MD5, no retries. Kept on the Mac in `research/animals-journey-context/hansen-GFC-2025-v1.13/`, never in the repository. Full sha256 of each file pinned in the builder.
 - **Licence and credit:** CC BY 4.0; credit "Source: Hansen/UMD/Google/USGS/NASA", shown with the figure and in Sources.
 - **What we compute:** for the calendar years 2007 and 2008, pixels mapped as land with tree cover in 2000 of at least 30 % (vegetation taller than 5 m) whose loss year is that year, summed with each row's WGS84 ellipsoidal pixel area. Result: about 145.1 ha (2007) and 99.9 ha (2008). Land, water and no-data areas reported separately; no-data never counts as zero loss.
