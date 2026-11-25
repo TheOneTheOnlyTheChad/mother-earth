@@ -9,7 +9,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 - **Context file** `assets/animals/zebra-botswana-Z3866-context-R1.json` sha256 `6b67818b…a21e`: 21,744 presumed vegetation-fire detections; mapped tree-cover loss about 245.0 ha (2007 145.1, 2008 99.9). Rebuilt identically on the Mac with `--check`.
 - **Page:** one block in the zebra card (`animals-context.js`, pinned, loads on screen); eight added stylesheet lines.
 - **Controls:** new UI suite 30/0 with 12 breaks caught; builder 16/0; Animals suites 282/0, 71/0, 102/0; hub alignment 6/0. No pin moved.
-- **Record:** `reviews/2026-11-25-animals-journey-context-c1a-rc.md`; Mac `_review/animals-journey-context-c1a/`.
+- **Record:** `reviews/2026-11-25-animals-journey-context-c1a-rc.md`; Mac `ChatGPT/Mother Earth/animals-journey-context-c1a/`.
 
 ## 25 Nov 04:32 UTC (clock reading) — **Animals journey context: GPT's targeted extractor review filed (HOLD on H1, H2); both fixed on the branch with focused offline controls; back to GPT for recheck. Not run; no tiles downloaded; corridor parked.** (page: none; Animals thread; branch `animals-journey-context-proposal` `0fce44a`)
 - **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-extractor-gpt-review.md` (sha256 `e8818215…cafd`).

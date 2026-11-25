@@ -81,7 +81,7 @@
   - the Hansen credit, with CC BY 4.0 linked;
   - the local-scale caveat.
   - The Animals page has no footer, so the acknowledgement sits in the block. The evidence record assumed a footer.
-- Screenshots (desktop and 390 px, disclosures closed and open) are in the Mac review folder.
+- Screenshots (desktop and 390 px, disclosures closed and open) are in the Mac review folder `ChatGPT/Mother Earth/animals-journey-context-c1a/`.
 
 ## 4. Tests
 
