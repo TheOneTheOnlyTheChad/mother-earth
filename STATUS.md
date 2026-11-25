@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 03:55 UTC (clock reading) — **Animals journey context: FIRMS pilot run by Chad (Terminal, 03:50 UTC); results and the zebra's final budget in the evidence record rev 1.1; package to GPT. Nothing built.** (page: none; Animals thread; branch `animals-journey-context-proposal` `2c19327`)
+- **Pilot:** six requests, all 200.
+  - 33 MODIS detections in two 5-day windows.
+  - The repeated request was byte-identical.
+  - The `type` field is present; `version` reads `6.03`; `acq_time` is unpadded.
+  - 31 transactions used in total (upper bound); no key in any output.
+  - Raw files stay private on the Mac (`research/animals-journey-context/20261125T035048Z-firms-pilot/`).
+- **Zebra extraction budget (C1a, not run):** 79 requests, worst case about 755 transactions against 5,000 per 10 minutes. Stops at 2,000 already used, at the first failure, or past 20 MB.
+- **For GPT:** Mac `_review/animals-journey-context-evidence/read/` (evidence rev 1.1, build brief rev 1.1, proposal, GPT's earlier review, pilot script, pilot manifest; hashes equal to the branch).
+
 ## 25 Nov 03:49 UTC (clock reading) — **Animals journey context: Chad's decisions and evidence-step go; GPT's proposal review filed; evidence record and build brief written; FIRMS pilot script ready on the Mac for Chad's Terminal run. Nothing built; no key used yet; no large download.** (page: none; Animals thread; branch `animals-journey-context-proposal` `9209abd`)
 - **Chad, 25 Nov:** his standing dated-data exception covers historical journey context; J-D2 C (zebra and East Walker only), J-D3 A subject to evidence, J-D4 A, J-D5 B, J-D6 A; go for the bounded evidence step with GPT's corrections folded in; exact budget before a small zebra pilot; no full corridor extraction.
 - **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-proposal-gpt-review.md` (sha256 `0ad6893b…a8`).
