@@ -73,19 +73,16 @@ def month_rows(first_min, last_min):
 def in_union(lat, lon): return S <= lat < N and W <= lon < E
 def cell_of(lat, lon): return f'{math.floor((lat + 90) / 4)}_{math.floor((lon + 180) / 4)}'
 
-def fires(firms_dir, first, last):
-    problems = verify.verify(firms_dir)
-    if problems: raise Refuse('the FIRMS extraction is not usable: ' + '; '.join(problems[:5]))
-    mraw = open(os.path.join(firms_dir, 'manifest.json'), 'rb').read(); m = json.loads(mraw)
+def count_fires(windows, first, last):
+    """Pure counting over [(start_date, days, csv_text)]: the rules of the record, testable without any provider file."""
     first_min = first.replace(second=0, microsecond=0); last_min = last.replace(second=0, microsecond=0)
     months = month_rows(first_min, last_min)
     seen, total, other_types, dup, outside_t, outside_u = {}, 0, {}, 0, 0, 0
     by_sat, by_cell, versions = {}, {c: 0 for c in CELLS}, set()
-    for w in m['windows']:
-        text = open(os.path.join(firms_dir, w['file']), 'rb').read().decode('utf-8')
+    for start, days, text in windows:
         for r in csv.DictReader(io.StringIO(text)):
-            if fetch.bad_row([r[k] for k in fetch.HEADER], date.fromisoformat(w['start']), date.fromisoformat(w['start']) + timedelta(days=w['days'] - 1)):
-                raise Refuse(f"{w['file']}: a row fails the extractor's checks")
+            if fetch.bad_row([r[k] for k in fetch.HEADER], start, start + timedelta(days=days - 1)):
+                raise Refuse(f'window {start}: a row fails the extractor\'s checks')
             key = (r['latitude'], r['longitude'], r['acq_date'], r['acq_time'].zfill(4), r['satellite'])
             full = tuple(r[k] for k in fetch.HEADER)
             if key in seen:
@@ -101,6 +98,16 @@ def fires(firms_dir, first, last):
             ym = at.strftime('%Y-%m'); [mo for mo in months if mo['from_utc'][:7] == ym][0]['count'] += 1
     if sum(mo['count'] for mo in months) != total: raise Refuse('the monthly rows do not sum to the total')
     if sum(by_cell.values()) != total: raise Refuse('the per-cell counts do not sum to the total')
+    return {'first_min': first_min, 'last_min': last_min, 'months': months, 'total': total, 'other_types': other_types, 'dup': dup,
+            'outside_t': outside_t, 'outside_u': outside_u, 'by_sat': by_sat, 'by_cell': by_cell, 'versions': versions}
+
+def fires(firms_dir, first, last):
+    problems = verify.verify(firms_dir)
+    if problems: raise Refuse('the FIRMS extraction is not usable: ' + '; '.join(problems[:5]))
+    mraw = open(os.path.join(firms_dir, 'manifest.json'), 'rb').read(); m = json.loads(mraw)
+    c = count_fires([(date.fromisoformat(w['start']), w['days'], open(os.path.join(firms_dir, w['file']), 'rb').read().decode('utf-8')) for w in m['windows']], first, last)
+    first_min, last_min, months, total = c['first_min'], c['last_min'], c['months'], c['total']
+    other_types, dup, outside_t, outside_u, by_sat, by_cell, versions = c['other_types'], c['dup'], c['outside_t'], c['outside_u'], c['by_sat'], c['by_cell'], c['versions']
     g = m['gap_list']
     return {
         'product': 'NASA FIRMS active fire detections, MODIS standard processing (MODIS_SP)',
