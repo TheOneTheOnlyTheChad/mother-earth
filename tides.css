@@ -1,0 +1,79 @@
+/* Mother Earth — Tides explorer. Page-scoped: every rule starts at body.tides. The shared style.css is loaded unchanged. */
+body.tides{overflow:auto}
+body.tides .top{position:sticky;top:0;z-index:40}
+@media (max-width:720px){body.tides .top{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"t m" "v v"}}   /* no clock on this page: two cells in the first row */
+body.tides .tdmain{max-width:1320px;margin:0 auto;padding:16px 16px 80px;font-size:15px;line-height:1.55}
+body.tides .tdmain h2{font:700 26px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;margin:4px 0 8px}
+body.tides .tdmain h3{font:600 17px/1.2 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:18px 0 6px}
+body.tides .td-model{margin:0 0 8px;padding:8px 10px;border:1px solid var(--line-strong);background:var(--card);font-size:13px;color:var(--fg)}
+body.tides .td-model .ev{margin-right:8px}
+body.tides .td-lede{margin:0 0 14px;max-width:80ch;color:#c9d3e0}
+body.tides .dim{color:var(--dim)}
+body.tides .td-small{font-size:12px;margin:6px 0 0}
+body.tides .td-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;margin:0}
+
+body.tides .td-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);grid-template-areas:"scene side" "ctl side";gap:14px 18px;align-items:start}
+body.tides .td-box{grid-area:scene;position:relative;border:1px solid var(--line);background:#05070b;overflow:hidden;min-width:0}
+body.tides .td-scene{width:100%;height:clamp(340px,58vh,620px);touch-action:pan-y}
+body.tides .td-box[data-three="none"] .td-scene{display:none}
+body.tides .td-3d{margin:0;padding:6px 10px;font-size:12px;color:var(--dim);border-top:1px solid var(--line);background:var(--panel);position:relative;z-index:3}
+body.tides .td-tag,body.tides .td-handle{position:absolute;left:0;top:0;z-index:2;font:600 12px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--fg);white-space:nowrap}
+body.tides .td-tag[hidden],body.tides .td-handle[hidden]{display:none}
+body.tides .td-tag{pointer-events:none;margin:-34px 0 0 -50px;width:100px;text-align:center;text-shadow:0 0 4px #000,0 0 2px #000}
+body.tides .td-handle{all:unset;position:absolute;left:0;top:0;z-index:2;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;cursor:grab;touch-action:none;box-sizing:border-box;border:1.5px dashed rgba(255,179,71,.75)}
+body.tides .td-handle.drag{cursor:grabbing;border-style:solid}
+body.tides .td-handle:hover{border-color:var(--accent);background:rgba(255,179,71,.08)}
+body.tides .td-handle:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+body.tides .td-handle span{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font:600 12px/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);white-space:nowrap;text-shadow:0 0 4px #000,0 0 2px #000}
+
+body.tides .td-ctl{grid-area:ctl;border:1px solid var(--line);background:var(--card);padding:12px 14px;min-width:0}
+body.tides .td-row{margin:0 0 12px;border:0;padding:0;min-width:0}
+body.tides .td-row label{display:block;font-size:13px;margin-bottom:4px}
+body.tides #td-slider{width:100%;height:32px;margin:0;accent-color:var(--accent)}
+body.tides .td-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+body.tides .td-ctl button{min-height:44px;padding:0 14px;border:1px solid var(--line-strong);background:rgba(140,170,200,.06);color:var(--fg);font:600 14px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+body.tides .td-ctl button:hover{background:rgba(140,170,200,.14)}
+body.tides .td-ctl button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(255,179,71,.12)}
+body.tides .td-modes legend{font-size:13px;padding:0;margin-bottom:4px}
+body.tides .td-modes label{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:0 16px 0 0;font-size:14px;cursor:pointer}
+body.tides .td-modes input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
+body.tides .td-cycle{margin:0;font-size:13px;font-variant-numeric:tabular-nums}
+
+body.tides .td-side{grid-area:side;min-width:0}
+body.tides .td-fig{margin:0;border:1px solid var(--line);background:var(--card);padding:8px}
+body.tides .td-xsec{display:block;width:100%;height:auto;max-height:340px}
+body.tides .td-fig figcaption{display:flex;flex-direction:column;gap:4px;font-size:12px;line-height:1.4;padding:6px 2px 0}
+body.tides .td-key{display:flex;align-items:center;gap:8px;color:var(--fg)}
+body.tides .td-key i{flex:0 0 22px;height:0;border-top:2.5px solid #53cfe6}
+body.tides .td-key i.k-ref{border-top:1.5px dashed #e8eef6}
+body.tides .td-readout{margin:10px 0 6px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--fg)}
+body.tides .td-explain{margin:0 0 8px;font-size:14.5px;line-height:1.55;color:#c9d3e0}
+body.tides .x-earth{fill:#1d3347;stroke:#4a6a86;stroke-width:.012}
+body.tides .x-water{fill:rgba(83,207,230,.26);stroke:none}
+body.tides .x-surf{fill:none;stroke:#53cfe6;stroke-width:.03;stroke-linejoin:round}
+body.tides .x-ref{fill:none;stroke:#e8eef6;stroke-width:.014;stroke-dasharray:.06 .05}
+body.tides .x-orbit{fill:none;stroke:rgba(127,141,163,.5);stroke-width:.01}
+body.tides .x-lbl{font:600 .15px var(--display);letter-spacing:.01em;fill:#d6dde8;text-transform:uppercase}
+body.tides .x-moon circle{fill:#b9bcc2;stroke:#ffb347;stroke-width:.02}
+body.tides .x-sun circle{fill:#f2c35a}
+body.tides .x-moon.off circle,body.tides .x-sun.off circle{fill:none;stroke:#7f8da3;stroke-width:.014;stroke-dasharray:.05 .04}
+body.tides .x-moon.off .x-lbl,body.tides .x-sun.off .x-lbl{fill:#7f8da3}
+
+body.tides .td-more{margin:14px 0 0;border:1px solid var(--line);background:var(--card);padding:0 14px}
+body.tides .td-more summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font:600 16px/1 var(--display);letter-spacing:.06em;text-transform:uppercase}
+body.tides .td-more[open]{padding-bottom:12px}
+body.tides .td-more li{margin:0 0 8px;color:#c9d3e0}
+body.tides .td-more ol,body.tides .td-more ul{padding-left:20px;margin:6px 0;max-width:86ch}
+body.tides .td-more p{max-width:86ch;color:#c9d3e0}
+body.tides code{overflow-wrap:anywhere}
+
+@media (max-width:980px){
+  body.tides .td-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"scene" "ctl" "side"}
+  body.tides .td-scene{height:clamp(240px,46vh,420px)}
+}
+@media (max-width:480px){
+  body.tides .tdmain{padding:12px 10px 80px}
+  body.tides .tdmain h2{font-size:22px}
+  body.tides .td-ctl button{padding:0 10px;font-size:13px}
+  body.tides .td-modes label{margin-right:10px}
+}
