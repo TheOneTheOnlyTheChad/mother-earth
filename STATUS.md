@@ -4,6 +4,31 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 15:55 UTC (clock reading) — **Tides: GPT's first-build review filed (HOLD; model and tuned exaggeration accepted); round 2 on `tides-rc` `7c3e2af` for GPT's recheck. Not merged, nothing live, no hub change** (page: none; Tides thread)
+- **Filed unchanged:** `reviews/2026-11-25-tides-rc-first-build-gpt-review.md` (sha256 `048976d4…0380`, relayed by Chad).
+- **Fixed:** R1 the Drawing sentence and neap share are generated from the model and checked by the build; R2 exact-geometry wording only within 0.5° of a preset, "close to" with the real share nearby; R3 labels placed clear of every body (both views × four phases × 1280×900, 1280×720, 390×844, plus free camera; also on Chad's Mac with real graphics); R5 real touch swipes now tested, which found and fixed a real fault (the canvas blocked vertical scrolling on touch).
+- **Evidence completed:** R4.1 Earth layer-level check (GIBS layer metadata, 11 NASA CMR collection records: no use restriction; done after the image was kept, and said so); R4.2 Sun checked on this picture against NOAA SWPC SRS 329 (three regions found within 1.1° latitude, 2.2° longitude) and its mask edge re-projected independently; R4.3 the image-use note's times corrected in a dated block; R5 loading: Tides ready in 646 ms median against Moon 342 ms (cold, local, software WebGL); pictures 1,364,086 B, over the 1.2 MB target by 14%, reported for judgement, nothing compressed.
+- **Suites:** `tides-model` 42 passed, 6/6 breaks; `tides-ui` 60 passed, 12/12 breaks. Packet `reviews/2026-11-25-tides-rc.md` (round 2 at the top; branch `e8978e2`).
+- **Next:** GPT rechecks round 2. Then Chad's preview judgement, the navigation candidate, his Approve line for release.
+
+## 25 Nov 15:53 UTC (clock reading) — **Animals: Chad's confirming email to the IWC after the call sent. Next: Cape Vidal call, 26 Nov.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.11.
+
+## 25 Nov 15:52 UTC (clock reading) — **Animals: Chad phoned the IWC and corrected the "private" description; by his account she is fine with it as Mother Earth is not advertised publicly.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.10, labelled as Chad's account. Written permission unchanged; IWC closed for this candidate.
+
+## 25 Nov 15:49 UTC (clock reading) — **Animals: GPT reviews the IWC correspondence: permission for the attributed five-line summary (contextual scope), numbers settled, no further enquiry needed. IWC enquiry CLOSED for this candidate. Whale example stays parked (Cape Vidal open; Tides active).** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.9 and `WHALE-RECOVERY.md` §5 update. GPT's text kept privately (names IWC staff).
+- **May be shown, credited to the International Whaling Commission with a link:** "Abundant and recovered after strong growth."; 18,111 (2015); 5th–95th percentile range 15,580–20,700; Relative Abundance "Very Good"; 1995–2015 change "Strongly Increased". Not blanket permission for other IWC material or commercial use.
+- **Access state recorded separately:** the site and repository were public on 25 Nov. Correcting the "private" description with the IWC is Chad's decision.
+- **Next:** Cape Vidal call (26 Nov). Build, review and release each need Chad's go.
+
+## 25 Nov 15:48 UTC (clock reading) — **Animals: third IWC reply filed. YES to the status sentence, credited to the IWC with a link. Figure and classes not named in the answer. Chad's reply described the page as private; the site and repository are public. Nothing built; whale example parked.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.8, summary only. Full thread, including Chad's sent enquiry of 20 Nov and reply of 25 Nov, kept privately on the Mac.
+- **Checked:** GitHub API 15:47:26 UTC, `visibility: public`, `has_pages: true`; no access change recorded today.
+- **Open:** whether the permission covers 18,111 (15,580–20,700) and the two classes; whether Chad corrects the description of the page. Both his. Cape Vidal still open.
+- **Next:** GPT reviews what the reply covers.
+
 ## 25 Nov 15:03 UTC (clock reading) — **Tides: first branch build on Chad's own go. Branch `tides-rc` `00aa7b9` for GPT's review. Not merged, nothing live, no hub change** (page: none; Tides thread)
 - **Chad's line (25 Nov):** "Go: Tides branch build as in that block (D2 pinned Earth, D3 pinned Sun, D4 unlinked, D5 extras out, no header clock)." He added that he is in constant contact with NASA, who know what Mother Earth does.
 - **Built:** `tides.html`, `tides-model.js`, `tides.js`, `tides.css`, two pinned references with `assets/tides/SOURCE.json`, build scripts, two suites. No existing file changed; no page links to Tides yet.
