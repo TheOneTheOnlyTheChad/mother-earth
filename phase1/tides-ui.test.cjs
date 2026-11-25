@@ -88,14 +88,17 @@ async function sceneXY(p, x, y, z) { return p.evaluate(([x, y, z]) => { const s 
   try {
     // ---------- T1: a separate view; existing files untouched (first slice adds files only)
     let changed = []; try { changed = execFileSync('git', ['-C', ROOT, 'diff', '--name-status', 'origin/main...HEAD'], { encoding: 'utf8' }).trim().split('\n').filter(Boolean); } catch (e) { changed = ['git-unavailable']; }
-    const modified = changed.filter(l => !/^A\t/.test(l) && !/\t(STATUS\.md|docs\/|reviews\/)/.test(l));
-    ok('T1a this branch changes no existing page file (only adds; STATUS and docs aside)', modified.length === 0, modified);
-    ok('T1b no other page links to tides.html yet (unlinked first build)', ['index.html', 'timeline.html', 'moon.html', 'sun.html', 'animals.html', 'sources.html'].every(f => !fs.readFileSync(path.join(ROOT, f), 'utf8').includes('tides.html')));
+    // navigation stage (tides-nav-rc): the only existing files changed are the six pages' headers, the stylesheet's TIDES-NAV block and
+    // index.html's promise wrapper, and the test suites that count the tabs; checked file by file by phase1/tides-nav.test.cjs and the packet
+    const NAV_FILES = ['animals.html', 'index.html', 'moon.html', 'sources.html', 'style.css', 'sun.html', 'timeline.html', 'phase1/desktop-overflow.test.cjs', 'phase1/timeline-ui.test.cjs', 'phase1/animals-tab-ui.test.cjs'];
+    const modified = changed.filter(l => !/^A\t/.test(l) && !/\t(STATUS\.md|docs\/|reviews\/)/.test(l)).filter(l => !NAV_FILES.includes(l.split('\t')[1]));
+    ok('T1a besides new files, this branch changes only the navigation files (headers, stylesheet, the suites that count tabs)', modified.length === 0, modified);
+    ok('T1b every other page links to tides.html exactly twice: one tab, one Menu item', ['index.html', 'timeline.html', 'moon.html', 'sun.html', 'animals.html', 'sources.html'].every(f => { const t = fs.readFileSync(path.join(ROOT, f), 'utf8'); return (t.match(/href="tides\.html"/g) || []).length === 2 && t.includes('<a href="tides.html" data-view="tides">Tides</a>') && t.includes('<a role="menuitem" href="tides.html" data-page="tides">Tides</a>'); }));
 
     const A = await open(browser), p = A.page;
     let s = await st(p);
     ok('T1c page loads at its address, scene built, no page errors', s.three === 'ok' && A.errors.length === 0, { three: s.three, errors: A.errors });
-    ok('T1d shared header: title, five view tabs, Menu with six items; no tab marked current', await p.evaluate(() => document.querySelectorAll('.top .tabs a').length === 5 && document.querySelectorAll('#menu-list a').length === 6 && !document.querySelector('.top [aria-current]') && /Mother Earth/.test(document.querySelector('.top h1').textContent)));
+    ok('T1d shared header: title, six view tabs and seven Menu items; only Tides marked current', await p.evaluate(() => document.querySelectorAll('.top .tabs a').length === 6 && document.querySelectorAll('#menu-list a').length === 7 && [...document.querySelectorAll('.top [aria-current]')].map(a => a.getAttribute('href')).join() === 'tides.html,tides.html' && /Mother Earth/.test(document.querySelector('.top h1').textContent)));
 
     // ---------- T8: model labels; no clock, no live, no dates or metres in the model area
     ok('T8a no clock element on this page', await p.evaluate(() => !document.getElementById('clock') && !document.querySelector('.top .clock')));

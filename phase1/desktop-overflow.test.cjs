@@ -30,21 +30,22 @@ const ok = (name, cond, info) => { if (cond) pass++; else { fail++; console.log(
     await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(500);
     const m = await p.evaluate(() => {
       const R = s => document.querySelector(s).getBoundingClientRect();
-      const pr = document.querySelector('.top .promise'), mb = R('.menu>button'), utc = document.querySelector('.top .clock span');
+      const po = document.querySelector('.top .promise'), pr = po.querySelector('span') || po, mb = R('.menu>button'), utc = document.querySelector('.top .clock span');
       const hit = document.elementFromPoint(mb.left + mb.width / 2, mb.top + mb.height / 2);
       return { loaded: [...document.fonts].filter(f => f.status === 'loaded').length, sw: document.documentElement.scrollWidth, W: innerWidth,
         header: R('header.top').width, headerH: R('header.top').height, rightCol: R('.col.right').right, menuRight: mb.right, menuHit: !!hit && !!hit.closest('.menu'),
         promiseCut: pr.scrollHeight > pr.clientHeight + 1 || pr.scrollWidth > pr.clientWidth + 1, promiseLines: Math.round(pr.getBoundingClientRect().height / parseFloat(getComputedStyle(pr).lineHeight)),
-        promiseText: pr.textContent.trim(), promiseShown: getComputedStyle(pr).display !== 'none', promiseFont: getComputedStyle(pr).fontSize,
+        promiseText: pr.textContent.trim(), promiseShown: getComputedStyle(po).display !== 'none' && getComputedStyle(pr).display !== 'none', promiseFont: getComputedStyle(pr).fontSize,
         utcShown: getComputedStyle(utc).display !== 'none' && utc.getBoundingClientRect().width > 0 && utc.textContent.trim() === 'UTC', clockRight: R('.top .clock').right, menuLeft: mb.left };
     });
     ok(`${tag}: fonts as intended`, fonts === 'real' ? m.loaded >= 4 : m.loaded === 0, m);
     ok(`${tag}: no horizontal overflow`, m.sw <= m.W, m);
     ok(`${tag}: header and stage no wider than the window`, m.header <= m.W + 0.5 && m.rightCol <= m.W + 0.5, m);
     ok(`${tag}: Menu on screen and clickable`, m.menuRight <= m.W && m.menuHit, m);
-    // Five tabs (Animals added, 19 Nov 2026): below 1200 px the promise is hidden, never shrunk or cut; from 1200 px it is shown in full at 11 px. (With four tabs the line was 1140 px.)
-    if (w < 1200) ok(`${tag}: promise hidden (too tight beside five tabs)`, !m.promiseShown, m);
-    else { ok(`${tag}: promise shown in full (≤ 2 lines, nothing cut)`, m.promiseShown && !m.promiseCut && m.promiseLines <= 2, m);
+    // Six tabs since tides-nav-rc (25 Nov 2026); the promise is now shown only where its two full lines fit (container query), checked
+    // with both fonts by phase1/tides-nav.test.cjs. Five tabs (Animals added, 19 Nov 2026): below 1200 px the promise is hidden, never shrunk or cut; from 1200 px it is shown in full at 11 px. (With four tabs the line was 1140 px.)
+    if (w < 1200) ok(`${tag}: promise hidden (too tight beside the tabs)`, !m.promiseShown, m);
+    else { ok(`${tag}: promise ${fonts === 'real' ? 'shown in full' : 'whole or not shown'} (≤ 2 lines, nothing cut)`, (fonts === 'real' ? m.promiseShown : true) && (!m.promiseShown || (!m.promiseCut && m.promiseLines <= 2)), m);   // fallback fonts: shown only where two full lines fit
       ok(`${tag}: promise at 11 px`, m.promiseFont === '11px', m); }
     ok(`${tag}: clock keeps its UTC label, clear of the Menu button`, m.utcShown && m.clockRight <= m.menuLeft + 0.5, m);
     ok(`${tag}: header height unchanged (56 px)`, Math.abs(m.headerH - 56) < 0.5, m);
