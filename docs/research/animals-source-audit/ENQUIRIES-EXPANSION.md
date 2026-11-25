@@ -4,12 +4,22 @@
 
 *Rev 1.1, 23 Nov 2026 13:33 UTC (clock reading; Claude, "Animals assessment" thread, on Chad's word "record it"): a first reply to enquiry E (Cape Vidal) is recorded in the new section "Replies" below, with the text Chad sent. It proposes a call. It answers none of the questions and grants no permission. Nothing else in this record changed.*
 
+*Rev 1.2, 25 Nov 2026 11:53 UTC (clock reading; Claude, "Animals 5" thread): a first reply to enquiry D (IWC) is recorded in "Replies" below, with the text Chad pasted. It gives the abundance figure's reference year, the three quantiles and a source, and states the IWC's position on links. It does not say in terms that the proposed card may be shown. It has not been reviewed by GPT. Nothing is cleared by it. Row D of the table and "What is not on record" are updated to match; nothing else changed.*
+
+*Rev 1.3, 25 Nov 2026 11:58 UTC (clock reading; Claude, same thread): the document linked in the IWC reply has now been read by Claude, from the copy Chad downloaded, on his word ("you can read it"), a one-off departure from the text-only rule. What it says is in the new part "The linked document" under D. It explains the method and confirms the classes and the status sentence. It does not contain the abundance figure or its range, and says nothing on reuse. Nothing is cleared.*
+
+*Rev 1.4, 25 Nov 2026 12:05 UTC (clock reading; Claude, same thread), after GPT's review: (1) the verbatim text of the IWC reply is taken out of this public file and replaced by a factual summary; the full email is kept privately (GPT: removing addresses does not turn a private email into a public source). Revisions 1.2 and 1.3 in this repository's history still hold the text; history is not rewritten. (2) GPT's review is summarised under D. (3) One page reference corrected (item 5.2). The Cape Vidal reply and enquiry under E are unchanged, pending Chad's word.*
+
+*Rev 1.5, 25 Nov 2026 12:12 UTC (clock reading; Claude, same thread): Chad says he has replied to the IWC ("replied", his message of 25 Nov). Recorded under D and in the table. Claude did not send, see or check any message. Nothing else changed.*
+
+*Rev 1.6, 25 Nov 2026 12:18 UTC (clock reading; Claude, same thread): a second IWC reply is recorded under D as a factual summary (full text kept privately). It says to use the values on the website, and passes the display-permission question to a colleague who was copied. Not reviewed by GPT when written. Permission is still open; nothing is cleared.*
+
 **All three are SENT. Never describe any of them as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
 
 | | Enquiry | To | Subject line as Chad gave it | Status |
 |---|---|---|---|---|
 | C | African penguins | Dr Richard Sherley (University of Exeter) | "African penguin count data and one historical journey for Mother Earth" | **SENT by Chad, 20 Nov 2026.** No reply reported |
-| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** No reply reported |
+| D | IWC | the IWC Secretariat | "Permission and clarification: Western Indian Ocean humpback status on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 25 Nov 2026: reference year, quantiles and a source given; a statement on links. Metadata closed; lower value and display permission open.** **Chad REPLIED to the IWC, 25 Nov 2026 (two questions: the lower value; display permission and conditions).** **Second reply 25 Nov 2026: use the website's values; permission question passed to a copied colleague, not yet answered.** See "Replies" |
 | E | Cape Vidal | Christopher Wilkinson (University of Pretoria) | "Cape Vidal humpback estimates: proposed attributed chart on Mother Earth" | **SENT by Chad, 20 Nov 2026.** **First reply 23 Nov 2026: proposes a chat or call on Thursday. No question answered; no permission given.** See "Replies" |
 
 ## What each asked (Chad's summary)
@@ -20,9 +30,72 @@
 ## What is not on record
 - The sent texts of C and D (E's sent text is on record from 23 Nov, below). **GPT prepared all three**; they are not Claude's drafts (`ENQUIRY-DRAFT-PENGUINS.md`, `ENQUIRY-DRAFT-IWC.md`), which are kept as history and may differ. Claude wrote no Cape Vidal draft.
 - The times C and D were sent.
-- Any reply to C or D. GPT has not checked the inbox (Chad).
+- Any reply to C. (D's first reply is on record from 25 Nov, below.) GPT has not checked the inbox (Chad).
 
 ## Replies
+
+### D, IWC: first reply, 25 Nov 2026
+
+**How it reached this record.** Chad pasted the email into the Claude thread on 25 Nov 2026 ("ok we got one reply"). Claude has not seen the inbox. The paste showed it as received "1:46 PM (4 minutes ago)" in Chad's mail view; the time zone is not stated in the paste. The workspace clock read 11:52:36 UTC (13:52 SAST) shortly after the paste arrived. The subject line shown was "Re: Permission and clarification: Western Indian Ocean humpback status on Mother Earth". The paste showed it addressed to Chad and three other recipients. Names and addresses are left out of this public repository; Chad holds them. The enquiry as sent was not quoted in the paste and is still not on record. GPT had not reviewed the reply when this was written.
+
+**The reply.** From a member of the IWC Secretariat's statistics and modelling staff. Its text is not reproduced here (rev 1.4). The full email as Chad pasted it is kept privately: Mac `research/animals-correspondence/2026-11-25-iwc/`, with GPT's review and the linked document. Its factual content is summarised below; the link it gave was `https://archive.iwc.int/pages/download.php?ref=22706&ext=pdf&alternative=7830&noattach=true&k=`.
+
+**What it says (Claude's reading; not GPT's, not a decision).**
+- **Reference year:** "The abundance figure refers to 2015."
+- **The three values:** quantiles at 5 %, 50 % and 95 %: 16580, 18111, 20700. The reply does not name the kind of interval beyond that.
+- **Derivation:** assessments were done for BSC1 and BSC2 and combined for BSC; she gives no further detail. The source is "the 2015 assessment", with a summary in paper SC/66A/SH03 (Jackson et al. 2015).
+- **Dates:** assessment data up to 2015; the assessment itself completed in 2016.
+- **Links:** the IWC allows links to web content for education and outreach, not for commercial use, clearly signposted and credited to the International Whaling Commission.
+
+**What it does not say.**
+- **It does not say in terms that the proposed card may be shown.** The enquiry asked (Chad's summary, above) for permission for a summary of the stock's status. The reply speaks of "links to web content". Whether that sentence covers displaying the IWC's status sentence, the figure with its range and the two classes on our own page is not stated. **It is not treated as permission.** The project rule in `WHALE-RECOVERY.md` §3 stands: no IWC website wording or figure is shown without the IWC's written permission.
+- Nothing on display guidelines beyond signposting and credit, on how the 2015 assessment date and the page's "last update: 2026" label should be presented, on the Relative Abundance or 20-year change classes, or on scope or duration.
+- Nothing about Cape Vidal, which is separate material with a separate rights holder.
+
+**A difference to settle before any use.** The reply gives the 5 % value as **16580**. Audit B recorded the graphics page's range on 20 Nov 2026 as **15,580**-20,700 (`WHALE-RECOVERY.md` §2). One of these differs from the other by exactly 1,000. Which is right is not established here: the IWC page was not re-read, and the linked document contains none of these numbers (below).
+
+**The linked document (read by Claude, 25 Nov 2026).**
+- **What was read.** Chad downloaded the file from the link in the reply and said "you can read it". Claude read his copy: `download.pdf` in his Downloads folder, 1,167,719 B, sha256 `46e1ebef54b97015998f24daeb2115f1fdc3b04822102a67a530e71ca1f8b3ae`, 31 pages, text extracted with `pdftotext`. The file is not committed. That it is the file behind the reply's link rests on Chad's statement; Claude did not fetch the link.
+- **What it is.** "Annex O, Report of the Sub-Committee on Stock Abundance and Status" of the IWC Scientific Committee. Page footers read "Annex O – SAS … June 2026"; the file's own creation date is 21 May 2026.
+- **Item 5.3.5 (pages 11–12).** An In-depth Assessment of Southern Hemisphere humpback whales was completed in 2016, with Jackson et al. (2015) as the summary. Its results were used for the status "thermometers". The stocks are described as fully model-assessed. The Status Summary and Status Details text is not yet complete. BSC1 and BSC2 were combined into one BSC group, and the BSC drafts needed minor extra calculations, set out in Appendix 4.
+- **Appendix 4, part 2 (page 28).** Results had been computed separately for substocks C1 and C2, as 1,000 sets of numbers (abundance in 1995 and 2015 and carrying capacity for each). Relative Abundance and 20-Year Change are computed from the summed substocks in each set, and the median, 5th and 95th percentiles are taken over the 1,000 values. Total 2015 abundance "was calculated similarly".
+- **Appendix 5 (page 31).** All Southern Hemisphere humpback assessment dates on the status pages are to be 2015. Table 1 gives, for BSC, Western Indian Ocean: Relative Abundance "Very Good"; 20-year "Strongly Increased"; brief statement "Abundant and recovered after strong growth". These match what audit B recorded from the graphics page on 20 Nov.
+- **Item 5.2 (pages 10–11; the statement is on page 11).** The status pages' standard interval is 90 %. (Page reference corrected in rev 1.4, GPT. For BSC the percentiles on page 28 are the basis, not another stock's interval.)
+- **What it does not contain.** The numbers 18,111, 16,580, 15,580 and 20,700 do not appear anywhere in the extracted text. Nothing in it addresses copyright, reuse or permission for the status pages.
+
+**What the reply and the document together establish (Claude's reading, for GPT).** The abundance figure is a 2015 model estimate: the median over 1,000 model results for C1 and C2 summed, with the 5th and 95th percentiles as its range. That closes the audit's three open points on reference year, derivation and the meaning of the range, subject to GPT's review. It does not settle the lower value, and it does not settle permission.
+
+**GPT's review, 25 Nov 2026 (summary; GPT's file is kept privately with the correspondence, sha256 `02b625ab…441e`, because it carries a draft email).**
+- **What GPT did:** hashed the PDF independently (same sha256), read pages 10–12, 28 and 31, searched all 31 pages for the four numbers (none present), and re-read the IWC graphics page and disclaimer by web retrieval.
+- **Permission:** the reply covers signposted, credited links for education and outreach, not commercial use. It does not explicitly permit showing the status sentence, the estimate and range and the two classes on our page. Not clearance for the card.
+- **Lower value:** the graphics page still shows 15,580; the reply says 16,580. Keep both with their provenance; do not choose, average or recompute. Ask the IWC which is correct and what to cite. The numeric gate stays open.
+- **Metadata: closed** at the level this presentation needs. Reference year 2015 (the reply). Derivation: a model-based combined-stock estimate from 1,000 result sets of C1 and C2, combined within each set (Annex O, Appendix 4 part 2, p. 28); not a census, not a sum of substock medians, not Cape Vidal counts. Range: 5th and 95th percentiles with the median; say "5th–95th percentile range", never "95 % confidence interval", and not "credible interval" without checking the assessment's method.
+- **Dates kept separate:** estimate year 2015; assessment completed 2016; status-page assessment label 2015; webpage update label 2026; Annex O June 2026; our own checked date. Jackson et al. keeps its 2015 citation year.
+- **Further question:** one short follow-up is warranted if Chad wants the card and not a link only, asking just the lower value and explicit display permission with its conditions. Chad's to decide and send.
+- **Claude's own check, 25 Nov:** a summarising web fetch of the graphics page also returned 18,111 (15,580-20,700) and "last update: 2026". Discovery-level only, not a browser read.
+
+**State for D after the review:** metadata closed; the exact lower value open; permission open. Whale example parked.
+
+**Chad's reply to the IWC, 25 Nov 2026.** Chad told Claude "replied" on 25 Nov 2026; the workspace clock read 12:12 UTC when this was written. The time he sent it is not on record. Drafts by GPT and Claude asked two things only: which lower value is correct with a source to cite, and whether the status sentence, estimate with its range and the two classes may be shown on our page, with any wording, citation or conditions. Which text he sent, and whether he changed it, is not on record here; the drafts are in the Claude thread and the private correspondence folder. **SENT. Never describe it as unsent. No duplicate and no follow-up unless Chad decides. Sending is not permission, and silence is not permission.**
+
+**Not read.** Paper SC/66A/SH03.
+
+**Still open for D:** whether the reply covers displaying the five items or only linking; the 15,580 / 16580 difference; display guidelines and the acknowledgement wording; how the two dates are presented; any condition on scope or duration. She invites further questions. Any answer or further question to the IWC is Chad's to decide and send; nothing is sent or chased by Claude.
+
+### D, IWC: second reply, 25 Nov 2026
+
+**How it reached this record.** Chad pasted it into the Claude thread on 25 Nov 2026 ("just got another reply"). Claude has not seen the inbox. The paste showed it as received "2:14 PM (2 minutes ago)" in Chad's mail view, time zone not stated; the workspace clock read 12:18 UTC when this was written. Same sender as the first reply, same subject line, addressed to Chad and the same three other recipients. Its text is not reproduced here; the full email is kept privately with the first (Mac `research/animals-correspondence/2026-11-25-iwc/`).
+
+**What it says (factual summary).**
+- **The values:** to use the values on the website; the 16,580 in her first email could have been a typo on her side.
+- **Display permission:** she names a copied IWC colleague as better placed to answer the second question. She does not answer it herself.
+
+**What follows (Claude's reading, for GPT).**
+- **The lower value:** the graphics page's figures stand: 18,111 (15,580-20,700), as recorded by audit B on 20 Nov and re-read by GPT and by Claude's fetch on 25 Nov. The 16,580 is kept in this record with its provenance and is not used. She gives no separate document to cite; the website is the source she points to.
+- **Permission:** still open. The question has been passed on inside the IWC to someone already on the thread, so Chad's reply already sits with that person. **No follow-up or duplicate unless Chad decides. Silence is not permission.**
+- No answer yet on wording, citation, conditions or how the non-commercial restriction applies.
+
+**State for D:** metadata closed; lower value settled as the website's 15,580, subject to GPT's review; display permission open and awaiting the IWC colleague. Whale example parked.
 
 ### E, Cape Vidal: first reply, 23 Nov 2026
 

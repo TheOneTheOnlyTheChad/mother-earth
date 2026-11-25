@@ -1,0 +1,17 @@
+51
+OLD: soil-ui (OLD=1: main's files): 0 passed, 3 failed — A0 B1 B!
+no-hash: soil-ui (BREAK=no-hash): 44 passed, 3 failed — A8 A9 B14
+sparse-first: soil-ui (BREAK=sparse-first): 40 passed, 2 failed — A! B14
+zero-positive: soil-ui (BREAK=zero-positive): 42 passed, 5 failed — A4 A13 B3 B4 B19
+combined: soil-ui (BREAK=combined): 42 passed, 5 failed — A3 A10 B6 B9
+no-outline: soil-ui (BREAK=no-outline): 45 passed, 2 failed — B6 B9
+fixture-accepted: soil-ui (BREAK=fixture-accepted): 46 passed, 1 failed — A6
+load-at-start: soil-ui (BREAK=load-at-start): 42 passed, 5 failed — B1 B19 B20 B21
+no-incomplete: soil-ui (BREAK=no-incomplete): 44 passed, 3 failed — A3 A11 B9
+bins-shifted: soil-ui (BREAK=bins-shifted): 42 passed, 5 failed — A4 A13 B3 B4 B19
+zero-drops-coverage: soil-ui (BREAK=zero-drops-coverage): 44 passed, 3 failed — A4 A13 B19
+unknown-counts: soil-ui (BREAK=unknown-counts): 45 passed, 2 failed — B20 B21
+no-soilview: soil-ui (BREAK=no-soilview): 45 passed, 2 failed — B22 B23
+alpha-only: soil-ui (BREAK=alpha-only): 44 passed, 3 failed — B3 B4 B19
+
+[exited with code 0]

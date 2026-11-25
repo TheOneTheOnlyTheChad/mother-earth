@@ -4,6 +4,52 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 12:20 UTC (Mac clock) — **Organic-soil emissions: release candidate `soil-release-rc` `d2d597b` for GPT review, on Chad's go. Not merged or deployed; no hub change** (Nature context thread)
+- **Version check before freezing:** 10:40 UTC, v1.0.1 only.
+- **Payload `86071bf`:**
+  - full 790-record table `c5c01ff5…30cf`;
+  - fixture and cutter retired, and a fixture table refused;
+  - fixture wording removed;
+  - Sources file note and REGISTER entry.
+- **Animals maintenance `d2d597b`:**
+  - 13b/13c/13e held to SOIL_MAIN;
+  - 13m literal 11-file manifest (af89de2..86071bf) and 13n maintenance binding;
+  - 13f counts 17 rows;
+  - 13j/13k/BASE_MAIN/TL_MAIN unchanged;
+  - negative controls demonstrated.
+- **Tests:**
+  - soil-ui 47/0; 13 named mutations plus OLD=1 (14 negative runs) all fail as they should *(corrected after GPT's review; first written as "14 breaks")*;
+  - 51 suites: 42 pass (animals-tab-ui 284/0; Key/mobile suites run with restored fixtures);
+  - 9 fail identically on main;
+  - hub-alignment 6/0.
+- **Packet:** `reviews/2026-11-25-soil-release-rc.md`, with evidence in `reviews/evidence/2026-11-25-soil-release-rc/`. Review copy: Mac `_review/soil-release-rc/`.
+
+## 25 Nov 12:18 UTC (clock reading) — **Animals: second IWC reply filed. Use the website's values (15,580 stands; 16,580 possibly a typo). Display permission passed to a copied IWC colleague, unanswered. Whale example parked.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.6, summary only; full text kept privately on the Mac. Not yet reviewed by GPT.
+- **Open:** explicit permission to show the sentence, figure and classes on our page, with its conditions. No follow-up or duplicate; silence grants nothing.
+
+## 25 Nov 12:12 UTC (clock reading) — **Animals: Chad has replied to the IWC (lower value; display permission and conditions). Waiting. Whale example parked.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.5. Sent by Chad, his statement; Claude saw no message. No follow-up or duplicate; sending and silence grant nothing.
+
+## 25 Nov 12:05 UTC (clock reading) — **Animals: GPT's review of the IWC reply recorded. Metadata closed (2015; model-based combined estimate; 5th–95th percentile range). Lower value and display permission OPEN. Reply text moved out of the public record. Whale example parked.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.4. GPT's review file and the full email are kept privately on the Mac (`research/animals-correspondence/2026-11-25-iwc/`), not in this repository; revisions 1.2 and 1.3 in history still hold the reply text.
+- **Open:** 15,580 on the IWC graphics page against 16,580 in the reply; explicit permission to show the sentence, figure and classes on our page.
+- **Next:** one short follow-up to the IWC, if Chad decides to send it. Nothing sent by Claude or GPT.
+
+## 25 Nov 11:58 UTC (clock reading) — **Animals: the document linked in the IWC reply read (Chad's download, on his word); method, classes and status sentence confirmed; figure and range not in it; nothing on reuse. To GPT. Nothing cleared.** (page: none; Animals thread)
+- **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.3, "The linked document". File: Chad's `download.pdf`, sha256 `46e1ebef…b3ae`, 31 pages, IWC Scientific Committee Annex O (Stock Abundance and Status), not committed. A one-off departure from the text-only rule, on Chad's "you can read it".
+- **Found:** C1 and C2 computed separately as 1,000 result sets and summed; median with 5th and 95th percentiles; total 2015 abundance calculated the same way; assessment dates 2015; BSC "Very Good", "Strongly Increased", "Abundant and recovered after strong growth".
+- **Not found:** 18,111 and its range (so 16580 against 15,580 stays open); any reuse or permission terms.
+- **Next:** GPT's review of what the reply covers. Any answer to the IWC is Chad's.
+
+## 25 Nov 11:53 UTC (clock reading) — **Animals: first IWC reply filed (enquiry D). Reference year, quantiles and a source given; a statement on links. Not reviewed by GPT; nothing cleared; whale example stays parked.** (page: none; Animals thread)
+- **Filed:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.2, the text as Chad pasted it on 25 Nov, the sender's address left out.
+- **It says:** the abundance figure refers to 2015; quantiles 5 % / 50 % / 95 % = 16580 / 18111 / 20700; BSC1 and BSC2 combined; data to 2015, assessment completed 2016; source paper SC/66A/SH03; links allowed for education and outreach, not commercial use, signposted and credited.
+- **It does not say** that the proposed card (status sentence, figure, classes on our page) may be shown. Not treated as permission.
+- **Difference recorded, not resolved:** 5 % value 16580 in the reply against 15,580 recorded from the graphics page on 20 Nov (`WHALE-RECOVERY.md` §2).
+- **Not read:** the linked archive PDF (text-only rule) and SC/66A/SH03.
+- **Next:** GPT reviews what the reply covers; any answer to the IWC is Chad's. Nothing sent, nothing chased.
+
 ## 25 Nov (after 10:25 UTC) — **Organic-soil emissions: GPT recheck PASS for the fixture preview `e51ca61`** (Nature context thread)
 - **Filed unchanged:** `reviews/2026-11-25-soil-preview-rc-r2-gpt-recheck.md`.
 - **Verdict:** the four findings are closed. The release-scope plan is supported, with these requirements:
