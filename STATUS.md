@@ -4,7 +4,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
-## 25 Nov (Mac clock at the push below) — **Organic-soil emissions: final integration for GPT closure. Final commit `soil-release-rc` `f8e3eda`. Not merged or deployed** (Nature context thread)
+## 25 Nov 12:40 UTC (Mac clock, just after the push) — **Organic-soil emissions: final integration for GPT closure. Final commit `soil-release-rc` `f8e3eda`. Not merged or deployed** (Nature context thread)
 - **GPT's release-candidate review:** technical PASS; filed unchanged.
 - **Records corrected:**
   - REGISTER provenance: three data payloads; supporting docs read but not saved; the licence file saved before the T1 go, disclosed;
