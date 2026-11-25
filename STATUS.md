@@ -4,6 +4,14 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 18:12 UTC (clock reading) — **Tides: preview passed by GPT (round 2) and accepted by Chad; navigation candidate `tides-nav-rc` `e130ea7` for GPT's review. Not merged, nothing live, no hub change** (page: none; Tides thread)
+- **Filed unchanged:** `reviews/2026-11-25-tides-rc-round2-gpt-recheck.md` (sha256 `cf357030…1a32`, relayed by Chad): PASS for the unlinked preview, R1–R5 closed.
+- **Chad's line (25 Nov):** "I'm happy with the preview and accept the 1,364,086-byte image total, 14% above the target. Keep the pictures as they are. Go for the navigation candidate, including the top Tides tab and relevant layout/regression checks. Return it for GPT review. No merge or deployment yet."
+- **Built on `tides-nav-rc`:** Tides tab after Sun and a Tides Menu item on all seven pages; six-tab header rules in one marked `style.css` block; World View's promise shown only where two full lines fit (container query, the Earth from Space branch's mechanism); one new stylesheet key on six pages (Timeline keeps its own). Suite `tides-nav` 2,882 passed, 3/3 breaks.
+- **Other threads' suites, narrow maintenance:** Animals suite gets `TIDES_MAIN` `8475452` / `TIDES_PARENT` `a84a642` pins with new 13o/13p (287 passed; 13 pin breaks caught); `timeline-ui` tab expectations; `timeline-mixed-assets` sets the header block aside (same two failures as main). `timeline-changes-build` now passes its stylesheet-key check, which failed on main.
+- **Full regression:** 102 suites run; the only failures are the same as on main (`place-ui` 1, `timeline-finds-ui` 4, `osmc-reliability-ui` 1, `timeline-mixed-assets` 2). Packet `reviews/2026-11-25-tides-nav-rc.md`.
+- **Next:** GPT reviews the navigation candidate. Then the release candidate (REGISTER lines, a Tides entry on Sources, served-hash coverage), then Chad's Approve line.
+
 ## 25 Nov 15:55 UTC (clock reading) — **Tides: GPT's first-build review filed (HOLD; model and tuned exaggeration accepted); round 2 on `tides-rc` `7c3e2af` for GPT's recheck. Not merged, nothing live, no hub change** (page: none; Tides thread)
 - **Filed unchanged:** `reviews/2026-11-25-tides-rc-first-build-gpt-review.md` (sha256 `048976d4…0380`, relayed by Chad).
 - **Fixed:** R1 the Drawing sentence and neap share are generated from the model and checked by the build; R2 exact-geometry wording only within 0.5° of a preset, "close to" with the real share nearby; R3 labels placed clear of every body (both views × four phases × 1280×900, 1280×720, 390×844, plus free camera; also on Chad's Mac with real graphics); R5 real touch swipes now tested, which found and fixed a real fault (the canvas blocked vertical scrolling on touch).
