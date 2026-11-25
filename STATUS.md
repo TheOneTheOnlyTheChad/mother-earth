@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 14:27 UTC (clock reading) — **Tides: GPT PASSES proposal rev 2 as a build proposal; recheck filed; image-use gate reads done. Waiting for Chad's own go. Nothing built, branched or fetched** (page: none; hub untouched; Tides thread)
+- **Filed unchanged:** `reviews/2026-11-25-tides-proposal-rev2-gpt-recheck.md` (sha256 `9594c9dd…ddaf`, relayed by Chad). R1–R3 closed. GPT recommends D2 pinned Earth, D3 pinned Sun, D4 unlinked first build, D5 optional controls left out, and supports no running UTC clock in the Tides header. One wording note for T7: the Sun needs no lighting-induced shading; its own picture's brightness variation and the plain unseen region stay.
+- **Gate reads (Claude, browser pane):** `docs/research/tides/TIDES-IMAGE-USE-READS-2026-11-25.md`. GIBS guidance, Earthdata data-use guidance and SDO's rules page read directly. Neither stops a dated reference copy. Open and named: a layer-level restriction check for the chosen Earth frame; the standing SDO reading (display texture, PI not notified).
+- **Chad's decisions and go:** the choices arrived in his message as GPT's suggested text ("from GPT and I after discussion"). Not yet taken as his own line; asked.
+
 ## 25 Nov 14:21 UTC (clock reading) — **Tides: GPT's review of proposal rev 1.1 filed (REVISE FIRST, core model accepted); proposal rev 2 for GPT's recheck. Docs only. Nothing built, branched, fetched or deployed** (page: none; hub untouched; Tides thread)
 - **Filed unchanged:** `reviews/2026-11-25-tides-proposal-rev1.1-gpt-review.md` (sha256 `28fb5591…7931`, from the Mac folder `Documents/ChatGPT/Mother Earth/`, relayed by Chad). Not Chad's approval.
 - **Rev 2 of `docs/concepts/TIDES-EXPLORER-PROPOSAL.md`:** Earth-image reason corrected to what was measured (a black cap north of 66°N on 4–7 Nov, about 16.5% of a polar view, not a black disc); height derivation ζ = −Vt/g written out with its assumptions and accepted by GPT, D7 closed; the Sun drawn self-lit, Earth and Moon lit by parallel rays from the model Sun direction; image-use records are a gate before either reference image is kept; no running clock in the Tides header; T1, T2, T6, T7, T8, T10 clarified; D1 and D6 recorded as closed. The top-level Tides tab stays in the release plan.
