@@ -651,8 +651,8 @@ Common to all six: **licence CC BY 4.0**; **commercial use: with attribution** (
 - **What we ship:** aggregates only, in the same context file as the FIRMS entry above.
 - **Commercial use:** CC BY 4.0 permits it with attribution; Mother Earth makes none.
 
-## WRI Land & Carbon Lab et al. — "Global organic soil disturbance and greenhouse gas emissions, 2001 to 2024: model outputs", version 1.0.1 (Zenodo record 22137130, DOI 10.5281/zenodo.22137130; concept 22137129) — Organic-soil emissions (modelled) optional layer and Everything-here row — **dated model; release candidate on branch `soil-release-rc`, not on the page until the release merge**
-- **Filed:** 25 Nov 2026 with the release candidate, on Chad's own go ("Go: prepare the soil release candidate."). The release merge and its hash are recorded here on release.
+## WRI Land & Carbon Lab et al. — "Global organic soil disturbance and greenhouse gas emissions, 2001 to 2024: model outputs", version 1.0.1 (Zenodo record 22137130, DOI 10.5281/zenodo.22137130; concept 22137129) — Organic-soil emissions (modelled) optional layer and Everything-here row — **dated model; on the page since 25 Nov 2026 (release merge `01c789c`, from `soil-release-rc` `f8e3eda`)**
+- **Filed:** 25 Nov 2026 with the release candidate, on Chad's own go ("Go: prepare the soil release candidate."). **Released** 25 Nov 2026 with merge `01c789c` (12:46:07 UTC commit time), on Chad's own Approve line naming `soil-release-rc` at `f8e3eda`; GPT's final integration closure and technical PASS; 30 served files hash-verified 12:47:52 UTC.
 - **Read:**
   - by Claude, 24–25 Nov 2026: the Zenodo record metadata and version list (API);
   - `readme_data.md` in full (24 Nov through the browser pane, not saved; 25 Nov as the rendered preview page);

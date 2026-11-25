@@ -4,6 +4,25 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 12:50 UTC (Mac clock) — **Organic-soil emissions LIVE (merge `01c789c`), and the Nature context close-out** (page: `index.html`, `sources.html`, `style.css`, `layers.js`, `soil.js`, table; Nature context thread)
+- **Released:** on Chad's own Approve line ("Approve: release organic-soil emissions from soil-release-rc at f8e3edaf19ab68c30f89d3760c65a673d48c3f28. Page only; no hub change. …"), after GPT's final integration closure (`reviews/2026-11-25-soil-final-integration-gpt-closure.md`, filed unchanged).
+- **Merge:** `01c789c` (commit time 12:46:07 UTC): f8e3eda plus docs-only main. Page, asset and test bytes are identical to `f8e3eda`.
+- **Served-hash checks:** **30/30** at 12:47:52 UTC (browser pane, `cache: no-store`): 29 root page files plus `assets/soil/g4-soil-v1.0.1.json`.
+- **Live check:** at load, no table request. Switched on: one request, 790 cells drawn, Key counts the layer, "Layers · 1 on", 22_70 text correct.
+- **Records:** REGISTER entry marked released; START-HERE live-page line; HANDOVER block.
+- **Close-out:**
+  - soil branches deleted (GitHub web page; the git proxy refuses deletes);
+  - Mac `_review/` emptied into `_to_delete/`;
+  - Mac synced.
+- **Still open from the spec, for a next thread:**
+  1. Hub `quantity` string still says "published" for forest. The page already prints its own wording, so this is a hub change for the next reviewed hub release (Earth from Space owner), on its own Approve line.
+  2. Global integrated disturbance alerts (`gfw_integrated_dist_alerts`: daily, 10 m, global, four systems including DIST-ALERT): a docs-only assessment of whether to extend forest context beyond the tropics, and how it relates to the current integrated alerts. Parked by Chad 24 Nov.
+  3. Soil: stock and stock-change products, which the spec lists beside emissions (e.g. WRI mineral-soil stock change, ESSD 2026; SoilGrids). Each needs its own assessment. Also possible later: a period switch or per-km² view, and the open 30 m release when it appears.
+  4. GNW fire alerts against FIRMS: an overlap and lineage assessment before any second fire feed (spec §5).
+  5. Alert completeness: date fields, confidence transitions and lookback (spec §5). The page states its aggregate limits; event-level handling would need its own design.
+  6. Journey context (Workstream C) beyond the zebra: the Animals thread owns it.
+  7. Horizon and EarthRanger/SMART (D, E): research reading only. The WRI webinar is 3 Dec 2026, 16:00–17:00 SAST (no registration made).
+
 ## 25 Nov 12:40 UTC (Mac clock, just after the push) — **Organic-soil emissions: final integration for GPT closure. Final commit `soil-release-rc` `f8e3eda`. Not merged or deployed** (Nature context thread)
 - **GPT's release-candidate review:** technical PASS; filed unchanged.
 - **Records corrected:**
