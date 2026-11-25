@@ -2,6 +2,20 @@
 
 Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 Nov). Current state and next steps: `HANDOVER.md`.
 
+# 25 Nov 2026
+
+## 25 Nov 00:03:59 UTC — **TIMELINE RELEASED: "Humans and human relatives", four dated finds, catalogue `tl-2026-11-R4`. Live page = merge `49d91bc`. Thread closed out** (production: page; Timeline thread; entry written 00:10:13 UTC clock reading; Chad, 24 Nov 18:47 UTC: "Approve: merge timeline-finds-release-rc b198033 into main (page release: Humans and human relatives, tl-2026-11-R4, release date 25 Nov 2026), with served-hash and live checks")
+- **Held until the catalogue's release day.** The line came on 24 Nov; the merge was made when the clock read 25 Nov 00:03 UTC.
+- **Before (00:03:28–00:03:32 UTC):** hub 0.6.25; R4 route 200, 48,134 B, `74b1f8b1…00ca`; R1, R2, R3 and the unversioned route exact. Branch still `b198033`, main still `e44d600`.
+- **Merge `49d91bc`** (no fast-forward; parents `e44d600`, `b198033`; commit time 00:03:55 UTC). Its tree differs from the tested combined tree `8ea37a7` in records and evidence files only.
+- **Served (00:05:26 UTC, github.io):** `timeline.html` `95ad7f82…27dd` (73,210 B), `timeline.js` `10ac42f4…ceec` (76,861 B, `?v=202612250900`), `style.css` `a386302f…9d71` (87,531 B), the three files in `assets/timeline/tl-2026-11-R4/`; `index.html` and `app.js` unchanged.
+- **Live read (00:05–00:07 UTC; pane at 588 px, 375 × 812 with the phone user agent, 1280 × 800):** explorer on from the hub's R4 route; "Revision tl-2026-11-R4, released 25 Nov 2026"; four find rows in the 400,000-year view with no sideways scroll; every mark opens its entry and Back returns to the same window with focus on the mark; Older / Newer entry walks the four finds; the end-Cretaceous image loads from the R4 folder; no script error. Hub routes byte-identical afterwards (00:07:06 UTC).
+- **Close-out:** REGISTER heading now "on the page since 25 Nov 2026". Branches `timeline-finds-release-rc`, `timeline-r4-hub-rc`, `timeline-finds-rc` deleted on the GitHub branches page (gone by 00:09:23 UTC; all three were on main); nine branches remain: `main` and eight of other threads, untouched. No Timeline copy was in the Mac `_review/`; the eleven folders there belong to other threads and stay. START-HERE §1 and §4aj, HANDOVER's Timeline block updated.
+- **Rollback (own Approve line):** page first, `git revert -m 1 49d91bc`; hub 0.6.24 (`db4f9cdf…1aa5`, `72ea123`) only after the page is back on R3; the R2 object stays.
+- **Open:** real phone, Safari, screen reader, 200 % zoom, a physical wheel on the live page; `ships` degraded and `firms:recovery` down in `/status` (no reading of mine before the hub deploy; hub owner's); enquiries E1–E4 are Chad's to send, none sent.
+- **One record:** `reviews/2026-11-25-timeline-r4-close-out.md`.
+- **Next:** Nature resumes (its own thread). Nothing is started for Timeline.
+
 # 24 Nov 2026
 
 ## 24 Nov 18:43 UTC (clock reading) — **Timeline R4: final combined tree tested; waiting for Chad's own page line. Page NOT released (still R3); release is for 25 Nov UTC, from 02:00 SAST** (page: none; Timeline thread)
