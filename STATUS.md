@@ -18,7 +18,7 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
   - 13j/13k/BASE_MAIN/TL_MAIN unchanged;
   - negative controls demonstrated.
 - **Tests:**
-  - soil-ui 47/0, with OLD and 14 breaks failing;
+  - soil-ui 47/0; 13 named mutations plus OLD=1 (14 negative runs) all fail as they should *(corrected after GPT's review; first written as "14 breaks")*;
   - 51 suites: 42 pass (animals-tab-ui 284/0; Key/mobile suites run with restored fixtures);
   - 9 fail identically on main;
   - hub-alignment 6/0.
