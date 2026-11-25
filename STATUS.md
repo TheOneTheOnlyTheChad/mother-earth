@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 07:00 UTC (clock reading) — **Animals journey context C1a: GPT's candidate review filed (PASS for the feature; four release items); final release tree prepared and tested on fresh main; back to GPT for the bounded release recheck. Not merged; corridor parked.** (pages: Animals and Sources, branch only; Animals thread; branch `animals-journey-context-proposal`)
+- **GPT's review** filed unchanged: `reviews/2026-11-25-animals-journey-context-c1a-gpt-review.md` (sha256 `b4c1bb3d…ec44`). Chad accepts the near-screen loading, the acknowledgement in the block, "about 245.0 ha" and the two disclosed area bases.
+- **Memory:** the build ran in a Linux VM on the Mac, not on macOS; the old "105 MB" was MiB. The builder now labels by platform; re-measured 104.7 MiB (raw 107,208 KiB; `/usr/bin/time` agrees), `--check` identical.
+- **Sources and REGISTER:** one Sources line after the zebra's source paragraph; two REGISTER entries (FIRMS `MODIS_SP` archive, Hansen v1.13). Check 13e now allows exactly that line on top of NC_MAIN's file, byte for byte; three new breaks plus the old unrelated-edit breaks are caught. No pin moved.
+- **Tests on this tree:** context UI 30/0 (12 breaks), Animals 282/0, 71/0, 102/0, hub 6/0, builder 17/0, extractor 72/0, Hansen 5/0; Sources-loading suites pass except `kept-ui`'s three World View failures, which fail identically on fresh main (pre-existing).
+- **Record:** `reviews/2026-11-25-animals-journey-context-c1a-release-rc.md`; Mac `ChatGPT/Mother Earth/animals-journey-context-c1a/` rebuilt with a regenerated checksum list.
+
 ## 25 Nov 06:00 UTC (clock reading) — **Animals journey context C1a (zebra): extraction and downloads COMPLETE (Chad, Terminal); private branch build; candidate to GPT. Not released, not merged; corridor parked.** (page: Animals, branch only; Animals thread; branch `animals-journey-context-proposal` `a83b04f3`)
 - **Runs:** FIRMS 73 windows / 81 requests / 21,771 rows, verifier clean; Hansen six files, 976.6 MB, length and MD5 checked.
 - **Context file** `assets/animals/zebra-botswana-Z3866-context-R1.json` sha256 `6b67818b…a21e`: 21,744 presumed vegetation-fire detections; mapped tree-cover loss about 245.0 ha (2007 145.1, 2008 99.9). Rebuilt identically on the Mac with `--check`.

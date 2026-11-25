@@ -19,7 +19,8 @@
 3. **Build.** Run offline on the Mac shell, with no provider call.
    - Run at `b948956`, then again with this candidate's builder (`73d7a19d…391c`) using `--check`. Result: `CHECK OK: identical`.
    - Output sha256 `6b67818b4fb2c334bce958f1b50a3a8d3e66fd69269357dee35650ffe922a21e`, 7,879 bytes.
-   - Resources: 6.5 s at `b948956` and 17.0 s on the re-check (Mac load varies); peak resident memory 105 MB both times.
+   - Resources: 6.5 s at `b948956` and 17.0 s on the re-check (Mac load varies); peak resident memory as printed, "105 MB", both times.
+   - **Correction (25 Nov, release preparation, GPT's candidate review item 1):** "105 MB" was mislabelled. The "Mac shell" is a Linux VM on Chad's Mac (Linux 6.8 aarch64), where `ru_maxrss` is in KiB, so the old `/1024` gave MiB, not MB, and was not a macOS figure. The builder now labels the value by platform and keeps the raw value. Re-measured on the release builder: 104.7 MiB (`ru_maxrss` 107,208 KiB; `/usr/bin/time -v` maximum resident set 107,208 kbytes), 18.2 s wall clock. See `reviews/2026-11-25-animals-journey-context-c1a-release-rc.md`.
    - A tampered copy of the output fails `--check`.
 
 ## 2. The figures (from the committed context file)
