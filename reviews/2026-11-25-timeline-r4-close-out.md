@@ -33,7 +33,7 @@
 3. **R2:** the object stays. Uploaded or pinned bytes are never changed or removed; a correction is a new revision id and key.
 
 ## 4. Removed at close-out
-See STATUS 25 Nov for the measured times. Branches of this work only: `timeline-finds-rc`, `timeline-finds-release-rc`, `timeline-r4-hub-rc` (all merged; work on main). Local worktrees and rehearsal previews in Claude's workspace. Mac review copies moved to `_to_delete/`. Nothing of another thread was touched; `BASE_MAIN`, `NC_MAIN` and `NC_PARENT` are unchanged, `TL_MAIN` = `643bb9a7e9c63045dec3eac87837212f05841a3f`.
+See STATUS 25 Nov for the measured times. Branches of this work only: `timeline-finds-rc`, `timeline-finds-release-rc`, `timeline-r4-hub-rc` (all merged; work on main). Local worktrees and rehearsal previews in Claude's workspace. No Timeline copy was in the Mac `_review/`, so nothing was moved to `_to_delete/`; the eleven folders there belong to other threads and stay. Mac synced preserve-first to the close-out commits (28 preserved files, each equal to the last synced commit `06c7ee3`). Nothing of another thread was touched; `BASE_MAIN`, `NC_MAIN` and `NC_PARENT` are unchanged, `TL_MAIN` = `643bb9a7e9c63045dec3eac87837212f05841a3f`.
 
 ## 5. Still open
 - **Not checked by anyone:** a real phone, Safari, a screen reader, true 200 % browser zoom, a physical mouse wheel on the live page.
