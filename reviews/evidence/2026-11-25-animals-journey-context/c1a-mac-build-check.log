@@ -1,0 +1,14 @@
+Mac shell, 25 Nov 2026 ~05:50 UTC. Scripts fetched from commit a83b04f355cc729960bd087944c44e04deada1b7 (raw.githubusercontent), sha256:
+73d7a19d6bb37ab9ab9c1862cafe250a8c376dce2b7ebe955c04db903d32391c  build_journey_context.py
+26c004a3458bfa574b967043997bdbf015cecb230575c4fad8435d9050902306  build_journey_context.test.py
+6b67818b4fb2c334bce958f1b50a3a8d3e66fd69269357dee35650ffe922a21e  ctx.json (the committed context file)
+62e29621bdb2637a7c60a5de6955f316931f9710a18ef48fccb716b6a5b4a752  journey_context_firms_fetch.py
+4bdaf0a7d4cc06dc86b95d9b2a3bdbd517d6387b696b0a1f7fe9686d9468ab00  journey_context_verify.py
+journey file sha256 prefix 8d00aa32dc728dee
+$ python -I build_journey_context.py --firms <private>/20261125T050326Z-firms-zebra --hansen <private>/hansen-GFC-2025-v1.13 --journey zebra.json --out out/zebra-botswana-Z3866-context-R1.json --check
+built in 17.0 s; peak resident memory 105 MB; 7879 bytes; sha256 6b67818b4fb2c334bce958f1b50a3a8d3e66fd69269357dee35650ffe922a21e
+CHECK OK: identical
+exit 0
+$ python -I build_journey_context.test.py
+16 passed, 0 failed
+Earlier build at b948956 (same output): built in 6.5 s; peak resident memory 105 MB; 7879 bytes; sha256 6b67818b…a21e. A tampered copy failed --check.
