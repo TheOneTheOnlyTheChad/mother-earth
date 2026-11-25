@@ -4,6 +4,11 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 14:21 UTC (clock reading) — **Tides: GPT's review of proposal rev 1.1 filed (REVISE FIRST, core model accepted); proposal rev 2 for GPT's recheck. Docs only. Nothing built, branched, fetched or deployed** (page: none; hub untouched; Tides thread)
+- **Filed unchanged:** `reviews/2026-11-25-tides-proposal-rev1.1-gpt-review.md` (sha256 `28fb5591…7931`, from the Mac folder `Documents/ChatGPT/Mother Earth/`, relayed by Chad). Not Chad's approval.
+- **Rev 2 of `docs/concepts/TIDES-EXPLORER-PROPOSAL.md`:** Earth-image reason corrected to what was measured (a black cap north of 66°N on 4–7 Nov, about 16.5% of a polar view, not a black disc); height derivation ζ = −Vt/g written out with its assumptions and accepted by GPT, D7 closed; the Sun drawn self-lit, Earth and Moon lit by parallel rays from the model Sun direction; image-use records are a gate before either reference image is kept; no running clock in the Tides header; T1, T2, T6, T7, T8, T10 clarified; D1 and D6 recorded as closed. The top-level Tides tab stays in the release plan.
+- **Open for Chad after GPT's recheck:** D2 (Earth image), D3 (Sun image), D4 (unlinked first build), D5 (optional extras left out), and his own go for a branch build.
+
 ## 25 Nov 13:59 UTC (clock reading) — **Tides: new thread; GPT's spec filed; Claude's implementation proposal rev 1.1 for GPT review. Docs only. Nothing built, branched, fetched or deployed** (page: none; hub untouched; Tides thread)
 - **This thread now owns Tides** (Chad, 25 Nov). Organic-soil emissions is closed (merge `01c789c`, close-out `d85524f`) and is not reopened. The other open Nature context items are separate mini specs, not this thread's. The later Sun reference-globe investigation is a separate workstream and no prerequisite.
 - **Filed unchanged:** GPT's "Tides explorer, spec rev 1" (24 Nov) as `docs/concepts/TIDES-EXPLORER-SPEC-GPT-rev1.md` (sha256 `539ef06d…d927`, 17,595 B, from the Mac folder `Documents/ChatGPT/Mother Earth/`).
