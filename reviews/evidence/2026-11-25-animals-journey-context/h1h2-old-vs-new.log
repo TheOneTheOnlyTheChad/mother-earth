@@ -1,0 +1,9 @@
+# GPT's H1 and H2 reproductions, old (e76d4de) against new, run by Claude in the cloud workspace, 25 Nov 2026 04:31 UTC
+OLD e76d4de  H1 attributed row: accepted, listed []
+OLD e76d4de  H1 2008-02-31: accepted, listed ['2008-02-31']
+NEW  H1 attributed row: accepted, listed ['2008-03-01']
+NEW  H1 2008-02-31: stopped: the missing-data list: '2008-02-31' is not a real calendar date (an unreadable list is never an empty one)
+OLD e76d4de  H2 area=0,0,4,4: verify() -> [] (accepted)
+OLD e76d4de  H2 source=VIIRS_SNPP_SP: verify() -> [] (accepted)
+NEW  H2 area=0,0,4,4: verify() -> ["area is '0,0,4,4', expected '20,-22,28,-18'"]
+NEW  H2 source=VIIRS_SNPP_SP: verify() -> ["source is 'VIIRS_SNPP_SP', expected 'MODIS_SP'"]

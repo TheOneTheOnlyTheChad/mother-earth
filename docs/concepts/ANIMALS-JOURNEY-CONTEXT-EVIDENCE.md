@@ -1,6 +1,6 @@
 # Animals journey context: evidence record (Nature context Workstream C)
 
-25 Nov 2026 04:19 UTC (clock reading) · **rev 1.2** (GPT's evidence review of 25 Nov folded in: §0 Chad's acceptances, §1 boundary prose, §3 version and gap-list wording, §4a budget wording, new §4b the extractor, §5 file count, §6 note; rev 1.1 added §4a) · Animals thread · for GPT · **nothing built; no extraction run; no tiles downloaded; corridor parked.**
+25 Nov 2026 04:31 UTC (clock reading) · **rev 1.3** (GPT's targeted extractor review of 25 Nov, `reviews/2026-11-25-animals-journey-context-extractor-gpt-review.md`, filed unchanged: H1 and H2 fixed, new §4c; §4a stop-rule wording; rev 1.2 folded in the evidence review) · Animals thread · for GPT · **nothing built; no extraction run; no tiles downloaded; corridor parked.**
 
 Follows the proposal `docs/concepts/ANIMALS-JOURNEY-CONTEXT-PROPOSAL.md` rev 1 and GPT's review `reviews/2026-11-25-animals-journey-context-proposal-gpt-review.md` (filed unchanged). GPT's corrections A to E are folded in here and in the build brief `docs/concepts/ANIMALS-JOURNEY-CONTEXT-BUILD-BRIEF.md`. No separate proposal revision is made.
 
@@ -116,7 +116,7 @@ Chad ran the pilot script unchanged (sha256 `91be1a2e…a027`) and pasted its si
 - Plus one availability request, key-status reads before the first window and after windows 15, 30, 45, 60 and 73 (six reads), and one keyless request for the missing-data list. That is **80 requests to the keyed API and 1 keyless: 81 HTTP requests**.
 - One at a time, 3 s apart, 60 s timeout, no automatic retries: **typically about 4–5 minutes**. Slow responses can make it longer; there is no promised maximum.
 - **Transactions: estimated about 755** (73 × 10.3), against 5,000 per 10 minutes. This is an estimate, not a maximum. What actually limits the run is the stop rules below, which read the real count.
-- **Stop rules** (enforced by the extractor; §4b): at any key-status read that is unreadable or not in the expected form; at any read showing 2,000 or more already used, which keeps at least 3,000 in reserve for other users of the key including the live hub; at the first failed, oversized or invalid response. A stopped run is marked so and nothing is built from it.
+- **Stop rules** (enforced by the extractor; §4b): at any key-status read that is unreadable or not in the expected form; at any read showing 2,000 or more already used, which is a **sampled** stop rule: usage is read before the run and after windows 15, 30, 45, 60 and 73, so it is not a guarantee that 3,000 stay free at every moment between readings, and the script reserves nothing on the provider's shared key (GPT); at the first failed, oversized or invalid response. A stopped run is marked so and nothing is built from it.
 - **Private cache:** about 73 CSVs. The pilot's 33 rows for 10 days took 2.9 KB, so the year is expected at well under 1 MB; the extraction stops if the cache passes 20 MB.
 - Same key handling as the pilot.
 - **The corridor is not included:** 585 requests, an estimated 6,000 transactions on the same sample, which would need spreading across several 10-minute windows. It gets its own budget line and go.
@@ -147,6 +147,57 @@ Chad ran the pilot script unchanged (sha256 `91be1a2e…a027`) and pasted its si
 - **verifier:** refuses an altered file, a missing file, a missing gap list, a manifest not complete, missing gap provenance, a missing window, and a leftover partial file.
 
 Two defects were found and fixed while writing these controls. A gap-list body with no table rows was first accepted as an empty list; it now stops the run. A key echoed inside a status body first stopped the run although status bodies are never stored; that check now applies only to stored responses. The real status response did not contain the key in the pilot.
+
+## 4c. GPT's targeted hold, H1 and H2, and the fixes (25 Nov)
+
+GPT reran the 39 offline controls on the Mac (39 passed) and reproduced two faults without any network use. Both are fixed on the same branch. No pilot was repeated, and no proposal revision was made.
+
+**H1: the missing-data list could silently lose a real gap.** The row pattern skipped a `<tr>` with attributes, so GPT's reproduction listed no gap where 1 Mar 2008 should appear. `2008-02-31` was also accepted as a date.
+- **Fix:** the list is now read with the standard library's HTML parser (`parse_gap_list`, a pure function). It accepts attributes on `<tr>` and `<td>`. It refuses any other markup, a cell outside a row, nesting, unclosed rows and rows without exactly four cells. Every date must be a real calendar date. Satellite labels must be among those the live list uses (Terra, Aqua, Suomi NPP, NOAA-20, NOAA-21 with their sensor). An unrecognised label stops the run rather than becoming "no MODIS gaps". Availability is read the same way (`parse_availability`, real dates required).
+- **Checked against the live list** in the pane on 25 Nov: the response (24,691 bytes, sha256 `8b9c8d5d…82be`, unchanged since the morning) is kept as a test fixture. It parses to 171 standard rows, with no Terra or Aqua MODIS date listed in the zebra's interval. The count of 171 is not pinned as a substitute for parsing.
+
+**H2: the verifier did not bind a folder to the planned extraction.** GPT changed only the manifest's area, and then only its source, and the verifier still accepted the folder.
+- **Fix:** `journey_context_verify.py` now holds its own fixed expectations: `MODIS_SP`, `20,-22,28,-18`, 25 Oct 2007 to 22 Oct 2008, 73 windows, 81 requests. It does not read them from the extractor. It also holds the approved extractor's sha256 (`APPROVED_EXTRACTOR_SHA256`); the suite fails if that differs from the extractor file. It checks:
+  - every window's index, start, duration and file name against its own plan;
+  - file names as plain names inside the folder;
+  - each file's hash, and re-runs the extractor's row checks on each, comparing the row count;
+  - 81 requests, all HTTP 200;
+  - the six key-status readings in planned order, each a valid reading below 2,000, the last after window 73;
+  - the saved availability and missing-data files re-parsed with the extractor's own pure parsers, with their summaries required to equal the manifest's exactly.
+- A malformed manifest shape gives a clear NOT USABLE, not a traceback. It establishes reproducible provenance only: the builder still parses, clips, deduplicates and checks aggregates.
+
+**Evidence** (Claude, cloud workspace, 25 Nov):
+- `python3 -I phase1/animals/journey_context_firms_fetch.test.py`: **72 passed, 0 failed** (`reviews/evidence/2026-11-25-animals-journey-context/firms-fetch-offline-controls-h1h2.log`).
+- **New H1 controls:**
+  - GPT's attributed row, through the whole extractor and directly;
+  - attributes on `<td>`;
+  - a valid list with no gap in the interval, which still completes;
+  - `2008-02-31`;
+  - an unknown label;
+  - nested markup, a three-cell row, an unclosed row;
+  - an impossible availability date;
+  - the live-list fixture.
+- **New H2 controls**, each refused:
+  - the area and source changes;
+  - another first day;
+  - a wrong or missing extractor identity;
+  - a missing final status reading, or one at 2,500 or with a text count;
+  - a request recorded as HTTP 500;
+  - a window file named `../x.csv`, a changed row count, a window record that isn't an object;
+  - a changed availability summary, a removed gap day and an extra gap field (each with the file unchanged);
+  - a manifest that is a list, `windows` null, readings of the wrong shape.
+
+  The untouched run gives USABLE from the command line.
+- **Old against new** (`h1h2-old-vs-new.log`), running GPT's reproductions on `e76d4de` and on the fix:
+
+| Case | Old | New |
+|---|---|---|
+| attributed row | accepted, listing `[]` | lists `['2008-03-01']` |
+| `2008-02-31` | accepted and listed | stops |
+| area `0,0,4,4` | verifier returns `[]` | refused |
+| source `VIIRS_SNPP_SP` | verifier returns `[]` | refused |
+
+  The full new suite stops at its first check on the old verifier, which has no extractor pin.
 
 ## 5. Hansen / UMD Global Forest Change: what was read and measured
 
@@ -182,7 +233,7 @@ Two defects were found and fixed while writing these controls. A gap-list body w
 - **Tree-cover loss carries strong caveats:** relative indicator, older method for 2007–08, approximate area, threshold applied to 2000. In the zebra's region, sampled canopy peaks at 54 %. So loss at a 30 % threshold may be very small or zero there, and the block must say what zero means.
 - **Threshold: 30 %** of tree cover in 2000, labelled beside the value (accepted by Chad, 25 Nov). It is a selection threshold, not a habitat definition. It is never changed after seeing the result.
 
-## 7. Open, for GPT (rev 1.2)
+## 7. Open, for GPT (rev 1.3)
 
-1. GPT's targeted check of the extractor, its verifier and the offline controls (§4b).
-2. After that check and Chad's go: Chad runs the extractor in Terminal and downloads the six Hansen files; then the C1a build on a branch.
+1. GPT's recheck of H1 and H2 (§4c) against the replacement hashes.
+2. After that and Chad's go: Chad runs the extractor in Terminal and downloads the six Hansen files; then the C1a build on a branch. The corridor stays parked.

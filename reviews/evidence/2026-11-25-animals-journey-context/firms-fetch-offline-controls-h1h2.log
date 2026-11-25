@@ -1,0 +1,74 @@
+PASS the verifier pins the reviewed extractor: APPROVED_EXTRACTOR_SHA256 equals this extractor file
+PASS H1: the live list of 25 Nov (fixture, sha256 8b9c8d5d…82be) parses fully: 171 standard rows, no MODIS day in the interval
+PASS H1: GPT's reproduction (an attributed MODIS row after a plain one) lists 1 Mar 2008
+PASS H1: 2008-02-31 is refused, not listed
+PASS H1: availability with an impossible date is refused
+PASS plan: 73 windows (72 of five days, one of four), 25 Oct 2007 to 22 Oct 2008
+PASS plan: status reads after windows 15, 30, 45, 60 and 73; 81 HTTP requests (80 keyed + 1 keyless)
+PASS test-only caps cannot be set without the test host
+PASS without the test host, ME_TEST_* caps are ignored and spacing stays 3 s
+PASS ok: state complete, exit 0, 73 windows, key absent
+PASS header_only: state complete, exit 0, 73 windows, key absent
+PASS status_reset: state complete, exit 0, 73 windows, key absent
+PASS status_500: state stopped, exit 1, "HTTP 500", 0 windows, key absent
+PASS status_bad_json: state stopped, exit 1, "not readable JSON", 0 windows, key absent
+PASS status_missing_field: state stopped, exit 1, "expected allowance", 0 windows, key absent
+PASS status_wrong_limit: state stopped, exit 1, "expected allowance", 0 windows, key absent
+PASS status_float: state stopped, exit 1, "expected allowance", 0 windows, key absent
+PASS status_busy: state stopped, exit 1, "already used", 0 windows, key absent
+PASS avail_short: state invalid, exit 1, "does not cover", 0 windows, key absent
+PASS status_final_bad: state stopped, exit 1, "not readable JSON", 73 windows, key absent
+PASS gap_bad: state invalid, exit 1, "never an empty one", 0 windows, key absent
+PASS gap_attr: state complete, exit 0, 73 windows, key absent
+PASS gap_attr_td: state complete, exit 0, 73 windows, key absent
+PASS gap_none_in_interval: state complete, exit 0, 73 windows, key absent
+PASS gap_bad_date: state invalid, exit 1, "not a real calendar date", 0 windows, key absent
+PASS gap_unknown_label: state invalid, exit 1, "unrecognised satellite label", 0 windows, key absent
+PASS gap_nested: state invalid, exit 1, "unsupported markup", 0 windows, key absent
+PASS gap_three_cells: state invalid, exit 1, "not 4", 0 windows, key absent
+PASS gap_unclosed: state invalid, exit 1, "ends inside a row", 0 windows, key absent
+PASS gap_no_rows: state invalid, exit 1, "never an empty one", 0 windows, key absent
+PASS area_html: state invalid, exit 1, "frozen MODIS header", 2 windows, key absent
+PASS area_bad_time: state invalid, exit 1, "valid HHMM", 2 windows, key absent
+PASS area_wrong_header: state invalid, exit 1, "frozen MODIS header", 2 windows, key absent
+PASS area_outside_date: state invalid, exit 1, "outside the requested window", 2 windows, key absent
+PASS area_bad_sat: state invalid, exit 1, "Terra or Aqua", 2 windows, key absent
+PASS area_outside_box: state invalid, exit 1, "outside the requested box", 2 windows, key absent
+PASS area_short_row: state invalid, exit 1, "fields, expected", 2 windows, key absent
+PASS area_key_echo: state invalid, exit 1, "contained the key", 2 windows, key absent
+PASS area_oversize: state stopped, exit 1, "byte cap", 2 windows, key absent
+PASS ok: state stopped, exit 1, "cache cap", key absent
+PASS area_500: state stopped, exit 1, "HTTP 500", 2 windows, key absent
+PASS area_500_big: state stopped, exit 1, "byte cap (65536)", 2 windows, key absent
+PASS area_drop: state stopped, exit 1, "failed", 2 windows, key absent
+PASS no KEYS.md row: stops before any request, writes nothing
+PASS verifier: a complete run is usable
+PASS verifier: an altered window file is refused
+PASS verifier: a missing window file is refused
+PASS verifier: a missing gap list is refused
+PASS verifier: a manifest not marked complete is refused
+PASS verifier: a manifest without gap-list provenance is refused
+PASS verifier: a missing window in the manifest is refused
+PASS verifier: a leftover partial file is refused
+PASS H2: the untouched complete run is usable
+PASS H2: area changed to 0,0,4,4 (GPT's reproduction) is refused
+PASS H2: source changed to VIIRS_SNPP_SP (GPT's reproduction) is refused
+PASS H2: a different first day is refused
+PASS H2: a different extractor identity is refused
+PASS H2: no extractor identity is refused
+PASS H2: the final key-status reading missing is refused
+PASS H2: a final key-status reading at 2,500 used is refused
+PASS H2: a key-status reading with a text count is refused
+PASS H2: one request recorded as HTTP 500 is refused
+PASS H2: a window file named ../x.csv is refused
+PASS H2: a window row count changed is refused
+PASS H2: a window record that is not an object is refused
+PASS H2: the availability summary changed, file unchanged is refused
+PASS H2: a gap day removed from the summary, file unchanged is refused
+PASS H2: an extra field in the gap summary is refused
+PASS H2: a manifest that is a JSON list gives a clear NOT USABLE, no traceback
+PASS H2: windows set to null gives a clear NOT USABLE, no traceback
+PASS H2: status readings of the wrong shape give a clear NOT USABLE
+PASS H2: the verifier command prints USABLE and exits 0 on the untouched run
+
+72 passed, 0 failed

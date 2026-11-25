@@ -15,6 +15,18 @@ KEY = '0123456789abcdef0123456789abcdef'
 HEADER = 'latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,instrument,confidence,version,bright_t31,frp,daynight,type'
 GAPS = {'success': True, 'html': '<tr><td>2022-10-22</td><td>Terra (MODIS)</td><td>2024-03-06</td><td>NOAA-21 (VIIRS)</td></tr>\n<tr><td>2008-03-01</td><td>Aqua (MODIS)</td><td></td><td></td></tr>'}
 
+ROW = lambda d, s, d2='', s2='': f'<tr><td>{d}</td><td>{s}</td><td>{d2}</td><td>{s2}</td></tr>'
+GAP_CASES = {   # H1 (GPT, 25 Nov): GPT's reproduction and the related failure shapes
+    'gap_attr': ROW('2022-10-22', 'Terra (MODIS)') + '<tr class="gap"><td>2008-03-01</td><td>Aqua (MODIS)</td><td></td><td></td></tr>',
+    'gap_attr_td': ROW('2022-10-22', 'Terra (MODIS)') + '<tr><td class="d">2008-03-01</td><td data-x="1">Aqua (MODIS)</td><td></td><td></td></tr>',
+    'gap_bad_date': ROW('2022-10-22', 'Terra (MODIS)') + ROW('2008-02-31', 'Aqua (MODIS)'),
+    'gap_unknown_label': ROW('2022-10-22', 'Terra (MODIS)') + ROW('2008-03-01', 'Aqua MODIS C7'),
+    'gap_nested': ROW('2022-10-22', 'Terra (MODIS)') + '<tr><td><b>2008-03-01</b></td><td>Aqua (MODIS)</td><td></td><td></td></tr>',
+    'gap_three_cells': ROW('2022-10-22', 'Terra (MODIS)') + '<tr><td>2008-03-01</td><td>Aqua (MODIS)</td><td></td></tr>',
+    'gap_unclosed': ROW('2022-10-22', 'Terra (MODIS)') + '<tr><td>2008-03-01</td><td>Aqua (MODIS)</td><td></td><td></td>',
+    'gap_none_in_interval': ROW('2022-10-22', 'Terra (MODIS)', '2024-03-06', 'NOAA-21 (VIIRS)') + ROW('2001-06-16', 'Terra (MODIS)'),
+}
+
 class Server:
     def __init__(self, mode):
         self.mode, self.status_n, self.area_n, self.log = mode, 0, 0, []
@@ -30,6 +42,7 @@ class Server:
                 if 'missing_data' in self.path:
                     if m == 'gap_bad': return self.send(200, json.dumps({'success': True, 'html': 'oops'}), 'application/json')
                     if m == 'gap_no_rows': return self.send(200, json.dumps({'success': True, 'html': '<tr><td></td><td></td><td>2024-03-06</td><td>NOAA-21 (VIIRS)</td></tr>'}), 'application/json')
+                    if m in GAP_CASES: return self.send(200, json.dumps({'success': True, 'html': GAP_CASES[m]}), 'application/json')
                     return self.send(200, json.dumps(GAPS), 'application/json')
                 if 'mapkey_status' in self.path:
                     srv.status_n += 1; n = srv.status_n
@@ -93,6 +106,18 @@ def check(name, cond, detail=''):
 
 import journey_context_firms_fetch as F
 import journey_context_verify as V
+import hashlib
+FIX = os.path.join(HERE, 'fixtures', 'firms-missing-data-2026-11-25.json')
+check('the verifier pins the reviewed extractor: APPROVED_EXTRACTOR_SHA256 equals this extractor file', V.APPROVED_EXTRACTOR_SHA256 == hashlib.sha256(open(FETCH, 'rb').read()).hexdigest(), V.APPROVED_EXTRACTOR_SHA256)
+real = F.parse_gap_list(open(FIX, 'rb').read())
+check('H1: the live list of 25 Nov (fixture, sha256 8b9c8d5d…82be) parses fully: 171 standard rows, no MODIS day in the interval', hashlib.sha256(open(FIX, 'rb').read()).hexdigest().startswith('8b9c8d5d') and real['standard_rows'] == 171 and real['modis_days_listed_in_interval'] == [])
+gl = lambda h: F.parse_gap_list(json.dumps({'success': True, 'html': h}).encode())
+check("H1: GPT's reproduction (an attributed MODIS row after a plain one) lists 1 Mar 2008", gl(GAP_CASES['gap_attr'])['modis_days_listed_in_interval'] == ['2008-03-01'])
+def raises(f):
+    try: f(); return False
+    except ValueError: return True
+check('H1: 2008-02-31 is refused, not listed', raises(lambda: gl(GAP_CASES['gap_bad_date'])))
+check('H1: availability with an impossible date is refused', raises(lambda: F.parse_availability(b'data_id,min_date,max_date\nMODIS_SP,2000-11-01,2026-02-30')))
 check('plan: 73 windows (72 of five days, one of four), 25 Oct 2007 to 22 Oct 2008', len(F.WINDOWS) == 73 and F.WINDOWS[0] == (date(2007, 10, 25), 5) and F.WINDOWS[-1] == (date(2008, 10, 19), 4) and sum(d for _, d in F.WINDOWS) == 364)
 check('plan: status reads after windows 15, 30, 45, 60 and 73; 81 HTTP requests (80 keyed + 1 keyless)', F.PLANNED_STATUS_AFTER == [15, 30, 45, 60, 73] and F.PLANNED_HTTP == 81)
 check('test-only caps cannot be set without the test host', F.RESPONSE_CAP == 2_000_000 and F.CACHE_CAP == 20_000_000 and F.HOST.startswith('https://firms.modaps.eosdis.nasa.gov') or bool(os.environ.get('ME_PILOT_TEST_HOST')))
@@ -123,6 +148,12 @@ for mode, why in [('status_500', 'HTTP 500'), ('status_bad_json', 'not readable 
 expect('avail_short', 'invalid', 1, 'does not cover', windows=0, extra=lambda p, o, m, s: not any('/api/area/' in x for x in s.log))
 expect('status_final_bad', 'stopped', 1, 'not readable JSON', windows=73, extra=lambda p, o, m, s: V.verify(o) != [] and not p.stdout.strip().splitlines()[-1].startswith('COMPLETE'))
 expect('gap_bad', 'invalid', 1, 'never an empty one', windows=0, extra=lambda p, o, m, s: len(s.log) == 1)
+# H1: attributed rows are read, not skipped; anything unreadable stops the run; a genuinely empty interval still passes
+expect('gap_attr', 'complete', 0, windows=73, extra=lambda p, o, m, s: m['gap_list']['modis_days_listed_in_interval'] == ['2008-03-01'] and V.verify(o) == [])
+expect('gap_attr_td', 'complete', 0, windows=73, extra=lambda p, o, m, s: m['gap_list']['modis_days_listed_in_interval'] == ['2008-03-01'])
+expect('gap_none_in_interval', 'complete', 0, windows=73, extra=lambda p, o, m, s: m['gap_list']['modis_days_listed_in_interval'] == [] and m['gap_list']['standard_rows'] == 2 and V.verify(o) == [])
+for mode, why in [('gap_bad_date', 'not a real calendar date'), ('gap_unknown_label', 'unrecognised satellite label'), ('gap_nested', 'unsupported markup'), ('gap_three_cells', 'not 4'), ('gap_unclosed', 'ends inside a row')]:
+    expect(mode, 'invalid', 1, why, windows=0, extra=lambda p, o, m, s: len(s.log) == 1 and 'gap_list' not in m)
 expect('gap_no_rows', 'invalid', 1, 'never an empty one', windows=0, extra=lambda p, o, m, s: len(s.log) == 1)
 # correction 3: strict CSV
 for mode, why in [('area_html', 'frozen MODIS header'), ('area_bad_time', 'valid HHMM'), ('area_wrong_header', 'frozen MODIS header'), ('area_outside_date', 'outside the requested window'), ('area_bad_sat', 'Terra or Aqua'), ('area_outside_box', 'outside the requested box'), ('area_short_row', 'fields, expected')]:
@@ -152,6 +183,39 @@ mm['state'] = 'stopped'; json.dump(mm, open(mp, 'w')); check('verifier: a manife
 mm = json.loads(keep); del mm['gap_list']; json.dump(mm, open(mp, 'w')); check('verifier: a manifest without gap-list provenance is refused', any('no gap_list record' in x for x in V.verify(out)))
 mm = json.loads(keep); mm['windows'] = mm['windows'][:-1]; json.dump(mm, open(mp, 'w')); check('verifier: a missing window in the manifest is refused', any('do not match the plan' in x for x in V.verify(out)))
 open(mp, 'w').write(keep); open(os.path.join(out, 'x.part'), 'w').write('x'); check('verifier: a leftover partial file is refused', any('partial' in x for x in V.verify(out)))
+shutil.rmtree(home, ignore_errors=True)
+
+# H2 (GPT, 25 Nov): the verifier binds a folder to the planned zebra extraction, not just to its own hashes
+p, out, m, srv, leak, home = run('ok')
+mp = os.path.join(out, 'manifest.json'); keep = open(mp).read()
+check('H2: the untouched complete run is usable', V.verify(out) == [])
+def tamper(name, change, expect_text):
+    mm = json.loads(keep); change(mm); open(mp, 'w').write(json.dumps(mm) if not isinstance(mm, str) else mm)
+    got = V.verify(out); open(mp, 'w').write(keep)
+    check(f'H2: {name} is refused', got != [] and any(expect_text in x for x in got), got)
+tamper('area changed to 0,0,4,4 (GPT\'s reproduction)', lambda mm: mm.update(area='0,0,4,4'), 'area is')
+tamper('source changed to VIIRS_SNPP_SP (GPT\'s reproduction)', lambda mm: mm.update(source='VIIRS_SNPP_SP'), 'source is')
+tamper('a different first day', lambda mm: mm.update(first_day='2007-10-24'), 'first_day is')
+tamper('a different extractor identity', lambda mm: mm.update(script_sha256='0' * 64), 'extractor identity')
+tamper('no extractor identity', lambda mm: mm.pop('script_sha256'), 'extractor identity')
+tamper('the final key-status reading missing', lambda mm: mm['status_readings'].pop(), 'six planned ones')
+tamper('a final key-status reading at 2,500 used', lambda mm: mm['status_readings'][-1].update(used=2500), 'below 2000')
+tamper('a key-status reading with a text count', lambda mm: mm['status_readings'][2].update(used='7'), 'below 2000')
+tamper('one request recorded as HTTP 500', lambda mm: mm['requests'][40].update(status=500), 'successful requests')
+tamper('a window file named ../x.csv', lambda mm: mm['windows'][5].update(file='../x.csv'), 'windows do not match')
+tamper('a window row count changed', lambda mm: mm['windows'][7].update(rows=99), 'rows, the manifest says')
+tamper('a window record that is not an object', lambda mm: mm['windows'].__setitem__(3, 'x'), 'not a list of records')
+tamper('the availability summary changed, file unchanged', lambda mm: mm['availability'].update(max_date='2030-01-01'), 'availability summary')
+tamper('a gap day removed from the summary, file unchanged', lambda mm: mm['gap_list'].update(modis_days_listed_in_interval=[]), 'gap_list summary')
+tamper('an extra field in the gap summary', lambda mm: mm['gap_list'].update(note='x'), 'gap_list summary')
+open(mp, 'w').write('[1, 2, 3]'); got = V.verify(out); open(mp, 'w').write(keep)
+check('H2: a manifest that is a JSON list gives a clear NOT USABLE, no traceback', got == ['the manifest is not a JSON object'], got)
+open(mp, 'w').write(json.dumps(dict(json.loads(keep), windows=None))); got = V.verify(out); open(mp, 'w').write(keep)
+check('H2: windows set to null gives a clear NOT USABLE, no traceback', got and all(not x.startswith('could not check') for x in got), got)
+open(mp, 'w').write(json.dumps(dict(json.loads(keep), status_readings={'a': 1}))); got = V.verify(out); open(mp, 'w').write(keep)
+check('H2: status readings of the wrong shape give a clear NOT USABLE', any('six planned ones' in x for x in got), got)
+r = subprocess.run([sys.executable, '-I', os.path.join(HERE, 'journey_context_verify.py'), out], capture_output=True, text=True)
+check('H2: the verifier command prints USABLE and exits 0 on the untouched run', r.returncode == 0 and r.stdout.strip() == 'USABLE', r.stdout + r.stderr)
 shutil.rmtree(home, ignore_errors=True)
 
 print(f'\n{passed} passed, {failed} failed')

@@ -22,6 +22,9 @@ Safety rules (GPT's review of 25 Nov 2026, corrections 1 to 5):
      coordinates, date inside the window, HHMM time (unpadded accepted, invalid rejected), satellite, instrument,
      confidence, version text, type, day/night and the numeric fields. Header-only is a valid zero; anything else
      (HTML, a plausible prefix, a bad row) stops the run.
+  H1 (GPT, 25 Nov, second review): the missing-data list is read with a standard-library HTML parser that accepts
+     attributes on <tr>/<td>, refuses any other markup, needs four cells per row, real calendar dates and known
+     satellite labels. Anything it cannot read stops the run; it is never treated as an empty list.
   4. What is hashed is exactly what is stored. If a response that would be stored contains the key, nothing of it
      is stored and the run stops with a redacted failure record. Key-status bodies are never stored: only their
      parsed allowance and usage numbers are kept.
@@ -30,6 +33,7 @@ Safety rules (GPT's review of 25 Nov 2026, corrections 1 to 5):
 The key is read from KEYS.md by this script and is never printed, logged or written.
 """
 import csv, hashlib, io, json, os, re, sys, time, urllib.error, urllib.request
+from html.parser import HTMLParser
 from datetime import date, datetime, timedelta, timezone
 
 TEST_HOST = os.environ.get('ME_PILOT_TEST_HOST')             # offline tests only; caps below may be lowered only with it
@@ -158,35 +162,15 @@ class Run:
 
     def availability(self):
         body = self.fetch('MODIS_SP data availability', '/api/data_availability/csv/{KEY}/MODIS_SP')
-        try: text = body.decode('utf-8')
-        except UnicodeDecodeError: raise Stop('invalid', 'availability was not UTF-8')
-        lines = [l for l in text.splitlines() if l.strip()]
-        if not lines or lines[0].strip() != AVAIL_HEADER: raise Stop('invalid', 'availability did not have the expected header')
-        rows = [l.split(',') for l in lines[1:]]
-        mine = [r for r in rows if len(r) == 3 and r[0] == SOURCE]
-        try:
-            ok = len(mine) == 1 and date.fromisoformat(mine[0][1]) <= FIRST and date.fromisoformat(mine[0][2]) >= LAST
-        except ValueError: ok = False
-        if not ok: raise Stop('invalid', 'availability does not cover the whole interval for MODIS_SP')
-        self.m['availability'] = {'min_date': mine[0][1], 'max_date': mine[0][2], 'sha256': self.store('availability-MODIS_SP.csv', body)}
+        try: summary = parse_availability(body)
+        except ValueError as e: raise Stop('invalid', f'availability: {e}')
+        self.m['availability'] = dict(summary, sha256=self.store('availability-MODIS_SP.csv', body))
 
     def gap_list(self):
         body = self.fetch('missing-data list (keyless)', '/api/missing_data/?action=fetch_data', keyed=False)
-        try:
-            d = json.loads(body.decode('utf-8')); html = d['html']
-            if d.get('success') is not True or not isinstance(html, str): raise ValueError
-        except Exception: raise Stop('invalid', 'the missing-data list was not the expected JSON')
-        trs = re.findall(r'<tr>(.*?)</tr>', html, re.S)
-        rows = [re.findall(r'<td>\s*([^<]*?)\s*</td>', tr) for tr in trs]
-        if not rows or any(len(r) != 4 for r in rows):
-            raise Stop('invalid', 'the missing-data list did not have table rows of four cells each (an unreadable list is never an empty one)')
-        sp = [(r[0], r[1]) for r in rows if r[0]]
-        if not sp: raise Stop('invalid', 'the missing-data list had no standard-data rows (an unreadable list is never an empty one)')
-        for dd, sat in sp:
-            if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', dd): raise Stop('invalid', 'the missing-data list had a malformed date')
-        modis = sorted(dd for dd, sat in sp if sat in ('Terra (MODIS)', 'Aqua (MODIS)') and FIRST.isoformat() <= dd <= LAST.isoformat())
-        self.m['gap_list'] = {'sha256': self.store('missing-data.json', body), 'standard_rows': len(sp),
-                              'modis_days_listed_in_interval': modis, 'meaning': "dates listed in the provider's missing-data table for Terra or Aqua MODIS standard data; not a statement about cloud or local observation"}
+        try: summary = parse_gap_list(body)
+        except ValueError as e: raise Stop('invalid', f'the missing-data list: {e} (an unreadable list is never an empty one)')
+        self.m['gap_list'] = dict(summary, sha256=self.store('missing-data.json', body))
 
     def area(self, i, start, days):
         body = self.fetch(f'area {start.isoformat()}, {days} days', f'/api/area/csv/{{KEY}}/{SOURCE}/{AREA}/{days}/{start.isoformat()}')
@@ -194,6 +178,78 @@ class Run:
         name = f'area-{start.isoformat()}-{days}d.csv'
         sha = self.store(name, body)
         self.m['windows'].append({'i': i, 'start': start.isoformat(), 'days': days, 'file': name, 'sha256': sha, 'rows': rows})
+
+# ---------- pure parsers, shared with journey_context_verify.py (no network, no state) ----------
+KNOWN_SATELLITES = ('Terra (MODIS)', 'Aqua (MODIS)', 'Suomi NPP (VIIRS)', 'NOAA-20 (VIIRS)', 'NOAA-21 (VIIRS)')
+MODIS_SATELLITES = ('Terra (MODIS)', 'Aqua (MODIS)')
+GAP_MEANING = "dates listed in the provider's missing-data table for Terra or Aqua MODIS standard data; not a statement about cloud or local observation"
+
+def real_date(text):
+    """A YYYY-MM-DD string that is a real calendar date, else None."""
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', text or ''): return None
+    try: return date.fromisoformat(text)
+    except ValueError: return None
+
+def parse_availability(body):
+    """Raises ValueError unless the body is the expected CSV naming MODIS_SP once with real dates covering FIRST..LAST."""
+    text = body.decode('utf-8')
+    lines = [l for l in text.splitlines() if l.strip()]
+    if not lines or lines[0].strip() != AVAIL_HEADER: raise ValueError('not the expected header')
+    mine = [l.split(',') for l in lines[1:] if l.split(',')[0] == SOURCE]
+    if len(mine) != 1 or len(mine[0]) != 3: raise ValueError('MODIS_SP is not listed exactly once with two dates')
+    lo, hi = real_date(mine[0][1].strip()), real_date(mine[0][2].strip())
+    if lo is None or hi is None: raise ValueError('MODIS_SP dates are not real calendar dates')
+    if not (lo <= FIRST and hi >= LAST): raise ValueError('does not cover the whole interval for MODIS_SP')
+    return {'min_date': lo.isoformat(), 'max_date': hi.isoformat()}
+
+class _GapTable(HTMLParser):
+    """Reads <tr>/<td> rows with any attributes. Anything else inside the table structure is refused, not skipped."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True); self.rows, self.row, self.cell, self.problem = [], None, None, None
+    def fail(self, why):
+        if not self.problem: self.problem = why
+    def handle_starttag(self, tag, attrs):
+        if tag == 'tr':
+            if self.row is not None: self.fail('a row starts inside another row')
+            self.row = []
+        elif tag == 'td':
+            if self.row is None: self.fail('a cell outside a row')
+            elif self.cell is not None: self.fail('a cell inside another cell')
+            self.cell = []
+        else: self.fail(f'unsupported markup <{tag}>')
+    def handle_endtag(self, tag):
+        if tag == 'td':
+            if self.cell is None: self.fail('a cell closes that never opened')
+            elif self.row is not None: self.row.append(''.join(self.cell).strip())
+            self.cell = None
+        elif tag == 'tr':
+            if self.row is None or self.cell is not None: self.fail('a row closes out of order')
+            else: self.rows.append(self.row)
+            self.row = None
+        else: self.fail(f'unsupported markup </{tag}>')
+    def handle_data(self, data):
+        if self.cell is not None: self.cell.append(data)
+        elif data.strip(): self.fail('text outside a cell')
+
+def parse_gap_list(body):
+    """Raises ValueError unless every row is four cells of (date, satellite) pairs with real dates and known labels."""
+    d = json.loads(body.decode('utf-8'))
+    if not isinstance(d, dict) or d.get('success') is not True or not isinstance(d.get('html'), str): raise ValueError('not the expected JSON')
+    t = _GapTable(); t.feed(d['html']); t.close()
+    if t.problem: raise ValueError(t.problem)
+    if t.row is not None or t.cell is not None: raise ValueError('the table ends inside a row')
+    if not t.rows: raise ValueError('no table rows')
+    standard = []
+    for r in t.rows:
+        if len(r) != 4: raise ValueError(f'a row has {len(r)} cells, not 4')
+        for dd, sat in ((r[0], r[1]), (r[2], r[3])):
+            if not dd and not sat: continue
+            if real_date(dd) is None: raise ValueError(f'{dd!r} is not a real calendar date')
+            if sat not in KNOWN_SATELLITES: raise ValueError(f'unrecognised satellite label {sat!r}')
+        if r[0]: standard.append((r[0], r[1]))
+    if not standard: raise ValueError('no standard-data rows')
+    modis = sorted(dd for dd, sat in standard if sat in MODIS_SATELLITES and FIRST.isoformat() <= dd <= LAST.isoformat())
+    return {'standard_rows': len(standard), 'modis_days_listed_in_interval': modis, 'meaning': GAP_MEANING}
 
 def validate_area(body, start, days):
     try: text = body.decode('utf-8')
