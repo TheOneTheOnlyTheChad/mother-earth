@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 15:55 UTC (clock reading) — **Tides: GPT's first-build review filed (HOLD; model and tuned exaggeration accepted); round 2 on `tides-rc` `7c3e2af` for GPT's recheck. Not merged, nothing live, no hub change** (page: none; Tides thread)
+- **Filed unchanged:** `reviews/2026-11-25-tides-rc-first-build-gpt-review.md` (sha256 `048976d4…0380`, relayed by Chad).
+- **Fixed:** R1 the Drawing sentence and neap share are generated from the model and checked by the build; R2 exact-geometry wording only within 0.5° of a preset, "close to" with the real share nearby; R3 labels placed clear of every body (both views × four phases × 1280×900, 1280×720, 390×844, plus free camera; also on Chad's Mac with real graphics); R5 real touch swipes now tested, which found and fixed a real fault (the canvas blocked vertical scrolling on touch).
+- **Evidence completed:** R4.1 Earth layer-level check (GIBS layer metadata, 11 NASA CMR collection records: no use restriction; done after the image was kept, and said so); R4.2 Sun checked on this picture against NOAA SWPC SRS 329 (three regions found within 1.1° latitude, 2.2° longitude) and its mask edge re-projected independently; R4.3 the image-use note's times corrected in a dated block; R5 loading: Tides ready in 646 ms median against Moon 342 ms (cold, local, software WebGL); pictures 1,364,086 B, over the 1.2 MB target by 14%, reported for judgement, nothing compressed.
+- **Suites:** `tides-model` 42 passed, 6/6 breaks; `tides-ui` 60 passed, 12/12 breaks. Packet `reviews/2026-11-25-tides-rc.md` (round 2 at the top; branch `e8978e2`).
+- **Next:** GPT rechecks round 2. Then Chad's preview judgement, the navigation candidate, his Approve line for release.
+
 ## 25 Nov 15:53 UTC (clock reading) — **Animals: Chad's confirming email to the IWC after the call sent. Next: Cape Vidal call, 26 Nov.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.11.
 

@@ -1,5 +1,12 @@
 # Tides: image-use reads for the two reference images
 
+> **Corrections and additions, 25 Nov 2026, 15:16 UTC (clock reading), after GPT's first-build review (R4).** The note below is kept as written and committed at 14:27:47 UTC (commit time, `fdfc9b5`); it is not edited.
+> - **Its read times are wrong.** "About 14:30–14:40 UTC" was not a clock reading. The three pages were read in the browser pane before the note was written, so before 14:27:47 UTC; the exact minutes were not logged.
+> - **"No image has been fetched or kept" was true when it was written.** Afterwards, on Chad's go: the Sun picture was copied from our hub at 14:29:48 UTC and the four Earth candidates were fetched from 14:30:21 UTC (`assets/tides/SOURCE.json`). So these reads came before acquisition, by the record above, but only by minutes.
+> - **The layer-level Earth check, left open below, was done at 15:12 UTC:** GIBS's layer metadata for `VIIRS_NOAA21_CorrectedReflectance_TrueColor` and NASA CMR's records of its 12 source collections (11 answered, 1 gave 404). None carries a use restriction: "UseConstraints: None" in all 11, the near-real-time ones pointing to the LANCE disclaimer already in REGISTER; originator NASA/GSFC. Details in `SOURCE.json` (`layer_check`). This was done after the image was kept, not before.
+> - **The Sun picture's own orientation and mask edge** are now checked on this frame, not only by reference to 14 Nov (`docs/research/tides/sun-reference-check-2026-11-25.json`).
+
+
 **25 Nov 2026, 14:27 UTC (clock reading at writing). Docs only.** Read directly by Claude in the browser pane on Chad's Mac, about 14:30–14:40 UTC the same day. These are the "gate" reads of `docs/concepts/TIDES-EXPLORER-PROPOSAL.md` rev 2, section 2. **No image has been fetched or kept.** REGISTER is not changed by this note; its lines are for the release, on Chad's own Approve.
 
 ## Earth: NASA GIBS frame kept as a dated reference
