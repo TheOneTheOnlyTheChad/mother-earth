@@ -229,14 +229,23 @@ def build(a):
     ctx['loss']['method'].pop('decode_seconds')                      # timing goes to stderr, not into the pinned file
     return (json.dumps(ctx, indent=1, ensure_ascii=False, sort_keys=False) + '\n').encode()
 
+def peak_memory(raw=None, platform=None):
+    """Peak resident memory, labelled honestly. ru_maxrss is in bytes on macOS (darwin) and in KiB on Linux; any other platform is
+    reported raw with no unit conversion. Measurement only: never written into the context file."""
+    platform = platform or sys.platform
+    raw = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss if raw is None else raw
+    if platform == 'darwin': mib = raw / 1048576; unit = 'bytes'
+    elif platform.startswith('linux'): mib = raw / 1024; unit = 'KiB'
+    else: return f'peak resident memory not converted (ru_maxrss raw {raw}, platform {platform})'
+    return f'peak resident memory {mib:.1f} MiB (ru_maxrss raw {raw} {unit}, platform {platform})'
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--firms', required=True); ap.add_argument('--hansen', required=True)
     ap.add_argument('--journey', required=True); ap.add_argument('--out', required=True); ap.add_argument('--check', action='store_true')
     a = ap.parse_args(); t0 = time.monotonic()
     try: data = build(a)
     except Refuse as e: print('REFUSED:', e); return 1
-    peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    print(f'built in {time.monotonic() - t0:.1f} s; peak resident memory {peak / 1024:.0f} MB; {len(data)} bytes; sha256 {hashlib.sha256(data).hexdigest()}', file=sys.stderr)
+    print(f'built in {time.monotonic() - t0:.1f} s; {peak_memory()}; {len(data)} bytes; sha256 {hashlib.sha256(data).hexdigest()}', file=sys.stderr)
     if a.check:
         same = os.path.exists(a.out) and open(a.out, 'rb').read() == data
         print('CHECK OK: identical' if same else 'CHECK FAILED: the file on disk differs from a fresh build'); return 0 if same else 1

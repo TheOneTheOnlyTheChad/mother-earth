@@ -47,4 +47,8 @@ rows10 = [(-10 - (r + 0.5) * B.PIX) for r in (32000, 39999)]; rows20 = [(-20 - (
 check('Hansen rows and columns used: every pixel centre inside the half-open union, none on a line, the two tiles meeting at 20° S without overlap',
       all(-22 <= x < -18 for x in rows10 + rows20) and rows10[1] > -20 > rows20[0] and all(20 <= x < 28 for x in cols) and cols[1] < 24 < cols[2])
 check('the builder refuses a FIRMS folder that does not pass the verifier', refused(lambda: B.fires(tempfile.mkdtemp(), FIRST, LAST)))
+check('memory label: macOS ru_maxrss is bytes, Linux is KiB; both give MiB with the raw value and platform kept; other platforms are not converted',
+      B.peak_memory(110100480, 'darwin') == 'peak resident memory 105.0 MiB (ru_maxrss raw 110100480 bytes, platform darwin)'
+      and B.peak_memory(107520, 'linux') == 'peak resident memory 105.0 MiB (ru_maxrss raw 107520 KiB, platform linux)'
+      and 'not converted' in B.peak_memory(5, 'win32'))
 print(f'\n{passed} passed, {failed} failed'); sys.exit(1 if failed else 0)
