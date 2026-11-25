@@ -4,6 +4,13 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov 18:49 UTC (clock reading) — **Tides: navigation PASS (GPT); final release candidate `tides-nav-rc` `72e0011` for GPT's review. Not merged, nothing live, no hub change** (page: none; Tides thread)
+- **Filed unchanged:** `reviews/2026-11-25-tides-nav-rc-gpt-review.md` (sha256 `a53a1d5d…587f6c`, relayed by Chad). Chad's own line: "Navigation PASS. Keep Tides after Sun. Prepare the final release candidate… Return the exact final commit for GPT review. No merge or deployment yet."
+- **Added for release (payload `54cbc0d`):** Tides section and shortcut on `sources.html`; REGISTER "Tides explorer" entry (model sources, both pinned references with hashes, dates, changes, terms, limits; the Sun as an Earth-facing reference; PI not notified); served-file manifest of 37 files (`phase1/tides/release_manifest.mjs`, `reviews/evidence/2026-11-25-tides-release-manifest.json`).
+- **Animals pins:** `TIDES_MAIN` `54cbc0d`, `TIDES_PARENT` `ea8cffc`; Sources may differ from `SOIL_MAIN` only by the Tides links, key, one section before Animals and one shortcut; 287 passed, 8/8 pin breaks.
+- **Checks at `6d65c4c`:** tides-ui 60, tides-model 42, tides-nav 2,882, every suite that loads Sources passing except the two known on main. Packet `reviews/2026-11-25-tides-release-rc.md`.
+- **Next:** GPT reviews the final commit `72e0011`. Then Chad's own Approve line naming it; merge (page only); 37-file served check; release records; close-out.
+
 ## 25 Nov 18:12 UTC (clock reading) — **Tides: preview passed by GPT (round 2) and accepted by Chad; navigation candidate `tides-nav-rc` `e130ea7` for GPT's review. Not merged, nothing live, no hub change** (page: none; Tides thread)
 - **Filed unchanged:** `reviews/2026-11-25-tides-rc-round2-gpt-recheck.md` (sha256 `cf357030…1a32`, relayed by Chad): PASS for the unlinked preview, R1–R5 closed.
 - **Chad's line (25 Nov):** "I'm happy with the preview and accept the 1,364,086-byte image total, 14% above the target. Keep the pictures as they are. Go for the navigation candidate, including the top Tides tab and relevant layout/regression checks. Return it for GPT review. No merge or deployment yet."
