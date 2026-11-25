@@ -16,7 +16,7 @@
   const GROUPS = [
     ['Observed', [['Earthquakes', '#tgl-usgs'], ['Fire detections', '#tgl-firms'], ['Ships', '#tgl-ships'], ['Forest disturbance', '#tgl-forest'], ['Drifting buoys', '#tgl-drifters'],
       ['Microplastic samples — dated', '#tgl-plastic'], ['Aircraft — count per area', '#tgl-air'], ['Aircraft — positions', '#tgl-airdots'], ['Night lights', '#tgl-nl'], ['Dust RGB imagery', '#tgl-dustrgb']]],
-    ['Analysed and modelled', [['Ocean heat', '#tgl-oh'], ['Wind by height', '#tgl-wind']]],
+    ['Analysed and modelled', [['Ocean heat', '#tgl-oh'], ['Wind by height', '#tgl-wind'], ['Organic-soil emissions (modelled)', '#tgl-soil']]],   // soil-preview-rc
     ['Computed', [['Day/night', '#tgl-night'], ['Orbital objects — payloads', '#orb-tgls [data-g="payload"]'], ['Orbital objects — rocket bodies', '#orb-tgls [data-g="rocket_body"]'], ['Orbital objects — debris', '#orb-tgls [data-g="debris"]']]],
   ];
   const ROWS = GROUPS.flatMap(g => g[1]);
