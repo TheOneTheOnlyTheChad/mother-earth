@@ -4,6 +4,16 @@ Newest first. Threads 1–13 are in `docs/STATUS-ARCHIVE.md` (moved verbatim 5 N
 
 # 25 Nov 2026
 
+## 25 Nov (Mac clock at the push below) — **Organic-soil emissions: final integration for GPT closure. Final commit `soil-release-rc` `f8e3eda`. Not merged or deployed** (Nature context thread)
+- **GPT's release-candidate review:** technical PASS; filed unchanged.
+- **Records corrected:**
+  - REGISTER provenance: three data payloads; supporting docs read but not saved; the licence file saved before the T1 go, disclosed;
+  - controls count: 13 mutations plus OLD=1.
+- **Reconciliation:** current main `7429699` merged, docs only, no conflicts. Page, asset and test bytes are identical to the reviewed `d2d597b`.
+- **Reruns:** soil-ui 47/0; animals-tab-ui 284/0; bare-earth-ui 190/0; nature-context-ui 78/0.
+- **Packet:** `reviews/2026-11-25-soil-release-integration.md`.
+- **Next:** GPT closure, then Chad's Approve line naming the final commit.
+
 ## 25 Nov 12:35 UTC (clock reading) — **Animals: Chad has emailed Cape Vidal to confirm tomorrow's call (26 Nov). Call sheet prepared privately. Nothing answered or cleared.** (page: none; Animals thread)
 - **Record:** `docs/research/animals-source-audit/ENQUIRIES-EXPANSION.md` rev 1.7. The call sheet is a private document of Chad's, not in this repository. Anything agreed on a call counts only once it is in writing.
 
